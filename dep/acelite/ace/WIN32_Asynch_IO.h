@@ -4,11 +4,15 @@
 /**
  *  @file    WIN32_Asynch_IO.h
  *
+ *  $Id: WIN32_Asynch_IO.h 97946 2014-10-31 14:07:41Z mcorino $
+ *
+ *
  *  These classes only works on Win32 platforms.
  *
  *  The implementation of ACE_Asynch_Transmit_File,
  *  ACE_Asynch_Accept, and ACE_Asynch_Connect are only supported if
  *  ACE_HAS_WINSOCK2 is defined or you are on WinNT 4.0 or higher.
+ *
  *
  *  @author Irfan Pyarali <irfan@cs.wustl.edu>
  *  @author Tim Harrison <harrison@cs.wustl.edu>
@@ -147,6 +151,7 @@ protected:
  *
  * @brief This class abstracts out the common things needed for
  * implementing Asynch_Operation for WIN32 platform.
+ *
  */
 class ACE_Export ACE_WIN32_Asynch_Operation : public virtual ACE_Asynch_Operation_Impl
 {
@@ -482,6 +487,7 @@ protected:
  *
  * @brief This class is a factory for starting off asynchronous writes
  *    on a stream.
+ *
  *
  *     Once open() is called, multiple asynchronous <writes>s can
  *     started using this class.  A ACE_Asynch_Write_Stream::Result
@@ -1337,6 +1343,7 @@ private:
 /**
  * @class ACE_WIN32_Asynch_Transmit_File_Result
  *
+ *
  * @brief This class implements ACE_Asynch_Transmit_File::Result for
  *     WIN32 platforms.
  *
@@ -1666,6 +1673,7 @@ protected:
  *     will be passed back to the @a handler when the asynchronous
  *     reads completes through the <ACE_Handler::handle_read_stream>
  *     callback.
+ *
  */
 class ACE_Export ACE_WIN32_Asynch_Read_Dgram : public virtual ACE_Asynch_Read_Dgram_Impl,
                                                public ACE_WIN32_Asynch_Operation
@@ -1843,6 +1851,7 @@ protected:
  *
  * @brief This class is a factory for starting off asynchronous writes
  *    on a UDP socket.
+ *
  *
  *     Once <open> is called, multiple asynchronous <writes>s can
  *     started using this class.  A ACE_Asynch_Write_Stream::Result

@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: OS_NS_stdlib.inl 97921 2014-10-10 21:58:31Z shuston $
+
 #include "ace/config-all.h"           /* Need ACE_TRACE */
 #include "ace/Object_Manager_Base.h"
 #include "ace/OS_NS_string.h"
@@ -25,13 +28,10 @@ ACE_OS::_exit (int status)
   ACE_OS_TRACE ("ACE_OS::_exit");
 #if defined (ACE_VXWORKS)
   ::exit (status);
-#elif defined (ACE_HAS_WINCE)
-  ::TerminateProcess (::GetCurrentProcess (), status);
-#elif !defined (ACE_LACKS__EXIT)
-   ::_exit (status);
+#elif !defined (ACE_HAS_WINCE)
+  ::_exit (status);
 #else
-  ACE_UNUSED_ARG (status);
-
+  ::TerminateProcess (::GetCurrentProcess (), status);
 #endif /* ACE_VXWORKS */
 }
 
@@ -42,7 +42,7 @@ ACE_OS::abort (void)
   ACE_OS::_exit (128 + SIGABRT);
 #elif !defined (ACE_LACKS_ABORT)
   ::abort ();
-#elif !defined (ACE_LACKS_EXIT)
+#else
   exit (1);
 #endif /* !ACE_LACKS_ABORT */
 }
@@ -339,8 +339,6 @@ ACE_OS::putenv (const char *string)
 #elif defined (ACE_LACKS_PUTENV)
   ACE_UNUSED_ARG (string);
   ACE_NOTSUP_RETURN (0);
-#elif defined (ACE_PUTENV_EQUIVALENT)
-  ACE_OSCALL_RETURN (ACE_PUTENV_EQUIVALENT (const_cast <char *> (string)), int, -1);
 #else /* ! ACE_HAS_WINCE */
   ACE_OSCALL_RETURN (ACE_STD_NAMESPACE::putenv (const_cast <char *> (string)), int, -1);
 #endif /* ACE_LACKS_PUTENV && ACE_HAS_SETENV */
@@ -409,11 +407,7 @@ ACE_INLINE int
 ACE_OS::rand (void)
 {
   ACE_OS_TRACE ("ACE_OS::rand");
-#if !defined (ACE_LACKS_RAND)
   ACE_OSCALL_RETURN (::rand (), int, -1);
-#else
-  ACE_NOTSUP_RETURN (-1);
-#endif /* ACE_LACKS_RAND */
 }
 
 ACE_INLINE int
@@ -431,7 +425,7 @@ ACE_OS::rand_r (unsigned int *seed)
   *seed = (unsigned int)new_seed;
   return (int) (new_seed & RAND_MAX);
 #else
-  return ace_rand_r_helper (seed);
+  return ::rand_r (seed);
 # endif /* ACE_LACKS_RAND_R */
 }
 
@@ -481,11 +475,7 @@ ACE_INLINE void
 ACE_OS::srand (u_int seed)
 {
   ACE_OS_TRACE ("ACE_OS::srand");
-#ifdef ACE_LACKS_SRAND
-  ACE_UNUSED_ARG (seed);
-#else
   ::srand (seed);
-#endif
 }
 
 #if !defined (ACE_LACKS_STRTOD)

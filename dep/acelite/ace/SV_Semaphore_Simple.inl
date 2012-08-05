@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: SV_Semaphore_Simple.inl 80826 2008-03-04 14:51:23Z wotte $
+
 #include "ace/Global_Macros.h"
 #include "ace/OS_NS_Thread.h"
 
@@ -40,11 +43,7 @@ ACE_INLINE int
 ACE_SV_Semaphore_Simple::close (void)
 {
   ACE_TRACE ("ACE_SV_Semaphore_Simple::close");
-#ifdef ACE_HAS_SYSV_IPC
   return this->init ();
-#else
-  ACE_NOTSUP_RETURN (-1);
-#endif
 }
 
 // General ACE_SV_Semaphore operation on an array of SV_Semaphores.

@@ -1,3 +1,5 @@
+// $Id: Addr.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 #include "ace/Addr.h"
 
 #if !defined (__ACE_INLINE__)
@@ -6,9 +8,6 @@
 
 #include "ace/Log_Category.h"
 #include "ace/os_include/sys/os_socket.h"
-#if defined (ACE_HAS_ALLOC_HOOKS)
-# include "ace/Malloc_Base.h"
-#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -39,7 +38,7 @@ ACE_Addr::get_addr (void) const
 }
 
 void
-ACE_Addr::set_addr (const void *, int)
+ACE_Addr::set_addr (void *, int)
 {
 }
 

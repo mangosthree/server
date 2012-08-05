@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: Atomic_Op_T.inl 95225 2011-12-05 20:25:15Z shuston $
+
 #include "ace/Guard_T.h"
 
 #include <algorithm>

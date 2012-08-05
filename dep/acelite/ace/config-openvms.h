@@ -1,4 +1,6 @@
 /* -*- C++ -*- */
+// $Id: config-openvms.h 94294 2011-07-01 09:32:25Z johnnyw $
+
 // The following configuration file is designed to work for OpenVMS 7.3-2
 
 #ifndef ACE_CONFIG_H

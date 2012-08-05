@@ -2,6 +2,8 @@
 /**
  *  @file    Netlink_Addr.h
  *
+ *  $Id: Netlink_Addr.h 95425 2012-01-09 11:09:43Z johnnyw $
+ *
  * @author Robert Iakobashvilli <coroberti@gmail.com>
  * @author Raz Ben Yehuda <raziebe@gmail.com>
  */
@@ -81,7 +83,7 @@ public:
   /**
    * Set a pointer to the address
    */
-  virtual void set_addr (const void *, int len= sizeof(sockaddr_nl) );
+  virtual void set_addr (void *, int len= sizeof(sockaddr_nl) );
 
   /// Declare the dynamic allocation hooks.
   ACE_ALLOC_HOOK_DECLARE;

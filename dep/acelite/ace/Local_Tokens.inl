@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: Local_Tokens.inl 96985 2013-04-11 15:50:32Z huangh $
+
 #if defined (ACE_HAS_TOKENS_LIBRARY)
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

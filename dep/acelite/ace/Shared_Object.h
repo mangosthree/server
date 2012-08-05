@@ -4,7 +4,9 @@
 /**
  *  @file    Shared_Object.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Shared_Object.h 81348 2008-04-14 09:00:32Z johnnyw $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
 
@@ -46,6 +48,7 @@ public:
 
   /// Returns information on a service object.
   virtual int info (ACE_TCHAR **info_string, size_t length = 0) const;
+
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

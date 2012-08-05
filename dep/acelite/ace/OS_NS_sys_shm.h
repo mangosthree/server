@@ -4,7 +4,9 @@
 /**
  *  @file   OS_NS_sys_shm.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: OS_NS_sys_shm.h 93359 2011-02-11 11:33:12Z mcorino $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...
  *

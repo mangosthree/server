@@ -1,5 +1,7 @@
 // -*- C++ -*-
 //
+//$Id: UUID.inl 85331 2009-05-14 00:04:12Z hillj $
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace ACE_Utils
@@ -153,13 +155,11 @@ namespace ACE_Utils
     this->pid_ = pid;
   }
 
-#ifndef ACE_LACKS_SSCANF
   ACE_INLINE void
   UUID::from_string (const ACE_CString& uuidString)
   {
     this->from_string_i (uuidString);
   }
-#endif
 
   ACE_INLINE bool
   UUID::operator == (const UUID &right) const

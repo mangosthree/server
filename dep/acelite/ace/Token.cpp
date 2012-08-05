@@ -1,3 +1,5 @@
+// $Id: Token.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 #include "ace/Token.h"
 
 #if !defined (__ACE_INLINE__)
@@ -294,7 +296,7 @@ ACE_Token::shared_acquire (void (*sleep_hook_func)(void *),
   ACELIB_DEBUG ((LM_DEBUG, "(%t) ACE_Token::shared_acquire (UNBLOCKED)\n"));
 #endif /* ACE_TOKEN_DEBUGGING */
 
-  // If timeout occurred
+  // If timeout occured
   if (timed_out)
     {
       // This thread was still selected to own the token.
@@ -440,7 +442,7 @@ ACE_Token::renew (int requeue_position,
   ACELIB_DEBUG ((LM_DEBUG, "(%t) ACE_Token::renew (UNBLOCKED)\n"));
 #endif /* ACE_TOKEN_DEBUGGING */
 
-  // If timeout occurred
+  // If timeout occured
   if (timed_out)
     {
       // This thread was still selected to own the token.

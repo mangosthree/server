@@ -4,6 +4,8 @@
 /**
  *  @file    DLL.h
  *
+ *  $Id: DLL.h 97888 2014-09-11 10:29:17Z mcorino $
+ *
  *  @author Kirthika Parameswaran <kirthika@cs.wustl.edu>
  */
 //=============================================================================
@@ -154,7 +156,7 @@ public:
    */
   void *symbol (const ACE_TCHAR *symbol_name, int ignore_errors = 0);
 
-  /// Returns a pointer to a string explaining that an error occurred.  You
+  /// Returns a pointer to a string explaining that an error occured.  You
   /// will need to consult the error log for the actual error string
   /// returned by the OS.
   ACE_TCHAR *error (void) const;

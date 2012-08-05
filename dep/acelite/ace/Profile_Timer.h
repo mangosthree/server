@@ -4,7 +4,9 @@
 /**
  *  @file    Profile_Timer.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Profile_Timer.h 93359 2011-02-11 11:33:12Z mcorino $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
 

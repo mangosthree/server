@@ -4,7 +4,9 @@
 /**
  *  @file    Task_T.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Task_T.h 96061 2012-08-16 09:36:07Z mcorino $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 

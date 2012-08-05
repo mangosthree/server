@@ -4,6 +4,8 @@
 /**
  *  @file    Object_Manager.h
  *
+ *  $Id: Object_Manager.h 91066 2010-07-12 11:05:04Z johnnyw $
+ *
  *  @author David L. Levine <levine@cs.wustl.edu>
  *  @author Matthias Kerkhoff
  *  @author Per Andersson
@@ -197,8 +199,6 @@ class ACE_Export ACE_Object_Manager : public ACE_Object_Manager_Base
 {
 
 public:
-  ACE_ALLOC_HOOK_DECLARE;
-
   /**
    * Explicitly initialize (construct the singleton instance of) the
    * ACE_Object_Manager.  Returns 0 on success, -1 on failure, and 1

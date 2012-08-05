@@ -73,9 +73,7 @@ public:
 #       if defined(G3D_WIN32)
 
             return InterlockedExchangeAdd(&m_value, x);
-#       elif defined(__arm__)
 
-            return __sync_fetch_and_add(&m_value, 1);
 #       elif defined(G3D_LINUX) || defined(G3D_FREEBSD)
 
             int32 old;
@@ -116,12 +114,8 @@ public:
 #       if defined(G3D_WIN32)
             // Note: returns the newly decremented value
             return InterlockedDecrement(&m_value);
-#       elif defined(__arm__)
-
-            return __sync_sub_and_fetch(&m_value, 1);
-
 #       elif defined(G3D_LINUX)  || defined(G3D_FREEBSD)
-	    unsigned char nz;
+            unsigned char nz;
 
             asm volatile ("lock; decl %1;\n\t"
                           "setnz %%al"
@@ -148,8 +142,6 @@ public:
     int32 compareAndSet(const int32 comperand, const int32 exchange) {
 #       if defined(G3D_WIN32)
             return InterlockedCompareExchange(&m_value, exchange, comperand);
-#       elif defined(__arm__)
-            return __sync_val_compare_and_swap(&m_value, comperand, exchange);
 #       elif defined(G3D_LINUX) || defined(G3D_FREEBSD) || defined(G3D_OSX)
             // Based on Apache Portable Runtime
             // http://koders.com/c/fid3B6631EE94542CDBAA03E822CA780CBA1B024822.aspx

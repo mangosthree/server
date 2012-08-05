@@ -4,7 +4,11 @@
 /**
  *  @file   CDR_Size.h
  *
+ *  $Id: CDR_Size.h 96688 2013-01-22 12:28:42Z johnnyw $
+ *
+ *
  * ACE Common Data Representation (CDR) size-calculating stream.
+ *
  *
  * The current implementation assumes that the host has 1-byte,
  * 2-byte and 4-byte integral types, and that it has single
@@ -12,7 +16,9 @@
  * Those assumptions are pretty good these days, with Crays being
  * the only known exception.
  *
+ *
  *  @author Boris Kolpackov <boris@kolpackov.net>
+ *
  */
 //=============================================================================
 
@@ -44,7 +50,7 @@ public:
   ACE_SizeCDR (ACE_CDR::Octet major_version = ACE_CDR_GIOP_MAJOR_VERSION,
                ACE_CDR::Octet minor_version = ACE_CDR_GIOP_MINOR_VERSION);
 
-  /// Returns @c false if an error has occurred.
+  /// Returns @c false if an error has ocurred.
   bool good_bit (void) const;
 
   /// Reset current size.
@@ -68,7 +74,6 @@ public:
   ACE_CDR::Boolean write_float (ACE_CDR::Float x);
   ACE_CDR::Boolean write_double (const ACE_CDR::Double &x);
   ACE_CDR::Boolean write_longdouble (const ACE_CDR::LongDouble &x);
-  ACE_CDR::Boolean write_fixed (const ACE_CDR::Fixed &x);
 
   /// For string we offer methods that accept a precomputed length.
   ACE_CDR::Boolean write_string (const ACE_CDR::Char *x);
@@ -78,10 +83,6 @@ public:
   ACE_CDR::Boolean write_wstring (const ACE_CDR::WChar *x);
   ACE_CDR::Boolean write_wstring (ACE_CDR::ULong length,
                                   const ACE_CDR::WChar *x);
-  ACE_CDR::Boolean write_string (const std::string &x);
-#if !defined(ACE_LACKS_STD_WSTRING)
-  ACE_CDR::Boolean write_wstring (const std::wstring &x);
-#endif
   //@}
 
   /// @note the portion written starts at <x> and ends
@@ -206,8 +207,6 @@ extern ACE_Export ACE_CDR::Boolean operator<< (ACE_SizeCDR &ss,
                                                ACE_CDR::Float x);
 extern ACE_Export ACE_CDR::Boolean operator<< (ACE_SizeCDR &ss,
                                                ACE_CDR::Double x);
-extern ACE_Export ACE_CDR::Boolean operator<< (ACE_SizeCDR &ss,
-                                               const ACE_CDR::Fixed &x);
 
 // CDR size-calculating output operator from helper classes
 
@@ -227,12 +226,6 @@ extern ACE_Export ACE_CDR::Boolean operator<< (ACE_SizeCDR &ss,
                                                const ACE_CDR::Char* x);
 extern ACE_Export ACE_CDR::Boolean operator<< (ACE_SizeCDR &ss,
                                                const ACE_CDR::WChar* x);
-extern ACE_Export ACE_CDR::Boolean operator<< (ACE_SizeCDR &ss,
-                                               const std::string& x);
-#if !defined(ACE_LACKS_STD_WSTRING)
-extern ACE_Export ACE_CDR::Boolean operator<< (ACE_SizeCDR &ss,
-                                               const std::wstring& x);
-#endif
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 

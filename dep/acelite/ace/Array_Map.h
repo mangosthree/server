@@ -4,6 +4,8 @@
 /**
  * @file    Array_Map.h
  *
+ * $Id: Array_Map.h 97262 2013-08-09 08:32:10Z johnnyw $
+ *
  * Light weight array-based map with fast iteration but linear
  * (i.e. O(n)) search times.  STL-style interface is exposed.
  *
@@ -29,17 +31,8 @@
 #include <utility>
 #include <iterator>
 #include <functional>
-#include <memory>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
-
-#if defined __SUNPRO_CC && !defined _RWSTD_ALLOCATOR
-# define ACE_ARRAY_MAP_DEFAULT_ALLOCATOR(K, V) std::allocator_interface< \
-                                                 std::allocator<void>,   \
-                                                 std::pair<K, V> >
-#else
-# define ACE_ARRAY_MAP_DEFAULT_ALLOCATOR(K, V) std::allocator<std::pair<K, V> >
-#endif
 
 /**
  * @class ACE_Array_Map
@@ -91,26 +84,24 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  *       -# Copy constructor
  *       -# operator=
  */
-template<typename Key, typename Value, class EqualTo = std::equal_to<Key>,
-         class Alloc = ACE_ARRAY_MAP_DEFAULT_ALLOCATOR (Key, Value) >
+template<typename Key, typename Value, class EqualTo = std::equal_to<Key> >
 class ACE_Array_Map
 {
 public:
 
   // STL-style typedefs/traits.
-  typedef Key                                    key_type;
-  typedef Value                                  mapped_type;
-  typedef Value                                  data_type;
-  typedef std::pair<key_type, mapped_type>       value_type;
-  typedef Alloc                                  allocator_type;
-  typedef value_type &                           reference;
-  typedef value_type const &                     const_reference;
-  typedef value_type *                           pointer;
-  typedef value_type const *                     const_pointer;
-  typedef value_type *                           iterator;
-  typedef value_type const *                     const_iterator;
-  typedef ptrdiff_t                              difference_type;
-  typedef size_t                                 size_type;
+  typedef Key                            key_type;
+  typedef Value                          data_type;
+  typedef std::pair<key_type, data_type> value_type;
+  typedef value_type *                   iterator;
+  typedef value_type const *             const_iterator;
+  typedef value_type &                   reference;
+  typedef value_type const &             const_reference;
+  typedef value_type *                   pointer;
+  typedef value_type const *             const_pointer;
+  typedef ptrdiff_t                      difference_type;
+  typedef size_t                         size_type;
+
   ACE_DECLARE_STL_REVERSE_ITERATORS
 
   /// Default Constructor.
@@ -244,9 +235,7 @@ public:
    * @par
    * map["Foo"] = 12;
    */
-  mapped_type & operator[] (key_type const & k);
-
-  allocator_type get_allocator() const { return alloc_; }
+  data_type & operator[] (key_type const & k);
 
 private:
 
@@ -254,8 +243,6 @@ private:
   void grow (size_type s);
 
 private:
-  /// The allocator.
-  allocator_type alloc_;
 
   /// Number of elements in the map.
   size_type size_;
@@ -268,19 +255,20 @@ private:
 
   /// Underlying array containing keys and data.
   value_type * nodes_;
+
 };
 
 // --------------------------------------------------------------
 
 /// @c ACE_Array_Map equality operator.
-template <typename Key, typename Value, class EqualTo, class Alloc>
-bool operator== (ACE_Array_Map<Key, Value, EqualTo, Alloc> const & lhs,
-                 ACE_Array_Map<Key, Value, EqualTo, Alloc> const & rhs);
+template <typename Key, typename Value, class EqualTo>
+bool operator== (ACE_Array_Map<Key, Value, EqualTo> const & lhs,
+                 ACE_Array_Map<Key, Value, EqualTo> const & rhs);
 
 /// @c ACE_Array_Map lexicographical comparison operator.
-template <typename Key, typename Value, class EqualTo, class Alloc>
-bool operator<  (ACE_Array_Map<Key, Value, EqualTo, Alloc> const & lhs,
-                 ACE_Array_Map<Key, Value, EqualTo, Alloc> const & rhs);
+template <typename Key, typename Value, class EqualTo>
+bool operator<  (ACE_Array_Map<Key, Value, EqualTo> const & lhs,
+                 ACE_Array_Map<Key, Value, EqualTo> const & rhs);
 
 // --------------------------------------------------------------
 

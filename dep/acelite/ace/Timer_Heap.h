@@ -4,7 +4,9 @@
 /**
  *  @file    Timer_Heap.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Timer_Heap.h 95335 2011-12-15 13:13:17Z msmit $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 

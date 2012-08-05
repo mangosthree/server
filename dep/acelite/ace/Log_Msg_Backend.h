@@ -4,7 +4,9 @@
 /**
  *  @file    Log_Msg_Backend.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Log_Msg_Backend.h 80826 2008-03-04 14:51:23Z wotte $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 

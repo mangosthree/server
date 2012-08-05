@@ -6,6 +6,8 @@
  *
  *  data types
  *
+ *  $Id: os_types.h 97939 2014-10-27 12:30:12Z johnnyw $
+ *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */
@@ -74,7 +76,7 @@ typedef double ACE_timer_t;
    typedef offset_t ACE_LOFF_T;
 #elif defined (WIN32)
    typedef __int64  ACE_LOFF_T;
-#elif (defined (ACE_VXWORKS) && (ACE_VXWORKS <= 0x700)) || \
+#elif (defined (ACE_VXWORKS) && (ACE_VXWORKS <= 0x690)) || \
   defined (ACE_LYNXOS_MAJOR) || \
   (defined (ACE_OPENVMS) && !defined (_LARGEFILE)) || \
   defined (__TANDEM)

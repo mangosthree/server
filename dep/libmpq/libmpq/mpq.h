@@ -43,18 +43,18 @@ extern "C" {
 #endif
 
 /* define errors. */
-#define LIBMPQ_ERROR_OPEN			-1		/* open error on file. */
-#define LIBMPQ_ERROR_CLOSE			-2		/* close error on file. */
-#define LIBMPQ_ERROR_SEEK			-3		/* lseek error on file. */
-#define LIBMPQ_ERROR_READ			-4		/* read error on file. */
-#define LIBMPQ_ERROR_WRITE			-5		/* write error on file. */
-#define LIBMPQ_ERROR_MALLOC			-6		/* memory allocation error. */
-#define LIBMPQ_ERROR_FORMAT			-7		/* format errror. */
-#define LIBMPQ_ERROR_NOT_INITIALIZED		-8		/* libmpq__init() wasn't called. */
-#define LIBMPQ_ERROR_SIZE			-9		/* buffer size is to small. */
-#define LIBMPQ_ERROR_EXIST			-10		/* file or block does not exist in archive. */
-#define LIBMPQ_ERROR_DECRYPT			-11		/* we don't know the decryption seed. */
-#define LIBMPQ_ERROR_UNPACK			-12		/* error on unpacking file. */
+#define LIBMPQ_ERROR_OPEN            -1        /* open error on file. */
+#define LIBMPQ_ERROR_CLOSE            -2        /* close error on file. */
+#define LIBMPQ_ERROR_SEEK            -3        /* lseek error on file. */
+#define LIBMPQ_ERROR_READ            -4        /* read error on file. */
+#define LIBMPQ_ERROR_WRITE            -5        /* write error on file. */
+#define LIBMPQ_ERROR_MALLOC            -6        /* memory allocation error. */
+#define LIBMPQ_ERROR_FORMAT            -7        /* format errror. */
+#define LIBMPQ_ERROR_NOT_INITIALIZED        -8        /* libmpq__init() wasn't called. */
+#define LIBMPQ_ERROR_SIZE            -9        /* buffer size is to small. */
+#define LIBMPQ_ERROR_EXIST            -10        /* file or block does not exist in archive. */
+#define LIBMPQ_ERROR_DECRYPT            -11        /* we don't know the decryption seed. */
+#define LIBMPQ_ERROR_UNPACK            -12        /* error on unpacking file. */
 
 /* internal data structure. */
 typedef struct mpq_archive mpq_archive_s;
@@ -64,6 +64,9 @@ typedef int64_t libmpq__off_t;
 
 /* generic information about library. */
 extern LIBMPQ_API const char *libmpq__version(void);
+
+/* string error message for a libmpq return code. */
+extern LIBMPQ_API const char *libmpq__strerror(int32_t returncode);
 
 /* generic mpq archive information. */
 extern LIBMPQ_API int32_t libmpq__archive_open(mpq_archive_s **mpq_archive, const char *mpq_filename, libmpq__off_t archive_offset);
@@ -95,4 +98,4 @@ extern LIBMPQ_API int32_t libmpq__block_read(mpq_archive_s *mpq_archive, uint32_
 }
 #endif
 
-#endif						/* _MPQ_H */
+#endif                        /* _MPQ_H */

@@ -1,3 +1,5 @@
+// $Id: Naming_Context.inl 84160 2009-01-14 14:13:58Z johnnyw $
+
 ACE_INLINE bool
 ACE_Name_Options::use_registry (void) const
 {

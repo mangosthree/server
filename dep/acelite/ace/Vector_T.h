@@ -4,6 +4,8 @@
 /**
  *  @file    Vector_T.h
  *
+ *  $Id: Vector_T.h 92069 2010-09-28 11:38:59Z johnnyw $
+ *
  *  @author Craig L. Ching <cching@mqsoftware.com>
  *  @author Gonzalo Diethelm <gonzalo.diethelm@aditiva.com>
  */
@@ -89,9 +91,6 @@ public:
    * Destructor.
    */
   ~ACE_Vector ();
-
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
 
   /**
    * Returns the current vector capacity, that is, the currently
@@ -187,16 +186,6 @@ public:
   bool operator!= (const ACE_Vector<T, DEFAULT_SIZE> &s) const;
 
   void swap (ACE_Vector &rhs);
-
-  /*
-   * Implement our own end functions because Array_Base's end functions use the
-   * current capacity, not the Vector's actual element count!
-   */
-  /// C++ Standard End Iterator
-  ///{
-  typename ACE_Array_Base<T>::iterator end ();
-  typename ACE_Array_Base<T>::const_iterator end () const;
-  ///}
 
 protected:
 

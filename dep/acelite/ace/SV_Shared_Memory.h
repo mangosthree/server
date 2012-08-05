@@ -4,7 +4,9 @@
 /**
  *  @file    SV_Shared_Memory.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: SV_Shared_Memory.h 80826 2008-03-04 14:51:23Z wotte $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
 

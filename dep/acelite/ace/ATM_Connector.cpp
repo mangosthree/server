@@ -1,4 +1,6 @@
 // ATM_Connector.cpp
+// $Id: ATM_Connector.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 #include "ace/ATM_Connector.h"
 #if defined (ACE_HAS_ATM)
 

@@ -4,8 +4,10 @@
 /**
  *  @file    Activation_Queue.h
  *
+ *  $Id: Activation_Queue.h 97436 2013-11-25 10:48:49Z johnnyw $
+ *
  *  @author Andres Kruse <Andres.Kruse@cern.ch>
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 

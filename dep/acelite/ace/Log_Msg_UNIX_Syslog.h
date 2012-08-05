@@ -4,6 +4,8 @@
 /**
  *  @file    Log_Msg_UNIX_Syslog.h
  *
+ *  $Id: Log_Msg_UNIX_Syslog.h 90388 2010-06-02 15:27:59Z vzykov $
+ *
  *  @author Jerry D. De Master <jdemaster@rite-solutions.com>
  */
 //=============================================================================

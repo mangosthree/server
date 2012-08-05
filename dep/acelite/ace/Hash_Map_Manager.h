@@ -4,9 +4,11 @@
 /**
  *  @file    Hash_Map_Manager.h
  *
+ *  $Id: Hash_Map_Manager.h 80826 2008-03-04 14:51:23Z wotte $
+ *
  *  Backward compatibility header.
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 

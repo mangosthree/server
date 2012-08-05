@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: Task_Ex_T.inl 96061 2012-08-16 09:36:07Z mcorino $
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <ACE_SYNCH_DECL, class ACE_MESSAGE_TYPE, class TIME_POLICY> ACE_INLINE void

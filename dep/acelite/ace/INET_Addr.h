@@ -4,7 +4,9 @@
 /**
  *  @file    INET_Addr.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: INET_Addr.h 95533 2012-02-14 22:59:17Z wotte $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 
@@ -19,7 +21,6 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ace/Addr.h"
-#include <vector>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -28,10 +29,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  *
  * @brief Defines a C++ wrapper facade for the Internet domain address
  * family format.
- *
- * ACE_INET_Addr can hold all of the IP addresses assigned to a single name.
- * By default it refers only to the first, if there is more than one. The
- * next() method can make the others available in turn.
  */
 class ACE_Export ACE_INET_Addr : public ACE_Addr
 {
@@ -57,14 +54,10 @@ public:
 
   /**
    * Initializes an ACE_INET_Addr from the @a address, which can be
-   * "ip-addr:port-number" (e.g., "tango.cs.wustl.edu:1234"),
-   * "ip-addr:port-name" (e.g., "tango.cs.wustl.edu:telnet"),
-   * "ip-number:port-number" (e.g., "128.252.166.57:1234"),
-   * "ip-number:port-name" (e.g., "128.252.166.57:telnet"),
-   * "[ipv6-number]:port-number (e.g, "[2001:db8::57]:1234") or
-   * "[ipv6-number]:port-name (e.g, "[2001:db8::57]:telnet").
-   * If there is no ':' in the @a address it is assumed to be a port number,
-   * with the IP address being INADDR_ANY.
+   * "ip-number:port-number" (e.g., "tango.cs.wustl.edu:1234" or
+   * "128.252.166.57:1234").  If there is no ':' in the @a address it
+   * is assumed to be a port number, with the IP address being
+   * INADDR_ANY.
    */
   explicit ACE_INET_Addr (const char address[],
                           int address_family = AF_UNSPEC);
@@ -117,20 +110,6 @@ public:
 
   // These methods are useful after the object has been constructed.
 
-  /// Assignment. In a more well-ordered world, member-wise assignment would
-  /// work fine. However, because of the class design feature that all of the
-  /// acceptor/connector-type classes that can be used in the
-  /// Acceptor-Connector framework take ACE_Addr objects instead of the
-  /// addressing class matching the family in use. The mechanism used to
-  /// enable this substitution to the more-appropriate class is
-  /// ACE_sap_any_cast, which casts the ACE_Addr to the more-specific class.
-  /// In this case, casting an ACE_Addr to ACE_INET_Addr then copying it.
-  /// Since adding multiple address support to ACE_INET_Addr, that cast-copy
-  /// operation ends up, in the member-wise case, copying a bogus vector
-  /// and doing lots of random damage. Thus, this operator is used to make
-  /// life ordered in this common scenario.
-  ACE_INET_Addr & operator= (const ACE_INET_Addr &rhs);
-
   /// Initializes from another ACE_INET_Addr.
   int set (const ACE_INET_Addr &);
 
@@ -178,15 +157,11 @@ public:
            const char protocol[] = "tcp");
 
   /**
-   * Initializes an ACE_INET_Addr from the @a address, which can be
-   * "ip-addr:port-number" (e.g., "tango.cs.wustl.edu:1234"),
-   * "ip-addr:port-name" (e.g., "tango.cs.wustl.edu:telnet"),
-   * "ip-number:port-number" (e.g., "128.252.166.57:1234"),
-   * "ip-number:port-name" (e.g., "128.252.166.57:telnet"),
-   * "[ipv6-number]:port-number (e.g, "[2001:db8::57]:1234") or
-   * "[ipv6-number]:port-name (e.g, "[2001:db8::57]:telnet").
-   * If there is no ':' in the @a address it is assumed to be a port number,
-   * with the IP address being INADDR_ANY.
+   * Initializes an ACE_INET_Addr from the @a addr, which can be
+   * "ip-number:port-number" (e.g., "tango.cs.wustl.edu:1234" or
+   * "128.252.166.57:1234").  If there is no ':' in the @a address it
+   * is assumed to be a port number, with the IP address being
+   * INADDR_ANY.
    */
   int set (const char addr[], int address_family = AF_UNSPEC);
 
@@ -216,16 +191,16 @@ public:
   int get_addr_size(void) const;
 
   /// Set a pointer to the address.
-  virtual void set_addr (const void *, int len);
+  virtual void set_addr (void *, int len);
 
   /// Set a pointer to the address.
-  virtual void set_addr (const void *, int len, int map);
+  virtual void set_addr (void *, int len, int map);
 
   /**
    * Transform the current ACE_INET_Addr address into string format.
-   * If @a ipaddr_format is true this produces "ip-number:port-number"
-   * (e.g., "128.252.166.57:1234" or "[2001:db8::57]:1234"), whereas
-   * if @a ipaddr_format is false this produces "ip-name:port-number" (e.g.,
+   * If @a ipaddr_format is ttrue this produces "ip-number:port-number"
+   * (e.g., "128.252.166.57:1234"), whereas if @a ipaddr_format is false
+   * this produces "ip-name:port-number" (e.g.,
    * "tango.cs.wustl.edu:1234").  Returns -1 if the @a size of the
    * @a buffer is too small, else 0.
    */
@@ -237,11 +212,9 @@ public:
    * Initializes an ACE_INET_Addr from the @a address, which can be
    * "ip-addr:port-number" (e.g., "tango.cs.wustl.edu:1234"),
    * "ip-addr:port-name" (e.g., "tango.cs.wustl.edu:telnet"),
-   * "ip-number:port-number" (e.g., "128.252.166.57:1234"),
-   * "ip-number:port-name" (e.g., "128.252.166.57:telnet"),
-   * "[ipv6-number]:port-number (e.g, "[2001:db8::57]:1234") or
-   * "[ipv6-number]:port-name (e.g, "[2001:db8::57]:telnet").
-   * If there is no ':' in the @a address it is assumed to be a port number,
+   * "ip-number:port-number" (e.g., "128.252.166.57:1234"), or
+   * "ip-number:port-name" (e.g., "128.252.166.57:telnet").  If there
+   * is no ':' in the @a address it is assumed to be a port number,
    * with the IP address being INADDR_ANY.
    */
   virtual int string_to_addr (const char address[],
@@ -376,13 +349,6 @@ public:
   /// Computes and returns hash value.
   virtual u_long hash (void) const;
 
-  /// If there is another address to examine, move to it and return true;
-  /// else return false.
-  bool next (void);
-
-  /// Reset the set of address so they can be scanned again using next().
-  void reset (void);
-
   /// Dump the state of an object.
   void dump (void) const;
 
@@ -400,22 +366,18 @@ private:
   int determine_type (void) const;
 
   /// Initialize underlying inet_addr_ to default values
-  void reset_i (void);
+  void reset (void);
 
   /// Underlying representation.
   /// This union uses the knowledge that the two structures share the
   /// first member, sa_family (as all sockaddr structures do).
-  union ip46
+  union
   {
     sockaddr_in  in4_;
 #if defined (ACE_HAS_IPV6)
     sockaddr_in6 in6_;
 #endif /* ACE_HAS_IPV6 */
   } inet_addr_;
-  // If there is more than one address assigned to a given name, this
-  // holds all of them; one is always copied to inet_addr_.
-  std::vector<union ip46> inet_addrs_;
-  std::vector<union ip46>::iterator inet_addrs_iter_;
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

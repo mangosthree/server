@@ -4,6 +4,8 @@
 /**
  *  @file    Dev_Poll_Reactor.h
  *
+ *  $Id: Dev_Poll_Reactor.h 97130 2013-05-13 17:36:26Z mesnier_p $
+ *
  *  @c /dev/poll (or Linux @c sys_epoll) based Reactor implementation.
  *
  *  @author  Ossama Othman <ossama@dre.vanderbilt.edu>
@@ -166,8 +168,6 @@ public:
   ///            0 if there were only wake-ups (no handlers to dispatch).
   int dequeue_one (ACE_Notification_Buffer &nb);
 
-  ACE_ALLOC_HOOK_DECLARE;
-
 protected:
 
   /**
@@ -292,8 +292,6 @@ class ACE_Export ACE_Dev_Poll_Reactor : public ACE_Reactor_Impl
 
     /// Flag to say whether or not this handle is registered with epoll.
     bool controlled;
-
-    ACE_ALLOC_HOOK_DECLARE;
   };
 
 
@@ -756,7 +754,7 @@ public:
    * Set the maximum number of times that ACE_Reactor_Impl will
    * iterate and dispatch the ACE_Event_Handlers that are passed in
    * via the notify queue before breaking out of its
-   * ACE_Message_Queue::dequeue() loop.  By default, this is set to
+   * <ACE_Message_Queue::dequeue> loop.  By default, this is set to
    * -1, which means "iterate until the queue is empty."  Setting this
    * to a value like "1 or 2" will increase "fairness" (and thus
    * prevent starvation) at the expense of slightly higher dispatching
@@ -768,7 +766,7 @@ public:
    * Get the maximum number of times that the ACE_Reactor_Impl will
    * iterate and dispatch the ACE_Event_Handlers that are passed in
    * via the notify queue before breaking out of its
-   * ACE_Message_Queue::dequeue() loop.
+   * <ACE_Message_Queue::dequeue> loop.
    */
   virtual int max_notify_iterations (void);
 

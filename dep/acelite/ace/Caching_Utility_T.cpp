@@ -1,3 +1,5 @@
+// $Id: Caching_Utility_T.cpp 92264 2010-10-19 18:12:46Z olli $
+
 #ifndef ACE_CACHING_UTILITY_T_CPP
 #define ACE_CACHING_UTILITY_T_CPP
 

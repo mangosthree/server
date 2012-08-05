@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: OS_NS_sys_stat.inl 96943 2013-03-30 09:42:31Z mcorino $
+
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_fcntl.h"
 #include "ace/OS_NS_errno.h"
@@ -148,11 +151,7 @@ namespace ACE_OS
                           int, -1);
 #elif defined (ACE_MKDIR_LACKS_MODE)
     ACE_UNUSED_ARG (mode);
-#  if defined (ACE_MKDIR_EQUIVALENT)
-    ACE_OSCALL_RETURN (ACE_MKDIR_EQUIVALENT (path), int, -1);
-#  else
     ACE_OSCALL_RETURN (::mkdir (path), int, -1);
-#  endif
 #else
     ACE_OSCALL_RETURN (::mkdir (path, mode), int, -1);
 #endif
@@ -200,7 +199,6 @@ namespace ACE_OS
 #elif defined (ACE_HAS_WINCE)
     ACE_TEXT_WIN32_FIND_DATA fdata;
 
-    int rc = 0;
     HANDLE fhandle;
 
     fhandle = ::FindFirstFile (ACE_TEXT_CHAR_TO_TCHAR (file), &fdata);
@@ -212,7 +210,7 @@ namespace ACE_OS
     else if (fdata.nFileSizeHigh != 0)
       {
         errno = EINVAL;
-        rc = -1;
+        return -1;
       }
     else
       {
@@ -222,9 +220,7 @@ namespace ACE_OS
         stp->st_mtime = ACE_Time_Value (fdata.ftLastWriteTime).sec ();
         stp->st_ctime = ACE_Time_Value (fdata.ftCreationTime).sec ();
       }
-
-    ::FindClose (fhandle);
-    return rc;
+    return 0;
 #elif defined (ACE_HAS_X86_STAT_MACROS)
     // Solaris for intel uses an macro for stat(), this macro is a
     // wrapper for _xstat().
@@ -242,7 +238,6 @@ namespace ACE_OS
 #if defined (ACE_HAS_WINCE)
     WIN32_FIND_DATAW fdata;
 
-    int rc = 0;
     HANDLE fhandle;
 
     fhandle = ::FindFirstFileW (file, &fdata);
@@ -254,7 +249,7 @@ namespace ACE_OS
     else if (fdata.nFileSizeHigh != 0)
       {
         errno = EINVAL;
-        rc = -1;
+        return -1;
       }
     else
       {
@@ -264,9 +259,7 @@ namespace ACE_OS
         stp->st_mtime = ACE_Time_Value (fdata.ftLastWriteTime).sec ();
         stp->st_ctime = ACE_Time_Value (fdata.ftCreationTime).sec ();
       }
-
-    ::FindClose (fhandle);
-    return rc;
+    return 0;
 #elif defined (__BORLANDC__) \
       || defined (_MSC_VER) \
       || (defined (__MINGW32__) && !defined (__MINGW64_VERSION_MAJOR))

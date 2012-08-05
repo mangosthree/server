@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: Countdown_Time_T.inl 95332 2011-12-15 11:09:41Z mcorino $
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <typename TIME_POLICY> ACE_INLINE bool

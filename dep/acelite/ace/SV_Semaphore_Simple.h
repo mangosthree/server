@@ -4,7 +4,9 @@
 /**
  *  @file    SV_Semaphore_Simple.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: SV_Semaphore_Simple.h 97314 2013-09-03 13:11:59Z johnnyw $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
 
@@ -170,7 +172,6 @@ protected:
   /// Number of semaphores we're creating.
   int sem_number_;
 
-#ifdef ACE_HAS_SYSV_IPC
   /**
    * Convert name to key This function is used internally to create
    * keys for the semaphores. A valid name contains letters and
@@ -182,8 +183,6 @@ protected:
    */
   int init (key_t k = static_cast<key_t> (ACE_INVALID_SEM_KEY),
             int i = -1);
-#endif
-
   key_t name_2_key (const char *name);
 };
 

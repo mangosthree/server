@@ -1,3 +1,5 @@
+// $Id: Throughput_Stats.cpp 97628 2014-02-24 11:29:43Z johnnyw $
+
 #include "ace/Throughput_Stats.h"
 
 #include "ace/OS_NS_stdio.h"

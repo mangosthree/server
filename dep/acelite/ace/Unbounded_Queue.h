@@ -4,7 +4,9 @@
 /**
  *  @file Unbounded_Queue.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Unbounded_Queue.h 84316 2009-02-03 19:46:05Z johnnyw $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 
@@ -142,6 +144,7 @@ private:
  *       -# Default constructor
  *       -# Copy constructor
  *       -# operator=
+ *
  */
 template <class T>
 class ACE_Unbounded_Queue

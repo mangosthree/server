@@ -4,6 +4,8 @@
 /**
  *  @file    Service_Gestalt.h
  *
+ *  $Id: Service_Gestalt.h 91626 2010-09-07 10:59:20Z johnnyw $
+ *
  *  @author Iliyan Jeliazkov <iliyan@ociweb.com>
  */
 //====================================================================
@@ -20,6 +22,7 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ace/Auto_Ptr.h"
 #include "ace/SString.h"
 #include "ace/Unbounded_Queue.h"
 #include "ace/Unbounded_Set.h"
@@ -62,6 +65,7 @@ class ACE_Svc_Conf_Param;
  * may or may not be bounded by the lifetime of the gestalt, that owns
  * it. This feature is important for the derived classes and the
  * Service Config in particular.
+ *
  */
 class ACE_Export ACE_Service_Gestalt : private ACE_Copy_Disabled
 {
@@ -321,7 +325,6 @@ public:
     ~Processed_Static_Svc (void);
     ACE_TCHAR * name_;
     const ACE_Static_Svc_Descriptor *assd_;
-    ACE_ALLOC_HOOK_DECLARE;
   };
 
   /// Get the current ACE_Service_Repository held by this object.

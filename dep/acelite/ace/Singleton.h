@@ -4,10 +4,12 @@
 /**
  *  @file    Singleton.h
  *
+ *  $Id: Singleton.h 84273 2009-01-30 12:55:25Z johnnyw $
+ *
  *  @brief
  *
  *  @author Tim Harrison <harrison@cs.wustl.edu>
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Chris Lahey
  *  @author Rich Christy
  *  @author David Levine <levine@cs.wustl.edu>
@@ -90,9 +92,6 @@ public:
   /// Dump the state of the object.
   static void dump (void);
 
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
-
 protected:
   /// Default constructor.
   ACE_Singleton (void);
@@ -139,9 +138,6 @@ public:
   /// Dump the state of the object.
   static void dump (void);
 
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
-
 protected:
   /// Default constructor.
   ACE_Unmanaged_Singleton (void);
@@ -187,9 +183,6 @@ public:
   /// Dump the state of the object.
   static void dump (void);
 
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
-
 protected:
   /// Default constructor.
   ACE_TSS_Singleton (void);
@@ -234,9 +227,6 @@ public:
 
   /// Dump the state of the object.
   static void dump (void);
-
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   /// Default constructor.
@@ -296,9 +286,6 @@ public:
 
   const ACE_TCHAR *name (void);
 
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
-
 protected:
   /// Default constructor.
   ACE_DLL_Singleton_T (void);
@@ -323,9 +310,6 @@ class ACE_DLL_Singleton_Adapter_T : public TYPE
 {
 public:
   const ACE_TCHAR *dll_name (void);
-
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

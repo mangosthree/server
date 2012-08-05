@@ -1,3 +1,5 @@
+// $Id: Event_Base.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 #include "ace/Event_Base.h"
 
 #if !defined (__ACE_INLINE__)
@@ -5,13 +7,8 @@
 #endif /* __ACE_INLINE__ */
 
 #include "ace/Log_Category.h"
-#if defined (ACE_HAS_ALLOC_HOOKS)
-# include "ace/Malloc_Base.h"
-#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
-
-ACE_ALLOC_HOOK_DEFINE(ACE_Event_Base)
 
 ACE_Event_Base::ACE_Event_Base ()
   : removed_ (false)

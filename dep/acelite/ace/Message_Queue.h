@@ -4,7 +4,9 @@
 /**
  *  @file    Message_Queue.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Message_Queue.h 97201 2013-06-18 07:17:34Z johnnyw $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 
@@ -198,6 +200,9 @@ public:
 
   /// Dump the state of an object.
   virtual void dump (void) const = 0;
+
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   // = Disallow copying and assignment.

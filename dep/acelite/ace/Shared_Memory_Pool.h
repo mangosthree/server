@@ -4,7 +4,9 @@
 /**
  *  @file     Shared_Memory_Pool.h
  *
- *  @author Dougls C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Shared_Memory_Pool.h 97185 2013-05-30 18:51:35Z johnnyw $
+ *
+ *  @author Dougls C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Prashant Jain <pjain@cs.wustl.edu>
  */
 //=============================================================================

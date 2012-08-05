@@ -4,7 +4,9 @@
 /**
  *  @file    Get_Opt.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Get_Opt.h 86367 2009-08-05 09:41:11Z johnnyw $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Don Hinton <dhinton@gmx.net> (added long option support)
  */
 //==========================================================================
@@ -405,8 +407,6 @@ private:
     /// simplifying long option handling, see tests/Get_Opt_Test.cpp
     /// for an example of this technique.
     int val_;
-
-    ACE_ALLOC_HOOK_DECLARE;
   };
 
   /// Updates nextchar_.

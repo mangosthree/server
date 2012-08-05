@@ -4,7 +4,9 @@
 /**
  *  @file    Read_Buffer.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Read_Buffer.h 92345 2010-10-24 12:39:33Z johnnyw $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Seth Widoff
  */
 //==========================================================================

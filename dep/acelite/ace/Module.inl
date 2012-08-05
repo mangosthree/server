@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: Module.inl 96061 2012-08-16 09:36:07Z mcorino $
+
 #include "ace/OS_NS_string.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

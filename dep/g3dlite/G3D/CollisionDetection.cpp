@@ -885,7 +885,7 @@ float CollisionDetection::collisionTimeForMovingPointFixedPlane(
     }
 }
 
-bool  CollisionDetection::rayAABox(
+bool __fastcall CollisionDetection::rayAABox(
     const Ray&              ray,
     const Vector3&          invDir,
     const AABox&            box,

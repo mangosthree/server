@@ -1,4 +1,6 @@
 // -*- C++ -*-
+// $Id: Sample_History.inl 95747 2012-05-13 17:14:12Z johnnyw $
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE int

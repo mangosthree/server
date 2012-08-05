@@ -4,7 +4,9 @@
 /**
  *  @file    TTY_IO.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: TTY_IO.h 97246 2013-08-07 07:10:20Z johnnyw $
+ *
+ *  @author Douglas C. Schmidt <schmidt@uci.edu>
  */
 //=============================================================================
 

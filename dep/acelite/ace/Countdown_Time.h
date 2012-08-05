@@ -4,7 +4,9 @@
 /**
  *  @file    Countdown_Time.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Countdown_Time.h 95332 2011-12-15 11:09:41Z mcorino $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Irfan Pyarali <irfan@cs.wustl.edu>
  */
 //=============================================================================

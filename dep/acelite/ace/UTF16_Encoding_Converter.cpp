@@ -1,3 +1,5 @@
+// $Id: UTF16_Encoding_Converter.cpp 83735 2008-11-14 09:41:52Z johnnyw $
+
 // ======================================================================
 //
 // The actual conversion methods are covered by the copyright information

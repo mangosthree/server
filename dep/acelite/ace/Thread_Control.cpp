@@ -1,3 +1,5 @@
+// $Id: Thread_Control.cpp 94054 2011-05-11 18:28:20Z johnnyw $
+
 #include "ace/Thread_Control.h"
 #include "ace/Thread_Manager.h"
 

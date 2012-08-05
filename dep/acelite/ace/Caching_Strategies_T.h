@@ -4,6 +4,8 @@
 /**
  *  @file    Caching_Strategies_T.h
  *
+ *  $Id: Caching_Strategies_T.h 92097 2010-09-30 05:41:49Z msmit $
+ *
  *  @author Kirthika Parameswaran <kirthika@cs.wustl.edu>
  */
 //=============================================================================
@@ -162,9 +164,6 @@ public:
   /// Dumps the state of the object.
   void dump (void) const;
 
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
-
 private:
 
   /// Implementation class.
@@ -259,9 +258,6 @@ public:
 
   /// Dumps the state of the object.
   void dump (void) const;
-
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
 
 private:
 
@@ -362,9 +358,6 @@ public:
   /// Dumps the state of the object.
   void dump (void) const;
 
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
-
 private:
 
   /// The level about which the purging will happen automagically.
@@ -456,9 +449,6 @@ public:
   /// Dumps the state of the object.
   void dump (void) const;
 
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
-
 private:
 
   /// The order is the deciding factor for the item to be removed from
@@ -535,9 +525,6 @@ public:
 
   /// Dumps the state of the object.
   void dump (void) const;
-
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
 
 private:
 

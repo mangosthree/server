@@ -4,9 +4,11 @@
 /**
  *  @file    Manual_Event.h
  *
+ *  $Id: Manual_Event.h 96220 2012-11-06 10:03:41Z mcorino $
+ *
  *   Moved from Synch.h.
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
 

@@ -4,9 +4,11 @@
 /**
  *  @file    Reverse_Lock_T.h
  *
+ *  $Id: Reverse_Lock_T.h 84481 2009-02-17 10:58:31Z johnnyw $
+ *
  *   Moved from Synch.h.
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
 

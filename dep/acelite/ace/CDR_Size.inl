@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: CDR_Size.inl 80826 2008-03-04 14:51:23Z wotte $
+
 #include "ace/OS_NS_string.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -113,13 +116,6 @@ ACE_SizeCDR::write_longdouble (const ACE_CDR::LongDouble &x)
 }
 
 ACE_INLINE ACE_CDR::Boolean
-ACE_SizeCDR::write_fixed (const ACE_CDR::Fixed &x)
-{
-  return this->write_array (&x, ACE_CDR::OCTET_SIZE, ACE_CDR::OCTET_ALIGN,
-                            (x.fixed_digits () + 2) / 2);
-}
-
-ACE_INLINE ACE_CDR::Boolean
 ACE_SizeCDR::write_string (const ACE_CDR::Char *x)
 {
   if (x != 0)
@@ -142,26 +138,6 @@ ACE_SizeCDR::write_wstring (const ACE_CDR::WChar *x)
     }
   return this->write_wstring (0, 0);
 }
-
-ACE_INLINE ACE_CDR::Boolean
-ACE_SizeCDR::write_string (const std::string &x)
-{
-  ACE_CDR::ULong len =
-    static_cast<ACE_CDR::ULong> (x.size ());
-  return this->write_string (len,
-                             x.empty () ? 0 : x.c_str ());
-}
-
-#if !defined(ACE_LACKS_STD_WSTRING)
-ACE_INLINE ACE_CDR::Boolean
-ACE_SizeCDR::write_wstring (const std::wstring &x)
-{
-  ACE_CDR::ULong len =
-    static_cast<ACE_CDR::ULong> (x.size ());
-  return this->write_wstring (len,
-                              x.empty () ? 0 : x.c_str ());
-}
-#endif
 
 ACE_INLINE ACE_CDR::Boolean
 ACE_SizeCDR::write_char_array (const ACE_CDR::Char *x,
@@ -372,13 +348,6 @@ operator<< (ACE_SizeCDR &ss, ACE_CDR::Double x)
 }
 
 ACE_INLINE ACE_CDR::Boolean
-operator<< (ACE_SizeCDR &ss, const ACE_CDR::Fixed &x)
-{
-  ss.write_fixed (x);
-  return (ACE_CDR::Boolean) ss.good_bit ();
-}
-
-ACE_INLINE ACE_CDR::Boolean
 operator<< (ACE_SizeCDR &ss, const ACE_CDR::Char *x)
 {
   ss.write_string (x);
@@ -391,22 +360,6 @@ operator<< (ACE_SizeCDR &ss, const ACE_CDR::WChar *x)
   ss.write_wstring (x);
   return (ACE_CDR::Boolean) ss.good_bit ();
 }
-
-ACE_INLINE ACE_CDR::Boolean
-operator<< (ACE_SizeCDR &ss, const std::string& x)
-{
-  ss.write_string (x);
-  return (ACE_CDR::Boolean) ss.good_bit ();
-}
-
-#if !defined(ACE_LACKS_STD_WSTRING)
-ACE_INLINE ACE_CDR::Boolean
-operator<< (ACE_SizeCDR &ss, const std::wstring& x)
-{
-  ss.write_wstring (x);
-  return (ACE_CDR::Boolean) ss.good_bit ();
-}
-#endif
 
 // The following use the helper classes
 ACE_INLINE ACE_CDR::Boolean

@@ -4,8 +4,11 @@
 /**
  *  @file    Env_Value_T.h
  *
+ *  $Id: Env_Value_T.h 92712 2010-11-25 12:22:13Z johnnyw $
+ *
  *  Template to encapsulate getting a value from an environment variable
  *  and using a supplied default value if not in the environment.
+ *
  *
  *  @author Chris Cleeland (derived from work by Carlos O'Ryan)
  */

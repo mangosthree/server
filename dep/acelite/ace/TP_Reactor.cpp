@@ -1,3 +1,5 @@
+// $Id: TP_Reactor.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 #include "ace/TP_Reactor.h"
 #include "ace/Thread.h"
 #include "ace/Timer_Queue.h"
@@ -315,7 +317,7 @@ int
 ACE_TP_Reactor::handle_notify_events (int & /*event_count*/,
                                       ACE_TP_Token_Guard &guard)
 {
-  // Get the handle on which notify calls could have occurred
+  // Get the handle on which notify calls could have occured
   ACE_HANDLE notify_handle = this->get_notify_handle ();
 
   int result = 0;

@@ -4,7 +4,9 @@
 /**
  *  @file   Strategies_T.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Strategies_T.h 97110 2013-05-10 08:03:33Z johnnyw $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 

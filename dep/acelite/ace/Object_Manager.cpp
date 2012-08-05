@@ -1,11 +1,13 @@
+// $Id: Object_Manager.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 #include "ace/Object_Manager.h"
 #if !defined (ACE_LACKS_ACE_TOKEN)
 # include "ace/Token_Manager.h"
 #endif /* ! ACE_LACKS_ACE_TOKEN */
 #include "ace/Thread_Manager.h"
 #if !defined (ACE_LACKS_ACE_SVCCONF)
-# include "ace/Service_Manager.h"
-# include "ace/Service_Config.h"
+#  include "ace/Service_Manager.h"
+#  include "ace/Service_Config.h"
 #endif /* ! ACE_LACKS_ACE_SVCCONF */
 #include "ace/Signal.h"
 #include "ace/Log_Category.h"
@@ -29,8 +31,7 @@
 #include "ace/Mutex.h"
 #include "ace/RW_Thread_Mutex.h"
 #if defined (ACE_DISABLE_WIN32_ERROR_WINDOWS) && !defined (ACE_HAS_WINCE)
-# include "ace/OS_NS_stdlib.h"
-# include /**/ <crtdbg.h>
+  #include "ace/OS_NS_stdlib.h"
 #endif // ACE_DISABLE_WIN32_ERROR_WINDOWS
 
 #if ! defined (ACE_APPLICATION_PREALLOCATED_OBJECT_DEFINITIONS)
@@ -120,8 +121,6 @@ public:
   ACE_Object_Manager_Preallocations (void);
   ~ACE_Object_Manager_Preallocations (void);
 
-  ACE_ALLOC_HOOK_DECLARE;
-
 private:
   ACE_Static_Svc_Descriptor ace_svc_desc_ACE_Service_Manager;
 };
@@ -150,8 +149,6 @@ ACE_Object_Manager_Preallocations::~ACE_Object_Manager_Preallocations (void)
 {
 }
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Object_Manager_Preallocations)
-
 #endif /* ! ACE_LACKS_ACE_SVCCONF */
 
 int
@@ -168,7 +165,7 @@ ACE_Object_Manager::shutting_down (void)
 
 #if defined (ACE_DISABLE_WIN32_ERROR_WINDOWS)
 // Instead of popping up a window for exceptions, just print something out
-LONG WINAPI ACE_UnhandledExceptionFilter (PEXCEPTION_POINTERS pExceptionInfo)
+LONG _stdcall ACE_UnhandledExceptionFilter (PEXCEPTION_POINTERS pExceptionInfo)
 {
   DWORD dwExceptionCode = pExceptionInfo->ExceptionRecord->ExceptionCode;
 
@@ -416,8 +413,6 @@ ACE_Object_Manager::~ACE_Object_Manager (void)
   dynamically_allocated_ = false;   // Don't delete this again in fini()
   fini ();
 }
-
-ACE_ALLOC_HOOK_DEFINE(ACE_Object_Manager)
 
 ACE_Object_Manager *
 ACE_Object_Manager::instance (void)
@@ -894,10 +889,13 @@ static ACE_Object_Manager_Manager ACE_Object_Manager_Manager_instance;
 
 #if defined (ACE_HAS_THREADS)
 
+// hack to get around errors while compiling using split-cpp
+#if !defined (ACE_IS_SPLITTING)
 // This is global so that it doesn't have to be declared in the header
 // file.  That would cause nasty circular include problems.
 typedef ACE_Cleanup_Adapter<ACE_Recursive_Thread_Mutex> ACE_Static_Object_Lock_Type;
 static ACE_Static_Object_Lock_Type *ACE_Static_Object_Lock_lock = 0;
+#endif /* ! ACE_IS_SPLITTING */
 
 // ACE_SHOULD_MALLOC_STATIC_OBJECT_LOCK isn't (currently) used by ACE.
 // But, applications may find it useful for avoiding recursive calls

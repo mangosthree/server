@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: Recursive_Thread_Mutex.inl 89121 2010-02-22 14:48:31Z schmidt $
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE ACE_recursive_thread_mutex_t &

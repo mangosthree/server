@@ -4,9 +4,11 @@
 /**
  *  @file    Condition_Attributes.h
  *
+ *  $Id: Condition_Attributes.h 96265 2012-11-13 13:31:10Z johnnyw $
+ *
  *   Moved from Synch.h.
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
 

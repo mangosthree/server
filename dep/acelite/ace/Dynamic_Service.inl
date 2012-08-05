@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: Dynamic_Service.inl 81318 2008-04-10 10:12:05Z johnnyw $
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 #if defined (ACE_USES_WCHAR)

@@ -4,7 +4,9 @@
 /**
  *  @file    IPC_SAP.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: IPC_SAP.h 97661 2014-03-17 09:52:07Z johnnyw $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 

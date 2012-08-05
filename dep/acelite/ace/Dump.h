@@ -4,6 +4,9 @@
 /**
  *  @file    Dump.h
  *
+ *  $Id: Dump.h 94034 2011-05-09 19:11:03Z johnnyw $
+ *
+ *
  * A prototype mechanism that allow all ACE objects to be registered
  * with a central in-memory "database" that can dump the state of all
  * live ACE objects (e.g., from within a debugger).
@@ -38,6 +41,7 @@
  *
  * 2. Adding support to allow particular classes of objects to
  *  be selectively dumped.
+ *
  *
  *  @author Doug Schmidt
  */
@@ -126,8 +130,6 @@ public:
 
   /// Interface to the Singleton instance of the object database.
   static ACE_ODB *instance (void);
-
-  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   ACE_ODB (void); // Ensure we have a Singleton...

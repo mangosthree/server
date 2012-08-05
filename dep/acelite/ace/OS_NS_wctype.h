@@ -4,6 +4,8 @@
 /**
  *  @file   OS_NS_wctype.h
  *
+ *  $Id: OS_NS_wctype.h 83891 2008-11-28 11:01:50Z johnnyw $
+ *
  *  @author Johnny Willemsen  <jwillemsen@remedy.nl>
  */
 //=============================================================================

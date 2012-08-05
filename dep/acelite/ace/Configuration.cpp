@@ -1,3 +1,4 @@
+// $Id: Configuration.cpp 97769 2014-06-05 06:37:53Z johnnyw $
 #include "ace/Configuration.h"
 #include "ace/Auto_Ptr.h"
 #include "ace/SString.h"
@@ -12,10 +13,6 @@
 #if !defined (__ACE_INLINE__)
 #include "ace/Configuration.inl"
 #endif /* __ACE_INLINE__ */
-
-#if defined (ACE_HAS_ALLOC_HOOKS)
-# include "ace/Malloc_Base.h"
-#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -337,13 +334,8 @@ ACE_Configuration::operator== (const ACE_Configuration& rhs) const
                               rc = (* (thisCharData + count) == * (rhsCharData + count));
                             }
 
-#if defined (ACE_HAS_ALLOC_HOOKS)
-                          ACE_Allocator::instance()->free(thisCharData);
-                          ACE_Allocator::instance()->free(rhsCharData);
-#else
                           delete [] thisCharData;
                           delete [] rhsCharData;
-#endif /* ACE_HAS_ALLOC_HOOKS */
                         }// end if the length's match
                     }
                   // We should never have valueTypes of INVALID, therefore
@@ -1220,14 +1212,8 @@ ACE_Configuration_Section_Key_Heap::~ACE_Configuration_Section_Key_Heap ()
 {
   delete value_iter_;
   delete section_iter_;
-#if defined (ACE_HAS_ALLOC_HOOKS)
-  ACE_Allocator::instance()->free (path_);
-#else
   ACE_OS::free (path_);
-#endif /* ACE_HAS_ALLOC_HOOKS */
 }
-
-ACE_ALLOC_HOOK_DEFINE(ACE_Configuration_Section_Key_Heap)
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -2069,11 +2055,7 @@ ACE_Configuration_Heap::get_binary_value (
     }
 
   // Make a copy
-#if defined (ACE_HAS_ALLOC_HOOKS)
-  ACE_ALLOCATOR_RETURN (data, static_cast<char*> (ACE_Allocator::instance()->malloc(sizeof(char) * VIntId.length_)), -1);
-#else
   ACE_NEW_RETURN (data, char[VIntId.length_], -1);
-#endif /* ACE_HAS_ALLOC_HOOKS */
   ACE_OS::memcpy (data, VIntId.data_.ptr_, VIntId.length_);
   length = VIntId.length_;
   return 0;

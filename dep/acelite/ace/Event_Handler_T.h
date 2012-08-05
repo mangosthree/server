@@ -4,7 +4,9 @@
 /**
  *  @file    Event_Handler_T.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Event_Handler_T.h 91626 2010-09-07 10:59:20Z johnnyw $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 

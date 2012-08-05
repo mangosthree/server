@@ -15,23 +15,19 @@
 
 
 if(USE_STORMLIB)
-    add_library(loadlib
-      sl/loadlib.cpp
-      sl/adt.cpp
-      sl/wdt.cpp
-      sl/mpq.cpp)
-
-    target_include_directories(loadlib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/sl)
-
-    target_link_libraries(loadlib PUBLIC stormlib)
+    include_directories(
+        ${CMAKE_SOURCE_DIR}/dep/StormLib/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/sl
+    )
+    add_library(loadlib sl/loadlib.cpp sl/adt.cpp sl/wdt.cpp sl/mpq.cpp)
+    target_link_libraries(loadlib storm)
 else()
-    add_library(loadlib
-      ml/loadlib.cpp
-      ml/adt.cpp
-      ml/wdt.cpp
-      ml/mpq.cpp)
-
-    target_include_directories(loadlib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/ml)
-
-    target_link_libraries(loadlib PUBLIC libmpq)
+    include_directories(
+        ${CMAKE_SOURCE_DIR}/dep/libmpq
+        ${CMAKE_CURRENT_SOURCE_DIR}/ml
+    )
+    add_library(loadlib ml/loadlib.cpp ml/adt.cpp ml/wdt.cpp ml/mpq.cpp)
 endif()
+
+# link loadlib with zlib
+target_link_libraries(loadlib zlib)

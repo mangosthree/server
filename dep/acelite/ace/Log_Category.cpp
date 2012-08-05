@@ -1,3 +1,5 @@
+// $Id: Log_Category.cpp 97058 2013-04-19 14:41:18Z huangh $
+
 #include "ace/Log_Msg.h"
 #include "ace/Log_Category.h"
 #include "ace/Atomic_Op.h"
@@ -71,8 +73,6 @@ ACE_Log_Category_TSS::ACE_Log_Category_TSS(ACE_Log_Category* category, ACE_Log_M
   , priority_mask_(0)
 {
 }
-
-ACE_ALLOC_HOOK_DEFINE(ACE_Log_Category_TSS)
 
 ACE_Log_Category_TSS*
 ACE_Log_Category::per_thr_obj()

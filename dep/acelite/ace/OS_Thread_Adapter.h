@@ -4,6 +4,8 @@
 /**
  *  @file OS_Thread_Adapter.h
  *
+ *  $Id: OS_Thread_Adapter.h 92682 2010-11-23 23:41:19Z shuston $
+ *
  *  @author Carlos O'Ryan <coryan@uci.edu>
  */
 //=============================================================================
@@ -57,8 +59,6 @@ public:
    * returns.
    */
   virtual ACE_THR_FUNC_RETURN invoke (void);
-
-  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
 

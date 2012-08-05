@@ -4,7 +4,9 @@
 /**
  *  @file    Message_Queue_T.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Message_Queue_T.h 96070 2012-08-17 09:07:16Z mcorino $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 

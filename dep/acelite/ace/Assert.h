@@ -4,7 +4,9 @@
 /**
  *  @file    Assert.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Assert.h 82808 2008-09-23 11:27:27Z smcqueen $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 

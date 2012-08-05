@@ -4,7 +4,9 @@
 /**
  *  @file    ARGV.h
  *
- *  @author Doug Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: ARGV.h 95972 2012-07-26 10:20:42Z johnnyw $
+ *
+ *  @author Doug Schmidt <schmidt@cs.wustl.edu>
  *  @author Everett Anderson <eea1@cs.wustl.edu>
  */
 //==========================================================================
@@ -297,7 +299,7 @@ private:
   /// The array of string arguments.
   CHAR_TYPE **argv_;
 
-  /// Buffer containing the argv contents.
+  /// Buffer containing the <argv> contents.
   CHAR_TYPE *buf_;
 
   /// Total length of the arguments in the queue, not counting

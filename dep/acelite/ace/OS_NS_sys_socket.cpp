@@ -1,3 +1,5 @@
+// $Id: OS_NS_sys_socket.cpp 96519 2012-12-17 10:00:00Z johnnyw $
+
 #include "ace/OS_NS_sys_socket.h"
 
 #if !defined (ACE_HAS_INLINED_OSCALLS)
@@ -108,7 +110,7 @@ ACE_OS::socket_init (int version_high, int version_low)
         {
           ACE_TCHAR fmt[] = ACE_TEXT ("%s failed, WSAGetLastError returned %d");
           ACE_TCHAR buf[80];  // @@ Eliminate magic number.
-          ACE_OS::snprintf (buf, 80, fmt, ACE_TEXT ("WSAStartup %d"), error);
+          ACE_OS::sprintf (buf, fmt, ACE_TEXT ("WSAStartup"), error);
           ::MessageBox (0, buf, ACE_TEXT ("WSAStartup failed!"), MB_OK);
         }
 #   else
@@ -139,7 +141,7 @@ ACE_OS::socket_fini (void)
 #   if defined (ACE_HAS_WINCE)
           ACE_TCHAR fmt[] = ACE_TEXT ("%s failed, WSAGetLastError returned %d");
           ACE_TCHAR buf[80];  // @@ Eliminate magic number.
-          ACE_OS::snprintf (buf, 80, fmt, ACE_TEXT ("WSACleanup %d"), error);
+          ACE_OS::sprintf (buf, fmt, ACE_TEXT ("WSACleanup"), error);
           ::MessageBox (0, buf , ACE_TEXT ("WSACleanup failed!"), MB_OK);
 #   else
           ACE_OS::fprintf (stderr,
@@ -217,12 +219,13 @@ ACE_OS::sendv_partial_i (ACE_HANDLE handle,
     }
 
   return (ssize_t) bytes_sent;
-#else
+# else
   ACE_UNUSED_ARG (handle);
   ACE_UNUSED_ARG (buffers);
   ACE_UNUSED_ARG (n);
-  ACE_NOTSUP_RETURN (-1);
-#endif /* ACE_HAS_WINSOCK2 */
+
+  return -1;
+# endif /* ACE_HAS_WINSOCK2 */
 }
 
 ssize_t
@@ -262,13 +265,14 @@ ACE_OS::send_partial_i (ACE_HANDLE handle,
     }
 
   return result;
-#else
+# else
   ACE_UNUSED_ARG (handle);
   ACE_UNUSED_ARG (buf);
   ACE_UNUSED_ARG (len);
   ACE_UNUSED_ARG (flags);
-  ACE_NOTSUP_RETURN (-1);
-#endif /* ACE_LACKS_SEND && ACE_WIN32 */
+
+  return -1;
+# endif /* ACE_LACKS_SEND && ACE_WIN32 */
 }
 
 ACE_END_VERSIONED_NAMESPACE_DECL

@@ -28,29 +28,32 @@ bool WINAPI SFileExtractFile(HANDLE hMpq, const char * szToExtract, const TCHAR 
     // Create the local file
     if(nError == ERROR_SUCCESS)
     {
-        pLocalFile = FileStream_CreateFile(szExtracted, 0);
+        pLocalFile = FileStream_CreateFile(szExtracted, STREAM_PROVIDER_LINEAR | BASE_PROVIDER_FILE);
         if(pLocalFile == NULL)
             nError = GetLastError();
     }
 
     // Copy the file's content
-    while(nError == ERROR_SUCCESS)
+    if(nError == ERROR_SUCCESS)
     {
         char  szBuffer[0x1000];
-        DWORD dwTransferred = 0;
+        DWORD dwTransferred;
 
-        // dwTransferred is only set to nonzero if something has been read.
-        // nError can be ERROR_SUCCESS or ERROR_HANDLE_EOF
-        if(!SFileReadFile(hMpqFile, szBuffer, sizeof(szBuffer), &dwTransferred, NULL))
-            nError = GetLastError();
-        if(nError == ERROR_HANDLE_EOF)
-            nError = ERROR_SUCCESS;
-        if(dwTransferred == 0)
-            break;
+        for(;;)
+        {
+            // dwTransferred is only set to nonzero if something has been read.
+            // nError can be ERROR_SUCCESS or ERROR_HANDLE_EOF
+            if(!SFileReadFile(hMpqFile, szBuffer, sizeof(szBuffer), &dwTransferred, NULL))
+                nError = GetLastError();
+            if(nError == ERROR_HANDLE_EOF)
+                nError = ERROR_SUCCESS;
+            if(dwTransferred == 0)
+                break;
 
-        // If something has been actually read, write it
-        if(!FileStream_Write(pLocalFile, NULL, szBuffer, dwTransferred))
-            nError = GetLastError();
+            // If something has been actually read, write it
+            if(!FileStream_Write(pLocalFile, NULL, szBuffer, dwTransferred))
+                nError = GetLastError();
+        }
     }
 
     // Close the files

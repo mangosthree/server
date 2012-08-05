@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: Malloc_T.inl 92069 2010-09-28 11:38:59Z johnnyw $
+
 #include "ace/OS_NS_string.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -23,8 +26,6 @@ ACE_Cached_Mem_Pool_Node<T>::set_next (ACE_Cached_Mem_Pool_Node<T> *ptr)
 {
   this->next_ = ptr;
 }
-
-ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Cached_Mem_Pool_Node)
 
 template <class T, class ACE_LOCK> ACE_INLINE size_t
 ACE_Cached_Allocator<T, ACE_LOCK>::pool_depth (void)
@@ -66,11 +67,7 @@ ACE_Malloc_T<ACE_MEM_POOL_2, ACE_LOCK, ACE_CB>::release (int close)
         this->memory_pool_.release (0);
 
       if (retv == 0)
-        {
-          ace_mon.release ();
-          this->remove ();
-        }
-
+        this->remove ();
       return retv;
     }
   return -1;

@@ -4,6 +4,8 @@
 /**
  *  @file    Free_List.h
  *
+ *  $Id: Free_List.h 92298 2010-10-21 11:15:17Z johnnyw $
+ *
  *  @author Darrell Brunsch (brunsch@cs.wustl.edu)
  */
 //=============================================================================
@@ -98,8 +100,6 @@ public:
 
   /// Resizes the free list to @a newsize.
   virtual void resize (size_t newsize);
-
-  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   /// Allocates @a n extra nodes for the freelist.

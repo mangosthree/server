@@ -4,6 +4,8 @@
 /**
  *  @file    Log_Msg_IPC.h
  *
+ *  $Id: Log_Msg_IPC.h 84536 2009-02-20 09:28:48Z johnnyw $
+ *
  *  @author Carlos O'Ryan <coryan@uci.edu>
  */
 //=============================================================================
@@ -68,8 +70,6 @@ public:
 
   virtual int close (void);
   virtual ssize_t log (ACE_Log_Record &log_record);
-
-  ACE_ALLOC_HOOK_DECLARE;
 
 private:
   ACE_LOG_MSG_IPC_STREAM message_queue_;

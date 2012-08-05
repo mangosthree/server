@@ -1,3 +1,5 @@
+// $Id: Message_Queue_T.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 #ifndef ACE_MESSAGE_QUEUE_T_CPP
 #define ACE_MESSAGE_QUEUE_T_CPP
 
@@ -28,10 +30,10 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE_Tyc(ACE_Message_Queue)
-ACE_ALLOC_HOOK_DEFINE_Tyc(ACE_Dynamic_Message_Queue)
-ACE_ALLOC_HOOK_DEFINE_Tcyc(ACE_Message_Queue_Ex)
-ACE_ALLOC_HOOK_DEFINE_Tcyc(ACE_Message_Queue_Ex_N)
+ACE_ALLOC_HOOK_DEFINE(ACE_Message_Queue)
+ACE_ALLOC_HOOK_DEFINE(ACE_Dynamic_Message_Queue)
+ACE_ALLOC_HOOK_DEFINE(ACE_Message_Queue_Ex)
+ACE_ALLOC_HOOK_DEFINE(ACE_Message_Queue_Ex_N)
 
 template <class ACE_MESSAGE_TYPE, ACE_SYNCH_DECL, class TIME_POLICY> void
 ACE_Message_Queue_Ex<ACE_MESSAGE_TYPE, ACE_SYNCH_USE, TIME_POLICY>::dump (void) const
@@ -381,7 +383,7 @@ ACE_Message_Queue_Ex_Iterator<ACE_MESSAGE_TYPE, ACE_SYNCH_USE, TIME_POLICY>::dum
   this->iter_.dump ();
 }
 
-ACE_ALLOC_HOOK_DEFINE_Tcyc(ACE_Message_Queue_Ex_Iterator)
+ACE_ALLOC_HOOK_DEFINE(ACE_Message_Queue_Ex_Iterator)
 
 template <class ACE_MESSAGE_TYPE, ACE_SYNCH_DECL, class TIME_POLICY>
 ACE_Message_Queue_Ex_Reverse_Iterator<ACE_MESSAGE_TYPE, ACE_SYNCH_USE, TIME_POLICY>::
@@ -422,7 +424,7 @@ ACE_Message_Queue_Ex_Reverse_Iterator<ACE_MESSAGE_TYPE, ACE_SYNCH_USE, TIME_POLI
   this->iter_.dump ();
 }
 
-ACE_ALLOC_HOOK_DEFINE_Tcyc(ACE_Message_Queue_Ex_Reverse_Iterator)
+ACE_ALLOC_HOOK_DEFINE(ACE_Message_Queue_Ex_Reverse_Iterator)
 
 template <class ACE_MESSAGE_TYPE, ACE_SYNCH_DECL, class TIME_POLICY>
 ACE_Message_Queue_Ex_N<ACE_MESSAGE_TYPE, ACE_SYNCH_USE, TIME_POLICY>::ACE_Message_Queue_Ex_N
@@ -530,7 +532,7 @@ ACE_Message_Queue_Ex_N<ACE_MESSAGE_TYPE, ACE_SYNCH_USE, TIME_POLICY>::wrap_with_
   return mb_head;
 }
 
-ACE_ALLOC_HOOK_DEFINE_Tyc(ACE_Message_Queue_Reverse_Iterator)
+ACE_ALLOC_HOOK_DEFINE(ACE_Message_Queue_Reverse_Iterator)
 
 template <class ACE_MESSAGE_TYPE, ACE_SYNCH_DECL, class TIME_POLICY> int
 ACE_Message_Queue_Ex<ACE_MESSAGE_TYPE, ACE_SYNCH_USE, TIME_POLICY>::dequeue (ACE_MESSAGE_TYPE *&first_item,
@@ -739,7 +741,7 @@ ACE_Message_Queue_Iterator<ACE_SYNCH_USE, TIME_POLICY>::dump (void) const
 #endif /* ACE_HAS_DUMP */
 }
 
-ACE_ALLOC_HOOK_DEFINE_Tyc(ACE_Message_Queue_Iterator)
+ACE_ALLOC_HOOK_DEFINE(ACE_Message_Queue_Iterator)
 
 template <ACE_SYNCH_DECL, class TIME_POLICY>
 ACE_Message_Queue_Reverse_Iterator<ACE_SYNCH_USE, TIME_POLICY>::ACE_Message_Queue_Reverse_Iterator (ACE_Message_Queue <ACE_SYNCH_USE, TIME_POLICY> &q)
@@ -2715,7 +2717,7 @@ ACE_Dynamic_Message_Queue<ACE_SYNCH_USE, TIME_POLICY>::refresh_pending_queue (co
                                      (int) current_status),
                                     -1);
                 }
-              /* FALLTHROUGH */
+              /* FALLTHRU */
             }
           else
             {

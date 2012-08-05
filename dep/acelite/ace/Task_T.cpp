@@ -1,3 +1,5 @@
+// $Id: Task_T.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 #ifndef ACE_TASK_T_CPP
 #define ACE_TASK_T_CPP
 
@@ -15,8 +17,6 @@
 #endif /* __ACE_INLINE__ */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
-
-ACE_ALLOC_HOOK_DEFINE_Tyc(ACE_Task)
 
 template <ACE_SYNCH_DECL, class TIME_POLICY> void
 ACE_Task<ACE_SYNCH_USE, TIME_POLICY>::dump (void) const

@@ -1,4 +1,6 @@
 /* -*- C++ -*- */
+// $Id: config-cygwin32.h 93530 2011-03-11 12:12:40Z olli $
+
 // The following configuration file is designed to work for CygWin
 // platforms using GNU C++.
 

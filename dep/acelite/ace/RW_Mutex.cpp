@@ -1,9 +1,11 @@
 /**
  * @file RW_Mutex.cpp
  *
+ * $Id: RW_Mutex.cpp 96985 2013-04-11 15:50:32Z huangh $
+ *
  * Originally in Synch.cpp
  *
- * @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ * @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 
 #include "ace/RW_Mutex.h"

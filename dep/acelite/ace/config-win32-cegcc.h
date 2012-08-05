@@ -1,4 +1,6 @@
 // -*- C++ -*-
+// $Id: config-win32-cegcc.h 92102 2010-09-30 08:14:15Z johnnyw $
+
 //
 // The following configuration file is designed to work for win32
 // platforms using gcc/g++ with mingw32 (http://www.mingw.org).

@@ -6,6 +6,8 @@
  *
  *  integer types
  *
+ *  $Id: os_stdint.h 97262 2013-08-09 08:32:10Z johnnyw $
+ *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */
@@ -34,8 +36,7 @@ extern "C"
 
 // BSD style types
 #if defined (ACE_LACKS_SYS_TYPES_H) \
-       || (defined (__GLIBC__) && !defined (_BSD_SOURCE)) \
-       || defined (ACE_LACKS_BSD_TYPES)
+       || (defined (__GLIBC__) && !defined (_BSD_SOURCE))
       typedef unsigned char u_char;
       typedef unsigned short u_short;
       typedef unsigned int u_int;

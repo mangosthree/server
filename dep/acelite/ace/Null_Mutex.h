@@ -4,9 +4,11 @@
 /**
  *  @file    Null_Mutex.h
  *
+ *  $Id: Null_Mutex.h 91626 2010-09-07 10:59:20Z johnnyw $
+ *
  *   Moved from Synch.h.
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
 
@@ -22,6 +24,7 @@
 
 #include "ace/Global_Macros.h"
 #include "ace/OS_Memory.h"
+
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -79,8 +82,6 @@ public:
   //ACE_ALLOC_HOOK_DECLARE;
 
   int lock_; // A dummy lock.
-
-  ACE_ALLOC_HOOK_DECLARE;
 };
 
 // FUZZ: disable check_for_ACE_Guard

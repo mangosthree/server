@@ -61,7 +61,7 @@
 namespace G3D {
 
 #ifdef _MSC_VER
-inline double  drand48() {
+inline double __fastcall drand48() {
     return ::rand() / double(RAND_MAX);
 }
 

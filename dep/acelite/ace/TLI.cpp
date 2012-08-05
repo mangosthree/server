@@ -1,3 +1,5 @@
+// $Id: TLI.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 // Defines the member functions for the base class of the ACE_TLI
 // abstraction.
 
@@ -49,6 +51,7 @@ ACE_TLI::ACE_TLI (void)
     {
       delete [] this->so_opt_req.opt.buf;
       this->so_opt_req.opt.buf = 0;
+      return;
     }
 #endif /* ACE_HAS_SVR4_TLI */
 }

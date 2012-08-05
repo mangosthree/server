@@ -4,7 +4,9 @@
 /**
  *  @file     MMAP_Memory_Pool.h
  *
- *  @author Dougls C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: MMAP_Memory_Pool.h 81589 2008-05-02 13:07:33Z johnnyw $
+ *
+ *  @author Dougls C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Prashant Jain <pjain@cs.wustl.edu>
  */
 //=============================================================================
@@ -333,10 +335,6 @@ public:
 
   /// Overwrite the default sync behavior with no-op
   virtual int sync (void *addr, size_t len, int flags = MS_SYNC);
-
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
-
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

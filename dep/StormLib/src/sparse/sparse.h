@@ -11,7 +11,9 @@
 #ifndef __SPARSE_H__
 #define __SPARSE_H__
 
-void CompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, int cbInBuffer);
-int  DecompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, int cbInBuffer);
+#include "../StormPort.h"
+
+void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutLength, unsigned char * pbInBuffer, int cbInLength);
+int  DecompressSparse(unsigned char * pbOutBuffer, int * pcbOutLength, unsigned char * pbInBuffer, int cbInLength);
 
 #endif // __SPARSE_H__

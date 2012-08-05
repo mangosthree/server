@@ -1,3 +1,5 @@
+// $Id: Atomic_Op_T.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 #ifndef ACE_ATOMIC_OP_T_CPP
 #define ACE_ATOMIC_OP_T_CPP
 
@@ -6,10 +8,6 @@
 #ifdef ACE_HAS_DUMP
 # include "ace/Log_Category.h"
 #endif  /* ACE_HAS_DUMP */
-
-#if defined (ACE_HAS_ALLOC_HOOKS)
-# include "ace/Malloc_Base.h"
-#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -21,8 +19,8 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE_Tcc(ACE_Atomic_Op_Ex)
-ACE_ALLOC_HOOK_DEFINE_Tcc(ACE_Atomic_Op)
+ACE_ALLOC_HOOK_DEFINE(ACE_Atomic_Op_Ex)
+ACE_ALLOC_HOOK_DEFINE(ACE_Atomic_Op)
 
 // *************************************************
 template <class ACE_LOCK, class TYPE> ACE_LOCK &

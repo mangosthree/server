@@ -4,7 +4,9 @@
 /**
  *  @file    Service_Repository.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Service_Repository.h 91016 2010-07-06 11:29:50Z johnnyw $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 
@@ -20,10 +22,8 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ace/Default_Constants.h"
-#include "ace/Synch_Traits.h"
-#include "ace/Array_Map.h"
-#include "ace/Malloc_Base.h"
 #include "ace/Recursive_Thread_Mutex.h"
+#include "ace/Array_Map.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -132,9 +132,6 @@ public:
   /// Dump the state of an object.
   void dump (void) const;
 
-  /// Returns a reference to the lock used by the ACE_Service_Repository
-  ACE_SYNCH_RECURSIVE_MUTEX &lock (void) const;
-
   /// Declare the dynamic allocation hooks.
   ACE_ALLOC_HOOK_DECLARE;
 
@@ -190,11 +187,7 @@ protected:
                   const ACE_DLL &adll);
 
   /// The typedef of the array used to store the services.
-#if defined (ACE_HAS_ALLOC_HOOKS)
-  typedef ACE_Array_Map<size_t, const ACE_Service_Type*, std::equal_to<size_t>, ACE_Allocator_Std_Adapter<std::pair<size_t, const ACE_Service_Type*> > > array_type;
-#else
-  typedef ACE_Array_Map<size_t, const ACE_Service_Type*> array_type;
-#endif /* ACE_HAS_ALLOC_HOOKS */
+  typedef ACE_Array_Map <size_t, const ACE_Service_Type*> array_type;
 
   /// Contains all the configured services.
   array_type service_array_;
@@ -205,8 +198,10 @@ protected:
   /// Must delete the @c svc_rep_ if true.
   static bool delete_svc_rep_;
 
-  /// Synchronization variable for the ACE_Service_Repository.
-  mutable ACE_SYNCH_RECURSIVE_MUTEX lock_;
+#if defined (ACE_MT_SAFE) && (ACE_MT_SAFE != 0)
+  /// Synchronization variable for the MT_SAFE Repository
+  mutable ACE_Recursive_Thread_Mutex lock_;
+#endif /* ACE_MT_SAFE */
 };
 
 /**

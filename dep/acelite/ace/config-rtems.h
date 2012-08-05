@@ -1,4 +1,6 @@
 /* -*- C -*- */
+// $Id: config-rtems.h 93571 2011-03-17 07:37:11Z olli $
+
 /* The following configuration file is designed to work for RTEMS
    platforms using GNU C.
 */

@@ -1,4 +1,6 @@
 /* -*- C++ -*- */
+// $Id: config-netbsd.h 97326 2013-09-11 07:52:09Z johnnyw $
+
 #ifndef ACE_CONFIG_H
 #define ACE_CONFIG_H
 

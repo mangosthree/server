@@ -1,8 +1,6 @@
-#include "ace/Shared_Memory_MM.h"
+// $Id: Shared_Memory_MM.cpp 91286 2010-08-05 09:04:31Z johnnyw $
 
-#if defined (ACE_HAS_ALLOC_HOOKS)
-# include "ace/Malloc_Base.h"
-#endif /* ACE_HAS_ALLOC_HOOKS */
+#include "ace/Shared_Memory_MM.h"
 
 #if !defined (__ACE_INLINE__)
 #include "ace/Shared_Memory_MM.inl"

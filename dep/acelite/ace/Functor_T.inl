@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: Functor_T.inl 96943 2013-03-30 09:42:31Z mcorino $
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template<class RECEIVER> ACE_INLINE

@@ -4,6 +4,8 @@
 /**
  *  @file    Base_Thread_Adapter.h
  *
+ *  $Id: Base_Thread_Adapter.h 95595 2012-03-07 13:33:25Z johnnyw $
+ *
  *  @author Nanbor Wang <nanbor@cs.wustl.edu>
  */
 //=============================================================================

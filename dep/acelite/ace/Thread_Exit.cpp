@@ -1,3 +1,5 @@
+// $Id: Thread_Exit.cpp 92580 2010-11-15 09:48:02Z johnnyw $
+
 #include "ace/Thread_Exit.h"
 #include "ace/Managed_Object.h"
 #include "ace/Thread_Manager.h"
@@ -89,8 +91,6 @@ ACE_Thread_Exit::~ACE_Thread_Exit (void)
 {
   ACE_OS_TRACE ("ACE_Thread_Exit::~ACE_Thread_Exit");
 }
-
-ACE_ALLOC_HOOK_DEFINE(ACE_Thread_Exit)
 
 ACE_Thread_Exit_Maybe::ACE_Thread_Exit_Maybe (int flag)
   : instance_ (0)

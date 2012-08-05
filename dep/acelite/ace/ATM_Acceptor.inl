@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: ATM_Acceptor.inl 96985 2013-04-11 15:50:32Z huangh $
+
 // Open versioned namespace, if enabled by the user.
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 

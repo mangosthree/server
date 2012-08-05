@@ -653,7 +653,7 @@ public:
 
      @return True if the ray hits the box
     */
-    static bool  rayAABox(
+    static bool __fastcall rayAABox(
         const Ray&              ray,
         const Vector3&          invDir,
         const AABox&            box,

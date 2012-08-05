@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: Service_Types.inl 89925 2010-04-19 12:49:11Z cbeaulac $
+
 #include "ace/ACE.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

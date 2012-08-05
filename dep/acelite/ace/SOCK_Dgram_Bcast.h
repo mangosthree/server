@@ -4,6 +4,8 @@
 /**
  *  @file    SOCK_Dgram_Bcast.h
  *
+ *  $Id: SOCK_Dgram_Bcast.h 80826 2008-03-04 14:51:23Z wotte $
+ *
  *  @author Doug Schmidt
  */
 //=============================================================================
@@ -44,8 +46,6 @@ public:
 
   /// Pointer to the next interface in the chain.
   ACE_Bcast_Node *next_;
-
-  ACE_ALLOC_HOOK_DECLARE;
 };
 
 /**

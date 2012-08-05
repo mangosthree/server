@@ -4,7 +4,9 @@
 /**
  *  @file     Memory_Pool.h
  *
- *  @author Dougls C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: Memory_Pool.h 80826 2008-03-04 14:51:23Z wotte $
+ *
+ *  @author Dougls C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Prashant Jain <pjain@cs.wustl.edu>
  */
 //=============================================================================

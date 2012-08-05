@@ -4,7 +4,9 @@
 /**
  *  @file   config-macros.h
  *
- *  @author (Originally in OS.h)Doug Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: config-macros.h 97400 2013-10-31 10:44:50Z mhengstmengel $
+ *
+ *  @author (Originally in OS.h)Doug Schmidt <schmidt@cs.wustl.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...
  *
@@ -19,15 +21,40 @@
 #ifndef ACE_CONFIG_MACROS_H
 #define ACE_CONFIG_MACROS_H
 
-#include "ace/config.h"
-#include "ace/config-face-safety.h"
+#define ACE_HAS_IPV6 1 
+#define ACE_USES_IPV4_IPV6_MIGRATION 1 
+
+#if defined(_WIN32)
+#  include "ace/config-win32.h"
+#elif defined(__linux) || defined(__linux__)
+#  include "ace/config-linux.h"
+#elif defined(__FreeBSD__)
+#  include "ace/config-freebsd.h"
+#elif defined(__APPLE__)
+#  include <AvailabilityMacros.h>
+#  if defined(MAC_OS_X_VERSION_10_10)
+#    include "ace/config-macosx-yosemite.h"
+#  elif defined(MAC_OS_X_VERSION_10_9)
+#    include "ace/config-macosx-mavericks.h"
+#  elif defined(MAC_OS_X_VERSION_10_8)
+#    include "ace/config-macosx-mountainlion.h"
+#  elif defined(MAC_OS_X_VERSION_10_7)
+#    include "ace/config-macosx-lion.h"
+#  elif defined(MAC_OS_X_VERSION_10_6)
+#    include "ace/config-macosx-snowleopard.h"
+#  elif defined(MAC_OS_X_VERSION_10_5)
+#    include "ace/config-macosx-leopard.h"
+#  elif defined(MAC_OS_X_VERSION_10_4)
+#    include "ace/config-macosx-tiger.h"
+#  elif defined(MAC_OS_X_VERSION_10_3)
+#    include "ace/config-macosx-panther.h"
+#  else
+#    include "ace/config-macosx.h"
+#endif
+#endif
 
 #include "ace/Version.h"
 #include "ace/Versioned_Namespace.h"
-
-#if defined (ACE_HAS_ALLOC_HOOKS)
-# include <new>
-#endif
 
 #if !defined (ACE_HAS_EXCEPTIONS)
 #define ACE_HAS_EXCEPTIONS
@@ -114,20 +141,11 @@
 #   endif
 # endif /* ACE_HAS_DYNAMIC_LINKING */
 
-# if defined (ACE_HAS_DYNAMIC_LINKING) && ACE_HAS_DYNAMIC_LINKING == 0 && \
-     defined (ACE_HAS_SVR4_DYNAMIC_LINKING)
-#   undef ACE_HAS_SVR4_DYNAMIC_LINKING
-# endif /* ACE_HAS_DYNAMIC_LINKING == 0 */
-
 # if defined (ACE_USES_FIFO_SEM)
 #   if defined (ACE_HAS_POSIX_SEM) || defined (ACE_LACKS_MKFIFO) || defined (ACE_LACKS_FCNTL)
 #     undef ACE_USES_FIFO_SEM
 #   endif
 # endif /* ACE_USES_FIFO_SEM */
-
-# ifndef ACE_LACKS_POSIX_DEVCTL
-#   define ACE_LACKS_POSIX_DEVCTL
-# endif
 
 // =========================================================================
 // INLINE macros
@@ -271,7 +289,7 @@
 # endif /* ghs || __GNUC__ || ..... */
 #endif /* !ACE_UNUSED_ARG */
 
-#if defined (_MSC_VER) || defined (ghs) || defined (__DECCXX) || defined(__BORLANDC__) || defined (ACE_RM544) || defined (__USLC__) || defined (__DCC__) || defined (__PGI) || defined (__TANDEM) || (defined (__HP_aCC) && (__HP_aCC < 39000 || __HP_aCC >= 60500))
+#if defined (_MSC_VER) || defined (ghs) || defined (__DECCXX) || defined(__BORLANDC__) || defined (ACE_RM544) || defined (__USLC__) || defined (__DCC__) || defined (__PGI) || defined (__TANDEM) || (defined (__HP_aCC) && (__HP_aCC < 40000 || __HP_aCC >= 60500))
 # define ACE_NOTREACHED(a)
 #else  /* ghs || ..... */
 # define ACE_NOTREACHED(a) a
@@ -284,175 +302,18 @@
 // ============================================================================
 
 # if defined (ACE_HAS_ALLOC_HOOKS)
-#  define ACE_ALLOC_HOOK_DECLARE \
+#   define ACE_ALLOC_HOOK_DECLARE \
   void *operator new (size_t bytes); \
-  void *operator new (size_t bytes, void *ptr); \
-  void *operator new (size_t bytes, const std::nothrow_t &) throw (); \
-  void operator delete (void *ptr); \
-  void operator delete (void *ptr, const std::nothrow_t &); \
-  void *operator new[] (size_t size); \
-  void operator delete[] (void *ptr); \
-  void *operator new[] (size_t size, const std::nothrow_t &) throw (); \
-  void operator delete[] (void *ptr, const std::nothrow_t &)
+  void operator delete (void *ptr);
 
-#  define ACE_GENERIC_ALLOCS(MAKE_PREFIX, CLASS) \
-  MAKE_PREFIX (void *, CLASS)::operator new (size_t bytes)        \
-  {                                                               \
-    void *const ptr = ACE_Allocator::instance ()->malloc (bytes); \
-    if (ptr == 0)                                                 \
-      throw std::bad_alloc ();                                    \
-    return ptr;                                                   \
-  }                                                               \
-  MAKE_PREFIX (void *, CLASS)::operator new (size_t, void *ptr) { return ptr; }\
-  MAKE_PREFIX (void *, CLASS)::operator new (size_t bytes, \
-                                             const std::nothrow_t &) throw () \
-  { return ACE_Allocator::instance ()->malloc (bytes); } \
-  MAKE_PREFIX (void, CLASS)::operator delete (void *ptr) \
-  { if (ptr) ACE_Allocator::instance ()->free (ptr); } \
-  MAKE_PREFIX (void, CLASS)::operator delete (void *ptr, \
-                                              const std::nothrow_t &) \
-  { if (ptr) ACE_Allocator::instance ()->free (ptr); } \
-  MAKE_PREFIX (void *, CLASS)::operator new[] (size_t size)      \
-  {                                                              \
-    void *const ptr = ACE_Allocator::instance ()->malloc (size); \
-    if (ptr == 0)                                                \
-      throw std::bad_alloc ();                                   \
-    return ptr;                                                  \
-  }                                                              \
-  MAKE_PREFIX (void, CLASS)::operator delete[] (void *ptr) \
-  { if (ptr) ACE_Allocator::instance ()->free (ptr); } \
-  MAKE_PREFIX (void *, CLASS)::operator new[] (size_t size, \
-                                               const std::nothrow_t &) throw ()\
-  { return ACE_Allocator::instance ()->malloc (size); } \
-  MAKE_PREFIX (void, CLASS)::operator delete[] (void *ptr, \
-                                                const std::nothrow_t &) \
-  { if (ptr) ACE_Allocator::instance ()->free (ptr); }
-
-#  define ACE_ALLOC_HOOK_HELPER(RET, CLASS) RET CLASS
-#  define ACE_ALLOC_HOOK_DEFINE(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tt(RET, CLASS) \
-  template <typename T1> RET CLASS<T1>
-#  define ACE_ALLOC_HOOK_DEFINE_Tt(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tt, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tc(RET, CLASS) template <class T1> RET CLASS<T1>
-#  define ACE_ALLOC_HOOK_DEFINE_Tc(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tc, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Ty(RET, CLASS) \
-  template <ACE_SYNCH_DECL> RET CLASS<ACE_SYNCH_USE>
-#  define ACE_ALLOC_HOOK_DEFINE_Ty(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Ty, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tyc(RET, CLASS) \
-  template <ACE_SYNCH_DECL, class T1> RET CLASS<ACE_SYNCH_USE, T1>
-#  define ACE_ALLOC_HOOK_DEFINE_Tyc(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tyc, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tycc(RET, CLASS) \
-  template <ACE_SYNCH_DECL, class T1, class T2> RET CLASS<ACE_SYNCH_USE, T1, T2>
-#  define ACE_ALLOC_HOOK_DEFINE_Tycc(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tycc, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tcy(RET, CLASS) \
-  template <class T1, ACE_SYNCH_DECL> RET CLASS<T1, ACE_SYNCH_USE>
-#  define ACE_ALLOC_HOOK_DEFINE_Tcy(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tcy, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tcyc(RET, CLASS) \
-  template <class T0, ACE_SYNCH_DECL, class T1> RET CLASS<T0, ACE_SYNCH_USE, T1>
-#  define ACE_ALLOC_HOOK_DEFINE_Tcyc(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tcyc, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tca(RET, CLASS) \
-  template <class T1, ACE_PEER_ACCEPTOR_1> RET CLASS<T1, ACE_PEER_ACCEPTOR_2>
-#  define ACE_ALLOC_HOOK_DEFINE_Tca(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tca, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tco(RET, CLASS) \
-  template <class T1, ACE_PEER_CONNECTOR_1> RET CLASS<T1, ACE_PEER_CONNECTOR_2>
-#  define ACE_ALLOC_HOOK_DEFINE_Tco(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tco, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tcoccc(RET, CLASS) \
-  template <class T1, ACE_PEER_CONNECTOR_1, class T3, class T4, class T5> RET \
-  CLASS<T1, ACE_PEER_CONNECTOR_2, T3, T4, T5>
-#  define ACE_ALLOC_HOOK_DEFINE_Tcoccc(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tcoccc, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tcc(RET, CLASS) \
-  template <class T1, class T2> RET CLASS<T1, T2>
-#  define ACE_ALLOC_HOOK_DEFINE_Tcc(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tcc, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tccc(RET, CLASS) \
-  template <class T1, class T2, class T3> RET CLASS<T1, T2, T3>
-#  define ACE_ALLOC_HOOK_DEFINE_Tccc(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tccc, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tccct(RET, CLASS) \
-  template <class T1, class T2, class T3, typename T4> RET CLASS<T1, T2, T3, T4>
-#  define ACE_ALLOC_HOOK_DEFINE_Tccct(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tccct, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tc4(RET, CLASS) \
-  template <class T1, class T2, class T3, class T4> RET CLASS<T1, T2, T3, T4>
-#  define ACE_ALLOC_HOOK_DEFINE_Tc4(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tc4, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tc5(RET, CLASS) \
-  template <class T1, class T2, class T3, class T4, class T5> RET \
-  CLASS<T1, T2, T3, T4, T5>
-#  define ACE_ALLOC_HOOK_DEFINE_Tc5(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tc5, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tc6(RET, CLASS) \
-  template <class T1, class T2, class T3, class T4, class T5, class T6> RET \
-  CLASS<T1, T2, T3, T4, T5, T6>
-#  define ACE_ALLOC_HOOK_DEFINE_Tc6(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tc6, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tc7(RET, CLASS) \
-  template <class T1, class T2, class T3, class T4, class T5, class T6, \
-            class T7> RET CLASS<T1, T2, T3, T4, T5, T6, T7>
-#  define ACE_ALLOC_HOOK_DEFINE_Tc7(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tc7, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tcs(RET, CLASS) \
-  template <class T1, size_t T2> RET CLASS<T1, T2>
-#  define ACE_ALLOC_HOOK_DEFINE_Tcs(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tcs, CLASS)
-
-#  define ACE_ALLOC_HOOK_HELPER_Tmcc(RET, CLASS) \
-  template <ACE_MEM_POOL_1, class ACE_LOCK, class ACE_CB> RET \
-  CLASS<ACE_MEM_POOL_2, ACE_LOCK, ACE_CB>
-#  define ACE_ALLOC_HOOK_DEFINE_Tmcc(CLASS) \
-  ACE_GENERIC_ALLOCS (ACE_ALLOC_HOOK_HELPER_Tmcc, CLASS)
-
+  // Note that these are just place holders for now.  Some day they
+  // may be be replaced by <ACE_Malloc>.
+#   define ACE_ALLOC_HOOK_DEFINE(CLASS) \
+  void *CLASS::operator new (size_t bytes) { return ::new char[bytes]; } \
+  void CLASS::operator delete (void *ptr) { delete [] ((char *) ptr); }
 # else
-#  define ACE_ALLOC_HOOK_DECLARE struct Ace_ {} /* Just need a dummy... */
-#  define ACE_ALLOC_HOOK_DEFINE(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tt(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tc(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tcc(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tccc(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tccct(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tc4(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tc5(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tc6(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tc7(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Ty(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tyc(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tycc(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tcy(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tcyc(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tca(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tco(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tcoccc(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tcs(CLASS)
-#  define ACE_ALLOC_HOOK_DEFINE_Tmcc(CLASS)
+#   define ACE_ALLOC_HOOK_DECLARE struct __Ace {} /* Just need a dummy... */
+#   define ACE_ALLOC_HOOK_DEFINE(CLASS)
 # endif /* ACE_HAS_ALLOC_HOOKS */
 
 // ============================================================================
@@ -691,13 +552,6 @@ extern "C" u_long CLS##_Export _get_dll_unload_policy (void) \
 
 #ifndef ACE_HAS_REACTOR_NOTIFICATION_QUEUE
 # define ACE_HAS_REACTOR_NOTIFICATION_QUEUE
-#endif
-
-// If config.h declared a lack of process-shared mutexes but was silent about
-// process-shared condition variables, ACE must not attempt to use a
-// process-shared condition variable (which always requires a mutex too).
-#if defined ACE_LACKS_MUTEXATTR_PSHARED && !defined ACE_LACKS_CONDATTR_PSHARED
-# define ACE_LACKS_CONDATTR_PSHARED
 #endif
 
 #endif /* ACE_CONFIG_MACROS_H */

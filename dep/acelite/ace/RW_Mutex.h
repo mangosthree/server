@@ -4,9 +4,11 @@
 /**
  *  @file    RW_Mutex.h
  *
+ *  $Id: RW_Mutex.h 93359 2011-02-11 11:33:12Z mcorino $
+ *
  *   Moved from Synch.h.
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
 

@@ -13,7 +13,15 @@
 #include "StormCommon.h"
 
 //-----------------------------------------------------------------------------
+// Defines
+
+#define LISTFILE_CACHE_SIZE 0x1000
+
+//-----------------------------------------------------------------------------
 // Private structure used for file search (search handle)
+
+struct TMPQSearch;
+typedef int (*MPQSEARCH)(TMPQSearch *, SFILE_FIND_DATA *);
 
 // Used by searching in MPQ archives
 struct TMPQSearch
@@ -29,67 +37,97 @@ struct TMPQSearch
 //-----------------------------------------------------------------------------
 // Local functions
 
-static TMPQSearch * IsValidSearchHandle(HANDLE hFind)
+static bool IsValidSearchHandle(TMPQSearch * hs)
 {
-    TMPQSearch * hs = (TMPQSearch *)hFind;
+    if(hs == NULL)
+        return false;
 
-    if(hs != NULL && IsValidMpqHandle(hs->ha))
-        return hs;
-
-    return NULL;
+    return IsValidMpqHandle(hs->ha);
 }
 
 bool CheckWildCard(const char * szString, const char * szWildCard)
 {
-    const char * szWildCardPtr;
+    const char * szSubString;
+    int nSubStringLength;
+    int nMatchCount = 0;
 
+    // When the mask is empty, it never matches
+    if(szWildCard == NULL || *szWildCard == 0)
+        return false;
+
+    // If the wildcard contains just "*", then it always matches
+    if(szWildCard[0] == '*' && szWildCard[1] == 0)
+        return true;
+
+    // Do normal test
     for(;;)
     {
         // If there is '?' in the wildcard, we skip one char
-        while(szWildCard[0] == '?')
+        while(*szWildCard == '?')
         {
-            if(szString[0] == 0)
-                return false;
-
             szWildCard++;
             szString++;
         }
 
-        // Handle '*'
-        szWildCardPtr = szWildCard;
-        if(szWildCardPtr[0] != 0)
+        // If there is '*', means zero or more chars. We have to
+        // find the sequence after '*'
+        if(*szWildCard == '*')
         {
-            if(szWildCardPtr[0] == '*')
+            // More stars is equal to one star
+            while(*szWildCard == '*' || *szWildCard == '?')
+                szWildCard++;
+
+            // If we found end of the wildcard, it's a match
+            if(*szWildCard == 0)
+                return true;
+
+            // Determine the length of the substring in szWildCard
+            szSubString = szWildCard;
+            while(*szSubString != 0 && *szSubString != '?' && *szSubString != '*')
+                szSubString++;
+            nSubStringLength = (int)(szSubString - szWildCard);
+            nMatchCount = 0;
+
+            // Now we have to find a substring in szString,
+            // that matches the substring in szWildCard
+            while(*szString != 0)
             {
-                szWildCardPtr++;
-
-                if(szWildCardPtr[0] == '*')
-                    continue;
-
-                if(szWildCardPtr[0] == 0)
-                    return true;
-
-                if(AsciiToUpperTable[szWildCardPtr[0]] == AsciiToUpperTable[szString[0]])
+                // Calculate match count
+                while(nMatchCount < nSubStringLength)
                 {
-                    if(CheckWildCard(szString, szWildCardPtr))
-                        return true;
+                    if(toupper(szString[nMatchCount]) != toupper(szWildCard[nMatchCount]))
+                        break;
+                    if(szString[nMatchCount] == 0)
+                        break;
+                    nMatchCount++;
                 }
-            }
-            else
-            {
-                if(AsciiToUpperTable[szWildCardPtr[0]] != AsciiToUpperTable[szString[0]])
-                    return false;
 
-                szWildCard = szWildCardPtr + 1;
-            }
+                // If the match count has reached substring length, we found a match
+                if(nMatchCount == nSubStringLength)
+                {
+                    szWildCard += nMatchCount;
+                    szString += nMatchCount;
+                    break;
+                }
 
-            if(szString[0] == 0)
-                return false;
-            szString++;
+                // No match, move to the next char in szString
+                nMatchCount = 0;
+                szString++;
+            }
         }
         else
         {
-            return (szString[0] == 0) ? true : false;
+            // If we came to the end of the string, compare it to the wildcard
+            if(toupper(*szString) != toupper(*szWildCard))
+                return false;
+
+            // If we arrived to the end of the string, it's a match
+            if(*szString == 0)
+                return true;
+
+            // Otherwise, continue in comparing
+            szWildCard++;
+            szString++;
         }
     }
 }
@@ -102,7 +140,7 @@ static DWORD GetSearchTableItems(TMPQArchive * ha)
     while(ha != NULL)
     {
         // Append the number of files
-        dwMergeItems += (ha->pHetTable != NULL) ? ha->pHetTable->dwEntryCount
+        dwMergeItems += (ha->pHetTable != NULL) ? ha->pHetTable->dwMaxFileCount
                                                 : ha->pHeader->dwBlockTableSize;
         // Move to the patched archive
         ha = ha->haPatch;
@@ -113,9 +151,9 @@ static DWORD GetSearchTableItems(TMPQArchive * ha)
 }
 
 static bool FileWasFoundBefore(
-    TMPQArchive * ha,
-    TMPQSearch * hs,
-    TFileEntry * pFileEntry)
+        TMPQArchive * ha,
+        TMPQSearch * hs,
+        TFileEntry * pFileEntry)
 {
     TFileEntry * pEntry;
     char * szRealFileName = pFileEntry->szFileName;
@@ -127,18 +165,18 @@ static bool FileWasFoundBefore(
     {
         // If we are in patch MPQ, we check if patch prefix matches
         // and then trim the patch prefix
-        if(ha->pPatchPrefix != NULL)
+        if(ha->cchPatchPrefix != 0)
         {
             // If the patch prefix doesn't fit, we pretend that the file
             // was there before and it will be skipped
-            if(_strnicmp(szRealFileName, ha->pPatchPrefix->szPatchPrefix, ha->pPatchPrefix->nLength))
+            if(_strnicmp(szRealFileName, ha->szPatchPrefix, ha->cchPatchPrefix))
                 return true;
 
-            szRealFileName += ha->pPatchPrefix->nLength;
+            szRealFileName += ha->cchPatchPrefix;
         }
 
         // Calculate the hash to the table
-        dwNameHash = ha->pfnHashString(szRealFileName, MPQ_HASH_NAME_A);
+        dwNameHash = HashString(szRealFileName, MPQ_HASH_NAME_A);
         dwStartIndex = dwIndex = (dwNameHash % hs->dwSearchTableItems);
 
         // The file might have been found before
@@ -175,185 +213,114 @@ static bool FileWasFoundBefore(
 
 static TFileEntry * FindPatchEntry(TMPQArchive * ha, TFileEntry * pFileEntry)
 {
-    TFileEntry * pPatchEntry = pFileEntry;
+    TFileEntry * pPatchEntry = NULL;
     TFileEntry * pTempEntry;
-    char szFileName[MAX_PATH+1];
+    char szFileName[MAX_PATH];
+    LCID lcLocale = pFileEntry->lcLocale;
 
-    // Can't find patch entry for a file that doesn't have name
-    if(pFileEntry->szFileName != NULL && pFileEntry->szFileName[0] != 0)
+    // Go while there are patches
+    while(ha->haPatch != NULL)
     {
-        // Go while there are patches
-        while(ha->haPatch != NULL)
-        {
-            // Move to the patch archive
-            ha = ha->haPatch;
-            szFileName[0] = 0;
+        // Move to the patch archive
+        ha = ha->haPatch;
 
-            // Prepare the prefix for the file name
-            if(ha->pPatchPrefix && ha->pPatchPrefix->nLength)
-                StringCopy(szFileName, _countof(szFileName), ha->pPatchPrefix->szPatchPrefix);
-            StringCat(szFileName, _countof(szFileName), pFileEntry->szFileName);
+        // Prepare the prefix for the file name
+        strcpy(szFileName, ha->szPatchPrefix);
+        strcat(szFileName, pFileEntry->szFileName);
 
-            // Try to find the file there
-            pTempEntry = GetFileEntryExact(ha, szFileName, 0, NULL);
-            if(pTempEntry != NULL)
-                pPatchEntry = pTempEntry;
-        }
+        // Try to find the file there
+        pTempEntry = GetFileEntryExact(ha, szFileName, lcLocale);
+        if(pTempEntry != NULL)
+            pPatchEntry = pTempEntry;
     }
 
     // Return the found patch entry
     return pPatchEntry;
 }
 
-static bool DoMPQSearch_FileEntry(
-    TMPQSearch * hs,
-    SFILE_FIND_DATA * lpFindFileData,
-    TMPQArchive * ha,
-    TMPQHash * pHashEntry,
-    TFileEntry * pFileEntry)
-{
-    TFileEntry * pPatchEntry;
-    HANDLE hFile = NULL;
-    const char * szFileName;
-    size_t nPrefixLength = (ha->pPatchPrefix != NULL) ? ha->pPatchPrefix->nLength : 0;
-    DWORD dwBlockIndex;
-    char szNameBuff[MAX_PATH];
-
-    // Is it a file but not a patch file?
-    if((pFileEntry->dwFlags & hs->dwFlagMask) == MPQ_FILE_EXISTS)
-    {
-        // Now we have to check if this file was not enumerated before
-        if(!FileWasFoundBefore(ha, hs, pFileEntry))
-        {
-//          if(pFileEntry != NULL && !_stricmp(pFileEntry->szFileName, "TriggerLibs\\NativeLib.galaxy"))
-//              DebugBreak();
-
-            // Find a patch to this file
-            // Note: This either succeeds or returns pFileEntry
-            pPatchEntry = FindPatchEntry(ha, pFileEntry);
-
-            // Prepare the block index
-            dwBlockIndex = (DWORD)(pFileEntry - ha->pFileTable);
-
-            // Get the file name. If it's not known, we will create pseudo-name
-            szFileName = pFileEntry->szFileName;
-            if(szFileName == NULL)
-            {
-                // Open the file by its pseudo-name.
-                sprintf(szNameBuff, "File%08u.xxx", (unsigned int)dwBlockIndex);
-                if(SFileOpenFileEx((HANDLE)hs->ha, szNameBuff, SFILE_OPEN_BASE_FILE, &hFile))
-                {
-                    SFileGetFileName(hFile, szNameBuff);
-                    szFileName = szNameBuff;
-                    SFileCloseFile(hFile);
-                }
-            }
-
-            // If the file name is still NULL, we cannot include the file to search results
-            if(szFileName != NULL)
-            {
-                // Check the file name against the wildcard
-                if(CheckWildCard(szFileName + nPrefixLength, hs->szSearchMask))
-                {
-                    // Fill the found entry. hash entry and block index are taken from the base MPQ
-                    lpFindFileData->dwHashIndex  = HASH_ENTRY_FREE;
-                    lpFindFileData->dwBlockIndex = dwBlockIndex;
-                    lpFindFileData->dwFileSize   = pPatchEntry->dwFileSize;
-                    lpFindFileData->dwFileFlags  = pPatchEntry->dwFlags;
-                    lpFindFileData->dwCompSize   = pPatchEntry->dwCmpSize;
-                    lpFindFileData->lcLocale     = 0;   // pPatchEntry->lcLocale;
-
-                    // Fill the filetime
-                    lpFindFileData->dwFileTimeHi = (DWORD)(pPatchEntry->FileTime >> 32);
-                    lpFindFileData->dwFileTimeLo = (DWORD)(pPatchEntry->FileTime);
-
-                    // Fill-in the entries from hash table entry, if given
-                    if(pHashEntry != NULL)
-                    {
-                        lpFindFileData->dwHashIndex = (DWORD)(pHashEntry - ha->pHashTable);
-                        lpFindFileData->lcLocale = pHashEntry->lcLocale;
-                    }
-
-                    // Fill the file name and plain file name
-                    StringCopy(lpFindFileData->cFileName, _countof(lpFindFileData->cFileName), szFileName + nPrefixLength);
-                    lpFindFileData->szPlainName = (char *)GetPlainFileName(lpFindFileData->cFileName);
-                    return true;
-                }
-            }
-        }
-    }
-
-    // Either not a valid item or was found before
-    return false;
-}
-
-static int DoMPQSearch_HashTable(TMPQSearch * hs, SFILE_FIND_DATA * lpFindFileData, TMPQArchive * ha)
-{
-    TMPQHash * pHashTableEnd = ha->pHashTable + ha->pHeader->dwHashTableSize;
-    TMPQHash * pHash;
-
-    // Parse the file table
-    for(pHash = ha->pHashTable + hs->dwNextIndex; pHash < pHashTableEnd; pHash++)
-    {
-        // Increment the next index for subsequent search
-        hs->dwNextIndex++;
-
-        // Does this hash table entry point to a proper block table entry?
-        if(IsValidHashEntry(ha, pHash))
-        {
-            // Check if this file entry should be included in the search result
-            if(DoMPQSearch_FileEntry(hs, lpFindFileData, ha, pHash, ha->pFileTable + MPQ_BLOCK_INDEX(pHash)))
-                return ERROR_SUCCESS;
-        }
-    }
-
-    // No more files
-    return ERROR_NO_MORE_FILES;
-}
-
-static int DoMPQSearch_FileTable(TMPQSearch * hs, SFILE_FIND_DATA * lpFindFileData, TMPQArchive * ha)
-{
-    TFileEntry * pFileTableEnd = ha->pFileTable + ha->dwFileTableSize;
-    TFileEntry * pFileEntry;
-
-    // Parse the file table
-    for(pFileEntry = ha->pFileTable + hs->dwNextIndex; pFileEntry < pFileTableEnd; pFileEntry++)
-    {
-        // Increment the next index for subsequent search
-        hs->dwNextIndex++;
-
-        // Check if this file entry should be included in the search result
-        if(DoMPQSearch_FileEntry(hs, lpFindFileData, ha, NULL, pFileEntry))
-            return ERROR_SUCCESS;
-    }
-
-    // No more files
-    return ERROR_NO_MORE_FILES;
-}
-
 // Performs one MPQ search
 static int DoMPQSearch(TMPQSearch * hs, SFILE_FIND_DATA * lpFindFileData)
 {
     TMPQArchive * ha = hs->ha;
-    int nError;
+    TFileEntry * pFileTableEnd;
+    TFileEntry * pPatchEntry;
+    TFileEntry * pFileEntry;
+    const char * szFileName;
+    HANDLE hFile;
+    char szPseudoName[20];
+    DWORD dwBlockIndex;
+    size_t nPrefixLength;
 
     // Start searching with base MPQ
     while(ha != NULL)
-    { 
-        // If the archive has hash table, we need to use hash table
-        // in order to catch hash table index and file locale.
-        // Note: If multiple hash table entries, point to the same block entry,
-        // we need, to report them all
-        nError = (ha->pHashTable != NULL) ? DoMPQSearch_HashTable(hs, lpFindFileData, ha)
-                                          : DoMPQSearch_FileTable(hs, lpFindFileData, ha);
-        if(nError == ERROR_SUCCESS)
-            return nError;
+    {
+        // Now parse the file entry table in order to get all files.
+        pFileTableEnd = ha->pFileTable + ha->dwFileTableSize;
+        pFileEntry = ha->pFileTable + hs->dwNextIndex;
 
-        // If there is no more patches in the chain, stop it.
-        // This also keeps hs->ha non-NULL, which is required
-        // for freeing the handle later
-        if(ha->haPatch == NULL)
-            break;
+        // Get the length of the patch prefix (0 if none)
+        nPrefixLength = strlen(ha->szPatchPrefix);
+
+        // Parse the file table
+        while(pFileEntry < pFileTableEnd)
+        {
+            // Increment the next index for subsequent search
+            hs->dwNextIndex++;
+
+            // Is it a file and not a patch file?
+            if((pFileEntry->dwFlags & hs->dwFlagMask) == MPQ_FILE_EXISTS)
+            {
+                // Now we have to check if this file was not enumerated before
+                if(!FileWasFoundBefore(ha, hs, pFileEntry))
+                {
+                    // Find a patch to this file
+                    pPatchEntry = FindPatchEntry(ha, pFileEntry);
+                    if(pPatchEntry == NULL)
+                        pPatchEntry = pFileEntry;
+
+                    // Prepare the block index
+                    dwBlockIndex = (DWORD)(pFileEntry - ha->pFileTable);
+
+                    // Get the file name. If it's not known, we will create pseudo-name
+                    szFileName = pFileEntry->szFileName;
+                    if(szFileName == NULL)
+                    {
+                        // Open the file by its pseudo-name.
+                        // This also generates the file name with a proper extension
+                        sprintf(szPseudoName, "File%08u.xxx", dwBlockIndex);
+                        if(SFileOpenFileEx((HANDLE)hs->ha, szPseudoName, SFILE_OPEN_FROM_MPQ, &hFile))
+                        {
+                            szFileName = (pFileEntry->szFileName != NULL) ? pFileEntry->szFileName : szPseudoName;
+                            SFileCloseFile(hFile);
+                        }
+                    }
+
+                    // Check the file name against the wildcard
+                    if(CheckWildCard(szFileName + nPrefixLength, hs->szSearchMask))
+                    {
+                        // Fill the found entry
+                        lpFindFileData->dwHashIndex  = pPatchEntry->dwHashIndex;
+                        lpFindFileData->dwBlockIndex = dwBlockIndex;
+                        lpFindFileData->dwFileSize   = pPatchEntry->dwFileSize;
+                        lpFindFileData->dwFileFlags  = pPatchEntry->dwFlags;
+                        lpFindFileData->dwCompSize   = pPatchEntry->dwCmpSize;
+                        lpFindFileData->lcLocale     = pPatchEntry->lcLocale;
+
+                        // Fill the filetime
+                        lpFindFileData->dwFileTimeHi = (DWORD)(pPatchEntry->FileTime >> 32);
+                        lpFindFileData->dwFileTimeLo = (DWORD)(pPatchEntry->FileTime);
+
+                        // Fill the file name and plain file name
+                        strcpy(lpFindFileData->cFileName, szFileName + nPrefixLength);
+                        lpFindFileData->szPlainName = (char *)GetPlainFileNameA(lpFindFileData->cFileName);
+                        return ERROR_SUCCESS;
+                    }
+
+                }
+            }
+
+            pFileEntry++;
+        }
 
         // Move to the next patch in the patch chain
         hs->ha = ha = ha->haPatch;
@@ -378,7 +345,7 @@ static void FreeMPQSearch(TMPQSearch *& hs)
 //-----------------------------------------------------------------------------
 // Public functions
 
-HANDLE WINAPI SFileFindFirstFile(HANDLE hMpq, const char * szMask, SFILE_FIND_DATA * lpFindFileData, const TCHAR * szListFile)
+HANDLE WINAPI SFileFindFirstFile(HANDLE hMpq, const char * szMask, SFILE_FIND_DATA * lpFindFileData, const char * szListFile)
 {
     TMPQArchive * ha = (TMPQArchive *)hMpq;
     TMPQSearch * hs = NULL;
@@ -386,7 +353,7 @@ HANDLE WINAPI SFileFindFirstFile(HANDLE hMpq, const char * szMask, SFILE_FIND_DA
     int nError = ERROR_SUCCESS;
 
     // Check for the valid parameters
-    if(!IsValidMpqHandle(hMpq))
+    if(!IsValidMpqHandle(ha))
         nError = ERROR_INVALID_HANDLE;
     if(szMask == NULL || lpFindFileData == NULL)
         nError = ERROR_INVALID_PARAMETER;
@@ -439,18 +406,18 @@ HANDLE WINAPI SFileFindFirstFile(HANDLE hMpq, const char * szMask, SFILE_FIND_DA
         FreeMPQSearch(hs);
         SetLastError(nError);
     }
-    
+
     // Return the result value
     return (HANDLE)hs;
 }
 
 bool WINAPI SFileFindNextFile(HANDLE hFind, SFILE_FIND_DATA * lpFindFileData)
 {
-    TMPQSearch * hs = IsValidSearchHandle(hFind);
+    TMPQSearch * hs = (TMPQSearch *)hFind;
     int nError = ERROR_SUCCESS;
 
     // Check the parameters
-    if(hs == NULL)
+    if(!IsValidSearchHandle(hs))
         nError = ERROR_INVALID_HANDLE;
     if(lpFindFileData == NULL)
         nError = ERROR_INVALID_PARAMETER;
@@ -465,10 +432,10 @@ bool WINAPI SFileFindNextFile(HANDLE hFind, SFILE_FIND_DATA * lpFindFileData)
 
 bool WINAPI SFileFindClose(HANDLE hFind)
 {
-    TMPQSearch * hs = IsValidSearchHandle(hFind);
+    TMPQSearch * hs = (TMPQSearch *)hFind;
 
     // Check the parameters
-    if(hs == NULL)
+    if(!IsValidSearchHandle(hs))
     {
         SetLastError(ERROR_INVALID_HANDLE);
         return false;

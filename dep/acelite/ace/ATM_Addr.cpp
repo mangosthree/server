@@ -1,3 +1,5 @@
+// $Id: ATM_Addr.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 // Defines the Internet domain address family address format.
 
 #include "ace/ATM_Addr.h"
@@ -450,7 +452,7 @@ ACE_ATM_Addr::addr_to_string (void) const
 
 // Set a pointer to the address.
 void
-ACE_ATM_Addr::set_addr (const void *addr, int len)
+ACE_ATM_Addr::set_addr (void *addr, int len)
 {
   ACE_TRACE ("ACE_ATM_Addr::set_addr");
 
@@ -462,7 +464,8 @@ ACE_ATM_Addr::set_addr (const void *addr, int len)
   this->ACE_Addr::base_set (AF_UNSPEC,
 #endif /* ACE_HAS_FORE_ATM_XTI || ACE_HAS_FORE_WS2 */
                             len);
-  ACE_OS::memcpy (&this->atm_addr_, addr, len);
+  ACE_OS::memcpy ((void *) &this->atm_addr_,
+ (void *) addr, len);
 }
 
 // Compare two addresses for inequality.

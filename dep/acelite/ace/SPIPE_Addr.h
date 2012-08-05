@@ -4,7 +4,9 @@
 /**
  *  @file    SPIPE_Addr.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: SPIPE_Addr.h 80826 2008-03-04 14:51:23Z wotte $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
 
@@ -55,7 +57,7 @@ public:
   virtual void *get_addr (void) const;
 
   /// Set a pointer to the underlying network address.
-  virtual void set_addr (const void *addr, int len);
+  virtual void set_addr (void *addr, int len);
 
   /// Transform the current address into string format.
   virtual int addr_to_string (ACE_TCHAR *addr, size_t) const;

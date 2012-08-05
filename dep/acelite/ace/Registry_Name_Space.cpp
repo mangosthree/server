@@ -1,3 +1,5 @@
+// $Id: Registry_Name_Space.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 #include "ace/Registry_Name_Space.h"
 
 

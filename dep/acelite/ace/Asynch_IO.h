@@ -4,6 +4,8 @@
 /**
  *  @file    Asynch_IO.h
  *
+ *  $Id: Asynch_IO.h 97246 2013-08-07 07:10:20Z johnnyw $
+ *
  *  This works on Win32 (defined (ACE_WIN32) && !defined
  *  (ACE_HAS_WINCE)) platforms and on POSIX4 platforms with {aio_*}
  *  routines (defined (ACE_HAS_AIO_CALLS))
@@ -983,13 +985,13 @@ public:
     ACE_Asynch_Accept_Result_Impl *implementation (void) const;
 
   protected:
-    /// Constructor. Implementation will not be deleted.
+    /// Contructor. Implementation will not be deleted.
     Result (ACE_Asynch_Accept_Result_Impl *implementation);
 
     /// Destructor.
     virtual ~Result (void);
 
-    /// Implementation class.
+    /// Impelmentation class.
     ACE_Asynch_Accept_Result_Impl *implementation_;
   };
 private:
@@ -1080,13 +1082,13 @@ public:
     ACE_Asynch_Connect_Result_Impl *implementation (void) const;
 
   protected:
-    /// Constructor. Implementation will not be deleted.
+    /// Contructor. Implementation will not be deleted.
     Result (ACE_Asynch_Connect_Result_Impl *implementation);
 
     /// Destructor.
     virtual ~Result (void);
 
-    /// Implementation class.
+    /// Impelmentation class.
     ACE_Asynch_Connect_Result_Impl *implementation_;
   };
 private:

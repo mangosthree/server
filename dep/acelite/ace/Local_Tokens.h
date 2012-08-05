@@ -4,8 +4,10 @@
 /**
  *  @file    Local_Tokens.h
  *
+ *  $Id: Local_Tokens.h 96985 2013-04-11 15:50:32Z huangh $
+ *
  *  @author Karl-Heinz Dorn <kdorn@erlh.siemens.de>
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Tim Harrison <harrison@cs.wustl.edu>
  *
  * This file contains definitions for the following classes:
@@ -34,6 +36,8 @@
  *  ACE_Thread_Semaphore, etc., that are defined in
  *  $ACE_ROOT/ace/Synch.h or the
  *  ACE_Token that's defined in $ACE_ROOT/ace/Token.h.
+ *
+ *
  */
 //=============================================================================
 

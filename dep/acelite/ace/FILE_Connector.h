@@ -4,7 +4,9 @@
 /**
  *  @file    FILE_Connector.h
  *
- *  @author Doug Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: FILE_Connector.h 96985 2013-04-11 15:50:32Z huangh $
+ *
+ *  @author Doug Schmidt <schmidt@cs.wustl.edu>
  */
 //=============================================================================
 

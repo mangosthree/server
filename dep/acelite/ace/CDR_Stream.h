@@ -4,6 +4,8 @@
 /**
  *  @file   CDR_Stream.h
  *
+ *  $Id: CDR_Stream.h 97972 2014-11-10 15:46:10Z johnnyw $
+ *
  * ACE Common Data Representation (CDR) marshaling and demarshaling
  * classes.
  *
@@ -25,6 +27,7 @@
  *  CDR stream ignores alignment when marshaling data. Use this option
  *  only when ACE_DISABLE_SWAP_ON_READ can be enabled. This option requires
  *  ACE CDR engine to do both marshaling and demarshaling.
+ *
  *
  *  @author TAO version by Aniruddha Gokhale <gokhale@cs.wustl.edu>
  *  @author Carlos O'Ryan <coryan@cs.wustl.edu>
@@ -56,7 +59,6 @@
 #include "Monitor_Size.h"
 #endif /* ACE_HAS_MONITOR_POINTS==1 */
 
-#include <string>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -122,7 +124,7 @@ public:
   /// with the alignment of @a data.
   /**
    * Create an output stream from an arbitrary buffer, care must be
-   * exercised with alignment, because this constructor will align if
+   * exercised with alignment, because this contructor will align if
    * needed.  In this case @a data will not point to the start of the
    * output stream. @c begin()->rd_ptr() points to the start of the
    * output stream.  See @c ACE_ptr_align_binary() to properly align a
@@ -139,11 +141,11 @@ public:
                  ACE_CDR::Octet giop_minor_version = ACE_CDR_GIOP_MINOR_VERSION);
 
   /// Build a CDR stream with an initial data block, it will *not* remove
-  /// @a data_block, since it did not allocated it.  It's important to be
-  /// careful with the alignment of <data_block>.
+  /// <data_block>, since it did not allocated it.  It's important to be
+  // careful with the alignment of <data_block>.
   /**
    * Create an output stream from an arbitrary data block, care must be
-   * exercised with alignment, because this constructor will align if
+   * exercised with alignment, because this contructor will align if
    * needed.  In this case @a data_block will not point to the
    * start of the output stream. begin()->rd_ptr() points to the start
    * off the output stream.  See ACE_ptr_align_binary() to properly align a
@@ -222,24 +224,6 @@ public:
     ACE_CDR::ULong bound_;
     ACE_CDR::Boolean nocopy_;
   };
-
-  struct ACE_Export from_std_string
-  {
-    from_std_string (const std::string &s,
-                     ACE_CDR::ULong b);
-    const std::string &val_;
-    ACE_CDR::ULong bound_;
-  };
-
-#if !defined(ACE_LACKS_STD_WSTRING)
-  struct ACE_Export from_std_wstring
-  {
-    from_std_wstring (const std::wstring &ws,
-                      ACE_CDR::ULong b);
-    const std::wstring &val_;
-    ACE_CDR::ULong bound_;
-  };
-#endif
   //@}
 
   /**
@@ -259,7 +243,6 @@ public:
   ACE_CDR::Boolean write_float (ACE_CDR::Float x);
   ACE_CDR::Boolean write_double (const ACE_CDR::Double &x);
   ACE_CDR::Boolean write_longdouble (const ACE_CDR::LongDouble &x);
-  ACE_CDR::Boolean write_fixed (const ACE_CDR::Fixed &x);
 
   /// For string we offer methods that accept a precomputed length.
   ACE_CDR::Boolean write_string (const ACE_CDR::Char *x);
@@ -269,11 +252,6 @@ public:
   ACE_CDR::Boolean write_wstring (const ACE_CDR::WChar *x);
   ACE_CDR::Boolean write_wstring (ACE_CDR::ULong length,
                                   const ACE_CDR::WChar *x);
-  ACE_CDR::Boolean write_string (const std::string &x);
-#if !defined(ACE_LACKS_STD_WSTRING)
-  ACE_CDR::Boolean write_wstring (const std::wstring &x);
-#endif
-
   //@}
 
   /// @note the portion written starts at @a x and ends
@@ -354,7 +332,7 @@ public:
    * type to insert. This requirement is satisfied by using one of the
    * placeholder-writing methods to align the stream for the anticipated
    * value and obtain the correct location.
-   * Treatment of @a x with respect to byte swapping is the same as for when
+   * Treatment of @a x with repect to byte swapping is the same as for when
    * any value is inserted.
    *
    * @param x   The value to insert into the specified location.
@@ -393,13 +371,12 @@ public:
   ACE_CDR::Boolean append_float (ACE_InputCDR &);
   ACE_CDR::Boolean append_double (ACE_InputCDR &);
   ACE_CDR::Boolean append_longdouble (ACE_InputCDR &);
-  ACE_CDR::Boolean append_fixed (ACE_InputCDR &);
 
   ACE_CDR::Boolean append_wstring (ACE_InputCDR &);
   ACE_CDR::Boolean append_string (ACE_InputCDR &);
   //@}
 
-  /// Returns @c false if an error has occurred.
+  /// Returns @c false if an error has ocurred.
   /**
    * @note The only expected error is to run out of memory.
    */
@@ -669,7 +646,7 @@ public:
 
   /**
    * Create an input stream from an arbitrary buffer.  The buffer must
-   * be properly aligned because this constructor will *not* work if
+   * be properly aligned because this contructor will *not* work if
    * the buffer is aligned unproperly.See ACE_ptr_align_binary() for
    * instructions on how to align a pointer properly and use
    * ACE_CDR::MAX_ALIGNMENT for the correct alignment.
@@ -701,7 +678,7 @@ public:
                 ACE_CDR::Octet minor_version = ACE_CDR_GIOP_MINOR_VERSION,
                 ACE_Lock* lock = 0);
 
-  /// Create an input stream from an ACE_Data_Block. The @a flag
+  /// Create an input stream from an ACE_Data_Block. The <flag>
   /// indicates whether the @a data can be deleted by the CDR stream
   /// or not
   ACE_InputCDR (ACE_Data_Block *data,
@@ -757,7 +734,7 @@ public:
 
     ACE_InputCDR &rhs_;
   };
-  /// Transfer the contents from @a rhs to a new CDR
+  /// Transfer the contents from <rhs> to a new CDR
   ACE_InputCDR (Transfer_Contents rhs);
 
   /// Destructor
@@ -818,25 +795,6 @@ public:
     const ACE_CDR::WChar *&val_;
     ACE_CDR::ULong bound_;
   };
-
-  /// Helper classes for extracting bounded strings into std::string/wstring.
-  struct ACE_Export to_std_string
-  {
-    to_std_string (std::string &s,
-                   ACE_CDR::ULong b);
-    std::string &val_;
-    ACE_CDR::ULong bound_;
-  };
-
-#if !defined(ACE_LACKS_STD_WSTRING)
-  struct ACE_Export to_std_wstring
-  {
-    to_std_wstring (std::wstring &ws,
-                    ACE_CDR::ULong b);
-    std::wstring &val_;
-    ACE_CDR::ULong bound_;
-  };
-#endif /* ACE_LACKS_STD_WSTRING */
   //@}
 
   /**
@@ -856,15 +814,10 @@ public:
   ACE_CDR::Boolean read_float (ACE_CDR::Float &x);
   ACE_CDR::Boolean read_double (ACE_CDR::Double &x);
   ACE_CDR::Boolean read_longdouble (ACE_CDR::LongDouble &x);
-  ACE_CDR::Boolean read_fixed (ACE_CDR::Fixed &x);
 
   ACE_CDR::Boolean read_string (ACE_CDR::Char *&x);
   ACE_CDR::Boolean read_string (ACE_CString &x);
   ACE_CDR::Boolean read_wstring (ACE_CDR::WChar*& x);
-  ACE_CDR::Boolean read_string (std::string& x);
-#if !defined(ACE_LACKS_STD_WSTRING)
-  ACE_CDR::Boolean read_wstring (std::wstring& x);
-#endif
   //@}
 
   /**
@@ -918,7 +871,6 @@ public:
   ACE_CDR::Boolean skip_float (void);
   ACE_CDR::Boolean skip_double (void);
   ACE_CDR::Boolean skip_longdouble (void);
-  ACE_CDR::Boolean skip_fixed (void);
   //@}
 
   /**
@@ -1095,7 +1047,7 @@ private:
   // We could use void* or char* to make the interface more
   // consistent, but using native types let us exploit the strict
   // alignment requirements of CDR streams and implement the
-  // operations using assignment.
+  // operations using asignment.
 
   /**
    * Read an array of @a length elements, each of @a size bytes and the
@@ -1160,12 +1112,6 @@ public:
   /// the characters from the stream codeset to the native codeset
   virtual ACE_CDR::Boolean read_string (ACE_InputCDR&,
                                         ACE_CDR::Char *&) = 0;
-
-  /// Read a std::string from the stream, including the length, converting
-  /// the characters from the stream codeset to the native codeset
-  /// (provide non-optimized default implementation)
-  virtual ACE_CDR::Boolean read_string (ACE_InputCDR&,
-                                        std::string &);
 
   /// Read an array of characters from the stream, converting the
   /// characters from the stream codeset to the native codeset.
@@ -1263,13 +1209,6 @@ public:
                                        ACE_CDR::WChar&) = 0;
   virtual ACE_CDR::Boolean read_wstring (ACE_InputCDR&,
                                          ACE_CDR::WChar *&) = 0;
-#if !defined(ACE_LACKS_STD_WSTRING)
-  /// Read a std::wstring from the stream, including the length, converting
-  /// the characters from the stream codeset to the native codeset
-  /// (provide non-optimized default implementation)
-  virtual ACE_CDR::Boolean read_wstring (ACE_InputCDR&,
-                                         std::wstring &);
-#endif
   virtual ACE_CDR::Boolean read_wchar_array (ACE_InputCDR&,
                                              ACE_CDR::WChar*,
                                              ACE_CDR::ULong) = 0;
@@ -1383,8 +1322,6 @@ extern ACE_Export ACE_CDR::Boolean operator<< (ACE_OutputCDR &os,
                                                ACE_CDR::Float x);
 extern ACE_Export ACE_CDR::Boolean operator<< (ACE_OutputCDR &os,
                                                ACE_CDR::Double x);
-extern ACE_Export ACE_CDR::Boolean operator<< (ACE_OutputCDR &os,
-                                               const ACE_CDR::Fixed &x);
 
 // CDR output operator from helper classes
 
@@ -1404,16 +1341,6 @@ extern ACE_Export ACE_CDR::Boolean operator<< (ACE_OutputCDR &os,
                                                const ACE_CDR::Char* x);
 extern ACE_Export ACE_CDR::Boolean operator<< (ACE_OutputCDR &os,
                                                const ACE_CDR::WChar* x);
-extern ACE_Export ACE_CDR::Boolean operator<< (ACE_OutputCDR &os,
-                                               ACE_OutputCDR::from_std_string x);
-extern ACE_Export ACE_CDR::Boolean operator<< (ACE_OutputCDR &os,
-                                               const std::string& x);
-#if !defined(ACE_LACKS_STD_WSTRING)
-extern ACE_Export ACE_CDR::Boolean operator<< (ACE_OutputCDR &os,
-                                               ACE_OutputCDR::from_std_wstring x);
-extern ACE_Export ACE_CDR::Boolean operator<< (ACE_OutputCDR &os,
-                                               const std::wstring& x);
-#endif
 
 // Not used by CORBA or TAO
 extern ACE_Export ACE_CDR::Boolean operator>> (ACE_InputCDR &is,
@@ -1438,8 +1365,6 @@ extern ACE_Export ACE_CDR::Boolean operator>> (ACE_InputCDR &is,
                                                ACE_CDR::Float &x);
 extern ACE_Export ACE_CDR::Boolean operator>> (ACE_InputCDR &is,
                                                ACE_CDR::Double &x);
-extern ACE_Export ACE_CDR::Boolean operator>> (ACE_InputCDR &is,
-                                               ACE_CDR::Fixed &x);
 
 // CDR input operator from helper classes
 
@@ -1459,16 +1384,6 @@ extern ACE_Export ACE_CDR::Boolean operator>> (ACE_InputCDR &is,
                                                ACE_CDR::Char*& x);
 extern ACE_Export ACE_CDR::Boolean operator>> (ACE_InputCDR &is,
                                                ACE_CDR::WChar*& x);
-extern ACE_Export ACE_CDR::Boolean operator<< (ACE_InputCDR &os,
-                                               ACE_InputCDR::to_std_string x);
-extern ACE_Export ACE_CDR::Boolean operator>> (ACE_InputCDR &is,
-                                               std::string& x);
-#if !defined(ACE_LACKS_STD_WSTRING)
-extern ACE_Export ACE_CDR::Boolean operator<< (ACE_InputCDR &os,
-                                               ACE_InputCDR::to_std_wstring x);
-extern ACE_Export ACE_CDR::Boolean operator>> (ACE_InputCDR &is,
-                                               std::wstring& x);
-#endif
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 

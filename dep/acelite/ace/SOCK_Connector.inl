@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: SOCK_Connector.inl 82723 2008-09-16 09:35:44Z johnnyw $
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // This constructor is used by a client when it wants to connect to

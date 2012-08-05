@@ -1,3 +1,5 @@
+// $Id: Condition_T.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 #ifndef ACE_CONDITION_T_CPP
 #define ACE_CONDITION_T_CPP
 
@@ -10,9 +12,6 @@
 #if defined (ACE_HAS_THREADS)
 
 #include "ace/Log_Category.h"
-#if defined (ACE_HAS_ALLOC_HOOKS)
-# include "ace/Malloc_Base.h"
-#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/Condition_T.inl"
@@ -21,8 +20,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Condition)
-ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Thread_Condition)
+ACE_ALLOC_HOOK_DEFINE(ACE_Condition)
 
 template <class MUTEX> void
 ACE_Condition<MUTEX>::dump (void) const

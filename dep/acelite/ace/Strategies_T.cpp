@@ -1,3 +1,5 @@
+// $Id: Strategies_T.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 #ifndef ACE_STRATEGIES_T_CPP
 #define ACE_STRATEGIES_T_CPP
 
@@ -1489,15 +1491,16 @@ ACE_NOOP_Concurrency_Strategy<SVC_HANDLER>::activate_svc_handler (SVC_HANDLER *,
   return 0;
 }
 
-ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Creation_Strategy)
-ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Singleton_Strategy)
-ACE_ALLOC_HOOK_DEFINE_Tc(ACE_DLL_Strategy)
-ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Concurrency_Strategy)
-ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Reactive_Strategy)
-ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Thread_Strategy)
-ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Process_Strategy)
-ACE_ALLOC_HOOK_DEFINE_Tca(ACE_Accept_Strategy)
-ACE_ALLOC_HOOK_DEFINE_Tco(ACE_Connect_Strategy)
+
+ACE_ALLOC_HOOK_DEFINE(ACE_Creation_Strategy)
+ACE_ALLOC_HOOK_DEFINE(ACE_Singleton_Strategy)
+ACE_ALLOC_HOOK_DEFINE(ACE_DLL_Strategy)
+ACE_ALLOC_HOOK_DEFINE(ACE_Concurrency_Strategy)
+ACE_ALLOC_HOOK_DEFINE(ACE_Thread_Strategy)
+ACE_ALLOC_HOOK_DEFINE(ACE_Connect_Strategy)
+ACE_ALLOC_HOOK_DEFINE(ACE_Process_Strategy)
+ACE_ALLOC_HOOK_DEFINE(ACE_Accept_Strategy)
+ACE_ALLOC_HOOK_DEFINE(ACE_Thread_Strategy)
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 

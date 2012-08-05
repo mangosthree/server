@@ -1,3 +1,5 @@
+// $Id: Reactor.cpp 91368 2010-08-16 13:03:34Z mhengstmengel $
+
 #include "ace/Reactor.h"
 
 #if !defined (ACE_LACKS_ACE_SVCCONF)

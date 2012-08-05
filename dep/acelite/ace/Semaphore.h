@@ -4,9 +4,11 @@
 /**
  *  @file    Semaphore.h
  *
+ *  $Id: Semaphore.h 81014 2008-03-19 11:41:31Z johnnyw $
+ *
  *   Moved from Synch.h.
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
 //==========================================================================
 

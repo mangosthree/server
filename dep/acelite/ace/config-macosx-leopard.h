@@ -1,10 +1,10 @@
 /* -*- C++ -*- */
+// $Id: config-macosx-leopard.h 97737 2014-05-02 14:30:47Z mesnier_p $
+
 // This configuration file is designed to work with the MacOS X operating system.
 
 #ifndef ACE_CONFIG_MACOSX_LEOPARD_H
 #define ACE_CONFIG_MACOSX_LEOPARD_H
-
-#include <Availability.h>
 
 #define ACE_HAS_MAC_OSX
 #define ACE_HAS_NET_IF_DL_H
@@ -25,11 +25,17 @@
 # endif // GCC 3.3
 #endif // ACE_SIZEOF_LONG_DOUBLE
 
+#define ACE_UINT64_TYPE unsigned long long
+
 #if defined (__GNUG__)
 # include "ace/config-g++-common.h"
 #endif /* __GNUG__ */
 
 #define ACE_ISCTYPE_EQUIVALENT __isctype
+
+#ifndef ACE_HAS_NONCONST_FD_ISSET
+#define ACE_HAS_NONCONST_FD_ISSET
+#endif
 
 #define ACE_HAS_WORKING_EXPLICIT_TEMPLATE_DESTRUCTOR
 
@@ -49,7 +55,6 @@
 
 #define ACE_HAS_GPERF
 #define ACE_HAS_POSIX_SEM
-#define ACE_HAS_SIOCGIFCONF
 
 #define ACE_HAS_SUNOS4_GETTIMEOFDAY
 
@@ -204,11 +209,10 @@
 #endif
 
 #define ACE_LACKS_CONDATTR_SETCLOCK
-#if __MAC_OS_X_VERSION_MAX_ALLOWED < 101200
 #define ACE_LACKS_CLOCKID_T
 #define ACE_LACKS_CLOCK_MONOTONIC
 #define ACE_LACKS_CLOCK_REALTIME
-#endif
+
 // dlcompat package (not part of base Darwin) is needed for dlopen().
 // You may download directly from sourceforge and install or use fink
 // Fink installer puts libraries in /sw/lib and headers in /sw/include
@@ -225,8 +229,6 @@
 
 // gperf seems to need this
 //#define ACE_HAS_NONSTATIC_OBJECT_MANAGER
-
-#define ACE_IOCTL_TYPE_ARG2 unsigned long
 
 #if defined(__APPLE_CC__) && (__APPLE_CC__ < 1173)
 #error "Compiler must be upgraded, see http://developer.apple.com"

@@ -4,6 +4,8 @@
 /**
  *  @file    Auto_IncDec_T.h
  *
+ *  $Id: Auto_IncDec_T.h 97879 2014-09-08 13:29:28Z johnnyw $
+ *
  *  @author Edan Ayal <EdanA@cti2.com>
  */
 //=============================================================================
@@ -47,9 +49,6 @@ public:
 
   /// Dump the state of an object.
   void dump (void) const;
-
-  /// Declare the dynamic allocation hooks.
-  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   /// Reference to the @c ACE_SAFELY_INCREMENTABLE_DECREMENTABLE counter

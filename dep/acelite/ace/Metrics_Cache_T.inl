@@ -1,4 +1,7 @@
 // -*- C++ -*-
+//
+// $Id: Metrics_Cache_T.inl 92090 2010-09-29 14:10:45Z johnnyw $
+
 #ifndef ACE_METRICS_CACHE_T_INL
 #define ACE_METRICS_CACHE_T_INL
 

@@ -4,7 +4,9 @@
 /**
  *  @file   OS_NS_errno.h
  *
- *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
+ *  $Id: OS_NS_errno.h 94454 2011-09-08 17:36:56Z johnnyw $
+ *
+ *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...
  *

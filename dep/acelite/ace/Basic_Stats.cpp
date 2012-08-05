@@ -1,3 +1,5 @@
+// $Id: Basic_Stats.cpp 96985 2013-04-11 15:50:32Z huangh $
+
 #include "ace/Basic_Stats.h"
 #include "ace/Log_Category.h"
 

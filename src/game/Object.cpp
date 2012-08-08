@@ -152,7 +152,6 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         {
             if (((GameObject*)this)->GetOwnerGuid().IsPlayer())
                 updatetype = UPDATETYPE_CREATE_OBJECT2;
-            break;
         }
     }
     if (updateFlags & UPDATEFLAG_HAS_POSITION)

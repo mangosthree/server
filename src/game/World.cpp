@@ -42,7 +42,6 @@
 #include "SpellMgr.h"
 #include "Chat.h"
 #include "DBCStores.h"
-#include "DB2Stores.h"
 #include "MassMailMgr.h"
 #include "LootMgr.h"
 #include "ItemEnchantmentMgr.h"
@@ -247,19 +246,12 @@ World::AddSession_(WorldSession* s)
         return;
     }
 
-    WorldPacket packet(SMSG_AUTH_RESPONSE, 17);
-
-    packet.WriteBit(false);                                 // has queue
-    packet.WriteBit(true);                                  // has account info
-
-    packet << uint32(0);                                    // Unknown - 4.3.2
-    packet << uint8(s->Expansion());                        // 0 - normal, 1 - TBC, 2 - WotLK, 3 - CT. must be set in database manually for each account
-    packet << uint32(0);                                    // BillingTimeRemaining
-    packet << uint8(s->Expansion());                        // 0 - normal, 1 - TBC, 2 - WotLK, 3 - CT. Must be set in database manually for each account.
-    packet << uint32(0);                                    // BillingTimeRested
-    packet << uint8(0);                                     // BillingPlanFlags
+    WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 1);
     packet << uint8(AUTH_OK);
-
+    packet << uint32(0);                                    // BillingTimeRemaining
+    packet << uint8(0);                                     // BillingPlanFlags
+    packet << uint32(0);                                    // BillingTimeRested
+    packet << uint8(s->Expansion());                        // 0 - normal, 1 - TBC, 2 - WotLK. Must be set in database manually for each account.
     s->SendPacket(&packet);
 
     s->SendAddonsInfo();
@@ -302,24 +294,17 @@ int32 World::GetQueuedSessionPos(WorldSession* sess)
 void World::AddQueuedSession(WorldSession* sess)
 {
     sess->SetInQueue(true);
-    m_QueuedSessions.push_back (sess);
+    m_QueuedSessions.push_back(sess);
 
     // The 1st SMSG_AUTH_RESPONSE needs to contain other info too.
-    WorldPacket packet (SMSG_AUTH_RESPONSE, 21);
-
-    packet.WriteBit(true);                                  // has queue
-    packet.WriteBit(false);                                 // unk queue-related
-    packet.WriteBit(true);                                  // has account data
-
-    packet << uint32(0);                                    // Unknown - 4.3.2
-    packet << uint8(sess->Expansion());                     // 0 - normal, 1 - TBC, 2 - WotLK, 3 - CT. must be set in database manually for each account
-    packet << uint32(0);                                    // BillingTimeRemaining
-    packet << uint8(sess->Expansion());                     // 0 - normal, 1 - TBC, 2 - WotLK, 3 - CT. Must be set in database manually for each account.
-    packet << uint32(0);                                    // BillingTimeRested
-    packet << uint8(0);                                     // BillingPlanFlags
+    WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 1 + 4 + 1);
     packet << uint8(AUTH_WAIT_QUEUE);
+    packet << uint32(0);                                    // BillingTimeRemaining
+    packet << uint8(0);                                     // BillingPlanFlags
+    packet << uint32(0);                                    // BillingTimeRested
+    packet << uint8(sess->Expansion());                     // 0 - normal, 1 - TBC, must be set in database manually for each account
     packet << uint32(GetQueuedSessionPos(sess));            // position in queue
-
+    packet << uint8(0);                                     // unk 3.3.0
     sess->SendPacket(&packet);
 }
 
@@ -966,9 +951,11 @@ void World::SetInitialWorldSettings()
     ///- Load the DBC files
     sLog.outString("Initialize data stores...");
     LoadDBCStores(m_dataPath);
-    LoadDB2Stores(m_dataPath);
     DetectDBCLang();
     sObjectMgr.SetDBCLocaleIndex(GetDefaultDbcLocale());    // Get once for all the locale index of DBC language (console/broadcasts)
+
+    sLog.outString("Loading SpellTemplate...");
+    sObjectMgr.LoadSpellTemplate();
 
     sLog.outString("Loading Script Names...");
     sScriptMgr.LoadScriptNames();
@@ -1109,9 +1096,6 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Quest POI");
     sObjectMgr.LoadQuestPOI();
-
-    sLog.outString("Loading Quest Phase Maps...");
-    sObjectMgr.LoadQuestPhaseMaps();
 
     sLog.outString("Loading Quests Relations...");
     sLog.outString();
@@ -1740,28 +1724,6 @@ void World::SendDefenseMessage(uint32 zoneId, int32 textId)
     }
 }
 
-/// Sends a server wide defense message to all players (or players of the specified team)
-void World::SendDefenseMessage(uint32 zoneId, int32 textId, Team team /*= TEAM_NONE*/)
-{
-    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-    {
-        if (itr->second &&
-                itr->second->GetPlayer() &&
-                itr->second->GetPlayer()->IsInWorld() &&
-                (team == TEAM_NONE || itr->second->GetPlayer()->GetTeam() == team))
-        {
-            char const* message = itr->second->GetMangosString(textId);
-            uint32 messageLength = strlen(message) + 1;
-
-            WorldPacket data(SMSG_DEFENSE_MESSAGE, 4 + 4 + messageLength);
-            data << uint32(zoneId);
-            data << uint32(messageLength);
-            data << message;
-            itr->second->SendPacket(&data);
-        }
-    }
-}
-
 /// Kick (and save) all players
 void World::KickAll()
 {
@@ -2071,7 +2033,7 @@ void World::InitWeeklyQuestResetTime()
     m_NextWeeklyQuestReset = m_NextWeeklyQuestReset < curTime ? nextWeekResetTime - WEEK : nextWeekResetTime;
 
     if (!result)
-        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextWeeklyQuestResetTime) VALUES ('" UI64FMTD "')", uint64(m_NextWeeklyQuestReset));
+        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextWeeklyQuestResetTime) VALUES ('"UI64FMTD"')", uint64(m_NextWeeklyQuestReset));
     else
         delete result;
 }
@@ -2102,7 +2064,7 @@ void World::InitDailyQuestResetTime()
     m_NextDailyQuestReset = m_NextDailyQuestReset < curTime ? nextDayResetTime - DAY : nextDayResetTime;
 
     if (!result)
-        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextDailyQuestResetTime) VALUES ('" UI64FMTD "')", uint64(m_NextDailyQuestReset));
+        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextDailyQuestResetTime) VALUES ('"UI64FMTD"')", uint64(m_NextDailyQuestReset));
     else
         delete result;
 }
@@ -2150,7 +2112,7 @@ void World::SetMonthlyQuestResetTime(bool initialize)
     m_NextMonthlyQuestReset = (initialize && m_NextMonthlyQuestReset < nextMonthResetTime) ? m_NextMonthlyQuestReset : nextMonthResetTime;
 
     // Row must exist for this to work. Currently row is added by InitDailyQuestResetTime(), called before this function
-    CharacterDatabase.PExecute("UPDATE saved_variables SET NextMonthlyQuestResetTime = '" UI64FMTD "'", uint64(m_NextMonthlyQuestReset));
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextMonthlyQuestResetTime = '"UI64FMTD"'", uint64(m_NextMonthlyQuestReset));
 }
 
 void World::ResetDailyQuests()
@@ -2162,7 +2124,7 @@ void World::ResetDailyQuests()
             itr->second->GetPlayer()->ResetDailyQuestStatus();
 
     m_NextDailyQuestReset = time_t(m_NextDailyQuestReset + DAY);
-    CharacterDatabase.PExecute("UPDATE saved_variables SET NextDailyQuestResetTime = '" UI64FMTD "'", uint64(m_NextDailyQuestReset));
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextDailyQuestResetTime = '"UI64FMTD"'", uint64(m_NextDailyQuestReset));
 }
 
 void World::ResetWeeklyQuests()
@@ -2174,7 +2136,7 @@ void World::ResetWeeklyQuests()
             itr->second->GetPlayer()->ResetWeeklyQuestStatus();
 
     m_NextWeeklyQuestReset = time_t(m_NextWeeklyQuestReset + WEEK);
-    CharacterDatabase.PExecute("UPDATE saved_variables SET NextWeeklyQuestResetTime = '" UI64FMTD "'", uint64(m_NextWeeklyQuestReset));
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextWeeklyQuestResetTime = '"UI64FMTD"'", uint64(m_NextWeeklyQuestReset));
 }
 
 void World::ResetMonthlyQuests()

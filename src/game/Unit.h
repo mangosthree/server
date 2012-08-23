@@ -1459,9 +1459,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // recommend use MonsterMove/MonsterMoveWithSpeed for most case that correctly work with movegens
         // if used additional args in ... part then floats must explicitly casted to double
         void SendHeartBeat();
-
-        bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING); }
-        bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE); }
+        bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING);}
+        bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE);}
         bool IsRooted() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT); }
         virtual void SetRoot(bool enabled) {}
         virtual void SetWaterWalk(bool enabled) {}
@@ -1892,7 +1891,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetSpeedRate(UnitMoveType mtype, float rate, bool forced = false);
 
         void KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpeed);
-        void KnockBackWithAngle(float angle, float horizontalSpeed, float verticalSpeed);
 
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();

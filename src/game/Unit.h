@@ -1892,6 +1892,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetSpeedRate(UnitMoveType mtype, float rate, bool forced = false);
 
         void KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpeed);
+        void KnockBackWithAngle(float angle, float horizontalSpeed, float verticalSpeed);
 
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();

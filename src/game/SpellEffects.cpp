@@ -1503,11 +1503,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 }
                 case 42631:                                 // Fire Bomb (explode)
                 {
-                    if (!unitTarget)
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
                         return;
 
                     unitTarget->RemoveAurasDueToSpell(42629);
                     unitTarget->CastSpell(unitTarget, 42630, true);
+
+                    // despawn the bomb after exploding
+                    ((Creature*)unitTarget)->ForcedDespawn(3000);
                     return;
                 }
                 case 42793:                                 // Burn Body

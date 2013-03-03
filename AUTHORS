@@ -1,9 +1,17 @@
-SPECIAL THANKS TO THE MAIN CONTRIBUTORS OF THE MaNGOS PROJECT (LISTED BELOW)
+This file contains authorship information related to the Continued-MaNGOS Project
 
-Julius "h" Kivimaki
-Ryan "I'm Sabu" Cleary
-Chris "Realm of Tearrrroorr" Metzen
-Jeffrey "Tigole" Kaplan
-Rob "EnoYls" Pardo
-Michael "Lamborghini" Morhaime
-Bobby "I need a raise" Kotick
+The code of C-MaNGOS is shipped as it is without any form of warenty,
+and - except for third party libraries - licensed under the GPL 2.0,
+which you can read from the file "COPYING"
+
+* The authors are assigned to by git commit authorship information,
+ listed within the git commit messages, or if forgotten before mentioned in the github comments related to a commit.
+
+* The most recent history can be checked at https://github.com/cmangos/mangos-wotlk
+
+* The older history (from svn times) is backed up and can be checked at https://github.com/cmangos/mangos-svn
+
+* Initially the code for this project was written by Wow Daemon team.
+
+The third party libraries have their own way of addressing authorship, and the authorship of commits importing/ updating
+a third party library reflects who did the importing instead of who wrote the code within the commit.

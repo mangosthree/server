@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
+ * This file is part of the Continued-MaNGOS Project
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,6 @@ namespace VMAP
             static void preventSpellsFromBeingTestedForLoS(const char* pSpellIdString);
             static bool checkSpellForLoS(unsigned int pSpellId);
     };
-
 }
+
 #endif

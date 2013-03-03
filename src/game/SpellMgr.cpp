@@ -747,6 +747,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             {
                 case 28441:                                 // AB Effect 000
                     return false;
+                case 18153:                                 // Kodo Kombobulator
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
                 case 62105:                                 // To'kini's Blowgun
@@ -762,6 +763,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
         case SPELL_EFFECT_HEAL_PCT:
         case SPELL_EFFECT_ENERGIZE_PCT:
         case SPELL_EFFECT_QUEST_COMPLETE:
+        case SPELL_EFFECT_KILL_CREDIT_PERSONAL:
+        case SPELL_EFFECT_KILL_CREDIT_GROUP:
             return true;
 
             // non-positive aura use
@@ -1174,7 +1177,6 @@ void SpellMgr::LoadSpellTargetPositions()
 
         mSpellTargetPositions[Spell_ID] = st;
         ++count;
-
     }
     while (result->NextRow());
 
@@ -1410,7 +1412,6 @@ void SpellMgr::LoadSpellProcEvents()
         spe.cooldown        = fields[16].GetUInt32();
 
         rankHelper.RecordRank(spe, entry);
-
     }
     while (result->NextRow());
 
@@ -1511,6 +1512,7 @@ bool IsCastEndProcModifierAura(SpellEntry const* spellInfo, SpellEffectIndex eff
             {
                 case SPELLMOD_RANGE:
                 case SPELLMOD_RADIUS:
+                case SPELLMOD_CRITICAL_CHANCE:
                 case SPELLMOD_NOT_LOSE_CASTING_TIME:
                 case SPELLMOD_CASTING_TIME:
                 case SPELLMOD_COOLDOWN:
@@ -1700,7 +1702,6 @@ void SpellMgr::LoadSpellBonuses()
         doForHighRanks(entry, worker);
 
         ++count;
-
     }
     while (result->NextRow());
 
@@ -1744,7 +1745,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
             SpellClassOptionsEntry const* spellClassOptions = procSpell->GetSpellClassOptions();
 
             // Check (if set) for spellFamilyName
-            if (spellProcEvent->spellFamilyName && spellClassOptions && (spellProcEvent->spellFamilyName != spellClassOptions->SpellFamilyName))
+            if (spellProcEvent->spellFamilyName && (!spellClassOptions || spellProcEvent->spellFamilyName != spellClassOptions->SpellFamilyName))
                 return false;
         }
     }
@@ -1911,7 +1912,6 @@ void SpellMgr::LoadSpellThreats()
         ste.ap_bonus = fields[3].GetFloat();
 
         rankHelper.RecordRank(ste, entry);
-
     }
     while (result->NextRow());
 
@@ -2533,10 +2533,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     if (IsRankSpellDueToSpell(spellInfo_1, spellId_2))
         return true;
 
-    if ((classOptions1 && classOptions1->SpellFamilyName == 0) || (classOptions2 && classOptions2->SpellFamilyName == 0))
+    if (!classOptions1 || classOptions1->SpellFamilyName == 0 || !classOptions2 || classOptions2->SpellFamilyName == 0)
         return false;
 
-    if (classOptions1 && classOptions2 && classOptions1->SpellFamilyName != classOptions2->SpellFamilyName)
+    if (classOptions1->SpellFamilyName != classOptions2->SpellFamilyName)
         return false;
 
     bool dummy_only = true;
@@ -2544,18 +2544,24 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     {
         SpellEffectEntry const* spellEffect1 = spellInfo_1->GetSpellEffect(SpellEffectIndex(i));
         SpellEffectEntry const* spellEffect2 = spellInfo_2->GetSpellEffect(SpellEffectIndex(i));
-        if(!spellEffect1 || !spellEffect2)
+
+        if (!spellEffect1 && !spellEffect2)
             continue;
+
+        if (!spellEffect1 || !spellEffect2)
+            return false;
+
         if (spellEffect1->Effect != spellEffect2->Effect ||
-        spellEffect1->EffectItemType != spellEffect2->EffectItemType ||
-        spellEffect1->EffectMiscValue != spellEffect2->EffectMiscValue ||
-        spellEffect1->EffectApplyAuraName != spellEffect2->EffectApplyAuraName)
+            spellEffect1->EffectItemType != spellEffect2->EffectItemType ||
+            spellEffect1->EffectMiscValue != spellEffect2->EffectMiscValue ||
+            spellEffect1->EffectApplyAuraName != spellEffect2->EffectApplyAuraName)
             return false;
 
         // ignore dummy only spells
-        if(spellEffect1->Effect && spellEffect1->Effect != SPELL_EFFECT_DUMMY && spellEffect1->EffectApplyAuraName != SPELL_AURA_DUMMY)
+        if (spellEffect1->Effect && spellEffect1->Effect != SPELL_EFFECT_DUMMY && spellEffect1->EffectApplyAuraName != SPELL_AURA_DUMMY)
             dummy_only = false;
     }
+
     if (dummy_only)
         return false;
 
@@ -2639,7 +2645,6 @@ uint32 SpellMgr::GetProfessionSpellMinLevel(uint32 spellId)
             return s2l[rank][1];
     }
 }
-
 
 bool SpellMgr::IsPrimaryProfessionFirstRankSpell(uint32 spellId) const
 {
@@ -3033,7 +3038,6 @@ void SpellMgr::LoadSpellChains()
                     continue;
                 }*/
             }
-
         }
 
         // removed ranks often still listed as forward in skill abilities but not listed as spell in it
@@ -3308,39 +3312,16 @@ void SpellMgr::LoadSpellLearnSpells()
 
 void SpellMgr::LoadSpellScriptTarget()
 {
-    mSpellScriptTarget.clear();                             // need for reload case
+    sSpellScriptTargetStorage.Load();
 
-    uint32 count = 0;
-
-    QueryResult* result = WorldDatabase.Query("SELECT entry,type,targetEntry FROM spell_script_target");
-
-    if (!result)
+    // Check content
+    for (SQLMultiStorage::SQLSIterator<SpellTargetEntry> itr = sSpellScriptTargetStorage.getDataBegin<SpellTargetEntry>(); itr < sSpellScriptTargetStorage.getDataEnd<SpellTargetEntry>(); ++itr)
     {
-        BarGoLink bar(1);
-
-        bar.step();
-
-        sLog.outString();
-        sLog.outErrorDb(">> Loaded 0 SpellScriptTarget. DB table `spell_script_target` is empty.");
-        return;
-    }
-
-    BarGoLink bar(result->GetRowCount());
-
-    do
-    {
-        Field* fields = result->Fetch();
-        bar.step();
-
-        uint32 spellId     = fields[0].GetUInt32();
-        uint32 type        = fields[1].GetUInt32();
-        uint32 targetEntry = fields[2].GetUInt32();
-
-        SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
-
+        SpellEntry const* spellProto = sSpellStore.LookupEntry(itr->spellId);
         if (!spellProto)
         {
-            sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u does not exist.", spellId, targetEntry);
+            sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u does not exist.", itr->spellId, itr->targetEntry);
+            sSpellScriptTargetStorage.EraseEntry(itr->spellId);
             continue;
         }
 
@@ -3361,6 +3342,8 @@ void SpellMgr::LoadSpellScriptTarget()
                 spellEffect->EffectImplicitTargetB == TARGET_AREAEFFECT_INSTANT ||
                 spellEffect->EffectImplicitTargetA == TARGET_AREAEFFECT_CUSTOM ||
                 spellEffect->EffectImplicitTargetB == TARGET_AREAEFFECT_CUSTOM ||
+                spellEffect->EffectImplicitTargetA == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
+                spellEffect->EffectImplicitTargetB == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
                 spellEffect->EffectImplicitTargetA == TARGET_AREAEFFECT_GO_AROUND_DEST ||
                 spellEffect->EffectImplicitTargetB == TARGET_AREAEFFECT_GO_AROUND_DEST)
             {
@@ -3370,88 +3353,88 @@ void SpellMgr::LoadSpellScriptTarget()
         }
         if (!targetfound)
         {
-            sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u does not have any implicit target TARGET_SCRIPT(38) or TARGET_SCRIPT_COORDINATES (46) or TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT (40).", spellId, targetEntry);
+            sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u does not have any implicit target TARGET_SCRIPT(38) or TARGET_SCRIPT_COORDINATES (46) or TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT (40).", itr->spellId, itr->targetEntry);
+            sSpellScriptTargetStorage.EraseEntry(itr->spellId);
             continue;
         }
 
-        if (type >= MAX_SPELL_TARGET_TYPE)
+        if (itr->type >= MAX_SPELL_TARGET_TYPE)
         {
-            sLog.outErrorDb("Table `spell_script_target`: target type %u for TargetEntry %u is incorrect.", type, targetEntry);
+            sLog.outErrorDb("Table `spell_script_target`: target type %u for TargetEntry %u is incorrect.", itr->type, itr->targetEntry);
+            sSpellScriptTargetStorage.EraseEntry(itr->spellId);
             continue;
         }
 
         // Checks by target type
-        switch (type)
+        switch (itr->type)
         {
             case SPELL_TARGET_TYPE_GAMEOBJECT:
             {
-                if (!targetEntry)
+                if (!itr->targetEntry)
                     break;
 
-                if (!sGOStorage.LookupEntry<GameObjectInfo>(targetEntry))
+                if (!sGOStorage.LookupEntry<GameObjectInfo>(itr->targetEntry))
                 {
-                    sLog.outErrorDb("Table `spell_script_target`: gameobject template entry %u does not exist.", targetEntry);
+                    sLog.outErrorDb("Table `spell_script_target`: gameobject template entry %u does not exist.", itr->targetEntry);
+                    sSpellScriptTargetStorage.EraseEntry(itr->spellId);
                     continue;
                 }
                 break;
             }
             default:
-                if (!targetEntry)
+                if (!itr->targetEntry)
                 {
-                    sLog.outErrorDb("Table `spell_script_target`: target entry == 0 for not GO target type (%u).", type);
+                    sLog.outErrorDb("Table `spell_script_target`: target entry == 0 for not GO target type (%u).", itr->type);
+                    sSpellScriptTargetStorage.EraseEntry(itr->spellId);
                     continue;
                 }
-                if (const CreatureInfo* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(targetEntry))
+                if (const CreatureInfo* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(itr->targetEntry))
                 {
-                    if (spellId == 30427 && !cInfo->SkinLootId)
+                    if (itr->spellId == 30427 && !cInfo->SkinLootId)
                     {
                         sLog.outErrorDb("Table `spell_script_target` has creature %u as a target of spellid 30427, but this creature has no skinlootid. Gas extraction will not work!", cInfo->Entry);
+                        sSpellScriptTargetStorage.EraseEntry(itr->spellId);
                         continue;
                     }
                 }
                 else
                 {
-                    sLog.outErrorDb("Table `spell_script_target`: creature template entry %u does not exist.", targetEntry);
+                    sLog.outErrorDb("Table `spell_script_target`: creature template entry %u does not exist.", itr->targetEntry);
+                    sSpellScriptTargetStorage.EraseEntry(itr->spellId);
                     continue;
                 }
                 break;
         }
-
-        mSpellScriptTarget.insert(SpellScriptTarget::value_type(spellId, SpellTargetEntry(SpellTargetType(type), targetEntry)));
-
-        ++count;
     }
-    while (result->NextRow());
-
-    delete result;
 
     // Check all spells
-    /* Disabled (lot errors at this moment)
-    for(uint32 i = 1; i < sSpellStore.nCount; ++i)
+    if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK))
     {
-        SpellEntry const * spellInfo = sSpellStore.LookupEntry(i);
-        if(!spellInfo)
-            continue;
-
-        bool found = false;
-        for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
+        for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
         {
-            if( spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT || spellInfo->EffectImplicitTargetA[j] != TARGET_SELF && spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT )
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(i);
+            if (!spellInfo)
+                continue;
+
+            SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+            if(!spellEffect)
+                continue;
+
+            for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
             {
-                SpellScriptTarget::const_iterator lower = GetBeginSpellScriptTarget(spellInfo->Id);
-                SpellScriptTarget::const_iterator upper = GetEndSpellScriptTarget(spellInfo->Id);
-                if(lower==upper)
+                if (spellEffect && (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT ||
+                                    (spellEffect->EffectImplicitTargetA != TARGET_SELF && spellEffect->EffectImplicitTargetB == TARGET_SCRIPT)))
                 {
-                    sLog.outErrorDb("Spell (ID: %u) has effect EffectImplicitTargetA/EffectImplicitTargetB = %u (TARGET_SCRIPT), but does not have record in `spell_script_target`",spellInfo->Id,TARGET_SCRIPT);
-                    break;                                  // effects of spell
+                    SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(i);
+                    if (bounds.first == bounds.second)
+                    {
+                        sLog.outErrorDb("Spell (ID: %u) has effect EffectImplicitTargetA/EffectImplicitTargetB = %u (TARGET_SCRIPT), but does not have record in `spell_script_target`", spellInfo->Id, TARGET_SCRIPT);
+                        break;                                  // effects of spell
+                    }
                 }
             }
         }
     }
-    */
-
-    sLog.outString();
-    sLog.outString(">> Loaded %u Spell Script Targets", count);
 }
 
 void SpellMgr::LoadSpellPetAuras()
@@ -3628,14 +3611,14 @@ bool SpellMgr::LoadPetDefaultSpells_helper(CreatureInfo const* cInfo, PetDefault
 
 void SpellMgr::LoadPetDefaultSpells()
 {
-    MANGOS_ASSERT(MAX_CREATURE_SPELL_DATA_SLOT == CREATURE_MAX_SPELLS);
+    MANGOS_ASSERT(MAX_CREATURE_SPELL_DATA_SLOT <= CREATURE_MAX_SPELLS);
 
     mPetDefaultSpellsMap.clear();
 
     uint32 countCreature = 0;
     uint32 countData = 0;
 
-    for (uint32 i = 0; i < sCreatureStorage.MaxEntry; ++i)
+    for (uint32 i = 0; i < sCreatureStorage.GetMaxEntry(); ++i)
     {
         CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i);
         if (!cInfo)
@@ -3691,8 +3674,9 @@ void SpellMgr::LoadPetDefaultSpells()
                     continue;
 
                 PetDefaultSpellsEntry petDefSpells;
-                for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
-                    petDefSpells.spellid[j] = cInfo->spells[j];
+                if (CreatureTemplateSpells const* templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(cInfo->Entry))
+                    for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
+                        petDefSpells.spellid[j] = templateSpells->spells[j];
 
                 if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
                 {
@@ -3746,7 +3730,6 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
                         }
                         return false;
                     }
-
                 }
                 // also possible IsLootCraftingSpell case but fake item must exist anyway
                 else if (!ObjectMgr::GetItemPrototype( spellEffect->EffectItemType ))
@@ -3886,7 +3869,6 @@ void SpellMgr::LoadSpellAreas()
                 sLog.outErrorDb("Spell %u listed in `spell_area` already listed with similar requirements.", spell);
                 continue;
             }
-
         }
 
         if (spellArea.areaId && !GetAreaEntryByAreaID(spellArea.areaId))
@@ -4469,7 +4451,6 @@ void SpellMgr::CheckUsedSpells(char const* table)
                 continue;
             }
         }
-
     }
     while (result->NextRow());
 

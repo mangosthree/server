@@ -6059,7 +6059,9 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool /*Real*/)
     if (m_modifier.periodictime == 0)
         m_modifier.periodictime = 1000;
 
-    m_periodicTimer = m_modifier.periodictime;
+    if (!GetSpellProto()->HasAttribute(SPELL_ATTR_EX5_START_PERIODIC_AT_APPLY))
+        m_periodicTimer = m_modifier.periodictime;
+
     m_isPeriodic = apply;
 }
 
@@ -6068,7 +6070,9 @@ void Aura::HandleModRegen(bool apply, bool /*Real*/)        // eating
     if (m_modifier.periodictime == 0)
         m_modifier.periodictime = 5000;
 
-    m_periodicTimer = 5000;
+    if (!GetSpellProto()->HasAttribute(SPELL_ATTR_EX5_START_PERIODIC_AT_APPLY))
+        m_periodicTimer = 5000;
+
     m_isPeriodic = apply;
 }
 

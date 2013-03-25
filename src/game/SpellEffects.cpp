@@ -4897,12 +4897,15 @@ void Spell::EffectProficiency(SpellEffectEntry const* /*effect*/)
 
     SpellEquippedItemsEntry const* eqItems = m_spellInfo->GetSpellEquippedItems();
 
-    if (eqItems && eqItems->EquippedItemClass == ITEM_CLASS_WEAPON && !(p_target->GetWeaponProficiency() & eqItems->EquippedItemSubClassMask))
+    if (!eqItems)
+        return;
+
+    if (eqItems->EquippedItemClass == ITEM_CLASS_WEAPON && !(p_target->GetWeaponProficiency() & eqItems->EquippedItemSubClassMask))
     {
         p_target->AddWeaponProficiency(eqItems->EquippedItemSubClassMask);
         p_target->SendProficiency(ITEM_CLASS_WEAPON, p_target->GetWeaponProficiency());
     }
-    if (eqItems && eqItems->EquippedItemClass == ITEM_CLASS_ARMOR && !(p_target->GetArmorProficiency() & eqItems->EquippedItemSubClassMask))
+    if (eqItems->EquippedItemClass == ITEM_CLASS_ARMOR && !(p_target->GetArmorProficiency() & eqItems->EquippedItemSubClassMask))
     {
         p_target->AddArmorProficiency(eqItems->EquippedItemSubClassMask);
         p_target->SendProficiency(ITEM_CLASS_ARMOR, p_target->GetArmorProficiency());

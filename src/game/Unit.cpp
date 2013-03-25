@@ -6558,9 +6558,9 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
     {
         SpellEquippedItemsEntry const* spellEquip = (*i)->GetSpellProto()->GetSpellEquippedItems();
         if( ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
-            spellEquip && spellEquip->EquippedItemClass == -1 &&
+            (!spellEquip || spellEquip->EquippedItemClass == -1 &&
                                                             // -1 == any item class (not wand then)
-            spellEquip->EquippedItemInventoryTypeMask == 0 )
+            spellEquip->EquippedItemInventoryTypeMask == 0))
                                                             // 0 == any inventory type (not wand then)
         {
             DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
@@ -6943,8 +6943,8 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
     {
         SpellEquippedItemsEntry const* spellEquip = (*i)->GetSpellProto()->GetSpellEquippedItems();
         if (((*i)->GetModifier()->m_miscvalue & schoolMask) != 0 &&
-            spellEquip && spellEquip->EquippedItemClass == -1 &&        // -1 == any item class (not wand then)
-            spellEquip->EquippedItemInventoryTypeMask == 0)             //  0 == any inventory type (not wand then)
+            (!spellEquip || spellEquip->EquippedItemClass == -1 &&      // -1 == any item class (not wand then)
+            spellEquip->EquippedItemInventoryTypeMask == 0))            //  0 == any inventory type (not wand then)
                 DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount;
     }
 

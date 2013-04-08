@@ -42,17 +42,15 @@ struct EnchStoreItem
 typedef std::vector<EnchStoreItem> EnchStoreList;
 typedef UNORDERED_MAP<uint32, EnchStoreList> EnchantmentStore;
 
-static EnchantmentStore RandomItemEnch;
+static EnchantmentStore RandomItemPropEnch;
+static EnchantmentStore RandomItemSuffixEnch;
 
 void LoadRandomEnchantmentsTable()
 {
-    RandomItemEnch.clear();                                 // for reload case
+    RandomItemPropEnch.clear();                             // for reload case
+    RandomItemSuffixEnch.clear();                           // for reload case
 
-    EnchantmentStore::const_iterator tab;
-    uint32 entry, ench;
-    float chance;
     uint32 count = 0;
-
     QueryResult* result = WorldDatabase.Query("SELECT entry, ench, chance FROM item_enchantment_template");
 
     if (result)
@@ -64,12 +62,23 @@ void LoadRandomEnchantmentsTable()
             Field* fields = result->Fetch();
             bar.step();
 
-            entry = fields[0].GetUInt32();
-            ench = fields[1].GetUInt32();
-            chance = fields[2].GetFloat();
+            int32 entry = fields[0].GetInt32();
+            uint32 ench = fields[1].GetUInt32();
+            float chance = fields[2].GetFloat();
 
             if (chance > 0.000001f && chance <= 100.0f)
-                RandomItemEnch[entry].push_back(EnchStoreItem(ench, chance));
+            {
+                if (entry > 0)
+                    RandomItemPropEnch[entry].push_back(EnchStoreItem(ench, chance));
+                else
+                    RandomItemSuffixEnch[-entry].push_back(EnchStoreItem(ench, chance));
+            }
+            else
+            {
+                sLog.outErrorDb("Item Enchantment %u for entry %u has too high or too low chance %f, skipped.", ench, entry, chance);
+                continue;
+            }
+ 
 
             ++count;
         }
@@ -87,16 +96,29 @@ void LoadRandomEnchantmentsTable()
     }
 }
 
-uint32 GetItemEnchantMod(uint32 entry)
+uint32 GetItemEnchantMod(int32 entry)
 {
-    if (!entry) return 0;
-
-    EnchantmentStore::const_iterator tab = RandomItemEnch.find(entry);
-
-    if (tab == RandomItemEnch.end())
-    {
-        sLog.outErrorDb("Item RandomProperty / RandomSuffix id #%u used in `item_template` but it doesn't have records in `item_enchantment_template` table.", entry);
+    if (!entry)
         return 0;
+
+    EnchantmentStore::const_iterator tab;
+    if (entry > 0)
+    {
+        tab = RandomItemPropEnch.find(entry);
+        if (tab == RandomItemPropEnch.end())
+        {
+            sLog.outErrorDb("Item RandomProperty id #%u used in `item_template` but it doesn't have records in `item_enchantment_template` table.", entry);
+            return 0;
+        }
+    }
+    else
+    {
+        tab = RandomItemSuffixEnch.find(-entry);
+        if (tab == RandomItemSuffixEnch.end())
+        {
+            sLog.outErrorDb("Item RandomSuffix id #%u used in `item_template` but it doesn't have records in `item_enchantment_template` table.", -entry);
+            return 0;
+        }
     }
 
     double dRoll = rand_chance();
@@ -122,6 +144,9 @@ uint32 GetItemEnchantMod(uint32 entry)
 
     return 0;
 }
+
+uint32 GetItemRandomPropertyMod(uint32 entry) { return GetItemEnchantMod(entry); }
+uint32 GetItemRandomSuffixMod(uint32 entry) { return GetItemEnchantMod(-int32(entry)); }
 
 uint32 GenerateEnchSuffixFactor(uint32 item_id)
 {

@@ -22,6 +22,7 @@
 #include "Common.h"
 
 void LoadRandomEnchantmentsTable();
-uint32 GetItemEnchantMod(uint32 entry);
+uint32 GetItemRandomPropertyMod(uint32 entry);
+uint32 GetItemRandomSuffixMod(uint32 entry);
 uint32 GenerateEnchSuffixFactor(uint32 item_id);
 #endif

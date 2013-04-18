@@ -396,7 +396,6 @@ struct AchievementCriteriaEntry
             uint32  goldInCopper;                           // 4
         } quest_reward_money;
 
-
         // ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY             = 67
         struct
         {
@@ -535,7 +534,7 @@ struct AreaTableEntry
     int32   area_level;                                     // 10       m_ExplorationLevel
     DBCString area_name;                                    // 11       m_AreaName_lang
     uint32  team;                                           // 12       m_factionGroupMask
-                                                            // 13-16    m_liquidTypeID[4]
+    uint32  LiquidTypeOverride[4];                          // 13-16    m_liquidTypeID[4]
                                                             // 17       m_minElevation
                                                             // 18       m_ambient_multiplier
                                                             // 19       m_lightid
@@ -685,9 +684,9 @@ struct ChrClassesEntry
     //uint32 flags2;                                        // 8        m_flags (0x08 HasRelicSlot)
     uint32  CinematicSequence;                              // 9        m_cinematicSequenceID
     uint32  expansion;                                      // 10       m_required_expansion
-    //uint32                                                // 11
-    //uint32                                                // 12
-    //uint32                                                // 13
+    uint32  apPerStr;                                       // 11       attack power per strength
+    uint32  apPerAgi;                                       // 12       attack power per agility
+    uint32  rapPerAgi;                                      // 13       ranged attack power per agility
 };
 
 struct ChrRacesEntry
@@ -833,6 +832,34 @@ struct CurrencyTypesEntry
     float GetPrecision() const  { return HasPrecision() ? CURRENCY_PRECISION : 1.0f; }
 };
 
+struct DestructibleModelDataEntry
+{
+    uint32 m_ID;                                            // 0        m_ID
+    uint32 intactDisplayId;                                 // 1
+    // uint32 unk2;                                         // 2
+    // uint32 unk3;                                         // 3
+    // uint32 unk4;                                         // 4
+    uint32 damagedDisplayId;                                // 5
+    // uint32 unk6;                                         // 6
+    // uint32 unk7;                                         // 7
+    // uint32 unk8;                                         // 8
+    // uint32 unk9;                                         // 9
+    uint32 destroyedDisplayId;                              // 10
+    // uint32 unk11;                                        // 11
+    // uint32 unk12;                                        // 12
+    // uint32 unk13;                                        // 13
+    // uint32 unk14;                                        // 14
+    uint32 rebuildingDisplayId;                             // 15
+    // uint32 unk16;                                        // 16
+    // uint32 unk17;                                        // 17
+    // uint32 unk18;                                        // 18
+    // uint32 unk19;                                        // 19
+    //uint32 smokeDisplayId;                                // 20
+    // uint32 unk21;                                        // 21
+    // uint32 unk22;                                        // 22
+    // uint32 unk23;                                        // 23
+};
+
 struct DungeonEncounterEntry
 {
     uint32 Id;                                              // 0        m_ID
@@ -961,15 +988,15 @@ struct FactionTemplateEntry
 
 struct GameObjectDisplayInfoEntry
 {
-    uint32      Displayid;                                  // 0        m_ID
-    //DBCString filename;                                   // 1
-    //uint32  unk1[10];                                     // 2-11
-    float   minX;                                           // 1
-    float   minY;                                           // 13
-    float   minZ;                                           // 14
-    float   maxX;                                           // 15
-    float   maxY;                                           // 16
-    float   maxZ;                                           // 17
+    uint32 Displayid;                                       // 0 m_ID
+    char* filename;                                         // 1 m_modelName
+    // uint32 unknown2[10];                                 // 2-11 m_Sound
+    float geoBoxMinX;                                       // 12 m_geoBoxMinX (use first value as interact dist, mostly in hacks way)
+    float geoBoxMinY;                                       // 13 m_geoBoxMinY
+    float geoBoxMinZ;                                       // 14 m_geoBoxMinZ
+    float geoBoxMaxX;                                       // 15 m_geoBoxMaxX
+    float geoBoxMaxY;                                       // 16 m_geoBoxMaxY
+    float geoBoxMaxZ;                                       // 17 m_geoBoxMaxZ
     //uint32 transport;                                     // 18
     //uint32 unk;                                           // 19
     //uint32 unk1;                                          // 20
@@ -1249,6 +1276,29 @@ struct ItemSetEntry
     m_target_level_max
 };*/
 
+struct LiquidTypeEntry
+{
+    uint32 Id;                                              // 0
+    //char* Name;                                           // 1
+    //uint32 Flags;                                         // 2 Water: 1|2|4|8, Magma: 8|16|32|64, Slime: 2|64|256, WMO Ocean: 1|2|4|8|512
+    uint32 Type;                                            // 3 0: Water, 1: Ocean, 2: Magma, 3: Slime
+    //uint32 SoundId;                                       // 4 Reference to SoundEntries.dbc
+    uint32 SpellId;                                         // 5 Reference to Spell.dbc
+    //float MaxDarkenDepth;                                 // 6 Only oceans got values here!
+    //float FogDarkenIntensity;                             // 7 Only oceans got values here!
+    //float AmbDarkenIntensity;                             // 8 Only oceans got values here!
+    //float DirDarkenIntensity;                             // 9 Only oceans got values here!
+    //uint32 LightID;                                       // 10 Only Slime (6) and Magma (7)
+    //float ParticleScale;                                  // 11 0: Slime, 1: Water/Ocean, 4: Magma
+    //uint32 ParticleMovement;                              // 12
+    //uint32 ParticleTexSlots;                              // 13
+    //uint32 LiquidMaterialID;                              // 14
+    //char* Texture[6];                                     // 15-20
+    //uint32 Color[2];                                      // 21-22
+    //float Unk1[18];                                       // 23-40 Most likely these are attributes for the shaders. Water: (23, TextureTilesPerBlock),(24, Rotation) Magma: (23, AnimationX),(24, AnimationY)
+    //uint32 Unk2[4];                                       // 41-44
+};
+
 #define MAX_LOCK_CASE 8
 
 struct LockEntry
@@ -1496,13 +1546,6 @@ struct ScalingStatValuesEntry
             return spellBonus;
         return 0;
     }
-
-    uint32 getFeralBonus(uint32 mask) const                 // removed in 3.2.x?
-    {
-        if (mask & 0x00010000)                              // not used?
-            return 0;
-        return 0;
-    }
 };
 
 /*struct SkillLineCategoryEntry{
@@ -1732,7 +1775,7 @@ struct SpellEffectEntry
     int32     EffectMiscValueB;                             // 118-120  m_effectMiscValueB
     float     EffectPointsPerComboPoint;                    // 124-126  m_effectPointsPerCombo
     uint32    EffectRadiusIndex;                            // 94-96    m_effectRadiusIndex - spellradius.dbc
-    //uint32   EffectRadiusMaxIndex;                        // 97-99    4.0.0
+    uint32    EffectRadiusMaxIndex;                         // 97-99    4.0.0
     float     EffectRealPointsPerLevel;                     // 79-81    m_effectRealPointsPerLevel
     ClassFamilyMask EffectSpellClassMask;                   // 127-129  m_effectSpellClassMask
     uint32    EffectTriggerSpell;                           // 121-123  m_effectTriggerSpell
@@ -1745,6 +1788,14 @@ struct SpellEffectEntry
     // helpers
 
     int32 CalculateSimpleValue() const { return EffectBasePoints; }
+
+    uint32 GetRadiusIndex() const
+    {
+        if (EffectRadiusIndex != 0)
+            return EffectRadiusIndex;
+
+        return EffectRadiusMaxIndex;
+    }
 };
 
 // SpellEquippedItems.dbc
@@ -1800,16 +1851,18 @@ struct SpellReagentsEntry
 // SpellScaling.dbc
 struct SpellScalingEntry
 {
-    //uint32    Id;                                           // 0        m_ID
-    uint32    castTimeMin;                                  // 1
-    uint32    castTimeMax;                                  // 2
-    uint32    castScalingMaxLevel;                          // 3
+    //uint32    Id;                                         // 0        m_ID
+    int32     castTimeMin;                                  // 1
+    int32     castTimeMax;                                  // 2
+    int32     castScalingMaxLevel;                          // 3
     int32     playerClass;                                  // 4        (index * 100) + charLevel => gtSpellScaling.dbc
     float     coeff1[3];                                    // 5-7
     float     coeff2[3];                                    // 8-10
     float     coeff3[3];                                    // 11-13
-    float     unkMult;                                      // 14       some coefficient, mostly 1.0f
-    uint32    unkLevel;                                     // 15       some level
+    float     coefBase;                                     // 14       some coefficient, mostly 1.0f
+    int32     coefLevelBase;                                // 15       some level
+
+    bool IsScalableEffect(SpellEffectIndex i) const { return coeff1[i] != 0.0f; };
 };
 
 // SpellShapeshift.dbc

@@ -75,10 +75,10 @@ void LoadRandomEnchantmentsTable()
             }
             else
             {
-                sLog.outErrorDb("Item Enchantment %u for entry %u has too high or too low chance %f, skipped.", ench, entry, chance);
+                sLog.outErrorDb("Item Enchantment %u for entry %i has too high or too low chance %f, skipped.", ench, entry, chance);
                 continue;
             }
- 
+
 
             ++count;
         }

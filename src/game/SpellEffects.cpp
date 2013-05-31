@@ -2643,6 +2643,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget, 56432, true, NULL, NULL, m_caster->GetObjectGuid());
                     return;
                 }
+                case 57578:                                 // Lava Strike
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
+                    return;
+                }
                 case 57908:                                 // Stain Cloth
                 {
                     // nothing do more

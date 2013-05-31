@@ -7904,6 +7904,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectEntry const* spellEffect, float& r
                 case 54148:                                 // Ritual of the Sword (Utgarde Pinnacle, Svala)
                 case 55479:                                 // Forced Obedience (Naxxramas, Razovius)
                 case 56140:                                 // Summon Power Spark (Eye of Eternity, Malygos)
+                case 57578:                                 // Lava Strike (Obsidian Sanctum, Sartharion)
                 case 59870:                                 // Glare of the Tribunal (h) (Halls of Stone)
                 case 62016:                                 // Charge Orb (Ulduar, Thorim)
                 case 62042:                                 // Stormhammer (Ulduar, Thorim)

@@ -7688,6 +7688,18 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     m_caster->CastSpell(m_caster, 50239, true);
                     return;
                 }
+                case 47958:                                 // Crystal Spikes
+                case 57083:                                 // Crystal Spikes (h2)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 47954, true);
+                    unitTarget->CastSpell(unitTarget, 47955, true);
+                    unitTarget->CastSpell(unitTarget, 47956, true);
+                    unitTarget->CastSpell(unitTarget, 47957, true);
+                    return;
+                }
                 case 48590:                                 // Avenging Spirits
                 {
                     if (!unitTarget)
@@ -8153,6 +8165,17 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     unitTarget->RemoveAurasDueToSpell(effect->CalculateSimpleValue());
                     break;
+                }
+                 case 57082:                                 // Crystal Spikes (h1)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 57077, true);
+                    unitTarget->CastSpell(unitTarget, 57078, true);
+                    unitTarget->CastSpell(unitTarget, 57080, true);
+                    unitTarget->CastSpell(unitTarget, 57081, true);
+                    return;
                 }
                 case 57337:                                 // Great Feast
                 {

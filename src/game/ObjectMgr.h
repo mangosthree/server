@@ -90,14 +90,17 @@ struct AreaTrigger
     float  target_Orientation;
 
     // Operators
-    bool IsMinimal() const { return requiredLevel == 0 && requiredItem == 0 && requiredItem2 == 0 && heroicKey == 0 &&
-                                    heroicKey2 == 0 && requiredQuest == 0 && requiredQuestHeroic == 0; }
+    bool IsMinimal() const
+    {
+        return requiredLevel == 0 && requiredItem == 0 && requiredItem2 == 0 && heroicKey == 0 &&
+               heroicKey2 == 0 && requiredQuest == 0 && requiredQuestHeroic == 0;
+    }
 
     bool IsLessOrEqualThan(AreaTrigger const* l) const      // Expected to have same map
     {
         MANGOS_ASSERT(target_mapId == l->target_mapId);
         return requiredLevel <= l->requiredLevel && requiredItem <= l->requiredItem && requiredItem2 <= l->requiredItem2
-                && heroicKey <= l->heroicKey&& heroicKey2 <= l->heroicKey2 && requiredQuest <= l->requiredQuest && requiredQuestHeroic <= l->requiredQuestHeroic;
+               && heroicKey <= l->heroicKey && heroicKey2 <= l->heroicKey2 && requiredQuest <= l->requiredQuest && requiredQuestHeroic <= l->requiredQuestHeroic;
     }
 };
 
@@ -118,6 +121,8 @@ typedef UNORDERED_MAP < uint32/*(mapid,spawnMode) pair*/, CellObjectGuidsMap > M
 #define MAX_DB_SCRIPT_STRING_ID        2000010000
 #define MIN_CREATURE_AI_TEXT_STRING_ID (-1)                 // 'creature_ai_texts'
 #define MAX_CREATURE_AI_TEXT_STRING_ID (-1000000)
+
+static_assert(MAX_DB_SCRIPT_STRING_ID < ACE_INT32_MAX, "Must scope with int32 range");
 
 struct MangosStringLocale
 {
@@ -264,9 +269,6 @@ struct GossipMenuItems
     bool            box_coded;
     uint32          box_money;
     std::string     box_text;
-    uint16          cond_1;
-    uint16          cond_2;
-    uint16          cond_3;
     uint16          conditionId;
 };
 
@@ -275,8 +277,6 @@ struct GossipMenus
     uint32          entry;
     uint32          text_id;
     uint32          script_id;
-    uint16          cond_1;
-    uint16          cond_2;
     uint16          conditionId;
 };
 
@@ -359,7 +359,7 @@ typedef std::pair<GraveYardMap::const_iterator, GraveYardMap::const_iterator> Gr
 
 enum ConditionType
 {
-    // value1       value2  for the Condition enumed
+    //                                                      // value1       value2  for the Condition enumed
     CONDITION_NOT                   = -3,                   // cond-id-1    0          returns !cond-id-1
     CONDITION_OR                    = -2,                   // cond-id-1    cond-id-2  returns cond-id-1 OR cond-id-2
     CONDITION_AND                   = -1,                   // cond-id-1    cond-id-2  returns cond-id-1 AND cond-id-2
@@ -381,7 +381,7 @@ enum ConditionType
     CONDITION_LEVEL                 = 15,                   // player_level 0, 1 or 2 (0: equal to, 1: equal or higher than, 2: equal or less than)
     CONDITION_NOITEM                = 16,                   // item_id      count   check not present req. amount items in inventory
     CONDITION_SPELL                 = 17,                   // spell_id     0, 1 (0: has spell, 1: hasn't spell)
-    CONDITION_INSTANCE_SCRIPT       = 18,                   // map_id       instance_condition_id (instance script specific enum)
+    CONDITION_INSTANCE_SCRIPT       = 18,                   // instance_condition_id (instance script specific enum) 0
     CONDITION_QUESTAVAILABLE        = 19,                   // quest_id     0       for case when loot/gossip possible only if player can start quest
     CONDITION_ACHIEVEMENT           = 20,                   // ach_id       0, 1 (0: has achievement, 1: hasn't achievement) for player
     CONDITION_ACHIEVEMENT_REALM     = 21,                   // ach_id       0, 1 (0: has achievement, 1: hasn't achievement) for server
@@ -400,6 +400,21 @@ enum ConditionType
     // If skill_value == 1, then true if player has not skill skill_id
     CONDITION_REPUTATION_RANK_MAX   = 30,                   // faction_id   max_rank
     CONDITION_COMPLETED_ENCOUNTER   = 31,                   // encounter_id encounter_id2       encounter_id[2] = DungeonEncounter(dbc).id (if value2 provided it will return value1 OR value2)
+    CONDITION_SOURCE_AURA           = 32,                   // spell_id     effindex (returns true if the source of the condition check has aura of spell_id, effIndex)
+    CONDITION_LAST_WAYPOINT         = 33,                   // waypointId   0 = exact, 1: wp <= waypointId, 2: wp > waypointId  Use to check what waypoint was last reached
+    CONDITION_XP_USER               = 34,                   // 0, 1 (0: XP off, 1: XP on) for player    0
+
+};
+
+enum ConditionSource                                        // From where was the condition called?
+{
+    CONDITION_FROM_LOOT             = 0,                    // Used to check a *_loot_template entry
+    CONDITION_FROM_REFERING_LOOT    = 1,                    // Used to check a entry refering to a reference_loot_template entry
+    CONDITION_FROM_GOSSIP_MENU      = 2,                    // Used to check a gossip menu menu-text
+    CONDITION_FROM_GOSSIP_OPTION    = 3,                    // Used to check a gossip menu option-item
+    CONDITION_FROM_EVENTAI          = 4,                    // Used to check EventAI Event "On Receive Emote"
+    CONDITION_FROM_HARDCODED        = 5,                    // Used to check a hardcoded event - not actually a condition
+    CONDITION_FROM_VENDOR           = 6,                    // Used to check a condition from a vendor
 };
 
 class PlayerCondition
@@ -415,15 +430,13 @@ class PlayerCondition
         bool IsValid() const { return IsValid(m_entry, m_condition, m_value1, m_value2); }
         static bool IsValid(uint16 entry, ConditionType condition, uint32 value1, uint32 value2);
 
-        bool Meets(Player const* pPlayer) const;            // Checks if the player meets the condition
+        static bool CanBeUsedWithoutPlayer(uint16 entry);
 
-        // TODO: old system, remove soon!
-        bool operator == (PlayerCondition const& lc) const
-        {
-            return (lc.m_condition == m_condition && lc.m_value1 == m_value1 && lc.m_value2 == m_value2);
-        }
+        // Checks if the player meets the condition
+        bool Meets(Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
 
     private:
+        bool CheckParamRequirements(Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
         uint16 m_entry;                                     // entry of the condition
         ConditionType m_condition;                          // additional condition type
         uint32 m_value1;                                    // data for the condition - see ConditionType definition
@@ -731,6 +744,7 @@ class ObjectMgr
 
         void LoadNPCSpellClickSpells();
         void LoadSpellTemplate();
+        void LoadCreatureTemplateSpells();
 
         void LoadWeatherZoneChances();
         void LoadGameTele();
@@ -743,6 +757,8 @@ class ObjectMgr
         void LoadVendors() { LoadVendors("npc_vendor", false); }
         void LoadTrainerTemplates();
         void LoadTrainers() { LoadTrainers("npc_trainer", false); }
+
+        void LoadVehicleAccessory();
 
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint32 level) const;
@@ -958,18 +974,8 @@ class ObjectMgr
         int GetIndexForLocale(LocaleConstant loc);
         LocaleConstant GetLocaleForIndex(int i);
 
-        // TODO: Outdated version, rename NEW and remove soon
-        uint16 GetConditionId(ConditionType condition, uint32 value1, uint32 value2);
-        bool IsPlayerMeetToCondition(Player const* player, uint16 condition_id) const
-        {
-            if (condition_id >= mConditions.size())
-                return false;
-
-            return mConditions[condition_id].Meets(player);
-        }
-
         // Check if a player meets condition conditionId
-        bool IsPlayerMeetToNEWCondition(Player const* pPlayer, uint16 conditionId) const;
+        bool IsPlayerMeetToCondition(uint16 conditionId, Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
 
         GameTele const* GetGameTele(uint32 id) const
         {
@@ -1030,7 +1036,7 @@ class ObjectMgr
 
         void AddVendorItem(uint32 entry, uint32 item, uint8 type, uint32 maxcount, uint32 incrtime, uint32 ExtendedCost);
         bool RemoveVendorItem(uint32 entry, uint32 item, uint8 type);
-        bool IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item, uint8 type, uint32 maxcount, uint32 ptime, uint32 ExtendedCost, Player* pl = NULL, std::set<uint32>* skip_vendors = NULL) const;
+        bool IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item, uint8 type, uint32 maxcount, uint32 ptime, uint32 ExtendedCost, uint16 conditionId, Player* pl = NULL, std::set<uint32>* skip_vendors = NULL) const;
 
         int GetOrNewIndexForLocale(LocaleConstant loc);
 
@@ -1231,10 +1237,6 @@ class ObjectMgr
         GossipMenuItemsLocaleMap mGossipMenuItemsLocaleMap;
         PointOfInterestLocaleMap mPointOfInterestLocaleMap;
         DungeonEncounterMap m_DungeonEncounters;
-
-        // Storage for Conditions. First element (index 0) is reserved for zero-condition (nothing required)
-        typedef std::vector<PlayerCondition> ConditionStore;
-        ConditionStore mConditions;
 
         CreatureModelRaceMap    m_mCreatureModelRaceMap;
 

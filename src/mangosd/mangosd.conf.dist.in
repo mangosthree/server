@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2010100901
+ConfVersion=2013012201
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -268,17 +268,20 @@ CleanCharacterDB = 1
 #    LogFilter_AchievementUpdates
 #    LogFilter_CreatureMoves
 #    LogFilter_TransportMoves
+#    LogFilter_PlayerMoves
 #    LogFilter_VisibilityChanges
 #    LogFilter_Weather
 #    LogFilter_DbStrictedCheck
+#    LogFilter_SQLText
 #    LogFilter_Pathfinding
-#        Log filters (active by default)
+#    LogFilter_MapsLoading
+#    LogFilter_EventAiDev
+#    LogFilter_Calendar
+#        Log filters (active by default - meaning: the filter is active, hence the log is not displayed)
 #        Default: 1 - not include with any log level
 #                 0 - include in log if log level permit
 #
 #    LogFilter_PeriodicAffects
-#    LogFilter_PlayerMoves
-#    LogFilter_SQLText
 #    LogFilter_AIAndMovegens
 #    LogFilter_PlayerStats
 #    LogFilter_Damage
@@ -301,6 +304,10 @@ CleanCharacterDB = 1
 #    DBErrorLogFile
 #        Log file of DB errors detected at server run
 #        Default: "DBErrors.log"
+#
+#    EventAIErrorLogFile
+#        Log file of EventAI errors detected at server run
+#        Default: "EventAIErrors.log"
 #
 #    CharLogFile
 #        Character operations logfile name
@@ -363,17 +370,21 @@ LogFilter_VisibilityChanges = 1
 LogFilter_Weather = 1
 LogFilter_DbStrictedCheck = 1
 LogFilter_Pathfinding = 1
+LogFilter_MapsLoading = 1
+LogFilter_EventAiDev = 1
 LogFilter_PeriodicAffects = 0
-LogFilter_PlayerMoves = 0
-LogFilter_SQLText = 0
+LogFilter_PlayerMoves = 1
+LogFilter_SQLText = 1
 LogFilter_AIAndMovegens = 0
 LogFilter_PlayerStats = 0
 LogFilter_Damage = 0
 LogFilter_Combat = 0
 LogFilter_SpellCast = 0
+LogFilter_Calendar = 1
 WorldLogFile = ""
 WorldLogTimestamp = 0
 DBErrorLogFile = "DBErrors.log"
+EventAIErrorLogFile = "EventAIErrors.log"
 CharLogFile = "Char.log"
 CharLogTimestamp = 0
 CharLogDump = 0
@@ -628,6 +639,14 @@ LogColors = ""
 #        Useful when you don't want old log events to be overwritten by new, but increasing can slow down performance
 #        Default: 25
 #
+#    Guild.UndeletableLevel
+#        A level above which guild can't be deleted.
+#        Default: 4
+#
+#    Guild.LevelingEnabled
+#        Allow guild leveling.
+#        Default: 1
+#
 #    TimerBar.Fatigue.GMLevel
 #        Disable/enable fatigue for security level (0..4) or high
 #        Default: 4 (None)
@@ -674,7 +693,7 @@ LogColors = ""
 #
 #    MinPetitionSigns
 #        Min signatures count to creating guild (0..9).
-#        Default: 9
+#        Default: 4
 #
 #    MaxGroupXPDistance
 #        Max distance to creature for group memeber to get XP at creature death.
@@ -783,6 +802,8 @@ Quests.Weekly.ResetHour = 6
 Quests.IgnoreRaid = 0
 Guild.EventLogRecordsCount = 100
 Guild.BankEventLogRecordsCount = 25
+Guild.UndeletableLevel = 4
+Guild.LevelingEnabled = 1
 TimerBar.Fatigue.GMLevel = 4
 TimerBar.Fatigue.Max = 60
 TimerBar.Breath.GMLevel = 4
@@ -793,7 +814,7 @@ MaxPrimaryTradeSkill = 2
 TradeSkill.GMIgnore.MaxPrimarySkillsCount = 4
 TradeSkill.GMIgnore.Level = 4
 TradeSkill.GMIgnore.Skill = 4
-MinPetitionSigns = 9
+MinPetitionSigns = 4
 MaxGroupXPDistance = 74
 MailDeliveryDelay = 3600
 MassMailer.SendPerTick = 10
@@ -823,8 +844,9 @@ Raid.MinLevel = 10
 #    AllowTwoSide.Interaction.Guild
 #    AllowTwoSide.Interaction.Auction
 #    AllowTwoSide.Interaction.Mail
+#    AllowTwoSide.Interaction.Calendar
 #        Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);merge all auction houses for players from
-#        different teams, send mail to different team.
+#        different teams, send mail to different team, calendar(invite player from different team)
 #        Default: 0 (Not allowed)
 #                 1 (Allowed)
 #
@@ -853,6 +875,7 @@ AllowTwoSide.Interaction.Group = 0
 AllowTwoSide.Interaction.Guild = 0
 AllowTwoSide.Interaction.Auction = 0
 AllowTwoSide.Interaction.Mail = 0
+AllowTwoSide.Interaction.Calendar = 0
 AllowTwoSide.WhoList = 0
 AllowTwoSide.AddFriend = 0
 TalentsInspecting = 1

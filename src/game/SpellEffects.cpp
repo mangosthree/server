@@ -8898,6 +8898,14 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
     if (!unitTarget)
         return;
 
+    // Script based implementation. Must be used only for not good for implementation in core spell effects
+    // So called only for not processed cases
+    if (unitTarget->GetTypeId() == TYPEID_UNIT)
+    {
+        if (sScriptMgr.OnEffectScriptEffect(m_caster, m_spellInfo->Id, SpellEffectIndex(effect->EffectIndex), (Creature*)unitTarget))
+            return;
+    }
+
     // Previous effect might have started script
     if (!ScriptMgr::CanSpellEffectStartDBScript(m_spellInfo, SpellEffectIndex(effect->EffectIndex)))
         return;

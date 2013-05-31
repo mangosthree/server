@@ -13986,6 +13986,8 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST_COUNT);
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST, pQuest->GetQuestId());
 
+    UpdateForQuestWorldObjects();
+
     // remove auras from spells with quest reward state limitations
     // Some spells applied at quest reward
     uint32 zone, area;
@@ -14654,6 +14656,8 @@ void Player::CurrencyAddedQuestCheck(uint32 entry)
             }
         }
     }
+
+    UpdateForQuestWorldObjects();
 }
 
 void Player::CurrencyRemovedQuestCheck(uint32 entry)
@@ -14677,6 +14681,8 @@ void Player::CurrencyRemovedQuestCheck(uint32 entry)
             }
         }
     }
+
+    UpdateForQuestWorldObjects();
 }
 
 void Player::ItemAddedQuestCheck(uint32 entry, uint32 count)
@@ -14787,6 +14793,8 @@ void Player::SpellAddedQuestCheck(uint32 entry)
                 CompleteQuest(questid);
         }
     }
+
+    UpdateForQuestWorldObjects();
 }
 
 void Player::SpellRemovedQuestCheck(uint32 entry)
@@ -14810,6 +14818,8 @@ void Player::SpellRemovedQuestCheck(uint32 entry)
                 IncompleteQuest(questid);
         }
     }
+
+    UpdateForQuestWorldObjects();
 }
 
 void Player::KilledMonster(CreatureInfo const* cInfo, ObjectGuid guid)

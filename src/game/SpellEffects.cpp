@@ -7562,6 +7562,14 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     return;
                 }
+                case 45235:                                 // Blaze
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 45236, true, NULL, NULL, m_caster->GetObjectGuid());
+                    return;
+                }
                 case 45668:                                 // Ultra-Advanced Proto-Typical Shortening Blaster
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
@@ -7664,6 +7672,32 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
 
                     m_caster->SetDisplayId(display_id);
+                    return;
+                }
+                case 45785:                                 // Sinister Reflection Clone
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
+                    return;
+                }
+                case 45833:                                 // Power of the Blue Flight
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 45836, true);
+                    return;
+                }
+                case 45892:                                 // Sinister Reflection
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // Summon 4 clones of the same player
+                    for (uint8 i = 0; i < 4; ++i)
+                        unitTarget->CastSpell(unitTarget, 45891, true, NULL, NULL, m_caster->GetObjectGuid());
                     return;
                 }
                 case 45958:                                 // Signal Alliance

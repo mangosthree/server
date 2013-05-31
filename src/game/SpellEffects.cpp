@@ -7326,6 +7326,14 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(m_caster, 32300, true);
                     return;
                 }
+                case 33676:                                 // Incite Chaos
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 33684, true);
+                    return;
+                }
                 case 35865:                                 // Summon Nether Vapor
                 {
                     if (!unitTarget)

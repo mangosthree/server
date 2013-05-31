@@ -401,7 +401,7 @@ void MovementInfo::Write(ByteBuffer& data, uint16 opcode) const
                 break;
             case MSETransportSeat:
                 if (hasTransportData)
-                    data << int32(t_seat);
+                    data << int8(t_seat);
                 break;
             case MSETransportPositionO:
                 if (hasTransportData)

@@ -37,6 +37,7 @@
 #include "VMapFactory.h"
 #include "MoveMap.h"
 #include "BattleGround/BattleGroundMgr.h"
+#include "Calendar.h"
 
 Map::~Map()
 {
@@ -434,6 +435,8 @@ bool Map::loaded(const GridPair& p) const
 
 void Map::Update(const uint32& t_diff)
 {
+    m_dyn_tree.update(t_diff);
+
     /// update worldsessions for existing players
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
     {
@@ -1338,6 +1341,7 @@ bool DungeonMap::Add(Player* player)
                     data << uint32(0);
                     player->GetSession()->SendPacket(&data);
                     player->BindToInstance(GetPersistanceState(), true);
+                    sCalendarMgr.SendCalendarRaidLockoutAdd(player, GetPersistanceState());
                 }
             }
         }
@@ -1444,6 +1448,7 @@ void DungeonMap::PermBindAllPlayers(Player* player)
             WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
             data << uint32(0);
             plr->GetSession()->SendPacket(&data);
+            sCalendarMgr.SendCalendarRaidLockoutAdd(plr, GetPersistanceState());
         }
 
         // if the leader is not in the instance the group will not get a perm bind
@@ -1490,7 +1495,6 @@ DungeonPersistentState* DungeonMap::GetPersistanceState() const
     return (DungeonPersistentState*)Map::GetPersistentState();
 }
 
-
 /* ******* Battleground Instance Maps ******* */
 
 BattleGroundMap::BattleGroundMap(uint32 id, time_t expiry, uint32 InstanceId, uint8 spawnMode)
@@ -1515,7 +1519,6 @@ BattleGroundPersistentState* BattleGroundMap::GetPersistanceState() const
 {
     return (BattleGroundPersistentState*)Map::GetPersistentState();
 }
-
 
 void BattleGroundMap::InitVisibilityDistance()
 {
@@ -1587,8 +1590,10 @@ bool Map::CanEnter(Player* player)
 }
 
 /// Put scripts in the execution queue
-bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target)
+bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams /*=SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET*/)
 {
+    MANGOS_ASSERT(source);
+
     ///- Find the script map
     ScriptMapMap::const_iterator s = scripts.second.find(id);
     if (s == scripts.second.end())
@@ -1598,6 +1603,20 @@ bool Map::ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* sourc
     ObjectGuid sourceGuid = source->GetObjectGuid();
     ObjectGuid targetGuid = target ? target->GetObjectGuid() : ObjectGuid();
     ObjectGuid ownerGuid  = source->isType(TYPEMASK_ITEM) ? ((Item*)source)->GetOwnerGuid() : ObjectGuid();
+
+    if (execParams)                                         // Check if the execution should be uniquely
+    {
+        for (ScriptScheduleMap::const_iterator searchItr = m_scriptSchedule.begin(); searchItr != m_scriptSchedule.end(); ++searchItr)
+        {
+            if (searchItr->second.IsSameScript(scripts.first, id,
+                                               execParams & SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE ? sourceGuid : ObjectGuid(),
+                                               execParams & SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET ? targetGuid : ObjectGuid(), ownerGuid))
+            {
+                DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u. Skip script as script already started for source %s, target %s - ScriptsStartParams %u", scripts.first, id, sourceGuid.GetString().c_str(), targetGuid.GetString().c_str(), execParams);
+                return true;
+            }
+        }
+    }
 
     ///- Schedule script execution for all scripts in the script map
     ScriptMap const* s2 = &(s->second);
@@ -1640,12 +1659,33 @@ void Map::ScriptsProcess()
     // ok as multimap is a *sorted* associative container
     while (!m_scriptSchedule.empty() && (iter->first <= sWorld.GetGameTime()))
     {
-        iter->second.HandleScriptStep();
+        if (iter->second.HandleScriptStep())
+        {
+            // Terminate following script steps of this script
+            const char* tableName = iter->second.GetTableName();
+            uint32 id = iter->second.GetId();
+            ObjectGuid sourceGuid = iter->second.GetSourceGuid();
+            ObjectGuid targetGuid = iter->second.GetTargetGuid();
+            ObjectGuid ownerGuid = iter->second.GetOwnerGuid();
 
-        m_scriptSchedule.erase(iter);
+            for (ScriptScheduleMap::iterator rmItr = m_scriptSchedule.begin(); rmItr != m_scriptSchedule.end();)
+            {
+                if (rmItr->second.IsSameScript(tableName, id, sourceGuid, targetGuid, ownerGuid))
+                {
+                    m_scriptSchedule.erase(rmItr++);
+                    sScriptMgr.DecreaseScheduledScriptCount();
+                }
+                else
+                    ++rmItr;
+            }
+        }
+        else
+        {
+            m_scriptSchedule.erase(iter);
+
+            sScriptMgr.DecreaseScheduledScriptCount();
+        }
         iter = m_scriptSchedule.begin();
-
-        sScriptMgr.DecreaseScheduledScriptCount();
     }
 }
 
@@ -1850,7 +1890,6 @@ class StaticMonsterChatBuilder
         Unit* i_target;
 };
 
-
 /**
  * Function simulates yell of creature
  *
@@ -1878,7 +1917,6 @@ void Map::MonsterYellToMap(ObjectGuid guid, int32 textId, uint32 language, Unit*
         return;
     }
 }
-
 
 /**
  * Function simulates yell of creature
@@ -1921,18 +1959,60 @@ void Map::PlayDirectSoundToMap(uint32 soundId, uint32 zoneId /*=0*/)
 /**
  * Function to check if a point is in line of sight from an other point
  */
-bool Map::IsInLineOfSight(float srcX, float srcY, float srcZ, float destX, float destY, float destZ)
+bool Map::IsInLineOfSight(float srcX, float srcY, float srcZ, float destX, float destY, float destZ, uint32 phasemask) const
 {
-    VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
-    return vMapManager->isInLineOfSight(GetId(), srcX, srcY, srcZ, destX, destY, destZ);
+    return VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(GetId(), srcX, srcY, srcZ, destX, destY, destZ)
+           && m_dyn_tree.isInLineOfSight(srcX, srcY, srcZ, destX, destY, destZ, phasemask);
 }
 
 /**
- * get the hit position and return true if we hit something
+ * get the hit position and return true if we hit something (in this case the dest position will hold the hit-position)
  * otherwise the result pos will be the dest pos
  */
-bool Map::GetObjectHitPos(float srcX, float srcY, float srcZ, float destX, float destY, float destZ, float& resX, float& resY, float& resZ, float pModifyDist)
+bool Map::GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, uint32 phasemask, float modifyDist) const
 {
-    VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
-    return vMapManager->getObjectHitPos(GetId(), srcX, srcY, srcZ, destX, destY, destZ, resX, resY, resZ, pModifyDist);
+    // at first check all static objects
+    float tempX, tempY, tempZ = 0.0f;
+    bool result0 = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetId(), srcX, srcY, srcZ, destX, destY, destZ, tempX, tempY, tempZ, modifyDist);
+    if (result0)
+    {
+        DEBUG_LOG("Map::GetHitPosition vmaps corrects gained with static objects! new dest coords are X:%f Y:%f Z:%f", destX, destY, destZ);
+        destX = tempX;
+        destY = tempY;
+        destZ = tempZ;
+    }
+    // at second all dynamic objects, if static check has an hit, then we can calculate only to this closer point
+    bool result1 = m_dyn_tree.getObjectHitPos(phasemask, srcX, srcY, srcZ, destX, destY, destZ, tempX, tempY, tempZ, modifyDist);
+    if (result1)
+    {
+        DEBUG_LOG("Map::GetHitPosition vmaps corrects gained with dynamic objects! new dest coords are X:%f Y:%f Z:%f", destX, destY, destZ);
+        destX = tempX;
+        destY = tempY;
+        destZ = tempZ;
+    }
+    return result0 || result1;
+}
+
+float Map::GetHeight(uint32 phasemask, float x, float y, float z) const
+{
+    float staticHeight = m_TerrainData->GetHeightStatic(x, y, z);
+
+    // Get Dynamic Height around static Height (if valid)
+    float dynSearchHeight = 2.0f + (z < staticHeight ? staticHeight : z);
+    return std::max<float>(staticHeight, m_dyn_tree.getHeight(x, y, dynSearchHeight, dynSearchHeight - staticHeight, phasemask));
+}
+
+void Map::InsertGameObjectModel(const GameObjectModel& mdl)
+{
+    m_dyn_tree.insert(mdl);
+}
+
+void Map::RemoveGameObjectModel(const GameObjectModel& mdl)
+{
+    m_dyn_tree.remove(mdl);
+}
+
+bool Map::ContainsGameObjectModel(const GameObjectModel& mdl) const
+{
+    return m_dyn_tree.contains(mdl);
 }

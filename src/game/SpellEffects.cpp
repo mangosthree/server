@@ -5546,7 +5546,7 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
     }
 
     Creature* spawnCreature = m_caster->SummonCreature(creatureEntry, list[0].x, list[0].y, list[0].z, m_caster->GetOrientation(),
-            (m_duration == 0) ? TEMPSUMMON_CORPSE_DESPAWN : TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, m_duration);
+                              (m_duration == 0) ? TEMPSUMMON_CORPSE_DESPAWN : TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, m_duration);
 
     if (!spawnCreature)
     {
@@ -10039,7 +10039,7 @@ void Spell::EffectWMOChange(SpellEffectEntry const* effect)
         return;
     }
 
-    DEBUG_LOG("Spell::EffectWMOChange, spell Id %u, object %u, misc-value %u", m_spellInfo->Id,gameObjTarget->GetEntry(), effect->EffectMiscValue);
+    DEBUG_LOG("Spell::EffectWMOChange, spell Id %u, object %u, misc-value %u", m_spellInfo->Id, gameObjTarget->GetEntry(), effect->EffectMiscValue);
 
     Unit* caster = GetAffectiveCaster();
     if (!caster)
@@ -10060,7 +10060,7 @@ void Spell::EffectWMOChange(SpellEffectEntry const* effect)
             gameObjTarget->ForceGameObjectHealth(0, caster);
             break;
         default:
-            sLog.outError("Spell::EffectWMOChange, spell Id %u with undefined change value %u", m_spellInfo->Id,effect->EffectMiscValue);
+            sLog.outError("Spell::EffectWMOChange, spell Id %u with undefined change value %u", m_spellInfo->Id, effect->EffectMiscValue);
             break;
     }
 }

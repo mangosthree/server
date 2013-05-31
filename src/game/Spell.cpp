@@ -1687,7 +1687,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // and no unitTarget (e.g. summon effects). As MaNGOS always needs a unitTarget we add just the caster here.
             // Logic: This is first target, and no second target => use m_caster -- This is second target: use m_caster if the spell is positive or a summon spell
             if ((spellEffect->EffectImplicitTargetA == targetMode && spellEffect->EffectImplicitTargetB == TARGET_NONE) ||
-                (spellEffect->EffectImplicitTargetB == targetMode && (IsPositiveSpell(m_spellInfo) || spellEffect->Effect == SPELL_EFFECT_SUMMON)))
+                    (spellEffect->EffectImplicitTargetB == targetMode && (IsPositiveSpell(m_spellInfo) || spellEffect->Effect == SPELL_EFFECT_SUMMON)))
                 targetUnitMap.push_back(m_caster);
             break;
         }
@@ -1724,7 +1724,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // and no unitTarget (e.g. summon effects). As MaNGOS always needs a unitTarget we add just the caster here.
             // Logic: This is first target, and no second target => use m_caster -- This is second target: use m_caster if the spell is positive or a summon spell
             if ((spellEffect->EffectImplicitTargetA == targetMode && spellEffect->EffectImplicitTargetB == TARGET_NONE) ||
-                (spellEffect->EffectImplicitTargetB == targetMode && (IsPositiveSpell(m_spellInfo) || spellEffect->Effect == SPELL_EFFECT_SUMMON)))
+                    (spellEffect->EffectImplicitTargetB == targetMode && (IsPositiveSpell(m_spellInfo) || spellEffect->Effect == SPELL_EFFECT_SUMMON)))
                 targetUnitMap.push_back(m_caster);
 
             break;

@@ -302,9 +302,9 @@ bool ChatHandler::HandleGPSCommand(char* args)
         zone_y = 0;
     }
 
-    TerrainInfo const* map = obj->GetTerrain();
-    float ground_z = map->GetHeight(obj->GetPositionX(), obj->GetPositionY(), MAX_HEIGHT);
-    float floor_z = map->GetHeight(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ());
+    Map const* map = obj->GetMap();
+    float ground_z = map->GetHeight(obj->GetPhaseMask(), obj->GetPositionX(), obj->GetPositionY(), MAX_HEIGHT);
+    float floor_z = map->GetHeight(obj->GetPhaseMask(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ());
 
     GridPair p = MaNGOS::ComputeGridPair(obj->GetPositionX(), obj->GetPositionY());
 
@@ -314,9 +314,11 @@ bool ChatHandler::HandleGPSCommand(char* args)
     uint32 have_map = GridMap::ExistMap(obj->GetMapId(), gx, gy) ? 1 : 0;
     uint32 have_vmap = GridMap::ExistVMap(obj->GetMapId(), gx, gy) ? 1 : 0;
 
+    TerrainInfo const* terrain = obj->GetTerrain();
+
     if (have_vmap)
     {
-        if (map->IsOutdoors(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ()))
+        if (terrain->IsOutdoors(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ()))
             PSendSysMessage("You are OUTdoor");
         else
             PSendSysMessage("You are INdoor");
@@ -347,11 +349,22 @@ bool ChatHandler::HandleGPSCommand(char* args)
               zone_x, zone_y, ground_z, floor_z, have_map, have_vmap);
 
     GridMapLiquidData liquid_status;
-    GridMapLiquidStatus res = map->getLiquidStatus(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), MAP_ALL_LIQUIDS, &liquid_status);
+    GridMapLiquidStatus res = terrain->getLiquidStatus(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), MAP_ALL_LIQUIDS, &liquid_status);
     if (res)
     {
-        PSendSysMessage(LANG_LIQUID_STATUS, liquid_status.level, liquid_status.depth_level, liquid_status.type, res);
+        PSendSysMessage(LANG_LIQUID_STATUS, liquid_status.level, liquid_status.depth_level, liquid_status.type_flags, res);
     }
+
+    // Additional vmap debugging help
+#ifdef _DEBUG_VMAPS
+    PSendSysMessage("Static terrain height (maps only): %f", obj->GetTerrain()->GetHeightStatic(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), false));
+
+    if (VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager())
+        PSendSysMessage("Vmap Terrain Height %f", vmgr->getHeight(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ() + 2.0f, 10000.0f));
+
+    PSendSysMessage("Static map height (maps and vmaps): %f", obj->GetTerrain()->GetHeightStatic(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ()));
+#endif
+
     return true;
 }
 
@@ -491,7 +504,6 @@ bool ChatHandler::HandleGonameCommand(char* args)
         SetSentErrorMessage(true);
         return false;
     }
-
 
     if (target)
     {
@@ -640,6 +652,49 @@ bool ChatHandler::HandleRecallCommand(char* args)
     }
 
     return HandleGoHelper(target, target->m_recallMap, target->m_recallX, target->m_recallY, &target->m_recallZ, &target->m_recallO);
+}
+
+bool ChatHandler::HandleModifyHolyPowerCommand(char* args)
+{
+    if (!*args)
+        return false;
+
+    int32 power = atoi(args);
+
+    if (power < 0)
+    {
+        SendSysMessage(LANG_BAD_VALUE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    Player* chr = getSelectedPlayer();
+    if (!chr)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    // check online security
+    if (HasLowerSecurity(chr))
+        return false;
+
+    int32 maxPower = int32(chr->GetMaxPower(POWER_HOLY_POWER));
+    if (power > maxPower)
+    {
+        SendSysMessage(LANG_BAD_VALUE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    PSendSysMessage(LANG_YOU_CHANGE_HOLY_POWER, GetNameLink(chr).c_str(), power, maxPower);
+    if (needReportToTarget(chr))
+        ChatHandler(chr).PSendSysMessage(LANG_YOURS_HOLY_POWER_CHANGED, GetNameLink().c_str(), power, maxPower);
+
+    chr->SetPower(POWER_HOLY_POWER, power);
+
+    return true;
 }
 
 // Edit Player HP
@@ -1519,15 +1574,20 @@ bool ChatHandler::HandleModifyMoneyCommand(char* args)
     if (HasLowerSecurity(chr))
         return false;
 
-    int32 addmoney = atoi(args);
+    int64 addmoney;
+    if (!ExtractInt64(&args, addmoney))
+        return false;
 
-    uint32 moneyuser = chr->GetMoney();
+    uint64 moneyuser = chr->GetMoney();
+
+    std::stringstream absadd; absadd << abs(addmoney);
+    std::stringstream add; add << addmoney;
 
     if (addmoney < 0)
     {
-        int32 newmoney = int32(moneyuser) + addmoney;
-
-        DETAIL_LOG(GetMangosString(LANG_CURRENT_MONEY), moneyuser, addmoney, newmoney);
+        int64 newmoney = int64(moneyuser) + addmoney;
+        DETAIL_LOG("USER1: %s, ADD: %s, DIF: %s",
+            MoneyToString(moneyuser).c_str(), MoneyToString(addmoney).c_str(), MoneyToString(newmoney).c_str());
         if (newmoney <= 0)
         {
             PSendSysMessage(LANG_YOU_TAKE_ALL_MONEY, GetNameLink(chr).c_str());
@@ -1541,17 +1601,17 @@ bool ChatHandler::HandleModifyMoneyCommand(char* args)
             if (newmoney > MAX_MONEY_AMOUNT)
                 newmoney = MAX_MONEY_AMOUNT;
 
-            PSendSysMessage(LANG_YOU_TAKE_MONEY, abs(addmoney), GetNameLink(chr).c_str());
+            PSendSysMessage(LANG_YOU_TAKE_MONEY, MoneyToString(abs(addmoney)).c_str(), GetNameLink(chr).c_str());
             if (needReportToTarget(chr))
-                ChatHandler(chr).PSendSysMessage(LANG_YOURS_MONEY_TAKEN, GetNameLink().c_str(), abs(addmoney));
+                ChatHandler(chr).PSendSysMessage(LANG_YOURS_MONEY_TAKEN, GetNameLink().c_str(), MoneyToString(abs(addmoney)).c_str());
             chr->SetMoney(newmoney);
         }
     }
     else
     {
-        PSendSysMessage(LANG_YOU_GIVE_MONEY, addmoney, GetNameLink(chr).c_str());
+        PSendSysMessage(LANG_YOU_GIVE_MONEY, MoneyToString(addmoney).c_str(), GetNameLink(chr).c_str());
         if (needReportToTarget(chr))
-            ChatHandler(chr).PSendSysMessage(LANG_YOURS_MONEY_GIVEN, GetNameLink().c_str(), addmoney);
+            ChatHandler(chr).PSendSysMessage(LANG_YOURS_MONEY_GIVEN, GetNameLink().c_str(), MoneyToString(addmoney).c_str());
 
         if (addmoney >= MAX_MONEY_AMOUNT)
             chr->SetMoney(MAX_MONEY_AMOUNT);
@@ -1559,7 +1619,8 @@ bool ChatHandler::HandleModifyMoneyCommand(char* args)
             chr->ModifyMoney(addmoney);
     }
 
-    DETAIL_LOG(GetMangosString(LANG_NEW_MONEY), moneyuser, addmoney, chr->GetMoney());
+    DETAIL_LOG("USER2: %s, ADD: %s, RESULT: %s\n",
+        MoneyToString(moneyuser).c_str(), MoneyToString(addmoney).c_str(), MoneyToString(chr->GetMoney()).c_str());
 
     return true;
 }
@@ -2089,8 +2150,6 @@ bool ChatHandler::HandleGoCommand(char* args)
 
     return HandleGoHelper(_player, mapid, x, y, &z);
 }
-
-
 
 // teleport at coordinates
 bool ChatHandler::HandleGoXYCommand(char* args)

@@ -45,14 +45,16 @@
 
 enum TempSummonType
 {
-    TEMPSUMMON_TIMED_OR_DEAD_DESPAWN       = 1,             // despawns after a specified time OR when the creature disappears
-    TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN     = 2,             // despawns after a specified time OR when the creature dies
-    TEMPSUMMON_TIMED_DESPAWN               = 3,             // despawns after a specified time
-    TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT = 4,             // despawns after a specified time after the creature is out of combat
-    TEMPSUMMON_CORPSE_DESPAWN              = 5,             // despawns instantly after death
-    TEMPSUMMON_CORPSE_TIMED_DESPAWN        = 6,             // despawns after a specified time after death
-    TEMPSUMMON_DEAD_DESPAWN                = 7,             // despawns when the creature disappears
-    TEMPSUMMON_MANUAL_DESPAWN              = 8              // despawns when UnSummon() is called
+    TEMPSUMMON_MANUAL_DESPAWN              = 0,             // despawns when UnSummon() is called
+    TEMPSUMMON_DEAD_DESPAWN                = 1,             // despawns when the creature disappears
+    TEMPSUMMON_CORPSE_DESPAWN              = 2,             // despawns instantly after death
+    TEMPSUMMON_CORPSE_TIMED_DESPAWN        = 3,             // despawns after a specified time after death (or when the creature disappears)
+    TEMPSUMMON_TIMED_DESPAWN               = 4,             // despawns after a specified time
+    TEMPSUMMON_TIMED_OOC_DESPAWN           = 5,             // despawns after a specified time after the creature is out of combat
+    TEMPSUMMON_TIMED_OR_DEAD_DESPAWN       = 6,             // despawns after a specified time OR when the creature disappears
+    TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN     = 7,             // despawns after a specified time OR when the creature dies
+    TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN   = 8,             // despawns after a specified time (OOC) OR when the creature disappears
+    TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN = 9,             // despawns after a specified time (OOC) OR when the creature dies
 };
 
 enum PhaseMasks
@@ -95,7 +97,6 @@ struct WorldLocation
     WorldLocation(WorldLocation const& loc)
         : mapid(loc.mapid), coord_x(loc.coord_x), coord_y(loc.coord_y), coord_z(loc.coord_z), orientation(NormalizeOrientation(loc.orientation)) {}
 };
-
 
 // use this class to measure time between world update ticks
 // essential for units updating their spells after cells become active
@@ -355,8 +356,6 @@ class MANGOS_DLL_SPEC Object
 
         uint16 GetValuesCount() const { return m_valuesCount; }
 
-        void InitValues() { _InitValues(); }
-
         virtual bool HasQuest(uint32 /* quest_id */) const { return false; }
         virtual bool HasInvolvedQuest(uint32 /* quest_id */) const { return false; }
 
@@ -386,7 +385,7 @@ class MANGOS_DLL_SPEC Object
             float*  m_floatValues;
         };
 
-        uint32* m_uint32Values_mirror;
+        std::vector<bool> m_changedValues;
 
         uint16 m_valuesCount;
 

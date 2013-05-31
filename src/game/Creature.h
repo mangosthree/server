@@ -54,7 +54,6 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NOT_TAUNTABLE   = 0x00000100,       // creature is immune to taunt auras and effect attack me
     CREATURE_FLAG_EXTRA_AGGRO_ZONE      = 0x00000200,       // creature sets itself in combat with zone on aggro
     CREATURE_FLAG_EXTRA_GUARD           = 0x00000400,       // creature is a guard
-    CREATURE_FLAG_EXTRA_NO_TALKTO_CREDIT = 0x00000800,      // creature doesn't give quest-credits when talked to (temporarily flag)
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
@@ -101,6 +100,7 @@ struct CreatureInfo
     uint32  rangeattacktime;
     uint32  unit_class;                                     // enum Classes. Note only 4 classes are known for creatures.
     uint32  unit_flags;                                     // enum UnitFlags mask values
+    uint32  unit_flags2;                                    // enum UnitFlags2 mask values
     uint32  dynamicflags;
     uint32  family;                                         // enum CreatureFamily values (optional)
     uint32  trainer_type;
@@ -121,15 +121,14 @@ struct CreatureInfo
     int32   resistance4;
     int32   resistance5;
     int32   resistance6;
-    uint32  spells[CREATURE_MAX_SPELLS];
     uint32  PetSpellDataId;
     uint32  mingold;
     uint32  maxgold;
     char const* AIName;
     uint32  MovementType;
     uint32  InhabitType;
-    float   unk16;
-    float   unk17;
+    float   healthModifier;
+    float   powerModifier;
     bool    RacialLeader;
     uint32  questItems[6];
     uint32  movementId;
@@ -175,6 +174,12 @@ struct CreatureInfo
         // if can tame exotic then can tame any temable
         return exotic || !IsExotic();
     }
+};
+
+struct CreatureTemplateSpells
+{
+    uint32 entry;
+    uint32 spells[CREATURE_MAX_SPELLS];
 };
 
 struct EquipmentInfo
@@ -321,14 +326,15 @@ enum
 
 struct VendorItem
 {
-    VendorItem(uint32 _item, uint8 _type, uint32 _maxcount, uint32 _incrtime, uint32 _ExtendedCost)
-        : item(_item), type(_type), maxcount(_maxcount), incrtime(_incrtime), ExtendedCost(_ExtendedCost) {}
+    VendorItem(uint32 _item, uint8 _type, uint32 _maxcount, uint32 _incrtime, uint32 _ExtendedCost, uint16 _conditionId)
+        : item(_item), type(_type), maxcount(_maxcount), incrtime(_incrtime), ExtendedCost(_ExtendedCost), conditionId(_conditionId) {}
 
     uint32 item;
     uint8  type;
     uint32 maxcount;                                        // 0 for infinity item amount, for type = VENDOR_ITEM_TYPE_CURRENCY, maxcount = currency count
     uint32 incrtime;                                        // time for restore items amount if maxcount != 0
     uint32 ExtendedCost;                                    // index in ItemExtendedCost.dbc
+    uint16 conditionId;                                     // condition to check for this item
 
     bool IsCurrency() const { return type == VENDOR_ITEM_TYPE_CURRENCY; }
 };
@@ -345,9 +351,9 @@ struct VendorItemData
     }
     bool Empty() const { return m_items.empty(); }
     uint8 GetItemCount() const { return m_items.size(); }
-    void AddItem(uint32 item, uint8 type, uint32 maxcount, uint32 ptime, uint32 ExtendedCost)
+    void AddItem(uint32 item, uint8 type, uint32 maxcount, uint32 ptime, uint32 ExtendedCost, uint16 conditonId)
     {
-        m_items.push_back(new VendorItem(item, type, maxcount, ptime, ExtendedCost));
+        m_items.push_back(new VendorItem(item, type, maxcount, ptime, ExtendedCost, conditonId));
     }
     bool RemoveItem(uint32 item_id, uint8 type);
     VendorItem const* FindItemCostPair(uint32 item_id, uint8 type, uint32 extendedCost) const;
@@ -461,6 +467,9 @@ enum TemporaryFactionFlags                                  // Used at real fact
     TEMPFACTION_RESTORE_RESPAWN         = 0x01,             // Default faction will be restored at respawn
     TEMPFACTION_RESTORE_COMBAT_STOP     = 0x02,             // ... at CombatStop() (happens at creature death, at evade or custom scripte among others)
     TEMPFACTION_RESTORE_REACH_HOME      = 0x04,             // ... at reaching home in home movement (evade), if not already done at CombatStop()
+    TEMPFACTION_TOGGLE_NON_ATTACKABLE   = 0x08,             // Remove UNIT_FLAG_NON_ATTACKABLE(0x02) when faction is changed (reapply when temp-faction is removed)
+    TEMPFACTION_TOGGLE_OOC_NOT_ATTACK   = 0x10,             // Remove UNIT_FLAG_OOC_NOT_ATTACKABLE(0x100) when faction is changed (reapply when temp-faction is removed)
+    TEMPFACTION_TOGGLE_PASSIVE          = 0x20,             // Remove UNIT_FLAG_PASSIVE(0x200) when faction is changed (reapply when temp-faction is removed)
     TEMPFACTION_ALL,
 };
 
@@ -488,7 +497,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void Update(uint32 update_diff, uint32 time) override;  // overwrite Unit::Update
 
         virtual void RegenerateAll(uint32 update_diff);
-        void GetRespawnCoord(float& x, float& y, float& z, float* ori = NULL, float* dist = NULL) const;
         uint32 GetEquipmentId() const { return m_equipmentId; }
 
         CreatureSubtype GetSubtype() const { return m_subtype; }
@@ -505,7 +513,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool CanWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
         bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
-        bool CanFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
+        bool CanFly()  const { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_UNK_2); }
 
         bool IsTrainerOf(Player* player, bool msg) const;
         bool CanInteractWithBattleMaster(Player* player, bool msg) const;
@@ -514,10 +522,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool IsOutOfThreatArea(Unit* pVictim) const;
         void FillGuidsListFromThreatList(GuidVector& guids, uint32 maxamount = 0);
 
-        bool IsImmuneToSpell(SpellEntry const* spellInfo) override;
-        // redefine Unit::IsImmuneToSpell
-        bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const override;
-        // redefine Unit::IsImmuneToSpellEffect
+        bool IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf) override;
+        bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const override;
+
         bool IsElite() const
         {
             if (IsPet())
@@ -545,7 +552,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         CreatureAI* AI() { return i_AI; }
 
-        void SetWalk(bool enable);
+        void SetWalk(bool enable, bool asDefault = true);
         void SetLevitate(bool enable);
         void SetRoot(bool enable) override;
         void SetWaterWalk(bool enable) override;
@@ -701,8 +708,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void SetCombatStartPosition(float x, float y, float z) { m_combatStartX = x; m_combatStartY = y; m_combatStartZ = z; }
         void GetCombatStartPosition(float& x, float& y, float& z) { x = m_combatStartX; y = m_combatStartY; z = m_combatStartZ; }
 
-        void SetSummonPoint(CreatureCreatePos const& pos) { m_summonPos = pos.m_pos; }
-        void GetSummonPoint(float& fX, float& fY, float& fZ, float& fOrient) const { fX = m_summonPos.x; fY = m_summonPos.y; fZ = m_summonPos.z; fOrient = m_summonPos.o; }
+        void SetRespawnCoord(CreatureCreatePos const& pos) { m_respawnPos = pos.m_pos; }
+        void SetRespawnCoord(float x, float y, float z, float ori) { m_respawnPos.x = x; m_respawnPos.y = y; m_respawnPos.z = z; m_respawnPos.o = ori; }
+        void GetRespawnCoord(float& x, float& y, float& z, float* ori = NULL, float* dist = NULL) const;
+        void ResetRespawnCoord();
 
         void SetDeadByDefault(bool death_state) { m_isDeadByDefault = death_state; }
 
@@ -765,7 +774,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         float m_combatStartY;
         float m_combatStartZ;
 
-        Position m_summonPos;
+        Position m_respawnPos;
 
     private:
         GridReference<Creature> m_gridRef;

@@ -1,5 +1,5 @@
 /*
- * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/**
+/*
  * @addtogroup TransportSystem to provide abstract support for transported entities
  * The Transport System in MaNGOS consists of these files:
  * - TransportSystem.h to provide the basic classes TransportBase and TransportInfo
@@ -46,7 +46,7 @@ struct VehicleSeatEntry;
 
 typedef std::map<uint8 /*seatPosition*/, VehicleSeatEntry const*> VehicleSeatMap;
 
-/**
+/*
  * A class to provide support for each vehicle. This includes
  * - Boarding and unboarding of passengers, including support to switch vehicles
  * - Basic checks if a passenger can board

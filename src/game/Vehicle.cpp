@@ -1,5 +1,5 @@
 /*
- * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/**
+/*
  * @addtogroup TransportSystem
  * @{
  *
@@ -78,7 +78,7 @@ void ObjectMgr::LoadVehicleAccessory()
     }
 }
 
-/**
+/*
  * Constructor of VehicleInfo
  *
  * @param owner         MUST be provided owner of the vehicle (type Unit)
@@ -143,7 +143,7 @@ void VehicleInfo::Initialize()
     m_isInitialized = true;
 }
 
-/**
+/*
  * This function will board a passenger onto a vehicle
  *
  * @param passenger MUST be provided. This Unit will be boarded onto the vehicles (if it checks out)
@@ -213,7 +213,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     ApplySeatMods(passenger, seatEntry->m_flags);
 }
 
-/**
+/*
  * This function will switch the seat of a passenger on the same vehicle
  *
  * @param passenger MUST be provided. This Unit will change its seat on the vehicle
@@ -268,7 +268,7 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     ApplySeatMods(passenger, seatEntry->m_flags);
 }
 
-/**
+/*
  * This function will Unboard a passenger
  *
  * @param passenger         MUST be provided. This Unit will be unboarded from the vehicle
@@ -338,7 +338,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
     }
 }
 
-/**
+/*
  * This function will check if a passenger can be boarded
  *
  * @param passenger         Unit that attempts to board onto a vehicle
@@ -420,7 +420,7 @@ VehicleSeatEntry const* VehicleInfo::GetSeatEntry(uint8 seat) const
     return itr != m_vehicleSeats.end() ? itr->second : NULL;
 }
 
-/**
+/*
  * This function will get a usable seat for a passenger
  *
  * @param passenger         MUST be provided. Unit for which to try to get a free seat

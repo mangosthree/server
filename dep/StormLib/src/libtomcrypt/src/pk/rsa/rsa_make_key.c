@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file rsa_make_key.c
   RSA key generation, Tom St Denis
 */  

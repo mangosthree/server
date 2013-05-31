@@ -1,4 +1,4 @@
-/**
+/*
   \file GImage.h
 
   See G3D::GImage for details.
@@ -39,13 +39,13 @@ class BinaryInput;
 class BinaryOutput;
 
 
-/**
+/*
   Interface to image compression & file formats. 
  
   Supported formats (decode and encode): Color JPEG, PNG,
-  (Uncompressed)TGA 24, (Uncompressed)TGA 32, BMP 1, BMP 4, BMP 8, BMP
+  (Uncompressed) TGA 24, (Uncompressed) TGA 32, BMP 1, BMP 4, BMP 8, BMP
   24, PPM (P6), and PPM ASCII (P1, P2, P3), which includes PPM, PGM,
-  and PBM.  8-bit paletted PCX, 24-bit PCX, and ICO are supported for
+  and PBM.  (Compressed) TGA 24, (Compressed) TGA 32, 8-bit paletted PCX, 24-bit PCX, and ICO are supported for
   decoding only.
 
   Sample usage:
@@ -77,6 +77,10 @@ class BinaryOutput;
   API for image manipulation and wider set of image load/save formats.  It is 
   recommended over GImage (we don't include it directly in G3D because their license
   is more restrictive than the BSD one).
+
+  \cite http://tfcduke.developpez.com/tutoriel/format/tga/fichiers/tga_specs.pdf
+
+  \sa Image3, Image3uint8, Image4, Image4uint8, Image1, Image1uint8, Texture, Map2D
 
   */
 class GImage {
@@ -111,7 +115,7 @@ public:
         AUTODETECT, UNKNOWN};
 
 
-    /**
+    /*
      The number of channels; either 3 (RGB) or 4 (RGBA)
      */
     inline int channels() const {
@@ -230,20 +234,20 @@ private:
     void encodeBMP(
         BinaryOutput&       out) const;
 
-    /**
+    /*
      The TGA file will be either 24- or 32-bit depending
      on the number of channels.
      */
     void encodeTGA(
         BinaryOutput&       out) const;
 
-    /**
+    /*
      Converts this image into a JPEG
      */
     void encodeJPEG(
         BinaryOutput&       out) const;
 
-    /**
+    /*
      Converts this image into a JPEG
      */
     void encodePNG(
@@ -279,7 +283,7 @@ private:
     void decodePPMASCII(
         BinaryInput&        input);
 
-    /**
+    /*
      Given [maybe] a filename, memory buffer, and [maybe] a format, 
      returns the most likely format of this file.
      */
@@ -301,7 +305,7 @@ public:
     void flipVertical();
     void rotate90CW(int numTimes = 1);
 
-    /**
+    /*
      Create an empty image of the given size.
      \sa load()
      */
@@ -311,7 +315,7 @@ public:
         int                 channels = 3,
         const MemoryManager::Ref& m = MemoryManager::create());
 
-    /**
+    /*
      Load an encoded image from disk and decode it.
      Throws GImage::Error if something goes wrong.
      */
@@ -320,7 +324,7 @@ public:
         Format              format = AUTODETECT,
         const MemoryManager::Ref& m = MemoryManager::create());
 
-    /**
+    /*
      Decodes an image stored in a buffer.
     */
     GImage(
@@ -335,7 +339,7 @@ public:
 
     GImage& operator=(const GImage& other);
 
-    /**
+    /*
      Returns a new GImage that has 4 channels.  RGB is
      taken from this GImage and the alpha from the red
      channel of the supplied image. The new GImage is passed
@@ -343,14 +347,14 @@ public:
      */ 
     void insertRedAsAlpha(const GImage& alpha, GImage& output) const;
 
-    /**
+    /*
      Returns a new GImage with 3 channels, removing
      the alpha channel if there is one. The new GImage
      is passed as a reference parameter for speed.
      */
     void stripAlpha(GImage& output) const;
 
-     /**
+     /*
       Loads an image from disk (clearing the old one first),
       using the existing memory manager.
       */
@@ -358,17 +362,17 @@ public:
         const std::string&  filename,
         Format              format = AUTODETECT);
 
-    /**
+    /*
      Frees memory and resets to a 0x0 image.
      */
     void clear();
         
-    /**
+    /*
      Deallocates the pixels.
      */
     virtual ~GImage();
 
-    /**
+    /*
      Resizes the internal buffer to (\a width x \a height) with the
      number of \a channels specified.  
      
@@ -376,7 +380,7 @@ public:
      */
     void resize(int width, int height, int channels, bool zero = true);
 
-    /**
+    /*
      Copies src sub-image data into dest at a certain offset.  
      The dest variable must already contain an image that is large
      enough to contain the src sub-image at the specified offset.
@@ -394,7 +398,7 @@ public:
         int srcWidth,
         int srcHeight);
 
-    /**
+    /*
      creates dest from src sub-image data.  
      Returns true on success and false if the src sub-image
      is not within src.
@@ -409,27 +413,27 @@ public:
     /** Averages color channels if they exist */
     void convertToL8();
 
-    /**
+    /*
       Returns true if format is supported.  Format
       should be an extension string (e.g. "BMP").
      */
     static bool supportedFormat(
         const std::string& format);
 
-    /**
+    /*
      Converts a string to an enum, returns UNKNOWN if not recognized.
      */
     static Format stringToFormat(
         const std::string& format);
 
-    /**
+    /*
      Encode and save to disk.
      */
     void save(
         const std::string& filename,
         Format             format = AUTODETECT) const;
    
-    /**
+    /*
      The caller must delete the returned buffer.
      TODO: provide a memory manager
      */
@@ -438,14 +442,14 @@ public:
         uint8*&             outData,
         int&                outLength) const;
 
-    /**
+    /*
      Does not commit the BinaryOutput when done.
      */
     void encode(
         Format              format,
         BinaryOutput&       out) const;
 
-    /**
+    /*
      Decodes the buffer into this image.
      @param format Must be the correct format.
      */
@@ -462,7 +466,7 @@ public:
     /** Ok for in == out */
     static void Y8U8V8_to_R8G8B8(int width, int height, const uint8* in, uint8* out);
 
-    /**
+    /*
     @param in        RGB buffer of numPixels * 3 bytes
     @param out       Buffer of numPixels * 4 bytes
     @param numPixels Number of RGB pixels to convert
@@ -493,7 +497,7 @@ public:
         uint8*                  out,
         int                     numPixels);
 
-    /**
+    /*
     Win32 32-bit HDC format.
     */
     static void RGBtoBGRA(
@@ -505,7 +509,7 @@ public:
         const uint8*            in,
         uint8*                  out,
         int                     numPixels);
-    /**
+    /*
     Uses the red channel of the second image as an alpha channel.
     */
     static void RGBxRGBtoRGBA(
@@ -514,7 +518,7 @@ public:
         uint8*                  out,
         int                     numPixels);
         
-    /**
+    /*
     Flips the image along the vertical axis.
     Safe for in == out.
     */
@@ -530,7 +534,7 @@ public:
         int                     width,
         int                     height);
 
-    /**
+    /*
     Given a tangent space bump map, computes a new image where the
     RGB channels are a tangent space normal map and the alpha channel
     is the original bump map.  Assumes the input image is tileable.
@@ -558,7 +562,7 @@ public:
         GImage&             normal,
         const BumpMapPreprocess& preprocess = BumpMapPreprocess());
 
-    /**
+    /*
     Bayer demosaicing using the filter proposed in 
 
     HIGH-QUALITY LINEAR INTERPOLATION FOR DEMOSAICING OF BAYER-PATTERNED COLOR IMAGES

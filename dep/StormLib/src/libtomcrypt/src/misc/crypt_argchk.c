@@ -11,7 +11,7 @@
 #include "../headers/tomcrypt.h"
 #include <signal.h>
 
-/**
+/*
   @file crypt_argchk.c
   Perform argument checking, Tom St Denis
 */  

@@ -24,7 +24,7 @@ static const struct {
    { MP_VAL  ,  CRYPT_INVALID_ARG},
 };
 
-/**
+/*
    Convert a MPI error to a LTC error (Possibly the most powerful function ever!  Oh wait... no) 
    @param err    The error to convert
    @return The equivalent LTC error code or CRYPT_ERROR if none found

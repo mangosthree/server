@@ -10,14 +10,14 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file rsa_free.c
   Free an RSA key, Tom St Denis
 */  
 
 #ifdef LTC_MRSA
 
-/**
+/*
   Free an RSA key from memory
   @param key   The RSA key to free
 */

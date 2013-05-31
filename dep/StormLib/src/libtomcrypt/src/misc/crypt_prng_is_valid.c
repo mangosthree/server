@@ -10,7 +10,7 @@
  */
 #include "../headers/tomcrypt.h"
 
-/**
+/*
   @file crypt_prng_is_valid.c
   Determine if PRNG is valid, Tom St Denis
 */

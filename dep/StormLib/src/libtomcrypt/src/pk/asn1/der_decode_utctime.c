@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_decode_utctime.c
   ASN.1 DER, decode a  UTCTIME, Tom St Denis
 */
@@ -39,7 +39,7 @@ static int char_to_int(unsigned char x)
    if (y >= max) return CRYPT_INVALID_PACKET;           \
    x += 2;
 
-/**
+/*
   Decodes a UTC time structure in DER format (reads all 6 valid encoding formats)
   @param in     Input buffer
   @param inlen  Length of input buffer in octets

@@ -10,14 +10,14 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_decode_choice.c
   ASN.1 DER, decode a CHOICE, Tom St Denis
 */
 
 #ifdef LTC_DER
 
-/**
+/*
    Decode a CHOICE
    @param in       The DER encoded input
    @param inlen    [in/out] The size of the input and resulting size of read type

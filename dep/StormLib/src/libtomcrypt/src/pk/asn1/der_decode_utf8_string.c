@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_decode_utf8_string.c
   ASN.1 DER, encode a UTF8 STRING, Tom St Denis
 */
@@ -18,7 +18,7 @@
 
 #ifdef LTC_DER
 
-/**
+/*
   Store a UTF8 STRING
   @param in      The DER encoded UTF8 STRING
   @param inlen   The size of the DER UTF8 STRING

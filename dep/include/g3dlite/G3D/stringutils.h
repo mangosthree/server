@@ -1,14 +1,14 @@
-/**
+/*
  @file stringutils.h
  
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
  
  @author  2000-09-09
- @edited  2008-08-05
+ @edited  2010-03-05
  */
 
-#ifndef G3D_STRINGUTILS_H
-#define G3D_STRINGUTILS_H
+#ifndef G3D_stringutils_h
+#define G3D_stringutils_h
 
 #include "G3D/platform.h"
 #include "G3D/Array.h"
@@ -28,21 +28,48 @@ extern const char* NEWLINE;
 */
 void parseCommaSeparated(const std::string s, Array<std::string>& array, bool stripQuotes = true);
 
-/**
+/** Finds the index of the first '\\' or '/' character, starting at index \a start. 
+  \sa G3D::findLastSlash, G3D::isSlash
+*/
+inline int findSlash(const std::string& f, int start = 0) {
+    int i = f.find('/', start);
+    int j = f.find('\\', start);
+    if (((i != -1) && (i < j)) || (j == -1)) {
+        return i;
+    } else {
+        return j;
+    }
+}
+
+
+/** Finds the index of the first '\\' or '/' character, starting at index \a start (if \a start is -1, starts at the end of the string).
+  \sa G3D::findSlash, G3D::isSlash
+  */
+inline int findLastSlash(const std::string& f, int start = -1) {
+    if (start == -1) {
+        start = f.length() - 1;
+    }
+
+    int i = f.rfind('/', start);
+    int j = f.rfind('\\', start);
+    return max(i, j);
+}
+
+/*
  Returns true if the test string begins with the pattern string.
  */
 bool beginsWith(
     const std::string&          test,
     const std::string&          pattern);
 
-/**
+/*
  Returns true if the test string ends with the pattern string.
  */
 bool endsWith(
     const std::string&          test,
     const std::string&          pattern);
 
-/**
+/*
  Produces a new string that is the input string
  wrapped at a certain number of columns (where
  the line is broken at the latest space before the
@@ -53,7 +80,7 @@ std::string wordWrap(
     const std::string&          input,
     int                         numCols);
 
-/**
+/*
  A comparison function for passing to Array::sort.
  */
 int stringCompare(
@@ -64,7 +91,7 @@ int stringPtrCompare(
     const std::string*          s1,
     const std::string*          s2);
 
-/**
+/*
  Returns a new string that is an uppercase version of x.
  */
 std::string toUpper(
@@ -73,14 +100,14 @@ std::string toUpper(
 std::string toLower(
     const std::string&          x);
 
-/**
+/*
  Splits x at each occurance of splitChar.
  */
 G3D::Array<std::string> stringSplit(
     const std::string&          x,
     char                        splitChar);
 
-/**
+/*
  joinChar is not inserted at the beginning or end, just in between
  elements.
  */
@@ -92,7 +119,7 @@ std::string stringJoin(
     const G3D::Array<std::string>&   a,
     const std::string&               joinStr);
 
-/**
+/*
  Strips whitespace from both ends of the string.
  */
 std::string trimWhitespace(

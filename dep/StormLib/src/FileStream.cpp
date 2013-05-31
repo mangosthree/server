@@ -212,7 +212,7 @@ static bool BaseFile_Read(
     return (dwBytesRead == dwBytesToRead);
 }
 
-/**
+/*
  * \a pStream Pointer to an open stream
  * \a pByteOffset Pointer to file byte offset. If NULL, writes to current position
  * \a pvBuffer Pointer to data to be written
@@ -318,7 +318,7 @@ static bool BaseFile_GetSize(
     return true;
 }
 
-/**
+/*
  * \a pStream Pointer to an open stream
  * \a NewFileSize New size of the file
  */
@@ -1699,7 +1699,7 @@ static bool EncryptedStream_Open(TEncryptedStream * pStream)
 //-----------------------------------------------------------------------------
 // Public functions
 
-/**
+/*
  * This function creates a new file for read-write access
  *
  * - If the current platform supports file sharing,
@@ -1762,7 +1762,7 @@ TFileStream * FileStream_CreateFile(
     return pStream;
 }
 
-/**
+/*
  * This function opens an existing file for read or read-write access
  * - If the current platform supports file sharing,
  *   the file must be open for read sharing (i.e. another application
@@ -1873,7 +1873,7 @@ TFileStream * FileStream_OpenFile(
     return pStream;
 }
 
-/**
+/*
  * Reads data from the stream
  *
  * - Returns true if the read operation succeeded and all bytes have been read
@@ -1898,7 +1898,7 @@ bool FileStream_Read(TFileStream * pStream, ULONGLONG * pByteOffset, void * pvBu
     return pStream->StreamRead(pStream, pByteOffset, pvBuffer, dwBytesToRead);
 }
 
-/**
+/*
  * This function writes data to the stream
  *
  * - Returns true if the write operation succeeded and all bytes have been written
@@ -1919,7 +1919,7 @@ bool FileStream_Write(TFileStream * pStream, ULONGLONG * pByteOffset, const void
     return pStream->StreamWrite(pStream, pByteOffset, pvBuffer, dwBytesToWrite);
 }
 
-/**
+/*
  * This function returns the current file position
  * \a pStream
  * \a ByteOffset
@@ -1930,7 +1930,7 @@ bool FileStream_GetPos(TFileStream * pStream, ULONGLONG * pByteOffset)
     return pStream->StreamGetPos(pStream, pByteOffset);
 }
 
-/**
+/*
  * Returns the size of a file
  *
  * \a pStream Pointer to an open stream
@@ -1942,7 +1942,7 @@ bool FileStream_GetSize(TFileStream * pStream, ULONGLONG * pFileSize)
     return pStream->StreamGetSize(pStream, pFileSize);
 }
 
-/**
+/*
  * Sets the size of a file
  *
  * \a pStream Pointer to an open stream
@@ -1957,7 +1957,7 @@ bool FileStream_SetSize(TFileStream * pStream, ULONGLONG NewFileSize)
     return pStream->StreamSetSize(pStream, NewFileSize);
 }
 
-/**
+/*
  * Returns the last write time of a file
  *
  * \a pStream Pointer to an open stream
@@ -1969,7 +1969,7 @@ bool FileStream_GetTime(TFileStream * pStream, ULONGLONG * pFileTime)
     return pStream->StreamGetTime(pStream, pFileTime);
 }
 
-/**
+/*
  * Returns the stream flags
  *
  * \a pStream Pointer to an open stream
@@ -1981,7 +1981,7 @@ bool FileStream_GetFlags(TFileStream * pStream, LPDWORD pdwStreamFlags)
     return true;
 }
 
-/**
+/*
  * Switches a stream with another. Used for final phase of archive compacting.
  * Performs these steps:
  *
@@ -2001,7 +2001,7 @@ bool FileStream_Switch(TFileStream * pStream, TFileStream * pNewStream)
     return pStream->StreamSwitch(pStream, pNewStream);
 }
 
-/**
+/*
  * Returns the file name of the stream
  *
  * \a pStream Pointer to an open stream
@@ -2012,7 +2012,7 @@ TCHAR * FileStream_GetFileName(TFileStream * pStream)
     return pStream->szFileName;
 }
 
-/**
+/*
  * Returns true if the stream is read-only
  *
  * \a pStream Pointer to an open stream
@@ -2022,7 +2022,7 @@ bool FileStream_IsReadOnly(TFileStream * pStream)
     return (pStream->dwFlags & STREAM_FLAG_READ_ONLY) ? true : false;
 }
 
-/**
+/*
  * This function enabled a linear stream to include data bitmap.
  * Used by MPQs v 4.0 from WoW. Each file block is represented by
  * a bit in the bitmap. 1 means the block is present, 0 means it's not.
@@ -2054,7 +2054,7 @@ bool FileStream_SetBitmap(TFileStream * pStream, TFileBitmap * pBitmap)
     return true;
 }
 
-/**
+/*
  * This function retrieves the file bitmap. A file bitmap is an array
  * of bits, each bit representing one file block. A value of 1 means
  * that the block is present in the file, a value of 0 means that the
@@ -2071,7 +2071,7 @@ bool FileStream_GetBitmap(TFileStream * pStream, TFileBitmap * pBitmap, DWORD Le
     return pStream->StreamGetBmp(pStream, pBitmap, Length, LengthNeeded);
 }
 
-/**
+/*
  * This function closes an archive file and frees any data buffers
  * that have been allocated for stream management. The function must also
  * support partially allocated structure, i.e. one or more buffers

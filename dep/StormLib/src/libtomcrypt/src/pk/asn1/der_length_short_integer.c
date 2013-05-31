@@ -10,14 +10,14 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_length_short_integer.c
   ASN.1 DER, get length of encoding, Tom St Denis
 */
 
 
 #ifdef LTC_DER
-/**
+/*
   Gets length of DER encoding of num 
   @param num    The integer to get the size of 
   @param outlen [out] The length of the DER encoding for the given integer

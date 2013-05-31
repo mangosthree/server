@@ -1,4 +1,4 @@
-/**
+/*
   @file GLight.h
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -18,7 +18,7 @@
 namespace G3D {
 class Any;
 
-/**
+/*
  A light representation that closely follows the OpenGL light format.
  */
 class GLight  {
@@ -89,6 +89,13 @@ public:
     static GLight spot(const Vector3& pos, const Vector3& pointDirection, float cutOffAngleDegrees, 
                        const Color3& color, float constAtt = 1, float linAtt = 0, float quadAtt = 0,
                        bool specular = true, bool diffuse = true);
+
+    /** Creates a spot light that looks at a specific point (by calling spot() ) */
+    static GLight spotTarget(const Vector3& pos, const Vector3& target, float cutOffAngleDegrees, 
+                       const Color3& color, float constAtt = 1, float linAtt = 0, float quadAtt = 0,
+                       bool specular = true, bool diffuse = true) {
+           return spot(pos, target - pos, cutOffAngleDegrees, color, constAtt, linAtt, quadAtt, specular, diffuse);
+    }
 
     /** Returns the sphere within which this light has some noticable effect.  May be infinite.
         @param cutoff The value at which the light intensity is considered negligible. */

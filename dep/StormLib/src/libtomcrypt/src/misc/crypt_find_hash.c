@@ -10,12 +10,12 @@
  */
 #include "../headers/tomcrypt.h"
 
-/**
+/*
   @file crypt_find_hash.c
   Find a hash, Tom St Denis
 */
 
-/**
+/*
    Find a registered hash by name
    @param name   The name of the hash to look for
    @return >= 0 if found, -1 if not present

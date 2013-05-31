@@ -1,5 +1,5 @@
 /*
- * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/**
+/*
  * @addtogroup TransportSystem to provide abstract support for transported entities
  * The Transport System in MaNGOS consists of these files:
  * - TransportSystem.h to provide the basic classes TransportBase and TransportInfo
@@ -43,7 +43,7 @@ class TransportInfo;
 
 typedef UNORDERED_MAP < WorldObject* /*passenger*/, TransportInfo* /*passengerInfo*/ > PassengerMap;
 
-/**
+/*
  * A class to provide basic support for each transporter. This includes
  * - Storing a list of passengers
  * - Providing helper for calculating between local and global coordinates
@@ -81,7 +81,7 @@ class TransportBase
         uint32 m_updatePositionsTimer;                      ///< Timer that is used to trigger updates for global coordinate calculations
 };
 
-/**
+/*
  * A class to provide basic information for each transported passenger. This includes
  * - local positions
  * - Accessors to get the transporter

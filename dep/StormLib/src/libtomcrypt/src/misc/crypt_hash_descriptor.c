@@ -10,7 +10,7 @@
  */
 #include "../headers/tomcrypt.h"
 
-/**
+/*
   @file crypt_hash_descriptor.c
   Stores the hash descriptor table, Tom St Denis  
 */

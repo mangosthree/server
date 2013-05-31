@@ -1,4 +1,4 @@
-/**
+/*
   \file GImage.cpp
   \author Morgan McGuire, http://graphics.cs.williams.edu
   Copyright 2002-2010, Morgan McGuire
@@ -639,7 +639,7 @@ void GImage::rotate90CW(int numTimes) {
     for (int j = 0; j < numTimes; ++j) {
         {
             uint8* temp = old;
-            uint8* old = m_byte;
+            old = m_byte;
             m_byte = temp;
         }
         

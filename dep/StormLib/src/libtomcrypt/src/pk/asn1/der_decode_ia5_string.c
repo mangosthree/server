@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_decode_ia5_string.c
   ASN.1 DER, encode a IA5 STRING, Tom St Denis
 */
@@ -18,7 +18,7 @@
 
 #ifdef LTC_DER
 
-/**
+/*
   Store a IA5 STRING
   @param in      The DER encoded IA5 STRING
   @param inlen   The size of the DER IA5 STRING

@@ -1,5 +1,5 @@
 /*
- * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 #ifndef DBCFILE_H
 #define DBCFILE_H
+
 #include <cassert>
 #include <string>
 #include "StormLib.h"
@@ -31,21 +32,27 @@ class DBCFile
         // Open database. It must be openened before it can be used.
         bool open();
 
+        // TODO: Add a close function?
+
         // Database exceptions
         class Exception
         {
             public:
-                Exception(const std::string& message) : message(message) { }
-                virtual ~Exception() { }
-                const std::string& getMessage() { return message; }
+                Exception(const std::string& message): message(message)
+                { }
+                virtual ~Exception()
+                { }
+                const std::string& getMessage() {return message;}
             private:
                 std::string message;
         };
 
+        //
         class NotFound: public Exception
         {
             public:
-                NotFound(): Exception("Key was not found") { }
+                NotFound(): Exception("Key was not found")
+                { }
         };
 
         // Iteration over database
@@ -58,13 +65,11 @@ class DBCFile
                     assert(field < file._fieldCount);
                     return *reinterpret_cast<float*>(offset + field * 4);
                 }
-
                 unsigned int getUInt(size_t field) const
                 {
                     assert(field < file._fieldCount);
                     return *reinterpret_cast<unsigned int*>(offset + field * 4);
                 }
-
                 int getInt(size_t field) const
                 {
                     assert(field < file._fieldCount);
@@ -78,17 +83,16 @@ class DBCFile
                     assert(stringOffset < file._stringSize);
                     return reinterpret_cast<char*>(file._stringTable + stringOffset);
                 }
-
             private:
                 Record(DBCFile& file, unsigned char* offset): file(file), offset(offset) {}
-                unsigned char* offset;
                 DBCFile& file;
+                unsigned char* offset;
 
                 friend class DBCFile;
                 friend class DBCFile::Iterator;
         };
-        /** Iterator that iterates over records
-        */
+
+        /* Iterator that iterates over records */
         class Iterator
         {
             public:
@@ -100,7 +104,6 @@ class DBCFile
                     record.offset += record.file._recordSize;
                     return *this;
                 }
-
                 /// Return address of current instance
                 Record const& operator*() const { return record; }
                 const Record* operator->() const { return &record; }
@@ -110,7 +113,6 @@ class DBCFile
                 {
                     return record.offset == b.record.offset;
                 }
-
                 bool operator!=(const Iterator& b) const
                 {
                     return record.offset != b.record.offset;

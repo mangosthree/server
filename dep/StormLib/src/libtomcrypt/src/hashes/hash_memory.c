@@ -10,12 +10,12 @@
  */
 #include "../headers/tomcrypt.h"
 
-/**
+/*
   @file hash_memory.c
   Hash memory helper, Tom St Denis
 */
 
-/**
+/*
   Hash a block of memory and store the digest.
   @param hash   The index of the hash you wish to use
   @param in     The data you wish to hash

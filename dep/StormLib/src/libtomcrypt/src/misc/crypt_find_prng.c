@@ -10,12 +10,12 @@
  */
 #include "../headers/tomcrypt.h"
 
-/**
+/*
   @file crypt_find_prng.c
   Find a PRNG, Tom St Denis
 */
 
-/**
+/*
    Find a registered PRNG by name
    @param name   The name of the PRNG to look for
    @return >= 0 if found, -1 if not present

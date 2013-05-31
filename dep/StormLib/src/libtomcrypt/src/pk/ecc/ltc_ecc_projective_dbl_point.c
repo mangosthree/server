@@ -16,14 +16,14 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file ltc_ecc_projective_dbl_point.c
   ECC Crypto, Tom St Denis
 */  
 
 #if defined(LTC_MECC) && (!defined(LTC_MECC_ACCEL) || defined(LTM_LTC_DESC))
 
-/**
+/*
    Double an ECC point
    @param P   The point to double
    @param R   [out] The destination of the double

@@ -1,5 +1,5 @@
 #
-# This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
+# This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
 #
 
 This small Python script is intended to help with the convertion

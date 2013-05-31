@@ -10,14 +10,14 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file rsa_import.c
   Import a LTC_PKCS RSA key, Tom St Denis
 */  
 
 #ifdef LTC_MRSA
 
-/**
+/*
   Import an RSAPublicKey or RSAPrivateKey [two-prime only, only support >= 1024-bit keys, defined in LTC_PKCS #1 v2.1]
   @param in      The packet to import from
   @param inlen   It's length (octets)

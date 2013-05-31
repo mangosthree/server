@@ -10,7 +10,7 @@
  */
 #include "../headers/tomcrypt.h"
 
-/**
+/*
   @file rand_prime.c
   Generate a random prime, Tom St Denis
 */  

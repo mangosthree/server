@@ -10,7 +10,7 @@
  */
 #include "../headers/tomcrypt.h"
 
-/**
+/*
   @file crypt_prng_descriptor.c
   Stores the PRNG descriptors, Tom St Denis
 */  

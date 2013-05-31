@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_decode_boolean.c
   ASN.1 DER, decode a BOOLEAN, Tom St Denis
 */
@@ -18,7 +18,7 @@
 
 #ifdef LTC_DER
 
-/**
+/*
   Read a BOOLEAN
   @param in      The destination for the DER encoded BOOLEAN
   @param inlen   The size of the DER BOOLEAN

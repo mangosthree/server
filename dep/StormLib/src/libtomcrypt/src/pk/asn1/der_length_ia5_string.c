@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_length_ia5_string.c
   ASN.1 DER, get length of IA5 STRING, Tom St Denis
 */
@@ -146,7 +146,7 @@ int der_ia5_value_decode(int v)
    return -1;
 }
    
-/**
+/*
   Gets length of DER encoding of IA5 STRING 
   @param octets   The values you want to encode 
   @param noctets  The number of octets in the string to encode

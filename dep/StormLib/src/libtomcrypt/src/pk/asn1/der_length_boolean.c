@@ -10,13 +10,13 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_length_boolean.c
   ASN.1 DER, get length of a BOOLEAN, Tom St Denis
 */
 
 #ifdef LTC_DER
-/**
+/*
   Gets length of DER encoding of a BOOLEAN 
   @param outlen [out] The length of the DER encoding
   @return CRYPT_OK if successful

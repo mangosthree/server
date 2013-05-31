@@ -10,12 +10,12 @@
  */
 #include "../headers/tomcrypt.h"
 
-/**
+/*
   @file crypt_register_prng.c
   Register a PRNG, Tom St Denis
 */
   
-/**
+/*
    Register a PRNG with the descriptor table
    @param prng   The PRNG you wish to register
    @return value >= 0 if successfully added (or already present), -1 if unsuccessful

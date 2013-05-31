@@ -10,14 +10,14 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_sequence_free.c
   ASN.1 DER, free's a structure allocated by der_decode_sequence_flexi(), Tom St Denis
 */
 
 #ifdef LTC_DER
 
-/**
+/*
   Free memory allocated by der_decode_sequence_flexi()
   @param in     The list to free
 */  

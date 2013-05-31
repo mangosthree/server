@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_decode_octet_string.c
   ASN.1 DER, encode a OCTET STRING, Tom St Denis
 */
@@ -18,7 +18,7 @@
 
 #ifdef LTC_DER
 
-/**
+/*
   Store a OCTET STRING
   @param in      The DER encoded OCTET STRING
   @param inlen   The size of the DER OCTET STRING

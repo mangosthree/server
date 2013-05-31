@@ -11,7 +11,7 @@
 #include "../headers/tomcrypt.h"
 
 
-/**
+/*
   @file md5.c
   LTC_MD5 hash function by Tom St Denis 
 */
@@ -225,7 +225,7 @@ static int md5_compress(hash_state *md, unsigned char *buf)
 }
 #endif
 
-/**
+/*
    Initialize the hash state
    @param md   The hash state you wish to initialize
    @return CRYPT_OK if successful
@@ -242,7 +242,7 @@ int md5_init(hash_state * md)
    return CRYPT_OK;
 }
 
-/**
+/*
    Process a block of memory though the hash
    @param md     The hash state
    @param in     The data to hash
@@ -251,7 +251,7 @@ int md5_init(hash_state * md)
 */
 HASH_PROCESS(md5_process, md5_compress, md5, 64)
 
-/**
+/*
    Terminate the hash to get the digest
    @param md  The hash state
    @param out [out] The destination of the hash (16 bytes)
@@ -306,7 +306,7 @@ int md5_done(hash_state * md, unsigned char *out)
     return CRYPT_OK;
 }
 
-/**
+/*
   Self-test the hash
   @return CRYPT_OK if successful, CRYPT_NOP if self-tests have been disabled
 */  

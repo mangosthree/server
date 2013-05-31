@@ -10,7 +10,7 @@
  */
 #include "../headers/tomcrypt.h"
 
-/**
+/*
   @file base64_decode.c
   Compliant base64 code donated by Wayne Scott (wscott@bitmover.com)
 */
@@ -42,7 +42,7 @@ static const unsigned char map[256] = {
 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
 255, 255, 255, 255 };
 
-/**
+/*
    base64 decode a block of memory
    @param in       The base64 data to decode
    @param inlen    The length of the base64 data

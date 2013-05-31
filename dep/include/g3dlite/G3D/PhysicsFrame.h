@@ -1,4 +1,4 @@
-/**
+/*
  @file PhysicsFrame.h
 
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
@@ -21,7 +21,7 @@
 
 namespace G3D {
 
-/**
+/*
   An RT transformation using a quaternion; suitable for
   physics integration.
 
@@ -32,31 +32,39 @@ public:
 
     Quat    rotation;
 
-    /**
+    /*
      Takes object space points to world space.
      */
     Vector3 translation;
 
-    /**
+    /*
      Initializes to the identity frame.
      */
     PhysicsFrame();
 
-    /**
-     Purely translational force
+    /*
+     Purely translational.
      */
     PhysicsFrame(const Vector3& translation) : translation(translation) {}
-
+    PhysicsFrame(const Quat& rot, const Vector3& translation) : rotation(rot), translation(translation) {}
+    PhysicsFrame(const Matrix3& rot, const Vector3& translation) : rotation(rot), translation(translation) {}
+    PhysicsFrame(const Matrix3& rot) : rotation(rot), translation(Vector3::zero()) {}
     PhysicsFrame(const CoordinateFrame& coordinateFrame);
+
+    /*
+      - PhysicsFrame( [quat], [vec3] )
+      - Vector3( ... )
+      - CFrame( ... )
+      - CFrame::from...( ... )
+     */
+    PhysicsFrame(const class Any& any);
 
     /** Compose: create the transformation that is <I>other</I> followed by <I>this</I>.*/
     PhysicsFrame operator*(const PhysicsFrame& other) const;
 
     virtual ~PhysicsFrame() {}
 
-    CoordinateFrame toCoordinateFrame() const;
-
-    /**
+    /*
      Linear interpolation (spherical linear for the rotations).
      */
     PhysicsFrame lerp(
@@ -67,7 +75,34 @@ public:
 
     void serialize(class BinaryOutput& b) const;
 
+    operator CFrame() const;
+
+    /** Multiplies both pieces by \a f; note that this will result in a non-unit 
+    quaternion that needs to be normalized */
+    PhysicsFrame& operator*=(float f) {
+        rotation *= f;
+        translation *= f;
+        return *this;
+    }
+
+    /** Multiplies both pieces by \a f; note that this will result in a non-unit 
+    quaternion that needs to be normalized */
+    PhysicsFrame operator*(float f) const {
+        return PhysicsFrame(rotation * f, translation * f);
+    }
+
+    PhysicsFrame operator+(const PhysicsFrame& f) const {
+        return PhysicsFrame(rotation + f.rotation, translation + f.translation);
+    }
+
+    PhysicsFrame& operator+=(const PhysicsFrame& f) {
+        rotation += f.rotation;
+        translation += f.translation;
+        return *this;
+    }
 };
+
+typedef PhysicsFrame PFrame;
 
 } // namespace
 

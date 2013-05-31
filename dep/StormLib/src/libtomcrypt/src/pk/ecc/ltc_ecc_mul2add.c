@@ -16,7 +16,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file ltc_ecc_mul2add.c
   ECC Crypto, Shamir's Trick, Tom St Denis
 */  

@@ -1,4 +1,4 @@
-/**
+/*
  @file g3dmath.cpp
  
  @author Morgan McGuire, graphics3d.com
@@ -10,6 +10,7 @@
 #include "G3D/g3dmath.h"
 #include <cstdlib>
 #include <cstring>
+
 
 namespace G3D {
 

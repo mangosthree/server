@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file rsa_exptmod.c
   RSA LTC_PKCS exptmod, Tom St Denis
 */  

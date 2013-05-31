@@ -10,12 +10,12 @@
  */
 #include "../headers/tomcrypt.h"
 
-/**
+/*
   @file crypt_register_hash.c
   Register a HASH, Tom St Denis
 */
 
-/**
+/*
    Register a hash with the descriptor table
    @param hash   The hash you wish to register
    @return value >= 0 if successfully added (or already present), -1 if unsuccessful

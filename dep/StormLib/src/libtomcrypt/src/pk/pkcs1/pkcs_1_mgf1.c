@@ -17,7 +17,7 @@
 
 #ifdef LTC_PKCS_1
 
-/**
+/*
    Perform LTC_PKCS #1 MGF1 (internal)
    @param seed        The seed for MGF1
    @param seedlen     The length of the seed

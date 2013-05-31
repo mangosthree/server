@@ -16,14 +16,14 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file ltc_ecc_projective_add_point.c
   ECC Crypto, Tom St Denis
 */  
 
 #if defined(LTC_MECC) && (!defined(LTC_MECC_ACCEL) || defined(LTM_LTC_DESC))
 
-/**
+/*
    Add two ECC points
    @param P        The point to add
    @param Q        The point to add

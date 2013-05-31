@@ -12,14 +12,14 @@
 #include <stdarg.h>
 
 
-/**
+/*
   @file der_decode_sequence_multi.c
   ASN.1 DER, decode a SEQUENCE, Tom St Denis
 */
 
 #ifdef LTC_DER
 
-/**
+/*
   Decode a SEQUENCE type using a VA list
   @param in    Input buffer
   @param inlen Length of input in octets

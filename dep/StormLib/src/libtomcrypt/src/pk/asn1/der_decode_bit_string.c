@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_decode_bit_string.c
   ASN.1 DER, encode a BIT STRING, Tom St Denis
 */
@@ -18,7 +18,7 @@
 
 #ifdef LTC_DER
 
-/**
+/*
   Store a BIT STRING
   @param in      The DER encoded BIT STRING
   @param inlen   The size of the DER BIT STRING

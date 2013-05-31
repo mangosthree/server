@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_length_object_identifier.c
   ASN.1 DER, get length of Object Identifier, Tom St Denis
 */
@@ -30,7 +30,7 @@ unsigned long der_object_identifier_bits(unsigned long x)
 }
 
 
-/**
+/*
   Gets length of DER encoding of Object Identifier
   @param nwords   The number of OID words 
   @param words    The actual OID words to get the size of

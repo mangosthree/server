@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_decode_printable_string.c
   ASN.1 DER, encode a printable STRING, Tom St Denis
 */
@@ -18,7 +18,7 @@
 
 #ifdef LTC_DER
 
-/**
+/*
   Store a printable STRING
   @param in      The DER encoded printable STRING
   @param inlen   The size of the DER printable STRING

@@ -10,12 +10,12 @@
  */
 #include "../headers/tomcrypt.h"
 
-/**
+/*
    @file zeromem.c
    Zero a block of memory, Tom St Denis
 */
 
-/**
+/*
    Zero a block of memory
    @param out    The destination of the area to zero
    @param outlen The length of the area to zero (octets)

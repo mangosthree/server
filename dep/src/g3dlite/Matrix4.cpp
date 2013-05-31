@@ -1,4 +1,4 @@
-/**
+/*
   @file Matrix4.cpp
  
  
@@ -44,7 +44,12 @@ Matrix4::Matrix4(const Any& any) {
         } else {
             any.verify(false, "Matrix4::scale() takes either 1 or 3 arguments");
         }
-    } else {
+    } else if (name == "matrix4::translation") {
+        if (any.size() == 3) {
+            *this = translation(any[0], any[1], any[2]);
+        } else {
+            any.verify(false, "Matrix4::translation() takes either 1 or 3 arguments");
+        }    } else {
         any.verify(false, "Expected Matrix4 constructor");
     }
 }
@@ -253,7 +258,7 @@ Matrix4::Matrix4(
     elt[3][0] = r4c1;  elt[3][1] = r4c2;  elt[3][2] = r4c3;  elt[3][3] = r4c4;
 }
 
-/**
+/*
  init should be <B>row major</B>.
  */
 Matrix4::Matrix4(const float* init) {

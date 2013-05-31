@@ -10,13 +10,13 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_decode_object_identifier.c
   ASN.1 DER, Decode Object Identifier, Tom St Denis
 */
 
 #ifdef LTC_DER
-/**
+/*
   Decode OID data and store the array of integers in words
   @param in      The OID DER encoded data
   @param inlen   The length of the OID data

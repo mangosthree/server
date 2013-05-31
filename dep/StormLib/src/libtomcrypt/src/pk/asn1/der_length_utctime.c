@@ -10,14 +10,14 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_length_utctime.c
   ASN.1 DER, get length of UTCTIME, Tom St Denis
 */
 
 #ifdef LTC_DER
 
-/**
+/*
   Gets length of DER encoding of UTCTIME
   @param utctime      The UTC time structure to get the size of
   @param outlen [out] The length of the DER encoding

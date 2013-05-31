@@ -10,7 +10,7 @@
  */
 #include "../headers/tomcrypt.h"
 
-/**
+/*
   @file sha1.c
   LTC_SHA1 code by Tom St Denis 
 */
@@ -157,7 +157,7 @@ static int sha1_compress(hash_state *md, unsigned char *buf)
 }
 #endif
 
-/**
+/*
    Initialize the hash state
    @param md   The hash state you wish to initialize
    @return CRYPT_OK if successful
@@ -175,7 +175,7 @@ int sha1_init(hash_state * md)
    return CRYPT_OK;
 }
 
-/**
+/*
    Process a block of memory though the hash
    @param md     The hash state
    @param in     The data to hash
@@ -184,7 +184,7 @@ int sha1_init(hash_state * md)
 */
 HASH_PROCESS(sha1_process, sha1_compress, sha1, 64)
 
-/**
+/*
    Terminate the hash to get the digest
    @param md  The hash state
    @param out [out] The destination of the hash (20 bytes)
@@ -238,7 +238,7 @@ int sha1_done(hash_state * md, unsigned char *out)
     return CRYPT_OK;
 }
 
-/**
+/*
   Self-test the hash
   @return CRYPT_OK if successful, CRYPT_NOP if self-tests have been disabled
 */  

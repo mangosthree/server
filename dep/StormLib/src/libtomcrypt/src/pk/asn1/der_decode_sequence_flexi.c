@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_decode_sequence_flexi.c
   ASN.1 DER, decode an array of ASN.1 types with a flexi parser, Tom St Denis
 */

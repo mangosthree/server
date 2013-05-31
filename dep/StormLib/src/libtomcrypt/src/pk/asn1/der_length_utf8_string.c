@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_length_utf8_string.c
   ASN.1 DER, get length of UTF8 STRING, Tom St Denis
 */
@@ -34,7 +34,7 @@ unsigned long der_utf8_charsize(const wchar_t c)
    }
 }
 
-/**
+/*
   Gets length of DER encoding of UTF8 STRING 
   @param in       The characters to measure the length of
   @param noctets  The number of octets in the string to encode

@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file rsa_verify_simple.c
   Created by Ladislav Zezula (zezula@volny.cz) as modification
   for Blizzard strong signature verification
@@ -18,7 +18,7 @@
 
 #ifdef LTC_MRSA
 
-/**
+/*
   Simple RSA decryption
   @param sig              The signature data
   @param siglen           The length of the signature data (octets)

@@ -1,5 +1,5 @@
 /*
- * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -672,7 +672,7 @@ void AchievementMgr::SendCriteriaUpdate(uint32 id, CriteriaProgress const* progr
     GetPlayer()->SendDirectMessage(&data);
 }
 
-/**
+/*
  * called at player login. The player might have fulfilled some achievements when the achievement system wasn't working yet
  */
 void AchievementMgr::CheckAllAchievementCriteria()
@@ -699,7 +699,7 @@ static const uint32 achievIdForDungeon[][4] =
 static const uint32 achievIdByClass[MAX_CLASSES] = { 0, 459, 465 , 462, 458, 464, 461, 467, 460, 463, 0, 466 };
 static const uint32 achievIdByRace[MAX_RACES]    = { 0, 1408, 1410, 1407, 1409, 1413, 1411, 1404, 1412, 0, 1405, 1406 };
 
-/**
+/*
  * this function will be called whenever the user might have done a timed-criteria relevant action, or by scripting side?
  */
 void AchievementMgr::StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId, time_t startTime /*= 0*/)
@@ -762,7 +762,7 @@ void AchievementMgr::StartTimedAchievementCriteria(AchievementCriteriaTypes type
     }
 }
 
-/**
+/*
  * this function will be called whenever there could be a timed achievement criteria failed because of ellapsed time
  */
 void AchievementMgr::DoFailedTimedAchievementCriterias()
@@ -806,7 +806,7 @@ void AchievementMgr::DoFailedTimedAchievementCriterias()
     }
 }
 
-/**
+/*
  * this function will be called whenever the user might have done a criteria relevant action
  */
 void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1, uint32 miscvalue2, Unit* unit, uint32 time)

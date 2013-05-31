@@ -1,5 +1,5 @@
 /*
- * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@
 #include "WorldSocket.h"
 #include "Opcodes.h"
 
-/**
+/*
 * This is a helper class to WorldSocketMgr ,that manages
 * network threads, and assigning connections from acceptor thread
 * to other network threads

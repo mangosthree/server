@@ -10,7 +10,7 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_decode_integer.c
   ASN.1 DER, decode an integer, Tom St Denis
 */
@@ -18,7 +18,7 @@
 
 #ifdef LTC_DER
 
-/**
+/*
   Read a mp_int integer
   @param in       The DER encoded data
   @param inlen    Size of DER encoded data

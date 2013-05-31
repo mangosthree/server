@@ -17,7 +17,7 @@
 
 #ifdef LTC_PKCS_1
 
-/**
+/*
    LTC_PKCS #1 v2.00 PSS decode
    @param  msghash         The hash to verify
    @param  msghashlen      The length of the hash (octets)

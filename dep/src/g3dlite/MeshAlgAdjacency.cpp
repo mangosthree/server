@@ -1,11 +1,11 @@
-/**
+/*
   @file MeshAlgAdjacency.cpp
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
   @created 2003-09-14
-  @edited  2009-04-26
+  @edited  2010-04-26
 
-  Copyright 2000-2009, Morgan McGuire.
+  Copyright 2000-2010, Morgan McGuire.
   All rights reserved.
 
  */
@@ -15,6 +15,7 @@
 #include "G3D/Set.h"
 #include "G3D/Stopwatch.h"
 #include "G3D/SmallArray.h"
+#include "G3D/AreaMemoryManager.h"
 
 namespace G3D {
 
@@ -43,6 +44,11 @@ private:
 
 public:
 
+    MeshEdgeTable() {
+        AreaMemoryManager::Ref mm = AreaMemoryManager::create();
+        table.clearAndSetMemoryManager(mm);
+    }
+
     void clear() {
         table.clear();
     }
@@ -51,7 +57,7 @@ public:
         table.resize(maxV);
     }
 
-    /**
+    /*
      Inserts the faceIndex into the edge's face list.
      The index may be a negative number indicating a backface.
 
@@ -137,7 +143,7 @@ public:
 };
 
 
-/**
+/*
  Assigns the edge index into the next unassigned edge
  index.  The edge index may be negative, indicating
  a reverse edge.

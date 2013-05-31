@@ -10,7 +10,7 @@
  */
 #include "../headers/tomcrypt.h"
 
-/**
+/*
   @file crypt_hash_is_valid.c
   Determine if hash is valid, Tom St Denis
 */  

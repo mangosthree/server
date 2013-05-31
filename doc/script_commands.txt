@@ -2,7 +2,7 @@
 ## Script processing
 -- --------------------------
 
-This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
+This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
 
 -- --------------------------
 ## id

@@ -10,13 +10,13 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_length_bit_string.c
   ASN.1 DER, get length of BIT STRING, Tom St Denis
 */
 
 #ifdef LTC_DER
-/**
+/*
   Gets length of DER encoding of BIT STRING 
   @param nbits  The number of bits in the string to encode
   @param outlen [out] The length of the DER encoding for the given string

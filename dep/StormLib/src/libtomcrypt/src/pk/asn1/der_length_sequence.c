@@ -10,14 +10,14 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file der_length_sequence.c
   ASN.1 DER, length a SEQUENCE, Tom St Denis
 */
 
 #ifdef LTC_DER
 
-/**
+/*
    Get the length of a DER sequence 
    @param list   The sequences of items in the SEQUENCE
    @param inlen  The number of items

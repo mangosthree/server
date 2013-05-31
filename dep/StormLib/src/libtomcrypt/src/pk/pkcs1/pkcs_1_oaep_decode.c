@@ -17,7 +17,7 @@
 
 #ifdef LTC_PKCS_1
 
-/**
+/*
    LTC_PKCS #1 v2.00 OAEP decode
    @param msg              The encoded data to decode
    @param msglen           The length of the encoded data (octets)

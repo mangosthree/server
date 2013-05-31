@@ -1,5 +1,5 @@
 /*
- * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -996,7 +996,7 @@ bool TerrainInfo::IsUnderWater(float x, float y, float z) const
     return false;
 }
 
-/**
+/*
  * Function find higher form water or ground height for current floor
  *
  * @param x, y, z    Coordinates original point at floor level

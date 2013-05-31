@@ -16,14 +16,14 @@
  */
 #include "../../headers/tomcrypt.h"
 
-/**
+/*
   @file ltc_ecc_map.c
   ECC Crypto, Tom St Denis
 */  
 
 #ifdef LTC_MECC
 
-/**
+/*
   Map a projective jacbobian point back to affine space
   @param P        [in/out] The point to map
   @param modulus  The modulus of the field the ECC curve is in

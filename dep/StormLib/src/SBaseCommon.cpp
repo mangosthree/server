@@ -386,7 +386,7 @@ void DecryptMpqTable(void * pvMpqTable, DWORD dwLength, const char * szKey)
 }
 */
 
-/**
+/*
  * Functions tries to get file decryption key. The trick comes from sector
  * positions which are stored at the begin of each compressed file. We know the
  * file size, that means we know number of sectors that means we know the first

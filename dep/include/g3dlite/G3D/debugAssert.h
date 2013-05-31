@@ -1,4 +1,4 @@
-/**
+/*
   @file debugAssert.h
  
   debugAssert(expression);
@@ -37,24 +37,24 @@
 #endif
 
 #ifdef G3D_LINUX
+#if SOMEONE_MADE_THIS_USEFUL /* G3DFIX: Disabled to avoid requirement for X11 libraries */
     // Needed so we can define a global display
     // pointer for debugAssert.
-#if SOMEONE_MADE_THIS_USEFUL
     #include <X11/Xlib.h>
     #include <X11/Xutil.h>
     #include <X11/Xatom.h>
-#endif
+#endif /* G3DFIX: Disabled to avoid requirement for X11 libraries */
 #endif
 
 
-/**
+/*
  @def debugBreak()
  
  Break at the current location (i.e. don't push a procedure stack frame
  before breaking).
  */
 
-/**
+/*
   @def debugAssert(exp)
   Breaks if the expression is false. If G3D_DEBUG_NOGUI is defined, prompts at
   the console, otherwise pops up a dialog.  The user may then break (debug), 
@@ -63,7 +63,7 @@
   The assertion is also posted to the clipboard under Win32.
  */
 
-/**
+/*
   @def debugAssertM(exp, msg)
   Breaks if the expression is false and displays a message. If G3D_DEBUG_NOGUI 
   is defined, prompts at the console, otherwise pops up a dialog.  The user may
@@ -72,7 +72,7 @@
   The assertion is also posted to the clipboard under Win32.
  */
 
-/**
+/*
  @def alwaysAssertM(exp, msg)
  Same as debugAssertM except that it asserts in release builds as well.
  */
@@ -94,7 +94,7 @@ void setAssertionHook(AssertionHook hook);
 
 AssertionHook assertionHook();
 
-/**
+/*
  Called by alwaysAssertM in case of failure in release mode.  If returns
  true then the program exits with -1 (you can replace this with your own
  version that throws an exception or has other failure modes).
@@ -108,7 +108,7 @@ namespace _internal {
 } // internal
 } // G3D
 
-/**
+/*
  @def __debugPromptShowDialog__
  @internal
  */
@@ -180,8 +180,8 @@ namespace _internal {
 namespace G3D {  namespace _internal {
 
 #ifdef G3D_LINUX
-#if SOMEONE_MADE_THIS_USEFUL
-    /**
+#if SOMEONE_MADE_THIS_USEFUL /* G3DFIX: Disabled to avoid requirement for X11 libraries */
+    /*
      A pointer to the X11 display.  Initially NULL.  If set to a
      non-null value (e.g. by SDLWindow), debugAssert attempts to use
      this display to release the mouse/input grab when an assertion
@@ -189,17 +189,17 @@ namespace G3D {  namespace _internal {
      */
     extern Display*      x11Display;
 
-    /**
+    /*
      A pointer to the X11 window.  Initially NULL.  If set to a
      non-null value (e.g. by SDLWindow), debugAssert attempts to use
      this window to release the mouse/input grab when an assertion
      fails.
      */
     extern Window        x11Window;
-#endif
+#endif /* G3DFIX: Disabled to avoid requirement for X11 libraries */
 #endif
 
-/**
+/*
  Pops up an assertion dialog or prints an assertion
 
  ignoreAlways      - return result of pressing the ignore button.

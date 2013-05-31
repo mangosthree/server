@@ -6272,6 +6272,53 @@ void ObjectMgr::LoadGameobjectInfo()
                     CheckGOLinkedTrapId(goInfo, goInfo->goober.linkedTrapId, 12);
                 break;
             }
+            case GAMEOBJECT_TYPE_TRANSPORT:                 // 11
+            {
+                TransportAnimationsByEntry::const_iterator itr = sTransportAnimationsByEntry.find(goInfo->id);
+                if (itr == sTransportAnimationsByEntry.end())
+                {
+                    sLog.outError("Gameobject (Entry: %u GoType: %u) is transport but does not have entries in TransportAnimation.dbc! Gameobject is obsolete.",
+                        goInfo->id, goInfo->type);
+                    break;
+                }
+
+                if (uint32 frame = goInfo->transport.startFrame)
+                {
+                    if (itr->second.find(frame) == itr->second.end())
+                    {
+                        sLog.outError("Gameobject (Entry: %u GoType: %u) has data0=%u but this frame is not in TransportAnimation.dbc! May cause client crashes.",
+                            goInfo->id, goInfo->type, frame);
+                    }
+                }
+
+                if (uint32 frame = goInfo->transport.nextFrame1)
+                {
+                    if (itr->second.find(frame) == itr->second.end())
+                    {
+                        sLog.outError("Gameobject (Entry: %u GoType: %u) has data6=%u but this frame is not in TransportAnimation.dbc! May cause client crashes.",
+                            goInfo->id, goInfo->type, frame);
+                    }
+                }
+
+                if (uint32 frame = goInfo->transport.nextFrame2)
+                {
+                    if (itr->second.find(frame) == itr->second.end())
+                    {
+                        sLog.outError("Gameobject (Entry: %u GoType: %u) has data8=%u but this frame is not in TransportAnimation.dbc! May cause client crashes.",
+                            goInfo->id, goInfo->type, frame);
+                    }
+                }
+
+                if (uint32 frame = goInfo->transport.nextFrame3)
+                {
+                    if (itr->second.find(frame) == itr->second.end())
+                    {
+                        sLog.outError("Gameobject (Entry: %u GoType: %u) has data10=%u but this frame is not in TransportAnimation.dbc! May cause client crashes.",
+                            goInfo->id, goInfo->type, frame);
+                    }
+                }
+                break;
+            }
             case GAMEOBJECT_TYPE_AREADAMAGE:                // 12
             {
                 if (goInfo->areadamage.lockId)

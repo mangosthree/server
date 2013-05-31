@@ -141,7 +141,10 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         return false;
     }
 
-    Object::_Create(guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
+    if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+        Object::_Create(guidlow, 0, HIGHGUID_MO_TRANSPORT);
+    else
+        Object::_Create(guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
 
     m_goInfo = goinfo;
 
@@ -150,6 +153,15 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         sLog.outErrorDb("Gameobject (GUID: %u) not created: Entry %u has invalid type %u in `gameobject_template`. It may crash client if created.", guidlow, name_id, goinfo->type);
         return false;
     }
+
+    // transport gameobject must have entry in TransportAnimation.dbc or client will crash
+    if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+        if (sTransportAnimationsByEntry.find(goinfo->id) == sTransportAnimationsByEntry.end())
+        {
+            sLog.outError("GameObject::Create: gameobject entry %u guid %u is transport, but does not have entry in TransportAnimation.dbc. Can't spawn.",
+                goinfo->id, guidlow);
+            return false;
+        }
 
     SetObjectScale(goinfo->size);
 
@@ -184,6 +196,10 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
             ForceGameObjectHealth(GetMaxHealth(), NULL);
             SetUInt32Value(GAMEOBJECT_PARENTROTATION, m_goInfo->destructibleBuilding.destructibleData);
+        case GAMEOBJECT_TYPE_TRANSPORT:
+            SetUInt32Value(GAMEOBJECT_LEVEL, WorldTimer::getMSTime());
+            if (goinfo->transport.startOpen)
+                SetGoState(GO_STATE_ACTIVE);
             break;
     }
 

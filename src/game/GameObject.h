@@ -192,11 +192,30 @@ struct GameObjectInfo
         //11 GAMEOBJECT_TYPE_TRANSPORT
         struct
         {
-            uint32 pause;                                   //0
+            uint32 startFrame;                              //0
             uint32 startOpen;                               //1
             uint32 autoCloseTime;                           //2 secs till autoclose = autoCloseTime / IN_MILLISECONDS (previous was 0x10000)
             uint32 pause1EventID;                           //3
             uint32 pause2EventID;                           //4
+            uint32 baseMap;                                 //5
+            uint32 nextFrame1;                              //6
+            uint32 unk7;                                    //7
+            uint32 nextFrame2;                              //8
+            uint32 unk9;                                    //9
+            uint32 nextFrame3;                              //10
+            uint32 unk11;                                   //11
+            uint32 unk12;                                   //12
+            uint32 unk13;                                   //13
+            uint32 unk14;                                   //14
+            uint32 unk15;                                   //15
+            uint32 unk16;                                   //16
+            uint32 unk17;                                   //17
+            uint32 unk18;                                   //18
+            uint32 unk19;                                   //19
+            uint32 unk20;                                   //20
+            uint32 unk21;                                   //21
+            uint32 unk22;                                   //22 ring of valor elevators
+            uint32 unk23;                                   //23 ring of valor elevators
         } transport;
         //12 GAMEOBJECT_TYPE_AREADAMAGE
         struct
@@ -543,9 +562,10 @@ struct GameObjectLocale
 // client side GO show states
 enum GOState
 {
-    GO_STATE_ACTIVE             = 0,                        // show in world as used and not reset (closed door open)
-    GO_STATE_READY              = 1,                        // show in world as ready (closed door close)
-    GO_STATE_ACTIVE_ALTERNATIVE = 2                         // show in world as used in alt way and not reset (closed door open by cannon fire)
+    GO_STATE_ACTIVE             = 0x00,                     // show in world as used and not reset (closed door open)
+    GO_STATE_READY              = 0x01,                     // show in world as ready (closed door close)
+    GO_STATE_ACTIVE_ALTERNATIVE = 0x02,                     // show in world as used in alt way and not reset (closed door open by cannon fire)
+    GO_STATE_TRANSPORT_SPEC     = 0x18,                     // additional mask that have all transport gameobjects
 };
 
 #define MAX_GO_STATE              3

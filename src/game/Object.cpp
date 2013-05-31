@@ -720,6 +720,13 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                         *data << uint16(-1);
                     }
                 }
+                else if (index == GAMEOBJECT_BYTES_1)
+                {
+                    if (((GameObject*)this)->GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT)
+                        *data << uint32(m_uint32Values[index] | GO_STATE_TRANSPORT_SPEC);
+                    else
+                        *data << uint32(m_uint32Values[index]);
+                }
                 else
                     *data << m_uint32Values[index];         // other cases
             }

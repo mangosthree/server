@@ -78,10 +78,10 @@ License
 [101]: http://community.getmangos.co.uk/ "MaNGOS Community Discussion Forums"
 
 [110]: http://github.com/mangosthree "MaNGOS Three · github organization"
-[111]: http://github.com/mangosthree /server "MaNGOS Three · server repository"
-[112]: http://github.com/mangosthree /scripts "MaNGOS Three · script extensions repository"
-[113]: http://github.com/mangosthree /database "MaNGOS Three · content database repository"
-[114]: https://travis-ci.org/mangosthree /server/ "MaNGOS Three · build status"
+[111]: http://github.com/mangosthree/server "MaNGOS Three · server repository"
+[112]: http://github.com/mangosthree/scripts "MaNGOS Three · script extensions repository"
+[113]: http://github.com/mangosthree/database "MaNGOS Three · content database repository"
+[114]: https://travis-ci.org/mangosthree/server/ "MaNGOS Three · build status"
 
 [201]: http://www.microsoft.com/express/ "Visual Studio Express · free, limited edition"
 [202]: http://gcc.gnu.org/ "GCC"

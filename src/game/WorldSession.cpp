@@ -597,25 +597,21 @@ void WorldSession::SendSetPhaseShift(uint32 phaseMask, uint16 mapId)
     data.WriteGuidMask<2, 3, 1, 6, 4, 5, 0, 7>(guid);
     data.WriteGuidBytes<7, 4>(guid);
 
-    // Seen only 0 bytes
-    data << uint32(0);
+    data << uint32(0);                  // number of WorldMapArea.dbc entries to control world map shift * 2
 
     data.WriteGuidBytes<1>(guid);
     data << uint32(phaseMask ? phaseFlags : 8);
     data.WriteGuidBytes<2, 6>(guid);
 
-    // Seen only 0 bytes
-    data << uint32(0);
+    data << uint32(0);                  // number of inactive terrain swaps * 2
 
-    // PhaseShift, uint16 (2 bytes)
-    data << uint32(phaseMask ? 2 : 0);
+    data << uint32(phaseMask ? 2 : 0);  // WRONG: number of Phase.dbc ids * 2
     if (phaseMask)
         data << uint16(phaseMask);
 
     data.WriteGuidBytes<3, 0>(guid);
 
-    // MapId , uint16 (2 bytes)
-    data << uint32(mapId ? 2 : 0);
+    data << uint32(mapId ? 2 : 0);      // number of terrains swaps * 2
     if (mapId)
         data << uint16(mapId);
 

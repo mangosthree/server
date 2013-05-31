@@ -118,7 +118,7 @@ void Corpse::SaveToDB()
         << uint64(m_time) << ", "
         << uint32(GetType()) << ", "
         << int(GetInstanceId()) << ", "
-        << uint16(GetPhaseMask()) << ")";           // prevent out of range error
+        << uint32(GetPhaseMask()) << ")";           // prevent out of range error
     CharacterDatabase.Execute(ss.str().c_str());
     CharacterDatabase.CommitTransaction();
 }

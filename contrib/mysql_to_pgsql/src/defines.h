@@ -181,3 +181,4 @@ void PG_Escape_Str(string& str)
 }
 
 #endif
+

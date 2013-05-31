@@ -1139,7 +1139,7 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
        << data.id << ","
        << data.mapid << ","
        << uint32(data.spawnMask) << ","                    // cast to prevent save as symbol
-       << uint16(data.phaseMask) << ","                    // prevent out of range error
+       << uint32(data.phaseMask) << ","                    // prevent out of range error
        << data.modelid_override << ","
        << data.equipmentId << ","
        << data.posX << ","

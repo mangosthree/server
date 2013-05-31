@@ -1262,7 +1262,7 @@ void ObjectMgr::LoadCreatures()
         data.is_dead            = fields[14].GetBool();
         data.movementType       = fields[15].GetUInt8();
         data.spawnMask          = fields[16].GetUInt8();
-        data.phaseMask          = fields[17].GetUInt16();
+        data.phaseMask          = fields[17].GetUInt32();
         int16 gameEvent         = fields[18].GetInt16();
         int16 GuidPoolId        = fields[19].GetInt16();
         int16 EntryPoolId       = fields[20].GetInt16();
@@ -1492,7 +1492,7 @@ void ObjectMgr::LoadGameObjects()
         data.animprogress   = fields[12].GetUInt32();
         uint32 go_state     = fields[13].GetUInt32();
         data.spawnMask      = fields[14].GetUInt8();
-        data.phaseMask      = fields[15].GetUInt16();
+        data.phaseMask      = fields[15].GetUInt32();
         int16 gameEvent     = fields[16].GetInt16();
         int16 GuidPoolId    = fields[17].GetInt16();
         int16 EntryPoolId   = fields[18].GetInt16();

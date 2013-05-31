@@ -54,8 +54,8 @@
 
 char remotes[NUM_REMOTES][MAX_REMOTE] =
 {
-    "git@github.com:cmangos/mangos-cata.git",
-    "git://github.com/cmangos/mangos-cata.git"                  // used for fetch if present
+    "git@github.com:mangosthree/server.git",
+    "git://github.com/mangosthree/server.git"           // used for fetch if present
 };
 
 char remote_branch[MAX_REMOTE] = "master";
@@ -148,8 +148,8 @@ bool find_path()
 
     // don't count the root
     int count_fwd = 0, count_back = 0;
-    for (ptr = cur_path - 1; ptr = strchr(ptr + 1, '/'); count_fwd++);
-    for (ptr = cur_path - 1; ptr = strchr(ptr + 1, '\\'); count_back++);
+    for (ptr = cur_path - 1; ptr == strchr(ptr + 1, '/'); count_fwd++);
+    for (ptr = cur_path - 1; ptr == strchr(ptr + 1, '\\'); count_back++);
     int count = std::max(count_fwd, count_back);
 
     char path[MAX_PATH];
@@ -662,34 +662,34 @@ bool generate_sql_makefile()
     if (!fout) { pclose(cmd_pipe); return false; }
 
     fprintf(fout,
-        "# This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information\n"
-        "#\n"
-        "# This program is free software; you can redistribute it and/or modify\n"
-        "# it under the terms of the GNU General Public License as published by\n"
-        "# the Free Software Foundation; either version 2 of the License, or\n"
-        "# (at your option) any later version.\n"
-        "#\n"
-        "# This program is distributed in the hope that it will be useful,\n"
-        "# but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-        "# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
-        "# GNU General Public License for more details.\n"
-        "#\n"
-        "# You should have received a copy of the GNU General Public License\n"
-        "# along with this program; if not, write to the Free Software\n"
-        "# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA\n"
-        "\n"
-        "## Process this file with automake to produce Makefile.in\n"
-        "\n"
-        "## Sub-directories to parse\n"
-        "\n"
-        "## Change installation location\n"
-        "#  datadir = mangos/%s\n"
-        "pkgdatadir = $(datadir)/mangos/%s\n"
-        "\n"
-        "## Files to be installed\n"
-        "#  Install basic SQL files to datadir\n"
-        "pkgdata_DATA = \\\n",
-        sql_update_dir, sql_update_dir
+            "# This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information\n"
+            "#\n"
+            "# This program is free software; you can redistribute it and/or modify\n"
+            "# it under the terms of the GNU General Public License as published by\n"
+            "# the Free Software Foundation; either version 2 of the License, or\n"
+            "# (at your option) any later version.\n"
+            "#\n"
+            "# This program is distributed in the hope that it will be useful,\n"
+            "# but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+            "# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+            "# GNU General Public License for more details.\n"
+            "#\n"
+            "# You should have received a copy of the GNU General Public License\n"
+            "# along with this program; if not, write to the Free Software\n"
+            "# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA\n"
+            "\n"
+            "## Process this file with automake to produce Makefile.in\n"
+            "\n"
+            "## Sub-directories to parse\n"
+            "\n"
+            "## Change installation location\n"
+            "#  datadir = mangos/%s\n"
+            "pkgdatadir = $(datadir)/mangos/%s\n"
+            "\n"
+            "## Files to be installed\n"
+            "#  Install basic SQL files to datadir\n"
+            "pkgdata_DATA = \\\n",
+            sql_update_dir, sql_update_dir
     );
 
     for(std::set<std::string>::iterator itr = file_list.begin(), next; itr != file_list.end(); ++itr)

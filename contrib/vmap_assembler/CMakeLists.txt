@@ -28,7 +28,8 @@ include_directories(../../dep/ACE_wrappers/)
 include_directories(../../objdir/dep/ACE_wrappers)
 include_directories(../../src/framework/)
 
-add_library(g3dlite ../../dep/src/g3dlite/AABox.cpp
+add_library(g3dlite
+	../../dep/src/g3dlite/AABox.cpp
 	../../dep/src/g3dlite/Box.cpp
 	../../dep/src/g3dlite/Crypto.cpp
 	../../dep/src/g3dlite/format.cpp

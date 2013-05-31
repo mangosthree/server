@@ -1425,7 +1425,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_c12594_01_mangos_spell_template` bit(1) default NULL
+  `required_c12601_01_mangos_spell_area` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1435,7 +1435,7 @@ CREATE TABLE `db_version` (
 
 LOCK TABLES `db_version` WRITE;
 /*!40000 ALTER TABLE `db_version` DISABLE KEYS */;
-INSERT INTO `db_version` (`version`, `creature_ai_version`, `cache_id`, `required_c12594_01_mangos_spell_template`) VALUES
+INSERT INTO `db_version` (`version`, `creature_ai_version`, `cache_id`, `required_c12601_01_mangos_spell_area`) VALUES
 ('Mangos default database.','Creature EventAI not provided.',0,NULL);
 /*!40000 ALTER TABLE `db_version` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -20962,16 +20962,17 @@ DROP TABLE IF EXISTS `spell_area`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_area` (
-  `spell` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `area` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `quest_start` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `quest_start_active` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  `quest_end` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `aura_spell` mediumint(8) NOT NULL DEFAULT '0',
-  `racemask` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `gender` tinyint(1) unsigned NOT NULL DEFAULT '2',
-  `autocast` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`spell`,`area`,`quest_start`,`quest_start_active`,`aura_spell`,`racemask`,`gender`)
+  `spell`              mediumint(8) unsigned NOT NULL default '0',
+  `area`               mediumint(8) unsigned NOT NULL default '0',
+  `quest_start`        mediumint(8) unsigned NOT NULL default '0',
+  `quest_start_active` tinyint(1) unsigned NOT NULL default '0',
+  `quest_end`          mediumint(8) unsigned NOT NULL default '0',
+  `condition_id`       mediumint(8) unsigned NOT NULL default '0',
+  `aura_spell`         mediumint(8) NOT NULL default '0',
+  `racemask`           mediumint(8) unsigned NOT NULL default '0',
+  `gender`             tinyint(1) unsigned NOT NULL default '2',
+  `autocast`           tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`spell`,`area`,`quest_start`,`quest_start_active`,`aura_spell`,`racemask`,`gender`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

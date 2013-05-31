@@ -1425,7 +1425,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_c12601_01_mangos_spell_area` bit(1) default NULL
+  `required_c12602_01_mangos_npc_spellclick_spells` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1435,7 +1435,7 @@ CREATE TABLE `db_version` (
 
 LOCK TABLES `db_version` WRITE;
 /*!40000 ALTER TABLE `db_version` DISABLE KEYS */;
-INSERT INTO `db_version` (`version`, `creature_ai_version`, `cache_id`, `required_c12601_01_mangos_spell_area`) VALUES
+INSERT INTO `db_version` (`version`, `creature_ai_version`, `cache_id`, `required_c12602_01_mangos_npc_spellclick_spells`) VALUES
 ('Mangos default database.','Creature EventAI not provided.',0,NULL);
 /*!40000 ALTER TABLE `db_version` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -4209,14 +4209,14 @@ DROP TABLE IF EXISTS `npc_spellclick_spells`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `npc_spellclick_spells` (
-  `npc_entry` int(10) unsigned NOT NULL COMMENT 'reference to creature_template',
-  `spell_id` int(10) unsigned NOT NULL COMMENT 'spell which should be casted ',
-  `quest_start` mediumint(8) unsigned NOT NULL COMMENT 'reference to quest_template',
-  `quest_start_active` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  `quest_end` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `cast_flags` tinyint(3) unsigned NOT NULL COMMENT 'first bit defines caster: 1=player, 0=creature; second bit defines target, same mapping as caster bit'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+    `npc_entry`   int unsigned NOT NULL COMMENT 'reference to creature_template',
+    `spell_id`    int unsigned NOT NULL COMMENT 'spell which should be casted ',
+    `quest_start`        mediumint(8) unsigned NOT NULL COMMENT 'reference to quest_template',
+    `quest_start_active` tinyint(1) unsigned NOT NULL default '0',
+    `quest_end`          mediumint(8) unsigned NOT NULL default '0',
+    `cast_flags`         tinyint unsigned NOT NULL COMMENT 'first bit defines caster: 1=player, 0=creature; second bit defines target, same mapping as caster bit',
+    `condition_id`       mediumint(8) unsigned NOT NULL default '0'
+) ENGINE = MYISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `npc_spellclick_spells`

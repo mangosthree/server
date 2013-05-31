@@ -1061,6 +1061,22 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     return;
                 }
+                case 19869:                                 // Dragon Orb
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(23958))
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 19832, true);
+                    return;
+                }
+                case 20037:                                 // Explode Orb Effect
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 20038, true);
+                    return;
+                }
                 case 20577:                                 // Cannibalize
                 {
                     if (unitTarget)

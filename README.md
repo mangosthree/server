@@ -21,16 +21,9 @@ Requirements
 ------------
 
 
-Compilation - Debian/Ubuntu
----------------------------
-
-
-Compilation - Other Linux systems
----------------------------------
-
-
-Compilation - Windows
----------------------
+Compilation Guides
+------------------
+Please see our compilation and installation guides at our [Wiki][20]
 
 License
 -------
@@ -71,6 +64,8 @@ License
 [2]: http://battle.net/wow/ "World of Warcraft"
 
 [10]: http://a.dependency.net/ "A · dependency"
+
+[20]: https://github.com/mangoswiki/Wiki/wiki/MaNGOS%20Installation/ "Wiki"
 
 [50]: http://www.wowpedia.org/Patch_4.3.4 "WoW Cataclysm· Patch 4.3.4 release notes"
 

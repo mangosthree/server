@@ -1896,10 +1896,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damageInfo, SpellEntry const* spellProto, WeaponAttackType attType = BASE_ATTACK);
         void CalculateHealAbsorb(uint32 heal, uint32* absorb);
 
-        void  UpdateSpeed(UnitMoveType mtype, bool forced, float ratio = 1.0f);
+        void UpdateSpeed(UnitMoveType mtype, bool forced, float ratio = 1.0f, bool ignoreChange = false);
         float GetSpeed(UnitMoveType mtype) const;
         float GetSpeedRate(UnitMoveType mtype) const { return m_speed_rate[mtype]; }
-        void SetSpeedRate(UnitMoveType mtype, float rate, bool forced = false);
+        void SetSpeedRate(UnitMoveType mtype, float rate, bool forced = false, bool ignoreChange = false);
 
         void KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpeed);
         void KnockBackWithAngle(float angle, float horizontalSpeed, float verticalSpeed);

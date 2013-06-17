@@ -20434,6 +20434,10 @@ void Player::SendInitialPacketsAfterAddToMap()
     SendAurasForTarget(this);
     SendEnchantmentDurations();                             // must be after add to map
     SendItemDurations();                                    // must be after add to map
+
+    UpdateSpeed(MOVE_RUN, true, 1.0f, true);
+    UpdateSpeed(MOVE_SWIM, true, 1.0f, true);
+    UpdateSpeed(MOVE_FLIGHT, true, 1.0f, true);
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()

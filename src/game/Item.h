@@ -123,12 +123,16 @@ enum InventoryResult
     EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM       = 81,      // EQUIP_ERR_OK, EVENT_AUTOEQUIP_BIND_CONFIRM
     EQUIP_ERR_ARTEFACTS_ONLY_FOR_OWN_CHARACTERS  = 82,      // ERR_NOT_SAME_ACCOUNT
     EQUIP_ERR_OK2                                = 83,      // EQUIP_ERR_OK
-    EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_COUNT_EXCEEDED_IS     = 84,
-    EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_SOCKETED_EXCEEDED_IS  = 85,
-    EQUIP_ERR_SCALING_STAT_ITEM_LEVEL_EXCEEDED              = 86,
-    EQUIP_ERR_PURCHASE_LEVEL_TOO_LOW                        = 87,
-    EQUIP_ERR_CANT_EQUIP_NEED_TALENT                        = 88,
-    EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_EQUIPPED_EXCEEDED_IS  = 89
+    EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_COUNT_EXCEEDED_IS = 84,       // You can only carry %d %s
+    EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_SOCKETED_EXCEEDED_IS  = 85,   // You can only equip %d |4item:items in the %s category
+    EQUIP_ERR_SCALING_STAT_ITEM_LEVEL_EXCEEDED   = 86,      // Your level is too high to use that item
+    EQUIP_ERR_PURCHASE_LEVEL_TOO_LOW             = 87,      // You must reach level %d to purchase that item.
+    EQUIP_ERR_CANT_EQUIP_NEED_TALENT             = 88,      // You do not have the required talent to equip that
+    EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_EQUIPPED_EXCEEDED_IS = 89,    // You can only equip %d |4item:items in the %s category
+    EQUIP_ERR_SHAPESHIFT_FORM_CANNOT_EQUIP       = 90,      // Cannot equip item in this form
+    EQUIP_ERR_ITEM_INVENTORY_FULL_SATCHEL        = 91,      // Your inventory is full. Your satchel has been delivered to your mailbox.
+    EQUIP_ERR_SCALING_STAT_ITEM_LEVEL_TOO_LOW    = 92,      // Your level is too low to use that item
+    EQUIP_ERR_CANT_BUY_QUANTITY                  = 93,      // You can't buy the specified quantity of that item.
 };
 
 enum BuyResult

@@ -379,7 +379,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleUnused,                                    //323 0 spells in 4.3.4
     &Aura::HandleNULL,                                      //324 2 spells in 4.3.4 test spells
     &Aura::HandleUnused,                                    //325 0 spells in 4.3.4
-    &Aura::HandleNULL,                                      //326 24 spells in 4.3.4 new phase auras
+    &Aura::HandlePhase,                                     //326 SPELL_AURA_PHASE_2 24 spells in 4.3.4
     &Aura::HandleUnused,                                    //327 0 spells in 4.3.4
     &Aura::HandleNULL,                                      //328 3 spells in 4.3.4 Eclipse Mastery Driver Passive
     &Aura::HandleNULL,                                      //329 SPELL_AURA_MOD_RUNIC_POWER_REGEN 3 spells in 4.3.4
@@ -8762,6 +8762,9 @@ void Aura::HandlePhase(bool apply, bool Real)
         Unit::AuraList const& phases = target->GetAurasByType(SPELL_AURA_PHASE);
         if (!phases.empty())
             target->RemoveAurasDueToSpell(phases.front()->GetId(), GetHolder());
+        Unit::AuraList const& phases2 = target->GetAurasByType(SPELL_AURA_PHASE_2);
+        if (!phases2.empty())
+            target->RemoveAurasDueToSpell(phases2.front()->GetId(), GetHolder());
     }
 
     target->SetPhaseMask(apply ? GetMiscValue() : uint32(PHASEMASK_NORMAL), true);

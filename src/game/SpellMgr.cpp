@@ -4021,6 +4021,7 @@ void SpellMgr::LoadSpellAreas()
             {
                 case SPELL_AURA_DUMMY:
                 case SPELL_AURA_PHASE:
+                case SPELL_AURA_PHASE_2:
                 case SPELL_AURA_GHOST:
                     break;
                 default:

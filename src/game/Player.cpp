@@ -2417,13 +2417,20 @@ void Player::SetGameMaster(bool on)
     }
     else
     {
-        m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON;
+        m_ExtraFlags &= ~PLAYER_EXTRA_GM_ON;
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 
         // restore phase
         AuraList const& phases = GetAurasByType(SPELL_AURA_PHASE);
-        SetPhaseMask(!phases.empty() ? phases.front()->GetMiscValue() : uint32(PHASEMASK_NORMAL), false);
+        AuraList const& phases2 = GetAurasByType(SPELL_AURA_PHASE_2);
+
+        if (!phases.empty())
+            SetPhaseMask(phases.front()->GetMiscValue(), false);
+        else if (!phases2.empty())
+            SetPhaseMask(phases2.front()->GetMiscValue(), false);
+        else
+            SetPhaseMask(PHASEMASK_NORMAL, false);
 
         CallForAllControlledUnits(SetGameMasterOffHelper(getFaction()), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 
@@ -22202,8 +22209,11 @@ uint32 Player::GetPhaseMaskForSpawn() const
     else
     {
         AuraList const& phases = GetAurasByType(SPELL_AURA_PHASE);
+        AuraList const& phases2 = GetAurasByType(SPELL_AURA_PHASE_2);
         if (!phases.empty())
             phase = phases.front()->GetMiscValue();
+        else if (!phases2.empty())
+            phase = phases2.front()->GetMiscValue();
     }
 
     // some aura phases include 1 normal map in addition to phase itself

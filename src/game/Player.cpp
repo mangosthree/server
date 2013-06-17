@@ -16217,6 +16217,7 @@ void Player::_LoadGlyphs(QueryResult* result)
         if (!gp)
         {
             sLog.outError("Player %s has not existing glyph entry %u on index %u, spec %u", m_name.c_str(), glyph, slot, spec);
+            CharacterDatabase.PExecute("DELETE FROM character_glyphs WHERE glyph = %u", glyph);
             continue;
         }
 
@@ -16224,12 +16225,14 @@ void Player::_LoadGlyphs(QueryResult* result)
         if (!gs)
         {
             sLog.outError("Player %s has not existing glyph slot entry %u on index %u, spec %u", m_name.c_str(), GetGlyphSlot(slot), slot, spec);
+            CharacterDatabase.PExecute("DELETE FROM character_glyphs WHERE slot = %u AND spec = %u AND guid = %u", slot, spec, GetGUIDLow());
             continue;
         }
 
         if (gp->TypeFlags != gs->TypeFlags)
         {
             sLog.outError("Player %s has glyph with typeflags %u in slot with typeflags %u, removing.", m_name.c_str(), gp->TypeFlags, gs->TypeFlags);
+            CharacterDatabase.PExecute("DELETE FROM character_glyphs WHERE slot = %u AND spec = %u AND guid = %u", slot, spec, GetGUIDLow());
             continue;
         }
 

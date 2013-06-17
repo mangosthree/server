@@ -527,7 +527,7 @@ void Item::SaveToDB()
 
                 stmt.addUInt32(GetGUIDLow());
                 stmt.addUInt32(owner->GetGUIDLow());
-                stmt.addUInt32(item->itemid);
+                stmt.addInt32(item->currency ? -int32(item->itemid) : item->itemid);
                 stmt.addUInt8(item->count);
                 stmt.addUInt32(item->randomSuffix);
                 stmt.addInt32(item->randomPropertyId);
@@ -649,7 +649,7 @@ bool Item::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
 void Item::LoadLootFromDB(Field* fields)
 {
     uint32 item_id     = abs(fields[1].GetInt32());
-    uint8  type        = fields[1].GetInt32() > 0 ? LOOT_ITEM_TYPE_ITEM : LOOT_ITEM_TYPE_CURRENCY;
+    uint8  type        = fields[1].GetInt32() >= 0 ? LOOT_ITEM_TYPE_ITEM : LOOT_ITEM_TYPE_CURRENCY;
     uint32 item_amount = fields[2].GetUInt32();
     uint32 item_suffix = fields[3].GetUInt32();
     int32  item_propid = fields[4].GetInt32();

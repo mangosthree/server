@@ -114,7 +114,7 @@ void LootStore::LoadLootTable()
 
             uint32 entry               = fields[0].GetUInt32();
             uint32 item                = abs(fields[1].GetInt32());
-            uint8 type                 = fields[1].GetInt32() > 0 ? LOOT_ITEM_TYPE_ITEM : LOOT_ITEM_TYPE_CURRENCY;
+            uint8 type                 = fields[1].GetInt32() >= 0 ? LOOT_ITEM_TYPE_ITEM : LOOT_ITEM_TYPE_CURRENCY;
             float  chanceOrQuestChance = fields[2].GetFloat();
             uint8  group               = fields[3].GetUInt8();
             int32  mincountOrRef       = fields[4].GetInt32();
@@ -359,7 +359,7 @@ LootItem::LootItem(LootStoreItem const& li)
     itemid      = li.itemid;
     type        = li.type;
     conditionId = li.conditionId;
-    currency = type == LOOT_ITEM_TYPE_CURRENCY;
+    currency    = type == LOOT_ITEM_TYPE_CURRENCY;
     count       = urand(li.mincountOrRef, li.maxcount);     // constructor called for mincountOrRef > 0 only
 
     is_looted = 0;

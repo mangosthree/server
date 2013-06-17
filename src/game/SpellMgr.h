@@ -267,12 +267,14 @@ inline bool IsPassiveSpellStackableWithRanks(SpellEntry const* spellProto)
 inline bool IsSpellRemoveAllMovementAndControlLossEffects(SpellEntry const* spellProto)
 {
     SpellEffectEntry const* spellEffect0 = spellProto->GetSpellEffect(EFFECT_INDEX_0);
+    if (!spellEffect0)
+        return false;
 
-    return spellEffect0 && spellEffect0->EffectApplyAuraName == SPELL_AURA_MECHANIC_IMMUNITY &&
+    return spellEffect0->EffectApplyAuraName == SPELL_AURA_MECHANIC_IMMUNITY &&
         spellEffect0->EffectMiscValue == 1 &&
-        spellEffect0->EffectApplyAuraName == 0 &&
-        spellEffect0->EffectApplyAuraName == 0 &&
-        (spellProto->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)/* && -- all above selected spells have SPELL_ATTR_EX5_* mask
+        spellProto->GetEffectApplyAuraNameByIndex(EFFECT_INDEX_1) == SPELL_AURA_NONE &&
+        spellProto->GetEffectApplyAuraNameByIndex(EFFECT_INDEX_2) == SPELL_AURA_NONE &&
+        spellProto->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)/* && -- all above selected spells have SPELL_ATTR_EX5_* mask
         ((spellProto->AttributesEx5 &
             (SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED|SPELL_ATTR_EX5_USABLE_WHILE_FEARED|SPELL_ATTR_EX5_USABLE_WHILE_STUNNED)) ==
             (SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED|SPELL_ATTR_EX5_USABLE_WHILE_FEARED|SPELL_ATTR_EX5_USABLE_WHILE_STUNNED))*/;

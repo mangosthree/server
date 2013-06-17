@@ -271,13 +271,13 @@ uint32 SpellEntry::GetEffectImplicitTargetAByIndex(SpellEffectIndex index) const
 int32 SpellEntry::GetAreaGroupId() const
 {
     SpellCastingRequirementsEntry const* castReq = GetSpellCastingRequirements();
-    return castReq ? castReq->AreaGroupId : -1;
+    return castReq ? castReq->AreaGroupId : 0;
 }
 
 uint32 SpellEntry::GetFacingCasterFlags() const
 {
     SpellCastingRequirementsEntry const* castReq = GetSpellCastingRequirements();
-    return castReq ? castReq->FacingCasterFlags : -1;
+    return castReq ? castReq->FacingCasterFlags : 0;
 }
 
 uint32 SpellEntry::GetBaseLevel() const

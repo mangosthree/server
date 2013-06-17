@@ -23760,7 +23760,7 @@ void Player::ModifyCurrencyCount(uint32 id, int32 count, bool modifyWeek, bool m
         }
 
         if (itr->first == CURRENCY_CONQUEST_ARENA_META || itr->first == CURRENCY_CONQUEST_BG_META)
-            ModifyCurrencyCount(CURRENCY_CONQUEST_POINTS, diff, modifyWeek, ignoreMultipliers);
+            ModifyCurrencyCount(CURRENCY_CONQUEST_POINTS, diff, modifyWeek, modifySeason, ignoreMultipliers);
     }
 }
 

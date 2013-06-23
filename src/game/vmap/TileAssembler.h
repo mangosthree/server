@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@
 
 namespace VMAP
 {
-    /*
+    /**
     This Class is used to convert raw vector data into balanced BSP-Trees.
     To start the conversion call convertWorld().
     */
@@ -114,5 +114,4 @@ namespace VMAP
             unsigned int getUniqueNameId(const std::string pName);
     };
 }                                                           // VMAP
-
 #endif                                                      /*_TILEASSEMBLER_H_*/

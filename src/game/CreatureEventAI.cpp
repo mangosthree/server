@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -100,7 +100,6 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c)
             m_CreatureEventAIList.reserve(events_count);
             for (CreatureEventAI_Event_Vec::const_iterator i = creatureEventsItr->second.begin(); i != creatureEventsItr->second.end(); ++i)
             {
-
                 // Debug check
 #ifndef MANGOS_DEBUG
                 if (i->event_flags & EFLAG_DEBUG_ONLY)
@@ -1256,7 +1255,7 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
         }
     }
 
-    // Melee Auto-Attack
+    // Melee Auto-Attack (recheck m_creature->getVictim in case of combat state was changed while processing events)
     if (Combat && m_MeleeEnabled)
         DoMeleeAttackIfReady();
 }

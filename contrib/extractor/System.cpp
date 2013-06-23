@@ -1,3 +1,21 @@
+/**
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include <stdio.h>
@@ -292,7 +310,7 @@ uint32 ReadMapDBC(int const locale)
         map_ids[x].id = dbc.getRecord(x).getUInt(0);
         strcpy(map_ids[x].name, dbc.getRecord(x).getString(1));
     }
-    printf("Done! (%u maps loaded)\n", map_count);
+    printf("Done! (%lu maps loaded)\n", map_count);
     return map_count;
 }
 
@@ -331,7 +349,7 @@ void ReadAreaTableDBC(int const locale)
 
     maxAreaId = dbc.getMaxId();
 
-    printf("Done! (%u areas loaded)\n", area_count);
+    printf("Done! (%lu areas loaded)\n", area_count);
 }
 
 void ReadLiquidTypeTableDBC(int const locale)
@@ -366,7 +384,7 @@ void ReadLiquidTypeTableDBC(int const locale)
     for(uint32 x = 0; x < LiqType_count; ++x)
         LiqType[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
 
-    printf("Done! (%u LiqTypes loaded)\n", LiqType_count);
+    printf("Done! (%lu LiqTypes loaded)\n", LiqType_count);
 }
 
 //

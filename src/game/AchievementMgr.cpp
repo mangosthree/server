@@ -2226,7 +2226,7 @@ void AchievementMgr::IncompletedAchievement(AchievementEntry const* achievement)
 void AchievementMgr::SendAllAchievementData()
 {
     // since we don't know the exact size of the packed GUIDs this is just an approximation
-    WorldPacket data(SMSG_ALL_ACHIEVEMENT_DATA, 4*2+m_completedAchievements.size()*4*2+m_completedAchievements.size()*7*4);
+    WorldPacket data(SMSG_ALL_ACHIEVEMENT_DATA, 4 * 2 + m_completedAchievements.size() * 4 * 2 + m_completedAchievements.size() * 7 * 4);
 
     ObjectGuid guid = m_player->GetObjectGuid();
 
@@ -2295,7 +2295,7 @@ void AchievementMgr::SendAllAchievementData()
 void AchievementMgr::SendRespondInspectAchievements(Player* player)
 {
     // since we don't know the exact size of the packed GUIDs this is just an approximation
-    WorldPacket data(SMSG_RESPOND_INSPECT_ACHIEVEMENTS, 4+4*2+m_completedAchievements.size()*4*2+m_completedAchievements.size()*7*4);
+    WorldPacket data(SMSG_RESPOND_INSPECT_ACHIEVEMENTS, 4 + 4 * 2 + m_completedAchievements.size() * 4 * 2 + m_completedAchievements.size() * 7 * 4);
 
     ObjectGuid targetGuid = m_player->GetObjectGuid();
     ObjectGuid guid = m_player->GetObjectGuid();

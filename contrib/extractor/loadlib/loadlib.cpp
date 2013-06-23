@@ -27,7 +27,7 @@ bool OpenArchive(char const* mpqFileName, HANDLE* mpqHandlePtr /*= NULL*/)
 
 bool OpenNewestFile(char const* filename, HANDLE* fileHandlerPtr)
 {
-    for(ArchiveSet::const_reverse_iterator i=gOpenArchives.rbegin(); i!=gOpenArchives.rend();++i)
+    for (ArchiveSet::const_reverse_iterator i = gOpenArchives.rbegin(); i != gOpenArchives.rend(); ++i)
     {
         // always prefer get updated file version
         if (SFileOpenFileEx(*i, filename, SFILE_OPEN_PATCHED_FILE, fileHandlerPtr))
@@ -37,9 +37,9 @@ bool OpenNewestFile(char const* filename, HANDLE* fileHandlerPtr)
     return false;
 }
 
-bool ExtractFile( char const* mpq_name, std::string const& filename )
+bool ExtractFile(char const* mpq_name, std::string const& filename)
 {
-    for(ArchiveSet::const_reverse_iterator i=gOpenArchives.rbegin(); i!=gOpenArchives.rend();++i)
+    for (ArchiveSet::const_reverse_iterator i = gOpenArchives.rbegin(); i != gOpenArchives.rend(); ++i)
     {
         HANDLE fileHandle;
         if (!SFileOpenFileEx(*i, mpq_name, SFILE_OPEN_PATCHED_FILE, &fileHandle))
@@ -69,7 +69,7 @@ bool ExtractFile( char const* mpq_name, std::string const& filename )
 
 void CloseArchives()
 {
-    for(ArchiveSet::const_iterator i = gOpenArchives.begin(); i != gOpenArchives.end();++i)
+    for (ArchiveSet::const_iterator i = gOpenArchives.begin(); i != gOpenArchives.end(); ++i)
         SFileCloseArchive(*i);
     gOpenArchives.clear();
 }
@@ -86,7 +86,7 @@ FileLoader::~FileLoader()
     free();
 }
 
-bool FileLoader::loadFile(char *filename, bool log)
+bool FileLoader::loadFile(char* filename, bool log)
 {
     free();
 
@@ -132,11 +132,9 @@ bool FileLoader::loadFile(char *filename, bool log)
 bool FileLoader::prepareLoadedData()
 {
     // Check version
-    version = (file_MVER *) data;
-
+    version = (file_MVER*) data;
     if (version->fcc != 'MVER')
         return false;
-
     if (version->ver != FILE_FORMAT_VERSION)
         return false;
     return true;

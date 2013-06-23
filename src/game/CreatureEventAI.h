@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -119,7 +119,7 @@ enum EventAI_ActionType
 enum Target
 {
     // Self (m_creature)
-    TARGET_T_SELF = 0,                                      // Self cast
+    TARGET_T_SELF                           = 0,            // Self cast
 
     // Hostile targets (if pet then returns pet owner)
     TARGET_T_HOSTILE,                                       // Our current target (ie: highest aggro)
@@ -506,8 +506,8 @@ struct CreatureEventAI_Event
             uint32 repeatMax;
         } friendly_buff;
         // EVENT_T_SUMMONED_UNIT                            = 17
-        // EVENT_T_SUMMONED_JUST_DIED                        = 25
-        // EVENT_T_SUMMONED_JUST_DESPAWN                     = 26
+        // EVENT_T_SUMMONED_JUST_DIED                       = 25
+        // EVENT_T_SUMMONED_JUST_DESPAWN                    = 26
         struct
         {
             uint32 creatureId;

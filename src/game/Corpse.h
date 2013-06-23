@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -83,7 +83,7 @@ class Corpse : public WorldObject
         Player* lootRecipient;
         bool lootForBody;
 
-        GridReference<Corpse>& GetGridRef() { return m_gridRef; }
+        GridReference<Corpse> &GetGridRef() { return m_gridRef; }
 
         bool IsExpired(time_t t) const;
     private:

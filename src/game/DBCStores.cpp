@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,8 +28,8 @@
 
 #include <map>
 
-typedef std::map<uint16,uint32> AreaFlagByAreaID;
-typedef std::map<uint32,uint32> AreaFlagByMapID;
+typedef std::map<uint16, uint32> AreaFlagByAreaID;
+typedef std::map<uint32, uint32> AreaFlagByMapID;
 
 struct WMOAreaTableTripple
 {
@@ -39,7 +39,7 @@ struct WMOAreaTableTripple
 
     bool operator <(const WMOAreaTableTripple& b) const
     {
-        return memcmp(this, &b, sizeof(WMOAreaTableTripple))<0;
+        return memcmp(this, &b, sizeof(WMOAreaTableTripple)) < 0;
     }
 
     // ordered by entropy; that way memcmp will have a minimal medium runtime
@@ -48,7 +48,7 @@ struct WMOAreaTableTripple
     int32 adtId;
 };
 
-typedef std::map<WMOAreaTableTripple, WMOAreaTableEntry const *> WMOAreaInfoByTripple;
+typedef std::map<WMOAreaTableTripple, WMOAreaTableEntry const*> WMOAreaInfoByTripple;
 
 DBCStorage <AreaTableEntry> sAreaStore(AreaTableEntryfmt);
 DBCStorage <AreaGroupEntry> sAreaGroupStore(AreaGroupEntryfmt);
@@ -90,7 +90,7 @@ DBCStorage <DurabilityCostsEntry> sDurabilityCostsStore(DurabilityCostsfmt);
 DBCStorage <EmotesEntry> sEmotesStore(EmotesEntryfmt);
 DBCStorage <EmotesTextEntry> sEmotesTextStore(EmotesTextEntryfmt);
 
-typedef std::map<uint32,SimpleFactionsList> FactionTeamMap;
+typedef std::map<uint32, SimpleFactionsList> FactionTeamMap;
 static FactionTeamMap sFactionTeamMap;
 DBCStorage <FactionEntry> sFactionStore(FactionEntryfmt);
 DBCStorage <FactionTemplateEntry> sFactionTemplateStore(FactionTemplateEntryfmt);

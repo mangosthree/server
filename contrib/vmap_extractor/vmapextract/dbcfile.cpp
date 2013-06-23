@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -116,4 +116,3 @@ DBCFile::Iterator DBCFile::end()
     assert(_data);
     return Iterator(*this, _stringTable);
 }
-

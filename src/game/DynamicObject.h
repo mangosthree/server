@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -66,7 +66,7 @@ class DynamicObject : public WorldObject
 
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
 
-        GridReference<DynamicObject>& GetGridRef() { return m_gridRef; }
+        GridReference<DynamicObject> &GetGridRef() { return m_gridRef; }
 
     protected:
         uint32 m_spellId;

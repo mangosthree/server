@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -335,7 +335,6 @@ struct VendorItem
     uint32 incrtime;                                        // time for restore items amount if maxcount != 0
     uint32 ExtendedCost;                                    // index in ItemExtendedCost.dbc
     uint16 conditionId;                                     // condition to check for this item
-
     bool IsCurrency() const { return type == VENDOR_ITEM_TYPE_CURRENCY; }
 };
 typedef std::vector<VendorItem*> VendorItemList;

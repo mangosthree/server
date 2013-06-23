@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -45,11 +45,11 @@ enum CapturePointAnimations
     CAPTURE_ANIM_NEUTRAL    = 2
 };
 
-typedef std::map<ObjectGuid /*playerGuid*/, bool /*isMainZone*/> GuidZoneMap;
+typedef std::map < ObjectGuid /*playerGuid*/, bool /*isMainZone*/ > GuidZoneMap;
 
 class OutdoorPvP
 {
-    friend class OutdoorPvPMgr;
+        friend class OutdoorPvPMgr;
 
     public:
         OutdoorPvP() {}

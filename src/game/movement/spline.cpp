@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,6 @@
 
 namespace Movement
 {
-
     SplineBase::EvaluationMethtod SplineBase::evaluators[SplineBase::ModesEnd] =
     {
         &SplineBase::EvaluateLinear,
@@ -57,7 +56,6 @@ namespace Movement
     };
 
 ///////////
-    #pragma region evaluation methtods
 
     using G3D::Matrix4;
     static const Matrix4 s_catmullRomCoeffs(
@@ -200,7 +198,6 @@ namespace Movement
         }
         return length;
     }
-    #pragma endregion
 
     void SplineBase::init_spline(const Vector3* controls, index_type count, EvaluationMode m)
     {

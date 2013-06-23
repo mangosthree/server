@@ -21,7 +21,7 @@ bool ExtractSingleModel(std::string& fname, StringSet& failedPaths)
     // >= 3.1.0 ADT MMDX section store filename.m2 filenames for corresponded .m2 file
     // nothing do
 
-    std::string output(szWorkDirWmo);
+    std::string output(szWorkDirWmo);                       // Stores output filename (possible changed)
     output += "/";
     output += name;
 

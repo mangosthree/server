@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -89,90 +89,90 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
     {
         recv_data >> lang;
 
-        // prevent talking at unknown language (cheating)
-        LanguageDesc const* langDesc = GetLanguageDescByID(lang);
-        if (!langDesc)
+    // prevent talking at unknown language (cheating)
+    LanguageDesc const* langDesc = GetLanguageDescByID(lang);
+    if (!langDesc)
+    {
+        SendNotification(LANG_UNKNOWN_LANGUAGE);
+        return;
+    }
+    if (langDesc->skill_id != 0 && !_player->HasSkill(langDesc->skill_id))
+    {
+        // also check SPELL_AURA_COMPREHEND_LANGUAGE (client offers option to speak in that language)
+        Unit::AuraList const& langAuras = _player->GetAurasByType(SPELL_AURA_COMPREHEND_LANGUAGE);
+        bool foundAura = false;
+        for (Unit::AuraList::const_iterator i = langAuras.begin(); i != langAuras.end(); ++i)
         {
-            SendNotification(LANG_UNKNOWN_LANGUAGE);
+            if ((*i)->GetModifier()->m_miscvalue == int32(lang))
+            {
+                foundAura = true;
+                break;
+            }
+        }
+        if (!foundAura)
+        {
+            SendNotification(LANG_NOT_LEARNED_LANGUAGE);
             return;
         }
-        if (langDesc->skill_id != 0 && !_player->HasSkill(langDesc->skill_id))
-        {
-            // also check SPELL_AURA_COMPREHEND_LANGUAGE (client offers option to speak in that language)
-            Unit::AuraList const& langAuras = _player->GetAurasByType(SPELL_AURA_COMPREHEND_LANGUAGE);
-            bool foundAura = false;
-            for (Unit::AuraList::const_iterator i = langAuras.begin(); i != langAuras.end(); ++i)
-            {
-                if ((*i)->GetModifier()->m_miscvalue == int32(lang))
-                {
-                    foundAura = true;
-                    break;
-                }
-            }
-            if (!foundAura)
-            {
-                SendNotification(LANG_NOT_LEARNED_LANGUAGE);
-                return;
-            }
-        }
+    }
 
-        if (lang == LANG_ADDON)
-        {
-            // Disabled addon channel?
-            if (!sWorld.getConfig(CONFIG_BOOL_ADDON_CHANNEL))
-                return;
-        }
-        // LANG_ADDON should not be changed nor be affected by flood control
+    if (lang == LANG_ADDON)
+    {
+        // Disabled addon channel?
+        if (!sWorld.getConfig(CONFIG_BOOL_ADDON_CHANNEL))
+            return;
+    }
+    // LANG_ADDON should not be changed nor be affected by flood control
+    else
+    {
+        // send in universal language if player in .gmon mode (ignore spell effects)
+        if (_player->isGameMaster())
+            lang = LANG_UNIVERSAL;
         else
         {
-            // send in universal language if player in .gmon mode (ignore spell effects)
-            if (_player->isGameMaster())
+            // send in universal language in two side iteration allowed mode
+            if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHAT))
                 lang = LANG_UNIVERSAL;
             else
             {
-                // send in universal language in two side iteration allowed mode
-                if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHAT))
-                    lang = LANG_UNIVERSAL;
-                else
+                switch (type)
                 {
-                    switch (type)
-                    {
-                        case CHAT_MSG_PARTY:
+                    case CHAT_MSG_PARTY:
                         case CHAT_MSG_PARTY_LEADER:
-                        case CHAT_MSG_RAID:
-                        case CHAT_MSG_RAID_LEADER:
-                        case CHAT_MSG_RAID_WARNING:
-                            // allow two side chat at group channel if two side group allowed
-                            if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
-                                lang = LANG_UNIVERSAL;
-                            break;
-                        case CHAT_MSG_GUILD:
-                        case CHAT_MSG_OFFICER:
-                            // allow two side chat at guild channel if two side guild allowed
-                            if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GUILD))
-                                lang = LANG_UNIVERSAL;
-                            break;
-                    }
+                    case CHAT_MSG_RAID:
+                    case CHAT_MSG_RAID_LEADER:
+                    case CHAT_MSG_RAID_WARNING:
+                        // allow two side chat at group channel if two side group allowed
+                        if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+                            lang = LANG_UNIVERSAL;
+                        break;
+                    case CHAT_MSG_GUILD:
+                    case CHAT_MSG_OFFICER:
+                        // allow two side chat at guild channel if two side guild allowed
+                        if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GUILD))
+                            lang = LANG_UNIVERSAL;
+                        break;
                 }
-
-                // but overwrite it by SPELL_AURA_MOD_LANGUAGE auras (only single case used)
-                Unit::AuraList const& ModLangAuras = _player->GetAurasByType(SPELL_AURA_MOD_LANGUAGE);
-                if (!ModLangAuras.empty())
-                    lang = ModLangAuras.front()->GetModifier()->m_miscvalue;
             }
 
-            if (type != CHAT_MSG_AFK && type != CHAT_MSG_DND)
-            {
-                if (!_player->CanSpeak())
-                {
-                    std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
-                    SendNotification(GetMangosString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
-                    return;
-                }
-
-                GetPlayer()->UpdateSpeakTime();
-            }
+            // but overwrite it by SPELL_AURA_MOD_LANGUAGE auras (only single case used)
+            Unit::AuraList const& ModLangAuras = _player->GetAurasByType(SPELL_AURA_MOD_LANGUAGE);
+            if (!ModLangAuras.empty())
+                lang = ModLangAuras.front()->GetModifier()->m_miscvalue;
         }
+
+        if (type != CHAT_MSG_AFK && type != CHAT_MSG_DND)
+        {
+            if (!_player->CanSpeak())
+            {
+                std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
+                SendNotification(GetMangosString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
+                return;
+            }
+
+            GetPlayer()->UpdateSpeakTime();
+        }
+    }
     }
     else
         lang = LANG_UNIVERSAL;

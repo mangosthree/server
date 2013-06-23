@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -155,7 +155,6 @@ void CreatureEventAIMgr::CheckUnusedAITexts()
 // -------------------
 void CreatureEventAIMgr::LoadCreatureEventAI_Summons(bool check_entry_use)
 {
-
     // Drop Existing EventSummon Map
     m_CreatureEventAI_Summon_Map.clear();
 

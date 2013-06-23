@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -692,17 +692,17 @@ struct ChrClassesEntry
 struct ChrRacesEntry
 {
     uint32      RaceID;                                     // 0        m_ID
-                                                            // 1        m_flags
+    // 1        m_flags
     uint32      FactionID;                                  // 2        m_factionID
-                                                            // 3        m_ExplorationSoundID
+    // 3        m_ExplorationSoundID
     uint32      model_m;                                    // 4        m_MaleDisplayId
     uint32      model_f;                                    // 5        m_FemaleDisplayId
-                                                            // 6        m_ClientPrefix
+    // 6        m_ClientPrefix
     uint32      TeamID;                                     // 7        m_BaseLanguage (7-Alliance 1-Horde)
-                                                            // 8        m_creatureType
-                                                            // 9        m_ResSicknessSpellID
-                                                            // 10       m_SplashSoundID
-                                                            // 11       m_clientFileString
+    // 8        m_creatureType
+    // 9        m_ResSicknessSpellID
+    // 10       m_SplashSoundID
+    // 11       m_clientFileString
     uint32      CinematicSequence;                          // 12       m_cinematicSequenceID
     //uint32    unk_322;                                    // 13       m_alliance (0 alliance, 1 horde, 2 not available?)
     DBCString name;                                         // 14       m_name_lang used for DBC language detection/selection
@@ -737,26 +737,26 @@ struct ChrPowerTypesEntry
 struct CinematicSequencesEntry
 {
     uint32      Id;                                         // 0        m_ID
-    //uint32      unk1;                                     // 1        m_soundID
-    //uint32      cinematicCamera;                          // 2        m_camera[8]
+    // uint32      unk1;                                    // 1        m_soundID
+    // uint32      cinematicCamera;                         // 2        m_camera[8]
 };
 
 struct CreatureDisplayInfoEntry
 {
     uint32      Displayid;                                  // 0        m_ID
-                                                            // 1        m_modelID
-                                                            // 2        m_soundID
+    // 1        m_modelID
+    // 2        m_soundID
     uint32      ExtendedDisplayInfoID;                      // 3        m_extendedDisplayInfoID -> CreatureDisplayInfoExtraEntry::DisplayExtraId
     float       scale;                                      // 4        m_creatureModelScale
-                                                            // 5        m_creatureModelAlpha
-                                                            // 6-8      m_textureVariation[3]
-                                                            // 9        m_portraitTextureName
-                                                            // 10       m_sizeClass
-                                                            // 11       m_bloodID
-                                                            // 12       m_NPCSoundID
-                                                            // 13       m_particleColorID
-                                                            // 14       m_creatureGeosetData
-                                                            // 15       m_objectEffectPackageID
+    // 5        m_creatureModelAlpha
+    // 6-8      m_textureVariation[3]
+    // 9        m_portraitTextureName
+    // 10       m_sizeClass
+    // 11       m_bloodID
+    // 12       m_NPCSoundID
+    // 13       m_particleColorID
+    // 14       m_creatureGeosetData
+    // 15       m_objectEffectPackageID
                                                             // 16       all 0
 };
 
@@ -764,15 +764,15 @@ struct CreatureDisplayInfoExtraEntry
 {
     uint32      DisplayExtraId;                             // 0        m_ID CreatureDisplayInfoEntry::m_extendedDisplayInfoID
     uint32      Race;                                       // 1        m_DisplayRaceID
-    //uint32    Gender;                                     // 2        m_DisplaySexID
-    //uint32    SkinColor;                                  // 3        m_SkinID
-    //uint32    FaceType;                                   // 4        m_FaceID
-    //uint32    HairType;                                   // 5        m_HairStyleID
-    //uint32    HairStyle;                                  // 6        m_HairColorID
-    //uint32    BeardStyle;                                 // 7        m_FacialHairID
-    //uint32    Equipment[11];                              // 8-18     m_NPCItemDisplay equipped static items EQUIPMENT_SLOT_HEAD..EQUIPMENT_SLOT_HANDS, client show its by self
-    //uint32    CanEquip;                                   // 19       m_flags 0..1 Can equip additional things when used for players
-    //char*                                                 // 20       m_BakeName CreatureDisplayExtra-*.blp
+    // uint32    Gender;                                    // 2        m_DisplaySexID
+    // uint32    SkinColor;                                 // 3        m_SkinID
+    // uint32    FaceType;                                  // 4        m_FaceID
+    // uint32    HairType;                                  // 5        m_HairStyleID
+    // uint32    HairStyle;                                 // 6        m_HairColorID
+    // uint32    BeardStyle;                                // 7        m_FacialHairID
+    // uint32    Equipment[11];                             // 8-18     m_NPCItemDisplay equipped static items EQUIPMENT_SLOT_HEAD..EQUIPMENT_SLOT_HANDS, client show its by self
+    // uint32    CanEquip;                                  // 19       m_flags 0..1 Can equip additional things when used for players
+    // char*                                                // 20       m_BakeName CreatureDisplayExtra-*.blp
 };
 
 struct CreatureFamilyEntry

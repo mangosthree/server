@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,6 @@ using G3D::Vector3;
 
 namespace VMAP
 {
-
     class MapRayCallback
     {
         public:
@@ -82,6 +81,7 @@ namespace VMAP
             bool result;
     };
 
+
     //=========================================================
 
     std::string StaticMapTree::getTileFileName(uint32 mapID, uint32 tileX, uint32 tileY)
@@ -132,7 +132,7 @@ namespace VMAP
     }
 
     //=========================================================
-    /*
+    /**
     If intersection is found within pMaxDist, sets pMaxDist to intersection distance and returns true.
     Else, pMaxDist is not modified and returns false;
     */
@@ -164,7 +164,7 @@ namespace VMAP
         return true;
     }
     //=========================================================
-    /*
+    /**
     When moving from pos1 to pos2 check if we hit an object. Return true and the position if we hit one
     Return the hit pos or the original dest pos
     */

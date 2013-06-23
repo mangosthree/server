@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -439,9 +439,9 @@ bool get_sql_update_info(const char* buffer, sql_update_info& info)
             sscanf(buffer, REV_SCAN "_%[^_]_%d_%[^.].sql", &info.rev, &info.nr, info.db) != 3)
     {
         info.rev = 0;       // this may be set by the first scans, even if they fail
-        if (sscanf(buffer, "%d_%[^_]_%[^.].sql", &info.nr, info.db, info.table) != 3 &&
-                sscanf(buffer, "%d_%[^.].sql", &info.nr, info.db) != 2)
-            return false;
+        if(sscanf(buffer, "%d_%[^_]_%[^.].sql", &info.nr, info.db, info.table) != 3 &&
+            sscanf(buffer, "%d_%[^.].sql", &info.nr, info.db) != 2)
+        return false;
     }
 
     for (info.db_idx = 0; info.db_idx < NUM_DATABASES; info.db_idx++)
@@ -512,7 +512,7 @@ bool find_sql_updates()
             {
                 last_sql_rev[info.db_idx] = info.rev;
                 last_sql_nr[info.db_idx] = info.nr;
-                sscanf(buffer, "%[^.]", last_sql_update[info.db_idx]);
+                    sscanf(buffer, "%[^.]", last_sql_update[info.db_idx]);
             }
             new_sql_updates.erase(itr);
         }
@@ -569,23 +569,23 @@ bool convert_sql_updates()
 
         std::ostringstream out_buff;
 
-        // add the update requirements
-        out_buff << "ALTER TABLE " << db_version_table[info.db_idx]
-                 << " CHANGE COLUMN required_" << last_sql_update[info.db_idx]
-                 << " required_" << new_name << " bit;\n\n";
+            // add the update requirements
+            out_buff << "ALTER TABLE " << db_version_table[info.db_idx]
+                     << " CHANGE COLUMN required_" << last_sql_update[info.db_idx]
+                     << " required_" << new_name << " bit;\n\n";
 
-        // skip the first one or two lines from the input
-        // if it already contains update requirements
-        if (fgets(buffer, MAX_BUF, fin))
-        {
-            char dummy[MAX_BUF];
-            if (sscanf(buffer, "ALTER TABLE %s CHANGE COLUMN required_%s required_%s bit", dummy, dummy, dummy) == 3)
+            // skip the first one or two lines from the input
+            // if it already contains update requirements
+            if (fgets(buffer, MAX_BUF, fin))
             {
-                if (fgets(buffer, MAX_BUF, fin) && buffer[0] != '\n')
+                char dummy[MAX_BUF];
+                if (sscanf(buffer, "ALTER TABLE %s CHANGE COLUMN required_%s required_%s bit", dummy, dummy, dummy) == 3)
+                {
+                    if (fgets(buffer, MAX_BUF, fin) && buffer[0] != '\n')
+                        out_buff << buffer;
+                }
+                else
                     out_buff << buffer;
-            }
-            else
-                out_buff << buffer;
         }
 
         // copy the rest of the file

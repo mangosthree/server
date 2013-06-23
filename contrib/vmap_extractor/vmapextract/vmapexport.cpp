@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -528,7 +528,6 @@ bool processArgv(int argc, char** argv)
             break;
         }
     }
-
     if (!result)
     {
         printf("Extract for %s.\n", szRawVMAPMagic);
@@ -607,7 +606,6 @@ int main(int argc, char** argv)
         printf("Detected and using locale locale: %s\n", Locales[i]);
         break;
     }
-
     ReadLiquidTypeTableDBC();
 
     // extract data

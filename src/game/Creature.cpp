@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -985,7 +985,7 @@ void Creature::PrepareBodyLootState()
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 }
 
-/*
+/**
  * Return original player who tap creature, it can be different from player/group allowed to loot so not use it for loot code
  */
 Player* Creature::GetOriginalLootRecipient() const
@@ -993,7 +993,7 @@ Player* Creature::GetOriginalLootRecipient() const
     return m_lootRecipientGuid ? ObjectAccessor::FindPlayer(m_lootRecipientGuid) : NULL;
 }
 
-/*
+/**
  * Return group if player tap creature as group member, independent is player after leave group or stil be group member
  */
 Group* Creature::GetGroupLootRecipient() const
@@ -1002,7 +1002,7 @@ Group* Creature::GetGroupLootRecipient() const
     return m_lootGroupRecipientId ? sObjectMgr.GetGroupById(m_lootGroupRecipientId) : NULL;
 }
 
-/*
+/**
  * Return player who can loot tapped creature (member of group or single player)
  *
  * In case when original player tap creature as group member then group tap prefered.
@@ -1035,7 +1035,7 @@ Player* Creature::GetLootRecipient() const
     return NULL;
 }
 
-/*
+/**
  * Set player and group (if player group member) who tap creature
  */
 void Creature::SetLootRecipient(Unit* unit)
@@ -1678,7 +1678,6 @@ SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
 
         if(spellInfo->GetManaCost() > GetPower(POWER_MANA))
             continue;
-
         SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
         float range = GetSpellMaxRange(srange);
         float minrange = GetSpellMinRange(srange);
@@ -1689,16 +1688,12 @@ SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
         //    continue;
         if (dist > range || dist < minrange)
             continue;
-
-
         if(spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_SILENCE && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
             continue;
         if(spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_PACIFY && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
             continue;
-
         return spellInfo;
     }
-
     return NULL;
 }
 
@@ -1728,13 +1723,11 @@ SpellEntry const* Creature::ReachWithSpellCure(Unit* pVictim)
                 break;
             }
         }
-
         if (bcontinue)
             continue;
 
         if(spellInfo->GetManaCost() > GetPower(POWER_MANA))
             continue;
-
         SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
         float range = GetSpellMaxRange(srange);
         float minrange = GetSpellMinRange(srange);
@@ -1745,15 +1738,12 @@ SpellEntry const* Creature::ReachWithSpellCure(Unit* pVictim)
         //    continue;
         if (dist > range || dist < minrange)
             continue;
-
         if(spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_SILENCE && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
             continue;
         if(spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_PACIFY && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
             continue;
-
         return spellInfo;
     }
-
     return NULL;
 }
 
@@ -1841,6 +1831,7 @@ void Creature::CallForHelp(float fRadius)
     Cell::VisitGridObjects(this, worker, fRadius);
 }
 
+/// if enemy provided, check for initial combat help against enemy
 bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /*= true*/) const
 {
     // we don't need help from zombies :)

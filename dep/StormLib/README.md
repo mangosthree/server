@@ -1,4 +1,4 @@
-stormlib ![Project status](http://getmangos.com/assets/img/repository-status-maintained.png)
+stormlib ![Project status](http://getmangos.co.uk/assets/img/repository-status-maintained.png)
 ========
 
 The StormLib library is a pack of modules, written in C++, which are able to

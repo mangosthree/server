@@ -54,7 +54,6 @@
     <ProjectGUID>{8072769E-CF10-48BF-B9E1-12752A5DAC6E}</ProjectGUID>
     <RootNamespace>sockets</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and $(VisualStudioVersion) == ''">$(VCTargetsPath11)</VCTargetsPath>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -324,6 +323,9 @@
     <ClCompile Include="..\..\dep\src\g3dlite\TextOutput.cpp" />
     <ClCompile Include="..\..\dep\src\g3dlite\UprightFrame.cpp" />
     <ClCompile Include="..\..\dep\src\g3dlite\Vector2.cpp" />
+    <ClCompile Include="..\..\dep\src\g3dlite\PhysicsFrame.cpp" />
+    <ClCompile Include="..\..\dep\src\g3dlite\FileSystem.cpp" />
+    <ClCompile Include="..\..\dep\src\g3dlite\uint128.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\dep\include\g3dlite\G3D\AABox.h" />
@@ -353,6 +355,9 @@
     <ClInclude Include="..\..\dep\include\g3dlite\G3D\Vector3.h" />
     <ClInclude Include="..\..\dep\include\g3dlite\G3D\Vector3int16.h" />
     <ClInclude Include="..\..\dep\include\g3dlite\G3D\Vector4.h" />
+    <ClInclude Include="..\..\dep\include\g3dlite\G3D\PhysicsFrame.h" />
+    <ClInclude Include="..\..\dep\include\g3dlite\G3D\FileSystem.h" />
+    <ClInclude Include="..\..\dep\include\g3dlite\G3D\uint128.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

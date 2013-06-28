@@ -32,10 +32,10 @@
       <UniqueIdentifier>{0ac140f9-89c1-4830-b673-514c5e8b4d37}</UniqueIdentifier>
     </Filter>
     <Filter Include="OutdoorPvP">
-      <UniqueIdentifier>{7d020a20-502d-49d3-8aa4-bd5e905571c5}</UniqueIdentifier>
+      <UniqueIdentifier>{c25f76ed-c7d6-495a-a647-1f97b1261fa7}</UniqueIdentifier>
     </Filter>
     <Filter Include="BattleGround">
-      <UniqueIdentifier>{57de5e8a-b022-4453-bd5e-d4f04553f78a}</UniqueIdentifier>
+      <UniqueIdentifier>{0af4d063-6d01-4546-a429-59bd828ab270}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -204,6 +204,9 @@
     <ClCompile Include="..\..\src\game\UpdateData.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\VehicleHandler.cpp">
+      <Filter>World/Handlers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\VoiceChatHandler.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
@@ -215,6 +218,33 @@
     </ClCompile>
     <ClCompile Include="..\..\src\game\World.cpp">
       <Filter>World/Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvP.cpp">
+      <Filter>OutdoorPvP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPEP.cpp">
+      <Filter>OutdoorPvP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPGH.cpp">
+      <Filter>OutdoorPvP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPHP.cpp">
+      <Filter>OutdoorPvP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPMgr.cpp">
+      <Filter>OutdoorPvP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPNA.cpp">
+      <Filter>OutdoorPvP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPSI.cpp">
+      <Filter>OutdoorPvP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPTF.cpp">
+      <Filter>OutdoorPvP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPZM.cpp">
+      <Filter>OutdoorPvP</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\ConfusedMovementGenerator.cpp">
       <Filter>Motion generators</Filter>
@@ -436,6 +466,12 @@
     <ClCompile Include="..\..\src\game\vmap\BIH.cpp">
       <Filter>vmaps</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\vmap\DynamicTree.cpp">
+      <Filter>vmaps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\vmap\GameObjectModel.cpp">
+      <Filter>vmaps</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\vmap\MapTree.cpp">
       <Filter>vmaps</Filter>
     </ClCompile>
@@ -474,33 +510,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\game\DB2Stores.cpp">
       <Filter>Server</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvP.cpp">
-      <Filter>OutdoorPvP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPEP.cpp">
-      <Filter>OutdoorPvP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPGH.cpp">
-      <Filter>OutdoorPvP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPHP.cpp">
-      <Filter>OutdoorPvP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPMgr.cpp">
-      <Filter>OutdoorPvP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPNA.cpp">
-      <Filter>OutdoorPvP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPSI.cpp">
-      <Filter>OutdoorPvP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPTF.cpp">
-      <Filter>OutdoorPvP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\OutdoorPvP\OutdoorPvPZM.cpp">
-      <Filter>OutdoorPvP</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\TransportSystem.cpp">
       <Filter>Object</Filter>
@@ -668,6 +677,33 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\World.h">
       <Filter>World/Handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvP.h">
+      <Filter>OutdoorPvP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPEP.h">
+      <Filter>OutdoorPvP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPGH.h">
+      <Filter>OutdoorPvP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPHP.h">
+      <Filter>OutdoorPvP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPMgr.h">
+      <Filter>OutdoorPvP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPNA.h">
+      <Filter>OutdoorPvP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPSI.h">
+      <Filter>OutdoorPvP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPTF.h">
+      <Filter>OutdoorPvP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPZM.h">
+      <Filter>OutdoorPvP</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\ConfusedMovementGenerator.h">
       <Filter>Motion generators</Filter>
@@ -913,6 +949,15 @@
     <ClInclude Include="..\..\src\game\vmap\BIH.h">
       <Filter>vmaps</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\game\vmap\BIHWrap.h">
+      <Filter>vmaps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\vmap\DynamicTree.h">
+      <Filter>vmaps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\vmap\GameObjectModel.h">
+      <Filter>vmaps</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\game\vmap\IVMapManager.h">
       <Filter>vmaps</Filter>
     </ClInclude>
@@ -920,6 +965,9 @@
       <Filter>vmaps</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\vmap\ModelInstance.h">
+      <Filter>vmaps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\vmap\RegularGrid.h">
       <Filter>vmaps</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\vmap\TileAssembler.h">
@@ -979,35 +1027,11 @@
     <ClInclude Include="..\..\src\game\DB2Structure.h">
       <Filter>Server</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvP.h">
-      <Filter>OutdoorPvP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPEP.h">
-      <Filter>OutdoorPvP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPGH.h">
-      <Filter>OutdoorPvP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPHP.h">
-      <Filter>OutdoorPvP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPMgr.h">
-      <Filter>OutdoorPvP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPNA.h">
-      <Filter>OutdoorPvP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPSI.h">
-      <Filter>OutdoorPvP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPTF.h">
-      <Filter>OutdoorPvP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\OutdoorPvP\OutdoorPvPZM.h">
-      <Filter>OutdoorPvP</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\game\TransportSystem.h">
       <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundWS.h">
+      <Filter>BattleGround</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\BattleGround\BattleGround.h">
       <Filter>BattleGround</Filter>
@@ -1049,9 +1073,6 @@
       <Filter>BattleGround</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\BattleGround\BattleGroundSA.h">
-      <Filter>BattleGround</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundWS.h">
       <Filter>BattleGround</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3504,14 +3504,14 @@ void SpellMgr::LoadSpellScriptTarget()
             if (!spellInfo)
                 continue;
 
-            SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
-            if(!spellEffect)
-                continue;
-
             for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
             {
-                if (spellEffect && (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT ||
-                                    (spellEffect->EffectImplicitTargetA != TARGET_SELF && spellEffect->EffectImplicitTargetB == TARGET_SCRIPT)))
+                SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(j));
+                if (!spellEffect)
+                    continue;
+
+                if (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT ||
+                    spellEffect->EffectImplicitTargetA != TARGET_SELF && spellEffect->EffectImplicitTargetB == TARGET_SCRIPT)
                 {
                     SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(i);
                     if (bounds.first == bounds.second)

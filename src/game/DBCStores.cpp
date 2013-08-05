@@ -145,6 +145,8 @@ DBCStorage <MapDifficultyEntry> sMapDifficultyStore(MapDifficultyEntryfmt); // o
 MapDifficultyMap sMapDifficultyMap;
 
 DBCStorage <MovieEntry> sMovieStore(MovieEntryfmt);
+DBCStorage <MountCapabilityEntry> sMountCapabilityStore(MountCapabilityfmt);
+DBCStorage <MountTypeEntry> sMountTypeStore(MountTypefmt);
 
 DBCStorage <NumTalentsAtLevelEntry> sNumTalentsAtLevelStore(NumTalentsAtLevelfmt);
 
@@ -561,6 +563,8 @@ void LoadDBCStores(const std::string& dataPath)
             sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = entry;
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sMovieStore,               dbcPath, "Movie.dbc");
+	LoadDBC(availableDbcLocales,bar,bad_dbc_files, sMountCapabilityStore,     dbcPath,"MountCapability.dbc");
+	LoadDBC(availableDbcLocales,bar,bad_dbc_files, sMountTypeStore,           dbcPath,"MountType.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sNumTalentsAtLevelStore,   dbcPath,"NumTalentsAtLevel.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sOverrideSpellDataStore,   dbcPath, "OverrideSpellData.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sQuestFactionRewardStore,  dbcPath, "QuestFactionReward.dbc");

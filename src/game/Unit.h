@@ -1932,6 +1932,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          */
         void Unmount(bool from_aura = false);
 
+        MountCapabilityEntry const* GetMountCapability(uint32 mountType) const;
+
         VehicleInfo* GetVehicleInfo() { return m_vehicleInfo; }
         bool IsVehicle() const { return m_vehicleInfo != NULL; }
         void SetVehicleId(uint32 entry, uint32 overwriteNpcEntry);

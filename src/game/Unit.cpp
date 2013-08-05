@@ -9428,6 +9428,16 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
     if(!spellEffect)
         return 0;
 
+    switch (spellEffect->EffectApplyAuraName)
+    {
+        case SPELL_AURA_MOUNTED:
+            if (MountCapabilityEntry const* mountCapability = GetMountCapability(uint32(spellEffect->EffectMiscValueB)))
+                return int32(mountCapability->Id);
+            break;
+        default:
+            break;
+    }
+
     Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;
     uint32 level = getLevel();
 

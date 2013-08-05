@@ -2900,14 +2900,14 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             case 58600:                                     // Restricted Flight Area
             {
-                AreaTableEntry const* area = GetAreaEntryByAreaID(target->GetAreaId());
+                /*AreaTableEntry const* area = GetAreaEntryByAreaID(target->GetAreaId());
 
                 // Dalaran restricted flight zone (recheck before apply unmount)
                 if (area && target->GetTypeId() == TYPEID_PLAYER && (area->flags & AREA_FLAG_CANNOT_FLY) &&
                         ((Player*)target)->IsFreeFlying() && !((Player*)target)->isGameMaster())
                 {
                     target->CastSpell(target, 58601, true); // Remove Flight Auras (also triggered Parachute (45472))
-                }
+                }*/
                 return;
             }
             case 61900:                                     // Electrical Charge
@@ -3407,6 +3407,10 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
 
     if (apply)
     {
+        // Running Wild 
+        if (GetId() == 87840)
+            target->Mount(target->getGender() == GENDER_MALE ? 29422 : 29423, GetId());
+
         CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
         if (!ci)
         {
@@ -3436,8 +3440,8 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
         target->Unmount(true);
 
 		// remove speed aura
-		if (MountCapabilityEntry const* mountCapability = target->GetMountCapability(uint32(GetMiscBValue())))
-			target->RemoveAurasDueToSpell(mountCapability->SpeedModSpell);
+		if (MountCapabilityEntry const* mountCapability = target->GetMountCapability(m_modifier.m_amount))
+			target->RemoveAurasByCasterSpell(mountCapability->SpeedModSpell, target->GetObjectGuid());
 
         CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
         if (ci && target->IsVehicle() && ci->vehicleId == target->GetVehicleInfo()->GetVehicleEntry()->m_ID)

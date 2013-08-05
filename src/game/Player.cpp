@@ -6851,17 +6851,6 @@ void Player::UpdateArea(uint32 newArea)
             SetFFAPvP(false);
     }
 
-    if (area)
-    {
-        // Dalaran restricted flight zone
-        if ((area->flags & AREA_FLAG_CANNOT_FLY) && IsFreeFlying() && !isGameMaster() && !HasAura(58600))
-            CastSpell(this, 58600, true);                   // Restricted Flight Area
-
-        // TODO: implement wintergrasp parachute when battle in progress
-        /* if ((area->flags & AREA_FLAG_OUTDOOR_PVP) && IsFreeFlying() && <WINTERGRASP_BATTLE_IN_PROGRESS> && !isGameMaster())
-            CastSpell(this, 58730, true); */
-    }
-
     UpdateAreaDependentAuras();
 }
 
@@ -22044,20 +22033,26 @@ bool Player::CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area) const
 {
     if (isGameMaster())
         return true;
+
     // continent checked in SpellMgr::GetSpellAllowedInLocationError at cast and area update
     uint32 v_map = GetVirtualMapForMapAndZone(mapid, zone);
 
-    if (v_map == 571 && !HasSpell(54197))   // Cold Weather Flying
-        return false;
+    // switch all known flying maps
+    switch (v_map)
+    {
+        case 0:         // Eastern Kingdoms
+        case 1:         // Kalimdor
+        case 646:       // Deepholm
+            return HasSpell(90267);
+        case 530:       // Outland
+            return true;
+        case 571:       // Northrend
+            // Check Cold Weather Flying
+            // Disallow mounting in wintergrasp when battle is in progress
+            return HasSpell(54197); /* && (!inWintergrasp || wg->GetState() != BF_IN_PROGRESS);*/
+    }
 
-    // don't allow flying in Dalaran restricted areas
-    // (no other zones currently has areas with AREA_FLAG_CANNOT_FLY)
-    if (AreaTableEntry const* atEntry = GetAreaEntryByAreaID(area))
-        return (!(atEntry->flags & AREA_FLAG_CANNOT_FLY));
-
-    // TODO: disallow mounting in wintergrasp too when battle is in progress
-    // forced dismount part in Player::UpdateArea()
-    return true;
+    return false;
 }
 
 struct DoPlayerLearnSpell

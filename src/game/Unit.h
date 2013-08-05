@@ -1934,6 +1934,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         MountCapabilityEntry const* GetMountCapability(uint32 mountType) const;
 
+        void PlayOneShotAnimKit(uint32 id);
+
         VehicleInfo* GetVehicleInfo() { return m_vehicleInfo; }
         bool IsVehicle() const { return m_vehicleInfo != NULL; }
         void SetVehicleId(uint32 entry, uint32 overwriteNpcEntry);

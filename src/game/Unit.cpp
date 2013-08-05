@@ -8241,10 +8241,18 @@ MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
         if (mountCapability->RequiredSpell && (GetTypeId() != TYPEID_PLAYER || !(Player*)(this)->HasSpell(mountCapability->RequiredSpell)))
             continue;
 
-    return mountCapability;
+        return mountCapability;
     }
 
     return NULL;
+}
+
+void Unit::PlayOneShotAnimKit(uint32 id)
+{
+    WorldPacket data(SMSG_PLAY_ONE_SHOT_ANIM_KIT, 7+2);
+    data << GetPackGUID();
+    data << uint16(id);
+    SendMessageToSet(&data, true);
 }
 
 void Unit::SetInCombatWith(Unit* enemy)

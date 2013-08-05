@@ -686,6 +686,7 @@ enum Opcodes
     MSG_QUEST_PUSH_RESULT                                 = 0x4515, // 4.3.4 15595
     SMSG_PLAY_MUSIC                                       = 0x4B06, // 4.3.4 15595
     SMSG_PLAY_OBJECT_SOUND                                = 0x2635, // 4.3.4 15595
+    SMSG_PLAY_ONE_SHOT_ANIM_KIT                           = 0x4A35, // 4.3.4 15595
     CMSG_REQUEST_PET_INFO                                 = 0x4924, // 4.3.4 15595
     CMSG_FAR_SIGHT                                        = 0x4835, // 4.3.4 15595
     SMSG_SPELLDISPELLOG                                   = 0x4516, // 4.3.4 15595

@@ -467,6 +467,15 @@ enum SkillRangeType
 
 SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial);
 
+struct HotfixInfo
+{
+    uint32 Type;
+    uint32 Timestamp;
+    uint32 Entry;
+};
+
+typedef std::vector<HotfixInfo> HotfixData;
+
 #define MAX_PLAYER_NAME          12                         // max allowed by client name length
 #define MAX_INTERNAL_PLAYER_NAME 15                         // max server internal player name length ( > MAX_PLAYER_NAME for support declined names )
 #define MAX_PET_NAME             12                         // max allowed by client name length
@@ -1116,6 +1125,20 @@ class ObjectMgr
         QuestRelationsMap& GetCreatureQuestRelationsMap() { return m_CreatureQuestRelations; }
 
         uint32 GetModelForRace(uint32 sourceModelId, uint32 racemask);
+
+        void LoadHotfixData();
+        HotfixData const& GetHotfixData() const { return m_hotfixData; }
+        uint32 GetHotfixDate(uint32 entry, uint32 type) const
+        {
+            uint32 ret = 0;
+            for (HotfixData::const_iterator itr = m_hotfixData.begin(); itr != m_hotfixData.end(); ++itr)
+                if (itr->Entry == entry && itr->Type == type)
+                    if (itr->Timestamp > ret)
+                        ret = itr->Timestamp;
+
+            return ret ? ret : uint32(time(NULL));
+        }
+
     protected:
 
         // first free id for selected id type
@@ -1252,6 +1275,8 @@ class ObjectMgr
         CacheVendorItemMap m_mCacheVendorItemMap;
         CacheTrainerSpellMap m_mCacheTrainerTemplateSpellMap;
         CacheTrainerSpellMap m_mCacheTrainerSpellMap;
+
+        HotfixData m_hotfixData; 
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()

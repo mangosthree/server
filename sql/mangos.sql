@@ -1425,7 +1425,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_m12652_command` bit(1) default NULL
+  `required_12662_01_mangos_hotfix_data` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1435,7 +1435,7 @@ CREATE TABLE `db_version` (
 
 LOCK TABLES `db_version` WRITE;
 /*!40000 ALTER TABLE `db_version` DISABLE KEYS */;
-INSERT INTO `db_version` (`version`, `creature_ai_version`, `cache_id`, `required_c12602_01_mangos_npc_spellclick_spells`) VALUES
+INSERT INTO `db_version` (`version`, `creature_ai_version`, `cache_id`, `required_12662_01_mangos_hotfix_data`) VALUES
 ('Mangos default database.','Creature EventAI not provided.',0,NULL);
 /*!40000 ALTER TABLE `db_version` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -2140,7 +2140,62 @@ INSERT INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`,
 /*!40000 ALTER TABLE `gossip_menu_option` ENABLE KEYS */;
 UNLOCK TABLES;
 
+
+ --
+-- Table structure for table `hotfix_data`
 --
+
+DROP TABLE IF EXISTS `hotfix_data`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hotfix_data` (
+  `entry` int(10) unsigned NOT NULL,
+  `type` int(10) unsigned NOT NULL DEFAULT '0',
+  `hotfixDate` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (`entry`,`type`,`hotfixDate`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hotfix_data`
+--
+
+LOCK TABLES `hotfix_data` WRITE;
+/*!40000 ALTER TABLE `hotfix_data` DISABLE KEYS */;
+INSERT INTO `hotfix_data` (`entry`, `type`, `hotfixDate`) VALUES
+('6948', '1344507586', '2011-11-23 08:34:13'),
+('44623', '1344507586', '2011-11-23 08:34:04'),
+('44625', '1344507586', '2011-11-23 08:34:04'),
+('44626', '1344507586', '2011-11-23 08:34:04'),
+('44632', '1344507586', '2011-11-23 08:34:04'),
+('44812', '1344507586', '2011-11-23 08:34:00'),
+('44834', '1344507586', '2011-11-23 08:34:00'),
+('44835', '1344507586', '2011-11-23 08:34:00'),
+('44836', '1344507586', '2011-11-23 08:34:00'),
+('44837', '1344507586', '2011-11-23 08:34:00'),
+('44838', '1344507586', '2011-11-23 08:34:00'),
+('44839', '1344507586', '2011-11-23 08:34:00'),
+('44840', '1344507586', '2011-11-23 08:34:00'),
+('44844', '1344507586', '2011-11-23 08:34:00'),
+('44853', '1344507586', '2011-11-23 08:34:00'),
+('44854', '1344507586', '2011-11-23 08:34:00'),
+('44855', '1344507586', '2011-11-23 08:34:00'),
+('44856', '1344507586', '2011-11-23 08:34:00'),
+('46784', '1344507586', '2011-11-23 08:34:00'),
+('46793', '1344507586', '2011-11-23 08:34:00'),
+('46796', '1344507586', '2011-11-23 08:34:00'),
+('46797', '1344507586', '2011-11-23 08:34:00'),
+('46887', '1344507586', '2011-11-23 08:34:00'),
+('46888', '1344507586', '2011-11-23 08:34:00'),
+('64488', '1344507586', '2011-11-23 08:34:13'),
+('69847', '1344507586', '2011-11-23 08:34:03'),
+('69847', '1344507586', '2011-11-23 08:34:06'),
+('72068', '1344507586', '2011-11-23 08:34:03'),
+('72068', '1344507586', '2011-11-23 08:34:06');
+/*!40000 ALTER TABLE `hotfix_data` ENABLE KEYS */;
+UNLOCK TABLES;
+
+-- 
 -- Table structure for table `instance_encounters`
 --
 

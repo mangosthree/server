@@ -9961,3 +9961,38 @@ GameObjectDataPair const* FindGOData::GetResult() const
 
     return i_anyData;
 }
+
+void ObjectMgr::LoadHotfixData()
+{
+    uint32 count = 0;
+    m_hotfixData.clear();
+
+    QueryResult* result = WorldDatabase.Query("SELECT entry, type, UNIX_TIMESTAMP(hotfixDate) FROM hotfix_data");
+    if (!result)
+    {
+        BarGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString(">> Loaded %u hotfix info entries. DB table `hotfix_data` is empty.", count);
+        return;
+    }
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        HotfixInfo info;
+        info.Entry      = fields[0].GetUInt32();
+        info.Type       = fields[1].GetUInt32();
+        info.Timestamp  = fields[2].GetUInt32();
+        m_hotfixData.push_back(info);
+        ++count;
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString(">> Loaded %u hotfix info entries.", count);
+} 

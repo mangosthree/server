@@ -67,6 +67,9 @@ enum AccountDataType
 #define GLOBAL_CACHE_MASK           0x15
 #define PER_CHARACTER_CACHE_MASK    0xEA
 
+#define DB2_REPLY_ITEM 1344507586
+#define DB2_REPLY_SPARSE 2442913102
+
 struct AccountData
 {
     AccountData() : Time(0), Data("") {}
@@ -862,6 +865,11 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleCalendarEventModeratorStatus(WorldPacket& recv_data);
         void HandleCalendarComplain(WorldPacket& recv_data);
         void HandleCalendarGetNumPending(WorldPacket& recv_data);
+
+        // Hotfix handlers
+        void HandleRequestHotfix(WorldPacket& recv_data);
+        void SendItemDb2Reply(uint32 entry);
+        void SendItemSparseDb2Reply(uint32 entry); 
 
         void HandleSpellClick(WorldPacket& recv_data);
         void HandleGetMirrorimageData(WorldPacket& recv_data);

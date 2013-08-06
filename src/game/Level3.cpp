@@ -448,6 +448,14 @@ bool ChatHandler::HandleReloadConditionsCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadHotfixDataCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading hotfix data...");
+    sObjectMgr.LoadHotfixData();
+    SendGlobalSysMessage("DB table `hotfix_data` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadGossipMenuCommand(char* /*args*/)
 {
     sObjectMgr.LoadGossipMenus();

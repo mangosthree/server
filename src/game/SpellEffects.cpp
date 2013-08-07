@@ -105,7 +105,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectJump,                                     // 42 SPELL_EFFECT_JUMP2
     &Spell::EffectTeleUnitsFaceCaster,                      // 43 SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER
     &Spell::EffectLearnSkill,                               // 44 SPELL_EFFECT_SKILL_STEP
-    &Spell::EffectAddHonor,                                 // 45 SPELL_EFFECT_ADD_HONOR                honor/pvp related
+    &Spell::EffectNULL,                                     // 45 SPELL_EFFECT_PLAY_MOVIE
     &Spell::EffectNULL,                                     // 46 SPELL_EFFECT_SPAWN                    spawn/login animation, expected by spawn unit cast, also base points store some dynflags
     &Spell::EffectTradeSkill,                               // 47 SPELL_EFFECT_TRADE_SKILL
     &Spell::EffectUnused,                                   // 48 SPELL_EFFECT_STEALTH                  one spell: Base Stealth
@@ -225,18 +225,18 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectActivateSpec,                             //162 SPELL_EFFECT_TALENT_SPEC_SELECT       activate primary/secondary spec
     &Spell::EffectUnused,                                   //163 unused in 3.3.5a
     &Spell::EffectCancelAura,                               //164 SPELL_EFFECT_CANCEL_AURA
-    &Spell::EffectNULL,                                     //165 SPELL_EFFECT_165                      82 spells in 4.3.4
-    &Spell::EffectNULL,                                     //166 SPELL_EFFECT_166                      56 spells in 4.3.4
+    &Spell::EffectNULL,                                     //165 SPELL_EFFECT_DAMAGE_FROM_MAX_HEALTH_PCT 82 spells in 4.3.4
+    &Spell::EffectNULL,                                     //166 SPELL_EFFECT_REWARD_CURRENCY          56 spells in 4.3.4
     &Spell::EffectNULL,                                     //167 SPELL_EFFECT_167                      42 spells in 4.3.4
     &Spell::EffectNULL,                                     //168 SPELL_EFFECT_168                      2 spells in 4.3.4 Allows give commands to controlled pet
-    &Spell::EffectNULL,                                     //169 SPELL_EFFECT_169                      9 spells in 4.3.4 removes something
+    &Spell::EffectNULL,                                     //169 SPELL_EFFECT_DESTROY_ITEM             9 spells in 4.3.4
     &Spell::EffectNULL,                                     //170 SPELL_EFFECT_170                      70 spells in 4.3.4
     &Spell::EffectNULL,                                     //171 SPELL_EFFECT_171                      19 spells in 4.3.4 related to GO summon
     &Spell::EffectNULL,                                     //172 SPELL_EFFECT_MASS_RESSURECTION        Mass Ressurection (Guild Perk)
     &Spell::EffectNULL,                                     //173 SPELL_EFFECT_BUY_GUILD_BANKSLOT       4 spells in 4.3.4 basepoints - slot
     &Spell::EffectNULL,                                     //174 SPELL_EFFECT_174                      13 spells some sort of area aura apply effect
     &Spell::EffectUnused,                                   //175 SPELL_EFFECT_175                      unused in 4.3.4
-    &Spell::EffectNULL,                                     //176 SPELL_EFFECT_176                      4 spells in 4.3.4
+    &Spell::EffectNULL,                                     //176 SPELL_EFFECT_SANCTUARY_2              4 spells in 4.3.4
     &Spell::EffectNULL,                                     //177 SPELL_EFFECT_177                      2 spells in 4.3.4 Deluge(100757) and test spell
     &Spell::EffectUnused,                                   //178 SPELL_EFFECT_178                      unused in 4.3.4
     &Spell::EffectNULL,                                     //179 SPELL_EFFECT_179                      15 spells in 4.3.4
@@ -5907,34 +5907,6 @@ void Spell::EffectLearnSkill(SpellEffectEntry const* effect)
 
     if (WorldObject const* caster = GetCastingObject())
         DEBUG_LOG("Spell: %s has learned skill %u (to maxlevel %u) from %s", unitTarget->GetGuidStr().c_str(), skillid, damage * 75, caster->GetGuidStr().c_str());
-}
-
-void Spell::EffectAddHonor(SpellEffectEntry const* /*effect*/)
-{
-    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    // not scale value for item based reward (/10 value expected)
-    if (m_CastItem)
-    {
-        ((Player*)unitTarget)->RewardHonor(NULL, 1, float(damage / 10));
-        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "SpellEffect::AddHonor (spell_id %u) rewards %d honor points (item %u) for player: %u", m_spellInfo->Id, damage / 10, m_CastItem->GetEntry(), ((Player*)unitTarget)->GetGUIDLow());
-        return;
-    }
-
-    // do not allow to add too many honor for player (50 * 21) = 1040 at level 70, or (50 * 31) = 1550 at level 80
-    if (damage <= 50)
-    {
-        float honor_reward = MaNGOS::Honor::hk_honor_at_level(unitTarget->getLevel(), damage);
-        ((Player*)unitTarget)->RewardHonor(NULL, 1, honor_reward);
-        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "SpellEffect::AddHonor (spell_id %u) rewards %f honor points (scale) to player: %u", m_spellInfo->Id, honor_reward, ((Player*)unitTarget)->GetGUIDLow());
-    }
-    else
-    {
-        // maybe we have correct honor_gain in damage already
-        ((Player*)unitTarget)->RewardHonor(NULL, 1, (float)damage);
-        sLog.outError("SpellEffect::AddHonor (spell_id %u) rewards %u honor points (non scale) for player: %u", m_spellInfo->Id, damage, ((Player*)unitTarget)->GetGUIDLow());
-    }
 }
 
 void Spell::EffectTradeSkill(SpellEffectEntry const* /*effect*/)

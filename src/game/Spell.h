@@ -291,7 +291,6 @@ class Spell
         void EffectJump(SpellEffectEntry const* effect);
         void EffectTeleUnitsFaceCaster(SpellEffectEntry const* effect);
         void EffectLearnSkill(SpellEffectEntry const* effect);
-        void EffectAddHonor(SpellEffectEntry const* effect);
         void EffectTradeSkill(SpellEffectEntry const* effect);
         void EffectEnchantItemPerm(SpellEffectEntry const* effect);
         void EffectEnchantItemTmp(SpellEffectEntry const* effect);

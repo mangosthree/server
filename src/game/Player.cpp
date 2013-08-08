@@ -7471,24 +7471,12 @@ void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply
 
         if (form_change)                                    // check aura active state from other form
         {
-            bool found = false;
-            for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
+            SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellInfo->Id);
+            for (SpellAuraHolderMap::const_iterator iter = spair.first; iter != spair.second; ++iter)
             {
-                SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellInfo->Id);
-                for (SpellAuraHolderMap::const_iterator iter = spair.first; iter != spair.second; ++iter)
-                {
-                    if (!item || iter->second->GetCastItemGuid() == item->GetObjectGuid())
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                if (found)
-                    break;
+                if (!item || iter->second->GetCastItemGuid() == item->GetObjectGuid())
+                    return;                                 // and skip re-cast already active aura at form change
             }
-
-            if (found)                                      // and skip re-cast already active aura at form change
-                return;
         }
 
         DEBUG_LOG("WORLD: cast %s Equip spellId - %i", (item ? "item" : "itemset"), spellInfo->Id);

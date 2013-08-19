@@ -63,14 +63,15 @@ enum AIEventType
 {
     // Usable with Event AI
     AI_EVENT_JUST_DIED          = 0,                        // Sender = Killed Npc, Invoker = Killer
-    AI_EVENT_CRITICAL_HEALTH    = 1,                        // Sender = Hurt Npc, Invoker = DamageDealer
-    AI_EVENT_LOST_HEALTH        = 2,                        // Sender = Hurt Npc, Invoker = DamageDealer
-    AI_EVENT_GOT_CCED           = 3,                        // Sender = CCed Npc, Invoker = Caster that CCed
+    AI_EVENT_CRITICAL_HEALTH    = 1,                        // Sender = Hurt Npc, Invoker = DamageDealer - Expected to be sent by 10% health
+    AI_EVENT_LOST_HEALTH        = 2,                        // Sender = Hurt Npc, Invoker = DamageDealer - Expected to be sent by 50% health
+    AI_EVENT_LOST_SOME_HEALTH   = 3,                        // Sender = Hurt Npc, Invoker = DamageDealer - Expected to be sent by 90% health
     AI_EVENT_GOT_FULL_HEALTH    = 4,                        // Sender = Healed Npc, Invoker = Healer
     AI_EVENT_CUSTOM_EVENTAI_A   = 5,                        // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
     AI_EVENT_CUSTOM_EVENTAI_B   = 6,                        // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
-    MAXIMAL_AI_EVENT_EVENTAI    = 7,
-
+    AI_EVENT_GOT_CCED           = 7,                        // Sender = CCed Npc, Invoker = Caster that CCed
+    MAXIMAL_AI_EVENT_EVENTAI    = 8,
+ 
     // Internal Use
     AI_EVENT_CALL_ASSISTANCE    = 10,                       // Sender = Attacked Npc, Invoker = Enemy
 
@@ -143,7 +144,7 @@ class MANGOS_DLL_SPEC CreatureAI
          * @param pHealer Unit* which deals the heal
          * @param uiHealedAmount Amount of healing received
          */
-        virtual void HealedBy(Unit * /*pHealer*/, uint32& /*uiHealedAmount*/) {}
+        virtual void HealedBy(Unit* /*pHealer*/, uint32& /*uiHealedAmount*/) {}
 
         /**
          * Called at any Damage to any victim (before damage apply)
@@ -317,7 +318,7 @@ class MANGOS_DLL_SPEC CreatureAI
          * @param uiDelay  delay time until the Event will be triggered
          * @param fRadius  range in which for receiver is searched
          */
-        void SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue = 0) const;
+        void SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue = 0) const;
 
         /**
          * Send an AI Event to a Creature

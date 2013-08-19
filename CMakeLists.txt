@@ -1,5 +1,5 @@
 #
-# This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+# This file is part of the MaNGOS Project. See AUTHORS file for Copyright information
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,11 +16,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-# CMake policies
 cmake_minimum_required(VERSION 2.8)
 
 project(MaNGOS)
-set(MANGOS_VERSION 0.18)
+set(MANGOS_VERSION 0.17)
 
 set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH}
@@ -51,6 +50,10 @@ message(
     CMAKE_INSTALL_PREFIX    Path where the server should be installed to
     PCH                     Use precompiled headers
     DEBUG                   Debug mode
+    INCLUDE_BINDINGS_DIR    Include a script library in src/bindings/ with the
+                            defined name. the name must corespond to the name of
+                            the folder and the folder must contain a valid
+                            CMakeLists.txt
     TBB_USE_EXTERNAL        Use external TBB
     USE_STD_MALLOC          Use standard malloc instead of TBB
     ACE_USE_EXTERNAL        Use external ACE
@@ -90,9 +93,6 @@ if(WIN32)
     set(DEP_ARCH x64)
   endif()
 endif()
-
-# find Git: used to get the revision number
-find_package(Git)
 
 # find Git: used to get the revision number
 find_package(Git)
@@ -217,6 +217,20 @@ endif()
 
 message(STATUS "MaNGOS-Core revision  : ${GIT_REVISION}")
 message(STATUS "Install server to     : ${CMAKE_INSTALL_PREFIX}")
+
+if(DEFINED INCLUDE_BINDINGS_DIR AND INCLUDE_BINDINGS_DIR)
+  # check if the directory exists
+  if(NOT IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR})
+    message(FATAL_ERROR "Could not find the script library which was supposed to be: " ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR})
+  endif()
+  # check if it really contains a CMakeLists.txt
+  if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR}/CMakeLists.txt)
+    message(FATAL_ERROR "The script library does not contain a CMakeLists.txt!")
+  endif()
+  message(STATUS "Build script library  : Yes (using ${INCLUDE_BINDINGS_DIR})")
+else()
+  message(STATUS "Build script library  : No")
+endif()
 
 # if(CLI)
 #   message(STATUS "Build with CLI        : Yes (default)")

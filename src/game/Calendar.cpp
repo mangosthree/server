@@ -580,6 +580,7 @@ void CalendarMgr::LoadCalendarsFromDB()
         do
         {
             Field* field = eventsQuery->Fetch();
+            bar.step();
 
             uint64 eventId         = field[0].GetUInt64();
 

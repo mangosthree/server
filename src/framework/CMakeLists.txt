@@ -1,4 +1,5 @@
-# This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+#
+# This file is part of the MaNGOS Project. See AUTHORS file for Copyright information
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,12 +14,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
 
 set(LIBRARY_NAME framework)
 
-set(LIBRARY_SRCS
+set(SRC_GRP_DYNAMIC
     Dynamic/FactoryHolder.h
     Dynamic/ObjectRegistry.h
+)
+
+set(SRC_GRP_GAMESYSTEM
     GameSystem/Grid.h
     GameSystem/GridLoader.h
     GameSystem/GridReference.h
@@ -27,51 +32,74 @@ set(LIBRARY_SRCS
     GameSystem/TypeContainer.h
     GameSystem/TypeContainerFunctions.h
     GameSystem/TypeContainerVisitor.h
+)
+
+set(SRC_GRP_PLATFORM
     Platform/CompilerDefs.h
     Platform/Define.h
+)
+
+set(SRC_GRP_POLICIES
     Policies/CreationPolicy.h
     Policies/MemoryManagement.cpp
     Policies/ObjectLifeTime.cpp
     Policies/ObjectLifeTime.h
     Policies/Singleton.h
     Policies/ThreadingModel.h
+)
+
+set(SRC_GRP_UTIL
     Utilities/ByteConverter.h
     Utilities/Callback.h
     Utilities/EventProcessor.cpp
     Utilities/EventProcessor.h
     Utilities/LinkedList.h
-    Utilities/LinkedReference/Reference.h
-    Utilities/LinkedReference/RefManager.h
     Utilities/TypeList.h
     Utilities/UnorderedMapSet.h
-   )
-
-source_group("Other"
-  REGULAR_EXPRESSION .*
 )
 
-source_group("GameSystem"
-  REGULAR_EXPRESSION GameSystem
+set(SRC_GRP_LINKED_REFERENCE
+    Utilities/LinkedReference/Reference.h
+    Utilities/LinkedReference/RefManager.h
 )
 
-source_group("Platform"
-  REGULAR_EXPRESSION Platform
-)
-
-source_group("Policies"
-  REGULAR_EXPRESSION Policies
-)
-
-source_group("Utilities"
-  REGULAR_EXPRESSION Utilities
-)
-
-source_group("LinkedReference"
-  REGULAR_EXPRESSION LinkedReference
+set(LIBRARY_SRCS
+    ${SRC_GRP_DYNAMIC}
+    ${SRC_GRP_GAMESYSTEM}
+    ${SRC_GRP_PLATFORM}
+    ${SRC_GRP_POLICIES}
+    ${SRC_GRP_UTIL}
+    ${SRC_GRP_LINKED_REFERENCE}
 )
 
 source_group("Dynamic"
-  REGULAR_EXPRESSION Dynamic
+  FILES
+    ${SRC_GRP_DYNAMIC}
+)
+
+source_group("GameSystem"
+  FILES
+    ${SRC_GRP_GAMESYSTEM}
+)
+
+source_group("Platform"
+  FILES
+    ${SRC_GRP_PLATFORM}
+)
+
+source_group("Policies"
+  FILES
+    ${SRC_GRP_POLICIES}
+)
+
+source_group("Utilities"
+  FILES
+    ${SRC_GRP_UTIL}
+)
+
+source_group("Utilities\\LinkedReference"
+  FILES
+    ${SRC_GRP_LINKED_REFERENCE}
 )
 
 include_directories(

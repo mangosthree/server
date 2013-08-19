@@ -501,12 +501,20 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
     }
 }
 
+/**
+ * What - if any - kind of explanation mark or question-mark should a quest-giver display for a player
+ * @param pPlayer - for whom
+ * @param questgiver - from whom
+ * @param defstatus - initial set status (usually it will be called with DIALOG_STATUS_NONE) - must not be DIALOG_STATUS_UNDEFINED
+ */
 uint32 WorldSession::getDialogStatus(Player* pPlayer, Object* questgiver, uint32 defstatus)
 {
+    MANGOS_ASSERT(defstatus != DIALOG_STATUS_UNDEFINED);
+
     uint32 dialogStatus = defstatus;
 
-    QuestRelationsMapBounds rbounds;
-    QuestRelationsMapBounds irbounds;
+    QuestRelationsMapBounds rbounds;                        // QuestRelations (quest-giver)
+    QuestRelationsMapBounds irbounds;                       // InvolvedRelations (quest-finisher)
 
     switch (questgiver->GetTypeId())
     {
@@ -528,9 +536,10 @@ uint32 WorldSession::getDialogStatus(Player* pPlayer, Object* questgiver, uint32
             return DIALOG_STATUS_NONE;
     }
 
+    // Check markings for quest-finisher
     for (QuestRelationsMap::const_iterator itr = irbounds.first; itr != irbounds.second; ++itr)
     {
-        uint32 dialogStatusNew = 0;
+        uint32 dialogStatusNew = DIALOG_STATUS_NONE;
         uint32 quest_id = itr->second;
         Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest_id);
 
@@ -554,9 +563,10 @@ uint32 WorldSession::getDialogStatus(Player* pPlayer, Object* questgiver, uint32
             dialogStatus = dialogStatusNew;
     }
 
+    // check markings for quest-giver
     for (QuestRelationsMap::const_iterator itr = rbounds.first; itr != rbounds.second; ++itr)
     {
-        uint32 dialogStatusNew = 0;
+        uint32 dialogStatusNew = DIALOG_STATUS_NONE;
         uint32 quest_id = itr->second;
         Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest_id);
 
@@ -565,24 +575,25 @@ uint32 WorldSession::getDialogStatus(Player* pPlayer, Object* questgiver, uint32
 
         QuestStatus status = pPlayer->GetQuestStatus(quest_id);
 
-        if (status == QUEST_STATUS_NONE)
+        if (status == QUEST_STATUS_NONE)                    // For all other cases the mark is handled either at some place else, or with involved-relations already
         {
             if (pPlayer->CanSeeStartQuest(pQuest))
             {
                 if (pPlayer->SatisfyQuestLevel(pQuest, false))
                 {
+                    int32 lowLevelDiff = sWorld.getConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF);
                     if (pQuest->IsAutoComplete() || (pQuest->IsRepeatable() && pPlayer->getQuestStatusMap()[quest_id].m_rewarded))
                     {
                         dialogStatusNew = DIALOG_STATUS_REWARD_REP;
                     }
-                    else if (int32(pPlayer->getLevel()) <= int32(pPlayer->GetQuestLevelForPlayer(pQuest)) + sWorld.getConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF))
+                    else if (lowLevelDiff < 0 || pPlayer->getLevel() <= pPlayer->GetQuestLevelForPlayer(pQuest) + uint32(lowLevelDiff))
                     {
                         if (pQuest->HasQuestFlag(QUEST_FLAGS_DAILY) || pQuest->HasQuestFlag(QUEST_FLAGS_WEEKLY))
                             dialogStatusNew = DIALOG_STATUS_AVAILABLE_REP;
                         else
                             dialogStatusNew = DIALOG_STATUS_AVAILABLE;
                     }
-                    else
+                    else                                    // player level much higher then quest-level
                         dialogStatusNew = DIALOG_STATUS_LOW_LEVEL_AVAILABLE;
                 }
                 else

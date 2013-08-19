@@ -118,7 +118,8 @@ enum __QuestGiverStatus
     DIALOG_STATUS_AVAILABLE_REP            = 0x080,
     DIALOG_STATUS_AVAILABLE                = 0x100,
     DIALOG_STATUS_REWARD2                  = 0x200,         // no yellow dot on minimap
-    DIALOG_STATUS_REWARD                   = 0x400          // yellow dot on minimap
+    DIALOG_STATUS_REWARD                   = 0x400,         // yellow dot on minimap
+    DIALOG_STATUS_UNDEFINED                = 0xFFFF,        // Used as result for unassigned ScriptCall
 };
 
 // values based at QuestInfo.dbc

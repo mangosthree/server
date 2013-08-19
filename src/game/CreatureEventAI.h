@@ -116,6 +116,7 @@ enum EventAI_ActionType
     ACTION_T_MOUNT_TO_ENTRY_OR_MODEL    = 43,               // Creature_template entry(param1) OR ModelId (param2) (or 0 for both to unmount)
     ACTION_T_CHANCED_TEXT               = 44,               // Chance to display the text, TextId1, optionally TextId2. If more than just -TextId1 is defined, randomize. Negative values.
     ACTION_T_THROW_AI_EVENT             = 45,               // EventType, Radius, unused 
+    ACTION_T_SET_THROW_MASK             = 46,               // EventTypeMask, unused, unused
     ACTION_T_END,
 };
 
@@ -132,15 +133,13 @@ enum Target
     TARGET_T_HOSTILE_RANDOM_NOT_TOP         = 5,            // Any random target except top threat
 
     // Invoker targets (if pet then returns pet owner)
-    TARGET_T_ACTION_INVOKER                 = 6,            // Unit who caused this Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF)
-    TARGET_T_ACTION_INVOKER_OWNER           = 7,            // Unit who is responsible for Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF)
+    TARGET_T_ACTION_INVOKER                 = 6,            // Unit who caused this Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF, EVENT_T_RECEIVE_EMOTE, EVENT_T_RECEIVE_AI_EVENT)
+    TARGET_T_ACTION_INVOKER_OWNER           = 7,            // Unit who is responsible for Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF, EVENT_T_RECEIVE_EMOTE, EVENT_T_RECEIVE_AI_EVENT)
     TARGET_T_EVENT_SENDER                   = 10,           // Unit who sent an AIEvent that was received with EVENT_T_RECEIVE_AI_EVENT
 
     // Hostile targets (including pets)
     TARGET_T_HOSTILE_RANDOM_PLAYER          = 8,            // Just any random player on our threat list
-    TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER  = 9,            // Any random player from threat list except top threat
-
-    TARGET_T_END
+    TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER  = 9             // Any random player from threat list except top threat
 };
 
 enum EventFlags
@@ -163,17 +162,6 @@ enum SpawnedEventMode
     SPAWNED_EVENT_MAP   = 1,
     SPAWNED_EVENT_ZONE  = 2
 };
-
-// String text additional data, used in (CreatureEventAI)
-struct StringTextData
-{
-    uint32 SoundId;
-    uint8  Type;
-    uint32 Language;
-    uint32 Emote;
-};
-// Text Maps
-typedef UNORDERED_MAP<int32, StringTextData> CreatureEventAI_TextMap;
 
 struct CreatureEventAI_Action
 {
@@ -402,6 +390,13 @@ struct CreatureEventAI_Action
             uint32 radius;
             uint32 unused;
         } throwEvent;
+        // ACTION_T_SET_THROW_MASK                          = 46
+        struct
+        {
+            uint32 eventTypeMask;
+            uint32 unused1;
+            uint32 unused2;
+        } setThrowMask;
         // RAW
         struct
         {
@@ -411,6 +406,8 @@ struct CreatureEventAI_Action
         } raw;
     };
 };
+
+#define AIEVENT_DEFAULT_THROW_RADIUS    30.0f
 
 struct CreatureEventAI_Event
 {
@@ -620,6 +617,7 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         void MoveInLineOfSight(Unit* who) override;
         void SpellHit(Unit* pUnit, const SpellEntry* pSpell) override;
         void DamageTaken(Unit* done_by, uint32& damage) override;
+        void HealedBy(Unit* healer, uint32& healedAmount) override;
         void UpdateAI(const uint32 diff) override;
         bool IsVisible(Unit*) const override;
         void ReceiveEmote(Player* pPlayer, uint32 text_emote) override;
@@ -633,10 +631,9 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker, Creature* pAIEventSender);
         inline uint32 GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3);
         inline int32 GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3);
-        inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker, Creature* pAIEventSender, uint32 forSpellId = 0, uint32 selectFlags = 0);
-
-        void DoScriptText(int32 textEntry, WorldObject* pSource, Unit* target);
-
+        /// If the bool& param is true, an error should be reported
+        inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker, Creature* pAIEventSender, bool& isError, uint32 forSpellId = 0, uint32 selectFlags = 0);
+ 
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event);
 
         Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff);
@@ -655,6 +652,11 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         uint8  m_Phase;                                     // Current phase, max 32 phases
         bool   m_MeleeEnabled;                              // If we allow melee auto attack
         uint32 m_InvinceabilityHpLevel;                     // Minimal health level allowed at damage apply
+
+        uint32 m_throwAIEventMask;                          // Automatically throw AIEvents that are encoded into this mask
+        // Note that Step 100 means that AI_EVENT_GOT_FULL_HEALTH was sent
+        // Steps 0..2 correspond to AI_EVENT_LOST_SOME_HEALTH(90%), AI_EVENT_LOST_HEALTH(50%), AI_EVENT_CRITICAL_HEALTH(10%)
+        uint32 m_throwAIEventStep;                          // Used for damage taken/ received heal
 };
 
 #endif

@@ -7396,13 +7396,7 @@ bool Spell::IsNeedSendToClient() const
 
 bool Spell::IsTriggeredSpellWithRedundentCastTime() const
 {
-<<<<<<< HEAD
-    return m_triggeredByAuraSpell || m_triggeredBySpellInfo ||
-        // possible not need after above check?
-        m_IsTriggeredSpell && (m_spellInfo->GetManaCost() || m_spellInfo->GetManaCostPercentage());
-=======
-    return m_IsTriggeredSpell && (m_spellInfo->manaCost || m_spellInfo->ManaCostPercentage);
->>>>>>> 47aa389... [12468] Use normal cast time for triggered spells by default
+    return m_IsTriggeredSpell && (m_spellInfo->GetManaCost() || m_spellInfo->GetManaCostPercentage());
 }
 
 bool Spell::HaveTargetsForEffect(SpellEffectIndex effect) const

@@ -770,10 +770,10 @@ namespace MMAP
         if (m_skipContinents)
             switch (mapID)
             {
-                case 0:
-                case 1:
-                case 530:
-                case 571:
+                case 0:		// Eastern Kingdoms
+                case 1:		// Kalimdor
+                case 530:	// Outland
+                case 571:	// Northrend
                     return true;
                 default:
                     break;
@@ -804,13 +804,14 @@ namespace MMAP
             switch (mapID)
             {
                 case 30:    // AV
-                case 37:    // ?
+                case 37:    // AC
                 case 489:   // WSG
                 case 529:   // AB
                 case 566:   // EotS
                 case 607:   // SotA
                 case 628:   // IoC
-                case 727:   // TP
+                case 726:   // TP
+                case 727:   // SM
                 case 728:   // BfG
                 case 761:   // BfG2
                 case 968:   // EotS2
@@ -828,51 +829,52 @@ namespace MMAP
         switch (mapID)
         {
                 // transport maps
-            case 582:
-            case 584:
-            case 586:
-            case 587:
-            case 588:
-            case 589:
-            case 590:
-            case 591:
-            case 592:
-            case 593:
-            case 594:
-            case 596:
-            case 610:
-            case 612:
-            case 613:
-            case 614:
-            case 620:
-            case 621:
-            case 622:
-            case 623:
-            case 641:
-            case 642:
-            case 647:
-            case 672:
-            case 673:
-            case 674:
-            case 712:
-            case 713:
-            case 718:
-            case 738:
-            case 739:
-            case 740:
-            case 741:
-            case 742:
-            case 743:
-            case 746:
-            case 747:
-            case 748:
-            case 749:
-            case 750:
-            case 762:
-            case 763:
-            case 765:
-            case 766:
-            case 767:
+            case 582:	// Transport: Rut'theran to Auberdine
+            case 584:	// Transport: Menethil to Theramore
+            case 586:	// Transport: Exodar to Auberdine
+            case 587:	// Transport: Feathermoon Ferry
+            case 588:	// Transport: Menethil to Auberdine
+            case 589:	// Transport: Orgrimmar to Grom'Gol
+            case 590:	// Transport: Grom'Gol to Undercity
+            case 591:	// Transport: Undercity to Orgrimmar
+            case 592:	// Transport: Borean Tundra Test
+            case 593:	// Transport: Booty Bay to Ratchet
+            case 594:	// Transport: Howling Fjord Sister Mercy (Quest)
+            case 596:	// Transport: Naglfar
+            case 610:	// Transport: Tirisfal to Vengeance Landing
+            case 612:	// Transport: Menethil to Valgarde
+            case 613:	// Transport: Orgrimmar to Warsong Hold
+            case 614:	// Transport: Stormwind to Valiance Keep
+            case 620:	// Transport: Moa'ki to Unu'pe
+            case 621:	// Transport: Moa'ki to Kamagua
+            case 622:	// Transport: Orgrim's Hammer
+            case 623:	// Transport: The Skybreaker
+            case 641:	// Transport: Alliance Airship BG
+            case 642:	// Transport: HordeAirshipBG
+            case 647:	// Transport: Orgrimmar to Thunder Bluff
+			case 662:	// Transport: Alliance Vashj'ir Ship
+            case 672:	// Transport: The Skybreaker (Icecrown Citadel Raid)
+            case 673:	// Transport: Orgrim's Hammer (Icecrown Citadel Raid)
+            case 674:	// Transport: Ship to Vashj'ir
+            case 712:	// Transport: The Skybreaker (IC Dungeon)
+            case 713:	// Transport: Orgrim's Hammer (IC Dungeon)
+            case 718:	// Transport: The Mighty Wind (Icecrown Citadel Raid)
+            case 738:	// Ship to Vashj'ir (Orgrimmar -> Vashj'ir)
+            case 739:	// Vashj'ir Sub - Horde
+            case 740:	// Vashj'ir Sub - Alliance
+            case 741:	// Twilight Highlands Horde Transport
+            case 742:	// Vashj'ir Sub - Horde - Circling Abyssal Maw
+            case 743:	// Vashj'ir Sub - Alliance circling Abyssal Maw
+            case 746:	// Uldum Phase Oasis
+            case 747:	// Transport: Deepholm Gunship
+            case 748:	// Transport: Onyxia/Nefarian Elevator
+            case 749:	// Transport: Gilneas Moving Gunship
+            case 750:	// Transport: Gilneas Static Gunship
+            case 762:	// Twilight Highlands Zeppelin 1
+            case 763:	// Twilight Highlands Zeppelin 2
+            case 765:	// Krazzworks Attack Zeppelin
+            case 766:	// Transport: Gilneas Moving Gunship 02
+            case 767:	// Transport: Gilneas Moving Gunship 03
                 return true;
             default:
                 return false;

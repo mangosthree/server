@@ -9389,7 +9389,8 @@ bool Unit::SelectHostileTarget()
                     m_HostileRefManager.deleteReference(target);
                     m_ThreatManager.modifyThreatPercent(target, -101);
 
-                    _removeAttacker(target);
+                    // remove target from current attacker, do not exit combat settings
+                    AttackStop(true); 
                 }
 
                 return false;

@@ -6184,9 +6184,20 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 {
     Unit* target = GetTarget();
 
-    // Special case with temporary increase max/current health
     switch (GetId())
     {
+    // Special case with temporary increase max/current health
+            // Cases where we need to manually calculate the amount for the spell (by percentage)
+            // recalculate to full amount at apply for proper remove 
+        case 54443:                                         // Demonic Empowerment (Voidwalker)
+        case 55233:                                         // Vampiric Blood
+        case 61254:                                         // Will of Sartharion (Obsidian Sanctum)
+            if (Real && apply)
+                m_modifier.m_amount = target->GetMaxHealth() * m_modifier.m_amount / 100;
+            // no break here
+
+            // Cases where m_amount already has the correct value (spells cast with CastCustomSpell or absolute values)
+        
         case 12976:                                         // Warrior Last Stand triggered spell
         case 28726:                                         // Nightmare Seed ( Nightmare Seed )
         case 31616:                                         // Nature's Guardian
@@ -6194,19 +6205,13 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
         case 44055: case 55915: case 55917: case 67596:     // Tremendous Fortitude (Battlemaster's Alacrity)
         case 50322:                                         // Survival Instincts
         case 53479:                                         // Hunter pet - Last Stand
-        case 54443:                                         // Demonic Empowerment (Voidwalker)
-        case 55233:                                         // Vampiric Blood
+
         case 59465:                                         // Brood Rage (Ahn'Kahet)
         {
             if (Real)
             {
                 if (apply)
                 {
-                    // Demonic Empowerment (Voidwalker) & Vampiric Blood - special cases, store percent in data
-                    // recalculate to full amount at apply for proper remove
-                    if (GetId() == 54443 || GetId() == 55233)
-                        m_modifier.m_amount = target->GetMaxHealth() * m_modifier.m_amount / 100;
-
                     target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
                     target->ModifyHealth(m_modifier.m_amount);
                 }
@@ -6221,10 +6226,10 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
             }
             return;
         }
+        // generic case
+        default:
+            target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
     }
-
-    // generic case
-    target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
 }
 
 void  Aura::HandleAuraModIncreaseMaxHealth(bool apply, bool /*Real*/)

@@ -8,8 +8,7 @@
 
 bool ExtractSingleModel(std::string& fname, StringSet& failedPaths)
 {
-    char* name = GetPlainName((char*)fname.c_str());
-    char* ext = GetExtension(name);
+    char* ext = GetExtension(GetPlainName((char*)fname.c_str()));
 
     // < 3.1.0 ADT MMDX section store filename.mdx filenames for corresponded .m2 file
     if (!strcmp(ext, ".mdx"))
@@ -23,7 +22,7 @@ bool ExtractSingleModel(std::string& fname, StringSet& failedPaths)
 
     std::string output(szWorkDirWmo);                       // Stores output filename (possible changed)
     output += "/";
-    output += name;
+    output += GetPlainName(fname.c_str());
 
     if (FileExists(output.c_str()))
         return true;

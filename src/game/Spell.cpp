@@ -7957,6 +7957,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectEntry const* spellEffect, float& r
                 case 71837:                                 // Vampiric Bite
                 case 71861:                                 // Swarming Shadows
                 case 72091:                                 // Frozen Orb (Vault of Archavon, Toravon)
+                case 72254:                                 // Mark of Fallen Champion (target selection) (ICC, Deathbringer Saurfang)
                 case 73022:                                 // Mutated Infection (Mode 2)
                 case 73023:                                 // Mutated Infection (Mode 3)
                     unMaxTargets = 1;

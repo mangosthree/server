@@ -23,6 +23,7 @@
 #undef _DLL
 #endif
 
+#include <string>
 #include "StormLib.h"
 #include <deque>
 

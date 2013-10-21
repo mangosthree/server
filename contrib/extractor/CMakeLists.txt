@@ -298,7 +298,6 @@ link_directories(
 add_subdirectory (loadlib)
 
 add_executable (ad dbcfile.cpp System.cpp)
-set_target_properties(ad PROPERTIES PUBLIC_HEADER "../../dep/StormLib/src/StormLib.h")
 target_link_libraries (ad storm loadlib)
 
 

@@ -9349,8 +9349,11 @@ void Spell::EffectInebriate(SpellEffectEntry const* /*effect*/)
 
     uint8 drunkValue = player->GetDrunkValue() + (uint8)damage;
     if (drunkValue > 100)
+    {
         drunkValue = 100;
-
+        if (roll_chance_i(25))
+            player->CastSpell(player, 67468, false);    // Drunken Vomit
+    }
     player->SetDrunkValue(drunkValue, m_CastItem ? m_CastItem->GetEntry() : 0); 
 }
 

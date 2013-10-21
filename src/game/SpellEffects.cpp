@@ -10366,7 +10366,7 @@ void Spell::EffectBind(SpellEffectEntry const* effect)
 
     Player* player = (Player*)unitTarget;
 
-    uint32 area_id = m_spellInfo->EffectMiscValue[eff_idx];
+    uint32 area_id = uint32(effect->EffectMiscValue);
     WorldLocation loc;
     if (effect->EffectImplicitTargetA == TARGET_TABLE_X_Y_Z_COORDINATES ||
         effect->EffectImplicitTargetB == TARGET_TABLE_X_Y_Z_COORDINATES)

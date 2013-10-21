@@ -164,10 +164,17 @@ enum Powers
 #define INVALID_POWER_INDEX             10000
 #define INVALID_POWER                   MAX_POWERS
 
+/**
+ * The different spell schools that are available, used in both damage calculation
+ * and spell casting to decide what should be affected, the SPELL_SCHOOL_NORMAL
+ * is the armor, others should be self explanatory.
+ *
+ * Note that these are the values to use for changing ie, the armor via a
+ * Modifier, and it is the Modifier::m_miscValue that should be set.
+ */
 enum SpellSchools
 {
-    /// Physical, Armor
-    SPELL_SCHOOL_NORMAL                 = 0,
+    SPELL_SCHOOL_NORMAL                 = 0,                // Physical, Armor
     SPELL_SCHOOL_HOLY                   = 1,
     SPELL_SCHOOL_FIRE                   = 2,
     SPELL_SCHOOL_NATURE                 = 3,
@@ -1364,14 +1371,12 @@ enum SpellImmunity
  * The different types of attacks you can do with 
  * weapons
  */
-enum WeaponAttackType
+enum WeaponAttackType                                       // The different weapon attack-types
 {
-    ///Main-hand weapon
-    BASE_ATTACK   = 0,
-    ///Off-hand weapon
-    OFF_ATTACK    = 1,
-    ///Ranged weapon, bow/wand etc.
-    RANGED_ATTACK = 2  
+    
+    BASE_ATTACK   = 0,                                      // Main-hand weapon
+    OFF_ATTACK    = 1,                                      // Off-hand weapon
+    RANGED_ATTACK = 2                                       ///Ranged weapon, bow/wand etc.  
 };
 
 #define MAX_ATTACK  3

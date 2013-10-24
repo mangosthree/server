@@ -1,10 +1,5 @@
 ALTER TABLE db_version CHANGE COLUMN required_c12564_01_mangos_spell_template required_c12594_01_mangos_spell_template bit;
 
-ALTER TABLE spell_template ADD COLUMN attr int(11) unsigned NOT NULL DEFAULT '0' AFTER id;
-ALTER TABLE spell_template ADD COLUMN attr_ex int(11) unsigned NOT NULL DEFAULT '0' AFTER attr;
-ALTER TABLE spell_template ADD COLUMN attr_ex2 int(11) unsigned NOT NULL DEFAULT '0' AFTER attr_ex;
-ALTER TABLE spell_template ADD COLUMN effect0_implicit_target_b int(11) unsigned NOT NULL DEFAULT '0' AFTER effect0_implicit_target_a;
-
 DELETE FROM spell_template WHERE id IN (21387, 23363, 25192, 26133, 37264, 37278, 37365, 58630, 59046, 59450, 64899, 64985, 65074, 65195, 68184, 72845);
 INSERT INTO spell_template VALUES
 (21387, 0x00000140, 0x10000000, 0x00000000, 0x00000028,  15,  21,   6,   1,    0,   0,  42, 0,       0,    21388, 'Melt-Weapon trigger aura related used by Ragnaros'),

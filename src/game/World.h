@@ -82,6 +82,19 @@ enum WorldTimers
 };
 
 /// Configuration elements
+
+// just placeholder for int64 values
+enum eConfigInt64Values
+{
+    CONFIG_INT64_VALUE_COUNT = 1	// change this value after new constances added
+};
+
+enum eConfigUInt64Values
+{
+    CONFIG_UINT64_START_PLAYER_MONEY = 0,
+    CONFIG_UINT64_VALUE_COUNT
+};
+
 enum eConfigUInt32Values
 {
     CONFIG_UINT32_COMPRESSION = 0,
@@ -107,7 +120,6 @@ enum eConfigUInt32Values
     CONFIG_UINT32_MAX_PLAYER_LEVEL,
     CONFIG_UINT32_START_PLAYER_LEVEL,
     CONFIG_UINT32_START_HEROIC_PLAYER_LEVEL,
-    CONFIG_UINT32_START_PLAYER_MONEY,
     CONFIG_UINT32_CURRENCY_START_HONOR_POINTS,
     CONFIG_UINT32_CURRENCY_START_CONQUEST_POINTS,
     CONFIG_UINT32_CURRENCY_CONQUEST_POINTS_DEFAULT_WEEK_CAP,
@@ -543,6 +555,16 @@ class World
         /// Get a server configuration element (see #eConfigFloatValues)
         float getConfig(eConfigFloatValues rate) const { return m_configFloatValues[rate]; }
 
+        /// Set a server configuration element (see #eConfigUInt64Values)
+        void setConfig(eConfigUInt64Values index, uint64 value) { m_configUint64Values[index] = value; }
+        /// Get a server configuration element (see #eConfigUInt64Values)
+        uint32 getConfig(eConfigUInt64Values index) const { return m_configUint64Values[index]; }
+
+        /// Set a server configuration element (see #eConfigUInt64Values)
+        void setConfig(eConfigInt64Values index, int64 value) { m_configInt64Values[index] = value; }
+        /// Get a server configuration element (see #eConfigUInt64Values)
+        uint32 getConfig(eConfigInt64Values index) const { return m_configInt64Values[index]; }
+
         /// Set a server configuration element (see #eConfigUInt32Values)
         void setConfig(eConfigUInt32Values index, uint32 value) { m_configUint32Values[index] = value; }
         /// Get a server configuration element (see #eConfigUInt32Values)
@@ -609,14 +631,20 @@ class World
         void ResetMonthlyQuests();
 
     private:
+        void setConfig(eConfigUInt64Values index, char const* fieldname, uint64 defvalue);
+        void setConfig(eConfigInt64Values index, char const* fieldname, int64 defvalue);
         void setConfig(eConfigUInt32Values index, char const* fieldname, uint32 defvalue);
         void setConfig(eConfigInt32Values index, char const* fieldname, int32 defvalue);
         void setConfig(eConfigFloatValues index, char const* fieldname, float defvalue);
         void setConfig(eConfigBoolValues index, char const* fieldname, bool defvalue);
         void setConfigPos(eConfigFloatValues index, char const* fieldname, float defvalue);
+        void setConfigMin(eConfigUInt64Values index, char const* fieldname, uint64 defvalue, uint64 minvalue);
+        void setConfigMin(eConfigInt64Values index, char const* fieldname, int64 defvalue, int64 minvalue);
         void setConfigMin(eConfigUInt32Values index, char const* fieldname, uint32 defvalue, uint32 minvalue);
         void setConfigMin(eConfigInt32Values index, char const* fieldname, int32 defvalue, int32 minvalue);
         void setConfigMin(eConfigFloatValues index, char const* fieldname, float defvalue, float minvalue);
+        void setConfigMinMax(eConfigUInt64Values index, char const* fieldname, uint64 defvalue, uint64 minvalue, uint64 maxvalue);
+        void setConfigMinMax(eConfigInt64Values index, char const* fieldname, int64 defvalue, int64 minvalue, int64 maxvalue);
         void setConfigMinMax(eConfigUInt32Values index, char const* fieldname, uint32 defvalue, uint32 minvalue, uint32 maxvalue);
         void setConfigMinMax(eConfigInt32Values index, char const* fieldname, int32 defvalue, int32 minvalue, int32 maxvalue);
         void setConfigMinMax(eConfigFloatValues index, char const* fieldname, float defvalue, float minvalue, float maxvalue);
@@ -643,6 +671,8 @@ class World
         uint32 m_maxActiveSessionCount;
         uint32 m_maxQueuedSessionCount;
 
+        uint64 m_configUint64Values[CONFIG_UINT64_VALUE_COUNT];
+        int64 m_configInt64Values[CONFIG_INT64_VALUE_COUNT];
         uint32 m_configUint32Values[CONFIG_UINT32_VALUE_COUNT];
         int32 m_configInt32Values[CONFIG_INT32_VALUE_COUNT];
         float m_configFloatValues[CONFIG_FLOAT_VALUE_COUNT];

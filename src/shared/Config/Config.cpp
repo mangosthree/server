@@ -105,6 +105,12 @@ int32 Config::GetIntDefault(const char* name, int32 def)
     return GetValueHelper(mConf, name, val) ? atoi(val.c_str()) : def;
 }
 
+int64 Config::GetInt64Default(const char* name, int64 def)
+{
+    ACE_TString val;
+    return GetValueHelper(mConf, name, val) ? atoi(val.c_str()) : def;
+}
+
 float Config::GetFloatDefault(const char* name, float def)
 {
     ACE_TString val;

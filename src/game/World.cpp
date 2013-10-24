@@ -617,7 +617,7 @@ void World::LoadConfigSettings(bool reload)
     setConfigMinMax(CONFIG_UINT32_START_PLAYER_LEVEL, "StartPlayerLevel", 1, 1, getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
     setConfigMinMax(CONFIG_UINT32_START_HEROIC_PLAYER_LEVEL, "StartHeroicPlayerLevel", 55, 1, getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
 
-    setConfigMinMax(CONFIG_UINT32_START_PLAYER_MONEY, "StartPlayerMoney", 0, 0, MAX_MONEY_AMOUNT);
+    setConfigMinMax(CONFIG_UINT64_START_PLAYER_MONEY, "StartPlayerMoney", 0, 0, MAX_MONEY_AMOUNT);
 
     setConfigMinMax(CONFIG_UINT32_CURRENCY_RESET_TIME_HOUR, "Currency.ResetHour", 6, 0, 23);
     setConfigMinMax(CONFIG_UINT32_CURRENCY_RESET_TIME_WEEK_DAY, "Currency.ResetWeekDay", 3, 0, 6);
@@ -2322,6 +2322,21 @@ void World::LoadDBVersion()
         m_CreatureEventAIVersion = "Unknown creature EventAI.";
 }
 
+void World::setConfig(eConfigUInt64Values index, char const* fieldname, uint64 defvalue)
+{
+    setConfig(index, sConfig.GetInt64Default(fieldname, defvalue));
+    if (int64(getConfig(index)) < 0)
+    {
+        sLog.outError("%s (%i) can't be negative. Using %u instead.", fieldname, int64(getConfig(index)), defvalue);
+        setConfig(index, defvalue);
+    }
+}
+
+void World::setConfig(eConfigInt64Values index, char const* fieldname, int64 defvalue)
+{
+    setConfig(index, sConfig.GetIntDefault(fieldname, defvalue));
+}
+
 void World::setConfig(eConfigUInt32Values index, char const* fieldname, uint32 defvalue)
 {
     setConfig(index, sConfig.GetIntDefault(fieldname, defvalue));
@@ -2357,6 +2372,26 @@ void World::setConfigPos(eConfigFloatValues index, char const* fieldname, float 
     }
 }
 
+void World::setConfigMin(eConfigUInt64Values index, char const* fieldname, uint64 defvalue, uint64 minvalue)
+{
+    setConfig(index, fieldname, defvalue);
+    if (getConfig(index) < minvalue)
+    {
+        sLog.outError("%s (%u) must be >= %u. Using %u instead.", fieldname, getConfig(index), minvalue, minvalue);
+        setConfig(index, minvalue);
+    }
+}
+
+void World::setConfigMin(eConfigInt64Values index, char const* fieldname, int64 defvalue, int64 minvalue)
+{
+    setConfig(index, fieldname, defvalue);
+    if (getConfig(index) < minvalue)
+    {
+        sLog.outError("%s (%i) must be >= %i. Using %i instead.", fieldname, getConfig(index), minvalue, minvalue);
+        setConfig(index, minvalue);
+    }
+}
+
 void World::setConfigMin(eConfigUInt32Values index, char const* fieldname, uint32 defvalue, uint32 minvalue)
 {
     setConfig(index, fieldname, defvalue);
@@ -2384,6 +2419,36 @@ void World::setConfigMin(eConfigFloatValues index, char const* fieldname, float 
     {
         sLog.outError("%s (%f) must be >= %f. Using %f instead.", fieldname, getConfig(index), minvalue, minvalue);
         setConfig(index, minvalue);
+    }
+}
+
+void World::setConfigMinMax(eConfigUInt64Values index, char const* fieldname, uint64 defvalue, uint64 minvalue, uint64 maxvalue)
+{
+    setConfig(index, fieldname, defvalue);
+    if (getConfig(index) < minvalue)
+    {
+        sLog.outError("%s (%u) must be in range %u...%u. Using %u instead.", fieldname, getConfig(index), minvalue, maxvalue, minvalue);
+        setConfig(index, minvalue);
+    }
+    else if (getConfig(index) > maxvalue)
+    {
+        sLog.outError("%s (%u) must be in range %u...%u. Using %u instead.", fieldname, getConfig(index), minvalue, maxvalue, maxvalue);
+        setConfig(index, maxvalue);
+    }
+}
+
+void World::setConfigMinMax(eConfigInt64Values index, char const* fieldname, int64 defvalue, int64 minvalue, int64 maxvalue)
+{
+    setConfig(index, fieldname, defvalue);
+    if (getConfig(index) < minvalue)
+    {
+        sLog.outError("%s (%i) must be in range %i...%i. Using %i instead.", fieldname, getConfig(index), minvalue, maxvalue, minvalue);
+        setConfig(index, minvalue);
+    }
+    else if (getConfig(index) > maxvalue)
+    {
+        sLog.outError("%s (%i) must be in range %i...%i. Using %i instead.", fieldname, getConfig(index), minvalue, maxvalue, maxvalue);
+        setConfig(index, maxvalue);
     }
 }
 

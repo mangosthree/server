@@ -38,6 +38,7 @@ class MANGOS_DLL_SPEC Config
         std::string GetStringDefault(const char* name, const char* def);
         bool GetBoolDefault(const char* name, const bool def = false);
         int32 GetIntDefault(const char* name, const int32 def);
+		int64 GetInt64Default(const char* name, const int64 def);
         float GetFloatDefault(const char* name, const float def);
 
         std::string GetFilename() const { return mFilename; }

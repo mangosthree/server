@@ -677,6 +677,14 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket& recv_data)
     GetPlayer()->ResurectUsingRequestData();                // will call spawncorpsebones
 }
 
+void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
+{
+    if (GetPlayer()->isAlive() || !GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+        return;
+
+    GetPlayer()->RepopAtGraveyard();
+}
+
 void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_AREATRIGGER");

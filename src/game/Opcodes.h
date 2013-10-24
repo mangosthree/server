@@ -407,6 +407,7 @@ enum Opcodes
     CMSG_REPOP_REQUEST                                    = 0x6235, // 4.3.4 15595
     SMSG_RESURRECT_REQUEST                                = 0x2905, // 4.3.4 15595
     CMSG_RESURRECT_RESPONSE                               = 0x6827, // 4.3.4 15595
+    CMSG_RETURN_TO_GRAVEYARD                              = 0x301E, // 4.3.4 15595
     CMSG_LOOT                                             = 0x0127, // 4.3.4 15595
     CMSG_LOOT_CURRENCY                                    = 0x781C, // 4.3.4 15595
     CMSG_LOOT_MONEY                                       = 0x6227, // 4.3.4 15595

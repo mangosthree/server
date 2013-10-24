@@ -1,4 +1,4 @@
-ALTER TABLE db_version CHANGE COLUMN required_12662_01_mangos_hotfix_data required_12774_01_mangos bit;
+ALTER TABLE db_version CHANGE COLUMN required_12662_01_mangos_hotfix_data required_12712_01_mangos bit;
 
 ALTER TABLE spell_template ADD COLUMN attr_ex3 int(11) unsigned NOT NULL DEFAULT '0' AFTER attr_ex2;
 

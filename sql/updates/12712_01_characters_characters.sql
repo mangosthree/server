@@ -1,4 +1,4 @@
-ALTER TABLE character_db_version CHANGE COLUMN required_12697_01_characters_characters required_12774_01_characters_characters  bit;
+ALTER TABLE character_db_version CHANGE COLUMN required_12697_01_characters_characters required_12712_01_characters_characters  bit;
 
 ALTER TABLE character_queststatus_daily DROP INDEX idx_guid;
 ALTER TABLE character_queststatus_monthly DROP INDEX idx_guid;

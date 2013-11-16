@@ -895,6 +895,11 @@ So if you want an npc to throw AIEvents automatically on death and on critical h
 -----------------------------
 47 = ACTION_T_EMOTE_TARGET
 -----------------------------
+Parameter 1: The Emote ID that the creature should perform. (Emote IDs are also contained in the DBC but they can be found in the mangos source as well).
+Parameter 2: Creature guid, to which emote dealer will performed.
+
+The creature will perform a visual emote. Unlike a text emote, a visual emote is one where the creature will actually move or perform a gesture.
+This is commonly used for NPC's who may perform a special action (Salute, Roar, ect...). Not all player emotes work for creature models.
 
 
 =========================================

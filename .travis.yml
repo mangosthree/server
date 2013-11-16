@@ -18,7 +18,7 @@ before_install:
  - sudo apt-get install -qq libbz2-dev libncurses5-dev libmysqlclient-dev libreadline-dev libsdl1.2-dev libssl-dev zlib1g-dev libace-dev
 
 script:
-  - cd dep/stormlib/
+  - cd dep/StormLib/
   - ./autogen.sh
   - ./configure && make
   - cd contrib/extractor/

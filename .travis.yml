@@ -18,10 +18,10 @@ before_install:
  - sudo apt-get install -qq libbz2-dev libncurses5-dev libmysqlclient-dev libreadline-dev libsdl1.2-dev libssl-dev zlib1g-dev libace-dev
 
 script:
-  - cd dep/libmpq/
+  - cd dep/stormlib/
   - ./autogen.sh
   - ./configure && make
-  - cd ../../contrib/extractor/
+  - cd contrib/extractor/
   - test -d _build || mkdir _build
   - cd _build
   - cmake -DCMAKE_INSTALL_PREFIX=../_install -DCMAKE_BUILD_TYPE=Debug ..

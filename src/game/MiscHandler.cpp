@@ -680,7 +680,7 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket& recv_data)
 void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
 {
     Player* pPlayer = GetPlayer();
-    if (pPlayer->isAlive() || !Player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    if (pPlayer->isAlive() || !pPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
 
     Corpse* pCorpse = pPlayer->GetCorpse();

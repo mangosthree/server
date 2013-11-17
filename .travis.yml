@@ -18,32 +18,9 @@ before_install:
  - sudo apt-get install -qq libbz2-dev libncurses5-dev libmysqlclient-dev libreadline-dev libsdl1.2-dev libssl-dev zlib1g-dev libace-dev
 
 script:
-  - cd dep/StormLib/
-  - ./autogen.sh
-  - ./configure && make
-  - cd contrib/extractor/
-  - test -d _build || mkdir _build
-  - cd _build
-  - cmake -DCMAKE_INSTALL_PREFIX=../_install -DCMAKE_BUILD_TYPE=Debug ..
-  - make -j4
-  - cd ../../vmap_assembler/
-  - test -d _build || mkdir _build
-  - cd _build
-  - cmake -DCMAKE_INSTALL_PREFIX=../_install -DCMAKE_BUILD_TYPE=Debug ..
-  - make -j4
-  - cd ../../vmap_extractor/
-  - test -d _build || mkdir _build
-  - cd _build
-  - cmake -DCMAKE_INSTALL_PREFIX=../_install -DCMAKE_BUILD_TYPE=Debug ..
-  - make -j4
-  - cd ../../mmap/
-  - test -d _build || mkdir _build
-  - cd _build
-  - cmake -DCMAKE_INSTALL_PREFIX=../_install -DCMAKE_BUILD_TYPE=Debug ..
-  - make -j4
-  - cd ../../../
   - test -d _build || mkdir _build
   - test -d _install || mkdir _install
   - cd _build
-  - cmake -DCMAKE_INSTALL_PREFIX=../_install -DCMAKE_BUILD_TYPE=Debug -DDEBUG=1 -DPCH=1 -DUSE_STD_MALLOC=1 -DACE_USE_EXTERNAL=1 ..
+  - cmake -DCMAKE_INSTALL_PREFIX=../_install -DCMAKE_BUILD_TYPE=Debug -DWITH_MOD_SCRIPTDEV2=0 ..
+
   - make -j4

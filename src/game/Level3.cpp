@@ -3468,7 +3468,7 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
     // Search in Spell.dbc
-    for (uint32 id = 0; id < sSpellStore.GetNumRows(); ++id)
+    for (uint32 id = 0; id < sSpellStore.GetNumRows(); id++)
     {
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(id);
         if (spellInfo)
@@ -3498,7 +3498,9 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
 
             if (loc < MAX_LOCALE)
             {
-                ShowSpellListHelper(target, spellInfo, LocaleConstant(loc));
+                if (target)
+                    ShowSpellListHelper(target, spellInfo, LocaleConstant(loc));
+
                 ++counter;
             }
         }

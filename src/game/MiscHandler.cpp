@@ -1536,7 +1536,7 @@ void WorldSession::HandleHearthandResurrect(WorldPacket& /*recv_data*/)
 
 void WorldSession::HandleRequestHotfix(WorldPacket& recv_data)
 {
-    uint32 type, count;
+    uint32 type = 0, count = 0;
     recv_data >> type;
 
     count = recv_data.ReadBits(23);
@@ -1547,7 +1547,7 @@ void WorldSession::HandleRequestHotfix(WorldPacket& recv_data)
     for (uint32 i = 0; i < count; ++i)
         recv_data.ReadGuidMask<0, 4, 7, 2, 5, 3, 6, 1>(guids[i]);
 
-    uint32 entry;
+    uint32 entry = 0;
     for (uint32 i = 0; i < count; ++i)
     {
         recv_data.ReadGuidBytes<5, 6, 7, 0, 1, 3, 4>(guids[i]);

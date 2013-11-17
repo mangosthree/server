@@ -679,10 +679,41 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
 {
-    if (GetPlayer()->isAlive() || !GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    Player* pPlayer = GetPlayer();
+    if (pPlayer->isAlive() || !Player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
 
-    GetPlayer()->RepopAtGraveyard();
+    Corpse* pCorpse = pPlayer->GetCorpse();
+    if (!pCorpse)
+        return;
+
+    WorldSafeLocsEntry const* ClosestGrave = NULL;
+
+    // Special handle for battleground maps
+    if (BattleGround* bg = GetBattleGround())
+        ClosestGrave = bg->GetClosestGraveYard(this);
+    else
+        ClosestGrave = sObjectMgr.GetClosestGraveYard(pCorpse->GetPositionX(), pCorpse->GetPositionY(), pCoprse->GetPositionZ(), pCorpse->GetMapId(), pPlayer->GetTeam());
+
+    // if no grave found, stay at the current location
+    // and don't show spirit healer location
+    if (ClosestGrave)
+    {
+        bool updateVisibility = pPlayer->IsInWorld() && pCorpse->GetMapId() == ClosestGrave->map_id;
+        TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, pPlayer->GetOrientation());
+        if (isDead())                                       // not send if alive, because it used in TeleportTo()
+        {
+            WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);// show spirit healer position on minimap
+            data << ClosestGrave->map_id;
+            data << ClosestGrave->x;
+            data << ClosestGrave->y;
+            data << ClosestGrave->z;
+            pPlayer->GetSession()->SendPacket(&data);
+        }
+
+        if (updateVisibility && pPlayer->IsInWorld())
+            pPlayer->UpdateVisibilityAndView();
+    }
 }
 
 void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)

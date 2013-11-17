@@ -8417,7 +8417,7 @@ void Aura::PeriodicDummyTick()
                     target->CastSpell(target, 68873, true);
                     return;
                 }
-// Exist more after, need add later
+                // Exist more after, need add later
                 default:
                     break;
             }
@@ -8427,14 +8427,14 @@ void Aura::PeriodicDummyTick()
             {
                 if (target->GetTypeId() != TYPEID_PLAYER)
                     return;
+
                 // Search SPELL_AURA_MOD_POWER_REGEN aura for this spell and add bonus
-                if (Aura* aura = GetHolder()->GetAuraByEffectIndex(SpellEffectIndex(GetEffIndex() - 1)))
+                if (Aura* aura = GetHolder()->GetAuraByEffectIndex(SpellEffectIndex(GetEffIndex(EFFECT_INDEX_0))))
                 {
                     aura->GetModifier()->m_amount = m_modifier.m_amount;
                     ((Player*)target)->UpdateManaRegen();
                     // Disable continue
                     m_isPeriodic = false;
-                    return;
                 }
                 return;
             }

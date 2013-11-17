@@ -8429,7 +8429,7 @@ void Aura::PeriodicDummyTick()
                     return;
 
                 // Search SPELL_AURA_MOD_POWER_REGEN aura for this spell and add bonus
-                if (Aura* aura = GetHolder()->GetAuraByEffectIndex(SpellEffectIndex(GetEffIndex(EFFECT_INDEX_0))))
+                if (Aura* aura = GetHolder()->GetAuraByEffectIndex(SpellEffectIndex(GetEffIndex()-1)))
                 {
                     aura->GetModifier()->m_amount = m_modifier.m_amount;
                     ((Player*)target)->UpdateManaRegen();

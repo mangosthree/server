@@ -557,6 +557,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandlePetitionDeclineOpcode(WorldPacket& recv_data);
         void HandleOfferPetitionOpcode(WorldPacket& recv_data);
         void HandleTurnInPetitionOpcode(WorldPacket& recv_data);
+        void HandleSetPetSlotOpcode(WorldPacket& recv_data);
 
         void HandleGuildQueryOpcode(WorldPacket& recvPacket);
         void HandleGuildCreateOpcode(WorldPacket& recvPacket);

@@ -761,3 +761,18 @@ void WorldSession::HandleLearnPreviewTalentsPet(WorldPacket& recv_data)
 
     _player->SendTalentsInfoData(true);
 }
+
+void WorldSession::HandleSetPetSlotOpcode(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_SET_PET_SLOT");
+
+    uint32 petNumber;
+    uint8 slot;
+    ObjectGuid guid;
+
+    recv_data >> petNumber >> slot;
+    recv_data.ReadGuidMask<3, 2, 0, 7, 5, 6, 1, 4>(guid);
+    recv_data.ReadGuidBytes<5, 3, 1, 7, 4, 0, 6, 2>(guid);
+
+    DEBUG_LOG("PetNumber: %u slot: %u guid: %s", petNumber, slot, guid.GetString().c_str());
++}

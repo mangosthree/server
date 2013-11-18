@@ -802,7 +802,7 @@ void WorldSession::HandleSetPetSlotOpcode(WorldPacket& recv_data)
 
     int32 destId = 0;
 
-    if (result = CharacterDatabase.PQuery("SELECT id, entry FROM character_pet WHERE owner = '%u' AND actual_slot = '%u'", _player->GetGUIDLow(), petNumber))
+    if (result = CharacterDatabase.PQuery("SELECT id, entry FROM character_pet WHERE owner = '%u' AND slot = '%u'", _player->GetGUIDLow(), petNumber))
     {
 
         destId = (*result)[0].GetUInt32();
@@ -840,9 +840,9 @@ void WorldSession::HandleSetPetSlotOpcode(WorldPacket& recv_data)
 
     CharacterDatabase.BeginTransaction();
 
-    CharacterDatabase.PExecute("UPDATE `character_pet` SET `slot` = '%u', `actual_slot` = '%u' WHERE `id` = '%u'", newSlot, newSlot, srcId);
+    CharacterDatabase.PExecute("UPDATE `character_pet` SET `slot` = '%u', `slot` = '%u' WHERE `id` = '%u'", newSlot, newSlot, srcId);
     if (destId)
-        CharacterDatabase.PExecute("UPDATE `character_pet` SET `slot` = '%u', `actual_slot` = '%u' WHERE `id` = '%u'", slot, slot, destId);
+        CharacterDatabase.PExecute("UPDATE `character_pet` SET `slot` = '%u', `slot` = '%u' WHERE `id` = '%u'", slot, slot, destId);
    
     CharacterDatabase.CommitTransaction();
     SendStableResult(newSlot < PET_SAVE_FIRST_STABLE_SLOT ? STABLE_SUCCESS_STABLE : STABLE_SUCCESS_UNSTABLE);

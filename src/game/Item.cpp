@@ -812,8 +812,8 @@ void Item::SetItemRandomProperties(int32 randomPropId)
                 SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID, item_rand->ID);
                 SetState(ITEM_CHANGED);
             }
-            for (uint32 i = PROP_ENCHANTMENT_SLOT_2; i < PROP_ENCHANTMENT_SLOT_2 + 3; ++i)
-                SetEnchantment(EnchantmentSlot(i), item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_2], 0, 0);
+            for (uint32 i = PROP_ENCHANTMENT_SLOT_1; i < PROP_ENCHANTMENT_SLOT_4; ++i)
+                SetEnchantment(EnchantmentSlot(i), item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_1], 0, 0);
         }
     }
     else
@@ -829,7 +829,7 @@ void Item::SetItemRandomProperties(int32 randomPropId)
                 SetState(ITEM_CHANGED);
             }
 
-            for (uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_0 + 3; ++i)
+            for (uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_4; ++i)
                 SetEnchantment(EnchantmentSlot(i), item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_0], 0, 0);
         }
     }
@@ -1394,3 +1394,102 @@ void Item::SetLootState(ItemLootUpdateState state)
     if (m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_UNCHANGED && m_lootState != ITEM_LOOT_TEMPORARY)
         SetState(ITEM_CHANGED);
 }
+
+uint32 Item::GetSpecialPrice(ItemPrototype const* proto, uint32 minimumPrice /*= 10000*/)
+{
+    uint32 cost = 0;
+
+    if (proto->Flags2 & ITEM_FLAG2_HAS_NORMAL_PRICE)
+        cost = proto->SellPrice;
+    else
+    {
+        bool normalPrice = true;
+        //cost = Item::GetSellPrice(proto, normalPrice);
+        cost = proto->SellPrice;
+
+        if (!normalPrice)
+        {
+            if (proto->BuyCount <= 1)
+            {
+                ItemClassEntry const* classEntry = sItemClassStore.LookupEntry(proto->Class);
+                if (classEntry)
+                    cost *= classEntry->PriceFactor;
+                else
+                    cost = 0;
+            }
+            else
+                cost /= 4 * proto->BuyCount;
+        }
+        else
+            cost = proto->SellPrice;
+    }
+
+    if (cost < minimumPrice)
+        cost = minimumPrice;
+
+    return cost;
+}
+
+int32 Item::GetReforgableStat(ItemModType statType) const
+{
+    ItemPrototype const* proto = GetProto();
+    for (uint32 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
+        if (proto->ItemStat[i].ItemStatType == statType)
+            return proto->ItemStat[i].ItemStatValue;
+
+    int32 randomPropId = GetItemRandomPropertyId();
+    if (!randomPropId)
+        return 0;
+
+    if (randomPropId < 0)
+    {
+        ItemRandomSuffixEntry const* randomSuffix = sItemRandomSuffixStore.LookupEntry(-randomPropId);
+        if (!randomSuffix)
+            return 0;
+
+        for (uint32 e = PROP_ENCHANTMENT_SLOT_0; e <= PROP_ENCHANTMENT_SLOT_4; ++e)
+        {
+            if (SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(GetEnchantmentId(EnchantmentSlot(e))))
+            {
+                for (uint32 f = 0; f < 3; ++f)
+                {
+                    if (enchant->type[f] == ITEM_ENCHANTMENT_TYPE_STAT && enchant->spellid[f] == statType)
+                    {
+                        for (int k = 0; k < 5; ++k)
+                        {
+                            if (randomSuffix->enchant_id[k] == enchant->ID)
+                                return int32((randomSuffix->prefix[k] * GetItemSuffixFactor()) / 10000);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        ItemRandomPropertiesEntry const* randomProp = sItemRandomPropertiesStore.LookupEntry(randomPropId);
+        if (!randomProp)
+            return 0;
+
+        for (uint32 e = PROP_ENCHANTMENT_SLOT_0; e <= PROP_ENCHANTMENT_SLOT_4; ++e)
+        {
+            if (SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(GetEnchantmentId(EnchantmentSlot(e))))
+            {
+                for (uint32 f = 0; f < 3; ++f)
+                {
+                    if (enchant->type[f] == ITEM_ENCHANTMENT_TYPE_STAT && enchant->spellid[f] == statType)
+                    {
+                        for (int k = 0; k < 3; ++k)
+                        {
+                            if (randomProp->enchant_id[k] == enchant->ID)
+                                return int32(enchant->amount[k]);
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+    return 0;
+}
+

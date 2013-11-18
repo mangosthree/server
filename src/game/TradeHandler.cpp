@@ -145,7 +145,7 @@ void WorldSession::SendUpdateTrade(bool trader_state /*= true*/)
                     data << uint32(item->GetEnchantmentId(EnchantmentSlot(enchant_slot)));
                 data << uint32(item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY));
                 data.WriteGuidBytes<6, 2, 7, 4>(creatorGuid);
-                data << uint32(0);                                  // reforge Id
+                data << uint32(item->GetEnchantmentId(REFORGE_ENCHANTMENT_SLOT));                                  // reforge Id
                 data << uint32(item->GetUInt32Value(ITEM_FIELD_DURABILITY));
                 data << uint32(item->GetItemRandomPropertyId());
                 data.WriteGuidBytes<3>(creatorGuid);

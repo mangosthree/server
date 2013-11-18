@@ -388,6 +388,11 @@ class MANGOS_DLL_SPEC Item : public Object
         void AddToClientUpdateList() override;
         void RemoveFromClientUpdateList() override;
         void BuildUpdateData(UpdateDataMapType& update_players) override;
+
+        // Reforge
+        static uint32 GetSpecialPrice(ItemPrototype const* proto, uint32 minimumPrice = 10000);
+        uint32 GetSpecialPrice(uint32 minimumPrice = 10000) const { return Item::GetSpecialPrice(GetProto(), minimumPrice); }
+        int32 GetReforgableStat(ItemModType statType) const;
     private:
         std::string m_text;
         uint8 m_slot;

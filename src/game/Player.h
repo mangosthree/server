@@ -1290,6 +1290,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddEnchantmentDuration(Item* item, EnchantmentSlot slot, uint32 duration);
         void ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur = true, bool ignore_condition = false);
         void ApplyEnchantment(Item* item, bool apply);
+        void ApplyReforgeEnchantment(Item* item, bool apply);
         void SendEnchantmentDurations();
         void BuildEnchantmentsInfoData(WorldPacket* data);
         void AddItemDurations(Item* item);

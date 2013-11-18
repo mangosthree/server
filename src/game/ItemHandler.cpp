@@ -1481,4 +1481,77 @@ void WorldSession::SendItemSparseDb2Reply(uint32 entry)
     data.append(buff);
 
     SendPacket(&data);
-} 
+}
+
+void WorldSession::SendReforgeResult(bool success)
+{
+    WorldPacket data(SMSG_REFORGE_RESULT, 1);
+    data.WriteBit(success);
+    SendPacket(&data);
+}
+
+void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
+{
+    uint32 slot, reforgeEntry;
+    ObjectGuid guid;
+    uint32 bag;
+    Player* player = GetPlayer();
+
+    recvData >> reforgeEntry >> slot >> bag;
+    recvData.ReadGuidMask<2, 6, 3, 4, 1, 0, 7, 5>(guid);
+    recvData.ReadGuidBytes<2, 3, 6, 4, 1, 0, 7, 5>(guid);
+
+    if (!player->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_REFORGER))
+    {
+        sLog.outDebug("WORLD: HandleReforgeItemOpcode - Unit (GUID: %s) not found or player can't interact with it.", guid.GetString().c_str());
+        SendReforgeResult(false);
+        return;
+    }
+
+    Item* item = player->GetItemByPos(bag, slot);
+    if (!item)
+    {
+        sLog.outDebug("WORLD: HandleReforgeItemOpcode - Player (Guid: %s) tried to reforge an invalid/non-existant item.", player->GetGuidStr().c_str());
+        SendReforgeResult(false);
+        return;
+    }
+
+    if (!reforgeEntry)
+    {
+        // Reset the item
+        if (item->IsEquipped())
+            player->ApplyReforgeEnchantment(item, false);
+
+        item->ClearEnchantment(REFORGE_ENCHANTMENT_SLOT);
+        SendReforgeResult(true);
+        return;
+    }
+
+    ItemReforgeEntry const* stats = sItemReforgeStore.LookupEntry(reforgeEntry);
+    if (!stats)
+    {
+        sLog.outDebug("WORLD: HandleReforgeItemOpcode - Player (Guid: %s) tried to reforge an item with invalid reforge entry (%u).", player->GetGuidStr().c_str(), reforgeEntry);
+        SendReforgeResult(false);
+        return;
+    }
+
+    if (!item->GetReforgableStat(ItemModType(stats->SourceStat)) || item->GetReforgableStat(ItemModType(stats->FinalStat))) // Cheating, you cant reforge to a stat that the item already has, nor reforge from a stat that the item does not have
+    {
+        SendReforgeResult(false);
+        return;
+    }
+
+    if (player->GetMoney() < uint64(item->GetSpecialPrice()))   // cheating
+    {
+        SendReforgeResult(false);
+        return;
+    }
+
+    player->ModifyMoney(-int64(item->GetSpecialPrice()));
+    item->SetEnchantment(REFORGE_ENCHANTMENT_SLOT, reforgeEntry, 0, 0);
+    SendReforgeResult(true);
+
+    if (item->IsEquipped())
+        player->ApplyReforgeEnchantment(item, true);
+}
+

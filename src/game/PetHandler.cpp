@@ -775,4 +775,76 @@ void WorldSession::HandleSetPetSlotOpcode(WorldPacket& recv_data)
     recv_data.ReadGuidBytes<5, 3, 1, 7, 4, 0, 6, 2>(guid);
 
     DEBUG_LOG("PetNumber: %u slot: %u guid: %s", petNumber, slot, guid.GetString().c_str());
-+}
+
+    if (!CheckStableMaster(guid))
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
+
+    GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
+
+    // find swapped pet slot in stable
+    QueryResult *result = CharacterDatabase.PQuery("SELECT slot, entry, id FROM character_pet WHERE owner = '%u' AND id = '%u'", _player->GetGUIDLow(), petNumber);
+    if (!result)
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
+
+    Field* fields = result->Fetch();
+    uint32 slot = PetSaveMode(fields[0].GetUInt32());
+    uint32 creatureId = fields[1].GetUInt32();
+    uint32 srcId = fields[2].GetUInt32();
+    delete result;
+
+    uint32 destPetNumber = 0;
+
+    int32 destId = 0;
+
+    if (result = CharacterDatabase.PQuery("SELECT id, entry FROM character_pet WHERE owner = '%u' AND actual_slot = '%u'", _player->GetGUIDLow(), petNumber))
+    {
+
+        destId = (*result)[0].GetUInt32();
+        destPetNumber = (*result)[1].GetUInt32();
+        delete result;
+    }
+
+    if (newSlot < PET_SAVE_FIRST_STABLE_SLOT)
+    {
+        // check existance of slot
+        uint32 slotToSpell[] = { 883, 83242, 83243, 83244, 83245 };
+        if (!_player->HasSpell(slotToSpell[newSlot]))
+        {
+            SendStableResult(STABLE_INVALID_SLOT);
+            return;
+        }
+
+         CreatureInfo const* creatureInfo = ObjectMgr::GetCreatureTemplate(creatureId);
+        if (!creatureInfo || !creatureInfo->isTameable(_player->CanTameExoticPets()))
+        {
+            // if problem in exotic pet
+            if (creatureInfo && creatureInfo->isTameable(true))
+                SendStableResult(STABLE_ERR_EXOTIC);
+            else
+                SendStableResult(STABLE_ERR_STABLE);
+            return;
+        }
+    }
+
+
+    // unsummon pet if it is it that we are swapping
+    if (Pet* pet = _player->GetPet())
+        if (pet->m_actualSlot == PetSaveMode(slot) || newSlot == PetSaveMode(slot))
+            pet->Unsummon(pet->isAlive() ? PetSaveMode(slot) : PET_SAVE_AS_DELETED, _player);
+
+    CharacterDatabase.BeginTransaction();
+
+    CharacterDatabase.PExecute("UPDATE `character_pet` SET `slot` = '%u', `actual_slot` = '%u' WHERE `id` = '%u'", newSlot, newSlot, srcId);
+    if (destId)
+        CharacterDatabase.PExecute("UPDATE `character_pet` SET `slot` = '%u', `actual_slot` = '%u' WHERE `id` = '%u'", slot, slot, destId);
+   
+    CharacterDatabase.CommitTransaction();
+    SendStableResult(newSlot < PET_SAVE_FIRST_STABLE_SLOT ? STABLE_SUCCESS_STABLE : STABLE_SUCCESS_UNSTABLE);
+}
+

@@ -3233,6 +3233,34 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 return;
             }
             break;
+ 
+            switch (m_spellInfo->Id)
+            {
+                case 21562: // Power Word: Fortitude
+                {
+                    Unit* target = unitTarget;
+                    if (!target)
+                        target = m_caster;
+
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER || target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(target, ((Player*)m_caster)->GetGroup() != ((Player*)target)->GetGroup() ? 79104 : 79105, true, NULL, NULL, m_caster->GetObjectGuid());
+                    return;
+                }
+                case 27683: // Shadow Protection
+                {
+                    Unit* target = unitTarget;
+                    if (!target)
+                        target = m_caster;
+
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER || target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(target, ((Player*)m_caster)->GetGroup() != ((Player*)target)->GetGroup() ? 79106 : 79107, true, NULL, NULL, m_caster->GetObjectGuid());
+                    return;
+                }
+            }
         }
         case SPELLFAMILY_DRUID:
         {

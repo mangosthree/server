@@ -1603,8 +1603,6 @@ void WorldSession::HandleObjectUpdateFailedOpcode(WorldPacket& recv_data)
     recv_data.ReadGuidMask<6, 7, 4, 0, 1, 5, 3, 2>(guid);
     recv_data.ReadGuidBytes<6, 7, 2, 3, 1, 4, 0, 5>(guid);
 
-    DEBUG_LOG("WORLD: Received CMSG_OBJECT_UPDATE_FAILED from %s (%u) guid: %s",
-
-    GetPlayerName(), GetAccountId(), guid.GetString().c_str());
+    DEBUG_LOG("WORLD: Received CMSG_OBJECT_UPDATE_FAILED from %s (%u) guid: %s", GetPlayerName(), GetAccountId(), guid.GetString().c_str());
 }
 

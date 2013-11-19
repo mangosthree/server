@@ -36,9 +36,6 @@ const char WorldTemplatesrcfmt[] = "is";
 const char WorldTemplatedstfmt[] = "ii";
 const char ConditionsSrcFmt[] = "iiii";
 const char ConditionsDstFmt[] = "iiii";
-const char SpellTemplatesrcfmt[] = "iiiiiiiiiiiiiiiix";
-const char SpellTemplatedstfmt[] = "niiiiiiiiiiiiiiifiiiissxxiixxixiiiiiiixiiiiiiiix";
-//                                  Id  attr                        proc  DurationIndex                 Effect0        tarA0    effectAura0          triggerSpell0      SpellName[16]   Rank[16]
 const char VehicleAccessorySrcFmt[] = "iiix";
 const char VehicleAccessoryDstFmt[] = "iii";
 const char CreatureTemplateSpellsFmt[] = "iiiiiiiiiii";
@@ -57,7 +54,6 @@ SQLStorage sConditionStorage(ConditionsSrcFmt, ConditionsDstFmt, "condition_entr
 
 SQLHashStorage sGameObjectDataAddonStorage(GameObjectInfoAddonInfofmt, "guid", "gameobject_addon");
 SQLHashStorage sGOStorage(GameObjectInfosrcfmt, GameObjectInfodstfmt, "entry", "gameobject_template");
-SQLHashStorage sSpellTemplate(SpellTemplatesrcfmt, SpellTemplatedstfmt, "id", "spell_template");
 SQLHashStorage sCreatureTemplateSpellsStorage(CreatureTemplateSpellsFmt, "entry", "creature_template_spells");
 
 SQLMultiStorage sVehicleAccessoryStorage(VehicleAccessorySrcFmt, VehicleAccessoryDstFmt, "vehicle_entry", "vehicle_accessory");

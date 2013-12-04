@@ -7,8 +7,8 @@ git:
 # only run travis on the master branch
 branches:
   only:
-    - master
-	- develop
+  - master
+  - develop
 
 # do not build with clang until fixed
 compiler:

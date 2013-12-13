@@ -151,7 +151,8 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 44   ACTION_T_CHANCED_TEXT                  Chance, -TextId1, -TextId2      Displays by Chance (1..100) the specified -TextId. When -TextId2 is specified, the selection will be randomized. Text types are defined, along with other options for the text, in a table below. Param2 and Param3 needs to be negative.
 45   ACTION_T_THROW_AI_EVENT                EventType, Radius               Throws an AIEvent of type (Param1) to nearby friendly Npcs in range of (Param2)
 46   ACTION_T_SET_THROW_MASK                EventTypeMask                   Marks for which AIEvents the npc will throw AIEvents on its own.
-47   ACTION_T_EMOTE_TARGET                  EmoteId, TargetGuid             NPC faces to creature (Param2) and does a specified emote id (Param1).
+47   ACTION_T_SUMMON_UNIQUE                 CreatureID, Target, SummonID    Only summons a creature when not already spawned (Param1) to attack target (Param2) at location specified by EventAI_Summons (Param3). Preventing multiple spawns of unique creatures.
+48   ACTION_T_EMOTE_TARGET                  EmoteId, TargetGuid             NPC faces to creature (Param2) and does a specified emote id (Param1).
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -893,14 +894,22 @@ Currently supported are:
 So if you want an npc to throw AIEvents automatically on death and on critical health, you would set its EventTypeMask to 0x03
 
 -----------------------------
-47 = ACTION_T_EMOTE_TARGET
+47 = ACTION_T_SUMMON_UNIQUE
+-----------------------------
+* Parameter 1: CreatureID - The creature template ID to be summoned. The value here needs to be a valid creature template ID.
+* Parameter 2: Target - The target type defining who the summoned creature will attack. The value in this field needs to be a valid target type as specified in the reference tables below. NOTE: Using target type 0 will cause the summoned creature to not attack anyone.
+* Parameter 3: SummonID - The summon ID from the creature_ai_summons table controlling the position (and spawn time) where the summoned mob should be spawned at.
+
+Only summons a creature when not already spawned (Param1) to attack target (Param2) at location specified by EventAI_Summons (Param3). Preventing multiple spawns of unique creatures.
+
+-----------------------------
+48 = ACTION_T_EMOTE_TARGET
 -----------------------------
 Parameter 1: The Emote ID that the creature should perform. (Emote IDs are also contained in the DBC but they can be found in the mangos source as well).
 Parameter 2: Creature guid, to which emote dealer will performed.
 
 The creature will perform a visual emote. Unlike a text emote, a visual emote is one where the creature will actually move or perform a gesture.
 This is commonly used for NPC's who may perform a special action (Salute, Roar, ect...). Not all player emotes work for creature models.
-
 
 =========================================
 Target Types

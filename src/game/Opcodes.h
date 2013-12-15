@@ -1123,8 +1123,8 @@ enum Opcodes
     SMSG_PROPOSE_LEVEL_GRANT                              = 0x6114, // 4.3.4 15595
     CMSG_ACCEPT_LEVEL_GRANT                               = 0x0205, // 4.3.4 15595
     SMSG_REFER_A_FRIEND_FAILURE                           = 0x2037, // 4.3.4 15595
-    SMSG_SPLINE_MOVE_SET_FLYING                           = 0x1423,
-    SMSG_SPLINE_MOVE_UNSET_FLYING                         = 0x1424,
+    SMSG_SPLINE_MOVE_SET_FLYING                           = 0x31B5, // 4.3.4 15595
+    SMSG_SPLINE_MOVE_UNSET_FLYING                         = 0x58A6, // 4.3.4 15595
     SMSG_SUMMON_CANCEL                                    = 0x1425,
     CMSG_CHANGE_PERSONAL_ARENA_RATING                     = 0x1426,
     CMSG_ALTER_APPEARANCE                                 = 0x0914, // 4.3.4 15595

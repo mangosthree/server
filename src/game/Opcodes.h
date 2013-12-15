@@ -310,7 +310,7 @@ enum Opcodes
     CMSG_OPENING_CINEMATIC                                = 0x10FA,
     SMSG_TRIGGER_CINEMATIC                                = 0x6C27, // 4.3.4 15595
     CMSG_NEXT_CINEMATIC_CAMERA                            = 0x10FC,
-    CMSG_COMPLETE_CINEMATIC                               = 0x10FD,
+    CMSG_COMPLETE_CINEMATIC                               = 0x2116, // 4.3.4 15595
     SMSG_TUTORIAL_FLAGS                                   = 0x0B35, // 4.3.4 15595
     CMSG_TUTORIAL_FLAG                                    = 0x6C26, // 4.3.4 15595
     CMSG_TUTORIAL_CLEAR                                   = 0x6515, // 4.3.4 15595
@@ -335,7 +335,7 @@ enum Opcodes
     SMSG_INVENTORY_CHANGE_FAILURE                         = 0x2236, // 4.3.4 15595
     SMSG_OPEN_CONTAINER                                   = 0x4714, // 4.3.4 15595
     CMSG_INSPECT                                          = 0x0927, // 4.3.4 15595
-    SMSG_INSPECT_RESULTS_UPDATE                           = 0x1116,
+    SMSG_INSPECT_RESULTS_UPDATE                           = 0x0C14, // 4.3.4 15595
     CMSG_INITIATE_TRADE                                   = 0x7916, // 4.3.4 15595
     CMSG_BEGIN_TRADE                                      = 0x721E, // 4.3.4 15595
     CMSG_BUSY_TRADE                                       = 0x331C, // 4.3.4 15595
@@ -389,7 +389,7 @@ enum Opcodes
     SMSG_ATTACKSWING_DEADTARGET                           = 0x2B26, // 4.3.4 15595
     SMSG_ATTACKSWING_CANT_ATTACK                          = 0x0016, // 4.3.4 15595
     SMSG_ATTACKERSTATEUPDATE                              = 0x0B25, // 4.3.4 15595
-    SMSG_BATTLEFIELD_PORT_DENIED                          = 0x114C,
+    SMSG_BATTLEFIELD_PORT_DENIED                          = 0x35A3, // 4.3.4 15595
     CMSG_PERFORM_ACTION_SET                               = 0x114D,
     SMSG_RESUME_CAST_BAR                                  = 0x114E,
     SMSG_CANCEL_COMBAT                                    = 0x4F04, // 4.3.4 15595
@@ -427,8 +427,8 @@ enum Opcodes
     SMSG_DUEL_WINNER                                      = 0x2D36, // 4.3.4 15595
     CMSG_DUEL_ACCEPTED                                    = 0x2136, // 4.3.4 15595
     CMSG_DUEL_CANCELLED                                   = 0x6624, // 4.3.4 15595
-    SMSG_MOUNTRESULT                                      = 0x116F,
-    SMSG_DISMOUNTRESULT                                   = 0x1170,
+    SMSG_MOUNTRESULT                                      = 0x2225, // 4.3.4 15595
+    SMSG_DISMOUNTRESULT                                   = 0x0D25, // 4.3.4 15595
     SMSG_REMOVED_FROM_PVP_QUEUE                           = 0x1171,
     CMSG_MOUNTSPECIAL_ANIM                                = 0x2807, // 4.3.4 15595
     SMSG_MOUNTSPECIAL_ANIM                                = 0x0217, // 4.3.4 15595
@@ -540,13 +540,13 @@ enum Opcodes
     SMSG_CLEAR_COOLDOWNS                                  = 0x59B4, // 4.3.4 15595
     SMSG_GAMEOBJECT_PAGETEXT                              = 0x2925, // 4.3.4 15595
     CMSG_SETSHEATHED                                      = 0x4326, // 4.3.4 15595
-    SMSG_COOLDOWN_CHEAT                                   = 0x11E2,
+    SMSG_COOLDOWN_CHEAT                                   = 0x4537, // 4.3.4 15595
     SMSG_SPELL_DELAYED                                    = 0x0715, // 4.3.4 15595
     CMSG_QUEST_POI_QUERY                                  = 0x4037, // 4.3.4 15595
     SMSG_QUEST_POI_QUERY_RESPONSE                         = 0x6304, // 4.3.4 15595
     CMSG_GHOST                                            = 0x11E6,
     CMSG_GM_INVIS                                         = 0x11E7,
-    SMSG_INVALID_PROMOTION_CODE                           = 0x11E8,
+    SMSG_INVALID_PROMOTION_CODE                           = 0x6F25, // 4.3.4 15595
     MSG_GM_BIND_OTHER                                     = 0x11E9,
     MSG_GM_SUMMON                                         = 0x11EA,
     SMSG_ITEM_TIME_UPDATE                                 = 0x2407, // 4.3.4 15595
@@ -580,7 +580,7 @@ enum Opcodes
     CMSG_REQUEST_ACCOUNT_DATA                             = 0x6505, // 4.3.4 15595
     CMSG_UPDATE_ACCOUNT_DATA                              = 0x4736, // 4.3.4 15595
     SMSG_UPDATE_ACCOUNT_DATA                              = 0x6837, // 4.3.4 15595
-    SMSG_CLEAR_FAR_SIGHT_IMMEDIATE                        = 0x120E,
+    SMSG_CLEAR_FAR_SIGHT_IMMEDIATE                        = 0x2A04, // 4.3.4 15595
     SMSG_CHANGEPLAYER_DIFFICULTY_RESULT                   = 0x2217, // 4.3.4 15595
     CMSG_GM_TEACH                                         = 0x1210,
     CMSG_GM_CREATE_ITEM_TARGET                            = 0x1211,
@@ -672,7 +672,7 @@ enum Opcodes
     SMSG_SET_PCT_SPELL_MODIFIER                           = 0x0224, // 4.3.4 15595
     CMSG_SET_AMMO                                         = 0x1269,
     SMSG_CORPSE_RECLAIM_DELAY                             = 0x0D34, // 4.3.4 15595
-    CMSG_SET_ACTIVE_MOVER                                 = 0x126B,
+    CMSG_SET_ACTIVE_MOVER                                 = 0x3314, // 4.3.4 15595
     CMSG_PET_CANCEL_AURA                                  = 0x4B25, // 4.3.4 15595
     CMSG_PLAYER_AI_CHEAT                                  = 0x126D,
     CMSG_CANCEL_AUTO_REPEAT_SPELL                         = 0x6C35, // 4.3.4 15595
@@ -1356,7 +1356,7 @@ enum Opcodes
     CMSG_LOW_LEVEL_RAID                                   = 0x4435, // 4.3.4 15595
     CMSG_LOW_LEVEL_RAID_USER                              = 0x0536, // 4.3.4 15595
     SMSG_CAMERA_SHAKE                                     = 0x150B,
-    SMSG_SOCKET_GEMS                                      = 0x150C,
+    SMSG_SOCKET_GEMS                                      = 0x6014, // 4.3.4 15595
     CMSG_SET_CHARACTER_MODEL                              = 0x150D,
     SMSG_CONNECT_TO                                       = 0x0942, // 4.3.4 15595
     CMSG_CONNECT_TO_FAILED                                = 0x150F,

@@ -148,7 +148,7 @@ enum Opcodes
     CMSG_GROUP_INVITE                                     = 0x0513, // 4.3.4 15595
     SMSG_GROUP_INVITE                                     = 0x31B2, // 4.3.4 15595
     CMSG_GROUP_CANCEL                                     = 0x1071,
-    SMSG_GROUP_CANCEL                                     = 0x1072,
+    SMSG_GROUP_CANCEL                                     = 0x4D25, // 4.3.4 15595
     CMSG_GROUP_INVITE_RESPONSE                            = 0x0410, // 4.3.4 15595
     SMSG_GROUP_DECLINE                                    = 0x6835, // 4.3.4 15595
     CMSG_GROUP_UNINVITE                                   = 0x1076,
@@ -1125,7 +1125,7 @@ enum Opcodes
     SMSG_REFER_A_FRIEND_FAILURE                           = 0x2037, // 4.3.4 15595
     SMSG_SPLINE_MOVE_SET_FLYING                           = 0x31B5, // 4.3.4 15595
     SMSG_SPLINE_MOVE_UNSET_FLYING                         = 0x58A6, // 4.3.4 15595
-    SMSG_SUMMON_CANCEL                                    = 0x1425,
+    SMSG_SUMMON_CANCEL                                    = 0x0B34, // 4.3.4 15595
     CMSG_CHANGE_PERSONAL_ARENA_RATING                     = 0x1426,
     CMSG_ALTER_APPEARANCE                                 = 0x0914, // 4.3.4 15595
     SMSG_ENABLE_BARBER_SHOP                               = 0x2D16, // 4.3.4 15595
@@ -1167,9 +1167,9 @@ enum Opcodes
     CMSG_PLAY_DANCE                                       = 0x144C,
     SMSG_PLAY_DANCE                                       = 0x144D,
     CMSG_LOAD_DANCES                                      = 0x144E,
-    CMSG_STOP_DANCE                                       = 0x144F,
-    SMSG_STOP_DANCE                                       = 0x1450,
-    CMSG_SYNC_DANCE                                       = 0x1451,
+    CMSG_STOP_DANCE                                       = 0x2907, // 4.3.4 15595
+    SMSG_STOP_DANCE                                       = 0x4637, // 4.3.4 15595
+    CMSG_SYNC_DANCE                                       = 0x0036, // 4.3.4 15595
     CMSG_DANCE_QUERY                                      = 0x1452,
     SMSG_DANCE_QUERY_RESPONSE                             = 0x1453,
     SMSG_INVALIDATE_DANCE                                 = 0x1454,

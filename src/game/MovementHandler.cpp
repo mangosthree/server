@@ -421,7 +421,9 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket& recv_data)
     recv_data.hexlike();
 
     ObjectGuid guid;
-    recv_data >> guid;
+
+    recv_data.WriteGuidMask<7, 2, 1, 0, 4, 5, 6, 3>(guid);
+    recv_data.WriteGuidBytes<3, 2, 4, 0, 5, 1, 6, 7>(guid);
 
     if (_player->GetMover()->GetObjectGuid() != guid)
     {

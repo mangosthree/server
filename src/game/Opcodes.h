@@ -1170,8 +1170,8 @@ enum Opcodes
     CMSG_STOP_DANCE                                       = 0x2907, // 4.3.4 15595
     SMSG_STOP_DANCE                                       = 0x4637, // 4.3.4 15595
     CMSG_SYNC_DANCE                                       = 0x0036, // 4.3.4 15595
-    CMSG_DANCE_QUERY                                      = 0x1452,
-    SMSG_DANCE_QUERY_RESPONSE                             = 0x1453,
+    CMSG_DANCE_QUERY                                      = 0x4E07, // 4.3.4 15595
+    SMSG_DANCE_QUERY_RESPONSE                             = 0x2F06, // 4.3.4 15595
     SMSG_INVALIDATE_DANCE                                 = 0x1454,
     CMSG_DELETE_DANCE                                     = 0x1455,
     SMSG_LEARNED_DANCE_MOVES                              = 0x0E05, // 4.3.4 15595
@@ -1187,10 +1187,10 @@ enum Opcodes
     CMSG_CALENDAR_EVENT_INVITE_NOTES                      = 0x1460,
     SMSG_CALENDAR_EVENT_INVITE_NOTES                      = 0x1461,
     SMSG_CALENDAR_EVENT_INVITE_NOTES_ALERT                = 0x1462,
-    CMSG_UPDATE_MISSILE_TRAJECTORY                        = 0x1463,
+    CMSG_UPDATE_MISSILE_TRAJECTORY                        = 0x781E, // 4.3.4 15595
     SMSG_UPDATE_ACCOUNT_DATA_COMPLETE                     = 0x2015, // 4.3.4 15595
     SMSG_TRIGGER_MOVIE                                    = 0x4625, // 4.3.4 15595
-    CMSG_COMPLETE_MOVIE                                   = 0x1466,
+    CMSG_COMPLETE_MOVIE                                   = 0x4136,
     CMSG_SET_GLYPH_SLOT                                   = 0x1467,
     CMSG_SET_GLYPH                                        = 0x1468,
     SMSG_ACHIEVEMENT_EARNED                               = 0x4405, // 4.3.4 15595
@@ -1198,7 +1198,7 @@ enum Opcodes
     SMSG_CRITERIA_UPDATE                                  = 0x6E37, // 4.3.4 15595
     CMSG_QUERY_INSPECT_ACHIEVEMENTS                       = 0x4D27, // 4.3.4 15595
     SMSG_RESPOND_INSPECT_ACHIEVEMENTS                     = 0x15B0, // 4.3.4 15595
-    CMSG_DISMISS_CONTROLLED_VEHICLE                       = 0x146E,
+    CMSG_DISMISS_CONTROLLED_VEHICLE                       = 0x3218, // 4.3.4 15595
     CMSG_COMPLETE_ACHIEVEMENT_CHEAT                       = 0x146F,
     SMSG_QUESTUPDATE_ADD_PVP_KILL                         = 0x4416, // 4.3.4 15595
     CMSG_SET_CRITERIA_CHEAT                               = 0x1471,

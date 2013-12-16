@@ -1,9 +1,11 @@
 -- FOLDERS:
+
 updates - contains updates for characters, mangos and realmd databases.
 
 tools - contains additional useful queries.
 
 -- SQL QUERIES:
+
 characters.sql - creates database in MySQL/PostgreSQL, which holds important every player character data.
 
 create_mysql.sql - creates initial databases structure for MaNGOS server in MySQL server. 

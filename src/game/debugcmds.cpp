@@ -31,6 +31,7 @@
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "SpellMgr.h"
+#include "PhaseMgr.h"
 
 bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
 {
@@ -666,13 +667,32 @@ bool ChatHandler::HandleDebugSendSetPhaseShiftCommand(char* args)
     if (!*args)
         return false;
 
-    char* m = strtok((char*)args, " ");
+    char* t = strtok((char*)args, " ");
     char* p = strtok(NULL, " ");
 
-    uint16 MapId = atoi(m);
-    uint32 PhaseShift = atoi(p);
-    m_session->SendSetPhaseShift(PhaseShift, MapId);
+    if (!t)
+        return false;
+
+    std::set<uint32> terrainswap;
+    std::set<uint32> phaseId;
+
+    terrainswap.insert((uint32)atoi(t));
+
+    if (p)
+        phaseId.insert((uint32)atoi(p));
+
+    m_session->SendSetPhaseShift(phaseId, terrainswap);
     return true;
+}
+
+bool ChatHandler::HandleDebugPhaseCommand(char* args)
+{
+    Player* player = getSelectedPlayer();
+    if (!player)
+        player = m_session->GetPlayer();
+
+    player->GetPhaseMgr()->SendDebugReportToPlayer(m_session->GetPlayer());
+     return true;
 }
 
 // show animation

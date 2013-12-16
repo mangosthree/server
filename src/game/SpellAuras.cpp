@@ -48,6 +48,7 @@
 #include "CellImpl.h"
 #include "Language.h"
 #include "MapManager.h"
+#include "PhaseMgr.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -8873,19 +8874,43 @@ void Aura::HandlePhase(bool apply, bool Real)
     Unit* target = GetTarget();
 
     // always non stackable
-    if (apply)
+    if (target->GetTypeId() == TYPEID_PLAYER)
     {
-        Unit::AuraList const& phases = target->GetAurasByType(SPELL_AURA_PHASE);
-        if (!phases.empty())
-            target->RemoveAurasDueToSpell(phases.front()->GetId(), GetHolder());
-        Unit::AuraList const& phases2 = target->GetAurasByType(SPELL_AURA_PHASE_2);
-        if (!phases2.empty())
-            target->RemoveAurasDueToSpell(phases2.front()->GetId(), GetHolder());
+        if (apply)
+            ((Player*)target)->GetPhaseMgr()->RegisterPhasingAuraEffect(this);
+        else
+            ((Player*)target)->GetPhaseMgr()->UnRegisterPhasingAuraEffect(this);
+    }
+    else
+    {
+        uint32 phaseMask = 0;
+        if (apply)
+        {
+            phaseMask = target->GetPhaseMask();
+            if (target->GetAurasByType(SPELL_AURA_PHASE).size() == 1 && target->GetAurasByType(SPELL_AURA_PHASE_2).size() == 1)
+                phaseMask &= ~PHASEMASK_NORMAL;
+
+            phaseMask |= GetMiscValue();
+        }
+        else
+        {
+            Unit::AuraList const& phases = target->GetAurasByType(SPELL_AURA_PHASE);
+            for (Unit::AuraList::const_iterator itr = phases.begin(); itr != phases.end(); ++itr)
+                phaseMask |= (*itr)->GetMiscValue();
+ 
+            Unit::AuraList const& phases2 = target->GetAurasByType(SPELL_AURA_PHASE_2);
+            for (Unit::AuraList::const_iterator itr = phases2.begin(); itr != phases2.end(); ++itr)
+                phaseMask |= (*itr)->GetMiscValue();
+        }
+
+        if (!phaseMask)
+            phaseMask = PHASEMASK_NORMAL;
+
+        target->SetPhaseMask(phaseMask, true);
     }
 
-    target->SetPhaseMask(apply ? GetMiscValue() : uint32(PHASEMASK_NORMAL), true);
     // no-phase is also phase state so same code for apply and remove
-    if (target->GetTypeId() == TYPEID_PLAYER)
+    if (GetEffIndex() == EFFECT_INDEX_0 && target->GetTypeId() == TYPEID_PLAYER)
     {
         SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAuraMapBounds(GetId());
         if (saBounds.first != saBounds.second)
@@ -8893,8 +8918,18 @@ void Aura::HandlePhase(bool apply, bool Real)
             uint32 zone, area;
             target->GetZoneAndAreaId(zone, area);
 
-            for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-                itr->second->ApplyOrRemoveSpellIfCan((Player*)target, zone, area, false);
+            for(SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+            {
+                // some auras remove at aura remove
+                if(!itr->second->IsFitToRequirements((Player*)target, zone, area))
+                    target->RemoveAurasDueToSpell(itr->second->spellId);
+                // some auras applied at aura apply
+                else if(itr->second->autocast)
+                {
+                    if (!target->HasAura(itr->second->spellId, EFFECT_INDEX_0))
+                        target->CastSpell(target, itr->second->spellId, true);
+                }
+            }
         }
     }
 }

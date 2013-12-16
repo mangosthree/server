@@ -57,6 +57,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "PhaseMgr.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
 {
@@ -3884,6 +3885,11 @@ void Spell::EffectClearQuest(SpellEffectEntry const* effect)
 
     player->SetQuestStatus(quest_id, QUEST_STATUS_NONE);
     player->getQuestStatusMap()[quest_id].m_rewarded = false;
+
+    PhaseUpdateData phaseUdateData;
+    phaseUdateData.AddQuestUpdate(quest_id);
+
+    player->GetPhaseMgr()->NotifyConditionChanged(phaseUdateData);
 }
 
 void Spell::EffectForceCast(SpellEffectEntry const* effect)

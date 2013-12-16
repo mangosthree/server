@@ -977,11 +977,34 @@ uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId)
     return mapid;
 }
 
-ContentLevels GetContentLevelsForMap(uint32 mapid)
+ContentLevels GetContentLevelsForMapAndZone(uint32 mapId, uint32 zoneId)
 {
-    MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
+    MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
     if (!mapEntry)
         return CONTENT_1_60;
+
+    if (mapEntry->rootPhaseMap != -1)
+        mapId = mapEntry->rootPhaseMap;
+
+    switch (mapId)
+    {
+        case 648:   // Lost Islands
+        case 654:   // Gilneas
+            return CONTENT_1_60;
+        default:
+            break;
+    }
+
+    switch (zoneId)
+    {
+        case 616:   // Mount Hyjal
+        case 4922:  // Twilight Highlands
+        case 5034:  // Uldum
+        case 5042:  // Deepholm
+            return CONTENT_81_85;
+        default:
+            break;
+    }
 
     switch (mapEntry->Expansion())
     {

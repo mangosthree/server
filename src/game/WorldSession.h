@@ -255,7 +255,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
         void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2, 3);
         void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
-        void SendSetPhaseShift(uint32 phaseMask, uint16 mapId = 0);
+        void SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<uint32> const& terrainswaps);
         void SendQueryTimeResponse();
         void SendRedirectClient(std::string& ip, uint16 port);
 

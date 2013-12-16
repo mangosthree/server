@@ -116,7 +116,7 @@ namespace MaNGOS
                         (((Creature*)u)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL)))
                 return 0;
 
-            uint32 xp_gain = BaseGain(pl->getLevel(), u->getLevel(), GetContentLevelsForMap(pl->GetMapId()));
+            uint32 xp_gain = BaseGain(pl->getLevel(), u->getLevel(), GetContentLevelsForMapAndZone(pl->GetMapId(), pl->GetZoneId()));
             if (xp_gain == 0)
                 return 0;
 

@@ -45,6 +45,13 @@ class Group;
 class ArenaTeam;
 class Item;
 class SQLStorage;
+struct PhaseDefinition;
+struct SpellPhaseInfo;
+
+typedef std::list<PhaseDefinition*> PhaseDefinitionContainer;
+typedef UNORDERED_MAP<uint32 /*zoneId*/, PhaseDefinitionContainer> PhaseDefinitionStore;
+
+typedef UNORDERED_MAP<uint32 /*spellId*/, SpellPhaseInfo*> SpellPhaseStore;
 
 struct GameTele
 {
@@ -320,17 +327,6 @@ struct QuestPOI
 typedef std::vector<QuestPOI> QuestPOIVector;
 typedef UNORDERED_MAP<uint32, QuestPOIVector> QuestPOIMap;
 
-struct QuestPhaseMaps
-{
-    uint16 MapId;
-    uint32 PhaseMask;
-
-    QuestPhaseMaps(uint16 mapId, uint32 phaseMask) : MapId(mapId), PhaseMask(phaseMask) {}
-};
-
-typedef std::vector<QuestPhaseMaps> QuestPhaseMapsVector;
-typedef UNORDERED_MAP<uint32, QuestPhaseMapsVector> QuestPhaseMapsMap;
-
 #define WEATHER_SEASONS 4
 struct WeatherSeasonChances
 {
@@ -428,6 +424,7 @@ enum ConditionSource                                        // From where was th
     CONDITION_FROM_SPELL_AREA       = 7,                    // Used to check a condition from spell_area table
     CONDITION_FROM_SPELLCLICK       = 8,                    // Used to check a condition from npc_spellclick_spells table
     CONDITION_FROM_DBSCRIPTS        = 9,                    // Used to check a condition from DB Scripts Engine
+    CONDITION_FROM_PHASEMGR         = 10,                   // Used to check a condition from phase manager
 };
 
 class PlayerCondition
@@ -451,6 +448,8 @@ class PlayerCondition
     private:
         bool CheckParamRequirements(Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
         uint16 m_entry;                                     // entry of the condition
+
+    public:
         ConditionType m_condition;                          // additional condition type
         uint32 m_value1;                                    // data for the condition - see ConditionType definition
         uint32 m_value2;
@@ -673,15 +672,6 @@ class ObjectMgr
             return NULL;
         }
 
-        QuestPhaseMapsVector const* GetQuestPhaseMapVector(uint32 questId)
-        {
-            QuestPhaseMapsMap::const_iterator itr = mQuestPhaseMap.find(questId);
-            if(itr != mQuestPhaseMap.end())
-                return &itr->second;
-
-            return NULL;
-        }
-
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
         static Player* GetPlayer(const char* name);         ///< Wrapper for ObjectAccessor::FindPlayerByName
@@ -762,7 +752,6 @@ class ObjectMgr
 
         void LoadPointsOfInterest();
         void LoadQuestPOI();
-        void LoadQuestPhaseMaps();
 
         void LoadNPCSpellClickSpells();
         void LoadCreatureTemplateSpells();
@@ -1006,6 +995,8 @@ class ObjectMgr
         // Check if a player meets condition conditionId
         bool IsPlayerMeetToCondition(uint16 conditionId, Player const* pPlayer, Map const* map, WorldObject const* source, ConditionSource conditionSourceType) const;
 
+        void GetConditions(uint32 conditionId, std::vector<PlayerCondition const*>& out) const;
+
         GameTele const* GetGameTele(uint32 id) const
         {
             GameTeleMap::const_iterator itr = m_GameTeleMap.find(id);
@@ -1152,6 +1143,12 @@ class ObjectMgr
             return ret ? ret : uint32(time(NULL));
         }
 
+        void LoadPhaseDefinitions();
+        void LoadSpellPhaseInfo();
+
+        PhaseDefinitionStore const* GetPhaseDefinitionStore() { return &_PhaseDefinitionStore; }
+        SpellPhaseStore const* GetSpellPhaseStore() { return &_SpellPhaseStore; }
+
     protected:
 
         // first free id for selected id type
@@ -1205,7 +1202,6 @@ class ObjectMgr
         PointOfInterestMap  mPointsOfInterest;
 
         QuestPOIMap         mQuestPOIMap;
-        QuestPhaseMapsMap   mQuestPhaseMap;
 
         WeatherZoneMap      mWeatherZoneMap;
 
@@ -1290,7 +1286,10 @@ class ObjectMgr
         CacheTrainerSpellMap m_mCacheTrainerTemplateSpellMap;
         CacheTrainerSpellMap m_mCacheTrainerSpellMap;
 
-        HotfixData m_hotfixData; 
+        HotfixData m_hotfixData;
+
+        PhaseDefinitionStore _PhaseDefinitionStore;
+        SpellPhaseStore _SpellPhaseStore;
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()

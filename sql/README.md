@@ -66,4 +66,4 @@ NOTE: for testing purposes, this sql query contains four accounts data by defaul
  </tr>
 </table>
 
-If still want to use clear realmd database, make sure, that on these accounts there wasn't created any characters, if is, truncate or reimport characters.sql and execute all these queries on realmd database - "truncate table account; truncate table realmcharacters;" (without quates).
+If you still want to use a clear realmd database, make sure that on these accounts no characters were created. If there is, truncate or reimport characters.sql and execute all these queries on realmd database - "truncate table account; truncate table realmcharacters;" (without quotes).

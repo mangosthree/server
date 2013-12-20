@@ -1,3 +1,5 @@
+ALTER TABLE db_version CHANGE COLUMN required_12741_01_mangos required_12751_01_mangos_phase bit;
+
 DROP TABLE IF EXISTS `phase_definitions`;
 CREATE TABLE `phase_definitions` (
   `zoneId` mediumint(7) unsigned NOT NULL DEFAULT '0',
@@ -20,5 +22,3 @@ CREATE TABLE `spell_phase` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `quest_phase_maps`;
-
-ALTER TABLE db_version CHANGE COLUMN required_12741_01_mangos required_12751_01_mangos_phase bit;

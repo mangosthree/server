@@ -697,7 +697,7 @@
     <ClInclude Include="..\..\src\game\vmap\WorldModel.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\dep\recastnavigation\Detour\win\VC110\Detour.vcxproj">
+    <ProjectReference Include="..\..\dep\recastnavigation\Detour\win\VC120\Detour.vcxproj">
       <Project>{72bdf975-4d4a-42c7-b2c4-f9ed90a2abb6}</Project>
     </ProjectReference>
     <ProjectReference Include="shared.vcxproj">

@@ -203,11 +203,11 @@
     <ClInclude Include="..\..\..\src\game\vmap\WorldModel.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\win\VC110\g3dlite.vcxproj">
+    <ProjectReference Include="..\..\..\win\VC120\g3dlite.vcxproj">
       <Project>{8072769e-cf10-48bf-b9e1-12752a5dac6e}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\win\VC110\zlib.vcxproj">
+    <ProjectReference Include="..\..\..\win\VC120\zlib.vcxproj">
       <Project>{8f1dea42-6a5b-4b62-839d-c141a7bfacf2}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>

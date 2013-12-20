@@ -1,17 +1,17 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vmapExtractor", "VC110\vmapExtractor.vcxproj", "{D4624B20-AC1E-4EE9-8C9C-0FB65EEE3393}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vmapExtractor", "VC120\vmapExtractor.vcxproj", "{D4624B20-AC1E-4EE9-8C9C-0FB65EEE3393}"
 	ProjectSection(ProjectDependencies) = postProject
 		{78424708-1F6E-4D4B-920C-FB6D26847055} = {78424708-1F6E-4D4B-920C-FB6D26847055}
 		{B96F612A-C91D-43B3-A4C3-D4294817EC6C} = {B96F612A-C91D-43B3-A4C3-D4294817EC6C}
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2} = {8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\..\..\win\VC110\zlib.vcxproj", "{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\..\..\win\VC120\zlib.vcxproj", "{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bzip2", "..\..\..\win\VC110\bzip2.vcxproj", "{B96F612A-C91D-43B3-A4C3-D4294817EC6C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bzip2", "..\..\..\win\VC120\bzip2.vcxproj", "{B96F612A-C91D-43B3-A4C3-D4294817EC6C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StormLib", "..\..\..\dep\StormLib\StormLib_vc110.vcxproj", "{78424708-1F6E-4D4B-920C-FB6D26847055}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StormLib", "..\..\..\dep\StormLib\StormLib_vc120.vcxproj", "{78424708-1F6E-4D4B-920C-FB6D26847055}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

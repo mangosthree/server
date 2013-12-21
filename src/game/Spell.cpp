@@ -4724,79 +4724,60 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
         return SPELL_CAST_OK;
 
     SpellRuneCostEntry const* src = sSpellRuneCostStore.LookupEntry(m_spellInfo->runeCostID);
-
-    if (!src)
-        return SPELL_CAST_OK;
-
-    if (src->NoRuneCost() && (!take || src->NoRunicPowerGain()))
+    if (!src || (src->NoRuneCost() && (!take || src->NoRunicPowerGain())))
         return SPELL_CAST_OK;
 
     if (take)
         m_runesState = plr->GetRunesState();                // store previous state
 
-    // at this moment for rune cost exist only no cost mods, and no percent mods
-    int32 runeCostMod = 10000;
-    if (Player* modOwner = plr->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCostMod, this);
+    int32 runeCost[NUM_RUNE_TYPES];                     // blood, frost, unholy, death
 
-    if (runeCostMod > 0)
+    // init cost data and apply mods
+    for (uint32 i = 0; i < RUNE_DEATH; ++i)
     {
-        int32 runeCost[NUM_RUNE_TYPES];                     // blood, frost, unholy, death
+        runeCost[i] = src->RuneCost[i];
+        if (Player* modOwner = plr->GetSpellModOwner())
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this);
+    }
+            
 
-        // init cost data and apply mods
-        for (uint32 i = 0; i < RUNE_DEATH; ++i)
-            runeCost[i] = runeCostMod > 0 ? src->RuneCost[i] : 0;
+    runeCost[RUNE_DEATH] = 0;                           // calculated later
 
-        runeCost[RUNE_DEATH] = 0;                           // calculated later
+    // scan non-death runes (death rune not used explicitly in rune costs)
+    for (uint32 i = 0; i < MAX_RUNES; ++i)
+    {
+        RuneType rune = plr->GetCurrentRune(i);
+        if (!plr->GetRuneCooldown(i) && runeCost[rune] > 0)
+        {
+            plr->SetRuneCooldown(i, RUNE_COOLDOWN);     // 5*2=10 sec
+            --runeCost[rune];
+        }
+    }
 
-        // scan non-death runes (death rune not used explicitly in rune costs)
+    // collect all not counted rune costs to death runes cost
+    for (uint32 i = 0; i < RUNE_DEATH; ++i)
+       if (runeCost[i] > 0)
+          runeCost[RUNE_DEATH] += runeCost[i];
+
+    // scan death runes
+    if (runeCost[RUNE_DEATH] > 0)
+    {
         for (uint32 i = 0; i < MAX_RUNES; ++i)
         {
             RuneType rune = plr->GetCurrentRune(i);
-            if (runeCost[rune] <= 0)
-                continue;
-
-            // already used
-            if (plr->GetRuneCooldown(i) != 0)
-                continue;
-
-            if (take)
-                plr->SetRuneCooldown(i, RUNE_COOLDOWN);     // 5*2=10 sec
-
-            --runeCost[rune];
-        }
-
-        // collect all not counted rune costs to death runes cost
-        for (uint32 i = 0; i < RUNE_DEATH; ++i)
-            if (runeCost[i] > 0)
-                runeCost[RUNE_DEATH] += runeCost[i];
-
-        // scan death runes
-        if (runeCost[RUNE_DEATH] > 0)
-        {
-            for (uint32 i = 0; i < MAX_RUNES && runeCost[RUNE_DEATH]; ++i)
+            if (plr->GetRuneCooldown(i) && rune == RUNE_DEATH)
             {
-                RuneType rune = plr->GetCurrentRune(i);
-                if (rune != RUNE_DEATH)
-                    continue;
-
-                // already used
-                if (plr->GetRuneCooldown(i) != 0)
-                    continue;
-
-                if (take)
-                    plr->SetRuneCooldown(i, RUNE_COOLDOWN); // 5*2=10 sec
-
-                --runeCost[rune];
+                plr->SetRuneCooldown(i, RUNE_COOLDOWN); // 5*2=10 sec
+                runeCost[rune]--;
 
                 if (take)
                     plr->ConvertRune(i, plr->GetBaseRune(i));
             }
         }
-
-        if (!take && runeCost[RUNE_DEATH] > 0)
-            return SPELL_FAILED_NO_POWER;                   // not sure if result code is correct
     }
+
+    if (runeCost[RUNE_DEATH] == 0)
+        return SPELL_FAILED_NO_POWER;                   // not sure if result code is correct
 
     if (take)
     {

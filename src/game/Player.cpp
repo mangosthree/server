@@ -2173,18 +2173,21 @@ void Player::Regenerate(Powers power, uint32 diff)
             if (getClass() != CLASS_DEATH_KNIGHT)
                 break;
 
-            for (uint32 rune = 0; rune < MAX_RUNES; ++rune)
+            for (uint8 rune = 0; rune < MAX_RUNES; rune += 2)
             {
-                if (uint16 cd = GetRuneCooldown(rune))      // if we have cooldown, reduce it...
+                uint32 cd_diff = diff;
+                uint8 runeToRegen = rune;
+                uint32 cd = GetRuneCooldown(rune);
+                uint32 secondRuneCd = GetRuneCooldown(rune + 1);
+                // Regenerate second rune of the same type only after first rune is off the cooldown
+                if (secondRuneCd && (cd > secondRuneCd || !cd))
                 {
-                    uint32 cd_diff = diff;
-                    AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-                    for (AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
-                        if ((*i)->GetModifier()->m_miscvalue == int32(power) && (*i)->GetMiscBValue() == GetCurrentRune(rune))
-                            cd_diff = cd_diff * ((*i)->GetModifier()->m_amount + 100) / 100;
-
-                    SetRuneCooldown(rune, (cd < cd_diff) ? 0 : cd - cd_diff);
+                    ++runeToRegen;
+                    cd = secondRuneCd;
                 }
+
+                if (cd)
+                    SetRuneCooldown(rune, (cd < cd_diff) ? 0 : cd - cd_diff);
             }
             break;
         }
@@ -22072,7 +22075,7 @@ void Player::ResyncRunes()
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
         data << uint8(GetCurrentRune(i));                   // rune type
-        data << uint8(255 - ((GetRuneCooldown(i) / REGEN_TIME_FULL) * 51));     // passed cooldown time (0-255)
+        data << uint8(255 - (GetRuneCooldown(i) * 51));     // passed cooldown time (0-255)
     }
     GetSession()->SendPacket(&data);
 }

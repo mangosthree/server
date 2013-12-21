@@ -9867,6 +9867,9 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     int32 heal = (glyph->GetModifier()->m_amount * shield->GetModifier()->m_amount) / 100;
                     caster->CastCustomSpell(m_target, 56160, &heal, NULL, NULL, true, 0, shield);
                 }
+                // Holy Walk
+                if (caster == m_target && caster->HasAura(33333))
+                    caster->CastSpell(caster, 96219, true);
                 return;
             }
 

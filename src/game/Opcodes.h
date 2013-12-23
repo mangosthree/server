@@ -47,8 +47,8 @@ enum Opcodes
     SMSG_QUERY_OBJECT_POSITION                            = 0x1006,
     CMSG_QUERY_OBJECT_ROTATION                            = 0x1007,
     SMSG_QUERY_OBJECT_ROTATION                            = 0x1008,
-    CMSG_WORLD_TELEPORT                                   = 0x1009,
-    CMSG_TELEPORT_TO_UNIT                                 = 0x100A,
+    CMSG_WORLD_TELEPORT                                   = 0x24B2, // 4.3.4 15595
+    CMSG_TELEPORT_TO_UNIT                                 = 0x4206, // 4.3.4 15595
     CMSG_ZONE_MAP                                         = 0x100B,
     SMSG_ZONE_MAP                                         = 0x100C,
     CMSG_DEBUG_CHANGECELLZONE                             = 0x100D,

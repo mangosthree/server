@@ -31,6 +31,7 @@ add_library(g3dlite
 	../../dep/src/g3dlite/AABox.cpp
 	../../dep/src/g3dlite/Box.cpp
 	../../dep/src/g3dlite/Crypto.cpp
+        ../../dep/src/g3dlite/FileSystem.cpp
 	../../dep/src/g3dlite/format.cpp
 	../../dep/src/g3dlite/Matrix3.cpp
 	../../dep/src/g3dlite/Plane.cpp
@@ -58,12 +59,14 @@ add_library(g3dlite
 	../../dep/src/g3dlite/Matrix4.cpp
 	../../dep/src/g3dlite/MemoryManager.cpp
 	../../dep/src/g3dlite/Quat.cpp
+	../../dep/src/g3dlite/PhysicsFrame.cpp
 	../../dep/src/g3dlite/Random.cpp
 	../../dep/src/g3dlite/Ray.cpp
 	../../dep/src/g3dlite/ReferenceCount.cpp
 	../../dep/src/g3dlite/Sphere.cpp
 	../../dep/src/g3dlite/TextInput.cpp
 	../../dep/src/g3dlite/TextOutput.cpp
+	../../dep/src/g3dlite/uint128.cpp
 	../../dep/src/g3dlite/UprightFrame.cpp
 	../../dep/src/g3dlite/Vector2.cpp
 	)

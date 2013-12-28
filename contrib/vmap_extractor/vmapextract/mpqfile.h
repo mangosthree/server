@@ -11,6 +11,7 @@
 #include <vector>
 #include <iostream>
 #include <deque>
+#include "StormLib.h"
 
 #ifdef _WIN32
 #include <Windows.h>    // mainly only HANDLE definition is required
@@ -55,7 +56,10 @@ class MPQFile
 
     public:
         MPQFile(HANDLE mpq, const char* filename);    // filenames are not case sensitive
-        ~MPQFile() { close(); }
+        ~MPQFile() 
+	{ 
+		close(); 
+	}
         size_t read(void* dest, size_t bytes);
         size_t getSize() { return size; }
         size_t getPos() { return pointer; }

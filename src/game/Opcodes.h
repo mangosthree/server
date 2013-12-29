@@ -104,7 +104,7 @@ enum Opcodes
     SMSG_NEW_WORLD                                        = 0x79B1, // 4.3.4 15595
     SMSG_TRANSFER_PENDING                                 = 0x18A6, // 4.3.4 15595
     SMSG_TRANSFER_ABORTED                                 = 0x0537, // 4.3.4 15595
-    SMSG_CHARACTER_LOGIN_FAILED                           = 0x1042,
+    SMSG_CHARACTER_LOGIN_FAILED                           = 0x4417, // 4.3.4 15595
     SMSG_LOGIN_SETTIMESPEED                               = 0x4D15, // 4.3.4 15595
     SMSG_GAMETIME_UPDATE                                  = 0x1044,
     CMSG_GAMETIME_SET                                     = 0x1045,

@@ -304,7 +304,7 @@ enum Opcodes
     SMSG_MOVE_NORMAL_FALL                                 = 0x51B6, // 4.3.4 15595
     SMSG_MOVE_SET_HOVER                                   = 0x5CB3, // 4.3.4 15595
     SMSG_MOVE_UNSET_HOVER                                 = 0x51B3, // 4.3.4 15595
-    CMSG_MOVE_HOVER_ACK                                   = 0x10F7,
+    CMSG_MOVE_HOVER_ACK                                   = 0x3318, // 4.3.4 15595
     MSG_MOVE_HOVER                                        = 0x10F8,
     CMSG_TRIGGER_CINEMATIC_CHEAT                          = 0x10F9,
     CMSG_OPENING_CINEMATIC                                = 0x10FA,

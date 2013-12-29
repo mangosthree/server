@@ -310,7 +310,7 @@ void InitializeOpcodes()
     OPCODE(SMSG_MOVE_NORMAL_FALL,                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_MOVE_SET_HOVER,                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_MOVE_UNSET_HOVER,                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(CMSG_MOVE_HOVER_ACK,                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleMoveHoverAck              );
+    OPCODE(CMSG_MOVE_HOVER_ACK,                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleMoveHoverAck              );
     //OPCODE(MSG_MOVE_HOVER,                               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     OPCODE(SMSG_SPLINE_MOVE_SET_WALK_SPEED,              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_SPLINE_MOVE_SET_RUN_SPEED,               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );

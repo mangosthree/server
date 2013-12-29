@@ -893,6 +893,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleReforgeItemOpcode(WorldPacket& recvData);
         void SendReforgeResult(bool success);
 
+        void HandleLoadScreenOpcode(WorldPacket& recvPacket);
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);

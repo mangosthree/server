@@ -1437,3 +1437,11 @@ void WorldSession::HandleSetCurrencyFlagsOpcode(WorldPacket& recv_data)
     GetPlayer()->SetCurrencyFlags(currencyId, uint8(flags));
 }
 
+void WorldSession::HandleLoadScreenOpcode(WorldPacket& recvPacket)
+{
+    DEBUG_LOG("CMSG_LOAD_SCREEN");
+    uint32 mapID;
+
+    recvPacket >> mapID;
+    recvPacket.ReadBit();
+}

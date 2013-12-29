@@ -106,9 +106,9 @@ enum Opcodes
     SMSG_TRANSFER_ABORTED                                 = 0x0537, // 4.3.4 15595
     SMSG_CHARACTER_LOGIN_FAILED                           = 0x4417, // 4.3.4 15595
     SMSG_LOGIN_SETTIMESPEED                               = 0x4D15, // 4.3.4 15595
-    SMSG_GAMETIME_UPDATE                                  = 0x1044,
+    SMSG_GAMETIME_UPDATE                                  = 0x4127, // 4.3.4 15595
     CMSG_GAMETIME_SET                                     = 0x1045,
-    SMSG_GAMETIME_SET                                     = 0x1046,
+    SMSG_GAMETIME_SET                                     = 0x0014, // 4.3.4 15595
     CMSG_GAMESPEED_SET                                    = 0x1047,
     SMSG_GAMESPEED_SET                                    = 0x1048,
     CMSG_SERVERTIME                                       = 0x1049,

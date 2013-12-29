@@ -612,6 +612,10 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
         plMover->SetPosition(movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z, movementInfo.GetPos()->o);
         plMover->m_movementInfo = movementInfo;
 
+        /* Movement should cancel looting */
+        if(ObjectGuid lootGUID = plMover->GetLootGuid())
+            plMover->SendLootRelease(lootGUID);
+
         if (movementInfo.GetPos()->z < -500.0f)
         {
             if (plMover->GetBattleGround()

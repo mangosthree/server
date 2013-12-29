@@ -285,11 +285,11 @@ enum Opcodes
     CMSG_MOVE_CHARM_PORT_CHEAT                            = 0x10E1,
     CMSG_MOVE_SET_RAW_POSITION                            = 0x10E2,
     SMSG_FORCE_RUN_SPEED_CHANGE                           = 0x10E3,
-    CMSG_FORCE_RUN_SPEED_CHANGE_ACK                       = 0x10E4,
+    CMSG_FORCE_RUN_SPEED_CHANGE_ACK                       = 0x7818, // 4.3.4 15595
     SMSG_FORCE_RUN_BACK_SPEED_CHANGE                      = 0x10E5,
     CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK                  = 0x10E6,
     SMSG_FORCE_SWIM_SPEED_CHANGE                          = 0x10E7,
-    CMSG_FORCE_SWIM_SPEED_CHANGE_ACK                      = 0x10E8,
+    CMSG_FORCE_SWIM_SPEED_CHANGE_ACK                      = 0x7A10, // 4.3.4 15595
     SMSG_FORCE_MOVE_ROOT                                  = 0x7DA0, // 4.3.4 15595
     CMSG_FORCE_MOVE_ROOT_ACK                              = 0x701E, // 4.3.4 15595
     SMSG_FORCE_MOVE_UNROOT                                = 0x7DB4, // 4.3.4 15595

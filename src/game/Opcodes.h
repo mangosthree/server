@@ -568,7 +568,6 @@ enum Opcodes
     SMSG_RWHOIS                                           = 0x11FF,
     SMSG_LFG_PLAYER_REWARD                                = 0x1200,
     SMSG_LFG_TELEPORT_DENIED                              = 0x1201,
-    CMSG_UNLEARN_SPELL                                    = 0x1202,
     CMSG_UNLEARN_SKILL                                    = 0x6106, // 4.3.4 15595
     SMSG_REMOVED_SPELL                                    = 0x4804, // 4.3.4 15595
     CMSG_DECHARGE                                         = 0x1205,

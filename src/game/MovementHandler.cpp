@@ -514,7 +514,7 @@ void WorldSession::HandleMoveHoverAck(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_MOVE_HOVER_ACK");
     uint64 guid;
-    recv_data.readPackGUID(guid);
+    guid = recv_data.readPackGUID(); // unused
     recv_data.read_skip<uint32>();
 
     MovementInfo movementInfo;

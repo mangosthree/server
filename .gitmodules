@@ -1,4 +1,0 @@
-
-[submodule "src/bindings/scripts"]
-	path = src/bindings/scripts
-	url = git@github.com:mangosthree/scripts.git

@@ -603,7 +603,7 @@ enum UnitFlags
     UNIT_FLAG_UNK_31                = 0x80000000            // set skinnable icon and also changes color of portrait
 };
 
-// Value masks for UNIT_FIELD_FLAGS_2
+// Value masks for UNIT_FIELD_FLAGS_2 (initialy is not implemented)
 enum UnitFlags2
 {
     UNIT_FLAG2_FEIGN_DEATH          = 0x00000001,

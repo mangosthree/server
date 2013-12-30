@@ -355,12 +355,14 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     SetAttackTime(RANGED_ATTACK, GetCreatureInfo()->rangeattacktime);
 
     uint32 unitFlags = GetCreatureInfo()->unit_flags;
+    uint32 unitFlags2 = GetCreatureInfo()->unit_flags2;
 
     // we may need to append or remove additional flags
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT))
         unitFlags |= UNIT_FLAG_IN_COMBAT;
 
     SetUInt32Value(UNIT_FIELD_FLAGS, unitFlags);
+    SetUInt32Value(UNIT_FIELD_FLAGS_2, unitFlags2);
 
     // preserve all current dynamic flags if exist
     uint32 dynFlags = GetUInt32Value(UNIT_DYNAMIC_FLAGS);

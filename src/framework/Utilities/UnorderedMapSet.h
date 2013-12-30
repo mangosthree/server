@@ -21,6 +21,7 @@
 
 #include "Platform/CompilerDefs.h"
 #include "Platform/Define.h"
+
 #if COMPILER == COMPILER_CLANG
 #  include <tr1/unordered_map>
 #  include <tr1/unordered_set>
@@ -30,7 +31,7 @@
 #elif COMPILER == COMPILER_GNU && (__GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 3)
 #  include <tr1/unordered_map>
 #  include <tr1/unordered_set>
-#elif COMPILER == COMPILER_GNU && __GNUC__ >= 3
+#elif COMPILER == COMPILER_GNU && __GNUC__ >= 3 && (__GNUC__ < 4 || __GNUC__ == 4 && __GNUC_MINOR__ < 3)
 #  include <ext/hash_map>
 #  include <ext/hash_set>
 #elif COMPILER == COMPILER_MICROSOFT && (_MSC_VER > 1500 || _MSC_VER == 1500 && _HAS_TR1)   // VC9.0 SP1 and later

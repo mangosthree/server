@@ -903,7 +903,7 @@ void InitializeOpcodes()
     //OPCODE(SMSG_CHARACTER_PROFILE,                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(SMSG_CHARACTER_PROFILE_REALM_CONNECTED,       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_DEFENSE_MESSAGE,                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(SMSG_INSTANCE_DIFFICULTY,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_WORLD_SERVER_INFO,                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(MSG_GM_RESETINSTANCELIMIT,                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     OPCODE(SMSG_MOTD,                                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(SMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY, STATUS_NEVER, PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );

@@ -16194,7 +16194,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     uint32 savedhealth = fields[46].GetUInt32();
     SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
 
-    static_assert(MAX_STORED_POWERS == 5, "Query not updated.");
+    COMPILE_ASSERT(MAX_STORED_POWERS == 5, "Query not updated.");
     for (uint32 i = 0; i < MAX_STORED_POWERS; ++i)
     {
         uint32 savedpower = fields[47 + i].GetUInt32();
@@ -17625,7 +17625,7 @@ void Player::SaveToDB()
 
     uberInsert.addUInt32(GetHealth());
 
-    static_assert(MAX_STORED_POWERS == 5, "Query not updated.");
+    COMPILE_ASSERT(MAX_STORED_POWERS == 5, "Query not updated.");
     for (uint32 i = 0; i < MAX_STORED_POWERS; ++i)
         uberInsert.addUInt32(GetPowerByIndex(i));
 
@@ -18306,7 +18306,7 @@ void Player::_SaveStats()
 
     stmt.addUInt32(GetGUIDLow());
     stmt.addUInt32(GetMaxHealth());
-    static_assert(MAX_STORED_POWERS == 5, "Query not updated.");
+    COMPILE_ASSERT(MAX_STORED_POWERS == 5, "Query not updated.");
     for (uint32 i = 0; i < MAX_STORED_POWERS; ++i)
         stmt.addUInt32(GetMaxPowerByIndex(i));
     for (int i = 0; i < MAX_STATS; ++i)

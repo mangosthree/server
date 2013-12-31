@@ -52,19 +52,13 @@
 #  define COMPILER COMPILER_INTEL
 #elif defined(__clang__)
 #  define COMPILER COMPILER_CLANG
-#  pragma error "FATAL ERROR: clang used"
 #elif defined( __GNUC__ ) && !defined(__clang__)
 #  define COMPILER COMPILER_GNU
 #else
 #  pragma error "FATAL ERROR: Unknown compiler."
 #endif
 
-#if COMPILER == COMPILER_MICROSOFT
-#  pragma warning( disable : 4267 )                         // conversion from 'size_t' to 'int', possible loss of data
-#  pragma warning( disable : 4786 )                         // identifier was truncated to '255' characters in the debug information
-#endif
-
-#if defined( __clang__)
+#if COMPILER == COMPILER_CLANG
 #define COMPILE_ASSERT(exp, name) _Static_assert((exp), #name)
 #else
 #define COMPILE_ASSERT(exp, name) static_assert((exp), #name) 

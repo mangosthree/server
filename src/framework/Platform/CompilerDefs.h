@@ -63,4 +63,11 @@
 #  pragma warning( disable : 4267 )                         // conversion from 'size_t' to 'int', possible loss of data
 #  pragma warning( disable : 4786 )                         // identifier was truncated to '255' characters in the debug information
 #endif
+
+#if defined( __clang__)
+#define COMPILE_ASSERT(exp, name) _Static_assert((exp), #name)
+#else
+#define COMPILE_ASSERT(exp, name) static_assert((exp), #name) 
+#endif
+
 #endif

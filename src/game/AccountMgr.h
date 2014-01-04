@@ -33,7 +33,7 @@ enum AccountOpResult
     AOR_DB_INTERNAL_ERROR
 };
 
-#define MAX_ACCOUNT_STR 16
+#define MAX_ACCOUNT_STR 32
 
 class AccountMgr
 {

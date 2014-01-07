@@ -6769,8 +6769,6 @@ void ObjectMgr::LoadReputationSpilloverTemplate()
         repTemplate.faction_rate[4]     = fields[14].GetFloat();
         repTemplate.faction_rank[4]     = fields[15].GetUInt32();
 
-
-
         FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionId);
 
         if (!factionEntry)
@@ -6841,7 +6839,6 @@ void ObjectMgr::LoadReputationSpilloverTemplate()
             sLog.outErrorDb("Faction (faction.dbc) %u does not exist but is used in `reputation_spillover_template`", repTemplate.faction[4]);
             continue;
         }
-
 
         m_RepSpilloverTemplateMap[factionId] = repTemplate;
 

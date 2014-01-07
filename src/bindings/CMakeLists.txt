@@ -20,4 +20,3 @@
 if(INCLUDE_BINDINGS_DIR)
   add_subdirectory(${INCLUDE_BINDINGS_DIR})
 endif()
-# add_subdirectory(scripts)

@@ -717,7 +717,7 @@ enum Opcodes
     SMSG_LFG_OFFER_CONTINUE                               = 0x1294,
     CMSG_TEST_DROP_RATE                                   = 0x1295,
     SMSG_TEST_DROP_RATE_RESULT                            = 0x1296,
-    CMSG_LFG_GET_STATUS                                   = 0x1297,
+    CMSG_LFG_GET_STATUS                                   = 0x2581, // 4.3.4 15595
     SMSG_SHOW_MAILBOX                                     = 0x1298,
     SMSG_RESET_RANGED_COMBAT_TIMER                        = 0x1299,
     SMSG_CHAT_NOT_IN_PARTY                                = 0x6A14, // 4.3.4 15595
@@ -920,7 +920,7 @@ enum Opcodes
     CMSG_MOVE_START_ASCEND                                = 0x390A,
     CMSG_MOVE_STOP_ASCEND                                 = 0x7B00, // 4.3.4 15595
     SMSG_ARENA_TEAM_STATS                                 = 0x4425, // 4.3.4 15595
-    CMSG_LFG_JOIN                                         = 0x135D,
+    CMSG_LFG_JOIN                                         = 0x2430, // 4.3.4 15595
     CMSG_LFG_LEAVE                                        = 0x135E,
     CMSG_LFG_SEARCH_JOIN                                  = 0x135F,
     CMSG_LFG_SEARCH_LEAVE                                 = 0x1360,
@@ -958,7 +958,7 @@ enum Opcodes
     MSG_MOVE_SET_FLIGHT_BACK_SPEED_CHEAT                  = 0x1380,
     SMSG_MOVE_SET_FLIGHT_BACK_SPEED                       = 0x30A2, // 4.3.4 15595
     SMSG_FORCE_FLIGHT_SPEED_CHANGE                        = 0x1382,
-    CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK                    = 0x1383,
+    CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK                    = 0x7314, // 4.3.4 15595
     SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE                   = 0x1384,
     CMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK               = 0x1385,
     SMSG_SPLINE_SET_FLIGHT_SPEED                          = 0x1386,
@@ -1138,7 +1138,7 @@ enum Opcodes
     CMSG_CALENDAR_UPDATE_EVENT                            = 0x142F,
     CMSG_CALENDAR_REMOVE_EVENT                            = 0x1430,
     CMSG_CALENDAR_COPY_EVENT                              = 0x1431,
-    CMSG_CALENDAR_EVENT_INVITE                            = 0x1432,
+    CMSG_CALENDAR_EVENT_INVITE                            = 0x2435, // 4.3.4 15595
     CMSG_CALENDAR_EVENT_RSVP                              = 0x1433,
     CMSG_CALENDAR_EVENT_REMOVE_INVITE                     = 0x1434,
     CMSG_CALENDAR_EVENT_STATUS                            = 0x1435,
@@ -1316,7 +1316,7 @@ enum Opcodes
     SMSG_BATTLEFIELD_MANAGER_ENTERING                     = 0x14E1,
     SMSG_BATTLEFIELD_MANAGER_QUEUE_INVITE                 = 0x14E2,
     CMSG_BATTLEFIELD_MANAGER_QUEUE_INVITE_RESPONSE        = 0x14E3,
-    CMSG_BATTLEFIELD_MANAGER_QUEUE_REQUEST                = 0x14E4,
+    CMSG_BATTLEFIELD_MANAGER_QUEUE_REQUEST                = 0x710C, // 4.3.4 15595 
     SMSG_BATTLEFIELD_MANAGER_QUEUE_REQUEST_RESPONSE       = 0x14E5,
     SMSG_BATTLEFIELD_MANAGER_EJECT_PENDING                = 0x14E6,
     SMSG_BATTLEFIELD_MANAGER_EJECTED                      = 0x14E7,
@@ -1366,7 +1366,7 @@ enum Opcodes
     CMSG_AUTH_CONTINUED_SESSION                           = 0x1513,
     CMSG_DROP_NEW_CONNECTION                              = 0x1514,
     SMSG_SEND_ALL_COMBAT_LOG                              = 0x1515,
-    SMSG_OPEN_LFG_DUNGEON_FINDER                          = 0x1516,
+    SMSG_OPEN_LFG_DUNGEON_FINDER                          = 0x0412, // 4.3.4 15595
     SMSG_MOVE_SET_COLLISION_HGT                           = 0x11B0, // 4.3.4 15595
     CMSG_MOVE_SET_COLLISION_HGT_ACK                       = 0x1518,
     MSG_MOVE_SET_COLLISION_HGT                            = 0x1519,

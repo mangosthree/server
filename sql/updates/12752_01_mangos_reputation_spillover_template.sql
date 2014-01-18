@@ -1,3 +1,4 @@
+ALTER TABLE `db_version` CHANGE `required_12751_01_mangos_phase` `required_12752_01_mangos_reputation_spillover_template` BIT(1) NULL; 
 ALTER TABLE `reputation_spillover_template`
 ADD COLUMN `faction5` SMALLINT(6) UNSIGNED DEFAULT '0' NOT NULL AFTER `rank_4`,
 ADD COLUMN `rate_5` FLOAT DEFAULT '0' NOT NULL AFTER `faction5`,

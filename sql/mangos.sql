@@ -1430,7 +1430,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_12712_02_mangos_command` bit(1) default NULL
+  `required_12752_01_mangos_reputation_spillover_template` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -20858,6 +20858,9 @@ CREATE TABLE `reputation_spillover_template` (
   `faction4` smallint(6) unsigned NOT NULL DEFAULT '0',
   `rate_4` float NOT NULL DEFAULT '0',
   `rank_4` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `faction5` smallint(6) unsigned DEFAULT '0',
+  `rate_5` float NOT NULL DEFAULT '0',
+  `rank_5` tinyint(3) unsigned DEFAULT '0',
   PRIMARY KEY (`faction`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Reputation spillover reputation gain';
 /*!40101 SET character_set_client = @saved_cs_client */;

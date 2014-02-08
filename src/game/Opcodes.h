@@ -930,7 +930,7 @@ enum Opcodes
     SMSG_LFG_ROLE_CHECK_UPDATE                            = 0x1364,
     SMSG_LFG_JOIN_RESULT                                  = 0x1365,
     SMSG_LFG_QUEUE_STATUS                                 = 0x1366,
-    CMSG_SET_LFG_COMMENT                                  = 0x1367,
+    CMSG_SET_LFG_COMMENT                                  = 0x0530, // 4.3.4 15595
     SMSG_LFG_UPDATE_PLAYER                                = 0x1368,
     SMSG_LFG_UPDATE_PARTY                                 = 0x1369,
     SMSG_LFG_UPDATE_SEARCH                                = 0x136A,
@@ -1134,7 +1134,7 @@ enum Opcodes
     CMSG_CALENDAR_GET_EVENT                               = 0x142B,
     CMSG_CALENDAR_GUILD_FILTER                            = 0x142C,
     CMSG_CALENDAR_ARENA_TEAM                              = 0x142D,
-    CMSG_CALENDAR_ADD_EVENT                               = 0x142E,
+    CMSG_CALENDAR_ADD_EVENT                               = 0x0726, // 4.3.4 15595
     CMSG_CALENDAR_UPDATE_EVENT                            = 0x142F,
     CMSG_CALENDAR_REMOVE_EVENT                            = 0x1430,
     CMSG_CALENDAR_COPY_EVENT                              = 0x1431,

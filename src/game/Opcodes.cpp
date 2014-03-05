@@ -1160,7 +1160,7 @@ void InitializeOpcodes()
     //OPCODE(CMSG_CALENDAR_EVENT_STATUS,                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarEventStatus       );
     //OPCODE(CMSG_CALENDAR_EVENT_MODERATOR_STATUS,         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleCalendarEventModeratorStatus);
     OPCODE(SMSG_CALENDAR_SEND_CALENDAR,                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(SMSG_CALENDAR_SEND_EVENT,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_CALENDAR_SEND_EVENT,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(SMSG_CALENDAR_FILTER_GUILD,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(SMSG_CALENDAR_ARENA_TEAM,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(SMSG_CALENDAR_EVENT_INVITE,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
@@ -1169,7 +1169,7 @@ void InitializeOpcodes()
     //OPCODE(SMSG_CALENDAR_COMMAND_RESULT,                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(SMSG_CALENDAR_RAID_LOCKOUT_ADDED,             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(SMSG_CALENDAR_RAID_LOCKOUT_REMOVED,           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(SMSG_CALENDAR_EVENT_INVITE_ALERT,             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_CALENDAR_EVENT_INVITE_ALERT,             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(SMSG_CALENDAR_EVENT_INVITE_REMOVED_ALERT,     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(SMSG_CALENDAR_EVENT_INVITE_STATUS_ALERT,      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(SMSG_CALENDAR_EVENT_REMOVED_ALERT,            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );

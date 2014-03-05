@@ -1144,7 +1144,7 @@ enum Opcodes
     CMSG_CALENDAR_EVENT_STATUS                            = 0x1435,
     CMSG_CALENDAR_EVENT_MODERATOR_STATUS                  = 0x1436,
     SMSG_CALENDAR_SEND_CALENDAR                           = 0x6805, // 4.3.4 15595
-    SMSG_CALENDAR_SEND_EVENT                              = 0x1438,
+    SMSG_CALENDAR_SEND_EVENT                              = 0x1438, // 4.3.4 15595
     SMSG_CALENDAR_FILTER_GUILD                            = 0x1439,
     SMSG_CALENDAR_ARENA_TEAM                              = 0x143A,
     SMSG_CALENDAR_EVENT_INVITE                            = 0x143B,
@@ -1153,7 +1153,7 @@ enum Opcodes
     SMSG_CALENDAR_COMMAND_RESULT                          = 0x143E,
     SMSG_CALENDAR_RAID_LOCKOUT_ADDED                      = 0x143F,
     SMSG_CALENDAR_RAID_LOCKOUT_REMOVED                    = 0x1440,
-    SMSG_CALENDAR_EVENT_INVITE_ALERT                      = 0x1441,
+    SMSG_CALENDAR_EVENT_INVITE_ALERT                      = 0x1441, // 4.3.4 15595
     SMSG_CALENDAR_EVENT_INVITE_REMOVED_ALERT              = 0x1442,
     SMSG_CALENDAR_EVENT_INVITE_STATUS_ALERT               = 0x1443,
     SMSG_CALENDAR_EVENT_REMOVED_ALERT                     = 0x1444,

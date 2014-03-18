@@ -1440,7 +1440,7 @@ CREATE TABLE `db_version` (
 
 LOCK TABLES `db_version` WRITE;
 /*!40000 ALTER TABLE `db_version` DISABLE KEYS */;
-INSERT INTO `db_version` (`version`, `creature_ai_version`, `cache_id`, `required_12712_02_mangos_command`) VALUES
+INSERT INTO `db_version` (`version`, `creature_ai_version`, `cache_id`, `required_12752_01_mangos_reputation_spillover_template`) VALUES
 ('Mangos default database.','Creature EventAI not provided.',0,NULL);
 /*!40000 ALTER TABLE `db_version` ENABLE KEYS */;
 UNLOCK TABLES;

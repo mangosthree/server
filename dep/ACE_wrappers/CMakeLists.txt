@@ -55,6 +55,12 @@ if(WIN32 AND MSVC)
     ALWAYS 0
   )
 elseif(UNIX)
+  if (${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
+        # ACE Won't build on FreeBSD 10 with the exceptions test enabled so we're just turning that test off
+	set(DISABLE_EXCEPTIONS "--enable-exceptions=no")
+  else()
+        set(DISABLE_EXCEPTIONS "")
+  endif()
   ExternalProject_Add(ACE_Project
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}

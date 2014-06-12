@@ -310,8 +310,11 @@ ByteBuffer& operator>> (ByteBuffer& buf, PackedGuidReader const& guid);
 
 inline PackedGuid ObjectGuid::WriteAsPacked() const { return PackedGuid(*this); }
 
+#if defined(__FreeBSD__)
+namespace std{
+# else
 HASH_NAMESPACE_START
-
+#endif
 template<>
 class hash<ObjectGuid>
 {
@@ -322,8 +325,12 @@ class hash<ObjectGuid>
             return hash<uint64>()(key.GetRawValue());
         }
 };
-
+#if defined(__FreeBSD__)
+}
+# else
 HASH_NAMESPACE_END
+#endif
+
 
 #define DEFINE_READGUIDMASK(T1, T2) template <T1> \
     void ByteBuffer::ReadGuidMask(ObjectGuid& guid) \

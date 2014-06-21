@@ -310,7 +310,7 @@ ByteBuffer& operator>> (ByteBuffer& buf, PackedGuidReader const& guid);
 
 inline PackedGuid ObjectGuid::WriteAsPacked() const { return PackedGuid(*this); }
 
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) && defined(__clang__)
 namespace std{
 # else
 HASH_NAMESPACE_START
@@ -325,7 +325,7 @@ class hash<ObjectGuid>
             return hash<uint64>()(key.GetRawValue());
         }
 };
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) && defined(__clang__)
 }
 # else
 HASH_NAMESPACE_END

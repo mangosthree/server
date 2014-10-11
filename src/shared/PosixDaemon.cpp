@@ -16,7 +16,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #include "Config/Config.h"
@@ -86,9 +89,12 @@ void startDaemon(uint32_t timeout)
         exit(EXIT_FAILURE);
     }
 
-    freopen("/dev/null", "rt", stdin);
-    freopen("/dev/null", "wt", stdout);
-    freopen("/dev/null", "wt", stderr);
+    if (!freopen("/dev/null", "rt", stdin))
+        exit(EXIT_FAILURE);
+    if (!freopen("/dev/null", "wt", stdout))
+        exit(EXIT_FAILURE);
+    if (!freopen("/dev/null", "wt", stderr))
+        exit(EXIT_FAILURE);
 }
 
 void stopDaemon()

@@ -52,12 +52,24 @@ class ObjectGuid;
 class ByteBufferException
 {
     public:
+    /**
+     * @brief
+     *
+     * @param _add
+     * @param _pos
+     * @param _esize
+     * @param _size
+     */
         ByteBufferException(bool _add, size_t _pos, size_t _esize, size_t _size)
             : add(_add), pos(_pos), esize(_esize), size(_size)
         {
             PrintPosError();
         }
 
+        /**
+         * @brief
+         *
+         */
         void PrintPosError() const
         {
             char const* traceStr;
@@ -76,10 +88,10 @@ class ByteBufferException
                 traceStr ? "\n" : "", traceStr ? traceStr : "");
         }
     private:
-        bool add;
-        size_t pos;
-        size_t esize;
-        size_t size;
+        bool add; /**< TODO */
+        size_t pos; /**< TODO */
+        size_t esize; /**< TODO */
+        size_t size; /**< TODO */
 };
 
 class BitStream
@@ -124,11 +136,23 @@ class BitStream
 };
 
 template<class T>
+/**
+ * @brief
+ *
+ */
 struct Unused
 {
+/**
+ * @brief
+ *
+ */
     Unused() {}
 };
 
+/**
+ * @brief
+ *
+ */
 class ByteBuffer
 {
     public:
@@ -152,6 +176,10 @@ class ByteBuffer
         {
         }
 
+        /**
+         * @brief
+         *
+         */
         void clear()
         {
             _storage.clear();
@@ -325,68 +353,132 @@ class ByteBuffer
             put(pos, (uint8*)&value, sizeof(value));
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator
+         */
         ByteBuffer& operator<<(uint8 value)
         {
             append<uint8>(value);
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator
+         */
         ByteBuffer& operator<<(uint16 value)
         {
             append<uint16>(value);
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator
+         */
         ByteBuffer& operator<<(uint32 value)
         {
             append<uint32>(value);
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator
+         */
         ByteBuffer& operator<<(uint64 value)
         {
             append<uint64>(value);
             return *this;
         }
 
-        // signed as in 2e complement
+        /**
+         * @brief signed as in 2e complement
+         *
+         * @param value
+         * @return ByteBuffer &operator
+         */
         ByteBuffer& operator<<(int8 value)
         {
             append<int8>(value);
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator
+         */
         ByteBuffer& operator<<(int16 value)
         {
             append<int16>(value);
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator
+         */
         ByteBuffer& operator<<(int32 value)
         {
             append<int32>(value);
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator
+         */
         ByteBuffer& operator<<(int64 value)
         {
             append<int64>(value);
             return *this;
         }
 
-        // floating points
+        /**
+         * @brief floating points
+         *
+         * @param value
+         * @return ByteBuffer &operator
+         */
         ByteBuffer& operator<<(float value)
         {
             append<float>(value);
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator
+         */
         ByteBuffer& operator<<(double value)
         {
             append<double>(value);
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator
+         */
         ByteBuffer& operator<<(const std::string& value)
         {
             append((uint8 const*)value.c_str(), value.length());
@@ -394,6 +486,12 @@ class ByteBuffer
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param str
+         * @return ByteBuffer &operator
+         */
         ByteBuffer& operator<<(const char* str)
         {
             append((uint8 const*)str, str ? strlen(str) : 0);
@@ -401,73 +499,144 @@ class ByteBuffer
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator >>
+         */
         ByteBuffer& operator>>(bool& value)
         {
             value = read<char>() > 0 ? true : false;
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator >>
+         */
         ByteBuffer& operator>>(uint8& value)
         {
             value = read<uint8>();
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator >>
+         */
         ByteBuffer& operator>>(uint16& value)
         {
             value = read<uint16>();
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator >>
+         */
         ByteBuffer& operator>>(uint32& value)
         {
             value = read<uint32>();
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator >>
+         */
         ByteBuffer& operator>>(uint64& value)
         {
             value = read<uint64>();
             return *this;
         }
 
-        // signed as in 2e complement
+        /**
+         * @brief signed as in 2e complement
+         *
+         * @param value
+         * @return ByteBuffer &operator >>
+         */
         ByteBuffer& operator>>(int8& value)
         {
             value = read<int8>();
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator >>
+         */
         ByteBuffer& operator>>(int16& value)
         {
             value = read<int16>();
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator >>
+         */
         ByteBuffer& operator>>(int32& value)
         {
             value = read<int32>();
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator >>
+         */
         ByteBuffer& operator>>(int64& value)
         {
             value = read<int64>();
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator >>
+         */
         ByteBuffer& operator>>(float& value)
         {
             value = read<float>();
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator >>
+         */
         ByteBuffer& operator>>(double& value)
         {
             value = read<double>();
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param value
+         * @return ByteBuffer &operator >>
+         */
         ByteBuffer& operator>>(std::string& value)
         {
             value.clear();
@@ -475,13 +644,19 @@ class ByteBuffer
             {
                 char c = read<char>();
                 if (c == 0)
-                    break;
+                    { break; }
                 value += c;
             }
             return *this;
         }
 
         template<class T>
+        /**
+         * @brief
+         *
+         * @param
+         * @return ByteBuffer &operator >>
+         */
         ByteBuffer& operator>>(Unused<T> const&)
         {
             return read_skip<T>();
@@ -501,8 +676,19 @@ class ByteBuffer
             return _storage[pos];
         }
 
+        /**
+         * @brief
+         *
+         * @return size_t
+         */
         size_t rpos() const { return _rpos; }
 
+        /**
+         * @brief
+         *
+         * @param rpos_
+         * @return size_t
+         */
         size_t rpos(size_t rpos_)
         {
             _rpos = rpos_;
@@ -516,6 +702,12 @@ class ByteBuffer
 
         size_t wpos() const { return _wpos; }
 
+        /**
+         * @brief
+         *
+         * @param wpos_
+         * @return size_t
+         */
         size_t wpos(size_t wpos_)
         {
             _wpos = wpos_;
@@ -539,6 +731,11 @@ class ByteBuffer
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @return T
+         */
         template <typename T> T read()
         {
             ResetBitReader();
@@ -547,10 +744,16 @@ class ByteBuffer
             return r;
         }
 
+        /**
+         * @brief
+         *
+         * @param pos
+         * @return T
+         */
         template <typename T> T read(size_t pos) const
         {
-            if(pos + sizeof(T) > size())
-                throw ByteBufferException(false, pos, sizeof(T), size());
+            if (pos + sizeof(T) > size())
+                { throw ByteBufferException(false, pos, sizeof(T), size()); }
             T val = *((T const*)&_storage[pos]);
             EndianConvert(val);
             return val;
@@ -567,15 +770,20 @@ class ByteBuffer
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @return uint64
+         */
         uint64 readPackGUID()
         {
             uint64 guid = 0;
             uint8 guidmark = 0;
             (*this) >> guidmark;
 
-            for(int i = 0; i < 8; ++i)
+            for (int i = 0; i < 8; ++i)
             {
-                if(guidmark & (uint8(1) << i))
+                if (guidmark & (uint8(1) << i))
                 {
                     uint8 bit;
                     (*this) >> bit;

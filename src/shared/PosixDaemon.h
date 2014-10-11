@@ -25,6 +25,19 @@
 #include "Common.h"
 #include "Log.h"
 
+/**
+ * @brief
+ *
+ * @param timeout
+ */
 void startDaemon(uint32_t timeout = 10);
+/**
+ * @brief
+ *
+ */
 void stopDaemon();
+/**
+ * @brief
+ *
+ */
 void detachDaemon();

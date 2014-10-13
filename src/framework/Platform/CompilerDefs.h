@@ -44,11 +44,11 @@
 #  define PLATFORM PLATFORM_UNIX
 #endif
 
-#define COMPILER_MICROSOFT 0
-#define COMPILER_GNU       1
-#define COMPILER_BORLAND   2
-#define COMPILER_INTEL     3
-#define COMPILER_CLANG     4
+#define COMPILER_MICROSOFT  0
+#define COMPILER_GNU        1
+#define COMPILER_BORLAND    2
+#define COMPILER_INTEL      3
+#define COMPILER_CLANG      4
 
 #ifdef _MSC_VER
 #  define COMPILER COMPILER_MICROSOFT
@@ -64,10 +64,10 @@
 #  pragma error "FATAL ERROR: Unknown compiler."
 #endif
 
-#if COMPILER == COMPILER_CLANG
-#define COMPILE_ASSERT(exp, name) _Static_assert((exp), #name)
+#if defined(__cplusplus) && __cplusplus == 201103L
+#  define COMPILER_HAS_CPP11_SUPPORT 1
 #else
-#define COMPILE_ASSERT(exp, name) static_assert((exp), #name) 
+#  define COMPILER_HAS_CPP11_SUPPORT 0
 #endif
 
 #endif

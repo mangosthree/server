@@ -32,22 +32,52 @@ class Unit;
 
 namespace Movement
 {
+    /**
+     * @brief
+     *
+     */
     typedef std::vector<Vector3> PointsArray;
 
+    /**
+     * @brief
+     *
+     */
     union FacingInfo
     {
+        /**
+         * @brief
+         *
+         */
         struct
         {
-            float x, y, z;
-        } f;
-        uint64  target;
-        float   angle;
+            float x, y, z; /**< TODO */
+        } f; /**< TODO */
+        uint64  target; /**< TODO */
+        float   angle; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @param o
+         */
         FacingInfo(float o) : angle(o) {}
+        /**
+         * @brief
+         *
+         * @param t
+         */
         FacingInfo(uint64 t) : target(t) {}
+        /**
+         * @brief
+         *
+         */
         FacingInfo() {}
     };
 
+    /**
+     * @brief
+     *
+     */
     struct MoveSplineInitArgs
     {
             MoveSplineInitArgs(size_t path_capacity = 16) : path_Idx_offset(0),
@@ -56,19 +86,29 @@ namespace Movement
                 path.reserve(path_capacity);
             }
 
-            PointsArray path;
-            FacingInfo facing;
-            MoveSplineFlag flags;
-            int32 path_Idx_offset;
-            float velocity;
+            PointsArray path; /**< TODO */
+            FacingInfo facing; /**< TODO */
+            MoveSplineFlag flags; /**< TODO */
+            int32 path_Idx_offset; /**< TODO */
+            float velocity; /**< TODO */
             float parabolic_amplitude;
             float time_perc;
-            uint32 splineId;
+            uint32 splineId; /**< TODO */
             float initialOrientation;
 
-            /** Returns true to show that the arguments were configured correctly and MoveSpline initialization will succeed. */
+            /**
+             * @brief Returns true to show that the arguments were configured correctly and MoveSpline initialization will succeed.
+             *
+             * @param unit
+             * @return bool
+             */
             bool Validate(Unit* unit) const;
         private:
+            /**
+             * @brief
+             *
+             * @return bool
+             */
             bool _checkPathBounds() const;
     };
 }

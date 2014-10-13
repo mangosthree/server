@@ -16199,8 +16199,6 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     // restore remembered power/health values (but not more max values)
     uint32 savedhealth = fields[46].GetUInt32();
     SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
-
-    COMPILE_ASSERT(MAX_STORED_POWERS == 5, "Query not updated.");
     for (uint32 i = 0; i < MAX_STORED_POWERS; ++i)
     {
         uint32 savedpower = fields[47 + i].GetUInt32();
@@ -16223,7 +16221,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             case 1: SetGameMaster(true); break;             // enable
             case 2:                                         // save state
                 if (extraflags & PLAYER_EXTRA_GM_ON)
-                    SetGameMaster(true);
+                    { SetGameMaster(true); }
                 break;
         }
 
@@ -17631,7 +17629,6 @@ void Player::SaveToDB()
 
     uberInsert.addUInt32(GetHealth());
 
-    COMPILE_ASSERT(MAX_STORED_POWERS == 5, "Query not updated.");
     for (uint32 i = 0; i < MAX_STORED_POWERS; ++i)
         uberInsert.addUInt32(GetPowerByIndex(i));
 
@@ -18312,14 +18309,13 @@ void Player::_SaveStats()
 
     stmt.addUInt32(GetGUIDLow());
     stmt.addUInt32(GetMaxHealth());
-    COMPILE_ASSERT(MAX_STORED_POWERS == 5, "Query not updated.");
     for (uint32 i = 0; i < MAX_STORED_POWERS; ++i)
         stmt.addUInt32(GetMaxPowerByIndex(i));
     for (int i = 0; i < MAX_STATS; ++i)
-        stmt.addFloat(GetStat(Stats(i)));
+        { stmt.addFloat(GetStat(Stats(i))); }
     // armor + school resistances
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
-        stmt.addUInt32(GetResistance(SpellSchools(i)));
+        { stmt.addUInt32(GetResistance(SpellSchools(i))); }
     stmt.addFloat(GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
     stmt.addFloat(GetFloatValue(PLAYER_DODGE_PERCENTAGE));
     stmt.addFloat(GetFloatValue(PLAYER_PARRY_PERCENTAGE));
@@ -18337,7 +18333,7 @@ void Player::outDebugStatsValues() const
 {
     // optimize disabled debug output
     if (!sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG) || sLog.HasLogFilter(LOG_FILTER_PLAYER_STATS))
-        return;
+        { return; }
 
     sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u", GetMaxHealth(), GetMaxPower(POWER_MANA));
     sLog.outDebug("AGILITY is: \t\t%f\t\tSTRENGTH is: \t\t%f", GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH));

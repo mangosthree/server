@@ -36,9 +36,17 @@ namespace Movement
 #pragma pack(push,1)
 #endif
 
+    /**
+     * @brief
+     *
+     */
     class MoveSplineFlag
     {
         public:
+            /**
+             * @brief
+             *
+             */
             enum eFlags
             {
                 None                = 0x00000000,
@@ -83,11 +91,35 @@ namespace Movement
                 Mask_Unused = No_Spline | Enter_Cycle | Frozen | FallingSlow | Unknown2 | Unknown3 | Unknown4 | SmoothGroundPath | Unknown6 | Unknown7 | Unknown8 | Unknown9,
             };
 
-            inline uint32& raw() { return (uint32&)*this;}
-            inline const uint32& raw() const { return (const uint32&)*this;}
+            /**
+             * @brief
+             *
+             * @return uint32
+             */
+            inline uint32& raw() { return (uint32&) * this;}
+            /**
+             * @brief
+             *
+             * @return const uint32
+             */
+            inline const uint32& raw() const { return (const uint32&) * this;}
 
+            /**
+             * @brief
+             *
+             */
             MoveSplineFlag() { raw() = 0; }
+            /**
+             * @brief
+             *
+             * @param f
+             */
             MoveSplineFlag(uint32 f) { raw() = f; }
+            /**
+             * @brief
+             *
+             * @param f
+             */
             MoveSplineFlag(const MoveSplineFlag& f) { raw() = f.raw(); }
 
             // Constant interface
@@ -100,12 +132,33 @@ namespace Movement
             bool hasAllFlags(uint32 f) const { return (raw() & f) == f;}
             bool hasFlag(uint32 f) const { return (raw() & f) != 0;}
             uint32 operator & (uint32 f) const { return (raw() & f);}
+            /**
+             * @brief
+             *
+             * @param f
+             * @return uint32 operator
+             */
             uint32 operator | (uint32 f) const { return (raw() | f);}
+            /**
+             * @brief
+             *
+             * @return std::string
+             */
             std::string ToString() const;
 
             // Not constant interface
 
+            /**
+             * @brief
+             *
+             * @param f
+             */
             void operator &= (uint32 f) { raw() &= f;}
+            /**
+             * @brief
+             *
+             * @param f
+             */
             void operator |= (uint32 f) { raw() |= f;}
 
             void EnableAnimation(uint8 anim) { raw() = (raw() & ~(Mask_Animations                           | Falling | Trajectory | FallingSlow)) | Animation | (anim & Mask_Animations);}
@@ -113,8 +166,16 @@ namespace Movement
             void EnableFalling()             { raw() = (raw() & ~(Mask_Animations                           | Trajectory | Animation))| Falling;}
             void EnableCatmullRom()          { raw() = (raw() & ~SmoothGroundPath)                          | Catmullrom | UncompressedPath; }
             void EnableFacingPoint()         { raw() = (raw() & ~Mask_Final_Facing)                         | Final_Point;}
-            void EnableFacingAngle()         { raw() = (raw() & ~Mask_Final_Facing)                         | Final_Angle;}
-            void EnableFacingTarget()        { raw() = (raw() & ~Mask_Final_Facing)                         | Final_Target;}
+            /**
+             * @brief
+             *
+             */
+            void EnableFacingAngle()    { raw() = (raw() & ~Mask_Final_Facing) | Final_Angle;}
+            /**
+             * @brief
+             *
+             */
+            void EnableFacingTarget()   { raw() = (raw() & ~Mask_Final_Facing) | Final_Target;}
             void EnableBoardVehicle()        { raw() = (raw() & ~(Catmullrom | ExitVehicle))                | BoardVehicle; }
             void EnableExitVehicle()         { raw() = (raw() & ~BoardVehicle)                              | ExitVehicle; }
 

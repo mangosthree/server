@@ -154,7 +154,7 @@ enum SpellFacingFlags
 
 /**
  * byte value (UNIT_FIELD_BYTES_1,0).
- * 
+ *
  * This is not to be used as a bitmask but as one value
  * each, ie: you can't be standing and sitting down at
  * the same time.
@@ -252,6 +252,10 @@ enum Swing
     TWOHANDEDSWING             = 2
 };
 
+/**
+ * This seems to be the state a target of an attack can be in.
+ * \todo Document more
+ */
 enum VictimState
 {
     VICTIMSTATE_UNAFFECTED     = 0,                         // seen in relation with HITINFO_MISS
@@ -266,9 +270,10 @@ enum VictimState
 };
 
 /**
- * TODO: Rename the LEFTSWING and NORMALSWING/2 to:
  * OFFSWING and BASESWING/2 or MAINSWING/2 to be more
  * in line with what is used in the other parts?
+ *
+ * \todo Rename the LEFTSWING and NORMALSWING/2 to:
  */
 enum HitInfo
 {
@@ -407,8 +412,6 @@ enum UnitMods
     UNIT_MOD_POWER_END = UNIT_MOD_ALTERNATIVE + 1
 };
 
-COMPILE_ASSERT(UNIT_MOD_POWER_END - UNIT_MOD_POWER_START == MAX_POWERS, "Power-related UnitMods are not updated.");
-
 enum BaseModGroup
 {
     CRIT_PERCENTAGE,
@@ -428,14 +431,16 @@ enum BaseModType
 
 enum DeathState
 {
-    ALIVE          = 0,                                     // show as alive
-    JUST_DIED      = 1,                                     // temporary state at die, for creature auto converted to CORPSE, for player at next update call
-    CORPSE         = 2,                                     // corpse state, for player this also meaning that player not leave corpse
-    DEAD           = 3,                                     // for creature despawned state (corpse despawned), for player CORPSE/DEAD not clear way switches (FIXME), and use m_deathtimer > 0 check for real corpse state
-    JUST_ALIVED    = 4,                                     // temporary state at resurrection, for creature auto converted to ALIVE, for player at next update call
+    ALIVE          = 0,     ///< show as alive
+    JUST_DIED      = 1,     ///< temporary state at die, for creature auto converted to CORPSE, for player at next update call
+    CORPSE         = 2,     ///< corpse state, for player this also meaning that player not leave corpse
+    DEAD           = 3,     ///< for creature despawned state (corpse despawned), for player CORPSE/DEAD not clear way switches (FIXME), and use m_deathtimer > 0 check for real corpse state
+    JUST_ALIVED    = 4      ///< temporary state at resurrection, for creature auto converted to ALIVE, for player at next update call
 };
 
-// internal state flags for some auras and movement generators, other.
+/**
+ * internal state flags for some auras and movement generators, other. (Taken from comment)
+ */
 enum UnitState
 {
     // persistent state (applied by aura/etc until expire)
@@ -2217,35 +2222,284 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void EnergizeBySpell(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype);
         uint32 SpellNonMeleeDamageLog(Unit* pVictim, uint32 spellID, uint32 damage);
         void CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item* castItem = NULL, Aura* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
+        /**
+         * Casts a spell simple and square, outputs some debugging info for some reasons, ie: if the
+         * spellInfo is NULL it is logged and the function won't do anything. If the spell is triggered
+         * by an \ref Aura and there's no originalCaster it is updated to be the cast of the \ref Aura
+         * and the triggeredBy is set to be the \ref Aura s \ref SpellEntry. Some work is done to
+         * work out if we should set a destination and/or source for the spell and it is then cast.
+         *
+         * Also, linked spells seem to be taken care of in here, but only the ones that should be
+         * removed on cast, ie: \ref SpellLinkedType::SPELL_LINKED_TYPE_REMOVEONCAST. See
+         * \ref SpellLinkedEntry for more info and \ref SpellLinkedType
+         *
+         * Finally calls \ref Spell::prepare on the \ref Spell and that's where it continues the
+         * execution.
+         *
+         * @param Victim victim that should be hit by the spell
+         * @param spellInfo info about the spell to cast
+         * @param triggered whether this was triggered by some outside circumstance or used as a button
+         * press on your action bar, true means triggered by outside circumstance
+         * @param castItem the \ref Item that cast the spell if any, usually NULL
+         * @param triggeredByAura the \ref Aura that triggered the spell if any
+         * @param originalCaster usually just \ref ObjectGuid constructor
+         * @param triggeredBy the \ref SpellEntry that triggered this spell if any
+         * \see Spell
+         * \see SpellCastTargets
+         * \todo What's the original caster?
+         * \todo Document the spell linked
+         */
         void CastSpell(Unit* Victim, SpellEntry const* spellInfo, bool triggered, Item* castItem = NULL, Aura* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
+        /**
+         * Does pretty much the same thing as \ref Unit::CastSpell but uses the three bp0-bp2 variables
+         * to change the \ref Spell s \ref Spell::m_currentBasePoints for the different
+         * \ref SpellEffectIndexes. This also works as the first version of \ref Unit::CastSpell which
+         * just does some checks and then calls the other one.
+         *
+         * @param Victim victim that should be hit by the spell
+         * @param spellId id of the spell to be cast
+         * @param bp0 this will change the \ref Spell s member \ref Spell::m_currentBasePoints for
+         * \ref SpellEffectIndex::EFFECT_INDEX_0 to this value if it's not NULL.
+         * @param bp1 this will change the \ref Spell s member \ref Spell::m_currentBasePoints for
+         * \ref SpellEffectIndex::EFFECT_INDEX_1 to this value if it's not NULL.
+         * @param bp2 this will change the \ref Spell s member \ref Spell::m_currentBasePoints for
+         * \ref SpellEffectIndex::EFFECT_INDEX_2 to this value if it's not NULL.
+         * @param triggered whether this was triggered by some outside circumstance or used as a button
+         * press on your action bar, true means triggered by outside circumstance
+         * @param castItem the \ref Item that cast this if any
+         * @param triggeredByAura the \ref Aura that triggered this
+         * @param originalCaster the original caster if any
+         * @param triggeredBy the \ref SpellEntry that triggered this cast, if any
+         * \todo What's the original caster?
+         */
         void CastCustomSpell(Unit* Victim, uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item* castItem = NULL, Aura* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
+        /**
+         * Same idea for this one as for \ref Unit::CastCustomSpell with a change to the spellid being
+         * exchanged for a \ref SpellEntry instead
+         *
+         * @param Victim victim that should be hit by the spell
+         * @param spellInfo info about the spell to cast
+         * @param bp0 this will change the \ref Spell s member \ref Spell::m_currentBasePoints for
+         * \ref SpellEffectIndex::EFFECT_INDEX_0 to this value if it's not NULL.
+         * @param bp1 this will change the \ref Spell s member \ref Spell::m_currentBasePoints for
+         * \ref SpellEffectIndex::EFFECT_INDEX_1 to this value if it's not NULL.
+         * @param bp2 this will change the \ref Spell s member \ref Spell::m_currentBasePoints for
+         * \ref SpellEffectIndex::EFFECT_INDEX_2 to this value if it's not NULL.
+         * @param triggered whether this was triggered by some outside circumstance or used as a button
+         * press on your action bar, true means triggered by outside circumstance
+         * @param castItem the \ref Item that cast this if any
+         * @param triggeredByAura the \ref Aura that triggered this
+         * @param originalCaster the original caster if any
+         * @param triggeredBy the \ref SpellEntry that triggered this cast, if any
+         * \todo What's the original caster?
+         */
         void CastCustomSpell(Unit* Victim, SpellEntry const* spellInfo, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item* castItem = NULL, Aura* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
+        /**
+         * Same idea as for \ref Unit::CastSpell, but with the parameters x, y, z telling the
+         * destination and source of the \ref SpellCastTargets depending on if the
+         * \ref SpellEntry::Targets bitflags have the
+         * \ref SpellCastTargetFlags::TARGET_FLAG_DEST_LOCATION  set for destination and
+         * \ref SpellCastTargetFlags::TARGET_FLAG_SOURCE_LOCATION set for location
+         *
+         * @param x coord for source/dest
+         * @param y coord for source/dest
+         * @param z coord for source/dest
+         * @param spellId id of the spell that was cast
+         * @param triggered whether this was triggered by some outside circumstance or used as a button
+         * press on your action bar, true means triggered by outside circumstance
+         * @param castItem the \ref Item that cast this if any
+         * @param triggeredByAura the \ref Aura that triggered this
+         * @param originalCaster the original caster if any
+         * @param triggeredBy the \ref SpellEntry that triggered this cast, if any
+         */
         void CastSpell(float x, float y, float z, uint32 spellId, bool triggered, Item* castItem = NULL, Aura* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
+        /**
+         * Same idea as for \ref Unit::CastSpell, but with the parameters x, y, z telling the
+         * destination and source of the \ref SpellCastTargets depending on if the
+         * \ref SpellEntry::Targets bitflags have the
+         * \ref SpellCastTargetFlags::TARGET_FLAG_DEST_LOCATION  set for destination and
+         * \ref SpellCastTargetFlags::TARGET_FLAG_SOURCE_LOCATION set for location
+         *
+         * @param x coord for source/dest
+         * @param y coord for source/dest
+         * @param z coord for source/dest
+         * @param spellInfo info about the spell to cast
+         * @param triggered whether this was triggered by some outside circumstance or used as a button
+         * press on your action bar, true means triggered by outside circumstance
+         * @param castItem the \ref Item that cast this if any
+         * @param triggeredByAura the \ref Aura that triggered this
+         * @param originalCaster the original caster if any
+         * @param triggeredBy the \ref SpellEntry that triggered this cast, if any
+         */
         void CastSpell(float x, float y, float z, SpellEntry const* spellInfo, bool triggered, Item* castItem = NULL, Aura* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
 
+        /**
+         * Changes the display id for this \ref Unit to the native one that it usually has.
+         * This is done by calling \ref Unit::SetDisplayId and \ref Unit::GetNativeDisplayId
+         * like so:
+         * \code{.cpp}
+         * SetDisplayId(GetNativeDisplayId());
+         * \endcode
+         */
         void DeMorph();
 
+        /**
+         * This sends an AttackStateUpdate, some info about damage that you've done etc.
+         * @param damageInfo the damage info used for knowing what to send
+         * \see OpcodesList::SMSG_ATTACKERSTATEUPDATE
+         * \todo Find out when and why this is sent
+         */
         void SendAttackStateUpdate(CalcDamageInfo* damageInfo);
+        /**
+         * The same thing as \ref Unit::SendAttackStateUpdate but you send along all the parameters
+         * that are needed instead of giving them through \ref CalcDamageInfo
+         * @param HitInfo hit information as in the \ref CalcDamageInfo::HitInfo
+         * @param target the target of the attack
+         * @param SwingType the swingtype, need to know what this is
+         * @param damageSchoolMask the damageschoolmask as the one from:
+         * \ref CalcDamageInfo::damageSchoolMask
+         * @param Damage the damage that was done
+         * @param AbsorbDamage how much of the damage that was absorbed
+         * @param Resist how much of the damage that was resisted
+         * @param TargetState the \ref VictimState of the target
+         * @param BlockedAmount how much of the damage that was blocked
+         * \todo What's the swingtype for?
+         */
         void SendAttackStateUpdate(uint32 HitInfo, Unit* target, uint8 SwingType, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount);
+        /**
+         * Used to send a update to the combat log for all \ref Player/\ref Unit s in the vicinity.
+         * @param log Info about who/what did damage to who and how etc, data needed for the packet
+         * \see OpcodesList::SMSG_SPELLNONMELEEDAMAGELOG
+         * \todo Is this actually for the combat log?
+         */
         void SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log);
+        /**
+         * Same idea as for \ref Unit::SendSpellNonMeleeDamageLog but without the helping
+         * \ref SpellNonMeleeDamage. This will set the \ref SpellNonMeleeDamage::HitInfo member to
+         * the following before sending the packet:
+         * \code {.cpp}
+         * \ref HitInfo::SPELL_HIT_TYPE_UNK1 | \ref HitInfo::SPELL_HIT_TYPE_UNK3 | \ref HitInfo::SPELL_HIT_TYPE_UNK6
+         * \endcode
+         *
+         * And if the \a CriticalHit parameter is true then it will add the flag
+         * \ref HitInfo::SPELL_HIT_TYPE_CRIT
+         *
+         * @param target the target of the spell
+         * @param SpellID id of the spell that was used
+         * @param Damage the damage done including the damage that was resisted/absorbed/blocked etc.
+         * Ie: damage + absorbed + resisted. This will be subtracted to the bare damage when inserted
+         * into the \ref SpellNonMeleeDamage struct
+         * @param damageSchoolMask mask for which kind of damage this is, see \ref SpellSchools for
+         * possible values, the first set bit out of this mask will be used a the \ref SpellSchools
+         * @param AbsorbedDamage how much of the damage that was absorbed
+         * @param Resist how much of the damage that was resisted
+         * @param PhysicalDamage whether or not this was physical damage
+         * @param Blocked how much of the damage that was blocked
+         * @param CriticalHit whether it was a critical hit or not
+         * \see HitInfo
+         * \see OpcodesList::SMSG_SPELLNONMELEEDAMAGELOG
+         * \todo Is this actually for the combat log?
+         */
         void SendSpellNonMeleeDamageLog(Unit* target, uint32 SpellID, uint32 Damage, SpellSchoolMask damageSchoolMask, uint32 AbsorbedDamage, uint32 Resist, bool PhysicalDamage, uint32 Blocked, bool CriticalHit = false);
+        /**
+         * Sends some data to the combat log about the periodic effects of an \ref Aura, it might be
+         * periodic healing/damage etc. Perhaps it increases the amount of power you have as a rogue
+         * and such. For more info on what exactly is sent etc see
+         * \ref OpcodesList::SMSG_PERIODICAURALOG.
+         * @param pInfo Info about the periodic effect of the \ref Aura
+         * \see OpcodesList::SMSG_PERIODICAURALOG
+         * \todo Is this actually for the combat log?
+         */
         void SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo);
+        /**
+         * Sends some data to the combat log about a spell that missed someone else. For more info
+         * on what's sent see \ref OpcodesList::SMSG_SPELLLOGMISS
+         * @param target the target of the \ref Spell that missed
+         * @param spellID id of the spell that missed
+         * @param missInfo info about how the spell actually missed ie: resisted/blocked/reflected etc.
+         */
         void SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo);
 
+        /**
+         * Teleports a \ref Creature or \ref Player to some coordinates within the same \ref Map,
+         * hence the name. If it's a \ref Creature that's being teleported it needs to have it's
+         * \ref MovementGenerator interrupted before the teleport and then reset afterwards. See
+         * \ref MovementGenerator::Reset and \ref MovementGenerator::Interrupt. Also, after moving
+         * a \ref Creature a hearbeat needs to be sent to inform the clients about the new location,
+         * this is done using \ref Unit::SendHeartBeat and the actual move of the \ref Creature is
+         * done with \ref Map::CreatureRelocation
+         * @param x the new x coord
+         * @param y the new y coord
+         * @param z the new z coord
+         * @param orientation the orientation after teleport, 0 is north and it's measured in radians
+         * @param casting used to decide whether a spell cast should be interrupted if a \ref Player
+         * is going to be teleported, see \ref TeleportToOptions::TELE_TO_SPELL, the idea is that
+         * you don't interrupt spellcasting at teleport if the spell is meant to teleport you as
+         * that would defeat the purpose of trying to teleport one self :)
+         */
         void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
+        /**
+         * Moves this \ref Unit to the given position in x,y,z coordinates. we can choose whether or
+         * not we want to generate a path to the target or just move straight there and if we would
+         * like to force the destination when creating the \ref PathFinder, only interesting
+         * if we have set generatePath to true.
+         *
+         * Taken from comments: recommend use \ref Unit::MonsterMove / \ref Unit::MonsterMoveWithSpeed
+         * for most case that correctly work with movegens, mmaps
+         * @param x the x coord to move to
+         * @param y the y coord to move to
+         * @param z the z coord to move to
+         * @param speed at which speed the \ref Unit should move
+         * @param generatePath whether a real path should be generated using a \ref PathFinder which
+         * will try to create a smooth path. if false we just go from current pos to given pos
+         * @param forceDestination if this is true it seems that we will try to get to our target
+         * even if there's something in the way. Otherwise we stop before we get there if there
+         * are obstacles
+         * \todo In what is the speed expressed? What is normal walking/running speed?
+         * \todo Is the dox about forceDestination correct?
+         */
         void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false);
         // recommend use MonsterMove/MonsterMoveWithSpeed for most case that correctly work with movegens
         // if used additional args in ... part then floats must explicitly casted to double
+        /**
+         * Tells nearby \ref Unit s and such that this \ref Unit has moved to a new position using
+         * \ref OpcodesList::MSG_MOVE_HEARTBEAT which will send the new position to all clients etc
+         * in the same \ref Cell
+         */
         void SendHeartBeat();
 
         bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING); }
         bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE); }
         bool IsRooted() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT); }
         virtual void SetRoot(bool /*enabled*/) {}
+        /**
+         * Changes this \ref Unit s ability to walk on water.
+         * @param enabled whether this \ref Unit should be able to walk on water (true) or not
+         * be able to (false)
+         * \see Player::SetWaterWalk
+         */
         virtual void SetWaterWalk(bool /*enabled*/) {}
 
+        /**
+         * Turns this \ref Unit towards the given one.
+         * @param target the \ref Unit we want to be turned towards
+         * \see WorldObject::SetOrientation
+         * \see WorldObejct::GetAngle
+         */
         void SetInFront(Unit const* target);
+        /**
+         * Sets this \ref Unit to face a certain angle.
+         * @param ori where we should start facing, measured in radians, 0 = north pi/2 = east etc.
+         * \todo is pi/2 = east or west? Logic says east?
+         */
         void SetFacingTo(float ori);
+        /**
+         * Does pretty much the same thing as \ref Unit::SetInFront but calls \ref Unit::SetFacingTo
+         * instead, which uses a \ref MoveSplineInit instead of just changing the angle.
+         * @param pObject the \ref WorldObject we should be facing
+         * \todo What difference does it make to use \ref MoveSplineInit instead of just directly
+         * changing the angle? Is it smoother?
+         */
         void SetFacingToObject(WorldObject* pObject);
 
         void SendHighestThreatUpdate(HostileReference* pHostileReference);
@@ -2280,27 +2534,80 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Pet* GetMiniPet() const;
         void SetMiniPet(Unit* pet) { SetCritterGuid(pet ? pet->GetObjectGuid() : ObjectGuid()); }
 
+        /** 
+         * Gets either the current charmer (ie mind control) or the owner of this \ref Unit
+         * @return the \ref ObjectGuid of either the charmer of this \ref Unit or the owner of it
+         */
         ObjectGuid const& GetCharmerOrOwnerGuid() const { return GetCharmerGuid() ? GetCharmerGuid() : GetOwnerGuid(); }
+        /** 
+         * Same thing as \ref Unit::GetCharmerOrOwnerGuid but with the exception that it returns
+         * it's own \ref ObjectGuid if it has no owner or charmer.
+         * @return either the charmers, owners or it's own \ref ObjectGuid
+         */
         ObjectGuid const& GetCharmerOrOwnerOrOwnGuid() const
         {
             if (ObjectGuid const& guid = GetCharmerOrOwnerGuid())
-                return guid;
+                { return guid; }
             return GetObjectGuid();
         }
+        /** 
+         * Checks if the charmer or owner is a \ref Player
+         * @return true if the charmer or owner is a \ref Player, false otherwise
+         * \see ObjectGuid::IsPlayer
+         */
         bool isCharmedOwnedByPlayerOrPlayer() const { return GetCharmerOrOwnerOrOwnGuid().IsPlayer(); }
 
+        /** 
+         * Get's the \ref Player that owns the \ref SpellModifier for this \ref Unit, if this
+         * \ref Unit is a \ref Player it's the owner, but if it's a \ref Pet och \ref Totem then
+         * then owner of the totem is returned if it's a \ref Player
+         * @return The \ref SpellModifier owner for this \ref Unit
+         */
         Player* GetSpellModOwner() const;
 
+        /** 
+         * Returns the \ref Unit that owns this \ref Unit if any
+         * @return the \ref Unit that owns this one, NULL if there is no owner
+         * \see Unit::GetOwnerGuid
+         */
         Unit* GetOwner() const;
+        /** 
+         * Returns the \ref Pet for this \ref Unit if any
+         * @return the \ref Pet that is associated with this \ref Unit if any, NULL if there is none
+         * \see Unit::GetPetGuid
+         */
         Pet* GetPet() const;
+        /** 
+         * Returns the \ref Unit that's currently charming this one if any.
+         * @return the \ref Unit that's charming this one, NULL if there is none
+         */
         Unit* GetCharmer() const;
+        /** 
+         * Returns the \ref Unit that this one is currently charming
+         * @return the \ref Unit that this one is charming, NULL if there is none
+         */
         Unit* GetCharm() const;
+        /** 
+         * Removes all \ref Aura s causing this \ref Unit to be charmed/possessed, the \ref Aura s
+         * that cause this are:
+         * - \ref AuraType::SPELL_AURA_MOD_CHARM
+         * - \ref AuraType::SPELL_AURA_MOD_POSSESS
+         * - \ref AuraType::SPELL_AURA_MOD_POSSESS_PET
+         */
         void Uncharm();
+        /** 
+         * Does the same as \ref Unit::GetCharmerOrOwnerGuid but returns the \ref Unit for that instead
+         * @return the \ref Unit that's charming this one or owning it, NULL if there is none
+         */
         Unit* GetCharmerOrOwner() const { return GetCharmerGuid() ? GetCharmer() : GetOwner(); }
+        /** 
+         * Does the same a \ref Unit::GetCharmerOrOwner but if there is none of those it returns itself
+         * @return a \ref Unit that's either owning or charming this one or just itself.
+         */
         Unit* GetCharmerOrOwnerOrSelf()
         {
             if (Unit* u = GetCharmerOrOwner())
-                return u;
+                { return u; }
 
             return this;
         }
@@ -2308,65 +2615,300 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Player* GetCharmerOrOwnerPlayerOrPlayerItself();
         Player const* GetCharmerOrOwnerPlayerOrPlayerItself() const;
 
+        /** 
+         * Set's the current \ref Pet for this \ref Unit
+         * @param pet The \ref Pet to add to this \ref Unit
+         */
         void SetPet(Pet* pet);
+        /** 
+         * Set's who we're currently charming
+         * @param pet The \ref Unit to set as charmed by us
+         */
         void SetCharm(Unit* pet);
 
+        /** 
+         * Adds a guardian to this \ref Unit which will generally defend this \ref Unit when on a
+         * threat list.
+         * @param pet the guardian to add
+         * \see Unit::m_guardianPets
+         */
         void AddGuardian(Pet* pet);
+        /** 
+         * Removes a guardian from this \ref Unit
+         * @param pet the guardian to remove
+         * \see Unit::m_guardianPets
+         */
         void RemoveGuardian(Pet* pet);
+        /** 
+         * Removes all current guardians from this \ref Unit
+         */
         void RemoveGuardians();
+        /** 
+         * Finds a guardian by it's entry, this is the entry in character.character_pet
+         * @param entry the entry to find
+         * @return the guardian/\ref Pet found or NULL if there's no such entry in the db
+         * \todo Is it the correct entry
+         */
         Pet* FindGuardianWithEntry(uint32 entry);
         Pet* GetProtectorPet();                             // expected single case in guardian list
 
+        /** 
+         * Is this \ref Unit charmed?
+         * @return true if the \ref Unit has a charmer, false otherwise
+         * \see Unit::GetCharmerGuid
+         */
         bool isCharmed() const { return !GetCharmerGuid().IsEmpty(); }
 
+        /** 
+         * There's only \ref CharmInfo available if this \ref Unit is in fact charmed by someone
+         * @return The \ref CharmInfo for this \ref Unit if any, NULL otherwise
+         */
         CharmInfo* GetCharmInfo() { return m_charmInfo; }
+        /** 
+         * Init the \ref CharmInfo struct with data about the \ref Unit that will be charmed
+         * @param charm the \ref Unit that is to be charmed
+         * @return the created \ref CharmInfo
+         * \todo Is the charm param really the unit to be charmed?
+         */
         CharmInfo* InitCharmInfo(Unit* charm);
 
+        /** 
+         * Get's the \ref ObjectGuid for a certain totem type that this \ref Unit has spawned
+         * @param slot the slot to get the \ref ObjectGuid for
+         * @return the \ref ObjectGuid for the given totem slot
+         */
         ObjectGuid const& GetTotemGuid(TotemSlot slot) const { return m_TotemSlot[slot]; }
+        /** 
+         * Gets a certain \ref Totem that this \ref Unit has spawned
+         * @param slot the slot to get the \ref Totem for
+         * @return The requested totem if there is any spawned, NULL otherwise
+         */
         Totem* GetTotem(TotemSlot slot) const;
+        /** 
+         * @return True if all totems slots are used (spawned), false otherwise
+         */
         bool IsAllTotemSlotsUsed() const;
 
+        /** 
+         * This is internal code that should only be called from the \ref Totem summon code
+         * @param slot 
+         * @param totem
+         * \internal
+         */
         void _AddTotem(TotemSlot slot, Totem* totem);       // only for call from Totem summon code
+        /** 
+         * This is internal code that should only be called from the \ref Totem class.
+         * @param totem
+         * \internal
+         */
         void _RemoveTotem(Totem* totem);                    // only for call from Totem class
 
+        /** 
+         * This will call the given function for all controlled \ref Unit s, for an example of
+         * how one such function could look please have a look at \ref CallForAllControlledUnitsExample
+         *
+         * The functors operator() should have the following signature:
+         * \code{.cpp}
+         * void operator()(Unit* unit) { ... };
+         * \endcode
+         * @param func the functor object used to call for each \ref Unit that we will find matching
+         * the mask
+         * @param controlledMask a mask telling which of the controlled \ref Unit s we want to call
+         * the functor for
+         */
         template<typename Func>
         void CallForAllControlledUnits(Func const& func, uint32 controlledMask);
+        /** 
+         * Works pretty much the same way as \ref Unit::CallForAllControlledUnits but instead
+         * the functors operator() should have the following signature:
+         * \code{.cpp}
+         * bool operator()(Unit* unit) { ... };
+         * \endcode
+         * @param func a functor object used to call for each \ref Unit that we will find matching
+         * the mask
+         * @param controlledMask a mask telling which of the controlled \ref Unit s we want to call
+         * the functor for
+         * @return true if the functor returned true for one of the \ref Unit s included by the
+         * controlledMask, false if none of them returned true
+         * \see Unit::isAttackingPlayer
+         */
         template<typename Func>
         bool CheckAllControlledUnits(Func const& func, uint32 controlledMask) const;
 
+        /** 
+         * Adds a \ref SpellAuraHolder
+         * @param holder the holder to add
+         * @return true if the holder was added, false otherwise
+         */
         bool AddSpellAuraHolder(SpellAuraHolder* holder);
+        /** 
+         * Adds a \ref Aura to \ref Unit::m_modAuras
+         * @param aura the \ref Aura to add
+         */
         void AddAuraToModList(Aura* aura);
-
-        // removing specific aura stack
+        
+        
+        /** 
+         * Removes an \ref Aura and sets the reason for removal inside the \ref Aura.
+         * 
+         * removing specific aura stack (From old comment)
+         * @param aura the \ref Aura to remove
+         * @param mode the reason why it is being removed
+         * \see Aura::SetRemoveMode
+         */
         void RemoveAura(Aura* aura, AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
+        /** 
+         * Removes an \ref Aura by spell id and the effect index for that spell to find out
+         * which \ref Aura to remove.
+         * @param spellId id of the spell which has the sought \ref Aura somewhere
+         * @param effindex the effect index for the spell to find the right \ref Aura
+         * @param except if != NULL we will not remove this \ref Aura if found
+         */
         void RemoveAura(uint32 spellId, SpellEffectIndex effindex, Aura* except = NULL);
+        /** 
+         * Removes a \ref SpellAuraHolder from this \ref Unit. This will remove all the effects that
+         * are currently stored in the \ref SpellAuraHolder.
+         * @param holder holder to be removed
+         * @param mode reason for removal
+         */
         void RemoveSpellAuraHolder(SpellAuraHolder* holder, AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
+        /** 
+         * Removes a single \ref Aura from a \ref SpellAuraHolder to cancel out just one effect of a
+         * \ref Spell.
+         * @param holder the holder to remove the \ref Aura from
+         * @param index the effect index to tell which \ref Aura we want to remove
+         * @param mode the reason for removing it
+         */
         void RemoveSingleAuraFromSpellAuraHolder(SpellAuraHolder* holder, SpellEffectIndex index, AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
+        /** 
+         * Does the same thing as \ref Unit::RemoveSingleAuraFromSpellAuraHolder but with spell id
+         * instead of a \ref SpellAuraHolder
+         * @param id id of the spell to find the \ref Aura in
+         * @param index the effect index to tell which \ref Aura we want to remove
+         * @param casterGuid guid of the caster to filter it out to just one \ref Aura to remove
+         * @param mode reason for removal
+         */
         void RemoveSingleAuraFromSpellAuraHolder(uint32 id, SpellEffectIndex index, ObjectGuid casterGuid, AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
 
-        // removing specific aura stacks by diff reasons and selections
+        /** 
+         * Removes all \ref Aura s that a certain spell would cause via it's effects (up to 3 of them
+         * per \ref Aura).
+         * 
+         * From old doc: removing specific aura stacka by diff reasons and selections
+         * @param spellId id of the spell causing the \ref Aura s you would like to remove
+         * @param except a spell that shouldn't be included in the removal
+         * @param mode reason for removal
+         * \see SpellEntry::Effect
+         */
         void RemoveAurasDueToSpell(uint32 spellId, SpellAuraHolder* except = NULL, AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
+        /** 
+         * Removes all \ref Aura s that a certain spell cast by a certain \ref Item would cause via
+         * it's effects (up to 3 of them per \ref Aura).
+         * @param castItem the \ref Item that cast the spell
+         * @param spellId id of the spell causing the \ref Aura s you would like to remove
+         */
         void RemoveAurasDueToItemSpell(Item* castItem, uint32 spellId);
+        /** 
+         * Removes all \ref Aura s that a certain spell cast by a certain \ref Player / \ref Unit
+         * would cause via it's effects (up to 3 of them per \ref Aura)
+         * @param spellId id of the \ref Spell causing the \ref Aura s you would like to remove
+         * @param casterGuid \ref ObjectGuid of the caster
+         * @param mode reason for removal
+         */
         void RemoveAurasByCasterSpell(uint32 spellId, ObjectGuid casterGuid, AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
         void RemoveAurasDueToSpellBySteal(uint32 spellId, ObjectGuid casterGuid, Unit* stealer);
+        /** 
+         * Removes all \ref Aura s caused by a certain spell because it was canceled.
+         * @param spellId id of the \ref Spell causing the \ref Aura s you would like to remove
+         */
         void RemoveAurasDueToSpellByCancel(uint32 spellId);
 
         // removing unknown aura stacks by diff reasons and selections
+        /**
+         * From old doc: removing unknown aura stacks by diff reasons and selections
+         * \todo Document and find out what it does
+         */
         void RemoveNotOwnTrackedTargetAuras(uint32 newPhase = 0x0);
+        /** 
+         * Removes all \ref SpellAuraHolder s that have the given \ref Mechanics mask which is created
+         * by doing something like the following if we want a mask for \ref Mechanics::MECHANIC_SAPPED:
+         * \code{.cpp}
+         * uint32 mask = 1 << (MECHANIC_SAPPED - 1);
+         * \endcode
+         * @param mechMask a mask of \ref Mechanics, see \ref MECHANIC_NOT_REMOVED_BY_SHAPESHIFT,
+         * \ref IMMUNE_TO_ROOT_AND_SNARE_MASK for examples
+         * @param exceptSpellId id of a \ref Spell that shouldn't be removed
+         * @param non_positive if we should remove non positive \ref Aura s or not, defaults to false
+         */
         void RemoveAurasAtMechanicImmunity(uint32 mechMask, uint32 exceptSpellId, bool non_positive = false);
+        /** 
+         * Removes all \ref Spell s that cause the given \ref AuraType
+         * @param auraType the type of auras we would like to remove spells for
+         */
         void RemoveSpellsCausingAura(AuraType auraType);
+        /** 
+         * Same as \ref Unit::RemoveSpellsCausingAura but with an exception
+         * for a \ref SpellAuraHolder that shouldn't be removed
+         * @param auraType the type of auras we would like to remove spells for
+         * @param except this will be excepted from removal
+         */
         void RemoveSpellsCausingAura(AuraType auraType, SpellAuraHolder* except);
+        /** 
+         * Same as \ref Unit::RemoveSpellsCausingAura but for a matching caster aswell.
+         * @param auraType the type of auras we would like to remove spells for
+         * @param casterGuid remove the aura only if the caster is equal to this guid
+         */
         void RemoveSpellsCausingAura(AuraType auraType, ObjectGuid casterGuid);
+        /** 
+         * Removes all ranks of the given \ref Spell, ie: if the spellid of rank 1 inner fire is
+         * given all the ranks of it will be removed.
+         * @param spellId id of the spell we want to remove all ranks for
+         */
         void RemoveRankAurasDueToSpell(uint32 spellId);
+        /** 
+         * 
+         * @param holder 
+         * @return true if we could remove something (and did), false otherwise
+         * \todo Document what this does and break into smaller functions!
+         */
         bool RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder);
+        /** 
+         * Removes all \ref Aura s that have the given interrupt flags
+         * @param flags see \ref AuraInterruptFlags for possible flags
+         */
         void RemoveAurasWithInterruptFlags(uint32 flags);
+        /** 
+         * Removes all \ref Aura s that have the given attributes
+         * @param flags see \ref SpellAttributes for possible values
+         */
         void RemoveAurasWithAttribute(uint32 flags);
+        /** 
+         * Removes all \ref Aura s which can be dispelled by the given \ref DispelType
+         * @param type the given type that you want to remove all \ref Aura s for
+         * @param casterGuid if this isn't 0 it will be checked that the caster of the \ref Spell is
+         * the same as the given guid before removal.
+         */
         void RemoveAurasWithDispelType(DispelType type, ObjectGuid casterGuid = ObjectGuid());
+        /** 
+         * Removes all \ref Aura s.
+         * @param mode the reason for removal
+         */
         void RemoveAllAuras(AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
         void RemoveArenaAuras(bool onleave = false);
+        /** 
+         * Removes all \ref Aura s on this \ref Unit s death. Removes all visible \ref Aura s and
+         * disabled the mods for the passive ones (taken from old docs). The reason used is
+         * \ref AuraRemoveMode::AURA_REMOVE_BY_DEATH
+         * \todo Where does it remove the passive ones?
+         */
         void RemoveAllAurasOnDeath();
+        /** 
+         * used when evading to remove all auras except some special auras. Linked and flying
+         * \ref Aura s shouldn't be removed on evade.
+         * \todo Are linked and flying auras really not removed on evade?
+         */
         void RemoveAllAurasOnEvade();
-
+        
         // removing specific aura FROM stack by diff reasons and selections
         void RemoveAuraHolderFromStack(uint32 spellId, uint32 stackAmount = 1, ObjectGuid casterGuid = ObjectGuid(), AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
         void RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount, ObjectGuid casterGuid, Unit* dispeller);
@@ -2535,6 +3077,13 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         SpellAuraHolderMap&       GetSpellAuraHolderMap()       { return m_spellAuraHolders; }
         SpellAuraHolderMap const& GetSpellAuraHolderMap() const { return m_spellAuraHolders; }
+        /**
+         * Get's a list of all the \ref Aura s of the given \ref AuraType that are currently
+         * affecting this \ref Unit.
+         * @param type the aura type we want to find
+         * @return A list of the auras currently applied to the \ref Unit with the given \ref AuraType
+         * \see Unit::m_modAuras
+         */
         AuraList const& GetAurasByType(AuraType type) const { return m_modAuras[type]; }
         void ApplyAuraProcTriggerDamage(Aura* aura, bool apply);
 
@@ -2751,7 +3300,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         AttackerSet m_attackers;
         Unit* m_attacking;
 
-        DeathState m_deathState;
+        DeathState m_deathState; ///< The current state of life/death for this \ref Unit
 
         SpellAuraHolderMap m_spellAuraHolders;
         SpellAuraHolderMap::iterator m_spellAuraHoldersUpdateIterator; // != end() in Unit::m_spellAuraHolders update and point to next element
@@ -2857,30 +3406,31 @@ void Unit::CallForAllControlledUnits(Func const& func, uint32 controlledMask)
 {
     if (controlledMask & CONTROLLED_PET)
         if (Pet* pet = GetPet())
-            func(pet);
+            { func(pet); }
 
     if (controlledMask & CONTROLLED_MINIPET)
         if (Pet* mini = GetMiniPet())
-            func(mini);
+            { func(mini); }
 
     if (controlledMask & CONTROLLED_GUARDIANS)
     {
         for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end();)
             if (Pet* guardian = _GetPet(*(itr++)))
-                func(guardian);
+                { func(guardian); }
     }
 
     if (controlledMask & CONTROLLED_TOTEMS)
     {
         for (int i = 0; i < MAX_TOTEM_SLOT; ++i)
             if (Unit* totem = _GetTotem(TotemSlot(i)))
-                func(totem);
+                { func(totem); }
     }
 
     if (controlledMask & CONTROLLED_CHARM)
         if (Unit* charm = GetCharm())
-            func(charm);
+            { func(charm); }
 }
+
 
 template<typename Func>
 bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) const
@@ -2888,19 +3438,19 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
     if (controlledMask & CONTROLLED_PET)
         if (Pet const* pet = GetPet())
             if (func(pet))
-                return true;
+                { return true; }
 
     if (controlledMask & CONTROLLED_MINIPET)
         if (Pet const* mini = GetMiniPet())
             if (func(mini))
-                return true;
+                { return true; }
 
     if (controlledMask & CONTROLLED_GUARDIANS)
     {
         for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end();)
             if (Pet const* guardian = _GetPet(*(itr++)))
                 if (func(guardian))
-                    return true;
+                    { return true; }
     }
 
     if (controlledMask & CONTROLLED_TOTEMS)
@@ -2908,13 +3458,13 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
         for (int i = 0; i < MAX_TOTEM_SLOT; ++i)
             if (Unit const* totem = _GetTotem(TotemSlot(i)))
                 if (func(totem))
-                    return true;
+                    { return true; }
     }
 
     if (controlledMask & CONTROLLED_CHARM)
         if (Unit const* charm = GetCharm())
             if (func(charm))
-                return true;
+                { return true; }
 
     return false;
 }

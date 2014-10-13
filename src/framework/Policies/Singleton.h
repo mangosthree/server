@@ -42,40 +42,74 @@ namespace MaNGOS
              class CreatePolicy = MaNGOS::OperatorNew<T>,
              class LifeTimePolicy = MaNGOS::ObjectLifeTime<T>
              >
+    /**
+     * @brief
+     *
+     */
     class MANGOS_DLL_DECL Singleton
     {
         public:
 
+            /**
+             * @brief
+             *
+             * @return T
+             */
             static T& Instance();
 
         protected:
 
+            /**
+             * @brief
+             *
+             */
             Singleton()
             {
             }
 
         private:
 
-            // Prohibited actions...this does not prevent hijacking.
+            /**
+             * @brief Prohibited actions...this does not prevent hijacking.
+             *
+             * @param
+             */
             Singleton(const Singleton&);
+            /**
+             * @brief
+             *
+             * @param
+             * @return Singleton &operator
+             */
             Singleton& operator=(const Singleton&);
 
-            // Singleton Helpers
+            /**
+             * @brief Singleton Helpers
+             *
+             */
             static void DestroySingleton();
 
-            // data structure
+            /**
+             * @brief data structure
+             *
+             */
             typedef typename ThreadingModel::Lock Guard;
-            static T* si_instance;
-            static bool si_destroyed;
+            static T* si_instance; /**< TODO */
+            static bool si_destroyed; /**< TODO */
     };
 
     template<typename T, class ThreadingModel, class CreatePolicy, class LifeTimePolicy>
-    T* Singleton<T, ThreadingModel, CreatePolicy, LifeTimePolicy>::si_instance = NULL;
+    T* Singleton<T, ThreadingModel, CreatePolicy, LifeTimePolicy>::si_instance = NULL; /**< TODO */
 
     template<typename T, class ThreadingModel, class CreatePolicy, class LifeTimePolicy>
-    bool Singleton<T, ThreadingModel, CreatePolicy, LifeTimePolicy>::si_destroyed = false;
+    bool Singleton<T, ThreadingModel, CreatePolicy, LifeTimePolicy>::si_destroyed = false; /**< TODO */
 
     template<typename T, class ThreadingModel, class CreatePolicy, class LifeTimePolicy>
+    /**
+     * @brief
+     *
+     * @return T &MaNGOS::Singleton<T, ThreadingModel, CreatePolicy, LifeTimePolicy>
+     */
     T& MaNGOS::Singleton<T, ThreadingModel, CreatePolicy, LifeTimePolicy>::Instance()
     {
         if (!si_instance)
@@ -100,6 +134,10 @@ namespace MaNGOS
     }
 
     template<typename T, class ThreadingModel, class CreatePolicy, class LifeTimePolicy>
+    /**
+     * @brief
+     *
+     */
     void MaNGOS::Singleton<T, ThreadingModel, CreatePolicy, LifeTimePolicy>::DestroySingleton()
     {
         CreatePolicy::Destroy(si_instance);

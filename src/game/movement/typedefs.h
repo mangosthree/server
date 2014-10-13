@@ -40,38 +40,81 @@ namespace Movement
     using G3D::Vector3;
     using G3D::Vector4;
 
+    /**
+     * @brief
+     *
+     * @param sec
+     * @return uint32
+     */
     inline uint32 SecToMS(float sec)
     {
         return static_cast<uint32>(sec * 1000.f);
     }
 
+    /**
+     * @brief
+     *
+     * @param ms
+     * @return float
+     */
     inline float MSToSec(uint32 ms)
     {
         return ms / 1000.f;
     }
 
     template<class T, T limit>
+    /**
+     * @brief
+     *
+     */
     class counter
     {
         public:
+            /**
+             * @brief
+             *
+             */
             counter() { init();}
 
+
+            /**
+             * @brief
+             *
+             */
             void Increase()
             {
                 if (m_counter == limit)
-                    init();
+                    { init(); }
                 else
-                    ++m_counter;
+                    { ++m_counter; }
             }
 
+            /**
+             * @brief
+             *
+             * @return T
+             */
             T NewId() { Increase(); return m_counter;}
+            /**
+             * @brief
+             *
+             * @return T
+             */
             T getCurrent() const { return m_counter;}
 
         private:
+            /**
+             * @brief
+             *
+             */
             void init() { m_counter = 0; }
-            T m_counter;
+            T m_counter; /**< TODO */
     };
 
+    /**
+     * @brief
+     *
+     */
     typedef counter<uint32, 0xFFFFFFFF> UInt32Counter;
 
     extern double gravity;

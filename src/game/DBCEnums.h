@@ -39,8 +39,8 @@
 #define STRONG_MAX_LEVEL 255
 enum MountFlags
 {
-	MOUNT_FLAG_CAN_PITCH                = 0x4,
-	MOUNT_FLAG_CAN_SWIM                 = 0x8
+    MOUNT_FLAG_CAN_PITCH                = 0x4,
+    MOUNT_FLAG_CAN_SWIM                 = 0x8
 };
 
 enum BattleGroundBracketId                                  // bracketId for level ranges

@@ -7676,7 +7676,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
             sLog.outErrorDb(">> Loaded 0 mangos strings. DB table `%s` is empty. Cannot continue.", table);
         else
             sLog.outString(">> Loaded 0 string templates. DB table `%s` is empty.", table);
-		return false;
+        return false;
     }
 
     uint32 count = 0;

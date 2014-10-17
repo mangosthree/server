@@ -535,7 +535,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
                 return SPELL_UA_IMMOLATE;
             break;
         }
-		// Need Fix
+        // Need Fix
         case SPELLFAMILY_PRIEST:
         {
             // "Well Fed" buff from Blessed Sunfruit, Blessed Sunfruit Juice, Alterac Spring Water
@@ -759,7 +759,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case 37388:                                 // Move 2
                 case 49634:                                 // Sergeant's Flare
                 case 54530:                                 // Opening
-		case 56099:                                 // Throw Ice
+        case 56099:                                 // Throw Ice
                 case 62105:                                 // To'kini's Blowgun
                     return true;
                 default:

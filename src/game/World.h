@@ -92,7 +92,7 @@ enum WorldTimers
 // just placeholder for int64 values
 enum eConfigInt64Values
 {
-    CONFIG_INT64_VALUE_COUNT = 1	// change this value after new constances added
+    CONFIG_INT64_VALUE_COUNT = 1    // change this value after new constances added
 };
 
 enum eConfigUInt64Values

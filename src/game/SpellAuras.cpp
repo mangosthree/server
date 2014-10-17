@@ -3450,16 +3450,16 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
         }
 
         target->Mount(display_id, GetId());
-		if (MountCapabilityEntry const* mountCapability = target->GetMountCapability(uint32(GetMiscBValue())))
-			target->CastSpell(target, mountCapability->SpeedModSpell, true);
+        if (MountCapabilityEntry const* mountCapability = target->GetMountCapability(uint32(GetMiscBValue())))
+            target->CastSpell(target, mountCapability->SpeedModSpell, true);
     }
     else
     {
         target->Unmount(true);
 
-		// remove speed aura
-		if (MountCapabilityEntry const* mountCapability = target->GetMountCapability(m_modifier.m_amount))
-			target->RemoveAurasByCasterSpell(mountCapability->SpeedModSpell, target->GetObjectGuid());
+        // remove speed aura
+        if (MountCapabilityEntry const* mountCapability = target->GetMountCapability(m_modifier.m_amount))
+            target->RemoveAurasByCasterSpell(mountCapability->SpeedModSpell, target->GetObjectGuid());
 
         CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
         if (ci && target->IsVehicle() && ci->vehicleId == target->GetVehicleInfo()->GetVehicleEntry()->m_ID)

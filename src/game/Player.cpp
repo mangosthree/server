@@ -4608,7 +4608,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
         RemoveAurasDueToSpell(20584);                       // speed bonuses
     RemoveAurasDueToSpell(8326);                            // SPELL_AURA_GHOST
 
-    SetDeathState(ALIVE);	
+    SetDeathState(ALIVE);    
 
     SetWaterWalk(false);
     SetRoot(false);

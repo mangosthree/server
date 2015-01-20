@@ -1,4 +1,9 @@
-# This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+# MaNGOS is a full featured server for World of Warcraft, supporting
+# the following clients: 1.12.x, 2.4.3, 3.2.5a, 4.2.3 and 5.4.8
+#
+# Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
+#
+# ***** BEGIN GPL LICENSE BLOCK *****
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,20 +18,48 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# ***** END GPL LICENSE BLOCK *****
+#
+# World of Warcraft, and all World of Warcraft or Warcraft art, images,
+# and lore are copyrighted by Blizzard Entertainment, Inc.
 
 # Needs to link against mangos_worldd.lib
 if(WIN32)
   link_directories(
-    ${CMAKE_BINARY_DIR}/src/mangosd/${CMAKE_CFG_INTDIR}
+    "${CMAKE_BINARY_DIR}/src/mangosd/${CMAKE_CFG_INTDIR}"
   )
   include_directories(
-    ${CMAKE_SOURCE_DIR}/dep/include # For Win32
+    "${CMAKE_SOURCE_DIR}/dep/include"
   )
 endif()
 
+#-----------------------------------------------------------------------------
+# Build the mangos-zero framework library
 add_subdirectory(framework)
+
+#-----------------------------------------------------------------------------
+# Build the mangos-zero shared library
 add_subdirectory(shared)
-add_subdirectory(realmd)
+
+#-----------------------------------------------------------------------------
+# Build the mangos-zero game library
 add_subdirectory(game)
+
+#-----------------------------------------------------------------------------
+# Build the mangos-zero realm authentication server
+add_subdirectory(realmd)
+
+#-----------------------------------------------------------------------------
+# Build the mangos-zero world server
 add_subdirectory(mangosd)
-add_subdirectory(bindings)
+
+#-----------------------------------------------------------------------------
+# Build the selected modules
+add_subdirectory(modules)
+
+#-----------------------------------------------------------------------------
+# If we want the tools for map/vmap/mmap extraction
+if(BUILD_TOOLS)
+    add_subdirectory(tools)
+endif()

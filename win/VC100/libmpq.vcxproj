@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -11,23 +11,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGUID>{367CCE76-14A7-4871-93D6-579DA35FBEFD}</ProjectGUID>
+    <ProjectGUID>{449D15D0-B3B9-4195-AB9C-E205FF77ABBE}</ProjectGUID>
     <Keyword>Win32Proj</Keyword>
     <Platform>Win32</Platform>
-    <ProjectName>g3dlite</ProjectName>
+    <ProjectName>libmpq</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v100</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v100</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -39,18 +39,18 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\_temp\g3dlite\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">g3dlite</TargetName>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\_temp\libmpq\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">libmpq</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.lib</TargetExt>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\_temp\g3dlite\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">g3dlite</TargetName>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\_temp\libmpq\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">libmpq</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.lib</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalOptions> /Zm500 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>..\..\dep\src\g3dlite;..\..\dep\include;..\..\dep\include\g3dlite;..\..\dep\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\libmpq;..\..\dep\libmpq\win;..\..\dep\src\zlib;..\..\dep\src\bzip2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Release/</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
       <DisableSpecificWarnings>4996;4355;4244;4267</DisableSpecificWarnings>
@@ -69,10 +69,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>PREPARED_SLN;WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\dep\src\g3dlite;..\..\dep\include;..\..\dep\include\g3dlite;..\..\dep\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\libmpq;..\..\dep\libmpq\win;..\..\dep\src\zlib;..\..\dep\src\bzip2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\dep\src\g3dlite;..\..\dep\include;..\..\dep\include\g3dlite;..\..\dep\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\libmpq;..\..\dep\libmpq\win;..\..\dep\src\zlib;..\..\dep\src\bzip2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -83,7 +83,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalOptions> /Zm500 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>..\..\dep\src\g3dlite;..\..\dep\include;..\..\dep\include\g3dlite;..\..\dep\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\libmpq;..\..\dep\libmpq\win;..\..\dep\src\zlib;..\..\dep\src\bzip2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Debug/</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsCpp</CompileAs>
@@ -103,10 +103,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>PREPARED_SLN;WIN32;_WINDOWS;_DEBUG;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\dep\src\g3dlite;..\..\dep\include;..\..\dep\include\g3dlite;..\..\dep\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\libmpq;..\..\dep\libmpq\win;..\..\dep\src\zlib;..\..\dep\src\bzip2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\dep\src\g3dlite;..\..\dep\include;..\..\dep\include\g3dlite;..\..\dep\include\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\libmpq;..\..\dep\libmpq\win;..\..\dep\src\zlib;..\..\dep\src\bzip2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -115,52 +115,43 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\dep\src\g3dlite\AABox.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Any.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\BinaryFormat.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\BinaryInput.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\BinaryOutput.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Box.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Capsule.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\CollisionDetection.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\CoordinateFrame.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Crypto.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Cylinder.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\FileSystem.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Line.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\LineSegment.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Log.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Matrix3.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Matrix4.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\MemoryManager.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\PhysicsFrame.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Plane.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Quat.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Random.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Ray.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\ReferenceCount.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\RegistryUtil.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Sphere.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\System.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\TextInput.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\TextOutput.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Triangle.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\UprightFrame.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Vector2.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Vector3.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\Vector4.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\debugAssert.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\fileutils.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\format.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\g3dfnmatch.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\g3dmath.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\prompt.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\stringutils.cpp" />
-    <ClCompile Include="..\..\dep\src\g3dlite\uint128.cpp" />
+    <ClInclude Include="..\..\dep\libmpq\libmpq\common.h" />
+    <ClInclude Include="..\..\dep\libmpq\libmpq\crypt_buf.h" />
+    <ClInclude Include="..\..\dep\libmpq\libmpq\explode.h" />
+    <ClInclude Include="..\..\dep\libmpq\libmpq\extract.h" />
+    <ClInclude Include="..\..\dep\libmpq\libmpq\huffman.h" />
+    <ClInclude Include="..\..\dep\libmpq\libmpq\mpq-internal.h" />
+    <ClInclude Include="..\..\dep\libmpq\libmpq\mpq.h" />
+    <ClInclude Include="..\..\dep\libmpq\libmpq\platform.h" />
+    <ClInclude Include="..\..\dep\libmpq\libmpq\wave.h" />
+    <ClCompile Include="..\..\dep\libmpq\libmpq\common.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="..\..\dep\libmpq\libmpq\explode.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="..\..\dep\libmpq\libmpq\extract.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="..\..\dep\libmpq\libmpq\huffman.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="..\..\dep\libmpq\libmpq\mpq.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="..\..\dep\libmpq\libmpq\wave.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="zlib.vcxproj">
-      <Project>{8d3cf9b7-05f2-4bcf-b833-27b279fdeaf3}</Project>
+    <ProjectReference Include="bzip2.vcxproj">
+      <Project>BC139E42-505E-430B-8610-6ED2B1E358E8</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

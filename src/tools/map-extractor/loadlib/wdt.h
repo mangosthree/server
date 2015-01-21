@@ -24,6 +24,7 @@
 
 #ifndef WDT_H
 #define WDT_H
+
 #include "loadlib.h"
 
 //**************************************************************************************
@@ -31,70 +32,134 @@
 //**************************************************************************************
 #define WDT_MAP_SIZE 64
 
+/**
+ * @brief
+ *
+ */
 class wdt_MWMO
 {
+        /**
+         * @brief
+         *
+         */
         union
         {
-            uint32 fcc;
-            char   fcc_txt[4];
+            uint32 fcc; /**< TODO */
+            char   fcc_txt[4]; /**< TODO */
         };
     public:
-        uint32 size;
+        uint32 size; /**< TODO */
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool prepareLoadedData();
 };
 
+/**
+ * @brief
+ *
+ */
 class wdt_MPHD
 {
+        /**
+         * @brief
+         *
+         */
         union
         {
-            uint32 fcc;
-            char   fcc_txt[4];
+            uint32 fcc; /**< TODO */
+            char   fcc_txt[4]; /**< TODO */
         };
     public:
-        uint32 size;
+        uint32 size; /**< TODO */
 
-        uint32 data1;
-        uint32 data2;
-        uint32 data3;
-        uint32 data4;
-        uint32 data5;
-        uint32 data6;
-        uint32 data7;
-        uint32 data8;
+        uint32 data1; /**< TODO */
+        uint32 data2; /**< TODO */
+        uint32 data3; /**< TODO */
+        uint32 data4; /**< TODO */
+        uint32 data5; /**< TODO */
+        uint32 data6; /**< TODO */
+        uint32 data7; /**< TODO */
+        uint32 data8; /**< TODO */
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool   prepareLoadedData();
 };
 
+/**
+ * @brief
+ *
+ */
 class wdt_MAIN
 {
+        /**
+         * @brief
+         *
+         */
         union
         {
-            uint32 fcc;
-            char   fcc_txt[4];
+            uint32 fcc; /**< TODO */
+            char   fcc_txt[4]; /**< TODO */
         };
     public:
-        uint32 size;
+        uint32 size; /**< TODO */
 
+        /**
+         * @brief
+         *
+         */
         struct adtData
         {
-            uint32 exist;
-            uint32 data1;
-        } adt_list[64][64];
+            uint32 exist; /**< TODO */
+            uint32 data1; /**< TODO */
+        } adt_list[64][64]; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool   prepareLoadedData();
 };
 
+/**
+ * @brief
+ *
+ */
 class WDT_file : public FileLoader
 {
     public:
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool   prepareLoadedData();
 
+        /**
+         * @brief
+         *
+         */
         WDT_file();
+        /**
+         * @brief
+         *
+         */
         ~WDT_file();
+        /**
+         * @brief
+         *
+         */
         void free();
 
-        wdt_MPHD* mphd;
-        wdt_MAIN* main;
-        wdt_MWMO* wmo;
+        wdt_MPHD* mphd; /**< TODO */
+        wdt_MAIN* main; /**< TODO */
+        wdt_MWMO* wmo; /**< TODO */
 };
 
 #endif

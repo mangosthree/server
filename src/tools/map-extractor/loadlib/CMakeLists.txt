@@ -10,4 +10,4 @@
 
 add_library (loadlib loadlib.cpp  adt.cpp  wdt.cpp)
 # link loadlib with zlib
-target_link_libraries (loadlib z)
+target_link_libraries (loadlib zlib)

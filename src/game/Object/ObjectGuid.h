@@ -95,7 +95,7 @@ struct PackedGuidReader
 
 #define NUM_GUID_BYTES sizeof(uint64)
 
-class MANGOS_DLL_SPEC ObjectGuid
+class  ObjectGuid
 {
     public:                                                 // constructors
         ObjectGuid() : m_guid(0) {}

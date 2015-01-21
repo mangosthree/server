@@ -1931,7 +1931,7 @@ struct SpellTotemsEntry
 };
 
 // Spell.dbc
-struct MANGOS_DLL_SPEC SpellEntry
+struct  SpellEntry
 {
     uint32    Id;                                           // 0        m_ID
     uint32    Attributes;                                   // 1        m_attribute

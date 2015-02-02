@@ -70,6 +70,7 @@ using std::hash_set;
 #  define UNORDERED_SET stdext::hash_set
 #  define HASH_NAMESPACE_START namespace stdext {
 #  define HASH_NAMESPACE_END }
+
 using stdext::hash_map;
 using stdext::hash_set;
 
@@ -96,7 +97,7 @@ HASH_NAMESPACE_END
 #  define HASH_NAMESPACE_END }
 using std::hash_map;
 using std::hash_set;
-#elif COMPILER == COMPILER_CLANG && __clang_major__ =< 3 && __clang_minor < 7
+#elif COMPILER == COMPILER_CLANG && __clang_major__ <= 3 && __clang_minor < 7
 #  define UNORDERED_MAP std::tr1::unordered_map
 #  define UNORDERED_SET std::tr1::unordered_set
 #  define HASH_NAMESPACE_START namespace std { namespace tr1 {

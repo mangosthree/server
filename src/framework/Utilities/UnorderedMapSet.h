@@ -97,14 +97,12 @@ HASH_NAMESPACE_END
 using std::hash_map;
 using std::hash_set;
 #elif COMPILER == COMPILER_CLANG
-# if __clang_major__ >= 3
-#    if __clang_minor >= 7
-#       define UNORDERED_MAP std::unordered_map
-#       define UNORDERED_SET std::unordered_set
-#    else
-#       define UNORDERED_MAP std::tr1::unordered_map
-#       define UNORDERED_SET std::tr1::unordered_set
-#    endif
+# if __clang_major__ == 3 && __clang_minor < 7
+#   define UNORDERED_MAP std::tr1::unordered_map
+#   define UNORDERED_SET std::tr1::unordered_set
+# else
+#   define UNORDERED_MAP std::unordered_map
+#   define UNORDERED_SET std::unordered_set
 # endif
 #  define HASH_NAMESPACE_START namespace std { namespace tr1 {
 #  define HASH_NAMESPACE_END } }

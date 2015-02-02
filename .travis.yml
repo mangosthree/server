@@ -11,7 +11,7 @@ compiler:
 
 before_install:
  # Latest ubuntu dependencies and libraries for development (gcc and etc).
- - sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+ - echo yes | sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 
  # update and install required tools
  - sudo apt-get -qq update

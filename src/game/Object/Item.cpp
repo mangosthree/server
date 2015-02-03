@@ -1063,11 +1063,22 @@ bool Item::IsTargetValidForItemUse(Unit* pUnitTarget)
     return false;
 }
 
-void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges)
+
+void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges, ObjectGuid casterGuid /*= ObjectGuid()*/)
 {
     // Better lost small time at check in comparison lost time at item save to DB.
     if ((GetEnchantmentId(slot) == id) && (GetEnchantmentDuration(slot) == duration) && (GetEnchantmentCharges(slot) == charges))
         return;
+
+    if (slot < MAX_INSPECTED_ENCHANTMENT_SLOT)
+    {
+        Player* owner = GetOwner();
+        if (uint32 oldEnchant = GetEnchantmentId(slot))
+            owner->GetSession()->SendEnchantmentLog(GetOwnerGuid(), ObjectGuid(), GetEntry(), oldEnchant);
+
+        if (id)
+            owner->GetSession()->SendEnchantmentLog(GetOwnerGuid(), casterGuid, GetEntry(), id);
+    }
 
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot * MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_ID_OFFSET, id);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot * MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET, duration);
@@ -1101,6 +1112,16 @@ void Item::ClearEnchantment(EnchantmentSlot slot)
     for (uint8 x = 0; x < 3; ++x)
         SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot * MAX_ENCHANTMENT_OFFSET + x, 0);
     SetState(ITEM_CHANGED);
+}
+
+void Item::SendUpdateSockets()
+{
+    WorldPacket data(SMSG_SOCKET_GEMS, 8 + 4 + 4 + 4 + 4);
+    data << GetObjectGuid();
+    for (uint32 i = SOCK_ENCHANTMENT_SLOT; i <= BONUS_ENCHANTMENT_SLOT; ++i)
+        data << uint32(GetEnchantmentId(EnchantmentSlot(i)));
+
+    GetOwner()->SendDirectMessage(&data);
 }
 
 bool Item::GemsFitSockets() const

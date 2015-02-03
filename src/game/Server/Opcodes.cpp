@@ -869,7 +869,8 @@ void InitializeOpcodes()
     //OPCODE(MSG_GM_DESTROY_CORPSE,                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     //OPCODE(CMSG_GM_DESTROY_ONLINE_CORPSE,                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     OPCODE(CMSG_ACTIVATETAXIEXPRESS,                     STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleActivateTaxiExpressOpcode );
-    //OPCODE(SMSG_SET_FACTION_ATWAR,                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_SET_FACTION_ATWAR,                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_SET_FACTION_NOT_VISIBLE,                 STATUS_NEVER, PROCESS_INPLACE, &WorldSession::Handle_ServerSide);
     //OPCODE(SMSG_GAMETIMEBIAS_SET,                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(CMSG_DEBUG_ACTIONS_START,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     //OPCODE(CMSG_DEBUG_ACTIONS_STOP,                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );

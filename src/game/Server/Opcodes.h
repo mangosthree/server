@@ -824,9 +824,9 @@ enum Opcodes
     CMSG_PET_SPELL_AUTOCAST                               = 0x2514, // 4.3.4 15595
     SMSG_WEATHER                                          = 0x2904, // 4.3.4 15595
     SMSG_PLAY_TIME_WARNING                                = 0x4814, // 4.3.4 15595
-    SMSG_MINIGAME_SETUP                                   = 0x0000,
-    SMSG_MINIGAME_STATE                                   = 0x0000,
-    CMSG_MINIGAME_MOVE                                    = 0x0000,
+    SMSG_MINIGAME_SETUP                                   = 0x6727, // 4.3.4 15595
+    SMSG_MINIGAME_STATE                                   = 0x2E17, // 4.3.4 15595
+    CMSG_MINIGAME_MOVE                                    = 0x2A34, // 4.3.4 15595
     SMSG_MINIGAME_MOVE_FAILED                             = 0x0000,
     SMSG_RAID_INSTANCE_MESSAGE                            = 0x6E15, // 4.3.4 15595
     SMSG_COMPRESSED_MOVES                                 = 0x0517, // 4.3.4 15595

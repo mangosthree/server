@@ -738,7 +738,7 @@ class MovementInfo
 {
     public:
         MovementInfo() : moveFlags(MOVEFLAG_NONE), moveFlags2(MOVEFLAG2_NONE), time(0),
-            t_time(0), t_seat(-1), t_time2(0), s_pitch(0.0f), fallTime(0), splineElevation(0.0f) {}
+            t_time(0), t_seat(-1), t_time2(0), s_pitch(0.0f), fallTime(0), splineElevation(0.0f), byteParam(0) {}
 
         // Read/Write methods
         void Read(ByteBuffer& data, uint16 opcode);
@@ -776,12 +776,14 @@ class MovementInfo
             t_seat = -1;
         }
         ObjectGuid const& GetGuid() const { return guid; }
+        ObjectGuid const& GetGuid2() const { return guid2; }
         ObjectGuid const& GetTransportGuid() const { return t_guid; }
         Position const* GetTransportPos() const { return &t_pos; }
         int8 GetTransportSeat() const { return t_seat; }
         uint32 GetTransportTime() const { return t_time; }
         uint32 GetTransportTime2() const { return t_time2; }
         uint32 GetFallTime() const { return fallTime; }
+        int8 GetByteParam() const { return byteParam; }
         void ChangeOrientation(float o) { pos.o = o; }
         void ChangePosition(float x, float y, float z, float o) { pos.x = x; pos.y = y; pos.z = z; pos.o = o; }
         void UpdateTime(uint32 _time) { time = _time; }
@@ -817,6 +819,7 @@ class MovementInfo
     private:
         // common
         ObjectGuid guid;
+        ObjectGuid guid2;
         uint32   moveFlags;                                 // see enum MovementFlags
         uint16   moveFlags2;                                // see enum MovementFlags2
         uint32   time;
@@ -837,6 +840,7 @@ class MovementInfo
         float    splineElevation;
         // status info
         StatusInfo si;
+        int8 byteParam;
 };
 
 inline WorldPacket& operator<< (WorldPacket& buf, MovementInfo const& mi)

@@ -1263,9 +1263,9 @@ enum Opcodes
     CMSG_SET_BREATH                                       = 0x0000,
     CMSG_QUERY_VEHICLE_STATUS                             = 0x0000,
     SMSG_BATTLEGROUND_INFO_THROTTLED                      = 0x0000,
-    SMSG_SET_VEHICLE_REC_ID                               = 0x0000,
-    CMSG_RIDE_VEHICLE_INTERACT                            = 0x0000,
-    CMSG_CONTROLLER_EJECT_PASSENGER                       = 0x0000,
+    SMSG_SET_VEHICLE_REC_ID                               = 0x4115, // 4.3.4 15595
+    CMSG_RIDE_VEHICLE_INTERACT                            = 0x2705, // 4.3.4 15595
+    CMSG_CONTROLLER_EJECT_PASSENGER                       = 0x6927, // 4.3.4 15595
     SMSG_PET_GUIDS                                        = 0x2D26, // 4.3.4 15595
     SMSG_CLIENTCACHE_VERSION                              = 0x2734, // 4.3.4 15595
     CMSG_CHANGE_GDF_ARENA_RATING                          = 0x0000,

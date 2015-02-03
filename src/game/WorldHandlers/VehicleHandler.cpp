@@ -96,15 +96,13 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket)
     DEBUG_LOG("WORLD: Received opcode CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE");
     recvPacket.hexlike();
 
-    ObjectGuid srcVehicleGuid;
     MovementInfo movementInfo;
-    ObjectGuid destVehicleGuid;
     uint8 seat;
 
-    recvPacket >> srcVehicleGuid.ReadAsPacked();
     recvPacket >> movementInfo;                             // Not used at the moment
-    recvPacket >> destVehicleGuid.ReadAsPacked();
-    recvPacket >> seat;
+    ObjectGuid srcVehicleGuid = movementInfo.GetGuid();
+    ObjectGuid destVehicleGuid = movementInfo.GetGuid2();
+    uint8 seat = movementInfo.GetByteParam();
 
     TransportInfo* transportInfo = _player->GetTransportInfo();
     if (!transportInfo || !transportInfo->IsOnVehicle())
@@ -174,4 +172,18 @@ void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)
         return;
 
     _player->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, passengerGuid);
+}
+
+void WorldSession::HandleRequestVehiclePrevSeat(WorldPacket& recv_data)
+{
+    DEBUG_LOG("WORLD: Received CMSG_REQUEST_VEHICLE_PREV_SEAT");
+    
+        // ToDo
+}
+
+void WorldSession::HandleRequestVehicleNextSeat(WorldPacket& recv_data)
+{
+    DEBUG_LOG("WORLD: Received CMSG_REQUEST_VEHICLE_NEXT_SEAT");
+    
+        // ToDo
 }

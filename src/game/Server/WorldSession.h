@@ -531,6 +531,8 @@ class  WorldSession
         void HandleRequestVehicleExit(WorldPacket& recvPacket);
         void HandleRequestVehicleSwitchSeat(WorldPacket& recvPacket);
         void HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket);
+        void HandleRequestVehiclePrevSeat(WorldPacket& recv_data);
+        void HandleRequestVehicleNextSeat(WorldPacket& recv_data);
         void HandleRideVehicleInteract(WorldPacket& recvPacket);
         void HandleEjectPassenger(WorldPacket& recvPacket);
 

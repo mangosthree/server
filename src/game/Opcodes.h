@@ -971,7 +971,7 @@ enum Opcodes
     CMSG_REALM_SPLIT                                      = 0x2906, // 4.3.4 15595
     CMSG_MOVE_CHNG_TRANSPORT                              = 0x3102, // 4.3.4 15595
     MSG_PARTY_ASSIGNMENT                                  = 0x0424, // 4.3.4 15595
-    SMSG_OFFER_PETITION_ERROR                             = 0x1390,
+    SMSG_OFFER_PETITION_ERROR                             = 0x2716, // 4.3.4 15595
     SMSG_TIME_SYNC_REQ                                    = 0x3CA4, // 4.3.4 15595
     CMSG_TIME_SYNC_RESP                                   = 0x3B0C, // 4.3.4 15595
     CMSG_SEND_LOCAL_EVENT                                 = 0x1393,

@@ -1639,7 +1639,7 @@ struct SkillLineAbilityEntry
     uint32    learnOnGetSkill;                              // 9        m_acquireMethod
     uint32    max_value;                                    // 10       m_trivialSkillLineRankHigh
     uint32    min_value;                                    // 11       m_trivialSkillLineRankLow
-    //uint32                                                // 12
+    uint32    characterPoints;                              // 12       4.0.0
     //uint32                                                // 13       4.0.0
 };
 

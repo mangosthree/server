@@ -900,7 +900,7 @@ void InitializeOpcodes()
     //OPCODE(MSG_DELAY_GHOST_TELEPORT,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     OPCODE(SMSG_SPELLINSTAKILLLOG,                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_SPELL_UPDATE_CHAIN_TARGETS,              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(CMSG_CHAT_FILTERED,                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
+    OPCODE(CMSG_CHAT_FILTERED,                           STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     //OPCODE(SMSG_EXPECTED_SPAM_RECORDS,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_SPELLSTEALLOG,                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(CMSG_LOTTERY_QUERY_OBSOLETE,                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );

@@ -877,7 +877,7 @@ enum Opcodes
     MSG_DELAY_GHOST_TELEPORT                              = 0x132F,
     SMSG_SPELLINSTAKILLLOG                                = 0x6216, // 4.3.4 15595
     SMSG_SPELL_UPDATE_CHAIN_TARGETS                       = 0x6006, // 4.3.4 15595
-    CMSG_CHAT_FILTERED                                    = 0x1332,
+    CMSG_CHAT_FILTERED                                    = 0x0946, // 4.3.4 15595
     SMSG_EXPECTED_SPAM_RECORDS                            = 0x1333,
     SMSG_SPELLSTEALLOG                                    = 0x4E26, // 4.3.4 15595
     CMSG_LOTTERY_QUERY_OBSOLETE                           = 0x1335,

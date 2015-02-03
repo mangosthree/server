@@ -1290,7 +1290,7 @@ enum Opcodes
     CMSG_GM_REMOVE_ACHIEVEMENT                            = 0x14C6,
     CMSG_GM_SET_CRITERIA_FOR_PLAYER                       = 0x14C7,
     SMSG_DESTROY_ARENA_UNIT                               = 0x2637, // 4.3.4 15595
-    SMSG_ARENA_TEAM_CHANGE_FAILED                         = 0x14C9,
+    SMSG_ARENA_TEAM_CHANGE_FAILED                         = 0x6E34, // 4.3.4 15595
     CMSG_PROFILEDATA_REQUEST                              = 0x14CA,
     SMSG_PROFILEDATA_RESPONSE                             = 0x14CB,
     CMSG_START_BATTLEFIELD_CHEAT                          = 0x14CC,

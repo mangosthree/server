@@ -710,6 +710,7 @@ enum Opcodes
     SMSG_PVP_CREDIT                                       = 0x6015, // 4.3.4 15595
     SMSG_AUCTION_REMOVED_NOTIFICATION                     = 0x2334, // 4.3.4 15595
     CMSG_GROUP_RAID_CONVERT                               = 0x6E27, // 4.3.4 15595
+    CMSG_GROUP_REQUEST_JOIN_UPDATES                       = 0x2583, // 4.3.4 15595
     CMSG_GROUP_ASSISTANT_LEADER                           = 0x6025, // 4.3.4 15595
     CMSG_BUYBACK_ITEM                                     = 0x6C17, // 4.3.4 15595
     SMSG_SERVER_MESSAGE                                   = 0x6C04, // 4.3.4 15595
@@ -979,7 +980,7 @@ enum Opcodes
     CMSG_SEND_COMBAT_TRIGGER                              = 0x1395,
     CMSG_MAELSTROM_GM_SENT_MAIL                           = 0x1396,
     SMSG_RESET_FAILED_NOTIFY                              = 0x4616, // 4.3.4 15595
-    SMSG_REAL_GROUP_UPDATE                                = 0x1398,
+    SMSG_REAL_GROUP_UPDATE                                = 0x0F34, // 4.3.4 15595
     SMSG_LFG_DISABLED                                     = 0x1399,
     CMSG_ACTIVE_PVP_CHEAT                                 = 0x139A,
     CMSG_CHEAT_DUMP_ITEMS_DEBUG_ONLY                      = 0x139B,

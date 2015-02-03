@@ -1002,7 +1002,7 @@ enum Opcodes
     SMSG_SPELL_CHANCE_PROC_LOG                            = 0x13AB,
     CMSG_MOVE_SET_RUN_SPEED                               = 0x13AC,
     SMSG_DISMOUNT                                         = 0x2135, // 4.3.4 15595
-    MSG_MOVE_UPDATE_CAN_FLY                               = 0x13AE,
+    SMSG_MOVE_UPDATE_CAN_FLY                              = 0x3DA1, // 4.3.4 15595
     MSG_RAID_READY_CHECK_CONFIRM                          = 0x4F05, // 4.3.4 15595
     CMSG_VOICE_SESSION_ENABLE                             = 0x2314, // 4.3.4 15595
     SMSG_VOICE_SESSION_ENABLE                             = 0x13B1,

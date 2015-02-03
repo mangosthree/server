@@ -37,10 +37,8 @@ void WorldSession::HandleDismissControlledVehicle(WorldPacket& recvPacket)
     DEBUG_LOG("WORLD: Received opcode CMSG_DISMISS_CONTROLLED_VEHICLE");
     recvPacket.hexlike();
 
-    ObjectGuid vehicleGuid;
     MovementInfo movementInfo;                              // Not used at the moment
 
-    recvPacket >> vehicleGuid.ReadAsPacked();
     recvPacket >> movementInfo;
 
     TransportInfo* transportInfo = _player->GetTransportInfo();
@@ -50,7 +48,7 @@ void WorldSession::HandleDismissControlledVehicle(WorldPacket& recvPacket)
     Unit* vehicle = (Unit*)transportInfo->GetTransport();
 
     // Something went wrong
-    if (vehicleGuid != vehicle->GetObjectGuid())
+    if (movementInfo.GetGuid() != vehicle->GetObjectGuid())
         return;
 
     // Remove Vehicle Control Aura

@@ -2486,9 +2486,81 @@ MovementStatusElements MoveNotActiveMoverSequence[] =
     MSEEnd,
 };
 
+MovementStatusElements DismissControlledVehicleSequence[] =
+{
+    MSEPositionY,
+    MSEPositionZ,
+    MSEPositionX,
+    MSEHasSplineElevation,
+    MSEHasFallData,
+    MSEHasTransportData,
+    MSEGuidBit4,
+    MSEGuidBit7,
+    MSEHasMovementFlags2,
+    MSEGuidBit2,
+    MSEHasOrientation,
+    MSEGuidBit0,
+    MSEGuidBit6,
+    MSEHasPitch,
+    MSEHasTimestamp,
+    MSEGuidBit1,
+    MSEHasUnknownBit,
+    MSEHasSpline,
+    MSEGuidBit3,
+    MSEHasMovementFlags,
+    MSEGuidBit5,
+    MSETransportGuidBit5,
+    MSEHasTransportTime3,
+    MSETransportGuidBit2,
+    MSETransportGuidBit0,
+    MSETransportGuidBit7,
+    MSETransportGuidBit3,
+    MSETransportGuidBit4,
+    MSETransportGuidBit1,
+    MSETransportGuidBit6,
+    MSEHasTransportTime2,
+    MSEFlags2,
+    MSEHasFallDirection,
+    MSEFlags,
+    MSEGuidByte6,
+    MSEGuidByte3,
+    MSEGuidByte1,
+    MSEGuidByte5,
+    MSEGuidByte2,
+    MSEGuidByte4,
+    MSEGuidByte7,
+    MSEGuidByte0,
+    MSETimestamp,
+    MSETransportTime3,
+    MSETransportGuidByte4,
+    MSETransportGuidByte7,
+    MSETransportTime2,
+    MSETransportGuidByte6,
+    MSETransportTime,
+    MSETransportPositionZ,
+    MSETransportGuidByte0,
+    MSETransportPositionX,
+    MSETransportGuidByte3,
+    MSETransportSeat,
+    MSETransportPositionY,
+    MSETransportPositionO,
+    MSETransportGuidByte1,
+    MSETransportGuidByte5,
+    MSETransportGuidByte2,
+    MSEFallTime,
+    MSEFallHorizontalSpeed,
+    MSEFallSinAngle,
+    MSEFallCosAngle,
+    MSEFallVerticalSpeed,
+    MSEPositionO,
+    MSESplineElevation,
+    MSEPitch,
+    MSEEnd,
+};
+
 MovementStatusElements* GetMovementStatusElementsSequence(uint16 opcode)
 {
-    switch(opcode)
+    switch (opcode)
     {
         case CMSG_CAST_SPELL:
         case CMSG_PET_CAST_SPELL:
@@ -2558,6 +2630,8 @@ MovementStatusElements* GetMovementStatusElementsSequence(uint16 opcode)
             return MoveUpdateKnockBackSequence;
         case CMSG_MOVE_NOT_ACTIVE_MOVER:
             return MoveNotActiveMoverSequence;
+        case CMSG_DISMISS_CONTROLLED_VEHICLE:
+            return DismissControlledVehicleSequence;
     }
     return NULL;
 }

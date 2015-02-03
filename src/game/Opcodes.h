@@ -1076,7 +1076,7 @@ enum Opcodes
     CMSG_CLEAR_CHANNEL_WATCH                              = 0x2604, // 4.3.4 15595
     SMSG_INSPECT_RESULTS                                  = 0x4014, // 4.3.4 15595
     SMSG_GOGOGO_OBSOLETE                                  = 0x13F6,
-    SMSG_ECHO_PARTY_SQUELCH                               = 0x13F7,
+    SMSG_ECHO_PARTY_SQUELCH                               = 0x0814, // 4.3.4 15595
     CMSG_SET_TITLE_SUFFIX                                 = 0x13F8,
     CMSG_SPELLCLICK                                       = 0x0805, // 4.3.4 15595
     SMSG_LOOT_LIST                                        = 0x6807, // 4.3.4 15595

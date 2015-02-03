@@ -344,6 +344,10 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     if (plMover)
         plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
+    // stop some emotes at player move
+    if (mover && (mover->GetUInt32Value(UNIT_NPC_EMOTESTATE) != 0))
+        mover->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+
     WorldPacket data(SMSG_PLAYER_MOVE, recv_data.size());
     data << movementInfo;
     mover->SendMessageToSetExcept(&data, _player);

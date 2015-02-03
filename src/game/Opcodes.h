@@ -691,7 +691,7 @@ enum Opcodes
     CMSG_REQUEST_PET_INFO                                 = 0x4924, // 4.3.4 15595
     CMSG_FAR_SIGHT                                        = 0x4835, // 4.3.4 15595
     SMSG_SPELLDISPELLOG                                   = 0x4516, // 4.3.4 15595
-    SMSG_DAMAGE_CALC_LOG                                  = 0x127D,
+    SMSG_DAMAGE_CALC_LOG                                  = 0x2436, // 4.3.4 15595
     CMSG_ENABLE_DAMAGE_LOG                                = 0x127E,
     CMSG_GROUP_CHANGE_SUB_GROUP                           = 0x4124, // 4.3.4 15595
     CMSG_REQUEST_PARTY_MEMBER_STATS                       = 0x0C04, // 4.3.4 15595
@@ -713,7 +713,7 @@ enum Opcodes
     CMSG_GROUP_ASSISTANT_LEADER                           = 0x6025, // 4.3.4 15595
     CMSG_BUYBACK_ITEM                                     = 0x6C17, // 4.3.4 15595
     SMSG_SERVER_MESSAGE                                   = 0x6C04, // 4.3.4 15595
-    CMSG_SET_SAVED_INSTANCE_EXTEND                        = 0x1293,
+    CMSG_SET_SAVED_INSTANCE_EXTEND                        = 0x6706, // 4.3.4 15595
     SMSG_LFG_OFFER_CONTINUE                               = 0x1294,
     CMSG_TEST_DROP_RATE                                   = 0x1295,
     SMSG_TEST_DROP_RATE_RESULT                            = 0x1296,

@@ -1095,7 +1095,7 @@ enum Opcodes
     SMSG_FORCE_DISPLAY_UPDATE                             = 0x1404,
     SMSG_SPELL_CHANCE_RESIST_PUSHBACK                     = 0x1405,
     CMSG_IGNORE_DIMINISHING_RETURNS_CHEAT                 = 0x1406,
-    SMSG_IGNORE_DIMINISHING_RETURNS_CHEAT                 = 0x1407,
+    SMSG_IGNORE_DIMINISHING_RETURNS_CHEAT                 = 0x0125, // 4.3.4 15595
     CMSG_KEEP_ALIVE                                       = 0x0015, // 4.3.4 15595
     SMSG_RAID_READY_CHECK_ERROR                           = 0x1409,
     CMSG_OPT_OUT_OF_LOOT                                  = 0x6B16, // 4.3.4 15595

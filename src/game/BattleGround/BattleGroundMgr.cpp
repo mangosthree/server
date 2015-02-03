@@ -1988,8 +1988,8 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket* data, ObjectGuid 
     *data << uint32(0);                     // 4.3.4 lossHonor random
     *data << uint32(0);                     // 4.3.4 winHonor random
     *data << uint32(0);                     // 4.3.4 winHonor weekend
-    *data << uint8(0);                      // max level
-    *data << uint8(0);                      // min level
+    *data << uint8(bgTemplate->GetMaxLevel()); // max level
+    *data << uint8(bgTemplate->GetMinLevel()); // min level
     data->WriteGuidMask<0, 1, 7>(guid);
     data->WriteBit(false);                  // has holiday bg currency bonus ??
     data->WriteBit(false);                  // has random bg currency bonus ??
@@ -2013,9 +2013,9 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket* data, ObjectGuid 
 
     data->WriteBits(count, 24);
     data->WriteGuidMask<6, 4, 2, 3>(guid);
-    data->WriteBit(true);                   // unk
+    data->WriteBit(false);                   // unk
     data->WriteGuidMask<5>(guid);
-    data->WriteBit(true);                   // signals EVENT_PVPQUEUE_ANYWHERE_SHOW if set
+    data->WriteBit(true);                   // hide battleground list window
 
     data->WriteGuidBytes<6, 1, 7, 5>(guid);
     data->FlushBits();

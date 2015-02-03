@@ -1091,7 +1091,6 @@ void WorldSession::HandleSetPlayerDeclinedNamesOpcode(WorldPacket& recv_data)
     {
         WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
         data << uint32(1);
-        data << ObjectGuid(guid);
         SendPacket(&data);
         return;
     }
@@ -1101,7 +1100,6 @@ void WorldSession::HandleSetPlayerDeclinedNamesOpcode(WorldPacket& recv_data)
     {
         WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
         data << uint32(1);
-        data << ObjectGuid(guid);
         SendPacket(&data);
         return;
     }
@@ -1110,7 +1108,6 @@ void WorldSession::HandleSetPlayerDeclinedNamesOpcode(WorldPacket& recv_data)
     {
         WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
         data << uint32(1);
-        data << ObjectGuid(guid);
         SendPacket(&data);
         return;
     }
@@ -1124,7 +1121,6 @@ void WorldSession::HandleSetPlayerDeclinedNamesOpcode(WorldPacket& recv_data)
     {
         WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
         data << uint32(1);
-        data << ObjectGuid(guid);
         SendPacket(&data);
         return;
     }
@@ -1136,7 +1132,6 @@ void WorldSession::HandleSetPlayerDeclinedNamesOpcode(WorldPacket& recv_data)
         {
             WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
             data << uint32(1);
-            data << ObjectGuid(guid);
             SendPacket(&data);
             return;
         }
@@ -1146,7 +1141,6 @@ void WorldSession::HandleSetPlayerDeclinedNamesOpcode(WorldPacket& recv_data)
     {
         WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
         data << uint32(1);
-        data << ObjectGuid(guid);
         SendPacket(&data);
         return;
     }
@@ -1162,7 +1156,6 @@ void WorldSession::HandleSetPlayerDeclinedNamesOpcode(WorldPacket& recv_data)
 
     WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4 + 8);
     data << uint32(0);                                      // OK
-    data << ObjectGuid(guid);
     SendPacket(&data);
 }
 

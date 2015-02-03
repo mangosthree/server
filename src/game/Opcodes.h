@@ -981,7 +981,7 @@ enum Opcodes
     CMSG_MAELSTROM_GM_SENT_MAIL                           = 0x1396,
     SMSG_RESET_FAILED_NOTIFY                              = 0x4616, // 4.3.4 15595
     SMSG_REAL_GROUP_UPDATE                                = 0x0F34, // 4.3.4 15595
-    SMSG_LFG_DISABLED                                     = 0x1399,
+    SMSG_LFG_DISABLED                                     = 0x0815, // 4.3.4 15595
     CMSG_ACTIVE_PVP_CHEAT                                 = 0x139A,
     CMSG_CHEAT_DUMP_ITEMS_DEBUG_ONLY                      = 0x139B,
     SMSG_CHEAT_DUMP_ITEMS_DEBUG_ONLY_RESPONSE             = 0x139C,

@@ -734,7 +734,7 @@ enum Opcodes
     SMSG_LOOT_MASTER_LIST                                 = 0x0325, // 4.3.4 15595
     SMSG_SET_FORCED_REACTIONS                             = 0x4615, // 4.3.4 15595
     SMSG_SPELL_FAILED_OTHER                               = 0x4535, // 4.3.4 15595
-    SMSG_GAMEOBJECT_RESET_STATE                           = 0x12A8,
+    SMSG_GAMEOBJECT_RESET_STATE                           = 0x2A16, // 4.3.4 15595
     CMSG_REPAIR_ITEM                                      = 0x2917, // 4.3.4 15595
     SMSG_CHAT_PLAYER_NOT_FOUND                            = 0x2526, // 4.3.4 15595
     MSG_TALENT_WIPE_CONFIRM                               = 0x0107, // 4.3.4 15595

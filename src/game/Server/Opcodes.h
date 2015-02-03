@@ -823,7 +823,7 @@ enum Opcodes
     SMSG_PARTY_MEMBER_STATS_FULL                          = 0x0215, // 4.3.4 15595
     CMSG_PET_SPELL_AUTOCAST                               = 0x2514, // 4.3.4 15595
     SMSG_WEATHER                                          = 0x2904, // 4.3.4 15595
-    SMSG_PLAY_TIME_WARNING                                = 0x0000,
+    SMSG_PLAY_TIME_WARNING                                = 0x4814, // 4.3.4 15595
     SMSG_MINIGAME_SETUP                                   = 0x0000,
     SMSG_MINIGAME_STATE                                   = 0x0000,
     CMSG_MINIGAME_MOVE                                    = 0x0000,

@@ -950,7 +950,7 @@ enum Opcodes
     MSG_INSPECT_ARENA_TEAMS                               = 0x2704, // 4.3.4 15595
     SMSG_DEATH_RELEASE_LOC                                = 0x2F07, // 4.3.4 15595
     CMSG_CANCEL_TEMP_ENCHANTMENT                          = 0x6C37, // 4.3.4 15595
-    SMSG_FORCED_DEATH_UPDATE                              = 0x137B,
+    SMSG_FORCED_DEATH_UPDATE                              = 0x2606, // 4.3.4 15595
     CMSG_CHEAT_SET_HONOR_CURRENCY                         = 0x137C,
     CMSG_CHEAT_SET_ARENA_CURRENCY                         = 0x137D,
     MSG_MOVE_SET_FLIGHT_SPEED_CHEAT                       = 0x137E,

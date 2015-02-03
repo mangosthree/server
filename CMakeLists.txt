@@ -111,6 +111,22 @@ endif()
 
 set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 set(CONF_DIR ${CMAKE_INSTALL_PREFIX}/etc)
+
+#Set config install path correctly from given path
+string(FIND "${CONF_DIR}" ":" CONF_DIR_ABSOLUTE)
+if(${CONF_DIR_ABSOLUTE} EQUAL -1)
+  #Path was not absolute
+  set(CONF_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${CONF_DIR}")
+  if(MSVC)
+     set(CONF_COPY_DIR "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/${CONF_DIR}")
+  else()
+   #Path was absolute
+   set(CONF_INSTALL_DIR "${CONF_DIR}")
+   if(MSVC)
+      set(CONF_COPY_DIR "${CONF_DIR}")
+  endif()
+endif()
+
 # If win32 put it in the bin dir not lib
 if(WIN32)
   set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/bin)

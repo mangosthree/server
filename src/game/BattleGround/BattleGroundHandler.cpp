@@ -763,3 +763,34 @@ void WorldSession::HandleRequestPvPRewardsOpcode(WorldPacket& recv_data)
     GetPlayer()->SendPvPRewards();
 }
 
+void WorldSession::HandleRequestRatedBgInfo(WorldPacket & recvData)
+{
+    DEBUG_LOG("WORLD: CMSG_REQUEST_RATED_BG_INFO");
+
+    uint8 unk;
+    recvData >> unk;
+
+    DEBUG_LOG("WorldSession::HandleRequestRatedBgInfo: unk = %u", unk);
+
+    WorldPacket data(SMSG_RATED_BG_STATS, 72);
+    data << uint32(0);      // BgWeeklyWins20vs20
+    data << uint32(0);      // BgWeeklyPlayed20vs20
+    data << uint32(0);      // BgWeeklyPlayed15vs15
+    data << uint32(0);
+    data << uint32(0);      // BgWeeklyWins10vs10
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);      // BgWeeklyWins15vs15
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);      // BgWeeklyPlayed10vs10
+    data << uint32(0);
+    data << uint32(0);
+
+    GetPlayer()->SendPacket(&data);
+}

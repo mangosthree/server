@@ -766,6 +766,7 @@ class  WorldSession
         void HandlePetCastSpellOpcode(WorldPacket& recvPacket);
         void HandlePetLearnTalent(WorldPacket& recvPacket);
         void HandleLearnPreviewTalentsPet(WorldPacket& recvPacket);
+        void HandleDismissCritter(WorldPacket& recvData);
 
         void HandleSetActionBarTogglesOpcode(WorldPacket& recv_data);
 

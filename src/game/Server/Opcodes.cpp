@@ -1252,7 +1252,7 @@ void InitializeOpcodes()
     //OPCODE(CMSG_REMOVE_GLYPH,                            STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleRemoveGlyphOpcode         );
     //OPCODE(CMSG_DUMP_OBJECTS,                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     //OPCODE(SMSG_DUMP_OBJECTS_DATA,                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    OPCODE(CMSG_DISMISS_CRITTER,                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
+    OPCODE(CMSG_DISMISS_CRITTER,                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleDismissCritter);
     //OPCODE(SMSG_NOTIFY_DEST_LOC_SPELL_CAST,              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_AUCTION_LIST_PENDING_SALES,              STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListPendingSales   );
     OPCODE(SMSG_AUCTION_LIST_PENDING_SALES,              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );

@@ -1236,7 +1236,7 @@ enum Opcodes
     CMSG_REMOVE_GLYPH                                     = 0x0000,
     CMSG_DUMP_OBJECTS                                     = 0x0000,
     SMSG_DUMP_OBJECTS_DATA                                = 0x0000,
-    CMSG_DISMISS_CRITTER                                  = 0x0000,
+    CMSG_DISMISS_CRITTER                                  = 0x4227, // 4.3.4 15595
     SMSG_NOTIFY_DEST_LOC_SPELL_CAST                       = 0x0000,
     CMSG_AUCTION_LIST_PENDING_SALES                       = 0x2C17, // 4.3.4 15595
     SMSG_AUCTION_LIST_PENDING_SALES                       = 0x6A27, // 4.3.4 15595

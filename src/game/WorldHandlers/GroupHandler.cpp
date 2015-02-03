@@ -1097,7 +1097,7 @@ void WorldSession::HandleGroupRequestJoinUpdates(WorldPacket& recv_data)
         return;
 
     WorldPacket data(SMSG_REAL_GROUP_UPDATE, 1 + 4 + 8);
-    data << uint8(group->);
+    data << uint8(group->GetGroupType());
     data << uint32(group->GetMembersCount() - 1);
     data << ObjectGuid(group->GetLeaderGuid());
     SendPacket(&data);

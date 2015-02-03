@@ -46,7 +46,7 @@ enum SpellCastFlags
 {
     CAST_FLAG_NONE              = 0x00000000,
     CAST_FLAG_HIDDEN_COMBATLOG  = 0x00000001,               // hide in combat log?
-    CAST_FLAG_UNKNOWN2          = 0x00000002,
+    CAST_FLAG_HAS_TRAJECTORY    = 0x00000002,
     CAST_FLAG_UNKNOWN3          = 0x00000004,
     CAST_FLAG_UNKNOWN4          = 0x00000008,
     CAST_FLAG_UNKNOWN5          = 0x00000010,

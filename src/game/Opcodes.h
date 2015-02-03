@@ -755,7 +755,7 @@ enum Opcodes
     CMSG_SHOWING_HELM                                     = 0x0735, // 4.3.4 15595
     CMSG_SHOWING_CLOAK                                    = 0x4135, // 4.3.4 15595
     SMSG_ROLE_CHOSEN                                      = 0x12BC,
-    SMSG_PLAYER_SKINNED                                   = 0x12BD,
+    SMSG_PLAYER_SKINNED                                   = 0x0116, // 4.3.4 15595
     SMSG_DURABILITY_DAMAGE_DEATH                          = 0x4C27, // 4.3.4 15595
     CMSG_SET_EXPLORATION                                  = 0x12BF,
     CMSG_SET_ACTIONBAR_TOGGLES                            = 0x2506, // 4.3.4 15595

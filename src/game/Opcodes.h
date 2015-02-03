@@ -722,7 +722,7 @@ enum Opcodes
     SMSG_RESET_RANGED_COMBAT_TIMER                        = 0x1299,
     SMSG_CHAT_NOT_IN_PARTY                                = 0x6A14, // 4.3.4 15595
     CMSG_GMTICKETSYSTEM_TOGGLE                            = 0x129B,
-    CMSG_CANCEL_GROWTH_AURA                               = 0x129C,
+    CMSG_CANCEL_GROWTH_AURA                               = 0x0237, // 4.3.4 15595
     SMSG_CANCEL_AUTO_REPEAT                               = 0x6436, // 4.3.4 15595
     SMSG_STANDSTATE_UPDATE                                = 0x6F04, // 4.3.4 15595
     SMSG_LOOT_ALL_PASSED                                  = 0x6237, // 4.3.4 15595

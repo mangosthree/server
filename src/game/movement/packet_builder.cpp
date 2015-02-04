@@ -26,7 +26,7 @@
 #include "MoveSpline.h"
 #include "Util.h"
 #include "WorldPacket.h"
-#include "../Creature.h"
+#include "../Object/Creature.h"
 
 namespace Movement
 {

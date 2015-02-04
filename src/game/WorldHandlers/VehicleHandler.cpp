@@ -97,7 +97,6 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket)
     recvPacket.hexlike();
 
     MovementInfo movementInfo;
-    uint8 seat;
 
     recvPacket >> movementInfo;                             // Not used at the moment
     ObjectGuid srcVehicleGuid = movementInfo.GetGuid();

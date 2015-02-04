@@ -26,18 +26,13 @@ set(EXECUTABLE_SRCS
     RASocket.h
     WorldRunnable.cpp
     WorldRunnable.h
+    MaNGOSsoap.cpp
+    MaNGOSsoap.h
+    soapC.cpp
+    soapH.h
+    soapServer.cpp
+    soapStub.h
 )
-
-if(SOAP)
-    LIST(APPEND EXECUTABLE_SRCS
-        MaNGOSsoap.cpp
-        MaNGOSsoap.h
-        soapC.cpp
-        soapH.h
-        soapServer.cpp
-        soapStub.h
-    )
-endif()
 
 if(WIN32)
     # add resource file to windows build
@@ -45,6 +40,7 @@ if(WIN32)
 endif()
 
 include_directories(
+    ${CMAKE_SOURCE_DIR}/dep/include/gsoap
     ${CMAKE_SOURCE_DIR}/src/shared
     ${CMAKE_SOURCE_DIR}/src/framework
     ${CMAKE_SOURCE_DIR}/src/game/
@@ -73,10 +69,6 @@ endif()
 
 if(SCRIPT_LIB_SD2)
     include_directories(${CMAKE_SOURCE_DIR}/src/modules/SD2)
-endif()
-
-if(SOAP)
-    include_directories(${CMAKE_SOURCE_DIR}/dep/include/gsoap)
 endif()
 
 if(POSTGRESQL)

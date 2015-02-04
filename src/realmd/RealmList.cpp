@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2014  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,21 +97,85 @@ RealmList& sRealmList
     return realmlist;
 }
 
+RealmVersion RealmList::BelongsToVersion(uint32 build) const
+{
+    RealmBuildVersionMap::const_iterator it;
+    if ((it = m_buildToVersion.find(build)) != m_buildToVersion.end())
+        return it->second;
+    else
+        return REALM_VERSION_VANILLA;
+}
+
+RealmList::RealmListIterators RealmList::GetIteratorsForBuild(uint32 build) const
+{
+    RealmVersion version = BelongsToVersion(build);
+    if (version >= REALM_VERSION_COUNT)
+        return RealmListIterators(
+            m_realmsByVersion[0].end(),
+            m_realmsByVersion[0].end()
+            );
+    return RealmListIterators(
+        m_realmsByVersion[uint32(version)].begin(),
+        m_realmsByVersion[uint32(version)].end()
+        );
+
+}
+
 /// Load the realm list from the database
 void RealmList::Initialize(uint32 updateInterval)
 {
     m_UpdateInterval = updateInterval;
-
+    
+    InitBuildToVersion();
+    
     ///- Get the content of the realmlist table in the database
     UpdateRealms(true);
+}
+
+uint32 RealmList::NumRealmsForBuild(uint32 build) const
+{
+    return m_realmsByVersion[BelongsToVersion(build)].size();
+}
+
+void RealmList::AddRealmToBuildList(const Realm& realm)
+{
+    RealmBuilds builds = realm.realmbuilds;
+    int buildNumber = *(builds.begin());
+    m_realmsByVersion[BelongsToVersion(buildNumber)].push_back(&realm);
+}
+
+void RealmList::InitBuildToVersion()
+{
+    m_buildToVersion[5875] = REALM_VERSION_VANILLA;
+    m_buildToVersion[6005] = REALM_VERSION_VANILLA;
+    m_buildToVersion[6141] = REALM_VERSION_VANILLA;
+    
+    m_buildToVersion[8606] = REALM_VERSION_TBC;
+    
+    m_buildToVersion[10505] = REALM_VERSION_WOTLK;
+    m_buildToVersion[11159] = REALM_VERSION_WOTLK;
+    m_buildToVersion[11403] = REALM_VERSION_WOTLK;
+    m_buildToVersion[11723] = REALM_VERSION_WOTLK;
+    m_buildToVersion[12340] = REALM_VERSION_WOTLK;
+    
+    m_buildToVersion[13623] = REALM_VERSION_CATA;
+    m_buildToVersion[15050] = REALM_VERSION_CATA;
+    m_buildToVersion[15595] = REALM_VERSION_CATA;
+    
+    m_buildToVersion[16357] = REALM_VERSION_MOP;
+    m_buildToVersion[16992] = REALM_VERSION_MOP;
+    m_buildToVersion[17055] = REALM_VERSION_MOP;
+    m_buildToVersion[17116] = REALM_VERSION_MOP;
+    m_buildToVersion[17128] = REALM_VERSION_MOP;
 }
 
 void RealmList::UpdateRealm(uint32 ID, const std::string& name, const std::string& address, uint32 port, uint8 icon, RealmFlags realmflags, uint8 timezone, AccountTypes allowedSecurityLevel, float popu, const std::string& builds)
 {
     ///- Create new if not exist or update existed
     Realm& realm = m_realms[name];
-
+    
     realm.m_ID       = ID;
+    realm.name       = name;
     realm.icon       = icon;
     realm.realmflags = realmflags;
     realm.timezone   = timezone;
@@ -129,6 +193,13 @@ void RealmList::UpdateRealm(uint32 ID, const std::string& name, const std::strin
 
     uint16 first_build = !realm.realmbuilds.empty() ? *realm.realmbuilds.begin() : 0;
 
+    if (first_build)
+        AddRealmToBuildList(realm);
+    else
+        sLog.outError("You don't seem to have added any allowed realmbuilds to the realm: %s"
+                      " and therefore it will not be listed to anyone",
+                      name.c_str());
+    
     realm.realmBuildInfo.build = first_build;
     realm.realmBuildInfo.major_version = 0;
     realm.realmBuildInfo.minor_version = 0;
@@ -156,7 +227,9 @@ void RealmList::UpdateIfNeed()
 
     // Clears Realm list
     m_realms.clear();
-
+    for (int i = 0; i < REALM_VERSION_COUNT; ++i)
+        m_realmsByVersion[i].clear();
+    
     // Get the content of the realmlist table in the database
     UpdateRealms(false);
 }

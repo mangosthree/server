@@ -21,6 +21,6 @@ before_install:
 script:
   - test -d _build || mkdir _build
   - cd _build
-  - cmake -DCMAKE_BUILD_TYPE=Debug -DACE_USE_EXTERNAL=1 ..
+  - cmake -DACE_USE_EXTERNAL=1 ..
 
   - make -j4

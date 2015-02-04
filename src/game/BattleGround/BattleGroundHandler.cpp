@@ -792,5 +792,5 @@ void WorldSession::HandleRequestRatedBgInfo(WorldPacket & recvData)
     data << uint32(0);
     data << uint32(0);
 
-    GetPlayer()->SendPacket(&data);
+    SendPacket(&data);
 }

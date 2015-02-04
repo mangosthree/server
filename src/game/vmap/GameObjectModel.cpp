@@ -27,11 +27,10 @@
 #include "VMapDefinitions.h"
 #include "WorldModel.h"
 
-#include "../GameObject.h"
-#include "../World.h"
+#include "../WorldHandlers/World.h"
 #include "GameObjectModel.h"
-#include "../DBCStores.h"
-#include "../Creature.h"
+#include "../Server/DBCStores.h"
+#include "../Object/Creature.h"
 
 struct GameobjectModelData
 {

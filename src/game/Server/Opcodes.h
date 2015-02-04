@@ -716,6 +716,7 @@ enum Opcodes
     SMSG_PVP_CREDIT                                       = 0x6015, // 4.3.4 15595
     SMSG_AUCTION_REMOVED_NOTIFICATION                     = 0x2334, // 4.3.4 15595
     CMSG_GROUP_RAID_CONVERT                               = 0x6E27, // 4.3.4 15595
+    CMSG_GROUP_REQUEST_JOIN_UPDATES                       = 0x2583, // 4.3.4 15595
     CMSG_GROUP_ASSISTANT_LEADER                           = 0x6025, // 4.3.4 15595
     CMSG_BUYBACK_ITEM                                     = 0x6C17, // 4.3.4 15595
     SMSG_SERVER_MESSAGE                                   = 0x6C04, // 4.3.4 15595

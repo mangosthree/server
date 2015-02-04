@@ -855,7 +855,8 @@ enum Opcodes
     CMSG_GM_DESTROY_ONLINE_CORPSE                         = 0x1312,
     CMSG_ACTIVATETAXIEXPRESS                              = 0x0515, // 4.3.4 15595
     SMSG_SET_FACTION_ATWAR                                = 0x1314,
-    SMSG_GAMETIMEBIAS_SET                                 = 0x1315,
+    SMSG_SET_FACTION_NOT_VISIBLE = 0x0000, //TODO: Needs fixing up
+    SMSG_GAMETIMEBIAS_SET = 0x1315,
     CMSG_DEBUG_ACTIONS_START                              = 0x1316,
     CMSG_DEBUG_ACTIONS_STOP                               = 0x1317,
     CMSG_SET_FACTION_INACTIVE                             = 0x0E37, // 4.3.4 15595

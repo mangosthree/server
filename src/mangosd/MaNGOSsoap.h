@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _MANGOSSOAP_H
-#define _MANGOSSOAP_H
+#ifndef MANGOS_H_MANGOSSOAP
+#define MANGOS_H_MANGOSSOAP
 
 #include "Common.h"
 #include "World.h"
@@ -65,7 +65,7 @@ class SOAPWorkingThread : public ACE_Task<ACE_MT_SYNCH>
                 if (this->getq(mb) == -1)
                 {
                     ACE_DEBUG((LM_INFO,
-                               ACE_TEXT("(%t) Shutting down\n")));
+                    ACE_TEXT("(%t) Shutting down\n")));
                     break;
                 }
 

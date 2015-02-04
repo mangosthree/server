@@ -48,7 +48,7 @@
 #ifdef VERSION
 #undef VERSION
 #endif // VERSION
-# include "config.h"
+//# include "config.h"
 #undef PACKAGE
 #undef PACKAGE_BUGREPORT
 #undef PACKAGE_NAME

@@ -34,6 +34,7 @@
 #include "Util.h"
 #include "Pet.h"
 #include "SpellAuras.h"
+#include "TemporarySummon.h"
 
 void WorldSession::HandlePetAction(WorldPacket& recv_data)
 {

@@ -47,7 +47,7 @@ endif()
 include_directories(
     ${CMAKE_SOURCE_DIR}/src/shared
     ${CMAKE_SOURCE_DIR}/src/framework
-    ${CMAKE_SOURCE_DIR}/src/game/AuctionHouseBot
+    ${CMAKE_SOURCE_DIR}/src/game/
     ${CMAKE_SOURCE_DIR}/src/game/BattleGround
     ${CMAKE_SOURCE_DIR}/src/game/Server
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers

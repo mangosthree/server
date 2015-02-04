@@ -1022,6 +1022,8 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_creature->HandleEmote(action.emoteTarget.emoteId);
             break;
         }
+        default:
+            break;
     }
 }
 
@@ -1063,6 +1065,8 @@ void CreatureEventAI::Reset()
                     (*i).Enabled = true;
                 break;
             }
+            default:
+                break;
             // default:
             // TODO: enable below code line / verify this is correct to enable events previously disabled (ex. aggro yell), instead of enable this in void Aggro()
             //(*i).Enabled = true;
@@ -1343,6 +1347,8 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                             if (m_creature->IsInRange(m_creature->getVictim(), (float)(*i).Event.range.minDist, (float)(*i).Event.range.maxDist))
                                 ProcessEvent(*i);
                     }
+                    break;
+                default:
                     break;
             }
 

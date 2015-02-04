@@ -33,7 +33,7 @@
 #include "Log.h"
 #include "Master.h"
 #include "SystemConfig.h"
-#include "AuctionHouseBot/AuctionHouseBot.h"
+#include "AuctionHouseBot.h"
 #include "revision.h"
 #include "revision_nr.h"
 #include <openssl/opensslv.h>

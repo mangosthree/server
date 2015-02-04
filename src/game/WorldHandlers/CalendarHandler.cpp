@@ -530,7 +530,7 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recv_data)
     uint32 status;
 
     recv_data >> eventId >> inviteId >> status;
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId ["UI64FMTD "], InviteId [" UI64FMTD "], status %u",
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "], InviteId [" UI64FMTD "], status %u",
                      eventId, inviteId, status);
 
     if (CalendarEvent* event = sCalendarMgr.GetEventById(eventId))

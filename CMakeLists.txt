@@ -124,6 +124,7 @@ if(${CONF_DIR_ABSOLUTE} EQUAL -1)
    set(CONF_INSTALL_DIR "${CONF_DIR}")
    if(MSVC)
       set(CONF_COPY_DIR "${CONF_DIR}")
+   endif()
   endif()
 endif()
 

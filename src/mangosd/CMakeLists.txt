@@ -48,13 +48,17 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/shared
     ${CMAKE_SOURCE_DIR}/src/framework
     ${CMAKE_SOURCE_DIR}/src/game/
+    ${CMAKE_SOURCE_DIR}/src/game/AuctionHouseBot
     ${CMAKE_SOURCE_DIR}/src/game/BattleGround
-    ${CMAKE_SOURCE_DIR}/src/game/Server
-    ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers
-    ${CMAKE_SOURCE_DIR}/src/game/Object
-    ${CMAKE_SOURCE_DIR}/src/game/Tools
-    ${CMAKE_SOURCE_DIR}/src/game/References
+    ${CMAKE_SOURCE_DIR}/src/game/ChatCommands
     ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators
+    ${CMAKE_SOURCE_DIR}/src/game/movement
+    ${CMAKE_SOURCE_DIR}/src/game/Object
+    ${CMAKE_SOURCE_DIR}/src/game/OutdoorPvP
+    ${CMAKE_SOURCE_DIR}/src/game/Server
+    ${CMAKE_SOURCE_DIR}/src/game/References
+    ${CMAKE_SOURCE_DIR}/src/game/Tools
+    ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers
     ${CMAKE_SOURCE_DIR}/src/game/vmap
     ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}/src/shared

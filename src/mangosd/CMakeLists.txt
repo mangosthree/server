@@ -97,11 +97,7 @@ target_link_libraries(${EXECUTABLE_NAME}
 
 add_dependencies(${EXECUTABLE_NAME} game)
 
-if(SOAP)
-    target_link_libraries(${EXECUTABLE_NAME}
-        gsoap
-    )
-endif()
+target_link_libraries(${EXECUTABLE_NAME} gsoap)
 
 if(WIN32)
   target_link_libraries(${EXECUTABLE_NAME}

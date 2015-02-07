@@ -554,14 +554,6 @@ void AddScripts()
     // battlegrounds
     AddSC_battleground();
 
-    // custom
-
-    // examples
-    AddSC_example_creature();
-    AddSC_example_escort();
-    AddSC_example_gossip_codebox();
-    AddSC_example_misc();
-
     // world
     AddSC_areatrigger_scripts();
     AddSC_bosses_emerald_dragons();

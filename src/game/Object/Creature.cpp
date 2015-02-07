@@ -565,7 +565,7 @@ void Creature::Update(uint32 update_diff, uint32 diff)
 
             // creature can be dead after Unit::Update call
             // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
-            if (!isAlive())
+            if (!IsAlive())
                 break;
 
             if (!IsInEvadeMode())
@@ -581,7 +581,7 @@ void Creature::Update(uint32 update_diff, uint32 diff)
 
             // creature can be dead after UpdateAI call
             // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
-            if (!isAlive())
+            if (!IsAlive())
                 break;
             RegenerateAll(update_diff);
             break;
@@ -621,7 +621,7 @@ void Creature::RegenerateAll(uint32 update_diff)
     if (m_regenTimer != 0)
         return;
 
-    if (!isInCombat() || IsPolymorphed())
+    if (!IsInCombat() || IsPolymorphed())
         RegenerateHealth();
 
     RegenerateMana();
@@ -640,7 +640,7 @@ void Creature::RegenerateMana()
     uint32 addvalue = 0;
 
     // Combat and any controlled creature
-    if (isInCombat() || GetCharmerOrOwnerGuid())
+    if (IsInCombat() || GetCharmerOrOwnerGuid())
     {
         float ManaIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_MANA);
         float Spirit = GetStat(STAT_SPIRIT);
@@ -781,7 +781,7 @@ bool Creature::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo cons
 
 bool Creature::IsTrainerOf(Player* pPlayer, bool msg) const
 {
-    if (!isTrainer())
+    if (!IsTrainer())
         return false;
 
     // pet trainers not have spells in fact now
@@ -1344,11 +1344,11 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
     AIM_Initialize();
 
     // Creature Linking, Initial load is handled like respawn
-    if (m_isCreatureLinkingTrigger && isAlive())
+    if (m_isCreatureLinkingTrigger && IsAlive())
         GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, this);
 
     // check if it is rabbit day
-    if (isAlive() && sWorld.getConfig(CONFIG_UINT32_RABBIT_DAY))
+    if (IsAlive() && sWorld.getConfig(CONFIG_UINT32_RABBIT_DAY))
     {
         time_t rabbit_day = time_t(sWorld.getConfig(CONFIG_UINT32_RABBIT_DAY));
         tm rabbit_day_tm = *localtime(&rabbit_day);
@@ -1571,7 +1571,7 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn)
     if (IsDespawned())
         return;
 
-    if (isAlive())
+    if (IsAlive())
         SetDeathState(JUST_DIED);
 
     RemoveCorpse();
@@ -1732,13 +1732,13 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
         return false;
 
     // Live player (or with not release body see live creatures or death creatures with corpse disappearing time > 0
-    if (pl->isAlive() || pl->GetDeathTimer() > 0)
+    if (pl->IsAlive() || pl->GetDeathTimer() > 0)
     {
-        return (isAlive() || m_corpseDecayTimer > 0 || (m_isDeadByDefault && m_deathState == CORPSE));
+        return (IsAlive() || m_corpseDecayTimer > 0 || (m_isDeadByDefault && m_deathState == CORPSE));
     }
 
     // Dead player see live creatures near own corpse
-    if (isAlive())
+    if (IsAlive())
     {
         Corpse* corpse = pl->GetCorpse();
         if (corpse)
@@ -1793,7 +1793,7 @@ void Creature::CallForHelp(float fRadius)
 bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /*= true*/) const
 {
     // we don't need help from zombies :)
-    if (!isAlive())
+    if (!IsAlive())
         return false;
 
     // we don't need help from non-combatant ;)
@@ -1804,7 +1804,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
         return false;
 
     // skip fighting creature
-    if (enemy && isInCombat())
+    if (enemy && IsInCombat())
         return false;
 
     // only free creature
@@ -1863,13 +1863,13 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     if (!pVictim->IsInMap(this))
         return true;
 
-    if (!pVictim->isTargetableForAttack())
+    if (!pVictim->IsTargetableForAttack())
         return true;
 
     if (!pVictim->isInAccessablePlaceFor(this))
         return true;
 
-    if (!pVictim->isVisibleForOrDetect(this, this, false))
+    if (!pVictim->IsVisibleForOrDetect(this, this, false))
         return true;
 
     if (sMapStore.LookupEntry(GetMapId())->IsDungeon())
@@ -2002,7 +2002,7 @@ void Creature::SetInCombatWithZone()
             if (pPlayer->isGameMaster())
                 continue;
 
-            if (pPlayer->isAlive() && !IsFriendlyTo(pPlayer))
+            if (pPlayer->IsAlive() && !IsFriendlyTo(pPlayer))
             {
                 pPlayer->SetInCombatWith(this);
                 AddThreat(pPlayer);
@@ -2064,7 +2064,7 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
         return NULL;
 
     // ThreatList m_threatlist;
-    ThreatList const& threatlist = getThreatManager().getThreatList();
+    ThreatList const& threatlist = GetThreatManager().getThreatList();
     ThreatList::const_iterator itr = threatlist.begin();
     ThreatList::const_reverse_iterator ritr = threatlist.rbegin();
 
@@ -2416,7 +2416,7 @@ void Creature::ClearTemporaryFaction()
     // Reset UNIT_FLAG_NON_ATTACKABLE, UNIT_FLAG_OOC_NOT_ATTACKABLE or UNIT_FLAG_PASSIVE flags
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_NON_ATTACKABLE && GetCreatureInfo()->unit_flags & UNIT_FLAG_NON_ATTACKABLE)
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-    if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_OOC_NOT_ATTACK && GetCreatureInfo()->unit_flags & UNIT_FLAG_OOC_NOT_ATTACKABLE && !isInCombat())
+    if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_OOC_NOT_ATTACK && GetCreatureInfo()->unit_flags & UNIT_FLAG_OOC_NOT_ATTACKABLE && !IsInCombat())
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_PASSIVE && GetCreatureInfo()->unit_flags & UNIT_FLAG_PASSIVE)
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
@@ -2454,7 +2454,7 @@ void Creature::FillGuidsListFromThreatList(GuidVector& guids, uint32 maxamount /
     if (!CanHaveThreatList())
         return;
 
-    ThreatList const& threats = getThreatManager().getThreatList();
+    ThreatList const& threats = GetThreatManager().getThreatList();
 
     maxamount = maxamount > 0 ? std::min(maxamount, uint32(threats.size())) : threats.size();
 

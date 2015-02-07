@@ -482,7 +482,7 @@ void WorldSession::HandleBinderActivateOpcode(WorldPacket& recv_data)
     ObjectGuid npcGuid;
     recv_data >> npcGuid;
 
-    if (!GetPlayer()->IsInWorld() || !GetPlayer()->isAlive())
+    if (!GetPlayer()->IsInWorld() || !GetPlayer()->IsAlive())
         return;
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_INNKEEPER);
@@ -554,7 +554,7 @@ void WorldSession::SendStablePet(ObjectGuid guid)
     uint8 num = 0;                                          // counter for place holder
 
     // not let move dead pet in slot
-    if (pet && pet->isAlive() && pet->getPetType() == HUNTER_PET)
+    if (pet && pet->IsAlive() && pet->getPetType() == HUNTER_PET)
     {
         data << uint32(pet->GetCharmInfo()->GetPetNumber());
         data << uint32(pet->GetEntry());
@@ -630,7 +630,7 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
 
     recv_data >> npcGUID;
 
-    if (!GetPlayer()->isAlive())
+    if (!GetPlayer()->IsAlive())
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;
@@ -649,7 +649,7 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
     Pet* pet = _player->GetPet();
 
     // can't place in stable dead pet
-    if (!pet || !pet->isAlive() || pet->getPetType() != HUNTER_PET)
+    if (!pet || !pet->IsAlive() || pet->getPetType() != HUNTER_PET)
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;
@@ -737,7 +737,7 @@ void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
     }
 
     Pet* pet = _player->GetPet();
-    if (pet && pet->isAlive())
+    if (pet && pet->IsAlive())
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;
@@ -841,7 +841,7 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recv_data)
     }
 
     // move alive pet to slot or delete dead pet
-    pet->Unsummon(pet->isAlive() ? PetSaveMode(slot) : PET_SAVE_AS_DELETED, _player);
+    pet->Unsummon(pet->IsAlive() ? PetSaveMode(slot) : PET_SAVE_AS_DELETED, _player);
 
     // summon unstabled pet
     Pet* newpet = new Pet;

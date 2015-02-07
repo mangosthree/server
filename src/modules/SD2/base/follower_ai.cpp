@@ -76,7 +76,7 @@ bool FollowerAI::AssistPlayerInCombat(Unit* pWho)
     }
 
     // experimental (unknown) flag not present
-    if (!(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_CAN_ASSIST))
+    if (!(m_creature->GetCreatureInfo()->type_flags & CREATURE_TYPEFLAGS_CAN_ASSIST))
     {
         return false;
     }

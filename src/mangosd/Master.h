@@ -26,28 +26,66 @@
 /// @{
 /// \file
 
-#ifndef _MASTER_H
-#define _MASTER_H
+#ifndef MANGOS_H_MASTER
+#define MANGOS_H_MASTER
 
 #include "Common.h"
 #include "Policies/Singleton.h"
 
-/// Start the server
+/**
+ * @brief Start the server
+ *
+ */
 class Master
 {
     public:
+        /**
+         * @brief
+         *
+         */
         Master();
+        /**
+         * @brief
+         *
+         */
         ~Master();
+        /**
+         * @brief
+         *
+         * @return int
+         */
         int Run();
-        static volatile uint32 m_masterLoopCounter;
+        static volatile uint32 m_masterLoopCounter; /**< TODO */
 
     private:
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool _StartDB();
 
+        /**
+         * @brief
+         *
+         */
         void _HookSignals();
+        /**
+         * @brief
+         *
+         */
         void _UnhookSignals();
+        /**
+         * @brief
+         *
+         * @param s
+         */
         static void _OnSignal(int s);
 
+        /**
+         * @brief
+         *
+         */
         void clearOnlineAccounts();
 };
 

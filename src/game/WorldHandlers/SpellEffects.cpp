@@ -269,7 +269,7 @@ void Spell::EffectUnused(SpellEffectEntry const* /*effect*/)
 
 void Spell::EffectResurrectNew(SpellEffectEntry const* effect)
 {
-    if (!unitTarget || unitTarget->isAlive())
+    if (!unitTarget || unitTarget->IsAlive())
         return;
 
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -291,7 +291,7 @@ void Spell::EffectResurrectNew(SpellEffectEntry const* effect)
 
 void Spell::EffectInstaKill(SpellEffectEntry const* /*effect*/)
 {
-    if (!unitTarget || !unitTarget->isAlive())
+    if (!unitTarget || !unitTarget->IsAlive())
         return;
 
     if (m_caster == unitTarget)                             // prevent interrupt message
@@ -327,7 +327,7 @@ void Spell::EffectEnvironmentalDMG(SpellEffectEntry const* effect)
 
 void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
 {
-    if (unitTarget && unitTarget->isAlive())
+    if (unitTarget && unitTarget->IsAlive())
     {
         SpellClassOptionsEntry const* classOptions = m_spellInfo->GetSpellClassOptions();
 
@@ -1098,8 +1098,8 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     // Spell used by Azuregos to teleport all the players to him
                     // This also resets the target threat
-                    if (m_caster->getThreatManager().getThreat(unitTarget))
-                        m_caster->getThreatManager().modifyThreatPercent(unitTarget, -100);
+                    if (m_caster->GetThreatManager().getThreat(unitTarget))
+                        m_caster->GetThreatManager().modifyThreatPercent(unitTarget, -100);
 
                     // cast summon player
                     m_caster->CastSpell(unitTarget, 21150, true);
@@ -1108,7 +1108,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 }
                 case 23019:                                 // Crystal Prison Dummy DND
                 {
-                    if (!unitTarget || !unitTarget->isAlive() || unitTarget->GetTypeId() != TYPEID_UNIT || ((Creature*)unitTarget)->IsPet())
+                    if (!unitTarget || !unitTarget->IsAlive() || unitTarget->GetTypeId() != TYPEID_UNIT || ((Creature*)unitTarget)->IsPet())
                         return;
 
                     Creature* creatureTarget = (Creature*)unitTarget;
@@ -1593,7 +1593,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     // Spell can be used in combat and may affect different target than the expected.
                     // If target is not the expected we need to prevent this effect.
-                    if (pCreature->HasLootRecipient() || pCreature->isInCombat())
+                    if (pCreature->HasLootRecipient() || pCreature->IsInCombat())
                         return;
 
                     // set loot recipient, prevent re-use same target
@@ -3376,7 +3376,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
             // Steady Shot
             if (huntClassOptions && huntClassOptions->SpellFamilyFlags & UI64LIT(0x100000000))
             {
-                if (!unitTarget || !unitTarget->isAlive())
+                if (!unitTarget || !unitTarget->IsAlive())
                     return;
 
                 bool found = false;
@@ -3410,7 +3410,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         sLog.outError("Spell %u not handled propertly in EffectDummy(Disengage)", m_spellInfo->Id);
                         return;
                 }
-                if (!target || !target->isAlive())
+                if (!target || !target->IsAlive())
                     return;
                 m_caster->CastSpell(target, spellid, true, NULL);
             }
@@ -4344,7 +4344,7 @@ void Spell::EffectApplyAura(SpellEffectEntry const* effect)
         return;
 
     // ghost spell check, allow apply any auras at player loading in ghost mode (will be cleanup after load)
-    if ((!unitTarget->isAlive() && !(IsDeathOnlySpell(m_spellInfo) || IsDeathPersistentSpell(m_spellInfo))) &&
+    if ((!unitTarget->IsAlive() && !(IsDeathOnlySpell(m_spellInfo) || IsDeathPersistentSpell(m_spellInfo))) &&
             (unitTarget->GetTypeId() != TYPEID_PLAYER || !((Player*)unitTarget)->GetSession()->PlayerLoading()))
         return;
 
@@ -4388,7 +4388,7 @@ void Spell::EffectPowerDrain(SpellEffectEntry const* effect)
 
     if (!unitTarget)
         return;
-    if (!unitTarget->isAlive())
+    if (!unitTarget->IsAlive())
         return;
     if (unitTarget->getPowerType() != drain_power)
         return;
@@ -4449,7 +4449,7 @@ void Spell::EffectPowerBurn(SpellEffectEntry const* effect)
 
     if (!unitTarget)
         return;
-    if (!unitTarget->isAlive())
+    if (!unitTarget->IsAlive())
         return;
     if (unitTarget->getPowerType() != powertype)
         return;
@@ -4486,7 +4486,7 @@ void Spell::EffectPowerBurn(SpellEffectEntry const* effect)
 
 void Spell::EffectHeal(SpellEffectEntry const* /*effect*/)
 {
-    if (unitTarget && unitTarget->isAlive() && damage >= 0)
+    if (unitTarget && unitTarget->IsAlive() && damage >= 0)
     {
         // Try to get original caster
         Unit* caster = GetAffectiveCaster();
@@ -4596,7 +4596,7 @@ void Spell::EffectHeal(SpellEffectEntry const* /*effect*/)
 
 void Spell::EffectHealPct(SpellEffectEntry const* /*effect*/)
 {
-    if (unitTarget && unitTarget->isAlive() && damage >= 0)
+    if (unitTarget && unitTarget->IsAlive() && damage >= 0)
     {
         // Try to get original caster
         Unit* caster = GetAffectiveCaster();
@@ -4619,7 +4619,7 @@ void Spell::EffectHealPct(SpellEffectEntry const* /*effect*/)
 void Spell::EffectHealMechanical(SpellEffectEntry const* /*effect*/)
 {
     // Mechanic creature type should be correctly checked by targetCreatureType field
-    if (unitTarget && unitTarget->isAlive() && damage >= 0)
+    if (unitTarget && unitTarget->IsAlive() && damage >= 0)
     {
         // Try to get original caster
         Unit* caster = GetAffectiveCaster();
@@ -4640,7 +4640,7 @@ void Spell::EffectHealthLeech(SpellEffectEntry const* effect)
 {
     if (!unitTarget)
         return;
-    if (!unitTarget->isAlive())
+    if (!unitTarget->IsAlive())
         return;
 
     if (damage < 0)
@@ -4659,7 +4659,7 @@ void Spell::EffectHealthLeech(SpellEffectEntry const* effect)
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
 
     int32 heal = int32(damage * multiplier);
-    if (m_caster->isAlive())
+    if (m_caster->IsAlive())
     {
         heal = m_caster->SpellHealingBonusTaken(m_caster, m_spellInfo, heal, HEAL);
 
@@ -4839,7 +4839,7 @@ void Spell::EffectEnergize(SpellEffectEntry const* effect)
 {
     if (!unitTarget)
         return;
-    if (!unitTarget->isAlive())
+    if (!unitTarget->IsAlive())
         return;
 
     if(effect->EffectMiscValue < 0 || effect->EffectMiscValue >= MAX_POWERS)
@@ -4943,7 +4943,7 @@ void Spell::EffectEnergisePct(SpellEffectEntry const* effect)
 {
     if (!unitTarget)
         return;
-    if (!unitTarget->isAlive())
+    if (!unitTarget->IsAlive())
         return;
 
     if (effect->EffectMiscValue < 0 || effect->EffectMiscValue >= MAX_POWERS)
@@ -5148,7 +5148,7 @@ void Spell::EffectApplyAreaAura(SpellEffectEntry const* effect)
 {
     if (!unitTarget)
         return;
-    if (!unitTarget->isAlive())
+    if (!unitTarget->IsAlive())
         return;
 
     AreaAura* Aur = new AreaAura(m_spellInfo, SpellEffectIndex(effect->EffectIndex), &m_currentBasePoints[effect->EffectIndex], m_spellAuraHolder, unitTarget, m_caster, m_CastItem);
@@ -6000,7 +6000,7 @@ void Spell::EffectPull(SpellEffectEntry const* /*effect*/)
 void Spell::EffectDistract(SpellEffectEntry const* /*effect*/)
 {
     // Check for possible target
-    if (!unitTarget || unitTarget->isInCombat())
+    if (!unitTarget || unitTarget->IsInCombat())
         return;
 
     // target must be OK to do this
@@ -6024,7 +6024,7 @@ void Spell::EffectPickPocket(SpellEffectEntry const* /*effect*/)
         return;
 
     // victim have to be alive and humanoid or undead
-    if (unitTarget->isAlive() && (unitTarget->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) != 0)
+    if (unitTarget->IsAlive() && (unitTarget->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) != 0)
     {
         int32 chance = 10 + int32(m_caster->getLevel()) - int32(unitTarget->getLevel());
 
@@ -6421,7 +6421,7 @@ void Spell::EffectSummonPet(SpellEffectEntry const* effect)
         if ((petentry == 0 || OldSummon->GetEntry() == petentry) && OldSummon->getPetType() != SUMMON_PET)
         {
             // pet in corpse state can't be summoned
-            if (OldSummon->isDead())
+            if (OldSummon->IsDead())
                 return;
 
             OldSummon->GetMap()->Remove((Creature*)OldSummon, false);
@@ -6554,7 +6554,7 @@ void Spell::EffectLearnPetSpell(SpellEffectEntry const* effect)
     Pet* pet = _player->GetPet();
     if (!pet)
         return;
-    if (!pet->isAlive())
+    if (!pet->IsAlive())
         return;
 
     SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(effect->EffectTriggerSpell);
@@ -6587,15 +6587,15 @@ void Spell::EffectTaunt(SpellEffectEntry const* /*effect*/)
     }
 
     // Also use this effect to set the taunter's threat to the taunted creature's highest value
-    if (unitTarget->CanHaveThreatList() && unitTarget->getThreatManager().getCurrentVictim())
-        unitTarget->getThreatManager().addThreat(m_caster, unitTarget->getThreatManager().getCurrentVictim()->getThreat());
+    if (unitTarget->CanHaveThreatList() && unitTarget->GetThreatManager().getCurrentVictim())
+        unitTarget->GetThreatManager().addThreat(m_caster, unitTarget->GetThreatManager().getCurrentVictim()->getThreat());
 }
 
 void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
 {
     if (!unitTarget)
         return;
-    if (!unitTarget->isAlive())
+    if (!unitTarget->IsAlive())
         return;
 
     // multiple weapon dmg effect workaround
@@ -6897,7 +6897,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
 
 void Spell::EffectThreat(SpellEffectEntry const* /*effect*/)
 {
-    if (!unitTarget || !unitTarget->isAlive() || !m_caster->isAlive())
+    if (!unitTarget || !unitTarget->IsAlive() || !m_caster->IsAlive())
         return;
 
     if (!unitTarget->CanHaveThreatList())
@@ -6910,7 +6910,7 @@ void Spell::EffectHealMaxHealth(SpellEffectEntry const* /*effect*/)
 {
     if (!unitTarget)
         return;
-    if (!unitTarget->isAlive())
+    if (!unitTarget->IsAlive())
         return;
 
     uint32 heal = m_caster->GetMaxHealth();
@@ -6922,7 +6922,7 @@ void Spell::EffectInterruptCast(SpellEffectEntry const* /*effect*/)
 {
     if (!unitTarget)
         return;
-    if (!unitTarget->isAlive())
+    if (!unitTarget->IsAlive())
         return;
 
     // TODO: not all spells that used this effect apply cooldown at school spells
@@ -7067,7 +7067,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                 case 22984:
                 case 22985:
                 {
-                    if (!unitTarget || !unitTarget->isAlive())
+                    if (!unitTarget || !unitTarget->IsAlive())
                         return;
 
                     // Onyxia Scale Cloak
@@ -9180,7 +9180,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
             // Judgement (seal trigger)
             if (m_spellInfo->GetCategory() == SPELLCATEGORY_JUDGEMENT)
             {
-                if (!unitTarget || !unitTarget->isAlive())
+                if (!unitTarget || !unitTarget->IsAlive())
                     return;
 
                 uint32 spellId1 = 0;
@@ -9789,7 +9789,7 @@ void Spell::EffectFeedPet(SpellEffectEntry const* effect)
     if (!pet)
         return;
 
-    if (!pet->isAlive())
+    if (!pet->IsAlive())
         return;
 
     int32 benefit = pet->GetCurrentFoodBenefitLevel(foodItem->GetProto()->ItemLevel);
@@ -9811,7 +9811,7 @@ void Spell::EffectDismissPet(SpellEffectEntry const* /*effect*/)
     Pet* pet = m_caster->GetPet();
 
     // not let dismiss dead pet
-    if (!pet || !pet->isAlive())
+    if (!pet || !pet->IsAlive())
         return;
 
     pet->Unsummon(PET_SAVE_NOT_IN_SLOT, m_caster);
@@ -9871,7 +9871,7 @@ void Spell::EffectResurrect(SpellEffectEntry const* /*effect*/)
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if (unitTarget->isAlive() || !unitTarget->IsInWorld())
+    if (unitTarget->IsAlive() || !unitTarget->IsInWorld())
         return;
 
     switch (m_spellInfo->Id)
@@ -9915,7 +9915,7 @@ void Spell::EffectResurrect(SpellEffectEntry const* /*effect*/)
 
 void Spell::EffectAddExtraAttacks(SpellEffectEntry const* /*effect*/)
 {
-    if (!unitTarget || !unitTarget->isAlive())
+    if (!unitTarget || !unitTarget->IsAlive())
         return;
 
     if (unitTarget->m_extraAttacks)
@@ -10016,7 +10016,7 @@ void Spell::EffectQuestComplete(SpellEffectEntry const* effect)
 
 void Spell::EffectSelfResurrect(SpellEffectEntry const* effect)
 {
-    if (!unitTarget || unitTarget->isAlive())
+    if (!unitTarget || unitTarget->IsAlive())
         return;
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -10178,7 +10178,7 @@ void Spell::EffectSummonDeadPet(SpellEffectEntry const* /*effect*/)
     Pet* pet = _player->GetPet();
     if (!pet)
         return;
-    if (pet->isAlive())
+    if (pet->IsAlive())
         return;
     if (damage < 0)
         return;
@@ -10298,7 +10298,7 @@ void Spell::EffectModifyThreatPercent(SpellEffectEntry const* /*effect*/)
     if (!unitTarget)
         return;
 
-    unitTarget->getThreatManager().modifyThreatPercent(m_caster, damage);
+    unitTarget->GetThreatManager().modifyThreatPercent(m_caster, damage);
 }
 
 void Spell::EffectTransmitted(SpellEffectEntry const* effect)
@@ -10477,7 +10477,7 @@ void Spell::EffectSkill(SpellEffectEntry const* /*effect*/)
 void Spell::EffectSpiritHeal(SpellEffectEntry const* /*effect*/)
 {
     // TODO player can't see the heal-animation - he should respawn some ticks later
-    if (!unitTarget || unitTarget->isAlive())
+    if (!unitTarget || unitTarget->IsAlive())
         return;
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -10494,7 +10494,7 @@ void Spell::EffectSpiritHeal(SpellEffectEntry const* /*effect*/)
 void Spell::EffectSkinPlayerCorpse(SpellEffectEntry const* /*effect*/)
 {
     DEBUG_LOG("Effect: SkinPlayerCorpse");
-    if ((m_caster->GetTypeId() != TYPEID_PLAYER) || (unitTarget->GetTypeId() != TYPEID_PLAYER) || (unitTarget->isAlive()))
+    if ((m_caster->GetTypeId() != TYPEID_PLAYER) || (unitTarget->GetTypeId() != TYPEID_PLAYER) || (unitTarget->IsAlive()))
         return;
 
     ((Player*)unitTarget)->RemovedInsignia((Player*)m_caster);

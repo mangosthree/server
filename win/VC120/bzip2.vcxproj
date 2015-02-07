@@ -113,7 +113,7 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\dep\Stormlib\Stormlib.h" />
+    <ClCompile Include="..\..\dep\Stormlib\src\Stormlib.h" />
     <ClCompile Include="..\..\dep\src\bzip2\blocksort.c" />
     <ClCompile Include="..\..\dep\src\bzip2\bzlib.c" />
     <ClCompile Include="..\..\dep\src\bzip2\compress.c" />

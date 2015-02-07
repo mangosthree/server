@@ -85,7 +85,7 @@
     </Midl>
     <Link>
       <AdditionalOptions> /machine:X86 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(Configuration)\game.lib;$(Configuration)\shared.lib;$(Configuration)\framework.lib;$(Configuration)\g3dlite.lib;$(Configuration)\ace.lib;$(Configuration)\gsoap.lib;$(Configuration)\zlib.lib;..\..\dep\lib\win32\libmySQL.lib;..\..\dep\lib\win32\libeay32.lib;$(Configuration)\detour.lib;$(Configuration)\mangosscript.lib;$(Configuration)\LuaEngine.lib;$(Configuration)\lualib.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(Configuration)\game.lib;$(Configuration)\shared.lib;$(Configuration)\framework.lib;$(Configuration)\g3dlite.lib;$(Configuration)\ace.lib;$(Configuration)\gsoap.lib;$(Configuration)\zlib.lib;..\..\dep\lib\win32\libmySQL.lib;..\..\dep\lib\win32\libeay32.lib;$(Configuration)\detour.lib;$(Configuration)\mangosscript.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>../../dep/acelite/ace;../../dep/acelite/ace/$(Configuration);;../../src/mangosd/$(Configuration);../../src/mangosd/$(Configuration)/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ImportLibrary>$(Configuration)/mangosd.lib</ImportLibrary>
@@ -134,7 +134,7 @@
     </Midl>
     <Link>
       <AdditionalOptions> /machine:X86 /debug %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(Configuration)\game.lib;$(Configuration)\shared.lib;$(Configuration)\framework.lib;$(Configuration)\g3dlite.lib;$(Configuration)\ace.lib;$(Configuration)\gsoap.lib;$(Configuration)\zlib.lib;..\..\dep\lib\win32\libmySQL.lib;..\..\dep\lib\win32\libeay32.lib;$(Configuration)\detour.lib;$(Configuration)\mangosscript.lib;$(Configuration)\LuaEngine.lib;$(Configuration)\lualib.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;$(Configuration)\game.lib;$(Configuration)\shared.lib;$(Configuration)\framework.lib;$(Configuration)\g3dlite.lib;$(Configuration)\ace.lib;$(Configuration)\gsoap.lib;$(Configuration)\zlib.lib;..\..\dep\lib\win32\libmySQL.lib;..\..\dep\lib\win32\libeay32.lib;$(Configuration)\detour.lib;$(Configuration)\mangosscript.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>../../dep/acelite/ace;../../dep/acelite/ace/$(Configuration);;../../src/mangosd/$(Configuration);../../src/mangosd/$(Configuration)/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>$(Configuration)/mangosd.lib</ImportLibrary>
@@ -169,9 +169,6 @@
     <ResourceCompile Include="..\..\src\mangosd\mangosd.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="LuaEngine.vcxproj">
-      <Project>61BCE72F-B726-48F3-9D02-7FD551F82DF8</Project>
-    </ProjectReference>
     <ProjectReference Include="ace.vcxproj">
       <Project>D70895A7-4EA1-48BE-A557-834D4357BAD3</Project>
     </ProjectReference>

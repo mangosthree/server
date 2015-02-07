@@ -2279,7 +2279,7 @@ class  Player : public Unit
         void SetTemporaryUnsummonedPetNumber(uint32 petnumber) { m_temporaryUnsummonedPetNumber = petnumber; }
         void UnsummonPetTemporaryIfAny();
         void ResummonPetTemporaryUnSummonedIfAny();
-        bool IsPetNeedBeTemporaryUnsummoned() const { return !IsInWorld() || !isAlive() || IsMounted() /*+in flight*/; }
+        bool IsPetNeedBeTemporaryUnsummoned() const { return !IsInWorld() || !IsAlive() || IsMounted() /*+in flight*/; }
 
         void SendCinematicStart(uint32 CinematicSequenceId);
         void SendMovieStart(uint32 MovieId);
@@ -2625,13 +2625,13 @@ class  Player : public Unit
         {
             // we should not execute delayed teleports for now dead players but has been alive at teleport
             // because we don't want player's ghost teleported from graveyard
-            return m_bHasDelayedTeleport && (isAlive() || !m_bHasBeenAliveAtDelayedTeleport);
+            return m_bHasDelayedTeleport && (IsAlive() || !m_bHasBeenAliveAtDelayedTeleport);
         }
 
         bool SetDelayedTeleportFlagIfCan()
         {
             m_bHasDelayedTeleport = m_bCanDelayTeleport;
-            m_bHasBeenAliveAtDelayedTeleport = isAlive();
+            m_bHasBeenAliveAtDelayedTeleport = IsAlive();
             return m_bHasDelayedTeleport;
         }
 

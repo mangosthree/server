@@ -2153,9 +2153,9 @@ class  Unit : public WorldObject
         MeleeHitOutcome RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackType attType) const;
         MeleeHitOutcome RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 dodge_chance, int32 parry_chance, int32 block_chance) const;
 
-        bool isVendor()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR); }
-        bool isTrainer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER); }
-        bool isQuestGiver()   const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER); }
+        bool IsVendor()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR); }
+        bool IsTrainer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER); }
+        bool IsQuestGiver()   const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER); }
         bool isGossip()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP); }
         bool isTaxi()         const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_FLIGHTMASTER); }
         bool isGuildMaster()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER); }
@@ -2179,7 +2179,7 @@ class  Unit : public WorldObject
 
         bool IsTaxiFlying()  const { return hasUnitState(UNIT_STAT_TAXI_FLIGHT); }
 
-        bool isInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
+        bool IsInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
         void SetInCombatState(bool PvP, Unit* enemy = NULL);
         void SetInCombatWith(Unit* enemy);
         void ClearInCombat();
@@ -2214,7 +2214,7 @@ class  Unit : public WorldObject
         bool isFrozen() const;
         bool IsIgnoreUnitState(SpellEntry const* spell, IgnoreUnitState ignoreState);
 
-        bool isTargetableForAttack(bool inversAlive = false) const;
+        bool IsTargetableForAttack(bool inversAlive = false) const;
         bool isPassiveToHostile() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE); }
 
         virtual bool IsInWater() const;
@@ -2511,8 +2511,8 @@ class  Unit : public WorldObject
         void SendThreatRemove(HostileReference* pHostileReference);
         void SendThreatUpdate();
 
-        bool isAlive() const { return (m_deathState == ALIVE); };
-        bool isDead() const { return (m_deathState == DEAD || m_deathState == CORPSE); };
+        bool IsAlive() const { return (m_deathState == ALIVE); };
+        bool IsDead() const { return (m_deathState == DEAD || m_deathState == CORPSE); };
         DeathState getDeathState() const { return m_deathState; };
         virtual void SetDeathState(DeathState s);           // overwritten in Creature/Player/Pet
 
@@ -3025,7 +3025,7 @@ class  Unit : public WorldObject
         void UpdateVisibilityAndView() override;            // overwrite WorldObject::UpdateVisibilityAndView()
 
         // common function for visibility checks for player/creatures with detection code
-        bool isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true) const;
+        bool IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true) const;
         bool canDetectInvisibilityOf(Unit const* u) const;
         void SetPhaseMask(uint32 newPhaseMask, bool update) override;// overwrite WorldObject::SetPhaseMask
 
@@ -3050,8 +3050,8 @@ class  Unit : public WorldObject
         void TauntFadeOut(Unit* taunter);
         void FixateTarget(Unit* pVictim);
         ObjectGuid GetFixateTargetGuid() const { return m_fixateTargetGuid; }
-        ThreatManager& getThreatManager() { return m_ThreatManager; }
-        ThreatManager const& getThreatManager() const { return m_ThreatManager; }
+        ThreatManager& GetThreatManager() { return m_ThreatManager; }
+        ThreatManager const& GetThreatManager() const { return m_ThreatManager; }
         void addHatedBy(HostileReference* pHostileReference) { m_HostileRefManager.insertFirst(pHostileReference); };
         void removeHatedBy(HostileReference* /*pHostileReference*/) { /* nothing to do yet */ }
         HostileRefManager& getHostileRefManager() { return m_HostileRefManager; }

@@ -617,10 +617,10 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     CleanupDeletedAuras();
 
     if (CanHaveThreatList())
-        getThreatManager().UpdateForClient(update_diff);
+        GetThreatManager().UpdateForClient(update_diff);
 
     // update combat timer only for players and pets
-    if (isInCombat() && GetCharmerOrOwnerPlayerOrPlayerItself())
+    if (IsInCombat() && GetCharmerOrOwnerPlayerOrPlayerItself())
     {
         // Check UNIT_STAT_MELEE_ATTACKING or UNIT_STAT_CHASE (without UNIT_STAT_FOLLOW in this case) so pets can reach far away
         // targets without stopping half way there and running off.
@@ -648,7 +648,7 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     if (IsVehicle())
     {
         // Initialize vehicle if not done
-        if (isAlive() && !m_vehicleInfo->IsInitialized())
+        if (IsAlive() && !m_vehicleInfo->IsInitialized())
             m_vehicleInfo->Initialize();
 
         // Update passenger positions if we are the first vehicle
@@ -839,7 +839,7 @@ void Unit::RemoveSpellsCausingAura(AuraType auraType, ObjectGuid casterGuid)
 
 void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb)
 {
-    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
+    if (!pVictim->IsAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
     {
         if (absorb)
             *absorb += damage;
@@ -1651,7 +1651,7 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
 
     if (!this || !pVictim)
         return;
-    if (!this->isAlive() || !pVictim->isAlive())
+    if (!this->IsAlive() || !pVictim->IsAlive())
         return;
 
     // Check spell crit chance
@@ -1732,7 +1732,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
     if (!this || !pVictim)
         return;
 
-    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
+    if (!pVictim->IsAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
         return;
 
     SpellEntry const* spellProto = sSpellStore.LookupEntry(damageInfo->SpellID);
@@ -1774,7 +1774,7 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, uint32 damage, CalcDamageInfo* da
 
     if (!this || !pVictim)
         return;
-    if (!this->isAlive() || !pVictim->isAlive())
+    if (!this->IsAlive() || !pVictim->IsAlive())
         return;
 
     // Select HitInfo/procAttacker/procVictim flag based on attack type
@@ -2026,7 +2026,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     if (!this || !pVictim)
         return;
 
-    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
+    if (!pVictim->IsAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
         return;
 
     // You don't lose health from damage taken from another player while in a sanctuary
@@ -2108,7 +2108,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     if (!(damageInfo->HitInfo & HITINFO_MISS))
     {
         // on weapon hit casts
-        if (GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
+        if (GetTypeId() == TYPEID_PLAYER && pVictim->IsAlive())
             ((Player*)this)->CastItemCombatSpell(pVictim, damageInfo->attackType);
 
         // victim's damage shield
@@ -2256,7 +2256,7 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
 
 void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, uint32* resist, bool canReflect)
 {
-    if (!pCaster || !isAlive() || !damage)
+    if (!pCaster || !IsAlive() || !damage)
         return;
 
     // Magic damage, check for resists
@@ -2699,7 +2699,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 
             // Damage can be splitted only if aura has an alive caster
             Unit* caster = (*i)->GetCaster();
-            if (!caster || caster == this || !caster->IsInWorld() || !caster->isAlive())
+            if (!caster || caster == this || !caster->IsInWorld() || !caster->IsAlive())
                 continue;
 
             uint32 splitted = uint32(RemainingDamage * (*i)->GetModifier()->m_amount / 100.0f);
@@ -2784,7 +2784,7 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
 
 void Unit::CalculateHealAbsorb(const uint32 heal, uint32* absorb)
 {
-    if (!isAlive() || !heal)
+    if (!IsAlive() || !heal)
         return;
 
     int32 RemainingHeal = heal;
@@ -2847,7 +2847,7 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     if (hasUnitState(UNIT_STAT_CAN_NOT_REACT) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
         return;
 
-    if (!pVictim->isAlive())
+    if (!pVictim->IsAlive())
         return;
 
     if (IsNonMeleeSpellCasted(false))
@@ -3405,7 +3405,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 {
     // Can`t miss on dead target (on skinning for example)
-    if (!pVictim->isAlive())
+    if (!pVictim->IsAlive())
         return SPELL_MISS_NONE;
 
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
@@ -4214,7 +4214,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
     SpellEntry const* aurSpellInfo = holder->GetSpellProto();
 
     // ghost spell check, allow apply any auras at player loading in ghost mode (will be cleanup after load)
-    if (!isAlive() && !IsDeathPersistentSpell(aurSpellInfo) &&
+    if (!IsAlive() && !IsDeathPersistentSpell(aurSpellInfo) &&
             !IsDeathOnlySpell(aurSpellInfo) &&
             (GetTypeId() != TYPEID_PLAYER || !((Player*)this)->GetSession()->PlayerLoading()))
     {
@@ -4740,7 +4740,7 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
         if (Aura* dotAura = GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, UI64LIT(0x10000000), 0x00000000, casterGuid))
             caster = dotAura->GetCaster();
 
-        if (caster && !caster->isDead())
+        if (caster && !caster->IsDead())
         {
             Unit::AuraList const& auras = caster->GetAurasByType(SPELL_AURA_DUMMY);
             for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
@@ -5598,7 +5598,7 @@ void Unit::ProcDamageAndSpell(Unit* pVictim, uint32 procAttacker, uint32 procVic
         ProcDamageAndSpellFor(false, pVictim, procAttacker, procExtra, attType, procSpell, amount);
     // Now go on with a victim's events'n'auras
     // Not much to do if no flags are set or there is no victim
-    if (pVictim && pVictim->isAlive() && procVictim)
+    if (pVictim && pVictim->IsAlive() && procVictim)
         pVictim->ProcDamageAndSpellFor(true, this, procVictim, procExtra, attType, procSpell, amount);
 }
 
@@ -6014,7 +6014,7 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
         return false;
 
     // dead units can neither attack nor be attacked
-    if (!isAlive() || !victim->IsInWorld() || !victim->isAlive())
+    if (!IsAlive() || !victim->IsInWorld() || !victim->IsAlive())
         return false;
 
     // player cannot attack in mount state
@@ -6518,7 +6518,7 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell, SpellEffectIndex eff)
         {
             if (Unit* magnet = (*itr)->GetCaster())
             {
-                if (magnet->isAlive() && magnet->IsWithinLOSInMap(this) && spell->CheckTarget(magnet, eff))
+                if (magnet->IsAlive() && magnet->IsWithinLOSInMap(this) && spell->CheckTarget(magnet, eff))
                     return magnet;
             }
         }
@@ -6531,7 +6531,7 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell, SpellEffectIndex eff)
         {
             if (Unit* magnet = (*i)->GetCaster())
             {
-                if (magnet->isAlive() && magnet->IsWithinLOSInMap(this) && (!spell || spell->CheckTarget(magnet, eff)))
+                if (magnet->IsAlive() && magnet->IsWithinLOSInMap(this) && (!spell || spell->CheckTarget(magnet, eff)))
                 {
                     if (roll_chance_i((*i)->GetModifier()->m_amount))
                         return magnet;
@@ -8302,7 +8302,7 @@ void Unit::SetInCombatWith(Unit* enemy)
 void Unit::SetInCombatState(bool PvP, Unit* enemy)
 {
     // only alive units can be in combat
-    if (!isAlive())
+    if (!IsAlive())
         return;
 
     if (PvP)
@@ -8371,7 +8371,7 @@ void Unit::ClearInCombat()
         ((Player*)this)->UpdatePotionCooldown();
 }
 
-bool Unit::isTargetableForAttack(bool inverseAlive /*=false*/) const
+bool Unit::IsTargetableForAttack(bool inverseAlive /*=false*/) const
 {
     if (GetTypeId() == TYPEID_PLAYER && ((Player*)this)->isGameMaster())
         return false;
@@ -8384,7 +8384,7 @@ bool Unit::isTargetableForAttack(bool inverseAlive /*=false*/) const
         return false;
 
     // inversealive is needed for some spells which need to be casted at dead targets (aoe)
-    if (isAlive() == inverseAlive)
+    if (IsAlive() == inverseAlive)
         return false;
 
     return IsInWorld() && !hasUnitState(UNIT_STAT_DIED) && !IsTaxiFlying();
@@ -8454,7 +8454,7 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
     return gain;
 }
 
-bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList, bool is3dDistance) const
+bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList, bool is3dDistance) const
 {
     if (!u || !IsInMap(u))
         return false;
@@ -8488,13 +8488,13 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
             return false;
 
         // if player is dead then he can't detect anyone in any cases
-        if (!u->isAlive())
+        if (!u->IsAlive())
             detect = false;
     }
     else
     {
         // all dead creatures/players not visible for any creatures
-        if (!u->isAlive() || !isAlive())
+        if (!u->IsAlive() || !IsAlive())
             return false;
     }
 
@@ -8519,7 +8519,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     // isInvisibleForAlive() those units can only be seen by dead or if other
     // unit is also invisible for alive.. if an isinvisibleforalive unit dies we
     // should be able to see it too
-    if (u->isAlive() && isAlive() && isInvisibleForAlive() != u->isInvisibleForAlive())
+    if (u->IsAlive() && IsAlive() && isInvisibleForAlive() != u->isInvisibleForAlive())
         if (u->GetTypeId() != TYPEID_PLAYER || !((Player*)u)->isGameMaster())
             return false;
 
@@ -8675,7 +8675,7 @@ void Unit::UpdateVisibilityAndView()
             Aura* aura = (*it);
             Unit* owner = aura->GetCaster();
 
-            if (!owner || !isVisibleForOrDetect(owner, this, false))
+            if (!owner || !IsVisibleForOrDetect(owner, this, false))
             {
                 alist.erase(it);
                 RemoveAura(aura);
@@ -9169,7 +9169,7 @@ bool Unit::CanHaveThreatList(bool ignoreAliveState/*=false*/) const
         return false;
 
     // only alive units can have threat list
-    if (!isAlive() && !ignoreAliveState)
+    if (!IsAlive() && !ignoreAliveState)
         return false;
 
     Creature const* creature = ((Creature const*)this);
@@ -9305,7 +9305,7 @@ void Unit::FixateTarget(Unit* pVictim)
 {
     if (!pVictim)                                           // Remove Fixation
         m_fixateTargetGuid.Clear();
-    else if (pVictim->isTargetableForAttack())              // Apply Fixation
+    else if (pVictim->IsTargetableForAttack())              // Apply Fixation
         m_fixateTargetGuid = pVictim->GetObjectGuid();
 
     // Start attacking the fixated target or the next proper one
@@ -9334,7 +9334,7 @@ bool Unit::SelectHostileTarget()
 
     MANGOS_ASSERT(GetTypeId() == TYPEID_UNIT);
 
-    if (!this->isAlive())
+    if (!this->IsAlive())
         return false;
 
     // This function only useful once AI has been initialized
@@ -9352,7 +9352,7 @@ bool Unit::SelectHostileTarget()
         else
         {
             Unit* pFixateTarget = GetMap()->GetUnit(m_fixateTargetGuid);
-            if (pFixateTarget && pFixateTarget->isAlive() && !IsSecondChoiceTarget(pFixateTarget, true))
+            if (pFixateTarget && pFixateTarget->IsAlive() && !IsSecondChoiceTarget(pFixateTarget, true))
                 target = pFixateTarget;
         }
     }
@@ -9367,7 +9367,7 @@ bool Unit::SelectHostileTarget()
         for (AuraList::const_reverse_iterator aura = tauntAuras.rbegin(); aura != tauntAuras.rend(); ++aura)
         {
             if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
-                    caster->isTargetableForAttack() && caster->isInAccessablePlaceFor((Creature*)this) &&
+                    caster->IsTargetableForAttack() && caster->isInAccessablePlaceFor((Creature*)this) &&
                     !IsSecondChoiceTarget(caster, true))
             {
                 target = caster;
@@ -9419,7 +9419,7 @@ bool Unit::SelectHostileTarget()
     }
 
     // no target but something prevent go to evade mode
-    if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT))
+    if (!IsInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT))
         return false;
 
     // last case when creature don't must go to evade mode:
@@ -9430,7 +9430,7 @@ bool Unit::SelectHostileTarget()
     {
         for (AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
         {
-            if ((*itr)->IsInMap(this) && (*itr)->isTargetableForAttack() && (*itr)->isInAccessablePlaceFor((Creature*)this))
+            if ((*itr)->IsInMap(this) && (*itr)->IsTargetableForAttack() && (*itr)->isInAccessablePlaceFor((Creature*)this))
                 return false;
         }
     }
@@ -9773,7 +9773,7 @@ void Unit::ApplyDiminishingAura(DiminishingGroup group, bool apply)
 
 bool Unit::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
 {
-    return isVisibleForOrDetect(u, viewPoint, false, inVisibleList, false);
+    return IsVisibleForOrDetect(u, viewPoint, false, inVisibleList, false);
 }
 
 /// returns true if creature can't be seen by alive units
@@ -10925,7 +10925,7 @@ void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 t
 
         GetMotionMaster()->MovementExpired(false);
 
-        if (GetTypeId() != TYPEID_PLAYER && isAlive())
+        if (GetTypeId() != TYPEID_PLAYER && IsAlive())
         {
             Creature* c = ((Creature*)this);
             // restore appropriate movement generator
@@ -10960,7 +10960,7 @@ void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
 
         GetMotionMaster()->MovementExpired(false);
 
-        if (GetTypeId() != TYPEID_PLAYER && isAlive())
+        if (GetTypeId() != TYPEID_PLAYER && IsAlive())
         {
             // restore appropriate movement generator
             if (getVictim())
@@ -11024,7 +11024,7 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid, uint32 /*spellID*/)
 
         clearUnitState(UNIT_STAT_DIED);
 
-        if (GetTypeId() != TYPEID_PLAYER && isAlive())
+        if (GetTypeId() != TYPEID_PLAYER && IsAlive())
         {
             // restore appropriate movement generator
             if (getVictim())
@@ -11553,7 +11553,7 @@ uint32 Unit::GetCombatRatingDamageReduction(CombatRating cr, float rate, float c
 
 void Unit::SendThreatUpdate()
 {
-    ThreatList const& tlist = getThreatManager().getThreatList();
+    ThreatList const& tlist = GetThreatManager().getThreatList();
     if (uint32 count = tlist.size())
     {
         DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Send SMSG_THREAT_UPDATE Message");
@@ -11571,7 +11571,7 @@ void Unit::SendThreatUpdate()
 
 void Unit::SendHighestThreatUpdate(HostileReference* pHostilReference)
 {
-    ThreatList const& tlist = getThreatManager().getThreatList();
+    ThreatList const& tlist = GetThreatManager().getThreatList();
     if (uint32 count = tlist.size())
     {
         DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Send SMSG_HIGHEST_THREAT_UPDATE Message");

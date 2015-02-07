@@ -575,7 +575,7 @@ void Pet::RegenerateAll(uint32 update_diff)
                 break;
         }
 
-        if (!isInCombat() || IsPolymorphed())
+        if (!IsInCombat() || IsPolymorphed())
             RegenerateHealth();
 
         RegenerateMana();
@@ -750,7 +750,7 @@ void Pet::GivePetXP(uint32 xp)
     if (xp < 1)
         return;
 
-    if (!isAlive())
+    if (!IsAlive())
         return;
 
     uint32 level = getLevel();

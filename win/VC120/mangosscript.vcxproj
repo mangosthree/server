@@ -187,7 +187,6 @@
     <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\alterac_mountains.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\arathi_highlands.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\blasted_lands.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\boss_kazzak.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\burning_steppes.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\dun_morogh.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\eastern_plaguelands.cpp" />
@@ -285,22 +284,6 @@
     <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\boss_vaelastrasz.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\boss_victor_nefarius.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\blackrock_mountain\blackwing_lair\instance_blackwing_lair.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_anubrekhan.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_faerlina.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_four_horsemen.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_gluth.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_gothik.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_grobbulus.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_heigan.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_kelthuzad.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_loatheb.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_maexxna.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_noth.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_patchwerk.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_razuvious.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_sapphiron.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\boss_thaddius.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\naxxramas\instance_naxxramas.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\zulgurub\boss_arlokk.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\zulgurub\boss_hakkar.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\eastern_kingdoms\zulgurub\boss_hazzarah.cpp" />
@@ -316,7 +299,6 @@
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\dire_maul\dire_maul.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\dire_maul\instance_dire_maul.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\maraudon\boss_noxxion.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\maraudon\maraudon.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\razorfen_downs\razorfen_downs.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\razorfen_kraul\instance_razorfen_kraul.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\razorfen_kraul\razorfen_kraul.cpp" />
@@ -327,7 +309,6 @@
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\zulfarrak\zulfarrak.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\onyxias_lair\boss_onyxia.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\onyxias_lair\instance_onyxias_lair.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\onyxias_lair\npc_onyxian_warder.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\ruins_of_ahnqiraj\boss_ayamiss.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\ruins_of_ahnqiraj\boss_buru.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\ruins_of_ahnqiraj\boss_kurinnaxx.cpp" />
@@ -338,7 +319,6 @@
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\ruins_of_ahnqiraj\ruins_of_ahnqiraj.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\temple_of_ahnqiraj\boss_bug_trio.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\temple_of_ahnqiraj\boss_cthun.cpp" />
-    <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\temple_of_ahnqiraj\boss_fankriss.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\temple_of_ahnqiraj\boss_huhuran.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\temple_of_ahnqiraj\boss_ouro.cpp" />
     <ClCompile Include="..\..\src\modules\SD2\scripts\kalimdor\temple_of_ahnqiraj\boss_sartura.cpp" />

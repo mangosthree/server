@@ -25,10 +25,10 @@
 #ifndef MANGOS_PATH_FINDER_H
 #define MANGOS_PATH_FINDER_H
 
-#include "MoveMapSharedDefines.h"
-#include "../recastnavigation/Detour/Include/DetourNavMesh.h"
-#include "../recastnavigation/Detour/Include/DetourNavMeshQuery.h"
+#include "DetourNavMesh.h"
+#include "DetourNavMeshQuery.h"
 
+#include "MoveMapSharedDefines.h"
 #include "movement/MoveSplineInitArgs.h"
 
 using Movement::Vector3;
@@ -102,9 +102,9 @@ class PathFinder
 
         dtQueryFilter m_filter;                     // use single filter for all movements, update it when needed
 
-        void setStartPosition(Vector3 point) { m_startPosition = point; }
-        void setEndPosition(Vector3 point) { m_actualEndPosition = point; m_endPosition = point; }
-        void setActualEndPosition(Vector3 point) { m_actualEndPosition = point; }
+        void setStartPosition(const Vector3 &point) { m_startPosition = point; }
+        void setEndPosition(const Vector3 &point) { m_actualEndPosition = point; m_endPosition = point; }
+        void setActualEndPosition(const Vector3 &point) { m_actualEndPosition = point; }
 
         void clear()
         {

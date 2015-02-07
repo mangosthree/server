@@ -66,7 +66,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
         return;
     }
 
-    if (!pet->isAlive())
+    if (!pet->IsAlive())
         return;
 
     if (pet->GetTypeId() == TYPEID_PLAYER)
@@ -309,7 +309,7 @@ void WorldSession::HandlePetStopAttack(WorldPacket& recv_data)
         return;
     }
 
-    if (!pet->isAlive())
+    if (!pet->IsAlive())
         return;
 
     pet->AttackStop();

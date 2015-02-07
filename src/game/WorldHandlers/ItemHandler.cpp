@@ -548,7 +548,7 @@ void WorldSession::HandleListInventoryOpcode(WorldPacket& recv_data)
 
     recv_data >> guid;
 
-    if (!GetPlayer()->isAlive())
+    if (!GetPlayer()->IsAlive())
         return;
 
     DEBUG_LOG("WORLD: Received opcode CMSG_LIST_INVENTORY");
@@ -890,7 +890,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleSetAmmoOpcode(WorldPacket& recv_data)
 {
-    if (!GetPlayer()->isAlive())
+    if (!GetPlayer()->IsAlive())
     {
         GetPlayer()->SendEquipError(EQUIP_ERR_YOU_ARE_DEAD, NULL, NULL);
         return;

@@ -33,7 +33,7 @@
 #include "AccountMgr.h"
 #include "ScriptMgr.h"
 #include "SystemConfig.h"
-#include "revision.h"
+//#include "revision.h"
 #include "revision_nr.h"
 #include "Util.h"
 
@@ -102,10 +102,7 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
     std::string str = secsToTimeString(sWorld.GetUptime());
 
     char const* full;
-    if (m_session)
-        full = MANGOS_FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, "|cffffffff|Hurl:" REVISION_ID "|h" REVISION_ID "|h|r");
-    else
-        full = MANGOS_FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID);
+	full = REVISION_NR;
     SendSysMessage(full);
 
     if (sScriptMgr.IsScriptLibraryLoaded())

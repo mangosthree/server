@@ -50,7 +50,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalOptions> /Zm500 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\shared;..\..\src\game\vmap;..\..\dep\include\g3dlite;..\..\src\framework;..\..\dep\acelite;..\..\dep\libmpq;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\dep\StormLib;\..\..\src\shared;..\..\src\game\vmap;..\..\dep\include\g3dlite;..\..\src\framework;..\..\dep\acelite;..\..\dep\libmpq;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Release/</AssemblerListingLocation>
       <CompileAs>CompileAsCpp</CompileAs>
       <DisableSpecificWarnings>4996;4355;4244;4267</DisableSpecificWarnings>
@@ -69,10 +69,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>PREPARED_SLN;WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;MANGOS;DO_MYSQL;WIN32;_WIN32;USE_STANDARD_MALLOC;MMAP_GENERATOR;NO_CORE_FUNCS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\shared;..\..\src\game\vmap;..\..\dep\include\g3dlite;..\..\src\framework;..\..\dep\acelite;..\..\dep\libmpq;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\dep\StormLib;..\..\src\shared;..\..\src\game\vmap;..\..\dep\include\g3dlite;..\..\src\framework;..\..\dep\acelite;..\..\dep\libmpq;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\shared;..\..\src\game\vmap;..\..\dep\include\g3dlite;..\..\src\framework;..\..\dep\acelite;..\..\dep\libmpq;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\dep\StormLib;..\..\src\shared;..\..\src\game\vmap;..\..\dep\include\g3dlite;..\..\src\framework;..\..\dep\acelite;..\..\dep\libmpq;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -83,7 +83,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalOptions> /Zm500 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\shared;..\..\src\game\vmap;..\..\dep\include\g3dlite;..\..\src\framework;..\..\dep\acelite;..\..\dep\libmpq;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\dep\StormLib;..\..\src\shared;..\..\src\game\vmap;..\..\dep\include\g3dlite;..\..\src\framework;..\..\dep\acelite;..\..\dep\libmpq;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>Debug/</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsCpp</CompileAs>
@@ -103,10 +103,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>PREPARED_SLN;WIN32;_WINDOWS;_DEBUG;HAVE_CONFIG_H;MANGOS;DO_MYSQL;WIN32;_WIN32;USE_STANDARD_MALLOC;MMAP_GENERATOR;NO_CORE_FUNCS;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\shared;..\..\src\game\vmap;..\..\dep\include\g3dlite;..\..\src\framework;..\..\dep\acelite;..\..\dep\libmpq;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\dep\StormLib;..\..\src\shared;..\..\src\game\vmap;..\..\dep\include\g3dlite;..\..\src\framework;..\..\dep\acelite;..\..\dep\libmpq;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\dep\include;..\..\src\shared;..\..\src\game\vmap;..\..\dep\include\g3dlite;..\..\src\framework;..\..\dep\acelite;..\..\dep\libmpq;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dep\include;..\..\dep\StormLib;..\..\src\shared;..\..\src\game\vmap;..\..\dep\include\g3dlite;..\..\src\framework;..\..\dep\acelite;..\..\dep\libmpq;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>

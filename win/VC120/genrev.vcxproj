@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGUID>{803F488E-4C5A-4866-8D5C-1E6C03C007C2}</ProjectGUID>
+    <ProjectGUID>{304083A8-CF14-496E-BF87-F4007D677274}</ProjectGUID>
     <Keyword>Win32Proj</Keyword>
     <Platform>Win32</Platform>
     <ProjectName>genrev</ProjectName>

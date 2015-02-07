@@ -43,7 +43,7 @@
 #include "Utilities/TypeList.h"
 #include "ScriptMgr.h"
 #include "CreatureLinkingMgr.h"
-#include "vmap/DynamicTree.h"
+#include "DynamicTree.h"
 
 #include <bitset>
 #include <list>

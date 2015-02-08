@@ -93,11 +93,11 @@ target_link_libraries(${EXECUTABLE_NAME}
     shared
     framework
     g3dlite
+    gsoap
 )
 
 add_dependencies(${EXECUTABLE_NAME} game)
 
-target_link_libraries(${EXECUTABLE_NAME} gsoap)
 
 if(WIN32)
   target_link_libraries(${EXECUTABLE_NAME}

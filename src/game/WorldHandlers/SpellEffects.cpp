@@ -3626,7 +3626,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
             // Mana Spring Totem
             if (shamClassOptions && shamClassOptions->SpellFamilyFlags & UI64LIT(0x0000000000004000))
             {
-                if (!unitTarget || unitTarget->getPowerType() != POWER_MANA)
+                if (!unitTarget || unitTarget->GetPowerType() != POWER_MANA)
                     return;
                 m_caster->CastCustomSpell(unitTarget, 52032, &damage, 0, 0, true, 0, 0, m_originalCasterGUID);
                 return;
@@ -3650,7 +3650,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
             }
             if (m_spellInfo->Id == 39610)                   // Mana Tide Totem effect
             {
-                if (!unitTarget || unitTarget->getPowerType() != POWER_MANA)
+                if (!unitTarget || unitTarget->GetPowerType() != POWER_MANA)
                     return;
 
                 // Glyph of Mana Tide
@@ -4390,7 +4390,7 @@ void Spell::EffectPowerDrain(SpellEffectEntry const* effect)
         return;
     if (!unitTarget->IsAlive())
         return;
-    if (unitTarget->getPowerType() != drain_power)
+    if (unitTarget->GetPowerType() != drain_power)
         return;
     if (damage < 0)
         return;
@@ -4451,7 +4451,7 @@ void Spell::EffectPowerBurn(SpellEffectEntry const* effect)
         return;
     if (!unitTarget->IsAlive())
         return;
-    if (unitTarget->getPowerType() != powertype)
+    if (unitTarget->GetPowerType() != powertype)
         return;
     if (damage < 0)
         return;
@@ -8588,7 +8588,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     if (!unitTarget)
                         return;
 
-                    switch (unitTarget->getPowerType())
+                    switch (unitTarget->GetPowerType())
                     {
                         case POWER_RUNIC_POWER:
                         {

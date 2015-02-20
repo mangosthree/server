@@ -1,5 +1,5 @@
 #
-# This file is part of the MaNGOS Project. See AUTHORS file for Copyright information
+# This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,45 +16,65 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+# CMake policies
 cmake_minimum_required(VERSION 2.8)
+# Until CMake 3.0 is the standard
+# And a solution to set_directory_properties is found.
+if(POLICY CMP0043)
+    cmake_policy(SET CMP0043 OLD)
+endif()
 
 project(MaNGOS)
 set(MANGOS_VERSION 0.20)
 
 set(CMAKE_MODULE_PATH
-  ${CMAKE_MODULE_PATH}
-  ${CMAKE_SOURCE_DIR}/cmake
+  "${CMAKE_MODULE_PATH}"
+  "${CMAKE_SOURCE_DIR}/cmake"
 )
 
 # define all options here
-option(ACE_USE_EXTERNAL     "Use external ACE"                      OFF)
-if(PCHSupport_FOUND AND WIN32) # TODO: why only enable it on windows by default?
-  option(PCH                "Use precompiled headers"               ON)
+if(WIN32)
+  set(CONF_DIR "" CACHE STRING "Config path. Can be absolute or relative")
 else()
-  option(PCH                "Use precompiled headers"               OFF)
+  set(CONF_DIR "etc/" CACHE STRING "Config path. Can be absolute or relative")
 endif()
+option(DEBUG                "Debug mode"                             OFF)
+option(USE_STD_MALLOC       "Use standard malloc instead of TBB"     ON)
+option(ACE_USE_EXTERNAL     "Use external ACE"                       OFF)
+option(POSTGRESQL           "Use PostgreSQL"                         OFF)
+option(BUILD_TOOLS          "Build tools (map/vmap/mmap extractors)" ON)
+#option(SCRIPT_LIB_ELUNA     "Use Eluna as the scripting engine"      ON) Temporarily disabled till more sync work is done
+option(SCRIPT_LIB_SD2       "Use ScriptDev2 as the scripting engine" ON)
+option(SOAP                 "Enable access via SOAP or not"          OFF)
+option(PCH                  "Use precompiled headers"                ON)
 # TODO: options that should be checked/created:
 #option(CLI                  "With CLI"                              ON)
 #option(RA                   "With Remote Access"                    OFF)
 #option(SQL                  "Copy SQL files"                        OFF)
-#option(TOOLS                "Build tools"                           OFF)
 
 # Output description of this script
 message("")
 message(
   "This script builds the MaNGOS server.
   Options that can be used in order to configure the process:
+   General:
     CMAKE_INSTALL_PREFIX    Path where the server should be installed to
-	CMAKE_BUILD_TYPE        Sets build type (Release;Debug;...)
+    CONF_DIR                Path to the configs, can be absolute or relative.
     PCH                     Use precompiled headers
-    INCLUDE_BINDINGS_DIR    Include a script library in src/bindings/ with the
-                            defined name. the name must corespond to the name of
-                            the folder and the folder must contain a valid
-                            CMakeLists.txt
+    DEBUG                   Debug mode
+    USE_STD_MALLOC          Use standard malloc instead of TBB
     ACE_USE_EXTERNAL        Use external ACE
+    BUILD_TOOLS             Build map/vmap/mmap extractors
+    SOAP                    Enable remote access via SOAP
+   Scripting engines:
+    SCRIPT_LIB_ELUNA        Compile with support for Eluna scripts
+    SCRIPT_LIB_SD2          Compile with support for ScriptDev2 scripts
+
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
   Also, you can specify the generator with -G. see 'cmake --help' for more details
-  For example: cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/opt/mangos"
+  For example: cmake .. -DDEBUG=1 -DCMAKE_INSTALL_PREFIX=/opt/mangos"
+  
+  Note: On UNIX systems, CONF_DIR is relative to the bin folder.
 )
 message("")
 
@@ -89,6 +109,11 @@ if(WIN32)
   endif()
 endif()
 
+# Used by map-extractor for now
+if(UNIX)
+  find_package(BZip2 REQUIRED)
+endif()
+
 # find Git: used to get the revision number
 find_package(Git)
 
@@ -109,8 +134,15 @@ if(CMAKE_CONFIGURATION_TYPES)
     FORCE)
 endif()
 
-set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
-set(CONF_DIR ${CMAKE_INSTALL_PREFIX}/etc)
+#Force set the default install path if it is default
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/bin/" CACHE PATH "MaNGOS default install prefix" FORCE)
+endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
+#Output the compiled exes and DLLs to build/bin directory on windows by default
+if(WIN32)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+endif()
 
 #Set config install path correctly from given path
 string(FIND "${CONF_DIR}" ":" CONF_DIR_ABSOLUTE)
@@ -118,26 +150,33 @@ if(${CONF_DIR_ABSOLUTE} EQUAL -1)
   #Path was not absolute
   set(CONF_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${CONF_DIR}")
   if(MSVC)
-     set(CONF_COPY_DIR "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/${CONF_DIR}")
-  else()
-   #Path was absolute
-   set(CONF_INSTALL_DIR "${CONF_DIR}")
-   if(MSVC)
-      set(CONF_COPY_DIR "${CONF_DIR}")
-   endif()
+    set(CONF_COPY_DIR "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/${CONF_DIR}")
+  endif()
+else()
+  #Path was absolute
+  set(CONF_INSTALL_DIR "${CONF_DIR}")
+  if(MSVC)
+    set(CONF_COPY_DIR "${CONF_DIR}")
   endif()
 endif()
 
-# If win32 put it in the bin dir not lib
+# If win32 put binaries in root folder, else bin.
 if(WIN32)
-  set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+  set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/)
+else()
+  set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+endif()
+
+# If win32 put libs in root folder, else bin.
+if(WIN32)
+  set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/)
 else()
   set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/lib)
 endif()
 
 # For Unix systems set the rpath so that libraries are found
-set(CMAKE_INSTALL_RPATH ${LIBS_DIR})
-set(CMAKE_INSTALL_NAME_DIR ${LIBS_DIR})
+set(CMAKE_INSTALL_RPATH "${LIBS_DIR}")
+set(CMAKE_INSTALL_NAME_DIR "${LIBS_DIR}")
 # Run out of build tree
 set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
 
@@ -164,18 +203,28 @@ endif()
 
 # Win32 delivered packages
 if(WIN32)
-  set(MYSQL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/include/mysql)
-  set(MYSQL_LIBRARY ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libmySQL.lib)
-  set(MYSQL_DEBUG_LIBRARY ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libmySQL.lib)
-  set(OPENSSL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/include/openssl)
-  set(OPENSSL_LIBRARIES ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libeay32.lib)
-  set(OPENSSL_DEBUG_LIBRARIES ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libeay32.lib)
+  set(MYSQL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dep/include/mysql")
+  set(MYSQL_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libmySQL.lib")
+  set(MYSQL_DEBUG_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libmySQL.lib")
+  set(OPENSSL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dep/include/openssl")
+  set(OPENSSL_LIBRARIES "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libeay32.lib")
+  set(OPENSSL_DEBUG_LIBRARIES "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libeay32.lib")
   # zlib is build
 endif()
 
 # *nix-specific packages
 if(UNIX)
-  find_package(MySQL REQUIRED)
+  if(POSTGRESQL)
+    find_package(PostgreSQL REQUIRED)
+
+    if(POSTGRESQL_FOUND)
+      include_directories(${POSTGRESQL_INCLUDE_DIRS})
+    endif(POSTGRESQL_FOUND)
+
+  else()
+    find_package(MySQL REQUIRED)
+  endif()
+
   find_package(OpenSSL REQUIRED)
   find_package(ZLIB REQUIRED)
 endif()
@@ -210,19 +259,11 @@ endif()
 
 message(STATUS "MaNGOS-Core revision  : ${GIT_REVISION}")
 message(STATUS "Install server to     : ${CMAKE_INSTALL_PREFIX}")
-
-if(DEFINED INCLUDE_BINDINGS_DIR AND INCLUDE_BINDINGS_DIR)
-  # check if the directory exists
-  if(NOT IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR})
-    message(FATAL_ERROR "Could not find the script library which was supposed to be: " ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR})
-  endif()
-  # check if it really contains a CMakeLists.txt
-  if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR}/CMakeLists.txt)
-    message(FATAL_ERROR "The script library does not contain a CMakeLists.txt!")
-  endif()
-  message(STATUS "Build script library  : Yes (using ${INCLUDE_BINDINGS_DIR})")
+message(STATUS "Install configs to    : ${CONF_INSTALL_DIR}")
+if("${CONF_DIR}" STREQUAL "")
+  message(STATUS "Search configs from   : binary directory (default)")
 else()
-  message(STATUS "Build script library  : No")
+  message(STATUS "Search configs from   : ${CONF_DIR}")
 endif()
 
 # if(CLI)
@@ -239,42 +280,67 @@ endif()
 #   message(STATUS "* Build with RA         : No  (default)")
 # endif(RA)
 
-if(PCH AND NOT PCHSupport_FOUND)
-  set(PCH 0 CACHE BOOL
-    "Use precompiled headers"
-    FORCE)
-  message(WARNING "No PCH for your system possible but PCH was set to 1. Resetting it."
-  )
+if(SOAP)
+  message(STATUS "Support for SOAP      : Yes")
+  set(DEFINITIONS ${DEFINITIONS} -DENABLE_SOAP)
+else()
+  message(STATUS "Support for SOAP      : No (default)")
 endif()
+
+#Eluna temporarily disabled till more sync work can be done
+
+#if(SCRIPT_LIB_ELUNA)
+#  message(STATUS "Script engine Eluna   : Yes (default)")
+#  add_definitions(-DENABLE_ELUNA)
+#else()
+#  message(STATUS "Script engine Eluna   : No")
+#endif()
+
+if(SCRIPT_LIB_SD2)
+  message(STATUS "Script engine SD2     : Yes (default)")
+  add_definitions(-DENABLE_SD2)
+else()
+  message(STATUS "Script engine SD2     : No")
+endif()
+
+if(BUILD_TOOLS)
+  message(STATUS "Build tools           : Yes (default)")
+else()
+  message(STATUS "Build tools           : No")
+endif()
+
 if(PCH)
-  message(STATUS "Use PCH               : Yes")
+  message(STATUS "Use PCH               : Yes (default)")
 else()
   message(STATUS "Use PCH               : No")
 endif()
 
+if(DEBUG)
+  set(CMAKE_BUILD_TYPE Debug)
+  message(STATUS "Build in debug-mode   : Yes")
+else()
+  set(CMAKE_BUILD_TYPE Release)
+  message(STATUS "Build in debug-mode   : No  (default)")
+endif()
 # Handle debugmode compiles (this will require further work for proper WIN32-setups)
 if(UNIX)
-  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libstdc++")
-  endif()
-
   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 endif()
 
 # Set warning levels for different builds
 if(UNIX)
-  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} --no-warnings ")
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} --no-warnings")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} --no-warnings")
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wfatal-errors -Wextra")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wfatal-errors -Wextra")
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wfatal-errors -Wextra -Winvalid-pch")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wfatal-errors -Wextra -Winvalid-pch")
 elseif(WIN32)
   # Disable warnings in Visual Studio 8 and above and add /MP
   if(MSVC AND NOT CMAKE_GENERATOR MATCHES "Visual Studio 7")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /MP")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /wd4996 /wd4355 /wd4244 /wd4267 /MP")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /W3 /MP")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /W3 /MP")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /MP")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /MP")
   endif()
 endif()
 
@@ -282,12 +348,6 @@ endif()
 #   message(STATUS "Install SQL-files     : Yes")
 # else()
 #   message(STATUS "Install SQL-files     : No  (default)")
-# endif()
-
-# if(TOOLS)
-#   message(STATUS "Build map/vmap tools  : Yes")
-# else()
-#   message(STATUS "Build map/vmap tools  : No  (default)")
 # endif()
 
 # Some small tweaks for Visual Studio 7 and above.
@@ -300,7 +360,7 @@ endif()
 
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH ${LIBS_DIR})
+set(CMAKE_INSTALL_RPATH "${LIBS_DIR}")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Generate revision-extractor
@@ -312,43 +372,23 @@ add_executable(genrev
   ${GENREV_SRC}
 )
 
-get_target_property(GENERATE_EXE genrev LOCATION)
-add_custom_target("revision.h" ALL
-  COMMAND ${GENERATE_EXE} ${CMAKE_SOURCE_DIR}
-  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-  DEPENDS genrev
-)
-
 if(WIN32)
   install(
     FILES
-      ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libeay32.dll
-      ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libmySQL.dll
+      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libeay32.dll"
+      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/ssleay32.dll"
+      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libmySQL.dll"
     DESTINATION ${LIBS_DIR}
     CONFIGURATIONS Release
   )
   install(
     FILES
-      ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libeay32.dll
-      ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libmySQL.dll
+      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libeay32.dll"
+      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/ssleay32.dll"
+      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}/libmySQL.dll"
     DESTINATION ${LIBS_DIR}
     CONFIGURATIONS Debug
   )
-  if(PLATFORM MATCHES X86)
-    # Copy dll's Windows needs
-    install(
-      FILES
-        ${CMAKE_SOURCE_DIR}/dep/lib/win32_release/dbghelp.dll
-      DESTINATION ${LIBS_DIR}
-      CONFIGURATIONS Release
-    )
-    install(
-      FILES
-        ${CMAKE_SOURCE_DIR}/dep/lib/win32_debug/dbghelp.dll
-      DESTINATION ${LIBS_DIR}
-      CONFIGURATIONS Debug
-    )
-  endif()
 endif()
 
 if(XCODE)
@@ -359,30 +399,73 @@ if(XCODE)
   endif()
 endif()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+# This is used by config.h.cmake
+if (SOAP)
+  set(ENABLE_SOAP ON)
+else()
+  set(ENABLE_SOAP OFF)
+endif()
 
-add_subdirectory(dep) # TODO: add vmap extractor build support
+add_subdirectory(dep)
 
 # Add definitions for all build types
 # Don't place this above 'dep' subdirectory! Because of defines build will crash.
+# Remember, this overwrites global preprocessors, thus SOAP, Eluna, SD2 etc. has to be defined twice.
+# TODO: Clean this up?
+
 set(DEFINITIONS
-  DO_MYSQL
   HAVE_CONFIG_H
-  VERSION="${MANGOS_VERSION}"
-  SYSCONFDIR="${CONF_DIR}/"
+  MANGOS
 )
+
+if(SOAP)
+  set(DEFINITIONS ${DEFINITIONS} ENABLE_SOAP)
+endif()
+
+#Temporarily disabled till more work can be done
+
+#if(SCRIPT_LIB_ELUNA)
+#   set(DEFINITIONS ${DEFINITIONS} ENABLE_ELUNA)
+#endif()
+
+if(SCRIPT_LIB_SD2)
+   set(DEFINITIONS ${DEFINITIONS} ENABLE_SD2)
+endif()
+
+if(POSTGRESQL)
+  set(DEFINITIONS ${DEFINITIONS} DO_POSTGRESQL)
+else()
+  set(DEFINITIONS ${DEFINITIONS} DO_MYSQL)
+endif()
+
 set(DEFINITIONS_RELEASE NDEBUG)
-set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
+set(DEFINITIONS_DEBUG) # _DEBUG MANGOS_DEBUG) was here..
 if(WIN32)
   set(DEFINITIONS ${DEFINITIONS} WIN32 _WIN32)
   set(DEFINITIONS_RELEASE ${DEFINITIONS_RELEASE} _CRT_SECURE_NO_WARNINGS)
 endif()
 
+if(USE_STD_MALLOC)
+  set(DEFINITIONS ${DEFINITIONS} USE_STANDARD_MALLOC)
+endif()
+
+# Specify the maximum PreCompiled Header memory allocation limit
+# Fixes a compiler-problem when using PCH - the /Ym flag is adjusted by the compiler in MSVC2012, hence we need to set an upper limit with /Zm to avoid discrepancies)
+# (And yes, this is a verified , unresolved bug with MSVC... *sigh*)
+# Make it MSVC specific, otherwise g++ etc pukes
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    string(REGEX REPLACE "/Zm[0-9]+ *" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm500" CACHE STRING "" FORCE)
+endif()
+
+if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
+endif()
+
 set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS}")
+#Something like this is what i've imagined with the new generator expressions in cmake 3.0 / lfx
+#set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "$<$<CONFIG:Release>:"${DEFINITIONS} ${DEFINITIONS_RELEASE}">$<$<CONFIG:Debug>:"${DEFINITIONS} ${DEFINITIONS_DEBUG}">")
 set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_RELEASE "${DEFINITIONS_RELEASE}")
 set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_DEBUG "${DEFINITIONS_DEBUG}")
 
 add_subdirectory(src)
-# if(SQL)
-#   add_subdirectory(sql)
-# endif()

@@ -565,11 +565,11 @@ void Pet::RegenerateAll(uint32 update_diff)
     // regenerate focus for hunter pets or energy for deathknight's ghoul
     if (m_regenTimer <= update_diff)
     {
-        switch (getPowerType())
+        switch (GetPowerType())
         {
             case POWER_FOCUS:
             case POWER_ENERGY:
-                Regenerate(getPowerType());
+                Regenerate(GetPowerType());
                 break;
             default:
                 break;

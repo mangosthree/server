@@ -28,6 +28,11 @@
 #include "Platform/Define.h"
 #include <cassert>
 
+#ifndef MANGOS
+#define MANGOS
+#endif /* MANGOS */
+#define CATA
+
 enum Gender
 {
     GENDER_MALE                        = 0,

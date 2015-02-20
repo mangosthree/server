@@ -740,13 +740,13 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     UpdateMaxHealth();                                      // Update max Health (for add bonus from stamina)
     SetHealth(GetMaxHealth());
 
-    if (getPowerType() == POWER_MANA)
+    if (GetPowerType() == POWER_MANA)
     {
         UpdateMaxPower(POWER_MANA);                         // Update max Mana (for add bonus from intellect)
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     }
 
-    if (getPowerType() != POWER_MANA)                       // hide additional mana bar if we have no mana
+    if (GetPowerType() != POWER_MANA)                       // hide additional mana bar if we have no mana
     {
         SetPower(POWER_MANA, 0);
         SetMaxPower(POWER_MANA, 0);
@@ -19380,20 +19380,20 @@ void Player::InitDataForForm(bool reapplyMods)
     {
         case FORM_CAT:
         {
-            if (getPowerType() != POWER_ENERGY)
+            if (GetPowerType() != POWER_ENERGY)
                 setPowerType(POWER_ENERGY);
             break;
         }
         case FORM_BEAR:
         {
-            if (getPowerType() != POWER_RAGE)
+            if (GetPowerType() != POWER_RAGE)
                 setPowerType(POWER_RAGE);
             break;
         }
         default:                                            // 0, for example
         {
             ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(getClass());
-            if (cEntry && cEntry->powerType < MAX_POWERS && uint32(getPowerType()) != cEntry->powerType)
+            if (cEntry && cEntry->powerType < MAX_POWERS && uint32(GetPowerType()) != cEntry->powerType)
                 setPowerType(Powers(cEntry->powerType));
             break;
         }
@@ -23396,7 +23396,7 @@ void Player::ActivateSpec(uint8 specNum)
 
     SendInitialActionButtons();
 
-    Powers pw = getPowerType();
+    Powers pw = GetPowerType();
     if (pw != POWER_MANA)
         SetPower(POWER_MANA, 0);
 

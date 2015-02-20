@@ -1719,7 +1719,7 @@ class  Unit : public WorldObject
          * Gets the power type for this Unit
          * @return The type of power this Unit uses
          */
-        Powers getPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, 3)); }
+        Powers GetPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, 3)); }
         void setPowerType(Powers power);
         int32 GetPower(Powers power) const;
         int32 GetPowerByIndex(uint32 index) const;
@@ -2211,7 +2211,7 @@ class  Unit : public WorldObject
         bool isInRoots() const { return HasAuraType(SPELL_AURA_MOD_ROOT); }
         bool IsPolymorphed() const;
 
-        bool isFrozen() const;
+        bool IsFrozen() const;
         bool IsIgnoreUnitState(SpellEntry const* spell, IgnoreUnitState ignoreState);
 
         bool IsTargetableForAttack(bool inversAlive = false) const;

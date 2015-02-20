@@ -51,12 +51,6 @@ include_directories(
     "${CMAKE_SOURCE_DIR}/dep/src/zlib"
 )
 
-
-
-
-target_link_libraries(vmap g3dlite zlib)
-
-
 set(SOURCES
     ./src/IntermediateValues.cpp
     ./src/generator.cpp

@@ -95,7 +95,7 @@ void extractDataFromGit(FILE* EntriesFile, std::string path, bool url, RawData& 
         char* acc_str  = NULL;
         char* repo_str = NULL;
 
-        // parse URL like git@github.com:mangoszero/server
+        // parse URL like git@github.com:mangosthree/server
         char url_buf[200];
         int res = sscanf(url_str, "git@%s", url_buf);
         if (res)

@@ -22,10 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#define _CRT_SECURE_NO_DEPRECATE
-
 #include "dbcfile.h"
 #include "loadlib/loadlib.h"
+
+#include <cstdio>
 
 DBCFile::DBCFile(const std::string& filename):
     filename(filename),
@@ -43,42 +43,48 @@ bool DBCFile::open()
     //if (!OpenNewestFile(filename.c_str(), &fileHandle))
     //    return false;
 
-    char header[4];
+    unsigned char header[4];
     unsigned int na, nb, es, ss;
 
     if (!SFileReadFile(fileHandle, header, 4, NULL, NULL))              // Magic header
     {
         SFileCloseFile(fileHandle);
+        printf("Could not read header in DBCFile %s.\n", filename.c_str());
         return false;
     }
 
     if (header[0] != 'W' || header[1] != 'D' || header[2] != 'B' || header[3] != 'C')
     {
         SFileCloseFile(fileHandle);
+        printf("The header in DBCFile %s did not match.\n", filename.c_str());
         return false;
     }
 
     if (!SFileReadFile(fileHandle, &na, 4, NULL, NULL))                 // Number of records
     {
         SFileCloseFile(fileHandle);
+        printf("Could not read number of records from DBCFile %s.\n", filename.c_str());
         return false;
     }
 
     if (!SFileReadFile(fileHandle, &nb, 4, NULL, NULL))                 // Number of fields
     {
         SFileCloseFile(fileHandle);
+        printf("Could not read number of fields from DBCFile %s.\n", filename.c_str());
         return false;
     }
 
     if (!SFileReadFile(fileHandle, &es, 4, NULL, NULL))                 // Size of a record
     {
         SFileCloseFile(fileHandle);
+        printf("Could not read record size from DBCFile %s.\n", filename.c_str());
         return false;
     }
 
     if (!SFileReadFile(fileHandle, &ss, 4, NULL, NULL))                 // String size
     {
         SFileCloseFile(fileHandle);
+        printf("Could not read string block size from DBCFile %s.\n", filename.c_str());
         return false;
     }
 
@@ -89,6 +95,7 @@ bool DBCFile::open()
     if (fieldCount * 4 != recordSize)
     {
         SFileCloseFile(fileHandle);
+        printf("Field count and record size in DBCFile %s do not match.\n", filename.c_str());
         return false;
     }
 
@@ -100,6 +107,7 @@ bool DBCFile::open()
     if (!SFileReadFile(fileHandle, data, data_size, NULL, NULL))
     {
         SFileCloseFile(fileHandle);
+        printf("DBCFile %s did not contain expected amount of data for records.\n", filename.c_str());
         return false;
     }
 
@@ -125,7 +133,7 @@ size_t DBCFile::getMaxId()
     for (size_t i = 0; i < getRecordCount(); ++i)
     {
         if (maxId < getRecord(i).getUInt(0))
-            maxId = getRecord(i).getUInt(0);
+            { maxId = getRecord(i).getUInt(0); }
     }
     return maxId;
 }

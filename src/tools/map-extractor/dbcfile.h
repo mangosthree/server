@@ -24,6 +24,7 @@
 
 #ifndef DBCFILE_H
 #define DBCFILE_H
+
 #include <cassert>
 #include <string>
 
@@ -33,54 +34,123 @@
 
 #include "StormLib.h"
 
+/**
+ * @brief
+ *
+ */
 class DBCFile
 {
     public:
+        /**
+         * @brief
+         *
+         * @param filename
+         */
         DBCFile(const std::string& filename);
         DBCFile(HANDLE file);
+        /**
+         * @brief
+         *
+         */
         ~DBCFile();
 
-        // Open database. It must be openened before it can be used.
+        /**
+         * @brief Open database. It must be openened before it can be used.
+         *
+         * @return bool
+         */
         bool open();
 
-        // Database exceptions
+        /**
+         * @brief Database exceptions
+         *
+         */
         class Exception
         {
             public:
+                /**
+                 * @brief
+                 *
+                 * @param message
+                 */
                 Exception(const std::string& message): message(message)
                 { }
+                /**
+                 * @brief
+                 *
+                 */
                 virtual ~Exception()
                 { }
+                /**
+                 * @brief
+                 *
+                 * @return const std::string
+                 */
                 const std::string& getMessage() {return message;}
             private:
-                std::string message;
+                std::string message; /**< TODO */
         };
+        /**
+         * @brief
+         *
+         */
         class NotFound: public Exception
         {
             public:
+                /**
+                 * @brief
+                 *
+                 */
                 NotFound(): Exception("Key was not found")
                 { }
         };
-        // Iteration over database
         class Iterator;
+        /**
+         * @brief Iteration over database
+         *
+         */
         class Record
         {
             public:
+                /**
+                 * @brief
+                 *
+                 * @param field
+                 * @return float
+                 */
                 float getFloat(size_t field) const
                 {
                     assert(field < file.fieldCount);
-                    return *reinterpret_cast<float*>(offset + field * 4);
+                    return *reinterpret_cast<float*>(offset + (field * 4));
                 }
+                /**
+                 * @brief
+                 *
+                 * @param field
+                 * @return unsigned int
+                 */
                 unsigned int getUInt(size_t field) const
                 {
                     assert(field < file.fieldCount);
-                    return *reinterpret_cast<unsigned int*>(offset + field * 4);
+                    return *reinterpret_cast<unsigned int*>(offset + (field * 4));
                 }
+                /**
+                 * @brief
+                 *
+                 * @param field
+                 * @return int
+                 */
                 int getInt(size_t field) const
                 {
                     assert(field < file.fieldCount);
-                    return *reinterpret_cast<int*>(offset + field * 4);
+                    return *reinterpret_cast<int*>(offset + (field * 4));
                 }
+                /**
+                 * @brief
+                 *
+                 * @param field
+                 * @return const char
+                 */
                 const char* getString(size_t field) const
                 {
                     assert(field < file.fieldCount);
@@ -89,64 +159,130 @@ class DBCFile
                     return reinterpret_cast<char*>(file.stringTable + stringOffset);
                 }
             private:
+                /**
+                 * @brief
+                 *
+                 * @param file
+                 * @param offset
+                 */
                 Record(DBCFile& file, unsigned char* offset): file(file), offset(offset) {}
-                unsigned char* offset;
-                DBCFile& file;
+                DBCFile& file; /**< TODO */
+                unsigned char* offset; /**< TODO */
 
                 friend class DBCFile;
                 friend class DBCFile::Iterator;
         };
-        /** Iterator that iterates over records
-        */
+
+        /**
+         * @brief Iterator that iterates over records
+         *
+         */
         class Iterator
         {
             public:
+                /**
+                 * @brief
+                 *
+                 * @param file
+                 * @param offset
+                 */
                 Iterator(DBCFile& file, unsigned char* offset):
                     record(file, offset) {}
-                /// Advance (prefix only)
+                /**
+                 * @brief Advance (prefix only)
+                 *
+                 * @return Iterator &operator
+                 */
                 Iterator& operator++()
                 {
                     record.offset += record.file.recordSize;
                     return *this;
                 }
-                /// Return address of current instance
+                /**
+                 * @brief Return address of current instance
+                 *
+                 * @return const Record &operator
+                 */
                 Record const& operator*() const { return record; }
+                /**
+                 * @brief
+                 *
+                 * @return const Record *operator ->
+                 */
                 const Record* operator->() const
                 {
                     return &record;
                 }
-                /// Comparison
+                /**
+                 * @brief Comparison
+                 *
+                 * @param b
+                 * @return bool operator
+                 */
                 bool operator==(const Iterator& b) const
                 {
                     return record.offset == b.record.offset;
                 }
+                /**
+                 * @brief
+                 *
+                 * @param b
+                 * @return bool operator
+                 */
                 bool operator!=(const Iterator& b) const
                 {
                     return record.offset != b.record.offset;
                 }
             private:
-                Record record;
+                Record record; /**< TODO */
         };
 
-        // Get record by id
+        /**
+         * @brief Get record by id
+         *
+         * @param id
+         * @return Record
+         */
         Record getRecord(size_t id);
-        /// Get begin iterator over records
+        /**
+         * @brief Get begin iterator over records
+         *
+         * @return Iterator
+         */
         Iterator begin();
-        /// Get begin iterator over records
+        /**
+         * @brief Get begin iterator over records
+         *
+         * @return Iterator
+         */
         Iterator end();
-        /// Trivial
+        /**
+         * @brief Trivial
+         *
+         * @return size_t
+         */
         size_t getRecordCount() const { return recordCount;}
+        /**
+         * @brief
+         *
+         * @return size_t
+         */
         size_t getFieldCount() const { return fieldCount; }
+        /**
+         * @brief
+         *
+         * @return size_t
+         */
         size_t getMaxId();
     private:
-        std::string filename;
+        std::string filename; /**< TODO */
         HANDLE fileHandle;
-        size_t recordSize;
-        size_t recordCount;
-        size_t fieldCount;
-        size_t stringSize;
-        unsigned char* data;
-        unsigned char* stringTable;
+        size_t recordSize; /**< TODO */
+        size_t recordCount; /**< TODO */
+        size_t fieldCount; /**< TODO */
+        size_t stringSize; /**< TODO */
+        unsigned char* data; /**< TODO */
+        unsigned char* stringTable; /**< TODO */
 };
 
 #endif

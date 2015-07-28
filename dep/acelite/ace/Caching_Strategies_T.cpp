@@ -1,10 +1,10 @@
-//$Id: Caching_Strategies_T.cpp 80826 2008-03-04 14:51:23Z wotte $
+//$Id: Caching_Strategies_T.cpp 97844 2014-08-22 15:53:43Z mesnier_p $
 
 #ifndef ACE_CACHING_STRATEGIES_T_CPP
-#define ACECACHING_STRATEGIES_T_CPP
+#define ACE_CACHING_STRATEGIES_T_CPP
 
 #include "ace/Caching_Strategies_T.h"
-#include "ace/Log_Msg.h"
+#include "ace/Log_Category.h"
 
 #if !defined (__ACE_INLINE__)
 #include "ace/Caching_Strategies_T.inl"

@@ -75,42 +75,42 @@ void SQLStorageBase::prepareToLoad(uint32 maxEntry, uint32 recordCount, uint32 r
 void SQLStorageBase::Free()
 {
     if (!m_data)
-        return;
+        { return; }
 
     uint32 offset = 0;
     for (uint32 x = 0; x < m_dstFieldCount; ++x)
     {
         switch (m_dst_format[x])
         {
-            case FT_LOGIC:
+            case DBC_FF_LOGIC:
                 offset += sizeof(bool);
                 break;
-            case FT_STRING:
+            case DBC_FF_STRING:
             {
                 for (uint32 recordItr = 0; recordItr < m_recordCount; ++recordItr)
-                    delete[] *(char**)((char*)(m_data + (recordItr * m_recordSize)) + offset);
+                    { delete[] *(char**)((char*)(m_data + (recordItr * m_recordSize)) + offset); }
 
                 offset += sizeof(char*);
                 break;
             }
-            case FT_NA:
-            case FT_INT:
+            case DBC_FF_NA:
+            case DBC_FF_INT:
                 offset += sizeof(uint32);
                 break;
-            case FT_BYTE:
-            case FT_NA_BYTE:
+            case DBC_FF_BYTE:
+            case DBC_FF_NA_BYTE:
                 offset += sizeof(char);
                 break;
-            case FT_FLOAT:
-            case FT_NA_FLOAT:
+            case DBC_FF_FLOAT:
+            case DBC_FF_NA_FLOAT:
                 offset += sizeof(float);
                 break;
-            case FT_NA_POINTER:
+            case DBC_FF_NA_POINTER:
                 // TODO- possible (and small) memleak here possible
                 offset += sizeof(char*);
                 break;
-            case FT_IND:
-            case FT_SORT:
+            case DBC_FF_IND:
+            case DBC_FF_SORT:
                 assert(false && "SQL storage not have sort field types");
                 break;
             default:
@@ -137,10 +137,10 @@ void SQLStorage::Free()
     m_Index = NULL;
 }
 
-void SQLStorage::Load()
+void SQLStorage::Load(bool error_at_empty /*= true*/)
 {
     SQLStorageLoader loader;
-    loader.Load(*this);
+    loader.Load(*this, error_at_empty);
 }
 
 SQLStorage::SQLStorage(const char* fmt, const char* _entry_field, const char* sqlname)
@@ -193,7 +193,7 @@ void SQLHashStorage::EraseEntry(uint32 id)
     // do not erase from m_records
     RecordMap::iterator find = m_indexMap.find(id);
     if (find != m_indexMap.end())
-        find->second = NULL;
+        { find->second = NULL; }
 }
 
 SQLHashStorage::SQLHashStorage(const char* fmt, const char* _entry_field, const char* sqlname)

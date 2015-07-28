@@ -25,7 +25,7 @@
 #ifndef DO_POSTGRESQL
 
 #include "DatabaseEnv.h"
-#include "Errors.h"
+#include "Utilities/Errors.h"
 
 QueryResultMysql::QueryResultMysql(MYSQL_RES* result, MYSQL_FIELD* fields, uint64 rowCount, uint32 fieldCount) :
     QueryResult(rowCount, fieldCount), mResult(result)
@@ -47,7 +47,7 @@ bool QueryResultMysql::NextRow()
     MYSQL_ROW row;
 
     if (!mResult)
-        return false;
+        { return false; }
 
     row = mysql_fetch_row(mResult);
     if (!row)
@@ -57,7 +57,7 @@ bool QueryResultMysql::NextRow()
     }
 
     for (uint32 i = 0; i < mFieldCount; ++i)
-        mCurrentRow[i].SetValue(row[i]);
+        { mCurrentRow[i].SetValue(row[i]); }
 
     return true;
 }

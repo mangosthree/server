@@ -1,4 +1,4 @@
-/*
+/**
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
@@ -25,7 +25,7 @@
 #ifndef _AUTH_HMACSHA1_H
 #define _AUTH_HMACSHA1_H
 
-#include "Common.h"
+#include "Common/Common.h"
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
 
@@ -35,18 +35,18 @@ class BigNumber;
 
 class HMACSHA1
 {
-    public:
-        HMACSHA1(uint32 len, uint8* seed);
-        ~HMACSHA1();
-        void UpdateBigNumber(BigNumber* bn);
-        void UpdateData(const uint8* data, int length);
-        void UpdateData(const std::string& str);
-        void Finalize();
-        uint8* ComputeHash(BigNumber* bn);
-        uint8* GetDigest() { return (uint8*)m_digest; }
-        int GetLength() { return SHA_DIGEST_LENGTH; }
-    private:
-        HMAC_CTX m_ctx;
-        uint8 m_digest[SHA_DIGEST_LENGTH];
+public:
+    HMACSHA1(uint32 len, uint8 *seed);
+    ~HMACSHA1();
+    void UpdateBigNumber(BigNumber *bn);
+    void UpdateData(const uint8 *data, int length);
+    void UpdateData(const std::string &str);
+    void Finalize();
+    uint8 *ComputeHash(BigNumber *bn);
+    uint8 *GetDigest() { return (uint8*)m_digest; }
+    int GetLength() { return SHA_DIGEST_LENGTH; }
+private:
+    HMAC_CTX m_ctx;
+    uint8 m_digest[SHA_DIGEST_LENGTH];
 };
 #endif

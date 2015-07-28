@@ -4,7 +4,7 @@
 /**
  *  @file   OS_NS_Thread.h
  *
- *  $Id: OS_NS_Thread.h 96061 2012-08-16 09:36:07Z mcorino $
+ *  $Id: OS_NS_Thread.h 97911 2014-10-07 21:58:25Z shuston $
  *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
@@ -37,6 +37,12 @@
 # include "ace/OS_NS_signal.h"
 # include "ace/ACE_export.h"
 # include "ace/Object_Manager_Base.h"
+
+#if defined (ACE_HAS_TSS_EMULATION) && !defined (ACE_HAS_THREAD_SPECIFIC_STORAGE)
+# if defined (ACE_HAS_VXTHREADS) && !defined (_WRS_CONFIG_SMP) && !defined (INCLUDE_AMP_CPU)
+#  include "taskVarLib.h" /* used by VxWorks < 6.9 */
+# endif /* VxWorks and ! SMP */
+#endif
 
 # if defined (ACE_EXPORT_MACRO)
 #   undef ACE_EXPORT_MACRO
@@ -875,6 +881,15 @@ private:
 #   else  /* ! ACE_HAS_THREAD_SPECIFIC_STORAGE */
   /// Location of current thread's TSS array.
   static void **&tss_base ();
+
+#     if defined (ACE_HAS_VXTHREADS)
+#       if (defined (_WRS_CONFIG_SMP) || defined (INCLUDE_AMP_CPU))
+  static __thread void* ace_tss_keys;
+#       else  /* ! VxWorks SMP */
+  static void* ace_tss_keys;
+#       endif /* ! VxWorks SMP */
+#     endif /* ACE_HAS_VXTHREADS */
+
 #   endif /* ! ACE_HAS_THREAD_SPECIFIC_STORAGE */
 
 #   if defined (ACE_HAS_THREAD_SPECIFIC_STORAGE)
@@ -1086,6 +1101,9 @@ namespace ACE_OS {
                      int type = ACE_DEFAULT_SYNCH_TYPE);
 
   ACE_NAMESPACE_INLINE_FUNCTION
+  int condattr_synctype (ACE_condattr_t &attributes, int& type);
+
+  ACE_NAMESPACE_INLINE_FUNCTION
   int condattr_destroy (ACE_condattr_t &attributes);
 
   ACE_NAMESPACE_INLINE_FUNCTION
@@ -1184,11 +1202,21 @@ namespace ACE_OS {
   extern ACE_Export
   int event_destroy (ACE_event_t *event);
 
-  extern ACE_Export
+  ACE_NAMESPACE_INLINE_FUNCTION
   int event_init (ACE_event_t *event,
                   int manual_reset = 0,
                   int initial_state = 0,
                   int type = ACE_DEFAULT_SYNCH_TYPE,
+                  const char *name = 0,
+                  void *arg = 0,
+                  LPSECURITY_ATTRIBUTES sa = 0);
+
+  extern ACE_Export
+  int event_init (ACE_event_t *event,
+                  int type,
+                  ACE_condattr_t *attributes,
+                  int manual_reset = 0,
+                  int initial_state = 0,
                   const char *name = 0,
                   void *arg = 0,
                   LPSECURITY_ATTRIBUTES sa = 0);
@@ -1199,6 +1227,16 @@ namespace ACE_OS {
                   int manual_reset,
                   int initial_state,
                   int type,
+                  const wchar_t *name,
+                  void *arg = 0,
+                  LPSECURITY_ATTRIBUTES sa = 0);
+
+  ACE_NAMESPACE_INLINE_FUNCTION
+  int event_init (ACE_event_t *event,
+                  int type,
+                  ACE_condattr_t *attributes,
+                  int manual_reset,
+                  int initial_state,
                   const wchar_t *name,
                   void *arg = 0,
                   LPSECURITY_ATTRIBUTES sa = 0);
@@ -1421,11 +1459,31 @@ namespace ACE_OS {
                  int max = 0x7fffffff,
                  LPSECURITY_ATTRIBUTES sa = 0);
 
+  ACE_NAMESPACE_INLINE_FUNCTION
+  int sema_init (ACE_sema_t *s,
+                 u_int count,
+                 int type,
+                 ACE_condattr_t *attributes,
+                 const char *name = 0,
+                 void *arg = 0,
+                 int max = 0x7fffffff,
+                 LPSECURITY_ATTRIBUTES sa = 0);
+
 # if defined (ACE_HAS_WCHAR)
   ACE_NAMESPACE_INLINE_FUNCTION
   int sema_init (ACE_sema_t *s,
                  u_int count,
                  int type,
+                 const wchar_t *name,
+                 void *arg = 0,
+                 int max = 0x7fffffff,
+                 LPSECURITY_ATTRIBUTES sa = 0);
+
+  ACE_NAMESPACE_INLINE_FUNCTION
+  int sema_init (ACE_sema_t *s,
+                 u_int count,
+                 int type,
+                 ACE_condattr_t *attributes,
                  const wchar_t *name,
                  void *arg = 0,
                  int max = 0x7fffffff,
@@ -1677,6 +1735,11 @@ namespace ACE_OS {
   ACE_NAMESPACE_INLINE_FUNCTION
   const char* thr_name (void);
 
+  /// Stores a string version of the current thread id into buffer and
+  /// returns the size of this thread id in bytes.
+  ACE_NAMESPACE_INLINE_FUNCTION
+  ssize_t thr_id (char buffer[], size_t buffer_length);
+
   /// State is THR_CANCEL_ENABLE or THR_CANCEL_DISABLE
   ACE_NAMESPACE_INLINE_FUNCTION
   int thr_setcancelstate (int new_state, int *old_state);
@@ -1833,12 +1896,18 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_event_t
 {
   friend int ACE_OS::event_init(ACE_event_t*, int, int, int, const char*, void*,int);
+  friend int ACE_OS::event_init(ACE_event_t*, int, ACE_condattr_t*, int, int, const char*, void*,int);
   friend int ACE_OS::event_destroy(ACE_event_t*);
   friend int ACE_OS::event_wait(ACE_event_t*);
   friend int ACE_OS::event_timedwait(ACE_event_t*, ACE_Time_Value*, int);
   friend int ACE_OS::event_signal(ACE_event_t*);
   friend int ACE_OS::event_pulse(ACE_event_t*);
   friend int ACE_OS::event_reset(ACE_event_t*);
+
+public:
+  /// Constructor initializing all pointer fields to null
+  ACE_event_t (void);
+
 protected:
 
   /// Event name if process shared.

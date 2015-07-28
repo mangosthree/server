@@ -1,6 +1,6 @@
 // -*- C++ -*-
 //
-// $Id: OS_NS_time.inl 95763 2012-05-16 06:43:51Z johnnyw $
+// $Id: OS_NS_time.inl 97769 2014-06-05 06:37:53Z johnnyw $
 
 #include "ace/OS_NS_string.h"
 #include "ace/OS_NS_errno.h"
@@ -374,7 +374,7 @@ ACE_OS::gmtime_r (const time_t *t, struct tm *res)
   ACE_OS_TRACE ("ACE_OS::gmtime_r");
 #if defined (ACE_HAS_REENTRANT_FUNCTIONS)
   ACE_OSCALL_RETURN (::gmtime_r (t, res), struct tm *, 0);
-#elif defined (ACE_HAS_TR24731_2005_CRT)
+#elif defined (ACE_HAS_TR24731_2005_CRT) && !defined (ACE_WIN32_VC14)
   struct tm *tm_p = res;
   ACE_SECURECRTCALL (gmtime_s (res, t), struct tm *, 0, tm_p);
   return tm_p;

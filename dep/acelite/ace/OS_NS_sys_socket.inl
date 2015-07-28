@@ -1,6 +1,5 @@
 // -*- C++ -*-
-//
-// $Id: OS_NS_sys_socket.inl 95533 2012-02-14 22:59:17Z wotte $
+// $Id: OS_NS_sys_socket.inl 97938 2014-10-27 07:56:26Z johnnyw $
 
 #include "ace/OS_NS_errno.h"
 #include "ace/OS_NS_macros.h"
@@ -57,7 +56,11 @@ ACE_OS::accept (ACE_HANDLE handle,
   // Apparently some platforms like VxWorks can't correctly deal with
   // a NULL addr.
 
+#    if defined (ACE_HAS_IPV6)
+   sockaddr_in6 fake_addr;
+#    else
    sockaddr_in fake_addr;
+#    endif /* ACE_HAS_IPV6 */
    int fake_addrlen;
 
    if (addrlen == 0)
@@ -866,27 +869,6 @@ ACE_OS::setsockopt (ACE_HANDLE handle,
   ACE_UNUSED_ARG (optlen);
   ACE_NOTSUP_RETURN (-1);
 #else
-#if defined (ACE_HAS_WINSOCK2) && (ACE_HAS_WINSOCK2 != 0) && defined(SO_REUSEPORT)
-  // To work around an inconsistency with Microsofts implementation of
-  // sockets, we will check for SO_REUSEADDR, and ignore it. Winsock
-  // always behaves as if SO_REUSEADDR=1. Some implementations have
-  // the same behaviour as Winsock, but use a new name for
-  // it. SO_REUSEPORT.  If you want the normal behaviour for
-  // SO_REUSEADDR=0, then NT 4 sp4 and later supports
-  // SO_EXCLUSIVEADDRUSE. This also requires using an updated Platform
-  // SDK so it was decided to ignore the option for now. (Especially
-  // since Windows always sets SO_REUSEADDR=1, which we can mimic by doing
-  // nothing.)
-  if (level == SOL_SOCKET) {
-    if (optname == SO_REUSEADDR) {
-      return 0; // Not supported by Winsock
-    }
-    if (optname == SO_REUSEPORT) {
-      optname = SO_REUSEADDR;
-    }
-  }
-#endif /*ACE_HAS_WINSOCK2*/
-
   int result;
   ACE_SOCKCALL (::setsockopt ((ACE_SOCKET) handle,
                               level,

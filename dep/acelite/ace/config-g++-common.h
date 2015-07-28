@@ -1,6 +1,6 @@
 // -*- C++ -*-
 //
-// $Id: config-g++-common.h 93500 2011-03-07 16:19:27Z vzykov $
+// $Id: config-g++-common.h 97874 2014-09-08 12:10:55Z johnnyw $
 
 // This configuration file is designed to be included by another,
 // specific configuration file.  It provides config information common
@@ -33,6 +33,15 @@
 // Versions of g++ prior to 3.3 had a buggy operator // new(nothrow)[]().
 #  define ACE_HAS_NEW_NOTHROW
 #endif /* __GNUC__ >= 3.3 */
+
+#if (__GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
+# if __cplusplus > 199711L
+#  define ACE_HAS_CPP11
+# endif
+# if __cplusplus > 201103L
+#  define ACE_HAS_CPP14
+# endif
+#endif
 
 #if (defined (i386) || defined (__i386__)) && !defined (ACE_SIZEOF_LONG_DOUBLE)
 # define ACE_SIZEOF_LONG_DOUBLE 12
@@ -104,8 +113,12 @@
 #  ifndef ACE_HAS_CUSTOM_EXPORT_MACROS
 #    define ACE_HAS_CUSTOM_EXPORT_MACROS
 #  endif  /* !ACE_HAS_CUSTOM_EXPORT_MACROS */
-#  define ACE_Proper_Export_Flag __attribute__ ((visibility("default")))
-#  define ACE_Proper_Import_Flag __attribute__ ((visibility("default")))
+#  ifndef ACE_Proper_Export_Flag
+#    define ACE_Proper_Export_Flag __attribute__ ((visibility("default")))
+#  endif /* !ACE_Proper_Export_Flag */
+#  ifndef ACE_Proper_Import_Flag
+#    define ACE_Proper_Import_Flag __attribute__ ((visibility("default")))
+#  endif /* !ACE_Proper_Import_Flag */
 
 #  if (__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 2))
 // Sadly, G++ 4.x silently ignores visibility attributes on

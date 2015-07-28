@@ -57,5 +57,3 @@ if(${CMAKE_BUILD_TYPE} MATCHES Debug)
     set(BUILD_PROPERTIES "-DMANGOS_DEBUG")
     set_target_properties(mangos-battleground PROPERTIES COMPILE_FLAGS ${BUILD_PROPERTIES})
 endif()
-
-add_dependencies(mangos-battleground revision.h)

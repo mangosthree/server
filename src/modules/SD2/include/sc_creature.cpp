@@ -254,13 +254,13 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, int32 uiSchool, int32 i
     // No target so we can't cast
     if (!pTarget)
     {
-        return NULL;
+        return false;
     }
 
     // Silenced so we can't cast
     if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
     {
-        return NULL;
+        return false;
     }
 
     // Using the extended script system we first create a list of viable spells
@@ -659,7 +659,9 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 uiDiff)
     {
         case NPC_BROODLORD:                                 // broodlord (not move down stairs)
             if (fZ > 448.60f)
-            { return false; }
+            {
+                return false;
+            }
             break;
         case NPC_VOID_REAVER:                               // void reaver (calculate from center of room)
             if (m_creature->GetDistance2d(432.59f, 371.93f) < 105.0f)

@@ -30,7 +30,8 @@
 #include "Opcodes.h"
 #include "World.h"
 #include "ObjectGuid.h"
-#include <zlib/zlib.h>
+#include "zlib.h"
+
 
 UpdateData::UpdateData(uint16 map) : m_blockCount(0), m_map(map)
 {

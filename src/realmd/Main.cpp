@@ -28,14 +28,13 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "RealmList.h"
+#include "Realm/RealmList.h"
 
 #include "Config/Config.h"
 #include "Log.h"
-#include "AuthSocket.h"
+#include "Auth/AuthSocket.h"
 #include "SystemConfig.h"
-#include "revision_nr.h"
-#include "revision_sql.h"
+#include "revision.h"
 #include "Util.h"
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>

@@ -24,94 +24,101 @@
 
 set(EXECUTABLE_NAME realmd)
 
+#Auth Files
+file(GLOB_RECURSE SRC_GRP_AUTH Auth/*.cpp Auth/*.h)
+source_group("Authentication" FILES ${SRC_GRP_AUTH})
+
+#Patch Files
+file(GLOB_RECURSE SRC_GRP_PATCH Patch/*.cpp Patch/*.h)
+source_group("Authentication" FILES ${SRC_GRP_PATCH})
+
+#Realm Files
+file(GLOB_RECURSE SRC_GRP_REALM Realm/*.cpp Realm/*.h)
+source_group("Realmlist" FILES ${SRC_GRP_REALM})
+
+#Socket Buffer Files
+file(GLOB_RECURSE SRC_GRP_SOCKB SocketBuffer/*.cpp SocketBuffer/*.h)
+source_group("Socket Buffer" FILES ${SRC_GRP_SOCKB})
+
 set(EXECUTABLE_SRCS
-    AuthCodes.h
-    AuthSocket.cpp
-    AuthSocket.h
-    BufferedSocket.cpp
-    BufferedSocket.h
+    ${SRC_GRP_AUTH}
+    ${SRC_GRP_PATCH}
+    ${SRC_GRP_REALM}
+    ${SRC_GRP_SOCKB}
     Main.cpp
-    PatchHandler.cpp
-    PatchHandler.h
-    RealmList.cpp
-    RealmList.h
-   )
+)
 
 if(WIN32)
-  # add resource file to windows build
-  set(EXECUTABLE_SRCS ${EXECUTABLE_SRCS} realmd.rc)
+    # add resource file to windows build
+    set(EXECUTABLE_SRCS ${EXECUTABLE_SRCS} realmd.rc)
 endif()
 
 include_directories(
-  "${CMAKE_SOURCE_DIR}/src/shared"
-  "${CMAKE_SOURCE_DIR}/src/framework"
-  "${CMAKE_BINARY_DIR}"
-  "${CMAKE_BINARY_DIR}/src/shared"
-  "${MYSQL_INCLUDE_DIR}"
-  "${ACE_INCLUDE_DIR}"
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/src/shared
+    ${CMAKE_SOURCE_DIR}/src/shared/Common
+    ${CMAKE_SOURCE_DIR}/src/shared/Utilities
+    ${CMAKE_SOURCE_DIR}/src/shared/Log
+    ${CMAKE_SOURCE_DIR}/src/shared/DataStores
+    ${CMAKE_SOURCE_DIR}/src/shared/Win
+    ${CMAKE_SOURCE_DIR}/src/shared/Linux
+    ${CMAKE_SOURCE_DIR}/src/framework
+    ${CMAKE_BINARY_DIR}
+    ${CMAKE_BINARY_DIR}/src/shared
+    ${ACE_INCLUDE_DIR}
+    ${OPENSSL_INCLUDE_DIR}
 )
 
-add_executable(${EXECUTABLE_NAME}
-  ${EXECUTABLE_SRCS}
-)
+add_executable(${EXECUTABLE_NAME} ${EXECUTABLE_SRCS})
 
 if(NOT ACE_USE_EXTERNAL)
-  add_dependencies(${EXECUTABLE_NAME} ace)
-  target_link_libraries(${EXECUTABLE_NAME} ace)
+    add_dependencies(${EXECUTABLE_NAME} ace)
+    target_link_libraries(${EXECUTABLE_NAME} ace)
 else()
-  target_link_libraries(${EXECUTABLE_NAME} ACE)
+    target_link_libraries(${EXECUTABLE_NAME} ACE)
 endif()
 
 target_link_libraries(${EXECUTABLE_NAME}
-  shared
-  framework
+    shared
+    framework
+    ${OPENSSL_LIBRARIES}
 )
 
-if(WIN32)
-  target_link_libraries(${EXECUTABLE_NAME}
-    optimized ${MYSQL_LIBRARY}
-    optimized ${OPENSSL_LIBRARIES}
-    debug ${MYSQL_DEBUG_LIBRARY}
-    debug ${OPENSSL_DEBUG_LIBRARIES}
-  )
-  if(PLATFORM MATCHES X86)
-    target_link_libraries(${EXECUTABLE_NAME})
-  endif()
+if(POSTGRESQL)
+    include_directories(${PostgreSQL_INCLUDE_DIR})
+    target_link_libraries(${EXECUTABLE_NAME} ${PostgreSQL_LIBRARIES})
+else()
+    include_directories(${MYSQL_INCLUDE_DIR})
+    target_link_libraries(${EXECUTABLE_NAME} ${MYSQL_LIBRARY})
 endif()
 
 if(UNIX)
-  target_link_libraries(${EXECUTABLE_NAME}
-    ${MYSQL_LIBRARY}
-    ${OPENSSL_LIBRARIES}
-    ${OPENSSL_EXTRA_LIBRARIES}
-  )
+    target_link_libraries(${EXECUTABLE_NAME} ${OPENSSL_EXTRA_LIBRARIES})
 endif()
 
 set(EXECUTABLE_LINK_FLAGS "")
 
 if(UNIX)
-  if (CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
-    set(EXECUTABLE_LINK_FLAGS "-Wl, --no-as-needed -pthread -lrt ${EXECUTABLE_LINK_FLAGS}")
-  elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
-    set(EXECUTABLE_LINK_FLAGS "-Wl,--no-as-needed -ldl -pthread -lrt ${EXECUTABLE_LINK_FLAGS}")
-  endif()
+    if (CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+        set(EXECUTABLE_LINK_FLAGS "-Wl, --no-as-needed -pthread -lrt ${EXECUTABLE_LINK_FLAGS}")
+    elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+        set(EXECUTABLE_LINK_FLAGS "-Wl,--no-as-needed -ldl -pthread -lrt ${EXECUTABLE_LINK_FLAGS}")
+    endif()
 endif()
 
 if(APPLE)
-  set(EXECUTABLE_LINK_FLAGS "-framework Carbon ${EXECUTABLE_LINK_FLAGS}")
+    set(EXECUTABLE_LINK_FLAGS "-framework Carbon ${EXECUTABLE_LINK_FLAGS}")
 endif()
 
-set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS
-  "${EXECUTABLE_LINK_FLAGS}"
-)
+set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS "${EXECUTABLE_LINK_FLAGS}")
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION "${BIN_DIR}")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/realmd.conf.dist.in" "${CMAKE_CURRENT_BINARY_DIR}/realmd.conf.dist")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/realmd.conf.dist" DESTINATION "${CONF_INSTALL_DIR}")
 
 if(WIN32 AND MSVC)
-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/\${BUILD_TYPE}/${EXECUTABLE_NAME}.pdb" DESTINATION "${BIN_DIR}" CONFIGURATIONS Debug)
-  add_custom_command(TARGET ${EXECUTABLE_NAME}
-    POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/realmd.conf.dist" "${CONF_COPY_DIR}"
-  )
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/\${BUILD_TYPE}/${EXECUTABLE_NAME}.pdb" DESTINATION "${BIN_DIR}" CONFIGURATIONS Debug)
+    add_custom_command(TARGET ${EXECUTABLE_NAME}
+        POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/realmd.conf.dist" "${CONF_COPY_DIR}"
+    )
 endif()

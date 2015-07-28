@@ -23,6 +23,7 @@
  */
 
 #include "DBCStores.h"
+#include "DB2Stores.h"
 #include "Policies/Singleton.h"
 #include "Log.h"
 #include "ProgressBar.h"

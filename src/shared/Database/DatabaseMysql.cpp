@@ -24,12 +24,12 @@
 
 #ifndef DO_POSTGRESQL
 
-#include "Util.h"
+#include "Utilities/Util.h"
 #include "Policies/Singleton.h"
 #include "Platform/Define.h"
-#include "Threading.h"
+#include "Threading/Threading.h"
 #include "DatabaseEnv.h"
-#include "Timer.h"
+#include "Utilities/Timer.h"
 
 size_t DatabaseMysql::db_count = 0;
 
@@ -66,7 +66,7 @@ DatabaseMysql::~DatabaseMysql()
 
     // Free Mysql library pointers for last ~DB
     if (--db_count == 0)
-        mysql_library_end();
+        { mysql_library_end(); }
 }
 
 SqlConnection* DatabaseMysql::CreateConnection()
@@ -100,17 +100,18 @@ bool MySQLConnection::Initialize(const char* infoString)
     iter = tokens.begin();
 
     if (iter != tokens.end())
-        host = *iter++;
+        { host = *iter++; }
     if (iter != tokens.end())
-        port_or_socket = *iter++;
+        { port_or_socket = *iter++; }
     if (iter != tokens.end())
-        user = *iter++;
+        { user = *iter++; }
     if (iter != tokens.end())
-        password = *iter++;
+        { password = *iter++; }
     if (iter != tokens.end())
-        database = *iter++;
+        { database = *iter++; }
 
     mysql_options(mysqlInit, MYSQL_SET_CHARSET_NAME, "utf8");
+    mysql_options(mysqlInit, MYSQL_OPT_RECONNECT, "1");
 #ifdef WIN32
     if (host == ".")                                        // named pipe use option (Windows)
     {
@@ -167,9 +168,9 @@ bool MySQLConnection::Initialize(const char* infoString)
     // LEAVE 'AUTOCOMMIT' MODE ALWAYS ENABLED!!!
     // W/O IT EVEN 'SELECT' QUERIES WOULD REQUIRE TO BE WRAPPED INTO 'START TRANSACTION'<>'COMMIT' CLAUSES!!!
     if (!mysql_autocommit(mMysql, 1))
-        DETAIL_LOG("AUTOCOMMIT SUCCESSFULLY SET TO 1");
+        { DETAIL_LOG("AUTOCOMMIT SUCCESSFULLY SET TO 1"); }
     else
-        DETAIL_LOG("AUTOCOMMIT NOT SET TO 1");
+        { DETAIL_LOG("AUTOCOMMIT NOT SET TO 1"); }
     /*-------------------------------------*/
 
     // set connection properties to UTF8 to properly handle locales for different
@@ -183,7 +184,7 @@ bool MySQLConnection::Initialize(const char* infoString)
 bool MySQLConnection::_Query(const char* sql, MYSQL_RES** pResult, MYSQL_FIELD** pFields, uint64* pRowCount, uint32* pFieldCount)
 {
     if (!mMysql)
-        return 0;
+        { return 0; }
 
     uint32 _s = WorldTimer::getMSTime();
 
@@ -203,7 +204,7 @@ bool MySQLConnection::_Query(const char* sql, MYSQL_RES** pResult, MYSQL_FIELD**
     *pFieldCount = mysql_field_count(mMysql);
 
     if (!*pResult)
-        return false;
+        { return false; }
 
     if (!*pRowCount)
     {
@@ -223,7 +224,7 @@ QueryResult* MySQLConnection::Query(const char* sql)
     uint32 fieldCount = 0;
 
     if (!_Query(sql, &result, &fields, &rowCount, &fieldCount))
-        return NULL;
+        { return NULL; }
 
     QueryResultMysql* queryResult = new QueryResultMysql(result, fields, rowCount, fieldCount);
 
@@ -239,11 +240,11 @@ QueryNamedResult* MySQLConnection::QueryNamed(const char* sql)
     uint32 fieldCount = 0;
 
     if (!_Query(sql, &result, &fields, &rowCount, &fieldCount))
-        return NULL;
+        { return NULL; }
 
     QueryFieldNames names(fieldCount);
     for (uint32 i = 0; i < fieldCount; ++i)
-        names[i] = fields[i].name;
+        { names[i] = fields[i].name; }
 
     QueryResultMysql* queryResult = new QueryResultMysql(result, fields, rowCount, fieldCount);
 
@@ -254,7 +255,7 @@ QueryNamedResult* MySQLConnection::QueryNamed(const char* sql)
 bool MySQLConnection::Execute(const char* sql)
 {
     if (!mMysql)
-        return false;
+        { return false; }
 
     {
         uint32 _s = WorldTimer::getMSTime();
@@ -308,9 +309,9 @@ bool MySQLConnection::RollbackTransaction()
 unsigned long MySQLConnection::escape_string(char* to, const char* from, unsigned long length)
 {
     if (!mMysql || !to || !from || !length)
-        return 0;
+        { return 0; }
 
-    return (mysql_real_escape_string(mMysql, to, from, length));
+    return(mysql_real_escape_string(mMysql, to, from, length));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -333,7 +334,7 @@ MySqlPreparedStatement::~MySqlPreparedStatement()
 bool MySqlPreparedStatement::prepare()
 {
     if (isPrepared())
-        return true;
+        { return true; }
 
     // remove old binds
     RemoveBinds();
@@ -399,7 +400,7 @@ void MySqlPreparedStatement::bind(const SqlStmtParameters& holder)
 
     // finalize adding params
     if (!m_pInputArgs)
-        return;
+        { return; }
 
     // verify if we bound all needed input parameters
     if (m_nParams != holder.boundParams())
@@ -447,7 +448,7 @@ void MySqlPreparedStatement::addParam(unsigned int nIndex, const SqlStmtFieldDat
 void MySqlPreparedStatement::RemoveBinds()
 {
     if (!m_stmt)
-        return;
+        { return; }
 
     delete[] m_pInputArgs;
     delete[] m_pResult;
@@ -466,11 +467,11 @@ void MySqlPreparedStatement::RemoveBinds()
 bool MySqlPreparedStatement::execute()
 {
     if (!isPrepared())
-        return false;
+        { return false; }
 
     if (mysql_stmt_execute(m_stmt))
     {
-        sLog.outError("SQL: cannot execute '%s'", m_szFmt.c_str());
+        sLog.outError("SQL: can not execute '%s'", m_szFmt.c_str());
         sLog.outError("SQL ERROR: %s", mysql_stmt_error(m_stmt));
         return false;
     }

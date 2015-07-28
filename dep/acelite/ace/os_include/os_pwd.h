@@ -6,7 +6,7 @@
  *
  *  password structure
  *
- *  $Id: os_pwd.h 93564 2011-03-16 14:35:58Z olli $
+ *  $Id: os_pwd.h 97827 2014-08-02 17:34:32Z johnnyw $
  *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
@@ -29,17 +29,6 @@
 #if !defined (ACE_LACKS_PWD_H)
 # include /**/ <pwd.h>
 #endif /* !ACE_LACKS_PWD_H */
-
-// Place all additions (especially function declarations) within extern "C" {}
-#ifdef __cplusplus
-extern "C"
-{
-#endif /* __cplusplus */
-
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 #include /**/ "ace/post.h"
 #endif /* ACE_OS_INCLUDE_OS_PWD_H */

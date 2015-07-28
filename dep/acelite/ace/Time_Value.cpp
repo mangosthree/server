@@ -1,4 +1,4 @@
-// $Id: Time_Value.cpp 96061 2012-08-16 09:36:07Z mcorino $
+// $Id: Time_Value.cpp 97886 2014-09-09 06:43:37Z johnnyw $
 
 #include "ace/Time_Value.h"
 
@@ -12,9 +12,13 @@
 #include "ace/Time_Policy.h"
 
 #ifdef ACE_HAS_CPP98_IOSTREAMS
-#include <ostream>
-#include <iomanip>
+# include <ostream>
+# include <iomanip>
 #endif /* ACE_HAS_CPP98_IOSTREAMS */
+
+#ifdef ACE_HAS_CPP11
+# include <cmath>
+#endif /* ACE_HAS_CPP11 */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -338,7 +342,11 @@ ostream &operator<<(ostream &o, const ACE_Time_Value &v)
     {
       o << tv->tv_sec;
       if (tv->tv_usec)
+#ifdef ACE_HAS_CPP11
+        o << '.' << std::setw (6) << std::abs (tv->tv_usec);
+#else
         o << '.' << std::setw (6) << ACE_STD_NAMESPACE::abs (tv->tv_usec);
+#endif
     }
   else if (tv->tv_usec < 0)
     o << "-0." << std::setw (6) << - tv->tv_usec;

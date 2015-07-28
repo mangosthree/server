@@ -75,20 +75,6 @@ typedef ACE_SHLIB_HANDLE MANGOS_LIBRARY_HANDLE;
 #endif // PLATFORM
 
 #if PLATFORM == PLATFORM_WINDOWS
-#  ifdef MANGOS_WIN32_DLL_IMPORT
-#    define MANGOS_DLL_DECL __declspec(dllimport)
-#  else //!MANGOS_WIN32_DLL_IMPORT
-#    ifdef MANGOS_WIND_DLL_EXPORT
-#      define MANGOS_DLL_DECL __declspec(dllexport)
-#    else //!MANGOS_WIND_DLL_EXPORT
-#      define MANGOS_DLL_DECL
-#    endif // MANGOS_WIND_DLL_EXPORT
-#  endif // MANGOS_WIN32_DLL_IMPORT
-#else // PLATFORM != PLATFORM_WINDOWS
-#  define MANGOS_DLL_DECL
-#endif // PLATFORM
-
-#if PLATFORM == PLATFORM_WINDOWS
 #  define MANGOS_DLL_SPEC __declspec(dllexport)
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
@@ -204,20 +190,5 @@ typedef uint32      DWORD;
  *
  */
 typedef uint64 OBJECT_HANDLE;
-
-enum FieldFormat
-{
-    FT_NA = 'x',                                            // ignore/ default, 4 byte size, in Source String means field is ignored, in Dest String means field is filled with default value
-    FT_NA_BYTE = 'X',                                       // ignore/ default, 1 byte size, see above
-    FT_NA_FLOAT = 'F',                                      // ignore/ default,  float size, see above
-    FT_NA_POINTER = 'p',                                    // fill default value into dest, pointer size, Use this only with static data (otherwise mem-leak)
-    FT_STRING = 's',                                        // char*
-    FT_FLOAT = 'f',                                         // float
-    FT_INT = 'i',                                           // uint32
-    FT_BYTE = 'b',                                          // uint8
-    FT_SORT = 'd',                                          // sorted by this field, field is not included
-    FT_IND = 'n',                                           // the same,but parsed to data
-    FT_LOGIC = 'l'                                          // Logical (boolean)
-};
 
 #endif // MANGOS_DEFINE_H

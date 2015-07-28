@@ -1,5 +1,5 @@
 // Handle_Set.cpp
-// $Id: Handle_Set.cpp 95761 2012-05-15 18:23:04Z johnnyw $
+// $Id: Handle_Set.cpp 97884 2014-09-08 18:00:53Z johnnyw $
 
 #include "ace/Handle_Set.h"
 
@@ -35,23 +35,23 @@ ACE_Handle_Set::dump (void) const
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_Handle_Set::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
 
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nsize_ = %d"), this->size_));
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nmax_handle_ = %d"), this->max_handle_));
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\n[ ")));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("\nsize_ = %d"), this->size_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("\nmax_handle_ = %d"), this->max_handle_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("\n[ ")));
 
 #if defined (ACE_WIN32)
   for (size_t i = 0; i < (size_t) this->mask_.fd_count + 1; i++)
-    ACE_DEBUG ((LM_DEBUG, ACE_TEXT (" %x "), this->mask_.fd_array[i]));
+    ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT (" %x "), this->mask_.fd_array[i]));
 #else /* !ACE_WIN32 */
   for (ACE_HANDLE i = 0; i < this->max_handle_ + 1; i++)
     if (this->is_set (i))
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT (" %d "), i));
+      ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT (" %d "), i));
 #endif /* ACE_WIN32 */
 
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT (" ]\n")));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT (" ]\n")));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -118,12 +118,12 @@ ACE_Handle_Set::count_bits (u_long n)
 
  ACE_TRACE ("ACE_Handle_Set::count_bits");
 #if defined (ACE_HAS_HANDLE_SET_OPTIMIZED_FOR_SELECT)
-  register int rval = 0;
+  ACE_REGISTER int rval = 0;
 
   // Count the number of enabled bits in <n>.  This algorithm is very
   // fast, i.e., O(enabled bits in n).
 
-  for (register u_long m = n;
+  for (ACE_REGISTER u_long m = n;
        m != 0;
        m &= m - 1)
     rval++;
@@ -144,8 +144,8 @@ ACE_Handle_Set::count_bits (u_long n)
 int
 ACE_Handle_Set::bitpos (u_long bit)
 {
-  register int l = 0;
-  register u_long n = bit - 1;
+  ACE_REGISTER int l = 0;
+  ACE_REGISTER u_long n = bit - 1;
 
   // This is a fast count method when have the most significative bit.
 
@@ -247,15 +247,15 @@ ACE_Handle_Set_Iterator::dump (void) const
 #if defined (ACE_HAS_DUMP)
   ACE_TRACE ("ACE_Handle_Set_Iterator::dump");
 
-  ACE_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_BEGIN_DUMP, this));
 #if defined(ACE_WIN32) || !defined(ACE_HAS_BIG_FD_SET)
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nhandle_index_ = %d"), this->handle_index_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("\nhandle_index_ = %d"), this->handle_index_));
 #elif defined(ACE_HAS_BIG_FD_SET)
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nword_max_ = %d"), this->word_max_));
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nword_val_ = %d"), this->word_val_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("\nword_max_ = %d"), this->word_max_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("\nword_val_ = %d"), this->word_val_));
 #endif
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("\nword_num_ = %d"), this->word_num_));
-  ACE_DEBUG ((LM_DEBUG, ACE_END_DUMP));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_TEXT ("\nword_num_ = %d"), this->word_num_));
+  ACELIB_DEBUG ((LM_DEBUG, ACE_END_DUMP));
 #endif /* ACE_HAS_DUMP */
 }
 
@@ -342,7 +342,7 @@ ACE_Handle_Set_Iterator::operator () (void)
     }
 #else /* !ACE_HAS_BIG_FD_SET */
    // Find the first word in fds_bits with bit on
-   register u_long lsb = this->word_val_;
+   ACE_REGISTER u_long lsb = this->word_val_;
 
    if (lsb == 0)
      {
@@ -383,7 +383,7 @@ ACE_Handle_Set_Iterator::operator () (void)
         // Remove least significative bit.
         this->word_val_ ^= lsb;
 
-        register u_long n = lsb - this->oldlsb_;
+        ACE_REGISTER u_long n = lsb - this->oldlsb_;
 
         // Move index to bit distance between new lsb and old lsb.
         do

@@ -4,7 +4,7 @@
 /**
  *  @file    Timer_Queue_T.h
  *
- *  $Id: Timer_Queue_T.h 95362 2011-12-18 11:56:24Z johnnyw $
+ *  $Id: Timer_Queue_T.h 97644 2014-03-07 11:59:51Z johnnyw $
  *
  *  @author Doug Schmidt <schmidt@cs.wustl.edu>
  *  @author Irfan Pyarali <irfan@cs.wustl.edu> and
@@ -117,9 +117,6 @@ public:
    */
   virtual int dispatch_info (const ACE_Time_Value &current_time,
                              ACE_Timer_Node_Dispatch_Info_T<TYPE> &info);
-
-
-
   //@{
   /**
    * Implement the gettimeofday() virtual function

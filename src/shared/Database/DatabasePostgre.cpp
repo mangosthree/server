@@ -53,7 +53,7 @@ DatabasePostgre::~DatabasePostgre()
 
 SqlConnection* DatabasePostgre::CreateConnection()
 {
-    return new PostgreSQLConnection();
+    return new PostgreSQLConnection(*this);
 }
 
 PostgreSQLConnection::~PostgreSQLConnection()
@@ -72,20 +72,20 @@ bool PostgreSQLConnection::Initialize(const char* infoString)
     iter = tokens.begin();
 
     if (iter != tokens.end())
-        host = *iter++;
+        { host = *iter++; }
     if (iter != tokens.end())
-        port_or_socket_dir = *iter++;
+        { port_or_socket_dir = *iter++; }
     if (iter != tokens.end())
-        user = *iter++;
+        { user = *iter++; }
     if (iter != tokens.end())
-        password = *iter++;
+        { password = *iter++; }
     if (iter != tokens.end())
-        database = *iter++;
+        { database = *iter++; }
 
     if (host == ".")
-        mPGconn = PQsetdbLogin(NULL, port_or_socket_dir == "." ? NULL : port_or_socket_dir.c_str(), NULL, NULL, database.c_str(), user.c_str(), password.c_str());
+        { mPGconn = PQsetdbLogin(NULL, port_or_socket_dir == "." ? NULL : port_or_socket_dir.c_str(), NULL, NULL, database.c_str(), user.c_str(), password.c_str()); }
     else
-        mPGconn = PQsetdbLogin(host.c_str(), port_or_socket_dir.c_str(), NULL, NULL, database.c_str(), user.c_str(), password.c_str());
+        { mPGconn = PQsetdbLogin(host.c_str(), port_or_socket_dir.c_str(), NULL, NULL, database.c_str(), user.c_str(), password.c_str()); }
 
     /* check to see that the backend connection was successfully made */
     if (PQstatus(mPGconn) != CONNECTION_OK)
@@ -105,13 +105,13 @@ bool PostgreSQLConnection::Initialize(const char* infoString)
 bool PostgreSQLConnection::_Query(const char* sql, PGresult** pResult, uint64* pRowCount, uint32* pFieldCount)
 {
     if (!mPGconn)
-        return false;
+        { return false; }
 
     uint32 _s = WorldTimer::getMSTime();
     // Send the query
     *pResult = PQexec(mPGconn, sql);
     if (!*pResult)
-        return false;
+        { return false; }
 
     if (PQresultStatus(*pResult) != PGRES_TUPLES_OK)
     {
@@ -141,14 +141,14 @@ bool PostgreSQLConnection::_Query(const char* sql, PGresult** pResult, uint64* p
 QueryResult* PostgreSQLConnection::Query(const char* sql)
 {
     if (!mPGconn)
-        return NULL;
+        { return NULL; }
 
     PGresult* result = NULL;
     uint64 rowCount = 0;
     uint32 fieldCount = 0;
 
     if (!_Query(sql, &result, &rowCount, &fieldCount))
-        return NULL;
+        { return NULL; }
 
     QueryResultPostgre* queryResult = new QueryResultPostgre(result, rowCount, fieldCount);
 
@@ -159,18 +159,18 @@ QueryResult* PostgreSQLConnection::Query(const char* sql)
 QueryNamedResult* PostgreSQLConnection::QueryNamed(const char* sql)
 {
     if (!mPGconn)
-        return NULL;
+        { return NULL; }
 
     PGresult* result = NULL;
     uint64 rowCount = 0;
     uint32 fieldCount = 0;
 
     if (!_Query(sql, &result, &rowCount, &fieldCount))
-        return NULL;
+        { return NULL; }
 
     QueryFieldNames names(fieldCount);
     for (uint32 i = 0; i < fieldCount; ++i)
-        names[i] = PQfname(result, i);
+        { names[i] = PQfname(result, i); }
 
     QueryResultPostgre* queryResult = new QueryResultPostgre(result, rowCount, fieldCount);
 
@@ -181,7 +181,7 @@ QueryNamedResult* PostgreSQLConnection::QueryNamed(const char* sql)
 bool PostgreSQLConnection::Execute(const char* sql)
 {
     if (!mPGconn)
-        return false;
+        { return false; }
 
     uint32 _s = WorldTimer::getMSTime();
 
@@ -204,7 +204,7 @@ bool PostgreSQLConnection::Execute(const char* sql)
 bool PostgreSQLConnection::_TransactionCmd(const char* sql)
 {
     if (!mPGconn)
-        return false;
+        { return false; }
 
     PGresult* res = PQexec(mPGconn, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -238,7 +238,7 @@ bool PostgreSQLConnection::RollbackTransaction()
 unsigned long PostgreSQLConnection::escape_string(char* to, const char* from, unsigned long length)
 {
     if (!mPGconn || !to || !from || !length)
-        return 0;
+        { return 0; }
 
     return PQescapeString(to, from, length);
 }

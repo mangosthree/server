@@ -6,7 +6,7 @@
  *
  *  data types
  *
- *  $Id: os_types.h 96089 2012-08-21 16:59:07Z johnnyw $
+ *  $Id: os_types.h 97939 2014-10-27 12:30:12Z johnnyw $
  *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
@@ -18,7 +18,7 @@
 
 #include /**/ "ace/pre.h"
 
-#include "ace/config-lite.h"
+#include /**/ "ace/config-lite.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -137,7 +137,7 @@ typedef DWORD nlink_t;
   typedef unsigned long useconds_t;
 #endif
 
-#if defined (ACE_WIN32) && !defined(__MINGW32__)
+#if defined (ACE_LACKS_PID_T)
    typedef int pid_t;
 #endif /* ACE_WIN32 */
 

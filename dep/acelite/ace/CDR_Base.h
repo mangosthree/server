@@ -4,7 +4,7 @@
 /**
  *  @file   CDR_Base.h
  *
- *  $Id: CDR_Base.h 95761 2012-05-15 18:23:04Z johnnyw $
+ *  $Id: CDR_Base.h 97885 2014-09-09 06:39:00Z johnnyw $
  *
  * ACE Common Data Representation (CDR) basic types.
  *
@@ -38,6 +38,7 @@
 
 #include "ace/Basic_Types.h"
 #include "ace/Default_Constants.h"
+#include "ace/Global_Macros.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 

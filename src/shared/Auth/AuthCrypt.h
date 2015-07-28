@@ -22,29 +22,63 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _AUTHCRYPT_H
-#define _AUTHCRYPT_H
+#ifndef MANGOS_H_AUTHCRYPT
+#define MANGOS_H_AUTHCRYPT
 
-#include <Common.h>
-#include "SARC4.h"
+#include "Common/Common.h"
+#include <vector>
+#include "ARC4.h"
 
 class BigNumber;
 
+/**
+ * @brief
+ *
+ */
 class AuthCrypt
 {
     public:
+        /**
+         * @brief
+         *
+         */
         AuthCrypt();
+        /**
+         * @brief
+         *
+         */
         ~AuthCrypt();
 
-        void Init(BigNumber* K);
+        /**
+        * @brief
+        *
+        */
+    void Init(BigNumber* K);
+        /**
+         * @brief
+         *
+         * @param
+         * @param size_t
+         */
         void DecryptRecv(uint8*, size_t);
+        /**
+         * @brief
+         *
+         * @param
+         * @param size_t
+         */
         void EncryptSend(uint8*, size_t);
 
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool IsInitialized() { return _initialized; }
 
     private:
-        SARC4 _clientDecrypt;
-        SARC4 _serverEncrypt;
-        bool _initialized;
+        ARC4 _clientDecrypt;
+        ARC4 _serverEncrypt;
+        bool _initialized; /**< TODO */
 };
 #endif

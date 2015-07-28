@@ -31,9 +31,14 @@
 #include "World.h"
 #include "WorldRunnable.h"
 #include "Timer.h"
+#include "ObjectAccessor.h"
 #include "MapManager.h"
 
 #include "Database/DatabaseEnv.h"
+
+#ifdef ENABLE_ELUNA 
+#include "LuaEngine.h" 
+#endif /* ENABLE_ELUNA */ 
 
 #define WORLD_SLEEP_CONST 50
 
@@ -45,9 +50,9 @@ extern int m_ServiceStatus;
 /// Heartbeat for the World
 void WorldRunnable::run()
 {
-    ///- Init new SQL thread for the world database
-    WorldDatabase.ThreadStart();                            // let thread do safe mySQL requests (one connection call enough)
-    sWorld.InitResultQueue();
+#ifdef ENABLE_ELUNA
+    sEluna->OnStartup();
+#endif /* ENABLE_ELUNA */
 
     uint32 realCurrTime = 0;
     uint32 realPrevTime = WorldTimer::tick();
@@ -75,20 +80,35 @@ void WorldRunnable::run()
             ACE_Based::Thread::Sleep(prevSleepTime);
         }
         else
+        {
             prevSleepTime = 0;
+        }
 
-#ifdef WIN32
-        if (m_ServiceStatus == 0) World::StopNow(SHUTDOWN_EXIT_CODE);
-        while (m_ServiceStatus == 2) Sleep(1000);
+#ifdef _WIN32
+        if (m_ServiceStatus == 0)
+        {
+            World::StopNow(SHUTDOWN_EXIT_CODE);
+        }
+
+        while (m_ServiceStatus == 2)
+            Sleep(1000);
 #endif
     }
 
-    sWorld.CleanupsBeforeStop();
+#ifdef ENABLE_ELUNA
+    sEluna->OnShutdown();
+#endif /* ENABLE_ELUNA */
+
+    sWorld.KickAll();                                       // save and kick all players
+    sWorld.UpdateSessions(1);                               // real players unload required UpdateSessions call
 
     sWorldSocketMgr->StopNetwork();
 
-    MapManager::Instance().UnloadAll();                     // unload all grids (including locked in memory)
+    sMapMgr.UnloadAll();                                    // unload all grids (including locked in memory)
 
-    ///- End the database thread
-    WorldDatabase.ThreadEnd();                              // free mySQL thread resources
+#ifdef ENABLE_ELUNA
+    // Eluna must be unloaded after Maps, since ~Map calls sEluna->OnDestroy,
+    //   and must be unloaded before the DB, since it can access the DB.
+    Eluna::Uninitialize();
+#endif /* ENABLE_ELUNA */
 }

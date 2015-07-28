@@ -1,15 +1,22 @@
-# Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
 #
-# This file is free software; as a special exception the author gives
-# unlimited permission to copy and/or distribute it, with or without
-# modifications, as long as this notice is preserved.
+# This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
 #
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
 
-# NOTE: Do not use glob here, it would include files we don't want
-set(ace_STAT_SRCS
+set(ace_STAT_SRCS 
   ACE.cpp
   ACE_crc32.cpp
   ACE_crc_ccitt.cpp
@@ -30,7 +37,6 @@ set(ace_STAT_SRCS
   ATM_Stream.cpp
   Atomic_Op.cpp
   Atomic_Op_Sparc.c
-  Auto_Event.cpp
   Barrier.cpp
   Base_Thread_Adapter.cpp
   Based_Pointer_Repository.cpp
@@ -70,7 +76,7 @@ set(ace_STAT_SRCS
   Dynamic_Service_Dependency.cpp
   Encoding_Converter.cpp
   Encoding_Converter_Factory.cpp
-  Event.cpp
+  Event_Base.cpp
   Event_Handler.cpp
   Event_Handler_Handle_Timeout_Upcall.cpp
   FIFO.cpp
@@ -105,6 +111,7 @@ set(ace_STAT_SRCS
   Local_Name_Space.cpp
   Local_Tokens.cpp
   Lock.cpp
+  Log_Category.cpp
   Log_Msg.cpp
   Log_Msg_Backend.cpp
   Log_Msg_Callback.cpp
@@ -121,7 +128,6 @@ set(ace_STAT_SRCS
   LSOCK_Stream.cpp
   Malloc.cpp
   Malloc_Allocator.cpp
-  Manual_Event.cpp
   MEM_Acceptor.cpp
   MEM_Addr.cpp
   MEM_Connector.cpp
@@ -142,6 +148,7 @@ set(ace_STAT_SRCS
   Monitor_Control_Types.cpp
   Monitor_Point_Registry.cpp
   Monitor_Size.cpp
+  Monotonic_Time_Policy.cpp
   Msg_WFMO_Reactor.cpp
   Multihomed_INET_Addr.cpp
   Mutex.cpp
@@ -156,6 +163,7 @@ set(ace_STAT_SRCS
   Obchunk.cpp
   Object_Manager.cpp
   Object_Manager_Base.cpp
+  Obstack.cpp
   OS_Errno.cpp
   OS_Log_Msg_Attributes.cpp
   OS_main.cpp
@@ -192,6 +200,7 @@ set(ace_STAT_SRCS
   OS_NS_time.cpp
   OS_NS_unistd.cpp
   OS_NS_wchar.cpp
+  OS_NS_wctype.cpp
   OS_QoS.cpp
   OS_Thread_Adapter.cpp
   OS_TLI.cpp
@@ -319,43 +328,22 @@ set(ace_STAT_SRCS
   XTI_ATM_Mcast.cpp
 )
 
-if (USE_COREPCH)
-  set(ace_PCH_HDR PrecompiledHeaders/WinAcePCH.h)
-  set(ace_PCH_SRC PrecompiledHeaders/WinAcePCH.cpp)
-endif()
-
-include_directories(
-  ${CMAKE_SOURCE_DIR}/dep/acelite
-  ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
-  ${CMAKE_SOURCE_DIR}/dep/src/zlib
-)
-
-# Needed for PCH support
-set_source_files_properties(Atomic_Op_Sparc.c Rtems_init.c PROPERTIES LANGUAGE CXX)
+include_directories(${CMAKE_SOURCE_DIR}/dep/acelite)
 
 add_definitions(-DACE_BUILD_DLL)
 
-add_library(ace SHARED
-  ${ace_STAT_SRCS}
-  ${ace_PCH_SRC}
-)
+add_library(ace SHARED ${ace_STAT_SRCS})
 
-if (MINGW) # GCC ignores "#prama comment"
+if (MINGW)
   target_link_libraries(ace ws2_32 iphlpapi netapi32 mswsock)
-endif()
-
-# Generate precompiled header
-if( USE_COREPCH )
-  add_cxx_pch(ace ${ace_PCH_HDR} ${ace_PCH_SRC})
 endif()
 
 install(
     TARGETS ace
     RUNTIME DESTINATION "${BIN_DIR}"
-    #is lib/ correct?
     LIBRARY DESTINATION "${LIBS_DIR}"
 )
 
-if(WIN32 AND MSVC)
+if(WIN32)
   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/\${BUILD_TYPE}/ace.pdb" DESTINATION "${BIN_DIR}" CONFIGURATIONS Debug)
 endif()

@@ -4,7 +4,7 @@
 /**
  *  @file    os_sysinfo.h
  *
- *  $Id: os_sysinfo.h 81692 2008-05-14 12:25:02Z johnnyw $
+ *  $Id: os_sysinfo.h 97827 2014-08-02 17:34:32Z johnnyw $
  *
  *  @author Johnny Willemsen  <jwillemsen@remedy.nl>
  */
@@ -15,7 +15,7 @@
 
 #include /**/ "ace/pre.h"
 
-#include "ace/config-lite.h"
+#include /**/ "ace/config-lite.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -24,16 +24,6 @@
 #if defined (ACE_HAS_SYS_SYSINFO_H)
 #  include /**/ <sys/sysinfo.h>
 #endif /* ACE_HAS_SYS_SYSINFO_H */
-
-// Place all additions (especially function declarations) within extern "C" {}
-#ifdef __cplusplus
-extern "C"
-{
-#endif /* __cplusplus */
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 #include /**/ "ace/post.h"
 #endif /* ACE_OS_INCLUDE_SYS_OS_SYSINFO_H */

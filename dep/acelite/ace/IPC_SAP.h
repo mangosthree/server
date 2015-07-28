@@ -4,7 +4,7 @@
 /**
  *  @file    IPC_SAP.h
  *
- *  $Id: IPC_SAP.h 80826 2008-03-04 14:51:23Z wotte $
+ *  $Id: IPC_SAP.h 97661 2014-03-17 09:52:07Z johnnyw $
  *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  */
@@ -81,9 +81,6 @@ protected:
 private:
   /// Underlying I/O handle.
   ACE_HANDLE handle_;
-
-  /// Cache the process ID.
-  static pid_t pid_;
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

@@ -1,6 +1,7 @@
-// $Id: OS_NS_string.cpp 93549 2011-03-15 19:50:24Z olli $
+// $Id: OS_NS_string.cpp 97884 2014-09-08 18:00:53Z johnnyw $
 
 #include "ace/ACE.h"
+#include "ace/Global_Macros.h"
 #include "ace/OS_NS_string.h"
 #include "ace/OS_NS_stdio.h"
 #include "ace/OS_NS_stdlib.h"
@@ -61,8 +62,8 @@ ACE_OS::strdup_emulation (const wchar_t *s)
 char *
 ACE_OS::strecpy (char *s, const char *t)
 {
-  register char *dscan = s;
-  register const char *sscan = t;
+  ACE_REGISTER char *dscan = s;
+  ACE_REGISTER const char *sscan = t;
 
   while ((*dscan++ = *sscan++) != '\0')
     continue;
@@ -74,8 +75,8 @@ ACE_OS::strecpy (char *s, const char *t)
 wchar_t *
 ACE_OS::strecpy (wchar_t *s, const wchar_t *t)
 {
-  register wchar_t *dscan = s;
-  register const wchar_t *sscan = t;
+  ACE_REGISTER wchar_t *dscan = s;
+  ACE_REGISTER const wchar_t *sscan = t;
 
   while ((*dscan++ = *sscan++) != ACE_TEXT_WIDE ('\0'))
     continue;
@@ -319,9 +320,9 @@ ACE_OS::strrchr_emulation (const char *s, int c)
 char *
 ACE_OS::strsncpy (char *dst, const char *src, size_t maxlen)
 {
-  register char *rdst = dst;
-  register const char *rsrc = src;
-  register size_t rmaxlen = maxlen;
+  ACE_REGISTER char *rdst = dst;
+  ACE_REGISTER const char *rsrc = src;
+  ACE_REGISTER size_t rmaxlen = maxlen;
 
   if (rmaxlen > 0)
     {
@@ -345,9 +346,9 @@ ACE_OS::strsncpy (char *dst, const char *src, size_t maxlen)
 ACE_WCHAR_T *
 ACE_OS::strsncpy (ACE_WCHAR_T *dst, const ACE_WCHAR_T *src, size_t maxlen)
 {
-  register ACE_WCHAR_T *rdst = dst;
-  register const ACE_WCHAR_T *rsrc = src;
-  register size_t rmaxlen = maxlen;
+  ACE_REGISTER ACE_WCHAR_T *rdst = dst;
+  ACE_REGISTER const ACE_WCHAR_T *rsrc = src;
+  ACE_REGISTER size_t rmaxlen = maxlen;
 
   if (rmaxlen > 0)
     {

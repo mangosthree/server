@@ -25,34 +25,89 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "Common.h"
+#include "Common/Common.h"
 #include <Policies/Singleton.h>
 #include "Platform/Define.h"
 
 class ACE_Configuration_Heap;
 
-class  Config
+/**
+ * @brief
+ *
+ */
+class Config
 {
     public:
-
+        /**
+         * @brief
+         *
+         */
         Config();
+        /**
+         * @brief
+         *
+         */
         ~Config();
 
+        /**
+         * @brief
+         *
+         * @param file
+         * @return bool
+         */
         bool SetSource(const char* file);
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool Reload();
 
+        /**
+         * @brief
+         *
+         * @param name
+         * @param def
+         * @return std::string
+         */
         std::string GetStringDefault(const char* name, const char* def);
+        /**
+         * @brief
+         *
+         * @param name
+         * @param def
+         * @return bool
+         */
         bool GetBoolDefault(const char* name, const bool def = false);
+        /**
+         * @brief
+         *
+         * @param name
+         * @param def
+         * @return int32
+         */
         int32 GetIntDefault(const char* name, const int32 def);
 		int64 GetInt64Default(const char* name, const int64 def);
+        /**
+         * @brief
+         *
+         * @param name
+         * @param def
+         * @return float
+         */
         float GetFloatDefault(const char* name, const float def);
 
+        /**
+         * @brief
+         *
+         * @return std::string
+         */
         std::string GetFilename() const { return mFilename; }
 
     private:
 
-        std::string mFilename;
-        ACE_Configuration_Heap* mConf;
+        std::string mFilename; /**< TODO */
+        ACE_Configuration_Heap* mConf; /**< TODO */
 };
 
 #define sConfig MaNGOS::Singleton<Config>::Instance()

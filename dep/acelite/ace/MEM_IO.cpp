@@ -1,5 +1,5 @@
 // MEM_IO.cpp
-// $Id: MEM_IO.cpp 92069 2010-09-28 11:38:59Z johnnyw $
+// $Id: MEM_IO.cpp 96985 2013-04-11 15:50:32Z huangh $
 
 #include "ace/MEM_IO.h"
 #include "ace/Handle_Set.h"
@@ -50,7 +50,7 @@ ACE_Reactive_MEM_IO::recv_buf (ACE_MEM_SAP_Node *&buf,
 
   if (retv == 0)
     {
-      //      ACE_DEBUG ((LM_INFO, "MEM_Stream closed\n"));
+      //      ACELIB_DEBUG ((LM_INFO, "MEM_Stream closed\n"));
       buf = 0;
       return 0;
     }

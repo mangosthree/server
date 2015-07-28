@@ -6,7 +6,7 @@
  *
  *  string operations
  *
- *  $Id: os_string.h 93117 2011-01-20 12:11:28Z mcorino $
+ *  $Id: os_string.h 97827 2014-08-02 17:34:32Z johnnyw $
  *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
@@ -29,21 +29,6 @@
 #if !defined (ACE_LACKS_STRING_H)
 # include /**/ <string.h>
 #endif /* !ACE_LACKS_STRING_H */
-
-
-// Place all additions (especially function declarations) within extern "C" {}
-#ifdef __cplusplus
-extern "C"
-{
-#endif /* __cplusplus */
-
-#if defined (ACE_LACKS_STRTOK_R_PROTOTYPE) && !defined (_POSIX_SOURCE)
-  char *strtok_r (char *s, const char *delim, char **save_ptr);
-#endif  /* ACE_LACKS_STRTOK_R_PROTOTYPE */
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 #include /**/ "ace/post.h"
 #endif /* ACE_OS_INCLUDE_OS_STRING_H */

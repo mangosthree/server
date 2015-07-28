@@ -28,8 +28,8 @@
 #include "Common.h"
 #include "Database.h"
 #include "Policies/Singleton.h"
-#include "ace/Thread_Mutex.h"
-#include "ace/Guard_T.h"
+#include <ace/Thread_Mutex.h>
+#include <ace/Guard_T.h>
 #include <stdarg.h>
 
 #ifdef WIN32
@@ -40,10 +40,10 @@
 #include <libpq-fe.h>
 #endif
 
-class  PostgreSQLConnection : public SqlConnection
+class PostgreSQLConnection : public SqlConnection
 {
     public:
-        PostgreSQLConnection() : mPGconn(NULL) {}
+        PostgreSQLConnection(Database& db) : SqlConnection(db), mPGconn(NULL) {}
         ~PostgreSQLConnection();
 
         bool Initialize(const char* infoString) override;
@@ -65,7 +65,7 @@ class  PostgreSQLConnection : public SqlConnection
         PGconn* mPGconn;
 };
 
-class  DatabasePostgre : public Database
+class DatabasePostgre : public Database
 {
         friend class MaNGOS::OperatorNew<DatabasePostgre>;
 

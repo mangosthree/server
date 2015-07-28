@@ -22,38 +22,72 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __SQLDELAYTHREAD_H
-#define __SQLDELAYTHREAD_H
+#ifndef MANGOS_H_SQLDELAYTHREAD
+#define MANGOS_H_SQLDELAYTHREAD
 
-#include "ace/Thread_Mutex.h"
-#include "LockedQueue.h"
-#include "Threading.h"
+#include <ace/Thread_Mutex.h>
+#include "LockedQueue/LockedQueue.h"
+#include "Threading/Threading.h"
 
 class Database;
 class SqlOperation;
 class SqlConnection;
 
+/**
+ * @brief
+ *
+ */
 class SqlDelayThread : public ACE_Based::Runnable
 {
+        /**
+         * @brief
+         *
+         */
         typedef ACE_Based::LockedQueue<SqlOperation*, ACE_Thread_Mutex> SqlQueue;
 
     private:
-        SqlQueue m_sqlQueue;                                ///< Queue of SQL statements
-        Database* m_dbEngine;                               ///< Pointer to used Database engine
-        SqlConnection* m_dbConnection;                      ///< Pointer to DB connection
-        volatile bool m_running;
+        SqlQueue m_sqlQueue;                                /**< Queue of SQL statements */
+        Database* m_dbEngine;                               /**< Pointer to used Database engine */
+        SqlConnection* m_dbConnection;                      /**< Pointer to DB connection */
+        volatile bool m_running; /**< TODO */
 
-        // process all enqueued requests
+        /**
+         * @brief process all enqueued requests
+         *
+         */
         void ProcessRequests();
 
     public:
+        /**
+         * @brief
+         *
+         * @param db
+         * @param conn
+         */
         SqlDelayThread(Database* db, SqlConnection* conn);
+        /**
+         * @brief
+         *
+         */
         ~SqlDelayThread();
 
-        ///< Put sql statement to delay queue
+        /**
+         * @brief Put sql statement to delay queue
+         *
+         * @param sql
+         * @return bool
+         */
         bool Delay(SqlOperation* sql) { m_sqlQueue.add(sql); return true; }
 
-        virtual void Stop();                                ///< Stop event
-        virtual void run();                                 ///< Main Thread loop
+        /**
+         * @brief Stop event
+         *
+         */
+        virtual void Stop();
+        /**
+         * @brief Main Thread loop
+         *
+         */
+        virtual void run();
 };
 #endif                                                      //__SQLDELAYTHREAD_H

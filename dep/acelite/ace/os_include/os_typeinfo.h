@@ -6,7 +6,7 @@
  *
  *  definitions for the typeinfo file
  *
- *  $Id: os_typeinfo.h 84160 2009-01-14 14:13:58Z johnnyw $
+ *  $Id: os_typeinfo.h 97827 2014-08-02 17:34:32Z johnnyw $
  *
  *  @author Don Hinton Johnny Willemsen  <jwillemsen@remedy.nl>
  */
@@ -24,16 +24,6 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 # include /**/ <typeinfo>
-
-// Place all additions (especially function declarations) within extern "C" {}
-#ifdef __cplusplus
-extern "C"
-{
-#endif /* __cplusplus */
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 #include /**/ "ace/post.h"
 #endif /* ACE_OS_INCLUDE_OS_TYPEINFO_H */

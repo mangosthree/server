@@ -14,24 +14,22 @@
 /* 19.11.03  1.01  Dan  Big endian handling                                  */
 /* 08.12.03  2.01  Dan  High-memory handling (> 0x80000000)                  */
 /*****************************************************************************/
- 
+
 #include <assert.h>
 #include <string.h>
- 
+
 #include "sparse.h"
 
 //-----------------------------------------------------------------------------
 // Public functions
 
-void CompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, int cbInBuffer)
+void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned char * pbInBuffer, int cbInBuffer)
 {
-    unsigned char * pbOutBufferEnd = (unsigned char *)pvOutBuffer + *pcbOutBuffer;
-    unsigned char * pbInBufferEnd = (unsigned char *)pvInBuffer + cbInBuffer;
-    unsigned char * pbLastNonZero = (unsigned char *)pvInBuffer;
-    unsigned char * pbOutBuffer0 = (unsigned char *)pvOutBuffer;
-    unsigned char * pbInBuffPtr = (unsigned char *)pvInBuffer;
-    unsigned char * pbOutBuffer = (unsigned char *)pvOutBuffer;
-    unsigned char * pbInBuffer = (unsigned char *)pvInBuffer;
+    unsigned char * pbOutBufferEnd = pbOutBuffer + *pcbOutBuffer;
+    unsigned char * pbInBufferEnd = pbInBuffer + cbInBuffer;
+    unsigned char * pbLastNonZero = pbInBuffer;
+    unsigned char * pbOutBuffer0 = pbOutBuffer;
+    unsigned char * pbInBuffPtr = pbInBuffer;
     size_t NumberOfNonZeros;
     size_t NumberOfZeros;
 
@@ -88,7 +86,7 @@ void CompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, i
                 // Put marker that means "0x80 of nonzeros"
                 *pbOutBuffer++ = 0xFF;
                 memcpy(pbOutBuffer, pbInBuffer, 0x80);
-                
+
                 // Adjust counter of nonzeros and both pointers
                 NumberOfNonZeros -= 0x80;
                 pbOutBuffer += 0x80;
@@ -108,7 +106,7 @@ void CompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, i
                 // Put marker that means "1 nonzero byte"
                 *pbOutBuffer++ = 0x80;
                 memcpy(pbOutBuffer, pbInBuffer, 1);
-                
+
                 // Adjust counter of nonzeros and both pointers
                 NumberOfNonZeros--;
                 pbOutBuffer++;
@@ -185,7 +183,7 @@ void CompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, i
 
             // Put marker that means "Several zeros"
             *pbOutBuffer++ = (unsigned char)(NumberOfZeros - 3);
-    
+
             // Adjust pointer
             pbInBuffer += NumberOfZeros;
         }
@@ -210,7 +208,7 @@ void CompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, i
                 // Terminate with a marker that means "0x80 of nonzeros"
                 *pbOutBuffer++ = 0xFF;
                 memcpy(pbOutBuffer, pbInBuffer, NumberOfNonZeros);
-                
+
                 // Adjust pointer
                 pbOutBuffer += NumberOfNonZeros;
                 break;
@@ -236,11 +234,9 @@ void CompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, i
     *pcbOutBuffer = (int)(pbOutBuffer - pbOutBuffer0);
 }
 
-int DecompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, int cbInBuffer)
+int DecompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned char * pbInBuffer, int cbInBuffer)
 {
-    unsigned char * pbInBufferEnd = (unsigned char *)pvInBuffer + cbInBuffer;
-    unsigned char * pbOutBuffer = (unsigned char *)pvOutBuffer;
-    unsigned char * pbInBuffer = (unsigned char *)pvInBuffer;
+    unsigned char * pbInBufferEnd = pbInBuffer + cbInBuffer;
     unsigned int cbChunkSize;
     unsigned int cbOutBuffer = 0;
     unsigned int OneByte;
@@ -260,7 +256,7 @@ int DecompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, 
     cbOutBuffer |= (OneByte << 0x00);
 
     // Verify the size of the stream against the output buffer size
-    if(cbOutBuffer > (unsigned int)*pcbOutBuffer)
+    if(cbOutBuffer > *pcbOutBuffer)
         return 0;
 
     // Put the output size to the buffer

@@ -42,15 +42,15 @@
 #include "SystemConfig.h"
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"
-#include "CliRunnable.h"
-#include "RASocket.h"
+#include "Comm/CliRunnable.h"
+#include "RA/RASocket.h"
 #include "Util.h"
-#include "revision_sql.h"
+#include "revision.h"
 #include "MassMailMgr.h"
 #include "DBCStores.h"
 #include "ScriptMgr.h"
 #ifdef ENABLE_SOAP
-#include "MaNGOSsoap.h"
+#include "SOAP/MaNGOSsoap.h"
 #endif
 
 #include <ace/OS_NS_signal.h>
@@ -570,7 +570,7 @@ void Master::clearOnlineAccounts()
 {
     // Cleanup online status for characters hosted at current realm
     /// \todo Only accounts with characters logged on *this* realm should have online status reset. Move the online column from 'account' to 'realmcharacters'?
-    LoginDatabase.PExecute("UPDATE account SET active_realm_id = 0 WHERE active_realm_id = '%u'", realmID);
+    LoginDatabase.PExecute("UPDATE account SET active_realm_id = 0, os = ''  WHERE active_realm_id = '%u'", realmID);
 
     CharacterDatabase.Execute("UPDATE characters SET online = 0 WHERE online<>0");
 

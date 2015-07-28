@@ -27,29 +27,55 @@
 #if !defined(QUERYRESULTMYSQL_H)
 #define QUERYRESULTMYSQL_H
 
-#include "Common.h"
+#include "Common/Common.h"
 
 #ifdef WIN32
 #include <winsock2.h>
-#include <mysql/mysql.h>
-#else
-#include <mysql.h>
 #endif
 
+#include <mysql.h>
+
+/**
+ * @brief
+ *
+ */
 class QueryResultMysql : public QueryResult
 {
     public:
+        /**
+         * @brief
+         *
+         * @param result
+         * @param fields
+         * @param rowCount
+         * @param fieldCount
+         */
         QueryResultMysql(MYSQL_RES* result, MYSQL_FIELD* fields, uint64 rowCount, uint32 fieldCount);
 
+        /**
+         * @brief
+         *
+         */
         ~QueryResultMysql();
 
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool NextRow() override;
 
+        /**
+         * @brief
+         *
+         * @param type
+         * @return Field::SimpleDataTypes
+         */
     private:
         enum Field::DataTypes ConvertNativeType(enum_field_types mysqlType) const;
         void EndQuery();
 
-        MYSQL_RES* mResult;
+        MYSQL_RES* mResult; /**< TODO */
 };
 #endif
 #endif

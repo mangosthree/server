@@ -4,7 +4,7 @@
 /**
  *  @file   config-macros.h
  *
- *  $Id: config-macros.h 94386 2011-08-10 12:42:53Z johnnyw $
+ *  $Id: config-macros.h 97400 2013-10-31 10:44:50Z mhengstmengel $
  *
  *  @author (Originally in OS.h)Doug Schmidt <schmidt@cs.wustl.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
@@ -21,10 +21,13 @@
 #ifndef ACE_CONFIG_MACROS_H
 #define ACE_CONFIG_MACROS_H
 
+#define ACE_HAS_IPV6 1 
+#define ACE_USES_IPV4_IPV6_MIGRATION 1 
+
 #ifdef _WIN32
-  #include "ace/config-win32.h"
+#include "ace/config-win32.h"
 #else
-  #include "ace/config-linux.h"
+#include "ace/config-linux.h"
 #endif
 
 #include "ace/Version.h"
@@ -186,6 +189,25 @@
 
 #endif /* !ACE_HAS_CUSTOM_EXPORT_MACROS */
 
+#if defined (ACE_HAS_EXPLICIT_TEMPLATE_CLASS_INSTANTIATION)
+# define ACE_SINGLETON_TEMPLATE_INSTANTIATION(T) \
+  template class T;
+# define ACE_SINGLETON_TEMPLATE_INSTANTIATE(SINGLETON_TYPE, CLASS, LOCK) \
+  template class SINGLETON_TYPE < CLASS, LOCK >;
+#elif defined (ACE_HAS_EXPLICIT_STATIC_TEMPLATE_MEMBER_INSTANTIATION)
+# define ACE_SINGLETON_TEMPLATE_INSTANTIATION(T) \
+  template T * T::singleton_;
+# define ACE_SINGLETON_TEMPLATE_INSTANTIATE(SINGLETON_TYPE, CLASS, LOCK) \
+  template SINGLETON_TYPE < CLASS, LOCK > * SINGLETON_TYPE < CLASS, LOCK >::singleton_;
+#endif /* ACE_HAS_EXPLICIT_STATIC_TEMPLATE_MEMBER_INSTANTIATION */
+
+#if !defined(ACE_SINGLETON_TEMPLATE_INSTANTIATION)
+# define ACE_SINGLETON_TEMPLATE_INSTANTIATION(T)
+#endif
+#if !defined(ACE_SINGLETON_TEMPLATE_INSTANTIATE)
+# define ACE_SINGLETON_TEMPLATE_INSTANTIATE(SINGLETON_TYPE, CLASS, LOCK)
+#endif
+
 // This is a whim of mine -- that instead of annotating a class with
 // ACE_Export in its declaration, we make the declaration near the TOP
 // of the file with ACE_DECLARE_EXPORT.
@@ -227,7 +249,7 @@
 // ============================================================================
 
 #if !defined (ACE_UNUSED_ARG)
-# if defined (__GNUC__) && ((__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2)))
+# if defined (__GNUC__) && ((__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2))) || (defined (__BORLANDC__) && defined (__clang__))
 #   define ACE_UNUSED_ARG(a) (void) (a)
 # elif defined (__GNUC__) || defined (ghs) || defined (__hpux) || defined (__DECCXX) || defined (__rational__) || defined (__USLC__) || defined (ACE_RM544) || defined (__DCC__) || defined (__PGI) || defined (__TANDEM)
 // Some compilers complain about "statement with no effect" with (a).

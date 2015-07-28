@@ -1,5 +1,5 @@
 // Event_Handler.cpp
-// $Id: Event_Handler.cpp 91286 2010-08-05 09:04:31Z johnnyw $
+// $Id: Event_Handler.cpp 97856 2014-08-29 11:30:58Z johnnyw $
 
 #include "ace/Event_Handler.h"
 #include "ace/OS_Errno.h"
@@ -13,8 +13,6 @@
 #endif /* __ACE_INLINE__ */
 
 #include <algorithm>
-
-
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -373,6 +371,26 @@ ACE_Event_Handler_var::reset (ACE_Event_Handler *p)
 {
   *this = p;
 }
+
+#if defined (ACE_HAS_CPP11)
+ACE_Event_Handler_var::operator bool() const
+{
+  return this->ptr_ == nullptr ? false : true;
+}
+
+bool
+ACE_Event_Handler_var::operator ==(std::nullptr_t) const
+{
+  return this->ptr_ == nullptr ? true : false;
+}
+
+bool
+ACE_Event_Handler_var::operator !=(std::nullptr_t) const
+{
+  return this->ptr_ == nullptr ? false : true;
+
+}
+#endif /* ACE_HAS_CPP11 */
 
 // ---------------------------------------------------------------------
 

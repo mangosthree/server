@@ -4,7 +4,7 @@
 /**
  *  @file   OS_NS_stdio.h
  *
- *  $Id: OS_NS_stdio.h 93500 2011-03-07 16:19:27Z vzykov $
+ *  $Id: OS_NS_stdio.h 97921 2014-10-10 21:58:31Z shuston $
  *
  *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
@@ -27,6 +27,7 @@
 
 #include "ace/os_include/os_stdio.h"
 #include "ace/os_include/os_fcntl.h"
+#include "ace/os_include/os_inttypes.h"
 #include /**/ "ace/ACE_export.h"
 
 /* OPENVMS needs unistd for cuserid() */
@@ -117,7 +118,7 @@ inline ACE_HANDLE ace_fileno_helper (FILE *fp)
   return (ACE_HANDLE)fileno (fp);
 # undef fileno
 # else
-  return (ACE_HANDLE)ACE_STD_NAMESPACE::fileno (fp);
+  return (ACE_HANDLE)(intptr_t)ACE_STD_NAMESPACE::fileno (fp);
 # endif /* defined (fileno) */
 }
 #endif /* !ACE_FILENO_EQUIVALENT */
@@ -488,15 +489,17 @@ namespace ACE_OS {
   int sprintf (wchar_t *buf, const wchar_t *format, ...);
 # endif /* ACE_HAS_WCHAR */
 
+# if !defined (ACE_DISABLE_TEMPNAM)
   ACE_NAMESPACE_INLINE_FUNCTION
   char *tempnam (const char *dir = 0,
                  const char *pfx = 0);
 
-#if defined (ACE_HAS_WCHAR)
+#   if defined (ACE_HAS_WCHAR)
   ACE_NAMESPACE_INLINE_FUNCTION
   wchar_t *tempnam (const wchar_t *dir,
                     const wchar_t *pfx = 0);
-#endif /* ACE_HAS_WCHAR */
+#   endif /* ACE_HAS_WCHAR */
+# endif /* !ACE_DISABLE_TEMPNAM */
 
   ACE_NAMESPACE_INLINE_FUNCTION
   int vasprintf (char **bufp, const char *format, va_list argptr)

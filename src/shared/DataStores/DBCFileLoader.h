@@ -27,8 +27,8 @@
 
 #include "Platform/Define.h"
 #include "Utilities/ByteConverter.h"
+#include "Common/Common.h"
 #include <cassert>
-#include "Common\Common.h"
 
 /**
  * @brief

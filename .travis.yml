@@ -4,23 +4,29 @@ language: cpp
 git:
   depth: 1
 
-# do not build with clang until fixed
+# send notifications to stack as well as email
+notifications:
+  slack: getmangos:yRgNBSgRQVh8WdfGEbT08Hit
+  
+# only run travis on the master branch
+branches:
+  only:
+    - master
+    - develop21
+
+# build on both Linux and OSX
+os:
+  - linux
+  - osx
+
+# build with both gcc and clang to ensure compatibility
 compiler:
   - gcc
   - clang
-
-before_install:
- # Latest ubuntu dependencies and libraries for development (gcc and etc).
- - echo yes | sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-
- # update and install required tools
- - sudo apt-get -qq update
- - sudo apt-get -qq install automake autoconf make patch libmysql++-dev build-essential gcc-4.8 g++-4.8 libbz2-dev libncurses5-dev libmysqlclient-dev
- - sudo apt-get -qq install libreadline-dev libsdl1.2-dev libssl-dev zlib1g-dev libace-dev libtool grep binutils
-
+ 
 script:
   - test -d _build || mkdir _build
+  - test -d _install || mkdir _install
   - cd _build
-  - cmake -DACE_USE_EXTERNAL=1 ..
-
+  - cmake -DCMAKE_INSTALL_PREFIX=../_install ..
   - make -j4

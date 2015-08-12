@@ -98,15 +98,50 @@ file(GLOB sources_northrend scripts/northrend/*.cpp scripts/northrend/*.h)
     LIST(APPEND mangosscript_LIB_SRCS ${sources_northrend})
     source_group("Northrend Scripts" FILES ${sources_northrend})
 
-#Instance: Blackrock Depths Scripts
+#Maelstrom Scripts
+file(GLOB sources_maelstrom scripts/maelstrom/*.cpp scripts/maelstrom/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_maelstrom})
+    source_group("Maelstrom Scripts" FILES ${sources_maelstrom})
+
+#Instance: Stonecore
+file(GLOB sources_instance_m_sc scripts/maelstrom/stonecore/*.cpp scripts/maelstrom/stonecore/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_m_sc})
+    source_group("Eastern Kingdoms Scripts\\Instances\\Stonecore" FILES ${sources_instance_m_sc})
+
+#Instance: Bastion of Twilight
+file(GLOB sources_instance_ek_bot scripts/eastern_kingdoms/bastion_of_twilight/*.cpp scripts/eastern_kingdoms/bastion_of_twilight/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_ek_bot})
+    source_group("Eastern Kingdoms Scripts\\Instances\\Bastion of Twilight" FILES ${sources_instance_ek_bot})
+
+#Instance: Blackrock Caverns
+file(GLOB sources_instance_ek_brc scripts/eastern_kingdoms/blackrock_mountain/blackrock_caverns/*.cpp scripts/eastern_kingdoms/blackrock_caverns/blackrock_depths/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_ek_brc})
+    source_group("Eastern Kingdoms Scripts\\Instances\\Blackrock Depths" FILES ${sources_instance_ek_brc})
+
+#Instance: Blackrock Depths
 file(GLOB sources_instance_ek_brd scripts/eastern_kingdoms/blackrock_mountain/blackrock_depths/*.cpp scripts/eastern_kingdoms/blackrock_mountain/blackrock_depths/*.h)
     LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_ek_brd})
     source_group("Eastern Kingdoms Scripts\\Instances\\Blackrock Depths" FILES ${sources_instance_ek_brd})
 
-#Instance: Blackrock Spire Scripts
+#Instance: Blackrock Spire
 file(GLOB sources_instance_ek_brs scripts/eastern_kingdoms/blackrock_mountain/blackrock_spire/*.cpp scripts/eastern_kingdoms/blackrock_mountain/blackrock_spire/*.h)
     LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_ek_brs})
     source_group("Eastern Kingdoms Scripts\\Instances\\Blackrock Spire" FILES ${sources_instance_ek_brs})
+
+#Instance: Blackwing Descent
+file(GLOB sources_instance_ek_bwd scripts/eastern_kingdoms/blackrock_mountain/blackwing_descent/*.cpp scripts/eastern_kingdoms/blackrock_mountain/blackwing_descent/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_ek_bwd})
+    source_group("Eastern Kingdoms Scripts\\Instances\\Blackrock Descent" FILES ${sources_instance_ek_bwd})
+
+#Instance: Blackwing Lair
+file(GLOB sources_instance_ek_bwl scripts/eastern_kingdoms/blackrock_mountain/blackwing_lair/*.cpp scripts/eastern_kingdoms/blackrock_mountain/blackwing_lair/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_ek_bwl})
+    source_group("Eastern Kingdoms Scripts\\Instances\\Blackrock Spire" FILES ${sources_instance_ek_bwl})
+
+#Instance: Molten Core
+file(GLOB sources_instance_ek_mc scripts/eastern_kingdoms/blackrock_mountain/molten_core/*.cpp scripts/eastern_kingdoms/blackrock_mountain/molten_core/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_ek_mc})
+    source_group("Eastern Kingdoms Scripts\\Instances\\Blackrock Spire" FILES ${sources_instance_ek_mc})
 
 #Instance: Deadmines Scripts
 file(GLOB sources_instance_ek_tdm scripts/eastern_kingdoms/deadmines/*.cpp scripts/eastern_kingdoms/deadmines/*.h)
@@ -117,6 +152,11 @@ file(GLOB sources_instance_ek_tdm scripts/eastern_kingdoms/deadmines/*.cpp scrip
 file(GLOB sources_instance_ek_gno scripts/eastern_kingdoms/gnomeregan/*.cpp scripts/eastern_kingdoms/gnomeregan/*.h)
     LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_ek_gno})
     source_group("Eastern Kingdoms Scripts\\Instances\\Gnomeregan" FILES ${sources_instance_ek_gno})
+
+#Instance: Grim Batol
+file(GLOB sources_instance_ek_gb scripts/eastern_kingdoms/grim_batol/*.cpp scripts/eastern_kingdoms/grim_batol/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_ek_gb})
+    source_group("Eastern Kingdoms Scripts\\Instances\\Grim Batol" FILES ${sources_instance_ek_gb})
 
 #Instance: Scarlet Monastery Scripts
 file(GLOB sources_instance_ek_sm scripts/eastern_kingdoms/scarlet_monastery/*.cpp scripts/eastern_kingdoms/scarlet_monastery/*.h)
@@ -147,6 +187,11 @@ file(GLOB sources_instance_ek_st scripts/eastern_kingdoms/sunken_temple/*.cpp sc
 file(GLOB sources_instance_ek_strat scripts/eastern_kingdoms/stratholme/*.cpp scripts/eastern_kingdoms/stratholme/*.h)
     LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_ek_strat})
     source_group("Eastern Kingdoms Scripts\\Instances\\Stratholme" FILES ${sources_instance_ek_strat})
+
+#Instance: Throne of the Tides
+file(GLOB sources_instance_ek_tott scripts/eastern_kingdoms/throne_of_the_tides/*.cpp scripts/eastern_kingdoms/throne_of_the_tides/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_ek_tott})
+    source_group("Eastern Kingdoms Scripts\\Instances\\Throne of the Tides" FILES ${sources_instance_ek_tott})
 
 #Instance: Magisters Terrace Scripts
 file(GLOB sources_instance_ek_mt scripts/eastern_kingdoms/magisters_terrace/*.cpp scripts/eastern_kingdoms/magisters_terrace/*.h)
@@ -213,10 +258,30 @@ file(GLOB sources_instance_k_wc scripts/kalimdor/wailing_caverns/*.cpp scripts/k
     LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_wc})
     source_group("Kalimdor Scripts\\Instances\\Wailing Caverns" FILES ${sources_instance_k_wc})
   
-#Instance: Caverns of Time - Black Morass
-file(GLOB sources_instance_k_cot_bm scripts/kalimdor/caverns_of_time/dark_portal/*.cpp scripts/kalimdor/caverns_of_time/dark_portal/*.h)
-    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_cot_bm})
-    source_group("Kalimdor Scripts\\Instances\\Caverns of Time\\Black Morass" FILES ${sources_instance_k_cot_bm})
+#Instance: Caverns of Time - Dark Portal
+file(GLOB sources_instance_k_cot_dp scripts/kalimdor/caverns_of_time/dark_portal/*.cpp scripts/kalimdor/caverns_of_time/dark_portal/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_cot_dp})
+    source_group("Kalimdor Scripts\\Instances\\Caverns of Time\\Dark Portal" FILES ${sources_instance_k_cot_dp})
+
+#Instance: Caverns of Time - Dragon Soul
+file(GLOB sources_instance_k_cot_ds scripts/kalimdor/caverns_of_time/dragon_soul/*.cpp scripts/kalimdor/caverns_of_time/dragon_soul/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_cot_ds})
+    source_group("Kalimdor Scripts\\Instances\\Caverns of Time\\Dragon Soul" FILES ${sources_instance_k_cot_ds})
+
+#Instance: Caverns of Time - End of Time
+file(GLOB sources_instance_k_cot_eot scripts/kalimdor/caverns_of_time/end_of_time/*.cpp scripts/kalimdor/caverns_of_time/end_of_time/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_cot_eot})
+    source_group("Kalimdor Scripts\\Instances\\Caverns of Time\\End of Time" FILES ${sources_instance_k_cot_eot})
+
+#Instance: Caverns of Time - Hour of Twilight
+file(GLOB sources_instance_k_cot_hot scripts/kalimdor/caverns_of_time/hour_of_twilight/*.cpp scripts/kalimdor/caverns_of_time/hour_of_twilight/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_cot_hot})
+    source_group("Kalimdor Scripts\\Instances\\Caverns of Time\\Hour of Twilight" FILES ${sources_instance_k_cot_hot})
+
+#Instance: Caverns of Time - Hyjal Summit
+file(GLOB sources_instance_k_cot_hs scripts/kalimdor/caverns_of_time/hyjal_summit/*.cpp scripts/kalimdor/caverns_of_time/hyjal_summit/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_cot_hs})
+    source_group("Kalimdor Scripts\\Instances\\Caverns of Time\\Hyjal Summit" FILES ${sources_instance_k_cot_hs})
 
 #Instance: Caverns of Time - Old Hillsbrad
 file(GLOB sources_instance_k_cot_oh scripts/kalimdor/caverns_of_time/old_hillsbrad/*.cpp scripts/kalimdor/caverns_of_time/old_hillsbrad/*.h)
@@ -227,11 +292,26 @@ file(GLOB sources_instance_k_cot_oh scripts/kalimdor/caverns_of_time/old_hillsbr
 file(GLOB sources_instance_k_cot_cos scripts/kalimdor/caverns_of_time/culling_of_stratholme/*.cpp scripts/kalimdor/caverns_of_time/culling_of_stratholme/*.h)
     LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_cot_cos})
     source_group("Kalimdor Scripts\\Instances\\Caverns of Time\\Culling of Stratholme" FILES ${sources_instance_k_cot_cos})
-  
-#Instance: Zul Farrak Scripts
+
+#Instance: Caverns of Time - Well of Eternity
+file(GLOB sources_instance_k_cot_woe scripts/kalimdor/caverns_of_time/well_of_eternity/*.cpp scripts/kalimdor/caverns_of_time/well_of_eternity/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_cot_woe})
+    source_group("Kalimdor Scripts\\Instances\\Caverns of Time\\Well of Eternity" FILES ${sources_instance_k_cot_woe})
+
+#Instance: Throne of the Four Winds
+file(GLOB sources_instance_k_totfw scripts/kalimdor/throne_of_the_four_winds/*.cpp scripts/kalimdor/throne_of_the_four_winds/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_totfw})
+    source_group("Kalimdor Scripts\\Instances\\Throne of the Four Winds" FILES ${sources_instance_k_totfw})
+
+#Instance: Zul Farrak 
 file(GLOB sources_instance_k_zf scripts/kalimdor/zulfarrak/*.cpp scripts/kalimdor/zulfarrak/*.h)
     LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_zf})
     source_group("Kalimdor Scripts\\Instances\\Zul Farrak" FILES ${sources_instance_k_zf})
+
+#Instance: Vortex Pinnacle
+file(GLOB sources_instance_k_vp scripts/kalimdor/vortex_pinnacle/*.cpp scripts/kalimdor/vortex_pinnacle/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_k_vp})
+    source_group("Kalimdor Scripts\\Instances\\Vortex Pinnacle" FILES ${sources_instance_k_vp})
 
 #Raid: Caverns of Time - Mount Hyjal
 file(GLOB sources_instance_k_cot_mh scripts/kalimdor/caverns_of_time/hyjal/*.cpp scripts/kalimdor/caverns_of_time/hyjal/*.h)

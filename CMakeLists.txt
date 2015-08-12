@@ -45,11 +45,12 @@ endif()
 option(DEBUG                "Debug mode (strict compile, all warnings)"     OFF)
 option(ACE_USE_EXTERNAL     "Use external ACE"                              OFF)
 option(POSTGRESQL           "Use PostgreSQL instead of MySQL"               OFF)
-option(BUILD_TOOLS          "Build the map/vmap/mmap extractors"            ON)
-option(SCRIPT_LIB_ELUNA     "Compile with support for Eluna scripts"        ON)
+option(BUILD_TOOLS          "Build the map/vmap/mmap extractors"            OFF)
+option(SCRIPT_LIB_ELUNA     "Compile with support for Eluna scripts"        OFF)
 option(SCRIPT_LIB_SD2       "Compile with support for ScriptDev2 scripts"   ON)
+#option(SCRIPT_LIB_SD3       "Compile with support for ScriptDev3 scripts"   OFF)
 option(PLAYERBOTS           "Enable Player Bots"                            OFF)
-option(SOAP                 "Enable remote access via SOAP"                 OFF)
+option(SOAP                 "Enable remote access via SOAP"                 ON)
 # Hidden option to enable/disable PCH. DEV ONLY!
 set(PCH ON)
 set(USE_STORMLIB ON)
@@ -69,6 +70,7 @@ message(
    Scripting engines:
     SCRIPT_LIB_ELUNA        Compile with support for Eluna scripts
     SCRIPT_LIB_SD2          Compile with support for ScriptDev2 scripts
+    SCRIPT_LIB_SD3          Compile with support for ScriptDev3 scripts
    Modules:
     PLAYERBOTS              Enable Player Bots
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
@@ -152,25 +154,32 @@ else()
 endif()
 
 if(SOAP)
-    message(STATUS "Support for SOAP      : Yes")
+    message(STATUS "Support for SOAP      : Yes (default)")
     add_definitions(-DENABLE_SOAP)
 else()
-    message(STATUS "Support for SOAP      : No (default)")
+    message(STATUS "Support for SOAP      : No")
 endif()
 
 if(SCRIPT_LIB_ELUNA)
-    message(STATUS "Script engine Eluna   : Yes (default)")
+    message(STATUS "Script engine Eluna   : Yes")
     add_definitions(-DENABLE_ELUNA)
 else()
-    message(STATUS "Script engine Eluna   : No")
+    message(STATUS "Script engine Eluna   : No (default)")
 endif()
 
 if(SCRIPT_LIB_SD2)
-    message(STATUS "Script engine SD2     : Yes (default)")
+    message(STATUS "Script engine SD2     : Yes  (default)")
     add_definitions(-DENABLE_SD2)
 else()
     message(STATUS "Script engine SD2     : No")
 endif()
+
+#if(SCRIPT_LIB_SD3)
+#    message(STATUS "Script engine SD3     : Yes")
+#    add_definitions(-DENABLE_SD3)
+#else()
+#    message(STATUS "Script engine SD3     : No (default)")
+#endif()
 
 if(PLAYERBOTS)
     message(STATUS "Enable Player Bots    : Yes (default)")

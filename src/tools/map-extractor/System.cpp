@@ -239,7 +239,7 @@ uint32 ReadBuild(int locale)
 {
     // include build info file also
     std::string filename  = std::string("component.wow-") + langs[locale] + ".txt";
-    printf("Read %s file... ", filename.c_str());
+    //printf("Read %s file... ", filename.c_str());
 
     HANDLE fileHandle;
 

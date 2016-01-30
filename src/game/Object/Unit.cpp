@@ -10087,7 +10087,7 @@ Powers Unit::GetPowerTypeByIndex(uint32 index, uint32 classId)
     return Powers(sChrClassXPowerIndexStore[classId][index]);
 }
 
-int32 Unit::GetPower(Powers power) const
+uint32 Unit::GetPower(Powers power) const
 {
     if (power == POWER_HEALTH)
         return GetHealth();
@@ -10099,7 +10099,7 @@ int32 Unit::GetPower(Powers power) const
     return GetUInt32Value(UNIT_FIELD_POWER1 + powerIndex);
 }
 
-int32 Unit::GetPowerByIndex(uint32 index) const
+uint32 Unit::GetPowerByIndex(uint32 index) const
 {
     MANGOS_ASSERT(index < MAX_STORED_POWERS);
 

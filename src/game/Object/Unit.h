@@ -1681,6 +1681,9 @@ class  Unit : public WorldObject
          * \see GetUInt32Value
          */
         uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAXHEALTH); }
+
+        bool IsFullHealth() const { return GetHealth() == GetMaxHealth(); }
+
         /** 
          * Gets the percent of the health. The formula: (GetHealth() * 100) / GetMaxHealth()
          * @return the current percent of the health
@@ -2203,12 +2206,56 @@ class  Unit : public WorldObject
         }
         bool HasAuraOfDifficulty(uint32 spellId) const;
 
+        /**
+        * This is overridden in \ref Player::HasSpell, \ref Creature::HasSpell and \ref Pet::HasSpell
+        * @return false in this implementation
+        */
         virtual bool HasSpell(uint32 /*spellID*/) const { return false; }
 
+        /**
+        * Check is this \ref Unit has a stealth modified applied
+        * @return true if this \ref Unit has the \ref AuraType \ref AuraType::SPELL_AURA_MOD_STEALTH
+        * applied, false otherwise
+        * \see Modifier
+        * \see Unit::HasAuraType
+        * \see AuraType
+        */
         bool HasStealthAura()      const { return HasAuraType(SPELL_AURA_MOD_STEALTH); }
+        /**
+        * Check if this \ref Unit has a invisibility \ref Aura modifier applied.
+        * @return true if this \ref Unit has the \ref AuraType
+        * \ref AuraType::SPELL_AURA_MOD_INVISIBILITY applied, false otherwise
+        * \see Modifier
+        * \see Unit::HasAuraType
+        * \see AuraType
+        */
         bool HasInvisibilityAura() const { return HasAuraType(SPELL_AURA_MOD_INVISIBILITY); }
+        /**
+        * Check if this \ref Unit has a fear \ref Aura modifier applied. Ie, is it feared?
+        * @return true if this \ref Unit has the \ref AuraType \ref AuraType::SPELL_AURA_MOD_FEAR
+        * applied, false otherwise
+        * \see Modifier
+        * \see Unit::HasAuraType
+        * \see AuraType
+        */
         bool isFeared()  const { return HasAuraType(SPELL_AURA_MOD_FEAR); }
-        bool isInRoots() const { return HasAuraType(SPELL_AURA_MOD_ROOT); }
+        /**
+        * Check if this \ref Unit has a rooting \ref Aura modifier applied. Ie, is it stuck in
+        * some way?
+        * @return true if this \ref Unit has the \ref AuraType \ref AuraType::SPELL_AURA_MOD_ROOT
+        * applied, false otherwise
+        * \see Modifier
+        * \see Unit::HasAuraType
+        * \see AuraType
+        */
+        bool IsInRoots() const { return HasAuraType(SPELL_AURA_MOD_ROOT); }
+        /**
+        * Is this \ref Unit polymorphed?
+        * @return true if this \ref Unit is polymorphed, false otherwise
+        * \see GetSpellSpecific
+        * \see Unit::GetTransform
+        * \todo Move the implementation to .h file exactly as the earlier ones?
+        */
         bool IsPolymorphed() const;
 
         bool IsFrozen() const;

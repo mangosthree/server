@@ -534,14 +534,14 @@ namespace LuaPlayer
     /**
      * Returns 'true' if the [Player] has taxi cheat activated, 'false' otherwise.
      *
-     * @return bool isTaxiCheater
+     * @return bool IsTaxiCheater
      */
     int IsTaxiCheater(Eluna* /*E*/, lua_State* L, Player* player)
     {
 #ifdef MANGOS
         Eluna::Push(L, player->IsTaxiCheater());
 #else
-        Eluna::Push(L, player->isTaxiCheater());
+		Eluna::Push(L, player->IsTaxiCheater());
 #endif
         return 1;
     }

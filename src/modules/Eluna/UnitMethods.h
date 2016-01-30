@@ -130,12 +130,12 @@ namespace LuaUnit
     /**
      * Returns true if the [Unit] a guild master.
      *
-     * @return bool isGuildMaster
+     * @return bool IsGuildMaster
      */
     int IsGuildMaster(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, unit->isGuildMaster());
+		Eluna::Push(L, unit->IsGuildMaster());
 #else
         Eluna::Push(L, unit->IsGuildMaster());
 #endif
@@ -145,12 +145,12 @@ namespace LuaUnit
     /**
      * Returns true if the [Unit] an innkeeper.
      *
-     * @return bool isInnkeeper
+     * @return bool IsInnkeeper
      */
     int IsInnkeeper(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, unit->isInnkeeper());
+		Eluna::Push(L, unit->IsInnkeeper());
 #else
         Eluna::Push(L, unit->IsInnkeeper());
 #endif
@@ -180,7 +180,7 @@ namespace LuaUnit
     int IsGossip(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, unit->isGossip());
+		Eluna::Push(L, unit->IsGossip());
 #else
         Eluna::Push(L, unit->IsGossip());
 #endif
@@ -190,12 +190,12 @@ namespace LuaUnit
     /**
      * Returns true if the [Unit] is a taxi master.
      *
-     * @return bool isTaxi
+     * @return bool IsTaxi
      */
     int IsTaxi(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, unit->isTaxi());
+		Eluna::Push(L, unit->IsTaxi());
 #else
         Eluna::Push(L, unit->IsTaxi());
 #endif
@@ -205,12 +205,12 @@ namespace LuaUnit
     /**
      * Returns true if the [Unit] is a spirit healer.
      *
-     * @return bool isSpiritHealer
+     * @return bool IsSpiritHealer
      */
     int IsSpiritHealer(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, unit->isSpiritHealer());
+		Eluna::Push(L, unit->IsSpiritHealer());
 #else
         Eluna::Push(L, unit->IsSpiritHealer());
 #endif
@@ -220,12 +220,12 @@ namespace LuaUnit
     /**
      * Returns true if the [Unit] is a spirit guide.
      *
-     * @return bool isSpiritGuide
+     * @return bool IsSpiritGuide
      */
     int IsSpiritGuide(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, unit->isSpiritGuide());
+		Eluna::Push(L, unit->IsSpiritGuide());
 #else
         Eluna::Push(L, unit->IsSpiritGuide());
 #endif
@@ -235,12 +235,12 @@ namespace LuaUnit
     /**
      * Returns true if the [Unit] is a tabard designer.
      *
-     * @return bool isTabardDesigner
+     * @return bool IsTabardDesigner
      */
     int IsTabardDesigner(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, unit->isTabardDesigner());
+		Eluna::Push(L, unit->IsTabardDesigner());
 #else
         Eluna::Push(L, unit->IsTabardDesigner());
 #endif
@@ -250,12 +250,12 @@ namespace LuaUnit
     /**
      * Returns true if the [Unit] provides services like vendor, training and auction.
      *
-     * @return bool isTabardDesigner
+     * @return bool IsServiceProvider
      */
     int IsServiceProvider(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, unit->isServiceProvider());
+		Eluna::Push(L, unit->IsServiceProvider());
 #else
         Eluna::Push(L, unit->IsServiceProvider());
 #endif
@@ -265,12 +265,12 @@ namespace LuaUnit
     /**
      * Returns true if the [Unit] is a spirit guide or spirit healer.
      *
-     * @return bool isSpiritService
+     * @return bool IsSpiritService
      */
     int IsSpiritService(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, unit->isSpiritService());
+		Eluna::Push(L, unit->IsSpiritService());
 #else
         Eluna::Push(L, unit->IsSpiritService());
 #endif
@@ -310,14 +310,14 @@ namespace LuaUnit
     /**
      * Returns true if the [Unit] is dying.
      *
-     * @return bool isDying
+     * @return bool IsDying
      */
     int IsDying(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef MANGOS
         Eluna::Push(L, unit->IsDying());
 #else
-        Eluna::Push(L, unit->isDying());
+		Eluna::Push(L, unit->IsDying());
 #endif
         return 1;
     }
@@ -325,12 +325,12 @@ namespace LuaUnit
     /**
      * Returns true if the [Unit] is a banker.
      *
-     * @return bool isBanker
+     * @return bool IsBanker
      */
     int IsBanker(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, unit->isBanker());
+		Eluna::Push(L, unit->IsBanker());
 #else
         Eluna::Push(L, unit->IsBanker());
 #endif
@@ -355,12 +355,12 @@ namespace LuaUnit
     /**
      * Returns true if the [Unit] is a battle master.
      *
-     * @return bool isBattleMaster
+     * @return bool IsBattleMaster
      */
     int IsBattleMaster(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, unit->isBattleMaster());
+		Eluna::Push(L, unit->IsBattleMaster());
 #else
         Eluna::Push(L, unit->IsBattleMaster());
 #endif
@@ -370,12 +370,12 @@ namespace LuaUnit
     /**
      * Returns true if the [Unit] is a charmed.
      *
-     * @return bool isCharmed
+     * @return bool IsCharmed
      */
     int IsCharmed(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, unit->isCharmed());
+		Eluna::Push(L, unit->IsCharmed());
 #else
         Eluna::Push(L, unit->IsCharmed());
 #endif
@@ -385,12 +385,12 @@ namespace LuaUnit
     /**
      * Returns true if the [Unit] is an armorer and can repair equipment.
      *
-     * @return bool isArmorer
+     * @return bool IsArmorer
      */
     int IsArmorer(Eluna* /*E*/, lua_State* L, Unit* unit)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, unit->isArmorer());
+		Eluna::Push(L, unit->IsArmorer());
 #else
         Eluna::Push(L, unit->IsArmorer());
 #endif

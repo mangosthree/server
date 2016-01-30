@@ -883,7 +883,7 @@ bool Creature::IsTrainerOf(Player* pPlayer, bool msg) const
 
 bool Creature::CanInteractWithBattleMaster(Player* pPlayer, bool msg) const
 {
-    if (!isBattleMaster())
+	if (!IsBattleMaster())
         return false;
 
     BattleGroundTypeId bgTypeId = sBattleGroundMgr.GetBattleMasterBG(GetEntry());
@@ -1772,7 +1772,7 @@ void Creature::SendAIReaction(AiReaction reactionType)
 void Creature::CallAssistance()
 {
     // FIXME: should player pets call for assistance?
-    if (!m_AlreadyCallAssistance && getVictim() && !isCharmed())
+	if (!m_AlreadyCallAssistance && getVictim() && !IsCharmed())
     {
         SetNoCallAssistance(true);
         AI()->SendAIEventAround(AI_EVENT_CALL_ASSISTANCE, getVictim(), sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY), sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));
@@ -1781,7 +1781,7 @@ void Creature::CallAssistance()
 
 void Creature::CallForHelp(float fRadius)
 {
-    if (fRadius <= 0.0f || !getVictim() || IsPet() || isCharmed())
+	if (fRadius <= 0.0f || !getVictim() || IsPet() || IsCharmed())
         return;
 
     MaNGOS::CallOfHelpCreatureInRangeDo u_do(this, getVictim(), fRadius);
@@ -2408,7 +2408,7 @@ void Creature::ClearTemporaryFaction()
     // No restore if creature is charmed/possessed.
     // For later we may consider extend to restore to charmer faction where charmer is creature.
     // This can also be done by update any pet/charmed of creature at any faction change to charmer.
-    if (isCharmed())
+	if (IsCharmed())
         return;
 
     // Reset to original faction

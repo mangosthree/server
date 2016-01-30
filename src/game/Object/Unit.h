@@ -1684,13 +1684,18 @@ class  Unit : public WorldObject
 
         bool IsFullHealth() const { return GetHealth() == GetMaxHealth(); }
 
+		bool HealthBelowPct(int32 pct) const { return GetHealth() < CountPctFromMaxHealth(pct); }
+		bool HealthAbovePct(int32 pct) const { return GetHealth() > CountPctFromMaxHealth(pct); }
+
         /** 
          * Gets the percent of the health. The formula: (GetHealth() * 100) / GetMaxHealth()
          * @return the current percent of the health
          * \see GetHealth
          * \see GetMaxHealth
          */
-        float GetHealthPercent() const { return (GetHealth() * 100.0f) / GetMaxHealth(); }
+		float GetHealthPercent() const { return (GetHealth() * 100.0f) / GetMaxHealth(); }
+		uint32 CountPctFromMaxHealth(int32 pct) const { return (GetMaxHealth() * static_cast<float>(pct) / 100.0f); }
+		uint32 CountPctFromCurHealth(int32 pct) const { return (GetHealth() * static_cast<float>(pct) / 100.0f); }
         /** 
          * Sets the health to the given value, it cant be higher than Unit::GetMaxHealth though
          * @param val the value to set the health to
@@ -2159,18 +2164,18 @@ class  Unit : public WorldObject
         bool IsVendor()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR); }
         bool IsTrainer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER); }
         bool IsQuestGiver()   const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER); }
-        bool isGossip()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP); }
-        bool isTaxi()         const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_FLIGHTMASTER); }
-        bool isGuildMaster()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER); }
-        bool isBattleMaster() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BATTLEMASTER); }
-        bool isBanker()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER); }
-        bool isInnkeeper()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_INNKEEPER); }
-        bool isSpiritHealer() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER); }
-        bool isSpiritGuide()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITGUIDE); }
-        bool isTabardDesigner()const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDDESIGNER); }
+		bool IsGossip()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP); }
+		bool IsTaxi()         const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_FLIGHTMASTER); }
+		bool IsGuildMaster()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER); }
+		bool IsBattleMaster() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BATTLEMASTER); }
+		bool IsBanker()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER); }
+		bool IsInnkeeper()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_INNKEEPER); }
+		bool IsSpiritHealer() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER); }
+		bool IsSpiritGuide()  const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITGUIDE); }
+		bool IsTabardDesigner()const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDDESIGNER); }
         bool isAuctioner()    const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_AUCTIONEER); }
-        bool isArmorer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_REPAIR); }
-        bool isServiceProvider() const
+		bool IsArmorer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_REPAIR); }
+		bool IsServiceProvider() const
         {
             return HasFlag(UNIT_NPC_FLAGS,
                            UNIT_NPC_FLAG_VENDOR | UNIT_NPC_FLAG_TRAINER | UNIT_NPC_FLAG_FLIGHTMASTER |
@@ -2178,7 +2183,7 @@ class  Unit : public WorldObject
                            UNIT_NPC_FLAG_INNKEEPER | UNIT_NPC_FLAG_SPIRITHEALER |
                            UNIT_NPC_FLAG_SPIRITGUIDE | UNIT_NPC_FLAG_TABARDDESIGNER | UNIT_NPC_FLAG_AUCTIONEER);
         }
-        bool isSpiritService() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE); }
+		bool IsSpiritService() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE); }
 
         bool IsTaxiFlying()  const { return hasUnitState(UNIT_STAT_TAXI_FLIGHT); }
 
@@ -2558,9 +2563,32 @@ class  Unit : public WorldObject
         void SendThreatRemove(HostileReference* pHostileReference);
         void SendThreatUpdate();
 
+		/**
+		* Checks whether or not this \ref Unit is alive by checking the \ref Unit::m_deathState member
+		* for the value \ref DeathState::ALIVE
+		* @return true if this \ref Unit is alive, false otherwise
+		*/
         bool IsAlive() const { return (m_deathState == ALIVE); };
-        bool IsDead() const { return (m_deathState == DEAD || m_deathState == CORPSE); };
-        DeathState getDeathState() const { return m_deathState; };
+		bool IsDying() const { return (m_deathState == JUST_DIED); }
+		/**
+		* Checks whether or not this \ref Unit is dead by checking the \ref Unit::m_deathState member
+		* for the value \ref DeathState::DEAD or \ref DeathState::CORPSE
+		* @return true if this \ref Unit is dead or a corpse (also dead), false otherwise
+		*/
+		bool IsDead() const { return (m_deathState == DEAD || m_deathState == CORPSE); };
+		/**
+		* Returns the current \ref DeathState for this \ref Unit.
+		* @return the value of the member \ref Unit::m_deathState
+		*/
+		DeathState getDeathState() const { return m_deathState; };
+		/**
+		* Changes the \ref DeathState for this \ref Unit and making sure that some things that should
+		* happen when that changes happen, ie: you just died, then you're auras should be removed,
+		* any combopoints that you had should be removed etc.
+		*
+		* This is overwritten to do different things in at least \ref Player, \ref Creature, \ref Pet
+		* @param s the new \ref DeathState this \ref Unit should get
+		*/
         virtual void SetDeathState(DeathState s);           // overwritten in Creature/Player/Pet
 
         ObjectGuid const& GetOwnerGuid() const { return  GetGuidValue(UNIT_FIELD_SUMMONEDBY); }
@@ -2708,7 +2736,7 @@ class  Unit : public WorldObject
          * @return true if the \ref Unit has a charmer, false otherwise
          * \see Unit::GetCharmerGuid
          */
-        bool isCharmed() const { return !GetCharmerGuid().IsEmpty(); }
+		bool IsCharmed() const { return !GetCharmerGuid().IsEmpty(); }
 
         /** 
          * There's only \ref CharmInfo available if this \ref Unit is in fact charmed by someone
@@ -3052,6 +3080,7 @@ class  Unit : public WorldObject
         SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitMod) const;
         Stats GetStatByAuraGroup(UnitMods unitMod) const;
         Powers GetPowerTypeByAuraGroup(UnitMods unitMod) const;
+		void SetPowerType(Powers new_powertype);
         bool CanModifyStats() const { return m_canModifyStats; }
         void SetCanModifyStats(bool modifyStats) { m_canModifyStats = modifyStats; }
         virtual bool UpdateStats(Stats stat) = 0;

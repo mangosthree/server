@@ -53,7 +53,7 @@ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recv_data)
     if (!pCreature)
         return;
 
-    if (!pCreature->isBattleMaster())                       // it's not battlemaster
+	if (!pCreature->IsBattleMaster())                       // it's not battlemaster
         return;
 
     // Stop the npc if moving

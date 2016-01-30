@@ -102,7 +102,7 @@ bool PetAI::IsVisible(Unit* pl) const
 bool PetAI::_needToStop() const
 {
     // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
-    if (m_creature->isCharmed() && m_creature->getVictim() == m_creature->GetCharmer())
+	if (m_creature->IsCharmed() && m_creature->getVictim() == m_creature->GetCharmer())
         return true;
 
     return !m_creature->getVictim()->IsTargetableForAttack();

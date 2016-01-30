@@ -728,6 +728,8 @@ class  Creature : public Unit
 
         void SetVirtualItem(VirtualItemSlot slot, uint32 item_id) { SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + slot, item_id); }
 
+		bool IsReputationGainDisabled() { return DisableReputationGain; }
+
     protected:
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags) const;
 
@@ -779,7 +781,9 @@ class  Creature : public Unit
         float m_combatStartY;
         float m_combatStartZ;
 
-        Position m_respawnPos;
+		Position m_respawnPos;
+
+		bool DisableReputationGain;
 
     private:
         GridReference<Creature> m_gridRef;

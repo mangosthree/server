@@ -40,11 +40,11 @@ static void DefineOpcode(uint16 opcode, const char* name, SessionStatus status, 
 #define OPCODE( name, status, packetProcessing, handler ) DefineOpcode( name, #name, status, packetProcessing, handler )
 
 /// Correspondence between opcodes and their names
-OpcodeHandler opcodeTable[MAX_OPCODE_TABLE_SIZE];
+OpcodeHandler opcodeTable[NUM_MSG_TYPES];
 
 void InitializeOpcodes()
 {
-    for(uint16 i = 0; i < MAX_OPCODE_TABLE_SIZE; ++i)
+    for (uint16 i = 0; i < NUM_MSG_TYPES; ++i)
         DefineOpcode(i, "UNKNOWN", STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
 
     OPCODE(MSG_WOW_CONNECTION,                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess            );

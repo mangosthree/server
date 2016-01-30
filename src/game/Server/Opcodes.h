@@ -1441,7 +1441,10 @@ enum Opcodes
     SMSG_START_TIMER                                      = 0x59A5, // 4.3.4 15595
 };
 
-#define MAX_OPCODE_TABLE_SIZE 0xFFFF
+// Don't forget to change this value and add opcode name to Opcodes.cpp when you add new opcode!
+#define NUM_MSG_TYPES 0xFFFF
+
+#define NUM_MSG_TYPES 0xFFFF
 
 extern void InitializeOpcodes();
 
@@ -1473,7 +1476,7 @@ struct OpcodeHandler
     void (WorldSession::*handler)(WorldPacket& recvPacket);
 };
 
-extern OpcodeHandler opcodeTable[MAX_OPCODE_TABLE_SIZE];
+extern OpcodeHandler opcodeTable[NUM_MSG_TYPES];
 
 /// Lookup opcode name for human understandable logging
 inline const char* LookupOpcodeName(uint16 id)

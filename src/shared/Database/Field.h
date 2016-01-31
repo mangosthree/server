@@ -102,7 +102,19 @@ class Field
          *
          * @return bool
          */
-        bool GetBool() const { return mValue ? atoi(mValue) > 0 : false; }
+		bool GetBool() const { return mValue ? atoi(mValue) > 0 : false; }
+		/**
+		* @brief
+		*
+		* @return double
+		*/
+		double GetDouble() const { return mValue ? static_cast<double>(atof(mValue)) : 0.0f; }
+		/**
+		* @brief
+		*
+		* @return int8
+		*/
+		int8 GetInt8() const { return mValue ? static_cast<int8>(atol(mValue)) : int8(0); }
         /**
          * @brief
          *
@@ -145,8 +157,26 @@ class Field
                 return 0;
 
             return value;
-        }
+		}
+		/**
+		* @brief
+		*
+		* @return int64
+		*/
+		uint64 GetInt64() const
+		{
+			int64 value = 0;
+			if (!mValue || sscanf(mValue, SI64FMTD, &value) == -1)
+				return 0;
 
+			return value;
+		}
+
+		/**
+		* @brief
+		*
+		* @param type
+		*/
         void SetType(enum DataTypes type) { mType = type; }
 
         /**

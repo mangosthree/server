@@ -169,23 +169,23 @@ enum ItemPrototypeFlags2
 
 enum BagFamilyMask
 {
-    BAG_FAMILY_MASK_NONE                      = 0x00000000,
-    BAG_FAMILY_MASK_ARROWS                    = 0x00000001,
-    BAG_FAMILY_MASK_BULLETS                   = 0x00000002,
-    BAG_FAMILY_MASK_SOUL_SHARDS               = 0x00000004,
-    BAG_FAMILY_MASK_LEATHERWORKING_SUPP       = 0x00000008,
-    BAG_FAMILY_MASK_INSCRIPTION_SUPP          = 0x00000010,
-    BAG_FAMILY_MASK_HERBS                     = 0x00000020,
-    BAG_FAMILY_MASK_ENCHANTING_SUPP           = 0x00000040,
-    BAG_FAMILY_MASK_ENGINEERING_SUPP          = 0x00000080,
-    BAG_FAMILY_MASK_KEYS                      = 0x00000100,
-    BAG_FAMILY_MASK_GEMS                      = 0x00000200,
-    BAG_FAMILY_MASK_MINING_SUPP               = 0x00000400,
-    BAG_FAMILY_MASK_SOULBOUND_EQUIPMENT       = 0x00000800,
-    BAG_FAMILY_MASK_VANITY_PETS               = 0x00001000,
-    BAG_FAMILY_MASK_CURRENCY_TOKENS           = 0x00002000,
-    BAG_FAMILY_MASK_QUEST_ITEMS               = 0x00004000,
-    BAG_FAMILY_MASK_FISHING_SUPP              = 0x00008000,
+    BAG_FAMILY_NONE                      = 0x00000000,
+    BAG_FAMILY_ARROWS                    = 0x00000001,
+    BAG_FAMILY_BULLETS                   = 0x00000002,
+    BAG_FAMILY_SOUL_SHARDS               = 0x00000004,
+    BAG_FAMILY_LEATHERWORKING_SUPP       = 0x00000008,
+    BAG_FAMILY_INSCRIPTION_SUPP          = 0x00000010,
+    BAG_FAMILY_HERBS                     = 0x00000020,
+    BAG_FAMILY_ENCHANTING_SUPP           = 0x00000040,
+    BAG_FAMILY_ENGINEERING_SUPP          = 0x00000080,
+    BAG_FAMILY_KEYS                      = 0x00000100,
+    BAG_FAMILY_GEMS                      = 0x00000200,
+    BAG_FAMILY_MINING_SUPP               = 0x00000400,
+    BAG_FAMILY_SOULBOUND_EQUIPMENT       = 0x00000800,
+    BAG_FAMILY_VANITY_PETS               = 0x00001000,
+    BAG_FAMILY_CURRENCY_TOKENS           = 0x00002000,
+    BAG_FAMILY_QUEST_ITEMS               = 0x00004000,
+    BAG_FAMILY_FISHING_SUPP              = 0x00008000,
 };
 
 enum SocketColor
@@ -652,7 +652,9 @@ struct ItemPrototype
         }
 
         return false;
-    }
+	}
+
+	bool IsCurrencyToken() const { return BagFamily & BAG_FAMILY_CURRENCY_TOKENS; }
 
     uint32 GetMaxStackSize() const { return Stackable > 0 ? uint32(Stackable) : uint32(0x7FFFFFFF - 1); }
     float getDPS() const;

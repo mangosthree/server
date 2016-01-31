@@ -788,6 +788,9 @@ enum EnviromentalDamage
     DAMAGE_FALL_TO_VOID         = 6                         // custom case for fall without durability loss
 };
 
+/*
+ * This is defined in Chat.h (just like Zero, One, and Two)
+ * DELETE THIS IF ALL IS OK
 enum PlayerChatTag
 {
     CHAT_TAG_NONE               = 0x00,
@@ -797,6 +800,8 @@ enum PlayerChatTag
     CHAT_TAG_COM                = 0x08,                     // Commentator
     CHAT_TAG_DEV                = 0x10,                     // Developer
 };
+
+*/
 
 enum PlayedTimeIndex
 {
@@ -1747,7 +1752,11 @@ class  Player : public Unit
         void SetInGuild(uint32 GuildId);
         void SetGuildLevel(uint32 level) { SetUInt32Value(PLAYER_GUILDLEVEL, level); }
         void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); }
-        void SetGuildInvited(uint32 GuildId, ObjectGuid inviter = ObjectGuid()) { m_GuildIdInvited = GuildId; m_GuildInviterGuid = inviter; }
+//		void SetGuildInvited(uint32 GuildId, ObjectGuid inviter = ObjectGuid()) { m_GuildIdInvited = GuildId; m_GuildInviterGuid = inviter; } .. PRE Dev21 version (DELETE IT?)
+		void SetGuildIdInvited(uint32 GuildId)
+		{
+			m_GuildIdInvited = GuildId;
+		}
         uint32 GetGuildId() const { return GetGuildGuid().GetCounter(); }
         ObjectGuid GetGuildGuid() const { return GetGuidValue(OBJECT_FIELD_DATA); }
         std::string GetGuildName() const;

@@ -3716,6 +3716,78 @@ void ChatHandler::LogCommand(char const* fullcmd)
     }
 }
 
+void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const* message, Language language /*= LANG_UNIVERSAL*/, ChatTagFlags chatTag /*= CHAT_TAG_NONE*/,
+	ObjectGuid const& senderGuid /*= ObjectGuid()*/, char const* senderName /*= NULL*/,
+	ObjectGuid const& targetGuid /*= ObjectGuid()*/, char const* targetName /*= NULL*/,
+	char const* channelName /*= NULL*/)
+{
+	bool isGM = chatTag & CHAT_TAG_GM;
+
+	data.Initialize(isGM ? SMSG_GM_MESSAGECHAT : SMSG_MESSAGECHAT);
+	data << uint8(msgtype);
+	data << uint32(language);
+	data << ObjectGuid(senderGuid);
+	data << uint32(0);                                              // 2.1.0
+
+	switch (msgtype)
+	{
+	case CHAT_MSG_MONSTER_SAY:
+	case CHAT_MSG_MONSTER_PARTY:
+	case CHAT_MSG_MONSTER_YELL:
+	case CHAT_MSG_MONSTER_WHISPER:
+	case CHAT_MSG_RAID_BOSS_WHISPER:
+	case CHAT_MSG_RAID_BOSS_EMOTE:
+	case CHAT_MSG_MONSTER_EMOTE:
+		MANGOS_ASSERT(senderName);
+		data << uint32(strlen(senderName) + 1);
+		data << senderName;
+		data << ObjectGuid(targetGuid);                         // Unit Target
+		if (targetGuid && !targetGuid.IsPlayer() && !targetGuid.IsPet())
+		{
+			data << uint32(strlen(targetName) + 1);             // target name length
+			data << targetName;                                 // target name
+		}
+		MANGOS_ASSERT(message);
+		data << uint32(strlen(message) + 1);
+		data << message;
+		data << uint8(chatTag);
+		break;
+	case CHAT_MSG_BG_SYSTEM_NEUTRAL:
+	case CHAT_MSG_BG_SYSTEM_ALLIANCE:
+	case CHAT_MSG_BG_SYSTEM_HORDE:
+		data << ObjectGuid(targetGuid);                         // Unit Target
+		if (targetGuid && !targetGuid.IsPlayer())
+		{
+			MANGOS_ASSERT(targetName);
+			data << uint32(strlen(targetName) + 1);             // target name length
+			data << targetName;                                 // target name
+		}
+		MANGOS_ASSERT(message);
+		data << uint32(strlen(message) + 1);
+		data << message;
+		data << uint8(chatTag);
+		break;
+	default:
+		if (msgtype == CHAT_MSG_CHANNEL)
+		{
+			MANGOS_ASSERT(channelName);
+			data << channelName;
+		}
+		data << ObjectGuid(targetGuid);
+		MANGOS_ASSERT(message);
+		data << uint32(strlen(message) + 1);
+		data << message;
+		data << uint8(chatTag);
+		if (isGM)
+		{
+			MANGOS_ASSERT(senderName);
+			data << uint32(strlen(senderName) + 1);
+			data << senderName;
+		}
+		break;
+	}
+}
+
 // Instantiate template for helper function
 template void ChatHandler::ShowNpcOrGoSpawnInformation<Creature>(uint32 guid);
 template void ChatHandler::ShowNpcOrGoSpawnInformation<GameObject>(uint32 guid);

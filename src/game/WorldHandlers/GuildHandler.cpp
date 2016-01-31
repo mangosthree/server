@@ -143,7 +143,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     DEBUG_LOG("Player %s Invited %s to Join his Guild", GetPlayer()->GetName(), Invitedname.c_str());
 
-    player->SetGuildInvited(GetPlayer()->GetGuildId(), GetPlayer()->GetObjectGuid());
+	player->SetGuildIdInvited(GetPlayer()->GetGuildId());
     // Put record into guildlog
     guild->LogGuildEvent(GUILD_EVENT_LOG_INVITE_PLAYER, GetPlayer()->GetObjectGuid(), player->GetObjectGuid());
 
@@ -292,7 +292,7 @@ void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
     if (Player* inviter = sObjectMgr.GetPlayer(GetPlayer()->GetGuildInviterGuid()))
         inviter->SendGuildDeclined(GetPlayer()->GetName(), recvPacket.GetOpcode() == CMSG_GUILD_AUTO_DECLINE);
 
-    GetPlayer()->SetGuildInvited(0);
+	GetPlayer()->SetGuildIdInvited(0);
     GetPlayer()->SetInGuild(0);
     GetPlayer()->SetGuildLevel(0);
 }

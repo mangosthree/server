@@ -308,9 +308,15 @@ class  Item : public Object
         virtual bool LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid = ObjectGuid());
         virtual void DeleteFromDB();
         void DeleteFromInventoryDB();
-        void LoadLootFromDB(Field* fields);
+		void LoadLootFromDB(Field* fields);
 
-        bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
+		Bag* ToBag() { if (IsBag()) return reinterpret_cast<Bag*>(this); else return NULL; }
+		const Bag* ToBag() const { if (IsBag()) return reinterpret_cast<const Bag*>(this); else return NULL; }
+
+		bool IsLocked() const { return !HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_UNLOCKED); }
+		bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
+		bool IsCurrencyToken() const { return GetProto()->IsCurrencyToken(); }
+		bool IsNotEmptyBag() const;
         bool IsBroken() const { return GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && GetUInt32Value(ITEM_FIELD_DURABILITY) == 0; }
         bool CanBeTraded(bool mail = false) const;
         void SetInTrade(bool b = true) { mb_in_trade = b; }

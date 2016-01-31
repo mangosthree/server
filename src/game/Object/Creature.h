@@ -511,7 +511,8 @@ class  Creature : public Unit
 
         bool IsCorpse() const { return getDeathState() ==  CORPSE; }
         bool IsDespawned() const { return getDeathState() ==  DEAD; }
-        void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
+		void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
+		uint32 GetCorpseDelay() const { return m_corpseDelay; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool IsCivilian() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
         bool IsGuard() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_GUARD; }
@@ -529,6 +530,7 @@ class  Creature : public Unit
 
         bool IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf) override;
         bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const override;
+		bool IsTappedBy(Player const* player) const;
 
         bool IsElite() const
         {
@@ -572,6 +574,7 @@ class  Creature : public Unit
 
         void _AddCreatureSpellCooldown(uint32 spell_id, time_t end_time);
         void _AddCreatureCategoryCooldown(uint32 category, time_t apply_time);
+		uint32 Creature::GetCreatureSpellCooldownDelay(uint32 spellId) const;
         void AddCreatureSpellCooldown(uint32 spellid);
         bool HasSpellCooldown(uint32 spell_id) const;
         bool HasCategoryCooldown(uint32 spell_id) const;
@@ -726,8 +729,9 @@ class  Creature : public Unit
 
         void SendAreaSpiritHealerQueryOpcode(Player* pl);
 
-        void SetVirtualItem(VirtualItemSlot slot, uint32 item_id) { SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + slot, item_id); }
+		void SetVirtualItem(VirtualItemSlot slot, uint32 item_id) { SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + slot, item_id); }
 
+		void SetDisableReputationGain(bool disable) { DisableReputationGain = disable; }
 		bool IsReputationGainDisabled() { return DisableReputationGain; }
 
     protected:

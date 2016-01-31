@@ -1616,6 +1616,19 @@ bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectInd
     return Unit::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
 }
 
+// return true if this creature is tapped by the player or by a member of his group.
+bool Creature::IsTappedBy(Player const* player) const
+{
+	if (player == GetOriginalLootRecipient())
+		return true;
+
+	Group const* playerGroup = player->GetGroup();
+	if (!playerGroup || playerGroup != GetGroupLootRecipient()) // if we dont have a group we arent the recipient
+		return false;                                           // if creature doesnt have group bound it means it was solo killed by someone else
+
+	return true;
+}
+
 SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
 {
     if (!pVictim)
@@ -2145,6 +2158,13 @@ bool Creature::HasCategoryCooldown(uint32 spell_id) const
 
     CreatureSpellCooldowns::const_iterator itr = m_CreatureCategoryCooldowns.find(spellInfo->GetCategory());
     return (itr != m_CreatureCategoryCooldowns.end() && time_t(itr->second + (spellInfo->GetCategoryRecoveryTime() / IN_MILLISECONDS)) > time(NULL));
+}
+
+uint32 Creature::GetCreatureSpellCooldownDelay(uint32 spellId) const
+{
+	CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spellId);
+	time_t t = time(NULL);
+	return uint32(itr != m_CreatureSpellCooldowns.end() && itr->second > t ? itr->second - t : 0);
 }
 
 bool Creature::HasSpellCooldown(uint32 spell_id) const

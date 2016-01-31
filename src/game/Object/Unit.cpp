@@ -5699,6 +5699,21 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit* target, uint8 /*SwingType
     SendAttackStateUpdate(&dmgInfo);
 }
 
+void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit* target, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount)
+{
+	CalcDamageInfo dmgInfo;
+	dmgInfo.HitInfo = HitInfo;
+	dmgInfo.attacker = this;
+	dmgInfo.target = target;
+	dmgInfo.damage = Damage - AbsorbDamage - Resist - BlockedAmount;
+	dmgInfo.damageSchoolMask = damageSchoolMask;
+	dmgInfo.absorb = AbsorbDamage;
+	dmgInfo.resist = Resist;
+	dmgInfo.TargetState = TargetState;
+	dmgInfo.blocked_amount = BlockedAmount;
+	SendAttackStateUpdate(&dmgInfo);
+}
+
 void Unit::setPowerType(Powers new_powertype)
 {
     SetByteValue(UNIT_FIELD_BYTES_0, 3, new_powertype);
@@ -9782,7 +9797,7 @@ bool Unit::isInvisibleForAlive() const
     if (m_AuraFlags & UNIT_AURAFLAG_ALIVE_INVISIBLE)
         return true;
     // TODO: maybe spiritservices also have just an aura
-    return isSpiritService();
+	return IsSpiritService();
 }
 
 uint32 Unit::GetCreatureType() const

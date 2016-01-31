@@ -2422,7 +2422,8 @@ class  Unit : public WorldObject
          * \todo What's the swingtype for?
          */
         void SendAttackStateUpdate(uint32 HitInfo, Unit* target, uint8 SwingType, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount);
-        /**
+		void SendAttackStateUpdate(uint32 HitInfo, Unit* target, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount);      
+		/**
          * Used to send a update to the combat log for all \ref Player/\ref Unit s in the vicinity.
          * @param log Info about who/what did damage to who and how etc, data needed for the packet
          * \see OpcodesList::SMSG_SPELLNONMELEEDAMAGELOG
@@ -3034,7 +3035,8 @@ class  Unit : public WorldObject
         // delayed+channeled spells are always interrupted
         void InterruptNonMeleeSpells(bool withDelayed, uint32 spellid = 0);
 
-        Spell* GetCurrentSpell(CurrentSpellTypes spellType) const { return m_currentSpells[spellType]; }
+		Spell* GetCurrentSpell(CurrentSpellTypes spellType) const { return m_currentSpells[spellType]; }
+		Spell* GetCurrentSpell(uint32 spellType) const { return m_currentSpells[spellType]; }
         Spell* FindCurrentSpellBySpellId(uint32 spell_id) const;
 
         bool CheckAndIncreaseCastCounter();

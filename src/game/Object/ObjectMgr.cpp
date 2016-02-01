@@ -9537,6 +9537,163 @@ bool ObjectMgr::RemoveVendorItem(uint32 entry, uint32 item, uint8 type)
     return true;
 }
 
+bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item_id, uint32 maxcount, uint32 incrtime, uint32 ExtendedCost, uint16 conditionId, Player* pl, std::set<uint32>* skip_vendors) const
+{
+    char const* idStr = isTemplate ? "vendor template" : "vendor";
+    CreatureInfo const* cInfo = NULL;
+
+    if (!isTemplate)
+    {
+        cInfo = GetCreatureTemplate(vendor_entry);
+        if (!cInfo)
+        {
+            if (pl)
+            {
+                ChatHandler(pl).SendSysMessage(LANG_COMMAND_VENDORSELECTION);
+            }
+            else
+            {
+                sLog.outErrorDb("Table `%s` has data for nonexistent creature (Entry: %u), ignoring", tableName, vendor_entry);
+            }
+            return false;
+        }
+
+        if (!(cInfo->npcflag & UNIT_NPC_FLAG_VENDOR))
+        {
+            if (!skip_vendors || skip_vendors->count(vendor_entry) == 0)
+            {
+                if (pl)
+                {
+                    ChatHandler(pl).SendSysMessage(LANG_COMMAND_VENDORSELECTION);
+                }
+                else
+                {
+                    sLog.outErrorDb("Table `%s` has data for creature (Entry: %u) without vendor flag, ignoring", tableName, vendor_entry);
+                }
+
+                if (skip_vendors)
+                {
+                    skip_vendors->insert(vendor_entry);
+                }
+            }
+            return false;
+        }
+    }
+
+    if (!GetItemPrototype(item_id))
+    {
+        if (pl)
+        {
+            ChatHandler(pl).PSendSysMessage(LANG_ITEM_NOT_FOUND, item_id);
+        }
+        else
+            sLog.outErrorDb("Table `%s` for %s %u contain nonexistent item (%u), ignoring",
+            tableName, idStr, vendor_entry, item_id);
+        return false;
+    }
+
+    if (ExtendedCost && !sItemExtendedCostStore.LookupEntry(ExtendedCost))
+    {
+        if (pl)
+            ChatHandler(pl).PSendSysMessage(LANG_EXTENDED_COST_NOT_EXIST, ExtendedCost);
+        else
+            sLog.outErrorDb("Table `%s` contain item (Entry: %u) with wrong ExtendedCost (%u) for %s %u, ignoring",
+            tableName, item_id, ExtendedCost, idStr, vendor_entry);
+        return false;
+    }
+
+    if (maxcount > 0 && incrtime == 0)
+    {
+        if (pl)
+        {
+            ChatHandler(pl).PSendSysMessage("MaxCount!=0 (%u) but IncrTime==0", maxcount);
+        }
+        else
+            sLog.outErrorDb("Table `%s` has `maxcount` (%u) for item %u of %s %u but `incrtime`=0, ignoring",
+            tableName, maxcount, item_id, idStr, vendor_entry);
+        return false;
+    }
+    else if (maxcount == 0 && incrtime > 0)
+    {
+        if (pl)
+        {
+            ChatHandler(pl).PSendSysMessage("MaxCount==0 but IncrTime<>=0");
+        }
+        else
+            sLog.outErrorDb("Table `%s` has `maxcount`=0 for item %u of %s %u but `incrtime`<>0, ignoring",
+            tableName, item_id, idStr, vendor_entry);
+        return false;
+    }
+
+    if (conditionId && !sConditionStorage.LookupEntry<PlayerCondition>(conditionId))
+    {
+        sLog.outErrorDb("Table `%s` has `condition_id`=%u for item %u of %s %u but this condition is not valid, ignoring", tableName, conditionId, item_id, idStr, vendor_entry);
+        return false;
+    }
+
+    VendorItemData const* vItems = isTemplate ? GetNpcVendorTemplateItemList(vendor_entry) : GetNpcVendorItemList(vendor_entry);
+    VendorItemData const* tItems = isTemplate ? NULL : GetNpcVendorTemplateItemList(vendor_entry);
+
+    if (!vItems && !tItems)
+    {
+        return true;
+    }                                        // later checks for non-empty lists
+
+    if (vItems && vItems->FindItem(item_id))
+    {
+        if (pl)
+        {
+            ChatHandler(pl).PSendSysMessage(LANG_ITEM_ALREADY_IN_LIST, item_id);
+        }
+        else
+            sLog.outErrorDb("Table `%s` has duplicate items %u for %s %u, ignoring",
+            tableName, item_id, idStr, vendor_entry);
+        return false;
+    }
+
+    if (!isTemplate)
+    {
+        if (tItems && tItems->GetItem(item_id))
+        {
+            if (pl)
+            {
+                ChatHandler(pl).PSendSysMessage(LANG_ITEM_ALREADY_IN_LIST, item_id);
+            }
+            else
+            {
+                if (!cInfo->vendorId)
+                    sLog.outErrorDb("Table `%s` has duplicate items %u for %s %u, ignoring",
+                    tableName, item_id, idStr, vendor_entry);
+                else
+                    sLog.outErrorDb("Table `%s` has duplicate items %u for %s %u (or possible in vendor template %u), ignoring",
+                    tableName, item_id, idStr, vendor_entry, cInfo->vendorId);
+            }
+            return false;
+        }
+    }
+
+    uint32 countItems = vItems ? vItems->GetItemCount() : 0;
+    countItems += tItems ? tItems->GetItemCount() : 0;
+
+    if (countItems >= MAX_VENDOR_ITEMS)
+    {
+        if (pl)
+        {
+            ChatHandler(pl).SendSysMessage(LANG_COMMAND_ADDVENDORITEMITEMS);
+        }
+        else
+            sLog.outErrorDb("Table `%s` has too many items (%u >= %i) for %s %u, ignoring",
+            tableName, countItems, MAX_VENDOR_ITEMS, idStr, vendor_entry);
+        return false;
+    }
+
+    return true;
+}
+
+/*
+   This is the Pre Dev21 version of the function
+   Delete this if the above works?
+*/
 bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item_id, uint8 type, uint32 maxcount, uint32 incrtime, uint32 ExtendedCost, uint16 conditionId, Player* pl, std::set<uint32>* skip_vendors) const
 {
     char const* idStr = isTemplate ? "vendor template" : "vendor";

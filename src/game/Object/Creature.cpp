@@ -92,13 +92,15 @@ bool VendorItemData::RemoveItem(uint32 item_id, uint8 type)
     return found;
 }
 
-VendorItem const* VendorItemData::FindItemCostPair(uint32 item_id, uint8 type, uint32 extendedCost) const
+VendorItem const* VendorItemData::FindItem(uint32 item_id) const
 {
     for (VendorItemList::const_iterator i = m_items.begin(); i != m_items.end(); ++i)
     {
         // Skip checking for conditions, condition system is powerfull enough to not require additional entries only for the conditions
-        if ((*i)->item == item_id && (*i)->ExtendedCost == extendedCost && (*i)->type == type)
+        if ((*i)->item == item_id)
+        {
             return *i;
+        }
     }
     return NULL;
 }

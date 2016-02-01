@@ -2018,7 +2018,7 @@ bool ChatHandler::isValidChatMessage(const char* message)
                     }
                     else if (linkedItem)
                     {
-                        DBCString suffix = itemSuffix?itemSuffix->nameSuffix:(itemProperty?itemProperty->nameSuffix:NULL);
+                        char* suffix = itemSuffix ? itemSuffix->nameSuffix : (itemProperty ? itemProperty->nameSuffix : NULL);
 
                         std::string expectedName = std::string(linkedItem->Name1);
                         if (suffix)

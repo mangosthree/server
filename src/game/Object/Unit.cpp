@@ -96,7 +96,7 @@ void MovementInfo::Read(ByteBuffer& data, uint16 opcode)
         MovementStatusElements element = sequence[i];
         if (element == MSEEnd)
             break;
-
+    
         if (element >= MSEGuidBit0 && element <= MSEGuidBit7)
         {
             guid[element - MSEGuidBit0] = data.ReadBit();

@@ -1217,13 +1217,13 @@ struct ItemRandomPropertiesEntry
     uint32    ID;                                           // 0        m_ID
     //char*     internalName                                // 1        m_Name
     uint32    enchant_id[5];                                // 2-6      m_Enchantment
-    DBCString nameSuffix;                                   // 7        m_name_lang
+    char*     nameSuffix;                                   // 7        m_name_lang
 };
 
 struct ItemRandomSuffixEntry
 {
     uint32    ID;                                           // 0        m_ID
-    DBCString nameSuffix;                                   // 1        m_name_lang
+    char*     nameSuffix;                                   // 1        m_name_lang
                                                             // 2        m_internalName
     uint32    enchant_id[5];                                // 3-7      m_enchantment
     uint32    prefix[5];                                    // 8-12     m_allocationPct

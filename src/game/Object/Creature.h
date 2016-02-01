@@ -362,6 +362,7 @@ struct VendorItemData
     }
     bool RemoveItem(uint32 item_id, uint8 type);
     VendorItem const* FindItemCostPair(uint32 item_id, uint8 type, uint32 extendedCost) const;
+    VendorItem const* FindItem(uint32 item_id) const;
 
     void Clear()
     {

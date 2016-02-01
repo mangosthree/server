@@ -105,6 +105,17 @@ VendorItem const* VendorItemData::FindItem(uint32 item_id) const
     return NULL;
 }
 
+VendorItem const* VendorItemData::FindItemCostPair(uint32 item_id, uint8 type, uint32 extendedCost) const
+{
+    for (VendorItemList::const_iterator i = m_items.begin(); i != m_items.end(); ++i)
+    {
+        // Skip checking for conditions, condition system is powerfull enough to not require additional entries only for the conditions
+        if ((*i)->item == item_id && (*i)->ExtendedCost == extendedCost && (*i)->type == type)
+            return *i;
+    }
+    return NULL;
+}
+
 bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
     m_owner.ForcedDespawn();

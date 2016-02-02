@@ -89,7 +89,7 @@ struct LootStoreItem
     uint8   type;                                           // 0 = item, 1 = currency
     float   chance;                                         // always positive, chance to drop for both quest and non-quest items, chance to be used for refs
     int32   mincountOrRef;                                  // mincount for drop items (positive) or minus referenced TemplateleId (negative)
-    uint32  maxcount;                                       // max drop count for the item (mincountOrRef positive) or Ref multiplicator (mincountOrRef negative)
+    uint8   maxcount;                                       // max drop count for the item (mincountOrRef positive) or Ref multiplicator (mincountOrRef negative)
     uint8   group       : 7;
     bool    needs_quest : 1;                                // quest drop (negative ChanceOrQuestChance in DB)
     uint16  conditionId : 16;                               // additional loot condition Id

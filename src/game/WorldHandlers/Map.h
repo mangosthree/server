@@ -62,6 +62,7 @@ struct ScriptInfo;
 class BattleGround;
 class GridMap;
 class GameObjectModel;
+class WeatherSystem;
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
@@ -220,6 +221,7 @@ class  Map : public GridRefManager<NGridType>
         bool ActiveObjectsNearGrid(uint32 x, uint32 y) const;
 
         void SendToPlayers(WorldPacket const* data) const;
+        bool SendToPlayersInZone(WorldPacket const* data, uint32 zoneId) const;
 
         typedef MapRefManager PlayerList;
         PlayerList const& GetPlayers() const { return m_mapRefManager; }
@@ -289,6 +291,8 @@ class  Map : public GridRefManager<NGridType>
 
         // Get Holder for Creature Linking
         CreatureLinkingHolder* GetCreatureLinkingHolder() { return &m_creatureLinkingHolder; }
+
+        void SetWeather(uint32 zoneId, WeatherType type, float grade, bool permanently);
 
     private:
         void LoadMapAndVMap(int gx, int gy);
@@ -383,6 +387,9 @@ class  Map : public GridRefManager<NGridType>
 
         // Dynamic Map tree object
         DynamicMapTree m_dyn_tree;
+
+        // WeatherSystem
+        WeatherSystem* m_weatherSystem;
 };
 
 class  WorldMap : public Map

@@ -3887,7 +3887,10 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
     m_currentSpells[CSpellType] = pSpell;
     pSpell->SetReferencedFromCurrent(true);
 
-    pSpell->m_selfContainer = &(m_currentSpells[pSpell->GetCurrentContainer()]);
+    pSpell->SetSelfContainer(&(m_currentSpells[pSpell->GetCurrentContainer()]));  // this works, but is not safe - <looks at Cédric>
+
+    // original and faulty code - delete once the above has been proven to work
+    // pSpell->m_selfContainer = &(m_currentSpells[pSpell->GetCurrentContainer()]); // m_selfContainer is not accessible, due to being a protected member
 }
 
 void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool sendAutoRepeatCancelToClient)
@@ -9526,9 +9529,9 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
     if (gtScalingEntry)
     {
         float scale = gtScalingEntry->value;
-        if (scalingEntry->castTimeMax > 0 && scalingEntry->castScalingMaxLevel > level)
+        if (uint32(scalingEntry->castTimeMax) > 0 && uint32(scalingEntry->castScalingMaxLevel) > level)
             scale *= float(scalingEntry->castTimeMin + float(level - 1) * (scalingEntry->castTimeMax - scalingEntry->castTimeMin) / (scalingEntry->castScalingMaxLevel - 1)) / float(scalingEntry->castTimeMax);
-        if (scalingEntry->coefLevelBase > level)
+        if (uint32(scalingEntry->coefLevelBase) > level)
             scale *= (1.0f - scalingEntry->coefBase) * (level - 1) / (scalingEntry->coefLevelBase - 1) + scalingEntry->coefBase;
 
         basePoints = int32(scalingEntry->coeff1[effect_index] * scale);

@@ -120,18 +120,18 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
                         return 0;
     }
 
-    int32 castTime = 0;
+    uint32 castTime = 0;
     SpellScalingEntry const* spellScalingEntry = spellInfo->GetSpellScaling();
     if (spell && spellScalingEntry && (spell->GetCaster()->GetTypeId() == TYPEID_PLAYER || spell->GetCaster()->GetObjectGuid().IsPet()))
     {
         uint32 level = spell->GetCaster()->getLevel();
         if (level == 1)
-            castTime = int32(spellScalingEntry->castTimeMin);
-        else if (level < spellScalingEntry->castScalingMaxLevel)
-            castTime = int32(spellScalingEntry->castTimeMin + float(level - 1) *
+            castTime = uint32(spellScalingEntry->castTimeMin);
+        else if (level < uint32(spellScalingEntry->castScalingMaxLevel))
+            castTime = uint32(spellScalingEntry->castTimeMin + float(level - 1) *
                 (spellScalingEntry->castTimeMax - spellScalingEntry->castTimeMin) / (spellScalingEntry->castScalingMaxLevel - 1));
         else
-            castTime = int32(spellScalingEntry->castTimeMax);
+            castTime = uint32(spellScalingEntry->castTimeMax);
     }
     else if (SpellCastTimesEntry const* spellCastTimeEntry = sSpellCastTimesStore.LookupEntry(spellInfo->CastingTimeIndex))
     {
@@ -146,13 +146,13 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
             }
 
             // currently only profession spells have CastTimePerLevel data filled, always negative
-            castTime = spellCastTimeEntry->CastTime + spellCastTimeEntry->CastTimePerLevel * level;
+            castTime = uint32(spellCastTimeEntry->CastTime + spellCastTimeEntry->CastTimePerLevel * level);
         }
         else
-            castTime = spellCastTimeEntry->CastTime;
+            castTime = uint32(spellCastTimeEntry->CastTime);
 
-        if (castTime < spellCastTimeEntry->MinCastTime)
-            castTime = spellCastTimeEntry->MinCastTime;
+        if (castTime < uint32(spellCastTimeEntry->MinCastTime))
+            castTime = uint32(spellCastTimeEntry->MinCastTime);
     }
     else
         // not all spells have cast time index and this is all is pasiive abilities
@@ -164,18 +164,18 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
             modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CASTING_TIME, castTime, spell);
 
         if (!spellInfo->HasAttribute(SPELL_ATTR_UNK4) && !spellInfo->HasAttribute(SPELL_ATTR_TRADESPELL))
-            castTime = int32(castTime * spell->GetCaster()->GetFloatValue(UNIT_MOD_CAST_SPEED));
+            castTime = uint32(castTime * spell->GetCaster()->GetFloatValue(UNIT_MOD_CAST_SPEED));
         else
         {
             if (spell->IsRangedSpell() && !spell->IsAutoRepeat())
-                castTime = int32(castTime * spell->GetCaster()->m_modAttackSpeedPct[RANGED_ATTACK]);
+                castTime = uint32(castTime * spell->GetCaster()->m_modAttackSpeedPct[RANGED_ATTACK]);
         }
     }
 
     if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (!spell || !spell->IsAutoRepeat()))
         castTime += 500;
 
-    return (castTime > 0) ? uint32(castTime) : 0;
+    return (castTime > 0) ? castTime : 0;
 }
 
 uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType damagetype)

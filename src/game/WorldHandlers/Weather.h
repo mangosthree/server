@@ -59,20 +59,66 @@ class Weather
     public:
         Weather(uint32 zone, WeatherZoneChances const* weatherChances);
         ~Weather() { };
+
         bool ReGenerate();
         bool UpdateWeather();
         void SendWeatherUpdateToPlayer(Player* player);
+        bool SendWeatherForPlayersInZone(Map const* _map);
         static void SendFineWeatherUpdateToPlayer(Player* player);
+        void SetWeather(WeatherType type, float grade, Map const* _map, bool isPermanent);
         void SetWeather(WeatherType type, float grade);
         /// For which zone is this weather?
         uint32 GetZone() { return m_zone; };
         bool Update(time_t diff);
+        static bool IsValidWeatherType(uint32 type)
+        {
+            switch (type)
+            {
+            case WEATHER_TYPE_FINE:
+            case WEATHER_TYPE_RAIN:
+            case WEATHER_TYPE_SNOW:
+            case WEATHER_TYPE_STORM:
+            case WEATHER_TYPE_THUNDERS:
+            case WEATHER_TYPE_BLACKRAIN:
+                return true;
+            default:
+                return false;
+            }
+        }
+
     private:
+        // Helper to get the grade between 0..1
+        void NormalizeGrade();
+        // Helper to log recent state
+        void LogWeatherState(WeatherState state) const;
+
         WeatherState GetWeatherState() const;
         uint32 m_zone;
         WeatherType m_type;
         float m_grade;
         ShortIntervalTimer m_timer;
         WeatherZoneChances const* m_weatherChances;
+        bool m_isPermanentWeather;
+};
+
+// ---------------------------------------------------------
+//         Weather information hold on one map
+// ---------------------------------------------------------
+
+/// Weathers for one map
+class WeatherSystem
+{
+public:
+    WeatherSystem(Map const* _map);
+    ~WeatherSystem();
+
+    Weather* FindOrCreateWeather(uint32 zoneId);
+    void UpdateWeathers(uint32 diff);
+
+private:
+    Map const* const m_map;
+
+    typedef UNORDERED_MAP<uint32 /*zoneId*/, Weather*> WeatherMap;
+    WeatherMap m_weathers;
 };
 #endif

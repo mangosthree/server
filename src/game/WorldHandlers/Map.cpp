@@ -43,6 +43,7 @@
 #include "VMapFactory.h"
 #include "MoveMap.h"
 #include "BattleGround/BattleGroundMgr.h"
+#include "Weather.h"
 #include "Calendar.h"
 
 Map::~Map()
@@ -1056,6 +1057,20 @@ void Map::SendToPlayers(WorldPacket const* data) const
         itr->getSource()->GetSession()->SendPacket(data);
 }
 
+bool Map::SendToPlayersInZone(WorldPacket const* data, uint32 zoneId) const
+{
+    bool foundPlayer = false;
+    for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
+    {
+        if (itr->getSource()->GetZoneId() == zoneId)
+        {
+            itr->getSource()->GetSession()->SendPacket(data);
+            foundPlayer = true;
+        }
+    }
+    return foundPlayer;
+}
+
 bool Map::ActiveObjectsNearGrid(uint32 x, uint32 y) const
 {
     MANGOS_ASSERT(x < MAX_NUMBER_OF_GRIDS);
@@ -1215,6 +1230,12 @@ void Map::CreateInstanceData(bool load)
         DEBUG_LOG("New instance data, \"%s\" ,initialized!", sScriptMgr.GetScriptName(i_script_id));
         i_data->Initialize();
     }
+}
+
+void Map::SetWeather(uint32 zoneId, WeatherType type, float grade, bool permanently)
+{
+    Weather* wth = m_weatherSystem->FindOrCreateWeather(zoneId);
+    wth->SetWeather(WeatherType(type), grade, this, permanently);
 }
 
 template void Map::Add(Corpse*);

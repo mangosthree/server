@@ -4182,6 +4182,12 @@ bool Player::HasSpell(uint32 spell) const
             !itr->second.disabled);
 }
 
+bool Player::HasTalent(uint32 spell, uint8 spec) const
+{
+    PlayerTalentMap::const_iterator itr = m_talents[spec].find(spell);
+    return (itr != m_talents[spec].end() && itr->second.state != PLAYERSPELL_REMOVED);
+}
+
 bool Player::HasActiveSpell(uint32 spell) const
 {
     PlayerSpellMap::const_iterator itr = m_spells.find(spell);
@@ -6734,6 +6740,16 @@ std::string Player::GetGuildName() const
         return guild->GetName();
 
     return "";
+}
+
+time_t Player::GetTalentResetTime() const
+{
+    return m_resetTalentsTime;
+}
+
+uint32 Player::GetTalentResetCost()	const
+{
+    return resetTalentsCost(); // this function added in dev21 - remove this comment if this line works
 }
 
 uint32 Player::GetGuildIdFromDB(ObjectGuid guid)
@@ -21714,6 +21730,39 @@ void Player::SendCorpseReclaimDelay(bool load)
     WorldPacket data(SMSG_CORPSE_RECLAIM_DELAY, 4);
     data << uint32(delay * IN_MILLISECONDS);
     GetSession()->SendPacket(&data);
+}
+
+uint32 Player::GetNextResetTalentsCost()	const
+{
+    // The first time reset costs 1 gold
+    if (GetTalentResetCost() < 1 * GOLD)
+        return 1 * GOLD;
+    // then 5 gold
+    else if (GetTalentResetCost() < 5 * GOLD)
+        return 5 * GOLD;
+    // After that it increases in increments of 5 gold
+    else if (GetTalentResetCost() < 10 * GOLD)
+        return 10 * GOLD;
+    else
+    {
+        uint64 months = (sWorld.GetGameTime() - GetTalentResetTime()) / MONTH;
+        if (months > 0)
+        {
+            // This cost will be reduced by a rate of 5 gold per month
+            int32 new_cost = int32(GetTalentResetCost() - 5 * GOLD*months);
+            // to a minimum of 10 gold.
+            return (new_cost < 10 * GOLD ? 10 * GOLD : new_cost);
+        }
+        else
+        {
+            // After that it increases in increments of 5 gold
+            int32 new_cost = GetTalentResetCost() + 5 * GOLD;
+            // until it hits a cap of 50 gold.
+            if (new_cost > 50 * GOLD)
+                new_cost = 50 * GOLD;
+            return new_cost;
+        }
+    }
 }
 
 Player* Player::GetNextRandomRaidMember(float radius)

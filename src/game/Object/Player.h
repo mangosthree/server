@@ -1590,6 +1590,7 @@ class  Player : public Unit
         void RemovePetActionBar();
 
         bool HasSpell(uint32 spell) const override;
+        bool HasTalent(uint32 spell, uint8 spec) const;
         bool HasActiveSpell(uint32 spell) const;            // show in spellbook
         TrainerSpellState GetTrainerSpellState(TrainerSpell const* trainer_spell, uint32 reqLevel) const;
         bool IsSpellFitByClassAndRace(uint32 spell_id, uint32* pReqlevel = NULL) const;
@@ -1760,6 +1761,8 @@ class  Player : public Unit
         uint32 GetGuildId() const { return GetGuildGuid().GetCounter(); }
         ObjectGuid GetGuildGuid() const { return GetGuidValue(OBJECT_FIELD_DATA); }
         std::string GetGuildName() const;
+        uint32 	GetTalentResetCost() const;
+        time_t Player::GetTalentResetTime() const;
         static uint32 GetGuildIdFromDB(ObjectGuid guid);
         static ObjectGuid GetGuildGuidFromDB(ObjectGuid guid);
         void SendGuildDeclined(std::string name, bool autodecline);
@@ -2341,6 +2344,7 @@ class  Player : public Unit
         void SetGroupUpdateFlag(uint32 flag) { m_groupUpdateMask |= flag; }
         const uint64& GetAuraUpdateMask() const { return m_auraUpdateMask; }
         void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
+        uint32 	GetNextResetTalentsCost() const;
         Player* GetNextRandomRaidMember(float radius);
         PartyResult CanUninviteFromGroup() const;
         // BattleGround Group System

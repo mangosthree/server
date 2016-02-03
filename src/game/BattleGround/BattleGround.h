@@ -531,6 +531,7 @@ class BattleGround
 
         // since arenas can be AvA or Hvh, we have to get the "temporary" team of a player
         Team GetPlayerTeam(ObjectGuid guid);
+        uint32 GetRemainingTime() const { return m_EndTime; }
         static Team GetOtherTeam(Team team) { return team ? ((team == ALLIANCE) ? HORDE : ALLIANCE) : TEAM_NONE; }
         static BattleGroundTeamIndex GetOtherTeamIndex(BattleGroundTeamIndex teamIdx) { return teamIdx == BG_TEAM_ALLIANCE ? BG_TEAM_HORDE : BG_TEAM_ALLIANCE; }
         bool IsPlayerInBattleGround(ObjectGuid guid);

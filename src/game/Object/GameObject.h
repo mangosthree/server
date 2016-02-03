@@ -647,6 +647,7 @@ class  GameObject : public WorldObject
         void AddToWorld() override;
         void RemoveFromWorld() override;
 
+        bool Create(uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state);
         bool Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang,
                     QuaternionData rotation = QuaternionData(), uint8 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY);
         void Update(uint32 update_diff, uint32 p_time) override;
@@ -775,6 +776,7 @@ class  GameObject : public WorldObject
         // 0 = use `gameobject`.`spawntimesecs`
         void ResetDoorOrButton();
 
+        void UpdateRotationFields(float rotation2 /*=0.0f*/, float rotation3 /*=0.0f*/);
         bool IsHostileTo(Unit const* unit) const override;
         bool IsFriendlyTo(Unit const* unit) const override;
 

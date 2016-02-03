@@ -330,6 +330,7 @@ enum
     VENDOR_ITEM_TYPE_MAX            = 3,
 };
 
+// Vendors
 struct VendorItem
 {
     VendorItem(uint32 _item, uint8 _type, uint32 _maxcount, uint32 _incrtime, uint32 _ExtendedCost, uint16 _conditionId)

@@ -1774,7 +1774,7 @@ GameObject* WorldObject::SummonGameObject(uint32 id, float x, float y, float z, 
     if (!map)
         return NULL;
 
-    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), id, map, x, y, z, angle))
+    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), id, map, GetPhaseMask(), x, y, z, angle))
     {
         delete pGameObj;
         return NULL;

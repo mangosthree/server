@@ -422,6 +422,17 @@ bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr)
     return true;
 }
 
+bool Utf8ToUpperOnlyLatin(std::string &utf8String)
+{
+    std::wstring wstr;
+    if (!Utf8toWStr(utf8String, wstr))
+        return false;
+
+    std::transform(wstr.begin(), wstr.end(), wstr.begin(), wcharToUpperOnlyLatin);
+
+    return WStrToUtf8(wstr, utf8String);
+}
+
 bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str)
 {
     try

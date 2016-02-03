@@ -2050,14 +2050,6 @@ struct  SpellEntry
     uint32 GetTargets() const;
     uint32 GetEffectApplyAuraNameByIndex(SpellEffectIndex index) const;
 
-    // helpers
-    /*
-    int32 CalculateSimpleValue(SpellEffectIndex eff) const { return EffectBasePoints[eff] + int32(1); }
-    ClassFamilyMask const& GetEffectSpellClassMask(SpellEffectIndex effect) const
-    {
-        return EffectSpellClassMask[effect];
-    } */
-
     bool IsFitToFamilyMask(uint64 familyFlags, uint32 familyFlags2 = 0) const
     {
         SpellClassOptionsEntry const* classOpt = GetSpellClassOptions();

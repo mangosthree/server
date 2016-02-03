@@ -282,7 +282,13 @@ inline bool Utf8toWStr(const std::string& utf8str, wchar_t* wstr, size_t& wsize)
 {
     return Utf8toWStr(utf8str.c_str(), utf8str.size(), wstr, wsize);
 }
-
+/**
+* @brief
+*
+* @param utf8String
+* @return bool
+*/
+bool Utf8ToUpperOnlyLatin(std::string &utf8String);
 /**
  * @brief
  *

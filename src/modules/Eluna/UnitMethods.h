@@ -2209,8 +2209,9 @@ namespace LuaUnit
         SpellAuraHolder* holder = CreateSpellAuraHolder(spellInfo, target, unit);
 
         for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-        {
-            uint8 eff = spellInfo->Effect[i];
+        {            
+            uint8 eff = (uint8)spellInfo->GetSpellEffect(SpellEffectIndex(i));
+            // uint8 eff = spellInfo->Effect[i]; // Effect is a member of SpellEffectIndex, nit SpellEvent
             if (eff >= TOTAL_SPELL_EFFECTS)
                 continue;
             if (IsAreaAuraEffect(eff) ||

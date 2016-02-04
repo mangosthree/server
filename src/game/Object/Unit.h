@@ -1728,7 +1728,7 @@ class  Unit : public WorldObject
          * @return The type of power this Unit uses
          */
         Powers GetPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, 3)); }
-        void setPowerType(Powers power);
+        void SetPowerType(Powers power);
         uint32 GetPower(Powers power) const;
         uint32 GetPowerByIndex(uint32 index) const;
         uint32 GetMaxPower(Powers power) const;
@@ -3082,7 +3082,6 @@ class  Unit : public WorldObject
         SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitMod) const;
         Stats GetStatByAuraGroup(UnitMods unitMod) const;
         Powers GetPowerTypeByAuraGroup(UnitMods unitMod) const;
-		void SetPowerType(Powers new_powertype);
         bool CanModifyStats() const { return m_canModifyStats; }
         void SetCanModifyStats(bool modifyStats) { m_canModifyStats = modifyStats; }
         virtual bool UpdateStats(Stats stat) = 0;

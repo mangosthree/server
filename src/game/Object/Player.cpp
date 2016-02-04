@@ -19397,20 +19397,20 @@ void Player::InitDataForForm(bool reapplyMods)
         case FORM_CAT:
         {
             if (GetPowerType() != POWER_ENERGY)
-                setPowerType(POWER_ENERGY);
+                SetPowerType(POWER_ENERGY);
             break;
         }
         case FORM_BEAR:
         {
             if (GetPowerType() != POWER_RAGE)
-                setPowerType(POWER_RAGE);
+                SetPowerType(POWER_RAGE);
             break;
         }
         default:                                            // 0, for example
         {
             ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(getClass());
             if (cEntry && cEntry->powerType < MAX_POWERS && uint32(GetPowerType()) != cEntry->powerType)
-                setPowerType(Powers(cEntry->powerType));
+                SetPowerType(Powers(cEntry->powerType));
             break;
         }
     }

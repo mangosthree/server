@@ -3666,7 +3666,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         {
             // reset power to default values only at power change
             if (target->GetPowerType() != PowerType)
-                target->setPowerType(PowerType);
+                target->SetPowerType(PowerType);
 
             switch (form)
             {
@@ -3745,7 +3745,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             target->SetDisplayId(target->GetNativeDisplayId());
 
         if (target->getClass() == CLASS_DRUID)
-            target->setPowerType(POWER_MANA);
+            target->SetPowerType(POWER_MANA);
 
         target->SetShapeshiftForm(FORM_NONE);
 

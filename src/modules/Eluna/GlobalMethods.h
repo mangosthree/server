@@ -1898,7 +1898,11 @@ namespace LuaGlobalFunctions
         if (!eObjectMgr->IsVendorItemValid(false, "npc_vendor", entry, item, maxcount, incrtime, extendedcost, 0))
             return 0;
 #ifndef CLASSIC
+#ifdef CATA
+        eObjectMgr->AddVendorItem(entry, item, maxcount, incrtime, extendedcost, 1);
+#else
         eObjectMgr->AddVendorItem(entry, item, maxcount, incrtime, extendedcost);
+#endif
 #else
         eObjectMgr->AddVendorItem(entry, item, maxcount, incrtime);
 #endif

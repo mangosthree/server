@@ -74,6 +74,11 @@ TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
     return NULL;
 }
 
+void VendorItemData::AddItem(uint32 item, uint8 type, uint32 maxcount, uint32 ptime, uint32 ExtendedCost, uint16 conditonId)
+{
+    m_items.push_back(new VendorItem(item, type, maxcount, ptime, ExtendedCost, conditonId));
+}
+
 bool VendorItemData::RemoveItem(uint32 item_id, uint8 type)
 {
     bool found = false;

@@ -1561,7 +1561,7 @@ namespace LuaUnit
             return luaL_argerror(L, 2, "valid Powers expected");
 
 #ifdef TRINITY
-        unit->setPowerType((Powers)type);
+        unit->SetPowerType((Powers)type);
 #else
         unit->SetPowerType((Powers)type);
 #endif

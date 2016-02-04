@@ -204,7 +204,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             break;
         case HUNTER_PET:
             SetByteFlag(UNIT_FIELD_BYTES_2, 2, fields[9].GetBool() ? UNIT_CAN_BE_ABANDONED : UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
-            setPowerType(POWER_FOCUS);
+            SetPowerType(POWER_FOCUS);
             break;
         default:
             sLog.outError("Pet have incorrect type (%u) for pet loading.", getPetType());
@@ -824,7 +824,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     }
     SetDisplayId(creature->GetDisplayId());
     SetNativeDisplayId(creature->GetNativeDisplayId());
-    setPowerType(POWER_FOCUS);
+    SetPowerType(POWER_FOCUS);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(creature->getLevel()));

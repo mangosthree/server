@@ -357,10 +357,7 @@ struct VendorItemData
     }
     bool Empty() const { return m_items.empty(); }
     uint8 GetItemCount() const { return m_items.size(); }
-    void AddItem(uint32 item, uint8 type, uint32 maxcount, uint32 ptime, uint32 ExtendedCost, uint16 conditonId)
-    {
-        m_items.push_back(new VendorItem(item, type, maxcount, ptime, ExtendedCost, conditonId));
-    }
+    void AddItem(uint32 item, uint8 type, uint32 maxcount, uint32 ptime, uint32 ExtendedCost, uint16 conditonId);
     bool RemoveItem(uint32 item_id, uint8 type);
     VendorItem const* FindItemCostPair(uint32 item_id, uint8 type, uint32 extendedCost) const;
     VendorItem const* FindItem(uint32 item_id) const;

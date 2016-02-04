@@ -5717,7 +5717,7 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit* target, SpellSchoolMask d
 	SendAttackStateUpdate(&dmgInfo);
 }
 
-void Unit::setPowerType(Powers new_powertype)
+void Unit::SetPowerType(Powers new_powertype)
 {
     SetByteValue(UNIT_FIELD_BYTES_0, 3, new_powertype);
 

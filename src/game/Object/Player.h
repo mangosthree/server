@@ -1765,7 +1765,7 @@ class  Player : public Unit
         ObjectGuid GetGuildGuid() const { return GetGuidValue(OBJECT_FIELD_DATA); }
         std::string GetGuildName() const;
         uint32 	GetTalentResetCost() const;
-        time_t Player::GetTalentResetTime() const;
+        time_t GetTalentResetTime() const;
         static uint32 GetGuildIdFromDB(ObjectGuid guid);
         static ObjectGuid GetGuildGuidFromDB(ObjectGuid guid);
         void SendGuildDeclined(std::string name, bool autodecline);

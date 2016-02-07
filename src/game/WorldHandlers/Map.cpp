@@ -45,16 +45,27 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "Weather.h"
 #include "Calendar.h"
+#ifdef ENABLE_ELUNA
+#include "LuaEngine.h"
+#endif /* ENABLE_ELUNA */
 
 Map::~Map()
 {
+#ifdef ENABLE_ELUNA
+    sEluna->OnDestroy(this);
+#endif /* ENABLE_ELUNA */
+
     UnloadAll(true);
 
     if (!m_scriptSchedule.empty())
+    {
         sScriptMgr.DecreaseScheduledScriptCount(m_scriptSchedule.size());
+    }
 
     if (m_persistentState)
-        m_persistentState->SetUsedByMapState(NULL);         // field pointer can be deleted after this
+    {
+        m_persistentState->SetUsedByMapState(NULL);
+    }         // field pointer can be deleted after this
 
     delete i_data;
     i_data = NULL;
@@ -64,7 +75,12 @@ Map::~Map()
 
     // release reference count
     if (m_TerrainData->Release())
+    {
         sTerrainMgr.UnloadTerrain(m_TerrainData->GetMapId());
+    }
+
+    delete m_weatherSystem;
+    m_weatherSystem = NULL;
 }
 
 void Map::LoadMapAndVMap(int gx, int gy)
@@ -667,8 +683,7 @@ Map::Remove(T* obj, bool remove)
     }
 }
 
-void
-Map::PlayerRelocation(Player* player, float x, float y, float z, float orientation)
+void Map::PlayerRelocation(Player* player, float x, float y, float z, float orientation)
 {
     MANGOS_ASSERT(player);
 
@@ -788,7 +803,9 @@ bool Map::UnloadGrid(const uint32& x, const uint32& y, bool pForce)
 
     {
         if (!pForce && ActiveObjectsNearGrid(x, y))
+        {
             return false;
+        }
 
         DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Unloading grid[%u,%u] for map %u", x, y, i_id);
         ObjectGridUnloader unloader(*grid);
@@ -1927,7 +1944,7 @@ class StaticMonsterChatBuilder
  * @param language language of the text
  * @param target, can be NULL
  */
-void Map::MonsterYellToMap(ObjectGuid guid, int32 textId, uint32 language, Unit const* target) const
+void Map::MonsterYellToMap(ObjectGuid guid, int32 textId, Language language, Unit const* target) const
 {
     if (guid.IsAnyTypeCreature())
     {
@@ -1958,14 +1975,16 @@ void Map::MonsterYellToMap(ObjectGuid guid, int32 textId, uint32 language, Unit 
  * @param senderLowGuid provide way proper show yell for near spawned creature with known lowguid,
  *        0 accepted by client else if this not important
  */
-void Map::MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, uint32 language, Unit const* target, uint32 senderLowGuid /*= 0*/) const
+void Map::MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, Language language, Unit const* target, uint32 senderLowGuid /*= 0*/) const
 {
     StaticMonsterChatBuilder say_build(cinfo, CHAT_MSG_MONSTER_YELL, textId, language, target, senderLowGuid);
     MaNGOS::LocalizedPacketDo<StaticMonsterChatBuilder> say_do(say_build);
 
     Map::PlayerList const& pList = GetPlayers();
     for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+    {
         say_do(itr->getSource());
+    }
 }
 
 /**

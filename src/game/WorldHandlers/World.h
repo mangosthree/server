@@ -78,13 +78,14 @@ enum ShutdownExitCode
 enum WorldTimers
 {
     WUPDATE_AUCTIONS    = 0,
-    WUPDATE_WEATHERS    = 1,
-    WUPDATE_UPTIME      = 2,
-    WUPDATE_CORPSES     = 3,
-    WUPDATE_EVENTS      = 4,
-    WUPDATE_DELETECHARS = 5,
-    WUPDATE_AHBOT       = 6,
-    WUPDATE_COUNT       = 7
+    WUPDATE_UPTIME      = 1,
+    WUPDATE_CORPSES     = 2,
+    WUPDATE_EVENTS      = 3,
+    WUPDATE_DELETECHARS = 4,
+    WUPDATE_AHBOT       = 5,
+    WUPDATE_LFGMGR      = 6,
+    WUPDATE_WEATHERS    = 7,
+    WUPDATE_COUNT       = 8
 };
 
 /// Configuration elements
@@ -126,6 +127,11 @@ enum eConfigUInt32Values
     CONFIG_UINT32_MAX_PLAYER_LEVEL,
     CONFIG_UINT32_START_PLAYER_LEVEL,
     CONFIG_UINT32_START_HEROIC_PLAYER_LEVEL,
+    CONFIG_UINT32_START_PLAYER_MONEY,
+    CONFIG_UINT32_MAX_HONOR_POINTS,
+    CONFIG_UINT32_START_HONOR_POINTS,
+    CONFIG_UINT32_MAX_ARENA_POINTS,
+    CONFIG_UINT32_START_ARENA_POINTS,
     CONFIG_UINT32_CURRENCY_START_HONOR_POINTS,
     CONFIG_UINT32_CURRENCY_START_CONQUEST_POINTS,
     CONFIG_UINT32_CURRENCY_CONQUEST_POINTS_DEFAULT_WEEK_CAP,
@@ -190,6 +196,7 @@ enum eConfigUInt32Values
     CONFIG_UINT32_BATTLEGROUND_QUEUE_ANNOUNCER_JOIN,
     CONFIG_UINT32_ARENA_MAX_RATING_DIFFERENCE,
     CONFIG_UINT32_ARENA_RATING_DISCARD_TIMER,
+    CONFIG_UINT32_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS,
     CONFIG_UINT32_ARENA_SEASON_ID,
     CONFIG_UINT32_ARENA_SEASON_PREVIOUS_ID,
     CONFIG_UINT32_CLIENTCACHE_VERSION,
@@ -347,6 +354,7 @@ enum eConfigBoolValues
     CONFIG_BOOL_SKILL_FAIL_POSSIBLE_FISHINGPOOL,
     CONFIG_BOOL_BATTLEGROUND_CAST_DESERTER,
     CONFIG_BOOL_BATTLEGROUND_QUEUE_ANNOUNCER_START,
+    CONFIG_BOOL_ARENA_AUTO_DISTRIBUTE_POINTS,
     CONFIG_BOOL_ARENA_QUEUE_ANNOUNCER_JOIN,
     CONFIG_BOOL_ARENA_QUEUE_ANNOUNCER_EXIT,
     CONFIG_BOOL_OUTDOORPVP_SI_ENABLED,
@@ -636,6 +644,7 @@ class World
         void SetMonthlyQuestResetTime(bool initialize = true);
         void ResetCurrencyWeekCounts();
         void ResetDailyQuests();
+        void ResetRandomBG();
         void ResetWeeklyQuests();
         void ResetMonthlyQuests();
 
@@ -714,7 +723,10 @@ class World
         time_t m_NextCurrencyReset;
         time_t m_NextDailyQuestReset;
         time_t m_NextWeeklyQuestReset;
-        time_t m_NextMonthlyQuestReset;
+        time_t m_NextMonthlyQuestReset;        
+
+        // next daily quests reset time
+        time_t m_NextRandomBGReset;
 
         // Player Queue
         Queue m_QueuedSessions;

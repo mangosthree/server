@@ -38,6 +38,15 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "WaypointMovementGenerator.h"
 
+#ifdef ENABLE_ELUNA
+#include "LuaEngine.h"
+#endif /* ENABLE_ELUNA */
+#ifdef ENABLE_SD3
+#include "system/ScriptDevMgr.h"
+#endif
+
+#include <cstring> /* std::strcmp */
+
 #include "revision.h"
 
 ScriptMapMapName sQuestEndScripts;
@@ -53,44 +62,12 @@ ScriptMapMapName sCreatureMovementScripts;
 INSTANTIATE_SINGLETON_1(ScriptMgr);
 
 ScriptMgr::ScriptMgr() :
-    m_hScriptLib(NULL),
-    m_scheduledScripts(0),
-
-    m_pOnInitScriptLibrary(NULL),
-    m_pOnFreeScriptLibrary(NULL),
-    m_pGetScriptLibraryVersion(NULL),
-
-    m_pGetCreatureAI(NULL),
-    m_pCreateInstanceData(NULL),
-
-    m_pOnGossipHello(NULL),
-    m_pOnGOGossipHello(NULL),
-    m_pOnGossipSelect(NULL),
-    m_pOnGOGossipSelect(NULL),
-    m_pOnGossipSelectWithCode(NULL),
-    m_pOnGOGossipSelectWithCode(NULL),
-    m_pOnQuestAccept(NULL),
-    m_pOnGOQuestAccept(NULL),
-    m_pOnItemQuestAccept(NULL),
-    m_pOnQuestRewarded(NULL),
-    m_pOnGOQuestRewarded(NULL),
-    m_pGetNPCDialogStatus(NULL),
-    m_pGetGODialogStatus(NULL),
-    m_pOnGOUse(NULL),
-    m_pOnItemUse(NULL),
-    m_pOnAreaTrigger(NULL),
-    m_pOnProcessEvent(NULL),
-    m_pOnEffectDummyCreature(NULL),
-    m_pOnEffectDummyGO(NULL),
-    m_pOnEffectDummyItem(NULL),
-    m_pOnEffectScriptEffectCreature(NULL),
-    m_pOnAuraDummy(NULL)
+    m_scheduledScripts(0)
 {
 }
 
 ScriptMgr::~ScriptMgr()
 {
-    UnloadScriptLibrary();
 }
 
 // /////////////////////////////////////////////////////////
@@ -1807,25 +1784,28 @@ bool ScriptAction::HandleScriptStep()
 //              Scripting Library Hooks
 // /////////////////////////////////////////////////////////
 
-void ScriptMgr::LoadAreaTriggerScripts()
+void ScriptMgr::LoadScriptBinding()
 {
-    m_AreaTriggerScripts.clear();                           // need for reload case
-    QueryResult* result = WorldDatabase.Query("SELECT entry, ScriptName FROM scripted_areatrigger");
+#ifdef ENABLE_SD3
+    for (int i = 0; i < SCRIPTED_MAX_TYPE; ++i)
+        m_scriptBind[i].clear();
 
+    QueryResult* result = WorldDatabase.PQuery("SELECT type, bind, ScriptName, data FROM script_binding");
     uint32 count = 0;
 
     if (!result)
     {
         BarGoLink bar(1);
         bar.step();
-
+        sLog.outString(">> Loaded no script binding.");
         sLog.outString();
-        sLog.outString(">> Loaded %u scripted areatrigger", count);
         return;
     }
 
-    BarGoLink bar(result->GetRowCount());
+    std::set<uint32> eventIds;                              // Store possible event ids, for checking
+    CollectPossibleEventIds(eventIds);
 
+    BarGoLink bar(result->GetRowCount());
     do
     {
         ++count;
@@ -1833,96 +1813,107 @@ void ScriptMgr::LoadAreaTriggerScripts()
 
         Field* fields = result->Fetch();
 
-        uint32 triggerId       = fields[0].GetUInt32();
-        const char* scriptName = fields[1].GetString();
+        uint8 type = fields[0].GetUInt8();
+        int32 id = fields[1].GetInt32();
+        const char* scriptName = fields[2].GetString();
+        uint8 data = fields[3].GetUInt8();
 
-        if (!sAreaTriggerStore.LookupEntry(triggerId))
+        if (type >= SCRIPTED_MAX_TYPE)
         {
-            sLog.outErrorDb("Table `scripted_areatrigger` has area trigger (ID: %u) not listed in `AreaTrigger.dbc`.", triggerId);
+            sLog.outErrorScriptLib("script_binding table contains a script for non-existent type %u (bind %d), ignoring.", type, id);
+            continue;
+        }
+        uint32 scriptId = GetScriptId(scriptName);
+        if (!scriptId)  //this should never happen! the script names are initialized from the same table
+        {
+            sLog.outErrorScriptLib("something is very bad with your script_binding table!");
             continue;
         }
 
-        m_AreaTriggerScripts[triggerId] = GetScriptId(scriptName);
-    }
-    while (result->NextRow());
+        // checking if the scripted object actually exists
+        bool exists = false;
+        switch (type)
+        {
+        case SCRIPTED_UNIT:
+            exists = id > 0 ? bool(sCreatureStorage.LookupEntry<CreatureInfo>(uint32(id))) : bool(sObjectMgr.GetCreatureData(uint32(-id)));
+            break;
+        case SCRIPTED_GAMEOBJECT:
+            exists = id > 0 ? bool(sGOStorage.LookupEntry<GameObjectInfo>(uint32(id))) : bool(sObjectMgr.GetGOData(uint32(-id)));
+            break;
+        case SCRIPTED_ITEM:
+            exists = bool(sItemStorage.LookupEntry<ItemPrototype>(uint32(id)));
+            break;
+        case SCRIPTED_AREATRIGGER:
+            exists = bool(sAreaTriggerStore.LookupEntry(uint32(id)));
+            break;
+        case SCRIPTED_SPELL:
+        case SCRIPTED_AURASPELL:
+            exists = bool(sSpellStore.LookupEntry(uint32(id)));
+            break;
+        case SCRIPTED_MAPEVENT:
+            exists = eventIds.count(uint32(id));
+            break;
+        case SCRIPTED_MAP:
+            exists = bool(sMapStore.LookupEntry(uint32(id)));
+            break;
+        case SCRIPTED_PVP_ZONE: // for now, no check on special zones
+            exists = bool(sAreaStore.LookupEntry(uint32(id)));
+            break;
+        case SCRIPTED_BATTLEGROUND:
+            if (MapEntry const* mapEntry = sMapStore.LookupEntry(uint32(id)))
+                exists = mapEntry->IsBattleGround();
+            break;
+        case SCRIPTED_INSTANCE:
+            if (MapEntry const* mapEntry = sMapStore.LookupEntry(uint32(id)))
+                exists = mapEntry->IsDungeon();
+            break;
+        case SCRIPTED_CONDITION:
+            exists = sConditionStorage.LookupEntry<PlayerCondition>(uint32(id));
+            break;
+        case SCRIPTED_ACHIEVEMENT:
+            break;
+        }
+
+        if (!exists)
+        {
+            sLog.outErrorScriptLib("script type %u (%s) is bound to non-existing entry %d, ignoring.", type, scriptName, id);
+            continue;
+        }
+
+        if (type == SCRIPTED_SPELL || type == SCRIPTED_AURASPELL)
+            id |= uint32(data) << 24;   //incorporate spell effect number into the key
+
+        m_scriptBind[type][id] = scriptId;
+    } while (result->NextRow());
 
     delete result;
+    sLog.outString("Of the total %u script bindings, loaded succesfully:", count);
+    for (uint8 i = 0; i < SCRIPTED_MAX_TYPE; ++i)
+    {
+        if (m_scriptBind[i].size()) //ignore missing script types to shorten the log
+        {
+            sLog.outString(".. type %u: %u binds", i, uint32(m_scriptBind[i].size()));
+            count -= m_scriptBind[i].size();
+        }
+    }
+    sLog.outString("Thus, %u script binds are found bad.", count);
 
     sLog.outString();
-    sLog.outString(">> Loaded %u areatrigger scripts", count);
-}
-
-void ScriptMgr::LoadEventIdScripts()
-{
-    m_EventIdScripts.clear();                           // need for reload case
-    QueryResult* result = WorldDatabase.Query("SELECT id, ScriptName FROM scripted_event");
-
-    uint32 count = 0;
-
-    if (!result)
-    {
-        BarGoLink bar(1);
-        bar.step();
-
-        sLog.outString();
-        sLog.outString(">> Loaded %u scripted event id", count);
-        return;
-    }
-
-    BarGoLink bar(result->GetRowCount());
-
-    std::set<uint32> eventIds;                              // Store possible event ids
-    CollectPossibleEventIds(eventIds);
-
-    do
-    {
-        ++count;
-        bar.step();
-
-        Field* fields = result->Fetch();
-
-        uint32 eventId          = fields[0].GetUInt32();
-        const char* scriptName  = fields[1].GetString();
-
-        std::set<uint32>::const_iterator itr = eventIds.find(eventId);
-        if (itr == eventIds.end())
-            sLog.outErrorDb("Table `scripted_event` has id %u not referring to any gameobject_template type 10 data2 field, type 3 data6 field, type 13 data 2 field, type 29 or any spell effect %u or path taxi node data",
-                            eventId, SPELL_EFFECT_SEND_EVENT);
-
-        m_EventIdScripts[eventId] = GetScriptId(scriptName);
-    }
-    while (result->NextRow());
-
-    delete result;
-
-    sLog.outString();
-    sLog.outString(">> Loaded %u scripted event id", count);
+#endif /* ENABLE_SD3 */
+    return;
 }
 
 void ScriptMgr::LoadScriptNames()
 {
     m_scriptNames.push_back("");
-    QueryResult* result = WorldDatabase.Query(
-                              "SELECT DISTINCT(ScriptName) FROM creature_template WHERE ScriptName <> '' "
-                              "UNION "
-                              "SELECT DISTINCT(ScriptName) FROM gameobject_template WHERE ScriptName <> '' "
-                              "UNION "
-                              "SELECT DISTINCT(ScriptName) FROM item_template WHERE ScriptName <> '' "
-                              "UNION "
-                              "SELECT DISTINCT(ScriptName) FROM scripted_areatrigger WHERE ScriptName <> '' "
-                              "UNION "
-                              "SELECT DISTINCT(ScriptName) FROM scripted_event WHERE ScriptName <> '' "
-                              "UNION "
-                              "SELECT DISTINCT(ScriptName) FROM instance_template WHERE ScriptName <> '' "
-                              "UNION "
-                              "SELECT DISTINCT(ScriptName) FROM world_template WHERE ScriptName <> ''");
+    QueryResult* result = WorldDatabase.Query("SELECT DISTINCT(ScriptName) FROM script_binding");
 
     if (!result)
     {
         BarGoLink bar(1);
         bar.step();
-        sLog.outString();
         sLog.outErrorDb(">> Loaded empty set of Script Names!");
+        sLog.outString();
         return;
     }
 
@@ -1934,13 +1925,13 @@ void ScriptMgr::LoadScriptNames()
         bar.step();
         m_scriptNames.push_back((*result)[0].GetString());
         ++count;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
     delete result;
 
     std::sort(m_scriptNames.begin(), m_scriptNames.end());
+
+    sLog.outString(">> Loaded %d unique Script Names", count);
     sLog.outString();
-    sLog.outString(">> Loaded %d Script Names", count);
 }
 
 uint32 ScriptMgr::GetScriptId(const char* name) const
@@ -1948,281 +1939,410 @@ uint32 ScriptMgr::GetScriptId(const char* name) const
     // use binary search to find the script name in the sorted vector
     // assume "" is the first element
     if (!name)
+    {
         return 0;
+    }
 
     ScriptNameMap::const_iterator itr =
         std::lower_bound(m_scriptNames.begin(), m_scriptNames.end(), name);
 
     if (itr == m_scriptNames.end() || *itr != name)
+    {
         return 0;
+    }
 
     return uint32(itr - m_scriptNames.begin());
 }
 
-uint32 ScriptMgr::GetAreaTriggerScriptId(uint32 triggerId) const
-{
-    AreaTriggerScriptMap::const_iterator itr = m_AreaTriggerScripts.find(triggerId);
-    if (itr != m_AreaTriggerScripts.end())
-        return itr->second;
-
-    return 0;
-}
-
-uint32 ScriptMgr::GetEventIdScriptId(uint32 eventId) const
-{
-    EventIdScriptMap::const_iterator itr = m_EventIdScripts.find(eventId);
-    if (itr != m_EventIdScripts.end())
-        return itr->second;
-
-    return 0;
-}
-
 char const* ScriptMgr::GetScriptLibraryVersion() const
 {
-    if (!m_pGetScriptLibraryVersion)
-        return "";
+#ifdef ENABLE_SD3
+    return SD3::GetScriptLibraryVersion();
+#else
+    return NULL;
+#endif
+}
 
-    return m_pGetScriptLibraryVersion();
+uint32 ScriptMgr::GetBoundScriptId(ScriptedObjectType entity, int32 entry)
+{
+    uint32 id = 0;
+    if (entity < SCRIPTED_MAX_TYPE)
+    {
+        EntryToScriptIdMap::const_iterator it = m_scriptBind[entity].find(entry);
+        if (it != m_scriptBind[entity].end())
+            id = it->second;
+    }
+    else
+        sLog.outErrorScriptLib("asking a script for non-existing entity type %u!", entity);
+
+    return id;
 }
 
 CreatureAI* ScriptMgr::GetCreatureAI(Creature* pCreature)
 {
-    if (!m_pGetCreatureAI)
-        return NULL;
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (CreatureAI* luaAI = sEluna->GetAI(pCreature))
+        return luaAI;
+#endif /* ENABLE_ELUNA */
 
-    return m_pGetCreatureAI(pCreature);
+#ifdef ENABLE_SD3
+    return SD3::GetCreatureAI(pCreature);
+#else
+    return NULL;
+#endif
 }
 
 InstanceData* ScriptMgr::CreateInstanceData(Map* pMap)
 {
-    if (!m_pCreateInstanceData)
-        return NULL;
-
-    return m_pCreateInstanceData(pMap);
+#ifdef ENABLE_SD3
+    return SD3::CreateInstanceData(pMap);
+#else
+    return NULL;
+#endif
 }
 
 bool ScriptMgr::OnGossipHello(Player* pPlayer, Creature* pCreature)
 {
-    return m_pOnGossipHello != NULL && m_pOnGossipHello(pPlayer, pCreature);
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (sEluna->OnGossipHello(pPlayer, pCreature))
+        return true;
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::GossipHello(pPlayer, pCreature);
+#else
+    return false;
+#endif
 }
 
 bool ScriptMgr::OnGossipHello(Player* pPlayer, GameObject* pGameObject)
 {
-    return m_pOnGOGossipHello != NULL && m_pOnGOGossipHello(pPlayer, pGameObject);
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (sEluna->OnGossipHello(pPlayer, pGameObject))
+        return true;
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::GOGossipHello(pPlayer, pGameObject);
+#else
+    return false;
+#endif
 }
 
 bool ScriptMgr::OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 action, const char* code)
 {
+#ifdef ENABLE_ELUNA
     if (code)
-        return m_pOnGossipSelectWithCode != NULL && m_pOnGossipSelectWithCode(pPlayer, pCreature, sender, action, code);
+    {
+        // Used by Eluna
+        if (sEluna->OnGossipSelectCode(pPlayer, pCreature, sender, action, code))
+            return true;
+    }
     else
-        return m_pOnGossipSelect != NULL && m_pOnGossipSelect(pPlayer, pCreature, sender, action);
+    {
+        // Used by Eluna
+        if (sEluna->OnGossipSelect(pPlayer, pCreature, sender, action))
+            return true;
+    }
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    if (code)
+    {
+        return SD3::GossipSelectWithCode(pPlayer, pCreature, sender, action, code);
+    }
+    else
+    {
+        return SD3::GossipSelect(pPlayer, pCreature, sender, action);
+    }
+#else
+    return false;
+#endif
 }
 
 bool ScriptMgr::OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 sender, uint32 action, const char* code)
 {
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
     if (code)
-        return m_pOnGOGossipSelectWithCode != NULL && m_pOnGOGossipSelectWithCode(pPlayer, pGameObject, sender, action, code);
+    {
+        if (sEluna->OnGossipSelectCode(pPlayer, pGameObject, sender, action, code))
+            return true;
+    }
     else
-        return m_pOnGOGossipSelect != NULL && m_pOnGOGossipSelect(pPlayer, pGameObject, sender, action);
+    {
+        if (sEluna->OnGossipSelect(pPlayer, pGameObject, sender, action))
+            return true;
+    }
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    if (code)
+    {
+        return SD3::GOGossipSelectWithCode(pPlayer, pGameObject, sender, action, code);
+    }
+    else
+    {
+        return SD3::GOGossipSelect(pPlayer, pGameObject, sender, action);
+    }
+#else
+    return false;
+#endif
 }
 
 bool ScriptMgr::OnQuestAccept(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
-    return m_pOnQuestAccept != NULL && m_pOnQuestAccept(pPlayer, pCreature, pQuest);
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (sEluna->OnQuestAccept(pPlayer, pCreature, pQuest))
+        return true;
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::QuestAccept(pPlayer, pCreature, pQuest);
+#else
+    return false;
+#endif
 }
 
 bool ScriptMgr::OnQuestAccept(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest)
 {
-    return m_pOnGOQuestAccept != NULL && m_pOnGOQuestAccept(pPlayer, pGameObject, pQuest);
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (sEluna->OnQuestAccept(pPlayer, pGameObject, pQuest))
+        return true;
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::GOQuestAccept(pPlayer, pGameObject, pQuest);
+#else
+    return false;
+#endif
 }
 
 bool ScriptMgr::OnQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
 {
-    return m_pOnItemQuestAccept != NULL && m_pOnItemQuestAccept(pPlayer, pItem, pQuest);
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (sEluna->OnQuestAccept(pPlayer, pItem, pQuest))
+        return true;
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::ItemQuestAccept(pPlayer, pItem, pQuest);
+#else
+    return false;
+#endif
 }
 
-bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
+bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest, uint32 reward)
 {
-    return m_pOnQuestRewarded != NULL && m_pOnQuestRewarded(pPlayer, pCreature, pQuest);
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (sEluna->OnQuestReward(pPlayer, pCreature, pQuest, reward))
+        return true;
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::QuestRewarded(pPlayer, pCreature, pQuest);
+#else
+    return false;
+#endif
 }
 
-bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest)
+bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest, uint32 reward)
 {
-    return m_pOnGOQuestRewarded != NULL && m_pOnGOQuestRewarded(pPlayer, pGameObject, pQuest);
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (sEluna->OnQuestReward(pPlayer, pGameObject, pQuest, reward))
+        return true;
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::GOQuestRewarded(pPlayer, pGameObject, pQuest);
+#else
+    return false;
+#endif
 }
 
 uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
 {
-    if (!m_pGetNPCDialogStatus)
-        return DIALOG_STATUS_UNDEFINED;
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pCreature))
+        return dialogId;
+#endif /* ENABLE_ELUNA */
 
-    return m_pGetNPCDialogStatus(pPlayer, pCreature);
+#ifdef ENABLE_SD3
+    return SD3::GetNPCDialogStatus(pPlayer, pCreature);
+#else
+    return DIALOG_STATUS_UNDEFINED;
+#endif
 }
 
 uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
 {
-    if (!m_pGetGODialogStatus)
-        return DIALOG_STATUS_UNDEFINED;
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pGameObject))
+        return dialogId;
+#endif /* ENABLE_ELUNA */
 
-    return m_pGetGODialogStatus(pPlayer, pGameObject);
+#ifdef ENABLE_SD3
+    return SD3::GetGODialogStatus(pPlayer, pGameObject);
+#else
+    return DIALOG_STATUS_UNDEFINED;
+#endif
 }
 
 bool ScriptMgr::OnGameObjectUse(Player* pPlayer, GameObject* pGameObject)
 {
-    return m_pOnGOUse != NULL && m_pOnGOUse(pPlayer, pGameObject);
+#ifdef ENABLE_ELUNA
+    if (sEluna->OnGameObjectUse(pPlayer, pGameObject))
+        return true;
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::GOUse(pPlayer, pGameObject);
+#else
+    return false;
+#endif
 }
 
 bool ScriptMgr::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {
-    return m_pOnItemUse != NULL && m_pOnItemUse(pPlayer, pItem, targets);
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (!sEluna->OnUse(pPlayer, pItem, targets))
+        return true;
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::ItemUse(pPlayer, pItem, targets);
+#else
+    return false;
+#endif
 }
 
 bool ScriptMgr::OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
 {
-    return m_pOnAreaTrigger != NULL && m_pOnAreaTrigger(pPlayer, atEntry);
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (sEluna->OnAreaTrigger(pPlayer, atEntry))
+        return true;
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::AreaTrigger(pPlayer, atEntry);
+#else
+    return false;
+#endif
+}
+
+bool ScriptMgr::OnNpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 spellId)
+{
+#ifdef ENABLE_SD3
+    return SD3::NpcSpellClick(pPlayer, pClickedCreature, spellId);
+#else
+    return false;
+#endif
 }
 
 bool ScriptMgr::OnProcessEvent(uint32 eventId, Object* pSource, Object* pTarget, bool isStart)
 {
-    return m_pOnProcessEvent != NULL && m_pOnProcessEvent(eventId, pSource, pTarget, isStart);
+#ifdef ENABLE_SD3
+    return SD3::ProcessEvent(eventId, pSource, pTarget, isStart);
+#else
+    return false;
+#endif
 }
 
 bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
 {
-    return m_pOnEffectDummyCreature != NULL && m_pOnEffectDummyCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
+        return true;
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::EffectDummyCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+#else
+    return false;
+#endif
 }
 
 bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, GameObject* pTarget, ObjectGuid originalCasterGuid)
 {
-    return m_pOnEffectDummyGO != NULL && m_pOnEffectDummyGO(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
+        return true;
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::EffectDummyGameObject(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+#else
+    return false;
+#endif
 }
 
 bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Item* pTarget, ObjectGuid originalCasterGuid)
 {
-    return m_pOnEffectDummyItem != NULL && m_pOnEffectDummyItem(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
+        return true;
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::EffectDummyItem(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+#else
+    return false;
+#endif   
 }
 
 bool ScriptMgr::OnEffectScriptEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
 {
-    return m_pOnEffectScriptEffectCreature != NULL && m_pOnEffectScriptEffectCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+#ifdef ENABLE_SD3
+    return SD3::EffectScriptEffectCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+#else
+    return false;
+#endif
 }
 
 bool ScriptMgr::OnAuraDummy(Aura const* pAura, bool apply)
 {
-    return m_pOnAuraDummy != NULL && m_pOnAuraDummy(pAura, apply);
+#ifdef ENABLE_SD3
+    return SD3::AuraDummy(pAura, apply);
+#else
+    return false;
+#endif
 }
 
 ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
 {
-    UnloadScriptLibrary();
-
-    std::string name = libName;
-    name = MANGOS_SCRIPT_PREFIX + name + MANGOS_SCRIPT_SUFFIX;
-
-    m_hScriptLib = MANGOS_LOAD_LIBRARY(name.c_str());
-
-    if (!m_hScriptLib)
-        return SCRIPT_LOAD_ERR_NOT_FOUND;
-
-#   define GET_SCRIPT_HOOK_PTR(P,N)             \
-        GetScriptHookPtr((P), (N));             \
-        if (!(P))                               \
-        {                                       \
-            /* prevent call before init */      \
-            m_pOnFreeScriptLibrary = NULL;      \
-            UnloadScriptLibrary();              \
-            return SCRIPT_LOAD_ERR_WRONG_API;   \
-        }
-
-    // let check used mangosd revision for build library (unsafe use with different revision because changes in inline functions, define and etc)
-    char const* (MANGOS_IMPORT * pGetMangosRevStr)();
-
-    GET_SCRIPT_HOOK_PTR(pGetMangosRevStr,              "GetMangosRevStr");
-
-    GET_SCRIPT_HOOK_PTR(m_pOnInitScriptLibrary,        "InitScriptLibrary");
-    GET_SCRIPT_HOOK_PTR(m_pOnFreeScriptLibrary,        "FreeScriptLibrary");
-    GET_SCRIPT_HOOK_PTR(m_pGetScriptLibraryVersion,    "GetScriptLibraryVersion");
-
-    GET_SCRIPT_HOOK_PTR(m_pGetCreatureAI,              "GetCreatureAI");
-    GET_SCRIPT_HOOK_PTR(m_pCreateInstanceData,         "CreateInstanceData");
-
-    GET_SCRIPT_HOOK_PTR(m_pOnGossipHello,              "GossipHello");
-    GET_SCRIPT_HOOK_PTR(m_pOnGOGossipHello,            "GOGossipHello");
-    GET_SCRIPT_HOOK_PTR(m_pOnGossipSelect,             "GossipSelect");
-    GET_SCRIPT_HOOK_PTR(m_pOnGOGossipSelect,           "GOGossipSelect");
-    GET_SCRIPT_HOOK_PTR(m_pOnGossipSelectWithCode,     "GossipSelectWithCode");
-    GET_SCRIPT_HOOK_PTR(m_pOnGOGossipSelectWithCode,   "GOGossipSelectWithCode");
-    GET_SCRIPT_HOOK_PTR(m_pOnQuestAccept,              "QuestAccept");
-    GET_SCRIPT_HOOK_PTR(m_pOnGOQuestAccept,            "GOQuestAccept");
-    GET_SCRIPT_HOOK_PTR(m_pOnItemQuestAccept,          "ItemQuestAccept");
-    GET_SCRIPT_HOOK_PTR(m_pOnQuestRewarded,            "QuestRewarded");
-    GET_SCRIPT_HOOK_PTR(m_pOnGOQuestRewarded,          "GOQuestRewarded");
-    GET_SCRIPT_HOOK_PTR(m_pGetNPCDialogStatus,         "GetNPCDialogStatus");
-    GET_SCRIPT_HOOK_PTR(m_pGetGODialogStatus,          "GetGODialogStatus");
-    GET_SCRIPT_HOOK_PTR(m_pOnGOUse,                    "GOUse");
-    GET_SCRIPT_HOOK_PTR(m_pOnItemUse,                  "ItemUse");
-    GET_SCRIPT_HOOK_PTR(m_pOnAreaTrigger,              "AreaTrigger");
-    GET_SCRIPT_HOOK_PTR(m_pOnProcessEvent,             "ProcessEvent");
-    GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyCreature,      "EffectDummyCreature");
-    GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyGO,            "EffectDummyGameObject");
-    GET_SCRIPT_HOOK_PTR(m_pOnEffectDummyItem,          "EffectDummyItem");
-    GET_SCRIPT_HOOK_PTR(m_pOnEffectScriptEffectCreature, "EffectScriptEffectCreature");
-    GET_SCRIPT_HOOK_PTR(m_pOnAuraDummy,                "AuraDummy");
-
-#   undef GET_SCRIPT_HOOK_PTR
-
-    if (strcmp(pGetMangosRevStr(), REVISION_NR) != 0)
+#ifdef ENABLE_SD3
+    if (std::strcmp(libName, MANGOS_SCRIPT_NAME) == 0)
     {
-        m_pOnFreeScriptLibrary = NULL;                      // prevent call before init
-        UnloadScriptLibrary();
-        return SCRIPT_LOAD_ERR_OUTDATED;
+        SD3::FreeScriptLibrary();
+        SD3::InitScriptLibrary();
+        return SCRIPT_LOAD_OK;
     }
-
-    m_pOnInitScriptLibrary();
-    return SCRIPT_LOAD_OK;
+#endif
+    return SCRIPT_LOAD_ERR_NOT_FOUND;
 }
 
 void ScriptMgr::UnloadScriptLibrary()
 {
-    if (!m_hScriptLib)
-        return;
-
-    if (m_pOnFreeScriptLibrary)
-        m_pOnFreeScriptLibrary();
-
-    MANGOS_CLOSE_LIBRARY(m_hScriptLib);
-    m_hScriptLib = NULL;
-
-    m_pOnInitScriptLibrary      = NULL;
-    m_pOnFreeScriptLibrary      = NULL;
-    m_pGetScriptLibraryVersion  = NULL;
-
-    m_pGetCreatureAI            = NULL;
-    m_pCreateInstanceData       = NULL;
-
-    m_pOnGossipHello            = NULL;
-    m_pOnGOGossipHello          = NULL;
-    m_pOnGossipSelect           = NULL;
-    m_pOnGOGossipSelect         = NULL;
-    m_pOnGossipSelectWithCode   = NULL;
-    m_pOnGOGossipSelectWithCode = NULL;
-    m_pOnQuestAccept            = NULL;
-    m_pOnGOQuestAccept          = NULL;
-    m_pOnItemQuestAccept        = NULL;
-    m_pOnQuestRewarded          = NULL;
-    m_pOnGOQuestRewarded        = NULL;
-    m_pGetNPCDialogStatus       = NULL;
-    m_pGetGODialogStatus        = NULL;
-    m_pOnGOUse                  = NULL;
-    m_pOnItemUse                = NULL;
-    m_pOnAreaTrigger            = NULL;
-    m_pOnProcessEvent           = NULL;
-    m_pOnEffectDummyCreature    = NULL;
-    m_pOnEffectDummyGO          = NULL;
-    m_pOnEffectDummyItem        = NULL;
-    m_pOnEffectScriptEffectCreature = NULL;
-    m_pOnAuraDummy              = NULL;
+#ifdef ENABLE_SD3
+    SD3::FreeScriptLibrary();
+#else
+    return;
+#endif
 }
 
 void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)

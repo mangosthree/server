@@ -76,6 +76,9 @@
 #include "CreatureLinkingMgr.h"
 #include "Calendar.h"
 #include "PhaseMgr.h"
+#ifdef ENABLE_ELUNA
+#include "LuaEngine.h"
+#endif /*ENABLE_ELUNA*/
 
 INSTANTIATE_SINGLETON_1(World);
 
@@ -428,6 +431,9 @@ void World::RemoveWeather(uint32 id)
 }
 
 /// Add a Weather object to the list
+/*
+ * chucky - delete this?
+ * this is not in Two
 Weather* World::AddWeather(uint32 zone_id)
 {
     WeatherZoneChances const* weatherChances = sObjectMgr.GetWeatherChances(zone_id);
@@ -442,6 +448,7 @@ Weather* World::AddWeather(uint32 zone_id)
     w->UpdateWeather();
     return w;
 }
+*/
 
 /// Initialize config values
 void World::LoadConfigSettings(bool reload)
@@ -958,16 +965,16 @@ void World::SetInitialWorldSettings()
 
     ///- Check the existence of the map files for all races start areas.
     if (!MapManager::ExistMapAndVMap(0, -6240.32f, 331.033f) ||                     // Dwarf/ Gnome
-            !MapManager::ExistMapAndVMap(0, -8949.95f, -132.493f) ||                // Human
-            !MapManager::ExistMapAndVMap(1, -618.518f, -4251.67f) ||                // Orc
-            !MapManager::ExistMapAndVMap(0, 1676.35f, 1677.45f) ||                  // Scourge
-            !MapManager::ExistMapAndVMap(1, 10311.3f, 832.463f) ||                  // NightElf
-            !MapManager::ExistMapAndVMap(1, -2917.58f, -257.98f) ||                 // Tauren
-            (m_configUint32Values[CONFIG_UINT32_EXPANSION] >= EXPANSION_TBC &&
-              (!MapManager::ExistMapAndVMap(530, 10349.6f, -6357.29f) ||            // BloodElf
-              !MapManager::ExistMapAndVMap(530, -3961.64f, -13931.2f))) ||          // Draenei
-            (m_configUint32Values[CONFIG_UINT32_EXPANSION] >= EXPANSION_WOTLK &&
-              !MapManager::ExistMapAndVMap(609, 2355.84f, -5664.77f)))              // Death Knight
+        !MapManager::ExistMapAndVMap(0, -8949.95f, -132.493f) ||                // Human
+        !MapManager::ExistMapAndVMap(1, -618.518f, -4251.67f) ||                // Orc
+        !MapManager::ExistMapAndVMap(0, 1676.35f, 1677.45f) ||                  // Scourge
+        !MapManager::ExistMapAndVMap(1, 10311.3f, 832.463f) ||                  // NightElf
+        !MapManager::ExistMapAndVMap(1, -2917.58f, -257.98f) ||                 // Tauren
+        (m_configUint32Values[CONFIG_UINT32_EXPANSION] >= EXPANSION_TBC &&
+        (!MapManager::ExistMapAndVMap(530, 10349.6f, -6357.29f) ||            // BloodElf
+        !MapManager::ExistMapAndVMap(530, -3961.64f, -13931.2f))) ||          // Draenei
+        (m_configUint32Values[CONFIG_UINT32_EXPANSION] >= EXPANSION_WOTLK &&
+        !MapManager::ExistMapAndVMap(609, 2355.84f, -5664.77f)))              // Death Knight
     {
         sLog.outError("Correct *.map files not found in path '%smaps' or *.vmtree/*.vmtile files in '%svmaps'. Please place *.map and vmap files in appropriate directories or correct the DataDir value in the mangosd.conf file.", m_dataPath.c_str(), m_dataPath.c_str());
         Log::WaitBeforeContinueIfNeed();
@@ -997,15 +1004,14 @@ void World::SetInitialWorldSettings()
     ///- Load the DBC files
     sLog.outString("Initialize data stores...");
     LoadDBCStores(m_dataPath);
-    LoadDB2Stores(m_dataPath);
     DetectDBCLang();
     sObjectMgr.SetDBCLocaleIndex(GetDefaultDbcLocale());    // Get once for all the locale index of DBC language (console/broadcasts)
 
+    sLog.outString("Loading SpellTemplate...");
+    sObjectMgr.LoadSpellTemplate();
+
     sLog.outString("Loading Script Names...");
     sScriptMgr.LoadScriptNames();
-
-    sLog.outString("Loading WorldTemplate...");
-    sObjectMgr.LoadWorldTemplate();
 
     sLog.outString("Loading InstanceTemplate...");
     sObjectMgr.LoadInstanceTemplate();
@@ -1029,6 +1035,12 @@ void World::SetInitialWorldSettings()
     ///- Init highest guids before any guid using table loading to prevent using not initialized guids in some code.
     sObjectMgr.SetHighestGuids();                           // must be after PackInstances() and PackGroupIds()
     sLog.outString();
+
+#ifdef ENABLE_ELUNA
+    ///- Initialize Lua Engine
+    sLog.outString("Initialize Eluna Lua Engine...");
+    Eluna::Initialize();
+#endif /* ENABLE_ELUNA */
 
     sLog.outString("Loading Page Texts...");
     sObjectMgr.LoadPageTexts();
@@ -1083,6 +1095,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Equipment templates...");
     sObjectMgr.LoadEquipmentTemplates();
+
+    sLog.outString("Loading Creature Stats...");
+    sObjectMgr.LoadCreatureClassLvlStats();
 
     sLog.outString("Loading Creature templates...");
     sObjectMgr.LoadCreatureTemplates();
@@ -1142,7 +1157,7 @@ void World::SetInitialWorldSettings()
     sPoolMgr.LoadFromDB();
 
     sLog.outString("Loading Weather Data...");
-    sObjectMgr.LoadWeatherZoneChances();
+    sWeatherMgr.LoadWeatherZoneChances();
 
     sLog.outString("Loading Quests...");
     sObjectMgr.LoadQuests();                                // must be loaded after DBCs, creature_template, item_template, gameobject tables
@@ -1165,12 +1180,6 @@ void World::SetInitialWorldSettings()
     // Load Conditions
     sLog.outString("Loading Conditions...");
     sObjectMgr.LoadConditions();
-
-    sLog.outString("Loading Phase definitions...");
-    sObjectMgr.LoadPhaseDefinitions();
-
-    sLog.outString("Loading Spell Phase Dbc Info...");
-    sObjectMgr.LoadSpellPhaseInfo();
 
     sLog.outString("Creating map persistent states for non-instanceable maps...");     // must be after PackInstances(), LoadCreatures(), sPoolMgr.LoadFromDB(), sGameEventMgr.LoadFromDB();
     sMapPersistentStateMgr.InitWorldMaps();
@@ -1196,11 +1205,10 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Tavern Area Triggers...");
     sObjectMgr.LoadTavernAreaTriggers();
 
-    sLog.outString("Loading AreaTrigger script names...");
-    sScriptMgr.LoadAreaTriggerScripts();
-
-    sLog.outString("Loading event id script names...");
-    sScriptMgr.LoadEventIdScripts();
+#ifdef ENABLE_SD3
+    sLog.outString("Loading all script bindings...");
+    sScriptMgr.LoadScriptBinding();
+#endif /* ENABLE_SD3 */
 
     sLog.outString("Loading Graveyard-zone links...");
     sObjectMgr.LoadGraveyardZones();
@@ -1339,8 +1347,14 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading GM tickets...");
     sTicketMgr.LoadGMTickets();
 
-    sLog.outString("Loading hotfix data...");
-    sObjectMgr.LoadHotfixData();
+    sLog.outString("Loading Dungeon Finder Requirements...");
+    sObjectMgr.LoadDungeonFinderRequirements();
+
+    sLog.outString("Loading Dungeon Finder Rewards...");
+    sObjectMgr.LoadDungeonFinderRewards();
+
+    sLog.outString("Loading Dungeon Finder Items...");
+    sObjectMgr.LoadDungeonFinderItems();
 
     ///- Handle outdated emails (delete/return)
     sLog.outString("Returning old mails...");
@@ -1372,21 +1386,25 @@ void World::SetInitialWorldSettings()
     sEventAIMgr.LoadCreatureEventAI_Scripts();
 
     sLog.outString("Initializing Scripts...");
+#ifdef ENABLE_SD3
     switch (sScriptMgr.LoadScriptLibrary(MANGOS_SCRIPT_NAME))
     {
-        case SCRIPT_LOAD_OK:
-            sLog.outString("Scripting library loaded.");
-            break;
-        case SCRIPT_LOAD_ERR_NOT_FOUND:
-            sLog.outError("Scripting library not found or not accessible.");
-            break;
-        case SCRIPT_LOAD_ERR_WRONG_API:
-            sLog.outError("Scripting library has wrong list functions (outdated?).");
-            break;
-        case SCRIPT_LOAD_ERR_OUTDATED:
-            sLog.outError("Scripting library build for old mangosd revision. You need rebuild it.");
-            break;
+    case SCRIPT_LOAD_OK:
+        sLog.outString("Scripting library loaded.");
+        break;
+    case SCRIPT_LOAD_ERR_NOT_FOUND:
+        sLog.outError("Scripting library not found or not accessible.");
+        break;
+    case SCRIPT_LOAD_ERR_WRONG_API:
+        sLog.outError("Scripting library has wrong list functions (outdated?).");
+        break;
+    case SCRIPT_LOAD_ERR_OUTDATED:
+        sLog.outError("Scripting library build for old mangosd revision. You need rebuild it.");
+        break;
     }
+#else /* ENABLE_SD3 */
+    sLog.outError("SD3 was not included in compilation, not using it.");
+#endif /* ENABLE_SD3 */
 
     ///- Initialize game time and timers
     sLog.outString("DEBUG:: Initialize game time and timers");
@@ -1399,12 +1417,11 @@ void World::SetInitialWorldSettings()
     local = *(localtime(&curr));                            // dereference and assign
     char isoDate[128];
     sprintf(isoDate, "%04d-%02d-%02d %02d:%02d:%02d",
-            local.tm_year + 1900, local.tm_mon + 1, local.tm_mday, local.tm_hour, local.tm_min, local.tm_sec);
+        local.tm_year + 1900, local.tm_mon + 1, local.tm_mday, local.tm_hour, local.tm_min, local.tm_sec);
 
     LoginDatabase.PExecute("INSERT INTO uptime (realmid, starttime, startstring, uptime) VALUES('%u', " UI64FMTD ", '%s', 0)",
-                           realmID, uint64(m_startTime), isoDate);
+        realmID, uint64(m_startTime), isoDate);
 
-    m_timers[WUPDATE_WEATHERS].SetInterval(1 * IN_MILLISECONDS);
     m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE * IN_MILLISECONDS);
     m_timers[WUPDATE_UPTIME].SetInterval(getConfig(CONFIG_UINT32_UPTIME_UPDATE)*MINUTE * IN_MILLISECONDS);
     // Update "uptime" table based on configuration entry in minutes.
@@ -1413,6 +1430,9 @@ void World::SetInitialWorldSettings()
 
     // for AhBot
     m_timers[WUPDATE_AHBOT].SetInterval(20 * IN_MILLISECONDS); // every 20 sec
+
+    // for Dungeon Finder
+    m_timers[WUPDATE_LFGMGR].SetInterval(30 * IN_MILLISECONDS); // every 30 sec
 
     // to set mailtimer to return mails every day between 4 and 5 am
     // mailtimer is increased when updating auctions
@@ -1433,6 +1453,7 @@ void World::SetInitialWorldSettings()
     ///- Initialize Battlegrounds
     sLog.outString("Starting BattleGround System");
     sBattleGroundMgr.CreateInitialBattleGrounds();
+    sBattleGroundMgr.InitAutomaticArenaPointDistribution();
 
     ///- Initialize Outdoor PvP
     sLog.outString("Starting Outdoor PvP System");
@@ -1442,13 +1463,19 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Transports...");
     sMapMgr.LoadTransports();
 
+    // Initialize Warden
+    sLog.outString("Loading Warden Checks...");
+    sWardenCheckMgr->LoadWardenChecks();
+    sLog.outString();
+
+    sLog.outString("Loading Warden Action Overrides...");
+    sWardenCheckMgr->LoadWardenOverrides();
+    sLog.outString();
+
     sLog.outString("Deleting expired bans...");
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
 
-    sLog.outString("Calculate next currency reset time...");
-    InitCurrencyResetTime();
-
-    sLog.outString("Calculate next daily quest reset time...");
+    sLog.outString("Calculate next daily quest and dungeon reset time...");
     InitDailyQuestResetTime();
 
     sLog.outString("Calculate next weekly quest reset time...");
@@ -1456,6 +1483,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Calculate next monthly quest reset time...");
     SetMonthlyQuestResetTime();
+
+    sLog.outString("Calculate random battleground reset time...");
+    InitRandomBGResetTime();
 
     sLog.outString("Starting Game Event system...");
     uint32 nextGameEvent = sGameEventMgr.Initialize();
@@ -1466,6 +1496,13 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Initialize AuctionHouseBot...");
     sAuctionBot.Initialize();
+
+#ifdef ENABLE_ELUNA
+    ///- Run eluna scripts.
+    // in multithread foreach: run scripts
+    sEluna->RunScripts();
+    sEluna->OnConfigLoad(false); // Must be done after Eluna is initialized and scripts have run.
+#endif
 
     sLog.outString("WORLD: World initialized");
 
@@ -1526,9 +1563,13 @@ void World::Update(uint32 diff)
     for (int i = 0; i < WUPDATE_COUNT; ++i)
     {
         if (m_timers[i].GetCurrent() >= 0)
+        {
             m_timers[i].Update(diff);
+        }
         else
+        {
             m_timers[i].SetCurrent(0);
+        }
     }
 
     ///- Update the game time and check for shutdown time
@@ -1537,9 +1578,12 @@ void World::Update(uint32 diff)
     ///-Update mass mailer tasks if any
     sMassMailMgr.Update();
 
-    /// Handle daily quests reset time
+    /// Handle daily quests and dungeon reset time
     if (m_gameTime > m_NextDailyQuestReset)
+    {
         ResetDailyQuests();
+        sLFGMgr.ResetDailyRecords();
+    }
 
     /// Handle weekly quests reset time
     if (m_gameTime > m_NextWeeklyQuestReset)
@@ -1549,9 +1593,9 @@ void World::Update(uint32 diff)
     if (m_gameTime > m_NextMonthlyQuestReset)
         ResetMonthlyQuests();
 
-    /// Handle monthly quests reset time
-    if (m_gameTime > m_NextCurrencyReset)
-        ResetCurrencyWeekCounts();
+    /// Handle random battlegrounds reset time
+    if (m_gameTime > m_NextRandomBGReset)
+        ResetRandomBG();
 
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
@@ -1577,28 +1621,16 @@ void World::Update(uint32 diff)
         m_timers[WUPDATE_AHBOT].Reset();
     }
 
+    /// <li> Update Dungeon Finder
+    if (m_timers[WUPDATE_LFGMGR].Passed())
+    {
+        sLFGMgr.Update();
+        m_timers[WUPDATE_LFGMGR].Reset();
+    }
+
     /// <li> Handle session updates
     UpdateSessions(diff);
 
-    /// <li> Handle weather updates when the timer has passed
-    if (m_timers[WUPDATE_WEATHERS].Passed())
-    {
-        ///- Send an update signal to Weather objects
-        for (WeatherMap::iterator itr = m_weathers.begin(); itr != m_weathers.end();)
-        {
-            ///- and remove Weather objects for zones with no player
-            // As interval > WorldTick
-            if (!itr->second->Update(m_timers[WUPDATE_WEATHERS].GetInterval()))
-            {
-                delete itr->second;
-                m_weathers.erase(itr++);
-            }
-            else
-                ++itr;
-        }
-
-        m_timers[WUPDATE_WEATHERS].SetCurrent(0);
-    }
     /// <li> Update uptime table
     if (m_timers[WUPDATE_UPTIME].Passed())
     {
@@ -1614,6 +1646,11 @@ void World::Update(uint32 diff)
     sMapMgr.Update(diff);
     sBattleGroundMgr.Update(diff);
     sOutdoorPvPMgr.Update(diff);
+
+    ///- Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnWorldUpdate(diff);
+#endif
 
     ///- Delete all characters which have been deleted X days before
     if (m_timers[WUPDATE_DELETECHARS].Passed())
@@ -1651,6 +1688,11 @@ void World::Update(uint32 diff)
 
     // And last, but not least handle the issued cli commands
     ProcessCliCommands();
+
+    ///- Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnWorldUpdate(diff);
+#endif /* ENABLE_ELUNA */
 
     // cleanup unused GridMap objects as well as VMaps
     sTerrainMgr.Update(diff);
@@ -2239,6 +2281,18 @@ void World::ResetDailyQuests()
 
     m_NextDailyQuestReset = time_t(m_NextDailyQuestReset + DAY);
     CharacterDatabase.PExecute("UPDATE saved_variables SET NextDailyQuestResetTime = '" UI64FMTD "'", uint64(m_NextDailyQuestReset));
+}
+
+void World::ResetRandomBG()
+{
+    sLog.outDetail("Random BG status reset for all characters.");
+    CharacterDatabase.Execute("DELETE FROM character_battleground_random");
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        if (itr->second->GetPlayer())
+            itr->second->GetPlayer()->SetRandomWinner(false);
+
+    m_NextRandomBGReset = time_t(m_NextRandomBGReset + DAY);
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextRandomBGResetTime = '" UI64FMTD "'", uint64(m_NextRandomBGReset));
 }
 
 void World::ResetWeeklyQuests()

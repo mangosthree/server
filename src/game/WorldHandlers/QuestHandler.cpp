@@ -265,7 +265,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recv_data)
     {
         if (_player->CanRewardQuest(pQuest, reward, true))
         {
-            _player->RewardQuest(pQuest, reward, pObject);
+            _player->RewardQuest(pQuest, reward, pObject, false);
 
             // Send next quest
             if (Quest const* nextquest = _player->GetNextQuest(guid, pQuest))

@@ -868,6 +868,82 @@ void ObjectMgr::LoadCreatureAddons()
                 sLog.outErrorDb("Creature (GUID: %u) does not exist but has a record in `creature_addon`", addon->guidOrEntry);
 }
 
+void ObjectMgr::LoadCreatureClassLvlStats()
+{
+    // initialize data array
+    memset(&m_creatureClassLvlStats, 0, sizeof(m_creatureClassLvlStats));
+
+    std::string queryStr = "SELECT Class, Level, BaseMana, BaseMeleeAttackPower, BaseRangedAttackPower, BaseArmor";
+
+    for (int i = 0; i <= MAX_EXPANSION; i++)
+    {
+        std::ostringstream str;
+        str << ", `BaseHealthExp" << i << "`, `BaseDamageExp" << i << "`";
+        queryStr.append(str.str().c_str());
+    }
+
+    queryStr.append(" FROM `creature_template_classlevelstats` ORDER BY `Class`, `Level`");
+    QueryResult* result = WorldDatabase.Query(queryStr.c_str());
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outErrorDb("DB table `creature_template_classlevelstats` is empty.");
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+    uint32 DataCount = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        bar.step();
+
+        uint32 creatureClass = fields[0].GetUInt32();
+        uint32 creatureLevel = fields[1].GetUInt32();
+
+        if (creatureLevel == 0 || creatureLevel > DEFAULT_MAX_CREATURE_LEVEL)
+        {
+            sLog.outErrorDb("Found stats for creature level [%u] with incorrect level. Skipping!", creatureLevel);
+            continue;
+        }
+
+        if (((1 << (creatureClass - 1)) & CLASSMASK_ALL_CREATURES) == 0)
+        {
+            sLog.outErrorDb("Found stats for creature class [%u] with incorrect class. Skipping!", creatureClass);
+            continue;
+        }
+
+        uint32  baseMana = fields[2].GetUInt32();
+        float   baseMeleeAttackPower = fields[3].GetFloat();
+        float   baseRangedAttackPower = fields[4].GetFloat();
+        uint32  baseArmor = fields[5].GetUInt32();
+
+        for (uint8 i = 0; i <= MAX_EXPANSION; ++i)
+        {
+            CreatureClassLvlStats &cCLS = m_creatureClassLvlStats[creatureLevel][classToIndex[creatureClass]][i - 1];   // values should start from 0
+            cCLS.BaseMana = baseMana;
+            cCLS.BaseMeleeAttackPower = baseMeleeAttackPower;
+            cCLS.BaseRangedAttackPower = baseRangedAttackPower;
+            cCLS.BaseArmor = baseArmor;
+
+            cCLS.BaseHealth = fields[6 + (i * 2)].GetUInt32();
+            cCLS.BaseDamage = fields[7 + (i * 2)].GetFloat();
+        }
+        ++DataCount;
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString(">> Loaded %u creature class level stats definitions.", DataCount);
+}
+
 void ObjectMgr::LoadEquipmentTemplates()
 {
     sEquipmentStorage.Load();
@@ -6993,6 +7069,112 @@ void ObjectMgr::LoadQuestPOI()
     sLog.outString(">> Loaded %u quest POI definitions", count);
 }
 
+void ObjectMgr::LoadDungeonFinderRequirements()
+{
+    uint32 count = 0;
+    mDungeonFinderRequirementsMap.clear();    // in case of a reload
+
+    //                                                0      1           2               3     4       5               6            7            8
+    QueryResult* result = WorldDatabase.Query("SELECT mapId, difficulty, min_item_level, item, item_2, alliance_quest, horde_quest, achievement, quest_incomplete_text FROM dungeonfinder_requirements");
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outErrorDb(">> Loaded 0 dungeon finder requirements. DB table `dungeonfinder_requirements`, is empty!");
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field* fields = result->Fetch();
+        bar.step();
+
+        uint32 mapId = fields[0].GetUInt32();
+        uint32 difficulty = fields[1].GetUInt32();
+        uint32 dungeonKey = MAKE_PAIR32(mapId, difficulty); // for unique key
+
+        uint32 minItemLevel = fields[2].GetUInt32();
+        uint32 item = fields[3].GetUInt32();
+        uint32 item2 = fields[4].GetUInt32();
+        uint32 allianceQuest = fields[5].GetUInt32();
+        uint32 hordeQuest = fields[6].GetUInt32();
+        uint32 achievement = fields[7].GetUInt32();
+        const char* questText = fields[8].GetString();
+
+        // check that items, quests, & achievements are real
+        if (item)
+        {
+            ItemEntry const* dbcitem = sItemStore.LookupEntry(item);
+            if (!dbcitem)
+            {
+                sLog.outString();
+                sLog.outErrorDb("Table `dungeonfinder_requirements` has invalid item entry %u for map %u ! Removing requirement.", item, mapId);
+                item = 0;
+            }
+        }
+
+        if (item2)
+        {
+            ItemEntry const* dbcitem = sItemStore.LookupEntry(item2);
+            if (!dbcitem)
+            {
+                sLog.outString();
+                sLog.outErrorDb("Table `dungeonfinder_requirements` has invalid item entry %u for map %u ! Removing requirement.", item2, mapId);
+                item2 = 0;
+            }
+        }
+
+        if (allianceQuest)
+        {
+            QuestMap::iterator qReqItr = mQuestTemplates.find(allianceQuest);
+            if (qReqItr == mQuestTemplates.end())
+            {
+                sLog.outString();
+                sLog.outErrorDb("Table `dungeonfinder_requirements` has invalid quest requirement %u for map %u ! Removing requirement.", allianceQuest, mapId);
+                allianceQuest = 0;
+            }
+        }
+
+        if (hordeQuest)
+        {
+            QuestMap::iterator qReqItr = mQuestTemplates.find(hordeQuest);
+            if (qReqItr == mQuestTemplates.end())
+            {
+                sLog.outString();
+                sLog.outErrorDb("Table `dungeonfinder_requirements` has invalid quest requirement %u for map %u ! Removing requirement.", hordeQuest, mapId);
+                hordeQuest = 0;
+            }
+        }
+
+        if (achievement)
+        {
+            if (!sAchievementStore.LookupEntry(achievement))
+            {
+                sLog.outString();
+                sLog.outErrorDb("Table `dungeonfinder_requirements` has invalid achievement %u for map %u ! Removing requirement.", achievement, mapId);
+                achievement = 0;
+            }
+        }
+
+        // add to map after checks
+        DungeonFinderRequirements requirement(minItemLevel, item, item2, allianceQuest, hordeQuest, achievement, questText);
+        mDungeonFinderRequirementsMap[dungeonKey] = requirement;
+
+        ++count;
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString(">> Loaded %u Dungeon Finder Requirements", count);
+}
+
 void ObjectMgr::LoadNPCSpellClickSpells()
 {
     uint32 count = 0;
@@ -7100,68 +7282,57 @@ void ObjectMgr::GetConditions(uint32 conditionId, std::vector<PlayerCondition co
     out.push_back(condition);
 }
 
-void ObjectMgr::LoadWeatherZoneChances()
+static char SERVER_SIDE_SPELL[] = "MaNGOS server-side spell";
+
+struct SQLSpellLoader : public SQLStorageLoaderBase<SQLSpellLoader, SQLHashStorage>
 {
-    uint32 count = 0;
-
-    //                                                0     1                   2                   3                    4                   5                   6                    7                 8                 9                  10                  11                  12
-    QueryResult* result = WorldDatabase.Query("SELECT zone, spring_rain_chance, spring_snow_chance, spring_storm_chance, summer_rain_chance, summer_snow_chance, summer_storm_chance, fall_rain_chance, fall_snow_chance, fall_storm_chance, winter_rain_chance, winter_snow_chance, winter_storm_chance FROM game_weather");
-
-    if (!result)
+    template<class S, class D>
+    void default_fill(uint32 field_pos, S src, D& dst)
     {
-        BarGoLink bar(1);
-
-        bar.step();
-
-        sLog.outString();
-        sLog.outErrorDb(">> Loaded 0 weather definitions. DB table `game_weather` is empty.");
-        return;
+        if (field_pos == LOADED_SPELLDBC_FIELD_POS_EQUIPPED_ITEM_CLASS)
+            dst = D(-1);
+        else
+            dst = D(src);
     }
 
-    BarGoLink bar(result->GetRowCount());
-
-    do
+    void default_fill_to_str(uint32 field_pos, char const* /*src*/, char * & dst)
     {
-        Field* fields = result->Fetch();
-        bar.step();
-
-        uint32 zone_id = fields[0].GetUInt32();
-
-        WeatherZoneChances& wzc = mWeatherZoneMap[zone_id];
-
-        for (int season = 0; season < WEATHER_SEASONS; ++season)
+        if (field_pos == LOADED_SPELLDBC_FIELD_POS_SPELLNAME_0)
         {
-            wzc.data[season].rainChance  = fields[season * (MAX_WEATHER_TYPE - 1) + 1].GetUInt32();
-            wzc.data[season].snowChance  = fields[season * (MAX_WEATHER_TYPE - 1) + 2].GetUInt32();
-            wzc.data[season].stormChance = fields[season * (MAX_WEATHER_TYPE - 1) + 3].GetUInt32();
-
-            if (wzc.data[season].rainChance > 100)
-            {
-                wzc.data[season].rainChance = 25;
-                sLog.outErrorDb("Weather for zone %u season %u has wrong rain chance > 100%%", zone_id, season);
-            }
-
-            if (wzc.data[season].snowChance > 100)
-            {
-                wzc.data[season].snowChance = 25;
-                sLog.outErrorDb("Weather for zone %u season %u has wrong snow chance > 100%%", zone_id, season);
-            }
-
-            if (wzc.data[season].stormChance > 100)
-            {
-                wzc.data[season].stormChance = 25;
-                sLog.outErrorDb("Weather for zone %u season %u has wrong storm chance > 100%%", zone_id, season);
-            }
+            dst = SERVER_SIDE_SPELL;
         }
-
-        ++count;
+        else
+        {
+            dst = new char[1];
+            *dst = 0;
+        }
     }
-    while (result->NextRow());
+};
 
-    delete result;
+void ObjectMgr::LoadSpellTemplate()
+{
+    SQLSpellLoader loader;
+    loader.Load(sSpellTemplate);
 
+    sLog.outString(">> Loaded %u spell definitions", sSpellTemplate.GetRecordCount());
     sLog.outString();
-    sLog.outString(">> Loaded %u weather definitions", count);
+
+    for (uint32 i = 1; i < sSpellTemplate.GetMaxEntry(); ++i)
+    {
+        // check data correctness
+        SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(i);
+        if (!spellEntry)
+            continue;
+
+        // insert serverside spell data
+        if (sSpellStore.GetNumRows() <= i)
+        {
+            sLog.outErrorDb("Loading Spell Template for spell %u, index out of bounds (max = %u)", i, sSpellStore.GetNumRows());
+            continue;
+        }
+        else
+            sSpellStore.InsertEntry(const_cast<SpellEntry*>(spellEntry), i);
+    }
 }
 
 void ObjectMgr::DeleteCreatureData(uint32 guid)
@@ -7737,7 +7908,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
         {
             data.SoundId     = fields[10].GetUInt32();
             data.Type        = fields[11].GetUInt32();
-            data.Language    = fields[12].GetUInt32();
+            data.LanguageId  = (Language)fields[12].GetUInt32();
             data.Emote       = fields[13].GetUInt32();
 
             if (data.SoundId && !sSoundEntriesStore.LookupEntry(data.SoundId))
@@ -7746,10 +7917,10 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
                 data.SoundId = 0;
             }
 
-            if (!GetLanguageDescByID(data.Language))
+            if (!GetLanguageDescByID(data.LanguageId))
             {
-                _DoStringError(entry, "Entry %i in table `%s` using Language %u but Language does not exist.", entry, table, data.Language);
-                data.Language = LANG_UNIVERSAL;
+                _DoStringError(entry, "Entry %i in table `%s` using Language %u but Language does not exist.", entry, table, data.LanguageId);
+                data.LanguageId = LANG_UNIVERSAL;
             }
 
             if (data.Type > CHAT_TYPE_ZONE_YELL)
@@ -10107,10 +10278,10 @@ bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=NULL*
     switch (data->Type)
     {
         case CHAT_TYPE_SAY:
-            source->MonsterSay(entry, data->Language, target);
+            source->MonsterSay(entry, data->LanguageId, target);
             break;
         case CHAT_TYPE_YELL:
-            source->MonsterYell(entry, data->Language, target);
+            source->MonsterYell(entry, data->LanguageId, target);
             break;
         case CHAT_TYPE_TEXT_EMOTE:
             source->MonsterTextEmote(entry, target);
@@ -10141,7 +10312,7 @@ bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=NULL*
             break;
         }
         case CHAT_TYPE_ZONE_YELL:
-            source->MonsterYellToZone(entry, data->Language, target);
+            source->MonsterYellToZone(entry, data->LanguageId, target);
             break;
     }
 

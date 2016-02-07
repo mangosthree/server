@@ -2104,7 +2104,7 @@ namespace LuaPlayer
         if (!quest || player->GetQuestStatus(entry) != QUEST_STATUS_COMPLETE)
             return 0;
 
-        player->RewardQuest(quest, 0, player);
+        player->RewardQuest(quest, 0, player, false);
         return 0;
     }
 

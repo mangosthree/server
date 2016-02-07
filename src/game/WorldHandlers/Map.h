@@ -102,197 +102,217 @@ enum LevelRequirementVsMode
 
 class  Map : public GridRefManager<NGridType>
 {
-        friend class MapReference;
-        friend class ObjectGridLoader;
-        friend class ObjectWorldLoader;
+    friend class MapReference;
+    friend class ObjectGridLoader;
+    friend class ObjectWorldLoader;
 
-    protected:
-        Map(uint32 id, time_t, uint32 InstanceId, uint8 SpawnMode);
+protected:
+    Map(uint32 id, time_t, uint32 InstanceId, uint8 SpawnMode);
 
-    public:
-        virtual ~Map();
+public:
+    virtual ~Map();
 
-        // currently unused for normal maps
-        bool CanUnload(uint32 diff)
-        {
-            if (!m_unloadTimer) return false;
-            if (m_unloadTimer <= diff) return true;
-            m_unloadTimer -= diff;
-            return false;
-        }
+    // currently unused for normal maps
+    bool CanUnload(uint32 diff)
+    {
+        if (!m_unloadTimer) { return false; }
+        if (m_unloadTimer <= diff) { return true; }
+        m_unloadTimer -= diff;
+        return false;
+    }
 
-        virtual bool Add(Player*);
-        virtual void Remove(Player*, bool);
-        template<class T> void Add(T*);
-        template<class T> void Remove(T*, bool);
+    virtual bool Add(Player*);
+    virtual void Remove(Player*, bool);
+    template<class T> void Add(T*);
+    template<class T> void Remove(T*, bool);
 
-        static void DeleteFromWorld(Player* player);        // player object will deleted at call
+    static void DeleteFromWorld(Player* player);        // player object will deleted at call
 
-        virtual void Update(const uint32&);
+    virtual void Update(const uint32&);
 
-        void MessageBroadcast(Player const*, WorldPacket*, bool to_self);
-        void MessageBroadcast(WorldObject const*, WorldPacket*);
-        void MessageDistBroadcast(Player const*, WorldPacket*, float dist, bool to_self, bool own_team_only = false);
-        void MessageDistBroadcast(WorldObject const*, WorldPacket*, float dist);
+    void MessageBroadcast(Player const*, WorldPacket*, bool to_self);
+    void MessageBroadcast(WorldObject const*, WorldPacket*);
+    void MessageDistBroadcast(Player const*, WorldPacket*, float dist, bool to_self, bool own_team_only = false);
+    void MessageDistBroadcast(WorldObject const*, WorldPacket*, float dist);
 
-        float GetVisibilityDistance() const { return m_VisibleDistance; }
-        // function for setting up visibility distance for maps on per-type/per-Id basis
-        virtual void InitVisibilityDistance();
+    float GetVisibilityDistance() const { return m_VisibleDistance; }
+    // function for setting up visibility distance for maps on per-type/per-Id basis
+    virtual void InitVisibilityDistance();
 
-        void PlayerRelocation(Player*, float x, float y, float z, float angl);
-        void CreatureRelocation(Creature* creature, float x, float y, float z, float orientation);
+    void PlayerRelocation(Player*, float x, float y, float z, float angl);
+    void CreatureRelocation(Creature* creature, float x, float y, float z, float orientation);
 
-        template<class T, class CONTAINER> void Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER> &visitor);
+    template<class T, class CONTAINER> void Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER>& visitor);
 
-        bool IsRemovalGrid(float x, float y) const
-        {
-            GridPair p = MaNGOS::ComputeGridPair(x, y);
-            return (!getNGrid(p.x_coord, p.y_coord) || getNGrid(p.x_coord, p.y_coord)->GetGridState() == GRID_STATE_REMOVAL);
-        }
+    bool IsRemovalGrid(float x, float y) const
+    {
+        GridPair p = MaNGOS::ComputeGridPair(x, y);
+        return(!getNGrid(p.x_coord, p.y_coord) || getNGrid(p.x_coord, p.y_coord)->GetGridState() == GRID_STATE_REMOVAL);
+    }
 
-        bool IsLoaded(float x, float y) const
-        {
-            GridPair p = MaNGOS::ComputeGridPair(x, y);
-            return loaded(p);
-        }
+    bool IsLoaded(float x, float y) const
+    {
+        GridPair p = MaNGOS::ComputeGridPair(x, y);
+        return loaded(p);
+    }
 
-        bool GetUnloadLock(const GridPair& p) const { return getNGrid(p.x_coord, p.y_coord)->getUnloadLock(); }
-        void SetUnloadLock(const GridPair& p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadExplicitLock(on); }
-        void LoadGrid(const Cell& cell, bool no_unload = false);
-        bool UnloadGrid(const uint32& x, const uint32& y, bool pForce);
-        virtual void UnloadAll(bool pForce);
+    bool GetUnloadLock(const GridPair& p) const { return getNGrid(p.x_coord, p.y_coord)->getUnloadLock(); }
+    void SetUnloadLock(const GridPair& p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadExplicitLock(on); }
+    void LoadGrid(const Cell& cell, bool no_unload = false);
+    bool UnloadGrid(const uint32& x, const uint32& y, bool pForce);
+    virtual void UnloadAll(bool pForce);
 
-        void ResetGridExpiry(NGridType& grid, float factor = 1) const
-        {
-            grid.ResetTimeTracker((time_t)((float)i_gridExpiry * factor));
-        }
+    void ResetGridExpiry(NGridType& grid, float factor = 1) const
+    {
+        grid.ResetTimeTracker((time_t)((float)i_gridExpiry * factor));
+    }
 
-        time_t GetGridExpiry(void) const { return i_gridExpiry; }
-        uint32 GetId(void) const { return i_id; }
+    time_t GetGridExpiry(void) const { return i_gridExpiry; }
+    uint32 GetId(void) const { return i_id; }
 
-        // some calls like isInWater should not use vmaps due to processor power
-        // can return INVALID_HEIGHT if under z+2 z coord not found height
+    // some calls like isInWater should not use vmaps due to processor power
+    // can return INVALID_HEIGHT if under z+2 z coord not found height
 
-        virtual void RemoveAllObjectsInRemoveList();
+    virtual void RemoveAllObjectsInRemoveList();
 
-        bool CreatureRespawnRelocation(Creature* c);        // used only in CreatureRelocation and ObjectGridUnloader
+    bool CreatureRespawnRelocation(Creature* c);        // used only in CreatureRelocation and ObjectGridUnloader
 
-        bool CheckGridIntegrity(Creature* c, bool moved) const;
+    bool CheckGridIntegrity(Creature* c, bool moved) const;
 
-        uint32 GetInstanceId() const { return i_InstanceId; }
-        virtual bool CanEnter(Player* player);
-        const char* GetMapName() const;
+    uint32 GetInstanceId() const { return i_InstanceId; }
+    virtual bool CanEnter(Player* player);
+    const char* GetMapName() const;
 
-        // have meaning only for instanced map (that have set real difficulty), NOT USE its for BaseMap
-        // _currently_ spawnmode == difficulty, but this can be changes later, so use appropriate spawnmode/difficult functions
-        // for simplify later code support
-        // regular difficulty = continent/dungeon normal/first raid normal difficulty
-        uint8 GetSpawnMode() const { return (i_spawnMode); }
-        Difficulty GetDifficulty() const { return Difficulty(GetSpawnMode()); }
-        bool IsRegularDifficulty() const { return GetDifficulty() == REGULAR_DIFFICULTY; }
-        uint32 GetMaxPlayers() const;                       // dependent from map difficulty
-        uint32 GetMaxResetDelay() const;                    // dependent from map difficulty
-        MapDifficultyEntry const* GetMapDifficulty() const; // dependent from map difficulty
+    // have meaning only for instanced map (that have set real difficulty), NOT USE its for BaseMap
+    // _currently_ spawnmode == difficulty, but this can be changes later, so use appropriate spawnmode/difficult functions
+    // for simplify later code support
+    // regular difficulty = continent/dungeon normal/first raid normal difficulty
+    uint8 GetSpawnMode() const { return (i_spawnMode); }
+    Difficulty GetDifficulty() const { return Difficulty(GetSpawnMode()); }
+    bool IsRegularDifficulty() const { return GetDifficulty() == REGULAR_DIFFICULTY; }
+    uint32 GetMaxPlayers() const;                       // dependent from map difficulty
+    uint32 GetMaxResetDelay() const;                    // dependent from map difficulty
+    MapDifficultyEntry const* GetMapDifficulty() const; // dependent from map difficulty
 
-        bool Instanceable() const { return i_mapEntry && i_mapEntry->Instanceable(); }
-        // NOTE: this duplicate of Instanceable(), but Instanceable() can be changed when BG also will be instanceable
-        bool IsDungeon() const { return i_mapEntry && i_mapEntry->IsDungeon(); }
-        bool IsRaid() const { return i_mapEntry && i_mapEntry->IsRaid(); }
-        bool IsNonRaidDungeon() const { return i_mapEntry && i_mapEntry->IsNonRaidDungeon(); }
-		bool IsRaidOrHeroicDungeon() const { return IsRaid() || GetDifficulty() > DUNGEON_DIFFICULTY_NORMAL; }
-		bool IsHeroic() const { return IsRaid() || i_spawnMode >= DUNGEON_DIFFICULTY_HEROIC; }
-        bool IsBattleGround() const { return i_mapEntry && i_mapEntry->IsBattleGround(); }
-        bool IsBattleArena() const { return i_mapEntry && i_mapEntry->IsBattleArena(); }
-        bool IsBattleGroundOrArena() const { return i_mapEntry && i_mapEntry->IsBattleGroundOrArena(); }
+    bool Instanceable() const { return i_mapEntry && i_mapEntry->Instanceable(); }
+    // NOTE: this duplicate of Instanceable(), but Instanceable() can be changed when BG also will be instanceable
+    bool IsDungeon() const { return i_mapEntry && i_mapEntry->IsDungeon(); }
+    bool IsRaid() const { return i_mapEntry && i_mapEntry->IsRaid(); }
+    bool IsHeroic() const { return IsRaid() ? i_spawnMode >= RAID_DIFFICULTY_10MAN_HEROIC : i_spawnMode >= DUNGEON_DIFFICULTY_HEROIC; }
+    bool IsNonRaidDungeon() const { return i_mapEntry && i_mapEntry->IsNonRaidDungeon(); }
+    bool IsRaidOrHeroicDungeon() const { return IsRaid() || GetDifficulty() > DUNGEON_DIFFICULTY_NORMAL; }
+    bool IsBattleGround() const { return i_mapEntry && i_mapEntry->IsBattleGround(); }
+    bool IsBattleArena() const { return i_mapEntry && i_mapEntry->IsBattleArena(); }
+    bool IsBattleGroundOrArena() const { return i_mapEntry && i_mapEntry->IsBattleGroundOrArena(); }
 
-        // can't be NULL for loaded map
-        MapPersistentState* GetPersistentState() const { return m_persistentState; }
+    // can't be NULL for loaded map
+    MapPersistentState* GetPersistentState() const { return m_persistentState; }
 
-        void AddObjectToRemoveList(WorldObject* obj);
+    void AddObjectToRemoveList(WorldObject* obj);
 
-        void UpdateObjectVisibility(WorldObject* obj, Cell cell, CellPair cellpair);
+    void UpdateObjectVisibility(WorldObject* obj, Cell cell, CellPair cellpair);
 
-        void resetMarkedCells() { marked_cells.reset(); }
-        bool isCellMarked(uint32 pCellId) { return marked_cells.test(pCellId); }
-        void markCell(uint32 pCellId) { marked_cells.set(pCellId); }
+    void resetMarkedCells() { marked_cells.reset(); }
+    bool isCellMarked(uint32 pCellId) { return marked_cells.test(pCellId); }
+    void markCell(uint32 pCellId) { marked_cells.set(pCellId); }
 
-        bool HavePlayers() const { return !m_mapRefManager.isEmpty(); }
-        uint32 GetPlayersCountExceptGMs() const;
-        bool ActiveObjectsNearGrid(uint32 x, uint32 y) const;
+    bool HavePlayers() const { return !m_mapRefManager.isEmpty(); }
+    uint32 GetPlayersCountExceptGMs() const;
+    bool ActiveObjectsNearGrid(uint32 x, uint32 y) const;
 
-        void SendToPlayers(WorldPacket const* data) const;
-        bool SendToPlayersInZone(WorldPacket const* data, uint32 zoneId) const;
+    /// Send a Packet to all players on a map
+    void SendToPlayers(WorldPacket const* data) const;
+    /// Send a Packet to all players in a zone. Return false if no player found
+    bool SendToPlayersInZone(WorldPacket const* data, uint32 zoneId) const;
 
-        typedef MapRefManager PlayerList;
-        PlayerList const& GetPlayers() const { return m_mapRefManager; }
+    typedef MapRefManager PlayerList;
+    PlayerList const& GetPlayers() const { return m_mapRefManager; }
 
-        // per-map script storage
-        enum ScriptExecutionParam
-        {
-            SCRIPT_EXEC_PARAM_NONE                    = 0x00,   // Start regardless if already started
-            SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE        = 0x01,   // Start Script only if not yet started (uniqueness identified by id and source)
-            SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET        = 0x02,   // Start Script only if not yet started (uniqueness identified by id and target)
-            SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET = 0x03,   // Start Script only if not yet started (uniqueness identified by id, source and target)
-        };
-        bool ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams = SCRIPT_EXEC_PARAM_NONE);
-        void ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* source, Object* target);
+    // per-map script storage
+    enum ScriptExecutionParam
+    {
+        SCRIPT_EXEC_PARAM_NONE = 0x00,   // Start regardless if already started
+        SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE = 0x01,   // Start Script only if not yet started (uniqueness identified by id and source)
+        SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET = 0x02,   // Start Script only if not yet started (uniqueness identified by id and target)
+        SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET = 0x03,   // Start Script only if not yet started (uniqueness identified by id, source and target)
+    };
+    bool ScriptsStart(ScriptMapMapName const& scripts, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams = SCRIPT_EXEC_PARAM_NONE);
+    void ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* source, Object* target);
 
-        // must called with AddToWorld
-        void AddToActive(WorldObject* obj);
-        // must called with RemoveFromWorld
-        void RemoveFromActive(WorldObject* obj);
+    // must called with AddToWorld
+    void AddToActive(WorldObject* obj);
+    // must called with RemoveFromWorld
+    void RemoveFromActive(WorldObject* obj);
 
-        Player* GetPlayer(ObjectGuid guid);
-        Creature* GetCreature(ObjectGuid guid);
-        Pet* GetPet(ObjectGuid guid);
-        Creature* GetAnyTypeCreature(ObjectGuid guid);      // normal creature or pet or vehicle
-        GameObject* GetGameObject(ObjectGuid guid);
-        DynamicObject* GetDynamicObject(ObjectGuid guid);
-        Corpse* GetCorpse(ObjectGuid guid);                 // !!! find corpse can be not in world
-        Unit* GetUnit(ObjectGuid guid);                     // only use if sure that need objects at current map, specially for player case
-        WorldObject* GetWorldObject(ObjectGuid guid);       // only use if sure that need objects at current map, specially for player case
+    Player* GetPlayer(ObjectGuid guid);
+    Creature* GetCreature(ObjectGuid guid);
+    Pet* GetPet(ObjectGuid guid);
+    Creature* GetAnyTypeCreature(ObjectGuid guid);      // normal creature or pet or vehicle
+    GameObject* GetGameObject(ObjectGuid guid);
+    DynamicObject* GetDynamicObject(ObjectGuid guid);
+    Corpse* GetCorpse(ObjectGuid guid);                 // !!! find corpse can be not in world
+    Unit* GetUnit(ObjectGuid guid);                     // only use if sure that need objects at current map, specially for player case
+    WorldObject* GetWorldObject(ObjectGuid guid);       // only use if sure that need objects at current map, specially for player case
 
-        typedef TypeUnorderedMapContainer<AllMapStoredObjectTypes, ObjectGuid> MapStoredObjectTypesContainer;
-        MapStoredObjectTypesContainer& GetObjectsStore() { return m_objectsStore; }
+    typedef TypeUnorderedMapContainer<AllMapStoredObjectTypes, ObjectGuid> MapStoredObjectTypesContainer;
+    MapStoredObjectTypesContainer& GetObjectsStore() { return m_objectsStore; }
 
-        void AddUpdateObject(Object* obj)
-        {
-            i_objectsToClientUpdate.insert(obj);
-        }
+    void AddUpdateObject(Object* obj)
+    {
+        i_objectsToClientUpdate.insert(obj);
+    }
 
-        void RemoveUpdateObject(Object* obj)
-        {
-            i_objectsToClientUpdate.erase(obj);
-        }
+    void RemoveUpdateObject(Object* obj)
+    {
+        i_objectsToClientUpdate.erase(obj);
+    }
 
-        // DynObjects currently
-        uint32 GenerateLocalLowGuid(HighGuid guidhigh);
+    // DynObjects currently
+    uint32 GenerateLocalLowGuid(HighGuid guidhigh);
 
-        // get corresponding TerrainData object for this particular map
-        const TerrainInfo* GetTerrain() const { return m_TerrainData; }
+    // get corresponding TerrainData object for this particular map
+    const TerrainInfo* GetTerrain() const { return m_TerrainData; }
 
-        void CreateInstanceData(bool load);
-        InstanceData* GetInstanceData() const { return i_data; }
-        uint32 GetScriptId() const { return i_script_id; }
+    void CreateInstanceData(bool load);
+    InstanceData* GetInstanceData() const { return i_data; }
+    virtual uint32 GetScriptId() const { return sScriptMgr.GetBoundScriptId(SCRIPTED_MAP, GetId()); }
 
-        void MonsterYellToMap(ObjectGuid guid, int32 textId, uint32 language, Unit const* target) const;
-        void MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, uint32 language, Unit const* target, uint32 senderLowGuid = 0) const;
-        void PlayDirectSoundToMap(uint32 soundId, uint32 zoneId = 0) const;
+    void MonsterYellToMap(ObjectGuid guid, int32 textId, Language language, Unit const* target) const;
+    void MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, Language language, Unit const* target, uint32 senderLowGuid = 0) const;
+    void PlayDirectSoundToMap(uint32 soundId, uint32 zoneId = 0) const;
 
-        // Dynamic VMaps
-        float GetHeight(uint32 phasemask, float x, float y, float z) const;
-        bool IsInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
-        bool GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, uint32 phasemask, float modifyDist) const;
+    // Dynamic VMaps
+    float GetHeight(uint32 phasemask, float x, float y, float z) const;
+    bool GetHeightInRange(uint32 phasemask, float x, float y, float& z, float maxSearchDist = 4.0f) const;
+    bool IsInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
+    bool GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, uint32 phasemask, float modifyDist) const;
 
-        // Object Model insertion/remove/test for dynamic vmaps use
-        void InsertGameObjectModel(const GameObjectModel& mdl);
-        void RemoveGameObjectModel(const GameObjectModel& mdl);
-        bool ContainsGameObjectModel(const GameObjectModel& mdl) const;
+    // Object Model insertion/remove/test for dynamic vmaps use
+    void InsertGameObjectModel(const GameObjectModel& mdl);
+    void RemoveGameObjectModel(const GameObjectModel& mdl);
+    bool ContainsGameObjectModel(const GameObjectModel& mdl) const;
 
-        // Get Holder for Creature Linking
-        CreatureLinkingHolder* GetCreatureLinkingHolder() { return &m_creatureLinkingHolder; }
+    // Get Holder for Creature Linking
+    CreatureLinkingHolder* GetCreatureLinkingHolder() { return &m_creatureLinkingHolder; }
 
-        void SetWeather(uint32 zoneId, WeatherType type, float grade, bool permanently);
+    // Teleport all players in that map to choosed location
+    void TeleportAllPlayersTo(TeleportLocation loc);
+
+    // WeatherSystem
+    WeatherSystem* GetWeatherSystem() const { return m_weatherSystem; }
+    /** Set the weather in a zone on this map
+    * @param zoneId set the weather for which zone
+    * @param type What weather to set
+    * @param grade how strong the weather should be
+    * @param permanently set the weather permanently?
+    */
+    void SetWeather(uint32 zoneId, WeatherType type, float grade, bool permanently);
+
+    // Random on map generation
+    bool GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius);
+    bool GetReachableRandomPointOnGround(uint32 phaseMask, float& x, float& y, float& z, float radius);
+    bool GetRandomPointInTheAir(uint32 phaseMask, float& x, float& y, float& z, float radius);
+    bool GetRandomPointUnderWater(uint32 phaseMask, float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status);
 
     private:
         void LoadMapAndVMap(int gx, int gy);
@@ -392,72 +412,76 @@ class  Map : public GridRefManager<NGridType>
         WeatherSystem* m_weatherSystem;
 };
 
-class  WorldMap : public Map
+class WorldMap : public Map
 {
-    private:
-        using Map::GetPersistentState;                      // hide in subclass for overwrite
-    public:
-        WorldMap(uint32 id, time_t expiry) : Map(id, expiry, 0, REGULAR_DIFFICULTY) {}
-        ~WorldMap() {}
+private:
+    using Map::GetPersistentState;                      // hide in subclass for overwrite
+public:
+    WorldMap(uint32 id, time_t expiry) : Map(id, expiry, 0, REGULAR_DIFFICULTY) {}
+    ~WorldMap() {}
 
-        // can't be NULL for loaded map
-        WorldPersistentState* GetPersistanceState() const;
+    // can't be NULL for loaded map
+    WorldPersistentState* GetPersistanceState() const;
 };
 
-class  DungeonMap : public Map
+class DungeonMap : public Map
 {
-    private:
-        using Map::GetPersistentState;                      // hide in subclass for overwrite
-    public:
-        DungeonMap(uint32 id, time_t, uint32 InstanceId, uint8 SpawnMode);
-        ~DungeonMap();
-        bool Add(Player*) override;
-        void Remove(Player*, bool) override;
-        void Update(const uint32&) override;
-        bool Reset(InstanceResetMethod method);
-        void PermBindAllPlayers(Player* player);
-        void UnloadAll(bool pForce) override;
-        void SendResetWarnings(uint32 timeLeft) const;
-        void SetResetSchedule(bool on);
+private:
+    using Map::GetPersistentState;                      // hide in subclass for overwrite
+public:
+    DungeonMap(uint32 id, time_t, uint32 InstanceId, uint8 SpawnMode);
+    ~DungeonMap();
+    bool Add(Player*) override;
+    void Remove(Player*, bool) override;
+    void Update(const uint32&) override;
+    bool Reset(InstanceResetMethod method);
+    void PermBindAllPlayers(Player* player);
+    void UnloadAll(bool pForce) override;
+    void SendResetWarnings(uint32 timeLeft) const;
+    void SetResetSchedule(bool on);
 
-        // can't be NULL for loaded map
-        DungeonPersistentState* GetPersistanceState() const;
+    uint32 GetScriptId() const override { return sScriptMgr.GetBoundScriptId(SCRIPTED_INSTANCE, GetId()); }
 
-        virtual void InitVisibilityDistance() override;
-    private:
-        bool m_resetAfterUnload;
-        bool m_unloadWhenEmpty;
+    // can't be NULL for loaded map
+    DungeonPersistentState* GetPersistanceState() const;
+
+    virtual void InitVisibilityDistance() override;
+private:
+    bool m_resetAfterUnload;
+    bool m_unloadWhenEmpty;
 };
 
-class  BattleGroundMap : public Map
+class BattleGroundMap : public Map
 {
-    private:
-        using Map::GetPersistentState;                      // hide in subclass for overwrite
-    public:
-        BattleGroundMap(uint32 id, time_t, uint32 InstanceId, uint8 spawnMode);
-        ~BattleGroundMap();
+private:
+    using Map::GetPersistentState;                      // hide in subclass for overwrite
+public:
+    BattleGroundMap(uint32 id, time_t, uint32 InstanceId, uint8 spawnMode);
+    ~BattleGroundMap();
 
-        void Update(const uint32&) override;
-        bool Add(Player*) override;
-        void Remove(Player*, bool) override;
-        bool CanEnter(Player* player) override;
-        void SetUnload();
-        void UnloadAll(bool pForce) override;
+    void Update(const uint32&) override;
+    bool Add(Player*) override;
+    void Remove(Player*, bool) override;
+    bool CanEnter(Player* player) override;
+    void SetUnload();
+    void UnloadAll(bool pForce) override;
 
-        virtual void InitVisibilityDistance() override;
-        BattleGround* GetBG() { return m_bg; }
-        void SetBG(BattleGround* bg) { m_bg = bg; }
+    virtual void InitVisibilityDistance() override;
+    BattleGround* GetBG() { return m_bg; }
+    void SetBG(BattleGround* bg) { m_bg = bg; }
 
-        // can't be NULL for loaded map
-        BattleGroundPersistentState* GetPersistanceState() const;
+    uint32 GetScriptId() const override { return sScriptMgr.GetBoundScriptId(SCRIPTED_BATTLEGROUND, GetId()); } //TODO bind BG scripts through script_binding, now these are broken!
 
-    private:
-        BattleGround* m_bg;
+    // can't be NULL for loaded map
+    BattleGroundPersistentState* GetPersistanceState() const;
+
+private:
+    BattleGround* m_bg;
 };
 
 template<class T, class CONTAINER>
 inline void
-Map::Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER> &visitor)
+Map::Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER>& visitor)
 {
     const uint32 x = cell.GridX();
     const uint32 y = cell.GridY();

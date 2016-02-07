@@ -74,6 +74,9 @@
 #include "Vehicle.h"
 #include "Calendar.h"
 #include "PhaseMgr.h"
+#ifdef ENABLE_ELUNA
+#include "LuaEngine.h"
+#endif /*ENABLE_ELUNA*/
 
 #include <cmath>
 
@@ -1942,6 +1945,13 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             return false;
     }
     return true;
+}
+
+void Player::SetRandomWinner(bool isWinner)
+{
+    m_IsBGRandomWinner = isWinner;
+    if (m_IsBGRandomWinner)
+        CharacterDatabase.PExecute("INSERT INTO character_battleground_random (guid) VALUES ('%u')", GetGUIDLow());
 }
 
 bool Player::TeleportToBGEntryPoint()
@@ -6898,8 +6908,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     if (!zone)
         return;
 
-    phaseMgr->AddUpdateFlag(PHASE_UPDATE_FLAG_ZONE_UPDATE);
-
     if (m_zoneUpdateId != newZone)
     {
         // handle outdoor pvp zones
@@ -6910,17 +6918,16 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
         if (sWorld.getConfig(CONFIG_BOOL_WEATHER))
         {
-            if (Weather* wth = sWorld.FindWeather(zone->ID))
-                wth->SendWeatherUpdateToPlayer(this);
-            else if (!sWorld.AddWeather(zone->ID))
-            {
-                // send fine weather packet to remove old zone's weather
-                Weather::SendFineWeatherUpdateToPlayer(this);
-            }
+            Weather* wth = GetMap()->GetWeatherSystem()->FindOrCreateWeather(newZone);
+            wth->SendWeatherUpdateToPlayer(this);
         }
     }
 
-    m_zoneUpdateId    = newZone;
+#ifdef ENABLE_ELUNA
+    sEluna->OnUpdateZone(this, newZone, newArea);
+#endif
+
+    m_zoneUpdateId = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
 
     // zone changed, so area changed as well, update it
@@ -6930,19 +6937,19 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     // in PvE, only opposition team capital
     switch (zone->team)
     {
-        case AREATEAM_ALLY:
-            pvpInfo.inHostileArea = GetTeam() != ALLIANCE && (sWorld.IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
-            break;
-        case AREATEAM_HORDE:
-            pvpInfo.inHostileArea = GetTeam() != HORDE && (sWorld.IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
-            break;
-        case AREATEAM_NONE:
-            // overwrite for battlegrounds, maybe batter some zone flags but current known not 100% fit to this
-            pvpInfo.inHostileArea = sWorld.IsPvPRealm() || InBattleGround();
-            break;
-        default:                                            // 6 in fact
-            pvpInfo.inHostileArea = false;
-            break;
+    case AREATEAM_ALLY:
+        pvpInfo.inHostileArea = GetTeam() != ALLIANCE && (sWorld.IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
+        break;
+    case AREATEAM_HORDE:
+        pvpInfo.inHostileArea = GetTeam() != HORDE && (sWorld.IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
+        break;
+    case AREATEAM_NONE:
+        // overwrite for battlegrounds, maybe batter some zone flags but current known not 100% fit to this
+        pvpInfo.inHostileArea = sWorld.IsPvPRealm() || InBattleGround();
+        break;
+    default:                                            // 6 in fact
+        pvpInfo.inHostileArea = false;
+        break;
     }
 
     if (pvpInfo.inHostileArea)                              // in hostile area
@@ -6990,8 +6997,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     UpdateZoneDependentAuras();
     UpdateZoneDependentPets();
-
-    phaseMgr->RemoveUpdateFlag(PHASE_UPDATE_FLAG_ZONE_UPDATE);
 }
 
 // If players are too far way of duel flag... then player loose the duel
@@ -14056,18 +14061,6 @@ void Player::CompleteQuest(uint32 quest_id)
     }
 }
 
-void Player::IncompleteQuest(uint32 quest_id)
-{
-    if (quest_id)
-    {
-        SetQuestStatus(quest_id, QUEST_STATUS_INCOMPLETE);
-
-        uint16 log_slot = FindQuestSlot(quest_id);
-        if (log_slot < MAX_QUEST_LOG_SIZE)
-            RemoveQuestSlotState(log_slot, QUEST_STATE_COMPLETE);
-    }
-}
-
 void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver, bool announce)
 {
     uint32 quest_id = pQuest->GetQuestId();
@@ -14075,7 +14068,9 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
     {
         if (pQuest->ReqItemId[i])
+        {
             DestroyItemCount(pQuest->ReqItemId[i], pQuest->ReqItemCount[i], true);
+        }
     }
 
     for (int i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
@@ -14088,18 +14083,13 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
         }
     }
 
-    // take currency
-    for (uint32 i = 0; i < QUEST_REQUIRED_CURRENCY_COUNT; ++i)
-    {
-        if (pQuest->ReqCurrencyId[i])
-            ModifyCurrencyCount(pQuest->ReqCurrencyId[i], -int32(pQuest->ReqCurrencyCount[i] * GetCurrencyPrecision(pQuest->ReqCurrencyId[i])));
-    }
-
     RemoveTimedQuest(quest_id);
 
     if (BattleGround* bg = GetBattleGround())
-        if (bg->GetTypeID() == BATTLEGROUND_AV)
+        if (bg->GetTypeID(true) == BATTLEGROUND_AV)
+        {
             ((BattleGroundAV*)bg)->HandleQuestComplete(pQuest->GetQuestId(), this);
+        }
 
     if (pQuest->GetRewChoiceItemsCount() > 0)
     {
@@ -14134,7 +14124,9 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
 
     uint16 log_slot = FindQuestSlot(quest_id);
     if (log_slot < MAX_QUEST_LOG_SIZE)
+    {
         SetQuestSlot(log_slot, 0);
+    }
 
     QuestStatusData& q_status = mQuestStatus[quest_id];
 
@@ -14143,7 +14135,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
 
     if (getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
     {
-        GiveXP(xp , NULL);
+        GiveXP(xp, NULL);
 
         // Give player extra money (for max level already included in pQuest->GetRewMoneyMaxLevel())
         if (pQuest->GetRewOrReqMoney() > 0)
@@ -14155,10 +14147,10 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     else
     {
         // reward money for max level already included in pQuest->GetRewMoneyMaxLevel()
-        uint64 money = uint32(pQuest->GetRewMoneyMaxLevel() * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
+        uint32 money = uint32(pQuest->GetRewMoneyMaxLevel() * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
 
         // reward money used if > xp replacement money
-        if (pQuest->GetRewOrReqMoney() > int64(money))
+        if (pQuest->GetRewOrReqMoney() > int32(money))
             money = pQuest->GetRewOrReqMoney();
 
         ModifyMoney(money);
@@ -14169,16 +14161,9 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     if (pQuest->GetRewOrReqMoney() < 0)
         ModifyMoney(pQuest->GetRewOrReqMoney());
 
-    // reward currency
-    for (uint32 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
-    {
-        if (pQuest->RewCurrencyId[i])
-            ModifyCurrencyCount(pQuest->RewCurrencyId[i], int32(pQuest->RewCurrencyCount[i] * GetCurrencyPrecision(pQuest->RewCurrencyId[i])));
-    }
-
-    // reward skill
-    if (uint32 skill = pQuest->GetRewSkill())
-        UpdateSkill(skill, pQuest->GetRewSkillValue());
+    // honor reward
+    if (uint32 honor = pQuest->CalculateRewardHonor(getLevel()))
+        RewardHonor(NULL, 0, honor);
 
     // title reward
     if (pQuest->GetCharTitleId())
@@ -14219,18 +14204,18 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
         q_status.uState = QUEST_CHANGED;
 
     if (announce)
-        SendQuestReward(pQuest, xp, questGiver);
+        SendQuestReward(pQuest, xp);
 
     bool handled = false;
 
     switch (questGiver->GetTypeId())
     {
-        case TYPEID_UNIT:
-            handled = sScriptMgr.OnQuestRewarded(this, (Creature*)questGiver, pQuest);
-            break;
-        case TYPEID_GAMEOBJECT:
-            handled = sScriptMgr.OnQuestRewarded(this, (GameObject*)questGiver, pQuest);
-            break;
+    case TYPEID_UNIT:
+        handled = sScriptMgr.OnQuestRewarded(this, reinterpret_cast<Creature*>(questGiver), pQuest, reward);
+        break;
+    case TYPEID_GAMEOBJECT:
+        handled = sScriptMgr.OnQuestRewarded(this, reinterpret_cast<GameObject*>(questGiver), pQuest, reward);
+        break;
     }
 
     if (!handled && pQuest->GetQuestCompleteScript() != 0)
@@ -14248,8 +14233,6 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST_COUNT);
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST, pQuest->GetQuestId());
 
-    UpdateForQuestWorldObjects();
-
     // remove auras from spells with quest reward state limitations
     // Some spells applied at quest reward
     uint32 zone, area;
@@ -14266,11 +14249,18 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(0);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
         itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
+}
 
-    PhaseUpdateData phaseUdateData;
-    phaseUdateData.AddQuestUpdate(quest_id);
+void Player::IncompleteQuest(uint32 quest_id)
+{
+    if (quest_id)
+    {
+        SetQuestStatus(quest_id, QUEST_STATUS_INCOMPLETE);
 
-    phaseMgr->NotifyConditionChanged(phaseUdateData);
+        uint16 log_slot = FindQuestSlot(quest_id);
+        if (log_slot < MAX_QUEST_LOG_SIZE)
+            RemoveQuestSlotState(log_slot, QUEST_STATE_COMPLETE);
+    }
 }
 
 void Player::FailQuest(uint32 questId)
@@ -15418,7 +15408,34 @@ void Player::SendQuestCompleteEvent(uint32 quest_id)
     }
 }
 
-void Player::SendQuestReward(Quest const* pQuest, uint32 XP, Object* /*questGiver*/)
+void Player::SendQuestReward(Quest const* pQuest, uint32 XP)
+{
+    uint32 questid = pQuest->GetQuestId();
+    DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE quest = %u", questid);
+    WorldPacket data(SMSG_QUESTGIVER_QUEST_COMPLETE, (4 + 4 + 4 + 4 + 4));
+    data << uint32(questid);
+
+    if (getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    {
+        data << uint32(XP);
+        data << uint32(pQuest->GetRewOrReqMoney());
+    }
+    else
+    {
+        data << uint32(0);
+        data << uint32(pQuest->GetRewOrReqMoney() + int32(pQuest->GetRewMoneyMaxLevel() * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY)));
+    }
+
+    data << uint32(10 * MaNGOS::Honor::hk_honor_at_level(getLevel(), pQuest->GetRewHonorAddition()));
+    data << uint32(pQuest->GetBonusTalents());              // bonus talents
+    data << uint32(0);                                      // arena points
+    GetSession()->SendPacket(&data);
+}
+
+// Delete this if the above works
+// the above was added for deve21 (chucky)
+//void Player::SendQuestReward(Quest const* pQuest, uint32 XP, Object* /*questGiver*/)
+/*
 {
     uint32 questid = pQuest->GetQuestId();
     DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE quest = %u", questid);
@@ -15436,7 +15453,6 @@ void Player::SendQuestReward(Quest const* pQuest, uint32 XP, Object* /*questGive
         data << uint32(pQuest->GetRewOrReqMoney() + int32(pQuest->GetRewMoneyMaxLevel() * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY)));
         data << uint32(0);
     }
-
     data << uint32(questid);
     data << uint32(pQuest->GetRewSkill());
 
@@ -15445,6 +15461,7 @@ void Player::SendQuestReward(Quest const* pQuest, uint32 XP, Object* /*questGive
 
     GetSession()->SendPacket(&data);
 }
+*/
 
 void Player::SendQuestFailed(uint32 quest_id, InventoryResult reason)
 {

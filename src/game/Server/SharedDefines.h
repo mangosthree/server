@@ -113,6 +113,11 @@ enum Classes
     (1<<(CLASS_DEATH_KNIGHT-1)) )
 
 #define CLASSMASK_ALL_CREATURES ((1<<(CLASS_WARRIOR-1)) | (1<<(CLASS_PALADIN-1)) | (1<<(CLASS_ROGUE-1)) | (1<<(CLASS_MAGE-1)) )
+#define MAX_CREATURE_CLASS 4
+
+// array index could be used to store class data only Warrior, Paladin, Rogue and Mage are indexed for creature
+//                                                  W  P     R           M
+static const uint8 classToIndex[MAX_CLASSES] = { 0, 0, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0 };
 
 #define CLASSMASK_WAND_USERS ((1<<(CLASS_PRIEST-1))|(1<<(CLASS_MAGE-1))|(1<<(CLASS_WARLOCK-1)))
 
@@ -3774,7 +3779,16 @@ enum MaxLevel
 
 static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLASSIC, MAX_LEVEL_TBC, MAX_LEVEL_WOTLK, MAX_LEVEL_CATACLYSM };
 
+// Max creature level (included some bosses and elite)
+#define DEFAULT_MAX_CREATURE_LEVEL 85
+
 // This spell is used for general boarding serverside
 #define SPELL_RIDE_VEHICLE_HARDCODED    46598
+
+enum TeleportLocation
+{
+    TELEPORT_LOCATION_HOMEBIND = 0,
+    TELEPORT_LOCATION_BG_ENTRY_POINT = 1,
+};
 
 #endif

@@ -141,12 +141,12 @@ static_assert(MAX_DB_SCRIPT_STRING_ID < ACE_INT32_MAX, "Must scope with int32 ra
 
 struct MangosStringLocale
 {
-    MangosStringLocale() : SoundId(0), Type(0), Language(0), Emote(0) { }
+    MangosStringLocale() : SoundId(0), Type(0), LanguageId(LANG_UNIVERSAL), Emote(0) { }
 
     std::vector<std::string> Content;                       // 0 -> default, i -> i-1 locale index
     uint32 SoundId;
     uint8  Type;
-    uint32 Language;
+    Language LanguageId;
     uint32 Emote;                       // 0 -> default, i -> i-1 locale index
 };
 
@@ -333,19 +333,6 @@ struct QuestPOI
 typedef std::vector<QuestPOI> QuestPOIVector;
 typedef UNORDERED_MAP<uint32, QuestPOIVector> QuestPOIMap;
 
-#define WEATHER_SEASONS 4
-struct WeatherSeasonChances
-{
-    uint32 rainChance;
-    uint32 snowChance;
-    uint32 stormChance;
-};
-
-struct WeatherZoneChances
-{
-    WeatherSeasonChances data[WEATHER_SEASONS];
-};
-
 struct DungeonEncounter
 {
     DungeonEncounter(DungeonEncounterEntry const* _dbcEntry, EncounterCreditType _creditType, uint32 _creditEntry, uint32 _lastEncounterDungeon)
@@ -358,6 +345,51 @@ struct DungeonEncounter
 
 typedef std::multimap<uint32, DungeonEncounter const*> DungeonEncounterMap;
 typedef std::pair<DungeonEncounterMap::const_iterator, DungeonEncounterMap::const_iterator> DungeonEncounterMapBounds;
+
+struct DungeonFinderRequirements
+{
+    uint32 minItemLevel;
+    uint32 item;
+    uint32 item2;
+    uint32 allianceQuestId;
+    uint32 hordeQuestId;
+    uint32 achievement;
+    const char* questIncompleteText;
+
+    DungeonFinderRequirements()
+        : minItemLevel(0), item(0), item2(0), allianceQuestId(0), hordeQuestId(0), achievement(0) {}
+    DungeonFinderRequirements(uint32 MinItemLevel, uint32 Item, uint32 Item2, uint32 AllianceQuestId,
+        uint32 HordeQuestId, uint32 Achievement, const char* QuestIncompleteText)
+        : minItemLevel(MinItemLevel), item(Item), item2(Item2), allianceQuestId(AllianceQuestId),
+        hordeQuestId(HordeQuestId), achievement(Achievement), questIncompleteText(QuestIncompleteText) {}
+};
+
+struct DungeonFinderRewards
+{
+    uint32 baseXPReward;
+    int32  baseMonetaryReward;
+
+    DungeonFinderRewards() : baseXPReward(0), baseMonetaryReward(0) {}
+    DungeonFinderRewards(uint32 BaseXPReward, int32 BaseMonetaryReward) : baseXPReward(BaseXPReward), baseMonetaryReward(BaseMonetaryReward) {}
+};
+
+struct DungeonFinderItems
+{
+    // sorted by auto-incrementing id
+    uint32 minLevel;
+    uint32 maxLevel;
+    uint32 itemReward;
+    uint32 itemAmount;
+    uint32 dungeonType;
+
+    DungeonFinderItems() : minLevel(0), maxLevel(0), itemReward(0), itemAmount(0), dungeonType(0) {}
+    DungeonFinderItems(uint32 MinLevel, uint32 MaxLevel, uint32 ItemReward, uint32 ItemAmount, uint32 DungeonType)
+        : minLevel(MinLevel), maxLevel(MaxLevel), itemReward(ItemReward), itemAmount(ItemAmount), dungeonType(DungeonType) {}
+};
+
+typedef UNORDERED_MAP<uint32, DungeonFinderRequirements> DungeonFinderRequirementsMap;
+typedef UNORDERED_MAP<uint32, DungeonFinderRewards> DungeonFinderRewardsMap;
+typedef UNORDERED_MAP<uint32, DungeonFinderItems> DungeonFinderItemsMap;
 
 struct GraveYardData
 {
@@ -548,8 +580,6 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, PointOfInterest> PointOfInterestMap;
 
-        typedef UNORDERED_MAP<uint32, WeatherZoneChances> WeatherZoneMap;
-
         void LoadGameobjectInfo();
         void AddGameobjectInfo(GameObjectInfo* goinfo);
 
@@ -713,6 +743,7 @@ class ObjectMgr
         void LoadCreatureTemplates();
         void LoadCreatures();
         void LoadCreatureAddons();
+        void LoadCreatureClassLvlStats();
         void LoadCreatureModelInfo();
         void LoadCreatureModelRace();
         void LoadEquipmentTemplates();
@@ -759,10 +790,14 @@ class ObjectMgr
         void LoadPointsOfInterest();
         void LoadQuestPOI();
 
+        void LoadDungeonFinderRequirements();
+        void LoadDungeonFinderRewards();
+        void LoadDungeonFinderItems();
+
         void LoadNPCSpellClickSpells();
+        void LoadSpellTemplate();
         void LoadCreatureTemplateSpells();
 
-        void LoadWeatherZoneChances();
         void LoadGameTele();
 
         void LoadNpcGossips();
@@ -824,15 +859,6 @@ class ObjectMgr
                     return &*set_itr;
 
             return NULL;
-        }
-
-        WeatherZoneChances const* GetWeatherChances(uint32 zone_id) const
-        {
-            WeatherZoneMap::const_iterator itr = mWeatherZoneMap.find(zone_id);
-            if (itr != mWeatherZoneMap.end())
-                return &itr->second;
-            else
-                return NULL;
         }
 
         CreatureDataPair const* GetCreatureDataPair(uint32 guid) const
@@ -1217,7 +1243,9 @@ class ObjectMgr
 
         QuestPOIMap         mQuestPOIMap;
 
-        WeatherZoneMap      mWeatherZoneMap;
+        DungeonFinderRequirementsMap mDungeonFinderRequirementsMap;
+        DungeonFinderRewardsMap mDungeonFinderRewardsMap;
+        DungeonFinderItemsMap mDungeonFinderItemsMap;
 
         // character reserved names
         typedef std::set<std::wstring> ReservedNamesMap;
@@ -1276,6 +1304,9 @@ class ObjectMgr
         typedef std::map<uint32, std::vector<std::string> > HalfNameMap;
         HalfNameMap PetHalfName0;
         HalfNameMap PetHalfName1;
+
+        // Array to store creature stats, Max creature level + 1 (for data alignement with in game level)
+        CreatureClassLvlStats m_creatureClassLvlStats[DEFAULT_MAX_CREATURE_LEVEL + 1][MAX_CREATURE_CLASS][MAX_EXPANSION + 1];
 
         MapObjectGuids mMapObjectGuids;
         CreatureDataMap mCreatureDataMap;

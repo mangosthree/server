@@ -1047,6 +1047,8 @@ class  Player : public Unit
 
         bool TeleportToBGEntryPoint();
 
+        void SetRandomWinner(bool isWinner);
+
         void SetSummonPoint(uint32 mapid, float x, float y, float z)
         {
             m_summon_expire = time(NULL) + MAX_PLAYER_SUMMON_DELAY;
@@ -1364,7 +1366,7 @@ class  Player : public Unit
         void AddQuest(Quest const* pQuest, Object* questGiver);
         void CompleteQuest(uint32 quest_id);
         void IncompleteQuest(uint32 quest_id);
-        void RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver, bool announce = true);
+        void RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver, bool announce);
 
         void FailQuest(uint32 quest_id);
         bool SatisfyQuestSkill(Quest const* qInfo, bool msg) const;
@@ -1449,7 +1451,8 @@ class  Player : public Unit
         bool CanShareQuest(uint32 quest_id) const;
 
         void SendQuestCompleteEvent(uint32 quest_id);
-        void SendQuestReward(Quest const* pQuest, uint32 XP, Object* questGiver);
+        void SendQuestReward(Quest const* pQuest, uint32 XP);
+        // void SendQuestReward(Quest const* pQuest, uint32 XP, Object* questGiver); // delete this if the above works (chucky)
         void SendQuestFailed(uint32 quest_id, InventoryResult reason = EQUIP_ERR_OK);
         void SendQuestTimerFailed(uint32 quest_id);
         void SendCanTakeQuestResponse(uint32 msg) const;
@@ -2191,6 +2194,8 @@ class  Player : public Unit
 
         // returns true if the player is in active state for capture point capturing
         bool CanUseCapturePoint();
+
+        bool m_IsBGRandomWinner;
 
         /*********************************************************/
         /***                    REST SYSTEM                    ***/

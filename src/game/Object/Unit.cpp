@@ -5704,17 +5704,17 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit* target, uint8 /*SwingType
 
 void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit* target, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount)
 {
-	CalcDamageInfo dmgInfo;
-	dmgInfo.HitInfo = HitInfo;
-	dmgInfo.attacker = this;
-	dmgInfo.target = target;
-	dmgInfo.damage = Damage - AbsorbDamage - Resist - BlockedAmount;
-	dmgInfo.damageSchoolMask = damageSchoolMask;
-	dmgInfo.absorb = AbsorbDamage;
-	dmgInfo.resist = Resist;
-	dmgInfo.TargetState = TargetState;
-	dmgInfo.blocked_amount = BlockedAmount;
-	SendAttackStateUpdate(&dmgInfo);
+    CalcDamageInfo dmgInfo;
+    dmgInfo.HitInfo = HitInfo;
+    dmgInfo.attacker = this;
+    dmgInfo.target = target;
+    dmgInfo.damage = Damage - AbsorbDamage - Resist - BlockedAmount;
+    dmgInfo.damageSchoolMask = damageSchoolMask;
+    dmgInfo.absorb = AbsorbDamage;
+    dmgInfo.resist = Resist;
+    dmgInfo.TargetState = TargetState;
+    dmgInfo.blocked_amount = BlockedAmount;
+    SendAttackStateUpdate(&dmgInfo);
 }
 
 void Unit::SetPowerType(Powers new_powertype)
@@ -8330,7 +8330,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
-	if (IsCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
+    if (IsCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
     // interrupt all delayed non-combat casts
@@ -8373,7 +8373,7 @@ void Unit::ClearInCombat()
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
-	if (IsCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
+    if (IsCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
     // Player's state will be cleared in Player::UpdateContestedPvP
@@ -9800,7 +9800,7 @@ bool Unit::isInvisibleForAlive() const
     if (m_AuraFlags & UNIT_AURAFLAG_ALIVE_INVISIBLE)
         return true;
     // TODO: maybe spiritservices also have just an aura
-	return IsSpiritService();
+    return IsSpiritService();
 }
 
 uint32 Unit::GetCreatureType() const

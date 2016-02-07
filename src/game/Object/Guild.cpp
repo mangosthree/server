@@ -244,7 +244,7 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
         pl->SetInGuild(m_Id);
         pl->SetGuildLevel(GetLevel());
         pl->SetRank(newmember.RankId);
-		pl->SetGuildIdInvited(0);
+        pl->SetGuildIdInvited(0);
     }
 
     UpdateAccountsNumber();
@@ -569,13 +569,13 @@ bool Guild::DelMember(ObjectGuid guid, bool isDisbanding)
 
 bool Guild::ChangeMemberRank(ObjectGuid guid, uint8 newRank)
 {
-	if (newRank <= GetLowestRank())                    // Validate rank (allow only existing ranks)
-	if (MemberSlot* member = GetMemberSlot(guid))
-	{
-		member->ChangeRank(newRank);
-		return true;
-	}
-	return false;
+    if (newRank <= GetLowestRank())                    // Validate rank (allow only existing ranks)
+    if (MemberSlot* member = GetMemberSlot(guid))
+    {
+        member->ChangeRank(newRank);
+        return true;
+    }
+    return false;
 }
 
 void Guild::BroadcastToGuild(WorldSession* session, const std::string& msg, uint32 language)

@@ -6757,7 +6757,7 @@ time_t Player::GetTalentResetTime() const
     return m_resetTalentsTime;
 }
 
-uint32 Player::GetTalentResetCost()	const
+uint32 Player::GetTalentResetCost()    const
 {
     return resetTalentsCost(); // this function added in dev21 - remove this comment if this line works
 }
@@ -21749,7 +21749,7 @@ void Player::SendCorpseReclaimDelay(bool load)
     GetSession()->SendPacket(&data);
 }
 
-uint32 Player::GetNextResetTalentsCost()	const
+uint32 Player::GetNextResetTalentsCost()    const
 {
     // The first time reset costs 1 gold
     if (GetTalentResetCost() < 1 * GOLD)

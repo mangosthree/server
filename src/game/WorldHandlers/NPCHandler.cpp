@@ -354,7 +354,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recv_data)
 
     pCreature->StopMoving();
 
-	if (pCreature->IsSpiritGuide())
+    if (pCreature->IsSpiritGuide())
         pCreature->SendAreaSpiritHealerQueryOpcode(_player);
 
     if (!sScriptMgr.OnGossipHello(_player, pCreature))

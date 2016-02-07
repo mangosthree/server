@@ -5756,7 +5756,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 Creature* target = (Creature*)m_targets.getUnitTarget();
 
-				if (target->IsPet() || target->IsCharmed())
+                if (target->IsPet() || target->IsCharmed())
                 {
                     plrCaster->SendPetTameFailure(PETTAME_CREATUREALREADYOWNED);
                     return SPELL_FAILED_DONT_REPORT;
@@ -6325,7 +6325,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
     if (m_caster->IsInCombat() && IsNonCombatSpell(m_spellInfo))
         return SPELL_FAILED_AFFECTING_COMBAT;
 
-	if (m_caster->GetTypeId() == TYPEID_UNIT && (((Creature*)m_caster)->IsPet() || m_caster->IsCharmed()))
+    if (m_caster->GetTypeId() == TYPEID_UNIT && (((Creature*)m_caster)->IsPet() || m_caster->IsCharmed()))
     {
         // dead owner (pets still alive when owners ressed?)
         if (m_caster->GetCharmerOrOwner() && !m_caster->GetCharmerOrOwner()->IsAlive())

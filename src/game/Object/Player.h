@@ -1065,17 +1065,17 @@ class  Player : public Unit
 
         static bool BuildEnumData(QueryResult* result, ByteBuffer* data, ByteBuffer* buffer);
 
-		void SetInWater(bool apply);
+        void SetInWater(bool apply);
 
-		bool IsInWater() const override
-		{
-			return m_isInWater;
-		}
-		bool IsUnderWater() const override;
-		bool IsFalling()
-		{
-			return GetPositionZ() < m_lastFallZ;
-		}
+        bool IsInWater() const override
+        {
+            return m_isInWater;
+        }
+        bool IsUnderWater() const override;
+        bool IsFalling()
+        {
+            return GetPositionZ() < m_lastFallZ;
+        }
 
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
@@ -1109,7 +1109,7 @@ class  Player : public Unit
         void SetGameMaster(bool on);
         bool isGMChat() const { return GetSession()->GetSecurity() >= SEC_MODERATOR && (m_ExtraFlags & PLAYER_EXTRA_GM_CHAT); }
         void SetGMChat(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_GM_CHAT; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_CHAT; }
-		bool IsTaxiCheater() const { return m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT; }
+        bool IsTaxiCheater() const { return m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT; }
         void SetTaxiCheater(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_TAXICHEAT; else m_ExtraFlags &= ~PLAYER_EXTRA_TAXICHEAT; }
         bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
         void SetGMVisible(bool on);
@@ -1756,15 +1756,15 @@ class  Player : public Unit
         void SetInGuild(uint32 GuildId);
         void SetGuildLevel(uint32 level) { SetUInt32Value(PLAYER_GUILDLEVEL, level); }
         void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); }
-//		void SetGuildInvited(uint32 GuildId, ObjectGuid inviter = ObjectGuid()) { m_GuildIdInvited = GuildId; m_GuildInviterGuid = inviter; } .. PRE Dev21 version (DELETE IT?)
-		void SetGuildIdInvited(uint32 GuildId)
-		{
-			m_GuildIdInvited = GuildId;
-		}
+//        void SetGuildInvited(uint32 GuildId, ObjectGuid inviter = ObjectGuid()) { m_GuildIdInvited = GuildId; m_GuildInviterGuid = inviter; } .. PRE Dev21 version (DELETE IT?)
+        void SetGuildIdInvited(uint32 GuildId)
+        {
+            m_GuildIdInvited = GuildId;
+        }
         uint32 GetGuildId() const { return GetGuildGuid().GetCounter(); }
         ObjectGuid GetGuildGuid() const { return GetGuidValue(OBJECT_FIELD_DATA); }
         std::string GetGuildName() const;
-        uint32 	GetTalentResetCost() const;
+        uint32     GetTalentResetCost() const;
         time_t GetTalentResetTime() const;
         static uint32 GetGuildIdFromDB(ObjectGuid guid);
         static ObjectGuid GetGuildGuidFromDB(ObjectGuid guid);
@@ -2349,7 +2349,7 @@ class  Player : public Unit
         void SetGroupUpdateFlag(uint32 flag) { m_groupUpdateMask |= flag; }
         const uint64& GetAuraUpdateMask() const { return m_auraUpdateMask; }
         void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
-        uint32 	GetNextResetTalentsCost() const;
+        uint32     GetNextResetTalentsCost() const;
         Player* GetNextRandomRaidMember(float radius);
         PartyResult CanUninviteFromGroup() const;
         // BattleGround Group System

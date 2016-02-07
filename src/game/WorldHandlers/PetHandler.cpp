@@ -462,7 +462,7 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
             // sign for autocast
             if (act_state == ACT_ENABLED && spell_id)
             {
-				if (pet->IsCharmed())
+                if (pet->IsCharmed())
                     charmInfo->ToggleCreatureAutocast(spell_id, true);
                 else
                     ((Pet*)pet)->ToggleAutocast(spell_id, true);
@@ -470,7 +470,7 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
             // sign for no/turn off autocast
             else if (act_state == ACT_DISABLED && spell_id)
             {
-				if (pet->IsCharmed())
+                if (pet->IsCharmed())
                     charmInfo->ToggleCreatureAutocast(spell_id, false);
                 else
                     ((Pet*)pet)->ToggleAutocast(spell_id, false);
@@ -632,7 +632,7 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
         return;
     }
 
-	if (pet->IsCharmed())
+    if (pet->IsCharmed())
         // state can be used as boolean
         pet->GetCharmInfo()->ToggleCreatureAutocast(spellid, state);
     else

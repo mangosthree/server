@@ -901,7 +901,7 @@ bool Creature::IsTrainerOf(Player* pPlayer, bool msg) const
 
 bool Creature::CanInteractWithBattleMaster(Player* pPlayer, bool msg) const
 {
-	if (!IsBattleMaster())
+    if (!IsBattleMaster())
         return false;
 
     BattleGroundTypeId bgTypeId = sBattleGroundMgr.GetBattleMasterBG(GetEntry());
@@ -1637,14 +1637,14 @@ bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectInd
 // return true if this creature is tapped by the player or by a member of his group.
 bool Creature::IsTappedBy(Player const* player) const
 {
-	if (player == GetOriginalLootRecipient())
-		return true;
+    if (player == GetOriginalLootRecipient())
+        return true;
 
-	Group const* playerGroup = player->GetGroup();
-	if (!playerGroup || playerGroup != GetGroupLootRecipient()) // if we dont have a group we arent the recipient
-		return false;                                           // if creature doesnt have group bound it means it was solo killed by someone else
+    Group const* playerGroup = player->GetGroup();
+    if (!playerGroup || playerGroup != GetGroupLootRecipient()) // if we dont have a group we arent the recipient
+        return false;                                           // if creature doesnt have group bound it means it was solo killed by someone else
 
-	return true;
+    return true;
 }
 
 SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
@@ -1803,7 +1803,7 @@ void Creature::SendAIReaction(AiReaction reactionType)
 void Creature::CallAssistance()
 {
     // FIXME: should player pets call for assistance?
-	if (!m_AlreadyCallAssistance && getVictim() && !IsCharmed())
+    if (!m_AlreadyCallAssistance && getVictim() && !IsCharmed())
     {
         SetNoCallAssistance(true);
         AI()->SendAIEventAround(AI_EVENT_CALL_ASSISTANCE, getVictim(), sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_ASSISTANCE_DELAY), sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));
@@ -1812,7 +1812,7 @@ void Creature::CallAssistance()
 
 void Creature::CallForHelp(float fRadius)
 {
-	if (fRadius <= 0.0f || !getVictim() || IsPet() || IsCharmed())
+    if (fRadius <= 0.0f || !getVictim() || IsPet() || IsCharmed())
         return;
 
     MaNGOS::CallOfHelpCreatureInRangeDo u_do(this, getVictim(), fRadius);
@@ -2180,9 +2180,9 @@ bool Creature::HasCategoryCooldown(uint32 spell_id) const
 
 uint32 Creature::GetCreatureSpellCooldownDelay(uint32 spellId) const
 {
-	CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spellId);
-	time_t t = time(NULL);
-	return uint32(itr != m_CreatureSpellCooldowns.end() && itr->second > t ? itr->second - t : 0);
+    CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spellId);
+    time_t t = time(NULL);
+    return uint32(itr != m_CreatureSpellCooldowns.end() && itr->second > t ? itr->second - t : 0);
 }
 
 bool Creature::HasSpellCooldown(uint32 spell_id) const
@@ -2446,7 +2446,7 @@ void Creature::ClearTemporaryFaction()
     // No restore if creature is charmed/possessed.
     // For later we may consider extend to restore to charmer faction where charmer is creature.
     // This can also be done by update any pet/charmed of creature at any faction change to charmer.
-	if (IsCharmed())
+    if (IsCharmed())
         return;
 
     // Reset to original faction

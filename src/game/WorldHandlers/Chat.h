@@ -71,12 +71,12 @@ enum ChatCommandSearchResult
 
 enum PlayerChatTag
 {
-	CHAT_TAG_NONE = 0,
-	CHAT_TAG_AFK = 1,
-	CHAT_TAG_DND = 2,
-	CHAT_TAG_GM = 3,
-	CHAT_TAG_COM = 4,                     // Commentator
-	CHAT_TAG_DEV = 5,                     // Developer
+    CHAT_TAG_NONE = 0,
+    CHAT_TAG_AFK = 1,
+    CHAT_TAG_DND = 2,
+    CHAT_TAG_GM = 3,
+    CHAT_TAG_COM = 4,                     // Commentator
+    CHAT_TAG_DEV = 5,                     // Developer
 };
 typedef uint32 ChatTagFlags;
 
@@ -120,32 +120,32 @@ class  ChatHandler
         ChatCommand const* FindCommand(char const* text);
 
         bool isValidChatMessage(const char* msg);
-		bool HasSentErrorMessage() { return sentErrorMessage; }
+        bool HasSentErrorMessage() { return sentErrorMessage; }
 
-		/**
-		* \brief Prepare SMSG_GM_MESSAGECHAT/SMSG_MESSAGECHAT
-		*
-		* Method:    BuildChatPacket build message chat packet generic way
-		* FullName:  ChatHandler::BuildChatPacket
-		* Access:    public static
-		* Returns:   void
-		*
-		* \param WorldPacket& data             : Provided packet will be filled with requested info
-		* \param ChatMsg msgtype               : Message type from ChatMsg enum from SharedDefines.h
-		* \param ChatTagFlags chatTag          : Chat tag from PlayerChatTag in Chat.h
-		* \param char const* message           : Message to send
-		* \param Language language             : Language from Language enum in SharedDefines.h
-		* \param ObjectGuid const& senderGuid  : May be null in some case but often required for ignore list
-		* \param char const* senderName        : Required for type *MONSTER* or *BATTLENET, but also if GM is true
-		* \param ObjectGuid const& targetGuid  : Often null, but needed for type *MONSTER* or *BATTLENET or *BATTLEGROUND* or *ACHIEVEMENT
-		* \param char const* targetName        : Often null, but needed for type *MONSTER* or *BATTLENET or *BATTLEGROUND*
-		* \param char const* channelName       : Required only for CHAT_MSG_CHANNEL
-		**/
-		static void BuildChatPacket(
-			WorldPacket& data, ChatMsg msgtype, char const* message, Language language = LANG_UNIVERSAL, ChatTagFlags chatTag = CHAT_TAG_NONE,
-			ObjectGuid const& senderGuid = ObjectGuid(), char const* senderName = NULL,
-			ObjectGuid const& targetGuid = ObjectGuid(), char const* targetName = NULL,
-			char const* channelName = NULL);
+        /**
+        * \brief Prepare SMSG_GM_MESSAGECHAT/SMSG_MESSAGECHAT
+        *
+        * Method:    BuildChatPacket build message chat packet generic way
+        * FullName:  ChatHandler::BuildChatPacket
+        * Access:    public static
+        * Returns:   void
+        *
+        * \param WorldPacket& data             : Provided packet will be filled with requested info
+        * \param ChatMsg msgtype               : Message type from ChatMsg enum from SharedDefines.h
+        * \param ChatTagFlags chatTag          : Chat tag from PlayerChatTag in Chat.h
+        * \param char const* message           : Message to send
+        * \param Language language             : Language from Language enum in SharedDefines.h
+        * \param ObjectGuid const& senderGuid  : May be null in some case but often required for ignore list
+        * \param char const* senderName        : Required for type *MONSTER* or *BATTLENET, but also if GM is true
+        * \param ObjectGuid const& targetGuid  : Often null, but needed for type *MONSTER* or *BATTLENET or *BATTLEGROUND* or *ACHIEVEMENT
+        * \param char const* targetName        : Often null, but needed for type *MONSTER* or *BATTLENET or *BATTLEGROUND*
+        * \param char const* channelName       : Required only for CHAT_MSG_CHANNEL
+        **/
+        static void BuildChatPacket(
+            WorldPacket& data, ChatMsg msgtype, char const* message, Language language = LANG_UNIVERSAL, ChatTagFlags chatTag = CHAT_TAG_NONE,
+            ObjectGuid const& senderGuid = ObjectGuid(), char const* senderName = NULL,
+            ObjectGuid const& targetGuid = ObjectGuid(), char const* targetName = NULL,
+            char const* channelName = NULL);
 
     protected:
         explicit ChatHandler() : m_session(NULL) {}      // for CLI subclass

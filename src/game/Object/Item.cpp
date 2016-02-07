@@ -411,9 +411,9 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 
 bool Item::IsNotEmptyBag() const
 {
-	if (Bag const* bag = ToBag())
-		return !bag->IsEmpty();
-	return false;
+    if (Bag const* bag = ToBag())
+        return !bag->IsEmpty();
+    return false;
 }
 
 void Item::UpdateDuration(Player* owner, uint32 diff)

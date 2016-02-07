@@ -92,11 +92,11 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-	if (!pCreature->IsTabardDesigner())
-	{
-		sLog.outError("WORLD: HandlePetitionBuyOpcode - unsupported npc type, npc: %s", guidNPC.GetString().c_str());
-		return;
-	}
+    if (!pCreature->IsTabardDesigner())
+    {
+        sLog.outError("WORLD: HandlePetitionBuyOpcode - unsupported npc type, npc: %s", guidNPC.GetString().c_str());
+        return;
+    }
 
     if (sGuildMgr.GetGuildByName(name))
     {
@@ -678,7 +678,7 @@ void WorldSession::SendPetitionShowList(ObjectGuid guid)
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     // only guild petitions currently used
-	if (!pCreature->IsTabardDesigner())
+    if (!pCreature->IsTabardDesigner())
     {
         DEBUG_LOG("WORLD: HandlePetitionShowListOpcode - %s is not supported npc type.", guid.GetString().c_str());
         return;

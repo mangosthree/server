@@ -652,9 +652,9 @@ struct ItemPrototype
         }
 
         return false;
-	}
+    }
 
-	bool IsCurrencyToken() const { return BagFamily & BAG_FAMILY_CURRENCY_TOKENS; }
+    bool IsCurrencyToken() const { return BagFamily & BAG_FAMILY_CURRENCY_TOKENS; }
 
     uint32 GetMaxStackSize() const { return Stackable > 0 ? uint32(Stackable) : uint32(0x7FFFFFFF - 1); }
     float getDPS() const;

@@ -47,6 +47,7 @@ class Item;
 class Object;
 class Player;
 class Unit;
+class Warden;
 class WorldPacket;
 class WorldSocket;
 class QueryResult;
@@ -921,6 +922,9 @@ class  WorldSession
         AccountTypes _security;
         uint32 _accountId;
         uint8 m_expansion;
+
+        // Warden
+        Warden* _warden;
 
         time_t _logoutTime;
         bool m_inQueue;                                     // session wait in auth.queue

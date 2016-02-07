@@ -2464,12 +2464,17 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
 }
 
 // Wrappers
-uint32 GetAreaTriggerScriptId(uint32 triggerId)
+
+/*
+ * commented out as not appearing in the previous versions of the core
+ * delete this if it is found not to be needed (chucky)
+*/
+uint32 ScriptMgr::GetAreaTriggerScriptId(uint32 triggerId) const
 {
     return sScriptMgr.GetAreaTriggerScriptId(triggerId);
 }
 
-uint32 GetEventIdScriptId(uint32 eventId)
+uint32 ScriptMgr::GetEventIdScriptId(uint32 eventId) const
 {
     return sScriptMgr.GetEventIdScriptId(eventId);
 }

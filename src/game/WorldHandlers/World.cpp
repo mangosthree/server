@@ -81,6 +81,9 @@
 #include "LuaEngine.h"
 #endif /*ENABLE_ELUNA*/
 
+// Warden
+#include "WardenCheckMgr.h"
+
 INSTANTIATE_SINGLETON_1(World);
 
 extern void LoadGameObjectModelList();
@@ -1922,6 +1925,7 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_
     delete resultAccounts;
     return BAN_SUCCESS;
 }
+
 
 /// Remove a ban from an account or IP address
 bool World::RemoveBanAccount(BanMode mode, std::string nameOrIP)

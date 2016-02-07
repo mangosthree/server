@@ -23,6 +23,7 @@
  */
 
 #include "WorldSession.h"
+#include "LFGMgr.h"
 #include "Log.h"
 #include "Player.h"
 #include "WorldPacket.h"
@@ -222,6 +223,9 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
     SendPacket(&data);
 }
 
+/*
+ * pre dev21 version
+ * delete this if the one below it proves to be good (chucky)
 void WorldSession::SendLfgJoinResult(LfgJoinResult result)
 {
     WorldPacket data(SMSG_LFG_JOIN_RESULT, 0);
@@ -246,7 +250,41 @@ void WorldSession::SendLfgJoinResult(LfgJoinResult result)
 
     SendPacket(&data);
 }
+*/
 
+void WorldSession::SendLfgJoinResult(LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons)
+{
+    uint32 packetSize = 0;
+    for (partyForbidden::const_iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
+        packetSize += 12 + uint32(it->second.size()) * 8;
+
+    WorldPacket data(SMSG_LFG_JOIN_RESULT, packetSize);
+    data << uint32(result);
+    data << uint32(state);
+
+    if (!lockedDungeons.empty())
+    {
+        for (partyForbidden::const_iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
+        {
+            dungeonForbidden dungeonInfo = it->second;
+
+            data << uint64(it->first); // object guid of player
+            data << uint32(dungeonInfo.size()); // amount of their locked dungeons
+
+            for (dungeonForbidden::iterator itr = dungeonInfo.begin(); itr != dungeonInfo.end(); ++itr)
+            {
+                data << uint32(itr->first); // dungeon entry
+                data << uint32(itr->second); // reason for dungeon being forbidden/locked
+            }
+        }
+    }
+
+    SendPacket(&data);
+}
+
+/*
+ * new version hass been added below for dev21
+ * delete this once the new one proves to work (chucky)
 void WorldSession::SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 id)
 {
     WorldPacket data(isGroup ? SMSG_LFG_UPDATE_PARTY : SMSG_LFG_UPDATE_PLAYER, 0);
@@ -276,3 +314,258 @@ void WorldSession::SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 
     }
     SendPacket(&data);
 }
+*/
+
+
+/*
+ * The following functions were added for dev21, teken from Two
+ * If tey prove to work, then delete/alter this comment (chucky)
+ */
+
+void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
+{
+    uint8 dungeonSize = uint8(status.dungeonList.size());
+
+    bool isQueued = false, joinLFG = false;
+
+    switch (status.updateType)
+    {
+    case LFG_UPDATE_JOIN:
+    case LFG_UPDATE_ADDED_TO_QUEUE:
+        isQueued = true;
+    case LFG_UPDATE_PROPOSAL_BEGIN:
+        if (isGroup)
+            joinLFG = true;
+        break;
+    case LFG_UPDATE_STATUS:
+        isQueued = (status.state == LFG_STATE_QUEUED);
+
+        if (isGroup)
+            joinLFG = (status.state != LFG_STATE_ROLECHECK) && (status.state != LFG_STATE_NONE);
+        break;
+    default:
+        break;
+    }
+
+    WorldPacket data(isGroup ? SMSG_LFG_UPDATE_PARTY : SMSG_LFG_UPDATE_PLAYER);
+    data << uint8(status.updateType);
+
+    data << uint8(dungeonSize > 0);
+
+    if (dungeonSize)
+    {
+        if (isGroup)
+            data << uint8(joinLFG);
+        data << uint8(isQueued);
+        data << uint8(0);
+        data << uint8(0);
+
+        if (isGroup)
+        {
+            for (uint32 i = 0; i < 3; ++i)
+                data << uint8(0);
+        }
+
+        data << uint8(dungeonSize);
+        for (std::set<uint32>::iterator it = status.dungeonList.begin(); it != status.dungeonList.end(); ++it)
+            data << uint32(*it);
+
+        data << status.comment;
+    }
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgQueueStatus(LFGQueueStatus const& status)
+{
+    WorldPacket data(SMSG_LFG_QUEUE_STATUS, 31);
+
+    data << uint32(status.dungeonID);
+    data << int32(status.playerAvgWaitTime);
+    data << int32(status.avgWaitTime);
+    data << int32(status.tankAvgWaitTime);
+    data << int32(status.healerAvgWaitTime);
+    data << int32(status.dpsAvgWaitTime);
+    data << uint8(status.neededTanks);
+    data << uint8(status.neededHeals);
+    data << uint8(status.neededDps);
+    data << uint32(status.timeSpentInQueue);
+
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
+{
+    WorldPacket data(SMSG_LFG_ROLE_CHECK_UPDATE);
+
+    data << uint32(roleCheck.state);
+    data << uint8(roleCheck.state == LFG_ROLECHECK_INITIALITING);
+
+    std::set<uint32> dungeons;
+    if (roleCheck.randomDungeonID)
+        dungeons.insert(roleCheck.randomDungeonID);
+    else
+        dungeons = roleCheck.dungeonList;
+
+    data << uint8(dungeons.size());
+    if (!dungeons.empty())
+        for (std::set<uint32>::iterator it = dungeons.begin(); it != dungeons.end(); ++it)
+            data << uint32(sLFGMgr.GetDungeonEntry(*it));
+
+    data << uint8(roleCheck.currentRoles.size());
+    if (!roleCheck.currentRoles.empty())
+    {
+        ObjectGuid leaderGuid = ObjectGuid(roleCheck.leaderGuidRaw);
+        uint8 leaderRoles = roleCheck.currentRoles.find(leaderGuid)->second;
+        Player* pLeader = ObjectAccessor::FindPlayer(leaderGuid);
+
+        data << uint64(leaderGuid.GetRawValue());
+        data << uint8(leaderRoles > 0);
+        data << uint32(leaderRoles);
+        data << uint8(pLeader->getLevel());
+
+        for (roleMap::const_iterator rItr = roleCheck.currentRoles.begin(); rItr != roleCheck.currentRoles.end(); ++rItr)
+        {
+            if (rItr->first == leaderGuid)
+                continue; // exclude the leader
+
+            ObjectGuid plrGuid = rItr->first;
+
+            Player* pPlayer = ObjectAccessor::FindPlayer(plrGuid);
+
+            data << uint64(plrGuid.GetRawValue());
+            data << uint8(rItr->second > 0);
+            data << uint32(rItr->second);
+            data << uint8(pPlayer->getLevel());
+        }
+    }
+
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgRoleChosen(uint64 rawGuid, uint8 roles)
+{
+    WorldPacket data(SMSG_ROLE_CHOSEN, 13);
+    data << uint64(rawGuid);
+    data << uint8(roles > 0);
+    data << uint32(roles);
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgProposalUpdate(LFGProposal const& proposal)
+{
+    Player* pPlayer = GetPlayer();
+    ObjectGuid plrGuid = pPlayer->GetObjectGuid();
+    ObjectGuid plrGroupGuid = proposal.groups.find(plrGuid)->second;
+
+    uint32 dungeonEntry = sLFGMgr.GetDungeonEntry(proposal.dungeonID);
+    bool showProposal = !proposal.isNew && proposal.groupRawGuid == plrGroupGuid.GetRawValue();
+
+    WorldPacket data(SMSG_LFG_PROPOSAL_UPDATE, 15 + (9 * proposal.currentRoles.size()));
+
+    data << uint32(dungeonEntry);                // Dungeon Entry
+    data << uint8(proposal.state);               // Proposal state
+    data << uint32(proposal.id);                 // ID of proposal
+    data << uint32(proposal.encounters);         // Encounters done
+    data << uint8(showProposal);                 // Show or hide proposal window [todo-this]
+    data << uint8(proposal.currentRoles.size()); // Size of group
+
+    for (playerGroupMap::const_iterator it = proposal.groups.begin(); it != proposal.groups.end(); ++it)
+    {
+        ObjectGuid grpPlrGuid = it->first;
+        uint8 grpPlrRole = proposal.currentRoles.find(grpPlrGuid)->second;
+        LFGProposalAnswer grpPlrAnswer = proposal.answers.find(grpPlrGuid)->second;
+
+        data << uint32(grpPlrRole);              // Player's role
+        data << uint8(grpPlrGuid == plrGuid);    // Is this player me?
+
+        if (it->second != 0)
+        {
+            data << uint8(it->second == ObjectGuid(proposal.groupRawGuid)); // Is player in the proposed group?
+            data << uint8(it->second == plrGroupGuid);          // Is player in the same group as myself?
+        }
+        else
+        {
+            data << uint8(0);
+            data << uint8(0);
+        }
+
+        data << uint8(grpPlrAnswer != LFG_ANSWER_PENDING);  // Has the player selected an answer?
+        data << uint8(grpPlrAnswer == LFG_ANSWER_AGREE);    // Has the player agreed to do the dungeon?
+    }
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgTeleportError(uint8 error)
+{
+    DEBUG_LOG("SMSG_LFG_TELEPORT_DENIED");
+    WorldPacket data(SMSG_LFG_TELEPORT_DENIED, 4);
+    data << uint32(error);
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgRewards(LFGRewards const& rewards)
+{
+    DEBUG_LOG("SMSG_LFG_PLAYER_REWARD");
+
+    WorldPacket data(SMSG_LFG_PLAYER_REWARD, 42);
+    data << uint32(rewards.randomDungeonEntry);
+    data << uint32(rewards.groupDungeonEntry);
+    data << uint8(rewards.hasDoneDaily);
+    data << uint32(1);
+    data << uint32(rewards.moneyReward);
+    data << uint32(rewards.expReward);
+    data << uint32(0);
+    data << uint32(0);
+    if (rewards.itemID != 0)
+    {
+        ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(rewards.itemID);
+        if (pProto)
+        {
+            data << uint8(1);
+            data << uint32(rewards.itemID);
+            data << uint32(pProto->DisplayInfoID);
+            data << uint32(rewards.itemAmount);
+        }
+    }
+    else
+        data << uint8(0);
+    SendPacket(&data);
+}
+
+void WorldSession::SendLfgBootUpdate(LFGBoot const& boot)
+{
+    DEBUG_LOG("SMSG_LFG_BOOT_PLAYER");
+
+    ObjectGuid plrGuid = GetPlayer()->GetObjectGuid();
+    LFGProposalAnswer plrAnswer = boot.answers.find(plrGuid)->second;
+
+    uint32 voteCount = 0, yayCount = 0;
+    for (proposalAnswerMap::const_iterator it = boot.answers.begin(); it != boot.answers.end(); ++it)
+    {
+        if (it->second != LFG_ANSWER_PENDING)
+        {
+            ++voteCount;
+            if (it->second == LFG_ANSWER_AGREE)
+                ++yayCount;
+        }
+    }
+
+    uint32 timeLeft = uint8(((boot.startTime + LFG_TIME_BOOT) - time(NULL)) / 1000);
+
+    WorldPacket data(SMSG_LFG_BOOT_PLAYER, 27 + boot.reason.length());
+
+    data << uint8(boot.inProgress);                   // Is boot still ongoing?
+    data << uint8(plrAnswer != LFG_ANSWER_PENDING);   // Did this player vote yet?
+    data << uint8(plrAnswer == LFG_ANSWER_AGREE);     // Did this player agree to boot them?
+    data << uint64(boot.playerVotedOn.GetRawValue()); // Potentially booted player's objectguid value
+    data << uint32(voteCount);                        // Number of players who've voted so far
+    data << uint32(yayCount);                         // Number of players who've voted against the plr so far
+    data << uint32(timeLeft);                         // Time left in seconds
+    data << uint32(REQUIRED_VOTES_FOR_BOOT);          // Number of votes needed to win
+    data << boot.reason.c_str();                      // Reason given for booting
+
+    SendPacket(&data);
+}
+
+
+

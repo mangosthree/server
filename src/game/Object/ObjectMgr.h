@@ -708,6 +708,28 @@ class ObjectMgr
             return NULL;
         }
 
+        DungeonFinderRequirements const* GetDungeonFinderRequirements(uint32 mapId, uint32 difficulty) const
+        {
+            DungeonFinderRequirementsMap::const_iterator itr = mDungeonFinderRequirementsMap.find(MAKE_PAIR32(mapId, difficulty));
+            if (itr != mDungeonFinderRequirementsMap.end())
+                return &itr->second;
+            return NULL;
+        }
+
+        DungeonFinderRewards const* GetDungeonFinderRewards(uint32 level) const
+        {
+            DungeonFinderRewardsMap::const_iterator itr = mDungeonFinderRewardsMap.find(level);
+            if (itr != mDungeonFinderRewardsMap.end())
+            {
+                return &itr->second;
+            }
+            return NULL;
+        }
+
+        DungeonFinderRequirementsMap const& GetDungeonFinderRequirementsMap() const { return mDungeonFinderRequirementsMap; }
+        DungeonFinderRewardsMap const& GetDungeonFinderRewardsMap() const { return mDungeonFinderRewardsMap; }
+        DungeonFinderItemsMap const& GetDungeonFinderItemsMap() const { return mDungeonFinderItemsMap; }
+
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
         static Player* GetPlayer(const char* name);         ///< Wrapper for ObjectAccessor::FindPlayerByName

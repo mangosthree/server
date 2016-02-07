@@ -34,6 +34,7 @@
 #include "ObjectGuid.h"
 #include "AuctionHouseMgr.h"
 #include "Item.h"
+#include "LFGMgr.h"
 
 struct ItemPrototype;
 struct AuctionEntry;
@@ -140,28 +141,9 @@ enum PartyResult
     ERR_PARTY_LFG_TELEPORT_IN_COMBAT    = 30
 };
 
-enum LfgJoinResult
-{
-    ERR_LFG_OK                                  = 0x00,
-    ERR_LFG_ROLE_CHECK_FAILED                   = 0x01,
-    ERR_LFG_GROUP_FULL                          = 0x02,
-    ERR_LFG_NO_LFG_OBJECT                       = 0x04,
-    ERR_LFG_NO_SLOTS_PLAYER                     = 0x05,
-    ERR_LFG_NO_SLOTS_PARTY                      = 0x06,
-    ERR_LFG_MISMATCHED_SLOTS                    = 0x07,
-    ERR_LFG_PARTY_PLAYERS_FROM_DIFFERENT_REALMS = 0x08,
-    ERR_LFG_MEMBERS_NOT_PRESENT                 = 0x09,
-    ERR_LFG_GET_INFO_TIMEOUT                    = 0x0A,
-    ERR_LFG_INVALID_SLOT                        = 0x0B,
-    ERR_LFG_DESERTER_PLAYER                     = 0x0C,
-    ERR_LFG_DESERTER_PARTY                      = 0x0D,
-    ERR_LFG_RANDOM_COOLDOWN_PLAYER              = 0x0E,
-    ERR_LFG_RANDOM_COOLDOWN_PARTY               = 0x0F,
-    ERR_LFG_TOO_MANY_MEMBERS                    = 0x10,
-    ERR_LFG_CANT_USE_DUNGEONS                   = 0x11,
-    ERR_LFG_ROLE_CHECK_FAILED2                  = 0x12,
-};
-
+/*
+ * these have been moved to LFGMgr.h for dev21
+ * delete from here once all is good with the move
 enum LfgUpdateType
 {
     LFG_UPDATE_JOIN     = 5,
@@ -178,6 +160,7 @@ enum LfgType
     LFG_TYPE_HEROIC_DUNGEON       = 5,
     LFG_TYPE_RANDOM_DUNGEON       = 6
 };
+*/
 
 enum ChatRestrictionType
 {
@@ -255,8 +238,20 @@ class  WorldSession
         void SendNotification(int32 string_id, ...);
         void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName* declinedName);
         void SendLfgSearchResults(LfgType type, uint32 entry);
-        void SendLfgJoinResult(LfgJoinResult result);
-        void SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 id);
+
+        //    void SendLfgJoinResult(LfgJoinResult result); // delete this if the below proves to work
+        void SendLfgJoinResult(LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons);
+
+      //  void SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 id); // delete this if the below proves to work
+        void SendLfgUpdate(bool isGroup, LFGPlayerStatus status);
+        void SendLfgQueueStatus(LFGQueueStatus const& status);
+        void SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck);
+        void SendLfgRoleChosen(uint64 rawGuid, uint8 roles);
+        void SendLfgProposalUpdate(LFGProposal const& proposal);
+        void SendLfgTeleportError(uint8 error);
+        void SendLfgRewards(LFGRewards const& rewards);
+        void SendLfgBootUpdate(LFGBoot const& boot);
+
 		void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
 		void SendGuildInvite(Player* player, bool alreadyInGuild = false);
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);

@@ -216,6 +216,7 @@ enum eConfigUInt32Values
     CONFIG_UINT32_GUID_RESERVE_SIZE_CREATURE,
     CONFIG_UINT32_GUID_RESERVE_SIZE_GAMEOBJECT,
     CONFIG_UINT32_MIN_LEVEL_FOR_RAID,
+    CONFIG_UINT32_RANDOM_BG_RESET_HOUR,
     CONFIG_UINT32_VALUE_COUNT
 };
 
@@ -640,6 +641,7 @@ class World
 
         void InitCurrencyResetTime();
         void InitDailyQuestResetTime();
+        void InitRandomBGResetTime();
         void InitWeeklyQuestResetTime();
         void SetMonthlyQuestResetTime(bool initialize = true);
         void ResetCurrencyWeekCounts();
@@ -722,11 +724,9 @@ class World
         // scheduled reset times
         time_t m_NextCurrencyReset;
         time_t m_NextDailyQuestReset;
-        time_t m_NextWeeklyQuestReset;
-        time_t m_NextMonthlyQuestReset;        
-
-        // next daily quests reset time
         time_t m_NextRandomBGReset;
+        time_t m_NextWeeklyQuestReset;
+        time_t m_NextMonthlyQuestReset;  
 
         // Player Queue
         Queue m_QueuedSessions;

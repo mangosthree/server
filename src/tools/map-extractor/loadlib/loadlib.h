@@ -30,7 +30,7 @@
 #endif
 
 #include <string>
-#include "..\..\dep\StormLib\src\StormLib.h"
+#include "StormLib.h"
 #include <deque>
 
 #ifdef WIN32

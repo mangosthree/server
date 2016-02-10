@@ -1,4 +1,4 @@
-[![](https://www.getmangos.eu/images/primus/blue/misc/logo.png)](http://www.getmangos.eu)&nbsp;
+[![](https://www.getmangos.eu/images/primus/blue/misc/logo.png)](https://getmangos.eu)&nbsp;
 [![](/icons/FORUM.gif)](https://www.getmangos.eu/forum.php)
 [![](/icons/WIKI.gif)](https://getmangos.eu/wiki)
 [![](/icons/TOOLS.gif)](http://github.com/mangostools)
@@ -149,7 +149,7 @@ respects for all of the code used other than [OpenSSL][48].
 [5]: http://www.wowpedia.org/Patch_4.3.4 "WoW Cataclysm· Patch 4.3.4 release notes"
 [7]: http://www.cppreference.com/ "C / C++ reference"
 
-[10]: http://getmangos.eu/ "mangos · project site"
+[10]: https://getmangos.eu/ "mangos · project site"
 [12]: http://github.com/mangosthree "mangos-three· github organization"
 [13]: http://github.com/mangosthree/server "mangos three · server repository"
 [15]: http://github.com/mangosthree/database "mangos three · content database repository"

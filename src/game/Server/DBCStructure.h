@@ -673,7 +673,7 @@ struct ChatChannelsEntry
     uint32  ChannelID;                                      // 0        m_ID
     uint32  flags;                                          // 1        m_flags
     //uint32                                                // 2        m_factionGroup
-    DBCString pattern;                                      // 3        m_name_lang
+    char*   pattern[16];                                    // 3        m_name_lang
     //char*       name;                                     // 4        m_shortcut_lang
 };
 

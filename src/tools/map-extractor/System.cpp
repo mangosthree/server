@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2016  MaNGOS project <https://getmangos.eu>
+ * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,8 +40,8 @@
 
 #include "dbcfile.h"
 
-#include "loadlib/adt.h"
-#include "loadlib/wdt.h"
+#include "adt.h"
+#include "wdt.h"
 #include <fcntl.h>
 
 #ifndef WIN32
@@ -1047,7 +1047,7 @@ void ExtractMapsFromMpq(uint32 build, const int locale)
     printf("Convert map files\n");
     for (uint32 z = 0; z < map_count; ++z)
     {
-        printf("Extract %s (%d/%d)                  \n", map_ids[z].name, z + 1, map_count);
+        printf("System.cpp:ExtractMapsFromMpq( ) - Extract %s (%d/%d)                  \n", map_ids[z].name, z + 1, map_count);
         // Loadup map grid data
         sprintf(mpq_map_name, "World\\Maps\\%s\\%s.wdt", map_ids[z].name, map_ids[z].name);
         WDT_file wdt;

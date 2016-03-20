@@ -185,14 +185,14 @@ extern int main(int argc, char** argv)
 
     sLog.outString("%s [world-daemon]", REVISION_NR);
     sLog.outString("<Ctrl-C> to stop.\n"
-                   "  __  __      _  _  ___  ___  ___                       \n"
-                   " |  \\/  |__ _| \\| |/ __|/ _ \\/ __|                      \n"                                         
-                   " | |\\/| / _` | .` | (_ | (_) \\__ \\                      \n"                                         
-                   " |_|  |_\\__,_|_|\\_|\\___|\\___/|___/                      \n"
-                   "                                        _____ _                 \n"            
-                   " For help and support please visit:    |_   _| |_  _ _ ___ ___  \n"  
-                   " Website: https://getmangos.eu           | | | ' \\| '_/ -_) -_) \n"  
-                   "    Wiki: http://github.com/mangoswiki   |_| |_||_|_| \\___\\___| \n" 
+                   "  __  __      _  _  ___  ___  ___                                 \n"
+                   " |  \\/  |__ _| \\| |/ __|/ _ \\/ __|                             \n"
+                   " | |\\/| / _` | .` | (_ | (_) \\__ \\                             \n"
+                   " |_|  |_\\__,_|_|\\_|\\___|\\___/|___/                            \n"
+                   "                                        _____ _                   \n"
+                   " For help and support please visit:    |_   _| |_  _ _ ___ ___    \n"
+                   "      Website: https://getmangos.eu      | | | ' \\| '_/ -_) -_)  \n"
+                   " Forum / Wiki: https://getmangos.eu      |_| |_||_|_| \\___\\___| \n"
                   );
     sLog.outString("Using configuration file %s.", cfg_file);
 

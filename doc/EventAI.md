@@ -2,8 +2,8 @@ mangos EventAI scripting
 ========================
 **Last Updated**: September 25, 2013
 
-*mangos-zero* provides a simple scripting feature through a set of event-based
-commands from with the database.
+*mangos* provides a simple scripting feature through a set of event-based
+commands from within the database.
 
 Introduction
 ------------

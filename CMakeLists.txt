@@ -19,7 +19,8 @@
 
 project(MaNGOS)
 set(MANGOS_VERSION 0.21)
-
+set(MANGOS_EXP "CATA")
+add_definitions(-DCATA)
 # CMake policies
 cmake_minimum_required(VERSION 2.8)
 # Until CMake 3.0 is the standard
@@ -50,7 +51,7 @@ option(SCRIPT_LIB_ELUNA     "Compile with support for Eluna scripts"        OFF)
 option(SCRIPT_LIB_SD2       "Compile with support for ScriptDev2 scripts"   ON)
 #option(SCRIPT_LIB_SD3       "Compile with support for ScriptDev3 scripts"   OFF)
 option(PLAYERBOTS           "Enable Player Bots"                            OFF)
-option(SOAP                 "Enable remote access via SOAP"                 ON)
+option(SOAP                 "Enable remote access via SOAP"                 OFF)
 # Hidden option to enable/disable PCH. DEV ONLY!
 set(PCH ON)
 set(USE_STORMLIB ON)
@@ -107,6 +108,9 @@ if(ACE_USE_EXTERNAL)
     endif()
 else()
     include(cmake/ImportACE.cmake)
+    if(NOT(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD"))
+        add_definitions(-DHAVE_ACE_STACK_TRACE_H)
+    endif()
 endif()
 
 if(POSTGRESQL)
@@ -143,6 +147,8 @@ if(GIT_EXECUTABLE)
 else()
     set(GIT_REVISION "Git not found")
 endif()
+
+set(DEFINITIONS ${DEFINITIONS} CATA)
 
 message(STATUS "MaNGOS-Core revision  : ${GIT_REVISION}")
 message(STATUS "Install server to     : ${CMAKE_INSTALL_PREFIX}")

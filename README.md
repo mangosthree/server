@@ -150,10 +150,10 @@ respects for all of the code used other than [OpenSSL][48].
 [7]: http://www.cppreference.com/ "C / C++ reference"
 
 [10]: https://getmangos.eu/ "mangos · project site"
-[12]: http://github.com/mangosthree "mangos-three· github organization"
-[13]: http://github.com/mangosthree/server "mangos three · server repository"
-[15]: http://github.com/mangosthree/database "mangos three · content database repository"
-[16]: https://travis-ci.org/mangosthree/server "Travis CI · mangos-three build status"
+[12]: http://github.com/mangosthree "MaNGOS Three· github organization"
+[13]: http://github.com/mangosthree/server "MaNGOS Three · server repository"
+[15]: http://github.com/mangosthree/database "MaNGOS Three · content database repository"
+[16]: https://travis-ci.org/mangosthree/server "Travis CI · MaNGOS Three build status"
 [17]: https://scan.coverity.com/ "Coverity Scan · Static Code Analysis"
 
 [19]: http://www.cmake.org/ "CMake · Cross Platform Make"

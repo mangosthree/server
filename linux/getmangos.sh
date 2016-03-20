@@ -2,8 +2,8 @@
 ###############################################################################
 # MaNGOS Build Automation Script                                              #
 # Written By: Ryan Ashley   Modified By: Antz                                 #
-# Copyright (c) 2014 MaNGOS Project                                           #
-# https://getmangos.eu/                                                        #
+# Copyright (c) 2014-2016 MaNGOS Project                                      #
+# https://getmangos.eu/                                                       #
 #                                                                             #
 # This program is free software; you can redistribute it and/or modify        #
 # it under the terms of the GNU General Public License as published by        #
@@ -22,10 +22,10 @@
 
 # Global variables
 DLGAPP="whiptail"
-VERSION="2"
+VERSION="3"
 SRCPATH="$HOME/mangos/src"
 INSTPATH="$HOME/mangos"
-DB_PREFIX="two"
+DB_PREFIX="three"
 P_DEBUG="0"
 P_STD_MALLOC="1"
 P_ACE_EXTERNAL="1"

@@ -1,4 +1,16 @@
-﻿MaNGOS 0.18   (?? ??? 20??)
+﻿MaNGOS Three Changelog
+======================
+This change log references the relevant changes (bug and security fixes) done
+in recent versions.
+
+0.21 (2016-xx-01) - "The Battle for the Elemental Planes"
+---------------------------------------------------------
+Many Thanks to all the groups and individuals who contributed to this release.
+- xxx+ Commits since the previous release.
+
+* TODO: Add full list of fixes from Rel18 to 21 for both Server, Scripts and Database
+
+MaNGOS 0.18   (?? ??? 20??)
 
  MaNGOS 0.18 - adds further improvements to the
  server core as well as to the majority of game classes and the game content

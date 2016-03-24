@@ -114,7 +114,7 @@ class Field
 		*
 		* @return int8
 		*/
-		int8 GetInt8() const { return mValue ? static_cast<int8>(atol(mValue)) : int8(0); }
+        int8 GetInt8() const { return mValue ? static_cast<int8>(atol(mValue)) : int8(0); }
         /**
          * @brief
          *
@@ -154,29 +154,29 @@ class Field
         {
             uint64 value = 0;
             if (!mValue || sscanf(mValue, UI64FMTD, &value) == -1)
-                return 0;
+                { return 0; }
 
             return value;
-		}
+        }
 		/**
 		* @brief
 		*
 		* @return int64
 		*/
-		uint64 GetInt64() const
-		{
-			int64 value = 0;
-			if (!mValue || sscanf(mValue, SI64FMTD, &value) == -1)
-				return 0;
+        uint64 GetInt64() const
+        {
+            int64 value = 0;
+            if (!mValue || sscanf(mValue, SI64FMTD, &value) == -1)
+                return 0;
 
-			return value;
-		}
+            return value;
+        }
 
-		/**
-		* @brief
-		*
-		* @param type
-		*/
+        /**
+         * @brief
+         *
+         * @param type
+         */
         void SetType(enum DataTypes type) { mType = type; }
 
         /**

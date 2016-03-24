@@ -46,7 +46,7 @@ bool ChatHandler::HandleHelpCommand(char* args)
     else
     {
         if (!ShowHelpForCommand(getCommandTable(), args))
-            SendSysMessage(LANG_NO_CMD);
+            { SendSysMessage(LANG_NO_CMD); }
     }
 
     return true;
@@ -62,7 +62,7 @@ bool ChatHandler::HandleAccountCommand(char* args)
 {
     // let show subcommands at unexpected data in args
     if (*args)
-        return false;
+        { return false; }
 
     AccountTypes gmlevel = GetAccessLevel();
     PSendSysMessage(LANG_ACCOUNT_LEVEL, uint32(gmlevel));
@@ -108,15 +108,14 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
     {
         char const* ver = sScriptMgr.GetScriptLibraryVersion();
         if (ver && *ver)
-            PSendSysMessage(LANG_USING_SCRIPT_LIB, ver);
+            { PSendSysMessage(LANG_USING_SCRIPT_LIB, ver); }
         else
-            SendSysMessage(LANG_USING_SCRIPT_LIB_UNKNOWN);
+            { SendSysMessage(LANG_USING_SCRIPT_LIB_UNKNOWN); }
     }
     else
-        SendSysMessage(LANG_USING_SCRIPT_LIB_NONE);
+        { SendSysMessage(LANG_USING_SCRIPT_LIB_NONE); }
 
     PSendSysMessage(LANG_USING_WORLD_DB, sWorld.GetDBVersion());
-    PSendSysMessage(LANG_USING_EVENT_AI, sWorld.GetCreatureEventAIVersion());
     PSendSysMessage(LANG_CONNECTED_USERS, activeClientsNum, maxActiveClientsNum, queuedClientsNum, maxQueuedClientsNum);
     PSendSysMessage(LANG_UPTIME, str.c_str());
 
@@ -125,23 +124,25 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
 
 bool ChatHandler::HandleDismountCommand(char* /*args*/)
 {
+    Player* player = m_session->GetPlayer();
+    
     // If player is not mounted, so go out :)
-    if (!m_session->GetPlayer()->IsMounted())
+    if (!player->IsMounted())
     {
         SendSysMessage(LANG_CHAR_NON_MOUNTED);
         SetSentErrorMessage(true);
         return false;
     }
 
-    if (m_session->GetPlayer()->IsTaxiFlying())
+    if (player->IsTaxiFlying())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         SetSentErrorMessage(true);
         return false;
     }
 
-    m_session->GetPlayer()->Unmount();
-    m_session->GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+    player->Unmount();
+    player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     return true;
 }
 
@@ -160,7 +161,7 @@ bool ChatHandler::HandleSaveCommand(char* /*args*/)
     // save or plan save after 20 sec (logout delay) if current next save time more this value and _not_ output any messages to prevent cheat planning
     uint32 save_interval = sWorld.getConfig(CONFIG_UINT32_INTERVAL_SAVE);
     if (save_interval == 0 || (save_interval > 20 * IN_MILLISECONDS && player->GetSaveTimer() <= save_interval - 20 * IN_MILLISECONDS))
-        player->SaveToDB();
+        { player->SaveToDB(); }
 
     return true;
 }
@@ -176,8 +177,8 @@ bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
         {
             AccountTypes itr_sec = itr->second->GetSession()->GetSecurity();
             if ((itr->second->isGameMaster() || (itr_sec > SEC_PLAYER && itr_sec <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
-                    (!m_session || itr->second->IsVisibleGloballyFor(m_session->GetPlayer())))
-                names.push_back(std::make_pair<std::string, bool>(GetNameLink(itr->second), itr->second->isAcceptWhispers()));
+                (!m_session || itr->second->IsVisibleGloballyFor(m_session->GetPlayer())))
+                { names.push_back(std::make_pair<std::string, bool>(GetNameLink(itr->second), itr->second->isAcceptWhispers())); }
         }
     }
 
@@ -188,10 +189,10 @@ bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
         char const* accepts = GetMangosString(LANG_GM_ACCEPTS_WHISPER);
         char const* not_accept = GetMangosString(LANG_GM_NO_WHISPER);
         for (std::list<std::pair< std::string, bool> >::const_iterator iter = names.begin(); iter != names.end(); ++iter)
-            PSendSysMessage("%s - %s", iter->first.c_str(), iter->second ? accepts : not_accept);
+            { PSendSysMessage("%s - %s", iter->first.c_str(), iter->second ? accepts : not_accept); }
     }
     else
-        SendSysMessage(LANG_GMS_NOT_LOGGED);
+        { SendSysMessage(LANG_GMS_NOT_LOGGED); }
 
     return true;
 }
@@ -212,7 +213,7 @@ bool ChatHandler::HandleAccountPasswordCommand(char* args)
     char* new_pass_c = ExtractQuotedOrLiteralArg(&args);
 
     if (!old_pass || !new_pass || !new_pass_c)
-        return false;
+        { return false; }
 
     std::string password_old = old_pass;
     std::string password_new = new_pass;

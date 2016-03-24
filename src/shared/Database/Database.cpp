@@ -25,6 +25,7 @@
 #include "DatabaseEnv.h"
 #include "Config/Config.h"
 #include "Database/SqlOperations.h"
+#include "revision.h"
 
 #include <ctime>
 #include <iostream>
@@ -33,6 +34,21 @@
 
 #define MIN_CONNECTION_POOL_SIZE 1
 #define MAX_CONNECTION_POOL_SIZE 16
+
+struct DBVersion
+{
+    std::string dbname;
+    uint32 expected_version;
+    uint32 expected_structure;
+    uint32 expected_content;
+    std::string description;
+};
+
+const DBVersion databaseVersions[COUNT_DATABASES] = {
+    { "World", WORLD_DB_VERSION_NR, WORLD_DB_STRUCTURE_NR, WORLD_DB_CONTENT_NR, WORLD_DB_UPDATE_DESCRIPTION }, // DATABASE_WORLD
+    { "Realmd", REALMD_DB_VERSION_NR, REALMD_DB_STRUCTURE_NR, REALMD_DB_CONTENT_NR, REALMD_DB_UPDATE_DESCRIPTION }, // DATABASE_REALMD
+    { "Character", CHAR_DB_VERSION_NR, CHAR_DB_STRUCTURE_NR, CHAR_DB_CONTENT_NR, CHAR_DB_UPDATE_DESCRIPTION }, // DATABASE_CHARACTER
+};
 
 //////////////////////////////////////////////////////////////////////////
 SqlPreparedStatement* SqlConnection::CreateStatement(const std::string& fmt)
@@ -178,6 +194,7 @@ void Database::InitDelayThread()
 
     // New delay thread for delay execute
     m_threadBody = CreateDelayThread();              // will deleted at m_delayThread delete
+    m_TransStorage = new ACE_TSS<Database::TransHelper>();
     m_delayThread = new ACE_Based::Thread(m_threadBody);
 }
 
@@ -187,9 +204,11 @@ void Database::HaltDelayThread()
 
     m_threadBody->Stop();                                   // Stop event
     m_delayThread->wait();                                  // Wait for flush to DB
+    delete m_TransStorage;
     delete m_delayThread;                                   // This also deletes m_threadBody
     m_delayThread = NULL;
     m_threadBody = NULL;
+    m_TransStorage=NULL;
 }
 
 void Database::ThreadStart()
@@ -333,7 +352,7 @@ bool Database::Execute(const char* sql)
     if (!m_pAsyncConn)
         { return false; }
 
-    SqlTransaction* pTrans = m_TransStorage->get();
+    SqlTransaction* pTrans = (*m_TransStorage)->get();
     if (pTrans)
     {
         // add SQL request to trans queue
@@ -399,7 +418,7 @@ bool Database::BeginTransaction()
 
     // initiate transaction on current thread
     // currently we do not support queued transactions
-    m_TransStorage->init();
+    (*m_TransStorage)->init();
     return true;
 }
 
@@ -409,7 +428,7 @@ bool Database::CommitTransaction()
         { return false; }
 
     // check if we have pending transaction
-    if (!m_TransStorage->get())
+    if (!(*m_TransStorage)->get())
         { return false; }
 
     // if async execution is not available
@@ -417,7 +436,7 @@ bool Database::CommitTransaction()
         { return CommitTransactionDirect(); }
 
     // add SqlTransaction to the async queue
-    m_threadBody->Delay(m_TransStorage->detach());
+    m_threadBody->Delay((*m_TransStorage)->detach());
     return true;
 }
 
@@ -427,11 +446,11 @@ bool Database::CommitTransactionDirect()
         { return false; }
 
     // check if we have pending transaction
-    if (!m_TransStorage->get())
+    if (!(*m_TransStorage)->get())
         { return false; }
 
     // directly execute SqlTransaction
-    SqlTransaction* pTrans = m_TransStorage->detach();
+    SqlTransaction* pTrans = (*m_TransStorage)->detach();
     pTrans->Execute(m_pAsyncConn);
     delete pTrans;
 
@@ -443,101 +462,93 @@ bool Database::RollbackTransaction()
     if (!m_pAsyncConn)
         { return false; }
 
-    if (!m_TransStorage->get())
+    if (!(*m_TransStorage)->get())
         { return false; }
 
     // remove scheduled transaction
-    m_TransStorage->reset();
+    (*m_TransStorage)->reset();
 
     return true;
 }
 
-bool Database::CheckRequiredField(char const* table_name, char const* required_name)
+bool Database::CheckDatabaseVersion(DatabaseTypes database)
 {
-    // check required field
-    QueryResult* result = PQuery("SELECT %s FROM %s LIMIT 1", required_name, table_name);
-    if (result)
-    {
-        delete result;
-        return true;
-    }
+    const DBVersion& dbversion = databaseVersions[database];
 
-    // check fail, prepare readabale error message
+    // Fetch the database version table information
+    QueryResult* result = Query("SELECT version, structure, content, description FROM db_version ORDER BY version DESC, structure DESC, content DESC LIMIT 1");
 
-    // search current required_* field in DB
-    const char* db_name;
-    if (!strcmp(table_name, "db_version"))
-        { db_name = "WORLD"; }
-    else if (!strcmp(table_name, "character_db_version"))
-        { db_name = "CHARACTER"; }
-    else if (!strcmp(table_name, "realmd_db_version"))
-        { db_name = "REALMD"; }
-    else
-        { db_name = "UNKNOWN"; }
-
-    char const* req_sql_update_name = required_name + strlen("required_");
-
-    QueryNamedResult* result2 = PQueryNamed("SELECT * FROM %s LIMIT 1", table_name);
-    if (result2)
-    {
-        QueryFieldNames const& namesMap = result2->GetFieldNames();
-        std::string reqName;
-        for (QueryFieldNames::const_iterator itr = namesMap.begin(); itr != namesMap.end(); ++itr)
-        {
-            if (itr->substr(0, 9) == "required_")
-            {
-                reqName = *itr;
-                break;
-            }
-        }
-
-        delete result2;
-
-        std::string cur_sql_update_name = reqName.substr(strlen("required_"), reqName.npos);
-
-        if (!reqName.empty())
-        {
-            sLog.outErrorDb("The table `%s` in your [%s] database indicates that this database is out of date!", table_name, db_name);
-            sLog.outErrorDb();
-            sLog.outErrorDb("  [A] You have: --> `%s.sql`", cur_sql_update_name.c_str());
-            sLog.outErrorDb();
-            sLog.outErrorDb("  [B] You need: --> `%s.sql`", req_sql_update_name);
-            sLog.outErrorDb();
-            sLog.outErrorDb("You must apply all updates after [A] to [B] to use mangos with this database.");
-            sLog.outErrorDb("These updates are included in the sql/updates folder.");
-            sLog.outErrorDb("Please read the included [README] in sql/updates for instructions on updating.");
-        }
-        else
-        {
-            sLog.outErrorDb("The table `%s` in your [%s] database is missing its version info.", table_name, db_name);
-            sLog.outErrorDb("MaNGOS can not find the version info needed to check that the db is up to date.");
-            sLog.outErrorDb();
-            sLog.outErrorDb("This revision of MaNGOS requires a database updated to:");
-            sLog.outErrorDb("`%s.sql`", req_sql_update_name);
-            sLog.outErrorDb();
-
-            if (!strcmp(db_name, "WORLD"))
-                { sLog.outErrorDb("Post this error to your database provider forum or find a solution there."); }
-            else
-                { sLog.outErrorDb("Reinstall your [%s] database with the included sql file in the sql folder.", db_name); }
-        }
-    }
-    else
-    {
-        sLog.outErrorDb("The table `%s` in your [%s] database is missing or corrupt.", table_name, db_name);
-        sLog.outErrorDb("MaNGOS can not find the version info needed to check that the db is up to date.");
+    // db_version table does not exist or is empty
+    if (!result)
+    { 
+        sLog.outErrorDb("The table `db_version` in your [%s] database is missing or corrupt.", dbversion.dbname.c_str());
         sLog.outErrorDb();
-        sLog.outErrorDb("This revision of mangos requires a database updated to:");
-        sLog.outErrorDb("`%s.sql`", req_sql_update_name);
+        sLog.outErrorDb("  [A] You have database Version: MaNGOS can not verify your database version or its existence!");
         sLog.outErrorDb();
-
-        if (!strcmp(db_name, "WORLD"))
-            { sLog.outErrorDb("Post this error to your database provider forum or find a solution there."); }
-        else
-            { sLog.outErrorDb("Reinstall your [%s] database with the included sql file in the sql folder.", db_name); }
+        sLog.outErrorDb("  [B] You need database Version: %u", dbversion.expected_version);
+        sLog.outErrorDb("                      Structure: %u", dbversion.expected_structure);
+        sLog.outErrorDb("                        Content: %u", dbversion.expected_content);
+        sLog.outErrorDb("                    Description: %s", dbversion.description.c_str());
+        sLog.outErrorDb();
+        sLog.outErrorDb("Please verify your database location or your database integrity.");
+        return false;
     }
 
-    return false;
+    Field* fields = result->Fetch();
+    uint32 version = fields[0].GetUInt32();
+    uint32 structure = fields[1].GetUInt32();
+    uint32 content = fields[2].GetUInt32();
+    std::string description = fields[3].GetCppString();
+
+    delete result;
+
+    // Structure does not match the required version
+    if (version != dbversion.expected_version || structure != dbversion.expected_structure)
+    {
+        sLog.outErrorDb("The table `db_version` indicates that your [%s] database does not match the expected structure!", dbversion.dbname.c_str());
+        sLog.outErrorDb();
+        sLog.outErrorDb("  [A] You have database Version: %u", version);
+        sLog.outErrorDb("                      Structure: %u", structure);
+        sLog.outErrorDb("                        Content: %u", content);
+        sLog.outErrorDb("                    Description: %s", description.c_str());
+        sLog.outErrorDb();
+        sLog.outErrorDb("  [B] You need database Version: %u", dbversion.expected_version);
+        sLog.outErrorDb("                      Structure: %u", dbversion.expected_structure);
+        sLog.outErrorDb("                        Content: %u", dbversion.expected_content);
+        sLog.outErrorDb("                    Description: %s", dbversion.description.c_str());
+        sLog.outErrorDb();
+        sLog.outErrorDb("You must apply all updates after [A] to [B] to use MaNGOS with this database.");
+        sLog.outErrorDb("These updates are included in the database/%s/Updates folder.", dbversion.dbname.c_str());
+        return false;
+    }
+
+    // DB is not up to date, but structure is correct. Send warning but start core
+    if (content > dbversion.expected_content)
+    {
+        sLog.outErrorDb("You have not updated the core for few DB [%s] updates!", dbversion.dbname.c_str());
+        sLog.outErrorDb("Current DB content is %u, core expects %u", content, dbversion.expected_content);
+        sLog.outErrorDb("This is ok for now but should not last long.");
+    }
+    else if (content != dbversion.expected_content) 
+    {
+        sLog.outErrorDb("The table `db_version` indicates that your [%s] database does not match the expected version!", dbversion.dbname.c_str());
+        sLog.outErrorDb();
+        sLog.outErrorDb("  [A] You have database Version: %u", version);
+        sLog.outErrorDb("                      Structure: %u", structure);
+        sLog.outErrorDb("                        Content: %u", content);
+        sLog.outErrorDb("                    Description: %s", description.c_str());
+        sLog.outErrorDb();
+        sLog.outErrorDb("  [B] You need database Version: %u", dbversion.expected_version);
+        sLog.outErrorDb("                      Structure: %u", dbversion.expected_structure);
+        sLog.outErrorDb("                        Content: %u", dbversion.expected_content);
+        sLog.outErrorDb("                    Description: %s", dbversion.description.c_str());
+        sLog.outErrorDb();
+        sLog.outErrorDb("You are missing content updates or you have content updates beyond the expected core version.");
+        sLog.outErrorDb("It is recommended to run ALL database updates up to the required core version.");
+        sLog.outErrorDb("These updates are included in the database/%s/Updates folder.", dbversion.dbname.c_str());
+    };
+
+    return true;
 }
 
 bool Database::ExecuteStmt(const SqlStatementID& id, SqlStmtParameters* params)
@@ -545,7 +556,7 @@ bool Database::ExecuteStmt(const SqlStatementID& id, SqlStmtParameters* params)
     if (!m_pAsyncConn)
         { return false; }
 
-    SqlTransaction* pTrans = m_TransStorage->get();
+    SqlTransaction* pTrans = (*m_TransStorage)->get();
     if (pTrans)
     {
         // add SQL request to trans queue

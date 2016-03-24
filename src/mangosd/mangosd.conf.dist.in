@@ -3,9 +3,9 @@
 ################################################################################
 
 [MangosdConf]
-ConfVersion=2013122901
+ConfVersion=2016031901
 
-###################################################################################################################
+################################################################################
 # CONNECTIONS AND DIRECTORIES
 #
 #    RealmID
@@ -26,7 +26,6 @@ ConfVersion=2013122901
 #    LoginDatabaseInfo
 #    WorldDatabaseInfo
 #    CharacterDatabaseInfo
-#    ScriptDev2DatabaseInfo
 #        Database connection settings for the world server.
 #        Default:
 #                ---MYSQL---
@@ -41,7 +40,6 @@ ConfVersion=2013122901
 #	LoginDatabaseConnections
 #	WorldDatabaseConnections
 #	CharacterDatabaseConnections
-#       ScriptDev2DatabaseConnections
 #		 Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
 #		 Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
 #		 So formula to find out how many connections will be established:
@@ -68,12 +66,10 @@ LogsDir                      = ""
 LoginDatabaseInfo            = "127.0.0.1;3306;mangos;mangos;realmd"
 WorldDatabaseInfo            = "127.0.0.1;3306;mangos;mangos;mangos"
 CharacterDatabaseInfo        = "127.0.0.1;3306;mangos;mangos;characters"
-ScriptDev2DatabaseInfo       = "127.0.0.1;3306;mangos;mangos;mangos"
 LoginDatabaseConnections     = 1
 WorldDatabaseConnections     = 1
 CharacterDatabaseConnections = 1
-ScriptDev2DatabaseConnections= 1
-MaxPingTime                  = 30
+MaxPingTime                  = 5
 WorldServerPort              = 8085
 BindIP                       = "0.0.0.0"
 
@@ -310,6 +306,10 @@ CleanCharacterDB                  = 1
 #        Log file of DB errors detected at server run
 #        Default: "DBErrors.log"
 #
+#    ElunaErrorLogFile
+#        Log file of Eluna errors detected at server run
+#        Default: "ElunaErrors.log"
+#
 #    EventAIErrorLogFile
 #        Log file of EventAI errors detected at server run
 #        Default: "EventAIErrors.log"
@@ -352,6 +352,11 @@ CleanCharacterDB                  = 1
 #        Default: "Ra.log"
 #                 "" - Empty name for disable
 #
+#    WardenLogFile
+#        Log file for warden-related output
+#        Default: ""          - no log file created
+#                 "warden.log" - recommended name to create a log file
+#
 #    LogColors
 #        Color for messages (format "normal_color details_color debug_color error_color")
 #        Colors: 0 - BLACK, 1 - RED, 2 - GREEN,  3 - BROWN, 4 - BLUE, 5 - MAGENTA, 6 -  CYAN, 7 - GREY,
@@ -389,6 +394,7 @@ LogFilter_Calendar = 1
 WorldLogFile                = "world-packets.log"
 WorldLogTimestamp           = 0
 DBErrorLogFile              = "world-database.log"
+ElunaErrorLogFile           = "ElunaErrors.log"
 EventAIErrorLogFile         = "world-eventai.log"
 CharLogFile                 = "world-characters.log"
 CharLogTimestamp            = 0
@@ -397,6 +403,8 @@ GmLogFile                   = "world-gamemaster.log"
 GmLogTimestamp              = 0
 GmLogPerAccount             = 0
 RaLogFile                   = "world-remote-access.log"
+WardenLogFile               = "warden.log"
+WardenLogTimestamp          = 0
 LogColors                   = "13 7 11 9"
 SD2ErrorLogFile             = "scriptdev2-errors.log"
 
@@ -735,7 +743,7 @@ SD2ErrorLogFile             = "scriptdev2-errors.log"
 #                 1 - recheck offhand slot weapon at talent reset also
 #
 #    PetUnsummonAtMount
-#        Persmanent pet will unsummoned at player mount
+#        Permanent pet will unsummoned at player mount
 #                 0 - unsummon only for flying mounts
 #        Default: 1 - unsummon for any mount
 #
@@ -776,11 +784,11 @@ SD2ErrorLogFile             = "scriptdev2-errors.log"
 #        You can bypass this setting by typing "/script SetAllowLowLevelRaid(true/false)" command in chat
 #        Default: 10
 #
-###################################################################################################################
+################################################################################
 
 GameType                                  = 1
 RealmZone                                 = 1
-Expansion = 3
+Expansion                                 = 3
 DBC.Locale                                = 255
 DeclinedNames                             = 0
 StrictPlayerNames                         = 0
@@ -792,15 +800,15 @@ MinPetName                                = 2
 CharactersCreatingDisabled                = 0
 CharactersPerAccount                      = 50
 CharactersPerRealm                        = 10
-HeroicCharactersPerRealm = 1
-MinLevelForHeroicCharacterCreating = 55
+HeroicCharactersPerRealm                  = 1
+MinLevelForHeroicCharacterCreating        = 55
 SkipCinematics                            = 0
-MaxPlayerLevel = 85
+MaxPlayerLevel                            = 85
 StartPlayerLevel                          = 1
-StartHeroicPlayerLevel = 55
+StartHeroicPlayerLevel                    = 55
 StartPlayerMoney                          = 0
 InstantLogout                             = 1
-DisableWaterBreath = 4
+DisableWaterBreath                        = 4
 AllFlightPaths                            = 0
 ActivateWeather                           = 1
 CastUnstuck                               = 1
@@ -831,15 +839,15 @@ MaxPrimaryTradeSkill                      = 2
 TradeSkill.GMIgnore.MaxPrimarySkillsCount = 4
 TradeSkill.GMIgnore.Level                 = 4
 TradeSkill.GMIgnore.Skill                 = 4
-MinPetitionSigns = 4
+MinPetitionSigns                          = 4
 MaxGroupXPDistance                        = 74
 MailDeliveryDelay                         = 3600
 MassMailer.SendPerTick                    = 10
-SkillChance.Prospecting = 0
-SkillChance.Milling = 0
-OffhandCheckAtTalentsReset = 0
-PetUnsummonAtMount = 1
-ClientCacheVersion = 0
+SkillChance.Prospecting                   = 0
+SkillChance.Milling                       = 0
+OffhandCheckAtTalentsReset                = 0
+PetUnsummonAtMount                        = 1
+ClientCacheVersion                        = 0
 Event.Announce                            = 0
 BeepAtStart                               = 1
 ShowProgressBars                          = 1
@@ -1010,22 +1018,23 @@ Corpse.Decay.RARE                         = 900
 Corpse.Decay.ELITE                        = 600
 Corpse.Decay.RAREELITE                    = 1200
 Corpse.Decay.WORLDBOSS                    = 3600
-Rate.Corpse.Decay.Looted = 0.0
-Rate.Creature.Normal.Damage = 1
+Rate.Corpse.Decay.Looted                  = 0.0
 Rate.Creature.Elite.Elite.Damage          = 1
-Rate.Creature.Elite.RAREELITE.Damage = 1
-Rate.Creature.Elite.WORLDBOSS.Damage = 1
+Rate.Creature.Elite.Elite.HP              = 1
+Rate.Creature.Elite.Elite.SpellDamage     = 1
 Rate.Creature.Elite.RARE.Damage           = 1
-Rate.Creature.Normal.SpellDamage = 1
-Rate.Creature.Elite.Elite.SpellDamage = 1
+Rate.Creature.Elite.RARE.HP               = 1
+Rate.Creature.Elite.RARE.SpellDamage      = 1
+Rate.Creature.Elite.RAREELITE.Damage      = 1
+Rate.Creature.Elite.RAREELITE.HP          = 1
 Rate.Creature.Elite.RAREELITE.SpellDamage = 1
+Rate.Creature.Elite.WORLDBOSS.Damage      = 1
+Rate.Creature.Elite.WORLDBOSS.HP          = 1
 Rate.Creature.Elite.WORLDBOSS.SpellDamage = 1
-Rate.Creature.Elite.RARE.SpellDamage = 1
+Rate.Creature.Normal.Damage               = 1
 Rate.Creature.Normal.HP                   = 1
-Rate.Creature.Elite.Elite.HP = 1
-Rate.Creature.Elite.RAREELITE.HP = 1
-Rate.Creature.Elite.WORLDBOSS.HP = 1
-Rate.Creature.Elite.RARE.HP = 1
+Rate.Creature.Normal.SpellDamage          = 1
+
 ListenRange.Say                           = 40
 ListenRange.TextEmote                     = 40
 ListenRange.Yell                          = 300
@@ -1163,16 +1172,16 @@ Channel.SilentlyGMJoin          = 0
 #
 ################################################################################
 
-GM.LoginState      = 2
-GM.Visible         = 2
-GM.AcceptTickets   = 2
-GM.Chat            = 2
-GM.WhisperingTo    = 2
-GM.InGMList.Level  = 3
-GM.InWhoList.Level = 3
-GM.LogTrade        = 1
-GM.StartLevel      = 1
-GM.LowerSecurity   = 0
+GM.LoginState            = 2
+GM.Visible               = 2
+GM.AcceptTickets         = 2
+GM.Chat                  = 2
+GM.WhisperingTo          = 2
+GM.InGMList.Level        = 3
+GM.InWhoList.Level       = 3
+GM.LogTrade              = 1
+GM.StartLevel            = 1
+GM.LowerSecurity         = 0
 GM.AllowAchievementGain  = 1
 GM.InvisibleAura         = 37800
 
@@ -1393,8 +1402,8 @@ Rate.Health                       = 1
 Rate.Mana                         = 1
 Rate.Rage.Income                  = 1
 Rate.Rage.Loss                    = 1
-Rate.RunicPower.Income = 1
-Rate.RunicPower.Loss = 1
+Rate.RunicPower.Income            = 1
+Rate.RunicPower.Loss              = 1
 Rate.Focus                        = 1
 Rate.Energy                       = 1
 Rate.Skill.Discovery              = 1
@@ -1407,8 +1416,8 @@ Rate.Drop.Item.Legendary          = 1
 Rate.Drop.Item.Artifact           = 1
 Rate.Drop.Item.Referenced         = 1
 Rate.Drop.Money                   = 1
-Rate.Drop.Currency = 1
-Rate.Drop.Currency.Amount = 1
+Rate.Drop.Currency                = 1
+Rate.Drop.Currency.Amount         = 1
 Rate.XP.Kill                      = 1
 Rate.XP.Quest                     = 1
 Rate.XP.Explore                   = 1
@@ -1419,13 +1428,13 @@ Rate.Damage.Fall                  = 1
 Rate.Auction.Time                 = 1
 Rate.Auction.Deposit              = 1
 Rate.Auction.Cut                  = 1
-Auction.Deposit.Min = 100
+Auction.Deposit.Min               = 100
 Rate.Honor                        = 1
 Rate.Mining.Amount                = 1
 Rate.Mining.Next                  = 1
 Rate.Talent                       = 1
 Rate.Reputation.Gain              = 1
-Rate.Reputation.LowLevel.Kill    = 1
+Rate.Reputation.LowLevel.Kill     = 1
 Rate.Reputation.LowLevel.Quest    = 1
 Rate.InstanceResetTime            = 1
 
@@ -1439,9 +1448,9 @@ SkillChance.Grey                  = 0
 SkillChance.MiningSteps           = 0
 SkillChance.SkinningSteps         = 0
 
-SkillFail.Loot.Fishing = 1
-SkillFail.Gain.Fishing = 1
-SkillFail.Possible.FishingPool = 0
+SkillFail.Loot.Fishing            = 1
+SkillFail.Gain.Fishing            = 1
+SkillFail.Possible.FishingPool    = 0
 
 DurabilityLossChance.Damage       = 0.5
 DurabilityLossChance.Absorb       = 0.5
@@ -1737,3 +1746,28 @@ Currency.ResetWeekDay = 3
 Currency.ResetHour = 6
 Currency.ConquestPointsDefaultWeekCap = 135000
 Currency.ConquestPointsArenaReward = 12000
+
+###################################################################################################################
+#  ELUNA SETTINGS
+#
+#    Eluna.Enabled
+#       Enable Eluna LuaEngine
+#       Default: 1 (Enabled)
+#                0 (Disabled)
+#
+#   Eluna.TraceBack
+#       Description: Sets whether to use debug.traceback function on a lua error or not.
+#                    Notice that you can redefine the function.
+#       Default:     false - (use default error output)
+#                    true  - (use debug.traceback function)
+#
+#   Eluna.ScriptPath
+#       Description: Sets the location of the script folder to load scripts from
+#                    The path can be relative or absolute.
+#       Default:     "lua_scripts"
+#
+###################################################################################################################
+
+Eluna.Enabled = 1
+Eluna.TraceBack = false
+Eluna.ScriptPath = "lua_scripts"

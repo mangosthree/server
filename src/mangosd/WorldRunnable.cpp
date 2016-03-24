@@ -57,7 +57,7 @@ void WorldRunnable::run()
     uint32 realCurrTime = 0;
     uint32 realPrevTime = WorldTimer::tick();
 
-    uint32 prevSleepTime = 0;                               // used for balanced full tick time length near WORLD_SLEEP_CONST
+    uint32 prevSleepTime = 0;  // used for balanced full tick time length near WORLD_SLEEP_CONST
 
     ///- While we have not World::m_stopEvent, update the world
     while (!World::IsStopped())

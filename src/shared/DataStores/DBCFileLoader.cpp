@@ -50,7 +50,6 @@ bool DBCFileLoader::Load(const char* filename, const char* fmt)
     }
 
     EndianConvert(header);
-
     if (header != 0x43424457)                               //'WDBC'
     {
         fclose(f);
@@ -366,11 +365,9 @@ char* DBCFileLoader::AutoProduceStrings(const char* format, char* dataTable, Loc
                     break;
                 case DBC_FF_STRING:
                 {
-                    char** holder = *((char***)(&dataTable[offset]));
-                    char** slot = &holder[loc];
-
                     // fill only not filled entries
-                    if (*slot == nullStr)
+                    char** slot = (char**)(&dataTable[offset]);
+                    if (!*slot || !** slot)
                     {
                         const char* st = getRecord(y).getString(x);
                         *slot = stringPool + (st - (const char*)stringTable);

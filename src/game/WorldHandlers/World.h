@@ -39,6 +39,7 @@
 #include <list>
 
 class Object;
+class ObjectGuid;
 class WorldPacket;
 class WorldSession;
 class Player;
@@ -379,6 +380,7 @@ enum eConfigBoolValues
     CONFIG_BOOL_VMAP_INDOOR_CHECK,
     CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT,
     CONFIG_BOOL_MMAP_ENABLED,
+    CONFIG_BOOL_ELUNA_ENABLED,
     CONFIG_BOOL_PLAYER_COMMANDS,
     CONFIG_BOOL_GUILD_LEVELING_ENABLED,
     // Warden
@@ -641,7 +643,6 @@ class World
         // used World DB version
         void LoadDBVersion();
         char const* GetDBVersion() { return m_DBVersion.c_str(); }
-        char const* GetCreatureEventAIVersion() { return m_CreatureEventAIVersion.c_str(); }
 
         void UpdatePhaseDefinitions();
 
@@ -748,7 +749,6 @@ class World
 
         // used versions
         std::string m_DBVersion;
-        std::string m_CreatureEventAIVersion;
 };
 
 extern uint32 realmID;

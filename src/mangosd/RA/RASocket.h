@@ -26,8 +26,8 @@
 /// @{
 /// \file
 
-#ifndef _RASOCKET_H
-#define _RASOCKET_H
+#ifndef MANGOS_H_RASOCKET
+#define MANGOS_H_RASOCKET
 
 #include "Common.h"
 #include <ace/Synch_Traits.h>

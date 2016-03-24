@@ -171,11 +171,33 @@ bool BigNumber::isZero() const
     return BN_is_zero(_bn) != 0;
 }
 
-uint8 *BigNumber::AsByteArray(int minSize, bool reverse)
+uint8* BigNumber::AsByteArray(int minSize)
 {
     int length = (minSize >= GetNumBytes()) ? minSize : GetNumBytes();
 
     delete[] _array;
+    _array = new uint8[length];
+
+    // If we need more bytes than length of BigNumber set the rest to 0
+    if (length > GetNumBytes())
+        { memset((void*)_array, 0, length); }
+
+    BN_bn2bin(_bn, (unsigned char*)_array);
+
+    std::reverse(_array, _array + length);
+
+    return _array;
+}
+
+uint8 *BigNumber::AsByteArray(int minSize, bool reverse)
+{
+    int length = (minSize >= GetNumBytes()) ? minSize : GetNumBytes();
+
+    if (_array)
+    {
+        delete[] _array;
+        _array = NULL;
+    }
     _array = new uint8[length];
 
     // If we need more bytes than length of BigNumber set the rest to 0

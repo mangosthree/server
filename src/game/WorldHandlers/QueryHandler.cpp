@@ -180,11 +180,11 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
 
         data << subName;
         data << ci->IconName;                               // "Directions" for guard, string for Icons 2.3.0
-        data << uint32(ci->type_flags);                     // flags
+        data << uint32(ci->CreatureTypeFlags);                     // flags
         data << uint32(0);                                  // unk
         data << uint32(ci->type);                           // CreatureType.dbc
         data << uint32(ci->family);                         // CreatureFamily.dbc
-        data << uint32(ci->rank);                           // Creature Rank (elite, boss, etc)
+        data << uint32(ci->Rank);                           // Creature Rank (elite, boss, etc)
         data << uint32(ci->KillCredit[0]);                  // new in 3.1, kill credit
         data << uint32(ci->KillCredit[1]);                  // new in 3.1, kill credit
 

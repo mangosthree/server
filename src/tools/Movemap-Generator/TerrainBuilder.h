@@ -101,7 +101,7 @@ namespace MMAP
 
             // vert and triangle methods
             static void transform(vector<G3D::Vector3>& original, vector<G3D::Vector3>& transformed,
-                                  float scale, G3D::Matrix3& rotation, G3D::Vector3& position);
+                                  float Scale, G3D::Matrix3& rotation, G3D::Vector3& position);
             static void copyVertices(vector<G3D::Vector3>& source, G3D::Array<float>& dest);
             static void copyIndices(vector<VMAP::MeshTriangle>& source, G3D::Array<int>& dest, int offest, bool flip);
             static void copyIndices(G3D::Array<int>& src, G3D::Array<int>& dest, int offset);

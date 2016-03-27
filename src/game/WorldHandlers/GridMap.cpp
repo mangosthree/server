@@ -584,7 +584,7 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
     if (data)
     {
         data->entry = entry;
-        data->type_flags = type;
+        data->CreatureTypeFlags = type;
         data->level = liquid_level;
         data->depth_level = ground_level;
     }
@@ -1009,7 +1009,7 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
                 data->depth_level = ground_level;
 
                 data->entry = liquid_type;
-                data->type_flags = 1 << liquidFlagType;
+                data->CreatureTypeFlags = 1 << liquidFlagType;
             }
 
             // For speed check as int values

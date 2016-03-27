@@ -72,7 +72,7 @@ class ModelInstance
 
         uint32 id;
         Vec3D pos, rot;
-        unsigned int d1, scale;
+        unsigned int d1, Scale;
         float w, sc;
 
         ModelInstance() {}

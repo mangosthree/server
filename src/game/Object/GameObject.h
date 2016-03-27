@@ -30,6 +30,7 @@
 #include "Object.h"
 #include "LootMgr.h"
 #include "Database/DatabaseEnv.h"
+#include "Utilities/EventProcessor.h"
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
@@ -294,7 +295,7 @@ struct GameObjectInfo
             uint32 maxLevel;                                // 1
             uint32 areaID;                                  // 2
         } meetingstone;
-        // 24 GAMEOBJECT_TYPE_FLAGSTAND
+        // 24 GAMEOBJECT_CreatureTypeFlagsTAND
         struct
         {
             uint32 lockId;                                  // 0
@@ -450,7 +451,7 @@ struct GameObjectInfo
             case GAMEOBJECT_TYPE_GOOBER:     return goober.lockId;
             case GAMEOBJECT_TYPE_AREADAMAGE: return areadamage.lockId;
             case GAMEOBJECT_TYPE_CAMERA:     return camera.lockId;
-            case GAMEOBJECT_TYPE_FLAGSTAND:  return flagstand.lockId;
+            case GAMEOBJECT_CreatureTypeFlagsTAND:  return flagstand.lockId;
             case GAMEOBJECT_TYPE_FISHINGHOLE: return fishinghole.lockId;
             case GAMEOBJECT_TYPE_FLAGDROP:   return flagdrop.lockId;
             default: return 0;
@@ -465,7 +466,7 @@ struct GameObjectInfo
             case GAMEOBJECT_TYPE_BUTTON:     return button.noDamageImmune;
             case GAMEOBJECT_TYPE_QUESTGIVER: return questgiver.noDamageImmune;
             case GAMEOBJECT_TYPE_GOOBER:     return goober.noDamageImmune;
-            case GAMEOBJECT_TYPE_FLAGSTAND:  return flagstand.noDamageImmune;
+            case GAMEOBJECT_CreatureTypeFlagsTAND:  return flagstand.noDamageImmune;
             case GAMEOBJECT_TYPE_FLAGDROP:   return flagdrop.noDamageImmune;
             default: return true;
         }
@@ -691,9 +692,9 @@ class  GameObject : public WorldObject
         {
             time_t now = time(NULL);
             if (m_respawnTime > now)
-                return m_respawnTime;
+                { return m_respawnTime; }
             else
-                return now;
+                { return now; }
         }
 
         void SetRespawnTime(time_t respawn)
@@ -799,9 +800,14 @@ class  GameObject : public WorldObject
         void SetCapturePointSlider(float value);
         float GetCapturePointSlider() const { return m_captureSlider; }
 
+        uint32 GetScriptId();
+
         GridReference<GameObject>& GetGridRef() { return m_gridRef; }
 
         GameObjectModel* m_model;
+        
+        // Event Handler
+        EventProcessor m_Events;
 
     protected:
         uint32      m_spellId;

@@ -283,13 +283,14 @@ struct ItemRequiredTarget
 
 bool ItemCanGoIntoBag(ItemPrototype const* proto, ItemPrototype const* pBagProto);
 
-class  Item : public Object
+class Item : public Object
 {
     public:
         static Item* CreateItem(uint32 item, uint32 count, Player const* player = NULL, uint32 randomPropertyId = 0);
         Item* CloneItem(uint32 count, Player const* player = NULL) const;
 
         Item();
+        ~Item();
 
         virtual bool Create(uint32 guidlow, uint32 itemid, Player const* owner);
 
@@ -397,6 +398,7 @@ class  Item : public Object
         bool HasInvolvedQuest(uint32 /*quest_id*/) const override { return false; }
         bool IsPotion() const { return GetProto()->IsPotion(); }
         bool IsConjuredConsumable() const { return GetProto()->IsConjuredConsumable(); }
+        uint32 GetScriptId() const;
 
         void AddToClientUpdateList() override;
         void RemoveFromClientUpdateList() override;

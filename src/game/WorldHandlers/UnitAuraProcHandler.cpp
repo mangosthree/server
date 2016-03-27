@@ -3031,7 +3031,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 {
                     trigger_spell_id = 64442;
 
-                    // need scale damage base at stack size
+                    // need Scale damage base at stack size
                     if (SpellEntry const* trigEntry = sSpellStore.LookupEntry(trigger_spell_id))
                         basepoints[EFFECT_INDEX_0] = trigEntry->CalculateSimpleValue(EFFECT_INDEX_0) * triggeredByAura->GetStackAmount();
 
@@ -3046,7 +3046,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
 
                     trigger_spell_id = 64569;
 
-                    // need scale damage base at stack size
+                    // need Scale damage base at stack size
                     if (SpellEntry const* trigEntry = sSpellStore.LookupEntry(trigger_spell_id))
                         basepoints[EFFECT_INDEX_0] = trigEntry->CalculateSimpleValue(EFFECT_INDEX_0) * triggeredByAura->GetStackAmount();
 

@@ -753,7 +753,7 @@ struct CreatureDisplayInfoEntry
     // 1        m_modelID
     // 2        m_soundID
     uint32      ExtendedDisplayInfoID;                      // 3        m_extendedDisplayInfoID -> CreatureDisplayInfoExtraEntry::DisplayExtraId
-    float       scale;                                      // 4        m_creatureModelScale
+    float       Scale;                                      // 4        m_creatureModelScale
     // 5        m_creatureModelAlpha
     // 6-8      m_textureVariation[3]
     // 9        m_portraitTextureName

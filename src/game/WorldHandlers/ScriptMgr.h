@@ -22,14 +22,14 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _SCRIPTMGR_H
-#define _SCRIPTMGR_H
+#ifndef MANGOS_H_SCRIPTMGR
+#define MANGOS_H_SCRIPTMGR
 
 #include "Common.h"
 #include "Policies/Singleton.h"
 #include "ObjectGuid.h"
 #include "DBCEnums.h"
-#include "ace/Atomic_Op.h"
+#include <ace/Atomic_Op.h>
 
 struct AreaTriggerEntry;
 struct SpellEntry;
@@ -49,28 +49,35 @@ class WorldObject;
 
 enum ScriptedObjectType
 {
-    SCRIPTED_UNIT = 0,    //CreatureScript
-    SCRIPTED_GAMEOBJECT = 1,    //GameObjectScript
-    SCRIPTED_ITEM = 2,    //ItemScript
-    SCRIPTED_AREATRIGGER = 3,    //AreaTriggerScript
-    SCRIPTED_SPELL = 4,    //SpellScript
-    SCRIPTED_AURASPELL = 5,    //AuraScript
-    SCRIPTED_MAPEVENT = 6,    //MapEventScript
-    SCRIPTED_MAP = 7,    //ZoneScript
-    SCRIPTED_BATTLEGROUND = 8,    //BattleGroundScript
-    SCRIPTED_PVP_ZONE = 9,    //OutdoorPvPScript
-    SCRIPTED_INSTANCE = 10,   //InstanceScript
-    SCRIPTED_CONDITION = 11,   //ConditionScript
-    SCRIPTED_ACHIEVEMENT = 12,   //AchievementScript
+    SCRIPTED_UNIT           = 0,    //CreatureScript
+    SCRIPTED_GAMEOBJECT     = 1,    //GameObjectScript
+    SCRIPTED_ITEM           = 2,    //ItemScript
+    SCRIPTED_AREATRIGGER    = 3,    //AreaTriggerScript
+    SCRIPTED_SPELL          = 4,    //SpellScript
+    SCRIPTED_AURASPELL      = 5,    //AuraScript
+    SCRIPTED_MAPEVENT       = 6,    //MapEventScript
+    SCRIPTED_MAP            = 7,    //ZoneScript
+    SCRIPTED_BATTLEGROUND   = 8,    //BattleGroundScript
+    SCRIPTED_PVP_ZONE       = 9,    //OutdoorPvPScript
+    SCRIPTED_INSTANCE       = 10,   //InstanceScript
+    SCRIPTED_CONDITION      = 11,   //ConditionScript
+    SCRIPTED_ACHIEVEMENT    = 12,   //AchievementScript
     SCRIPTED_MAX_TYPE
 };
 
-enum ScriptCommand                                          // resSource, resTarget are the resulting Source/ Target after buddy search is done
+enum ScriptImplementation
+{
+    SCRIPT_FROM_DATABASE    = 0,
+    SCRIPT_FROM_CORE        = 1,
+    SCRIPT_FROM_ELUNA       = 2,
+};
+
+enum DBScriptCommand                                        // resSource, resTarget are the resulting Source/ Target after buddy search is done
 {
     SCRIPT_COMMAND_TALK                     = 0,            // resSource = WorldObject, resTarget = Unit/none
                                                             // dataint = text entry from db_script_string -table. dataint2-4 optional for random selected texts.
     SCRIPT_COMMAND_EMOTE                    = 1,            // resSource = Unit, resTarget = Unit/none
-                                                            // datalong1 = emote_id
+                                                            // datalong1 = emote_id, dataint1-4 optional for random selected emotes
     SCRIPT_COMMAND_FIELD_SET                = 2,            // source = any, datalong = field_id, datalong2 = value
     SCRIPT_COMMAND_MOVE_TO                  = 3,            // resSource = Creature, datalong2 = travel_speed*100, x/y/z
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
@@ -88,6 +95,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_REMOVE_AURA              = 14,           // resSource = Unit, datalong = spell_id
     SCRIPT_COMMAND_CAST_SPELL               = 15,           // resSource = Unit, cast spell at resTarget = Unit
                                                             // datalong=spellid
+                                                            // dataint1-4 optional for random selected spell
                                                             // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = cast triggered
     SCRIPT_COMMAND_PLAY_SOUND               = 16,           // resSource = WorldObject, target=any/player, datalong (sound_id), datalong2 (bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide; so 1|2 = 3 is target with distance dependent)
     SCRIPT_COMMAND_CREATE_ITEM              = 17,           // source or target must be player, datalong = item entry, datalong2 = amount
@@ -124,9 +132,25 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_XP_USER                  = 33,           // source or target with Player, datalong = bool (0=off, 1=on)
     SCRIPT_COMMAND_TERMINATE_COND           = 34,           // datalong = condition_id, datalong2 = if != 0 then quest_id of quest that will be failed for player's group if the script is terminated
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL terminate when condition is false ELSE terminate when condition is true
+    SCRIPT_COMMAND_SEND_AI_EVENT_AROUND     = 35,           // resSource = Creature, resTarget = Unit
+                                                            // datalong = AIEventType
+                                                            // datalong2 = radius
+    SCRIPT_COMMAND_TURN_TO                  = 36,           // resSource = Unit, resTarget = Unit/none
+    SCRIPT_COMMAND_MOVE_DYNAMIC             = 37,           // resSource = Creature, resTarget Worldobject.
+                                                            // datalong = 0: Move resSource towards resTarget
+                                                            // datalong != 0: Move resSource to a random point between datalong2..datalong around resTarget.
+                                                            //      orientation != 0: Obtain a random point around resTarget in direction of orientation
+                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL Obtain a random point around resTarget in direction of resTarget->GetOrientation + orientation
+                                                            // for resTarget == resSource and orientation == 0 this will mean resSource moving forward
+    SCRIPT_COMMAND_SEND_MAIL                = 38,           // resSource WorldObject, can be NULL, resTarget Player
+                                                            // datalong: Send mailTemplateId from resSource (if provided) to player resTarget
+                                                            // datalong2: AlternativeSenderEntry. Use as sender-Entry
+                                                            // dataint1: Delay (>= 0) in Seconds
+    SCRIPT_COMMAND_CHANGE_ENTRY             = 39,           // resSource = Creature, datalong=creature entry
+                                                            // dataint1 = entry
 };
 
-#define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
+#define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
 
 enum ScriptInfoDataFlags
 {
@@ -347,6 +371,36 @@ struct ScriptInfo
             uint32 failQuest;                               // datalong2
         } terminateCond;
 
+        struct                                              // SCRIPT_COMMAND_SEND_AI_EVENT_AROUND (35)
+        {
+            uint32 eventType;                               // datalong
+            uint32 radius;                                  // datalong2
+        } sendAIEvent;
+
+        struct                                              // SCRIPT_COMMAND_TURN_TO (36)
+        {
+            uint32 targetId;                                // datalong
+            uint32 empty1;                                  // datalong2
+        } turnTo;
+
+        struct                                              // SCRIPT_COMMAND_MOVE_DYNAMIC (37)
+        {
+            uint32 maxDist;                                 // datalong
+            uint32 minDist;                                 // datalong2
+        } moveDynamic;
+
+        struct                                              // SCRIPT_COMMAND_SEND_MAIL (38)
+        {
+            uint32 mailTemplateId;                          // datalong
+            uint32 altSender;                               // datalong2;
+        } sendMail;
+
+        struct                                              // SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL (23)
+        {
+            uint32 creatureEntry;                           // datalong
+            uint32 empty1;                                  // datalong2
+        } changeEntry;
+
         struct
         {
             uint32 data[2];
@@ -402,11 +456,14 @@ struct ScriptInfo
             case SCRIPT_COMMAND_MOVE_TO:
             case SCRIPT_COMMAND_TEMP_SUMMON_CREATURE:
             case SCRIPT_COMMAND_CAST_SPELL:
+            case SCRIPT_COMMAND_PLAY_SOUND:
             case SCRIPT_COMMAND_MOVEMENT:
             case SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL:
             case SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL:
             case SCRIPT_COMMAND_TERMINATE_SCRIPT:
             case SCRIPT_COMMAND_TERMINATE_COND:
+            case SCRIPT_COMMAND_TURN_TO:
+            case SCRIPT_COMMAND_MOVE_DYNAMIC:
                 return true;
             default:
                 return false;
@@ -423,11 +480,26 @@ class ScriptAction
 
         bool HandleScriptStep();                            // return true IF AND ONLY IF the script should be terminated
 
-        const char* GetTableName() const { return m_table; }
-        uint32 GetId() const { return m_script->id; }
-        ObjectGuid GetSourceGuid() const { return m_sourceGuid; }
-        ObjectGuid GetTargetGuid() const { return m_targetGuid; }
-        ObjectGuid GetOwnerGuid() const { return m_ownerGuid; }
+        const char* GetTableName() const
+        {
+            return m_table;
+        }
+        uint32 GetId() const
+        {
+            return m_script->id;
+        }
+        ObjectGuid GetSourceGuid() const
+        {
+            return m_sourceGuid;
+        }
+        ObjectGuid GetTargetGuid() const
+        {
+            return m_targetGuid;
+        }
+        ObjectGuid GetOwnerGuid() const
+        {
+            return m_ownerGuid;
+        }
 
         bool IsSameScript(const char* table, uint32 id, ObjectGuid sourceGuid, ObjectGuid targetGuid, ObjectGuid ownerGuid) const
         {
@@ -451,6 +523,7 @@ class ScriptAction
         bool LogIfNotCreature(WorldObject* pWorldObject);
         bool LogIfNotUnit(WorldObject* pWorldObject);
         bool LogIfNotGameObject(WorldObject* pWorldObject);
+        bool LogIfNotPlayer(WorldObject* pWorldObject);
         Player* GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldObject* pTarget);
 };
 
@@ -482,6 +555,8 @@ class ScriptMgr
         ScriptMgr();
         ~ScriptMgr();
 
+        std::string GenerateNameToId(ScriptedObjectType sot, uint32 id);
+
         void LoadGameObjectScripts();
         void LoadGameObjectTemplateScripts();
         void LoadQuestEndScripts();
@@ -496,11 +571,11 @@ class ScriptMgr
 
         void LoadScriptNames();
         void LoadScriptBinding();
+        void LoadAreaTriggerScripts();
+        void LoadEventIdScripts();
+        void LoadSpellIdScripts();
 
-        uint32 GetAreaTriggerScriptId(uint32 triggerId) const;
-        uint32 GetEventIdScriptId(uint32 eventId) const;
-
-        uint32 GetBoundScriptId(ScriptedObjectType entity, int32 entry);
+        bool ReloadScriptBinding();
 
         const char* GetScriptName(uint32 id) const
         {
@@ -511,16 +586,17 @@ class ScriptMgr
         {
             return m_scriptNames.size();
         }
+        uint32 GetBoundScriptId(ScriptedObjectType entity, int32 entry);
 
         ScriptLoadResult LoadScriptLibrary(const char* libName);
         void UnloadScriptLibrary();
         bool IsScriptLibraryLoaded() const
         {
-    #ifdef ENABLE_SD3
+#ifdef ENABLE_SD3
             return true;
-    #else
+#else
             return false;
-    #endif
+#endif
         }
 
         uint32 IncreaseScheduledScriptsCount()
@@ -561,10 +637,10 @@ class ScriptMgr
         bool OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry);
         bool OnNpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 spellId);
         bool OnProcessEvent(uint32 eventId, Object* pSource, Object* pTarget, bool isStart);
-        bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid);
+        bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Unit* pTarget, ObjectGuid originalCasterGuid);
         bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, GameObject* pTarget, ObjectGuid originalCasterGuid);
         bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Item* pTarget, ObjectGuid originalCasterGuid);
-        bool OnEffectScriptEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid);
+        bool OnEffectScriptEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Unit* pTarget, ObjectGuid originalCasterGuid);
         bool OnAuraDummy(Aura const* pAura, bool apply);
 
     private:
@@ -579,6 +655,10 @@ class ScriptMgr
 
         ScriptNameMap           m_scriptNames;
 
+#ifdef _DEBUG
+        // mutex allowing to reload the script binding table; TODO just do it AWAY from any map update, e.g. right after sessions update 
+        ACE_RW_Thread_Mutex m_bindMutex;
+#endif /* _DEBUG */
         // atomic op counter for active scripts amount
         ACE_Atomic_Op<ACE_Thread_Mutex, long> m_scheduledScripts;
 };
@@ -588,10 +668,8 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
 
 #define sScriptMgr MaNGOS::Singleton<ScriptMgr>::Instance()
 
- uint32 GetAreaTriggerScriptId(uint32 triggerId);
- uint32 GetEventIdScriptId(uint32 eventId);
- uint32 GetScriptId(const char* name);
- char const* GetScriptName(uint32 id);
- uint32 GetScriptIdsCount();
+uint32 GetScriptId(const char* name);
+char const* GetScriptName(uint32 id);
+uint32 GetScriptIdsCount();
 
 #endif

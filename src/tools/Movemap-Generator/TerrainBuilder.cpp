@@ -600,7 +600,7 @@ namespace MMAP
                 bool isM2 = instance.name.find(".m2") != instance.name.npos || instance.name.find(".M2") != instance.name.npos;
 
                 // transform data
-                float scale = instance.iScale;
+                float Scale = instance.iScale;
                 G3D::Matrix3 rotation = G3D::Matrix3::fromEulerAnglesXYZ(G3D::pi() * instance.iRot.z / -180.f, G3D::pi() * instance.iRot.x / -180.f, G3D::pi() * instance.iRot.y / -180.f);
                 Vector3 position = instance.iPos;
                 position.x -= 32 * GRID_SIZE;
@@ -616,7 +616,7 @@ namespace MMAP
                     (*it).getMeshData(tempVertices, tempTriangles, liquid);
 
                     // first handle collision mesh
-                    transform(tempVertices, transformedVertices, scale, rotation, position);
+                    transform(tempVertices, transformedVertices, Scale, rotation, position);
 
                     int offset = meshData.solidVerts.size() / 3;
 
@@ -663,7 +663,7 @@ namespace MMAP
                             for (uint32 y = 0; y < vertsY; ++y)
                             {
                                 vert = Vector3(corner.x + x * GRID_PART_SIZE, corner.y + y * GRID_PART_SIZE, data[y * vertsX + x]);
-                                vert = vert * rotation * scale + position;
+                                vert = vert * rotation * Scale + position;
                                 vert.x *= -1.f;
                                 vert.y *= -1.f;
                                 liqVerts.push_back(vert);
@@ -713,12 +713,12 @@ namespace MMAP
     }
 
     /**************************************************************************/
-    void TerrainBuilder::transform(vector<Vector3>& source, vector<Vector3>& transformedVertices, float scale, G3D::Matrix3& rotation, Vector3& position)
+    void TerrainBuilder::transform(vector<Vector3>& source, vector<Vector3>& transformedVertices, float Scale, G3D::Matrix3& rotation, Vector3& position)
     {
         for (vector<Vector3>::iterator it = source.begin(); it != source.end(); ++it)
         {
             // apply tranform, then mirror along the horizontal axes
-            Vector3 v((*it) * rotation * scale + position);
+            Vector3 v((*it) * rotation * Scale + position);
             v.x *= -1.f;
             v.y *= -1.f;
             transformedVertices.push_back(v);

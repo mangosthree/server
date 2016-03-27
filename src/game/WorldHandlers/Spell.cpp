@@ -7654,7 +7654,7 @@ SpellCastResult Spell::CanOpenLock(SpellEffectIndex effIndex, uint32 lockId, Ski
                     reqSkillValue = lockInfo->Skill[j];
 
                     // castitem check: rogue using skeleton keys. the skill values should not be added in this case.
-                    // MAX_SKILL_TYPE - skill value scales with caster level
+                    // MAX_SKILL_TYPE - skill value Scales with caster level
                     if (skillId == MAX_SKILL_TYPE)
                         skillValue = m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER ? 0 : m_caster->getLevel() * 5;
                     else
@@ -8223,10 +8223,10 @@ void Spell::GetSpellRangeAndRadius(SpellEffectEntry const* spellEffect, float& r
                         radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
                     break;
                 }
-                case 66881:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale)
-                case 67638:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale) (Mode 1)
-                case 67639:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale) (Mode 2)
-                case 67640:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale) (Mode 3)
+                case 66881:                                 // Slime Pool (ToCrusader, Acidmaw & DreadScale)
+                case 67638:                                 // Slime Pool (ToCrusader, Acidmaw & DreadScale) (Mode 1)
+                case 67639:                                 // Slime Pool (ToCrusader, Acidmaw & DreadScale) (Mode 2)
+                case 67640:                                 // Slime Pool (ToCrusader, Acidmaw & DreadScale) (Mode 3)
                     if (SpellAuraHolder* auraHolder = m_caster->GetSpellAuraHolder(66882))
                         radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
                     break;

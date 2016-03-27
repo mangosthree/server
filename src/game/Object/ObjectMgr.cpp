@@ -585,13 +585,13 @@ void ObjectMgr::LoadCreatureTemplates()
         if (!ok)
             continue;
 
-        FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->faction_A);
+        FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->FactionAlliance);
         if (!factionTemplate)
-            sLog.outErrorDb("Creature (Entry: %u) has nonexistent faction_A template (%u)", cInfo->Entry, cInfo->faction_A);
+            sLog.outErrorDb("Creature (Entry: %u) has nonexistent factionAlliance template (%u)", cInfo->Entry, cInfo->FactionAlliance);
 
-        factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->faction_H);
+        factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->FactionHorde);
         if (!factionTemplate)
-            sLog.outErrorDb("Creature (Entry: %u) has nonexistent faction_H template (%u)", cInfo->Entry, cInfo->faction_H);
+            sLog.outErrorDb("Creature (Entry: %u) has nonexistent factionHorde template (%u)", cInfo->Entry, cInfo->FactionHorde);
 
         for (int k = 0; k < MAX_KILL_CREDIT; ++k)
         {
@@ -605,7 +605,7 @@ void ObjectMgr::LoadCreatureTemplates()
             }
         }
 
-        // used later for scale
+        // used later for Scale
         CreatureDisplayInfoEntry const* displayScaleEntry = NULL;
 
         for (int i = 0; i < MAX_CREATURE_MODEL; ++i)
@@ -701,18 +701,18 @@ void ObjectMgr::LoadCreatureTemplates()
             const_cast<CreatureInfo*>(cInfo)->MovementType = IDLE_MOTION_TYPE;
         }
 
-        if (cInfo->vehicleId && !sVehicleStore.LookupEntry(cInfo->vehicleId))
+        if (cInfo->VehicleTemplateId && !sVehicleStore.LookupEntry(cInfo->VehicleTemplateId))
         {
-            sLog.outErrorDb("Creature (Entry: %u) has non-existing vehicle_id (%u), set to 0.", cInfo->Entry, cInfo->vehicleId);
-            const_cast<CreatureInfo*>(cInfo)->vehicleId = 0;
+            sLog.outErrorDb("Creature (Entry: %u) has non-existing vehicle_id (%u), set to 0.", cInfo->Entry, cInfo->VehicleTemplateId);
+            const_cast<CreatureInfo*>(cInfo)->VehicleTemplateId = 0;
         }
 
-        if (cInfo->equipmentId > 0)                         // 0 no equipment
+        if (cInfo->EquipmentTemplateId > 0)                         // 0 no equipment
         {
-            if (!GetEquipmentInfo(cInfo->equipmentId))
+            if (!GetEquipmentInfo(cInfo->EquipmentTemplateId))
             {
-                sLog.outErrorDb("Table `creature_template` have creature (Entry: %u) with equipment_id %u not found in table `creature_equip_template`, set to no equipment.", cInfo->Entry, cInfo->equipmentId);
-                const_cast<CreatureInfo*>(cInfo)->equipmentId = 0;
+                sLog.outErrorDb("Table `creature_template` have creature (Entry: %u) with equipment_id %u not found in table `creature_equip_template`, set to no equipment.", cInfo->Entry, cInfo->EquipmentTemplateId);
+                const_cast<CreatureInfo*>(cInfo)->EquipmentTemplateId = 0;
             }
         }
 
@@ -722,13 +722,13 @@ void ObjectMgr::LoadCreatureTemplates()
                 sLog.outErrorDb("Table `creature_template` have creature (Entry: %u) with vendor_id %u but not have flag UNIT_NPC_FLAG_VENDOR (%u), vendor items will ignored.", cInfo->Entry, cInfo->vendorId, UNIT_NPC_FLAG_VENDOR);
         }
 
-        /// if not set custom creature scale then load scale from CreatureDisplayInfo.dbc
-        if (cInfo->scale <= 0.0f)
+        /// if not set custom creature Scale then load Scale from CreatureDisplayInfo.dbc
+        if (cInfo->Scale <= 0.0f)
         {
             if (displayScaleEntry)
-                const_cast<CreatureInfo*>(cInfo)->scale = displayScaleEntry->scale;
+                const_cast<CreatureInfo*>(cInfo)->Scale = displayScaleEntry->Scale;
             else
-                const_cast<CreatureInfo*>(cInfo)->scale = DEFAULT_OBJECT_SCALE;
+                const_cast<CreatureInfo*>(cInfo)->Scale = DEFAULT_OBJECT_SCALE;
         }
     }
 }
@@ -1403,17 +1403,17 @@ void ObjectMgr::LoadCreatures()
             data.curhealth = cInfo->minhealth;
         }
 
-        if (cInfo->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
+        if (cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
         {
             if (!mapEntry || !mapEntry->IsDungeon())
-                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`flags_extra` including CREATURE_FLAG_EXTRA_INSTANCE_BIND (%u) but creature are not in instance.",
+                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_FLAG_EXTRA_INSTANCE_BIND (%u) but creature are not in instance.",
                                 guid, data.id, CREATURE_FLAG_EXTRA_INSTANCE_BIND);
         }
 
-        if (cInfo->flags_extra & CREATURE_FLAG_EXTRA_AGGRO_ZONE)
+        if (cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_AGGRO_ZONE)
         {
             if (!mapEntry || !mapEntry->IsDungeon())
-                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`flags_extra` including CREATURE_FLAG_EXTRA_AGGRO_ZONE (%u) but creature are not in instance.",
+                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_FLAG_EXTRA_AGGRO_ZONE (%u) but creature are not in instance.",
                                 guid, data.id, CREATURE_FLAG_EXTRA_AGGRO_ZONE);
         }
 
@@ -6273,7 +6273,7 @@ void ObjectMgr::LoadGameobjectInfo()
     {
         GameObjectInfo const* goInfo = itr.getValue();
 
-        if (goInfo->size <= 0.0f)                           // prevent use too small scales
+        if (goInfo->size <= 0.0f)                           // prevent use too small Scales
         {
             ERROR_DB_STRICT_LOG("Gameobject (Entry: %u GoType: %u) have too small size=%f",
                                 goInfo->id, goInfo->type, goInfo->size);
@@ -6449,7 +6449,7 @@ void ObjectMgr::LoadGameobjectInfo()
                 CheckGOSpellId(goInfo, goInfo->spellcaster.spellId, 0);
                 break;
             }
-            case GAMEOBJECT_TYPE_FLAGSTAND:                 // 24
+            case GAMEOBJECT_CreatureTypeFlagsTAND:                 // 24
             {
                 if (goInfo->flagstand.lockId)
                     CheckGOLockId(goInfo, goInfo->flagstand.lockId, 0);

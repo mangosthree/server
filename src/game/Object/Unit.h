@@ -1,4 +1,4 @@
-/**Unit::GetPower
+/**
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
@@ -27,10 +27,8 @@
  * @{
  * \file
  */
-
-
-#ifndef __UNIT_H
-#define __UNIT_H
+#ifndef MANGOS_H_UNIT
+#define MANGOS_H_UNIT
 
 #include "Common.h"
 #include "Object.h"
@@ -201,7 +199,7 @@ enum UnitStandFlags
 enum UnitBytes1_Flags
 {
     UNIT_BYTE1_FLAG_ALWAYS_STAND = 0x01,
-    UNIT_BYTE1_FLAG_UNK_2        = 0x02,                    // Creature that can fly and are not on the ground appear to have this flag. If they are on the ground, flag is not present.
+    UNIT_BYTE1_FLAG_FLY_ANIM     = 0x02,                    // Creature that can fly and are not on the ground appear to have this flag. If they are on the ground, flag is not present.
     UNIT_BYTE1_FLAG_UNTRACKABLE  = 0x04,
     UNIT_BYTE1_FLAG_ALL          = 0xFF
 };
@@ -358,17 +356,20 @@ enum DamageTypeToSchool
     DAMAGE_TAKEN
 };
 
+/**
+ * This is what decides how an \ref Aura was removed, the cause of it being removed.
+ */
 enum AuraRemoveMode
 {
     AURA_REMOVE_BY_DEFAULT,
-    AURA_REMOVE_BY_STACK,                                   // at replace by similar aura
-    AURA_REMOVE_BY_CANCEL,
-    AURA_REMOVE_BY_DISPEL,
-    AURA_REMOVE_BY_DEATH,
-    AURA_REMOVE_BY_DELETE,                                  // use for speedup and prevent unexpected effects at player logout/pet unsummon (must be used _only_ after save), delete.
-    AURA_REMOVE_BY_SHIELD_BREAK,                            // when absorb shield is removed by damage, heal absorb debuf
-    AURA_REMOVE_BY_EXPIRE,                                  // at duration end
-    AURA_REMOVE_BY_TRACKING,                                // aura is removed because of a conflicting tracked aura
+    AURA_REMOVE_BY_STACK,           ///< at replace by similar aura
+    AURA_REMOVE_BY_CANCEL,          ///< It was cancelled by the user (needs confirmation)
+    AURA_REMOVE_BY_DISPEL,          ///< It was dispelled by ie Remove Magic
+    AURA_REMOVE_BY_DEATH,           ///< The \ref Unit died and there for it was removed 
+    AURA_REMOVE_BY_DELETE,          ///< use for speedup and prevent unexpected effects at player logout/pet unsummon (must be used _only_ after save), delete.
+    AURA_REMOVE_BY_SHIELD_BREAK,    ///< when absorb shield is removed by damage
+    AURA_REMOVE_BY_EXPIRE,          ///< at duration end
+    AURA_REMOVE_BY_TRACKING         ///< aura is removed because of a conflicting tracked aura
 };
 
 enum UnitMods
@@ -866,10 +867,10 @@ namespace Movement
  */
 enum DiminishingLevels
 {
-    DIMINISHING_LEVEL_1             = 0,         //< Won't make a difference to stun duration
-    DIMINISHING_LEVEL_2             = 1,         //< Reduces stun time by 50%
-    DIMINISHING_LEVEL_3             = 2,         //< Reduces stun time by 75%
-    DIMINISHING_LEVEL_IMMUNE        = 3          //< The target is immune to the DiminishingGrouop
+    DIMINISHING_LEVEL_1             = 0,         ///<Won't make a difference to stun duration
+    DIMINISHING_LEVEL_2             = 1,         ///<Reduces stun time by 50%
+    DIMINISHING_LEVEL_3             = 2,         ///<Reduces stun time by 75%
+    DIMINISHING_LEVEL_IMMUNE        = 3          ///<The target is immune to the DiminishingGrouop
 };
 
 /**
@@ -909,14 +910,16 @@ struct DiminishingReturn
     uint32                  hitCount;
 };
 
-// At least some values expected fixed and used in auras field, other custom
+/**
+ * At least some values expected fixed and used in auras field, other custom
+ */
 enum MeleeHitOutcome
 {
     MELEE_HIT_EVADE     = 0,
     MELEE_HIT_MISS      = 1,
-    MELEE_HIT_DODGE     = 2,                                // used as misc in SPELL_AURA_IGNORE_COMBAT_RESULT
-    MELEE_HIT_BLOCK     = 3,                                // used as misc in SPELL_AURA_IGNORE_COMBAT_RESULT
-    MELEE_HIT_PARRY     = 4,                                // used as misc in SPELL_AURA_IGNORE_COMBAT_RESULT
+    MELEE_HIT_DODGE     = 2,     ///< used as misc in SPELL_AURA_IGNORE_COMBAT_RESULT
+    MELEE_HIT_BLOCK     = 3,     ///< used as misc in SPELL_AURA_IGNORE_COMBAT_RESULT
+    MELEE_HIT_PARRY     = 4,     ///< used as misc in SPELL_AURA_IGNORE_COMBAT_RESULT
     MELEE_HIT_GLANCING  = 5,
     MELEE_HIT_CRIT      = 6,
     MELEE_HIT_CRUSHING  = 7,
@@ -1012,6 +1015,10 @@ struct SpellNonMeleeDamage
     uint32 HitInfo;
 };
 
+/**
+ * Used as a convenience struct for the \ref Unit::SendPeriodicAuraLog
+ * \todo Is it used in more places? Check SpellAuras.cpp for some examples and document it
+ */
 struct SpellPeriodicAuraLogInfo
 {
     SpellPeriodicAuraLogInfo(Aura* _aura, uint32 _damage, uint32 _overDamage, uint32 _absorb, uint32 _resist, float _multiplier, bool _critical = false)
@@ -1153,6 +1160,11 @@ enum ActionBarIndex
 
 #define MAX_UNIT_ACTION_BAR_INDEX (ACTION_BAR_INDEX_END-ACTION_BAR_INDEX_START)
 
+/**
+ * This structure/class is used when someone is charming (ie: mind control spell and the like)
+ * someone else, to get the charmed ones action bar, the spells and such. It also takes care
+ * of pets the charmed one has etc. 
+ */
 struct CharmInfo
 {
     public:
@@ -1680,14 +1692,15 @@ class  Unit : public WorldObject
          * \see EUnitFields
          * \see GetUInt32Value
          */
+        bool HealthAbovePctHealed(int32 pct, uint32 heal) const { return uint64(GetHealth()) + uint64(heal) > CountPctFromMaxHealth(pct); }          
         uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAXHEALTH); }
 
         bool IsFullHealth() const { return GetHealth() == GetMaxHealth(); }
 
         bool HealthBelowPct(int32 pct) const { return GetHealth() < CountPctFromMaxHealth(pct); }
+        bool HealthBelowPctDamaged(int32 pct, uint32 damage) const { return int64(GetHealth()) - int64(damage) < int64(CountPctFromMaxHealth(pct)); }
         bool HealthAbovePct(int32 pct) const { return GetHealth() > CountPctFromMaxHealth(pct); }
-
-        /** 
+        /**
          * Gets the percent of the health. The formula: (GetHealth() * 100) / GetMaxHealth()
          * @return the current percent of the health
          * \see GetHealth
@@ -2185,26 +2198,119 @@ class  Unit : public WorldObject
         }
         bool IsSpiritService() const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE); }
 
+        /**
+         * Is this unit flying in taxi?
+         * @return true if the Unit has the state \ref UNIT_STAT_TAXI_FLIGHT (is flying in taxi), false otherwise
+         * \see hasUnitState
+         */
         bool IsTaxiFlying()  const { return hasUnitState(UNIT_STAT_TAXI_FLIGHT); }
 
+        /**
+         * Checks to see if a creature, whilst moving along a path, has reached a specific waypoint, or near to
+         * @param currentPositionX is the creature's current X ordinate in the game world
+         * @param currentPositionY is the creature's current Y ordinate in the game world
+         * @param currentPositionZ is the creature's current Z ordinate in the game world
+         * @param destinationPositionX is the in game ordinate that we wish to check against the creature's current X ordinate (are they the same, or very close?)
+         * @param destinationPositionY is the in game ordinate that we wish to check against the creature's current Y ordinate (are they the same, or very close?)
+         * @param destinationPositionZ is the in game ordinate that we wish to check against the creature's current Z ordinate (are they the same, or very close?)
+         * @param distanceX is the distance from the creature's current X ordinate to the destination X ordinate 
+         * @param distanceY is the distance from the creature's current Y ordinate to the destination Y ordinate 
+         * @param distanceZ is the distance from the creature's current Z ordinate to the destination Z ordinate 
+         * 
+         */
+        bool IsNearWaypoint(float currentPositionX, float currentPositionY, float currentPositionZ, float destinationPositionX, float destinationPositionY, float destinationPositionZ, float distanceX, float distanceY, float distanceZ);
+
+
+        /**
+         * Is this unit in combat?
+         * @return true if the Unit has the flag \ref UNIT_FLAG_IN_COMBAT (is in combat), false otherwise
+         * \see EUnitFields
+         * \see UnitFlags
+         */
         bool IsInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
+        /**
+         * Sets this \ref Unit into combat, if it already was this has no bigger meaning if the
+         * PvP flag hasn't changed since last time it was applied.
+         * @param PvP whether this was a PvP combat or not, this is important for how quick the combat flag will wear away and possibly more
+         * @param enemy Our target that we are attacking, only does something if the attacked one is a creature it seems
+         * \see ClearInCombat
+         * \see SetInCombatWith
+         */
         void SetInCombatState(bool PvP, Unit* enemy = NULL);
+        /**
+         * Sets us in combat with the given enemy, this in turn just does a few small checks for if
+         * it's a duel or PvP and then calls \ref Unit::SetInCombatState with the correct value for
+         * PvP and enemy
+         * @param enemy the enemy that we are attacking/engaging
+         * \see ClearInCombat
+         * \see SetInCombatState
+         */
         void SetInCombatWith(Unit* enemy);
+        /**
+         * Clears the combat flag for this unit using \ref Object::RemoveFlag and clears
+         * the Unit state \ref UnitState::UNIT_STAT_ATTACK_PLAYER. This is not where a
+         * \ref Player s PvP flags are cleared, that is handled in \ref Player::UpdateContestedPvP
+         * \see EUnitFields
+         */
         void ClearInCombat();
+        /**
+         * Probably returns how long it is until this Unit should get out of PvP combat again,
+         * although not used in that sense.
+         * @return the time we have left from our start of PvP combat
+         * \todo Find out what this actually does/means
+         */
         uint32 GetCombatTimer() const { return m_CombatTimer; }
 
+        /**
+         * Gets all \ref SpellAuraHolder s that have the same given spell_id
+         * @param spell_id the spell_id to search for
+         * @return 2 iterators to the range of \ref SpellAuraHolder s that were found
+         */
         SpellAuraHolderBounds GetSpellAuraHolderBounds(uint32 spell_id)
         {
             return m_spellAuraHolders.equal_range(spell_id);
         }
+        /**
+         * Same as \ref Unit::GetSpellAuraHolderBounds
+         */
         SpellAuraHolderConstBounds GetSpellAuraHolderBounds(uint32 spell_id) const
         {
             return m_spellAuraHolders.equal_range(spell_id);
         }
 
+        /**
+         * Checks if this \ref Unit has the given AuraType
+         * @param auraType the type of aura to look for
+         * @return true if this \ref Unit is affected by the given \ref AuraType, false otherwise
+         */
         bool HasAuraType(AuraType auraType) const;
+        /**
+         * Checks if the given \ref SpellEntry affects the \ref AuraType in some way, this is done
+         * by calling \ref Aura::isAffectedOnSpell which in turn seems to check if the spellProto
+         * and the \ref Aura s own \ref SpellEntry have the same \ref SpellEntry::SpellFamilyName.
+         * (The \ref Aura get's it's \ref SpellEntry by calling \ref Aura::GetSpellProto)
+         * @param auraType the type of aura we want to check
+         * @param spellProto the spell we want to check for affecting the aura type
+         * @return true if the spell affects the given aura type, false otherwise
+         * \todo Is this actually correct, also, make it more clear what it actually checks
+         */
         bool HasAffectedAura(AuraType auraType, SpellEntry const* spellProto) const;
+        /**
+         * Checks if we have at least one \ref Aura that is associated with the given spell id
+         * and \ref SpellEffectIndex.
+         * @param spellId the spell id to look for
+         * @param effIndex the effect index the \ref Aura should have
+         * @return true if there was at least one \ref Aura associated with the id that belonged to
+         * the correct \ref SpellEffectIndex, false otherwise
+         */
         bool HasAura(uint32 spellId, SpellEffectIndex effIndex) const;
+        /**
+         * Checks if we have at least one \ref Aura that is associated with the given spell id via
+         * the \ref Unit::m_spellAuraHolders multimap. Generalized version of the other
+         * \ref Unit::HasAura
+         * @param spellId the spell id to look for
+         * @return true if there was at least one \ref Aura associated with the id, false otherwise
+         */
         bool HasAura(uint32 spellId) const
         {
             return m_spellAuraHolders.find(spellId) != m_spellAuraHolders.end();
@@ -3197,7 +3303,7 @@ class  Unit : public WorldObject
         void setTransForm(uint32 spellid) { m_transform = spellid;}
         uint32 getTransForm() const { return m_transform;}
 
-        // at any changes to scale and/or displayId
+        // at any changes to Scale and/or displayId
         void UpdateModelData();
 
         DynamicObject* GetDynObject(uint32 spellId, SpellEffectIndex effIndex);

@@ -151,9 +151,9 @@ ModelInstance::ModelInstance(MPQFile& f, const char* ModelInstName, uint32 mapID
     pos = fixCoords(Vec3D(ff[0], ff[1], ff[2]));
     f.read(ff, 12);
     rot = Vec3D(ff[0], ff[1], ff[2]);
-    f.read(&scale, 4);
-    // scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
-    sc = scale / 1024.0f;
+    f.read(&Scale, 4);
+    // Scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
+    sc = Scale / 1024.0f;
 
     char tempname[512];
     sprintf(tempname, "%s/%s", szWorkDirWmo, ModelInstName);

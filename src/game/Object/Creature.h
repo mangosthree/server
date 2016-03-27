@@ -90,13 +90,13 @@ struct CreatureInfo
     uint32  minmana;
     uint32  maxmana;
     uint32  armor;
-    uint32  faction_A;
-    uint32  faction_H;
+    uint32  FactionAlliance;
+    uint32  FactionHorde;
     uint32  npcflag;
     float   speed_walk;
     float   speed_run;
-    float   scale;
-    uint32  rank;
+    float   Scale;
+    uint32  Rank;
     float   mindmg;
     float   maxdmg;
     uint32  dmgschool;
@@ -117,7 +117,7 @@ struct CreatureInfo
     float   maxrangedmg;
     uint32  rangedattackpower;
     uint32  type;                                           // enum CreatureType values
-    uint32  type_flags;                                     // enum CreatureTypeFlags mask values
+    uint32  CreatureTypeFlags;                                     // enum CreatureTypeFlags mask values
     uint32  lootid;
     uint32  pickpocketLootId;
     uint32  SkinLootId;
@@ -139,42 +139,42 @@ struct CreatureInfo
     uint32  questItems[6];
     uint32  movementId;
     bool    RegenHealth;
-    uint32  vehicleId;
-    uint32  equipmentId;
+    uint32  VehicleTemplateId;
+    uint32  EquipmentTemplateId;
     uint32  trainerId;
     uint32  vendorId;
     uint32  MechanicImmuneMask;
-    uint32  flags_extra;
+    uint32  ExtraFlags;
     uint32  ScriptID;
 
     // helpers
     HighGuid GetHighGuid() const
     {
-        return vehicleId ? HIGHGUID_VEHICLE : HIGHGUID_UNIT;
+        return VehicleTemplateId ? HIGHGUID_VEHICLE : HIGHGUID_UNIT;
     }
 
     ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(GetHighGuid(), Entry, lowguid); }
 
     SkillType GetRequiredLootSkill() const
     {
-        if (type_flags & CREATURE_TYPEFLAGS_HERBLOOT)
-            return SKILL_HERBALISM;
-        else if (type_flags & CREATURE_TYPEFLAGS_MININGLOOT)
-            return SKILL_MINING;
-        else if (type_flags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
+        if (CreatureTypeFlags & CREATURE_TYPEFLAGS_HERBLOOT)
+            { return SKILL_HERBALISM; }
+        else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
+            { return SKILL_MINING; }
+        else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
             return SKILL_ENGINEERING;
         else
-            return SKILL_SKINNING;                          // normal case
+            { return SKILL_SKINNING; }                          // normal case
     }
 
     bool IsExotic() const
     {
-        return (type_flags & CREATURE_TYPEFLAGS_EXOTIC);
+        return (CreatureTypeFlags & CREATURE_TYPEFLAGS_EXOTIC);
     }
 
     bool isTameable(bool exotic) const
     {
-        if (type != CREATURE_TYPE_BEAST || family == 0 || (type_flags & CREATURE_TYPEFLAGS_TAMEABLE) == 0)
+        if (type != CREATURE_TYPE_BEAST || family == 0 || (CreatureTypeFlags & CREATURE_TYPEFLAGS_TAMEABLE) == 0)
             return false;
 
         // if can tame exotic then can tame any temable
@@ -376,7 +376,7 @@ struct VendorItemData
     void Clear()
     {
         for (VendorItemList::const_iterator itr = m_items.begin(); itr != m_items.end(); ++itr)
-            delete(*itr);
+            { delete(*itr); }
         m_items.clear();
     }
 };
@@ -488,7 +488,7 @@ enum TemporaryFactionFlags                                  // Used at real fact
     TEMPFACTION_ALL,
 };
 
-class  Creature : public Unit
+class Creature : public Unit
 {
         CreatureAI* i_AI;
 
@@ -521,15 +521,15 @@ class  Creature : public Unit
 
         bool IsCorpse() const { return getDeathState() ==  CORPSE; }
         bool IsDespawned() const { return getDeathState() ==  DEAD; }
-		void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
-		uint32 GetCorpseDelay() const { return m_corpseDelay; }
+        void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
+        uint32 GetCorpseDelay() const { return m_corpseDelay; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
-        bool IsCivilian() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
-        bool IsGuard() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_GUARD; }
+        bool IsCivilian() const { return GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_CIVILIAN; }
+        bool IsGuard() const { return GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_GUARD; }
 
         bool CanWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
         virtual bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
-        bool CanFly()  const { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_UNK_2) || HasAuraType(SPELL_AURA_FLY); }
+        bool CanFly()  const { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_FLY_ANIM) || HasAuraType(SPELL_AURA_FLY); }
 
         bool IsTrainerOf(Player* player, bool msg) const;
         bool CanInteractWithBattleMaster(Player* player, bool msg) const;
@@ -545,18 +545,18 @@ class  Creature : public Unit
         bool IsElite() const
         {
             if (IsPet())
-                return false;
+                { return false; }
 
-            uint32 rank = GetCreatureInfo()->rank;
-            return rank != CREATURE_ELITE_NORMAL && rank != CREATURE_ELITE_RARE;
+            uint32 Rank = GetCreatureInfo()->Rank;
+            return Rank != CREATURE_ELITE_NORMAL && Rank != CREATURE_ELITE_RARE;
         }
 
         bool IsWorldBoss() const
         {
             if (IsPet())
-                return false;
+                { return false; }
 
-            return GetCreatureInfo()->rank == CREATURE_ELITE_WORLDBOSS;
+            return GetCreatureInfo()->Rank == CREATURE_ELITE_WORLDBOSS;
         }
 
         uint32 GetLevelForTarget(Unit const* target) const override; // overwrite Unit::GetLevelForTarget for boss level support
@@ -634,17 +634,50 @@ class  Creature : public Unit
         virtual void DeleteFromDB();                        // overwrited in Pet
         static void DeleteFromDB(uint32 lowguid, CreatureData const* data);
 
+        /// Represent the loots available on the creature.
         Loot loot;
+
+        /// Indicates whether the creature has has been pickpocked.
         bool lootForPickPocketed;
+
+        /// Indicates whether the creature has been checked.
         bool lootForBody;
+
+        /// Indicates whether the creature has been skinned.
         bool lootForSkin;
 
+        /**
+        * Method preparing the creature for the loot state. Based on the previous loot state, the loot ID provided in the database and the creature's type,
+        * this method updates the state of the creature for loots.
+        *
+        * At the end of this method, the creature loot state may be:
+        * Lootable: UNIT_DYNFLAG_LOOTABLE
+        * Skinnable: UNIT_FLAG_SKINNABLE
+        * Not lootable: No flag
+        */
         void PrepareBodyLootState();
+
+        /**
+        * function returning the GUID of the loot recipient (a player GUID).
+        *
+        * \return ObjectGuid Player GUID.
+        */
         ObjectGuid GetLootRecipientGuid() const { return m_lootRecipientGuid; }
         uint32 GetLootGroupRecipientId() const { return m_lootGroupRecipientId; }
         Player* GetLootRecipient() const;                   // use group cases as prefered
         Group* GetGroupLootRecipient() const;
+        /**
+        * function indicating whether the whether the creature has a looter recipient defined (either a group ID, either a player GUID).
+        *
+        * \return boolean true if the creature has a recipient defined, false otherwise.
+        */
         bool HasLootRecipient() const { return m_lootGroupRecipientId || m_lootRecipientGuid; }
+
+        /**
+        * function indicating whether the recipient is a group.
+        * 
+        * \return boolean true if the creature's recipient is a group, false otherwise.
+        */
         bool IsGroupLootRecipient() const { return m_lootGroupRecipientId; }
         void SetLootRecipient(Unit* unit);
         void AllLootRemovedFromCorpse();
@@ -680,7 +713,7 @@ class  Creature : public Unit
         bool IsVisibleInGridForPlayer(Player* pl) const override;
 
         void RemoveCorpse();
-        bool IsDeadByDefault() const { return m_isDeadByDefault; };
+        bool IsDeadByDefault() const { return m_IsDeadByDefault; };
 
         void ForcedDespawn(uint32 timeMSToDespawn = 0);
 
@@ -718,9 +751,9 @@ class  Creature : public Unit
         virtual uint32 GetPetAutoSpellOnPos(uint8 pos) const
         {
             if (pos >= CREATURE_MAX_SPELLS || m_charmInfo->GetCharmSpell(pos)->GetType() != ACT_ENABLED)
-                return 0;
+                { return 0; }
             else
-                return m_charmInfo->GetCharmSpell(pos)->GetAction();
+                { return m_charmInfo->GetCharmSpell(pos)->GetAction(); }
         }
 
         void SetCombatStartPosition(float x, float y, float z) { m_combatStartX = x; m_combatStartY = y; m_combatStartZ = z; }
@@ -731,7 +764,7 @@ class  Creature : public Unit
         void GetRespawnCoord(float& x, float& y, float& z, float* ori = NULL, float* dist = NULL) const;
         void ResetRespawnCoord();
 
-        void SetDeadByDefault(bool death_state) { m_isDeadByDefault = death_state; }
+        void SetDeadByDefault(bool death_state) { m_IsDeadByDefault = death_state; }
 
         void SetFactionTemporary(uint32 factionId, uint32 tempFactionFlags = TEMPFACTION_ALL);
         void ClearTemporaryFaction();
@@ -739,11 +772,10 @@ class  Creature : public Unit
 
         void SendAreaSpiritHealerQueryOpcode(Player* pl);
 
-		void SetVirtualItem(VirtualItemSlot slot, uint32 item_id) { SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + slot, item_id); }
+        void SetVirtualItem(VirtualItemSlot slot, uint32 item_id) { SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + slot, item_id); }
 
-		void SetDisableReputationGain(bool disable) { DisableReputationGain = disable; }
-		bool IsReputationGainDisabled() { return DisableReputationGain; }
-
+        void SetDisableReputationGain(bool disable) { DisableReputationGain = disable; }
+        bool IsReputationGainDisabled() { return DisableReputationGain; }
     protected:
         bool MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* pSpellInfo, uint32 selectFlags) const;
 
@@ -785,7 +817,7 @@ class  Creature : public Unit
         bool m_AlreadySearchedAssistance;
         bool m_regenHealth;
         bool m_AI_locked;
-        bool m_isDeadByDefault;
+        bool m_IsDeadByDefault;
         uint32 m_temporaryFactionFlags;                     // used for real faction changes (not auras etc)
 
         SpellSchoolMask m_meleeDamageSchoolMask;
@@ -795,9 +827,9 @@ class  Creature : public Unit
         float m_combatStartY;
         float m_combatStartZ;
 
-		Position m_respawnPos;
+        Position m_respawnPos;
 
-		bool DisableReputationGain;
+        bool DisableReputationGain;
 
     private:
         GridReference<Creature> m_gridRef;

@@ -69,7 +69,7 @@ typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> WorldHandler;
  * a queue where it stores packet if there is no place on
  * the queue. The reason this is done, is because the server
  * does really a lot of small-size writes to it, and it doesn't
- * scale well to allocate memory for every. When something is
+ * Scale well to allocate memory for every. When something is
  * written to the output buffer the socket is not immediately
  * activated for output (again for the same reason), there
  * is 10ms celling (thats why there is Update() override method).

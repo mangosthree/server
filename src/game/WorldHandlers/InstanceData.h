@@ -55,7 +55,7 @@ enum InstanceConditionIDs                                   // Suggested values 
     INSTANCE_CONDITION_ID_ULDUAR            = 33113,
 };
 
-class  InstanceData
+class InstanceData
 {
     public:
 
@@ -94,16 +94,19 @@ class  InstanceData
         virtual void OnObjectCreate(GameObject*) {}
 
         // called on creature creation
-        virtual void OnCreatureCreate(Creature * /*creature*/) {}
+        virtual void OnCreatureCreate(Creature* /*creature*/) {}
 
         // called on creature enter combat
-        virtual void OnCreatureEnterCombat(Creature * /*creature*/) {}
+        virtual void OnCreatureEnterCombat(Creature* /*creature*/) {}
 
         // called on creature evade
-        virtual void OnCreatureEvade(Creature * /*creature*/) {}
+        virtual void OnCreatureEvade(Creature* /*creature*/) {}
 
         // called on creature death
-        virtual void OnCreatureDeath(Creature * /*creature*/) {}
+        virtual void OnCreatureDeath(Creature* /*creature*/) {}
+
+        // called on creature despawn
+        virtual void OnCreatureDespawn(Creature* /*creature*/) {}
 
         // All-purpose data storage 64 bit
         virtual uint64 GetData64(uint32 /*Data*/) const { return 0; }

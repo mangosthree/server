@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _OBJECT_H
-#define _OBJECT_H
+#ifndef MANGOS_H_OBJECT
+#define MANGOS_H_OBJECT
 
 #include "Common.h"
 #include "ByteBuffer.h"
@@ -39,13 +39,13 @@
 #define CONTACT_DISTANCE            0.5f
 #define INTERACTION_DISTANCE        5.0f
 #define ATTACK_DISTANCE             5.0f
-#define MAX_VISIBILITY_DISTANCE     333.0f      // max distance for visible object show, limited in 333 yards
-#define DEFAULT_VISIBILITY_DISTANCE 90.0f       // default visible distance, 90 yards on continents
-#define DEFAULT_VISIBILITY_INSTANCE 120.0f      // default visible distance in instances, 120 yards
-#define DEFAULT_VISIBILITY_BGARENAS 180.0f      // default visible distance in BG/Arenas, 180 yards
+#define MAX_VISIBILITY_DISTANCE     333.0f                  // max distance for visible object show, limited in 333 yards
+#define DEFAULT_VISIBILITY_DISTANCE 90.0f                   // default visible distance, 90 yards on continents
+#define DEFAULT_VISIBILITY_INSTANCE 120.0f                  // default visible distance in instances, 120 yards
+#define DEFAULT_VISIBILITY_BGARENAS 180.0f                  // default visible distance in BG/Arenas, 180 yards
 
 #define DEFAULT_WORLD_OBJECT_SIZE   0.388999998569489f      // currently used (correctly?) for any non Unit world objects. This is actually the bounding_radius, like player/creature from creature_model_data
-#define DEFAULT_OBJECT_SCALE        1.0f                    // player/item scale as default, npc/go from database, pets from dbc
+#define DEFAULT_OBJECT_SCALE        1.0f                    // player/item Scale as default, npc/go from database, pets from dbc
 
 #define MAX_STEALTH_DETECT_RANGE    45.0f
 
@@ -73,6 +73,7 @@ class WorldPacket;
 class UpdateData;
 class WorldSession;
 class Creature;
+class GameObject;
 class Player;
 class Unit;
 class Group;
@@ -84,6 +85,7 @@ class TerrainInfo;
 class ElunaEventProcessor;
 #endif /* ENABLE_ELUNA */
 class TransportInfo;
+struct MangosStringLocale;
 
 typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
 
@@ -107,6 +109,7 @@ struct WorldLocation
         : mapid(loc.mapid), coord_x(loc.coord_x), coord_y(loc.coord_y), coord_z(loc.coord_z), orientation(NormalizeOrientation(loc.orientation)) {}
 };
 
+
 // use this class to measure time between world update ticks
 // essential for units updating their spells after cells become active
 class WorldUpdateCounter
@@ -117,7 +120,7 @@ class WorldUpdateCounter
         time_t timeElapsed()
         {
             if (!m_tmStart)
-                m_tmStart = WorldTimer::tickPrevTime();
+                { m_tmStart = WorldTimer::tickPrevTime(); }
 
             return WorldTimer::getMSTimeDiff(m_tmStart, WorldTimer::tickTime());
         }
@@ -128,7 +131,7 @@ class WorldUpdateCounter
         uint32 m_tmStart;
 };
 
-class  Object
+class Object
 {
     public:
         virtual ~Object();
@@ -137,7 +140,7 @@ class  Object
         virtual void AddToWorld()
         {
             if (m_inWorld)
-                return;
+                { return; }
 
             m_inWorld = true;
 
@@ -243,8 +246,8 @@ class  Object
         DynamicObject const* ToDynObject() const { if (GetTypeId() == TYPEID_DYNAMICOBJECT) return reinterpret_cast<DynamicObject const*>(this); else return NULL; }
 
         void SetInt32Value(uint16 index,        int32  value);
-        void SetUInt32Value(uint16 index, uint32  value);
-        void UpdateUInt32Value(uint16 index, uint32  value);
+        void SetUInt32Value(uint16 index,       uint32  value);
+        void UpdateUInt32Value(uint16 index,    uint32  value);
         void SetUInt64Value(uint16 index, const uint64& value);
         void SetFloatValue(uint16 index,       float   value);
         void SetByteValue(uint16 index, uint8 offset, uint8 value);
@@ -272,11 +275,19 @@ class  Object
         void ToggleFlag(uint16 index, uint32 flag)
         {
             if (HasFlag(index, flag))
-                RemoveFlag(index, flag);
+                { RemoveFlag(index, flag); }
             else
-                SetFlag(index, flag);
+                { SetFlag(index, flag); }
         }
 
+        /**
+         * Checks if a certain flag is set.
+         * @param index The index to check, values may originate from at least \ref EUnitFields
+         * @param flag Which flag to check, value may originate from a lot of places, see code
+         * for examples of what
+         * @return true if the flag is set, false otherwise
+         * \todo More info on these flags and where they come from, also, which indexes can be used?
+         */
         bool HasFlag(uint16 index, uint32 flag) const
         {
             MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index , false));
@@ -286,9 +297,9 @@ class  Object
         void ApplyModFlag(uint16 index, uint32 flag, bool apply)
         {
             if (apply)
-                SetFlag(index, flag);
+                { SetFlag(index, flag); }
             else
-                RemoveFlag(index, flag);
+                { RemoveFlag(index, flag); }
         }
 
         void SetByteFlag(uint16 index, uint8 offset, uint8 newFlag);
@@ -297,9 +308,9 @@ class  Object
         void ToggleByteFlag(uint16 index, uint8 offset, uint8 flag)
         {
             if (HasByteFlag(index, offset, flag))
-                RemoveByteFlag(index, offset, flag);
+                { RemoveByteFlag(index, offset, flag); }
             else
-                SetByteFlag(index, offset, flag);
+                { SetByteFlag(index, offset, flag); }
         }
 
         bool HasByteFlag(uint16 index, uint8 offset, uint8 flag) const
@@ -312,9 +323,9 @@ class  Object
         void ApplyModByteFlag(uint16 index, uint8 offset, uint32 flag, bool apply)
         {
             if (apply)
-                SetByteFlag(index, offset, flag);
+                { SetByteFlag(index, offset, flag); }
             else
-                RemoveByteFlag(index, offset, flag);
+                { RemoveByteFlag(index, offset, flag); }
         }
 
         void SetShortFlag(uint16 index, bool highpart, uint16 newFlag);
@@ -323,9 +334,9 @@ class  Object
         void ToggleShortFlag(uint16 index, bool highpart, uint8 flag)
         {
             if (HasShortFlag(index, highpart, flag))
-                RemoveShortFlag(index, highpart, flag);
+                { RemoveShortFlag(index, highpart, flag); }
             else
-                SetShortFlag(index, highpart, flag);
+                { SetShortFlag(index, highpart, flag); }
         }
 
         bool HasShortFlag(uint16 index, bool highpart, uint8 flag) const
@@ -337,9 +348,9 @@ class  Object
         void ApplyModShortFlag(uint16 index, bool highpart, uint32 flag, bool apply)
         {
             if (apply)
-                SetShortFlag(index, highpart, flag);
+                { SetShortFlag(index, highpart, flag); }
             else
-                RemoveShortFlag(index, highpart, flag);
+                { RemoveShortFlag(index, highpart, flag); }
         }
 
         void SetFlag64(uint16 index, uint64 newFlag)
@@ -359,9 +370,9 @@ class  Object
         void ToggleFlag64(uint16 index, uint64 flag)
         {
             if (HasFlag64(index, flag))
-                RemoveFlag64(index, flag);
+                { RemoveFlag64(index, flag); }
             else
-                SetFlag64(index, flag);
+                { SetFlag64(index, flag); }
         }
 
         bool HasFlag64(uint16 index, uint64 flag) const
@@ -373,9 +384,9 @@ class  Object
         void ApplyModFlag64(uint16 index, uint64 flag, bool apply)
         {
             if (apply)
-                SetFlag64(index, flag);
+                { SetFlag64(index, flag); }
             else
-                RemoveFlag64(index, flag);
+                { RemoveFlag64(index, flag); }
         }
 
         void ClearUpdateMask(bool remove);
@@ -435,7 +446,7 @@ class  Object
 
 struct WorldObjectChangeAccumulator;
 
-class  WorldObject : public Object
+class WorldObject : public Object
 {
         friend struct WorldObjectChangeAccumulator;
 
@@ -443,7 +454,7 @@ class  WorldObject : public Object
 
         // class is used to manipulate with WorldUpdateCounter
         // it is needed in order to get time diff between two object's Update() calls
-        class  UpdateHelper
+        class UpdateHelper
         {
             public:
                 explicit UpdateHelper(WorldObject* obj) : m_obj(obj) {}
@@ -462,9 +473,9 @@ class  WorldObject : public Object
                 WorldObject* const m_obj;
         };
 
-        virtual ~WorldObject() {}
+        virtual ~WorldObject();
 
-        virtual void Update(uint32 /*update_diff*/, uint32 /*time_diff*/) {}
+        virtual void Update(uint32 /*update_diff*/, uint32 /*time_diff*/);
 
         void _Create(uint32 guidlow, HighGuid guidhigh, uint32 phaseMask);
 
@@ -485,6 +496,7 @@ class  WorldObject : public Object
         void GetPosition(WorldLocation& loc) const
         { loc.mapid = m_mapId; GetPosition(loc.coord_x, loc.coord_y, loc.coord_z); loc.orientation = GetOrientation(); }
         float GetOrientation() const { return m_position.o; }
+
         /// Gives a 2d-point in distance distance2d in direction absAngle around the current position (point-to-point)
         void GetNearPoint2D(float& x, float& y, float distance2d, float absAngle) const;
         /** Gives a "free" spot for searcher in distance distance2d in direction absAngle on "good" height
@@ -602,6 +614,7 @@ class  WorldObject : public Object
 
         void PlayDistanceSound(uint32 sound_id, Player const* target = NULL) const;
         void PlayDirectSound(uint32 sound_id, Player const* target = NULL) const;
+        void PlayMusic(uint32 sound_id, Player const* target = NULL) const;
 
         void SendObjectDeSpawnAnim(ObjectGuid guid);
         void SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId = 0);
@@ -645,8 +658,7 @@ class  WorldObject : public Object
         // ASSERT print helper
         bool PrintCoordinatesError(float x, float y, float z, char const* descr) const;
 
-        virtual void StartGroupLoot(Group* /*group*/, uint32 /*timer*/) {}
-
+        virtual void StartGroupLoot(Group* /*group*/, uint32 /*timer*/) { }
 #ifdef ENABLE_ELUNA
         ElunaEventProcessor* elunaEvents;
 #endif /* ENABLE_ELUNA */

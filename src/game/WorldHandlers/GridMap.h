@@ -117,7 +117,7 @@ enum GridMapLiquidStatus
 
 struct GridMapLiquidData
 {
-    uint32 type_flags;
+    uint32 CreatureTypeFlags;
     uint32 entry;
     float level;
     float depth_level;

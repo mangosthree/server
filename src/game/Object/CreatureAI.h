@@ -52,7 +52,8 @@ enum CanCastResult
     CAST_FAIL_TOO_CLOSE         = 4,
     CAST_FAIL_POWER             = 5,
     CAST_FAIL_STATE             = 6,
-    CAST_FAIL_TARGET_AURA       = 7
+    CAST_FAIL_TARGET_AURA       = 7,
+    CAST_FAIL_NO_LOS            = 8
 };
 
 enum CastFlags
@@ -63,6 +64,14 @@ enum CastFlags
     CAST_NO_MELEE_IF_OOM        = 0x08,                     // Prevents creature from entering melee if out of mana or out of range
     CAST_FORCE_TARGET_SELF      = 0x10,                     // Forces the target to cast this spell on itself
     CAST_AURA_NOT_PRESENT       = 0x20,                     // Only casts the spell if the target does not have an aura from the spell
+};
+
+enum CombatMovementFlags
+{
+    COMBAT_MOVEMENT_SCRIPT      = 0x01,                      // Combat movement enforced by script
+    COMBAT_MOVEMENT_LOS         = 0x02,                      // Combat movement triggered by LoS issues
+    COMBAT_MOVEMENT_OOM         = 0x04,                      // Combat movement triggered by power exhaustion
+    COMBAT_MOVEMENT_DISTANCE    = 0x08                       // Combat movement triggered by distance checks
 };
 
 enum AIEventType
@@ -77,18 +86,18 @@ enum AIEventType
     AI_EVENT_CUSTOM_EVENTAI_B   = 6,                        // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
     AI_EVENT_GOT_CCED           = 7,                        // Sender = CCed Npc, Invoker = Caster that CCed
     MAXIMAL_AI_EVENT_EVENTAI    = 8,
- 
+
     // Internal Use
     AI_EVENT_CALL_ASSISTANCE    = 10,                       // Sender = Attacked Npc, Invoker = Enemy
 
-    // Predefined for SD2
+    // Predefined for SD3
     AI_EVENT_START_ESCORT       = 100,                      // Invoker = Escorting Player
     AI_EVENT_START_ESCORT_B     = 101,                      // Invoker = Escorting Player
     AI_EVENT_START_EVENT        = 102,                      // Invoker = EventStarter
     AI_EVENT_START_EVENT_A      = 103,                      // Invoker = EventStarter
     AI_EVENT_START_EVENT_B      = 104,                      // Invoker = EventStarter
 
-    // Some IDs for special cases in SD2
+    // Some IDs for special cases in SD3
     AI_EVENT_CUSTOM_A           = 1000,
     AI_EVENT_CUSTOM_B           = 1001,
     AI_EVENT_CUSTOM_C           = 1002,
@@ -97,7 +106,7 @@ enum AIEventType
     AI_EVENT_CUSTOM_F           = 1005,
 };
 
-class  CreatureAI
+class CreatureAI
 {
     public:
         explicit CreatureAI(Creature* creature) :
@@ -111,7 +120,7 @@ class  CreatureAI
 
         ///== Information about AI ========================
         /**
-         * This funcion is used to display information about the AI.
+         * This function is used to display information about the AI.
          * It is called when the .npc aiinfo command is used.
          * Use this for on-the-fly debugging
          * @param reader is a ChatHandler to send messages to.
@@ -150,7 +159,7 @@ class  CreatureAI
          * @param pHealer Unit* which deals the heal
          * @param uiHealedAmount Amount of healing received
          */
-        virtual void HealedBy(Unit* /*pHealer*/, uint32& /*uiHealedAmount*/) {}
+        virtual void HealedBy(Unit * /*pHealer*/, uint32& /*uiHealedAmount*/) {}
 
         /**
          * Called at any Damage to any victim (before damage apply)
@@ -341,6 +350,8 @@ class  CreatureAI
          * @param pInvoker Unit that triggered this event (like an attacker)
          */
         virtual void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*miscValue*/) {}
+
+        virtual void Reset() {}
 
     protected:
         void HandleMovementOnAttackStart(Unit* victim);

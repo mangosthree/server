@@ -40,8 +40,8 @@
 
 #include "dbcfile.h"
 
-#include "adt.h"
-#include "wdt.h"
+#include "sl/adt.h"
+#include "sl/wdt.h"
 #include <fcntl.h>
 
 #ifndef WIN32

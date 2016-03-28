@@ -23,7 +23,7 @@
  */
 
 #include "dbcfile.h"
-#include "loadlib.h"
+#include "sl/loadlib.h"
 
 #include <cstdio>
 

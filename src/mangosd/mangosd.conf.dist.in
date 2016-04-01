@@ -366,47 +366,47 @@ CleanCharacterDB                  = 1
 #
 ################################################################################
 
-LogSQL                      = 1
-PidFile                     = ""
-LogLevel                    = 3
-LogTime                     = 0
-LogFile                     = "world-server.log"
-LogTimestamp                = 0
-LogFileLevel                = 0
+LogSQL                       = 1
+PidFile                      = ""
+LogLevel                     = 3
+LogTime                      = 0
+LogFile                      = "world-server.log"
+LogTimestamp                 = 0
+LogFileLevel                 = 0
 LogFilter_AchievementUpdates = 1
-LogFilter_CreatureMoves     = 1
-LogFilter_TransportMoves = 1
-LogFilter_VisibilityChanges = 1
-LogFilter_Weather           = 1
-LogFilter_DbStrictedCheck   = 1
-LogFilter_Pathfinding       = 1
-LogFilter_MapsLoading       = 1
-LogFilter_EventAiDev        = 1
-LogFilter_PeriodicAffects   = 0
-LogFilter_PlayerMoves       = 1
-LogFilter_SQLText           = 1
-LogFilter_AIAndMovegens     = 0
-LogFilter_PlayerStats       = 0
-LogFilter_Damage            = 0
-LogFilter_Combat            = 0
-LogFilter_SpellCast         = 0
-LogFilter_Calendar = 1
-WorldLogFile                = "world-packets.log"
-WorldLogTimestamp           = 0
-DBErrorLogFile              = "world-database.log"
-ElunaErrorLogFile           = "ElunaErrors.log"
-EventAIErrorLogFile         = "world-eventai.log"
-CharLogFile                 = "world-characters.log"
-CharLogTimestamp            = 0
-CharLogDump                 = 0
-GmLogFile                   = "world-gamemaster.log"
-GmLogTimestamp              = 0
-GmLogPerAccount             = 0
-RaLogFile                   = "world-remote-access.log"
-WardenLogFile               = "warden.log"
-WardenLogTimestamp          = 0
-LogColors                   = "13 7 11 9"
-SD2ErrorLogFile             = "scriptdev2-errors.log"
+LogFilter_CreatureMoves      = 1
+LogFilter_TransportMoves     = 1
+LogFilter_VisibilityChanges  = 1
+LogFilter_Weather            = 1
+LogFilter_DbStrictedCheck    = 1
+LogFilter_Pathfinding        = 1
+LogFilter_MapsLoading        = 1
+LogFilter_EventAiDev         = 1
+LogFilter_PeriodicAffects    = 0
+LogFilter_PlayerMoves        = 1
+LogFilter_SQLText            = 1
+LogFilter_AIAndMovegens      = 0
+LogFilter_PlayerStats        = 0
+LogFilter_Damage             = 0
+LogFilter_Combat             = 0
+LogFilter_SpellCast          = 0
+LogFilter_Calendar           = 1
+WorldLogFile                 = "world-packets.log"
+WorldLogTimestamp            = 0
+DBErrorLogFile               = "world-database.log"
+ElunaErrorLogFile            = "ElunaErrors.log"
+EventAIErrorLogFile          = "world-eventai.log"
+CharLogFile                  = "world-characters.log"
+CharLogTimestamp             = 0
+CharLogDump                  = 0
+GmLogFile                    = "world-gamemaster.log"
+GmLogTimestamp               = 0
+GmLogPerAccount              = 0
+RaLogFile                    = "world-remote-access.log"
+WardenLogFile                = "warden.log"
+WardenLogTimestamp           = 0
+LogColors                    = "13 7 11 9"
+SD2ErrorLogFile              = "scriptdev2-errors.log"
 
 ################################################################################
 # SERVER SETTINGS
@@ -590,7 +590,7 @@ SD2ErrorLogFile             = "scriptdev2-errors.log"
 #        Default: 20
 #
 #   BirthdayTime
-#        Set to birthday (date in unix time), By default 28th August 2005, when MaNGOS got it’s name
+#        Set to birthday (date in unix time), By default 28th August 2005, when MaNGOS got itÂ’s name
 #        Default: 1125180000
 #
 #   RabbitDay
@@ -768,7 +768,8 @@ SD2ErrorLogFile             = "scriptdev2-errors.log"
 #    WaitAtStartupError
 #        After startup error report wait <Enter> or some time before continue (and possible close console window)
 #                 -1 (wait until <Enter> press)
-#        Default:  0 (not wait)
+#        Default: 10 (wait 10 seconds before closing)
+#                  0 (not wait)
 #                  N (>0, wait N secs)
 #
 #    PlayerCommands
@@ -821,14 +822,14 @@ Instance.ResetTimeHour                    = 4
 Instance.UnloadDelay                      = 1800000
 Quests.LowLevelHideDiff                   = 4
 Quests.HighLevelHideDiff                  = 7
-Quests.Daily.ResetHour = 6
-Quests.Weekly.ResetWeekDay = 3
-Quests.Weekly.ResetHour = 6
+Quests.Daily.ResetHour                    = 6
+Quests.Weekly.ResetWeekDay                = 3
+Quests.Weekly.ResetHour                   = 6
 Quests.IgnoreRaid                         = 0
 Guild.EventLogRecordsCount                = 100
-Guild.BankEventLogRecordsCount = 25
-Guild.UndeletableLevel = 4
-Guild.LevelingEnabled = 1
+Guild.BankEventLogRecordsCount            = 25
+Guild.UndeletableLevel                    = 4
+Guild.LevelingEnabled                     = 1
 TimerBar.Fatigue.GMLevel                  = 4
 TimerBar.Fatigue.Max                      = 60
 TimerBar.Breath.GMLevel                   = 4
@@ -851,10 +852,10 @@ ClientCacheVersion                        = 0
 Event.Announce                            = 0
 BeepAtStart                               = 1
 ShowProgressBars                          = 1
-WaitAtStartupError                        = 0
+WaitAtStartupError                        = 10
 PlayerCommands                            = 0
-Motd = "Welcome to the Massive Network Game Object Server."
-Raid.MinLevel = 10
+Motd                                      = "Welcome to Mangos Three."
+Raid.MinLevel                             = 10
 
 ################################################################################
 # PLAYER INTERACTION
@@ -894,17 +895,17 @@ Raid.MinLevel = 10
 #
 ################################################################################
 
-AllowTwoSide.Accounts = 1
-AllowTwoSide.Interaction.Chat    = 0
-AllowTwoSide.Interaction.Channel = 0
-AllowTwoSide.Interaction.Group   = 0
-AllowTwoSide.Interaction.Guild   = 0
-AllowTwoSide.Interaction.Auction = 0
-AllowTwoSide.Interaction.Mail    = 0
+AllowTwoSide.Accounts             = 1
+AllowTwoSide.Interaction.Chat     = 0
+AllowTwoSide.Interaction.Channel  = 0
+AllowTwoSide.Interaction.Group    = 0
+AllowTwoSide.Interaction.Guild    = 0
+AllowTwoSide.Interaction.Auction  = 0
+AllowTwoSide.Interaction.Mail     = 0
 AllowTwoSide.Interaction.Calendar = 0
-AllowTwoSide.WhoList             = 0
-AllowTwoSide.AddFriend           = 0
-TalentsInspecting                = 1
+AllowTwoSide.WhoList              = 0
+AllowTwoSide.AddFriend            = 0
+TalentsInspecting                 = 1
 
 ################################################################################
 # CREATURE AND GAMEOBJECT SETTINGS
@@ -1096,7 +1097,7 @@ ChatStrictLinkChecking.Kick     = 0
 ChatFlood.MessageCount          = 10
 ChatFlood.MessageDelay          = 1
 ChatFlood.MuteTime              = 10
-Channel.RestrictedLfg = 1
+Channel.RestrictedLfg           = 1
 Channel.SilentlyGMJoin          = 0
 
 ################################################################################
@@ -1551,14 +1552,14 @@ BattleGround.PremadeGroupWaitForMatch = 1800000
 #
 ################################################################################
 
-Arena.MaxRatingDifference = 150
-Arena.RatingDiscardTimer = 600000
-Arena.QueueAnnouncer.Join = 0
-Arena.QueueAnnouncer.Exit = 0
-Arena.ArenaSeason.ID = 1
+Arena.MaxRatingDifference    = 150
+Arena.RatingDiscardTimer     = 600000
+Arena.QueueAnnouncer.Join    = 0
+Arena.QueueAnnouncer.Exit    = 0
+Arena.ArenaSeason.ID         = 1
 Arena.ArenaSeasonPrevious.ID = 0
-Arena.StartRating = -1
-Arena.StartPersonalRating = -1
+Arena.StartRating            = -1
+Arena.StartPersonalRating    = -1
 
 ################################################################################
 # OUTDOOR PVP CONFIG
@@ -1739,13 +1740,13 @@ CharDelete.KeepDays = 30
 #
 ###################################################################################################################
 
-Currency.StartHonorPoints = 0
-Currency.StartConquestPoints = 0
-Currency.ResetInterval = 7
-Currency.ResetWeekDay = 3
-Currency.ResetHour = 6
+Currency.StartHonorPoints             = 0
+Currency.StartConquestPoints          = 0
+Currency.ResetInterval                = 7
+Currency.ResetWeekDay                 = 3
+Currency.ResetHour                    = 6
 Currency.ConquestPointsDefaultWeekCap = 135000
-Currency.ConquestPointsArenaReward = 12000
+Currency.ConquestPointsArenaReward    = 12000
 
 ###################################################################################################################
 #  ELUNA SETTINGS
@@ -1768,6 +1769,6 @@ Currency.ConquestPointsArenaReward = 12000
 #
 ###################################################################################################################
 
-Eluna.Enabled = 1
-Eluna.TraceBack = false
+Eluna.Enabled    = 1
+Eluna.TraceBack  = false
 Eluna.ScriptPath = "lua_scripts"

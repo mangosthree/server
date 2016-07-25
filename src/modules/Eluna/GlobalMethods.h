@@ -8,6 +8,7 @@
 #define GLOBALMETHODS_H
 
 #include "ElunaBinding.h"
+#include "Util.h"
 
 /***
  * These functions can be used anywhere at any time, including at start-up.

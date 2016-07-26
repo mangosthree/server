@@ -27,6 +27,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #ifdef WIN32
 #pragma warning(disable:4996)

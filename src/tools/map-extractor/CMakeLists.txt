@@ -33,7 +33,7 @@ include_directories(
 
 add_executable(${EXECUTABLE_NAME} dbcfile.cpp System.cpp ${EXECUTABLE_SRCS})
 
-target_link_libraries(${EXECUTABLE_NAME} StormLib loadlib)
+target_link_libraries(${EXECUTABLE_NAME} loadlib StormLib)
 
 #Output the compiled exes to build/bin/$(Configuration)/tools directory on windows by default
 if(WIN32)

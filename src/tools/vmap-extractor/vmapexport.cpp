@@ -560,6 +560,7 @@ bool processArgv(int argc, char** argv)
 int main(int argc, char** argv)
 {
     bool success = true;
+	std::string outDir = std::string(output_path) + "/vmaps";
 
     // Use command line arguments, when some
     if (!processArgv(argc, argv))
@@ -571,12 +572,25 @@ int main(int argc, char** argv)
         std::string sdir = std::string(szWorkDirWmo) + "/dir";
         std::string sdir_bin = std::string(szWorkDirWmo) + "/dir_bin";
         struct stat status;
+        bool dirty = false;
+
         if (!stat(sdir.c_str(), &status) || !stat(sdir_bin.c_str(), &status))
         {
-            printf("Your output directory seems to be polluted, please use an empty directory!\n");
-            printf("<press return to exit>");
+            printf(" Your %s directory seems to exist, please delete it!\n", szWorkDirWmo);
+            dirty = true;
+        }
+
+        if (!stat(outDir.c_str(), &status))
+        {
+            printf(" Your %s directory seems to exist, please delete it!\n", outDir.c_str());
+            dirty = true;
+        }
+
+        if (dirty)
+        {
+            printf(" <press return to exit>");
             char garbage[2];
-            scanf("%c", garbage);
+            int ret = scanf("%c", garbage);
             return 1;
         }
     }

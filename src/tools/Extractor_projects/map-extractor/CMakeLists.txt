@@ -17,30 +17,28 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-set(EXECUTABLE_NAME "vmap-extractor")
+project(MANGOS_MAP_EXTRACTOR)
+
+set(EXECUTABLE_NAME "map-extractor")
 
 if(WIN32)
     # add resource file to windows build
-    set(EXECUTABLE_SRCS ${EXECUTABLE_SRCS} vmap-extractor.rc)
+    set(EXECUTABLE_SRCS ${EXECUTABLE_SRCS} map-extractor.rc)
 endif()
 
 include_directories(
-    #${CMAKE_SOURCE_DIR}/dep/libmpq
     ${CMAKE_SOURCE_DIR}/dep/StormLib/src
     ${CMAKE_SOURCE_DIR}/dep/loadlib
+    ${CMAKE_SOURCE_DIR}/src/tools/Extractor_projects/shared
 )
 
-add_executable(${EXECUTABLE_NAME} ${EXECUTABLE_SRCS}
-    adtfile.cpp
-    dbcfile.cpp
-    gameobject_extract.cpp
-    model.cpp
-    vmapexport.cpp
-    wdtfile.cpp
-    wmo.cpp
+set(SOURCES
+    ${CMAKE_SOURCE_DIR}/src/tools/Extractor_projects/shared/ExtractorCommon.cpp
 )
 
-target_link_libraries(${EXECUTABLE_NAME} StormLib loadlib bzip2 zlib)
+add_executable(${EXECUTABLE_NAME} dbcfile.cpp System.cpp ${SOURCES} ${EXECUTABLE_SRCS})
+
+target_link_libraries(${EXECUTABLE_NAME} loadlib StormLib)
 
 #Output the compiled exes to build/bin/$(Configuration)/tools directory on windows by default
 if(WIN32)
@@ -60,4 +58,33 @@ endif()
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION "${BIN_DIR}/${TOOLS_DIR}")
 if(WIN32 AND MSVC)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/\${BUILD_TYPE}/${EXECUTABLE_NAME}.pdb" DESTINATION "${BIN_DIR}/${TOOLS_DIR}" CONFIGURATIONS Debug)
+endif()
+
+#install documentation and generation scripts
+install(
+    FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../Extractor_Binaries/ExtractResources.sh"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../Extractor_Binaries/make_vmaps.bat"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../Extractor_Binaries/mmap_excluded.txt"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../Extractor_Binaries/MoveMapGen.sh"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../Extractor_Binaries/offmesh.txt"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../Extractor_Binaries/README.txt"
+    DESTINATION
+        "${BIN_DIR}/${TOOLS_DIR}"
+)
+
+if( WIN32 )
+    if ( MSVC )
+        add_custom_command(TARGET ${EXECUTABLE_NAME}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/tools/"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/../../Extractor_Binaries" "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/tools/"
+        )
+    elseif ( MINGW )
+        add_custom_command(TARGET ${EXECUTABLE_NAME}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/bin/tools/"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/../../Extractor_Binaries" "${CMAKE_BINARY_DIR}/bin/tools/"
+        )
+    endif()
 endif()

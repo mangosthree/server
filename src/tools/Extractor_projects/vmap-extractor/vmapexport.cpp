@@ -55,7 +55,7 @@
 
 #include "vmapexport.h"
 
-#include "vmapexport.h"
+#include "../shared/ExtractorCommon.h"
 
 //------------------------------------------------------------------------------
 // Defines
@@ -547,7 +547,6 @@ bool processArgv(int argc, char** argv)
     return result;
 }
 
-
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 // Main
 //
@@ -559,7 +558,7 @@ bool processArgv(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-    bool success = true;
+	bool success = true;
 	std::string outDir = std::string(output_path) + "/vmaps";
 
     // Use command line arguments, when some
@@ -598,12 +597,17 @@ int main(int argc, char** argv)
     printf("Extract for %s. Beginning work ....\n", szRawVMAPMagic);
     //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     // Create the working directory
+	CreateDir(std::string(szWorkDirWmo));
+	CreateDir(outDir);
+
+	/*
     if (mkdir(szWorkDirWmo
 #ifdef __linux__
               , 0711
 #endif
              ))
         success = (errno == EEXIST);
+	*/
 
     LoadCommonMPQFiles(CONF_TargetBuild);
 

@@ -44,6 +44,8 @@
 #include "sl/wdt.h"
 #include <fcntl.h>
 
+#include "../shared/ExtractorCommon.h"
+
 #ifndef WIN32
 #include <unistd.h>
 #endif
@@ -101,21 +103,13 @@ float CONF_float_to_int16_limit = 2048.0f;   // Max accuracy = val/65536
 float CONF_flat_height_delta_limit = 0.005f; // If max - min less this value - surface is flat
 float CONF_flat_liquid_delta_limit = 0.001f; // If max - min less this value - liquid surface is flat
 
-static char* const langs[] = {"enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU" };
+// static char* const langs[] = {"enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU" };
 #define LANG_COUNT 12
 
 #define MIN_SUPPORTED_BUILD 15595                           // code expect mpq files and mpq content files structure for this build or later
 #define EXPANSION_COUNT 3
 #define WORLD_COUNT 2
 
-void CreateDir(const std::string& Path)
-{
-#ifdef WIN32
-    _mkdir(Path.c_str());
-#else
-    mkdir(Path.c_str(), 0777);
-#endif
-}
 
 bool FileExists(const char* FileName)
 {

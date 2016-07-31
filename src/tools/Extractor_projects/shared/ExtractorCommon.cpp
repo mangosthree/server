@@ -394,7 +394,7 @@ bool CreateDir(const std::string& sPath)
 	if (_mkdir(sPath.c_str()) == 0)
 		return 1;
 #else
-	if (_return mkdir(sPath.c_str(), 0777) == 0)
+	if (mkdir(sPath.c_str(), 0777) == 0)
 		return 1;
 #endif
 	return 0; // failed to create the directory

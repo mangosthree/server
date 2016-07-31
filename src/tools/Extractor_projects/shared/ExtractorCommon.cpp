@@ -366,7 +366,7 @@ void setVMapMagicVersion(int iCoreNumber, char* magic)
         std::strcpy(magic,"VMAPt06");
         break;
     case CLIENT_CATA:
-        std::strcpy(magic,"VMAPc06");
+        std::strcpy(magic,"VMAPc04");
         break;
     case CLIENT_MOP:
         std::strcpy(magic,"VMAPp06");
@@ -388,13 +388,16 @@ void setVMapMagicVersion(int iCoreNumber, char* magic)
 *
 * @param sPath
 */
-void CreateDir(const std::string& sPath)
+bool CreateDir(const std::string& sPath)
 {
 #ifdef WIN32
-    _mkdir(sPath.c_str());
+	if (_mkdir(sPath.c_str()) == 0)
+		return 1;
 #else
-    mkdir(sPath.c_str(), 0777);
+	if (_return mkdir(sPath.c_str(), 0777) == 0)
+		return 1;
 #endif
+	return 0; // failed to create the directory
 }
 
 /**

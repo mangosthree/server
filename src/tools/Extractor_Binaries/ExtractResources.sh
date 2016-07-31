@@ -201,6 +201,10 @@ then
     echo "`date`: Start extraction of vmaps..." | tee -a $LOG_FILE
     ./vmap-extractor | tee -a $DETAIL_LOG_FILE
     echo "`date`: Extracting of vmaps finished" | tee -a $LOG_FILE
+    
+	echo "`date`: Start assembling of vmaps..." | tee -a $LOG_FILE
+    ./vmap-assembler Buildings vmaps | tee -a $DETAIL_LOG_FILE
+	echo "`date`: Assembling of vmaps finished" | tee -a $LOG_FILE
 
     echo | tee -a $LOG_FILE
     echo | tee -a $DETAIL_LOG_FILE

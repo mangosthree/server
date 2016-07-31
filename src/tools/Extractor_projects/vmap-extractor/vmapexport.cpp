@@ -558,7 +558,8 @@ bool processArgv(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-	bool success = true;
+	bool bCreatedVmapsFolder = false;
+	bool bExtractedWMOfiles = false;
 	std::string outDir = std::string(output_path) + "/vmaps";
 
     // Use command line arguments, when some
@@ -598,17 +599,9 @@ int main(int argc, char** argv)
     //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     // Create the working directory
 	CreateDir(std::string(szWorkDirWmo));
-	CreateDir(outDir);
+	bCreatedVmapsFolder = CreateDir(outDir);
 
-	/*
-    if (mkdir(szWorkDirWmo
-#ifdef __linux__
-              , 0711
-#endif
-             ))
-        success = (errno == EEXIST);
-	*/
-
+	printf("Loading common MPQ files\n");
     LoadCommonMPQFiles(CONF_TargetBuild);
 
     int FirstLocale = -1;
@@ -629,12 +622,15 @@ int main(int argc, char** argv)
     ReadLiquidTypeTableDBC();
 
     // extract data
-    if (success)
-        success = ExtractWmo();
+	if (bCreatedVmapsFolder)
+	{
+		printf("Extracting WMO file\n");
+		bExtractedWMOfiles = ExtractWmo();
+	}
 
     //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     //map.dbc
-    if (success)
+	if (bExtractedWMOfiles)
     {
         DBCFile* dbc = new DBCFile(LocaleMpq, "DBFilesClient\\Map.dbc");
         if (!dbc->open())
@@ -665,13 +661,18 @@ int main(int argc, char** argv)
     SFileCloseArchive(WorldMpq);
 
     printf("\n");
-    if (!success)
+	if (!bExtractedWMOfiles)
     {
         printf("ERROR: Extract for %s. Work NOT complete.\n   Precise vector data=%d.\nPress any key.\n", szRawVMAPMagic, preciseVectorData);
         getchar();
     }
 
-    printf("Extract for %s. Work complete. No errors.\n", szRawVMAPMagic);
+	printf("Extract for %s. Work complete. ", szRawVMAPMagic);
+	if (!bCreatedVmapsFolder || !bExtractedWMOfiles)
+		printf("There were errors.\n");
+	else
+        printf("No errors.\n");
+
     delete [] LiqType;
     return 0;
 }

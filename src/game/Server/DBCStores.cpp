@@ -1035,6 +1035,7 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
     return NULL;
 }
 
+/*
 static ChatChannelsEntry worldCh = { 26, 4, "world" };
 
 ChatChannelsEntry const* GetChannelEntryFor(const std::string& name)
@@ -1073,6 +1074,7 @@ ChatChannelsEntry const* GetChannelEntryFor(const std::string& name)
 
     return NULL;
 }
+*/
 
 bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId)
 {

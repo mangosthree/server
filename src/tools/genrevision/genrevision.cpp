@@ -79,7 +79,8 @@ bool extractDataFromGit(std::string filename, std::string path, bool url, RawDat
 {
     char buf[1024];
 
-    if (FILE* entriesFile = fopen(filename.c_str(), "r"))
+    FILE* entriesFile = fopen(filename.c_str(), "r");
+    if (entriesFile)
     {
         char hash_str[200];
         char branch_str[200];
@@ -111,7 +112,7 @@ bool extractDataFromGit(std::string filename, std::string path, bool url, RawDat
             char* acc_str  = NULL;
             char* repo_str = NULL;
 
-        // parse URL like git@github.com:mangosthree/server
+            // parse URL like git@github.com:mangoszero/server
             char url_buf[200];
             int res = sscanf(url_str, "git@%s", url_buf);
             if (res)
@@ -141,42 +142,47 @@ bool extractDataFromGit(std::string filename, std::string path, bool url, RawDat
         else
             { strcpy(data.rev_str, hash_str); }
     }
-    else if (entriesFile = fopen((path + ".git/HEAD").c_str(), "r"))
+    else
     {
-        if (!fgets(buf, sizeof(buf), entriesFile))
+        entriesFile = fopen((path + ".git/HEAD").c_str(), "r");
+        if(entriesFile) 
         {
-            fclose(entriesFile);
-            return false;
-        }
-
-        char refBuff[200];
-        if (!sscanf(buf, "ref: %s", refBuff))
-        {
-            fclose(entriesFile);
-            return false;
-        }
-
-        fclose(entriesFile);
-
-        if (FILE *refFile = fopen((path + ".git/" + refBuff).c_str(), "r"))
-        {
-            char hash[41];
-
-            if (!fgets(hash, sizeof(hash), refFile))
+            if (!fgets(buf, sizeof(buf), entriesFile))
             {
-                fclose(refFile);
+                fclose(entriesFile);
                 return false;
             }
 
-            strcpy(data.rev_str, hash);
+            char refBuff[200];
+            if (!sscanf(buf, "ref: %s", refBuff))
+            {
+                fclose(entriesFile);
+                return false;
+            }
+
+            fclose(entriesFile);
+
+            FILE *refFile = fopen((path + ".git/" + refBuff).c_str(), "r");
+            if (refFile)
+            {
+                char hash[41];
+
+                if (!fgets(hash, sizeof(hash), refFile))
+                {
+                    fclose(refFile);
+                    return false;
+                }
+
+                strcpy(data.rev_str, hash);
             
-            fclose(refFile);
+                fclose(refFile);
+            }
+            else
+                { return false; }
         }
         else
             { return false; }
     }
-    else
-        return false;
 
     time_t rev_time = 0;
     // extracting date/time

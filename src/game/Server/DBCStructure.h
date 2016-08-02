@@ -1251,25 +1251,29 @@ struct ItemSetEntry
 
 struct LfgDungeonsEntry
 {
-    uint32 ID;                                              // 0    m_ID
-    char*  name[16];                                        // 1-16 m_name_lang
-    uint32 minLevel;                                        // 18    m_minLevel
-    uint32 maxLevel;                                        // 19    m_maxLevel
-    uint32 targetLevel;                                     // 20    m_target_level
-    uint32 targetLevelMin;                                  // 21    m_target_level_min
-    uint32 targetLevelMax;                                  // 22    m_target_level_max
-    int32  mapID;                                           // 23    m_mapID
-    uint32 difficulty;                                      // 24    m_difficulty
-    uint32 flags;                                           // 25    m_flags
-    uint32 typeID;                                          // 26    m_typeID
-    //uint32 faction;                                       // 27    m_faction
-    //char* textureFilename;                                // 28    m_textureFilename
-    uint32 expansionLevel;                                  // 29    m_expansionLevel
-    uint32 orderIndex;                                      // 30    m_order_index
-    uint32 groupID;                                         // 31    m_group_id
-    //char* description[16]; // 32-49 m_Description_lang
+	uint32	ID;
+	DBCString	Name;
+	uint32	minLevel;
+	uint32	maxLevel;
+	uint32	target_level;
+	uint32	target_level_min;
+	uint32	target_level_max;
+	float	mapID;
+	uint32	difficulty;
+	uint32	flags;
+	uint32	typeID;
+	float	faction;
+	DBCString	textureFilename;
+	uint32	expansionLevel;
+	DBCString	order_index;
+	uint32	group_id;
+	DBCString	description_lang;
+	uint32	col17;
+	uint32	col18;
+	uint32	col19;
+	uint32	col20;
 
-    uint32 Entry() const { return ID + ((uint8)typeID << 24); }
+	uint32 Entry() const { return ID + ((uint8)typeID << 24); }
 };
 
 /*struct LfgDungeonGroupEntry

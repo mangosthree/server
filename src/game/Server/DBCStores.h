@@ -34,6 +34,15 @@
 bool IsAcceptableClientBuild(uint32 build);
 std::string AcceptableClientBuildsListStr();
 
+/**
+ * This function checks to see if there is a valid locale file (component.wow-<locale>.txt) 
+ * and returns an index to the locale or -1 if not found
+ * @PARAM dataPath full path to the data directory
+ * @RETURN index number representing the location of the locale in the its structure,
+ * LocaleNameStr in Common.cpp
+ */
+int ReadDBCLocale(const std::string sDataPath);
+
 typedef std::list<uint32> SimpleFactionsList;
 
 SimpleFactionsList const* GetFactionTeamList(uint32 faction);
@@ -48,8 +57,8 @@ uint32 GetAreaFlagByMapId(uint32 mapid);
 
 WMOAreaTableEntry const* GetWMOAreaTableEntryByTripple(int32 rootid, int32 adtid, int32 groupid);
 
- AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
- AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_id);
+AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
+AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_id);
 
 uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId);
 

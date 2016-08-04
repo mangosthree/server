@@ -10,7 +10,7 @@ MPQFile::MPQFile(HANDLE mpq, const char* filename):
     size(0)
 {
     HANDLE file;
-    if (!SFileOpenFileEx(mpq, filename, SFILE_OPEN_PATCHED_FILE, &file))
+    if (!SFileOpenFileEx(mpq, filename, SFILE_OPEN_FROM_MPQ, &file))
     {
         int error = GetLastError();
         if ( error != ERROR_FILE_NOT_FOUND )

@@ -294,7 +294,7 @@ uint32 ReadMapDBC(int const locale)
     printf("Read Map.dbc file... ");
 
     HANDLE dbcFile;
-    if (!SFileOpenFileEx(localeFile, "DBFilesClient\\Map.dbc", SFILE_OPEN_PATCHED_FILE, &dbcFile))
+    if (!SFileOpenFileEx(localeFile, "DBFilesClient\\Map.dbc", SFILE_OPEN_FROM_MPQ, &dbcFile))
     {
         printf("Fatal error: Cannot find Map.dbc in archive!\n");
         exit(1);
@@ -329,7 +329,7 @@ void ReadAreaTableDBC(int const locale)
     printf("Read AreaTable.dbc file...");
 
     HANDLE dbcFile;
-    if (!SFileOpenFileEx(localeFile, "DBFilesClient\\AreaTable.dbc", SFILE_OPEN_PATCHED_FILE, &dbcFile))
+    if (!SFileOpenFileEx(localeFile, "DBFilesClient\\AreaTable.dbc", SFILE_OPEN_FROM_MPQ, &dbcFile))
     {
         printf("Fatal error: Cannot find AreaTable.dbc in archive!\n");
         exit(1);
@@ -367,7 +367,7 @@ void ReadLiquidTypeTableDBC(int const locale)
     printf("Read LiquidType.dbc file...");
 
     HANDLE dbcFile;
-    if (!SFileOpenFileEx(localeFile, "DBFilesClient\\LiquidType.dbc", SFILE_OPEN_PATCHED_FILE, &dbcFile))
+    if (!SFileOpenFileEx(localeFile, "DBFilesClient\\LiquidType.dbc", SFILE_OPEN_FROM_MPQ, &dbcFile))
     {
         printf("Fatal error: Cannot find LiquidType.dbc in archive!\n");
         exit(1);

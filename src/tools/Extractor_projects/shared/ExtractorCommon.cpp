@@ -366,7 +366,7 @@ void setVMapMagicVersion(int iCoreNumber, char* magic)
         std::strcpy(magic,"VMAPt06");
         break;
     case CLIENT_CATA:
-        std::strcpy(magic,"VMAPc04");
+        std::strcpy(magic,"VMAPc06");
         break;
     case CLIENT_MOP:
         std::strcpy(magic,"VMAPp06");

@@ -78,7 +78,6 @@ struct InstanceTemplate
     // or 0 (not related to continent 0 map id)
     uint32 levelMin;
     uint32 levelMax;
-    uint32 script_id;
 };
 
 struct WorldTemplate

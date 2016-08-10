@@ -426,7 +426,6 @@ struct GameObjectInfo
     uint32 unk2;
     uint32 MinMoneyLoot;
     uint32 MaxMoneyLoot;
-    uint32 ScriptId;
 
     // helpers
     bool IsDespawnAtAction() const

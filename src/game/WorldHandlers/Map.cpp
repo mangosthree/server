@@ -1193,6 +1193,67 @@ void Map::RemoveFromActive(WorldObject* obj)
 
 void Map::CreateInstanceData(bool load)
 {
+	if (i_data != NULL)
+	{
+		return;
+	}
+
+	uint32 i_script_id = GetScriptId();
+
+	if (!i_script_id)
+	{
+		return;
+	}
+
+	i_data = sScriptMgr.CreateInstanceData(this);
+	if (!i_data)
+	{
+		return;
+	}
+
+	if (load)
+	{
+		// TODO: make a global storage for this
+		QueryResult* result;
+
+		if (Instanceable())
+		{
+			result = CharacterDatabase.PQuery("SELECT data FROM instance WHERE id = '%u'", i_InstanceId);
+		}
+		else
+		{
+			result = CharacterDatabase.PQuery("SELECT data FROM world WHERE map = '%u'", GetId());
+		}
+
+		if (result)
+		{
+			Field* fields = result->Fetch();
+			const char* data = fields[0].GetString();
+			if (data)
+			{
+				DEBUG_LOG("Loading instance data for `%s` (Map: %u Instance: %u)", sScriptMgr.GetScriptName(i_script_id), GetId(), i_InstanceId);
+				i_data->Load(data);
+			}
+			delete result;
+		}
+		else
+		{
+			// for non-instanceable map always add data to table if not found, later code expected that for map in `word` exist always after load
+			if (!Instanceable())
+			{
+				CharacterDatabase.PExecute("INSERT INTO world VALUES ('%u', '')", GetId());
+			}
+		}
+	}
+	else
+	{
+		DEBUG_LOG("New instance data, \"%s\" ,initialized!", sScriptMgr.GetScriptName(i_script_id));
+		i_data->Initialize();
+	}
+}
+/*
+void Map::CreateInstanceData(bool load)
+{
     if (i_data != NULL)
         return;
 
@@ -1247,7 +1308,7 @@ void Map::CreateInstanceData(bool load)
         DEBUG_LOG("New instance data, \"%s\" ,initialized!", sScriptMgr.GetScriptName(i_script_id));
         i_data->Initialize();
     }
-}
+} */
 
 void Map::SetWeather(uint32 zoneId, WeatherType type, float grade, bool permanently)
 {

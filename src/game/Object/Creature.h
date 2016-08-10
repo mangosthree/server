@@ -145,7 +145,6 @@ struct CreatureInfo
     uint32  vendorId;
     uint32  MechanicImmuneMask;
     uint32  ExtraFlags;
-    uint32  ScriptID;
 
     // helpers
     HighGuid GetHighGuid() const

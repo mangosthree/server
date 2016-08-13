@@ -355,8 +355,9 @@ bool WorldSession::Update(PacketFilter& updater)
         m_Socket = NULL;
     }
 
-    if (m_Socket && !m_Socket->IsClosed() && _warden)
-        _warden->Update();
+ // WARDEN ISSUE - commented out to stop crash
+ //   if (m_Socket && !m_Socket->IsClosed() && _warden)
+ //       _warden->Update();
 
     // check if we are safe to proceed with logout
     // logout procedure should happen only in World::UpdateSessions() method!!!
@@ -366,9 +367,9 @@ bool WorldSession::Update(PacketFilter& updater)
         time_t currTime = time(NULL);
         if (!m_Socket || (ShouldLogOut(currTime) && !m_playerLoading))
             { LogoutPlayer(true); }
-
-        if (m_Socket && GetPlayer() && _warden)
-            _warden->Update();
+// WARDEN ISSUE - commented out to stop crash 
+//        if (m_Socket && GetPlayer() && _warden)
+//           _warden->Update();
 
         if (!m_Socket)
             { return false; }                                   // Will remove this session from the world session map

@@ -6915,12 +6915,14 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         sOutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);
 
         SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
-
+// WEATHER ISSUE - commented out to prevent crash on entering game world
+  /*
         if (sWorld.getConfig(CONFIG_BOOL_WEATHER))
         {
             Weather* wth = GetMap()->GetWeatherSystem()->FindOrCreateWeather(newZone);
             wth->SendWeatherUpdateToPlayer(this);
         }
+   */
     }
 
 #ifdef ENABLE_ELUNA

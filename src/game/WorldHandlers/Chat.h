@@ -126,7 +126,7 @@ class  ChatHandler
         * \param uint32 achievementId          : Required only for *ACHIEVEMENT
         * \param const char* addonPrefix       : Required only for *CHAT_MSG_ADDON
         **/
-        static void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const* message, Language language = LANG_UNIVERSAL, ChatTagFlags chatTag = CHAT_TAG_NONE,
+        static void BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const* message, Language language = LANG_UNIVERSAL, ChatTagFlags chatTag = CHAT_TAG_NONE,
             ObjectGuid const& senderGuid = ObjectGuid(), char const* senderName = NULL,
             ObjectGuid const& targetGuid = ObjectGuid(), char const* targetName = NULL,
             char const* channelName = NULL, uint32 achievementId = 0, const char* addonPrefix = NULL);

@@ -92,7 +92,7 @@ struct npc_kitten : public CreatureScript
 
         void MoveInLineOfSight(Unit* pWho) override
         {
-            // should not have npcflag by default, so set when expected
+            // should not have NpcFlags by default, so set when expected
             if (!m_creature->getVictim() && !m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && HasFollowState(STATE_FOLLOW_INPROGRESS) && pWho->GetEntry() == NPC_WINNA)
             {
                 if (m_creature->IsWithinDistInMap(pWho, INTERACTION_DISTANCE))

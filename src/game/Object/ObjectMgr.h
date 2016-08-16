@@ -132,7 +132,7 @@ typedef UNORDERED_MAP < uint32/*(mapid,spawnMode) pair*/, CellObjectGuidsMap > M
 #define MIN_MANGOS_STRING_ID           1                    // 'mangos_string'
 #define MAX_MANGOS_STRING_ID           2000000000
 #define MIN_DB_SCRIPT_STRING_ID        MAX_MANGOS_STRING_ID // 'db_script_string'
-#define MAX_DB_SCRIPT_STRING_ID        2000010000
+#define MAX_DB_SCRIPT_STRING_ID        2001000000
 #define MIN_CREATURE_AI_TEXT_STRING_ID (-1)                 // 'creature_ai_texts'
 #define MAX_CREATURE_AI_TEXT_STRING_ID (-1000000)
 // Anything below MAX_CREATURE_AI_TEXT_STRING_ID is handled by the external script lib
@@ -283,7 +283,7 @@ struct GossipMenuItems
     uint8           option_icon;
     std::string     option_text;
     uint32          option_id;
-    uint32          npc_option_npcflag;
+    uint32          npc_option_NpcFlags;
     int32           action_menu_id;
     uint32          action_poi_id;
     uint32          action_script_id;
@@ -1191,6 +1191,19 @@ class ObjectMgr
         QuestRelationsMap& GetCreatureQuestRelationsMap() { return m_CreatureQuestRelations; }
 
         uint32 GetModelForRace(uint32 sourceModelId, uint32 racemask);
+        /**
+        * \brief: Data returned is used to compute health, mana, armor, damage of creatures. May be nullptr.
+        * \param uint32 level               creature level
+        * \param uint32 unitClass           creature class, related to CLASSMASK_ALL_CREATURES
+        * \param uint32 expansion           creature expansion (we could have creature exp = 0 for wotlk as well as exp = 1 or exp = 2)
+        * \return: CreatureClassLvlStats const* or nullptr
+        *
+        * Description: GetCreatureClassLvlStats give fast access to creature stats data.
+        * FullName: ObjectMgr::GetCreatureClassLvlStats
+        * Access: public
+        * Qualifier: const
+        **/
+        CreatureClassLvlStats const* GetCreatureClassLvlStats(uint32 level, uint32 unitClass, int32 expansion) const;
 
         void LoadHotfixData();
         HotfixData const& GetHotfixData() const { return m_hotfixData; }

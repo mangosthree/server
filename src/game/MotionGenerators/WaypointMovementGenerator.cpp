@@ -142,6 +142,7 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
 
         if (behavior->textid[0])
         {
+            int32 textId = behavior->textid[0];
             // Not only one text is set
             if (behavior->textid[1])
             {
@@ -153,10 +154,13 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
                         break;
                 }
 
-                creature.MonsterSay(behavior->textid[rand() % i], LANG_UNIVERSAL);
+                textId = behavior->textid[urand(0, i - 1)];
             }
+
+            if (MangosStringLocale const* textData = sObjectMgr.GetMangosStringLocale(textId))
+                creature.MonsterText(textData, nullptr);
             else
-                creature.MonsterSay(behavior->textid[0], LANG_UNIVERSAL);
+                sLog.outErrorDb("%s reached waypoint %u, attempted to do text %i, but required text-data could not be found", creature.GetGuidStr().c_str(), i_currentNode, textId);
         }
     }
 

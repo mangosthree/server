@@ -3779,7 +3779,7 @@ enum MaxLevel
 static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLASSIC, MAX_LEVEL_TBC, MAX_LEVEL_WOTLK, MAX_LEVEL_CATACLYSM };
 
 // Max creature level (included some bosses and elite)
-#define DEFAULT_MAX_CREATURE_LEVEL 85
+#define DEFAULT_MAX_CREATURE_LEVEL 90
 
 // This spell is used for general boarding serverside
 #define SPELL_RIDE_VEHICLE_HARDCODED    46598

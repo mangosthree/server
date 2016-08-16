@@ -1542,6 +1542,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget, spell_id, true);
                     return;
                 }
+                case 41283:                                 // Abyssal Toss
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->SummonCreature(23416, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000);
+                    return;
+                }
                 case 41333:                                 // Empyreal Equivalency
                 {
                     if (!unitTarget)
@@ -2738,6 +2746,31 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     unitTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                     return;
                 }
+                case 62217:                                 // Unstable Energy
+                case 62922:                                 // Unstable Energy (h)
+                {
+                    if (!unitTarget)
+						return;
+
+					unitTarget->RemoveAurasDueToSpell(effect->CalculateSimpleValue());
+                    return;
+                }
+                case 62262:                                 // Brightleaf Flux
+                {
+                    if (!unitTarget)
+                        return;
+
+                    if (unitTarget->HasAura(62239))
+                        unitTarget->RemoveAurasDueToSpell(62239);
+                    else
+					{
+						uint32 stackAmount = urand(1, GetSpellStore()->LookupEntry(62239)->GetStackAmount());
+
+                        for (uint8 i = 0; i < stackAmount; ++i)
+                            unitTarget->CastSpell(unitTarget, 62239, true);
+                    }
+                    return;
+                }
                 case 62278:                                 // Lightning Orb Charger
                 {
                     if (!unitTarget)
@@ -2745,6 +2778,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     unitTarget->CastSpell(m_caster, 62466, true);
                     unitTarget->CastSpell(unitTarget, 62279, true);
+                    return;
+                }
+                case 62652:                                 // Tidal Wave
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_caster->GetMap()->IsRegularDifficulty() ? 62653 : 62935, true);
                     return;
                 }
                 case 62797:                                 // Storm Cloud
@@ -2764,6 +2805,15 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
                     return;
                 }
+                case 63027:                                 // Proximity Mines
+                {
+                    if (!unitTarget)
+                        return;
+
+                    for (uint8 i = 0; i < 15; ++i)
+                        unitTarget->CastSpell(unitTarget, 65347, true);
+                    return;
+                }
                 case 63499:                                 // Dispel Magic
                 {
                     if (!unitTarget)
@@ -2778,6 +2828,22 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         return;
 
                     m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
+                }
+                case 63667:                                 // Napalm Shell
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, m_caster->GetMap()->IsRegularDifficulty() ? 63666 : 65026, true);
+                    return;
+                }
+                case 63681:                                 // Rocket Strike
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 63036, true);
+                    return;
                 }
                 case 63820:                                 // Summon Scrap Bot Trigger (Ulduar - Mimiron) for Scrap Bots
                 case 64425:                                 // Summon Scrap Bot Trigger (Ulduar - Mimiron) for Assault Bots
@@ -2801,6 +2867,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     m_caster->SetFacingTo(frand(0, M_PI_F * 2));
                     return;
                 }
+                case 64402:                                 // Rocket Strike
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 63681, true);
+                    return;
+                }
                 case 64489:                                 // Feral Rush
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -2818,12 +2892,28 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     m_caster->CastSpell(m_caster, 64540, true);
                     return;
                 }
+				case 64623:                                 // Frost Bomb
+				{
+					if (!unitTarget)
+						return;
+
+					m_caster->CastSpell(unitTarget, 64627, true);
+					return;
+				}
                 case 64673:                                 // Feral Rush (h)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
                     m_caster->CastSpell(unitTarget, 64674, true);
+                    return;
+                }
+                case 64841:                                 // Rapid Burst
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, 63382, false);
                     return;
                 }
                 case 64981:                                 // Summon Random Vanquished Tentacle
@@ -2838,6 +2928,16 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     }
 
                     m_caster->CastSpell(m_caster, spell_id, true);
+                    return;
+                }
+                case 65346:                                 // Proximity Mine
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(m_caster, m_caster->GetMap()->IsRegularDifficulty() ? 66351 : 63009, true);
+                    m_caster->RemoveAurasDueToSpell(65345);
+                    m_caster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     return;
                 }
                 case 66390:                                 // Read Last Rites
@@ -5279,7 +5379,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
                                 return;
 
                             // FIXME: not all totems and similar cases selected by this check...
-                            if (cInfo->type == CREATURE_TYPE_TOTEM)
+                            if (cInfo->CreatureType == CREATURE_TYPE_TOTEM)
                                 summonResult = DoSummonTotem(effect);
                             else
                                 summonResult = DoSummonGuardian(summonPositions, summon_prop, effect, level);
@@ -5468,7 +5568,7 @@ bool Spell::DoSummonCritter(CreatureSummonPositions& list, SummonPropertiesEntry
     critter->InitPetCreateSpells();                         // e.g. disgusting oozeling has a create spell as critter...
     // critter->InitLevelupSpellsForLevel();                // none?
     critter->SelectLevel(critter->GetCreatureInfo());       // some summoned creaters have different from 1 DB data for level/hp
-    critter->SetUInt32Value(UNIT_NPC_FLAGS, critter->GetCreatureInfo()->npcflag);
+    critter->SetUInt32Value(UNIT_NPC_FLAGS, critter->GetCreatureInfo()->NpcFlags);
     // some mini-pets have quests
     // set timer for unsummon
     if (m_duration > 0)
@@ -5538,7 +5638,7 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
         // spawnCreature->SetName("");                      // generated by client
         spawnCreature->SetOwnerGuid(m_caster->GetObjectGuid());
         spawnCreature->SetPowerType(POWER_MANA);
-        spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS, spawnCreature->GetCreatureInfo()->npcflag);
+        spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS, spawnCreature->GetCreatureInfo()->NpcFlags);
 
         spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
         spawnCreature->SetCreatorGuid(m_caster->GetObjectGuid());
@@ -7597,6 +7697,23 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget, triggeredSpell[urand(0, 3)], true);
                     return;
                 }
+                case 44323:                                 // Hawk Hunting
+                case 44407:                                 // Hawk Hunting
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    // check target entry specific to each spell
+                    if (m_spellInfo->Id == 44323 && unitTarget->GetEntry() != 24746)
+                        return;
+                    if (m_spellInfo->Id == 44407 && unitTarget->GetEntry() != 24747)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, effect->CalculateSimpleValue(), true);
+                    // despawn delay depends on the distance between caster and target
+                    ((Creature*)unitTarget)->ForcedDespawn(100 * unitTarget->GetDistance2d(m_caster));
+                    return;
+                }
                 case 44364:                                 // Rock Falcon Primer
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -7771,6 +7888,14 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget, 45259, true);
                     return;
                 }
+                case 45625:                                 // Arcane Chains: Character Force Cast
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
+                    return;
+                }
                 case 45668:                                 // Ultra-Advanced Proto-Typical Shortening Blaster
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
@@ -7855,7 +7980,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
                     else
                     {
-                        m_caster->SetUInt32Value(UNIT_NPC_FLAGS, cTemplate->npcflag);
+                        m_caster->SetUInt32Value(UNIT_NPC_FLAGS, cTemplate->NpcFlags);
                         ((Creature*)m_caster)->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, 0);
                         ((Creature*)m_caster)->SetVirtualItem(VIRTUAL_ITEM_SLOT_1, 0);
 
@@ -8643,6 +8768,28 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(m_caster, 64909, true);
                     return;
                 }
+                case 62282:                                 // Iron Roots
+                case 62440:                                 // Strengthened Iron Roots
+                case 63598:                                 // Iron Roots (h)
+                case 63601:                                 // Strengthened Iron Roots (h)
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || !((Creature*)unitTarget)->IsTemporarySummon())
+                        return;
+
+                    uint32 ownerAura = 0;
+
+                    switch (m_spellInfo->Id)
+                    {
+                        case 62282: ownerAura = 62283; break;
+                        case 62440: ownerAura = 62438; break;
+                        case 63598: ownerAura = 62930; break;
+                        case 63601: ownerAura = 62861; break;
+                    };
+
+                    if (Unit* summoner = unitTarget->GetMap()->GetUnit(((TemporarySummon*)unitTarget)->GetSummonerGuid()))
+                        summoner->RemoveAurasDueToSpell(ownerAura);
+                    return;
+                }
                 case 62381:                                 // Chill
                 {
                     if (!unitTarget)
@@ -8683,18 +8830,6 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     uint32 spellId = effect->CalculateSimpleValue();
                     unitTarget->RemoveAuraHolderFromStack(spellId, numStacks);
-                    return;
-                }
-                case 62678:                                 // Summon Allies of Nature
-                {
-                    const uint32 randSpells[] =
-                    {
-                        62685,  // Summon Wave - 1 Mob
-                        62686,  // Summon Wave - 3 Mob
-                        62688,  // Summon Wave - 10 Mob
-                    };
-
-                    m_caster->CastSpell(m_caster, randSpells[urand(0, countof(randSpells) - 1)], true);
                     return;
                 }
                 case 62688:                                 // Summon Wave - 10 Mob

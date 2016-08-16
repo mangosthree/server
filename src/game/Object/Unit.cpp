@@ -902,47 +902,10 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         return 0;
     }
 
-    // no xp,health if type 8 /critters/
-    if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->GetCreatureType() == CREATURE_TYPE_CRITTER)
-    {
-        // TODO: fix this part
-        // Critter may not die of damage taken, instead expect it to run away (no fighting back)
-        // If (this) is TYPEID_PLAYER, (this) will enter combat w/victim, but after some time, automatically leave combat.
-        // It is unclear how it should work for other cases.
-        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamage critter, critter dies");
-
-        ((Creature*)pVictim)->SetLootRecipient(this);
-
-        JustKilledCreature((Creature*)pVictim, NULL);
-        pVictim->SetHealth(0);
-
-        return damage;
-    }
-
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageStart");
 
     uint32 health = pVictim->GetHealth();
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "deal dmg:%d to health:%d ", damage, health);
-
-    // duel ends when player has 1 or less hp
-    bool duel_hasEnded = false;
-    if (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->duel && damage >= (health - 1))
-    {
-        // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
-        if (((Player*)pVictim)->duel->opponent == this || ((Player*)pVictim)->duel->opponent->GetObjectGuid() == GetOwnerGuid())
-            damage = health - 1;
-
-        duel_hasEnded = true;
-    }
-    // Get in CombatState
-    if (pVictim != this && damagetype != DOT)
-    {
-        SetInCombatWith(pVictim);
-        pVictim->SetInCombatWith(this);
-
-        if (Player* attackedPlayer = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself())
-            SetContestedPvP(attackedPlayer);
-    }
 
     // Rage from Damage made (only from direct weapon damage)
     if (cleanDamage && damagetype == DIRECT_DAMAGE && this != pVictim && GetTypeId() == TYPEID_PLAYER && (GetPowerType() == POWER_RAGE))
@@ -976,6 +939,70 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             case RANGED_ATTACK:
                 break;
         }
+    }
+
+    // no xp,health if type 8 /critters/
+    if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->GetCreatureType() == CREATURE_TYPE_CRITTER)
+    {
+        // TODO: fix this part
+        // Critter may not die of damage taken, instead expect it to run away (no fighting back)
+        // If (this) is TYPEID_PLAYER, (this) will enter combat w/victim, but after some time, automatically leave combat.
+        // It is unclear how it should work for other cases.
+        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamage critter, critter dies");
+
+        ((Creature*)pVictim)->SetLootRecipient(this);
+
+        JustKilledCreature((Creature*)pVictim, nullptr);
+        pVictim->SetHealth(0);
+
+        return damage;
+    }
+
+    // share damage by auras
+    AuraList const& vShareDamageAuras = pVictim->GetAurasByType(SPELL_AURA_SHARE_DAMAGE_PCT);
+    for (AuraList::const_iterator itr = vShareDamageAuras.begin(); itr != vShareDamageAuras.end(); ++itr)
+    {
+        if (!spellProto)
+            break;
+
+        SpellEffectEntry const* spellEffect = spellProto->GetSpellEffect(EFFECT_INDEX_0);
+
+        // if damage is done by another shared aura, then skip to avoid circular reference (aura 300 is only applied on effect_idx_0
+        if (spellEffect && spellEffect->Effect == SPELL_EFFECT_APPLY_AURA &&
+            spellEffect->EffectApplyAuraName == SPELL_AURA_SHARE_DAMAGE_PCT)
+            break;
+
+        if (Unit* shareTarget = (*itr)->GetCaster())
+        {
+            if (shareTarget != pVictim && ((*itr)->GetMiscValue() & damageSchoolMask))
+            {
+                SpellEntry const* shareSpell = (*itr)->GetSpellProto();
+                uint32 shareDamage = uint32(damage*(*itr)->GetModifier()->m_amount / 100.0f);
+                DealDamageMods(shareTarget, shareDamage, nullptr);
+                DealDamage(shareTarget, shareDamage, 0, damagetype, GetSpellSchoolMask(shareSpell), shareSpell, false);
+            }
+        }
+    }
+
+    // duel ends when player has 1 or less hp
+    bool duel_hasEnded = false;
+    if (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->duel && damage >= (health - 1))
+    {
+        // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
+        if (((Player*)pVictim)->duel->opponent == this || ((Player*)pVictim)->duel->opponent->GetObjectGuid() == GetOwnerGuid())
+            damage = health - 1;
+
+        duel_hasEnded = true;
+    }
+
+    // Get in CombatState
+    if (pVictim != this && damagetype != DOT)
+    {
+        SetInCombatWith(pVictim);
+        pVictim->SetInCombatWith(this);
+
+        if (Player* attackedPlayer = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself())
+            SetContestedPvP(attackedPlayer);
     }
 
     if (GetTypeId() == TYPEID_PLAYER && this != pVictim)
@@ -1208,11 +1235,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             pVictim->AttackedBy(this);
         }
 
-        if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
-        {
-            if (!spellProto || !(spellProto->GetAuraInterruptFlags() & AURA_INTERRUPT_FLAG_DIRECT_DAMAGE))
-                pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE);
-        }
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
             float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
@@ -1242,21 +1264,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             {
                 EquipmentSlots slot = EquipmentSlots(urand(0, EQUIPMENT_SLOT_END - 1));
                 ((Player*)this)->DurabilityPointLossForEquipSlot(slot);
-            }
-        }
-
-        // TODO: Store auras by interrupt flag to speed this up.
-        SpellAuraHolderMap& vAuras = pVictim->GetSpellAuraHolderMap();
-        for (SpellAuraHolderMap::const_iterator i = vAuras.begin(), next; i != vAuras.end(); i = next)
-        {
-            const SpellEntry* se = i->second->GetSpellProto();
-            next = i; ++next;
-            if (spellProto && spellProto->Id == se->Id) // Not drop auras added by self
-                continue;
-            if (!se->GetProcFlags() && (se->GetAuraInterruptFlags() & AURA_INTERRUPT_FLAG_DAMAGE))
-            {
-                pVictim->RemoveAurasDueToSpell(i->second->GetId());
-                next = vAuras.begin();
             }
         }
 
@@ -1426,7 +1433,7 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
         {
             if (m->IsRaidOrHeroicDungeon())
             {
-                if (victim->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
+                if (victim->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_INSTANCE_BIND)
                     { ((DungeonMap*)m)->PermBindAllPlayers(creditedPlayer); }
             }
             else
@@ -1779,7 +1786,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
 }
 
 // TODO for melee need create structure as in
-void Unit::CalculateMeleeDamage(Unit* pVictim, uint32 damage, CalcDamageInfo* damageInfo, WeaponAttackType attackType)
+void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, WeaponAttackType attackType /*= BASE_ATTACK*/)
 {
     damageInfo->attacker         = this;
     damageInfo->target           = pVictim;
@@ -1836,7 +1843,7 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, uint32 damage, CalcDamageInfo* da
         damageInfo->cleanDamage    = 0;
         return;
     }
-    damage += CalculateDamage(damageInfo->attackType, false);
+    uint32 damage = CalculateDamage(damageInfo->attackType, false);
     // Add melee damage bonus
     damage = MeleeDamageBonusDone(damageInfo->target, damage, damageInfo->attackType);
     damage = damageInfo->target->MeleeDamageBonusTaken(this, damage, damageInfo->attackType);
@@ -2909,7 +2916,7 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     pVictim = SelectMagnetTarget(pVictim);
 
     CalcDamageInfo damageInfo;
-    CalculateMeleeDamage(pVictim, 0, &damageInfo, attType);
+    CalculateMeleeDamage(pVictim, &damageInfo, attType);
     // Send log damage message to client
     DealDamageMods(pVictim, damageInfo.damage, &damageInfo.absorb);
     SendAttackStateUpdate(&damageInfo);
@@ -3028,7 +3035,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
         else
             parry_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE) * 25;
 
-        if (parry_chance > 0 && (pVictim->GetTypeId() == TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_PARRY)))
+        if (parry_chance > 0 && (pVictim->GetTypeId() == TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_PARRY)))
         {
             parry_chance -= skillBonus;
 
@@ -3066,7 +3073,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
     // check if attack comes from behind, nobody can parry or block if attacker is behind
     if (!from_behind)
     {
-        if (pVictim->GetTypeId() == TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_BLOCK))
+        if (pVictim->GetTypeId() == TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_BLOCK))
         {
             tmp = block_chance;
             if ((tmp > 0)                                   // check if unit _can_ block
@@ -3092,7 +3099,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
     if (GetLevelForTarget(pVictim) >= pVictim->GetLevelForTarget(this) + 4 &&
             // can be from by creature (if can) or from controlled player that considered as creature
             ((GetTypeId() != TYPEID_PLAYER && !((Creature*)this)->IsPet() &&
-              !(((Creature*)this)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_CRUSH)) ||
+              !(((Creature*)this)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_CRUSH)) ||
              GetTypeId() == TYPEID_PLAYER && GetCharmerOrOwnerGuid()))
     {
         // when their weapon skill is 15 or more above victim's defense skill
@@ -3226,7 +3233,7 @@ bool Unit::IsSpellBlocked(Unit* pCaster, SpellEntry const* spellEntry, WeaponAtt
     // Check creatures ExtraFlags for disable block
     if (GetTypeId() == TYPEID_UNIT)
     {
-        if (((Creature*)this)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_BLOCK)
+        if (((Creature*)this)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_BLOCK)
             return false;
     }
 
@@ -3363,7 +3370,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
     if (pVictim->GetTypeId() == TYPEID_UNIT)
     {
         uint32 flagEx = ((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags;
-        if (flagEx & CREATURE_FLAG_EXTRA_NO_PARRY)
+        if (flagEx & CREATURE_EXTRA_FLAG_NO_PARRY)
             canParry = false;
     }
     // Ignore combat result aura
@@ -6225,6 +6232,26 @@ bool Unit::isAttackingPlayer() const
     return CheckAllControlledUnits(IsAttackingPlayerHelper(), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
+bool Unit::CanAttackByItself() const
+{
+    if (!IsVehicle())
+        return true;
+
+    for (uint8 i = 0; i < MAX_VEHICLE_SEAT; ++i)
+    {
+        if (uint32 seatId = m_vehicleInfo->GetVehicleEntry()->m_seatID[i])
+        {
+            if (VehicleSeatEntry const* seatEntry = sVehicleSeatStore.LookupEntry(seatId))
+            {
+                if (seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL)
+                    return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 void Unit::RemoveAllAttackers()
 {
     while (!m_attackers.empty())
@@ -8431,7 +8458,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
             { pCreature->AI()->EnterCombat(enemy); }
 
         // Some bosses are set into combat with zone
-        if (GetMap()->IsDungeon() && (pCreature->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_AGGRO_ZONE) && enemy && enemy->IsControlledByPlayer())
+        if (GetMap()->IsDungeon() && (pCreature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_AGGRO_ZONE) && enemy && enemy->IsControlledByPlayer())
             { pCreature->SetInCombatWithZone(); }
 
         if (InstanceData* mapInstance = GetInstanceData())
@@ -8466,7 +8493,7 @@ void Unit::ClearInCombat()
     if (GetTypeId() == TYPEID_UNIT)
     {
         Creature* cThis = static_cast<Creature*>(this);
-        if (cThis->GetCreatureInfo()->unit_flags & UNIT_FLAG_OOC_NOT_ATTACKABLE && !(cThis->GetTemporaryFactionFlags() & TEMPFACTION_TOGGLE_OOC_NOT_ATTACK))
+        if (cThis->GetCreatureInfo()->UnitFlags & UNIT_FLAG_OOC_NOT_ATTACKABLE && !(cThis->GetTemporaryFactionFlags() & TEMPFACTION_TOGGLE_OOC_NOT_ATTACK))
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
 
         clearUnitState(UNIT_STAT_ATTACK_PLAYER);
@@ -8968,10 +8995,10 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio, bool ignore
         switch (mtype)
         {
             case MOVE_RUN:
-                speed *= ((Creature*)this)->GetCreatureInfo()->speed_run;
+                speed *= ((Creature*)this)->GetCreatureInfo()->SpeedRun;
                 break;
             case MOVE_WALK:
-                speed *= ((Creature*)this)->GetCreatureInfo()->speed_walk;
+                speed *= ((Creature*)this)->GetCreatureInfo()->SpeedWalk;
                 break;
             default:
                 break;
@@ -9900,7 +9927,7 @@ uint32 Unit::GetCreatureType() const
             return CREATURE_TYPE_HUMANOID;
     }
     else
-        return ((Creature*)this)->GetCreatureInfo()->type;
+        return ((Creature*)this)->GetCreatureInfo()->CreatureType;
 }
 
 /*#######################################
@@ -10816,76 +10843,91 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
         if (itr->second->IsDeleted())
             continue;
 
-        SpellProcEventEntry const* spellProcEvent = NULL;
+        SpellProcEventEntry const* spellProcEvent = nullptr;
+        // check if that aura is triggered by proc event (then it will be managed by proc handler)
         if (!IsTriggeredAtSpellProcEvent(pTarget, itr->second, procSpell, procFlag, procExtra, attType, isVictim, spellProcEvent))
+        {
+            // spell seem not managed by proc system, although some case need to be handled
+
+            // only process damage case on victim
+            if (!isVictim || !(procFlag & PROC_FLAG_TAKEN_ANY_DAMAGE))
+                continue;
+
+            const SpellEntry* se = itr->second->GetSpellProto();
+
+            // check if the aura is interruptible by damage and if its not just added by this spell (spell who is responsible for this damage is procSpell)
+            if (se->GetAuraInterruptFlags() & AURA_INTERRUPT_FLAG_DAMAGE && (!procSpell || procSpell->Id != se->Id))
+            {
+                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: Added Spell %u to 'remove aura due to spell' list! Reason: Damage received.", se->Id);
+                removedSpells.push_back(se->Id);
+            }
             continue;
+        }
 
         itr->second->SetInUse(true);                        // prevent holder deletion
         procTriggered.push_back(ProcTriggeredData(spellProcEvent, itr->second));
     }
 
-    // Nothing found
-    if (procTriggered.empty())
-        return;
-
-    // Handle effects proceed this time
-    for (ProcTriggeredList::const_iterator itr = procTriggered.begin(); itr != procTriggered.end(); ++itr)
+    if (!procTriggered.empty())
     {
-        // Some auras can be deleted in function called in this loop (except first, ofc)
-        SpellAuraHolder* triggeredByHolder = itr->triggeredByHolder;
-        if (triggeredByHolder->IsDeleted())
-            continue;
-
-        SpellProcEventEntry const* spellProcEvent = itr->spellProcEvent;
-        bool useCharges = triggeredByHolder->GetAuraCharges() > 0;
-        bool procSuccess = true;
-        bool anyAuraProc = false;
-
-        // For players set spell cooldown if need
-        uint32 cooldown = 0;
-        if (GetTypeId() == TYPEID_PLAYER && spellProcEvent && spellProcEvent->cooldown)
-            cooldown = spellProcEvent->cooldown;
-
-        for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        // Handle effects proceed this time
+        for (ProcTriggeredList::const_iterator itr = procTriggered.begin(); itr != procTriggered.end(); ++itr)
         {
-            Aura* triggeredByAura = triggeredByHolder->GetAuraByEffectIndex(SpellEffectIndex(i));
-            if (!triggeredByAura)
+            // Some auras can be deleted in function called in this loop (except first, ofc)
+            SpellAuraHolder* triggeredByHolder = itr->triggeredByHolder;
+            if (triggeredByHolder->IsDeleted())
                 continue;
 
-            SpellEffectEntry const* spellEffect = triggeredByHolder->GetSpellProto()->GetSpellEffect(SpellEffectIndex(i));
-            if (!spellEffect)
-                continue;
+            SpellProcEventEntry const* spellProcEvent = itr->spellProcEvent;
+            bool useCharges = triggeredByHolder->GetAuraCharges() > 0;
+            bool procSuccess = true;
+            bool anyAuraProc = false;
 
-            if (procSpell)
+            // For players set spell cooldown if need
+            uint32 cooldown = 0;
+            if (GetTypeId() == TYPEID_PLAYER && spellProcEvent && spellProcEvent->cooldown)
+                cooldown = spellProcEvent->cooldown;
+
+            for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
-                if (spellProcEvent)
-                {
-                    if (spellProcEvent->spellFamilyMask[i])
-                    {
-                        if (!procSpell->IsFitToFamilyMask(spellProcEvent->spellFamilyMask[i]))
-                            continue;
+                Aura* triggeredByAura = triggeredByHolder->GetAuraByEffectIndex(SpellEffectIndex(i));
+                if (!triggeredByAura)
+                    continue;
 
-                        // don't allow proc from cast end for non modifier spells
-                        // unless they have proc ex defined for that
-                        if (IsCastEndProcModifierAura(triggeredByHolder->GetSpellProto(), SpellEffectIndex(i), procSpell))
+                SpellEffectEntry const* spellEffect = triggeredByHolder->GetSpellProto()->GetSpellEffect(SpellEffectIndex(i));
+                if (!spellEffect)
+                    continue;
+
+                if (procSpell)
+                {
+                    if (spellProcEvent)
+                    {
+                        if (spellProcEvent->spellFamilyMask[i])
                         {
-                            if (useCharges && procExtra != PROC_EX_CAST_END && spellProcEvent->procEx == PROC_EX_NONE)
+                            if (!procSpell->IsFitToFamilyMask(spellProcEvent->spellFamilyMask[i]))
+                                continue;
+
+                            // don't allow proc from cast end for non modifier spells
+                            // unless they have proc ex defined for that
+                            if (IsCastEndProcModifierAura(triggeredByHolder->GetSpellProto(), SpellEffectIndex(i), procSpell))
+                            {
+                                if (useCharges && procExtra != PROC_EX_CAST_END && spellProcEvent->procEx == PROC_EX_NONE)
+                                    continue;
+                            }
+                            else if (spellProcEvent->procEx == PROC_EX_NONE && procExtra == PROC_EX_CAST_END)
                                 continue;
                         }
-                        else if (spellProcEvent->procEx == PROC_EX_NONE && procExtra == PROC_EX_CAST_END)
+                        // don't check dbc FamilyFlags if schoolMask exists
+                        else if (!triggeredByAura->CanProcFrom(procSpell, procFlag, spellProcEvent->procEx, procExtra, damage != 0, !spellProcEvent->schoolMask))
                             continue;
                     }
-                    // don't check dbc FamilyFlags if schoolMask exists
-                    else if (!triggeredByAura->CanProcFrom(procSpell, procFlag, spellProcEvent->procEx, procExtra, damage != 0, !spellProcEvent->schoolMask))
+                    else if (!triggeredByAura->CanProcFrom(procSpell, procFlag, PROC_EX_NONE, procExtra, damage != 0, true))
                         continue;
                 }
-                else if (!triggeredByAura->CanProcFrom(procSpell, procFlag, PROC_EX_NONE, procExtra, damage != 0, true))
-                    continue;
-            }
 
-            SpellAuraProcResult procResult = (*this.*AuraProcHandler[spellEffect->EffectApplyAuraName])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
-            switch (procResult)
-            {
+                SpellAuraProcResult procResult = (*this.*AuraProcHandler[spellEffect->EffectApplyAuraName])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
+                switch (procResult)
+                {
                 case SPELL_AURA_PROC_CANT_TRIGGER:
                     continue;
                 case SPELL_AURA_PROC_FAILED:
@@ -10893,20 +10935,21 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                     break;
                 case SPELL_AURA_PROC_OK:
                     break;
+                }
+
+                anyAuraProc = true;
             }
 
-            anyAuraProc = true;
-        }
+            // Remove charge (aura can be removed by triggers)
+            if (useCharges && procSuccess && anyAuraProc && !triggeredByHolder->IsDeleted())
+            {
+                // If last charge dropped add spell to remove list
+                if (triggeredByHolder->DropAuraCharge())
+                    removedSpells.push_back(triggeredByHolder->GetId());
+            }
 
-        // Remove charge (aura can be removed by triggers)
-        if (useCharges && procSuccess && anyAuraProc && !triggeredByHolder->IsDeleted())
-        {
-            // If last charge dropped add spell to remove list
-            if (triggeredByHolder->DropAuraCharge())
-                removedSpells.push_back(triggeredByHolder->GetId());
+            triggeredByHolder->SetInUse(false);
         }
-
-        triggeredByHolder->SetInUse(false);
     }
 
     if (!removedSpells.empty())

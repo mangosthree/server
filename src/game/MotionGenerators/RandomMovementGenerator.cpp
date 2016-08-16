@@ -47,12 +47,41 @@ RandomMovementGenerator<Creature>::RandomMovementGenerator(const Creature& creat
 template<>
 void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
 {
+    float destX = i_x;
+    float destY = i_y;
+    float destZ = i_z;
+
+    creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
+
+    // check if new random position is assigned, GetReachableRandomPosition may fail
+    if (creature.GetMap()->GetReachableRandomPosition(&creature, destX, destY, destZ, i_radius))
+    {
+        Movement::MoveSplineInit init(creature);
+        init.MoveTo(destX, destY, destZ, true);
+        init.SetWalk(true);
+        init.Launch();
+        if (roll_chance_i(MOVEMENT_RANDOM_MMGEN_CHANCE_NO_BREAK))
+            i_nextMoveTime.Reset(50);
+        else
+            i_nextMoveTime.Reset(urand(3000, 10000));       // Keep a short wait time
+    }
+    else
+        i_nextMoveTime.Reset(50);                           // Retry later
+    return;
+}
+
+/*
+void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
+{
     const float angle = rand_norm_f() * (M_PI_F * 2.0f);
     const float range = rand_norm_f() * i_radius;
 
-    float destX = i_x + range * cos(angle);
-    float destY = i_y + range * sin(angle);
-    float destZ = i_z + frand(-1, 1) * i_verticalZ;
+    float destX = i_x;
+    float destY = i_y;
+    float destZ = i_z;
+    //    float destX = i_x + range * cos(angle);
+    //    float destY = i_y + range * sin(angle);
+    //    float destZ = i_z + frand(-1, 1) * i_verticalZ;
     creature.UpdateAllowedPositionZ(destX, destY, destZ);
 
     creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
@@ -67,6 +96,7 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
     else
         i_nextMoveTime.Reset(urand(500, 10000));
 }
+*/
 
 template<>
 void RandomMovementGenerator<Creature>::Initialize(Creature& creature)

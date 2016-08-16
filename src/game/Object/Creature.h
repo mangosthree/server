@@ -49,17 +49,23 @@ struct GameEventCreatureData;
 
 enum CreatureFlagsExtra
 {
-    CREATURE_FLAG_EXTRA_INSTANCE_BIND   = 0x00000001,       // creature kill bind instance with killer and killer's group
-    CREATURE_FLAG_EXTRA_CIVILIAN        = 0x00000002,       // not aggro (ignore faction/reputation hostility)
-    CREATURE_FLAG_EXTRA_NO_PARRY        = 0x00000004,       // creature can't parry
-    CREATURE_FLAG_EXTRA_NO_PARRY_HASTEN = 0x00000008,       // creature can't counter-attack at parry
-    CREATURE_FLAG_EXTRA_NO_BLOCK        = 0x00000010,       // creature can't block
-    CREATURE_FLAG_EXTRA_NO_CRUSH        = 0x00000020,       // creature can't do crush attacks
-    CREATURE_FLAG_EXTRA_NO_XP_AT_KILL   = 0x00000040,       // creature kill not provide XP
-    CREATURE_FLAG_EXTRA_INVISIBLE       = 0x00000080,       // creature is always invisible for player (mostly trigger creatures)
-    CREATURE_FLAG_EXTRA_NOT_TAUNTABLE   = 0x00000100,       // creature is immune to taunt auras and effect attack me
-    CREATURE_FLAG_EXTRA_AGGRO_ZONE      = 0x00000200,       // creature sets itself in combat with zone on aggro
-    CREATURE_FLAG_EXTRA_GUARD           = 0x00000400,       // creature is a guard
+    CREATURE_EXTRA_FLAG_INSTANCE_BIND           = 0x00000001,       // creature kill bind instance with killer and killer's group
+    CREATURE_EXTRA_FLAG_CIVILIAN                = 0x00000002,       // not aggro (ignore faction/reputation hostility)
+    CREATURE_EXTRA_FLAG_NO_PARRY                = 0x00000004,       // creature can't parry
+    CREATURE_EXTRA_FLAG_NO_PARRY_HASTEN         = 0x00000008,       // creature can't counter-attack at parry
+    CREATURE_EXTRA_FLAG_NO_BLOCK                = 0x00000010,       // creature can't block
+    CREATURE_EXTRA_FLAG_NO_CRUSH                = 0x00000020,       // creature can't do crush attacks
+    CREATURE_EXTRA_FLAG_NO_XP_AT_KILL           = 0x00000040,       // creature kill not provide XP
+    CREATURE_EXTRA_FLAG_INVISIBLE               = 0x00000080,       // creature is always invisible for player (mostly trigger creatures)
+    CREATURE_EXTRA_FLAG_NOT_TAUNTABLE           = 0x00000100,       // creature is immune to taunt auras and effect attack me
+    CREATURE_EXTRA_FLAG_AGGRO_ZONE              = 0x00000200,       // creature sets itself in combat with zone on aggro
+    CREATURE_EXTRA_FLAG_GUARD                   = 0x00000400,       // creature is a guard
+    CREATURE_EXTRA_FLAG_NO_CALL_ASSIST          = 0x00000800,       // creature shouldn't call for assistance on aggro
+    CREATURE_EXTRA_FLAG_ACTIVE                  = 0x00001000,       // creature is active object. Grid of this creature will be loaded and creature set as active
+    CREATURE_EXTRA_FLAG_MMAP_FORCE_ENABLE       = 0x00002000,       // creature is forced to use MMaps
+    CREATURE_EXTRA_FLAG_MMAP_FORCE_DISABLE      = 0x00004000,       // creature is forced to NOT use MMaps
+    CREATURE_EXTRA_FLAG_WALK_IN_WATER           = 0x00008000,       // creature is forced to walk in water even it can swim
+    CREATURE_EXTRA_FLAG_HAVE_NO_SWIM_ANIMATION  = 0x00010000,       // we have to not set "swim" animation or creature will have "no animation"
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
@@ -72,7 +78,123 @@ enum CreatureFlagsExtra
 #define MAX_KILL_CREDIT 2
 #define MAX_CREATURE_MODEL 4
 
+
 // from `creature_template` table
+struct CreatureInfo
+{
+    uint32  Entry;
+    char*   Name;
+    char*   SubName;
+    char*   IconName;
+    uint32  MinLevel;
+    uint32  MaxLevel;
+    uint32  DifficultyEntry[MAX_DIFFICULTY - 1];
+    uint32  ModelId[MAX_CREATURE_MODEL];
+    uint32  FactionAlliance;
+    uint32  FactionHorde;
+    float   Scale;
+    uint32  Family;                                        // enum CreatureFamily values (optional)
+    uint32  CreatureType;                                  // enum CreatureType values
+    uint32  InhabitType;
+    uint32  RegenerateStats;
+    bool    RacialLeader;
+    uint32  NpcFlags;
+    uint32  UnitFlags;                                     // enum UnitFlags mask values
+    uint32  UnitFlags2;                                    // enum UnitFlags2 mask values
+    uint32  DynamicFlags;
+    uint32  ExtraFlags;
+    uint32  CreatureTypeFlags;                             // enum CreatureTypeFlags mask values
+    float   SpeedWalk;
+    float   SpeedRun;
+    uint32  UnitClass;                                     // enum Classes. Note only 4 classes are known for creatures.
+    uint32  Rank;
+    int32   Expansion;                                      // creature expansion, important for stats, CAN BE -1 as marker for some invalid cases.
+    float   HealthMultiplier;
+    float   PowerMultiplier;
+    float   DamageMultiplier;
+    float   DamageVariance;
+    float   ArmorMultiplier;
+    float   ExperienceMultiplier;
+    uint32  MinLevelHealth;
+    uint32  MaxLevelHealth;
+    uint32  MinLevelMana;
+    uint32  MaxLevelMana;
+    float   MinMeleeDmg;
+    float   MaxMeleeDmg;
+    float   MinRangedDmg;
+    float   MaxRangedDmg;
+    uint32  Armor;
+    uint32  MeleeAttackPower;
+    uint32  RangedAttackPower;
+    uint32  MeleeBaseAttackTime;
+    uint32  RangedBaseAttackTime;
+    uint32  DamageSchool;
+    uint32  MinLootGold;
+    uint32  MaxLootGold;
+    uint32  LootId;
+    uint32  PickpocketLootId;
+    uint32  SkinningLootId;
+    uint32  KillCredit[MAX_KILL_CREDIT];
+    uint32  QuestItems[6];
+    uint32  MechanicImmuneMask;
+    int32   ResistanceHoly;
+    int32   ResistanceFire;
+    int32   ResistanceNature;
+    int32   ResistanceFrost;
+    int32   ResistanceShadow;
+    int32   ResistanceArcane;
+    uint32  PetSpellDataId;
+    uint32  MovementType;
+    uint32  MovementTemplateId;
+    uint32  TrainerType;
+    uint32  TrainerSpell;
+    uint32  TrainerClass;
+    uint32  TrainerRace;
+    uint32  TrainerTemplateId;
+    uint32  VendorTemplateId;
+    uint32  EquipmentTemplateId;
+    uint32  VehicleTemplateId;
+    uint32  GossipMenuId;
+    char const* AIName;
+
+    // helpers
+    HighGuid GetHighGuid() const
+    {
+        return VehicleTemplateId ? HIGHGUID_VEHICLE : HIGHGUID_UNIT;
+    }
+
+    ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(GetHighGuid(), Entry, lowguid); }
+
+    SkillType GetRequiredLootSkill() const
+    {
+        if (CreatureTypeFlags & CREATURE_TYPEFLAGS_HERBLOOT)
+            return SKILL_HERBALISM;
+        else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
+            return SKILL_MINING;
+        else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
+            return SKILL_ENGINEERING;
+        else
+            return SKILL_SKINNING;                          // normal case
+    }
+
+    bool IsExotic() const
+    {
+        return (CreatureTypeFlags & CREATURE_TYPEFLAGS_EXOTIC);
+    }
+
+    bool isTameable(bool exotic) const
+    {
+        if (CreatureType != CREATURE_TYPE_BEAST || Family == 0 || (CreatureTypeFlags & CREATURE_TYPEFLAGS_TAMEABLE) == 0)
+            return false;
+
+        // if can tame exotic then can tame any temable
+        return exotic || !IsExotic();
+    }
+};
+
+
+// from `creature_template` table
+/*
 struct CreatureInfo
 {
     uint32  Entry;
@@ -83,16 +205,16 @@ struct CreatureInfo
     char*   SubName;
     char*   IconName;
     uint32  GossipMenuId;
-    uint32  minlevel;
-    uint32  maxlevel;
-    uint32  minhealth;
+    uint32  MinLevel;
+    uint32  MaxLevel;
+    uint32  MinLevelHealth;
     uint32  maxhealth;
-    uint32  minmana;
+    uint32  MinLevelMana;
     uint32  maxmana;
     uint32  armor;
     uint32  FactionAlliance;
     uint32  FactionHorde;
-    uint32  npcflag;
+    uint32  NpcFlags;
     float   speed_walk;
     float   speed_run;
     float   Scale;
@@ -102,25 +224,25 @@ struct CreatureInfo
     uint32  dmgschool;
     uint32  attackpower;
     float   dmg_multiplier;
-    uint32  baseattacktime;
-    uint32  rangeattacktime;
-    uint32  unit_class;                                     // enum Classes. Note only 4 classes are known for creatures.
-    uint32  unit_flags;                                     // enum UnitFlags mask values
-    uint32  unit_flags2;                                    // enum UnitFlags2 mask values
+    uint32  MeleeAttackPower;
+    uint32  RangedAttackPower;
+    uint32  UnitClass;                                     // enum Classes. Note only 4 classes are known for creatures.
+    uint32  UnitFlags;                                     // enum UnitFlags mask values
+    uint32  UnitFlags2;                                    // enum UnitFlags2 mask values
     uint32  dynamicflags;
     uint32  family;                                         // enum CreatureFamily values (optional)
-    uint32  trainer_type;
+    uint32  TrainerType;
     uint32  trainer_spell;
-    uint32  trainer_class;
+    uint32  TrainerClass;
     uint32  trainer_race;
     float   minrangedmg;
     float   maxrangedmg;
     uint32  rangedattackpower;
     uint32  type;                                           // enum CreatureType values
     uint32  CreatureTypeFlags;                                     // enum CreatureTypeFlags mask values
-    uint32  lootid;
+    uint32  Lootid;
     uint32  pickpocketLootId;
-    uint32  SkinLootId;
+    uint32  SkinningLootId;
     int32   resistance1;
     int32   resistance2;
     int32   resistance3;
@@ -128,7 +250,7 @@ struct CreatureInfo
     int32   resistance5;
     int32   resistance6;
     uint32  PetSpellDataId;
-    uint32  mingold;
+    uint32  MinLootGold;
     uint32  maxgold;
     char const* AIName;
     uint32  MovementType;
@@ -141,8 +263,8 @@ struct CreatureInfo
     bool    RegenHealth;
     uint32  VehicleTemplateId;
     uint32  EquipmentTemplateId;
-    uint32  trainerId;
-    uint32  vendorId;
+    uint32  TrainerTemplateId;
+    uint32  VendorTemplateId;
     uint32  MechanicImmuneMask;
     uint32  ExtraFlags;
 
@@ -179,7 +301,7 @@ struct CreatureInfo
         // if can tame exotic then can tame any temable
         return exotic || !IsExotic();
     }
-};
+}; */
 
 struct CreatureTemplateSpells
 {
@@ -328,6 +450,12 @@ enum SelectFlags
     SELECT_FLAG_POWER_RUNIC         = 0x020,
     SELECT_FLAG_IN_MELEE_RANGE      = 0x040,
     SELECT_FLAG_NOT_IN_MELEE_RANGE  = 0x080,
+};
+
+enum RegenStatsFlags
+{
+    REGEN_FLAG_HEALTH = 0x001,
+    REGEN_FLAG_POWER = 0x002,
 };
 
 // Vendors
@@ -501,7 +629,7 @@ class Creature : public Unit
 
         bool Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, Team team = TEAM_NONE, const CreatureData* data = NULL, GameEventCreatureData const* eventData = NULL);
         bool LoadCreatureAddon(bool reload);
-        void SelectLevel(const CreatureInfo* cinfo, float percentHealth = 100.0f, float percentMana = 100.0f);
+        void SelectLevel(const CreatureInfo* cinfo, float percentHealth = 100.0f);
         void LoadEquipment(uint32 equip_entry, bool force = false);
 
         bool HasStaticDBSpawnData() const;                  // listed in `creature` table and have fixed in DB guid
@@ -523,12 +651,14 @@ class Creature : public Unit
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         uint32 GetCorpseDelay() const { return m_corpseDelay; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
-        bool IsCivilian() const { return GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_CIVILIAN; }
-        bool IsGuard() const { return GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_GUARD; }
+        bool IsCivilian() const { return GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_CIVILIAN; }
+        bool IsGuard() const { return GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_GUARD; }
 
         bool CanWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
-        virtual bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
-        bool CanFly()  const { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_FLY_ANIM) || HasAuraType(SPELL_AURA_FLY); }
+        bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
+        bool IsSwimming() const { return (m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_SWIMMING))); }
+        bool CanFly() const { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_FLY_ANIM) || m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_LEVITATING | MOVEFLAG_CAN_FLY)); }
+        bool IsFlying() const { return (m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_FLYING | MOVEFLAG_LEVITATING))); }
 
         bool IsTrainerOf(Player* player, bool msg) const;
         bool CanInteractWithBattleMaster(Player* player, bool msg) const;
@@ -745,7 +875,8 @@ class Creature : public Unit
         bool HasInvolvedQuest(uint32 quest_id)  const override;
 
         GridReference<Creature>& GetGridRef() { return m_gridRef; }
-        bool IsRegeneratingHealth() { return m_regenHealth; }
+        bool IsRegeneratingHealth() { return GetCreatureInfo()->RegenerateStats & REGEN_FLAG_HEALTH; }
+        bool IsRegeneratingPower() { return GetCreatureInfo()->RegenerateStats & REGEN_FLAG_POWER; }
         virtual uint8 GetPetAutoSpellSize() const { return CREATURE_MAX_SPELLS; }
         virtual uint32 GetPetAutoSpellOnPos(uint8 pos) const
         {
@@ -802,6 +933,7 @@ class Creature : public Unit
         time_t m_respawnTime;                               // (secs) time of next respawn
         uint32 m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
         uint32 m_corpseDelay;                               // (secs) delay between death and corpse disappearance
+        uint32 m_aggroDelay;                                // (msecs)delay between respawn and aggro due to movement
         float m_respawnradius;
 
         CreatureSubtype m_subtype;                          // set in Creatures subclasses for fast it detect without dynamic_cast use

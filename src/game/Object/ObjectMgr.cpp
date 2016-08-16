@@ -527,38 +527,38 @@ void ObjectMgr::LoadCreatureTemplates()
             if (!ok2)
                 continue;
 
-            if (cInfo->unit_class != difficultyInfo->unit_class)
+            if (cInfo->UnitClass != difficultyInfo->UnitFlags)
             {
-                sLog.outErrorDb("Creature (Entry: %u, class %u) has different `unit_class` in difficulty %u mode (Entry: %u, class %u).",
-                                i, cInfo->unit_class, diff + 1, cInfo->DifficultyEntry[diff], difficultyInfo->unit_class);
+                sLog.outErrorDb("Creature (Entry: %u, class %u) has different `UnitClass` in difficulty %u mode (Entry: %u, class %u).",
+                    i, cInfo->UnitClass, diff + 1, cInfo->DifficultyEntry[diff], difficultyInfo->UnitClass);
                 continue;
             }
 
-            if (cInfo->npcflag != difficultyInfo->npcflag)
+            if (cInfo->NpcFlags != difficultyInfo->NpcFlags)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has different `npcflag` in difficulty %u mode (Entry: %u).", i, diff + 1, cInfo->DifficultyEntry[diff]);
+                sLog.outErrorDb("Creature (Entry: %u) has different `NpcFlags` in difficulty %u mode (Entry: %u).", i, diff + 1, cInfo->DifficultyEntry[diff]);
                 continue;
             }
 
-            if (cInfo->trainer_class != difficultyInfo->trainer_class)
+            if (cInfo->TrainerClass != difficultyInfo->TrainerClass)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_class` in difficulty %u mode (Entry: %u).", i, diff + 1, cInfo->DifficultyEntry[diff]);
+                sLog.outErrorDb("Creature (Entry: %u) has different `TrainerClass` in difficulty %u mode (Entry: %u).", i, diff + 1, cInfo->DifficultyEntry[diff]);
                 continue;
             }
 
-            if (cInfo->trainer_race != difficultyInfo->trainer_race)
+            if (cInfo->TrainerRace != difficultyInfo->TrainerRace)
             {
                 sLog.outErrorDb("Creature (Entry: %u) has different `trainer_race` in difficulty %u mode (Entry: %u).", i, diff + 1, cInfo->DifficultyEntry[diff]);
                 continue;
             }
 
-            if (cInfo->trainer_type != difficultyInfo->trainer_type)
+            if (cInfo->TrainerType != difficultyInfo->TrainerType)
             {
-                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_type` in difficulty %u mode (Entry: %u).", i, diff + 1, cInfo->DifficultyEntry[diff]);
+                sLog.outErrorDb("Creature (Entry: %u) has different `TrainerType` in difficulty %u mode (Entry: %u).", i, diff + 1, cInfo->DifficultyEntry[diff]);
                 continue;
             }
 
-            if (cInfo->trainer_spell != difficultyInfo->trainer_spell)
+            if (cInfo->TrainerSpell != difficultyInfo->TrainerSpell)
             {
                 sLog.outErrorDb("Creature (Entry: %u) has different `trainer_spell` in difficulty %u mode (Entry: %u).", i, diff + 1, cInfo->DifficultyEntry[diff]);
                 continue;
@@ -630,56 +630,89 @@ void ObjectMgr::LoadCreatureTemplates()
         if (!displayScaleEntry)
             sLog.outErrorDb("Creature (Entry: %u) has nonexistent modelid in modelid_1/modelid_2/modelid_3/modelid_4", cInfo->Entry);
 
-        if (!cInfo->minlevel)
+        if (!cInfo->MinLevel)
         {
             sLog.outErrorDb("Creature (Entry: %u) has invalid minlevel, set to 1", cInfo->Entry);
-            const_cast<CreatureInfo*>(cInfo)->minlevel = 1;
+            const_cast<CreatureInfo*>(cInfo)->MinLevel = 1;
         }
 
-        if (cInfo->minlevel > cInfo->maxlevel)
+        if (cInfo->MinLevel > cInfo->MaxLevel)
         {
             sLog.outErrorDb("Creature (Entry: %u) has invalid maxlevel, set to minlevel", cInfo->Entry);
-            const_cast<CreatureInfo*>(cInfo)->maxlevel = cInfo->minlevel;
+            const_cast<CreatureInfo*>(cInfo)->MaxLevel = cInfo->MinLevel;
         }
 
-        // use below code for 0-checks for unit_class
-        if (!cInfo->unit_class)
-            ERROR_DB_STRICT_LOG("Creature (Entry: %u) not has proper unit_class(%u) for creature_template", cInfo->Entry, cInfo->unit_class);
-        else if (((1 << (cInfo->unit_class - 1)) & CLASSMASK_ALL_CREATURES) == 0)
-            sLog.outErrorDb("Creature (Entry: %u) has invalid unit_class(%u) for creature_template", cInfo->Entry, cInfo->unit_class);
-
-        if (cInfo->dmgschool >= MAX_SPELL_SCHOOL)
+        if (cInfo->MinLevel > DEFAULT_MAX_CREATURE_LEVEL)
         {
-            sLog.outErrorDb("Creature (Entry: %u) has invalid spell school value (%u) in `dmgschool`", cInfo->Entry, cInfo->dmgschool);
-            const_cast<CreatureInfo*>(cInfo)->dmgschool = SPELL_SCHOOL_NORMAL;
+            sLog.outErrorDb("Creature (Entry: %u) `MinLevel` exceeds maximum allowed value of '%u'", cInfo->Entry, uint32(DEFAULT_MAX_CREATURE_LEVEL));
+            const_cast<CreatureInfo*>(cInfo)->MinLevel = uint32(DEFAULT_MAX_CREATURE_LEVEL);
         }
 
-        if (cInfo->baseattacktime == 0)
-            const_cast<CreatureInfo*>(cInfo)->baseattacktime  = BASE_ATTACK_TIME;
+        if (cInfo->MaxLevel > DEFAULT_MAX_CREATURE_LEVEL)
+        {
+            sLog.outErrorDb("Creature (Entry: %u) `MaxLevel` exceeds maximum allowed value of '%u'", cInfo->Entry, uint32(DEFAULT_MAX_CREATURE_LEVEL));
+            const_cast<CreatureInfo*>(cInfo)->MaxLevel = uint32(DEFAULT_MAX_CREATURE_LEVEL);
+        }
 
-        if (cInfo->rangeattacktime == 0)
-            const_cast<CreatureInfo*>(cInfo)->rangeattacktime = BASE_ATTACK_TIME;
+        if (cInfo->Expansion > MAX_EXPANSION)
+        {
+            sLog.outErrorDb("Creature (Entry: %u) `Expansion(%u)` is not correct", cInfo->Entry, uint32(MAX_EXPANSION));
+            const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
+        }
 
-        if (cInfo->npcflag & UNIT_NPC_FLAG_SPELLCLICK)
+        if (!cInfo->UnitClass || (((1 << (cInfo->UnitClass - 1)) & CLASSMASK_ALL_CREATURES) == 0))
+        {
+            ERROR_DB_STRICT_LOG("Creature (Entry: %u) does not have proper `UnitClass` (%u) in creature_template", cInfo->Entry, cInfo->UnitClass);
+            // Mark NPC as having improper data by his expansion
+            const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
+        }
+
+        if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK) && cInfo->Expansion >= 0)  // TODO - Remove the DB_STRICTED_CHECK after a while
+        {
+            // check if ClassLevel data are available for all possible level of that creature
+            for (uint32 level = cInfo->MinLevel; level <= cInfo->MaxLevel; ++level)
+            {
+                if (!GetCreatureClassLvlStats(level, cInfo->UnitClass, cInfo->Expansion))
+                {
+                    sLog.outErrorDb("Creature (Entry: %u), level(%u) has no data in `creature_template_classlevelstats`", cInfo->Entry, level);
+                    // Deactivate using ClassLevelStats for this NPC
+                    const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
+                }
+            }
+        }
+
+        if (cInfo->DamageSchool >= MAX_SPELL_SCHOOL)
+        {
+            sLog.outErrorDb("Creature (Entry: %u) has invalid spell school value (%u) in `DamageSchool`", cInfo->Entry, cInfo->DamageSchool);
+            const_cast<CreatureInfo*>(cInfo)->DamageSchool = SPELL_SCHOOL_NORMAL;
+        }
+
+        if (cInfo->MeleeAttackPower == 0)
+            const_cast<CreatureInfo*>(cInfo)->MeleeAttackPower  = BASE_ATTACK_TIME;
+
+        if (cInfo->RangedAttackPower == 0)
+            const_cast<CreatureInfo*>(cInfo)->RangedAttackPower = BASE_ATTACK_TIME;
+
+        if (cInfo->NpcFlags & UNIT_NPC_FLAG_SPELLCLICK)
         {
             sLog.outDebug("Creature (Entry: %u) has dynamic flag UNIT_NPC_FLAG_SPELLCLICK (%u) set, but it is expected to be set in run-time based at `npc_spellclick_spells` contents.", cInfo->Entry, UNIT_NPC_FLAG_SPELLCLICK);
-            const_cast<CreatureInfo*>(cInfo)->npcflag &= ~UNIT_NPC_FLAG_SPELLCLICK;
+            const_cast<CreatureInfo*>(cInfo)->NpcFlags &= ~UNIT_NPC_FLAG_SPELLCLICK;
         }
 
-        if ((cInfo->npcflag & UNIT_NPC_FLAG_TRAINER) && cInfo->trainer_type >= MAX_TRAINER_TYPE)
-            sLog.outErrorDb("Creature (Entry: %u) has wrong trainer type %u", cInfo->Entry, cInfo->trainer_type);
+        if ((cInfo->NpcFlags & UNIT_NPC_FLAG_TRAINER) && cInfo->TrainerType >= MAX_TRAINER_TYPE)
+            sLog.outErrorDb("Creature (Entry: %u) has wrong trainer type %u", cInfo->Entry, cInfo->TrainerType);
 
-        if (cInfo->type && !sCreatureTypeStore.LookupEntry(cInfo->type))
+        if (cInfo->CreatureType && !sCreatureTypeStore.LookupEntry(cInfo->CreatureType))
         {
-            sLog.outErrorDb("Creature (Entry: %u) has invalid creature type (%u) in `type`", cInfo->Entry, cInfo->type);
-            const_cast<CreatureInfo*>(cInfo)->type = CREATURE_TYPE_HUMANOID;
+            sLog.outErrorDb("Creature (Entry: %u) has invalid creature type (%u) in `type`", cInfo->Entry, cInfo->CreatureType);
+            const_cast<CreatureInfo*>(cInfo)->CreatureType = CREATURE_TYPE_HUMANOID;
         }
 
         // must exist or used hidden but used in data horse case
-        if (cInfo->family && !sCreatureFamilyStore.LookupEntry(cInfo->family) && cInfo->family != CREATURE_FAMILY_HORSE_CUSTOM)
+        if (cInfo->Family && !sCreatureFamilyStore.LookupEntry(cInfo->Family) && cInfo->Family != CREATURE_FAMILY_HORSE_CUSTOM)
         {
-            sLog.outErrorDb("Creature (Entry: %u) has invalid creature family (%u) in `family`", cInfo->Entry, cInfo->family);
-            const_cast<CreatureInfo*>(cInfo)->family = 0;
+            sLog.outErrorDb("Creature (Entry: %u) has invalid creature family (%u) in `Family`", cInfo->Entry, cInfo->Family);
+            const_cast<CreatureInfo*>(cInfo)->Family = 0;
         }
 
         if (cInfo->InhabitType <= 0 || cInfo->InhabitType > INHABIT_ANYWHERE)
@@ -716,10 +749,10 @@ void ObjectMgr::LoadCreatureTemplates()
             }
         }
 
-        if (cInfo->vendorId > 0)
+        if (cInfo->VendorTemplateId > 0)
         {
-            if (!(cInfo->npcflag & UNIT_NPC_FLAG_VENDOR))
-                sLog.outErrorDb("Table `creature_template` have creature (Entry: %u) with vendor_id %u but not have flag UNIT_NPC_FLAG_VENDOR (%u), vendor items will ignored.", cInfo->Entry, cInfo->vendorId, UNIT_NPC_FLAG_VENDOR);
+            if (!(cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR))
+                sLog.outErrorDb("Table `creature_template` have creature (Entry: %u) with vendor_id %u but not have flag UNIT_NPC_FLAG_VENDOR (%u), vendor items will ignored.", cInfo->Entry, cInfo->VendorTemplateId, UNIT_NPC_FLAG_VENDOR);
         }
 
         /// if not set custom creature Scale then load Scale from CreatureDisplayInfo.dbc
@@ -946,6 +979,19 @@ void ObjectMgr::LoadCreatureClassLvlStats()
 
 	sLog.outString();
 	sLog.outString(">> Loaded %u creature class level stats definitions.", DataCount);
+}
+
+CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, uint32 unitClass, int32 expansion) const
+{
+    if (expansion < 0)
+        return nullptr;
+
+    CreatureClassLvlStats const* cCLS = &m_creatureClassLvlStats[level][classToIndex[unitClass]][expansion];
+
+    if (cCLS->BaseHealth != 0 && cCLS->BaseDamage > 0.1f)
+        return cCLS;
+
+    return nullptr;
 }
 
 void ObjectMgr::LoadEquipmentTemplates()
@@ -1401,30 +1447,30 @@ void ObjectMgr::LoadCreatures()
             }
         }
 
-        if (cInfo->RegenHealth && data.curhealth < cInfo->minhealth)
+        if (cInfo->RegenerateStats & REGEN_FLAG_HEALTH && data.curhealth < cInfo->MinLevelHealth)
         {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenHealth`=1 and low current health (%u), `creature_template`.`minhealth`=%u.", guid, data.id, data.curhealth, cInfo->minhealth);
-            data.curhealth = cInfo->minhealth;
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenHealth`=1 and low current health (%u), `creature_template`.`MinLevelHealth`=%u.", guid, data.id, data.curhealth, cInfo->MinLevelHealth);
+            data.curhealth = cInfo->MinLevelHealth;
         }
 
-        if (cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
+        if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_INSTANCE_BIND)
         {
             if (!mapEntry || !mapEntry->IsDungeon())
-                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_FLAG_EXTRA_INSTANCE_BIND (%u) but creature are not in instance.",
-                                guid, data.id, CREATURE_FLAG_EXTRA_INSTANCE_BIND);
+                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_EXTRA_FLAG_INSTANCE_BIND (%u) but creature are not in instance.",
+                                guid, data.id, CREATURE_EXTRA_FLAG_INSTANCE_BIND);
         }
 
-        if (cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_AGGRO_ZONE)
+        if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_AGGRO_ZONE)
         {
             if (!mapEntry || !mapEntry->IsDungeon())
-                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_FLAG_EXTRA_AGGRO_ZONE (%u) but creature are not in instance.",
-                                guid, data.id, CREATURE_FLAG_EXTRA_AGGRO_ZONE);
+                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_EXTRA_FLAG_AGGRO_ZONE (%u) but creature are not in instance.",
+                                guid, data.id, CREATURE_EXTRA_FLAG_AGGRO_ZONE);
         }
 
-        if (data.curmana < cInfo->minmana)
+        if (data.curmana < cInfo->MinLevelMana)
         {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with low current mana (%u), `creature_template`.`minmana`=%u.", guid, data.id, data.curmana, cInfo->minmana);
-            data.curmana = cInfo->minmana;
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with low current mana (%u), `creature_template`.`MinLevelMana`=%u.", guid, data.id, data.curmana, cInfo->MinLevelMana);
+            data.curmana = cInfo->MinLevelMana;
         }
 
         if (data.spawndist < 0.0f)
@@ -6601,7 +6647,7 @@ std::string ObjectMgr::GeneratePetName(uint32 entry)
     if (list0.empty() || list1.empty())
     {
         CreatureInfo const* cinfo = GetCreatureTemplate(entry);
-        char const* petname = GetPetName(cinfo->family, sWorld.GetDefaultDbcLocale());
+        char const* petname = GetPetName(cinfo->Family, sWorld.GetDefaultDbcLocale());
         if (!petname)
             petname = cinfo->Name;
         return std::string(petname);
@@ -7340,7 +7386,7 @@ void ObjectMgr::LoadNPCSpellClickSpells()
         mSpellClickInfoMap.insert(SpellClickInfoMap::value_type(npc_entry, info));
 
         // mark creature template as spell clickable
-        const_cast<CreatureInfo*>(cInfo)->npcflag |= UNIT_NPC_FLAG_SPELLCLICK;
+        const_cast<CreatureInfo*>(cInfo)->NpcFlags |= UNIT_NPC_FLAG_SPELLCLICK;
 
         ++count;
     }
@@ -7544,8 +7590,8 @@ void ObjectMgr::LoadCreatureQuestRelations()
         CreatureInfo const* cInfo = GetCreatureTemplate(itr->first);
         if (!cInfo)
             sLog.outErrorDb("Table `creature_questrelation` have data for nonexistent creature entry (%u) and existing quest %u", itr->first, itr->second);
-        else if (!(cInfo->npcflag & UNIT_NPC_FLAG_QUESTGIVER))
-            sLog.outErrorDb("Table `creature_questrelation` has creature entry (%u) for quest %u, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", itr->first, itr->second);
+        else if (!(cInfo->NpcFlags & UNIT_NPC_FLAG_QUESTGIVER))
+            sLog.outErrorDb("Table `creature_questrelation` has creature entry (%u) for quest %u, but NpcFlags does not include UNIT_NPC_FLAG_QUESTGIVER", itr->first, itr->second);
     }
 }
 
@@ -7558,8 +7604,8 @@ void ObjectMgr::LoadCreatureInvolvedRelations()
         CreatureInfo const* cInfo = GetCreatureTemplate(itr->first);
         if (!cInfo)
             sLog.outErrorDb("Table `creature_involvedrelation` have data for nonexistent creature entry (%u) and existing quest %u", itr->first, itr->second);
-        else if (!(cInfo->npcflag & UNIT_NPC_FLAG_QUESTGIVER))
-            sLog.outErrorDb("Table `creature_involvedrelation` has creature entry (%u) for quest %u, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", itr->first, itr->second);
+        else if (!(cInfo->NpcFlags & UNIT_NPC_FLAG_QUESTGIVER))
+            sLog.outErrorDb("Table `creature_involvedrelation` has creature entry (%u) for quest %u, but NpcFlags does not include UNIT_NPC_FLAG_QUESTGIVER", itr->first, itr->second);
     }
 }
 
@@ -7997,10 +8043,10 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
         // Load additional string content if necessary
         if (extra_content)
         {
-            data.SoundId     = fields[10].GetUInt32();
-            data.Type        = fields[11].GetUInt32();
-            data.LanguageId  = (Language)fields[12].GetUInt32();
-            data.Emote       = fields[13].GetUInt32();
+            data.SoundId = fields[10].GetUInt32();
+            data.Type = fields[11].GetUInt32();
+            data.LanguageId = Language(fields[12].GetUInt32());
+            data.Emote = fields[13].GetUInt32();
 
             if (data.SoundId && !sSoundEntriesStore.LookupEntry(data.SoundId))
             {
@@ -8010,7 +8056,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
 
             if (!GetLanguageDescByID(data.LanguageId))
             {
-                _DoStringError(entry, "Entry %i in table `%s` using Language %u but Language does not exist.", entry, table, data.LanguageId);
+                _DoStringError(entry, "Entry %i in table `%s` using Language %u but Language does not exist.", entry, table, uint32(data.LanguageId));
                 data.LanguageId = LANG_UNIVERSAL;
             }
 
@@ -9237,7 +9283,7 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
                 continue;
             }
 
-            if (!(cInfo->npcflag & UNIT_NPC_FLAG_TRAINER))
+            if (!(cInfo->NpcFlags & UNIT_NPC_FLAG_TRAINER))
             {
                 if (skip_trainers.find(entry) == skip_trainers.end())
                 {
@@ -9247,11 +9293,11 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
                 continue;
             }
 
-            if (TrainerSpellData const* tSpells = cInfo->trainerId ? GetNpcTrainerTemplateSpells(cInfo->trainerId) : NULL)
+            if (TrainerSpellData const* tSpells = cInfo->TrainerTemplateId ? GetNpcTrainerTemplateSpells(cInfo->TrainerTemplateId) : NULL)
             {
                 if (tSpells->spellList.find(spell) != tSpells->spellList.end())
                 {
-                    sLog.outErrorDb("Table `%s` (Entry: %u) has spell %u listed in trainer template %u, ignore", tableName, entry, spell, cInfo->trainerId);
+                    sLog.outErrorDb("Table `%s` (Entry: %u) has spell %u listed in trainer template %u, ignore", tableName, entry, spell, cInfo->TrainerTemplateId);
                     continue;
                 }
             }
@@ -9349,12 +9395,12 @@ void ObjectMgr::LoadTrainerTemplates()
     {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
         {
-            if (cInfo->trainerId)
+            if (cInfo->TrainerTemplateId)
             {
-                if (m_mCacheTrainerTemplateSpellMap.find(cInfo->trainerId) != m_mCacheTrainerTemplateSpellMap.end())
-                    trainer_ids.erase(cInfo->trainerId);
+                if (m_mCacheTrainerTemplateSpellMap.find(cInfo->TrainerTemplateId) != m_mCacheTrainerTemplateSpellMap.end())
+                    trainer_ids.erase(cInfo->TrainerTemplateId);
                 else
-                    sLog.outErrorDb("Creature (Entry: %u) has trainer_id = %u for nonexistent trainer template", cInfo->Entry, cInfo->trainerId);
+                    sLog.outErrorDb("Creature (Entry: %u) has trainer_id = %u for nonexistent trainer template", cInfo->Entry, cInfo->TrainerTemplateId);
             }
         }
     }
@@ -9433,12 +9479,12 @@ void ObjectMgr::LoadVendorTemplates()
     {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
         {
-            if (cInfo->vendorId)
+            if (cInfo->VendorTemplateId)
             {
-                if (m_mCacheVendorTemplateItemMap.find(cInfo->vendorId) !=  m_mCacheVendorTemplateItemMap.end())
-                    vendor_ids.erase(cInfo->vendorId);
+                if (m_mCacheVendorTemplateItemMap.find(cInfo->VendorTemplateId) !=  m_mCacheVendorTemplateItemMap.end())
+                    vendor_ids.erase(cInfo->VendorTemplateId);
                 else
-                    sLog.outErrorDb("Creature (Entry: %u) has vendor_id = %u for nonexistent vendor template", cInfo->Entry, cInfo->vendorId);
+                    sLog.outErrorDb("Creature (Entry: %u) has vendor_id = %u for nonexistent vendor template", cInfo->Entry, cInfo->VendorTemplateId);
             }
         }
     }
@@ -9593,7 +9639,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
     m_mGossipMenuItemsMap.clear();
 
     QueryResult* result = WorldDatabase.Query(
-                              "SELECT menu_id, id, option_icon, option_text, option_id, npc_option_npcflag, "
+                              "SELECT menu_id, id, option_icon, option_text, option_id, npc_option_NpcFlags, "
                               "action_menu_id, action_poi_id, action_script_id, box_coded, box_money, box_text, "
                               "condition_id "
                               "FROM gossip_menu_option ORDER BY menu_id, id");
@@ -9654,7 +9700,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
         gMenuItem.option_icon           = fields[2].GetUInt8();
         gMenuItem.option_text           = fields[3].GetCppString();
         gMenuItem.option_id             = fields[4].GetUInt32();
-        gMenuItem.npc_option_npcflag    = fields[5].GetUInt32();
+        gMenuItem.npc_option_NpcFlags    = fields[5].GetUInt32();
         gMenuItem.action_menu_id        = fields[6].GetInt32();
         gMenuItem.action_poi_id         = fields[7].GetUInt32();
         gMenuItem.action_script_id      = fields[8].GetUInt32();
@@ -9693,7 +9739,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
         if (gMenuItem.option_id >= GOSSIP_OPTION_MAX)
             sLog.outErrorDb("Table gossip_menu_option for menu %u, id %u has unknown option id %u. Option will not be used", gMenuItem.menu_id, gMenuItem.id, gMenuItem.option_id);
 
-        if (gMenuItem.menu_id && gMenuItem.npc_option_npcflag)
+        if (gMenuItem.menu_id && gMenuItem.npc_option_NpcFlags)
         {
             bool found_menu_uses = false;
             bool found_flags_uses = false;
@@ -9706,12 +9752,12 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
                 found_menu_uses = true;
 
                 // some from creatures with gossip menu can use gossip option base at npc_flags
-                if (gMenuItem.npc_option_npcflag & cInfo->npcflag)
+                if (gMenuItem.npc_option_NpcFlags & cInfo->NpcFlags)
                     found_flags_uses = true;
             }
 
             if (found_menu_uses && !found_flags_uses)
-                sLog.outErrorDb("Table gossip_menu_option for menu %u, id %u has `npc_option_npcflag` = %u but creatures using this menu does not have corresponding`npcflag`. Option will not accessible in game.", gMenuItem.menu_id, gMenuItem.id, gMenuItem.npc_option_npcflag);
+                sLog.outErrorDb("Table gossip_menu_option for menu %u, id %u has `npc_option_NpcFlags` = %u but creatures using this menu does not have corresponding`NpcFlags`. Option will not accessible in game.", gMenuItem.menu_id, gMenuItem.id, gMenuItem.npc_option_NpcFlags);
         }
 
         if (gMenuItem.action_poi_id && !GetPointOfInterest(gMenuItem.action_poi_id))
@@ -9820,7 +9866,7 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
             return false;
         }
 
-        if (!(cInfo->npcflag & UNIT_NPC_FLAG_VENDOR))
+        if (!(cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR))
         {
             if (!skip_vendors || skip_vendors->count(vendor_entry) == 0)
             {
@@ -9923,12 +9969,12 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
             }
             else
             {
-                if (!cInfo->vendorId)
+                if (!cInfo->VendorTemplateId)
                     sLog.outErrorDb("Table `%s` has duplicate items %u for %s %u, ignoring",
                     tableName, item_id, idStr, vendor_entry);
                 else
                     sLog.outErrorDb("Table `%s` has duplicate items %u for %s %u (or possible in vendor template %u), ignoring",
-                    tableName, item_id, idStr, vendor_entry, cInfo->vendorId);
+                    tableName, item_id, idStr, vendor_entry, cInfo->VendorTemplateId);
             }
             return false;
         }
@@ -9974,7 +10020,7 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
             return false;
         }
 
-        if (!(cInfo->npcflag & UNIT_NPC_FLAG_VENDOR))
+        if (!(cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR))
         {
             if (!skip_vendors || skip_vendors->count(vendor_entry) == 0)
             {
@@ -10111,12 +10157,12 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
                 ChatHandler(pl).PSendSysMessage(LANG_ITEM_ALREADY_IN_LIST, item_id, type == VENDOR_ITEM_TYPE_CURRENCY, ExtendedCost);
             else
             {
-                if (!cInfo->vendorId)
+                if (!cInfo->VendorTemplateId)
                     sLog.outErrorDb("Table `%s` has duplicate %s %u (with extended cost %u) for %s %u, ignoring",
                                     tableName, nameStr, item_id, ExtendedCost, idStr, vendor_entry);
                 else
                     sLog.outErrorDb("Table `%s` has duplicate %s %u (with extended cost %u) for %s %u (or possible in vendor template %u), ignoring",
-                                    tableName, nameStr, item_id, ExtendedCost, idStr, vendor_entry, cInfo->vendorId);
+                                    tableName, nameStr, item_id, ExtendedCost, idStr, vendor_entry, cInfo->VendorTemplateId);
             }
             return false;
         }
@@ -10366,47 +10412,13 @@ bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=NULL*
         }
     }
 
-    switch (data->Type)
+    if ((data->Type == CHAT_TYPE_WHISPER || data->Type == CHAT_TYPE_BOSS_WHISPER) && (!target || target->GetTypeId() != TYPEID_PLAYER))
     {
-        case CHAT_TYPE_SAY:
-            source->MonsterSay(entry, data->LanguageId, target);
-            break;
-        case CHAT_TYPE_YELL:
-            source->MonsterYell(entry, data->LanguageId, target);
-            break;
-        case CHAT_TYPE_TEXT_EMOTE:
-            source->MonsterTextEmote(entry, target);
-            break;
-        case CHAT_TYPE_BOSS_EMOTE:
-            source->MonsterTextEmote(entry, target, true);
-            break;
-        case CHAT_TYPE_WHISPER:
-        {
-            if (target && target->GetTypeId() == TYPEID_PLAYER)
-                source->MonsterWhisper(entry, target);
-            else
-            {
-                _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).", entry);
-                return false;
-            }
-            break;
-        }
-        case CHAT_TYPE_BOSS_WHISPER:
-        {
-            if (target && target->GetTypeId() == TYPEID_PLAYER)
-                source->MonsterWhisper(entry, target, true);
-            else
-            {
-                _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).", entry);
-                return false;
-            }
-            break;
-        }
-        case CHAT_TYPE_ZONE_YELL:
-            source->MonsterYellToZone(entry, data->LanguageId, target);
-            break;
+        _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).", entry);
+        return false;
     }
 
+    source->MonsterText(data, target);
     return true;
 }
 

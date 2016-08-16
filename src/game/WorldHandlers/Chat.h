@@ -71,12 +71,12 @@ enum ChatCommandSearchResult
 
 enum PlayerChatTag
 {
-    CHAT_TAG_NONE = 0,
-    CHAT_TAG_AFK = 1,
-    CHAT_TAG_DND = 2,
-    CHAT_TAG_GM = 3,
-    CHAT_TAG_COM = 4,                     // Commentator
-    CHAT_TAG_DEV = 5,                     // Developer
+    CHAT_TAG_NONE = 0x00,
+    CHAT_TAG_AFK = 0x01,
+    CHAT_TAG_DND = 0x02,
+    CHAT_TAG_GM = 0x04,
+    CHAT_TAG_COM = 0x08,                     // Commentator
+    CHAT_TAG_DEV = 0x10,                     // Developer
 };
 typedef uint32 ChatTagFlags;
 
@@ -86,23 +86,6 @@ class  ChatHandler
         explicit ChatHandler(WorldSession* session);
         explicit ChatHandler(Player* player);
         ~ChatHandler();
-
-        static void FillMessageData(WorldPacket* data, WorldSession* session, uint8 type, uint32 language, const char* channelName, ObjectGuid targetGuid, const char* message, Unit* speaker, const char* addonPrefix = NULL);
-
-        static void FillMessageData(WorldPacket* data, WorldSession* session, uint8 type, uint32 language, ObjectGuid targetGuid, const char* message)
-        {
-            FillMessageData(data, session, type, language, NULL, targetGuid, message, NULL);
-        }
-
-        static void FillMessageData(WorldPacket* data, WorldSession* session, uint8 type, uint32 language, const char* message)
-        {
-            FillMessageData(data, session, type, language, NULL, ObjectGuid(), message, NULL);
-        }
-
-        void FillSystemMessageData(WorldPacket* data, const char* message)
-        {
-            FillMessageData(data, m_session, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, ObjectGuid(), message);
-        }
 
         static char* LineFromMessage(char*& pos) { char* start = strtok(pos, "\n"); pos = NULL; return start; }
 
@@ -140,12 +123,13 @@ class  ChatHandler
         * \param ObjectGuid const& targetGuid  : Often null, but needed for type *MONSTER* or *BATTLENET or *BATTLEGROUND* or *ACHIEVEMENT
         * \param char const* targetName        : Often null, but needed for type *MONSTER* or *BATTLENET or *BATTLEGROUND*
         * \param char const* channelName       : Required only for CHAT_MSG_CHANNEL
+        * \param uint32 achievementId          : Required only for *ACHIEVEMENT
+        * \param const char* addonPrefix       : Required only for *CHAT_MSG_ADDON
         **/
-        static void BuildChatPacket(
-            WorldPacket& data, ChatMsg msgtype, char const* message, Language language = LANG_UNIVERSAL, ChatTagFlags chatTag = CHAT_TAG_NONE,
+        static void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const* message, Language language = LANG_UNIVERSAL, ChatTagFlags chatTag = CHAT_TAG_NONE,
             ObjectGuid const& senderGuid = ObjectGuid(), char const* senderName = NULL,
             ObjectGuid const& targetGuid = ObjectGuid(), char const* targetName = NULL,
-            char const* channelName = NULL);
+            char const* channelName = NULL, uint32 achievementId = 0, const char* addonPrefix = NULL);
 
     protected:
         explicit ChatHandler() : m_session(NULL) {}      // for CLI subclass
@@ -450,6 +434,7 @@ class  ChatHandler
         bool HandleReloadAreaTriggerTavernCommand(char* args);
         bool HandleReloadAreaTriggerTeleportCommand(char* args);
         bool HandleReloadBattleEventCommand(char* args);
+        bool HandleReloadCreaturesStatsCommand(char* args);
         bool HandleReloadCommandCommand(char* args);
         bool HandleReloadConditionsCommand(char* args);
         bool HandleReloadCreatureQuestRelationsCommand(char* args);

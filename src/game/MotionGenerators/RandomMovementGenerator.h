@@ -27,6 +27,9 @@
 
 #include "MovementGenerator.h"
 
+// define chance for creature to not stop after reaching a waypoint
+#define MOVEMENT_RANDOM_MMGEN_CHANCE_NO_BREAK 30
+
 template<class T>
 class  RandomMovementGenerator
     : public MovementGeneratorMedium< T, RandomMovementGenerator<T> >

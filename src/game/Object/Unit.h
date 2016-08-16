@@ -1253,6 +1253,18 @@ enum IgnoreUnitState
 #define REGEN_TIME_PRECISE      500                         // Used in Spell::CheckPower for precise regeneration in spell cast time
 #define REGEN_TIME_HOLY_POWER   10000                       // This determines how often holy power regen is processed
 
+// Power type values defines
+enum PowerDefaults
+{
+    POWER_RAGE_DEFAULT = 1000,
+    POWER_FOCUS_DEFAULT = 100,
+    POWER_ENERGY_DEFAULT = 100,
+    POWER_RUNE_DEFAULT = 8,
+    POWER_RUNIC_POWER_DEFAULT = 1000,
+    POWER_HOLY_POWER_DEFAULT = 3,
+    POWER_SOUL_SHARDS_DEFAULT = 3,
+};
+
 struct SpellProcEventEntry;                                 // used only privately
 
 #define MAX_OBJECT_SLOT 5
@@ -1492,6 +1504,11 @@ class  Unit : public WorldObject
          * @return true if you and/or your pets/minions etc are attacking a player.
          */
         bool isAttackingPlayer() const;
+        /**
+        * Checks if wa vehicle is allowed to attack other units by itself.
+        * @return true if vehicle can attack itself.
+        */
+        bool CanAttackByItself() const;
         /** 
          * @return The victim that you are currently attacking
          */
@@ -2120,7 +2137,7 @@ class  Unit : public WorldObject
          * @param damageInfo this is filled with data about what kind of damage that was done
          * @param attackType type of attack, base/off/ranged
          */
-        void CalculateMeleeDamage(Unit* pVictim, uint32 damage, CalcDamageInfo* damageInfo, WeaponAttackType attackType = BASE_ATTACK);
+        void CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, WeaponAttackType attackType = BASE_ATTACK);
         /** 
          * Deals melee damage, if the attack was parried we reduce the victims time until next hit 
          * instead of the weapons normal time by 20 or 60%.

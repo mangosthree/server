@@ -121,10 +121,12 @@ enum EventAI_ActionType
     ACTION_T_SET_INVINCIBILITY_HP_LEVEL = 42,               // MinHpValue, format(0-flat,1-percent from max health)
     ACTION_T_MOUNT_TO_ENTRY_OR_MODEL    = 43,               // Creature_template entry(param1) OR ModelId (param2) (or 0 for both to unmount)
     ACTION_T_CHANCED_TEXT               = 44,               // Chance to display the text, TextId1, optionally TextId2. If more than just -TextId1 is defined, randomize. Negative values.
-    ACTION_T_THROW_AI_EVENT             = 45,               // EventType, Radius, unused 
+    ACTION_T_THROW_AI_EVENT             = 45,               // EventType, Radius, unused
     ACTION_T_SET_THROW_MASK             = 46,               // EventTypeMask, unused, unused
-    ACTION_T_SUMMON_UNIQUE              = 47,               // CreatureId, Target, SpawnId
-    ACTION_T_EMOTE_TARGET               = 48,               // EmoteId, TargetGuid
+    ACTION_T_SET_STAND_STATE            = 47,               // StandState, unused, unused
+    ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance, unused
+    ACTION_T_DYNAMIC_MOVEMENT           = 49,               // EnableDynamicMovement (1 = on; 0 = off)
+
     ACTION_T_END,
 };
 
@@ -173,7 +175,7 @@ enum SpawnedEventMode
 
 struct CreatureEventAI_Action
 {
-    EventAI_ActionType type: 16;
+    EventAI_ActionType type : 16;
     union
     {
         // ACTION_T_TEXT                                    = 1
@@ -384,7 +386,6 @@ struct CreatureEventAI_Action
             uint32 creatureId;                              // set one from fields (or 0 for both to dismount)
             uint32 modelId;
         } mount;
-
         // ACTION_T_CHANCED_TEXT                            = 44
         struct
         {
@@ -405,19 +406,27 @@ struct CreatureEventAI_Action
             uint32 unused1;
             uint32 unused2;
         } setThrowMask;
-        // ACTION_T_SUMMON_UNIQUE                           = 47
+        // ACTION_T_SET_STAND_STATE                         = 47
         struct
         {
-            uint32 creatureId;
-            uint32 target;
-            uint32 spawnId;
-        } summon_unique;
-        // ACTION_T_EMOTE_TARGET                            = 48
+            uint32 standState;
+            uint32 unused1;
+            uint32 unused2;
+        } setStandState;
+        // ACTION_T_CHANGE_MOVEMENT                         = 48
         struct
         {
-            uint32 emoteId;
-            uint32 targetGuid;
-        } emoteTarget;
+            uint32 movementType;
+            uint32 wanderDistance;
+            uint32 unused1;
+        } changeMovement;
+        // ACTION_T_DYNAMIC_MOVEMENT                        = 49
+        struct
+        {
+            uint32 state;                                   // bool: 1 = on; 0 = off
+            uint32 unused1;
+            uint32 unused2;
+        } dynamicMovement;
         // RAW
         struct
         {
@@ -672,6 +681,8 @@ class  CreatureEventAI : public CreatureAI
 
         uint8  m_Phase;                                     // Current phase, max 32 phases
         bool   m_MeleeEnabled;                              // If we allow melee auto attack
+        bool   m_DynamicMovement;                           // Core will control creatures movement if this is enabled
+        bool   m_HasOOCLoSEvent;                            // Cache if a OOC-LoS Event exists
         uint32 m_InvinceabilityHpLevel;                     // Minimal health level allowed at damage apply
 
         uint32 m_throwAIEventMask;                          // Automatically throw AIEvents that are encoded into this mask

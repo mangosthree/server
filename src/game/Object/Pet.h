@@ -168,7 +168,7 @@ class  Pet : public Creature
                 return m_autospells[pos];
         }
 
-        bool CanSwim() const override
+        bool CanSwim() const
         {
             Unit const* owner = GetOwner();
             if (owner)

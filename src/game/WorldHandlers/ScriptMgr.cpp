@@ -1226,7 +1226,7 @@ bool ScriptAction::HandleScriptStep()
             for (int i = 0; i < MAX_TEXT_ID; ++i)
             {
                 if (!m_script->textId[i])
-                    { break; }
+                    break;
                 emotes.push_back(uint32(m_script->textId[i]));
             }
 

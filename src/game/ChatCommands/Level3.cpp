@@ -1137,6 +1137,14 @@ bool ChatHandler::HandleReloadMailLevelRewardCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadCreaturesStatsCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading stats data...");
+    sObjectMgr.LoadCreatureClassLvlStats();
+    SendGlobalSysMessage("DB table `creature_template_classlevelstats` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleLoadScriptsCommand(char* args)
 {
     if (!*args)
@@ -2472,7 +2480,7 @@ bool ChatHandler::HandleLearnAllMyPetTalentsCommand(char* /*args*/)
         return false;
     }
 
-    CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->family);
+    CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->Family);
     if (!pet_family)
     {
         SendSysMessage(LANG_WRONG_PET_TYPE);
@@ -4338,7 +4346,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     }
 
     uint32 faction = target->getFaction();
-    uint32 npcflags = target->GetUInt32Value(UNIT_NPC_FLAGS);
+    uint32 NpcFlagss = target->GetUInt32Value(UNIT_NPC_FLAGS);
     uint32 displayid = target->GetDisplayId();
     uint32 nativeid = target->GetNativeDisplayId();
     uint32 Entry = target->GetEntry();
@@ -4358,25 +4366,25 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
             break;
 
     if (diff < MAX_DIFFICULTY)
-        PSendSysMessage(LANG_NPCINFO_CHAR_DIFFICULTY, target->GetGuidStr().c_str(), faction, npcflags,
+        PSendSysMessage(LANG_NPCINFO_CHAR_DIFFICULTY, target->GetGuidStr().c_str(), faction, NpcFlagss,
                         Entry, target->GetCreatureInfo()->Entry, diff,
                         displayid, nativeid);
     else
-        PSendSysMessage(LANG_NPCINFO_CHAR, target->GetGuidStr().c_str(), faction, npcflags, Entry, displayid, nativeid);
+        PSendSysMessage(LANG_NPCINFO_CHAR, target->GetGuidStr().c_str(), faction, NpcFlagss, Entry, displayid, nativeid);
 
     PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());
     PSendSysMessage(LANG_NPCINFO_HEALTH, target->GetCreateHealth(), target->GetMaxHealth(), target->GetHealth());
     PSendSysMessage(LANG_NPCINFO_FLAGS, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->getFaction());
     PSendSysMessage(LANG_COMMAND_RAWPAWNTIMES, defRespawnDelayStr.c_str(), curRespawnDelayStr.c_str());
-    PSendSysMessage(LANG_NPCINFO_LOOT,  cInfo->lootid, cInfo->pickpocketLootId, cInfo->SkinLootId);
+    PSendSysMessage(LANG_NPCINFO_LOOT,  cInfo->LootId, cInfo->PickpocketLootId, cInfo->SkinningLootId);
     PSendSysMessage(LANG_NPCINFO_DUNGEON_ID, target->GetInstanceId());
     PSendSysMessage(LANG_NPCINFO_POSITION, float(target->GetPositionX()), float(target->GetPositionY()), float(target->GetPositionZ()));
 
-    if ((npcflags & UNIT_NPC_FLAG_VENDOR))
+    if ((NpcFlagss & UNIT_NPC_FLAG_VENDOR))
     {
         SendSysMessage(LANG_NPCINFO_VENDOR);
     }
-    if ((npcflags & UNIT_NPC_FLAG_TRAINER))
+    if ((NpcFlagss & UNIT_NPC_FLAG_TRAINER))
     {
         SendSysMessage(LANG_NPCINFO_TRAINER);
     }

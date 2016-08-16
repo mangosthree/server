@@ -148,38 +148,38 @@ void OutdoorPvPEP::HandleGameObjectCreate(GameObject* go)
     }
 }
 
-void OutdoorPvPEP::HandleObjectiveComplete(uint32 eventId, std::list<Player*> players, Team team)
+void OutdoorPvPEP::HandleObjectiveComplete(uint32 eventId, const std::list<Player*>& players, Team team)
 {
     uint32 credit = 0;
 
     switch (eventId)
     {
-        case EVENT_CROWNGUARD_PROGRESS_ALLIANCE:
-        case EVENT_CROWNGUARD_PROGRESS_HORDE:
-            credit = NPC_CROWNGUARD_TOWER_QUEST_DOODAD;
-            break;
-        case EVENT_EASTWALL_PROGRESS_ALLIANCE:
-        case EVENT_EASTWALL_PROGRESS_HORDE:
-            credit = NPC_EASTWALL_TOWER_QUEST_DOODAD;
-            break;
-        case EVENT_NORTHPASS_PROGRESS_ALLIANCE:
-        case EVENT_NORTHPASS_PROGRESS_HORDE:
-            credit = NPC_NORTHPASS_TOWER_QUEST_DOODAD;
-            break;
-        case EVENT_PLAGUEWOOD_PROGRESS_ALLIANCE:
-        case EVENT_PLAGUEWOOD_PROGRESS_HORDE:
-            credit = NPC_PLAGUEWOOD_TOWER_QUEST_DOODAD;
-            break;
-        default:
-            return;
+    case EVENT_CROWNGUARD_PROGRESS_ALLIANCE:
+    case EVENT_CROWNGUARD_PROGRESS_HORDE:
+        credit = NPC_CROWNGUARD_TOWER_QUEST_DOODAD;
+        break;
+    case EVENT_EASTWALL_PROGRESS_ALLIANCE:
+    case EVENT_EASTWALL_PROGRESS_HORDE:
+        credit = NPC_EASTWALL_TOWER_QUEST_DOODAD;
+        break;
+    case EVENT_NORTHPASS_PROGRESS_ALLIANCE:
+    case EVENT_NORTHPASS_PROGRESS_HORDE:
+        credit = NPC_NORTHPASS_TOWER_QUEST_DOODAD;
+        break;
+    case EVENT_PLAGUEWOOD_PROGRESS_ALLIANCE:
+    case EVENT_PLAGUEWOOD_PROGRESS_HORDE:
+        credit = NPC_PLAGUEWOOD_TOWER_QUEST_DOODAD;
+        break;
+    default:
+        return;
     }
 
-    for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
+    for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
     {
         if ((*itr) && (*itr)->GetTeam() == team)
         {
             (*itr)->KilledMonsterCredit(credit);
-            (*itr)->RewardHonor(NULL, 1, HONOR_REWARD_PLAGUELANDS);
+            (*itr)->RewardHonor(nullptr, 1, HONOR_REWARD_PLAGUELANDS);
         }
     }
 }

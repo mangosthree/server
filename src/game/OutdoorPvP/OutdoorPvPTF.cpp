@@ -118,7 +118,7 @@ void OutdoorPvPTF::HandleGameObjectCreate(GameObject* go)
     }
 }
 
-void OutdoorPvPTF::HandleObjectiveComplete(uint32 eventId, std::list<Player*> players, Team team)
+void OutdoorPvPTF::HandleObjectiveComplete(uint32 eventId, const std::list<Player*>& players, Team team)
 {
     for (uint8 i = 0; i < MAX_TF_TOWERS; ++i)
     {
@@ -126,7 +126,7 @@ void OutdoorPvPTF::HandleObjectiveComplete(uint32 eventId, std::list<Player*> pl
         {
             if (terokkarTowerEvents[i][j].eventEntry == eventId)
             {
-                for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
+                for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
                     if ((*itr) && (*itr)->GetTeam() == team)
                         (*itr)->AreaExploredOrEventHappens(team == ALLIANCE ? QUEST_SPIRITS_OF_AUCHINDOUM_ALLIANCE : QUEST_SPIRITS_OF_AUCHINDOUM_HORDE);
@@ -351,8 +351,11 @@ void OutdoorPvPTF::LockTowers(const WorldObject* objRef)
         if (GameObject* go = objRef->GetMap()->GetGameObject(m_towerBanners[i]))
             go->SetLootState(GO_JUST_DEACTIVATED);
         else
+        {
             // if grid is unloaded, changing the saved slider value is enough
-            sOutdoorPvPMgr.SetCapturePointSlider(terokkarTowers[i], m_zoneOwner == ALLIANCE ? -CAPTURE_SLIDER_ALLIANCE : -CAPTURE_SLIDER_HORDE);
+            CapturePointSlider value(m_zoneOwner == ALLIANCE ? CAPTURE_SLIDER_ALLIANCE : CAPTURE_SLIDER_HORDE, true);
+            sOutdoorPvPMgr.SetCapturePointSlider(terokkarTowers[i], value);
+        }
     }
 }
 
@@ -363,12 +366,15 @@ void OutdoorPvPTF::ResetTowers(const WorldObject* objRef)
     {
         if (GameObject* go = objRef->GetMap()->GetGameObject(m_towerBanners[i]))
         {
-            go->SetCapturePointSlider(CAPTURE_SLIDER_MIDDLE);
+            go->SetCapturePointSlider(CAPTURE_SLIDER_MIDDLE, false);
             // visual update needed because banner still has artkit from previous owner
             SetBannerVisual(go, CAPTURE_ARTKIT_NEUTRAL, CAPTURE_ANIM_NEUTRAL);
         }
         else
-            // if grid is unloaded, resetting the saved slider value is enough
-            sOutdoorPvPMgr.SetCapturePointSlider(terokkarTowers[i], CAPTURE_SLIDER_MIDDLE);
+        {
+            // if grid is unloaded, changing the saved slider value is enough
+            CapturePointSlider value(CAPTURE_SLIDER_MIDDLE, false);
+            sOutdoorPvPMgr.SetCapturePointSlider(terokkarTowers[i], value);
+        }
     }
 }

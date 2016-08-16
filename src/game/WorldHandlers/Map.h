@@ -309,9 +309,9 @@ class Map : public GridRefManager<NGridType>
 
         // Random on map generation
         bool GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius);
-        bool GetReachableRandomPointOnGround(float& x, float& y, float& z, float radius);
-        bool GetRandomPointInTheAir(float& x, float& y, float& z, float radius);
-        bool GetRandomPointUnderWater(float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status);
+        bool GetReachableRandomPointOnGround(uint32 phaseMask, float& x, float& y, float& z, float radius);
+        bool GetRandomPointInTheAir(uint32 phaseMask, float& x, float& y, float& z, float radius);
+        bool GetRandomPointUnderWater(uint32 phaseMask, float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status);
 
     private:
         void LoadMapAndVMap(int gx, int gy);

@@ -1457,15 +1457,15 @@ void Aura::TriggerSpell()
                         // move loot to player inventory and despawn target
                         if (caster->GetTypeId() == TYPEID_PLAYER &&
                                 triggerTarget->GetTypeId() == TYPEID_UNIT &&
-                                ((Creature*)triggerTarget)->GetCreatureInfo()->type == CREATURE_TYPE_GAS_CLOUD)
+                                ((Creature*)triggerTarget)->GetCreatureInfo()->CreatureType == CREATURE_TYPE_GAS_CLOUD)
                         {
                             Player* player = (Player*)caster;
                             Creature* creature = (Creature*)triggerTarget;
-                            // missing lootid has been reported on startup - just return
-                            if (!creature->GetCreatureInfo()->SkinLootId)
+                            // missing Lootid has been reported on startup - just return
+                            if (!creature->GetCreatureInfo()->SkinningLootId)
                                 return;
 
-                            player->AutoStoreLoot(creature, creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning, true);
+                            player->AutoStoreLoot(creature, creature->GetCreatureInfo()->SkinningLootId, LootTemplates_Skinning, true);
 
                             creature->ForcedDespawn();
                         }
@@ -2378,9 +2378,14 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 54729:                             // Winged Steed of the Ebon Blade
                         Spell::SelectMountByAreaAndSkill(target, GetSpellProto(), 0, 0, 54726, 54727, 0);
                         return;
-                    case 58600:                             // Restricted Flight Area
-                        target->MonsterWhisper(LANG_NO_FLY_ZONE, target, true);
+                    case 58600:                            // Restricted Flight Area
+                    {
+                        if (!target || target->GetTypeId() != TYPEID_PLAYER)
+                            return;
+                        const char* text = sObjectMgr.GetMangosString(LANG_NO_FLY_ZONE, ((Player*)target)->GetSession()->GetSessionDbLocaleIndex());
+                        target->MonsterWhisper(text, target, true);
                         return;
+                    }
                     case 61187:                             // Twilight Shift (single target)
                     case 61190:                             // Twilight Shift (many targets)
                         target->RemoveAurasDueToSpell(57620);
@@ -2936,18 +2941,18 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                 return;
             }
-            case 64398:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Scrap Bots
-            case 64426:                                     // Summon Scrap Bot (Ulduar, Mimiron) - for Assault Bots
-            case 64621:                                     // Summon Fire Bot (Ulduar, Mimiron)
+            case 62483:                                     // Stonebark's Essence Channel
+            case 62484:                                     // Ironbranch's Essence Channel
+            case 62485:                                     // Brightleaf's Essence Channel
+            case 65587:                                     // Brightleaf's Essence Channel (h)
+            case 65588:                                     // Ironbranch's Essence Channel (h)
+            case 65589:                                     // Stonebark's Essence Channel (h)
             {
-                uint32 triggerSpell = 0;
-                switch (GetId())
+                if (Unit* caster = GetCaster())
                 {
-                    case 64398: triggerSpell = 63819; break;
-                    case 64426: triggerSpell = 64427; break;
-                    case 64621: triggerSpell = 64622; break;
+                    if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+                        caster->CastSpell(caster, 62467, true);
                 }
-                target->CastSpell(target, triggerSpell, false);
                 return;
             }
             case 68839:                                     // Corrupt Soul
@@ -4487,15 +4492,15 @@ void Aura::HandleModCharm(bool apply, bool Real)
             if (caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK)
             {
                 CreatureInfo const* cinfo = ((Creature*)target)->GetCreatureInfo();
-                if (cinfo && cinfo->type == CREATURE_TYPE_DEMON)
+                if (cinfo && cinfo->CreatureType == CREATURE_TYPE_DEMON)
                 {
                     // creature with pet number expected have class set
                     if (target->GetByteValue(UNIT_FIELD_BYTES_0, 1) == 0)
                     {
-                        if (cinfo->unit_class == 0)
-                            sLog.outErrorDb("Creature (Entry: %u) have unit_class = 0 but used in charmed spell, that will be result client crash.", cinfo->Entry);
+                        if (cinfo->UnitClass == 0)
+                            sLog.outErrorDb("Creature (Entry: %u) have UnitClass = 0 but used in charmed spell, that will be result client crash.", cinfo->Entry);
                         else
-                            sLog.outError("Creature (Entry: %u) have unit_class = %u but at charming have class 0!!! that will be result client crash.", cinfo->Entry, cinfo->unit_class);
+                            sLog.outError("Creature (Entry: %u) have UnitClass = %u but at charming have class 0!!! that will be result client crash.", cinfo->Entry, cinfo->UnitClass);
 
                         target->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
                     }
@@ -4533,10 +4538,10 @@ void Aura::HandleModCharm(bool apply, bool Real)
                 target->setFaction(cinfo->FactionAlliance);
 
             // restore UNIT_FIELD_BYTES_0
-            if (cinfo && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK && cinfo->type == CREATURE_TYPE_DEMON)
+            if (cinfo && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK && cinfo->CreatureType == CREATURE_TYPE_DEMON)
             {
                 // DB must have proper class set in field at loading, not req. restore, including workaround case at apply
-                // m_target->SetByteValue(UNIT_FIELD_BYTES_0, 1, cinfo->unit_class);
+                // m_target->SetByteValue(UNIT_FIELD_BYTES_0, 1, cinfo->UnitClass);
 
                 if (target->GetCharmInfo())
                     { target->GetCharmInfo()->SetPetNumber(0, true); }
@@ -4947,12 +4952,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
             { target->ModifyAuraState(AURA_STATE_FROZEN, apply); }
 
-        target->addUnitState(UNIT_STAT_ROOT);
         target->SetTargetGuid(ObjectGuid());
-
-        // Save last orientation
-        if (target->getVictim())
-            target->SetOrientation(target->GetAngle(target->getVictim()));
 
         if (target->GetTypeId() == TYPEID_PLAYER)
         {
@@ -4991,18 +4991,14 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
 
         // Real remove called after current aura remove from lists, check if other similar auras active
         if (target->HasAuraType(SPELL_AURA_MOD_ROOT))
-            { return; }
+        {
+            return;
+        }
 
         target->clearUnitState(UNIT_STAT_ROOT);
 
-        if (!target->hasUnitState(UNIT_STAT_STUNNED))     // prevent allow move if have also stun effect
-        {
-            if (target->getVictim() && target->IsAlive())
-                target->SetTargetGuid(target->getVictim()->GetObjectGuid());
-
-            if (target->GetTypeId() == TYPEID_PLAYER)
-                target->SetRoot(false);
-        }
+        if (!target->hasUnitState(UNIT_STAT_STUNNED) && (target->GetTypeId() == TYPEID_PLAYER))     // prevent allow move if have also stun effect
+            target->SetRoot(false);
     }
 }
 
@@ -7027,7 +7023,7 @@ void Aura::HandleAuraEmpathy(bool apply, bool /*Real*/)
         return;
 
     CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(GetTarget()->GetEntry());
-    if (ci && ci->type == CREATURE_TYPE_BEAST)
+    if (ci && ci->CreatureType == CREATURE_TYPE_BEAST)
         GetTarget()->ApplyModUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO, apply);
 }
 
@@ -8346,6 +8342,14 @@ void Aura::PeriodicDummyTick()
                         target->CastSpell(target, 63536, true, NULL, this);
                     return;
                 }
+                case 63382:                                 // Rapid Burst
+                {
+                    if (GetAuraTicks() % 2)
+                        target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 64019 : 64532, true);
+                    else
+                        target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 63387 : 64531, true);
+                    return;
+                }
                 case 64217:                                 // Overcharged
                 {
                     if (GetHolder()->GetStackAmount() >= 10)
@@ -8826,7 +8830,7 @@ void Aura::HandleAuraMirrorImage(bool apply, bool Real)
         const CreatureModelInfo* minfo = sObjectMgr.GetCreatureModelInfo(pCreature->GetNativeDisplayId());
 
         pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 0, 0);
-        pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 1, cinfo->unit_class);
+        pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 1, cinfo->UnitClass);
         pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
         pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 3, 0);
 

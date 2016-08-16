@@ -3384,7 +3384,7 @@ void Spell::cast(bool skipCheck)
             // Hand of Reckoning
             else if (m_spellInfo->Id == 62124)
             {
-                if (m_targets.getUnitTarget() && m_targets.getUnitTarget()->getVictim() != m_caster)
+                if (!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetTargetGuid() != m_caster->GetObjectGuid())
                     AddPrecastSpell(67485);                 // Hand of Rekoning (no typos in name ;) )
             }
             // Divine Shield, Divine Protection or Hand of Protection
@@ -7972,6 +7972,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectEntry const* spellEffect, float& r
                 case 44869:                                 // Spectral Blast (SWP, Kalecgos)
                 case 45391:                                 // Summon Demonic Vapor (SWP, Felmyst)
                 case 45785:                                 // Sinister Reflection Clone (SWP, Kil'jaeden)
+                case 45863:                                 // Cosmetic - Incinerate to Random Target (Borean Tundra)
                 case 45892:                                 // Sinister Reflection (SWP, Kil'jaeden)
                 case 45976:                                 // Open Portal (SWP, M'uru)
                 case 46372:                                 // Ice Spear Target Picker (Slave Pens, Ahune)
@@ -8000,15 +8001,15 @@ void Spell::GetSpellRangeAndRadius(SpellEffectEntry const* spellEffect, float& r
                 case 62797:                                 // Storm Cloud (Ulduar, Hodir)
                 case 63018:                                 // Searing Light (Ulduar, XT-002)
                 case 63024:                                 // Gravity Bomb (Ulduar, XT-002)
-                case 63387:                                 // Rapid Burst
                 case 63545:                                 // Icicle (Ulduar, Hodir)
                 case 63795:                                 // Psychosis (Ulduar, Yogg-Saron)
                 case 63820:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Scrap Bots, hits npc 33856
                 case 64218:                                 // Overcharge (VoA, Emalon)
                 case 64234:                                 // Gravity Bomb (h) (Ulduar, XT-002)
+				case 64402:                                 // Rocket Strike (Ulduar, Mimiron)
                 case 64425:                                 // Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Assault Bots, hits npc 33856
-                case 64531:                                 // Rapid Burst (h)
                 case 64543:                                 // Melt Ice (Ulduar, Hodir)
+                case 64623:                                 // Frost Bomb (Ulduar, Mimiron)
                 case 65121:                                 // Searing Light (h) (Ulduar, XT-002)
                 case 65301:                                 // Psychosis (Ulduar, Yogg-Saron)
                 case 65872:                                 // Pursuing Spikes (ToCrusader, Anub'arak)

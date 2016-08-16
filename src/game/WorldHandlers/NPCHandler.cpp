@@ -178,12 +178,12 @@ void WorldSession::SendTrainerList(ObjectGuid guid, const std::string& strTitle)
     }
 
     uint32 maxcount = (cSpells ? cSpells->spellList.size() : 0) + (tSpells ? tSpells->spellList.size() : 0);
-    uint32 trainer_type = cSpells && cSpells->trainerType ? cSpells->trainerType : (tSpells ? tSpells->trainerType : 0);
+    uint32 TrainerType = cSpells && cSpells->trainerType ? cSpells->trainerType : (tSpells ? tSpells->trainerType : 0);
 
     WorldPacket data(SMSG_TRAINER_LIST, 8 + 4 + 4 + maxcount * 38 + strTitle.size() + 1);
     data << ObjectGuid(guid);
-    data << uint32(trainer_type);
-    data << uint32(ci->trainerId);
+    data << uint32(TrainerType);
+    data << uint32(ci->TrainerTemplateId);
 
     size_t count_pos = data.wpos();
     data << uint32(maxcount);
@@ -243,9 +243,9 @@ void WorldSession::SendTrainerList(ObjectGuid guid, const std::string& strTitle)
 void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
 {
     ObjectGuid guid;
-    uint32 spellId = 0, trainerId = 0;
+    uint32 spellId = 0, TrainerTemplateId = 0;
 
-    recv_data >> guid >> trainerId >> spellId;
+    recv_data >> guid >> TrainerTemplateId >> spellId;
     DEBUG_LOG("WORLD: Received opcode CMSG_TRAINER_BUY_SPELL Trainer: %s, learn spell id is: %u", guid.GetString().c_str(), spellId);
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TRAINER);

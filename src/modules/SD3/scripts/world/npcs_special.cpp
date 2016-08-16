@@ -1213,9 +1213,9 @@ struct npc_guardian : public CreatureScript
 # npc_innkeeper
 #########*/
 
-// Script applied to all innkeepers by npcflag.
+// Script applied to all innkeepers by NpcFlags.
 // Are there any known innkeepers that does not hape the options in the below?
-// (remember gossipHello is not called unless npcflag|1 is present)
+// (remember gossipHello is not called unless NpcFlags|1 is present)
 
 enum
 {

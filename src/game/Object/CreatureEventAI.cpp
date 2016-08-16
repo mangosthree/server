@@ -732,7 +732,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             break;
         case ACTION_T_COMBAT_MOVEMENT:
             // ignore no affect case
-            if (m_isCombatMovement == (action.combat_movement.state != 0))
+            if (m_isCombatMovement == (action.combat_movement.state != 0) || m_creature->IsNonMeleeSpellCasted(false))
                 return;
 
             SetCombatMovement(action.combat_movement.state != 0, true);
@@ -966,63 +966,38 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_throwAIEventMask = action.setThrowMask.eventTypeMask;
             break;
         }
-        case ACTION_T_SUMMON_UNIQUE:
+        case ACTION_T_SET_STAND_STATE:
         {
-            Creature* pCreature = NULL;
-            MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_creature, action.summon_unique.creatureId, true, false, 100, true);
-            MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreature, u_check);
-            Cell::VisitGridObjects(m_creature, searcher, 100);
-            WorldObject* pSpawn = NULL;
-            pSpawn = pCreature;
-
-            if (!pSpawn)
-            {
-                Unit* target = GetTargetByType(action.summon_unique.target, pActionInvoker, pAIEventSender, reportTargetError);
-
-                if (!target && reportTargetError)
-                    sLog.outErrorEventAI("Event %u - NULL target for ACTION_T_SUMMON_UNIQUE(%u), target-type %u", EventId, action.type, action.summon_unique.target);
-
-                CreatureEventAI_Summon_Map::const_iterator i = sEventAIMgr.GetCreatureEventAISummonMap().find(action.summon_unique.spawnId);
-                if (i == sEventAIMgr.GetCreatureEventAISummonMap().end())
-                {
-                    sLog.outErrorEventAI("Failed to spawn creature %u. Summon map index %u does not exist. EventID %d. CreatureID %d", action.summon_unique.creatureId, action.summon_unique.spawnId, EventId, m_creature->GetEntry());
-                    return;
-                }
-
-                Creature* pCreature = NULL;
-                if ((*i).second.SpawnTimeSecs)
-                    pCreature = m_creature->SummonCreature(action.summon_unique.creatureId, (*i).second.position_x, (*i).second.position_y, (*i).second.position_z, (*i).second.orientation, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, (*i).second.SpawnTimeSecs);
-                else
-                    pCreature = m_creature->SummonCreature(action.summon_unique.creatureId, (*i).second.position_x, (*i).second.position_y, (*i).second.position_z, (*i).second.orientation, TEMPSUMMON_TIMED_OOC_DESPAWN, 0);
-
-                if (!pCreature)
-                    sLog.outErrorEventAI("Failed to spawn creature %u. EventId %d.Creature %d", action.summon_unique.creatureId, EventId, m_creature->GetEntry());
-                else if (action.summon_unique.target != TARGET_T_SELF && target)
-                    pCreature->AI()->AttackStart(target);
-
-                break;
-            } 
-
-            if (pSpawn)
-            {
-                return;
-            }
+            m_creature->SetStandState(action.setStandState.standState);
+            break;
         }
-        case ACTION_T_EMOTE_TARGET:
+        case ACTION_T_CHANGE_MOVEMENT:
         {
-            Unit* pCreature = m_creature->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, action.emoteTarget.targetGuid));
-            if (!pCreature)
+            switch (action.changeMovement.movementType)
             {
-                sLog.outErrorEventAI("Event %d. Cannot find creature by guid %d", EventId, action.emoteTarget.targetGuid);
-                return;
+            case IDLE_MOTION_TYPE:
+                m_creature->GetMotionMaster()->MoveIdle();
+                break;
+            case RANDOM_MOTION_TYPE:
+                m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), float(action.changeMovement.wanderDistance));
+                break;
+            case WAYPOINT_MOTION_TYPE:
+                m_creature->GetMotionMaster()->MoveWaypoint();
+                break;
             }
+            break;
+        }
+        case ACTION_T_DYNAMIC_MOVEMENT:
+        {
+            if (action.dynamicMovement.state && m_DynamicMovement || !action.dynamicMovement.state && !m_DynamicMovement)
+                break;
 
-
-            m_creature->SetFacingToObject(pCreature);
-            m_creature->HandleEmote(action.emoteTarget.emoteId);
+            m_DynamicMovement = action.dynamicMovement.state;
+            SetCombatMovement(!m_DynamicMovement, true);
             break;
         }
         default:
+            sLog.outError("CreatureEventAi::ProcessAction(): action(%u) not implemented", static_cast<uint32>(action.type));
             break;
     }
 }

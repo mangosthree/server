@@ -47,11 +47,11 @@ static eConfigFloatValues const qualityToRate[MAX_ITEM_QUALITY] =
 LootStore LootTemplates_Creature("creature_loot_template",     "creature entry",                 true);
 LootStore LootTemplates_Disenchant("disenchant_loot_template",   "item disenchant id",             true);
 LootStore LootTemplates_Fishing("fishing_loot_template",      "area id",                        true);
-LootStore LootTemplates_Gameobject("gameobject_loot_template",   "gameobject lootid",              true);
+LootStore LootTemplates_Gameobject("gameobject_loot_template",   "gameobject Lootid",              true);
 LootStore LootTemplates_Item("item_loot_template",         "item entry with ITEM_FLAG_LOOTABLE", true);
 LootStore LootTemplates_Mail("mail_loot_template",         "mail template id",               false);
 LootStore LootTemplates_Milling("milling_loot_template",      "item entry (herb)",              true);
-LootStore LootTemplates_Pickpocketing("pickpocketing_loot_template", "creature pickpocket lootid",     true);
+LootStore LootTemplates_Pickpocketing("pickpocketing_loot_template", "creature pickpocket Lootid",     true);
 LootStore LootTemplates_Prospecting("prospecting_loot_template",  "item entry (ore)",               true);
 LootStore LootTemplates_Reference("reference_loot_template",    "reference id",                   false);
 LootStore LootTemplates_Skinning("skinning_loot_template",     "creature skinning id",           true);
@@ -1271,12 +1271,12 @@ void LoadLootTemplates_Creature()
     {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
         {
-            if (uint32 lootid = cInfo->lootid)
+            if (uint32 Lootid = cInfo->LootId)
             {
-                if (ids_set.find(lootid) == ids_set.end())
-                    LootTemplates_Creature.ReportNotExistedId(lootid);
+                if (ids_set.find(Lootid) == ids_set.end())
+                    LootTemplates_Creature.ReportNotExistedId(Lootid);
                 else
-                    ids_setUsed.insert(lootid);
+                    ids_setUsed.insert(Lootid);
             }
         }
     }
@@ -1301,12 +1301,12 @@ void LoadLootTemplates_Disenchant()
     {
         if (ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype>(i))
         {
-            if (uint32 lootid = proto->DisenchantID)
+            if (uint32 Lootid = proto->DisenchantID)
             {
-                if (ids_set.find(lootid) == ids_set.end())
-                    LootTemplates_Disenchant.ReportNotExistedId(lootid);
+                if (ids_set.find(Lootid) == ids_set.end())
+                    LootTemplates_Disenchant.ReportNotExistedId(Lootid);
                 else
-                    ids_setUsed.insert(lootid);
+                    ids_setUsed.insert(Lootid);
             }
         }
     }
@@ -1344,12 +1344,12 @@ void LoadLootTemplates_Gameobject()
     // remove real entries and check existence loot
     for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
     {
-        if (uint32 lootid = itr->GetLootId())
+        if (uint32 Lootid = itr->GetLootId())
         {
-            if (ids_set.find(lootid) == ids_set.end())
-                LootTemplates_Gameobject.ReportNotExistedId(lootid);
+            if (ids_set.find(Lootid) == ids_set.end())
+                LootTemplates_Gameobject.ReportNotExistedId(Lootid);
             else
-                ids_setUsed.insert(lootid);
+                ids_setUsed.insert(Lootid);
         }
     }
     for (LootIdSet::const_iterator itr = ids_setUsed.begin(); itr != ids_setUsed.end(); ++itr)
@@ -1419,12 +1419,12 @@ void LoadLootTemplates_Pickpocketing()
     {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
         {
-            if (uint32 lootid = cInfo->pickpocketLootId)
+            if (uint32 Lootid = cInfo->PickpocketLootId)
             {
-                if (ids_set.find(lootid) == ids_set.end())
-                    LootTemplates_Pickpocketing.ReportNotExistedId(lootid);
+                if (ids_set.find(Lootid) == ids_set.end())
+                    LootTemplates_Pickpocketing.ReportNotExistedId(Lootid);
                 else
-                    ids_setUsed.insert(lootid);
+                    ids_setUsed.insert(Lootid);
             }
         }
     }
@@ -1485,12 +1485,12 @@ void LoadLootTemplates_Skinning()
     {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
         {
-            if (uint32 lootid = cInfo->SkinLootId)
+            if (uint32 Lootid = cInfo->SkinningLootId)
             {
-                if (ids_set.find(lootid) == ids_set.end())
-                    LootTemplates_Skinning.ReportNotExistedId(lootid);
+                if (ids_set.find(Lootid) == ids_set.end())
+                    LootTemplates_Skinning.ReportNotExistedId(Lootid);
                 else
-                    ids_setUsed.insert(lootid);
+                    ids_setUsed.insert(Lootid);
             }
         }
     }

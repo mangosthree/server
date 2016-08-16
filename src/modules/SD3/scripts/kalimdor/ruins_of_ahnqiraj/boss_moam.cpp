@@ -86,7 +86,7 @@ struct boss_moam : public CreatureScript
             m_creature->SetMaxPower(POWER_MANA, m_creature->GetCreatureInfo()->MaxLevelMana);
 #endif
 #if defined (CATA)
-            m_creature->SetMaxPower(POWER_MANA, m_creature->GetCreatureInfo()->maxmana);// TODO MaxLevelHealth);
+            m_creature->SetMaxPower(POWER_MANA, m_creature->GetCreatureInfo()->MaxLevelMana);// TODO MaxLevelHealth);
 #endif
         }
 

@@ -45,6 +45,7 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "Weather.h"
 #include "Calendar.h"
+#include "Chat.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
@@ -1970,8 +1971,8 @@ uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
  */
 class StaticMonsterChatBuilder
 {
-    public:
-        StaticMonsterChatBuilder(CreatureInfo const* cInfo, ChatMsg msgtype, int32 textId, uint32 language, Unit const* target, uint32 senderLowGuid = 0)
+public:
+        StaticMonsterChatBuilder(CreatureInfo const* cInfo, ChatMsg msgtype, int32 textId, Language language, Unit const* target, uint32 senderLowGuid = 0)
             : i_cInfo(cInfo), i_msgtype(msgtype), i_textId(textId), i_language(language), i_target(target)
         {
             // 0 lowguid not used in core, but accepted fine in this case by client
@@ -1984,7 +1985,8 @@ class StaticMonsterChatBuilder
             char const* nameForLocale = i_cInfo->Name;
             sObjectMgr.GetCreatureLocaleStrings(i_cInfo->Entry, loc_idx, &nameForLocale);
 
-            WorldObject::BuildMonsterChat(&data, i_senderGuid, i_msgtype, text, i_language, nameForLocale, i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
+            ChatHandler::BuildChatPacket(data, i_msgtype, text, i_language, CHAT_TAG_NONE, i_senderGuid, nameForLocale, i_target ? i_target->GetObjectGuid() : ObjectGuid(),
+                i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
         }
 
     private:
@@ -1992,7 +1994,7 @@ class StaticMonsterChatBuilder
         CreatureInfo const* i_cInfo;
         ChatMsg i_msgtype;
         int32 i_textId;
-        uint32 i_language;
+        Language i_language;
         Unit const* i_target;
 };
 
@@ -2125,4 +2127,179 @@ void Map::RemoveGameObjectModel(const GameObjectModel& mdl)
 bool Map::ContainsGameObjectModel(const GameObjectModel& mdl) const
 {
     return m_dyn_tree.contains(mdl);
+}
+// This will generate a random point to all directions in water for the provided point in radius range.
+bool Map::GetRandomPointUnderWater(uint32 phaseMask, float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status)
+{
+    const float angle = rand_norm_f() * (M_PI_F * 2.0f);
+    const float range = rand_norm_f() * radius;
+
+    float i_x = x + range * cos(angle);
+    float i_y = y + range * sin(angle);
+
+    // get real ground of new point
+    // the code consider cylinder instead of sphere for possible z
+    float ground = GetHeight(phaseMask, i_x, i_y, z);
+    if (ground > INVALID_HEIGHT) // GetHeight can fail
+    {
+        float min_z = z - 0.7f * radius; // 0.7 to have a bit a "flat" cylinder, TODO which value looks nicest
+        if (min_z < ground)
+            min_z = ground + 0.5f; // Get some space to prevent under map
+
+        float liquidLevel = liquid_status.level - 2.0f; // just to make the generated point is in water and not on surface or a bit above
+
+        // if not enough space to fit the creature better is to return from here
+        if (min_z > liquidLevel)
+            return false;
+
+        float max_z = std::max(z + 0.7f * radius, min_z);
+        max_z = std::min(max_z, liquidLevel);
+        x = i_x;
+        y = i_y;
+        z = min_z + rand_norm_f() * (max_z - min_z);
+        return true;
+    }
+    return false;
+}
+
+// This will generate a random point to all directions in air for the provided point in radius range.
+bool Map::GetRandomPointInTheAir(uint32 phaseMask, float& x, float& y, float& z, float radius)
+{
+    const float angle = rand_norm_f() * (M_PI_F * 2.0f);
+    const float range = rand_norm_f() * radius;
+
+    float i_x = x + range * cos(angle);
+    float i_y = y + range * sin(angle);
+
+    // get real ground of new point
+    // the code consider cylinder instead of sphere for possible z
+    float ground = GetHeight(phaseMask, i_x, i_y, z);
+    if (ground > INVALID_HEIGHT) // GetHeight can fail
+    {
+        float min_z = z - 0.7f * radius; // 0.7 to have a bit a "flat" cylinder, TODO which value looks nicest
+        if (min_z < ground)
+            min_z = ground + 2.5f; // Get some space to prevent landing
+        float max_z = std::max(z + 0.7f * radius, min_z);
+        x = i_x;
+        y = i_y;
+        z = min_z + rand_norm_f() * (max_z - min_z);
+        return true;
+    }
+    return false;
+}
+
+// supposed to be used for not big radius, usually less than 20.0f
+bool Map::GetReachableRandomPointOnGround(uint32 phaseMask, float& x, float& y, float& z, float radius)
+{
+    // Generate a random range and direction for the new point
+    const float angle = rand_norm_f() * (M_PI_F * 2.0f);
+    const float range = rand_norm_f() * radius;
+
+    float i_x = x + range * cos(angle);
+    float i_y = y + range * sin(angle);
+    float i_z = z + 1.0f;
+
+    GetHitPosition(x, y, z + 1.0f, i_x, i_y, i_z, phaseMask, -0.5f);
+    i_z = z; // reset i_z to z value to avoid too much difference from original point before GetHeightInRange
+    // commented out, as this function has not been defined anywhere (previous cores or other repos)
+//    if (!GetHeightInRange(phaseMask, i_x, i_y, i_z)) // GetHeight can fail
+//        return false;
+
+    // here we have a valid position but the point can have a big Z in some case
+    // next code will check angle from 2 points
+    //        c
+    //       /|
+    //      / |
+    //    b/__|a
+
+    // project vector to get only positive value
+    float ab = fabs(x - i_x);
+    float ac = fabs(z - i_z);
+
+    // slope represented by c angle (in radian)
+    float slope = 0;
+    const float MAX_SLOPE_IN_RADIAN = 50.0f / 180.0f * M_PI_F;  // 50(degree) max seem best value for walkable slope
+
+    // check ab vector to avoid divide by 0
+    if (ab > 0.0f)
+    {
+        // compute c angle and convert it from radian to degree
+        slope = atan(ac / ab);
+        if (slope < MAX_SLOPE_IN_RADIAN)
+        {
+            x = i_x;
+            y = i_y;
+            z = i_z;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Get random point by handling different situation depending of if the unit is flying/swimming/walking
+bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius)
+{
+
+    float i_x = x;
+    float i_y = y;
+    float i_z = z;
+
+    bool newDestAssigned = false;   // used to check if new random destination is found
+
+    bool isFlying = false;
+    bool isSwimming = true;
+    switch (unit->GetTypeId())
+    {
+    case TYPEID_PLAYER:
+        isFlying = static_cast<Player*>(unit)->IsFlying();
+        break;
+    case TYPEID_UNIT:
+        isFlying = static_cast<Creature*>(unit)->IsFlying();
+        isSwimming = static_cast<Creature*>(unit)->IsSwimming();
+        break;
+    default:
+        sLog.outError("Map::GetReachableRandomPosition> Unsupported unit type is passed!");
+        return false;
+    }
+
+    if (radius < 0.1f)
+    {
+        sLog.outError("Map::GetReachableRandomPosition> Unsupported unit type is passed!");
+        return false;
+    }
+
+    if (isFlying)
+    {
+        newDestAssigned = GetRandomPointInTheAir(unit->GetPhaseMask(), i_x, i_y, i_z, radius);
+        /*if (newDestAssigned)
+        sLog.outString("Generating air random point for %s", GetGuidStr().c_str());*/
+    }
+    else
+    {
+        GridMapLiquidData liquid_status;
+        GridMapLiquidStatus res = m_TerrainData->getLiquidStatus(i_x, i_y, i_z, MAP_ALL_LIQUIDS, &liquid_status);
+        if (isSwimming && (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER)))
+        {
+            newDestAssigned = GetRandomPointUnderWater(unit->GetPhaseMask(), i_x, i_y, i_z, radius, liquid_status);
+            /*if (newDestAssigned)
+            sLog.outString("Generating swim random point for %s", GetGuidStr().c_str());*/
+        }
+        else
+        {
+            newDestAssigned = GetReachableRandomPointOnGround(unit->GetPhaseMask(), i_x, i_y, i_z, radius);
+            /*if (newDestAssigned)
+            sLog.outString("Generating ground random point for %s", GetGuidStr().c_str());*/
+        }
+    }
+
+    if (newDestAssigned)
+    {
+        x = i_x;
+        y = i_y;
+        z = i_z;
+        return true;
+    }
+
+    return false;
 }

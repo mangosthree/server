@@ -601,16 +601,13 @@ class WorldObject : public Object
         virtual void SendMessageToSetInRange(WorldPacket* data, float dist, bool self) const;
         void SendMessageToSetExcept(WorldPacket* data, Player const* skipped_receiver) const;
 
-        void MonsterSay(const char* text, uint32 language, Unit const* target = NULL) const;
-        void MonsterYell(const char* text, uint32 language, Unit const* target = NULL) const;
+        void MonsterSay(const char* text, uint32 language, Unit const* target = nullptr) const;
+        void MonsterYell(const char* text, uint32 language, Unit const* target = nullptr) const;
         void MonsterTextEmote(const char* text, Unit const* target, bool IsBossEmote = false) const;
         void MonsterWhisper(const char* text, Unit const* target, bool IsBossWhisper = false) const;
-        void MonsterSay(int32 textId, uint32 language, Unit const* target = NULL) const;
-        void MonsterYell(int32 textId, uint32 language, Unit const* target = NULL) const;
-        void MonsterTextEmote(int32 textId, Unit const* target, bool IsBossEmote = false) const;
-        void MonsterWhisper(int32 textId, Unit const* receiver, bool IsBossWhisper = false) const;
+        void MonsterText(MangosStringLocale const* textData, Unit const* target) const;
+
         void MonsterYellToZone(int32 textId, uint32 language, Unit const* target) const;
-        static void BuildMonsterChat(WorldPacket* data, ObjectGuid senderGuid, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName);
 
         void PlayDistanceSound(uint32 sound_id, Player const* target = NULL) const;
         void PlayDirectSound(uint32 sound_id, Player const* target = NULL) const;

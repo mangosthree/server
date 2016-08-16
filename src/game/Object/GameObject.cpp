@@ -2048,30 +2048,27 @@ bool GameObject::HasStaticDBSpawnData() const
     return sObjectMgr.GetGOData(GetGUIDLow()) != NULL;
 }
 
-void GameObject::SetCapturePointSlider(float value)
+void GameObject::SetCapturePointSlider(float value, bool isLocked)
 {
     GameObjectInfo const* info = GetGOInfo();
 
+    m_captureSlider = value;
+
     // only activate non-locked capture point
-    if (value >= 0)
-    {
-        m_captureSlider = value;
-        { SetLootState(GO_ACTIVATED); }
-    }
-    else
-        m_captureSlider = -value;
+    if (!isLocked)
+        SetLootState(GO_ACTIVATED);
 
     // set the state of the capture point based on the slider value
     if ((int)m_captureSlider == CAPTURE_SLIDER_ALLIANCE)
-        { m_captureState = CAPTURE_STATE_WIN_ALLIANCE; }
+        m_captureState = CAPTURE_STATE_WIN_ALLIANCE;
     else if ((int)m_captureSlider == CAPTURE_SLIDER_HORDE)
-        { m_captureState = CAPTURE_STATE_WIN_HORDE; }
+        m_captureState = CAPTURE_STATE_WIN_HORDE;
     else if (m_captureSlider > CAPTURE_SLIDER_MIDDLE + info->capturePoint.neutralPercent * 0.5f)
-        { m_captureState = CAPTURE_STATE_PROGRESS_ALLIANCE; }
+        m_captureState = CAPTURE_STATE_PROGRESS_ALLIANCE;
     else if (m_captureSlider < CAPTURE_SLIDER_MIDDLE - info->capturePoint.neutralPercent * 0.5f)
-        { m_captureState = CAPTURE_STATE_PROGRESS_HORDE; }
+        m_captureState = CAPTURE_STATE_PROGRESS_HORDE;
     else
-        { m_captureState = CAPTURE_STATE_NEUTRAL; }
+        m_captureState = CAPTURE_STATE_NEUTRAL;
 }
 
 void GameObject::TickCapturePoint()

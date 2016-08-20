@@ -61,6 +61,9 @@ namespace Movement
              */
             int32 Launch();
 
+            /* Stop any creature movement */
+            void Stop();
+
             /* Adds movement by parabolic trajectory
              * @param amplitude  - the maximum height of parabola, value could be negative and positive
              * @param start_time - delay between movement starting time and beginning to move by parabolic trajectory

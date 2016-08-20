@@ -60,7 +60,6 @@ class PlayerSocial;
 class DungeonPersistentState;
 class Spell;
 class Item;
-class PhaseMgr;
 
 struct AreaTrigger;
 
@@ -1209,7 +1208,7 @@ class Player : public Unit
 
         void RemovePet(PetSaveMode mode);
 
-        PhaseMgr* GetPhaseMgr() { return phaseMgr; }
+        uint32 GetPhaseMaskForSpawn() const;                // used for proper set phase for DB at GM-mode creature/GO spawn
 
         void Say(const std::string& text, const uint32 language);
         void Yell(const std::string& text, const uint32 language);
@@ -2854,8 +2853,6 @@ class Player : public Unit
         uint32 m_timeSyncServer;
 
         uint32 m_cachedGS;
-
-        PhaseMgr* phaseMgr;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

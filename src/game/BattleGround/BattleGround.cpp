@@ -81,7 +81,7 @@ namespace MaNGOS
     class BattleGroundYellBuilder
     {
     public:
-            BattleGroundYellBuilder(Language language, int32 textId, Creature const* source, va_list* args = nullptr)
+            BattleGroundYellBuilder(Language language, int32 textId, Creature const* source, va_list* args = NULL)
                 : i_language(language), i_textId(textId), i_source(source), i_args(args) {}
             void operator()(WorldPacket& data, int32 loc_idx)
             {
@@ -125,13 +125,13 @@ namespace MaNGOS
                 snprintf(str, 2048, text, arg1str, arg2str);
 
                 ObjectGuid guid;
-                char const* pName = nullptr;
+                char const* pName = NULL;
                 if (i_source)
                 {
                     guid = i_source->GetObjectGuid();
                     pName = i_source->GetName();
                 }
-                ChatHandler::BuildChatPacket(data, i_msgtype, str, LANG_UNIVERSAL, CHAT_TAG_NONE, ObjectGuid(), nullptr, guid, pName);
+                ChatHandler::BuildChatPacket(data, i_msgtype, str, LANG_UNIVERSAL, CHAT_TAG_NONE, ObjectGuid(), NULL, guid, pName);
             }
         private:
             ChatMsg i_msgtype;
@@ -997,6 +997,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
             plr->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
 
         plr->RemoveAurasDueToSpell(isArena() ? SPELL_ARENA_DAMPENING : SPELL_BATTLEGROUND_DAMPENING);
+        plr->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
         if (!plr->IsAlive())                                // resurrect on exit
         {
@@ -1313,11 +1314,12 @@ void BattleGround::RemoveFromBGFreeSlotQueue()
 {
     // set to be able to re-add if needed
     m_InBGFreeSlotQueue = false;
-    for (BGFreeSlotQueueType::iterator itr = sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].begin(); itr != sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].end(); ++itr)
+    BGFreeSlotQueueType& bgFreeSlot = sBattleGroundMgr.BGFreeSlotQueue[m_TypeID];
+    for (BGFreeSlotQueueType::iterator itr = bgFreeSlot.begin(); itr != bgFreeSlot.end(); ++itr)
     {
         if ((*itr)->GetInstanceID() == GetInstanceID())
         {
-            sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].erase(itr);
+            bgFreeSlot.erase(itr);
             return;
         }
     }

@@ -37,7 +37,6 @@
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "SpellMgr.h"
-#include "PhaseMgr.h"
 
 bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
 {
@@ -129,58 +128,60 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
     if (!unit || (unit->GetTypeId() != TYPEID_PLAYER))
         unit = m_session->GetPlayer();
 
-    std::ifstream ifs("opcode.txt");
-    if (ifs.bad())
+    std::ifstream stream("opcode.txt");
+    if (!stream.is_open())
         return false;
 
-    uint32 opcode;
-    ifs >> opcode;
+    uint32 opcode = 0;
+    if (!(stream >> opcode))
+    {
+        stream.close();
+        return false;
+    }
 
     WorldPacket data(Opcodes(opcode), 0);
 
-    while (!ifs.eof())
+    std::string type;
+    while (stream >> type)
     {
-        std::string type;
-        ifs >> type;
-
-        if (type == "")
+        if (type.empty())
             break;
 
         if (type == "uint8")
         {
-            uint16 val1;
-            ifs >> val1;
-            data << uint8(val1);
+            uint16 value;
+            stream >> value;
+            data << uint8(value);
         }
         else if (type == "uint16")
         {
-            uint16 val2;
-            ifs >> val2;
-            data << val2;
+            uint16 value;
+            stream >> value;
+            data << value;
         }
         else if (type == "uint32")
         {
-            uint32 val3;
-            ifs >> val3;
-            data << val3;
+            uint32 value;
+            stream >> value;
+            data << value;
         }
         else if (type == "uint64")
         {
-            uint64 val4;
-            ifs >> val4;
-            data << val4;
+            uint64 value;
+            stream >> value;
+            data << value;
         }
         else if (type == "float")
         {
-            float val5;
-            ifs >> val5;
-            data << val5;
+            float value;
+            stream >> value;
+            data << value;
         }
         else if (type == "string")
         {
-            std::string val6;
-            ifs >> val6;
-            data << val6;
+            std::string value;
+            stream >> value;
+            data << value;
         }
         else if (type == "pguid")
         {
@@ -192,11 +193,15 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
             break;
         }
     }
-    ifs.close();
+    stream.close();
+
     DEBUG_LOG("Sending opcode %u, %s", data.GetOpcode(), data.GetOpcodeName());
+
     data.hexlike();
     ((Player*)unit)->GetSession()->SendPacket(&data);
+
     PSendSysMessage(LANG_COMMAND_OPCODESENT, data.GetOpcode(), unit->GetName());
+
     return true;
 }
 
@@ -673,32 +678,23 @@ bool ChatHandler::HandleDebugSendSetPhaseShiftCommand(char* args)
     if (!*args)
         return false;
 
-    char* t = strtok((char*)args, " ");
+    char* m = strtok((char*)args, " ");
     char* p = strtok(NULL, " ");
 
-    if (!t)
-        return false;
-
-    std::set<uint32> terrainswap;
-    std::set<uint32> phaseId;
-
-    terrainswap.insert((uint32)atoi(t));
-
-    if (p)
-        phaseId.insert((uint32)atoi(p));
-
-    m_session->SendSetPhaseShift(phaseId, terrainswap);
+    uint16 MapId = atoi(m);
+    uint32 PhaseShift = atoi(p);
+    m_session->SendSetPhaseShift(PhaseShift, MapId);
     return true;
 }
 
 bool ChatHandler::HandleDebugPhaseCommand(char* args)
 {
-    Player* player = getSelectedPlayer();
-    if (!player)
-        player = m_session->GetPlayer();
+    uint32 emote_id;
+    if (!ExtractUInt32(&args, emote_id))
+        { return false; }
 
-    player->GetPhaseMgr()->SendDebugReportToPlayer(m_session->GetPlayer());
-     return true;
+    m_session->GetPlayer()->HandleEmoteCommand(emote_id);
+    return true;
 }
 
 // show animation
@@ -973,29 +969,30 @@ bool ChatHandler::HandlerDebugModValueHelper(Object* target, uint32 field, char*
             return false;
 
         uint32 value = target->GetUInt32Value(field);
+        const char* guidString = guid.GetString().c_str();
 
         switch (type)
         {
             default:
             case 1:                                         // int +
                 value = uint32(int32(value) + int32(iValue));
-                DEBUG_LOG(GetMangosString(LANG_CHANGE_INT32), guid.GetString().c_str(), field, iValue, value, value);
-                PSendSysMessage(LANG_CHANGE_INT32_FIELD, guid.GetString().c_str(), field, iValue, value, value);
+                DEBUG_LOG(GetMangosString(LANG_CHANGE_INT32), guidString, field, iValue, value, value);
+                PSendSysMessage(LANG_CHANGE_INT32_FIELD, guidString, field, iValue, value, value);
                 break;
             case 2:                                         // |= bit or
                 value |= iValue;
-                DEBUG_LOG(GetMangosString(LANG_CHANGE_HEX), guid.GetString().c_str(), field, typeStr, iValue, value);
-                PSendSysMessage(LANG_CHANGE_HEX_FIELD, guid.GetString().c_str(), field, typeStr, iValue, value);
+                DEBUG_LOG(GetMangosString(LANG_CHANGE_HEX), guidString, field, typeStr, iValue, value);
+                PSendSysMessage(LANG_CHANGE_HEX_FIELD, guidString, field, typeStr, iValue, value);
                 break;
             case 3:                                         // &= bit and
                 value &= iValue;
-                DEBUG_LOG(GetMangosString(LANG_CHANGE_HEX), guid.GetString().c_str(), field, typeStr, iValue, value);
-                PSendSysMessage(LANG_CHANGE_HEX_FIELD, guid.GetString().c_str(), field, typeStr, iValue, value);
+                DEBUG_LOG(GetMangosString(LANG_CHANGE_HEX), guidString, field, typeStr, iValue, value);
+                PSendSysMessage(LANG_CHANGE_HEX_FIELD, guidString, field, typeStr, iValue, value);
                 break;
             case 4:                                         // &=~ bit and not
                 value &= ~iValue;
-                DEBUG_LOG(GetMangosString(LANG_CHANGE_HEX), guid.GetString().c_str(), field, typeStr, iValue, value);
-                PSendSysMessage(LANG_CHANGE_HEX_FIELD, guid.GetString().c_str(), field, typeStr, iValue, value);
+                DEBUG_LOG(GetMangosString(LANG_CHANGE_HEX), guidString, field, typeStr, iValue, value);
+                PSendSysMessage(LANG_CHANGE_HEX_FIELD, guidString, field, typeStr, iValue, value);
                 break;
         }
 

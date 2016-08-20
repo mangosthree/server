@@ -210,39 +210,39 @@ enum MangosStrings
     LANG_RESETALL_SPELLS                = 218,
     LANG_RESETALL_TALENTS               = 219,
 
-    LANG_WAYPOINT_NOTFOUND              = 220,
-    LANG_WAYPOINT_NOTFOUNDLAST          = 221,
-    LANG_WAYPOINT_NOTFOUNDSEARCH        = 222,
-    LANG_WAYPOINT_NOTFOUNDDBPROBLEM     = 223,
-    LANG_WAYPOINT_CREATSELECTED         = 224,
-    LANG_WAYPOINT_CREATNOTFOUND         = 225,
-    LANG_WAYPOINT_VP_SELECT             = 226,
-    LANG_WAYPOINT_VP_NOTFOUND           = 227,
-    LANG_WAYPOINT_VP_NOTCREATED         = 228,
-    LANG_WAYPOINT_VP_ALLREMOVED         = 229,
-    LANG_WAYPOINT_NOTCREATED            = 230,
-    LANG_WAYPOINT_NOGUID                = 231,
-    LANG_WAYPOINT_NOWAYPOINTGIVEN       = 232,
-    LANG_WAYPOINT_ARGUMENTREQ           = 233,
-    LANG_WAYPOINT_ADDED                 = 234,
-    LANG_WAYPOINT_ADDED_NO              = 235,
-    LANG_WAYPOINT_CHANGED               = 236,
-    LANG_WAYPOINT_CHANGED_NO            = 237,
-    LANG_WAYPOINT_EXPORTED              = 238,
-    LANG_WAYPOINT_NOTHINGTOEXPORT       = 239,
-    LANG_WAYPOINT_IMPORTED              = 240,
-    LANG_WAYPOINT_REMOVED               = 241,
-    LANG_WAYPOINT_NOTREMOVED            = 242,
-    LANG_WAYPOINT_TOOFAR1               = 243,
-    LANG_WAYPOINT_TOOFAR2               = 244,
-    LANG_WAYPOINT_TOOFAR3               = 245,
-    LANG_WAYPOINT_INFO_TITLE            = 246,
-    LANG_WAYPOINT_INFO_WAITTIME         = 247,
-    LANG_WAYPOINT_INFO_MODEL            = 248,
-    LANG_WAYPOINT_INFO_EMOTE            = 249,
-    LANG_WAYPOINT_INFO_SPELL            = 250,
-    LANG_WAYPOINT_INFO_TEXT             = 251,
-    LANG_WAYPOINT_INFO_AISCRIPT         = 252,
+    LANG_WAYPOINT_NOTFOUND              = 220,              // Cannot find waypoint id %u for %s (in path %i, loaded from %s)
+    LANG_WAYPOINT_NOTFOUNDLAST          = 221,              // Last Waypoint not found for %s
+    LANG_WAYPOINT_NOTFOUNDPATH          = 222,              // %s has no path or path empty, path-id %i (loaded from %s)
+    LANG_WAYPOINT_NOTFOUNDDBPROBLEM     = 223,              // Creature (GUID: %u) No waypoints found - This is a MaNGOS db problem (single float).
+    LANG_WAYPOINT_NOTFOUND_NPC          = 224,              // Cannot access %s on map, maybe you are too far away from its spawn location
+    LANG_WAYPOINT_CREATNOTFOUND         = 225,              // Creature (GUID: %u) not found
+    LANG_WAYPOINT_VP_SELECT             = 226,              // You must select a visual waypoint.
+    LANG_WAYPOINT_VP_NOTFOUND           = 227,              // No visual waypoints found
+    LANG_WAYPOINT_VP_NOTCREATED         = 228,              // Could not create visual waypoint with creatureID: %d
+    LANG_WAYPOINT_VP_ALLREMOVED         = 229,              // All visual waypoints removed
+    LANG_WAYPOINT_NOTCREATED            = 230,              // Could not add waypoint %u to %s (pathId %i stored by %s)
+    LANG_WAYPOINT_NOGUID                = 231,              // No GUID provided.
+    LANG_WAYPOINT_NOWAYPOINTGIVEN       = 232,              // No waypoint number provided.
+    LANG_WAYPOINT_ARGUMENTREQ           = 233,              // Argument required for \'%s\'.
+    LANG_WAYPOINT_ADDED                 = 234,              // Added Waypoint %u to %s (PathId %i, path stored by %s)
+    LANG_WAYPOINT_ADDED_NO              = 235,              // UNUSED
+    LANG_WAYPOINT_CHANGED               = 236,              // Waypoint changed.
+    LANG_WAYPOINT_CHANGED_NO            = 237,              // Waypoint %s modified.
+    LANG_WAYPOINT_EXPORTED              = 238,              // WP export successfull.
+    LANG_WAYPOINT_NOTHINGTOEXPORT       = 239,              // No waypoints found inside the database.
+    LANG_WAYPOINT_IMPORTED              = 240,              // File imported.
+    LANG_WAYPOINT_REMOVED               = 241,              // Waypoint removed.
+    LANG_WAYPOINT_NOTREMOVED            = 242,              // UNUSED
+    LANG_WAYPOINT_TOOFAR1               = 243,              // UNUSED
+    LANG_WAYPOINT_TOOFAR2               = 244,              // UNUSED
+    LANG_WAYPOINT_TOOFAR3               = 245,              // UNUSED
+    LANG_WAYPOINT_INFO_TITLE            = 246,              // Waypoint %u for %s (from pathId %i, stored by %s)
+    LANG_WAYPOINT_INFO_WAITTIME         = 247,              // Waittime: %d
+    LANG_WAYPOINT_INFO_ORI              = 248,              // Orientation: %f
+    LANG_WAYPOINT_INFO_SCRIPTID         = 249,              // ScriptId: %u
+    LANG_WAYPOINT_INFO_UNK_SCRIPTID     = 250,              // ScriptID set to non-existing id %u, add it to DBScriptsEngine and reload the table.
+    LANG_WAYPOINT_INFO_TEXT             = 251,              // UNUSED
+    LANG_WAYPOINT_INFO_AISCRIPT         = 252,              // AIScriptName: %s
 
     LANG_RENAME_PLAYER                  = 253,
     LANG_RENAME_PLAYER_GUID             = 254,
@@ -742,13 +742,12 @@ enum MangosStrings
     LANG_DEBUG_ARENA_OFF                = 738,
     LANG_DEBUG_BG_ON                    = 739,
     LANG_DEBUG_BG_OFF                   = 740,
-
-    LANG_DIST_ARENA_POINTS_START = 741,
-    LANG_DIST_ARENA_POINTS_ONLINE_START = 742,
-    LANG_DIST_ARENA_POINTS_ONLINE_END   = 743,
-    LANG_DIST_ARENA_POINTS_TEAM_START   = 744,
-    LANG_DIST_ARENA_POINTS_TEAM_END     = 745,
-    LANG_DIST_ARENA_POINTS_END          = 746,
+//                                      = 741, not used
+//                                      = 742, not used
+//                                      = 743, not used
+//                                      = 744, not used
+//                                      = 745, not used
+//                                      = 746, not used
 //                                      = 747, not used
 //                                      = 748, not used
 //                                      = 749, not used
@@ -1026,14 +1025,6 @@ enum MangosStrings
     LANG_VENDOR_WRONG_ITEM_TYPE         = 1700,
     LANG_VENDOR_WRONG_CURRENCY_MAXCOUNT = 1701,
 
-    LANG_PHASING_REPORT_STATUS          = 1702,
-    LANG_PHASING_NO_DEFINITIONS         = 1703,
-    LANG_PHASING_SUCCESS                = 1704,
-    LANG_PHASING_FAILED                 = 1705,
-    LANG_PHASING_LAST_PHASE             = 1706,
-    LANG_PHASING_LIST                   = 1707,
-    LANG_PHASING_PHASEMASK              = 1708,
-
     // FREE IDS                           1800-9999
 
     // Use for not-in-official-sources patches
@@ -1045,4 +1036,5 @@ enum MangosStrings
     // `db_script_string` table index     2000000000-2000999999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
     // For other tables maybe             2001000000-2147483647 (max index)
 };
+
 #endif

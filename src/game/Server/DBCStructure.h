@@ -1456,6 +1456,16 @@ struct PhaseEntry
     uint32 Flags;                                           // 2 - 0x0, 0x4, 0x8
 };
 
+struct PowerDisplayEntry
+{
+    uint32      id;                                         // 0        m_ID
+    uint32      power;                                      // 1        m_power
+    // uint32   unk1                                        // 2
+    // float    unk2                                        // 3
+    // float    unk3                                        // 4
+    // float    unk4                                        // 5
+};
+
 struct PvPDifficultyEntry
 {
     //uint32      id;                                       // 0        m_ID
@@ -1807,32 +1817,31 @@ struct SpellCooldownsEntry
 // SpellEffect.dbc
 struct SpellEffectEntry
 {
-    //uint32    Id;                                           // 0        m_ID
-    uint32    Effect;                                       // 73-75    m_effect
-    float     EffectMultipleValue;                          // 106-108  m_effectAmplitude
-    uint32    EffectApplyAuraName;                          // 100-102  m_effectAura
-    uint32    EffectAmplitude;                              // 103-105  m_effectAuraPeriod
-    int32     EffectBasePoints;                             // 82-84    m_effectBasePoints (don't must be used in spell/auras explicitly, must be used cached Spell::m_currentBasePoints)
-    //float   unk_320_4;                                    // 169-171  3.2.0
-    float     DmgMultiplier;                                // 156-158  m_effectChainAmplitude
-    uint32    EffectChainTarget;                            // 109-111  m_effectChainTargets
-    int32     EffectDieSides;                               // 76-78    m_effectDieSides
-    uint32    EffectItemType;                               // 112-114  m_effectItemType
-    uint32    EffectMechanic;                               // 85-87    m_effectMechanic
-    int32     EffectMiscValue;                              // 115-117  m_effectMiscValue
-    int32     EffectMiscValueB;                             // 118-120  m_effectMiscValueB
-    float     EffectPointsPerComboPoint;                    // 124-126  m_effectPointsPerCombo
-    uint32    EffectRadiusIndex;                            // 94-96    m_effectRadiusIndex - spellradius.dbc
-    uint32    EffectRadiusMaxIndex;                         // 97-99    4.0.0
-    float     EffectRealPointsPerLevel;                     // 79-81    m_effectRealPointsPerLevel
-    ClassFamilyMask EffectSpellClassMask;                   // 127-129  m_effectSpellClassMask
-    uint32    EffectTriggerSpell;                           // 121-123  m_effectTriggerSpell
-    uint32    EffectImplicitTargetA;                        // 88-90    m_implicitTargetA
-    uint32    EffectImplicitTargetB;                        // 91-93    m_implicitTargetB
-    uint32    EffectSpellId;                                // new 4.0.0
-    uint32    EffectIndex;                                  // new 4.0.0
-    //uint32 unk;                                           // 24 - 4.2.0
-
+    //uint32    Id;                                         // 0        m_ID
+    uint32    Effect;                                       // 1        m_effect
+    float     EffectMultipleValue;                          // 2        m_effectAmplitude
+    uint32    EffectApplyAuraName;                          // 3        m_effectAura
+    uint32    EffectAmplitude;                              // 4        m_effectAuraPeriod
+    int32     EffectBasePoints;                             // 5        m_effectBasePoints (don't must be used in spell/auras explicitly, must be used cached Spell::m_currentBasePoints)
+    float     EffectBonusMultiplier;                        // 6        m_effectBonus
+    float     EffectDamageMultiplier;                       // 7        m_effectChainAmplitude
+    uint32    EffectChainTarget;                            // 8        m_effectChainTargets
+    int32     EffectDieSides;                               // 9        m_effectDieSides
+    uint32    EffectItemType;                               // 10       m_effectItemType
+    uint32    EffectMechanic;                               // 11       m_effectMechanic
+    int32     EffectMiscValue;                              // 12       m_effectMiscValue
+    int32     EffectMiscValueB;                             // 13       m_effectMiscValueB
+    float     EffectPointsPerComboPoint;                    // 14       m_effectPointsPerCombo
+    uint32    EffectRadiusIndex;                            // 15       m_effectRadiusIndex - spellradius.dbc
+    uint32    EffectRadiusMaxIndex;                         // 16       4.0.0
+    float     EffectRealPointsPerLevel;                     // 17       m_effectRealPointsPerLevel
+    ClassFamilyMask EffectSpellClassMask;                   // 18 19 20 m_effectSpellClassMask
+    uint32    EffectTriggerSpell;                           // 21       m_effectTriggerSpell
+    uint32    EffectImplicitTargetA;                        // 22       m_implicitTargetA
+    uint32    EffectImplicitTargetB;                        // 23       m_implicitTargetB
+    uint32    EffectSpellId;                                // 24       m_spellId - spell.dbc
+    uint32    EffectIndex;                                  // 25       m_spellEffectIdx
+    //uint32 unk;                                           // 26       4.2.0 only 0 or 1
     // helpers
 
     int32 CalculateSimpleValue() const { return EffectBasePoints; }
@@ -2353,7 +2362,7 @@ struct VehicleEntry
     uint32  m_uiLocomotionType;                             // 34
     float   m_msslTrgtImpactTexRadius;                      // 35
     uint32  m_uiSeatIndicatorType;                          // 36       m_vehicleUIIndicatorID
-    uint32  m_powerType;                                    // 37       m_powerDisplayID
+    uint32  m_powerDisplayID;                               // 37
                                                             // 38 new in 3.1
                                                             // 39 new in 3.1
 };
@@ -2421,9 +2430,6 @@ struct VehicleSeatEntry
     //uint32 unk[6];                                        // 58-63
     //uint32 unk2;                                          // 64 4.0.0
     //uint32 unk3;                                          // 65 4.0.1
-
-    bool IsUsable() const { return m_flags & SEAT_FLAG_USABLE; }
-
 };
 
 struct WMOAreaTableEntry

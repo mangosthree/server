@@ -491,6 +491,12 @@ class BattleGround
         // Process Capture event
         virtual bool HandleEvent(uint32 /*eventId*/, GameObject* /*go*/) { return false; }
 
+        // Called when a creature is created
+        virtual void HandleCreatureCreate(Creature* /*creature*/) {}
+
+        // handle capture objective complete
+        virtual void HandleObjectiveComplete(uint32 /*eventId*/, const std::list<Player*>& /*players*/, Team /*team*/) {}
+
         // Called when a gameobject is created
         virtual void HandleGameObjectCreate(GameObject* /*go*/) {}
 

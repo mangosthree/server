@@ -177,15 +177,15 @@ Commands and their parameters
 
 TemporaryFactionFlags
 ---------------------
-* `TEMPFACTION_NONE`: 0x00, when no flag is used in temporary faction change, faction will be persistent. It will then require manual change back to default/another faction when changed once
-* `TEMPFACTION_RESTORE_RESPAWN`: 0x01, default faction will be restored at respawn
-* `TEMPFACTION_RESTORE_COMBAT_STOP`: 0x02, ... at CombatStop() (happens at creature death, at evade or custom script among others)
-* `TEMPFACTION_RESTORE_REACH_HOME`: 0x04, ... at reaching home in home movement (evade), if not already done at CombatStop()
+* `TEMPFACTION_NONE`                    = 0x00,  // When no flag is used in temporary faction change, faction will be persistent. It will then require manual change back to default/another faction when changed once
+* `TEMPFACTION_RESTORE_RESPAWN`         = 0x01,  // Default faction will be restored at respawn
+* `TEMPFACTION_RESTORE_COMBAT_STOP`     = 0x02,  // ... at CombatStop() (happens at creature death, at evade or custom scripte among others)
+* `TEMPFACTION_RESTORE_REACH_HOME`      = 0x04,  // ... at reaching home in home movement (evade), if not already done at CombatStop()
 
-The next flags allow to remove unit_flags combined with a faction change (also these flags will be reapplied when the faction is changed back)
+// The next flags allow to remove unit_flags combined with a faction change (also these flags will be reapplied when the faction is changed back)
 
-* `TEMPFACTION_TOGGLE_NON_ATTACKABLE`: 0x08, remove UNIT_FLAG_NON_ATTACKABLE(0x02) when faction is changed (reapply when temp-faction is removed)
-* `TEMPFACTION_TOGGLE_OOC_NOT_ATTACK`: 0x10, remove UNIT_FLAG_OOC_NOT_ATTACKABLE(0x100) when faction is changed (reapply when temp-faction is removed)
-* `TEMPFACTION_TOGGLE_PASSIVE`       : 0x20, remove UNIT_FLAG_PASSIVE(0x200)
-* `TEMPFACTION_TOGGLE_PACIFIED`      : 0x40, remove UNIT_FLAG_PACIFIED(0x20000) when faction is changed (reapply when temp-faction is removed)
-* `TEMPFACTION_TOGGLE_NOT_SELECTABLE`: 0x80, remove UNIT_FLAG_NOT_SELECTABLE(0x2000000) when faction is changed (reapply when temp-faction is removed)
+* `TEMPFACTION_TOGGLE_NON_ATTACKABLE`   = 0x08,  // Remove UNIT_FLAG_NON_ATTACKABLE(0x02) when faction is changed (reapply when temp-faction is removed)
+* `TEMPFACTION_TOGGLE_OOC_NOT_ATTACK`   = 0x10,  // Remove UNIT_FLAG_OOC_NOT_ATTACKABLE(0x100) when faction is changed (reapply when temp-faction is removed)
+* `TEMPFACTION_TOGGLE_PASSIVE`          = 0x20,  // Remove UNIT_FLAG_PASSIVE(0x200) when faction is changed (reapply when temp-faction is removed)
+* `TEMPFACTION_TOGGLE_PACIFIED`         = 0x40,  // Remove UNIT_FLAG_PACIFIED(0x20000) when faction is changed (reapply when temp-faction is removed)
+* `TEMPFACTION_TOGGLE_NOT_SELECTABLE`   = 0x80,  // Remove UNIT_FLAG_NOT_SELECTABLE(0x2000000) when faction is changed (reapply when temp-faction is removed)

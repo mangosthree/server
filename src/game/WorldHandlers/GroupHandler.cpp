@@ -37,6 +37,8 @@
 #include "Util.h"
 #include "DB2Structure.h"
 #include "DB2Stores.h"
+#include "Vehicle.h"
+#include "TransportSystem.h"
 
 /* differeces from off:
     -you can uninvite yourself - is is useful
@@ -905,6 +907,14 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         *data << uint32(0);
         *data << uint8(0);
     }
+
+    if (mask & GROUP_UPDATE_FLAG_VEHICLE_SEAT)
+    {
+        if (player->GetTransportInfo())
+            *data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->m_seatID[player->GetTransportInfo()->GetTransportSeat()]);
+        else
+            *data << uint32(0);
+    }
 }
 
 /*this procedure handles clients CMSG_REQUEST_PARTY_MEMBER_STATS request*/
@@ -1047,6 +1057,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         data << uint64(0);                                  // GROUP_UPDATE_FLAG_PET_AURAS
         data << uint32(0);                                  // GROUP_UPDATE_FLAG_PET_AURAS
     }
+
+    if (player->GetTransportInfo())                         // GROUP_UPDATE_FLAG_VEHICLE_SEAT
+        data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->m_seatID[player->GetTransportInfo()->GetTransportSeat()]);
 
     data << uint32(8);                                      // GROUP_UPDATE_FLAG_PHASE
     data << uint32(0);                                      // GROUP_UPDATE_FLAG_PHASE

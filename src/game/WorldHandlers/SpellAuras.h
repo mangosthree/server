@@ -414,6 +414,10 @@ class  Aura
         void HandleAuraModBlockCritChance(bool apply, bool Real);
         void HandleModIncreaseSpellPowerPct(bool apply, bool Real);
         void HandleOverrideSpellPowerByAp(bool apply, bool Real);
+        void HandleMirrorName(bool apply, bool Real);
+        void HandlePreventResurrection(bool apply, bool Real);
+        void HandleFactionOverride(bool apply, bool Real);
+        void HandleTriggerLinkedAura(bool apply, bool Real);
 
         virtual ~Aura();
 

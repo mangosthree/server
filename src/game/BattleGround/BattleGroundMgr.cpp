@@ -1437,7 +1437,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
     if (bg->isArena())
     {
         // it seems this must be according to BG_WINNER_A/H and _NOT_ BG_TEAM_A/H
-        for (int8 i = 0; i < BG_TEAMS_COUNT; ++i)
+        for (int8 i = 0; i < PVP_TEAM_COUNT; ++i)
         {
             if (ArenaTeam* at = sObjectMgr.GetArenaTeamById(bg->m_ArenaTeamIds[i]))
                 data->WriteBits(at->GetName().length(), 8);
@@ -1451,6 +1451,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
     {
         ObjectGuid memberGuid = itr->first;
         Player* player = sObjectMgr.GetPlayer(itr->first);
+        const BattleGroundScore* score = itr->second;
 
         data->WriteBit(0);                  // unk1
         data->WriteBit(0);                  // unk2
@@ -1466,18 +1467,18 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
         data->WriteBit(team == ALLIANCE);   // unk7
         data->WriteGuidMask<7>(memberGuid);
 
-        buffer << uint32(itr->second->HealingDone);         // healing done
-        buffer << uint32(itr->second->DamageDone);          // damage done
+        buffer << uint32(score->HealingDone);         // healing done
+        buffer << uint32(score->DamageDone);          // damage done
 
         if (!bg->isArena())
         {
-            buffer << uint32(itr->second->BonusHonor);
-            buffer << uint32(itr->second->Deaths);
-            buffer << uint32(itr->second->HonorableKills);
+            buffer << uint32(score->BonusHonor);
+            buffer << uint32(score->Deaths);
+            buffer << uint32(score->HonorableKills);
         }
 
         buffer.WriteGuidBytes<4>(memberGuid);
-        buffer << uint32(itr->second->KillingBlows);
+        buffer << uint32(score->KillingBlows);
         // if (unk5) << uint32() unk
         buffer.WriteGuidBytes<5>(memberGuid);
         // if (unk6) << uint32() unk
@@ -1493,25 +1494,25 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
         {
             case BATTLEGROUND_AV:
                 data->WriteBits(5, 24);                     // count of next fields
-                buffer << uint32(((BattleGroundAVScore*)itr->second)->GraveyardsAssaulted); // GraveyardsAssaulted
-                buffer << uint32(((BattleGroundAVScore*)itr->second)->GraveyardsDefended);  // GraveyardsDefended
-                buffer << uint32(((BattleGroundAVScore*)itr->second)->TowersAssaulted);     // TowersAssaulted
-                buffer << uint32(((BattleGroundAVScore*)itr->second)->TowersDefended);      // TowersDefended
-                buffer << uint32(((BattleGroundAVScore*)itr->second)->SecondaryObjectives); // SecondaryObjectives - free some of the Lieutnants
+                buffer << uint32(((BattleGroundAVScore*)score)->GraveyardsAssaulted); // GraveyardsAssaulted
+                buffer << uint32(((BattleGroundAVScore*)score)->GraveyardsDefended);  // GraveyardsDefended
+                buffer << uint32(((BattleGroundAVScore*)score)->TowersAssaulted);     // TowersAssaulted
+                buffer << uint32(((BattleGroundAVScore*)score)->TowersDefended);      // TowersDefended
+                buffer << uint32(((BattleGroundAVScore*)score)->SecondaryObjectives); // SecondaryObjectives - free some of the Lieutnants
                 break;
             case BATTLEGROUND_WS:
                 data->WriteBits(2, 24);                     // count of next fields
-                buffer << uint32(((BattleGroundWGScore*)itr->second)->FlagCaptures);        // flag captures
-                buffer << uint32(((BattleGroundWGScore*)itr->second)->FlagReturns);         // flag returns
+                buffer << uint32(((BattleGroundWGScore*)score)->FlagCaptures);        // flag captures
+                buffer << uint32(((BattleGroundWGScore*)score)->FlagReturns);         // flag returns
                 break;
             case BATTLEGROUND_AB:
                 data->WriteBits(2, 24);                     // count of next fields
-                buffer << uint32(((BattleGroundABScore*)itr->second)->BasesAssaulted);      // bases asssulted
-                buffer << uint32(((BattleGroundABScore*)itr->second)->BasesDefended);       // bases defended
+                buffer << uint32(((BattleGroundABScore*)score)->BasesAssaulted);      // bases asssulted
+                buffer << uint32(((BattleGroundABScore*)score)->BasesDefended);       // bases defended
                 break;
             case BATTLEGROUND_EY:
                 data->WriteBits(1, 24);                     // count of next fields
-                buffer << uint32(((BattleGroundEYScore*)itr->second)->FlagCaptures);        // flag captures
+                buffer << uint32(((BattleGroundEYScore*)score)->FlagCaptures);        // flag captures
                 break;
             case BATTLEGROUND_NA:
             case BATTLEGROUND_BE:
@@ -1541,7 +1542,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
 
     if (bg->isRated())                                      // arena
     {
-        for (int8 i = 0; i < BG_TEAMS_COUNT; ++i)
+        for (int8 i = 0; i < PVP_TEAM_COUNT; ++i)
         {
             uint32 pointsLost = bg->m_ArenaTeamRatingChanges[i] < 0 ? abs(bg->m_ArenaTeamRatingChanges[i]) : 0;
             uint32 pointsGained = bg->m_ArenaTeamRatingChanges[i] > 0 ? bg->m_ArenaTeamRatingChanges[i] : 0;
@@ -1558,7 +1559,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
 
     if (bg->isArena())
     {
-        for (int8 i = 0; i < BG_TEAMS_COUNT; ++i)
+        for (int8 i = 0; i < PVP_TEAM_COUNT; ++i)
         {
             if (ArenaTeam* at = sObjectMgr.GetArenaTeamById(bg->m_ArenaTeamIds[i]))
                 data->append(at->GetName().data(), at->GetName().length());
@@ -1902,15 +1903,17 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         uint32 MinPlayersPerTeam = fields[1].GetUInt32();
         uint32 MaxPlayersPerTeam = fields[2].GetUInt32();
 
-        // check values from DB
-        if (MaxPlayersPerTeam == 0 || MinPlayersPerTeam == 0)
+        if (MaxPlayersPerTeam == 0)
         {
-            sLog.outErrorDb("Table `battleground_template` for id %u have wrong min/max players per team settings. BG not created.", bgTypeID);
+            sLog.outErrorDb("Table `battleground_template` for id %u doesn't allow any player per team settings. BG not created.", bgTypeID);
             continue;
         }
 
         if (MinPlayersPerTeam > MaxPlayersPerTeam)
+        {
             MinPlayersPerTeam = MaxPlayersPerTeam;
+            sLog.outErrorDb("Table `battleground_template` for id %u has min players > max players per team settings. Min players will use same value as max players.", bgTypeID);
+        }
 
         float AStartLoc[4];
         float HStartLoc[4];

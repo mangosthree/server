@@ -223,35 +223,6 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
     SendPacket(&data);
 }
 
-/*
- * pre dev21 version
- * delete this if the one below it proves to be good (chucky)
-void WorldSession::SendLfgJoinResult(LfgJoinResult result)
-{
-    WorldPacket data(SMSG_LFG_JOIN_RESULT, 0);
-    data << uint32(result);
-    data << uint32(0); // ERR_LFG_ROLE_CHECK_FAILED_TIMEOUT = 3, ERR_LFG_ROLE_CHECK_FAILED_NOT_VIABLE = (value - 3 == result)
-
-    if (result == ERR_LFG_NO_SLOTS_PARTY)
-    {
-        uint8 count1 = 0;
-        data << uint8(count1);                              // players count?
-        for (uint32 i = 0; i < count1; ++i)
-        {
-            data << uint64(0);                              // player guid?
-            uint32 count2 = 0;
-            for (uint32 j = 0; j < count2; ++j)
-            {
-                data << uint32(0);                          // dungeon id/type
-                data << uint32(0);                          // lock status?
-            }
-        }
-    }
-
-    SendPacket(&data);
-}
-*/
-
 void WorldSession::SendLfgJoinResult(LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons)
 {
     uint32 packetSize = 0;

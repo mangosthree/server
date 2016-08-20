@@ -353,7 +353,7 @@ void CalendarMgr::RemoveEvent(uint64 eventId, Player* remover)
 // Add invit to an event and inform client
 // some check done before so it may fail and raison is sent to client
 // return value is the CalendarInvite pointer on success
-CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& senderGuid, ObjectGuid const& inviteeGuid, CalendarInviteStatus status, CalendarModerationRank rank, std::string text, time_t statusTime)
+CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& senderGuid, ObjectGuid const& inviteeGuid, CalendarInviteStatus status, CalendarModerationRank rank, const std::string& text, time_t statusTime)
 {
     Player* sender = sObjectMgr.GetPlayer(senderGuid);
     if (!event || !sender)
@@ -481,7 +481,7 @@ void CalendarMgr::CopyEvent(uint64 eventId, time_t newTime, ObjectGuid const& gu
         return;
 
     if (newEvent->IsGuildAnnouncement())
-        AddInvite(newEvent, guid, guid,  CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(NULL));
+        AddInvite(newEvent, guid, guid,  CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(nullptr));
     else
     {
         // copy all invitees, set new owner as the one who make the copy, set invitees status to invited
@@ -490,18 +490,19 @@ void CalendarMgr::CopyEvent(uint64 eventId, time_t newTime, ObjectGuid const& gu
 
         while (ci_itr != cInvMap->end())
         {
-            if (ci_itr->second->InviteeGuid == guid)
+            const CalendarInvite* invite = ci_itr->second;
+            if (invite->InviteeGuid == guid)
             {
-                AddInvite(newEvent, guid, ci_itr->second->InviteeGuid,  CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(NULL));
+                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(nullptr));
             }
             else
             {
                 CalendarModerationRank rank = CALENDAR_RANK_PLAYER;
                 // copy moderator rank
-                if (ci_itr->second->Rank == CALENDAR_RANK_MODERATOR)
+                if (invite->Rank == CALENDAR_RANK_MODERATOR)
                     rank = CALENDAR_RANK_MODERATOR;
 
-                AddInvite(newEvent, guid, ci_itr->second->InviteeGuid,  CALENDAR_STATUS_INVITED, rank, "", time(NULL));
+                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_INVITED, rank, "", time(nullptr));
             }
             ++ci_itr;
         }

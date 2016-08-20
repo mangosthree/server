@@ -448,6 +448,7 @@ enum ConditionType
     CONDITION_GENDER                = 35,                   // 0=male, 1=female, 2=none (see enum Gender)
     CONDITION_DEAD_OR_AWAY          = 36,                   // value1: 0=player dead, 1=player is dead (with group dead), 2=player in instance are dead, 3=creature is dead
                                                             // value2: if != 0 only consider players in range of this value
+    CONDITION_CREATURE_IN_RANGE     = 37,                   // value1: creature entry; value2: range; returns only alive creatures
 };
 
 enum ConditionSource                                        // From where was the condition called?
@@ -462,7 +463,6 @@ enum ConditionSource                                        // From where was th
     CONDITION_FROM_SPELL_AREA       = 7,                    // Used to check a condition from spell_area table
     CONDITION_FROM_SPELLCLICK       = 8,                    // Used to check a condition from npc_spellclick_spells table
     CONDITION_FROM_DBSCRIPTS        = 9,                    // Used to check a condition from DB Scripts Engine
-    CONDITION_FROM_PHASEMGR         = 10,                   // Used to check a condition from phase manager
 };
 
 class PlayerCondition
@@ -1041,7 +1041,7 @@ class ObjectMgr
         static PetNameInvalidReason CheckPetName(const std::string& name);
         static bool IsValidCharterName(const std::string& name);
 
-        static bool CheckDeclinedNames(std::wstring mainpart, DeclinedName const& names);
+        static bool CheckDeclinedNames(const std::wstring& mainpart, DeclinedName const& names);
 
         int GetIndexForLocale(LocaleConstant loc);
         LocaleConstant GetLocaleForIndex(int i);
@@ -1192,11 +1192,11 @@ class ObjectMgr
 
         uint32 GetModelForRace(uint32 sourceModelId, uint32 racemask);
         /**
-        * \brief: Data returned is used to compute health, mana, armor, damage of creatures. May be nullptr.
+        * \brief: Data returned is used to compute health, mana, armor, damage of creatures. May be NULL.
         * \param uint32 level               creature level
         * \param uint32 unitClass           creature class, related to CLASSMASK_ALL_CREATURES
         * \param uint32 expansion           creature expansion (we could have creature exp = 0 for wotlk as well as exp = 1 or exp = 2)
-        * \return: CreatureClassLvlStats const* or nullptr
+        * \return: CreatureClassLvlStats const* or NULL
         *
         * Description: GetCreatureClassLvlStats give fast access to creature stats data.
         * FullName: ObjectMgr::GetCreatureClassLvlStats

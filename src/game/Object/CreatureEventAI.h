@@ -689,6 +689,7 @@ class  CreatureEventAI : public CreatureAI
         // Note that Step 100 means that AI_EVENT_GOT_FULL_HEALTH was sent
         // Steps 0..2 correspond to AI_EVENT_LOST_SOME_HEALTH(90%), AI_EVENT_LOST_HEALTH(50%), AI_EVENT_CRITICAL_HEALTH(10%)
         uint32 m_throwAIEventStep;                          // Used for damage taken/ received heal
+        float m_LastSpellMaxRange;                          // Maximum spell range that was cast during dynamic movement
 };
 
 #endif

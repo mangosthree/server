@@ -383,8 +383,8 @@ bool ChatHandler::HandleSummonCommand(char* args)
     if (!ExtractPlayerTarget(&args, &target, &target_guid, &target_name))
         return false;
 
-    Player* _player = m_session->GetPlayer();
-    if (target == _player || target_guid == _player->GetObjectGuid())
+    Player* player = m_session->GetPlayer();
+    if (target == player || target_guid == player->GetObjectGuid())
     {
         PSendSysMessage(LANG_CANT_TELEPORT_SELF);
         SetSentErrorMessage(true);
@@ -405,7 +405,7 @@ bool ChatHandler::HandleSummonCommand(char* args)
             return false;
         }
 
-        Map* pMap = m_session->GetPlayer()->GetMap();
+        Map* pMap = player->GetMap();
 
         if (pMap->IsBattleGroundOrArena())
         {
@@ -442,9 +442,9 @@ bool ChatHandler::HandleSummonCommand(char* args)
             }
 
             // we are in instance, and can summon only player in our group with us as lead
-            if (!m_session->GetPlayer()->GetGroup() || !target->GetGroup() ||
-                    (target->GetGroup()->GetLeaderGuid() != m_session->GetPlayer()->GetObjectGuid()) ||
-                    (m_session->GetPlayer()->GetGroup()->GetLeaderGuid() != m_session->GetPlayer()->GetObjectGuid()))
+            if (!player->GetGroup() || !target->GetGroup() ||
+                    (target->GetGroup()->GetLeaderGuid() != player->GetObjectGuid()) ||
+                    (player->GetGroup()->GetLeaderGuid() != player->GetObjectGuid()))
                 // the last check is a bit excessive, but let it be, just in case
             {
                 PSendSysMessage(LANG_CANNOT_SUMMON_TO_INST, nameLink.c_str());
@@ -455,7 +455,7 @@ bool ChatHandler::HandleSummonCommand(char* args)
 
         PSendSysMessage(LANG_SUMMONING, nameLink.c_str(), "");
         if (needReportToTarget(target))
-            ChatHandler(target).PSendSysMessage(LANG_SUMMONED_BY, playerLink(_player->GetName()).c_str());
+            ChatHandler(target).PSendSysMessage(LANG_SUMMONED_BY, playerLink(player->GetName()).c_str());
 
         // stop flight if need
         if (target->IsTaxiFlying())
@@ -483,12 +483,12 @@ bool ChatHandler::HandleSummonCommand(char* args)
         PSendSysMessage(LANG_SUMMONING, nameLink.c_str(), GetMangosString(LANG_OFFLINE));
 
         // in point where GM stay
-        Player::SavePositionInDB(target_guid, m_session->GetPlayer()->GetMapId(),
-                                 m_session->GetPlayer()->GetPositionX(),
-                                 m_session->GetPlayer()->GetPositionY(),
-                                 m_session->GetPlayer()->GetPositionZ(),
-                                 m_session->GetPlayer()->GetOrientation(),
-                                 m_session->GetPlayer()->GetZoneId());
+        Player::SavePositionInDB(target_guid, player->GetMapId(),
+                                 player->GetPositionX(),
+                                 player->GetPositionY(),
+                                 player->GetPositionZ(),
+                                 player->GetOrientation(),
+                                 player->GetZoneId());
     }
 
     return true;
@@ -1984,13 +1984,14 @@ bool ChatHandler::HandleGroupgoCommand(char* args)
         return false;
     }
 
-    Map* gmMap = m_session->GetPlayer()->GetMap();
+    Player* player = m_session->GetPlayer();
+    Map* gmMap = player->GetMap();
     bool to_instance =  gmMap->Instanceable();
 
     // we are in instance, and can summon only player in our group with us as lead
     if (to_instance && (
-                !m_session->GetPlayer()->GetGroup() || (grp->GetLeaderGuid() != m_session->GetPlayer()->GetObjectGuid()) ||
-                (m_session->GetPlayer()->GetGroup()->GetLeaderGuid() != m_session->GetPlayer()->GetObjectGuid())))
+                !player->GetGroup() || (grp->GetLeaderGuid() != player->GetObjectGuid()) ||
+                (player->GetGroup()->GetLeaderGuid() != player->GetObjectGuid())))
         // the last check is a bit excessive, but let it be, just in case
     {
         SendSysMessage(LANG_CANNOT_SUMMON_TO_INST);
@@ -1998,7 +1999,7 @@ bool ChatHandler::HandleGroupgoCommand(char* args)
         return false;
     }
 
-    for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
+    for (GroupReference* itr = grp->GetFirstMember(); itr != nullptr; itr = itr->next())
     {
         Player* pl = itr->getSource();
 

@@ -753,6 +753,7 @@ class MovementInfo
         MovementFlags GetMovementFlags() const { return MovementFlags(moveFlags); }
         void SetMovementFlags(MovementFlags f) { moveFlags = f; }
         MovementFlags2 GetMovementFlags2() const { return MovementFlags2(moveFlags2); }
+        void AddMovementFlags2(MovementFlags2 f) { moveFlags2 |= f; }
 
         // Position manipulations
         Position const* GetPos() const { return &pos; }
@@ -1256,13 +1257,13 @@ enum IgnoreUnitState
 // Power type values defines
 enum PowerDefaults
 {
-    POWER_RAGE_DEFAULT = 1000,
-    POWER_FOCUS_DEFAULT = 100,
-    POWER_ENERGY_DEFAULT = 100,
-    POWER_RUNE_DEFAULT = 8,
-    POWER_RUNIC_POWER_DEFAULT = 1000,
-    POWER_HOLY_POWER_DEFAULT = 3,
-    POWER_SOUL_SHARDS_DEFAULT = 3,
+    POWER_RAGE_DEFAULT              = 1000,
+    POWER_FOCUS_DEFAULT             = 100,
+    POWER_ENERGY_DEFAULT            = 100,
+    POWER_RUNE_DEFAULT              = 8,
+    POWER_RUNIC_POWER_DEFAULT       = 1000,
+    POWER_HOLY_POWER_DEFAULT        = 3,
+    POWER_SOUL_SHARDS_DEFAULT       = 3,
 };
 
 struct SpellProcEventEntry;                                 // used only privately
@@ -1861,6 +1862,10 @@ class  Unit : public WorldObject
          */
         void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction); }
         FactionTemplateEntry const* getFactionTemplateEntry() const;
+        /** 
+         * 
+         */
+        void RestoreOriginalFaction();
         /** 
          * Are we hostile towards the given Unit?
          * @param unit the unit we want to check against
@@ -3384,6 +3389,7 @@ class  Unit : public WorldObject
         SpellAuraProcResult HandleManaShieldAuraProc(Unit* pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
         SpellAuraProcResult HandleModResistanceAuraProc(Unit* pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
         SpellAuraProcResult HandleRemoveByDamageChanceProc(Unit* pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
+        SpellAuraProcResult HandleInvisibilityAuraProc(Unit* pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown);
         SpellAuraProcResult HandleNULLProc(Unit* /*pVictim*/, uint32 /*damage*/, Aura* /*triggeredByAura*/, SpellEntry const* /*procSpell*/, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
         {
             // no proc handler for this aura type

@@ -189,8 +189,13 @@ void Totem::SetTypeBySummonSpell(SpellEntry const* spellProto)
 
 bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
 {
+    // Totem may affected by some specific spells
+    // Mana Spring, Healing stream, Mana tide
+    // Flags : 0x00000002000 | 0x00000004000 | 0x00004000000 -> 0x00004006000
+    if (spellInfo->GetSpellFamilyName() == SPELLFAMILY_SHAMAN && spellInfo->IsFitToFamilyMask(UI64LIT(0x00004006000)))
+        return false;
     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(index);
-    if(spellEffect)
+    if (spellEffect)
     {
         // TODO: possibly all negative auras immune?
         switch(spellEffect->Effect)

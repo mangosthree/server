@@ -76,6 +76,8 @@ class  MotionMaster : private std::stack<MovementGenerator*>
 
         void Initialize();
 
+        MovementGenerator const* GetCurrent() const { return top(); }
+
         MovementGenerator* operator->(void) { return top(); }
 
         using Impl::top;

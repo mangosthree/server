@@ -101,10 +101,11 @@ class PathFinder
         const dtNavMeshQuery*   m_navMeshQuery;     // the nav mesh query used to find the path
 
         dtQueryFilter m_filter;                     // use single filter for all movements, update it when needed
+        
 
-        void setStartPosition(const Vector3 &point) { m_startPosition = point; }
-        void setEndPosition(const Vector3 &point) { m_actualEndPosition = point; m_endPosition = point; }
-        void setActualEndPosition(const Vector3 &point) { m_actualEndPosition = point; }
+        void setStartPosition(const Vector3& point) { m_startPosition = point; }
+        void setEndPosition(const Vector3& point) { m_actualEndPosition = point; m_endPosition = point; }
+        void setActualEndPosition(const Vector3& point) { m_actualEndPosition = point; }
 
         void clear()
         {

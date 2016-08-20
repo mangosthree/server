@@ -671,6 +671,51 @@ void WorldSession::SendNotification(int32 string_id, ...)
     }
 }
 
+void WorldSession::SendSetPhaseShift(uint32 phaseMask, uint16 mapId)
+{
+    ObjectGuid guid = _player->GetObjectGuid();
+
+    uint32 phaseFlags = 0;
+
+    for (uint32 i = 0; i < sPhaseStore.GetNumRows(); i++)
+    {
+        if (PhaseEntry const* phase = sPhaseStore.LookupEntry(i))
+        {
+            if (phase->PhaseShift == phaseMask)
+            {
+                phaseFlags = phase->Flags;
+                break;
+            }
+        }
+    }
+
+    WorldPacket data(SMSG_SET_PHASE_SHIFT, 30);
+    data.WriteGuidMask<2, 3, 1, 6, 4, 5, 0, 7>(guid);
+    data.WriteGuidBytes<7, 4>(guid);
+
+    data << uint32(0);                  // number of WorldMapArea.dbc entries to control world map shift * 2
+
+    data.WriteGuidBytes<1>(guid);
+    data << uint32(phaseMask ? phaseFlags : 8);
+    data.WriteGuidBytes<2, 6>(guid);
+
+    data << uint32(0);                  // number of inactive terrain swaps * 2
+
+    data << uint32(phaseMask ? 2 : 0);  // WRONG: number of Phase.dbc ids * 2
+    if (phaseMask)
+        data << uint16(phaseMask);
+
+    data.WriteGuidBytes<3, 0>(guid);
+
+    data << uint32(mapId ? 2 : 0);      // number of terrains swaps * 2
+    if (mapId)
+        data << uint16(mapId);
+
+    data.WriteGuidBytes<5>(guid);
+    SendPacket(&data);
+}
+
+/*
 void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<uint32> const& terrainswaps)
 {
     if (PlayerLoading())
@@ -707,6 +752,7 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
     data.WriteGuidBytes<5>(guid);
     SendPacket(&data);
 }
+*/
 
 const char* WorldSession::GetMangosString(int32 entry) const
 {
@@ -807,7 +853,7 @@ void WorldSession::LoadAccountData(QueryResult* result, uint32 mask)
     delete result;
 }
 
-void WorldSession::SetAccountData(AccountDataType type, time_t time_, std::string data)
+void WorldSession::SetAccountData(AccountDataType type, time_t time_, const std::string& data)
 {
     if ((1 << type) & GLOBAL_CACHE_MASK)
     {
@@ -828,7 +874,7 @@ void WorldSession::SetAccountData(AccountDataType type, time_t time_, std::strin
     }
     else
     {
-        // _player can be NULL and packet received after logout but m_GUID still store correct guid
+        // _player can be nullptr and packet received after logout but m_GUID still store correct guid
         if (!m_GUIDLow)
             return;
 

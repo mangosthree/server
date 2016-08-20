@@ -1547,12 +1547,12 @@ bool ScriptAction::HandleScriptStep()
             }
 
             // bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide
-            Player* pSoundTarget = NULL;
+            Player* pSoundTarget = nullptr;
             if (m_script->playSound.flags & 1)
             {
                 pSoundTarget = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
                 if (!pSoundTarget)
-                    { break; }
+                    break;
             }
 
             if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
@@ -1560,11 +1560,11 @@ bool ScriptAction::HandleScriptStep()
             else
             {
                 if (m_script->playSound.flags & 2)
-                    { pSource->PlayDistanceSound(m_script->playSound.soundId, pSoundTarget); }
+                    pSource->PlayDistanceSound(m_script->playSound.soundId, pSoundTarget);
                 else if (m_script->playSound.flags & (4 | 8))
-                    { m_map->PlayDirectSoundToMap(m_script->playSound.soundId, m_script->playSound.flags & 8 ? pSource->GetZoneId() : 0); }
+                    m_map->PlayDirectSoundToMap(m_script->playSound.soundId, m_script->playSound.flags & 8 ? pSource->GetZoneId() : 0);
                 else
-                    { pSource->PlayDirectSound(m_script->playSound.soundId, pSoundTarget); }
+                    pSource->PlayDirectSound(m_script->playSound.soundId, pSoundTarget);
             }
             break;
         }
@@ -2696,4 +2696,9 @@ char const* GetScriptName(uint32 id)
 uint32 GetScriptIdsCount()
 {
     return sScriptMgr.GetScriptIdsCount();
+}
+
+bool AddWaypointFromExternal(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime)
+{
+    return sWaypointMgr.AddExternalNode(entry, pathId, pointId, x, y, z, o, waittime);
 }

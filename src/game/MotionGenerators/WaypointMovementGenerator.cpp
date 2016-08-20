@@ -38,40 +38,35 @@
 #include <cassert>
 
 //-----------------------------------------------//
-void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature)
+void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature, int32 pathId, WaypointPathOrigin wpOrigin, uint32 overwriteEntry)
 {
     DETAIL_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "LoadPath: loading waypoint path for %s", creature.GetGuidStr().c_str());
 
-    i_path = sWaypointMgr.GetPath(creature.GetGUIDLow());
+    if (!overwriteEntry)
+        overwriteEntry = creature.GetEntry();
 
-    // We may LoadPath() for several occasions:
+    if (wpOrigin == PATH_NO_PATH && pathId == 0)
+        i_path = sWaypointMgr.GetDefaultPath(overwriteEntry, creature.GetGUIDLow(), &m_PathOrigin);
+    else
+    {
+        m_PathOrigin = wpOrigin == PATH_NO_PATH ? PATH_FROM_ENTRY : wpOrigin;
+        i_path = sWaypointMgr.GetPathFromOrigin(overwriteEntry, creature.GetGUIDLow(), pathId, m_PathOrigin);
+    }
+    m_pathId = pathId;
 
-    // 1: When creature.MovementType=2
-    //    1a) Path is selected by creature.guid == creature_movement.id
-    //    1b) Path for 1a) does not exist and then use path from creature.GetEntry() == creature_movement_template.entry
-
-    // 2: When creature_template.MovementType=2
-    //    2a) Creature is summoned and has creature_template.MovementType=2
-    //        Creators need to be sure that creature_movement_template is always valid for summons.
-    //        Mob that can be summoned anywhere should not have creature_movement_template for example.
-
-    // No movement found for guid
+    // No movement found for entry nor guid
     if (!i_path)
     {
-        i_path = sWaypointMgr.GetPathTemplate(creature.GetEntry());
-
-        // No movement found for entry
-        if (!i_path)
-        {
-            sLog.outErrorDb("WaypointMovementGenerator::LoadPath: creature %s (Entry: %u GUID: %u) doesn't have waypoint path",
-                            creature.GetName(), creature.GetEntry(), creature.GetGUIDLow());
-            return;
-        }
+        if (m_PathOrigin == PATH_FROM_EXTERNAL)
+            sLog.outErrorScriptLib("WaypointMovementGenerator::LoadPath: %s doesn't have waypoint path %i", creature.GetGuidStr().c_str(), pathId);
+        else
+            sLog.outErrorDb("WaypointMovementGenerator::LoadPath: %s doesn't have waypoint path %i", creature.GetGuidStr().c_str(), pathId);
+        return;
     }
 
-    // Initialize the i_currentNode to point to the first node
     if (i_path->empty())
         return;
+    // Initialize the i_currentNode to point to the first node
     i_currentNode = i_path->begin()->first;
     m_lastReachedWaypoint = 0;
 }
@@ -80,10 +75,6 @@ void WaypointMovementGenerator<Creature>::Initialize(Creature& creature)
 {
     creature.addUnitState(UNIT_STAT_ROAMING);
     creature.clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
-
-    LoadPath(creature);
-
-    StartMoveNow(creature);
 }
 
 void WaypointMovementGenerator<Creature>::Finalize(Creature& creature)
@@ -158,21 +149,14 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
             }
 
             if (MangosStringLocale const* textData = sObjectMgr.GetMangosStringLocale(textId))
-                creature.MonsterText(textData, nullptr);
+                creature.MonsterText(textData, NULL);
             else
                 sLog.outErrorDb("%s reached waypoint %u, attempted to do text %i, but required text-data could not be found", creature.GetGuidStr().c_str(), i_currentNode, textId);
         }
     }
 
     // Inform script
-    MovementInform(creature);
     Stop(node.delay);
-}
-
-void WaypointMovementGenerator<Creature>::StartMoveNow(Creature& creature)
-{
-    i_nextMoveTime.Reset(0);
-    StartMove(creature);
 }
 
 void WaypointMovementGenerator<Creature>::StartMove(Creature& creature)
@@ -254,13 +238,7 @@ bool WaypointMovementGenerator<Creature>::Update(Creature& creature, const uint3
     return true;
 }
 
-void WaypointMovementGenerator<Creature>::MovementInform(Creature& creature)
-{
-    if (creature.AI())
-        creature.AI()->MovementInform(WAYPOINT_MOTION_TYPE, i_currentNode);
-}
-
-bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, float& y, float& z) const
+bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, float& y, float& z, float& o) const
 {
     // prevent a crash at empty waypoint path.
     if (!i_path || i_path->empty())
@@ -271,9 +249,34 @@ bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, 
     if (!m_lastReachedWaypoint && lastPoint == i_path->end())
         return false;
 
-    MANGOS_ASSERT(lastPoint != i_path->end()); 
+    MANGOS_ASSERT(lastPoint != i_path->end());
 
-    x = lastPoint->second.x; y = lastPoint->second.y; z = lastPoint->second.z;
+    WaypointNode const* curWP = &(lastPoint->second);
+
+    x = curWP->x;
+    y = curWP->y;
+    z = curWP->z;
+
+    if (curWP->orientation != 100)
+        o = curWP->orientation;
+    else                                                    // Calculate the resulting angle based on positions between previous and current waypoint
+    {
+        WaypointNode const* prevWP;
+        if (lastPoint != i_path->begin())                   // Not the first waypoint
+        {
+            --lastPoint;
+            prevWP = &(lastPoint->second);
+        }
+        else                                                // Take the last waypoint (crbegin()) as previous
+            prevWP = &(i_path->rbegin()->second);
+
+        float dx = x - prevWP->x;
+        float dy = y - prevWP->y;
+        o = atan2(dy, dx);                                  // returns value between -Pi..Pi
+
+        o = (o >= 0) ? o : 2 * M_PI_F + o;
+    }
+
     return true;
 }
 
@@ -418,9 +421,12 @@ void FlightPathMovementGenerator::DoEventIfAny(Player& player, TaxiPathNodeEntry
     }
 }
 
-bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, float& z) const
+bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, float& z, float& o) const
 {
     const TaxiPathNodeEntry& node = (*i_path)[i_currentNode];
-    x = node.x; y = node.y; z = node.z;
+    x = node.x;
+    y = node.y;
+    z = node.z;
+
     return true;
 }

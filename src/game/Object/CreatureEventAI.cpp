@@ -91,16 +91,21 @@ inline bool IsEventFlagsFitForNormalMap(uint8 eFlags)
 CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
     m_Phase(0),
     m_MeleeEnabled(true),
+    m_DynamicMovement(false),
+    m_HasOOCLoSEvent(false),
     m_InvinceabilityHpLevel(0),
     m_throwAIEventMask(0),
-    m_throwAIEventStep(0)
+    m_throwAIEventStep(0),
+    m_LastSpellMaxRange(0)
 {
     // Need make copy for filter unneeded steps and safe in case table reload
     CreatureEventAI_Event_Map::const_iterator creatureEventsItr = sEventAIMgr.GetCreatureEventAIMap().find(m_creature->GetEntry());
     if (creatureEventsItr != sEventAIMgr.GetCreatureEventAIMap().end())
     {
         uint32 events_count = 0;
-        for (CreatureEventAI_Event_Vec::const_iterator i = creatureEventsItr->second.begin(); i != creatureEventsItr->second.end(); ++i)
+
+        const CreatureEventAI_Event_Vec& creatureEvent = creatureEventsItr->second;
+        for (CreatureEventAI_Event_Vec::const_iterator i = creatureEvent.begin(); i != creatureEvent.end(); ++i)
         {
             // Debug check
 #ifndef MANGOS_DEBUG
@@ -119,27 +124,33 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
         }
         // EventMap had events but they were not added because they must be for instance
         if (events_count == 0)
-            sLog.outErrorEventAI("Creature %u has events but no events added to list because of instance flags.", m_creature->GetEntry());
+            sLog.outErrorEventAI("Creature %u has events but no events added to list because of instance flags (spawned in map %u, difficulty %u).", m_creature->GetEntry(), m_creature->GetMapId(), m_creature->GetMap()->GetDifficulty());
         else
         {
             m_CreatureEventAIList.reserve(events_count);
-            for (CreatureEventAI_Event_Vec::const_iterator i = creatureEventsItr->second.begin(); i != creatureEventsItr->second.end(); ++i)
+            for (CreatureEventAI_Event_Vec::const_iterator i = creatureEvent.begin(); i != creatureEvent.end(); ++i)
             {
                 // Debug check
 #ifndef MANGOS_DEBUG
                 if (i->event_flags & EFLAG_DEBUG_ONLY)
                     continue;
 #endif
+                bool storeEvent = false;
                 if (m_creature->GetMap()->IsDungeon())
                 {
                     if ((1 << (m_creature->GetMap()->GetSpawnMode() + 1)) & i->event_flags)
-                    {
-                        // event flagged for instance mode
-                        m_CreatureEventAIList.push_back(CreatureEventAIHolder(*i));
-                    }
+                        storeEvent = true;
                 }
                 else if (IsEventFlagsFitForNormalMap(i->event_flags))
+                    storeEvent = true;
+
+                if (storeEvent)
+                {
                     m_CreatureEventAIList.push_back(CreatureEventAIHolder(*i));
+                    // Cache for fast use
+                    if (i->event_type == EVENT_T_OOC_LOS)
+                        m_HasOOCLoSEvent = true;
+                }
             }
         }
     }
@@ -1191,7 +1202,7 @@ void CreatureEventAI::EnterCombat(Unit* enemy)
 
 void CreatureEventAI::AttackStart(Unit* who)
 {
-    if (!who)
+    if (!who || !m_creature->CanAttackByItself())
         return;
 
     if (m_creature->Attack(who, m_MeleeEnabled))

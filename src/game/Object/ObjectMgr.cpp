@@ -520,10 +520,10 @@ void ObjectMgr::LoadCreatureTemplates()
             if (!ok2)
                 continue;
 
-            if (cInfo->UnitClass != difficultyInfo->UnitFlags)
+            if (cInfo->UnitClass != difficultyInfo->UnitClass)
             {
-                sLog.outErrorDb("Creature (Entry: %u, class %u) has different `UnitClass` in difficulty %u mode (Entry: %u, class %u).",
-                    i, cInfo->UnitClass, diff + 1, cInfo->DifficultyEntry[diff], difficultyInfo->UnitClass);
+                sLog.outErrorDb("Creature (Entry: %u, class %u) has different `unit_class` in difficulty %u mode (Entry: %u, class %u).",
+                                i, cInfo->UnitClass, diff + 1, cInfo->DifficultyEntry[diff], difficultyInfo->UnitClass);
                 continue;
             }
 
@@ -1197,7 +1197,7 @@ void ObjectMgr::LoadCreatureModelInfo()
 void ObjectMgr::LoadCreatureModelRace()
 {
     m_mCreatureModelRaceMap.clear();                        // can be used for reload
-
+    
     QueryResult* result = WorldDatabase.Query("SELECT modelid, racemask, creature_entry, modelid_racial FROM creature_model_race");
 
     if (!result)
@@ -9652,7 +9652,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
     m_mGossipMenuItemsMap.clear();
 
     QueryResult* result = WorldDatabase.Query(
-                              "SELECT menu_id, id, option_icon, option_text, option_id, npc_option_NpcFlags, "
+                              "SELECT menu_id, id, option_icon, option_text, option_id, npc_option_npcflag, "
                               "action_menu_id, action_poi_id, action_script_id, box_coded, box_money, box_text, "
                               "condition_id "
                               "FROM gossip_menu_option ORDER BY menu_id, id");

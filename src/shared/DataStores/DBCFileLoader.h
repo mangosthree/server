@@ -201,9 +201,9 @@ class DBCFileLoader
         char* AutoProduceStringsArrayHolders(const char* fmt, char* dataTable);
         char* AutoProduceStrings(const char* fmt, char* dataTable, LocaleConstant loc);
         /**
-         * @brief This works out the total amount of memory required by the types specified within the format string
+         * Calculate and return the total amount of memory required by the types specified within the format string
          *
-         * @param format
+         * @param format the format string passed to it (see DBCfmt.h)
          * @param index_pos
          * @return uint32 the total amount of memory required for all the data types
          */

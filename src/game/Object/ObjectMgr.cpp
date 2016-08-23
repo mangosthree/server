@@ -908,10 +908,8 @@ void ObjectMgr::LoadCreatureClassLvlStats()
 		queryStr.append(str.str().c_str());
 	}
 
-	sLog.outErrorDb("Querying creature_template_classlevelstats table");
 	queryStr.append(" FROM `creature_template_classlevelstats` ORDER BY `Class`, `Level`");
 	QueryResult* result = WorldDatabase.Query(queryStr.c_str());
-	sLog.outErrorDb("Finished querying creature_template_classlevelstats table");
 
 	if (!result)
 	{
@@ -927,7 +925,6 @@ void ObjectMgr::LoadCreatureClassLvlStats()
 	BarGoLink bar(result->GetRowCount());
 	uint32 DataCount = 0;
 
-	sLog.outErrorDb("Processing rows of creature_template_classlevelstats table");
 	do
 	{
 		Field* fields = result->Fetch();
@@ -966,7 +963,6 @@ void ObjectMgr::LoadCreatureClassLvlStats()
 		}
 		++DataCount;
 	} while (result->NextRow());
-	sLog.outErrorDb("Finished processing rows of creature_template_classlevelstats table");
 
 	delete result;
 

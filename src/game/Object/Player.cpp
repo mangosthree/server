@@ -4545,7 +4545,7 @@ void Player::SetRoot(bool enable)
 {
     WorldPacket data;
     BuildForceMoveRootPacket(&data, enable, 0);
-    GetSession()->SendPacket(&data);
+    SendMessageToSet(&data, true);
 }
 
 void Player::SetWaterWalk(bool enable)

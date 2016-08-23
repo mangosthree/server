@@ -35,6 +35,7 @@ const char AuctionHouseEntryfmt[]="niiix";
 const char BankBagSlotPricesEntryfmt[] = "ni";
 const char BarberShopStyleEntryfmt[]="nixxxiii";
 const char BattlemasterListEntryfmt[]="niiiiiiiiixsiiiiiiii";
+//                                    1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160
 const char CharStartOutfitEntryfmt[]="diiiiiiiiiiiiiiiiiiiiiiiiixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char CharTitlesEntryfmt[]="nxsxix";
 const char ChatChannelsEntryfmt[]="iixsx";
@@ -117,6 +118,7 @@ const char SoundEntriesfmt[]="nissssssssssssssssssssssxxxxxxxxxxx";
 const char SpellCastTimefmt[]="niii";
 const char SpellDurationfmt[] = "niii";
 const char SpellDifficultyfmt[] = "niiii";
+//                          1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160
 const char SpellEntryfmt[]="niiiiiiiiiiiiiiifiiiissxxiixxixiiiiiiixiiiiiiiix";
 const char SpellAuraOptionsEntryfmt[]="diiii";
 const char SpellAuraRestrictionsEntryfmt[]="diiiiiiii";
@@ -124,6 +126,7 @@ const char SpellCastingRequirementsEntryfmt[]="dixxixi";
 const char SpellCategoriesEntryfmt[]="diiiiii";
 const char SpellClassOptionsEntryfmt[]="dxiiiix";
 const char SpellCooldownsEntryfmt[]="diii";
+//                                1        10        20        30            
 const char SpellEffectEntryfmt[]="difiiiffiiiiiifiifiiiiiiiix";
 const char SpellEquippedItemsEntryfmt[]="diii";
 const char SpellInterruptsEntryfmt[]="dixixi";
@@ -152,6 +155,7 @@ const char TaxiPathNodeEntryfmt[] = "diiifffiiii";
 const char TotemCategoryEntryfmt[]="nxii";
 const char TransportAnimationEntryfmt[]="diixxxx";
 const char VehicleEntryfmt[]="niffffiiiiiiiifffffffffffffffssssfifiixx";
+//                                1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160
 const char VehicleSeatEntryfmt[]="niiffffffffffiiiiiifffffffiiifffiiiiiiiffiiiiixxxxxxxxxxxxxxxxxxxx";
 const char WMOAreaTableEntryfmt[]="niiixxxxxiixxxx";
 const char WorldMapAreaEntryfmt[]="xinxffffixxxxx";

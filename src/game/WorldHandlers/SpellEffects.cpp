@@ -4275,15 +4275,24 @@ void Spell::EffectTriggerMissileSpell(SpellEffectEntry const* effect)
 
     if (!spellInfo)
     {
-        sLog.outError("EffectTriggerMissileSpell of spell %u (eff: %u): triggering unknown spell id %u",
-            m_spellInfo->Id,effect->EffectIndex,triggered_spell_id);
+        if (unitTarget)
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart spellid %u in EffectTriggerMissileSpell", m_spellInfo->Id);
+            m_caster->GetMap()->ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, unitTarget);
+        }
+        else
+            sLog.outError("EffectTriggerMissileSpell of spell %u (eff: %u): triggering unknown spell id %u",
+                      m_spellInfo->Id, effect->EffectIndex, triggered_spell_id);
         return;
     }
 
     if (m_CastItem)
         DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->Id);
 
-    m_caster->CastSpell(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, spellInfo, true, m_CastItem, NULL, m_originalCasterGUID, m_spellInfo);
+    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+        m_caster->CastSpell(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, spellInfo, true, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
+    else if (unitTarget)
+        m_caster->CastSpell(unitTarget, spellInfo, true, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
 }
 
 void Spell::EffectJump(SpellEffectEntry const* effect)
@@ -11535,10 +11544,7 @@ void Spell::EffectPlayMusic(SpellEffectEntry const* effect)
         return;
     }
 
-    WorldPacket data(SMSG_PLAY_MUSIC, 4);
-    data << uint32(soundId);
-    data << ObjectGuid();
-    ((Player*)unitTarget)->GetSession()->SendPacket(&data);
+    m_caster->PlayMusic(soundId, (Player*)unitTarget);
 }
 
 void Spell::EffectSpecCount(SpellEffectEntry const* /*effect*/)

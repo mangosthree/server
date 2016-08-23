@@ -1841,7 +1841,7 @@ struct SpellEffectEntry
     uint32    EffectImplicitTargetB;                        // 23       m_implicitTargetB
     uint32    EffectSpellId;                                // 24       m_spellId - spell.dbc
     uint32    EffectIndex;                                  // 25       m_spellEffectIdx
-    //uint32 unk;                                           // 26       4.2.0 only 0 or 1
+    // uint32 unk;                                           // 26       4.2.0 only 0 or 1
     // helpers
 
     int32 CalculateSimpleValue() const { return EffectBasePoints; }

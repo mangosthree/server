@@ -1029,6 +1029,7 @@ void World::SetInitialWorldSettings()
     CharacterDatabase.PExecute("DELETE FROM corpse WHERE corpse_type = '0' OR time < (UNIX_TIMESTAMP()-'%u')", 3 * DAY);
 
     ///- Load the DBC and DB2 files
+
     sLog.outString("Initialize data stores...");
     LoadDBCStores(m_dataPath);
     DetectDBCLang();
@@ -1127,7 +1128,7 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature Stats...");
     sObjectMgr.LoadCreatureClassLvlStats();
 
-    sLog.outString("Loading Creature templates...");
+    sLog.outErrorDb("Loading Creature templates...");
     sObjectMgr.LoadCreatureTemplates();
 
     sLog.outString("Loading Creature template spells...");
@@ -1518,6 +1519,11 @@ void World::SetInitialWorldSettings()
     sLog.outString("Starting Game Event system...");
     uint32 nextGameEvent = sGameEventMgr.Initialize();
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    // depend on next event
+
+    // ToDo: requires fix after the latest updates
+    //sLog.outString("Loading grids for active creatures or transports...");
+    //sObjectMgr.LoadActiveEntities(nullptr);
+    //sLog.outString();
 
     // Delete all characters which have been deleted X days before
     Player::DeleteOldCharacters();

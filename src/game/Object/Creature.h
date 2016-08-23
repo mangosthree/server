@@ -97,7 +97,7 @@ struct CreatureInfo
     uint32  CreatureType;                                  // enum CreatureType values
     uint32  InhabitType;
     uint32  RegenerateStats;
-    bool    RacialLeader;
+    int32    RacialLeader;
     uint32  NpcFlags;
     uint32  UnitFlags;                                     // enum UnitFlags mask values
     uint32  UnitFlags2;                                    // enum UnitFlags2 mask values
@@ -191,117 +191,6 @@ struct CreatureInfo
         return exotic || !IsExotic();
     }
 };
-
-
-// from `creature_template` table
-/*
-struct CreatureInfo
-{
-    uint32  Entry;
-    uint32  DifficultyEntry[MAX_DIFFICULTY - 1];
-    uint32  KillCredit[MAX_KILL_CREDIT];
-    uint32  ModelId[MAX_CREATURE_MODEL];
-    char*   Name;
-    char*   SubName;
-    char*   IconName;
-    uint32  GossipMenuId;
-    uint32  MinLevel;
-    uint32  MaxLevel;
-    uint32  MinLevelHealth;
-    uint32  maxhealth;
-    uint32  MinLevelMana;
-    uint32  maxmana;
-    uint32  armor;
-    uint32  FactionAlliance;
-    uint32  FactionHorde;
-    uint32  NpcFlags;
-    float   speed_walk;
-    float   speed_run;
-    float   Scale;
-    uint32  Rank;
-    float   mindmg;
-    float   maxdmg;
-    uint32  dmgschool;
-    uint32  attackpower;
-    float   dmg_multiplier;
-    uint32  MeleeAttackPower;
-    uint32  RangedAttackPower;
-    uint32  UnitClass;                                     // enum Classes. Note only 4 classes are known for creatures.
-    uint32  UnitFlags;                                     // enum UnitFlags mask values
-    uint32  UnitFlags2;                                    // enum UnitFlags2 mask values
-    uint32  dynamicflags;
-    uint32  family;                                         // enum CreatureFamily values (optional)
-    uint32  TrainerType;
-    uint32  trainer_spell;
-    uint32  TrainerClass;
-    uint32  trainer_race;
-    float   minrangedmg;
-    float   maxrangedmg;
-    uint32  rangedattackpower;
-    uint32  type;                                           // enum CreatureType values
-    uint32  CreatureTypeFlags;                                     // enum CreatureTypeFlags mask values
-    uint32  Lootid;
-    uint32  pickpocketLootId;
-    uint32  SkinningLootId;
-    int32   resistance1;
-    int32   resistance2;
-    int32   resistance3;
-    int32   resistance4;
-    int32   resistance5;
-    int32   resistance6;
-    uint32  PetSpellDataId;
-    uint32  MinLootGold;
-    uint32  maxgold;
-    char const* AIName;
-    uint32  MovementType;
-    uint32  InhabitType;
-    float   healthModifier;
-    float   powerModifier;
-    bool    RacialLeader;
-    uint32  questItems[6];
-    uint32  movementId;
-    bool    RegenHealth;
-    uint32  VehicleTemplateId;
-    uint32  EquipmentTemplateId;
-    uint32  TrainerTemplateId;
-    uint32  VendorTemplateId;
-    uint32  MechanicImmuneMask;
-    uint32  ExtraFlags;
-
-    // helpers
-    HighGuid GetHighGuid() const
-    {
-        return VehicleTemplateId ? HIGHGUID_VEHICLE : HIGHGUID_UNIT;
-    }
-
-    ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(GetHighGuid(), Entry, lowguid); }
-
-    SkillType GetRequiredLootSkill() const
-    {
-        if (CreatureTypeFlags & CREATURE_TYPEFLAGS_HERBLOOT)
-            { return SKILL_HERBALISM; }
-        else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
-            { return SKILL_MINING; }
-        else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
-            return SKILL_ENGINEERING;
-        else
-            { return SKILL_SKINNING; }                          // normal case
-    }
-
-    bool IsExotic() const
-    {
-        return (CreatureTypeFlags & CREATURE_TYPEFLAGS_EXOTIC);
-    }
-
-    bool isTameable(bool exotic) const
-    {
-        if (type != CREATURE_TYPE_BEAST || family == 0 || (CreatureTypeFlags & CREATURE_TYPEFLAGS_TAMEABLE) == 0)
-            return false;
-
-        // if can tame exotic then can tame any temable
-        return exotic || !IsExotic();
-    }
-}; */
 
 struct CreatureTemplateSpells
 {

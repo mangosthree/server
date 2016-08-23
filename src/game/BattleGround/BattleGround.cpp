@@ -657,24 +657,54 @@ void BattleGround::EndBattleGround(Team winner)
 {
     this->RemoveFromBGFreeSlotQueue();
 
-    ArenaTeam* winner_arena_team = NULL;
-    ArenaTeam* loser_arena_team = NULL;
+    ArenaTeam* winner_arena_team = nullptr;
+    ArenaTeam* loser_arena_team = nullptr;
     uint32 loser_rating = 0;
     uint32 winner_rating = 0;
     WorldPacket data;
     int32 winmsg_id = 0;
 
+    uint32 bgScoresWinner = TEAM_INDEX_NEUTRAL;
+    uint64 battleground_id = 1;
+
     if (winner == ALLIANCE)
     {
         winmsg_id = isBattleGround() ? LANG_BG_A_WINS : LANG_ARENA_GOLD_WINS;
+        PlaySoundToAll(SOUND_ALLIANCE_WINS);
 
-        PlaySoundToAll(SOUND_ALLIANCE_WINS);                // alliance wins sound
+        // reversed index for the bg score storage system
+        bgScoresWinner = TEAM_INDEX_HORDE;
     }
     else if (winner == HORDE)
     {
         winmsg_id = isBattleGround() ? LANG_BG_H_WINS : LANG_ARENA_GREEN_WINS;
+        PlaySoundToAll(SOUND_HORDE_WINS);
 
-        PlaySoundToAll(SOUND_HORDE_WINS);                   // horde wins sound
+        // reversed index for the bg score storage system
+        bgScoresWinner = TEAM_INDEX_ALLIANCE;
+    }
+
+    // store battleground scores
+    if (isBattleGround() && sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_SCORE_STATISTICS))
+    {
+        static SqlStatementID insPvPstatsBattleground;
+        QueryResult* result;
+
+        SqlStatement stmt = CharacterDatabase.CreateStatement(insPvPstatsBattleground, "INSERT INTO pvpstats_battlegrounds (id, winner_team, bracket_id, type, date) VALUES (?, ?, ?, ?, NOW())");
+
+        uint8 battleground_bracket = GetMinLevel() / 10;
+        uint8 battleground_type = (uint8)GetTypeID();
+
+        // query next id
+        result = CharacterDatabase.Query("SELECT MAX(id) FROM pvpstats_battlegrounds");
+        if (result)
+        {
+            Field* fields = result->Fetch();
+            battleground_id = fields[0].GetUInt64() + 1;
+            delete result;
+        }
+
+        stmt.PExecute(battleground_id, bgScoresWinner, battleground_bracket, battleground_type);
     }
 
     SetWinner(winner);
@@ -686,22 +716,30 @@ void BattleGround::EndBattleGround(Team winner)
     // arena rating calculation
     if (isArena() && isRated())
     {
-        winner_arena_team = sObjectMgr.GetArenaTeamById(GetArenaTeamIdForTeam(winner));
-        loser_arena_team = sObjectMgr.GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(winner)));
-        if (winner_arena_team && loser_arena_team)
+        if (winner != TEAM_NONE)
         {
-            loser_rating = loser_arena_team->GetStats().rating;
-            winner_rating = winner_arena_team->GetStats().rating;
-            int32 winner_change = winner_arena_team->WonAgainst(loser_rating);
-            int32 loser_change = loser_arena_team->LostAgainst(winner_rating);
-            DEBUG_LOG("--- Winner rating: %u, Loser rating: %u, Winner change: %i, Loser change: %i ---", winner_rating, loser_rating, winner_change, loser_change);
-            SetArenaTeamRatingChangeForTeam(winner, winner_change);
-            SetArenaTeamRatingChangeForTeam(GetOtherTeam(winner), loser_change);
+            winner_arena_team = sObjectMgr.GetArenaTeamById(GetArenaTeamIdForTeam(winner));
+            loser_arena_team = sObjectMgr.GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(winner)));
+            if (winner_arena_team && loser_arena_team)
+            {
+                loser_rating = loser_arena_team->GetStats().rating;
+                winner_rating = winner_arena_team->GetStats().rating;
+                int32 winner_change = winner_arena_team->WonAgainst(loser_rating);
+                int32 loser_change = loser_arena_team->LostAgainst(winner_rating);
+                DEBUG_LOG("--- Winner rating: %u, Loser rating: %u, Winner change: %i, Loser change: %i ---", winner_rating, loser_rating, winner_change, loser_change);
+                SetArenaTeamRatingChangeForTeam(winner, winner_change);
+                SetArenaTeamRatingChangeForTeam(GetOtherTeam(winner), loser_change);
+            }
+            else
+            {
+                SetArenaTeamRatingChangeForTeam(ALLIANCE, 0);
+                SetArenaTeamRatingChangeForTeam(HORDE, 0);
+            }
         }
         else
         {
-            SetArenaTeamRatingChangeForTeam(ALLIANCE, 0);
-            SetArenaTeamRatingChangeForTeam(HORDE, 0);
+            SetArenaTeamRatingChangeForTeam(ALLIANCE, ARENA_TIMELIMIT_POINTS_LOSS);
+            SetArenaTeamRatingChangeForTeam(HORDE, ARENA_TIMELIMIT_POINTS_LOSS);
         }
     }
 
@@ -776,6 +814,30 @@ void BattleGround::EndBattleGround(Team winner)
             }
         }
 
+        // store battleground score statistics for each player
+        if (isBattleGround() && sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_SCORE_STATISTICS))
+        {
+            static SqlStatementID insPvPstatsPlayer;
+            BattleGroundScoreMap::iterator score = m_PlayerScores.find(itr->first);
+            SqlStatement stmt = CharacterDatabase.CreateStatement(insPvPstatsPlayer, "INSERT INTO pvpstats_players (battleground_id, character_guid, score_killing_blows, score_deaths, score_honorable_kills, score_bonus_honor, score_damage_done, score_healing_done, attr_1, attr_2, attr_3, attr_4, attr_5) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+            stmt.addUInt32(battleground_id);
+            stmt.addUInt32(plr->GetGUIDLow());
+            stmt.addUInt32(score->second->GetKillingBlows());
+            stmt.addUInt32(score->second->GetDeaths());
+            stmt.addUInt32(score->second->GetHonorableKills());
+            stmt.addUInt32(score->second->GetBonusHonor());
+            stmt.addUInt32(score->second->GetDamageDone());
+            stmt.addUInt32(score->second->GetHealingDone());
+            stmt.addUInt32(score->second->GetAttr1());
+            stmt.addUInt32(score->second->GetAttr2());
+            stmt.addUInt32(score->second->GetAttr3());
+            stmt.addUInt32(score->second->GetAttr4());
+            stmt.addUInt32(score->second->GetAttr5());
+
+            stmt.Execute();
+        }
+
         if (team == winner)
         {
             RewardMark(plr, ITEM_WINNER_COUNT);
@@ -800,9 +862,6 @@ void BattleGround::EndBattleGround(Team winner)
 
     if (isArena() && isRated() && winner_arena_team && loser_arena_team)
     {
-        // update arena points only after increasing the player's match count!
-        // obsolete: winner_arena_team->UpdateArenaPointsHelper();
-        // obsolete: loser_arena_team->UpdateArenaPointsHelper();
         // save the stat changes
         winner_arena_team->SaveToDB();
         loser_arena_team->SaveToDB();

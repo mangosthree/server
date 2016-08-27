@@ -206,6 +206,7 @@ class  Pet : public Creature
         bool CanTakeMoreActiveSpells(uint32 SpellIconID);
         void ToggleAutocast(uint32 spellid, bool apply);
 
+        void SetModeFlags(PetModeFlags mode);
         void ApplyModeFlags(PetModeFlags mode, bool apply);
         PetModeFlags GetModeFlags() const { return m_petModeFlags; }
 
@@ -230,6 +231,25 @@ class  Pet : public Creature
         bool unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
         bool removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
         void CleanupActionBar();
+
+        bool m_retreating;
+
+        void SetIsRetreating(bool retreating = false) { m_retreating = retreating; }
+        bool GetIsRetreating() { return m_retreating; }
+
+        bool m_stayPosSet;
+        float m_stayPosX;
+        float m_stayPosY;
+        float m_stayPosZ;
+        float m_stayPosO;
+
+        void SetStayPosition(bool stay = false);
+        bool IsStayPosSet() { return m_stayPosSet; }
+
+        float GetStayPosX() { return m_stayPosX; }
+        float GetStayPosY() { return m_stayPosY; }
+        float GetStayPosZ() { return m_stayPosZ; }
+        float GetStayPosO() { return m_stayPosO; }
 
         PetSpellMap     m_spells;
         AutoSpellList   m_autospells;

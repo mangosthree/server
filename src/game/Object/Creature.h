@@ -542,11 +542,11 @@ class Creature : public Unit
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         uint32 GetCorpseDelay() const { return m_corpseDelay; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
-        bool IsCivilian() const { return GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_CIVILIAN; }
-        bool IsGuard() const { return GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_GUARD; }
+        bool IsCivilian() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_CIVILIAN) != 0; }
+        bool IsGuard() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_GUARD) != 0; }
 
-        bool CanWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
-        bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
+        bool CanWalk() const { return (GetCreatureInfo()->InhabitType & INHABIT_GROUND) != 0; }
+        bool CanSwim() const { return (GetCreatureInfo()->InhabitType & INHABIT_WATER) != 0; }
         bool IsSwimming() const { return (m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_SWIMMING))); }
         bool CanFly() const { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_FLY_ANIM) || m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_LEVITATING | MOVEFLAG_CAN_FLY)); }
         bool IsFlying() const { return (m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_FLYING | MOVEFLAG_LEVITATING))); }
@@ -560,6 +560,7 @@ class Creature : public Unit
 
         bool IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf) override;
         bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const override;
+        void SetLootStatus(CreatureLootStatus status);
 		bool IsTappedBy(Player const* player) const;
 
         bool IsElite() const
@@ -591,6 +592,10 @@ class Creature : public Unit
 
         void SetWalk(bool enable, bool asDefault = true);
         void SetLevitate(bool enable);
+        void SetSwim(bool enable) override;
+        void SetCanFly(bool enable) override;
+        void SetFeatherFall(bool enable) override;
+        void SetHover(bool enable) override;
         void SetRoot(bool enable) override;
         void SetWaterWalk(bool enable) override;
 
@@ -818,6 +823,7 @@ class Creature : public Unit
         uint32 m_lootMoney;
         ObjectGuid m_lootRecipientGuid;                     // player who will have rights for looting if m_lootGroupRecipient==0 or group disbanded
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
+        CreatureLootStatus m_lootStatus;                    // loot status (used to know when we could loot, pickpocket or skin)
 
         /// Timers
         uint32 m_corpseDecayTimer;                          // (msecs)timer for death or corpse disappearance

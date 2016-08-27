@@ -213,32 +213,32 @@ BattleGround::BattleGround()
     m_MapId             = 0;
     m_Map               = NULL;
 
-    m_TeamStartLocX[BG_TEAM_ALLIANCE]   = 0;
-    m_TeamStartLocX[BG_TEAM_HORDE]      = 0;
+    m_TeamStartLocX[TEAM_INDEX_ALLIANCE]   = 0;
+    m_TeamStartLocX[TEAM_INDEX_HORDE]      = 0;
 
-    m_TeamStartLocY[BG_TEAM_ALLIANCE]   = 0;
-    m_TeamStartLocY[BG_TEAM_HORDE]      = 0;
+    m_TeamStartLocY[TEAM_INDEX_ALLIANCE]   = 0;
+    m_TeamStartLocY[TEAM_INDEX_HORDE]      = 0;
 
-    m_TeamStartLocZ[BG_TEAM_ALLIANCE]   = 0;
-    m_TeamStartLocZ[BG_TEAM_HORDE]      = 0;
+    m_TeamStartLocZ[TEAM_INDEX_ALLIANCE]   = 0;
+    m_TeamStartLocZ[TEAM_INDEX_HORDE]      = 0;
 
-    m_TeamStartLocO[BG_TEAM_ALLIANCE]   = 0;
-    m_TeamStartLocO[BG_TEAM_HORDE]      = 0;
+    m_TeamStartLocO[TEAM_INDEX_ALLIANCE]   = 0;
+    m_TeamStartLocO[TEAM_INDEX_HORDE]      = 0;
 
-    m_ArenaTeamIds[BG_TEAM_ALLIANCE]   = 0;
-    m_ArenaTeamIds[BG_TEAM_HORDE]      = 0;
+    m_ArenaTeamIds[TEAM_INDEX_ALLIANCE]   = 0;
+    m_ArenaTeamIds[TEAM_INDEX_HORDE]      = 0;
 
-    m_ArenaTeamRatingChanges[BG_TEAM_ALLIANCE]   = 0;
-    m_ArenaTeamRatingChanges[BG_TEAM_HORDE]      = 0;
+    m_ArenaTeamRatingChanges[TEAM_INDEX_ALLIANCE]   = 0;
+    m_ArenaTeamRatingChanges[TEAM_INDEX_HORDE]      = 0;
 
-    m_BgRaids[BG_TEAM_ALLIANCE]         = NULL;
-    m_BgRaids[BG_TEAM_HORDE]            = NULL;
+    m_BgRaids[TEAM_INDEX_ALLIANCE]         = NULL;
+    m_BgRaids[TEAM_INDEX_HORDE]            = NULL;
 
-    m_PlayersCount[BG_TEAM_ALLIANCE]    = 0;
-    m_PlayersCount[BG_TEAM_HORDE]       = 0;
+    m_PlayersCount[TEAM_INDEX_ALLIANCE]    = 0;
+    m_PlayersCount[TEAM_INDEX_HORDE]       = 0;
 
-    m_TeamScores[BG_TEAM_ALLIANCE]      = 0;
-    m_TeamScores[BG_TEAM_HORDE]         = 0;
+    m_TeamScores[TEAM_INDEX_ALLIANCE]      = 0;
+    m_TeamScores[TEAM_INDEX_HORDE]         = 0;
 
     m_PrematureCountDown = false;
     m_PrematureCountDownTimer = 0;
@@ -459,6 +459,14 @@ void BattleGround::Update(uint32 diff)
     /*********************************************************/
     /***           BATTLEGROUND ENDING SYSTEM              ***/
     /*********************************************************/
+    if (GetStatus() == STATUS_IN_PROGRESS && isArena())
+    {
+        // after 45 minutes without one team losing, the arena closes with no winner and -16 rating change for both
+        if (m_StartTime > uint32(m_StartDelayTimes[BG_STARTING_EVENT_FIRST] + ARENA_FORCED_DRAW))
+        {
+            EndBattleGround(TEAM_NONE);
+        }
+    }
 
     if (GetStatus() == STATUS_WAIT_LEAVE)
     {
@@ -485,7 +493,7 @@ void BattleGround::Update(uint32 diff)
 
 void BattleGround::SetTeamStartLoc(Team team, float X, float Y, float Z, float O)
 {
-    BattleGroundTeamIndex teamIdx = GetTeamIndexByTeamId(team);
+    PvpTeamIndex teamIdx = GetTeamIndexByTeamId(team);
     m_TeamStartLocX[teamIdx] = X;
     m_TeamStartLocY[teamIdx] = Y;
     m_TeamStartLocZ[teamIdx] = Z;
@@ -1322,18 +1330,20 @@ void BattleGround::AddOrSetPlayerToCorrectBgGroup(Player* plr, ObjectGuid plr_gu
 }
 
 // This method should be called when player logs into running battleground
-void BattleGround::EventPlayerLoggedIn(Player* player, ObjectGuid plr_guid)
+void BattleGround::EventPlayerLoggedIn(Player* player)
 {
+    ObjectGuid playerGuid = player->GetObjectGuid();
+
     // player is correct pointer
     for (OfflineQueue::iterator itr = m_OfflineQueue.begin(); itr != m_OfflineQueue.end(); ++itr)
     {
-        if (*itr == plr_guid)
+        if (*itr == playerGuid)
         {
             m_OfflineQueue.erase(itr);
             break;
         }
     }
-    m_Players[plr_guid].OfflineRemoveTime = 0;
+    m_Players[playerGuid].OfflineRemoveTime = 0;
     PlayerAddedToBGCheckIfBGIsRunning(player);
     // if battleground is starting, then add preparation aura
     // we don't have to do that, because preparation aura isn't removed when player logs out
@@ -1783,7 +1793,7 @@ WorldSafeLocsEntry const* BattleGround::GetClosestGraveYard(Player* player)
 
 bool BattleGround::IsTeamScoreInRange(Team team, uint32 minScore, uint32 maxScore) const
 {
-    BattleGroundTeamIndex team_idx = GetTeamIndexByTeamId(team);
+    PvpTeamIndex team_idx = GetTeamIndexByTeamId(team);
     uint32 score = (m_TeamScores[team_idx] < 0) ? 0 : uint32(m_TeamScores[team_idx]);
     return score >= minScore && score <= maxScore;
 }

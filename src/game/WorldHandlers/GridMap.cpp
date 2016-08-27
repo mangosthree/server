@@ -42,6 +42,9 @@ char const* MAP_AREA_MAGIC    = "AREA";
 char const* MAP_HEIGHT_MAGIC  = "MHGT";
 char const* MAP_LIQUID_MAGIC  = "MLIQ";
 
+static uint16 holetab_h[4] = { 0x1111, 0x2222, 0x4444, 0x8888 };
+static uint16 holetab_v[4] = { 0x000F, 0x00F0, 0x0F00, 0xF000 };
+
 GridMap::GridMap()
 {
     m_flags = 0;
@@ -1055,6 +1058,23 @@ bool TerrainInfo::IsInWater(float x, float y, float pZ, GridMapLiquidData* data)
         if (getLiquidStatus(x, y, pZ, MAP_ALL_LIQUIDS, liquid_ptr))
         {
             // if (liquid_prt->level - liquid_prt->depth_level > 2) //???
+            return true;
+        }
+    }
+    return false;
+}
+
+// check if creature is in water and have enough space to swim
+bool TerrainInfo::IsSwimmable(float x, float y, float pZ, float radius /*= 1.5f*/, GridMapLiquidData* data /*= 0*/) const
+{
+    // Check surface in x, y point for liquid
+    if (const_cast<TerrainInfo*>(this)->GetGrid(x, y))
+    {
+        GridMapLiquidData liquid_status;
+        GridMapLiquidData* liquid_ptr = data ? data : &liquid_status;
+        if (getLiquidStatus(x, y, pZ, MAP_ALL_LIQUIDS, liquid_ptr))
+        {
+            if (liquid_ptr->level - liquid_ptr->depth_level > radius) // is unit have enough space to swim
             return true;
         }
     }

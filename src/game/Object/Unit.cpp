@@ -976,8 +976,8 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             {
                 SpellEntry const* shareSpell = (*itr)->GetSpellProto();
                 uint32 shareDamage = uint32(damage*(*itr)->GetModifier()->m_amount / 100.0f);
-                DealDamageMods(shareTarget, shareDamage, NULL);
-                DealDamage(shareTarget, shareDamage, 0, damagetype, GetSpellSchoolMask(shareSpell), shareSpell, false);
+                DealDamageMods(shareTarget, shareDamage, nullptr);
+                DealDamage(shareTarget, shareDamage, nullptr, damagetype, GetSpellSchoolMask(shareSpell), shareSpell, false);
             }
         }
     }
@@ -1681,9 +1681,11 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
         { return; }
 
     if (!this || !pVictim)
-        { return; }
-    if (!this->IsAlive() || !pVictim->IsAlive())
-        { return; }
+        return;
+
+    // units which are not alive cannot deal damage except for dying creatures
+    if ((!this->IsAlive() || !pVictim->IsAlive()) && (this->GetTypeId() != TYPEID_UNIT || this->getDeathState() != DEAD))
+        return;
 
     // Check spell crit chance
     bool crit = IsSpellCrit(pVictim, spellInfo, damageSchoolMask, attackType);
@@ -3521,7 +3523,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
         return SPELL_MISS_EVADE;
 
     // Check for immune
-    if (pVictim->IsImmuneToSpell(spell, this == pVictim))
+    if (pVictim->IsImmuneToSpell(spell, this == pVictim) && !spell->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
         return SPELL_MISS_IMMUNE;
 
     // All positive spells can`t miss
@@ -3530,7 +3532,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
         return SPELL_MISS_NONE;
 
     // Check for immune
-    if (pVictim->IsImmunedToDamage(GetSpellSchoolMask(spell)))
+    if (pVictim->IsImmunedToDamage(GetSpellSchoolMask(spell)) && !spell->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
         return SPELL_MISS_IMMUNE;
 
     // Try victim reflect spell
@@ -4027,7 +4029,7 @@ void Unit::SetFacingToObject(WorldObject* pObject)
     SetFacingTo(GetAngle(pObject));
 }
 
-bool Unit::isInAccessablePlaceFor(Creature const* c) const
+bool Unit::IsInAccessablePlaceFor(Creature const* c) const
 {
     if (IsInWater())
         return c->CanSwim();
@@ -5875,7 +5877,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
             return false;
 
         // Sanctuary
-        if (pTarget->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY) && pTester->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY))
+        if (pTarget->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE) && pTester->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE))
             return false;
 
         // PvP FFA state
@@ -5987,7 +5989,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
             return true;
 
         // Sanctuary
-        if (pTarget->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY) && pTester->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY))
+        if (pTarget->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE) && pTester->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE))
             return true;
 
         // PvP FFA state
@@ -6661,6 +6663,17 @@ void Unit::EnergizeBySpell(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers 
     pVictim->ModifyPower(powertype, Damage);
 }
 
+/** Calculate spell coefficents and level penalties for spell/melee damage or heal
+ *
+ * this is the caster of the spell/ melee attacker
+ * @param spellProto SpellEntry of the used spell
+ * @param total current value onto which the Bonus and level penalty will be calculated
+ * @param benefit additional benefit from ie spellpower-auras
+ * @param ap_benefit additional melee attackpower benefit from auras
+ * @param damagetype what kind of damage
+ * @param donePart calculate for done or taken
+ * @param defCoeffMod default coefficient for additional scaling (i.e. normal player healing SCALE_SPELLPOWER_HEALING)
+ */
 int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int32 benefit, int32 ap_benefit,  DamageEffectType damagetype, bool donePart, float defCoeffMod)
 {
     // Distribute Damage over multiple effects, reduce by AoE
@@ -7119,7 +7132,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* pCaster, SpellEntry const* spellProto, 
     int32 TakenAdvertisedBenefit = SpellBaseDamageBonusTaken(GetSpellSchoolMask(spellProto));
 
     // apply benefit affected by spell power implicit coeffs and spell level penalties
-    TakenTotal = SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
+    TakenTotal = pCaster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
 
     float tmpDamage = (int32(pdamage) + TakenTotal * int32(stack)) * TakenTotalMod;
 
@@ -7568,7 +7581,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
     int32 DoneAdvertisedBenefit  = SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto));
 
     // apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
-    DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true, 1.88f);
+    DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true, SCALE_SPELLPOWER_HEALING);
 
     // use float as more appropriate for negative values and percent applying
     float heal = (healamount + DoneTotal * int32(stack)) * DoneTotalMod;
@@ -7612,7 +7625,7 @@ uint32 Unit::SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellProto,
     int32 TakenAdvertisedBenefit = SpellBaseHealingBonusTaken(GetSpellSchoolMask(spellProto));
 
     // apply benefit affected by spell power implicit coeffs and spell level penalties
-    TakenTotal = SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false, 1.88f);
+    TakenTotal = pCaster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false, SCALE_SPELLPOWER_HEALING);
 
     AuraList const& mHealingGet = GetAurasByType(SPELL_AURA_MOD_HEALING_RECEIVED);
     for (AuraList::const_iterator i = mHealingGet.begin(); i != mHealingGet.end(); ++i)
@@ -8155,7 +8168,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackTy
     if (!isWeaponDamageBasedSpell)
     {
         // apply benefit affected by spell power implicit coeffs and spell level penalties
-        TakenFlat = SpellBonusWithCoeffs(spellProto, 0, TakenFlat, 0, damagetype, false);
+        TakenFlat = pCaster->SpellBonusWithCoeffs(spellProto, 0, TakenFlat, 0, damagetype, false);
     }
 
     float tmpDamage = float(int32(pdamage) + TakenFlat * int32(stack)) * TakenPercent;
@@ -8257,6 +8270,10 @@ void Unit::Mount(uint32 mount, uint32 spellId)
                     pet->ApplyModeFlags(PET_MODE_DISABLE_ACTIONS, true);
             }
         }
+
+        float height = ((Player*)this)->GetCollisionHeight(true);
+        if (height)
+            SendCollisionHeightUpdate(height);
     }
 }
 
@@ -8284,9 +8301,17 @@ void Unit::Unmount(bool from_aura)
     if (GetTypeId() == TYPEID_PLAYER)
     {
         if (Pet* pet = GetPet())
-            pet->ApplyModeFlags(PET_MODE_DISABLE_ACTIONS, false);
+        {
+            // Get reaction state and display appropriately
+            if (CharmInfo* charmInfo = pet->GetCharmInfo())
+                pet->SetModeFlags(PetModeFlags(charmInfo->GetReactState() | charmInfo->GetCommandState() * 0x100));
+        }
         else
-            { ((Player*)this)->ResummonPetTemporaryUnSummonedIfAny(); }
+            ((Player*)this)->ResummonPetTemporaryUnSummonedIfAny();
+
+        float height = ((Player*)this)->GetCollisionHeight(false);
+        if (height)
+            SendCollisionHeightUpdate(height);
     }
 }
 
@@ -8687,8 +8712,23 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     if (m_Visibility == VISIBILITY_OFF)
         return false;
 
+    // grouped players should always see stealthed party members
+    if (GetTypeId() == TYPEID_PLAYER && u->GetTypeId() == TYPEID_PLAYER)
+        if (((Player*)this)->IsGroupVisibleFor(((Player*)u)) && u->IsFriendlyTo(this))
+            return true;
+
     // raw invisibility
     bool invisible = (m_invisibilityMask != 0 || u->m_invisibilityMask != 0);
+    if (u->GetTypeId() == TYPEID_PLAYER) // if object is player with mover, use its visibility masks, so that an invisible player MCing a creature can see stuff
+    {
+        if (Player* player = (Player*)u)
+        {
+            if (Unit* mover=player->GetMover())
+            {
+                invisible= (m_invisibilityMask != 0 || mover->m_invisibilityMask != 0);
+            }
+        }
+    }
 
     // detectable invisibility case
     if (invisible && (
@@ -8705,35 +8745,18 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     // special cases for always overwrite invisibility/stealth
     if (invisible || m_Visibility == VISIBILITY_GROUP_STEALTH)
     {
-        // non-hostile case
-        if (!u->IsHostileTo(this))
-        {
-            // player see other player with stealth/invisibility only if he in same group or raid or same team (raid/team case dependent from conf setting)
-            if (GetTypeId() == TYPEID_PLAYER && u->GetTypeId() == TYPEID_PLAYER)
-            {
-                if (((Player*)this)->IsGroupVisibleFor(((Player*)u)))
-                    return true;
-
-                // else apply same rules as for hostile case (detecting check for stealth)
-            }
-        }
-        // hostile case
-        else
+        if (u->IsHostileTo(this))
         {
             // Hunter mark functionality
             AuraList const& auras = GetAurasByType(SPELL_AURA_MOD_STALKED);
             for (AuraList::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
                 if ((*iter)->GetCasterGuid() == u->GetObjectGuid())
                     return true;
-
-            // else apply detecting check for stealth
         }
 
         // none other cases for detect invisibility, so invisible
         if (invisible)
             return false;
-
-        // else apply stealth detecting check
     }
 
     // unit got in stealth in this moment and must ignore old detected state
@@ -9518,7 +9541,7 @@ bool Unit::SelectHostileTarget()
         for (AuraList::const_reverse_iterator aura = tauntAuras.rbegin(); aura != tauntAuras.rend(); ++aura)
         {
             if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
-                    caster->IsTargetableForAttack() && caster->isInAccessablePlaceFor((Creature*)this) &&
+                    caster->IsTargetableForAttack() && caster->IsInAccessablePlaceFor((Creature*)this) &&
                     !IsSecondChoiceTarget(caster, true))
             {
                 target = caster;
@@ -9581,7 +9604,7 @@ bool Unit::SelectHostileTarget()
     {
         for (AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
         {
-            if ((*itr)->IsInMap(this) && (*itr)->IsTargetableForAttack() && (*itr)->isInAccessablePlaceFor((Creature*)this))
+            if ((*itr)->IsInMap(this) && (*itr)->IsTargetableForAttack() && (*itr)->IsInAccessablePlaceFor((Creature*)this))
                 return false;
         }
     }
@@ -12153,6 +12176,62 @@ void Unit::BuildMoveFeatherFallPacket(WorldPacket* data, bool apply, uint32 valu
         *data << uint32(value);
         data->WriteGuidMask<3, 0, 1, 5, 7, 4, 6, 2>(guid);
         data->WriteGuidBytes<2, 7, 1, 4, 5, 0, 3, 6>(guid);
+    }
+}
+
+void Unit::BuildMoveHoverPacket(WorldPacket* data, bool apply, uint32 value)
+{
+    ObjectGuid guid = GetObjectGuid();
+
+    if (apply)
+    {
+        data->Initialize(SMSG_MOVE_SET_HOVER, 8 + 4 + 1);
+        data->WriteGuidMask<1, 4, 2, 3, 0, 5, 6, 7>(guid);
+        data->WriteGuidBytes<5, 4, 1, 2, 3, 6, 0, 7>(guid);
+        *data << uint32(0);
+    }
+    else
+    {
+        data->Initialize(SMSG_MOVE_UNSET_HOVER, 8 + 4 + 1);
+        data->WriteGuidMask<4, 6, 3, 1, 2, 7, 5, 0>(guid);
+        data->WriteGuidBytes<4, 5, 3, 6, 7, 1, 2, 0>(guid);
+        *data << uint32(0);
+    }
+}
+
+void Unit::BuildMoveLevitatePacket(WorldPacket* data, bool apply, uint32 value)
+{
+    ObjectGuid guid = GetObjectGuid();
+
+    if (apply)
+    {
+        data->Initialize(SMSG_MOVE_GRAVITY_ENABLE);
+        data->WriteGuidMask<1, 4, 7, 5, 2, 0, 3, 6>(GetObjectGuid());
+        data->WriteGuidBytes<3>(GetObjectGuid());
+        *data << uint32(value);
+        data->WriteGuidBytes<7, 6, 4, 0, 1, 5, 2>(GetObjectGuid());
+    }
+    else
+    {
+        data->Initialize(SMSG_MOVE_GRAVITY_DISABLE);
+        data->WriteGuidMask<0, 1, 5, 7, 6, 4, 3, 2>(GetObjectGuid());
+        data->WriteGuidBytes<7, 2, 0>(GetObjectGuid());
+        *data << uint32(value);
+        data->WriteGuidBytes<5, 1, 3, 4, 6>(GetObjectGuid());
+    }
+}
+
+void Unit::SendCollisionHeightUpdate(float height)
+{
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        WorldPacket data(SMSG_MOVE_SET_COLLISION_HGT, GetPackGUID().size() + 4 + 4);
+        data.WriteGuidMask<6, 1, 4, 7, 5, 2, 0, 3>(GetObjectGuid());
+        data.WriteGuidBytes<6, 0, 4, 3, 5>(GetObjectGuid());
+        data << uint32(sWorld.GetGameTime());   // Packet counter
+        data.WriteGuidBytes<1, 2, 7>(GetObjectGuid());
+        data << ((Player*)this)->GetCollisionHeight(true);
+        ((Player*)this)->GetSession()->SendPacket(&data);
     }
 }
 

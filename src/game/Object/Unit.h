@@ -150,6 +150,8 @@ enum SpellFacingFlags
 #define BASE_ATTACK_TIME 2000
 #define BASE_BLOCK_DAMAGE_PERCENT 30
 
+#define SCALE_SPELLPOWER_HEALING        1.88f
+
 /**
  * byte value (UNIT_FIELD_BYTES_1,0).
  *
@@ -225,9 +227,9 @@ enum UnitPVPStateFlags
     UNIT_BYTE2_FLAG_PVP         = 0x01,
     UNIT_BYTE2_FLAG_UNK1        = 0x02,
     UNIT_BYTE2_FLAG_FFA_PVP     = 0x04,
-    UNIT_BYTE2_FLAG_SANCTUARY   = 0x08,
-    UNIT_BYTE2_FLAG_UNK4        = 0x10,
-    UNIT_BYTE2_FLAG_UNK5        = 0x20,
+    UNIT_BYTE2_FLAG_SUPPORTABLE = 0x08,                     // allows for being targeted for healing/bandaging by friendlies
+    UNIT_BYTE2_FLAG_AURAS       = 0x10,                     // show possitive auras as positive, and allow its dispel
+    UNIT_BYTE2_FLAG_UNK5        = 0x20,                     // show negative auras as positive, *not* allowing dispel (at least for pets)
     UNIT_BYTE2_FLAG_UNK6        = 0x40,
     UNIT_BYTE2_FLAG_UNK7        = 0x80
 };
@@ -596,7 +598,7 @@ enum UnitFlags
     UNIT_FLAG_PVP                   = 0x00001000,           // changed in 3.0.3
     UNIT_FLAG_SILENCED              = 0x00002000,           // silenced, 2.1.1
     UNIT_FLAG_UNK_14                = 0x00004000,           // 2.0.8
-    UNIT_FLAG_UNK_15                = 0x00008000,
+    UNIT_FLAG_UNK_15                = 0x00008000,           // related to jerky movement in water?
     UNIT_FLAG_UNK_16                = 0x00010000,           // removes attackable icon
     UNIT_FLAG_PACIFIED              = 0x00020000,           // 3.0.3 ok
     UNIT_FLAG_STUNNED               = 0x00040000,           // 3.0.3 ok
@@ -2399,7 +2401,7 @@ class  Unit : public WorldObject
 
         virtual bool IsInWater() const;
         virtual bool IsUnderWater() const;
-        bool isInAccessablePlaceFor(Creature const* c) const;
+        bool IsInAccessablePlaceFor(Creature const* c) const;
 
         void SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, uint32 OverHeal, bool critical = false, uint32 absorb = 0);
         void SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype);
@@ -2656,6 +2658,12 @@ class  Unit : public WorldObject
         bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING); }
         bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE); }
         bool IsRooted() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT); }
+
+        virtual void SetLevitate(bool /*enabled*/) {}
+        virtual void SetSwim(bool /*enabled*/) {}
+        virtual void SetCanFly(bool /*enabled*/) {}
+        virtual void SetFeatherFall(bool /*enabled*/) {}
+        virtual void SetHover(bool /*enabled*/) {}
         virtual void SetRoot(bool /*enabled*/) {}
         /**
          * Changes this \ref Unit s ability to walk on water.
@@ -3327,6 +3335,7 @@ class  Unit : public WorldObject
 
         // at any changes to Scale and/or displayId
         void UpdateModelData();
+        void SendCollisionHeightUpdate(float height);
 
         DynamicObject* GetDynObject(uint32 spellId, SpellEffectIndex effIndex);
         DynamicObject* GetDynObject(uint32 spellId);
@@ -3485,6 +3494,9 @@ class  Unit : public WorldObject
 
         bool IsLinkingEventTrigger() const { return m_isCreatureLinkingTrigger; }
 
+        virtual bool CanSwim() const = 0;
+        virtual bool CanFly() const = 0;
+
         bool IsSplineEnabled() const;
 
         bool IsInWorgenForm(bool inPermanent = false) const;
@@ -3496,6 +3508,8 @@ class  Unit : public WorldObject
         void BuildSendPlayVisualPacket(WorldPacket* data, uint32 value, bool impact);
         void BuildMoveSetCanFlyPacket(WorldPacket* data, bool apply, uint32 value);
         void BuildMoveFeatherFallPacket(WorldPacket* data, bool apply, uint32 value);
+        void BuildMoveHoverPacket(WorldPacket* data, bool apply, uint32 value);
+        void BuildMoveLevitatePacket(WorldPacket* data, bool apply, uint32 value);
 
     protected:
         explicit Unit();

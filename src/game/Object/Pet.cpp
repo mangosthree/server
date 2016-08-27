@@ -504,6 +504,7 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         CastPetAuras(true);
     }
+    CastOwnerTalentAuras();
 }
 
 void Pet::Update(uint32 update_diff, uint32 diff)
@@ -2089,6 +2090,40 @@ void Pet::SynchronizeLevelWithOwner()
         default:
             break;
     }
+}
+
+void Pet::SetModeFlags(PetModeFlags mode)
+{
+    m_petModeFlags = mode;
+
+    Unit* owner = GetOwner();
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    WorldPacket data(SMSG_PET_MODE, 12);
+    data << GetObjectGuid();
+    data << uint32(m_petModeFlags);
+    ((Player*)owner)->GetSession()->SendPacket(&data);
+}
+
+void Pet::SetStayPosition(bool stay)
+{
+    if (stay)
+    {
+        m_stayPosX = GetPositionX();
+        m_stayPosY = GetPositionY();
+        m_stayPosZ = GetPositionZ();
+        m_stayPosO = GetOrientation();
+    }
+    else
+    {
+        m_stayPosX = 0;
+        m_stayPosY = 0;
+        m_stayPosZ = 0;
+        m_stayPosO = 0;
+    }
+
+    m_stayPosSet = stay;
 }
 
 void Pet::ApplyModeFlags(PetModeFlags mode, bool apply)

@@ -536,7 +536,7 @@ class WorldObject : public Object
 
         bool IsPositionValid() const;
         void UpdateGroundPositionZ(float x, float y, float& z) const;
-        void UpdateAllowedPositionZ(float x, float y, float& z) const;
+        void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = nullptr) const;
 
         void GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z) const;
 

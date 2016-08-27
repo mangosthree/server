@@ -477,6 +477,20 @@ void WorldSession::SendSpiritResurrect()
     }
 }
 
+void WorldSession::HandleReturnToGraveyardOpcode(WorldPacket& recv_data)
+{
+    Corpse* corpse = _player->GetCorpse();
+    if (!corpse)
+        return;
+
+    WorldSafeLocsEntry const* corpseGrave = sObjectMgr.GetClosestGraveYard(corpse->GetPositionX(), corpse->GetPositionY(),
+            corpse->GetPositionZ(), corpse->GetMapId(), _player->GetTeam());
+    if (!corpseGrave)
+        return;
+
+    _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
+}
+
 void WorldSession::HandleBinderActivateOpcode(WorldPacket& recv_data)
 {
     ObjectGuid npcGuid;

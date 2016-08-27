@@ -353,7 +353,12 @@ struct Areas
 };
 
 #define MAX_RUNES               6
-#define RUNE_COOLDOWN           (2*5*IN_MILLISECONDS)       // msec
+
+enum RuneCooldowns
+{
+    RUNE_BASE_COOLDOWN          = 10000,
+    RUNE_MISS_COOLDOWN          = 1500     // cooldown applied on runes when the spell misses
+};
 
 enum RuneType
 {
@@ -364,17 +369,30 @@ enum RuneType
     NUM_RUNE_TYPES              = 4
 };
 
+static RuneType runeSlotTypes[MAX_RUNES] =
+{
+    /*0*/ RUNE_BLOOD,
+    /*1*/ RUNE_BLOOD,
+    /*2*/ RUNE_UNHOLY,
+    /*3*/ RUNE_UNHOLY,
+    /*4*/ RUNE_FROST,
+    /*5*/ RUNE_FROST
+};
+
 struct RuneInfo
 {
     uint8  BaseRune;
     uint8  CurrentRune;
+    uint16 BaseCooldown;
     uint16 Cooldown;                                        // msec
+    Aura const* ConvertAura;
 };
 
 struct Runes
 {
     RuneInfo runes[MAX_RUNES];
     uint8 runeState;                                        // mask of available runes
+    uint32 lastUsedRuneMask;
 
     void SetRuneState(uint8 index, bool set = true)
     {
@@ -1191,6 +1209,15 @@ class Player : public Unit
         }
         void SetRestBonus(float rest_bonus_new);
 
+        /**
+        * \brief: compute rest bonus
+        * \param: time_t timePassed > time from last check
+        * \param: bool offline      > is the player was offline?
+        * \param: bool inRestPlace  > if it was offline, is the player was in city/tavern/inn?
+        * \returns: float
+        **/
+        float ComputeRest(time_t timePassed, bool offline = false, bool inRestPlace = false);
+
         RestType GetRestType() const
         {
             return rest_type;
@@ -1538,6 +1565,9 @@ class Player : public Unit
 
         void AddTimedQuest(uint32 quest_id) { m_timedquests.insert(quest_id); }
         void RemoveTimedQuest(uint32 quest_id) { m_timedquests.erase(quest_id); }
+
+        //! Return collision height sent to client
+        float GetCollisionHeight(bool mounted) const;
 
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
@@ -2058,6 +2088,10 @@ class Player : public Unit
             StopMirrorTimer(FIRE_TIMER);
         }
 
+        void SetLevitate(bool enable) override;
+        void SetCanFly(bool enable) override;
+        void SetFeatherFall(bool enable) override;
+        void SetHover(bool enable) override;
         void SetRoot(bool enable) override;
         void SetWaterWalk(bool enable) override;
 
@@ -2371,6 +2405,7 @@ class Player : public Unit
         bool isMoving() const { return m_movementInfo.HasMovementFlag(movementFlagsMask); }
         bool isMovingOrTurning() const { return m_movementInfo.HasMovementFlag(movementOrTurningFlagsMask); }
 
+        bool CanSwim() const { return true; }
         bool CanFly() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_CAN_FLY); }
         bool IsFlying() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING); }
         bool IsFreeFlying() const { return HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED) || HasAuraType(SPELL_AURA_FLY); }
@@ -2498,7 +2533,8 @@ class Player : public Unit
 
         GridReference<Player>& GetGridRef() { return m_gridRef; }
         MapReference& GetMapRef() { return m_mapRef; }
-
+        
+        bool IsTappedByMeOrMyGroup(Creature* creature);
         bool isAllowedToLoot(Creature* creature);
 
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
@@ -2508,10 +2544,22 @@ class Player : public Unit
         RuneType GetBaseRune(uint8 index) const { return RuneType(m_runes->runes[index].BaseRune); }
         RuneType GetCurrentRune(uint8 index) const { return RuneType(m_runes->runes[index].CurrentRune); }
         uint16 GetRuneCooldown(uint8 index) const { return m_runes->runes[index].Cooldown; }
+        uint16 GetBaseRuneCooldown(uint8 index) const { return m_runes->runes[index].BaseCooldown; }
+        uint8 GetRuneCooldownFraction(uint8 index) const;
+        void UpdateRuneRegen(RuneType rune);
+        void UpdateRuneRegen();
         bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const;
+        void ClearLastUsedRuneMask() { m_runes->lastUsedRuneMask = 0; }
+        bool IsLastUsedRune(uint8 index) const { return (m_runes->lastUsedRuneMask & (1 << index)) != 0; }
+        void SetLastUsedRune(RuneType type) { m_runes->lastUsedRuneMask |= 1 << uint32(type); }
         void SetBaseRune(uint8 index, RuneType baseRune) { m_runes->runes[index].BaseRune = baseRune; }
         void SetCurrentRune(uint8 index, RuneType currentRune) { m_runes->runes[index].CurrentRune = currentRune; }
         void SetRuneCooldown(uint8 index, uint16 cooldown) { m_runes->runes[index].Cooldown = cooldown; m_runes->SetRuneState(index, (cooldown == 0) ? true : false); }
+        void SetBaseRuneCooldown(uint8 index, uint16 cooldown) { m_runes->runes[index].BaseCooldown = cooldown; }
+        void SetRuneConvertAura(uint8 index, Aura const* aura) { m_runes->runes[index].ConvertAura = aura; }
+        void AddRuneByAuraEffect(uint8 index, RuneType newType, Aura const* aura);
+        void RemoveRunesByAuraEffect(Aura const* aura);
+        void RestoreBaseRune(uint8 index);
         void ConvertRune(uint8 index, RuneType newType);
         bool ActivateRunes(RuneType type, uint32 count);
         void ResyncRunes();

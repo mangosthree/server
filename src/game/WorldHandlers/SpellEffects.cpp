@@ -222,7 +222,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectQuestOffer,                               //150 SPELL_EFFECT_QUEST_OFFER
     &Spell::EffectTriggerRitualOfSummoning,                 //151 SPELL_EFFECT_TRIGGER_SPELL_2
     &Spell::EffectNULL,                                     //152 SPELL_EFFECT_152                      summon Refer-a-Friend
-    &Spell::EffectNULL,                                     //153 SPELL_EFFECT_CREATE_PET               misc value is creature entry
+    &Spell::EffectCreateTamedPet,                           //153 SPELL_EFFECT_CREATE_PET               misc value is creature entry
     &Spell::EffectTeachTaxiNode,                            //154 SPELL_EFFECT_TEACH_TAXI_NODE          single spell: Teach River's Heart Taxi Path
     &Spell::EffectTitanGrip,                                //155 SPELL_EFFECT_TITAN_GRIP Allows you to equip two-handed axes, maces and swords in one hand, but you attack $49152s1% slower than normal.
     &Spell::EffectEnchantItemPrismatic,                     //156 SPELL_EFFECT_ENCHANT_ITEM_PRISMATIC
@@ -4191,17 +4191,12 @@ void Spell::EffectTriggerSpell(SpellEffectEntry const* effect)
                 pet->CastSpell(pet, 28305, true);
             return;
         }
-        case 53258:                                         // Empower Rune Weapon
+        case 58832:                                         // Mirror Image
         {
-            // remove cooldown of frost/death, undead/blood activated in main spell
-            if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-            {
-                bool res1 = ((Player*)unitTarget)->ActivateRunes(RUNE_FROST, 2);
-                bool res2 = ((Player*)unitTarget)->ActivateRunes(RUNE_DEATH, 2);
-                if (res1 || res2)
-                    ((Player*)unitTarget)->ResyncRunes();
-            }
-            return;
+            // Glyph of Mirror Image
+            if (m_caster->HasAura(63093))
+                m_caster->CastSpell(m_caster, 65047, true, m_CastItem, nullptr, m_originalCasterGUID);
+            break;
         }
     }
 
@@ -4339,7 +4334,11 @@ void Spell::EffectJump(SpellEffectEntry const* effect)
         return;
     }
 
-    m_caster->NearTeleportTo(x, y, z, o, true);             // TODO Implement this as jump movement?
+    // Try to normalize Z coord because GetContactPoint do nothing with Z axis
+    m_caster->UpdateAllowedPositionZ(x, y, z);
+
+    float speed = m_spellInfo->speed ? m_spellInfo->speed : 27.0f;
+    m_caster->GetMotionMaster()->MoveDestination(x, y, z, o, speed, 2.5f);
 }
 
 void Spell::EffectTeleportUnits(SpellEffectEntry const* effect)   // TODO - Use target settings for this effect!
@@ -6629,56 +6628,45 @@ void Spell::EffectSummonPet(SpellEffectEntry const* effect)
 {
     uint32 petentry = effect->EffectMiscValue;
 
-    Pet* OldSummon = m_caster->GetPet();
-
-    // if pet requested type already exist
-    if (OldSummon)
-    {
-        if ((petentry == 0 || OldSummon->GetEntry() == petentry) && OldSummon->getPetType() != SUMMON_PET)
-        {
-            // pet in corpse state can't be summoned
-            if (OldSummon->IsDead())
-                return;
-
-            OldSummon->GetMap()->Remove((Creature*)OldSummon, false);
-
-            float px, py, pz;
-            m_caster->GetClosePoint(px, py, pz, OldSummon->GetObjectBoundingRadius());
-
-            OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
-            m_caster->GetMap()->Add((Creature*)OldSummon);
-
-            if (m_caster->GetTypeId() == TYPEID_PLAYER && OldSummon->isControlled())
-            {
-                ((Player*)m_caster)->PetSpellInitialize();
-            }
-            return;
-        }
-
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            OldSummon->Unsummon(OldSummon->getPetType() == HUNTER_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT, m_caster);
-        else
-            return;
-    }
-
-    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(petentry);
-
-    // == 0 in case call current pet, check only real summon case
-    if (petentry && !cInfo)
-    {
-        sLog.outErrorDb("EffectSummonPet: creature entry %u not found for spell %u.", petentry, m_spellInfo->Id);
-        return;
-    }
-
     Pet* NewSummon = new Pet;
 
-    // petentry==0 for hunter "call pet" (current pet summoned if any)
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
-        return;
-
-    // not error in case fail hunter call pet
-    if (!petentry)
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
+        switch(m_caster->getClass())
+        {
+            case CLASS_HUNTER:
+            {
+                // Everything already taken care of, we are only here because we loaded pet from db successfully
+                delete NewSummon;
+                return;
+            }
+            default:
+            {
+                if (Pet* OldSummon = m_caster->GetPet())
+                    OldSummon->Unsummon(PET_SAVE_NOT_IN_SLOT, m_caster);
+
+                // Load pet from db; if any to load
+                if (NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
+                {
+                    NewSummon->SetHealth(NewSummon->GetMaxHealth());
+                    NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
+
+                    NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
+
+                    return;
+                }
+
+                NewSummon->setPetType(SUMMON_PET);
+            }
+        }
+    }
+    else
+        NewSummon->setPetType(GUARDIAN_PET);
+
+    CreatureInfo const* cInfo = petentry ? ObjectMgr::GetCreatureTemplate(petentry) : nullptr;
+    if (!cInfo)
+    {
+        sLog.outErrorDb("EffectSummonPet: creature entry %u not found for spell %u.", petentry, m_spellInfo->Id);
         delete NewSummon;
         return;
     }
@@ -6695,68 +6683,64 @@ void Spell::EffectSummonPet(SpellEffectEntry const* effect)
 
     NewSummon->SetRespawnCoord(pos);
 
-    uint32 petlevel = m_caster->getLevel();
-    NewSummon->setPetType(SUMMON_PET);
+    // Level of pet summoned
+    uint32 level = std::max(m_caster->getLevel() + effect->EffectMultipleValue, 1.0f);
 
-    uint32 faction = m_caster->getFaction();
-    if (m_caster->GetTypeId() == TYPEID_UNIT)
-    {
-        if (((Creature*)m_caster)->IsTotem())
-            NewSummon->GetCharmInfo()->SetReactState(REACT_AGGRESSIVE);
-        else
-            NewSummon->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
-    }
-
+    NewSummon->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
     NewSummon->SetOwnerGuid(m_caster->GetObjectGuid());
     NewSummon->SetCreatorGuid(m_caster->GetObjectGuid());
-    NewSummon->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
-    NewSummon->setFaction(faction);
-    NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL)));
-    NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
-    NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
+    NewSummon->setFaction(m_caster->getFaction());
+    NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
     NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
-    NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
-    // this enables pet details window (Shift+P)
-
-    if (m_caster->IsPvP())
-        NewSummon->SetPvP(true);
-
-    if (m_caster->IsFFAPvP())
-        NewSummon->SetFFAPvP(true);
-
-    NewSummon->InitStatsForLevel(petlevel, m_caster);
+    NewSummon->InitStatsForLevel(level);
     NewSummon->InitPetCreateSpells();
     NewSummon->InitLevelupSpellsForLevel();
     NewSummon->InitTalentForLevel();
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && NewSummon->getPetType() == SUMMON_PET)
-    {
-        // generate new name for summon pet
-        std::string new_name = sObjectMgr.GeneratePetName(petentry);
-        if (!new_name.empty())
-            NewSummon->SetName(new_name);
-    }
-
-    if (NewSummon->getPetType() == HUNTER_PET)
-    {
-        NewSummon->RemoveByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED);
-        NewSummon->SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_ABANDONED);
-    }
-
-    NewSummon->AIM_Initialize();
-    NewSummon->SetHealth(NewSummon->GetMaxHealth());
-    NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
-
     map->Add((Creature*)NewSummon);
+    NewSummon->AIM_Initialize();
 
     m_caster->SetPet(NewSummon);
     DEBUG_LOG("New Pet has guid %u", NewSummon->GetGUIDLow());
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
+        NewSummon->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+
+        NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS);
+        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+
+        NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
+
+        // generate new name for summon pet
+        NewSummon->SetName(sObjectMgr.GeneratePetName(petentry));
+
+        if (m_caster->IsPvP())
+            NewSummon->SetPvP(true);
+
+        if (m_caster->IsFFAPvP())
+            NewSummon->SetFFAPvP(true);
+
         NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
         ((Player*)m_caster)->PetSpellInitialize();
+    }
+    else
+    {
+        // Notify Summoner
+        if (m_originalCaster && (m_originalCaster != m_caster)
+            && (m_originalCaster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_originalCaster)->AI())
+        {
+            ((Creature*)m_originalCaster)->AI()->JustSummoned(NewSummon);
+            if (m_originalCaster->IsInCombat() && !(NewSummon->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
+                ((Creature*)NewSummon)->AI()->AttackStart(m_originalCaster->getAttackerForHelper());
+        }
+        else if ((m_caster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_caster)->AI())
+        {
+            ((Creature*)m_caster)->AI()->JustSummoned(NewSummon);
+            if (m_caster->IsInCombat() && !(NewSummon->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
+                ((Creature*)NewSummon)->AI()->AttackStart(m_caster->getAttackerForHelper());
+        }
     }
 }
 
@@ -11490,8 +11474,8 @@ void Spell::EffectActivateRune(SpellEffectEntry const* effect)
         return;
 
     int32 count = damage;                                   // max amount of reset runes
-    if (plr->ActivateRunes(RuneType(effect->EffectMiscValue), count))
-        plr->ResyncRunes();
+
+    plr->ResyncRunes();
 }
 
 void Spell::EffectTitanGrip(SpellEffectEntry const* effect)

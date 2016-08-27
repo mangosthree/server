@@ -100,7 +100,7 @@ struct boss_talon_king_ikiss : public CreatureScript
 
         void MoveInLineOfSight(Unit* pWho) override
         {
-            if (!m_creature->getVictim() && pWho->IsTargetableForAttack() && (m_creature->IsHostileTo(pWho)) && pWho->isInAccessablePlaceFor(m_creature))
+            if (!m_creature->getVictim() && pWho->IsTargetableForAttack() && (m_creature->IsHostileTo(pWho)) && pWho->IsInAccessablePlaceFor(m_creature))
             {
                 if (!m_bIntro && m_creature->IsWithinDistInMap(pWho, 100.0f))
                 {

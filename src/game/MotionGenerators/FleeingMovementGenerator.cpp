@@ -37,16 +37,17 @@
 template<class T>
 void FleeingMovementGenerator<T>::_setTargetLocation(T& owner)
 {
-    if (!&owner)
-        return;
-
     // ignore in case other no reaction state
     if (owner.hasUnitState((UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_NOT_MOVE) & ~UNIT_STAT_FLEEING))
         return;
 
     float x, y, z;
     if (!_getPoint(owner, x, y, z))
+    {
+        // random point not found recheck later
+        i_nextCheckTime.Reset(50);
         return;
+    }
 
     owner.addUnitState(UNIT_STAT_FLEEING_MOVE);
 
@@ -55,7 +56,8 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T& owner)
     path.calculate(x, y, z);
     if (path.getPathType() & PATHFIND_NOPATH)
     {
-        i_nextCheckTime.Reset(urand(1000, 1500));
+        // path not found recheck later
+        i_nextCheckTime.Reset(50);
         return;
     }
 
@@ -69,9 +71,6 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T& owner)
 template<class T>
 bool FleeingMovementGenerator<T>::_getPoint(T& owner, float& x, float& y, float& z)
 {
-    if (!&owner)
-        return false;
-
     float dist_from_caster, angle_to_caster;
     if (Unit* fright = ObjectAccessor::GetUnit(owner, i_frightGuid))
     {
@@ -109,12 +108,23 @@ bool FleeingMovementGenerator<T>::_getPoint(T& owner, float& x, float& y, float&
 
     x = curr_x + dist * cos(angle);
     y = curr_y + dist * sin(angle);
-    z = curr_z;
+    z = curr_z + 0.5f;
+
+    // try to fix z
+    if (!owner.GetMap()->GetHeightInRange(owner.GetPhaseMask(), x, y, z))
+        return false;
 
     if (owner.GetTypeId() == TYPEID_PLAYER)
-        owner.GetMap()->GetHitPosition(curr_x, curr_y, curr_z, x, y, z, owner.GetPhaseMask(), -0.1f);
-
-    owner.UpdateAllowedPositionZ(x, y, z);
+    {
+        // check any collision
+        float testZ = z + 0.5f; // needed to avoid some false positive hit detection of terrain or passable little object
+        if (owner.GetMap()->GetHitPosition(curr_x, curr_y, curr_z + 0.5f, x, y, testZ, owner.GetPhaseMask(), -0.1f))
+        {
+            z = testZ;
+            if (!owner.GetMap()->GetHeightInRange(owner.GetPhaseMask(), x, y, z))
+                return false;
+        }
+    }
 
     return true;
 }

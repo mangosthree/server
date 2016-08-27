@@ -280,7 +280,6 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
 
     // Can not logout if...
     if (GetPlayer()->IsInCombat() ||                        //...is in combat
-            GetPlayer()->duel         ||                    //...is in Duel
             //...is jumping ...is falling
             GetPlayer()->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR)))
     {
@@ -1082,10 +1081,14 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     recv_data >> guid;
     DEBUG_LOG("Inspected guid is %s", guid.GetString().c_str());
 
-    _player->SetSelectionGuid(guid);
-
     Player* plr = sObjectMgr.GetPlayer(guid);
     if (!plr)                                               // wrong player
+        return;
+
+    if (!_player->IsWithinDistInMap(plr, INSPECT_DISTANCE, false))
+        return;
+
+    if (_player->IsHostileTo(plr))
         return;
 
     WorldPacket data(SMSG_INSPECT_RESULTS, 50);
@@ -1119,12 +1122,17 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     recv_data.ReadGuidBytes<4, 7, 0, 5, 1, 6, 2, 3>(guid);
 
     Player* player = sObjectMgr.GetPlayer(guid);
-
     if (!player)
     {
         sLog.outError("InspectHonorStats: WTF, player not found...");
         return;
     }
+
+    if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+        return;
+
+    if (_player->IsHostileTo(player))
+        return;
 
     WorldPacket data(SMSG_INSPECT_HONOR_STATS, 18);
     data.WriteGuidMask<4, 3, 6, 2, 5, 0, 7, 1>(player->GetObjectGuid());
@@ -1520,8 +1528,17 @@ void WorldSession::HandleQueryInspectAchievementsOpcode(WorldPacket& recv_data)
 
     recv_data >> guid.ReadAsPacked();
 
-    if (Player* player = sObjectMgr.GetPlayer(guid))
-        player->GetAchievementMgr().SendRespondInspectAchievements(_player);
+    Player* player = sObjectMgr.GetPlayer(guid);
+    if (!player)
+        return;
+
+    if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+        return;
+
+    if (_player->IsHostileTo(player))
+        return;
+
+    player->GetAchievementMgr().SendRespondInspectAchievements(_player);
 }
 
 void WorldSession::HandleUITimeRequestOpcode(WorldPacket& /*recv_data*/)

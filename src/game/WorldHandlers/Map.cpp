@@ -298,12 +298,15 @@ bool Map::EnsureGridLoaded(const Cell& cell)
     return false;
 }
 
-void Map::LoadGrid(const Cell& cell, bool no_unload)
+void Map::ForceLoadGrid(float x, float y)
 {
-    EnsureGridLoaded(cell);
-
-    if (no_unload)
+    if (!IsLoaded(x, y))
+    {
+        CellPair p = MaNGOS::ComputeCellPair(x, y);
+        Cell cell(p);
+        EnsureGridLoadedAtEnter(cell);
         getNGrid(cell.GridX(), cell.GridY())->setUnloadExplicitLock(true);
+    }
 }
 
 bool Map::Add(Player* player)
@@ -2114,6 +2117,61 @@ bool Map::GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float
         destZ = tempZ;
     }
     return result0 || result1;
+}
+
+// Find an height within a reasonable range of provided Z. This method may fail so we have to handle that case.
+bool Map::GetHeightInRange(uint32 phasemask, float x, float y, float& z, float maxSearchDist /*= 4.0f*/) const
+{
+    float height, vmapHeight, mapHeight;
+    vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
+
+    VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
+    if (!vmgr->isLineOfSightCalcEnabled())
+        vmgr = nullptr;
+
+    if (vmgr)
+    {
+        // pure vmap search
+        vmapHeight = vmgr->getHeight(i_id, x, y, z + 2.0f, maxSearchDist + 2.0f);
+    }
+
+    // find raw height from .map file on X,Y coordinates
+    if (GridMap* gmap = const_cast<TerrainInfo*>(m_TerrainData)->GetGrid(x, y)) // TODO:: find a way to remove that const_cast
+        mapHeight = gmap->getHeight(x, y);
+
+    float diffMaps = fabs(fabs(z) - fabs(mapHeight));
+    float diffVmaps = fabs(fabs(z) - fabs(vmapHeight));
+    if (diffVmaps < maxSearchDist)
+    {
+        if (diffMaps < maxSearchDist)
+        {
+            // well we simply have to take the highest as normally there we cannot be on top of cavern is maxSearchDist is not too big
+            if (vmapHeight > mapHeight)
+                height = vmapHeight;
+            else
+                height = mapHeight;
+
+            //sLog.outString("vmap %5.4f, map %5.4f, height %5.4f", vmapHeight, mapHeight, height);
+        }
+        else
+        {
+            //sLog.outString("vmap %5.4f", vmapHeight);
+            height = vmapHeight;
+        }
+    }
+    else
+    {
+        if (diffMaps < maxSearchDist)
+        {
+            //sLog.outString("map %5.4f", mapHeight);
+            height = mapHeight;
+        }
+        else
+            return false;
+    }
+
+    z = std::max<float>(height, m_dyn_tree.getHeight(x, y, height + 1.0f, maxSearchDist, phasemask));
+    return true;
 }
 
 float Map::GetHeight(uint32 phasemask, float x, float y, float z) const

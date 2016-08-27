@@ -842,6 +842,11 @@ class  GameObject : public WorldObject
         ObjectGuid m_lootRecipientGuid;                     // player who will have rights for looting if m_lootGroupRecipient==0 or group disbanded
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
 
+        // Used for chest type
+        bool m_isInUse;                                     // only one player at time are allowed to open chest
+        time_t m_reStockTimer;                              // timer to refill the chest
+        time_t m_despawnTimer;                              // timer to despawn the chest if something changed in it
+
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);
         void TickCapturePoint();

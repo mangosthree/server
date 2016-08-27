@@ -72,6 +72,28 @@ void BattleGroundEY::Update(uint32 diff)
         else
             m_flagRespawnTimer -= diff;
     }
+
+    // workaround for Fel Reaver Ruins flag capture needed on 3.3.5 only
+    // the original areatrigger (4514) is covered by a bigger one (4515) and is not triggered on client side
+    if (IsFlagPickedUp())
+    {
+        if (m_felReaverFlagTimer < diff)
+        {
+            Player* flagCarrier = sObjectMgr.GetPlayer(GetFlagCarrierGuid());
+            if (flagCarrier)
+            {
+                if (m_towerOwner[NODE_FEL_REAVER_RUINS] == flagCarrier->GetTeam())
+                {
+                    // coords and range taken from DBC of areatrigger (4514)
+                    if (flagCarrier->GetDistance(2044.0f, 1729.729f, 1190.03f) <= 3.0f)
+                        EventPlayerCapturedFlag(flagCarrier, NODE_FEL_REAVER_RUINS);
+                }
+            }
+            m_felReaverFlagTimer = EY_FEL_REAVER_FLAG_UPDATE_TIME;
+        }
+        else
+            m_felReaverFlagTimer -= diff;
+    }
 }
 
 void BattleGroundEY::StartingEventOpenDoors()
@@ -85,7 +107,7 @@ void BattleGroundEY::StartingEventOpenDoors()
 
 void BattleGroundEY::AddPoints(Team team, uint32 points)
 {
-    BattleGroundTeamIndex team_index = GetTeamIndexByTeamId(team);
+    PvpTeamIndex team_index = GetTeamIndexByTeamId(team);
     m_TeamScores[team_index] += points;
     m_honorScoreTicks[team_index] += points;
     if (m_honorScoreTicks[team_index] >= m_honorTicks)
@@ -231,7 +253,7 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_ALLIANCE);
 
         // spawn gameobjects
-        SpawnEvent(towerId, BG_TEAM_ALLIANCE, true);
+        SpawnEvent(towerId, TEAM_INDEX_ALLIANCE, true);
     }
     else if (team == HORDE)
     {
@@ -242,7 +264,7 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_HORDE);
 
         // spawn gameobjects
-        SpawnEvent(towerId, BG_TEAM_HORDE, true);
+        SpawnEvent(towerId, TEAM_INDEX_HORDE, true);
     }
     else
     {
@@ -310,15 +332,15 @@ void BattleGroundEY::Reset()
     // call parent's class reset
     BattleGround::Reset();
 
-    m_TeamScores[BG_TEAM_ALLIANCE] = 0;
-    m_TeamScores[BG_TEAM_HORDE] = 0;
+    m_TeamScores[TEAM_INDEX_ALLIANCE] = 0;
+    m_TeamScores[TEAM_INDEX_HORDE] = 0;
 
     m_towersAlliance = 0;
     m_towersHorde = 0;
 
     m_honorTicks = BattleGroundMgr::IsBGWeekend(GetTypeID()) ? EY_WEEKEND_HONOR_INTERVAL : EY_NORMAL_HONOR_INTERVAL;
-    m_honorScoreTicks[BG_TEAM_ALLIANCE] = 0;
-    m_honorScoreTicks[BG_TEAM_HORDE] = 0;
+    m_honorScoreTicks[TEAM_INDEX_ALLIANCE] = 0;
+    m_honorScoreTicks[TEAM_INDEX_HORDE] = 0;
 
     m_flagState = EY_FLAG_STATE_ON_BASE;
     m_flagCarrier.Clear();
@@ -326,6 +348,7 @@ void BattleGroundEY::Reset()
 
     m_flagRespawnTimer = 0;
     m_resourceUpdateTimer = 0;
+    m_felReaverFlagTimer = 0;
 
     m_towerWorldState[NODE_BLOOD_ELF_TOWER] = WORLD_STATE_EY_BLOOD_ELF_TOWER_NEUTRAL;
     m_towerWorldState[NODE_FEL_REAVER_RUINS] = WORLD_STATE_EY_FEL_REAVER_RUINS_NEUTRAL;
@@ -512,8 +535,8 @@ void BattleGroundEY::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, WORLD_STATE_EY_TOWER_COUNT_ALLIANCE, m_towersAlliance);
     FillInitialWorldState(data, count, WORLD_STATE_EY_TOWER_COUNT_HORDE, m_towersHorde);
 
-    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_ALLIANCE, m_TeamScores[BG_TEAM_ALLIANCE]);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_HORDE, m_TeamScores[BG_TEAM_HORDE]);
+    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_ALLIANCE, m_TeamScores[TEAM_INDEX_ALLIANCE]);
+    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_HORDE, m_TeamScores[TEAM_INDEX_HORDE]);
 
     // tower world states
     FillInitialWorldState(data, count, WORLD_STATE_EY_BLOOD_ELF_TOWER_ALLIANCE, m_towerOwner[NODE_BLOOD_ELF_TOWER] == ALLIANCE);

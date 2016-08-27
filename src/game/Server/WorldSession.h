@@ -677,6 +677,7 @@ class WorldSession
         void HandleGossipHelloOpcode(WorldPacket& recvPacket);
         void HandleGossipSelectOptionOpcode(WorldPacket& recvPacket);
         void HandleSpiritHealerActivateOpcode(WorldPacket& recvPacket);
+        void HandleReturnToGraveyardOpcode(WorldPacket& recvPacket);
         void HandleNpcTextQueryOpcode(WorldPacket& recvPacket);
         void HandleBinderActivateOpcode(WorldPacket& recvPacket);
         void HandleListStabledPetsOpcode(WorldPacket& recvPacket);

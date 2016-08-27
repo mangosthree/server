@@ -184,7 +184,7 @@ bool npc_escortAI::AssistPlayerInCombat(Unit* pWho)
 
 void npc_escortAI::MoveInLineOfSight(Unit* pWho)
 {
-    if (pWho->IsTargetableForAttack() && pWho->isInAccessablePlaceFor(m_creature))
+    if (pWho->IsTargetableForAttack() && pWho->IsInAccessablePlaceFor(m_creature))
     {
         // AssistPlayerInCombat can start attack, so return if true
         if (HasEscortState(STATE_ESCORT_ESCORTING) && AssistPlayerInCombat(pWho))

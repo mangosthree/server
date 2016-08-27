@@ -101,12 +101,16 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket)
     DEBUG_LOG("WORLD: Received opcode CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE");
     recvPacket.hexlike();
 
+    ObjectGuid srcVehicleGuid;
     MovementInfo movementInfo;
+    ObjectGuid destVehicleGuid;
+    uint8 seat;
 
-    recvPacket >> movementInfo;                             // Not used at the moment
-    ObjectGuid srcVehicleGuid = movementInfo.GetGuid();
-    ObjectGuid destVehicleGuid = movementInfo.GetGuid2();
-    uint8 seat = movementInfo.GetByteParam();
+    recvPacket >> movementInfo;              
+
+    srcVehicleGuid = movementInfo.GetGuid();
+    destVehicleGuid = movementInfo.GetGuid2();
+    seat = movementInfo.GetByteParam();
 
     TransportInfo* transportInfo = _player->GetTransportInfo();
     if (!transportInfo || !transportInfo->IsOnVehicle())

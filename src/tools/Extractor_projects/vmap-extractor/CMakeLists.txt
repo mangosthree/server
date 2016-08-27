@@ -43,7 +43,7 @@ add_executable(${EXECUTABLE_NAME} ${EXECUTABLE_SRCS}
     ${CMAKE_SOURCE_DIR}/src/tools/Extractor_projects/shared/ExtractorCommon.cpp
 )
 
-target_link_libraries(${EXECUTABLE_NAME} StormLib loadlib bzip2 zlib)
+target_link_libraries(${EXECUTABLE_NAME} loadlib bzip2 zlib StormLib)
 
 #Output the compiled exes to build/bin/$(Configuration)/tools directory on windows by default
 if(WIN32)

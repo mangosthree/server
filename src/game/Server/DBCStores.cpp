@@ -86,7 +86,8 @@ DBCStorage <CinematicSequencesEntry> sCinematicSequencesStore(CinematicSequences
 DBCStorage <CreatureDisplayInfoEntry> sCreatureDisplayInfoStore(CreatureDisplayInfofmt);
 DBCStorage <CreatureDisplayInfoExtraEntry> sCreatureDisplayInfoExtraStore(CreatureDisplayInfoExtrafmt);
 DBCStorage <CreatureFamilyEntry> sCreatureFamilyStore(CreatureFamilyfmt);
-DBCStorage <CreatureSpellDataEntry> sCreatureSpellDataStore(CreatureSpellDatafmt);
+DBCStorage <CreatureModelDataEntry> sCreatureModelDataStore(CreatureModelDatafmt);
+DBCStorage <CreatureSpellDataEntry> sCreatureSpellDataStore(CreatureSpellDatafmt); // sCreatureModelDataStore
 DBCStorage <CreatureTypeEntry> sCreatureTypeStore(CreatureTypefmt);
 DBCStorage <CurrencyTypesEntry> sCurrencyTypesStore(CurrencyTypesfmt);
 
@@ -511,21 +512,22 @@ void LoadDBCStores(const std::string& dataPath)
         sChrClassXPowerTypesStore[entry->classId][entry->power] = index;
         sChrClassXPowerIndexStore[entry->classId][index] = entry->power;
     }
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sChrRacesStore,            dbcPath, "ChrRaces.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCinematicSequencesStore,  dbcPath, "CinematicSequences.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCreatureDisplayInfoStore, dbcPath, "CreatureDisplayInfo.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCreatureDisplayInfoExtraStore, dbcPath, "CreatureDisplayInfoExtra.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCreatureFamilyStore,      dbcPath, "CreatureFamily.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCreatureSpellDataStore,   dbcPath, "CreatureSpellData.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCreatureTypeStore,        dbcPath, "CreatureType.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCurrencyTypesStore,       dbcPath, "CurrencyTypes.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sDestructibleModelDataStore, dbcPath, "DestructibleModelData.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sDungeonEncounterStore,    dbcPath, "DungeonEncounter.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sDurabilityCostsStore,     dbcPath, "DurabilityCosts.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sDurabilityQualityStore,   dbcPath, "DurabilityQuality.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sEmotesStore,              dbcPath, "Emotes.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sEmotesTextStore,          dbcPath, "EmotesText.dbc");
-    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sFactionStore,             dbcPath, "Faction.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sChrRacesStore,            dbcPath,"ChrRaces.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sCinematicSequencesStore,  dbcPath,"CinematicSequences.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sCreatureDisplayInfoStore, dbcPath,"CreatureDisplayInfo.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sCreatureDisplayInfoExtraStore,dbcPath,"CreatureDisplayInfoExtra.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sCreatureFamilyStore,      dbcPath,"CreatureFamily.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sCreatureModelDataStore,   dbcPath,"CreatureModelData.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sCreatureSpellDataStore,   dbcPath,"CreatureSpellData.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sCreatureTypeStore,        dbcPath,"CreatureType.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sCurrencyTypesStore,       dbcPath,"CurrencyTypes.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sDestructibleModelDataStore,dbcPath,"DestructibleModelData.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sDungeonEncounterStore,    dbcPath,"DungeonEncounter.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sDurabilityCostsStore,     dbcPath,"DurabilityCosts.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sDurabilityQualityStore,   dbcPath,"DurabilityQuality.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sEmotesStore,              dbcPath,"Emotes.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sEmotesTextStore,          dbcPath,"EmotesText.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sFactionStore,             dbcPath,"Faction.dbc");
     for (uint32 i = 0; i < sFactionStore.GetNumRows(); ++i)
     {
         FactionEntry const* faction = sFactionStore.LookupEntry(i);
@@ -1004,6 +1006,87 @@ uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId)
     return mapid;
 }
 
+ContentLevels GetContentLevelsForMap(uint32 mapid)
+{
+    MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
+    if (!mapEntry)
+        return CONTENT_1_60;
+
+    // exceptions for 648 - Goblin Starter area and 654 - Worgen Starter area
+    if (mapid == 648 || mapid == 654)
+        return CONTENT_1_60;
+
+    switch (mapEntry->Expansion())
+    {
+        default: return CONTENT_1_60;
+        case 1:  return CONTENT_61_70;
+        case 2:  return CONTENT_71_80;
+        case 3:  return CONTENT_81_85;
+    }
+}
+
+ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
+{
+    // not sorted, numbering index from 0
+    for (uint32 i = 0; i < sChatChannelsStore.GetNumRows(); ++i)
+    {
+        ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(i);
+        if (ch && ch->ChannelID == channel_id)
+            return ch;
+    }
+    return nullptr;
+}
+
+bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId)
+{
+    if (requiredTotemCategoryId==0)
+        return true;
+    if (itemTotemCategoryId==0)
+        return false;
+
+    TotemCategoryEntry const* itemEntry = sTotemCategoryStore.LookupEntry(itemTotemCategoryId);
+    if (!itemEntry)
+        return false;
+    TotemCategoryEntry const* reqEntry = sTotemCategoryStore.LookupEntry(requiredTotemCategoryId);
+    if (!reqEntry)
+        return false;
+
+    if (itemEntry->categoryType!=reqEntry->categoryType)
+        return false;
+
+    return (itemEntry->categoryMask & reqEntry->categoryMask)==reqEntry->categoryMask;
+}
+
+bool Zone2MapCoordinates(float& x, float& y, uint32 zone)
+{
+    WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
+
+    // if not listed then map coordinates (instance)
+    if (!maEntry || maEntry->x2 == maEntry->x1 || maEntry->y2 == maEntry->y1)
+        return false;
+
+    std::swap(x, y);                                        // at client map coords swapped
+    x = x * ((maEntry->x2-maEntry->x1) / 100) + maEntry->x1;
+    y = y * ((maEntry->y2-maEntry->y1) / 100) + maEntry->y1;    // client y coord from top to down
+
+    return true;
+}
+
+bool Map2ZoneCoordinates(float& x,float& y,uint32 zone)
+{
+    WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
+
+    // if not listed then map coordinates (instance)
+    if (!maEntry || maEntry->x2 == maEntry->x1 || maEntry->y2 == maEntry->y1)
+        return false;
+
+    x = (x-maEntry->x1)/((maEntry->x2-maEntry->x1)/100);
+    y = (y-maEntry->y1)/((maEntry->y2-maEntry->y1)/100);    // client y coord from top to down
+    std::swap(x,y);                                         // client have map coords swapped
+
+    return true;
+}
+
 ContentLevels GetContentLevelsForMapAndZone(uint32 mapId, uint32 zoneId)
 {
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
@@ -1040,109 +1123,6 @@ ContentLevels GetContentLevelsForMapAndZone(uint32 mapId, uint32 zoneId)
         case 2:  return CONTENT_71_80;
         case 3:  return CONTENT_81_85;
     }
-}
-
-ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
-{
-    // not sorted, numbering index from 0
-    for (uint32 i = 0; i < sChatChannelsStore.GetNumRows(); ++i)
-    {
-        ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(i);
-        if (ch && ch->ChannelID == channel_id)
-            return ch;
-    }
-    return NULL;
-}
-
-/*
-static ChatChannelsEntry worldCh = { 26, 4, "world" };
-
-ChatChannelsEntry const* GetChannelEntryFor(const std::string& name)
-{
-    // not sorted, numbering index from 0
-    for (uint32 i = 0; i < sChatChannelsStore.GetNumRows(); ++i)
-    {
-        ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(i);
-        if (ch)
-        {
-            // need to remove %s from entryName if it exists before we match
-            std::string entryName(ch->pattern[0]);
-            std::size_t removeString = entryName.find("%s");
-
-            if (removeString != std::string::npos)
-                entryName.replace(removeString, 2, "");
-
-            if (name.find(entryName) != std::string::npos)
-                return ch;
-        }
-    }
-
-    bool compare = true;        // hack for world channel, TODO smth!
-    std::string world = "world";
-    for (uint8 i = 0; i < name.length(); ++i)
-    {
-        if (tolower(name[i]) != world[i])
-        {
-            compare = false;
-            break;
-        }
-    }
-
-    if (compare)
-        return &worldCh;
-
-    return NULL;
-}
-*/
-
-bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId)
-{
-    if (requiredTotemCategoryId == 0)
-        return true;
-    if (itemTotemCategoryId == 0)
-        return false;
-
-    TotemCategoryEntry const* itemEntry = sTotemCategoryStore.LookupEntry(itemTotemCategoryId);
-    if (!itemEntry)
-        return false;
-    TotemCategoryEntry const* reqEntry = sTotemCategoryStore.LookupEntry(requiredTotemCategoryId);
-    if (!reqEntry)
-        return false;
-
-    if (itemEntry->categoryType != reqEntry->categoryType)
-        return false;
-
-    return (itemEntry->categoryMask & reqEntry->categoryMask) == reqEntry->categoryMask;
-}
-
-bool Zone2MapCoordinates(float& x, float& y, uint32 zone)
-{
-    WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
-
-    // if not listed then map coordinates (instance)
-    if (!maEntry || maEntry->x2 == maEntry->x1 || maEntry->y2 == maEntry->y1)
-        return false;
-
-    std::swap(x, y);                                        // at client map coords swapped
-    x = x * ((maEntry->x2 - maEntry->x1) / 100) + maEntry->x1;
-    y = y * ((maEntry->y2 - maEntry->y1) / 100) + maEntry->y1; // client y coord from top to down
-
-    return true;
-}
-
-bool Map2ZoneCoordinates(float& x, float& y, uint32 zone)
-{
-    WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
-
-    // if not listed then map coordinates (instance)
-    if (!maEntry || maEntry->x2 == maEntry->x1 || maEntry->y2 == maEntry->y1)
-        return false;
-
-    x = (x - maEntry->x1) / ((maEntry->x2 - maEntry->x1) / 100);
-    y = (y - maEntry->y1) / ((maEntry->y2 - maEntry->y1) / 100); // client y coord from top to down
-    std::swap(x, y);                                        // client have map coords swapped
-
-    return true;
 }
 
 MapDifficultyEntry const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty)

@@ -346,6 +346,12 @@ void TradeData::SetMoney(uint64 money)
     if (m_money == money)
         return;
 
+    if (money > m_player->GetMoney())
+    {
+        m_player->GetSession()->SendTradeStatus(TRADE_STATUS_CLOSE_WINDOW);
+        return;
+    }
+
     m_money = money;
 
     SetAccepted(false);
@@ -1264,19 +1270,17 @@ void Player::Update(uint32 update_diff, uint32 p_time)
                 RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
             }
         }
-    }
+    }// Speed collect rest bonus (section/in hour)
 
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-        if (roll_chance_i(3) && GetTimeInnEnter() > 0)      // Freeze update
+        if (GetTimeInnEnter() > 0)                          // Freeze update
         {
-            time_t time_inn = time(NULL) - GetTimeInnEnter();
+            time_t time_inn = now - GetTimeInnEnter();
             if (time_inn >= 10)                             // Freeze update
             {
-                float bubble = 0.125f * sWorld.getConfig(CONFIG_FLOAT_RATE_REST_INGAME);
-                // Speed collect rest bonus (section/in hour)
-                SetRestBonus(float(GetRestBonus() + time_inn * (GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 72000) * bubble));
-                UpdateInnerTime(time(NULL));
+                SetRestBonus(GetRestBonus() + ComputeRest(time_inn));
+                UpdateInnerTime(now);
             }
         }
     }
@@ -2888,7 +2892,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK | PLAYER_FLAGS_DND | PLAYER_FLAGS_GM | PLAYER_FLAGS_GHOST);
 
     RemoveStandFlags(UNIT_STAND_FLAGS_ALL);                 // one form stealth modified bytes
-    RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP | UNIT_BYTE2_FLAG_SANCTUARY);
+    RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP | UNIT_BYTE2_FLAG_SUPPORTABLE);
 
     // restore if need some important flags
     SetUInt32Value(PLAYER_FIELD_BYTES2, 0);                 // flags empty by default
@@ -4147,14 +4151,14 @@ void Player::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     {
         for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
         {
-            if (m_items[i] == NULL)
+            if (m_items[i] == nullptr)
                 continue;
 
             m_items[i]->BuildCreateUpdateBlockForPlayer(data, target);
         }
         for (int i = INVENTORY_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
         {
-            if (m_items[i] == NULL)
+            if (m_items[i] == nullptr)
                 continue;
 
             m_items[i]->BuildCreateUpdateBlockForPlayer(data, target);
@@ -4552,6 +4556,38 @@ void Player::SetWaterWalk(bool enable)
 {
     WorldPacket data;
     BuildMoveWaterWalkPacket(&data, enable, 0);
+    GetSession()->SendPacket(&data);
+}
+
+void Player::SetLevitate(bool enable)
+{
+    WorldPacket data;
+    BuildMoveLevitatePacket(&data, enable, 0);
+    GetSession()->SendPacket(&data);
+}
+
+void Player::SetCanFly(bool enable)
+{
+    WorldPacket data;
+    BuildMoveSetCanFlyPacket(&data, enable, 0);
+    GetSession()->SendPacket(&data);
+}
+
+void Player::SetFeatherFall(bool enable)
+{
+    WorldPacket data;
+    BuildMoveFeatherFallPacket(&data, enable, 0);
+    SendMessageToSet(&data, true);
+
+    // start fall from current height
+    if (!enable)
+        SetFallInformation(0, GetPositionZ());
+}
+
+void Player::SetHover(bool enable)
+{
+    WorldPacket data;
+    BuildMoveHoverPacket(&data, enable, 0);
     GetSession()->SendPacket(&data);
 }
 
@@ -6184,9 +6220,6 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
         // group update
         if (GetGroup() && (old_x != x || old_y != y))
             SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POSITION);
-
-        if (GetTrader() && !IsWithinDistInMap(GetTrader(), INTERACTION_DISTANCE))
-            GetSession()->SendCancelTrade();   // will close both side trade windows
     }
 
     if (m_positionStatusUpdateTimer)                        // Update position's state only on interval
@@ -6966,13 +6999,13 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     if (zone->flags & AREA_FLAG_SANCTUARY)                  // in sanctuary
     {
-        SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
+        SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE);
         if (sWorld.IsFFAPvPRealm())
             SetFFAPvP(false);
     }
     else
     {
-        RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
+        RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE);
     }
 
     if (zone->flags & AREA_FLAG_CAPITAL)                    // in capital city
@@ -7483,9 +7516,9 @@ void Player::ApplyItemEquipSpell(Item* item, bool apply, bool form_change)
         else
         {
             // at un-apply remove all spells (not only at-apply, so any at-use active affects from item and etc)
-            // except with at-use with negative charges, so allow consuming item spells (including with extra flag that prevent consume really)
+            // except on form change and with at-use with negative charges, so allow consuming item spells (including with extra flag that prevent consume really)
             // applied to player after item remove from equip slot
-            if (spellData.SpellTrigger == ITEM_SPELLTRIGGER_ON_USE && spellData.SpellCharges < 0)
+            if (spellData.SpellTrigger == ITEM_SPELLTRIGGER_ON_USE && (form_change || spellData.SpellCharges < 0))
                 continue;
         }
 
@@ -14004,6 +14037,10 @@ bool Player::SatisfyQuestPreviousQuest(Quest const* qInfo, bool msg) const
                     return true;
 
                 // each-from-all exclusive group ( < 0)
+                // given a group with 2+ quests, and one of those has a branch that is not restricted by the group, return true
+                if (qInfo->GetPrevQuestId() != 0 && qPrevInfo->GetNextQuestId() != qInfo->GetPrevQuestId())
+                    return true;
+
                 // can be start if only all quests in prev quest exclusive group completed and rewarded
                 ExclusiveQuestGroupsMapBounds bounds = sObjectMgr.GetExclusiveQuestGroupsMapBounds(qPrevInfo->GetExclusiveGroup());
 
@@ -14035,6 +14072,11 @@ bool Player::SatisfyQuestPreviousQuest(Quest const* qInfo, bool msg) const
             {
                 // skip one-from-all exclusive group
                 if (qPrevInfo->GetExclusiveGroup() >= 0)
+                    return true;
+
+                // each-from-all exclusive group ( < 0)
+                // given a group with 2+ quests, and one of those has a branch that is not restricted by the group, return true
+                if (qInfo->GetPrevQuestId() != 0 && qPrevInfo->GetNextQuestId() != abs(qInfo->GetPrevQuestId()))
                     return true;
 
                 // each-from-all exclusive group ( < 0)
@@ -15494,7 +15536,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             m_bgData.bgTypeID = currentBg->GetTypeID();     // bg data not marked as modified
 
             // join player to battleground group
-            currentBg->EventPlayerLoggedIn(this, GetObjectGuid());
+            currentBg->EventPlayerLoggedIn(this);
             currentBg->AddOrSetPlayerToCorrectBgGroup(this, GetObjectGuid(), m_bgData.bgTeam);
 
             SetInviteForBattleGroundQueueType(bgQueueTypeId, currentBg->GetInstanceID());
@@ -15722,17 +15764,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     m_rest_bonus = fields[21].GetFloat();
 
     if (time_diff > 0)
-    {
-        // speed collect rest bonus in offline, in logout, far from tavern, city (section/in hour)
-        float bubble0 = 0.031f;
-        // speed collect rest bonus in offline, in logout, in tavern, city (section/in hour)
-        float bubble1 = 0.125f;
-        float bubble = fields[23].GetUInt32() > 0
-                       ? bubble1 * sWorld.getConfig(CONFIG_FLOAT_RATE_REST_OFFLINE_IN_TAVERN_OR_CITY)
-                       : bubble0 * sWorld.getConfig(CONFIG_FLOAT_RATE_REST_OFFLINE_IN_WILDERNESS);
-
-        SetRestBonus(GetRestBonus() + time_diff * ((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 72000)*bubble);
-    }
+        SetRestBonus(GetRestBonus() + ComputeRest(time_diff, true, (fields[23].GetInt32() > 0)));
 
     // load skills after InitStatsForLevel because it triggering aura apply also
     _LoadSkills(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSKILLS));
@@ -15931,6 +15963,43 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     _LoadEquipmentSets(holder->GetResult(PLAYER_LOGIN_QUERY_LOADEQUIPMENTSETS));
 
     return true;
+}
+
+bool Player::IsTappedByMeOrMyGroup(Creature* creature)
+{
+    /* Nobody tapped the monster (solo kill by another NPC) */
+    if (!creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))
+        { return false; }
+
+    /* If there is a loot recipient, assign it to recipient */
+    if (Player* recipient = creature->GetLootRecipient())
+    {
+        /* See if we're in a group */
+        if (Group* plr_group = recipient->GetGroup())
+        {
+            /* Recipient is in a group... but is it ours? */
+            if (Group* my_group = GetGroup())
+            {
+                /* Check groups are the same */
+                if (plr_group != my_group)
+                    { return false; } // Cheater, deny loot
+            }
+            else
+                { return false; } // We're not in a group, probably cheater
+
+            /* We're in the looters group, so mob is tapped by us */
+            return true;
+        }
+        /* We're not in a group, check to make sure we're the recipient (prevent cheaters) */
+        else if (recipient == this)
+            { return true; }
+    }
+    else
+        /* Don't know what happened to the recipient, probably disconnected
+         * Either way, it isn't us, so mark as tapped */
+        { return false; }
+
+    return false;
 }
 
 bool Player::isAllowedToLoot(Creature* creature)
@@ -21716,6 +21785,123 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
     GetSession()->SendPacket(&data);
 }
 
+void Player::UpdateRuneRegen(RuneType rune)
+{
+    if (rune >= RUNE_DEATH)
+        return;
+
+    RuneType actualRune = rune;
+    float cooldown = RUNE_BASE_COOLDOWN;
+    for (uint8 i = 0; i < MAX_RUNES; i += 2)
+    {
+        if (GetBaseRune(i) != rune)
+            continue;
+
+        uint32 cd = GetRuneCooldown(i);
+        uint32 secondRuneCd = GetRuneCooldown(i + 1);
+        if (!cd && !secondRuneCd)
+            actualRune = GetCurrentRune(i);
+        else if (secondRuneCd && (cd > secondRuneCd || !cd))
+        {
+            cooldown = GetBaseRuneCooldown(i + 1);
+            actualRune = GetCurrentRune(i + 1);
+        }
+        else
+        {
+            cooldown = GetBaseRuneCooldown(i);
+            actualRune = GetCurrentRune(i);
+        }
+
+        break;
+    }
+
+    float auraMod = 1.0f;
+    Unit::AuraList const& regenAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+    for (Unit::AuraList::const_iterator i = regenAuras.begin(); i != regenAuras.end(); ++i)
+        if ((*i)->GetMiscValue() == POWER_RUNE && (*i)->GetSpellEffect()->EffectMiscValueB == rune)
+            auraMod *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+
+    // Unholy Presence
+    if (Aura* aura = GetAura(48265, EFFECT_INDEX_0))
+        auraMod *= (100.0f + aura->GetModifier()->m_amount) / 100.0f;
+
+    // Runic Corruption
+    if (Aura* aura = GetAura(51460, EFFECT_INDEX_0))
+        auraMod *= (100.0f + aura->GetModifier()->m_amount) / 100.0f;
+
+    float hastePct = (100.0f - GetRatingBonusValue(CR_HASTE_MELEE)) / 100.0f;
+    if (hastePct < 0)
+        hastePct = 1.0f;
+
+    cooldown *= hastePct / auraMod;
+
+    float value = float(1 * IN_MILLISECONDS) / cooldown;
+    SetFloatValue(PLAYER_RUNE_REGEN_1 + uint8(actualRune), value);
+}
+
+void Player::UpdateRuneRegen()
+{
+    for (uint8 i = 0; i < NUM_RUNE_TYPES; ++i)
+        UpdateRuneRegen(RuneType(i));
+}
+
+uint8 Player::GetRuneCooldownFraction(uint8 index) const
+{
+    uint16 baseCd = GetBaseRuneCooldown(index);
+    if (!baseCd || !GetRuneCooldown(index))
+        return 255;
+    else if (baseCd == GetRuneCooldown(index))
+        return 0;
+
+    return uint8(float(baseCd - GetRuneCooldown(index)) / baseCd * 255);
+}
+
+void Player::AddRuneByAuraEffect(uint8 index, RuneType newType, Aura const* aura)
+{
+    // Item - Death Knight T11 DPS 4P Bonus
+    if (newType == RUNE_DEATH && HasAura(90459))
+        CastSpell(this, 90507, true);   // Death Eater
+
+    SetRuneConvertAura(index, aura); ConvertRune(index, newType);
+}
+
+void Player::RemoveRunesByAuraEffect(Aura const* aura)
+{
+    for (uint8 i = 0; i < MAX_RUNES; ++i)
+    {
+        if (m_runes->runes[i].ConvertAura == aura)
+        {
+            ConvertRune(i, GetBaseRune(i));
+            SetRuneConvertAura(i, NULL);
+        }
+    }
+}
+
+void Player::RestoreBaseRune(uint8 index)
+{
+    Aura const* aura = m_runes->runes[index].ConvertAura;
+    // If rune was converted by a non-pasive aura that still active we should keep it converted
+    if (aura && !IsPassiveSpell(aura->GetSpellProto()))
+        return;
+
+    // Blood of the North
+    if (aura->GetId() == 54637 && HasAura(54637))
+        return;
+
+    ConvertRune(index, GetBaseRune(index));
+    SetRuneConvertAura(index, NULL);
+    // Don't drop passive talents providing rune convertion
+    if (!aura || aura->GetModifier()->m_auraname != SPELL_AURA_CONVERT_RUNE)
+        return;
+
+    for (uint8 i = 0; i < MAX_RUNES; ++i)
+        if (aura == m_runes->runes[i].ConvertAura)
+            return;
+
+    if (Unit* target = aura->GetTarget())
+        target->RemoveSpellAuraHolder(const_cast<Aura*>(aura)->GetHolder());
+}
+
 void Player::ConvertRune(uint8 index, RuneType newType)
 {
     SetCurrentRune(index, newType);
@@ -21749,7 +21935,7 @@ void Player::ResyncRunes()
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
         data << uint8(GetCurrentRune(i));                   // rune type
-        data << uint8(255 - (GetRuneCooldown(i) * 51));     // passed cooldown time (0-255)
+        data << uint8(GetRuneCooldownFraction(i));
     }
     GetSession()->SendPacket(&data);
 }
@@ -21760,16 +21946,6 @@ void Player::AddRunePower(uint8 index)
     data << uint32(1 << index);                             // mask (0x00-0x3F probably)
     GetSession()->SendPacket(&data);
 }
-
-static RuneType runeSlotTypes[MAX_RUNES] =
-{
-    /*0*/ RUNE_BLOOD,
-    /*1*/ RUNE_BLOOD,
-    /*2*/ RUNE_UNHOLY,
-    /*3*/ RUNE_UNHOLY,
-    /*4*/ RUNE_FROST,
-    /*5*/ RUNE_FROST
-};
 
 void Player::InitRunes()
 {
@@ -24064,6 +24240,77 @@ bool Player::FitArmorSpecializationRules(SpellEntry const * spellProto) const
     }
 
     return true;
+}
+
+float Player::ComputeRest(time_t timePassed, bool offline /*= false*/, bool inRestPlace /*= false*/)
+{
+    // Every 8h in resting zone we gain a bubble
+    // A bubble is 5% of the total xp so there is 20 bubbles
+    // So we gain (total XP/20 every 8h) (8h = 288800 sec)
+    // (TotalXP/20)/28800; simplified to (TotalXP/576000) per second
+    // Client automatically double the value sent so we have to divide it by 2
+    // So final formula (TotalXP/1152000)
+    float bonus = timePassed * (GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 1152000.0f); // Get the gained rest xp for given second
+    if (!offline)
+        bonus *= sWorld.getConfig(CONFIG_FLOAT_RATE_REST_INGAME);                   // Apply the custom setting
+    else
+    {
+        if (inRestPlace)
+            bonus *= sWorld.getConfig(CONFIG_FLOAT_RATE_REST_OFFLINE_IN_TAVERN_OR_CITY);
+        else
+            bonus *= sWorld.getConfig(CONFIG_FLOAT_RATE_REST_OFFLINE_IN_WILDERNESS) / 4.0f; // bonus is reduced by 4 when not in rest place
+    }
+    return bonus;
+}
+
+float Player::GetCollisionHeight(bool mounted) const
+{
+    if (mounted)
+    {
+        // mounted case
+        CreatureDisplayInfoEntry const* mountDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID));
+        if (!mountDisplayInfo)
+            return GetCollisionHeight(false);
+
+        CreatureModelDataEntry const* mountModelData = sCreatureModelDataStore.LookupEntry(mountDisplayInfo->ModelId);
+        if (!mountModelData)
+            return GetCollisionHeight(false);
+
+        CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
+        if (!displayInfo)
+        {
+            sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
+            return 0;
+        }
+        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+        if (!modelData)
+        {
+            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
+            return 0;
+        }
+
+        float scaleMod = GetObjectScale(); // 99% sure about this
+
+        return scaleMod * mountModelData->MountHeight + modelData->CollisionHeight * 0.5f;
+    }
+    else
+    {
+        // use native model collision height in dismounted case
+        CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
+        if (!displayInfo)
+        {
+            sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
+            return 0;
+        }
+        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+        if (!modelData)
+        {
+            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
+            return 0;
+        }
+
+        return modelData->CollisionHeight;
+    }
 }
 
 void Player::SendPetitionSignResult(ObjectGuid petitionGuid, Player* player, uint32 result)

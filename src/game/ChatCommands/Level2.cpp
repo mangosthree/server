@@ -50,6 +50,7 @@
 #include "Util.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 #include "WaypointMovementGenerator.h"
 #include <cctype>
 #include <iostream>

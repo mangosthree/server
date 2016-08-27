@@ -545,13 +545,14 @@ class  Aura
 class  AreaAura : public Aura
 {
     public:
-        AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = NULL, Item* castItem = NULL);
+        AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr, uint32 originalRankSpellId = 0);
         ~AreaAura();
     protected:
         void Update(uint32 diff) override;
     private:
         float m_radius;
         AreaAuraType m_areaAuraType;
+        uint32       m_originalRankSpellId;
 };
 
 class  PersistentAreaAura : public Aura

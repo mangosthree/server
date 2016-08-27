@@ -333,6 +333,7 @@ void FlightPathMovementGenerator::Finalize(Player& player)
 
     player.Unmount();
     player.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
+    player.SetClientControl(&player, 1);
 
     if (player.m_taxi.empty())
     {

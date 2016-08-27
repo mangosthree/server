@@ -113,6 +113,12 @@ BindIP                       = "0.0.0.0"
 #        Default: 1 (unload grids)
 #                 0 (do not unload grids)
 #
+#    LoadAllGridsOnMaps
+#        Load grids of maps at server startup (if you have lot memory you can try it to have a living world always loaded)
+#        This also allow ALL creatures on the given maps to update their grid without any player around.
+#        Default: "" (don't load all grids at startup)
+#                 "mapId1[,mapId2[..]]" (DO load all grids on the given maps- Experimental and very resource consumming)
+#
 #    GridCleanUpDelay
 #        Grid clean up delay (in milliseconds)
 #        Default: 300000 (5 min)
@@ -207,6 +213,7 @@ PlayerLimit                       = 100
 SaveRespawnTimeImmediately        = 1
 MaxOverspeedPings                 = 2
 GridUnload                        = 1
+LoadAllGridsOnMaps                = ""
 GridCleanUpDelay                  = 300000
 MapUpdateInterval                 = 100
 ChangeWeatherInterval             = 600000
@@ -1487,6 +1494,11 @@ Death.Ghost.RunSpeed.Battleground = 1.0
 #                 1 (send to joined player only)
 #                 2 (send to all players)
 #
+#    Battleground.ScoreStatistics
+#        Enable Battleground scores storage in database
+#        Default: 0 (disable)
+#                 1 (enable)
+#
 #    Battleground.QueueAnnouncer.Start
 #        Enable queue announcer posting to chat at BG start
 #        Default: 0 (disable)
@@ -1512,6 +1524,7 @@ Death.Ghost.RunSpeed.Battleground = 1.0
 Battleground.CastDeserter             = 1
 Battleground.QueueAnnouncer.Join      = 0
 Battleground.QueueAnnouncer.Start     = 0
+Battleground.ScoreStatistics          = 0
 Battleground.InvitationType           = 0
 BattleGround.PrematureFinishTimer     = 300000
 BattleGround.PremadeGroupWaitForMatch = 1800000

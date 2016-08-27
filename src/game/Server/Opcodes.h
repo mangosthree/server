@@ -840,8 +840,8 @@ enum Opcodes
     SMSG_SPLINE_SET_SWIM_BACK_SPEED                       = 0x1303,
     SMSG_SPLINE_SET_TURN_RATE                             = 0x1304,
     SMSG_SPLINE_MOVE_UNROOT                               = 0x75B6, // 4.3.4 15595
-    SMSG_SPLINE_MOVE_FEATHER_FALL                         = 0x1306,
-    SMSG_SPLINE_MOVE_NORMAL_FALL                          = 0x1307,
+    SMSG_SPLINE_MOVE_FEATHER_FALL                         = 0x3DA5, // 4.3.4 15595
+    SMSG_SPLINE_MOVE_NORMAL_FALL                          = 0x38B2, // 4.3.4 15595
     SMSG_SPLINE_MOVE_SET_HOVER                            = 0x14B6, // 4.3.4 15595
     SMSG_SPLINE_MOVE_UNSET_HOVER                          = 0x7DA5, // 4.3.4 15595
     SMSG_SPLINE_MOVE_WATER_WALK                           = 0x50A2, // 4.3.4 15595
@@ -1238,7 +1238,7 @@ enum Opcodes
     CMSG_REMOVE_GLYPH                                     = 0x148B,
     CMSG_DUMP_OBJECTS                                     = 0x148C,
     SMSG_DUMP_OBJECTS_DATA                                = 0x148D,
-    CMSG_DISMISS_CRITTER                                  = 0x4227,
+    CMSG_DISMISS_CRITTER                                  = 0x4227, // 4.3.4 15595
     SMSG_NOTIFY_DEST_LOC_SPELL_CAST                       = 0x148F,
     CMSG_AUCTION_LIST_PENDING_SALES                       = 0x2C17, // 4.3.4 15595
     SMSG_AUCTION_LIST_PENDING_SALES                       = 0x6A27, // 4.3.4 15595
@@ -1264,9 +1264,9 @@ enum Opcodes
     CMSG_SET_BREATH                                       = 0x14A5,
     CMSG_QUERY_VEHICLE_STATUS                             = 0x14A6,
     SMSG_BATTLEGROUND_INFO_THROTTLED                      = 0x14A7,
-    SMSG_SET_VEHICLE_REC_ID                               = 0x14A8,
-    CMSG_RIDE_VEHICLE_INTERACT                            = 0x14A9,
-    CMSG_CONTROLLER_EJECT_PASSENGER                       = 0x14AA,
+    SMSG_SET_VEHICLE_REC_ID                               = 0x4115, // 4.3.4 15595
+    CMSG_RIDE_VEHICLE_INTERACT                            = 0x2705, // 4.3.4 15595
+    CMSG_CONTROLLER_EJECT_PASSENGER                       = 0x6927, // 4.3.4 15595
     SMSG_PET_GUIDS                                        = 0x2D26, // 4.3.4 15595
     SMSG_CLIENTCACHE_VERSION                              = 0x2734, // 4.3.4 15595
     CMSG_CHANGE_GDF_ARENA_RATING                          = 0x14AD,
@@ -1376,7 +1376,7 @@ enum Opcodes
     SMSG_SEND_ALL_COMBAT_LOG                              = 0x1515,
     SMSG_OPEN_LFG_DUNGEON_FINDER                          = 0x0412, // 4.3.4 15595
     SMSG_MOVE_SET_COLLISION_HGT                           = 0x11B0, // 4.3.4 15595
-    CMSG_MOVE_SET_COLLISION_HGT_ACK                       = 0x1518,
+    CMSG_MOVE_SET_COLLISION_HGT_ACK                       = 0x7114, // 4.3.4 15595
     MSG_MOVE_SET_COLLISION_HGT                            = 0x1519,
     CMSG_CLEAR_RANDOM_BG_WIN_TIME                         = 0x151A,
     CMSG_CLEAR_HOLIDAY_BG_WIN_TIME                        = 0x151B,

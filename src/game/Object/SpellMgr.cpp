@@ -811,6 +811,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                         case 13139:                         // net-o-matic special effect
                         case 23445:                         // evil twin
                         case 35679:                         // Protectorate Demolitionist
+                        case 37695:                         // Stanky
                         case 38637:                         // Nether Exhaustion (red)
                         case 38638:                         // Nether Exhaustion (green)
                         case 38639:                         // Nether Exhaustion (blue)
@@ -843,6 +844,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                         return false;
                     break;
                 case SPELL_AURA_MOD_DAMAGE_TAKEN:           // dependent from bas point sign (positive -> negative)
+                case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
                     if (spellEffect->CalculateSimpleValue() < 0)
                         return true;
                     // let check by target modes (for Amplify Magic cases/etc)
@@ -1406,8 +1408,8 @@ struct DoSpellProcEvent
         else
             ++count;
     }
-
-    bool HasEntry(uint32 spellId) { return spe_map.count(spellId) > 0; }
+    
+    bool HasEntry(uint32 spellId) { return spe_map.find(spellId) != spe_map.end(); }
     bool SetStateToEntry(uint32 spellId) { return (state = spe_map.find(spellId)) != spe_map.end(); }
     SpellProcEventMap& spe_map;
     SpellProcEventMap::const_iterator state;
@@ -1694,7 +1696,7 @@ void SpellMgr::LoadSpellBonuses()
                     break;
                 }
             }
-            direct_calc = CalculateDefaultCoefficient(spell, SPELL_DIRECT_DAMAGE) * (isHeal ? 1.88f : 1.0f);
+            direct_calc = CalculateDefaultCoefficient(spell, SPELL_DIRECT_DAMAGE) * (isHeal ? SCALE_SPELLPOWER_HEALING : 1.0f);
             direct_diff = std::abs(sbe.direct_damage - direct_calc);
         }
 
@@ -1716,7 +1718,7 @@ void SpellMgr::LoadSpellBonuses()
                     break;
                 }
             }
-            dot_calc = CalculateDefaultCoefficient(spell, DOT) * (isHeal ? 1.88f : 1.0f);
+            dot_calc = CalculateDefaultCoefficient(spell, DOT) * (isHeal ? SCALE_SPELLPOWER_HEALING : 1.0f);
             dot_diff = std::abs(sbe.dot_damage - dot_calc);
         }
 
@@ -2874,7 +2876,7 @@ SpellEntry const* SpellMgr::SelectAuraRankForLevel(SpellEntry const* spellInfo, 
             break;
 
         // if found appropriate level
-        if (level + 10 >= spellInfo->GetSpellLevel())
+        if (level + 10 >= nextSpellInfo->GetSpellLevel())
             return nextSpellInfo;
 
         // one rank less then
@@ -3562,7 +3564,7 @@ void SpellMgr::LoadSpellScriptTarget()
                 {
                     if (itr->spellId == 30427 && !cInfo->SkinningLootId)
                     {
-                        sLog.outErrorDb("Table `spell_script_target` has creature %u as a target of spellid 30427, but this creature has no skinLootid. Gas extraction will not work!", cInfo->Entry);
+                        sLog.outErrorDb("Table `spell_script_target` has creature %u as a target of spellid 30427, but this creature has no SkinningLootId. Gas extraction will not work!", cInfo->Entry);
                         sSpellScriptTargetStorage.EraseEntry(itr->spellId);
                         continue;
                     }

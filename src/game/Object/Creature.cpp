@@ -208,6 +208,10 @@ void Creature::AddToWorld()
         { GetMap()->GetObjectsStore().insert<Creature>(GetObjectGuid(), (Creature*)this); }
 
     Unit::AddToWorld();
+
+    // Make active if required
+    if (sWorld.isForceLoadMap(GetMapId()) || (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE))
+        SetActiveObjectState(true);
 }
 
 void Creature::RemoveFromWorld()
@@ -384,7 +388,14 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
     UpdateSpeed(MOVE_WALK, false);
     UpdateSpeed(MOVE_RUN,  false);
 
-    SetLevitate(cinfo->InhabitType & INHABIT_AIR);
+    SetLevitate((cinfo->InhabitType & INHABIT_AIR) != 0); // TODO: may not be correct to send opcode at this point (already handled by UPDATE_OBJECT createObject)
+
+    // check if we need to add swimming movement. TODO: i thing movement flags should be computed automatically at each movement of creature so we need a sort of UpdateMovementFlags() method
+    if (cinfo->InhabitType & INHABIT_WATER &&               // check inhabit type water
+            !(cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_WALK_IN_WATER) &&  // check if creature is forced to walk (crabs, giant,...)
+            data &&                                         // check if there is data to get creature spawn pos
+            GetMap()->GetTerrain()->IsSwimmable(data->posX, data->posY, data->posZ, minfo->bounding_radius))  // check if creature is in water and have enough space to swim
+        m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);  // add swimming movement
 
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
@@ -485,8 +496,10 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* 
     // if mod2                          use mod2 unless mod2 has modelid_alt_model (then both by 50%-chance)
     // if mod1                          use mod1
 
-    // model selected here may be replaced with other_gender using own function
+    // The follow decision tree needs to be updated if MAX_CREATURE_MODEL is changed.
+    static_assert(MAX_CREATURE_MODEL == 4, "Need to update model selection code for new or removed model fields");
 
+    // model selected here may be replaced with other_gender using own function
     if (cinfo->ModelId[3] && cinfo->ModelId[2] && cinfo->ModelId[1] && cinfo->ModelId[0])
     {
         display_id = cinfo->ModelId[urand(0, 3)];
@@ -1159,6 +1172,9 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     CreatureInfo const* cinfo = GetCreatureInfo();
     if (cinfo)
     {
+        // The following if-else assumes that there are 4 model fields and needs updating if this is changed.
+        static_assert(MAX_CREATURE_MODEL == 4, "Need to update custom model check for new/removed model fields.");
+        
         if (displayId != cinfo->ModelId[0] && displayId != cinfo->ModelId[1] &&
                 displayId != cinfo->ModelId[2] && displayId != cinfo->ModelId[3])
         {
@@ -1765,6 +1781,35 @@ bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectInd
     return Unit::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
 }
 
+// Set loot status. Also handle remove corpse timer
+void Creature::SetLootStatus(CreatureLootStatus status)
+{
+    if (status <= m_lootStatus)
+        return;
+
+    m_lootStatus = status;
+    switch (status)
+    {
+        case CREATURE_LOOT_STATUS_LOOTED:
+            if (m_creatureInfo->SkinningLootId)
+                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+            else
+                RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            break;
+        case CREATURE_LOOT_STATUS_SKINNED:
+            m_corpseDecayTimer = 0; // remove corpse at next update
+            RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+            RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            break;
+        case CREATURE_LOOT_STATUS_SKIN_AVAILABLE:
+            SetFlag(UNIT_FIELD_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+            break;
+        default:
+            break;
+    }
+}
+
 // return true if this creature is tapped by the player or by a member of his group.
 bool Creature::IsTappedBy(Player const* player) const
 {
@@ -2038,7 +2083,7 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     if (!pVictim->IsTargetableForAttack())
         return true;
 
-    if (!pVictim->isInAccessablePlaceFor(this))
+    if (!pVictim->IsInAccessablePlaceFor(this))
         return true;
 
     if (!pVictim->IsVisibleForOrDetect(this, this, false))
@@ -2769,6 +2814,54 @@ void Creature::SetLevitate(bool enable)
 
         SendMessageToSet(&data, true);
     }
+}
+
+void Creature::SetSwim(bool enable)
+{
+    if (enable)
+        m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);
+    else
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_SWIMMING);
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_START_SWIM : SMSG_SPLINE_MOVE_STOP_SWIM);
+    data << GetPackGUID();
+    SendMessageToSet(&data, true);
+}
+
+void Creature::SetCanFly(bool enable)
+{
+    if (enable)
+        m_movementInfo.AddMovementFlag(MOVEFLAG_CAN_FLY);
+    else
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_CAN_FLY);
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_FLYING : SMSG_SPLINE_MOVE_UNSET_FLYING, 9);
+    data << GetPackGUID();
+    SendMessageToSet(&data, true);
+}
+
+void Creature::SetFeatherFall(bool enable)
+{
+    if (enable)
+        m_movementInfo.AddMovementFlag(MOVEFLAG_SAFE_FALL);
+    else
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_SAFE_FALL);
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_FEATHER_FALL : SMSG_SPLINE_MOVE_NORMAL_FALL);
+    data << GetPackGUID();
+    SendMessageToSet(&data, true);
+}
+
+void Creature::SetHover(bool enable)
+{
+    if (enable)
+        m_movementInfo.AddMovementFlag(MOVEFLAG_HOVER);
+    else
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_HOVER);
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_HOVER : SMSG_SPLINE_MOVE_UNSET_HOVER, 9);
+    data << GetPackGUID();
+    SendMessageToSet(&data, false);
 }
 
 void Creature::SetRoot(bool enable)

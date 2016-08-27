@@ -664,19 +664,37 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 {
                     *data << (m_uint32Values[index] & ~UNIT_FLAG_NOT_SELECTABLE);
                 }
-                // hide lootable animation for unallowed players
+                /* Hide loot animation for players that aren't permitted to loot the corpse */
                 else if (index == UNIT_DYNAMIC_FLAGS && GetTypeId() == TYPEID_UNIT)
                 {
+                    uint32 send_value = m_uint32Values[index];
+
+                    /* Initiate pointer to creature so we can check loot */
+                    if (Creature* my_creature = (Creature*)this)
+                        /* If the creature is NOT fully looted */
+                        if (!my_creature->loot.isLooted())
+                            /* If the lootable flag is NOT set */
+                            if (!(send_value & UNIT_DYNFLAG_LOOTABLE))
+                            {
+                                /* Update it on the creature */
+                                my_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                                /* Update it in the packet */
+                                send_value = send_value | UNIT_DYNFLAG_LOOTABLE;
+                            }
+
+                    /* If we're not allowed to loot the target, destroy the lootable flag */
                     if (!target->isAllowedToLoot((Creature*)this))
-                        *data << (m_uint32Values[index] & ~(UNIT_DYNFLAG_LOOTABLE | UNIT_DYNFLAG_TAPPED_BY_PLAYER));
-                    else
-                    {
-                        // flag only for original loot recipent
-                        if (target->GetObjectGuid() == ((Creature*)this)->GetLootRecipientGuid())
-                            *data << m_uint32Values[index];
-                        else
-                            *data << (m_uint32Values[index] & ~(UNIT_DYNFLAG_TAPPED | UNIT_DYNFLAG_TAPPED_BY_PLAYER));
-                    }
+                        if (send_value & UNIT_DYNFLAG_LOOTABLE)
+                            { send_value = send_value & ~UNIT_DYNFLAG_LOOTABLE; }
+
+                    /* If we are allowed to loot it and mob is tapped by us, destroy the tapped flag */
+                    bool is_tapped = target->IsTappedByMeOrMyGroup((Creature*)this);
+
+                    /* If the creature has tapped flag but is tapped by us, remove the flag */
+                    if (send_value & UNIT_DYNFLAG_TAPPED && is_tapped)
+                        { send_value = send_value & ~UNIT_DYNFLAG_TAPPED; }
+
+                    *data << send_value;
                 }
                 else
                 {
@@ -1479,8 +1497,11 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float& z) const
         { z = new_z + 0.05f; }                                  // just to be sure that we are not a few pixel under the surface
 }
 
-void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z) const
+void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=nullptr*/) const
 {
+    if (!atMap)
+        atMap = GetMap();
+
     switch (GetTypeId())
     {
         case TYPEID_UNIT:
@@ -1492,21 +1513,21 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z) const
                 bool canSwim = ((Creature const*)this)->CanSwim();
                 float ground_z = z;
                 float max_z = canSwim
-                              ? GetTerrain()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK))
-                              : ((ground_z = GetMap()->GetHeight(GetPhaseMask(), x, y, z)));
+                              ? atMap->GetTerrain()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK))
+                              : ((ground_z = atMap->GetHeight(GetPhaseMask(), x, y, z)));
                 if (max_z > INVALID_HEIGHT)
                 {
                     if (z > max_z)
-                        { z = max_z; }
+                        z = max_z;
                     else if (z < ground_z)
-                        { z = ground_z; }
+                        z = ground_z;
                 }
             }
             else
             {
-                float ground_z = GetMap()->GetHeight(GetPhaseMask(), x, y, z);
+                float ground_z = atMap->GetHeight(GetPhaseMask(), x, y, z);
                 if (z < ground_z)
-                    { z = ground_z; }
+                    z = ground_z;
             }
             break;
         }
@@ -1516,18 +1537,18 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z) const
             if (!((Player const*)this)->CanFly())
             {
                 float ground_z = z;
-                float max_z = GetTerrain()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK));
+                float max_z = atMap->GetTerrain()->GetWaterOrGroundLevel(x, y, z, &ground_z, !((Unit const*)this)->HasAuraType(SPELL_AURA_WATER_WALK));
                 if (max_z > INVALID_HEIGHT)
                 {
                     if (z > max_z)
-                        { z = max_z; }
+                        z = max_z;
                     else if (z < ground_z)
-                        { z = ground_z; }
+                        z = ground_z;
                 }
             }
             else
             {
-                float ground_z = GetMap()->GetHeight(GetPhaseMask(), x, y, z);
+                float ground_z = atMap->GetHeight(GetPhaseMask(), x, y, z);
                 if (z < ground_z)
                     z = ground_z;
             }
@@ -1535,9 +1556,9 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z) const
         }
         default:
         {
-            float ground_z = GetMap()->GetHeight(GetPhaseMask(), x, y, z);
+            float ground_z = atMap->GetHeight(GetPhaseMask(), x, y, z);
             if (ground_z > INVALID_HEIGHT)
-                { z = ground_z; }
+                z = ground_z;
             break;
         }
     }
@@ -1914,9 +1935,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     if (!sWorld.getConfig(CONFIG_BOOL_DETECT_POS_COLLISION))
     {
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x, y, z);      // update to LOS height if available
+            searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); // update to LOS height if available
         else
-            { UpdateGroundPositionZ(x, y, z); }
+            UpdateGroundPositionZ(x, y, z);
         return;
     }
 
@@ -1942,12 +1963,12 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     if (selector.CheckOriginalAngle())
     {
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x, y, z);      // update to LOS height if available
+            searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); // update to LOS height if available
         else
-            { UpdateGroundPositionZ(x, y, z); }
+            UpdateGroundPositionZ(x, y, z);
 
         if (fabs(init_z - z) < dist && IsWithinLOS(x, y, z))
-            { return; }
+            return;
 
         first_los_conflict = true;                          // first point have LOS problems
     }
@@ -1964,12 +1985,12 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         z = GetPositionZ();
 
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x, y, z);      // update to LOS height if available
+            searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); // update to LOS height if available
         else
-            { UpdateGroundPositionZ(x, y, z); }
+            UpdateGroundPositionZ(x, y, z);
 
         if (fabs(init_z - z) < dist && IsWithinLOS(x, y, z))
-            { return; }
+            return;
     }
 
     // BAD NEWS: not free pos (or used or have LOS problems)
@@ -1980,9 +2001,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         y = first_y;
 
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x, y, z);      // update to LOS height if available
+            searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); // update to LOS height if available
         else
-            { UpdateGroundPositionZ(x, y, z); }
+            UpdateGroundPositionZ(x, y, z);
         return;
     }
 
@@ -1996,12 +2017,12 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         z = GetPositionZ();
 
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x, y, z);      // update to LOS height if available
+            searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); // update to LOS height if available
         else
-            { UpdateGroundPositionZ(x, y, z); }
+            UpdateGroundPositionZ(x, y, z);
 
         if (fabs(init_z - z) < dist && IsWithinLOS(x, y, z))
-            { return; }
+            return;
     }
 
     // BAD BAD NEWS: all found pos (free and used) have LOS problem :(
@@ -2009,9 +2030,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     y = first_y;
 
     if (searcher)
-        searcher->UpdateAllowedPositionZ(x, y, z);          // update to LOS height if available
+        searcher->UpdateAllowedPositionZ(x, y, z, GetMap());// update to LOS height if available
     else
-        { UpdateGroundPositionZ(x, y, z); }
+        UpdateGroundPositionZ(x, y, z);
 }
 
 void WorldObject::SetPhaseMask(uint32 newPhaseMask, bool update)

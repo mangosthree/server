@@ -92,30 +92,30 @@ void MapManager::InitializeVisibilityDistanceInfo()
         (*iter).second->InitVisibilityDistance();
 }
 
+/// @param id - MapId of the to be created map. @param obj WorldObject for which the map is to be created. Must be player for Instancable maps.
 Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
 {
-    MANGOS_ASSERT(obj);
-    // if(!obj->IsInWorld()) sLog.outError("GetMap: called for map %d with object (typeid %d, guid %d, mapid %d, instanceid %d) who is not in world!", id, obj->GetTypeId(), obj->GetGUIDLow(), obj->GetMapId(), obj->GetInstanceId());
     Guard _guard(*this);
 
-    Map* m = NULL;
+    Map* m = nullptr;
 
     const MapEntry* entry = sMapStore.LookupEntry(id);
     if (!entry)
-        return NULL;
+        return nullptr;
 
     if (entry->Instanceable())
     {
-        MANGOS_ASSERT(obj->GetTypeId() == TYPEID_PLAYER);
+        MANGOS_ASSERT(obj && obj->GetTypeId() == TYPEID_PLAYER);
         // create DungeonMap object
-        if (obj->GetTypeId() == TYPEID_PLAYER)
-            m = CreateInstance(id, (Player*)obj);
+        m = CreateInstance(id, (Player*)obj);
+        // Load active objects for this map
+        sObjectMgr.LoadActiveEntities(m);
     }
     else
     {
         // create regular non-instanceable map
         m = FindMap(id);
-        if (m == NULL)
+        if (m == nullptr)
         {
             m = new WorldMap(id, i_gridCleanUpDelay);
             // add map into container

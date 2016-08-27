@@ -1438,7 +1438,7 @@ void ObjectMgr::LoadCreatures()
 
         if (cInfo->RegenerateStats & REGEN_FLAG_HEALTH && data.curhealth < cInfo->MinLevelHealth)
         {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenHealth`=1 and low current health (%u), `creature_template`.`MinLevelHealth`=%u.", guid, data.id, data.curhealth, cInfo->MinLevelHealth);
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenerateStats` & REGEN_FLAG_HEALTH and low current health (%u), `creature_template`.`MinLevelHealth`=%u.", guid, data.id, data.curhealth, cInfo->MinLevelHealth);
             data.curhealth = cInfo->MinLevelHealth;
         }
 
@@ -1491,7 +1491,12 @@ void ObjectMgr::LoadCreatures()
         }
 
         if (gameEvent == 0 && GuidPoolId == 0 && EntryPoolId == 0) // if not this is to be managed by GameEvent System or Pool system
+        {
             AddCreatureToGrid(guid, &data);
+
+            if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE)
+                m_activeCreatures.insert(ActiveCreatureGuidsOnMap::value_type(data.mapid, guid));
+        }
 
         ++count;
     }
@@ -7580,9 +7585,9 @@ void ObjectMgr::LoadCreatureQuestRelations()
     {
         CreatureInfo const* cInfo = GetCreatureTemplate(itr->first);
         if (!cInfo)
-            sLog.outErrorDb("Table `creature_questrelation` have data for nonexistent creature entry (%u) and existing quest %u", itr->first, itr->second);
+            sLog.outErrorDb("Table `creature_involvedrelation` have data for nonexistent creature entry (%u) and existing quest %u", itr->first, itr->second);
         else if (!(cInfo->NpcFlags & UNIT_NPC_FLAG_QUESTGIVER))
-            sLog.outErrorDb("Table `creature_questrelation` has creature entry (%u) for quest %u, but NpcFlags does not include UNIT_NPC_FLAG_QUESTGIVER", itr->first, itr->second);
+            sLog.outErrorDb("Table `creature_involvedrelation` has creature entry (%u) for quest %u, but NpcFlags does not include UNIT_NPC_FLAG_QUESTGIVER", itr->first, itr->second);
     }
 }
 
@@ -9400,6 +9405,7 @@ void ObjectMgr::LoadTrainerTemplates()
 
     // post loading check
     std::set<uint32> trainer_ids;
+    bool hasErrored = false;
 
     for (CacheTrainerSpellMap::const_iterator tItr = m_mCacheTrainerTemplateSpellMap.begin(); tItr != m_mCacheTrainerTemplateSpellMap.end(); ++tItr)
         trainer_ids.insert(tItr->first);
@@ -9408,18 +9414,21 @@ void ObjectMgr::LoadTrainerTemplates()
     {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
         {
-            if (cInfo->TrainerTemplateId)
-            {
                 if (m_mCacheTrainerTemplateSpellMap.find(cInfo->TrainerTemplateId) != m_mCacheTrainerTemplateSpellMap.end())
                     trainer_ids.erase(cInfo->TrainerTemplateId);
                 else
-                    sLog.outErrorDb("Creature (Entry: %u) has trainer_id = %u for nonexistent trainer template", cInfo->Entry, cInfo->TrainerTemplateId);
-            }
+                {
+                    sLog.outErrorDb("Creature (Entry: %u) has TrainerTemplateId = %u for nonexistent trainer template", cInfo->Entry, cInfo->TrainerTemplateId);
+                    hasErrored = true;
+                }
         }
     }
 
     for (std::set<uint32>::const_iterator tItr = trainer_ids.begin(); tItr != trainer_ids.end(); ++tItr)
         sLog.outErrorDb("Table `npc_trainer_template` has trainer template %u not used by any trainers ", *tItr);
+
+    if (hasErrored || !trainer_ids.empty())                 // Append extra line in case of reported errors
+        sLog.outString();
 }
 
 void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
@@ -9497,13 +9506,63 @@ void ObjectMgr::LoadVendorTemplates()
                 if (m_mCacheVendorTemplateItemMap.find(cInfo->VendorTemplateId) !=  m_mCacheVendorTemplateItemMap.end())
                     vendor_ids.erase(cInfo->VendorTemplateId);
                 else
-                    sLog.outErrorDb("Creature (Entry: %u) has vendor_id = %u for nonexistent vendor template", cInfo->Entry, cInfo->VendorTemplateId);
+                    sLog.outErrorDb("Creature (Entry: %u) has VendorTemplateId = %u for nonexistent vendor template", cInfo->Entry, cInfo->VendorTemplateId);
             }
         }
     }
 
     for (std::set<uint32>::const_iterator vItr = vendor_ids.begin(); vItr != vendor_ids.end(); ++vItr)
         sLog.outErrorDb("Table `npc_vendor_template` has vendor template %u not used by any vendors ", *vItr);
+}
+
+/* This function is supposed to take care of three things:
+ *  1) Load Transports on Map or on Continents
+ *  2) Load Active Npcs on Map or Continents
+ *  3) Load Everything dependend on config setting LoadAllGridsOnMaps
+ *
+ *  This function is currently WIP, hence parts exist only as draft.
+ */
+void ObjectMgr::LoadActiveEntities(Map* _map)
+{
+    // Special case on startup - load continents
+    if (!_map)
+    {
+        uint32 continents[] = {0, 1, 530, 571};
+        for (int i = 0; i < countof(continents); ++i)
+        {
+            _map = sMapMgr.FindMap(continents[i]);
+            if (!_map)
+                _map = sMapMgr.CreateMap(continents[i], nullptr);
+
+            if (_map)
+                LoadActiveEntities(_map);
+            else
+                sLog.outError("ObjectMgr::LoadActiveEntities - Unable to create Map %u", continents[i]);
+        }
+
+        return;
+    }
+
+    // Load active objects for _map
+    if (sWorld.isForceLoadMap(_map->GetId()))
+    {
+        for (CreatureDataMap::const_iterator itr = mCreatureDataMap.begin(); itr != mCreatureDataMap.end(); ++itr)
+        {
+            if (itr->second.mapid == _map->GetId())
+                _map->ForceLoadGrid(itr->second.posX, itr->second.posY);
+        }
+    }
+    else                                                   // Normal case - Load all npcs that are active
+    {
+        std::pair<ActiveCreatureGuidsOnMap::const_iterator, ActiveCreatureGuidsOnMap::const_iterator> bounds = m_activeCreatures.equal_range(_map->GetId());
+        for (ActiveCreatureGuidsOnMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+        {
+            CreatureData const& data = mCreatureDataMap[itr->second];
+            _map->ForceLoadGrid(data.posX, data.posY);
+        }
+    }
+
+    // Load Transports on Map _map
 }
 
 void ObjectMgr::LoadNpcGossips()
@@ -9568,11 +9627,9 @@ void ObjectMgr::LoadGossipMenu(std::set<uint32>& gossipScriptSet)
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded gossip_menu, table is empty!");
+        sLog.outString();
         return;
     }
 
@@ -9631,20 +9688,25 @@ void ObjectMgr::LoadGossipMenu(std::set<uint32>& gossipScriptSet)
 
     delete result;
 
-    sLog.outString();
-    sLog.outString(">> Loaded %u gossip_menu entries", count);
-
     // post loading tests
     for (uint32 i = 1; i < sCreatureStorage.GetMaxEntry(); ++i)
+    {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
             if (cInfo->GossipMenuId)
                 if (m_mGossipMenusMap.find(cInfo->GossipMenuId) == m_mGossipMenusMap.end())
-                    sLog.outErrorDb("Creature (Entry: %u) has gossip_menu_id = %u for nonexistent menu", cInfo->Entry, cInfo->GossipMenuId);
+                    sLog.outErrorDb("Creature (Entry: %u) has GossipMenuId = %u for nonexistent menu", cInfo->Entry, cInfo->GossipMenuId);
+    }
 
-    for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
-        if (uint32 menuid = itr->GetGossipMenuId())
-            if (m_mGossipMenusMap.find(menuid) == m_mGossipMenusMap.end())
-                ERROR_DB_STRICT_LOG("Gameobject (Entry: %u) has gossip_menu_id = %u for nonexistent menu", itr->id, menuid);
+    if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK))
+    {
+        for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
+            if (uint32 menuid = itr->GetGossipMenuId())
+                if (m_mGossipMenusMap.find(menuid) == m_mGossipMenusMap.end())
+                    sLog.outErrorDb("Gameobject (Entry: %u) has gossip_menu_id = %u for nonexistent menu", itr->id, menuid);
+    }
+
+    sLog.outString(">> Loaded %u gossip_menu entries", count);
+    sLog.outString();
 }
 
 void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
@@ -9660,11 +9722,9 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded gossip_menu_option, table is empty!");
+        sLog.outString();
         return;
     }
 
@@ -9770,7 +9830,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
             }
 
             if (found_menu_uses && !found_flags_uses)
-                sLog.outErrorDb("Table gossip_menu_option for menu %u, id %u has `npc_option_NpcFlags` = %u but creatures using this menu does not have corresponding`NpcFlags`. Option will not accessible in game.", gMenuItem.menu_id, gMenuItem.id, gMenuItem.npc_option_NpcFlags);
+                sLog.outErrorDb("Table gossip_menu_option for menu %u, id %u has `npc_option_npcflag` = %u but creatures using this menu does not have corresponding `NpcFlags`. Option will not accessible in game.", gMenuItem.menu_id, gMenuItem.id, gMenuItem.npc_option_NpcFlags);
         }
 
         if (gMenuItem.action_poi_id && !GetPointOfInterest(gMenuItem.action_poi_id))
@@ -9804,7 +9864,6 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
         m_mGossipMenuItemsMap.insert(GossipMenuItemsMap::value_type(gMenuItem.menu_id, gMenuItem));
 
         ++count;
-
     }
     while (result->NextRow());
 
@@ -9816,8 +9875,8 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
             sLog.outErrorDb("Table `gossip_menu` contain unused (in creature or GO or menu options) menu id %u.", *itr);
     }
 
-    sLog.outString();
     sLog.outString(">> Loaded %u gossip_menu_option entries", count);
+    sLog.outString();
 }
 
 void ObjectMgr::LoadGossipMenus()

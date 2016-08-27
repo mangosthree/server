@@ -105,7 +105,7 @@ namespace LuaUnit
         Creature* creature = Eluna::CHECKOBJ<Creature>(L, 2);
 
 #ifndef TRINITY
-        Eluna::Push(L, unit->isInAccessablePlaceFor(creature));
+        Eluna::Push(L, unit->IsInAccessablePlaceFor(creature));
 #else
         Eluna::Push(L, unit->isInAccessiblePlaceFor(creature));
 #endif
@@ -1707,12 +1707,12 @@ namespace LuaUnit
 
         if (apply)
         {
-            unit->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
+            unit->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE);
             unit->CombatStop();
             unit->CombatStopWithPets();
         }
         else
-            unit->RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
+            unit->RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE);
 
         return 0;
     }

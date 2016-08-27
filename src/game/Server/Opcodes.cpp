@@ -856,14 +856,14 @@ void InitializeOpcodes()
     //OPCODE(SMSG_SPLINE_SET_SWIM_BACK_SPEED,              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(SMSG_SPLINE_SET_TURN_RATE,                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_SPLINE_MOVE_UNROOT,                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(SMSG_SPLINE_MOVE_FEATHER_FALL,                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(SMSG_SPLINE_MOVE_NORMAL_FALL,                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_SPLINE_MOVE_FEATHER_FALL,                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_SPLINE_MOVE_NORMAL_FALL,                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_SPLINE_MOVE_SET_HOVER,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_SPLINE_MOVE_UNSET_HOVER,                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_SPLINE_MOVE_WATER_WALK,                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_SPLINE_MOVE_LAND_WALK,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_SPLINE_MOVE_START_SWIM,                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(SMSG_SPLINE_MOVE_STOP_SWIM,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_SPLINE_MOVE_STOP_SWIM,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_SPLINE_MOVE_SET_RUN_MODE,                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_SPLINE_MOVE_SET_WALK_MODE,               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(CMSG_GM_NUKE_ACCOUNT,                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
@@ -1268,7 +1268,7 @@ void InitializeOpcodes()
     OPCODE(SMSG_SERVER_FIRST_ACHIEVEMENT,                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_PET_LEARNED_SPELL,                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_PET_REMOVED_SPELL,                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    OPCODE(CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE, STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleChangeSeatsOnControlledVehicle );
+    OPCODE(CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE,      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleChangeSeatsOnControlledVehicle );
     OPCODE(CMSG_HEARTH_AND_RESURRECT,                    STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleHearthandResurrect        );
     OPCODE(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA,    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_CRITERIA_DELETED,                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
@@ -1319,9 +1319,9 @@ void InitializeOpcodes()
     //OPCODE(CMSG_START_BATTLEFIELD_CHEAT,                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     //OPCODE(CMSG_END_BATTLEFIELD_CHEAT,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     //OPCODE(SMSG_COMPOUND_MOVE,                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    OPCODE(SMSG_MOVE_GRAVITY_DISABLE,                    STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_MOVE_GRAVITY_DISABLE,                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_MOVE_GRAVITY_DISABLE_ACK,                STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
-    OPCODE(SMSG_MOVE_GRAVITY_ENABLE,                     STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_MOVE_GRAVITY_ENABLE,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_MOVE_GRAVITY_ENABLE_ACK,                 STATUS_UNHANDLED,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     //OPCODE(MSG_MOVE_GRAVITY_CHNG,                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_SPLINE_MOVE_GRAVITY_DISABLE,             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
@@ -1392,7 +1392,7 @@ void InitializeOpcodes()
     //OPCODE(SMSG_SEND_ALL_COMBAT_LOG,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_OPEN_LFG_DUNGEON_FINDER,                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_MOVE_SET_COLLISION_HGT,                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(CMSG_MOVE_SET_COLLISION_HGT_ACK,              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
+    OPCODE(CMSG_MOVE_SET_COLLISION_HGT_ACK,              STATUS_UNHANDLED,PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     //OPCODE(MSG_MOVE_SET_COLLISION_HGT,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(CMSG_CLEAR_RANDOM_BG_WIN_TIME,                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     //OPCODE(CMSG_CLEAR_HOLIDAY_BG_WIN_TIME,               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );

@@ -144,19 +144,17 @@ World::~World()
     // it is assumed that no other thread is accessing this data when the destructor is called.  therefore, no locks are necessary
 
     ///- Empty the kicked session set
-    std::for_each(m_sessions.begin(), m_sessions.end(), [](const SessionMap::value_type &p) { delete p.second; });
-    m_sessions.clear();
+    for (auto const session : m_sessions)
+        delete session.second;
 
-    std::for_each(m_cliCommandQueue.begin(), m_cliCommandQueue.end(), [](const CliCommandHolder *p) { delete p; });
-    m_cliCommandQueue.clear();
+    for (auto const cliCommand : m_cliCommandQueue)
+        delete cliCommand;
 
-    std::for_each(m_sessionAddQueue.begin(), m_sessionAddQueue.end(), [](const WorldSession *s) { delete s; });
-    m_sessionAddQueue.clear();
+    for (auto const session : m_sessionAddQueue)
+        delete session;
 
     VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
-
-    delete m_configForceLoadMapIds;
 }
 
 /// Cleanups before world stop
@@ -577,6 +575,17 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_ADDON_CHANNEL, "AddonChannel", true);
     setConfig(CONFIG_BOOL_CLEAN_CHARACTER_DB, "CleanCharacterDB", true);
     setConfig(CONFIG_BOOL_GRID_UNLOAD, "GridUnload", true);
+
+    std::string forceLoadGridOnMaps = sConfig.GetStringDefault("LoadAllGridsOnMaps", "");
+    if (!forceLoadGridOnMaps.empty())
+    {
+        unsigned int pos = 0;
+        unsigned int id;
+        VMAP::VMapFactory::chompAndTrim(forceLoadGridOnMaps);
+        while (VMAP::VMapFactory::getNextId(forceLoadGridOnMaps, pos, id))
+            m_configForceLoadMapIds.insert(id);
+    }
+
     setConfig(CONFIG_UINT32_INTERVAL_SAVE, "PlayerSave.Interval", 15 * MINUTE * IN_MILLISECONDS);
     setConfigMinMax(CONFIG_UINT32_MIN_LEVEL_STAT_SAVE, "PlayerSave.Stats.MinLevel", 0, 0, MAX_LEVEL);
     setConfig(CONFIG_BOOL_STATS_SAVE_ONLY_ON_LOGOUT, "PlayerSave.Stats.SaveOnlyOnLogout", true);
@@ -635,7 +644,7 @@ void World::LoadConfigSettings(bool reload)
     if (configNoReload(reload, CONFIG_UINT32_MAX_PLAYER_LEVEL, "MaxPlayerLevel", DEFAULT_MAX_LEVEL))
         { setConfigMinMax(CONFIG_UINT32_MAX_PLAYER_LEVEL, "MaxPlayerLevel", DEFAULT_MAX_LEVEL, 1, DEFAULT_MAX_LEVEL); }
 
-    setConfigMinMax(CONFIG_UINT32_START_PLAYER_LEVEL, "StartPlayerLevel", 1, 1, getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
+    setConfigMinMax(CONFIG_UINT32_START_PLAYER_LEVEL, "StartPlayerLevel", 1, 1, (uint32)getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
     setConfigMinMax(CONFIG_UINT32_START_HEROIC_PLAYER_LEVEL, "StartHeroicPlayerLevel", 55, 1, getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
 
     setConfigMinMax(CONFIG_UINT64_START_PLAYER_MONEY, "StartPlayerMoney", 0, 0, MAX_MONEY_AMOUNT);
@@ -787,6 +796,7 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_BATTLEGROUND_CAST_DESERTER,                  "Battleground.CastDeserter", true);
     setConfigMinMax(CONFIG_UINT32_BATTLEGROUND_QUEUE_ANNOUNCER_JOIN,   "Battleground.QueueAnnouncer.Join", 0, 0, 2);
     setConfig(CONFIG_BOOL_BATTLEGROUND_QUEUE_ANNOUNCER_START,          "Battleground.QueueAnnouncer.Start", false);
+    setConfig(CONFIG_BOOL_BATTLEGROUND_SCORE_STATISTICS,               "Battleground.ScoreStatistics", false);
     setConfig(CONFIG_UINT32_BATTLEGROUND_INVITATION_TYPE,              "Battleground.InvitationType", 0);
     setConfig(CONFIG_UINT32_BATTLEGROUND_PREMATURE_FINISH_TIMER,       "BattleGround.PrematureFinishTimer", 5 * MINUTE * IN_MILLISECONDS);
     setConfig(CONFIG_UINT32_BATTLEGROUND_PREMADE_GROUP_WAIT_FOR_MATCH, "BattleGround.PremadeGroupWaitForMatch", 30 * MINUTE * IN_MILLISECONDS);

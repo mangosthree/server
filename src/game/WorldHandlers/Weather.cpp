@@ -55,11 +55,18 @@ Weather::Weather(uint32 zone, WeatherZoneChances const* weatherChances) :
 bool Weather::Update(uint32 diff, Map const* _map)
 {
     m_timer.Update(diff);
-    if (ReGenerate())
+
+    ///- If the timer has passed, ReGenerate the weather
+    if (m_timer.Passed())
     {
-        ///- Weather will be removed if not updated (no players in zone anymore)
-        if (!SendWeatherForPlayersInZone(_map))
-            return false;
+        m_timer.Reset();
+        // update only if Regenerate has changed the weather
+        if (ReGenerate())
+        {
+            ///- Weather will be removed if not updated (no players in zone anymore)
+            if (!SendWeatherForPlayersInZone(_map))
+                return false;
+        }
     }
     return true;
 }
@@ -155,24 +162,16 @@ bool Weather::ReGenerate()
     uint32 chance1 = m_weatherChances->data[season].rainChance;
     uint32 chance2 = chance1 + m_weatherChances->data[season].snowChance;
     uint32 chance3 = chance2 + m_weatherChances->data[season].stormChance;
-    
+
     uint32 rnd = urand(1, 100);
     if (rnd <= chance1)
-    {
         m_type = WEATHER_TYPE_RAIN;
-    }
     else if (rnd <= chance2)
-    {
         m_type = WEATHER_TYPE_SNOW;
-    }
     else if (rnd <= chance3)
-    {
         m_type = WEATHER_TYPE_STORM;
-    }
     else
-    {
         m_type = WEATHER_TYPE_FINE;
-    }
 
     /// New weather statistics (if not fine):
     ///- 85% light
@@ -353,7 +352,7 @@ WeatherState Weather::GetWeatherState() const
                 return WEATHER_STATE_HEAVY_SANDSTORM;
         case WEATHER_TYPE_BLACKRAIN:
             return WEATHER_STATE_BLACKRAIN;
-        case WEATHER_TYPE_THUNDERS:
+        case WEATHER_TYPE_THUNDER:
             return WEATHER_STATE_THUNDERS;
         case WEATHER_TYPE_FINE:                             // fine
         default:

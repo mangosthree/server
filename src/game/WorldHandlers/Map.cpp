@@ -43,9 +43,9 @@
 #include "VMapFactory.h"
 #include "MoveMap.h"
 #include "BattleGround/BattleGroundMgr.h"
-#include "Weather.h"
 #include "Calendar.h"
 #include "Chat.h"
+#include "Weather.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
@@ -59,26 +59,20 @@ Map::~Map()
     UnloadAll(true);
 
     if (!m_scriptSchedule.empty())
-    {
         sScriptMgr.DecreaseScheduledScriptCount(m_scriptSchedule.size());
-    }
 
     if (m_persistentState)
-    {
-        m_persistentState->SetUsedByMapState(NULL);
-    }         // field pointer can be deleted after this
+        m_persistentState->SetUsedByMapState(nullptr);         // field pointer can be deleted after this
 
     delete i_data;
-    i_data = NULL;
+    i_data = nullptr;
 
     // unload instance specific navigation data
     MMAP::MMapFactory::createOrGetMMapManager()->unloadMapInstance(m_TerrainData->GetMapId(), GetInstanceId());
 
     // release reference count
     if (m_TerrainData->Release())
-    {
         sTerrainMgr.UnloadTerrain(m_TerrainData->GetMapId());
-    }
 
     delete m_weatherSystem;
     m_weatherSystem = NULL;
@@ -122,6 +116,8 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
 
     m_persistentState = sMapPersistentStateMgr.AddPersistentState(i_mapEntry, GetInstanceId(), GetDifficulty(), 0, IsDungeon());
     m_persistentState->SetUsedByMapState(this);
+
+    m_weatherSystem = new WeatherSystem(this);
 }
 
 void Map::InitVisibilityDistance()
@@ -591,6 +587,8 @@ void Map::Update(const uint32& t_diff)
 
     if (i_data)
         i_data->Update(t_diff);
+
+    m_weatherSystem->UpdateWeathers(t_diff);
 }
 
 void Map::Remove(Player* player, bool remove)

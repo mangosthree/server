@@ -34,6 +34,13 @@
 #include "Timer.h"
 
 class Player;
+class Map;
+
+// ---------------------------------------------------------
+//            Actual Weather in one zone
+// ---------------------------------------------------------
+
+class Player;
 
 enum WeatherState
 {
@@ -75,7 +82,7 @@ class Weather
             case WEATHER_TYPE_RAIN:
             case WEATHER_TYPE_SNOW:
             case WEATHER_TYPE_STORM:
-            case WEATHER_TYPE_THUNDERS:
+            case WEATHER_TYPE_THUNDER:
             case WEATHER_TYPE_BLACKRAIN:
                 return true;
             default:

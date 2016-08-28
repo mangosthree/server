@@ -37,7 +37,7 @@
     #define CHAR_DB_UPDATE_DESCRIPTION "match_client_limits"
 
     #define WORLD_DB_VERSION_NR 21
-    #define WORLD_DB_STRUCTURE_NR 2
-    #define WORLD_DB_CONTENT_NR 3
+    #define WORLD_DB_STRUCTURE_NR 3
+    #define WORLD_DB_CONTENT_NR 0
     #define WORLD_DB_UPDATE_DESCRIPTION "script_binding populated"
 #endif // __REVISION_H__

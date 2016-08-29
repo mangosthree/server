@@ -84,8 +84,6 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: Received opcode CMSG_WHO");
     // recv_data.hexlike();
 
-    uint32 clientcount = 0;
-
     uint32 level_min, level_max, racemask, classmask, zones_count, str_count;
     uint32 zoneids[10];                                     // 10 is client limit
     std::string player_name, guild_name;
@@ -149,9 +147,12 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_WHO_LIST);
     AccountTypes gmLevelInWhoList = (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_WHO_LIST);
 
+    uint32 matchcount = 0;
+    uint32 displaycount = 0;
+
     WorldPacket data(SMSG_WHO, 50);                         // guess size
-    data << uint32(clientcount);                            // clientcount place holder, listed count
-    data << uint32(clientcount);                            // clientcount place holder, online count
+    data << uint32(matchcount);                             // clientcount place holder, listed count
+    data << uint32(displaycount);                           // clientcount place holder, online count
 
     // TODO: Guard Player map
     HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
@@ -250,6 +251,8 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
         if (!s_show)
             continue;
 
+        ++displaycount;
+
         data << pname;                                      // player name
         data << gname;                                      // guild name
         data << uint32(lvl);                                // player level
@@ -257,15 +260,13 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
         data << uint32(race);                               // player race
         data << uint8(gender);                              // player gender
         data << uint32(pzoneid);                            // player zone id
-
-        // 50 is maximum player count sent to client
-        if ((++clientcount) == 50)
-            break;
     }
 
-    uint32 count = m.size();
-    data.put(0, clientcount);                               // insert right count, listed count
-    data.put(4, count > 50 ? count : clientcount);          // insert right count, online count
+    if (sWorld.getConfig(CONFIG_UINT32_MAX_WHOLIST_RETURNS) && matchcount > sWorld.getConfig(CONFIG_UINT32_MAX_WHOLIST_RETURNS))
+        matchcount = sWorld.getConfig(CONFIG_UINT32_MAX_WHOLIST_RETURNS);
+
+    data.put(0, displaycount);                              // insert right count, count displayed
+    data.put(4, matchcount);                                // insert right count, count of matches
 
     SendPacket(&data);
     DEBUG_LOG("WORLD: Send SMSG_WHO Message");

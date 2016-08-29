@@ -31,6 +31,8 @@
 #include "../../dep/recastnavigation/Detour/Include/DetourNavMesh.h"
 #include "../../dep/recastnavigation/Detour/Include/DetourNavMeshQuery.h"
 
+class Unit;
+
 //  memory management
 inline void* dtCustomAlloc(int size, dtAllocHint /*hint*/)
 {
@@ -107,7 +109,9 @@ namespace MMAP
             static MMapManager* createOrGetMMapManager();
             static void clear();
             static void preventPathfindingOnMaps(const char* ignoreMapIds);
-            static bool IsPathfindingEnabled(uint32 mapId);
+            static bool IsPathfindingEnabled(uint32 mapId, const Unit* unit);
+            static bool IsPathfindingForceEnabled(const Unit* unit);
+            static bool IsPathfindingForceDisabled(const Unit* unit);
     };
 }
 

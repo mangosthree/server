@@ -702,7 +702,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
-            case SCRIPT_COMMAND_SEND_AI_EVENT_AROUND:       // 35
+            case SCRIPT_COMMAND_SEND_AI_EVENT:              // 35
             {
                 if (tmp.sendAIEvent.eventType >= MAXIMAL_AI_EVENT_EVENTAI)
                 {
@@ -717,7 +717,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             {
                 if (tmp.moveDynamic.maxDist < tmp.moveDynamic.minDist)
                 {
-                    sLog.outErrorDb("Table `%s` has invalid min-dist (datalong2 = %u) less than max-dist (datalon = %u) in SCRIPT_COMMAND_MOVE_DYNAMIC for script id %u", tablename, tmp.moveDynamic.minDist, tmp.moveDynamic.maxDist, tmp.id);
+                    sLog.outErrorDb("Table `%s` has invalid min-dist (datalong2 = %u) less than max-dist (datalong = %u) in SCRIPT_COMMAND_MOVE_DYNAMIC for script id %u", tablename, tmp.moveDynamic.minDist, tmp.moveDynamic.maxDist, tmp.id);
                     continue;
                 }
                 break;
@@ -736,7 +736,36 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
-            case SCRIPT_COMMAND_CHANGE_ENTRY:              // 39
+            case SCRIPT_COMMAND_SET_FLY:                    // 39
+            case SCRIPT_COMMAND_DESPAWN_GO:                 // 40
+            case SCRIPT_COMMAND_RESPAWN:                    // 41
+                break;
+            case SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS:        // 42
+            {
+                if (tmp.textId[0] < 0 || tmp.textId[1] < 0 || tmp.textId[2] < 0)
+                {
+                    sLog.outErrorDb("Table `%s` has invalid equipment slot (dataint = %u, dataint2 = %u, dataint3 = %u) in SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS for script id %u", tablename, tmp.textId[0], tmp.textId[1], tmp.textId[2], tmp.id);
+                    continue;
+                }
+                break;
+            }
+            case SCRIPT_COMMAND_RESET_GO:                   // 43
+                break;
+            case SCRIPT_COMMAND_UPDATE_TEMPLATE:            // 44
+            {
+                if (!sCreatureStorage.LookupEntry<CreatureInfo>(tmp.updateTemplate.newTemplate))
+                {
+                    sLog.outErrorDb("Table `%s` uses nonexistent creature entry %u in SCRIPT_COMMAND_UPDATE_TEMPLATE for script id %u.", tablename, tmp.updateTemplate.newTemplate, tmp.id);
+                    continue;
+                }
+                if (tmp.updateTemplate.newFactionTeam != 0 && tmp.updateTemplate.newFactionTeam != 1)
+                {
+                    sLog.outErrorDb("Table `%s` uses nonexistent faction team %u in SCRIPT_COMMAND_UPDATE_TEMPLATE for script id %u.", tablename, tmp.updateTemplate.newFactionTeam, tmp.id);
+                    continue;
+                }
+                break;
+            }
+            case SCRIPT_COMMAND_CHANGE_ENTRY:              // 45
             {
                 if (tmp.changeEntry.creatureEntry && !ObjectMgr::GetCreatureTemplate(tmp.changeEntry.creatureEntry))
                     {
@@ -1048,15 +1077,24 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
 
             if (m_script->IsCreatureBuddy())
             {
-                Creature* pCreatureBuddy = NULL;
+                Creature* pCreatureBuddy = nullptr;
 
-                MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->buddyEntry, true, false, m_script->searchRadiusOrGuid, true);
-                MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
+                if (m_script->data_flags & SCRIPT_FLAG_BUDDY_IS_DESPAWNED)
+                {
+                    MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(pSearcher, m_script->buddyEntry, m_script->searchRadiusOrGuid);
+                    MaNGOS::CreatureLastSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(pCreatureBuddy, u_check);
+                    Cell::VisitGridObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
+                }
+                else
+                {
+                    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->buddyEntry, true, false, m_script->searchRadiusOrGuid, true);
+                    MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
 
-                if (m_script->data_flags & SCRIPT_FLAG_BUDDY_IS_PET)
-                    { Cell::VisitWorldObjects(pSearcher, searcher, m_script->searchRadiusOrGuid); }
-                else                                        // Normal Creature
-                    { Cell::VisitGridObjects(pSearcher, searcher, m_script->searchRadiusOrGuid); }
+                    if (m_script->data_flags & SCRIPT_FLAG_BUDDY_IS_PET)
+                        Cell::VisitWorldObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
+                    else                                        // Normal Creature
+                        Cell::VisitGridObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
+                }
 
                 pBuddy = pCreatureBuddy;
 
@@ -1894,55 +1932,80 @@ bool ScriptAction::HandleScriptStep()
             }
             return terminateResult;
         }
-        case SCRIPT_COMMAND_SEND_AI_EVENT_AROUND:           // 35
+        case SCRIPT_COMMAND_SEND_AI_EVENT:                  // 35
         {
             if (LogIfNotCreature(pSource))
                 return false;
             if (LogIfNotUnit(pTarget))
                 break;
 
-            ((Creature*)pSource)->AI()->SendAIEventAround(AIEventType(m_script->sendAIEvent.eventType), (Unit*)pTarget, 0, float(m_script->sendAIEvent.radius));
+            // if radius is provided send AI event around
+            if (m_script->sendAIEvent.radius)
+                ((Creature*)pSource)->AI()->SendAIEventAround(AIEventType(m_script->sendAIEvent.eventType), (Unit*)pTarget, 0, float(m_script->sendAIEvent.radius));
+            // else if no radius and target is creature send AI event to target
+            else if (pTarget->GetTypeId() == TYPEID_UNIT)
+                ((Creature*)pSource)->AI()->SendAIEvent(AIEventType(m_script->sendAIEvent.eventType), nullptr, (Creature*)pTarget);
             break;
         }
-        case SCRIPT_COMMAND_TURN_TO:                 // 36
+        case SCRIPT_COMMAND_TURN_TO:                        // 36
         {
-            if (LogIfNotUnit(pSource))
-                { break; }
+            if (LogIfNotCreature(pSource))
+                return false;
+            Creature* pCSource = static_cast<Creature*>(pSource);
+            if (!pTarget)
+            {
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command _SET_FACING (%u): No target found.", m_table, m_script->id, m_script->command);
+                return false;
+            }
+            if (m_script->turnTo.targetId)
+            {
+                float x, y, z, o;
+                if (pCSource->GetMotionMaster()->empty() || !pCSource->GetMotionMaster()->top()->GetResetPosition(*pCSource, x, y, z, o))
+                    pCSource->GetRespawnCoord(x, y, z, &o);
+                pCSource->SetFacingTo(o);
 
-            ((Unit*)pSource)->SetFacingTo(pSource->GetAngle(pTarget));
+                if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && !pCSource->IsInCombat())
+                    pCSource->SetTargetGuid(ObjectGuid());
+            }
+            else
+            {
+                pCSource->SetFacingToObject(pTarget);
+                if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && !LogIfNotUnit(pTarget) && !pCSource->IsInCombat())
+                    pCSource->SetTargetGuid(pTarget->GetObjectGuid());
+            }
             break;
         }
         case SCRIPT_COMMAND_MOVE_DYNAMIC:                   // 37
         {
-            //if (LogIfNotCreature(pSource))
-            //    return false;
-            //if (LogIfNotUnit(pTarget))
-            //    return false;
+            if (LogIfNotCreature(pSource))
+                return false;
+            if (LogIfNotUnit(pTarget))
+                return false;
 
-            //float x, y, z;
-            //if (m_script->moveDynamic.maxDist == 0)         // Move to pTarget
-            //{
-            //    if (pTarget == pSource)
-            //    {
-            //        sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, _MOVE_DYNAMIC called with maxDist == 0, but resultingSource == resultingTarget (== %s)", m_table, m_script->id, pSource->GetGuidStr().c_str());
-            //        break;
-            //    }
-            //    pTarget->GetContactPoint(pSource, x, y, z);
-            //}
-            //else                                            // Calculate position
-            //{
-            //    float orientation;
-            //    if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-            //        orientation = pSource->GetOrientation() + m_script->o + 2 * M_PI_F;
-            //    else
-            //        orientation = m_script->o;
+            float x, y, z;
+            if (m_script->moveDynamic.maxDist == 0)         // Move to pTarget
+            {
+                if (pTarget == pSource)
+                {
+                    sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, _MOVE_DYNAMIC called with maxDist == 0, but resultingSource == resultingTarget (== %s)", m_table, m_script->id, pSource->GetGuidStr().c_str());
+                    break;
+                }
+                pTarget->GetContactPoint(pSource, x, y, z);
+            }
+            else                                            // Calculate position
+            {
+                float orientation;
+                if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+                    orientation = pSource->GetOrientation() + m_script->o + 2 * M_PI_F;
+                else
+                    orientation = m_script->o;
 
-            //    pSource->GetRandomPoint(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), m_script->moveDynamic.maxDist, x, y, z,
-            //                            m_script->moveDynamic.minDist, (orientation == 0.0f ? NULL : &orientation));
-            //    z = std::max(z, pTarget->GetPositionZ());
-            //    pSource->UpdateAllowedPositionZ(x, y, z);
-            //}
-            //((Creature*)pSource)->GetMotionMaster()->MovePoint(1, x, y, z);
+                pSource->GetRandomPoint(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), m_script->moveDynamic.maxDist, x, y, z,
+                                        m_script->moveDynamic.minDist, (orientation == 0.0f ? nullptr : &orientation));
+                z = std::max(z, pTarget->GetPositionZ());
+                pSource->UpdateAllowedPositionZ(x, y, z);
+            }
+            ((Creature*)pSource)->GetMotionMaster()->MovePoint(1, x, y, z);
             break;
         }
         case SCRIPT_COMMAND_SEND_MAIL:                      // 38
@@ -1962,7 +2025,98 @@ bool ScriptAction::HandleScriptStep()
             MailDraft(m_script->sendMail.mailTemplateId).SendMailTo(static_cast<Player*>(pTarget), sender, MAIL_CHECK_MASK_HAS_BODY, deliverDelay);
             break;
         }
-        case SCRIPT_COMMAND_CHANGE_ENTRY:                   // 39
+        case SCRIPT_COMMAND_SET_FLY:                        // 39
+        {
+            if (LogIfNotCreature(pSource))
+                break;
+
+            // enable / disable the fly anim flag
+            if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+            {
+                if (m_script->fly.fly)
+                    pSource->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+                else
+                    pSource->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            }
+
+            ((Creature*)pSource)->SetLevitate(!!m_script->fly.fly);
+            break;
+        }
+        case SCRIPT_COMMAND_DESPAWN_GO:                     // 40
+        {
+            if (LogIfNotGameObject(pTarget))
+                break;
+
+            // ToDo: Change this to pGo->ForcedDespawn() when function is implemented!
+            ((GameObject*)pTarget)->SetLootState(GO_JUST_DEACTIVATED);
+            break;
+        }
+        case SCRIPT_COMMAND_RESPAWN:                        // 41
+        {
+            if (LogIfNotCreature(pTarget))
+                break;
+
+            ((Creature*)pTarget)->Respawn();
+            break;
+        }
+        case SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS:            // 42
+        {
+            if (LogIfNotCreature(pSource))
+                return false;
+
+            Creature* pCSource = static_cast<Creature*>(pSource);
+            // reset default
+            if (m_script->setEquipment.resetDefault)
+            {
+                pCSource->LoadEquipment(pCSource->GetCreatureInfo()->EquipmentTemplateId, true);
+                break;
+            }
+
+            // main hand
+            if (m_script->textId[0] >= 0)
+                pCSource->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, m_script->textId[0]);
+
+            // off hand
+            if (m_script->textId[1] >= 0)
+                pCSource->SetVirtualItem(VIRTUAL_ITEM_SLOT_1, m_script->textId[1]);
+
+            // ranged
+            if (m_script->textId[2] >= 0)
+                pCSource->SetVirtualItem(VIRTUAL_ITEM_SLOT_2, m_script->textId[2]);
+            break;
+        }
+        case SCRIPT_COMMAND_RESET_GO:                       // 43
+        {
+            if (LogIfNotGameObject(pTarget))
+                break;
+
+            GameObject* pGoTarget = static_cast<GameObject*>(pTarget);
+            switch (pGoTarget->GetGoType())
+            {
+                case GAMEOBJECT_TYPE_DOOR:
+                case GAMEOBJECT_TYPE_BUTTON:
+                    pGoTarget->ResetDoorOrButton();
+                    break;
+                default:
+                    sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed for gameobject(buddyEntry: %u). Gameobject is not a door or button", m_table, m_script->id, m_script->command, m_script->buddyEntry);
+                    break;
+            }
+            break;
+        }
+        case SCRIPT_COMMAND_UPDATE_TEMPLATE:                // 44
+        {
+            if (LogIfNotCreature(pSource))
+                return false;
+
+            Creature* pCSource = static_cast<Creature*>(pSource);
+
+            if (pCSource->GetEntry() != m_script->updateTemplate.newTemplate)
+                pCSource->UpdateEntry(m_script->updateTemplate.newTemplate, m_script->updateTemplate.newFactionTeam ? HORDE : ALLIANCE);
+            else
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed. Source already has specified creature entry.", m_table, m_script->id, m_script->command);
+            break;
+        }
+        case SCRIPT_COMMAND_CHANGE_ENTRY:                   // 45
         {
             if (LogIfNotCreature(pSource))
                 { break; }

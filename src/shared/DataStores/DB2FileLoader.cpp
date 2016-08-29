@@ -44,9 +44,8 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
         data=NULL;
     }
 
-    FILE* f = fopen(filename, "rb");
-    if (!f)
-        { return false; }
+    FILE * f = fopen(filename, "rb");
+    if(!f)return false;
 
     if(fread(&header, 4, 1, f) != 1)                        // Signature
     {
@@ -59,10 +58,10 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
     if(header != 0x32424457)
     {
         fclose(f);
-        return false;
+        return false;                                       //'WDB2'
     }
 
-    if (fread(&recordCount, 4, 1, f) != 1)                  // Number of records
+    if(fread(&recordCount,4,1,f)!=1)                        // Number of records
     {
         fclose(f);
         return false;
@@ -70,7 +69,7 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 
     EndianConvert(recordCount);
 
-    if (fread(&fieldCount, 4, 1, f) != 1)                   // Number of fields
+    if(fread(&fieldCount,4,1,f)!=1)                         // Number of fields
     {
         fclose(f);
         return false;
@@ -78,7 +77,7 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 
     EndianConvert(fieldCount);
 
-    if (fread(&recordSize, 4, 1, f) != 1)                   // Size of a record
+    if(fread(&recordSize,4,1,f)!=1)                         // Size of a record
     {
         fclose(f);
         return false;
@@ -86,7 +85,7 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 
     EndianConvert(recordSize);
 
-    if (fread(&stringSize, 4, 1, f) != 1)                   // String size
+    if(fread(&stringSize,4,1,f)!=1)                         // String size
     {
         fclose(f);
         return false;
@@ -153,19 +152,19 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 
     fieldsOffset = new uint32[fieldCount];
     fieldsOffset[0] = 0;
-    for (uint32 i = 1; i < fieldCount; ++i)
+    for(uint32 i = 1; i < fieldCount; i++)
     {
         fieldsOffset[i] = fieldsOffset[i - 1];
         if (fmt[i - 1] == 'b' || fmt[i - 1] == 'X')         // byte fields
-            { fieldsOffset[i] += 1; }
+            fieldsOffset[i] += 1;
         else                                                // 4 byte fields (int32/float/strings)
-            { fieldsOffset[i] += 4; }
+            fieldsOffset[i] += 4;
     }
 
-    data = new unsigned char[recordSize * recordCount + stringSize];
-    stringTable = data + recordSize * recordCount;
+    data = new unsigned char[recordSize*recordCount+stringSize];
+    stringTable = data + recordSize*recordCount;
 
-    if (fread(data, recordSize * recordCount + stringSize, 1, f) != 1)
+    if(fread(data, recordSize * recordCount + stringSize, 1, f) != 1)
     {
         fclose(f);
         return false;

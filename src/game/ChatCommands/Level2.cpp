@@ -61,6 +61,7 @@
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "MoveMap.h"                                        // for mmap manager
 #include "PathFinder.h"                                     // for mmap commands
+#include "movement/MoveSplineInit.h"
 
 static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
 {
@@ -2919,24 +2920,21 @@ inline void UnsummonVisualWaypoints(Player const* player, ObjectGuid ownerGuid)
     }
 }
 
-/**
- * Add a waypoint to a creature.
+/** Add a waypoint to a creature
+ * .wp add [dbGuid] [pathId] [source]
  *
- * The user can either select an npc or provide its GUID.
+ * The user can either select an npc or provide its dbGuid.
+ * Also the user can specify pathId and source if wanted.
  *
  * The user can even select a visual waypoint - then the new waypoint
  * is placed *after* the selected one - this makes insertion of new
  * waypoints possible.
  *
- * eg:
- * .wp add 12345
- * -> adds a waypoint to the npc with the GUID 12345
+ * .wp add [pathId] [source]
+ * -> adds a waypoint to the currently selected creature, to path pathId in source-storage
  *
- * .wp add
- * -> adds a waypoint to the currently selected creature
- *
- *
- * @param args if the user did not provide a GUID, it is NULL
+ * .wp add guid [pathId] [source]
+ * -> if no npc is selected, expect the creature provided with guid argument
  *
  * @return true - command did succeed, false - something went wrong
  */
@@ -3079,27 +3077,42 @@ bool ChatHandler::HandleWpAddCommand(char* args)
     PSendSysMessage(LANG_WAYPOINT_ADDED, wpPointId, wpOwner->GetGuidStr().c_str(), wpPathId, WaypointManager::GetOriginString(wpDestination).c_str());
 
     return true;
-}                                                           // HandleWpAddCommand
+}                                                              // HandleWpAddCommand
 
 /**
- * .wp modify emote | spell | text | del | move | add
+ * .wp modify waittime | scriptid | orientation | del | move [dbGuid, id] [value]
  *
- * add -> add a WP after the selected visual waypoint
- *        User must select a visual waypoint and then issue ".wp modify add"
- *
- * emote <emoteID>
+ * waittime <Delay>
  *   User has selected a visual waypoint before.
- *   <emoteID> is added to this waypoint. Everytime the
- *   NPC comes to this waypoint, the emote is called.
+ *   Delay <Delay> is added to this waypoint. Everytime the
+ *   NPC comes to this waypoint, it will wait Delay millieseconds.
  *
- * emote <GUID> <WPNUM> <emoteID>
+ * waittime <DBGuid> <WPNUM> <Delay>
  *   User has not selected visual waypoint before.
- *   For the waypoint <WPNUM> for the NPC with <GUID>
- *   an emote <emoteID> is added.
- *   Everytime the NPC comes to this waypoint, the emote is called.
+ *   For the waypoint <WPNUM> for the NPC with <DBGuid>
+ *   an delay Delay is added to this waypoint
+ *   Everytime the NPC comes to this waypoint, it will wait Delay millieseconds.
  *
+ * scriptid <scriptId>
+ *   User has selected a visual waypoint before.
+ *   <scriptId> is added to this waypoint. Everytime the
+ *   NPC comes to this waypoint, the DBScript scriptId is executed.
  *
- * info <GUID> <WPNUM> -> User did not select a visual waypoint and
+ * scriptid <DBGuid> <WPNUM> <scriptId>
+ *   User has not selected visual waypoint before.
+ *   For the waypoint <WPNUM> for the NPC with <DBGuid>
+ *   an emote <scriptId> is added.
+ *   Everytime the NPC comes to this waypoint, the DBScript scriptId is executed.
+ *
+ * orientation [DBGuid, WpNum] <Orientation>
+ *   Set the orientation of the selected waypoint or waypoint given with DbGuid/ WpId
+ *   to the value of <Orientation>.
+ *
+ * del [DBGuid, WpId]
+ *   Remove the selected waypoint or waypoint given with DbGuid/ WpId.
+ *
+ * move [DBGuid, WpId]
+ *   Move the selected waypoint or waypoint given with DbGuid/ WpId to player's current positiion.
  */
 bool ChatHandler::HandleWpModifyCommand(char* args)
 {
@@ -3303,29 +3316,19 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
 }
 
 /**
- * .wp show info | on | off
+ * .wp show info | on | off | first | last [dbGuid] [pathId [wpOrigin] ]
  *
  * info -> User has selected a visual waypoint before
- *
- * info <GUID> <WPNUM> -> User did not select a visual waypoint and
- *                        provided the GUID of the NPC and the number of
- *                        the waypoint.
  *
  * on -> User has selected an NPC; all visual waypoints for this
  *       NPC are added to the world
  *
- * on <GUID> -> User did not select an NPC - instead the GUID of the
+ * on <dbGuid> -> User did not select an NPC - instead the dbGuid of the
  *              NPC is provided. All visual waypoints for this NPC
  *              are added from the world.
  *
  * off -> User has selected an NPC; all visual waypoints for this
  *        NPC are removed from the world.
- *
- * on <GUID> -> User did not select an NPC - instead the GUID of the
- *              NPC is provided. All visual waypoints for this NPC
- *              are removed from the world.
- *
- *
  */
 bool ChatHandler::HandleWpShowCommand(char* args)
 {
@@ -5071,20 +5074,53 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
     char* para = strtok(args, " ");
 
     bool useStraightPath = false;
-    if (para && strcmp(para, "true") == 0)
-        useStraightPath = true;
+    bool followPath = false;
+    bool unitToPlayer = false;
+    if (para)
+    {
+        if (strcmp(para, "go") == 0)
+        {
+            followPath = true;
+            para = strtok(nullptr, " ");
+            if (para && strcmp(para, "straight") == 0)
+                useStraightPath = true;
+        }
+        else if (strcmp(para, "straight") == 0)
+            useStraightPath = true;
+        else if (strcmp(para, "to_me") == 0)
+            unitToPlayer = true;
+        else
+        {
+            PSendSysMessage("Use '.mmap path go' to move on target.");
+            PSendSysMessage("Use '.mmap path straight' to generate straight path.");
+            PSendSysMessage("Use '.mmap path to_me' to generate path from the target to you.");
+        }
+    }
+
+    Unit* destinationUnit;
+    Unit* originUnit;
+    if (unitToPlayer)
+    {
+        destinationUnit = player;
+        originUnit = target;
+    }
+    else
+    {
+        destinationUnit = target;
+        originUnit = player;
+    }
 
     // unit locations
     float x, y, z;
-    player->GetPosition(x, y, z);
+    destinationUnit->GetPosition(x, y, z);
 
     // path
-    PathFinder path(target);
+    PathFinder path(originUnit);
     path.setUseStrightPath(useStraightPath);
     path.calculate(x, y, z);
 
     PointsArray pointPath = path.getPath();
-    PSendSysMessage("%s's path to %s:", target->GetName(), player->GetName());
+    PSendSysMessage("%s's path to %s:", originUnit->GetName(), destinationUnit->GetName());
     PSendSysMessage("Building %s", useStraightPath ? "StraightPath" : "SmoothPath");
     PSendSysMessage("length " SIZEFMTD " type %u", pointPath.size(), path.getPathType());
 
@@ -5099,13 +5135,15 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
     if (!player->isGameMaster())
         PSendSysMessage("Enable GM mode to see the path points.");
 
-    // this entry visible only to GM's with "gm on"
-    static const uint32 WAYPOINT_NPC_ENTRY = 1;
-    Creature* wp = NULL;
     for (uint32 i = 0; i < pointPath.size(); ++i)
+        player->SummonCreature(VISUAL_WAYPOINT, pointPath[i].x, pointPath[i].y, pointPath[i].z, 0, TEMPSUMMON_TIMED_DESPAWN, 9000);
+
+    if (followPath)
     {
-        wp = player->SummonCreature(WAYPOINT_NPC_ENTRY, pointPath[i].x, pointPath[i].y, pointPath[i].z, 0, TEMPSUMMON_TIMED_DESPAWN, 9000);
-        // TODO: make creature not sink/fall
+        Movement::MoveSplineInit init(*player);
+        init.MovebyPath(pointPath);
+        init.SetWalk(false);
+        init.Launch();
     }
 
     return true;

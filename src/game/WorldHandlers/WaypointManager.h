@@ -91,7 +91,7 @@ class WaypointManager
 
         WaypointPath* GetDefaultPath(uint32 entry, uint32 lowGuid, WaypointPathOrigin* wpOrigin = NULL)
         {
-            WaypointPath* path = NULL;
+            WaypointPath* path = GetPath(lowGuid);
             path = GetPath(lowGuid);
             if (path && wpOrigin)
                 *wpOrigin = PATH_FROM_GUID;

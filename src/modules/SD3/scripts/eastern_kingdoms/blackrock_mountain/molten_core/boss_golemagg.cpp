@@ -43,9 +43,11 @@ enum
     SPELL_EARTHQUAKE        = 19798,
     SPELL_ENRAGE            = 19953,
     SPELL_GOLEMAGG_TRUST    = 20553,
+    SPELL_DOUBLE_ATTACK     = 18943,
 
     // Core Rager
     EMOTE_LOW_HP            = -1409002,
+    SPELL_THRASH            = 12787,
     SPELL_MANGLE            = 19820
 };
 
@@ -60,6 +62,7 @@ struct boss_golemagg : public CreatureScript
             m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
 #if defined (WOTLK) || defined (CATA)
         DoCastSpellIfCan(m_creature, SPELL_MAGMA_SPLASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 #endif
         }
 
@@ -185,6 +188,9 @@ struct mob_core_rager : public CreatureScript
         mob_core_ragerAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
             m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            Reset();
+
+            DoCastSpellIfCan(m_creature, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         }
 
         ScriptedInstance* m_pInstance;
@@ -206,6 +212,11 @@ struct mob_core_rager : public CreatureScript
                     uiDamage = 0;
                 }
             }
+        }
+
+        void JustReachedHome() override
+        {
+            DoCastSpellIfCan(m_creature, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         }
 
         void UpdateAI(const uint32 uiDiff) override

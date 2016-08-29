@@ -465,11 +465,12 @@ enum TotemCategoryType
 // SummonProperties.dbc, col 1          == Group            (m_control)
 enum SummonPropGroup
 {
-    SUMMON_PROP_GROUP_WILD              = 0,
-    SUMMON_PROP_GROUP_FRIENDLY          = 1,
-    SUMMON_PROP_GROUP_PETS              = 2,
-    SUMMON_PROP_GROUP_CONTROLLABLE      = 3,
-    SUMMON_PROP_GROUP_VEHICLE           = 4
+    SUMMON_PROP_GROUP_WILD                      = 0,
+    SUMMON_PROP_GROUP_FRIENDLY                  = 1,
+    SUMMON_PROP_GROUP_PETS                      = 2,
+    SUMMON_PROP_GROUP_CONTROLLABLE              = 3,
+    SUMMON_PROP_GROUP_VEHICLE                   = 4,
+    SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE    = 5
 };
 
 // SummonProperties.dbc, col 2          == FactionId        (m_faction)

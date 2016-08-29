@@ -191,7 +191,7 @@ void PlayerTaxi::LoadTaxiMask(const char* data)
             (index < TaxiMaskSize) && (iter != tokens.end()); ++iter, ++index)
     {
         // load and set bits only for existing taxi nodes
-        m_taximask[index] = sTaxiNodesMask[index] & uint8(atol((*iter).c_str()));
+        m_taximask[index] = sTaxiNodesMask[index] & uint8(std::stoul((*iter).c_str()));
     }
 }
 
@@ -218,7 +218,7 @@ bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, Team 
 
     for (Tokens::iterator iter = tokens.begin(); iter != tokens.end(); ++iter)
     {
-        uint32 node = uint32(atol(iter->c_str()));
+        uint32 node = std::stoul(iter->c_str());
         AddTaxiDestination(node);
     }
 
@@ -2358,23 +2358,7 @@ GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameo
     {
         if (uint32(go->GetGoType()) == gameobject_type || gameobject_type == MAX_GAMEOBJECT_TYPE)
         {
-            float maxdist;
-            switch (go->GetGoType())
-            {
-                    // TODO: find out how the client calculates the maximal usage distance to spellless working
-                    // gameobjects like guildbanks and mailboxes - 10.0 is a just an abitrary choosen number
-                case GAMEOBJECT_TYPE_GUILD_BANK:
-                case GAMEOBJECT_TYPE_MAILBOX:
-                    maxdist = 10.0f;
-                    break;
-                case GAMEOBJECT_TYPE_FISHINGHOLE:
-                    maxdist = 20.0f + CONTACT_DISTANCE;     // max spell range
-                    break;
-                default:
-                    maxdist = INTERACTION_DISTANCE;
-                    break;
-            }
-
+            float maxdist = go->GetInteractionDistance();
             if (go->IsWithinDistInMap(this, maxdist) && go->isSpawned())
                 return go;
 
@@ -5541,6 +5525,10 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
 
     SkillStatusMap::iterator itr = mSkillStatus.find(skill_id);
     if (itr == mSkillStatus.end() || itr->second.uState == SKILL_DELETED)
+        return false;
+
+    SkillStatusData& skillStatus = itr->second;
+    if (skillStatus.uState == SKILL_DELETED)
         return false;
 
     uint16 field = itr->second.pos / 2;
@@ -15349,7 +15337,7 @@ void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
     uint32 index;
     for (iter = tokens.begin(), index = 0; index < count; ++iter, ++index)
     {
-        m_uint32Values[startOffset + index] = atol((*iter).c_str());
+        m_uint32Values[startOffset + index] = std::stoul((*iter).c_str());
     }
 }
 

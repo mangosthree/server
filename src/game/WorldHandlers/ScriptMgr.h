@@ -132,7 +132,7 @@ enum DBScriptCommand                                        // resSource, resTar
     SCRIPT_COMMAND_XP_USER                  = 33,           // source or target with Player, datalong = bool (0=off, 1=on)
     SCRIPT_COMMAND_TERMINATE_COND           = 34,           // datalong = condition_id, datalong2 = if != 0 then quest_id of quest that will be failed for player's group if the script is terminated
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL terminate when condition is false ELSE terminate when condition is true
-    SCRIPT_COMMAND_SEND_AI_EVENT_AROUND     = 35,           // resSource = Creature, resTarget = Unit
+    SCRIPT_COMMAND_SEND_AI_EVENT     = 35,           // resSource = Creature, resTarget = Unit
                                                             // datalong = AIEventType
                                                             // datalong2 = radius
     SCRIPT_COMMAND_TURN_TO                  = 36,           // resSource = Unit, resTarget = Unit/none
@@ -145,8 +145,20 @@ enum DBScriptCommand                                        // resSource, resTar
     SCRIPT_COMMAND_SEND_MAIL                = 38,           // resSource WorldObject, can be NULL, resTarget Player
                                                             // datalong: Send mailTemplateId from resSource (if provided) to player resTarget
                                                             // datalong2: AlternativeSenderEntry. Use as sender-Entry
+    SCRIPT_COMMAND_SET_FLY                  = 39,           // resSource = Creature
+                                                            // datalong = bool 0=off, 1=on
+                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL set/unset byte flag UNIT_BYTE1_FLAG_FLY_ANIM
                                                             // dataint1: Delay (>= 0) in Seconds
-    SCRIPT_COMMAND_CHANGE_ENTRY             = 39,           // resSource = Creature, datalong=creature entry
+    SCRIPT_COMMAND_DESPAWN_GO               = 40,           // resTarget = GameObject
+    SCRIPT_COMMAND_RESPAWN                  = 41,           // resSource = Creature. Requires SCRIPT_FLAG_BUDDY_IS_DESPAWNED to find dead or despawned targets
+    SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS      = 42,           // resSource = Creature
+                                                            // datalong = resetDefault: bool 0=false, 1=true
+                                                            // dataint = main hand slot; dataint2 = off hand slot; dataint3 = ranged slot
+    SCRIPT_COMMAND_RESET_GO                 = 43,           // resTarget = GameObject
+    SCRIPT_COMMAND_UPDATE_TEMPLATE          = 44,           // resSource = Creature
+                                                            // datalong = new Creature entry
+                                                            // datalong2 = Alliance(0) Horde(1), other values throw error
+    SCRIPT_COMMAND_CHANGE_ENTRY             = 45,           // resSource = Creature, datalong=creature entry
                                                             // dataint1 = entry
 };
 
@@ -161,8 +173,9 @@ enum ScriptInfoDataFlags
     SCRIPT_FLAG_COMMAND_ADDITIONAL          = 0x08,         // command dependend
     SCRIPT_FLAG_BUDDY_BY_GUID               = 0x10,         // take the buddy by guid
     SCRIPT_FLAG_BUDDY_IS_PET                = 0x20,         // buddy is a pet
+    SCRIPT_FLAG_BUDDY_IS_DESPAWNED          = 0X40,         // buddy is dead or despawned
 };
-#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_IS_PET - 1)
+#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_IS_DESPAWNED - 1)
 
 struct ScriptInfo
 {
@@ -371,7 +384,7 @@ struct ScriptInfo
             uint32 failQuest;                               // datalong2
         } terminateCond;
 
-        struct                                              // SCRIPT_COMMAND_SEND_AI_EVENT_AROUND (35)
+        struct                                              // SCRIPT_COMMAND_SEND_AI_EVENT (35)
         {
             uint32 eventType;                               // datalong
             uint32 radius;                                  // datalong2
@@ -395,7 +408,30 @@ struct ScriptInfo
             uint32 altSender;                               // datalong2;
         } sendMail;
 
-        struct                                              // SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL (23)
+        struct                                              // SCRIPT_COMMAND_SET_FLY (39)
+        {
+            uint32 fly;                                     // datalong
+            uint32 empty;                                   // datalong2
+        } fly;
+
+        // datalong unsed                                   // SCRIPT_COMMAND_DESPAWN_GO (40)
+        // datalong unsed                                   // SCRIPT_COMMAND_RESPAWN (41)
+
+        struct                                              // SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS (42)
+        {
+            uint32 resetDefault;                            // datalong
+            uint32 empty;                                   // datalong2
+        } setEquipment;
+
+        // datalong unsed                                   // SCRIPT_COMMAND_RESET_GO (43)
+
+        struct                                              // SCRIPT_COMMAND_UPDATE_TEMPLATE (44)
+        {
+            uint32 newTemplate;                             // datalong
+            uint32 newFactionTeam;                          // datalong2
+        } updateTemplate;
+
+        struct                                              // SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL (45)
         {
             uint32 creatureEntry;                           // datalong
             uint32 empty1;                                  // datalong2
@@ -443,6 +479,8 @@ struct ScriptInfo
             case SCRIPT_COMMAND_CLOSE_DOOR:
             case SCRIPT_COMMAND_ACTIVATE_OBJECT:
             case SCRIPT_COMMAND_GO_LOCK_STATE:
+            case SCRIPT_COMMAND_DESPAWN_GO:
+            case SCRIPT_COMMAND_RESET_GO:
                 return false;
             default:
                 return true;
@@ -464,6 +502,7 @@ struct ScriptInfo
             case SCRIPT_COMMAND_TERMINATE_COND:
             case SCRIPT_COMMAND_TURN_TO:
             case SCRIPT_COMMAND_MOVE_DYNAMIC:
+            case SCRIPT_COMMAND_SET_FLY:
                 return true;
             default:
                 return false;

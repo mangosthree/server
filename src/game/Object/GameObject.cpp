@@ -79,6 +79,10 @@ GameObject::GameObject() : WorldObject(),
     m_groupLootTimer = 0;
     m_groupLootId = 0;
     m_lootGroupRecipientId = 0;
+
+    m_isInUse = false;
+    m_reStockTimer = 0;
+    m_despawnTimer = 0;
 }
 
 GameObject::~GameObject()
@@ -1951,6 +1955,7 @@ void GameObject::SetLootRecipient(Unit* pUnit)
     {
         m_lootRecipientGuid.Clear();
         m_lootGroupRecipientId = 0;
+        ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);       // needed to be sure tapping status is updated
         return;
     }
 
@@ -1964,6 +1969,8 @@ void GameObject::SetLootRecipient(Unit* pUnit)
     // set group for group existed case including if player will leave group at loot time
     if (Group* group = player->GetGroup())
         { m_lootGroupRecipientId = group->GetId(); }
+
+    ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);           // needed to be sure tapping status is updated
 }
 
 float GameObject::GetObjectBoundingRadius() const
@@ -2400,6 +2407,15 @@ float GameObject::GetInteractionDistance()
         default:
             return INTERACTION_DISTANCE;
     }
+}
+
+void GameObject::SetInUse(bool use)
+{
+    m_isInUse = use;
+    if (use)
+        SetGoState(GO_STATE_ACTIVE);
+    else
+        SetGoState(GO_STATE_READY);
 }
 
 uint32 GameObject::GetScriptId()

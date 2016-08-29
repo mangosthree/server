@@ -211,6 +211,7 @@ struct boss_freya : public CreatureScript
 
         uint32 m_uiEpilogueTimer;
         uint32 m_uiBerserkTimer;
+        uint32 m_uiDrainEldersTimer;
 
         uint32 m_uiAlliesNatureTimer;
         uint8 m_uiAlliesWaveCount;
@@ -244,6 +245,7 @@ struct boss_freya : public CreatureScript
             m_uiUnstableEnergyTimer = 0;
             m_uiIronRootsTimer = 0;
             m_uiGroundTremorTimer = 0;
+            m_uiDrainEldersTimer        = 0;
 
             // make the spawn spells random
             std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
@@ -292,17 +294,26 @@ struct boss_freya : public CreatureScript
                 if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_BRIGHTLEAF))
                 {
                     if (pElder->IsAlive())
+                    {
                         pElder->AI()->EnterEvadeMode();
+                        pElder->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    }
                 }
                 if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_IRONBRACH))
                 {
                     if (pElder->IsAlive())
+                    {
                         pElder->AI()->EnterEvadeMode();
+                        pElder->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    }
                 }
                 if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_STONEBARK))
                 {
                     if (pElder->IsAlive())
+                    {
                         pElder->AI()->EnterEvadeMode();
+                        pElder->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    }
                 }
             }
         }
@@ -468,7 +479,7 @@ struct boss_freya : public CreatureScript
             {
                 if (pElder->IsAlive())
                 {
-                    pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_BRIGHTLEAF_ESSENCE_CHANNEL : SPELL_BRIGHTLEAF_ESSENCE_CHANNEL_H, true);
+                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_BRIGHTLEAF_ESSENCE_CHANNEL : SPELL_BRIGHTLEAF_ESSENCE_CHANNEL_H, false, NULL, NULL, m_creature->GetObjectGuid());
                     pElder->CastSpell(pElder, SPELL_FULL_HEAL, true);
 
                     m_uiUnstableEnergyTimer = 25000;
@@ -479,7 +490,7 @@ struct boss_freya : public CreatureScript
             {
                 if (pElder->IsAlive())
                 {
-                    pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_IRONBRANCH_ESSENCE_CHANNEL : SPELL_IRONBRANCH_ESSENCE_CHANNEL_H, true);
+                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_IRONBRANCH_ESSENCE_CHANNEL : SPELL_IRONBRANCH_ESSENCE_CHANNEL_H, false, NULL, NULL, m_creature->GetObjectGuid());
                     pElder->CastSpell(pElder, SPELL_FULL_HEAL, true);
 
                     m_uiIronRootsTimer = 60000;
@@ -490,7 +501,7 @@ struct boss_freya : public CreatureScript
             {
                 if (pElder->IsAlive())
                 {
-                    pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_STONEBARK_ESSEMCE_CHANNEL : SPELL_STONEBARK_ESSEMCE_CHANNEL_H, true);
+                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_STONEBARK_ESSEMCE_CHANNEL : SPELL_STONEBARK_ESSEMCE_CHANNEL_H, false, NULL, NULL, m_creature->GetObjectGuid());
                     pElder->CastSpell(pElder, SPELL_FULL_HEAL, true);
 
                     m_uiGroundTremorTimer = 10000;
@@ -505,6 +516,38 @@ struct boss_freya : public CreatureScript
                 DoScriptText(SAY_AGGRO_HARD, m_creature);
             else
                 DoScriptText(SAY_AGGRO, m_creature);
+        }
+
+        // Function that will drain elders after aggro
+        void DoDrainElders()
+        {
+            if (!m_pInstance)
+                return;
+
+            if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_BRIGHTLEAF))
+            {
+                if (pElder->IsAlive())
+                {
+                    pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, true);
+                    pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
+            }
+            if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_IRONBRACH))
+            {
+                if (pElder->IsAlive())
+                {
+                    pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, true);
+                    pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
+            }
+            if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_STONEBARK))
+            {
+                if (pElder->IsAlive())
+                {
+                    pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, true);
+                    pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -538,6 +581,18 @@ struct boss_freya : public CreatureScript
                 }
                 else
                     m_uiBerserkTimer -= uiDiff;
+            }
+
+            // Drain elders after hard mode aggro
+            if (m_uiDrainEldersTimer)
+            {
+                if (m_uiDrainEldersTimer <= uiDiff)
+                {
+                    DoDrainElders();
+                    m_uiDrainEldersTimer = 0;
+                }
+                else
+                    m_uiDrainEldersTimer -= uiDiff;
             }
 
             if (m_uiThreeAlliesTimer)

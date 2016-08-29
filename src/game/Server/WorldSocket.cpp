@@ -1051,17 +1051,18 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
 
     // critical section
     {
-        ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
-
         if (m_Session)
+        {
             m_Session->SetLatency(latency);
+            m_Session->ResetClientTimeDelay();
+        }
         else
         {
             sLog.outError("WorldSocket::HandlePing: peer sent CMSG_PING, "
                           "but is not authenticated or got recently kicked,"
                           " address = %s",
                           GetRemoteAddress().c_str());
-            return -1;
+            return false;
         }
     }
 

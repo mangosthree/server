@@ -2976,7 +2976,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             {
                 //AreaTableEntry const* area = GetAreaEntryByAreaID(target->GetAreaId());
 
-                //// Dalaran restricted flight zone (recheck before apply unmount)
+                //// Dalaran restricstruct boss_freyted flight zone (recheck before apply unmount)
                 //if (area && target->GetTypeId() == TYPEID_PLAYER && (area->flags & AREA_FLAG_CANNOT_FLY) &&
                 //        ((Player*)target)->IsFreeFlying() && !((Player*)target)->isGameMaster())
                 //{

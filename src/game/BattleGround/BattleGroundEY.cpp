@@ -401,18 +401,6 @@ void BattleGroundEY::HandleKillPlayer(Player* player, Player* killer)
 
 void BattleGroundEY::EventPlayerDroppedFlag(Player* source)
 {
-    if (GetStatus() != STATUS_IN_PROGRESS)
-    {
-        // if not running, do not cast things at the dropper player, neither send unnecessary messages
-        // just take off the aura
-        if (IsFlagPickedUp() && GetFlagCarrierGuid() == source->GetObjectGuid())
-        {
-            ClearFlagCarrier();
-            source->RemoveAurasDueToSpell(EY_NETHERSTORM_FLAG_SPELL);
-        }
-        return;
-    }
-
     if (!IsFlagPickedUp())
         return;
 
@@ -421,6 +409,13 @@ void BattleGroundEY::EventPlayerDroppedFlag(Player* source)
 
     ClearFlagCarrier();
     source->RemoveAurasDueToSpell(EY_NETHERSTORM_FLAG_SPELL);
+
+    if (GetStatus() != STATUS_IN_PROGRESS)
+    {
+        // do not cast auras or send messages after match has ended
+        return;
+    }
+
     m_flagState = EY_FLAG_STATE_ON_GROUND;
     m_flagRespawnTimer = EY_FLAG_RESPAWN_TIME;
     source->CastSpell(source, SPELL_RECENTLY_DROPPED_FLAG, true);
@@ -429,12 +424,12 @@ void BattleGroundEY::EventPlayerDroppedFlag(Player* source)
     if (source->GetTeam() == ALLIANCE)
     {
         UpdateWorldState(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_ALLIANCE, 1);
-        SendMessageToAll(LANG_BG_EY_DROPPED_FLAG, CHAT_MSG_BG_SYSTEM_ALLIANCE, NULL);
+        SendMessageToAll(LANG_BG_EY_DROPPED_FLAG, CHAT_MSG_BG_SYSTEM_ALLIANCE, nullptr);
     }
     else
     {
         UpdateWorldState(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_HORDE, 1);
-        SendMessageToAll(LANG_BG_EY_DROPPED_FLAG, CHAT_MSG_BG_SYSTEM_HORDE, NULL);
+        SendMessageToAll(LANG_BG_EY_DROPPED_FLAG, CHAT_MSG_BG_SYSTEM_HORDE, nullptr);
     }
 }
 
@@ -624,4 +619,18 @@ bool BattleGroundEY::IsAllNodesControlledByTeam(Team team) const
             return false;
 
     return true;
+}
+
+Team BattleGroundEY::GetPrematureWinner()
+{
+    int32 hordeScore = m_TeamScores[TEAM_INDEX_HORDE];
+    int32 allianceScore = m_TeamScores[TEAM_INDEX_ALLIANCE];
+
+    if (hordeScore > allianceScore)
+        return HORDE;
+    if (allianceScore > hordeScore)
+        return ALLIANCE;
+
+    // If the values are equal, fall back to number of players on each team
+    return BattleGround::GetPrematureWinner();
 }

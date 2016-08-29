@@ -1810,17 +1810,26 @@ void Creature::SetLootStatus(CreatureLootStatus status)
     }
 }
 
-// return true if this creature is tapped by the player or by a member of his group.
-bool Creature::IsTappedBy(Player const* player) const
+// simple tap system return true if player or his group tapped the creature
+// TODO:: this is semi correct. For group situation need more work but its not a big issue
+bool Creature::IsTappedBy(Player* plr) const
 {
-    if (player == GetOriginalLootRecipient())
-        return true;
+    if (Player* recipient = GetLootRecipient())
+    {
+        if (recipient == plr)
+            return true;
 
-    Group const* playerGroup = player->GetGroup();
-    if (!playerGroup || playerGroup != GetGroupLootRecipient()) // if we dont have a group we arent the recipient
-        return false;                                           // if creature doesnt have group bound it means it was solo killed by someone else
-
-    return true;
+        if (Group* grp = recipient->GetGroup())
+        {
+            if (Group* plrGroup = plr->GetGroup())
+            {
+                if (plrGroup == grp)
+                    return true;
+            }
+        }
+        return false;
+    }
+    return false;
 }
 
 SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)

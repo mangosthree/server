@@ -462,6 +462,7 @@ class WorldSession
             m_latency = latency;
         }
         void SetClientTimeDelay(uint32 delay) { m_clientTimeDelay = delay; }
+        void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
         uint32 getDialogStatus(Player* pPlayer, Object* questgiver, uint32 defstatus);
 
     public:                                                 // opcodes handlers
@@ -1015,10 +1016,10 @@ class WorldSession
         LocaleConstant m_sessionDbcLocale;
         int m_sessionDbLocaleIndex;
         uint32 m_latency;
+        uint32 m_clientTimeDelay;
         AccountData m_accountData[NUM_ACCOUNT_DATA_TYPES];
         uint32 m_Tutorials[8];
         TutorialDataState m_tutorialState;
-        uint32 m_clientTimeDelay;
         AddonsList m_addonsList;
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
 };

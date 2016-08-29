@@ -635,6 +635,6 @@ void WaypointManager::CheckTextsExistance(std::set<int32>& ids)
     {
         for (WaypointPath::const_iterator pItr = pmItr->second.begin(); pItr != pmItr->second.end(); ++pItr)
             if (pItr->second.behavior)
-                CheckWPText(false, pmItr->first, pItr->first, pItr->second.behavior, ids);
+                CheckWPText(true, pmItr->first, pItr->first, pItr->second.behavior, ids);
     }
 }

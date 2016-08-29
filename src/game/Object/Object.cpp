@@ -800,7 +800,7 @@ bool Object::LoadValues(const char* data)
     int index;
     for (iter = tokens.begin(), index = 0; index < m_valuesCount; ++iter, ++index)
     {
-        m_uint32Values[index] = atol((*iter).c_str());
+        m_uint32Values[index] = std::stoul((*iter).c_str());
     }
 
     return true;
@@ -1116,6 +1116,16 @@ void Object::MarkForClientUpdate()
             AddToClientUpdateList();
             m_objectUpdated = true;
         }
+    }
+}
+
+void Object::ForceValuesUpdateAtIndex(uint32 index)
+{
+    m_changedValues[index] = true;
+    if (m_inWorld && !m_objectUpdated)
+    {
+        AddToClientUpdateList();
+        m_objectUpdated = true;
     }
 }
 

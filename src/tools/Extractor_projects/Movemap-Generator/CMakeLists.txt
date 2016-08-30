@@ -67,11 +67,23 @@ else()
     target_link_libraries(${EXECUTABLE_NAME} ACE)
 endif()
 
+target_link_libraries(${EXECUTABLE_NAME} g3dlite vmap detour recast zlib shared)
+
+set(EXECUTABLE_LINK_FLAGS "")
+
 if(UNIX)
-    target_link_libraries(${EXECUTABLE_NAME} rt)
+    if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+        set(EXECUTABLE_LINK_FLAGS "-Wl,--no-as-needed -lrt -pthread ${EXECUTABLE_LINK_FLAGS}")
+    elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+        set(EXECUTABLE_LINK_FLAGS "-Wl,--no-as-needed -ldl -pthread -lrt ${EXECUTABLE_LINK_FLAGS}")
+    endif()
 endif()
 
-target_link_libraries(${EXECUTABLE_NAME} g3dlite vmap detour recast zlib shared)
+if(APPLE)
+    set(EXECUTABLE_LINK_FLAGS "-framework CoreServices ${EXECUTABLE_LINK_FLAGS}")
+endif()
+
+set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS "${EXECUTABLE_LINK_FLAGS}")
 
 #Output the compiled exes to build/bin/$(Configuration)/tools directory on windows by default
 if(WIN32)
@@ -92,3 +104,5 @@ install(TARGETS ${EXECUTABLE_NAME} DESTINATION "${BIN_DIR}/${TOOLS_DIR}")
 if(WIN32 AND MSVC)
   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/\${BUILD_TYPE}/${EXECUTABLE_NAME}.pdb" DESTINATION "${BIN_DIR}/${TOOLS_DIR}" CONFIGURATIONS Debug)
 endif()
+Contact GitHub API Training Shop Blog About
+© 2016 GitHub, Inc. Terms Privacy Security Status Help

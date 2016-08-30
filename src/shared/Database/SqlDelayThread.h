@@ -29,6 +29,8 @@
 #include "LockedQueue/LockedQueue.h"
 #include "Threading/Threading.h"
 
+#include <mutex>
+
 class Database;
 class SqlOperation;
 class SqlConnection;

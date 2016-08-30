@@ -566,7 +566,6 @@ class  ChatHandler
         bool HandleWpModifyCommand(char* args);
         bool HandleWpShowCommand(char* args);
         bool HandleWpExportCommand(char* args);
-        bool HandleWpImportCommand(char* args);
 
         bool HandleHelpCommand(char* args);
         bool HandleCommandsCommand(char* args);

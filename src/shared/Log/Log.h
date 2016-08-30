@@ -28,6 +28,8 @@
 #include "Common/Common.h"
 #include "Policies/Singleton.h"
 
+#include <mutex>
+
 class Config;
 class ByteBuffer;
 

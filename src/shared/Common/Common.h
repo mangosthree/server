@@ -88,6 +88,7 @@
 #include <queue>
 #include <sstream>
 #include <algorithm>
+#include <unordered_map>
 
 #include "Utilities/Errors.h"
 #include "LockedQueue/LockedQueue.h"

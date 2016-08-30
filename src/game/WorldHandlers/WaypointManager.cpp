@@ -112,6 +112,7 @@ void WaypointManager::Load()
         {
             barRow.step();
             Field* fields = result->Fetch();
+
             uint32 id           = fields[0].GetUInt32();
             uint32 point        = fields[1].GetUInt32();
 
@@ -126,7 +127,7 @@ void WaypointManager::Load()
             if (cData->movementType != WAYPOINT_MOTION_TYPE)
                 creatureNoMoveType.insert(id);
 
-            WaypointPath& path  = m_pathMap[id];
+            WaypointPath& path  = m_pathTemplateMap[id << 8];
             WaypointNode& node  = path[point];
 
             node.x              = fields[2].GetFloat();
@@ -391,12 +392,16 @@ void WaypointManager::Load()
 void WaypointManager::Unload()
 {
     for (WaypointPathMap::iterator itr = m_pathMap.begin(); itr != m_pathMap.end(); ++itr)
-        _clearPath(itr->second);
+        { _clearPath(itr->second); }
     m_pathMap.clear();
 
     for (WaypointPathMap::iterator itr = m_pathTemplateMap.begin(); itr != m_pathTemplateMap.end(); ++itr)
-        _clearPath(itr->second);
+        { _clearPath(itr->second); }
     m_pathTemplateMap.clear();
+
+    for (WaypointPathMap::iterator itr = m_externalPathTemplateMap.begin(); itr != m_externalPathTemplateMap.end(); ++itr)
+        { _clearPath(itr->second); }
+    m_externalPathTemplateMap.clear();
 }
 
 void WaypointManager::_clearPath(WaypointPath& path)

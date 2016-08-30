@@ -30,6 +30,8 @@
 #include "Platform/Define.h"
 #include <G3D/Vector3.h>
 
+#include <unordered_map>
+
 //===========================================================
 
 #define MAP_FILENAME_EXTENSION2 ".vmtree"

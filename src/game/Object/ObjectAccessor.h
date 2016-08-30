@@ -40,6 +40,8 @@
 #include "Player.h"
 #include "Corpse.h"
 
+#include <mutex>
+
 #include <set>
 #include <list>
 

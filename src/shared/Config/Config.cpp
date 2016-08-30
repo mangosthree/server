@@ -24,6 +24,11 @@
 
 #include "Config.h"
 #include <ace/Configuration_Import_Export.h>
+#include <mutex>
+
+#include <unordered_map>
+#include <string>
+#include <fstream>
 
 #include "Policies/Singleton.h"
 

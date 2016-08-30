@@ -28,6 +28,10 @@
 #include "Common/Common.h"
 #include <Policies/Singleton.h>
 #include "Platform/Define.h"
+#include <mutex>
+
+#include <string>
+#include <unordered_map>
 
 class ACE_Configuration_Heap;
 

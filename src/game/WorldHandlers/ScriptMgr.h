@@ -29,7 +29,8 @@
 #include "Policies/Singleton.h"
 #include "ObjectGuid.h"
 #include "DBCEnums.h"
-#include <ace/Atomic_Op.h>
+//#include <ace/Atomic_Op.h>  <- delete this if the #include below works
+#include <atomic>
 
 struct AreaTriggerEntry;
 struct SpellEntry;
@@ -614,6 +615,9 @@ class ScriptMgr
         void LoadEventIdScripts();
         void LoadSpellIdScripts();
 
+        uint32 GetAreaTriggerScriptId(uint32 triggerId) const;
+        uint32 GetEventIdScriptId(uint32 eventId) const;
+
         bool ReloadScriptBinding();
 
         const char* GetScriptName(uint32 id) const
@@ -706,6 +710,14 @@ class ScriptMgr
 bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart = true, Unit* forwardToPvp = NULL);
 
 #define sScriptMgr MaNGOS::Singleton<ScriptMgr>::Instance()
+
+MANGOS_DLL_SPEC uint32 GetAreaTriggerScriptId(uint32 triggerId);
+MANGOS_DLL_SPEC uint32 GetEventIdScriptId(uint32 eventId);
+MANGOS_DLL_SPEC uint32 GetScriptId(const char* name);
+MANGOS_DLL_SPEC char const* GetScriptName(uint32 id);
+MANGOS_DLL_SPEC uint32 GetScriptIdsCount();
+MANGOS_DLL_SPEC void SetExternalWaypointTable(char const* tableName);
+MANGOS_DLL_SPEC bool AddWaypointFromExternal(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
 
 uint32 GetScriptId(const char* name);
 char const* GetScriptName(uint32 id);

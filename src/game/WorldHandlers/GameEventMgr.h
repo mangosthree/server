@@ -30,6 +30,8 @@
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
 
+#include <mutex>
+
 #define max_ge_check_delay 86400                            // 1 day in seconds
 
 class Creature;

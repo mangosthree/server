@@ -35,6 +35,8 @@
 #include <bitset>
 #include <list>
 
+#include <mutex>
+
 class Creature;
 class Unit;
 class WorldPacket;

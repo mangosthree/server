@@ -36,6 +36,8 @@
 #include "Policies/Singleton.h"
 #include "Util.h"
 
+#include <mutex>
+
 char const* MAP_MAGIC         = "MAPS";
 char const* MAP_VERSION_MAGIC = "c1.4";
 char const* MAP_AREA_MAGIC    = "AREA";

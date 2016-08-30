@@ -3140,7 +3140,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
 
     // Did user provide a GUID or did the user select a creature?
     Creature* targetCreature = getSelectedCreature();       // Expect a visual waypoint to be selected
-    Creature* wpOwner = nullptr;                               // Who moves along the waypoint
+    Creature* wpOwner;                                      // Who moves along the waypoint
     uint32 wpId = 0;
     WaypointPathOrigin wpSource = PATH_NO_PATH;
     int32 wpPathId = 0;
@@ -3393,8 +3393,8 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         }
     }
 
-    Creature* wpOwner = NULL;                               ///< Npc that is moving
-    TemporarySummonWaypoint* wpTarget = NULL;               // Define here for wp-info command
+    Creature* wpOwner;                                         ///< Npc that is moving
+    TemporarySummonWaypoint* wpTarget = nullptr;               // Define here for wp-info command
 
     // Show info for the selected waypoint (Step one: get moving npc)
     if (subCmd == "info")
@@ -3431,7 +3431,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         wpOwner = targetCreature;
 
     // Get the path
-    WaypointPath* wpPath = NULL;
+    WaypointPath* wpPath = nullptr;
     if (wpOrigin != PATH_NO_PATH)                           // Might have been provided by param
         wpPath = sWaypointMgr.GetPathFromOrigin(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPathId, wpOrigin);
     else
@@ -3538,65 +3538,112 @@ bool ChatHandler::HandleWpShowCommand(char* args)
     return false;
 }      
 
+/// [Guid if no selected unit] <filename> [pathId [wpOrigin] ]
 bool ChatHandler::HandleWpExportCommand(char* args)
 {
     if (!*args)
         return false;
 
-    // Next arg is: <GUID> <ARGUMENT>
+    Creature* wpOwner;
+    WaypointPathOrigin wpOrigin = PATH_NO_PATH;
+    int32 wpPathId = 0;
 
-    // Did user provide a GUID
-    // or did the user select a creature?
-    // -> variable lowguid is filled with the GUID of the NPC
-    uint32 lowguid = 0;
-    Creature* target = getSelectedCreature();
-    char* arg_str = NULL;
-    if (target)
+    if (Creature* targetCreature = getSelectedCreature())
     {
-        if (target->GetEntry() != VISUAL_WAYPOINT)
-            lowguid = target->GetGUIDLow();
-        else
+        // Check if the user did specify a visual waypoint
+        if (targetCreature->GetEntry() == VISUAL_WAYPOINT && targetCreature->GetSubtype() == CREATURE_SUBTYPE_TEMPORARY_SUMMON)
         {
-            QueryResult* result = WorldDatabase.PQuery("SELECT id FROM creature_movement WHERE wpguid = %u LIMIT 1", target->GetGUIDLow());
-            if (!result)
+            TemporarySummonWaypoint* wpTarget = dynamic_cast<TemporarySummonWaypoint*>(targetCreature);
+            if (!wpTarget)
             {
-                PSendSysMessage(LANG_WAYPOINT_NOTFOUNDDBPROBLEM, target->GetGUIDLow());
-                return true;
+                PSendSysMessage(LANG_WAYPOINT_VP_SELECT);
+                SetSentErrorMessage(true);
+                return false;
             }
-            Field* fields = result->Fetch();
-            lowguid = fields[0].GetUInt32();;
-            delete result;
-        }
 
-        arg_str = strtok(args, " ");
+            // Who moves along this waypoint?
+            wpOwner = targetCreature->GetMap()->GetAnyTypeCreature(wpTarget->GetSummonerGuid());
+            if (!wpOwner)
+            {
+                PSendSysMessage(LANG_WAYPOINT_NOTFOUND_NPC, wpTarget->GetSummonerGuid().GetString().c_str());
+                SetSentErrorMessage(true);
+                return false;
+            }
+            wpOrigin = (WaypointPathOrigin)wpTarget->GetPathOrigin();
+            wpPathId = wpTarget->GetPathId();
+        }
+        else // normal creature selected
+            wpOwner = targetCreature;
     }
     else
     {
-        // user provided <GUID>
-        char* guid_str = strtok(args, " ");
-        if (!guid_str)
+        uint32 dbGuid;
+        if (!ExtractUInt32(&args, dbGuid))
         {
-            SendSysMessage(LANG_WAYPOINT_NOGUID);
+            PSendSysMessage(LANG_WAYPOINT_NOGUID);
+            SetSentErrorMessage(true);
             return false;
         }
-        lowguid = atoi((char*)guid_str);
 
-        arg_str = strtok((char*)NULL, " ");
+        CreatureData const* data = sObjectMgr.GetCreatureData(dbGuid);
+        if (!data)
+        {
+            PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, dbGuid);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (m_session->GetPlayer()->GetMapId() != data->mapid)
+        {
+            PSendSysMessage(LANG_COMMAND_CREATUREATSAMEMAP, dbGuid);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
+        wpOwner = m_session->GetPlayer()->GetMap()->GetAnyTypeCreature(data->GetObjectGuid(dbGuid));
+        if (!wpOwner)
+        {
+            PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, dbGuid);
+            SetSentErrorMessage(true);
+            return false;
+        }
     }
 
-    if (!arg_str)
+    // wpOwner is now known, in case of export by visual waypoint also the to be exported path
+    char* export_str = ExtractLiteralArg(&args);
+    if (!export_str)
     {
         PSendSysMessage(LANG_WAYPOINT_ARGUMENTREQ, "export");
+        SetSentErrorMessage(true);
         return false;
     }
 
-    PSendSysMessage("DEBUG: wp export, GUID: %u", lowguid);
+    if (wpOrigin == PATH_NO_PATH)                           // No WP selected, Extract optional arguments
+    {
+        if (ExtractOptInt32(&args, wpPathId, 0))            // Fill path-id and source
+        {
+            uint32 src = (uint32)PATH_NO_PATH;
+            if (ExtractOptUInt32(&args, src, src))
+                wpOrigin = (WaypointPathOrigin)src;
+            else // pathId provided but no destination
+            {
+                if (wpPathId != 0)
+                    wpOrigin = PATH_FROM_ENTRY;             // Multiple Paths must only be assigned by entry
+            }
+        }
 
-    QueryResult* result = WorldDatabase.PQuery(
-                              //          0      1           2           3           4            5       6       7         8      9      10       11       12       13       14       15
-                              "SELECT point, position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, textid1, textid2, textid3, textid4, textid5, id FROM creature_movement WHERE id = '%u' ORDER BY point", lowguid);
+        if (wpOrigin == PATH_NO_PATH)
+        {
+            if (wpOwner->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                if (WaypointMovementGenerator<Creature> const* wpMMGen = dynamic_cast<WaypointMovementGenerator<Creature> const*>(wpOwner->GetMotionMaster()->GetCurrent()))
+                    wpMMGen->GetPathInformation(wpPathId, wpOrigin);
+            if (wpOrigin == PATH_NO_PATH)
+                sWaypointMgr.GetDefaultPath(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), &wpOrigin);
+        }
+    }
 
-    if (!result)
+    WaypointPath const* wpPath = sWaypointMgr.GetPathFromOrigin(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPathId, wpOrigin);
+    if (!wpPath || wpPath->empty())
     {
         PSendSysMessage(LANG_WAYPOINT_NOTHINGTOEXPORT);
         SetSentErrorMessage(true);
@@ -3604,81 +3651,47 @@ bool ChatHandler::HandleWpExportCommand(char* args)
     }
 
     std::ofstream outfile;
-    outfile.open(arg_str);
+    outfile.open(export_str);
 
-    do
+    std::string table;
+    char const* key_field;
+    uint32 key;
+    switch (wpOrigin)
     {
-        Field* fields = result->Fetch();
-
-        outfile << "INSERT INTO creature_movement ";
-        outfile << "(id, point, position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, textid1, textid2, textid3, textid4, textid5) VALUES ";
-
-        outfile << "( ";
-        outfile << fields[15].GetUInt32();                  // id
-        outfile << ", ";
-        outfile << fields[0].GetUInt32();                   // point
-        outfile << ", ";
-        outfile << fields[1].GetFloat();                    // position_x
-        outfile << ", ";
-        outfile << fields[2].GetFloat();                    // position_y
-        outfile << ", ";
-        outfile << fields[3].GetUInt32();                   // position_z
-        outfile << ", ";
-        outfile << fields[4].GetUInt32();                   // orientation
-        outfile << ", ";
-        outfile << fields[5].GetUInt32();                   // model1
-        outfile << ", ";
-        outfile << fields[6].GetUInt32();                   // model2
-        outfile << ", ";
-        outfile << fields[7].GetUInt16();                   // waittime
-        outfile << ", ";
-        outfile << fields[8].GetUInt32();                   // emote
-        outfile << ", ";
-        outfile << fields[9].GetUInt32();                   // spell
-        outfile << ", ";
-        outfile << fields[10].GetUInt32();                  // textid1
-        outfile << ", ";
-        outfile << fields[11].GetUInt32();                  // textid2
-        outfile << ", ";
-        outfile << fields[12].GetUInt32();                  // textid3
-        outfile << ", ";
-        outfile << fields[13].GetUInt32();                  // textid4
-        outfile << ", ";
-        outfile << fields[14].GetUInt32();                  // textid5
-        outfile << ");\n ";
+        case PATH_FROM_ENTRY: key = wpOwner->GetEntry();    key_field = "entry";    table = "creature_movement_template"; break;
+        case PATH_FROM_GUID: key = wpOwner->GetGUIDLow();   key_field = "id";       table = "creature_movement"; break;
+        case PATH_FROM_EXTERNAL: key = wpOwner->GetEntry(); key_field = "entry";    table = sWaypointMgr.GetExternalWPTable(); break;
+        case PATH_NO_PATH:
+            return false;
     }
-    while (result->NextRow());
-    delete result;
+
+    outfile << "DELETE FROM " << table << " WHERE " << key_field << "=" << key << ";\n";
+    if (wpOrigin != PATH_FROM_EXTERNAL)
+        outfile << "INSERT INTO " << table << " (" << key_field << ", point, position_x, position_y, position_z, orientation, waittime, script_id) VALUES\n";
+    else
+        outfile << "INSERT INTO " << table << " (" << key_field << ", point, position_x, position_y, position_z, orientation, waittime) VALUES\n";
+
+    WaypointPath::const_iterator itr = wpPath->begin();
+    uint32 countDown = wpPath->size();
+    for (; itr != wpPath->end(); ++itr, --countDown)
+    {
+        outfile << "(" << key << ",";
+        outfile << itr->first << ",";
+        outfile << itr->second.x << ",";
+        outfile << itr->second.y << ",";
+        outfile << itr->second.z << ",";
+        outfile << itr->second.orientation << ",";
+        outfile << itr->second.delay << ",";
+        if (wpOrigin != PATH_FROM_EXTERNAL)                 // Only for normal waypoints
+            outfile << itr->second.script_id << ")";
+        if (countDown > 1)
+            outfile << ",\n";
+        else
+            outfile << ";\n";
+    }
 
     PSendSysMessage(LANG_WAYPOINT_EXPORTED);
     outfile.close();
-
-    return true;
-}
-
-bool ChatHandler::HandleWpImportCommand(char* args)
-{
-    if (!*args)
-        return false;
-
-    char* arg_str = strtok(args, " ");
-    if (!arg_str)
-        return false;
-
-    std::string line;
-    std::ifstream infile(arg_str);
-    if (infile.is_open())
-    {
-        while (! infile.eof())
-        {
-            getline(infile, line);
-            // cout << line << endl;
-            QueryResult* result = WorldDatabase.Query(line.c_str());
-            delete result;
-        }
-        infile.close();
-    }
-    PSendSysMessage(LANG_WAYPOINT_IMPORTED);
 
     return true;
 }

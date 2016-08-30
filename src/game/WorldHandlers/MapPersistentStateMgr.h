@@ -38,6 +38,8 @@
 #include "ObjectGuid.h"
 #include "PoolManager.h"
 
+#include <mutex>
+
 struct InstanceTemplate;
 struct MapEntry;
 struct MapDifficultyEntry;

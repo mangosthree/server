@@ -37,6 +37,8 @@
 #include "ObjectGuid.h"
 #include "World.h"
 
+#include <mutex>
+
 #include <cmath>
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, ACE_Thread_Mutex>

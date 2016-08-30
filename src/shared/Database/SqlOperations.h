@@ -32,6 +32,8 @@
 #include <queue>
 #include "Utilities/Callback.h"
 
+#include <mutex>
+
 /// ---- BASE ---
 
 class Database;

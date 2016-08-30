@@ -110,8 +110,8 @@ class WaypointManager
         // Helper function to get a path provided the required information
         WaypointPath* GetPathFromOrigin(uint32 entry, uint32 lowGuid, int32 pathId, WaypointPathOrigin wpOrigin)
         {
-            WaypointPathMap* wpMap = NULL;
-            uint32 key = 0;
+            WaypointPathMap* wpMap;
+            uint32 key;
 
             switch (wpOrigin)
             {
@@ -121,19 +121,19 @@ class WaypointManager
                     break;
                 case PATH_FROM_ENTRY:
                     if (pathId >= 0xFF || pathId < 0)
-                        return NULL;
+                        return nullptr;
                     key = (entry << 8) + pathId;
                     wpMap = &m_pathTemplateMap;
                     break;
                 case PATH_FROM_EXTERNAL:
                     if (pathId >= 0xFF || pathId < 0)
-                        return NULL;
+                        return nullptr;
                     key = (entry << 8) + pathId;
                     wpMap = &m_externalPathTemplateMap;
                     break;
                 case PATH_NO_PATH:
                 default:
-                    return NULL;
+                    return nullptr;
             }
             WaypointPathMap::iterator find = wpMap->find(key);
             return find != wpMap->end() ? &find->second : NULL;
@@ -197,6 +197,6 @@ class WaypointManager
 #define sWaypointMgr MaNGOS::Singleton<WaypointManager>::Instance()
 
 /// Accessor for Scripting library
-MANGOS_DLL_SPEC bool AddWaypointFromExternal(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
+bool AddWaypointFromExternal(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
 
 #endif

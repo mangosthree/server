@@ -33,6 +33,7 @@ npc_captured_beryl_sorcerer
 npc_nexus_drake_hatchling
 npc_scourged_flamespitter
 npc_bonker_togglevolt
+npc_jenny
 EndContentData */
 
 #include "precompiled.h"
@@ -1128,6 +1129,119 @@ struct npc_bonker_togglevolt : public CreatureScript
     }
 };
 
+/*######
+## npc_jenny
+######*/
+
+enum
+{
+    SPELL_CREATES_CARRIED       = 46340,
+    SPELL_DROP_CRATE            = 46342,
+    SPELL_JENNY_CREDIT          = 46358,
+
+    NPC_FEZZIX                  = 25849,
+
+    QUEST_ID_LOADER_UP          = 11881,
+};
+
+struct npc_jenny : public CreatureScript
+{
+    npc_jenny() : CreatureScript("npc_jenny") {}
+
+    struct npc_jennyAI : public FollowerAI
+    {
+        npc_jennyAI(Creature* pCreature) : FollowerAI(pCreature)
+        {
+            m_bFollowStarted = false;
+            m_bEventComplete = false;
+            Reset();
+        }
+
+        bool m_bEventComplete;
+        bool m_bFollowStarted;
+
+        uint32 m_uiDropDelayTimer;
+
+        void Reset() override
+        {
+            m_uiDropDelayTimer = 0;
+        }
+
+        void AttackedBy(Unit* pAttacker) override
+        {
+            if (!m_uiDropDelayTimer)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_DROP_CRATE) == CAST_OK)
+                {
+                    m_creature->RemoveAuraHolderFromStack(SPELL_CREATES_CARRIED);
+                    m_uiDropDelayTimer = 10000;
+
+                    // check if all crates are dropped
+                    if (!m_creature->HasAura(SPELL_CREATES_CARRIED))
+                    {
+                        FollowerAI::JustDied(pAttacker);
+                        m_creature->ForcedDespawn();
+                    }
+                }
+            }
+        }
+
+        void AttackStart(Unit* pWho) override { }
+
+        void MoveInLineOfSight(Unit* pWho) override
+        {
+            if (m_bEventComplete)
+                return;
+
+            if (pWho->GetEntry() == NPC_FEZZIX && m_creature->IsWithinDistInMap(pWho, 10.0f))
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_JENNY_CREDIT) == CAST_OK)
+                {
+                    SetFollowComplete(true);
+
+                    float fX, fY, fZ;
+                    pWho->GetContactPoint(m_creature, fX, fY, fZ);
+                    m_creature->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+                    m_creature->ForcedDespawn(15000);
+
+                    m_bEventComplete = true;
+                }
+            }
+        }
+
+        void UpdateFollowerAI(const uint32 uiDiff)
+        {
+            if (!m_bFollowStarted)
+            {
+                if (Player* pSummoner = m_creature->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
+                    StartFollow(pSummoner, pSummoner->getFaction(), GetQuestTemplateStore(QUEST_ID_LOADER_UP));
+
+                    if (DoCastSpellIfCan(m_creature, SPELL_CREATES_CARRIED) == CAST_OK)
+                        m_bFollowStarted = true;
+                }
+            }
+
+            if (m_uiDropDelayTimer)
+            {
+                if (m_uiDropDelayTimer <= uiDiff)
+                    m_uiDropDelayTimer = 0;
+                else
+                    m_uiDropDelayTimer -= uiDiff;
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+        }
+
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_jennyAI(pCreature);
+    }
+};
+
 void AddSC_borean_tundra()
 {
     Script* s;
@@ -1145,6 +1259,8 @@ void AddSC_borean_tundra()
     s = new npc_scourged_flamespitter();
     s->RegisterSelf();
     s = new npc_bonker_togglevolt();
+    s->RegisterSelf();
+    s = new npc_jenny();
     s->RegisterSelf();
 
     s = new spell_throw_wolf_batt();

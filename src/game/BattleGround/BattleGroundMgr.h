@@ -33,6 +33,8 @@
 #include "BattleGround.h"
 #include "ace/Recursive_Thread_Mutex.h"
 
+#include <mutex>
+
 typedef std::map<uint32, BattleGround*> BattleGroundSet;
 
 // this container can't be deque, because deque doesn't like removing the last element - if you remove it, it invalidates next iterator and crash appears

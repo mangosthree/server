@@ -32,6 +32,8 @@
 #include <iomanip>
 #include <limits>
 
+#include <unordered_map>
+
 using G3D::Vector3;
 
 namespace VMAP

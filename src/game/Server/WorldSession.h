@@ -37,6 +37,8 @@
 #include "Item.h"
 #include "LFGMgr.h"
 
+#include <mutex>
+
 struct ItemPrototype;
 struct AuctionEntry;
 struct AuctionHouseEntry;

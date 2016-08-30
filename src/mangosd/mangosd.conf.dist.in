@@ -37,14 +37,14 @@ ConfVersion=2016031901
 #                    hostname;port;username;password;database
 #                    .;/path/to/unix_socket/DIRECTORY or . for default path;username;password;database - use Unix sockets at Unix/Linux
 #
-#	LoginDatabaseConnections
-#	WorldDatabaseConnections
-#	CharacterDatabaseConnections
-#		 Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
-#		 Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
-#		 So formula to find out how many connections will be established:
+#    LoginDatabaseConnections
+#    WorldDatabaseConnections
+#    CharacterDatabaseConnections
+#        Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
+#        Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
+#        So formula to find out how many connections will be established:
 #                X = LoginDatabaseConnections + WorldDatabaseConnections + CharacterDatabaseConnections + 1
-#		 Default: 1 connection for SELECT statements
+#        Default: 1 connection for SELECT statements
 #
 #    MaxPingTime
 #        Settings for maximum database-ping interval (minutes between pings)
@@ -63,9 +63,9 @@ ConfVersion=2016031901
 RealmID                      = 1
 DataDir                      = "."
 LogsDir                      = ""
-LoginDatabaseInfo            = "127.0.0.1;3306;mangos;mangos;realmd"
-WorldDatabaseInfo            = "127.0.0.1;3306;mangos;mangos;mangos"
-CharacterDatabaseInfo        = "127.0.0.1;3306;mangos;mangos;characters"
+LoginDatabaseInfo            = "127.0.0.1;3306;root;mangos;realmd"
+WorldDatabaseInfo            = "127.0.0.1;3306;root;mangos;mangos3"
+CharacterDatabaseInfo        = "127.0.0.1;3306;root;mangos;character3"
 LoginDatabaseConnections     = 1
 WorldDatabaseConnections     = 1
 CharacterDatabaseConnections = 1
@@ -161,7 +161,6 @@ BindIP                       = "0.0.0.0"
 #        Requires VMaps enabled to work.
 #        Default: 1 (Enabled)
 #                 0 (Disabled)
-#
 #
 #    DetectPosCollision
 #        Check final move position, summon position, etc for visible collision with other objects or
@@ -381,8 +380,8 @@ LogFile                      = "world-server.log"
 LogTimestamp                 = 0
 LogFileLevel                 = 0
 LogFilter_AchievementUpdates = 1
-LogFilter_CreatureMoves      = 1
 LogFilter_TransportMoves     = 1
+LogFilter_CreatureMoves      = 1
 LogFilter_VisibilityChanges  = 1
 LogFilter_Weather            = 1
 LogFilter_DbStrictedCheck    = 1
@@ -779,14 +778,6 @@ SD2ErrorLogFile              = "scriptdev2-errors.log"
 #                  0 (not wait)
 #                  N (>0, wait N secs)
 #
-#    PlayerCommands
-#        Should player chat be parsed for GM commands.
-#        Default: 0 (ignore commands)
-#                 1 (parse commands)
-#
-#    Motd
-#        Message of the Day. Displayed at worldlogin for every user ('@' for a newline).
-#
 #    Raid.MinLevel
 #        Minimal player level to join raid groups (only affects existing raid groups, party->raid convert ignored)
 #        You can bypass this setting by typing "/script SetAllowLowLevelRaid(true/false)" command in chat
@@ -794,8 +785,11 @@ SD2ErrorLogFile              = "scriptdev2-errors.log"
 #
 #    PlayerCommands
 #        Should player chat be parsed for GM commands.
-#        Default: 1 (parse commands)
-#                 0 (ignore commands)
+#        Default: 0 (ignore commands)
+#                 1 (parse commands)
+#
+#    Motd
+#        Message of the Day. Displayed at worldlogin for every user ('@' for a newline).
 #
 ################################################################################
 
@@ -826,7 +820,7 @@ AllFlightPaths                            = 0
 ActivateWeather                           = 1
 CastUnstuck                               = 1
 MaxSpellCastsInChain                      = 20
-BirthdayTime = 1125180000
+BirthdayTime                              = 1125180000
 RabbitDay                                 = 0
 Instance.IgnoreLevel                      = 0
 Instance.IgnoreRaid                       = 0
@@ -865,10 +859,9 @@ Event.Announce                            = 0
 BeepAtStart                               = 1
 ShowProgressBars                          = 1
 WaitAtStartupError                        = 10
-PlayerCommands                            = 0
-Motd                                      = "Welcome to Mangos Three."
 Raid.MinLevel                             = 10
-PlayerCommands                            = 1
+PlayerCommands                            = 0
+Motd                                      = "Welcome to Mangos Three"
 
 ################################################################################
 # PLAYER INTERACTION
@@ -885,8 +878,8 @@ PlayerCommands                            = 1
 #    AllowTwoSide.Interaction.Auction
 #    AllowTwoSide.Interaction.Mail
 #    AllowTwoSide.Interaction.Calendar
-#        Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);merge all auction houses for players from
-#        different teams, send mail to different team, calendar(invite player from different team)
+#        Allow or not common :chat(say,yell); channel(chat); group(join); guild(join); merge all auction houses for players from
+#        different teams; send mail to different team; calendar(invite player from different team)
 #        Default: 0 (Not allowed)
 #                 1 (Allowed)
 #
@@ -1402,7 +1395,7 @@ Visibility.AIRelocationNotifyDelay = 1000
 #
 #    Death.Bones.World
 #    Death.Bones.BattlegroundOrArena
-#         Enable/disable creating bones instead corpse at resurrection (in normal zones/instacnes, or battleground/arenas)
+#         Enabled/disabled creating bones instead corpse at resurrection (in normal zones/instacnes, or battleground/arenas)
 #         Default: 1 (enabled)
 #                  0 (disabled)
 #
@@ -1555,7 +1548,7 @@ BattleGround.PremadeGroupWaitForMatch = 1800000
 #                 1 (enable)
 #
 #    Arena.ArenaSeason.ID
-#        Current area season id show in client
+#        Current area season id, used for selection some rated arena settings.
 #        Default: 1
 #
 #    Arena.ArenaSeasonPrevious.ID

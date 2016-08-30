@@ -1953,13 +1953,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     return true;
 }
 
-void Player::SetRandomWinner(bool isWinner)
-{
-    m_IsBGRandomWinner = isWinner;
-    if (m_IsBGRandomWinner)
-        CharacterDatabase.PExecute("INSERT INTO character_battleground_random (guid) VALUES ('%u')", GetGUIDLow());
-}
-
 bool Player::TeleportToBGEntryPoint()
 {
     ScheduleDelayedOperation(DELAYED_BG_MOUNT_RESTORE);

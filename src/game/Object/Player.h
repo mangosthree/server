@@ -1095,8 +1095,6 @@ class Player : public Unit
 
         bool TeleportToBGEntryPoint();
 
-        void SetRandomWinner(bool isWinner);
-
         void SetSummonPoint(uint32 mapid, float x, float y, float z)
         {
             m_summon_expire = time(NULL) + MAX_PLAYER_SUMMON_DELAY;

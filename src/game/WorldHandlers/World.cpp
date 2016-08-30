@@ -1583,13 +1583,9 @@ void World::Update(uint32 diff)
     for (int i = 0; i < WUPDATE_COUNT; ++i)
     {
         if (m_timers[i].GetCurrent() >= 0)
-        {
-            m_timers[i].Update(diff);
-        }
+            { m_timers[i].Update(diff); }
         else
-        {
-            m_timers[i].SetCurrent(0);
-        }
+            { m_timers[i].SetCurrent(0); }
     }
 
     ///- Update the game time and check for shutdown time
@@ -1598,24 +1594,9 @@ void World::Update(uint32 diff)
     ///-Update mass mailer tasks if any
     sMassMailMgr.Update();
 
-    /// Handle daily quests and dungeon reset time
+    /// Handle daily quests reset time
     if (m_gameTime > m_NextDailyQuestReset)
-    {
         ResetDailyQuests();
-        sLFGMgr.ResetDailyRecords();
-    }
-
-    /// Handle weekly quests reset time
-    if (m_gameTime > m_NextWeeklyQuestReset)
-        ResetWeeklyQuests();
-
-    /// Handle monthly quests reset time
-    if (m_gameTime > m_NextMonthlyQuestReset)
-        ResetMonthlyQuests();
-
-    /// Handle random battlegrounds reset time
-    if (m_gameTime > m_NextRandomBGReset)
-        ResetRandomBG();
 
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
@@ -1641,13 +1622,6 @@ void World::Update(uint32 diff)
         m_timers[WUPDATE_AHBOT].Reset();
     }
 
-    /// <li> Update Dungeon Finder
-    if (m_timers[WUPDATE_LFGMGR].Passed())
-    {
-        sLFGMgr.Update();
-        m_timers[WUPDATE_LFGMGR].Reset();
-    }
-
     /// <li> Handle session updates
     UpdateSessions(diff);
 
@@ -1670,7 +1644,7 @@ void World::Update(uint32 diff)
     ///- Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnWorldUpdate(diff);
-#endif
+#endif /* ENABLE_ELUNA */
 
     ///- Delete all characters which have been deleted X days before
     if (m_timers[WUPDATE_DELETECHARS].Passed())
@@ -2333,18 +2307,6 @@ void World::ResetDailyQuests()
 
     m_NextDailyQuestReset = time_t(m_NextDailyQuestReset + DAY);
     CharacterDatabase.PExecute("UPDATE saved_variables SET NextDailyQuestResetTime = '" UI64FMTD "'", uint64(m_NextDailyQuestReset));
-}
-
-void World::ResetRandomBG()
-{
-    sLog.outDetail("Random BG status reset for all characters.");
-    CharacterDatabase.Execute("DELETE FROM character_battleground_random");
-    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-        if (itr->second->GetPlayer())
-            itr->second->GetPlayer()->SetRandomWinner(false);
-
-    m_NextRandomBGReset = time_t(m_NextRandomBGReset + DAY);
-    CharacterDatabase.PExecute("UPDATE saved_variables SET NextRandomBGResetTime = '" UI64FMTD "'", uint64(m_NextRandomBGReset));
 }
 
 void World::ResetWeeklyQuests()

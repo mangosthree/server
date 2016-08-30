@@ -675,7 +675,6 @@ class World
         void SetMonthlyQuestResetTime(bool initialize = true);
         void ResetCurrencyWeekCounts();
         void ResetDailyQuests();
-        void ResetRandomBG();
         void ResetWeeklyQuests();
         void ResetMonthlyQuests();
 

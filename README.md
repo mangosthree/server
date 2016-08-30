@@ -1,15 +1,8 @@
-<table border=0 cellpadding=0 cellspacing=0 valign='top'><tr>
-<td><a href='https://getmangos.eu' target='getmangos.eu'><img src='https://www.getmangos.eu/images/primus/blue/misc/logo.png' border=0></a></td>
-<td valign='top'>
-<a href='https://www.getmangos.eu/forum.php' target='getmangos.forum'><img src='https://www.getmangos.eu/wiki/icons/FORUM.gif' border=0></a>
-<a href='https://www.getmangos.eu/wiki' target='getmangos.wiki'><img src='https://www.getmangos.eu/wiki/icons/WIKI.gif' border=0></a>
-<a href='https://www.github.com/mangostools' target='getmangos.tools'><img src='https://www.getmangos.eu/wiki/icons/TOOLS.gif' border=0></a>
-<a href='https://www.getmangos.eu/project.php' target='getmangos.tracker'><img src='https://www.getmangos.eu/wiki/icons/TRACKER.gif' border=0></a>
-<br />Build Status: <br/>Linux 
-<a href='https://travis-ci.org/mangosthree/server/builds' target='MangosThree'><img src='https://travis-ci.org/mangosthree/server.png' border=0></a>
- Windows 
-<a href='https://ci.appveyor.com/project/MaNGOS/server-wtbhv/history' target='MangosThree'><img src='https://ci.appveyor.com/api/projects/status/github/mangosthree/server?branch=develop21&svg=true' border=0></a>
-</td></tr></table>
+[![](https://www.getmangos.eu/!assets_mangos/logo.png)](http://www.getmangos.eu)&nbsp;
+[![](/icons/FORUM.gif)](https://www.getmangos.eu/forum.php)
+[![](/icons/WIKI.gif)](http://github.com/mangoswiki/wiki/wiki)
+[![](/icons/TRACKER.gif)](https://www.getmangos.eu/project.php)
+[![Build status](https://travis-ci.org/mangosthree/server.png)][16]
 
 Cataclysm WOW BRANCH
 ===
@@ -157,6 +150,7 @@ respects for all of the code used other than [OpenSSL][48].
 [12]: http://github.com/mangosthree "MaNGOS Three· github organization"
 [13]: http://github.com/mangosthree/server "MaNGOS Three · server repository"
 [15]: http://github.com/mangosthree/database "MaNGOS Three · content database repository"
+[16]: https://travis-ci.org/mangosthree/server "Travis CI . MaNGOS Three build status"
 [17]: https://scan.coverity.com/ "Coverity Scan · Static Code Analysis"
 
 [19]: http://www.cmake.org/ "CMake · Cross Platform Make"

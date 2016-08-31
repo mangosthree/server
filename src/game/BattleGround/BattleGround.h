@@ -110,6 +110,7 @@ enum BattleGroundSpells
 
 enum BattleGroundTimeIntervals
 {
+    CHECK_PLAYER_POSITION_INVERVAL  = 1000,                 // ms
     RESURRECTION_INTERVAL           = 30000,                // ms
     INVITATION_REMIND_TIME          = 20000,                // ms
     INVITE_ACCEPT_WAIT_TIME         = 60000,                // ms
@@ -422,6 +423,9 @@ class BattleGround
             return m_Map;
         }
 
+        void SetStartMaxDist(float startMaxDist) { m_startMaxDist = startMaxDist; }
+        float GetStartMaxDist() const { return m_startMaxDist; }
+
         void SetTeamStartLoc(Team team, float X, float Y, float Z, float O);
         void GetTeamStartLoc(Team team, float& X, float& Y, float& Z, float& O) const
         {
@@ -612,6 +616,7 @@ class BattleGround
         uint32 m_StartTime;
         uint32 m_CountdownTimer;
         bool m_ArenaBuffSpawned;                            // to cache if arenabuff event is started (cause bool is faster than checking IsActiveEvent)
+        uint32 m_validStartPositionTimer;
         int32 m_EndTime;                                    // it is set to 120000 when bg is ending and it decreases itself
         BattleGroundBracketId m_BracketId;
         ArenaType  m_ArenaType;                             // 2=2v2, 3=3v3, 5=5v5
@@ -660,6 +665,7 @@ class BattleGround
         float m_TeamStartLocY[PVP_TEAM_COUNT];
         float m_TeamStartLocZ[PVP_TEAM_COUNT];
         float m_TeamStartLocO[PVP_TEAM_COUNT];
+        float m_startMaxDist;
 };
 
 // helper functions for world state list fill

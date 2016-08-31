@@ -748,6 +748,7 @@ void AddSC_boss_exarch_maladaar();                   // auchindoun, auchenai_cry
 void AddSC_boss_shirrak();
 void AddSC_boss_nexusprince_shaffar();               // auchindoun, mana_tombs
 void AddSC_boss_pandemonius();
+void AddSC_mana_tombs();
 void AddSC_boss_anzu();                              // auchindoun, sethekk_halls
 void AddSC_boss_darkweaver_syth();
 void AddSC_boss_talon_king_ikiss();

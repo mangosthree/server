@@ -58,14 +58,14 @@ struct npc_ragged_john : public CreatureScript
         {
             if (who->HasAura(16468, EFFECT_INDEX_0))
             {
-                if (who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 15) && who->IsInAccessablePlaceFor(m_creature))
+                if (who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 15) && who->isInAccessablePlaceFor(m_creature))
                 {
                     DoCastSpellIfCan(who, 16472);
                     ((Player*)who)->AreaExploredOrEventHappens(4866);
                 }
             }
 
-            if (!m_creature->getVictim() && who->IsTargetableForAttack() && (m_creature->IsHostileTo(who)) && who->IsInAccessablePlaceFor(m_creature))
+            if (!m_creature->getVictim() && who->IsTargetableForAttack() && (m_creature->IsHostileTo(who)) && who->isInAccessablePlaceFor(m_creature))
             {
                 if (!m_creature->CanFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
                 {

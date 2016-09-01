@@ -56,7 +56,7 @@ void ScriptedPetAI::MoveInLineOfSight(Unit* pWho)
     }
 
     if (m_creature->CanInitiateAttack() && pWho->IsTargetableForAttack() &&
-        m_creature->IsHostileTo(pWho) && pWho->IsInAccessablePlaceFor(m_creature))
+        m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
     {
         if (!m_creature->CanFly() && m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
         {

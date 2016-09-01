@@ -1244,7 +1244,7 @@ struct horde_defender : public CreatureScript
         void MoveInLineOfSight(Unit* u) override
         {
             if (m_creature->CanInitiateAttack() && u->IsTargetableForAttack() &&
-                m_creature->IsHostileTo(u) && u->IsInAccessablePlaceFor(m_creature))
+                m_creature->IsHostileTo(u) && u->isInAccessablePlaceFor(m_creature))
             {
                 float attackRadius = 38.0f;
                 if (m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->IsWithinLOSInMap(u))
@@ -1327,7 +1327,7 @@ struct kolkar_invader : public CreatureScript
         void MoveInLineOfSight(Unit* u) override
         {
             if (m_creature->CanInitiateAttack() && u->IsTargetableForAttack() &&
-                m_creature->IsHostileTo(u) && u->IsInAccessablePlaceFor(m_creature))
+                m_creature->IsHostileTo(u) && u->isInAccessablePlaceFor(m_creature))
             {
                 float attackRadius = 38.0f;
                 if (m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->IsWithinLOSInMap(u))

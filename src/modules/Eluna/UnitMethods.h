@@ -105,7 +105,7 @@ namespace LuaUnit
         Creature* creature = Eluna::CHECKOBJ<Creature>(L, 2);
 
 #ifndef TRINITY
-        Eluna::Push(L, unit->IsInAccessablePlaceFor(creature));
+        Eluna::Push(L, unit->isInAccessablePlaceFor(creature));
 #else
         Eluna::Push(L, unit->isInAccessiblePlaceFor(creature));
 #endif

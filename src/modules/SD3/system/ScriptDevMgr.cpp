@@ -601,11 +601,14 @@ bool SD3::AuraDummy(Aura const* pAura, bool bApply)
 InstanceData* SD3::CreateInstanceData(Map* pMap)
 {
     Script* pTempScript = m_scripts[pMap->GetScriptId()];
-
-    if (!pTempScript || !pTempScript->ToInstanceScript())
-    {
+    if (!pTempScript)
         return NULL;
-    }
 
-    return pTempScript->ToInstanceScript()->GetInstanceData(pMap);
+    if (pTempScript->ToInstanceScript())
+        return pTempScript->ToInstanceScript()->GetInstanceData(pMap);
+
+    if (pTempScript->ToZoneScript())
+        return pTempScript->ToZoneScript()->GetInstanceData(pMap);
+
+    return NULL;
 }

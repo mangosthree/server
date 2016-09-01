@@ -144,7 +144,7 @@ bool npc_escortAI::AssistPlayerInCombat(Unit* pWho)
         return false;
     }
 
-    // unit state prevents (similar check is done in CanInitiateAttack which also include checking UnitFlags. We skip those here)
+    // unit state prevents (similar check is done in CanInitiateAttack which also include checking unit_flags. We skip those here)
     if (m_creature->hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED))
     {
         return false;
@@ -629,7 +629,7 @@ void npc_escortAI::Start(bool bRun, const Player* pPlayer, const Quest* pQuest, 
         debug_log("SD3: EscortAI start with WAYPOINT_MOTION_TYPE, changed to MoveIdle.");
     }
 
-    // disable NpcFlagss
+    // disable npcflags
     m_creature->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
     debug_log("SD3: EscortAI started with " SIZEFMTD " waypoints. Run = %d, PlayerGuid = %s", WaypointList.size(), m_bIsRunning, m_playerGuid.GetString().c_str());

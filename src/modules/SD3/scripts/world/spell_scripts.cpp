@@ -608,12 +608,12 @@ struct spell_apply_salve : public SpellScript
     {
         if (uiSpellId == SPELL_APPLY_SALVE && uiEffIndex == EFFECT_INDEX_0)
         {
-            if (pCaster->GetTypeId() != TYPEID_PLAYER)
+            Creature *pCreatureTarget = pTarget->ToCreature();
+            if (pCaster->GetTypeId() != TYPEID_PLAYER || !pCreatureTarget)
             {
                 return true;
             }
 
-            Creature *pCreatureTarget = pTarget->ToCreature();
             if (pCreatureTarget->GetEntry() != NPC_SICKLY_DEER && pCreatureTarget->GetEntry() != NPC_SICKLY_GAZELLE)
             {
                 return true;
@@ -638,7 +638,7 @@ struct spell_sacred_cleansing : public SpellScript
     {
         if (uiSpellId == SPELL_SACRED_CLEANSING && uiEffIndex == EFFECT_INDEX_1)
         {
-            if (pTarget->ToCreature() && pTarget->GetEntry() != NPC_MORBENT)
+            if (!pTarget->ToCreature() || pTarget->GetEntry() != NPC_MORBENT)
             {
                 return true;
             }
@@ -657,7 +657,7 @@ struct spell_melodious_rapture : public SpellScript
         if (uiSpellId == SPELL_MELODIOUS_RAPTURE && uiEffIndex == EFFECT_INDEX_0)
         {
             Creature *pCreatureTarget = pTarget->ToCreature();
-            if (pCaster->GetTypeId() != TYPEID_PLAYER && pCreatureTarget->GetEntry() != NPC_DEEPRUN_RAT)
+            if (pCaster->GetTypeId() != TYPEID_PLAYER || !pCreatureTarget || (pCreatureTarget->GetEntry() != NPC_DEEPRUN_RAT))
             {
                 return true;
             }
@@ -910,6 +910,9 @@ struct spell_orb_of_murloc_control : public SpellScript
     bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override //SPELL_ORB_OF_MURLOC_CONTROL
     {
         Creature* pCreatureTarget = pTarget->ToCreature();
+        if (!pCreatureTarget)
+            return true;
+
         pCreatureTarget->CastSpell(pCaster, SPELL_GREENGILL_SLAVE_FREED, true);
 
         // Freed Greengill Slave
@@ -928,6 +931,9 @@ struct spell_fumping : public SpellScript
     bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
     {
         Creature *pCreatureTarget = pTarget->ToCreature();
+        if (!pCreatureTarget)
+            return true;
+
         if (uiSpellId == SPELL_FUMPING && uiEffIndex == EFFECT_INDEX_2)
         {
             switch (urand(0, 2))
@@ -1030,6 +1036,9 @@ struct spell_throw_gordawg_boulder : public SpellScript
     bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
     {
         Creature *pCreatureTarget = pTarget->ToCreature();
+        if (!pCreatureTarget)
+            return true;
+
         if (uiSpellId == SPELL_THROW_GORDAWG_BOULDER && uiEffIndex == EFFECT_INDEX_0)
         {
             for (int i = 0; i < 3; ++i)
@@ -1161,7 +1170,7 @@ struct spell_throw_ice : public SpellScript
         if (uiEffIndex == EFFECT_INDEX_0)
         {
             Creature *pCreatureTarget = pTarget->ToCreature();
-            if (pCreatureTarget->GetEntry() != NPC_SMOLDERING_SCRAP_BUNNY)
+            if (!pCreatureTarget || pCreatureTarget->GetEntry() != NPC_SMOLDERING_SCRAP_BUNNY)
                 return true;
 
             if (GameObject* pScrap = GetClosestGameObjectWithEntry(pCreatureTarget, GO_SMOLDERING_SCRAP, 5.0f))

@@ -226,6 +226,14 @@ void AddSC_western_plaguelands();
 void AddSC_westfall();
 void AddSC_wetlands();
 
+// Cata zones
+#if defined (CATA)
+void AddSC_gilneas();
+void AddSC_gilneas_city();
+void AddSC_twilight_highlands();
+void AddSC_vashjir();
+#endif  
+
 void AddEasternKingdomsScripts()
 {
     AddSC_blackrock_depths();                               // blackrock_depths
@@ -426,6 +434,13 @@ void AddEasternKingdomsScripts()
     AddSC_western_plaguelands();
     AddSC_westfall();
     AddSC_wetlands();
+
+// Cata zones
+#if defined (CATA)  
+    AddSC_gilneas();
+    AddSC_gilneas_city();
+#endif
+
 }
 
 // kalimdor
@@ -510,6 +525,12 @@ void AddSC_thunder_bluff();
 void AddSC_ungoro_crater();
 void AddSC_winterspring();
 
+// Cata zones
+#if defined (CATA)
+void AddSC_uldum();
+void AddSC_mount_hyjal();
+#endif  
+
 void AddKalimdorScripts()
 {
     AddSC_instance_blackfathom_deeps();                     // blackfathom deeps
@@ -592,6 +613,12 @@ void AddKalimdorScripts()
     AddSC_thunder_bluff();
     AddSC_ungoro_crater();
     AddSC_winterspring();
+
+// Cata zones
+#if defined (CATA)
+    AddSC_uldum();
+    AddSC_mount_hyjal();
+#endif  
 }
 
 #if defined (WOTLK) || defined (CATA)
@@ -748,7 +775,6 @@ void AddSC_boss_exarch_maladaar();                   // auchindoun, auchenai_cry
 void AddSC_boss_shirrak();
 void AddSC_boss_nexusprince_shaffar();               // auchindoun, mana_tombs
 void AddSC_boss_pandemonius();
-void AddSC_mana_tombs();
 void AddSC_boss_anzu();                              // auchindoun, sethekk_halls
 void AddSC_boss_darkweaver_syth();
 void AddSC_boss_talon_king_ikiss();

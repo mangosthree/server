@@ -2401,7 +2401,22 @@ class  Unit : public WorldObject
         bool isPassiveToHostile() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE); }
 
         virtual bool IsInWater() const;
+        /**
+         * Is this \ref Unit under water?
+         * @return true if the \ref Unit is under water, false otherwise
+         * \see Object::GetTerrain
+         * \see TerrainInfo::IsUnderWater
+         */
         virtual bool IsUnderWater() const;
+        /**
+         * Can the given \ref Creature access this \ref Unit in some way? If this \ref Unit is in
+         * water we check if the \ref Creature can swim, if so it's accessible, otherwise it's not.
+         * If we're not in water the \ref Creature should be able to walk or fly and then we're
+         * accessible.
+         * @param c The \ref Creature to check accessibility for
+         * @return true if this \ref Unit is accessible to the \ref Creature given, false otherwise
+         * \todo Rename to IsInAccessablePlaceFor to follow standards?
+         */
         bool IsInAccessablePlaceFor(Creature const* c) const;
 
         void SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, uint32 OverHeal, bool critical = false, uint32 absorb = 0);

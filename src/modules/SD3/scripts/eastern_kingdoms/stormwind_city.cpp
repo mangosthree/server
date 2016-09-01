@@ -348,7 +348,7 @@ struct npc_squire_rowe : public CreatureScript
             }
 
             // Summoned npc has escort and this can trigger twice if escort state is not checked
-            if (uiPointId && HasEscortState(STATE_ESCORT_PAUSED))
+            if (HasEscortState(STATE_ESCORT_PAUSED))
             {
                 StartNextDialogueText(NPC_WINDSOR);
             }
@@ -444,6 +444,8 @@ struct npc_squire_rowe : public CreatureScript
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
+
         // Allow gossip if quest 6402 is completed but not yet rewarded or 6402 is rewarded but 6403 isn't yet completed
         if ((pPlayer->GetQuestStatus(QUEST_STORMWIND_RENDEZVOUS) == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(QUEST_STORMWIND_RENDEZVOUS)) ||
             (pPlayer->GetQuestRewardStatus(QUEST_STORMWIND_RENDEZVOUS) && pPlayer->GetQuestStatus(QUEST_THE_GREAT_MASQUERADE) != QUEST_STATUS_COMPLETE))
@@ -653,13 +655,11 @@ struct npc_reginald_windsor : public CreatureScript
 
     struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
     {
-        npc_reginald_windsorAI(Creature* m_creature) : npc_escortAI(m_creature),
-        DialogueHelper(aMasqueradeDialogue)
+        npc_reginald_windsorAI(Creature* m_creature) : npc_escortAI(m_creature), DialogueHelper(aMasqueradeDialogue)
         {
             m_pScriptedMap = (ScriptedMap*)m_creature->GetInstanceData();
-            // Npc flag is controlled by script
-            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
             InitializeDialogueHelper(m_pScriptedMap);
+            Reset();
         }
 
         ScriptedMap* m_pScriptedMap;
@@ -678,6 +678,7 @@ struct npc_reginald_windsor : public CreatureScript
 
         void Reset() override
         {
+            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
             m_uiGuardCheckTimer = 0;
             m_bIsKeepReady = false;
             m_bCanGuardSalute = false;
@@ -782,14 +783,17 @@ struct npc_reginald_windsor : public CreatureScript
 
         void JustDidDialogueStep(int32 iEntry) override
         {
-            if (!m_pScriptedMap)
-            {
-                return;
-            }
+            if (!m_pScriptedMap) return;
 
             switch (iEntry)
             {
-                // Set orientation and prepare the npcs for the next event
+            case SAY_WINDSOR_QUEST_ACCEPT:
+                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                {
+                    Start(false, pPlayer);
+                }
+                break;
+            // Set orientation and prepare the npcs for the next event
             case SAY_WINDSOR_GET_READY:
                 m_creature->SetFacingTo(0.6f);
                 break;
@@ -882,6 +886,7 @@ struct npc_reginald_windsor : public CreatureScript
                 break;
             case SAY_WINDSOR_BEFORE_KEEP:
                 m_bIsKeepReady = true;
+                m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 break;
             case NPC_GUARD_CITY:
@@ -1136,6 +1141,8 @@ struct npc_reginald_windsor : public CreatureScript
     {
         bool bIsEventReady = false;
 
+        pPlayer->PlayerTalkClass->ClearMenus();
+
         if (npc_reginald_windsorAI* pReginaldAI = dynamic_cast<npc_reginald_windsorAI*>(pCreature->AI()))
         {
             bIsEventReady = pReginaldAI->IsKeepEventReady();
@@ -1162,7 +1169,6 @@ struct npc_reginald_windsor : public CreatureScript
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
     {
-        pPlayer->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
         {
             if (npc_reginald_windsorAI* pReginaldAI = dynamic_cast<npc_reginald_windsorAI*>(pCreature->AI()))

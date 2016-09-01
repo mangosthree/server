@@ -171,6 +171,10 @@ struct spell_lazy_peon_awake : public SpellScript
         if (uiSpellId == SPELL_AWAKEN_PEON && uiEffIndex == EFFECT_INDEX_0)
         {
             Creature* pCreatureTarget = pTarget->ToCreature();
+            if (!pCreatureTarget)
+            {
+                return true;
+            }
             if (!pCreatureTarget->HasAura(SPELL_PEON_SLEEP) || pCaster->GetTypeId() != TYPEID_PLAYER || pCreatureTarget->GetEntry() != NPC_SLEEPING_PEON)
             {
                 return true;

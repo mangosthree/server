@@ -41,7 +41,7 @@ enum
     TYPE_SULFURON               = 7,    // do not change order: end
     TYPE_MAJORDOMO              = 8, 
     TYPE_RAGNAROS               = 9,
-    TYPE_FLAME_DOSED            = MAX_ENCOUNTER,
+    TYPE_FLAME_DOUSED           = MAX_ENCOUNTER,
     TYPE_DO_FREE_GARR_ADDS      = MAX_ENCOUNTER+1,
 
     MAX_MOLTEN_RUNES            = 7,

@@ -179,11 +179,8 @@ struct npc_ancestral_wolf : public CreatureScript
 
         void Reset() override
         {
-            DoCastSpellIfCan(m_creature, SPELL_ANCESTRAL_WOLF_BUFF);
+            m_creature->CastSpell(m_creature, SPELL_ANCESTRAL_WOLF_BUFF, true);
         }
-
-        void AttackStart(Unit* /*pWho*/) override { }
-        void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
         void WaypointReached(uint32 uiPointId) override
         {

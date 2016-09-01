@@ -1774,16 +1774,6 @@ void AddSC_netherstorm()
     s = new npc_drijya();
     s->RegisterSelf();
 
-#if defined (WOTLK) || defined (CATA)
-    s = new npc_dimensius();
-    s->RegisterSelf();
-
-    /*pNewScript = new Script;
-    pNewScript->Name = "npc_dimensius";
-    pNewScript->GetAI = &GetAI_npc_dimensius;
-    pNewScript->RegisterSelf();*/
-#endif
-
     //pNewScript = new Script;
     //pNewScript->Name = "go_manaforge_control_console";
     //pNewScript->pGOUse = &GOUse_go_manaforge_control_console;
@@ -1837,4 +1827,14 @@ void AddSC_netherstorm()
     //pNewScript->GetAI = &GetAI_npc_drijya;
     //pNewScript->pQuestAcceptNPC = &QuestAccept_npc_drijya;
     //pNewScript->RegisterSelf();
+
+#if defined (WOTLK)    
+    s = new npc_dimensius();
+    s->RegisterSelf();
+
+    /*pNewScript = new Script;
+    pNewScript->Name = "npc_dimensius";
+    pNewScript->GetAI = &GetAI_npc_dimensius;
+    pNewScript->RegisterSelf();*/
+#endif
 }

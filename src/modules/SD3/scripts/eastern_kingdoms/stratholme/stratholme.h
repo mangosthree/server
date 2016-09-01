@@ -87,7 +87,9 @@ enum
     GO_YSIDA_CAGE               = 181071,                   // Cage to open after baron event is done
 
     QUEST_DEAD_MAN_PLEA         = 8945,
-    SPELL_BARON_ULTIMATUM       = 27861,
+    SPELL_BARON_ULTIMATUM       = 27861,                    // Aura for player during the run (visual icon)
+    SPELL_BARON_SOUL_DRAIN      = 27640,                    // Used by the Baron to kill Ysida
+    SPELL_YSIDA_FREED           = 27773,                    // Argent Dawn extra-reputation reward on successful Baron run
     SPELL_SUMMON_POSTMASTER     = 24627,
 
     SAY_ANNOUNCE_ZIGGURAT_1     = -1329004,
@@ -99,7 +101,9 @@ enum
     SAY_ANNOUNCE_RUN_START      = -1329009,
     SAY_ANNOUNCE_RUN_10_MIN     = -1329010,
     SAY_ANNOUNCE_RUN_5_MIN      = -1329011,
+    YSIDA_SAY_RUN_5_MIN         = -1329019,
     SAY_ANNOUNCE_RUN_FAIL       = -1329012,
+    YSIDA_SAY_RUN_FAIL          = -1329020,
     SAY_ANNOUNCE_RAMSTEIN       = -1329013,
     SAY_UNDEAD_DEFEAT           = -1329014,
     SAY_EPILOGUE                = -1329015,

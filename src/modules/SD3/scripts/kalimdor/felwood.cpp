@@ -92,7 +92,7 @@ struct npc_kitten : public CreatureScript
 
         void MoveInLineOfSight(Unit* pWho) override
         {
-            // should not have NpcFlags by default, so set when expected
+            // should not have npcflag by default, so set when expected
             if (!m_creature->getVictim() && !m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && HasFollowState(STATE_FOLLOW_INPROGRESS) && pWho->GetEntry() == NPC_WINNA)
             {
                 if (m_creature->IsWithinDistInMap(pWho, INTERACTION_DISTANCE))
@@ -460,7 +460,7 @@ struct event_npc_kroshius : public MapEventScript
 {
     event_npc_kroshius() : MapEventScript("event_npc_kroshius") {}
 
-    bool ProcessEventId_npc_kroshius(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
+    bool OnReceived(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/) override
     {
         if (uiEventId == EVENT_KROSHIUS_REVIVE)
         {

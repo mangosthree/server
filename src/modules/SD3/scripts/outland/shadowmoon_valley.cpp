@@ -472,6 +472,8 @@ struct npc_dragonmaw_peon : public CreatureScript
                     m_uiPoisonTimer -= uiDiff;
                 }
             }
+            
+            DoMeleeAttackIfReady();
         }
     };
 
@@ -1626,7 +1628,7 @@ struct spell_totem_of_spirits : public SpellScript
     }
 };
 
-#if defined (TBC) || defined (WOTLK) || defined (CATA)
+#if defined (TBC) || defined (WOTLK) 
 struct aura_elemental_sieve : public AuraScript
 {
     aura_elemental_sieve() : AuraScript("aura_elemental_sieve") {}
@@ -2331,7 +2333,7 @@ void AddSC_shadowmoon_valley()
     s->RegisterSelf();
     s = new spell_totem_of_spirits();
     s->RegisterSelf();
-#if defined (TBC) || defined (WOTLK) || defined (CATA) 
+#if defined (TBC) || defined (WOTLK) 
     s = new aura_elemental_sieve();
     s->RegisterSelf();
 #endif

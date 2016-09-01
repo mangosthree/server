@@ -30,6 +30,7 @@
 #include "Common.h"
 #include "DBCStructure.h"
 #include "ScriptMgr.h"
+#include "QuestDef.h"
 
 class Player;
 class Creature;
@@ -171,7 +172,7 @@ struct CreatureScript : public Script
     virtual bool OnGossipHello(Player*, Creature*) { return false; }
     virtual bool OnGossipSelect(Player*, Creature*, uint32, uint32) { return false; }
     virtual bool OnGossipSelectWithCode(Player*, Creature*, uint32, uint32, const char*) { return false; }
-    virtual uint32 OnDialogEnd(Player*, Creature*) { return 0; }
+    virtual uint32 OnDialogEnd(Player*, Creature*) { return DIALOG_STATUS_UNDEFINED; }
     virtual bool OnQuestAccept(Player*, Creature*, Quest const*) { return false; }
     virtual bool OnQuestRewarded(Player*, Creature*, Quest const*) { return false; }
 #if defined (WOTLK) || defined (CATA)
@@ -188,7 +189,7 @@ struct GameObjectScript : public Script
     virtual bool OnGossipHello(Player*, GameObject*) { return false; }
     virtual bool OnGossipSelect(Player*, GameObject*, uint32, uint32) { return false; }
     virtual bool OnGossipSelectWithCode(Player*, GameObject*, uint32, uint32, const char*) { return false; }
-    virtual uint32 OnDialogEnd(Player*, GameObject*) { return 0; }
+    virtual uint32 OnDialogEnd(Player*, GameObject*) { return DIALOG_STATUS_UNDEFINED; }
     virtual bool OnQuestAccept(Player*, GameObject*, Quest const*) { return false; }
     virtual bool OnQuestRewarded(Player*, GameObject*, Quest const*) { return false; }
     virtual bool OnUse(Player*, GameObject*) { return false; }

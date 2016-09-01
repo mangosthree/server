@@ -123,12 +123,10 @@ struct npc_spirit_guide : public CreatureScript
 #endif
     };
 
-#if defined (TBC) || defined (WOTLK) || defined (CATA)    
     CreatureAI* GetAI(Creature* pCreature) override
     {
         return new npc_spirit_guideAI(pCreature);
     }
-#endif
 };
 
 void AddSC_battleground()

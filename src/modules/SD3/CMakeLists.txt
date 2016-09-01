@@ -531,6 +531,19 @@ file(GLOB sources_raid_nr_eoe scripts/northrend/nexus/eye_of_eternity/*.cpp scri
 file(GLOB sources_raid_nr_uld scripts/northrend/ulduar/ulduar/*.cpp scripts/northrend/ulduar/ulduar/*.h)
   LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_nr_uld})
   source_group("Northrend Scripts\\Raids\\Ulduar" FILES ${sources_raid_nr_uld})
+
+# --- THREE ONLY ---
+if ("${MANGOS_EXP}" STREQUAL "CATA")
+#Maelstrom Scripts
+file(GLOB sources_maelstrom scripts/maelstrom/*.cpp scripts/maelstrom/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_maelstrom})
+    source_group("Maelstrom Scripts" FILES ${sources_maelstrom})
+#Instance: Stonecore
+file(GLOB sources_instance_m_sc scripts/maelstrom/stonecore/*.cpp scripts/maelstrom/stonecore/*.h)
+    LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_m_sc})
+    source_group("Eastern Kingdoms Scripts\\Instances\\Stonecore" FILES ${sources_instance_m_sc})
+endif()
+# --- END IF ---
   
 #WorldScript: Scarlet Enclave
 file(GLOB sources_world_scarlet_enclave scripts/eastern_kingdoms/scarlet_enclave/*.cpp scripts/eastern_kingdoms/scarlet_enclave/*.h)

@@ -60,7 +60,7 @@ struct npc_mountaineer_pebblebitty : public CreatureScript  //TODO localisation
 
         if (!pPlayer->GetQuestRewardStatus(3181) == 1)
         {
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Open the gate please, i need to get to Searing Gorge", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Open the gate please, I need to get to Searing Gorge", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
         }
 
         pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
@@ -74,7 +74,7 @@ struct npc_mountaineer_pebblebitty : public CreatureScript  //TODO localisation
         switch (uiAction)
         {
         case GOSSIP_ACTION_INFO_DEF + 1:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "But i need to get there, now open the gate!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "But I need to get there, now open the gate!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
             pPlayer->SEND_GOSSIP_MENU(1833, pCreature->GetObjectGuid());
             break;
         case GOSSIP_ACTION_INFO_DEF + 2:
@@ -82,7 +82,7 @@ struct npc_mountaineer_pebblebitty : public CreatureScript  //TODO localisation
             pPlayer->SEND_GOSSIP_MENU(1834, pCreature->GetObjectGuid());
             break;
         case GOSSIP_ACTION_INFO_DEF + 3:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Doesn't matter, i'm invulnerable.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Doesn't matter, I'm invulnerable.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
             pPlayer->SEND_GOSSIP_MENU(1835, pCreature->GetObjectGuid());
             break;
         case GOSSIP_ACTION_INFO_DEF + 4:
@@ -90,7 +90,7 @@ struct npc_mountaineer_pebblebitty : public CreatureScript  //TODO localisation
             pPlayer->SEND_GOSSIP_MENU(1836, pCreature->GetObjectGuid());
             break;
         case GOSSIP_ACTION_INFO_DEF + 5:
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Ok, i'll try to remember that.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Ok, I'll try to remember that.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
             pPlayer->SEND_GOSSIP_MENU(1837, pCreature->GetObjectGuid());
             break;
         case GOSSIP_ACTION_INFO_DEF + 6:

@@ -43,7 +43,6 @@ enum
     EMOTE_INSECT_SWARM          = -1533154,
     EMOTE_CORPSE_SCARABS        = -1533155,
 
-    SPELL_DOUBLE_ATTACK         = 18943,
     SPELL_IMPALE                = 28783,                    // May be wrong spell id. Causes more dmg than I expect
     SPELL_IMPALE_H              = 56090,
     SPELL_LOCUSTSWARM           = 28785,                    // This is a self buff that triggers the dmg debuff
@@ -83,9 +82,6 @@ struct boss_anubrekhan : public CreatureScript
             m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
             m_introDialogue.InitializeDialogueHelper(m_pInstance);
             m_bHasTaunted = false;
-            Reset();
-
-            DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         }
 
         ScriptedInstance* m_pInstance;
@@ -139,8 +135,6 @@ struct boss_anubrekhan : public CreatureScript
         {
             if (m_pInstance)
                 m_pInstance->SetData(TYPE_ANUB_REKHAN, FAIL);
-
-            DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         }
 
         void MoveInLineOfSight(Unit* pWho) override

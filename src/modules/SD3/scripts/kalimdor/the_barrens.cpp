@@ -817,17 +817,6 @@ struct npc_regthar_deathgate : public CreatureScript
         std::list<uint32> lSpawnListHorde;
         std::list<Creature*>::iterator itrh;
 
-        void Reset()
-        {
-        }
-
-
-        void JustRespawned()
-        {
-            FinishEvent();
-            Reset();
-        }
-
         uint64 m_uiPlayerGUID;
         uint64 m_uiEventTimer;
         uint32 m_uiSummonCountInvader;
@@ -841,24 +830,35 @@ struct npc_regthar_deathgate : public CreatureScript
         uint32 m_uiPhaseCount;
         bool   m_bEventStarted;
 
+        void Reset() {}
+
+        void JustRespawned()
+        {
+            FinishEvent();
+            Reset();
+        }
+
         void StartEvent(uint64 uiPlayerGUID)
         {
-            m_uiPlayerGUID = uiPlayerGUID;
-            m_bEventStarted = true;
-            m_uiEventTimer = 1200000;
-            m_uiSummonCountInvader = 0;
-            m_uiSummonCountStormseer = 0;
-            m_uiSummonCountHorde = 0;
-            m_uiWaitSummonTimer = 0;
-            m_uiWaitSummonTimerHorde = 0;
-            m_uiSpawnPosition = 0;
-            m_uiKillCount = 0;
-            m_uiCreatureCount = 0;
-            m_uiPhaseCount = 1;
-            lCreatureList.clear();
-            lSpawnList.clear();
-            lCreatureListHorde.clear();
-            lSpawnListHorde.clear();
+            if (!m_bEventStarted)
+            {
+                m_bEventStarted = true;
+                m_uiPlayerGUID = uiPlayerGUID;
+                m_uiEventTimer = 1200000;
+                m_uiSummonCountInvader = 0;
+                m_uiSummonCountStormseer = 0;
+                m_uiSummonCountHorde = 0;
+                m_uiWaitSummonTimer = 0;
+                m_uiWaitSummonTimerHorde = 0;
+                m_uiSpawnPosition = 0;
+                m_uiKillCount = 0;
+                m_uiCreatureCount = 0;
+                m_uiPhaseCount = 1;
+                lCreatureList.clear();
+                lSpawnList.clear();
+                lCreatureListHorde.clear();
+                lSpawnListHorde.clear();
+            }
         }
 
         void FinishEvent()
@@ -986,8 +986,6 @@ struct npc_regthar_deathgate : public CreatureScript
             if (pKilled->GetEntry() == NPC_WARLORD_KROMZAR)
             {
                 DoScriptText(YELL_RETREAT, m_creature);
-                pKilled->SummonGameObject(164690, pKilled->GetPositionX(), pKilled->GetPositionY(), pKilled->GetPositionZ(),
-                               4.12f, 60000);
                 m_uiPhaseCount = 4;
             }
 
@@ -1158,17 +1156,16 @@ struct npc_regthar_deathgate : public CreatureScript
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
+        pPlayer->PlayerTalkClass->ClearMenus();
         if (pCreature->IsQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
-        if (pPlayer->GetQuestStatus(QUEST_COUNTERATTACK) == QUEST_STATUS_INCOMPLETE)
+        if (npc_regthar_deathgateAI* pRegtharAI = dynamic_cast<npc_regthar_deathgateAI*>(pCreature->AI()))
         {
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Where is warlord Krom'zar?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            pPlayer->SEND_GOSSIP_MENU(2533, pCreature->GetObjectGuid());
-            return true;
+            if (!pRegtharAI->m_bEventStarted && (pPlayer->GetQuestStatus(QUEST_COUNTERATTACK) == QUEST_STATUS_INCOMPLETE))
+              pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Where is warlord Krom'zar?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
         }
-        else
-            pPlayer->SEND_GOSSIP_MENU(2533, pCreature->GetObjectGuid());
+        pPlayer->SEND_GOSSIP_MENU(2533, pCreature->GetObjectGuid());
         return true;
     }
 

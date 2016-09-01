@@ -1,3 +1,5 @@
+
+
 /**
  * ScriptDev3 is an extension for mangos providing enhanced features for
  * area triggers, creatures, game objects, instances, items, and spells beyond
@@ -23,65 +25,27 @@
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
-
+ 
 /**
  * ScriptData
- * SDName:      Molten_Core
- * SD%Complete: 25
- * SDComment:   None
- * SDCategory:  Molten Core
+ * SDName:      Vashjir
+ * SD%Complete: 0
+ * SDComment:   Placeholder
+ * SDCategory:  Vashjir
  * EndScriptData
  */
 
 /**
  * ContentData
-#if defined (CLASSIC) || defined (TBC) || defined(WOTLK)
- * go_molten_core_rune
-#endif
  * EndContentData
  */
 
 #include "precompiled.h"
-#if defined (CLASSIC) || defined (TBC) || defined(WOTLK)
-#include "molten_core.h"
 
 /*######
-## go_molten_core_rune
+#
 ######*/
 
-struct go_molten_core_rune : public GameObjectScript
+void AddSC_vashjir()
 {
-    go_molten_core_rune() : GameObjectScript("go_molten_core_rune") {}
-
-    bool OnUse(Player* /*pPlayer*/, GameObject* pGo) override
-    {
-        ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
-
-        if (!pInstance)
-        {
-            return true;
-        }
-
-        if (pInstance->GetData(pGo->GetGOInfo()->button.linkedTrapId) == SPECIAL)
-        {
-            pInstance->SetData(TYPE_FLAME_DOUSED, pGo->GetGOInfo()->button.linkedTrapId);
-            return false;   // this path allows the spell to have effect
-        }
-
-        return true;
-    }
-};
-#endif
-void AddSC_molten_core()
-{
-#if defined (CLASSIC) || defined (TBC) || defined(WOTLK)
-    Script* s;
-    s = new go_molten_core_rune();
-    s->RegisterSelf();
-
-    //pNewScript = new Script;
-    //pNewScript->Name = "go_molten_core_rune";
-    //pNewScript->pGOUse = &GOUse_go_molten_core_rune;
-    //pNewScript->RegisterSelf();
-#endif
 }

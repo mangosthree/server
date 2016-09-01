@@ -109,8 +109,9 @@ struct is_blackrock_spire : public InstanceScript
             m_uiFlamewreathWaveCount(0),
             m_uiStadiumEventTimer(0),
             m_uiStadiumWaves(0),
-#if defined (TBC) || defined(WOTLK)
+#if defined (CLASSIC)
             m_uiStadiumMobsAlive(0),
+
             m_uiDragonspineDoorTimer(0),
             m_uiDragonspineGoCount(0),
             m_bUpperDoorOpened(false)
@@ -161,7 +162,7 @@ struct is_blackrock_spire : public InstanceScript
                 }
                 break;
 
-#if defined (TBC) || defined(WOTLK)
+#if defined (CLASSIC)
         case GO_BRAZIER_1:
         case GO_BRAZIER_2:
         case GO_BRAZIER_3:
@@ -494,7 +495,7 @@ struct is_blackrock_spire : public InstanceScript
                 }
                 break;
             }
-#if defined (TBC) || defined(WOTLK)
+#if defined (CLASSIC)
             case MAX_ENCOUNTER:
                 if (Player* pPlayer = instance->GetPlayer(ObjectGuid(guid)))
                     DoOpenUpperDoorIfCan(pPlayer);
@@ -532,7 +533,7 @@ struct is_blackrock_spire : public InstanceScript
 #endif
         }
 
-#if defined (TBC) || defined(WOTLK)
+#if defined (CLASSIC)
         void DoOpenUpperDoorIfCan(Player* pPlayer)
         {
             if (m_bUpperDoorOpened)
@@ -545,7 +546,7 @@ struct is_blackrock_spire : public InstanceScript
                 m_bUpperDoorOpened = true;
             }
         }
-#endif  
+#endif
 
         void Update(uint32 uiDiff) override
         {
@@ -575,7 +576,7 @@ struct is_blackrock_spire : public InstanceScript
                 }
             }
 
-#if defined (TBC) || defined(WOTLK)
+#if defined (CLASSIC)
             // unlock dragon spine door
             if (m_uiDragonspineDoorTimer)
             {
@@ -891,7 +892,7 @@ struct is_blackrock_spire : public InstanceScript
         uint8 m_uiStadiumWaves;
         uint8 m_uiStadiumMobsAlive;
 
-#if defined (TBC) || defined(WOTLK)
+#if defined (CLASSIC)
         bool m_bUpperDoorOpened;
         uint32 m_uiDragonspineGoCount;
         uint32 m_uiDragonspineDoorTimer;
@@ -926,7 +927,7 @@ struct at_blackrock_spire : public AreaTriggerScript
             if (InstanceData* pInstance = pPlayer->GetInstanceData())
             {
                 pInstance->SetData(MAX_ENCOUNTER, DO_SORT_MOBS);
-#if defined (TBC) || defined(WOTLK)
+#if defined (CLASSIC)
                 pInstance->SetData64(MAX_ENCOUNTER, pPlayer->GetObjectGuid().GetRawValue());
 #endif
             }

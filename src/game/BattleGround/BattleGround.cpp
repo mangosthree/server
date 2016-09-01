@@ -184,7 +184,7 @@ void BattleGround::BroadcastWorker(Do& _do)
             _do(plr);
 }
 
-BattleGround::BattleGround(): m_BuffChange(false), m_ArenaBuffSpawned(false), m_StartDelayTime(0), m_startMaxDist(0)
+BattleGround::BattleGround()
 {
     m_TypeID            = BattleGroundTypeId(0);
     m_Status            = STATUS_NONE;
@@ -197,7 +197,6 @@ BattleGround::BattleGround(): m_BuffChange(false), m_ArenaBuffSpawned(false), m_
     m_IsArena           = false;
     m_Winner            = TEAM_NONE;
     m_StartTime         = 0;
-    m_validStartPositionTimer = 0;
     m_CountdownTimer    = 0;
     m_Events            = 0;
     m_IsRated           = false;
@@ -370,30 +369,25 @@ void BattleGround::Update(uint32 diff)
 
     if (GetStatus() == STATUS_WAIT_JOIN && GetPlayersSize())
     {
-        float maxDist = GetStartMaxDist();
-        if (maxDist > 0.0f)
-        {
-            if (m_validStartPositionTimer < diff)
-            {
-                for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-                {
-                    if (Player* player = sObjectMgr.GetPlayer(itr->first))
-                    {
-                        float x, y, z, o;
-                        GetTeamStartLoc(player->GetTeam(), x, y, z, o);
-                        if (!player->IsWithinDist3d(x, y, z, maxDist))
-                        {
-                            player->TeleportTo(GetMapId(), x, y, z, o);
-                        }
-                    }
-                }
-                m_validStartPositionTimer = CHECK_PLAYER_POSITION_INVERVAL;
-            }
-            else
-                m_validStartPositionTimer -= diff;
-        }
-
         ModifyStartDelayTime(diff);
+
+        if (m_CountdownTimer >= 10000)
+        {
+            uint32 countdownMaxForBGType = isArena() ? ARENA_COUNTDOWN_MAX : BATTLEGROUND_COUNTDOWN_MAX;
+
+            WorldPacket data(SMSG_START_TIMER, 4+4+4);
+            data << uint32(0);
+            data << uint32(countdownMaxForBGType - (m_StartTime / 1000));
+            data << uint32(countdownMaxForBGType);
+
+            for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+                if (Player* player = sObjectMgr.GetPlayer(itr->first))
+                    player->GetSession()->SendPacket(&data);
+
+            m_CountdownTimer = 0;
+        }
+        else
+            m_CountdownTimer += diff;
 
         if (!(m_Events & BG_STARTING_EVENT_1))
         {

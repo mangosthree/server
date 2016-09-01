@@ -43,14 +43,11 @@ enum
     SPELL_MAGMASHACKLES         = 19496,
     SPELL_ERUPTION_TRIGGER      = 20482,    // target script, dispel and permanent immune to banish anywhere on map
     SPELL_ENRAGE_TRIGGER        = 19515,    // target script, effect dummy anywhere on map
-    SPELL_ENRAGE                = 19516,    
 
     // Add spells
-    SPELL_THRASH                = 8876,
-    SPELL_IMMOLATE              = 15733,
     SPELL_ERUPTION              = 19497,
     SPELL_MASSIVE_ERUPTION      = 20483,                    // TODO possible on death
-    SPELL_SEPARATION_ANXIETY_BOSSGARR    = 23492,           // Used if separated too far from Garr
+    SPELL_IMMOLATE              = 20294,
 };
 
 struct boss_garr : public CreatureScript
@@ -187,10 +184,6 @@ struct mob_firesworn : public CreatureScript
         mob_fireswornAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
             m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-            Reset();
-
-            DoCastSpellIfCan(m_creature, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-            DoCastSpellIfCan(m_creature, SPELL_IMMOLATE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         }
 
         ScriptedInstance* m_pInstance;
@@ -204,12 +197,6 @@ struct mob_firesworn : public CreatureScript
             m_uiImmolateTimer = urand(4 * IN_MILLISECONDS, 8 * IN_MILLISECONDS);    // These times are probably wrong
             m_uiSeparationCheckTimer = 5 * IN_MILLISECONDS;
             m_bExploding = false;
-        }
-
-        void JustReachedHome() override
-        {
-            DoCastSpellIfCan(m_creature, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-            DoCastSpellIfCan(m_creature, SPELL_IMMOLATE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         }
 
         void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override

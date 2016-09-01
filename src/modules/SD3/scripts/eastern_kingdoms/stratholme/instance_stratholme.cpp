@@ -50,7 +50,8 @@ static const EventLocation aStratholmeLocation[] =
     { 3969.357f, -3391.871f, 119.116f, 5.91f },               // Skeletons summon loc
     { 4033.044f, -3431.031f, 119.055f, 0.0f },                // Skeletons move loc
     { 4032.602f, -3378.506f, 119.752f, 4.74f },               // Guards summon loc
-    { 4042.575f, -3337.929f, 115.059f, 0.0f },                // Ysida move loc
+    { 4044.78f,  -3333.68f,  117.26f,  4.15f},                 // Ysida summon loc
+    { 4041.9f,   -3337.6f,   115.06f,  3.82f},                  // Ysida move/death loc
     { 3713.681f, -3427.814f, 131.198f, 6.2f }                 // The Unforgiven spawn area
 };
 
@@ -105,6 +106,7 @@ struct is_stratholme : public InstanceScript
             switch (pCreature->GetEntry())
             {
             case NPC_BARON:
+	    case NPC_YSIDA:
             case NPC_YSIDA_TRIGGER:
             case NPC_BARTHILAS:
             case NPC_PALADIN_QUEST_CREDIT:
@@ -222,7 +224,13 @@ struct is_stratholme : public InstanceScript
                         break;
                     }
 
-                    DoOrSimulateScriptTextForThisInstance(SAY_ANNOUNCE_RUN_START, NPC_BARON);
+                    // Baron ultimatum starts: summon Ysida in the case
+		    // Baron ultimatum starts: summon Ysida in the cage
+                    if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
+                    {
+                        DoOrSimulateScriptTextForThisInstance(SAY_ANNOUNCE_RUN_START, NPC_BARON);
+                        pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[7].m_fX, aStratholmeLocation[7].m_fY, aStratholmeLocation[7].m_fZ, aStratholmeLocation[7].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    }
 
                     m_uiBaronRunTimer = 45 * MINUTE * IN_MILLISECONDS;
                     debug_log("SD3: Instance Stratholme: Baron run in progress.");
@@ -355,11 +363,7 @@ struct is_stratholme : public InstanceScript
             case TYPE_BARON:
                 if (uiData == IN_PROGRESS)
                 {
-                    // Reached the Baron within time-limit
-                    if (m_auiEncounter[TYPE_BARON_RUN] == IN_PROGRESS)
-                    {
-                        SetData(TYPE_BARON_RUN, DONE);
-                    }
+                
 
                     // Close Slaughterhouse door if needed
                     if (m_auiEncounter[uiType] == FAIL)
@@ -369,8 +373,12 @@ struct is_stratholme : public InstanceScript
                 }
                 if (uiData == DONE)
                 {
-                    if (m_auiEncounter[TYPE_BARON_RUN] == DONE)
+                    // Players successfully engaged Baron within the time-limit of his ultimatum
+                //     Note: UpdateAI() prevents TYPE_BARON_RUN to be marked as FAILED if the
+                //     Baron is already engaged (in progress) when the ultimatum timer expires
+                if (m_auiEncounter[TYPE_BARON_RUN] == IN_PROGRESS)
                     {
+			SetData(TYPE_BARON_RUN, DONE);
                         Map::PlayerList const& players = instance->GetPlayers();
 
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
@@ -385,19 +393,19 @@ struct is_stratholme : public InstanceScript
                                 if (pPlayer->GetQuestStatus(QUEST_DEAD_MAN_PLEA) == QUEST_STATUS_INCOMPLETE)
                                 {
                                     pPlayer->AreaExploredOrEventHappens(QUEST_DEAD_MAN_PLEA);
+
+				    // Argent Dawn reputation reward
+                            	    pPlayer->CastSpell(pPlayer, SPELL_YSIDA_FREED, true);
                                 }
                             }
                         }
 
-                        // Open cage and finish rescue event
-                        if (Creature* pYsidaT = GetSingleCreatureFromStorage(NPC_YSIDA_TRIGGER))
+                        // Open cage, finish rescue event
+                        if (Creature* pYsida = GetSingleCreatureFromStorage(NPC_YSIDA))
                         {
-                            if (Creature* pYsida = pYsidaT->SummonCreature(NPC_YSIDA, pYsidaT->GetPositionX(), pYsidaT->GetPositionY(), pYsidaT->GetPositionZ(), pYsidaT->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 1800000))
-                            {
-                                DoScriptText(SAY_EPILOGUE, pYsida);
-                                pYsida->GetMotionMaster()->MovePoint(0, aStratholmeLocation[7].m_fX, aStratholmeLocation[7].m_fY, aStratholmeLocation[7].m_fZ);
-                            }
+                            DoScriptText(SAY_EPILOGUE, pYsida);
                             DoUseDoorOrButton(GO_YSIDA_CAGE);
+                            pYsida->GetMotionMaster()->MovePoint(0, aStratholmeLocation[8].m_fX, aStratholmeLocation[8].m_fY, aStratholmeLocation[8].m_fZ, aStratholmeLocation[8].m_fO);
                         }
                     }
 
@@ -556,6 +564,20 @@ struct is_stratholme : public InstanceScript
                 m_auiEncounter[TYPE_PALLID] = SPECIAL;
             }
 
+// Baron ultimatum succeed: summon Ysida outside the cage alive
+    if (m_auiEncounter[TYPE_BARON_RUN] == DONE)
+    {
+        if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
+            pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[9].m_fX, aStratholmeLocation[9].m_fY, aStratholmeLocation[9].m_fZ, aStratholmeLocation[9].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+    }
+    // Baron ultimatum failed: summon Ysida outside the cage dead
+    if (m_auiEncounter[TYPE_BARON_RUN] == FAIL)
+    {
+        if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
+            if (Creature* pYsida = pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[9].m_fX, aStratholmeLocation[9].m_fY, aStratholmeLocation[9].m_fZ, aStratholmeLocation[9].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                pYsida->DealDamage(pYsida, pYsida->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+    }
+
             OUT_LOAD_INST_DATA_COMPLETE;
         }
 
@@ -575,8 +597,9 @@ struct is_stratholme : public InstanceScript
             case NPC_RAMSTEIN:
                 SetData(TYPE_RAMSTEIN, IN_PROGRESS);
                 break;
-                // TODO - uncomment when proper working within core! case NPC_BARON:             SetData(TYPE_BARON, IN_PROGRESS);    break;
-
+            case NPC_BARON:             
+		SetData(TYPE_BARON, IN_PROGRESS);    
+		break;
             case NPC_ABOM_BILE:
             case NPC_ABOM_VENOM:
                 // Start Slaughterhouse Event
@@ -607,8 +630,9 @@ struct is_stratholme : public InstanceScript
             case NPC_RAMSTEIN:
                 SetData(TYPE_RAMSTEIN, FAIL);
                 break;
-                // TODO - uncomment when proper working within core! case NPC_BARON:             SetData(TYPE_BARON, FAIL);    break;
-
+            case NPC_BARON:             
+		SetData(TYPE_BARON, FAIL);    
+		break;
             case NPC_ABOM_BILE:
             case NPC_ABOM_VENOM:
                 // Fail in Slaughterhouse Event before Ramstein
@@ -718,7 +742,8 @@ struct is_stratholme : public InstanceScript
                 }
             }
 
-            if (m_uiBaronRunTimer)
+            // Check changes for Baron ultimatum timer only if Baron is not already in combat
+    	    if (m_uiBaronRunTimer && GetData(TYPE_BARON) != IN_PROGRESS)
             {
                 if (m_uiYellCounter == 0 && m_uiBaronRunTimer <= 10 * MINUTE * IN_MILLISECONDS)
                 {
@@ -731,14 +756,41 @@ struct is_stratholme : public InstanceScript
                     ++m_uiYellCounter;
                 }
 
+		// Used to create a delay of 10s between Baron speech and Ysida's answer
+        	else if (m_uiYellCounter == 2 && m_uiBaronRunTimer <= (5 * MINUTE - 10) * IN_MILLISECONDS)
+        	{
+            	    DoOrSimulateScriptTextForThisInstance(YSIDA_SAY_RUN_5_MIN, NPC_YSIDA);
+            	    ++m_uiYellCounter;
+        	}
+
                 if (m_uiBaronRunTimer <= uiDiff)
                 {
-                    SetData(TYPE_BARON_RUN, FAIL);
+                    if (GetData(TYPE_BARON_RUN) != FAIL)
+            	    {
+                	SetData(TYPE_BARON_RUN, FAIL);
 
-                    DoOrSimulateScriptTextForThisInstance(SAY_ANNOUNCE_RUN_FAIL, NPC_BARON);
+                	// Open the cage and let Ysida face her doom
+                	if (Creature* pYsida = GetSingleCreatureFromStorage(NPC_YSIDA))
+                	{
+                    		pYsida->GetMotionMaster()->MovePoint(0, aStratholmeLocation[8].m_fX, aStratholmeLocation[8].m_fY, aStratholmeLocation[8].m_fZ, aStratholmeLocation[8].m_fO);
+                    		DoUseDoorOrButton(GO_YSIDA_CAGE);
+                	}
+			DoOrSimulateScriptTextForThisInstance(SAY_ANNOUNCE_RUN_FAIL, NPC_BARON);
 
-                    m_uiBaronRunTimer = 0;
-                    debug_log("SD3: Instance Stratholme: Baron run event reached end. Event has state %u.", GetData(TYPE_BARON_RUN));
+                        m_uiBaronRunTimer = 8000;  // We reset the timer so the speech of Ysida is not said at the same time than the Baron's one
+            		}
+            		else
+            		{
+                		// Baron ultimatum failed: let the Baron kill her
+                		if (Creature* pYsida = GetSingleCreatureFromStorage(NPC_YSIDA))
+                    		if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
+                        	pBaron->CastSpell(pYsida, SPELL_BARON_SOUL_DRAIN, true);
+
+                		DoOrSimulateScriptTextForThisInstance(YSIDA_SAY_RUN_FAIL, NPC_YSIDA);
+
+                		m_uiBaronRunTimer = 0;  // event done for good, no more speech
+                		debug_log("SD2: Instance Stratholme: Baron run event reached end. Event has state %u.", GetData(TYPE_BARON_RUN));
+            		}
                 }
                 else
                 {

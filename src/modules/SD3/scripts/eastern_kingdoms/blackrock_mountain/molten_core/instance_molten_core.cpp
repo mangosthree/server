@@ -212,72 +212,20 @@ struct is_molten_core : public InstanceScript
                 }
                 // no break here!
             case TYPE_LUCIFRON:
-                m_auiEncounter[uiType] = uiData;
-                break;
             case TYPE_MAGMADAR:
-                m_auiEncounter[uiType] = uiData;
-#if defined (WOTLK) || defined (CATA)
-            if (uiData == DONE)
-                { DoUseDoorOrButton(GO_RUNE_KRESS); }
-#endif
-                break;
             case TYPE_GEHENNAS:
-                m_auiEncounter[uiType] = uiData;
-#if defined (WOTLK) || defined (CATA)
-            if (uiData == DONE)
-                { DoUseDoorOrButton(GO_RUNE_MOHN); }
-#endif
-                break;
             case TYPE_GARR:
-                m_auiEncounter[uiType] = uiData;
-#if defined (WOTLK) || defined (CATA)
-            if (uiData == DONE)
-                { DoUseDoorOrButton(GO_RUNE_BLAZ); }
-#endif
-                break;
             case TYPE_SHAZZRAH:
-                m_auiEncounter[uiType] = uiData;
-#if defined (WOTLK) || defined (CATA)
-            if (uiData == DONE)
-                { DoUseDoorOrButton(GO_RUNE_MAZJ); }
-#endif
-                break;
             case TYPE_GEDDON:
-                m_auiEncounter[uiType] = uiData;
-#if defined (WOTLK) || defined (CATA)
-            if (uiData == DONE)
-                { DoUseDoorOrButton(GO_RUNE_ZETH); }
-#endif
-                break;
             case TYPE_GOLEMAGG:
-                m_auiEncounter[uiType] = uiData;
-#if defined (WOTLK) || defined (CATA)
-            if (uiData == DONE)
-                { DoUseDoorOrButton(GO_RUNE_THERI); }
-#endif
-                break;
             case TYPE_SULFURON:
             case TYPE_RAGNAROS:
                 m_auiEncounter[uiType] = uiData;
-#if defined (WOTLK) || defined (CATA)
-            if (uiData == DONE)
-                { DoUseDoorOrButton(GO_RUNE_KORO); }
-#endif
                 break;
-            case TYPE_FLAME_DOSED:
-                if (sRuneEncounters const *rstr = GetRuneStructForTrapEntry(uiData))
-                {
-                    m_auiRuneState[rstr->getRuneType()] = DONE;
-                    save = true;
-                    if (GameObject *trap = GetSingleGameObjectFromStorage(rstr->m_uiTrapEntry))
-                    {
-                        trap->SetGoState(GO_STATE_ACTIVE);
-                        trap->SetLootState(GO_JUST_DEACTIVATED);    //TODO fix GameObject::Use for traps
-                    }
-                    if (GameObject *rune = GetSingleGameObjectFromStorage(rstr->m_uiRuneEntry))
-                        rune->SetGoState(GO_STATE_READY);
-                    DoSpawnMajordomoIfCan(false);
-                }
+            case TYPE_FLAME_DOUSED:
+                save = true;
+                SetRuneDoused(GetRuneStructForTrapEntry(uiData));
+                DoSpawnMajordomoIfCan(false);
                 break;
             case TYPE_DO_FREE_GARR_ADDS:
                 for (std::set<ObjectGuid>::const_iterator it = m_sFireswornGUID.begin(); it != m_sFireswornGUID.end(); ++it)
@@ -291,31 +239,24 @@ struct is_molten_core : public InstanceScript
                 return;
             }
 
-            // Check if Majordomo can be summoned
-#if defined (CLASSIC) || defined (TBC)
-            if (uiType < MAX_ENCOUNTER && uiData == DONE)   // a boss just killed
+            // if a rune boss is done, then: pre-WOTLK: allow to use the rune GO; WOTLK and later: set the rune as doused
+            if (uiType > TYPE_LUCIFRON && uiType < TYPE_MAJORDOMO && uiData == DONE)
             {
+#if defined (CLASSIC) || defined (TBC)
                 if (sRuneEncounters const *rstr = GetRuneStructForBoss(uiType))
                 {
                     m_auiRuneState[rstr->getRuneType()] = SPECIAL;
                     if (GameObject *trap = GetSingleGameObjectFromStorage(rstr->m_uiTrapEntry))
                         trap->SetGoState(GO_STATE_READY);
                 }
-            }
 #endif
 #if defined (WOTLK) || defined (CATA)
-            if (uiData == DONE)
-            {
+                SetRuneDoused(GetRuneStructForBoss(uiType));
                 DoSpawnMajordomoIfCan(false);
+#endif
             }
-#endif
 
-#if defined (CLASSIC) || defined (TBC) || defined(WOTLK)
             if (save)
-#endif
-#if defined (WOTLK) || defined (CATA)
-            if (uiData == DONE)
-#endif
             {
                 OUT_SAVE_INST_DATA;
 
@@ -416,12 +357,7 @@ struct is_molten_core : public InstanceScript
             // Check if all rune bosses are done
             for (uint8 i = TYPE_MAGMADAR; i < TYPE_MAJORDOMO; ++i)
             {
-#if defined (CLASSIC) || defined (TBC) || defined(WOTLK)
-                if (m_auiEncounter[i] != SPECIAL)
-#endif
-#if defined (WOTLK) || defined (CATA)
-        if (m_auiEncounter[i] != DONE)
-#endif
+                if (m_auiEncounter[i] != DONE || m_auiRuneState[i - TYPE_MAGMADAR] != DONE)
                 {
                     return;
                 }
@@ -475,6 +411,21 @@ struct is_molten_core : public InstanceScript
                 return &m_aMoltenCoreRunes[i];
 
             return NULL;
+        }
+
+        void SetRuneDoused(sRuneEncounters const* rstr)
+        {
+            if (rstr)
+            {
+                m_auiRuneState[rstr->getRuneType()] = DONE;
+                if (GameObject *trap = GetSingleGameObjectFromStorage(rstr->m_uiTrapEntry))
+                {
+                    trap->SetGoState(GO_STATE_ACTIVE);
+                    trap->SetLootState(GO_JUST_DEACTIVATED);    //TODO fix GameObject::Use for traps
+                }
+                if (GameObject *rune = GetSingleGameObjectFromStorage(rstr->m_uiRuneEntry))
+                    rune->SetGoState(GO_STATE_READY);
+            }
         }
 
         std::string m_strInstData;

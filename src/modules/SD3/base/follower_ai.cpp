@@ -82,7 +82,7 @@ bool FollowerAI::AssistPlayerInCombat(Unit* pWho)
         return false;
     }
 
-    // unit state prevents (similar check is done in CanInitiateAttack which also include checking UnitFlags. We skip those here)
+    // unit state prevents (similar check is done in CanInitiateAttack which also include checking unit_flags. We skip those here)
     if (m_creature->hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED))
     {
         return false;

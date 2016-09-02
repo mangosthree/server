@@ -58,9 +58,8 @@ bool ScriptedAI::IsVisible(Unit* pWho) const
     {
         return false;
     }
-    
- //   return m_creature->IsWithinDist(pWho, VISIBLE_RANGE) && pWho->IsVisibleForOrDetect(m_creature, m_creature, true); 166.0f
-    return m_creature->IsWithinDist(pWho, 166.0f) && pWho->IsVisibleForOrDetect(m_creature, m_creature, true); 
+
+    return m_creature->IsWithinDist(pWho, VISIBLE_RANGE) && pWho->IsVisibleForOrDetect(m_creature, m_creature, true);
 }
 
 /**

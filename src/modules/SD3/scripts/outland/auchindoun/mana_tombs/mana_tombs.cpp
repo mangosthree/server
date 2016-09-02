@@ -315,6 +315,7 @@ struct npc_shaheen : public CreatureScript
 void AddSC_mana_tombs()
 {
     Script* s;
+	
     s = new npc_shaheen();
     s->RegisterSelf();
 }

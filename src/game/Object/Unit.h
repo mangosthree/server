@@ -2415,9 +2415,9 @@ class  Unit : public WorldObject
          * accessible.
          * @param c The \ref Creature to check accessibility for
          * @return true if this \ref Unit is accessible to the \ref Creature given, false otherwise
-         * \todo Rename to IsInAccessablePlaceFor to follow standards?
+         * \todo Rename to isInAccessablePlaceFor to follow standards?
          */
-        bool IsInAccessablePlaceFor(Creature const* c) const;
+        bool isInAccessablePlaceFor(Creature const* c) const;
 
         void SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, uint32 OverHeal, bool critical = false, uint32 absorb = 0);
         void SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype);

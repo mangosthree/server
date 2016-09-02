@@ -148,7 +148,7 @@ void HostileReference::updateOnlineStatus()
              !getTarget()->IsTaxiFlying()))
     {
         Creature* creature = (Creature*) getSourceUnit();
-        online = getTarget()->IsInAccessablePlaceFor(creature);
+        online = getTarget()->isInAccessablePlaceFor(creature);
         if (!online)
         {
             if (creature->AI()->canReachByRangeAttack(getTarget()))

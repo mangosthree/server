@@ -2092,7 +2092,7 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     if (!pVictim->IsTargetableForAttack())
         return true;
 
-    if (!pVictim->IsInAccessablePlaceFor(this))
+    if (!pVictim->isInAccessablePlaceFor(this))
         return true;
 
     if (!pVictim->IsVisibleForOrDetect(this, this, false))

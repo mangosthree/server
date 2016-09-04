@@ -129,9 +129,10 @@ WorldSession::~WorldSession()
         m_Socket = NULL;
     }
 
+	// CAUSES CRASH ON PLAYER EXITING TO LOGIN SCREEN
     // Warden
-    if (_warden)
-        delete _warden;
+//    if (_warden)
+//        delete _warden;
 
     ///- empty incoming packet queue
     WorldPacket* packet = NULL;

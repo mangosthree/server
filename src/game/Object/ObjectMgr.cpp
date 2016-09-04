@@ -9408,27 +9408,30 @@ void ObjectMgr::LoadTrainerTemplates()
     bool hasErrored = false;
 
     for (CacheTrainerSpellMap::const_iterator tItr = m_mCacheTrainerTemplateSpellMap.begin(); tItr != m_mCacheTrainerTemplateSpellMap.end(); ++tItr)
-        trainer_ids.insert(tItr->first);
+        { trainer_ids.insert(tItr->first); }
 
     for (uint32 i = 1; i < sCreatureStorage.GetMaxEntry(); ++i)
     {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
         {
+            if (cInfo->TrainerTemplateId)
+            {
                 if (m_mCacheTrainerTemplateSpellMap.find(cInfo->TrainerTemplateId) != m_mCacheTrainerTemplateSpellMap.end())
-                    trainer_ids.erase(cInfo->TrainerTemplateId);
+                    { trainer_ids.erase(cInfo->TrainerTemplateId); }
                 else
                 {
                     sLog.outErrorDb("Creature (Entry: %u) has TrainerTemplateId = %u for nonexistent trainer template", cInfo->Entry, cInfo->TrainerTemplateId);
                     hasErrored = true;
                 }
+            }
         }
     }
 
     for (std::set<uint32>::const_iterator tItr = trainer_ids.begin(); tItr != trainer_ids.end(); ++tItr)
-        sLog.outErrorDb("Table `npc_trainer_template` has trainer template %u not used by any trainers ", *tItr);
+        { sLog.outErrorDb("Table `npc_trainer_template` has trainer template %u not used by any trainers ", *tItr); }
 
     if (hasErrored || !trainer_ids.empty())                 // Append extra line in case of reported errors
-        sLog.outString();
+        { sLog.outString(); }
 }
 
 void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)

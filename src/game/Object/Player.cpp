@@ -2247,6 +2247,8 @@ void Player::RegenerateHealth(uint32 diff)
     if (curValue >= maxValue) return;
 
     float HealthIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_HEALTH);
+    // This needs fixing
+    HealthIncreaseRate = 1.0f; // having to do this as the above constantly results in 0 - mangosd.conf is obviously not being read properly
 
     float addvalue = 0.0f;
 

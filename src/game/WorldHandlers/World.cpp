@@ -808,7 +808,7 @@ void World::LoadConfigSettings(bool reload)
 	setConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT, "PetUnsummonAtMount", true);
 
 	// Warden
-
+/* badly broken on m3 :( - this causes all these defaults to be set to 0
 	setConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED, "Warden.WinEnabled", true);
 	setConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED, "Warden.OSXEnabled", false);
 	setConfig(CONFIG_UINT32_WARDEN_NUM_MEM_CHECKS, "Warden.NumMemChecks", 3);
@@ -817,7 +817,7 @@ void World::LoadConfigSettings(bool reload)
 	setConfig(CONFIG_UINT32_WARDEN_CLIENT_CHECK_HOLDOFF, "Warden.ClientCheckHoldOff", 30);
 	setConfig(CONFIG_UINT32_WARDEN_CLIENT_FAIL_ACTION, "Warden.ClientCheckFailAction", 0);
 	setConfig(CONFIG_UINT32_WARDEN_CLIENT_RESPONSE_DELAY, "Warden.ClientResponseDelay", 600);
-	setConfig(CONFIG_UINT32_WARDEN_DB_LOGLEVEL, "Warden.DBLogLevel", 0);
+	setConfig(CONFIG_UINT32_WARDEN_DB_LOGLEVEL, "Warden.DBLogLevel", 0); */
 
     m_relocation_ai_notify_delay = sConfig.GetIntDefault("Visibility.AIRelocationNotifyDelay", 1000u);
     m_relocation_lower_limit_sq  = pow(sConfig.GetFloatDefault("Visibility.RelocationLowerLimit", 10), 2);

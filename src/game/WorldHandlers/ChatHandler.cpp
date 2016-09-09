@@ -222,16 +222,19 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             to = recv_data.ReadString(toLength);
             msg = recv_data.ReadString(msgLength);
 
-            if (!processChatmessageFurtherAfterSecurityChecks(msg, lang))
-                return;
-
             if (msg.empty())
-                break;
+                { break; }
+
+            if (ChatHandler(this).ParseCommands(msg.c_str()))
+                { break; }
+
+            if (!processChatmessageFurtherAfterSecurityChecks(msg, lang))
+                { return; }
 
             if (!normalizePlayerName(to))
             {
                 SendPlayerNotFoundNotice(to);
-                break;
+                { break; }
             }
 
             Player* player = sObjectMgr.GetPlayer(to.c_str());

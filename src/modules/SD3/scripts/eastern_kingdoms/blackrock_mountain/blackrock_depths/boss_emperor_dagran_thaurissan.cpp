@@ -39,8 +39,10 @@
 enum eEmperor
 {
     FACTION_NEUTRAL             = 734,
-    SAY_AGGRO                   = -1230001,
-    SAY_SLAY                    = -1230002,
+    YELL_AGGRO_1                = -1230001,
+    YELL_AGGRO_2                = -1230064,
+    YELL_AGGRO_3                = -1230065,
+    YELL_SLAY                   = -1230002,
 
     SPELL_HANDOFTHAURISSAN      = 17492,
     SPELL_AVATAROFFLAME         = 15636
@@ -55,6 +57,7 @@ struct boss_emperor_dagran_thaurissan : public CreatureScript
         boss_emperor_dagran_thaurissanAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
             m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            Reset();
         }
 
         ScriptedInstance* m_pInstance;
@@ -72,19 +75,28 @@ struct boss_emperor_dagran_thaurissan : public CreatureScript
 
         void Aggro(Unit* /*pWho*/) override
         {
-            DoScriptText(SAY_AGGRO, m_creature);
+            uint32 uiTextId;
+            switch (urand(0, 2))
+            {
+                case 0: uiTextId = YELL_AGGRO_1; break;
+                case 1: uiTextId = YELL_AGGRO_2; break;
+                case 2: uiTextId = YELL_AGGRO_3; break;
+            }
+            DoScriptText(uiTextId, m_creature);
             m_creature->CallForHelp(VISIBLE_RANGE);
         }
 
         void JustDied(Unit* /*pVictim*/) override
         {
             if (!m_pInstance)
-            {
                 return;
-            }
 
             if (Creature* pPrincess = m_pInstance->GetSingleCreatureFromStorage(NPC_PRINCESS))
             {
+                // check if we didn't update the entry
+                if (pPrincess->GetEntry() != NPC_PRINCESS)
+                    return;
+
                 if (pPrincess->IsAlive())
                 {
                     pPrincess->SetFactionTemporary(FACTION_NEUTRAL, TEMPFACTION_NONE);
@@ -95,50 +107,33 @@ struct boss_emperor_dagran_thaurissan : public CreatureScript
 
         void KilledUnit(Unit* /*pVictim*/) override
         {
-            DoScriptText(SAY_SLAY, m_creature);
+            DoScriptText(YELL_SLAY, m_creature);
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            {
                 return;
-            }
 
             if (m_uiHandOfThaurissan_Timer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    DoCastSpellIfCan(pTarget, SPELL_HANDOFTHAURISSAN);
+                    if (DoCastSpellIfCan(pTarget, SPELL_HANDOFTHAURISSAN) == CAST_OK)
+                        m_uiHandOfThaurissan_Timer = urand(5, 10) * 1000;
                 }
-
-                // 3 Hands of Thaurissan will be casted
-                // if (m_uiCounter < 3)
-                //{
-                //    m_uiHandOfThaurissan_Timer = 1000;
-                //    ++m_uiCounter;
-                //}
-                // else
-                //{
-                m_uiHandOfThaurissan_Timer = 5000;
-                // m_uiCounter = 0;
-                //}
             }
             else
-            {
                 m_uiHandOfThaurissan_Timer -= uiDiff;
-            }
 
             // AvatarOfFlame_Timer
             if (m_uiAvatarOfFlame_Timer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_AVATAROFFLAME);
-                m_uiAvatarOfFlame_Timer = 18000;
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_AVATAROFFLAME) == CAST_OK)
+                    m_uiAvatarOfFlame_Timer = 18000;
             }
             else
-            {
                 m_uiAvatarOfFlame_Timer -= uiDiff;
-            }
 
             DoMeleeAttackIfReady();
         }

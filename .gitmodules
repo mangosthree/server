@@ -4,3 +4,6 @@
 [submodule "dep"]
 	path = dep
 	url = https://github.com/mangos/mangosDeps
+[submodule "src/modules/SD3"]
+	path = src/modules/SD3
+	url = https://github.com/mangos/ScriptDev3

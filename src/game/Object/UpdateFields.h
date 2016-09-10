@@ -129,7 +129,7 @@ enum EUnitFields
     UNIT_FIELD_HOVERHEIGHT                           = OBJECT_END + 0x87,
     UNIT_FIELD_MAXITEMLEVEL                          = OBJECT_END + 0x88,
     UNIT_FIELD_PADDING                               = OBJECT_END + 0x89,
-    UNIT_END                                         = OBJECT_END + 0x008E,
+    UNIT_END                                         = OBJECT_END + 0x8A
 };
 
 enum EItemFields

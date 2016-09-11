@@ -491,9 +491,10 @@ void GlobalCooldownMgr::CancelGlobalCooldown(SpellEntry const* spellInfo)
 
 Unit::Unit() :
     movespline(new Movement::MoveSpline()),
-    m_charmInfo(NULL),
+    m_charmInfo(nullptr),
     i_motionMaster(this),
-    m_vehicleInfo(NULL),
+    m_regenTimer(0),
+    m_vehicleInfo(nullptr),
     m_ThreatManager(this),
     m_HostileRefManager(this)
 {
@@ -6454,6 +6455,14 @@ void Unit::Uncharm()
         charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
         charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
         charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS_PET);
+
+        // TODO:: find a way to get rid of this bad hack to remove Raise ally aura
+        if (charm->GetTypeId() == TYPEID_UNIT)
+        {
+            uint32 createdBySpellId = charm->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+            if (static_cast<Creature*>(charm)->IsTemporarySummon() && createdBySpellId)
+                RemoveAurasDueToSpell(createdBySpellId);
+        }
     }
 }
 

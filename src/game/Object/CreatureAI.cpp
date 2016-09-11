@@ -26,6 +26,7 @@
 #include "Creature.h"
 #include "DBCStores.h"
 #include "Spell.h"
+#include "SpellMgr.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
@@ -60,6 +61,9 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
         // Check for power (also done by Spell::CheckCast())
         if (m_creature->GetPower((Powers)pSpell->powerType) < Spell::CalculatePowerCost(pSpell, m_creature))
             { return CAST_FAIL_POWER; }
+
+        if (!pSpell->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !m_creature->IsWithinLOSInMap(pTarget) && m_creature != pTarget)
+            return CAST_FAIL_NOT_IN_LOS;
     }
 
     if (const SpellRangeEntry* pSpellRange = sSpellRangeStore.LookupEntry(pSpell->rangeIndex))
@@ -115,6 +119,16 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
             // Interrupt any previous spell
             if (uiCastFlags & CAST_INTERRUPT_PREVIOUS && pCaster->IsNonMeleeSpellCasted(false))
                 { pCaster->InterruptNonMeleeSpells(false); }
+
+            // Creature should always stop before it will cast a non-instant spell            
+            if (GetSpellCastTime(pSpell))
+                pCaster->StopMoving();
+
+            // Creature should interrupt any current melee spell
+            pCaster->InterruptSpell(CURRENT_MELEE_SPELL);
+
+            // Creature should stop wielding weapon while casting
+            pCaster->SetSheath(SHEATH_STATE_UNARMED);
 
             pCaster->CastSpell(pTarget, pSpell, uiCastFlags & CAST_TRIGGERED, NULL, NULL, uiOriginalCasterGUID);
             return CAST_OK;

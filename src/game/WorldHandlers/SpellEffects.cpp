@@ -7555,6 +7555,14 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     unitTarget->CastSpell(unitTarget, 27699, true);
                     return;
                 }
+                case 28352:                                 // Breath of Sargeras
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 28342, true);
+                    return;
+                }
                 case 28374:                                 // Decimate (Naxxramas: Gluth)
                 case 54426:                                 // Decimate (Naxxramas: Gluth (spells are identical))
                 case 71123:                                 // Decimate (ICC: Precious / Stinky)
@@ -8790,26 +8798,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                         return;
 
                     charmer->RemoveAurasDueToSpell(51923);
-
-                    // HACK ALERT
-                    // Replace with Spell Interrupting, when casting spells properly is possible in mangos
-                    //charmer->InterruptNonMeleeSpells(true);
-
-                    Player* player = (Player*)charmer;
-                    Creature* possessed = (Creature*)m_caster;
-                    player->RemoveAurasDueToSpell(51852);
-
-                    player->SetCharm(nullptr);
-                    player->SetClientControl(possessed, 0);
-                    player->SetMover(nullptr);
-                    player->GetCamera().ResetView();
-                    player->RemovePetActionBar();
-
-                    possessed->clearUnitState(UNIT_STAT_CONTROLLED);
-                    possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-                    possessed->SetCharmerGuid(ObjectGuid());
-                    possessed->ForcedDespawn();
-
+                    charmer->RemoveAurasDueToSpell(51852);
                     return;
                 }
                 case 52751:                                 // Death Gate

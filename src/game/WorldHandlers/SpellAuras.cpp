@@ -7951,8 +7951,8 @@ void Aura::PeriodicTick()
             if (!target->IsAlive())
                 { return; }
 
-            Powers pt = target->GetPowerType();
-            if (int32(pt) != m_modifier.m_miscvalue)
+            Powers powerType = target->GetPowerType();
+            if (int32(powerType) != m_modifier.m_miscvalue)
                 { return; }
 
             if ( spellProto->GetAuraInterruptFlags() & AURA_INTERRUPT_FLAG_NOT_SEATED )
@@ -7969,8 +7969,11 @@ void Aura::PeriodicTick()
             // Anger Management
             // amount = 1+ 16 = 17 = 3,4*5 = 10,2*5/3
             // so 17 is rounded amount for 5 sec tick grow ~ 1 range grow in 3 sec
-            if (pt == POWER_RAGE)
-                target->ModifyPower(pt, m_modifier.m_amount * 3 / 5);
+            if (powerType == POWER_RAGE)
+                target->ModifyPower(powerType, m_modifier.m_amount * 3 / 5);
+            // Butchery
+            else if (powerType == POWER_RUNIC_POWER && target->IsInCombat())
+                target->ModifyPower(powerType, m_modifier.m_amount);
             break;
         }
         // Here tick dummy auras

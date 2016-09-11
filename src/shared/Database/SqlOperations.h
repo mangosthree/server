@@ -33,6 +33,7 @@
 #include "Utilities/Callback.h"
 
 #include <mutex>
+#include <memory>
 
 /// ---- BASE ---
 

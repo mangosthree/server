@@ -148,7 +148,7 @@ void MapManager::LoadTransports()
     }
 }
 
-Transport::Transport() : GameObject()
+Transport::Transport() : GameObject(), m_pathTime(0), m_timer(0), m_nextNodeTime(0), m_period(0)
 {
     m_updateFlag = UPDATEFLAG_TRANSPORT | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_ROTATION;
 }

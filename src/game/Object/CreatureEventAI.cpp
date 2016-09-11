@@ -663,14 +663,32 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
 
             switch (castResult)
             {
-                case CAST_FAIL_POWER:
-                case CAST_FAIL_TOO_FAR:
+                case CAST_OK:
                 {
-                    // Melee current victim if flag not set
-                    if (!(action.cast.castFlags & CAST_NO_MELEE_IF_OOM))
+                    if (m_DynamicMovement)
                     {
-                        switch (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType())
+                        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+
+                        if (spellInfo && !(spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT || spellInfo->rangeIndex == SPELL_RANGE_IDX_SELF_ONLY) && target != m_creature)
                         {
+                            SpellRangeEntry const* spellRange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
+                            if (spellRange)
+                                m_LastSpellMaxRange = spellRange->maxRange;
+                        }
+                    }
+                    break;
+                }
+                case CAST_FAIL_TOO_FAR:
+                case CAST_FAIL_POWER:
+                case CAST_FAIL_NOT_IN_LOS:
+                {
+                    if (!m_creature->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT))
+                    {
+                        // Melee current victim if flag not set
+                        if (!(action.cast.castFlags & CAST_NO_MELEE_IF_OOM))
+                        {
+                            switch (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType())
+                            {
                             case CHASE_MOTION_TYPE:
                             case FOLLOW_MOTION_TYPE:
                                 m_attackDistance = 0.0f;
@@ -681,7 +699,12 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                                 break;
                             default:
                                 break;
+                            }
                         }
+                    }
+                    else if (m_DynamicMovement)
+                    {
+                        m_LastSpellMaxRange = 0.0f;
                     }
                     break;
                 }
@@ -1029,10 +1052,10 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         }
         case ACTION_T_DYNAMIC_MOVEMENT:
         {
-            if (action.dynamicMovement.state && m_DynamicMovement || !action.dynamicMovement.state && !m_DynamicMovement)
+            if ((!!action.dynamicMovement.state) == m_DynamicMovement)
                 break;
 
-            m_DynamicMovement = action.dynamicMovement.state;
+            m_DynamicMovement = !!action.dynamicMovement.state;
             SetCombatMovement(!m_DynamicMovement, true);
             break;
         }
@@ -1345,21 +1368,25 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
         m_EventUpdateTime -= diff;
     }
 
-    // Melee Auto-Attack (getVictim might be nullptr as result of timer based events and actions)
-    if (Combat && m_creature->getVictim())
+    Unit* victim = m_creature->getVictim();
+    // Melee Auto-Attack
+    if (Combat && victim && !(m_creature->IsNonMeleeSpellCasted(false) || m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT)))
     {
         // Update creature dynamic movement position before doing anything else
         if (m_DynamicMovement)
         {
-            if (!m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT) && !m_creature->IsNonMeleeSpellCasted(false))
+            if (m_creature->IsWithinLOSInMap(victim))
             {
-                if (m_LastSpellMaxRange && m_creature->IsInRange(m_creature->getVictim(), 0, (m_LastSpellMaxRange / 1.5f)))
+                if (m_LastSpellMaxRange && m_creature->IsInRange(victim, 0, (m_LastSpellMaxRange / 1.5f)))
                     SetCombatMovement(false, true);
                 else
                     SetCombatMovement(true, true);
             }
+            else
+                SetCombatMovement(true, true);
         }
-        else if (m_MeleeEnabled)
+        else if (m_MeleeEnabled && m_creature->CanReachWithMeleeAttack(victim)
+            && !(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE))
             DoMeleeAttackIfReady();
     }
 }

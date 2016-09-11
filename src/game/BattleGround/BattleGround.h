@@ -660,6 +660,7 @@ class BattleGround
         float m_TeamStartLocY[PVP_TEAM_COUNT];
         float m_TeamStartLocZ[PVP_TEAM_COUNT];
         float m_TeamStartLocO[PVP_TEAM_COUNT];
+        float m_startMaxDist;
 };
 
 // helper functions for world state list fill

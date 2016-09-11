@@ -38,10 +38,17 @@ namespace FactorySelector
 {
     CreatureAI* selectAI(Creature* creature)
     {
-        // Allow scripting AI for normal creatures and not controlled pets (guardians and mini-pets)
-        if ((!creature->IsPet() || !((Pet*)creature)->isControlled()) && !creature->IsCharmed())
-            if (CreatureAI* scriptedAI = sScriptMgr.GetCreatureAI(creature))
+        CreatureAI* scriptedAI = sScriptMgr.GetCreatureAI(creature);
+        if (scriptedAI)
+        {
+            // charmed creature may have some script even if its not supposed to be that way (ex: Eye of Acherus)
+            if (creature->IsCharmed())
                 return scriptedAI;
+
+            // Allow scripting AI for normal creatures and not controlled pets (guardians and mini-pets)
+            if (!creature->IsPet() || !static_cast<Pet*>(creature)->isControlled())
+                return scriptedAI;
+        }
 
         CreatureAIRegistry& ai_registry(CreatureAIRepository::Instance());
 

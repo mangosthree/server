@@ -55,7 +55,7 @@
 #include "ElunaEventMgr.h"
 #endif /* ENABLE_ELUNA */
 
-Object::Object()
+Object::Object(): m_updateFlag(0)
 {
     m_objectTypeId      = TYPEID_OBJECT;
     m_objectType        = TYPEMASK_OBJECT;
@@ -1781,33 +1781,36 @@ void WorldObject::AddObjectToRemoveList()
     GetMap()->AddObjectToRemoveList(this);
 }
 
-Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSummonType spwtype, uint32 despwtime, bool asActiveObject)
+Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSummonType spwtype, uint32 despwtime, bool asActiveObject, bool setRun)
 {
     CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(id);
     if (!cinfo)
     {
         sLog.outErrorDb("WorldObject::SummonCreature: Creature (Entry: %u) not existed for summoner: %s. ", id, GetGuidStr().c_str());
-        return NULL;
+        return nullptr;
     }
 
     TemporarySummon* pCreature = new TemporarySummon(GetObjectGuid());
 
     Team team = TEAM_NONE;
     if (GetTypeId() == TYPEID_PLAYER)
-        { team = ((Player*)this)->GetTeam(); }
+        team = ((Player*)this)->GetTeam();
 
     CreatureCreatePos pos(GetMap(), x, y, z, ang, GetPhaseMask());
 
     if (x == 0.0f && y == 0.0f && z == 0.0f)
-        { pos = CreatureCreatePos(this, GetOrientation(), CONTACT_DISTANCE, ang); }
+        pos = CreatureCreatePos(this, GetOrientation(), CONTACT_DISTANCE, ang);
 
     if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo, team))
     {
         delete pCreature;
-        return NULL;
+        return nullptr;
     }
 
     pCreature->SetRespawnCoord(pos);
+
+    // Set run or walk before any other movement starts
+    pCreature->SetWalk(!setRun);
 
     // Active state set before added to map
     pCreature->SetActiveObjectState(asActiveObject);
@@ -1815,7 +1818,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     pCreature->Summon(spwtype, despwtime);                  // Also initializes the AI and MMGen
 
     if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-        { ((Creature*)this)->AI()->JustSummoned(pCreature); }
+        ((Creature*)this)->AI()->JustSummoned(pCreature);
     
 #ifdef ENABLE_ELUNA
     if (Unit* summoner = ToUnit())
@@ -1824,7 +1827,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 
     // Creature Linking, Initial load is handled like respawn
     if (pCreature->IsLinkingEventTrigger())
-        { GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, pCreature); }
+        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, pCreature);
 
     // return the creature therewith the summoner has access to it
     return pCreature;

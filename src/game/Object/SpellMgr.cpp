@@ -809,7 +809,9 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     switch (spellproto->Id)
                     {
                         case 13139:                         // net-o-matic special effect
+                        case 23182:                         // Mark of Frost
                         case 23445:                         // evil twin
+                        case 25040:                         // Mark of Nature
                         case 35679:                         // Protectorate Demolitionist
                         case 37695:                         // Stanky
                         case 38637:                         // Nether Exhaustion (red)
@@ -931,6 +933,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     {
                         case 36897:                         // Transporter Malfunction (race mutation to horde)
                         case 36899:                         // Transporter Malfunction (race mutation to alliance)
+                        case 37097:                         // Crate Disguise
                             return false;
                     }
                     break;
@@ -940,6 +943,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     {
                         case 802:                           // Mutate Bug, wrongly negative by target modes
                         case 38449:                         // Blessing of the Tides
+                        case 50312:                         // Unholy Frenzy
                             return true;
                         case 36900:                         // Soul Split: Evil!
                         case 36901:                         // Soul Split: Good
@@ -1058,16 +1062,6 @@ bool IsSingleTargetSpell(SpellEntry const* spellInfo)
 {
     // all other single target spells have if it has AttributesEx5
     if (spellInfo->HasAttribute(SPELL_ATTR_EX5_SINGLE_TARGET_SPELL))
-        return true;
-
-    // TODO - need found Judgements rule
-    switch (GetSpellSpecific(spellInfo->Id))
-    {
-        case SPELL_JUDGEMENT:
-            return true;
-        default:
-            break;
-    }
 
     // single target triggered spell.
     // Not real client side single target spell, but it' not triggered until prev. aura expired.
@@ -1086,12 +1080,10 @@ bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellI
         spellInfo1->SpellIconID == spellInfo2->SpellIconID )
         return true;
 
-    // TODO - need found Judgements rule
     SpellSpecific spec1 = GetSpellSpecific(spellInfo1->Id);
     // spell with single target specific types
     switch (spec1)
     {
-        case SPELL_JUDGEMENT:
         case SPELL_MAGE_POLYMORPH:
             if (GetSpellSpecific(spellInfo2->Id) == spec1)
                 return true;

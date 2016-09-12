@@ -107,6 +107,9 @@ void HostileReference::fireStatusChanged(ThreatRefStatusChangeEvent& pThreatRefS
 
 void HostileReference::addThreat(float pMod)
 {
+    if (pMod + iThreat < 0)
+        pMod = -iThreat;
+
     iThreat += pMod;
     // the threat is changed. Source and target unit have to be availabe
     // if the link was cut before relink it again
@@ -495,12 +498,16 @@ Unit* ThreatManager::getHostileTarget()
 
 float ThreatManager::getThreat(Unit* pVictim, bool pAlsoSearchOfflineList)
 {
+    if (!pVictim)
+        return 0.0f;
+
     float threat = 0.0f;
-    HostileReference* ref = iThreatContainer.getReferenceByTarget(pVictim);
-    if (!ref && pAlsoSearchOfflineList)
-        ref = iThreatOfflineContainer.getReferenceByTarget(pVictim);
-    if (ref)
+
+    if (HostileReference* ref = iThreatContainer.getReferenceByTarget(pVictim))
         threat = ref->getThreat();
+    else if (pAlsoSearchOfflineList)
+        threat = iThreatOfflineContainer.getReferenceByTarget(pVictim)->getThreat();
+
     return threat;
 }
 

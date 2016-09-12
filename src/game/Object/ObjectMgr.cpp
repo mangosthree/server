@@ -8227,9 +8227,9 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         case CONDITION_TEAM:
         {
             if (conditionSourceType == CONDITION_FROM_REFERING_LOOT && sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
-                { return true; }
+                return true;
             else
-                { return uint32(player->GetTeam()) == m_value1; }
+                return uint32(player->GetTeam()) == m_value1;
         }
         case CONDITION_SKILL:
             return player->HasSkill(m_value1) && player->GetBaseSkillValue(m_value1) >= m_value2;

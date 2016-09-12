@@ -768,6 +768,76 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
 {
     // Not in world
     if (!IsInWorld() || !u->IsInWorld())
+        return false;
+
+    // invisible at client always
+    if (!GetGOInfo()->displayId)
+        return false;
+
+    // Transport always visible at this step implementation
+    if (IsTransport() && IsInMap(u))
+        return true;
+
+    // quick check visibility false cases for non-GM-mode
+    if (!u->isGameMaster())
+    {
+        // despawned and then not visible for non-GM in GM-mode
+        if (!isSpawned())
+            return false;
+
+        // special invisibility cases
+        if (GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed)
+        {
+            bool trapNotVisible = false;
+
+            // handle summoned traps, usually by players
+            if (Unit* owner = GetOwner())
+            {
+                if (owner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    Player* ownerPlayer = (Player*)owner;
+                    if ((GetMap()->IsBattleGroundOrArena() && ownerPlayer->GetBGTeam() != u->GetBGTeam()) ||
+                        (ownerPlayer->IsInDuelWith(u)) ||
+                        (ownerPlayer->GetTeam() != u->GetTeam()))
+                        trapNotVisible = true;
+                }
+                else
+                {
+                    if (u->IsFriendlyTo(owner))
+                        return true;
+                }
+            }
+            // handle environment traps (spawned by DB)
+            else
+            {
+                if (this->IsFriendlyTo(u))
+                    return true;
+                else
+                    trapNotVisible = true;
+            }
+
+            // only rogue have skill for traps detection
+            if (Aura* aura = ((Player*)u)->GetAura(2836, EFFECT_INDEX_0))
+            {
+                if (roll_chance_i(aura->GetModifier()->m_amount) && u->isInFront(this, 15.0f))
+                    return true;
+            }
+
+            if (trapNotVisible)
+                return false;
+        }
+    }
+
+    // check distance
+    return IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() +
+                             (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
+}
+
+/*
+bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
+{
+    // Not in world
+    if (!IsInWorld() || !u->IsInWorld())
         { return false; }
 
     // invisible at client always
@@ -784,6 +854,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
         // despawned and then not visible for non-GM in GM-mode
         if (!isSpawned())
             { return false; }
+*/
 
         // special invisibility cases
         /* TODO: implement trap stealth, take look at spell 2836
@@ -792,12 +863,14 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
             if(check stuff here)
                 return false;
         }*/
+/*
     }
-
     // check distance
+
     return IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() +
                              (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
 }
+*/
 
 void GameObject::Respawn()
 {
@@ -1669,7 +1742,7 @@ void GameObject::Use(Unit* user)
     SpellCastTargets targets;
     targets.setUnitTarget(user);
 
-    spell->prepare(&targets);
+    spell->SpellStart(&targets);
 }
 
 // overwrite WorldObject function for proper name localization

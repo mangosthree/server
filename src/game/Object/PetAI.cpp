@@ -48,28 +48,24 @@ PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), inComb
     UpdateAllies();
 }
 
-void PetAI::MoveInLineOfSight(Unit* u)
+void PetAI::MoveInLineOfSight(Unit* pWho)
 {
     if (m_creature->getVictim())
-        return;
-
-    if (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
         return;
 
     if (!m_creature->GetCharmInfo() || !m_creature->GetCharmInfo()->HasReactState(REACT_AGGRESSIVE))
         return;
 
-    if (u->IsTargetableForAttack() && m_creature->IsHostileTo(u) &&
-            u->isInAccessablePlaceFor(m_creature))
+    if (m_creature->CanInitiateAttack() && pWho->IsTargetableForAttack() &&
+            m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
     {
-        float attackRadius = m_creature->GetAttackDistance(u);
-        if (m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
+        if (!m_creature->CanFly() && m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
+            return;
+
+        if (m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
         {
-            if (m_creature->IsWithinLOSInMap(u))
-            {
-                AttackStart(u);
-                u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            }
+            pWho->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            AttackStart(pWho);
         }
     }
 }
@@ -298,7 +294,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
             m_creature->AddCreatureSpellCooldown(spell->m_spellInfo->Id);
 
-            spell->prepare(&targets);
+            spell->SpellStart(&targets);
         }
 
         // deleted cached Spell objects

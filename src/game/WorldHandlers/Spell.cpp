@@ -243,8 +243,8 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
     // TARGET_FLAG_UNK2 is used for non-combat pets, maybe other?
     if (m_targetMask & (TARGET_FLAG_UNIT | TARGET_FLAG_UNK2))
         data >> m_unitTargetGUID.ReadAsPacked();
-
-    if (m_targetMask & (TARGET_FLAG_OBJECT))
+    
+    if (m_targetMask & (TARGET_FLAG_OBJECT | TARGET_FLAG_GAMEOBJECT_ITEM))
         data >> m_GOTargetGUID.ReadAsPacked();
 
     if ((m_targetMask & (TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM)) && caster->GetTypeId() == TYPEID_PLAYER)
@@ -416,7 +416,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         m_currentBasePoints[i] = m_spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
 
-    m_spellState = SPELL_STATE_PREPARING;
+    m_spellState = SPELL_STATE_CREATED;
 
     m_castPositionX = m_castPositionY = m_castPositionZ = 0;
     m_TriggerSpells.clear();
@@ -1854,6 +1854,13 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     ++next;
                     continue;
                 }
+
+                if (!prev->IsWithinLOSInMap(*next)
+                    || (m_spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_CC_TARGETS) && !(*next)->CanFreeMove()))
+                {
+                    ++next;
+                    continue;
+                }
                 prev = *next;
                 targetUnitMap.push_back(prev);
                 tempTargetUnitMap.erase(next);
@@ -2986,8 +2993,13 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     }
 
     // remove caster from the list if required by attribute
-    if (targetMode != TARGET_SELF && targetMode != TARGET_SELF2 && m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
-        targetUnitMap.remove(m_caster);
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
+    {
+        const SpellEffectEntry* spellEffect = m_spellInfo->GetSpellEffect(effIndex);
+
+        if (targetMode != TARGET_SELF && targetMode != TARGET_SELF2 && (spellEffect && spellEffect->Effect != SPELL_EFFECT_SUMMON))
+            targetUnitMap.remove(m_caster);
+    }
 
     if (unMaxTargets && targetUnitMap.size() > unMaxTargets)
     {
@@ -3064,34 +3076,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     }
 }
 
-void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
+SpellCastResult Spell::PreCastCheck(Aura* triggeredByAura /*= nullptr*/)
 {
-    m_targets = *targets;
-
-    m_spellState = SPELL_STATE_PREPARING;
-
-    m_castPositionX = m_caster->GetPositionX();
-    m_castPositionY = m_caster->GetPositionY();
-    m_castPositionZ = m_caster->GetPositionZ();
-    m_castOrientation = m_caster->GetOrientation();
-
-    if (triggeredByAura)
-        m_triggeredByAuraSpell  = triggeredByAura->GetSpellProto();
-
-    // create and add update event for this spell
-    SpellEvent* Event = new SpellEvent(this);
-    m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
-
     // Prevent casting at cast another spell (ServerSide check)
-    if (m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count)
-    {
-        SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
-        finish(false);
-        return;
-    }
-
-    // Fill cost data
-    m_powerCost = CalculatePowerCost(m_spellInfo, m_caster, this, m_CastItem);
+    if (m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count && !m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
+        return SPELL_FAILED_SPELL_IN_PROGRESS;
 
     SpellCastResult result = CheckCast(true);
     if (result != SPELL_CAST_OK && !IsAutoRepeat())         // always cast autorepeat dummy for triggering
@@ -3101,10 +3090,49 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
             SendChannelUpdate(0);
             triggeredByAura->GetHolder()->SetAuraDuration(0);
         }
+        return result;
+    }
+
+    return SPELL_CAST_OK;
+}
+
+void Spell::SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura)
+{
+    m_spellState = SPELL_STATE_STARTING;
+    m_targets = *targets;
+
+    if (m_CastItem)
+        m_CastItemGuid = m_CastItem->GetObjectGuid();
+
+    m_castPositionX = m_caster->GetPositionX();
+    m_castPositionY = m_caster->GetPositionY();
+    m_castPositionZ = m_caster->GetPositionZ();
+    m_castOrientation = m_caster->GetOrientation();
+
+    if (triggeredByAura)
+        m_triggeredByAuraSpell = triggeredByAura->GetSpellProto();
+
+    // create and add update event for this spell
+    SpellEvent* Event = new SpellEvent(this);
+    m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
+
+    // Fill cost data
+    m_powerCost = m_IsTriggeredSpell ? 0 : CalculatePowerCost(m_spellInfo, m_caster, this, m_CastItem);
+
+    SpellCastResult result = PreCastCheck();
+    if (result != SPELL_CAST_OK)
+    {
         SendCastResult(result);
         finish(false);
         return;
     }
+    else
+        Prepare();
+}
+
+void Spell::Prepare()
+{
+    m_spellState = SPELL_STATE_PREPARING;
 
     // Prepare data for triggers
     prepareDataForTriggerSystem();
@@ -3116,13 +3144,8 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
     // set timer base at cast time
     ReSetTimer();
 
-    // stealth must be removed at cast starting (at show channel bar)
-    // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
-    if (!m_IsTriggeredSpell && isSpellBreakStealth(m_spellInfo))
-    {
-        m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-        m_caster->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
-    }
+    if (!m_IsTriggeredSpell)
+        m_caster->RemoveAurasOnCast(m_spellInfo);
 
     // add non-triggered (with cast time and without)
     if (!m_IsTriggeredSpell)
@@ -3134,6 +3157,10 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
         SendSpellStart();
 
         TriggerGlobalCooldown();
+
+        // Execute instant spells immediate
+        if (m_timer == 0 && !IsNextMeleeSwingSpell() && !IsAutoRepeat() && !IsChanneledSpell(m_spellInfo))
+            cast();
     }
     // execute triggered without cast time explicitly in call point
     else if (m_timer == 0)
@@ -5087,7 +5114,7 @@ void Spell::CastTriggerSpells()
     for (SpellInfoList::const_iterator si = m_TriggerSpells.begin(); si != m_TriggerSpells.end(); ++si)
     {
         Spell* spell = new Spell(m_caster, (*si), true, m_originalCasterGUID);
-        spell->prepare(&m_targets);                         // use original spell original targets
+        spell->SpellStart(&m_targets);                         // use original spell original targets
     }
 }
 
@@ -6072,22 +6099,42 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_EFFECT_SUMMON_PET:
             {
-                if (m_caster->GetPetGuid())                 // let warlock do a replacement summon
+                if (m_caster->GetCharmGuid())
+                    return SPELL_FAILED_ALREADY_HAVE_CHARM;
+
+                uint32 plClass = m_caster->getClass();
+                if (plClass == CLASS_HUNTER)
                 {
-
-                    Pet* pet = ((Player*)m_caster)->GetPet();
-
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_WARLOCK)
+                    if (Creature* pet = m_caster->GetPet())
                     {
-                        if (strict)                         // Summoning Disorientation, trigger pet stun (cast by pet so it doesn't attack player)
-                            pet->CastSpell(pet, 32752, true, NULL, NULL, pet->GetObjectGuid());
+                        if (!pet->IsAlive() || pet->IsDead()) // this one will not play along; tried and retried countless times....
+                            return SPELL_FAILED_TARGETS_DEAD;
+                        else
+                            return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+                    }
+                    else
+                    {
+                        Pet* dbPet = new Pet;
+                        if (dbPet->LoadPetFromDB((Player*)m_caster, 0))
+                            return SPELL_CAST_OK;           // still returns an error to the player, so this error must come from somewhere else...
+                        else
+                        {
+                            delete dbPet;
+                            return SPELL_FAILED_NO_PET;
+                        }
+                    }
+                }
+                else if (m_caster->GetPetGuid())
+                {
+                    if (plClass == CLASS_WARLOCK)                  // let warlock do a replacement summon
+                    {
+                        if (strict)     // Summoning Disorientation, trigger pet stun (cast by pet so it doesn't attack player)
+                            if (Pet* pet = ((Player*)m_caster)->GetPet())
+                                pet->CastSpell(pet, 32752, true, nullptr, nullptr, pet->GetObjectGuid());
                     }
                     else
                         return SPELL_FAILED_ALREADY_HAVE_SUMMON;
                 }
-
-                if (m_caster->GetCharmGuid())
-                    return SPELL_FAILED_ALREADY_HAVE_CHARM;
 
                 break;
             }
@@ -6438,16 +6485,21 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
     if (!m_caster->IsAlive())
         return SPELL_FAILED_CASTER_DEAD;
 
-    if (m_caster->IsNonMeleeSpellCasted(false))             // prevent spellcast interruption by another spellcast
+    if (m_caster->IsNonMeleeSpellCasted(false) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING)) // prevent spellcast interruption by another spellcast
         return SPELL_FAILED_SPELL_IN_PROGRESS;
     if (m_caster->IsInCombat() && IsNonCombatSpell(m_spellInfo))
         return SPELL_FAILED_AFFECTING_COMBAT;
 
     if (m_caster->GetTypeId() == TYPEID_UNIT && (((Creature*)m_caster)->IsPet() || m_caster->IsCharmed()))
     {
-        // dead owner (pets still alive when owners ressed?)
-        if (m_caster->GetCharmerOrOwner() && !m_caster->GetCharmerOrOwner()->IsAlive())
-            return SPELL_FAILED_CASTER_DEAD;
+        // dead owner (currently only ghouled players can have alive pet casting)
+        Unit* charmer = m_caster->GetCharmerOrOwner();
+        if (charmer)
+        {
+            Player* pCharmer = charmer->GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(charmer) : nullptr;
+            if (!charmer->IsAlive() && (!pCharmer || !pCharmer->IsGhouled()))
+                return SPELL_FAILED_CASTER_DEAD;
+        }
 
         if (!target && m_targets.getUnitTarget())
             target = m_targets.getUnitTarget();

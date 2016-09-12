@@ -156,9 +156,6 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
     }
     else
         sLog.outErrorEventAI("EventMap for Creature %u is empty but creature is using CreatureEventAI.", m_creature->GetEntry());
-
-    // Handle Spawned Events, also calls Reset()
-    JustRespawned();
 }
 
 #define LOG_PROCESS_EVENT                                                                                                       \

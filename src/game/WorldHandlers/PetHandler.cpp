@@ -150,9 +150,12 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     break;
                 }
                 case COMMAND_ABANDON:                       // abandon (hunter pet) or dismiss (summoned pet)
-                    if (((Creature*)pet)->IsPet())
+                {
+                    Creature* petC = (Creature*)pet;
+                    if (petC->IsPet())
+
                     {
-                        Pet* p = (Pet*)pet;
+                        Pet* p = (Pet*)petC;
                         if (p->getPetType() == HUNTER_PET)
                             p->Unsummon(PET_SAVE_AS_DELETED, _player);
                         else
@@ -161,7 +164,16 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     }
                     else                                    // charmed
                         _player->Uncharm();
+
+                    if (petC->IsTemporarySummon()) // special case when pet was temporary summon through DoSummonPossesed
+                    {
+                        petC->ForcedDespawn();
+                        return;
+                    }
+
+                    ((Pet*)pet)->SetStayPosition();
                     break;
+                }
                 default:
                     sLog.outError("WORLD: unknown PET flag Action %i and spellid %i.", uint32(flag), spellid);
             }

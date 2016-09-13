@@ -2826,7 +2826,7 @@ class  Unit : public WorldObject
          * - \ref AuraType::SPELL_AURA_MOD_POSSESS
          * - \ref AuraType::SPELL_AURA_MOD_POSSESS_PET
          */
-        void Uncharm();
+        virtual void Uncharm();
         /** 
          * Does the same as \ref Unit::GetCharmerOrOwnerGuid but returns the \ref Unit for that instead
          * @return the \ref Unit that's charming this one or owning it, NULL if there is none
@@ -3529,6 +3529,15 @@ class  Unit : public WorldObject
         void BuildMoveFeatherFallPacket(WorldPacket* data, bool apply, uint32 value);
         void BuildMoveHoverPacket(WorldPacket* data, bool apply, uint32 value);
         void BuildMoveLevitatePacket(WorldPacket* data, bool apply, uint32 value);
+
+        // Take possession of an unit (pet, creature, ...)
+        bool TakePossessOf(Unit* possessed);
+
+        // Take possession of a new spawned unit
+        Unit* TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry const* summonProp, SpellEffectEntry const* spellEffect, float x, float y, float z, float ang);
+
+        // Reset control to player
+        void ResetControlState(bool attackCharmer = true);
 
     protected:
         explicit Unit();

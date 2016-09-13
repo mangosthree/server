@@ -12298,3 +12298,225 @@ void Unit::SendCollisionHeightUpdate(float height)
     }
 }
 
+// This will create a new creature and set the current unit as the controller of that new creature
+Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry const* summonProp, SpellEffectEntry const* spellEffect, float x, float y, float z, float ang)
+{
+    int32 const& creatureEntry = spellEffect->EffectMiscValue;
+    CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(creatureEntry);
+    if (!cinfo)
+    {
+        sLog.outErrorDb("WorldObject::SummonCreature: Creature (Entry: %u) not existed for summoner: %s. ", creatureEntry, GetGuidStr().c_str());
+        return nullptr;
+    }
+
+    if (GetCharm())
+    {
+        sLog.outError("Unit::TakePossessOf> There is already a charmed creature for %s its : %s. ", GetGuidStr().c_str(), GetCharm()->GetGuidStr().c_str());
+        return nullptr;
+    }
+
+    TemporarySummon* pCreature = new TemporarySummon(GetObjectGuid());
+
+    CreatureCreatePos pos(GetMap(), x, y, z, ang, GetPhaseMask());
+
+    if (x == 0.0f && y == 0.0f && z == 0.0f)
+        pos = CreatureCreatePos(this, GetOrientation(), CONTACT_DISTANCE, ang);
+
+    if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo))
+    {
+        delete pCreature;
+        return nullptr;
+    }
+
+    Player* player = GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this): nullptr;
+
+    pCreature->setFaction(getFaction());                                // set same faction than player
+    pCreature->SetRespawnCoord(pos);                                    // set spawn coord
+    pCreature->SetCharmerGuid(GetObjectGuid());                         // save guid of the charmer
+    pCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, spellEntry->Id);   // set the spell id used to create this (may be used for removing corresponding aura
+    pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);  // set flag for client that mean this unit is controlled by a player
+    pCreature->addUnitState(UNIT_STAT_CONTROLLED);                      // also set internal unit state flag
+    pCreature->SelectLevel(getLevel());                                 // set level to same level than summoner TODO:: not sure its always the case...
+    pCreature->SetLinkedToOwnerAura(TEMPSUMMON_LINKED_AURA_OWNER_CHECK | TEMPSUMMON_LINKED_AURA_REMOVE_OWNER); // set what to do if linked aura is removed or the creature is dead.
+    pCreature->SetWalk(IsWalking(), true);                              // sync the walking state with the summoner
+
+    // important before adding to the map!
+    SetCharmGuid(pCreature->GetObjectGuid());                           // save guid of charmed creature
+
+    pCreature->SetSummonProperties(TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000); // set 5s corpse decay
+    GetMap()->Add(static_cast<Creature*>(pCreature));                   // create the creature in the client
+
+    // Give the control to the player
+    if (player)
+    {
+        player->GetCamera().SetView(pCreature);                         // modify camera view to the creature view
+        player->SetClientControl(pCreature, 1);                         // transfer client control to the creature
+        player->SetMover(pCreature);                                    // set mover so now we know that creature is "moved" by this unit
+        player->SendForcedObjectUpdate();                               // we have to update client data here to avoid problem with the "release spirit" windows reappear.
+    }
+
+    // initialize AI
+    pCreature->AIM_Initialize();
+    
+    if (player)
+    {
+        // Initialize pet bar
+        if (CharmInfo* charmInfo = pCreature->InitCharmInfo(pCreature))
+            charmInfo->InitPossessCreateSpells();
+        player->PossessSpellInitialize();
+    }
+    else
+    {
+        // fire just summoned hook
+        if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
+            ((Creature*)this)->AI()->JustSummoned(pCreature);
+    }
+
+    // Creature Linking, Initial load is handled like respawn
+    if (pCreature->IsLinkingEventTrigger())
+        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, pCreature);
+
+    // return the creature therewith the summoner has access to it
+    return pCreature;
+}
+
+bool Unit::TakePossessOf(Unit* possessed)
+{
+    Player* player = nullptr;
+    if (GetTypeId() == TYPEID_PLAYER)
+        player = static_cast<Player *>(this);
+
+    possessed->addUnitState(UNIT_STAT_CONTROLLED);
+    possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+    possessed->SetCharmerGuid(GetObjectGuid());
+    possessed->setFaction(getFaction());
+
+    SetCharm(possessed);
+
+    Creature* possessedCreature = nullptr;
+    if (possessed->GetTypeId() == TYPEID_UNIT)
+        possessedCreature = static_cast<Creature *>(possessed);
+
+    if (player)
+    {
+        player->GetCamera().SetView(possessed);
+        player->SetClientControl(possessed, 1);
+        player->SetMover(possessed);
+        player->SendForcedObjectUpdate();
+
+        if (possessedCreature && possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
+        {
+            possessed->StopMoving();
+            possessed->GetMotionMaster()->Clear(false);
+            possessed->GetMotionMaster()->MoveIdle();
+            return true;
+        }
+        else if (CharmInfo* charmInfo = possessed->InitCharmInfo(possessed))
+        {
+            charmInfo->InitPossessCreateSpells();
+            charmInfo->SetReactState(REACT_PASSIVE);
+            charmInfo->SetCommandState(COMMAND_STAY);
+        }
+        player->PossessSpellInitialize();
+    }
+
+    possessed->CombatStop(true);
+    possessed->DeleteThreatList();
+    possessed->getHostileRefManager().deleteReferences();
+
+    if (possessedCreature)
+    {
+        possessedCreature->AIM_Initialize();
+    }
+    else if (possessed->GetTypeId() == TYPEID_PLAYER)
+    {
+        static_cast<Player*>(possessed)->SetClientControl(possessed, 0);
+    }
+    return true;
+}
+
+void Unit::ResetControlState(bool attackCharmer /*= true*/)
+{
+    Player* player = nullptr;
+    if (GetTypeId() == TYPEID_PLAYER)
+        player = static_cast<Player *>(this);
+
+    Unit* possessed = GetCharm();
+
+    if (!possessed)
+    {
+        if (player)
+        {
+            player->GetCamera().ResetView();
+            player->SetClientControl(player, 1);
+            player->SetMover(nullptr);
+        }
+        return;
+    }
+
+    Creature* possessedCreature = static_cast<Creature *>(possessed);
+
+    possessed->clearUnitState(UNIT_STAT_CONTROLLED);
+    possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+    possessed->SetCharmerGuid(ObjectGuid());
+    SetCharmGuid(ObjectGuid());
+
+    if (player)
+    {
+        player->SetClientControl(possessed, 0);
+        player->SetMover(nullptr);
+        player->GetCamera().ResetView();
+
+        if (possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
+        {
+            // out of range pet dismissed
+            if (!possessedCreature->IsWithinDistInMap(this, possessedCreature->GetMap()->GetVisibilityDistance()))
+            {
+                player->RemovePet(PET_SAVE_REAGENTS);
+            }
+            else
+            {
+                possessedCreature->GetMotionMaster()->MoveFollow(this, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+            }
+
+            return;
+        }
+        else
+            player->RemovePetActionBar();
+    }
+
+    possessed->CombatStop(true);
+    possessed->DeleteThreatList();
+    possessed->getHostileRefManager().deleteReferences();
+
+    if (possessed->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player* possessedPlayer = static_cast<Player *>(possessed);
+        possessedPlayer->setFactionForRace(possessedPlayer->getRace());
+        possessedPlayer->SetClientControl(possessedPlayer, 1);
+    }
+    else if (possessedCreature)
+    {
+        if (possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
+        {
+            // out of range pet dismissed
+            if (!possessedCreature->IsWithinDistInMap(this, possessedCreature->GetMap()->GetVisibilityDistance()))
+            {
+                player->RemovePet(PET_SAVE_REAGENTS);
+            }
+            else
+            {
+                possessedCreature->GetMotionMaster()->MoveFollow(this, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+            }
+        }
+        else if (attackCharmer)
+        {
+            CreatureInfo const* cinfo = possessedCreature->GetCreatureInfo();
+            possessedCreature->setFaction(cinfo->FactionAlliance);
+            possessedCreature->AIM_Initialize();
+            possessedCreature->AttackedBy(this);
+        }
+    }
+}
+
+

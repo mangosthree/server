@@ -35,12 +35,15 @@ class TemporarySummon : public Creature
         virtual ~TemporarySummon() {};
 
         void Update(uint32 update_diff, uint32 time) override;
+        void SetSummonProperties(TempSummonType type, uint32 lifetime);
         void Summon(TempSummonType type, uint32 lifetime);
-        void  UnSummon();
+        void MANGOS_DLL_SPEC UnSummon();
         void SaveToDB();
         ObjectGuid const& GetSummonerGuid() const { return m_summoner ; }
         Unit* GetSummoner() const { return ObjectAccessor::GetUnit(*this, m_summoner); }
+        void SetLinkedToOwnerAura(uint32 flags) { m_linkedToOwnerAura |= flags; };
     private:
+        void RemoveAuraFromOwner();
         void SaveToDB(uint32, uint8, uint32) override       // overwrited of Creature::SaveToDB     - don't must be called
         {
             MANGOS_ASSERT(false);
@@ -54,6 +57,7 @@ class TemporarySummon : public Creature
         uint32 m_timer;
         uint32 m_lifetime;
         ObjectGuid m_summoner;
+        uint32 m_linkedToOwnerAura;
 };
 
 class TemporarySummonWaypoint : public TemporarySummon

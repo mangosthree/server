@@ -2257,6 +2257,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
                 targetUnitMap.push_back((Unit*)m_caster->GetTransportInfo()->GetTransport());
             break;
+        case TARGET_VEHICLE_DRIVER:
+            if (m_caster->IsVehicle())
+                if (Unit* vehicleDriver = m_caster->GetCharmer())
+                    targetUnitMap.push_back(vehicleDriver);
+            break;
         case TARGET_VEHICLE_PASSENGER_0:
         case TARGET_VEHICLE_PASSENGER_1:
         case TARGET_VEHICLE_PASSENGER_2:
@@ -3704,8 +3709,10 @@ void Spell::_handle_immediate_phase()
         if(!spellEffect)
             continue;
         // persistent area auras target only the ground
-        if(spellEffect->Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA)
-            HandleEffects(NULL, NULL, NULL, SpellEffectIndex(j));
+        if (spellEffect->Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA ||
+                //summon a gameobject at the spell's destination xyz
+                (spellEffect->Effect == SPELL_EFFECT_TRANS_DOOR && spellEffect->EffectImplicitTargetA == TARGET_AREAEFFECT_GO_AROUND_DEST))
+            HandleEffects(nullptr, nullptr, nullptr, SpellEffectIndex(j));
     }
 }
 
@@ -6505,6 +6512,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
             target = m_targets.getUnitTarget();
 
         bool need = false;
+        bool script = false;
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
             SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(SpellEffectIndex(i));
@@ -6523,9 +6531,16 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
                     return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
                 break;
             }
+            else if (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT_COORDINATES)
+            {
+                script = true;
+                continue;
+            }
         }
         if (need)
             m_targets.setUnitTarget(target);
+        else if (script == true)
+            return CheckCast(true);
 
         Unit* _target = m_targets.getUnitTarget();
 

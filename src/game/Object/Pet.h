@@ -254,6 +254,21 @@ class  Pet : public Creature
         PetSpellMap     m_spells;
         AutoSpellList   m_autospells;
 
+        uint32 m_opener;
+        uint32 m_openerMinRange;
+        uint32 m_openerMaxRange;
+
+        uint32 GetSpellOpener()         { return m_opener; }
+        uint32 GetSpellOpenerMinRange() { return m_openerMinRange; }
+        uint32 GetSpellOpenerMaxRange() { return m_openerMaxRange; }
+
+        void SetSpellOpener(uint32 spellId = 0, uint32 minRange = 0, uint32 maxRange = 0)
+        {
+            m_opener = spellId;
+            m_openerMinRange = minRange;
+            m_openerMaxRange = maxRange;
+        }
+
         void InitPetCreateSpells();
 
         bool resetTalents(bool no_cost = false);

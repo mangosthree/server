@@ -7497,6 +7497,11 @@ void Spell::UpdatePointers()
     UpdateOriginalCasterPointer();
 
     m_targets.Update(m_caster);
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        m_CastItem = ((Player *)m_caster)->GetItemByGuid(m_CastItemGuid);
+    else
+        m_CastItem = NULL;
 }
 
 bool Spell::CheckTargetCreatureType(Unit* target) const
@@ -8063,6 +8068,7 @@ void Spell::ClearCastItem()
         m_targets.setItemTarget(NULL);
 
     m_CastItem = NULL;
+    m_CastItemGuid.Clear();
 }
 
 bool Spell::HasGlobalCooldown()

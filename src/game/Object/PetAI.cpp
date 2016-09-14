@@ -128,6 +128,15 @@ void PetAI::UpdateAI(const uint32 diff)
         return;
 
     Unit* owner = m_creature->GetCharmerOrOwner();
+    Unit* victim = nullptr;
+
+    if (!((Pet*)m_creature)->isControlled())
+        m_creature->SelectHostileTarget();
+
+    // Creature pets and guardians will always look in threat list for victim
+    if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
+        || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
+        victim = m_creature->getVictim();
 
     if (m_updateAlliesTimer <= diff)
         // UpdateAllies self set update timer
@@ -135,62 +144,68 @@ void PetAI::UpdateAI(const uint32 diff)
     else
         m_updateAlliesTimer -= diff;
 
-    if (inCombat && (!m_creature->getVictim() || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
-        _stopAttack();
-
-    // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
-    if (m_creature->getVictim())
+    if (inCombat && !victim)
     {
-        if (_needToStop())
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "PetAI (guid = %u) is stopping attack.", m_creature->GetGUIDLow());
-            _stopAttack();
-            return;
-        }
-
-        bool meleeReach = m_creature->CanReachWithMeleeAttack(m_creature->getVictim());
-
-        if (m_creature->IsStopped() || meleeReach)
-        {
-            // required to be stopped cases
-            if (m_creature->IsStopped() && m_creature->IsNonMeleeSpellCasted(false))
-            {
-                if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
-                    m_creature->InterruptNonMeleeSpells(false);
-                else
-                    return;
-            }
-            // not required to be stopped case
-            else if (DoMeleeAttackIfReady())
-            {
-                if (!m_creature->getVictim())
-                    return;
-
-                // if pet misses its target, it will also be the first in threat list
-                m_creature->getVictim()->AddThreat(m_creature);
-
-                if (_needToStop())
-                    _stopAttack();
-            }
-        }
+        m_creature->AttackStop(true);
+        inCombat = false;
     }
-    else if (owner && m_creature->GetCharmInfo())
+
+    if (((Pet*)m_creature)->GetIsRetreating())
     {
-        if (owner->IsInCombat() && !(m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE) || m_creature->GetCharmInfo()->HasCommandState(COMMAND_STAY)))
-        {
-            AttackStart(owner->getAttackerForHelper());
-        }
-        else if (m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
+        if (!owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
         {
             if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
-            {
                 m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-            }
-        }
-    }
 
+            return;
+        }
+        else
+           ((Pet*)m_creature)->SetIsRetreating();
+    }
+    else if (((Pet*)m_creature)->GetSpellOpener() != 0) // have opener stored
+    {
+        uint32 minRange = ((Pet*)m_creature)->GetSpellOpenerMinRange();
+
+        if (!(victim = m_creature->getVictim())
+            || (minRange != 0 && m_creature->IsWithinDistInMap(victim, minRange)))
+            ((Pet*)m_creature)->SetSpellOpener();
+        else if (m_creature->IsWithinDistInMap(victim, ((Pet*)m_creature)->GetSpellOpenerMaxRange())
+                && m_creature->IsWithinLOSInMap(victim))
+        {
+            // stop moving
+            m_creature->clearUnitState(UNIT_STAT_MOVING);
+
+            // auto turn to target
+            m_creature->SetInFront(victim);
+
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                m_creature->SendCreateUpdateToPlayer((Player*)victim);
+
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+                m_creature->SendCreateUpdateToPlayer((Player*)owner);
+
+            uint32 spell_id = ((Pet*)m_creature)->GetSpellOpener();
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
+
+            Spell* spell = new Spell(m_creature, spellInfo, false);
+
+            SpellCastResult result = spell->CheckPetCast(victim);
+
+            if (result == SPELL_CAST_OK)
+            {
+                m_creature->AddCreatureSpellCooldown(spell_id);
+                spell->SpellStart(&(spell->m_targets));
+            }
+            else
+                delete spell;
+
+            ((Pet*)m_creature)->SetSpellOpener();
+        }
+        else
+            return;
+    }
     // Autocast (casted only in combat or persistent spells in any state)
-    if (!m_creature->IsNonMeleeSpellCasted(false))
+    else if (!m_creature->IsNonMeleeSpellCasted(false))
     {
         typedef std::vector<std::pair<Unit*, Spell*> > TargetSpellList;
         TargetSpellList targetSpellStore;
@@ -220,7 +235,6 @@ void PetAI::UpdateAI(const uint32 diff)
                 // Consume Shadows, Lesser Invisibility, so ignore checks for its
                 if (!IsNonCombatSpell(spellInfo))
                 {
-                    // allow only spell without spell cost or with spell cost but not duration limit
                     int32 duration = GetSpellDuration(spellInfo);
                     SpellPowerEntry const* spellPower = spellInfo->GetSpellPower();
                     if (spellPower && (spellPower->manaCost || spellPower->ManaCostPercentage || spellPower->manaPerSecond) && duration > 0)
@@ -228,22 +242,21 @@ void PetAI::UpdateAI(const uint32 diff)
 
                     // allow only spell without cooldown > duration
                     int32 cooldown = GetSpellRecoveryTime(spellInfo);
-                    if (cooldown >= 0 && duration >= 0 && cooldown > duration)
+
+                    // allow only spell not on cooldown
+                    if (cooldown != 0 && duration < cooldown)
                         continue;
                 }
             }
-            else
-            {
-                // just ignore non-combat spells
-                if (IsNonCombatSpell(spellInfo))
-                    continue;
-            }
+            // just ignore non-combat spells
+            else if (IsNonCombatSpell(spellInfo))
+                continue;
 
             Spell* spell = new Spell(m_creature, spellInfo, false);
 
-            if (inCombat && !m_creature->hasUnitState(UNIT_STAT_FOLLOW) && spell->CanAutoCast(m_creature->getVictim()))
+            if (inCombat && !m_creature->hasUnitState(UNIT_STAT_FOLLOW) && spell->CanAutoCast(victim))
             {
-                targetSpellStore.push_back(TargetSpellList::value_type(m_creature->getVictim(), spell));
+                targetSpellStore.push_back(TargetSpellList::value_type(victim, spell));
                 continue;
             }
             else
@@ -301,6 +314,105 @@ void PetAI::UpdateAI(const uint32 diff)
         for (TargetSpellList::const_iterator itr = targetSpellStore.begin(); itr != targetSpellStore.end(); ++itr)
             delete itr->second;
     }
+
+    // Guardians will always look in threat list for victim
+    if (!((Pet*)m_creature)->isControlled())
+        m_creature->SelectHostileTarget();
+
+    if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
+        || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
+        victim = m_creature->getVictim();
+
+    // Stop here if casting spell (No melee and no movement)
+    if (m_creature->IsNonMeleeSpellCasted(false))
+        return;
+
+    if (victim)
+    {
+        // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
+        // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
+        if ((m_creature->IsCharmed() && victim == m_creature->GetCharmer()) || !victim->IsTargetableForAttack())
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "PetAI (guid = %u) is stopping attack.", m_creature->GetGUIDLow());
+            m_creature->CombatStop();
+            inCombat = false;
+            
+            return;
+        }
+
+        // if pet misses its target, it will also be the first in threat list
+        if (!(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE)
+            && m_creature->CanReachWithMeleeAttack(victim))
+        {
+            if (!m_creature->HasInArc(2 * M_PI_F / 3, victim))
+            {
+                m_creature->SetInFront(victim);
+                if (victim->GetTypeId() == TYPEID_PLAYER)
+                    m_creature->SendCreateUpdateToPlayer((Player*)victim);
+
+                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                    m_creature->SendCreateUpdateToPlayer((Player*)owner);
+            }
+
+            if (DoMeleeAttackIfReady())
+                victim->AddThreat(m_creature);
+        }
+        else if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE)
+            || m_creature->hasUnitState(UNIT_STAT_MOVING)))
+            AttackStart(victim);
+    }
+    else if (owner)
+    {
+        CharmInfo* charmInfo = m_creature->GetCharmInfo();
+
+        if (owner->IsInCombat() && !(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
+            || (charmInfo && charmInfo->HasReactState(REACT_PASSIVE))))
+            AttackStart(owner->getAttackerForHelper());
+        else if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+        {
+            if (charmInfo && charmInfo->HasCommandState(COMMAND_STAY))
+            {
+                if (Pet* pet = (Pet*)m_creature)
+                {
+                    //if stay command is set but we dont have stay pos set then we need to establish current pos as stay position
+                    if (!pet->IsStayPosSet())
+                        pet->SetStayPosition(true);
+
+                    float stayPosX = pet->GetStayPosX();
+                    float stayPosY = pet->GetStayPosY();
+                    float stayPosZ = pet->GetStayPosZ();
+
+                    if (m_creature->GetPositionX() == stayPosX
+                        && m_creature->GetPositionY() == stayPosY
+                        && m_creature->GetPositionZ() == stayPosZ)
+                    {
+                        float StayPosO = pet->GetStayPosO();
+
+                        if (m_creature->hasUnitState(UNIT_STAT_MOVING))
+                        {
+                            m_creature->GetMotionMaster()->Clear(false);
+                            m_creature->GetMotionMaster()->MoveIdle();
+                        }
+                        else if (m_creature->GetOrientation() != StayPosO)
+                            m_creature->SetOrientation(StayPosO);
+                    }
+                    else
+                        pet->GetMotionMaster()->MovePoint(0, stayPosX, stayPosY, stayPosZ, false);
+                }
+            }
+            else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW))
+            {
+                if (owner->IsWithinDistInMap(m_creature, PET_FOLLOW_DIST))
+                {
+                    m_creature->GetMotionMaster()->Clear(false);
+                    m_creature->GetMotionMaster()->MoveIdle();
+                }
+            }
+            else if (charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW)
+                && !owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
+                m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+        }
+    }
 }
 
 bool PetAI::_isVisible(Unit* u) const
@@ -350,8 +462,9 @@ void PetAI::UpdateAllies()
 
 void PetAI::AttackedBy(Unit* attacker)
 {
-    // when attacked, fight back in case 1)no victim already AND 2)not set to passive AND 3)not set to stay, unless can it can reach attacker with melee attack anyway
-    if (!m_creature->getVictim() && m_creature->GetCharmInfo() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE) &&
-            (!m_creature->GetCharmInfo()->HasCommandState(COMMAND_STAY) || m_creature->CanReachWithMeleeAttack(attacker)))
+    // when attacked, fight back if no victim unless we have a charm state set to passive
+    if (!(m_creature->getVictim() || ((Pet*)m_creature)->GetIsRetreating() == true)
+        && !(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
+        || (m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE))))
         AttackStart(attacker);
 }

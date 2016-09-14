@@ -251,6 +251,10 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
         if (!s_show)
             continue;
 
+        // 49 is maximum player count sent to client
+        if (++matchcount > 49)
+            continue;
+
         ++displaycount;
 
         data << pname;                                      // player name

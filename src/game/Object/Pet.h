@@ -56,12 +56,17 @@ enum PetSaveMode
 // There might be a lot more
 enum PetModeFlags
 {
-    PET_MODE_UNKNOWN_0         = 0x0000001,
-    PET_MODE_UNKNOWN_2         = 0x0000100,
+    PET_MODE_STAY              = 0x0000000,
+    PET_MODE_FOLLOW            = 0x0000001,
+    PET_MODE_ATTACK            = 0x0000002,
+    PET_MODE_PASSIVE           = 0x0000000,
+    PET_MODE_DEFENSIVE         = 0x0000100,
+    PET_MODE_AGGRESSIVE        = 0x0000200,
+
     PET_MODE_DISABLE_ACTIONS   = 0x8000000,
 
     // autoset in client at summon
-    PET_MODE_DEFAULT           = PET_MODE_UNKNOWN_0 | PET_MODE_UNKNOWN_2,
+    PET_MODE_DEFAULT           = PET_MODE_FOLLOW | PET_MODE_DEFENSIVE,
 };
 
 enum PetSpellState
@@ -146,9 +151,7 @@ class  Pet : public Creature
         void setPetType(PetType type) { m_petType = type; }
         bool isControlled() const { return getPetType() == SUMMON_PET || getPetType() == HUNTER_PET; }
         bool isTemporarySummoned() const { return m_duration > 0; }
-
-        bool IsPermanentPetFor(Player* owner);              // pet have tab in character windows and set UNIT_FIELD_PETNUMBER
-
+        
         bool Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, uint32 pet_number);
         bool CreateBaseAtCreature(Creature* creature);
         bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false);

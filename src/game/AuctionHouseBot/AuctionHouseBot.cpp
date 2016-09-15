@@ -427,7 +427,19 @@ bool AuctionBotConfig::Initialize()
 
     m_ItemsPerCycleBoost = getConfig(CONFIG_UINT32_AHBOT_ITEMS_PER_CYCLE_BOOST);
     m_ItemsPerCycleNormal = getConfig(CONFIG_UINT32_AHBOT_ITEMS_PER_CYCLE_NORMAL);
+
     return true;
+}
+
+void AuctionBotConfig::SetAHBotId(const std::string& BotCharName)
+{
+    m_BotId = 0;
+    if (!BotCharName.empty())
+    {
+        m_BotId = sObjectMgr.GetPlayerGuidByName(BotCharName.c_str()).GetCounter();
+        if (!m_BotId)
+          { sLog.outError("AHBot uses an invalid character name `%s`", BotCharName.c_str()); }
+    }
 }
 
 void AuctionBotConfig::setConfig(AuctionBotConfigUInt32Values index, char const* fieldname, uint32 defvalue)
@@ -483,6 +495,7 @@ void AuctionBotConfig::GetConfigFromFile()
 
     SetAHBotIncludes(m_AhBotCfg.GetStringDefault("AuctionHouseBot.forceIncludeItems", ""));
     SetAHBotExcludes(m_AhBotCfg.GetStringDefault("AuctionHouseBot.forceExcludeItems", ""));
+    SetAHBotId(m_AhBotCfg.GetStringDefault("AuctionHouseBot.CharacterName", ""));
 
     setConfig(CONFIG_BOOL_AHBOT_BUYER_ALLIANCE_ENABLED       , "AuctionHouseBot.Buyer.Alliance.Enabled"      , false);
     setConfig(CONFIG_BOOL_AHBOT_BUYER_HORDE_ENABLED          , "AuctionHouseBot.Buyer.Horde.Enabled"         , false);
@@ -694,7 +707,7 @@ uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config)
 {
     config.SameItemInfo.clear();
     uint32 count = 0;
-    time_t Now = time(nullptr);
+    time_t Now = time(NULL);
 
     AuctionHouseObject::AuctionEntryMapBounds bounds = sAuctionMgr.GetAuctionsMap(config.GetHouseType())->GetAuctionsBounds();
     for (AuctionHouseObject::AuctionEntryMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
@@ -713,16 +726,16 @@ uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config)
                 if (Aentry->buyout != 0)
                 {
                     if (Aentry->buyout / item->GetCount() < buyerItem.MinBuyPrice)
-                        buyerItem.MinBuyPrice = Aentry->buyout / item->GetCount();
+                        { buyerItem.MinBuyPrice = Aentry->buyout / item->GetCount(); }
                     else if (buyerItem.MinBuyPrice == 0)
-                        buyerItem.MinBuyPrice = Aentry->buyout / item->GetCount();
+                        { buyerItem.MinBuyPrice = Aentry->buyout / item->GetCount(); }
                 }
                 if (Aentry->startbid / item->GetCount() < buyerItem.MinBidPrice)
-                    buyerItem.MinBidPrice = Aentry->startbid / item->GetCount();
+                    { buyerItem.MinBidPrice = Aentry->startbid / item->GetCount(); }
                 else if (buyerItem.MinBidPrice == 0)
-                    buyerItem.MinBidPrice = Aentry->startbid / item->GetCount();
+                    { buyerItem.MinBidPrice = Aentry->startbid / item->GetCount(); }
 
-                if (!Aentry->owner)
+                if (Aentry->owner == sAuctionBotConfig.GetAHBotId())
                 {
                     if ((Aentry->bid != 0) && Aentry->bidder) // Add bided by player
                     {
@@ -753,7 +766,7 @@ uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config)
         }
     }
 
-    DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: %u items added to buyable vector for ah type: %u", count, config.GetHouseType());
+    DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: %u items added to buyable vector for AH type: %u", count, config.GetHouseType());
     DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: SameItemInfo size = " SIZEFMTD, config.SameItemInfo.size());
     return count;
 }
@@ -899,7 +912,7 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
 
     PrepareListOfEntry(config);
 
-    time_t Now = time(nullptr);
+    time_t Now = time(NULL);
     uint32 BuyCycles;
     if (config.CheckedEntry.size() > sAuctionBotConfig.GetItemPerCycleBoost())
     {
@@ -907,7 +920,7 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
         BASIC_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Boost value used for Buyer! (if this happens often adjust both ItemsPerCycle in ahbot.conf)");
     }
     else
-        BuyCycles = sAuctionBotConfig.GetItemPerCycleNormal();
+        { BuyCycles = sAuctionBotConfig.GetItemPerCycleNormal(); }
 
     for (CheckEntryMap::iterator itr = config.CheckedEntry.begin(); itr != config.CheckedEntry.end();)
     {
@@ -930,7 +943,7 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
         }
 
         if (BuyCycles == 0)
-            break;
+            { break; }
 
         uint32 MaxChance = 5000;
 
@@ -948,9 +961,9 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
 
         double MaxBuyablePrice = (BasePrice * config.BuyerPriceRatio) / 100;
         uint32 buyoutPrice = auction->buyout / item->GetCount();
+
         uint32 bidPrice;
         uint32 bidPriceByItem;
-
         if (auction->bid >= auction->startbid)
         {
             bidPrice = auction->GetAuctionOutBid();
@@ -966,7 +979,6 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
         double InGame_BidPrice;
         uint32 minBidPrice;
         uint32 minBuyPrice;
-
         BuyerItemInfoMap::iterator sameitem_itr = config.SameItemInfo.find(item->GetEntry());
         if (sameitem_itr == config.SameItemInfo.end())
         {
@@ -980,8 +992,9 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
             const BuyerItemInfo& sameBuyerItem = sameitem_itr->second;
 
             if (sameBuyerItem.ItemCount == 1)
-                MaxBuyablePrice = MaxBuyablePrice * 5;  // if only one item exist can be bought if the price is high too.
-
+                {
+                    MaxBuyablePrice = MaxBuyablePrice * 5;
+                } // if only one item exist can be buyed if the price is high too.
             InGame_BuyPrice = sameBuyerItem.BuyPrice / sameBuyerItem.ItemCount;
             InGame_BidPrice = sameBuyerItem.BidPrice / sameBuyerItem.ItemCount;
             minBidPrice = sameBuyerItem.MinBidPrice;
@@ -997,28 +1010,29 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
                          minBuyPrice / 10000, minBidPrice / 10000);
         DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Actual Entry price,  Buy=%ug, Bid=%ug.", buyoutPrice / 10000, bidPrice / 10000);
 
-        if (!auction->owner)                // Original auction owner
+        if (auction->owner == sAuctionBotConfig.GetAHBotId())      // Original auction owner
         {
-            MaxChance = MaxChance / 5;      // if Owner is AHBot this mean player placed bid on this auction. We divide by 5 chance for AhBuyer to place bid on it. (This make more challenge than ignore entry)
+            MaxChance = MaxChance / 5;                             // if Owner is AHBot this mean player placed bid on this auction. We divide by 5 chance for AhBuyer to place bid on it. (This make more challenge than ignore entry)
         }
-        if (auction->buyout != 0)           // Is the item directly buyable?
+        if (auction->buyout != 0)                                  // Is the item directly buyable?
         {
             if (IsBuyableEntry(buyoutPrice, InGame_BuyPrice, MaxBuyablePrice, minBuyPrice, MaxChance, config.FactionChance))
             {
                 if (IsBidableEntry(bidPriceByItem, InGame_BuyPrice, MaxBidablePrice, minBidPrice, MaxChance / 2, config.FactionChance))
-                        if (urand(0, 5) == 0) PlaceBidToEntry(auction, bidPrice); else BuyEntry(auction);
+                    if (urand(0, 5) == 0) { PlaceBidToEntry(auction, bidPrice); }
+                    else { BuyEntry(auction); }
                 else
-                    BuyEntry(auction);
+                    { BuyEntry(auction); }
             }
             else
             {
                 if (IsBidableEntry(bidPriceByItem, InGame_BuyPrice, MaxBidablePrice, minBidPrice, MaxChance / 2, config.FactionChance))
-                    PlaceBidToEntry(auction, bidPrice);
+                    { PlaceBidToEntry(auction, bidPrice); }
             }
         }
         else // buyout = 0 mean only bid are possible
             if (IsBidableEntry(bidPriceByItem, InGame_BuyPrice, MaxBidablePrice, minBidPrice, MaxChance, config.FactionChance))
-                PlaceBidToEntry(auction, bidPrice);
+                { PlaceBidToEntry(auction, bidPrice); }
 
         auctionEval.LastChecked = Now;
         --BuyCycles;
@@ -1217,12 +1231,12 @@ bool AuctionBotSeller::Initialize()
         // vendor filter
         if (!sAuctionBotConfig.getConfig(CONFIG_BOOL_AHBOT_ITEMS_VENDOR))
         {
-            bool isVendorItem = false;
-            for (size_t i = 0; (i < npcItems.size()) && (!isVendorItem); ++i)
+            bool IsVendorItem = false;
+            for (size_t i = 0; (i < npcItems.size()) && (!IsVendorItem); ++i)
                 if (itemID == npcItems[i])
-                    isVendorItem = true;
+                    { IsVendorItem = true; }
 
-            if (isVendorItem)
+            if (IsVendorItem)
                 { continue; }
         }
 
@@ -1232,7 +1246,7 @@ bool AuctionBotSeller::Initialize()
             bool isLootItem = false;
             for (size_t i = 0; (i < lootItems.size()) && (!isLootItem); ++i)
                 if (itemID == lootItems[i])
-                    isLootItem = true;
+                    { isLootItem = true; }
             if (isLootItem)
                 { continue; }
         }
@@ -1240,18 +1254,18 @@ bool AuctionBotSeller::Initialize()
         // not vendor/loot filter
         if (!sAuctionBotConfig.getConfig(CONFIG_BOOL_AHBOT_ITEMS_MISC))
         {
-            bool isVendorItem = false;
+            bool IsVendorItem = false;
             bool isLootItem = false;
 
-            for (size_t i = 0; (i < npcItems.size()) && (!isVendorItem); ++i)
+            for (size_t i = 0; (i < npcItems.size()) && (!IsVendorItem); ++i)
                 if (itemID == npcItems[i])
-                    isVendorItem = true;
+                    { IsVendorItem = true; }
 
             for (size_t i = 0; (i < lootItems.size()) && (!isLootItem); ++i)
                 if (itemID == lootItems[i])
                     { isLootItem = true; }
 
-            if ((!isLootItem) && (!isVendorItem))
+            if ((!isLootItem) && (!IsVendorItem))
                 { continue; }
         }
 
@@ -1604,7 +1618,7 @@ uint32 AuctionBotSeller::SetStat(AHB_Seller_Config& config)
             ItemPrototype const* prototype = item->GetProto();
             if (prototype)
             {
-                if (!Aentry->owner)                         // Add only ahbot items
+                if (Aentry->owner == sAuctionBotConfig.GetAHBotId())             // Add only ahbot items
                 {
                     ++ItemsInAH[prototype->Quality][prototype->Class];
                 }
@@ -1832,7 +1846,7 @@ AuctionHouseBot::~AuctionHouseBot()
     delete m_Seller;
 }
 
-void AuctionHouseBot::InitilizeAgents()
+void AuctionHouseBot::InitializeAgents()
 {
     if (sAuctionBotConfig.getConfig(CONFIG_BOOL_AHBOT_SELLER_ENABLED))
     {
@@ -1859,7 +1873,9 @@ void AuctionHouseBot::InitilizeAgents()
 void AuctionHouseBot::Initialize()
 {
     if (sAuctionBotConfig.Initialize())
-        { InitilizeAgents(); }
+    {
+        InitializeAgents();
+    }
 }
 
 void AuctionHouseBot::SetItemsRatio(uint32 al, uint32 ho, uint32 ne)
@@ -1894,7 +1910,7 @@ bool AuctionHouseBot::ReloadAllConfig()
         return false;
     }
 
-    InitilizeAgents();
+    InitializeAgents();
     return true;
 }
 
@@ -1914,7 +1930,7 @@ void AuctionHouseBot::PrepareStatusInfos(AuctionHouseBotStatusInfo& statusInfo)
             if (Item* item = sAuctionMgr.GetAItem(Aentry->itemGuidLow))
             {
                 ItemPrototype const* prototype = item->GetProto();
-                if (!Aentry->owner)                         // Add only ahbot items
+                if (Aentry->owner == sAuctionBotConfig.GetAHBotId())                          // Add only ahbot items
                 {
                     if (prototype->Quality < MAX_AUCTION_QUALITY)
                         { ++statusInfo[i].QualityInfo[prototype->Quality]; }
@@ -1935,8 +1951,8 @@ void AuctionHouseBot::Rebuild(bool all)
         for (AuctionHouseObject::AuctionEntryMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
         {
             AuctionEntry* entry = itr->second;
-            if (!entry->owner)                              // ahbot auction
-                if (all || entry->bid == 0)                 // expire now auction if no bid or forced
+            if (entry->owner == sAuctionBotConfig.GetAHBotId())                                    // ahbot auction
+                if (all || entry->bid == 0)                                                        // expire auction now if no bid or forced
                     entry->expireTime = sWorld.GetGameTime();
         }
     }

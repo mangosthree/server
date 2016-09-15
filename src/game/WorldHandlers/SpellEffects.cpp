@@ -6085,7 +6085,7 @@ void Spell::EffectDispel(SpellEffectEntry const* effect)
                 if (!holder->IsPositive())
                     positive = false;
                 else
-                    positive = !holder->GetSpellProto()->HasAttribute(SPELL_ATTR_EX_NEGATIVE);
+                    positive = !holder->GetSpellProto()->HasAttribute(SPELL_ATTR_NEGATIVE);
 
                 // do not remove positive auras if friendly target
                 //               negative auras if non-friendly target
@@ -6583,41 +6583,44 @@ void Spell::EffectTameCreature(SpellEffectEntry const* /*effect*/)
     if (plr->IsFFAPvP())
         pet->SetFFAPvP(true);
 
-    // level of hunter pet can't be less owner level at 5 levels
-    uint32 level = creatureTarget->getLevel() + 5 < plr->getLevel() ? (plr->getLevel() - 5) : creatureTarget->getLevel();
-
-    if (!pet->InitStatsForLevel(level))
-    {
-        sLog.outError("Pet::InitStatsForLevel() failed for creature (Entry: %u)!", creatureTarget->GetEntry());
-        delete pet;
-        return;
-    }
-
     pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
-    // this enables pet details window (Shift+P)
-    pet->AIM_Initialize();
-    pet->InitPetCreateSpells();
+
+    pet->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
+
+    // level of hunter pet can't be less owner level at 5 levels
+    uint32 cLevel = creatureTarget->getLevel();
+    uint32 plLevel = plr->getLevel();
+    uint32 level = (cLevel + 5) < plLevel ? (plLevel - 5) : cLevel;
+    pet->InitStatsForLevel(level);
     pet->InitLevelupSpellsForLevel();
     pet->InitTalentForLevel();
-    pet->SetHealth(pet->GetMaxHealth());
 
-    // "kill" original creature
+    pet->SetHealthPercent(creatureTarget->GetHealthPercent());
+
+    pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
+
+    // destroy creature object
     creatureTarget->ForcedDespawn();
 
     // prepare visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, level - 1);
 
-    // add to world
+    // add pet object to the world
     pet->GetMap()->Add((Creature*)pet);
+    pet->AIM_Initialize();
 
     // visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
 
+    // this enables pet details window (Shift+P)
+    pet->InitPetCreateSpells();
+
     // caster have pet now
     plr->SetPet(pet);
 
-    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
     plr->PetSpellInitialize();
+
+    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
 
 void Spell::EffectSummonPet(SpellEffectEntry const* effect)
@@ -11090,8 +11093,13 @@ void Spell::EffectSummonDeadPet(SpellEffectEntry const* /*effect*/)
         return;
     if (pet->IsAlive())
         return;
-    if (damage < 0)
-        return;
+
+    if (_player->GetDistance(pet) >= 2.0f)
+    {
+        float px, py, pz;
+        m_caster->GetClosePoint(px, py, pz, pet->GetObjectBoundingRadius());
+        ((Unit*)pet)->NearTeleportTo(px, py, pz, -m_caster->GetOrientation());
+    }
 
     pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
     pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
@@ -11872,7 +11880,7 @@ void Spell::EffectGravityPull(SpellEffectEntry const* effect)
 
 void Spell::EffectCreateTamedPet(SpellEffectEntry const* effect)
 {
-    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->getClass() != CLASS_HUNTER)
+    if (!unitTarget || unitTarget->getClass() != CLASS_HUNTER)
         return;
 
     uint32 creatureEntry = effect->EffectMiscValue;
@@ -11884,7 +11892,7 @@ void Spell::EffectCreateTamedPet(SpellEffectEntry const* effect)
         return;
     }
 
-    Pet* newTamedPet = new Pet;
+    Pet* newTamedPet = new Pet(HUNTER_PET);
     CreatureCreatePos pos(unitTarget, unitTarget->GetOrientation());
 
     Map* map = unitTarget->GetMap();
@@ -11896,15 +11904,12 @@ void Spell::EffectCreateTamedPet(SpellEffectEntry const* effect)
     }
 
     newTamedPet->SetRespawnCoord(pos);
-    newTamedPet->setPetType(HUNTER_PET);
 
     newTamedPet->SetOwnerGuid(unitTarget->GetObjectGuid());
     newTamedPet->SetCreatorGuid(unitTarget->GetObjectGuid());
     newTamedPet->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
     newTamedPet->setFaction(unitTarget->getFaction());
-    newTamedPet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL)));
-    newTamedPet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
-    newTamedPet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
+    newTamedPet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
     newTamedPet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
     newTamedPet->GetCharmInfo()->SetPetNumber(petNumber, true);
@@ -11915,17 +11920,15 @@ void Spell::EffectCreateTamedPet(SpellEffectEntry const* effect)
     if (unitTarget->IsFFAPvP())
         newTamedPet->SetFFAPvP(true);
 
-    newTamedPet->InitStatsForLevel(unitTarget->getLevel(), unitTarget);
+    newTamedPet->InitStatsForLevel(unitTarget->getLevel());
     newTamedPet->InitPetCreateSpells();
     newTamedPet->InitLevelupSpellsForLevel();
     newTamedPet->InitTalentForLevel();
 
-    newTamedPet->RemoveByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED);
+    newTamedPet->SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED);
     newTamedPet->SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_ABANDONED);
 
     newTamedPet->AIM_Initialize();
-    newTamedPet->SetHealth(newTamedPet->GetMaxHealth());
-    newTamedPet->SetPower(POWER_MANA, newTamedPet->GetMaxPower(POWER_MANA));
 
     float x, y, z;
     unitTarget->GetClosePoint(x, y, z, newTamedPet->GetObjectBoundingRadius());

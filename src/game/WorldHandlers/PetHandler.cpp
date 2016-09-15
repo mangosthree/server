@@ -60,9 +60,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
         return;
     }
 
-    if (GetPlayer()->GetObjectGuid() != pet->GetCharmerOrOwnerGuid())
+    if (_player->GetObjectGuid() != pet->GetCharmerOrOwnerGuid())
     {
-        sLog.outError("HandlePetAction: %s isn't controlled by %s.", petGuid.GetString().c_str(), GetPlayer()->GetGuidStr().c_str());
+        sLog.outError("HandlePetAction: %s isn't controlled by %s.", petGuid.GetString().c_str(), _player->GetGuidStr().c_str());
         return;
     }
 
@@ -118,45 +118,35 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 }
                 case COMMAND_ATTACK:                        // spellid=1792  // ATTACK
                 {
-                    Unit* TargetUnit = _player->GetMap()->GetUnit(targetGuid);
-                    if (!TargetUnit)
-                        return;
+                    ((Pet*)pet)->SetIsRetreating();
+                    ((Pet*)pet)->SetSpellOpener();
 
-                    // not let attack friendly units.
-                    if (GetPlayer()->IsFriendlyTo(TargetUnit))
-                        return;
-                    // Not let attack through obstructions
-                    if (!pet->IsWithinLOSInMap(TargetUnit))
-                        return;
+                    Unit* targetUnit = targetGuid ? _player->GetMap()->GetUnit(targetGuid) : nullptr;
 
-                    // This is true if pet has no target or has target but targets differs.
-                    if (pet->getVictim() != TargetUnit)
+                    if (targetUnit && targetUnit != pet && targetUnit->IsTargetableForAttack() && targetUnit->isInAccessablePlaceFor((Creature*)pet))
                     {
-                        if (pet->getVictim())
-                            pet->AttackStop();
+                        _player->SetInCombatState(true, targetUnit);
 
-                        if (pet->hasUnitState(UNIT_STAT_CONTROLLED))
+                        // This is true if pet has no target or has target but targets differs.
+                        if (pet->getVictim() != targetUnit)
                         {
-                            pet->Attack(TargetUnit, true);
-                            pet->SendPetAIReaction();
-                        }
-                        else
-                        {
+                            pet->AttackStop();
                             pet->GetMotionMaster()->Clear();
 
                             if (((Creature*)pet)->AI())
-                                ((Creature*)pet)->AI()->AttackStart(TargetUnit);
-
-                            // 10% chance to play special pet attack talk, else growl
-                            if (((Creature*)pet)->IsPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && pet != TargetUnit && roll_chance_i(10))
-                                pet->SendPetTalk((uint32)PET_TALK_ATTACK);
-                            else
                             {
-                                // 90% chance for pet and 100% chance for charmed creature
+                                ((Creature*)pet)->AI()->AttackStart(targetUnit);
+                                 // 10% chance to play special warlock pet attack talk, else growl
+                                if (((Creature*)pet)->IsPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && roll_chance_i(10))
+                                    pet->SendPetTalk((uint32)PET_TALK_ATTACK);
+
                                 pet->SendPetAIReaction();
                             }
+                            else
+                                pet->Attack(targetUnit, true);
                         }
                     }
+
                     break;
                 }
                 case COMMAND_ABANDON:                       // abandon (hunter pet) or dismiss (summoned pet)
@@ -208,9 +198,10 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
         case ACT_PASSIVE:                                   // 0x01
         case ACT_ENABLED:                                   // 0xC1    spell
         {
-            Unit* unit_target = NULL;
-            if (targetGuid)
-                unit_target = _player->GetMap()->GetUnit(targetGuid);
+            ((Pet*)pet)->SetIsRetreating();
+            ((Pet*)pet)->SetSpellOpener();
+
+            Unit* unit_target = targetGuid ? _player->GetMap()->GetUnit(targetGuid) : nullptr;
 
             // do not cast unknown spells
             SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid);
@@ -228,13 +219,18 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
                 if (!spellEffect)
                     continue;
-                if (spellEffect->EffectImplicitTargetA == TARGET_ALL_ENEMY_IN_AREA || spellEffect->EffectImplicitTargetA == TARGET_ALL_ENEMY_IN_AREA_INSTANT || spellEffect->EffectImplicitTargetA == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
+
+                if (spellEffect->EffectImplicitTargetA == TARGET_ALL_ENEMY_IN_AREA
+                    || spellEffect->EffectImplicitTargetA == TARGET_ALL_ENEMY_IN_AREA_INSTANT
+                    || spellEffect->EffectImplicitTargetA == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
                     return;
             }
 
             // do not cast not learned spells
             if (!pet->HasSpell(spellid) || IsPassiveSpell(spellInfo))
                 return;
+
+            _player->SetInCombatState(true, unit_target);
 
             pet->clearUnitState(UNIT_STAT_MOVING);
 

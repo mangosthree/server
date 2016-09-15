@@ -755,8 +755,8 @@ SD2ErrorLogFile              = "scriptdev2-errors.log"
 #
 #    PetUnsummonAtMount
 #        Permanent pet will unsummoned at player mount
-#                 0 - unsummon only for flying mounts
-#        Default: 1 - unsummon for any mount
+#        Default: 0 - unsummon only when appropriate (don't unsummon temp summons on ground mounting)
+#                 1 - always unsummon controlled pets on mounting
 #
 #    ClientCacheVersion
 #        Client cache version for client cache data reset. Use any different from DB value and not recently used for triggering reset.
@@ -858,7 +858,7 @@ MassMailer.SendPerTick                    = 10
 SkillChance.Prospecting                   = 0
 SkillChance.Milling                       = 0
 OffhandCheckAtTalentsReset                = 0
-PetUnsummonAtMount                        = 1
+PetUnsummonAtMount                        = 0
 ClientCacheVersion                        = 0
 Event.Announce                            = 0
 BeepAtStart                               = 1

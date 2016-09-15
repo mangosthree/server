@@ -130,7 +130,8 @@ bool Group::Create(ObjectGuid guid, const char* name)
 
     m_lootMethod = GROUP_LOOT;
     m_lootThreshold = ITEM_QUALITY_UNCOMMON;
-    m_looterGuid = guid;
+    m_masterLooterGuid = guid;
+    m_currentLooterGuid = guid;                                             // used for round robin looter
 
     m_dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL;
     m_raidDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
@@ -155,7 +156,7 @@ bool Group::Create(ObjectGuid guid, const char* name)
         CharacterDatabase.PExecute("INSERT INTO groups (groupId,leaderGuid,mainTank,mainAssistant,lootMethod,looterGuid,lootThreshold,icon1,icon2,icon3,icon4,icon5,icon6,icon7,icon8,groupType,difficulty,raiddifficulty) "
                                    "VALUES ('%u','%u','%u','%u','%u','%u','%u','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','%u','%u','%u')",
                                    m_Id, m_leaderGuid.GetCounter(), m_mainTankGuid.GetCounter(), m_mainAssistantGuid.GetCounter(), uint32(m_lootMethod),
-                                   m_looterGuid.GetCounter(), uint32(m_lootThreshold),
+                                   m_masterLooterGuid.GetCounter(), uint32(m_lootThreshold),
                                    m_targetIcons[0].GetRawValue(), m_targetIcons[1].GetRawValue(),
                                    m_targetIcons[2].GetRawValue(), m_targetIcons[3].GetRawValue(),
                                    m_targetIcons[4].GetRawValue(), m_targetIcons[5].GetRawValue(),
@@ -168,6 +169,8 @@ bool Group::Create(ObjectGuid guid, const char* name)
 
     if (!isBGGroup())
         CharacterDatabase.CommitTransaction();
+
+    _updateLeaderFlag();
 
     return true;
 }
@@ -269,8 +272,10 @@ bool Group::AddLeaderInvite(Player* player)
     if (!AddInvite(player))
         return false;
 
+    _updateLeaderFlag(true);
     m_leaderGuid = player->GetObjectGuid();
     m_leaderName = player->GetName();
+    _updateLeaderFlag();
     return true;
 }
 
@@ -484,6 +489,7 @@ void Group::Disband(bool hideDestroy)
         ResetInstances(INSTANCE_RESET_GROUP_DISBAND, true, NULL);
     }
 
+    _updateLeaderFlag(true);
     m_leaderGuid.Clear();
     m_leaderName.clear();
 }
@@ -1365,6 +1371,12 @@ void Group::_removeRolls(ObjectGuid guid)
         if (!CountRollVote(guid, it, ROLL_NOT_EMITED_YET))
             ++it;
     }
+}
+
+void Group::_updateLeaderFlag(const bool remove /*= false*/)
+{
+    if (Player* player = sObjectMgr.GetPlayer(m_leaderGuid))
+        player->UpdateGroupLeaderFlag(remove);
 }
 
 bool Group::_setMembersGroup(ObjectGuid guid, uint8 group)

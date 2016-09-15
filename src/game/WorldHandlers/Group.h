@@ -406,6 +406,8 @@ class  Group
         void _setLeader(ObjectGuid guid);
 
         void _removeRolls(ObjectGuid guid);
+        
+        void _updateLeaderFlag(const bool remove = false);
 
         bool _setMembersGroup(ObjectGuid guid, uint8 group);
         bool _setAssistantFlag(ObjectGuid guid, const bool& state);
@@ -489,6 +491,8 @@ class  Group
         LootMethod          m_lootMethod;
         ItemQualities       m_lootThreshold;
         ObjectGuid          m_looterGuid;
+        ObjectGuid          m_masterLooterGuid;
+        ObjectGuid          m_currentLooterGuid;
         Rolls               RollId;
         BoundInstancesMap   m_boundInstances[MAX_DIFFICULTY];
         uint8*              m_subGroupsCounts;

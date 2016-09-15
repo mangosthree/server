@@ -50,22 +50,24 @@ PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), inComb
 
 void PetAI::MoveInLineOfSight(Unit* pWho)
 {
-    if (m_creature->getVictim())
-        return;
-
-    if (!m_creature->GetCharmInfo() || !m_creature->GetCharmInfo()->HasReactState(REACT_AGGRESSIVE))
-        return;
-
-    if (m_creature->CanInitiateAttack() && pWho->IsTargetableForAttack() &&
-            m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
-    {
-        if (!m_creature->CanFly() && m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
+    if (Unit* victim = m_creature->getVictim())
+        if (victim->IsAlive())
             return;
 
-        if (m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
+    if (CharmInfo* charmInfo = m_creature->GetCharmInfo())
+    {
+        if (charmInfo->HasReactState(REACT_AGGRESSIVE)
+            && !(m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+            && pWho && pWho->IsTargetableForAttack() && pWho->isInAccessablePlaceFor(m_creature)
+            && (m_creature->IsHostileTo(pWho) || pWho->IsHostileTo(m_creature->GetCharmerOrOwner()))
+            && m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho))
+            && m_creature->GetDistanceZ(pWho) <= CREATURE_Z_ATTACK_RANGE
+            && m_creature->IsWithinLOSInMap(pWho))
         {
-            pWho->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
             AttackStart(pWho);
+
+            if (Unit* owner = m_creature->GetOwner())
+                owner->SetInCombatState(true, pWho);
         }
     }
 }
@@ -81,7 +83,9 @@ void PetAI::AttackStart(Unit* u)
         // thus with the following clear the original TMG gets invalidated and crash, doh
         // hope it doesn't start to leak memory without this :-/
         // i_pet->Clear();
-        HandleMovementOnAttackStart(u);
+        if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+            HandleMovementOnAttackStart(u);
+
         inCombat = true;
     }
 }

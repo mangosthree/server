@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _VMAPTOOLS_H
-#define _VMAPTOOLS_H
+#ifndef MANGOS_H_VMAPTOOLS
+#define MANGOS_H_VMAPTOOLS
 
 #include <G3D/CollisionDetection.h>
 #include <G3D/AABox.h>
@@ -39,13 +39,25 @@ The collision detection is modified to return true, if we are inside an object.
 namespace VMAP
 {
     template<class TValue>
+    /**
+     * @brief
+     *
+     */
     class IntersectionCallBack
     {
         public:
-            TValue*      closestEntity;
-            G3D::Vector3 hitLocation;
-            G3D::Vector3 hitNormal;
+            TValue*      closestEntity; /**< TODO */
+            G3D::Vector3 hitLocation; /**< TODO */
+            G3D::Vector3 hitNormal; /**< TODO */
 
+            /**
+             * @brief
+             *
+             * @param ray
+             * @param entity
+             * @param pStopAtFirstHit
+             * @param distance
+             */
             void operator()(const G3D::Ray& ray, const TValue* entity, bool pStopAtFirstHit, float& distance)
             {
                 entity->intersect(ray, distance, pStopAtFirstHit, hitLocation, hitNormal);
@@ -56,11 +68,25 @@ namespace VMAP
     //==============================================================
     //==============================================================
 
+    /**
+     * @brief
+     *
+     */
     class MyCollisionDetection
     {
         private:
         public:
 
+            /**
+             * @brief
+             *
+             * @param origin
+             * @param dir
+             * @param box
+             * @param location
+             * @param Inside
+             * @return bool
+             */
             static bool collisionLocationForMovingPointFixedAABox(
                 const G3D::Vector3&     origin,
                 const G3D::Vector3&     dir,
@@ -135,7 +161,7 @@ namespace VMAP
                     {
                         location[i] = origin[i] + MaxT[WhichPlane] * dir[i];
                         if ((location[i] < MinB[i]) ||
-                                (location[i] > MaxB[i]))
+                            (location[i] > MaxB[i]))
                         {
                             // On this plane we're outside the box extents, so
                             // we miss the box

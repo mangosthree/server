@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _BIH_H
-#define _BIH_H
+#ifndef MANGOS_H_BIH
+#define MANGOS_H_BIH
 
 #include <G3D/Vector3.h>
 #include <G3D/Ray.h>
@@ -49,6 +49,12 @@ using G3D::Vector3;
 using G3D::AABox;
 using G3D::Ray;
 
+/**
+ * @brief
+ *
+ * @param f
+ * @return uint32
+ */
 static inline uint32 floatToRawIntBits(float f)
 {
     union
@@ -60,6 +66,12 @@ static inline uint32 floatToRawIntBits(float f)
     return temp.ival;
 }
 
+/**
+ * @brief
+ *
+ * @param i
+ * @return float
+ */
 static inline float intBitsToFloat(uint32 i)
 {
     union
@@ -71,33 +83,54 @@ static inline float intBitsToFloat(uint32 i)
     return temp.fval;
 }
 
+/**
+ * @brief
+ *
+ */
 struct AABound
 {
-    Vector3 lo, hi;
+    Vector3 lo, hi; /**< TODO */
 };
 
-/** Bounding Interval Hierarchy Class.
-    Building and Ray-Intersection functions based on BIH from
-    Sunflow, a Java Raytracer, released under MIT/X11 License
-    http://sunflow.sourceforge.net/
-    Copyright (c) 2003-2007 Christopher Kulla
-*/
-
+/**
+ * @brief Bounding Interval Hierarchy Class.
+ *  Building and Ray-Intersection functions based on BIH from
+ *  Sunflow, a Java Raytracer, released under MIT/X11 License
+ *  http://sunflow.sourceforge.net/
+ *  Copyright (c) 2003-2007 Christopher Kulla
+ *
+ */
 class BIH
 {
     private:
+        /**
+         * @brief
+         *
+         */
         void init_empty()
         {
             tree.clear();
             objects.clear();
             // create space for the first node
-            tree.push_back(3 << 30); // dummy leaf
+            tree.push_back((uint32)3 << 30); // dummy leaf
             tree.insert(tree.end(), 2, 0);
         }
 
     public:
+        /**
+         * @brief
+         *
+         */
         BIH() {init_empty();}
         template< class BoundsFunc, class PrimArray >
+        /**
+         * @brief
+         *
+         * @param primitives
+         * @param getBounds
+         * @param leafSize
+         * @param printStats
+         */
         void build(const PrimArray& primitives, BoundsFunc& getBounds, uint32 leafSize = 3, bool printStats = false)
         {
             if (primitives.size() == 0)
@@ -114,7 +147,6 @@ class BIH
             for (uint32 i = 0; i < dat.numPrims; ++i)
             {
                 dat.indices[i] = i;
-                AABox tb;
                 getBounds(primitives[i], dat.primBound[i]);
                 bounds.merge(dat.primBound[i]);
             }
@@ -122,19 +154,32 @@ class BIH
             BuildStats stats;
             buildHierarchy(tempTree, dat, stats);
             if (printStats)
-                stats.printStats();
+                { stats.printStats(); }
 
             objects.resize(dat.numPrims);
             for (uint32 i = 0; i < dat.numPrims; ++i)
-                objects[i] = dat.indices[i];
+                { objects[i] = dat.indices[i]; }
             // nObjects = dat.numPrims;
             tree = tempTree;
             delete[] dat.primBound;
             delete[] dat.indices;
         }
+        /**
+         * @brief
+         *
+         * @return uint32
+         */
         uint32 primCount() { return objects.size(); }
 
         template<typename RayCallback>
+        /**
+         * @brief
+         *
+         * @param r
+         * @param intersectCallback
+         * @param maxDist
+         * @param stopAtFirst
+         */
         void intersectRay(const Ray& r, RayCallback& intersectCallback, float& maxDist, bool stopAtFirst = false) const
         {
             float intervalMin = -1.f;
@@ -150,20 +195,20 @@ class BIH
                     float t1 = (bounds.low()[i]  - org[i]) * invDir[i];
                     float t2 = (bounds.high()[i] - org[i]) * invDir[i];
                     if (t1 > t2)
-                        std::swap(t1, t2);
+                        { std::swap(t1, t2); }
                     if (t1 > intervalMin)
-                        intervalMin = t1;
+                        { intervalMin = t1; }
                     if (t2 < intervalMax || intervalMax < 0.f)
-                        intervalMax = t2;
+                        { intervalMax = t2; }
                     // intervalMax can only become smaller for other axis,
                     //  and intervalMin only larger respectively, so stop early
                     if (intervalMax <= 0 || intervalMin >= maxDist)
-                        return;
+                        { return; }
                 }
             }
 
             if (intervalMin > intervalMax)
-                return;
+                { return; }
             intervalMin = std::max(intervalMin, 0.f);
             intervalMax = std::min(intervalMax, maxDist);
 
@@ -206,7 +251,7 @@ class BIH
                             float tb = (intBitsToFloat(tree[node + offsetBack[axis]]) - org[axis]) * invDir[axis];
                             // ray passes between clip zones
                             if (tf < intervalMin && tb > intervalMax)
-                                break;
+                                { break; }
                             int back = offset + offsetBack3[axis];
                             node = back;
                             // ray passes through far node only
@@ -239,7 +284,7 @@ class BIH
                             while (n > 0)
                             {
                                 bool hit = intersectCallback(r, objects[offset], maxDist, stopAtFirst);
-                                if (stopAtFirst && hit) return;
+                                if (stopAtFirst && hit) { return; }
                                 --n;
                                 ++offset;
                             }
@@ -249,14 +294,14 @@ class BIH
                     else
                     {
                         if (axis > 2)
-                            return; // should not happen
+                            { return; } // should not happen
                         float tf = (intBitsToFloat(tree[node + offsetFront[axis]]) - org[axis]) * invDir[axis];
                         float tb = (intBitsToFloat(tree[node + offsetBack[axis]]) - org[axis]) * invDir[axis];
                         node = offset;
                         intervalMin = (tf >= intervalMin) ? tf : intervalMin;
                         intervalMax = (tb <= intervalMax) ? tb : intervalMax;
                         if (intervalMin > intervalMax)
-                            break;
+                            { break; }
                         continue;
                     }
                 } // traversal loop
@@ -264,12 +309,12 @@ class BIH
                 {
                     // stack is empty?
                     if (stackPos == 0)
-                        return;
+                        { return; }
                     // move back up the stack
                     --stackPos;
                     intervalMin = stack[stackPos].tnear;
                     if (maxDist < intervalMin)
-                        continue;
+                        { continue; }
                     node = stack[stackPos].node;
                     intervalMax = stack[stackPos].tfar;
                     break;
@@ -279,10 +324,16 @@ class BIH
         }
 
         template<typename IsectCallback>
+        /**
+         * @brief
+         *
+         * @param p
+         * @param intersectCallback
+         */
         void intersectPoint(const Vector3& p, IsectCallback& intersectCallback) const
         {
             if (!bounds.contains(p))
-                return;
+                { return; }
 
             StackNode stack[MAX_STACK_SIZE];
             int stackPos = 0;
@@ -305,7 +356,7 @@ class BIH
                             float tr = intBitsToFloat(tree[node + 2]);
                             // point is between clip zones
                             if (tl < p[axis] && tr > p[axis])
-                                break;
+                                { break; }
                             int right = offset + 3;
                             node = right;
                             // point is in right node only
@@ -341,78 +392,139 @@ class BIH
                     else // BVH2 node (empty space cut off left and right)
                     {
                         if (axis > 2)
-                            return; // should not happen
+                            { return; } // should not happen
                         float tl = intBitsToFloat(tree[node + 1]);
                         float tr = intBitsToFloat(tree[node + 2]);
                         node = offset;
                         if (tl > p[axis] || tr < p[axis])
-                            break;
+                            { break; }
                         continue;
                     }
                 } // traversal loop
 
                 // stack is empty?
                 if (stackPos == 0)
-                    return;
+                    { return; }
                 // move back up the stack
                 --stackPos;
                 node = stack[stackPos].node;
             }
         }
 
+        /**
+         * @brief
+         *
+         * @param wf
+         * @return bool
+         */
         bool writeToFile(FILE* wf) const;
+        /**
+         * @brief
+         *
+         * @param rf
+         * @return bool
+         */
         bool readFromFile(FILE* rf);
 
     protected:
-        std::vector<uint32> tree;
-        std::vector<uint32> objects;
-        AABox bounds;
+        std::vector<uint32> tree; /**< TODO */
+        std::vector<uint32> objects; /**< TODO */
+        AABox bounds; /**< TODO */
 
+        /**
+         * @brief
+         *
+         */
         struct buildData
         {
-            uint32* indices;
-            AABox* primBound;
-            uint32 numPrims;
-            int maxPrims;
+            uint32* indices; /**< TODO */
+            AABox* primBound; /**< TODO */
+            uint32 numPrims; /**< TODO */
+            int maxPrims; /**< TODO */
         };
+        /**
+         * @brief
+         *
+         */
         struct StackNode
         {
-            uint32 node;
-            float tnear;
-            float tfar;
+            uint32 node; /**< TODO */
+            float tnear; /**< TODO */
+            float tfar; /**< TODO */
         };
 
+        /**
+         * @brief
+         *
+         */
         class BuildStats
         {
             private:
-                int numNodes;
-                int numLeaves;
-                int sumObjects;
-                int minObjects;
-                int maxObjects;
-                int sumDepth;
-                int minDepth;
-                int maxDepth;
-                int numLeavesN[6];
-                int numBVH2;
+                int numNodes; /**< TODO */
+                int numLeaves; /**< TODO */
+                int sumObjects; /**< TODO */
+                int minObjects; /**< TODO */
+                int maxObjects; /**< TODO */
+                int sumDepth; /**< TODO */
+                int minDepth; /**< TODO */
+                int maxDepth; /**< TODO */
+                int numLeavesN[6]; /**< TODO */
+                int numBVH2; /**< TODO */
 
             public:
+                /**
+                 * @brief
+                 *
+                 */
                 BuildStats():
                     numNodes(0), numLeaves(0), sumObjects(0), minObjects(0x0FFFFFFF),
                     maxObjects(0xFFFFFFFF), sumDepth(0), minDepth(0x0FFFFFFF),
                     maxDepth(0xFFFFFFFF), numBVH2(0)
                 {
-                    for (int i = 0; i < 6; ++i) numLeavesN[i] = 0;
+                    for (int i = 0; i < 6; ++i) { numLeavesN[i] = 0; }
                 }
 
+                /**
+                 * @brief
+                 *
+                 */
                 void updateInner() { ++numNodes; }
+                /**
+                 * @brief
+                 *
+                 */
                 void updateBVH2() { ++numBVH2; }
+                /**
+                 * @brief
+                 *
+                 * @param depth
+                 * @param n
+                 */
                 void updateLeaf(int depth, int n);
+                /**
+                 * @brief
+                 *
+                 */
                 void printStats();
         };
 
+        /**
+         * @brief
+         *
+         * @param tempTree
+         * @param dat
+         * @param stats
+         */
         void buildHierarchy(std::vector<uint32>& tempTree, buildData& dat, BuildStats& stats);
 
+        /**
+         * @brief
+         *
+         * @param tempTree
+         * @param nodeIndex
+         * @param left
+         * @param right
+         */
         void createNode(std::vector<uint32>& tempTree, int nodeIndex, uint32 left, uint32 right)
         {
             // write leaf node
@@ -420,6 +532,19 @@ class BIH
             tempTree[nodeIndex + 1] = right - left + 1;
         }
 
+        /**
+         * @brief
+         *
+         * @param left
+         * @param right
+         * @param tempTree
+         * @param dat
+         * @param gridBox
+         * @param nodeBox
+         * @param nodeIndex
+         * @param depth
+         * @param stats
+         */
         void subdivide(int left, int right, std::vector<uint32>& tempTree, buildData& dat, AABound& gridBox, AABound& nodeBox, int nodeIndex, int depth, BuildStats& stats);
 };
 

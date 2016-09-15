@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _VMAPFACTORY_H
-#define _VMAPFACTORY_H
+#ifndef MANGOS_H_VMAPFACTORY
+#define MANGOS_H_VMAPFACTORY
 
 #include "IVMapManager.h"
 
@@ -35,13 +35,37 @@ namespace VMAP
 {
     //===========================================================
 
+    /**
+     * @brief
+     *
+     */
     class VMapFactory
     {
         public:
+            /**
+             * @brief
+             *
+             * @return IVMapManager
+             */
             static IVMapManager* createOrGetVMapManager();
+            /**
+             * @brief
+             *
+             */
             static void clear();
 
+            /**
+             * @brief
+             *
+             * @param pSpellIdString
+             */
             static void preventSpellsFromBeingTestedForLoS(const char* pSpellIdString);
+            /**
+             * @brief
+             *
+             * @param pSpellId
+             * @return bool
+             */
             static bool checkSpellForLoS(unsigned int pSpellId);
 
             static void chompAndTrim(std::string& str);

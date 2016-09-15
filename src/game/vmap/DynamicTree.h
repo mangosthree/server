@@ -1,4 +1,4 @@
-/*
+/**
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
@@ -24,7 +24,9 @@
 
 #ifndef DYNAMICMAP_TREE_H
 #define DYNAMICMAP_TREE_H
+
 #include "Platform/Define.h"
+
 namespace G3D
 {
     class Vector3;
@@ -34,27 +36,121 @@ namespace G3D
 }
 class GameObjectModel;
 
+/**
+ * @brief
+ *
+ */
 class DynamicMapTree
 {
     public:
+        /**
+         * @brief
+         *
+         */
         DynamicMapTree();
+        /**
+         * @brief
+         *
+         */
         ~DynamicMapTree();
 
+        /**
+         * @brief
+         *
+         * @param x1
+         * @param y1
+         * @param z1
+         * @param x2
+         * @param y2
+         * @param z2
+         * @return bool
+         */
         bool isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
+        /**
+         * @brief
+         *
+         * @param ray
+         * @param endPos
+         * @param maxDist
+         * @return bool
+         */
         bool getIntersectionTime(uint32 phasemask, const G3D::Ray& ray, const G3D::Vector3& endPos, float& maxDist) const;
+        /**
+         * @brief
+         *
+         * @param pPos1
+         * @param pPos2
+         * @param pResultHitPos
+         * @param pModifyDist
+         * @return bool
+         */
         bool getObjectHitPos(uint32 phasemask, const G3D::Vector3& pPos1, const G3D::Vector3& pPos2, G3D::Vector3& pResultHitPos, float pModifyDist) const;
+        /**
+         * @brief
+         *
+         * @param x1
+         * @param y1
+         * @param z1
+         * @param x2
+         * @param y2
+         * @param z2
+         * @param rx
+         * @param ry
+         * @param rz
+         * @param pModifyDist
+         * @return bool
+         */
         bool getObjectHitPos(uint32 phasemask, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float& ry, float& rz, float pModifyDist) const;
+        /**
+         * @brief
+         *
+         * @param x
+         * @param y
+         * @param z
+         * @param maxSearchDist
+         * @return float
+         */
         float getHeight(float x, float y, float z, float maxSearchDist, uint32 phasemask) const;
 
+        /**
+         * @brief
+         *
+         * @param
+         */
         void insert(const GameObjectModel&);
+        /**
+         * @brief
+         *
+         * @param
+         */
         void remove(const GameObjectModel&);
+        /**
+         * @brief
+         *
+         * @param
+         * @return bool
+         */
         bool contains(const GameObjectModel&) const;
+        /**
+         * @brief
+         *
+         * @return int
+         */
         int size() const;
 
+        /**
+         * @brief
+         *
+         */
         void balance();
+        /**
+         * @brief
+         *
+         * @param diff
+         */
         void update(uint32 diff);
     private:
-        struct DynTreeImpl& impl;
+        struct DynTreeImpl& impl; /**< TODO */
 };
 
 #endif

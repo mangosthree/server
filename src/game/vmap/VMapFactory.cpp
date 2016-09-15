@@ -83,7 +83,7 @@ namespace VMAP
             pId = atoi(idString.c_str());
             result = true;
         }
-        return result;
+        return(result);
     }
 
     //===============================================
@@ -94,7 +94,7 @@ namespace VMAP
     void VMapFactory::preventSpellsFromBeingTestedForLoS(const char* pSpellIdString)
     {
         if (!iIgnoreSpellIds)
-            iIgnoreSpellIds = new Table<unsigned int , bool>();
+            { iIgnoreSpellIds = new Table<unsigned int , bool>(); }
         if (pSpellIdString != NULL)
         {
             unsigned int pos = 0;
@@ -112,7 +112,7 @@ namespace VMAP
 
     bool VMapFactory::checkSpellForLoS(unsigned int pSpellId)
     {
-        return !iIgnoreSpellIds->containsKey(pSpellId);
+        return(!iIgnoreSpellIds->containsKey(pSpellId));
     }
 
     //===============================================
@@ -120,7 +120,7 @@ namespace VMAP
     IVMapManager* VMapFactory::createOrGetVMapManager()
     {
         if (gVMapManager == 0)
-            gVMapManager = new VMapManager2();              // should be taken from config ... Please change if you like :-)
+            { gVMapManager = new VMapManager2(); }              // should be taken from config ... Please change if you like :-)
         return gVMapManager;
     }
 

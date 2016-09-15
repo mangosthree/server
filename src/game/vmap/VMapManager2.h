@@ -30,8 +30,6 @@
 #include "Platform/Define.h"
 #include <G3D/Vector3.h>
 
-#include <unordered_map>
-
 //===========================================================
 
 #define MAP_FILENAME_EXTENSION2 ".vmtree"
@@ -53,65 +51,255 @@ namespace VMAP
     class StaticMapTree;
     class WorldModel;
 
+    /**
+     * @brief
+     *
+     */
     class ManagedModel
     {
         public:
+            /**
+             * @brief
+             *
+             */
             ManagedModel(): iModel(0), iRefCount(0) {}
+            /**
+             * @brief
+             *
+             * @param model
+             */
             void setModel(WorldModel* model) { iModel = model; }
+            /**
+             * @brief
+             *
+             * @return WorldModel
+             */
             WorldModel* getModel() { return iModel; }
+            /**
+             * @brief
+             *
+             */
             void incRefCount() { ++iRefCount; }
+            /**
+             * @brief
+             *
+             * @return int
+             */
             int decRefCount() { return --iRefCount; }
         protected:
-            WorldModel* iModel;
-            int iRefCount;
+            WorldModel* iModel; /**< TODO */
+            int iRefCount; /**< TODO */
     };
 
+    /**
+     * @brief
+     *
+     */
     typedef UNORDERED_MAP<uint32 , StaticMapTree*> InstanceTreeMap;
+    /**
+     * @brief
+     *
+     */
     typedef UNORDERED_MAP<std::string, ManagedModel> ModelFileMap;
 
+    /**
+     * @brief
+     *
+     */
     class VMapManager2 : public IVMapManager
     {
         protected:
             // Tree to check collision
-            ModelFileMap iLoadedModelFiles;
-            InstanceTreeMap iInstanceMapTrees;
+            ModelFileMap iLoadedModelFiles; /**< TODO */
+            InstanceTreeMap iInstanceMapTrees; /**< TODO */
 
+            /**
+             * @brief
+             *
+             * @param pMapId
+             * @param basePath
+             * @param tileX
+             * @param tileY
+             * @return bool
+             */
             bool _loadMap(uint32 pMapId, const std::string& basePath, uint32 tileX, uint32 tileY);
             /* void _unloadMap(uint32 pMapId, uint32 x, uint32 y); */
 
         public:
             // public for debug
+            /**
+             * @brief
+             *
+             * @param x
+             * @param y
+             * @param z
+             * @return G3D::Vector3
+             */
             G3D::Vector3 convertPositionToInternalRep(float x, float y, float z) const;
+            /**
+             * @brief
+             *
+             * @param pMapId
+             * @return std::string
+             */
             static std::string getMapFileName(unsigned int pMapId);
 
+            /**
+             * @brief
+             *
+             */
             VMapManager2();
+            /**
+             * @brief
+             *
+             */
             ~VMapManager2();
 
+            /**
+             * @brief
+             *
+             * @param pBasePath
+             * @param pMapId
+             * @param x
+             * @param y
+             * @return VMAPLoadResult
+             */
             VMAPLoadResult loadMap(const char* pBasePath, unsigned int pMapId, int x, int y) override;
 
+            /**
+             * @brief
+             *
+             * @param pMapId
+             * @param x
+             * @param y
+             */
             void unloadMap(unsigned int pMapId, int x, int y) override;
+            /**
+             * @brief
+             *
+             * @param pMapId
+             */
             void unloadMap(unsigned int pMapId) override;
 
+            /**
+             * @brief
+             *
+             * @param pMapId
+             * @param x1
+             * @param y1
+             * @param z1
+             * @param x2
+             * @param y2
+             * @param z2
+             * @return bool
+             */
             bool isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2) override;
             /**
             fill the hit pos and return true, if an object was hit
             */
+            /**
+             * @brief
+             *
+             * @param pMapId
+             * @param x1
+             * @param y1
+             * @param z1
+             * @param x2
+             * @param y2
+             * @param z2
+             * @param rx
+             * @param ry
+             * @param rz
+             * @param pModifyDist
+             * @return bool
+             */
             bool getObjectHitPos(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float& ry, float& rz, float pModifyDist) override;
+            /**
+             * @brief
+             *
+             * @param pMapId
+             * @param x
+             * @param y
+             * @param z
+             * @param maxSearchDist
+             * @return float
+             */
             float getHeight(unsigned int pMapId, float x, float y, float z, float maxSearchDist) override;
 
+            /**
+             * @brief
+             *
+             * @param pCommand
+             * @return bool
+             */
             bool processCommand(char* pCommand) override { return false; }      // for debug and extensions
 
+            /**
+             * @brief
+             *
+             * @param pMapId
+             * @param x
+             * @param y
+             * @param z
+             * @param flags
+             * @param adtId
+             * @param rootId
+             * @param groupId
+             * @return bool
+             */
             bool getAreaInfo(unsigned int pMapId, float x, float y, float& z, uint32& flags, int32& adtId, int32& rootId, int32& groupId) const override;
+            /**
+             * @brief
+             *
+             * @param pMapId
+             * @param x
+             * @param y
+             * @param z
+             * @param ReqLiquidType
+             * @param level
+             * @param floor
+             * @param type
+             * @return bool
+             */
             bool GetLiquidLevel(uint32 pMapId, float x, float y, float z, uint8 ReqLiquidType, float& level, float& floor, uint32& type) const override;
 
+            /**
+             * @brief
+             *
+             * @param basepath
+             * @param filename
+             * @return WorldModel
+             */
             WorldModel* acquireModelInstance(const std::string& basepath, const std::string& filename);
+            /**
+             * @brief
+             *
+             * @param filename
+             */
             void releaseModelInstance(const std::string& filename);
 
+            /**
+             * @brief what's the use of this? o.O
+             *
+             * @param pMapId
+             * @param x
+             * @param y
+             * @return std::string
+             */
             // what's the use of this? o.O
             std::string getDirFileName(unsigned int pMapId, int x, int y) const override
             {
                 return getMapFileName(pMapId);
             }
+            /**
+             * @brief
+             *
+             * @param pBasePath
+             * @param pMapId
+             * @param x
+             * @param y
+             * @return bool
+             */
             bool existsMap(const char* pBasePath, unsigned int pMapId, int x, int y) override;
 
 #ifdef MMAP_GENERATOR

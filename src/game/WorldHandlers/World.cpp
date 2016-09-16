@@ -1489,7 +1489,7 @@ void World::SetInitialWorldSettings()
 
     // ToDo: requires fix after the latest updates
     //sLog.outString("Loading grids for active creatures or transports...");
-    //sObjectMgr.LoadActiveEntities(nullptr);
+    //sObjectMgr.LoadActiveEntities(NULL);
     //sLog.outString();
 
     // Delete all characters which have been deleted X days before

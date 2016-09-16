@@ -491,10 +491,10 @@ void GlobalCooldownMgr::CancelGlobalCooldown(SpellEntry const* spellInfo)
 
 Unit::Unit() :
     movespline(new Movement::MoveSpline()),
-    m_charmInfo(nullptr),
+    m_charmInfo(NULL),
     i_motionMaster(this),
     m_regenTimer(0),
-    m_vehicleInfo(nullptr),
+    m_vehicleInfo(NULL),
     m_ThreatManager(this),
     m_HostileRefManager(this)
 {
@@ -12450,7 +12450,7 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         {
             player->GetCamera().ResetView();
             player->SetClientControl(player, 1);
-            player->SetMover(nullptr);
+            player->SetMover(NULL);
         }
         return;
     }
@@ -12465,7 +12465,7 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
     if (player)
     {
         player->SetClientControl(possessed, 0);
-        player->SetMover(nullptr);
+        player->SetMover(NULL);
         player->GetCamera().ResetView();
 
         if (possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())

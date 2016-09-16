@@ -635,7 +635,7 @@ bool CreatureLinkingHolder::IsSlaveInRangeOfBoss(Creature const* pBoss, float sX
 bool CreatureLinkingHolder::IsRespawnReady(uint32 dbLowGuid, Map* _map) const
 {
     time_t respawnTime = _map->GetPersistentState()->GetCreatureRespawnTime(dbLowGuid);
-    return (!respawnTime || respawnTime <= time(nullptr)) && CanSpawn(dbLowGuid, _map, nullptr, 0.0f, 0.0f);
+    return (!respawnTime || respawnTime <= time(NULL)) && CanSpawn(dbLowGuid, _map, nullptr, 0.0f, 0.0f);
 }
 
 // Function to check if a passive spawning condition is met

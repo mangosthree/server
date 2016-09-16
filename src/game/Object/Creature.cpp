@@ -1785,7 +1785,7 @@ void Creature::SetDeathState(DeathState s)
     if ((s == JUST_DIED && !m_IsDeadByDefault) || (s == JUST_ALIVED && m_IsDeadByDefault))
     {
         m_corpseDecayTimer = m_corpseDelay * IN_MILLISECONDS; // the max/default time for corpse decay (before creature is looted/AllLootRemovedFromCorpse() is called)
-        m_respawnTime = time(nullptr) + m_respawnDelay;        // respawn delay (spawntimesecs)
+        m_respawnTime = time(NULL) + m_respawnDelay;        // respawn delay (spawntimesecs)
 
         // always save boss respawn time at death to prevent crash cheating
         if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY) || IsWorldBoss())
@@ -1818,7 +1818,7 @@ void Creature::SetDeathState(DeathState s)
         Unit::SetDeathState(ALIVE);
 
         SetHealth(GetMaxHealth());
-        SetLootRecipient(nullptr);
+        SetLootRecipient(NULL);
         if (GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_RESPAWN)
             ClearTemporaryFaction();
 

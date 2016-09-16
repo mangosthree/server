@@ -545,7 +545,7 @@ void DungeonResetScheduler::ScheduleReset(bool add, time_t time, DungeonResetEve
 
 void DungeonResetScheduler::Update()
 {
-    time_t now = time(nullptr), t;
+    time_t now = time(NULL), t;
     while (!m_resetTimeQueue.empty() && (t = m_resetTimeQueue.begin()->first) < now)
     {
         DungeonResetEvent& event = m_resetTimeQueue.begin()->second;
@@ -596,7 +596,7 @@ void DungeonResetScheduler::Update()
 
 void DungeonResetScheduler::ResetAllRaid()
 {
-    time_t now = time(nullptr);
+    time_t now = time(NULL);
     ResetTimeQueue rTQ;
     rTQ.clear();
 
@@ -921,7 +921,7 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
     if (!mapEntry->IsDungeon())
         return;
 
-    time_t now = time(nullptr);
+    time_t now = time(NULL);
 
     if (!warn)
     {

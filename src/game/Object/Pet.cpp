@@ -39,7 +39,7 @@ Pet::Pet(PetType type) :
     m_resetTalentsCost(0), m_resetTalentsTime(0), m_usedTalentCount(0),
     m_removed(false),  m_petType(type), m_duration(0),
     m_bonusdamage(0), m_auraUpdateMask(0), m_loading(false),
-    m_declinedname(nullptr), m_petModeFlags(PET_MODE_DEFAULT), m_retreating(false),
+    m_declinedname(NULL), m_petModeFlags(PET_MODE_DEFAULT), m_retreating(false),
     m_stayPosSet(false), m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
     m_opener(0), m_openerMinRange(0), m_openerMaxRange(0)
 {
@@ -426,7 +426,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         };
         savePet.addString(ss);
 
-        savePet.addUInt64(uint64(time(nullptr)));
+        savePet.addUInt64(uint64(time(NULL)));
         savePet.addUInt32(uint32(m_resetTalentsCost));
         savePet.addUInt64(uint64(m_resetTalentsTime));
         savePet.addUInt32(GetUInt32Value(UNIT_CREATED_BY_SPELL));

@@ -3184,7 +3184,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     if (apply)
                         caster->FixateTarget(target);
                     else if (target->GetObjectGuid() == caster->GetFixateTargetGuid())
-                        caster->FixateTarget(nullptr);
+                        caster->FixateTarget(NULL);
 
                     return;
                 }

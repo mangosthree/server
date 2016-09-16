@@ -1535,7 +1535,7 @@ uint32 Guild::GetMemberSlotWithdrawRem(uint32 LowGuid, uint8 TabId)
     if ((GetBankRights(member.RankId, TabId) & GUILD_BANK_RIGHT_VIEW_TAB) != GUILD_BANK_RIGHT_VIEW_TAB)
         return 0;
 
-    uint32 curTime = uint32(time(nullptr) / MINUTE);
+    uint32 curTime = uint32(time(NULL) / MINUTE);
     if (curTime - member.BankResetTimeTab[TabId] >= 24 * HOUR / MINUTE)
     {
         member.BankResetTimeTab[TabId] = curTime;
@@ -1556,7 +1556,7 @@ uint64 Guild::GetMemberMoneyWithdrawRem(uint32 LowGuid)
     if (member.RankId == GR_GUILDMASTER)
         return WITHDRAW_MONEY_UNLIMITED;
 
-    uint32 curTime = uint32(time(nullptr) / MINUTE);           // minutes
+    uint32 curTime = uint32(time(NULL) / MINUTE);           // minutes
     // 24 hours
     if (curTime > member.BankResetTimeMoney + 24 * HOUR / MINUTE)
     {

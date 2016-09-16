@@ -597,11 +597,11 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
 
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
-            pPlayer->SetCharm(nullptr);
+            pPlayer->SetCharm(NULL);
             pVehicle->SetCharmerGuid(ObjectGuid());
 
             pPlayer->SetClientControl(pVehicle, 0);
-            pPlayer->SetMover(nullptr);
+            pPlayer->SetMover(NULL);
 
             pVehicle->clearUnitState(UNIT_STAT_CONTROLLED);
             pVehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
@@ -621,7 +621,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
     {
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
-            passenger->SetCharm(nullptr);
+            passenger->SetCharm(NULL);
             pVehicle->SetCharmerGuid(ObjectGuid());
         }
 

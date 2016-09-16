@@ -716,7 +716,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     spell->m_cast_count = cast_count;                       // probably pending spell cast
     spell->m_targets = targets;
 
-    SpellCastResult result = triggeredByAura ? SPELL_CAST_OK : spell->CheckPetCast(nullptr);
+    SpellCastResult result = triggeredByAura ? SPELL_CAST_OK : spell->CheckPetCast(NULL);
     if (result == SPELL_CAST_OK)
     {
         pet->AddCreatureSpellCooldown(spellid);

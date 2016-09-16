@@ -1136,7 +1136,7 @@ void CreatureEventAI::EnterEvadeMode()
     if (m_creature->IsAlive() && !m_creature->IsBoarded())
         m_creature->GetMotionMaster()->MoveTargetedHome();
 
-    m_creature->SetLootRecipient(nullptr);
+    m_creature->SetLootRecipient(NULL);
 
     // Handle Evade events
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)

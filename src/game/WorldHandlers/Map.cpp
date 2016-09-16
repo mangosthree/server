@@ -62,7 +62,7 @@ Map::~Map()
         sScriptMgr.DecreaseScheduledScriptCount(m_scriptSchedule.size());
 
     if (m_persistentState)
-        m_persistentState->SetUsedByMapState(nullptr);         // field pointer can be deleted after this
+        m_persistentState->SetUsedByMapState(NULL);         // field pointer can be deleted after this
 
     delete i_data;
     i_data = nullptr;

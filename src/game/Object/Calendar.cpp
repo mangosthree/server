@@ -481,7 +481,7 @@ void CalendarMgr::CopyEvent(uint64 eventId, time_t newTime, ObjectGuid const& gu
         return;
 
     if (newEvent->IsGuildAnnouncement())
-        AddInvite(newEvent, guid, guid,  CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(nullptr));
+        AddInvite(newEvent, guid, guid,  CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(NULL));
     else
     {
         // copy all invitees, set new owner as the one who make the copy, set invitees status to invited
@@ -493,7 +493,7 @@ void CalendarMgr::CopyEvent(uint64 eventId, time_t newTime, ObjectGuid const& gu
             const CalendarInvite* invite = ci_itr->second;
             if (invite->InviteeGuid == guid)
             {
-                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(nullptr));
+                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(NULL));
             }
             else
             {
@@ -502,7 +502,7 @@ void CalendarMgr::CopyEvent(uint64 eventId, time_t newTime, ObjectGuid const& gu
                 if (invite->Rank == CALENDAR_RANK_MODERATOR)
                     rank = CALENDAR_RANK_MODERATOR;
 
-                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_INVITED, rank, "", time(nullptr));
+                AddInvite(newEvent, guid, invite->InviteeGuid, CALENDAR_STATUS_INVITED, rank, "", time(NULL));
             }
             ++ci_itr;
         }

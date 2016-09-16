@@ -132,7 +132,7 @@ class  ChatHandler
             char const* channelName = NULL, uint32 achievementId = 0, const char* addonPrefix = NULL);
 
     protected:
-        explicit ChatHandler() : m_session(nullptr), sentErrorMessage(false) {}      // for CLI subclass
+        explicit ChatHandler() : m_session(NULL), sentErrorMessage(false) {}      // for CLI subclass
 
         bool hasStringAbbr(const char* name, const char* part);
 

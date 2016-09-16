@@ -19089,7 +19089,7 @@ void Player::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
     WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + m_spells.size() * 8);
     data << GetObjectGuid();
     data << uint8(0x0);                                     // flags (0x1, 0x2)
-    time_t curTime = time(nullptr);
+    time_t curTime = time(NULL);
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         if (itr->second.state == PLAYERSPELL_REMOVED)
@@ -21346,10 +21346,10 @@ void Player::Uncharm()
         charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS_PET);
         if (charm == GetMover())
         {
-            SetMover(nullptr);
+            SetMover(NULL);
             GetCamera().ResetView();
             RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
-            SetCharm(nullptr);
+            SetCharm(NULL);
             SetClientControl(this, 1);
         }
     }

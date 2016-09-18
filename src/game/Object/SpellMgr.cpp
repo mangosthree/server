@@ -918,6 +918,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                         return false;
                     break;
                 case SPELL_AURA_MOD_DECREASE_SPEED:         // used in positive spells also
+                    if (spellproto->Id == 37830)            // Repolarized Magneto Sphere
+                        return true;
                     // part of positive spell if casted at self
                     if ((spellEffect->EffectImplicitTargetA == TARGET_SELF ||
                         spellEffect->EffectImplicitTargetA == TARGET_SELF2) &&

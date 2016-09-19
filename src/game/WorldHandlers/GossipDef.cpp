@@ -481,7 +481,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     data << uint8(0);                                       // is areatrigger quest
     data << pQuest->GetReqSpellLearned();
 
-    data << uint32(pQuest->GetRewChoiceItemsCount());
+    data << pQuest->GetRewChoiceItemsCount();
 
     for (uint32 i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
         data << pQuest->RewChoiceItemId[i];
@@ -509,7 +509,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     if (GetMenuSession()->GetPlayer()->getLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
         data << pQuest->GetRewMoneyMaxLevel();
     else
-        data << uint32(pQuest->GetRewOrReqMoney());
+        data << pQuest->GetRewOrReqMoney();
 
     data << pQuest->XPValue(GetMenuSession()->GetPlayer());
 
@@ -527,7 +527,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
         data << pQuest->RewRepValueId[i];
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No bonus is expected given
-        data << uint32(0);
+        data << int32(0);
     // data << int32(pQuest->RewRepValue[i]);            // current field for store of rep value, can be reused to implement "override value"
 
     data << pQuest->GetRewSpell();                  // reward spell, this spell will display (icon) (casted if RewSpellCast==0)
@@ -549,9 +549,6 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
         data << pQuest->DetailsEmote[i];
         data << pQuest->DetailsEmoteDelay[i];       // DetailsEmoteDelay (in ms)
     }
-
-    data << uint32(1);
-    data << uint32(1);
 
     GetMenuSession()->SendPacket(&data);
 

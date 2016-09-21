@@ -2445,7 +2445,7 @@ bool ChatHandler::HandleItemMoveCommand(char* args)
     if (!pParam1)
         return false;
 
-    char* pParam2 = strtok(nullptr, " ");
+    char* pParam2 = strtok(NULL, " ");
     if (!pParam2)
         return false;
 
@@ -3392,7 +3392,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
     }
 
     Creature* wpOwner;                                         ///< Npc that is moving
-    TemporarySummonWaypoint* wpTarget = nullptr;               // Define here for wp-info command
+    TemporarySummonWaypoint* wpTarget = NULL;               // Define here for wp-info command
 
     // Show info for the selected waypoint (Step one: get moving npc)
     if (subCmd == "info")
@@ -3429,7 +3429,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         wpOwner = targetCreature;
 
     // Get the path
-    WaypointPath* wpPath = nullptr;
+    WaypointPath* wpPath = NULL;
     if (wpOrigin != PATH_NO_PATH)                           // Might have been provided by param
         wpPath = sWaypointMgr.GetPathFromOrigin(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPathId, wpOrigin);
     else
@@ -5092,7 +5092,7 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
         if (strcmp(para, "go") == 0)
         {
             followPath = true;
-            para = strtok(nullptr, " ");
+            para = strtok(NULL, " ");
             if (para && strcmp(para, "straight") == 0)
                 useStraightPath = true;
         }

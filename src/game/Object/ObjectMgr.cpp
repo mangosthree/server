@@ -9544,7 +9544,7 @@ void ObjectMgr::LoadActiveEntities(Map* _map)
         {
             _map = sMapMgr.FindMap(continents[i]);
             if (!_map)
-                _map = sMapMgr.CreateMap(continents[i], nullptr);
+                _map = sMapMgr.CreateMap(continents[i], NULL);
 
             if (_map)
                 LoadActiveEntities(_map);

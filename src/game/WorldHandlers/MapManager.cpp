@@ -97,11 +97,11 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
 {
     Guard _guard(*this);
 
-    Map* m = nullptr;
+    Map* m = NULL;
 
     const MapEntry* entry = sMapStore.LookupEntry(id);
     if (!entry)
-        return nullptr;
+        return NULL;
 
     if (entry->Instanceable())
     {
@@ -115,7 +115,7 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
     {
         // create regular non-instanceable map
         m = FindMap(id);
-        if (m == nullptr)
+        if (m == NULL)
         {
             m = new WorldMap(id, i_gridCleanUpDelay);
             // add map into container

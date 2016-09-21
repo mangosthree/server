@@ -981,8 +981,8 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             {
                 SpellEntry const* shareSpell = (*itr)->GetSpellProto();
                 uint32 shareDamage = uint32(damage*(*itr)->GetModifier()->m_amount / 100.0f);
-                DealDamageMods(shareTarget, shareDamage, nullptr);
-                DealDamage(shareTarget, shareDamage, nullptr, damagetype, GetSpellSchoolMask(shareSpell), shareSpell, false);
+                DealDamageMods(shareTarget, shareDamage, NULL);
+                DealDamage(shareTarget, shareDamage, NULL, damagetype, GetSpellSchoolMask(shareSpell), shareSpell, false);
             }
         }
     }
@@ -12307,13 +12307,13 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
     if (!cinfo)
     {
         sLog.outErrorDb("WorldObject::SummonCreature: Creature (Entry: %u) not existed for summoner: %s. ", creatureEntry, GetGuidStr().c_str());
-        return nullptr;
+        return NULL;
     }
 
     if (GetCharm())
     {
         sLog.outError("Unit::TakePossessOf> There is already a charmed creature for %s its : %s. ", GetGuidStr().c_str(), GetCharm()->GetGuidStr().c_str());
-        return nullptr;
+        return NULL;
     }
 
     TemporarySummon* pCreature = new TemporarySummon(GetObjectGuid());
@@ -12326,10 +12326,10 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
     if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo))
     {
         delete pCreature;
-        return nullptr;
+        return NULL;
     }
 
-    Player* player = GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this): nullptr;
+    Player* player = GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this): NULL;
 
     pCreature->setFaction(getFaction());                                // set same faction than player
     pCreature->SetRespawnCoord(pos);                                    // set spawn coord
@@ -12383,7 +12383,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
 
 bool Unit::TakePossessOf(Unit* possessed)
 {
-    Player* player = nullptr;
+    Player* player = NULL;
     if (GetTypeId() == TYPEID_PLAYER)
         player = static_cast<Player *>(this);
 
@@ -12394,7 +12394,7 @@ bool Unit::TakePossessOf(Unit* possessed)
 
     SetCharm(possessed);
 
-    Creature* possessedCreature = nullptr;
+    Creature* possessedCreature = NULL;
     if (possessed->GetTypeId() == TYPEID_UNIT)
         possessedCreature = static_cast<Creature *>(possessed);
 
@@ -12438,7 +12438,7 @@ bool Unit::TakePossessOf(Unit* possessed)
 
 void Unit::ResetControlState(bool attackCharmer /*= true*/)
 {
-    Player* player = nullptr;
+    Player* player = NULL;
     if (GetTypeId() == TYPEID_PLAYER)
         player = static_cast<Player *>(this);
 

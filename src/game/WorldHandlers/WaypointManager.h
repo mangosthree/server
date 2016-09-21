@@ -121,19 +121,19 @@ class WaypointManager
                     break;
                 case PATH_FROM_ENTRY:
                     if (pathId >= 0xFF || pathId < 0)
-                        return nullptr;
+                        return NULL;
                     key = (entry << 8) + pathId;
                     wpMap = &m_pathTemplateMap;
                     break;
                 case PATH_FROM_EXTERNAL:
                     if (pathId >= 0xFF || pathId < 0)
-                        return nullptr;
+                        return NULL;
                     key = (entry << 8) + pathId;
                     wpMap = &m_externalPathTemplateMap;
                     break;
                 case PATH_NO_PATH:
                 default:
-                    return nullptr;
+                    return NULL;
             }
             WaypointPathMap::iterator find = wpMap->find(key);
             return find != wpMap->end() ? &find->second : NULL;

@@ -335,7 +335,7 @@ CreatureLinkingInfo const* CreatureLinkingMgr::GetLinkedTriggerInformation(uint3
             return &(iter->second);
     }
 
-    return nullptr;
+    return NULL;
 }
 
 // Function to add slave-NPCs to the holder
@@ -453,7 +453,7 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
     {
         if (pInfo->linkingFlag & reverseEventFlagFilter)
         {
-            Creature* pMaster = nullptr;
+            Creature* pMaster = NULL;
             if (pInfo->mapId != INVALID_MAP_ID)             // entry case
             {
                 BossGuidMapBounds finds = m_masterGuid.equal_range(pInfo->masterId);
@@ -635,7 +635,7 @@ bool CreatureLinkingHolder::IsSlaveInRangeOfBoss(Creature const* pBoss, float sX
 bool CreatureLinkingHolder::IsRespawnReady(uint32 dbLowGuid, Map* _map) const
 {
     time_t respawnTime = _map->GetPersistentState()->GetCreatureRespawnTime(dbLowGuid);
-    return (!respawnTime || respawnTime <= time(NULL)) && CanSpawn(dbLowGuid, _map, nullptr, 0.0f, 0.0f);
+    return (!respawnTime || respawnTime <= time(NULL)) && CanSpawn(dbLowGuid, _map, NULL, 0.0f, 0.0f);
 }
 
 // Function to check if a passive spawning condition is met
@@ -717,7 +717,7 @@ bool CreatureLinkingHolder::TryFollowMaster(Creature* pCreature)
     if (!pInfo || !(pInfo->linkingFlag & FLAG_FOLLOW))
         return false;
 
-    Creature* pMaster = nullptr;
+    Creature* pMaster = NULL;
     if (pInfo->mapId != INVALID_MAP_ID)                     // entry case
     {
         BossGuidMapBounds finds = m_masterGuid.equal_range(pInfo->masterId);

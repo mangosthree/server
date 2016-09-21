@@ -132,7 +132,7 @@ void PetAI::UpdateAI(const uint32 diff)
         return;
 
     Unit* owner = m_creature->GetCharmerOrOwner();
-    Unit* victim = nullptr;
+    Unit* victim = NULL;
 
     if (!((Pet*)m_creature)->isControlled())
         m_creature->SelectHostileTarget();

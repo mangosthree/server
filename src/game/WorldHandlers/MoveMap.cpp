@@ -66,7 +66,7 @@ namespace MMAP
         delete[] mapList;
     }
 
-    bool MMapFactory::IsPathfindingEnabled(uint32 mapId, const Unit* unit = nullptr)
+    bool MMapFactory::IsPathfindingEnabled(uint32 mapId, const Unit* unit = NULL)
     {
         if (!sWorld.getConfig(CONFIG_BOOL_MMAP_ENABLED))
             return false;

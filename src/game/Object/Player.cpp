@@ -4140,14 +4140,14 @@ void Player::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     {
         for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
         {
-            if (m_items[i] == nullptr)
+            if (m_items[i] == NULL)
                 continue;
 
             m_items[i]->BuildCreateUpdateBlockForPlayer(data, target);
         }
         for (int i = INVENTORY_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
         {
-            if (m_items[i] == nullptr)
+            if (m_items[i] == NULL)
                 continue;
 
             m_items[i]->BuildCreateUpdateBlockForPlayer(data, target);
@@ -6321,7 +6321,7 @@ void Player::CheckAreaExploreAndOutdoor()
 
             if (!shapeShift || (shapeShift->Stances || shapeShift->StancesNot) && !IsNeedCastSpellAtFormApply(spellInfo, GetShapeshiftForm()))
                 continue;
-            CastSpell(this, itr->first, true, nullptr);
+            CastSpell(this, itr->first, true, NULL);
         }
     }
     else if (sWorld.getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK) && !isGameMaster())

@@ -312,8 +312,8 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
     if (!his_trade)
         return;
 
-    Item* myItems[TRADE_SLOT_TRADED_COUNT]  = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-    Item* hisItems[TRADE_SLOT_TRADED_COUNT] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+    Item* myItems[TRADE_SLOT_TRADED_COUNT]  = { NULL, NULL, NULL, NULL, NULL, NULL };
+    Item* hisItems[TRADE_SLOT_TRADED_COUNT] = { NULL, NULL, NULL, NULL, NULL, NULL };
 
     // set before checks to properly undo at problems (it already set in to client)
     my_trade->SetAccepted(true);
@@ -367,10 +367,10 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
     {
         setAcceptTradeMode(my_trade, his_trade, myItems, hisItems);
 
-        Spell* my_spell = nullptr;
+        Spell* my_spell = NULL;
         SpellCastTargets my_targets;
 
-        Spell* his_spell = nullptr;
+        Spell* his_spell = NULL;
         SpellCastTargets his_targets;
 
         // not accept if spell can't be casted now (cheating)
@@ -529,9 +529,9 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         // cleanup
         clearAcceptTradeMode(my_trade, his_trade);
         delete _player->m_trade;
-        _player->m_trade = nullptr;
+        _player->m_trade = NULL;
         delete trader->m_trade;
-        trader->m_trade = nullptr;
+        trader->m_trade = NULL;
 
         // desynchronized with the other saves here (SaveInventoryAndGoldToDB() not have own transaction guards)
         CharacterDatabase.BeginTransaction();

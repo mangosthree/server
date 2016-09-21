@@ -311,7 +311,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "setphase",       SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectPhaseCommand,     "", NULL },
         { "target",         SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectTargetCommand,    "", NULL },
         { "turn",           SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectTurnCommand,      "", NULL },
-        { nullptr,          0,                  false, NULL,                                           "", NULL }
+        { NULL,          0,                  false, NULL,                                           "", NULL }
     };
 
     static ChatCommand guildCommandTable[] =

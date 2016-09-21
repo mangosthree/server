@@ -1034,7 +1034,7 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
         if (ch && ch->ChannelID == channel_id)
             return ch;
     }
-    return nullptr;
+    return NULL;
 }
 
 bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId)

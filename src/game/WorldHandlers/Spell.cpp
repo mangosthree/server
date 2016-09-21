@@ -2349,7 +2349,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             if (target && target != m_caster)
             {
                 // Can only be casted on group's members or its pets
-                Group*  pGroup = nullptr;
+                Group*  pGroup = NULL;
 
                 Unit* owner = m_caster->GetCharmerOrOwner();
                 Unit* targetOwner = target->GetCharmerOrOwner();
@@ -2527,7 +2527,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_AREAEFFECT_PARTY:
         {
             Unit* owner = m_caster->GetCharmerOrOwner();
-            Player* pTarget = nullptr;
+            Player* pTarget = NULL;
 
             if (owner)
             {
@@ -2553,13 +2553,13 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
             }
 
-            Group* pGroup = pTarget ? pTarget->GetGroup() : nullptr;
+            Group* pGroup = pTarget ? pTarget->GetGroup() : NULL;
 
             if (pGroup)
             {
                 uint8 subgroup = pTarget->GetSubGroup();
 
-                for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
+                for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
                     Player* Target = itr->getSource();
 
@@ -2675,12 +2675,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_AREAEFFECT_PARTY_AND_CLASS:
         {
             Player* targetPlayer = m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER
-                                   ? (Player*)m_targets.getUnitTarget() : nullptr;
+                                   ? (Player*)m_targets.getUnitTarget() : NULL;
 
-            Group* pGroup = targetPlayer ? targetPlayer->GetGroup() : nullptr;
+            Group* pGroup = targetPlayer ? targetPlayer->GetGroup() : NULL;
             if (pGroup)
             {
-                for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
+                for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
                     Player* Target = itr->getSource();
 
@@ -2717,7 +2717,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_RIGHT_FROM_VICTIM:
         case TARGET_LEFT_FROM_VICTIM:
         {
-            Unit* pTarget = nullptr;
+            Unit* pTarget = NULL;
 
             // explicit cast data from client or server-side cast
             // some spell at client send caster
@@ -3085,7 +3085,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     }
 }
 
-SpellCastResult Spell::PreCastCheck(Aura* triggeredByAura /*= nullptr*/)
+SpellCastResult Spell::PreCastCheck(Aura* triggeredByAura /*= NULL*/)
 {
     // Prevent casting at cast another spell (ServerSide check)
     if (m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count && !m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
@@ -3716,7 +3716,7 @@ void Spell::_handle_immediate_phase()
         if (spellEffect->Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA ||
                 //summon a gameobject at the spell's destination xyz
                 (spellEffect->Effect == SPELL_EFFECT_TRANS_DOOR && spellEffect->EffectImplicitTargetA == TARGET_AREAEFFECT_GO_AROUND_DEST))
-            HandleEffects(nullptr, nullptr, nullptr, SpellEffectIndex(j));
+            HandleEffects(NULL, NULL, NULL, SpellEffectIndex(j));
     }
 }
 
@@ -3853,7 +3853,7 @@ void Spell::update(uint32 difftime)
                                 continue;
 
                             Unit* unit = m_caster->GetObjectGuid() == target.targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, target.targetGUID);
-                            if (unit == nullptr)
+                            if (unit == NULL)
                                 continue;
 
                             p->RewardPlayerAndGroupAtCast(unit, m_spellInfo->Id);
@@ -6141,7 +6141,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     {
                         if (strict)     // Summoning Disorientation, trigger pet stun (cast by pet so it doesn't attack player)
                             if (Pet* pet = ((Player*)m_caster)->GetPet())
-                                pet->CastSpell(pet, 32752, true, nullptr, nullptr, pet->GetObjectGuid());
+                                pet->CastSpell(pet, 32752, true, NULL, NULL, pet->GetObjectGuid());
                     }
                     else
                         return SPELL_FAILED_ALREADY_HAVE_SUMMON;
@@ -6507,7 +6507,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
         Unit* charmer = m_caster->GetCharmerOrOwner();
         if (charmer)
         {
-            Player* pCharmer = charmer->GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(charmer) : nullptr;
+            Player* pCharmer = charmer->GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(charmer) : NULL;
             if (!charmer->IsAlive() && (!pCharmer || !pCharmer->IsGhouled()))
                 return SPELL_FAILED_CASTER_DEAD;
         }

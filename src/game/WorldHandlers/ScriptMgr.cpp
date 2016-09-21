@@ -1077,7 +1077,7 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
 
             if (m_script->IsCreatureBuddy())
             {
-                Creature* pCreatureBuddy = nullptr;
+                Creature* pCreatureBuddy = NULL;
 
                 if (m_script->data_flags & SCRIPT_FLAG_BUDDY_IS_DESPAWNED)
                 {
@@ -1585,7 +1585,7 @@ bool ScriptAction::HandleScriptStep()
             }
 
             // bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide
-            Player* pSoundTarget = nullptr;
+            Player* pSoundTarget = NULL;
             if (m_script->playSound.flags & 1)
             {
                 pSoundTarget = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
@@ -1944,7 +1944,7 @@ bool ScriptAction::HandleScriptStep()
                 ((Creature*)pSource)->AI()->SendAIEventAround(AIEventType(m_script->sendAIEvent.eventType), (Unit*)pTarget, 0, float(m_script->sendAIEvent.radius));
             // else if no radius and target is creature send AI event to target
             else if (pTarget->GetTypeId() == TYPEID_UNIT)
-                ((Creature*)pSource)->AI()->SendAIEvent(AIEventType(m_script->sendAIEvent.eventType), nullptr, (Creature*)pTarget);
+                ((Creature*)pSource)->AI()->SendAIEvent(AIEventType(m_script->sendAIEvent.eventType), NULL, (Creature*)pTarget);
             break;
         }
         case SCRIPT_COMMAND_TURN_TO:                        // 36
@@ -2001,7 +2001,7 @@ bool ScriptAction::HandleScriptStep()
                     orientation = m_script->o;
 
                 pSource->GetRandomPoint(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), m_script->moveDynamic.maxDist, x, y, z,
-                                        m_script->moveDynamic.minDist, (orientation == 0.0f ? nullptr : &orientation));
+                                        m_script->moveDynamic.minDist, (orientation == 0.0f ? NULL : &orientation));
                 z = std::max(z, pTarget->GetPositionZ());
                 pSource->UpdateAllowedPositionZ(x, y, z);
             }

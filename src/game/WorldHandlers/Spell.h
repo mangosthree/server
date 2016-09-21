@@ -390,7 +390,7 @@ class Spell
         Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = NULL);
         ~Spell();
 
-        void SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura = nullptr);
+        void SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura = NULL);
 
         void cancel();
 
@@ -537,7 +537,7 @@ class Spell
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data
         void UpdateOriginalCasterPointer();
 
-        SpellCastResult PreCastCheck(Aura* triggeredByAura = nullptr);
+        SpellCastResult PreCastCheck(Aura* triggeredByAura = NULL);
         void Prepare();
 
         Unit* m_caster;

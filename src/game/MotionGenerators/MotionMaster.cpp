@@ -59,7 +59,7 @@ void MotionMaster::Initialize()
     if (m_owner->GetTypeId() == TYPEID_UNIT && !m_owner->hasUnitState(UNIT_STAT_CONTROLLED))
     {
         MovementGenerator* movement = FactorySelector::selectMovementGenerator((Creature*)m_owner);
-        push(movement == nullptr ? &si_idleMovement : movement);
+        push(movement == NULL ? &si_idleMovement : movement);
         top()->Initialize(*m_owner);
         if (top()->GetMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
             (static_cast<WaypointMovementGenerator<Creature>*>(top()))->InitializeWaypointPath(*((Creature*)(m_owner)), 0, PATH_NO_PATH, 0, 0);

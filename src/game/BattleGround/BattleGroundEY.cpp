@@ -427,12 +427,12 @@ void BattleGroundEY::EventPlayerDroppedFlag(Player* source)
     if (source->GetTeam() == ALLIANCE)
     {
         UpdateWorldState(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_ALLIANCE, 1);
-        SendMessageToAll(LANG_BG_EY_DROPPED_FLAG, CHAT_MSG_BG_SYSTEM_ALLIANCE, nullptr);
+        SendMessageToAll(LANG_BG_EY_DROPPED_FLAG, CHAT_MSG_BG_SYSTEM_ALLIANCE, NULL);
     }
     else
     {
         UpdateWorldState(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_HORDE, 1);
-        SendMessageToAll(LANG_BG_EY_DROPPED_FLAG, CHAT_MSG_BG_SYSTEM_HORDE, nullptr);
+        SendMessageToAll(LANG_BG_EY_DROPPED_FLAG, CHAT_MSG_BG_SYSTEM_HORDE, NULL);
     }
 }
 

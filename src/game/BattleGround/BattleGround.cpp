@@ -658,8 +658,8 @@ void BattleGround::EndBattleGround(Team winner)
 {
     this->RemoveFromBGFreeSlotQueue();
 
-    ArenaTeam* winner_arena_team = nullptr;
-    ArenaTeam* loser_arena_team = nullptr;
+    ArenaTeam* winner_arena_team = NULL;
+    ArenaTeam* loser_arena_team = NULL;
     uint32 loser_rating = 0;
     uint32 winner_rating = 0;
     WorldPacket data;

@@ -877,7 +877,7 @@ void WorldSession::SetAccountData(AccountDataType type, time_t time_, const std:
     }
     else
     {
-        // _player can be nullptr and packet received after logout but m_GUID still store correct guid
+        // _player can be NULL and packet received after logout but m_GUID still store correct guid
         if (!m_GUIDLow)
             return;
 

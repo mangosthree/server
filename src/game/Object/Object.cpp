@@ -1451,7 +1451,7 @@ bool WorldObject::isInBack(WorldObject const* target, float distance, float arc)
     return IsWithinDist(target, distance) && !HasInArc(2 * M_PI_F - arc, target);
 }
 
-void WorldObject::GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z, float minDist /*=0.0f*/, float const* ori /*=nullptr*/) const
+void WorldObject::GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z, float minDist /*=0.0f*/, float const* ori /*=NULL*/) const
 {
     if (distance == 0)
     {
@@ -1490,7 +1490,7 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float& z) const
         { z = new_z + 0.05f; }                                  // just to be sure that we are not a few pixel under the surface
 }
 
-void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=nullptr*/) const
+void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=NULL*/) const
 {
     if (!atMap)
         atMap = GetMap();
@@ -1761,7 +1761,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     if (!cinfo)
     {
         sLog.outErrorDb("WorldObject::SummonCreature: Creature (Entry: %u) not existed for summoner: %s. ", id, GetGuidStr().c_str());
-        return nullptr;
+        return NULL;
     }
 
     TemporarySummon* pCreature = new TemporarySummon(GetObjectGuid());
@@ -1778,7 +1778,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo, team))
     {
         delete pCreature;
-        return nullptr;
+        return NULL;
     }
 
     pCreature->SetRespawnCoord(pos);

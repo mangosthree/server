@@ -2581,7 +2581,7 @@ bool ChatHandler::HandleLearnCommand(char* args)
     if (!spell || !sSpellStore.LookupEntry(spell))
         return false;
 
-    bool allRanks = ExtractLiteralArg(&args, "all") != nullptr;
+    bool allRanks = ExtractLiteralArg(&args, "all") != NULL;
     if (!allRanks && *args)                                 // can be fail also at syntax error
         return false;
 
@@ -3978,7 +3978,7 @@ bool ChatHandler::HandleDieCommand(char* /*args*/)
 
     if (target->IsAlive())
     {
-        player->DealDamage(target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+        player->DealDamage(target, target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
     }
 
     return true;
@@ -4014,7 +4014,7 @@ bool ChatHandler::HandleDamageCommand(char* args)
     // flat melee damage without resistance/etc reduction
     if (!*args)
     {
-        player->DealDamage(target, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+        player->DealDamage(target, damage, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
         if (target != player)
             player->SendAttackStateUpdate(HITINFO_NORMALSWING2, target, SPELL_SCHOOL_MASK_NORMAL, damage, 0, 0, VICTIMSTATE_NORMAL, 0);
         return true;
@@ -4046,7 +4046,7 @@ bool ChatHandler::HandleDamageCommand(char* args)
         damage -= absorb + resist;
 
         player->DealDamageMods(target, damage, &absorb);
-        player->DealDamage(target, damage, nullptr, DIRECT_DAMAGE, schoolmask, nullptr, false);
+        player->DealDamage(target, damage, NULL, DIRECT_DAMAGE, schoolmask, NULL, false);
         player->SendAttackStateUpdate(HITINFO_NORMALSWING2, target, schoolmask, damage, absorb, resist, VICTIMSTATE_NORMAL, 0);
         return true;
     }
@@ -6441,7 +6441,7 @@ bool ChatHandler::HandleCastCommand(char* args)
         return false;
     }
 
-    bool triggered = ExtractLiteralArg(&args, "triggered") != nullptr;
+    bool triggered = ExtractLiteralArg(&args, "triggered") != NULL;
     if (!triggered && *args)                                // can be fail also at syntax error
         return false;
 

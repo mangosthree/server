@@ -121,7 +121,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     ((Pet*)pet)->SetIsRetreating();
                     ((Pet*)pet)->SetSpellOpener();
 
-                    Unit* targetUnit = targetGuid ? _player->GetMap()->GetUnit(targetGuid) : nullptr;
+                    Unit* targetUnit = targetGuid ? _player->GetMap()->GetUnit(targetGuid) : NULL;
 
                     if (targetUnit && targetUnit != pet && targetUnit->IsTargetableForAttack() && targetUnit->isInAccessablePlaceFor((Creature*)pet))
                     {
@@ -201,7 +201,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             ((Pet*)pet)->SetIsRetreating();
             ((Pet*)pet)->SetSpellOpener();
 
-            Unit* unit_target = targetGuid ? _player->GetMap()->GetUnit(targetGuid) : nullptr;
+            Unit* unit_target = targetGuid ? _player->GetMap()->GetUnit(targetGuid) : NULL;
 
             // do not cast unknown spells
             SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid);

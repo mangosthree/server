@@ -65,7 +65,7 @@ Map::~Map()
         m_persistentState->SetUsedByMapState(NULL);         // field pointer can be deleted after this
 
     delete i_data;
-    i_data = nullptr;
+    i_data = NULL;
 
     // unload instance specific navigation data
     MMAP::MMapFactory::createOrGetMMapManager()->unloadMapInstance(m_TerrainData->GetMapId(), GetInstanceId());
@@ -2127,7 +2127,7 @@ bool Map::GetHeightInRange(uint32 phasemask, float x, float y, float& z, float m
 
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
     if (!vmgr->isLineOfSightCalcEnabled())
-        vmgr = nullptr;
+        vmgr = NULL;
 
     if (vmgr)
     {

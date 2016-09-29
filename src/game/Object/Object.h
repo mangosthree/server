@@ -646,7 +646,7 @@ class WorldObject : public Object
         void SetMap(Map* map);
         Map* GetMap() const { MANGOS_ASSERT(m_currMap); return m_currMap; }
         // used to check all object's GetMap() calls when object is not in world!
-        void ResetMap() { m_currMap = NULL; }
+        void ResetMap();
 
         // obtain terrain data for map where this object belong...
         TerrainInfo const* GetTerrain() const;
@@ -654,7 +654,7 @@ class WorldObject : public Object
         void AddToClientUpdateList() override;
         void RemoveFromClientUpdateList() override;
         void BuildUpdateData(UpdateDataMapType&) override;
-        
+
         Creature* SummonCreature(uint32 id, float x, float y, float z, float ang, TempSummonType spwtype, uint32 despwtime, bool asActiveObject = false, bool setRun = false);
         GameObject* SummonGameObject(uint32 id, float x, float y, float z, float angle, uint32 despwtime);
 

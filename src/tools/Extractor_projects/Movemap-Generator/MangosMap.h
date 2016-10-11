@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2016  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,25 +22,29 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _MMAP_MANGOS_MAP_H
-#define _MMAP_MANGOS_MAP_H
+#ifndef MANGOS_H_MMAP_MANGOS_MAP
+#define MANGOS_H_MMAP_MANGOS_MAP
 
 // following is copied from src/game/GridMap.h (too many useless includes there to use original file)
 namespace MaNGOS
 {
+    /**
+     * @brief
+     *
+     */
     struct GridMapFileHeader
     {
-        uint32 mapMagic;
-        uint32 versionMagic;
+        uint32 mapMagic; /**< TODO */
+        uint32 versionMagic; /**< TODO */
         uint32 buildMagic;
-        uint32 areaMapOffset;
-        uint32 areaMapSize;
-        uint32 heightMapOffset;
-        uint32 heightMapSize;
-        uint32 liquidMapOffset;
-        uint32 liquidMapSize;
-        uint32 holesOffset;
-        uint32 holesSize;
+        uint32 areaMapOffset; /**< TODO */
+        uint32 areaMapSize; /**< TODO */
+        uint32 heightMapOffset; /**< TODO */
+        uint32 heightMapSize; /**< TODO */
+        uint32 liquidMapOffset; /**< TODO */
+        uint32 liquidMapSize; /**< TODO */
+        uint32 holesOffset; /**< TODO */
+        uint32 holesSize; /**< TODO */
     };
 
     // ==============mmaps don't use area==============
@@ -57,27 +61,35 @@ namespace MaNGOS
 #define MAP_HEIGHT_AS_INT16   0x0002
 #define MAP_HEIGHT_AS_INT8    0x0004
 
+    /**
+     * @brief
+     *
+     */
     struct GridMapHeightHeader
     {
-        uint32 fourcc;
-        uint32 flags;
-        float gridHeight;
-        float gridMaxHeight;
+        uint32 fourcc; /**< TODO */
+        uint32 flags; /**< TODO */
+        float gridHeight; /**< TODO */
+        float gridMaxHeight; /**< TODO */
     };
 
 #define MAP_LIQUID_NO_TYPE    0x0001
 #define MAP_LIQUID_NO_HEIGHT  0x0002
 
+    /**
+     * @brief
+     *
+     */
     struct GridMapLiquidHeader
     {
-        uint32 fourcc;
-        uint16 flags;
-        uint16 liquidType;
-        uint8 offsetX;
-        uint8 offsetY;
-        uint8 width;
-        uint8 height;
-        float liquidLevel;
+        uint32 fourcc; /**< TODO */
+        uint16 flags; /**< TODO */
+        uint16 liquidType; /**< TODO */
+        uint8 offsetX; /**< TODO */
+        uint8 offsetY; /**< TODO */
+        uint8 width; /**< TODO */
+        uint8 height; /**< TODO */
+        float liquidLevel; /**< TODO */
     };
 
     //enum GridMapLiquidStatus

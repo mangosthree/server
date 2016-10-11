@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2016  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 #ifndef WMO_H
 #define WMO_H
+
 #define TILESIZE (533.33333f)
 #define CHUNKSIZE ((TILESIZE) / 16.0f)
 
@@ -48,94 +49,170 @@ class MPQFile;
 /* for whatever reason a certain company just can't stick to one coordinate system... */
 static inline Vec3D fixCoords(const Vec3D& v) { return Vec3D(v.z, v.x, v.y); }
 
+/**
+ * @brief
+ *
+ */
 class WMORoot
 {
     public:
-        uint32 nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, RootWMOID, liquidType;
-        unsigned int col;
-        float bbcorn1[3];
-        float bbcorn2[3];
+        uint32 nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, RootWMOID, liquidType; /**< TODO */
+        unsigned int col; /**< TODO */
+        float bbcorn1[3]; /**< TODO */
+        float bbcorn2[3]; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @param filename
+         */
         WMORoot(std::string& filename);
+        /**
+         * @brief
+         *
+         */
         ~WMORoot();
 
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool open();
+        /**
+         * @brief
+         *
+         * @param output
+         * @return bool
+         */
         bool ConvertToVMAPRootWmo(FILE* output);
     private:
-        std::string filename;
+        std::string filename; /**< TODO */
         char outfilename;
 };
 
+/**
+ * @brief
+ *
+ */
 struct WMOLiquidHeader
 {
-    int xverts, yverts, xtiles, ytiles;
-    float pos_x;
-    float pos_y;
-    float pos_z;
-    short type;
+    int xverts, yverts, xtiles, ytiles; /**< TODO */
+    float pos_x; /**< TODO */
+    float pos_y; /**< TODO */
+    float pos_z; /**< TODO */
+    short type; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 struct WMOLiquidVert
 {
-    uint16 unk1;
-    uint16 unk2;
-    float height;
+    uint16 unk1; /**< TODO */
+    uint16 unk2; /**< TODO */
+    float height; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 class WMOGroup
 {
     public:
         // MOGP
-        int groupName, descGroupName, mogpFlags;
-        float bbcorn1[3];
-        float bbcorn2[3];
-        uint16 moprIdx;
-        uint16 moprNItems;
-        uint16 nBatchA;
-        uint16 nBatchB;
-        uint32 nBatchC, fogIdx, liquidType, groupWMOID;
+        int groupName, descGroupName, mogpFlags; /**< TODO */
+        float bbcorn1[3]; /**< TODO */
+        float bbcorn2[3]; /**< TODO */
+        uint16 moprIdx; /**< TODO */
+        uint16 moprNItems; /**< TODO */
+        uint16 nBatchA; /**< TODO */
+        uint16 nBatchB; /**< TODO */
+        uint32 nBatchC, fogIdx, liquidType, groupWMOID; /**< TODO */
 
-        int mopy_size, moba_size;
-        int LiquEx_size;
-        unsigned int nVertices; // number when loaded
-        int nTriangles; // number when loaded
-        char* MOPY;
-        uint16* MOVI;
-        uint16* MoviEx;
-        float* MOVT;
-        uint16* MOBA;
-        int* MobaEx;
-        WMOLiquidHeader* hlq;
-        WMOLiquidVert* LiquEx;
-        char* LiquBytes;
-        uint32 liquflags;
+        int mopy_size, moba_size; /**< TODO */
+        int LiquEx_size; /**< TODO */
+        unsigned int nVertices; /**< number when loaded */
+        int nTriangles; /**< number when loaded */
+        char* MOPY; /**< TODO */
+        uint16* MOVI; /**< TODO */
+        uint16* MoviEx; /**< TODO */
+        float* MOVT; /**< TODO */
+        uint16* MOBA; /**< TODO */
+        int* MobaEx; /**< TODO */
+        WMOLiquidHeader* hlq; /**< TODO */
+        WMOLiquidVert* LiquEx; /**< TODO */
+        char* LiquBytes; /**< TODO */
+        uint32 liquflags; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @param filename
+         */
         WMOGroup(std::string& filename);
+        /**
+         * @brief
+         *
+         */
         ~WMOGroup();
 
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool open();
+        /**
+         * @brief
+         *
+         * @param output
+         * @param rootWMO
+         * @param pPreciseVectorData
+         * @return int
+         */
         int ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPreciseVectorData);
 
     private:
-        std::string filename;
+        std::string filename; /**< TODO */
         char outfilename;
 };
 
+/**
+ * @brief
+ *
+ */
 class WMOInstance
 {
-        static std::set<int> ids;
+        static std::set<int> ids; /**< TODO */
     public:
-        std::string MapName;
-        int currx;
-        int curry;
-        WMOGroup* wmo;
-        Vec3D pos;
-        Vec3D pos2, pos3, rot;
-        uint32 indx, id, d2, d3;
-        int doodadset;
+        std::string MapName; /**< TODO */
+        int currx; /**< TODO */
+        int curry; /**< TODO */
+        WMOGroup* wmo; /**< TODO */
+        Vec3D pos; /**< TODO */
+        Vec3D pos2, pos3, rot; /**< TODO */
+        uint32 indx, id, d2, d3; /**< TODO */
+        int doodadset; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @param f
+         * @param WmoInstName
+         * @param mapID
+         * @param tileX
+         * @param tileY
+         * @param pDirfile
+         */
         WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile);
 
+        /**
+         * @brief
+         *
+         */
         static void reset();
 };
 

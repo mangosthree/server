@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2016  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _MMAP_COMMON_H
-#define _MMAP_COMMON_H
+#ifndef MANGOS_H_MMAP_COMMON
+#define MANGOS_H_MMAP_COMMON
 
 // stop warning spam from ACE includes
 #ifdef WIN32
@@ -44,10 +44,17 @@ using namespace std;
 
 namespace MMAP
 {
+    /**
+     * @brief
+     *
+     * @param filter
+     * @param str
+     * @return bool
+     */
     inline bool matchWildcardFilter(const char* filter, const char* str)
     {
         if (!filter || !str)
-            return false;
+            { return false; }
 
         // end on null character
         while (*filter && *str)
@@ -55,19 +62,19 @@ namespace MMAP
             if (*filter == '*')
             {
                 if (*++filter == '\0')  // wildcard at end of filter means all remaing chars match
-                    return true;
+                    { return true; }
 
                 while (true)
                 {
                     if (*filter == *str)
-                        break;
+                        { break; }
                     if (*str == '\0')
-                        return false;   // reached end of string without matching next filter character
+                        { return false; }   // reached end of string without matching next filter character
                     str++;
                 }
             }
             else if (*filter != *str)
-                return false;           // mismatch
+                { return false; }           // mismatch
 
             filter++;
             str++;
@@ -76,12 +83,25 @@ namespace MMAP
         return ((*filter == '\0' || (*filter == '*' && *++filter == '\0')) && *str == '\0');
     }
 
+    /**
+     * @brief
+     *
+     */
     enum ListFilesResult
     {
         LISTFILE_DIRECTORY_NOT_FOUND = 0,
         LISTFILE_OK = 1
     };
 
+    /**
+     * @brief
+     *
+     * @param fileList
+     * @param dirpath
+     * @param filter
+     * @param includeSubDirs
+     * @return ListFilesResult
+     */
     inline ListFilesResult getDirContents(vector<string>& fileList, string dirpath = ".", string filter = "*", bool includeSubDirs = false)
     {
 #ifdef WIN32
@@ -94,12 +114,12 @@ namespace MMAP
         hFind = FindFirstFile(directory.c_str(), &findFileInfo);
 
         if (hFind == INVALID_HANDLE_VALUE)
-            return LISTFILE_DIRECTORY_NOT_FOUND;
+            { return LISTFILE_DIRECTORY_NOT_FOUND; }
 
         do
         {
             if (includeSubDirs || (findFileInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
-                fileList.push_back(string(findFileInfo.cFileName));
+                { fileList.push_back(string(findFileInfo.cFileName)); }
         }
         while (FindNextFile(hFind, &findFileInfo));
 
@@ -116,16 +136,16 @@ namespace MMAP
             if ((dp = readdir(dirp)) != NULL)
             {
                 if (matchWildcardFilter(filter.c_str(), dp->d_name))
-                    fileList.push_back(string(dp->d_name));
+                    { fileList.push_back(string(dp->d_name)); }
             }
             else
-                break;
+                { break; }
         }
 
         if (dirp)
-            closedir(dirp);
+            { closedir(dirp); }
         else
-            return LISTFILE_DIRECTORY_NOT_FOUND;
+            { return LISTFILE_DIRECTORY_NOT_FOUND; }
 #endif
 
         return LISTFILE_OK;

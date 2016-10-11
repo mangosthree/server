@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2016  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,29 +25,57 @@
 #ifndef WDTFILE_H
 #define WDTFILE_H
 
+#include <string>
 #include "mpqfile.h"
 #include "wmo.h"
-#include <string>
 #include "stdlib.h"
 
 class ADTFile;
 
+/**
+ * @brief
+ *
+ */
 class WDTFile
 {
     public:
+        /**
+         * @brief
+         *
+         * @param file_name
+         * @param file_name1
+         */
         WDTFile(char* file_name, char* file_name1);
+        /**
+         * @brief
+         *
+         */
         ~WDTFile(void);
+        /**
+         * @brief
+         *
+         * @param map_id
+         * @param mapID
+         * @return bool
+         */
         bool init(char* map_id, unsigned int mapID);
 
-        string* gWmoInstansName;
-        int gnWMO, nMaps;
+        std::string* gWmoInstansName; /**< TODO */
+        int gnWMO, nMaps; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @param x
+         * @param z
+         * @return ADTFile
+         */
         ADTFile* GetMap(int x, int z);
 
     private:
-        MPQFile WDT;
-        bool maps[64][64];
-        string filename;
+        MPQFile WDT; /**< TODO */
+        bool maps[64][64]; /**< TODO */
+        std::string filename; /**< TODO */
 };
 
 #endif

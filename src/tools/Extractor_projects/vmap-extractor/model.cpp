@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2016  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,14 +60,17 @@ bool Model::open(StringSet& failedPaths)
         f.seekRelative(header.ofsBoundingVertices);
         vertices = new Vec3D[header.nBoundingVertices];
         f.read(vertices, header.nBoundingVertices * 12);
+
         for (uint32 i = 0; i < header.nBoundingVertices; i++)
         {
             vertices[i] = fixCoordSystem(vertices[i]);
         }
         f.seek(0);
         f.seekRelative(header.ofsBoundingTriangles);
+
         indices = new uint16[header.nBoundingTriangles];
         f.read(indices, header.nBoundingTriangles * 2);
+
         f.close();
     }
     else
@@ -88,6 +91,7 @@ bool Model::ConvertToVMAPModel(const char* outfilename)
         printf("Can't create the output file '%s'\n", outfilename);
         return false;
     }
+
     fwrite(szRawVMAPMagic, 8, 1, output);
     uint32 nVertices = 0;
     nVertices = header.nBoundingVertices;
@@ -172,11 +176,11 @@ ModelInstance::ModelInstance(MPQFile& f, const char* ModelInstName, uint32 mapID
     fclose(input);
 
     if (nVertices == 0)
-        return;
+        { return; }
 
     uint16 adtId = 0;// not used for models
     uint32 flags = MOD_M2;
-    if (tileX == 65 && tileY == 65) flags |= MOD_WORLDSPAWN;
+    if (tileX == 65 && tileY == 65) { flags |= MOD_WORLDSPAWN; }
     //write mapID, tileX, tileY, Flags, ID, Pos, Rot, Scale, name
     fwrite(&mapID, sizeof(uint32), 1, pDirfile);
     fwrite(&tileX, sizeof(uint32), 1, pDirfile);

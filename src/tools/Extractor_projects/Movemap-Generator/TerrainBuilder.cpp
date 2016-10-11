@@ -90,7 +90,7 @@ namespace MMAP
 
         FILE* mapFile = fopen(mapFileName, "rb");
         if (!mapFile)
-            return false;
+            { return false; }
 
         GridMapFileHeader fheader;
         fread(&fheader, sizeof(GridMapFileHeader), 1, mapFile);
@@ -140,10 +140,10 @@ namespace MMAP
                 heightMultiplier = (hheader.gridMaxHeight - hheader.gridHeight) / 255;
 
                 for (i = 0; i < V9_SIZE_SQ; ++i)
-                    V9[i] = (float)v9[i] * heightMultiplier + hheader.gridHeight;
+                    { V9[i] = (float)v9[i] * heightMultiplier + hheader.gridHeight; }
 
                 for (i = 0; i < V8_SIZE_SQ; ++i)
-                    V8[i] = (float)v8[i] * heightMultiplier + hheader.gridHeight;
+                    { V8[i] = (float)v8[i] * heightMultiplier + hheader.gridHeight; }
             }
             else if (hheader.flags & MAP_HEIGHT_AS_INT16)
             {
@@ -154,10 +154,10 @@ namespace MMAP
                 heightMultiplier = (hheader.gridMaxHeight - hheader.gridHeight) / 65535;
 
                 for (i = 0; i < V9_SIZE_SQ; ++i)
-                    V9[i] = (float)v9[i] * heightMultiplier + hheader.gridHeight;
+                    { V9[i] = (float)v9[i] * heightMultiplier + hheader.gridHeight; }
 
                 for (i = 0; i < V8_SIZE_SQ; ++i)
-                    V8[i] = (float)v8[i] * heightMultiplier + hheader.gridHeight;
+                    { V8[i] = (float)v8[i] * heightMultiplier + hheader.gridHeight; }
             }
             else
             {
@@ -241,7 +241,7 @@ namespace MMAP
                         col = i % V9_SIZE;
 
                         if (row < lheader.offsetY || row >= lheader.offsetY + lheader.height ||
-                                col < lheader.offsetX || col >= lheader.offsetX + lheader.width)
+                            col < lheader.offsetX || col >= lheader.offsetX + lheader.width)
                         {
                             // dummy vert using invalid height
                             meshData.liquidVerts.append((xoffset + col * GRID_PART_SIZE) * -1, INVALID_MAP_LIQ_HEIGHT, (yoffset + row * GRID_PART_SIZE) * -1);
@@ -297,7 +297,7 @@ namespace MMAP
         int* ttris = ttriangles.getCArray();
 
         if (ltriangles.size() + ttriangles.size() == 0)
-            return false;
+            { return false; }
 
         // make a copy of liquid vertices
         // used to pad right-bottom frame due to lost vertex data at extraction
@@ -320,7 +320,7 @@ namespace MMAP
 
                 // if there is no liquid, don't use liquid
                 if (!liquid_type || !meshData.liquidVerts.size() || !ltriangles.size())
-                    useLiquid = false;
+                    { useLiquid = false; }
                 else
                 {
                     liquidType = getLiquidType(i, liquid_type);
@@ -350,7 +350,7 @@ namespace MMAP
 
                 // if there is no terrain, don't use terrain
                 if (!ttriangles.size())
-                    useTerrain = false;
+                    { useTerrain = false; }
 
                 // while extracting ADT data we are losing right-bottom vertices
                 // this code adds fair approximation of lost data
@@ -376,18 +376,18 @@ namespace MMAP
                         {
                             float h = lverts[ltris[idx] * 3 + 1];
                             if (h == INVALID_MAP_LIQ_HEIGHT || h > INVALID_MAP_LIQ_HEIGHT_MAX)
-                                lverts[ltris[idx] * 3 + 1] = quadHeight;
+                                { lverts[ltris[idx] * 3 + 1] = quadHeight; }
                         }
                     }
 
                     // no valid vertexes - don't use this poly at all
                     if (validCount == 0)
-                        useLiquid = false;
+                        { useLiquid = false; }
                 }
 
                 // if there is a hole here, don't use the terrain
                 if (useTerrain)
-                    useTerrain = !isHole(i, holes);
+                    { useTerrain = !isHole(i, holes); }
 
                 // we use only one terrain kind per quad - pick higher one
                 if (useTerrain && useLiquid)
@@ -398,10 +398,10 @@ namespace MMAP
                     {
                         float h = lverts[ltris[x] * 3 + 1];
                         if (minLLevel > h)
-                            minLLevel = h;
+                            { minLLevel = h; }
 
                         if (maxLLevel < h)
-                            maxLLevel = h;
+                            { maxLLevel = h; }
                     }
 
                     float maxTLevel = INVALID_MAP_LIQ_HEIGHT;
@@ -410,19 +410,19 @@ namespace MMAP
                     {
                         float h = tverts[ttris[x] * 3 + 1];
                         if (maxTLevel < h)
-                            maxTLevel = h;
+                            { maxTLevel = h; }
 
                         if (minTLevel > h)
-                            minTLevel = h;
+                            { minTLevel = h; }
                     }
 
                     // terrain under the liquid?
                     if (minLLevel > maxTLevel)
-                        useTerrain = false;
+                        { useTerrain = false; }
 
                     //liquid under the terrain?
                     if (minTLevel > maxLLevel)
-                        useLiquid = false;
+                        { useLiquid = false; }
                 }
 
                 // store the result
@@ -430,12 +430,12 @@ namespace MMAP
                 {
                     meshData.liquidType.append(liquidType);
                     for (int k = 0; k < 3; ++k)
-                        meshData.liquidTris.append(ltris[k]);
+                        { meshData.liquidTris.append(ltris[k]); }
                 }
 
                 if (useTerrain)
                     for (int k = 0; k < 3 * tTriCount / 2; ++k)
-                        meshData.solidTris.append(ttris[k]);
+                        { meshData.solidTris.append(ttris[k]); }
 
                 // advance to next set of triangles
                 ltris += 3;
@@ -444,7 +444,7 @@ namespace MMAP
         }
 
         if (lverts_copy)
-            delete [] lverts_copy;
+            { delete [] lverts_copy; }
 
         return meshData.solidTris.size() || meshData.liquidTris.size();
     }
@@ -566,20 +566,20 @@ namespace MMAP
         do
         {
             if (result == VMAP_LOAD_RESULT_ERROR)
-                break;
+                { break; }
 
             InstanceTreeMap instanceTrees;
             ((VMapManager2*)vmapManager)->getInstanceMapTree(instanceTrees);
 
             if (!instanceTrees[mapID])
-                break;
+                { break; }
 
             ModelInstance* models = NULL;
             uint32 count = 0;
             instanceTrees[mapID]->getModelInstances(models, count);
 
             if (!models)
-                break;
+                { break; }
 
             for (uint32 i = 0; i < count; ++i)
             {
@@ -588,7 +588,7 @@ namespace MMAP
                 // model instances exist in tree even though there are instances of that model in this tile
                 WorldModel* worldModel = instance.getWorldModel();
                 if (!worldModel)
-                    continue;
+                    { continue; }
 
                 // now we have a model to add to the meshdata
                 retval = true;
@@ -600,7 +600,7 @@ namespace MMAP
                 bool isM2 = instance.name.find(".m2") != instance.name.npos || instance.name.find(".M2") != instance.name.npos;
 
                 // transform data
-                float Scale = instance.iScale;
+                float scale = instance.iScale;
                 G3D::Matrix3 rotation = G3D::Matrix3::fromEulerAnglesXYZ(G3D::pi() * instance.iRot.z / -180.f, G3D::pi() * instance.iRot.x / -180.f, G3D::pi() * instance.iRot.y / -180.f);
                 Vector3 position = instance.iPos;
                 position.x -= 32 * GRID_SIZE;
@@ -616,7 +616,7 @@ namespace MMAP
                     (*it).getMeshData(tempVertices, tempTriangles, liquid);
 
                     // first handle collision mesh
-                    transform(tempVertices, transformedVertices, Scale, rotation, position);
+                    transform(tempVertices, transformedVertices, scale, rotation, position);
 
                     int offset = meshData.solidVerts.size() / 3;
 
@@ -663,7 +663,7 @@ namespace MMAP
                             for (uint32 y = 0; y < vertsY; ++y)
                             {
                                 vert = Vector3(corner.x + x * GRID_PART_SIZE, corner.y + y * GRID_PART_SIZE, data[y * vertsX + x]);
-                                vert = vert * rotation * Scale + position;
+                                vert = vert * rotation * scale + position;
                                 vert.x *= -1.f;
                                 vert.y *= -1.f;
                                 liqVerts.push_back(vert);
@@ -693,7 +693,7 @@ namespace MMAP
 
                         uint32 liqOffset = meshData.liquidVerts.size() / 3;
                         for (uint32 i = 0; i < liqVerts.size(); ++i)
-                            meshData.liquidVerts.append(liqVerts[i].y, liqVerts[i].z, liqVerts[i].x);
+                            { meshData.liquidVerts.append(liqVerts[i].y, liqVerts[i].z, liqVerts[i].x); }
 
                         for (uint32 i = 0; i < liqTris.size() / 3; ++i)
                         {
@@ -713,12 +713,12 @@ namespace MMAP
     }
 
     /**************************************************************************/
-    void TerrainBuilder::transform(vector<Vector3>& source, vector<Vector3>& transformedVertices, float Scale, G3D::Matrix3& rotation, Vector3& position)
+    void TerrainBuilder::transform(vector<Vector3>& source, vector<Vector3>& transformedVertices, float scale, G3D::Matrix3& rotation, Vector3& position)
     {
         for (vector<Vector3>::iterator it = source.begin(); it != source.end(); ++it)
         {
             // apply tranform, then mirror along the horizontal axes
-            Vector3 v((*it) * rotation * Scale + position);
+            Vector3 v((*it) * rotation * scale + position);
             v.x *= -1.f;
             v.y *= -1.f;
             transformedVertices.push_back(v);
@@ -764,7 +764,7 @@ namespace MMAP
     {
         int* src = source.getCArray();
         for (int32 i = 0; i < source.size(); ++i)
-            dest.append(src[i] + offset);
+            { dest.append(src[i] + offset); }
     }
 
     /**************************************************************************/
@@ -779,7 +779,7 @@ namespace MMAP
         for (int i = 0; i < tris.size(); ++i)
         {
             if (vertMap.find(t[i]) != vertMap.end())
-                continue;
+                { continue; }
 
             vertMap.insert(std::pair<int, int>(t[i], 0));
         }
@@ -803,7 +803,7 @@ namespace MMAP
         {
             map<int, int>::iterator it;
             if ((it = vertMap.find(t[i])) == vertMap.end())
-                continue;
+                { continue; }
 
             t[i] = (*it).second;
         }
@@ -816,7 +816,7 @@ namespace MMAP
     {
         // no meshfile input given?
         if (offMeshFilePath == NULL)
-            return;
+            { return; }
 
         FILE* fp = fopen(offMeshFilePath, "rb");
         if (!fp)
@@ -835,9 +835,9 @@ namespace MMAP
             float size;
             if (10 != sscanf(buf, "%d %d,%d (%f %f %f) (%f %f %f) %f", &mid, &tx, &ty,
                              &p0[0], &p0[1], &p0[2], &p1[0], &p1[1], &p1[2], &size))
-                continue;
+                { continue; }
 
-            if (mapID == mid, tileX == tx, tileY == ty)
+            if ((mapID == mid) && (tileX == tx) && (tileY == ty))
             {
                 meshData.offMeshConnections.append(p0[1]);
                 meshData.offMeshConnections.append(p0[2]);

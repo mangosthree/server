@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2016  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _MMAP_TERRAIN_BUILDER_H
-#define _MMAP_TERRAIN_BUILDER_H
+#ifndef MANGOS_H_MMAP_TERRAIN_BUILDER
+#define MANGOS_H_MMAP_TERRAIN_BUILDER
 
 #include "MMapCommon.h"
 #include "MangosMap.h"
@@ -39,6 +39,10 @@ using namespace MaNGOS;
 
 namespace MMAP
 {
+    /**
+     * @brief
+     *
+     */
     enum Spot
     {
         TOP     = 1,
@@ -48,94 +52,250 @@ namespace MMAP
         ENTIRE  = 5
     };
 
+    /**
+     * @brief
+     *
+     */
     enum Grid
     {
         GRID_V8,
         GRID_V9
     };
 
-    static const int V9_SIZE = 129;
-    static const int V9_SIZE_SQ = V9_SIZE* V9_SIZE;
-    static const int V8_SIZE = 128;
-    static const int V8_SIZE_SQ = V8_SIZE* V8_SIZE;
-    static const float GRID_SIZE = 533.33333f;
-    static const float GRID_PART_SIZE = GRID_SIZE / V8_SIZE;
+    static const int V9_SIZE = 129; /**< TODO */
+    static const int V9_SIZE_SQ = V9_SIZE* V9_SIZE; /**< TODO */
+    static const int V8_SIZE = 128; /**< TODO */
+    static const int V8_SIZE_SQ = V8_SIZE* V8_SIZE; /**< TODO */
+    static const float GRID_SIZE = 533.33333f; /**< TODO */
+    static const float GRID_PART_SIZE = GRID_SIZE / V8_SIZE; /**< TODO */
 
     // see contrib/extractor/system.cpp, CONF_use_minHeight
-    static const float INVALID_MAP_LIQ_HEIGHT = -500.f;
-    static const float INVALID_MAP_LIQ_HEIGHT_MAX = 5000.0f;
+    static const float INVALID_MAP_LIQ_HEIGHT = -500.f; /**< TODO */
+    static const float INVALID_MAP_LIQ_HEIGHT_MAX = 5000.0f; /**< TODO */
 
     // see following files:
-    // contrib/extractor/system.cpp
+    // src/tools/map-extractor/system.cpp
     // src/game/GridMap.cpp
     static char const* MAP_VERSION_MAGIC = "c1.4";
-
+    /**
+     * @brief
+     *
+     */
     struct MeshData
     {
-        G3D::Array<float> solidVerts;
-        G3D::Array<int> solidTris;
+        G3D::Array<float> solidVerts; /**< TODO */
+        G3D::Array<int> solidTris; /**< TODO */
 
-        G3D::Array<float> liquidVerts;
-        G3D::Array<int> liquidTris;
-        G3D::Array<uint8> liquidType;
+        G3D::Array<float> liquidVerts; /**< TODO */
+        G3D::Array<int> liquidTris; /**< TODO */
+        G3D::Array<uint8> liquidType; /**< TODO */
 
         // offmesh connection data
-        G3D::Array<float> offMeshConnections;   // [p0y,p0z,p0x,p1y,p1z,p1x] - per connection
-        G3D::Array<float> offMeshConnectionRads;
-        G3D::Array<unsigned char> offMeshConnectionDirs;
-        G3D::Array<unsigned char> offMeshConnectionsAreas;
-        G3D::Array<unsigned short> offMeshConnectionsFlags;
+        G3D::Array<float> offMeshConnections;   // [p0y,p0z,p0x,p1y,p1z,p1x] - per connection /**< TODO */
+        G3D::Array<float> offMeshConnectionRads; /**< TODO */
+        G3D::Array<unsigned char> offMeshConnectionDirs; /**< TODO */
+        G3D::Array<unsigned char> offMeshConnectionsAreas; /**< TODO */
+        G3D::Array<unsigned short> offMeshConnectionsFlags; /**< TODO */
     };
 
+    /**
+     * @brief
+     *
+     */
     class TerrainBuilder
     {
         public:
+            /**
+             * @brief
+             *
+             * @param skipLiquid
+             */
             TerrainBuilder(bool skipLiquid);
+            /**
+             * @brief
+             *
+             */
             ~TerrainBuilder();
 
+            /**
+             * @brief
+             *
+             * @param mapID
+             * @param tileX
+             * @param tileY
+             * @param meshData
+             */
             void loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData);
+            /**
+             * @brief
+             *
+             * @param mapID
+             * @param tileX
+             * @param tileY
+             * @param meshData
+             * @return bool
+             */
             bool loadVMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData);
+            /**
+             * @brief
+             *
+             * @param mapID
+             * @param tileX
+             * @param tileY
+             * @param meshData
+             * @param offMeshFilePath
+             */
             void loadOffMeshConnections(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData, const char* offMeshFilePath);
 
+            /**
+             * @brief
+             *
+             * @return bool
+             */
             bool usesLiquids() { return !m_skipLiquid; }
 
-            // vert and triangle methods
+            /**
+             * @brief vert and triangle methods
+             *
+             * @param original
+             * @param transformed
+             * @param scale
+             * @param rotation
+             * @param position
+             */
             static void transform(vector<G3D::Vector3>& original, vector<G3D::Vector3>& transformed,
-                                  float Scale, G3D::Matrix3& rotation, G3D::Vector3& position);
+                                  float scale, G3D::Matrix3& rotation, G3D::Vector3& position);
+            /**
+             * @brief
+             *
+             * @param source
+             * @param dest
+             */
             static void copyVertices(vector<G3D::Vector3>& source, G3D::Array<float>& dest);
+            /**
+             * @brief
+             *
+             * @param source
+             * @param dest
+             * @param offest
+             * @param flip
+             */
             static void copyIndices(vector<VMAP::MeshTriangle>& source, G3D::Array<int>& dest, int offest, bool flip);
+            /**
+             * @brief
+             *
+             * @param src
+             * @param dest
+             * @param offset
+             */
             static void copyIndices(G3D::Array<int>& src, G3D::Array<int>& dest, int offset);
+            /**
+             * @brief
+             *
+             * @param verts
+             * @param tris
+             */
             static void cleanVertices(G3D::Array<float>& verts, G3D::Array<int>& tris);
         private:
-            /// Loads a portion of a map's terrain
+            /**
+             * @brief Loads a portion of a map's terrain
+             *
+             * @param mapID
+             * @param tileX
+             * @param tileY
+             * @param meshData
+             * @param portion
+             * @return bool
+             */
             bool loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData, Spot portion);
 
-            /// Sets loop variables for selecting only certain parts of a map's terrain
+            /**
+             * @brief Sets loop variables for selecting only certain parts of a map's terrain
+             *
+             * @param portion
+             * @param loopStart
+             * @param loopEnd
+             * @param loopInc
+             */
             void getLoopVars(Spot portion, int& loopStart, int& loopEnd, int& loopInc);
 
-            /// Controls whether liquids are loaded
-            bool m_skipLiquid;
+            bool m_skipLiquid; /**< Controls whether liquids are loaded */
 
-            /// Load the map terrain from file
+            /**
+             * @brief Load the map terrain from file
+             *
+             * @param mapID
+             * @param tileX
+             * @param tileY
+             * @param vertices
+             * @param triangles
+             * @param portion
+             * @return bool
+             */
             bool loadHeightMap(uint32 mapID, uint32 tileX, uint32 tileY, G3D::Array<float>& vertices, G3D::Array<int>& triangles, Spot portion);
 
-            /// Get the vector coordinate for a specific position
+            /**
+             * @brief Get the vector coordinate for a specific position
+             *
+             * @param index
+             * @param grid
+             * @param xOffset
+             * @param yOffset
+             * @param coord
+             * @param v
+             */
             void getHeightCoord(int index, Grid grid, float xOffset, float yOffset, float* coord, float* v);
 
-            /// Get the triangle's vector indices for a specific position
+            /**
+             * @brief Get the triangle's vector indices for a specific position
+             *
+             * @param square
+             * @param triangle
+             * @param indices
+             * @param liquid
+             */
             void getHeightTriangle(int square, Spot triangle, int* indices, bool liquid = false);
 
-            /// Determines if the specific position's triangles should be rendered
+            /**
+             * @brief Determines if the specific position's triangles should be rendered
+             *
+             * @param square
+             * @param holes[][]
+             * @return bool
+             */
             bool isHole(int square, const uint16 holes[16][16]);
 
-            /// Get the liquid vector coordinate for a specific position
+            /**
+             * @brief Get the liquid vector coordinate for a specific position
+             *
+             * @param index
+             * @param index2
+             * @param xOffset
+             * @param yOffset
+             * @param coord
+             * @param v
+             */
             void getLiquidCoord(int index, int index2, float xOffset, float yOffset, float* coord, float* v);
 
-            /// Get the liquid type for a specific position
+            /**
+             * @brief Get the liquid type for a specific position
+             *
+             * @param square
+             * @param liquid_type[][]
+             * @return uint8
+             */
             uint8 getLiquidType(int square, const uint8 liquid_type[16][16]);
 
-            // hide parameterless and copy constructor
+            /**
+             * @brief hide parameterless constructor
+             *
+             */
             TerrainBuilder();
+            /**
+             * @brief hide copy constructor
+             *
+             * @param tb
+             */
             TerrainBuilder(const TerrainBuilder& tb);
     };
 }

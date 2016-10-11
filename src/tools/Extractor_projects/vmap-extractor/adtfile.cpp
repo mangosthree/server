@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2016  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,13 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#define _CRT_SECURE_NO_WARNINGS
-
-#include "vmapexport.h"
-#include "adtfile.h"
-
 #include <algorithm>
 #include <cstdio>
+#include "vmapexport.h"
+#include "adtfile.h"
 
 #ifdef WIN32
 #define snprintf _snprintf
@@ -91,30 +88,27 @@ extern HANDLE WorldMpq;
 
 ADTFile::ADTFile(char* filename): ADT(WorldMpq, filename)
 {
-    Adtfilename.append(filename);
+    AdtFilename.append(filename);
 }
 
 bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths)
 {
-    if (ADT.isEof())
-        return false;
+    if (ADT.isEof()) { return false; }
 
     uint32 size;
 
-    string xMap;
-    string yMap;
+    std::string xMap;
+    std::string yMap;
 
-    Adtfilename.erase(Adtfilename.find(".adt"), 4);
-    string TempMapNumber;
-    TempMapNumber = Adtfilename.substr(Adtfilename.length() - 6, 6);
+    AdtFilename.erase(AdtFilename.find(".adt"), 4);
+    std::string TempMapNumber;
+
+    TempMapNumber = AdtFilename.substr(AdtFilename.length() - 6, 6);
     xMap = TempMapNumber.substr(TempMapNumber.find("_") + 1, (TempMapNumber.find_last_of("_") - 1) - (TempMapNumber.find("_")));
     yMap = TempMapNumber.substr(TempMapNumber.find_last_of("_") + 1, (TempMapNumber.length()) - (TempMapNumber.find_last_of("_")));
-    Adtfilename.erase((Adtfilename.length() - xMap.length() - yMap.length() - 2), (xMap.length() + yMap.length() + 2));
-    string AdtMapNumber = xMap + ' ' + yMap + ' ' + GetPlainName((char*)Adtfilename.c_str());
-    //printf("Processing map %s...\n", AdtMapNumber.c_str());
-    //printf("MapNumber = %s\n", TempMapNumber.c_str());
-    //printf("xMap = %s\n", xMap.c_str());
-    //printf("yMap = %s\n", yMap.c_str());
+    AdtFilename.erase((AdtFilename.length() - xMap.length() - yMap.length() - 2), (xMap.length() + yMap.length() + 2));
+    
+    string AdtMapNumber = xMap + ' ' + yMap + ' ' + GetPlainName((char*)AdtFilename.c_str());
 
     std::string dirname = std::string(szWorkDirWmo) + "/dir_bin";
     FILE* dirfile;
@@ -149,18 +143,16 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
                 ADT.read(buf, size);
                 char* p = buf;
                 int t = 0;
-                ModelInstansName = new string[size];
+                ModelInstansName = new std::string[size];
                 while (p < buf + size)
                 {
                     fixnamen(p, strlen(p));
                     char* s = GetPlainName(p);
                     fixname2(s, strlen(s));
-                    string path(p);                         // Store copy after name fixed
-
-                    std::string fixedName;
-                    ExtractSingleModel(path, fixedName, failedPaths);
-                    ModelInstansName[t++] = fixedName;
-
+                    std::string path(p);                         // Store copy after name fixed
+                    std::string uName;
+                    ExtractSingleModel(path, uName, failedPaths);
+                    ModelInstansName[t++] = uName;
                     p = p + strlen(p) + 1;
                 }
                 delete[] buf;
@@ -174,10 +166,10 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
                 ADT.read(buf, size);
                 char* p = buf;
                 int q = 0;
-                WmoInstansName = new string[size];
+                WmoInstansName = new std::string[size];
                 while (p < buf + size)
                 {
-                    string path(p);
+                    std::string path(p);
                     char* s = GetPlainName(p);
                     fixnamen(s, strlen(s));
                     fixname2(s, strlen(s));

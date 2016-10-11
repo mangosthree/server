@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2016  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,111 +33,148 @@
 #define TILESIZE (533.33333f)
 #define CHUNKSIZE ((TILESIZE) / 16.0f)
 #define UNITSIZE (CHUNKSIZE / 8.0f)
-
 class Liquid;
 
+/**
+ * @brief
+ *
+ */
 typedef struct
 {
-    float x;
-    float y;
-    float z;
+    float x; /**< TODO */
+    float y; /**< TODO */
+    float z; /**< TODO */
 } svec;
 
+/**
+ * @brief
+ *
+ */
 struct vec
 {
-    double x;
-    double y;
-    double z;
+    double x; /**< TODO */
+    double y; /**< TODO */
+    double z; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 struct triangle
 {
-    vec v[3];
+    vec v[3]; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 typedef struct
 {
-    float v9[16 * 8 + 1][16 * 8 + 1];
-    float v8[16 * 8][16 * 8];
+    float v9[16 * 8 + 1][16 * 8 + 1]; /**< TODO */
+    float v8[16 * 8][16 * 8]; /**< TODO */
 } Cell;
 
+/**
+ * @brief
+ *
+ */
 typedef struct
 {
-    double v9[9][9];
-    double v8[8][8];
-    uint16 area_id;
+    double v9[9][9]; /**< TODO */
+    double v8[8][8]; /**< TODO */
+    uint16 area_id; /**< TODO */
     //Liquid *lq;
-    float waterlevel[9][9];
-    uint8 flag;
+    float waterlevel[9][9]; /**< TODO */
+    uint8 flag; /**< TODO */
 } chunk;
 
+/**
+ * @brief
+ *
+ */
 typedef struct
 {
-    chunk ch[16][16];
+    chunk ch[16][16]; /**< TODO */
 } mcell;
 
+/**
+ * @brief
+ *
+ */
 struct MapChunkHeader
 {
-    uint32 flags;
-    uint32 ix;
-    uint32 iy;
-    uint32 nLayers;
-    uint32 nDoodadRefs;
-    uint32 ofsHeight;
-    uint32 ofsNormal;
-    uint32 ofsLayer;
-    uint32 ofsRefs;
-    uint32 ofsAlpha;
-    uint32 sizeAlpha;
-    uint32 ofsShadow;
-    uint32 sizeShadow;
-    uint32 areaid;
-    uint32 nMapObjRefs;
-    uint32 holes;
-    uint16 s1;
-    uint16 s2;
-    uint32 d1;
-    uint32 d2;
-    uint32 d3;
-    uint32 predTex;
-    uint32 nEffectDoodad;
-    uint32 ofsSndEmitters;
-    uint32 nSndEmitters;
-    uint32 ofsLiquid;
-    uint32 sizeLiquid;
-    float  zpos;
-    float  xpos;
-    float  ypos;
-    uint32 textureId;
-    uint32 props;
-    uint32 effectId;
+    uint32 flags; /**< TODO */
+    uint32 ix; /**< TODO */
+    uint32 iy; /**< TODO */
+    uint32 nLayers; /**< TODO */
+    uint32 nDoodadRefs; /**< TODO */
+    uint32 ofsHeight; /**< TODO */
+    uint32 ofsNormal; /**< TODO */
+    uint32 ofsLayer; /**< TODO */
+    uint32 ofsRefs; /**< TODO */
+    uint32 ofsAlpha; /**< TODO */
+    uint32 sizeAlpha; /**< TODO */
+    uint32 ofsShadow; /**< TODO */
+    uint32 sizeShadow; /**< TODO */
+    uint32 areaid; /**< TODO */
+    uint32 nMapObjRefs; /**< TODO */
+    uint32 holes; /**< TODO */
+    uint16 s1; /**< TODO */
+    uint16 s2; /**< TODO */
+    uint32 d1; /**< TODO */
+    uint32 d2; /**< TODO */
+    uint32 d3; /**< TODO */
+    uint32 predTex; /**< TODO */
+    uint32 nEffectDoodad; /**< TODO */
+    uint32 ofsSndEmitters; /**< TODO */
+    uint32 nSndEmitters; /**< TODO */
+    uint32 ofsLiquid; /**< TODO */
+    uint32 sizeLiquid; /**< TODO */
+    float  zpos; /**< TODO */
+    float  xpos; /**< TODO */
+    float  ypos; /**< TODO */
+    uint32 textureId; /**< TODO */
+    uint32 props; /**< TODO */
+    uint32 effectId; /**< TODO */
 };
 
-
+/**
+ * @brief
+ *
+ */
 class ADTFile
 {
     public:
+        /**
+         * @brief
+         *
+         * @param filename
+         */
         ADTFile(char* filename);
+        /**
+         * @brief
+         *
+         */
         ~ADTFile();
-        int nWMO;
-        int nMDX;
-        string* WmoInstansName;
-        string* ModelInstansName;
+        int nWMO; /**< TODO */
+        int nMDX; /**< TODO */
+        string* WmoInstansName; /**< TODO */
+        string* ModelInstansName; /**< TODO */
+        /**
+         * @brief
+         *
+         * @param map_num
+         * @param tileX
+         * @param tileY
+         * @param failedPaths
+         * @return bool
+         */
         bool init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths);
-        //void LoadMapChunks();
-
-        //uint32 wmo_count;
-        /*
-            const mcell& Getmcell() const
-            {
-                return Mcell;
-            }
-        */
     private:
-        //size_t mcnk_offsets[256], mcnk_sizes[256];
-        MPQFile ADT;
-        //mcell Mcell;
-        string Adtfilename;
+        MPQFile ADT; /**< TODO */
+        string AdtFilename; /**< TODO */
 };
 
 const char* GetPlainName(const char* FileName);
@@ -145,6 +182,4 @@ char* GetPlainName(char* FileName);
 char const* GetExtension(char const* FileName);
 void fixnamen(char* name, size_t len);
 void fixname2(char* name, size_t len);
-//void fixMapNamen(char *name, size_t len);
-
 #endif

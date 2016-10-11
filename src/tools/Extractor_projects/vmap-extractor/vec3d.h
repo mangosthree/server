@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2016  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,15 +28,37 @@
 #include <iostream>
 #include <cmath>
 
+/**
+ * @brief
+ *
+ */
 class Vec3D
 {
     public:
-        float x, y, z;
+        float x, y, z; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @param x0
+         * @param y0
+         * @param z0
+         */
         Vec3D(float x0 = 0.0f, float y0 = 0.0f, float z0 = 0.0f) : x(x0), y(y0), z(z0) {}
 
+        /**
+         * @brief
+         *
+         * @param v
+         */
         Vec3D(const Vec3D& v) : x(v.x), y(v.y), z(v.z) {}
 
+        /**
+         * @brief
+         *
+         * @param v
+         * @return Vec3D &operator
+         */
         Vec3D& operator= (const Vec3D& v)
         {
             x = v.x;
@@ -45,40 +67,83 @@ class Vec3D
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param v
+         * @return Vec3D operator
+         */
         Vec3D operator+ (const Vec3D& v) const
         {
             Vec3D r(x + v.x, y + v.y, z + v.z);
             return r;
         }
 
+        /**
+         * @brief
+         *
+         * @param v
+         * @return Vec3D operator
+         */
         Vec3D operator- (const Vec3D& v) const
         {
             Vec3D r(x - v.x, y - v.y, z - v.z);
             return r;
         }
 
+        /**
+         * @brief
+         *
+         * @param v
+         * @return float operator
+         */
         float operator* (const Vec3D& v) const
         {
             return x * v.x + y * v.y + z * v.z;
         }
 
+        /**
+         * @brief
+         *
+         * @param d
+         * @return Vec3D operator
+         */
         Vec3D operator* (float d) const
         {
             Vec3D r(x * d, y * d, z * d);
             return r;
         }
 
+        /**
+         * @brief
+         *
+         * @param d
+         * @param v
+         * @return Vec3D operator
+         */
         friend Vec3D operator* (float d, const Vec3D& v)
         {
             return v * d;
         }
 
+        /**
+         * @brief
+         *
+         * @param v
+         * @return Vec3D operator
+         */
         Vec3D operator% (const Vec3D& v) const
         {
             Vec3D r(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
             return r;
         }
 
+        /**
+         * @brief
+         *
+         * @param v
+         * @return Vec3D &operator
+         */
         Vec3D& operator+= (const Vec3D& v)
         {
             x += v.x;
@@ -87,6 +152,12 @@ class Vec3D
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param v
+         * @return Vec3D &operator
+         */
         Vec3D& operator-= (const Vec3D& v)
         {
             x -= v.x;
@@ -95,6 +166,12 @@ class Vec3D
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @param d
+         * @return Vec3D &operator
+         */
         Vec3D& operator*= (float d)
         {
             x *= d;
@@ -103,22 +180,42 @@ class Vec3D
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @return float
+         */
         float lengthSquared() const
         {
             return x * x + y * y + z * z;
         }
 
+        /**
+         * @brief
+         *
+         * @return float
+         */
         float length() const
         {
             return sqrt(x * x + y * y + z * z);
         }
 
+        /**
+         * @brief
+         *
+         * @return Vec3D
+         */
         Vec3D& normalize()
         {
             this->operator*= (1.0f / length());
             return *this;
         }
 
+        /**
+         * @brief
+         *
+         * @return Vec3D operator
+         */
         Vec3D operator~() const
         {
             Vec3D r(*this);
@@ -126,18 +223,37 @@ class Vec3D
             return r;
         }
 
+        /**
+         * @brief
+         *
+         * @param in
+         * @param v
+         * @return std::istream &operator >>
+         */
         friend std::istream& operator>>(std::istream& in, Vec3D& v)
         {
             in >> v.x >> v.y >> v.z;
             return in;
         }
 
+        /**
+         * @brief
+         *
+         * @param out
+         * @param v
+         * @return std::ostream &operator
+         */
         friend std::ostream& operator<<(std::ostream& out, const Vec3D& v)
         {
             out << v.x << " " << v.y << " " << v.z;
             return out;
         }
 
+        /**
+         * @brief
+         *
+         * @return operator float
+         */
         operator float* ()
         {
             return (float*)this;
@@ -246,6 +362,15 @@ class Vec2D
         }
 };
 
+/**
+ * @brief
+ *
+ * @param x0
+ * @param y0
+ * @param x
+ * @param y
+ * @param angle
+ */
 inline void rotate(float x0, float y0, float* x, float* y, float angle)
 {
     float xa = *x - x0, ya = *y - y0;

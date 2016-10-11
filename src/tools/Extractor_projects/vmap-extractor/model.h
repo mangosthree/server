@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2016  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@
 #define MODEL_H
 
 #include "vec3d.h"
-//#include "mpq.h"
 #include "modelheaders.h"
 #include <vector>
 #include "vmapexport.h"
@@ -43,17 +42,42 @@ class Model
         uint32 offsBB_vertices, offsBB_indices;
         Vec3D* BB_vertices, *vertices;
         uint16* BB_indices, *indices;
-        size_t nIndices;
+        size_t nIndices; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @param failedPaths
+         * @return bool
+         */
         bool open(StringSet& failedPaths);
+        /**
+         * @brief
+         *
+         * @param outfilename
+         * @return bool
+         */
         bool ConvertToVMAPModel(const char* outfilename);
 
-        bool ok;
+        bool ok; /**< TODO */
 
+        /**
+         * @brief
+         *
+         * @param filename
+         */
         Model(std::string& filename);
+        /**
+         * @brief
+         *
+         */
         ~Model() {_unload();}
 
     private:
+        /**
+         * @brief
+         *
+         */
         void _unload()
         {
             delete[] vertices;
@@ -61,21 +85,39 @@ class Model
             vertices = NULL;
             indices = NULL;
         }
-        std::string filename;
+        std::string filename; /**< TODO */
         char outfilename;
 };
 
+/**
+ * @brief
+ *
+ */
 class ModelInstance
 {
     public:
-        Model* model;
+        Model* model; /**< TODO */
 
-        uint32 id;
-        Vec3D pos, rot;
+        uint32 id; /**< TODO */
+        Vec3D pos, rot; /**< TODO */
         unsigned int d1, Scale;
         float w, sc;
 
+        /**
+         * @brief
+         *
+         */
         ModelInstance() {}
+        /**
+         * @brief
+         *
+         * @param f
+         * @param ModelInstName
+         * @param mapID
+         * @param tileX
+         * @param tileY
+         * @param pDirfile
+         */
         ModelInstance(MPQFile& f, const char* ModelInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile);
 
 };

@@ -84,10 +84,10 @@ template<const unsigned int LIMIT>
 struct CoordPair
 {
     CoordPair(uint32 x = 0, uint32 y = 0) : x_coord(x), y_coord(y) {}
-    CoordPair(const CoordPair<LIMIT> &obj) : x_coord(obj.x_coord), y_coord(obj.y_coord) {}
-    bool operator==(const CoordPair<LIMIT> &obj) const { return (obj.x_coord == x_coord && obj.y_coord == y_coord); }
-    bool operator!=(const CoordPair<LIMIT> &obj) const { return !operator==(obj); }
-    CoordPair<LIMIT>& operator=(const CoordPair<LIMIT> &obj)
+    CoordPair(const CoordPair<LIMIT>& obj) : x_coord(obj.x_coord), y_coord(obj.y_coord) {}
+    bool operator==(const CoordPair<LIMIT>& obj) const { return (obj.x_coord == x_coord && obj.y_coord == y_coord); }
+    bool operator!=(const CoordPair<LIMIT>& obj) const { return !operator==(obj); }
+    CoordPair<LIMIT>& operator=(const CoordPair<LIMIT>& obj)
     {
         x_coord = obj.x_coord;
         y_coord = obj.y_coord;
@@ -97,33 +97,33 @@ struct CoordPair
     void operator<<(const uint32 val)
     {
         if (x_coord > val)
-            x_coord -= val;
+            { x_coord -= val; }
         else
-            x_coord = 0;
+            { x_coord = 0; }
     }
 
     void operator>>(const uint32 val)
     {
         if (x_coord + val < LIMIT)
-            x_coord += val;
+            { x_coord += val; }
         else
-            x_coord = LIMIT - 1;
+            { x_coord = LIMIT - 1; }
     }
 
     void operator-=(const uint32 val)
     {
         if (y_coord > val)
-            y_coord -= val;
+            { y_coord -= val; }
         else
-            y_coord = 0;
+            { y_coord = 0; }
     }
 
     void operator+=(const uint32 val)
     {
         if (y_coord + val < LIMIT)
-            y_coord += val;
+            { y_coord += val; }
         else
-            y_coord = LIMIT - 1;
+            { y_coord = LIMIT - 1; }
     }
 
     CoordPair& normalize()
@@ -167,14 +167,14 @@ namespace MaNGOS
     inline void NormalizeMapCoord(float& c)
     {
         if (c > MAP_HALFSIZE - 0.5)
-            c = MAP_HALFSIZE - 0.5;
+            { c = MAP_HALFSIZE - 0.5; }
         else if (c < -(MAP_HALFSIZE - 0.5))
-            c = -(MAP_HALFSIZE - 0.5);
+            { c = -(MAP_HALFSIZE - 0.5); }
     }
 
     inline bool IsValidMapCoord(float c)
     {
-        return std::isfinite(c) && (std::fabs(c) <= MAP_HALFSIZE - 0.5);
+        return finite(c) && (std::fabs(c) <= MAP_HALFSIZE - 0.5);
     }
 
     inline bool IsValidMapCoord(float x, float y)
@@ -184,12 +184,12 @@ namespace MaNGOS
 
     inline bool IsValidMapCoord(float x, float y, float z)
     {
-        return IsValidMapCoord(x, y) && std::isfinite(z);
+        return IsValidMapCoord(x, y) && finite(z);
     }
 
     inline bool IsValidMapCoord(float x, float y, float z, float o)
     {
-        return IsValidMapCoord(x, y, z) && std::isfinite(o);
+        return IsValidMapCoord(x, y, z) && finite(o);
     }
 }
 #endif

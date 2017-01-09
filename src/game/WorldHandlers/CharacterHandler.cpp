@@ -46,6 +46,9 @@
 #include "Language.h"
 #include "SpellMgr.h"
 #include "Calendar.h"
+#ifdef ENABLE_ELUNA
+#include "LuaEngine.h"
+#endif /* ENABLE_ELUNA */
 
 // config option SkipCinematics supported values
 enum CinematicsSkipMode
@@ -552,6 +555,11 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     BASIC_LOG("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
     sLog.outChar("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
 
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnCreate(pNewChar);
+#endif /* ENABLE_ELUNA */
+
     delete pNewChar;                                        // created only to call SaveToDB()
 }
 
@@ -603,6 +611,11 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
     std::string IP_str = GetRemoteAddress();
     BASIC_LOG("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), lowguid);
     sLog.outChar("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), lowguid);
+
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnDelete(lowguid);
+#endif /* ENABLE_ELUNA */
 
     if (sLog.IsOutCharDump())                               // optimize GetPlayerDump call
     {
@@ -884,10 +897,20 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         SendNotification(LANG_RESET_TALENTS);               // we can use SMSG_TALENTS_INVOLUNTARILY_RESET here
     }
 
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
-        pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
+        sEluna->OnFirstLogin(pCurrChar);
+#endif /* ENABLE_ELUNA */
 
-    // show time before shutdown if shutdown planned.
+
+    /* We've done what we need to, remove the flag */
+    if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
+    {
+        pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
+    }
+
+    /* If the server is shutting down, show shutdown time remaining */
     if (sWorld.IsShutdowning())
         sWorld.ShutdownMsg(true, pCurrChar);
 
@@ -916,6 +939,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     // Handle Login-Achievements (should be handled after loading)
     pCurrChar->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ON_LOGIN, 1);
+
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnLogin(pCurrChar);
+#endif /* ENABLE_ELUNA */
 
     delete holder;
 }

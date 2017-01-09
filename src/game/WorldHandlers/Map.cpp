@@ -64,6 +64,11 @@ Map::~Map()
     if (m_persistentState)
         { m_persistentState->SetUsedByMapState(NULL); }         // field pointer can be deleted after this
 
+//#ifdef ENABLE_ELUNA
+//    if (Instanceable())
+//        sEluna->FreeInstanceId(GetInstanceId());
+//#endif /* ENABLE_ELUNA */
+
     delete i_data;
     i_data = NULL;
 
@@ -118,6 +123,9 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
     m_persistentState->SetUsedByMapState(this);
 
     m_weatherSystem = new WeatherSystem(this);
+#ifdef ENABLE_ELUNA
+    sEluna->OnCreate(this);
+#endif /* ENABLE_ELUNA */
 }
 
 void Map::InitVisibilityDistance()
@@ -322,6 +330,11 @@ bool Map::Add(Player* player)
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
     player->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()));
     UpdateObjectVisibility(player, cell, p);
+
+#ifdef ENABLE_ELUNA
+    sEluna->OnMapChanged(player);
+    sEluna->OnPlayerEnter(this, player);
+#endif /* ENABLE_ELUNA */
 
     if (i_data)
         { i_data->OnPlayerEnter(player); }
@@ -587,6 +600,10 @@ void Map::Update(const uint32& t_diff)
     if (!m_scriptSchedule.empty())
         { ScriptsProcess(); }
 
+#ifdef ENABLE_ELUNA
+    sEluna->OnUpdate(this, t_diff);
+#endif /* ENABLE_ELUNA */
+
     if (i_data)
         { i_data->Update(t_diff); }
 
@@ -595,6 +612,10 @@ void Map::Update(const uint32& t_diff)
 
 void Map::Remove(Player* player, bool remove)
 {
+#ifdef ENABLE_ELUNA
+    sEluna->OnPlayerLeave(this, player);
+#endif /* ENABLE_ELUNA */
+
     if (i_data)
         { i_data->OnPlayerLeave(player); }
 
@@ -1015,6 +1036,13 @@ void Map::AddObjectToRemoveList(WorldObject* obj)
 {
     MANGOS_ASSERT(obj->GetMapId() == GetId() && obj->GetInstanceId() == GetInstanceId());
 
+#ifdef ENABLE_ELUNA
+    if (Creature* creature = obj->ToCreature())
+        sEluna->OnRemove(creature);
+    else if (GameObject* gameobject = obj->ToGameObject())
+        sEluna->OnRemove(gameobject);
+#endif /* ENABLE_ELUNA */
+
     obj->CleanupsBeforeDelete();                            // remove or simplify at least cross referenced links
 
     i_objectsToRemove.insert(obj);
@@ -1201,6 +1229,10 @@ void Map::CreateInstanceData(bool load)
     {
         return;
     }
+
+//#ifdef ENABLE_ELUNA
+//    i_data = sEluna->GetInstanceData(this);
+//#endif /* ENABLE_ELUNA */
 
     uint32 i_script_id = GetScriptId();
 
@@ -1595,7 +1627,7 @@ void DungeonMap::PermBindAllPlayers(Player* player)
 void DungeonMap::UnloadAll(bool pForce)
 {
     TeleportAllPlayersTo(TELEPORT_LOCATION_HOMEBIND);
-    
+
     if (m_resetAfterUnload == true)
         { GetPersistanceState()->DeleteRespawnTimes(); }
 
@@ -2195,6 +2227,7 @@ bool Map::ContainsGameObjectModel(const GameObjectModel& mdl) const
 {
     return m_dyn_tree.contains(mdl);
 }
+
 // This will generate a random point to all directions in water for the provided point in radius range.
 bool Map::GetRandomPointUnderWater(uint32 phaseMask, float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status)
 {

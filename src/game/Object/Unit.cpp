@@ -1138,13 +1138,14 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
             { ((Creature*)this)->AI()->KilledUnit(pVictim); }
 
-#ifdef ENABLE_ELUNA
         if (Creature* killer = ToCreature())
         {
+            // Used by Eluna
+#ifdef ENABLE_ELUNA
             if (Player* killed = pVictim->ToPlayer())
                 sEluna->OnPlayerKilledByCreature(killer, killed);
+#endif /* ENABLE_ELUNA */
         }
-#endif
 
         // Call AI OwnerKilledUnit (for any current summoned minipet/guardian/protector)
         PetOwnerKilledUnit(pVictim);
@@ -1210,9 +1211,10 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
                         { outdoorPvP->HandlePlayerKill(player_tap, playerVictim); }
                 }
 
+                // Used by Eluna
 #ifdef ENABLE_ELUNA
                 sEluna->OnPVPKill(player_tap, playerVictim);
-#endif
+#endif /* ENABLE_ELUNA */
             }
         }
         else                                                // Killed creature

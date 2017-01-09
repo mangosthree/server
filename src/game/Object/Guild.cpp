@@ -36,6 +36,9 @@
 #include "Language.h"
 #include "World.h"
 #include "Calendar.h"
+#ifdef ENABLE_ELUNA
+#include "LuaEngine.h"
+#endif /* ENABLE_ELUNA */
 
 //// MemberSlot ////////////////////////////////////////////
 void MemberSlot::SetMemberStats(Player* player)
@@ -148,6 +151,11 @@ bool Guild::Create(Player* leader, std::string gname)
 
     CreateDefaultGuildRanks(lSession->GetSessionDbLocaleIndex());
 
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnCreate(this, leader, gname.c_str());
+#endif /* ENABLE_ELUNA */
+
     return AddMember(m_LeaderGuid, (uint32)GR_GUILDMASTER);
 }
 
@@ -249,6 +257,11 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
 
     UpdateAccountsNumber();
 
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnAddMember(this, pl, newmember.RankId);
+#endif /* ENABLE_ELUNA */
+
     return true;
 }
 
@@ -259,6 +272,11 @@ void Guild::SetMOTD(std::string motd)
     // motd now can be used for encoding to DB
     CharacterDatabase.escape_string(motd);
     CharacterDatabase.PExecute("UPDATE guild SET motd='%s' WHERE guildid='%u'", motd.c_str(), m_Id);
+
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnMOTDChanged(this, motd);
+#endif /* ENABLE_ELUNA */
 }
 
 void Guild::SetGINFO(std::string ginfo)
@@ -268,6 +286,11 @@ void Guild::SetGINFO(std::string ginfo)
     // ginfo now can be used for encoding to DB
     CharacterDatabase.escape_string(ginfo);
     CharacterDatabase.PExecute("UPDATE guild SET info='%s' WHERE guildid='%u'", ginfo.c_str(), m_Id);
+
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnInfoChanged(this, ginfo);
+#endif /* ENABLE_ELUNA */
 }
 
 bool Guild::LoadGuildFromDB(QueryResult* guildDataResult)
@@ -567,6 +590,11 @@ bool Guild::DelMember(ObjectGuid guid, bool isDisbanding)
     if (!isDisbanding)
         UpdateAccountsNumber();
 
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnRemoveMember(this, player, isDisbanding); // IsKicked not a part of Mangos, implement?
+#endif /* ENABLE_ELUNA */
+
     return members.empty();
 }
 
@@ -861,6 +889,12 @@ void Guild::Disband()
     CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid = '%u'", m_Id);
     CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE guildid = '%u'", m_Id);
     CharacterDatabase.CommitTransaction();
+
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnDisband(this);
+#endif /* ENABLE_ELUNA */
+
     sGuildMgr.RemoveGuild(m_Id);
 }
 

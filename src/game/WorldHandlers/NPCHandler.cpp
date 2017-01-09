@@ -40,6 +40,9 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "Chat.h"
+#ifdef ENABLE_ELUNA
+#include "LuaEngine.h"
+#endif /* ENABLE_ELUNA */
 
 enum StableResultCode
 {

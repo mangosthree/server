@@ -1985,6 +1985,10 @@ void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode)
         m_ShutdownTimer = time;
         ShutdownMsg(true);
     }
+    ///- Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnShutdownInitiate(ShutdownExitCode(exitcode), ShutdownMask(options));
+#endif /* ENABLE_ELUNA */
 }
 
 /// Display a shutdown message to the user(s)

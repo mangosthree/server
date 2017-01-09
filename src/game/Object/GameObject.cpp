@@ -108,6 +108,11 @@ void GameObject::AddToWorld()
 
     // After Object::AddToWorld so that for initial state the GO is added to the world (and hence handled correctly)
     UpdateCollisionState();
+
+#ifdef ENABLE_ELUNA
+    if (!IsInWorld())
+        sEluna->OnAddToWorld(this);
+#endif /* ENABLE_ELUNA */
 }
 
 void GameObject::RemoveFromWorld()

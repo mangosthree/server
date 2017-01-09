@@ -2573,6 +2573,11 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 
     uint32 level = getLevel();
 
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnGiveXP(this, xp, victim);
+#endif /* ENABLE_ELUNA */
+
     // XP to money conversion processed in Player::RewardQuest
     if (level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
         return;
@@ -2690,6 +2695,11 @@ void Player::GiveLevel(uint32 level)
 
     // resend quests status directly
     SendQuestGiverStatusMultiple();
+
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnLevelChanged(this, level);
+#endif /* ENABLE_ELUNA */
 }
 
 void Player::UpdateFreeTalentPoints(bool resetIfNeed)
@@ -3864,6 +3874,11 @@ uint32 Player::resetTalentsCost() const
 
 bool Player::resetTalents(bool no_cost, bool all_specs)
 {
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnTalentsReset(this, no_cost);
+#endif /* ENABLE_ELUNA */
+
     // not need after this call
     if (HasAtLoginFlag(AT_LOGIN_RESET_TALENTS) && all_specs)
         RemoveAtLoginFlag(AT_LOGIN_RESET_TALENTS, true);
@@ -4677,6 +4692,10 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     m_camera.UpdateVisibilityForOwner();
     // update visibility of player for nearby cameras
     UpdateObjectVisibility();
+
+#ifdef ENABLE_ELUNA
+    sEluna->OnResurrect(this);
+#endif /* ENABLE_ELUNA */
 
     if (!applySickness)
         return;
@@ -6953,9 +6972,10 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         }
     }
 
+    // Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnUpdateZone(this, newZone, newArea);
-#endif
+#endif /* ENABLE_ELUNA */
 
     m_zoneUpdateId = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
@@ -7095,6 +7115,11 @@ void Player::DuelComplete(DuelCompleteType type)
         if (duel->opponent)
             duel->opponent->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_DUEL, 1);
     }
+
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnDuelEnd(duel->opponent, this, type);
+#endif /* ENABLE_ELUNA */
 
     // Remove Duel Flag object
     if (GameObject* obj = GetMap()->GetGameObject(GetGuidValue(PLAYER_DUEL_ARBITER)))
@@ -10542,6 +10567,12 @@ InventoryResult Player::CanUseItem(ItemPrototype const* pProto) const
         if (getLevel() < pProto->RequiredLevel)
             return EQUIP_ERR_CANT_EQUIP_LEVEL_I;
 
+#ifdef ENABLE_ELUNA
+        InventoryResult eres = sEluna->OnCanUseItem(this, pProto->ItemId);
+        if (eres != EQUIP_ERR_OK)
+            return eres;
+#endif
+
         return EQUIP_ERR_OK;
     }
     return EQUIP_ERR_ITEM_NOT_FOUND;
@@ -10866,6 +10897,11 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 
         ApplyEquipCooldown(pItem2);
 
+        // Used by Eluna
+#ifdef ENABLE_ELUNA
+        sEluna->OnEquip(this, pItem2, bag, slot);
+#endif /* ENABLE_ELUNA */
+
         return pItem2;
     }
     // Apply Titan's Grip damage penalty if necessary
@@ -10875,6 +10911,10 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
     // only for full equip instead adding to stack
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM, pItem->GetEntry());
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM, slot + 1);
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnEquip(this, pItem, bag, slot);
+#endif /* ENABLE_ELUNA */
 
     return pItem;
 }
@@ -11104,6 +11144,9 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
             ApplyItemOnStoreSpell(pItem, false);
 
         ItemRemovedQuestCheck(pItem->GetEntry(), pItem->GetCount());
+#ifdef ENABLE_ELUNA
+        sEluna->OnRemove(this, pItem);
+#endif /* ENABLE_ELUNA */
 
         if (bag == INVENTORY_SLOT_BAG_0)
         {
@@ -17059,6 +17102,10 @@ InstancePlayerBind* Player::BindToInstance(DungeonPersistentState* state, bool p
         if (!load)
             DEBUG_LOG("Player::BindToInstance: %s(%d) is now bound to map %d, instance %d, difficulty %d",
                       GetName(), GetGUIDLow(), state->GetMapId(), state->GetInstanceId(), state->GetDifficulty());
+        // Used by Eluna
+#ifdef ENABLE_ELUNA
+        sEluna->OnBindToInstance(this, (Difficulty)0, state->GetMapId(), permanent);
+#endif /* ENABLE_ELUNA */
         return &bind;
     }
     else
@@ -17290,6 +17337,13 @@ void Player::SaveToDB()
     outDebugStatsValues();
 
     CharacterDatabase.BeginTransaction();
+
+
+#ifdef ENABLE_ELUNA
+    // Hack to check that this is not on create save
+    if (!HasAtLoginFlag(AT_LOGIN_FIRST))
+        sEluna->OnSave(this);
+#endif /* ENABLE_ELUNA */
 
     static SqlStatementID delChar ;
     static SqlStatementID insChar ;
@@ -18382,6 +18436,11 @@ void Player::UpdateDuelFlag(time_t currTime)
 {
     if (!duel || duel->startTimer == 0 || currTime < duel->startTimer + 3)
         return;
+
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnDuelStart(this, duel->opponent);
+#endif /* ENABLE_ELUNA */
 
     SetUInt32Value(PLAYER_DUEL_TEAM, 1);
     duel->opponent->SetUInt32Value(PLAYER_DUEL_TEAM, 2);
@@ -22776,6 +22835,9 @@ void Player::LearnPetTalent(ObjectGuid petGuid, uint32 talentId, uint32 talentRa
     // learn! (other talent ranks will unlearned at learning)
     pet->learnSpell(spellid);
     DETAIL_LOG("PetTalentID: %u Rank: %u Spell: %u\n", talentId, talentRank, spellid);
+#ifdef ENABLE_ELUNA
+    sEluna->OnLearnTalents(this, talentId, talentRank, spellid);
+#endif /*ENABLE_ELUNA*/
 }
 
 void Player::UpdateFallInformationIfNeed(MovementInfo const& minfo, uint16 opcode)

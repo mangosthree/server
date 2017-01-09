@@ -66,6 +66,9 @@
 #include "Vehicle.h"
 #include "G3D/Vector3.h"
 #include "LootMgr.h"
+#ifdef ENABLE_ELUNA
+#include "LuaEngine.h"
+#endif /* ENABLE_ELUNA */
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
 {
@@ -6042,7 +6045,13 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
     // Notify Summoner
     if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
         ((Creature*)m_originalCaster)->AI()->JustSummoned(spawnCreature);
-
+#ifdef ENABLE_ELUNA
+    if (Unit* summoner = m_caster->ToUnit())
+        sEluna->OnSummoned(spawnCreature, summoner);
+    else if (m_originalCaster)
+        if (Unit* summoner = m_originalCaster->ToUnit())
+            sEluna->OnSummoned(spawnCreature, summoner);
+#endif /* ENABLE_ELUNA */
     return true;
 }
 
@@ -10218,6 +10227,11 @@ void Spell::EffectDuel(SpellEffectEntry const* effect)
 
     caster->SetGuidValue(PLAYER_DUEL_ARBITER, pGameObj->GetObjectGuid());
     target->SetGuidValue(PLAYER_DUEL_ARBITER, pGameObj->GetObjectGuid());
+
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+    sEluna->OnDuelRequest(target, caster);
+#endif /* ENABLE_ELUNA */
 }
 
 void Spell::EffectStuck(SpellEffectEntry const* effect /*effect*/)
@@ -10474,6 +10488,10 @@ void Spell::EffectApplyGlyph(SpellEffectEntry const* effect)
             player->SendTalentsInfoData(false);
         }
     }
+//#ifdef ENABLE_ELUNA
+//    if (Unit* summoner = m_originalCaster->ToUnit())
+//        sEluna->OnSummoned(spawnCreature, summoner);
+//#endif /* ENABLE_ELUNA */
 }
 
 void Spell::EffectEnchantHeldItem(SpellEffectEntry const* effect)

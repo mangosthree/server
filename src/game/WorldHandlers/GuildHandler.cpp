@@ -34,6 +34,9 @@
 #include "GossipDef.h"
 #include "SocialMgr.h"
 #include "Calendar.h"
+#ifdef ENABLE_ELUNA
+#include "LuaEngine.h"
+#endif /* ENABLE_ELUNA */
 
 void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 {

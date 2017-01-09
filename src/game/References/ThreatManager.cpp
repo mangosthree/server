@@ -437,9 +437,9 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, bool crit, SpellScho
 
     if (threat > 0.0f)
     {
-        if (float redirectedMod = pVictim->getHostileRefManager().GetThreatRedirectionMod())
+        if (float redirectedMod = pVictim->GetHostileRefManager().GetThreatRedirectionMod())
         {
-            if (Unit* redirectedTarget = pVictim->getHostileRefManager().GetThreatRedirectionTarget())
+            if (Unit* redirectedTarget = pVictim->GetHostileRefManager().GetThreatRedirectionTarget())
             {
                 if (redirectedTarget != getOwner() && redirectedTarget->IsAlive())
                 {

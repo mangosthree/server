@@ -2786,7 +2786,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 59628:                                     // Tricks of the Trade, triggered buff
             {
                 if (Unit* pCaster = GetCaster())
-                    pCaster->getHostileRefManager().ResetThreatRedirection();
+                    pCaster->GetHostileRefManager().ResetThreatRedirection();
                 return;
             }
             case 36730:                                     // Flame Strike
@@ -3375,7 +3375,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     {
                         // used for direct in code aura removes and spell proc event charges expire
                         if (m_removeMode != AURA_REMOVE_BY_DEFAULT)
-                            target->getHostileRefManager().ResetThreatRedirection();
+                            target->GetHostileRefManager().ResetThreatRedirection();
                     }
                     return;
                 }
@@ -3393,7 +3393,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     {
                         // used for direct in code aura removes and spell proc event charges expire
                         if (m_removeMode != AURA_REMOVE_BY_DEFAULT)
-                            target->getHostileRefManager().ResetThreatRedirection();
+                            target->GetHostileRefManager().ResetThreatRedirection();
                     }
                     return;
                 }
@@ -4393,7 +4393,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
 
         target->CombatStop(true);
         target->DeleteThreatList();
-        target->getHostileRefManager().deleteReferences();
+        target->GetHostileRefManager().deleteReferences();
 
         if (target->GetTypeId() == TYPEID_UNIT)
         {
@@ -4470,7 +4470,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
 
         target->CombatStop(true);
         target->DeleteThreatList();
-        target->getHostileRefManager().deleteReferences();
+        target->GetHostileRefManager().deleteReferences();
 
         if (target->GetTypeId() == TYPEID_UNIT)
         {
@@ -4999,7 +4999,7 @@ void Aura::HandleAuraModTotalThreat(bool apply, bool Real)
 
     float threatMod = apply ? float(m_modifier.m_amount) : float(-m_modifier.m_amount);
 
-    target->getHostileRefManager().threatAssist(caster, threatMod, GetSpellProto());
+    target->GetHostileRefManager().threatAssist(caster, threatMod, GetSpellProto());
 }
 
 void Aura::HandleModTaunt(bool apply, bool Real)
@@ -5358,7 +5358,7 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
                     target->CastSpell(caster, 59665, true);
             }
             else
-                target->getHostileRefManager().ResetThreatRedirection();
+                target->GetHostileRefManager().ResetThreatRedirection();
             break;
         default:
             break;
@@ -7520,7 +7520,7 @@ void Aura::PeriodicTick()
             // Health Leech effects do not generate healing aggro
             if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_LEECH)
                 break;
-            pCaster->getHostileRefManager().threatAssist(pCaster, gain * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
+            pCaster->GetHostileRefManager().threatAssist(pCaster, gain * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
             break;
         }
         case SPELL_AURA_PERIODIC_HEAL:
@@ -7596,7 +7596,7 @@ void Aura::PeriodicTick()
                     if (BattleGround* bg = ((Player*)pCaster)->GetBattleGround())
                         bg->UpdatePlayerScore(((Player*)pCaster), SCORE_HEALING_DONE, gain);
 
-                target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
+                target->GetHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
 
                 // apply damage part to caster if needed (ex. health funnel)
                 if (target != pCaster && spellProto->SpellVisual[0] == 163)
@@ -7767,7 +7767,7 @@ void Aura::PeriodicTick()
             int32 gain = target->ModifyPower(power, pdamage);
 
             if (Unit* pCaster = GetCaster())
-                target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
+                target->GetHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
             break;
         }
         case SPELL_AURA_OBS_MOD_MANA:
@@ -7793,7 +7793,7 @@ void Aura::PeriodicTick()
             int32 gain = target->ModifyPower(POWER_MANA, pdamage);
 
             if (Unit* pCaster = GetCaster())
-                target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
+                target->GetHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
             break;
         }
         case SPELL_AURA_POWER_BURN_MANA:
@@ -7855,7 +7855,7 @@ void Aura::PeriodicTick()
 
             int32 gain = target->ModifyHealth(m_modifier.m_amount);
             if (Unit* caster = GetCaster())
-                target->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f  * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
+                target->GetHostileRefManager().threatAssist(caster, float(gain) * 0.5f  * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
             break;
         }
         case SPELL_AURA_MOD_POWER_REGEN:

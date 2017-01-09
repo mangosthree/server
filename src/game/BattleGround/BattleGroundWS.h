@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __BATTLEGROUNDWS_H
-#define __BATTLEGROUNDWS_H
+#ifndef MANGOS_H_BATTLEGROUNDWS
+#define MANGOS_H_BATTLEGROUNDWS
 
 #include "BattleGround.h"
 
@@ -33,6 +33,10 @@
 #define BG_WS_TIME_LIMIT          (25*MINUTE*IN_MILLISECONDS)
 #define BG_WS_EVENT_START_BATTLE  8563
 
+/**
+ * @brief
+ *
+ */
 enum BG_WS_Sound
 {
     BG_WS_SOUND_FLAG_CAPTURED_ALLIANCE  = 8173,
@@ -44,6 +48,10 @@ enum BG_WS_Sound
     BG_WS_SOUND_FLAGS_RESPAWNED         = 8232
 };
 
+/**
+ * @brief
+ *
+ */
 enum BG_WS_SpellId
 {
     BG_WS_SPELL_WARSONG_FLAG            = 23333,
@@ -52,11 +60,15 @@ enum BG_WS_SpellId
     BG_WS_SPELL_SILVERWING_FLAG_DROPPED = 23336
 };
 
+/**
+ * @brief
+ *
+ */
 enum BG_WS_WorldStates
 {
     BG_WS_FLAG_UNK_ALLIANCE       = 1545,
     BG_WS_FLAG_UNK_HORDE          = 1546,
-//    FLAG_UNK                      = 1547,
+    // BG_FLAG_UNK                   = 1547,
     BG_WS_FLAG_CAPTURES_ALLIANCE  = 1581,
     BG_WS_FLAG_CAPTURES_HORDE     = 1582,
     BG_WS_FLAG_CAPTURES_MAX       = 1601,
@@ -66,6 +78,10 @@ enum BG_WS_WorldStates
     BG_WS_TIME_REMAINING          = 4248
 };
 
+/**
+ * @brief
+ *
+ */
 enum BG_WS_FlagState
 {
     BG_WS_FLAG_STATE_ON_BASE      = 0,
@@ -74,6 +90,10 @@ enum BG_WS_FlagState
     BG_WS_FLAG_STATE_ON_GROUND    = 3
 };
 
+/**
+ * @brief
+ *
+ */
 enum BG_WS_Graveyards
 {
     WS_GRAVEYARD_FLAGROOM_ALLIANCE = 769,
@@ -82,19 +102,35 @@ enum BG_WS_Graveyards
     WS_GRAVEYARD_MAIN_HORDE        = 772
 };
 
+/**
+ * @brief
+ *
+ */
 class BattleGroundWGScore : public BattleGroundScore
 {
     public:
+        /**
+         * @brief
+         *
+         */
         BattleGroundWGScore() : FlagCaptures(0), FlagReturns(0) {};
+        /**
+         * @brief
+         *
+         */
         virtual ~BattleGroundWGScore() {};
 
         uint32 GetAttr1() const { return FlagCaptures; }
         uint32 GetAttr2() const { return FlagReturns; }
 
-        uint32 FlagCaptures;
-        uint32 FlagReturns;
+        uint32 FlagCaptures; /**< TODO */
+        uint32 FlagReturns; /**< TODO */
 };
 
+/**
+ * @brief
+ *
+ */
 enum BG_WS_Events
 {
     WS_EVENT_FLAG_A               = 0,
@@ -103,71 +139,238 @@ enum BG_WS_Events
     WS_EVENT_SPIRITGUIDES_SPAWN   = 2
 };
 
+
+/**
+ * @brief
+ *
+ */
 class BattleGroundWS : public BattleGround
 {
         friend class BattleGroundMgr;
 
     public:
-        /* Construction */
+        /**
+         * @brief Construction
+         *
+         */
         BattleGroundWS();
+        /**
+         * @brief
+         *
+         * @param diff
+         */
         void Update(uint32 diff) override;
 
-        /* inherited from BattlegroundClass */
+        /**
+         * @brief inherited from BattlegroundClass
+         *
+         * @param plr
+         */
         virtual void AddPlayer(Player* plr) override;
+        /**
+         * @brief
+         *
+         */
         virtual void StartingEventOpenDoors() override;
 
-        /* BG Flags */
+        /**
+         * @brief BG Flags
+         *
+         * @return ObjectGuid
+         */
         ObjectGuid GetAllianceFlagCarrierGuid() const { return m_flagCarrierAlliance; }
+        /**
+         * @brief
+         *
+         * @return ObjectGuid
+         */
         ObjectGuid GetHordeFlagCarrierGuid() const { return m_flagCarrierHorde; }
 
+        /**
+         * @brief
+         *
+         * @param guid
+         */
         void SetAllianceFlagCarrier(ObjectGuid guid) { m_flagCarrierAlliance = guid; }
+        /**
+         * @brief
+         *
+         * @param guid
+         */
         void SetHordeFlagCarrier(ObjectGuid guid) { m_flagCarrierHorde = guid; }
 
+        /**
+         * @brief
+         *
+         */
         void ClearAllianceFlagCarrier() { m_flagCarrierAlliance.Clear(); }
+        /**
+         * @brief
+         *
+         */
         void ClearHordeFlagCarrier() { m_flagCarrierHorde.Clear(); }
 
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool IsAllianceFlagPickedUp() const { return !m_flagCarrierAlliance.IsEmpty(); }
+        /**
+         * @brief
+         *
+         * @return bool
+         */
         bool IsHordeFlagPickedUp() const { return !m_flagCarrierHorde.IsEmpty(); }
 
+        /**
+         * @brief
+         *
+         * @param team
+         * @param captured
+         */
         void RespawnFlag(Team team, bool captured);
+        /**
+         * @brief
+         *
+         * @param team
+         */
         void RespawnDroppedFlag(Team team);
+        /**
+         * @brief
+         *
+         * @param team
+         * @return uint8
+         */
         uint8 GetFlagState(Team team) { return m_FlagState[GetTeamIndexByTeamId(team)]; }
 
-        /* Battleground Events */
+        /**
+         * @brief Battleground Events
+         *
+         * @param source
+         */
         virtual void EventPlayerDroppedFlag(Player* source) override;
+        /**
+         * @brief
+         *
+         * @param source
+         * @param target_obj
+         */
         virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        /**
+         * @brief
+         *
+         * @param source
+         */
         virtual void EventPlayerCapturedFlag(Player* source) override;
 
+        /**
+         * @brief
+         *
+         * @param plr
+         * @param guid
+         */
         void RemovePlayer(Player* plr, ObjectGuid guid) override;
+        /**
+         * @brief
+         *
+         * @param source
+         * @param trigger
+         */
         bool HandleAreaTrigger(Player* source, uint32 trigger) override;
+        /**
+         * @brief
+         *
+         * @param player
+         * @param killer
+         */
         void HandleKillPlayer(Player* player, Player* killer) override;
+        /**
+         * @brief
+         *
+         */
         virtual void Reset() override;
+        /**
+         * @brief
+         *
+         * @param winner
+         */
         void EndBattleGround(Team winner) override;
+        /**
+         * @brief
+         *
+         * @param player
+         * @return const WorldSafeLocsEntry
+         */
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
         uint32 GetRemainingTimeInMinutes() { return m_EndTimer ? (m_EndTimer - 1) / (MINUTE * IN_MILLISECONDS) + 1 : 0; }
 
+        /**
+         * @brief
+         *
+         * @param team
+         * @param value
+         */
         void UpdateFlagState(Team team, uint32 value);
+        /**
+         * @brief
+         *
+         * @param team
+         */
         void UpdateTeamScore(Team team);
+        /**
+         * @brief
+         *
+         * @param source
+         * @param type
+         * @param value
+         */
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
+        /**
+         * @brief
+         *
+         * @param guid
+         * @param team
+         */
         void SetDroppedFlagGuid(ObjectGuid guid, Team team)  { m_DroppedFlagGuid[GetTeamIndexByTeamId(team)] = guid;}
+        /**
+         * @brief
+         *
+         * @param team
+         */
         void ClearDroppedFlagGuid(Team team)  { m_DroppedFlagGuid[GetTeamIndexByTeamId(team)].Clear();}
+        /**
+         * @brief
+         *
+         * @param team
+         * @return const ObjectGuid
+         */
         ObjectGuid const& GetDroppedFlagGuid(Team team) const { return m_DroppedFlagGuid[GetTeamIndexByTeamId(team)];}
+        /**
+         * @brief
+         *
+         * @param data
+         * @param count
+         */
         virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
-        
+        /**
+         * @brief
+         *
+         */
         virtual Team GetPrematureWinner() override;
 
     private:
-        ObjectGuid m_flagCarrierAlliance;
-        ObjectGuid m_flagCarrierHorde;
+        ObjectGuid m_flagCarrierAlliance; /**< TODO */
+        ObjectGuid m_flagCarrierHorde; /**< TODO */
 
-        ObjectGuid m_DroppedFlagGuid[PVP_TEAM_COUNT];
-        uint8 m_FlagState[PVP_TEAM_COUNT];
-        int32 m_FlagsTimer[PVP_TEAM_COUNT];
-        int32 m_FlagsDropTimer[PVP_TEAM_COUNT];
+        ObjectGuid m_DroppedFlagGuid[PVP_TEAM_COUNT]; /**< TODO */
+        uint8 m_FlagState[PVP_TEAM_COUNT]; /**< TODO */
+        int32 m_FlagsTimer[PVP_TEAM_COUNT]; /**< TODO */
+        int32 m_FlagsDropTimer[PVP_TEAM_COUNT]; /**< TODO */
 
-        uint32 m_ReputationCapture;
-        uint32 m_HonorWinKills;
-        uint32 m_HonorEndKills;
+        uint32 m_ReputationCapture; /**< TODO */
+        uint32 m_HonorWinKills; /**< TODO */
+        uint32 m_HonorEndKills; /**< TODO */
         uint32 m_EndTimer;
         Team   m_LastCapturedFlagTeam;
 };

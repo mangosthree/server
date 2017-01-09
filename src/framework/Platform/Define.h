@@ -64,20 +64,9 @@ typedef ACE_SHLIB_HANDLE MANGOS_LIBRARY_HANDLE;
 #  define MANGOS_EXPORT __declspec(dllexport)
 #  define MANGOS_IMPORT __cdecl
 #else // PLATFORM != PLATFORM_WINDOWS
-#  include <dlfcn.h>
-   typedef void* MANGOS_LIBRARY_HANDLE;
-#  define MANGOS_LOAD_LIBRARY(libname)     dlopen(libname, RTLD_LAZY)
-#  define MANGOS_CLOSE_LIBRARY(hlib)       dlclose(hlib)
-#  define MANGOS_GET_PROC_ADDR(hlib, name) dlsym(hlib, name)
 #  define MANGOS_EXPORT export
-#  if PLATFORM == PLATFORM_APPLE
-#    define MANGOS_SCRIPT_SUFFIX ".dylib"
-#  else
-#    define MANGOS_SCRIPT_SUFFIX ".so"
-#  endif
-#  define MANGOS_SCRIPT_PREFIX "lib"
-#  if defined(__APPLE_CC__) && defined(BIG_ENDIAN) // TODO:: more work to do with byte order. Have to be rechecked after boost integration.
-#    if (defined (__ppc__) || defined (__powerpc__))
+#  if defined(__APPLE_CC__) && defined(BIG_ENDIAN)
+#    if (defined(__ppc__) || defined(__powerpc__))
 #      define MANGOS_IMPORT __attribute__ ((longcall))
 #    else
 #      define MANGOS_IMPORT

@@ -658,7 +658,7 @@ class WorldObject : public Object
         Creature* SummonCreature(uint32 id, float x, float y, float z, float ang, TempSummonType spwtype, uint32 despwtime, bool asActiveObject = false, bool setRun = false);
         GameObject* SummonGameObject(uint32 id, float x, float y, float z, float angle, uint32 despwtime);
 
-        bool isActiveObject() const { return m_isActiveObject || m_viewPoint.hasViewers(); }
+        bool IsActiveObject() const { return m_IsActiveObject || m_viewPoint.hasViewers(); }
         void SetActiveObjectState(bool active);
 
         ViewPoint& GetViewPoint() { return m_viewPoint; }
@@ -696,7 +696,7 @@ class WorldObject : public Object
         Position m_position;
         ViewPoint m_viewPoint;
         WorldUpdateCounter m_updateTracker;
-        bool m_isActiveObject;
+        bool m_IsActiveObject;
 };
 
 #endif

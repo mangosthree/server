@@ -1110,7 +1110,7 @@ WorldObject::WorldObject() :
     m_transportInfo(NULL),
     m_currMap(NULL),
     m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL),
-    m_isActiveObject(false)
+    m_IsActiveObject(false)
 {
 }
 
@@ -2159,17 +2159,17 @@ bool WorldObject::PrintCoordinatesError(float x, float y, float z, char const* d
 
 void WorldObject::SetActiveObjectState(bool active)
 {
-    if (m_isActiveObject == active || (isType(TYPEMASK_PLAYER) && !active))  // player shouldn't became inactive, never
+    if (m_IsActiveObject == active || (isType(TYPEMASK_PLAYER) && !active))  // player shouldn't became inactive, never
         { return; }
 
     if (IsInWorld() && !isType(TYPEMASK_PLAYER))
         // player's update implemented in a different from other active worldobject's way
         // it's considired to use generic way in future
     {
-        if (isActiveObject() && !active)
+        if (IsActiveObject() && !active)
             { GetMap()->RemoveFromActive(this); }
-        else if (!isActiveObject() && active)
+        else if (!IsActiveObject() && active)
             { GetMap()->AddToActive(this); }
     }
-    m_isActiveObject = active;
+    m_IsActiveObject = active;
 }

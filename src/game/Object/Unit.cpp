@@ -1108,7 +1108,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         // stop combat
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageAttackStop");
         pVictim->CombatStop();
-        pVictim->getHostileRefManager().deleteReferences();
+        pVictim->GetHostileRefManager().deleteReferences();
 
         /*
          *                      Actions for the killer
@@ -10592,9 +10592,9 @@ void Unit::CleanupsBeforeDelete()
         ClearComboPointHolders();
         DeleteThreatList();
         if (GetTypeId() == TYPEID_PLAYER)
-            getHostileRefManager().setOnlineOfflineState(false);
+            GetHostileRefManager().setOnlineOfflineState(false);
         else
-            getHostileRefManager().deleteReferences();
+            GetHostileRefManager().deleteReferences();
         RemoveAllAuras(AURA_REMOVE_BY_DELETE);
     }
     WorldObject::CleanupsBeforeDelete();
@@ -11259,7 +11259,7 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid, uint32 /*spellID*/)
         if (casterGuid == GetObjectGuid())
             FinishSpell(CURRENT_GENERIC_SPELL, false);
         InterruptNonMeleeSpells(true);
-        getHostileRefManager().deleteReferences();
+        GetHostileRefManager().deleteReferences();
     }
     else
     {
@@ -11912,7 +11912,7 @@ void Unit::StopAttackFaction(uint32 faction_id)
             ++itr;
     }
 
-    getHostileRefManager().deleteReferencesForFaction(faction_id);
+    GetHostileRefManager().deleteReferencesForFaction(faction_id);
 
     CallForAllControlledUnits(StopAttackFactionHelper(faction_id), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
@@ -12425,7 +12425,7 @@ bool Unit::TakePossessOf(Unit* possessed)
 
     possessed->CombatStop(true);
     possessed->DeleteThreatList();
-    possessed->getHostileRefManager().deleteReferences();
+    possessed->GetHostileRefManager().deleteReferences();
 
     if (possessedCreature)
     {
@@ -12490,7 +12490,7 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
 
     possessed->CombatStop(true);
     possessed->DeleteThreatList();
-    possessed->getHostileRefManager().deleteReferences();
+    possessed->GetHostileRefManager().deleteReferences();
 
     if (possessed->GetTypeId() == TYPEID_PLAYER)
     {

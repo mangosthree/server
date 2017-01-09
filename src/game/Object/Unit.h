@@ -3286,7 +3286,7 @@ class  Unit : public WorldObject
         ThreatManager const& GetThreatManager() const { return m_ThreatManager; }
         void addHatedBy(HostileReference* pHostileReference) { m_HostileRefManager.insertFirst(pHostileReference); };
         void removeHatedBy(HostileReference* /*pHostileReference*/) { /* nothing to do yet */ }
-        HostileRefManager& getHostileRefManager() { return m_HostileRefManager; }
+        HostileRefManager& GetHostileRefManager() { return m_HostileRefManager; }
 
         SpellAuraHolder* GetVisibleAura(uint8 slot) const
         {

@@ -1800,7 +1800,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                 case 57934:
                 {
                     triggered_spell_id = 57933;             // Tricks of the Trade, increased damage buff
-                    target = getHostileRefManager().GetThreatRedirectionTarget();
+                    target = GetHostileRefManager().GetThreatRedirectionTarget();
                     if (!target)
                         return SPELL_AURA_PROC_FAILED;
 

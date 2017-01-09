@@ -2390,7 +2390,7 @@ void Player::SetInWater(bool apply)
     // remove auras that need water/land
     RemoveAurasWithInterruptFlags(apply ? AURA_INTERRUPT_FLAG_NOT_ABOVEWATER : AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
 
-    getHostileRefManager().updateThreatTables();
+    GetHostileRefManager().updateThreatTables();
 }
 
 struct SetGameMasterOnHelper
@@ -2399,7 +2399,7 @@ struct SetGameMasterOnHelper
     void operator()(Unit* unit) const
     {
         unit->setFaction(35);
-        unit->getHostileRefManager().setOnlineOfflineState(false);
+        unit->GetHostileRefManager().setOnlineOfflineState(false);
     }
 };
 
@@ -2409,7 +2409,7 @@ struct SetGameMasterOffHelper
     void operator()(Unit* unit) const
     {
         unit->setFaction(faction);
-        unit->getHostileRefManager().setOnlineOfflineState(true);
+        unit->GetHostileRefManager().setOnlineOfflineState(true);
     }
     uint32 faction;
 };
@@ -2427,7 +2427,7 @@ void Player::SetGameMaster(bool on)
         SetFFAPvP(false);
         ResetContestedPvP();
 
-        getHostileRefManager().setOnlineOfflineState(false);
+        GetHostileRefManager().setOnlineOfflineState(false);
         CombatStopWithPets();
 
         SetPhaseMask(PHASEMASK_ANYWHERE, false);            // see and visible in all phases
@@ -2458,7 +2458,7 @@ void Player::SetGameMaster(bool on)
         // restore FFA PvP area state, remove not allowed for GM mounts
         UpdateArea(m_areaUpdateId);
 
-        getHostileRefManager().setOnlineOfflineState(true);
+        GetHostileRefManager().setOnlineOfflineState(true);
     }
 
     m_camera.UpdateVisibilityForOwner();

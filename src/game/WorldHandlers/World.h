@@ -26,8 +26,8 @@
 /// @{
 /// \file
 
-#ifndef __WORLD_H
-#define __WORLD_H
+#ifndef MANGOS_H_WORLD
+#define MANGOS_H_WORLD
 
 #include "Common.h"
 #include "Timer.h"
@@ -229,7 +229,8 @@ enum eConfigUInt32Values
     CONFIG_UINT32_WARDEN_CLIENT_BAN_DURATION,
     CONFIG_UINT32_WARDEN_NUM_MEM_CHECKS,
     CONFIG_UINT32_WARDEN_NUM_OTHER_CHECKS,
-    CONFIG_UINT32_WARDEN_DB_LOGLEVEL
+    CONFIG_UINT32_WARDEN_DB_LOGLEVEL,
+    CONFIG_UINT32_AUTOBROADCAST_INTERVAL,
 };
 
 /// Configuration elements
@@ -418,7 +419,7 @@ enum RealmType
     REALM_TYPE_RP       = 6,
     REALM_TYPE_RPPVP    = 8,
     REALM_TYPE_FFA_PVP  = 16                                // custom, free for all pvp mode like arena PvP in all zones except rest activated places and sanctuaries
-                          // replaced by REALM_PVP in realm list
+    // replaced by REALM_PVP in realm list
 };
 
 /// This is values from first column of Cfg_Categories.dbc (1.12.1 have another numeration)
@@ -654,6 +655,7 @@ class World
         char const* GetDBVersion() { return m_DBVersion.c_str(); }
 
         void UpdatePhaseDefinitions();
+        void LoadBroadcastStrings();
 
         /**
         * \brief: force all client to request player data
@@ -703,6 +705,18 @@ class World
         bool configNoReload(bool reload, eConfigInt32Values index, char const* fieldname, int32 defvalue);
         bool configNoReload(bool reload, eConfigFloatValues index, char const* fieldname, float defvalue);
         bool configNoReload(bool reload, eConfigBoolValues index, char const* fieldname, bool defvalue);
+
+        // AutoBroadcast system
+        void AutoBroadcast();
+        struct BroadcastString
+        {
+            uint32 freq;
+            std::string text;
+        };
+        std::vector<BroadcastString> m_broadcastList;
+        uint32 m_broadcastWeight;
+        bool m_broadcastEnable;
+        IntervalTimer m_broadcastTimer;
 
         static volatile bool m_stopEvent;
         static uint8 m_ExitCode;
@@ -755,7 +769,7 @@ class World
         time_t m_NextDailyQuestReset;
         time_t m_NextRandomBGReset;
         time_t m_NextWeeklyQuestReset;
-        time_t m_NextMonthlyQuestReset;  
+        time_t m_NextMonthlyQuestReset;
 
         // Player Queue
         Queue m_QueuedSessions;

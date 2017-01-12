@@ -1021,11 +1021,12 @@ enum MangosStrings
     LANG_OPVP_SI_CAPTURE_H              = 1635,
     LANG_OPVP_SI_CAPTURE_A              = 1636,
 
-    // Room for 4.x clients only          1700-1799
+    // Room for 4.x clients only          1702-1799
     LANG_VENDOR_WRONG_ITEM_TYPE         = 1700,
     LANG_VENDOR_WRONG_CURRENCY_MAXCOUNT = 1701,
 
-    // FREE IDS                           1800-9999
+    // FREE IDS                           1801-9999
+    LANG_AUTOBROADCAST                  = 1800
 
     // Use for not-in-official-sources patches
     //                                    10000-10999

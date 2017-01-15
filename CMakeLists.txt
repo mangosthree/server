@@ -73,7 +73,7 @@ message(
     SOAP                    Enable remote access via SOAP
    Scripting engines:
     SCRIPT_LIB_ELUNA        Compile with support for Eluna scripts
-    SCRIPT_LIB_SD3          Compile with support for ScriptDev2 scripts
+    SCRIPT_LIB_SD3          Compile with support for ScriptDev3 scripts
    Modules:
     PLAYERBOTS              Enable Player Bots
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.

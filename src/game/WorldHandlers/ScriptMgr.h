@@ -48,6 +48,22 @@ class SpellCastTargets;
 class Unit;
 class WorldObject;
 
+enum DBScriptType
+{
+    DBS_INTERNAL              = -1,
+    DBS_ON_QUEST_START        = 0,
+    DBS_ON_QUEST_END          = 1,
+    DBS_ON_GOSSIP             = 2,
+    DBS_ON_CREATURE_MOVEMENT  = 3,
+    DBS_ON_CREATURE_DEATH     = 4,
+    DBS_ON_SPELL              = 5,
+    DBS_ON_GO_USE             = 6,
+    DBS_ON_GOT_USE            = 7,
+    DBS_ON_EVENT              = 8,
+    DBS_END                   = 9,
+};
+#define DBS_START DBS_ON_QUEST_START
+
 enum ScriptedObjectType
 {
     SCRIPTED_UNIT           = 0,    //CreatureScript
@@ -134,7 +150,7 @@ enum DBScriptCommand                                        // resSource, resTar
     SCRIPT_COMMAND_XP_USER                  = 33,           // source or target with Player, datalong = bool (0=off, 1=on)
     SCRIPT_COMMAND_TERMINATE_COND           = 34,           // datalong = condition_id, datalong2 = if != 0 then quest_id of quest that will be failed for player's group if the script is terminated
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL terminate when condition is false ELSE terminate when condition is true
-    SCRIPT_COMMAND_SEND_AI_EVENT     = 35,           // resSource = Creature, resTarget = Unit
+    SCRIPT_COMMAND_SEND_AI_EVENT_AROUND     = 35,           // resSource = Creature, resTarget = Unit
                                                             // datalong = AIEventType
                                                             // datalong2 = radius
     SCRIPT_COMMAND_TURN_TO                  = 36,           // resSource = Unit, resTarget = Unit/none
@@ -386,7 +402,7 @@ struct ScriptInfo
             uint32 failQuest;                               // datalong2
         } terminateCond;
 
-        struct                                              // SCRIPT_COMMAND_SEND_AI_EVENT (35)
+        struct                                              // SCRIPT_COMMAND_SEND_AI_EVENT_AROUND (35)
         {
             uint32 eventType;                               // datalong
             uint32 radius;                                  // datalong2
@@ -512,18 +528,22 @@ struct ScriptInfo
     }
 };
 
+typedef std::vector < ScriptInfo > ScriptChain;
+typedef std::map < uint32 /*id*/, ScriptChain > ScriptChainMap;
+typedef std::vector < ScriptChainMap > DBScripts;
+
 class ScriptAction
 {
     public:
-        ScriptAction(const char* _table, Map* _map, ObjectGuid _sourceGuid, ObjectGuid _targetGuid, ObjectGuid _ownerGuid, ScriptInfo const* _script) :
-            m_table(_table), m_map(_map), m_sourceGuid(_sourceGuid), m_targetGuid(_targetGuid), m_ownerGuid(_ownerGuid), m_script(_script)
+        ScriptAction(DBScriptType _type, Map* _map, ObjectGuid _sourceGuid, ObjectGuid _targetGuid, ObjectGuid _ownerGuid, ScriptInfo const* _script) :
+            m_type(_type), m_map(_map), m_sourceGuid(_sourceGuid), m_targetGuid(_targetGuid), m_ownerGuid(_ownerGuid), m_script(_script)
         {}
 
         bool HandleScriptStep();                            // return true IF AND ONLY IF the script should be terminated
 
-        const char* GetTableName() const
+        DBScriptType GetType() const
         {
-            return m_table;
+            return m_type;
         }
         uint32 GetId() const
         {
@@ -542,16 +562,16 @@ class ScriptAction
             return m_ownerGuid;
         }
 
-        bool IsSameScript(const char* table, uint32 id, ObjectGuid sourceGuid, ObjectGuid targetGuid, ObjectGuid ownerGuid) const
+        bool IsSameScript(DBScriptType type, uint32 id, ObjectGuid sourceGuid, ObjectGuid targetGuid, ObjectGuid ownerGuid) const
         {
-            return table == m_table && id == GetId() &&
+            return type == m_type && id == GetId() &&
                    (sourceGuid == m_sourceGuid || !sourceGuid) &&
                    (targetGuid == m_targetGuid || !targetGuid) &&
                    (ownerGuid == m_ownerGuid || !ownerGuid);
         }
 
     private:
-        const char* m_table;                                // of which table the script was started
+        DBScriptType m_type;                                // which type has the script was started
         Map* m_map;                                         // Map on which the action will be executed
         ObjectGuid m_sourceGuid;
         ObjectGuid m_targetGuid;
@@ -568,19 +588,6 @@ class ScriptAction
         Player* GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldObject* pTarget);
 };
 
-typedef std::multimap < uint32 /*delay*/, ScriptInfo > ScriptMap;
-typedef std::map < uint32 /*id*/, ScriptMap > ScriptMapMap;
-typedef std::pair<const char*, ScriptMapMap> ScriptMapMapName;
-
-extern ScriptMapMapName sQuestEndScripts;
-extern ScriptMapMapName sQuestStartScripts;
-extern ScriptMapMapName sSpellScripts;
-extern ScriptMapMapName sGameObjectScripts;
-extern ScriptMapMapName sGameObjectTemplateScripts;
-extern ScriptMapMapName sEventScripts;
-extern ScriptMapMapName sGossipScripts;
-extern ScriptMapMapName sCreatureDeathScripts;
-extern ScriptMapMapName sCreatureMovementScripts;
 
 enum ScriptLoadResult
 {
@@ -598,16 +605,7 @@ class ScriptMgr
 
         std::string GenerateNameToId(ScriptedObjectType sot, uint32 id);
 
-        void LoadGameObjectScripts();
-        void LoadGameObjectTemplateScripts();
-        void LoadQuestEndScripts();
-        void LoadQuestStartScripts();
-        void LoadEventScripts();
-        void LoadSpellScripts();
-        void LoadGossipScripts();
-        void LoadCreatureDeathScripts();
-        void LoadCreatureMovementScripts();
-
+        void LoadDbScripts(DBScriptType type);
         void LoadDbScriptStrings();
 
         void LoadScriptNames();
@@ -621,15 +619,26 @@ class ScriptMgr
 
         bool ReloadScriptBinding();
 
+        ScriptChainMap const* GetScriptChainMap(DBScriptType type)
+        {
+            if ((type != DBS_INTERNAL) && type < DBS_END)
+                return &m_dbScripts[type];
+
+            return NULL;
+        }
+
         const char* GetScriptName(uint32 id) const
         {
             return id < m_scriptNames.size() ? m_scriptNames[id].c_str() : "";
         }
+
         uint32 GetScriptId(const char* name) const;
+
         uint32 GetScriptIdsCount() const
         {
             return m_scriptNames.size();
         }
+
         uint32 GetBoundScriptId(ScriptedObjectType entity, int32 entry);
 
         ScriptLoadResult LoadScriptLibrary(const char* libName);
@@ -689,16 +698,16 @@ class ScriptMgr
 
     private:
         void CollectPossibleEventIds(std::set<uint32>& eventIds);
-        void LoadScripts(ScriptMapMapName& scripts, const char* tablename);
-        void CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32>& ids);
+        void LoadScripts(DBScriptType type);
+        void CheckScriptTexts(std::set<int32>& ids);
 
         typedef std::vector<std::string> ScriptNameMap;
         typedef UNORDERED_MAP<int32, uint32> EntryToScriptIdMap;
 
-        EntryToScriptIdMap      m_scriptBind[SCRIPTED_MAX_TYPE];
+        EntryToScriptIdMap m_scriptBind[SCRIPTED_MAX_TYPE];
 
-        ScriptNameMap           m_scriptNames;
-
+        ScriptNameMap      m_scriptNames;
+        DBScripts          m_dbScripts;
 #ifdef _DEBUG
         // mutex allowing to reload the script binding table; TODO just do it AWAY from any map update, e.g. right after sessions update 
         ACE_RW_Thread_Mutex m_bindMutex;
@@ -712,16 +721,13 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
 
 #define sScriptMgr MaNGOS::Singleton<ScriptMgr>::Instance()
 
-MANGOS_DLL_SPEC uint32 GetAreaTriggerScriptId(uint32 triggerId);
-MANGOS_DLL_SPEC uint32 GetEventIdScriptId(uint32 eventId);
-MANGOS_DLL_SPEC uint32 GetScriptId(const char* name);
-MANGOS_DLL_SPEC char const* GetScriptName(uint32 id);
-MANGOS_DLL_SPEC uint32 GetScriptIdsCount();
-MANGOS_DLL_SPEC void SetExternalWaypointTable(char const* tableName);
-MANGOS_DLL_SPEC bool AddWaypointFromExternal(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
-
 uint32 GetScriptId(const char* name);
 char const* GetScriptName(uint32 id);
 uint32 GetScriptIdsCount();
+uint32 GetAreaTriggerScriptId(uint32 triggerId);
+uint32 GetEventIdScriptId(uint32 eventId);
+uint32 GetScriptIdsCount();
+void SetExternalWaypointTable(char const* tableName);
+bool AddWaypointFromExternal(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
 
 #endif

@@ -905,12 +905,12 @@ bool ChatHandler::HandleReloadDBScriptsOnGossipCommand(char* args)
     }
 
     if (*args != 'a')
-        sLog.outString("Re-Loading Scripts from `dbscripts_on_gossip`...");
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_GOSSIP]`..."); }
 
-    sScriptMgr.LoadGossipScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_GOSSIP);
 
     if (*args != 'a')
-        SendGlobalSysMessage("DB table `dbscripts_on_gossip` reloaded.");
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_GOSSIP]` reloaded.");
 
     return true;
 }
@@ -925,12 +925,12 @@ bool ChatHandler::HandleReloadDBScriptsOnSpellCommand(char* args)
     }
 
     if (*args != 'a')
-        sLog.outString("Re-Loading Scripts from `dbscripts_on_spell`...");
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_SPELL]`..."); }
 
-    sScriptMgr.LoadSpellScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_SPELL);
 
     if (*args != 'a')
-        SendGlobalSysMessage("DB table `dbscripts_on_spell` reloaded.");
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_SPELL]` reloaded.");
 
     return true;
 }
@@ -945,12 +945,12 @@ bool ChatHandler::HandleReloadDBScriptsOnQuestStartCommand(char* args)
     }
 
     if (*args != 'a')
-        sLog.outString("Re-Loading Scripts from `dbscripts_on_quest_start`...");
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_QUEST_START]`..."); }
 
-    sScriptMgr.LoadQuestStartScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_QUEST_START);
 
     if (*args != 'a')
-        SendGlobalSysMessage("DB table `dbscripts_on_quest_start` reloaded.");
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_QUEST_START]` reloaded.");
 
     return true;
 }
@@ -965,12 +965,12 @@ bool ChatHandler::HandleReloadDBScriptsOnQuestEndCommand(char* args)
     }
 
     if (*args != 'a')
-        sLog.outString("Re-Loading Scripts from `dbscripts_on_quest_end`...");
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_QUEST_END]`..."); }
 
-    sScriptMgr.LoadQuestEndScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_QUEST_END);
 
     if (*args != 'a')
-        SendGlobalSysMessage("DB table `dbscripts_on_quest_end` reloaded.");
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_QUEST_END]` reloaded.");
 
     return true;
 }
@@ -985,12 +985,12 @@ bool ChatHandler::HandleReloadDBScriptsOnEventCommand(char* args)
     }
 
     if (*args != 'a')
-        sLog.outString("Re-Loading Scripts from `dbscripts_on_event`...");
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_EVENT]`..."); }
 
-    sScriptMgr.LoadEventScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_EVENT);
 
     if (*args != 'a')
-        SendGlobalSysMessage("DB table `dbscripts_on_event` reloaded.");
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_EVENT]` reloaded.");
 
     return true;
 }
@@ -1005,13 +1005,13 @@ bool ChatHandler::HandleReloadDBScriptsOnGoUseCommand(char* args)
     }
 
     if (*args != 'a')
-        sLog.outString("Re-Loading Scripts from `dbscripts_on_go[_template]_use`...");
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_GO[_TEMPLATE]_USE]`..."); }
 
-    sScriptMgr.LoadGameObjectScripts();
-    sScriptMgr.LoadGameObjectTemplateScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_GO_USE);
+    sScriptMgr.LoadDbScripts(DBS_ON_GOT_USE);
 
     if (*args != 'a')
-        SendGlobalSysMessage("DB table `dbscripts_on_go[_template]_use` reloaded.");
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_GO[_TEMPLATE]_USE]` reloaded.");
 
     return true;
 }
@@ -1026,12 +1026,12 @@ bool ChatHandler::HandleReloadDBScriptsOnCreatureDeathCommand(char* args)
     }
 
     if (*args != 'a')
-        sLog.outString("Re-Loading Scripts from `dbscripts_on_creature_death`...");
+        { sLog.outString("Re-Loading Scripts from `db_scripts [type = DBS_ON_CREATURE_DEATH]`..."); }
 
-    sScriptMgr.LoadCreatureDeathScripts();
+    sScriptMgr.LoadDbScripts(DBS_ON_CREATURE_DEATH);
 
     if (*args != 'a')
-        SendGlobalSysMessage("DB table `dbscripts_on_creature_death` reloaded.");
+        SendGlobalSysMessage("DB table `db_scripts [type = DBS_ON_CREATURE_DEATH]` reloaded.");
 
     return true;
 }

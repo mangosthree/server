@@ -34,8 +34,6 @@
 #include "GuildMgr.h"
 #include "ObjectMgr.h"
 #include "WorldSession.h"
-#include "Auth/BigNumber.h"
-#include "Auth/Sha1.h"
 #include "UpdateData.h"
 #include "LootMgr.h"
 #include "Chat.h"

@@ -33,8 +33,8 @@
 #include "Item.h"
 #include "Spell.h"
 #include "SocialMgr.h"
-#include "Language.h"
 #include "DBCStores.h"
+#include "Language.h"
 
 void WorldSession::SendTradeStatus(TradeStatus status)
 {

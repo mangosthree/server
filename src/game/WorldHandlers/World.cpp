@@ -58,7 +58,6 @@
 #include "Policies/Singleton.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "OutdoorPvP/OutdoorPvP.h"
-#include "TemporarySummon.h"
 #include "VMapFactory.h"
 #include "MoveMap.h"
 #include "GameEventMgr.h"

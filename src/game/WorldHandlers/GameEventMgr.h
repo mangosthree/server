@@ -28,7 +28,6 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "Platform/Define.h"
-#include "Policies/Singleton.h"
 
 #include <mutex>
 

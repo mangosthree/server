@@ -28,8 +28,6 @@
 #include "Log.h"
 #include "ProgressBar.h"
 #include "SharedDefines.h"
-#include "SpellAuraDefines.h"
-#include "ObjectGuid.h"
 
 #include "DBCfmt.h"
 

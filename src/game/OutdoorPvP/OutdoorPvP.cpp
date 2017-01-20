@@ -20,8 +20,6 @@
  */
 
 #include "OutdoorPvP.h"
-#include "Language.h"
-#include "World.h"
 #include "ObjectMgr.h"
 #include "Object.h"
 #include "GameObject.h"

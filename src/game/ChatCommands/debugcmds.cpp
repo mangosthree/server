@@ -23,7 +23,7 @@
  */
 
 #include "Common.h"
-#include "Database/DatabaseEnv.h"
+#include "DBCStores.h"
 #include "WorldPacket.h"
 #include "Player.h"
 #include "Opcodes.h"

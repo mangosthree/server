@@ -27,6 +27,7 @@
 #include "Creature.h"
 #include "GameObject.h"
 #include "Player.h"
+#include "Language.h"
 
 OutdoorPvPSI::OutdoorPvPSI() : OutdoorPvP(),
     m_resourcesAlliance(0),

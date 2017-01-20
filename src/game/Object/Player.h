@@ -31,7 +31,6 @@
 #include "Item.h"
 
 #include "Database/DatabaseEnv.h"
-#include "NPCHandler.h"
 #include "QuestDef.h"
 #include "Group.h"
 #include "Bag.h"
@@ -45,7 +44,6 @@
 #include "SharedDefines.h"
 #include "Chat.h"
 
-#include<string>
 #include<vector>
 
 struct Mail;

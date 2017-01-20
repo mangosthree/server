@@ -26,8 +26,6 @@
 #define _ACCMGR_H
 
 #include "Common.h"
-#include "Policies/Singleton.h"
-#include <string>
 
 enum AccountOpResult
 {

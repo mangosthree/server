@@ -32,8 +32,7 @@
 #include "SpellAuras.h"
 #include "Totem.h"
 #include "Creature.h"
-#include "Formulas.h"
-#include "CreatureAI.h"
+#include "ScriptMgr.h"
 #include "Util.h"
 
 pAuraProcHandler AuraProcHandler[TOTAL_AURAS] =

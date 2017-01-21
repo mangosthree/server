@@ -23,7 +23,8 @@
  */
 
 #include "GridStates.h"
-#include "ObjectGridLoader.h"
+#include "GridNotifiers.h"
+#include "GameSystem/Grid.h"
 #include "Log.h"
 
 void

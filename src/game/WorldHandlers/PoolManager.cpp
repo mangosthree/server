@@ -28,6 +28,7 @@
 #include "ProgressBar.h"
 #include "Log.h"
 #include "MapPersistentStateMgr.h"
+#include "MapManager.h"
 #include "World.h"
 #include "Policies/Singleton.h"
 

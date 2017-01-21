@@ -25,16 +25,17 @@
 #ifndef MANGOS_H_BIH
 #define MANGOS_H_BIH
 
-#include <stdexcept>
-#include <vector>
-#include <algorithm>
-#include <cmath>
-
-#include <Platform/Define.h>
-
 #include <G3D/Vector3.h>
 #include <G3D/Ray.h>
 #include <G3D/AABox.h>
+
+#include <Platform/Define.h>
+
+#include <stdexcept>
+#include <vector>
+#include <algorithm>
+#include <limits>
+#include <cmath>
 
 #define MAX_STACK_SIZE 64
 

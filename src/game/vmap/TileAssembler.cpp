@@ -22,15 +22,15 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include <set>
-#include <iomanip>
-#include <sstream>
-
 #include "TileAssembler.h"
 #include "MapTree.h"
 #include "BIH.h"
 #include "VMapDefinitions.h"
 
+#include <set>
+#include <iomanip>
+#include <sstream>
+#include <iomanip>
 
 using G3D::Vector3;
 using G3D::AABox;

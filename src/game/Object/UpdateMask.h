@@ -25,6 +25,7 @@
 #ifndef __UPDATEMASK_H
 #define __UPDATEMASK_H
 
+#include "UpdateFields.h"
 #include "Errors.h"
 
 class UpdateMask

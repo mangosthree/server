@@ -37,6 +37,7 @@
 #include "ObjectMgr.h"
 #include "Mail.h"
 #include "WorldPacket.h"
+#include "Util.h"
 #include "Formulas.h"
 #include "GridNotifiersImpl.h"
 #include "Chat.h"

@@ -23,6 +23,7 @@
  */
 
 #include "PointMovementGenerator.h"
+#include "Errors.h"
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "TemporarySummon.h"

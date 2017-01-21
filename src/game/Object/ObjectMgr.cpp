@@ -32,6 +32,7 @@
 #include "ObjectGuid.h"
 #include "ScriptMgr.h"
 #include "SpellMgr.h"
+#include "UpdateMask.h"
 #include "World.h"
 #include "Group.h"
 #include "ArenaTeam.h"
@@ -40,10 +41,13 @@
 #include "Language.h"
 #include "PoolManager.h"
 #include "GameEventMgr.h"
+#include "Spell.h"
 #include "Chat.h"
+#include "AccountMgr.h"
 #include "MapPersistentStateMgr.h"
 #include "SpellAuras.h"
 #include "Util.h"
+#include "WaypointManager.h"
 #include "GossipDef.h"
 #include "Mail.h"
 #include "InstanceData.h"
@@ -53,7 +57,6 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 
-#include "ItemEnchantmentMgr.h"
 #include <limits>
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);

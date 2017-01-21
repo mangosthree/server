@@ -34,6 +34,11 @@
 #include "DBCEnums.h"
 #include "SharedDefines.h"
 
+#include <map>
+#include <vector>
+
+struct ItemPrototype;
+
 class WorldSession;
 class Map;
 class BattleGround;

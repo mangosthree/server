@@ -41,6 +41,7 @@
 #include "World.h"
 #include "ObjectAccessor.h"
 #include "BattleGround/BattleGroundMgr.h"
+#include "MapManager.h"
 #include "SocialMgr.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"

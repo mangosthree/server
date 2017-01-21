@@ -22,7 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "ByteBuffer.h"
 #include "ReactorAI.h"
+#include "Errors.h"
 #include "Creature.h"
 #include "Map.h"
 #include "Log.h"

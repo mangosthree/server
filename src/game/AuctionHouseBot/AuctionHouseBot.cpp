@@ -29,7 +29,6 @@
 #include "AuctionHouseMgr.h"
 #include "SystemConfig.h"
 #include "SQLStorages.h"
-#include "World.h"
 
 /** \addtogroup auctionbot
  * @{

@@ -39,7 +39,6 @@
 #include "CreatureLinkingMgr.h"
 #include "Pet.h"
 #include "DBCStores.h"
-#include "Log.h"
 
 #include <cassert>
 

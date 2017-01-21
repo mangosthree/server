@@ -29,6 +29,7 @@
 
 #include <map>
 #include <set>
+#include <string>
 
 class Transport : public GameObject
 {

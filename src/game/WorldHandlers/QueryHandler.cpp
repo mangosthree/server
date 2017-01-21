@@ -34,7 +34,10 @@
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "Player.h"
+#include "UpdateMask.h"
 #include "NPCHandler.h"
+#include "Pet.h"
+#include "MapManager.h"
 #include "SQLStorages.h"
 
 void WorldSession::SendNameQueryOpcode(Player* p)

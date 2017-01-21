@@ -30,6 +30,7 @@
 #include "Opcodes.h"
 #include "ObjectMgr.h"
 #include "Chat.h"
+#include "Database/DatabaseEnv.h"
 #include "ChannelMgr.h"
 #include "Group.h"
 #include "Guild.h"

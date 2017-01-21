@@ -33,6 +33,7 @@
 #include "MapManager.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "MassMailMgr.h"
+#include "SpellMgr.h"
 #include "Policies/Singleton.h"
 
 INSTANTIATE_SINGLETON_1(GameEventMgr);

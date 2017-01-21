@@ -31,6 +31,7 @@
 #include "Opcodes.h"
 #include "Guild.h"
 #include "GuildMgr.h"
+#include "GossipDef.h"
 #include "SocialMgr.h"
 #include "Calendar.h"
 #ifdef ENABLE_ELUNA

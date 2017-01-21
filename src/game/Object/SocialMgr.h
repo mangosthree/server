@@ -25,6 +25,7 @@
 #ifndef __MANGOS_SOCIALMGR_H
 #define __MANGOS_SOCIALMGR_H
 
+#include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
 #include "ObjectGuid.h"
 

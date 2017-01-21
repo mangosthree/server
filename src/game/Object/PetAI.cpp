@@ -28,6 +28,7 @@
 #include "Player.h"
 #include "DBCStores.h"
 #include "Spell.h"
+#include "ObjectAccessor.h"
 #include "SpellMgr.h"
 #include "Creature.h"
 #include "World.h"

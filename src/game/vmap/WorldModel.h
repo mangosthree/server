@@ -25,8 +25,7 @@
 #ifndef MANGOS_H_WORLDMODEL
 #define MANGOS_H_WORLDMODEL
 
-#include "Platform/Define.h"
-
+#include <G3D/HashTrait.h>
 #include <G3D/Vector3.h>
 #include <G3D/AABox.h>
 #include <G3D/Ray.h>

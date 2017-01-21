@@ -26,8 +26,10 @@
 
 #include "Common.h"
 #include "Channel.h"
+#include "Policies/Singleton.h"
 
 #include <map>
+#include <string>
 
 class ChannelMgr
 {

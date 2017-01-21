@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <sys/types.h>
 #include "VMapFactory.h"
 #include "VMapManager2.h"
 

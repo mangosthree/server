@@ -26,6 +26,8 @@
 #define _AUCTION_HOUSE_MGR_H
 
 #include "Common.h"
+#include "SharedDefines.h"
+#include "Policies/Singleton.h"
 #include "DBCStructure.h"
 
 class Item;

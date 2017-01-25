@@ -25,10 +25,8 @@
 #ifndef MANGOS_CALENDAR_H
 #define MANGOS_CALENDAR_H
 
-#include "Policies/Singleton.h"
 #include "Common.h"
 #include "ObjectGuid.h"
-#include "SharedDefines.h"
 
 enum CalendarEventType
 {
@@ -234,7 +232,7 @@ class CalendarMgr
 
         CalendarEvent* AddEvent(ObjectGuid const& guid, std::string title, std::string description, uint32 type, uint32 repeatable, uint32 maxInvites,
                                 int32 dungeonId, time_t eventTime, time_t unkTime, uint32 flags);
-        
+
         CalendarInvite* AddInvite(CalendarEvent* event, ObjectGuid const& senderGuid, ObjectGuid const& inviteeGuid, CalendarInviteStatus status, CalendarModerationRank rank, const std::string& text, time_t statusTime);
 
         void RemoveEvent(uint64 eventId, Player* remover);

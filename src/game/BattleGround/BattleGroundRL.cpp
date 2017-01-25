@@ -26,7 +26,6 @@
 #include "Player.h"
 #include "BattleGround.h"
 #include "BattleGroundRL.h"
-#include "ObjectMgr.h"
 #include "Language.h"
 #include "WorldPacket.h"
 

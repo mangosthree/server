@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2017  MaNGOS project <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,6 +108,20 @@ inline uint32 secsToTimeBitFields(time_t secs)
     tm* lt = localtime(&secs);
     return (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 | (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 | lt->tm_hour << 6 | lt->tm_min;
 }
+
+/**
+ * @brief Initializes the TSS for MersenneTwister
+ *
+ *
+ */
+void initMTRandTSS();
+
+/**
+ * @brief Cleanups the TSS for MersenneTwister
+ *
+ *
+ */
+void deleteMTRandTSS();
 
 /**
  * @brief Return a random number in the range min..max; (max-min) must be smaller than 32768.
@@ -508,7 +522,7 @@ inline bool isBasicLatinString(const std::wstring &wstr, bool numericOrSpace)
 {
     for (size_t i = 0; i < wstr.size(); ++i)
         if (!isBasicLatinCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
-            return false;
+            { return false; }
     return true;
 }
 
@@ -523,7 +537,7 @@ inline bool isExtendedLatinString(const std::wstring &wstr, bool numericOrSpace)
 {
     for (size_t i = 0; i < wstr.size(); ++i)
         if (!isExtendedLatinCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
-            return false;
+            { return false; }
     return true;
 }
 
@@ -538,7 +552,7 @@ inline bool isCyrillicString(const std::wstring &wstr, bool numericOrSpace)
 {
     for (size_t i = 0; i < wstr.size(); ++i)
         if (!isCyrillicCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
-            return false;
+            { return false; }
     return true;
 }
 
@@ -553,7 +567,7 @@ inline bool isEastAsianString(const std::wstring &wstr, bool numericOrSpace)
 {
     for (size_t i = 0; i < wstr.size(); ++i)
         if (!isEastAsianCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
-            return false;
+            { return false; }
     return true;
 }
 
@@ -699,6 +713,12 @@ bool Utf8FitTo(const std::string& str, std::wstring search);
  * @param str...
  */
 void utf8printf(FILE* out, const char* str, ...);
+/**
+ * @brief
+ *
+ * @param str
+ */
+void utf8print(void* /*arg*/, const char* str);
 /**
  * @brief
  *

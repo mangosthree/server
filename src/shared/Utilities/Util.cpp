@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2015  MaNGOS project <http://getmangos.eu>
+ * Copyright (C) 2005-2017  MaNGOS project <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #include <ace/INET_Addr.h>
 
 typedef ACE_TSS<MTRand> MTRandTSS;
-static MTRandTSS mtRand;
+static MTRandTSS *mtRand;
 
 static ACE_Time_Value g_SystemTickTime = ACE_OS::gettimeofday();
 
@@ -47,7 +47,7 @@ uint32 WorldTimer::tick()
     m_iPrevTime = m_iTime;
 
     // get the new one and don't forget to persist current system time in m_SystemTickTime
-    m_iTime = WorldTimer::getMSTime_internal(true);
+    m_iTime = WorldTimer::getMSTime_internal();
 
     // return tick diff
     return getMSTimeDiff(m_iPrevTime, m_iTime);
@@ -58,14 +58,14 @@ uint32 WorldTimer::getMSTime()
     return getMSTime_internal();
 }
 
-uint32 WorldTimer::getMSTime_internal(bool savetime /*= false*/)
+uint32 WorldTimer::getMSTime_internal()
 {
     // get current time
     const ACE_Time_Value currTime = ACE_OS::gettimeofday();
     // calculate time diff between two world ticks
     // special case: curr_time < old_time - we suppose that our time has not ticked at all
     // this should be constant value otherwise it is possible that our time can start ticking backwards until next world tick!!!
-    ACE_UINT64 diff = 0;
+    uint64 diff = 0;
     (currTime - g_SystemTickTime).msec(diff);
 
     // lets calculate current world time
@@ -74,44 +74,54 @@ uint32 WorldTimer::getMSTime_internal(bool savetime /*= false*/)
 }
 
 //////////////////////////////////////////////////////////////////////////
+void initMTRandTSS()
+{
+    mtRand = new ACE_TSS<MTRand>();
+}
+
+void deleteMTRandTSS()
+{
+    delete mtRand;
+}
+
 int32 irand(int32 min, int32 max)
 {
-    return int32(mtRand->randInt(max - min)) + min;
+    return int32((*mtRand)->randInt(max - min)) + min;
 }
 
 uint32 urand(uint32 min, uint32 max)
 {
-    return mtRand->randInt(max - min) + min;
+    return (*mtRand)->randInt(max - min) + min;
 }
 
 float frand(float min, float max)
 {
-    return mtRand->randExc(max - min) + min;
+    return (*mtRand)->randExc(max - min) + min;
 }
 
 int32 rand32()
 {
-    return mtRand->randInt();
+    return (*mtRand)->randInt();
 }
 
 double rand_norm(void)
 {
-    return mtRand->randExc();
+    return (*mtRand)->randExc();
 }
 
 float rand_norm_f(void)
 {
-    return (float)mtRand->randExc();
+    return (float)(*mtRand)->randExc();
 }
 
 double rand_chance(void)
 {
-    return mtRand->randExc(100.0);
+    return (*mtRand)->randExc(100.0);
 }
 
 float rand_chance_f(void)
 {
-    return (float)mtRand->randExc(100.0);
+    return (float)(*mtRand)->randExc(100.0);
 }
 
 Tokens StrSplit(const std::string& src, const std::string& sep)
@@ -479,26 +489,26 @@ std::wstring GetMainPartOfName(std::wstring wname, uint32 declension)
 {
     // supported only Cyrillic cases
     if (wname.size() < 1 || !isCyrillicCharacter(wname[0]) || declension > 5)
-        return wname;
+    { return wname; }
 
     // Important: end length must be <= MAX_INTERNAL_PLAYER_NAME-MAX_PLAYER_NAME (3 currently)
 
-    static wchar_t const a_End[] = { wchar_t(1), wchar_t(0x0430), wchar_t(0x0000) };
-    static wchar_t const o_End[] = { wchar_t(1), wchar_t(0x043E), wchar_t(0x0000) };
-    static wchar_t const ya_End[] = { wchar_t(1), wchar_t(0x044F), wchar_t(0x0000) };
-    static wchar_t const ie_End[] = { wchar_t(1), wchar_t(0x0435), wchar_t(0x0000) };
-    static wchar_t const i_End[] = { wchar_t(1), wchar_t(0x0438), wchar_t(0x0000) };
-    static wchar_t const yeru_End[] = { wchar_t(1), wchar_t(0x044B), wchar_t(0x0000) };
-    static wchar_t const u_End[] = { wchar_t(1), wchar_t(0x0443), wchar_t(0x0000) };
-    static wchar_t const yu_End[] = { wchar_t(1), wchar_t(0x044E), wchar_t(0x0000) };
-    static wchar_t const oj_End[] = { wchar_t(2), wchar_t(0x043E), wchar_t(0x0439), wchar_t(0x0000) };
-    static wchar_t const ie_j_End[] = { wchar_t(2), wchar_t(0x0435), wchar_t(0x0439), wchar_t(0x0000) };
-    static wchar_t const io_j_End[] = { wchar_t(2), wchar_t(0x0451), wchar_t(0x0439), wchar_t(0x0000) };
-    static wchar_t const o_m_End[] = { wchar_t(2), wchar_t(0x043E), wchar_t(0x043C), wchar_t(0x0000) };
-    static wchar_t const io_m_End[] = { wchar_t(2), wchar_t(0x0451), wchar_t(0x043C), wchar_t(0x0000) };
-    static wchar_t const ie_m_End[] = { wchar_t(2), wchar_t(0x0435), wchar_t(0x043C), wchar_t(0x0000) };
-    static wchar_t const soft_End[] = { wchar_t(1), wchar_t(0x044C), wchar_t(0x0000) };
-    static wchar_t const j_End[] = { wchar_t(1), wchar_t(0x0439), wchar_t(0x0000) };
+    static wchar_t const a_End[]    = { wchar_t(1), wchar_t(0x0430), wchar_t(0x0000)};
+    static wchar_t const o_End[]    = { wchar_t(1), wchar_t(0x043E), wchar_t(0x0000)};
+    static wchar_t const ya_End[]   = { wchar_t(1), wchar_t(0x044F), wchar_t(0x0000)};
+    static wchar_t const ie_End[]   = { wchar_t(1), wchar_t(0x0435), wchar_t(0x0000)};
+    static wchar_t const i_End[]    = { wchar_t(1), wchar_t(0x0438), wchar_t(0x0000)};
+    static wchar_t const yeru_End[] = { wchar_t(1), wchar_t(0x044B), wchar_t(0x0000)};
+    static wchar_t const u_End[]    = { wchar_t(1), wchar_t(0x0443), wchar_t(0x0000)};
+    static wchar_t const yu_End[]   = { wchar_t(1), wchar_t(0x044E), wchar_t(0x0000)};
+    static wchar_t const oj_End[]   = { wchar_t(2), wchar_t(0x043E), wchar_t(0x0439), wchar_t(0x0000)};
+    static wchar_t const ie_j_End[] = { wchar_t(2), wchar_t(0x0435), wchar_t(0x0439), wchar_t(0x0000)};
+    static wchar_t const io_j_End[] = { wchar_t(2), wchar_t(0x0451), wchar_t(0x0439), wchar_t(0x0000)};
+    static wchar_t const o_m_End[]  = { wchar_t(2), wchar_t(0x043E), wchar_t(0x043C), wchar_t(0x0000)};
+    static wchar_t const io_m_End[] = { wchar_t(2), wchar_t(0x0451), wchar_t(0x043C), wchar_t(0x0000)};
+    static wchar_t const ie_m_End[] = { wchar_t(2), wchar_t(0x0435), wchar_t(0x043C), wchar_t(0x0000)};
+    static wchar_t const soft_End[] = { wchar_t(1), wchar_t(0x044C), wchar_t(0x0000)};
+    static wchar_t const j_End[]    = { wchar_t(1), wchar_t(0x0439), wchar_t(0x0000)};
 
     static wchar_t const* const dropEnds[6][8] =
     {
@@ -515,7 +525,7 @@ std::wstring GetMainPartOfName(std::wstring wname, uint32 declension)
         size_t len = size_t((*itr)[-1]);                    // get length from string size field
 
         if (wname.substr(wname.size() - len, len) == *itr)
-            return wname.substr(0, wname.size() - len);
+        { return wname.substr(0, wname.size() - len); }
     }
 
     return wname;
@@ -567,14 +577,6 @@ bool Utf8FitTo(const std::string& str, std::wstring search)
         { return false; }
 
     return true;
-}
-
-void utf8printf(FILE* out, const char* str, ...)
-{
-    va_list ap;
-    va_start(ap, str);
-    vutf8printf(out, str, &ap);
-    va_end(ap);
 }
 
 void vutf8printf(FILE* out, const char* str, va_list* ap)
@@ -662,3 +664,28 @@ void HexStrToByteArray(std::string const& str, uint8* out, bool reverse /*= fals
         out[j++] = strtoul(buffer, NULL, 16);
     }
 }
+
+void utf8print(void* /*arg*/, const char* str)
+{
+#if PLATFORM == PLATFORM_WINDOWS
+    wchar_t wtemp_buf[6000];
+    size_t wtemp_len = 6000 - 1;
+    if (!Utf8toWStr(str, strlen(str), wtemp_buf, wtemp_len))
+        { return; }
+
+    char temp_buf[6000];
+    CharToOemBuffW(&wtemp_buf[0], &temp_buf[0], wtemp_len + 1);
+    printf("%s", temp_buf);
+#else
+    printf("%s", str);
+#endif
+}
+
+void utf8printf(FILE* out, const char* str, ...)
+{
+    va_list ap;
+    va_start(ap, str);
+    vutf8printf(out, str, &ap);
+    va_end(ap);
+}
+

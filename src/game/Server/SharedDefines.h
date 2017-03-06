@@ -3753,7 +3753,7 @@ enum TrackedAuraType
 // will only support WoW, WoW:TBC, WoW:WotLK and WoW:Cataclysm 4.3.4 client build 15595...
 
 #define EXPECTED_MANGOSD_CLIENT_BUILD        {15595, 0}
-#define EXPECTED_MANGOSD_CLIENT_VERSION      {"4.3.4"}
+#define EXPECTED_MANGOSD_CLIENT_VERSION      "4.3.4"
 
 // max supported expansion level in mangosd
 // NOTE: not set it more that supported by targeted client version with all expansions installed
@@ -3789,8 +3789,8 @@ static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLAS
 
 enum TeleportLocation
 {
-    TELEPORT_LOCATION_HOMEBIND = 0,
-    TELEPORT_LOCATION_BG_ENTRY_POINT = 1,
+    TELEPORT_LOCATION_HOMEBIND          = 0,
+    TELEPORT_LOCATION_BG_ENTRY_POINT    = 1,
 };
 
 // For Loot system

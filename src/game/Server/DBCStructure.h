@@ -673,7 +673,7 @@ struct ChatChannelsEntry
     uint32  ChannelID;                                      // 0        m_ID
     uint32  flags;                                          // 1        m_flags
     //uint32                                                // 2        m_factionGroup
-	DBCString   pattern;                                    // 3        m_name_lang
+    DBCString   pattern;                                    // 3        m_name_lang
 //    char*   pattern[16];                                    // 3        m_name_lang
     //char*       name;                                     // 4        m_shortcut_lang
 };
@@ -1274,29 +1274,29 @@ struct ItemSetEntry
 
 struct LfgDungeonsEntry
 {
-	uint32	ID;
-	DBCString	Name;
-	uint32	minLevel;
-	uint32	maxLevel;
-	uint32	target_level;
-	uint32	target_level_min;
-	uint32	target_level_max;
-	float	mapID;
-	uint32	difficulty;
-	uint32	flags;
-	uint32	typeID;
-	float	faction;
-	DBCString	textureFilename;
-	uint32	expansionLevel;
-	DBCString	order_index;
-	uint32	group_id;
-	DBCString	description_lang;
-	uint32	col17;
-	uint32	col18;
-	uint32	col19;
-	uint32	col20;
+    uint32    ID;
+    DBCString    Name;
+    uint32    minLevel;
+    uint32    maxLevel;
+    uint32    target_level;
+    uint32    target_level_min;
+    uint32    target_level_max;
+    float    mapID;
+    uint32    difficulty;
+    uint32    flags;
+    uint32    typeID;
+    float    faction;
+    DBCString    textureFilename;
+    uint32    expansionLevel;
+    DBCString    order_index;
+    uint32    group_id;
+    DBCString    description_lang;
+    uint32    col17;
+    uint32    col18;
+    uint32    col19;
+    uint32    col20;
 
-	uint32 Entry() const { return ID + ((uint8)typeID << 24); }
+    uint32 Entry() const { return ID + ((uint8)typeID << 24); }
 };
 
 /*struct LfgDungeonGroupEntry

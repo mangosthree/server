@@ -293,19 +293,19 @@ static bool ReadDBCBuildFileText(const std::string& dbc_path, char const* locale
 
 int ReadDBCLocale(const std::string sDataPath)
 {
-	std::string sDBCpath = sDataPath + "dbc/";
+    std::string sDBCpath = sDataPath + "dbc/";
     std::string sFilename;
     
-	for (int uLocaleIndex = 0; uLocaleIndex < MAX_LOCALE; ++uLocaleIndex)
-	{
+    for (int uLocaleIndex = 0; uLocaleIndex < MAX_LOCALE; ++uLocaleIndex)
+    {
         sFilename  = sDBCpath + "component.wow-" + fullLocaleNameList[uLocaleIndex].name + ".txt";
-		if (FILE* file = fopen(sFilename.c_str(), "rb"))
-		{
-			return uLocaleIndex; // Successfully located the locale
-		}
-	}
+        if (FILE* file = fopen(sFilename.c_str(), "rb"))
+        {
+            return uLocaleIndex; // Successfully located the locale
+        }
+    }
 
-	return -1; // Failed to locate or access the component.wow<locale>.txt file
+    return -1; // Failed to locate or access the component.wow<locale>.txt file
 }
 
 static uint32 ReadDBCBuild(const std::string& dbc_path, LocaleNameStr const*&localeNameStr)

@@ -41,11 +41,11 @@ int main(int argc, char* argv[])
     
     std::cout << "using " << src << " as source directory and writing output to " << dest << std::endl;
 
-	std::cout << "Create TileAssembler " << std::endl;
+    std::cout << "Create TileAssembler " << std::endl;
 
-	VMAP::TileAssembler* ta = new VMAP::TileAssembler(src, dest);
+    VMAP::TileAssembler* ta = new VMAP::TileAssembler(src, dest);
 
-	std::cout << "Convert to World2 " << std::endl;
+    std::cout << "Convert to World2 " << std::endl;
 
     if (!ta->convertWorld2())
     {
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-	std::cout << "THE END!!! " << std::endl;
+    std::cout << "THE END!!! " << std::endl;
 
     delete ta;
     std::cout << "Ok, all done" << std::endl;

@@ -129,7 +129,7 @@ WorldSession::~WorldSession()
         m_Socket = NULL;
     }
 
-	// CAUSES CRASH ON PLAYER EXITING TO LOGIN SCREEN
+    // CAUSES CRASH ON PLAYER EXITING TO LOGIN SCREEN
     // Warden
 //    if (_warden)
 //        delete _warden;

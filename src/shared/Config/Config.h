@@ -91,7 +91,7 @@ class Config
          * @return int32
          */
         int32 GetIntDefault(const char* name, const int32 def);
-		int64 GetInt64Default(const char* name, const int64 def);
+        int64 GetInt64Default(const char* name, const int64 def);
         /**
          * @brief
          *

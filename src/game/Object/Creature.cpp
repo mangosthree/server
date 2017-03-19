@@ -2651,8 +2651,8 @@ std::string Creature::GetScriptName() const
 
 uint32 Creature::GetScriptId() const
 {
-	// scripts bound to DB guid have priority over ones bound to creature entry
-	return sScriptMgr.GetBoundScriptId(SCRIPTED_UNIT, -int32(GetGUIDLow())) ? sScriptMgr.GetBoundScriptId(SCRIPTED_UNIT, -int32(GetGUIDLow())) : sScriptMgr.GetBoundScriptId(SCRIPTED_UNIT, GetEntry());
+    // scripts bound to DB guid have priority over ones bound to creature entry
+    return sScriptMgr.GetBoundScriptId(SCRIPTED_UNIT, -int32(GetGUIDLow())) ? sScriptMgr.GetBoundScriptId(SCRIPTED_UNIT, -int32(GetGUIDLow())) : sScriptMgr.GetBoundScriptId(SCRIPTED_UNIT, GetEntry());
 }
 
 VendorItemData const* Creature::GetVendorItems() const

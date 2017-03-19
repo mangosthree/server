@@ -238,14 +238,14 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
             
             if (dungeon)
             {
-				uint32 group = dungeon->group_id;
+                uint32 group = dungeon->group_id;
                 
                 for (uint32 id = 0; id < sLfgDungeonsStore.GetNumRows(); ++id)
                 {
                     LfgDungeonsEntry const* dungeonList = sLfgDungeonsStore.LookupEntry(id);
                     if (dungeonList)
                     {
-						if (dungeonList->group_id == group)
+                        if (dungeonList->group_id == group)
                             dungeons.insert(dungeonList->ID); // adding to set
                     }
                 }

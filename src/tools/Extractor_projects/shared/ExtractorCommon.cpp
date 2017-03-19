@@ -391,13 +391,13 @@ void setVMapMagicVersion(int iCoreNumber, char* magic)
 bool CreateDir(const std::string& sPath)
 {
 #ifdef WIN32
-	if (_mkdir(sPath.c_str()) == 0)
-		return 1;
+    if (_mkdir(sPath.c_str()) == 0)
+        return 1;
 #else
-	if (mkdir(sPath.c_str(), 0777) == 0)
-		return 1;
+    if (mkdir(sPath.c_str(), 0777) == 0)
+        return 1;
 #endif
-	return 0; // failed to create the directory
+    return 0; // failed to create the directory
 }
 
 /**
@@ -517,8 +517,8 @@ bool shouldSkipMap(int mapID,bool m_skipContinents, bool m_skipJunkMaps, bool m_
         case 605:   // development_nonweighted.wdt - (WOTLK / CATA / MOP)
         case 606:   // QA_DVD.wdt - (WOTLK / CATA / MOP)
         case 627:   // unused.wdt - (CATA / MOP)
-        case 930:	// (UNUSED) Scenario: Alcaz Island - (MOP)
-        case 995:	// The Depths [UNUSED] - (MOP)
+        case 930:    // (UNUSED) Scenario: Alcaz Island - (MOP)
+        case 995:    // The Depths [UNUSED] - (MOP)
         case 1010:  // MistsCTF3
         case 1014:  // (UNUSED) Peak of Serenity Scenario - (MOP)
         case 1028:  // (UNUSED) Scenario: Mogu Ruins - (MOP)
@@ -558,7 +558,7 @@ bool shouldSkipMap(int mapID,bool m_skipContinents, bool m_skipJunkMaps, bool m_
         case 728:   // BfG - (CATA / MOP)
         case 761:   // BfG2 - (CATA / MOP)
         case 968:   // EotS2 - (CATA / MOP)
-        case 998:	// VOP - (MOP)
+        case 998:    // VOP - (MOP)
         case 1010:  // CTF3 - (MOP)
         case 1101:  // DOTA - (MOP)
         case 1105:  // GR - (MOP)

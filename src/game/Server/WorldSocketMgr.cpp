@@ -47,6 +47,7 @@ WorldSocketMgr::WorldSocketMgr()
     acceptor_(NULL),reactor_(NULL),
     sockets_()
 {
+    InitializeOpcodes();
 }
 
 WorldSocketMgr::~WorldSocketMgr()

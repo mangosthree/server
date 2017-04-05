@@ -1705,7 +1705,7 @@ void World::DetectDBCLang()
     // get the DBC Locale
     int uLocale = ReadDBCLocale(m_dataPath);
 
-    if (!uLocale)
+    if (uLocale == -1)
     {
         sLog.outError("Unable to determine your DBC Locale! (corrupt or missing component.wow-<locale>.txt file)");
         Log::WaitBeforeContinueIfNeed();

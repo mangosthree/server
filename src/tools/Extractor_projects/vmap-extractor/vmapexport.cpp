@@ -35,6 +35,8 @@
 #define mkdir _mkdir
 #else
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
 #endif
 
 #undef min

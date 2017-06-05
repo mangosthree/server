@@ -792,7 +792,7 @@ void Guild::SwitchRank(uint32 rankId, bool up)
     if (rankId >= m_Ranks.size())
         return;
 
-    if (rankId == GR_GUILDMASTER && up || rankId == GetLowestRank() && !up)
+    if ((rankId == GR_GUILDMASTER && up) || (rankId == GetLowestRank() && !up))
         return;
 
     uint32 otherRankId = rankId + (up ? -1 : 1);

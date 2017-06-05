@@ -69,7 +69,7 @@ void WorldSession::SendTradeStatus(TradeStatus status)
             data << uint32(0);
             break;
         }
-        case 31:
+        case 31: // WTF is this?
         {
             data.WriteBit(false);
             data << uint32(0);

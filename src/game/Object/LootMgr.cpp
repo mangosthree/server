@@ -287,7 +287,7 @@ bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
 
     if (group && type == LOOT_ITEM_TYPE_CURRENCY)
     {
-        sLog.outErrorDb("Table '%s' entry %d currency %d: group is set, but currencies must not have group - skipped", store.GetName(), entry, itemid, group, 1 << 7);
+        sLog.outErrorDb("Table '%s' entry %d currency %d: has group %u, but currencies must not have group - skipped", store.GetName(), entry, itemid, group);
         return false;
     }
 

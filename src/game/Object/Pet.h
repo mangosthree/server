@@ -162,7 +162,7 @@ class  Pet : public Creature
         void SetDeathState(DeathState s) override;          // overwrite virtual Creature::SetDeathState and Unit::SetDeathState
         void Update(uint32 update_diff, uint32 diff) override;  // overwrite virtual Creature::Update and Unit::Update
 
-        uint8 GetPetAutoSpellSize() const { return m_autospells.size(); }
+        virtual uint8 GetPetAutoSpellSize() const override { return m_autospells.size(); }
         uint32 GetPetAutoSpellOnPos(uint8 pos) const override
         {
             if (pos >= m_autospells.size())
@@ -171,7 +171,7 @@ class  Pet : public Creature
                 return m_autospells[pos];
         }
 
-        bool CanSwim() const
+        virtual bool CanSwim() const override
         {
             Unit const* owner = GetOwner();
             if (owner)
@@ -290,7 +290,7 @@ class  Pet : public Creature
         void ResetAuraUpdateMask() { m_auraUpdateMask = 0; }
 
         // overwrite Creature function for name localization back to WorldObject version without localization
-        const char* GetNameForLocaleIdx(int32 locale_idx) const { return WorldObject::GetNameForLocaleIdx(locale_idx); }
+        virtual const char* GetNameForLocaleIdx(int32 locale_idx) const override { return WorldObject::GetNameForLocaleIdx(locale_idx); }
 
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
 

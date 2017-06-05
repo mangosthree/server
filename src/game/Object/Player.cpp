@@ -5609,7 +5609,7 @@ bool Player::UpdateCraftSkill(uint32 spellid)
 
             uint32 craft_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_CRAFTING);
             if (!_spell_idx->second->characterPoints)
-                sLog.outError("Player::UpdateCraftSkill spell %u has characterPoints == 0!");
+                sLog.outError("Player::UpdateCraftSkill spell %u has characterPoints == 0!", spellid);
             else
                 craft_skill_gain += _spell_idx->second->characterPoints - 1;
 
@@ -17133,7 +17133,7 @@ DungeonPersistentState* Player::GetBoundInstanceSaveForSelfOrGroup(uint32 mapid)
         InstanceGroupBind* groupBind = NULL;
         // use the player's difficulty setting (it may not be the same as the group's)
         if (Group* group = GetGroup())
-            if (groupBind = group->GetBoundInstance(mapid, this))
+            if ((groupBind = group->GetBoundInstance(mapid, this)))
                 state = groupBind->state;
     }
 
@@ -20527,7 +20527,7 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
         case AREA_LOCKSTATUS_QUEST_NOT_COMPLETED:
             if (mapEntry->MapID == 269)                     // Exception for Black Morass
             {
-                GetSession()->SendAreaTriggerMessage(GetSession()->GetMangosString(LANG_TELEREQ_QUEST_BLACK_MORASS));
+                GetSession()->SendAreaTriggerMessage("%s", GetSession()->GetMangosString(LANG_TELEREQ_QUEST_BLACK_MORASS));
                 break;
             }
             else if (mapEntry->IsContinent())               // do not report anything for quest areatrigge

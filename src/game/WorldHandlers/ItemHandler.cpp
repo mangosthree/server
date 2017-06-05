@@ -574,7 +574,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
 
     float discountMod = _player->GetReputationPriceDiscount(pCreature);
 
-    uint8 count = 0;
+    uint16 count = 0;
     ByteBuffer buffer;
     for (uint8 vendorslot = 0; vendorslot < numitems; ++vendorslot)
     {

@@ -21,6 +21,11 @@ set(LIBRARY_NAME game)
 
 add_definitions(-DDT_POLYREF64)
 
+set(game_PCH "${CMAKE_CURRENT_SOURCE_DIR}/pchdef.h")
+if(PCH)
+    LIST(APPEND game_PCH "${CMAKE_CURRENT_SOURCE_DIR}/pchdef.cpp")
+endif()
+
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
@@ -135,15 +140,15 @@ set(LIBRARY_SRCS
     ${SRC_GRP_WARDEN}
     ${SRC_GRP_WARDEN_MODULES}
     ${SRC_GRP_WORLD_HANDLERS}
-    pchdef.cpp
-    pchdef.h
+    ${game_PCH}
 )
 
-if(PCH)
-    include_directories(${CMAKE_CURRENT_BINARY_DIR})
-endif()
-
 add_library(${LIBRARY_NAME} STATIC ${LIBRARY_SRCS})
+
+# Generate precompiled header
+if(PCH)
+    ADD_CXX_PCH(${LIBRARY_NAME} ${game_PCH})
+endif()
 
 target_link_libraries(${LIBRARY_NAME} shared detour)
 
@@ -157,20 +162,6 @@ endif()
 if(NOT ACE_USE_EXTERNAL)
     add_dependencies(${LIBRARY_NAME} ace)
 endif()
-
-# Generate precompiled header
-if(PCH)
-    ADD_CXX_PCH(${LIBRARY_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/pchdef.h ${CMAKE_CURRENT_SOURCE_DIR}/pchdef.cpp)
-endif()
-
-#if(PLAYERBOTS)
-#    include_directories(
-#        ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot
-#        ${CMAKE_SOURCE_DIR}/src/modules/Bots/ahbot
-#    )
-#    target_link_libraries(${LIBRARY_NAME} Bots)
-#    add_dependencies(${LIBRARY_NAME} Bots)
-#endif()
 
 if(SCRIPT_LIB_SD3)
     include_directories(${CMAKE_SOURCE_DIR}/src/modules/SD3)

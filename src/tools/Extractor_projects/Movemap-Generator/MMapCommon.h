@@ -38,6 +38,7 @@
 #ifndef WIN32
 #include <stddef.h>
 #include <dirent.h>
+#include <errno.h>
 #endif
 
 using namespace std;

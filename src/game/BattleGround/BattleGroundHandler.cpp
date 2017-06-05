@@ -232,16 +232,16 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket & /*recv_
     {
         case BATTLEGROUND_WS:
         {
-            if (flagCarrierA = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetAllianceFlagCarrierGuid()))
+            if ((flagCarrierA = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetAllianceFlagCarrierGuid())))
                 ++flagCarrierCountH;
 
-            if (flagCarrierH = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetHordeFlagCarrierGuid()))
+            if ((flagCarrierH = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetHordeFlagCarrierGuid())))
                 ++flagCarrierCountH;
             break;
         }
         case BATTLEGROUND_EY:
         {
-            if (flagCarrierH = sObjectMgr.GetPlayer(((BattleGroundEY*)bg)->GetFlagCarrierGuid()))
+            if ((flagCarrierH = sObjectMgr.GetPlayer(((BattleGroundEY*)bg)->GetFlagCarrierGuid())))
                 ++flagCarrierCountH;
             break;
         }

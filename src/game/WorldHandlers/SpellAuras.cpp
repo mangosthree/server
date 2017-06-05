@@ -4031,11 +4031,15 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
 
             // Polymorph (sheep/penguin case)
             if (GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_MAGE && GetSpellProto()->SpellIconID == 82)
+            {
                 if (Unit* caster = GetCaster())
+                {
                     if (caster->HasAura(52648))             // Glyph of the Penguin
-                        model_id = 26452;
+                        { model_id = 26452; }
                     else if (caster->HasAura(57927))        // Glyph of the Monkey
-                        model_id = 21362;
+                        { model_id = 21362; }
+                }
+            }
 
             target->SetDisplayId(model_id);
 
@@ -9583,11 +9587,15 @@ void SpellAuraHolder::BuildUpdatePacket(WorldPacket& data) const
     if (auraFlags & AFLAG_EFFECT_AMOUNT_SEND)
     {
         for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        {
             if (auraFlags & (1 << i))
+            {
                 if (Aura const* aura = m_auras[i])
-                    data << int32(aura->GetModifier()->m_amount);
+                    { data << int32(aura->GetModifier()->m_amount); }
                 else
-                    data << int32(0);
+                    { data << int32(0); }
+            }
+        }
     }
 }
 

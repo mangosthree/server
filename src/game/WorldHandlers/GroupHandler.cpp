@@ -783,11 +783,15 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
                     *data << uint32(holder->GetId());
                     *data << uint16(holder->GetAuraFlags());
                     if (holder->GetAuraFlags() & AFLAG_EFFECT_AMOUNT_SEND)
+                    {
                         for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                        {
                             if (Aura* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
-                                *data << int32(aura->GetModifier()->m_amount);
+                                { *data << int32(aura->GetModifier()->m_amount); }
                             else
-                                *data << int32(0);
+                                { *data << int32(0); }
+                        }
+                    }
                 }
                 else
                 {
@@ -876,11 +880,15 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
                         *data << uint32(holder->GetId());
                         *data << uint16(holder->GetAuraFlags());
                         if (holder->GetAuraFlags() & AFLAG_EFFECT_AMOUNT_SEND)
+                        {
                             for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                            {
                                 if (Aura* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
-                                    *data << int32(aura->GetModifier()->m_amount);
+                                    { *data << int32(aura->GetModifier()->m_amount); }
                                 else
-                                    *data << int32(0);
+                                    { *data << int32(0); }
+                            }
+                        }
                     }
                     else
                     {
@@ -1006,11 +1014,15 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
             data << uint32(holder->GetId());
             data << uint16(holder->GetAuraFlags());
             if (holder->GetAuraFlags() & AFLAG_EFFECT_AMOUNT_SEND)
+            {
                 for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                {
                     if (Aura* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
-                        data << int32(aura->GetModifier()->m_amount);
+                        { data << int32(aura->GetModifier()->m_amount); }
                     else
-                        data << int32(0);
+                        { data << int32(0); }
+                }
+            }
         }
     }
     data.put<uint64>(maskPos, auramask);                    // GROUP_UPDATE_FLAG_AURAS
@@ -1041,11 +1053,15 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
                 data << uint32(holder->GetId());
                 data << uint16(holder->GetAuraFlags());
                 if (holder->GetAuraFlags() & AFLAG_EFFECT_AMOUNT_SEND)
-                for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-                    if (Aura* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
-                        data << int32(aura->GetModifier()->m_amount);
-                    else
-                        data << int32(0);
+                {
+                    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                    {
+                        if (Aura* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
+                            { data << int32(aura->GetModifier()->m_amount); }
+                        else
+                            { data << int32(0); }
+                    }
+                }
             }
         }
         data.put<uint64>(petMaskPos, petauramask);          // GROUP_UPDATE_FLAG_PET_AURAS

@@ -23,6 +23,9 @@
  */
 
 // add here most rarely modified headers to speed up debug build compilation
+#ifndef GAME_PCH_H
+#define GAME_PCH_H
+
 #include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
 #include "Common.h"
 
@@ -36,3 +39,5 @@
 #include "GuildMgr.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
+
+#endif

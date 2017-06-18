@@ -93,8 +93,7 @@ GameObject::~GameObject()
 void GameObject::AddToWorld()
 {
 #ifdef ENABLE_ELUNA
-    if (!IsInWorld())
-        sEluna->OnAddToWorld(this);
+    bool inWorld = IsInWorld();
 #endif /* ENABLE_ELUNA */
 
     ///- Register the gameobject for guid lookup
@@ -110,7 +109,7 @@ void GameObject::AddToWorld()
     UpdateCollisionState();
 
 #ifdef ENABLE_ELUNA
-    if (!IsInWorld())
+    if (!inWorld)
         sEluna->OnAddToWorld(this);
 #endif /* ENABLE_ELUNA */
 }

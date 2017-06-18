@@ -196,8 +196,7 @@ Creature::~Creature()
 void Creature::AddToWorld()
 {
 #ifdef ENABLE_ELUNA
-    if (!IsInWorld())
-        sEluna->OnAddToWorld(this);
+    bool inWorld = IsInWorld();
 #endif /* ENABLE_ELUNA */
 
     ///- Register the creature for guid lookup
@@ -211,7 +210,7 @@ void Creature::AddToWorld()
         SetActiveObjectState(true);
 
 #ifdef ENABLE_ELUNA
-    if (!IsInWorld())
+    if (!inWorld)
         sEluna->OnAddToWorld(this);
 #endif /* ENABLE_ELUNA */
 }

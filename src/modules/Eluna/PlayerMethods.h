@@ -2597,14 +2597,14 @@ namespace LuaPlayer
     {
         bool no_cost = Eluna::CHECKVAL<bool>(L, 2, true);
 
+#ifdef TRINITY
 #ifdef CATA
         player->ResetTalents(no_cost);
 #else
-#ifdef TRINITY
         player->ResetTalents(no_cost);
+#endif
 #else
         player->resetTalents(no_cost);
-#endif
 #endif
 #if (!defined(TBC) && !defined(CLASSIC))
         player->SendTalentsInfoData(false);

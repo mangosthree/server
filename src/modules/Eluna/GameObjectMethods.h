@@ -59,7 +59,11 @@ namespace LuaGameObject
      */
     int IsActive(lua_State* L, GameObject* go)
     {
+#if defined(MANGOS) && defined(CATA)
+        Eluna::Push(L, go->IsActiveObject());
+#else
         Eluna::Push(L, go->isActiveObject());
+#endif
         return 1;
     }
 

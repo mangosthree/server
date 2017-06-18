@@ -1786,15 +1786,7 @@ namespace LuaGlobalFunctions
         uint32 incrtime = Eluna::CHECKVAL<uint32>(L, 4);
         uint32 extendedcost = Eluna::CHECKVAL<uint32>(L, 5);
 
-#ifndef TRINITY
-        if (!eObjectMgr->IsVendorItemValid(false, "npc_vendor", entry, item, maxcount, incrtime, extendedcost, 0))
-            return 0;
-#ifndef CLASSIC
-        eObjectMgr->AddVendorItem(entry, item, maxcount, incrtime, extendedcost);
-#else
-        eObjectMgr->AddVendorItem(entry, item, maxcount, incrtime);
-#endif
-#else
+#ifdef TRINITY
 #ifdef CATA
         if (!eObjectMgr->IsVendorItemValid(entry, item, maxcount, incrtime, extendedcost, 1))
             return 0;
@@ -1803,6 +1795,20 @@ namespace LuaGlobalFunctions
         if (!eObjectMgr->IsVendorItemValid(entry, item, maxcount, incrtime, extendedcost))
             return 0;
         eObjectMgr->AddVendorItem(entry, item, maxcount, incrtime, extendedcost);
+#endif
+#else
+#ifdef CATA
+        if (!eObjectMgr->IsVendorItemValid(false, "npc_vendor", entry, item, VENDOR_ITEM_TYPE_ITEM, maxcount, incrtime, extendedcost, 0))
+            return 0;
+        eObjectMgr->AddVendorItem(entry, item, VENDOR_ITEM_TYPE_ITEM, maxcount, incrtime, extendedcost);
+#else
+        if (!eObjectMgr->IsVendorItemValid(false, "npc_vendor", entry, item, maxcount, incrtime, extendedcost, 0))
+            return 0;
+#ifndef CLASSIC
+        eObjectMgr->AddVendorItem(entry, item, maxcount, incrtime, extendedcost);
+#else
+        eObjectMgr->AddVendorItem(entry, item, maxcount, incrtime);
+#endif
 #endif
 #endif
         return 0;

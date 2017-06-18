@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2010 - 2015 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
@@ -16,6 +16,8 @@
  *
  * [Aura]s on your player are displayed in-game as a series of icons to the left
  *   of the mini-map.
+ *
+ * Inherits all methods from: none
  */
 namespace LuaAura
 {
@@ -24,7 +26,7 @@ namespace LuaAura
      *
      * @return [Unit] caster
      */
-    int GetCaster(Eluna* /*E*/, lua_State* L, Aura* aura)
+    int GetCaster(lua_State* L, Aura* aura)
     {
         Eluna::Push(L, aura->GetCaster());
         return 1;
@@ -35,7 +37,7 @@ namespace LuaAura
      *
      * @return string caster_guid : the GUID of the Unit as a decimal string
      */
-    int GetCasterGUID(Eluna* /*E*/, lua_State* L, Aura* aura)
+    int GetCasterGUID(lua_State* L, Aura* aura)
     {
 #ifndef TRINITY
         Eluna::Push(L, aura->GetCasterGuid());
@@ -50,7 +52,7 @@ namespace LuaAura
      *
      * @return uint32 caster_level
      */
-    int GetCasterLevel(Eluna* /*E*/, lua_State* L, Aura* aura)
+    int GetCasterLevel(lua_State* L, Aura* aura)
     {
         Eluna::Push(L, aura->GetCaster()->getLevel());
         return 1;
@@ -61,7 +63,7 @@ namespace LuaAura
      *
      * @return int32 duration : amount of time left in milliseconds
      */
-    int GetDuration(Eluna* /*E*/, lua_State* L, Aura* aura)
+    int GetDuration(lua_State* L, Aura* aura)
     {
 #ifndef TRINITY
         Eluna::Push(L, aura->GetAuraDuration());
@@ -76,7 +78,7 @@ namespace LuaAura
      *
      * @return uint32 aura_id
      */
-    int GetAuraId(Eluna* /*E*/, lua_State* L, Aura* aura)
+    int GetAuraId(lua_State* L, Aura* aura)
     {
         Eluna::Push(L, aura->GetId());
         return 1;
@@ -90,7 +92,7 @@ namespace LuaAura
      *
      * @return int32 max_duration : the maximum duration of the Aura, in milliseconds
      */
-    int GetMaxDuration(Eluna* /*E*/, lua_State* L, Aura* aura)
+    int GetMaxDuration(lua_State* L, Aura* aura)
     {
 #ifndef TRINITY
         Eluna::Push(L, aura->GetAuraMaxDuration());
@@ -107,7 +109,7 @@ namespace LuaAura
      *
      * @return uint32 stack_amount
      */
-    int GetStackAmount(Eluna* /*E*/, lua_State* L, Aura* aura)
+    int GetStackAmount(lua_State* L, Aura* aura)
     {
         Eluna::Push(L, aura->GetStackAmount());
         return 1;
@@ -118,7 +120,7 @@ namespace LuaAura
      *
      * @return [Unit] owner
      */
-    int GetOwner(Eluna* /*E*/, lua_State* L, Aura* aura)
+    int GetOwner(lua_State* L, Aura* aura)
     {
 #ifndef TRINITY
         Eluna::Push(L, aura->GetTarget());
@@ -133,7 +135,7 @@ namespace LuaAura
      *
      * @param int32 duration : the new duration of the Aura, in milliseconds
      */
-    int SetDuration(Eluna* /*E*/, lua_State* L, Aura* aura)
+    int SetDuration(lua_State* L, Aura* aura)
     {
         int32 duration = Eluna::CHECKVAL<int32>(L, 2);
 #ifndef TRINITY
@@ -157,7 +159,7 @@ namespace LuaAura
      *
      * @param int32 duration : the new maximum duration of the Aura, in milliseconds
      */
-    int SetMaxDuration(Eluna* /*E*/, lua_State* L, Aura* aura)
+    int SetMaxDuration(lua_State* L, Aura* aura)
     {
         int32 duration = Eluna::CHECKVAL<int32>(L, 2);
 #ifndef TRINITY
@@ -181,7 +183,7 @@ namespace LuaAura
      *
      * @param uint32 amount
      */
-    int SetStackAmount(Eluna* /*E*/, lua_State* L, Aura* aura)
+    int SetStackAmount(lua_State* L, Aura* aura)
     {
         uint8 amount = Eluna::CHECKVAL<uint8>(L, 2);
 #ifndef TRINITY
@@ -195,7 +197,7 @@ namespace LuaAura
     /**
      * Remove this [Aura] from the [Unit] it is applied to.
      */
-    int Remove(Eluna* /*E*/, lua_State* L, Aura* aura)
+    int Remove(lua_State* L, Aura* aura)
     {
 #ifndef TRINITY
         aura->GetTarget()->RemoveSpellAuraHolder(aura->GetHolder(), AURA_REMOVE_BY_CANCEL);

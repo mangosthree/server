@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 - 2015 Eluna Lua Engine <http://emudevs.com/>
+ * Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
  * This program is free software licensed under GPL version 3
  * Please see the included DOCS/LICENSE.md for more information
  */
@@ -18,13 +18,16 @@ struct ScriptedAI;
 
 struct ElunaCreatureAI : ScriptedAI
 {
+    // used to delay the spawn hook triggering on AI creation
+    bool justSpawned;
+    // used to delay movementinform hook (WP hook)
+    std::vector< std::pair<uint32, uint32> > movepoints;
 #ifndef TRINITY
 #define me  m_creature
 #endif
 
-    ElunaCreatureAI(Creature* creature) : ScriptedAI(creature)
+    ElunaCreatureAI(Creature* creature) : ScriptedAI(creature), justSpawned(true)
     {
-        JustRespawned();
     }
     ~ElunaCreatureAI() { }
 
@@ -35,6 +38,22 @@ struct ElunaCreatureAI : ScriptedAI
     void UpdateAI(uint32 diff) override
 #endif
     {
+        if (justSpawned)
+        {
+            justSpawned = false;
+            JustRespawned();
+        }
+
+        if (!movepoints.empty())
+        {
+            for (auto& point : movepoints)
+            {
+                if (!sEluna->MovementInform(me, point.first, point.second))
+                    ScriptedAI::MovementInform(point.first, point.second);
+            }
+            movepoints.clear();
+        }
+
         if (!sEluna->UpdateAI(me, diff))
         {
 #ifdef TRINITY
@@ -93,8 +112,9 @@ struct ElunaCreatureAI : ScriptedAI
     //Called at waypoint reached or PointMovement end
     void MovementInform(uint32 type, uint32 id) override
     {
-        if (!sEluna->MovementInform(me, type, id))
-            ScriptedAI::MovementInform(type, id);
+        // delayed since hook triggers before actually reaching the point
+        // and starting new movement would bug
+        movepoints.push_back(std::make_pair(type, id));
     }
 
     // Called before EnterCombat even before the creature is in combat.
@@ -104,19 +124,21 @@ struct ElunaCreatureAI : ScriptedAI
             ScriptedAI::AttackStart(target);
     }
 
+#ifdef TRINITY
+    // Called for reaction at stopping attack at no attackers or targets
+    void EnterEvadeMode(EvadeReason /*why*/) override
+    {
+        if (!sEluna->EnterEvadeMode(me))
+            ScriptedAI::EnterEvadeMode();
+    }
+#else
     // Called for reaction at stopping attack at no attackers or targets
     void EnterEvadeMode() override
     {
         if (!sEluna->EnterEvadeMode(me))
             ScriptedAI::EnterEvadeMode();
     }
-
-    // Called when the creature is target of hostile action: swing, hostile spell landed, fear/etc)
-    void AttackedBy(Unit* attacker) override
-    {
-        if (!sEluna->AttackedBy(me, attacker))
-            ScriptedAI::AttackedBy(attacker);
-    }
+#endif
 
     // Called when creature is spawned or respawned (for reseting variables)
     void JustRespawned() override

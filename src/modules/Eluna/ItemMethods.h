@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2010 - 2015 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
@@ -7,15 +7,17 @@
 #ifndef ITEMMETHODS_H
 #define ITEMMETHODS_H
 
+/***
+ * Inherits all methods from: [Object]
+ */
 namespace LuaItem
 {
-    /* BOOLEAN */
     /**
      * Returns 'true' if the [Item] is soulbound, 'false' otherwise
      *
      * @return bool isSoulBound
      */
-    int IsSoulBound(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsSoulBound(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsSoulBound());
         return 1;
@@ -27,7 +29,7 @@ namespace LuaItem
      *
      * @return bool isAccountBound
      */
-    int IsBoundAccountWide(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsBoundAccountWide(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsBoundAccountWide());
         return 1;
@@ -39,7 +41,7 @@ namespace LuaItem
      *
      * @return bool isBoundByEnchant
      */
-    int IsBoundByEnchant(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsBoundByEnchant(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsBoundByEnchant());
         return 1;
@@ -51,7 +53,7 @@ namespace LuaItem
      * @param [Player] player : the [Player] object to check the item against
      * @return bool isNotBound
      */
-    int IsNotBoundToPlayer(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsNotBoundToPlayer(lua_State* L, Item* item)
     {
         Player* player = Eluna::CHECKOBJ<Player>(L, 2);
 
@@ -64,7 +66,7 @@ namespace LuaItem
      *
      * @return bool isLocked
      */
-    int IsLocked(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsLocked(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsLocked());
         return 1;
@@ -75,7 +77,7 @@ namespace LuaItem
      *
      * @return bool isBag
      */
-    int IsBag(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsBag(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsBag());
         return 1;
@@ -87,7 +89,7 @@ namespace LuaItem
      *
      * @return bool isCurrencyToken
      */
-    int IsCurrencyToken(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsCurrencyToken(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsCurrencyToken());
         return 1;
@@ -99,7 +101,7 @@ namespace LuaItem
      *
      * @return bool isNotEmptyBag
      */
-    int IsNotEmptyBag(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsNotEmptyBag(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsNotEmptyBag());
         return 1;
@@ -110,7 +112,7 @@ namespace LuaItem
      *
      * @return bool isBroken
      */
-    int IsBroken(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsBroken(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsBroken());
         return 1;
@@ -121,7 +123,7 @@ namespace LuaItem
      *
      * @return bool isTradeable
      */
-    int CanBeTraded(Eluna* /*E*/, lua_State* L, Item* item)
+    int CanBeTraded(lua_State* L, Item* item)
     {
 #if (defined(TBC) || defined(CLASSIC))
         Eluna::Push(L, item->CanBeTraded());
@@ -137,7 +139,7 @@ namespace LuaItem
      *
      * @return bool isInTrade
      */
-    int IsInTrade(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsInTrade(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsInTrade());
         return 1;
@@ -148,7 +150,7 @@ namespace LuaItem
      *
      * @return bool isInBag
      */
-    int IsInBag(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsInBag(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsInBag());
         return 1;
@@ -159,7 +161,7 @@ namespace LuaItem
      *
      * @return bool isEquipped
      */
-    int IsEquipped(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsEquipped(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsEquipped());
         return 1;
@@ -171,7 +173,7 @@ namespace LuaItem
      * @param uint32 questId : the [Quest] id to be checked
      * @return bool hasQuest
      */
-    int HasQuest(Eluna* /*E*/, lua_State* L, Item* item)
+    int HasQuest(lua_State* L, Item* item)
     {
         uint32 quest = Eluna::CHECKVAL<uint32>(L, 2);
 #ifndef TRINITY
@@ -187,7 +189,7 @@ namespace LuaItem
      *
      * @return bool isPotion
      */
-    int IsPotion(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsPotion(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsPotion());
         return 1;
@@ -199,7 +201,7 @@ namespace LuaItem
      *
      * @return bool isWeaponVellum
      */
-    int IsWeaponVellum(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsWeaponVellum(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsWeaponVellum());
         return 1;
@@ -210,7 +212,7 @@ namespace LuaItem
      *
      * @return bool isArmorVellum
      */
-    int IsArmorVellum(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsArmorVellum(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsArmorVellum());
         return 1;
@@ -222,21 +224,17 @@ namespace LuaItem
      *
      * @return bool isConjuredConsumable
      */
-    int IsConjuredConsumable(Eluna* /*E*/, lua_State* L, Item* item)
+    int IsConjuredConsumable(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsConjuredConsumable());
         return 1;
     }
 
-    /*
-     * int IsRefundExpired(Eluna* E, lua_State* L, Item* item)// TODO: Implement core support
-     * {
-     *     Eluna::Push(L, item->IsRefundExpired());
-     *     return 1;
-     * }
-     */
-
-    /* GETTERS */
+    /*int IsRefundExpired(lua_State* L, Item* item)// TODO: Implement core support
+    {
+        Eluna::Push(L, item->IsRefundExpired());
+        return 1;
+    }*/
 
     /**
      * Returns the chat link of the [Item]
@@ -259,7 +257,7 @@ namespace LuaItem
      * @param [LocaleConstant] locale = DEFAULT_LOCALE : locale to return the [Item]'s name in
      * @return string itemLink
      */
-    int GetItemLink(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetItemLink(lua_State* L, Item* item)
     {
         uint8 locale = Eluna::CHECKVAL<uint8>(L, 2, DEFAULT_LOCALE);
         if (locale >= TOTAL_LOCALES)
@@ -268,7 +266,7 @@ namespace LuaItem
         const ItemTemplate* temp = item->GetTemplate();
         std::string name = temp->Name1;
         if (ItemLocale const* il = eObjectMgr->GetItemLocale(temp->ItemId))
-            ObjectMgr::GetLocaleString(il->Name, locale, name);
+            ObjectMgr::GetLocaleString(il->Name, static_cast<LocaleConstant>(locale), name);
 
 #ifndef CLASSIC
         if (int32 itemRandPropId = item->GetItemRandomPropertyId())
@@ -292,12 +290,8 @@ namespace LuaItem
             }
             if (suffix)
             {
-                //std::string test(suffix[(name != temp->Name1) ? loc_idx : DEFAULT_LOCALE]);
-                //if (!test.empty())
-                //{
                 name += ' ';
                 name += suffix[(name != temp->Name1) ? locale : uint8(DEFAULT_LOCALE)];
-                /*}*/
             }
         }
 #endif
@@ -319,7 +313,7 @@ namespace LuaItem
         return 1;
     }
 
-    int GetOwnerGUID(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetOwnerGUID(lua_State* L, Item* item)
     {
 #ifndef TRINITY
         Eluna::Push(L, item->GetOwnerGuid());
@@ -334,7 +328,7 @@ namespace LuaItem
      *
      * @return [Player] player : the [Player] who owns the [Item]
      */
-    int GetOwner(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetOwner(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetOwner());
         return 1;
@@ -345,7 +339,7 @@ namespace LuaItem
      *
      * @return uint32 count
      */
-    int GetCount(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetCount(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetCount());
         return 1;
@@ -356,7 +350,7 @@ namespace LuaItem
      *
      * @return uint32 maxCount
      */
-    int GetMaxStackCount(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetMaxStackCount(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetMaxStackCount());
         return 1;
@@ -367,7 +361,7 @@ namespace LuaItem
      *
      * @return uint8 slot
      */
-    int GetSlot(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetSlot(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetSlot());
         return 1;
@@ -378,7 +372,7 @@ namespace LuaItem
      *
      * @return uint8 bagSlot
      */
-    int GetBagSlot(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetBagSlot(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetBagSlot());
         return 1;
@@ -390,7 +384,7 @@ namespace LuaItem
      * @param [EnchantmentSlot] enchantSlot : the enchant slot specified
      * @return uint32 enchantId : the id of the enchant slot specified
      */
-    int GetEnchantmentId(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetEnchantmentId(lua_State* L, Item* item)
     {
         uint32 enchant_slot = Eluna::CHECKVAL<uint32>(L, 2);
 
@@ -407,7 +401,7 @@ namespace LuaItem
      * @param uint32 spellIndex : the spell index specified
      * @return uint32 spellId : the id of the spell
      */
-    int GetSpellId(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetSpellId(lua_State* L, Item* item)
     {
         uint32 index = Eluna::CHECKVAL<uint32>(L, 2);
         if (index >= MAX_ITEM_PROTO_SPELLS)
@@ -423,7 +417,7 @@ namespace LuaItem
      * @param uint32 spellIndex : the spell index specified
      * @return uint32 spellTrigger : the spell trigger of the specified index
      */
-    int GetSpellTrigger(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetSpellTrigger(lua_State* L, Item* item)
     {
         uint32 index = Eluna::CHECKVAL<uint32>(L, 2);
         if (index >= MAX_ITEM_PROTO_SPELLS)
@@ -438,7 +432,7 @@ namespace LuaItem
      *
      * @return uint32 class
      */
-    int GetClass(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetClass(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->Class);
         return 1;
@@ -449,7 +443,7 @@ namespace LuaItem
      *
      * @return uint32 subClass
      */
-    int GetSubClass(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetSubClass(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->SubClass);
         return 1;
@@ -460,7 +454,7 @@ namespace LuaItem
      *
      * @return string name
      */
-    int GetName(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetName(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->Name1);
         return 1;
@@ -471,7 +465,7 @@ namespace LuaItem
      *
      * @return uint32 displayId
      */
-    int GetDisplayId(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetDisplayId(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->DisplayInfoID);
         return 1;
@@ -482,7 +476,7 @@ namespace LuaItem
      *
      * @return uint32 quality
      */
-    int GetQuality(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetQuality(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->Quality);
         return 1;
@@ -493,7 +487,7 @@ namespace LuaItem
      *
      * @return uint32 count
      */
-    int GetBuyCount(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetBuyCount(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->BuyCount);
         return 1;
@@ -504,7 +498,7 @@ namespace LuaItem
      *
      * @return uint32 price
      */
-    int GetBuyPrice(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetBuyPrice(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->BuyPrice);
         return 1;
@@ -515,7 +509,7 @@ namespace LuaItem
      *
      * @return uint32 price
      */
-    int GetSellPrice(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetSellPrice(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->SellPrice);
         return 1;
@@ -526,7 +520,7 @@ namespace LuaItem
      *
      * @return uint32 inventoryType
      */
-    int GetInventoryType(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetInventoryType(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->InventoryType);
         return 1;
@@ -537,7 +531,7 @@ namespace LuaItem
      *
      * @return uint32 allowableClass
      */
-    int GetAllowableClass(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetAllowableClass(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->AllowableClass);
         return 1;
@@ -548,7 +542,7 @@ namespace LuaItem
      *
      * @return uint32 allowableRace
      */
-    int GetAllowableRace(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetAllowableRace(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->AllowableRace);
         return 1;
@@ -559,7 +553,7 @@ namespace LuaItem
      *
      * @return uint32 itemLevel
      */
-    int GetItemLevel(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetItemLevel(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->ItemLevel);
         return 1;
@@ -570,14 +564,14 @@ namespace LuaItem
      *
      * @return uint32 requiredLevel
      */
-    int GetRequiredLevel(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetRequiredLevel(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->RequiredLevel);
         return 1;
     }
 
 #ifdef WOTLK
-    int GetStatsCount(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetStatsCount(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->StatsCount);
         return 1;
@@ -589,14 +583,14 @@ namespace LuaItem
      *
      * @return uint32 randomPropertyId
      */
-    int GetRandomProperty(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetRandomProperty(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->RandomProperty);
         return 1;
     }
 
 #ifndef CLASSIC
-    int GetRandomSuffix(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetRandomSuffix(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->RandomSuffix);
         return 1;
@@ -608,7 +602,7 @@ namespace LuaItem
      *
      * @return uint32 itemSetId
      */
-    int GetItemSet(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetItemSet(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->GetTemplate()->ItemSet);
         return 1;
@@ -619,7 +613,7 @@ namespace LuaItem
      *
      * @return uint32 bagSize
      */
-    int GetBagSize(Eluna* /*E*/, lua_State* L, Item* item)
+    int GetBagSize(lua_State* L, Item* item)
     {
         if (Bag* bag = item->ToBag())
             Eluna::Push(L, bag->GetBagSize());
@@ -628,13 +622,12 @@ namespace LuaItem
         return 1;
     }
 
-    /* SETTERS */
     /**
      * Sets the [Player] specified as the owner of the [Item]
      *
      * @param [Player] player : the [Player] specified
      */
-    int SetOwner(Eluna* /*E*/, lua_State* L, Item* item)
+    int SetOwner(lua_State* L, Item* item)
     {
         Player* player = Eluna::CHECKOBJ<Player>(L, 2);
 #ifndef TRINITY
@@ -650,7 +643,7 @@ namespace LuaItem
      *
      * @param bool setBinding
      */
-    int SetBinding(Eluna* /*E*/, lua_State* L, Item* item)
+    int SetBinding(lua_State* L, Item* item)
     {
         bool soulbound = Eluna::CHECKVAL<bool>(L, 2);
 
@@ -663,7 +656,7 @@ namespace LuaItem
      *
      * @param uint32 count
      */
-    int SetCount(Eluna* /*E*/, lua_State* L, Item* item)
+    int SetCount(lua_State* L, Item* item)
     {
         uint32 count = Eluna::CHECKVAL<uint32>(L, 2);
         item->SetCount(count);
@@ -677,7 +670,7 @@ namespace LuaItem
      * @param uint32 enchantSlot : the slot for the enchant to be applied to
      * @return bool enchantmentSuccess : if enchantment is successfully set to specified slot, returns 'true', otherwise 'false'
      */
-    int SetEnchantment(Eluna* /*E*/, lua_State* L, Item* item)
+    int SetEnchantment(lua_State* L, Item* item)
     {
         Player* owner = item->GetOwner();
         if (!owner)
@@ -711,7 +704,7 @@ namespace LuaItem
      * @param uint32 enchantSlot : the slot for the enchant to be removed from
      * @return bool enchantmentRemoved : if enchantment is successfully removed from specified slot, returns 'true', otherwise 'false'
      */
-    int ClearEnchantment(Eluna* /*E*/, lua_State* L, Item* item)
+    int ClearEnchantment(lua_State* L, Item* item)
     {
         Player* owner = item->GetOwner();
         if (!owner)
@@ -739,7 +732,7 @@ namespace LuaItem
     /**
      * Saves the [Item] to the database
      */
-    int SaveToDB(Eluna* /*E*/, lua_State* /*L*/, Item* item)
+    int SaveToDB(lua_State* /*L*/, Item* item)
     {
 #ifndef TRINITY
         item->SaveToDB();

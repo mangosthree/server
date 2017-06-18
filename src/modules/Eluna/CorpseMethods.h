@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2010 - 2015 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
@@ -9,6 +9,8 @@
 
 /***
  * The remains of a [Player] that has died.
+ *
+ * Inherits all methods from: [Object], [WorldObject]
  */
 namespace LuaCorpse
 {
@@ -17,7 +19,7 @@ namespace LuaCorpse
      *
      * @return uint64 ownerGUID
      */
-    int GetOwnerGUID(Eluna* /*E*/, lua_State* L, Corpse* corpse)
+    int GetOwnerGUID(lua_State* L, Corpse* corpse)
     {
 #ifndef TRINITY
         Eluna::Push(L, corpse->GetOwnerGuid());
@@ -32,7 +34,7 @@ namespace LuaCorpse
      *
      * @return uint32 ghostTime
      */
-    int GetGhostTime(Eluna* /*E*/, lua_State* L, Corpse* corpse)
+    int GetGhostTime(lua_State* L, Corpse* corpse)
     {
         Eluna::Push(L, corpse->GetGhostTime());
         return 1;
@@ -50,7 +52,7 @@ namespace LuaCorpse
      *
      * @return [CorpseType] corpseType
      */
-    int GetType(Eluna* /*E*/, lua_State* L, Corpse* corpse)
+    int GetType(lua_State* L, Corpse* corpse)
     {
         Eluna::Push(L, corpse->GetType());
         return 1;
@@ -61,7 +63,7 @@ namespace LuaCorpse
      *
      * See [Corpse:GetGhostTime].
      */
-    int ResetGhostTime(Eluna* /*E*/, lua_State* /*L*/, Corpse* corpse)
+    int ResetGhostTime(lua_State* /*L*/, Corpse* corpse)
     {
         corpse->ResetGhostTime();
         return 0;
@@ -70,23 +72,9 @@ namespace LuaCorpse
     /**
      * Saves the [Corpse] to the database.
      */
-    int SaveToDB(Eluna* /*E*/, lua_State* /*L*/, Corpse* corpse)
+    int SaveToDB(lua_State* /*L*/, Corpse* corpse)
     {
         corpse->SaveToDB();
-        return 0;
-    }
-
-    /**
-     * Deletes the [Corpse] from the world.
-     *
-     * If the [Corpse]'s type is not BONES then this does nothing.
-     */
-    int DeleteBonesFromWorld(Eluna* /*E*/, lua_State* /*L*/, Corpse* corpse)
-    {
-        // Prevent a failed assertion.
-        if (corpse->GetType() != CORPSE_BONES)
-            return 0;
-        corpse->DeleteBonesFromWorld();
         return 0;
     }
 };

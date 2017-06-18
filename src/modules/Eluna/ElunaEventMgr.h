@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2010 - 2015 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
@@ -54,7 +54,7 @@ class ElunaEventProcessor
 
 public:
     typedef std::multimap<uint64, LuaEvent*> EventList;
-    typedef UNORDERED_MAP<int, LuaEvent*> EventMap;
+    typedef std::unordered_map<int, LuaEvent*> EventMap;
 
     ElunaEventProcessor(Eluna** _E, WorldObject* _obj);
     ~ElunaEventProcessor();
@@ -77,10 +77,10 @@ private:
     Eluna** E;
 };
 
-class EventMgr : public ElunaUtil::RWLockable
+class EventMgr : public ElunaUtil::Lockable
 {
 public:
-    typedef UNORDERED_SET<ElunaEventProcessor*> ProcessorSet;
+    typedef std::unordered_set<ElunaEventProcessor*> ProcessorSet;
     ProcessorSet processors;
     ElunaEventProcessor* globalProcessor;
     Eluna** E;

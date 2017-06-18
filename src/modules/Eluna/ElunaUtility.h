@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2010 - 2015 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
@@ -7,6 +7,10 @@
 #ifndef _ELUNA_UTIL_H
 #define _ELUNA_UTIL_H
 
+#include <unordered_map>
+#include <unordered_set>
+#include <mutex>
+#include <memory>
 #include "Common.h"
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
@@ -19,25 +23,26 @@
 #include "Database/QueryResult.h"
 #endif
 
-// Some dummy includes containing BOOST_VERSION:
-// ObjectAccessor.h Config.h Log.h
-#ifdef BOOST_VERSION
-#define USING_BOOST
-#endif
-
-#ifdef USING_BOOST
-#include <boost/thread/locks.hpp>
-#include <boost/thread/shared_mutex.hpp>
-#else
-#include <ace/Recursive_Thread_Mutex.h>
-#endif
-
 #ifdef TRINITY
 typedef QueryResult ElunaQuery;
 #define ELUNA_LOG_INFO(...)     TC_LOG_INFO("eluna", __VA_ARGS__);
 #define ELUNA_LOG_ERROR(...)    TC_LOG_ERROR("eluna", __VA_ARGS__);
 #define ELUNA_LOG_DEBUG(...)    TC_LOG_DEBUG("eluna", __VA_ARGS__);
 #define GET_GUID                GetGUID
+
+#define HIGHGUID_PLAYER         HighGuid::Player
+#define HIGHGUID_UNIT           HighGuid::Unit
+#define HIGHGUID_ITEM           HighGuid::Item
+#define HIGHGUID_GAMEOBJECT     HighGuid::GameObject
+#define HIGHGUID_PET            HighGuid::Pet
+#define HIGHGUID_TRANSPORT      HighGuid::Transport
+#define HIGHGUID_VEHICLE        HighGuid::Vehicle
+#define HIGHGUID_CONTAINER      HighGuid::Container
+#define HIGHGUID_DYNAMICOBJECT  HighGuid::DynamicObject
+#define HIGHGUID_CORPSE         HighGuid::Corpse
+#define HIGHGUID_MO_TRANSPORT   HighGuid::Mo_Transport
+#define HIGHGUID_INSTANCE       HighGuid::Instance
+#define HIGHGUID_GROUP          HighGuid::Group
 #else
 typedef QueryNamedResult ElunaQuery;
 #define ASSERT                  MANGOS_ASSERT
@@ -48,15 +53,6 @@ typedef QueryNamedResult ElunaQuery;
 #define GetGameObjectTemplate   GetGameObjectInfo
 #define GetItemTemplate         GetItemPrototype
 #define GetTemplate             GetProto
-#endif
-
-#ifndef UNORDERED_MAP
-#include <unordered_map>
-#define UNORDERED_MAP std::unordered_map
-#endif
-#ifndef UNORDERED_SET
-#include <unordered_set>
-#define UNORDERED_SET std::unordered_set
 #endif
 
 #ifndef MAKE_NEW_GUID
@@ -74,6 +70,7 @@ typedef QueryNamedResult ElunaQuery;
 
 class Unit;
 class WorldObject;
+struct FactionTemplateEntry;
 
 namespace ElunaUtil
 {
@@ -106,46 +103,51 @@ namespace ElunaUtil
     {
     public:
         WorldObjectInRangeCheck(bool nearest, WorldObject const* obj, float range,
-            uint16 typeMask = 0, uint32 entry = 0, uint32 hostile = 0);
+            uint16 typeMask = 0, uint32 entry = 0, uint32 hostile = 0, uint32 dead = 0);
         WorldObject const& GetFocusObject() const;
         bool operator()(WorldObject* u);
 
-        WorldObject const* i_obj;
-        uint32 i_hostile;
-        uint32 i_entry;
+        WorldObject const* const i_obj;
+        Unit const* i_obj_unit;
+        FactionTemplateEntry const* i_obj_fact;
+        uint32 const i_hostile; // 0 both, 1 hostile, 2 friendly
+        uint32 const i_entry;
         float i_range;
-        uint16 i_typeMask;
-        bool i_nearest;
+        uint16 const i_typeMask;
+        uint32 const i_dead; // 0 both, 1 alive, 2 dead
+        bool const i_nearest;
     };
 
     /*
      * Usage:
      * Inherit this class, then when needing lock, use
-     * ReadGuard guard(GetLock());
-     * or
-     * WriteGuard guard(GetLock());
+     * Guard guard(GetLock());
      *
      * The lock is automatically released at end of scope
      */
-    class RWLockable
+    class Lockable
     {
     public:
-
-#ifdef USING_BOOST
-        typedef boost::recursive_mutex LockType;
-        typedef boost::shared_lock<boost::shared_mutex> ReadGuard;
-        typedef boost::unique_lock<boost::shared_mutex> WriteGuard;
-#else
-        typedef ACE_Recursive_Thread_Mutex LockType;
-        typedef ACE_Read_Guard<LockType> ReadGuard;
-        typedef ACE_Write_Guard<LockType> WriteGuard;
-#endif
+        typedef std::mutex LockType;
+        typedef std::lock_guard<LockType> Guard;
 
         LockType& GetLock() { return _lock; }
 
     private:
         LockType _lock;
     };
+
+    /*
+     * Encodes `data` in Base-64 and store the result in `output`.
+     */
+    void EncodeData(const unsigned char* data, size_t input_length, std::string& output);
+
+    /*
+     * Decodes `data` from Base-64 and returns a pointer to the result, or `NULL` on error.
+     *
+     * The returned result buffer must be `delete[]`ed by the caller.
+     */
+    unsigned char* DecodeData(const char* data, size_t *output_length);
 };
 
 #endif

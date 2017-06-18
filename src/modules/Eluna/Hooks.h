@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 - 2015 Eluna Lua Engine <http://emudevs.com/>
+ * Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
  * This program is free software licensed under GPL version 3
  * Please see the included DOCS/LICENSE.md for more information
  */
@@ -13,7 +13,7 @@
  * A. If results will be IGNORED:
  *
  *     // Return early if there are no bindings.
- *     if (!WhateverBindings->HasEvents(SOME_EVENT_TYPE))
+ *     if (!WhateverBindings->HasBindingsFor(SOME_EVENT_TYPE))
  *         return;
  *
  *     // Lock out any other threads.
@@ -31,7 +31,7 @@
  * B. If results will be USED:
  *
  *     // Return early if there are no bindings.
- *     if (!WhateverBindings->HasEvents(SOME_EVENT_TYPE))
+ *     if (!WhateverBindings->HasBindingsFor(SOME_EVENT_TYPE))
  *          return;
  *
  *     // Lock out any other threads.
@@ -84,6 +84,8 @@ namespace Hooks
         REGTYPE_ITEM_GOSSIP,
         REGTYPE_PLAYER_GOSSIP,
         REGTYPE_BG,
+        REGTYPE_MAP,
+        REGTYPE_INSTANCE,
         REGTYPE_COUNT
     };
 
@@ -141,7 +143,7 @@ namespace Hooks
         AUCTION_EVENT_ON_SUCCESSFUL             =     28,       // (event, auctionId, owner, item, expireTime, buyout, startBid, currentBid, bidderGUIDLow)
         AUCTION_EVENT_ON_EXPIRE                 =     29,       // (event, auctionId, owner, item, expireTime, buyout, startBid, currentBid, bidderGUIDLow)
 
-	    // AddOns
+        // AddOns
         ADDON_EVENT_ON_MESSAGE                  =     30,       // (event, sender, type, prefix, msg, target) - target can be nil/whisper_target/guild/group/channel. Can return false
         
         WORLD_EVENT_ON_DELETE_CREATURE          =     31,       // (event, creature)
@@ -207,7 +209,7 @@ namespace Hooks
     {
         // Guild
         GUILD_EVENT_ON_ADD_MEMBER               =     1,       // (event, guild, player, rank)
-        GUILD_EVENT_ON_REMOVE_MEMBER            =     2,       // (event, guild, isDisbanding)
+        GUILD_EVENT_ON_REMOVE_MEMBER            =     2,       // (event, guild, player, isDisbanding)
         GUILD_EVENT_ON_MOTD_CHANGE              =     3,       // (event, guild, newMotd)
         GUILD_EVENT_ON_INFO_CHANGE              =     4,       // (event, guild, newInfo)
         GUILD_EVENT_ON_CREATE                   =     5,       // (event, guild, leader, name)  // Not on TC
@@ -258,7 +260,7 @@ namespace Hooks
         CREATURE_EVENT_ON_RECEIVE_EMOTE                   = 8,  // (event, creature, player, emoteid) - Can return true to stop normal action
         CREATURE_EVENT_ON_DAMAGE_TAKEN                    = 9,  // (event, creature, attacker, damage) - Can return new damage
         CREATURE_EVENT_ON_PRE_COMBAT                      = 10, // (event, creature, target) - Can return true to stop normal action
-        CREATURE_EVENT_ON_ATTACKED_AT                     = 11, // (event, creature, attacker) - Can return true to stop normal action
+        // UNUSED
         CREATURE_EVENT_ON_OWNER_ATTACKED                  = 12, // (event, creature, target) - Can return true to stop normal action            // Not on mangos
         CREATURE_EVENT_ON_OWNER_ATTACKED_AT               = 13, // (event, creature, attacker) - Can return true to stop normal action          // Not on mangos
         CREATURE_EVENT_ON_HIT_BY_SPELL                    = 14, // (event, creature, caster, spellid) - Can return true to stop normal action
@@ -331,6 +333,18 @@ namespace Hooks
         BG_EVENT_ON_CREATE                              = 3,    // (event, bg, bgId, instanceId) - Needs to be added to TC
         BG_EVENT_ON_PRE_DESTROY                         = 4,    // (event, bg, bgId, instanceId) - Needs to be added to TC
         BG_EVENT_COUNT
+    };
+
+    enum InstanceEvents
+    {
+        INSTANCE_EVENT_ON_INITIALIZE                    = 1,    // (event, instance_data, map)
+        INSTANCE_EVENT_ON_LOAD                          = 2,    // (event, instance_data, map)
+        INSTANCE_EVENT_ON_UPDATE                        = 3,    // (event, instance_data, map, diff)
+        INSTANCE_EVENT_ON_PLAYER_ENTER                  = 4,    // (event, instance_data, map, player)
+        INSTANCE_EVENT_ON_CREATURE_CREATE               = 5,    // (event, instance_data, map, creature)
+        INSTANCE_EVENT_ON_GAMEOBJECT_CREATE             = 6,    // (event, instance_data, map, go)
+        INSTANCE_EVENT_ON_CHECK_ENCOUNTER_IN_PROGRESS   = 7,    // (event, instance_data, map)
+        INSTANCE_EVENT_COUNT
     };
 };
 

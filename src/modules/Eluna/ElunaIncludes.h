@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2010 - 2015 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
@@ -40,22 +40,23 @@
 
 #ifdef TRINITY
 #include "Config.h"
+#include "GroupMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellInfo.h"
 #include "WeatherMgr.h"
 #include "Battleground.h"
-#include "revision.h"
+#include "GitRevision.h"
+#include "SpellHistory.h"
 #else
 #include "Config/Config.h"
+#ifdef CMANGOS
+#include "AI/AggressorAI.h"
+#else
 #include "AggressorAI.h"
+#endif
 #include "BattleGroundMgr.h"
 #include "SQLStorages.h"
-#endif
-
-#ifdef MANGOS
 #include "revision.h"
-#elif defined(CMANGOS)
-#include "revision_nr.h"
 #endif
 
 #if (!defined(TBC) && !defined(CLASSIC))
@@ -71,8 +72,8 @@ typedef Opcodes                 OpcodesList;
 #endif
 
 /*
- * Note: if you add or change a CORE_NAME #define,
- *   please update LuaGlobalFunctions::GetCoreName docstring.
+ * Note: if you add or change a CORE_NAME or CORE_VERSION #define,
+ *   please update LuaGlobalFunctions::GetCoreName or LuaGlobalFunctions::GetCoreVersion documentation example string.
  */
 #ifdef MANGOS
 #define CORE_NAME               "MaNGOS"
@@ -81,12 +82,12 @@ typedef Opcodes                 OpcodesList;
 
 #ifdef CMANGOS
 #define CORE_NAME               "cMaNGOS"
-#define CORE_VERSION            REVISION_NR
+#define CORE_VERSION            REVISION_DATE " " REVISION_TIME
 #endif
 
 #ifdef TRINITY
 #define CORE_NAME               "TrinityCore"
-#define CORE_VERSION            _DATE
+#define CORE_VERSION            (GitRevision::GetDate())
 #define eWorld                  (sWorld)
 #define eMapMgr                 (sMapMgr)
 #define eConfigMgr              (sConfigMgr)
@@ -94,7 +95,7 @@ typedef Opcodes                 OpcodesList;
 #define eObjectMgr              (sObjectMgr)
 #define eAccountMgr             (sAccountMgr)
 #define eAuctionMgr             (sAuctionMgr)
-#define eObjectAccessor         (sObjectAccessor)
+#define eObjectAccessor()       ObjectAccessor::
 #define REGEN_TIME_FULL
 typedef ThreatContainer::StorageType ThreatList;
 
@@ -111,7 +112,7 @@ typedef ThreatContainer::StorageType ThreatList;
 #define eObjectMgr              (&sObjectMgr)
 #define eAccountMgr             (&sAccountMgr)
 #define eAuctionMgr             (&sAuctionMgr)
-#define eObjectAccessor         (&sObjectAccessor)
+#define eObjectAccessor()       sObjectAccessor.
 #define SERVER_MSG_STRING       SERVER_MSG_CUSTOM
 #define TOTAL_LOCALES           MAX_LOCALE
 #define DIALOG_STATUS_SCRIPTED_NO_STATUS    DIALOG_STATUS_UNDEFINED
@@ -125,6 +126,10 @@ typedef ThreatContainer::StorageType ThreatList;
 
 #ifdef TBC
 #define SPELL_AURA_MOD_KILL_XP_PCT  SPELL_AURA_MOD_XP_PCT
+#endif
+
+#if defined(WOTLK) && !defined(MANGOS)
+#define UNIT_BYTE2_FLAG_SANCTUARY   UNIT_BYTE2_FLAG_SUPPORTABLE
 #endif
 
 typedef TemporarySummon TempSummon;

@@ -1,10 +1,24 @@
 --
--- Copyright (C) 2010 - 2015 Eluna Lua Engine <http://emudevs.com/>
+-- Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
 -- This program is free software licensed under GPL version 3
 -- Please see the included DOCS/LICENSE.md for more information
 --
 
 -- filename.ext files are loaded before normal .lua files
+
+--
+-- This extension allows saving data to specific object for it's lifetime in current runtime session
+-- Supports Map, Player, Creature, GameObject
+--
+-- SetData sets a value
+--  obj:SetData(key, val)
+--
+-- GetData gets the data table or a specific value by key from it
+--  local tbl = obj:GetData()
+--  local val = obj:GetData(key)
+--
+
+local pairs = pairs
 
 local variableStores = {
     Map = {},
@@ -13,68 +27,80 @@ local variableStores = {
     GameObject = {},
 }
 
-local function DestroyData(event, obj)
-    if (event == 18) then
-        local mapid = obj:GetMapId()
-        local instid = obj:GetInstanceId()
-        if (variableStores.Map[mapid]) then
-            variableStores.Map[mapid][instid] = nil
+local function DestroyMapData(event, obj)
+    local map = obj:GetMapId()
+    local inst = obj:GetInstanceId()
+    for k,v in pairs(variableStores) do
+        local mapdata = v[map]
+        if mapdata then
+            mapdata[inst] = nil
         end
-    else
-        variableStores[obj:GetObjectType()][obj:GetGUIDLow()] = nil
+    end
+end
+
+local function DestroyObjData(event, obj)
+    local otype = obj:GetObjectType()
+    local guid = otype == "Map" and 1 or obj:GetGUIDLow()
+
+    if otype == "Player" then
+        variableStores[otype][guid] = nil
+        return
+    end
+
+    local map = obj:GetMapId()
+    local inst = obj:GetInstanceId()
+    local mapdata = variableStores[otype][map]
+    if mapdata then
+        local instancedata = mapdata[inst]
+        if instancedata then
+            instancedata[guid] = nil
+        end
     end
 end
 
 local function GetData(self, field)
-    local Type = self:GetObjectType()
-    local varStore = variableStores[Type]
-    local id
-    if (Type == "Map") then
-        local mapid = self:GetMapId()
-        varStore = varStore[mapid]
-        if (not varStore) then
-            return nil
+    local otype = self:GetObjectType()
+    local guid = otype == "Map" and 1 or self:GetGUIDLow()
+    local varStore = variableStores[otype]
+
+    if otype == "Player" then
+        varStore[guid] = varStore[guid] or {}
+        if field ~= nil then
+            return varStore[guid][field]
         end
-        id = self:GetInstanceId()
-    else
-        id = self:GetGUIDLow()
+        return varStore[guid]
     end
-    
-    if (not varStore[id]) then
-        return nil
+
+    local map = self:GetMapId()
+    local inst = self:GetInstanceId()
+    varStore[map] = varStore[map] or {}
+    varStore[map][inst] = varStore[map][inst] or {}
+    varStore[map][inst][guid] = varStore[map][inst][guid] or {}
+
+    if field ~= nil then
+        return varStore[map][inst][guid][field]
     end
-    
-    if (field == nil) then
-        return varStore[id]
-    else
-        return varStore[id][field]
-    end
+    return varStore[map][inst][guid]
 end
 
 local function SetData(self, field, val)
-    assert(field ~= nil, "field was nil", 2)
-    
-    local Type = self:GetObjectType()
-    local varStore = variableStores[Type]
-    local id
-    if (Type == "Map") then
-        local mapid = self:GetMapId()
-    
-        if (not varStore[mapid]) then
-            varStore[mapid] = {}
-        end
-        varStore = varStore[mapid]
-        
-        id = self:GetInstanceId()
-    else
-        id = self:GetGUIDLow()
+    local otype = self:GetObjectType()
+    local guid = otype == "Map" and 1 or self:GetGUIDLow()
+    local varStore = variableStores[otype]
+
+    if otype == "Player" then
+        varStore[guid] = varStore[guid] or {}
+        varStore[guid][field] = val
+        return
     end
-    
-    if (not varStore[id]) then
-        varStore[id] = {}
-    end
-    
-    varStore[id][field] = val
+
+    local map = self:GetMapId()
+    local inst = self:GetInstanceId()
+    varStore[map] = varStore[map] or {}
+    varStore[map][inst] = varStore[map][inst] or {}
+    varStore[map][inst][guid] = varStore[map][inst][guid] or {}
+
+    varStore[map][inst][guid][field] = val
 end
 
 for k,v in pairs(variableStores) do
@@ -82,7 +108,8 @@ for k,v in pairs(variableStores) do
     _G[k].SetData = SetData
 end
 
-RegisterPlayerEvent(4, DestroyData)
-RegisterServerEvent(31, DestroyData)
-RegisterServerEvent(32, DestroyData)
-RegisterServerEvent(18, DestroyData)
+RegisterPlayerEvent(4, DestroyObjData) -- logout
+RegisterServerEvent(31, DestroyObjData) -- creature delete
+RegisterServerEvent(32, DestroyObjData) -- gameobject delete
+RegisterServerEvent(17, DestroyMapData) -- map create
+RegisterServerEvent(18, DestroyMapData) -- map destroy

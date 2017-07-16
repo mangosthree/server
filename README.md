@@ -9,6 +9,7 @@
 <a href='https://travis-ci.org/mangosthree/server/builds' target='MangosThree'><img src='https://travis-ci.org/mangosthree/server.png' border=0></a>
  Windows 
 <a href='https://ci.appveyor.com/project/MaNGOS/server-wtbhv/history' target='MangosThree'><img src='https://ci.appveyor.com/api/projects/status/github/mangosthree/server?branch=develop21&svg=true' border=0></a>
+  Codacy Status <a href="https://www.codacy.com/app/MaNGOS/MangosThree?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mangosthree/server&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/58227f14b9024384a22e4e12e3cf7a89"/></a>
 </td></tr></table>
 
 Cataclysm WOW BRANCH

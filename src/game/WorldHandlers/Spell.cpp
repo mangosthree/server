@@ -6087,6 +6087,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if ((canFailAtMax || skillValue < sWorld.GetConfigMaxSkillValue()) && reqSkillValue > irand(skillValue - 25, skillValue + 37))
                         return SPELL_FAILED_TRY_AGAIN;
                 }
+                break;
             }
             case SPELL_EFFECT_SUMMON_DEAD_PET:
             {

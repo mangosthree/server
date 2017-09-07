@@ -24,7 +24,7 @@
 
 #ifndef MANGOS_H_REVISION
 #define MANGOS_H_REVISION
-    #define REVISION_NR "210701"
+    #define REVISION_NR "210708"
 
     #define REALMD_DB_VERSION_NR 21
     #define REALMD_DB_STRUCTURE_NR 1
@@ -38,6 +38,6 @@
 
     #define WORLD_DB_VERSION_NR 21
     #define WORLD_DB_STRUCTURE_NR 7
-    #define WORLD_DB_CONTENT_NR 1
-    #define WORLD_DB_UPDATE_DESCRIPTION "db_scripts_refactor"
+    #define WORLD_DB_CONTENT_NR 8
+    #define WORLD_DB_UPDATE_DESCRIPTION "kodo_roundup_tidyup"
 #endif // __REVISION_H__

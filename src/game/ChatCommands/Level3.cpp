@@ -5646,7 +5646,7 @@ bool ChatHandler::HandleQuestCompleteCommand(char* args)
     if (uint32 spell = pQuest->GetReqSpellLearned())
         player->learnSpell(spell, false);
 
-    player->CompleteQuest(entry);
+    player->CompleteQuest(entry, QUEST_STATUS_FORCE_COMPLETE);
     return true;
 }
 

@@ -36,6 +36,10 @@
 #include "SpellMgr.h"
 #include "Policies/Singleton.h"
 
+#ifdef ENABLE_ELUNA
+#include "LuaEngine.h"
+#endif /* ENABLE_ELUNA */
+
 INSTANTIATE_SINGLETON_1(GameEventMgr);
 
 bool GameEventMgr::CheckOneGameEvent(uint16 entry, time_t currenttime) const
@@ -83,6 +87,10 @@ void GameEventMgr::StartEvent(uint16 event_id, bool overwrite /*=false*/, bool r
         if (mGameEvent[event_id].end <= mGameEvent[event_id].start)
             mGameEvent[event_id].end = mGameEvent[event_id].start + mGameEvent[event_id].length;
     }
+#ifdef ENABLE_ELUNA
+    if (IsActiveEvent(event_id))
+        sEluna->OnGameEventStart(event_id);
+#endif /* ENABLE_ELUNA */
 }
 
 void GameEventMgr::StopEvent(uint16 event_id, bool overwrite)
@@ -94,6 +102,10 @@ void GameEventMgr::StopEvent(uint16 event_id, bool overwrite)
         if (mGameEvent[event_id].end <= mGameEvent[event_id].start)
             mGameEvent[event_id].end = mGameEvent[event_id].start + mGameEvent[event_id].length;
     }
+#ifdef ENABLE_ELUNA
+    if (!IsActiveEvent(event_id))
+        sEluna->OnGameEventStop(event_id);
+#endif /* ENABLE_ELUNA */
 }
 
 void GameEventMgr::LoadFromDB()
@@ -283,7 +295,6 @@ void GameEventMgr::LoadFromDB()
     }
     else
     {
-
         BarGoLink bar(result->GetRowCount());
         do
         {
@@ -374,7 +385,6 @@ void GameEventMgr::LoadFromDB()
     }
     else
     {
-
         BarGoLink bar(result->GetRowCount());
         do
         {
@@ -454,7 +464,6 @@ void GameEventMgr::LoadFromDB()
     }
     else
     {
-
         BarGoLink bar(result->GetRowCount());
         do
         {
@@ -514,7 +523,6 @@ void GameEventMgr::LoadFromDB()
     }
     else
     {
-
         BarGoLink bar(result->GetRowCount());
         do
         {

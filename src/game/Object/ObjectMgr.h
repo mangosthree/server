@@ -823,8 +823,6 @@ class ObjectMgr
 
         void LoadGameTele();
 
-        void LoadNpcGossips();
-
         void LoadGossipMenus();
 
         void LoadVendorTemplates();

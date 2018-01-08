@@ -110,6 +110,11 @@ elseif(UNIX)
     if(CMAKE_C_COMPILER MATCHES "gcc" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
 
+        if (BUILD_SHARED_LIBS)
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+        endif()
+
         if(PLATFORM EQUAL 32)
             set(SSE_FLAGS "-msse2 -mfpmath=sse")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SSE_FLAGS}")
@@ -143,6 +148,10 @@ elseif(UNIX)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS} -Woverloaded-virtual")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3")
+            if (BUILD_SHARED_LIBS)
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+            endif()
         endif()
 
         # -Wno-narrowing needed to suppress a warning in g3d

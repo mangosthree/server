@@ -27,11 +27,6 @@
 
 #include <cassert>
 #include <string>
-
-#ifdef _DLL
-#undef _DLL
-#endif
-
 #include "StormLib.h"
 
 /**

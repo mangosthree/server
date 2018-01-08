@@ -38,7 +38,7 @@ set(SOURCES
 
 add_executable(${EXECUTABLE_NAME} dbcfile.cpp System.cpp ${SOURCES} ${EXECUTABLE_SRCS})
 
-target_link_libraries(${EXECUTABLE_NAME} loadlib StormLib)
+target_link_libraries(${EXECUTABLE_NAME} loadlib storm)
 
 #Output the compiled exes to build/bin/$(Configuration)/tools directory on windows by default
 if(WIN32)

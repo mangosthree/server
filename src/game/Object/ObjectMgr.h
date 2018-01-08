@@ -825,7 +825,9 @@ class ObjectMgr
 
         void LoadGossipMenus();
 
+        void LoadVendorTemplates();
         void LoadVendors() { LoadVendors("npc_vendor", false); }
+        void LoadTrainerTemplates();
         void LoadTrainers() { LoadTrainers("npc_trainer", false); }
 
         /// @param _map Map* of the map for which to load active entities. If NULL active entities on continents are loaded

@@ -584,7 +584,6 @@ namespace LuaGlobalFunctions
      *
      *         // Eluna
      *         ELUNA_EVENT_ON_LUA_STATE_CLOSE          =     16,       // (event) - triggers just before shutting down eluna (on shutdown and restart)
-     *         ELUNA_EVENT_ON_LUA_STATE_OPEN           =     33,       // (event) - triggers after all scripts are loaded
      *
      *         // Map
      *         MAP_EVENT_ON_CREATE                     =     17,       // (event, map)
@@ -613,7 +612,11 @@ namespace LuaGlobalFunctions
      *         WORLD_EVENT_ON_DELETE_CREATURE          =     31,       // (event, creature)
      *         WORLD_EVENT_ON_DELETE_GAMEOBJECT        =     32,       // (event, gameobject)
      *
-     *         SERVER_EVENT_COUNT
+     *         // Eluna
+     *         ELUNA_EVENT_ON_LUA_STATE_OPEN           =     33,       // (event) - triggers after all scripts are loaded
+     *
+     *         GAME_EVENT_START                        =     34,       // (event, gameeventid)
+     *         GAME_EVENT_STOP                         =     35,       // (event, gameeventid)
      *     };
      *
      * @proto cancel = (event, function)

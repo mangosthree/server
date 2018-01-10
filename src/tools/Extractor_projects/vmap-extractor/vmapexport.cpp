@@ -79,7 +79,7 @@ char const* CONF_mpq_list[] =
 
 #define LAST_DBC_IN_DATA_BUILD 13623    // after this build mpqs with dbc are back to locale folder
 
-TCHAR* const LocalesT[] =
+TCHAR const* LocalesT[] =
 {
     _T("enGB"), _T("enUS"),
     _T("deDE"), _T("esES"),

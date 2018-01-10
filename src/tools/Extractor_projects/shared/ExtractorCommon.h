@@ -45,7 +45,7 @@ bool shouldSkipMap(int mapID, bool m_skipContinents, bool m_skipJunkMaps, bool m
 uint32 const Builds[] = {13164, 13205, 13287, 13329, 13596, 13623, 13914, 14007, 14333, 14480, 14545, 15005, 15050, 15211, 15354, 15595, 0};
 static uint32 CONF_TargetBuild = 15595;              // 4.3.4.15595
 
-static char* const Locales[] = {"enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU"};
+static char const* Locales[] = {"enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU"};
 #define LOCALES_COUNT 12
 
 /// Enumerated Core Numbers

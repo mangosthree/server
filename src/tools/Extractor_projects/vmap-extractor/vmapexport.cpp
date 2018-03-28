@@ -204,7 +204,7 @@ bool LoadLocaleMPQFile(int const locale)
     AppendPatchMPQFilesToList(Locales[locale], Locales[locale], NULL, updates);
     // now update to newer view, root
     AppendPatchMPQFilesToList(NULL, NULL, Locales[locale], updates);
-    
+
     // ./Data wow-update-base files
     for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
     {
@@ -241,7 +241,7 @@ bool LoadLocaleMPQFile(int const locale)
         //if (!OpenArchive(filename))
         if (!SFileOpenPatchArchive(LocaleMpq, filename, "", 0))
             printf("Error open patch archive: %s\n\n", filename);
-    }    
+    }
 
     // ./Data/Cache/<locale> patch files
     for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
@@ -254,7 +254,7 @@ bool LoadLocaleMPQFile(int const locale)
         if (!SFileOpenPatchArchive(LocaleMpq, filename, "", 0))
             printf("Error open patch archive: %s\n\n", filename);
     }
-    
+
     return true;
 }
 
@@ -358,17 +358,17 @@ void LoadCommonMPQFiles(uint32 build)
             printf("Scanned %d files, found patch = %d\n", count, found);
         }
     }
-    
+
     // ./Data/Cache patch-base files
     for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
-    {        
+    {
         sprintf(filename, "%s/Data/Cache/patch-base-%u.MPQ", input_path, Builds[i]);
 
         printf("\nPatching : %s\n", filename);
 
         if (!SFileOpenPatchArchive(WorldMpq, filename, "", 0))
             printf("Error open patch archive: %s\n\n", filename);
-    } 
+    }
 }
 void strToLower(char* str)
 {

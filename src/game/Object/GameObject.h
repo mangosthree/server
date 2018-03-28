@@ -450,7 +450,7 @@ struct GameObjectInfo
             case GAMEOBJECT_TYPE_GOOBER:     return goober.lockId;
             case GAMEOBJECT_TYPE_AREADAMAGE: return areadamage.lockId;
             case GAMEOBJECT_TYPE_CAMERA:     return camera.lockId;
-            case GAMEOBJECT_CreatureTypeFlagsTAND:  return flagstand.lockId;
+            case GAMEOBJECT_TYPE_FLAGSTAND:  return flagstand.lockId;
             case GAMEOBJECT_TYPE_FISHINGHOLE: return fishinghole.lockId;
             case GAMEOBJECT_TYPE_FLAGDROP:   return flagdrop.lockId;
             default: return 0;
@@ -465,7 +465,7 @@ struct GameObjectInfo
             case GAMEOBJECT_TYPE_BUTTON:     return button.noDamageImmune;
             case GAMEOBJECT_TYPE_QUESTGIVER: return questgiver.noDamageImmune;
             case GAMEOBJECT_TYPE_GOOBER:     return goober.noDamageImmune;
-            case GAMEOBJECT_CreatureTypeFlagsTAND:  return flagstand.noDamageImmune;
+            case GAMEOBJECT_TYPE_FLAGSTAND:  return flagstand.noDamageImmune;
             case GAMEOBJECT_TYPE_FLAGDROP:   return flagdrop.noDamageImmune;
             default: return true;
         }

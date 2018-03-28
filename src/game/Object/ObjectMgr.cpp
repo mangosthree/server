@@ -6495,7 +6495,7 @@ void ObjectMgr::LoadGameobjectInfo()
                 CheckGOSpellId(goInfo, goInfo->spellcaster.spellId, 0);
                 break;
             }
-            case GAMEOBJECT_CreatureTypeFlagsTAND:                 // 24
+            case GAMEOBJECT_TYPE_FLAGSTAND:                 // 24
             {
                 if (goInfo->flagstand.lockId)
                     CheckGOLockId(goInfo, goInfo->flagstand.lockId, 0);

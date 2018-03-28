@@ -5228,7 +5228,7 @@ void Spell::EffectOpenLock(SpellEffectEntry const* effect)
                 return;
             }
         }
-        else if (goInfo->type == GAMEOBJECT_CreatureTypeFlagsTAND)
+        else if (goInfo->type == GAMEOBJECT_TYPE_FLAGSTAND)
         {
             // CanUseBattleGroundObject() already called in CheckCast()
             // in battleground check

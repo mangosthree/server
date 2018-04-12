@@ -6892,12 +6892,12 @@ bool ChatHandler::HandleAccountSetAddonCommand(char* args)
 bool ChatHandler::HandleSendMailHelper(MailDraft& draft, char* args)
 {
     // format: "subject text" "mail text"
-    char* msgSubject = ExtractQuotedArg(&args);
-    if (!msgSubject)
+    std::string msgSubject = ExtractQuotedArg(&args);
+    if (msgSubject.empty())
         { return false; }
 
-    char* msgText = ExtractQuotedArg(&args);
-    if (!msgText)
+    std::string msgText = ExtractQuotedArg(&args);
+    if (msgText.empty())
         { return false; }
 
     // msgSubject, msgText isn't NUL after prev. check
@@ -6939,12 +6939,12 @@ bool ChatHandler::HandleSendMassMailCommand(char* args)
 bool ChatHandler::HandleSendItemsHelper(MailDraft& draft, char* args)
 {
     // format: "subject text" "mail text" item1[:count1] item2[:count2] ... item12[:count12]
-    char* msgSubject = ExtractQuotedArg(&args);
-    if (!msgSubject)
+    std::string msgSubject = ExtractQuotedArg(&args);
+    if (msgSubject.empty())
         { return false; }
 
-    char* msgText = ExtractQuotedArg(&args);
-    if (!msgText)
+    std::string msgText = ExtractQuotedArg(&args);
+    if (msgText.empty())
         { return false; }
 
     // extract items
@@ -7074,8 +7074,8 @@ bool ChatHandler::HandleSendMoneyHelper(MailDraft& draft, char* args)
 {
     /// format: "subject text" "mail text" money
 
-    char* msgSubject = ExtractQuotedArg(&args);
-    if (!msgSubject)
+    std::string  msgSubject = ExtractQuotedArg(&args);
+    if (msgSubject.empty())
         { return false; }
 
     char* msgText = ExtractQuotedArg(&args);

@@ -598,7 +598,7 @@ struct ItemPrototype
     uint32 Delay;
     float  RangedModRange;
     _Spell Spells[MAX_ITEM_PROTO_SPELLS];
-    uint32 Bonding;
+    uint32 Bonding;                              ///< See \ref ItemBondingType
     char*  Description;
     uint32 PageText;
     uint32 LanguageID;
@@ -622,7 +622,7 @@ struct ItemPrototype
     float  ArmorDamageModifier;
     uint32 Duration;
     uint32 ItemLimitCategory;                               // id from ItemLimitCategory.dbc
-    uint32 HolidayId;  
+    uint32 HolidayId;                                       // id from Holidays.dbc
     uint32 DisenchantID;
     uint32 FoodType;
     float  StatScalingFactor;
@@ -662,7 +662,7 @@ struct ItemPrototype
     float GetMinDamage() const { return floor(getDPS() * float(Delay) / 1000.0f * 0.7f + 0.5f); }
     float GetMaxDamage() const { return floor(getDPS() * float(Delay) / 1000.0f * 1.3f + 0.5f); }
 
-    bool IsPotion() const { return Class==ITEM_CLASS_CONSUMABLE && SubClass==ITEM_SUBCLASS_POTION; }
+    bool IsPotion() const { return Class == ITEM_CLASS_CONSUMABLE && SubClass == ITEM_SUBCLASS_POTION; }
     bool IsConjuredConsumable() const { return Class == ITEM_CLASS_CONSUMABLE && (Flags & ITEM_FLAG_CONJURED); }
     bool IsVellum() const
     {

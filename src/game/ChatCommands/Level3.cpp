@@ -4352,7 +4352,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     }
 
     uint32 faction = target->getFaction();
-    uint32 NpcFlagss = target->GetUInt32Value(UNIT_NPC_FLAGS);
+    uint32 npcflags = target->GetUInt32Value(UNIT_NPC_FLAGS);
     uint32 displayid = target->GetDisplayId();
     uint32 nativeid = target->GetNativeDisplayId();
     uint32 Entry = target->GetEntry();
@@ -4372,11 +4372,11 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
             break;
 
     if (diff < MAX_DIFFICULTY)
-        PSendSysMessage(LANG_NPCINFO_CHAR_DIFFICULTY, target->GetGuidStr().c_str(), faction, NpcFlagss,
+        PSendSysMessage(LANG_NPCINFO_CHAR_DIFFICULTY, target->GetGuidStr().c_str(), faction, npcflags,
                         Entry, target->GetCreatureInfo()->Entry, diff,
                         displayid, nativeid);
     else
-        PSendSysMessage(LANG_NPCINFO_CHAR, target->GetGuidStr().c_str(), faction, NpcFlagss, Entry, displayid, nativeid);
+        PSendSysMessage(LANG_NPCINFO_CHAR, target->GetGuidStr().c_str(), faction, npcflags, Entry, displayid, nativeid);
 
     PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());
     PSendSysMessage(LANG_NPCINFO_HEALTH, target->GetCreateHealth(), target->GetMaxHealth(), target->GetHealth());
@@ -4386,11 +4386,11 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     PSendSysMessage(LANG_NPCINFO_DUNGEON_ID, target->GetInstanceId());
     PSendSysMessage(LANG_NPCINFO_POSITION, float(target->GetPositionX()), float(target->GetPositionY()), float(target->GetPositionZ()));
 
-    if ((NpcFlagss & UNIT_NPC_FLAG_VENDOR))
+    if ((npcflags & UNIT_NPC_FLAG_VENDOR))
     {
         SendSysMessage(LANG_NPCINFO_VENDOR);
     }
-    if ((NpcFlagss & UNIT_NPC_FLAG_TRAINER))
+    if ((npcflags & UNIT_NPC_FLAG_TRAINER))
     {
         SendSysMessage(LANG_NPCINFO_TRAINER);
     }
@@ -5387,17 +5387,17 @@ bool ChatHandler::HandleServerRestartCommand(char* args)
 {
     uint32 delay;
     if (!ExtractUInt32(&args, delay))
-        return false;
+        { return false; }
 
     uint32 exitcode;
     if (!ExtractOptUInt32(&args, exitcode, RESTART_EXIT_CODE))
-        return false;
+        { return false; }
 
     // Exit code should be in range of 0-125, 126-255 is used
     // in many shells for their own return codes and code > 255
     // is not supported in many others
     if (exitcode > 125)
-        return false;
+        { return false; }
 
     sWorld.ShutdownServ(delay, SHUTDOWN_MASK_RESTART, exitcode);
     return true;

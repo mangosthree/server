@@ -56,7 +56,7 @@ AuctionHouseMgr::AuctionHouseMgr()
 AuctionHouseMgr::~AuctionHouseMgr()
 {
     for (ItemMap::const_iterator itr = mAitems.begin(); itr != mAitems.end(); ++itr)
-        delete itr->second;
+        { delete itr->second; }
 }
 
 
@@ -143,7 +143,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
         }
     }
     else if (!bidder)
-        bidder_accId = sObjectMgr.GetPlayerAccountIdByGUID(bidder_guid);
+        { bidder_accId = sObjectMgr.GetPlayerAccountIdByGUID(bidder_guid); }
 
     if (auction_owner)
         auction_owner->GetSession()->SendAuctionOwnerNotification(auction);
@@ -412,29 +412,29 @@ void AuctionHouseMgr::LoadAuctions()
             auction->itemGuidLow = 0;                       // must be 0 if auction delivery pending
         else
         {
-            // check if sold item exists for guid
-            // and item_template in fact (GetAItem will fail if problematic in result check in AuctionHouseMgr::LoadAuctionItems)
-            Item* pItem = GetAItem(auction->itemGuidLow);
-            if (!pItem)
-            {
-                auction->DeleteFromDB();
-                sLog.outError("Auction %u has not a existing item : %u, deleted", auction->Id, auction->itemGuidLow);
-                delete auction;
-                continue;
-            }
+        // check if sold item exists for guid
+        // and item_template in fact (GetAItem will fail if problematic in result check in AuctionHouseMgr::LoadAuctionItems)
+        Item* pItem = GetAItem(auction->itemGuidLow);
+        if (!pItem)
+        {
+            auction->DeleteFromDB();
+            sLog.outError("Auction %u has not a existing item : %u, deleted", auction->Id, auction->itemGuidLow);
+            delete auction;
+            continue;
+        }
 
-            // overwrite by real item data
-            if ((auction->itemTemplate != pItem->GetEntry()) ||
-                    (auction->itemCount != pItem->GetCount()) ||
-                    (auction->itemRandomPropertyId != pItem->GetItemRandomPropertyId()))
-            {
-                auction->itemTemplate = pItem->GetEntry();
-                auction->itemCount    = pItem->GetCount();
-                auction->itemRandomPropertyId = pItem->GetItemRandomPropertyId();
+        // overwrite by real item data
+        if ((auction->itemTemplate != pItem->GetEntry()) ||
+            (auction->itemCount != pItem->GetCount()) ||
+            (auction->itemRandomPropertyId != pItem->GetItemRandomPropertyId()))
+        {
+            auction->itemTemplate = pItem->GetEntry();
+            auction->itemCount    = pItem->GetCount();
+            auction->itemRandomPropertyId = pItem->GetItemRandomPropertyId();
 
-                // No SQL injection (no strings)
-                CharacterDatabase.PExecute("UPDATE auction SET item_template = %u, item_count = %u, item_randompropertyid = %i WHERE itemguid = %u",
-                                           auction->itemTemplate, auction->itemCount, auction->itemRandomPropertyId, auction->itemGuidLow);
+            // No SQL injection (no strings)
+            CharacterDatabase.PExecute("UPDATE auction SET item_template = %u, item_count = %u, item_randompropertyid = %i WHERE itemguid = %u",
+                                       auction->itemTemplate, auction->itemCount, auction->itemRandomPropertyId, auction->itemGuidLow);
             }
         }
 
@@ -844,7 +844,7 @@ void WorldSession::BuildListAuctionItems(std::vector<AuctionEntry*> const& aucti
                 { continue; }
 
             if (levelmin != 0x00 && (proto->RequiredLevel < levelmin || (levelmax != 0x00 && proto->RequiredLevel > levelmax)))
-                continue;
+                { continue; }
 
             if (usable != 0x00)
             {

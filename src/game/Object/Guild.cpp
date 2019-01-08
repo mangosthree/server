@@ -79,7 +79,7 @@ void MemberSlot::ChangeRank(uint32 newRank)
     Player* player = sObjectMgr.GetPlayer(guid);
     // If player not online data in data field will be loaded from guild tabs no need to update it !!
     if (player)
-        player->SetRank(newRank);
+        { player->SetRank(newRank); }
 
     CharacterDatabase.PExecute("UPDATE guild_member SET rank='%u' WHERE guid='%u'", newRank, guid.GetCounter());
 }
@@ -117,11 +117,11 @@ Guild::~Guild()
 bool Guild::Create(Player* leader, std::string gname)
 {
     if (sGuildMgr.GetGuildByName(gname))
-        return false;
+        { return false; }
 
     WorldSession* lSession = leader->GetSession();
     if (!lSession)
-        return false;
+        { return false; }
 
     m_LeaderGuid = leader->GetObjectGuid();
     m_Name = gname;
@@ -179,12 +179,12 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
     if (pl)
     {
         if (pl->GetGuildId() != 0)
-            return false;
+            { return false; }
     }
     else
     {
         if (Player::GetGuildIdFromDB(plGuid) != 0)          // player already in guild
-            return false;
+            { return false; }
     }
 
     // remove all player signs from another petitions
@@ -211,7 +211,7 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
         //                                                     0    1     2     3    4
         QueryResult* result = CharacterDatabase.PQuery("SELECT name,level,class,zone,account FROM characters WHERE guid = '%u'", lowguid);
         if (!result)
-            return false;                                   // player doesn't exist
+            { return false; }                                   // player doesn't exist
 
         Field* fields    = result->Fetch();
         newmember.Name   = fields[0].GetCppString();
@@ -222,9 +222,9 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
         delete result;
 
         if (newmember.Level < 1 || newmember.Level > STRONG_MAX_LEVEL ||
-                !((1 << (newmember.Class - 1)) & CLASSMASK_ALL_PLAYABLE))
+            !((1 << (newmember.Class - 1)) & CLASSMASK_ALL_PLAYABLE))
         {
-            sLog.outError("%s has a broken data in field `characters` table, cannot add him to guild.", plGuid.GetString().c_str());
+            sLog.outError("%s has a broken data in field `characters` table, can not add him to guild.", plGuid.GetString().c_str());
             return false;
         }
     }
@@ -296,7 +296,7 @@ void Guild::SetGINFO(std::string ginfo)
 bool Guild::LoadGuildFromDB(QueryResult* guildDataResult)
 {
     if (!guildDataResult)
-        return false;
+        { return false; }
 
     Field* fields = guildDataResult->Fetch();
 
@@ -335,10 +335,10 @@ bool Guild::CheckGuildStructure()
     if (GM_rights == -1)
     {
         if (DelMember(m_LeaderGuid))
-            return false;                                   // guild will disbanded and deleted in caller
+            { return false; }                                   // guild will disbanded and deleted in caller
     }
     else if (GM_rights != GR_GUILDMASTER)
-        SetLeader(m_LeaderGuid);
+        { SetLeader(m_LeaderGuid); }
 
     // Allow only 1 guildmaster, set other to officer
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
@@ -365,7 +365,7 @@ bool Guild::LoadRanksFromDB(QueryResult* guildRanksResult)
 
     // GUILD RANKS are sequence starting from 0 = GUILD_MASTER (ALL PRIVILEGES) to max 9 (lowest privileges)
     // the lower rank id is considered higher rank - so promotion does rank-- and demotion does rank++
-    // between ranks in sequence cannot be gaps - so 0,1,2,4 cannot be
+    // between ranks in sequence can not be gaps - so 0,1,2,4 can not be
     // min ranks count is 5 and max is 10.
 
     do
@@ -373,7 +373,7 @@ bool Guild::LoadRanksFromDB(QueryResult* guildRanksResult)
         fields = guildRanksResult->Fetch();
         // condition that would be true when all ranks in QueryResult will be processed and guild without ranks is being processed
         if (!fields)
-            break;
+            { break; }
 
         uint32 guildId       = fields[0].GetUInt32();
         if (guildId < m_Id)
@@ -385,7 +385,7 @@ bool Guild::LoadRanksFromDB(QueryResult* guildRanksResult)
         }
 
         if (guildId > m_Id)                                 // we loaded all ranks for this guild already, break cycle
-            break;
+            { break; }
 
         uint32 rankID        = fields[1].GetUInt32();
         std::string rankName = fields[2].GetCppString();
@@ -393,11 +393,11 @@ bool Guild::LoadRanksFromDB(QueryResult* guildRanksResult)
         uint32 rankMoney     = fields[4].GetUInt32();
 
         if (rankID != m_Ranks.size())                       // guild_rank.ids are sequence 0,1,2,3..
-            broken_ranks =  true;
+            { broken_ranks =  true; }
 
         // first rank is guildmaster, prevent loss leader rights
         if (m_Ranks.empty())
-            rankRights |= GR_RIGHT_ALL;
+            { rankRights |= GR_RIGHT_ALL; }
 
         AddRank(rankName, rankRights, rankMoney);
     }
@@ -432,14 +432,14 @@ bool Guild::LoadRanksFromDB(QueryResult* guildRanksResult)
 bool Guild::LoadMembersFromDB(QueryResult* guildMembersResult)
 {
     if (!guildMembersResult)
-        return false;
+        { return false; }
 
     do
     {
         Field* fields = guildMembersResult->Fetch();
         // this condition will be true when all rows in QueryResult are processed and new guild without members is going to be loaded - prevent crash
         if (!fields)
-            break;
+            { break; }
         uint32 guildId       = fields[0].GetUInt32();
         if (guildId < m_Id)
         {
@@ -451,7 +451,7 @@ bool Guild::LoadMembersFromDB(QueryResult* guildMembersResult)
 
         if (guildId > m_Id)
             // we loaded all members for this guild already, break cycle
-            break;
+            { break; }
 
         MemberSlot newmember;
         uint32 lowguid = fields[1].GetUInt32();
@@ -459,7 +459,7 @@ bool Guild::LoadMembersFromDB(QueryResult* guildMembersResult)
         newmember.RankId = fields[2].GetUInt32();
         // don't allow member to have not existing rank!
         if (newmember.RankId >= m_Ranks.size())
-            newmember.RankId = GetLowestRank();
+            { newmember.RankId = GetLowestRank(); }
 
         newmember.Pnote                 = fields[3].GetCppString();
         newmember.OFFnote               = fields[4].GetCppString();
@@ -467,8 +467,8 @@ bool Guild::LoadMembersFromDB(QueryResult* guildMembersResult)
         newmember.BankRemMoney          = fields[6].GetUInt32();
         for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
         {
-            newmember.BankResetTimeTab[i] = fields[7 + (2 * i)].GetUInt32();
-            newmember.BankRemSlotsTab[i]  = fields[8 + (2 * i)].GetUInt32();
+            newmember.BankResetTimeTab[i] = fields[7+(2*i)].GetUInt32();
+            newmember.BankRemSlotsTab[i]  = fields[8+(2*i)].GetUInt32();
         }
 
         newmember.Name                  = fields[19].GetCppString();
@@ -504,7 +504,7 @@ bool Guild::LoadMembersFromDB(QueryResult* guildMembersResult)
     while (guildMembersResult->NextRow());
 
     if (members.empty())
-        return false;
+        { return false; }
 
     UpdateAccountsNumber();
 
@@ -515,7 +515,7 @@ void Guild::SetLeader(ObjectGuid guid)
 {
     MemberSlot* slot = GetMemberSlot(guid);
     if (!slot)
-        return;
+        { return; }
 
     m_LeaderGuid = guid;
     slot->ChangeRank(GR_GUILDMASTER);
@@ -558,13 +558,13 @@ bool Guild::DelMember(ObjectGuid guid, bool isDisbanding)
         }
 
         if (!best)
-            return true;
+            { return true; }
 
         SetLeader(newLeaderGUID);
 
         // If player not online data in data field will be loaded from guild tabs no need to update it !!
         if (Player* newLeader = sObjectMgr.GetPlayer(newLeaderGUID))
-            newLeader->SetRank(GR_GUILDMASTER);
+            { newLeader->SetRank(GR_GUILDMASTER); }
 
         // when leader non-exist (at guild load with deleted leader only) not send broadcasts
         if (oldLeader)
@@ -691,7 +691,7 @@ void Guild::BroadcastPacket(WorldPacket* packet)
     {
         Player* player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
         if (player)
-            player->GetSession()->SendPacket(packet);
+            { player->GetSession()->SendPacket(packet); }
     }
 }
 
@@ -703,7 +703,7 @@ void Guild::BroadcastPacketToRank(WorldPacket* packet, uint32 rankId)
         {
             Player* player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
             if (player)
-                player->GetSession()->SendPacket(packet);
+                { player->GetSession()->SendPacket(packet); }
         }
     }
 }
@@ -744,7 +744,7 @@ void Guild::MassInviteToEvent(WorldSession* session, uint32 minLevel, uint32 max
 void Guild::CreateRank(std::string name_, uint32 rights)
 {
     if (m_Ranks.size() >= GUILD_RANKS_MAX_COUNT)
-        return;
+        { return; }
 
     // ranks are sequence 0,1,2,... where 0 means guildmaster
     uint32 new_rank_id = m_Ranks.size();
@@ -775,7 +775,7 @@ void Guild::DelRank(uint32 rankId)
 
     // client won't allow to have less than GUILD_RANKS_MIN_COUNT ranks in guild
     if (m_Ranks.size() <= GUILD_RANKS_MIN_COUNT || rankId < GUILD_RANKS_MIN_COUNT)
-        return;
+        { return; }
 
     RankList::iterator itr = m_Ranks.erase(m_Ranks.begin() + rankId);
     // delete lowest guild_rank
@@ -826,7 +826,7 @@ void Guild::SwitchRank(uint32 rankId, bool up)
 std::string Guild::GetRankName(uint32 rankId)
 {
     if (rankId >= m_Ranks.size())
-        return "<unknown>";
+        { return "<unknown>"; }
 
     return m_Ranks[rankId].Name;
 }
@@ -834,7 +834,7 @@ std::string Guild::GetRankName(uint32 rankId)
 uint32 Guild::GetRankRights(uint32 rankId)
 {
     if (rankId >= m_Ranks.size())
-        return 0;
+        { return 0; }
 
     return m_Ranks[rankId].Rights;
 }
@@ -842,7 +842,7 @@ uint32 Guild::GetRankRights(uint32 rankId)
 void Guild::SetRankName(uint32 rankId, std::string name_)
 {
     if (rankId >= m_Ranks.size())
-        return;
+        { return; }
 
     m_Ranks[rankId].Name = name_;
 
@@ -854,7 +854,7 @@ void Guild::SetRankName(uint32 rankId, std::string name_)
 void Guild::SetRankRights(uint32 rankId, uint32 rights)
 {
     if (rankId >= m_Ranks.size())
-        return;
+        { return; }
 
     m_Ranks[rankId].Rights = rights;
 
@@ -980,15 +980,15 @@ void Guild::Roster(WorldSession* session /*= NULL*/)
     data << uint32(0);
 
     if (session)
-        session->SendPacket(&data);
+        { session->SendPacket(&data); }
     else
-        BroadcastPacket(&data);
+        { BroadcastPacket(&data); }
     DEBUG_LOG("WORLD: Sent (SMSG_GUILD_ROSTER)");
 }
 
 void Guild::Query(WorldSession* session)
 {
-    WorldPacket data(SMSG_GUILD_QUERY_RESPONSE, 8 * 32 + 200); // we can only guess size
+    WorldPacket data(SMSG_GUILD_QUERY_RESPONSE, (8 * 32 + 200)); // we can only guess size
 
     data << GetObjectGuid();
     data << m_Name;
@@ -996,9 +996,9 @@ void Guild::Query(WorldSession* session)
     for (size_t i = 0 ; i < GUILD_RANKS_MAX_COUNT; ++i)     // show always 10 ranks
     {
         if (i < m_Ranks.size())
-            data << m_Ranks[i].Name;
+            { data << m_Ranks[i].Name; }
         else
-            data << uint8(0);                               // null string
+            { data << uint8(0); }                               // null string
     }
 
     // Rank order of creation
@@ -1079,12 +1079,12 @@ uint32 Guild::GetAccountsNumber()
 {
     // not need recalculation
     if (m_accountsNumber)
-        return m_accountsNumber;
+        { return m_accountsNumber; }
 
     // We use a set to be sure each element will be unique
     std::set<uint32> accountsIdSet;
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
-        accountsIdSet.insert(itr->second.accountId);
+        { accountsIdSet.insert(itr->second.accountId); }
 
     m_accountsNumber = accountsIdSet.size();
 
@@ -1119,7 +1119,7 @@ void Guild::LoadGuildEventLogFromDB()
     //                                                     0        1          2            3            4        5
     QueryResult* result = CharacterDatabase.PQuery("SELECT LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp FROM guild_eventlog WHERE guildid=%u ORDER BY TimeStamp DESC,LogGuid DESC LIMIT %u", m_Id, GUILD_EVENTLOG_MAX_RECORDS);
     if (!result)
-        return;
+        { return; }
     bool isNextLogGuidSet = false;
     // uint32 configCount = sWorld.getConfig(CONFIG_UINT32_GUILD_EVENT_LOG_COUNT);
     // First event in list will be the oldest and the latest event is last event in list
@@ -1164,7 +1164,7 @@ void Guild::LogGuildEvent(uint8 EventType, ObjectGuid playerGuid1, ObjectGuid pl
     m_GuildEventLogNextGuid = (m_GuildEventLogNextGuid + 1) % sWorld.getConfig(CONFIG_UINT32_GUILD_EVENT_LOG_COUNT);
     // Check max records limit
     if (m_GuildEventLog.size() >= GUILD_EVENTLOG_MAX_RECORDS)
-        m_GuildEventLog.pop_front();
+        { m_GuildEventLog.pop_front(); }
     // Add event to list
     m_GuildEventLog.push_back(NewEvent);
     // Save event to DB
@@ -1510,6 +1510,12 @@ bool Guild::MemberMoneyWithdraw(uint64 amount, uint32 LowGuid)
         CharacterDatabase.PExecute("UPDATE guild_member SET BankRemMoney='%u' WHERE guildid='%u' AND guid='%u'",
                                    itr->second.BankRemMoney, m_Id, LowGuid);
     }
+
+//#ifdef ENABLE_ELUNA
+//    Player* player = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, LowGuid));
+//    sEluna->OnMemberWitdrawMoney(this, player, amount, false); // IsRepair not a part of Mangos, implement?
+//#endif
+
     return true;
 }
 
@@ -1876,6 +1882,10 @@ void Guild::LogBankEvent(uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uin
 
         m_GuildBankEventLog_Item[TabId].push_back(NewEvent);
     }
+
+#ifdef ENABLE_ELUNA
+    sEluna->OnBankEvent(this, EventType, TabId, PlayerGuidLow, ItemOrMoney, ItemStackCount, DestTabId);
+#endif
 
     // save event to database
     CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid='%u' AND LogGuid='%u' AND TabId='%u'", m_Id, currentLogGuid, currentTabId);
@@ -2630,7 +2640,7 @@ void Guild::BroadcastEvent(GuildEvents event, ObjectGuid guid, char const* str1 
         data << str2;
     }
     else if (str1)
-        data << str1;
+        { data << str1; }
 
     if (guid)
         data << ObjectGuid(guid);

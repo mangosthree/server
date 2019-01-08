@@ -38,7 +38,7 @@ class LootStore;
 class WorldObject;
 
 #define MAX_NR_LOOT_ITEMS 16
-// note: the client cannot show more than 16 items total
+// note: the client can not show more than 16 items total
 #define MAX_NR_QUEST_ITEMS 32
 // unrelated to the number of quest items shown, just for reserve
 
@@ -196,7 +196,7 @@ class LootStore
 
 class LootTemplate
 {
-        class  LootGroup;                                   // A set of loot definitions for items (refs are not allowed inside)
+        class LootGroup;                                   // A set of loot definitions for items (refs are not allowed inside)
         typedef std::vector<LootGroup> LootGroups;
 
     public:
@@ -281,15 +281,15 @@ struct Loot
             m_playerCurrencies.clear();
 
             for (QuestItemMap::const_iterator itr = m_playerQuestItems.begin(); itr != m_playerQuestItems.end(); ++itr)
-                delete itr->second;
+                { delete itr->second; }
             m_playerQuestItems.clear();
 
             for (QuestItemMap::const_iterator itr = m_playerFFAItems.begin(); itr != m_playerFFAItems.end(); ++itr)
-                delete itr->second;
+                { delete itr->second; }
             m_playerFFAItems.clear();
 
             for (QuestItemMap::const_iterator itr = m_playerNonQuestNonFFANonCurrencyConditionalItems.begin(); itr != m_playerNonQuestNonFFANonCurrencyConditionalItems.end(); ++itr)
-                delete itr->second;
+                { delete itr->second; }
             m_playerNonQuestNonFFANonCurrencyConditionalItems.clear();
 
             m_playersLooting.clear();

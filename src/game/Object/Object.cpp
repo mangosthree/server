@@ -133,14 +133,14 @@ void Object::SendForcedObjectUpdate()
 void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const
 {
     if (!target)
-        return;
+        { return; }
 
     uint8  updatetype   = UPDATETYPE_CREATE_OBJECT;
     uint16 updateFlags  = m_updateFlag;
 
     /** lower flag1 **/
     if (target == this)                                     // building packet for yourself
-        updateFlags |= UPDATEFLAG_SELF;
+        { updateFlags |= UPDATEFLAG_SELF; }
 
     if (m_itsNewObject)
     {
@@ -1493,7 +1493,7 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float& z) const
 void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=NULL*/) const
 {
     if (!atMap)
-        atMap = GetMap();
+        { atMap = GetMap(); }
 
     switch (GetTypeId())
     {
@@ -1511,16 +1511,16 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
                 if (max_z > INVALID_HEIGHT)
                 {
                     if (z > max_z)
-                        z = max_z;
+                        { z = max_z; }
                     else if (z < ground_z)
-                        z = ground_z;
+                        { z = ground_z; }
                 }
             }
             else
             {
                 float ground_z = atMap->GetHeight(GetPhaseMask(), x, y, z);
                 if (z < ground_z)
-                    z = ground_z;
+                    { z = ground_z; }
             }
             break;
         }
@@ -1534,9 +1534,9 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
                 if (max_z > INVALID_HEIGHT)
                 {
                     if (z > max_z)
-                        z = max_z;
+                        { z = max_z; }
                     else if (z < ground_z)
-                        z = ground_z;
+                        { z = ground_z; }
                 }
             }
             else
@@ -1551,7 +1551,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
         {
             float ground_z = atMap->GetHeight(GetPhaseMask(), x, y, z);
             if (ground_z > INVALID_HEIGHT)
-                z = ground_z;
+                { z = ground_z; }
             break;
         }
     }
@@ -1566,7 +1566,7 @@ void WorldObject::MonsterSay(const char* text, uint32 language, Unit const* targ
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_SAY, text, LANG_UNIVERSAL, CHAT_TAG_NONE, GetObjectGuid(), GetName(),
-        target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
+                                 target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY), true);
 }
 
@@ -1574,7 +1574,7 @@ void WorldObject::MonsterYell(const char* text, uint32 language, Unit const* tar
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_YELL, text, LANG_UNIVERSAL, CHAT_TAG_NONE, GetObjectGuid(), GetName(),
-        target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
+                                 target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL), true);
 }
 
@@ -1582,7 +1582,7 @@ void WorldObject::MonsterTextEmote(const char* text, Unit const* target, bool Is
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     ChatHandler::BuildChatPacket(data, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, text, LANG_UNIVERSAL, CHAT_TAG_NONE, GetObjectGuid(), GetName(),
-        target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
+                                 target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
     SendMessageToSetInRange(&data, sWorld.getConfig(IsBossEmote ? CONFIG_FLOAT_LISTEN_RANGE_YELL : CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE), true);
 }
 
@@ -1593,7 +1593,7 @@ void WorldObject::MonsterWhisper(const char* text, Unit const* target, bool IsBo
 
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     ChatHandler::BuildChatPacket(data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL, CHAT_TAG_NONE, GetObjectGuid(), GetName(),
-        target->GetObjectGuid(), target->GetName());
+                                 target->GetObjectGuid(), target->GetName());
     ((Player*)target)->GetSession()->SendPacket(&data);
 }
 
@@ -1601,19 +1601,19 @@ namespace MaNGOS
 {
     class MonsterChatBuilder
     {
-    public:
+        public:
             MonsterChatBuilder(WorldObject const& obj, ChatMsg msgtype, MangosStringLocale const* textData, Language language, Unit const* target)
                 : i_object(obj), i_msgtype(msgtype), i_textData(textData), i_language(language), i_target(target) {}
             void operator()(WorldPacket& data, int32 loc_idx)
             {
                 char const* text = NULL;
                 if ((int32)i_textData->Content.size() > loc_idx + 1 && !i_textData->Content[loc_idx + 1].empty())
-                    text = i_textData->Content[loc_idx + 1].c_str();
+                    { text = i_textData->Content[loc_idx + 1].c_str(); }
                 else
-                    text = i_textData->Content[0].c_str();
+                    { text = i_textData->Content[0].c_str(); }
 
                 ChatHandler::BuildChatPacket(data, i_msgtype, text, i_language, CHAT_TAG_NONE, i_object.GetObjectGuid(), i_object.GetNameForLocaleIdx(loc_idx),
-                    i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
+                                             i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
             }
 
         private:
@@ -1656,7 +1656,7 @@ void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* ta
         case CHAT_TYPE_WHISPER:
         {
             if (!target || target->GetTypeId() != TYPEID_PLAYER)
-                return;
+                { return; }
             MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_WHISPER, textData, LANG_UNIVERSAL, target);
             MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
             say_do((Player*)target);
@@ -1665,7 +1665,7 @@ void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* ta
         case CHAT_TYPE_BOSS_WHISPER:
         {
             if (!target || target->GetTypeId() != TYPEID_PLAYER)
-                return;
+                { return; }
             MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_RAID_BOSS_WHISPER, textData, LANG_UNIVERSAL, target);
             MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
             say_do((Player*)target);
@@ -1679,7 +1679,7 @@ void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* ta
             Map::PlayerList const& pList = GetMap()->GetPlayers();
             for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
                 if (itr->getSource()->GetZoneId() == zoneid)
-                    say_do(itr->getSource());
+                    { say_do(itr->getSource()); }
             break;
         }
     }
@@ -1771,12 +1771,12 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 
     Team team = TEAM_NONE;
     if (GetTypeId() == TYPEID_PLAYER)
-        team = ((Player*)this)->GetTeam();
+        { team = ((Player*)this)->GetTeam(); }
 
     CreatureCreatePos pos(GetMap(), x, y, z, ang, GetPhaseMask());
 
     if (x == 0.0f && y == 0.0f && z == 0.0f)
-        pos = CreatureCreatePos(this, GetOrientation(), CONTACT_DISTANCE, ang);
+        { pos = CreatureCreatePos(this, GetOrientation(), CONTACT_DISTANCE, ang); }
 
     if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo, team))
     {
@@ -1795,8 +1795,8 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     pCreature->Summon(spwtype, despwtime);                  // Also initializes the AI and MMGen
 
     if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-        ((Creature*)this)->AI()->JustSummoned(pCreature);
-    
+        { ((Creature*)this)->AI()->JustSummoned(pCreature); }
+
 #ifdef ENABLE_ELUNA
     if (Unit* summoner = ToUnit())
         sEluna->OnSummoned(pCreature, summoner);
@@ -1804,7 +1804,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 
     // Creature Linking, Initial load is handled like respawn
     if (pCreature->IsLinkingEventTrigger())
-        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, pCreature);
+        { GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, pCreature); }
 
     // return the creature therewith the summoner has access to it
     return pCreature;
@@ -1816,7 +1816,7 @@ GameObject* WorldObject::SummonGameObject(uint32 id, float x, float y, float z, 
 
     Map *map = GetMap();
 
-    if(!map)
+    if (!map)
         return NULL;
 
     if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), id, map, GetPhaseMask(), x, y, z, angle))
@@ -1934,9 +1934,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     if (!sWorld.getConfig(CONFIG_BOOL_DETECT_POS_COLLISION))
     {
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); // update to LOS height if available
+            { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
         else
-            UpdateGroundPositionZ(x, y, z);
+            { UpdateGroundPositionZ(x, y, z); }
         return;
     }
 
@@ -1962,12 +1962,12 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     if (selector.CheckOriginalAngle())
     {
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); // update to LOS height if available
+            { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
         else
-            UpdateGroundPositionZ(x, y, z);
+            { UpdateGroundPositionZ(x, y, z); }
 
         if (fabs(init_z - z) < dist && IsWithinLOS(x, y, z))
-            return;
+            { return; }
 
         first_los_conflict = true;                          // first point have LOS problems
     }
@@ -1984,12 +1984,12 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         z = GetPositionZ();
 
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); // update to LOS height if available
+            { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
         else
-            UpdateGroundPositionZ(x, y, z);
+            { UpdateGroundPositionZ(x, y, z); }
 
         if (fabs(init_z - z) < dist && IsWithinLOS(x, y, z))
-            return;
+            { return; }
     }
 
     // BAD NEWS: not free pos (or used or have LOS problems)
@@ -2000,9 +2000,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         y = first_y;
 
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); // update to LOS height if available
+            { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
         else
-            UpdateGroundPositionZ(x, y, z);
+            { UpdateGroundPositionZ(x, y, z); }
         return;
     }
 
@@ -2016,12 +2016,12 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         z = GetPositionZ();
 
         if (searcher)
-            searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); // update to LOS height if available
+            { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
         else
-            UpdateGroundPositionZ(x, y, z);
+            { UpdateGroundPositionZ(x, y, z); }
 
         if (fabs(init_z - z) < dist && IsWithinLOS(x, y, z))
-            return;
+            { return; }
     }
 
     // BAD BAD NEWS: all found pos (free and used) have LOS problem :(
@@ -2029,9 +2029,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     y = first_y;
 
     if (searcher)
-        searcher->UpdateAllowedPositionZ(x, y, z, GetMap());// update to LOS height if available
+        { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }          // update to LOS height if available
     else
-        UpdateGroundPositionZ(x, y, z);
+        { UpdateGroundPositionZ(x, y, z); }
 }
 
 void WorldObject::SetPhaseMask(uint32 newPhaseMask, bool update)
@@ -2060,9 +2060,9 @@ void WorldObject::PlayDirectSound(uint32 sound_id, Player const* target /*= NULL
     data << uint32(sound_id);
     data << ObjectGuid();
     if (target)
-        target->SendDirectMessage(&data);
+        { target->SendDirectMessage(&data); }
     else
-        SendMessageToSet(&data, true);
+        { SendMessageToSet(&data, true); }
 }
 
 void WorldObject::PlayMusic(uint32 sound_id, Player const* target /*= NULL*/) const
@@ -2166,9 +2166,9 @@ void WorldObject::SetActiveObjectState(bool active)
         // player's update implemented in a different from other active worldobject's way
         // it's considired to use generic way in future
     {
-        if (isActiveObject() && !active)
+        if (IsActiveObject() && !active)
             { GetMap()->RemoveFromActive(this); }
-        else if (!isActiveObject() && active)
+        else if (!IsActiveObject() && active)
             { GetMap()->AddToActive(this); }
     }
     m_isActiveObject = active;

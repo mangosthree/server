@@ -34,7 +34,7 @@ int AggressorAI::Permissible(const Creature* creature)
 {
     // have some hostile factions, it will be selected by IsHostileTo check at MoveInLineOfSight
     if (!creature->IsCivilian() && !creature->IsNeutralToAll())
-        return PERMIT_BASE_PROACTIVE;
+        { return PERMIT_BASE_PROACTIVE; }
 
     return PERMIT_BASE_NO;
 }
@@ -47,10 +47,10 @@ void AggressorAI::MoveInLineOfSight(Unit* u)
 {
     // Ignore Z for flying creatures
     if (!m_creature->CanFly() && m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE)
-        return;
+        { return; }
 
     if (m_creature->CanInitiateAttack() && u->IsTargetableForAttack() &&
-            m_creature->IsHostileTo(u) && u->isInAccessablePlaceFor(m_creature))
+        m_creature->IsHostileTo(u) && u->isInAccessablePlaceFor(m_creature))
     {
         float attackRadius = m_creature->GetAttackDistance(u);
         if (m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->IsWithinLOSInMap(u))
@@ -111,7 +111,7 @@ void AggressorAI::EnterEvadeMode()
 
         // Remove ChaseMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
         if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-            m_creature->GetMotionMaster()->MoveTargetedHome();
+            { m_creature->GetMotionMaster()->MoveTargetedHome(); }
     }
 
     m_creature->DeleteThreatList();
@@ -124,7 +124,7 @@ void AggressorAI::UpdateAI(const uint32 /*diff*/)
 {
     // update i_victimGuid if m_creature->getVictim() !=0 and changed
     if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        return;
+        { return; }
 
     i_victimGuid = m_creature->getVictim()->GetObjectGuid();
 
@@ -140,7 +140,7 @@ bool AggressorAI::IsVisible(Unit* pl) const
 void AggressorAI::AttackStart(Unit* u)
 {
     if (!u || !m_creature->CanAttackByItself())
-        return;
+        { return; }
 
     if (m_creature->Attack(u, true))
     {

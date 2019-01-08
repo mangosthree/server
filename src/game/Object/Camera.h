@@ -35,7 +35,7 @@ class WorldPacket;
 class Player;
 
 /// Camera - object-receiver. Receives broadcast packets from nearby worldobjects, object visibility changes and sends them to client
-class  Camera
+class Camera
 {
         friend class ViewPoint;
     public:
@@ -77,13 +77,13 @@ class  Camera
 
     public:
         GridReference<Camera>& GetGridRef() { return m_gridRef; }
-        bool isActiveObject() const { return false; }
+        bool IsActiveObject() const { return false; }
     private:
         GridReference<Camera> m_gridRef;
 };
 
 /// Object-observer, notifies farsight object state to cameras that attached to it
-class  ViewPoint
+class ViewPoint
 {
         friend class Camera;
 

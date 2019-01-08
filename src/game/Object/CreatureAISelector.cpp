@@ -48,7 +48,7 @@ namespace FactorySelector
 
             // Allow scripting AI for normal creatures and not controlled pets (guardians and mini-pets)
             if (!creature->IsPet() || !static_cast<Pet*>(creature)->isControlled())
-                return scriptedAI;
+                { return scriptedAI; }
         }
 
         CreatureAIRegistry& ai_registry(CreatureAIRepository::Instance());
@@ -64,17 +64,17 @@ namespace FactorySelector
         {
             Unit* controler = creature->GetOwner() ? creature->GetOwner() : creature->GetCharmer();
             if (controler && controler->GetTypeId() == TYPEID_PLAYER && controler->IsAlive())
-                ai_factory = ai_registry.GetRegistryItem("PetAI");
+            { ai_factory = ai_registry.GetRegistryItem("PetAI"); }
         }
         else if (creature->IsTotem())
-            ai_factory = ai_registry.GetRegistryItem("TotemAI");
+            { ai_factory = ai_registry.GetRegistryItem("TotemAI"); }
 
         // select by script name
         if (!ai_factory && !ainame.empty())
-            ai_factory = ai_registry.GetRegistryItem(ainame.c_str());
+            { ai_factory = ai_registry.GetRegistryItem(ainame.c_str()); }
 
         if (!ai_factory && creature->IsGuard())
-            ai_factory = ai_registry.GetRegistryItem("GuardAI");
+            { ai_factory = ai_registry.GetRegistryItem("GuardAI"); }
 
         // select by permit check
         if (!ai_factory)

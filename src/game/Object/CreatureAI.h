@@ -91,14 +91,14 @@ enum AIEventType
     // Internal Use
     AI_EVENT_CALL_ASSISTANCE    = 13,                       // Sender = Attacked Npc, Invoker = Enemy
 
-    // Predefined for SD2
+    // Predefined for SD3
     AI_EVENT_START_ESCORT       = 100,                      // Invoker = Escorting Player
     AI_EVENT_START_ESCORT_B     = 101,                      // Invoker = Escorting Player
     AI_EVENT_START_EVENT        = 102,                      // Invoker = EventStarter
     AI_EVENT_START_EVENT_A      = 103,                      // Invoker = EventStarter
     AI_EVENT_START_EVENT_B      = 104,                      // Invoker = EventStarter
 
-    // Some IDs for special cases in SD2
+    // Some IDs for special cases in SD3
     AI_EVENT_CUSTOM_A           = 1000,
     AI_EVENT_CUSTOM_B           = 1001,
     AI_EVENT_CUSTOM_C           = 1002,
@@ -121,7 +121,7 @@ class CreatureAI
 
         ///== Information about AI ========================
         /**
-         * This function is used to display information about the AI.
+         * This funcion is used to display information about the AI.
          * It is called when the .npc aiinfo command is used.
          * Use this for on-the-fly debugging
          * @param reader is a ChatHandler to send messages to.
@@ -327,7 +327,7 @@ class CreatureAI
 
         ///== Event Handling ===============================
 
-        /**
+        /*
          * Send an AI Event to nearby Creatures around
          * @param uiType number to specify the event, default cases listed in enum AIEventType
          * @param pInvoker Unit that triggered this event (like an attacker)
@@ -336,7 +336,7 @@ class CreatureAI
          */
         void SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue = 0) const;
 
-        /**
+        /*
          * Send an AI Event to a Creature
          * @param eventType to specify the event, default cases listed in enum AIEventType
          * @param pInvoker Unit that triggered this event (like an attacker)
@@ -344,7 +344,7 @@ class CreatureAI
          */
         void SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue = 0) const;
 
-        /**
+        /*
          * Called when an AI Event is received
          * @param eventType to specify the event, default cases listed in enum AIEventType
          * @param pSender Creature that sent this event

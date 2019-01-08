@@ -176,7 +176,7 @@ enum SpawnedEventMode
 
 struct CreatureEventAI_Action
 {
-    EventAI_ActionType type : 16;
+    EventAI_ActionType type: 16;
     union
     {
         // ACTION_T_TEXT                                    = 1
@@ -627,7 +627,7 @@ struct CreatureEventAIHolder
     bool UpdateRepeatTimer(Creature* creature, uint32 repeatMin, uint32 repeatMax);
 };
 
-class  CreatureEventAI : public CreatureAI
+class CreatureEventAI : public CreatureAI
 {
     public:
         explicit CreatureEventAI(Creature* c);
@@ -656,7 +656,7 @@ class  CreatureEventAI : public CreatureAI
         void ReceiveEmote(Player* pPlayer, uint32 text_emote) override;
         void SummonedCreatureJustDied(Creature* unit) override;
         void SummonedCreatureDespawn(Creature* unit) override;
-        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 miscValue) override; 
+        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 miscValue) override;
 
         static int Permissible(const Creature*);
 
@@ -666,7 +666,7 @@ class  CreatureEventAI : public CreatureAI
         inline int32 GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3);
         /// If the bool& param is true, an error should be reported
         inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker, Creature* pAIEventSender, bool& isError, uint32 forSpellId = 0, uint32 selectFlags = 0);
- 
+
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event);
 
         Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff);

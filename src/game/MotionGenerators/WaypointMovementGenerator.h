@@ -39,10 +39,10 @@
 #include <set>
 
 #define FLIGHT_TRAVEL_UPDATE  100
-#define STOP_TIME_FOR_PLAYER  (3 * MINUTE * IN_MILLISECONDS)  // 3 Minutes
+#define STOP_TIME_FOR_PLAYER  (3 * MINUTE * IN_MILLISECONDS)// 3 Minutes
 
 template<class T, class P>
-class MANGOS_DLL_SPEC PathMovementBase
+class PathMovementBase
 {
     public:
         PathMovementBase() : i_currentNode(0) {}
@@ -63,12 +63,12 @@ class MANGOS_DLL_SPEC PathMovementBase
  */
 
 template<class T>
-class  WaypointMovementGenerator;
+class WaypointMovementGenerator;
 
 template<>
-class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
+class WaypointMovementGenerator<Creature>
     : public MovementGeneratorMedium< Creature, WaypointMovementGenerator<Creature> >,
-      public PathMovementBase<Creature, WaypointPath const*>
+  public PathMovementBase<Creature, WaypointPath const*>
 {
     public:
         WaypointMovementGenerator(Creature&) : i_nextMoveTime(0), m_isArrivalDone(false), m_lastReachedWaypoint(0) {}
@@ -111,7 +111,7 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
 /** FlightPathMovementGenerator generates movement of the player for the paths
  * and hence generates ground and activities for the player.
  */
-class  FlightPathMovementGenerator
+class FlightPathMovementGenerator
     : public MovementGeneratorMedium< Player, FlightPathMovementGenerator >,
   public PathMovementBase<Player, TaxiPathNodeList const*>
 {

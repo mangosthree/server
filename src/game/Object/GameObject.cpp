@@ -772,7 +772,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
 {
     // Not in world
     if (!IsInWorld() || !u->IsInWorld())
-        return false;
+        { return false; }
 
     // invisible at client always
     if (!GetGOInfo()->displayId)
@@ -780,14 +780,14 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
 
     // Transport always visible at this step implementation
     if (IsTransport() && IsInMap(u))
-        return true;
+        { return true; }
 
     // quick check visibility false cases for non-GM-mode
     if (!u->isGameMaster())
     {
         // despawned and then not visible for non-GM in GM-mode
         if (!isSpawned())
-            return false;
+            { return false; }
 
         // special invisibility cases
         if (GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed)
@@ -1216,7 +1216,7 @@ void GameObject::Use(Unit* user)
 
             // TODO: Improve this when more information is available, currently these traps are known that must send the anim (Onyxia/ Heigan Fissures/ Trap in DireMaul)
             if (GetDisplayId() == 4392 || GetDisplayId() == 4472 || GetDisplayId() == 4491 || GetDisplayId() == 6785 || GetDisplayId() == 3073 || GetDisplayId() == 7998)
-                SendGameObjectCustomAnim(GetObjectGuid());
+                { SendGameObjectCustomAnim(GetObjectGuid()); }
 
             // TODO: Despawning of traps? (Also related to code in ::Update)
             return;
@@ -1354,7 +1354,7 @@ void GameObject::Use(Unit* user)
             if (!scriptReturnValue)
                 { GetMap()->ScriptsStart(DBS_ON_GO_USE, GetGUIDLow(), spellCaster, this); }
             else
-                return;
+                { return; }
 
             // cast this spell later if provided
             spellId = info->goober.spellId;
@@ -2143,19 +2143,19 @@ void GameObject::SetCapturePointSlider(float value, bool isLocked)
 
     // only activate non-locked capture point
     if (!isLocked)
-        SetLootState(GO_ACTIVATED);
+        { SetLootState(GO_ACTIVATED); }
 
     // set the state of the capture point based on the slider value
     if ((int)m_captureSlider == CAPTURE_SLIDER_ALLIANCE)
-        m_captureState = CAPTURE_STATE_WIN_ALLIANCE;
+        { m_captureState = CAPTURE_STATE_WIN_ALLIANCE; }
     else if ((int)m_captureSlider == CAPTURE_SLIDER_HORDE)
-        m_captureState = CAPTURE_STATE_WIN_HORDE;
+        { m_captureState = CAPTURE_STATE_WIN_HORDE; }
     else if (m_captureSlider > CAPTURE_SLIDER_MIDDLE + info->capturePoint.neutralPercent * 0.5f)
-        m_captureState = CAPTURE_STATE_PROGRESS_ALLIANCE;
+        { m_captureState = CAPTURE_STATE_PROGRESS_ALLIANCE; }
     else if (m_captureSlider < CAPTURE_SLIDER_MIDDLE - info->capturePoint.neutralPercent * 0.5f)
-        m_captureState = CAPTURE_STATE_PROGRESS_HORDE;
+        { m_captureState = CAPTURE_STATE_PROGRESS_HORDE; }
     else
-        m_captureState = CAPTURE_STATE_NEUTRAL;
+        { m_captureState = CAPTURE_STATE_NEUTRAL; }
 }
 
 void GameObject::TickCapturePoint()
@@ -2499,3 +2499,4 @@ uint32 GameObject::GetScriptId()
 {
     return sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) ? sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) : sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, GetEntry());
 }
+

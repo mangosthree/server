@@ -68,10 +68,10 @@ namespace Movement
         if (transportInfo)
             transportInfo->GetLocalPosition(real_position.x, real_position.y, real_position.z, real_position.orientation);
 
-        // there is a big chane that current position is unknown if current state is not finalized, need compute it
+        // there is a big chance that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
         if (!move_spline.Finalized() && !transportInfo)
-            real_position = move_spline.ComputePosition();
+            { real_position = move_spline.ComputePosition(); }
 
         if (args.path.empty())
         {
@@ -92,10 +92,10 @@ namespace Movement
         moveFlags |= MOVEFLAG_FORWARD;
 
         if (args.velocity == 0.f)
-            args.velocity = unit.GetSpeed(SelectSpeedType(moveFlags));
+            { args.velocity = unit.GetSpeed(SelectSpeedType(moveFlags)); }
 
         if (!args.Validate(&unit))
-            return 0;
+            { return 0; }
 
         unit.m_movementInfo.SetMovementFlags((MovementFlags)moveFlags);
         move_spline.Initialize(args);
@@ -132,7 +132,7 @@ namespace Movement
         if (transportInfo)
             transportInfo->GetLocalPosition(real_position.x, real_position.y, real_position.z, real_position.orientation);
 
-        // there is a big chane that current position is unknown if current state is not finalized, need compute it
+        // there is a big chance that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
         if (!move_spline.Finalized() && !transportInfo)
             real_position = move_spline.ComputePosition();
@@ -143,7 +143,7 @@ namespace Movement
             MoveTo(real_position);
         }
 
-        // corrent first vertex
+        // current first vertex
         args.path[0] = real_position;
 
         args.flags = MoveSplineFlag::Done;

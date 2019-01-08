@@ -1138,7 +1138,7 @@ void BattleGround::SendRewardMarkByMail(Player* plr, uint32 mark, uint32 count)
 /// <param name="plr">The PLR.</param>
 void BattleGround::RewardQuestComplete(Player* plr)
 {
-    uint32 quest;
+    uint32 quest = 0;
     switch (GetTypeID())
     {
         case BATTLEGROUND_AV:
@@ -2072,6 +2072,11 @@ void BattleGround::CheckArenaWinConditions()
         EndBattleGround(ALLIANCE);
 }
 
+/// <summary>
+/// Sets the bg raid.
+/// </summary>
+/// <param name="team">The team.</param>
+/// <param name="bg_raid">The bg_raid.</param>
 void BattleGround::SetBgRaid(Team team, Group* bg_raid)
 {
     Group*& old_raid = m_BgRaids[GetTeamIndexByTeamId(team)];

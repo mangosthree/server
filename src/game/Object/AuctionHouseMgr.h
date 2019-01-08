@@ -22,11 +22,29 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * This is part of the code that takes care of the Auction House and all that can happen with it,
+ * it takes care of adding new items to it, bidding/buyouting them etc. Also handles the errors
+ * that can happen, ie: you don't have enough money, your account isn't paid for (won't really
+ * happen on these servers), the item you are trying to buy doesn't exist etc.
+ *
+ * This is also what is partly used by the \ref AuctionHouseBot as an interface to what it needs
+ * for performing the usual operations such as checking what has been bidded on etc.
+ *
+ * \todo Add more info about how the auction house system works.
+ */
+
+
 #ifndef _AUCTION_HOUSE_MGR_H
 #define _AUCTION_HOUSE_MGR_H
 
 #include "Common.h"
 #include "DBCStructure.h"
+
+/** \addtogroup auctionhouse
+ * @{
+ * \file
+ */
 
 class Item;
 class Player;
@@ -37,24 +55,28 @@ class WorldPacket;
 #define MAX_AUCTION_SORT 12
 #define AUCTION_SORT_REVERSED 0x10
 
+/**
+ * Documentation for this taken directly from comments in source
+ * \todo Needs real documentation of what these values mean and where they are sent etc.
+ */
 enum AuctionError
 {
-    AUCTION_OK                          = 0,                // depends on enum AuctionAction
-    AUCTION_ERR_INVENTORY               = 1,                // depends on enum InventoryChangeResult
-    AUCTION_ERR_DATABASE                = 2,                // ERR_AUCTION_DATABASE_ERROR (default)
-    AUCTION_ERR_NOT_ENOUGH_MONEY        = 3,                // ERR_NOT_ENOUGH_MONEY
-    AUCTION_ERR_ITEM_NOT_FOUND          = 4,                // ERR_ITEM_NOT_FOUND
-    AUCTION_ERR_HIGHER_BID              = 5,                // ERR_AUCTION_HIGHER_BID
-    AUCTION_ERR_BID_INCREMENT           = 7,                // ERR_AUCTION_BID_INCREMENT
-    AUCTION_ERR_BID_OWN                 = 10,               // ERR_AUCTION_BID_OWN
-    AUCTION_ERR_RESTRICTED_ACCOUNT      = 13                // ERR_RESTRICTED_ACCOUNT
+    AUCTION_OK                          = 0,                ///< depends on enum AuctionAction
+    AUCTION_ERR_INVENTORY               = 1,                ///< depends on enum InventoryChangeResult
+    AUCTION_ERR_DATABASE                = 2,                ///< ERR_AUCTION_DATABASE_ERROR (default)
+    AUCTION_ERR_NOT_ENOUGH_MONEY        = 3,                ///< ERR_NOT_ENOUGH_MONEY
+    AUCTION_ERR_ITEM_NOT_FOUND          = 4,                ///< ERR_ITEM_NOT_FOUND
+    AUCTION_ERR_HIGHER_BID              = 5,                ///< ERR_AUCTION_HIGHER_BID
+    AUCTION_ERR_BID_INCREMENT           = 7,                ///< ERR_AUCTION_BID_INCREMENT
+    AUCTION_ERR_BID_OWN                 = 10,               ///< ERR_AUCTION_BID_OWN
+    AUCTION_ERR_RESTRICTED_ACCOUNT      = 13                ///< ERR_RESTRICTED_ACCOUNT
 };
 
 enum AuctionAction
 {
-    AUCTION_STARTED     = 0,                                // ERR_AUCTION_STARTED
-    AUCTION_REMOVED     = 1,                                // ERR_AUCTION_REMOVED
-    AUCTION_BID_PLACED  = 2                                 // ERR_AUCTION_BID_PLACED
+    AUCTION_STARTED     = 0,                                ///< ERR_AUCTION_STARTED
+    AUCTION_REMOVED     = 1,                                ///< ERR_AUCTION_REMOVED
+    AUCTION_BID_PLACED  = 2                                 ///< ERR_AUCTION_BID_PLACED
 };
 
 struct AuctionEntry
@@ -99,7 +121,7 @@ class AuctionHouseObject
         ~AuctionHouseObject()
         {
             for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
-                delete itr->second;
+                { delete itr->second; }
         }
 
         typedef std::map<uint32, AuctionEntry*> AuctionEntryMap;
@@ -150,11 +172,16 @@ class AuctionSorter
         Player* m_viewPlayer;
 };
 
+/**
+ * This describes the type of auction house that we are dealing with, they can be either:
+ * - neutral (anyone can do their shopping there)
+ * - alliance/horde (only the respective faction can shop there)
+ */
 enum AuctionHouseType
 {
-    AUCTION_HOUSE_ALLIANCE  = 0,
-    AUCTION_HOUSE_HORDE     = 1,
-    AUCTION_HOUSE_NEUTRAL   = 2
+    AUCTION_HOUSE_ALLIANCE  = 0, ///< Alliance only auction house
+    AUCTION_HOUSE_HORDE     = 1, ///< Horde only auction house
+    AUCTION_HOUSE_NEUTRAL   = 2  ///< Neutral auction house, anyone can do business here
 };
 
 #define MAX_AUCTION_HOUSE_TYPE 3
@@ -205,6 +232,9 @@ class AuctionHouseMgr
         ItemMap             mAitems;
 };
 
+/// Convenience define to access the singleton object for the Auction House Manager
 #define sAuctionMgr MaNGOS::Singleton<AuctionHouseMgr>::Instance()
+
+/** @} */
 
 #endif

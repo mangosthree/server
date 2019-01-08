@@ -91,20 +91,20 @@ struct CreatureInfo
     uint32  FactionAlliance;
     uint32  FactionHorde;
     float   Scale;
-    uint32  Family;                                        // enum CreatureFamily values (optional)
-    uint32  CreatureType;                                  // enum CreatureType values
+    uint32  Family;                                         // enum CreatureFamily values (optional)
+    uint32  CreatureType;                                   // enum CreatureType values
     uint32  InhabitType;
     uint32  RegenerateStats;
     int32    RacialLeader;
     uint32  NpcFlags;
-    uint32  UnitFlags;                                     // enum UnitFlags mask values
+    uint32  UnitFlags;                                      // enum UnitFlags mask values
     uint32  UnitFlags2;                                    // enum UnitFlags2 mask values
     uint32  DynamicFlags;
     uint32  ExtraFlags;
-    uint32  CreatureTypeFlags;                             // enum CreatureTypeFlags mask values
+    uint32  CreatureTypeFlags;                              // enum CreatureTypeFlags mask values
     float   SpeedWalk;
     float   SpeedRun;
-    uint32  UnitClass;                                     // enum Classes. Note only 4 classes are known for creatures.
+    uint32  UnitClass;                                      // enum Classes. Note only 4 classes are known for creatures.
     uint32  Rank;
     int32   Expansion;                                      // creature expansion, important for stats, CAN BE -1 as marker for some invalid cases.
     float   HealthMultiplier;
@@ -166,13 +166,13 @@ struct CreatureInfo
     SkillType GetRequiredLootSkill() const
     {
         if (CreatureTypeFlags & CREATURE_TYPEFLAGS_HERBLOOT)
-            return SKILL_HERBALISM;
+            { return SKILL_HERBALISM; }
         else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
-            return SKILL_MINING;
+            { return SKILL_MINING; }
         else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
             return SKILL_ENGINEERING;
         else
-            return SKILL_SKINNING;                          // normal case
+            { return SKILL_SKINNING; }                          // normal case
     }
 
     bool IsExotic() const
@@ -341,8 +341,8 @@ enum SelectFlags
 
 enum RegenStatsFlags
 {
-    REGEN_FLAG_HEALTH = 0x001,
-    REGEN_FLAG_POWER = 0x002,
+    REGEN_FLAG_HEALTH               = 0x001,
+    REGEN_FLAG_POWER                = 0x002,
 };
 
 // Vendors
@@ -377,7 +377,7 @@ struct VendorItemData
 
     VendorItem* GetItem(uint32 slot) const
     {
-        if (slot >= m_items.size()) return NULL;
+        if (slot >= m_items.size()) { return NULL; }
         return m_items[slot];
     }
     bool Empty() const { return m_items.empty(); }
@@ -690,6 +690,12 @@ class Creature : public Unit
         * \return ObjectGuid Player GUID.
         */
         ObjectGuid GetLootRecipientGuid() const { return m_lootRecipientGuid; }
+
+        /**
+        * function returning the group recipient ID.
+        *
+        * \return uint32 Group ID.
+        */
         uint32 GetLootGroupRecipientId() const { return m_lootGroupRecipientId; }
         Player* GetLootRecipient() const;                   // use group cases as prefered
         Group* GetGroupLootRecipient() const;

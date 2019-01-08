@@ -1,4 +1,4 @@
-/*
+/**
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
@@ -27,7 +27,7 @@
 
 #include "MovementGenerator.h"
 
-class  IdleMovementGenerator : public MovementGenerator
+class IdleMovementGenerator : public MovementGenerator
 {
     public:
 
@@ -41,7 +41,7 @@ class  IdleMovementGenerator : public MovementGenerator
 
 extern IdleMovementGenerator si_idleMovement;
 
-class  DistractMovementGenerator : public MovementGenerator
+class DistractMovementGenerator : public MovementGenerator
 {
     public:
         explicit DistractMovementGenerator(uint32 timer) : m_timer(timer) {}
@@ -57,7 +57,7 @@ class  DistractMovementGenerator : public MovementGenerator
         uint32 m_timer;
 };
 
-class  AssistanceDistractMovementGenerator : public DistractMovementGenerator
+class AssistanceDistractMovementGenerator : public DistractMovementGenerator
 {
     public:
         AssistanceDistractMovementGenerator(uint32 timer) :

@@ -911,9 +911,9 @@ bool ChatHandler::HandleModifyFactionCommand(char* args)
         {
             uint32 factionid = chr->getFaction();
             uint32 flag      = chr->GetUInt32Value(UNIT_FIELD_FLAGS);
-            uint32 NpcFlags   = chr->GetUInt32Value(UNIT_NPC_FLAGS);
+            uint32 npcflag   = chr->GetUInt32Value(UNIT_NPC_FLAGS);
             uint32 dyflag    = chr->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
-            PSendSysMessage(LANG_CURRENT_FACTION, chr->GetGUIDLow(), factionid, flag, NpcFlags, dyflag);
+            PSendSysMessage(LANG_CURRENT_FACTION, chr->GetGUIDLow(), factionid, flag, npcflag, dyflag);
         }
         return true;
     }
@@ -940,19 +940,19 @@ bool ChatHandler::HandleModifyFactionCommand(char* args)
     if (!ExtractOptUInt32(&args, flag, chr->GetUInt32Value(UNIT_FIELD_FLAGS)))
         { return false; }
 
-    uint32 NpcFlags;
-    if (!ExtractOptUInt32(&args, NpcFlags, chr->GetUInt32Value(UNIT_NPC_FLAGS)))
+    uint32 npcflag;
+    if (!ExtractOptUInt32(&args, npcflag, chr->GetUInt32Value(UNIT_NPC_FLAGS)))
         { return false; }
 
     uint32  dyflag;
     if (!ExtractOptUInt32(&args, dyflag, chr->GetUInt32Value(UNIT_DYNAMIC_FLAGS)))
         { return false; }
 
-    PSendSysMessage(LANG_YOU_CHANGE_FACTION, chr->GetGUIDLow(), factionid, flag, NpcFlags, dyflag);
+    PSendSysMessage(LANG_YOU_CHANGE_FACTION, chr->GetGUIDLow(), factionid, flag, npcflag, dyflag);
 
     chr->setFaction(factionid);
     chr->SetUInt32Value(UNIT_FIELD_FLAGS, flag);
-    chr->SetUInt32Value(UNIT_NPC_FLAGS, NpcFlags);
+    chr->SetUInt32Value(UNIT_NPC_FLAGS, npcflag);
     chr->SetUInt32Value(UNIT_DYNAMIC_FLAGS, dyflag);
 
     return true;
@@ -2288,14 +2288,15 @@ bool ChatHandler::HandleGoGridCommand(char* args)
 
 bool ChatHandler::HandleModifyDrunkCommand(char* args)
 {
-    if (!*args)    { return false; }
+    if (!*args)
+        return false;
 
     uint8 drunkValue = (uint8)atoi(args);
     if (drunkValue > 100)
         drunkValue = 100;
 
     if (Player* target = getSelectedPlayer())
-        target->SetDrunkValue(drunkValue); 
+        target->SetDrunkValue(drunkValue);
 
     return true;
 }

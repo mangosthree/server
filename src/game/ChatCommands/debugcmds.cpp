@@ -311,7 +311,7 @@ bool ChatHandler::HandleDebugSendChannelNotifyCommand(char* args)
 // Send notification in chat
 bool ChatHandler::HandleDebugSendChatMsgCommand(char* args)
 {
-    const char* msg = "testtest";
+    const char* msg = args;
 
     uint32 type;
     if (!ExtractUInt32(&args, type) || type > 255)
@@ -1120,7 +1120,7 @@ bool ChatHandler::HandleDebugSpellCoefsCommand(char* args)
                     direct_calc, direct_calc * SCALE_SPELLPOWER_HEALING, bonus ? bonus->direct_damage : 0.0f, bonus ? bonus->ap_bonus : 0.0f);
     PSendSysMessage(LANG_SPELLCOEFS, spellid, isDotHeal ? dotHealStr : dotDamageStr,
                     dot_calc, dot_calc * SCALE_SPELLPOWER_HEALING, bonus ? bonus->dot_damage : 0.0f, bonus ? bonus->ap_dot_bonus : 0.0f);
-    
+
     return true;
 }
 

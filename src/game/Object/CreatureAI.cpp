@@ -117,7 +117,7 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
             }
 
             // Interrupt any previous spell
-            if (uiCastFlags & CAST_INTERRUPT_PREVIOUS && pCaster->IsNonMeleeSpellCasted(false))
+            if ((uiCastFlags & CAST_INTERRUPT_PREVIOUS) && pCaster->IsNonMeleeSpellCasted(false))
                 { pCaster->InterruptNonMeleeSpells(false); }
 
             // Creature should always stop before it will cast a non-instant spell            
@@ -153,16 +153,16 @@ void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=fals
     m_isCombatMovement = enable;
 
     if (enable)
-        m_creature->clearUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
+        { m_creature->clearUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT); }
     else
-        m_creature->addUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
+        { m_creature->addUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT); }
 
     if (stopOrStartMovement && m_creature->getVictim())     // Only change current movement while in combat
     {
         if (enable)
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle);
+            { m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle); }
         else if (!enable && m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-            m_creature->StopMoving();
+            { m_creature->StopMoving(); }
     }
 }
 
@@ -261,7 +261,7 @@ void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32
     }
 }
 
-void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver,  uint32 miscValue /*=0*/) const
+void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue /*=0*/) const
 {
     MANGOS_ASSERT(pReceiver);
     pReceiver->AI()->ReceiveAIEvent(eventType, m_creature, pInvoker, miscValue);

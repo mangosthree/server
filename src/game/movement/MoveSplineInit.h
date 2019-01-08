@@ -43,7 +43,7 @@ namespace Movement
      * @brief Initializes and launches spline movement
      *
      */
-    class MANGOS_DLL_SPEC MoveSplineInit
+    class MoveSplineInit
     {
         public:
 
@@ -60,8 +60,11 @@ namespace Movement
              * @return int32 duration - estimated travel time
              */
             int32 Launch();
-
-            /* Stop any creature movement */
+            
+            /**
+             * @brief Stop any creature movement
+             * 
+             */
             void Stop();
 
             /* Adds movement by parabolic trajectory
@@ -75,7 +78,7 @@ namespace Movement
              */
             void SetAnimation(AnimType anim);
 
-            /**
+            /*
              * @brief  Adds final facing animation
              * sets unit's facing to specified point/angle after all path done.
              * you can have only one final facing: previous will be overriden
@@ -170,7 +173,9 @@ namespace Movement
             /* Sets ExitVehicle flag
              */
             void SetExitVehicle();
+
             PointsArray& Path() { return args.path; }
+
         protected:
 
             MoveSplineInitArgs args; /**< TODO */

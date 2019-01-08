@@ -39,7 +39,7 @@ class Item;
 
 enum GuildDefaultRanks
 {
-    // these ranks can be modified, but they cannot be deleted
+    // these ranks can be modified, but they can not be deleted
     GR_GUILDMASTER  = 0,
     GR_OFFICER      = 1,
     GR_VETERAN      = 2,
@@ -401,7 +401,7 @@ class Guild
             for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
                 if (Player* player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first)))
                     if (player != except)
-                        _do(player);
+                        { _do(player); }
         }
 
         void CreateRank(std::string name, uint32 rights);
@@ -443,7 +443,7 @@ class Guild
         {
             for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
                 if (itr->second.Name == name)
-                    return &itr->second;
+                    { return &itr->second; }
 
             return NULL;
         }

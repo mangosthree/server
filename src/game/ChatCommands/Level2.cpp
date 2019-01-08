@@ -271,7 +271,7 @@ bool ChatHandler::HandleTriggerCommand(char* args)
 
     AreaTrigger const* at = sObjectMgr.GetAreaTrigger(atEntry->id);
     if (at)
-        PSendSysMessage(LANG_TRIGGER_REQ_LEVEL, at->requiredLevel);
+        { PSendSysMessage(LANG_TRIGGER_REQ_LEVEL, at->requiredLevel); }
 
     if (uint32 quest_id = sObjectMgr.GetQuestForAreaTrigger(atEntry->id))
     {
@@ -286,9 +286,9 @@ bool ChatHandler::HandleTriggerCommand(char* args)
             SendSysMessage(LANG_TRIGGER_REQ_ITEMS);
 
             if (at->requiredItem)
-                ShowItemListHelper(at->requiredItem, loc_idx, pl);
+                { ShowItemListHelper(at->requiredItem, loc_idx, pl); }
             if (at->requiredItem2)
-                ShowItemListHelper(at->requiredItem2, loc_idx, pl);
+                { ShowItemListHelper(at->requiredItem2, loc_idx, pl); }
         }
 
         if (at->requiredQuest)
@@ -1369,6 +1369,7 @@ bool ChatHandler::HandleCharacterAchievementsCommand(char* args)
 void ChatHandler::ShowFactionListHelper(FactionEntry const* factionEntry, LocaleConstant loc, FactionState const* repState /*= NULL*/, Player* target /*= NULL */)
 {
     std::string name = factionEntry->name[loc];
+
     // send faction in "id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
     // or              "id - [faction] [no reputation]" format
     std::ostringstream ss;
@@ -1921,6 +1922,7 @@ bool ChatHandler::HandleNpcMoveCommand(char* args)
     Player* player = m_session->GetPlayer();
 
     Creature* pCreature = getSelectedCreature();
+
     if (!pCreature)
     {
         // number or [name] Shift-click form |color|Hcreature:creature_guid|h[name]|h|r
@@ -2476,7 +2478,6 @@ bool ChatHandler::HandleDeMorphCommand(char* /*args*/)
     if (!target)
         { target = m_session->GetPlayer(); }
 
-
     // check online security
     else if (target->GetTypeId() == TYPEID_PLAYER && HasLowerSecurity((Player*)target))
         { return false; }
@@ -2679,11 +2680,11 @@ bool ChatHandler::HandleTicketCommand(char* args)
             PSendSysMessage(LANG_COMMAND_TICKETCOUNT, count, GetOnOffStr(accept));
         }
         else
-            PSendSysMessage(LANG_COMMAND_TICKETCOUNT_CONSOLE, count);
+            { PSendSysMessage(LANG_COMMAND_TICKETCOUNT_CONSOLE, count); }
 
         return true;
     }
-    
+
     // ticket accept on
     if (strncmp(px, "on", 3) == 0)
     {
@@ -2756,7 +2757,7 @@ bool ChatHandler::HandleTicketCommand(char* args)
 
         // no response text?
         if (!*args)
-            return false;
+            { return false; }
 
         ticket->SetResponseText(args);
 
@@ -2771,7 +2772,7 @@ bool ChatHandler::HandleTicketCommand(char* args)
     if (ExtractUInt32(&px, num))
     {
         if (num == 0)
-            return false;
+            { return false; }
 
         // mgr numbering tickets start from 0
         GMTicket* ticket = sTicketMgr.GetGMTicketByOrderPos(num - 1);
@@ -2789,7 +2790,7 @@ bool ChatHandler::HandleTicketCommand(char* args)
     ObjectGuid target_guid;
     std::string target_name;
     if (!ExtractPlayerTarget(&px, NULL, &target_guid, &target_name))
-        return false;
+        { return false; }
 
     // ticket $char_name
     GMTicket* ticket = sTicketMgr.GetGMTicket(target_guid);
@@ -2849,7 +2850,7 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
             PSendSysMessage(LANG_COMMAND_TICKETPLAYERDEL, GetNameLink(pl).c_str());
         }
         else
-            PSendSysMessage(LANG_COMMAND_TICKETDEL);
+            { PSendSysMessage(LANG_COMMAND_TICKETDEL); }
 
         return true;
     }
@@ -3139,7 +3140,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
 
     // Did user provide a GUID or did the user select a creature?
     Creature* targetCreature = getSelectedCreature();       // Expect a visual waypoint to be selected
-    Creature* wpOwner;                                      // Who moves along the waypoint
+    Creature* wpOwner = NULL;                               // Who moves along the waypoint
     uint32 wpId = 0;
     WaypointPathOrigin wpSource = PATH_NO_PATH;
     int32 wpPathId = 0;
@@ -3392,7 +3393,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         }
     }
 
-    Creature* wpOwner;                                         ///< Npc that is moving
+    Creature* wpOwner = NULL;                               ///< Npc that is moving
     TemporarySummonWaypoint* wpTarget = NULL;               // Define here for wp-info command
 
     // Show info for the selected waypoint (Step one: get moving npc)
@@ -3543,7 +3544,7 @@ bool ChatHandler::HandleWpExportCommand(char* args)
     if (!*args)
         return false;
 
-    Creature* wpOwner;
+    Creature* wpOwner = NULL;
     WaypointPathOrigin wpOrigin = PATH_NO_PATH;
     int32 wpPathId = 0;
 

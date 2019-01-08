@@ -580,7 +580,7 @@ uint32 ArenaTeam::GetPoints(uint32 MemberRating)
     else if (m_Type == ARENA_TYPE_3v3)
         points *= 0.88f;
 
-    return (uint32)points;
+    return (uint32) points;
 }
 
 bool ArenaTeam::HaveMember(ObjectGuid guid) const
@@ -736,8 +736,8 @@ void ArenaTeam::UpdateArenaPointsHelper(std::map<uint32, uint32>& PlayerPoints)
     if (m_stats.games_week < 10)
         return;
     // to get points, a player has to participate in at least 30% of the matches
-    uint32 min_plays = (uint32)ceil(m_stats.games_week * 0.3);
-    for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    uint32 min_plays = (uint32) ceil(m_stats.games_week * 0.3);
+    for (MemberList::const_iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
     {
         // the player participated in enough games, update his points
         uint32 points_to_add = 0;

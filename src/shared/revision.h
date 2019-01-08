@@ -24,7 +24,7 @@
 
 #ifndef MANGOS_H_REVISION
 #define MANGOS_H_REVISION
-    #define REVISION_NR "210708"
+    #define REVISION_NR "2109001"
 
     #define REALMD_DB_VERSION_NR 21
     #define REALMD_DB_STRUCTURE_NR 1
@@ -37,7 +37,7 @@
     #define CHAR_DB_UPDATE_DESCRIPTION "Remove DbDocs"
 
     #define WORLD_DB_VERSION_NR 21
-    #define WORLD_DB_STRUCTURE_NR 8
+    #define WORLD_DB_STRUCTURE_NR 9
     #define WORLD_DB_CONTENT_NR 1
-    #define WORLD_DB_UPDATE_DESCRIPTION "force_version_change"
+    #define WORLD_DB_UPDATE_DESCRIPTION "quest_relations"
 #endif // __REVISION_H__

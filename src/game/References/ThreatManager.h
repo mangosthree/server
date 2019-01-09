@@ -40,7 +40,7 @@ class Creature;
 class ThreatManager;
 struct SpellEntry;
 
-#define THREAT_UPDATE_INTERVAL (1 * IN_MILLISECONDS)    // Server should send threat update to client periodically each second
+#define THREAT_UPDATE_INTERVAL (1 * IN_MILLISECONDS)        // Server should send threat update to client periodically each second
 
 //==============================================================
 // Class to calculate the real threat based
@@ -52,7 +52,7 @@ class ThreatCalcHelper
 };
 
 //==============================================================
-class  HostileReference : public Reference<Unit, ThreatManager>
+class HostileReference : public Reference<Unit, ThreatManager>
 {
     public:
         HostileReference(Unit* pUnit, ThreatManager* pThreatManager, float pThreat);
@@ -78,7 +78,7 @@ class  HostileReference : public Reference<Unit, ThreatManager>
 
         // used for temporary setting a threat and reducting it later again.
         // the threat modification is stored
-        void setTempThreat(float pThreat) { iTempThreatModifyer = pThreat - getThreat(); if (iTempThreatModifyer != 0.0f) addThreat(iTempThreatModifyer);  }
+        void setTempThreat(float pThreat) { iTempThreatModifyer = pThreat - getThreat(); if (iTempThreatModifyer != 0.0f) { addThreat(iTempThreatModifyer); }  }
 
         void resetTempThreat()
         {
@@ -142,7 +142,7 @@ class ThreatManager;
 
 typedef std::list<HostileReference*> ThreatList;
 
-class  ThreatContainer
+class ThreatContainer
 {
     private:
         ThreatList iThreatList;
@@ -169,7 +169,7 @@ class  ThreatContainer
 
         bool isDirty() const { return iDirty; }
 
-        bool empty() const { return iThreatList.empty(); }
+        bool empty() const { return(iThreatList.empty()); }
 
         HostileReference* getMostHated() { return iThreatList.empty() ? NULL : iThreatList.front(); }
 
@@ -180,7 +180,7 @@ class  ThreatContainer
 
 //=================================================
 
-class  ThreatManager
+class ThreatManager
 {
     public:
         friend class HostileReference;

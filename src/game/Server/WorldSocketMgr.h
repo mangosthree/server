@@ -29,7 +29,6 @@
  */
 
 #ifndef MANGOS_H_WORLDSOCKETMGR
-
 #define MANGOS_H_WORLDSOCKETMGR
 
 #include <ace/Basic_Types.h>

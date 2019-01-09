@@ -539,11 +539,17 @@ enum SpellCastTargetFlags
     TARGET_FLAG_VISUAL_CHAIN    = 0x00080000                // uint32, loop { vec3, guid -> if guid == 0 break }
 };
 
+/**
+ * Used in \ref Unit::HasAura for example, also used in \ref Spell::m_currentBasePoints. These
+ * reference the three effects a \ref Spell can have which do different things, for instance it
+ * can be applying a \ref Aura. For a reference see QSW which you can get at
+ * https://bitbucket.org/sidsukana/qsw
+ */
 enum SpellEffectIndex
 {
-    EFFECT_INDEX_0     = 0,
-    EFFECT_INDEX_1     = 1,
-    EFFECT_INDEX_2     = 2
+    EFFECT_INDEX_0     = 0, ///< The first spell effect
+    EFFECT_INDEX_1     = 1, ///< The second spell effect
+    EFFECT_INDEX_2     = 2  ///< The third spell effect
 };
 
 #define MAX_EFFECT_INDEX 3

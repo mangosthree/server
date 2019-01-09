@@ -807,7 +807,7 @@ class  GameObject : public WorldObject
         GridReference<GameObject>& GetGridRef() { return m_gridRef; }
 
         GameObjectModel* m_model;
-        
+
         // Event Handler
         EventProcessor m_Events;
 

@@ -11,12 +11,15 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef WORLD_PVP_SI
@@ -26,6 +29,10 @@
 #include "OutdoorPvP.h"
 #include "Language.h"
 
+/**
+ * @brief
+ *
+ */
 enum
 {
     // npcs
@@ -63,23 +70,70 @@ enum
     WORLD_STATE_SI_SILITHYST_MAX        = 2317
 };
 
+/**
+ * @brief
+ *
+ */
 class OutdoorPvPSI : public OutdoorPvP
 {
     public:
+        /**
+         * @brief
+         *
+         */
         OutdoorPvPSI();
 
+        /**
+         * @brief
+         *
+         * @param player
+         * @param isMainZone
+         */
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
+        /**
+         * @brief
+         *
+         * @param player
+         * @param isMainZone
+         */
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;
+        /**
+         * @brief
+         *
+         * @param data
+         * @param count
+         */
         void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
+        /**
+         * @brief
+         *
+         * @param player
+         * @param triggerId
+         * @return bool
+         */
         bool HandleAreaTrigger(Player* player, uint32 triggerId) override;
+        /**
+         * @brief
+         *
+         * @param player
+         * @param go
+         * @return bool
+         */
         bool HandleGameObjectUse(Player* player, GameObject* go) override;
+        /**
+         * @brief
+         *
+         * @param player
+         * @param spellId
+         * @return bool
+         */
         bool HandleDropFlag(Player* player, uint32 spellId) override;
 
     private:
-        uint8 m_resourcesAlliance;
-        uint8 m_resourcesHorde;
-        Team m_zoneOwner;
+        uint8 m_resourcesAlliance; /**< TODO */
+        uint8 m_resourcesHorde; /**< TODO */
+        Team m_zoneOwner; /**< TODO */
 };
 
 #endif

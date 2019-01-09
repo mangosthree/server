@@ -155,7 +155,7 @@ const char TaxiPathEntryfmt[] = "niii";
 const char TaxiPathNodeEntryfmt[] = "diiifffiiii";
 const char TotemCategoryEntryfmt[]="nxii";
 const char TransportAnimationEntryfmt[]="diixxxx";
-const char VehicleEntryfmt[]="niffffiiiiiiiifffffffffffffffssssfifiixx";
+const char VehicleEntryfmt[] = "niffffiiiiiiiifffffffffffffffssssfifiixx";
 //                                1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160
 const char VehicleSeatEntryfmt[]="niiffffffffffiiiiiifffffffiiifffiiiiiiiffiiiiixxxxxxxxxxxxxxxxxxxx";
 const char WMOAreaTableEntryfmt[]="niiixxxxxiixxxx";

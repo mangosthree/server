@@ -59,7 +59,6 @@ AuctionHouseMgr::~AuctionHouseMgr()
         { delete itr->second; }
 }
 
-
 AuctionHouseObject* AuctionHouseMgr::GetAuctionsMap(AuctionHouseEntry const* house)
 {
     if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
@@ -381,7 +380,6 @@ void AuctionHouseMgr::LoadAuctions()
         auction->itemTemplate = fields[3].GetUInt32();
         auction->itemCount = fields[4].GetUInt32();
         auction->itemRandomPropertyId = fields[5].GetUInt32();
-
         auction->owner = fields[6].GetUInt32();
 
         if (auction->owner)

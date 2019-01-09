@@ -165,7 +165,9 @@ bool ChatHandler::HandleGMCommand(char* args)
             m_session->SendNotification(LANG_GM_ON); 
         }
         else
+        {
             m_session->SendNotification(LANG_GM_OFF);
+        }
         return true;
     }
 

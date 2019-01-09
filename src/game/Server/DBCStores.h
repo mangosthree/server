@@ -26,7 +26,7 @@
 #define MANGOS_DBCSTORES_H
 
 #include "Common.h"
-#include"DataStores/DBCStore.h"
+#include "DataStores/DBCStore.h"
 #include "DBCStructure.h"
 
 #include <list>
@@ -69,7 +69,6 @@ enum ContentLevels
     CONTENT_71_80,
     CONTENT_81_85,
 };
-
 ContentLevels GetContentLevelsForMapAndZone(uint32 mapId, uint32 zoneId);
 
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id);

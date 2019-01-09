@@ -321,6 +321,13 @@ class BattleGroundAB : public BattleGround
          * @param delay
          */
         void _CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool delay);
+        /**
+         * @brief
+         *
+         * @param node
+         * @param type
+         * @param teamIndex
+         */
         void _DelBanner(uint8 node, uint8 type, uint8 teamIndex);
         /**
          * @brief

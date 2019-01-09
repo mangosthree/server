@@ -260,7 +260,7 @@ bool IsAcceptableClientBuild(uint32 build)
     int accepted_versions[] = EXPECTED_MANGOSD_CLIENT_BUILD;
     for (int i = 0; accepted_versions[i]; ++i)
         if (int(build) == accepted_versions[i])
-            return true;
+            { return true; }
 
     return false;
 }
@@ -270,7 +270,7 @@ std::string AcceptableClientBuildsListStr()
     std::ostringstream data;
     int accepted_versions[] = EXPECTED_MANGOSD_CLIENT_BUILD;
     for (int i = 0; accepted_versions[i]; ++i)
-        data << accepted_versions[i] << " ";
+        { data << accepted_versions[i] << " "; }
     return data.str();
 }
 
@@ -1039,9 +1039,9 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
 
 bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId)
 {
-    if (requiredTotemCategoryId==0)
+    if (requiredTotemCategoryId == 0)
         return true;
-    if (itemTotemCategoryId==0)
+    if (itemTotemCategoryId == 0)
         return false;
 
     TotemCategoryEntry const* itemEntry = sTotemCategoryStore.LookupEntry(itemTotemCategoryId);
@@ -1051,10 +1051,10 @@ bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredT
     if (!reqEntry)
         return false;
 
-    if (itemEntry->categoryType!=reqEntry->categoryType)
+    if (itemEntry->categoryType != reqEntry->categoryType)
         return false;
 
-    return (itemEntry->categoryMask & reqEntry->categoryMask)==reqEntry->categoryMask;
+    return (itemEntry->categoryMask & reqEntry->categoryMask) == reqEntry->categoryMask;
 }
 
 bool Zone2MapCoordinates(float& x, float& y, uint32 zone)
@@ -1066,13 +1066,13 @@ bool Zone2MapCoordinates(float& x, float& y, uint32 zone)
         return false;
 
     std::swap(x, y);                                        // at client map coords swapped
-    x = x * ((maEntry->x2-maEntry->x1) / 100) + maEntry->x1;
-    y = y * ((maEntry->y2-maEntry->y1) / 100) + maEntry->y1;    // client y coord from top to down
+    x = x * ((maEntry->x2 - maEntry->x1) / 100) + maEntry->x1;
+    y = y * ((maEntry->y2 - maEntry->y1) / 100) + maEntry->y1; // client y coord from top to down
 
     return true;
 }
 
-bool Map2ZoneCoordinates(float& x,float& y,uint32 zone)
+bool Map2ZoneCoordinates(float& x, float& y, uint32 zone)
 {
     WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
 
@@ -1080,9 +1080,9 @@ bool Map2ZoneCoordinates(float& x,float& y,uint32 zone)
     if (!maEntry || maEntry->x2 == maEntry->x1 || maEntry->y2 == maEntry->y1)
         return false;
 
-    x = (x-maEntry->x1)/((maEntry->x2-maEntry->x1)/100);
-    y = (y-maEntry->y1)/((maEntry->y2-maEntry->y1)/100);    // client y coord from top to down
-    std::swap(x,y);                                         // client have map coords swapped
+    x = (x - maEntry->x1) / ((maEntry->x2 - maEntry->x1) / 100);
+    y = (y - maEntry->y1) / ((maEntry->y2 - maEntry->y1) / 100); // client y coord from top to down
+    std::swap(x, y);                                        // client have map coords swapped
 
     return true;
 }

@@ -61,7 +61,7 @@ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recv_data)
     BattleGroundTypeId bgTypeId = sBattleGroundMgr.GetBattleMasterBG(pCreature->GetEntry());
 
     if (bgTypeId == BATTLEGROUND_TYPE_NONE)
-        return;
+        { return; }
 
     if (!_player->GetBGAccessByLevel(bgTypeId))
     {
@@ -112,7 +112,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
 
     // ignore if player is already in BG
     if (_player->InBattleGround())
-        return;
+        { return; }
 
     // get bg instance or bg template if instance not found
     BattleGround* bg = NULL;
@@ -158,7 +158,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         if (!grp)
             { return; }
         if (grp->GetLeaderGuid() != _player->GetObjectGuid())
-            return;
+            { return; }
         err = grp->CanJoinBattleGroundQueue(bg, bgQueueTypeId, 0, bg->GetMaxPlayersPerTeam(), false, 0);
         isPremade = sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_PREMADE_GROUP_WAIT_FOR_MATCH) &&
                     (grp->GetMembersCount() >= bg->GetMinPlayersPerTeam());
@@ -286,7 +286,7 @@ void WorldSession::HandlePVPLogDataOpcode(WorldPacket & /*recv_data*/)
 
     BattleGround* bg = _player->GetBattleGround();
     if (!bg)
-        { return; }
+        return;
 
     // arena finish version will send in BattleGround::EndBattleGround directly
     if (bg->isArena())
@@ -393,7 +393,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
     if (!bracketEntry)
         return;
 
-    // some checks if player isn't cheating - it is not exactly cheating, but we cannot allow it
+    // some checks if player isn't cheating - it is not exactly cheating, but we can not allow it
     if (action == 1 && ginfo.arenaType == ARENA_TYPE_NONE)
     {
         // if player is trying to enter battleground (not arena!) and he has deserter debuff, we must just remove him from queue

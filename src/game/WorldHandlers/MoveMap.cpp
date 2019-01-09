@@ -42,7 +42,7 @@ namespace MMAP
     MMapManager* MMapFactory::createOrGetMMapManager()
     {
         if (g_MMapManager == NULL)
-            g_MMapManager = new MMapManager();
+            { g_MMapManager = new MMapManager(); }
 
         return g_MMapManager;
     }
@@ -50,7 +50,7 @@ namespace MMAP
     void MMapFactory::preventPathfindingOnMaps(const char* ignoreMapIds)
     {
         if (!g_mmapDisabledIds)
-            g_mmapDisabledIds = new std::set<uint32>();
+            { g_mmapDisabledIds = new std::set<uint32>(); }
 
         uint32 strLenght = strlen(ignoreMapIds) + 1;
         char* mapList = new char[strLenght];
@@ -133,7 +133,7 @@ namespace MMAP
     MMapManager::~MMapManager()
     {
         for (MMapDataSet::iterator i = loadedMMaps.begin(); i != loadedMMaps.end(); ++i)
-            delete i->second;
+            { delete i->second; }
 
         // by now we should not have maps loaded
         // if we had, tiles in MMapData->mmapLoadedTiles, their actual data is lost!
@@ -143,7 +143,7 @@ namespace MMAP
     {
         // we already have this map loaded?
         if (loadedMMaps.find(mapId) != loadedMMaps.end())
-            return true;
+            { return true; }
 
         // load and init dtNavMesh - read parameters from file
         uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%03i.mmap") + 1;
@@ -154,7 +154,7 @@ namespace MMAP
         if (!file)
         {
             if (MMapFactory::IsPathfindingEnabled(mapId))
-                sLog.outError("MMAP:loadMapData: Error: Could not open mmap file '%s'", fileName);
+                { sLog.outError("MMAP:loadMapData: Error: Could not open mmap file '%s'", fileName); }
             delete[] fileName;
             return false;
         }
@@ -194,7 +194,7 @@ namespace MMAP
     {
         // make sure the mmap is loaded and ready to load tiles
         if (!loadMapData(mapId))
-            return false;
+            { return false; }
 
         // get this mmap data
         MMapData* mmap = loadedMMaps[mapId];

@@ -157,6 +157,10 @@ enum Stats
 
 #define MAX_STATS                        5
 
+/**
+ * These are the different possible powers that are available to us, they should
+ * be fairly familiar if you've played WoW.
+ */
 enum Powers
 {
     POWER_MANA                          = 0,
@@ -233,7 +237,7 @@ inline SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
 {
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
         if (mask & (1 << i))
-            return SpellSchools(i);
+            { return SpellSchools(i); }
 
     return SPELL_SCHOOL_NORMAL;
 }
@@ -1349,7 +1353,7 @@ enum Mechanics
 #define IMMUNE_TO_INTERRUPT_AND_SILENCE_MASK ( \
     (1<<(MECHANIC_INTERRUPT-1))|(1<<(MECHANIC_SILENCE-1)))
 
-// Daze and all croud control spells except polymorph are not removed
+/// Daze and all crowd control spells except polymorph are not removed
 #define MECHANIC_NOT_REMOVED_BY_SHAPESHIFT ( \
     (1<<(MECHANIC_CHARM -1))|(1<<(MECHANIC_DISORIENTED-1))|(1<<(MECHANIC_FEAR  -1))| \
     (1<<(MECHANIC_PACIFY-1))|(1<<(MECHANIC_STUN       -1))|(1<<(MECHANIC_FREEZE-1))| \
@@ -1397,10 +1401,12 @@ enum SpellImmunity
  */
 enum WeaponAttackType                                       // The different weapon attack-types
 {
-
-    BASE_ATTACK   = 0,                                      // Main-hand weapon
-    OFF_ATTACK    = 1,                                      // Off-hand weapon
-    RANGED_ATTACK = 2                                       ///Ranged weapon, bow/wand etc.
+    ///Main-hand weapon
+    BASE_ATTACK   = 0,
+    ///Off-hand weapon
+    OFF_ATTACK    = 1,
+    ///Ranged weapon, bow/wand etc.
+    RANGED_ATTACK = 2
 };
 
 #define MAX_ATTACK  3
@@ -1503,7 +1509,7 @@ enum Targets
     TARGET_VEHICLE_PASSENGER_6         = 102,
     TARGET_VEHICLE_PASSENGER_7         = 103,
     TARGET_IN_FRONT_OF_CASTER_30       = 104,
-    TARGET_105                         = 105,
+    TARGET_105                         = 105,               // 1 spell
     TARGET_106                         = 106,
     TARGET_107                         = 107,               // possible TARGET_WMO(GO?)_IN_FRONT_OF_CASTER(_30 ?) TODO: Verify the angle!
     TARGET_GO_IN_FRONT_OF_CASTER_90    = 108,
@@ -1528,11 +1534,16 @@ enum Targets
     TARGET_127                         = 127,
 };
 
+/**
+ * Tells how a spell that was cast missed or hit, ie it might have been
+ * resisted or dodged etc. This enum tells which of those it was. The only
+ * one which indicates a hit is SPELL_MISS_NONE
+ */
 enum SpellMissInfo
 {
-    SPELL_MISS_NONE                    = 0,
+    SPELL_MISS_NONE                    = 0, ///< Indicates an actual hit
     SPELL_MISS_MISS                    = 1,
-    SPELL_MISS_RESIST                  = 2,
+    SPELL_MISS_RESIST                  = 2, ///< The spell was resisted
     SPELL_MISS_DODGE                   = 3,
     SPELL_MISS_PARRY                   = 4,
     SPELL_MISS_BLOCK                   = 5,
@@ -1597,9 +1608,8 @@ enum DamageEffectType
     DOT                     = 2,
     HEAL                    = 3,
     /// used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
-    NODAMAGE                = 4,
-    /// used to avoid rogue loosing stealth on falling damage
-    SELF_DAMAGE_ROGUE_FALL  = 5,
+    NODAMAGE                = 4,                            //< used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
+    SELF_DAMAGE_ROGUE_FALL  = 5,                            //< used to avoid rogue loosing stealth on falling damage
     SELF_DAMAGE             = 6
 };
 
@@ -1649,9 +1659,9 @@ enum GameObjectFlags
 {
     GO_FLAG_IN_USE          = 0x00000001,                   // disables interaction while animated
     GO_FLAG_LOCKED          = 0x00000002,                   // require key, spell, event, etc to be opened. Makes "Locked" appear in tooltip
-    GO_FLAG_INTERACT_COND   = 0x00000004,                   // cannot interact (condition to interact)
+    GO_FLAG_INTERACT_COND   = 0x00000004,                   // can not interact (condition to interact)
     GO_FLAG_TRANSPORT       = 0x00000008,                   // any kind of transport? Object can transport (elevator, boat, car)
-    GO_FLAG_NO_INTERACT     = 0x00000010,                   // players cannot interact with this go (often need to remove flag in event)
+    GO_FLAG_NO_INTERACT     = 0x00000010,                   // players can not interact with this go (often need to remove flag in event)
     GO_FLAG_NODESPAWN       = 0x00000020,                   // never despawn, typically for doors, they just change state
     GO_FLAG_TRIGGERED       = 0x00000040,                   // typically, summoned objects. Triggered by spell or other events
     GO_FLAG_UNK_8           = 0x00000080,
@@ -3206,7 +3216,7 @@ enum UnitDynFlags
     UNIT_DYNFLAG_NONE                       = 0x0000,
     UNIT_DYNFLAG_LOOTABLE                   = 0x0001,
     UNIT_DYNFLAG_TRACK_UNIT                 = 0x0002,
-    UNIT_DYNFLAG_TAPPED                     = 0x0004,       // Lua_UnitIsTapped
+    UNIT_DYNFLAG_TAPPED                     = 0x0004,       // Lua_UnitIsTapped - Indicates the target as grey for the client.
     UNIT_DYNFLAG_TAPPED_BY_PLAYER           = 0x0008,       // Lua_UnitIsTappedByPlayer
     UNIT_DYNFLAG_SPECIALINFO                = 0x0010,
     UNIT_DYNFLAG_DEAD                       = 0x0020,
@@ -3652,7 +3662,12 @@ enum PetTameFailureReason
     PETTAME_UNKNOWNERROR            = 14,
 };
 
-// Stored in SummonProperties.dbc with slot+1 values
+/**
+ * These are the different totem types that are available.
+ * Stored in SummonProperties.dbc with slot+1 values
+ * \see Totem
+ * \see Unit::GetTotemGuid
+ */
 enum TotemSlot
 {
     TOTEM_SLOT_FIRE   = 0,

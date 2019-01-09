@@ -577,13 +577,13 @@ enum PlayerExtraFlags
 // 2^n values
 enum AtLoginFlags
 {
-    AT_LOGIN_NONE               = 0x00,
-    AT_LOGIN_RENAME             = 0x01,
-    AT_LOGIN_RESET_SPELLS       = 0x02,
-    AT_LOGIN_RESET_TALENTS      = 0x04,
-    AT_LOGIN_CUSTOMIZE          = 0x08,
-    AT_LOGIN_RESET_PET_TALENTS  = 0x10,
-    AT_LOGIN_FIRST              = 0x20,
+    AT_LOGIN_NONE                 = 0x00,
+    AT_LOGIN_RENAME               = 0x01,
+    AT_LOGIN_RESET_SPELLS         = 0x02,
+    AT_LOGIN_RESET_TALENTS        = 0x04,
+    AT_LOGIN_CUSTOMIZE            = 0x08,
+    AT_LOGIN_RESET_PET_TALENTS    = 0x10,
+    AT_LOGIN_FIRST                = 0x20,
 };
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;
@@ -1132,8 +1132,14 @@ class Player : public Unit
 
         void ToggleAFK();
         void ToggleDND();
-        bool isAFK() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK); }
-        bool isDND() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND); }
+        bool isAFK() const
+        {
+            return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK);
+        }
+        bool isDND() const
+        {
+            return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND);
+        }
         ChatTagFlags GetChatTag() const;
 
         std::string autoReplyMsg;
@@ -1163,10 +1169,17 @@ class Player : public Unit
         void SetTaxiCheater(bool on) { if (on) { m_ExtraFlags |= PLAYER_EXTRA_TAXICHEAT; } else { m_ExtraFlags &= ~PLAYER_EXTRA_TAXICHEAT; } }
         bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
         void SetGMVisible(bool on);
-        void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
+        void SetPvPDeath(bool on)
+        {
+            if (on) { m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; }
+            else { m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
+        }
 
         // 0 = own auction, -1 = enemy auction, 1 = goblin auction
-        int GetAuctionAccessMode() const { return m_ExtraFlags & PLAYER_EXTRA_AUCTION_ENEMY ? -1 : (m_ExtraFlags & PLAYER_EXTRA_AUCTION_NEUTRAL ? 1 : 0); }
+        int GetAuctionAccessMode() const
+        {
+            return m_ExtraFlags & PLAYER_EXTRA_AUCTION_ENEMY ? -1 : (m_ExtraFlags & PLAYER_EXTRA_AUCTION_NEUTRAL ? 1 : 0);
+        }
         void SetAuctionAccessMode(int state)
         {
             m_ExtraFlags &= ~(PLAYER_EXTRA_AUCTION_ENEMY | PLAYER_EXTRA_AUCTION_NEUTRAL);
@@ -1206,15 +1219,15 @@ class Player : public Unit
             return m_rest_bonus;
         }
         void SetRestBonus(float rest_bonus_new);
-
+        
         /**
-        * \brief: compute rest bonus
-        * \param: time_t timePassed > time from last check
-        * \param: bool offline      > is the player was offline?
-        * \param: bool inRestPlace  > if it was offline, is the player was in city/tavern/inn?
-        * \returns: float
-        **/
-        float ComputeRest(time_t timePassed, bool offline = false, bool inRestPlace = false);        
+         * \brief: compute rest bonus
+         * \param: time_t timePassed > time from last check
+         * \param: bool offline > is the player was offline?
+         * \param: bool inRestPlace > if it was offline, is the player was in city/tavern/inn?
+         * \returns: float
+         **/
+        float ComputeRest(time_t timePassed, bool offline = false, bool inRestPlace = false);
 
         /**
         * \brief: player is interacting with something.
@@ -1570,8 +1583,8 @@ class Player : public Unit
 
         void AddTimedQuest(uint32 quest_id) { m_timedquests.insert(quest_id); }
         void RemoveTimedQuest(uint32 quest_id) { m_timedquests.erase(quest_id); }
-
-        //! Return collision height sent to client
+        
+        /// Return collision height sent to client
         float GetCollisionHeight(bool mounted) const;
 
         /*********************************************************/

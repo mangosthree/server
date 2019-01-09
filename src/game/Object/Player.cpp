@@ -75,7 +75,7 @@
 #include "Calendar.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
-#endif /*ENABLE_ELUNA*/
+#endif /* ENABLE_ELUNA */
 
 #include <cmath>
 
@@ -223,11 +223,11 @@ bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, Team 
     }
 
     if (m_TaxiDestinations.empty())
-        return true;
+        { return true; }
 
     // Check integrity
     if (m_TaxiDestinations.size() < 2)
-        return false;
+        { return false; }
 
     for (size_t i = 1; i < m_TaxiDestinations.size(); ++i)
     {
@@ -235,12 +235,12 @@ bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, Team 
         uint32 path;
         sObjectMgr.GetTaxiPath(m_TaxiDestinations[i - 1], m_TaxiDestinations[i], path, cost);
         if (!path)
-            return false;
+            { return false; }
     }
 
     // can't load taxi path without mount set (quest taxi path?)
     if (!sObjectMgr.GetTaxiMountDisplayId(GetTaxiSource(), team, true))
-        return false;
+        { return false; }
 
     return true;
 }
@@ -248,12 +248,12 @@ bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, Team 
 std::string PlayerTaxi::SaveTaxiDestinationsToString()
 {
     if (m_TaxiDestinations.empty())
-        return "";
+        { return ""; }
 
     std::ostringstream ss;
 
     for (size_t i = 0; i < m_TaxiDestinations.size(); ++i)
-        ss << m_TaxiDestinations[i] << " ";
+        { ss << m_TaxiDestinations[i] << " "; }
 
     return ss.str();
 }
@@ -261,7 +261,7 @@ std::string PlayerTaxi::SaveTaxiDestinationsToString()
 uint32 PlayerTaxi::GetCurrentTaxiPath() const
 {
     if (m_TaxiDestinations.size() < 2)
-        return 0;
+        { return 0; }
 
     uint32 path;
     uint32 cost;
@@ -293,9 +293,10 @@ bool TradeData::HasItem(ObjectGuid item_guid) const
 {
     for (int i = 0; i < TRADE_SLOT_COUNT; ++i)
         if (m_items[i] == item_guid)
-            return true;
+            { return true; }
     return false;
 }
+
 
 Item* TradeData::GetSpellCastItem() const
 {
@@ -307,7 +308,7 @@ void TradeData::SetItem(TradeSlots slot, Item* item)
     ObjectGuid itemGuid = item ? item->GetObjectGuid() : ObjectGuid();
 
     if (m_items[slot] == itemGuid)
-        return;
+        { return; }
 
     m_items[slot] = itemGuid;
 
@@ -318,7 +319,7 @@ void TradeData::SetItem(TradeSlots slot, Item* item)
 
     // need remove possible trader spell applied to changed item
     if (slot == TRADE_SLOT_NONTRADED)
-        GetTraderData()->SetSpell(0);
+        { GetTraderData()->SetSpell(0); }
 
     // need remove possible player spell applied (possible move reagent)
     SetSpell(0);
@@ -329,7 +330,7 @@ void TradeData::SetSpell(uint32 spell_id, Item* castItem /*= NULL*/)
     ObjectGuid itemGuid = castItem ? castItem->GetObjectGuid() : ObjectGuid();
 
     if (m_spell == spell_id && m_spellCastItem == itemGuid)
-        return;
+        { return; }
 
     m_spell = spell_id;
     m_spellCastItem = itemGuid;
@@ -344,7 +345,7 @@ void TradeData::SetSpell(uint32 spell_id, Item* castItem /*= NULL*/)
 void TradeData::SetMoney(uint64 money)
 {
     if (m_money == money)
-        return;
+        { return; }
 
     if (money > m_player->GetMoney())
     {
@@ -363,9 +364,9 @@ void TradeData::SetMoney(uint64 money)
 void TradeData::Update(bool for_trader /*= true*/)
 {
     if (for_trader)
-        m_trader->GetSession()->SendUpdateTrade(true);      // player state for trader
+        { m_trader->GetSession()->SendUpdateTrade(true); }      // player state for trader
     else
-        m_player->GetSession()->SendUpdateTrade(false);     // player state for player
+        { m_player->GetSession()->SendUpdateTrade(false); }     // player state for player
 }
 
 void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
@@ -375,9 +376,9 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
     if (!state)
     {
         if (crosssend)
-            m_trader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+            { m_trader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE); }
         else
-            m_player->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+            { m_player->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE); }
     }
 }
 
@@ -403,11 +404,11 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
     m_ExtraFlags = 0;
     if (GetSession()->GetSecurity() >= SEC_GAMEMASTER)
-        SetAcceptTicket(true);
+        { SetAcceptTicket(true); }
 
     // players always accept
     if (GetSession()->GetSecurity() == SEC_PLAYER)
-        SetAcceptWhispers(true);
+        { SetAcceptWhispers(true); }
 
     m_comboPoints = 0;
 
@@ -471,7 +472,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_lastLiquid = NULL;
 
     for (int i = 0; i < MAX_TIMERS; ++i)
-        m_MirrorTimer[i] = DISABLED_MIRROR_TIMER;
+        { m_MirrorTimer[i] = DISABLED_MIRROR_TIMER; }
 
     m_MirrorTimerFlags = UNDERWATER_NONE;
     m_MirrorTimerFlagsLast = UNDERWATER_NONE;
@@ -520,7 +521,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_itemUpdateQueueBlocked = false;
 
     for (int i = 0; i < MAX_MOVE_TYPE; ++i)
-        m_forced_speed_changes[i] = 0;
+        { m_forced_speed_changes[i] = 0; }
 
     m_stableSlots = 0;
 
@@ -591,10 +592,10 @@ Player::~Player()
 
     // all mailed items should be deleted, also all mail should be deallocated
     for (PlayerMails::const_iterator itr =  m_mail.begin(); itr != m_mail.end(); ++itr)
-        delete *itr;
+        { delete *itr; }
 
     for (ItemMap::const_iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
-        delete iter->second;                                // if item is duplicated... then server may crash ... but that item should be deallocated
+        { delete iter->second; }                                // if item is duplicated... then server may crash ... but that item should be deallocated
 
     delete PlayerTalkClass;
 
@@ -604,7 +605,7 @@ Player::~Player()
     }
 
     for (size_t x = 0; x < ItemSetEff.size(); ++x)
-        delete ItemSetEff[x];
+        { delete ItemSetEff[x]; }
 
     // clean up player-instance binds, may unload some instance saves
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
@@ -659,7 +660,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     }
 
     for (int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
-        m_items[i] = NULL;
+        { m_items[i] = NULL; }
 
     SetLocationMapId(info->mapId);
     Relocate(info->positionX, info->positionY, info->positionZ, info->orientation);
@@ -675,7 +676,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     SetByteValue(UNIT_FIELD_BYTES_0, 2, gender);
     SetByteValue(UNIT_FIELD_BYTES_0, 3, powertype);
 
-    InitDisplayIds();                                       // model, Scale and model data
+    InitDisplayIds();                                       // model, scale and model data
 
     SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_PVP);
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
@@ -784,14 +785,14 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
         for (int j = 0; j < MAX_OUTFIT_ITEMS; ++j)
         {
             if (oEntry->ItemId[j] <= 0)
-                continue;
+                { continue; }
 
             uint32 item_id = oEntry->ItemId[j];
 
             // just skip, reported in ObjectMgr::LoadItemPrototypes
             ItemPrototype const* iProto = ObjectMgr::GetItemPrototype(item_id);
             if (!iProto)
-                continue;
+                { continue; }
 
             // BuyCount by default
             int32 count = iProto->BuyCount;
@@ -817,7 +818,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     }
 
     for (PlayerCreateInfoItems::const_iterator item_id_itr = info->item.begin(); item_id_itr != info->item.end(); ++item_id_itr)
-        StoreNewItemInBestSlots(item_id_itr->item_id, item_id_itr->item_amount);
+        { StoreNewItemInBestSlots(item_id_itr->item_id, item_id_itr->item_amount); }
 
     // bags and main-hand weapon must equipped at this moment
     // now second pass for not equipped (offhand weapon/shield if it attempt equipped before main-hand weapon)
@@ -848,7 +849,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
                 // if  this is ammo then use it
                 msg = CanUseAmmo(pItem->GetEntry());
                 if (msg == EQUIP_ERR_OK)
-                    SetAmmo(pItem->GetEntry());
+                    { SetAmmo(pItem->GetEntry()); }
             }
         }
     }
@@ -870,7 +871,7 @@ bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
         uint16 eDest;
         uint8 msg = CanEquipNewItem(NULL_SLOT, eDest, titem_id, false);
         if (msg != EQUIP_ERR_OK)
-            break;
+            { break; }
 
         EquipNewItem(eDest, titem_id, true);
         AutoUnequipOffhandIfNeed();
@@ -878,7 +879,7 @@ bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
     }
 
     if (titem_amount == 0)
-        return true;                                        // equipped
+        { return true; }                                        // equipped
 
     // attempt store
     ItemPosCountVec sDest;
@@ -905,7 +906,7 @@ Item* Player::StoreNewItemInInventorySlot(uint32 itemEntry, uint32 amount)
     if (msg == EQUIP_ERR_OK)
     {
         if (Item* pItem = StoreNewItem(vDest, itemEntry, true, Item::GenerateItemRandomPropertyId(itemEntry)))
-            return pItem;
+            { return pItem; }
     }
 
     return NULL;
@@ -916,7 +917,7 @@ void Player::SendMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 Curre
     if (int(MaxValue) == DISABLED_MIRROR_TIMER)
     {
         if (int(CurrentValue) != DISABLED_MIRROR_TIMER)
-            StopMirrorTimer(Type);
+            { StopMirrorTimer(Type); }
         return;
     }
     WorldPacket data(SMSG_START_MIRROR_TIMER, (21));
@@ -940,15 +941,15 @@ void Player::StopMirrorTimer(MirrorTimerType Type)
 uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
 {
     if (!IsAlive() || isGameMaster())
-        return 0;
+        { return 0; }
 
     // Absorb, resist some environmental damage type
     uint32 absorb = 0;
     uint32 resist = 0;
     if (type == DAMAGE_LAVA)
-        CalculateDamageAbsorbAndResist(this, SPELL_SCHOOL_MASK_FIRE, DIRECT_DAMAGE, damage, &absorb, &resist);
+        { CalculateDamageAbsorbAndResist(this, SPELL_SCHOOL_MASK_FIRE, DIRECT_DAMAGE, damage, &absorb, &resist); }
     else if (type == DAMAGE_SLIME)
-        CalculateDamageAbsorbAndResist(this, SPELL_SCHOOL_MASK_NATURE, DIRECT_DAMAGE, damage, &absorb, &resist);
+        { CalculateDamageAbsorbAndResist(this, SPELL_SCHOOL_MASK_NATURE, DIRECT_DAMAGE, damage, &absorb, &resist); }
 
     damage -= absorb + resist;
 
@@ -991,23 +992,23 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
     {
         case FATIGUE_TIMER:
             if (GetSession()->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_TIMERBAR_FATIGUE_GMLEVEL))
-                return DISABLED_MIRROR_TIMER;
+                { return DISABLED_MIRROR_TIMER; }
             return sWorld.getConfig(CONFIG_UINT32_TIMERBAR_FATIGUE_MAX) * IN_MILLISECONDS;
         case BREATH_TIMER:
         {
             if (!IsAlive() || HasAuraType(SPELL_AURA_WATER_BREATHING) ||
-                    GetSession()->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_TIMERBAR_BREATH_GMLEVEL))
-                return DISABLED_MIRROR_TIMER;
+                GetSession()->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_TIMERBAR_BREATH_GMLEVEL))
+                { return DISABLED_MIRROR_TIMER; }
             int32 UnderWaterTime = sWorld.getConfig(CONFIG_UINT32_TIMERBAR_BREATH_MAX) * IN_MILLISECONDS;
             AuraList const& mModWaterBreathing = GetAurasByType(SPELL_AURA_MOD_WATER_BREATHING);
             for (AuraList::const_iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)
-                UnderWaterTime = uint32(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
+                { UnderWaterTime = uint32(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f); }
             return UnderWaterTime;
         }
         case FIRE_TIMER:
         {
             if (!IsAlive() || GetSession()->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_TIMERBAR_FIRE_GMLEVEL))
-                return DISABLED_MIRROR_TIMER;
+                { return DISABLED_MIRROR_TIMER; }
             return sWorld.getConfig(CONFIG_UINT32_TIMERBAR_FIRE_MAX) * IN_MILLISECONDS;
         }
         default:
@@ -1020,13 +1021,13 @@ void Player::UpdateMirrorTimers()
 {
     // Desync flags for update on next HandleDrowning
     if (m_MirrorTimerFlags)
-        m_MirrorTimerFlagsLast = ~m_MirrorTimerFlags;
+        { m_MirrorTimerFlagsLast = ~m_MirrorTimerFlags; }
 }
 
 void Player::HandleDrowning(uint32 time_diff)
 {
     if (!m_MirrorTimerFlags)
-        return;
+        { return; }
 
     // In water
     if (m_MirrorTimerFlags & UNDERWATER_INWATER)
@@ -1050,7 +1051,7 @@ void Player::HandleDrowning(uint32 time_diff)
                 EnvironmentalDamage(DAMAGE_DROWNING, damage);
             }
             else if (!(m_MirrorTimerFlagsLast & UNDERWATER_INWATER))      // Update time in client if need
-                SendMirrorTimer(BREATH_TIMER, getMaxTimer(BREATH_TIMER), m_MirrorTimer[BREATH_TIMER], -1);
+                { SendMirrorTimer(BREATH_TIMER, getMaxTimer(BREATH_TIMER), m_MirrorTimer[BREATH_TIMER], -1); }
         }
     }
     else if (m_MirrorTimer[BREATH_TIMER] != DISABLED_MIRROR_TIMER)        // Regen timer
@@ -1059,9 +1060,9 @@ void Player::HandleDrowning(uint32 time_diff)
         // Need breath regen
         m_MirrorTimer[BREATH_TIMER] += 10 * time_diff;
         if (m_MirrorTimer[BREATH_TIMER] >= UnderWaterTime || !IsAlive())
-            StopMirrorTimer(BREATH_TIMER);
+            { StopMirrorTimer(BREATH_TIMER); }
         else if (m_MirrorTimerFlagsLast & UNDERWATER_INWATER)
-            SendMirrorTimer(BREATH_TIMER, UnderWaterTime, m_MirrorTimer[BREATH_TIMER], 10);
+            { SendMirrorTimer(BREATH_TIMER, UnderWaterTime, m_MirrorTimer[BREATH_TIMER], 10); }
     }
 
     // In dark water
@@ -1086,10 +1087,10 @@ void Player::HandleDrowning(uint32 time_diff)
                     EnvironmentalDamage(DAMAGE_EXHAUSTED, damage);
                 }
                 else if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))       // Teleport ghost to graveyard
-                    RepopAtGraveyard();
+                    { RepopAtGraveyard(); }
             }
             else if (!(m_MirrorTimerFlagsLast & UNDERWATER_INDARKWATER))
-                SendMirrorTimer(FATIGUE_TIMER, getMaxTimer(FATIGUE_TIMER), m_MirrorTimer[FATIGUE_TIMER], -1);
+                { SendMirrorTimer(FATIGUE_TIMER, getMaxTimer(FATIGUE_TIMER), m_MirrorTimer[FATIGUE_TIMER], -1); }
         }
     }
     else if (m_MirrorTimer[FATIGUE_TIMER] != DISABLED_MIRROR_TIMER)       // Regen timer
@@ -1097,16 +1098,16 @@ void Player::HandleDrowning(uint32 time_diff)
         int32 DarkWaterTime = getMaxTimer(FATIGUE_TIMER);
         m_MirrorTimer[FATIGUE_TIMER] += 10 * time_diff;
         if (m_MirrorTimer[FATIGUE_TIMER] >= DarkWaterTime || !IsAlive())
-            StopMirrorTimer(FATIGUE_TIMER);
+            { StopMirrorTimer(FATIGUE_TIMER); }
         else if (m_MirrorTimerFlagsLast & UNDERWATER_INDARKWATER)
-            SendMirrorTimer(FATIGUE_TIMER, DarkWaterTime, m_MirrorTimer[FATIGUE_TIMER], 10);
+            { SendMirrorTimer(FATIGUE_TIMER, DarkWaterTime, m_MirrorTimer[FATIGUE_TIMER], 10); }
     }
 
     if (m_MirrorTimerFlags & (UNDERWATER_INLAVA /*| UNDERWATER_INSLIME*/) && !(m_lastLiquid && m_lastLiquid->SpellId))
     {
         // Breath timer not activated - activate it
         if (m_MirrorTimer[FIRE_TIMER] == DISABLED_MIRROR_TIMER)
-            m_MirrorTimer[FIRE_TIMER] = getMaxTimer(FIRE_TIMER);
+            { m_MirrorTimer[FIRE_TIMER] = getMaxTimer(FIRE_TIMER); }
         else
         {
             m_MirrorTimer[FIRE_TIMER] -= time_diff;
@@ -1117,7 +1118,7 @@ void Player::HandleDrowning(uint32 time_diff)
                 // TODO: Check this formula
                 uint32 damage = urand(600, 700);
                 if (m_MirrorTimerFlags & UNDERWATER_INLAVA)
-                    EnvironmentalDamage(DAMAGE_LAVA, damage);
+                    { EnvironmentalDamage(DAMAGE_LAVA, damage); }
                 // need to skip Slime damage in Undercity,
                 // maybe someone can find better way to handle environmental damage
                 //else if (m_zoneUpdateId != 1497)
@@ -1126,7 +1127,7 @@ void Player::HandleDrowning(uint32 time_diff)
         }
     }
     else
-        m_MirrorTimer[FIRE_TIMER] = DISABLED_MIRROR_TIMER;
+        { m_MirrorTimer[FIRE_TIMER] = DISABLED_MIRROR_TIMER; }
 
     // Recheck timers flag
     m_MirrorTimerFlags &= ~UNDERWATER_EXIST_TIMERS;
@@ -1139,7 +1140,7 @@ void Player::HandleDrowning(uint32 time_diff)
     m_MirrorTimerFlagsLast = m_MirrorTimerFlags;
 }
 
-// The player sobers by 1% every 9 seconds
+/// The player sobers by 1% every 9 seconds
 void Player::HandleSobering()
 {
     uint8 currentDrunkValue = GetDrunkValue();
@@ -2434,7 +2435,7 @@ void Player::SetGameMaster(bool on)
     }
     else
     {
-        m_ExtraFlags &= ~PLAYER_EXTRA_GM_ON;
+        m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON;
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 
@@ -5561,7 +5562,7 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
     uint16 value = GetUInt16Value(PLAYER_SKILL_RANK_0 + field, offset);
     uint16 max = GetUInt16Value(PLAYER_SKILL_MAX_RANK_0 + field, offset);
 
-    if (!max || !value || value >= max)
+    if ((!max) || (!value) || (value >= max))
         return false;
 
     uint32 new_value = value + step;
@@ -6975,9 +6976,9 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnUpdateZone(this, newZone, newArea);
-#endif /* ENABLE_ELUNA */
-
-    m_zoneUpdateId = newZone;
+#endif
+    
+    m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
 
     // zone changed, so area changed as well, update it
@@ -6987,19 +6988,19 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     // in PvE, only opposition team capital
     switch (zone->team)
     {
-    case AREATEAM_ALLY:
-        pvpInfo.inHostileArea = GetTeam() != ALLIANCE && (sWorld.IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
-        break;
-    case AREATEAM_HORDE:
-        pvpInfo.inHostileArea = GetTeam() != HORDE && (sWorld.IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
-        break;
-    case AREATEAM_NONE:
-        // overwrite for battlegrounds, maybe batter some zone flags but current known not 100% fit to this
-        pvpInfo.inHostileArea = sWorld.IsPvPRealm() || InBattleGround();
-        break;
-    default:                                            // 6 in fact
-        pvpInfo.inHostileArea = false;
-        break;
+        case AREATEAM_ALLY:
+            pvpInfo.inHostileArea = GetTeam() != ALLIANCE && (sWorld.IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
+            break;
+        case AREATEAM_HORDE:
+            pvpInfo.inHostileArea = GetTeam() != HORDE && (sWorld.IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
+            break;
+        case AREATEAM_NONE:
+            // overwrite for battlegrounds, maybe batter some zone flags but current known not 100% fit to this
+            pvpInfo.inHostileArea = sWorld.IsPvPRealm() || InBattleGround();
+            break;
+        default:                                            // 6 in fact
+            pvpInfo.inHostileArea = false;
+            break;
     }
 
     if (pvpInfo.inHostileArea)                              // in hostile area

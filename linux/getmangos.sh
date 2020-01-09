@@ -3,7 +3,7 @@
 # MaNGOS Build Automation Script                                              #
 # Written By: Ryan Ashley                                                     #
 # Updated By: Cedric Servais                                                  #
-# Copyright (c) 2014-2019 MaNGOS Project                                      #
+# Copyright (c) 2014-2020 MaNGOS Project                                      #
 # https://getmangos.eu/                                                       #
 #                                                                             #
 # This program is free software; you can redistribute it and/or modify        #
@@ -411,7 +411,7 @@ function GetRelease()
       ;;
     5)
       SRCPATH="$ROOTPATH/five/src"
-      INSTPATH="$ROOTPATH/fice"
+      INSTPATH="$ROOTPATH/five"
       DB_PREFIX="five"
       ;;
     *)

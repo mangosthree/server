@@ -39,6 +39,7 @@ PathFinder::PathFinder(const Unit* owner) :
     DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::PathInfo for %u \n", m_sourceUnit->GetGUIDLow());
 
     uint32 mapId = m_sourceUnit->GetMapId();
+
     if (MMAP::MMapFactory::IsPathfindingEnabled(mapId, owner))
     {
         MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
@@ -56,14 +57,13 @@ PathFinder::~PathFinder()
 
 bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest)
 {
-    // Vector3 oldDest = getEndPosition();
-    Vector3 dest(destX, destY, destZ);
-    setEndPosition(dest);
-
     float x, y, z;
     m_sourceUnit->GetPosition(x, y, z);
     Vector3 start(x, y, z);
     setStartPosition(start);
+
+    Vector3 dest(destX, destY, destZ);
+    setEndPosition(dest);
 
     m_forceDestination = forceDest;
 
@@ -336,14 +336,14 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
         // generate suffix
         uint32 suffixPolyLength = 0;
         dtResult = m_navMeshQuery->findPath(
-                                suffixStartPoly,    // start polygon
-                                endPoly,            // end polygon
-                                suffixEndPoint,     // start position
-                                endPoint,           // end position
-                                &m_filter,            // polygon search filter
-                                m_pathPolyRefs + prefixPolyLength - 1,    // [out] path
-                                (int*)&suffixPolyLength,
-                                MAX_PATH_LENGTH - prefixPolyLength); // max number of polygons in output path
+                       suffixStartPoly,    // start polygon
+                       endPoly,            // end polygon
+                       suffixEndPoint,     // start position
+                       endPoint,           // end position
+                       &m_filter,            // polygon search filter
+                       m_pathPolyRefs + prefixPolyLength - 1,    // [out] path
+                       (int*)&suffixPolyLength,
+                       MAX_PATH_LENGTH - prefixPolyLength); // max number of polygons in output path
 
         if (!suffixPolyLength || dtStatusFailed(dtResult))
         {
@@ -370,14 +370,14 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
         clear();
 
         dtResult = m_navMeshQuery->findPath(
-                                startPoly,          // start polygon
-                                endPoly,            // end polygon
-                                startPoint,         // start position
-                                endPoint,           // end position
-                                &m_filter,           // polygon search filter
-                                m_pathPolyRefs,     // [out] path
-                                (int*)&m_polyLength,
-                                MAX_PATH_LENGTH);   // max number of polygons in output path
+                       startPoly,          // start polygon
+                       endPoly,            // end polygon
+                       startPoint,         // start position
+                       endPoint,           // end position
+                       &m_filter,           // polygon search filter
+                       m_pathPolyRefs,     // [out] path
+                       (int*)&m_polyLength,
+                       MAX_PATH_LENGTH);   // max number of polygons in output path
 
         if (!m_polyLength || dtStatusFailed(dtResult))
         {
@@ -782,4 +782,24 @@ bool PathFinder::inRange(const Vector3& p1, const Vector3& p2, float r, float h)
 float PathFinder::dist3DSqr(const Vector3& p1, const Vector3& p2) const
 {
     return (p1 - p2).squaredLength();
+}
+
+void PathFinder::NormalizePath(uint32& size)
+{
+    for (uint32 i = 0; i < m_pathPoints.size(); ++i)
+      { m_sourceUnit->UpdateAllowedPositionZ(m_pathPoints[i].x, m_pathPoints[i].y, m_pathPoints[i].z); }
+
+    // check if the Z difference between each point is higher than SMOOTH_PATH_HEIGHT.
+    // add another point if that's the case and keep adding new midpoints till the Z difference is low enough
+    for (uint32 i = 1; i < m_pathPoints.size(); ++i)
+    {
+        if ((m_pathPoints[i - 1].z - m_pathPoints[i].z) > SMOOTH_PATH_HEIGHT)
+        {
+            auto midPoint = m_pathPoints[i - 1] + (m_pathPoints[i] - m_pathPoints[i - 1]) / 2.f;
+            m_sourceUnit->UpdateAllowedPositionZ(midPoint.x, midPoint.y, midPoint.z);
+            m_pathPoints.insert(m_pathPoints.begin() + i, midPoint);
+            --i;
+        }
+    }
+    size = m_pathPoints.size();
 }

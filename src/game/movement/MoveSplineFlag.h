@@ -124,13 +124,36 @@ namespace Movement
 
             // Constant interface
 
+            /**
+             * @brief
+             *
+             * @return bool
+             */
             bool isSmooth() const { return raw() & Catmullrom;}
             bool isLinear() const { return !isSmooth();}
+            /**
+             * @brief
+             *
+             * @return bool
+             */
             bool isFacing() const { return raw() & Mask_Final_Facing;}
 
             uint8 getAnimationId() const { return animId;}
+
+            /**
+             * @brief
+             *
+             * @param f
+             * @return bool
+             */
             bool hasAllFlags(uint32 f) const { return (raw() & f) == f;}
             bool hasFlag(uint32 f) const { return (raw() & f) != 0;}
+            /**
+             * @brief
+             *
+             * @param f
+             * @return uint32 operator
+             */
             uint32 operator & (uint32 f) const { return (raw() & f);}
             /**
              * @brief
@@ -165,7 +188,11 @@ namespace Movement
             void EnableParabolic()           { raw() = (raw() & ~(Mask_Animations                           | Falling | Animation | FallingSlow)) | Trajectory;}
             void EnableFalling()             { raw() = (raw() & ~(Mask_Animations                           | Trajectory | Animation))| Falling;}
             void EnableCatmullRom()          { raw() = (raw() & ~SmoothGroundPath)                          | Catmullrom | UncompressedPath; }
-            void EnableFacingPoint()         { raw() = (raw() & ~Mask_Final_Facing)                         | Final_Point;}
+            /**
+             * @brief
+             *
+             */
+            void EnableFacingPoint()    { raw() = (raw() & ~Mask_Final_Facing) | Final_Point;}
             /**
              * @brief
              *
@@ -215,6 +242,6 @@ namespace Movement
 #else
 #pragma pack(pop)
 #endif
-}
 
-#endif // MANGOSSERVER_MOVESPLINEFLAG_H
+}
+#endif

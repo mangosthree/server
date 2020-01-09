@@ -25,9 +25,9 @@
 #ifndef MANGOS_CREATUREAI_H
 #define MANGOS_CREATUREAI_H
 
-#include "SharedDefines.h"
 #include "Dynamic/FactoryHolder.h"
 #include "ObjectGuid.h"
+#include "SharedDefines.h"
 
 class WorldObject;
 class GameObject;
@@ -352,6 +352,7 @@ class CreatureAI
          */
         virtual void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*miscValue*/) {}
 
+        // Reset should be defined here, as it is called from out the AI ctor now
         virtual void Reset() {}
 
     protected:

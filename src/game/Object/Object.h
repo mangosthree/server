@@ -659,6 +659,7 @@ class WorldObject : public Object
         GameObject* SummonGameObject(uint32 id, float x, float y, float z, float angle, uint32 despwtime);
 
         bool IsActiveObject() const { return m_isActiveObject || m_viewPoint.hasViewers(); }
+        bool isActiveObject() const { return IsActiveObject(); } // This is for Eluna to build. Should be removed in the future!
         void SetActiveObjectState(bool active);
 
         ViewPoint& GetViewPoint() { return m_viewPoint; }

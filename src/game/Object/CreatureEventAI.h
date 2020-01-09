@@ -128,7 +128,7 @@ enum EventAI_ActionType
     ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance, unused
     ACTION_T_DYNAMIC_MOVEMENT           = 49,               // EnableDynamicMovement (1 = on; 0 = off)
 
-    ACTION_T_END,
+    ACTION_T_END
 };
 
 enum Target
@@ -150,7 +150,9 @@ enum Target
 
     // Hostile targets (including pets)
     TARGET_T_HOSTILE_RANDOM_PLAYER          = 8,            // Just any random player on our threat list
-    TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER  = 9             // Any random player from threat list except top threat
+    TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER  = 9,            // Any random player from threat list except top threat
+
+    TARGET_T_END
 };
 
 enum EventFlags
@@ -439,8 +441,6 @@ struct CreatureEventAI_Action
     };
 };
 
-#define AIEVENT_DEFAULT_THROW_RADIUS    30.0f
-
 struct CreatureEventAI_Event
 {
     uint32 event_id;
@@ -597,6 +597,9 @@ struct CreatureEventAI_Event
 
     CreatureEventAI_Action action[MAX_ACTIONS];
 };
+
+#define AIEVENT_DEFAULT_THROW_RADIUS    30.0f
+
 // Event_Map
 typedef std::vector<CreatureEventAI_Event> CreatureEventAI_Event_Vec;
 typedef UNORDERED_MAP<uint32, CreatureEventAI_Event_Vec > CreatureEventAI_Event_Map;

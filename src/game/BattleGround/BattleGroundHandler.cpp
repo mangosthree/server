@@ -295,7 +295,7 @@ void WorldSession::HandlePVPLogDataOpcode(WorldPacket & /*recv_data*/)
 
     BattleGround* bg = _player->GetBattleGround();
     if (!bg)
-        return;
+        { return; }
 
     // arena finish version will send in BattleGround::EndBattleGround directly
     if (bg->isArena())

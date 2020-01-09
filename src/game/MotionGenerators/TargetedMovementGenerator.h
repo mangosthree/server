@@ -73,7 +73,6 @@ class TargetedMovementGeneratorMedium
         float i_angle;
         bool m_speedChanged : 1;
         bool i_targetReached : 1;
-
         PathFinder* i_path;
 };
 

@@ -207,7 +207,7 @@ void Creature::AddToWorld()
 
     // Make active if required
     if (sWorld.isForceLoadMap(GetMapId()) || (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE))
-        SetActiveObjectState(true);
+        { SetActiveObjectState(true); }
 
 #ifdef ENABLE_ELUNA
     if (!inWorld)
@@ -407,7 +407,7 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
 bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=NULL*/, GameEventCreatureData const* eventData /*=NULL*/, bool preserveHPAndPower /*=true*/)
 {
     if (!InitEntry(Entry, data, eventData))
-        { return false; }
+    { return false; }
 
     // creatures always have melee weapon ready if any
     SetSheath(SHEATH_STATE_MELEE);
@@ -422,9 +422,13 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
         SelectLevel();
 
     if (team == HORDE)
-        { setFaction(GetCreatureInfo()->FactionHorde);  }
+    {
+        setFaction(GetCreatureInfo()->FactionHorde);
+    }
     else
-        { setFaction(GetCreatureInfo()->FactionAlliance); }
+    {
+        setFaction(GetCreatureInfo()->FactionAlliance);
+    }
 
     SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->NpcFlags);
 
@@ -439,7 +443,9 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
 
     // we may need to append or remove additional flags
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT))
-        { unitFlags |= UNIT_FLAG_IN_COMBAT; }
+    {
+        unitFlags |= UNIT_FLAG_IN_COMBAT;
+    }
 
     SetUInt32Value(UNIT_FIELD_FLAGS, unitFlags);
     SetUInt32Value(UNIT_FIELD_FLAGS_2, unitFlags2);
@@ -463,24 +469,34 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(GetCreatureInfo()->FactionAlliance))
     {
         if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLAG_PVP)
-            { SetPvP(true); }
+        {
+            SetPvP(true);
+        }
         else
-            { SetPvP(false); }
+        {
+            SetPvP(false);
+        }
     }
 
     // Try difficulty dependend version before falling back to base entry
     CreatureTemplateSpells const* templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(GetCreatureInfo()->Entry);
     if (!templateSpells)
-        { templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(GetEntry()); }
+    {
+        templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(GetEntry());
+    }
     if (templateSpells)
         for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
-            { m_spells[i] = templateSpells->spells[i]; }
+        {
+            m_spells[i] = templateSpells->spells[i];
+        }
 
     SetVehicleId(GetCreatureInfo()->VehicleTemplateId, 0);
 
     // if eventData set then event active and need apply spell_start
     if (eventData)
-        { ApplyGameEventSpells(eventData, true); }
+    {
+        ApplyGameEventSpells(eventData, true);
+    }
 
     return true;
 }
@@ -489,7 +505,9 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* 
 {
     // Use creature event model explicit, override any other static models
     if (eventData && eventData->modelid)
-        { return eventData->modelid; }
+    {
+        return eventData->modelid;
+    }
 
     // Use creature model explicit, override template (creature.modelid)
     if (data && data->modelid_override)
@@ -759,7 +777,9 @@ void Creature::RegeneratePower()
     {
         Modifier const* modifier = (*i)->GetModifier();
         if (modifier->m_miscvalue == int32(powerType))
+        {
             addValue += modifier->m_amount;
+        }
     }
 
     AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
@@ -767,7 +787,9 @@ void Creature::RegeneratePower()
     {
         Modifier const* modifier = (*i)->GetModifier();
         if (modifier->m_miscvalue == int32(powerType))
+        {
             addValue *= (modifier->m_amount + 100) / 100.0f;
+        }
     }
 
     ModifyPower(powerType, int32(addValue));
@@ -823,7 +845,9 @@ void Creature::DoFleeToGetAssistance()
         if (!pCreature)
             { SetFeared(true, getVictim()->GetObjectGuid(), 0 , sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY)); }
         else
+        {
             GetMotionMaster()->MoveSeekAssistance(pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ());
+        }
     }
 }
 
@@ -1187,7 +1211,7 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     {
         // The following if-else assumes that there are 4 model fields and needs updating if this is changed.
         static_assert(MAX_CREATURE_MODEL == 4, "Need to update custom model check for new/removed model fields.");
-        
+
         if (displayId != cinfo->ModelId[0] && displayId != cinfo->ModelId[1] &&
             displayId != cinfo->ModelId[2] && displayId != cinfo->ModelId[3])
         {
@@ -1524,18 +1548,18 @@ float Creature::_GetSpellDamageMod(int32 Rank)
 {
     switch (Rank)                                           // define rates for each elite rank
     {
-    case CREATURE_ELITE_NORMAL:
-        return sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_NORMAL_SPELLDAMAGE);
-    case CREATURE_ELITE_ELITE:
-        return sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE);
-    case CREATURE_ELITE_RAREELITE:
-        return sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_ELITE_RAREELITE_SPELLDAMAGE);
-    case CREATURE_ELITE_WORLDBOSS:
-        return sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_ELITE_WORLDBOSS_SPELLDAMAGE);
-    case CREATURE_ELITE_RARE:
-        return sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_ELITE_RARE_SPELLDAMAGE);
-    default:
-        return sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE);
+        case CREATURE_ELITE_NORMAL:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_NORMAL_SPELLDAMAGE);
+        case CREATURE_ELITE_ELITE:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE);
+        case CREATURE_ELITE_RAREELITE:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_ELITE_RAREELITE_SPELLDAMAGE);
+        case CREATURE_ELITE_WORLDBOSS:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_ELITE_WORLDBOSS_SPELLDAMAGE);
+        case CREATURE_ELITE_RARE:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_ELITE_RARE_SPELLDAMAGE);
+        default:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE);
     }
 }
 
@@ -2187,19 +2211,29 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
 bool Creature::CanInitiateAttack()
 {
     if (hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED))
-        { return false; }
+    {
+        return false;
+    }
 
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
-        { return false; }
+    {
+        return false;
+    }
 
     if (isPassiveToHostile())
-        { return false; }
+    {
+        return false;
+    }
 
     if (m_aggroDelay != 0)
+    {
         return false;
+    }
 
     if (!CanAttackByItself())
+    {
         return false;
+    }
 
     return true;
 }
@@ -2502,7 +2536,9 @@ bool Creature::HasCategoryCooldown(uint32 spell_id) const
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
-        { return false; }
+    {
+        return false;
+    }
 
     CreatureSpellCooldowns::const_iterator itr = m_CreatureCategoryCooldowns.find(spellInfo->GetCategory());
     return (itr != m_CreatureCategoryCooldowns.end() && time_t(itr->second + (spellInfo->GetCategoryRecoveryTime() / IN_MILLISECONDS)) > time(NULL));
@@ -3036,9 +3072,13 @@ void Creature::SetRoot(bool enable)
 void Creature::SetWaterWalk(bool enable)
 {
     if (enable)
+    {
         m_movementInfo.AddMovementFlag(MOVEFLAG_WATERWALKING);
+    }
     else
+    {
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_WATERWALKING);
+    }
 
     if (IsInWorld())
     {

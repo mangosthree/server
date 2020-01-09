@@ -343,9 +343,9 @@ bool Guild::CheckGuildStructure()
     // Allow only 1 guildmaster, set other to officer
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        MemberSlot& member = itr->second;
+        MemberSlot &member = itr->second;
         if (member.RankId == GR_GUILDMASTER && m_LeaderGuid != member.guid)
-            member.ChangeRank(GR_OFFICER);
+            { member.ChangeRank(GR_OFFICER); }
     }
 
     return true;
@@ -588,7 +588,7 @@ bool Guild::DelMember(ObjectGuid guid, bool isDisbanding)
     CharacterDatabase.PExecute("DELETE FROM guild_member WHERE guid = '%u'", lowguid);
 
     if (!isDisbanding)
-        UpdateAccountsNumber();
+        { UpdateAccountsNumber(); }
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
@@ -601,22 +601,22 @@ bool Guild::DelMember(ObjectGuid guid, bool isDisbanding)
 bool Guild::ChangeMemberRank(ObjectGuid guid, uint8 newRank)
 {
     if (newRank <= GetLowestRank())                    // Validate rank (allow only existing ranks)
-    if (MemberSlot* member = GetMemberSlot(guid))
-    {
-        member->ChangeRank(newRank);
-        return true;
-    }
+        if (MemberSlot* member = GetMemberSlot(guid))
+        {
+            member->ChangeRank(newRank);
+            return true;
+        }
     return false;
 }
 
 void Guild::BroadcastToGuild(WorldSession* session, const std::string& msg, uint32 language)
 {
     if (!session)
-        return;
+        { return; }
 
     Player* player = session->GetPlayer();
     if (!player || !HasRankRight(player->GetRank(), GR_RIGHT_GCHATSPEAK))
-        return;
+        { return; }
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_GUILD, msg.c_str(), Language(language), player->GetChatTag(), player->GetObjectGuid(), player->GetName());
@@ -626,7 +626,7 @@ void Guild::BroadcastToGuild(WorldSession* session, const std::string& msg, uint
         Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
 
         if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_GCHATLISTEN) && !pl->GetSocial()->HasIgnore(player->GetObjectGuid()))
-            pl->GetSession()->SendPacket(&data);
+            { pl->GetSession()->SendPacket(&data); }
     }
 }
 
@@ -650,11 +650,11 @@ void Guild::BroadcastAddonToGuild(WorldSession* session, const std::string& msg,
 void Guild::BroadcastToOfficers(WorldSession* session, const std::string& msg, uint32 language)
 {
     if (!session)
-        return;
+        { return; }
 
     Player* player = session->GetPlayer();
     if (!player || !HasRankRight(player->GetRank(), GR_RIGHT_OFFCHATSPEAK))
-        return;
+        { return; }
 
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {

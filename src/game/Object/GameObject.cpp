@@ -837,45 +837,6 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                              (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
 }
 
-/*
-bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
-{
-    // Not in world
-    if (!IsInWorld() || !u->IsInWorld())
-        { return false; }
-
-    // invisible at client always
-    if (!GetGOInfo()->displayId)
-        return false;
-
-    // Transport always visible at this step implementation
-    if (IsTransport() && IsInMap(u))
-        { return true; }
-
-    // quick check visibility false cases for non-GM-mode
-    if (!u->isGameMaster())
-    {
-        // despawned and then not visible for non-GM in GM-mode
-        if (!isSpawned())
-            { return false; }
-*/
-
-        // special invisibility cases
-        /* TODO: implement trap stealth, take look at spell 2836
-        if(GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed && u->IsHostileTo(GetOwner()))
-        {
-            if(check stuff here)
-                return false;
-        }*/
-/*
-    }
-    // check distance
-
-    return IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() +
-                             (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
-}
-*/
-
 void GameObject::Respawn()
 {
     if (m_spawnedByDefault && m_respawnTime > 0)
@@ -2469,6 +2430,20 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
     SetGoAnimProgress(GetMaxHealth() ? m_useTimes * 255 / GetMaxHealth() : 255);
 }
 
+void GameObject::SetInUse(bool use)
+{
+    m_isInUse = use;
+    if (use)
+        SetGoState(GO_STATE_ACTIVE);
+    else
+        SetGoState(GO_STATE_READY);
+}
+
+uint32 GameObject::GetScriptId()
+{
+    return sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) ? sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) : sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, GetEntry());
+}
+
 float GameObject::GetInteractionDistance()
 {
     switch (GetGoType())
@@ -2486,17 +2461,4 @@ float GameObject::GetInteractionDistance()
     }
 }
 
-void GameObject::SetInUse(bool use)
-{
-    m_isInUse = use;
-    if (use)
-        SetGoState(GO_STATE_ACTIVE);
-    else
-        SetGoState(GO_STATE_READY);
-}
-
-uint32 GameObject::GetScriptId()
-{
-    return sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) ? sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) : sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, GetEntry());
-}
 

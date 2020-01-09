@@ -104,8 +104,6 @@ void LootStore::LoadLootTable()
     // Clearing store (for reloading case)
     Clear();
 
-    sLog.outString("%s :", GetName());
-
     //                                                 0      1     2                    3        4              5         6
     QueryResult* result = WorldDatabase.PQuery("SELECT entry, item, ChanceOrQuestChance, groupid, mincountOrRef, maxcount, condition_id FROM %s", GetName());
 
@@ -179,8 +177,8 @@ void LootStore::LoadLootTable()
 
         Verify();                                           // Checks validity of the loot store
 
+        sLog.outString(">> Loaded %u loot definitions (" SIZEFMTD " templates) from table %s", count, m_LootTemplates.size(), GetName());
         sLog.outString();
-        sLog.outString(">> Loaded %u loot definitions (" SIZEFMTD " templates)", count, m_LootTemplates.size());
     }
     else
     {
@@ -236,8 +234,12 @@ void LootStore::CheckLootRefs(LootIdSet* ref_set) const
 void LootStore::ReportUnusedIds(LootIdSet const& ids_set) const
 {
     // all still listed ids isn't referenced
-    for (LootIdSet::const_iterator itr = ids_set.begin(); itr != ids_set.end(); ++itr)
-        { sLog.outErrorDb("Table '%s' entry %d isn't %s and not referenced from loot, and then useless.", GetName(), *itr, GetEntryName()); }
+    if (!ids_set.empty())
+    {
+        for (LootIdSet::const_iterator itr = ids_set.begin(); itr != ids_set.end(); ++itr)
+            sLog.outErrorDb("Table '%s' entry %d isn't %s and not referenced from loot, and then useless.", GetName(), *itr, GetEntryName());
+        sLog.outString();
+    }
 }
 
 void LootStore::ReportNotExistedId(uint32 id) const
@@ -428,41 +430,41 @@ bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTar
     {
         ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemid);
         if (!pProto)
-            return false;
+        { return false; }
 
         // not show loot for not own team
         if ((pProto->Flags2 & ITEM_FLAG2_HORDE_ONLY) && player->GetTeam() != HORDE)
-            return false;
+        { return false; }
 
         if ((pProto->Flags2 & ITEM_FLAG2_ALLIANCE_ONLY) && player->GetTeam() != ALLIANCE)
-            return false;
+        { return false; }
 
         if (needs_quest)
         {
             // Checking quests for quest-only drop (check only quests requirements in this case)
             if (!player->HasQuestForItem(itemid))
-                return false;
+            { return false; }
         }
         else
         {
             // Not quest only drop (check quest starting items for already accepted non-repeatable quests)
             if (pProto->StartQuest && player->GetQuestStatus(pProto->StartQuest) != QUEST_STATUS_NONE && !player->HasQuestForItem(itemid))
-                return false;
+            { return false; }
         }
     }
     else if (type == LOOT_ITEM_TYPE_CURRENCY)
     {
         CurrencyTypesEntry const * currency = sCurrencyTypesStore.LookupEntry(itemid);
         if (!itemid)
-            return false;
+        { return false; }
 
         if (!player->isGameMaster())
         {
             if (currency->Category == CURRENCY_CATEGORY_META)
-                return false;
+            { return false; }
 
             if (currency->Category == CURRENCY_CATEGORY_ARCHAEOLOGY && !player->HasSkill(SKILL_ARCHAEOLOGY))
-                return false;
+            { return false; }
         }
     }
 
@@ -1274,12 +1276,12 @@ void LoadLootTemplates_Creature()
     {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
         {
-            if (uint32 Lootid = cInfo->LootId)
+            if (uint32 lootid = cInfo->LootId)
             {
-                if (ids_set.find(Lootid) == ids_set.end())
-                    LootTemplates_Creature.ReportNotExistedId(Lootid);
+                if (ids_set.find(lootid) == ids_set.end())
+                    { LootTemplates_Creature.ReportNotExistedId(lootid); }
                 else
-                    ids_setUsed.insert(Lootid);
+                    { ids_setUsed.insert(lootid); }
             }
         }
     }
@@ -1304,12 +1306,12 @@ void LoadLootTemplates_Disenchant()
     {
         if (ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype>(i))
         {
-            if (uint32 Lootid = proto->DisenchantID)
+            if (uint32 lootid = proto->DisenchantID)
             {
-                if (ids_set.find(Lootid) == ids_set.end())
-                    LootTemplates_Disenchant.ReportNotExistedId(Lootid);
+                if (ids_set.find(lootid) == ids_set.end())
+                    { LootTemplates_Disenchant.ReportNotExistedId(lootid); }
                 else
-                    ids_setUsed.insert(Lootid);
+                    { ids_setUsed.insert(lootid); }
             }
         }
     }
@@ -1347,12 +1349,12 @@ void LoadLootTemplates_Gameobject()
     // remove real entries and check existence loot
     for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
     {
-        if (uint32 Lootid = itr->GetLootId())
+        if (uint32 lootid = itr->GetLootId())
         {
-            if (ids_set.find(Lootid) == ids_set.end())
-                LootTemplates_Gameobject.ReportNotExistedId(Lootid);
+            if (ids_set.find(lootid) == ids_set.end())
+                { LootTemplates_Gameobject.ReportNotExistedId(lootid); }
             else
-                ids_setUsed.insert(Lootid);
+                { ids_setUsed.insert(lootid); }
         }
     }
     for (LootIdSet::const_iterator itr = ids_setUsed.begin(); itr != ids_setUsed.end(); ++itr)
@@ -1422,12 +1424,12 @@ void LoadLootTemplates_Pickpocketing()
     {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
         {
-            if (uint32 Lootid = cInfo->PickpocketLootId)
+            if (uint32 lootid = cInfo->PickpocketLootId)
             {
-                if (ids_set.find(Lootid) == ids_set.end())
-                    LootTemplates_Pickpocketing.ReportNotExistedId(Lootid);
+                if (ids_set.find(lootid) == ids_set.end())
+                    { LootTemplates_Pickpocketing.ReportNotExistedId(lootid); }
                 else
-                    ids_setUsed.insert(Lootid);
+                    { ids_setUsed.insert(lootid); }
             }
         }
     }
@@ -1488,12 +1490,12 @@ void LoadLootTemplates_Skinning()
     {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
         {
-            if (uint32 Lootid = cInfo->SkinningLootId)
+            if (uint32 lootid = cInfo->SkinningLootId)
             {
-                if (ids_set.find(Lootid) == ids_set.end())
-                    LootTemplates_Skinning.ReportNotExistedId(Lootid);
+                if (ids_set.find(lootid) == ids_set.end())
+                    { LootTemplates_Skinning.ReportNotExistedId(lootid); }
                 else
-                    ids_setUsed.insert(Lootid);
+                    { ids_setUsed.insert(lootid); }
             }
         }
     }

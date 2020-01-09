@@ -39,17 +39,17 @@ void GMTicketMgr::LoadGMTickets()
     m_GMTicketMap.clear();                                  // For reload case
 
     QueryResult* result = CharacterDatabase.Query(
-                              //      0     1            2              3                                  4
-                              "SELECT guid, ticket_text, response_text, UNIX_TIMESTAMP(ticket_lastchange), ticket_id FROM character_ticket ORDER BY ticket_id ASC");
-
+    //      0     1            2              3                                  4
+    "SELECT guid, ticket_text, response_text, UNIX_TIMESTAMP(ticket_lastchange), ticket_id "
+    "FROM character_ticket "
+    "ORDER BY ticket_id ASC");
+    
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outString(">> Loaded `character_ticket`, table is empty.");
+        sLog.outString();
         return;
     }
 
@@ -80,8 +80,8 @@ void GMTicketMgr::LoadGMTickets()
     while (result->NextRow());
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " GM tickets", GetTicketCount());
+    sLog.outString();
 }
 
 void GMTicketMgr::DeleteAll()

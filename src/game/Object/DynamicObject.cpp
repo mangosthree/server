@@ -48,7 +48,7 @@ void DynamicObject::AddToWorld()
 {
     ///- Register the dynamicObject for guid lookup
     if (!IsInWorld())
-        GetMap()->GetObjectsStore().insert<DynamicObject>(GetObjectGuid(), (DynamicObject*)this);
+        { GetMap()->GetObjectsStore().insert<DynamicObject>(GetObjectGuid(), (DynamicObject*)this); }
 
     Object::AddToWorld();
 }

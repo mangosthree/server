@@ -43,6 +43,8 @@ namespace ACE_Based
             LockType _lock; /**< Lock access to the queue. */
             StorageType _queue; /**< Storage backing the queue. */
 
+            /*volatile*/ bool _canceled; /**< Cancellation flag. */
+
         public:
 
             /**

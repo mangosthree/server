@@ -280,7 +280,9 @@ bool WaypointMovementGenerator<Creature>::CanMove(int32 diff, Creature& u)
 {
     i_nextMoveTime.Update(diff);
     if (i_nextMoveTime.Passed() && u.hasUnitState(UNIT_STAT_WAYPOINT_PAUSED))
+    {
         i_nextMoveTime.Reset(1);
+    }
 
     return i_nextMoveTime.Passed() && !u.hasUnitState(UNIT_STAT_WAYPOINT_PAUSED);
 }
@@ -481,7 +483,6 @@ void FlightPathMovementGenerator::DoEventIfAny(Player& player, TaxiPathNodeEntry
         StartEvents_Event(player.GetMap(), eventid, &player, &player, departure);
     }
 }
-
 bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, float& z, float& o) const
 {
     const TaxiPathNodeEntry& node = (*i_path)[i_currentNode];

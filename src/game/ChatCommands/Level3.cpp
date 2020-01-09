@@ -439,7 +439,7 @@ bool ChatHandler::HandleReloadCommandCommand(char* /*args*/)
 
 bool ChatHandler::HandleReloadCreatureQuestRelationsCommand(char* /*args*/)
 {
-    sLog.outString("Loading Quests Relations... (`creature_questrelation`)");
+    sLog.outString("Loading creature quest givers...");
     sObjectMgr.LoadCreatureQuestRelations();
     SendGlobalSysMessage("DB table `creature_questrelation` (creature quest givers) reloaded.");
     return true;
@@ -447,7 +447,7 @@ bool ChatHandler::HandleReloadCreatureQuestRelationsCommand(char* /*args*/)
 
 bool ChatHandler::HandleReloadCreatureQuestInvRelationsCommand(char* /*args*/)
 {
-    sLog.outString("Loading Quests Relations... (`creature_involvedrelation`)");
+    sLog.outString("Loading creature quest takers...");
     sObjectMgr.LoadCreatureInvolvedRelations();
     SendGlobalSysMessage("DB table `creature_involvedrelation` (creature quest takers) reloaded.");
     return true;
@@ -478,7 +478,7 @@ bool ChatHandler::HandleReloadGossipMenuCommand(char* /*args*/)
 
 bool ChatHandler::HandleReloadGOQuestRelationsCommand(char* /*args*/)
 {
-    sLog.outString("Loading Quests Relations... (`gameobject_questrelation`)");
+    sLog.outString("Loading gameobject quest givers...");
     sObjectMgr.LoadGameobjectQuestRelations();
     SendGlobalSysMessage("DB table `gameobject_questrelation` (gameobject quest givers) reloaded.");
     return true;
@@ -486,7 +486,7 @@ bool ChatHandler::HandleReloadGOQuestRelationsCommand(char* /*args*/)
 
 bool ChatHandler::HandleReloadGOQuestInvRelationsCommand(char* /*args*/)
 {
-    sLog.outString("Loading Quests Relations... (`gameobject_involvedrelation`)");
+    sLog.outString("Loading gameobject quest takers...");
     sObjectMgr.LoadGameobjectInvolvedRelations();
     SendGlobalSysMessage("DB table `gameobject_involvedrelation` (gameobject quest takers) reloaded.");
     return true;
@@ -5381,13 +5381,17 @@ bool ChatHandler::HandleServerShutDownCommand(char* args)
 
     uint32 exitcode;
     if (!ExtractOptUInt32(&args, exitcode, SHUTDOWN_EXIT_CODE))
+    {
         return false;
+    }
 
     // Exit code should be in range of 0-125, 126-255 is used
     // in many shells for their own return codes and code > 255
     // is not supported in many others
     if (exitcode > 125)
+    {
         return false;
+    }
 
     sWorld.ShutdownServ(delay, 0, exitcode);
     return true;
@@ -5397,17 +5401,23 @@ bool ChatHandler::HandleServerRestartCommand(char* args)
 {
     uint32 delay;
     if (!ExtractUInt32(&args, delay))
-        { return false; }
+    {
+        return false;
+    }
 
     uint32 exitcode;
     if (!ExtractOptUInt32(&args, exitcode, RESTART_EXIT_CODE))
-        { return false; }
+    {
+        return false;
+    }
 
     // Exit code should be in range of 0-125, 126-255 is used
     // in many shells for their own return codes and code > 255
     // is not supported in many others
     if (exitcode > 125)
-        { return false; }
+    {
+        return false;
+    }
 
     sWorld.ShutdownServ(delay, SHUTDOWN_MASK_RESTART, exitcode);
     return true;
@@ -5417,17 +5427,23 @@ bool ChatHandler::HandleServerIdleRestartCommand(char* args)
 {
     uint32 delay;
     if (!ExtractUInt32(&args, delay))
+    {
         return false;
+    }
 
     uint32 exitcode;
     if (!ExtractOptUInt32(&args, exitcode, RESTART_EXIT_CODE))
+    {
         return false;
+    }
 
     // Exit code should be in range of 0-125, 126-255 is used
     // in many shells for their own return codes and code > 255
     // is not supported in many others
     if (exitcode > 125)
+    {
         return false;
+    }
 
     sWorld.ShutdownServ(delay, SHUTDOWN_MASK_RESTART | SHUTDOWN_MASK_IDLE, exitcode);
     return true;
@@ -5437,17 +5453,23 @@ bool ChatHandler::HandleServerIdleShutDownCommand(char* args)
 {
     uint32 delay;
     if (!ExtractUInt32(&args, delay))
+    {
         return false;
+    }
 
     uint32 exitcode;
     if (!ExtractOptUInt32(&args, exitcode, SHUTDOWN_EXIT_CODE))
+    {
         return false;
+    }
 
     // Exit code should be in range of 0-125, 126-255 is used
     // in many shells for their own return codes and code > 255
     // is not supported in many others
     if (exitcode > 125)
+    {
         return false;
+    }
 
     sWorld.ShutdownServ(delay, SHUTDOWN_MASK_IDLE, exitcode);
     return true;

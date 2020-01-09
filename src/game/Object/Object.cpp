@@ -511,9 +511,6 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
         data->WriteGuidBytes<4, 0, 3, 5, 7, 6, 2, 1>(guid);
     }
 
-    //if (updateFlags & UPDATEFLAG_ANIM_KITS)
-    //    *data << uint16(0) << uint16(0) << uint16(0);
-
     if (updateFlags & UPDATEFLAG_TRANSPORT)
         *data << uint32(WorldTimer::getMSTime());
 }
@@ -1487,13 +1484,13 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float& z) const
 {
     float new_z = GetMap()->GetHeight(GetPhaseMask(), x, y, z);
     if (new_z > INVALID_HEIGHT)
-        { z = new_z + 0.05f; }                                  // just to be sure that we are not a few pixel under the surface
+    { z = new_z + 0.05f; }                                  // just to be sure that we are not a few pixel under the surface
 }
 
 void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=NULL*/) const
 {
     if (!atMap)
-        { atMap = GetMap(); }
+    { atMap = GetMap(); }
 
     switch (GetTypeId())
     {

@@ -44,6 +44,7 @@ class Unit;
 
 #define SMOOTH_PATH_STEP_SIZE   4.0f
 #define SMOOTH_PATH_SLOP        0.3f
+#define SMOOTH_PATH_HEIGHT      1.0f
 
 #define VERTEX_SIZE       3
 #define INVALID_POLYREF   0
@@ -76,6 +77,7 @@ class PathFinder
         Vector3 getStartPosition()      const { return m_startPosition; }
         Vector3 getEndPosition()        const { return m_endPosition; }
         Vector3 getActualEndPosition()  const { return m_actualEndPosition; }
+        void NormalizePath(uint32& size);
 
         PointsArray& getPath() { return m_pathPoints; }
         PathType getPathType() const { return m_type; }
@@ -102,9 +104,9 @@ class PathFinder
 
         dtQueryFilter m_filter;                     // use single filter for all movements, update it when needed
 
-        void setStartPosition(const Vector3& point) { m_startPosition = point; }
-        void setEndPosition(const Vector3& point) { m_actualEndPosition = point; m_endPosition = point; }
-        void setActualEndPosition(const Vector3& point) { m_actualEndPosition = point; }
+        void setStartPosition(const Vector3 &point) { m_startPosition = point; }
+        void setEndPosition(const Vector3 &point) { m_actualEndPosition = point; m_endPosition = point; }
+        void setActualEndPosition(const Vector3 &point) { m_actualEndPosition = point; }
 
         void clear()
         {

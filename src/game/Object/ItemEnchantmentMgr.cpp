@@ -29,9 +29,10 @@
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
+#include "Util.h"
+
 #include <list>
 #include <vector>
-#include "Util.h"
 
 struct EnchStoreItem
 {
@@ -92,14 +93,13 @@ void LoadRandomEnchantmentsTable()
 
         delete result;
 
-        sLog.outString();
         sLog.outString(">> Loaded %u Item Enchantment definitions", count);
     }
     else
     {
-        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
     }
+    sLog.outString();
 }
 
 uint32 GetItemEnchantMod(int32 entry)
@@ -129,7 +129,7 @@ uint32 GetItemEnchantMod(int32 entry)
     double dRoll = rand_chance();
     float fCount = 0;
 
-    const EnchStoreList& enchantList = tab->second;
+    const EnchStoreList &enchantList = tab->second;
     for (EnchStoreList::const_iterator ench_iter = enchantList.begin(); ench_iter != enchantList.end(); ++ench_iter)
     {
         fCount += ench_iter->chance;

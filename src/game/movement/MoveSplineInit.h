@@ -116,6 +116,15 @@ namespace Movement
              * @param maxPathRange 
              */
             void MoveTo(const Vector3& destination, bool generatePath = false, bool forceDestination = false);
+            /**
+             * @brief
+             *
+             * @param x
+             * @param y
+             * @param z
+             * @param generatePath
+             * @param forceDestination
+             */
             void MoveTo(float x, float y, float z, bool generatePath = false, bool forceDestination = false);
 
             /**
@@ -128,11 +137,11 @@ namespace Movement
              */
             void SetFirstPointId(int32 pointId) { args.path_Idx_offset = pointId; }
 
-            /* Enables CatmullRom spline interpolation mode(makes path smooth)
-             * if not enabled linear spline mode will be choosen. Disabled by default
-             */
             void SetSmooth();
-            /* Enables CatmullRom spline interpolation mode, enables flying animation. Disabled by default
+            /**
+             * @brief Enables CatmullRom spline interpolation mode, enables flying animation.
+             * Disabled by default
+             *
              */
             void SetFly();
             /**
@@ -158,7 +167,9 @@ namespace Movement
              */
             void SetOrientationFixed(bool enable);
 
-            /* Sets the velocity (in case you want to have custom movement velocity)
+            /**
+             * @brief Sets the velocity (in case you want to have custom movement velocity)
+             *
              * if no set, speed will be selected based on unit's speeds and current movement mode
              * Has no effect if falling mode enabled
              *
@@ -174,8 +185,12 @@ namespace Movement
              */
             void SetExitVehicle();
 
+            /**
+             * @brief
+             *
+             * @return PointsArray
+             */
             PointsArray& Path() { return args.path; }
-
         protected:
 
             MoveSplineInitArgs args; /**< TODO */
@@ -187,8 +202,17 @@ namespace Movement
      *
      */
     inline void MoveSplineInit::SetFly() { args.flags.flying = true;}
+    /**
+     * @brief
+     *
+     * @param enable
+     */
     inline void MoveSplineInit::SetWalk(bool enable) { args.flags.walkmode = enable;}
     inline void MoveSplineInit::SetSmooth() { args.flags.EnableCatmullRom();}
+    /**
+     * @brief
+     *
+     */
     inline void MoveSplineInit::SetCyclic() { args.flags.cyclic = true;}
     /**
      * @brief
@@ -218,12 +242,28 @@ namespace Movement
         args.path.assign(controls.begin(), controls.end());
     }
 
+    /**
+     * @brief
+     *
+     * @param x
+     * @param y
+     * @param z
+     * @param generatePath
+     * @param forceDestination
+     */
     inline void MoveSplineInit::MoveTo(float x, float y, float z, bool generatePath, bool forceDestination)
     {
         Vector3 v(x, y, z);
         MoveTo(v, generatePath, forceDestination);
     }
 
+    /**
+     * @brief
+     *
+     * @param dest
+     * @param generatePath
+     * @param forceDestination
+     */
     inline void MoveSplineInit::MoveTo(const Vector3& dest, bool generatePath, bool forceDestination)
     {
         if (generatePath)
@@ -253,6 +293,11 @@ namespace Movement
         args.flags.EnableAnimation((uint8)anim);
     }
 
+    /**
+     * @brief
+     *
+     * @param spot
+     */
     inline void MoveSplineInit::SetFacing(Vector3 const& spot)
     {
         args.facing.f.x = spot.x;
@@ -261,4 +306,5 @@ namespace Movement
         args.flags.EnableFacingPoint();
     }
 }
+
 #endif // MANGOSSERVER_MOVESPLINEINIT_H

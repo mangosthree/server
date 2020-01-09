@@ -600,7 +600,7 @@ struct GameObjectDataAddon
 };
 
 // For containers:  [GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY        -> ...
-// For bobber:      GO_NOT_READY  ->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED-><deleted>
+// For bobber:      [GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED-><deleted>
 // For door(closed):[GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY(close) -> ...
 // For door(open):  [GO_NOT_READY]->GO_READY (open) ->GO_ACTIVATED (close)->GO_JUST_DEACTIVATED->GO_READY(open)  -> ...
 enum LootState
@@ -624,9 +624,9 @@ enum CapturePointState
 
 enum CapturePointSliderValue
 {
-    CAPTURE_SLIDER_ALLIANCE = 100,                  // full alliance
-    CAPTURE_SLIDER_HORDE = 0,                       // full horde
-    CAPTURE_SLIDER_MIDDLE = 50                      // middle
+    CAPTURE_SLIDER_ALLIANCE         = 100,                  // full alliance
+    CAPTURE_SLIDER_HORDE            = 0,                    // full horde
+    CAPTURE_SLIDER_MIDDLE           = 50                    // middle
 };
 
 class Unit;
@@ -638,7 +638,7 @@ struct GameObjectDisplayInfoEntry;
 
 #define GO_ANIMPROGRESS_DEFAULT 0xFF
 
-class  GameObject : public WorldObject
+class GameObject : public WorldObject
 {
     public:
         explicit GameObject();

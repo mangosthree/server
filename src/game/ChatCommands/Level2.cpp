@@ -54,14 +54,14 @@
 #include "WaypointMovementGenerator.h"
 #include <cctype>
 #include <iostream>
-#include <fstream>
-#include <map>
-#include <typeinfo>
-
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "MoveMap.h"                                        // for mmap manager
 #include "PathFinder.h"                                     // for mmap commands
 #include "movement/MoveSplineInit.h"
+
+#include <fstream>
+#include <map>
+#include <typeinfo>
 
 static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
 {

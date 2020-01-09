@@ -118,27 +118,21 @@ void Log::SetColor(bool stdout_stream, Color color)
 
     static WORD WinColorFG[Color_count] =
     {
-        0,                                                  // BLACK
-        FOREGROUND_RED,                                     // RED
-        FOREGROUND_GREEN,                                   // GREEN
-        FOREGROUND_RED | FOREGROUND_GREEN,                  // BROWN
-        FOREGROUND_BLUE,                                    // BLUE
-        FOREGROUND_RED | FOREGROUND_BLUE,                   // MAGENTA
-        FOREGROUND_GREEN | FOREGROUND_BLUE,                 // CYAN
-        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,// WHITE
-        // YELLOW
-        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,
-        // RED_BOLD
-        FOREGROUND_RED | FOREGROUND_INTENSITY,
-        // GREEN_BOLD
-        FOREGROUND_GREEN | FOREGROUND_INTENSITY,
-        FOREGROUND_BLUE | FOREGROUND_INTENSITY,             // BLUE_BOLD
-        // MAGENTA_BOLD
-        FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-        // CYAN_BOLD
-        FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-        // WHITE_BOLD
-        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY
+        0,                                                                         // BLACK
+        FOREGROUND_RED,                                                            // RED
+        FOREGROUND_GREEN,                                                          // GREEN
+        FOREGROUND_RED | FOREGROUND_GREEN,                                         // BROWN
+        FOREGROUND_BLUE,                                                           // BLUE
+        FOREGROUND_RED | FOREGROUND_BLUE,                                          // MAGENTA
+        FOREGROUND_GREEN | FOREGROUND_BLUE,                                        // CYAN
+        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,                       // WHITE
+        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,                  // YELLOW
+        FOREGROUND_RED | FOREGROUND_INTENSITY,                                     // RED_BOLD
+        FOREGROUND_GREEN | FOREGROUND_INTENSITY,                                   // GREEN_BOLD
+        FOREGROUND_BLUE | FOREGROUND_INTENSITY,                                    // BLUE_BOLD
+        FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY,                   // MAGENTA_BOLD
+        FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,                 // CYAN_BOLD
+        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY // WHITE_BOLD
     };
 
     HANDLE hConsole = GetStdHandle(stdout_stream ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
@@ -779,6 +773,7 @@ void Log::outDetail(const char* str, ...)
 
 void Log::outDebug(const char* str, ...)
 {
+#ifdef MANGOS_DEBUG
     if (!str)
         { return; }
 
@@ -815,6 +810,7 @@ void Log::outDebug(const char* str, ...)
     }
 
     fflush(stdout);
+#endif
 }
 
 void Log::outCommand(uint32 account, const char* str, ...)

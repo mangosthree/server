@@ -532,6 +532,7 @@ std::wstring GetMainPartOfName(std::wstring wname, uint32 declension)
     return wname;
 }
 
+
 bool utf8ToConsole(const std::string& utf8str, std::string& conStr)
 {
 #if PLATFORM == PLATFORM_WINDOWS

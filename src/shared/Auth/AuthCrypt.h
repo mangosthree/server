@@ -49,11 +49,12 @@ class AuthCrypt
          */
         ~AuthCrypt();
 
+
         /**
-        * @brief
-        *
-        */
-    void Init(BigNumber* K);
+         * @brief
+         *
+         */
+        void Init(BigNumber* K);
         /**
          * @brief
          *

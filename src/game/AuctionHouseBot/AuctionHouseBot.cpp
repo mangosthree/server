@@ -850,7 +850,6 @@ bool AuctionBotBuyer::IsBuyableEntry(uint64 buyoutPrice, double InGame_BuyPrice,
 
 bool AuctionBotBuyer::IsBidableEntry(uint64 bidPrice, double InGame_BuyPrice, double MaxBidablePrice, uint64 MinBidPrice, uint32 MaxChance, uint32 ChanceRatio)
 {
-    double ratio = 0;
     uint32 Chance = 0;
 
     if (bidPrice <= MinBidPrice)
@@ -861,7 +860,7 @@ bool AuctionBotBuyer::IsBidableEntry(uint64 bidPrice, double InGame_BuyPrice, do
         {
             if (bidPrice < MaxBidablePrice)
             {
-                ratio = MaxBidablePrice / bidPrice;
+                double ratio = MaxBidablePrice / bidPrice;
                 if (ratio < 3)
                     { Chance = ((MaxChance / 500) * ratio); }
                 else
@@ -875,7 +874,7 @@ bool AuctionBotBuyer::IsBidableEntry(uint64 bidPrice, double InGame_BuyPrice, do
     {
         if (bidPrice < MaxBidablePrice)
         {
-            ratio = MaxBidablePrice / bidPrice;
+            double ratio = MaxBidablePrice / bidPrice;
             if (ratio < 4)
                 { Chance = ((MaxChance / 1000) * ratio); }
             else
@@ -961,6 +960,7 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
         BasePrice *= item->GetCount();
 
         double MaxBuyablePrice = (BasePrice * config.BuyerPriceRatio) / 100;
+        BuyerItemInfoMap::iterator sameitem_itr = config.SameItemInfo.find(item->GetEntry());
         uint32 buyoutPrice = auction->buyout / item->GetCount();
 
         uint32 bidPrice;
@@ -980,7 +980,6 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
         double InGame_BidPrice;
         uint32 minBidPrice;
         uint32 minBuyPrice;
-        BuyerItemInfoMap::iterator sameitem_itr = config.SameItemInfo.find(item->GetEntry());
         if (sameitem_itr == config.SameItemInfo.end())
         {
             InGame_BuyPrice = 0;
@@ -1277,23 +1276,35 @@ bool AuctionBotSeller::Initialize()
             case ITEM_CLASS_WEAPON:
             {
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_ITEM_LEVEL))
+                {
                     if (prototype->ItemLevel < value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_ITEM_LEVEL))
+                {
                     if (prototype->ItemLevel > value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_REQ_LEVEL))
+                {
                     if (prototype->RequiredLevel < value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_REQ_LEVEL))
+                {
                     if (prototype->RequiredLevel > value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_SKILL_RANK))
+                {
                     if (prototype->RequiredSkillRank < value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_SKILL_RANK))
+                {
                     if (prototype->RequiredSkillRank > value)
                         { continue; }
+                }
                 break;
             }
             case ITEM_CLASS_RECIPE:
@@ -1301,17 +1312,25 @@ bool AuctionBotSeller::Initialize()
             case ITEM_CLASS_PROJECTILE:
             {
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_REQ_LEVEL))
+                {
                     if (prototype->RequiredLevel < value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_REQ_LEVEL))
+                {
                     if (prototype->RequiredLevel > value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MIN_SKILL_RANK))
+                {
                     if (prototype->RequiredSkillRank < value)
                         { continue; }
+                }
                 if (uint32 value = sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ITEM_MAX_SKILL_RANK))
+                {
                     if (prototype->RequiredSkillRank > value)
                         { continue; }
+                }
                 break;
             }
             case ITEM_CLASS_MISC:
@@ -1379,6 +1398,9 @@ bool AuctionBotSeller::Initialize()
                         { continue; }
                 break;
             }
+
+            default:
+                continue;
         }
 
         m_ItemPool[prototype->Quality][prototype->Class].push_back(itemID);

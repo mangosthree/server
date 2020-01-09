@@ -7,14 +7,14 @@ process.
 Requirements
 ------------
 You will need a working installation of the [World of Warcraft][1] client patched
-to version 1.12.x.
+to version 4.3.4.
 
 Also, you will have to run a full build of *mangos* to create all map tools.
 
 Instructions
 ------------
 Copy the created map tools to the [World of Warcraft][1] installation directory,
-namely the tolls named:
+namely the tools named:
 
 * `map-extractor`
 * `vmap-extractor`

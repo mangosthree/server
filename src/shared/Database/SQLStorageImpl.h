@@ -274,7 +274,6 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
         return;
     }
 
-//    sLog.outErrorDb("Total # of fields in database: %u - total # of expected fields %u", result->GetFieldCount(), store.GetSrcFieldCount());
     if (store.GetSrcFieldCount() != result->GetFieldCount())
     {
         recordCount = 0;
@@ -373,13 +372,10 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
             }
             ++y;
         }
-
-        // check on the contents of the fields
-//    sLog.outErrorDb("Entry: %u - InhabitType %u - NPC Flags %u - Unit Flags %u", (*result)[0].GetUInt32(), (*result)[18].GetUInt32(), (*result)[21].GetUInt32(), (*result)[22].GetUInt32());
     }
     while (result->NextRow());
 
     delete result;
-} 
+}
 
 #endif

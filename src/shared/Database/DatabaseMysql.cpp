@@ -66,7 +66,9 @@ DatabaseMysql::~DatabaseMysql()
 
     // Free Mysql library pointers for last ~DB
     if (--db_count == 0)
-        { mysql_library_end(); }
+        {
+            mysql_library_end();
+        }
 }
 
 SqlConnection* DatabaseMysql::CreateConnection()

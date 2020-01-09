@@ -71,10 +71,6 @@
     }
 #endif
 
-#ifdef MANGOS_DEBUG
-#  define MANGOS_ASSERT WPError
-#else
-#  define MANGOS_ASSERT WPError                             // Error even if in release mode.
-#endif
+#define MANGOS_ASSERT WPError                             // Error even if in release mode.
 
 #endif

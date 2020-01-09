@@ -10,7 +10,7 @@ cls
 echo.
 echo.
 echo.
-IF EXIST buildings\dir (ECHO The buildings folder already exist do you want to delete it?
+IF EXIST Buildings\dir (ECHO The Buildings folder already exist do you want to delete it?
 echo If YES hit Enter to continue if no CLOSE the program now! . . .
 pause>nul
 DEL /S /Q buildings)
@@ -19,7 +19,7 @@ cls
 echo.
 echo.
 echo.
-IF NOT %ERRORLEVEL% LEQ 1 (echo The vmap extract tool finalized with errors.
+IF NOT %ERRORLEVEL% LEQ 1 (echo The vmap extract tool finished with errors.
 echo Hit Enter to continue . . .
 pause>nul)
 cls

@@ -1673,7 +1673,7 @@ void ObjectMgr::LoadGameObjects()
                           //             7                         8                         9                         10                        11                            12                           13                    14                        15
                           "`gameobject`.`rotation0`, `gameobject`.`rotation1`, `gameobject`.`rotation2`, `gameobject`.`rotation3`, `gameobject`.`spawntimesecs`, `gameobject`.`animprogress`, `gameobject`.`state`, `gameobject`.`spawnMask`, `gameobject`.`phaseMask`, "
                           //             16                         17                                       18
-                          "`gameobject`.`event`, `pool_gameobject`.`pool_entry`, `pool_gameobject_template`.`pool_entry` "
+                          "`game_event_gameobject`.`event`, `pool_gameobject`.`pool_entry`, `pool_gameobject_template`.`pool_entry` "
                           "FROM `gameobject` "
                           "LEFT OUTER JOIN `game_event_gameobject` ON `gameobject`.`guid` = `game_event_gameobject`.`guid` "
                           "LEFT OUTER JOIN `pool_gameobject` ON `gameobject`.`guid` = `pool_gameobject`.`guid` "
@@ -3983,7 +3983,7 @@ void ObjectMgr::LoadQuests()
                           //   80                81                   82                   83
                           "`ReqCurrencyCount1`, `ReqCurrencyCount1`, `ReqCurrencyCount1`, `ReqCurrencyCount1`,"
                           //   84            85               86               87               88
-                          "`ReqSpellCast1`, `ReqSpellCast2`, `ReqSpellCast3`, `ReqSpellCast4`, `ReqSpellLearnedv,"
+                          "`ReqSpellCast1`, `ReqSpellCast2`, `ReqSpellCast3`, `ReqSpellCast4`, `ReqSpellLearned`,"
                           //   89               90                  91                  92                  93                  94
                           "`RewChoiceItemId1`, `RewChoiceItemId2`, `RewChoiceItemId3`, `RewChoiceItemId4`, `RewChoiceItemId5`, `RewChoiceItemId6`,"
                           //   95                  96                     97                     98                     99                     100

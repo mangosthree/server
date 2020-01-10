@@ -209,7 +209,9 @@ struct ActionButton
         {
             packedData = newData;
             if (uState != ACTIONBUTTON_NEW)
-                { uState = ACTIONBUTTON_CHANGED; }
+            {
+                uState = ACTIONBUTTON_CHANGED;
+            }
         }
     }
 };
@@ -1185,7 +1187,9 @@ class Player : public Unit
             m_ExtraFlags &= ~(PLAYER_EXTRA_AUCTION_ENEMY | PLAYER_EXTRA_AUCTION_NEUTRAL);
 
             if (state < 0)
-                { m_ExtraFlags |= PLAYER_EXTRA_AUCTION_ENEMY; }
+            {
+                m_ExtraFlags |= PLAYER_EXTRA_AUCTION_ENEMY;
+            }
             else if (state > 0)
                 { m_ExtraFlags |= PLAYER_EXTRA_AUCTION_NEUTRAL; }
         }
@@ -1308,7 +1312,9 @@ class Player : public Unit
         InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap = false) const
         {
             if (!pItem)
-                { return EQUIP_ERR_ITEM_NOT_FOUND; }
+            {
+                return EQUIP_ERR_ITEM_NOT_FOUND;
+            }
             uint32 count = pItem->GetCount();
             return _CanStoreItem(bag, slot, dest, pItem->GetEntry(), count, pItem, swap, NULL);
         }
@@ -2284,7 +2290,9 @@ class Player : public Unit
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId != BATTLEGROUND_QUEUE_NONE)
-                    { return true; }
+                {
+                    return true;
+                }
             return false;
         }
 
@@ -2300,14 +2308,18 @@ class Player : public Unit
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-                    { return i; }
+                {
+                    return i;
+                }
             return PLAYER_MAX_BATTLEGROUND_QUEUES;
         }
         bool IsInvitedForBattleGroundQueueType(BattleGroundQueueTypeId bgQueueTypeId) const
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-                    { return m_bgBattleGroundQueueID[i].invitedToInstance != 0; }
+                {
+                    return m_bgBattleGroundQueueID[i].invitedToInstance != 0;
+                }
             return false;
         }
         bool InBattleGroundQueueForBattleGroundQueueType(BattleGroundQueueTypeId bgQueueTypeId) const
@@ -2338,7 +2350,9 @@ class Player : public Unit
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId == BATTLEGROUND_QUEUE_NONE)
-                    { return true; }
+                {
+                    return true;
+                }
             return false;
         }
         void RemoveBattleGroundQueueId(BattleGroundQueueTypeId val)
@@ -2357,13 +2371,17 @@ class Player : public Unit
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
-                    { m_bgBattleGroundQueueID[i].invitedToInstance = instanceId; }
+                {
+                    m_bgBattleGroundQueueID[i].invitedToInstance = instanceId;
+                }
         }
         bool IsInvitedForBattleGroundInstance(uint32 instanceId) const
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].invitedToInstance == instanceId)
-                    { return true; }
+                {
+                    return true;
+                }
             return false;
         }
         WorldLocation const& GetBattleGroundEntryPoint() const { return m_bgData.joinPos; }
@@ -2876,7 +2894,9 @@ class Player : public Unit
         void ScheduleDelayedOperation(uint32 operation)
         {
             if (operation < DELAYED_END)
-                { m_DelayedOperations |= operation; }
+            {
+                m_DelayedOperations |= operation;
+            }
         }
 
         void _fillGearScoreData(Item* item, GearScoreVec* gearScore, uint32& twoHandScore);

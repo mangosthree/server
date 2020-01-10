@@ -129,7 +129,9 @@ WorldSocket::~WorldSocket(void)
     delete m_RecvWPct;
 
     if (m_OutBuffer)
-        { m_OutBuffer->release(); }
+    {
+        m_OutBuffer->release();
+    }
 
     closing_ = true;
 
@@ -147,7 +149,9 @@ void WorldSocket::CloseSocket(void)
         ACE_GUARD(LockType, Guard, m_OutBufferLock);
 
         if (closing_)
-            { return; }
+        {
+            return;
+        }
 
         closing_ = true;
         peer().close_writer();
@@ -170,7 +174,9 @@ int WorldSocket::SendPacket(const WorldPacket& pct)
     ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
 
     if (closing_)
-        { return -1; }
+    {
+        return -1;
+    }
 
     // Dump outgoing packet.
     sLog.outWorldPacketDump(uint32(get_handle()), pct.GetOpcode(), pct.GetOpcodeName(), &pct, false);
@@ -232,7 +238,9 @@ int WorldSocket::open(void* a)
 
     // Prevent double call to this func.
     if (m_OutBuffer)
-        { return -1; }
+    {
+        return -1;
+    }
 
     // This will also prevent the socket from being Updated
     // while we are initializing it.
@@ -240,7 +248,9 @@ int WorldSocket::open(void* a)
 
     // Hook for the manager.
     if (sWorldSocketMgr->OnSocketOpen(this) == -1)
-        { return -1; }
+    {
+        return -1;
+    }
 
     // Allocate the buffer.
     ACE_NEW_RETURN(m_OutBuffer, ACE_Message_Block(m_OutBufferSize), -1);
@@ -273,7 +283,9 @@ int WorldSocket::open(void* a)
     packet << uint8(1);
 
     if (SendPacket(packet) == -1)
-        { return -1; }
+    {
+        return -1;
+    }
 
     // Register with ACE Reactor
     if (reactor()->register_handler(this, ACE_Event_Handler::READ_MASK | ACE_Event_Handler::WRITE_MASK) == -1)
@@ -309,7 +321,9 @@ int WorldSocket::close(int)
 int WorldSocket::handle_input(ACE_HANDLE)
 {
     if (closing_)
-        { return -1; }
+    {
+        return -1;
+    }
 
     switch (handle_input_missing_data())
     {
@@ -347,7 +361,9 @@ int WorldSocket::handle_output(ACE_HANDLE)
     ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
 
     if (closing_)
-        { return -1; }
+    {
+        return -1;
+    }
 
     const size_t send_len = m_OutBuffer->length();
 
@@ -361,11 +377,15 @@ int WorldSocket::handle_output(ACE_HANDLE)
 #endif // MSG_NOSIGNAL
 
     if (n == 0)
-        { return -1; }
+    {
+        return -1;
+    }
     else if (n == -1)
     {
         if (errno == EWOULDBLOCK || errno == EAGAIN)
-            { return schedule_wakeup_output(Guard); }
+        {
+            return schedule_wakeup_output(Guard);
+        }
 
         return -1;
     }
@@ -458,7 +478,9 @@ int WorldSocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask)
         closing_ = true;
 
         if (h == ACE_INVALID_HANDLE)
-            { peer().close_writer(); }
+        {
+            peer().close_writer();
+        }
     }
 
     // Critical section
@@ -475,10 +497,14 @@ int WorldSocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask)
 int WorldSocket::Update(void)
 {
     if (closing_)
-        { return -1; }
+    {
+        return -1;
+    }
 
     if (m_OutActive || (m_OutBuffer->length() == 0 && msg_queue()->is_empty()))
-        { return 0; }
+    {
+        return 0;
+    }
 
     int ret;
     do
@@ -545,7 +571,9 @@ int WorldSocket::handle_input_payload(void)
     m_Header.reset();
 
     if (ret == -1)
-        { errno = EINVAL; }
+    {
+        errno = EINVAL;
+    }
 
     return ret;
 }
@@ -572,7 +600,9 @@ int WorldSocket::handle_input_missing_data(void)
                                   recv_size);
 
     if (n <= 0)
-        { return (int)n; }
+    {
+        return (int)n;
+    }
 
     message_block.wr_ptr(n);
 
@@ -642,7 +672,9 @@ int WorldSocket::handle_input_missing_data(void)
 int WorldSocket::cancel_wakeup_output(GuardType& g)
 {
     if (!m_OutActive)
-        { return 0; }
+    {
+        return 0;
+    }
 
     m_OutActive = false;
 
@@ -662,7 +694,9 @@ int WorldSocket::cancel_wakeup_output(GuardType& g)
 int WorldSocket::schedule_wakeup_output(GuardType& g)
 {
     if (m_OutActive)
-        { return 0; }
+    {
+        return 0;
+    }
 
     m_OutActive = true;
 
@@ -688,7 +722,9 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     const ACE_UINT16 opcode = new_pct->GetOpcode();
 
     if (closing_)
-        { return -1; }
+    {
+        return -1;
+    }
 
     // Dump received packet.
     sLog.outWorldPacketDump(uint32(get_handle()), new_pct->GetOpcode(), new_pct->GetOpcodeName(), new_pct, true);
@@ -917,7 +953,9 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     id = fields[0].GetUInt32();
     security = fields[1].GetUInt16();
     if (security > SEC_ADMINISTRATOR)                       // prevent invalid security settings in DB
-        { security = SEC_ADMINISTRATOR; }
+    {
+        security = SEC_ADMINISTRATOR;
+    }
 
     K.SetHexStr(fields[2].GetString());
 
@@ -925,7 +963,9 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     locale = LocaleConstant(fields[9].GetUInt8());
     if (locale >= MAX_LOCALE)
-        { locale = LOCALE_enUS; }
+    {
+        locale = LOCALE_enUS;
+    }
 
     delete result;
 

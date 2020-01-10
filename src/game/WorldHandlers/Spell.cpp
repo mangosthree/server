@@ -5331,7 +5331,9 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
 
             if (!m_IsTriggeredSpell && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_ATTR_EX2_IGNORE_LOS) && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
-                { return SPELL_FAILED_LINE_OF_SIGHT; }
+            {
+                return SPELL_FAILED_LINE_OF_SIGHT;
+            }
 
             // auto selection spell rank implemented in WorldSession::HandleCastSpellOpcode
             // this case can be triggered if rank not found (too low-level target for first rank)
@@ -7658,7 +7660,9 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
                     return false;
 
                 if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !corpse->IsWithinLOSInMap(m_caster))
-                    { return false; }
+                {
+                    return false;
+                }
             }
 
             // all ok by some way or another, skip normal check
@@ -7668,7 +7672,9 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
             if (target != m_caster)
             if (WorldObject* caster = GetCastingObject())
                     if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !target->IsWithinLOSInMap(caster))
-                { return false; }
+                    {
+                        return false;
+                    }
             break;
         }
     }

@@ -45,7 +45,9 @@ QueryResultPostgre::~QueryResultPostgre()
 bool QueryResultPostgre::NextRow()
 {
     if (!mResult)
-        { return false; }
+    {
+        return false;
+    }
 
     if (mTableIndex >= mRowCount)
     {
@@ -58,7 +60,9 @@ bool QueryResultPostgre::NextRow()
     {
         pPQgetvalue = PQgetvalue(mResult, mTableIndex, j);
         if (pPQgetvalue && !(*pPQgetvalue))
-            { pPQgetvalue = NULL; }
+        {
+            pPQgetvalue = NULL;
+        }
 
         mCurrentRow[j].SetValue(pPQgetvalue);
     }

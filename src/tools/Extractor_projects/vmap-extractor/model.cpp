@@ -176,7 +176,9 @@ ModelInstance::ModelInstance(MPQFile& f, const char* ModelInstName, uint32 mapID
     fclose(input);
 
     if (nVertices == 0)
-        { return; }
+    {
+        return;
+    }
 
     uint16 adtId = 0;// not used for models
     uint32 flags = MOD_M2;

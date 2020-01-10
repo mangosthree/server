@@ -49,7 +49,9 @@ void LoadGameObjectModelList()
 {
     FILE* model_list_file = fopen((sWorld.GetDataPath() + "vmaps/" + VMAP::GAMEOBJECT_MODELS).c_str(), "rb");
     if (!model_list_file)
-        { return; }
+    {
+        return;
+    }
 
     uint32 name_length, displayId;
     char buff[500];
@@ -98,14 +100,18 @@ void LoadGameObjectModelList()
 GameObjectModel::~GameObjectModel()
 {
     if (iModel)
-        { ((VMAP::VMapManager2*)VMAP::VMapFactory::createOrGetVMapManager())->releaseModelInstance(name); }
+    {
+        ((VMAP::VMapManager2*)VMAP::VMapFactory::createOrGetVMapManager())->releaseModelInstance(name);
+    }
 }
 
 bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDisplayInfoEntry* const pDisplayInfo)
 {
     ModelList::const_iterator it = model_list.find(pDisplayInfo->Displayid);
     if (it == model_list.end())
-        { return false; }
+    {
+        return false;
+    }
 
     G3D::AABox mdl_box(it->second.bound);
     // ignore models with no bounds
@@ -118,7 +124,9 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     iModel = ((VMAP::VMapManager2*)VMAP::VMapFactory::createOrGetVMapManager())->acquireModelInstance(sWorld.GetDataPath() + "vmaps/", it->second.name);
 
     if (!iModel)
-        { return false; }
+    {
+        return false;
+    }
 
     name = it->second.name;
     iPos = Vector3(pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ());
@@ -156,7 +164,9 @@ GameObjectModel* GameObjectModel::construct(const GameObject* const pGo)
 {
     const GameObjectDisplayInfoEntry* info = sGameObjectDisplayInfoStore.LookupEntry(pGo->GetDisplayId());
     if (!info)
-        { return NULL; }
+    {
+        return NULL;
+    }
 
     GameObjectModel* mdl = new GameObjectModel();
     if (!mdl->initialize(pGo, info))
@@ -171,11 +181,15 @@ GameObjectModel* GameObjectModel::construct(const GameObject* const pGo)
 bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const
 {
     if (!(phasemask & ph_mask))
-        { return false; }
+    {
+        return false;
+    }
 
     float time = ray.intersectionTime(iBound);
     if (time == G3D::inf())
-        { return false; }
+    {
+        return false;
+    }
 
     // child bounds are defined in object space:
     Vector3 p = iInvRot * (ray.origin() - iPos) * iInvScale;

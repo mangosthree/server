@@ -90,7 +90,9 @@ namespace MMAP
 
         FILE* mapFile = fopen(mapFileName, "rb");
         if (!mapFile)
-            { return false; }
+        {
+            return false;
+        }
 
         GridMapFileHeader fheader;
         fread(&fheader, sizeof(GridMapFileHeader), 1, mapFile);
@@ -297,7 +299,9 @@ namespace MMAP
         int* ttris = ttriangles.getCArray();
 
         if (ltriangles.size() + ttriangles.size() == 0)
-            { return false; }
+        {
+            return false;
+        }
 
         // make a copy of liquid vertices
         // used to pad right-bottom frame due to lost vertex data at extraction
@@ -320,7 +324,9 @@ namespace MMAP
 
                 // if there is no liquid, don't use liquid
                 if (!liquid_type || !meshData.liquidVerts.size() || !ltriangles.size())
-                    { useLiquid = false; }
+                {
+                    useLiquid = false;
+                }
                 else
                 {
                     liquidType = getLiquidType(i, liquid_type);
@@ -350,7 +356,9 @@ namespace MMAP
 
                 // if there is no terrain, don't use terrain
                 if (!ttriangles.size())
-                    { useTerrain = false; }
+                {
+                    useTerrain = false;
+                }
 
                 // while extracting ADT data we are losing right-bottom vertices
                 // this code adds fair approximation of lost data
@@ -376,18 +384,24 @@ namespace MMAP
                         {
                             float h = lverts[ltris[idx] * 3 + 1];
                             if (h == INVALID_MAP_LIQ_HEIGHT || h > INVALID_MAP_LIQ_HEIGHT_MAX)
-                                { lverts[ltris[idx] * 3 + 1] = quadHeight; }
+                            {
+                                lverts[ltris[idx] * 3 + 1] = quadHeight;
+                            }
                         }
                     }
 
                     // no valid vertexes - don't use this poly at all
                     if (validCount == 0)
-                        { useLiquid = false; }
+                    {
+                        useLiquid = false;
+                    }
                 }
 
                 // if there is a hole here, don't use the terrain
                 if (useTerrain)
-                    { useTerrain = !isHole(i, holes); }
+                {
+                    useTerrain = !isHole(i, holes);
+                }
 
                 // we use only one terrain kind per quad - pick higher one
                 if (useTerrain && useLiquid)
@@ -398,10 +412,14 @@ namespace MMAP
                     {
                         float h = lverts[ltris[x] * 3 + 1];
                         if (minLLevel > h)
-                            { minLLevel = h; }
+                        {
+                            minLLevel = h;
+                        }
 
                         if (maxLLevel < h)
-                            { maxLLevel = h; }
+                        {
+                            maxLLevel = h;
+                        }
                     }
 
                     float maxTLevel = INVALID_MAP_LIQ_HEIGHT;
@@ -410,19 +428,27 @@ namespace MMAP
                     {
                         float h = tverts[ttris[x] * 3 + 1];
                         if (maxTLevel < h)
-                            { maxTLevel = h; }
+                        {
+                            maxTLevel = h;
+                        }
 
                         if (minTLevel > h)
-                            { minTLevel = h; }
+                        {
+                            minTLevel = h;
+                        }
                     }
 
                     // terrain under the liquid?
                     if (minLLevel > maxTLevel)
-                        { useTerrain = false; }
+                    {
+                        useTerrain = false;
+                    }
 
                     //liquid under the terrain?
                     if (minTLevel > maxLLevel)
-                        { useLiquid = false; }
+                    {
+                        useLiquid = false;
+                    }
                 }
 
                 // store the result
@@ -444,7 +470,9 @@ namespace MMAP
         }
 
         if (lverts_copy)
-            { delete [] lverts_copy; }
+        {
+            delete [] lverts_copy;
+        }
 
         return meshData.solidTris.size() || meshData.liquidTris.size();
     }
@@ -566,20 +594,26 @@ namespace MMAP
         do
         {
             if (result == VMAP_LOAD_RESULT_ERROR)
-                { break; }
+            {
+                break;
+            }
 
             InstanceTreeMap instanceTrees;
             ((VMapManager2*)vmapManager)->getInstanceMapTree(instanceTrees);
 
             if (!instanceTrees[mapID])
-                { break; }
+            {
+                break;
+            }
 
             ModelInstance* models = NULL;
             uint32 count = 0;
             instanceTrees[mapID]->getModelInstances(models, count);
 
             if (!models)
-                { break; }
+            {
+                break;
+            }
 
             for (uint32 i = 0; i < count; ++i)
             {
@@ -588,7 +622,9 @@ namespace MMAP
                 // model instances exist in tree even though there are instances of that model in this tile
                 WorldModel* worldModel = instance.getWorldModel();
                 if (!worldModel)
-                    { continue; }
+                {
+                    continue;
+                }
 
                 // now we have a model to add to the meshdata
                 retval = true;
@@ -779,7 +815,9 @@ namespace MMAP
         for (int i = 0; i < tris.size(); ++i)
         {
             if (vertMap.find(t[i]) != vertMap.end())
-                { continue; }
+            {
+                continue;
+            }
 
             vertMap.insert(std::pair<int, int>(t[i], 0));
         }
@@ -803,7 +841,9 @@ namespace MMAP
         {
             map<int, int>::iterator it;
             if ((it = vertMap.find(t[i])) == vertMap.end())
-                { continue; }
+            {
+                continue;
+            }
 
             t[i] = (*it).second;
         }
@@ -816,7 +856,9 @@ namespace MMAP
     {
         // no meshfile input given?
         if (offMeshFilePath == NULL)
-            { return; }
+        {
+            return;
+        }
 
         FILE* fp = fopen(offMeshFilePath, "rb");
         if (!fp)

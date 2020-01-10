@@ -243,13 +243,19 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             msg = recv_data.ReadString(msgLength);
 
             if (msg.empty())
-                { break; }
+            {
+                break;
+            }
 
             if (ChatHandler(this).ParseCommands(msg.c_str()))
-                { break; }
+            {
+                break;
+            }
 
             if (!processChatmessageFurtherAfterSecurityChecks(msg, lang))
-                { return; }
+            {
+                return;
+            }
 
             if (!normalizePlayerName(to))
             {

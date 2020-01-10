@@ -208,7 +208,9 @@ class TypeUnorderedMapContainer
         {
             typename UNORDERED_MAP<KEY_TYPE, SPECIFIC_TYPE*>::iterator i = elements._element.find(hdl);
             if (i == elements._element.end())
-                { return NULL; }
+            {
+                return NULL;
+            }
             else
                 { return i->second; }
         }

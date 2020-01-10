@@ -668,7 +668,9 @@ int main(int argc, char** argv)
 
     // Use command line arguments, when some
     if (!processArgv(argc, argv))
-        { return 1; }
+    {
+        return 1;
+    }
 
     // some simple check if working dir is dirty
     else

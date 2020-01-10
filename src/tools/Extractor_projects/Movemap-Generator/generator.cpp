@@ -106,11 +106,15 @@ bool handleArgs(int argc, char** argv,
         {
             param = argv[++i];
             if (!param)
-                { return false; }
+            {
+                return false;
+            }
 
             float maxangle = atof(param);
             if (maxangle <= 90.f && maxangle >= 45.f)
-                { maxAngle = maxangle; }
+            {
+                maxAngle = maxangle;
+            }
             else
                 { printf("invalid option for '--maxAngle', using default\n"); }
         }
@@ -118,7 +122,9 @@ bool handleArgs(int argc, char** argv,
         {
             param = argv[++i];
             if (!param)
-                { return false; }
+            {
+                return false;
+            }
 
             char* stileX = strtok(param, ",");
             char* stileY = strtok(NULL, ",");
@@ -126,9 +132,13 @@ bool handleArgs(int argc, char** argv,
             int tiley = atoi(stileY);
 
             if ((tilex > 0 && tilex < 64) || (tilex == 0 && strcmp(stileX, "0") == 0))
-                { tileX = tilex; }
+            {
+                tileX = tilex;
+            }
             if ((tiley > 0 && tiley < 64) || (tiley == 0 && strcmp(stileY, "0") == 0))
-                { tileY = tiley; }
+            {
+                tileY = tiley;
+            }
 
             if (tileX < 0 || tileY < 0)
             {
@@ -140,10 +150,14 @@ bool handleArgs(int argc, char** argv,
         {
             param = argv[++i];
             if (!param)
-                { return false; }
+            {
+                return false;
+            }
 
             if (strcmp(param, "true") == 0)
-                { skipLiquid = true; }
+            {
+                skipLiquid = true;
+            }
             else if (strcmp(param, "false") == 0)
                 { skipLiquid = false; }
             else
@@ -153,10 +167,14 @@ bool handleArgs(int argc, char** argv,
         {
             param = argv[++i];
             if (!param)
-                { return false; }
+            {
+                return false;
+            }
 
             if (strcmp(param, "true") == 0)
-                { skipContinents = true; }
+            {
+                skipContinents = true;
+            }
             else if (strcmp(param, "false") == 0)
                 { skipContinents = false; }
             else
@@ -166,10 +184,14 @@ bool handleArgs(int argc, char** argv,
         {
             param = argv[++i];
             if (!param)
-                { return false; }
+            {
+                return false;
+            }
 
             if (strcmp(param, "true") == 0)
-                { skipJunkMaps = true; }
+            {
+                skipJunkMaps = true;
+            }
             else if (strcmp(param, "false") == 0)
                 { skipJunkMaps = false; }
             else
@@ -179,10 +201,14 @@ bool handleArgs(int argc, char** argv,
         {
             param = argv[++i];
             if (!param)
-                { return false; }
+            {
+                return false;
+            }
 
             if (strcmp(param, "true") == 0)
-                { skipBattlegrounds = true; }
+            {
+                skipBattlegrounds = true;
+            }
             else if (strcmp(param, "false") == 0)
                 { skipBattlegrounds = false; }
             else
@@ -192,10 +218,14 @@ bool handleArgs(int argc, char** argv,
         {
             param = argv[++i];
             if (!param)
-                { return false; }
+            {
+                return false;
+            }
 
             if (strcmp(param, "true") == 0)
-                { debugOutput = true; }
+            {
+                debugOutput = true;
+            }
             else if (strcmp(param, "false") == 0)
                 { debugOutput = false; }
             else
@@ -209,10 +239,14 @@ bool handleArgs(int argc, char** argv,
         {
             param = argv[++i];
             if (!param)
-                { return false; }
+            {
+                return false;
+            }
 
             if (strcmp(param, "true") == 0)
-                { bigBaseUnit = true; }
+            {
+                bigBaseUnit = true;
+            }
             else if (strcmp(param, "false") == 0)
                 { bigBaseUnit = false; }
             else
@@ -222,7 +256,9 @@ bool handleArgs(int argc, char** argv,
         {
             param = argv[++i];
             if (!param)
-                { return false; }
+            {
+                return false;
+            }
 
             offMeshInputPath = param;
         }
@@ -235,7 +271,9 @@ bool handleArgs(int argc, char** argv,
         {
             int map = atoi(argv[i]);
             if (map > 0 || (map == 0 && (strcmp(argv[i], "0") == 0)))
-                { mapnum = map; }
+            {
+                mapnum = map;
+            }
             else
             {
                 printf("invalid map id\n");
@@ -279,23 +317,31 @@ int main(int argc, char** argv)
     if (mapnum == -1 && debugOutput)
     {
         if (silent)
-            { return -2; }
+        {
+            return -2;
+        }
 
         printf(" You have specifed debug output, but didn't specify a map to generate.\n");
         printf(" This will generate debug output for ALL maps.\n");
         printf(" Are you sure you want to continue? (y/n) ");
         if (getchar() != 'y')
-            { return 0; }
+        {
+            return 0;
+        }
     }
 
     if (!checkDirectories(debugOutput))
-        { return silent ? -3 : finish(" Press any key to close...", -3); }
+    {
+        return silent ? -3 : finish(" Press any key to close...", -3);
+    }
 
     MapBuilder builder(maxAngle, skipLiquid, skipContinents, skipJunkMaps,
                        skipBattlegrounds, debugOutput, bigBaseUnit, offMeshInputPath);
 
     if (tileX > -1 && tileY > -1 && mapnum >= 0)
-        { builder.buildSingleTile(mapnum, tileX, tileY); }
+    {
+        builder.buildSingleTile(mapnum, tileX, tileY);
+    }
     else if (mapnum >= 0)
         builder.buildMap(uint32(mapnum));
     else

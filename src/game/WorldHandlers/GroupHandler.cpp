@@ -787,7 +787,9 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
                         for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
                         {
                             if (Aura* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
-                                { *data << int32(aura->GetModifier()->m_amount); }
+                            {
+                                *data << int32(aura->GetModifier()->m_amount);
+                            }
                             else
                                 { *data << int32(0); }
                         }
@@ -884,7 +886,9 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
                             for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
                             {
                                 if (Aura* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
-                                    { *data << int32(aura->GetModifier()->m_amount); }
+                                {
+                                    *data << int32(aura->GetModifier()->m_amount);
+                                }
                                 else
                                     { *data << int32(0); }
                             }
@@ -1018,7 +1022,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
                 for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
                 {
                     if (Aura* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
-                        { data << int32(aura->GetModifier()->m_amount); }
+                    {
+                        data << int32(aura->GetModifier()->m_amount);
+                    }
                     else
                         { data << int32(0); }
                 }
@@ -1057,7 +1063,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
                     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
                     {
                         if (Aura* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
-                            { data << int32(aura->GetModifier()->m_amount); }
+                        {
+                            data << int32(aura->GetModifier()->m_amount);
+                        }
                         else
                             { data << int32(0); }
                     }

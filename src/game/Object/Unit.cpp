@@ -604,7 +604,9 @@ Unit::~Unit()
 void Unit::Update(uint32 update_diff, uint32 p_time)
 {
     if (!IsInWorld())
-        { return; }
+    {
+        return;
+    }
 
     /*if(p_time > m_AurasCheck)
     {
@@ -639,7 +641,9 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
         {
             // m_CombatTimer set at aura start and it will be freeze until aura removing
             if (m_CombatTimer <= update_diff)
-                { CombatStop(); }
+            {
+                CombatStop();
+            }
             else
                 { m_CombatTimer -= update_diff; }
         }
@@ -684,10 +688,14 @@ bool Unit::UpdateMeleeAttackingState()
 {
     Unit* victim = getVictim();
     if (!victim || IsNonMeleeSpellCasted(false))
-        { return false; }
+    {
+        return false;
+    }
 
     if (!isAttackReady(BASE_ATTACK) && !(isAttackReady(OFF_ATTACK) && haveOffhandWeapon()))
-        { return false; }
+    {
+        return false;
+    }
 
     uint8 swingError = 0;
     if (!CanReachWithMeleeAttack(victim))
@@ -711,7 +719,9 @@ bool Unit::UpdateMeleeAttackingState()
             if (haveOffhandWeapon())
             {
                 if (getAttackTimer(OFF_ATTACK) < ATTACK_DISPLAY_DELAY)
-                    { setAttackTimer(OFF_ATTACK, ATTACK_DISPLAY_DELAY); }
+                {
+                    setAttackTimer(OFF_ATTACK, ATTACK_DISPLAY_DELAY);
+                }
             }
             AttackerStateUpdate(victim, BASE_ATTACK);
             resetAttackTimer(BASE_ATTACK);
@@ -721,7 +731,9 @@ bool Unit::UpdateMeleeAttackingState()
             // prevent base and off attack in same time, delay attack at 0.2 sec
             uint32 base_att = getAttackTimer(BASE_ATTACK);
             if (base_att < ATTACK_DISPLAY_DELAY)
-                { setAttackTimer(BASE_ATTACK, ATTACK_DISPLAY_DELAY); }
+            {
+                setAttackTimer(BASE_ATTACK, ATTACK_DISPLAY_DELAY);
+            }
             // do attack
             AttackerStateUpdate(victim, OFF_ATTACK);
             resetAttackTimer(OFF_ATTACK);
@@ -732,7 +744,9 @@ bool Unit::UpdateMeleeAttackingState()
     if (player && swingError != player->LastSwingErrorMsg())
     {
         if (swingError == 1)
-            { player->SendAttackSwingNotInRange(); }
+        {
+            player->SendAttackSwingNotInRange();
+        }
         else if (swingError == 2)
             { player->SendAttackSwingBadFacingAttack(); }
         player->SwingErrorMsg(swingError);
@@ -744,10 +758,14 @@ bool Unit::UpdateMeleeAttackingState()
 bool Unit::haveOffhandWeapon() const
 {
     if (!CanUseEquippedWeapon(OFF_ATTACK))
-        { return false; }
+    {
+        return false;
+    }
 
     if (GetTypeId() == TYPEID_PLAYER)
-        { return ((Player*)this)->GetWeaponForAttack(OFF_ATTACK, true, true); }
+    {
+        return ((Player*)this)->GetWeaponForAttack(OFF_ATTACK, true, true);
+    }
     else
     {
         uint32 ItemId = GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1);
@@ -781,7 +799,9 @@ float Unit::GetCombatReach(Unit const* pVictim, bool forMeleeRange /*=true*/, fl
                   BASE_MELEERANGE_OFFSET + flat_mod;
 
     if (forMeleeRange && reach < ATTACK_DISTANCE)
-        { reach = ATTACK_DISTANCE; }
+    {
+        reach = ATTACK_DISTANCE;
+    }
 
     return reach;
 }
@@ -856,7 +876,9 @@ void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb)
     if (!pVictim->IsAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
     {
         if (absorb)
-            { *absorb += damage; }
+        {
+            *absorb += damage;
+        }
         damage = 0;
         return;
     }
@@ -874,13 +896,19 @@ void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb)
 
     // Script Event damage Deal
     if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-        { ((Creature*)this)->AI()->DamageDeal(pVictim, damage); }
+    {
+        ((Creature*)this)->AI()->DamageDeal(pVictim, damage);
+    }
     // Script Event damage taken
     if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->AI())
-        { ((Creature*)pVictim)->AI()->DamageTaken(this, damage); }
+    {
+        ((Creature*)pVictim)->AI()->DamageTaken(this, damage);
+    }
 
     if (absorb && originalDamage > damage)
-        { *absorb += (originalDamage - damage); }
+    {
+        *absorb += (originalDamage - damage);
+    }
 }
 
 uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss)
@@ -1030,7 +1058,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         ((Player*)pVictim)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HIT_RECEIVED, damage);
 
     if (pVictim->GetTypeId() == TYPEID_UNIT && !((Creature*)pVictim)->IsPet() && !((Creature*)pVictim)->HasLootRecipient())
-        { ((Creature*)pVictim)->SetLootRecipient(this); }
+    {
+        ((Creature*)pVictim)->SetLootRecipient(this);
+    }
 
     if (health <= damage)
     {
@@ -1049,13 +1079,17 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             group_tap = ((Creature*)pVictim)->GetGroupLootRecipient();
 
             if (Player* recipient = ((Creature*)pVictim)->GetOriginalLootRecipient())
-                { player_tap = recipient; }
+            {
+                player_tap = recipient;
+            }
         }
         // in player kill case group tap selected by player_tap (killer-player itself, or charmer, or owner, etc)
         else
         {
             if (player_tap)
-                { group_tap = player_tap->GetGroup(); }
+            {
+                group_tap = player_tap->GetGroup();
+            }
         }
 
         // Spirit of Redemtion Talent
@@ -1089,7 +1123,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             data << pVictim->GetObjectGuid();               // victim
 
             if (group_tap)
-                { group_tap->BroadcastPacket(&data, false, group_tap->GetMemberGroup(player_tap->GetObjectGuid()), player_tap->GetObjectGuid()); }
+            {
+                group_tap->BroadcastPacket(&data, false, group_tap->GetMemberGroup(player_tap->GetObjectGuid()), player_tap->GetObjectGuid());
+            }
 
             player_tap->SendDirectMessage(&data);
         }
@@ -1100,7 +1136,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         if (player_tap != pVictim)
         {
             if (group_tap)
-                { group_tap->RewardGroupAtKill(pVictim, player_tap); }
+            {
+                group_tap->RewardGroupAtKill(pVictim, player_tap);
+            }
             else if (player_tap)
                 { player_tap->RewardSinglePlayerAtKill(pVictim); }
         }
@@ -1120,7 +1158,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             // save value before aura remove
             uint32 ressSpellId = pVictim->GetUInt32Value(PLAYER_SELF_RES_SPELL);
             if (!ressSpellId)
-                { ressSpellId = ((Player*)pVictim)->GetResurrectionSpellId(); }
+            {
+                ressSpellId = ((Player*)pVictim)->GetResurrectionSpellId();
+            }
 
             // Remove all expected to remove at death auras (most important negative case like DoT or periodic triggers)
             pVictim->RemoveAllAurasOnDeath();
@@ -1136,7 +1176,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 
         // Call KilledUnit for creatures
         if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-            { ((Creature*)this)->AI()->KilledUnit(pVictim); }
+        {
+            ((Creature*)this)->AI()->KilledUnit(pVictim);
+        }
 
         if (Creature* killer = ToCreature())
         {
@@ -1160,7 +1202,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             // remember victim PvP death for corpse type and corpse reclaim delay
             // at original death (not at SpiritOfRedemtionTalent timeout)
             if (!damageFromSpiritOfRedemtionTalent)
-                { playerVictim->SetPvPDeath(player_tap != NULL); }
+            {
+                playerVictim->SetPvPDeath(player_tap != NULL);
+            }
 
             // achievement stuff
             playerVictim->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_DAMAGE_RECEIVED, health);
@@ -1208,7 +1252,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
                 {
                     // selfkills are not handled in outdoor pvp scripts
                     if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(playerVictim->GetCachedZoneId()))
-                        { outdoorPvP->HandlePlayerKill(player_tap, playerVictim); }
+                    {
+                        outdoorPvP->HandlePlayerKill(player_tap, playerVictim);
+                    }
                 }
 
                 // Used by Eluna
@@ -1282,14 +1328,18 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
                 {
                     // skip channeled spell (processed differently below)
                     if (i == CURRENT_CHANNELED_SPELL)
-                        { continue; }
+                    {
+                        continue;
+                    }
 
                     if (Spell* spell = pVictim->GetCurrentSpell(CurrentSpellTypes(i)))
                     {
                         if (spell->getState() == SPELL_STATE_PREPARING)
                         {
                             if(spell->m_spellInfo->GetInterruptFlags() & SPELL_INTERRUPT_FLAG_ABORT_ON_DMG)
-                                { pVictim->InterruptSpell(CurrentSpellTypes(i)); }
+                            {
+                                pVictim->InterruptSpell(CurrentSpellTypes(i));
+                            }
                             else
                                 { spell->Delayed(); }
                         }
@@ -1305,7 +1355,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
                     if (channelInterruptFlags & CHANNEL_FLAG_DELAY)
                     {
                         if (pVictim != this)                // don't shorten the duration of channeling if you damage yourself
-                            { spell->DelayedChannel(); }
+                        {
+                            spell->DelayedChannel();
+                        }
                     }
                     else if ((channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)))
                     {
@@ -1353,7 +1405,9 @@ struct PetOwnerKilledUnitHelper
         if (pTarget->GetTypeId() == TYPEID_UNIT)
         {
             if (((Creature*)pTarget)->AI())
-                { ((Creature*)pTarget)->AI()->OwnerKilledUnit(m_victim); }
+            {
+                ((Creature*)pTarget)->AI()->OwnerKilledUnit(m_victim);
+            }
         }
     }
 
@@ -1369,7 +1423,9 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
     if (victim->GetCreatureType() == CREATURE_TYPE_CRITTER && GetTypeId() == TYPEID_PLAYER)
     {
         if (CreatureInfo const* normalInfo = ObjectMgr::GetCreatureTemplate(victim->GetEntry()))
-            { ((Player*)this)->KilledMonster(normalInfo, victim->GetObjectGuid()); }
+        {
+            ((Player*)this)->KilledMonster(normalInfo, victim->GetObjectGuid());
+        }
     }
 
     // Interrupt channeling spell when a Possessed Summoned is killed
@@ -1381,14 +1437,18 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
         {
             Spell* channeledSpell = creator->GetCurrentSpell(CURRENT_CHANNELED_SPELL);
             if (channeledSpell && channeledSpell->m_spellInfo->Id == spellInfo->Id)
-                { creator->InterruptNonMeleeSpells(false); }
+            {
+                creator->InterruptNonMeleeSpells(false);
+            }
         }
     }
 
     /* ******************************* Inform various hooks ************************************ */
     // Inform victim's AI
     if (victim->AI())
-        { victim->AI()->JustDied(this); }
+    {
+        victim->AI()->JustDied(this);
+    }
 
     // Inform Owner
     Unit* pOwner = victim->GetCharmerOrOwner();
@@ -1398,17 +1458,23 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
         if (pSummon->GetSummonerGuid().IsCreatureOrVehicle())
             if (Creature* pSummoner = victim->GetMap()->GetCreature(pSummon->GetSummonerGuid()))
                 if (pSummoner->AI())
-                    { pSummoner->AI()->SummonedCreatureJustDied(victim); }
+                {
+                    pSummoner->AI()->SummonedCreatureJustDied(victim);
+                }
     }
     else if (pOwner && pOwner->GetTypeId() == TYPEID_UNIT)
     {
         if (((Creature*)pOwner)->AI())
-            { ((Creature*)pOwner)->AI()->SummonedCreatureJustDied(victim); }
+        {
+            ((Creature*)pOwner)->AI()->SummonedCreatureJustDied(victim);
+        }
     }
 
     // Inform Instance Data and Linking
     if (InstanceData* mapInstance = victim->GetInstanceData())
-        { mapInstance->OnCreatureDeath(victim); }
+    {
+        mapInstance->OnCreatureDeath(victim);
+    }
 
     if (responsiblePlayer)                                  // killedby Player, inform BG
         if (BattleGround* bg = responsiblePlayer->GetBattleGround())
@@ -1421,13 +1487,17 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
 
     // Notify the outdoor pvp script
     if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(responsiblePlayer ? responsiblePlayer->GetCachedZoneId() : GetZoneId()))
-        { outdoorPvP->HandleCreatureDeath(victim); }
+    {
+        outdoorPvP->HandleCreatureDeath(victim);
+    }
 
     // Start creature death script
     GetMap()->ScriptsStart(DBS_ON_CREATURE_DEATH, victim->GetEntry(), victim, responsiblePlayer ? responsiblePlayer : this);
 
     if (victim->IsLinkingEventTrigger())
-        { victim->GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_DIE, victim); }
+    {
+        victim->GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_DIE, victim);
+    }
 
     // Dungeon specific stuff
     if (victim->GetInstanceId())
@@ -1441,7 +1511,9 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
             if (m->IsRaidOrHeroicDungeon())
             {
                 if (victim->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_INSTANCE_BIND)
-                    { ((DungeonMap*)m)->PermBindAllPlayers(creditedPlayer); }
+                {
+                    ((DungeonMap*)m)->PermBindAllPlayers(creditedPlayer);
+                }
             }
             else
             {
@@ -1450,7 +1522,9 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
                 // until the players leave the instance
                 time_t resettime = victim->GetRespawnTimeEx() + 2 * HOUR;
                 if (save->GetResetTime() < resettime)
-                    { save->SetResetTime(resettime); }
+                {
+                    save->SetResetTime(resettime);
+                }
             }
             // update encounter state if needed
             ((DungeonMap*)m)->GetPersistanceState()->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, victim->GetEntry());
@@ -1484,7 +1558,9 @@ void Unit::CastStop(uint32 except_spellid)
 {
     for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
         if (m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->Id != except_spellid)
-            { InterruptSpell(CurrentSpellTypes(i), false); }
+        {
+            InterruptSpell(CurrentSpellTypes(i), false);
+        }
 }
 
 void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item* castItem, Aura* triggeredByAura, ObjectGuid originalCaster, SpellEntry const* triggeredBy)
@@ -1494,7 +1570,9 @@ void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item* castIte
     if (!spellInfo)
     {
         if (triggeredByAura)
-            { sLog.outError("CastSpell: unknown spell id %i by caster: %s triggered by aura %u (eff %u)", spellId, GetGuidStr().c_str(), triggeredByAura->GetId(), triggeredByAura->GetEffIndex()); }
+        {
+            sLog.outError("CastSpell: unknown spell id %i by caster: %s triggered by aura %u (eff %u)", spellId, GetGuidStr().c_str(), triggeredByAura->GetId(), triggeredByAura->GetEffIndex());
+        }
         else
             { sLog.outError("CastSpell: unknown spell id %i by caster: %s", spellId, GetGuidStr().c_str()); }
         return;
@@ -1508,19 +1586,25 @@ void Unit::CastSpell(Unit* Victim, SpellEntry const* spellInfo, bool triggered, 
     if (!spellInfo)
     {
         if (triggeredByAura)
-            { sLog.outError("CastSpell: unknown spell by caster: %s triggered by aura %u (eff %u)", GetGuidStr().c_str(), triggeredByAura->GetId(), triggeredByAura->GetEffIndex()); }
+        {
+            sLog.outError("CastSpell: unknown spell by caster: %s triggered by aura %u (eff %u)", GetGuidStr().c_str(), triggeredByAura->GetId(), triggeredByAura->GetEffIndex());
+        }
         else
             { sLog.outError("CastSpell: unknown spell by caster: %s", GetGuidStr().c_str()); }
         return;
     }
 
     if (castItem)
-        { DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->Id); }
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->Id);
+    }
 
     if (triggeredByAura)
     {
         if (!originalCaster)
-            { originalCaster = triggeredByAura->GetCasterGuid(); }
+        {
+            originalCaster = triggeredByAura->GetCasterGuid();
+        }
 
         triggeredBy = triggeredByAura->GetSpellProto();
     }
@@ -1540,7 +1624,9 @@ void Unit::CastSpell(Unit* Victim, SpellEntry const* spellInfo, bool triggered, 
     targets.setUnitTarget(Victim);
 
     if (spellInfo->GetTargets() & TARGET_FLAG_DEST_LOCATION)
-        { targets.setDestination(Victim->GetPositionX(), Victim->GetPositionY(), Victim->GetPositionZ()); }
+    {
+        targets.setDestination(Victim->GetPositionX(), Victim->GetPositionY(), Victim->GetPositionZ());
+    }
     if (spellInfo->GetTargets() & TARGET_FLAG_SOURCE_LOCATION)
         if (WorldObject* caster = spell->GetCastingObject())
             targets.setSource(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
@@ -1577,12 +1663,16 @@ void Unit::CastCustomSpell(Unit* Victim, SpellEntry const* spellInfo, int32 cons
     }
 
     if (castItem)
-        { DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->Id); }
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->Id);
+    }
 
     if (triggeredByAura)
     {
         if (!originalCaster)
-            { originalCaster = triggeredByAura->GetCasterGuid(); }
+        {
+            originalCaster = triggeredByAura->GetCasterGuid();
+        }
 
         triggeredBy = triggeredByAura->GetSpellProto();
     }
@@ -1590,23 +1680,33 @@ void Unit::CastCustomSpell(Unit* Victim, SpellEntry const* spellInfo, int32 cons
     Spell* spell = new Spell(this, spellInfo, triggered, originalCaster, triggeredBy);
 
     if (bp0)
-        { spell->m_currentBasePoints[EFFECT_INDEX_0] = *bp0; }
+    {
+        spell->m_currentBasePoints[EFFECT_INDEX_0] = *bp0;
+    }
 
     if (bp1)
-        { spell->m_currentBasePoints[EFFECT_INDEX_1] = *bp1; }
+    {
+        spell->m_currentBasePoints[EFFECT_INDEX_1] = *bp1;
+    }
 
     if (bp2)
-        { spell->m_currentBasePoints[EFFECT_INDEX_2] = *bp2; }
+    {
+        spell->m_currentBasePoints[EFFECT_INDEX_2] = *bp2;
+    }
 
     SpellCastTargets targets;
     targets.setUnitTarget(Victim);
     spell->m_CastItem = castItem;
 
     if (spellInfo->GetTargets() & TARGET_FLAG_DEST_LOCATION)
-        { targets.setDestination(Victim->GetPositionX(), Victim->GetPositionY(), Victim->GetPositionZ()); }
+    {
+        targets.setDestination(Victim->GetPositionX(), Victim->GetPositionY(), Victim->GetPositionZ());
+    }
     if (spellInfo->GetTargets() & TARGET_FLAG_SOURCE_LOCATION)
         if (WorldObject* caster = spell->GetCastingObject())
-            { targets.setSource(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ()); }
+        {
+            targets.setSource(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
+        }
 
     spell->SpellStart(&targets, triggeredByAura);
 }
@@ -1641,12 +1741,16 @@ void Unit::CastSpell(float x, float y, float z, SpellEntry const* spellInfo, boo
     }
 
     if (castItem)
-        { DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->Id); }
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->Id);
+    }
 
     if (triggeredByAura)
     {
         if (!originalCaster)
-            { originalCaster = triggeredByAura->GetCasterGuid(); }
+        {
+            originalCaster = triggeredByAura->GetCasterGuid();
+        }
 
         triggeredBy = triggeredByAura->GetSpellProto();
     }
@@ -1656,13 +1760,19 @@ void Unit::CastSpell(float x, float y, float z, SpellEntry const* spellInfo, boo
     SpellCastTargets targets;
 
     if (spellInfo->GetTargets() & TARGET_FLAG_DEST_LOCATION)
-        { targets.setDestination(x, y, z); }
+    {
+        targets.setDestination(x, y, z);
+    }
     if (spellInfo->GetTargets() & TARGET_FLAG_SOURCE_LOCATION)
-        { targets.setSource(x, y, z); }
+    {
+        targets.setSource(x, y, z);
+    }
 
     // Spell cast with x,y,z but without dbc target-mask, set destination
     if (!(targets.m_targetMask & (TARGET_FLAG_DEST_LOCATION | TARGET_FLAG_SOURCE_LOCATION)))
-        { targets.setDestination(x, y, z); }
+    {
+        targets.setDestination(x, y, z);
+    }
 
     spell->m_CastItem = castItem;
     spell->SpellStart(&targets, triggeredByAura);
@@ -1687,7 +1797,9 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
     Unit* pVictim = damageInfo->target;
 
     if (damage < 0)
-        { return; }
+    {
+        return;
+    }
 
     if (!this || !pVictim)
         return;
@@ -1767,15 +1879,21 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
 void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
 {
     if (!damageInfo)
-        { return; }
+    {
+        return;
+    }
 
     Unit* pVictim = damageInfo->target;
 
     if (!this || !pVictim)
-        { return; }
+    {
+        return;
+    }
 
     if (!pVictim->IsAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
-        { return; }
+    {
+        return;
+    }
 
     SpellEntry const* spellProto = sSpellStore.LookupEntry(damageInfo->SpellID);
     if (spellProto == NULL)
@@ -1815,9 +1933,13 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
     damageInfo->hitOutCome       = MELEE_HIT_EVADE;
 
     if (!this || !pVictim)
-        { return; }
+    {
+        return;
+    }
     if (!this->IsAlive() || !pVictim->IsAlive())
-        { return; }
+    {
+        return;
+    }
 
     // Select HitInfo/procAttacker/procVictim flag based on attack type
     switch (attackType)
@@ -2001,17 +2123,25 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
 
             // apply max/min bounds
             if (lowEnd < 0.01f)                             // the low end must not go bellow 0.01f
-                { lowEnd = 0.01f; }
+            {
+                lowEnd = 0.01f;
+            }
             else if (lowEnd > maxLowEnd)                    // the smaller value of this and 0.6 is kept as the low end
                 { lowEnd = maxLowEnd; }
 
             if (highEnd < 0.2f)                             // high end limits
-                { highEnd = 0.2f; }
+            {
+                highEnd = 0.2f;
+            }
             if (highEnd > 0.99f)
-                { highEnd = 0.99f; }
+            {
+                highEnd = 0.99f;
+            }
 
             if (lowEnd > highEnd)                           // prevent negative range size
-                { lowEnd = highEnd; }
+            {
+                lowEnd = highEnd;
+            }
 
             reducePercent = lowEnd + rand_norm_f() * (highEnd - lowEnd);
 
@@ -2057,7 +2187,9 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
             damageInfo->procEx |= PROC_EX_ABSORB;
         }
         if (damageInfo->resist)
-            { damageInfo->HitInfo |= HITINFO_RESIST; }
+        {
+            damageInfo->HitInfo |= HITINFO_RESIST;
+        }
     }
     else // Umpossible get negative result but....
         { damageInfo->damage = 0; }
@@ -2069,10 +2201,14 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     Unit* pVictim = damageInfo->target;
 
     if (!this || !pVictim)
-        { return; }
+    {
+        return;
+    }
 
     if (!pVictim->IsAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
-        { return; }
+    {
+        return;
+    }
 
     // You don't lose health from damage taken from another player while in a sanctuary
     // You still see it in the combat log though
@@ -2081,9 +2217,13 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
     // Hmmmm dont like this emotes client must by self do all animations
     if (damageInfo->HitInfo & HITINFO_CRITICALHIT)
-        { pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL); }
+    {
+        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
+    }
     if (damageInfo->blocked_amount && damageInfo->TargetState != VICTIMSTATE_BLOCKS)
-        { pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD); }
+    {
+        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
+    }
 
     // This seems to reduce the victims time until next attack if your attack was parried
     if (damageInfo->TargetState == VICTIMSTATE_PARRY)
@@ -2140,7 +2280,9 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
         // there is a newbie protection, at level 10 just 7% base chance; assuming linear function
         if (pVictim->getLevel() < 30)
-            { Probability = 0.65f * pVictim->getLevel() + 0.5f; }
+        {
+            Probability = 0.65f * pVictim->getLevel() + 0.5f;
+        }
 
         uint32 VictimDefense = pVictim->GetMaxSkillValueForLevel(this);
         uint32 AttackerMeleeSkill = GetMaxSkillValueForLevel();
@@ -2148,10 +2290,14 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
         Probability *= AttackerMeleeSkill / (float)VictimDefense;
 
         if (Probability > 40.0f)
-            { Probability = 40.0f; }
+        {
+            Probability = 40.0f;
+        }
 
         if (roll_chance_f(Probability))
-            { CastSpell(pVictim, 1604, true); }
+        {
+            CastSpell(pVictim, 1604, true);
+        }
     }
 
     // If not miss
@@ -2159,7 +2305,9 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     {
         // on weapon hit casts
         if (GetTypeId() == TYPEID_PLAYER && pVictim->IsAlive())
-            { ((Player*)this)->CastItemCombatSpell(pVictim, damageInfo->attackType); }
+        {
+            ((Player*)this)->CastItemCombatSpell(pVictim, damageInfo->attackType);
+        }
 
         // victim's damage shield
         std::set<Aura*> alreadyDone;
@@ -2219,11 +2367,15 @@ void Unit::HandleEmoteState(uint32 emote_id)
 void Unit::HandleEmote(uint32 emote_id)
 {
     if (!emote_id)
-        { HandleEmoteState(0); }
+    {
+        HandleEmoteState(0);
+    }
     else if (EmotesEntry const* emoteEntry = sEmotesStore.LookupEntry(emote_id))
     {
         if (emoteEntry->EmoteType)                          // 1,2 states, 0 command
-            { HandleEmoteState(emote_id); }
+        {
+            HandleEmoteState(emote_id);
+        }
         else
             { HandleEmoteCommand(emote_id); }
     }
@@ -2282,7 +2434,9 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
     }
 
     if (armor < 0.0f)
-        { armor = 0.0f; }
+    {
+        armor = 0.0f;
+    }
 
     float levelModifier = (float)getLevel();
     if (levelModifier > 59)
@@ -2292,9 +2446,13 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
     tmpvalue = tmpvalue / (1.0f + tmpvalue);
 
     if (tmpvalue < 0.0f)
-        { tmpvalue = 0.0f; }
+    {
+        tmpvalue = 0.0f;
+    }
     if (tmpvalue > 0.75f)
-        { tmpvalue = 0.75f; }
+    {
+        tmpvalue = 0.75f;
+    }
 
     newdamage = uint32(damage - (damage * tmpvalue));
 
@@ -2304,7 +2462,9 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
 void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, uint32* resist, bool canReflect)
 {
     if (!pCaster || !IsAlive() || !damage)
-        { return; }
+    {
+        return;
+    }
 
     // Magic damage, check for resists
     if ((schoolMask & SPELL_SCHOOL_MASK_NORMAL) == 0)
@@ -2319,9 +2479,13 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 
         tmpvalue2 *= (float)(0.15f / getLevel());
         if (tmpvalue2 < 0.0f)
-            { tmpvalue2 = 0.0f; }
+        {
+            tmpvalue2 = 0.0f;
+        }
         if (tmpvalue2 > 0.75f)
-            { tmpvalue2 = 0.75f; }
+        {
+            tmpvalue2 = 0.75f;
+        }
         uint32 ran = urand(0, 100);
         float faq[4] = {24.0f, 6.0f, 4.0f, 6.0f};
         uint8 m = 0;
@@ -2330,16 +2494,22 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
         {
             Binom += 2400 * (powf(tmpvalue2, float(i)) * powf((1 - tmpvalue2), float(4 - i))) / faq[i];
             if (ran > Binom)
-                { ++m; }
+            {
+                ++m;
+            }
             else
                 { break; }
         }
         if (damagetype == DOT && m == 4)
-            { *resist += uint32(damage - 1); }
+        {
+            *resist += uint32(damage - 1);
+        }
         else
             { *resist += uint32(damage * m / 4); }
         if (*resist > damage)
-            { *resist = damage; }
+        {
+            *resist = damage;
+        }
     }
     else
         { *resist = 0; }
@@ -2620,7 +2790,9 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
         // currentAbsorb - damage can be absorbed by shield
         // If need absorb less damage
         if (RemainingDamage < currentAbsorb)
-            { currentAbsorb = RemainingDamage; }
+        {
+            currentAbsorb = RemainingDamage;
+        }
 
         RemainingDamage -= currentAbsorb;
 
@@ -2632,10 +2804,14 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
         // Reduce shield amount
         mod->m_amount -= currentAbsorb;
         if ((*i)->GetHolder()->DropAuraCharge())
-            { mod->m_amount = 0; }
+        {
+            mod->m_amount = 0;
+        }
         // Need remove it later
         if (mod->m_amount <= 0)
-            { existExpired = true; }
+        {
+            existExpired = true;
+        }
     }
 
     // Remove all expired absorb auras
@@ -2668,11 +2844,15 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 
         // check damage school mask
         if (((*i)->GetModifier()->m_miscvalue & schoolMask) == 0)
-            { continue; }
+        {
+            continue;
+        }
 
         int32 currentAbsorb;
         if (RemainingDamage >= (*i)->GetModifier()->m_amount)
-            { currentAbsorb = (*i)->GetModifier()->m_amount; }
+        {
+            currentAbsorb = (*i)->GetModifier()->m_amount;
+        }
         else
             { currentAbsorb = RemainingDamage; }
 
@@ -2681,11 +2861,15 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
         if (float manaMultiplier = (spellEffect ? spellEffect->EffectMultipleValue : 0))
         {
             if (Player* modOwner = GetSpellModOwner())
-                { modOwner->ApplySpellMod((*i)->GetId(), SPELLMOD_MULTIPLE_VALUE, manaMultiplier); }
+            {
+                modOwner->ApplySpellMod((*i)->GetId(), SPELLMOD_MULTIPLE_VALUE, manaMultiplier);
+            }
 
             int32 maxAbsorb = int32(GetPower(POWER_MANA) / manaMultiplier);
             if (currentAbsorb > maxAbsorb)
-                { currentAbsorb = maxAbsorb; }
+            {
+                currentAbsorb = maxAbsorb;
+            }
 
             int32 manaReduction = int32(currentAbsorb * manaMultiplier);
             ApplyPowerMod(POWER_MANA, manaReduction, false);
@@ -3941,7 +4125,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
     m_currentSpells[CSpellType] = pSpell;
     pSpell->SetReferencedFromCurrent(true);
 
-    pSpell->SetSelfContainer(&(m_currentSpells[pSpell->GetCurrentContainer()]));  // this works, but is not safe - <looks at Cédric>
+    pSpell->SetSelfContainer(&(m_currentSpells[pSpell->GetCurrentContainer()]));  // this works, but is not safe - <looks at Cï¿½dric>
 
     // original and faulty code - delete once the above has been proven to work
     // pSpell->m_selfContainer = &(m_currentSpells[pSpell->GetCurrentContainer()]); // m_selfContainer is not accessible, due to being a protected member
@@ -8529,23 +8713,31 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 {
     // only alive units can be in combat
     if (!IsAlive())
-        { return; }
+    {
+        return;
+    }
 
     if (PvP)
-        { m_CombatTimer = 5000; }
+    {
+        m_CombatTimer = 5000;
+    }
 
     bool creatureNotInCombat = GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
     if (IsCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
-        { SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT); }
+    {
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+    }
 
     // interrupt all delayed non-combat casts
     for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
         if (Spell* spell = GetCurrentSpell(CurrentSpellTypes(i)))
             if (IsNonCombatSpell(spell->m_spellInfo))
-                { InterruptSpell(CurrentSpellTypes(i), false); }
+            {
+                InterruptSpell(CurrentSpellTypes(i), false);
+            }
 
     if (getRace() == RACE_WORGEN && !IsInWorgenForm(true) && HasWorgenForm())
         CastSpell(this, 97709, true);   // cast Altered Form
@@ -8562,17 +8754,25 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         Creature* pCreature = (Creature*)this;
 
         if (pCreature->AI())
-            { pCreature->AI()->EnterCombat(enemy); }
+        {
+            pCreature->AI()->EnterCombat(enemy);
+        }
 
         // Some bosses are set into combat with zone
         if (GetMap()->IsDungeon() && (pCreature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_AGGRO_ZONE) && enemy && enemy->IsControlledByPlayer())
-            { pCreature->SetInCombatWithZone(); }
+        {
+            pCreature->SetInCombatWithZone();
+        }
 
         if (InstanceData* mapInstance = GetInstanceData())
-            { mapInstance->OnCreatureEnterCombat(pCreature); }
+        {
+            mapInstance->OnCreatureEnterCombat(pCreature);
+        }
 
         if (m_isCreatureLinkingTrigger)
-            { GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_AGGRO, pCreature, enemy); }
+        {
+            GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_AGGRO, pCreature, enemy);
+        }
     }
 
     // Used by Eluna
@@ -8588,7 +8788,9 @@ void Unit::ClearInCombat()
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
     if (IsCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
-        { RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT); }
+    {
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+    }
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA

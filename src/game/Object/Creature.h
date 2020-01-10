@@ -166,7 +166,9 @@ struct CreatureInfo
     SkillType GetRequiredLootSkill() const
     {
         if (CreatureTypeFlags & CREATURE_TYPEFLAGS_HERBLOOT)
-            { return SKILL_HERBALISM; }
+        {
+            return SKILL_HERBALISM;
+        }
         else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
             { return SKILL_MINING; }
         else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
@@ -565,7 +567,9 @@ class Creature : public Unit
         bool IsElite() const
         {
             if (IsPet())
-                { return false; }
+            {
+                return false;
+            }
 
             uint32 Rank = GetCreatureInfo()->Rank;
             return Rank != CREATURE_ELITE_NORMAL && Rank != CREATURE_ELITE_RARE;
@@ -574,7 +578,9 @@ class Creature : public Unit
         bool IsWorldBoss() const
         {
             if (IsPet())
-                { return false; }
+            {
+                return false;
+            }
 
             return GetCreatureInfo()->Rank == CREATURE_ELITE_WORLDBOSS;
         }
@@ -785,7 +791,9 @@ class Creature : public Unit
         virtual uint32 GetPetAutoSpellOnPos(uint8 pos) const
         {
             if (pos >= CREATURE_MAX_SPELLS || m_charmInfo->GetCharmSpell(pos)->GetType() != ACT_ENABLED)
-                { return 0; }
+            {
+                return 0;
+            }
             else
                 { return m_charmInfo->GetCharmSpell(pos)->GetAction(); }
         }

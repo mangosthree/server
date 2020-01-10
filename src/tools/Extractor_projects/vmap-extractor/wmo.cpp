@@ -395,7 +395,9 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
         fwrite(VERT, 4, 3, output);
         for (uint32 i = 0; i < nVertices; ++i)
             if (IndexRenum[i] >= 0)
-                { check -= fwrite(MOVT + 3 * i, sizeof(float), 3, output); }
+            {
+                check -= fwrite(MOVT + 3 * i, sizeof(float), 3, output);
+            }
 
         assert(check == 0);
 
@@ -412,7 +414,9 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
         // according to WoW.Dev Wiki:
         uint32 liquidEntry;
         if (rootWMO->liquidType & 4)
-            { liquidEntry = liquidType; }
+        {
+            liquidEntry = liquidType;
+        }
         else if (liquidType == 15)
             { liquidEntry = 0; }
         else
@@ -431,11 +435,15 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
                 {
                     ++v2;
                     if (v2 >= v1)
-                        { break; }
+                    {
+                        break;
+                    }
                 }
 
                 if (v2 < v1 && (LiquBytes[v2] & 0xF) != 15)
-                    { liquidEntry = (LiquBytes[v2] & 0xF) + 1; }
+                {
+                    liquidEntry = (LiquBytes[v2] & 0xF) + 1;
+                }
             }
         }
 
@@ -533,7 +541,9 @@ WMOInstance::WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint
     fclose(input);
 
     if (nVertices == 0)
-        { return; }
+    {
+        return;
+    }
 
     float x, z;
     x = pos.x;

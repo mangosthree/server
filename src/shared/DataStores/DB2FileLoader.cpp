@@ -228,7 +228,9 @@ uint32 DB2FileLoader::GetFormatRecordSize(const char * format,int32* index_pos)
     }
 
     if (index_pos)
-        { *index_pos = i; }
+    {
+        *index_pos = i;
+    }
 
     return recordsize;
 }
@@ -258,7 +260,9 @@ char* DB2FileLoader::AutoProduceData(const char* format, uint32& records, char**
 
     typedef char* ptr;
     if (strlen(format) != fieldCount)
-        { return NULL; }
+    {
+        return NULL;
+    }
 
     // get struct size and index pos
     int32 i;
@@ -272,7 +276,9 @@ char* DB2FileLoader::AutoProduceData(const char* format, uint32& records, char**
         {
             uint32 ind = getRecord(y).getUInt(i);
             if (ind > maxi)
-                { maxi = ind; }
+            {
+                maxi = ind;
+            }
         }
 
         ++maxi;
@@ -342,7 +348,9 @@ static char const* const nullStr = "";
 char* DB2FileLoader::AutoProduceStringsArrayHolders(const char* format, char* dataTable)
 {
     if (strlen(format) != fieldCount)
-        { return NULL; }
+    {
+        return NULL;
+    }
 
     // we store flat holders pool as single memory block
     size_t stringFields = GetFormatStringsFields(format);

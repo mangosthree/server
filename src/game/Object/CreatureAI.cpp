@@ -40,7 +40,9 @@ CreatureAI::~CreatureAI()
 void CreatureAI::AttackedBy(Unit* attacker)
 {
     if (!m_creature->getVictim())
-        { AttackStart(attacker); }
+    {
+        AttackStart(attacker);
+    }
 }
 
 CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, bool isTriggered)
@@ -50,17 +52,25 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
     {
         // State does not allow
         if (m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
-            { return CAST_FAIL_STATE; }
+        {
+            return CAST_FAIL_STATE;
+        }
 
         if (pSpell->GetPreventionType() == SPELL_PREVENTION_TYPE_SILENCE && m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
-            { return CAST_FAIL_STATE; }
+        {
+            return CAST_FAIL_STATE;
+        }
 
         if (pSpell->GetPreventionType() == SPELL_PREVENTION_TYPE_PACIFY && m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
-            { return CAST_FAIL_STATE; }
+        {
+            return CAST_FAIL_STATE;
+        }
 
         // Check for power (also done by Spell::CheckCast())
         if (m_creature->GetPower((Powers)pSpell->powerType) < Spell::CalculatePowerCost(pSpell, m_creature))
-            { return CAST_FAIL_POWER; }
+        {
+            return CAST_FAIL_POWER;
+        }
 
         if (!pSpell->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !m_creature->IsWithinLOSInMap(pTarget) && m_creature != pTarget)
             return CAST_FAIL_NOT_IN_LOS;
@@ -74,12 +84,16 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
             float fDistance = m_creature->GetCombatDistance(pTarget, pSpell->rangeIndex == SPELL_RANGE_IDX_COMBAT);
 
             if (fDistance > (m_creature->IsHostileTo(pTarget) ? pSpellRange->maxRange : pSpellRange->maxRangeFriendly))
-                { return CAST_FAIL_TOO_FAR; }
+            {
+                return CAST_FAIL_TOO_FAR;
+            }
 
             float fMinRange = m_creature->IsHostileTo(pTarget) ? pSpellRange->minRange : pSpellRange->minRangeFriendly;
 
             if (fMinRange && fDistance < fMinRange)
-                { return CAST_FAIL_TOO_CLOSE; }
+            {
+                return CAST_FAIL_TOO_CLOSE;
+            }
         }
 
         return CAST_OK;
@@ -93,7 +107,9 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
     Unit* pCaster = m_creature;
 
     if (uiCastFlags & CAST_FORCE_TARGET_SELF)
-        { pCaster = pTarget; }
+    {
+        pCaster = pTarget;
+    }
 
     // Allowed to cast only if not casting (unless we interrupt ourself) or if spell is triggered
     if (!pCaster->IsNonMeleeSpellCasted(false) || (uiCastFlags & (CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS)))
@@ -104,7 +120,9 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
             if (uiCastFlags & CAST_AURA_NOT_PRESENT)
             {
                 if (pTarget->HasAura(uiSpell))
-                    { return CAST_FAIL_TARGET_AURA; }
+                {
+                    return CAST_FAIL_TARGET_AURA;
+                }
             }
 
             // Check if can not cast spell
@@ -120,7 +138,9 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
 
             // Interrupt any previous spell
             if ((uiCastFlags & CAST_INTERRUPT_PREVIOUS) && pCaster->IsNonMeleeSpellCasted(false))
-                { pCaster->InterruptNonMeleeSpells(false); }
+            {
+                pCaster->InterruptNonMeleeSpells(false);
+            }
 
             // Creature should always stop before it will cast a non-instant spell            
             if (GetSpellCastTime(pSpell))
@@ -155,14 +175,18 @@ void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=fals
     m_isCombatMovement = enable;
 
     if (enable)
-        { m_creature->clearUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT); }
+    {
+        m_creature->clearUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
+    }
     else
         { m_creature->addUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT); }
 
     if (stopOrStartMovement && m_creature->getVictim())     // Only change current movement while in combat
     {
         if (enable)
-            { m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle); }
+        {
+            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle);
+        }
         else if (!enable && m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
             { m_creature->StopMoving(); }
     }

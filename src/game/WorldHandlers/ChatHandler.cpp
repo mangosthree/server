@@ -570,7 +570,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                     if (!sEluna->OnChat(GetPlayer(), type, lang, msg, chn))
                         return;
 #endif /* ENABLE_ELUNA */
-                    chn->Say(_player, msg.c_str(), lang); 
+                    chn->Say(_player, msg.c_str(), lang);
                 }
             }
 

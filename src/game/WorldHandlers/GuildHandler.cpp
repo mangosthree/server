@@ -535,7 +535,7 @@ void WorldSession::HandleGuildSetRankOpcode(WorldPacket& recvPacket)
     if (promote)
     {
         // allow to promote only to lower rank than member's rank
-        // and only to rank not higher that invoker's 
+        // and only to rank not higher that invoker's
         if (GetPlayer()->GetRank() + 1 >= slot->RankId || newRankId <=  GetPlayer()->GetRank())
         {
             SendGuildCommandResult(GUILD_INVITE_S, plName, ERR_GUILD_RANK_TOO_HIGH_S);

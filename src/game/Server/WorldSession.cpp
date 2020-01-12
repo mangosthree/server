@@ -390,7 +390,7 @@ bool WorldSession::Update(PacketFilter& updater)
         {
             LogoutPlayer(true);
         }
-// WARDEN ISSUE - commented out to stop crash 
+// WARDEN ISSUE - commented out to stop crash
 //        if (m_Socket && GetPlayer() && _warden)
 //           _warden->Update();
 

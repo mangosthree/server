@@ -828,7 +828,10 @@ bool AuctionBotBuyer::IsBuyableEntry(uint64 buyoutPrice, double InGame_BuyPrice,
                 {
                     Chance = MaxChance - (ratio * (MaxChance / 10));
                 }
-                else { Chance = 1; }
+                else
+                {
+                    Chance = 1;
+                }
             }
         }
     }
@@ -847,7 +850,10 @@ bool AuctionBotBuyer::IsBuyableEntry(uint64 buyoutPrice, double InGame_BuyPrice,
                 {
                     Chance = (MaxChance / 5) - (ratio * (MaxChance / 50));
                 }
-                else { Chance = 1; }
+                else
+                {
+                    Chance = 1;
+                }
             }
         }
     }
@@ -862,9 +868,15 @@ bool AuctionBotBuyer::IsBuyableEntry(uint64 buyoutPrice, double InGame_BuyPrice,
             {
                 Chance = (MaxChance / 5) - (ratio * (MaxChance / 50));
             }
-            else { Chance = 0; }
+            else
+            {
+                Chance = 0;
+            }
         }
-        else { Chance = 0; }
+        else
+        {
+            Chance = 0;
+        }
     }
     uint32 RandNum = urand(1, ChanceRatio);
     if (RandNum <= Chance)
@@ -1056,8 +1068,14 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
             if (IsBuyableEntry(buyoutPrice, InGame_BuyPrice, MaxBuyablePrice, minBuyPrice, MaxChance, config.FactionChance))
             {
                 if (IsBidableEntry(bidPriceByItem, InGame_BuyPrice, MaxBidablePrice, minBidPrice, MaxChance / 2, config.FactionChance))
-                    if (urand(0, 5) == 0) { PlaceBidToEntry(auction, bidPrice); }
-                    else { BuyEntry(auction); }
+                    if (urand(0, 5) == 0)
+                    {
+                        PlaceBidToEntry(auction, bidPrice);
+                    }
+                    else
+                    {
+                        BuyEntry(auction);
+                    }
                 else
                     { BuyEntry(auction); }
             }
@@ -1093,7 +1111,10 @@ bool AuctionBotBuyer::Update(AuctionHouseType houseType)
         }
         return true;
     }
-    else { return false; }
+    else
+    {
+        return false;
+    }
 }
 
 //== AuctionBotSeller functions ============================
@@ -1898,7 +1919,10 @@ void AuctionBotSeller::addNewAuctions(AHB_Seller_Config& config)
         items = sAuctionBotConfig.GetItemPerCycleBoost();
         BASIC_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Boost value used to fill AH! (if this happens often adjust both ItemsPerCycle in ahbot.conf)");
     }
-    else { items = sAuctionBotConfig.GetItemPerCycleNormal(); }
+    else
+    {
+        items = sAuctionBotConfig.GetItemPerCycleNormal();
+    }
 
     uint32 houseid;
     switch (config.GetHouseType())

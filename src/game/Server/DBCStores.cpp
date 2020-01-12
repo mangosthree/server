@@ -297,7 +297,7 @@ int ReadDBCLocale(const std::string sDataPath)
 {
     std::string sDBCpath = sDataPath + "dbc/";
     std::string sFilename;
-    
+
     for (int uLocaleIndex = 0; uLocaleIndex < MAX_LOCALE; ++uLocaleIndex)
     {
         sFilename  = sDBCpath + "component.wow-" + fullLocaleNameList[uLocaleIndex].name + ".txt";
@@ -848,7 +848,7 @@ void LoadDBCStores(const std::string& dataPath)
     }
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sTotemCategoryStore,       dbcPath, "TotemCategory.dbc");
-    
+
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sTransportAnimationStore,  dbcPath,"TransportAnimation.dbc");
     for (uint32 i = 0; i < sTransportAnimationStore.GetNumRows(); ++i)
         if (TransportAnimationEntry const* entry = sTransportAnimationStore.LookupEntry(i))

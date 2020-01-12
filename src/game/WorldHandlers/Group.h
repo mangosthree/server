@@ -406,7 +406,7 @@ class  Group
         void _setLeader(ObjectGuid guid);
 
         void _removeRolls(ObjectGuid guid);
-        
+
         void _updateLeaderFlag(const bool remove = false);
 
         bool _setMembersGroup(ObjectGuid guid, uint8 group);

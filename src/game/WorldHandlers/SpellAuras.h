@@ -439,7 +439,7 @@ class  Aura
         Modifier const* GetModifier() const { return &m_modifier; }
         int32 GetMiscValue() const { return m_spellEffect ? m_spellEffect->EffectMiscValue : 0; }
         int32 GetMiscBValue() const { return m_spellEffect ? m_spellEffect->EffectMiscValueB : 0; }
-        
+
         SpellEntry const* GetSpellProto() const { return GetHolder()->GetSpellProto(); }
         SpellEffectEntry const* GetSpellEffect() const { return m_spellEffect; }
         uint32 GetId() const{ return GetHolder()->GetSpellProto()->Id; }

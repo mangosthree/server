@@ -541,7 +541,7 @@ class WorldSession
         void HandleLogoutRequestOpcode(WorldPacket& recvPacket);
         void HandlePlayerLogoutOpcode(WorldPacket& recvPacket);
         void HandleLogoutCancelOpcode(WorldPacket& recvPacket);
-        
+
         void HandleGMTicketGetTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketCreateOpcode(WorldPacket& recvPacket);
         void HandleGMTicketSystemStatusOpcode(WorldPacket& recvPacket);
@@ -962,7 +962,7 @@ class WorldSession
         // Hotfix handlers
         void HandleRequestHotfix(WorldPacket& recv_data);
         void SendItemDb2Reply(uint32 entry);
-        void SendItemSparseDb2Reply(uint32 entry); 
+        void SendItemSparseDb2Reply(uint32 entry);
 
         void HandleObjectUpdateFailedOpcode(WorldPacket& recv_data);
 

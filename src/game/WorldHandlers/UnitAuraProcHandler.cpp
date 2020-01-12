@@ -3034,13 +3034,25 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 {
                     float stat = 0.0f;
                     // strength
-                    if (GetStat(STAT_STRENGTH) > stat) { trigger_spell_id = 60229; stat = GetStat(STAT_STRENGTH); }
+                    if (GetStat(STAT_STRENGTH) > stat)
+                    {
+                        trigger_spell_id = 60229; stat = GetStat(STAT_STRENGTH);
+                    }
                     // agility
-                    if (GetStat(STAT_AGILITY)  > stat) { trigger_spell_id = 60233; stat = GetStat(STAT_AGILITY);  }
+                    if (GetStat(STAT_AGILITY)  > stat)
+                    {
+                        trigger_spell_id = 60233; stat = GetStat(STAT_AGILITY);
+                    }
                     // intellect
-                    if (GetStat(STAT_INTELLECT) > stat) { trigger_spell_id = 60234; stat = GetStat(STAT_INTELLECT);}
+                    if (GetStat(STAT_INTELLECT) > stat)
+                    {
+                        trigger_spell_id = 60234; stat = GetStat(STAT_INTELLECT);
+                    }
                     // spirit
-                    if (GetStat(STAT_SPIRIT)   > stat) { trigger_spell_id = 60235;                               }
+                    if (GetStat(STAT_SPIRIT)   > stat)
+                    {
+                        trigger_spell_id = 60235;
+                    }
                     break;
                 }
                 // case 55580: break:                       // Mana Link
@@ -3093,18 +3105,30 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 {
                     float stat = 0.0f;
                     // strength
-                    if (GetStat(STAT_STRENGTH) > stat) { trigger_spell_id = 67708; stat = GetStat(STAT_STRENGTH); }
+                    if (GetStat(STAT_STRENGTH) > stat)
+                    {
+                        trigger_spell_id = 67708; stat = GetStat(STAT_STRENGTH);
+                    }
                     // agility
-                    if (GetStat(STAT_AGILITY)  > stat) { trigger_spell_id = 67703;                               }
+                    if (GetStat(STAT_AGILITY)  > stat)
+                    {
+                        trigger_spell_id = 67703;
+                    }
                     break;
                 }
                 case 67771:                                 // Death's Choice (heroic), Item - Coliseum 25 Heroic Melee Trinket
                 {
                     float stat = 0.0f;
                     // strength
-                    if (GetStat(STAT_STRENGTH) > stat) { trigger_spell_id = 67773; stat = GetStat(STAT_STRENGTH); }
+                    if (GetStat(STAT_STRENGTH) > stat)
+                    {
+                        trigger_spell_id = 67773; stat = GetStat(STAT_STRENGTH);
+                    }
                     // agility
-                    if (GetStat(STAT_AGILITY)  > stat) { trigger_spell_id = 67772;                               }
+                    if (GetStat(STAT_AGILITY)  > stat)
+                    {
+                        trigger_spell_id = 67772;
+                    }
                     break;
                 }
                 case 69023:                                 // Mirrored Soul

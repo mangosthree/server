@@ -457,7 +457,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
             if (ql->PortraitTurnInText.size() > (size_t)loc_idx && !ql->PortraitTurnInText[loc_idx].empty())
                 PortraitTurnInText = ql->PortraitTurnInText[loc_idx];
         }
-    } 
+    }
 
     WorldPacket data(SMSG_QUESTGIVER_QUEST_DETAILS, 100);   // guess size
     data << guid;
@@ -519,7 +519,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     data << pQuest->GetBonusTalents();                      // bonus talents
     data << uint32(0);                                      // unk, unused bonus arena points?
     data << uint32(0);                                      // rep reward show mask?
-    
+
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward factions ids
         data << pQuest->RewRepFaction[i];
 
@@ -553,7 +553,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     GetMenuSession()->SendPacket(&data);
 
     DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS - for %s of %s, questid = %u", GetMenuSession()->GetPlayer()->GetGuidStr().c_str(), guid.GetString().c_str(), pQuest->GetQuestId());
-} 
+}
 
 // send only static data in this packet!
 void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
@@ -652,8 +652,8 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
     data << uint32(pQuest->GetRewSkill());                  // Rewarded skill id
     data << uint32(pQuest->GetRewSkillValue());             // Rewarded skill bonus points
     data << uint32(0);                                      // rew rep show mask?
-    data << uint32(pQuest->GetPortraitGiver()); 
-    data << uint32(pQuest->GetPortraitTurnIn()); 
+    data << uint32(pQuest->GetPortraitGiver());
+    data << uint32(pQuest->GetPortraitTurnIn());
 
     int iI;
 

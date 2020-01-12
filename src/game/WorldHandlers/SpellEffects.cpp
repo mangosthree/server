@@ -309,7 +309,7 @@ void Spell::EffectInstaKill(SpellEffectEntry const* /*effect*/)
     data << unitTarget->GetObjectGuid();                    // Victim GUID
     data << uint32(m_spellInfo->Id);
     m_caster->SendMessageToSet(&data, true);
-    
+
     m_caster->DealDamage(unitTarget, unitTarget->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, m_spellInfo, false);
 }
 
@@ -5390,7 +5390,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
 
     Unit* responsibleCaster = m_originalCaster;
     if (realCaster->GetTypeId() == TYPEID_GAMEOBJECT)
-        responsibleCaster = ((GameObject*)realCaster)->GetOwner(); 
+        responsibleCaster = ((GameObject*)realCaster)->GetOwner();
 
     // Expected Level                                       (Totem, Pet and Critter may not use this)
     uint32 level = responsibleCaster ? responsibleCaster->getLevel() : m_caster->getLevel();
@@ -5429,7 +5429,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
         {
             realCaster->GetRandomPoint(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, radius, itr->x, itr->y, itr->z);
             if (realCaster->GetMap()->GetHitPosition(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, itr->x, itr->y, itr->z, m_caster->GetPhaseMask(), -0.5f))
-                realCaster->UpdateAllowedPositionZ(itr->x, itr->y, itr->z); 
+                realCaster->UpdateAllowedPositionZ(itr->x, itr->y, itr->z);
         }
         else                                                // Get a point near the caster
         {
@@ -5548,7 +5548,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
 
     if (!summonResult)
         return;                                             // No further handling required
-    
+
     for (itr = summonPositions.begin(); itr != summonPositions.end(); ++itr)
     {
         MANGOS_ASSERT(itr->creature || itr != summonPositions.begin());
@@ -10322,7 +10322,7 @@ void Spell::EffectActivateObject(SpellEffectEntry const* effect)
                     uint32 templars[] = {15209, 15211, 15212, 15307};
                     uint32 dukes[] = {15206, 15207, 15208, 15220};
                     uint32 royals[] = {15203, 15204, 15205, 15305};
- 
+
                     switch (m_spellInfo->Id)
                     {
                         case 24734: npcEntry = templars[urand(0, 3)]; break;
@@ -10533,7 +10533,7 @@ void Spell::EffectInebriate(SpellEffectEntry const* /*effect*/)
         if (roll_chance_i(25))
             player->CastSpell(player, 67468, false);    // Drunken Vomit
     }
-    player->SetDrunkValue(drunkValue, m_CastItem ? m_CastItem->GetEntry() : 0); 
+    player->SetDrunkValue(drunkValue, m_CastItem ? m_CastItem->GetEntry() : 0);
 }
 
 void Spell::EffectFeedPet(SpellEffectEntry const* effect)
@@ -11723,7 +11723,7 @@ void Spell::EffectBind(SpellEffectEntry const* effect)
     {
         player->GetPosition(loc);
         if (!area_id)
-            area_id = player->GetAreaId(); 
+            area_id = player->GetAreaId();
     }
 
     player->SetHomebindToLocation(loc, area_id);

@@ -1218,7 +1218,7 @@ DrunkenState Player::GetDrunkenstateByValue(uint8 value)
          return DRUNKEN_SMASHED;
     if (value >= 50)
          return DRUNKEN_DRUNK;
-    if (value) 
+    if (value)
         return DRUNKEN_TIPSY;
     return DRUNKEN_SOBER;
 }
@@ -1235,7 +1235,7 @@ void Player::SetDrunkValue(uint8 newDrunkValue, uint32 itemId /*= 0*/)
 
     SetByteValue(PLAYER_BYTES_3, 1, newDrunkValue);
 
-    uint32 newDrunkenState = Player::GetDrunkenstateByValue(newDrunkValue); 
+    uint32 newDrunkenState = Player::GetDrunkenstateByValue(newDrunkValue);
 
     // special drunk invisibility detection
     if (newDrunkenState >= DRUNKEN_DRUNK)
@@ -7045,7 +7045,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 #ifdef ENABLE_ELUNA
     sEluna->OnUpdateZone(this, newZone, newArea);
 #endif
-    
+
     m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
 
@@ -15619,7 +15619,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     SetUInt32Value(PLAYER_BYTES_2, fields[10].GetUInt32());
 
     SetByteValue(PLAYER_BYTES_3, 0, gender);
-    SetByteValue(PLAYER_BYTES_3, 1, fields[45].GetUInt8()); 
+    SetByteValue(PLAYER_BYTES_3, 1, fields[45].GetUInt8());
 
     SetUInt32Value(PLAYER_FLAGS, fields[11].GetUInt32());
     SetInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, fields[44].GetInt32());
@@ -15855,7 +15855,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     if (time_diff < uint32(GetDrunkValue()) * 9)
         newDrunkValue = GetDrunkValue() - time_diff / 9;
 
-    SetDrunkValue(newDrunkValue); 
+    SetDrunkValue(newDrunkValue);
 
     m_cinematic = fields[18].GetUInt32();
     m_Played_time[PLAYED_TIME_TOTAL] = fields[19].GetUInt32();
@@ -20503,7 +20503,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     data << uint32(sWorld.GetNextWeeklyQuestsResetTime() - WEEK);   // LastWeeklyReset (not instance reset)
     data << uint32(GetMap()->GetDifficulty());
-    GetSession()->SendPacket(&data); 
+    GetSession()->SendPacket(&data);
 
     SendInitialSpells();
 
@@ -22956,7 +22956,7 @@ void Player::UnsummonPetIfAny()
     Pet* pet = GetPet();
     if (!pet)
         return;
- 
+
     pet->Unsummon(PET_SAVE_NOT_IN_SLOT, this);
 }
 

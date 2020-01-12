@@ -607,7 +607,10 @@ void BattleGround::SendPacketToTeam(Team teamId, WorldPacket* packet, Player* se
         }
 
         Team team = itr->second.PlayerTeam;
-        if (!team) { team = plr->GetTeam(); }
+        if (!team)
+        {
+            team = plr->GetTeam();
+        }
 
         if (team == teamId)
         {
@@ -651,7 +654,10 @@ void BattleGround::PlaySoundToTeam(uint32 SoundID, Team teamId)
         }
 
         Team team = itr->second.PlayerTeam;
-        if (!team) { team = plr->GetTeam(); }
+        if (!team)
+        {
+            team = plr->GetTeam();
+        }
 
         if (team == teamId)
         {
@@ -684,7 +690,10 @@ void BattleGround::CastSpellOnTeam(uint32 SpellID, Team teamId)
         }
 
         Team team = itr->second.PlayerTeam;
-        if (!team) { team = plr->GetTeam(); }
+        if (!team)
+        {
+            team = plr->GetTeam();
+        }
 
         if (team == teamId)
         {
@@ -716,7 +725,10 @@ void BattleGround::RewardHonorToTeam(uint32 Honor, Team teamId)
         }
 
         Team team = itr->second.PlayerTeam;
-        if (!team) { team = plr->GetTeam(); }
+        if (!team)
+        {
+            team = plr->GetTeam();
+        }
 
         if (team == teamId)
         {
@@ -756,7 +768,10 @@ void BattleGround::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, 
         }
 
         Team team = itr->second.PlayerTeam;
-        if (!team) { team = plr->GetTeam(); }
+        if (!team)
+        {
+            team = plr->GetTeam();
+        }
 
         if (team == teamId)
         {
@@ -1286,7 +1301,10 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
         {
             plr->ClearAfkReports();
 
-            if (!team) { team = plr->GetTeam(); }
+            if (!team)
+            {
+                team = plr->GetTeam();
+            }
 
             // if arena, remove the specific arena auras
             if (isArena())

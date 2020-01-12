@@ -903,7 +903,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
         case HUNTER_PET:
         {
             CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cInfo->Family);
-    
+
             if (cFamily && cFamily->minScale > 0.0f)
             {
                 float scale;
@@ -1028,7 +1028,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                     float dMinLevel = cInfo->MinMeleeDmg / cInfo->MinLevel;
                     float dMaxLevel = cInfo->MaxMeleeDmg / cInfo->MaxLevel;
                     float mDmg = (dMaxLevel - ((dMaxLevel - dMinLevel) / 2)) * petlevel;
-                    
+
                     // Set damage
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(mDmg - mDmg / 4));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((mDmg - mDmg / 4) * 1.5));
@@ -1044,7 +1044,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                 health = 1;
                 mana = 1;
                 armor = 1;
-                
+
                 // Set damage
                 SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 1);
                 SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 1);

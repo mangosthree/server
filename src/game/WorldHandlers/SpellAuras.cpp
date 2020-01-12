@@ -1236,7 +1236,7 @@ void Aura::TriggerSpell()
 //                    // Haunted
 //                    case 18347: break;
 //                    // Ranshalla Waiting
-//                    case 18953: break;    
+//                    case 18953: break;
 
                     case 19695:                             // Inferno
                     {
@@ -3535,7 +3535,7 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
 
     if (apply)
     {
-        // Running Wild 
+        // Running Wild
         if (GetId() == 87840)
             target->Mount(target->getGender() == GENDER_MALE ? 29422 : 29423, GetId());
 
@@ -4497,7 +4497,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
         {
             //remove any existing charm just in case
             caster->Uncharm();
- 
+
             //pets should be removed when possesing a target if somehow check was bypassed
             ((Player*)caster)->UnsummonPetIfAny();
         }
@@ -6395,7 +6395,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
     {
     // Special case with temporary increase max/current health
             // Cases where we need to manually calculate the amount for the spell (by percentage)
-            // recalculate to full amount at apply for proper remove 
+            // recalculate to full amount at apply for proper remove
         case 54443:                                         // Demonic Empowerment (Voidwalker)
         case 55233:                                         // Vampiric Blood
         case 61254:                                         // Will of Sartharion (Obsidian Sanctum)
@@ -6404,7 +6404,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
             // no break here
 
             // Cases where m_amount already has the correct value (spells cast with CastCustomSpell or absolute values)
-        
+
         case 12976:                                         // Warrior Last Stand triggered spell
         case 28726:                                         // Nightmare Seed ( Nightmare Seed )
         case 31616:                                         // Nature's Guardian
@@ -7121,8 +7121,14 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             const PlayerSpellMap& sp_list = ((Player*)target)->GetSpellMap();
             for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
             {
-                if (itr->second.state == PLAYERSPELL_REMOVED) { continue; }
-                if (itr->first == spellId1 || itr->first == spellId2) { continue; }
+                if (itr->second.state == PLAYERSPELL_REMOVED)
+                {
+                    continue;
+                }
+                if (itr->first == spellId1 || itr->first == spellId2)
+                {
+                    continue;
+                }
                 SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
                 if (!spellInfo || !IsNeedCastSpellAtFormApply(spellInfo, form))
                 {
@@ -7900,7 +7906,7 @@ void Aura::PeriodicTick()
                         {
                             spell->cancel();
                         }
-            
+
             if (Player* modOwner = pCaster->GetSpellModOwner())
             {
                 modOwner->ApplySpellMod(GetId(), SPELLMOD_ALL_EFFECTS, new_damage);
@@ -8125,7 +8131,7 @@ void Aura::PeriodicTick()
                         pdamage = target->GetMaxPower(POWER_MANA) * 5 / 100;
                         drain_amount = target->GetPower(POWER_MANA) > pdamage ? pdamage : target->GetPower(POWER_MANA);
                         target->ModifyPower(POWER_MANA, -drain_amount);
-                        
+
                         SpellPeriodicAuraLogInfo info(this, drain_amount, 0, 0, 0, 0.0f);
                         target->SendPeriodicAuraLog(&info);
                     }

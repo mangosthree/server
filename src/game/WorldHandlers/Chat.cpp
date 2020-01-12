@@ -235,7 +235,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "equiperror",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendEquipErrorCommand,      "", NULL },
         { "largepacket",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendLargePacketCommand,     "", NULL },
         { "opcode",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendOpcodeCommand,          "", NULL },
-        { "phase",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugPhaseCommand,               "", NULL },        
+        { "phase",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugPhaseCommand,               "", NULL },
         { "poi",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendPoiCommand,             "", NULL },
         { "qpartymsg",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendQuestPartyMsgCommand,   "", NULL },
         { "qinvalidmsg",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendQuestInvalidMsgCommand, "", NULL },
@@ -1471,8 +1471,8 @@ bool ChatHandler::isValidChatMessage(const char* message)
     /*
 
     valid examples:
-    |cff00aa00|Hcurrency:391|h[Рекомендательный значок Тол Барада]|h|r
-    |cffff8000|Hinstancelock:070000000177AF81:532:0:1|h[Каражан]|h|r            NYI
+    |cff00aa00|Hcurrency:391|h[пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ]|h|r
+    |cffff8000|Hinstancelock:070000000177AF81:532:0:1|h[пїЅпїЅпїЅпїЅпїЅпїЅпїЅ]|h|r            NYI
     |cffa335ee|Hitem:812:0:0:0:0:0:0:0:70|h[Glowing Brightwood Staff]|h|r
     |cff808080|Hquest:2278:47|h[The Platinum Discs]|h|r
     |cffffd000|Htrade:4037:1:150:1:6AAAAAAAAAAAAAAAAAAAAAAOAADAAAAAAAAAAAAAAAAIAAAAAAAAA|h[Engineering]|h|r

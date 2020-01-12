@@ -128,7 +128,7 @@ struct GridMapLiquidData
 class GridMap
 {
     private:
-        
+
         uint16 m_holes[16][16];
         uint32 m_flags;
 

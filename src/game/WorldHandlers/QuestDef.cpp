@@ -52,7 +52,7 @@ Quest::Quest(Field* questRecord)
     CharTitleId = questRecord[20].GetUInt32();
     PlayersSlain = questRecord[21].GetUInt32();
     BonusTalents = questRecord[22].GetUInt32();
-    
+
     PortraitGiver = questRecord[23].GetUInt32();
     PortraitTurnIn = questRecord[24].GetUInt32();
 
@@ -71,7 +71,7 @@ Quest::Quest(Field* questRecord)
     RequestItemsText = questRecord[37].GetCppString();
     EndText = questRecord[38].GetCppString();
     CompletedText = questRecord[39].GetCppString();
-        
+
     PortraitGiverName = questRecord[40].GetCppString();
     PortraitGiverText = questRecord[41].GetCppString();
     PortraitTurnInName = questRecord[42].GetCppString();
@@ -97,12 +97,12 @@ Quest::Quest(Field* questRecord)
 
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
         ReqCreatureOrGOCount[i] = questRecord[72 + i].GetUInt32();
-    
+
     for (int i = 0; i < QUEST_REQUIRED_CURRENCY_COUNT; ++i)
         ReqCurrencyId[i] = questRecord[76 + i].GetUInt32();
     for (int i = 0; i < QUEST_REQUIRED_CURRENCY_COUNT; ++i)
         ReqCurrencyCount[i] = questRecord[80 + i].GetUInt32();
-    
+
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
         ReqSpell[i] = questRecord[84 + i].GetUInt32();
 
@@ -119,8 +119,8 @@ Quest::Quest(Field* questRecord)
         RewItemId[i] = questRecord[101 + i].GetUInt32();
 
     for (int i = 0; i < QUEST_REWARDS_COUNT; ++i)
-        RewItemCount[i] = questRecord[105 + i].GetUInt32();       
-    
+        RewItemCount[i] = questRecord[105 + i].GetUInt32();
+
     for (int i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
         RewCurrencyId[i] = questRecord[109 + i].GetUInt32();
     for (int i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
@@ -164,7 +164,7 @@ Quest::Quest(Field* questRecord)
         OfferRewardEmote[i] = questRecord[156 + i].GetInt32();
 
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        OfferRewardEmoteDelay[i] = questRecord[160 + i].GetInt32();    
+        OfferRewardEmoteDelay[i] = questRecord[160 + i].GetInt32();
 
     SoundAcceptId = questRecord[164].GetUInt32();
     SoundTurnInId = questRecord[165].GetUInt32();

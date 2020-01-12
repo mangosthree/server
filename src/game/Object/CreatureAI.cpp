@@ -131,7 +131,7 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
                 CanCastResult castResult = CanCastSpell(pTarget, pSpell, uiCastFlags & CAST_TRIGGERED);
 
                 if (castResult != CAST_OK)
-                { 
+                {
                     return castResult;
                 }
             }
@@ -142,7 +142,7 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
                 pCaster->InterruptNonMeleeSpells(false);
             }
 
-            // Creature should always stop before it will cast a non-instant spell            
+            // Creature should always stop before it will cast a non-instant spell
             if (GetSpellCastTime(pSpell))
                 pCaster->StopMoving();
 

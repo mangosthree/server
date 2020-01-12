@@ -106,7 +106,7 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket)
     ObjectGuid destVehicleGuid;
     uint8 seat;
 
-    recvPacket >> movementInfo;              
+    recvPacket >> movementInfo;
 
     srcVehicleGuid = movementInfo.GetGuid();
     destVehicleGuid = movementInfo.GetGuid2();
@@ -194,13 +194,13 @@ void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)
 void WorldSession::HandleRequestVehiclePrevSeat(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received CMSG_REQUEST_VEHICLE_PREV_SEAT");
-    
+
         // ToDo
 }
 
 void WorldSession::HandleRequestVehicleNextSeat(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received CMSG_REQUEST_VEHICLE_NEXT_SEAT");
-    
+
         // ToDo
 }

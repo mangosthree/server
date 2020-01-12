@@ -1402,7 +1402,7 @@ struct DoSpellProcEvent
         else
             ++count;
     }
-    
+
     bool HasEntry(uint32 spellId) { return spe_map.find(spellId) != spe_map.end(); }
     bool SetStateToEntry(uint32 spellId) { return (state = spe_map.find(spellId)) != spe_map.end(); }
     SpellProcEventMap& spe_map;

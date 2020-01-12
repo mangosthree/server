@@ -368,7 +368,7 @@ void PetAI::UpdateAI(const uint32 diff)
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "PetAI (guid = %u) is stopping attack.", m_creature->GetGUIDLow());
             m_creature->CombatStop();
             inCombat = false;
-            
+
             return;
         }
 

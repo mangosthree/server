@@ -100,7 +100,7 @@ void MovementInfo::Read(ByteBuffer& data, uint16 opcode)
         MovementStatusElements element = sequence[i];
         if (element == MSEEnd)
             break;
-    
+
         if (element >= MSEGuidBit0 && element <= MSEGuidBit7)
         {
             guid[element - MSEGuidBit0] = data.ReadBit();
@@ -2197,7 +2197,10 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
 
 void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 {
-    if (damageInfo == 0) { return; }
+    if (damageInfo == 0)
+    {
+        return;
+    }
     Unit* pVictim = damageInfo->target;
 
     if (!this || !pVictim)
@@ -9851,7 +9854,7 @@ bool Unit::SelectHostileTarget()
                     m_ThreatManager.modifyThreatPercent(target, -101);
 
                     // remove target from current attacker, do not exit combat settings
-                    AttackStop(true); 
+                    AttackStop(true);
                 }
 
                 return false;
@@ -12562,7 +12565,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
 
     // initialize AI
     pCreature->AIM_Initialize();
-    
+
     if (player)
     {
         // Initialize pet bar

@@ -3909,8 +3909,8 @@ void ObjectMgr::LoadQuests()
                           //   29        30        31           32
                           "RewXPId, SrcItemId, SrcItemCount, SrcSpell,"
                           //   33     34       35          36               37                38       39               40                  41                  42                  43
-                          "Title, Details, Objectives, OfferRewardText, RequestItemsText, EndText, CompletedText, PortraitGiverName, PortraitGiverText, PortraitTurnInName, PortraitTurnInText,"                          
-                          //    44               45             46               47                 
+                          "Title, Details, Objectives, OfferRewardText, RequestItemsText, EndText, CompletedText, PortraitGiverName, PortraitGiverText, PortraitTurnInName, PortraitTurnInText,"
+                          //    44               45             46               47
                           "ObjectiveText1, ObjectiveText2, ObjectiveText3, ObjectiveText4,"
                           //   48          49          50          51          52          53           54             55             56             57             58             59
                           "ReqItemId1, ReqItemId2, ReqItemId3, ReqItemId4, ReqItemId5, ReqItemId6, ReqItemCount1, ReqItemCount2, ReqItemCount3, ReqItemCount4, ReqItemCount5, ReqItemCount6,"
@@ -3929,12 +3929,12 @@ void ObjectMgr::LoadQuests()
                           //   95                   96                   97                   98                   99                   100
                           "RewChoiceItemCount1, RewChoiceItemCount2, RewChoiceItemCount3, RewChoiceItemCount4, RewChoiceItemCount5, RewChoiceItemCount6,"
                           //  101         102         103         104          105            106             107            108
-                          "RewItemId1, RewItemId2, RewItemId3, RewItemId4, RewItemCount1, RewItemCount2, RewItemCount3, RewItemCount4,"                          
+                          "RewItemId1, RewItemId2, RewItemId3, RewItemId4, RewItemCount1, RewItemCount2, RewItemCount3, RewItemCount4,"
                           //  109                110              111              112
                           "RewCurrencyId1, RewCurrencyId2, RewCurrencyId3, RewCurrencyId4,"
                           //  113                   114                115                116
-                          "RewCurrencyCount1, RewCurrencyCount2, RewCurrencyCount3, RewCurrencyCount4,"                          
-                          //  117         118          
+                          "RewCurrencyCount1, RewCurrencyCount2, RewCurrencyCount3, RewCurrencyCount4,"
+                          //  117         118
                           "RewSkill, RewSkillValue,"
                           //   119              120             121             122             123
                           "RewRepFaction1, RewRepFaction2, RewRepFaction3, RewRepFaction4, RewRepFaction5,"
@@ -11050,4 +11050,4 @@ void ObjectMgr::LoadHotfixData()
 
     sLog.outString();
     sLog.outString(">> Loaded %u hotfix info entries.", count);
-} 
+}

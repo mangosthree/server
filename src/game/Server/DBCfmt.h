@@ -127,7 +127,7 @@ const char SpellCastingRequirementsEntryfmt[]="dixxixi";
 const char SpellCategoriesEntryfmt[]="diiiiii";
 const char SpellClassOptionsEntryfmt[]="dxiiiix";
 const char SpellCooldownsEntryfmt[]="diii";
-//                                1        10        20        30            
+//                                1        10        20        30
 const char SpellEffectEntryfmt[]="difiiiffiiiiiifiifiiiiiiiix";
 const char SpellEquippedItemsEntryfmt[]="diii";
 const char SpellInterruptsEntryfmt[]="dixixi";

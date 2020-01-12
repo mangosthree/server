@@ -104,7 +104,10 @@ void LoadRandomEnchantmentsTable()
 
 uint32 GetItemEnchantMod(int32 entry)
 {
-    if (!entry) { return 0; }
+    if (!entry)
+    {
+        return 0;
+    }
 
     EnchantmentStore::const_iterator tab;
     if (entry > 0)
@@ -134,7 +137,10 @@ uint32 GetItemEnchantMod(int32 entry)
     {
         fCount += ench_iter->chance;
 
-        if (fCount > dRoll) { return ench_iter->ench; }
+        if (fCount > dRoll)
+        {
+            return ench_iter->ench;
+        }
     }
 
     // we could get here only if sum of all enchantment chances is lower than 100%
@@ -145,7 +151,10 @@ uint32 GetItemEnchantMod(int32 entry)
     {
         fCount += ench_iter->chance;
 
-        if (fCount > dRoll) { return ench_iter->ench; }
+        if (fCount > dRoll)
+        {
+            return ench_iter->ench;
+        }
     }
 
     return 0;

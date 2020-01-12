@@ -35,7 +35,7 @@ bool IsAcceptableClientBuild(uint32 build);
 std::string AcceptableClientBuildsListStr();
 
 /**
- * This function checks to see if there is a valid locale file (component.wow-<locale>.txt) 
+ * This function checks to see if there is a valid locale file (component.wow-<locale>.txt)
  * and returns an index to the locale or -1 if not found
  * @PARAM dataPath full path to the data directory
  * @RETURN index number representing the location of the locale in the its structure,

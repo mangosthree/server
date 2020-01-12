@@ -137,7 +137,7 @@ void LoadDB2Stores(const std::string& dataPath)
         sLog.outError("Please extract correct db2 files from build %s", AcceptableClientBuildsListStr().c_str());
         exit(1);
     }
-    
+
     sLog.outString();
     sLog.outString( ">> Initialized %d db2 stores", DB2FileCount );
 }

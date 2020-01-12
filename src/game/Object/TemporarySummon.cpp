@@ -213,7 +213,7 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
         default:
             break;
     }
-    
+
     Creature::Update(update_diff, diff);
 }
 

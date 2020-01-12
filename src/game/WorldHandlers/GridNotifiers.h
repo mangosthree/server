@@ -243,7 +243,7 @@ namespace MaNGOS
     /*
     template<class Check>
     struct WorldObjectLastSearcher
-    { 
+    {
         WorldObject*& i_object;
         Check& i_check;
 

@@ -247,7 +247,7 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
     // TARGET_FLAG_UNK2 is used for non-combat pets, maybe other?
     if (m_targetMask & (TARGET_FLAG_UNIT | TARGET_FLAG_UNK2))
         data >> m_unitTargetGUID.ReadAsPacked();
-    
+
     if (m_targetMask & (TARGET_FLAG_OBJECT | TARGET_FLAG_GAMEOBJECT_ITEM))
         data >> m_GOTargetGUID.ReadAsPacked();
 
@@ -1692,7 +1692,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     uint32 unMaxTargets = m_spellInfo->GetMaxAffectedTargets();
 
     float radius;
-    GetSpellRangeAndRadius(spellEffect, radius, EffectChainTarget, unMaxTargets); 
+    GetSpellRangeAndRadius(spellEffect, radius, EffectChainTarget, unMaxTargets);
 
     std::list<GameObject*> tempTargetGOList;
 
@@ -6387,7 +6387,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_NO_MOUNTS_ALLOWED;
 
                 if (spellEffect->EffectMiscValueB && !m_caster->GetMountCapability(spellEffect->EffectMiscValueB))
-                    return SPELL_FAILED_NOT_HERE; 
+                    return SPELL_FAILED_NOT_HERE;
 
                 // Ignore map check if spell have AreaId. AreaId already checked and this prevent special mount spells
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && !sMapStore.LookupEntry(m_caster->GetMapId())->IsMountAllowed() && !m_IsTriggeredSpell && !m_spellInfo->GetAreaGroupId())

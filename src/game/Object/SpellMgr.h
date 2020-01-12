@@ -752,7 +752,7 @@ enum ProcFlagsEx
     /// If set trigger always but only one time (not used)
     PROC_EX_EX_ONE_TIME_TRIGGER = 0x0020000,
     /// For periodic heal
-    PROC_EX_PERIODIC_POSITIVE   = 0x0040000, 
+    PROC_EX_PERIODIC_POSITIVE   = 0x0040000,
     PROC_EX_CAST_END            = 0x0080000                 // procs on end of cast
 };
 
@@ -1127,7 +1127,7 @@ class SpellMgr
 
             return 0;
         }
-        
+
         bool IsHighRankOfSpell(uint32 spell1, uint32 spell2) const
         {
             SpellChainMap::const_iterator itr = mSpellChains.find(spell1);

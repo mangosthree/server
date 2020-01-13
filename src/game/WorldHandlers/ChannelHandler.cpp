@@ -42,7 +42,9 @@ void WorldSession::HandleJoinChannelOpcode(WorldPacket& recvPacket)
     pass = recvPacket.ReadString(passwordLength);
 
     if (channelname.empty())
+    {
         return;
+    }
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetJoinChannel(channelname, channel_id))
@@ -60,7 +62,9 @@ void WorldSession::HandleLeaveChannelOpcode(WorldPacket& recvPacket)
     channelname = recvPacket.ReadString(recvPacket.ReadBits(8));
 
     if (channelname.empty())
+    {
         return;
+    }
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
     {
@@ -112,7 +116,9 @@ void WorldSession::HandleChannelSetOwnerOpcode(WorldPacket& recvPacket)
     channelname = recvPacket.ReadString(channelLen);
 
     if (!normalizePlayerName(newp))
+    {
         return;
+    }
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
@@ -143,7 +149,9 @@ void WorldSession::HandleChannelModeratorOpcode(WorldPacket& recvPacket)
     channelname = recvPacket.ReadString(channelLen);
 
     if (!normalizePlayerName(otp))
+    {
         return;
+    }
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
@@ -163,7 +171,9 @@ void WorldSession::HandleChannelUnmoderatorOpcode(WorldPacket& recvPacket)
     channelname = recvPacket.ReadString(channelLen);
 
     if (!normalizePlayerName(otp))
+    {
         return;
+    }
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
@@ -183,7 +193,9 @@ void WorldSession::HandleChannelMuteOpcode(WorldPacket& recvPacket)
     channelname = recvPacket.ReadString(channelLen);
 
     if (!normalizePlayerName(otp))
+    {
         return;
+    }
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
@@ -203,7 +215,9 @@ void WorldSession::HandleChannelUnmuteOpcode(WorldPacket& recvPacket)
     channelname = recvPacket.ReadString(channelLen);
 
     if (!normalizePlayerName(otp))
+    {
         return;
+    }
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
@@ -223,7 +237,9 @@ void WorldSession::HandleChannelInviteOpcode(WorldPacket& recvPacket)
     channelname = recvPacket.ReadString(channelLen);
 
     if (!normalizePlayerName(otp))
+    {
         return;
+    }
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
@@ -243,7 +259,9 @@ void WorldSession::HandleChannelKickOpcode(WorldPacket& recvPacket)
     otp = recvPacket.ReadString(nameLen);
 
     if (!normalizePlayerName(otp))
+    {
         return;
+    }
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
@@ -263,7 +281,9 @@ void WorldSession::HandleChannelBanOpcode(WorldPacket& recvPacket)
     channelname = recvPacket.ReadString(channelLen);
 
     if (!normalizePlayerName(otp))
+    {
         return;
+    }
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
@@ -283,7 +303,9 @@ void WorldSession::HandleChannelUnbanOpcode(WorldPacket& recvPacket)
     channelname = recvPacket.ReadString(channelLen);
 
     if (!normalizePlayerName(otp))
+    {
         return;
+    }
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))

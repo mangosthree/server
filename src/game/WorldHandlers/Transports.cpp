@@ -222,7 +222,9 @@ struct keyFrame
 bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
 {
     if (pathid >= sTaxiPathNodesByPath.size())
+    {
         return false;
+    }
 
     TaxiPathNodeList const& path = sTaxiPathNodesByPath[pathid];
 
@@ -509,7 +511,9 @@ bool Transport::RemovePassenger(Player* passenger)
 void Transport::Update(uint32 update_diff, uint32 /*p_time*/)
 {
     if (m_WayPoints.size() <= 1)
+    {
         return;
+    }
 
     m_timer = WorldTimer::getMSTime() % m_period;
     while (((m_timer - m_curr->first) % m_pathTime) > ((m_next->first - m_curr->first) % m_pathTime))
@@ -552,7 +556,9 @@ void Transport::UpdateForMap(Map const* targetMap)
 {
     Map::PlayerList const& pl = targetMap->GetPlayers();
     if (pl.isEmpty())
+    {
         return;
+    }
 
     if (GetMapId() == targetMap->GetId())
     {
@@ -567,7 +573,9 @@ void Transport::UpdateForMap(Map const* targetMap)
 
                 // Prevent sending transport maps in player update object
                 if (packet.ReadUInt16() != itr->getSource()->GetMapId())
+                {
                     return;
+                }
 
                 itr->getSource()->SendDirectMessage(&packet);
             }
@@ -586,7 +594,9 @@ void Transport::UpdateForMap(Map const* targetMap)
             {
                 // Prevent sending transport maps in player update object
                 if (out_packet.ReadUInt16() != itr->getSource()->GetMapId())
+                {
                     return;
+                }
 
                 itr->getSource()->SendDirectMessage(&out_packet);
             }

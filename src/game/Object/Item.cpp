@@ -80,7 +80,9 @@ void AddItemsSetItem(Player* player, Item* item)
             player->ItemSetEff[x] = eff;
         }
         else
-            { player->ItemSetEff.push_back(eff); }
+        {
+            player->ItemSetEff.push_back(eff);
+        }
     }
 
     ++eff->item_count;
@@ -228,7 +230,9 @@ bool ItemCanGoIntoBag(ItemPrototype const* pProto, ItemPrototype const* pBagProt
                     return true;
                 case ITEM_SUBCLASS_MINING_CONTAINER:
                     if (!(pProto->BagFamily & BAG_FAMILY_MINING_SUPP))
+                    {
                         return false;
+                    }
                     return true;
                 case ITEM_SUBCLASS_ENGINEERING_CONTAINER:
                     if (!(pProto->BagFamily & BAG_FAMILY_ENGINEERING_SUPP))
@@ -238,19 +242,27 @@ bool ItemCanGoIntoBag(ItemPrototype const* pProto, ItemPrototype const* pBagProt
                     return true;
                 case ITEM_SUBCLASS_GEM_CONTAINER:
                     if (!(pProto->BagFamily & BAG_FAMILY_GEMS))
+                    {
                         return false;
+                    }
                     return true;
                 case ITEM_SUBCLASS_LEATHERWORKING_CONTAINER:
                     if (!(pProto->BagFamily & BAG_FAMILY_LEATHERWORKING_SUPP))
+                    {
                         return false;
+                    }
                     return true;
                 case ITEM_SUBCLASS_INSCRIPTION_CONTAINER:
                     if (!(pProto->BagFamily & BAG_FAMILY_INSCRIPTION_SUPP))
+                    {
                         return false;
+                    }
                     return true;
                 case ITEM_SUBCLASS_FISHING_CONTAINER:
                     if (!(pProto->BagFamily & BAG_FAMILY_FISHING_SUPP))
+                    {
                         return false;
+                    }
                     return true;
                 default:
                     return false;
@@ -280,7 +292,9 @@ bool ItemCanGoIntoBag(ItemPrototype const* pProto, ItemPrototype const* pBagProt
 uint32 ItemPrototype::GetArmor() const
 {
     if (Quality >= ITEM_QUALITY_HEIRLOOM)                   // heirlooms have it's own dbc...
+    {
         return 0;
+    }
 
     if (Class == ITEM_CLASS_ARMOR && SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
     {
@@ -295,7 +309,9 @@ uint32 ItemPrototype::GetArmor() const
     ItemArmorTotalEntry const* iat = sItemArmorTotalStore.LookupEntry(ItemLevel);
 
     if (!iaq || !iat)
+    {
         return 0;
+    }
 
     if (InventoryType != INVTYPE_HEAD && InventoryType != INVTYPE_CHEST && InventoryType != INVTYPE_SHOULDERS &&
         InventoryType != INVTYPE_LEGS && InventoryType != INVTYPE_FEET && InventoryType != INVTYPE_WRISTS &&
@@ -311,7 +327,9 @@ uint32 ItemPrototype::GetArmor() const
         al = sArmorLocationStore.LookupEntry(InventoryType);
 
     if (!al)
+    {
         return 0;
+    }
 
     float iatMult, alMult;
 
@@ -347,7 +365,9 @@ float ItemPrototype::getDPS() const
     if (Class == ITEM_CLASS_WEAPON)
     {
         if (Quality >= ITEM_QUALITY_HEIRLOOM)               // heirlooms have it's own dbc...
+        {
             return damage;
+        }
 
         ItemDamageEntry const* id = NULL;
 
@@ -395,7 +415,9 @@ float ItemPrototype::getDPS() const
         }
 
         if (!id)
+        {
             return damage;
+        }
 
         return id->Value[Quality];
     }
@@ -455,7 +477,9 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 bool Item::IsNotEmptyBag() const
 {
     if (Bag const* bag = ToBag())
+    {
         return !bag->IsEmpty();
+    }
     return false;
 }
 
@@ -820,7 +844,9 @@ uint32 Item::GetSkill()
                 return 0;
             }
             else
-                { return item_weapon_skills[proto->SubClass]; }
+            {
+                return item_weapon_skills[proto->SubClass];
+            }
 
         case ITEM_CLASS_ARMOR:
             if (proto->SubClass >= MAX_ITEM_SUBCLASS_ARMOR)
@@ -828,7 +854,9 @@ uint32 Item::GetSkill()
                 return 0;
             }
             else
-                { return item_armor_skills[proto->SubClass]; }
+            {
+                return item_armor_skills[proto->SubClass];
+            }
 
         default:
             return 0;
@@ -846,7 +874,9 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
 
     // item must have one from this field values not null if it can have random enchantments
     if ((!itemProto->RandomProperty) && (!itemProto->RandomSuffix))
+    {
         return 0;
+    }
 
     // Random Property case
     if (itemProto->RandomProperty)
@@ -920,7 +950,9 @@ bool Item::UpdateItemSuffixFactor()
 {
     uint32 suffixFactor = GenerateEnchSuffixFactor(GetEntry());
     if (GetItemSuffixFactor() == suffixFactor)
+    {
         return false;
+    }
     SetUInt32Value(ITEM_FIELD_PROPERTY_SEED, suffixFactor);
     return true;
 }
@@ -1086,7 +1118,9 @@ bool Item::IsBoundByEnchant() const
         }
 
         if (enchant_slot == TRANSMOGRIFY_ENCHANTMENT_SLOT)
+        {
             return true;
+        }
 
         if (enchant_slot > PRISMATIC_ENCHANTMENT_SLOT && enchant_slot < PROP_ENCHANTMENT_SLOT_0)
             continue;
@@ -1118,7 +1152,9 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
         {
             // EffectItemType[0] is the associated scroll itemID, if a scroll can be made
             if (spellEffect_0->EffectItemType == 0)
+            {
                 return false;
+            }
             // Other checks do not apply to vellum enchants, so return final result
             int32 eqItemClass = spellInfo->GetEquippedItemClass();
             return proto->SubClass == ITEM_SUBCLASS_VELLUM && (eqItemClass == ITEM_CLASS_WEAPON || eqItemClass == ITEM_CLASS_ARMOR);
@@ -1127,7 +1163,9 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
 
     SpellEquippedItemsEntry const* equippedItems = spellInfo->GetSpellEquippedItems();
     if (!equippedItems)
+    {
         return true;
+    }
 
     if (equippedItems->EquippedItemClass != -1)             // -1 == any item class
     {
@@ -1339,7 +1377,9 @@ void Item::SendTimeUpdate(Player* owner)
 {
 #ifdef ENABLE_PLAYERBOTS
     if (!owner || !owner->IsInWorld() || owner->GetPlayerbotAI())
+    {
         return;
+    }
 #endif
 
     uint32 duration = GetUInt32Value(ITEM_FIELD_DURATION);
@@ -1380,7 +1420,9 @@ Item* Item::CreateItem(uint32 item, uint32 count, Player const* player, uint32 r
             return pItem;
         }
         else
-            { delete pItem; }
+        {
+            delete pItem;
+        }
     }
     return NULL;
 }
@@ -1422,7 +1464,9 @@ bool Item::IsBindedNotWith(Player const* player) const
 
     // not BOA item case
     if (!IsBoundAccountWide())
+    {
         return true;
+    }
 
     // online
     if (Player* owner = GetOwner())
@@ -1514,7 +1558,9 @@ bool Item::HasMaxCharges() const
 
     for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
         if (GetSpellCharges(i) != itemProto->Spells[i].SpellCharges)
+        {
             return false;
+        }
 
     return true;
 }
@@ -1563,7 +1609,9 @@ void Item::SetLootState(ItemLootUpdateState state)
             }
             // temporary must stay until remove (ignore any changes)
             else if (m_lootState != ITEM_LOOT_TEMPORARY)
-                { m_lootState = ITEM_LOOT_UNCHANGED; }
+            {
+                m_lootState = ITEM_LOOT_UNCHANGED;
+            }
             break;
         case ITEM_LOOT_REMOVED:
             // if loot not saved then it existence in past can be just ignored
@@ -1628,17 +1676,23 @@ int32 Item::GetReforgableStat(ItemModType statType) const
     ItemPrototype const* proto = GetProto();
     for (uint32 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
         if (proto->ItemStat[i].ItemStatType == statType)
+        {
             return proto->ItemStat[i].ItemStatValue;
+        }
 
     int32 randomPropId = GetItemRandomPropertyId();
     if (!randomPropId)
+    {
         return 0;
+    }
 
     if (randomPropId < 0)
     {
         ItemRandomSuffixEntry const* randomSuffix = sItemRandomSuffixStore.LookupEntry(-randomPropId);
         if (!randomSuffix)
+        {
             return 0;
+        }
 
         for (uint32 e = PROP_ENCHANTMENT_SLOT_0; e <= PROP_ENCHANTMENT_SLOT_4; ++e)
         {
@@ -1651,7 +1705,9 @@ int32 Item::GetReforgableStat(ItemModType statType) const
                         for (int k = 0; k < 5; ++k)
                         {
                             if (randomSuffix->enchant_id[k] == enchant->ID)
+                            {
                                 return int32((randomSuffix->prefix[k] * GetItemSuffixFactor()) / 10000);
+                            }
                         }
                     }
                 }
@@ -1662,7 +1718,9 @@ int32 Item::GetReforgableStat(ItemModType statType) const
     {
         ItemRandomPropertiesEntry const* randomProp = sItemRandomPropertiesStore.LookupEntry(randomPropId);
         if (!randomProp)
+        {
             return 0;
+        }
 
         for (uint32 e = PROP_ENCHANTMENT_SLOT_0; e <= PROP_ENCHANTMENT_SLOT_4; ++e)
         {
@@ -1675,7 +1733,9 @@ int32 Item::GetReforgableStat(ItemModType statType) const
                         for (int k = 0; k < 3; ++k)
                         {
                             if (randomProp->enchant_id[k] == enchant->ID)
+                            {
                                 return int32(enchant->amount[k]);
+                            }
                         }
                     }
                 }

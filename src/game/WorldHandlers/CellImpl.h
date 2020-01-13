@@ -68,7 +68,9 @@ inline void
 Cell::Visit(const CellPair& standing_cell, TypeContainerVisitor<T, CONTAINER> &visitor, Map& m, float x, float y, float radius) const
 {
     if (standing_cell.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || standing_cell.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
+    {
         return;
+    }
 
     // no jokes here... Actually placing ASSERT() here was good idea, but
     // we had some problems with DynamicObjects, which pass radius = 0.0f (DB issue?)
@@ -149,7 +151,9 @@ Cell::VisitCircle(TypeContainerVisitor<T, CONTAINER> &visitor, Map& m, const Cel
     // if x_shift == 0 then we have too small cell area, which were already
     // visited at previous step, so just return from procedure...
     if (x_shift == 0)
+    {
         return;
+    }
 
     uint32 y_start = end_cell.y_coord;
     uint32 y_end = begin_cell.y_coord;

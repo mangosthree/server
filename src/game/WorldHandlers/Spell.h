@@ -564,7 +564,9 @@ class Spell
         bool isDelayableNoMore()
         {
             if (m_delayAtDamageCount >= 2)
+            {
                 return true;
+            }
 
             ++m_delayAtDamageCount;
             return false;
@@ -751,7 +753,9 @@ namespace MaNGOS
         void Visit(PlayerMapType& m)
         {
             if (!i_originalCaster)
+            {
                 return;
+            }
 
             for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
             {
@@ -832,7 +836,9 @@ namespace MaNGOS
             MANGOS_ASSERT(i_data);
 
             if (!i_originalCaster || !i_castingObject)
+            {
                 return;
+            }
 
             for (typename GridRefManager<T>::iterator itr = m.begin(); itr != m.end(); ++itr)
             {

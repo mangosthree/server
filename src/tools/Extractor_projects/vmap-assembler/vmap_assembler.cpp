@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 
     std::string src = argv[1];
     std::string dest = argv[2];
-    
+
     std::cout << "using " << src << " as source directory and writing output to " << dest << std::endl;
 
     std::cout << "Create TileAssembler " << std::endl;

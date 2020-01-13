@@ -567,7 +567,9 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
 
     // can't delete loaded character
     if (sObjectMgr.GetPlayer(guid))
+    {
         return;
+    }
 
     uint32 accountId = 0;
     std::string name;
@@ -603,7 +605,9 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
 
     // prevent deleting other players' characters using cheating tools
     if (accountId != GetAccountId())
+    {
         return;
+    }
 
     std::string IP_str = GetRemoteAddress();
     BASIC_LOG("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), lowguid);
@@ -1198,19 +1202,25 @@ void WorldSession::HandleAlterAppearanceOpcode(WorldPacket& recv_data)
     {
         BarberShopStyleEntry const* bs_skinTone = sBarberShopStyleStore.LookupEntry(skinTone);
         if (!bs_skinTone || bs_skinTone->type != 3 || bs_skinTone->race != _player->getRace() || bs_skinTone->gender != _player->getGender())
+        {
             return;
+        }
         skinTone_id = bs_skinTone->hair_id;
     }
 
     BarberShopStyleEntry const* bs_hair = sBarberShopStyleStore.LookupEntry(Hair);
 
     if (!bs_hair || bs_hair->type != 0 || bs_hair->race != _player->getRace() || bs_hair->gender != _player->getGender())
+    {
         return;
+    }
 
     BarberShopStyleEntry const* bs_facialHair = sBarberShopStyleStore.LookupEntry(FacialHair);
 
     if (!bs_facialHair || bs_facialHair->type != 2 || bs_facialHair->race != _player->getRace() || bs_facialHair->gender != _player->getGender())
+    {
         return;
+    }
 
     uint32 Cost = _player->GetBarberShopCost(bs_hair->hair_id, Color, bs_facialHair->hair_id, skinTone_id);
 
@@ -1371,7 +1381,9 @@ void WorldSession::HandleEquipmentSetSaveOpcode(WorldPacket& recv_data)
     recv_data >> iconName;
 
     if (index >= MAX_EQUIPMENT_SET_INDEX)                   // client set slots amount
+    {
         return;
+    }
 
     EquipmentSet eqSet;
 
@@ -1397,10 +1409,14 @@ void WorldSession::HandleEquipmentSetSaveOpcode(WorldPacket& recv_data)
         Item* item = _player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
 
         if (!item && itemGuid)                              // cheating check 1
+        {
             return;
+        }
 
         if (item && item->GetObjectGuid() != itemGuid)      // cheating check 2
+        {
             return;
+        }
 
         eqSet.Items[i] = itemGuid.GetCounter();
     }

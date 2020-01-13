@@ -1574,7 +1574,9 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
                         z = max_z;
                     }
                     else if (z < ground_z)
-                        { z = ground_z; }
+                    {
+                        z = ground_z;
+                    }
                 }
             }
             else
@@ -1601,7 +1603,9 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
                         z = max_z;
                     }
                     else if (z < ground_z)
-                        { z = ground_z; }
+                    {
+                        z = ground_z;
+                    }
                 }
             }
             else
@@ -1681,7 +1685,9 @@ namespace MaNGOS
                     text = i_textData->Content[loc_idx + 1].c_str();
                 }
                 else
-                    { text = i_textData->Content[0].c_str(); }
+                {
+                    text = i_textData->Content[0].c_str();
+                }
 
                 ChatHandler::BuildChatPacket(data, i_msgtype, text, i_language, CHAT_TAG_NONE, i_object.GetObjectGuid(), i_object.GetNameForLocaleIdx(loc_idx),
                                              i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
@@ -1906,7 +1912,9 @@ GameObject* WorldObject::SummonGameObject(uint32 id, float x, float y, float z, 
     Map *map = GetMap();
 
     if (!map)
+    {
         return NULL;
+    }
 
     if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), id, map, GetPhaseMask(), x, y, z, angle))
     {
@@ -2001,7 +2009,9 @@ namespace MaNGOS
                     angle -= 2.0f * M_PI_F;
                 }
                 else if (angle < -M_PI_F)
-                    { angle += 2.0f * M_PI_F; }
+                {
+                    angle += 2.0f * M_PI_F;
+                }
 
                 i_selector.AddUsedArea(u, angle, dist2d);
             }
@@ -2035,7 +2045,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         if (searcher)
             { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
         else
-            { UpdateGroundPositionZ(x, y, z); }
+        {
+            UpdateGroundPositionZ(x, y, z);
+        }
         return;
     }
 
@@ -2063,7 +2075,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         if (searcher)
             { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
         else
-            { UpdateGroundPositionZ(x, y, z); }
+        {
+            UpdateGroundPositionZ(x, y, z);
+        }
 
         if (fabs(init_z - z) < dist && IsWithinLOS(x, y, z))
         {
@@ -2087,7 +2101,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         if (searcher)
             { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
         else
-            { UpdateGroundPositionZ(x, y, z); }
+        {
+            UpdateGroundPositionZ(x, y, z);
+        }
 
         if (fabs(init_z - z) < dist && IsWithinLOS(x, y, z))
         {
@@ -2105,7 +2121,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         if (searcher)
             { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
         else
-            { UpdateGroundPositionZ(x, y, z); }
+        {
+            UpdateGroundPositionZ(x, y, z);
+        }
         return;
     }
 
@@ -2121,7 +2139,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         if (searcher)
             { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
         else
-            { UpdateGroundPositionZ(x, y, z); }
+        {
+            UpdateGroundPositionZ(x, y, z);
+        }
 
         if (fabs(init_z - z) < dist && IsWithinLOS(x, y, z))
         {
@@ -2136,7 +2156,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     if (searcher)
         { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }          // update to LOS height if available
     else
-        { UpdateGroundPositionZ(x, y, z); }
+    {
+        UpdateGroundPositionZ(x, y, z);
+    }
 }
 
 void WorldObject::SetPhaseMask(uint32 newPhaseMask, bool update)
@@ -2158,7 +2180,9 @@ void WorldObject::PlayDistanceSound(uint32 sound_id, Player const* target /*= NU
         target->SendDirectMessage(&data);
     }
     else
-        { SendMessageToSet(&data, true); }
+    {
+        SendMessageToSet(&data, true);
+    }
 }
 
 void WorldObject::PlayDirectSound(uint32 sound_id, Player const* target /*= NULL*/) const
@@ -2171,7 +2195,9 @@ void WorldObject::PlayDirectSound(uint32 sound_id, Player const* target /*= NULL
         target->SendDirectMessage(&data);
     }
     else
-        { SendMessageToSet(&data, true); }
+    {
+        SendMessageToSet(&data, true);
+    }
 }
 
 void WorldObject::PlayMusic(uint32 sound_id, Player const* target /*= NULL*/) const
@@ -2183,7 +2209,9 @@ void WorldObject::PlayMusic(uint32 sound_id, Player const* target /*= NULL*/) co
         target->SendDirectMessage(&data);
     }
     else
-        { SendMessageToSet(&data, true); }
+    {
+        SendMessageToSet(&data, true);
+    }
 }
 
 void WorldObject::UpdateVisibilityAndView()
@@ -2288,7 +2316,9 @@ void WorldObject::SetActiveObjectState(bool active)
             GetMap()->RemoveFromActive(this);
         }
         else if (!IsActiveObject() && active)
-            { GetMap()->AddToActive(this); }
+        {
+            GetMap()->AddToActive(this);
+        }
     }
     m_isActiveObject = active;
 }

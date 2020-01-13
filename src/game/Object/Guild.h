@@ -424,7 +424,9 @@ class Guild
         {
             for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
                 if (itr->second.RankId == rankId)
+                {
                     return true;
+                }
 
             return false;
         }

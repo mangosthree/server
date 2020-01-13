@@ -88,7 +88,9 @@ bool WorldSession::CheckMailBox(ObjectGuid guid)
         }
     }
     else
+    {
         return false;
+    }
 
     return true;
 }
@@ -172,10 +174,14 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
     // packet read complete, now do check
 
     if (!CheckMailBox(mailboxGuid))
+    {
         return;
+    }
 
     if (receiver.empty())
+    {
         return;
+    }
 
     Player* pl = _player;
 
@@ -372,7 +378,9 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket& recv_data)
     recv_data >> mailId;
 
     if (!CheckMailBox(mailboxGuid))
+    {
         return;
+    }
 
     Player* pl = _player;
 
@@ -403,7 +411,9 @@ void WorldSession::HandleMailDelete(WorldPacket& recv_data)
     recv_data.read_skip<uint32>();                          // mailTemplateId
 
     if (!CheckMailBox(mailboxGuid))
+    {
         return;
+    }
 
     Player* pl = _player;
     pl->m_mailsUpdated = true;
@@ -439,7 +449,9 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recv_data)
     recv_data.read_skip<uint64>();                          // original sender GUID for return to, not used
 
     if (!CheckMailBox(mailboxGuid))
+    {
         return;
+    }
 
     Player* pl = _player;
     Mail* m = pl->GetMail(mailId);
@@ -498,7 +510,9 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recv_data)
     recv_data >> itemId;                                    // item guid low
 
     if (!CheckMailBox(mailboxGuid))
+    {
         return;
+    }
 
     Player* pl = _player;
 
@@ -595,7 +609,9 @@ void WorldSession::HandleMailTakeMoney(WorldPacket& recv_data)
     recv_data >> money;
 
     if (!CheckMailBox(mailboxGuid))
+    {
         return;
+    }
 
     Player* pl = _player;
 
@@ -630,7 +646,9 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
     recv_data >> mailboxGuid;
 
     if (!CheckMailBox(mailboxGuid))
+    {
         return;
+    }
 
     // client can't work with packets > max int16 value
     const uint32 maxPacketSize = 32767;
@@ -759,7 +777,9 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recv_data)
     recv_data >> mailId;
 
     if (!CheckMailBox(mailboxGuid))
+    {
         return;
+    }
 
     Player* pl = _player;
 

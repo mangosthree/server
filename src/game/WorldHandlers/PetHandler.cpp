@@ -67,19 +67,25 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
     }
 
     if (!pet->IsAlive())
+    {
         return;
+    }
 
     if (pet->GetTypeId() == TYPEID_PLAYER)
     {
         // controller player can only do melee attack
         if (!(flag == ACT_COMMAND && spellid == COMMAND_ATTACK))
+        {
             return;
+        }
     }
     else if (((Creature*)pet)->IsPet())
     {
         // pet can have action bar disabled
         if (((Pet*)pet)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+        {
             return;
+        }
     }
 
     CharmInfo* charmInfo = pet->GetCharmInfo();
@@ -212,7 +218,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             }
 
             if (pet->GetCharmInfo() && pet->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+            {
                 return;
+            }
 
             for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
@@ -228,7 +236,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
             // do not cast not learned spells
             if (!pet->HasSpell(spellid) || IsPassiveSpell(spellInfo))
+            {
                 return;
+            }
 
             _player->SetInCombatState(true, unit_target);
 
@@ -336,7 +346,9 @@ void WorldSession::HandlePetStopAttack(WorldPacket& recv_data)
     }
 
     if (!pet->IsAlive())
+    {
         return;
+    }
 
     pet->AttackStop();
 }
@@ -413,7 +425,9 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
 
     // pet can have action bar disabled
     if (pet->IsPet() && ((Pet*)pet)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+    {
         return;
+    }
 
     CharmInfo* charmInfo = pet->GetCharmInfo();
     if (!charmInfo)
@@ -437,7 +451,9 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
 
         // ignore invalid position
         if (position[i] >= MAX_UNIT_ACTION_BAR_INDEX)
+        {
             return;
+        }
 
         // in the normal case, command and reaction buttons can only be moved, not removed
         // at moving count ==2, at removing count == 1
@@ -445,7 +461,9 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
         if (act_state == ACT_COMMAND || act_state == ACT_REACTION)
         {
             if (count == 1)
+            {
                 return;
+            }
 
             move_command = true;
         }
@@ -589,7 +607,9 @@ void WorldSession::HandlePetAbandon(WorldPacket& recv_data)
     DETAIL_LOG("HandlePetAbandon. CMSG_PET_ABANDON pet guid is %s", guid.GetString().c_str());
 
     if (!_player->IsInWorld())
+    {
         return;
+    }
 
     // pet/charmed
     if (Creature* pet = _player->GetMap()->GetAnyTypeCreature(guid))
@@ -619,7 +639,9 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
     }
 
     if (pet->getPetType() != HUNTER_PET || pet->m_usedTalentCount == 0)
+    {
         return;
+    }
 
     CharmInfo* charmInfo = pet->GetCharmInfo();
     if (!charmInfo)
@@ -649,7 +671,9 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
 
     // do not add not learned spells/ passive spells
     if (!pet->HasSpell(spellid) || IsPassiveSpell(spellid))
+    {
         return;
+    }
 
     CharmInfo* charmInfo = pet->GetCharmInfo();
     if (!charmInfo)
@@ -696,13 +720,17 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     }
 
     if (pet->GetCharmInfo() && pet->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+    {
         return;
+    }
 
     Aura* triggeredByAura = pet->GetTriggeredByClientAura(spellid);
 
     // do not cast not learned spells
     if ((!triggeredByAura && !pet->HasSpell(spellid)) || IsPassiveSpell(spellInfo))
+    {
         return;
+    }
 
     SpellCastTargets targets;
 

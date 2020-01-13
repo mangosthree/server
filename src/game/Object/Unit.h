@@ -1385,7 +1385,9 @@ class  Unit : public WorldObject
         bool CanUseEquippedWeapon(WeaponAttackType attackType) const
         {
             if (IsInFeralForm())
+            {
                 return false;
+            }
 
             switch (attackType)
             {
@@ -1456,10 +1458,14 @@ class  Unit : public WorldObject
         Unit* getAttackerForHelper()                        // If someone wants to help, who to give them
         {
             if (getVictim() != NULL)
+            {
                 return getVictim();
+            }
 
             if (!m_attackers.empty())
+            {
                 return *(m_attackers.begin());
+            }
 
             return NULL;
         }
@@ -1900,7 +1906,9 @@ class  Unit : public WorldObject
         bool IsContestedGuard() const
         {
             if (FactionTemplateEntry const* entry = getFactionTemplateEntry())
+            {
                 return entry->IsContestedGuardFaction();
+            }
 
             return false;
         }
@@ -3296,7 +3304,9 @@ class  Unit : public WorldObject
         {
             VisibleAuraMap::const_iterator itr = m_visibleAuras.find(slot);
             if (itr != m_visibleAuras.end())
+            {
                 return itr->second;
+            }
             return NULL;
         }
         void SetVisibleAura(uint8 slot, SpellAuraHolder* holder)

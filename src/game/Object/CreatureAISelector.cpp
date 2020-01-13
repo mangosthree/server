@@ -44,7 +44,9 @@ namespace FactorySelector
         {
             // charmed creature may have some script even if its not supposed to be that way (ex: Eye of Acherus)
             if (creature->IsCharmed())
+            {
                 return scriptedAI;
+            }
 
             // Allow scripting AI for normal creatures and not controlled pets (guardians and mini-pets)
             if (!creature->IsPet() || !static_cast<Pet*>(creature)->isControlled())
@@ -71,7 +73,9 @@ namespace FactorySelector
             }
         }
         else if (creature->IsTotem())
-            { ai_factory = ai_registry.GetRegistryItem("TotemAI"); }
+        {
+            ai_factory = ai_registry.GetRegistryItem("TotemAI");
+        }
 
         // select by script name
         if (!ai_factory && !ainame.empty())

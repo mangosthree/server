@@ -213,7 +213,9 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 
     // ignore for remote control state
     if (!pUser->IsSelfMover())
+    {
         return;
+    }
 
     Item* pItem = pUser->GetItemByPos(bagIndex, slot);
     if (!pItem)
@@ -291,14 +293,20 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
 
     // ignore for remote control state
     if (!_player->IsSelfMover())
+    {
         return;
+    }
 
     GameObject* obj = _player->GetMap()->GetGameObject(guid);
     if (!obj)
+    {
         return;
+    }
 
     if (!obj->IsWithinDistInMap(_player, obj->GetInteractionDistance()))
+    {
         return;
+    }
 
     // Additional check preventing exploits (ie loot despawned chests)
     if (!obj->isSpawned())
@@ -333,14 +341,20 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
 
     // ignore for remote control state
     if (!_player->IsSelfMover())
+    {
         return;
+    }
 
     GameObject* go = GetPlayer()->GetMap()->GetGameObject(guid);
     if (!go)
+    {
         return;
+    }
 
     if (!go->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
+    {
         return;
+    }
 
     _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_GAMEOBJECT, go->GetEntry());
 }
@@ -446,11 +460,15 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
     // ignore for remote control state (for player case)
     Unit* mover = _player->GetMover();
     if (mover != _player && mover->GetTypeId() == TYPEID_PLAYER)
+    {
         return;
+    }
 
     // FIXME: hack, ignore unexpected client cancel Deadly Throw cast
     if (spellId == 26679)
+    {
         return;
+    }
 
     if (mover->IsNonMeleeSpellCasted(false))
         mover->InterruptNonMeleeSpells(false, spellId);
@@ -463,13 +481,19 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
 
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
+    {
         return;
+    }
 
     if (spellInfo->HasAttribute(SPELL_ATTR_CANT_CANCEL))
+    {
         return;
+    }
 
     if (IsPassiveSpell(spellInfo))
+    {
         return;
+    }
 
     if (!IsPositiveSpell(spellId))
     {
@@ -491,10 +515,14 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
 
             // this also include case when aura not found
             if (!allow)
+            {
                 return;
+            }
         }
         else
+        {
             return;
+        }
     }
 
     // channeled spell case (it currently casted then)
@@ -510,7 +538,9 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
 
     // not own area auras can't be cancelled (note: maybe need to check for aura on holder and not general on spell)
     if (holder && holder->GetCasterGuid() != _player->GetObjectGuid() && HasAreaAuraEffect(holder->GetSpellProto()))
+    {
         return;
+    }
 
     // non channeled case
     _player->RemoveAurasDueToSpellByCancel(spellId);
@@ -526,7 +556,9 @@ void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
 
     // ignore for remote control state
     if (!_player->IsSelfMover())
+    {
         return;
+    }
 
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
@@ -579,7 +611,9 @@ void WorldSession::HandleCancelChanneling(WorldPacket& recv_data)
     // ignore for remote control state (for player case)
     Unit* mover = _player->GetMover();
     if (mover != _player && mover->GetTypeId() == TYPEID_PLAYER)
+    {
         return;
+    }
 
     mover->InterruptSpell(CURRENT_CHANNELED_SPELL);
 }
@@ -592,10 +626,14 @@ void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
 
     // ignore for remote control state
     if (!_player->IsSelfMover())
+    {
         return;
+    }
 
     if (int(slotId) >= MAX_TOTEM_SLOT)
+    {
         return;
+    }
 
     if (Totem* totem = GetPlayer()->GetTotem(TotemSlot(slotId)))
         totem->UnSummon();
@@ -606,7 +644,9 @@ void WorldSession::HandleSelfResOpcode(WorldPacket& /*recv_data*/)
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: CMSG_SELF_RES");                  // empty opcode
 
     if (_player->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+    {
         return;
+    }
 
     if (_player->GetUInt32Value(PLAYER_SELF_RES_SPELL))
     {
@@ -625,11 +665,15 @@ void WorldSession::HandleSpellClick(WorldPacket& recv_data)
 
     // client prevent click and set different icon at combat state; however combat state is allowed for dungeons
     if (_player->IsInCombat() && !_player->GetMap()->IsDungeon())
+    {
         return;
+    }
 
     Creature* unit = _player->GetMap()->GetAnyTypeCreature(guid);
     if (!unit || unit->IsInCombat())                        // client prevent click and set different icon at combat state
+    {
         return;
+    }
 
     SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(unit->GetEntry());
     for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
@@ -637,7 +681,9 @@ void WorldSession::HandleSpellClick(WorldPacket& recv_data)
         if (itr->second.IsFitToRequirements(_player, unit))
         {
             if (sScriptMgr.OnNpcSpellClick(_player, unit, itr->second.spellId))
+            {
                 return;
+            }
 
             Unit* caster = (itr->second.castFlags & 0x1) ? (Unit*)_player : (Unit*)unit;
             Unit* target = (itr->second.castFlags & 0x2) ? (Unit*)_player : (Unit*)unit;
@@ -661,12 +707,16 @@ void WorldSession::HandleGetMirrorimageData(WorldPacket& recv_data)
     Creature* pCreature = _player->GetMap()->GetAnyTypeCreature(guid);
 
     if (!pCreature)
+    {
         return;
+    }
 
     Unit::AuraList const& images = pCreature->GetAurasByType(SPELL_AURA_MIRROR_IMAGE);
 
     if (images.empty())
+    {
         return;
+    }
 
     Unit* pCaster = images.front()->GetCaster();
 

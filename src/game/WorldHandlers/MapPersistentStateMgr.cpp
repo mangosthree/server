@@ -74,7 +74,9 @@ bool MapPersistentState::UnloadIfEmpty()
         return false;
     }
     else
+    {
         return true;
+    }
 }
 
 void MapPersistentState::SaveCreatureRespawnTime(uint32 loguid, time_t t)
@@ -83,7 +85,9 @@ void MapPersistentState::SaveCreatureRespawnTime(uint32 loguid, time_t t)
 
     // BGs/Arenas always reset at server restart/unload, so no reason store in DB
     if (GetMapEntry()->IsBattleGroundOrArena())
+    {
         return;
+    }
 
     CharacterDatabase.BeginTransaction();
 
@@ -108,7 +112,9 @@ void MapPersistentState::SaveGORespawnTime(uint32 loguid, time_t t)
 
     // BGs/Arenas always reset at server restart/unload, so no reason store in DB
     if (GetMapEntry()->IsBattleGroundOrArena())
+    {
         return;
+    }
 
     CharacterDatabase.BeginTransaction();
 
@@ -293,9 +299,13 @@ time_t DungeonPersistentState::GetResetTimeForDB() const
     // only state the reset time for normal instances
     const MapEntry* entry = sMapStore.LookupEntry(GetMapId());
     if (!entry || entry->map_type == MAP_RAID || GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
+    {
         return 0;
+    }
     else
+    {
         return GetResetTime();
+    }
 }
 
 void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint32 creditEntry)
@@ -337,7 +347,9 @@ bool BattleGroundPersistentState::CanBeUnload() const
 uint32 DungeonResetScheduler::GetMaxResetTimeFor(MapDifficultyEntry const* mapDiff)
 {
     if (!mapDiff || !mapDiff->resetTime)
+    {
         return 0;
+    }
 
     uint32 delay = uint32(mapDiff->resetTime / DAY * sWorld.getConfig(CONFIG_FLOAT_RATE_INSTANCE_RESET_TIME)) * DAY;
 
@@ -644,7 +656,9 @@ MapPersistentStateManager::~MapPersistentStateManager()
 MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const* mapEntry, uint32 instanceId, Difficulty difficulty, time_t resetTime, bool canReset, bool load /*=false*/, bool initPools /*= true*/, uint32 completedEncountersMask /*= 0*/)
 {
     if (MapPersistentState* old_save = GetPersistentState(mapEntry->MapID, instanceId))
+    {
         return old_save;
+    }
 
     if (mapEntry->IsDungeon())
     {
@@ -721,7 +735,9 @@ void MapPersistentStateManager::DeleteInstanceFromDB(uint32 instanceid)
 void MapPersistentStateManager::RemovePersistentState(uint32 mapId, uint32 instanceId)
 {
     if (lock_instLists)
+    {
         return;
+    }
 
     if (instanceId)
     {
@@ -919,7 +935,9 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
     // global reset for all instances of the given map
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
     if (!mapEntry->IsDungeon())
+    {
         return;
+    }
 
     time_t now = time(NULL);
 

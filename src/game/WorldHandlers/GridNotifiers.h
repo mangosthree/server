@@ -641,7 +641,9 @@ namespace MaNGOS
             bool operator()(Player* u)
             {
                 if (i_fobj->IsFriendlyTo(u) || u->IsAlive() || u->IsTaxiFlying())
+                {
                     return false;
+                }
 
                 return i_fobj->IsWithinDistInMap(u, i_range);
             }
@@ -683,10 +685,14 @@ namespace MaNGOS
             {
                 GameObjectInfo const* goInfo = go->GetGOInfo();
                 if (goInfo->type != GAMEOBJECT_TYPE_SPELL_FOCUS)
+                {
                     return false;
+                }
 
                 if (goInfo->spellFocus.focusId != i_focusId)
+                {
                     return false;
+                }
 
                 float dist = (float)goInfo->spellFocus.dist;
 
@@ -791,7 +797,9 @@ namespace MaNGOS
             bool operator()(GameObject* go)
             {
                 if (go->GetEntry() == i_entry && go->IsWithinDist3d(i_x, i_y, i_z, i_range))
+                {
                     return true;
+                }
 
                 return false;
             }
@@ -915,7 +923,9 @@ namespace MaNGOS
                         && i_obj->IsWithinDistInMap(u, i_range))
                     return true;
                 else
+                {
                     return false;
+                }
             }
         private:
             WorldObject const* i_obj;
@@ -950,9 +960,13 @@ namespace MaNGOS
             bool operator()(Unit* u)
             {
                 if (u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range) && i_obj->IsFriendlyTo(u))
+                {
                     return true;
+                }
                 else
+                {
                     return false;
+                }
             }
         private:
             WorldObject const* i_obj;
@@ -967,7 +981,9 @@ namespace MaNGOS
             bool operator()(Unit* u)
             {
                 if (u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range))
+                {
                     return true;
+                }
 
                 return false;
             }
@@ -1016,18 +1032,26 @@ namespace MaNGOS
             {
                 // Check contains checks for: live, non-selectable, non-attackable flags, flight check and GM check, ignore totems
                 if (!u->IsTargetableForAttack())
+                {
                     return false;
+                }
 
                 // ignore totems as AoE targets
                 if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->IsTotem())
+                {
                     return false;
+                }
 
                 // check visibility only for unit-like original casters
                 if (i_targetForUnit && !u->IsVisibleForOrDetect((Unit const*)i_originalCaster, i_originalCaster, false))
+                {
                     return false;
+                }
 
                 if ((i_targetForPlayer ? !i_originalCaster->IsFriendlyTo(u) : i_originalCaster->IsHostileTo(u)) && i_obj->IsWithinDistInMap(u, i_range))
+                {
                     return true;
+                }
 
                 return false;
             }
@@ -1052,13 +1076,19 @@ namespace MaNGOS
             {
                 // Check contains checks for: live, non-selectable, non-attackable flags, flight check and GM check, ignore totems
                 if (!u->IsTargetableForAttack())
+                {
                     return false;
+                }
 
                 if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->IsTotem())
+                {
                     return false;
+                }
 
                 if ((i_targetForPlayer ? !i_obj->IsFriendlyTo(u) : i_obj->IsHostileTo(u)) && i_obj->IsWithinDistInMap(u, i_range))
+                {
                     return true;
+                }
 
                 return false;
             }
@@ -1114,7 +1144,9 @@ namespace MaNGOS
             bool operator()(Creature* u)
             {
                 if (u->IsAlive() && u->IsHostileTo(i_funit) && i_funit->IsWithinDistInMap(u, u->GetAttackDistance(i_funit)))
+                {
                     return true;
+                }
 
                 return false;
             }
@@ -1147,15 +1179,23 @@ namespace MaNGOS
             bool operator()(Creature* u)
             {
                 if (u == i_obj)
+                {
                     return false;
+                }
                 if (!u->CanAssistTo(i_obj, i_enemy))
+                {
                     return false;
+                }
 
                 if (!i_obj->IsWithinDistInMap(u, i_range))
+                {
                     return false;
+                }
 
                 if (!i_obj->IsWithinLOSInMap(u))
+                {
                     return false;
+                }
 
                 i_range = i_obj->GetDistance(u);            // use found unit range as new range limit for next check
                 return true;
@@ -1208,7 +1248,9 @@ namespace MaNGOS
             bool operator()(Unit* pUnit)
             {
                 if (pUnit->GetEntry() == m_uiEntry && m_pObject->IsWithinDist(pUnit, m_fRange, false))
+                {
                     return true;
+                }
 
                 return false;
             }
@@ -1232,7 +1274,9 @@ namespace MaNGOS
             bool operator()(Player* u)
             {
                 if (u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range))
+                {
                     return true;
+                }
 
                 return false;
             }

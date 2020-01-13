@@ -199,7 +199,9 @@ class ByteBuffer
         void FlushBits()
         {
             if (_bitpos == 8)
+            {
                 return;
+            }
 
             append((uint8 *)&_curbitval, sizeof(uint8));
             _curbitval = 0;
@@ -983,7 +985,9 @@ class ByteBuffer
         ByteBuffer& append(const uint8* src, size_t cnt)
         {
             if (!cnt)
+            {
                 return *this;
+            }
 
             MANGOS_ASSERT(size() < 10000000);
 
@@ -1005,7 +1009,9 @@ class ByteBuffer
         ByteBuffer& append(const ByteBuffer& buffer)
         {
             if (buffer.wpos())
+            {
                 return append(buffer.contents(), buffer.wpos());
+            }
             return *this;
         }
 

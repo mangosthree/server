@@ -147,7 +147,9 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
     // expected bracket entry
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), _player->getLevel());
     if (!bracketEntry)
+    {
         return;
+    }
 
     GroupJoinBattlegroundResult err = ERR_BATTLEGROUND_NONE;
 
@@ -319,7 +321,9 @@ void WorldSession::HandlePVPLogDataOpcode(WorldPacket & /*recv_data*/)
 
     // arena finish version will send in BattleGround::EndBattleGround directly
     if (bg->isArena())
+    {
         return;
+    }
 
     WorldPacket data;
     sBattleGroundMgr.BuildPvpLogDataPacket(&data, bg);
@@ -422,7 +426,9 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
     // expected bracket entry
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), _player->getLevel());
     if (!bracketEntry)
+    {
         return;
+    }
 
     // some checks if player isn't cheating - it is not exactly cheating, but we can not allow it
     if (action == 1 && ginfo.arenaType == ARENA_TYPE_NONE)
@@ -670,7 +676,9 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
 
     // ignore if we already in BG or BG queue
     if (_player->InBattleGround())
+    {
         return;
+    }
 
     ArenaType arenatype = ArenaTeam::GetTypeBySlot(arenaslot);
     uint32 arenaRating = 0;
@@ -693,14 +701,20 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
     BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bgTypeId, arenatype);
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), _player->getLevel());
     if (!bracketEntry)
+    {
         return;
+    }
 
     Group* grp = _player->GetGroup();
     // no group found, error
     if (!grp)
+    {
         return;
+    }
     if (grp->GetLeaderGuid() != _player->GetObjectGuid())
+    {
         return;
+    }
 
     uint32 ateamId = _player->GetArenaTeamId(arenaslot);
     // check real arena team existence only here (if it was moved to group->CanJoin .. () then we would have to get it twice)
@@ -720,7 +734,9 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
     {
         ArenaTeamMember const* at_member = at->GetMember(citr->guid);
         if (!at_member)                                 // group member joining to arena must be in leader arena team
+        {
             return;
+        }
 
         // calc avg personal rating
         avg_pers_rating += at_member->personal_rating;

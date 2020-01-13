@@ -65,7 +65,9 @@ bool Weather::Update(uint32 diff, Map const* _map)
         {
             ///- Weather will be removed if not updated (no players in zone anymore)
             if (!SendWeatherForPlayersInZone(_map))
+            {
                 return false;
+            }
         }
     }
     return true;
@@ -75,7 +77,9 @@ bool Weather::Update(uint32 diff, Map const* _map)
 bool Weather::ReGenerate()
 {
     if (m_isPermanentWeather)
+    {
         return false;
+    }
 
     // remember old values
     WeatherType old_type = m_type;
@@ -230,7 +234,9 @@ bool Weather::SendWeatherForPlayersInZone(Map const* _map)
 
     ///- Send the weather packet to all players in this zone
     if (!_map->SendToPlayersInZone(&data, m_zone))
+    {
         return false;
+    }
 
     ///- Log the event
     LogWeatherState(state);
@@ -246,7 +252,9 @@ bool Weather::UpdateWeather()
 {
     Player* player = sWorld.FindPlayerInZone(m_zone);
     if (!player)
+    {
         return false;
+    }
 
     ///- Send the weather packet to all players in this zone
     if (m_grade >= 1)
@@ -314,7 +322,9 @@ void Weather::SetWeather(WeatherType type, float grade, Map const* _map, bool is
     m_isPermanentWeather = isPermanent;
 
     if (m_type == type && m_grade == grade)
+    {
         return;
+    }
 
     m_type = type;
     m_grade = grade;
@@ -325,31 +335,51 @@ void Weather::SetWeather(WeatherType type, float grade, Map const* _map, bool is
 WeatherState Weather::GetWeatherState() const
 {
     if (m_grade < 0.27f)
+    {
         return WEATHER_STATE_FINE;
+    }
 
     switch (m_type)
     {
         case WEATHER_TYPE_RAIN:                             // rain
             if (m_grade < 0.40f)
+            {
                 return WEATHER_STATE_LIGHT_RAIN;
+            }
             else if (m_grade < 0.70f)
+            {
                 return WEATHER_STATE_MEDIUM_RAIN;
+            }
             else
+            {
                 return WEATHER_STATE_HEAVY_RAIN;
+            }
         case WEATHER_TYPE_SNOW:                             // snow
             if (m_grade < 0.40f)
+            {
                 return WEATHER_STATE_LIGHT_SNOW;
+            }
             else if (m_grade < 0.70f)
+            {
                 return WEATHER_STATE_MEDIUM_SNOW;
+            }
             else
+            {
                 return WEATHER_STATE_HEAVY_SNOW;
+            }
         case WEATHER_TYPE_STORM:                            // storm
             if (m_grade < 0.40f)
+            {
                 return WEATHER_STATE_LIGHT_SANDSTORM;
+            }
             else if (m_grade < 0.70f)
+            {
                 return WEATHER_STATE_MEDIUM_SANDSTORM;
+            }
             else
+            {
                 return WEATHER_STATE_HEAVY_SANDSTORM;
+            }
         case WEATHER_TYPE_BLACKRAIN:
             return WEATHER_STATE_BLACKRAIN;
         case WEATHER_TYPE_THUNDER:
@@ -443,7 +473,9 @@ Weather* WeatherSystem::FindOrCreateWeather(uint32 zoneId)
     WeatherMap::const_iterator itr = m_weathers.find(zoneId);
     // Return if found
     if (itr != m_weathers.end())
+    {
         return itr->second;
+    }
     // Create
     Weather* w = new Weather(zoneId, sWeatherMgr.GetWeatherChances(zoneId));
     m_weathers[zoneId] = w;

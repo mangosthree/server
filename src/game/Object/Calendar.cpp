@@ -42,7 +42,9 @@ CalendarEvent::~CalendarEvent()
 bool CalendarEvent::AddInvite(CalendarInvite* invite)
 {
     if (!invite)
+    {
         return false;
+    }
 
     return m_Invitee.insert(CalendarInviteMap::value_type(invite->InviteId, invite)).second;
 }
@@ -51,7 +53,9 @@ CalendarInvite* CalendarEvent::GetInviteById(uint64 inviteId)
 {
     CalendarInviteMap::iterator itr = m_Invitee.find(inviteId);
     if (itr != m_Invitee.end())
+    {
         return itr->second;
+    }
     return NULL;
 }
 
@@ -61,7 +65,9 @@ CalendarInvite* CalendarEvent::GetInviteByGuid(ObjectGuid const& guid)
     while (inviteItr != m_Invitee.end())
     {
         if (inviteItr->second->InviteeGuid == guid)
+        {
             return inviteItr->second;
+        }
         ++inviteItr;
     }
 
@@ -249,7 +255,9 @@ CalendarEvent* CalendarMgr::AddEvent(ObjectGuid const& guid, std::string title, 
 {
     Player* player = sObjectMgr.GetPlayer(guid);
     if (!player)
+    {
         return NULL;
+    }
 
     if (title.empty())
     {
@@ -356,7 +364,9 @@ CalendarInvite* CalendarMgr::AddInvite(CalendarEvent* event, ObjectGuid const& s
 {
     Player* sender = sObjectMgr.GetPlayer(senderGuid);
     if (!event || !sender)
+    {
         return NULL;
+    }
 
     std::string name;
     sObjectMgr.GetPlayerNameByGUID(inviteeGuid, name);
@@ -477,7 +487,9 @@ void CalendarMgr::CopyEvent(uint64 eventId, time_t newTime, ObjectGuid const& gu
                                        CALENDAR_MAX_INVITES, event->DungeonId, newTime, event->UnknownTime, event->Flags);
 
     if (!newEvent)
+    {
         return;
+    }
 
     if (newEvent->IsGuildAnnouncement())
         AddInvite(newEvent, guid, guid,  CALENDAR_STATUS_CONFIRMED, CALENDAR_RANK_OWNER, "", time(NULL));
@@ -686,7 +698,9 @@ bool CalendarMgr::CanAddEvent(ObjectGuid const& guid)
     // count all event created by guid
     for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end(); ++itr)
         if ((itr->second.CreatorGuid == guid) && (++totalEvents >= CALENDAR_MAX_EVENTS))
+        {
             return false;
+        }
     return true;
 }
 
@@ -694,13 +708,17 @@ bool CalendarMgr::CanAddEvent(ObjectGuid const& guid)
 bool CalendarMgr::CanAddGuildEvent(uint32 guildId)
 {
     if (!guildId)
+    {
         return false;
+    }
 
     uint32 totalEvents = 0;
     // count all guild events in a guild
     for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end(); ++itr)
         if ((itr->second.GuildId == guildId) && (++totalEvents >= CALENDAR_MAX_GUILD_EVENTS))
+        {
             return false;
+        }
     return true;
 }
 
@@ -721,7 +739,9 @@ bool CalendarMgr::CanAddInviteTo(ObjectGuid const& guid)
         while (ci_itr != cInvMap->end())
         {
             if ((ci_itr->second->InviteeGuid == guid) && (++totalInvites >= CALENDAR_MAX_INVITES))
+            {
                 return false;
+            }
             ++ci_itr;
         }
     }

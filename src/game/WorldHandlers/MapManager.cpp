@@ -101,7 +101,9 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
 
     const MapEntry* entry = sMapStore.LookupEntry(id);
     if (!entry)
+    {
         return NULL;
+    }
 
     if (entry->Instanceable())
     {
@@ -143,7 +145,9 @@ Map* MapManager::FindMap(uint32 mapid, uint32 instanceId) const
 
     MapMapType::const_iterator iter = i_maps.find(MapID(mapid, instanceId));
     if (iter == i_maps.end())
+    {
         return NULL;
+    }
 
     // this is a small workaround for transports
     if (instanceId == 0 && iter->second->Instanceable())
@@ -177,7 +181,9 @@ void MapManager::Update(uint32 diff)
 {
     i_timer.Update(diff);
     if (!i_timer.Passed())
+    {
         return;
+    }
 
     for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
         iter->second->Update((uint32)i_timer.GetCurrent());

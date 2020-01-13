@@ -52,7 +52,9 @@ DelayExecutor::~DelayExecutor()
 int DelayExecutor::deactivate()
 {
     if (!activated())
+    {
         return -1;
+    }
 
     activated(false);
     queue_.queue()->deactivate();
@@ -86,10 +88,14 @@ int DelayExecutor::svc()
 int DelayExecutor::activate(int num_threads, ACE_Method_Request* pre_svc_hook, ACE_Method_Request* post_svc_hook)
 {
     if (activated())
+    {
         return -1;
+    }
 
     if (num_threads < 1)
+    {
         return -1;
+    }
 
     if (pre_svc_hook_)
         delete pre_svc_hook_;
@@ -103,7 +109,9 @@ int DelayExecutor::activate(int num_threads, ACE_Method_Request* pre_svc_hook, A
     queue_.queue()->activate();
 
     if (ACE_Task_Base::activate(THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED, num_threads) == -1)
+    {
         return -1;
+    }
 
     activated(true);
 
@@ -113,7 +121,9 @@ int DelayExecutor::activate(int num_threads, ACE_Method_Request* pre_svc_hook, A
 int DelayExecutor::execute(ACE_Method_Request* new_req)
 {
     if (new_req == NULL)
+    {
         return -1;
+    }
 
     if (queue_.enqueue(new_req, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
     {

@@ -59,7 +59,9 @@ struct MassMailerQueryHandler
     void HandleQueryCallback(QueryResult* result, MailDraft* mailProto, MailSender sender)
     {
         if (!result)
+        {
             return;
+        }
 
         MassMailMgr::ReceiversList& recievers = sMassMailMgr.AddMassMailTask(mailProto, sender);
 
@@ -81,7 +83,9 @@ void MassMailMgr::AddMassMailTask(MailDraft* mailProto, const MailSender& sender
 void MassMailMgr::Update(bool sendall /*= false*/)
 {
     if (m_massMails.empty())
+    {
         return;
+    }
 
     uint32 maxcount = sWorld.getConfig(CONFIG_UINT32_MASS_MAILER_SEND_PER_TICK);
 

@@ -212,7 +212,9 @@ class TypeUnorderedMapContainer
                 return NULL;
             }
             else
-                { return i->second; }
+            {
+                return i->second;
+            }
         }
 
         template<class SPECIFIC_TYPE>

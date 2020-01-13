@@ -49,7 +49,9 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
     Team team = owner->GetTypeId() == TYPEID_PLAYER ? ((Player*)owner)->GetTeam() : TEAM_NONE;
 
     if (!CreateFromProto(guidlow, cinfo, team))
+    {
         return false;
+    }
 
     // special model selection case for totems
     if (owner->GetTypeId() == TYPEID_PLAYER)
@@ -65,7 +67,9 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
         cPos.m_pos.z = owner->GetPositionZ();
 
     if (!cPos.Relocate(this))
+    {
         return false;
+    }
 
     // Notify the map's instance data.
     // Only works if you create the object in it, not if it is moves to that map.
@@ -111,7 +115,9 @@ void Totem::Summon(Unit* owner)
 
     // there are some totems, which exist just for their visual appeareance
     if (!GetSpell())
+    {
         return;
+    }
 
     switch (m_type)
     {
@@ -174,7 +180,9 @@ void Totem::SetOwner(Unit* owner)
 Unit* Totem::GetOwner()
 {
     if (ObjectGuid ownerGuid = GetOwnerGuid())
+    {
         return ObjectAccessor::GetUnit(*this, ownerGuid);
+    }
 
     return NULL;
 }
@@ -199,7 +207,9 @@ bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex 
     // Mana Spring, Healing stream, Mana tide
     // Flags : 0x00000002000 | 0x00000004000 | 0x00004000000 -> 0x00004006000
     if (spellInfo->GetSpellFamilyName() == SPELLFAMILY_SHAMAN && spellInfo->IsFitToFamilyMask(UI64LIT(0x00004006000)))
+    {
         return false;
+    }
     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(index);
     if (spellEffect)
     {

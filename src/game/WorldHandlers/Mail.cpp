@@ -127,7 +127,9 @@ MailDraft& MailDraft::AddItem(Item* item)
 bool MailDraft::prepareItems(Player* receiver)
 {
     if (!m_mailTemplateId || !m_mailTemplateItemsNeed)
+    {
         return false;
+    }
 
     m_mailTemplateItemsNeed = false;
 
@@ -357,7 +359,9 @@ void MailDraft::SendMailTo(MailReceiver const& receiver, MailSender const& sende
 void Mail::prepareTemplateItems(Player* receiver)
 {
     if (!mailTemplateId || !items.empty())
+    {
         return;
+    }
 
     has_items = true;
 

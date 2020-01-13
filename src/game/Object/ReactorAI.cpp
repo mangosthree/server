@@ -35,7 +35,9 @@ int
 ReactorAI::Permissible(const Creature* creature)
 {
     if (creature->IsCivilian() || creature->IsNeutralToAll())
+    {
         return PERMIT_BASE_REACTIVE;
+    }
 
     return PERMIT_BASE_NO;
 }
@@ -49,7 +51,9 @@ void
 ReactorAI::AttackStart(Unit* p)
 {
     if (!p || !m_creature->CanAttackByItself())
+    {
         return;
+    }
 
     if (m_creature->Attack(p, true))
     {
@@ -75,7 +79,9 @@ ReactorAI::UpdateAI(const uint32 /*time_diff*/)
 {
     // update i_victimGuid if i_creature.getVictim() !=0 and changed
     if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    {
         return;
+    }
 
     i_victimGuid = m_creature->getVictim()->GetObjectGuid();
 

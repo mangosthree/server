@@ -56,7 +56,9 @@ void GuildMgr::RemoveGuild(uint32 guildId)
 void GuildMgr::RemoveGuild(ObjectGuid guildGuid)
 {
     if (!guildGuid.IsGuild())
+    {
         return;
+    }
 
     RemoveGuild(guildGuid.GetCounter());
 }
@@ -65,7 +67,9 @@ Guild* GuildMgr::GetGuildById(uint32 guildId) const
 {
     GuildMap::const_iterator itr = m_GuildMap.find(guildId);
     if (itr != m_GuildMap.end())
+    {
         return itr->second;
+    }
 
     return NULL;
 }
@@ -73,7 +77,9 @@ Guild* GuildMgr::GetGuildById(uint32 guildId) const
 Guild* GuildMgr::GetGuildByGuid(ObjectGuid guildGuid) const
 {
     if (!guildGuid.IsGuild())
+    {
         return NULL;
+    }
 
     return GetGuildById(guildGuid.GetCounter());
 }
@@ -82,7 +88,9 @@ Guild* GuildMgr::GetGuildByName(std::string const& name) const
 {
     for (GuildMap::const_iterator itr = m_GuildMap.begin(); itr != m_GuildMap.end(); ++itr)
         if (itr->second->GetName() == name)
+        {
             return itr->second;
+        }
 
     return NULL;
 }
@@ -91,7 +99,9 @@ Guild* GuildMgr::GetGuildByLeader(ObjectGuid const& guid) const
 {
     for (GuildMap::const_iterator itr = m_GuildMap.begin(); itr != m_GuildMap.end(); ++itr)
         if (itr->second->GetLeaderGuid() == guid)
+        {
             return itr->second;
+        }
 
     return NULL;
 }
@@ -100,7 +110,9 @@ std::string GuildMgr::GetGuildNameById(uint32 guildId) const
 {
     GuildMap::const_iterator itr = m_GuildMap.find(guildId);
     if (itr != m_GuildMap.end())
+    {
         return itr->second->GetName();
+    }
 
     return "";
 }
@@ -108,7 +120,9 @@ std::string GuildMgr::GetGuildNameById(uint32 guildId) const
 std::string GuildMgr::GetGuildNameByGuid(ObjectGuid guildGuid) const
 {
     if (!guildGuid.IsGuild())
+    {
         return "";
+    }
 
     return GetGuildNameById(guildGuid.GetCounter());
 }

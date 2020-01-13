@@ -43,7 +43,9 @@
 void WorldSession::SendNameQueryOpcode(Player* p)
 {
     if (!p)
+    {
         return;
+    }
 
     // guess size
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8 + 1 + 1 + 1 + 1 + 1 + 10));
@@ -87,7 +89,9 @@ void WorldSession::SendNameQueryOpcodeFromDB(ObjectGuid guid)
 void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32 accountId)
 {
     if (!result)
+    {
         return;
+    }
 
     WorldSession* session = sWorld.FindSession(accountId);
     if (!session)

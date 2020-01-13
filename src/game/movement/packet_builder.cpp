@@ -135,16 +135,22 @@ namespace Movement
                 WriteCatmullRomCyclicPath(spline, data);
             }
             else
-                { WriteCatmullRomPath(spline, data); }
+            {
+                WriteCatmullRomPath(spline, data);
+            }
         }
         else
-            { WriteLinearPath(spline, data); }
+        {
+            WriteLinearPath(spline, data);
+        }
     }
 
     void PacketBuilder::WriteCreateBits(const MoveSpline& move_spline, ByteBuffer& data)
     {
         if (!data.WriteBit(!move_spline.Finalized()))
+        {
             return;
+        }
 
         MoveSplineFlag splineFlags = move_spline.splineflags;
         uint32 nodes = move_spline.getPath().size();

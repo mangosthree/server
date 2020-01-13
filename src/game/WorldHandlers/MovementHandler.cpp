@@ -50,7 +50,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 {
     // ignore unexpected far teleports
     if (!GetPlayer()->IsBeingTeleportedFar())
+    {
         return;
+    }
 
     // get start teleport coordinates (will used later in fail case)
     WorldLocation old_loc;
@@ -277,10 +279,14 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
     Player* plMover = mover->GetTypeId() == TYPEID_PLAYER ? (Player*)mover : NULL;
 
     if (!plMover || !plMover->IsBeingTeleportedNear())
+    {
         return;
+    }
 
     if (guid != plMover->GetObjectGuid())
+    {
         return;
+    }
 
     plMover->SetSemaphoreTeleportNear(false);
 
@@ -334,7 +340,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     /*----------------*/
 
     if (!VerifyMovementInfo(movementInfo, movementInfo.GetGuid()))
+    {
         return;
+    }
 
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
     if (opcode == CMSG_MOVE_FALL_LAND && plMover && !plMover->IsTaxiFlying())
@@ -407,7 +415,9 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data)
     {
         --_player->m_forced_speed_changes[force_move_type];
         if (_player->m_forced_speed_changes[force_move_type] > 0)
+        {
             return;
+        }
     }
 
     if (!_player->GetTransport() && fabs(_player->GetSpeed(move_type) - newspeed) > 0.01f)
@@ -498,7 +508,9 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
     recv_data >> movementInfo;
 
     if (!VerifyMovementInfo(movementInfo, movementInfo.GetGuid()))
+    {
         return;
+    }
 
     HandleMoverRelocation(movementInfo);
 
@@ -559,7 +571,9 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
 void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)
 {
     if (!_player->IsAlive() || _player->IsInCombat())
+    {
         return;
+    }
 
     ObjectGuid summonerGuid;
     bool agree;
@@ -573,17 +587,23 @@ bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGu
 {
     // ignore wrong guid (player attempt cheating own session for not own guid possible...)
     if (guid != _player->GetMover()->GetObjectGuid())
+    {
         return false;
+    }
 
     if (!MaNGOS::IsValidMapCoord(movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z, movementInfo.GetPos()->o))
+    {
         return false;
+    }
 
     if (movementInfo.GetTransportGuid())
     {
         // transports size limited
         // (also received at zeppelin/lift leave by some reason with t_* as absolute in continent coordinates, can be safely skipped)
         if (movementInfo.GetTransportPos()->x > 50 || movementInfo.GetTransportPos()->y > 50 || movementInfo.GetTransportPos()->z > 100)
+        {
             return false;
+        }
 
         if (!MaNGOS::IsValidMapCoord(movementInfo.GetPos()->x + movementInfo.GetTransportPos()->x, movementInfo.GetPos()->y + movementInfo.GetTransportPos()->y,
                                      movementInfo.GetPos()->z + movementInfo.GetTransportPos()->z, movementInfo.GetPos()->o + movementInfo.GetTransportPos()->o))

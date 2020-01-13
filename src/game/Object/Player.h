@@ -246,7 +246,9 @@ struct Glyph
     void SetId(uint32 newId)
     {
         if (newId == id)
+        {
             return;
+        }
 
         if (id == 0 && uState == GLYPH_UNCHANGED)           // not exist yet in db and already saved
         {
@@ -925,7 +927,9 @@ class PlayerTaxi
                 return true;
             }
             else
-                { return false; }
+            {
+                return false;
+            }
         }
         void AppendTaximaskTo(ByteBuffer& data, bool all);
 
@@ -1197,7 +1201,9 @@ class Player : public Unit
                 m_ExtraFlags |= PLAYER_EXTRA_AUCTION_ENEMY;
             }
             else if (state > 0)
-                { m_ExtraFlags |= PLAYER_EXTRA_AUCTION_NEUTRAL; }
+            {
+                m_ExtraFlags |= PLAYER_EXTRA_AUCTION_NEUTRAL;
+            }
         }
 
 
@@ -2307,7 +2313,9 @@ class Player : public Unit
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].invitedToInstance == instanceId)
+                {
                     return m_bgBattleGroundQueueID[i].bgQueueTypeId;
+                }
             return BATTLEGROUND_QUEUE_NONE;
         }
         uint32 GetBattleGroundQueueIndex(BattleGroundQueueTypeId bgQueueTypeId) const

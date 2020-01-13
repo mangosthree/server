@@ -97,7 +97,9 @@ void GossipMenu::AddMenuItem(uint8 Icon, int32 itemText, uint32 dtSender, uint32
 uint32 GossipMenu::MenuItemSender(unsigned int ItemId)
 {
     if (ItemId >= m_gItems.size())
+    {
         return 0;
+    }
 
     return m_gItems[ ItemId ].m_gSender;
 }
@@ -105,7 +107,9 @@ uint32 GossipMenu::MenuItemSender(unsigned int ItemId)
 uint32 GossipMenu::MenuItemAction(unsigned int ItemId)
 {
     if (ItemId >= m_gItems.size())
+    {
         return 0;
+    }
 
     return m_gItems[ ItemId ].m_gOptionId;
 }
@@ -113,7 +117,9 @@ uint32 GossipMenu::MenuItemAction(unsigned int ItemId)
 bool GossipMenu::MenuItemCoded(unsigned int ItemId)
 {
     if (ItemId >= m_gItems.size())
+    {
         return 0;
+    }
 
     return m_gItems[ ItemId ].m_gCoded;
 }
@@ -356,7 +362,9 @@ void QuestMenu::AddMenuItem(uint32 QuestId, uint8 Icon)
 {
     Quest const* qinfo = sObjectMgr.GetQuestTemplate(QuestId);
     if (!qinfo)
+    {
         return;
+    }
 
     MANGOS_ASSERT(m_qItems.size() <= GOSSIP_MAX_MENU_ITEMS);
 
@@ -372,7 +380,9 @@ bool QuestMenu::HasItem(uint32 questid)
 {
     for (QuestMenuItemList::const_iterator i = m_qItems.begin(); i != m_qItems.end(); ++i)
         if (i->m_qId == questid)
+        {
             return true;
+        }
     return false;
 }
 

@@ -73,19 +73,27 @@ namespace MMAP
     bool MMapFactory::IsPathfindingEnabled(uint32 mapId, const Unit* unit = NULL)
     {
         if (!sWorld.getConfig(CONFIG_BOOL_MMAP_ENABLED))
+        {
             return false;
+        }
 
         if (unit)
         {
             // always use mmaps for players
             if (unit->GetTypeId() == TYPEID_PLAYER)
+            {
                 return true;
+            }
 
             if (IsPathfindingForceDisabled(unit))
+            {
                 return false;
+            }
 
             if (IsPathfindingForceEnabled(unit))
+            {
                 return true;
+            }
 
             // always use mmaps for pets of players (can still be disabled by extra-flag for pet creature)
             if (unit->GetTypeId() == TYPEID_UNIT && ((Creature*)unit)->IsPet() && unit->GetOwner() &&
@@ -112,7 +120,9 @@ namespace MMAP
             if (const CreatureInfo* pInfo = pCreature->GetCreatureInfo())
             {
                 if (pInfo->ExtraFlags & CREATURE_EXTRA_FLAG_MMAP_FORCE_ENABLE)
+                {
                     return true;
+                }
             }
         }
 
@@ -126,7 +136,9 @@ namespace MMAP
             if (const CreatureInfo* pInfo = pCreature->GetCreatureInfo())
             {
                 if (pInfo->ExtraFlags & CREATURE_EXTRA_FLAG_MMAP_FORCE_DISABLE)
+                {
                     return true;
+                }
             }
         }
 
@@ -384,7 +396,9 @@ namespace MMAP
     dtNavMesh const* MMapManager::GetNavMesh(uint32 mapId)
     {
         if (loadedMMaps.find(mapId) == loadedMMaps.end())
+        {
             return NULL;
+        }
 
         return loadedMMaps[mapId]->navMesh;
     }
@@ -392,7 +406,9 @@ namespace MMAP
     dtNavMeshQuery const* MMapManager::GetNavMeshQuery(uint32 mapId, uint32 instanceId)
     {
         if (loadedMMaps.find(mapId) == loadedMMaps.end())
+        {
             return NULL;
+        }
 
         MMapData* mmap = loadedMMaps[mapId];
         if (mmap->navMeshQueries.find(instanceId) == mmap->navMeshQueries.end())

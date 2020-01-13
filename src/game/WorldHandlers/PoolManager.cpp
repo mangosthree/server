@@ -160,7 +160,9 @@ bool PoolGroup<T>::CheckPool() const
         for (uint32 i = 0; i < ExplicitlyChanced.size(); ++i)
             chance += ExplicitlyChanced[i].chance;
         if (chance != 100 && chance != 0)
+        {
             return false;
+        }
     }
     return true;
 }
@@ -212,7 +214,9 @@ PoolObject* PoolGroup<T>::RollOne(SpawnedPoolData& spawns, uint32 triggerFrom)
             // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
             // so this need explicit check for this case
             if (roll < 0 && !ExplicitlyChanced[i].exclude && (ExplicitlyChanced[i].guid == triggerFrom || !spawns.IsSpawnedObject<T>(ExplicitlyChanced[i].guid)))
+            {
                 return &ExplicitlyChanced[i];
+            }
         }
     }
 
@@ -222,7 +226,9 @@ PoolObject* PoolGroup<T>::RollOne(SpawnedPoolData& spawns, uint32 triggerFrom)
         // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
         // so this need explicit check for this case
         if (!EqualChanced[index].exclude && (EqualChanced[index].guid == triggerFrom || !spawns.IsSpawnedObject<T>(EqualChanced[index].guid)))
+        {
             return &EqualChanced[index];
+        }
     }
 
     return NULL;
@@ -532,7 +538,9 @@ struct PoolMapChecker
     {
         MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
         if (!mapEntry)
+        {
             return false;
+        }
 
         MapEntry const* poolMapEntry = m_poolTemplates[pool_id].mapEntry;
 
@@ -545,7 +553,9 @@ struct PoolMapChecker
 
         // if at same map, then all ok
         if (poolMapEntry == mapEntry)
+        {
             return true;
+        }
 
         // pool spawns must be at single instanceable map
         if (mapEntry->Instanceable())
@@ -1160,7 +1170,9 @@ void PoolManager::SpawnPoolInMaps(uint16 pool_id, bool instantly)
 
     // pool no have spawns (base at loading algo
     if (!poolTemplate.mapEntry)
+    {
         return;
+    }
 
     SpawnPoolInMapsWorker worker(*this, pool_id, instantly);
     sMapPersistentStateMgr.DoForAllStatesWithMapId(poolTemplate.mapEntry->MapID, worker);
@@ -1187,7 +1199,9 @@ void PoolManager::DespawnPoolInMaps(uint16 pool_id)
 
     // pool no have spawns (base at loading algo
     if (!poolTemplate.mapEntry)
+    {
         return;
+    }
 
     DespawnPoolInMapsWorker worker(*this, pool_id);
     sMapPersistentStateMgr.DoForAllStatesWithMapId(poolTemplate.mapEntry->MapID, worker);
@@ -1223,7 +1237,9 @@ void PoolManager::UpdatePoolInMaps(uint16 pool_id, uint32 db_guid_or_pool_id)
 
     // pool no have spawns (base at loading algo
     if (!poolTemplate.mapEntry)
+    {
         return;
+    }
 
     UpdatePoolInMapsWorker<T> worker(*this, pool_id, db_guid_or_pool_id);
     sMapPersistentStateMgr.DoForAllStatesWithMapId(poolTemplate.mapEntry->MapID, worker);

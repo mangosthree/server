@@ -152,7 +152,9 @@ namespace MMAP
                 }
             }
             else
-                { break; }
+            {
+                break;
+            }
         }
 
         if (dirp)
@@ -160,7 +162,9 @@ namespace MMAP
             closedir(dirp);
         }
         else
-            { return LISTFILE_DIRECTORY_NOT_FOUND; }
+        {
+            return LISTFILE_DIRECTORY_NOT_FOUND;
+        }
 #endif
 
         return LISTFILE_OK;

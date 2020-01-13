@@ -49,7 +49,9 @@ bool GameEventMgr::CheckOneGameEvent(uint16 entry, time_t currenttime) const
             ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * MINUTE)) < (mGameEvent[entry].length * MINUTE))
         return true;
     else
+    {
         return false;
+    }
 }
 
 uint32 GameEventMgr::NextCheck(uint16 entry) const
@@ -58,11 +60,15 @@ uint32 GameEventMgr::NextCheck(uint16 entry) const
 
     // outdated event: we return max
     if (currenttime > mGameEvent[entry].end)
+    {
         return max_ge_check_delay;
+    }
 
     // never started event, we return delay before start
     if (mGameEvent[entry].start > currenttime)
+    {
         return uint32(mGameEvent[entry].start - currenttime);
+    }
 
     uint32 delay;
     // in event, we return the end of it
@@ -73,9 +79,13 @@ uint32 GameEventMgr::NextCheck(uint16 entry) const
         delay = (mGameEvent[entry].occurence * MINUTE) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * MINUTE));
     // In case the end is before next check
     if (mGameEvent[entry].end  < time_t(currenttime + delay))
+    {
         return uint32(mGameEvent[entry].end - currenttime);
+    }
     else
+    {
         return delay;
+    }
 }
 
 void GameEventMgr::StartEvent(uint16 event_id, bool overwrite /*=false*/, bool resume /*=false*/)
@@ -884,11 +894,15 @@ GameEventCreatureData const* GameEventMgr::GetCreatureUpdateDataForActiveEvent(u
     }
 
     if (!event_id)
+    {
         return NULL;
+    }
 
     for (GameEventCreatureDataList::const_iterator itr = mGameEventCreatureData[event_id].begin(); itr != mGameEventCreatureData[event_id].end(); ++itr)
         if (itr->first == lowguid)
+        {
             return &itr->second;
+        }
 
     return NULL;
 }
@@ -1020,7 +1034,9 @@ int16 GameEventMgr::GetGameEventId<Pool>(uint32 guid_or_poolid)
     for (uint16 i = 0; i < mGameEventSpawnPoolIds.size(); ++i)
         for (IdList::const_iterator itr = mGameEventSpawnPoolIds[i].begin(); itr != mGameEventSpawnPoolIds[i].end(); ++itr)
             if (*itr == guid_or_poolid)
+            {
                 return i;
+            }
     return 0;
 }
 
@@ -1032,11 +1048,15 @@ GameEventMgr::GameEventMgr()
 bool GameEventMgr::IsActiveHoliday(HolidayIds id)
 {
     if (id == HOLIDAY_NONE)
+    {
         return false;
+    }
 
     for (GameEventMgr::ActiveEvents::const_iterator itr = m_ActiveEvents.begin(); itr != m_ActiveEvents.end(); ++itr)
         if (mGameEvent[*itr].holiday_id == id)
+        {
             return true;
+        }
 
     return false;
 }

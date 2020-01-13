@@ -200,7 +200,9 @@ void AppendDBCFileListTo(HANDLE mpqHandle, std::set<std::string>& filelist)
 
     HANDLE searchHandle = SFileFindFirstFile(mpqHandle, "*.dbc", &findFileData, NULL);
     if (!searchHandle)
+    {
         return;
+    }
 
     filelist.insert(findFileData.cFileName);
 
@@ -216,7 +218,9 @@ void AppendDB2FileListTo(HANDLE mpqHandle, std::set<std::string>& filelist)
 
     HANDLE searchHandle = SFileFindFirstFile(mpqHandle, "*.db2", &findFileData, NULL);
     if (!searchHandle)
+    {
         return;
+    }
 
     filelist.insert(findFileData.cFileName);
 
@@ -525,7 +529,9 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
     ADT_file adt;
 
     if (!adt.loadFile(filename, false))
+    {
         return false;
+    }
 
     memset(liquid_show, 0, sizeof(liquid_show));
     memset(liquid_flags, 0, sizeof(liquid_flags));
@@ -675,8 +681,14 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
         for (int x = 0; x < ADT_GRID_SIZE; x++)
         {
             float h = V8[y][x];
-            if (maxHeight < h) { maxHeight = h; }
-            if (minHeight > h) { minHeight = h; }
+            if (maxHeight < h)
+            {
+                maxHeight = h;
+            }
+            if (minHeight > h)
+            {
+                minHeight = h;
+            }
         }
     }
     for (int y = 0; y <= ADT_GRID_SIZE; y++)
@@ -684,8 +696,14 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
         for (int x = 0; x <= ADT_GRID_SIZE; x++)
         {
             float h = V9[y][x];
-            if (maxHeight < h) { maxHeight = h; }
-            if (minHeight > h) { minHeight = h; }
+            if (maxHeight < h)
+            {
+                maxHeight = h;
+            }
+            if (minHeight > h)
+            {
+                minHeight = h;
+            }
         }
     }
 
@@ -776,7 +794,9 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
             map.heightMapSize += sizeof(uint16_V9) + sizeof(uint16_V8);
         }
         else
-            { map.heightMapSize += sizeof(V9) + sizeof(V8); }
+        {
+            map.heightMapSize += sizeof(V9) + sizeof(V8);
+        }
     }
 
     // Get from MCLQ chunk (old)
@@ -919,7 +939,9 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
                             liquid_height[cy][cx] = height[pos];
                         }
                         else
-                            { liquid_height[cy][cx] = h->heightLevel1; }
+                        {
+                            liquid_height[cy][cx] = h->heightLevel1;
+                        }
                         pos++;
                     }
                 }
@@ -965,16 +987,36 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
             {
                 if (liquid_show[y][x])
                 {
-                    if (minX > x) { minX = x; }
-                    if (maxX < x) { maxX = x; }
-                    if (minY > y) { minY = y; }
-                    if (maxY < y) { maxY = y; }
+                    if (minX > x)
+                    {
+                        minX = x;
+                    }
+                    if (maxX < x)
+                    {
+                        maxX = x;
+                    }
+                    if (minY > y)
+                    {
+                        minY = y;
+                    }
+                    if (maxY < y)
+                    {
+                        maxY = y;
+                    }
                     float h = liquid_height[y][x];
-                    if (maxHeight < h) { maxHeight = h; }
-                    if (minHeight > h) { minHeight = h; }
+                    if (maxHeight < h)
+                    {
+                        maxHeight = h;
+                    }
+                    if (minHeight > h)
+                    {
+                        minHeight = h;
+                    }
                 }
                 else
-                    { liquid_height[y][x] = CONF_use_minHeight; }
+                {
+                    liquid_height[y][x] = CONF_use_minHeight;
+                }
             }
         }
         map.liquidMapOffset = map.heightMapOffset + map.heightMapSize;
@@ -1009,7 +1051,9 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
             liquidHeader.liquidType = type;
         }
         else
-            { map.liquidMapSize += sizeof(liquid_entry) + sizeof(liquid_flags); }
+        {
+            map.liquidMapSize += sizeof(liquid_entry) + sizeof(liquid_flags);
+        }
 
         if (!(liquidHeader.flags & MAP_LIQUID_NO_HEIGHT))
         {
@@ -1025,7 +1069,9 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
         map.holesOffset = map.liquidMapOffset + map.liquidMapSize;
     }
     else
-        { map.holesOffset = map.heightMapOffset + map.heightMapSize; }
+    {
+        map.holesOffset = map.heightMapOffset + map.heightMapSize;
+    }
 
     map.holesSize = sizeof(holes);
     memset(holes, 0, map.holesSize);
@@ -1283,7 +1329,7 @@ void LoadLocaleMPQFiles(int const locale)
     AppendPatchMPQFilesToList(Locales[locale], Locales[locale], NULL, updates);
     // now update to newer view, root
     AppendPatchMPQFilesToList(NULL, NULL, Locales[locale], updates);
-    
+
     // ./Data wow-update-base files
     for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
     {
@@ -1320,7 +1366,7 @@ void LoadLocaleMPQFiles(int const locale)
         //if (!OpenArchive(filename))
         if (!SFileOpenPatchArchive(localeMpqHandle, filename, "", 0))
             printf("Error open patch archive: %s\n\n", filename);
-    }    
+    }
 
     // ./Data/Cache/<locale> patch files
     for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
@@ -1384,11 +1430,11 @@ void LoadBaseMPQFiles()
             printf("Error open patch archive: %s\n\n", filename);
             return;
         }
-    }    
-    
+    }
+
     // ./Data/Cache patch-base files
     for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
-    {        
+    {
         sprintf(filename, "%s/Data/Cache/patch-base-%u.MPQ", input_path, Builds[i]);
 
         printf("\nPatching : %s\n", filename);
@@ -1396,7 +1442,7 @@ void LoadBaseMPQFiles()
         //if (!OpenArchive(filename))
         if (!SFileOpenPatchArchive(worldMpqHandle, filename, "", 0))
             printf("Error open patch archive: %s\n\n", filename);
-    } 
+    }
 }
 
 int main(int argc, char* arg[])
@@ -1443,7 +1489,7 @@ int main(int argc, char* arg[])
             CloseArchives();
         }
     }
-    
+
     if (FirstLocale < 0)
     {
         printf("No locales detected\n");

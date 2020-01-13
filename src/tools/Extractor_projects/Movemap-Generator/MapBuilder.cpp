@@ -311,9 +311,13 @@ namespace MMAP
             rcVmax(bmax, lmax);
         }
         else if (meshData.solidVerts.size())
-            { rcCalcBounds(meshData.solidVerts.getCArray(), meshData.solidVerts.size() / 3, bmin, bmax); }
+        {
+            rcCalcBounds(meshData.solidVerts.getCArray(), meshData.solidVerts.size() / 3, bmin, bmax);
+        }
         else
-            { rcCalcBounds(meshData.liquidVerts.getCArray(), meshData.liquidVerts.size() / 3, lmin, lmax); }
+        {
+            rcCalcBounds(meshData.liquidVerts.getCArray(), meshData.liquidVerts.size() / 3, lmin, lmax);
+        }
 
         // convert coord bounds to grid bounds
         maxX = 32 - bmin[0] / GRID_SIZE;
@@ -351,14 +355,18 @@ namespace MMAP
                 tileXMax = tileX;
             }
             else if (tileX < tileXMin)
-                { tileXMin = tileX; }
+            {
+                tileXMin = tileX;
+            }
 
             if (tileY > tileYMax)
             {
                 tileYMax = tileY;
             }
             else if (tileY < tileYMin)
-                { tileYMin = tileY; }
+            {
+                tileYMin = tileY;
+            }
         }
 
         // use Max because '32 - tileX' is negative for values over 32

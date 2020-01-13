@@ -76,7 +76,9 @@ uint8 GetSpellStartDBScriptPriority(SpellEntry const* spellinfo, SpellEffectInde
 #if defined (CATA)
     SpellEffectEntry const* spellEffect = spellinfo->GetSpellEffect(effIdx);
     if (!spellEffect)
+    {
         return 0;
+    }
 #endif
 #if defined (CATA)
     if (spellEffect->Effect == SPELL_EFFECT_SCRIPT_EFFECT)
@@ -1357,7 +1359,9 @@ bool ScriptAction::HandleScriptStep()
                 pWorldObject = pSource;
             }
             else if (pTarget && pTarget->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT))
-                { pWorldObject = pTarget; }
+            {
+                pWorldObject = pTarget;
+            }
 
             // if we have a distance, we must have a worldobject
             if (m_script->questExplored.distance != 0 && !pWorldObject)
@@ -1373,7 +1377,9 @@ bool ScriptAction::HandleScriptStep()
                 failQuest = true;
             }
             else if (m_script->questExplored.distance != 0 && !pWorldObject->IsWithinDistInMap(pPlayer, float(m_script->questExplored.distance)))
-                { failQuest = true; }
+            {
+                failQuest = true;
+            }
 
             // quest id and flags checked at script loading
             if (!failQuest)
@@ -1381,7 +1387,9 @@ bool ScriptAction::HandleScriptStep()
                 pPlayer->AreaExploredOrEventHappens(m_script->questExplored.questId);
             }
             else
-                { pPlayer->FailQuest(m_script->questExplored.questId); }
+            {
+                pPlayer->FailQuest(m_script->questExplored.questId);
+            }
 
             break;
         }
@@ -1420,7 +1428,9 @@ bool ScriptAction::HandleScriptStep()
                 pPlayer->RewardPlayerAndGroupAtEvent(creatureEntry, pSearcher);
             }
             else
-                { pPlayer->KilledMonsterCredit(creatureEntry, pRewardSource ? pRewardSource->GetObjectGuid() : ObjectGuid()); }
+            {
+                pPlayer->KilledMonsterCredit(creatureEntry, pRewardSource ? pRewardSource->GetObjectGuid() : ObjectGuid());
+            }
 
             break;
         }
@@ -1626,9 +1636,13 @@ bool ScriptAction::HandleScriptStep()
                     pSource->PlayDistanceSound(m_script->playSound.soundId, pSoundTarget);
                 }
                 else if (m_script->playSound.flags & (4 | 8))
-                    { m_map->PlayDirectSoundToMap(m_script->playSound.soundId, (m_script->playSound.flags & 8) ? pSource->GetZoneId() : 0); }
+                {
+                    m_map->PlayDirectSoundToMap(m_script->playSound.soundId, (m_script->playSound.flags & 8) ? pSource->GetZoneId() : 0);
+                }
                 else
-                    { pSource->PlayDirectSound(m_script->playSound.soundId, pSoundTarget); }
+                {
+                    pSource->PlayDirectSound(m_script->playSound.soundId, pSoundTarget);
+                }
             }
             break;
         }
@@ -1732,7 +1746,9 @@ bool ScriptAction::HandleScriptStep()
                 ((Creature*)pSource)->SetFactionTemporary(m_script->faction.factionId, m_script->faction.flags);
             }
             else
-                { ((Creature*)pSource)->ClearTemporaryFaction(); }
+            {
+                ((Creature*)pSource)->ClearTemporaryFaction();
+            }
 
             break;
         }
@@ -1748,7 +1764,9 @@ bool ScriptAction::HandleScriptStep()
                 ((Creature*)pSource)->DeMorph();
             }
             else if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-                { ((Creature*)pSource)->SetDisplayId(m_script->morph.creatureOrModelEntry); }
+            {
+                ((Creature*)pSource)->SetDisplayId(m_script->morph.creatureOrModelEntry);
+            }
             else
             {
                 CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_script->morph.creatureOrModelEntry);
@@ -1771,7 +1789,9 @@ bool ScriptAction::HandleScriptStep()
                 ((Creature*)pSource)->Unmount();
             }
             else if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-                { ((Creature*)pSource)->Mount(m_script->mount.creatureOrModelEntry); }
+            {
+                ((Creature*)pSource)->Mount(m_script->mount.creatureOrModelEntry);
+            }
             else
             {
                 CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_script->mount.creatureOrModelEntry);
@@ -1839,14 +1859,18 @@ bool ScriptAction::HandleScriptStep()
                 pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
             }
             else if (m_script->goLockState.lockState & 0x02)
-                { pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED); }
+            {
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+            }
             // Set Non Interactable or Set Interactable
             if (m_script->goLockState.lockState & 0x04)
             {
                 pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             }
             else if (m_script->goLockState.lockState & 0x08)
-                { pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT); }
+            {
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            }
 
             break;
         }
@@ -1875,7 +1899,9 @@ bool ScriptAction::HandleScriptStep()
             }
             // Remove Flags
             else if (m_script->npcFlag.change_flag & 0x02)
-                { pSource->RemoveFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag); }
+            {
+                pSource->RemoveFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag);
+            }
             // Toggle Flags
             else
             {
@@ -1884,7 +1910,9 @@ bool ScriptAction::HandleScriptStep()
                     pSource->RemoveFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag);
                 }
                 else
-                    { pSource->SetFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag); }
+                {
+                    pSource->SetFlag(UNIT_NPC_FLAGS, m_script->npcFlag.flag);
+                }
             }
 
             break;
@@ -1929,7 +1957,9 @@ bool ScriptAction::HandleScriptStep()
                 }
             }
             else
-                { result = true; }
+            {
+                result = true;
+            }
 
             if (result)                                    // Terminate further steps of this script
             {
@@ -1958,7 +1988,9 @@ bool ScriptAction::HandleScriptStep()
                 ((Creature*)pSource)->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
             }
             else
-                { ((Creature*)pSource)->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED); }
+            {
+                ((Creature*)pSource)->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+            }
             break;
         }
         case SCRIPT_COMMAND_XP_USER:                        // 33
@@ -1995,7 +2027,9 @@ bool ScriptAction::HandleScriptStep()
                 terminateResult = !sObjectMgr.IsPlayerMeetToCondition(m_script->terminateCond.conditionId, player, m_map, second, CONDITION_FROM_DBSCRIPTS);
             }
             else
-                { terminateResult = sObjectMgr.IsPlayerMeetToCondition(m_script->terminateCond.conditionId, player, m_map, second, CONDITION_FROM_DBSCRIPTS); }
+            {
+                terminateResult = sObjectMgr.IsPlayerMeetToCondition(m_script->terminateCond.conditionId, player, m_map, second, CONDITION_FROM_DBSCRIPTS);
+            }
 
             if (terminateResult && m_script->terminateCond.failQuest && player)
             {
@@ -2023,7 +2057,9 @@ bool ScriptAction::HandleScriptStep()
         case SCRIPT_COMMAND_SEND_AI_EVENT_AROUND:           // 35
         {
             if (LogIfNotCreature(pSource))
+            {
                 return false;
+            }
             if (LogIfNotUnit(pTarget))
                 break;
 
@@ -2048,9 +2084,13 @@ bool ScriptAction::HandleScriptStep()
         case SCRIPT_COMMAND_MOVE_DYNAMIC:                   // 37
         {
             if (LogIfNotCreature(pSource))
+            {
                 return false;
+            }
             if (LogIfNotUnit(pTarget))
+            {
                 return false;
+            }
 
             float x, y, z;
             if (m_script->moveDynamic.maxDist == 0)         // Move to pTarget
@@ -2081,9 +2121,13 @@ bool ScriptAction::HandleScriptStep()
         case SCRIPT_COMMAND_SEND_MAIL:                      // 38
         {
             if (LogIfNotPlayer(pTarget))
+            {
                 return false;
+            }
             if (!m_script->sendMail.altSender && LogIfNotCreature(pSource))
+            {
                 return false;
+            }
 
             MailSender sender;
             if (m_script->sendMail.altSender)
@@ -2132,7 +2176,9 @@ bool ScriptAction::HandleScriptStep()
         case SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS:            // 42
         {
             if (LogIfNotCreature(pSource))
+            {
                 return false;
+            }
 
             Creature* pCSource = static_cast<Creature*>(pSource);
             // reset default
@@ -2176,7 +2222,9 @@ bool ScriptAction::HandleScriptStep()
         case SCRIPT_COMMAND_UPDATE_TEMPLATE:                // 44
         {
             if (LogIfNotCreature(pSource))
+            {
                 return false;
+            }
 
             Creature* pCSource = static_cast<Creature*>(pSource);
 
@@ -2425,7 +2473,9 @@ CreatureAI* ScriptMgr::GetCreatureAI(Creature* pCreature)
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (CreatureAI* luaAI = sEluna->GetAI(pCreature))
+    {
         return luaAI;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2449,7 +2499,9 @@ bool ScriptMgr::OnGossipHello(Player* pPlayer, Creature* pCreature)
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (sEluna->OnGossipHello(pPlayer, pCreature))
+    {
         return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2464,7 +2516,9 @@ bool ScriptMgr::OnGossipHello(Player* pPlayer, GameObject* pGameObject)
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (sEluna->OnGossipHello(pPlayer, pGameObject))
+    {
         return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2481,13 +2535,17 @@ bool ScriptMgr::OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 send
     {
         // Used by Eluna
         if (sEluna->OnGossipSelectCode(pPlayer, pCreature, sender, action, code))
+        {
             return true;
+        }
     }
     else
     {
         // Used by Eluna
         if (sEluna->OnGossipSelect(pPlayer, pCreature, sender, action))
+        {
             return true;
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2497,7 +2555,9 @@ bool ScriptMgr::OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 send
         return SD3::GossipSelectWithCode(pPlayer, pCreature, sender, action, code);
     }
     else
-        { return SD3::GossipSelect(pPlayer, pCreature, sender, action); }
+    {
+        return SD3::GossipSelect(pPlayer, pCreature, sender, action);
+    }
 #else
     return false;
 #endif
@@ -2510,12 +2570,16 @@ bool ScriptMgr::OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 
     if (code)
     {
         if (sEluna->OnGossipSelectCode(pPlayer, pGameObject, sender, action, code))
+        {
             return true;
+        }
     }
     else
     {
         if (sEluna->OnGossipSelect(pPlayer, pGameObject, sender, action))
+        {
             return true;
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2525,7 +2589,9 @@ bool ScriptMgr::OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 
         return SD3::GOGossipSelectWithCode(pPlayer, pGameObject, sender, action, code);
     }
     else
-        { return SD3::GOGossipSelect(pPlayer, pGameObject, sender, action); }
+    {
+        return SD3::GOGossipSelect(pPlayer, pGameObject, sender, action);
+    }
 #else
     return false;
 #endif
@@ -2536,7 +2602,9 @@ bool ScriptMgr::OnQuestAccept(Player* pPlayer, Creature* pCreature, Quest const*
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (sEluna->OnQuestAccept(pPlayer, pCreature, pQuest))
+    {
         return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2551,7 +2619,9 @@ bool ScriptMgr::OnQuestAccept(Player* pPlayer, GameObject* pGameObject, Quest co
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (sEluna->OnQuestAccept(pPlayer, pGameObject, pQuest))
+    {
         return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2566,7 +2636,9 @@ bool ScriptMgr::OnQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (sEluna->OnQuestAccept(pPlayer, pItem, pQuest))
+    {
         return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2581,7 +2653,9 @@ bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest cons
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (sEluna->OnQuestReward(pPlayer, pCreature, pQuest, reward))
+    {
         return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2596,7 +2670,9 @@ bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (sEluna->OnQuestReward(pPlayer, pGameObject, pQuest, reward))
+    {
         return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2611,7 +2687,9 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pCreature))
+    {
         return dialogId;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2626,7 +2704,9 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pGameObject))
+    {
         return dialogId;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2640,7 +2720,9 @@ bool ScriptMgr::OnGameObjectUse(Player* pPlayer, GameObject* pGameObject)
 {
 #ifdef ENABLE_ELUNA
     if (sEluna->OnGameObjectUse(pPlayer, pGameObject))
+    {
         return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2655,7 +2737,9 @@ bool ScriptMgr::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (!sEluna->OnUse(pPlayer, pItem, targets))
+    {
         return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2670,7 +2754,9 @@ bool ScriptMgr::OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (sEluna->OnAreaTrigger(pPlayer, atEntry))
+    {
         return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2704,7 +2790,9 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 #ifdef ENABLE_ELUNA
     if (pTarget->ToCreature())
         if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget->ToCreature()))
+        {
             return true;
+        }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2719,7 +2807,9 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
+    {
         return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2734,7 +2824,9 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
+    {
         return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2903,7 +2995,9 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
 #endif
                 { bg = ((BattleGroundMap*)map)->GetBG(); }
             else                                            // Use the go, because GOs don't move
-                { opvp = sOutdoorPvPMgr.GetScript(((GameObject*)source)->GetZoneId()); }
+            {
+                opvp = sOutdoorPvPMgr.GetScript(((GameObject*)source)->GetZoneId());
+            }
         }
 
         if (bg && bg->HandleEvent(id, static_cast<GameObject*>(source)))
@@ -2923,7 +3017,9 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
         execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE;
     }
     else if (target && target->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT))
-        { execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET; }
+    {
+        execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET;
+    }
 
     return map->ScriptsStart(DBS_ON_EVENT, id, source, target, execParam);
 }

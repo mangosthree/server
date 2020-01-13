@@ -287,7 +287,9 @@ WardenCheck* WardenCheckMgr::GetWardenDataById(uint16 build, uint16 Id)
         {
             MultiCheckContainer::const_iterator it = MCheckStore.find(ComposeMultiCheckKey(build, Id));
             if (it != MCheckStore.end())
+            {
                 return it->second;
+            }
         }
         return CheckStore[Id];
     }
@@ -301,12 +303,16 @@ WardenCheckResult* WardenCheckMgr::GetWardenResultById(uint16 build, uint16 Id)
     {
         MultiResultContainer::const_iterator it = MCheckResultStore.find(ComposeMultiCheckKey(build, Id));
         if (it != MCheckResultStore.end())
+        {
             return it->second;
+        }
     }
 
     CheckResultContainer::const_iterator itr = CheckResultStore.find(Id);
     if (itr != CheckResultStore.end())
+    {
         return itr->second;
+    }
 
     return NULL;
 }

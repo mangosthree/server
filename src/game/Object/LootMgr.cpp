@@ -274,11 +274,15 @@ bool LootStoreItem::Roll(bool rate) const
     }
 
     if (type == LOOTITEM_TYPE_CURRENCY)
+    {
         return roll_chance_f(chance * (rate ? sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_CURRENCY) : 1.0f));
+    }
     else
     {
         if (needs_quest)
+        {
             return roll_chance_f(chance * (rate ? sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_ITEM_QUEST) : 1.0f));
+        }
 
         ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemid);
 
@@ -436,7 +440,9 @@ bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTar
 {
     // DB conditions check
     if (conditionId && !sObjectMgr.IsPlayerMeetToCondition(conditionId, player, player->GetMap(), lootTarget, CONDITION_FROM_LOOT))
+    {
         return false;
+    }
 
     if (type == LOOT_ITEM_TYPE_ITEM)
     {
@@ -592,7 +598,9 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, 
     }
     // ... for personal loot
     else
-        { FillNotNormalLootFor(loot_owner); }
+    {
+        FillNotNormalLootFor(loot_owner);
+    }
 
     return true;
 }
@@ -753,7 +761,9 @@ void Loot::NotifyItemRemoved(uint8 lootIndex)
             pl->SendNotifyLootItemRemoved(lootIndex);
         }
         else
-            { m_playersLooting.erase(i); }
+        {
+            m_playersLooting.erase(i);
+        }
     }
 }
 
@@ -770,7 +780,9 @@ void Loot::NotifyMoneyRemoved()
             pl->SendNotifyLootMoneyRemoved();
         }
         else
-            { m_playersLooting.erase(i); }
+        {
+            m_playersLooting.erase(i);
+        }
     }
 }
 
@@ -808,7 +820,9 @@ void Loot::NotifyQuestItemRemoved(uint8 questIndex)
             }
         }
         else
-            { m_playersLooting.erase(i); }
+        {
+            m_playersLooting.erase(i);
+        }
     }
 }
 
@@ -821,9 +835,13 @@ void Loot::generateMoneyLoot(uint32 minAmount, uint32 maxAmount)
             gold = uint32(maxAmount * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
         }
         else if ((maxAmount - minAmount) < 32700)
-            { gold = uint32(urand(minAmount, maxAmount) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY)); }
+        {
+            gold = uint32(urand(minAmount, maxAmount) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
+        }
         else
-            { gold = uint32(urand(minAmount >> 8, maxAmount >> 8) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY)) << 8; }
+        {
+            gold = uint32(urand(minAmount >> 8, maxAmount >> 8) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY)) << 8;
+        }
     }
 }
 
@@ -1071,7 +1089,9 @@ void LootTemplate::LootGroup::AddEntry(LootStoreItem& item)
         ExplicitlyChanced.push_back(item);
     }
     else
-        { EqualChanced.push_back(item); }
+    {
+        EqualChanced.push_back(item);
+    }
 }
 
 // Rolls an item from the group, returns NULL if all miss their chances
@@ -1197,7 +1217,9 @@ void LootTemplate::LootGroup::CheckLootRefs(LootIdSet* ref_set) const
                 LootTemplates_Reference.ReportNotExistedId(-ieItr->mincountOrRef);
             }
             else if (ref_set)
-                { ref_set->erase(-ieItr->mincountOrRef); }
+            {
+                ref_set->erase(-ieItr->mincountOrRef);
+            }
         }
     }
 
@@ -1210,7 +1232,9 @@ void LootTemplate::LootGroup::CheckLootRefs(LootIdSet* ref_set) const
                 LootTemplates_Reference.ReportNotExistedId(-ieItr->mincountOrRef);
             }
             else if (ref_set)
-                { ref_set->erase(-ieItr->mincountOrRef); }
+            {
+                ref_set->erase(-ieItr->mincountOrRef);
+            }
         }
     }
 }
@@ -1229,7 +1253,9 @@ void LootTemplate::AddEntry(LootStoreItem& item)
         Groups[item.group - 1].AddEntry(item);              // Adds new entry to the group
     }
     else                                                    // Non-grouped entries and references are stored together
-        { Entries.push_back(item); }
+    {
+        Entries.push_back(item);
+    }
 }
 
 // Rolls for every item in the template and adds the rolled items the the loot
@@ -1369,7 +1395,9 @@ void LootTemplate::CheckLootRefs(LootIdSet* ref_set) const
                 LootTemplates_Reference.ReportNotExistedId(-ieItr->mincountOrRef);
             }
             else if (ref_set)
-                { ref_set->erase(-ieItr->mincountOrRef); }
+            {
+                ref_set->erase(-ieItr->mincountOrRef);
+            }
         }
     }
 
@@ -1394,7 +1422,9 @@ void LoadLootTemplates_Creature()
                     LootTemplates_Creature.ReportNotExistedId(lootid);
                 }
                 else
-                    { ids_setUsed.insert(lootid); }
+                {
+                    ids_setUsed.insert(lootid);
+                }
             }
         }
     }
@@ -1426,7 +1456,9 @@ void LoadLootTemplates_Disenchant()
                     LootTemplates_Disenchant.ReportNotExistedId(lootid);
                 }
                 else
-                    { ids_setUsed.insert(lootid); }
+                {
+                    ids_setUsed.insert(lootid);
+                }
             }
         }
     }
@@ -1473,7 +1505,9 @@ void LoadLootTemplates_Gameobject()
                 LootTemplates_Gameobject.ReportNotExistedId(lootid);
             }
             else
-                { ids_setUsed.insert(lootid); }
+            {
+                ids_setUsed.insert(lootid);
+            }
         }
     }
     for (LootIdSet::const_iterator itr = ids_setUsed.begin(); itr != ids_setUsed.end(); ++itr)
@@ -1504,7 +1538,9 @@ void LoadLootTemplates_Item()
             }
             // wdb have wrong data cases, so skip by default
             else if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK))
-                { LootTemplates_Item.ReportNotExistedId(proto->ItemId); }
+            {
+                LootTemplates_Item.ReportNotExistedId(proto->ItemId);
+            }
         }
     }
 
@@ -1554,7 +1590,9 @@ void LoadLootTemplates_Pickpocketing()
                     LootTemplates_Pickpocketing.ReportNotExistedId(lootid);
                 }
                 else
-                    { ids_setUsed.insert(lootid); }
+                {
+                    ids_setUsed.insert(lootid);
+                }
             }
         }
     }
@@ -1624,7 +1662,9 @@ void LoadLootTemplates_Skinning()
                     LootTemplates_Skinning.ReportNotExistedId(lootid);
                 }
                 else
-                    { ids_setUsed.insert(lootid); }
+                {
+                    ids_setUsed.insert(lootid);
+                }
             }
         }
     }

@@ -933,7 +933,9 @@ bool ChatHandler::HasLowerSecurityAccount(WorldSession* target, uint32 target_ac
 
     // ignore only for non-players for non strong checks (when allow apply command at least to same sec level)
     if (GetAccessLevel() > SEC_PLAYER && !strong && !sWorld.getConfig(CONFIG_BOOL_GM_LOWER_SECURITY))
+    {
         return false;
+    }
 
     if (target)
         target_sec = target->GetSecurity();
@@ -959,16 +961,24 @@ bool ChatHandler::hasStringAbbr(const char* name, const char* part)
     {
         // "" part from non-"" command
         if (!*part)
+        {
             return false;
+        }
 
         for (;;)
         {
             if (!*part)
+            {
                 return true;
+            }
             else if (!*name)
+            {
                 return false;
+            }
             else if (tolower(*name) != tolower(*part))
+            {
                 return false;
+            }
             ++name; ++part;
         }
     }
@@ -1275,7 +1285,9 @@ void ChatHandler::ExecuteCommand(const char* text)
         {
 #ifdef ENABLE_ELUNA
             if (!sEluna->OnCommand(m_session ? m_session->GetPlayer() : NULL, fullcmd.c_str()))
+            {
                 return;
+            }
 #endif /* ENABLE_ELUNA */
             SendSysMessage(LANG_NO_SUBCMD);
             ShowHelpForCommand(command->ChildCommands, text);
@@ -1286,7 +1298,9 @@ void ChatHandler::ExecuteCommand(const char* text)
         {
 #ifdef ENABLE_ELUNA
             if (!sEluna->OnCommand(m_session ? m_session->GetPlayer() : NULL, fullcmd.c_str()))
+            {
                 return;
+            }
 #endif /* ENABLE_ELUNA */
             SendSysMessage(LANG_NO_CMD);
             SetSentErrorMessage(true);
@@ -1356,19 +1370,27 @@ bool ChatHandler::ParseCommands(const char* text)
     if (m_session)
     {
         if (m_session->GetSecurity() == SEC_PLAYER && !sWorld.getConfig(CONFIG_BOOL_PLAYER_COMMANDS))
+        {
             return false;
+        }
 
         if (text[0] != '!' && text[0] != '.')
+        {
             return false;
+        }
 
         /// ignore single . and ! in line
         if (strlen(text) < 2)
+        {
             return false;
+        }
     }
 
     /// ignore messages staring from many dots.
     if ((text[0] == '.' && text[1] == '.') || (text[0] == '!' && text[1] == '!'))
+    {
         return false;
+    }
 
     /// skip first . or ! (in console allowed use command with . and ! and without its)
     if (text[0] == '!' || text[0] == '.')
@@ -1400,7 +1422,9 @@ bool ChatHandler::ShowHelpForSubCommands(ChatCommand* table, char const* cmd)
     }
 
     if (list.empty())
+    {
         return false;
+    }
 
     if (table == getCommandTable())
     {
@@ -1458,7 +1482,9 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand* table, const char* cmd)
 
     if (childCommands)
         if (ShowHelpForSubCommands(childCommands, showCommand ? showCommand->Name : ""))
+        {
             return true;
+        }
 
     if (command && command->Help.empty())
         SendSysMessage(LANG_NO_HELP_CMD);
@@ -1486,7 +1512,9 @@ bool ChatHandler::isValidChatMessage(const char* message)
     */
 
     if (strlen(message) > 255)
+    {
         return false;
+    }
 
     const char validSequence[6] = "cHhhr";
     const char* validSequenceIterator = validSequence;
@@ -1502,12 +1530,16 @@ bool ChatHandler::isValidChatMessage(const char* message)
             message = strchr(message, '|');
 
             if (!message)
+            {
                 return true;
+            }
 
             ++message;
             char commandChar = *message;
             if (validCommands.find(commandChar) == std::string::npos)
+            {
                 return false;
+            }
 
             ++message;
             // validate sequence
@@ -1521,7 +1553,9 @@ bool ChatHandler::isValidChatMessage(const char* message)
                         ++validSequenceIterator;
                 }
                 else if (commandChar != '|')
+                {
                     return false;
+                }
             }
         }
         return true;
@@ -1632,12 +1666,16 @@ bool ChatHandler::isValidChatMessage(const char* message)
                 // read chars up to colon  = link type
                 reader.getline(buffer, 256, ':');
                 if (reader.eof())                           // : must be
+                {
                     return false;
+                }
 
                 if (strcmp(buffer, "currency") == 0)
                 {
                     if (color != CHAT_LINK_COLOR_CURRENCY)
+                    {
                         return false;
+                    }
 
                     uint32 currencyEntry = 0;
                     // read currency entry
@@ -1651,14 +1689,18 @@ bool ChatHandler::isValidChatMessage(const char* message)
                     }
                     linkedCurrency = sCurrencyTypesStore.LookupEntry(currencyEntry);
                     if (!linkedCurrency)
+                    {
                         return false;
+                    }
                 }
                 else if (strcmp(buffer, "item") == 0)
                 {
                     // read item entry
                     reader.getline(buffer, 256, ':');
                     if (reader.eof())                       // : must be
+                    {
                         return false;
+                    }
 
                     linkedItem = ObjectMgr::GetItemPrototype(atoi(buffer));
                     if (!linkedItem)
@@ -1696,7 +1738,9 @@ bool ChatHandler::isValidChatMessage(const char* message)
                             else if (c == '-')
                                 negativeNumber = true;
                             else
+                            {
                                 return false;
+                            }
                         }
                     }
                     if (negativeNumber)
@@ -1706,13 +1750,17 @@ bool ChatHandler::isValidChatMessage(const char* message)
                     {
                         itemProperty = sItemRandomPropertiesStore.LookupEntry(propertyId);
                         if (!itemProperty)
+                        {
                             return false;
+                        }
                     }
                     else if (propertyId < 0)
                     {
                         itemSuffix = sItemRandomSuffixStore.LookupEntry(-propertyId);
                         if (!itemSuffix)
+                        {
                             return false;
+                        }
                     }
 
                     // ignore other integers
@@ -1777,16 +1825,22 @@ bool ChatHandler::isValidChatMessage(const char* message)
                 else if (strcmp(buffer, "trade") == 0)
                 {
                     if (color != CHAT_LINK_COLOR_TRADE)
+                    {
                         return false;
+                    }
 
                     // read spell entry
                     reader.getline(buffer, 256, ':');
                     if (reader.eof())                       // : must be
+                    {
                         return false;
+                    }
 
                     linkedSpell = sSpellStore.LookupEntry(atoi(buffer));
                     if (!linkedSpell)
+                    {
                         return false;
+                    }
 
                     char c = reader.peek();
                     // base64 encoded stuff
@@ -1800,20 +1854,28 @@ bool ChatHandler::isValidChatMessage(const char* message)
                 {
                     // talent links are always supposed to be blue
                     if (color != CHAT_LINK_COLOR_TALENT)
+                    {
                         return false;
+                    }
 
                     // read talent entry
                     reader.getline(buffer, 256, ':');
                     if (reader.eof())                       // : must be
+                    {
                         return false;
+                    }
 
                     TalentEntry const* talentInfo = sTalentStore.LookupEntry(atoi(buffer));
                     if (!talentInfo)
+                    {
                         return false;
+                    }
 
                     linkedSpell = sSpellStore.LookupEntry(talentInfo->RankID[0]);
                     if (!linkedSpell)
+                    {
                         return false;
+                    }
 
                     char c = reader.peek();
                     // skillpoints? whatever, drop it
@@ -1826,7 +1888,9 @@ bool ChatHandler::isValidChatMessage(const char* message)
                 else if (strcmp(buffer, "spell") == 0)
                 {
                     if (color != CHAT_LINK_COLOR_SPELL)
+                    {
                         return false;
+                    }
 
                     uint32 spellid = 0;
                     // read spell entry
@@ -1840,12 +1904,16 @@ bool ChatHandler::isValidChatMessage(const char* message)
                     }
                     linkedSpell = sSpellStore.LookupEntry(spellid);
                     if (!linkedSpell)
+                    {
                         return false;
+                    }
                 }
                 else if (strcmp(buffer, "enchant") == 0)
                 {
                     if (color != CHAT_LINK_COLOR_ENCHANT)
+                    {
                         return false;
+                    }
 
                     uint32 spellid = 0;
                     // read spell entry
@@ -1859,22 +1927,30 @@ bool ChatHandler::isValidChatMessage(const char* message)
                     }
                     linkedSpell = sSpellStore.LookupEntry(spellid);
                     if (!linkedSpell)
+                    {
                         return false;
+                    }
                 }
                 else if (strcmp(buffer, "achievement") == 0)
                 {
                     if (color != CHAT_LINK_COLOR_ACHIEVEMENT)
+                    {
                         return false;
+                    }
 
                     reader.getline(buffer, 256, ':');
                     if (reader.eof())                       // : must be
+                    {
                         return false;
+                    }
 
                     uint32 achievementId = atoi(buffer);
                     linkedAchievement = sAchievementStore.LookupEntry(achievementId);
 
                     if (!linkedAchievement)
+                    {
                         return false;
+                    }
 
                     char c = reader.peek();
                     // skip progress
@@ -1887,12 +1963,16 @@ bool ChatHandler::isValidChatMessage(const char* message)
                 else if (strcmp(buffer, "glyph") == 0)
                 {
                     if (color != CHAT_LINK_COLOR_GLYPH)
+                    {
                         return false;
+                    }
 
                     // first id is slot, drop it
                     reader.getline(buffer, 256, ':');
                     if (reader.eof())                       // : must be
+                    {
                         return false;
+                    }
 
                     uint32 glyphId = 0;
                     char c = reader.peek();
@@ -1905,12 +1985,16 @@ bool ChatHandler::isValidChatMessage(const char* message)
                     }
                     GlyphPropertiesEntry const* glyph = sGlyphPropertiesStore.LookupEntry(glyphId);
                     if (!glyph)
+                    {
                         return false;
+                    }
 
                     linkedSpell = sSpellStore.LookupEntry(glyph->SpellId);
 
                     if (!linkedSpell)
+                    {
                         return false;
+                    }
                 }
                 else
                 {
@@ -1930,13 +2014,17 @@ bool ChatHandler::isValidChatMessage(const char* message)
                     }
                     reader.getline(buffer, 256, ']');
                     if (reader.eof())                       // ] must be
+                    {
                         return false;
+                    }
 
                     // verify the link name
                     if (linkedCurrency)
                     {
                         if (linkedCurrency->Category == CURRENCY_CATEGORY_META)
+                        {
                             return false;
+                        }
 
                         bool foundName = false;
                         for (uint8 i = 0; i < MAX_LOCALE; ++i)
@@ -1948,7 +2036,9 @@ bool ChatHandler::isValidChatMessage(const char* message)
                             }
                         }
                         if (!foundName)
+                        {
                             return false;
+                        }
                     }
                     else if (linkedSpell)
                     {
@@ -1997,7 +2087,9 @@ bool ChatHandler::isValidChatMessage(const char* message)
                             }
                         }
                         if (!foundName)
+                        {
                             return false;
+                        }
                     }
                     else if (linkedQuest)
                     {
@@ -2081,12 +2173,16 @@ bool ChatHandler::isValidChatMessage(const char* message)
                             }
                         }
                         if (!foundName)
+                        {
                             return false;
+                        }
                     }
                     // that place should never be reached - if nothing linked has been set in |H
                     // it will return false before
                     else
+                    {
                         return false;
+                    }
                 }
                 break;
             case 'r':
@@ -2109,12 +2205,16 @@ bool ChatHandler::isValidChatMessage(const char* message)
 Player* ChatHandler::getSelectedPlayer()
 {
     if (!m_session)
+    {
         return NULL;
+    }
 
     ObjectGuid guid  = m_session->GetPlayer()->GetSelectionGuid();
 
     if (!guid)
+    {
         return m_session->GetPlayer();
+    }
 
     return sObjectMgr.GetPlayer(guid);
 }
@@ -2122,12 +2222,16 @@ Player* ChatHandler::getSelectedPlayer()
 Unit* ChatHandler::getSelectedUnit()
 {
     if (!m_session)
+    {
         return NULL;
+    }
 
     ObjectGuid guid = m_session->GetPlayer()->GetSelectionGuid();
 
     if (!guid)
+    {
         return m_session->GetPlayer();
+    }
 
     // can be selected player at another map
     return ObjectAccessor::GetUnit(*m_session->GetPlayer(), guid);
@@ -2136,7 +2240,9 @@ Unit* ChatHandler::getSelectedUnit()
 Creature* ChatHandler::getSelectedCreature()
 {
     if (!m_session)
+    {
         return NULL;
+    }
 
     return m_session->GetPlayer()->GetMap()->GetAnyTypeCreature(m_session->GetPlayer()->GetSelectionGuid());
 }
@@ -2150,7 +2256,9 @@ Creature* ChatHandler::getSelectedCreature()
 void ChatHandler::SkipWhiteSpaces(char** args)
 {
     if (!*args)
+    {
         return;
+    }
 
     while (isWhiteSpace(**args))
         ++(*args);
@@ -2166,7 +2274,9 @@ void ChatHandler::SkipWhiteSpaces(char** args)
 bool  ChatHandler::ExtractInt32(char** args, int32& val)
 {
     if (!*args || !** args)
+    {
         return false;
+    }
 
     char* tail = *args;
 
@@ -2178,7 +2288,9 @@ bool  ChatHandler::ExtractInt32(char** args, int32& val)
         return false;                                       // args not modified and can be re-parsed
 
     if (valRaw < std::numeric_limits<int32>::min() || valRaw > std::numeric_limits<int32>::max())
+    {
         return false;
+    }
 
     // value successfully extracted
     val = int32(valRaw);
@@ -2216,7 +2328,9 @@ bool  ChatHandler::ExtractOptInt32(char** args, int32& val, int32 defVal)
 bool  ChatHandler::ExtractUInt32Base(char** args, uint32& val, uint32 base)
 {
     if (!*args || !** args)
+    {
         return false;
+    }
 
     char* tail = *args;
 
@@ -2228,7 +2342,9 @@ bool  ChatHandler::ExtractUInt32Base(char** args, uint32& val, uint32 base)
         return false;                                       // args not modified and can be re-parsed
 
     if (valRaw > std::numeric_limits<uint32>::max())
+    {
         return false;
+    }
 
     // value successfully extracted
     val = uint32(valRaw);
@@ -2248,7 +2364,9 @@ bool  ChatHandler::ExtractUInt32Base(char** args, uint32& val, uint32 base)
 bool  ChatHandler::ExtractUInt64(char** args, uint64& val)
 {
     if (!*args || !** args)
+    {
         return false;
+    }
 
     char* tail = *args;
 
@@ -2260,7 +2378,9 @@ bool  ChatHandler::ExtractUInt64(char** args, uint64& val)
         return false;                                       // args not modified and can be re-parsed
 
     if (valRaw > std::numeric_limits<uint64>::max())
+    {
         return false;
+    }
 
     // value successfully extracted
     val = uint64(valRaw);
@@ -2280,7 +2400,9 @@ bool  ChatHandler::ExtractUInt64(char** args, uint64& val)
 bool  ChatHandler::ExtractInt64(char** args, int64& val)
 {
     if (!*args || !** args)
+    {
         return false;
+    }
 
     char* tail = *args;
 
@@ -2292,7 +2414,9 @@ bool  ChatHandler::ExtractInt64(char** args, int64& val)
         return false;                                       // args not modified and can be re-parsed
 
     if (valRaw < std::numeric_limits<int64>::min() || valRaw > std::numeric_limits<int64>::max())
+    {
         return false;
+    }
 
     // value successfully extracted
     val = int64(valRaw);
@@ -2329,7 +2453,9 @@ bool  ChatHandler::ExtractOptUInt32(char** args, uint32& val, uint32 defVal)
 bool  ChatHandler::ExtractFloat(char** args, float& val)
 {
     if (!*args || !** args)
+    {
         return false;
+    }
 
     char* tail = *args;
 
@@ -2378,7 +2504,9 @@ bool  ChatHandler::ExtractOptFloat(char** args, float& val, float defVal)
 char* ChatHandler::ExtractLiteralArg(char** args, char const* lit /*= NULL*/)
 {
     if (!*args || !** args)
+    {
         return NULL;
+    }
 
     char* head = *args;
 
@@ -2392,7 +2520,9 @@ char* ChatHandler::ExtractLiteralArg(char** args, char const* lit /*= NULL*/)
         case '|':
             // client replace all | by || in raw text
             if (head[1] != '|')
+            {
                 return NULL;
+            }
             ++head;                                         // skip one |
             break;
         default: break;
@@ -2412,10 +2542,14 @@ char* ChatHandler::ExtractLiteralArg(char** args, char const* lit /*= NULL*/)
         int diff = strncmp(head, lit, l);
 
         if (diff != 0)
+        {
             return NULL;
+        }
 
         if (head[l] && !isWhiteSpace(head[l]))
+        {
             return NULL;
+        }
 
         char* arg = head;
 
@@ -2455,10 +2589,14 @@ char* ChatHandler::ExtractLiteralArg(char** args, char const* lit /*= NULL*/)
 char* ChatHandler::ExtractQuotedArg(char** args, bool asis /*= false*/)
 {
     if (!*args || !** args)
+    {
         return NULL;
+    }
 
     if (**args != '\'' &&**  args != '"' &&**  args != '[')
+    {
         return NULL;
+    }
 
     char guard = (*args)[0];
 
@@ -2472,7 +2610,9 @@ char* ChatHandler::ExtractQuotedArg(char** args, bool asis /*= false*/)
         ++tail;
 
     if (!*tail || (tail[1] && !isWhiteSpace(tail[1])))      // fail
+    {
         return NULL;
+    }
 
     if (!tail[1])                                           // quote is last char in string
     {
@@ -2520,14 +2660,18 @@ bool  ChatHandler::ExtractOnOff(char** args, bool& value)
 {
     char* arg = ExtractLiteralArg(args);
     if (!arg)
+    {
         return false;
+    }
 
     if (strncmp(arg, "on", 3) == 0)
         value = true;
     else if (strncmp(arg, "off", 4) == 0)
         value = false;
     else
+    {
         return false;
+    }
 
     return true;
 }
@@ -2552,11 +2696,15 @@ bool  ChatHandler::ExtractOnOff(char** args, bool& value)
 char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= NULL*/, int* foundIdx /*= NULL*/, char** keyPair /*= NULL*/, char** somethingPair /*= NULL*/)
 {
     if (!*args || !** args)
+    {
         return NULL;
+    }
 
     // skip if not linked started or encoded single | (doubled by client)
     if ((*args)[0] != '|' || (*args)[1] == '|')
+    {
         return NULL;
+    }
 
     // |color|Hlinktype:key:data...|h[name]|h|r
 
@@ -2578,7 +2726,9 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
             ++tail;
 
         if (!*tail)
+        {
             return NULL;
+        }
 
         // |Hlinktype:key:data...|h[name]|h|r
 
@@ -2588,7 +2738,9 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
     // Hlinktype:key:data...|h[name]|h|r
 
     if (*tail != 'H')
+    {
         return NULL;
+    }
 
     int linktype_idx = 0;
 
@@ -2606,14 +2758,18 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
 
         // is search fail?
         if (!linkTypes[linktype_idx])                       // NULL terminator in last element
+        {
             return NULL;
+        }
 
         tail += strlen(linkTypes[linktype_idx]);            // skip linktype string
 
         // :key:data...|h[name]|h|r
 
         if (*tail != ':')
+        {
             return NULL;
+        }
     }
     else
     {
@@ -2621,7 +2777,9 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
             ++tail;
 
         if (!*tail)
+        {
             return NULL;
+        }
     }
 
     ++tail;
@@ -2634,7 +2792,9 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
         ++tail;
 
     if (!*tail)
+    {
         return NULL;
+    }
 
     keyEnd = tail;                                          // remember key end for truncate
 
@@ -2654,7 +2814,9 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
             ++tail;
 
         if (!*tail)
+        {
             return NULL;
+        }
 
         somethingEnd = tail;                                // remember data end for truncate
     }
@@ -2665,7 +2827,9 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
         ++tail;
 
     if (!*tail)
+    {
         return NULL;
+    }
 
     // |h[name]|h|r
 
@@ -2673,7 +2837,9 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
 
     // [name]|h|r
     if (!*tail || *tail != '[')
+    {
         return NULL;
+    }
 
     while (*tail && (*tail != ']' || *(tail + 1) != '|'))   // skip name part
         ++tail;
@@ -2682,13 +2848,17 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
 
     // h|r
     if (!*tail || *tail != 'h'  || *(tail + 1) != '|')
+    {
         return NULL;
+    }
 
     tail += 2;                                              // skip h|
 
     // r
     if (!*tail || *tail != 'r' || (*(tail + 1) && !isWhiteSpace(*(tail + 1))))
+    {
         return NULL;
+    }
 
     ++tail;                                                 // skip r
 
@@ -2729,7 +2899,9 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
 char* ChatHandler::ExtractArg(char** args, bool asis /*= false*/)
 {
     if (!*args || !** args)
+    {
         return NULL;
+    }
 
     char* arg = ExtractQuotedOrLiteralArg(args, asis);
     if (!arg)
@@ -2751,7 +2923,9 @@ char* ChatHandler::ExtractOptNotLastArg(char** args)
 
     // have more data
     if (*args &&**  args)
+    {
         return arg;
+    }
 
     // optional name not found
     *args = arg ? arg : (char*)"";                          // *args don't must be NULL
@@ -2805,7 +2979,9 @@ char* ChatHandler::ExtractKeyFromLink(char** text, char const* const* linkTypes,
 {
     // skip empty
     if (!*text || !** text)
+    {
         return NULL;
+    }
 
     // return non link case
     char* arg = ExtractQuotedOrLiteralArg(text);
@@ -2822,7 +2998,9 @@ char* ChatHandler::ExtractKeyFromLink(char** text, char const* const* linkTypes,
 
     arg = ExtractLinkArg(text, linkTypes, found_idx, keyPair, something1 ? somethingPair : NULL);
     if (!arg)
+    {
         return NULL;
+    }
 
     *keyPair[1] = '\0';                                     // truncate key string
 
@@ -2852,7 +3030,9 @@ bool ChatHandler::ExtractUint32KeyFromLink(char** text, char const* linkType, ui
 {
     char* arg = ExtractKeyFromLink(text, linkType);
     if (!arg)
+    {
         return false;
+    }
 
     return ExtractUInt32(&arg, value);
 }
@@ -2860,7 +3040,9 @@ bool ChatHandler::ExtractUint32KeyFromLink(char** text, char const* linkType, ui
 GameObject* ChatHandler::GetGameObjectWithGuid(uint32 lowguid, uint32 entry)
 {
     if (!m_session)
+    {
         return NULL;
+    }
 
     Player* pl = m_session->GetPlayer();
 
@@ -2898,11 +3080,15 @@ uint32 ChatHandler::ExtractSpellIdFromLink(char** text)
     char* param1_str = NULL;
     char* idS = ExtractKeyFromLink(text, spellKeys, &type, &param1_str);
     if (!idS)
+    {
         return 0;
+    }
 
     uint32 id;
     if (!ExtractUInt32(&idS, id))
+    {
         return 0;
+    }
 
     switch (type)
     {
@@ -2916,11 +3102,15 @@ uint32 ChatHandler::ExtractSpellIdFromLink(char** text)
             // talent
             TalentEntry const* talentEntry = sTalentStore.LookupEntry(id);
             if (!talentEntry)
+            {
                 return 0;
+            }
 
             int32 rank;
             if (!ExtractInt32(&param1_str, rank))
+            {
                 return 0;
+            }
 
             if (rank < 0)                                   // unlearned talent have in shift-link field -1 as rank
                 rank = 0;
@@ -2932,7 +3122,9 @@ uint32 ChatHandler::ExtractSpellIdFromLink(char** text)
             uint32 glyph_prop_id;
 
             if (!ExtractUInt32(&param1_str, glyph_prop_id))
+            {
                 return 0;
+            }
 
             GlyphPropertiesEntry const* glyphPropEntry = sGlyphPropertiesStore.LookupEntry(glyph_prop_id);
             return glyphPropEntry ? glyphPropEntry->SpellId : 0;
@@ -2948,14 +3140,20 @@ GameTele const* ChatHandler::ExtractGameTeleFromLink(char** text)
     // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
     char* cId = ExtractKeyFromLink(text, "Htele");
     if (!cId)
+    {
         return NULL;
+    }
 
     // id case (explicit or from shift link)
     uint32 id;
     if (ExtractUInt32(&cId, id))
+    {
         return sObjectMgr.GetGameTele(id);
+    }
     else
+    {
         return sObjectMgr.GetGameTele(cId);
+    }
 }
 
 enum GuidLinkType
@@ -2983,7 +3181,9 @@ ObjectGuid ChatHandler::ExtractGuidFromLink(char** text)
     // |color|Hplayer:name|h[name]|h|r
     char* idS = ExtractKeyFromLink(text, guidKeys, &type);
     if (!idS)
+    {
         return ObjectGuid();
+    }
 
     switch (type)
     {
@@ -2992,10 +3192,14 @@ ObjectGuid ChatHandler::ExtractGuidFromLink(char** text)
         {
             std::string name = idS;
             if (!normalizePlayerName(name))
+            {
                 return ObjectGuid();
+            }
 
             if (Player* player = sObjectMgr.GetPlayer(name.c_str()))
+            {
                 return player->GetObjectGuid();
+            }
 
             return sObjectMgr.GetPlayerGuidByName(name);
         }
@@ -3003,23 +3207,35 @@ ObjectGuid ChatHandler::ExtractGuidFromLink(char** text)
         {
             uint32 lowguid;
             if (!ExtractUInt32(&idS, lowguid))
+            {
                 return ObjectGuid();
+            }
 
             if (CreatureData const* data = sObjectMgr.GetCreatureData(lowguid))
+            {
                 return data->GetObjectGuid(lowguid);
+            }
             else
+            {
                 return ObjectGuid();
+            }
         }
         case GUID_LINK_GAMEOBJECT:
         {
             uint32 lowguid;
             if (!ExtractUInt32(&idS, lowguid))
+            {
                 return ObjectGuid();
+            }
 
             if (GameObjectData const* data = sObjectMgr.GetGOData(lowguid))
+            {
                 return ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, lowguid);
+            }
             else
+            {
                 return ObjectGuid();
+            }
         }
     }
 
@@ -3070,7 +3286,9 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
     // |color|Hareatrigger_target:id|h[name]|h|r
     char* idS = ExtractKeyFromLink(text, locationKeys, &type);
     if (!idS)
+    {
         return false;
+    }
 
     switch (type)
     {
@@ -3079,7 +3297,9 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
         {
             std::string name = idS;
             if (!normalizePlayerName(name))
+            {
                 return false;
+            }
 
             if (Player* player = sObjectMgr.GetPlayer(name.c_str()))
             {
@@ -3104,11 +3324,15 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
         {
             uint32 id;
             if (!ExtractUInt32(&idS, id))
+            {
                 return false;
+            }
 
             GameTele const* tele = sObjectMgr.GetGameTele(id);
             if (!tele)
+            {
                 return false;
+            }
             mapid = tele->mapId;
             x = tele->position_x;
             y = tele->position_y;
@@ -3119,11 +3343,15 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
         {
             uint32 id;
             if (!ExtractUInt32(&idS, id))
+            {
                 return false;
+            }
 
             TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(id);
             if (!node)
+            {
                 return false;
+            }
             mapid = node->map_id;
             x = node->x;
             y = node->y;
@@ -3134,7 +3362,9 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
         {
             uint32 lowguid;
             if (!ExtractUInt32(&idS, lowguid))
+            {
                 return false;
+            }
 
             if (CreatureData const* data = sObjectMgr.GetCreatureData(lowguid))
             {
@@ -3145,13 +3375,17 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
                 return true;
             }
             else
+            {
                 return false;
+            }
         }
         case LOCATION_LINK_GAMEOBJECT:
         {
             uint32 lowguid;
             if (!ExtractUInt32(&idS, lowguid))
+            {
                 return false;
+            }
 
             if (GameObjectData const* data = sObjectMgr.GetGOData(lowguid))
             {
@@ -3162,13 +3396,17 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
                 return true;
             }
             else
+            {
                 return false;
+            }
         }
         case LOCATION_LINK_CREATURE_ENTRY:
         {
             uint32 id;
             if (!ExtractUInt32(&idS, id))
+            {
                 return false;
+            }
 
             if (ObjectMgr::GetCreatureTemplate(id))
             {
@@ -3185,16 +3423,22 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
                     return true;
                 }
                 else
+                {
                     return false;
+                }
             }
             else
+            {
                 return false;
+            }
         }
         case LOCATION_LINK_GAMEOBJECT_ENTRY:
         {
             uint32 id;
             if (!ExtractUInt32(&idS, id))
+            {
                 return false;
+            }
 
             if (ObjectMgr::GetGameObjectInfo(id))
             {
@@ -3211,16 +3455,22 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
                     return true;
                 }
                 else
+                {
                     return false;
+                }
             }
             else
+            {
                 return false;
+            }
         }
         case LOCATION_LINK_AREATRIGGER:
         {
             uint32 id;
             if (!ExtractUInt32(&idS, id))
+            {
                 return false;
+            }
 
             AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(id);
             if (!atEntry)
@@ -3240,7 +3490,9 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
         {
             uint32 id;
             if (!ExtractUInt32(&idS, id))
+            {
                 return false;
+            }
 
             if (!sAreaTriggerStore.LookupEntry(id))
             {
@@ -3274,11 +3526,15 @@ std::string ChatHandler::ExtractPlayerNameFromLink(char** text)
     // |color|Hplayer:name|h[name]|h|r
     char* name_str = ExtractKeyFromLink(text, "Hplayer");
     if (!name_str)
+    {
         return "";
+    }
 
     std::string name = name_str;
     if (!normalizePlayerName(name))
+    {
         return "";
+    }
 
     return name;
 }
@@ -3359,12 +3615,16 @@ uint32 ChatHandler::ExtractAccountId(char** args, std::string* accountName /*= N
     if (!account_str)
     {
         if (!targetIfNullArg)
+        {
             return 0;
+        }
 
         /// only target player different from self allowed (if targetPlayer!=NULL then not console)
         Player* targetPlayer = getSelectedPlayer();
         if (!targetPlayer)
+        {
             return 0;
+        }
 
         account_id = targetPlayer->GetSession()->GetAccountId();
 
@@ -3467,7 +3727,9 @@ bool ChatHandler::ExtractRaceMask(char** text, uint32& raceMask, char const** ma
         }
 
         if (!raceMask)
+        {
             return false;
+        }
     }
 
     return true;
@@ -3513,7 +3775,9 @@ bool CliHandler::isAvailable(ChatCommand const& cmd) const
 {
     // skip non-console commands in console case
     if (!cmd.AllowConsole)
+    {
         return false;
+    }
 
     // normal case
     return GetAccessLevel() >= (AccountTypes)cmd.SecurityLevel;

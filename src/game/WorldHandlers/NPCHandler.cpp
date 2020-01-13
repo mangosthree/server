@@ -87,7 +87,9 @@ void WorldSession::HandleBankerActivateOpcode(WorldPacket& recv_data)
     recv_data >> guid;
 
     if (!CheckBanker(guid))
+    {
         return;
+    }
 
     SendShowBank(guid);
 }
@@ -153,11 +155,15 @@ void WorldSession::SendTrainerList(ObjectGuid guid, const std::string& strTitle)
 
     // trainer list loaded at check;
     if (!unit->IsTrainerOf(_player, true))
+    {
         return;
+    }
 
     CreatureInfo const* ci = unit->GetCreatureInfo();
     if (!ci)
+    {
         return;
+    }
 
     TrainerSpellData const* cSpells = unit->GetTrainerSpells();
     TrainerSpellData const* tSpells = unit->GetTrainerTemplateSpells();
@@ -456,12 +462,16 @@ void WorldSession::HandleReturnToGraveyardOpcode(WorldPacket& recv_data)
 {
     Corpse* corpse = _player->GetCorpse();
     if (!corpse)
+    {
         return;
+    }
 
     WorldSafeLocsEntry const* corpseGrave = sObjectMgr.GetClosestGraveYard(corpse->GetPositionX(), corpse->GetPositionY(),
             corpse->GetPositionZ(), corpse->GetMapId(), _player->GetTeam());
     if (!corpseGrave)
+    {
         return;
+    }
 
     _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
 }
@@ -472,7 +482,9 @@ void WorldSession::HandleBinderActivateOpcode(WorldPacket& recv_data)
     recv_data >> npcGuid;
 
     if (!GetPlayer()->IsInWorld() || !GetPlayer()->IsAlive())
+    {
         return;
+    }
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(npcGuid, UNIT_NPC_FLAG_INNKEEPER);
     if (!unit)
@@ -488,7 +500,9 @@ void WorldSession::SendBindPoint(Creature* npc)
 {
     // prevent set homebind to instances in any case
     if (GetPlayer()->GetMap()->Instanceable())
+    {
         return;
+    }
 
     // send spell for bind 3286 bind magic
     npc->CastSpell(_player, 3286, true);                    // Bind
@@ -859,10 +873,14 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recv_data)
     {
         uint32 GuildId = _player->GetGuildId();
         if (!GuildId)
+        {
             return;
+        }
         Guild* pGuild = sGuildMgr.GetGuildById(GuildId);
         if (!pGuild)
+        {
             return;
+        }
         pGuild->LogBankEvent(GUILD_BANK_LOG_REPAIR_MONEY, 0, _player->GetGUIDLow(), TotalCost);
         pGuild->SendMoneyInfo(this, _player->GetGUIDLow());
     }

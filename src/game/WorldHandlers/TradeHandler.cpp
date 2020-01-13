@@ -182,7 +182,9 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
 {
     Player* trader = _player->GetTrader();
     if (!trader)
+    {
         return;
+    }
 
     for (int i = 0; i < TRADE_SLOT_TRADED_COUNT; ++i)
     {
@@ -304,13 +306,17 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 
     TradeData* my_trade = _player->m_trade;
     if (!my_trade)
+    {
         return;
+    }
 
     Player* trader = my_trade->GetTrader();
 
     TradeData* his_trade = trader->m_trade;
     if (!his_trade)
+    {
         return;
+    }
 
     Item* myItems[TRADE_SLOT_TRADED_COUNT]  = { NULL, NULL, NULL, NULL, NULL, NULL };
     Item* hisItems[TRADE_SLOT_TRADED_COUNT] = { NULL, NULL, NULL, NULL, NULL, NULL };
@@ -552,7 +558,9 @@ void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     TradeData* my_trade = _player->m_trade;
     if (!my_trade)
+    {
         return;
+    }
 
     my_trade->SetAccepted(false, true);
 }
@@ -561,7 +569,9 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     TradeData* my_trade = _player->m_trade;
     if (!my_trade)
+    {
         return;
+    }
 
     my_trade->GetTrader()->GetSession()->SendTradeStatus(TRADE_STATUS_OPEN_WINDOW);
     SendTradeStatus(TRADE_STATUS_OPEN_WINDOW);
@@ -570,7 +580,9 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& /*recvPacket*/)
 void WorldSession::SendCancelTrade()
 {
     if (m_playerRecentlyLogout)
+    {
         return;
+    }
 
     SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
 }
@@ -589,7 +601,9 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
     recvPacket.ReadGuidBytes<7, 4, 3, 5, 1, 2, 6, 0>(otherGuid);
 
     if (GetPlayer()->m_trade)
+    {
         return;
+    }
 
     if (!GetPlayer()->IsAlive())
     {
@@ -693,7 +707,9 @@ void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
 
     TradeData* my_trade = _player->GetTradeData();
     if (!my_trade)
+    {
         return;
+    }
 
     // gold can be incorrect, but this is checked at trade finished.
     my_trade->SetMoney(gold);
@@ -712,7 +728,9 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 
     TradeData* my_trade = _player->m_trade;
     if (!my_trade)
+    {
         return;
+    }
 
     // invalid slot number
     if (tradeSlot >= TRADE_SLOT_COUNT)
@@ -747,11 +765,15 @@ void WorldSession::HandleClearTradeItemOpcode(WorldPacket& recvPacket)
 
     TradeData* my_trade = _player->m_trade;
     if (!my_trade)
+    {
         return;
+    }
 
     // invalid slot number
     if (tradeSlot >= TRADE_SLOT_COUNT)
+    {
         return;
+    }
 
     my_trade->SetItem(TradeSlots(tradeSlot), NULL);
 }

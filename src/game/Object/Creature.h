@@ -170,9 +170,13 @@ struct CreatureInfo
             return SKILL_HERBALISM;
         }
         else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
-            { return SKILL_MINING; }
+        {
+            return SKILL_MINING;
+        }
         else if (CreatureTypeFlags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
+        {
             return SKILL_ENGINEERING;
+        }
         else
             { return SKILL_SKINNING; }                          // normal case
     }
@@ -185,7 +189,9 @@ struct CreatureInfo
     bool isTameable(bool exotic) const
     {
         if (CreatureType != CREATURE_TYPE_BEAST || Family == 0 || (CreatureTypeFlags & CREATURE_TYPEFLAGS_TAMEABLE) == 0)
+        {
             return false;
+        }
 
         // if can tame exotic then can tame any temable
         return exotic || !IsExotic();
@@ -798,7 +804,9 @@ class Creature : public Unit
                 return 0;
             }
             else
-                { return m_charmInfo->GetCharmSpell(pos)->GetAction(); }
+            {
+                return m_charmInfo->GetCharmSpell(pos)->GetAction();
+            }
         }
 
         void SetCombatStartPosition(float x, float y, float z) { m_combatStartX = x; m_combatStartY = y; m_combatStartZ = z; }

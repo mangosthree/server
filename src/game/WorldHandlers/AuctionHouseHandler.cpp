@@ -274,7 +274,9 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
 
     AuctionHouseEntry const* auctionHouseEntry = GetCheckedAuctionHouseForAuctioneer(auctioneerGuid);
     if (!auctionHouseEntry)
+    {
         return;
+    }
 
     // always return pointer
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(auctionHouseEntry);
@@ -392,7 +394,9 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recv_data)
 
     AuctionHouseEntry const* auctionHouseEntry = GetCheckedAuctionHouseForAuctioneer(auctioneerGuid);
     if (!auctionHouseEntry)
+    {
         return;
+    }
 
     // always return pointer
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(auctionHouseEntry);
@@ -444,7 +448,9 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recv_data)
 
     // cheating
     if (price < auction->startbid)
+    {
         return;
+    }
 
     SendAuctionCommandResult(auction, AUCTION_BID_PLACED, AUCTION_OK);
 
@@ -467,7 +473,9 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recv_data)
 
     AuctionHouseEntry const* auctionHouseEntry = GetCheckedAuctionHouseForAuctioneer(auctioneerGuid);
     if (!auctionHouseEntry)
+    {
         return;
+    }
 
     // always return pointer
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(auctionHouseEntry);
@@ -494,7 +502,9 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recv_data)
     {
         uint64 auctionCut = auction->GetAuctionCut();
         if (pl->GetMoney() < auctionCut)                    // player doesn't have enough money, maybe message needed
+        {
             return;
+        }
 
         if (auction->bidder)                                // if auction have real existed bidder send mail
             SendAuctionCancelledToBidderMail(auction);
@@ -547,7 +557,9 @@ void WorldSession::HandleAuctionListBidderItems(WorldPacket& recv_data)
 
     AuctionHouseEntry const* auctionHouseEntry = GetCheckedAuctionHouseForAuctioneer(auctioneerGuid);
     if (!auctionHouseEntry)
+    {
         return;
+    }
 
     // always return pointer
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(auctionHouseEntry);
@@ -591,7 +603,9 @@ void WorldSession::HandleAuctionListOwnerItems(WorldPacket& recv_data)
 
     AuctionHouseEntry const* auctionHouseEntry = GetCheckedAuctionHouseForAuctioneer(auctioneerGuid);
     if (!auctionHouseEntry)
+    {
         return;
+    }
 
     // always return pointer
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(auctionHouseEntry);
@@ -629,7 +643,9 @@ void WorldSession::HandleAuctionListItems(WorldPacket& recv_data)
     recv_data >> usable >> isFull >> unk >> sortCount;
 
     if (sortCount >= MAX_AUCTION_SORT)
+    {
         return;
+    }
 
     uint8 Sort[MAX_AUCTION_SORT];
     memset(Sort, MAX_AUCTION_SORT, MAX_AUCTION_SORT);
@@ -641,7 +657,9 @@ void WorldSession::HandleAuctionListItems(WorldPacket& recv_data)
         recv_data >> column;
 
         if (column >= MAX_AUCTION_SORT)
+        {
             return;
+        }
 
         recv_data >> reversed;
         Sort[i] = (reversed > 0) ? (column |= AUCTION_SORT_REVERSED) : column;
@@ -649,7 +667,9 @@ void WorldSession::HandleAuctionListItems(WorldPacket& recv_data)
 
     AuctionHouseEntry const* auctionHouseEntry = GetCheckedAuctionHouseForAuctioneer(auctioneerGuid);
     if (!auctionHouseEntry)
+    {
         return;
+    }
 
     // always return pointer
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(auctionHouseEntry);
@@ -676,7 +696,9 @@ void WorldSession::HandleAuctionListItems(WorldPacket& recv_data)
     // converting string that we try to find to lower case
     std::wstring wsearchedname;
     if (!Utf8toWStr(searchedname, wsearchedname))
+    {
         return;
+    }
 
     wstrToLower(wsearchedname);
 
@@ -700,7 +722,9 @@ void WorldSession::HandleAuctionListPendingSales(WorldPacket& recv_data)
 
     AuctionHouseEntry const* auctionHouseEntry = GetCheckedAuctionHouseForAuctioneer(auctioneerGuid);
     if (!auctionHouseEntry)
+    {
         return;
+    }
 
     uint32 count = 0;
 

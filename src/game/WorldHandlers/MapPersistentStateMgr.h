@@ -406,7 +406,9 @@ inline void MapPersistentStateManager::DoForAllStatesWithMapId(uint32 mapId, Do&
 {
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
     if (!mapEntry)
+    {
         return;
+    }
 
     if (mapEntry->Instanceable())
     {

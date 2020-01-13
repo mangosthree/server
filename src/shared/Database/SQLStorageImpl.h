@@ -270,7 +270,9 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
             sLog.outError("%s table is empty!\n", store.GetTableName());
         }
         else
-            { sLog.outString("%s table is empty!\n", store.GetTableName()); }
+        {
+            sLog.outString("%s table is empty!\n", store.GetTableName());
+        }
 
         recordCount = 0;
         return;

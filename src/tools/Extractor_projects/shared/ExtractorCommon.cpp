@@ -42,7 +42,7 @@
  /* This isn't the nicest way to do things..
  * TODO: Fix this with snprintf instead and check that it still works
  */
-#define sprintf_s sprintf 
+#define sprintf_s sprintf
 #endif
 
 #if defined( __GNUC__ )
@@ -90,7 +90,7 @@ FILE* openWoWExe()
 /**
 *  This function loads up a binary file (WoW executable), then searches for and returns
 *  the build number of the file. The build number is searched for in hex form.
-* 
+*
 *  @PARAM sFilename is the filename of the WoW executable to be loaded
 *  @RETURN iBuild the build number of the WoW executable, or 0 if failed
 */
@@ -392,10 +392,14 @@ bool CreateDir(const std::string& sPath)
 {
 #ifdef WIN32
     if (_mkdir(sPath.c_str()) == 0)
+    {
         return 1;
+    }
 #else
     if (mkdir(sPath.c_str(), 0777) == 0)
+    {
         return 1;
+    }
 #endif
     return 0; // failed to create the directory
 }

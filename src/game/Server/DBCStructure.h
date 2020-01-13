@@ -518,7 +518,9 @@ struct AchievementCriteriaEntry
     bool IsExplicitlyStartedTimedCriteria() const
     {
         if (!timeLimit)
+        {
             return false;
+        }
 
         // in case raw.value == timedCriteriaMiscId in timedCriteriaMiscId stored spellid/itemids for cast/use, so repeating aura start at first cast/use until fails
         return requiredType == ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST || raw.value != timedCriteriaMiscId;
@@ -984,10 +986,14 @@ struct FactionTemplateEntry
         {
             for (int i = 0; i < 4; ++i)
                 if (enemyFaction[i]  == entry.faction)
+                {
                     return false;
+                }
             for (int i = 0; i < 4; ++i)
                 if (friendFaction[i] == entry.faction)
+                {
                     return true;
+                }
         }
         return (friendlyMask & entry.ourMask) || (ourMask & entry.friendlyMask);
     }
@@ -997,10 +1003,14 @@ struct FactionTemplateEntry
         {
             for (int i = 0; i < 4; ++i)
                 if (enemyFaction[i]  == entry.faction)
+                {
                     return true;
+                }
             for (int i = 0; i < 4; ++i)
                 if (friendFaction[i] == entry.faction)
+                {
                     return false;
+                }
         }
         return (hostileMask & entry.ourMask) != 0;
     }
@@ -1009,7 +1019,9 @@ struct FactionTemplateEntry
     {
         for (int i = 0; i < 4; ++i)
             if (enemyFaction[i] != 0)
+            {
                 return false;
+            }
         return hostileMask == 0 && friendlyMask == 0;
     }
     bool IsContestedGuardFaction() const { return (factionFlags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD) != 0; }
@@ -1622,7 +1634,9 @@ struct ScalingStatValuesEntry
     uint32 getSpellBonus(uint32 mask) const
     {
         if (mask & 0x00008000)
+        {
             return spellBonus;
+        }
         return 0;
     }
 };
@@ -1879,7 +1893,9 @@ struct SpellEffectEntry
     uint32 GetRadiusIndex() const
     {
         if (EffectRadiusIndex != 0)
+        {
             return EffectRadiusIndex;
+        }
 
         return EffectRadiusMaxIndex;
     }

@@ -282,7 +282,9 @@ bool WorldSession::Update(PacketFilter& updater)
                         }
                     }
                     else if (_player->IsInWorld())
-                        { ExecuteOpcode(opHandle, packet); }
+                    {
+                        ExecuteOpcode(opHandle, packet);
+                    }
 
                     // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
 
@@ -306,9 +308,13 @@ bool WorldSession::Update(PacketFilter& updater)
                         LogUnexpectedOpcode(packet, "the player has not logged in yet");
                     }
                     else if (_player->IsInWorld())
-                        { LogUnexpectedOpcode(packet, "the player is still in world"); }
+                    {
+                        LogUnexpectedOpcode(packet, "the player is still in world");
+                    }
                     else
-                        { ExecuteOpcode(opHandle, packet); }
+                    {
+                        ExecuteOpcode(opHandle, packet);
+                    }
                     break;
                 case STATUS_AUTHED:
                     // prevent cheating with skip queue wait
@@ -471,7 +477,9 @@ void WorldSession::LogoutPlayer(bool Save)
                     }
                 }
                 else if ((*itr)->GetTypeId() == TYPEID_PLAYER)
-                    { aset.insert((Player*)(*itr)); }
+                {
+                    aset.insert((Player*)(*itr));
+                }
             }
 
             _player->SetPvPDeath(!aset.empty());
@@ -758,7 +766,9 @@ void WorldSession::SendSetPhaseShift(uint32 phaseMask, uint16 mapId)
 void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<uint32> const& terrainswaps)
 {
     if (PlayerLoading())
+    {
         return;
+    }
 
     ObjectGuid guid = _player->GetObjectGuid();
 
@@ -863,7 +873,9 @@ void WorldSession::LoadAccountData(QueryResult* result, uint32 mask)
             m_accountData[i] = AccountData();
 
     if (!result)
+    {
         return;
+    }
 
     do
     {
@@ -915,7 +927,9 @@ void WorldSession::SetAccountData(AccountDataType type, time_t time_, const std:
     {
         // _player can be NULL and packet received after logout but m_GUID still store correct guid
         if (!m_GUIDLow)
+        {
             return;
+        }
 
         static SqlStatementID delId;
         static SqlStatementID insId;
@@ -1038,12 +1052,16 @@ void WorldSession::SaveTutorialsData()
 void WorldSession::ReadAddonsInfo(ByteBuffer &data)
 {
     if (data.rpos() + 4 > data.size())
+    {
         return;
+    }
     uint32 size;
     data >> size;
 
     if (!size)
+    {
         return;
+    }
 
     if (size > 0xFFFFF)
     {
@@ -1071,7 +1089,9 @@ void WorldSession::ReadAddonsInfo(ByteBuffer &data)
 
             // check next addon data format correctness
             if (addonInfo.rpos() + 1 > addonInfo.size())
+            {
                 return;
+            }
 
             addonInfo >> addonName;
 
@@ -1182,7 +1202,9 @@ void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* pac
 {
 #ifdef ENABLE_ELUNA
     if (!sEluna->OnPacketReceive(this, *packet))
+    {
         return;
+    }
 #endif /* ENABLE_ELUNA */
 
     // need prevent do internal far teleports in handlers because some handlers do lot steps

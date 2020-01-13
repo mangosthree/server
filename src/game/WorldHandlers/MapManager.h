@@ -43,7 +43,9 @@ struct MapID
     bool operator<(const MapID& val) const
     {
         if (nMapId == val.nMapId)
+        {
             return nInstanceId < val.nInstanceId;
+        }
 
         return nMapId < val.nMapId;
     }

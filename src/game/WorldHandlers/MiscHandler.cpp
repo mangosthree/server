@@ -60,10 +60,14 @@ void WorldSession::HandleRepopRequestOpcode(WorldPacket& recv_data)
     recv_data.read_skip<uint8>();
 
     if (GetPlayer()->IsAlive() || GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    {
         return;
+    }
 
     if (GetPlayer()->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
+    {
         return;
+    }
 
     // the world update order is sessions, players, creatures
     // the netcode runs in parallel with all of these
@@ -141,7 +145,9 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     std::wstring wplayer_name;
     std::wstring wguild_name;
     if (!(Utf8toWStr(player_name, wplayer_name) && Utf8toWStr(guild_name, wguild_name)))
+    {
         return;
+    }
     wstrToLower(wplayer_name);
     wstrToLower(wguild_name);
 
@@ -412,7 +418,9 @@ void WorldSession::HandleSetTargetOpcode(WorldPacket& recv_data)
     // update reputation list if need
     Unit* unit = ObjectAccessor::GetUnit(*_player, guid);   // can select group members at diff maps
     if (!unit)
+    {
         return;
+    }
 
     if (FactionTemplateEntry const* factionTemplateEntry = sFactionTemplateStore.LookupEntry(unit->getFaction()))
         _player->GetReputationMgr().SetVisible(factionTemplateEntry);
@@ -428,7 +436,9 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket& recv_data)
     // update reputation list if need
     Unit* unit = ObjectAccessor::GetUnit(*_player, guid);   // can select group members at diff maps
     if (!unit)
+    {
         return;
+    }
 
     if (FactionTemplateEntry const* factionTemplateEntry = sFactionTemplateStore.LookupEntry(unit->getFaction()))
         _player->GetReputationMgr().SetVisible(factionTemplateEntry);
@@ -464,7 +474,9 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket& recv_data)
     recv_data >> friendNote;
 
     if (!normalizePlayerName(friendName))
+    {
         return;
+    }
 
     CharacterDatabase.escape_string(friendName);            // prevent SQL injection - normal name don't must changed by this call
 
@@ -477,7 +489,9 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket& recv_data)
 void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult* result, uint32 accountId, std::string friendNote)
 {
     if (!result)
+    {
         return;
+    }
 
     uint32 friendLowGuid = (*result)[0].GetUInt32();
     ObjectGuid friendGuid = ObjectGuid(HIGHGUID_PLAYER, friendLowGuid);
@@ -487,7 +501,9 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult* result, uint32 acc
 
     WorldSession* session = sWorld.FindSession(accountId);
     if (!session || !session->GetPlayer())
+    {
         return;
+    }
 
     FriendsResult friendResult = FRIEND_NOT_FOUND;
     if (friendGuid)
@@ -545,7 +561,9 @@ void WorldSession::HandleAddIgnoreOpcode(WorldPacket& recv_data)
     recv_data >> IgnoreName;
 
     if (!normalizePlayerName(IgnoreName))
+    {
         return;
+    }
 
     CharacterDatabase.escape_string(IgnoreName);            // prevent SQL injection - normal name don't must changed by this call
 
@@ -558,7 +576,9 @@ void WorldSession::HandleAddIgnoreOpcode(WorldPacket& recv_data)
 void WorldSession::HandleAddIgnoreOpcodeCallBack(QueryResult* result, uint32 accountId)
 {
     if (!result)
+    {
         return;
+    }
 
     uint32 ignoreLowGuid = (*result)[0].GetUInt32();
     ObjectGuid ignoreGuid = ObjectGuid(HIGHGUID_PLAYER, ignoreLowGuid);
@@ -567,7 +587,9 @@ void WorldSession::HandleAddIgnoreOpcodeCallBack(QueryResult* result, uint32 acc
 
     WorldSession* session = sWorld.FindSession(accountId);
     if (!session || !session->GetPlayer())
+    {
         return;
+    }
 
     FriendsResult ignoreResult = FRIEND_IGNORE_NOT_FOUND;
     if (ignoreGuid)
@@ -645,27 +667,39 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recv_data)
     recv_data >> guid;
 
     if (GetPlayer()->IsAlive())
+    {
         return;
+    }
 
     // do not allow corpse reclaim in arena
     if (GetPlayer()->InArena())
+    {
         return;
+    }
 
     // body not released yet
     if (!GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    {
         return;
+    }
 
     Corpse* corpse = GetPlayer()->GetCorpse();
 
     if (!corpse)
+    {
         return;
+    }
 
     // prevent resurrect before 30-sec delay after body release not finished
     if (corpse->GetGhostTime() + GetPlayer()->GetCorpseReclaimDelay(corpse->GetType() == CORPSE_RESURRECTABLE_PVP) > time(NULL))
+    {
         return;
+    }
 
     if (!corpse->IsWithinDistInMap(GetPlayer(), CORPSE_RECLAIM_RADIUS, true))
+    {
         return;
+    }
 
     // resurrect
     GetPlayer()->ResurrectPlayer(GetPlayer()->InBattleGround() ? 1.0f : 0.5f);
@@ -684,7 +718,9 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket& recv_data)
     recv_data >> status;
 
     if (GetPlayer()->IsAlive())
+    {
         return;
+    }
 
     if (status == 0)
     {
@@ -693,7 +729,9 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket& recv_data)
     }
 
     if (!GetPlayer()->isRessurectRequestedBy(guid))
+    {
         return;
+    }
 
     GetPlayer()->ResurectUsingRequestData();                // will call spawncorpsebones
 }
@@ -702,7 +740,9 @@ void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
 {
     Player* pPlayer = GetPlayer();
     if (pPlayer->IsAlive() || !pPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    {
         return;
+    }
 
     WorldSafeLocsEntry const* ClosestGrave = NULL;
 
@@ -767,7 +807,9 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
     }
 
     if (sScriptMgr.OnAreaTrigger(player, atEntry))
+    {
         return;
+    }
 
     uint32 quest_id = sObjectMgr.GetQuestForAreaTrigger(Trigger_ID);
     if (quest_id && player->IsAlive() && player->IsActiveQuest(quest_id))
@@ -792,22 +834,30 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
     if (BattleGround* bg = player->GetBattleGround())
     {
         if (bg->HandleAreaTrigger(player, Trigger_ID))
-             return;
+        {
+            return;
+        }
     }
     else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
     {
         if (outdoorPvP->HandleAreaTrigger(player, Trigger_ID))
+        {
             return;
+        }
     }
 
     // NULL if all values default (non teleport trigger)
     AreaTrigger const* at = sObjectMgr.GetAreaTrigger(Trigger_ID);
     if (!at)
+    {
         return;
+    }
 
     MapEntry const* targetMapEntry = sMapStore.LookupEntry(at->target_mapId);
     if (!targetMapEntry)
+    {
         return;
+    }
 
     // ghost resurrected at enter attempt to dungeon with corpse (including fail enter cases)
     if (!player->IsAlive() && targetMapEntry->IsDungeon())
@@ -845,7 +895,9 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
                 at = corpseAt;
                 targetMapEntry = sMapStore.LookupEntry(at->target_mapId);
                 if (!targetMapEntry)
+                {
                     return;
+                }
             }
         }
 
@@ -868,7 +920,9 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recv_data)
     DEBUG_LOG("UAD: type %u, time %u, decompressedSize %u", type, timestamp, decompressedSize);
 
     if (type > NUM_ACCOUNT_DATA_TYPES)
+    {
         return;
+    }
 
     if (decompressedSize == 0)                              // erase
     {
@@ -923,7 +977,9 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
     DEBUG_LOG("RAD: type %u", type);
 
     if (type > NUM_ACCOUNT_DATA_TYPES)
+    {
         return;
+    }
 
     AccountData* adata = GetAccountData(AccountDataType(type));
 
@@ -1096,13 +1152,19 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
     Player* plr = sObjectMgr.GetPlayer(guid);
     if (!plr)                                               // wrong player
+    {
         return;
+    }
 
     if (!_player->IsWithinDistInMap(plr, INSPECT_DISTANCE, false))
+    {
         return;
+    }
 
     if (_player->IsHostileTo(plr))
+    {
         return;
+    }
 
     WorldPacket data(SMSG_INSPECT_RESULTS, 50);
     data << plr->GetObjectGuid();
@@ -1142,10 +1204,14 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     }
 
     if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+    {
         return;
+    }
 
     if (_player->IsHostileTo(player))
+    {
         return;
+    }
 
     WorldPacket data(SMSG_INSPECT_HONOR_STATS, 18);
     data.WriteGuidMask<4, 3, 6, 2, 5, 0, 7, 1>(player->GetObjectGuid());
@@ -1325,7 +1391,9 @@ void WorldSession::HandleFarSightOpcode(WorldPacket& recv_data)
 
     WorldObject* obj = _player->GetMap()->GetWorldObject(_player->GetFarSightGuid());
     if (!obj)
+    {
         return;
+    }
 
     switch (op)
     {
@@ -1351,7 +1419,9 @@ void WorldSession::HandleSetTitleOpcode(WorldPacket& recv_data)
     if (title > 0 && title < MAX_TITLE_INDEX)
     {
         if (!GetPlayer()->HasTitle(title))
+        {
             return;
+        }
     }
     else
         title = 0;
@@ -1404,7 +1474,9 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recv_data)
     }
 
     if (Difficulty(mode) == _player->GetDungeonDifficulty())
+    {
         return;
+    }
 
     // cannot reset while in an instance
     Map* map = _player->GetMap();
@@ -1416,7 +1488,9 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recv_data)
 
     // Exception to set mode to normal for low-level players
     if (_player->getLevel() < LEVELREQUIREMENT_HEROIC && mode > REGULAR_DIFFICULTY)
+    {
         return;
+    }
 
     if (Group* pGroup = _player->GetGroup())
     {
@@ -1449,7 +1523,9 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recv_data)
     }
 
     if (Difficulty(mode) == _player->GetRaidDifficulty())
+    {
         return;
+    }
 
     // cannot reset while in an instance
     Map* map = _player->GetMap();
@@ -1461,7 +1537,9 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recv_data)
 
     // Exception to set mode to normal for low-level players
     if (_player->getLevel() < LEVELREQUIREMENT_HEROIC && mode > REGULAR_DIFFICULTY)
+    {
         return;
+    }
 
     if (Group* pGroup = _player->GetGroup())
     {
@@ -1543,13 +1621,19 @@ void WorldSession::HandleQueryInspectAchievementsOpcode(WorldPacket& recv_data)
 
     Player* player = sObjectMgr.GetPlayer(guid);
     if (!player)
+    {
         return;
+    }
 
     if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+    {
         return;
+    }
 
     if (_player->IsHostileTo(player))
+    {
         return;
+    }
 
     player->GetAchievementMgr().SendRespondInspectAchievements(_player);
 }
@@ -1578,11 +1662,15 @@ void WorldSession::HandleHearthandResurrect(WorldPacket& /*recv_data*/)
 
     AreaTableEntry const* atEntry = sAreaStore.LookupEntry(_player->GetAreaId());
     if (!atEntry || !(atEntry->flags & AREA_FLAG_CAN_HEARTH_AND_RES))
+    {
         return;
+    }
 
     // Can't use in flight
     if (_player->IsTaxiFlying())
+    {
         return;
+    }
 
     // Send Everytime
     _player->BuildPlayerRepop();

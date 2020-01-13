@@ -193,15 +193,21 @@ bool CannibalizeObjectCheck::operator()(Corpse* u)
 {
     // ignore bones
     if (u->GetType() == CORPSE_BONES)
+    {
         return false;
+    }
 
     Player* owner = ObjectAccessor::FindPlayer(u->GetOwnerGuid());
 
     if (!owner || i_fobj->IsFriendlyTo(owner))
+    {
         return false;
+    }
 
     if (i_fobj->IsWithinDistInMap(u, i_range))
+    {
         return true;
+    }
 
     return false;
 }
@@ -214,7 +220,9 @@ void MaNGOS::RespawnDo::operator()(Creature* u) const
     {
         BattleGroundEventIdx eventId = sBattleGroundMgr.GetCreatureEventIndex(u->GetGUIDLow());
         if (!((BattleGroundMap*)map)->GetBG()->IsActiveEvent(eventId.event1, eventId.event2))
+        {
             return;
+        }
     }
 
     u->Respawn();
@@ -228,7 +236,9 @@ void MaNGOS::RespawnDo::operator()(GameObject* u) const
     {
         BattleGroundEventIdx eventId = sBattleGroundMgr.GetGameObjectEventIndex(u->GetGUIDLow());
         if (!((BattleGroundMap*)map)->GetBG()->IsActiveEvent(eventId.event1, eventId.event2))
+        {
             return;
+        }
     }
 
     u->Respawn();
@@ -237,18 +247,26 @@ void MaNGOS::RespawnDo::operator()(GameObject* u) const
 void MaNGOS::CallOfHelpCreatureInRangeDo::operator()(Creature* u)
 {
     if (u == i_funit)
+    {
         return;
+    }
 
     if (!u->CanAssistTo(i_funit, i_enemy, false))
+    {
         return;
+    }
 
     // too far
     if (!i_funit->IsWithinDistInMap(u, i_range))
+    {
         return;
+    }
 
     // only if see assisted creature
     if (!i_funit->IsWithinLOSInMap(u))
+    {
         return;
+    }
 
     if (u->AI())
         u->AI()->AttackStart(i_enemy);
@@ -257,18 +275,26 @@ void MaNGOS::CallOfHelpCreatureInRangeDo::operator()(Creature* u)
 bool MaNGOS::AnyAssistCreatureInRangeCheck::operator()(Creature* u)
 {
     if (u == i_funit)
+    {
         return false;
+    }
 
     if (!u->CanAssistTo(i_funit, i_enemy))
+    {
         return false;
+    }
 
     // too far
     if (!i_funit->IsWithinDistInMap(u, i_range))
+    {
         return false;
+    }
 
     // only if see assisted creature
     if (!i_funit->IsWithinLOSInMap(u))
+    {
         return false;
+    }
 
     return true;
 }

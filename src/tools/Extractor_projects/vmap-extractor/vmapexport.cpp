@@ -481,7 +481,9 @@ bool ExtractSingleWmo(std::string& fname)
     fixnamen(szLocalFile, strlen(szLocalFile));
 
     if (FileExists(szLocalFile))
+    {
         return true;
+    }
 
     int p = 0;
     //Select root wmo files
@@ -499,7 +501,9 @@ bool ExtractSingleWmo(std::string& fname)
     }
 
     if (p == 3)
+    {
         return true;
+    }
 
     bool file_ok = true;
     std::cout << "Extracting " << fname << std::endl;

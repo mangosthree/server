@@ -58,7 +58,9 @@ void WorldSession::SendTaxiStatus(ObjectGuid guid)
 
     // not found nearest
     if (curloc == 0)
+    {
         return;
+    }
 
     DEBUG_LOG("WORLD: current location %u ", curloc);
 
@@ -87,7 +89,9 @@ void WorldSession::HandleTaxiQueryAvailableNodes(WorldPacket& recv_data)
 
     // unknown taxi node case
     if (SendLearnNewTaxiNode(unit))
+    {
         return;
+    }
 
     // known taxi node case
     SendTaxiMenu(unit);
@@ -99,7 +103,9 @@ void WorldSession::SendTaxiMenu(Creature* unit)
     uint32 curloc = sObjectMgr.GetNearestTaxiNode(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ(), unit->GetMapId(), GetPlayer()->GetTeam());
 
     if (curloc == 0)
+    {
         return;
+    }
 
     DEBUG_LOG("WORLD: CMSG_TAXINODE_STATUS_QUERY %u ", curloc);
 
@@ -145,7 +151,9 @@ bool WorldSession::SendLearnNewTaxiNode(Creature* unit)
         return true;
     }
     else
+    {
         return false;
+    }
 }
 
 void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)
@@ -190,7 +198,9 @@ void WorldSession::HandleActivateTaxiExpressOpcode(WorldPacket& recv_data)
     }
 
     if (nodes.empty())
+    {
         return;
+    }
 
     DEBUG_LOG("WORLD: Received opcode CMSG_ACTIVATETAXIEXPRESS from %d to %d" , nodes.front(), nodes.back());
 
@@ -210,7 +220,9 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
     // we need process only (1)
     uint32 curDest = GetPlayer()->m_taxi.GetTaxiDestination();
     if (!curDest)
+    {
         return;
+    }
 
     TaxiNodesEntry const* curDestNode = sTaxiNodesStore.LookupEntry(curDest);
 

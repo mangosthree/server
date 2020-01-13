@@ -149,10 +149,22 @@ namespace MMAP
         fwrite(&(chf->ch), sizeof(chf->ch), 1, file);
 
         int tmp = 0;
-        if (chf->cells) { tmp |= 1; }
-        if (chf->spans) { tmp |= 2; }
-        if (chf->dist) { tmp |= 4; }
-        if (chf->areas) { tmp |= 8; }
+        if (chf->cells)
+        {
+            tmp |= 1;
+        }
+        if (chf->spans)
+        {
+            tmp |= 2;
+        }
+        if (chf->dist)
+        {
+            tmp |= 4;
+        }
+        if (chf->areas)
+        {
+            tmp |= 8;
+        }
 
         fwrite(&tmp, sizeof(tmp), 1, file);
 

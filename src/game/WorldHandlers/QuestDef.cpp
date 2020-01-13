@@ -301,7 +301,9 @@ uint32 Quest::XPValue(Player* pPlayer) const
 int32  Quest::GetRewOrReqMoney() const
 {
     if (RewOrReqMoney <= 0)
+    {
         return RewOrReqMoney;
+    }
 
     return int32(RewOrReqMoney * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
 }
@@ -309,7 +311,9 @@ int32  Quest::GetRewOrReqMoney() const
 bool Quest::IsAllowedInRaid() const
 {
     if (Type == QUEST_TYPE_RAID || Type == QUEST_TYPE_RAID_10 || Type == QUEST_TYPE_RAID_25)
+    {
         return true;
+    }
 
     return sWorld.getConfig(CONFIG_BOOL_QUEST_IGNORE_RAID);
 }
@@ -327,7 +331,9 @@ uint32 Quest::CalculateRewardHonor(uint32 level) const
         /* not exist in 4.x
         TeamContributionPoints const* tc = sTeamContributionPoints.LookupEntry(level-1);
         if(!tc)
+        {
             return 0;
+        }
         */
         uint32 i_honor = uint32(/*tc->Value*/1.0f * GetRewHonorMultiplier() * 0.1f);
         honor = i_honor + GetRewHonorAddition();

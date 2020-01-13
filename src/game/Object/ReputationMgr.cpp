@@ -40,7 +40,9 @@ ReputationRank ReputationMgr::ReputationToRank(int32 standing)
     {
         limit -= PointsInRank[i];
         if (standing >= limit)
+        {
             return ReputationRank(i);
+        }
     }
     return MIN_REPUTATION_RANK;
 }
@@ -61,7 +63,9 @@ int32 ReputationMgr::GetReputation(uint32 faction_id) const
 int32 ReputationMgr::GetBaseReputation(FactionEntry const* factionEntry) const
 {
     if (!factionEntry)
+    {
         return 0;
+    }
 
     uint32 raceMask = m_player->getRaceMask();
     uint32 classMask = m_player->getClassMask();
@@ -75,10 +79,14 @@ int32 ReputationMgr::GetReputation(FactionEntry const* factionEntry) const
 {
     // Faction without recorded reputation. Just ignore.
     if (!factionEntry)
+    {
         return 0;
+    }
 
     if (FactionState const* state = GetState(factionEntry))
+    {
         return GetBaseReputation(factionEntry) + state->Standing;
+    }
 
     return 0;
 }
@@ -106,7 +114,9 @@ void ReputationMgr::ApplyForceReaction(uint32 faction_id, ReputationRank rank, b
 uint32 ReputationMgr::GetDefaultStateFlags(FactionEntry const* factionEntry) const
 {
     if (!factionEntry)
+    {
         return 0;
+    }
 
     uint32 raceMask = m_player->getRaceMask();
     uint32 classMask = m_player->getClassMask();
@@ -201,7 +211,9 @@ void ReputationMgr::SendInitialReputations()
 void ReputationMgr::SendVisible(FactionState const* faction) const
 {
     if (m_player->GetSession()->PlayerLoading())
+    {
         return;
+    }
 
     // make faction visible in reputation list at client
     WorldPacket data(SMSG_SET_FACTION_VISIBLE, 4);
@@ -361,7 +373,9 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
         achievementManager.UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_HONORED_REPUTATION, factionEntry->ID);
 
         if (new_rank > old_rank)
+        {
             return true;
+        }
     }
     return false;
 }
@@ -369,7 +383,9 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
 void ReputationMgr::SetVisible(FactionTemplateEntry const* factionTemplateEntry)
 {
     if (!factionTemplateEntry->faction)
+    {
         return;
+    }
 
     if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction))
         SetVisible(factionEntry);
@@ -378,11 +394,15 @@ void ReputationMgr::SetVisible(FactionTemplateEntry const* factionTemplateEntry)
 void ReputationMgr::SetVisible(FactionEntry const* factionEntry)
 {
     if (factionEntry->reputationListID < 0)
+    {
         return;
+    }
 
     FactionStateList::iterator itr = m_factions.find(factionEntry->reputationListID);
     if (itr == m_factions.end())
+    {
         return;
+    }
 
     SetVisible(&itr->second);
 }
@@ -391,11 +411,15 @@ void ReputationMgr::SetVisible(FactionState* faction)
 {
     // always invisible or hidden faction can't be make visible
     if (faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED | FACTION_FLAG_HIDDEN))
+    {
         return;
+    }
 
     // already set
     if (faction->Flags & FACTION_FLAG_VISIBLE)
+    {
         return;
+    }
 
     faction->Flags |= FACTION_FLAG_VISIBLE;
     faction->needSend = true;
@@ -410,11 +434,15 @@ void ReputationMgr::SetAtWar(RepListID repListID, bool on)
 {
     FactionStateList::iterator itr = m_factions.find(repListID);
     if (itr == m_factions.end())
+    {
         return;
+    }
 
     // always invisible or hidden faction can't change war state
     if (itr->second.Flags & (FACTION_FLAG_INVISIBLE_FORCED | FACTION_FLAG_HIDDEN))
+    {
         return;
+    }
 
     SetAtWar(&itr->second, on);
 }
@@ -423,11 +451,15 @@ void ReputationMgr::SetAtWar(FactionState* faction, bool atWar)
 {
     // not allow declare war to faction unless already hated or less
     if (atWar && (faction->Flags & FACTION_FLAG_PEACE_FORCED) && ReputationToRank(faction->Standing) > REP_HATED)
+    {
         return;
+    }
 
     // already set
     if (((faction->Flags & FACTION_FLAG_AT_WAR) != 0) == atWar)
+    {
         return;
+    }
 
     if (atWar)
         faction->Flags |= FACTION_FLAG_AT_WAR;
@@ -442,7 +474,9 @@ void ReputationMgr::SetInactive(RepListID repListID, bool on)
 {
     FactionStateList::iterator itr = m_factions.find(repListID);
     if (itr == m_factions.end())
+    {
         return;
+    }
 
     SetInactive(&itr->second, on);
 }
@@ -451,11 +485,15 @@ void ReputationMgr::SetInactive(FactionState* faction, bool inactive)
 {
     // always invisible or hidden faction can't be inactive
     if (inactive && ((faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED | FACTION_FLAG_HIDDEN)) || !(faction->Flags & FACTION_FLAG_VISIBLE)))
+    {
         return;
+    }
 
     // already set
     if (((faction->Flags & FACTION_FLAG_INACTIVE) != 0) == inactive)
+    {
         return;
+    }
 
     if (inactive)
         faction->Flags |= FACTION_FLAG_INACTIVE;

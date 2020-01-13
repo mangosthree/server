@@ -280,7 +280,9 @@ class  Group
         {
             for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
                 if (itr->name == name)
+                {
                     return itr->guid;
+                }
 
             return ObjectGuid();
         }
@@ -288,7 +290,9 @@ class  Group
         {
             member_citerator mslot = _getMemberCSlot(guid);
             if (mslot == m_memberSlots.end())
+            {
                 return false;
+            }
 
             return mslot->assistant;
         }
@@ -311,7 +315,9 @@ class  Group
         {
             member_citerator mslot = _getMemberCSlot(guid);
             if (mslot == m_memberSlots.end())
+            {
                 return MAX_RAID_SUBGROUPS + 1;
+            }
 
             return mslot->group;
         }
@@ -331,14 +337,18 @@ class  Group
         void SetAssistant(ObjectGuid guid, bool state)
         {
             if (!isRaidGroup())
+            {
                 return;
+            }
             if (_setAssistantFlag(guid, state))
                 SendUpdate();
         }
         void SetMainTank(ObjectGuid guid)
         {
             if (!isRaidGroup())
+            {
                 return;
+            }
 
             if (_setMainTank(guid))
                 SendUpdate();
@@ -346,7 +356,9 @@ class  Group
         void SetMainAssistant(ObjectGuid guid)
         {
             if (!isRaidGroup())
+            {
                 return;
+            }
 
             if (_setMainAssistant(guid))
                 SendUpdate();
@@ -432,7 +444,9 @@ class  Group
         {
             for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
                 if (itr->guid == guid)
+                {
                     return itr;
+                }
 
             return m_memberSlots.end();
         }
@@ -441,7 +455,9 @@ class  Group
         {
             for (member_witerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
                 if (itr->guid == guid)
+                {
                     return itr;
+                }
 
             return m_memberSlots.end();
         }

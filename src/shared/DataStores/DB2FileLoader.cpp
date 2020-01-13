@@ -303,7 +303,9 @@ char* DB2FileLoader::AutoProduceData(const char* format, uint32& records, char**
             indexTable[getRecord(y).getUInt(i)] = &dataTable[offset];
         }
         else
-            { indexTable[y] = &dataTable[offset]; }
+        {
+            indexTable[y] = &dataTable[offset];
+        }
 
         for (uint32 x = 0; x < fieldCount; ++x)
         {
@@ -409,7 +411,9 @@ char* DB2FileLoader::AutoProduceStringsArrayHolders(const char* format, char* da
 char* DB2FileLoader::AutoProduceStrings(const char* format, char* dataTable, LocaleConstant loc)
 {
     if(strlen(format)!=fieldCount)
+    {
         return NULL;
+    }
 
     // each string field at load have array of string for each locale
     size_t stringHolderSize = sizeof(char*) * MAX_LOCALE;

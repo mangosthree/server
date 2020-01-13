@@ -80,7 +80,9 @@ char const* GetExtension(char const* FileName)
 {
     char const* szTemp;
     if ((szTemp = strrchr(FileName, '.')) != NULL)
+    {
         return szTemp;
+    }
     return NULL;
 }
 
@@ -93,7 +95,10 @@ ADTFile::ADTFile(char* filename): ADT(WorldMpq, filename)
 
 bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths)
 {
-    if (ADT.isEof()) { return false; }
+    if (ADT.isEof())
+    {
+        return false;
+    }
 
     uint32 size;
 
@@ -107,7 +112,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
     xMap = TempMapNumber.substr(TempMapNumber.find("_") + 1, (TempMapNumber.find_last_of("_") - 1) - (TempMapNumber.find("_")));
     yMap = TempMapNumber.substr(TempMapNumber.find_last_of("_") + 1, (TempMapNumber.length()) - (TempMapNumber.find_last_of("_")));
     AdtFilename.erase((AdtFilename.length() - xMap.length() - yMap.length() - 2), (xMap.length() + yMap.length() + 2));
-    
+
     string AdtMapNumber = xMap + ' ' + yMap + ' ' + GetPlainName((char*)AdtFilename.c_str());
 
     std::string dirname = std::string(szWorkDirWmo) + "/dir_bin";

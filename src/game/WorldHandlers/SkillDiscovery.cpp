@@ -173,7 +173,9 @@ uint32 GetExplicitDiscoverySpell(uint32 spellId, Player* player)
     // in this case we have both skill and spell
     SkillDiscoveryMap::const_iterator tab = SkillDiscoveryStore.find(spellId);
     if (tab == SkillDiscoveryStore.end())
+    {
         return 0;
+    }
 
     SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellId);
     uint32 skillvalue = bounds.first != bounds.second ? player->GetSkillValue(bounds.first->second->skillId) : 0;
@@ -196,7 +198,9 @@ uint32 GetExplicitDiscoverySpell(uint32 spellId, Player* player)
             continue;
 
         if (item_iter->chance > roll)
+        {
             return item_iter->spellId;
+        }
 
         roll -= item_iter->chance;
     }
@@ -225,7 +229,9 @@ uint32 GetSkillDiscoverySpell(uint32 skillId, uint32 spellId, Player* player)
     }
 
     if (!skillId)
+    {
         return 0;
+    }
 
     // check skill line case
     tab = SkillDiscoveryStore.find(-(int32)skillId);

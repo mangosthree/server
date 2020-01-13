@@ -418,9 +418,13 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
             liquidEntry = liquidType;
         }
         else if (liquidType == 15)
-            { liquidEntry = 0; }
+        {
+            liquidEntry = 0;
+        }
         else
-            { liquidEntry = liquidType + 1; }
+        {
+            liquidEntry = liquidType + 1;
+        }
 
         if (!liquidEntry)
         {
@@ -559,7 +563,10 @@ WMOInstance::WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint
 
     float scale = 1.0f;
     uint32 flags = MOD_HAS_BOUND;
-    if (tileX == 65 && tileY == 65) { flags |= MOD_WORLDSPAWN; }
+    if (tileX == 65 && tileY == 65)
+    {
+        flags |= MOD_WORLDSPAWN;
+    }
     //write mapID, tileX, tileY, Flags, ID, Pos, Rot, Scale, Bound_lo, Bound_hi, name
     fwrite(&mapID, sizeof(uint32), 1, pDirfile);
     fwrite(&tileX, sizeof(uint32), 1, pDirfile);

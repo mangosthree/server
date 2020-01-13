@@ -27,11 +27,15 @@ bool ExtractSingleModel(std::string& origPath, std::string& fixedName, StringSet
     output += fixedName;
 
     if (FileExists(output.c_str()))
+    {
         return true;
+    }
 
     Model mdl(origPath);                                    // Possible changed fname
     if (!mdl.open(failedPaths))
+    {
         return false;
+    }
 
     return mdl.ConvertToVMAPModel(output.c_str());
 }

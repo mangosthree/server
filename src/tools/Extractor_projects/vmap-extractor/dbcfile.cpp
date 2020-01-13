@@ -34,7 +34,9 @@ DBCFile::DBCFile(HANDLE mpq, const char* filename) :
 bool DBCFile::open()
 {
     if (!SFileOpenFileEx(_mpq, _filename, SFILE_OPEN_FROM_MPQ, &_file))
+    {
         return false;
+    }
 
     char header[4];
     unsigned int na, nb, es, ss;
@@ -42,37 +44,51 @@ bool DBCFile::open()
     DWORD readBytes = 0;
     SFileReadFile(_file, header, 4, &readBytes, NULL);
     if (readBytes != 4)                                         // Number of records
+    {
         return false;
+    }
 
     if (header[0] != 'W' || header[1] != 'D' || header[2] != 'B' || header[3] != 'C')
+    {
         return false;
+    }
 
     readBytes = 0;
     SFileReadFile(_file, &na, 4, &readBytes, NULL);
     if (readBytes != 4)                                         // Number of records
+    {
         return false;
+    }
 
     readBytes = 0;
     SFileReadFile(_file, &nb, 4, &readBytes, NULL);
     if (readBytes != 4)                                         // Number of fields
+    {
         return false;
+    }
 
     readBytes = 0;
     SFileReadFile(_file, &es, 4, &readBytes, NULL);
     if (readBytes != 4)                                         // Size of a record
+    {
         return false;
+    }
 
     readBytes = 0;
     SFileReadFile(_file, &ss, 4, &readBytes, NULL);
     if (readBytes != 4)                                         // String size
+    {
         return false;
+    }
 
     _recordSize = es;
     _recordCount = na;
     _fieldCount = nb;
     _stringSize = ss;
     if (_fieldCount * 4 != _recordSize)
+    {
         return false;
+    }
 
     _data = new unsigned char[_recordSize * _recordCount + _stringSize];
     _stringTable = _data + _recordSize * _recordCount;
@@ -81,7 +97,9 @@ bool DBCFile::open()
     readBytes = 0;
     SFileReadFile(_file, _data, data_size, &readBytes, NULL);
     if (readBytes != data_size)
+    {
         return false;
+    }
 
     return true;
 }

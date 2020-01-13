@@ -740,7 +740,9 @@ class ObjectMgr
         {
             QuestPOIMap::const_iterator itr = mQuestPOIMap.find(questId);
             if (itr != mQuestPOIMap.end())
+            {
                 return &itr->second;
+            }
             return NULL;
         }
 
@@ -748,7 +750,9 @@ class ObjectMgr
         {
             DungeonFinderRequirementsMap::const_iterator itr = mDungeonFinderRequirementsMap.find(MAKE_PAIR32(mapId, difficulty));
             if (itr != mDungeonFinderRequirementsMap.end())
+            {
                 return &itr->second;
+            }
             return NULL;
         }
 
@@ -960,11 +964,15 @@ class ObjectMgr
         {
             MailLevelRewardMap::const_iterator map_itr = m_mailLevelRewardMap.find(level);
             if (map_itr == m_mailLevelRewardMap.end())
+            {
                 return NULL;
+            }
 
             for (MailLevelRewardList::const_iterator set_itr = map_itr->second.begin(); set_itr != map_itr->second.end(); ++set_itr)
                 if (set_itr->raceMask & raceMask)
+                {
                     return &*set_itr;
+                }
 
             return NULL;
         }
@@ -1277,7 +1285,9 @@ class ObjectMgr
         {
             ItemConvertMap::const_iterator iter = m_ItemConvert.find(itemEntry);
             if (iter == m_ItemConvert.end())
+            {
                 return 0;
+            }
 
             ItemPrototype const* proto = GetItemPrototype(iter->second);
             return (proto && proto->AllowableRace & raceMask) ? iter->second : 0;

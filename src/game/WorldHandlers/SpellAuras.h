@@ -175,7 +175,9 @@ class  SpellAuraHolder
         void SetAuraCharges(uint32 charges, bool update = true)
         {
             if (m_procCharges == charges)
+            {
                 return;
+            }
             m_procCharges = charges;
 
             if (update)
@@ -184,7 +186,9 @@ class  SpellAuraHolder
         bool DropAuraCharge()                               // return true if last charge dropped
         {
             if (m_procCharges == 0)
+            {
                 return false;
+            }
 
             --m_procCharges;
             SendAuraUpdate(false);

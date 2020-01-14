@@ -64,7 +64,9 @@ void fixnamen(char* name, size_t len)
     }
     //extension in lowercase
     for (size_t i = len - 3; i < len; i++)
+    {
         name[i] |= 0x20;
+    }
 }
 
 void fixname2(char* name, size_t len)

@@ -857,7 +857,9 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     DEBUG_LOG("WORLD: Changed RankName to %s , Rights to 0x%.4X", rankname.c_str(), rights);
 
     for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
+    {
         guild->SetBankRightsAndSlots(rankId, uint8(i), uint16(BankRights[i] & 0xFF), uint16(BankSlotPerDay[i]), true);
+    }
 
     guild->SetBankMoneyPerDay(rankId, MoneyPerDay);
     guild->SetRankName(rankId, rankname);

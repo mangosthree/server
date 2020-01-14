@@ -302,7 +302,9 @@ uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType d
 
     // -5% of total per any additional effect (multiplicative)
     for (int i = 0; i < effects; ++i)
+    {
         CastingTime *= 0.95f;
+    }
 
     return CastingTime;
 }
@@ -4120,7 +4122,9 @@ void SpellMgr::LoadPetDefaultSpells()
         int32 petSpellsId = -(int32)cInfo->PetSpellDataId;
         PetDefaultSpellsEntry petDefSpells;
         for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
+        {
             petDefSpells.spellid[j] = spellDataEntry->spellId[j];
+        }
 
         if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
         {
@@ -4161,7 +4165,9 @@ void SpellMgr::LoadPetDefaultSpells()
                 PetDefaultSpellsEntry petDefSpells;
                 if (CreatureTemplateSpells const* templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(cInfo->Entry))
                     for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
+                    {
                         petDefSpells.spellid[j] = templateSpells->spells[j];
+                    }
 
                 if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
                 {

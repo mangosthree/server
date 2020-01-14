@@ -56,7 +56,9 @@ WaypointBehavior::WaypointBehavior(const WaypointBehavior& b)
     model1 = b.model1;
     model2 = b.model2;
     for (int i = 0; i < MAX_WAYPOINT_TEXT; ++i)
+    {
         textid[i] = b.textid[i];
+    }
 }
 
 void WaypointManager::Load()
@@ -401,7 +403,9 @@ void WaypointManager::Load()
     if (!movementScriptSet.empty())
     {
         for (std::set<uint32>::const_iterator itr = movementScriptSet.begin(); itr != movementScriptSet.end(); ++itr)
+        {
             sLog.outErrorDb("Table `dbscripts_on_creature_movement` contain unused script, id %u.", *itr);
+        }
     }
 }
 
@@ -423,7 +427,9 @@ void WaypointManager::Unload()
 void WaypointManager::_clearPath(WaypointPath& path)
 {
     for (WaypointPath::const_iterator itr = path.begin(); itr != path.end(); ++itr)
+    {
         delete itr->second.behavior;
+    }
     path.clear();
 }
 

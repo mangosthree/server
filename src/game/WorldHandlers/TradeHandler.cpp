@@ -148,7 +148,9 @@ void WorldSession::SendUpdateTrade(bool trader_state /*= true*/)
                 data.WriteGuidBytes<1>(creatorGuid);
                 data << uint32(item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
                 for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT + MAX_GEM_SOCKETS; ++enchant_slot)
+                {
                     data << uint32(item->GetEnchantmentId(EnchantmentSlot(enchant_slot)));
+                }
                 data << uint32(item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY));
                 data.WriteGuidBytes<6, 2, 7, 4>(creatorGuid);
                 data << uint32(item->GetEnchantmentId(REFORGE_ENCHANTMENT_SLOT));                                  // reforge Id

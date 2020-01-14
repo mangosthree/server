@@ -227,7 +227,9 @@ void WorldSession::SendLfgJoinResult(LfgJoinResult result, LFGState state, party
 {
     uint32 packetSize = 0;
     for (partyForbidden::const_iterator it = lockedDungeons.begin(); it != lockedDungeons.end(); ++it)
+    {
         packetSize += 12 + uint32(it->second.size()) * 8;
+    }
 
     WorldPacket data(SMSG_LFG_JOIN_RESULT, packetSize);
     data << uint32(result);
@@ -274,13 +276,17 @@ void WorldSession::SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 
         {
             data << uint8(0);
             for (uint32 i = 0; i < 3; ++i)
+            {
                 data << uint8(0);
+            }
         }
 
         uint8 count = 1;
         data << uint8(count);
         for (uint32 i = 0; i < count; ++i)
+        {
             data << uint32(id);
+        }
         data << "";
     }
     SendPacket(&data);
@@ -334,12 +340,16 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
         if (isGroup)
         {
             for (uint32 i = 0; i < 3; ++i)
+            {
                 data << uint8(0);
+            }
         }
 
         data << uint8(dungeonSize);
         for (std::set<uint32>::iterator it = status.dungeonList.begin(); it != status.dungeonList.end(); ++it)
+        {
             data << uint32(*it);
+        }
 
         data << status.comment;
     }
@@ -380,7 +390,9 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
     data << uint8(dungeons.size());
     if (!dungeons.empty())
         for (std::set<uint32>::iterator it = dungeons.begin(); it != dungeons.end(); ++it)
+        {
             data << uint32(sLFGMgr.GetDungeonEntry(*it));
+        }
 
     data << uint8(roleCheck.currentRoles.size());
     if (!roleCheck.currentRoles.empty())

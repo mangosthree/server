@@ -267,7 +267,9 @@ bool AccountMgr::normalizeString(std::string& utf8str)
     }
 
     for (uint32 i = 0; i <= wstr_len; ++i)
+    {
         wstr_buf[i] = wcharToUpperOnlyLatin(wstr_buf[i]);
+    }
 
     return WStrToUtf8(wstr_buf, wstr_len, utf8str);
 }

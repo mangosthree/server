@@ -365,7 +365,9 @@ char* DB2FileLoader::AutoProduceStringsArrayHolders(const char* format, char* da
 
     // dbc strings expected to have at least empty string
     for(size_t i = 0; i < stringHoldersPoolSize / sizeof(char*); ++i)
+    {
         ((char const**)stringHoldersPool)[i] = nullStr;
+    }
 
     uint32 offset=0;
 

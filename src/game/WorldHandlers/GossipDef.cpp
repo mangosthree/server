@@ -494,9 +494,13 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     data << pQuest->GetRewChoiceItemsCount();
 
     for (uint32 i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
+    {
         data << pQuest->RewChoiceItemId[i];
+    }
     for (uint32 i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
+    {
         data << pQuest->RewChoiceItemCount[i];
+    }
     for (uint32 i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
         if (ItemPrototype const* IProto = ObjectMgr::GetItemPrototype(pQuest->RewChoiceItemId[i]))
             data << IProto->DisplayInfoID;
@@ -506,9 +510,13 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     data << pQuest->GetRewItemsCount();
 
     for (uint32 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+    {
         data << pQuest->RewItemId[i];
+    }
     for (uint32 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+    {
         data << pQuest->RewItemCount[i];
+    }
     for (uint32 i = 0; i < QUEST_REWARDS_COUNT; ++i)
         if (ItemPrototype const* IProto = ObjectMgr::GetItemPrototype(pQuest->RewItemId[i]))
             data << IProto->DisplayInfoID;
@@ -534,7 +542,9 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
         data << pQuest->RewRepFaction[i];
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // columnid in QuestFactionReward.dbc (if negative, from second row)
+    {
         data << pQuest->RewRepValueId[i];
+    }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No bonus is expected given
         data << int32(0);
@@ -544,10 +554,14 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     data << pQuest->GetRewSpellCast();              // casted spell
 
     for (uint32 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
+    {
         data << pQuest->RewCurrencyId[i];
+    }
 
     for (uint32 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
+    {
         data << pQuest->RewCurrencyCount[i];
+    }
 
     data << pQuest->GetRewSkill();
     data << pQuest->GetRewSkillValue();
@@ -583,7 +597,9 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
     PortraitTurnInText = pQuest->GetPortraitTurnInText();
 
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+    {
         ObjectiveText[i] = pQuest->ObjectiveText[i];
+    }
 
     int loc_idx = GetMenuSession()->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
@@ -671,9 +687,13 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
     /*if (pQuest->HasQuestFlag(QUEST_FLAGS_HIDDEN_REWARDS))
     {
         for (iI = 0; iI < QUEST_REWARDS_COUNT; ++iI)
+        {
             data << uint32(0) << uint32(0);
+        }
         for (iI = 0; iI < QUEST_REWARD_CHOICES_COUNT; ++iI)
+        {
             data << uint32(0) << uint32(0);
+        }
     }
     else*/
     {
@@ -693,7 +713,9 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
         data << uint32(pQuest->RewRepFaction[i]);
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // columnid in QuestFactionReward.dbc (if negative, from second row)
+    {
         data << int32(pQuest->RewRepValueId[i]);
+    }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No bonus is expected given
         data << int32(0);
@@ -735,7 +757,9 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
     data << uint32(pQuest->GetReqSpellLearned());
 
     for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; ++iI)
+    {
         data << ObjectiveText[iI];
+    }
 
     for(iI = 0; iI < QUEST_REWARD_CURRENCY_COUNT; ++iI)
     {
@@ -825,9 +849,13 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
 
     data << uint32(pQuest->GetRewChoiceItemsCount());
     for (uint32 i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
+    {
         data << uint32(pQuest->RewChoiceItemId[i]);
+    }
     for (uint32 i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
+    {
         data << uint32(pQuest->RewChoiceItemCount[i]);
+    }
     for (uint32 i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
         if (ItemPrototype const* pItem = ObjectMgr::GetItemPrototype(pQuest->RewChoiceItemId[i]))
             data << uint32(pItem->DisplayInfoID);
@@ -836,9 +864,13 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
 
     data << uint32(pQuest->GetRewItemsCount());
     for (uint32 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+    {
         data << uint32(pQuest->RewItemId[i]);
+    }
     for (uint32 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+    {
         data << uint32(pQuest->RewItemCount[i]);
+    }
     for (uint32 i = 0; i < QUEST_REWARDS_COUNT; ++i)
         if (ItemPrototype const* pItem = ObjectMgr::GetItemPrototype(pQuest->RewItemId[i]))
             data << uint32(pItem->DisplayInfoID);
@@ -865,7 +897,9 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
         data << uint32(pQuest->RewRepFaction[i]);
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // columnid in QuestFactionReward.dbc (if negative, from second row)
+    {
         data << int32(pQuest->RewRepValueId[i]);
+    }
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No diplomacy bonus is expected given, reward also does not display in chat window
         data << int32(0);
@@ -875,10 +909,14 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
     data << uint32(pQuest->GetRewSpellCast());              // casted spell
 
     for (uint32 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
+    {
         data << uint32(pQuest->RewCurrencyId[i]);
+    }
 
     for (uint32 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
+    {
         data << uint32(pQuest->RewCurrencyCount[i]);
+    }
 
     data << uint32(pQuest->GetRewSkill());
     data << uint32(pQuest->GetRewSkillValue());

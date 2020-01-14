@@ -123,7 +123,9 @@ void LoadDB2Stores(const std::string& dataPath)
     {
         std::string str;
         for (StoreProblemList1::iterator i = bad_db2_files.begin(); i != bad_db2_files.end(); ++i)
+        {
             str += *i + "\n";
+        }
 
         sLog.outError("Some required *.db2 files (%u from %d) not found or not compatible:\n%s",(uint32)bad_db2_files.size(), DB2FileCount, str.c_str());
         exit(1);

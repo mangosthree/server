@@ -781,7 +781,9 @@ void WorldSession::HandleGetMirrorimageData(WorldPacket& recv_data)
         data << ObjectGuid();
 
         for (int i = 0; i < 11; ++i)
+        {
             data << (uint32)0;
+        }
     }
 
     SendPacket(&data);

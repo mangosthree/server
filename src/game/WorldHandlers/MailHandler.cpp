@@ -141,7 +141,9 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
 
     ObjectGuid itemGuids[MAX_MAIL_ITEMS];
     for (uint8 i = 0; i < items_count; ++i)
+    {
         recv_data.ReadGuidMask<2, 6, 3, 7, 1, 0, 4, 5>(itemGuids[i]);
+    }
 
     recv_data.ReadGuidMask<3, 4>(mailboxGuid);
 

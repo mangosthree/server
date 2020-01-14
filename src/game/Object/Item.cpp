@@ -924,7 +924,9 @@ void Item::SetItemRandomProperties(int32 randomPropId)
                 SetState(ITEM_CHANGED);
             }
             for (uint32 i = PROP_ENCHANTMENT_SLOT_1; i < PROP_ENCHANTMENT_SLOT_4; ++i)
+            {
                 SetEnchantment(EnchantmentSlot(i), item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_1], 0, 0);
+            }
         }
     }
     else
@@ -941,7 +943,9 @@ void Item::SetItemRandomProperties(int32 randomPropId)
             }
 
             for (uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_4; ++i)
+            {
                 SetEnchantment(EnchantmentSlot(i), item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_0], 0, 0);
+            }
         }
     }
 }
@@ -1268,7 +1272,9 @@ void Item::ClearEnchantment(EnchantmentSlot slot)
     }
 
     for (uint8 x = 0; x < 3; ++x)
+    {
         SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot * MAX_ENCHANTMENT_OFFSET + x, 0);
+    }
     SetState(ITEM_CHANGED);
 }
 
@@ -1277,7 +1283,9 @@ void Item::SendUpdateSockets()
     WorldPacket data(SMSG_SOCKET_GEMS, 8 + 4 + 4 + 4 + 4);
     data << GetObjectGuid();
     for (uint32 i = SOCK_ENCHANTMENT_SLOT; i <= BONUS_ENCHANTMENT_SLOT; ++i)
+    {
         data << uint32(GetEnchantmentId(EnchantmentSlot(i)));
+    }
 
     GetOwner()->SendDirectMessage(&data);
 }

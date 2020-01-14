@@ -108,7 +108,9 @@ Guild::Guild()
     m_GuildEventLogNextGuid = 0;
     m_GuildBankEventLogNextGuid_Money = 0;
     for (uint8 i = 0; i < GUILD_BANK_MAX_TABS; ++i)
+    {
         m_GuildBankEventLogNextGuid_Item[i] = 0;
+    }
 }
 
 Guild::~Guild()
@@ -245,7 +247,9 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
     newmember.LogoutTime = time(NULL);
     newmember.BankResetTimeMoney = 0;                       // this will force update at first query
     for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
+    {
         newmember.BankResetTimeTab[i] = 0;
+    }
     members[lowguid] = newmember;
 
     std::string dbPnote   = newmember.Pnote;
@@ -333,7 +337,9 @@ bool Guild::LoadGuildFromDB(QueryResult* guildDataResult)
     m_TabListMap.resize(purchasedTabs);
 
     for (uint8 i = 0; i < purchasedTabs; ++i)
+    {
         m_TabListMap[i] = new GuildBankTab;
+    }
 
     return true;
 }
@@ -1115,7 +1121,9 @@ void Guild::QueryRanks(WorldSession* session)
     data.WriteBits(m_Ranks.size(), 18);
 
     for (uint8 i = 0; i < m_Ranks.size(); ++i)
+    {
         data.WriteBits(m_Ranks[i].Name.length(), 7);
+    }
 
     for (uint8 i = 0; i < m_Ranks.size(); ++i)
     {
@@ -1183,7 +1191,9 @@ void Guild::DisplayGuildEventLog(WorldSession* session)
     // count, max count == 100
     data.WriteBits(m_GuildEventLog.size(), 23);
     for (GuildEventLog::iterator itr = m_GuildEventLog.begin(); itr != m_GuildEventLog.end(); ++itr)
+    {
         itr->WriteData(data, buffer);
+    }
     if (!buffer.empty())
     {
         data.FlushBits();
@@ -1378,7 +1388,9 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, GuildItemPosCountVec cons
     data.WriteBits(0, 22);                                  // Tell client that there's no tab info in this packet
 
     for (GuildItemPosCountVec::const_iterator itr = slots.begin(); itr != slots.end(); ++itr)
+    {
         AppendDisplayGuildBankSlot(data, buffer, tab, itr->Slot);
+    }
 
     data << uint64(GetGuildBankMoney());
     if (!buffer.empty())
@@ -1774,7 +1786,9 @@ void Guild::SetBankRightsAndSlots(uint32 rankId, uint8 TabId, uint32 right, uint
         for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
             if (itr->second.RankId == rankId)
                 for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
+                {
                     itr->second.BankResetTimeTab[i] = 0;
+                }
 
         CharacterDatabase.PExecute("DELETE FROM guild_bank_right WHERE guildid='%u' AND TabId='%u' AND rid='%u'", m_Id, uint32(TabId), rankId);
         CharacterDatabase.PExecute("INSERT INTO guild_bank_right (guildid,TabId,rid,gbright,SlotPerDay) VALUES "
@@ -1960,7 +1974,9 @@ void Guild::DisplayGuildBankLogs(WorldSession* session, uint8 TabId)
         // Here we display money logs
         data.WriteBits(m_GuildBankEventLog_Money.size(), 23);
         for (GuildBankEventLog::iterator itr = m_GuildBankEventLog_Money.begin(); itr != m_GuildBankEventLog_Money.end(); ++itr)
+        {
             itr->WriteData(data, buffer);
+        }
     }
     else
     {
@@ -1968,7 +1984,9 @@ void Guild::DisplayGuildBankLogs(WorldSession* session, uint8 TabId)
         // number of log entries
         data.WriteBits(m_GuildBankEventLog_Item[TabId].size(), 23);
         for (GuildBankEventLog::iterator itr = m_GuildBankEventLog_Item[TabId].begin(); itr != m_GuildBankEventLog_Item[TabId].end(); ++itr)
+        {
             itr->WriteData(data, buffer);
+        }
     }
     if (!buffer.empty())
     {

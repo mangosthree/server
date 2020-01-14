@@ -161,13 +161,19 @@ World::~World()
 
     ///- Empty the kicked session set
     for (auto const session : m_sessions)
+    {
         delete session.second;
+    }
 
     for (auto const cliCommand : m_cliCommandQueue)
+    {
         delete cliCommand;
+    }
 
     for (auto const session : m_sessionAddQueue)
+    {
         delete session;
+    }
 
     VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
@@ -1692,7 +1698,9 @@ void World::showFooter()
 
     std::string sModules;
     for (std::set<std::string>::const_iterator it = modules_.begin(); it != modules_.end(); ++it)
+    {
         sModules = sModules + " \n" + *it;
+    }
 
     sLog.outString("\n"
         "_______________________________________________________\n"

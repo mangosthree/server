@@ -278,7 +278,9 @@ ObjectGridUnloader::Visit(GridRefManager<T> &m)
 {
     // remove all cross-reference before deleting
     for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
+    {
         iter->getSource()->CleanupsBeforeDelete();
+    }
 
     while (!m.isEmpty())
     {

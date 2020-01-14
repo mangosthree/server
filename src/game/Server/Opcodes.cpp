@@ -45,7 +45,9 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES];
 void InitializeOpcodes()
 {
     for (uint16 i = 0; i < NUM_MSG_TYPES; ++i)
+    {
         DefineOpcode(i, "UNKNOWN", STATUS_UNHANDLED, PROCESS_INPLACE, &WorldSession::Handle_NULL);
+    }
 
     OPCODE(MSG_WOW_CONNECTION,                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess            );
     OPCODE(SMSG_AUTH_CHALLENGE,                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );

@@ -125,7 +125,9 @@ ObjectAccessor::SaveAllPlayers()
     HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
     for (HashMapHolder<Player>::MapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+    {
         itr->second->SaveToDB();
+    }
 }
 
 void ObjectAccessor::KickPlayer(ObjectGuid guid)

@@ -54,7 +54,9 @@ void BitStream::WriteBit(uint32 bit)
 template <typename T> void BitStream::WriteBits(T value, size_t bits)
 {
     for (int32 i = bits-1; i >= 0; --i)
+    {
         WriteBit((value >> i) & 1);
+    }
 }
 
 bool BitStream::Empty()
@@ -69,7 +71,9 @@ void BitStream::Reverse()
     Clear();
 
     for(uint32 i = len; i > 0; --i)
+    {
         WriteBit(b[i-1]);
+    }
 }
 
 void BitStream::Print()
@@ -77,7 +81,9 @@ void BitStream::Print()
     std::stringstream ss;
     ss << "BitStream: ";
     for (uint32 i = 0; i < GetLength(); ++i)
+    {
         ss << uint32(GetBit(i)) << " ";
+    }
 
     sLog.outDebug("%s", ss.str().c_str());
 }

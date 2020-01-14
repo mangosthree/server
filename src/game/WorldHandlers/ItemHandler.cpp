@@ -698,7 +698,9 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
     data.WriteGuidMask<3, 6, 5, 2, 7>(vendorguid);
 
     for (uint32 i = 0; i < bitFlags.size(); ++i)
+    {
         data.WriteBit(bitFlags[i]);
+    }
 
     data.WriteGuidMask<4>(vendorguid);
     data.FlushBits();
@@ -1064,7 +1066,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     }
 
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+    {
         recv_data >> gemGuids[i];
+    }
 
     // cheat -> tried to socket same gem multiple times
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
@@ -1102,7 +1106,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 
     Item* Gems[MAX_GEM_SOCKETS];
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
+    {
         Gems[i] = gemGuids[i] ? _player->GetItemByGuid(gemGuids[i]) : NULL;
+    }
 
     GemPropertiesEntry const* GemProps[MAX_GEM_SOCKETS];
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)               // get geminfo from dbc storage
@@ -1252,7 +1258,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 
     // remove ALL enchants
     for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT + MAX_GEM_SOCKETS; ++enchant_slot)
+    {
         _player->ApplyEnchantment(itemTarget, EnchantmentSlot(enchant_slot), false);
+    }
 
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
     {
@@ -1266,7 +1274,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     }
 
     for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT + MAX_GEM_SOCKETS; ++enchant_slot)
+    {
         _player->ApplyEnchantment(itemTarget, EnchantmentSlot(enchant_slot), true);
+    }
 
     bool SocketBonusToBeActivated = itemTarget->GemsFitSockets();// current socketbonus state
     if (SocketBonusActivated != SocketBonusToBeActivated)   // if there was a change...
@@ -1443,16 +1453,24 @@ void WorldSession::SendItemSparseDb2Reply(uint32 entry)
     buff << uint32(proto->ContainerSlots);
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_STATS; ++x)
+    {
         buff << uint32(proto->ItemStat[x].ItemStatType);
+    }
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_STATS; ++x)
+    {
         buff << int32(proto->ItemStat[x].ItemStatValue);
+    }
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_STATS; ++x)
+    {
         buff << int32(proto->ItemStat[x].ItemStatType2);
+    }
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_STATS; ++x)
+    {
         buff << int32(proto->ItemStat[x].ItemStatValue2);
+    }
 
     buff << uint32(proto->ScalingStatDistribution);
     buff << uint32(proto->DamageType);
@@ -1460,22 +1478,34 @@ void WorldSession::SendItemSparseDb2Reply(uint32 entry)
     buff << float(proto->RangedModRange);
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
+    {
         buff << int32(proto->Spells[x].SpellId);
+    }
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
+    {
         buff << uint32(proto->Spells[x].SpellTrigger);
+    }
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
+    {
         buff << int32(proto->Spells[x].SpellCharges);
+    }
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
+    {
         buff << int32(proto->Spells[x].SpellCooldown);
+    }
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
+    {
         buff << uint32(proto->Spells[x].SpellCategory);
+    }
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
+    {
         buff << int32(proto->Spells[x].SpellCategoryCooldown);
+    }
 
     buff << uint32(proto->Bonding);
 
@@ -1510,10 +1540,14 @@ void WorldSession::SendItemSparseDb2Reply(uint32 entry)
     buff << uint32(proto->TotemCategory);
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_SOCKETS; ++x)
+    {
         buff << uint32(proto->Socket[x].Color);
+    }
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_SOCKETS; ++x)
+    {
         buff << uint32(proto->Socket[x].Content);
+    }
 
     buff << uint32(proto->socketBonus);
     buff << uint32(proto->GemProperties);

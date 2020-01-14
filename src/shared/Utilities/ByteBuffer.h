@@ -244,7 +244,9 @@ class ByteBuffer
         template <typename T> void WriteBits(T value, size_t bits)
         {
             for (int32 i = bits-1; i >= 0; --i)
+            {
                 WriteBit((value >> i) & 1);
+            }
         }
 
         uint32 ReadBits(size_t bits)
@@ -261,7 +263,9 @@ class ByteBuffer
         {
             BitStream b;
             for (uint32 i = 0; i < len; ++i)
+            {
                 b.WriteBit(ReadBit());
+            }
             return b;
         }
 
@@ -270,7 +274,9 @@ class ByteBuffer
             uint8* guidByte = ((uint8*)&guid);
 
             for (uint8 i = 0; i < maskCount; i++)
+            {
                 WriteBit(guidByte[maskOrder[i + maskPos]]);
+            }
         }
 
         void WriteGuidBytes(uint64 guid, uint8* byteOrder, uint8 byteCount, uint8 bytePos)
@@ -1081,7 +1087,9 @@ class ByteBuffer
         {
             sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
             for (uint32 i = 0; i < size(); ++i)
+            {
                 sLog.outDebug("%u - ", read<uint8>(i) );
+            }
             sLog.outDebug(" ");
         }
 
@@ -1089,7 +1097,9 @@ class ByteBuffer
         {
             sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
             for (uint32 i = 0; i < size(); ++i)
+            {
                 sLog.outDebug("%c", read<uint8>(i) );
+            }
             sLog.outDebug(" ");
         }
 

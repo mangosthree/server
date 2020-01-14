@@ -1689,7 +1689,9 @@ void WorldSession::HandleRequestHotfix(WorldPacket& recv_data)
     guids.resize(count);
 
     for (uint32 i = 0; i < count; ++i)
+    {
         recv_data.ReadGuidMask<0, 4, 7, 2, 5, 3, 6, 1>(guids[i]);
+    }
 
     uint32 entry = 0;
     for (uint32 i = 0; i < count; ++i)

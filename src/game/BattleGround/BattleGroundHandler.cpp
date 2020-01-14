@@ -820,7 +820,9 @@ void WorldSession::HandleRequestPvPOptionsEnabledOpcode(WorldPacket& recv_data)
 
     WorldPacket data(SMSG_PVP_OPTIONS_ENABLED, 1);
     for (int i = 0; i < 5; ++i)
+    {
         data.WriteBit(true);
+    }
 
     SendPacket(&data);
 }

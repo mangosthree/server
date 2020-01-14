@@ -790,13 +790,17 @@ void WorldSession::SendSetPhaseShift(std::set<uint32> const& phaseIds, std::set<
 
     data << uint32(phaseIds.size() * 2);        // Phase.dbc ids
     for (std::set<uint32>::const_iterator itr = phaseIds.begin(); itr != phaseIds.end(); ++itr)
+    {
         data << uint16(*itr);
+    }
 
     data.WriteGuidBytes<3, 0>(guid);
 
     data << uint32(terrainswaps.size() * 2);    // Active terrain swaps
     for (std::set<uint32>::const_iterator itr = terrainswaps.begin(); itr != terrainswaps.end(); ++itr)
+    {
         data << uint16(*itr);
+    }
 
     data.WriteGuidBytes<5>(guid);
     SendPacket(&data);

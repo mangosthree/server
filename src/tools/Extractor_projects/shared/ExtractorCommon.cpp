@@ -124,7 +124,9 @@ int getBuildNumber()
 
     /// jump over as much of the file as possible, before we start searching for the base #
     for (int i = 0; i < 3300; i++)
+    {
         fread(jumpBytesBuffer, sizeof(jumpBytesBuffer), 1, pFile);
+    }
 
     /// Search for the build #
     while (!bBuildFound && fread(byteSearchBuffer, 1, 1, pFile))

@@ -320,7 +320,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
             Field* fields2 = result->Fetch();
             for (int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            {
                 m_declinedname->name[i] = fields2[i].GetCppString();
+            }
 
             delete result;
         }
@@ -900,7 +902,9 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     }
 
     for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
+    {
         SetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + i), BASE_VALUE, float(createResistance[i]));
+    }
 
     float health, mana, armor, minDmg;
 
@@ -937,7 +941,9 @@ void Pet::InitStatsForLevel(uint32 petlevel)
             if (PetLevelInfo const* pInfo = sObjectMgr.GetPetLevelInfo(1, petlevel))
             {
                 for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
+                {
                     SetCreateStat(Stats(i), float(pInfo->stats[i]));
+                }
 
                 health = pInfo->health;
                 mana = 0;
@@ -955,7 +961,9 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                 sLog.outErrorDb("HUNTER PET levelstats missing in DB! 'Weakifying' pet");
 
                 for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
+                {
                     SetCreateStat(Stats(i), 1.0f);
+                }
 
                 health = 1;
                 mana = 0;
@@ -1010,7 +1018,9 @@ void Pet::InitStatsForLevel(uint32 petlevel)
             if (PetLevelInfo const* pInfo = sObjectMgr.GetPetLevelInfo(cInfo->Entry, petlevel))
             {
                 for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
+                {
                     SetCreateStat(Stats(i), float(pInfo->stats[i]));
+                }
 
                 health = pInfo->health;
                 mana = pInfo->mana;
@@ -1045,7 +1055,9 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                 sLog.outErrorDb("SUMMON_PET levelstats missing in DB! 'Weakifying' pet and giving it mana to make it obvious");
 
                 for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
+                {
                     SetCreateStat(Stats(i), 1.0f);
+                }
 
                 health = 1;
                 mana = 1;

@@ -1560,7 +1560,9 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     std::random_shuffle(spellPool.begin(), spellPool.end());
 
                     for (uint8 i = 0; i < (m_caster->GetMap()->IsRegularDifficulty() ? 2 : 4); ++i)
+                    {
                         m_caster->CastSpell(m_caster, spellPool[i], true);
+                    }
 
                     return;
                 }
@@ -3010,7 +3012,9 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     uint32 random = urand(3, 5);
 
                     for (uint32 i = 0; i < random; ++i)
+                    {
                         m_caster->CastSpell(m_caster, 55528, true);
+                    }
 
                     return;
                 }
@@ -3141,7 +3145,9 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     }
 
                     for (uint8 i = 0; i < 5; ++i)
+                    {
                         m_caster->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
+                    }
                     return;
                 }
                 case 63030:                                 // Boil Ominously
@@ -4133,7 +4139,9 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     // Righteous Defense (step 2) (in old version 31980 dummy effect)
                     // Clear targets for eff 1
                     for (TargetList::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                    {
                         ihit->effectMask &= ~(1 << 1);
+                    }
 
                     // not empty (checked), copy
                     Unit::AttackerSet attackers = friendTarget->getAttackers();
@@ -9033,7 +9041,9 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     // Summon 4 clones of the same player
                     for (uint8 i = 0; i < 4; ++i)
+                    {
                         unitTarget->CastSpell(unitTarget, 45891, true, NULL, NULL, m_caster->GetObjectGuid());
+                    }
                     return;
                 }
                 case 45918:                                 // Soul Sever
@@ -9128,13 +9138,19 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     // Quest - Jormungar Explosion Summon Object
                     for (int i = 0; i < 2; ++i)
+                    {
                         m_caster->CastSpell(m_caster, 47309, true);
+                    }
 
                     for (int i = 0; i < 2; ++i)
+                    {
                         m_caster->CastSpell(m_caster, 47924, true);
+                    }
 
                     for (int i = 0; i < 2; ++i)
+                    {
                         m_caster->CastSpell(m_caster, 47925, true);
+                    }
 
                     return;
                 }
@@ -9687,13 +9703,19 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     // Quest - Mammoth Explosion Summon Object
                     for (int i = 0; i < 2; ++i)
+                    {
                         m_caster->CastSpell(m_caster, 54623, true);
+                    }
 
                     for (int i = 0; i < 2; ++i)
+                    {
                         m_caster->CastSpell(m_caster, 54627, true);
+                    }
 
                     for (int i = 0; i < 2; ++i)
+                    {
                         m_caster->CastSpell(m_caster, 54628, true);
+                    }
 
                     // Summon Main Mammoth Meat
                     m_caster->CastSpell(m_caster, 57444, true);
@@ -9901,7 +9923,9 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                         uint32 stackAmount = urand(1, GetSpellStore()->LookupEntry(62239)->GetStackAmount());
 
                         for (uint8 i = 0; i < stackAmount; ++i)
+                        {
                             unitTarget->CastSpell(unitTarget, 62239, true);
+                        }
                     }
                     return;
                 }
@@ -10005,7 +10029,9 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     uint32 spellId = effect->CalculateSimpleValue();
 
                     for (uint32 i = 0; i < 10; ++i)
+                    {
                         m_caster->CastSpell(m_caster, spellId, true);
+                    }
 
                     return;
                 }
@@ -10060,7 +10086,9 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
 
                     for (uint8 i = 0; i < 15; ++i)
+                    {
                         unitTarget->CastSpell(unitTarget, 65347, true);
+                    }
                     return;
                 }
                 case 63119:                                 // Block!
@@ -10107,7 +10135,9 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
 
                     for (uint8 i = 0; i < 5; ++i)
+                    {
                         unitTarget->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
+                    }
                     return;
                 }
                 case 63667:                                 // Napalm Shell
@@ -10373,7 +10403,9 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
 
                     for (uint8 i = 0; i < 11; ++i)
+                    {
                         unitTarget->CastSpell(unitTarget, effect->CalculateSimpleValue(), true);
+                    }
 
                     return;
                 }
@@ -10638,7 +10670,9 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     // Cast summon spells 72701, 72702, 72703, 72704
                     for (uint32 triggeredSpell = effect->CalculateSimpleValue(); triggeredSpell < m_spellInfo->Id; ++triggeredSpell)
+                    {
                         unitTarget->CastSpell(unitTarget, triggeredSpell, true);
+                    }
 
                     return;
                 }

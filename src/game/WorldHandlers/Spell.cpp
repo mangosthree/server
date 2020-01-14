@@ -424,7 +424,9 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
     UpdateOriginalCasterPointer();
 
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         m_currentBasePoints[i] = m_spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
+    }
 
     m_spellState = SPELL_STATE_CREATED;
 
@@ -785,7 +787,9 @@ void Spell::FillTargetMap()
         }
 
         for (UnitList::const_iterator iunit = tmpUnitLists[effToIndex[i]].begin(); iunit != tmpUnitLists[effToIndex[i]].end(); ++iunit)
+        {
             AddUnitTarget((*iunit), SpellEffectIndex(i));
+        }
     }
 }
 
@@ -3127,7 +3131,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         }
         // Add resulting GOs as GOTargets
         for (std::list<GameObject*>::iterator iter = tempTargetGOList.begin(); iter != tempTargetGOList.end(); ++iter)
+        {
             AddGOTarget(*iter, effIndex);
+        }
     }
 }
 
@@ -3612,7 +3618,9 @@ void Spell::cast(bool skipCheck)
 
         // fill initial spell damage from caster for delayed casted spells
         for (TargetList::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+        {
             HandleDelayedSpellLaunch(&(*ihit));
+        }
 
         // Okay, maps created, now prepare flags
         m_immediateHandled = false;
@@ -3680,10 +3688,14 @@ void Spell::handle_immediate()
     }
 
     for (TargetList::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+    {
         DoAllEffectOnTarget(&(*ihit));
+    }
 
     for (GOTargetList::iterator ihit = m_UniqueGOTargetInfo.begin(); ihit != m_UniqueGOTargetInfo.end(); ++ihit)
+    {
         DoAllEffectOnTarget(&(*ihit));
+    }
 
     // spell is finished, perform some last features of the spell here
     _handle_finish_phase();
@@ -3776,7 +3788,9 @@ void Spell::_handle_immediate_phase()
 
     // process items
     for (ItemTargetList::iterator ihit = m_UniqueItemInfo.begin(); ihit != m_UniqueItemInfo.end(); ++ihit)
+    {
         DoAllEffectOnTarget(&(*ihit));
+    }
 
     // process ground
     for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
@@ -4237,14 +4251,18 @@ void Spell::SendSpellStart()
             data << uint8(m_runesState);
             data << uint8(caster->GetRunesState());
             for (uint8 i = 0; i < MAX_RUNES; ++i)
+            {
                 data << uint8(caster->GetRuneCooldownFraction(i));
+            }
         }
         else
         {
             data << uint8(0);
             data << uint8(0);
             for (uint8 i = 0; i < MAX_RUNES; ++i)
+            {
                 data << uint8(0);
+            }
         }
     }
 
@@ -4335,14 +4353,18 @@ void Spell::SendSpellGo()
             data << uint8(m_runesState);
             data << uint8(caster->GetRunesState());
             for (uint8 i = 0; i < MAX_RUNES; ++i)
+            {
                 data << uint8(255 - ((caster->GetRuneCooldown(i) / REGEN_TIME_FULL) * 51));
+            }
         }
         else
         {
             data << uint8(0);
             data << uint8(0);
             for (uint8 i = 0; i < MAX_RUNES; ++i)
+            {
                 data << uint8(0);
+            }
         }
     }
 
@@ -5264,7 +5286,9 @@ void Spell::CastTriggerSpells()
 void Spell::CastPreCastSpells(Unit* target)
 {
     for (SpellInfoList::const_iterator si = m_preCastSpells.begin(); si != m_preCastSpells.end(); ++si)
+    {
         m_caster->CastSpell(target, (*si), true, m_CastItem);
+    }
 }
 
 Unit* Spell::GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const

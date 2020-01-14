@@ -467,7 +467,9 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
     SetUInt32Value(ITEM_FIELD_DURABILITY, itemProto->MaxDurability);
 
     for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-        { SetSpellCharges(i, itemProto->Spells[i].SpellCharges); }
+    {
+        SetSpellCharges(i, itemProto->Spells[i].SpellCharges);
+    }
 
     SetUInt32Value(ITEM_FIELD_DURATION, itemProto->Duration);
 
@@ -525,7 +527,9 @@ void Item::SaveToDB()
 
             std::ostringstream ss;
             for (uint16 i = 0; i < m_valuesCount; ++i)
-                { ss << GetUInt32Value(i) << " "; }
+            {
+                ss << GetUInt32Value(i) << " ";
+            }
 
             stmt = CharacterDatabase.CreateStatement(insItem, "INSERT INTO item_instance (guid,owner_guid,data,text) VALUES (?, ?, ?, ?)");
             stmt.PExecute(guid, GetOwnerGuid().GetCounter(), ss.str().c_str(), m_text.c_str());
@@ -539,7 +543,9 @@ void Item::SaveToDB()
 
             std::ostringstream ss;
             for (uint16 i = 0; i < m_valuesCount; ++i)
-                { ss << GetUInt32Value(i) << " "; }
+            {
+                ss << GetUInt32Value(i) << " ";
+            }
 
             stmt.PExecute(ss.str().c_str(), GetOwnerGuid().GetCounter(), m_text.c_str(), guid);
 
@@ -733,7 +739,9 @@ bool Item::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
 
         std::ostringstream ss;
         for (uint16 i = 0; i < m_valuesCount; ++i)
-            { ss << GetUInt32Value(i) << " "; }
+        {
+            ss << GetUInt32Value(i) << " ";
+        }
 
         stmt.addString(ss);
         stmt.addUInt32(GetOwnerGuid().GetCounter());

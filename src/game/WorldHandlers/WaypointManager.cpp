@@ -76,7 +76,9 @@ void WaypointManager::Load()
     std::set<uint32> movementScriptSet;
 
     for (ScriptChainMap::const_iterator itr = scm->begin(); itr != scm->end(); ++itr)
-        { movementScriptSet.insert(itr->first); }
+    {
+        movementScriptSet.insert(itr->first);
+    }
 
     // /////////////////////////////////////////////////////
     // creature_movement
@@ -412,15 +414,21 @@ void WaypointManager::Load()
 void WaypointManager::Unload()
 {
     for (WaypointPathMap::iterator itr = m_pathMap.begin(); itr != m_pathMap.end(); ++itr)
-        { _clearPath(itr->second); }
+    {
+        _clearPath(itr->second);
+    }
     m_pathMap.clear();
 
     for (WaypointPathMap::iterator itr = m_pathTemplateMap.begin(); itr != m_pathTemplateMap.end(); ++itr)
-        { _clearPath(itr->second); }
+    {
+        _clearPath(itr->second);
+    }
     m_pathTemplateMap.clear();
 
     for (WaypointPathMap::iterator itr = m_externalPathTemplateMap.begin(); itr != m_externalPathTemplateMap.end(); ++itr)
-        { _clearPath(itr->second); }
+    {
+        _clearPath(itr->second);
+    }
     m_externalPathTemplateMap.clear();
 }
 

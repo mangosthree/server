@@ -440,7 +440,9 @@ void ParsMapFiles()
     {
         printf(" Warning: Some models could not be extracted, see below\n");
         for (StringSet::const_iterator itr = failedPaths.begin(); itr != failedPaths.end(); ++itr)
-            { printf("Could not find file of model %s\n", itr->c_str()); }
+        {
+            printf("Could not find file of model %s\n", itr->c_str());
+        }
         printf(" A few not found models can be expected and are not alarming.\n");
     }
 }

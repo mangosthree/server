@@ -196,7 +196,9 @@ QueryNamedResult* PostgreSQLConnection::QueryNamed(const char* sql)
 
     QueryFieldNames names(fieldCount);
     for (uint32 i = 0; i < fieldCount; ++i)
-        { names[i] = PQfname(result, i); }
+    {
+        names[i] = PQfname(result, i);
+    }
 
     QueryResultPostgre* queryResult = new QueryResultPostgre(result, rowCount, fieldCount);
 

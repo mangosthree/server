@@ -1560,10 +1560,14 @@ void Pet::_SaveAuras()
             stmt.addUInt8(holder->GetAuraCharges());
 
             for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-                { stmt.addInt32(damage[i]); }
+            {
+                stmt.addInt32(damage[i]);
+            }
 
             for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-                { stmt.addUInt32(periodicTime[i]); }
+            {
+                stmt.addUInt32(periodicTime[i]);
+            }
 
             stmt.addInt32(holder->GetAuraMaxDuration());
             stmt.addInt32(holder->GetAuraDuration());
@@ -2231,7 +2235,9 @@ void Pet::LearnPetPassives()
     if (petStore != sPetFamilySpellsStore.end())
     {
         for (PetFamilySpellsSet::const_iterator petSet = petStore->second.begin(); petSet != petStore->second.end(); ++petSet)
-            { addSpell(*petSet, ACT_DECIDE, PETSPELL_NEW, PETSPELL_FAMILY); }
+        {
+            addSpell(*petSet, ACT_DECIDE, PETSPELL_NEW, PETSPELL_FAMILY);
+        }
     }
 }
 

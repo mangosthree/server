@@ -266,7 +266,9 @@ std::string PlayerTaxi::SaveTaxiDestinationsToString()
     std::ostringstream ss;
 
     for (size_t i = 0; i < m_TaxiDestinations.size(); ++i)
-        { ss << m_TaxiDestinations[i] << " "; }
+    {
+        ss << m_TaxiDestinations[i] << " ";
+    }
 
     return ss.str();
 }
@@ -505,7 +507,9 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_lastLiquid = NULL;
 
     for (int i = 0; i < MAX_TIMERS; ++i)
-        { m_MirrorTimer[i] = DISABLED_MIRROR_TIMER; }
+    {
+        m_MirrorTimer[i] = DISABLED_MIRROR_TIMER;
+    }
 
     m_MirrorTimerFlags = UNDERWATER_NONE;
     m_MirrorTimerFlagsLast = UNDERWATER_NONE;
@@ -554,7 +558,9 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_itemUpdateQueueBlocked = false;
 
     for (int i = 0; i < MAX_MOVE_TYPE; ++i)
-        { m_forced_speed_changes[i] = 0; }
+    {
+        m_forced_speed_changes[i] = 0;
+    }
 
     m_stableSlots = 0;
 
@@ -629,7 +635,9 @@ Player::~Player()
 
     // all mailed items should be deleted, also all mail should be deallocated
     for (PlayerMails::const_iterator itr =  m_mail.begin(); itr != m_mail.end(); ++itr)
-        { delete *itr; }
+    {
+        delete *itr;
+    }
 
     for (ItemMap::const_iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
         { delete iter->second; }                                // if item is duplicated... then server may crash ... but that item should be deallocated
@@ -642,7 +650,9 @@ Player::~Player()
     }
 
     for (size_t x = 0; x < ItemSetEff.size(); ++x)
-        { delete ItemSetEff[x]; }
+    {
+        delete ItemSetEff[x];
+    }
 
     // clean up player-instance binds, may unload some instance saves
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
@@ -699,7 +709,9 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     }
 
     for (int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
-        { m_items[i] = NULL; }
+    {
+        m_items[i] = NULL;
+    }
 
     SetLocationMapId(info->mapId);
     Relocate(info->positionX, info->positionY, info->positionZ, info->orientation);
@@ -863,7 +875,9 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     }
 
     for (PlayerCreateInfoItems::const_iterator item_id_itr = info->item.begin(); item_id_itr != info->item.end(); ++item_id_itr)
-        { StoreNewItemInBestSlots(item_id_itr->item_id, item_id_itr->item_amount); }
+    {
+        StoreNewItemInBestSlots(item_id_itr->item_id, item_id_itr->item_amount);
+    }
 
     // bags and main-hand weapon must equipped at this moment
     // now second pass for not equipped (offhand weapon/shield if it attempt equipped before main-hand weapon)
@@ -1063,7 +1077,9 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
             int32 UnderWaterTime = sWorld.getConfig(CONFIG_UINT32_TIMERBAR_BREATH_MAX) * IN_MILLISECONDS;
             AuraList const& mModWaterBreathing = GetAurasByType(SPELL_AURA_MOD_WATER_BREATHING);
             for (AuraList::const_iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)
-                { UnderWaterTime = uint32(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f); }
+            {
+                UnderWaterTime = uint32(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
+            }
             return UnderWaterTime;
         }
         case FIRE_TIMER:
@@ -19252,10 +19268,14 @@ void Player::_SaveStats()
         stmt.addUInt32(GetMaxPowerByIndex(i));
     }
     for (int i = 0; i < MAX_STATS; ++i)
-        { stmt.addFloat(GetStat(Stats(i))); }
+    {
+        stmt.addFloat(GetStat(Stats(i)));
+    }
     // armor + school resistances
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
-        { stmt.addUInt32(GetResistance(SpellSchools(i))); }
+    {
+        stmt.addUInt32(GetResistance(SpellSchools(i)));
+    }
     stmt.addFloat(GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
     stmt.addFloat(GetFloatValue(PLAYER_DODGE_PERCENTAGE));
     stmt.addFloat(GetFloatValue(PLAYER_PARRY_PERCENTAGE));

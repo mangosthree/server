@@ -321,7 +321,9 @@ BattleGround::~BattleGround()
     this->RemoveFromBGFreeSlotQueue();
 
     for (BattleGroundScoreMap::const_iterator itr = m_PlayerScores.begin(); itr != m_PlayerScores.end(); ++itr)
-        { delete itr->second; }
+    {
+        delete itr->second;
+    }
 }
 
 /// <summary>
@@ -1444,7 +1446,9 @@ void BattleGround::Reset()
     m_Players.clear();
 
     for (BattleGroundScoreMap::const_iterator itr = m_PlayerScores.begin(); itr != m_PlayerScores.end(); ++itr)
-        { delete itr->second; }
+    {
+        delete itr->second;
+    }
     m_PlayerScores.clear();
 }
 
@@ -1896,7 +1900,9 @@ void BattleGround::OpenDoorEvent(uint8 event1, uint8 event2 /*=0*/)
     }
     GuidVector::const_iterator itr = m_EventObjects[MAKE_PAIR32(event1, event2)].gameobjects.begin();
     for (; itr != m_EventObjects[MAKE_PAIR32(event1, event2)].gameobjects.end(); ++itr)
-        { DoorOpen(*itr); }
+    {
+        DoorOpen(*itr);
+    }
 }
 
 /// <summary>
@@ -1924,10 +1930,14 @@ void BattleGround::SpawnEvent(uint8 event1, uint8 event2, bool spawn)
 
     GuidVector::const_iterator itr = m_EventObjects[MAKE_PAIR32(event1, event2)].creatures.begin();
     for (; itr != m_EventObjects[MAKE_PAIR32(event1, event2)].creatures.end(); ++itr)
-        { SpawnBGCreature(*itr, (spawn) ? RESPAWN_IMMEDIATELY : RESPAWN_ONE_DAY); }
+    {
+        SpawnBGCreature(*itr, (spawn) ? RESPAWN_IMMEDIATELY : RESPAWN_ONE_DAY);
+    }
     GuidVector::const_iterator itr2 = m_EventObjects[MAKE_PAIR32(event1, event2)].gameobjects.begin();
     for (; itr2 != m_EventObjects[MAKE_PAIR32(event1, event2)].gameobjects.end(); ++itr2)
-        { SpawnBGObject(*itr2, (spawn) ? RESPAWN_IMMEDIATELY : RESPAWN_ONE_DAY); }
+    {
+        SpawnBGObject(*itr2, (spawn) ? RESPAWN_IMMEDIATELY : RESPAWN_ONE_DAY);
+    }
 }
 
 /// <summary>

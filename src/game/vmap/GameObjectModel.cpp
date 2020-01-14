@@ -140,7 +140,9 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     mdl_box = AABox(mdl_box.low() * iScale, mdl_box.high() * iScale);
     AABox rotated_bounds;
     for (int i = 0; i < 8; ++i)
-        { rotated_bounds.merge(iRotation * mdl_box.corner(i)); }
+    {
+        rotated_bounds.merge(iRotation * mdl_box.corner(i));
+    }
 
     this->iBound = rotated_bounds + iPos;
 

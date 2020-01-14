@@ -142,10 +142,14 @@ namespace MMAP
                 heightMultiplier = (hheader.gridMaxHeight - hheader.gridHeight) / 255;
 
                 for (i = 0; i < V9_SIZE_SQ; ++i)
-                    { V9[i] = (float)v9[i] * heightMultiplier + hheader.gridHeight; }
+                {
+                    V9[i] = (float)v9[i] * heightMultiplier + hheader.gridHeight;
+                }
 
                 for (i = 0; i < V8_SIZE_SQ; ++i)
-                    { V8[i] = (float)v8[i] * heightMultiplier + hheader.gridHeight; }
+                {
+                    V8[i] = (float)v8[i] * heightMultiplier + hheader.gridHeight;
+                }
             }
             else if (hheader.flags & MAP_HEIGHT_AS_INT16)
             {
@@ -156,10 +160,14 @@ namespace MMAP
                 heightMultiplier = (hheader.gridMaxHeight - hheader.gridHeight) / 65535;
 
                 for (i = 0; i < V9_SIZE_SQ; ++i)
-                    { V9[i] = (float)v9[i] * heightMultiplier + hheader.gridHeight; }
+                {
+                    V9[i] = (float)v9[i] * heightMultiplier + hheader.gridHeight;
+                }
 
                 for (i = 0; i < V8_SIZE_SQ; ++i)
-                    { V8[i] = (float)v8[i] * heightMultiplier + hheader.gridHeight; }
+                {
+                    V8[i] = (float)v8[i] * heightMultiplier + hheader.gridHeight;
+                }
             }
             else
             {
@@ -456,12 +464,16 @@ namespace MMAP
                 {
                     meshData.liquidType.append(liquidType);
                     for (int k = 0; k < 3; ++k)
-                        { meshData.liquidTris.append(ltris[k]); }
+                    {
+                        meshData.liquidTris.append(ltris[k]);
+                    }
                 }
 
                 if (useTerrain)
                     for (int k = 0; k < 3 * tTriCount / 2; ++k)
-                        { meshData.solidTris.append(ttris[k]); }
+                    {
+                        meshData.solidTris.append(ttris[k]);
+                    }
 
                 // advance to next set of triangles
                 ltris += 3;
@@ -729,7 +741,9 @@ namespace MMAP
 
                         uint32 liqOffset = meshData.liquidVerts.size() / 3;
                         for (uint32 i = 0; i < liqVerts.size(); ++i)
-                            { meshData.liquidVerts.append(liqVerts[i].y, liqVerts[i].z, liqVerts[i].x); }
+                        {
+                            meshData.liquidVerts.append(liqVerts[i].y, liqVerts[i].z, liqVerts[i].x);
+                        }
 
                         for (uint32 i = 0; i < liqTris.size() / 3; ++i)
                         {
@@ -800,7 +814,9 @@ namespace MMAP
     {
         int* src = source.getCArray();
         for (int32 i = 0; i < source.size(); ++i)
-            { dest.append(src[i] + offset); }
+        {
+            dest.append(src[i] + offset);
+        }
     }
 
     /**************************************************************************/

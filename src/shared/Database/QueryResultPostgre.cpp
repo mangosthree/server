@@ -34,7 +34,9 @@ QueryResultPostgre::QueryResultPostgre(PGresult* result, uint64 rowCount, uint32
     MANGOS_ASSERT(mCurrentRow);
 
     for (uint32 i = 0; i < mFieldCount; ++i)
-        { mCurrentRow[i].SetType(ConvertNativeType(PQftype(result, i))); }
+    {
+        mCurrentRow[i].SetType(ConvertNativeType(PQftype(result, i)));
+    }
 }
 
 QueryResultPostgre::~QueryResultPostgre()

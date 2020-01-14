@@ -516,7 +516,9 @@ Unit::Unit() :
     m_deathState = ALIVE;
 
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
-        { m_currentSpells[i] = NULL; }
+    {
+        m_currentSpells[i] = NULL;
+    }
 
     m_castCounter = 0;
 
@@ -535,7 +537,9 @@ Unit::Unit() :
     m_canModifyStats = false;
 
     for (int i = 0; i < MAX_SPELL_IMMUNITY; ++i)
-        { m_spellImmune[i].clear(); }
+    {
+        m_spellImmune[i].clear();
+    }
     for (int i = 0; i < UNIT_MOD_END; ++i)
     {
         m_auraModifiersGroup[i][BASE_VALUE] = 0.0f;
@@ -553,7 +557,9 @@ Unit::Unit() :
         m_weaponDamage[i][MAXDAMAGE] = BASE_MAXDAMAGE;
     }
     for (int i = 0; i < MAX_STATS; ++i)
-        { m_createStats[i] = 0.0f; }
+    {
+        m_createStats[i] = 0.0f;
+    }
 
     m_attacking = NULL;
     m_modMeleeHitChance = 0.0f;
@@ -565,14 +571,20 @@ Unit::Unit() :
 
     // m_victimThreat = 0.0f;
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
-        { m_threatModifier[i] = 1.0f; }
+    {
+        m_threatModifier[i] = 1.0f;
+    }
     m_isSorted = true;
     for (int i = 0; i < MAX_MOVE_TYPE; ++i)
-        { m_speed_rate[i] = 1.0f; }
+    {
+        m_speed_rate[i] = 1.0f;
+    }
 
     // remove aurastates allowing special moves
     for (int i = 0; i < MAX_REACTIVE; ++i)
-        { m_reactiveTimer[i] = 0; }
+    {
+        m_reactiveTimer[i] = 0;
+    }
 
     m_isCreatureLinkingTrigger = false;
     m_isSpawningLinked = false;

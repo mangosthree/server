@@ -283,15 +283,21 @@ struct Loot
             m_playerCurrencies.clear();
 
             for (QuestItemMap::const_iterator itr = m_playerQuestItems.begin(); itr != m_playerQuestItems.end(); ++itr)
-                { delete itr->second; }
+            {
+                delete itr->second;
+            }
             m_playerQuestItems.clear();
 
             for (QuestItemMap::const_iterator itr = m_playerFFAItems.begin(); itr != m_playerFFAItems.end(); ++itr)
-                { delete itr->second; }
+            {
+                delete itr->second;
+            }
             m_playerFFAItems.clear();
 
             for (QuestItemMap::const_iterator itr = m_playerNonQuestNonFFANonCurrencyConditionalItems.begin(); itr != m_playerNonQuestNonFFANonCurrencyConditionalItems.end(); ++itr)
-                { delete itr->second; }
+            {
+                delete itr->second;
+            }
             m_playerNonQuestNonFFANonCurrencyConditionalItems.clear();
 
             m_playersLooting.clear();

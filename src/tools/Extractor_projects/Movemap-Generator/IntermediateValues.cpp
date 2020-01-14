@@ -273,10 +273,14 @@ namespace MMAP
         int triCount = allTris.size() / 3;
 
         for (int i = 0; i < allVerts.size() / 3; i++)
-            { fprintf(objFile, "v %f %f %f\n", verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2]); }
+        {
+            fprintf(objFile, "v %f %f %f\n", verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2]);
+        }
 
         for (int i = 0; i < allTris.size() / 3; i++)
-            { fprintf(objFile, "f %i %i %i\n", tris[i * 3] + 1, tris[i * 3 + 1] + 1, tris[i * 3 + 2] + 1); }
+        {
+            fprintf(objFile, "f %i %i %i\n", tris[i * 3] + 1, tris[i * 3 + 1] + 1, tris[i * 3 + 2] + 1);
+        }
 
         fclose(objFile);
 

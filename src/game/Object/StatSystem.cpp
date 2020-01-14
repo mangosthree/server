@@ -141,7 +141,9 @@ bool Player::UpdateAllStats()
     UpdateMaxHealth();
 
     for (uint32 i = POWER_MANA; i < MAX_POWERS; ++i)
-        { UpdateMaxPower(Powers(i)); }
+    {
+        UpdateMaxPower(Powers(i));
+    }
 
     UpdateAllRatings();
     UpdateAllCritPercentages();
@@ -156,7 +158,9 @@ bool Player::UpdateAllStats()
     UpdateExpertise(BASE_ATTACK);
     UpdateExpertise(OFF_ATTACK);
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
-        { UpdateResistances(i); }
+    {
+        UpdateResistances(i);
+    }
 
     return true;
 }
@@ -648,7 +652,9 @@ void Player::UpdateSpellHitChances()
 void Player::UpdateAllSpellCritChances()
 {
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
-        { UpdateSpellCritChance(i); }
+    {
+        UpdateSpellCritChance(i);
+    }
 }
 
 void Player::UpdateExpertise(WeaponAttackType attack)
@@ -819,10 +825,14 @@ bool Creature::UpdateAllStats()
     UpdateAttackPowerAndDamage();
 
     for (uint32 i = POWER_MANA; i < MAX_POWERS; ++i)
-        { UpdateMaxPower(Powers(i)); }
+    {
+        UpdateMaxPower(Powers(i));
+    }
 
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
-        { UpdateResistances(i); }
+    {
+        UpdateResistances(i);
+    }
 
     return true;
 }
@@ -970,13 +980,19 @@ bool Pet::UpdateStats(Stats stat)
 bool Pet::UpdateAllStats()
 {
     for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        { UpdateStats(Stats(i)); }
+    {
+        UpdateStats(Stats(i));
+    }
 
     for (uint32 i = POWER_MANA; i < MAX_POWERS; ++i)
-        { UpdateMaxPower(Powers(i)); }
+    {
+        UpdateMaxPower(Powers(i));
+    }
 
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
-        { UpdateResistances(i); }
+    {
+        UpdateResistances(i);
+    }
 
     return true;
 }

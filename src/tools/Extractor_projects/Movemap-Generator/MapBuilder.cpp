@@ -194,7 +194,9 @@ namespace MMAP
             // add all tiles within bounds to tile list.
             for (uint32 i = minX; i <= maxX; ++i)
                 for (uint32 j = minY; j <= maxY; ++j)
-                    { tiles->insert(StaticMapTree::packTileID(i, j)); }
+                {
+                    tiles->insert(StaticMapTree::packTileID(i, j));
+                }
         }
 
         if (!tiles->size())

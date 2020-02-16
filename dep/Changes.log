@@ -1,0 +1,58 @@
+June 16, 2019
+    - revert some ACE changes which badly affected threads in FreeBSD
+
+May 27, 2019
+    - fixed TomLib::Crypt build on VS
+    - fixed Detour/Recast CMake configuration
+    - assuring STATIC generation of libraries for ZLIB::ZLIB, BZIP2::BZIP2 and mpqlib
+
+May 17,2019
+    - removed useless files from ACE
+
+May 15, 2019
+    - added PCH support for ACE
+
+May 10th, 2019
+    - cleaned up libmpq
+    - bzip2 version raised to 1.0.6
+    - zlib version raised to 1.2.11
+    - root CMakeLists.txt logic improved
+    - revert some FreBSD patches
+
+May 3rd, 2019
+    - added missing sources to ACE CMakeLists.txt
+    - fixed ACE_SIZE_T_FORMAT_SPECIFIER for FreeBSD
+    - applied FreeBSD 12+ patches from ports collection to ACE
+
+May 2nd, 2019
+    - fixed a typo which prevented ACE to be built as static lib
+    - added _WANT_SEMUN compiler definition for ACE when build on FreeBSD 12+
+    - removed __fastcall attribute from G3D sources
+    - removed redundant zlib and bzip2 sources from stormlib
+    - added TomCrypt and TomMath as static libs for future removal of OpenSSL
+    - changed CmakeLists.txt files to proper show header files on IDEs
+    - removed mersenne source code
+
+January 16th, 2019
+    - ACE is built as static library by default.
+    - Fixed ACE_HAS_CPP11/14 defines for compatibility with other compilers.
+    - added support for FreeBSD on stormlib
+
+March 7th, 2018
+    - To build ACE as static library, one has to add the following line to the global CMakeLists.txt
+      'add_definitions(-DACE_AS_STATIC_LIBS)'
+
+2017 and older
+    - The default files for ACE_LITE were amended in commit: https://github.com/mangos/mangosDeps/commit/52e4c984dbca474f7a4353b444339067a95ea277
+    - The same changes need to be reapplied if a new version is added.
+    - The following two lines were amended to fix a connection bottleneck (especially on Linux):
+        ACE_DEFAULT_BACKLOG - Change 5 to 128 https://github.com/mangos/mangosDeps/blob/Rel21/acelite/ace/Default_Constants.h#L81
+        ACE_DEFAULT_ASYNCH_BACKLOG - Change 5 to 128 https://github.com/mangos/mangosDeps/blob/Rel21/acelite/ace/Default_Constants.h#L85
+    - For MacOS X, the ACE_UINT64_TYPE should be defined as follows in `ace/config-macosx-leopard.h`
+        #define ACE_UINT64_TYPE unsigned long long
+    - To get Travis CI working with `macos10.12` and `xcode8.3`, the following changes should be made to `ace/config-macosx-yosemite.h`
+        #include "ace/config-macosx-mavericks.h"
+        #undef ACE_LACKS_CLOCKID_T
+        #undef ACE_LACKS_CLOCK_MONOTONIC
+        #undef ACE_LACKS_CLOCK_REALTIME
+

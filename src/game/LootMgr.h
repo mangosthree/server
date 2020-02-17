@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,10 @@
 #include <map>
 #include <vector>
 
+class Player;
+class LootStore;
+class WorldObject;
+
 #define MAX_NR_LOOT_ITEMS 16
 // note: the client cannot show more than 16 items total
 #define MAX_NR_QUEST_ITEMS 32
@@ -54,8 +58,8 @@ enum LootType
     LOOT_FISHING                = 3,
     LOOT_DISENCHANTING          = 4,
     // ignored always by client
-    LOOT_SKINNING               = 6,
-    LOOT_PROSPECTING            = 7,
+    LOOT_SKINNING               = 6,                        // unsupported by client, sending LOOT_PICKPOCKETING instead
+    LOOT_PROSPECTING            = 7,                        // unsupported by client, sending LOOT_PICKPOCKETING instead
     LOOT_MILLING                = 8,
 
     LOOT_FISHINGHOLE            = 20,                       // unsupported by client, sending LOOT_FISHING instead
@@ -72,11 +76,6 @@ enum LootSlotType
     LOOT_SLOT_OWNER   = 4,                                  // ignore binding confirmation and etc, for single player looting
     MAX_LOOT_SLOT_TYPE                                      // custom, use for mark skipped from show items
 };
-
-
-
-class Player;
-class LootStore;
 
 struct LootStoreItem
 {
@@ -124,8 +123,8 @@ struct LootItem
     LootItem(uint32 itemid_, uint8 type_, uint32 count_, uint32 randomSuffix_ = 0, int32 randomPropertyId_ = 0);
 
     // Basic checks for player/item compatibility - if false no chance to see the item in the loot
-    bool AllowedForPlayer(Player const* player) const;
-    LootSlotType GetSlotTypeForSharedLoot(PermissionTypes permission, Player* viewer, bool condition_ok = false) const;
+    bool AllowedForPlayer(Player const* player, WorldObject const* lootTarget) const;
+    LootSlotType GetSlotTypeForSharedLoot(PermissionTypes permission, Player* viewer, WorldObject const* lootTarget, bool condition_ok = false) const;
 };
 
 typedef std::vector<LootItem> LootItemList;
@@ -255,7 +254,7 @@ struct Loot
         uint8 unlootedCount;
         LootType loot_type;                                 // required for achievement system
 
-        Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0), loot_type(LOOT_CORPSE) {}
+        Loot(WorldObject const* lootTarget, uint32 _gold = 0) : gold(_gold), unlootedCount(0), loot_type(LOOT_CORPSE), m_lootTarget(lootTarget) {}
         ~Loot() { clear(); }
 
         // if loot becomes invalid this reference is used to inform the listener
@@ -309,6 +308,8 @@ struct Loot
         LootItem* LootItemInSlot(uint32 lootslot, Player* player, QuestItem** qitem = NULL, QuestItem** ffaitem = NULL, QuestItem** conditem = NULL, QuestItem** currency = NULL);
         uint32 GetMaxSlotInLootFor(Player* player) const;
 
+        WorldObject const* GetLootTarget() const { return m_lootTarget; }
+
     private:
         void FillNotNormalLootFor(Player* player);
         QuestItemList* FillCurrencyLoot(Player* player);
@@ -327,6 +328,9 @@ struct Loot
 
         // All rolls are registered here. They need to know, when the loot is not valid anymore
         LootValidatorRefManager m_LootValidatorRefManager;
+
+        // What is looted
+        WorldObject const* m_lootTarget;
 };
 
 struct LootView

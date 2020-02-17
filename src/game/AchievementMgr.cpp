@@ -42,7 +42,7 @@
 #include "InstanceData.h"
 #include "DBCStructure.h"
 
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 
 INSTANTIATE_SINGLETON_1(AchievementGlobalMgr);
 
@@ -75,7 +75,6 @@ namespace MaNGOS
             uint32 i_achievementId;
     };
 }                                                           // namespace MaNGOS
-
 
 bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* criteria)
 {
@@ -173,7 +172,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
                 return false;
             }
             SpellEffectEntry const* spellEffect = spellEntry->GetSpellEffect(SpellEffectIndex(aura.effect_idx));
-            if (spellEffect && !spellEffect->EffectApplyAuraName)
+            if (!spellEffect || !spellEffect->EffectApplyAuraName)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement %s (%u) have non-aura spell effect (ID: %u Effect: %u), ignore.",
                                 criteria->ID, criteria->requiredType, (requirementType == ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA ? "ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA" : "ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA"), requirementType, aura.spell_id, aura.effect_idx);
@@ -610,7 +609,6 @@ void AchievementMgr::LoadFromDB(QueryResult* achievementResult, QueryResult* cri
         while (criteriaResult->NextRow());
         delete criteriaResult;
     }
-
 }
 
 void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement)
@@ -1143,7 +1141,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 change = 1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
-
             }
             case ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_CREATURE:
                 // AchievementMgr::UpdateAchievementCriteria might also be called on login - skip in this case
@@ -2800,7 +2797,6 @@ void AchievementGlobalMgr::LoadRewards()
 
         m_achievementRewards.insert(AchievementRewardsMap::value_type(entry, reward));
         ++count;
-
     }
     while (result->NextRow());
 
@@ -2894,7 +2890,6 @@ void AchievementGlobalMgr::LoadRewardLocales()
         }
 
         m_achievementRewardLocales.insert(AchievementRewardLocalesMap::value_type(entry, data));
-
     }
     while (result->NextRow());
 

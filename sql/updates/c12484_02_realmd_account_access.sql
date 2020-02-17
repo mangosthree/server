@@ -1,0 +1,3 @@
+ALTER TABLE realmd_db_version CHANGE COLUMN required_c12484_01_realmd_account required_c12484_02_realmd_account_access bit;
+
+DROP TABLE account_access;

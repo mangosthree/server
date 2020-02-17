@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -504,6 +504,7 @@ bool ChatHandler::HandleAppearCommand(char* args)
         SetSentErrorMessage(true);
         return false;
     }
+
 
     if (target)
     {

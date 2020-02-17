@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,6 +37,9 @@ void stripLineInvisibleChars(std::string& src);
 std::string secsToTimeString(time_t timeInSecs, bool shortText = false, bool hoursOnly = false);
 uint32 TimeStringToSecs(const std::string& timestring);
 std::string TimeToTimestampStr(time_t t);
+time_t timeBitFieldsToSecs(uint32 packedDate);
+
+std::string MoneyToString(uint64 money);
 
 inline uint32 secsToTimeBitFields(time_t secs)
 {

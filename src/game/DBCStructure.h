@@ -42,9 +42,9 @@ typedef char const* const* DBCString;                       //char* DBCStrings[M
 
 struct AchievementEntry
 {
-    uint32      ID;                                         // 0        m_ID
-    uint32      factionFlag;                                // 1        m_faction -1=all, 0=horde, 1=alliance
-    uint32      mapID;                                      // 2        m_instance_id -1=none
+    uint32    ID;                                           // 0        m_ID
+    uint32    factionFlag;                                  // 1        m_faction -1=all, 0=horde, 1=alliance
+    uint32    mapID;                                        // 2        m_instance_id -1=none
     uint32      parentAchievement;                          // 3        m_supercedes its Achievement parent (can`t start while parent uncomplete, use its Criteria if don`t have own, use its progress on begin)
     DBCString   name;                                       // 4        m_title_lang
     DBCString   description;                                // 5        m_description_lang
@@ -640,14 +640,14 @@ struct BattlemasterListEntry
 
 struct CharStartOutfitEntry
 {
-    //uint32 Id;                                            // 0        m_ID
+    // uint32 Id;                                           // 0        m_ID
     uint32 RaceClassGender;                                 // 1        m_raceID m_classID m_sexID m_outfitID (UNIT_FIELD_BYTES_0 & 0x00FFFFFF) comparable (0 byte = race, 1 byte = class, 2 byte = gender)
     int32 ItemId[MAX_OUTFIT_ITEMS];                         // 2-25     m_ItemID
-    //int32 ItemDisplayId[MAX_OUTFIT_ITEMS];                // 26-29    m_DisplayItemID not required at server side
-    //int32 ItemInventorySlot[MAX_OUTFIT_ITEMS];            // 50-73    m_InventoryType not required at server side
-    //uint32 Unknown1;                                      // 74 unique values (index-like with gaps ordered in other way as ids)
-    //uint32 Unknown2;                                      // 75
-    //uint32 Unknown3;                                      // 76
+    // int32 ItemDisplayId[MAX_OUTFIT_ITEMS];               // 26-29    m_DisplayItemID not required at server side
+    // int32 ItemInventorySlot[MAX_OUTFIT_ITEMS];           // 50-73    m_InventoryType not required at server side
+    // uint32 Unknown1;                                     // 74 unique values (index-like with gaps ordered in other way as ids)
+    // uint32 Unknown2;                                     // 75
+    // uint32 Unknown3;                                     // 76
     //uint32 Unknown4;                                      // 77
     //uint32 Unknown5;                                      // 78
 };
@@ -655,7 +655,7 @@ struct CharStartOutfitEntry
 struct CharTitlesEntry
 {
     uint32  ID;                                             // 0,       m_ID
-    //uint32      unk1;                                     // 1        m_Condition_ID
+    // uint32      unk1;                                    // 1        m_Condition_ID
     DBCString name;                                         // 2        m_name_lang
     //char*       name2;                                    // 3        m_name1_lang
     uint32  bit_index;                                      // 4        m_mask_ID used in PLAYER_CHOSEN_TITLE and 1<<index in PLAYER__FIELD_KNOWN_TITLES
@@ -704,7 +704,7 @@ struct ChrRacesEntry
     // 10       m_SplashSoundID
     // 11       m_clientFileString
     uint32      CinematicSequence;                          // 12       m_cinematicSequenceID
-    //uint32    unk_322;                                    // 13       m_alliance (0 alliance, 1 horde, 2 not available?)
+    // uint32    unk_322;                                   // 13       m_alliance (0 alliance, 1 horde, 2 not available?)
     DBCString name;                                         // 14       m_name_lang used for DBC language detection/selection
     //char*       nameFemale;                               // 15       m_name_female_lang
     //char*       nameNeutralGender;                        // 16       m_name_male_lang
@@ -796,7 +796,7 @@ struct CreatureSpellDataEntry
 {
     uint32    ID;                                           // 0        m_ID
     uint32    spellId[MAX_CREATURE_SPELL_DATA_SLOT];        // 1-4      m_spells[4]
-    //uint32    availability[MAX_CREATURE_SPELL_DATA_SLOT]; // 4-7      m_availability[4]
+    // uint32    availability[MAX_CREATURE_SPELL_DATA_SLOT];// 4-7      m_availability[4]
 };
 
 struct CreatureTypeEntry
@@ -928,7 +928,7 @@ struct FactionEntry
         for (int i = 0; i < 4; ++i)
         {
             if ((BaseRepRaceMask[i] == 0 || (BaseRepRaceMask[i] & raceMask)) &&
-                (BaseRepClassMask[i] == 0 || (BaseRepClassMask[i] & classMask)))
+                    (BaseRepClassMask[i] == 0 || (BaseRepClassMask[i] & classMask)))
                 return i;
         }
 
@@ -951,12 +951,12 @@ struct FactionTemplateEntry
     // helpers
     bool IsFriendlyTo(FactionTemplateEntry const& entry) const
     {
-        if(entry.faction)
+        if (entry.faction)
         {
-            for(int i = 0; i < 4; ++i)
+            for (int i = 0; i < 4; ++i)
                 if (enemyFaction[i]  == entry.faction)
                     return false;
-            for(int i = 0; i < 4; ++i)
+            for (int i = 0; i < 4; ++i)
                 if (friendFaction[i] == entry.faction)
                     return true;
         }
@@ -964,26 +964,26 @@ struct FactionTemplateEntry
     }
     bool IsHostileTo(FactionTemplateEntry const& entry) const
     {
-        if(entry.faction)
+        if (entry.faction)
         {
-            for(int i = 0; i < 4; ++i)
+            for (int i = 0; i < 4; ++i)
                 if (enemyFaction[i]  == entry.faction)
                     return true;
-            for(int i = 0; i < 4; ++i)
+            for (int i = 0; i < 4; ++i)
                 if (friendFaction[i] == entry.faction)
                     return false;
         }
         return (hostileMask & entry.ourMask) != 0;
     }
-    bool IsHostileToPlayers() const { return (hostileMask & FACTION_MASK_PLAYER) !=0; }
+    bool IsHostileToPlayers() const { return (hostileMask & FACTION_MASK_PLAYER) != 0; }
     bool IsNeutralToAll() const
     {
-        for(int i = 0; i < 4; ++i)
+        for (int i = 0; i < 4; ++i)
             if (enemyFaction[i] != 0)
                 return false;
         return hostileMask == 0 && friendlyMask == 0;
     }
-    bool IsContestedGuardFaction() const { return (factionFlags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD)!=0; }
+    bool IsContestedGuardFaction() const { return (factionFlags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD) != 0; }
 };
 
 struct GameObjectDisplayInfoEntry
@@ -1098,12 +1098,12 @@ struct GtOCTBaseHPByClassEntry
 
 struct GtOCTBaseMPByClassEntry
 {
-    float ratio;
+    float    ratio;
 };
 
 /*struct HolidayDescriptionsEntry
 {
-    uint32 ID;                                              // 0,       m_ID this is NOT holiday id
+    uint32 ID;                                              // 0        m_ID this is NOT holiday id
     //char*     name;                                       // 1        m_name_lang
 };*/
 
@@ -1116,17 +1116,17 @@ struct GtOCTBaseMPByClassEntry
 struct HolidaysEntry
 {
     uint32 ID;                                              // 0        m_ID
-    //uint32 duration[10];                                  // 1-10     m_duration
-    //uint32 date[26];                                      // 11-36    m_date (dates in unix time starting at January, 1, 2000)
-    //uint32 region;                                        // 37       m_region (wow region)
-    //uint32 looping;                                       // 38       m_looping
-    //uint32 calendarFlags[10];                             // 39-48    m_calendarFlags
-    //uint32 holidayNameId;                                 // 49       m_holidayNameID (HolidayNames.dbc)
-    //uint32 holidayDescriptionId;                          // 50       m_holidayDescriptionID (HolidayDescriptions.dbc)
-    //char *textureFilename;                                // 51       m_textureFilename
-    //uint32 priority;                                      // 52       m_priority
-    //uint32 calendarFilterType;                            // 53       m_calendarFilterType (-1,0,1 or 2)
-    //uint32 flags;                                         // 54       m_flags
+    // uint32 duration[10];                                 // 1-10     m_duration
+    // uint32 date[26];                                     // 11-36    m_date (dates in unix time starting at January, 1, 2000)
+    // uint32 region;                                       // 37       m_region (wow region)
+    // uint32 looping;                                      // 38       m_looping
+    // uint32 calendarFlags[10];                            // 39-48    m_calendarFlags
+    // uint32 holidayNameId;                                // 49       m_holidayNameID (HolidayNames.dbc)
+    // uint32 holidayDescriptionId;                         // 50       m_holidayDescriptionID (HolidayDescriptions.dbc)
+    // char *textureFilename;                               // 51       m_textureFilename
+    // uint32 priority;                                     // 52       m_priority
+    // uint32 calendarFilterType;                           // 53       m_calendarFilterType (-1,0,1 or 2)
+    // uint32 flags;                                        // 54       m_flags
 };
 
 struct ItemArmorQualityEntry
@@ -1319,9 +1319,9 @@ struct MailTemplateEntry
 
 struct MapEntry
 {
-    uint32      MapID;                                          // 0        m_ID
+    uint32  MapID;                                          // 0        m_ID
     DBCString   internalname;                                   // 1        m_Directory
-    uint32      map_type;                                       // 2        m_InstanceType
+    uint32  map_type;                                       // 2        m_InstanceType
     uint32      mapFlags;                                       // 3        m_Flags (0x100 - CAN_CHANGE_PLAYER_DIFFICULTY)
     uint32      unk4;                                           // 4 4.0.1
     uint32      isPvP;                                          // 5        m_PVP 0 or 1 for battlegrounds (not arenas)
@@ -1354,10 +1354,10 @@ struct MapEntry
     bool IsMountAllowed() const
     {
         return !IsDungeon() ||
-            MapID==209 || MapID==269 || MapID==309 ||       // TanarisInstance, CavernsOfTime, Zul'gurub
-            MapID==509 || MapID==534 || MapID==560 ||       // AhnQiraj, HyjalPast, HillsbradPast
-            MapID==568 || MapID==580 || MapID==595 ||       // ZulAman, Sunwell Plateau, Culling of Stratholme
-            MapID==603 || MapID==615 || MapID==616;         // Ulduar, The Obsidian Sanctum, The Eye Of Eternity
+               MapID == 209 || MapID == 269 || MapID == 309 || // TanarisInstance, CavernsOfTime, Zul'gurub
+               MapID == 509 || MapID == 534 || MapID == 560 || // AhnQiraj, HyjalPast, HillsbradPast
+               MapID == 568 || MapID == 580 || MapID == 595 || // ZulAman, Sunwell Plateau, Culling of Stratholme
+               MapID == 603 || MapID == 615 || MapID == 616;// Ulduar, The Obsidian Sanctum, The Eye Of Eternity
     }
 
     bool IsContinent() const
@@ -1397,7 +1397,7 @@ struct OverrideSpellDataEntry
 {
     uint32      Id;                                         // 0        m_ID
     uint32      Spells[MAX_OVERRIDE_SPELLS];                // 1-10     m_spells
-    //uint32      unk2;                                     // 11       m_flags
+    // uint32      unk2;                                    // 11       m_flags
     //uint32      unk3;                                     // 12 possibly flag
 };
 
@@ -1468,33 +1468,33 @@ struct ScalingStatValuesEntry
     //uint32 trash[24];                                     // 22-45
     //uint32 unk2;                                          // 46 unk, probably also Armor for level (flag 0x80000?)
 
-/*struct ScalingStatValuesEntry
-{
-    m_ID
-    m_charlevel
-    m_shoulderBudget
-    m_trinketBudget
-    m_weaponBudget1H
-    m_rangedBudget
-    m_clothShoulderArmor
-    m_leatherShoulderArmor
-    m_mailShoulderArmor
-    m_plateShoulderArmor
-    m_weaponDPS1H
-    m_weaponDPS2H
-    m_spellcasterDPS1H
-    m_spellcasterDPS2H
-    m_rangedDPS
-    m_wandDPS
-    m_spellPower
-    m_primaryBudget
-    m_tertiaryBudget
-    m_clothCloakArmor
-    m_clothChestArmor
-    m_leatherChestArmor
-    m_mailChestArmor
-    m_plateChestArmor
-};*/
+    /*struct ScalingStatValuesEntry
+    {
+        m_ID
+        m_charlevel
+        m_shoulderBudget
+        m_trinketBudget
+        m_weaponBudget1H
+        m_rangedBudget
+        m_clothShoulderArmor
+        m_leatherShoulderArmor
+        m_mailShoulderArmor
+        m_plateShoulderArmor
+        m_weaponDPS1H
+        m_weaponDPS2H
+        m_spellcasterDPS1H
+        m_spellcasterDPS2H
+        m_rangedDPS
+        m_wandDPS
+        m_spellPower
+        m_primaryBudget
+        m_tertiaryBudget
+        m_clothCloakArmor
+        m_clothChestArmor
+        m_leatherChestArmor
+        m_mailChestArmor
+        m_plateChestArmor
+    };*/
     uint32  getssdMultiplier(uint32 mask) const
     {
         if (mask & 0x4001F)
@@ -1513,15 +1513,15 @@ struct ScalingStatValuesEntry
     {
         if (mask & 0x00F001E0)
         {
-            if(mask & 0x00000020) return armorMod[0];
-            if(mask & 0x00000040) return armorMod[1];
-            if(mask & 0x00000080) return armorMod[2];
-            if(mask & 0x00000100) return armorMod[3];
+            if (mask & 0x00000020) return armorMod[0];
+            if (mask & 0x00000040) return armorMod[1];
+            if (mask & 0x00000080) return armorMod[2];
+            if (mask & 0x00000100) return armorMod[3];
 
-            if(mask & 0x00100000) return armorMod2[0];      // cloth
-            if(mask & 0x00200000) return armorMod2[1];      // leather
-            if(mask & 0x00400000) return armorMod2[2];      // mail
-            if(mask & 0x00800000) return armorMod2[3];      // plate
+            if (mask & 0x00100000) return armorMod2[0];     // cloth
+            if (mask & 0x00200000) return armorMod2[1];     // leather
+            if (mask & 0x00400000) return armorMod2[2];     // mail
+            if (mask & 0x00800000) return armorMod2[3];     // plate
         }
         return 0;
     }
@@ -1530,12 +1530,12 @@ struct ScalingStatValuesEntry
     {
         if (mask & 0x7E00)
         {
-            if(mask & 0x00000200) return dpsMod[0];
-            if(mask & 0x00000400) return dpsMod[1];
-            if(mask & 0x00000800) return dpsMod[2];
-            if(mask & 0x00001000) return dpsMod[3];
-            if(mask & 0x00002000) return dpsMod[4];
-            if(mask & 0x00004000) return dpsMod[5];         // not used?
+            if (mask & 0x00000200) return dpsMod[0];
+            if (mask & 0x00000400) return dpsMod[1];
+            if (mask & 0x00000800) return dpsMod[2];
+            if (mask & 0x00001000) return dpsMod[3];
+            if (mask & 0x00002000) return dpsMod[4];
+            if (mask & 0x00004000) return dpsMod[5];        // not used?
         }
         return 0;
     }
@@ -1721,25 +1721,25 @@ struct SpellClassOptionsEntry
 
     // helpers
 
-    bool IsFitToFamilyMask(uint64 familyFlags, uint32 familyFlags2 = 0) const
-    {
-        return SpellFamilyFlags.IsFitToFamilyMask(familyFlags, familyFlags2);
-    }
+        bool IsFitToFamilyMask(uint64 familyFlags, uint32 familyFlags2 = 0) const
+        {
+            return SpellFamilyFlags.IsFitToFamilyMask(familyFlags, familyFlags2);
+        }
 
-    bool IsFitToFamily(SpellFamily family, uint64 familyFlags, uint32 familyFlags2 = 0) const
-    {
-        return SpellFamily(SpellFamilyName) == family && IsFitToFamilyMask(familyFlags, familyFlags2);
-    }
+        bool IsFitToFamily(SpellFamily family, uint64 familyFlags, uint32 familyFlags2 = 0) const
+        {
+            return SpellFamily(SpellFamilyName) == family && IsFitToFamilyMask(familyFlags, familyFlags2);
+        }
 
-    bool IsFitToFamilyMask(ClassFamilyMask const& mask) const
-    {
-        return SpellFamilyFlags.IsFitToFamilyMask(mask);
-    }
+        bool IsFitToFamilyMask(ClassFamilyMask const& mask) const
+        {
+            return SpellFamilyFlags.IsFitToFamilyMask(mask);
+        }
 
-    bool IsFitToFamily(SpellFamily family, ClassFamilyMask const& mask) const
-    {
-        return SpellFamily(SpellFamilyName) == family && IsFitToFamilyMask(mask);
-    }
+        bool IsFitToFamily(SpellFamily family, ClassFamilyMask const& mask) const
+        {
+            return SpellFamily(SpellFamilyName) == family && IsFitToFamilyMask(mask);
+        }
 
     private:
         // catch wrong uses
@@ -2033,14 +2033,14 @@ struct MANGOS_DLL_SPEC SpellEntry
         return classOpt && classOpt->IsFitToFamily(family, mask);
     }
 
-    inline bool HasAttribute(SpellAttributes attribute) const { return Attributes & attribute; }
-    inline bool HasAttribute(SpellAttributesEx attribute) const { return AttributesEx & attribute; }
-    inline bool HasAttribute(SpellAttributesEx2 attribute) const { return AttributesEx2 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx3 attribute) const { return AttributesEx3 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx4 attribute) const { return AttributesEx4 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx5 attribute) const { return AttributesEx5 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx6 attribute) const { return AttributesEx6 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx7 attribute) const { return AttributesEx7 & attribute; }
+        inline bool HasAttribute(SpellAttributes attribute) const { return Attributes & attribute; }
+        inline bool HasAttribute(SpellAttributesEx attribute) const { return AttributesEx & attribute; }
+        inline bool HasAttribute(SpellAttributesEx2 attribute) const { return AttributesEx2 & attribute; }
+        inline bool HasAttribute(SpellAttributesEx3 attribute) const { return AttributesEx3 & attribute; }
+        inline bool HasAttribute(SpellAttributesEx4 attribute) const { return AttributesEx4 & attribute; }
+        inline bool HasAttribute(SpellAttributesEx5 attribute) const { return AttributesEx5 & attribute; }
+        inline bool HasAttribute(SpellAttributesEx6 attribute) const { return AttributesEx6 & attribute; }
+        inline bool HasAttribute(SpellAttributesEx7 attribute) const { return AttributesEx7 & attribute; }
     inline bool HasAttribute(SpellAttributesEx8 attribute) const { return AttributesEx8 & attribute; }
     inline bool HasAttribute(SpellAttributesEx9 attribute) const { return AttributesEx9 & attribute; }
     inline bool HasAttribute(SpellAttributesEx10 attribute) const { return AttributesEx10 & attribute; }
@@ -2457,9 +2457,9 @@ struct WorldPvPAreaEntry
 #endif
 
 typedef std::set<uint32> SpellCategorySet;
-typedef std::map<uint32,SpellCategorySet > SpellCategoryStore;
+typedef std::map<uint32, SpellCategorySet > SpellCategoryStore;
 typedef std::set<uint32> PetFamilySpellsSet;
-typedef std::map<uint32,PetFamilySpellsSet > PetFamilySpellsStore;
+typedef std::map<uint32, PetFamilySpellsSet > PetFamilySpellsStore;
 
 // Structures not used for casting to loaded DBC data and not required then packing
 struct TalentSpellPos
@@ -2471,7 +2471,7 @@ struct TalentSpellPos
     uint8  rank;
 };
 
-typedef std::map<uint32,TalentSpellPos> TalentSpellPosMap;
+typedef std::map<uint32, TalentSpellPos> TalentSpellPosMap;
 
 struct SpellEffect
 {
@@ -2488,14 +2488,14 @@ typedef std::map<uint32, SpellEffect> SpellEffectMap;
 
 struct TaxiPathBySourceAndDestination
 {
-    TaxiPathBySourceAndDestination() : ID(0),price(0) {}
-    TaxiPathBySourceAndDestination(uint32 _id,uint32 _price) : ID(_id),price(_price) {}
+    TaxiPathBySourceAndDestination() : ID(0), price(0) {}
+    TaxiPathBySourceAndDestination(uint32 _id, uint32 _price) : ID(_id), price(_price) {}
 
     uint32    ID;
     uint32    price;
 };
-typedef std::map<uint32,TaxiPathBySourceAndDestination> TaxiPathSetForSource;
-typedef std::map<uint32,TaxiPathSetForSource> TaxiPathSetBySource;
+typedef std::map<uint32, TaxiPathBySourceAndDestination> TaxiPathSetForSource;
+typedef std::map<uint32, TaxiPathSetForSource> TaxiPathSetBySource;
 
 struct TaxiPathNodePtr
 {
@@ -2507,7 +2507,7 @@ struct TaxiPathNodePtr
     operator TaxiPathNodeEntry const& () const { return *i_ptr; }
 };
 
-typedef Path<TaxiPathNodePtr,TaxiPathNodeEntry const> TaxiPathNodeList;
+typedef Path<TaxiPathNodePtr, TaxiPathNodeEntry const> TaxiPathNodeList;
 typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
 
 typedef UNORDERED_MAP<uint32 /*frame*/, TransportAnimationEntry const*> TransportAnimationEntryMap;

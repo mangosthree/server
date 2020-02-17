@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -187,7 +187,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
         player->SendEquipError(msg, NULL, NULL, item->itemid);
 }
 
-void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
+void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
 {
     DEBUG_LOG("WORLD: CMSG_LOOT_MONEY");
 
@@ -263,7 +263,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
                     playersNear.push_back(playerGroup);
             }
 
-            uint32 money_per_player = uint32((pLoot->gold) / (playersNear.size()));
+            uint64 money_per_player = uint32((pLoot->gold) / (playersNear.size()));
 
             for (std::vector<Player*>::const_iterator i = playersNear.begin(); i != playersNear.end(); ++i)
             {
@@ -272,7 +272,8 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
 
                 WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
                 data << uint32(money_per_player);
-                data << uint8(playersNear.size() > 1 ? 0 : 1);  // 0 is "you share of loot..."
+                data << uint8(playersNear.size() > 1 ? 0 : 1);// 0 is "you share of loot..."
+
                 (*i)->GetSession()->SendPacket(&data);
             }
         }
@@ -497,13 +498,11 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
                 if (group->GetLooterGuid() == player->GetObjectGuid())
                     group->UpdateLooterGuid(pCreature);
 
-            if (loot->isLooted())
+            if (loot->isLooted() && !pCreature->isAlive())
             {
                 // for example skinning after normal loot
                 pCreature->PrepareBodyLootState();
-
-                if (!pCreature->isAlive())
-                    pCreature->AllLootRemovedFromCorpse();
+                pCreature->AllLootRemovedFromCorpse();
             }
             break;
         }

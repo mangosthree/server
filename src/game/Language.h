@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -150,7 +150,7 @@ enum MangosStrings
     LANG_YOU_GIVE_MOUNT                 = 150,
     LANG_MOUNT_GIVED                    = 151,
 
-    LANG_CURRENT_MONEY                  = 152,
+    //                                    152 not used
     LANG_YOU_TAKE_ALL_MONEY             = 153,
     LANG_YOURS_ALL_MONEY_GONE           = 154,
     LANG_YOU_TAKE_MONEY                 = 155,
@@ -158,8 +158,7 @@ enum MangosStrings
     LANG_YOU_GIVE_MONEY                 = 157,
     LANG_YOURS_MONEY_GIVEN              = 158,
     LANG_YOU_HEAR_SOUND                 = 159,
-
-    LANG_NEW_MONEY                      = 160,              // Log
+    //                                    160 not used
 
     LANG_REMOVE_BIT                     = 161,
     LANG_SET_BIT                        = 162,
@@ -167,7 +166,7 @@ enum MangosStrings
     LANG_COMMAND_TELE_NOTFOUND          = 164,
     LANG_COMMAND_TELE_PARAMETER         = 165,
     LANG_COMMAND_TELE_NOLOCATION        = 166,
-    //                                    167               // not used
+    LANG_YOURS_HOLY_POWER_CHANGED       = 167,
     LANG_COMMAND_TELE_LOCATION          = 168,
 
     LANG_MAIL_SENT                      = 169,
@@ -177,7 +176,8 @@ enum MangosStrings
     LANG_YOU_CHANGE_RUNIC_POWER         = 173,
     LANG_YOURS_RUNIC_POWER_CHANGED      = 174,
     LANG_LIQUID_STATUS                  = 175,
-    // Room for more level 1              176-199 not used
+    LANG_YOU_CHANGE_HOLY_POWER          = 176,
+    // Room for more level 1              177-199 not used
 
     // level 2 chat
     LANG_NO_SELECTION                   = 200,
@@ -940,7 +940,9 @@ enum MangosStrings
     LANG_AHBOT_ITEMS_RATIO              = 1191,
     LANG_MOVEGENS_EFFECT                = 1192,
     LANG_GEARSCORE                      = 1193,
-    // Room for more level 3              1194-1199 not used
+    LANG_COMMAND_GO_STATUS              = 1194,
+    LANG_COMMAND_GO_STATUS_DOOR         = 1195,
+    // Room for more level 3              1196-1199 not used
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
@@ -966,9 +968,8 @@ enum MangosStrings
     LANG_NPC_EVENTAI_PHASE              = 1506,
     LANG_NPC_EVENTAI_MOVE               = 1507,
     LANG_NPC_EVENTAI_COMBAT             = 1508,
-    LANG_VENDOR_WRONG_ITEM_TYPE         = 1509,
-    LANG_VENDOR_WRONG_CURRENCY_MAXCOUNT = 1510,
-    // Room for more Level 2              1509-1599 not used
+    LANG_POOL_ENTRY_LOWER_MAX_POOL      = 1509,
+    // Room for more Level 2              1510-1599 not used
 
     // Outdoor PvP
     LANG_OPVP_EP_CAPTURE_NPT_H          = 1600,
@@ -1014,12 +1015,14 @@ enum MangosStrings
     LANG_OPVP_SI_CAPTURE_H              = 1635,
     LANG_OPVP_SI_CAPTURE_A              = 1636,
 
-    // FREE IDS                           1700-9999
+    // Room for 4.x clients only          1700-1799
+    LANG_VENDOR_WRONG_ITEM_TYPE         = 1700,
+    LANG_VENDOR_WRONG_CURRENCY_MAXCOUNT = 1701,
+
+    // FREE IDS                           1800-9999
 
     // Use for not-in-official-sources patches
     //                                    10000-10999
-
-    LANG_INVALID_REALMID                = 11001,
 
     // Use for custom patches             11000-11999
 

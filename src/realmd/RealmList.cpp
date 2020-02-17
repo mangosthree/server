@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 #include "RealmList.h"
 #include "AuthCodes.h"
 #include "Util.h"                                           // for Tokens typedef
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
 
 INSTANTIATE_SINGLETON_1(RealmList);
@@ -40,7 +40,7 @@ static RealmBuildInfo ExpectedRealmdClientBuilds[] =
     {15595, 4, 3, 4, ' '},                                  // highest supported build, also auto accept all above for simplify future supported builds testing
     {15050, 4, 3, 0, ' '},
     {13623, 4, 0, 6, 'a'},
-    {12340, 3, 3, 5, 'a'},
+    {12340, 3, 3, 5, 'a'},                                  // highest supported build, also auto accept all above for simplify future supported builds testing
     {11723, 3, 3, 3, 'a'},
     {11403, 3, 3, 2, ' '},
     {11159, 3, 3, 0, 'a'},

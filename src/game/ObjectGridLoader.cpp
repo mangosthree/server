@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,7 +35,7 @@ class MANGOS_DLL_DECL ObjectGridRespawnMover
 
         void Move(GridType& grid);
 
-        template<class T> void Visit(GridRefManager<T>&) {}
+        template<class T> void Visit(GridRefManager<T> &) {}
         void Visit(CreatureMapType& m);
 };
 
@@ -266,7 +266,7 @@ ObjectGridUnloader::Unload(GridType& grid)
 
 template<class T>
 void
-ObjectGridUnloader::Visit(GridRefManager<T>& m)
+ObjectGridUnloader::Visit(GridRefManager<T> &m)
 {
     // remove all cross-reference before deleting
     for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)

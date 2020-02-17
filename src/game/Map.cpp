@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1520,6 +1520,7 @@ BattleGroundPersistentState* BattleGroundMap::GetPersistanceState() const
     return (BattleGroundPersistentState*)Map::GetPersistentState();
 }
 
+
 void BattleGroundMap::InitVisibilityDistance()
 {
     // init visibility distance for BG/Arenas
@@ -1689,7 +1690,7 @@ void Map::ScriptsProcess()
     }
 }
 
-/*
+/**
  * Function return player that in world at CURRENT map
  *
  * Note: This is function preferred if you sure that need player only placed at specific map
@@ -1703,7 +1704,7 @@ Player* Map::GetPlayer(ObjectGuid guid)
     return plr && plr->GetMap() == this ? plr : NULL;
 }
 
-/*
+/**
  * Function return creature (non-pet and then most summoned by spell creatures) that in world at CURRENT map
  *
  * @param guid must be creature or vehicle guid (HIGHGUID_UNIT HIGHGUID_VEHICLE)
@@ -1713,7 +1714,7 @@ Creature* Map::GetCreature(ObjectGuid guid)
     return m_objectsStore.find<Creature>(guid, (Creature*)NULL);
 }
 
-/*
+/**
  * Function return pet that in world at CURRENT map
  *
  * @param guid must be pet guid (HIGHGUID_PET)
@@ -1723,7 +1724,7 @@ Pet* Map::GetPet(ObjectGuid guid)
     return m_objectsStore.find<Pet>(guid, (Pet*)NULL);
 }
 
-/*
+/**
  * Function return corpse that at CURRENT map
  *
  * Note: corpse can be NOT IN WORLD, so can't be used corpse->GetMap() without pre-check corpse->isInWorld()
@@ -1736,7 +1737,7 @@ Corpse* Map::GetCorpse(ObjectGuid guid)
     return ret && ret->GetInstanceId() == GetInstanceId() ? ret : NULL;
 }
 
-/*
+/**
  * Function return non-player unit object that in world at CURRENT map, so creature, or pet, or vehicle
  *
  * @param guid must be non-player unit guid (HIGHGUID_PET HIGHGUID_UNIT HIGHGUID_VEHICLE)
@@ -1754,7 +1755,7 @@ Creature* Map::GetAnyTypeCreature(ObjectGuid guid)
     return NULL;
 }
 
-/*
+/**
  * Function return gameobject that in world at CURRENT map
  *
  * @param guid must be gameobject guid (HIGHGUID_GAMEOBJECT)
@@ -1764,7 +1765,7 @@ GameObject* Map::GetGameObject(ObjectGuid guid)
     return m_objectsStore.find<GameObject>(guid, (GameObject*)NULL);
 }
 
-/*
+/**
  * Function return dynamic object that in world at CURRENT map
  *
  * @param guid must be dynamic object guid (HIGHGUID_DYNAMICOBJECT)
@@ -1774,7 +1775,7 @@ DynamicObject* Map::GetDynamicObject(ObjectGuid guid)
     return m_objectsStore.find<DynamicObject>(guid, (DynamicObject*)NULL);
 }
 
-/*
+/**
  * Function return unit in world at CURRENT map
  *
  * Note: in case player guid not always expected need player at current map only.
@@ -1790,7 +1791,7 @@ Unit* Map::GetUnit(ObjectGuid guid)
     return GetAnyTypeCreature(guid);
 }
 
-/*
+/**
  * Function return world object in world at CURRENT map, so any except transports
  */
 WorldObject* Map::GetWorldObject(ObjectGuid guid)
@@ -1858,7 +1859,7 @@ uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
     }
 }
 
-/*
+/**
  * Helper structure for building static chat information
  *
  */
@@ -1890,7 +1891,8 @@ class StaticMonsterChatBuilder
         Unit* i_target;
 };
 
-/*
+
+/**
  * Function simulates yell of creature
  *
  * @param guid must be creature guid of whom to Simulate the yell, non-creature guids not supported at this moment
@@ -1918,7 +1920,8 @@ void Map::MonsterYellToMap(ObjectGuid guid, int32 textId, uint32 language, Unit*
     }
 }
 
-/*
+
+/**
  * Function simulates yell of creature
  *
  * @param cinfo must be entry of Creature of whom to Simulate the yell
@@ -1938,7 +1941,7 @@ void Map::MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, uint32 langu
         say_do(itr->getSource());
 }
 
-/*
+/**
  * Function to play sound to all players in map
  *
  * @param soundId Played Sound
@@ -1956,7 +1959,7 @@ void Map::PlayDirectSoundToMap(uint32 soundId, uint32 zoneId /*=0*/)
             itr->getSource()->SendDirectMessage(&data);
 }
 
-/*
+/**
  * Function to check if a point is in line of sight from an other point
  */
 bool Map::IsInLineOfSight(float srcX, float srcY, float srcZ, float destX, float destY, float destZ, uint32 phasemask) const
@@ -1965,7 +1968,7 @@ bool Map::IsInLineOfSight(float srcX, float srcY, float srcZ, float destX, float
            && m_dyn_tree.isInLineOfSight(srcX, srcY, srcZ, destX, destY, destZ, phasemask);
 }
 
-/*
+/**
  * get the hit position and return true if we hit something (in this case the dest position will hold the hit-position)
  * otherwise the result pos will be the dest pos
  */

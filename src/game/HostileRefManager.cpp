@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,6 @@
 
 HostileRefManager::HostileRefManager(Unit* pOwner) : iOwner(pOwner), m_redirectionMod(0.0f)
 {
-
 }
 
 HostileRefManager::~HostileRefManager()

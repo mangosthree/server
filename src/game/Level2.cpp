@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -604,7 +604,6 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
                         continue;
 
                     worker(*cr_data);
-
                 }
                 while (result->NextRow());
 
@@ -753,7 +752,6 @@ bool ChatHandler::HandleGoObjectCommand(char* args)
                         continue;
 
                     worker(*go_data);
-
                 }
                 while (result->NextRow());
 
@@ -891,6 +889,11 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         PSendSysMessage(LANG_COMMAND_RAWPAWNTIMES, defRespawnDelayStr.c_str(), curRespawnDelayStr.c_str());
 
         ShowNpcOrGoSpawnInformation<GameObject>(target->GetGUIDLow());
+
+        if (target->GetGoType() == GAMEOBJECT_TYPE_DOOR)
+            PSendSysMessage(LANG_COMMAND_GO_STATUS_DOOR, target->GetGoState(), target->getLootState(), GetOnOffStr(target->IsCollisionEnabled()), goI->door.startOpen ? "open" : "closed");
+        else
+            PSendSysMessage(LANG_COMMAND_GO_STATUS, target->GetGoState(), target->getLootState(), GetOnOffStr(target->IsCollisionEnabled()));
     }
     return true;
 }
@@ -972,6 +975,7 @@ bool ChatHandler::HandleGameObjectTurnCommand(char* args)
     obj->SetWorldRotationAngles(z_rot, y_rot, x_rot);
     obj->SaveToDB();
     PSendSysMessage(LANG_COMMAND_TURNOBJMESSAGE, obj->GetGUIDLow(), obj->GetGOInfo()->name, obj->GetGUIDLow());
+
     return true;
 }
 
@@ -1356,7 +1360,6 @@ bool ChatHandler::HandleCharacterAchievementsCommand(char* args)
 void ChatHandler::ShowFactionListHelper(FactionEntry const* factionEntry, LocaleConstant loc, FactionState const* repState /*= NULL*/, Player* target /*= NULL */)
 {
     std::string name = factionEntry->name[loc];
-
     // send faction in "id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
     // or              "id - [faction] [no reputation]" format
     std::ostringstream ss;
@@ -1456,8 +1459,7 @@ bool ChatHandler::HandleModifyRepCommand(char* args)
     if (!*args)
         return false;
 
-    Player* target = NULL;
-    target = getSelectedPlayer();
+    Player* target = getSelectedPlayer();
 
     if (!target)
     {
@@ -1615,6 +1617,10 @@ bool ChatHandler::HandleNpcAddVendorCurrencyCommand(char* args)
     if (!ExtractUInt32(&args, maxcount))
         return false;
 
+    uint32 incrtime;
+    if (!ExtractOptUInt32(&args, incrtime, 0))
+        return false;
+
     uint32 extendedcost;
     if (!ExtractUInt32(&args, extendedcost))
         return false;
@@ -1623,7 +1629,7 @@ bool ChatHandler::HandleNpcAddVendorCurrencyCommand(char* args)
 
     uint32 vendor_entry = vendor ? vendor->GetEntry() : 0;
 
-    if (!sObjectMgr.IsVendorItemValid(false, "npc_vendor", vendor_entry, currencyId, VENDOR_ITEM_TYPE_CURRENCY, maxcount, 0, extendedcost, m_session->GetPlayer()))
+    if (!sObjectMgr.IsVendorItemValid(false, "npc_vendor", vendor_entry, currencyId, VENDOR_ITEM_TYPE_CURRENCY, maxcount, incrtime, extendedcost, 0, m_session->GetPlayer()))
     {
         SetSentErrorMessage(true);
         return false;
@@ -1664,7 +1670,7 @@ bool ChatHandler::HandleNpcAddVendorItemCommand(char* args)
 
     uint32 vendor_entry = vendor ? vendor->GetEntry() : 0;
 
-    if (!sObjectMgr.IsVendorItemValid(false, "npc_vendor", vendor_entry, itemId, VENDOR_ITEM_TYPE_ITEM, maxcount, incrtime, extendedcost, m_session->GetPlayer()))
+    if (!sObjectMgr.IsVendorItemValid(false, "npc_vendor", vendor_entry, itemId, VENDOR_ITEM_TYPE_ITEM, maxcount, incrtime, extendedcost, 0, m_session->GetPlayer()))
     {
         SetSentErrorMessage(true);
         return false;
@@ -2278,7 +2284,7 @@ bool ChatHandler::HandleNpcUnFollowCommand(char* /*args*/)
     }
 
     FollowMovementGenerator<Creature> const* mgen
-        = static_cast<FollowMovementGenerator<Creature> const*>((creature->GetMotionMaster()->top()));
+    = static_cast<FollowMovementGenerator<Creature> const*>((creature->GetMotionMaster()->top()));
 
     if (mgen->GetTarget() != player)
     {
@@ -2434,7 +2440,6 @@ bool ChatHandler::HandleNpcSubNameCommand(char* /*args*/)
 
     if (strlen((char*)args)>75)
     {
-
         PSendSysMessage(LANG_TOO_LONG_SUBNAME, strlen((char*)args)-75);
         return true;
     }
@@ -2608,7 +2613,7 @@ bool ChatHandler::HandlePInfoCommand(char* args)
         return false;
 
     uint32 accId = 0;
-    uint32 money = 0;
+    uint64 money = 0;
     uint32 total_player_time = 0;
     uint32 level = 0;
     uint32 latency = 0;
@@ -2641,7 +2646,7 @@ bool ChatHandler::HandlePInfoCommand(char* args)
         Field* fields = result->Fetch();
         total_player_time = fields[0].GetUInt32();
         level = fields[1].GetUInt32();
-        money = fields[2].GetUInt32();
+        money = fields[2].GetUInt64();
         accId = fields[3].GetUInt32();
         delete result;
     }
@@ -2677,10 +2682,7 @@ bool ChatHandler::HandlePInfoCommand(char* args)
     PSendSysMessage(LANG_PINFO_ACCOUNT, (target ? "" : GetMangosString(LANG_OFFLINE)), nameLink.c_str(), target_guid.GetCounter(), username.c_str(), accId, security, last_ip.c_str(), last_login.c_str(), latency);
 
     std::string timeStr = secsToTimeString(total_player_time, true, true);
-    uint32 gold = money / GOLD;
-    uint32 silv = (money % GOLD) / SILVER;
-    uint32 copp = (money % GOLD) % SILVER;
-    PSendSysMessage(LANG_PINFO_LEVEL,  timeStr.c_str(), level, gold, silv, copp);
+    PSendSysMessage(LANG_PINFO_LEVEL,  timeStr.c_str(), level, MoneyToString(money).c_str());
 
     return true;
 }
@@ -2914,7 +2916,7 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
     return true;
 }
 
-/*
+/**
  * Add a waypoint to a creature.
  *
  * The user can either select an npc or provide its GUID.
@@ -3080,7 +3082,7 @@ bool ChatHandler::HandleWpAddCommand(char* args)
     return true;
 }                                                           // HandleWpAddCommand
 
-/*
+/**
  * .wp modify emote | spell | text | del | move | add
  *
  * add -> add a WP after the selected visual waypoint
@@ -3474,7 +3476,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
     return true;
 }
 
-/*
+/**
  * .wp show info | on | off
  *
  * info -> User has selected a visual waypoint before
@@ -3643,7 +3645,6 @@ bool ChatHandler::HandleWpShowCommand(char* args)
             PSendSysMessage(LANG_WAYPOINT_INFO_SPELL, spell);
             for (int i = 0;  i < MAX_WAYPOINT_TEXT; ++i)
                 PSendSysMessage(LANG_WAYPOINT_INFO_TEXT, i + 1, textid[i], (textid[i] ? GetMangosString(textid[i]) : ""));
-
         }
         while (result->NextRow());
         // Cleanup memory
@@ -3684,7 +3685,6 @@ bool ChatHandler::HandleWpShowCommand(char* args)
                     pCreature->DeleteFromDB();
                     pCreature->AddObjectToRemoveList();
                 }
-
             }
             while (result2->NextRow());
             delete result2;
@@ -3976,7 +3976,6 @@ bool ChatHandler::HandleWpExportCommand(char* args)
         outfile << ", ";
         outfile << fields[14].GetUInt32();                  // textid5
         outfile << ");\n ";
-
     }
     while (result->NextRow());
     delete result;
@@ -4514,7 +4513,7 @@ bool ChatHandler::HandleLearnAllRecipesCommand(char* args)
     HandleLearnSkillRecipesHelper(target, targetSkillInfo->id);
 
     uint16 maxLevel = target->GetPureMaxSkillValue(targetSkillInfo->id);
-    target->SetSkill(targetSkillInfo->id, maxLevel, maxLevel);
+    target->SetSkill(targetSkillInfo->id, maxLevel, maxLevel, target->GetSkillStep(targetSkillInfo->id));
     PSendSysMessage(LANG_COMMAND_LEARN_ALL_RECIPES, name.c_str());
     return true;
 }
@@ -4618,7 +4617,6 @@ bool ChatHandler::ShowAccountListHelper(QueryResult* result, uint32* limit, bool
         else
             PSendSysMessage(LANG_ACCOUNT_LIST_LINE_CONSOLE,
                             account, fields[1].GetString(), char_name, fields[2].GetString(), fields[3].GetUInt32(), fields[4].GetUInt32());
-
     }
     while (result->NextRow());
 
@@ -4856,6 +4854,12 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
     uint32 pool_id;
     if (!ExtractUint32KeyFromLink(&args, "Hpool", pool_id))
         return false;
+
+    if (pool_id > sPoolMgr.GetMaxPoolId())
+    {
+        PSendSysMessage(LANG_POOL_ENTRY_LOWER_MAX_POOL, pool_id, sPoolMgr.GetMaxPoolId());
+        return true;
+    }
 
     Player* player = m_session ? m_session->GetPlayer() : NULL;
 

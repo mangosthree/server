@@ -102,13 +102,13 @@ namespace Movement
             void operator &= (uint32 f) { raw() &= f;}
             void operator |= (uint32 f) { raw() |= f;}
 
-            void EnableAnimation(uint8 anim) { raw() = (raw() & ~(Mask_Animations | Falling | Trajectory | FallingSlow)) | Animation | (anim & Mask_Animations);}
-            void EnableParabolic()           { raw() = (raw() & ~(Mask_Animations | Falling | Animation | FallingSlow)) | Trajectory;}
-            void EnableFalling()             { raw() = (raw() & ~(Mask_Animations | Trajectory | Animation))| Falling;}
-            void EnableCatmullRom()          { raw() = (raw() & ~SmoothGroundPath) | Catmullrom | UncompressedPath; }
-            void EnableFacingPoint()         { raw() = (raw() & ~Mask_Final_Facing) | Final_Point;}
-            void EnableFacingAngle()         { raw() = (raw() & ~Mask_Final_Facing) | Final_Angle;}
-            void EnableFacingTarget()        { raw() = (raw() & ~Mask_Final_Facing) | Final_Target;}
+            void EnableAnimation(uint8 anim) { raw() = (raw() & ~(Mask_Animations                           | Falling | Trajectory | FallingSlow)) | Animation | (anim & Mask_Animations);}
+            void EnableParabolic()           { raw() = (raw() & ~(Mask_Animations                           | Falling | Animation | FallingSlow)) | Trajectory;}
+            void EnableFalling()             { raw() = (raw() & ~(Mask_Animations                           | Trajectory | Animation))| Falling;}
+            void EnableCatmullRom()          { raw() = (raw() & ~SmoothGroundPath)                          | Catmullrom | UncompressedPath; }
+            void EnableFacingPoint()         { raw() = (raw() & ~Mask_Final_Facing)                         | Final_Point;}
+            void EnableFacingAngle()         { raw() = (raw() & ~Mask_Final_Facing)                         | Final_Angle;}
+            void EnableFacingTarget()        { raw() = (raw() & ~Mask_Final_Facing)                         | Final_Target;}
             void EnableBoardVehicle()        { raw() = (raw() & ~(Catmullrom | ExitVehicle))                | BoardVehicle; }
             void EnableExitVehicle()         { raw() = (raw() & ~BoardVehicle)                              | ExitVehicle; }
 

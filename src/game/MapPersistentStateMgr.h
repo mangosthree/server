@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -282,12 +282,13 @@ struct DungeonResetEvent
 {
     ResetEventType type   : 8;                              // if RESET_EVENT_NORMAL_DUNGEON then InstanceID == 0 and applied to all instances for pair (map,diff)
     Difficulty difficulty : 8;                              // used with mapid used as for select reset for global cooldown instances (instamceid==0 for event)
-    uint16 mapid;
+    uint16 mapid;                                           // used with mapid used as for select reset for global cooldown instances (instanceid==0 for event)
     uint32 instanceId;                                      // used for select reset for normal dungeons
 
     DungeonResetEvent() : type(RESET_EVENT_NORMAL_DUNGEON), difficulty(DUNGEON_DIFFICULTY_NORMAL), mapid(0), instanceId(0) {}
     DungeonResetEvent(ResetEventType t, uint32 _mapid, Difficulty d, uint32 _instanceid)
         : type(t), difficulty(d), mapid(_mapid), instanceId(_instanceid) {}
+
     bool operator == (const DungeonResetEvent& e) { return e.mapid == mapid && e.difficulty == difficulty && e.instanceId == instanceId; }
 };
 
@@ -401,7 +402,6 @@ inline void MapPersistentStateManager::DoForAllStatesWithMapId(uint32 mapId, Do&
             else
                 ++itr;
         }
-
     }
     else
     {

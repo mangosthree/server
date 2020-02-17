@@ -317,6 +317,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleLookupTeleCommand(char* args);
         bool HandleLookupTitleCommand(char* args);
 
+        bool HandleModifyHolyPowerCommand(char* args);
         bool HandleModifyHPCommand(char* args);
         bool HandleModifyManaCommand(char* args);
         bool HandleModifyRageCommand(char* args);
@@ -410,15 +411,20 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleReloadCreatureQuestRelationsCommand(char* args);
         bool HandleReloadCreatureQuestInvRelationsCommand(char* args);
         bool HandleReloadDbScriptStringCommand(char* args);
-        bool HandleReloadEventScriptsCommand(char* args);
+        bool HandleReloadDBScriptsOnCreatureDeathCommand(char* args);
+        bool HandleReloadDBScriptsOnEventCommand(char* args);
+        bool HandleReloadDBScriptsOnGossipCommand(char* args);
+        bool HandleReloadDBScriptsOnGoUseCommand(char* args);
+        bool HandleReloadDBScriptsOnQuestEndCommand(char* args);
+        bool HandleReloadDBScriptsOnQuestStartCommand(char* args);
+        bool HandleReloadDBScriptsOnSpellCommand(char* args);
+
         bool HandleReloadEventAITextsCommand(char* args);
         bool HandleReloadEventAISummonsCommand(char* args);
         bool HandleReloadEventAIScriptsCommand(char* args);
         bool HandleReloadGameGraveyardZoneCommand(char* args);
-        bool HandleReloadGameObjectScriptsCommand(char* args);
         bool HandleReloadGameTeleCommand(char* args);
         bool HandleReloadGossipMenuCommand(char* args);
-        bool HandleReloadGossipScriptsCommand(char* args);
         bool HandleReloadGOQuestRelationsCommand(char* args);
         bool HandleReloadGOQuestInvRelationsCommand(char* args);
         bool HandleReloadItemConvertCommand(char* args);
@@ -455,9 +461,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleReloadPointsOfInterestCommand(char* args);
         bool HandleReloadSpellClickSpellsCommand(char* args);
         bool HandleReloadQuestAreaTriggersCommand(char* args);
-        bool HandleReloadQuestEndScriptsCommand(char* args);
         bool HandleReloadQuestPOICommand(char* args);
-        bool HandleReloadQuestStartScriptsCommand(char* args);
         bool HandleReloadQuestTemplateCommand(char* args);
         bool HandleReloadReservedNameCommand(char* args);
         bool HandleReloadReputationRewardRateCommand(char* args);
@@ -473,7 +477,6 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleReloadSpellProcItemEnchantCommand(char* args);
         bool HandleReloadSpellBonusesCommand(char* args);
         bool HandleReloadSpellScriptTargetCommand(char* args);
-        bool HandleReloadSpellScriptsCommand(char* args);
         bool HandleReloadSpellTargetPositionCommand(char* args);
         bool HandleReloadSpellThreatsCommand(char* args);
         bool HandleReloadSpellPetAurasCommand(char* args);
@@ -621,6 +624,8 @@ class MANGOS_DLL_SPEC ChatHandler
         bool  ExtractUInt32Base(char** args, uint32& val, uint32 base);
         bool  ExtractUInt32(char** args, uint32& val) { return ExtractUInt32Base(args, val, 10); }
         bool  ExtractOptUInt32(char** args, uint32& val, uint32 defVal);
+        bool  ExtractUInt64(char** args, uint64& val);
+        bool  ExtractInt64(char** args, int64& val);
         bool  ExtractFloat(char** args, float& val);
         bool  ExtractOptFloat(char** args, float& val, float defVal);
         char* ExtractQuotedArg(char** args, bool asis = false);

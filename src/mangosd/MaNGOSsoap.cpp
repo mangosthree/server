@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -148,7 +148,6 @@ int ns1__executeCommand(soap* soap, char* command, char** result)
     else
         return soap_sender_fault(soap, printBuffer, printBuffer);
 }
-
 
 void SOAPCommand::commandFinished(void* soapconnection, bool success)
 {

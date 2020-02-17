@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -69,7 +69,6 @@
 #define BG_AV_REP_OWNED_MINE_HOLIDAY        36
 
 #define BG_AV_EVENT_START_BATTLE            9166
-
 enum BG_AV_Sounds
 {
     BG_AV_SOUND_NEAR_LOSE               = 8456,             // not confirmed yet
@@ -122,7 +121,6 @@ enum BG_AV_Nodes
     BG_AV_NODES_ERROR                   = 255,
 };
 #define BG_AV_NODES_MAX                 15
-
 
 // for nodeevents we will use event1=node
 // event2 is related to BG_AV_States
@@ -320,18 +318,15 @@ class BattleGroundAV : public BattleGround
 
     public:
         BattleGroundAV();
-        ~BattleGroundAV();
         void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player* plr) override;
 
-        virtual void StartingEventCloseDoors() override;
         virtual void StartingEventOpenDoors() override;
         // world states
         virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
-        void RemovePlayer(Player* plr, ObjectGuid guid) override;
         void HandleAreaTrigger(Player* source, uint32 trigger) override;
         virtual void Reset() override;
 

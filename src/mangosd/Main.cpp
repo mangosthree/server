@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -82,7 +82,6 @@ extern int main(int argc, char** argv)
 {
     ///- Command line parsing
     char const* cfg_file = _MANGOSD_CONFIG;
-
 
     char const* options = ":a:c:s:";
 

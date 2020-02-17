@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1921,6 +1921,9 @@ void GameObject::SetLootRecipient(Unit* pUnit)
 
 float GameObject::GetObjectBoundingRadius() const
 {
+    // FIXME:
+    // 1. This is clearly hack way because we usually need this to check range, but a box just is no ball
+    // 2. In some cases this must be only interactive size, not GO size, current way can affect creature target point auto-selection in strange ways for big underground/virtual GOs
     if (m_displayInfo)
     {
         float dx = m_displayInfo->geoBoxMaxX - m_displayInfo->geoBoxMinX;

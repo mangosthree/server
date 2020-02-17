@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 #include "DatabaseEnv.h"
 
-SqlStmtParameters::SqlStmtParameters(int nParams)
+SqlStmtParameters::SqlStmtParameters(uint32 nParams)
 {
     // reserve memory if needed
     if (nParams > 0)

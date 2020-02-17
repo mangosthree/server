@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,7 +33,7 @@ inline void* dtCustomAlloc(int size, dtAllocHint /*hint*/)
 
 inline void dtCustomFree(void* ptr)
 {
-    delete[] (unsigned char*)ptr;
+    delete[](unsigned char*)ptr;
 }
 
 //  move map related classes

@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,6 @@ AuthCrypt::AuthCrypt() : _clientDecrypt(SHA_DIGEST_LENGTH), _serverEncrypt(SHA_D
 
 AuthCrypt::~AuthCrypt()
 {
-
 }
 
 void AuthCrypt::Init(BigNumber* K)

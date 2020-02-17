@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,6 +37,7 @@ Pet::Pet(PetType type) :
 {
     m_name = "Pet";
     m_regenTimer = 4000;
+    m_holyPowerRegenTimer = REGEN_TIME_HOLY_POWER;
 
     // pets always have a charminfo, even if they are not actually charmed
     CharmInfo* charmInfo = InitCharmInfo(this);
@@ -124,7 +125,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         delete result;
         return false;
     }
-
 
     uint32 summon_spell_id = fields[16].GetUInt32();
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
@@ -580,7 +580,6 @@ void Pet::RegenerateAll(uint32 update_diff)
         m_regenTimer -= update_diff;
 }
 
-
 void Pet::Regenerate(Powers power)
 {
     uint32 curValue = GetPower(power);
@@ -944,7 +943,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
                     }
                     case CLASS_MAGE:
                     {
-                        //40% damage bonus of mage's frost damage
+                        // 40% damage bonus of mage's frost damage
                         float val = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FROST) * 0.4f;
                         if (val < 0)
                             val = 0;
@@ -1364,7 +1363,7 @@ void Pet::_SaveAuras()
 
         // skip all holders from spells that are passive or channeled
         // do not save single target holders (unless they were cast by the player)
-        if (save && !holder->IsPassive() && !IsChanneledSpell(holder->GetSpellProto()) && (holder->GetCasterGuid() == GetObjectGuid() || !holder->IsSingleTarget()))
+        if (save && !holder->IsPassive() && !IsChanneledSpell(holder->GetSpellProto()) && (holder->GetCasterGuid() == GetObjectGuid() || holder->GetTrackedAuraType() != TRACK_AURA_TYPE_NOT_TRACKED))
         {
             int32  damage[MAX_EFFECT_INDEX];
             uint32 periodicTime[MAX_EFFECT_INDEX];
@@ -1746,7 +1745,7 @@ bool Pet::resetTalents(bool no_cost)
 
     if (!no_cost)
     {
-        player->ModifyMoney(-(int32)cost);
+        player->ModifyMoney(-(int64)cost);
 
         m_resetTalentsCost = cost;
         m_resetTalentsTime = time(NULL);
@@ -1861,7 +1860,6 @@ void Pet::UpdateFreeTalentPoints(bool resetIfNeed)
     else
         SetFreeTalentPoints(talentPointsForLevel - m_usedTalentCount);
 }
-
 
 void Pet::InitTalentForLevel()
 {

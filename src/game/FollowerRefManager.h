@@ -26,9 +26,5 @@ class TargetedMovementGeneratorBase;
 
 class FollowerRefManager : public RefManager<Unit, TargetedMovementGeneratorBase>
 {
-<<<<<<< HEAD
-
-=======
->>>>>>> 893970bcb... [m] Lots of Doxygen fixes/additions - thanks to lfxGroove
 };
 #endif

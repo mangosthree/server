@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,7 +32,7 @@
 #include "World.h"
 #include "Log.h"
 #include "Timer.h"
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 #include "SystemConfig.h"
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"
@@ -125,7 +125,6 @@ class RARunnable : public ACE_Based::Runnable
             m_Reactor = new ACE_Reactor(imp, 1 /* 1= delete implementation so we don't have to care */);
 
             m_Acceptor = new RASocket::Acceptor;
-
         }
 
         ~RARunnable()

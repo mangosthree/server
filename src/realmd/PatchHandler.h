@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -34,7 +34,7 @@
 #include <openssl/bn.h>
 #include <openssl/md5.h>
 
-/*
+/**
  * @brief Caches MD5 hash of client patches present on the server
  */
 class PatchCache
@@ -68,7 +68,6 @@ class PatchCache
     private:
         void LoadPatchesInfo();
         Patches patches_;
-
 };
 
 class PatchHandler: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
@@ -87,7 +86,6 @@ class PatchHandler: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
 
     private:
         ACE_HANDLE patch_fd_;
-
 };
 
 #endif /* _BK_PATCHHANDLER_H__ */

@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -135,7 +135,6 @@ class MANGOS_DLL_SPEC HostileReference : public Reference<Unit, ThreatManager>
 class ThreatManager;
 
 typedef std::list<HostileReference*> ThreatList;
-
 
 class MANGOS_DLL_SPEC ThreatContainer
 {

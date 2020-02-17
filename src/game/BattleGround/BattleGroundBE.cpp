@@ -37,24 +37,6 @@ BattleGroundBE::BattleGroundBE()
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
 }
 
-BattleGroundBE::~BattleGroundBE()
-{
-}
-
-void BattleGroundBE::Update(uint32 diff)
-{
-    BattleGround::Update(diff);
-
-    /*if (GetStatus() == STATUS_IN_PROGRESS)
-    {
-        // update something
-    }*/
-}
-
-void BattleGroundBE::StartingEventCloseDoors()
-{
-}
-
 void BattleGroundBE::StartingEventOpenDoors()
 {
     OpenDoorEvent(BG_EVENT_DOOR);
@@ -119,10 +101,10 @@ void BattleGroundBE::HandleAreaTrigger(Player* source, uint32 trigger)
     switch (trigger)
     {
         case 4538:                                          // buff trigger?
-            // buff_guid = m_BgObjects[BG_BE_OBJECT_BUFF_1];
+            // buff_guid = -nonexistingStorage-[BG_BE_OBJECT_BUFF_1];
             break;
         case 4539:                                          // buff trigger?
-            // buff_guid = m_BgObjects[BG_BE_OBJECT_BUFF_2];
+            // buff_guid = -nonexistingStorage-[BG_BE_OBJECT_BUFF_2];
             break;
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", trigger);
@@ -141,27 +123,14 @@ void BattleGroundBE::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, 0x9f3, 1);
 }
 
-void BattleGroundBE::Reset()
-{
-    // call parent's class reset
-    BattleGround::Reset();
-}
-
-bool BattleGroundBE::SetupBattleGround()
-{
-    return true;
-}
-
 void BattleGroundBE::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
-
     BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
     if (itr == m_PlayerScores.end())                        // player not found...
         return;
 
     // there is nothing special in this score
     BattleGround::UpdatePlayerScore(source, type, value);
-
 }
 
 /*

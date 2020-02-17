@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -43,24 +43,24 @@ enum GuildDefaultRanks
 
 enum GuildRankRights
 {
-    GR_RIGHT_EMPTY                  = 0x00000040,
-    GR_RIGHT_GCHATLISTEN            = 0x00000041,
-    GR_RIGHT_GCHATSPEAK             = 0x00000042,
-    GR_RIGHT_OFFCHATLISTEN          = 0x00000044,
-    GR_RIGHT_OFFCHATSPEAK           = 0x00000048,
-    GR_RIGHT_PROMOTE                = 0x000000C0,
-    GR_RIGHT_DEMOTE                 = 0x00000140,
-    GR_RIGHT_INVITE                 = 0x00000050,
-    GR_RIGHT_REMOVE                 = 0x00000060,
-    GR_RIGHT_SETMOTD                = 0x00001040,
-    GR_RIGHT_EPNOTE                 = 0x00002040,
-    GR_RIGHT_VIEWOFFNOTE            = 0x00004040,
-    GR_RIGHT_EOFFNOTE               = 0x00008040,
-    GR_RIGHT_MODIFY_GUILD_INFO      = 0x00010040,
-    GR_RIGHT_WITHDRAW_GOLD_LOCK     = 0x00020000,               // remove money withdraw capacity
-    GR_RIGHT_WITHDRAW_REPAIR        = 0x00040000,               // withdraw for repair
-    GR_RIGHT_WITHDRAW_GOLD          = 0x00080000,               // withdraw gold
-    GR_RIGHT_CREATE_GUILD_EVENT     = 0x00100000,               // wotlk
+    GR_RIGHT_EMPTY              = 0x00000040,
+    GR_RIGHT_GCHATLISTEN        = 0x00000041,
+    GR_RIGHT_GCHATSPEAK         = 0x00000042,
+    GR_RIGHT_OFFCHATLISTEN      = 0x00000044,
+    GR_RIGHT_OFFCHATSPEAK       = 0x00000048,
+    GR_RIGHT_PROMOTE            = 0x000000C0,
+    GR_RIGHT_DEMOTE             = 0x00000140,
+    GR_RIGHT_INVITE             = 0x00000050,
+    GR_RIGHT_REMOVE             = 0x00000060,
+    GR_RIGHT_SETMOTD            = 0x00001040,
+    GR_RIGHT_EPNOTE             = 0x00002040,
+    GR_RIGHT_VIEWOFFNOTE        = 0x00004040,
+    GR_RIGHT_EOFFNOTE           = 0x00008040,
+    GR_RIGHT_MODIFY_GUILD_INFO  = 0x00010040,
+    GR_RIGHT_WITHDRAW_GOLD_LOCK = 0x00020000,               // remove money withdraw capacity
+    GR_RIGHT_WITHDRAW_REPAIR    = 0x00040000,               // withdraw for repair
+    GR_RIGHT_WITHDRAW_GOLD      = 0x00080000,               // withdraw gold
+    GR_RIGHT_CREATE_GUILD_EVENT = 0x00100000,               // wotlk
     GR_RIGHT_REQUIRES_AUTHENTICATOR = 0x00200000,
     GR_RIGHT_MODIFY_BANK_TABS       = 0x00400000,               // cata?
     GR_RIGHT_REMOVE_GUILD_EVENT     = 0x00800000,               // wotlk
@@ -80,29 +80,29 @@ enum Typecommand
 
 enum CommandErrors
 {
-    ERR_PLAYER_NO_MORE_IN_GUILD         = 0x00,
-    ERR_GUILD_INTERNAL                  = 0x01,
-    ERR_ALREADY_IN_GUILD                = 0x02,
-    ERR_ALREADY_IN_GUILD_S              = 0x03,
-    ERR_INVITED_TO_GUILD                = 0x04,
-    ERR_ALREADY_INVITED_TO_GUILD_S      = 0x05,
-    ERR_GUILD_NAME_INVALID              = 0x06,
-    ERR_GUILD_NAME_EXISTS_S             = 0x07,
-    ERR_GUILD_LEADER_LEAVE              = 0x08,
-    ERR_GUILD_PERMISSIONS               = 0x08,
-    ERR_GUILD_PLAYER_NOT_IN_GUILD       = 0x09,
-    ERR_GUILD_PLAYER_NOT_IN_GUILD_S     = 0x0A,
-    ERR_GUILD_PLAYER_NOT_FOUND_S        = 0x0B,
-    ERR_GUILD_NOT_ALLIED                = 0x0C,
-    ERR_GUILD_RANK_TOO_HIGH_S           = 0x0D,
-    ERR_GUILD_RANK_TOO_LOW_S            = 0x0E,
-    ERR_GUILD_RANKS_LOCKED              = 0x11,
-    ERR_GUILD_RANK_IN_USE               = 0x12,
-    ERR_GUILD_IGNORING_YOU_S            = 0x13,
-    ERR_GUILD_UNK1                      = 0x14,
-    ERR_GUILD_WITHDRAW_LIMIT            = 0x19,
-    ERR_GUILD_NOT_ENOUGH_MONEY          = 0x1A,
-    ERR_GUILD_BANK_FULL                 = 0x1C,
+    ERR_PLAYER_NO_MORE_IN_GUILD     = 0x00,
+    ERR_GUILD_INTERNAL              = 0x01,
+    ERR_ALREADY_IN_GUILD            = 0x02,
+    ERR_ALREADY_IN_GUILD_S          = 0x03,
+    ERR_INVITED_TO_GUILD            = 0x04,
+    ERR_ALREADY_INVITED_TO_GUILD_S  = 0x05,
+    ERR_GUILD_NAME_INVALID          = 0x06,
+    ERR_GUILD_NAME_EXISTS_S         = 0x07,
+    ERR_GUILD_LEADER_LEAVE          = 0x08,
+    ERR_GUILD_PERMISSIONS           = 0x08,
+    ERR_GUILD_PLAYER_NOT_IN_GUILD   = 0x09,
+    ERR_GUILD_PLAYER_NOT_IN_GUILD_S = 0x0A,
+    ERR_GUILD_PLAYER_NOT_FOUND_S    = 0x0B,
+    ERR_GUILD_NOT_ALLIED            = 0x0C,
+    ERR_GUILD_RANK_TOO_HIGH_S       = 0x0D,
+    ERR_GUILD_RANK_TOO_LOW_S        = 0x0E,
+    ERR_GUILD_RANKS_LOCKED          = 0x11,
+    ERR_GUILD_RANK_IN_USE           = 0x12,
+    ERR_GUILD_IGNORING_YOU_S        = 0x13,
+    ERR_GUILD_UNK1                  = 0x14,
+    ERR_GUILD_WITHDRAW_LIMIT        = 0x19,
+    ERR_GUILD_NOT_ENOUGH_MONEY      = 0x1A,
+    ERR_GUILD_BANK_FULL             = 0x1C,
     ERR_GUILD_ITEM_NOT_FOUND            = 0x1D,
     ERR_GUILD_TOO_MUCH_MONEY            = 0x1F,
     ERR_GUILD_BANK_WRONG_TAB            = 0x20,
@@ -152,10 +152,10 @@ enum PetitionTurns
 
 enum PetitionSigns
 {
-    PETITION_SIGN_OK                    = 0,
-    PETITION_SIGN_ALREADY_SIGNED        = 1,
-    PETITION_SIGN_ALREADY_IN_GUILD      = 2,
-    PETITION_SIGN_CANT_SIGN_OWN         = 3,
+    PETITION_SIGN_OK                = 0,
+    PETITION_SIGN_ALREADY_SIGNED    = 1,
+    PETITION_SIGN_ALREADY_IN_GUILD  = 2,
+    PETITION_SIGN_CANT_SIGN_OWN     = 3,
     PETITION_SIGN_NOT_SAME_SERVER       = 5,
     PETITION_SIGN_PETITION_FULL         = 8,
     PETITION_SIGN_ALREADY_SIGNED_OTHER  = 10,
@@ -174,14 +174,14 @@ enum GuildBankRights
 
 enum GuildBankEventLogTypes
 {
-    GUILD_BANK_LOG_DEPOSIT_ITEM         = 1,
-    GUILD_BANK_LOG_WITHDRAW_ITEM        = 2,
-    GUILD_BANK_LOG_MOVE_ITEM            = 3,
-    GUILD_BANK_LOG_DEPOSIT_MONEY        = 4,
-    GUILD_BANK_LOG_WITHDRAW_MONEY       = 5,
-    GUILD_BANK_LOG_REPAIR_MONEY         = 6,
-    GUILD_BANK_LOG_MOVE_ITEM2           = 7,
-    GUILD_BANK_LOG_UNK1                 = 8,
+    GUILD_BANK_LOG_DEPOSIT_ITEM     = 1,
+    GUILD_BANK_LOG_WITHDRAW_ITEM    = 2,
+    GUILD_BANK_LOG_MOVE_ITEM        = 3,
+    GUILD_BANK_LOG_DEPOSIT_MONEY    = 4,
+    GUILD_BANK_LOG_WITHDRAW_MONEY   = 5,
+    GUILD_BANK_LOG_REPAIR_MONEY     = 6,
+    GUILD_BANK_LOG_MOVE_ITEM2       = 7,
+    GUILD_BANK_LOG_UNK1             = 8,
     GUILD_BANK_LOG_BUY_SLOT             = 9,
     GUILD_BANK_LOG_CASH_FLOW_DEPOSIT    = 10,
 };

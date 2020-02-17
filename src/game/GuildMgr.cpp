@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 #include "Log.h"
 #include "ObjectGuid.h"
 #include "Database/DatabaseEnv.h"
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 #include "ProgressBar.h"
 #include "World.h"
 
@@ -47,6 +47,14 @@ void GuildMgr::RemoveGuild(uint32 guildId)
     m_GuildMap.erase(guildId);
 }
 
+void GuildMgr::RemoveGuild(ObjectGuid guildGuid)
+{
+    if (!guildGuid.IsGuild())
+        return;
+
+    RemoveGuild(guildGuid.GetCounter());
+}
+
 Guild* GuildMgr::GetGuildById(uint32 guildId) const
 {
     GuildMap::const_iterator itr = m_GuildMap.find(guildId);
@@ -54,6 +62,14 @@ Guild* GuildMgr::GetGuildById(uint32 guildId) const
         return itr->second;
 
     return NULL;
+}
+
+Guild* GuildMgr::GetGuildByGuid(ObjectGuid guildGuid) const
+{
+    if (!guildGuid.IsGuild())
+        return NULL;
+
+    return GetGuildById(guildGuid.GetCounter());
 }
 
 Guild* GuildMgr::GetGuildByName(std::string const& name) const
@@ -81,6 +97,14 @@ std::string GuildMgr::GetGuildNameById(uint32 guildId) const
         return itr->second->GetName();
 
     return "";
+}
+
+std::string GuildMgr::GetGuildNameByGuid(ObjectGuid guildGuid) const
+{
+    if (!guildGuid.IsGuild())
+        return "";
+
+    return GetGuildNameById(guildGuid.GetCounter());
 }
 
 void GuildMgr::LoadGuilds()

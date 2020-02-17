@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -5166,7 +5166,7 @@ void Unit::RemoveAllAurasOnDeath()
 void Unit::RemoveAllAurasOnEvade()
 {
     // used when evading to remove all auras except some special auras
-    // Vehicle control auras should not be removed on evade - neither should linked auras
+    // Vehicle control auras / Fly should not be removed on evade - neither should linked auras
     for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
     {
         SpellEntry const* proto = iter->second->GetSpellProto();
@@ -5590,11 +5590,6 @@ void Unit::SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo)
     // for(i = 0; i < target count; ++i)
     data << target->GetObjectGuid();                        // target GUID
     data << uint8(missInfo);
-    //if (flag)
-    //{
-    //    data << float(0.0f);
-    //    data << float(0.0f);
-    //}
     // end loop
     SendMessageToSet(&data, true);
 }
@@ -5664,7 +5659,7 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
         data << uint32(0);
     }
 
-    SendMessageToSet(&data, true);
+    SendMessageToSet(&data, true);  /**/
 }
 
 void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit* target, uint8 /*SwingType*/, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount)
@@ -6609,7 +6604,7 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
     return total;
 };
 
-/*
+/**
  * Calculates caster part of spell damage bonuses,
  * also includes different bonuses dependent from target auras
  */
@@ -6685,7 +6680,8 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
             continue;
         switch ((*i)->GetModifier()->m_miscvalue)
         {
-            case 4920: // Molten Fury
+                // Molten Fury
+            case 4920:
             case 4919:
             case 6917: // Death's Embrace
             case 6926:
@@ -7336,7 +7332,7 @@ uint32 Unit::SpellCriticalHealingBonus(SpellEntry const* spellProto, uint32 dama
     return damage;
 }
 
-/*
+/**
  * Calculates caster part of healing spell bonuses,
  * also includes different bonuses dependent from target auras
  */
@@ -7479,7 +7475,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
     return heal < 0 ? 0 : uint32(heal);
 }
 
-/*
+/**
  * Calculates target part of healing spell bonuses,
  * will be called on each tick for periodic damage over time auras
  */
@@ -7493,6 +7489,7 @@ uint32 Unit::SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellProto,
         TakenTotalMod *= (100.0f + minval) / 100.0f;
 
     float maxval = float(GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT));
+    // no SPELL_AURA_MOD_PERIODIC_HEAL positive cases
     if (maxval)
         TakenTotalMod *= (100.0f + maxval) / 100.0f;
 
@@ -7616,7 +7613,7 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf)
     // SpellImmuneList const& dispelList = m_spellImmune[IMMUNITY_EFFECT];
 
     SpellImmuneList const& dispelList = m_spellImmune[IMMUNITY_DISPEL];
-    for(SpellImmuneList::const_iterator itr = dispelList.begin(); itr != dispelList.end(); ++itr)
+    for (SpellImmuneList::const_iterator itr = dispelList.begin(); itr != dispelList.end(); ++itr)
         if (itr->type == spellInfo->GetDispel())
             return true;
 
@@ -7648,7 +7645,7 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf)
 
 bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
 {
-    //If m_immuneToEffect type contain this effect type, IMMUNE effect.
+    // If m_immuneToEffect type contain this effect type, IMMUNE effect.
     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(index);
     if(!spellEffect)
         return false;
@@ -7692,11 +7689,10 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
                     return true;
         }
     }
-
     return false;
 }
 
-/*
+/**
  * Calculates caster part of melee damage bonuses,
  * also includes different bonuses dependent from target auras
  */
@@ -7964,7 +7960,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
     return tmpDamage > 0 ? uint32(tmpDamage) : 0;
 }
 
-/*
+/**
  * Calculates target part of melee damage bonuses,
  * will be called on each tick for periodic damage over time auras
  */
@@ -8815,6 +8811,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
     if (m_speed_rate[mtype] != rate || ignoreChange)
     {
         m_speed_rate[mtype] = rate;
+
         propagateSpeedChange();
 
         WorldPacket data;
@@ -8933,7 +8930,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
 
         m_movementInfo.UpdateTime(WorldTimer::getMSTime());
 
-        // TODO: Actually such opcodes should (always?) be packed with SMSG_COMPRESSED_MOVES 
+        // TODO: Actually such opcodes should (always?) be packed with SMSG_COMPRESSED_MOVES
         switch (mtype)
         {
             case MOVE_WALK:

@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -268,7 +268,6 @@ std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
         ss << uint32(taxi.m_taximask[i]) << " ";    // cast to prevent conversion to char
     return ss;
 }
-
 //== TradeData =================================================
 
 TradeData* TradeData::GetTraderData() const

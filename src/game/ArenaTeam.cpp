@@ -63,7 +63,6 @@ ArenaTeam::ArenaTeam()
 
 ArenaTeam::~ArenaTeam()
 {
-
 }
 
 bool ArenaTeam::Create(ObjectGuid captainGuid, ArenaType type, std::string arenaTeamName)
@@ -140,10 +139,6 @@ bool ArenaTeam::AddMember(ObjectGuid playerGuid)
             return false;
         }
     }
-
-    // remove all player signs from another petitions
-    // this will be prevent attempt joining player to many arenateams and corrupt arena team data integrity
-    Player::RemovePetitionsAndSigns(playerGuid, GetType());
 
     ArenaTeamMember newmember;
     newmember.name              = plName;
@@ -543,6 +538,20 @@ uint8 ArenaTeam::GetSlotByType(ArenaType type)
     return 0xFF;
 }
 
+ArenaType ArenaTeam::GetTypeBySlot(uint8 slot)
+{
+    switch (slot)
+    {
+        case 0: return ARENA_TYPE_2v2;
+        case 1: return ARENA_TYPE_3v3;
+        case 2: return ARENA_TYPE_5v5;
+        default:
+            break;
+    }
+    sLog.outError("FATAL: Unknown arena team slot %u for some arena team", slot);
+    return ArenaType(0xFF);
+}
+
 bool ArenaTeam::HaveMember(ObjectGuid guid) const
 {
     for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
@@ -723,4 +732,24 @@ bool ArenaTeam::IsFighting() const
         }
     }
     return false;
+}
+
+// add new arena event to all already connected team members
+void ArenaTeam::MassInviteToEvent(WorldSession* session)
+{
+    WorldPacket data(SMSG_CALENDAR_ARENA_TEAM);
+
+    data << uint32(m_members.size());
+
+    for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    {
+        uint32 level = Player::GetLevelFromDB(itr->guid);
+
+        if (itr->guid != session->GetPlayer()->GetObjectGuid())
+        {
+            data << itr->guid.WriteAsPacked();
+            data << uint8(level);
+        }
+    }
+    session->SendPacket(&data);
 }

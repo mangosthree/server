@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -34,11 +34,12 @@ char const* ObjectGuid::GetTypeName(HighGuid high)
         case HIGHGUID_UNIT:         return "Creature";
         case HIGHGUID_PET:          return "Pet";
         case HIGHGUID_VEHICLE:      return "Vehicle";
-        case HIGHGUID_DYNAMICOBJECT: return "DynObject";
+        case HIGHGUID_DYNAMICOBJECT:return "DynObject";
         case HIGHGUID_CORPSE:       return "Corpse";
         case HIGHGUID_MO_TRANSPORT: return "MoTransport";
         case HIGHGUID_INSTANCE:     return "InstanceID";
         case HIGHGUID_GROUP:        return "Group";
+        case HIGHGUID_BATTLEGROUND: return "Battleground";
         default:
             return "<unknown>";
     }

@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -166,6 +166,7 @@ enum Powers
 
 enum SpellSchools
 {
+    /// Physical, Armor
     SPELL_SCHOOL_NORMAL                 = 0,
     SPELL_SCHOOL_HOLY                   = 1,
     SPELL_SCHOOL_FIRE                   = 2,
@@ -177,10 +178,15 @@ enum SpellSchools
 
 #define MAX_SPELL_SCHOOL                  7
 
+/**
+ * A bitmask of the available SpellSchools. Used for convenience
+ */
 enum SpellSchoolMask
 {
-    SPELL_SCHOOL_MASK_NONE    = 0x00,                       // not exist
-    SPELL_SCHOOL_MASK_NORMAL  = (1 << SPELL_SCHOOL_NORMAL), // PHYSICAL (Armor)
+    /// not exist
+    SPELL_SCHOOL_MASK_NONE    = 0x00,
+    /// PHYSICAL (Armor)
+    SPELL_SCHOOL_MASK_NORMAL  = (1 << SPELL_SCHOOL_NORMAL), 
     SPELL_SCHOOL_MASK_HOLY    = (1 << SPELL_SCHOOL_HOLY),
     SPELL_SCHOOL_MASK_FIRE    = (1 << SPELL_SCHOOL_FIRE),
     SPELL_SCHOOL_MASK_NATURE  = (1 << SPELL_SCHOOL_NATURE),
@@ -190,14 +196,14 @@ enum SpellSchoolMask
 
     // unions
 
-    // 124, not include normal and holy damage
+    /// 124, not include normal and holy damage
     SPELL_SCHOOL_MASK_SPELL   = (SPELL_SCHOOL_MASK_FIRE   |
                                  SPELL_SCHOOL_MASK_NATURE | SPELL_SCHOOL_MASK_FROST  |
                                  SPELL_SCHOOL_MASK_SHADOW | SPELL_SCHOOL_MASK_ARCANE),
-    // 126
+    /// 126
     SPELL_SCHOOL_MASK_MAGIC   = (SPELL_SCHOOL_MASK_HOLY | SPELL_SCHOOL_MASK_SPELL),
 
-    // 127
+    /// 127
     SPELL_SCHOOL_MASK_ALL     = (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_MAGIC)
 };
 
@@ -282,7 +288,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNK0                         = 0x00000001,// 0
     SPELL_ATTR_EX_DRAIN_ALL_POWER              = 0x00000002,// 1 use all power (Only paladin Lay of Hands and Bunyanize)
     SPELL_ATTR_EX_CHANNELED_1                  = 0x00000004,// 2 channeled 1
-    SPELL_ATTR_EX_UNK3                         = 0x00000008,// 3
+    SPELL_ATTR_EX_CANT_REFLECTED               = 0x00000008,// 3 used for detect can or not spell reflected
     SPELL_ATTR_EX_UNK4                         = 0x00000010,// 4
     SPELL_ATTR_EX_NOT_BREAK_STEALTH            = 0x00000020,// 5 Not break stealth
     SPELL_ATTR_EX_CHANNELED_2                  = 0x00000040,// 6 channeled 2
@@ -301,10 +307,10 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNK19                        = 0x00080000,// 19
     SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS      = 0x00100000,// 20 Req combo points on target
     SPELL_ATTR_EX_UNK21                        = 0x00200000,// 21
-    SPELL_ATTR_EX_REQ_COMBO_POINTS             = 0x00400000,// 22 Use combo points
+    SPELL_ATTR_EX_REQ_COMBO_POINTS             = 0x00400000,// 22 Use combo points (in 4.x not required combo point target selected)
     SPELL_ATTR_EX_UNK23                        = 0x00800000,// 23
     SPELL_ATTR_EX_UNK24                        = 0x01000000,// 24 Req fishing pole??
-    SPELL_ATTR_EX_UNK25                        = 0x02000000,// 25
+    SPELL_ATTR_EX_UNK25                        = 0x02000000,// 25 not set in 2.4.2
     SPELL_ATTR_EX_UNK26                        = 0x04000000,// 26
     SPELL_ATTR_EX_UNK27                        = 0x08000000,// 27
     SPELL_ATTR_EX_UNK28                        = 0x10000000,// 28
@@ -317,24 +323,24 @@ enum SpellAttributesEx2
 {
     SPELL_ATTR_EX2_UNK0                        = 0x00000001,// 0
     SPELL_ATTR_EX2_UNK1                        = 0x00000002,// 1
-    SPELL_ATTR_EX2_CANT_REFLECTED              = 0x00000004,// 2 ? used for detect can or not spell reflected // do not need LOS (e.g. 18220 since 3.3.3)
+    SPELL_ATTR_EX2_IGNORE_LOS                  = 0x00000004,// 2 do not need LOS (e.g. 18220 since 3.3.3) // changed meaning from ? used for detect can or not spell reflected
     SPELL_ATTR_EX2_UNK3                        = 0x00000008,// 3 auto targeting? (e.g. fishing skill enhancement items since 3.3.3)
     SPELL_ATTR_EX2_UNK4                        = 0x00000010,// 4
     SPELL_ATTR_EX2_AUTOREPEAT_FLAG             = 0x00000020,// 5
     SPELL_ATTR_EX2_UNK6                        = 0x00000040,// 6 only usable on tabbed by yourself
     SPELL_ATTR_EX2_UNK7                        = 0x00000080,// 7
-    SPELL_ATTR_EX2_UNK8                        = 0x00000100,// 8 not set in 3.0.3
+    SPELL_ATTR_EX2_UNK8                        = 0x00000100,// 8 not set in 2.4.2 or 3.0.3
     SPELL_ATTR_EX2_UNK9                        = 0x00000200,// 9
     SPELL_ATTR_EX2_UNK10                       = 0x00000400,// 10
     SPELL_ATTR_EX2_HEALTH_FUNNEL               = 0x00000800,// 11
     SPELL_ATTR_EX2_UNK12                       = 0x00001000,// 12
     SPELL_ATTR_EX2_UNK13                       = 0x00002000,// 13
     SPELL_ATTR_EX2_UNK14                       = 0x00004000,// 14
-    SPELL_ATTR_EX2_UNK15                       = 0x00008000,// 15 not set in 3.0.3
+    SPELL_ATTR_EX2_UNK15                       = 0x00008000,// 15 not set in 2.4.2 or 3.0.3
     SPELL_ATTR_EX2_UNK16                       = 0x00010000,// 16
     SPELL_ATTR_EX2_UNK17                       = 0x00020000,// 17 suspend weapon timer instead of resetting it, (?Hunters Shot and Stings only have this flag?)
     SPELL_ATTR_EX2_UNK18                       = 0x00040000,// 18 Only Revive pet - possible req dead pet
-    SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT         = 0x00080000,// 19 does not necessarly need shapeshift
+    SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT         = 0x00080000,// 19 does not necessarily need shapeshift (pre-3.x not have passive spells with this attribute)
     SPELL_ATTR_EX2_UNK20                       = 0x00100000,// 20
     SPELL_ATTR_EX2_DAMAGE_REDUCED_SHIELD       = 0x00200000,// 21 for ice blocks, pala immunity buffs, priest absorb shields, but used also for other spells -> not sure!
     SPELL_ATTR_EX2_UNK22                       = 0x00400000,// 22
@@ -359,7 +365,7 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_UNK5                        = 0x00000020,// 5
     SPELL_ATTR_EX3_UNK6                        = 0x00000040,// 6
     SPELL_ATTR_EX3_UNK7                        = 0x00000080,// 7 create a separate (de)buff stack for each caster
-    SPELL_ATTR_EX3_UNK8                        = 0x00000100,// 8
+    SPELL_ATTR_EX3_TARGET_ONLY_PLAYER          = 0x00000100,// 8 Can target only player
     SPELL_ATTR_EX3_UNK9                        = 0x00000200,// 9
     SPELL_ATTR_EX3_MAIN_HAND                   = 0x00000400,// 10 Main hand weapon required
     SPELL_ATTR_EX3_BATTLEGROUND                = 0x00000800,// 11 Can casted only on battleground
@@ -1262,7 +1268,7 @@ enum Mechanics
     MECHANIC_FEAR             = 5,
     MECHANIC_GRIP             = 6,
     MECHANIC_ROOT             = 7,
-    MECHANIC_PACIFY           = 8,                          //0 spells use this mechanic
+    MECHANIC_PACIFY           = 8,                          // No spells use this mechanic
     MECHANIC_SILENCE          = 9,
     MECHANIC_SLEEP            = 10,
     MECHANIC_SNARE            = 11,
@@ -1354,11 +1360,18 @@ enum SpellImmunity
 
 #define MAX_SPELL_IMMUNITY           6
 
+/**
+ * The different types of attacks you can do with 
+ * weapons
+ */
 enum WeaponAttackType
 {
+    ///Main-hand weapon
     BASE_ATTACK   = 0,
+    ///Off-hand weapon
     OFF_ATTACK    = 1,
-    RANGED_ATTACK = 2
+    ///Ranged weapon, bow/wand etc.
+    RANGED_ATTACK = 2  
 };
 
 #define MAX_ATTACK  3
@@ -1450,29 +1463,35 @@ enum Targets
     TARGET_NONCOMBAT_PET               = 90,
     TARGET_91                          = 91,
     TARGET_92                          = 92,
-    TARGET_94                          = 94,
+    TARGET_CONTROLLED_VEHICLE          = 94,
     TARGET_95                          = 95,
-    TARGET_96                          = 96,
-    TARGET_97                          = 97,
+    TARGET_VEHICLE_PASSENGER_0         = 96,
+    TARGET_VEHICLE_PASSENGER_1         = 97,
+    TARGET_VEHICLE_PASSENGER_2         = 98,
+    TARGET_VEHICLE_PASSENGER_3         = 99,
+    TARGET_VEHICLE_PASSENGER_4         = 100,
+    TARGET_VEHICLE_PASSENGER_5         = 101,
+    TARGET_VEHICLE_PASSENGER_6         = 102,
+    TARGET_VEHICLE_PASSENGER_7         = 103,
     TARGET_IN_FRONT_OF_CASTER_30       = 104,
-    TARGET_105                         = 105,
+    TARGET_105                         = 105,               // 1 spell
     TARGET_106                         = 106,
-    TARGET_107                         = 107,
+    TARGET_107                         = 107,               // possible TARGET_WMO(GO?)_IN_FRONT_OF_CASTER(_30 ?) TODO: Verify the angle!
     TARGET_GO_IN_FRONT_OF_CASTER_90    = 108,
-    TARGET_109                         = 109,   // spell 89008
-    TARGET_110                         = 110,   // front enemy aoe
-    TARGET_111                         = 111,   // not used
-    TARGET_112                         = 112,   // spell 89549
-    TARGET_113                         = 113,   // not used
-    TARGET_114                         = 114,   // not used
-    TARGET_115                         = 115,   // not used
-    TARGET_116                         = 116,   // not used
-    TARGET_117                         = 117,   // test spell 83658
-    TARGET_118                         = 118,   // test spell 79579
-    TARGET_119                         = 119,   // mass ressurection 83968
+    TARGET_109                         = 109,               // spell 89008
+    TARGET_110                         = 110,               // front enemy aoe
+    TARGET_111                         = 111,               // not used
+    TARGET_112                         = 112,               // spell 89549
+    TARGET_113                         = 113,               // not used
+    TARGET_114                         = 114,               // not used
+    TARGET_115                         = 115,               // not used
+    TARGET_116                         = 116,               // not used
+    TARGET_117                         = 117,               // test spell 83658
+    TARGET_118                         = 118,               // test spell 79579
+    TARGET_119                         = 119,               // mass ressurection 83968
     TARGET_120                         = 120,
-    TARGET_121                         = 121,   // spell 95750
-    TARGET_122                         = 122,   // spell 100661
+    TARGET_121                         = 121,               // spell 95750
+    TARGET_122                         = 122,               // spell 100661
     TARGET_123                         = 123,
     TARGET_124                         = 124,
     TARGET_125                         = 125,
@@ -1506,11 +1525,19 @@ enum SpellHitType
     SPELL_HIT_TYPE_UNK6 = 0x00020
 };
 
+/**
+ * TODO: Find out where these are used except for Unit::CalculateSpellDamage
+ * and dox it properly
+ */
 enum SpellDmgClass
 {
+    /// Counted as a spell damage
     SPELL_DAMAGE_CLASS_NONE     = 0,
+    /// Counted as a spell damage
     SPELL_DAMAGE_CLASS_MAGIC    = 1,
+    /// Melee damage
     SPELL_DAMAGE_CLASS_MELEE    = 2,
+    /// Ranged damage
     SPELL_DAMAGE_CLASS_RANGED   = 3
 };
 
@@ -1521,21 +1548,27 @@ enum SpellPreventionType
     SPELL_PREVENTION_TYPE_PACIFY    = 2
 };
 
-// indexes from SpellRange.dbc, listed only special and used in code
+/// indexes from SpellRange.dbc, listed only special and used in code
 enum SpellRangeIndex
 {
-    SPELL_RANGE_IDX_SELF_ONLY = 1,                          // 0.0
-    SPELL_RANGE_IDX_COMBAT    = 2,                          // 5.5 (but dynamic)
-    SPELL_RANGE_IDX_ANYWHERE  = 13,                         // 500000 (anywhere)
+    /// 0.0
+    SPELL_RANGE_IDX_SELF_ONLY = 1,
+    /// 5.5 (but dynamic), seems to indicate melee range
+    SPELL_RANGE_IDX_COMBAT    = 2,
+    /// 500000 (anywhere)
+    SPELL_RANGE_IDX_ANYWHERE  = 13,                         
 };
 
 enum DamageEffectType
 {
-    DIRECT_DAMAGE           = 0,                            // used for normal weapon damage (not for class abilities or spells)
-    SPELL_DIRECT_DAMAGE     = 1,                            // spell/class abilities damage
+    /// Used for normal weapon damage (not for class abilities or spells)
+    DIRECT_DAMAGE           = 0,
+    /// spell/class abilities damage
+    SPELL_DIRECT_DAMAGE     = 1,                            
     DOT                     = 2,
     HEAL                    = 3,
-    NODAMAGE                = 4,                            // used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
+    /// used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
+    NODAMAGE                = 4,                            
     SELF_DAMAGE             = 5
 };
 
@@ -1591,9 +1624,9 @@ enum GameObjectFlags
     GO_FLAG_NODESPAWN       = 0x00000020,                   // never despawn, typically for doors, they just change state
     GO_FLAG_TRIGGERED       = 0x00000040,                   // typically, summoned objects. Triggered by spell or other events
     GO_FLAG_UNK_8           = 0x00000080,
-    GO_FLAG_UNK_9           = 0x00000100,                   //? Seen on type 33, possible meaning "destruct in progress"
-    GO_FLAG_UNK_10          = 0x00000200,                   //? Seen on type 33
-    GO_FLAG_UNK_11          = 0x00000400                    //? Seen on type 33, possibly meaning "destructed"
+    GO_FLAG_UNK_9           = 0x00000100,                   //? Seen on type 33, meaning unknown
+    GO_FLAG_UNK_10          = 0x00000200,                   //? Seen on type 33, likely damaged
+    GO_FLAG_UNK_11          = 0x00000400                    //? Seen on type 33, likely destroyed
 };
 
 enum GameObjectDynamicLowFlags
@@ -2821,12 +2854,13 @@ enum PetDiet
 #define CHAIN_SPELL_JUMP_RADIUS 10
 
 // Max values for Guild & Guild Bank
-#define GUILD_BANK_MAX_TABS         6                       // send by client for money log also
+#define GUILD_BANK_MAX_TABS         8                       // send by client for money log also
+#define GUILD_BANK_MAX_BOUGHT_TABS  6                       // number of tabs that can be bought through bank interface
 #define GUILD_BANK_MAX_SLOTS        98
 #define GUILD_BANK_MAX_LOGS         25
 #define GUILD_BANK_MONEY_LOGS_TAB   100                     // used for money log in DB
 #define GUILD_EVENTLOG_MAX_RECORDS  100
-#define GUILD_RANKS_MIN_COUNT       5
+#define GUILD_RANKS_MIN_COUNT       2
 #define GUILD_RANKS_MAX_COUNT       10
 
 enum AiReaction
@@ -3107,12 +3141,14 @@ enum MailResponseResult
     MAIL_ERR_RECIPIENT_NOT_FOUND       = 4,
     MAIL_ERR_NOT_YOUR_TEAM             = 5,
     MAIL_ERR_INTERNAL_ERROR            = 6,
+    MAIL_ERR_DELETE_ITEM_ERROR         = 10,    // ERR_MAIL_DATABASE_ERROR
     MAIL_ERR_DISABLED_FOR_TRIAL_ACC    = 14,
     MAIL_ERR_RECIPIENT_CAP_REACHED     = 15,
     MAIL_ERR_CANT_SEND_WRAPPED_COD     = 16,
     MAIL_ERR_MAIL_AND_CHAT_SUSPENDED   = 17,
     MAIL_ERR_TOO_MANY_ATTACHMENTS      = 18,
     MAIL_ERR_MAIL_ATTACHMENT_INVALID   = 19,
+    MAIL_ERR_MAIL_FAILED_NO_REPORT     = 20,
     MAIL_ERR_ITEM_HAS_EXPIRED          = 21,
 };
 
@@ -3132,7 +3168,8 @@ enum PetTameFailureReason
     PETTAME_DEAD                    = 10,                   // not used in taming
     PETTAME_NOTDEAD                 = 11,                   // not used in taming
     PETTAME_CANTCONTROLEXOTIC       = 12,                   // 3.x
-    PETTAME_UNKNOWNERROR            = 13
+    PETTAME_INVALIDSLOT             = 13,
+    PETTAME_UNKNOWNERROR            = 14,
 };
 
 // Stored in SummonProperties.dbc with slot+1 values
@@ -3223,6 +3260,14 @@ enum AreaLockStatus
     AREA_LOCKSTATUS_HAS_BIND                    = 12,
 };
 
+enum TrackedAuraType
+{
+    TRACK_AURA_TYPE_NOT_TRACKED                 = 0,        // relation - caster : target is n:m (usual case)
+    TRACK_AURA_TYPE_SINGLE_TARGET               = 1,        // relation - caster : target is 1:1. Might get stolen
+    TRACK_AURA_TYPE_CONTROL_VEHICLE             = 2,        // relation - caster : target is N:1.
+    MAX_TRACKED_AURA_TYPES
+};
+
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
 // will only support WoW, WoW:TBC, WoW:WotLK and WoW:Cataclysm 4.3.4 client build 15595...
@@ -3234,6 +3279,14 @@ enum AreaLockStatus
 // account with expansion > client supported will rejected at connection by client
 // because if client receive unsupported expansion level it think
 // that it not have expansion installed and reject
+enum Expansions
+{
+    EXPANSION_NONE                      = 0,                // classic
+    EXPANSION_TBC                       = 1,                // TBC
+    EXPANSION_WOTLK                     = 2,                // WotLK
+    EXPANSION_CATA                      = 3,                // Cataclysm
+};
+
 #define MAX_EXPANSION 3
 
 // Maxlevel for expansion
@@ -3242,8 +3295,12 @@ enum MaxLevel
     MAX_LEVEL_CLASSIC                   = 60,
     MAX_LEVEL_TBC                       = 70,
     MAX_LEVEL_WOTLK                     = 80,
+    MAX_LEVEL_CATACLYSM                 = 85,
 };
 
-static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLASSIC, MAX_LEVEL_TBC, MAX_LEVEL_WOTLK };
+static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLASSIC, MAX_LEVEL_TBC, MAX_LEVEL_WOTLK, MAX_LEVEL_CATACLYSM };
+
+// This spell is used for general boarding serverside
+#define SPELL_RIDE_VEHICLE_HARDCODED    46598
 
 #endif

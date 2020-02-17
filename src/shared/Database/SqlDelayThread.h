@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,6 @@
 #include "ace/Thread_Mutex.h"
 #include "LockedQueue.h"
 #include "Threading.h"
-
 
 class Database;
 class SqlOperation;

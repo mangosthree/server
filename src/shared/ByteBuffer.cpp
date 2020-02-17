@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -74,4 +74,3 @@ void BitStream::Print()
 
     sLog.outDebug(ss.str().c_str());
 }
-

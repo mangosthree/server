@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -63,8 +63,8 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator*>
     private:
         typedef std::stack<MovementGenerator*> Impl;
         typedef std::vector<MovementGenerator*> ExpireList;
-    public:
 
+    public:
         explicit MotionMaster(Unit* unit) : m_owner(unit), m_expList(NULL), m_cleanFlag(MMCF_NONE) {}
         ~MotionMaster();
 
@@ -115,11 +115,10 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator*>
         MovementGeneratorType GetCurrentMovementGeneratorType() const;
 
         void propagateSpeedChange();
-
-        // will only work in MMgens where we have a target (TARGETED_MOTION_TYPE)
-        void UpdateFinalDistanceToTarget(float fDistance);
+        uint32 getLastReachedWaypoint() const;
 
         bool GetDestination(float& x, float& y, float& z);
+
     private:
         void Mutate(MovementGenerator* m);                  // use Move* functions instead
 

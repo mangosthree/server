@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -360,7 +360,8 @@ float ItemPrototype::getDPS() const
     return damage;
 }
 
-Item::Item()
+Item::Item() :
+    loot(NULL)
 {
     m_objectType |= TYPEMASK_ITEM;
     m_objectTypeId = TYPEID_ITEM;
@@ -536,7 +537,6 @@ void Item::SaveToDB()
                 stmt.Execute();
             }
         }
-
     }
 
     if (m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_TEMPORARY)
@@ -996,10 +996,6 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
 {
     ItemPrototype const* proto = GetProto();
 
-    SpellEquippedItemsEntry const* equippedItems = spellInfo->GetSpellEquippedItems();
-    if (!equippedItems)
-        return true;
-
     // Enchant spells only use Effect[0] (patch 3.3.2)
     if (proto->IsVellum())
     {
@@ -1015,6 +1011,10 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
             return proto->SubClass == ITEM_SUBCLASS_VELLUM && (eqItemClass == ITEM_CLASS_WEAPON || eqItemClass == ITEM_CLASS_ARMOR);
         }
     }
+
+    SpellEquippedItemsEntry const* equippedItems = spellInfo->GetSpellEquippedItems();
+    if (!equippedItems)
+        return true;
 
     if (equippedItems->EquippedItemClass != -1)             // -1 == any item class
     {

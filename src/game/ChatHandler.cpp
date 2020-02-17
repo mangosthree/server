@@ -648,6 +648,7 @@ void WorldSession::HandleEmoteOpcode(WorldPacket& recv_data)
 
     uint32 emote;
     recv_data >> emote;
+    DEBUG_LOG("CMSG_EMOTE %u", emote);
     GetPlayer()->HandleEmoteCommand(emote);
 }
 
@@ -673,6 +674,9 @@ namespace MaNGOS
                     data.append(nam, namlen);
                 else
                     data << uint8(0x00);
+
+                DEBUG_LOG("SMSG_TEXT_EMOTE i_text_emote %u i_emote_num %u",
+                    i_text_emote, i_emote_num);
             }
 
         private:
@@ -744,10 +748,11 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data)
 {
     ObjectGuid iguid;
     uint8 unk;
-    // DEBUG_LOG("WORLD: Received CMSG_CHAT_IGNORED");
+    // DEBUG_LOG("WORLD: Received opcode CMSG_CHAT_IGNORED");
 
-    recv_data >> iguid;
     recv_data >> unk;                                       // probably related to spam reporting
+    recv_data.ReadGuidMask<2, 5, 6, 4, 7, 0, 1, 3>(iguid);
+    recv_data.ReadGuidBytes<0, 6, 5, 1, 4, 3, 7, 2>(iguid);
 
     Player* player = sObjectMgr.GetPlayer(iguid);
     if (!player || !player->GetSession())

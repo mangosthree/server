@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 #include "Common.h"
 #include <cassert>
 
-/*enum
+/*enum FieldFormat
 {
     FT_NA = 'x',                                            // ignore/ default, 4 byte size, in Source String means field is ignored, in Dest String means field is filled with default value
     FT_NA_BYTE = 'X',                                       // ignore/ default, 1 byte size, see above
@@ -83,7 +83,6 @@ class DBCFileLoader
                 DBCFileLoader& file;
 
                 friend class DBCFileLoader;
-
         };
 
         // Get record by id
@@ -101,6 +100,7 @@ class DBCFileLoader
         static uint32 GetFormatStringsFields(const char * format);
 
     private:
+
         uint32 recordSize;
         uint32 recordCount;
         uint32 fieldCount;

@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/*
+/**
  * @addtogroup mailing
  * @{
  *
@@ -106,43 +106,63 @@ bool WorldSession::CheckMailBox(ObjectGuid guid)
  */
 void WorldSession::HandleSendMail(WorldPacket& recv_data)
 {
+    sLog.outError("WORLD: CMSG_SEND_MAIL");
     ObjectGuid mailboxGuid;
-    uint64 unk3;
+    uint64 money, COD;
     std::string receiver, subject, body;
-    uint32 unk1, unk2, money, COD;
-    uint8 unk4;
-    recv_data >> mailboxGuid;
-    recv_data >> receiver;
-
-    recv_data >> subject;
-
-    recv_data >> body;
+    uint8 receiverLen, subjectLen, bodyLen;
+    uint32 unk1, unk2;
 
     recv_data >> unk1;                                      // stationery?
     recv_data >> unk2;                                      // 0x00000000
 
-    uint8 items_count;
-    recv_data >> items_count;                               // attached items count
+    recv_data >> COD >> money;                              // cod and money
 
+    bodyLen = recv_data.ReadBits(12);
+    subjectLen = recv_data.ReadBits(9);
+
+    uint8 items_count = recv_data.ReadBits(5);              // attached items count
     if (items_count > MAX_MAIL_ITEMS)                       // client limit
     {
         GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_TOO_MANY_ATTACHMENTS);
-        recv_data.rpos(recv_data.wpos());                   // set to end to avoid warnings spam
+        recv_data.rfinish();                                // set to end to avoid warnings spam
         return;
     }
 
+    recv_data.ReadGuidMask<0>(mailboxGuid);
+
     ObjectGuid itemGuids[MAX_MAIL_ITEMS];
+    for (uint8 i = 0; i < items_count; ++i)
+        recv_data.ReadGuidMask<2, 6, 3, 7, 1, 0, 4, 5>(itemGuids[i]);
+
+    recv_data.ReadGuidMask<3, 4>(mailboxGuid);
+
+    receiverLen = recv_data.ReadBits(7);
+
+    recv_data.ReadGuidMask<2, 6, 1, 7, 5>(mailboxGuid);
+
+    recv_data.ReadGuidBytes<4>(mailboxGuid);
 
     for (uint8 i = 0; i < items_count; ++i)
     {
+        recv_data.ReadGuidBytes<6, 1, 7, 2>(itemGuids[i]);
         recv_data.read_skip<uint8>();                       // item slot in mail, not used
-        recv_data >> itemGuids[i];
+        recv_data.ReadGuidBytes<3, 0, 4, 5>(itemGuids[i]);
     }
 
-    recv_data >> money >> COD;                              // money and cod
-    recv_data >> unk3;                                      // const 0
-    recv_data >> unk4;                                      // const 0
+    recv_data.ReadGuidBytes<7, 3, 6, 5>(mailboxGuid);
 
+    subject = recv_data.ReadString(subjectLen);
+    receiver = recv_data.ReadString(receiverLen);
+
+    recv_data.ReadGuidBytes<2, 0>(mailboxGuid);
+
+    body = recv_data.ReadString(bodyLen);
+
+    recv_data.ReadGuidBytes<1>(mailboxGuid);
+
+    DEBUG_LOG("WORLD: CMSG_SEND_MAIL receiver '%s' subject '%s' body '%s' mailbox " UI64FMTD " money " UI64FMTD " COD " UI64FMTD " unkt1 %u unk2 %u",
+        receiver.c_str(), subject.c_str(), body.c_str(), mailboxGuid.GetRawValue(), money, COD, unk1, unk2);
     // packet read complete, now do check
 
     if (!CheckMailBox(mailboxGuid))
@@ -159,13 +179,13 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
 
     if (!rc)
     {
-        DETAIL_LOG("%s is sending mail to %s (GUID: nonexistent!) with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u",
+        DEBUG_LOG("%s is sending mail to %s (GUID: nonexistent!) with subject %s and body %s includes %u items, " UI64FMTD " copper and " UI64FMTD " COD copper with unk1 = %u, unk2 = %u",
                    pl->GetGuidStr().c_str(), receiver.c_str(), subject.c_str(), body.c_str(), items_count, money, COD, unk1, unk2);
         pl->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_NOT_FOUND);
         return;
     }
 
-    DETAIL_LOG("%s is sending mail to %s with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u",
+    DEBUG_LOG("%s is sending mail to %s with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u",
                pl->GetGuidStr().c_str(), rc.GetString().c_str(), subject.c_str(), body.c_str(), items_count, money, COD, unk1, unk2);
 
     if (pl->GetObjectGuid() == rc)
@@ -176,7 +196,7 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
 
     uint32 cost = items_count ? 30 * items_count : 30;      // price hardcoded in client
 
-    uint32 reqmoney = cost + money;
+    uint64 reqmoney = cost + money;
 
     if (pl->GetMoney() < reqmoney)
     {
@@ -271,7 +291,7 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
 
     pl->SendMailResult(0, MAIL_SEND, MAIL_OK);
 
-    pl->ModifyMoney(-int32(reqmoney));
+    pl->ModifyMoney(-int64(reqmoney));
     pl->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_MAIL, cost);
 
     bool needItemDelay = false;
@@ -308,7 +328,7 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
 
         if (money > 0 &&  GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_BOOL_GM_LOG_TRADE))
         {
-            sLog.outCommand(GetAccountId(), "GM %s (Account: %u) mail money: %u to player: %s (Account: %u)",
+            sLog.outCommand(GetAccountId(), "GM %s (Account: %u) mail money: " UI64FMTD " to player: %s (Account: %u)",
                             GetPlayerName(), GetAccountId(), money, receiver.c_str(), rc_account);
         }
     }
@@ -327,7 +347,7 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
     CharacterDatabase.CommitTransaction();
 }
 
-/*
+/**
  * Handles the Packet sent by the client when reading a mail.
  *
  * This method is called when a client reads a mail that was previously unread.
@@ -360,7 +380,7 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket& recv_data)
     }
 }
 
-/*
+/**
  * Handles the Packet sent by the client when deleting a mail.
  *
  * This method is called when a client deletes a mail in his mailbox.
@@ -395,7 +415,7 @@ void WorldSession::HandleMailDelete(WorldPacket& recv_data)
     }
     pl->SendMailResult(mailId, MAIL_DELETED, MAIL_OK);
 }
-/*
+/**
  * Handles the Packet sent by the client when returning a mail to sender.
  * This method is called when a player chooses to return a mail to its sender.
  * It will create a new MailDraft and add the items, money, etc. associated with the mail
@@ -459,7 +479,7 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recv_data)
     pl->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, MAIL_OK);
 }
 
-/*
+/**
  * Handles the packet sent by the client when taking an item from the mail.
  */
 void WorldSession::HandleMailTakeItem(WorldPacket& recv_data)
@@ -536,7 +556,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recv_data)
                 .SendMailTo(MailReceiver(sender, sender_guid), _player, MAIL_CHECK_MASK_COD_PAYMENT);
             }
 
-            pl->ModifyMoney(-int32(m->COD));
+            pl->ModifyMoney(-int64(m->COD));
         }
         m->COD = 0;
         m->state = MAIL_STATE_CHANGED;
@@ -556,16 +576,17 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recv_data)
     else
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_EQUIP_ERROR, msg);
 }
-
-/*
+/**
  * Handles the packet sent by the client when taking money from the mail.
  */
 void WorldSession::HandleMailTakeMoney(WorldPacket& recv_data)
 {
     ObjectGuid mailboxGuid;
     uint32 mailId;
+    uint64 money;
     recv_data >> mailboxGuid;
     recv_data >> mailId;
+    recv_data >> money;
 
     if (!CheckMailBox(mailboxGuid))
         return;
@@ -593,7 +614,7 @@ void WorldSession::HandleMailTakeMoney(WorldPacket& recv_data)
     CharacterDatabase.CommitTransaction();
 }
 
-/*
+/**
  * Handles the packet sent by the client when requesting the current mail list.
  * It will send a list of all available mails in the players mailbox to the client.
  */
@@ -653,15 +674,15 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
             case MAIL_AUCTION:
                 data << uint32((*itr)->sender);             // creature/gameobject entry, auction id
                 break;
-            case MAIL_ITEM:                                 // item entry (?) sender = "Unknown", NYI
-                data << uint32(0);                          // item entry
+            case MAIL_CALENDAR:
+                data << uint32(0);                          // unknown
                 break;
         }
 
-        data << uint32((*itr)->COD);                        // COD
+        data << uint64((*itr)->COD);                        // COD
         data << uint32(0);                                  // unknown, probably changed in 3.3.3
         data << uint32((*itr)->stationery);                 // stationery (Stationery.dbc)
-        data << uint32((*itr)->money);                      // copper
+        data << uint64((*itr)->money);                      // copper
         data << uint32((*itr)->checked);                    // flags
         data << float(float((*itr)->expire_time - time(NULL)) / float(DAY));// Time
         data << uint32((*itr)->mailTemplateId);             // mail template (MailTemplate.dbc)
@@ -768,7 +789,6 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recv_data)
     bodyItem->SetGuidValue(ITEM_FIELD_CREATOR, ObjectGuid(HIGHGUID_PLAYER, m->sender));
     bodyItem->SetFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_READABLE | ITEM_DYNFLAG_UNK15 | ITEM_DYNFLAG_UNK16);
 
-
     DETAIL_LOG("HandleMailCreateTextItem mailid=%u", mailId);
 
     ItemPosCountVec dest;
@@ -789,10 +809,10 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recv_data)
     }
 }
 
-/*
+/**
  * No idea when this is called.
  */
-void WorldSession::HandleQueryNextMailTime(WorldPacket& /**recv_data*/)
+void WorldSession::HandleQueryNextMailTime(WorldPacket & /**recv_data*/)
 {
     WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME, 8);
 

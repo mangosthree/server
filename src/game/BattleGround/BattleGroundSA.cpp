@@ -30,24 +30,6 @@ BattleGroundSA::BattleGroundSA()
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_WS_HAS_BEGUN;
 }
 
-BattleGroundSA::~BattleGroundSA()
-{
-
-}
-
-void BattleGroundSA::Update(uint32 diff)
-{
-    BattleGround::Update(diff);
-}
-
-void BattleGroundSA::StartingEventCloseDoors()
-{
-}
-
-void BattleGroundSA::StartingEventOpenDoors()
-{
-}
-
 void BattleGroundSA::AddPlayer(Player* plr)
 {
     BattleGround::AddPlayer(plr);
@@ -57,21 +39,8 @@ void BattleGroundSA::AddPlayer(Player* plr)
     m_PlayerScores[plr->GetObjectGuid()] = sc;
 }
 
-void BattleGroundSA::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
-{
-
-}
-
-void BattleGroundSA::HandleAreaTrigger(Player* /*source*/, uint32 /*trigger*/)
-{
-    // this is wrong way to implement these things. On official it done by gameobject spell cast.
-    if (GetStatus() != STATUS_IN_PROGRESS)
-        return;
-}
-
 void BattleGroundSA::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
-
     BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
     if (itr == m_PlayerScores.end())                        // player not found...
         return;

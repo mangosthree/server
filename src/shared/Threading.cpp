@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -103,7 +103,6 @@ int ThreadPriority::getPriority(Priority p) const
 
 Thread::Thread() : m_iThreadId(0), m_hThreadHandle(0), m_task(0)
 {
-
 }
 
 Thread::Thread(Runnable* instance) : m_iThreadId(0), m_hThreadHandle(0), m_task(instance)

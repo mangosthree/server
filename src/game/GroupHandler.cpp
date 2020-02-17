@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -80,7 +80,7 @@ void WorldSession::SendGroupInvite(Player* player, bool alreadyInGroup /*= false
     data.append(player->GetName(), strlen(player->GetName()));
     data << uint32(0);
 
-    player->GetSession()->SendPacket(&data);
+    SendPacket(&data);
 }
 
 void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
@@ -166,7 +166,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_ALREADY_IN_GROUP_S);
 
         // tell the player that they were invited but it failed as they were already in a group
-        SendGroupInvite(player, true);
+        player->GetSession()->SendGroupInvite(player, true);
 
         return;
     }
@@ -214,7 +214,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
         }
     }
 
-    SendGroupInvite(player);
+    player->GetSession()->SendGroupInvite(_player);
     SendPartyResult(PARTY_OP_INVITE, membername, ERR_PARTY_RESULT_OK);
 }
 
@@ -904,7 +904,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
 /*this procedure handles clients CMSG_REQUEST_PARTY_MEMBER_STATS request*/
 void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received CMSG_REQUEST_PARTY_MEMBER_STATS");
+    DEBUG_LOG("WORLD: Received opcode CMSG_REQUEST_PARTY_MEMBER_STATS");
     ObjectGuid guid;
     recv_data >> guid;
 
@@ -1057,7 +1057,7 @@ void WorldSession::HandleRequestRaidInfoOpcode(WorldPacket& /*recv_data*/)
 
 void WorldSession::HandleOptOutOfLootOpcode(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received CMSG_OPT_OUT_OF_LOOT");
+    DEBUG_LOG("WORLD: Received opcode CMSG_OPT_OUT_OF_LOOT");
 
     uint32 unkn;
     recv_data >> unkn;
@@ -1076,7 +1076,7 @@ void WorldSession::HandleOptOutOfLootOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleSetAllowLowLevelRaidOpcode(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received CMSG_SET_ALLOW_LOW_LEVEL_RAID: %4X", recv_data.GetOpcode());
+    DEBUG_LOG("WORLD: Received opcode CMSG_SET_ALLOW_LOW_LEVEL_RAID: %4X", recv_data.GetOpcode());
 
     uint8 allow;
     recv_data >> allow;

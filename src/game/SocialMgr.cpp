@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  */
 
 #include "SocialMgr.h"
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
 #include "Opcodes.h"
 #include "WorldPacket.h"
@@ -171,12 +171,10 @@ bool PlayerSocial::HasIgnore(ObjectGuid ignore_guid)
 
 SocialMgr::SocialMgr()
 {
-
 }
 
 SocialMgr::~SocialMgr()
 {
-
 }
 
 void SocialMgr::GetFriendInfo(Player* player, uint32 friend_lowguid, FriendInfo& friendInfo)

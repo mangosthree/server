@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 #include "Log.h"
 
 void
-InvalidState::Update(Map&, NGridType&, GridInfo&, const uint32& /*x*/, const uint32& /*y*/, const uint32&) const
+InvalidState::Update(Map&, NGridType&, GridInfo&, const uint32 &/*x*/, const uint32 &/*y*/, const uint32&) const
 {
 }
 

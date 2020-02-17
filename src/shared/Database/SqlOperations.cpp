@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -169,7 +169,7 @@ QueryResult* SqlQueryHolder::GetResult(size_t index)
         /// the query strings are freed on the first GetResult or in the destructor
         if (m_queries[index].first != NULL)
         {
-            delete[] (const_cast<char*>(m_queries[index].first));
+            delete[](const_cast<char*>(m_queries[index].first));
             m_queries[index].first = NULL;
         }
         /// when you get a result aways remember to delete it!
@@ -194,7 +194,7 @@ SqlQueryHolder::~SqlQueryHolder()
         /// results used already (getresult called) are expected to be deleted
         if (m_queries[i].first != NULL)
         {
-            delete[] (const_cast<char*>(m_queries[i].first));
+            delete[](const_cast<char*>(m_queries[i].first));
             delete m_queries[i].second;
         }
     }

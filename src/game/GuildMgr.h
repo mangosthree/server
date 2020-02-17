@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,11 +36,14 @@ class GuildMgr
 
         void AddGuild(Guild* guild);
         void RemoveGuild(uint32 guildId);
+        void RemoveGuild(ObjectGuid guildGuid);
 
         Guild* GetGuildById(uint32 guildId) const;
+        Guild* GetGuildByGuid(ObjectGuid guildGuid) const;
         Guild* GetGuildByName(std::string const& name) const;
         Guild* GetGuildByLeader(ObjectGuid const& guid) const;
         std::string GetGuildNameById(uint32 guildId) const;
+        std::string GetGuildNameByGuid(ObjectGuid guildGuid) const;
 
         void LoadGuilds();
 };

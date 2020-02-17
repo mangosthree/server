@@ -28,7 +28,7 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "MassMailMgr.h"
 #include "SpellMgr.h"
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 
 INSTANTIATE_SINGLETON_1(GameEventMgr);
 
@@ -153,6 +153,7 @@ void GameEventMgr::LoadFromDB()
 
             if (pGameEvent.occurence < pGameEvent.length)   // occurence < length is useless. This also asserts that occurence > 0!
             {
+                pGameEvent.length = 0;                      // disable event (GameEventData::isValid() returns false when it gets updated)
                 sLog.outErrorDb("`game_event` game event id (%i) has occurence %u  < length %u and can't be used.", event_id, pGameEvent.occurence, pGameEvent.length);
                 continue;
             }
@@ -167,7 +168,6 @@ void GameEventMgr::LoadFromDB()
             }
 
             pGameEvent.description  = fields[6].GetCppString();
-
         }
         while (result->NextRow());
         delete result;
@@ -253,7 +253,6 @@ void GameEventMgr::LoadFromDB()
 
             GuidList& crelist = mGameEventCreatureGuids[internal_event_id];
             crelist.push_back(guid);
-
         }
         while (result->NextRow());
         delete result;
@@ -332,7 +331,6 @@ void GameEventMgr::LoadFromDB()
 
             GuidList& golist = mGameEventGameobjectGuids[internal_event_id];
             golist.push_back(guid);
-
         }
         while (result->NextRow());
         delete result;
@@ -427,7 +425,6 @@ void GameEventMgr::LoadFromDB()
 
             equiplist.push_back(GameEventCreatureDataPair(guid, newData));
             mGameEventCreatureDataPerGuid.insert(GameEventCreatureDataPerGuidMap::value_type(guid, event_id));
-
         }
         while (result->NextRow());
         delete result;
@@ -488,7 +485,6 @@ void GameEventMgr::LoadFromDB()
 
             QuestList& questlist = mGameEventQuests[event_id];
             questlist.push_back(quest);
-
         }
         while (result->NextRow());
         delete result;
@@ -569,7 +565,6 @@ void GameEventMgr::LoadFromDB()
 
             MailList& maillist = mGameEventMails[internal_event_id];
             maillist.push_back(mail);
-
         }
         while (result->NextRow());
         delete result;
@@ -623,6 +618,9 @@ uint32 GameEventMgr::Update(ActiveEvents const* activeAtShutdown /*= NULL*/)
     uint32 calcDelay;
     for (uint16 itr = 1; itr < mGameEvent.size(); ++itr)
     {
+        if (!mGameEvent[itr].isValid())
+            continue;
+
         // sLog.outErrorDb("Checking event %u",itr);
         if (CheckOneGameEvent(itr, currenttime))
         {

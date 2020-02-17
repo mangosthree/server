@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -181,7 +181,7 @@ void Totem::SetTypeBySummonSpell(SpellEntry const* spellProto)
         m_type = TOTEM_STATUE;                              // Jewelery statue
 }
 
-bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const
+bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
 {
     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(index);
     if(spellEffect)
@@ -207,5 +207,5 @@ bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex 
         }
     }
 
-    return Creature::IsImmuneToSpellEffect(spellInfo, index);
+    return Creature::IsImmuneToSpellEffect(spellInfo, index, castOnSelf);
 }

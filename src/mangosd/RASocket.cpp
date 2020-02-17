@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -70,7 +70,6 @@ int RASocket::open(void*)
         sLog.outError("RASocket::open: peer ().get_remote_addr errno = %s", ACE_OS::strerror(errno));
         return -1;
     }
-
 
     sLog.outRALog("Incoming connection from %s.", remote_addr.get_host_addr());
 
@@ -275,7 +274,6 @@ int RASocket::handle_input(ACE_HANDLE)
                 break;
                 ///</ul>
         };
-
     }
     // no enter yet? wait for next input...
     return 0;

@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 #ifndef MANGOS_SPELLAURAS_H
 #define MANGOS_SPELLAURAS_H
 
@@ -22,11 +23,44 @@
 #include "DBCEnums.h"
 #include "ObjectGuid.h"
 
+/**
+ * Used to modify what an Aura does to a player/npc.
+ * Accessible through Aura::m_modifier.
+ * \see CreateAura
+ * \see Aura
+ * \see AreaAura
+ * \see AuraType
+ */
 struct Modifier
 {
+    /**
+     * Decides what the aura does, ie, it may have the
+     * value AuraType::SPELL_AURA_MOD_BASE_RESISTANCE_PCT which
+     * would change the base armor of a player.
+     */
     AuraType m_auraname;
+    /**
+     * By how much the aura should change the affected
+     * value. Ie, -27 would make the value decided by Modifier::m_miscvalue
+     * be reduced by 27% if the earlier mentioned AuraType
+     * would have been used. And 27 would increase the value by 27%
+     */
     int32 m_amount;
+    /**
+     * A miscvalue that is dependent on what the aura will do, this
+     * is usually decided by the AuraType, ie:
+     * with AuraType::SPELL_AURA_MOD_BASE_RESISTANCE_PCT this value
+     * could be SpellSchoolMask::SPELL_SCHOOL_MASK_NORMAL which would
+     * tell the aura that it should change armor.
+     * If Modifier::m_auraname would have been AuraType::SPELL_AURA_MOUNTED
+     * then m_miscvalue would have decided which model the mount should have
+     */
     int32 m_miscvalue;
+    /**
+     * Decides how often the aura should be applied, if it is
+     * set to 0 it's only applied once and then removed when
+     * the Aura is removed
+     */
     uint32 periodictime;
 };
 
@@ -106,9 +140,9 @@ class MANGOS_DLL_SPEC SpellAuraHolder
         void Update(uint32 diff);
         void RefreshHolder();
 
-        bool IsSingleTarget() const { return m_isSingleTarget; }
-        void SetIsSingleTarget(bool val) { m_isSingleTarget = val; }
-        void UnregisterSingleCastHolder();
+        TrackedAuraType GetTrackedAuraType() const { return m_trackedAuraType; }
+        void SetTrackedAuraType(TrackedAuraType val) { m_trackedAuraType = val; }
+        void UnregisterAndCleanupTrackedAuras();
 
         int32 GetAuraMaxDuration() const { return m_maxDuration; }
         void SetAuraMaxDuration(int32 duration);
@@ -178,12 +212,12 @@ class MANGOS_DLL_SPEC SpellAuraHolder
 
         AuraRemoveMode m_removeMode: 8;                     // Store info for know remove aura reason
         DiminishingGroup m_AuraDRGroup: 8;                  // Diminishing
+        TrackedAuraType m_trackedAuraType: 8;               // store if the caster tracks the aura - can change at spell steal for example
 
         bool m_permanent: 1;
         bool m_isPassive: 1;
         bool m_isDeathPersist: 1;
         bool m_isRemovedOnShapeLost: 1;
-        bool m_isSingleTarget: 1;                           // true if it's a single target spell and registered at caster - can change at spell steal for example
         bool m_deleted: 1;
 
         uint32 m_in_use;                                    // > 0 while in SpellAuraHolder::ApplyModifiers call/SpellAuraHolder::Update/etc
@@ -337,8 +371,6 @@ class MANGOS_DLL_SPEC Aura
         void HandleModTargetResistance(bool apply, bool Real);
         void HandleAuraModAttackPowerPercent(bool apply, bool Real);
         void HandleAuraModRangedAttackPowerPercent(bool apply, bool Real);
-        void HandleAuraModRangedAttackPowerOfStatPercent(bool apply, bool Real);
-        void HandleAuraModAttackPowerOfStatPercent(bool apply, bool Real);
         void HandleAuraModAttackPowerOfArmor(bool apply, bool Real);
         void HandleSpiritOfRedemption(bool apply, bool Real);
         void HandleModManaRegen(bool apply, bool Real);
@@ -367,13 +399,15 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraIncreaseBaseHealthPercent(bool Apply, bool Real);
         void HandleNoReagentUseAura(bool Apply, bool Real);
         void HandlePhase(bool Apply, bool Real);
-        void HandleModTargetArmorPct(bool Apply, bool Real);
         void HandleAuraModAllCritChance(bool Apply, bool Real);
         void HandleAuraOpenStable(bool apply, bool Real);
         void HandleAuraAddMechanicAbilities(bool apply, bool Real);
         void HandleAuraStopNaturalManaRegen(bool apply, bool Real);
+        void HandleAuraSetVehicleId(bool apply, bool Real);
         void HandleAuraMastery(bool apply, bool Real);
         void HandleAuraModBlockCritChance(bool apply, bool Real);
+        void HandleModIncreaseSpellPowerPct(bool apply, bool Real);
+        void HandleOverrideSpellPowerByAp(bool apply, bool Real);
 
         virtual ~Aura();
 
@@ -468,7 +502,6 @@ class MANGOS_DLL_SPEC Aura
         void ReapplyAffectedPassiveAuras();
 
         Modifier m_modifier;
-        SpellModifier *m_spellmod;
 
         SpellEffectEntry const* m_spellEffect;
         time_t m_applyTime;

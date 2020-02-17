@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -279,7 +279,7 @@ void WorldSession::HandleDestroyItemOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleReadItemOpcode(WorldPacket& recv_data)
 {
-    // DEBUG_LOG( "WORLD: CMSG_READ_ITEM");
+    // DEBUG_LOG("WORLD: Received opcode CMSG_READ_ITEM");
 
     uint8 bag, slot;
     recv_data >> bag >> slot;
@@ -312,7 +312,7 @@ void WorldSession::HandleReadItemOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandlePageQuerySkippedOpcode(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received CMSG_PAGE_TEXT_QUERY");
+    DEBUG_LOG("WORLD: Received opcode CMSG_PAGE_TEXT_QUERY");
 
     uint32 itemid;
     ObjectGuid guid;
@@ -324,7 +324,7 @@ void WorldSession::HandlePageQuerySkippedOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received CMSG_SELL_ITEM");
+    DEBUG_LOG("WORLD: Received opcode CMSG_SELL_ITEM");
 
     ObjectGuid vendorGuid;
     ObjectGuid itemGuid;
@@ -421,7 +421,7 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
                     _player->AddItemToBuyBackSlot(pItem);
                 }
 
-                uint32 money = pProto->SellPrice * count;
+                uint64 money = pProto->SellPrice * count;
 
                 _player->ModifyMoney(money);
                 _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_VENDORS, money);
@@ -437,7 +437,7 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleBuybackItem(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received CMSG_BUYBACK_ITEM");
+    DEBUG_LOG("WORLD: Received opcode CMSG_BUYBACK_ITEM");
     ObjectGuid vendorGuid;
     uint32 slot;
 
@@ -458,7 +458,7 @@ void WorldSession::HandleBuybackItem(WorldPacket& recv_data)
     Item* pItem = _player->GetItemFromBuyBackSlot(slot);
     if (pItem)
     {
-        uint32 price = _player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START);
+        uint64 price = _player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START);
         if (_player->GetMoney() < price)
         {
             _player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, pItem->GetEntry(), 0);
@@ -469,7 +469,7 @@ void WorldSession::HandleBuybackItem(WorldPacket& recv_data)
         InventoryResult msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
         if (msg == EQUIP_ERR_OK)
         {
-            _player->ModifyMoney(-(int32)price);
+            _player->ModifyMoney(-(int64)price);
             _player->RemoveItemFromBuyBackSlot(slot, false);
             _player->ItemAddedQuestCheck(pItem->GetEntry(), pItem->GetCount());
             _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_RECEIVE_EPIC_ITEM, pItem->GetEntry(), pItem->GetCount());
@@ -490,7 +490,7 @@ void WorldSession::HandleBuyItemOpcode(WorldPacket& recv_data)
     uint8 type, bagSlot;
 
     recv_data >> vendorGuid >> type >> item >> slot >> count >> bagGuid >> bagSlot;
-    DEBUG_LOG("WORLD: Received CMSG_BUY_ITEM, vendorguid: %s, type: %u, item: %u, slot: %u, count: %u, bagGuid: %s, bagSlog: %u",
+    DEBUG_LOG("WORLD: Received opcode CMSG_BUY_ITEM, vendorguid: %s, type: %u, item: %u, slot: %u, count: %u, bagGuid: %s, bagSlog: %u",
         vendorGuid.GetString().c_str(), type, item, slot, count, bagGuid.GetString().c_str(), bagSlot);
 
     // client side expected counting from 1, and we send to client vendorslot+1 already
@@ -545,7 +545,7 @@ void WorldSession::HandleListInventoryOpcode(WorldPacket& recv_data)
     if (!GetPlayer()->isAlive())
         return;
 
-    DEBUG_LOG("WORLD: Recvd CMSG_LIST_INVENTORY");
+    DEBUG_LOG("WORLD: Received opcode CMSG_LIST_INVENTORY");
 
     SendListInventory(guid);
 }
@@ -613,6 +613,9 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
 
                     if ((pProto->AllowableRace & _player->getRaceMask()) == 0)
                         continue;
+
+                    if (crItem->conditionId && !sObjectMgr.IsPlayerMeetToCondition(crItem->conditionId, _player, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
+                        continue;
                 }
 
                 // possible item coverting for BoA case
@@ -645,7 +648,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                 if (!pCurrency)
                     continue;
 
-                if (pCurrency->ID == CURRENCY_CONQUEST_ARENA_META || pCurrency->ID == CURRENCY_CONQUEST_BG_META)
+                if (pCurrency->Category == CURRENCY_CATEGORY_META)
                     continue;
 
                 ++count;
@@ -750,7 +753,6 @@ void WorldSession::HandleAutoStoreBagItemOpcode(WorldPacket& recv_data)
     _player->StoreItem(dest, pItem, true);
 }
 
-
 bool WorldSession::CheckBanker(ObjectGuid guid)
 {
     // GM case
@@ -795,29 +797,16 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
 
     BankBagSlotPricesEntry const* slotEntry = sBankBagSlotPricesStore.LookupEntry(slot);
 
-    WorldPacket data(SMSG_BUY_BANK_SLOT_RESULT, 4);
-
     if (!slotEntry)
-    {
-        data << uint32(ERR_BANKSLOT_FAILED_TOO_MANY);
-        SendPacket(&data);
         return;
-    }
 
-    uint32 price = slotEntry->price;
+    uint64 price = slotEntry->price;
 
     if (_player->GetMoney() < price)
-    {
-        data << uint32(ERR_BANKSLOT_INSUFFICIENT_FUNDS);
-        SendPacket(&data);
         return;
-    }
 
     _player->SetBankBagSlotCount(slot);
-    _player->ModifyMoney(-int32(price));
-
-    data << uint32(ERR_BANKSLOT_OK);
-    SendPacket(&data);
+    _player->ModifyMoney(-int64(price));
 
     _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BUY_BANK_SLOT);
 }
@@ -1160,7 +1149,6 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
                         }
                     }
                 }
-
             }
         }
 
@@ -1231,9 +1219,10 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     {
         if (GemEnchants[i])
         {
+            uint32 count = 1;
             itemTarget->SetEnchantment(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT + i), GemEnchants[i], 0, 0);
             if (Item* guidItem = gemGuids[i] ? _player->GetItemByGuid(gemGuids[i]) : NULL)
-                _player->DestroyItem(guidItem->GetBagSlot(), guidItem->GetSlot(), true);
+                _player->DestroyItemCount(guidItem, count, true);
         }
     }
 

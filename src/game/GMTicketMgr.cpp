@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "ProgressBar.h"
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 #include "Player.h"
 
 INSTANTIATE_SINGLETON_1(GMTicketMgr);
@@ -71,7 +71,6 @@ void GMTicketMgr::LoadGMTickets()
 
         ticket.Init(guid, fields[1].GetCppString(), fields[2].GetCppString(), time_t(fields[3].GetUInt64()));
         m_GMTicketListByCreatingOrder.push_back(&ticket);
-
     }
     while (result->NextRow());
     delete result;

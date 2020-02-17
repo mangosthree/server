@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 #ifdef DO_POSTGRESQL
 
 #include "Util.h"
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 #include "Platform/Define.h"
 #include "Threading.h"
 #include "DatabaseEnv.h"
@@ -43,7 +43,6 @@ DatabasePostgre::DatabasePostgre()
 
 DatabasePostgre::~DatabasePostgre()
 {
-
 }
 
 SqlConnection* DatabasePostgre::CreateConnection()

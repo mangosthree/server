@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -281,7 +281,7 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
 
     recv_data >> guid;
 
-    DEBUG_LOG("WORLD: Recvd CMSG_GAMEOBJ_USE Message guid: %s", guid.GetString().c_str());
+    DEBUG_LOG("WORLD: Received opcode CMSG_GAMEOBJ_USE guid: %s", guid.GetString().c_str());
 
     // ignore for remote control state
     if (!_player->IsSelfMover())
@@ -320,7 +320,7 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
     ObjectGuid guid;
     recvPacket >> guid;
 
-    DEBUG_LOG("WORLD: Recvd CMSG_GAMEOBJ_REPORT_USE Message guid: %s", guid.GetString().c_str());
+    DEBUG_LOG("WORLD: Received opcode CMSG_GAMEOBJ_REPORT_USE guid: %s", guid.GetString().c_str());
 
     // ignore for remote control state
     if (!_player->IsSelfMover())
@@ -356,7 +356,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
               spellId, cast_count, cast_flags, recvPacket.size());
 
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
-
     if (!spellInfo)
     {
         sLog.outError("WORLD: unknown spell id %u", spellId);
@@ -364,12 +363,15 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    Aura* triggeredByAura = mover->GetTriggeredByClientAura(spellId);
+
     if (mover->GetTypeId() == TYPEID_PLAYER)
     {
         // not have spell in spellbook or spell passive and not casted by client
-        if (!((Player*)mover)->HasActiveSpell(spellId) || IsPassiveSpell(spellInfo))
+
+        if ((!((Player*)mover)->HasActiveSpell(spellId) && !triggeredByAura) || IsPassiveSpell(spellInfo))
         {
-            sLog.outError("World: Player %u casts spell %u which he shouldn't have", mover->GetGUIDLow(), spellId);
+            sLog.outError("World: %s casts spell %u which he shouldn't have", mover->GetGuidStr().c_str(), spellId);
             // cheater? kick? ban?
             recvPacket.rpos(recvPacket.wpos());             // prevent spam at ignore packet
             return;
@@ -383,6 +385,24 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             // cheater? kick? ban?
             recvPacket.rpos(recvPacket.wpos());             // prevent spam at ignore packet
             return;
+        }
+    }
+
+    Unit::AuraList swaps = mover->GetAurasByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+    Unit::AuraList const& swaps2 = mover->GetAurasByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2);
+    if (!swaps2.empty())
+        swaps.insert(swaps.end(), swaps2.begin(), swaps2.end());
+
+    for (Unit::AuraList::const_iterator itr = swaps.begin(); itr != swaps.end(); ++itr)
+    {
+        if ((*itr)->isAffectedOnSpell(spellInfo))
+        {
+            if (SpellEntry const* newInfo = sSpellStore.LookupEntry((*itr)->GetModifier()->m_amount))
+            {
+                spellInfo = newInfo;
+                spellId = newInfo->Id;
+            }
+            break;
         }
     }
 
@@ -401,10 +421,10 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             spellInfo = actualSpellInfo;
     }
 
-    Spell* spell = new Spell(mover, spellInfo, false);
+    Spell* spell = new Spell(mover, spellInfo, triggeredByAura ? true : false, mover->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : NULL);
     spell->m_cast_count = cast_count;                       // set count of casts
     spell->m_glyphIndex = glyphIndex;
-    spell->prepare(&targets);
+    spell->prepare(&targets, triggeredByAura);
 }
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
@@ -616,7 +636,8 @@ void WorldSession::HandleGetMirrorimageData(WorldPacket& recv_data)
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: CMSG_GET_MIRRORIMAGE_DATA");
 
     ObjectGuid guid;
-    recv_data >> guid;
+    uint32 displayId;
+    recv_data >> guid >> displayId;
 
     Creature* pCreature = _player->GetMap()->GetAnyTypeCreature(guid);
 
@@ -652,8 +673,8 @@ void WorldSession::HandleGetMirrorimageData(WorldPacket& recv_data)
         // facial hair
         data << (uint8)pPlayer->GetByteValue(PLAYER_BYTES_2, 0);
 
-        // guild id
-        data << (uint32)pPlayer->GetGuildId();
+        // guild guid
+        data << pPlayer->GetGuildGuid();
 
         if (pPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
             data << (uint32)0;
@@ -688,7 +709,7 @@ void WorldSession::HandleGetMirrorimageData(WorldPacket& recv_data)
 
         data << (uint8)0;
 
-        data << (uint32)0;
+        data << ObjectGuid();
 
         for (int i = 0; i < 11; ++i)
             data << (uint32)0;

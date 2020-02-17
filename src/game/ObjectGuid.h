@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,6 +75,7 @@ enum HighGuid
     HIGHGUID_MO_TRANSPORT   = 0x1FC,                        // blizz 1FC (for GAMEOBJECT_TYPE_MO_TRANSPORT)
     HIGHGUID_INSTANCE       = 0x1F4,                        // blizz 1F4
     HIGHGUID_GROUP          = 0x1F5,                        // blizz 1F5
+    HIGHGUID_GUILD          = 0x1FF7,                       // blizz 1FF7
 };
 
 class ObjectGuid;
@@ -93,8 +94,8 @@ class MANGOS_DLL_SPEC ObjectGuid
     public:                                                 // constructors
         ObjectGuid() : m_guid(0) {}
         explicit ObjectGuid(uint64 guid) : m_guid(guid) {}
-        ObjectGuid(HighGuid hi, uint32 entry, uint32 counter) : m_guid(counter ? uint64(counter) | (uint64(entry) << 32) | (uint64(hi) << 52) : 0) {}
-        ObjectGuid(HighGuid hi, uint32 counter) : m_guid(counter ? uint64(counter) | (uint64(hi) << 52) : 0) {}
+        ObjectGuid(HighGuid hi, uint32 entry, uint32 counter) : m_guid(counter ? uint64(counter) | (uint64(entry) << 32) | (uint64(hi) << (IsLargeHigh(hi) ? 48 : 52)) : 0) {}
+        ObjectGuid(HighGuid hi, uint32 counter) : m_guid(counter ? uint64(counter) | (uint64(hi) << (IsLargeHigh(hi) ? 48 : 52)) : 0) {}
 
         operator uint64() const { return m_guid; }
     private:
@@ -111,20 +112,25 @@ class MANGOS_DLL_SPEC ObjectGuid
         PackedGuid WriteAsPacked() const;
     public:                                                 // accessors
         uint64   GetRawValue() const { return m_guid; }
-        HighGuid GetHigh() const { return HighGuid((m_guid >> 52) & 0x00000FFF); }
+        HighGuid GetHigh() const
+        {
+            HighGuid high = HighGuid((m_guid >> 48) & 0xFFFF);
+            return HighGuid(IsLargeHigh(high) ? high :
+                (m_guid >> 52) & 0xFFF);
+        }
         uint32   GetEntry() const { return HasEntry() ? uint32((m_guid >> 32) & UI64LIT(0xFFFF)) : 0; }
         uint32   GetCounter()  const
         {
             return HasEntry()
                    ? uint32(m_guid & UI64LIT(0x00000000FFFFFFFF))
-                   : uint32(m_guid & UI64LIT(0x000000FFFFFFFFFF));
+                   : uint32(m_guid & UI64LIT(0x00000000FFFFFFFF));  // TODO: switch to 40 bits, but this needs rewrite code to use uint64 instead uint32
         }
 
         static uint32 GetMaxCounter(HighGuid high)
         {
             return HasEntry(high)
-                   ? uint32(0x00FFFFFFFF)
-                   : uint32(0xFFFFFFFFFF);
+                   ? uint32(0xFFFFFFFF)
+                   : uint32(0xFFFFFFFF);    // TODO: switch to 40 bits
         }
 
         uint32 GetMaxCounter() const { return GetMaxCounter(GetHigh()); }
@@ -146,6 +152,8 @@ class MANGOS_DLL_SPEC ObjectGuid
         bool IsMOTransport()       const { return GetHigh() == HIGHGUID_MO_TRANSPORT;         }
         bool IsInstance()          const { return GetHigh() == HIGHGUID_INSTANCE;             }
         bool IsGroup()             const { return GetHigh() == HIGHGUID_GROUP;                }
+        bool IsBattleGround()      const { return GetHigh() == HIGHGUID_BATTLEGROUND;         }
+        bool IsGuild()             const { return GetHigh() == HIGHGUID_GUILD;                }
 
         static TypeID GetTypeId(HighGuid high)
         {
@@ -157,7 +165,7 @@ class MANGOS_DLL_SPEC ObjectGuid
                 case HIGHGUID_PET:          return TYPEID_UNIT;
                 case HIGHGUID_PLAYER:       return TYPEID_PLAYER;
                 case HIGHGUID_GAMEOBJECT:   return TYPEID_GAMEOBJECT;
-                case HIGHGUID_DYNAMICOBJECT: return TYPEID_DYNAMICOBJECT;
+                case HIGHGUID_DYNAMICOBJECT:return TYPEID_DYNAMICOBJECT;
                 case HIGHGUID_CORPSE:       return TYPEID_CORPSE;
                 case HIGHGUID_MO_TRANSPORT: return TYPEID_GAMEOBJECT;
                 case HIGHGUID_VEHICLE:      return TYPEID_UNIT;
@@ -220,12 +228,26 @@ class MANGOS_DLL_SPEC ObjectGuid
                 case HIGHGUID_UNIT:
                 case HIGHGUID_PET:
                 case HIGHGUID_VEHICLE:
+                case HIGHGUID_BATTLEGROUND:
                 default:
                     return true;
             }
         }
 
         bool HasEntry() const { return HasEntry(GetHigh()); }
+
+        static bool IsLargeHigh(HighGuid high)
+        {
+            switch(high)
+            {
+                case HIGHGUID_GUILD:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        bool IsLargeHigh() const { return IsLargeHigh(GetHigh()); }
 
     private:                                                // fields
         union

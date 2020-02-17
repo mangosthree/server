@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,11 +38,13 @@
 enum StableResultCode
 {
     STABLE_ERR_MONEY        = 0x01,                         // "you don't have enough money"
+    STABLE_INVALID_SLOT     = 0x03,
     STABLE_ERR_STABLE       = 0x06,                         // currently used in most fail cases
     STABLE_SUCCESS_STABLE   = 0x08,                         // stable success
     STABLE_SUCCESS_UNSTABLE = 0x09,                         // unstable/swap success
     STABLE_SUCCESS_BUY_SLOT = 0x0A,                         // buy slot success
-    STABLE_ERR_EXOTIC       = 0x0C,                         // "you are unable to control exotic creatures"
+    STABLE_ERR_EXOTIC       = 0x0B,                         // "you are unable to control exotic creatures"
+    STABLE_ERR_INTERNAL     = 0x0C,
 };
 
 void WorldSession::HandleTabardVendorActivateOpcode(WorldPacket& recv_data)
@@ -75,7 +77,7 @@ void WorldSession::HandleBankerActivateOpcode(WorldPacket& recv_data)
 {
     ObjectGuid guid;
 
-    DEBUG_LOG("WORLD: Received CMSG_BANKER_ACTIVATE");
+    DEBUG_LOG("WORLD: Received opcode CMSG_BANKER_ACTIVATE");
 
     recv_data >> guid;
 
@@ -117,7 +119,6 @@ void WorldSession::SendTrainerList(ObjectGuid guid)
     std::string str = GetMangosString(LANG_NPC_TAINER_HELLO);
     SendTrainerList(guid, str);
 }
-
 
 static void SendTrainerSpellHelper(WorldPacket& data, TrainerSpell const* tSpell, TrainerSpellState state, float fDiscountMod, bool can_learn_primary_prof, uint32 reqLevel)
 {
@@ -239,7 +240,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
     uint32 spellId = 0, trainerId = 0;
 
     recv_data >> guid >> trainerId >> spellId;
-    DEBUG_LOG("WORLD: Received CMSG_TRAINER_BUY_SPELL Trainer: %s, learn spell id is: %u", guid.GetString().c_str(), spellId);
+    DEBUG_LOG("WORLD: Received opcode CMSG_TRAINER_BUY_SPELL Trainer: %s, learn spell id is: %u", guid.GetString().c_str(), spellId);
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TRAINER);
     if (!unit)
@@ -302,7 +303,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
     }
     else
     {
-        _player->ModifyMoney(-int32(nSpellCost));
+        _player->ModifyMoney(-int64(nSpellCost));
 
         // visual effect on trainer
         WorldPacket data;
@@ -313,12 +314,12 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
         _player->BuildSendPlayVisualPacket(&data, 0x016A, true);
         SendPacket(&data);
 
-        // learn explicitly or cast explicitly
-        // TODO - Are these spells really cast correctly this way?
-        if (trainer_spell->IsCastable())
-            _player->CastSpell(_player, trainer_spell->spell, true);
-        else
-            _player->learnSpell(spellId, false);
+    // learn explicitly or cast explicitly
+    // TODO - Are these spells really cast correctly this way?
+    if (trainer_spell->IsCastable())
+        _player->CastSpell(_player, trainer_spell->spell, true);
+    else
+        _player->learnSpell(spellId, false);
 
         sendData << ObjectGuid(guid);
         sendData << uint32(spellId);                                // should be same as in packet from client
@@ -329,7 +330,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleGossipHelloOpcode(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Received CMSG_GOSSIP_HELLO");
+    DEBUG_LOG("WORLD: Received opcode CMSG_GOSSIP_HELLO");
 
     ObjectGuid guid;
     recv_data >> guid;
@@ -771,7 +772,7 @@ void WorldSession::HandleBuyStableSlot(WorldPacket& recv_data)
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 }
 
-void WorldSession::HandleStableRevivePet(WorldPacket& /* recv_data */)
+void WorldSession::HandleStableRevivePet(WorldPacket &/* recv_data */)
 {
     DEBUG_LOG("HandleStableRevivePet: Not implemented");
 }
@@ -793,7 +794,6 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recv_data)
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
-
 
     Pet* pet = _player->GetPet();
 

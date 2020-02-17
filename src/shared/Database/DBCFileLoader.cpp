@@ -1,4 +1,4 @@
-/*
+/**
  * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -313,8 +313,8 @@ char* DBCFileLoader::AutoProduceStrings(const char* format, char* dataTable, Loc
     // each string field at load have array of string for each locale
     size_t stringHolderSize = sizeof(char*) * MAX_LOCALE;
 
-    char* stringPool= new char[stringSize];
-    memcpy(stringPool,stringTable,stringSize);
+    char* stringPool = new char[stringSize];
+    memcpy(stringPool, stringTable, stringSize);
 
     uint32 offset = 0;
 
@@ -345,8 +345,7 @@ char* DBCFileLoader::AutoProduceStrings(const char* format, char* dataTable, Loc
                         const char* st = getRecord(y).getString(x);
                         *slot = stringPool + (st - (const char*)stringTable);
                     }
-
-                    offset+=sizeof(char*);
+                    offset += sizeof(char*);
                     break;
                 }
                 case FT_LOGIC:

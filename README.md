@@ -8,7 +8,7 @@
 <br />Build Status: <br/>Linux 
 <a href='https://travis-ci.org/mangosthree/server/builds' target='MangosThree'><img src='https://travis-ci.org/mangosthree/server.png' border=0></a>
  Windows 
-<a href='https://ci.appveyor.com/project/MaNGOS/server-wtbhv/history' target='MangosThree'><img src='https://ci.appveyor.com/api/projects/status/github/mangosthree/server?branch=develop21&svg=true' border=0></a>
+<a href='https://ci.appveyor.com/project/MaNGOS/server-wtbhv/history' target='MangosThree'><img src='https://ci.appveyor.com/api/projects/status/github/mangosthree/server?branch=master&svg=true' border=0></a>
   Codacy Status <a href="https://www.codacy.com/app/MaNGOS/MangosThree?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mangosthree/server&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/58227f14b9024384a22e4e12e3cf7a89"/></a>
 </td></tr></table>
 
@@ -61,7 +61,7 @@ Building *Mangos* is currently possible with these compilers:
 
 * **Microsoft Visual Studio (Express[^1])**, 32 bit and 64 bit. Both
   [Visual Studio][30] and the Express editions of [Visual Studio][31] are
-  supported. Only Visual Studio 2012 and above are now officially supported.
+  supported. Only Visual Studio 2013 and above are now officially supported.
 
 * **Microsoft Windows SDK**, 32 bit and 64 bit. The [Windows 7 SDK][32] is
   recommended, as older versions lack compiler features required to build
@@ -78,7 +78,7 @@ inventing the wheel again.
 *Please note that Linux and Mac OS X users should install packages using
 their systems package management instead of source packages.*
 
-* **MySQL** / **PostgreSQL**: to store content, and user data, we rely on
+* **MySQL** / **MariaDB**: to store content, and user data, we rely on
   [MySQL][40]/[MariaDB][41] and [PostgreSQL][42] to handle data.
 * **ACE**: the [ADAPTIVE Communication Environment][43] aka. *ACE* provides us
   with a solid cross-platform framework for abstracting operating system
@@ -171,7 +171,7 @@ respects for all of the code used other than [OpenSSL][48].
 [26]: http://www.dragonflybsd.org/ "DragonFlyBSD"
 
 [30]: http://www.microsoft.com/visualstudio/eng/ "Visual Studio 2012"
-[31]: http://www.microsoft.com/visualstudio/eng/products/visual-studio-express-products "Visual Studio Express 2012 for Windows Desktop"
+[31]: http://www.microsoft.com/visualstudio/eng/products/visual-studio-express-products "Visual Studio Express 2013 for Windows Desktop"
 [32]: http://www.microsoft.com/en-us/download/details.aspx?id=8279 "Windows SDK for Windows 7 and .NET Framework 4"
 [33]: http://clang.llvm.org/ "clang · a C language family frontend for LLVM"
 [34]: http://git-scm.com/ "Git · Distributed version control system"

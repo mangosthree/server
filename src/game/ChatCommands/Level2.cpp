@@ -2954,6 +2954,7 @@ bool ChatHandler::HandlePInfoCommand(char* args)
     }
 
     std::string username = GetMangosString(LANG_ERROR);
+    std::string email = GetMangosString(LANG_ERROR);
     std::string last_ip = GetMangosString(LANG_ERROR);
     AccountTypes security = SEC_PLAYER;
     std::string last_login = GetMangosString(LANG_ERROR);
@@ -2967,11 +2968,20 @@ bool ChatHandler::HandlePInfoCommand(char* args)
 
         if (GetAccessLevel() >= security)
         {
+            if (security == SEC_ADMINISTRATOR)
+            {
+                email = fields[2].GetCppString();
+            }
+            else
+            {
+                email = "*hidden*";
+            }
             last_ip = fields[3].GetCppString();
             last_login = fields[4].GetCppString();
         }
         else
         {
+            email = "-";
             last_ip = "-";
             last_login = "-";
         }
@@ -2981,7 +2991,7 @@ bool ChatHandler::HandlePInfoCommand(char* args)
 
     std::string nameLink = playerLink(target_name);
 
-    PSendSysMessage(LANG_PINFO_ACCOUNT, (target ? "" : GetMangosString(LANG_OFFLINE)), nameLink.c_str(), target_guid.GetCounter(), username.c_str(), accId, security, last_ip.c_str(), last_login.c_str(), latency);
+    PSendSysMessage(LANG_PINFO_ACCOUNT, (target ? "" : GetMangosString(LANG_OFFLINE)), nameLink.c_str(), target_guid.GetCounter(), username.c_str(), accId, security, email.c_str(), last_ip.c_str(), last_login.c_str(), latency);
 
     std::string timeStr = secsToTimeString(total_player_time, true, true);
     PSendSysMessage(LANG_PINFO_LEVEL,  timeStr.c_str(), level, MoneyToString(money).c_str());

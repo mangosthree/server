@@ -144,7 +144,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
 
     // a petition is invalid, if both the owner and the type matches
     // we checked above, if this player is in an arenateam, so this must be data corruption
-    QueryResult* result = CharacterDatabase.PQuery("SELECT petitionguid FROM petition WHERE ownerguid = '%u'", _player->GetGUIDLow());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `petitionguid` FROM `petition` WHERE `ownerguid` = '%u'", _player->GetGUIDLow());
 
     std::ostringstream ssInvalidPetitionGUIDs;
 
@@ -166,9 +166,9 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
     DEBUG_LOG("Invalid petition GUIDs: %s", ssInvalidPetitionGUIDs.str().c_str());
     CharacterDatabase.escape_string(name);
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM petition WHERE petitionguid IN ( %s )",  ssInvalidPetitionGUIDs.str().c_str());
-    CharacterDatabase.PExecute("DELETE FROM petition_sign WHERE petitionguid IN ( %s )", ssInvalidPetitionGUIDs.str().c_str());
-    CharacterDatabase.PExecute("INSERT INTO petition (ownerguid, petitionguid, name) VALUES ('%u', '%u', '%s')",
+    CharacterDatabase.PExecute("DELETE FROM `petition` WHERE `petitionguid` IN ( %s )",  ssInvalidPetitionGUIDs.str().c_str());
+    CharacterDatabase.PExecute("DELETE FROM `petition_sign` WHERE `petitionguid` IN ( %s )", ssInvalidPetitionGUIDs.str().c_str());
+    CharacterDatabase.PExecute("INSERT INTO `petition` (`ownerguid`, `petitionguid`, `name`) VALUES ('%u', '%u', '%s')",
                                _player->GetGUIDLow(), charter->GetGUIDLow(), name.c_str());
     CharacterDatabase.CommitTransaction();
 }
@@ -200,7 +200,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recv_data)
         return;
     }
 
-    result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", petitionguid_low);
+    result = CharacterDatabase.PQuery("SELECT `playerguid` FROM `petition_sign` WHERE `petitionguid` = '%u'", petitionguid_low);
 
     // result==NULL also correct in case no sign yet
     if (result)
@@ -251,9 +251,9 @@ void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid)
     uint8 signs = 0;
 
     QueryResult* result = CharacterDatabase.PQuery(
-                              "SELECT ownerguid, name, "
-                              "  (SELECT COUNT(playerguid) FROM petition_sign WHERE petition_sign.petitionguid = '%u') AS signs "
-                              "FROM petition WHERE petitionguid = '%u'", petitionLowGuid, petitionLowGuid);
+                              "SELECT `ownerguid`, `name`, "
+                              "  (SELECT COUNT(`playerguid`) FROM `petition_sign` WHERE `petition_sign`.`petitionguid` = '%u') AS `signs` "
+                              "FROM `petition` WHERE `petitionguid` = '%u'", petitionLowGuid, petitionLowGuid);
 
     if (result)
     {
@@ -333,7 +333,7 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket& recv_data)
 
     std::string db_newname = newname;
     CharacterDatabase.escape_string(db_newname);
-    CharacterDatabase.PExecute("UPDATE petition SET name = '%s' WHERE petitionguid = '%u'",
+    CharacterDatabase.PExecute("UPDATE `petition` SET `name` = '%s' WHERE `petitionguid` = '%u'",
                                db_newname.c_str(), petitionGuid.GetCounter());
 
     DEBUG_LOG("Petition %s renamed to '%s'", petitionGuid.GetString().c_str(), newname.c_str());
@@ -358,9 +358,9 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
     uint32 petitionLowGuid = petitionGuid.GetCounter();
 
     QueryResult* result = CharacterDatabase.PQuery(
-                              "SELECT ownerguid, "
-                              "  (SELECT COUNT(playerguid) FROM petition_sign WHERE petition_sign.petitionguid = '%u') AS signs "
-                              "FROM petition WHERE petitionguid = '%u'", petitionLowGuid, petitionLowGuid);
+                              "SELECT `ownerguid`, "
+                              "  (SELECT COUNT(`playerguid`) FROM `petition_sign` WHERE `petition_sign`.`petitionguid` = '%u') AS `signs` "
+                              "FROM `petition` WHERE `petitionguid` = '%u'", petitionLowGuid, petitionLowGuid);
 
     if (!result)
     {
@@ -404,7 +404,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
 
     // client doesn't allow to sign petition two times by one character, but not check sign by another character from same account
     // not allow sign another player from already sign player account
-    result = CharacterDatabase.PQuery("SELECT playerguid, petitionguid FROM petition_sign WHERE player_account = '%u'", GetAccountId());
+    result = CharacterDatabase.PQuery("SELECT `playerguid`, `petitionguid` FROM `petition_sign` WHERE `player_account` = '%u'", GetAccountId());
 
     if (result)
     {
@@ -434,7 +434,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
         }
     }
 
-    CharacterDatabase.PExecute("INSERT INTO petition_sign (ownerguid,petitionguid, playerguid, player_account) VALUES ('%u', '%u', '%u','%u')",
+    CharacterDatabase.PExecute("INSERT INTO `petition_sign` (`ownerguid`,`petitionguid`, `playerguid`, `player_account`) VALUES ('%u', '%u', '%u','%u')",
                                ownerLowGuid, petitionLowGuid, _player->GetGUIDLow(), GetAccountId());
 
     DEBUG_LOG("PETITION SIGN: %s by %s", petitionGuid.GetString().c_str(), _player->GetGuidStr().c_str());
@@ -464,7 +464,7 @@ void WorldSession::HandlePetitionDeclineOpcode(WorldPacket& recv_data)
 
     uint32 petitionLowGuid = petitionGuid.GetCounter();
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT ownerguid FROM petition WHERE petitionguid = '%u'", petitionLowGuid);
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `ownerguid` FROM `petition` WHERE `petitionguid` = '%u'", petitionLowGuid);
     if (!result)
     {
         return;
@@ -530,7 +530,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket& recv_data)
 
     /// Get petition signs count
     uint8 signs = 0;
-    result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", petitionGuid.GetCounter());
+    result = CharacterDatabase.PQuery("SELECT `playerguid` FROM `petition_sign` WHERE `petitionguid` = '%u'", petitionGuid.GetCounter());
     // result==NULL also correct charter without signs
     if (result)
         signs = (uint8)result->GetRowCount();
@@ -573,7 +573,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
     std::string name;
 
     // data
-    QueryResult* result = CharacterDatabase.PQuery("SELECT ownerguid, name FROM petition WHERE petitionguid = '%u'", petitionGuid.GetCounter());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `ownerguid`, `name` FROM `petition` WHERE `petitionguid` = '%u'", petitionGuid.GetCounter());
     if (result)
     {
         Field* fields = result->Fetch();
@@ -599,7 +599,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
     }
 
     // signs
-    result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", petitionGuid.GetCounter());
+    result = CharacterDatabase.PQuery("SELECT `playerguid` FROM `petition_sign` WHERE `petitionguid` = '%u'", petitionGuid.GetCounter());
     uint8 signs = result ? (uint8)result->GetRowCount() : 0;
 
     uint32 count = sWorld.getConfig(CONFIG_UINT32_MIN_PETITION_SIGNS);
@@ -657,8 +657,8 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
     delete result;
 
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM petition WHERE petitionguid = '%u'", petitionGuid.GetCounter());
-    CharacterDatabase.PExecute("DELETE FROM petition_sign WHERE petitionguid = '%u'", petitionGuid.GetCounter());
+    CharacterDatabase.PExecute("DELETE FROM `petition` WHERE `petitionguid` = '%u'", petitionGuid.GetCounter());
+    CharacterDatabase.PExecute("DELETE FROM `petition_sign` WHERE `petitionguid` = '%u'", petitionGuid.GetCounter());
     CharacterDatabase.CommitTransaction();
 
     // created

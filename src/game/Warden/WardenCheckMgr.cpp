@@ -56,7 +56,7 @@ void WardenCheckMgr::LoadWardenChecks()
         return;
     }
 
-    QueryResult *result = WorldDatabase.Query("SELECT MAX(id) FROM warden_checks");
+    QueryResult *result = WorldDatabase.Query("SELECT MAX(`id`) FROM `warden_checks`");
 
     if (!result)
     {
@@ -246,8 +246,8 @@ void WardenCheckMgr::LoadWardenOverrides()
         return;
     }
 
-    //                                                      0        1
-    QueryResult* result = CharacterDatabase.Query("SELECT wardenId, action FROM warden_action");
+    //                                                    0         1
+    QueryResult* result = CharacterDatabase.Query("SELECT `wardenId`, `action` FROM `warden_action`");
 
     if (!result)
     {

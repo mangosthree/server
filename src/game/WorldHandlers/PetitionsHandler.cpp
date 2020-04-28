@@ -312,15 +312,8 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket& recv_data)
         return;
     }
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT `type` FROM `petition` WHERE `petitionguid` = '%u'", petitionGuid.GetCounter());
-
-    if (result)
-    {
-        Field* fields = result->Fetch();
-        type = fields[0].GetUInt32();
-        delete result;
-    }
-    else
+    QueryResult* result = CharacterDatabase.PQuery("SELECT 1 FROM `petition` WHERE `petitionguid` = '%u'", petitionGuid.GetCounter());
+    if (!result)
     {
         DEBUG_LOG("CMSG_PETITION_QUERY failed for petition: %s", petitionGuid.GetString().c_str());
         return;
@@ -508,7 +501,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket& recv_data)
     }
 
     /// Get petition type and check
-    QueryResult* result = CharacterDatabase.PQuery("SELECT `type` FROM `petition` WHERE `petitionguid` = '%u'", petitionGuid.GetCounter());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT 1 FROM `petition` WHERE `petitionguid` = '%u'", petitionGuid.GetCounter());
     if (!result)
     {
         return;

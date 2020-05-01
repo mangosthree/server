@@ -1710,7 +1710,7 @@ uint32 Guild::GetMemberSlotWithdrawRem(uint32 LowGuid, uint8 TabId)
     {
         member.BankResetTimeTab[TabId] = curTime;
         member.BankRemSlotsTab[TabId] = GetBankSlotPerDay(member.RankId, TabId);
-        CharacterDatabase.PExecute("UPDATE guild_member SET BankResetTimeTab%u='%u', BankRemSlotsTab%u='%u' WHERE guildid='%u' AND guid='%u'",
+        CharacterDatabase.PExecute("UPDATE `guild_member` SET `BankResetTimeTab%u`='%u', `BankRemSlotsTab%u`='%u' WHERE `guildid`='%u' AND `guid`='%u'",
                                    uint32(TabId), member.BankResetTimeTab[TabId], uint32(TabId), member.BankRemSlotsTab[TabId], m_Id, LowGuid);
     }
     return member.BankRemSlotsTab[TabId];
@@ -1736,7 +1736,7 @@ uint64 Guild::GetMemberMoneyWithdrawRem(uint32 LowGuid)
     {
         member.BankResetTimeMoney = curTime;
         member.BankRemMoney = GetBankMoneyPerDay(member.RankId);
-        CharacterDatabase.PExecute("UPDATE guild_member SET BankResetTimeMoney='%u', BankRemMoney='%u' WHERE guildid='%u' AND guid='%u'",
+        CharacterDatabase.PExecute("UPDATE `guild_member` SET `BankResetTimeMoney`='%u', `BankRemMoney`='%u' WHERE `guildid`='%u' AND `guid`='%u'",
                                    member.BankResetTimeMoney, member.BankRemMoney, m_Id, LowGuid);
     }
     return member.BankRemMoney;

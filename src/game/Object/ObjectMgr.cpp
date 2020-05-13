@@ -3983,7 +3983,7 @@ void ObjectMgr::LoadQuests()
                           //   80                81                   82                   83
                           "`ReqCurrencyCount1`, `ReqCurrencyCount1`, `ReqCurrencyCount1`, `ReqCurrencyCount1`,"
                           //   84            85               86               87               88
-                          "`ReqSpellCast1`, `ReqSpellCast2`, `ReqSpellCast3`, `ReqSpellCast4`, `ReqSpellLearnedv,"
+                          "`ReqSpellCast1`, `ReqSpellCast2`, `ReqSpellCast3`, `ReqSpellCast4`, `ReqSpellLearnedv`,"
                           //   89               90                  91                  92                  93                  94
                           "`RewChoiceItemId1`, `RewChoiceItemId2`, `RewChoiceItemId3`, `RewChoiceItemId4`, `RewChoiceItemId5`, `RewChoiceItemId6`,"
                           //   95                  96                     97                     98                     99                     100

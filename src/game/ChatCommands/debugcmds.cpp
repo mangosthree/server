@@ -161,7 +161,7 @@ bool ChatHandler::HandleDebugRecvOpcodeCommand(char* /*args*/)
         return false;
     }
 
-    WorldPacket *data = new WorldPacket(opcode, 10);
+    WorldPacket *data = new WorldPacket(Opcodes(opcode), 10);
 
     std::string type;
     while (stream >> type)

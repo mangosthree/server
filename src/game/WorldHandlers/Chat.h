@@ -28,6 +28,7 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
+#include "Language.h"
 
 struct AchievementEntry;
 struct AchievementCriteriaEntry;
@@ -80,6 +81,12 @@ enum PlayerChatTag
 };
 typedef uint32 ChatTagFlags;
 
+static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
+{
+    LANG_REP_HATED,    LANG_REP_HOSTILE, LANG_REP_UNFRIENDLY, LANG_REP_NEUTRAL,
+    LANG_REP_FRIENDLY, LANG_REP_HONORED, LANG_REP_REVERED,    LANG_REP_EXALTED
+};
+
 class  ChatHandler
 {
     public:
@@ -126,7 +133,8 @@ class  ChatHandler
         * \param uint32 achievementId          : Required only for *ACHIEVEMENT
         * \param const char* addonPrefix       : Required only for *CHAT_MSG_ADDON
         **/
-        static void BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const* message, Language language = LANG_UNIVERSAL, ChatTagFlags chatTag = CHAT_TAG_NONE,
+        static void BuildChatPacket(
+            WorldPacket& data, ChatMsg msgtype, char const* message, Language language = LANG_UNIVERSAL, ChatTagFlags chatTag = CHAT_TAG_NONE,
             ObjectGuid const& senderGuid = ObjectGuid(), char const* senderName = NULL,
             ObjectGuid const& targetGuid = ObjectGuid(), char const* targetName = NULL,
             char const* channelName = NULL, uint32 achievementId = 0, const char* addonPrefix = NULL);

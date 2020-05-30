@@ -28,7 +28,6 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
-#include "Language.h"
 
 struct AchievementEntry;
 struct AchievementCriteriaEntry;

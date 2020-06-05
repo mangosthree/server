@@ -54,12 +54,31 @@ class Unit;
 class ChatCommand
 {
     public:
-        const char*        Name;
-        uint32             SecurityLevel;                   // function pointer required correct align (use uint32)
-        bool               AllowConsole;
-        bool (ChatHandler::*Handler)(char* args);
-        std::string        Help;
-        ChatCommand*       ChildCommands;
+    uint32             Id;
+    const char* Name;
+    uint32             SecurityLevel;                   // function pointer required correct align (use uint32)
+    bool               AllowConsole;
+    bool (ChatHandler::* Handler)(char* args);
+    std::string        Help;
+    ChatCommand* ChildCommands;
+
+      ChatCommand(
+          const char* pName,
+          uint32 pSecurityLevel,
+          bool pAllowConsole,
+          bool (ChatHandler::* pHandler)(char* args),
+          std::string pHelp,
+          ChatCommand* pChildCommands
+      )
+         : Id(-1)
+      {
+          Name = pName;
+          SecurityLevel = pSecurityLevel;
+          AllowConsole = pAllowConsole;
+          Handler = pHandler;
+          Help = pHelp;
+          ChildCommands = pChildCommands;
+      }
 };
 
 enum ChatCommandSearchResult
@@ -150,7 +169,7 @@ class  ChatHandler
 
         void SendGlobalSysMessage(const char* str);
 
-        bool SetDataForCommandInTable(ChatCommand* table, const char* text, uint32 security, std::string const& help);
+        bool SetDataForCommandInTable(ChatCommand* table, uint32 id, const char* text, uint32 security, std::string const& help);
         void ExecuteCommand(const char* text);
         void LogCommand(char const* fullcmd);
 
@@ -340,6 +359,7 @@ class  ChatHandler
         bool HandleLookupPlayerEmailCommand(char* args);
         bool HandleLookupPoolCommand(char* args);
         bool HandleLookupQuestCommand(char* args);
+        bool HandleReloadLocalesCommandHelpCommand(char* args);
         bool HandleLookupSkillCommand(char* args);
         bool HandleLookupSpellCommand(char* args);
         bool HandleLookupTaxiNodeCommand(char* args);

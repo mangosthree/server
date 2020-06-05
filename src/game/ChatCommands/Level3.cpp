@@ -64,6 +64,7 @@
 #include "AuctionHouseBot/AuctionHouseBot.h"
 #include "SQLStorages.h"
 #include "DisableMgr.h"
+#include "CommandMgr.h"
 
 static uint32 ahbotQualityIds[MAX_AUCTION_QUALITY] =
 {
@@ -402,6 +403,7 @@ bool ChatHandler::HandleReloadAllLocalesCommand(char* /*args*/)
     HandleReloadLocalesPageTextCommand((char*)"a");
     HandleReloadLocalesPointsOfInterestCommand((char*)"a");
     HandleReloadLocalesQuestCommand((char*)"a");
+    HandleReloadLocalesCommandHelpCommand((char*)"a");
     return true;
 }
 
@@ -1140,6 +1142,14 @@ bool ChatHandler::HandleReloadLocalesNpcTextCommand(char* /*args*/)
     sLog.outString("Re-Loading Locales NPC Text ... ");
     sObjectMgr.LoadGossipTextLocales();
     SendGlobalSysMessage("DB table `locales_npc_text` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLocalesCommandHelpCommand(char* /*args*/)
+{
+    sLog.outString("Re-Loading Locales Command Help ... ");
+    sCommandMgr.LoadCommandHelpLocale();
+    SendGlobalSysMessage("DB table `locales_command` reloaded.");
     return true;
 }
 

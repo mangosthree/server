@@ -26,7 +26,7 @@
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
 
-class ChatCommand; // Forward declaration of 
+class ChatCommand; // Forward declaration of
 
 INSTANTIATE_SINGLETON_1(CommandMgr);
 
@@ -70,7 +70,7 @@ void CommandMgr::LoadCommandHelpLocale()
         uint32 commandId = fields[0].GetUInt32(); // to assign with db data
 
         CommandHelpLocale& data = m_CommandHelpLocaleMap[commandId];
-        for (int i = 1; i <= MAX_LOCALE; ++i)
+        for (int i = 1; i < MAX_LOCALE; ++i)
         {
             std::string str = fields[i].GetCppString();
             if (!str.empty())
@@ -114,7 +114,7 @@ void CommandMgr::GetCommandHelpLocaleString(uint32 commandId, int32 loc_idx, std
             if (namePtr && il->HelpText.size() > size_t(loc_idx) && !il->HelpText[loc_idx].empty())
             {
                 *namePtr = il->HelpText[loc_idx];
-            }           
+            }
         }
     }
 }

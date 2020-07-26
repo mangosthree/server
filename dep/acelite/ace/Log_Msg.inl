@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: Log_Msg.inl 97662 2014-03-17 10:11:16Z johnnyw $
-
 #include "ace/OS_NS_string.h"
 #include "ace/OS_NS_unistd.h"
 

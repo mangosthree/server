@@ -1,5 +1,3 @@
-// $Id: Unbounded_Queue.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #ifndef ACE_UNBOUNDED_QUEUE_CPP
 #define ACE_UNBOUNDED_QUEUE_CPP
 
@@ -19,7 +17,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Unbounded_Queue)
+ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Unbounded_Queue)
 
 template <class T>
 ACE_Unbounded_Queue<T>::ACE_Unbounded_Queue (ACE_Allocator *alloc)

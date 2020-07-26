@@ -4,9 +4,7 @@
 /**
  *  @file    Stream.h
  *
- *  $Id: Stream.h 96070 2012-08-17 09:07:16Z mcorino $
- *
- *  @author Douglas C. Schmidt <schmidt@uci.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //==========================================================================
 
@@ -212,7 +210,6 @@ template <ACE_SYNCH_DECL, class TIME_POLICY = ACE_System_Time_Policy>
 class ACE_Stream_Iterator
 {
 public:
-  // = Initialization method.
   ACE_Stream_Iterator (const ACE_Stream<ACE_SYNCH_USE, TIME_POLICY> &sr);
 
   // = Iteration methods.

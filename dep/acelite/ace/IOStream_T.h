@@ -4,8 +4,6 @@
 /**
  *  @file    IOStream_T.h
  *
- *  $Id: IOStream_T.h 93359 2011-02-11 11:33:12Z mcorino $
- *
  *  @author James CE Johnson <jcej@lads.com>
  *  @author Jim Crossley <jim@lads.com>
  *
@@ -111,7 +109,6 @@ template <class STREAM>
 class ACE_IOStream : public iostream, public STREAM
 {
 public:
-  // = Initialization and termination methods.
   ACE_IOStream (STREAM &stream,
                   u_int streambuf_size = ACE_STREAMBUF_SIZE);
 

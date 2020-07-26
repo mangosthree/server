@@ -4,9 +4,7 @@
 /**
  *  @file    Countdown_Time_T.h
  *
- *  $Id: Countdown_Time_T.h 97130 2013-05-13 17:36:26Z mesnier_p $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 

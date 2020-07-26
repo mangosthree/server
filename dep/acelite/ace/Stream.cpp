@@ -1,6 +1,4 @@
 // Stream.cpp
-// $Id: Stream.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #ifndef ACE_STREAM_CPP
 #define ACE_STREAM_CPP
 
@@ -21,7 +19,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Stream)
+ACE_ALLOC_HOOK_DEFINE_Tyc(ACE_Stream)
 
 // Give some idea of what the heck is going on in a stream!
 

@@ -1,4 +1,3 @@
-// $Id: config-macosx-mountainlion.h 97579 2014-02-11 09:40:17Z johnnyw $
 #ifndef ACE_CONFIG_MACOSX_MOUNTAINLION_H
 #define ACE_CONFIG_MACOSX_MOUNTAINLION_H
 

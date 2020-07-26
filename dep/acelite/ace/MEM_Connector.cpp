@@ -1,5 +1,3 @@
-// $Id: MEM_Connector.cpp 97326 2013-09-11 07:52:09Z johnnyw $
-
 #include "ace/MEM_Connector.h"
 
 #if (ACE_HAS_POSITION_INDEPENDENT_POINTERS == 1)
@@ -34,7 +32,7 @@ ACE_MEM_Connector::ACE_MEM_Connector (void)
 // Establish a connection.
 ACE_MEM_Connector::ACE_MEM_Connector (ACE_MEM_Stream &new_stream,
                                       const ACE_INET_Addr &remote_sap,
-                                      ACE_Time_Value *timeout,
+                                      const ACE_Time_Value *timeout,
                                       const ACE_Addr &local_sap,
                                       int reuse_addr,
                                       int flags,
@@ -57,7 +55,7 @@ ACE_MEM_Connector::ACE_MEM_Connector (ACE_MEM_Stream &new_stream,
 int
 ACE_MEM_Connector::connect (ACE_MEM_Stream &new_stream,
                             const ACE_INET_Addr &remote_sap,
-                            ACE_Time_Value *timeout,
+                            const ACE_Time_Value *timeout,
                             const ACE_Addr &local_sap,
                             int reuse_addr,
                             int flags,

@@ -1,5 +1,3 @@
-// $Id: Dev_Poll_Reactor.cpp 97894 2014-09-16 18:11:56Z johnnyw $
-
 #include "ace/OS_NS_errno.h"
 #include "ace/Dev_Poll_Reactor.h"
 #include "ace/Signal.h"
@@ -44,6 +42,10 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
+ACE_ALLOC_HOOK_DEFINE(ACE_Dev_Poll_Reactor)
+ACE_ALLOC_HOOK_DEFINE(ACE_Dev_Poll_Reactor::Event_Tuple)
+ACE_ALLOC_HOOK_DEFINE(ACE_Dev_Poll_Reactor_Notify)
+
 ACE_Dev_Poll_Reactor_Notify::ACE_Dev_Poll_Reactor_Notify (void)
   : dp_reactor_ (0)
   , notification_pipe_ ()
@@ -74,10 +76,16 @@ ACE_Dev_Poll_Reactor_Notify::open (ACE_Reactor_Impl *r,
       if (this->notification_pipe_.open () == -1)
         return -1;
 
-#if defined (F_SETFD)
+#if defined (F_SETFD) && !defined (ACE_LACKS_FCNTL)
       // close-on-exec
-      ACE_OS::fcntl (this->notification_pipe_.read_handle (), F_SETFD, 1);
-      ACE_OS::fcntl (this->notification_pipe_.write_handle (), F_SETFD, 1);
+      if (ACE_OS::fcntl (this->notification_pipe_.read_handle (), F_SETFD, 1) == -1)
+        {
+          return -1;
+        }
+      if (ACE_OS::fcntl (this->notification_pipe_.write_handle (), F_SETFD, 1) == -1)
+        {
+          return -1;
+        }
 #endif /* F_SETFD */
 
 #if defined (ACE_HAS_REACTOR_NOTIFICATION_QUEUE)
@@ -1322,7 +1330,22 @@ ACE_Dev_Poll_Reactor::dispatch_io_event (Token_Guard &guard)
         if (info != 0 && info->event_handler == eh)
           {
             if (status < 0)
-              this->remove_handler_i (handle, disp_mask, grd);
+              {
+                this->remove_handler_i (handle, disp_mask, grd);
+#ifdef ACE_HAS_EVENT_POLL
+                // epoll-based effectively suspends handlers around the upcall.
+                // If the handler must be resumed, check to be sure it's the
+                // same handle/handler combination still.
+                if (reactor_resumes_eh)
+                  {
+                    info = this->handler_rep_.find (handle);
+                    if (info != 0 && info->event_handler == eh)
+                      {
+                        this->resume_handler_i (handle);
+                      }
+                  }
+#endif /* ACE_HAS_EVENT_POLL */
+              }
           }
       }
       // Scope close handles eh ref count decrement, if needed.
@@ -2520,7 +2543,7 @@ ACE_Dev_Poll_Reactor::Token_Guard::acquire_quietly (ACE_Time_Value *max_wait)
     }
 
   // We got the token and so let us mark ourselves as owner
-  this->owner_ = 1;
+  this->owner_ = true;
 
   return result;
 }
@@ -2555,7 +2578,7 @@ ACE_Dev_Poll_Reactor::Token_Guard::acquire (ACE_Time_Value *max_wait)
     }
 
   // We got the token and so let us mark ourseleves as owner
-  this->owner_ = 1;
+  this->owner_ = true;
 
   return result;
 }

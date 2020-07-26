@@ -1,5 +1,3 @@
-// $Id: Dynamic.cpp 97391 2013-10-28 09:38:26Z mhengstmengel $
-
 #include "ace/Dynamic.h"
 #include "ace/Singleton.h"
 #include "ace/TSS_T.h"
@@ -19,6 +17,8 @@ ACE_Dynamic::ACE_Dynamic (void)
 {
   ACE_TRACE ("ACE_Dynamic::ACE_Dynamic");
 }
+
+ACE_ALLOC_HOOK_DEFINE(ACE_Dynamic)
 
 /* static */ ACE_Dynamic *
 ACE_Dynamic::instance (void)

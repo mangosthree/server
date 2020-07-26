@@ -1,5 +1,3 @@
-// $Id: Framework_Component.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/Framework_Component.h"
 
 #if !defined (__ACE_INLINE__)
@@ -44,9 +42,15 @@ ACE_Framework_Repository::open (int size)
 
   ACE_Framework_Component **temp = 0;
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_ALLOCATOR_RETURN (temp,
+                        static_cast<ACE_Framework_Component**> (ACE_Allocator::instance()->malloc(sizeof(ACE_Framework_Component*) * size)),
+                        -1);
+#else
   ACE_NEW_RETURN (temp,
                   ACE_Framework_Component *[size],
                   -1);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
   this->component_vector_ = temp;
   this->total_size_ = size;
@@ -75,7 +79,11 @@ ACE_Framework_Repository::close (void)
             delete s;
           }
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+      ACE_Allocator::instance()->free(this->component_vector_);
+#else
       delete [] this->component_vector_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
       this->component_vector_ = 0;
       this->current_size_ = 0;
     }

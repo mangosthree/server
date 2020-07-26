@@ -1,9 +1,9 @@
-// $Id: Reactor_Token_T.cpp 97645 2014-03-07 12:01:21Z johnnyw $
-
 #include "ace/Log_Category.h"
 #include "ace/Reactor_Token_T.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Reactor_Token_T)
 
 template <class ACE_TOKEN_TYPE> void
 ACE_Reactor_Token_T<ACE_TOKEN_TYPE>::dump (void) const

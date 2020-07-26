@@ -4,9 +4,7 @@
 /**
  *  @file   OS_NS_pwd.h
  *
- *  $Id: OS_NS_pwd.h 93597 2011-03-21 12:54:52Z johnnyw $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...
  *

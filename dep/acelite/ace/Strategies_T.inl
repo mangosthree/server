@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Strategies_T.inl 96985 2013-04-11 15:50:32Z huangh $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <class SVC_HANDLER> ACE_INLINE

@@ -1,5 +1,3 @@
-// $Id: Map_Manager.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #ifndef ACE_MAP_MANAGER_CPP
 #define ACE_MAP_MANAGER_CPP
 
@@ -17,13 +15,13 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Map_Entry)
-ACE_ALLOC_HOOK_DEFINE(ACE_Map_Manager)
-ACE_ALLOC_HOOK_DEFINE(ACE_Map_Const_Iterator_Base)
-ACE_ALLOC_HOOK_DEFINE(ACE_Map_Iterator_Base)
-ACE_ALLOC_HOOK_DEFINE(ACE_Map_Const_Iterator)
-ACE_ALLOC_HOOK_DEFINE(ACE_Map_Iterator)
-ACE_ALLOC_HOOK_DEFINE(ACE_Map_Reverse_Iterator)
+ACE_ALLOC_HOOK_DEFINE_Tcc(ACE_Map_Entry)
+ACE_ALLOC_HOOK_DEFINE_Tccc(ACE_Map_Manager)
+ACE_ALLOC_HOOK_DEFINE_Tccc(ACE_Map_Const_Iterator_Base)
+ACE_ALLOC_HOOK_DEFINE_Tccc(ACE_Map_Iterator_Base)
+ACE_ALLOC_HOOK_DEFINE_Tccc(ACE_Map_Const_Iterator)
+ACE_ALLOC_HOOK_DEFINE_Tccc(ACE_Map_Iterator)
+ACE_ALLOC_HOOK_DEFINE_Tccc(ACE_Map_Reverse_Iterator)
 
 template <class EXT_ID, class INT_ID, class ACE_LOCK> int
 ACE_Map_Manager<EXT_ID, INT_ID, ACE_LOCK>::open (size_t size,

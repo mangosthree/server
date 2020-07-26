@@ -4,8 +4,6 @@
 /**
  *  @file    TLI_Connector.h
  *
- *  $Id: TLI_Connector.h 96985 2013-04-11 15:50:32Z huangh $
- *
  *  @author Doug Schmidt
  */
 //=============================================================================
@@ -35,7 +33,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_TLI_Connector
 {
 public:
-  // = Initialization methods.
   /// Default constructor.
   ACE_TLI_Connector (void);
 

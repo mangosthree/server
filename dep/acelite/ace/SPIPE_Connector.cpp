@@ -1,11 +1,12 @@
-// $Id: SPIPE_Connector.cpp 97308 2013-09-01 00:58:08Z mesnier_p $
-
 #include "ace/SPIPE_Connector.h"
 #include "ace/Handle_Ops.h"
 #include "ace/Log_Category.h"
 #include "ace/OS_NS_sys_time.h"
 #include "ace/OS_NS_fcntl.h"
 #include "ace/OS_NS_unistd.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/SPIPE_Connector.inl"

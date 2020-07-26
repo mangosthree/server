@@ -1,5 +1,3 @@
-// $Id: Timer_List_T.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #ifndef ACE_TIMER_LIST_T_C
 #define ACE_TIMER_LIST_T_C
 

@@ -6,8 +6,6 @@
  *
  *  sockets local interfaces
  *
- *  $Id: os_if.h 91688 2010-09-09 11:21:50Z johnnyw $
- *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */
@@ -26,6 +24,9 @@
 
 #if !defined (ACE_LACKS_NET_IF_H)
 #  include /**/ <net/if.h>
+#  if defined (m_flags)
+#    undef m_flags
+#  endif /* m_flags */
 #  if defined (ACE_HAS_NET_IF_DL_H)
 #    include /**/ <net/if_dl.h>
 #  endif /* ACE_HAS_NET_IF_DL_H */
@@ -39,6 +40,7 @@
 
 #if defined (ACE_HAS_WINSOCK2) && (ACE_HAS_WINSOCK2 != 0)
 #  include /**/ <ws2tcpip.h>
+#  include /**/ <iphlpapi.h>
 #endif /* ACE_HAS_WINSOCK2 */
 
 // Place all additions (especially function declarations) within extern "C" {}
@@ -99,6 +101,10 @@ struct  ifconf {
 #if !defined (IFF_BROADCAST)
 # define IFF_BROADCAST 0x2
 #endif /* IFF_BROADCAST */
+
+#if defined ACE_HAS_WINSOCK2 && defined ACE_LACKS_IF_NAMEINDEX
+struct if_nameindex {};
+#endif
 
 #ifdef __cplusplus
 }

@@ -4,9 +4,7 @@
 /**
  *  @file    Select_Reactor_Base.h
  *
- *  $Id: Select_Reactor_Base.h 93792 2011-04-07 11:48:50Z mcorino $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 
@@ -30,14 +28,18 @@
 # include "ace/Notification_Queue.h"
 #endif /* ACE_HAS_REACTOR_NOTIFICATION_QUEUE */
 
-#ifdef ACE_WIN32
+#if defined (ACE_WIN32) || defined (ACE_MQX)
+# define ACE_SELECT_REACTOR_BASE_USES_HASH_MAP
+#endif
+
+#ifdef ACE_SELECT_REACTOR_BASE_USES_HASH_MAP
 # include "ace/Null_Mutex.h"
 # include "ace/Hash_Map_Manager_T.h"
 # include "ace/Functor.h"  /* For ACE_Hash<void *> */
 # include <functional>      /* For std::equal_to<>  */
 #else
 # include "ace/Array_Base.h"
-#endif  /* ACE_WIN32 */
+#endif  /* ACE_SELECT_REACTOR_BASE_USES_HASH_MAP */
 
 #if !defined (ACE_DISABLE_NOTIFY_PIPE_DEFAULT)
 # define ACE_DISABLE_NOTIFY_PIPE_DEFAULT 0
@@ -137,7 +139,6 @@ public:
   /// Destructor.
   virtual ~ACE_Select_Reactor_Notify (void);
 
-  // = Initialization and termination methods.
   /// Initialize.
   virtual int open (ACE_Reactor_Impl *,
                     ACE_Timer_Queue * = 0,
@@ -291,7 +292,7 @@ public:
   typedef ACE_Event_Handler * value_type;
 
   // = The mapping from <HANDLES> to <Event_Handlers>.
-#ifdef ACE_WIN32
+#ifdef ACE_SELECT_REACTOR_BASE_USES_HASH_MAP
   /**
    * The NT version implements this via a hash map
    * @c ACE_Event_Handler*.  Since NT implements @c ACE_HANDLE
@@ -313,11 +314,10 @@ public:
    */
   typedef ACE_Array_Base<value_type> map_type;
   typedef ACE_HANDLE max_handlep1_type;
-#endif  /* ACE_WIN32 */
+#endif  /* ACE_SELECT_REACTOR_BASE_USES_HASH_MAP */
 
   typedef map_type::size_type size_type;
 
-  // = Initialization and termination methods.
   /// Default "do-nothing" constructor.
   ACE_Select_Reactor_Handler_Repository (ACE_Select_Reactor_Impl &);
 
@@ -397,11 +397,11 @@ private:
   /// Reference to our @c Select_Reactor.
   ACE_Select_Reactor_Impl &select_reactor_;
 
-#ifndef ACE_WIN32
+#ifndef ACE_SELECT_REACTOR_BASE_USES_HASH_MAP
   /// The highest currently active handle, plus 1 (ranges between 0 and
   /// @c max_size_.
   max_handlep1_type max_handlep1_;
-#endif  /* !ACE_WIN32 */
+#endif  /* !ACE_SELECT_REACTOR_BASE_USES_HASH_MAP */
 
   /// Underlying table of event handlers.
   map_type event_handlers_;
@@ -419,7 +419,6 @@ public:
   typedef
     ACE_Select_Reactor_Handler_Repository::map_type::const_iterator const_base_iterator;
 
-  // = Initialization method.
   explicit ACE_Select_Reactor_Handler_Repository_Iterator (
     ACE_Select_Reactor_Handler_Repository const * s);
 
@@ -589,14 +588,13 @@ protected:
 
   /// Controls/access whether the notify handler should renew the
   /// Select_Reactor's token or not.
-  int supress_notify_renew (void);
-  void supress_notify_renew (int sr);
+  bool supress_notify_renew (void);
+  void supress_notify_renew (bool sr);
 
 private:
-
   /// Determine whether we should renew Select_Reactor's token after handling
   /// the notification message.
-  int supress_renew_;
+  bool supress_renew_;
 
   /// Deny access since member-wise won't work...
   ACE_Select_Reactor_Impl (const ACE_Select_Reactor_Impl &);

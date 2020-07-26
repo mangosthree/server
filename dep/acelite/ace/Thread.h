@@ -4,9 +4,7 @@
 /**
  *  @file    Thread.h
  *
- *  $Id: Thread.h 92060 2010-09-27 18:08:48Z johnnyw $
- *
- *  @author Douglas Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas Schmidt <d.schmidt@vanderbilt.edu>
  */
 //==========================================================================
 

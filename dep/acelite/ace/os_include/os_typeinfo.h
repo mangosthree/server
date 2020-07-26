@@ -6,8 +6,6 @@
  *
  *  definitions for the typeinfo file
  *
- *  $Id: os_typeinfo.h 97827 2014-08-02 17:34:32Z johnnyw $
- *
  *  @author Don Hinton Johnny Willemsen  <jwillemsen@remedy.nl>
  */
 //=============================================================================

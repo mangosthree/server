@@ -1,5 +1,3 @@
-//$Id: Cached_Connect_Strategy_T.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #ifndef ACE_CACHED_CONNECT_STRATEGY_T_CPP
 #define ACE_CACHED_CONNECT_STRATEGY_T_CPP
 
@@ -16,6 +14,9 @@
 #include "ace/WFMO_Reactor.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ACE_ALLOC_HOOK_DEFINE_Tcoccc (ACE_Cached_Connect_Strategy_Ex)
+ACE_ALLOC_HOOK_DEFINE_Tcoccc (ACE_Bounded_Cached_Connect_Strategy)
 
 template <class SVC_HANDLER, ACE_PEER_CONNECTOR_1, class CACHING_STRATEGY, class ATTRIBUTES, class MUTEX>
 ACE_Cached_Connect_Strategy_Ex<SVC_HANDLER, ACE_PEER_CONNECTOR_2, CACHING_STRATEGY, ATTRIBUTES, MUTEX>::ACE_Cached_Connect_Strategy_Ex
@@ -557,7 +558,6 @@ ACE_Cached_Connect_Strategy_Ex<SVC_HANDLER, ACE_PEER_CONNECTOR_2, CACHING_STRATE
     }
 }
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Cached_Connect_Strategy_Ex)
 /////////////////////////////////////////////////////////////////////////
 
 template <class SVC_HANDLER, ACE_PEER_CONNECTOR_1, class CACHING_STRATEGY, class ATTRIBUTES, class MUTEX>
@@ -722,8 +722,6 @@ ACE_Bounded_Cached_Connect_Strategy<SVC_HANDLER, ACE_PEER_CONNECTOR_2, CACHING_S
 
   return 0;
 }
-
-ACE_ALLOC_HOOK_DEFINE(ACE_Bounded_Cached_Connect_Strategy)
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 

@@ -1,5 +1,3 @@
-// $Id: Countdown_Time_T.cpp 97130 2013-05-13 17:36:26Z mesnier_p $
-
 #ifndef ACE_COUNTDOWN_TIME_T_CPP
 #define ACE_COUNTDOWN_TIME_T_CPP
 

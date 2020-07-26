@@ -4,8 +4,6 @@
 /**
  *  @file    Capabilities.h
  *
- *  $Id: Capabilities.h 91077 2010-07-13 14:33:08Z johnnyw $
- *
  *  @author Arturo Montes <mitosys@colomsat.net.co>
  */
 //=============================================================================
@@ -27,11 +25,6 @@
 #include "ace/SString.h"
 #include "ace/Functor_String.h"
 
-#if defined (ACE_IS_SPLITTING)
-# include "ace/OS_NS_ctype.h"
-#endif  /* ACE_IS_SPLITTING */
-
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 /**
@@ -47,11 +40,9 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_CapEntry
 {
 public:
-
    virtual ~ACE_CapEntry (void);
 
 protected:
-
   enum
   {
     ACE_INTCAP = 0,
@@ -62,9 +53,7 @@ protected:
   ACE_CapEntry (int captype);
 
 protected:
-
   int captype_;
-
 };
 
 /**
@@ -80,6 +69,7 @@ class ACE_Export ACE_IntCapEntry : public ACE_CapEntry
 public:
   ACE_IntCapEntry (int val);
   int getval (void) const;
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   int val_;
@@ -98,6 +88,7 @@ class ACE_Export ACE_StringCapEntry : public ACE_CapEntry
 public:
   ACE_StringCapEntry (const ACE_TString &val);
   ACE_TString getval (void) const;
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   ACE_TString val_;
@@ -116,6 +107,7 @@ class ACE_Export ACE_BoolCapEntry : public ACE_CapEntry
 public:
   ACE_BoolCapEntry (int val);
   int getval (void) const;
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
   int val_;
@@ -140,7 +132,6 @@ protected:
 class ACE_Export ACE_Capabilities
 {
 public:
-
   typedef  ACE_Hash_Map_Manager_Ex<ACE_TString, ACE_CapEntry *, ACE_Hash<ACE_TString>, ACE_Equal_To<ACE_TString>, ACE_Null_Mutex> CAPABILITIES_MAP;
 
   /// The Constructor
@@ -150,7 +141,6 @@ public:
   ~ACE_Capabilities(void);
 
 public:
-
   /// Get a string entry.
   int getval (const ACE_TCHAR *ent, ACE_TString &val);
 
@@ -162,7 +152,6 @@ public:
   int getent (const ACE_TCHAR *fname, const ACE_TCHAR *name);
 
 protected:
-
   /// Parse an integer property
   const ACE_TCHAR *parse (const ACE_TCHAR *buf, int &cap);
 
@@ -186,30 +175,9 @@ protected:
   void resetcaps (void);
 
 private:
-
   /// This is the set of ACE_CapEntry.
   CAPABILITIES_MAP caps_;
 };
-
-#if defined (ACE_IS_SPLITTING)
-int
-is_empty (const ACE_TCHAR *line)
-{
-  while (*line && ACE_OS::ace_isspace (*line))
-    ++line;
-
-  return *line == ACE_TEXT ('\0') || *line == ACE_TEXT ('#');
-}
-
-int
-is_line (const ACE_TCHAR *line)
-{
-  while (*line && ACE_OS::ace_isspace (*line))
-    ++line;
-
-  return *line != ACE_TEXT ('\0');
-}
-#endif /* ACE_IS_SPLITTING */
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 

@@ -1,5 +1,3 @@
-// $Id: Thread_Hook.cpp 97246 2013-08-07 07:10:20Z johnnyw $
-
 #include "ace/Thread_Hook.h"
 #include "ace/Object_Manager_Base.h"
 

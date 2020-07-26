@@ -4,8 +4,6 @@
 /**
  *  @file    Timeprobe.h
  *
- *  $Id: Timeprobe.h 97262 2013-08-09 08:32:10Z johnnyw $
- *
  *  @author Irfan Pyarali
  *
  * If users want to use time probes, the ACE_COMPILE_TIMEPROBES

@@ -4,8 +4,6 @@
 /**
  *  @file    SUN_Proactor.h
  *
- *  $Id: SUN_Proactor.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Alexander Libman <alibman@baltimore.com>
  */
 //=============================================================================
@@ -63,7 +61,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  */
 class ACE_Export ACE_SUN_Proactor : public ACE_POSIX_AIOCB_Proactor
 {
-
 public:
   virtual Proactor_Type get_impl_type (void);
 

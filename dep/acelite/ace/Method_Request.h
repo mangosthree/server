@@ -4,10 +4,8 @@
 /**
  *  @file    Method_Request.h
  *
- *  $Id: Method_Request.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Andres Kruse <Andres.Kruse@cern.ch>
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 
@@ -45,7 +43,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_Method_Request
 {
 public:
-  // = Initialization and termination methods.
   /// Constructor.
   ACE_Method_Request (unsigned long priority = 0);
 

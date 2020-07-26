@@ -4,11 +4,9 @@
 /**
  *  @file    Recursive_Thread_Mutex.h
  *
- *  $Id: Recursive_Thread_Mutex.h 93359 2011-02-11 11:33:12Z mcorino $
- *
  *   Moved from Synch.h.
  *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu> and
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu> and
  *          Abdullah Sowayan <abdullah.sowayan@lmco.com>
  */
 //==========================================================================

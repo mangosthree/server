@@ -1,5 +1,3 @@
-// $Id: Timer_Queue_T.cpp 97644 2014-03-07 11:59:51Z johnnyw $
-
 #ifndef ACE_TIMER_QUEUE_T_CPP
 #define ACE_TIMER_QUEUE_T_CPP
 
@@ -413,11 +411,9 @@ ACE_Timer_Queue_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY>::dispatch_info_i (const 
   if (this->is_empty ())
     return 0;
 
-  ACE_Timer_Node_T<TYPE> *expired = 0;
-
   if (this->earliest_time () <= cur_time)
     {
-      expired = this->remove_first ();
+      ACE_Timer_Node_T<TYPE> *expired = this->remove_first ();
 
       // Get the dispatch info
       expired->get_dispatch_info (info);

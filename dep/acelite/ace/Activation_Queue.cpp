@@ -1,5 +1,3 @@
-// $Id: Activation_Queue.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/Activation_Queue.h"
 
 #if !defined (__ACE_INLINE__)
@@ -12,6 +10,8 @@
 #include "ace/Time_Value.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ACE_ALLOC_HOOK_DEFINE (ACE_Activation_Queue)
 
 void
 ACE_Activation_Queue::dump (void) const

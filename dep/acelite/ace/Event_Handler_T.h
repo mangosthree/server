@@ -4,9 +4,7 @@
 /**
  *  @file    Event_Handler_T.h
  *
- *  $Id: Event_Handler_T.h 91626 2010-09-07 10:59:20Z johnnyw $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 
@@ -77,7 +75,6 @@ public:
   /// Handle close events.
   typedef int (T::*CL_HANDLER) (ACE_HANDLE, ACE_Reactor_Mask);
 
-  /// = Initialization and termination methods.
   typedef int (T::*SIG_HANDLER) (int, siginfo_t*, ucontext_t*);
 
   /// Initialize the op_handler.

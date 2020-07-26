@@ -1,5 +1,3 @@
-// $Id: MEM_SAP.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/MEM_SAP.h"
 
 #if (ACE_HAS_POSITION_INDEPENDENT_POINTERS == 1)
@@ -12,7 +10,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_IPC_SAP)
+ACE_ALLOC_HOOK_DEFINE(ACE_MEM_SAP)
 
 void
 ACE_MEM_SAP::dump (void) const
@@ -84,7 +82,9 @@ ACE_MEM_SAP::close_shm_malloc (void)
   int retv = -1;
 
   if (this->shm_malloc_ != 0)
-    this->shm_malloc_->release (1);
+    if (this->shm_malloc_->release (1) == 0)
+      ACE_Process_Mutex::unlink (this->shm_malloc_->memory_pool ().
+                                 mmap ().filename ());
 
   delete this->shm_malloc_;
   this->shm_malloc_ = 0;

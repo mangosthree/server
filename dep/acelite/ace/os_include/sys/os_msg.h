@@ -6,8 +6,6 @@
  *
  *  XSI message queue structures
  *
- *  $Id: os_msg.h 97262 2013-08-09 08:32:10Z johnnyw $
- *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */

@@ -1,5 +1,3 @@
-// $Id: Priority_Reactor.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/Priority_Reactor.h"
 #include "ace/Malloc_T.h"
 
@@ -31,8 +29,13 @@ ACE_Priority_Reactor::init_bucket (void)
            TUPLE_ALLOCATOR (ACE_Select_Reactor::DEFAULT_SIZE));
 
   // The event handlers are assigned to a new As the Event
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_ALLOCATOR (this->bucket_,
+                 static_cast<QUEUE **>(ACE_Allocator::instance()->malloc(sizeof(QUEUE *) * (npriorities))));
+#else
   ACE_NEW (this->bucket_,
            QUEUE *[npriorities]);
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
   // This loops "ensures" exception safety.
   for (int i = 0; i < npriorities; ++i)
@@ -69,7 +72,11 @@ ACE_Priority_Reactor::~ACE_Priority_Reactor (void)
   for (int i = 0; i < npriorities; ++i)
     delete this->bucket_[i];
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free(this->bucket_);
+#else
   delete[] this->bucket_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
   delete tuple_allocator_;
 }
 

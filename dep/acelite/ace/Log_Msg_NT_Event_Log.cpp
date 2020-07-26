@@ -1,5 +1,3 @@
-// $Id: Log_Msg_NT_Event_Log.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/config-all.h"
 
 #if defined (ACE_HAS_LOG_MSG_NT_EVENT_LOG)

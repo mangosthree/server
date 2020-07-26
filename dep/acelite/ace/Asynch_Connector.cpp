@@ -1,5 +1,3 @@
-// $Id: Asynch_Connector.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #ifndef ACE_ASYNCH_CONNECTOR_CPP
 #define ACE_ASYNCH_CONNECTOR_CPP
 

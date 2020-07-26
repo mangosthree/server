@@ -1,5 +1,3 @@
-// $Id: Timer_Hash_T.cpp 97646 2014-03-07 12:35:48Z johnnyw $
-
 #ifndef ACE_TIMER_HASH_T_CPP
 #define ACE_TIMER_HASH_T_CPP
 

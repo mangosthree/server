@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Vector_T.inl 81478 2008-04-28 13:22:26Z schmidt $
-
 #include <algorithm>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -46,6 +43,18 @@ void ACE_Vector<T, DEFAULT_SIZE>::pop_back (void)
       --length_;
       ACE_Array<T>::size (length_);
     }
+}
+
+template <class T, size_t DEFAULT_SIZE> ACE_INLINE
+typename ACE_Array_Base<T>::iterator ACE_Vector<T, DEFAULT_SIZE>::end ()
+{
+  return ACE_Array_Base<T>::array_ + length_;
+}
+
+template <class T, size_t DEFAULT_SIZE> ACE_INLINE
+typename ACE_Array_Base<T>::const_iterator ACE_Vector<T, DEFAULT_SIZE>::end () const
+{
+  return ACE_Array_Base<T>::array_ + length_;
 }
 
 // Compare this vector with <s> for inequality.

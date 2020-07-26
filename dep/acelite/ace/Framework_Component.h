@@ -4,8 +4,6 @@
 /**
  *  @file    Framework_Component.h
  *
- *  $Id: Framework_Component.h 92208 2010-10-13 06:20:39Z johnnyw $
- *
  * A prototype mechanism that allows framework components, singletons
  * such as ACE_Reactor, ACE_Proactor, etc, to be registered with a
  * central repository managed by the ACE_Object_Manager or
@@ -150,12 +148,10 @@ public:
   ACE_ALLOC_HOOK_DECLARE;
 
 protected:
-
   /// Initialize the repository.
   ACE_Framework_Repository (int size = ACE_Framework_Repository::DEFAULT_SIZE);
 
 private:
-
   /// Actually removes the dll components, must be called with locks held.
   int remove_dll_components_i (const ACE_TCHAR *dll_name);
 
@@ -164,7 +160,6 @@ private:
   void compact (void);
 
 private:
-
   /// Contains all the framework components.
   ACE_Framework_Component **component_vector_;
 

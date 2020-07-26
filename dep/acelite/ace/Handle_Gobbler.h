@@ -4,8 +4,6 @@
 /**
  *  @file    Handle_Gobbler.h
  *
- *  $Id: Handle_Gobbler.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Kirthika Parameswaran <kirthika@cs.wustl.edu>
  *  @author Irfan Pyarali <irfan@cs.wustl.edu>
  */
@@ -36,13 +34,12 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Handle_Gobbler
 {
 public:
-
   /// Destructor.  Cleans up any remaining handles.
   inline ~ACE_Handle_Gobbler (void);
 
   /**
-   * Handles are opened continously until the process runs out of
-   * them, and then <n_handles_to_keep_available> handles are closed
+   * Handles are opened continuously until the process runs out of
+   * them, and then @a n_handles_to_keep_available handles are closed
    * (freed) thereby making them usable in the future.
    */
   inline int consume_handles (size_t n_handles_to_keep_available);

@@ -1,5 +1,3 @@
-// $Id: NT_Service.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/config-all.h"
 #if defined (ACE_WIN32) && !defined (ACE_LACKS_WIN32_SERVICES)
 
@@ -204,7 +202,10 @@ ACE_NT_Service::insert (DWORD start_type,
                                              0,
                                              SC_MANAGER_ALL_ACCESS);
   if (sc_mgr == 0)
-    return -1;
+    {
+      ACE_OS::set_errno_to_last_error();
+      return -1;
+    }
 
   SC_HANDLE sh = ACE_TEXT_CreateService (sc_mgr,
                                          this->name (),

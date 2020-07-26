@@ -4,8 +4,6 @@
 /**
  *  @file    Functor_T.h
  *
- *  $Id: Functor_T.h 96943 2013-03-30 09:42:31Z mcorino $
- *
  *   Templatized classes for implementing function objects that are
  *   used in various places in ACE.  There are currently two major
  *   categories of function objects in ACE: GOF Command Pattern
@@ -14,11 +12,10 @@
  *   method, while the STL-style functors are invoked via an
  *   <operator()> method.
  *
- *
  *  @author Chris Gill <cdgill@cs.wustl.edu>
  *  @author Based on Command Pattern implementations originally done by
  *  @author Carlos O'Ryan <coryan@cs.wustl.edu>
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  *  @author Sergio Flores-Gaitan <sergio@cs.wustl.edu>
  *  @author and on STL-style functor implementations originally done by
  *  @author Irfan Pyarali  <irfan@cs.wustl.edu>
@@ -72,6 +69,8 @@ public:
   /// Invokes the method @c action_ from the object @c receiver_.
   virtual int execute (void *arg = 0);
 
+  ACE_ALLOC_HOOK_DECLARE;
+
 private:
   /// Object where the method resides.
   RECEIVER &receiver_;
@@ -85,7 +84,6 @@ private:
  *
  * @brief Defines a class template that allows us to invoke a member
  * function using the GoF command style callback.
- *
  */
 template <class RECEIVER>
 class ACE_Member_Function_Command : public ACE_Command_Base

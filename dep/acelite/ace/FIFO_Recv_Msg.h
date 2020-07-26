@@ -4,8 +4,6 @@
 /**
  *  @file    FIFO_Recv_Msg.h
  *
- *  $Id: FIFO_Recv_Msg.h 84480 2009-02-16 18:58:16Z johnnyw $
- *
  *  @author Doug Schmidt
  */
 //=============================================================================
@@ -45,7 +43,6 @@ class ACE_Str_Buf;
 class ACE_Export ACE_FIFO_Recv_Msg : public ACE_FIFO_Recv
 {
 public:
-  // = Initialization methods.
   /// Default constructor.
   ACE_FIFO_Recv_Msg (void);
 

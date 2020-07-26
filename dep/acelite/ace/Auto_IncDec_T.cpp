@@ -1,5 +1,3 @@
-// $Id: Auto_IncDec_T.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #ifndef ACE_AUTO_INCDEC_T_CPP
 #define ACE_AUTO_INCDEC_T_CPP
 
@@ -14,9 +12,13 @@
 #include "ace/Auto_IncDec_T.inl"
 #endif /* __ACE_INLINE__ */
 
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Auto_IncDec)
+ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Auto_IncDec)
 
 template <class ACE_SAFELY_INCREMENTABLE_DECREMENTABLE> void
 ACE_Auto_IncDec<ACE_SAFELY_INCREMENTABLE_DECREMENTABLE>::dump (void) const

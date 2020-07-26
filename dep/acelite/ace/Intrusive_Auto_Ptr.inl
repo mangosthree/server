@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Intrusive_Auto_Ptr.inl 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/Guard_T.h"
 #include "ace/Log_Category.h"
 
@@ -83,7 +80,7 @@ ACE_Intrusive_Auto_Ptr<X>::operator = (const ACE_Intrusive_Auto_Ptr<X> &rhs)
   // assign a zero
   if (rhs.rep_  == 0)
     {
-      X::intrusive_remove_ref (rhs.rep_);
+      X::intrusive_remove_ref (this->rep_);
       this->rep_ = 0;
       return;
     }

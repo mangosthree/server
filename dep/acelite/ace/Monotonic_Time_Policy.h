@@ -4,8 +4,6 @@
 /**
  *  @file Monotonic_Time_Policy.h
  *
- *  $Id: Monotonic_Time_Policy.h 96061 2012-08-16 09:36:07Z mcorino $
- *
  *  @author Martin Corino <mcorino@remedy.nl>
  */
 #include /**/ "ace/pre.h"
@@ -27,8 +25,8 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  *
  * This class implements support for returning monotonic time values
  * on platforms that support that.
- * If a platform does not support monotonic time the policy returns
- * ACE_Time_Value::zero.
+ * If a platform does not support monotonic time ACE_HAS_MONOTONIC_TIME_POLICY
+ * isn't defined and the policy returns ACE_Time_Value::zero.
  */
 class ACE_Export ACE_Monotonic_Time_Policy
 {

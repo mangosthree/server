@@ -1,5 +1,3 @@
-// $Id: Atomic_Op_GCC_T.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/OS_NS_unistd.h"
 
 #if defined (ACE_HAS_GCC_ATOMIC_BUILTINS) && (ACE_HAS_GCC_ATOMIC_BUILTINS == 1)

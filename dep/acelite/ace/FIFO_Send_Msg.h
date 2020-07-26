@@ -4,8 +4,6 @@
 /**
  *  @file    FIFO_Send_Msg.h
  *
- *  $Id: FIFO_Send_Msg.h 84480 2009-02-16 18:58:16Z johnnyw $
- *
  *  @author Doug Schmidt
  */
 //=============================================================================
@@ -39,7 +37,6 @@ class ACE_Str_Buf;
 class ACE_Export ACE_FIFO_Send_Msg : public ACE_FIFO_Send
 {
 public:
-  // = Initialization methods.
   /// Default constructor.
   ACE_FIFO_Send_Msg (void);
 

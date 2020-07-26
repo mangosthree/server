@@ -1,5 +1,3 @@
-// $Id: TP_Reactor.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/TP_Reactor.h"
 #include "ace/Thread.h"
 #include "ace/Timer_Queue.h"
@@ -102,7 +100,7 @@ ACE_TP_Reactor::ACE_TP_Reactor (ACE_Sig_Handler *sh,
   : ACE_Select_Reactor (sh, tq, ACE_DISABLE_NOTIFY_PIPE_DEFAULT, 0, mask_signals, s_queue)
 {
   ACE_TRACE ("ACE_TP_Reactor::ACE_TP_Reactor");
-  this->supress_notify_renew (1);
+  this->supress_notify_renew (true);
 }
 
 ACE_TP_Reactor::ACE_TP_Reactor (size_t max_number_of_handles,
@@ -114,7 +112,7 @@ ACE_TP_Reactor::ACE_TP_Reactor (size_t max_number_of_handles,
   : ACE_Select_Reactor (max_number_of_handles, restart, sh, tq, ACE_DISABLE_NOTIFY_PIPE_DEFAULT, 0, mask_signals, s_queue)
 {
   ACE_TRACE ("ACE_TP_Reactor::ACE_TP_Reactor");
-  this->supress_notify_renew (1);
+  this->supress_notify_renew (true);
 }
 
 int
@@ -317,7 +315,7 @@ int
 ACE_TP_Reactor::handle_notify_events (int & /*event_count*/,
                                       ACE_TP_Token_Guard &guard)
 {
-  // Get the handle on which notify calls could have occured
+  // Get the handle on which notify calls could have occurred
   ACE_HANDLE notify_handle = this->get_notify_handle ();
 
   int result = 0;

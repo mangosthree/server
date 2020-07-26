@@ -4,12 +4,10 @@
 /**
  *  @file    SOCK_SEQPACK_Acceptor.h
  *
- *  $Id: SOCK_SEQPACK_Acceptor.h 84325 2009-02-04 22:46:30Z shuston $
  *  @author  Patrick J. Lardieri <plardier@atl.lmco.com>
  *  @author  Gaurav Naik, Lockheed Martin ATL
  *  @author  based on SOCK_STREAM_Acceptor
- *            by Douglas C. Schmidt <schmidt@cs.wustl.edu>
- *
+ *            by Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 
@@ -45,7 +43,6 @@ class ACE_Time_Value;
 class ACE_Export ACE_SOCK_SEQPACK_Acceptor : public ACE_SOCK
 {
 public:
-  // = Initialization and termination methods.
   /// Default constructor.
   ACE_SOCK_SEQPACK_Acceptor (void);
 

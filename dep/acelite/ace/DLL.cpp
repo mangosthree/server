@@ -1,5 +1,3 @@
-// $Id: DLL.cpp 97888 2014-09-11 10:29:17Z mcorino $
-
 #include "ace/DLL.h"
 
 #include "ace/Log_Category.h"
@@ -103,7 +101,11 @@ ACE_DLL::~ACE_DLL (void)
   // occur if full ACE_DLL initialization is interrupted due to errors
   // (e.g. attempting to open a DSO/DLL that does not exist).  Make
   // sure this->dll_name_ is deallocated.
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free (this->dll_name_);
+#else
   delete [] this->dll_name_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 // This method opens the library based on the mode specified using the
@@ -223,7 +225,11 @@ ACE_DLL::close (void)
 
   // Even if close_dll() failed, go ahead and cleanup.
   this->dll_handle_ = 0;
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_Allocator::instance()->free (this->dll_name_);
+#else
   delete [] this->dll_name_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
   this->dll_name_ = 0;
   this->close_handle_on_destruction_ = false;
 
@@ -270,7 +276,7 @@ ACE_DLL::set_handle (ACE_SHLIB_HANDLE handle,
 {
   ACE_TRACE ("ACE_DLL::set_handle");
 
-  // Create a unique name.  Note that this name is only quaranteed
+  // Create a unique name.  Note that this name is only guaranteed
   // to be unique for the life of this object.
   ACE_TCHAR temp[ACE_UNIQUE_NAME_LEN];
   ACE_OS::unique_name (this, temp, ACE_UNIQUE_NAME_LEN);

@@ -3,8 +3,6 @@
 /**
  *  @file   config-win32-msvc-9.h
  *
- *  $Id: config-win32-msvc-9.h 97431 2013-11-19 14:28:52Z johnnyw $
- *
  *  @brief  Microsoft Visual C++ 9.0 configuration file.
  *
  *  This file is the ACE configuration file for Microsoft Visual C++ version 9.

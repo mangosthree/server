@@ -4,8 +4,6 @@
 /**
  *  @file    Managed_Object.h
  *
- *  $Id: Managed_Object.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author David L. Levine <levine@cs.wustl.edu>
  */
 //=============================================================================
@@ -139,12 +137,10 @@ public:
   // on AIX 4.1 w/xlC v. 3.01.
 
 protected:
-
   // Disallow instantiation of this class.
   ACE_UNIMPLEMENTED_FUNC (ACE_Managed_Object (void))
 
 private:
-
   ACE_UNIMPLEMENTED_FUNC (ACE_Managed_Object (const ACE_Managed_Object<TYPE> &))
   ACE_UNIMPLEMENTED_FUNC (void operator= (const ACE_Managed_Object<TYPE> &))
 };

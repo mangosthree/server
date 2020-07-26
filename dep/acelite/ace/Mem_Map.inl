@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Mem_Map.inl 96760 2013-02-05 21:11:03Z stanleyk $
-
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_sys_mman.h"
 #include "ace/OS_NS_sys_stat.h"

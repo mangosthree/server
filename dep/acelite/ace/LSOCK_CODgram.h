@@ -4,9 +4,7 @@
 /**
  *  @file    LSOCK_CODgram.h
  *
- *  $Id: LSOCK_CODgram.h 84419 2009-02-11 22:28:11Z shuston $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 

@@ -4,8 +4,6 @@
 /**
  *  @file    Timer_Hash_T.h
  *
- *  $Id: Timer_Hash_T.h 97645 2014-03-07 12:01:21Z johnnyw $
- *
  *  @author Darrell Brunsch <brunsch@cs.wustl.edu>
  */
 //=============================================================================
@@ -175,7 +173,6 @@ public:
   /// Type inherited from
   typedef ACE_Timer_Queue_T<TYPE, FUNCTOR, ACE_LOCK, TIME_POLICY> Base_Timer_Queue;
 
-  // = Initialization and termination methods.
   /**
    * Default constructor. @a table_size determines the size of the
    * hash table.  @a upcall_functor is the instance of the FUNCTOR

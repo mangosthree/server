@@ -4,9 +4,7 @@
 /**
  *  @file   OS_NS_ctype.h
  *
- *  $Id: OS_NS_ctype.h 83891 2008-11-28 11:01:50Z johnnyw $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...
  *

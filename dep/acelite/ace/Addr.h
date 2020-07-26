@@ -4,9 +4,7 @@
 /**
  *  @file    Addr.h
  *
- *  $Id: Addr.h 81030 2008-03-20 12:43:29Z johnnyw $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 
@@ -32,7 +30,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_Addr
 {
 public:
-  // = Initialization and termination methods.
   /// Initializes instance variables.
   ACE_Addr (int type = -1, int size = -1);
 
@@ -59,7 +56,7 @@ public:
   virtual void *get_addr (void) const;
 
   /// Set a pointer to the address.
-  virtual void set_addr (void *, int len);
+  virtual void set_addr (const void *, int len);
 
   // = Equality/inequality tests
   /// Check for address equality.

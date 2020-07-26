@@ -1,5 +1,3 @@
-// $Id: SOCK_SEQPACK_Association.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/SOCK_SEQPACK_Association.h"
 
 #include "ace/Auto_Ptr.h"
@@ -51,10 +49,8 @@ ACE_SOCK_SEQPACK_Association::abort (void)
   // setsockopt() SO_LINGER configures socket to reap immediately.
   // Normal close then aborts the association.
   //
-  linger slinger;
-
+  linger slinger = { 0, 0 };
   slinger.l_onoff = 1;
-  slinger.l_linger = 0;
 
   if (-1 == ACE_OS::setsockopt (this->get_handle (),
                                 SOL_SOCKET,
@@ -164,7 +160,11 @@ ACE_SOCK_SEQPACK_Association::get_local_addrs (ACE_INET_Addr *addrs, size_t &siz
   // an ACE_Auto_Array_Ptr.)
   {
     sockaddr_in *addr_structs_bootstrap = 0;
+#if defined(ACE_HAS_ALLOC_HOOKS)
+    ACE_ALLOCATOR_RETURN (addr_structs_bootstrap, static_cast<sockaddr_in*>(ACE_Allocator::instance()->malloc(sizeof(sockaddr_in) * size)), -1);
+#else
     ACE_NEW_RETURN (addr_structs_bootstrap, sockaddr_in[size], -1);
+#endif
     addr_structs.reset(addr_structs_bootstrap);
   }
 
@@ -303,7 +303,11 @@ ACE_SOCK_SEQPACK_Association::get_remote_addrs (ACE_INET_Addr *addrs, size_t &si
   // an ACE_Auto_Array_Ptr.)
   {
     sockaddr_in *addr_structs_bootstrap = 0;
+#if defined (ACE_HAS_ALLOC_HOOKS)
+    ACE_ALLOCATOR_RETURN (addr_structs_bootstrap, static_cast<sockaddr_in*>(ACE_Allocator::instance()->malloc(sizeof(sockaddr_in) * (size))), -1);
+#else
     ACE_NEW_RETURN (addr_structs_bootstrap, sockaddr_in[size], -1);
+#endif
     addr_structs.reset(addr_structs_bootstrap);
   }
 

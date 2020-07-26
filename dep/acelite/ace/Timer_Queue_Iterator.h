@@ -1,5 +1,3 @@
-//$Id: Timer_Queue_Iterator.h 96333 2012-11-23 08:08:31Z johnnyw $
-
 #ifndef ACE_TIMER_QUEUE_ITERATOR_H
 #define ACE_TIMER_QUEUE_ITERATOR_H
 
@@ -19,7 +17,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  * @class ACE_Timer_Node_Dispatch_Info_T
  *
  * @brief Maintains generated dispatch information for Timer nodes.
- *
  */
 template <class TYPE>
 class ACE_Timer_Node_Dispatch_Info_T
@@ -124,6 +121,9 @@ public:
   /// Dump the state of an TYPE.
   void dump (void) const;
 
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
+
 private:
   /// Type of object stored in the Queue
   TYPE type_;
@@ -162,7 +162,6 @@ template <class TYPE>
 class ACE_Timer_Queue_Iterator_T
 {
 public:
-  // = Initialization and termination methods.
   /// Constructor.
   ACE_Timer_Queue_Iterator_T (void);
 

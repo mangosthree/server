@@ -4,8 +4,6 @@
 /**
  *  @file    ATM_Connector.h
  *
- *  $Id: ATM_Connector.h 82723 2008-09-16 09:35:44Z johnnyw $
- *
  *  @author Joe Hoffert <joeh@cs.wustl.edu>
  */
 //=============================================================================
@@ -51,7 +49,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_ATM_Connector
 {
 public:
-  // = Initialization methods.
   /// Default constructor.
   ACE_ATM_Connector (void);
 

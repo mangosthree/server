@@ -4,8 +4,6 @@
 /**
  *  @file Intrusive_List.h
  *
- *  $Id: Intrusive_List.h 91688 2010-09-09 11:21:50Z johnnyw $
- *
  *  @author Carlos O'Ryan <coryan@uci.edu>
  */
 //=============================================================================
@@ -52,13 +50,11 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  *
  * @todo The ACE_Message_Queue is an example of an intrusive list (or
  * queue) but it is not implemented in terms of this class.
- *
  */
 template <class T>
 class ACE_Intrusive_List
 {
 public:
-  // = Initialization and termination methods.
   /// Constructor.  Use user specified allocation strategy
   /// if specified.
   ACE_Intrusive_List (void);

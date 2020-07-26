@@ -4,10 +4,8 @@
 /**
  *  @file Dynamic_Service_Base.h
  *
- *  $Id: Dynamic_Service_Base.h 89454 2010-03-11 09:35:25Z johnnyw $
- *
  *  @author Prashant Jain <pjain@cs.wustl.edu>
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 

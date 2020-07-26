@@ -1,5 +1,3 @@
-// $Id: OS_main.cpp 97431 2013-11-19 14:28:52Z johnnyw $
-
 #include "ace/OS_main.h"
 
 #if !defined (ACE_DOESNT_DEFINE_MAIN)

@@ -4,11 +4,9 @@
 /**
  *  @file    Auto_Event.h
  *
- *  $Id: Auto_Event.h 96749 2013-02-02 19:08:38Z johnnyw $
- *
  *   Moved from Synch.h.
  *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //==========================================================================
 

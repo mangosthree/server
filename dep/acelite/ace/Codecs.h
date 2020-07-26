@@ -4,15 +4,12 @@
 /**
  *  @file   Codecs.h
  *
- *  $Id: Codecs.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Krishnakumar B <kitty@cs.wustl.edu>
  *
  *  Codecs is a generic wrapper for various encoding and decoding
  *  mechanisms. Currently it includes Base64 content transfer-encoding as
  *  specified by RFC 2045, Multipurpose Internet Mail Extensions (MIME) Part
  *  One: Format of Internet Message Bodies.
- *
  */
 //=============================================================================
 
@@ -30,7 +27,6 @@
 #include "ace/Basic_Types.h"
 #include "ace/Global_Macros.h"
 
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 /**
@@ -41,12 +37,10 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  * This class provides methods to encode or decode a stream of bytes
  * to/from Base64 encoding. It doesn't convert the input stream to a
  * canonical form before encoding.
- *
  */
 class ACE_Export ACE_Base64
 {
 public:
-
   //@{
 
   /**
@@ -59,7 +53,6 @@ public:
    * @return Encoded Base64 data in byte stream or NULL if input data cannot
    *         be encoded.
    */
-
   static ACE_Byte* encode (const ACE_Byte* input,
                            const size_t input_len,
                            size_t* output_len,
@@ -87,12 +80,10 @@ public:
   //@}
 
 protected:
-
   // Prevent default construction.
   ACE_Base64 (void) {}
 
 private:
-
   // Preventing copying and assignment.
   ACE_Base64 (ACE_Base64 const &);
   ACE_Base64 & operator= (ACE_Base64 const &);
@@ -101,7 +92,6 @@ private:
   static void init (void);
 
 private:
-
   /// Alphabet used for decoding i.e decoder_[alphabet_[i = 0..63]] = i
   static ACE_Byte decoder_[];
 
@@ -111,7 +101,6 @@ private:
 
   /// Boolean to denote whether initialization is complete
   static bool init_;
-
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

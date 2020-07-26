@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: WFMO_Reactor.inl 97894 2014-09-16 18:11:56Z johnnyw $
-
 #include "ace/Handle_Set.h"
 #include "ace/Reactor.h"
 #include "ace/Thread.h"

@@ -4,9 +4,7 @@
 /**
  *  @file    SPIPE_Connector.h
  *
- *  $Id: SPIPE_Connector.h 82723 2008-09-16 09:35:44Z johnnyw $
- *
- *  @author Doug Schmidt <schmidt@cs.wustl.edu>
+ *  @author Doug Schmidt <d.schmidt@vanderbilt.edu>
  *  @author Prashant Jain <pjain@cs.wustl.edu>
  */
 //=============================================================================
@@ -34,7 +32,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_SPIPE_Connector
 {
 public:
-  // = Initialization method.
   /// Default constructor.
   ACE_SPIPE_Connector (void);
 

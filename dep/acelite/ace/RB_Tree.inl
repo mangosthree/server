@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: RB_Tree.inl 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/Guard_T.h"
 #include "ace/Malloc_Base.h"
 #include "ace/Log_Category.h"

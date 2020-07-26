@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: FILE_Connector.inl 96985 2013-04-11 15:50:32Z huangh $
-
 // Creates a Local ACE_FILE.
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

@@ -1,5 +1,3 @@
-// $Id: ATM_Stream.cpp 97461 2013-12-12 16:30:01Z shuston $
-
 #include "ace/ATM_Stream.h"
 
 #if defined (ACE_HAS_ATM)

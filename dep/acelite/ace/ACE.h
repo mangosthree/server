@@ -4,8 +4,6 @@
 /**
  * @file    ACE.h
  *
- * $Id: ACE.h 97308 2013-09-01 00:58:08Z mesnier_p $
- *
  * This file contains value added ACE functions that extend the
  * behavior of the UNIX and Win32 OS calls.
  *
@@ -13,7 +11,7 @@
  * in order to manage the namespace better.  These functions are put
  * here rather than in @c ACE_OS in order to separate concerns.
  *
- * @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ * @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 
@@ -56,14 +54,18 @@ class ACE_Handle_Set;
 namespace ACE
 {
   // = ACE version information.
-  /// e.g., the "5" in ACE 5.1.12.
+  /// e.g., the "6" in ACE 6.3.4
   extern ACE_Export u_int major_version (void);
 
-  /// e.g., the "1" in ACE 5.1.12.
+  /// e.g., the "3" in ACE 6.3.4
   extern ACE_Export u_int minor_version (void);
 
-  /// e.g., the "12" in ACE 5.1.12.
-  /// Returns 0 for "stable" (non-beta) releases.
+  /// e.g., the "4" in ACE 6.3.4
+  /// Returns 0 for "stable" (non-micro) releases.
+  extern ACE_Export u_int micro_version (void);
+
+  /// e.g., the "4" in ACE 6.3.4
+  /// Returns 0 for "stable" (non-micro) releases.
   extern ACE_Export u_int beta_version (void);
 
   // = C++ compiler version information.
@@ -213,7 +215,9 @@ namespace ACE
    *
    * @return -1 on error, else total number of bytes received.
    */
+#if !defined (ACE_LACKS_VA_FUNCTIONS)
   extern ACE_Export ssize_t recv (ACE_HANDLE handle, size_t n, ...);
+#endif /* ACE_LACKS_VA_FUNCTIONS */
 
   extern ACE_Export ssize_t recvv (ACE_HANDLE handle,
                                    iovec *iov,
@@ -294,7 +298,9 @@ namespace ACE
                   size_t *bytes_transferred = 0);
 
   /// Varargs variant.
+#if !defined (ACE_LACKS_VA_FUNCTIONS)
   extern ACE_Export ssize_t send (ACE_HANDLE handle, size_t n, ...);
+#endif /* ACE_LACKS_VA_FUNCTIONS */
 
   extern ACE_Export ssize_t sendv (ACE_HANDLE handle,
                                    const iovec *iov,

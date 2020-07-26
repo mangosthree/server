@@ -1,8 +1,9 @@
-// $Id: SV_Semaphore_Complex.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/SV_Semaphore_Complex.h"
 #include "ace/Log_Category.h"
 #include "ace/OS_NS_Thread.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/SV_Semaphore_Complex.inl"
@@ -68,8 +69,10 @@ ACE_SV_Semaphore_Complex::open (key_t k,
                                 mode_t perms)
 {
   ACE_TRACE ("ACE_SV_Semaphore_Complex::open");
+#ifdef ACE_HAS_SYSV_IPC
   if (k == IPC_PRIVATE)
     return -1;
+#endif
 
   this->key_ = k;
 
@@ -118,7 +121,11 @@ ACE_SV_Semaphore_Complex::open (key_t k,
       int semval = ACE_SV_Semaphore_Simple::control (GETVAL, 0, 1);
 
       if (semval == -1)
+#ifdef ACE_HAS_SYSV_IPC
         return this->init ();
+#else
+        return -1;
+#endif
       else if (semval == 0)
         {
           // We should initialize by doing a SETALL, but that would
@@ -150,7 +157,11 @@ ACE_SV_Semaphore_Complex::open (key_t k,
       // Decrement the process counter. We don't need a lock to do this.
       if (ACE_OS::semop (this->internal_id_,
                          &ACE_SV_Semaphore_Complex::op_open_[0], 1) < 0)
+#ifdef ACE_HAS_SYSV_IPC
         return this->init ();
+#else
+        return -1;
+#endif
       return 0;
     }
 }
@@ -179,8 +190,10 @@ ACE_SV_Semaphore_Complex::close (void)
   ACE_TRACE ("ACE_SV_Semaphore_Complex::close");
   int semval;
 
+#ifdef ACE_HAS_SYSV_IPC
   if (this->key_ == (key_t) - 1 || this->internal_id_ == -1)
     return -1;
+#endif
 
   // The following semop() first gets a lock on the ACE_SV_Semaphore,
   // then increments [1] - the process number.
@@ -205,7 +218,9 @@ ACE_SV_Semaphore_Complex::close (void)
     {
       int result = ACE_OS::semop (this->internal_id_,
                                   &ACE_SV_Semaphore_Complex::op_unlock_[0], 1);
+#ifdef ACE_HAS_SYSV_IPC
       this->init ();
+#endif
       return result;
     }
 }
@@ -229,12 +244,14 @@ ACE_SV_Semaphore_Complex::ACE_SV_Semaphore_Complex (const char *name,
 {
   ACE_TRACE ("ACE_SV_Semaphore_Complex::ACE_SV_Semaphore_Complex");
 
-  key_t key;
+  key_t key = ACE_DEFAULT_SEM_KEY;
 
-  if (name == 0)
-    key = ACE_DEFAULT_SEM_KEY;
-  else
+#ifdef ACE_HAS_SYSV_IPC
+  if (name != 0)
     key = this->name_2_key (name);
+#else
+  ACE_UNUSED_ARG (name);
+#endif
 
   if (this->open (key, flags, initial_value, nsems, perms) == -1)
     ACELIB_ERROR ((LM_ERROR,  ACE_TEXT ("%p\n"),  ACE_TEXT ("ACE_SV_Semaphore_Complex")));
@@ -250,7 +267,9 @@ ACE_SV_Semaphore_Complex::~ACE_SV_Semaphore_Complex (void)
 ACE_SV_Semaphore_Complex::ACE_SV_Semaphore_Complex (void)
 {
   ACE_TRACE ("ACE_SV_Semaphore_Complex::ACE_SV_Semaphore_Complex");
+#ifdef ACE_HAS_SYSV_IPC
   this->init ();
+#endif
 }
 
 ACE_END_VERSIONED_NAMESPACE_DECL

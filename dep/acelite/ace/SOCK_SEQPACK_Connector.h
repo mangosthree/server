@@ -4,13 +4,10 @@
 /**
  *  @file    SOCK_SEQPACK_Connector.h
  *
- *  $Id: SOCK_SEQPACK_Connector.h 84816 2009-03-13 08:16:32Z johnnyw $
- *
  *  @author  Patrick J. Lardieri <plardier@atl.lmco.com>
  *  @author  Gaurav Naik, Lockheed Martin ATL
  *  @author  based on SOCK_STREAM_Connector
  *            by Douglas C. Schmidt <schmidt@dre.vanderbilt.edu>
- *
  */
 //=============================================================================
 
@@ -51,7 +48,6 @@ class ACE_Time_Value;
 class ACE_Export ACE_SOCK_SEQPACK_Connector
 {
 public:
-  // = Initialization and termination methods.
   /// Default constructor.
   ACE_SOCK_SEQPACK_Connector (void);
 
@@ -267,7 +263,7 @@ public:
    *                    to the peer.
    * @param remote_sap  If non-0, it points to the @c ACE_INET_Addr object
    *                    that will contain the address of the connected peer.
-   * @param timeout     Same values and return value possibilites as for
+   * @param timeout     Same values and return value possibilities as for
    *                    connect(). @see connect().
    */
   int complete (ACE_SOCK_SEQPACK_Association &new_association,

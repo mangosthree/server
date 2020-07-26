@@ -4,8 +4,6 @@
 /**
  *  @file    TLI_Stream.h
  *
- *  $Id: TLI_Stream.h 97262 2013-08-09 08:32:10Z johnnyw $
- *
  *  @author Doug Schmidt
  */
 //=============================================================================
@@ -42,7 +40,6 @@ public:
   friend class ACE_TLI_Acceptor;
   friend class ACE_TLI_Connector;
 
-  // = Initialization and termination methods.
   /// Default constructor.
   ACE_TLI_Stream (void);
 

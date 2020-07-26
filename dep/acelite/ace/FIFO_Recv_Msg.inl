@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: FIFO_Recv_Msg.inl 97246 2013-08-07 07:10:20Z johnnyw $
-
 #include "ace/Min_Max.h"
 #include "ace/OS_NS_stropts.h"
 #include "ace/Truncate.h"

@@ -4,9 +4,7 @@
 /**
  *  @file    Service_Types.h
  *
- *  $Id: Service_Types.h 89925 2010-04-19 12:49:11Z cbeaulac $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //==========================================================================
 
@@ -39,7 +37,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_Service_Type_Impl
 {
 public:
-  // = Initialization and termination methods.
   ACE_Service_Type_Impl (void *object,
                          const ACE_TCHAR *s_name,
                          u_int flags = 0,
@@ -104,7 +101,6 @@ protected:
 class ACE_Export ACE_Service_Object_Type : public ACE_Service_Type_Impl
 {
 public:
-  // = Initialization method.
   ACE_Service_Object_Type (void *so,
                            const ACE_TCHAR *name,
                            u_int flags = 0,
@@ -134,7 +130,6 @@ private:
 class ACE_Export ACE_Module_Type : public ACE_Service_Type_Impl
 {
 public:
-  // = Initialization method.
   ACE_Module_Type (void *m, // Really an ACE_Module *.
                    const ACE_TCHAR *identifier,
                    u_int flags = 0,
@@ -175,7 +170,6 @@ private:
 class ACE_Export ACE_Stream_Type : public ACE_Service_Type_Impl
 {
 public:
-  // = Initialization method.
   ACE_Stream_Type (void *s, // Really an ACE_Stream *.
                    const ACE_TCHAR *identifier,
                    u_int flags = 0,

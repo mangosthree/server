@@ -4,9 +4,7 @@
 /**
  *  @file    DEV_Connector.h
  *
- *  $Id: DEV_Connector.h 96985 2013-04-11 15:50:32Z huangh $
- *
- *  @author Gerhard Lenzer and Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Gerhard Lenzer and Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 
@@ -21,7 +19,6 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
-
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 

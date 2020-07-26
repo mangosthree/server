@@ -4,9 +4,7 @@
 /**
  *  @file    SOCK_Connector.h
  *
- *  $Id: SOCK_Connector.h 91626 2010-09-07 10:59:20Z johnnyw $
- *
- *  @author Doug Schmidt <schmidt@cs.wustl.edu>
+ *  @author Doug Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 
@@ -261,7 +259,7 @@ public:
    *                    to the peer.
    * @param remote_sap  If non-0, it points to the @c ACE_INET_Addr object
    *                    that will contain the address of the connected peer.
-   * @param timeout     Same values and return value possibilites as for
+   * @param timeout     Same values and return value possibilities as for
    *                    connect(). @see connect().
    */
   int complete (ACE_SOCK_Stream &new_stream,

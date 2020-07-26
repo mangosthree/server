@@ -1,5 +1,3 @@
-// $Id: FIFO.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/FIFO.h"
 
 #if !defined (__ACE_INLINE__)
@@ -11,6 +9,9 @@
 #include "ace/OS_NS_errno.h"
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/OS_NS_fcntl.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 

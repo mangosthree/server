@@ -1,5 +1,3 @@
-// $Id: Token_Invariants.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/Token_Invariants.h"
 
 #if defined (ACE_HAS_TOKENS_LIBRARY)

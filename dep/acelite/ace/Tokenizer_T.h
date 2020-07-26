@@ -4,9 +4,7 @@
 /**
  *  @file    Tokenizer_T.h
  *
- *  $Id: Tokenizer_T.h 88793 2010-02-01 17:50:34Z cleeland $
- *
- *  @author Douglas C. Schmidt (schmidt@cs.wustl.edu)
+ *  @author Douglas C. Schmidt (d.schmidt@vanderbilt.edu)
  *  @author Nanbor Wang <nanbor@cs.wustl.edu>
  */
 //=============================================================================

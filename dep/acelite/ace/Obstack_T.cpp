@@ -1,5 +1,3 @@
-// $Id: Obstack_T.cpp 97400 2013-10-31 10:44:50Z mhengstmengel $
-
 #ifndef ACE_OBSTACK_T_CPP
 #define ACE_OBSTACK_T_CPP
 
@@ -17,7 +15,7 @@
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_ALLOC_HOOK_DEFINE(ACE_Obstack_T)
+ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Obstack_T)
 
 template <class ACE_CHAR_T> void
 ACE_Obstack_T<ACE_CHAR_T>::dump (void) const

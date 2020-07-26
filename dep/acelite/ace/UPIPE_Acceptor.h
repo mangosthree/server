@@ -4,8 +4,6 @@
 /**
  *  @file    UPIPE_Acceptor.h
  *
- *  $Id: UPIPE_Acceptor.h 82723 2008-09-16 09:35:44Z johnnyw $
- *
  *  @author Gerhard Lenzer
  *  @author Douglas C. Schmidt
  */
@@ -38,7 +36,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_UPIPE_Acceptor : public ACE_SPIPE_Acceptor
 {
 public:
-  // = Initialization and termination.
   /// Default constructor.
   ACE_UPIPE_Acceptor (void);
 

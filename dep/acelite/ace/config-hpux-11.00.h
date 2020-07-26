@@ -1,6 +1,4 @@
 /* -*- C++ -*- */
-// $Id: config-hpux-11.00.h 97326 2013-09-11 07:52:09Z johnnyw $
-
 // The following configuration file is designed to work for HP
 // platforms running HP-UX 11.00 using aC++ or gcc (2.95 and up).
 
@@ -106,7 +104,6 @@
 #endif /* ACE_HAS_AIO_CALLS */
 
 ////////////////////////////////////////////////////////////////////////////
-//
 // General OS information - see README for more details on what they mean
 //
 ///////////////////////////////////////////////////////////////////////////
@@ -165,7 +162,6 @@
 #define ACE_HAS_CLOCK_SETTIME
 
 #define ACE_LACKS_CLOCK_MONOTONIC
-#define ACE_LACKS_MONOTONIC_TIME
 
 #define ACE_LACKS_PTHREAD_SCOPE_PROCESS
 
@@ -349,7 +345,6 @@
 #define ACE_LACKS_STRUCT_LIFNUM
 
 //////////////////////////////////////////////////////////////////////////
-//
 // STREAMS information
 //
 //////////////////////////////////////////////////////////////////////////
@@ -370,7 +365,6 @@
 // #define ACE_HAS_STREAM_PIPES
 
 /////////////////////////////////////////////////////////////////////////
-//
 // TLI/XTI information
 //
 ////////////////////////////////////////////////////////////////////////
@@ -387,7 +381,6 @@
 #define ACE_HAS_SYS_XTI_H 1
 
 /////////////////////////////////////////////////////////////////////////
-//
 // Threads information.
 //
 // Use of threads is controlled by the 'threads' argument to make.  See

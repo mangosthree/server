@@ -4,8 +4,6 @@
 /**
  *  @file    Proactor_Impl.h
  *
- *  $Id: Proactor_Impl.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Alexander Babu Arulanthu <alex@cs.wustl.edu>
  *  @author Alexander Libman <alibman@ihug.com.au>
  */
@@ -36,7 +34,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  * classes.
  *
  * See the Proactor pattern description at
- * http://www.cs.wustl.edu/~schmidt/proactor.ps.gz for more
+ * http://www.dre.vanderbilt.edu/~schmidt/PDF/proactor.pdf for more
  * details.
  */
 class ACE_Export ACE_Proactor_Impl : public ACE_Event_Handler

@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Message_Queue_Vx.inl 96860 2013-02-25 16:55:51Z schmidt $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 #if defined (ACE_VXWORKS)
@@ -22,6 +19,13 @@ ACE_Message_Queue_Vx::msgq (void)
                                 reinterpret_cast<MSG_Q_ID> (tail_)
 #endif /* __RTP__ */
                                 );
+}
+
+ACE_INLINE int
+ACE_Message_Queue_Vx::peek_dequeue_head (ACE_Message_Block *&,
+                                         ACE_Time_Value *)
+{
+  ACE_NOTSUP_RETURN (-1);
 }
 
 #endif /* ACE_VXWORKS */

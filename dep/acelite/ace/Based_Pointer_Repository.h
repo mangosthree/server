@@ -4,8 +4,6 @@
 /**
  *  @file    Based_Pointer_Repository.h
  *
- *  $Id: Based_Pointer_Repository.h 84837 2009-03-16 13:01:15Z johnnyw $
- *
  *  @author Dietrich Quehl <Dietrich.Quehl@med.siemens.de>
  *  @author Douglas C. Schmidt <schmidt@.cs.wustl.edu>
  */
@@ -43,7 +41,6 @@ class ACE_Export ACE_Based_Pointer_Repository
 public:
   // = Use ACE_Null_Mutex to allow locking while iterating.
 
-  // = Initialization and termination methods.
   ACE_Based_Pointer_Repository (void);
   ~ACE_Based_Pointer_Repository (void);
 
@@ -66,7 +63,6 @@ public:
   int unbind (void *addr);
 
 private:
-
   /// Use the "Cheshire-Cat" technique to hide the implementation in
   /// order to avoid circular #include dependencies.
   ACE_Based_Pointer_Repository_Rep *rep_;

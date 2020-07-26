@@ -3,8 +3,6 @@
 /**
  *  @file   Codeset_Registry.h
  *
- *  $Id: Codeset_Registry.h 93651 2011-03-28 08:49:11Z johnnyw $
- *
  * ACE wrapper around access functions for the OSF's DCE codeset registry
  * access functions
  *
@@ -38,7 +36,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_Codeset_Registry
 {
 public:
-
   /// Based on a locale string, find the registry value and optional codeset
   /// collection. This wraps the dce_cs_loc_to_rgy function, or emulates it.
   static int locale_to_registry (const ACE_CString &locale,

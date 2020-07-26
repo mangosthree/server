@@ -1,11 +1,9 @@
 /**
  * @file Thread_Mutex.cpp
  *
- * $Id: Thread_Mutex.cpp 96985 2013-04-11 15:50:32Z huangh $
- *
  * Originally in Synch.cpp
  *
- * @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ * @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 
 #include "ace/Thread_Mutex.h"

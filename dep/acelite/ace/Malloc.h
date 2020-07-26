@@ -4,8 +4,6 @@
 /**
  *  @file    Malloc.h
  *
- *  $Id: Malloc.h 96985 2013-04-11 15:50:32Z huangh $
- *
  *  @author Doug Schmidt and Irfan Pyarali
  */
 //==========================================================================
@@ -302,7 +300,6 @@ public:
   class ACE_Export ACE_Name_Node
   {
   public:
-    // = Initialization methods.
     /// Constructor.
     ACE_Name_Node (const char *name,
                    char *name_ptr,

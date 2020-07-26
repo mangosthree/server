@@ -1,5 +1,3 @@
-// $Id: Timer_Queue_Adapters.cpp 97493 2013-12-31 07:45:27Z johnnyw $
-
 #ifndef ACE_TIMER_QUEUE_ADAPTERS_CPP
 #define ACE_TIMER_QUEUE_ADAPTERS_CPP
 
@@ -161,7 +159,7 @@ ACE_Thread_Timer_Queue_Adapter<TQ, TYPE>::ACE_Thread_Timer_Queue_Adapter (ACE_Th
   : ACE_Task_Base (tm),
     timer_queue_(timer_queue),
     delete_timer_queue_(false),
-    condition_ (mutex_),
+    condition_ (mutex_, cond_attr_),
     active_ (true), // Assume that we start in active mode.
     thr_id_ (ACE_OS::NULL_thread)
 {

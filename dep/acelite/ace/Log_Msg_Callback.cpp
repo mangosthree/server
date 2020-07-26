@@ -1,5 +1,3 @@
-// $Id: Log_Msg_Callback.cpp 97246 2013-08-07 07:10:20Z johnnyw $
-
 #include "ace/Log_Msg_Callback.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: config-win32-mingw.h 96943 2013-03-30 09:42:31Z mcorino $
-
 //
 // The following configuration file is designed to work for win32
 // platforms using gcc/g++ with mingw32 (http://www.mingw.org).
@@ -89,6 +87,8 @@
 #define ACE_LACKS_PDHMSG_H
 #define ACE_LACKS_STRTOK_R
 #define ACE_LACKS_LOCALTIME_R
+#define ACE_LACKS_GMTIME_R
+#define ACE_LACKS_ASCTIME_R
 #define ACE_HAS_NONCONST_WCSDUP
 #define ACE_HAS_WINSOCK2_GQOS
 #define ACE_ISCTYPE_EQUIVALENT ::_isctype

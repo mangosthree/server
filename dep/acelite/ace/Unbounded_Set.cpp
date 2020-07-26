@@ -1,5 +1,3 @@
-// $Id: Unbounded_Set.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #ifndef ACE_UNBOUNDED_SET_CPP
 #define ACE_UNBOUNDED_SET_CPP
 

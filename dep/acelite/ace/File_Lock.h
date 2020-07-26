@@ -4,9 +4,7 @@
 /**
  *  @file    File_Lock.h
  *
- *  $Id: File_Lock.h 91064 2010-07-12 10:11:24Z johnnyw $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 

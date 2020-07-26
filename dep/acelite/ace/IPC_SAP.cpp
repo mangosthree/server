@@ -1,5 +1,3 @@
-// $Id: IPC_SAP.cpp 97661 2014-03-17 09:52:07Z johnnyw $
-
 #include "ace/IPC_SAP.h"
 
 #include "ace/Log_Category.h"
@@ -7,6 +5,9 @@
 #include "ace/os_include/os_signal.h"
 #include "ace/OS_NS_errno.h"
 #include "ace/OS_NS_fcntl.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/IPC_SAP.inl"

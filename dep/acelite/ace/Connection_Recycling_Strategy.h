@@ -4,8 +4,6 @@
 /**
  *  @file   Connection_Recycling_Strategy.h
  *
- *  $Id: Connection_Recycling_Strategy.h 97246 2013-08-07 07:10:20Z johnnyw $
- *
  *  @author Doug Schmidt
  */
 //=============================================================================
@@ -55,7 +53,6 @@ public:
   /// Cleanup hint and reset @a act_holder to zero if @a act_holder != 0.
   virtual int cleanup_hint (const void *recycling_act,
                             void **act_holder = 0) = 0;
-
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

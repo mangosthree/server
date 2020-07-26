@@ -1,9 +1,10 @@
-// $Id: LSOCK_Dgram.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/LSOCK_Dgram.h"
 #if !defined (ACE_LACKS_UNIX_DOMAIN_SOCKETS)
 
 #include "ace/Log_Category.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 
 

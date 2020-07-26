@@ -4,9 +4,7 @@
 /**
  *  @file    SV_Shared_Memory.h
  *
- *  $Id: SV_Shared_Memory.h 80826 2008-03-04 14:51:23Z wotte $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //==========================================================================
 
@@ -41,7 +39,6 @@ public:
     ACE_OPEN   = 0
   };
 
-  // = Initialization and termination methods.
   ACE_SV_Shared_Memory (void);
   ACE_SV_Shared_Memory (key_t external_id,
                         size_t size,

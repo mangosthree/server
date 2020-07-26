@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: SV_Message_Queue.inl 96483 2012-12-09 14:38:45Z johnnyw $
-
 #include "ace/Global_Macros.h"
 #include "ace/OS_NS_sys_msg.h"
 

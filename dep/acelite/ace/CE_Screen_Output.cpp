@@ -1,5 +1,3 @@
-// $Id: CE_Screen_Output.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/CE_Screen_Output.h"
 #if defined (ACE_HAS_WINCE)
 

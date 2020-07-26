@@ -4,8 +4,6 @@
 /**
  *  @file    Filecache.h
  *
- *  $Id: Filecache.h 97202 2013-06-19 22:35:11Z mesnier_p $
- *
  *  @author James Hu
  */
 //=============================================================================
@@ -188,6 +186,8 @@ public:
   /// was deleted.
   ACE_Filecache_Object *finish (ACE_Filecache_Object *&new_file);
 
+  ACE_ALLOC_HOOK_DECLARE;
+
 protected:
   ACE_Filecache_Object *insert_i (const ACE_TCHAR *filename,
                                   ACE_SYNCH_RW_MUTEX &filelock,
@@ -283,6 +283,8 @@ public:
   /// True if file on disk is newer than cached file.
   int update (void) const;
 
+  ACE_ALLOC_HOOK_DECLARE;
+
 protected:
   /// Prevent from being called.
   ACE_Filecache_Object (void);
@@ -296,7 +298,6 @@ private:
                const ACE_TCHAR *s = ACE_TEXT ("ACE_Filecache_Object"));
 
 public:
-
   enum Creation_States
   {
     ACE_READING = 1,

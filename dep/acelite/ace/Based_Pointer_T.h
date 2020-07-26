@@ -4,8 +4,6 @@
 /**
  *  @file    Based_Pointer_T.h
  *
- *  $Id: Based_Pointer_T.h 81705 2008-05-15 14:02:02Z johnnyw $
- *
  *  @author Dietrich Quehl <Dietrich.Quehl@med.siemens.de>
  *  @author Douglas C. Schmidt <schmidt@.cs.wustl.edu>
  */
@@ -159,7 +157,6 @@ template <class CONCRETE>
 class ACE_Based_Pointer : public ACE_Based_Pointer_Basic<CONCRETE>
 {
 public:
-  // = Initialization method.
   /// Constructor.  See constructor for ACE_Based_Pointer_Basic for
   /// details.
   ACE_Based_Pointer (void);

@@ -4,8 +4,6 @@
 /**
  *  @file    ATM_Acceptor.h
  *
- *  $Id: ATM_Acceptor.h 82723 2008-09-16 09:35:44Z johnnyw $
- *
  *  @author Joe Hoffert
  */
 //=============================================================================
@@ -59,9 +57,7 @@ class ACE_Time_Value;
  */
 class ACE_Export ACE_ATM_Acceptor
 {
-
 public:
-  // = Initialization and termination methods.
   /// Default constructor.
   ACE_ATM_Acceptor (void);
 

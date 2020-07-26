@@ -4,8 +4,6 @@
 /**
  *  @file    ATM_Addr.h
  *
- *  $Id: ATM_Addr.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Joe Hoffert <joeh@cs.wustl.edu>
  */
 //==========================================================================
@@ -65,7 +63,6 @@ public:
   static const int OPT_FLAGS_PMP;
   static const int DEFAULT_SELECTOR;
 
-  // = Initialization methods.
   /// Default constructor.
   ACE_ATM_Addr (u_char selector = DEFAULT_SELECTOR);
 
@@ -93,7 +90,6 @@ public:
   /// Default dtor.
   ~ACE_ATM_Addr (void);
 
-  // = Initialization methods (useful after object construction).
   /// Default initialization for non-address values (e.g.,
   /// t_atm_sap_addr.SVE_tag_addr, t_atm_sap_addr.SVE_tag_selector)
   void init (u_char selector = DEFAULT_SELECTOR);
@@ -150,7 +146,7 @@ public:
   virtual void *get_addr (void) const;
 
   /// Set a pointer to the address.
-  virtual void set_addr (void *, int);
+  virtual void set_addr (const void *, int);
 
   /// Return the selector for network address.
   u_char get_selector (void) const;

@@ -4,8 +4,6 @@
 /**
  *  @file    Cached_Connect_Strategy_T.h
  *
- *  $Id: Cached_Connect_Strategy_T.h 92097 2010-09-30 05:41:49Z msmit $
- *
  *  @author Kirthika Parameswaran <kirthika@cs.wustl.edu>
  */
 //=============================================================================
@@ -104,8 +102,10 @@ public:
   // = Accessor.
   CACHING_STRATEGY &caching_strategy (void);
 
-protected:
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
 
+protected:
   /// Find an idle handle.
   int find (ACE_Refcounted_Hash_Recyclable<ACE_PEER_CONNECTOR_ADDR> &search_addr,
             ACE_Hash_Map_Entry<ACE_Refcounted_Hash_Recyclable<ACE_PEER_CONNECTOR_ADDR>, std::pair<SVC_HANDLER *, ATTRIBUTES> > *&entry);
@@ -205,7 +205,6 @@ template <class SVC_HANDLER, ACE_PEER_CONNECTOR_1,
 class ACE_Bounded_Cached_Connect_Strategy
   : public ACE_Cached_Connect_Strategy_Ex<SVC_HANDLER, ACE_PEER_CONNECTOR_2, CACHING_STRATEGY, ATTRIBUTES, MUTEX>
 {
-
    typedef ACE_Cached_Connect_Strategy_Ex<SVC_HANDLER, ACE_PEER_CONNECTOR_2, CACHING_STRATEGY, ATTRIBUTES, MUTEX>
    CCSEBASE;
 
@@ -214,7 +213,6 @@ class ACE_Bounded_Cached_Connect_Strategy
           REFCOUNTED_HASH_RECYCLABLE_ADDRESS;
 
 public:
-
   /// Constructor
   ACE_Bounded_Cached_Connect_Strategy (size_t  max_size,
                                        CACHING_STRATEGY &caching_s,
@@ -224,14 +222,13 @@ public:
                                        MUTEX *lock = 0,
                                        int delete_lock = 0);
 
-   /// Destructor
-   virtual ~ACE_Bounded_Cached_Connect_Strategy (void);
+  /// Destructor
+  virtual ~ACE_Bounded_Cached_Connect_Strategy (void);
 
-   /// Declare the dynamic allocation hooks.
-   ACE_ALLOC_HOOK_DECLARE;
+  /// Declare the dynamic allocation hooks.
+  ACE_ALLOC_HOOK_DECLARE;
 
 protected:
-
   virtual int find_or_create_svc_handler_i (SVC_HANDLER *&sh,
                                             const ACE_PEER_CONNECTOR_ADDR &remote_addr,
                                             ACE_Time_Value *timeout,
@@ -244,7 +241,6 @@ protected:
                                             int &found);
 
 protected:
-
   /// Max items in the cache, used as a bound for the creation of svc_handlers.
   size_t  max_size_;
 };

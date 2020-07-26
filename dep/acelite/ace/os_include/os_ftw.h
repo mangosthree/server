@@ -6,8 +6,6 @@
  *
  *  file tree traversal
  *
- *  $Id: os_ftw.h 97827 2014-08-02 17:34:32Z johnnyw $
- *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */

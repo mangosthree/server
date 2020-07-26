@@ -1,6 +1,4 @@
 /* -*- C++ -*- */
-// $Id: Asynch_Acceptor.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #ifndef ACE_ASYNCH_ACCEPTOR_C
 #define ACE_ASYNCH_ACCEPTOR_C
 

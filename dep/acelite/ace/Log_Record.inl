@@ -1,11 +1,12 @@
 // -*- C++ -*-
-//
-// $Id: Log_Record.inl 97017 2013-04-15 14:00:52Z mitza $
-
 #include "ace/Global_Macros.h"
 #include "ace/os_include/arpa/os_inet.h"
 #include "ace/Time_Value.h"
 #include "ace/OS_NS_string.h"
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -13,7 +14,11 @@ ACE_INLINE
 ACE_Log_Record::~ACE_Log_Record (void)
 {
   if (this->msg_data_)
+#if defined (ACE_HAS_ALLOC_HOOKS)
+    ACE_Allocator::instance()->free(this->msg_data_);
+#else
     delete [] this->msg_data_;
+#endif /* ACE_HAS_ALLOC_HOOKS */
 }
 
 ACE_INLINE ACE_UINT32

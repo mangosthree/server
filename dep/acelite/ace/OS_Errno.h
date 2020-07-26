@@ -4,9 +4,7 @@
 /**
  *  @file   OS_Errno.h
  *
- *  $Id: OS_Errno.h 83891 2008-11-28 11:01:50Z johnnyw $
- *
- *  @author (Originally in OS.h)Doug Schmidt <schmidt@cs.wustl.edu>
+ *  @author (Originally in OS.h)Doug Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 

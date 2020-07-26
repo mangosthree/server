@@ -4,9 +4,7 @@
 /**
  *  @file    Module.h
  *
- *  $Id: Module.h 96061 2012-08-16 09:36:07Z mcorino $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //==========================================================================
 
@@ -78,7 +76,6 @@ template <ACE_SYNCH_DECL, class TIME_POLICY = ACE_System_Time_Policy>
 class ACE_Module : public ACE_Module_Base
 {
 public:
-  // = Initialization and termination methods.
   /// Create an empty Module.
   ACE_Module (void);
 

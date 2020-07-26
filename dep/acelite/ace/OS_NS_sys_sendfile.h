@@ -4,8 +4,6 @@
 /**
  *  @file    OS_NS_sys_sendfile.h
  *
- *  $Id: OS_NS_sys_sendfile.h 84216 2009-01-22 18:34:40Z johnnyw $
- *
  *  @author Ossama Othman <ossama@dre.vanderbilt.edu>
  */
 //=============================================================================
@@ -34,7 +32,7 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace ACE_OS
 {
-  /// Finds the length of a string (char version).
+  /// Wrapper for sendfile to transfer data between file descriptor
   ACE_NAMESPACE_INLINE_FUNCTION
   ssize_t sendfile (ACE_HANDLE out_fd,
                     ACE_HANDLE in_fd,

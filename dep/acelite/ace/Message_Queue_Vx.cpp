@@ -1,5 +1,3 @@
-// $Id: Message_Queue_Vx.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/Message_Queue.h"
 #include "ace/Message_Queue_Vx.h"
 #include "ace/Log_Category.h"
@@ -15,6 +13,8 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 ////////////////////////////////
 // class ACE_Message_Queue_Vx //
 ////////////////////////////////
+
+ACE_ALLOC_HOOK_DEFINE (ACE_Message_Queue_Vx);
 
 void
 ACE_Message_Queue_Vx::dump (void) const
@@ -341,15 +341,6 @@ ACE_Message_Queue_Vx::wait_not_empty_cond (ACE_Time_Value *)
   // Always return here, and let the VxWorks message queue handle blocking.
   return 0;
 }
-
-#if ! defined (ACE_NEEDS_FUNC_DEFINITIONS)
-int
-ACE_Message_Queue_Vx::peek_dequeue_head (ACE_Message_Block *&,
-                                         ACE_Time_Value *)
-{
-  ACE_NOTSUP_RETURN (-1);
-}
-#endif /* ! ACE_NEEDS_FUNC_DEFINITIONS */
 
 #endif /* ACE_VXWORKS */
 

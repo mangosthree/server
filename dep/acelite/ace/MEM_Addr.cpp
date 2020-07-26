@@ -1,5 +1,3 @@
-// $Id: MEM_Addr.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 // Defines the Internet domain address family address format.
 
 #include "ace/MEM_Addr.h"
@@ -14,6 +12,9 @@
 #include "ace/OS_NS_stdlib.h"
 #include "ace/OS_NS_unistd.h"
 #include "ace/os_include/os_netdb.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -117,7 +118,7 @@ ACE_MEM_Addr::get_addr (void) const
 
 // Set a pointer to the address.
 void
-ACE_MEM_Addr::set_addr (void *addr, int len)
+ACE_MEM_Addr::set_addr (const void *addr, int len)
 {
   ACE_TRACE ("ACE_MEM_Addr::set_addr");
 

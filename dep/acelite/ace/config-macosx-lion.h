@@ -1,14 +1,9 @@
-// $Id: config-macosx-lion.h 97667 2014-03-17 12:38:46Z johnnyw $
 #ifndef ACE_CONFIG_MACOSX_LION_H
 #define ACE_CONFIG_MACOSX_LION_H
 
 #include "ace/config-macosx-leopard.h"
 
 #ifdef __clang__
-# ifdef ACE_HAS_GCC_ATOMIC_BUILTINS
-# undef ACE_HAS_GCC_ATOMIC_BUILTINS
-# endif
-
 # define ACE_ANY_OPS_USE_NAMESPACE
 #endif /* __clang__ */
 

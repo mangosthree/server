@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Refcounted_Auto_Ptr.inl 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/Guard_T.h"
 #include "ace/Log_Category.h"
 

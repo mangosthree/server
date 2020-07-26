@@ -4,8 +4,6 @@
 /**
  *  @file    Sched_Params.h
  *
- *  $Id: Sched_Params.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author David Levine <levine@cs.wustl.edu>
  *  @author Carlos O'Ryan <coryan@uci.edu>
  */
@@ -73,7 +71,6 @@ class ACE_Export ACE_Sched_Params
 public:
   typedef int Policy;
 
-  // = Initialization and termination methods.
   /// Constructor.
   ACE_Sched_Params (const Policy policy,
                     const ACE_Sched_Priority priority,

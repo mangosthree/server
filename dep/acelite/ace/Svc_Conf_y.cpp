@@ -1,4 +1,3 @@
-// $Id: Svc_Conf_y.cpp 96985 2013-04-11 15:50:32Z huangh $
 /* A Bison parser, made by GNU Bison 2.3.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
@@ -104,8 +103,6 @@
 
 /* Copy the first part of user declarations.  */
 
-
-// $Id: Svc_Conf_y.cpp 96985 2013-04-11 15:50:32Z huangh $
 
 #include "ace/Svc_Conf.h"
 
@@ -1904,7 +1901,7 @@ ace_yyreturn:
       ace_yystos[*ace_yyssp], ace_yyvsp);
       YYPOPSTACK (1);
     }
-#ifndef ace_yyoverflow
+#if defined ace_yyoverflow && !defined ACE_LACKS_FREE
   if (ace_yyss != ace_yyssa)
     YYSTACK_FREE (ace_yyss);
 #endif

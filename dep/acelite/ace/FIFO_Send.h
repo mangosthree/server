@@ -4,12 +4,9 @@
 /**
  *  @file    FIFO_Send.h
  *
- *  $Id: FIFO_Send.h 91574 2010-08-30 16:52:24Z shuston $
- *
  *  @author Doug Schmidt
  */
 //==========================================================================
-
 
 #ifndef ACE_FIFO_SEND_H
 #define ACE_FIFO_SEND_H

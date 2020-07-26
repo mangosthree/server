@@ -1,5 +1,3 @@
-// $Id: Process_Mutex.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/Process_Mutex.h"
 #include "ace/Log_Category.h"
 #include "ace/ACE.h"
@@ -36,6 +34,17 @@ ACE_Process_Mutex::unique_name (void)
   // Win32, unnamed synchronization objects are acceptable.
   ACE::unique_name (this, this->name_, ACE_UNIQUE_NAME_LEN);
   return this->name_;
+}
+
+int
+ACE_Process_Mutex::unlink (const ACE_TCHAR *name)
+{
+#if defined (_ACE_USE_SV_SEM)
+  ACE_UNUSED_ARG (name);
+  return 0;
+#else
+  return ACE_Mutex::unlink (name);
+#endif
 }
 
 ACE_Process_Mutex::ACE_Process_Mutex (const char *name, void *arg, mode_t mode)

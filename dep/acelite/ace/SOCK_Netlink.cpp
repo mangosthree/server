@@ -1,5 +1,3 @@
-// $Id: SOCK_Netlink.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include /* */  "ace/SOCK_Netlink.h"
 
 #ifdef ACE_HAS_NETLINK
@@ -10,6 +8,9 @@
 #include "ace/OS_NS_unistd.h"
 #include "ace/SOCK_Netlink.h"
 #include "ace/OS_NS_sys_socket.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/SOCK_Netlink.inl"

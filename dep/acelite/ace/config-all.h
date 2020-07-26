@@ -4,9 +4,7 @@
 /**
  *  @file   config-all.h
  *
- *  $Id: config-all.h 97262 2013-08-09 08:32:10Z johnnyw $
- *
- *  @author (Originally in OS.h)Doug Schmidt <schmidt@cs.wustl.edu>
+ *  @author (Originally in OS.h)Doug Schmidt <d.schmidt@vanderbilt.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...
  */

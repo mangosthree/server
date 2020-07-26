@@ -1,5 +1,3 @@
-// $Id: Connection_Recycling_Strategy.cpp 97246 2013-08-07 07:10:20Z johnnyw $
-
 #include "ace/Connection_Recycling_Strategy.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

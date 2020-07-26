@@ -2,11 +2,9 @@
 /**
  * @file Condition_Attributes.cpp
  *
- * $Id: Condition_Attributes.cpp 96265 2012-11-13 13:31:10Z johnnyw $
- *
  * Originally in Synch.cpp
  *
- * @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ * @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 
 #include "ace/Condition_Thread_Mutex.h"

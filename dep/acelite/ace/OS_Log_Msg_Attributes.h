@@ -4,8 +4,6 @@
 /**
  *  @file    OS_Log_Msg_Attributes.h
  *
- *  $Id: OS_Log_Msg_Attributes.h 97874 2014-09-08 12:10:55Z johnnyw $
- *
  *  @author Carlos O'Ryan
  */
 //=============================================================================

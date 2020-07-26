@@ -4,8 +4,6 @@
 /**
  *  @file    DLL_Manager.h
  *
- *  $Id: DLL_Manager.h 97888 2014-09-11 10:29:17Z mcorino $
- *
  *  @author Don Hinton <dhinton@ieee.org>
  */
 //=============================================================================
@@ -20,7 +18,6 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "ace/Auto_Ptr.h"
 #include "ace/Containers_T.h"
 #include "ace/SString.h"
 #include "ace/os_include/os_dlfcn.h"
@@ -30,7 +27,6 @@
 #endif /* ACE_MT_SAFE */
 
 #define ACE_DEFAULT_DLL_MANAGER_SIZE 1024
-
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -52,14 +48,12 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
  * Most of this class came from the original ACE_DLL class.  ACE_DLL
  * is now just an interface that passed all it's calls either directly
  * or via ACE_DLL_Manager to this class for execution.
- *
  */
 class ACE_Export ACE_DLL_Handle
 {
 public:
-
   /// Error stack. Fixed size should suffice. Ignores any errors exceeding the size.
-  typedef ACE_Fixed_Stack < ACE_TString, 10 >  ERROR_STACK;
+  typedef ACE_Fixed_Stack <ACE_TString, 10> ERROR_STACK;
 
   /// Default construtor.
   ACE_DLL_Handle (void);
@@ -142,8 +136,9 @@ public:
    */
   ACE_SHLIB_HANDLE get_handle (bool become_owner = false);
 
-private:
+  ACE_ALLOC_HOOK_DECLARE;
 
+private:
   /// Returns a string explaining why <symbol> or <open>
   /// failed in @a err.  This is used internal to print out the error to the log,
   /// but since this object is shared, we can't store or return the error
@@ -156,12 +151,30 @@ private:
   void get_dll_names (const ACE_TCHAR *dll_name,
                       ACE_Array<ACE_TString> &try_names);
 
+  /**
+   * This method opens and dynamically links a library/DLL.
+   * @param dll_name  The filename or path of the DLL to load.
+   * @param open_mode  Flags to alter the actions taken when loading the DLL.
+   *        The possible values are:
+   *        @li @c RTLD_LAZY (this the default): loads identifier symbols but
+   *            not the symbols for functions, which are loaded dynamically
+   *            on demand.
+   *        @li @c RTLD_NOW: performs all necessary relocations when
+   *            @a dll_name is first loaded
+   *        @li @c RTLD_GLOBAL: makes symbols available for relocation
+   *            processing of any other DLLs.
+   * @param errors Optional address of an error stack to collect any errors
+   *        encountered.
+   * @retval false On failure
+   * @retval true On success
+   */
+  bool open_i (const ACE_TCHAR *dll_name, int open_mode, ERROR_STACK* errors);
+
   /// Disallow copying and assignment since we don't handle them.
   ACE_DLL_Handle (const ACE_DLL_Handle &);
   void operator= (const ACE_DLL_Handle &);
 
 private:
-
   /// Keep track of how many ACE_DLL objects have a reference to this
   /// dll.
   sig_atomic_t refcount_;
@@ -217,7 +230,6 @@ class ACE_Framework_Repository;
  *
  *  ACE_DLL_UNLOAD_POLICY_DEFAULT - Default policy allows dlls to control
  *  their own destinies, but will unload those that don't make a choice eagerly.
- *
  */
 class ACE_Export ACE_DLL_Manager
 {
@@ -251,8 +263,9 @@ public:
   /// refcounts.
   void unload_policy (u_long unload_policy);
 
-protected:
+  ACE_ALLOC_HOOK_DECLARE;
 
+protected:
   /// Default constructor.
   ACE_DLL_Manager (int size = ACE_DLL_Manager::DEFAULT_SIZE);
 
@@ -272,7 +285,6 @@ protected:
   int unload_dll (ACE_DLL_Handle *dll_handle, int force_unload = 0);
 
 private:
-
   /// Close the singleton instance.
   static void close_singleton (void);
 
@@ -281,7 +293,6 @@ private:
   void operator= (const ACE_DLL_Manager &);
 
 private:
-
   /// Vector containing all loaded handle objects.
   ACE_DLL_Handle **handle_vector_;
 

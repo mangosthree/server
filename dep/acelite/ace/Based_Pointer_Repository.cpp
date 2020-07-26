@@ -1,11 +1,13 @@
-// $Id: Based_Pointer_Repository.cpp 97383 2013-10-23 08:44:20Z mhengstmengel $
-
 #include "ace/Map_Manager.h"
 #include "ace/Based_Pointer_Repository.h"
 #include "ace/Guard_T.h"
 #include "ace/Null_Mutex.h"
 #include "ace/Synch_Traits.h"
 #include "ace/RW_Thread_Mutex.h"
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -32,7 +34,11 @@ public:
 
   /// Synchronize concurrent access to the map.
   ACE_SYNCH_MUTEX lock_;
+
+  ACE_ALLOC_HOOK_DECLARE;
 };
+
+ACE_ALLOC_HOOK_DEFINE(ACE_Based_Pointer_Repository_Rep);
 
 ACE_Based_Pointer_Repository::ACE_Based_Pointer_Repository (void)
 {

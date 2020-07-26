@@ -1,5 +1,3 @@
-// $Id: Sig_Adapter.cpp 96257 2012-11-12 13:35:09Z johnnyw $
-
 #include "ace/Sig_Adapter.h"
 
 ACE_Sig_Adapter::ACE_Sig_Adapter (ACE_Sig_Action &sa, int sigkey)
@@ -35,6 +33,8 @@ ACE_Sig_Adapter::ACE_Sig_Adapter (ACE_Sig_Handler_Ex sig_func,
 ACE_Sig_Adapter::~ACE_Sig_Adapter ()
 {
 }
+
+ACE_ALLOC_HOOK_DEFINE(ACE_Sig_Adapter)
 
 int
 ACE_Sig_Adapter::sigkey (void)

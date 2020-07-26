@@ -4,8 +4,6 @@
 /**
  *  @file    MEM_SAP.h
  *
- *  $Id: MEM_SAP.h 92090 2010-09-29 14:10:45Z johnnyw $
- *
  *  @author Nanbor Wang <nanbor@cs.wustl.edu>
  */
 //=============================================================================
@@ -74,8 +72,6 @@ public:
 class ACE_Export ACE_MEM_SAP
 {
 public:
-  // = Initialization and termination methods.
-
   typedef ACE_Malloc_T<ACE_MMAP_MEMORY_POOL, ACE_Process_Mutex, ACE_PI_Control_Block> MALLOC_TYPE;
   typedef ACE_MMAP_Memory_Pool_Options MALLOC_OPTIONS;
 

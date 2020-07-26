@@ -4,8 +4,6 @@
 /**
  *  @file    Functor.h
  *
- *  $Id: Functor.h 95761 2012-05-15 18:23:04Z johnnyw $
- *
  *   Non-templatized classes and class template specializations for
  *   implementing function objects that are used in  various places
  *   in ACE.  There are currently two major categories of function
@@ -16,11 +14,10 @@
  *  Non-templatized classes for implementing the GoF Command Pattern,
  *  also known as functors or function objects.
  *
- *
  *  @author Chris Gill <cdgill@cs.wustl.edu>
  *  @author Based on Command Pattern implementations originally done by
  *  @author Carlos O'Ryan <coryan@cs.wustl.edu>
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  *  @author Sergio Flores-Gaitan <sergio@cs.wustl.edu>
  *  @author and on STL-style functor implementations originally done by
  *  @author Irfan Pyarali  <irfan@cs.wustl.edu>
@@ -60,7 +57,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_Command_Base
 {
 public:
-  // = Initialization and termination methods.
   /// Default constructor.
   ACE_Command_Base (void);
 
@@ -204,6 +200,32 @@ public:
   unsigned long operator () (unsigned long t) const;
 };
 
+#if (ACE_SIZEOF_LONG == 8)
+/**
+ * @brief Function object for hashing a long long number
+ */
+template<>
+class ACE_Export ACE_Hash<long long>
+{
+public:
+  /// Simply returns t
+  unsigned long operator () (long long t) const;
+};
+#endif /* ACE_SIZEOF_LONG == 8 */
+
+#if (ACE_SIZEOF_LONG == 8)
+/**
+ * @brief Function object for hashing an unsigned long long number
+ */
+template<>
+class ACE_Export ACE_Hash<unsigned long long>
+{
+public:
+  /// Simply returns t
+  unsigned long operator () (unsigned long long t) const;
+};
+#endif /* ACE_SIZEOF_LONG == 8 */
+
 #if (ACE_SIZEOF_LONG < 8)
 /**
  * @brief Function object for hashing a signed 64-bit number
@@ -253,8 +275,7 @@ public:
 };
 
 /**
- * @brief Function object for hashing a void *
- */
+ * @brief Function object for hashing a void */
 template<>
 class ACE_Export ACE_Hash<void *>
 {

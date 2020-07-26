@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: config-win32-mingw64.h 97440 2013-11-27 12:16:41Z mcorino $
-
 //
 // The following configuration file is designed to work for win32 and win64
 // platforms using gcc/g++ with mingw64 (http://http://mingw-w64.sourceforge.net/).
@@ -124,8 +122,12 @@
 #define ACE_LACKS_PDHMSG_H
 #define ACE_LACKS_STRTOK_R
 #define ACE_LACKS_LOCALTIME_R
+#define ACE_LACKS_GMTIME_R
+#define ACE_LACKS_ASCTIME_R
 #define ACE_HAS_NONCONST_WCSDUP
 #define ACE_ISCTYPE_EQUIVALENT ::_isctype
+
+#define ACE_HAS_PTHREAD_SIGMASK_PROTOTYPE
 
 #define ACE_INT64_FORMAT_SPECIFIER_ASCII "%I64d"
 #define ACE_UINT64_FORMAT_SPECIFIER_ASCII "%I64u"

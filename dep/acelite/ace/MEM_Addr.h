@@ -4,8 +4,6 @@
 /**
  *  @file    MEM_Addr.h
  *
- *  $Id: MEM_Addr.h 97326 2013-09-11 07:52:09Z johnnyw $
- *
  *  @author Nanbor Wang <nanbor@cs.wustl.edu>
  */
 //==========================================================================
@@ -36,7 +34,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_MEM_Addr : public ACE_Addr
 {
 public:
-  // = Initialization methods.
   /// Default constructor.
   ACE_MEM_Addr (void);
 
@@ -78,7 +75,7 @@ public:
   virtual void *get_addr (void) const;
 
   /// Set a pointer to the address.
-  virtual void set_addr (void *, int len);
+  virtual void set_addr (const void *, int len);
 
   /// Transform the external ACE_MEM_Addr address into string
   /// format.
@@ -107,7 +104,21 @@ public:
    */
   const char *get_host_name (void) const;
 
-  /// Return the "dotted decimal" external address.
+  /**
+   * Return the "dotted decimal" external Internet address representation of
+   * the hostname storing it in the @a addr (which is assumed to be
+   * @a addr_size bytes long).  This version is reentrant.
+   */
+  const char *get_host_addr (char *addr, int addr_size) const;
+
+  /**
+   * Return the "dotted decimal" external Internet address representation of
+   * the hostname.  This version is non-reentrant since it returns a
+   * pointer to a static data area.  You should therefore either
+   * (1) do a "deep copy" of the address returned by get_host_addr(), e.g.,
+   * using strdup() or (2) use the "reentrant" version of
+   * get_host_addr() described above.
+   */
   const char *get_host_addr (void) const;
 
   /// Return the 4-byte external IP address, converting it into host byte

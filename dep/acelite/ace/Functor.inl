@@ -4,19 +4,16 @@
 /**
  *  @file    Functor.inl
  *
- *  $Id: Functor.inl 95763 2012-05-16 06:43:51Z johnnyw $
- *
  *  Inlinable method definitions for non-templatized classes
  *  and template specializations implementing the GOF Command Pattern,
  *  and STL-style functors.
- *
  *
  *  @author Chris Gill           <cdgill@cs.wustl.edu>
  *
  * Based on Command Pattern implementations originally done by
  *
  * Carlos O'Ryan        <coryan@cs.wustl.edu>
- * Douglas C. Schmidt   <schmidt@cs.wustl.edu>
+ * Douglas C. Schmidt   <d.schmidt@vanderbilt.edu>
  * Sergio Flores-Gaitan <sergio@cs.wustl.edu>
  *
  * and on STL-style functor implementations originally done by
@@ -106,6 +103,22 @@ ACE_Hash<unsigned long>::operator () (unsigned long t) const
 {
   return t;
 }
+
+#if (ACE_SIZEOF_LONG == 8)
+ACE_INLINE unsigned long
+ACE_Hash<long long>::operator () (long long t) const
+{
+  return static_cast<unsigned long> (t);
+}
+#endif /* ACE_SIZEOF_LONG == 8 */
+
+#if (ACE_SIZEOF_LONG == 8)
+ACE_INLINE unsigned long
+ACE_Hash<unsigned long long>::operator () (unsigned long long t) const
+{
+  return static_cast<unsigned long> (t);
+}
+#endif /* ACE_SIZEOF_LONG == 8 */
 
 // This #if needs to match the one in Functor.h
 #if (ACE_SIZEOF_LONG < 8)

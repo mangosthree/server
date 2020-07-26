@@ -4,8 +4,6 @@
 /**
  *  @file    Logging_Strategy.h
  *
- *  $Id: Logging_Strategy.h 96985 2013-04-11 15:50:32Z huangh $
- *
  *  @author Prashant Jain <pjain@cs.wustl.edu>
  *  @author Orlando Ribeiro <oribeiro@inescporto.pt>
  */
@@ -205,10 +203,10 @@ protected:
   ACE_Log_Msg *log_msg_;
 };
 
-ACE_END_VERSIONED_NAMESPACE_DECL
-
 ACE_STATIC_SVC_DECLARE_EXPORT(ACE, ACE_Logging_Strategy)
 
 ACE_FACTORY_DECLARE (ACE, ACE_Logging_Strategy)
+
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* ACE_LOGGING_STRATEGY_H */

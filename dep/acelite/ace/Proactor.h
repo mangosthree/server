@@ -4,8 +4,6 @@
 /**
  *  @file    Proactor.h
  *
- *  $Id: Proactor.h 95332 2011-12-15 11:09:41Z mcorino $
- *
  *  @author Irfan Pyarali <irfan@cs.wustl.edu>
  *  @author Tim Harrison <harrison@cs.wustl.edu>
  *  @author Alexander Babu Arulanthu <alex@cs.wustl.edu>
@@ -124,7 +122,7 @@ protected:
  * @brief A manager for asynchronous event demultiplexing.
  *
  * See the Proactor pattern description at
- * http://www.cs.wustl.edu/~schmidt/proactor.ps.gz for more
+ * http://www.dre.vanderbilt.edu/~schmidt/PDF/proactor.pdf for more
  * details.
  */
 class ACE_Export ACE_Proactor

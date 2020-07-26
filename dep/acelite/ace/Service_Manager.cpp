@@ -1,5 +1,3 @@
-// $Id: Service_Manager.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/Service_Manager.h"
 
 #include "ace/Get_Opt.h"
@@ -80,11 +78,11 @@ ACE_Service_Manager::info (ACE_TCHAR **strp, size_t length) const
       return -1;
     }
 
-  ACE_OS::sprintf (buf,
-                   ACE_TEXT ("%d/%s %s"),
-                   sa.get_port_number (),
-                   ACE_TEXT ("tcp"),
-                   ACE_TEXT ("# lists all services in the daemon\n"));
+  ACE_OS::snprintf (buf, BUFSIZ,
+                    ACE_TEXT ("%d/%s %s"),
+                    sa.get_port_number (),
+                    ACE_TEXT ("tcp"),
+                    ACE_TEXT ("# lists all services in the daemon\n"));
 
   if (*strp == 0 && (*strp = ACE_OS::strdup (buf)) == 0)
     {

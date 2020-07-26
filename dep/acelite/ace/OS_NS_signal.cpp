@@ -1,5 +1,3 @@
-// $Id: OS_NS_signal.cpp 97246 2013-08-07 07:10:20Z johnnyw $
-
 #include "ace/OS_NS_signal.h"
 
 #if !defined (ACE_HAS_INLINED_OSCALLS)

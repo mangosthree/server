@@ -1,5 +1,3 @@
-// $Id: POSIX_CB_Proactor.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/POSIX_CB_Proactor.h"
 
 #if defined (ACE_HAS_AIO_CALLS) && !defined (ACE_HAS_BROKEN_SIGEVENT_STRUCT)

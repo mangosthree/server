@@ -1,5 +1,3 @@
-// $Id: Based_Pointer_T.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #ifndef ACE_BASED_POINTER_T_CPP
 #define ACE_BASED_POINTER_T_CPP
 
@@ -14,6 +12,8 @@
 #endif /* __ACE_INLINE__ */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ACE_ALLOC_HOOK_DEFINE_Tc(ACE_Based_Pointer_Basic)
 
 template <class CONCRETE>
 ACE_Based_Pointer<CONCRETE>::ACE_Based_Pointer (void)

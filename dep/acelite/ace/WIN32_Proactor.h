@@ -4,8 +4,6 @@
 /**
  *  @file    WIN32_Proactor.h
  *
- *  $Id: WIN32_Proactor.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Irfan Pyarali (irfan@cs.wustl.edu)
  *  @author Tim Harrison (harrison@cs.wustl.edu)
  *  @author Alexander Babu Arulanthu <alex@cs.wustl.edu>
@@ -46,7 +44,7 @@ class ACE_WIN32_Proactor_Timer_Handler;
  * @brief A manager for asynchronous event demultiplexing on Win32.
  *
  * See the Proactor pattern description at
- * http://www.cs.wustl.edu/~schmidt/PDF/proactor.pdf for more
+ * http://www.dre.vanderbilt.edu/~schmidt/PDF/proactor.pdf for more
  * details.
  */
 class ACE_Export ACE_WIN32_Proactor : public ACE_Proactor_Impl

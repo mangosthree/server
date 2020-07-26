@@ -1,5 +1,3 @@
-// $Id: Svc_Handler.cpp 97075 2013-04-24 15:01:48Z schmidt $
-
 #ifndef ACE_SVC_HANDLER_CPP
 #define ACE_SVC_HANDLER_CPP
 

@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: Obstack.cpp 97400 2013-10-31 10:44:50Z mhengstmengel $
-
 #include "ace/Obstack.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

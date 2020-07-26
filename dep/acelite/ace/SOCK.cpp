@@ -1,7 +1,8 @@
-// $Id: SOCK.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/SOCK.h"
 #include "ace/Log_Category.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/SOCK.inl"

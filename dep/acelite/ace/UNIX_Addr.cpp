@@ -1,10 +1,12 @@
-// $Id: UNIX_Addr.cpp 91286 2010-08-05 09:04:31Z johnnyw $
-
 #include "ace/UNIX_Addr.h"
 
 
 
 #if !defined (ACE_LACKS_UNIX_DOMAIN_SOCKETS)
+
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/UNIX_Addr.inl"
@@ -16,14 +18,12 @@ ACE_ALLOC_HOOK_DEFINE(ACE_UNIX_Addr)
 
 // Set a pointer to the address.
 void
-ACE_UNIX_Addr::set_addr (void *addr, int len)
+ACE_UNIX_Addr::set_addr (const void *addr, int len)
 {
   ACE_TRACE ("ACE_UNIX_Addr::set_addr");
 
   this->ACE_Addr::base_set (AF_UNIX, len);
-  ACE_OS::memcpy ((void *) &this->unix_addr_,
-                  (void *) addr,
-                  len);
+  ACE_OS::memcpy (&this->unix_addr_, addr, len);
 }
 
 // Return a pointer to the underlying address.
@@ -41,6 +41,10 @@ ACE_UNIX_Addr::string_to_addr (const char addr[])
 {
   ACE_OS::strsncpy (this->unix_addr_.sun_path, addr,
                     sizeof this->unix_addr_.sun_path);
+
+  this->set_size (sizeof this->unix_addr_ -
+                  sizeof (this->unix_addr_.sun_path) +
+                  ACE_OS::strlen (this->unix_addr_.sun_path));
   return 0;
 }
 
@@ -71,7 +75,8 @@ ACE_UNIX_Addr::dump (void) const
 // Do nothing constructor.
 
 ACE_UNIX_Addr::ACE_UNIX_Addr (void)
-  : ACE_Addr (AF_UNIX, sizeof this->unix_addr_)
+  : ACE_Addr (AF_UNIX,
+              sizeof this->unix_addr_ - sizeof (this->unix_addr_.sun_path))
 {
   (void) ACE_OS::memset ((void *) &this->unix_addr_,
                          0,

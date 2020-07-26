@@ -1,5 +1,3 @@
-// $Id: Dynamic_Service_Dependency.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/ACE.h"
 #include "ace/DLL_Manager.h"
 #include "ace/Dynamic_Service_Dependency.h"

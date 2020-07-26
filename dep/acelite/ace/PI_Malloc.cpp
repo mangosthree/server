@@ -1,5 +1,3 @@
-// $Id: PI_Malloc.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #ifndef ACE_PI_MALLOC_CPP
 #define ACE_PI_MALLOC_CPP
 

@@ -4,9 +4,7 @@
 /**
  *  @file    RW_Process_Mutex.h
  *
- *  $Id: RW_Process_Mutex.h 87487 2009-11-12 07:54:39Z johnnyw $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 

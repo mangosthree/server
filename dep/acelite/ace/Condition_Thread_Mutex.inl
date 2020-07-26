@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: Condition_Thread_Mutex.inl 96174 2012-10-03 08:25:59Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE int

@@ -1,5 +1,3 @@
-// $Id: WIN32_Asynch_IO.cpp 97957 2014-11-04 17:45:11Z johnnyw $
-
 #include "ace/WIN32_Asynch_IO.h"
 
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) && \

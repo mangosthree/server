@@ -3,11 +3,8 @@
 /**
  *  @file    Codeset_IBM1047.cpp
  *
- *  $Id: Codeset_IBM1047.cpp 91286 2010-08-05 09:04:31Z johnnyw $
- *
  *  Defines the arrays required to convert between ISO8859 (aka
  *  Latin/1) and IBM1047 (aka EBCDIC).
- *
  *
  *  @author Jim Rogers (jrogers@viasoft.com)
  */
@@ -120,6 +117,42 @@ ACE_IBM1047_ISO8859::read_string (ACE_InputCDR& in,
 
   x = 0;
   return 0;
+}
+
+ACE_CDR::Boolean
+ACE_IBM1047_ISO8859::read_string (ACE_InputCDR& in,
+                                  std::string & x)
+{
+#if defined (ACE_HAS_CPP11)
+  ACE_CDR::ULong len;
+
+  in.read_ulong (len);
+
+  if (len > 0)
+    {
+      try
+        {
+          x.resize (len);
+        }
+      catch (const std::bad_alloc&)
+        {
+          return false;
+        }
+
+      if (this->read_char_array (in, &x[0], len))
+      {
+        x.resize (len-1); // drop terminating '\0' read from stream
+        return true;
+      }
+
+      delete [] x;
+    }
+
+  x.clear ();
+  return false;
+#else
+  return this->ACE_Char_Codeset_Translator::read_string (in, x);
+#endif
 }
 
 ACE_CDR::Boolean
@@ -237,6 +270,42 @@ ACE_ISO8859_IBM1047::read_string (ACE_InputCDR &in,
 
   x = 0;
   return 0;
+}
+
+ACE_CDR::Boolean
+ACE_ISO8859_IBM1047::read_string (ACE_InputCDR& in,
+                                  std::string & x)
+{
+#if defined (ACE_HAS_CPP11)
+  ACE_CDR::ULong len;
+
+  in.read_ulong (len);
+
+  if (len > 0)
+    {
+      try
+        {
+          x.resize (len);
+        }
+      catch (const std::bad_alloc&)
+        {
+          return false;
+        }
+
+      if (this->read_char_array (in, &x[0], len))
+      {
+        x.resize (len-1); // drop terminating '\0' read from stream
+        return true;
+      }
+
+      delete [] x;
+    }
+
+  x.clear ();
+  return false;
+#else
+  return this->ACE_Char_Codeset_Translator::read_string (in, x);
+#endif
 }
 
 ACE_CDR::Boolean

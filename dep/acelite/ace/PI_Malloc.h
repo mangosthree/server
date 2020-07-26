@@ -4,8 +4,6 @@
 /**
  *  @file   PI_Malloc.h
  *
- *  $Id: PI_Malloc.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Priyanka Gontla <pgontla@ece.uci.edu>
  *  @author Based on code that existed in other ACE files.
  */
@@ -103,7 +101,6 @@ public:
   class ACE_Export ACE_Name_Node
   {
   public:
-    // = Initialization methods.
     /// Constructor.
     ACE_Name_Node (const char *name,
                    char *name_ptr,

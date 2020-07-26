@@ -4,9 +4,7 @@
 /**
  *  @file    Log_Msg_Callback.h
  *
- *  $Id: Log_Msg_Callback.h 97246 2013-08-07 07:10:20Z johnnyw $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //=============================================================================
 

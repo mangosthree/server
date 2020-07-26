@@ -3,8 +3,6 @@
 /**
  *  @file   Stack_Trace.h
  *
- *  $Id: Stack_Trace.h 97426 2013-11-12 09:59:19Z johnnyw $
- *
  *  @author Chris Cleeland (cleeland.ociweb.com)
  */
 //=============================================================================
@@ -24,6 +22,8 @@
 #  ifndef ACE_STACK_TRACE_SYMBUFSIZ
 #    define ACE_STACK_TRACE_SYMBUFSIZ 4096
 #  endif
+
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 /**
  *  @class ACE_Stack_Trace
@@ -101,6 +101,8 @@ private:
 
   void generate_trace (ssize_t starting_frame_offset, size_t num_frames);
 };
+
+ACE_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 #endif /* ACE_STACK_TRACE_H */

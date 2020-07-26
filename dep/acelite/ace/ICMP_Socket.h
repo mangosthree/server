@@ -4,8 +4,6 @@
 /**
  *  @file    ICMP_Socket.h
  *
- *  $Id: ICMP_Socket.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Robert S. Iakobashvili <coroberti@gmail.com> <coroberti@walla.co.il>
  *  @author Gonzalo A. Diethelm <gonzalo.diethelm@aditiva.com>
  */
@@ -39,8 +37,6 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_ICMP_Socket : public ACE_SOCK
 {
 public:
-  // = Initialization methods.
-
   /**
    * @name Data transfer routines.
    *

@@ -6,8 +6,6 @@
  *
  *  format of directory entries
  *
- *  $Id: os_dirent.h 93359 2011-02-11 11:33:12Z mcorino $
- *
  *  @author Don Hinton <dhinton@dresystems.com>
  *  @author This code was originally in various places including ace/OS.h.
  */
@@ -66,8 +64,10 @@ struct ACE_DIR {
   /// The name of the directory we are looking into
   ACE_TCHAR *directory_name_;
 
+#if !defined (ACE_MQX)
   /// Remember the handle between calls.
   HANDLE current_handle_;
+#endif
 
   /// The struct for the results
   ACE_DIRENT *dirent_;

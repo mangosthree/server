@@ -1,5 +1,3 @@
-// $Id: Dynamic_Service_Base.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/Dynamic_Service_Base.h"
 #include "ace/ACE.h"
 #include "ace/Service_Config.h"

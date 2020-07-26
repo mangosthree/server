@@ -1,7 +1,4 @@
 // -*- C++ -*-
-//
-// $Id: Process.inl 97660 2014-03-17 09:49:33Z johnnyw $
-
 #include "ace/ACE.h"
 #include "ace/OS_NS_sys_wait.h"
 #include "ace/OS_NS_signal.h"
@@ -220,6 +217,11 @@ ACE_Process_Options::set_thread_attributes (void)
 #else
   return 0;
 #endif /* !ACE_HAS_WINCE */
+}
+
+ACE_INLINE HANDLE ACE_Process_Options::get_user_token (void) const
+{
+  return user_token_;
 }
 
 #else /* !defined (ACE_WIN32) */

@@ -1,5 +1,3 @@
-// $Id: SOCK_Dgram_Bcast.cpp 97798 2014-07-03 10:57:43Z johnnyw $
-
 #include "ace/SOCK_Dgram_Bcast.h"
 
 #include "ace/Log_Category.h"
@@ -8,6 +6,9 @@
 #include "ace/os_include/net/os_if.h"
 #include "ace/OS_NS_netdb.h"
 #include "ace/OS_Memory.h"
+#if defined (ACE_HAS_ALLOC_HOOKS)
+# include "ace/Malloc_Base.h"
+#endif /* ACE_HAS_ALLOC_HOOKS */
 
 #if !defined (__ACE_INLINE__)
 #include "ace/SOCK_Dgram_Bcast.inl"
@@ -26,6 +27,8 @@ ACE_Bcast_Node::ACE_Bcast_Node (ACE_INET_Addr &addr,
 {
   ACE_TRACE ("ACE_Bcast_Node::ACE_Bcast_Node");
 }
+
+ACE_ALLOC_HOOK_DEFINE(ACE_Bcast_Node)
 
 void
 ACE_SOCK_Dgram_Bcast::dump (void) const
@@ -152,7 +155,11 @@ ACE_SOCK_Dgram_Bcast::mk_broadcast (const ACE_TCHAR *host_name)
         return -1;
       else
         ACE_OS::memcpy ((char *) &host_addr.sin_addr.s_addr,
+# ifdef ACE_HOSTENT_H_ADDR
+                        (char *) hp->ACE_HOSTENT_H_ADDR,
+# else
                         (char *) hp->h_addr,
+# endif
                         hp->h_length);
     }
 

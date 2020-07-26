@@ -1,5 +1,3 @@
-// $Id: System_Time.cpp 97308 2013-09-01 00:58:08Z mesnier_p $
-
 #include "ace/System_Time.h"
 #include "ace/MMAP_Memory_Pool.h"
 #include "ace/Malloc_T.h"

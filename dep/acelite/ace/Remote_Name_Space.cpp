@@ -1,4 +1,3 @@
-// $Id: Remote_Name_Space.cpp 96985 2013-04-11 15:50:32Z huangh $
 #include "ace/Remote_Name_Space.h"
 #include "ace/Auto_Ptr.h"
 #include "ace/Log_Category.h"
@@ -109,9 +108,15 @@ ACE_Remote_Name_Space::resolve (const ACE_NS_WString &name,
 
   ACE_NS_WString temp (reply.value (), reply.value_len () / sizeof (ACE_WCHAR_T));
   value = temp;
+#if defined (ACE_HAS_ALLOC_HOOKS)
+  ACE_ALLOCATOR_RETURN (type,
+                        static_cast<char*>(ACE_Allocator::instance()->malloc(sizeof(char) * (reply.type_len () + 1))),
+                        -1);
+#else
   ACE_NEW_RETURN (type,
                   char[reply.type_len () + 1],
                   -1);
+#endif /* ACE_HAS_ALLOC_HOOKS */
   ACE_OS::strcpy (type, reply.type ());
   return 0;
 }
@@ -361,6 +366,8 @@ ACE_Remote_Name_Space::~ACE_Remote_Name_Space (void)
 {
   ACE_TRACE ("ACE_Remote_Name_Space::~ACE_Remote_Name_Space");
 }
+
+ACE_ALLOC_HOOK_DEFINE(ACE_Remote_Name_Space)
 
 void
 ACE_Remote_Name_Space::dump (void) const

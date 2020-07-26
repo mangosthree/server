@@ -4,8 +4,6 @@
 /**
  *  @file    Atomic_Op_GCC_T.h
  *
- *  $Id: Atomic_Op_GCC_T.h 95225 2011-12-05 20:25:15Z shuston $
- *
  *  @author Johnny Willemsen  <jwillemsen@remedy.nl
  */
 //=============================================================================
@@ -106,14 +104,12 @@ protected:
   ACE_Atomic_Op_GCC (const ACE_Atomic_Op_GCC<T> &c);
 
 private:
-
   // This function cannot be supported by this template specialization.
   // If you need access to an underlying lock, use the ACE_Atomic_Op_Ex
   // template instead.
   ACE_Thread_Mutex &mutex (void);
 
 private:
-
   /// Current object decorated by the atomic op.
   volatile T value_;
 };

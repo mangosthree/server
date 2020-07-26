@@ -6,8 +6,6 @@
  *
  *  declarations for sysctl
  *
- *  $Id: os_sysctl.h 97827 2014-08-02 17:34:32Z johnnyw $
- *
  *  @author Johnny Willemsen  <jwillemsen@remedy.nl>
  */
 //=============================================================================

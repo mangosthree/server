@@ -1,6 +1,4 @@
 // -*- C++ -*-
-// $Id: IO_Cntl_Msg.inl 97589 2014-02-14 18:38:51Z johnnyw $
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE

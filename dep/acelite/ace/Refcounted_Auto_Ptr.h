@@ -4,8 +4,6 @@
 /**
  *  @file    Refcounted_Auto_Ptr.h
  *
- *  $Id: Refcounted_Auto_Ptr.h 81179 2008-03-31 19:00:29Z iliyan $
- *
  *  @author John Tucker <JTucker@infoglide.com>
  */
 //=============================================================================
@@ -47,9 +45,6 @@ template <class X, class ACE_LOCK>
 class ACE_Refcounted_Auto_Ptr
 {
 public:
-
-  // = Initialization and termination methods.
-
   /// Constructor that initializes an ACE_Refcounted_Auto_Ptr to
   /// the specified pointer value.
   explicit ACE_Refcounted_Auto_Ptr (X *p = 0);

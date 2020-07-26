@@ -1,10 +1,9 @@
-// $Id: Monitor_Point_Registry.cpp 96985 2013-04-11 15:50:32Z huangh $
-
 #include "ace/Monitor_Point_Registry.h"
 
 #if defined (ACE_HAS_MONITOR_FRAMEWORK) && (ACE_HAS_MONITOR_FRAMEWORK == 1)
 
 #include "ace/Monitor_Base.h"
+#include "ace/Guard_T.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -1,6 +1,4 @@
 /* -*- C++ -*- */
-// $Id: config-freebsd.h 95430 2012-01-11 20:45:28Z mcorino $
-
 // The following configuration file is designed to work for FreeBSD
 
 #ifndef ACE_CONFIG_H
@@ -13,6 +11,11 @@
 
 // Make sure we source in the OS version.
 #include <osreldate.h>
+
+// Make sure system defined macro (not related to ACE_OS::atop)
+// is not defined during ACE compilation
+#include <machine/param.h>
+#undef atop
 
 #include "ace/config-posix.h"
 
@@ -100,12 +103,6 @@
 #if !defined ACE_LACKS_PERFECT_MULTICAST_FILTERING
 # define ACE_LACKS_PERFECT_MULTICAST_FILTERING 1
 #endif /* ACE_LACKS_PERFECT_MULTICAST_FILTERING */
-
-#if defined (__ia64) || defined (__x86_64__)
-# define ACE_UINT64_FORMAT_SPECIFIER_ASCII "%lu"
-# define ACE_SSIZE_T_FORMAT_SPECIFIER_ASCII "%ld"
-# define ACE_SIZE_T_FORMAT_SPECIFIER_ASCII "%lu"
-#endif /* __ia64 */
 
 //
 // Version specific settings

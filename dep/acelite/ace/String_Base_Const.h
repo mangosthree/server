@@ -4,8 +4,6 @@
 /**
  *  @file    String_Base_Const.h
  *
- *  $Id: String_Base_Const.h 80826 2008-03-04 14:51:23Z wotte $
- *
  *  @author Nanbor Wang <nanbor@cs.wustl.edu>
  */
 //=============================================================================
@@ -22,7 +20,6 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 /**
@@ -37,13 +34,11 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Export ACE_String_Base_Const
 {
 public:
-
   typedef ACE_Allocator::size_type size_type;
 
   /// Constant that denotes case where no such character position
   /// exists.
   static size_type const npos;
-
 };
 
 ACE_END_VERSIONED_NAMESPACE_DECL

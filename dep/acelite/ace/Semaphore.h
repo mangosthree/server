@@ -4,11 +4,9 @@
 /**
  *  @file    Semaphore.h
  *
- *  $Id: Semaphore.h 81014 2008-03-19 11:41:31Z johnnyw $
- *
  *   Moved from Synch.h.
  *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  */
 //==========================================================================
 
@@ -36,7 +34,6 @@ class ACE_Time_Value;
 class ACE_Export ACE_Semaphore
 {
 public:
-  // = Initialization and termination.
   /// Initialize the semaphore, with initial value of "count".
   ACE_Semaphore (unsigned int count = 1, // By default make this unlocked.
                  int type = USYNC_THREAD,

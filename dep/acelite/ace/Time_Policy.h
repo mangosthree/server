@@ -4,8 +4,6 @@
 /**
  *  @file Time_Policy.h
  *
- *  $Id: Time_Policy.h 96061 2012-08-16 09:36:07Z mcorino $
- *
  *  @author Carlos O'Ryan <coryan@atdesk.com>
  *  @author Martin Corino <mcorino@remedy.nl>
  */
@@ -44,7 +42,6 @@ public:
  * @class ACE_HR_Time_Policy
  *
  * @brief Implement a time policy based on the ACE Highres timer.
- *
  */
 class ACE_Export ACE_HR_Time_Policy
 {
@@ -119,8 +116,12 @@ public:
   /// Set delegate
   void set_delegate (ACE_Dynamic_Time_Policy_Base const * delegate);
 
-  /// Copy policy
-  ACE_Delegating_Time_Policy& operator =(ACE_Delegating_Time_Policy const & pol);
+#if defined (ACE_HAS_CPP11)
+  ACE_Delegating_Time_Policy (const ACE_Delegating_Time_Policy&) = default;
+  ACE_Delegating_Time_Policy (ACE_Delegating_Time_Policy&&) = default;
+  ACE_Delegating_Time_Policy& operator = (ACE_Delegating_Time_Policy const &) = default;
+  ACE_Delegating_Time_Policy &operator = (ACE_Delegating_Time_Policy&&)  = default;
+#endif /* ACE_HAS_CPP11 */
 
   /// Noop. Just here to satisfy backwards compatibility demands.
   void set_gettimeofday (ACE_Time_Value (*gettimeofday)(void));
@@ -133,7 +134,6 @@ private:
  *
  * @brief Abstract base class for dynamically loaded and/or shared
  *        time policies.
- *
  */
 class ACE_Export ACE_Dynamic_Time_Policy_Base
 {

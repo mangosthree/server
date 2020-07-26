@@ -4,9 +4,7 @@
 /**
  *  @file  OS.h
  *
- *  $Id: OS.h 97130 2013-05-13 17:36:26Z mesnier_p $
- *
- *  @author Douglas C. Schmidt <schmidt@cs.wustl.edu>
+ *  @author Douglas C. Schmidt <d.schmidt@vanderbilt.edu>
  *  @author Jesper S. M|ller<stophph@diku.dk>
  *  @author and a cast of thousands...
  */

@@ -4,8 +4,6 @@
 /**
  *  @file    pre.h
  *
- *  $Id: pre.h 97602 2014-02-19 20:24:30Z johnnyw $
- *
  *  @author Christopher Kohlhoff <chris@kohlhoff.com>
  *
  *  This file saves the original alignment rules and changes the alignment
@@ -19,7 +17,7 @@
 # pragma pack (push, 8)
 #elif defined (__BORLANDC__)
 # pragma option push -a8 -b -Ve- -Vx- -w-rvl -w-rch -w-ccc -w-obs -w-aus -w-pia -w-inl -w-sig
-# if (__BORLANDC__ >= 0x660) && (__BORLANDC__ <= 0x680)
+# if (__BORLANDC__ >= 0x660) && (__BORLANDC__ <= 0x730)
 // False warning: Function defined with different linkage, reported to
 // Embarcadero as QC 117740
 #  pragma option push -w-8127

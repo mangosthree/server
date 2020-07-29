@@ -52,6 +52,7 @@
 #include "CellImpl.h"
 #include "movement/MoveSplineInit.h"
 #include "CreatureLinkingMgr.h"
+#include "DisableMgr.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
@@ -223,7 +224,9 @@ void Creature::AddToWorld()
 
 #ifdef ENABLE_ELUNA
     if (!inWorld)
+    {
         sEluna->OnAddToWorld(this);
+    }
 #endif /* ENABLE_ELUNA */
 }
 
@@ -231,7 +234,9 @@ void Creature::RemoveFromWorld()
 {
 #ifdef ENABLE_ELUNA
     if (IsInWorld())
+    {
         sEluna->OnRemoveFromWorld(this);
+    }
 #endif /* ENABLE_ELUNA */
 
     ///- Remove the creature from the accessor
@@ -279,7 +284,9 @@ void Creature::RemoveCorpse()
     }
 
     if (m_isCreatureLinkingTrigger)
+    {
         GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_DESPAWN, this);
+    }
 
     if (InstanceData* mapInstance = GetInstanceData())
     {
@@ -399,7 +406,9 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
     else if (!data || data->equipmentId == 0)
     {
         if (cinfo->EquipmentTemplateId== 0)
+        {
             LoadEquipment(normalInfo->EquipmentTemplateId); // use default from normal template if diff does not have any
+        }
         else
             LoadEquipment(cinfo->EquipmentTemplateId);      // else use from diff template
     }
@@ -695,9 +704,13 @@ void Creature::Update(uint32 update_diff, uint32 diff)
         case ALIVE:
         {
             if (m_aggroDelay <= update_diff)
+            {
                 m_aggroDelay = 0;
+            }
             else
+            {
                 m_aggroDelay -= update_diff;
+            }
 
             if (m_IsDeadByDefault)
             {
@@ -824,7 +837,9 @@ void Creature::RegeneratePower()
                 addValue = uint32(Spirit / 5.0f + 17.0f) * ManaIncreaseRate;
             }
             else
+            {
                 addValue = maxValue / 3.0f;
+            }
             break;
         case POWER_ENERGY:
             // ToDo: for vehicle this is different - NEEDS TO BE FIXED!
@@ -882,8 +897,7 @@ void Creature::RegenerateHealth()
     if (GetCharmerOrOwnerGuid())
     {
         float HealthIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_HEALTH);
-        float Spirit = GetStat(STAT_SPIRIT);
-
+        float Spirit = GetStat(STAT_SPIRIT); //for charmed creatures, spirit = 0!
         if (GetPower(POWER_MANA) > 0)
         {
             addvalue = uint32(Spirit * 0.25 * HealthIncreaseRate);
@@ -1155,7 +1169,9 @@ bool Creature::CanInteractWithBattleMaster(Player* pPlayer, bool msg) const
             case BATTLEGROUND_RL:
             case BATTLEGROUND_SA:
             case BATTLEGROUND_DS:
-            case BATTLEGROUND_RV: pPlayer->PlayerTalkClass->SendGossipMenu(10024, GetObjectGuid()); break;
+            case BATTLEGROUND_RV:
+                pPlayer->PlayerTalkClass->SendGossipMenu(10024, GetObjectGuid());
+                break;
             default: break;
         }
         return false;
@@ -1326,12 +1342,18 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
             displayId != cinfo->ModelId[2] && displayId != cinfo->ModelId[3])
         {
             for (int i = 0; i < MAX_CREATURE_MODEL && displayId; ++i)
+            {
                 if (cinfo->ModelId[i])
+                {
                     if (CreatureModelInfo const* minfo = sObjectMgr.GetCreatureModelInfo(cinfo->ModelId[i]))
+                    {
                         if (displayId == minfo->modelid_other_gender)
                         {
                             displayId = 0;
                         }
+                    }
+                }
+            }
         }
         else
         {
@@ -1558,9 +1580,11 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth /*= 10
         mana = minmana + uint32(rellevel * (maxmana - minmana));
     }
 
-    health *= _GetHealthMod(rank); // Apply custom config settting
+    health *= _GetHealthMod(rank); // Apply custom config setting
     if (health < 1)
+    {
         health = 1;
+    }
 
     //////////////////////////////////////////////////////////////////////////
     // Set values
@@ -1594,17 +1618,22 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth /*= 10
             case POWER_ENERGY:      maxValue = POWER_ENERGY_DEFAULT * cinfo->PowerMultiplier; break;
             case POWER_RUNE:        maxValue = 0; break;
             case POWER_RUNIC_POWER: maxValue = 0; break;
+            default:                break; // make compilers happy
         }
 
         uint32 value = maxValue;
 
         // For non regenerating powers set 0
         if ((i == POWER_ENERGY || i == POWER_MANA) && !IsRegeneratingPower())
+        {
             value = 0;
+        }
 
         // Mana requires an extra field to be set
         if (i == POWER_MANA)
+        {
             SetCreateMana(value);
+        }
 
         SetMaxPower(Powers(i), maxValue);
         SetPower(Powers(i), value);
@@ -2027,12 +2056,11 @@ void Creature::SetDeathState(DeathState s)
 
 void Creature::Respawn()
 {
+    RemoveCorpse();
     if (!IsInWorld())                                       // Could be removed as part of a pool (in which case respawn-time is handled with pool-system)
     {
         return;
     }
-
-    RemoveCorpse();
 
     if (IsDespawned())
     {
@@ -2290,7 +2318,7 @@ SpellEntry const* Creature::ReachWithSpellCure(Unit* pVictim)
 
         float dist = GetCombatDistance(pVictim, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
 
-        // if(!isInFront( pVictim, range ) && spellInfo->AttributesEx )
+        // if(!IsInFront( pVictim, range ) && spellInfo->AttributesEx )
         //    continue;
         if (dist > range || dist < minrange)
         {
@@ -2592,7 +2620,9 @@ bool Creature::LoadCreatureAddon(bool reload)
     SetByteValue(UNIT_FIELD_BYTES_2, 0, cainfo->sheath_state);
 
     if (cainfo->pvp_state != 0)
+    {
         SetByteValue(UNIT_FIELD_BYTES_2, 1, cainfo->pvp_state);
+    }
 
     // SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
     // SetByteValue(UNIT_FIELD_BYTES_2, 3, 0);
@@ -2834,7 +2864,9 @@ void Creature::AddCreatureSpellCooldown(uint32 spellid)
     }
 
     if(uint32 category = spellInfo->GetCategory())
+    {
         _AddCreatureCategoryCooldown(category, time(NULL));
+    }
 }
 
 bool Creature::HasCategoryCooldown(uint32 spell_id) const
@@ -3269,8 +3301,7 @@ void Creature::AddToRemoveListInMaps(uint32 db_guid, CreatureData const* data)
 
 struct SpawnCreatureInMapsWorker
 {
-    SpawnCreatureInMapsWorker(uint32 guid, CreatureData const* data)
-        : i_guid(guid), i_data(data) {}
+    SpawnCreatureInMapsWorker(uint32 guid, CreatureData const* data) : i_guid(guid), i_data(data) {}
 
     void operator()(Map* map)
     {
@@ -3384,9 +3415,13 @@ void Creature::SetLevitate(bool enable)
 void Creature::SetSwim(bool enable)
 {
     if (enable)
+    {
         m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);
+    }
     else
+    {
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_SWIMMING);
+    }
 
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_START_SWIM : SMSG_SPLINE_MOVE_STOP_SWIM);
     data << GetPackGUID();
@@ -3396,9 +3431,13 @@ void Creature::SetSwim(bool enable)
 void Creature::SetCanFly(bool enable)
 {
     if (enable)
+    {
         m_movementInfo.AddMovementFlag(MOVEFLAG_CAN_FLY);
+    }
     else
+    {
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_CAN_FLY);
+    }
 
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_FLYING : SMSG_SPLINE_MOVE_UNSET_FLYING, 9);
     data << GetPackGUID();
@@ -3408,9 +3447,13 @@ void Creature::SetCanFly(bool enable)
 void Creature::SetFeatherFall(bool enable)
 {
     if (enable)
+    {
         m_movementInfo.AddMovementFlag(MOVEFLAG_SAFE_FALL);
+    }
     else
+    {
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_SAFE_FALL);
+    }
 
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_FEATHER_FALL : SMSG_SPLINE_MOVE_NORMAL_FALL);
     data << GetPackGUID();
@@ -3420,9 +3463,13 @@ void Creature::SetFeatherFall(bool enable)
 void Creature::SetHover(bool enable)
 {
     if (enable)
+    {
         m_movementInfo.AddMovementFlag(MOVEFLAG_HOVER);
+    }
     else
+    {
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_HOVER);
+    }
 
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_HOVER : SMSG_SPLINE_MOVE_UNSET_HOVER, 9);
     data << GetPackGUID();

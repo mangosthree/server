@@ -344,9 +344,13 @@ bool ChatHandler::HandleTriggerCommand(char* args)
             SendSysMessage(LANG_TRIGGER_REQ_KEYS_HEROIC);
 
             if (at->heroicKey)
+            {
                 ShowItemListHelper(at->heroicKey, loc_idx, pl);
+            }
             if (at->heroicKey2)
+            {
                 ShowItemListHelper(at->heroicKey2, loc_idx, pl);
+            }
         }
 
         if (at->requiredQuestHeroic)
@@ -1311,7 +1315,9 @@ bool ChatHandler::HandleGameObjectPhaseCommand(char* args)
 
     // by DB guid
     if (GameObjectData const* go_data = sObjectMgr.GetGOData(lowguid))
+    {
         obj = GetGameObjectWithGuid(lowguid, go_data->id);
+    }
 
     if (!obj)
     {
@@ -1431,7 +1437,9 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
                     if (AchievementCriteriaEntryList const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
                         for (AchievementCriteriaEntryList::const_iterator itr = criteriaList->begin(); itr != criteriaList->end(); ++itr)
                             if (mgr->IsCompletedCriteria(*itr, achEntry))
+                            {
                                 criteriaMask[((*itr)->showOrder - 1) / 32] |= (1 << (((*itr)->showOrder - 1) % 32));
+                            }
 
                 for (int i = 0; i < 4; ++i)
                 {
@@ -1439,16 +1447,22 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
                 }
             }
             else
+            {
                 ss << "0:0:0:0:";
+            }
         }
 
         ss << "|h[" << name << " " << localeNames[loc] << "]|h|r";
     }
     else
+    {
         ss << achEntry->ID << " - " << name << " " << localeNames[loc];
+    }
 
     if (target && date)
+    {
         ss << " [" << TimeToTimestampStr(*date) << "]";
+    }
 
     SendSysMessage(ss.str().c_str());
 }
@@ -1480,12 +1494,16 @@ bool ChatHandler::HandleLookupAchievementCommand(char* args)
     {
         AchievementEntry const* achEntry = sAchievementStore.LookupEntry(id);
         if (!achEntry)
+        {
             continue;
+        }
 
         int loc = GetSessionDbcLocale();
         std::string name = achEntry->name[loc];
         if (name.empty())
+        {
             continue;
+        }
 
         if (!Utf8FitTo(name, wnamepart))
         {
@@ -1493,14 +1511,20 @@ bool ChatHandler::HandleLookupAchievementCommand(char* args)
             for (; loc < MAX_LOCALE; ++loc)
             {
                 if (loc == GetSessionDbcLocale())
+                {
                     continue;
+                }
 
                 name = achEntry->name[loc];
                 if (name.empty())
+                {
                     continue;
+                }
 
                 if (Utf8FitTo(name, wnamepart))
+                {
                     break;
+                }
             }
         }
 
@@ -1513,7 +1537,9 @@ bool ChatHandler::HandleLookupAchievementCommand(char* args)
     }
 
     if (counter == 0)                                       // if counter == 0 then we found nth
+    {
         SendSysMessage(LANG_COMMAND_ACHIEVEMENT_NOTFOUND);
+    }
     return true;
 }
 
@@ -2607,7 +2633,9 @@ bool ChatHandler::HandleNpcSetPhaseCommand(char* args)
     pCreature->SetPhaseMask(phasemask, true);
 
     if (pCreature->HasStaticDBSpawnData())
+    {
         pCreature->SaveToDB();
+    }
 
     return true;
 }
@@ -2700,7 +2728,9 @@ bool ChatHandler::HandleNpcSubNameCommand(char* /*args*/)
     /* Temp. disabled
 
     if (!*args)
+    {
         args = "";
+    }
 
     if (strlen((char*)args)>75)
     {
@@ -2884,7 +2914,9 @@ bool ChatHandler::HandleModifyPhaseCommand(char* args)
 
     Unit* target = getSelectedUnit();
     if (!target)
+    {
         target = m_session->GetPlayer();
+    }
 
     // check online security
     else if (target->GetTypeId() == TYPEID_PLAYER && HasLowerSecurity((Player*)target))
@@ -3128,7 +3160,9 @@ bool ChatHandler::HandleTicketCommand(char* args)
         ticket->SetResponseText(args);
 
         if (Player* pl = sObjectMgr.GetPlayer(ticket->GetPlayerGuid()))
+        {
             pl->GetSession()->SendGMResponse(ticket);
+        }
 
         return true;
     }
@@ -3285,14 +3319,20 @@ inline void UnsummonVisualWaypoints(Player const* player, ObjectGuid ownerGuid)
     for (std::list<Creature*>::iterator itr = waypoints.begin(); itr != waypoints.end(); ++itr)
     {
         if ((*itr)->GetSubtype() != CREATURE_SUBTYPE_TEMPORARY_SUMMON)
+        {
             continue;
+        }
 
         TemporarySummonWaypoint* wpTarget = dynamic_cast<TemporarySummonWaypoint*>(*itr);
         if (!wpTarget)
+        {
             continue;
+        }
 
         if (wpTarget->GetSummonerGuid() == ownerGuid)
+        {
             wpTarget->UnSummon();
+        }
     }
 }
 
@@ -3320,7 +3360,9 @@ bool ChatHandler::HandleWpAddCommand(char* args)
 
     CreatureInfo const* waypointInfo = ObjectMgr::GetCreatureTemplate(VISUAL_WAYPOINT);
     if (!waypointInfo || waypointInfo->GetHighGuid() != HIGHGUID_UNIT)
+    {
         return false;                                       // must exist as normal creature in mangos.sql 'creature_template'
+    }
 
     Creature* targetCreature = getSelectedCreature();
     WaypointPathOrigin wpDestination = PATH_NO_PATH;        ///< into which storage
@@ -3354,7 +3396,9 @@ bool ChatHandler::HandleWpAddCommand(char* args)
             wpPointId = wpTarget->GetWaypointId() + 1;      // Insert as next waypoint
         }
         else // normal creature selected
+        {
             wpOwner = targetCreature;
+        }
     }
     else //!targetCreature - first argument must be dbGuid
     {
@@ -3396,11 +3440,15 @@ bool ChatHandler::HandleWpAddCommand(char* args)
         {
             uint32 src = (uint32)PATH_NO_PATH;
             if (ExtractOptUInt32(&args, src, src))
+            {
                 wpDestination = (WaypointPathOrigin)src;
+            }
             else // pathId provided but no destination
             {
                 if (wpPathId != 0)
+                {
                     wpDestination = PATH_FROM_ENTRY;        // Multiple Paths must only be assigned by entry
+                }
             }
         }
 
@@ -3408,7 +3456,9 @@ bool ChatHandler::HandleWpAddCommand(char* args)
         {
             if (wpOwner->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
                 if (WaypointMovementGenerator<Creature> const* wpMMGen = dynamic_cast<WaypointMovementGenerator<Creature> const*>(wpOwner->GetMotionMaster()->GetCurrent()))
+                {
                     wpMMGen->GetPathInformation(wpPathId, wpDestination);
+                }
 
             // Get information about default path if no current path. If no default path, prepare data dependendy on uniqueness
             if (wpDestination == PATH_NO_PATH && !sWaypointMgr.GetDefaultPath(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), &wpDestination))
@@ -3418,7 +3468,9 @@ bool ChatHandler::HandleWpAddCommand(char* args)
                 {
                     QueryResult* result = WorldDatabase.PQuery("SELECT COUNT(`id`) FROM `creature` WHERE `id` = %u", wpOwner->GetEntry());
                     if (result && result->Fetch()[0].GetUInt32() != 1)
+                    {
                         wpDestination = PATH_FROM_GUID;
+                    }
                     delete result;
                 }
             }
@@ -3501,7 +3553,9 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
 
     CreatureInfo const* waypointInfo = ObjectMgr::GetCreatureTemplate(VISUAL_WAYPOINT);
     if (!waypointInfo || waypointInfo->GetHighGuid() != HIGHGUID_UNIT)
-        { return false; }                                       // must exist as normal creature in mangos.sql 'creature_template'
+    {
+        return false;                                        // must exist as normal creature in mangos.sql 'creature_template'
+    }
 
     // first arg: add del text emote spell waittime move
     char* subCmd_str = ExtractLiteralArg(&args);
@@ -3598,10 +3652,14 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
     {
         if (wpOwner->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
             if (WaypointMovementGenerator<Creature> const* wpMMGen = dynamic_cast<WaypointMovementGenerator<Creature> const*>(wpOwner->GetMotionMaster()->GetCurrent()))
+            {
                 wpMMGen->GetPathInformation(wpPathId, wpSource);
+            }
 
         if (wpSource == PATH_NO_PATH)
+        {
             sWaypointMgr.GetDefaultPath(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), &wpSource);
+        }
     }
 
     WaypointPath const* wpPath = sWaypointMgr.GetPathFromOrigin(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPathId, wpSource);
@@ -3637,7 +3695,9 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
         sWaypointMgr.DeleteNode(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpId, wpPathId, wpSource);
 
         if (TemporarySummonWaypoint* wpCreature = dynamic_cast<TemporarySummonWaypoint*>(targetCreature))
+        {
             wpCreature->UnSummon();
+        }
 
         if (wpPath->empty())
         {
@@ -3686,7 +3746,9 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
         }
 
         if (!sWaypointMgr.SetNodeScriptId(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpId, wpPathId, wpSource, scriptId))
+        {
             PSendSysMessage(LANG_WAYPOINT_INFO_UNK_SCRIPTID, scriptId);
+        }
     }
     else if (subCmd == "orientation")
     {
@@ -3729,7 +3791,9 @@ bool ChatHandler::HandleWpShowCommand(char* args)
 
     CreatureInfo const* waypointInfo = ObjectMgr::GetCreatureTemplate(VISUAL_WAYPOINT);
     if (!waypointInfo || waypointInfo->GetHighGuid() != HIGHGUID_UNIT)
-        { return false; }                                       // must exist as normal creature in mangos.sql 'creature_template'
+    {
+        return false;                                        // must exist as normal creature in mangos.sql 'creature_template'
+    }
 
     // first arg: info, on, off, first, last
 
@@ -3752,7 +3816,9 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         {
             uint32 src;
             if (ExtractOptUInt32(&args, src, (uint32)PATH_NO_PATH))
+            {
                 wpOrigin = (WaypointPathOrigin)src;
+            }
         }
     }
     else    // Guid must be provided
@@ -3766,7 +3832,9 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         {
             uint32 src = (uint32)PATH_NO_PATH;
             if (ExtractOptUInt32(&args, src, src))
+            {
                 wpOrigin = (WaypointPathOrigin)src;
+            }
         }
 
         // Params now parsed, check them
@@ -3822,12 +3890,16 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         wpPathId = wpTarget->GetPathId();
     }
     else
+    {
         wpOwner = targetCreature;
+    }
 
     // Get the path
     WaypointPath* wpPath = NULL;
     if (wpOrigin != PATH_NO_PATH)                           // Might have been provided by param
+    {
         wpPath = sWaypointMgr.GetPathFromOrigin(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPathId, wpOrigin);
+    }
     else
     {
         if (wpOwner->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
@@ -3838,7 +3910,9 @@ bool ChatHandler::HandleWpShowCommand(char* args)
             }
 
         if (wpOrigin == PATH_NO_PATH)
+        {
             wpPath = sWaypointMgr.GetDefaultPath(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), &wpOrigin);
+        }
     }
 
     if (!wpPath || wpPath->empty())
@@ -3865,7 +3939,9 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         PSendSysMessage(LANG_WAYPOINT_INFO_ORI, point->second.orientation);
         PSendSysMessage(LANG_WAYPOINT_INFO_SCRIPTID, point->second.script_id);
         if (wpOrigin == PATH_FROM_EXTERNAL)
+        {
             PSendSysMessage(LANG_WAYPOINT_INFO_AISCRIPT, wpOwner->GetScriptName().c_str());
+        }
         if (WaypointBehavior* behaviour = point->second.behavior)
         {
             PSendSysMessage(" ModelId1: %u", behaviour->model1);
@@ -3971,7 +4047,9 @@ bool ChatHandler::HandleWpExportCommand(char* args)
             wpPathId = wpTarget->GetPathId();
         }
         else // normal creature selected
+        {
             wpOwner = targetCreature;
+        }
     }
     else
     {
@@ -4022,11 +4100,15 @@ bool ChatHandler::HandleWpExportCommand(char* args)
         {
             uint32 src = (uint32)PATH_NO_PATH;
             if (ExtractOptUInt32(&args, src, src))
+            {
                 wpOrigin = (WaypointPathOrigin)src;
+            }
             else // pathId provided but no destination
             {
                 if (wpPathId != 0)
+                {
                     wpOrigin = PATH_FROM_ENTRY;             // Multiple Paths must only be assigned by entry
+                }
             }
         }
 
@@ -4034,9 +4116,13 @@ bool ChatHandler::HandleWpExportCommand(char* args)
         {
             if (wpOwner->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
                 if (WaypointMovementGenerator<Creature> const* wpMMGen = dynamic_cast<WaypointMovementGenerator<Creature> const*>(wpOwner->GetMotionMaster()->GetCurrent()))
+                {
                     wpMMGen->GetPathInformation(wpPathId, wpOrigin);
+                }
             if (wpOrigin == PATH_NO_PATH)
+            {
                 sWaypointMgr.GetDefaultPath(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), &wpOrigin);
+            }
         }
     }
 
@@ -4085,11 +4171,17 @@ bool ChatHandler::HandleWpExportCommand(char* args)
         outfile << itr->second.orientation << ",";
         outfile << itr->second.delay << ",";
         if (wpOrigin != PATH_FROM_EXTERNAL)                 // Only for normal waypoints
+        {
             outfile << itr->second.script_id << ")";
+        }
         if (countDown > 1)
+        {
             outfile << ",\n";
+        }
         else
+        {
             outfile << ";\n";
+        }
     }
 
     PSendSysMessage(LANG_WAYPOINT_EXPORTED);
@@ -4647,7 +4739,9 @@ bool ChatHandler::HandleLearnAllRecipesCommand(char* args)
         if ((skillInfo->categoryId != SKILL_CATEGORY_PROFESSION &&
                 skillInfo->categoryId != SKILL_CATEGORY_SECONDARY) ||
                 !skillInfo->canLink)                        // only prof with recipes have set
-            { continue; }
+                {
+                    continue;
+                }
 
         int loc = GetSessionDbcLocale();
         name = skillInfo->name[loc];
@@ -5315,9 +5409,13 @@ bool ChatHandler::HandleWaterwalkCommand(char* args)
     }
 
     if (value)
-        { player->SetWaterWalk(true); }                         // ON
+    {
+        player->SetWaterWalk(true);                          // ON
+    }
     else
-        { player->SetWaterWalk(false); }                        // OFF
+    {
+        player->SetWaterWalk(false);                         // OFF
+    }
 
     PSendSysMessage(LANG_YOU_SET_WATERWALK, args, GetNameLink(player).c_str());
     if (needReportToTarget(player))
@@ -5362,7 +5460,9 @@ bool ChatHandler::HandleLookupTitleCommand(char* args)
             int loc = GetSessionDbcLocale();
             std::string name = titleInfo->name[loc];
             if (name.empty())
+            {
                 continue;
+            }
 
             if (!Utf8FitTo(name, wnamepart))
             {
@@ -5370,14 +5470,20 @@ bool ChatHandler::HandleLookupTitleCommand(char* args)
                 for (; loc < MAX_LOCALE; ++loc)
                 {
                     if (loc == GetSessionDbcLocale())
+                    {
                         continue;
+                    }
 
                     name = titleInfo->name[loc];
                     if (name.empty())
+                    {
                         continue;
+                    }
 
                     if (Utf8FitTo(name, wnamepart))
+                    {
                         break;
+                    }
                 }
             }
 
@@ -5394,16 +5500,22 @@ bool ChatHandler::HandleLookupTitleCommand(char* args)
 
                 // send title in "id (idx:idx) - [namedlink locale]" format
                 if (m_session)
+                {
                     PSendSysMessage(LANG_TITLE_LIST_CHAT, id, titleInfo->bit_index, id, titleNameStr, localeNames[loc], knownStr, activeStr);
+                }
                 else
+                {
                     PSendSysMessage(LANG_TITLE_LIST_CONSOLE, id, titleInfo->bit_index, titleNameStr, localeNames[loc], knownStr, activeStr);
+                }
 
                 ++counter;
             }
         }
     }
     if (counter == 0)                                       // if counter == 0 then we found nth
+    {
         SendSysMessage(LANG_COMMAND_NOTITLEFOUND);
+    }
     return true;
 }
 
@@ -5544,7 +5656,9 @@ bool ChatHandler::HandleTitlesSetMaskCommand(char* args)
 
     for (uint32 i = 1; i < sCharTitlesStore.GetNumRows(); ++i)
         if (CharTitlesEntry const* tEntry = sCharTitlesStore.LookupEntry(i))
+        {
             titles2 &= ~(uint64(1) << tEntry->bit_index);
+        }
 
     titles &= ~titles2;                                     // remove nonexistent titles
 
@@ -5580,7 +5694,9 @@ bool ChatHandler::HandleCharacterTitlesCommand(char* args)
         {
             std::string name = titleInfo->name[loc];
             if (name.empty())
+            {
                 continue;
+            }
 
             char const* activeStr = target && target->GetUInt32Value(PLAYER_CHOSEN_TITLE) == titleInfo->bit_index
                                     ? GetMangosString(LANG_ACTIVE)
@@ -5591,9 +5707,13 @@ bool ChatHandler::HandleCharacterTitlesCommand(char* args)
 
             // send title in "id (idx:idx) - [namedlink locale]" format
             if (m_session)
+            {
                 PSendSysMessage(LANG_TITLE_LIST_CHAT, id, titleInfo->bit_index, id, titleNameStr, localeNames[loc], knownStr, activeStr);
+            }
             else
+            {
                 PSendSysMessage(LANG_TITLE_LIST_CONSOLE, id, titleInfo->bit_index, name.c_str(), localeNames[loc], knownStr, activeStr);
+            }
         }
     }
     return true;
@@ -5678,12 +5798,18 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
             followPath = true;
             para = strtok(NULL, " ");
             if (para && strcmp(para, "straight") == 0)
+            {
                 useStraightPath = true;
+            }
         }
         else if (strcmp(para, "straight") == 0)
+        {
             useStraightPath = true;
+        }
         else if (strcmp(para, "to_me") == 0)
+        {
             unitToPlayer = true;
+        }
         else
         {
             PSendSysMessage("Use '.mmap path go' to move on target.");

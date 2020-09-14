@@ -322,9 +322,13 @@ uint32 ItemPrototype::GetArmor() const
     ArmorLocationEntry const* al = NULL;
 
     if (InventoryType == INVTYPE_ROBE)
+    {
         al = sArmorLocationStore.LookupEntry(INVTYPE_CHEST);
+    }
     else
+    {
         al = sArmorLocationStore.LookupEntry(InventoryType);
+    }
 
     if (!al)
     {
@@ -377,15 +381,23 @@ float ItemPrototype::getDPS() const
             case INVTYPE_WEAPONMAINHAND:
             case INVTYPE_WEAPONOFFHAND:
                 if (Flags2 & ITEM_FLAG2_CASTER_WEAPON)      // caster weapon flag
+                {
                     id = sItemDamageOneHandCasterStore.LookupEntry(ItemLevel);
+                }
                 else
+                {
                     id = sItemDamageOneHandStore.LookupEntry(ItemLevel);
+                }
                 break;
             case INVTYPE_2HWEAPON:
                 if (Flags2 & ITEM_FLAG2_CASTER_WEAPON)      // caster weapon flag
+                {
                     id = sItemDamageTwoHandCasterStore.LookupEntry(ItemLevel);
+                }
                 else
+                {
                     id = sItemDamageTwoHandStore.LookupEntry(ItemLevel);
+                }
                 break;
             case INVTYPE_AMMO:
                 id = sItemDamageAmmoStore.LookupEntry(ItemLevel);
@@ -502,9 +514,13 @@ void Item::UpdateDuration(Player* owner, uint32 diff)
 #endif /* ENABLE_ELUNA */
 
         if (uint32 newItemId = sObjectMgr.GetItemExpireConvert(GetEntry()))
+        {
             owner->ConvertItem(this, newItemId);
+        }
         else
+        {
             owner->DestroyItem(GetBagSlot(), GetSlot(), true);
+        }
         return;
     }
 
@@ -690,7 +706,9 @@ bool Item::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
     if (GetItemRandomPropertyId() < 0)
     {
         if (UpdateItemSuffixFactor())
+        {
             need_save = true;
+        }
     }
 
     // Remove bind flag for items vs NO_BIND set
@@ -1135,7 +1153,9 @@ bool Item::IsBoundByEnchant() const
         }
 
         if (enchant_slot > PRISMATIC_ENCHANTMENT_SLOT && enchant_slot < PROP_ENCHANTMENT_SLOT_0)
+        {
             continue;
+        }
 
         SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if (!enchantEntry)
@@ -1182,12 +1202,16 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
     if (equippedItems->EquippedItemClass != -1)             // -1 == any item class
     {
         if (equippedItems->EquippedItemClass != int32(proto->Class))
-            { return false; }                                   //  wrong item class
+        {
+            return false;                                    //  wrong item class
+        }
 
         if (equippedItems->EquippedItemSubClassMask != 0)   // 0 == any subclass
         {
             if ((equippedItems->EquippedItemSubClassMask & (1 << proto->SubClass)) == 0)
-                { return false; }                               // subclass not present in mask
+            {
+                return false;                                // subclass not present in mask
+            }
         }
     }
 
@@ -1197,7 +1221,9 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
     if (equippedItems->EquippedItemInventoryTypeMask != 0 && (spellInfo->GetTargets() & TARGET_FLAG_ITEM))    // 0 == any inventory type
     {
         if ((equippedItems->EquippedItemInventoryTypeMask  & (1 << proto->InventoryType)) == 0)
-            { return false; }                                   // inventory type not present in mask
+        {
+            return false;                                    // inventory type not present in mask
+        }
     }
 
     return true;
@@ -1238,10 +1264,14 @@ void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint
     {
         Player* owner = GetOwner();
         if (uint32 oldEnchant = GetEnchantmentId(slot))
+        {
             owner->GetSession()->SendEnchantmentLog(GetOwnerGuid(), ObjectGuid(), GetEntry(), oldEnchant);
+        }
 
         if (id)
+        {
             owner->GetSession()->SendEnchantmentLog(GetOwnerGuid(), casterGuid, GetEntry(), id);
+        }
     }
 
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1 + slot * MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_ID_OFFSET, id);
@@ -1309,14 +1339,18 @@ bool Item::GemsFitSockets() const
         if (!enchant_id)
         {
             if (SocketColor) fits &= false;
-            continue;
+            {
+                continue;
+            }
         }
 
         SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if (!enchantEntry)
         {
             if (SocketColor) fits &= false;
-            continue;
+            {
+                continue;
+            }
         }
 
         uint8 GemColor = 0;
@@ -1329,7 +1363,9 @@ bool Item::GemsFitSockets() const
             {
                 GemPropertiesEntry const* gemProperty = sGemPropertiesStore.LookupEntry(gemProto->GemProperties);
                 if (gemProperty)
+                {
                     GemColor = gemProperty->color;
+                }
             }
         }
 
@@ -1345,14 +1381,20 @@ uint8 Item::GetGemCountWithID(uint32 GemID) const
     {
         uint32 enchant_id = GetEnchantmentId(EnchantmentSlot(enchant_slot));
         if (!enchant_id)
+        {
             continue;
+        }
 
         SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if (!enchantEntry)
+        {
             continue;
+        }
 
         if (GemID == enchantEntry->GemID)
+        {
             ++count;
+        }
     }
     return count;
 }
@@ -1364,18 +1406,26 @@ uint8 Item::GetGemCountWithLimitCategory(uint32 limitCategory) const
     {
         uint32 enchant_id = GetEnchantmentId(EnchantmentSlot(enchant_slot));
         if (!enchant_id)
+        {
             continue;
+        }
 
         SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if (!enchantEntry)
+        {
             continue;
+        }
 
         ItemPrototype const* gemProto = ObjectMgr::GetItemPrototype(enchantEntry->GemID);
         if (!gemProto)
+        {
             continue;
+        }
 
         if (gemProto->ItemLimitCategory == limitCategory)
+        {
             ++count;
+        }
     }
     return count;
 }
@@ -1413,7 +1463,9 @@ void Item::SendTimeUpdate(Player* owner)
 Item* Item::CreateItem(uint32 item, uint32 count, Player const* player, uint32 randomPropertyId)
 {
     if (count < 1)
-        { return NULL; }                                        // don't create item at zero count
+    {
+        return NULL;                                         // don't create item at zero count
+    }
 
     if (ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(item))
     {
@@ -1657,7 +1709,9 @@ uint32 Item::GetSpecialPrice(ItemPrototype const* proto, uint32 minimumPrice /*=
     uint32 cost = 0;
 
     if (proto->Flags2 & ITEM_FLAG2_HAS_NORMAL_PRICE)
+    {
         cost = proto->SellPrice;
+    }
     else
     {
         bool normalPrice = true;
@@ -1670,19 +1724,29 @@ uint32 Item::GetSpecialPrice(ItemPrototype const* proto, uint32 minimumPrice /*=
             {
                 ItemClassEntry const* classEntry = sItemClassStore.LookupEntry(proto->Class);
                 if (classEntry)
+                {
                     cost *= classEntry->PriceFactor;
+                }
                 else
+                {
                     cost = 0;
+                }
             }
             else
+            {
                 cost /= 4 * proto->BuyCount;
+            }
         }
         else
+        {
             cost = proto->SellPrice;
+        }
     }
 
     if (cost < minimumPrice)
+    {
         cost = minimumPrice;
+    }
 
     return cost;
 }

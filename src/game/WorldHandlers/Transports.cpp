@@ -283,7 +283,9 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
         {
             // remember first stop frame
             if (firstStop == -1)
+            {
                 firstStop = i;
+            }
             lastStop = i;
         }
     }
@@ -293,9 +295,13 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
     {
         int j = (i + lastStop) % keyFrames.size();
         if (keyFrames[j].node->actionFlag == 2)
+        {
             tmpDist = 0;
+        }
         else
+        {
             tmpDist += keyFrames[j].distFromPrev;
+        }
         keyFrames[j].distSinceStop = tmpDist;
     }
 
@@ -305,20 +311,30 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
         tmpDist += keyFrames[(j + 1) % keyFrames.size()].distFromPrev;
         keyFrames[j].distUntilStop = tmpDist;
         if (keyFrames[j].node->actionFlag == 2)
+        {
             tmpDist = 0;
+        }
     }
 
     for (size_t i = 0; i < keyFrames.size(); ++i)
     {
         if (keyFrames[i].distSinceStop < (30 * 30 * 0.5f))
+        {
             keyFrames[i].tFrom = sqrt(2 * keyFrames[i].distSinceStop);
+        }
         else
+        {
             keyFrames[i].tFrom = ((keyFrames[i].distSinceStop - (30 * 30 * 0.5f)) / 30) + 30;
+        }
 
         if (keyFrames[i].distUntilStop < (30 * 30 * 0.5f))
+        {
             keyFrames[i].tTo = sqrt(2 * keyFrames[i].distUntilStop);
+        }
         else
+        {
             keyFrames[i].tTo = ((keyFrames[i].distUntilStop - (30 * 30 * 0.5f)) / 30) + 30;
+        }
 
         keyFrames[i].tFrom *= 1000;
         keyFrames[i].tTo *= 1000;
@@ -333,7 +349,9 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
     int t = 0;
     bool teleport = false;
     if (keyFrames[keyFrames.size() - 1].node->mapid != keyFrames[0].node->mapid)
+    {
         teleport = true;
+    }
 
     WayPoint pos(keyFrames[0].node->mapid, keyFrames[0].node->x, keyFrames[0].node->y, keyFrames[0].node->z, teleport,
                  keyFrames[0].node->arrivalEventID, keyFrames[0].node->departureEventID);
@@ -372,7 +390,9 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
                     //                    sLog.outString("T: %d, D: %f, x: %f, y: %f, z: %f", t, d, newX, newY, newZ);
                     pos = WayPoint(keyFrames[i].node->mapid, newX, newY, newZ, teleport);
                     if (teleport)
+                    {
                         m_WayPoints[t] = pos;
+                    }
                 }
 
                 if (tFrom < tTo)                            // caught in tFrom dock's "gravitational pull"
@@ -405,9 +425,13 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
         }
 
         if (keyFrames[i + 1].tFrom > keyFrames[i + 1].tTo)
+        {
             t += 100 - ((long)keyFrames[i + 1].tTo % 100);
+        }
         else
+        {
             t += (long)keyFrames[i + 1].tTo % 100;
+        }
 
         bool teleport = false;
         if ((keyFrames[i + 1].node->actionFlag == 1) || (keyFrames[i + 1].node->mapid != keyFrames[i].node->mapid))
@@ -449,7 +473,9 @@ void Transport::MoveToNextWayPoint()
 
     ++m_next;
     if (m_next == m_WayPoints.end())
+    {
         m_next = m_WayPoints.begin();
+    }
 }
 
 void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
@@ -506,7 +532,9 @@ bool Transport::AddPassenger(Player* passenger)
 bool Transport::RemovePassenger(Player* passenger)
 {
     if (m_passengers.erase(passenger))
+    {
         DETAIL_LOG("Player %s removed from transport %s.", passenger->GetName(), GetName());
+    }
     return true;
 }
 
@@ -548,7 +576,9 @@ void Transport::Update(uint32 update_diff, uint32 /*p_time*/)
         m_nextNodeTime = m_curr->first;
 
         if (m_curr == m_WayPoints.begin())
+        {
             DETAIL_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, " ************ BEGIN ************** %s", GetName());
+        }
 
         DETAIL_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, "%s moved to %f %f %f %d", GetName(), m_curr->second.x, m_curr->second.y, m_curr->second.z, m_curr->second.mapid);
     }
@@ -613,6 +643,8 @@ void Transport::DoEventIfAny(WayPointMap::value_type const& node, bool departure
         DEBUG_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, "Taxi %s event %u of node %u of %s \"%s\") path", departure ? "departure" : "arrival", eventid, node.first, GetGuidStr().c_str(), GetName());
 
         if (!sScriptMgr.OnProcessEvent(eventid, this, this, departure))
+        {
             GetMap()->ScriptsStart(DBS_ON_EVENT, eventid, this, this);
+        }
     }
 }

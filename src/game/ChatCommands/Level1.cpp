@@ -657,9 +657,13 @@ bool ChatHandler::HandleAppearCommand(char* args)
             }
 
             if (cMap->IsRaid())
+            {
                 _player->SetRaidDifficulty(target->GetRaidDifficulty());
+            }
             else
+            {
                 _player->SetDungeonDifficulty(target->GetDungeonDifficulty());
+            }
         }
 
         PSendSysMessage(LANG_APPEARING_AT, chrNameLink.c_str());
@@ -778,7 +782,9 @@ bool ChatHandler::HandleModifyHolyPowerCommand(char* args)
 
     PSendSysMessage(LANG_YOU_CHANGE_HOLY_POWER, GetNameLink(chr).c_str(), power, maxPower);
     if (needReportToTarget(chr))
+    {
         ChatHandler(chr).PSendSysMessage(LANG_YOURS_HOLY_POWER_CHANGED, GetNameLink().c_str(), power, maxPower);
+    }
 
     chr->SetPower(POWER_HOLY_POWER, power);
 
@@ -991,7 +997,9 @@ bool ChatHandler::HandleModifyRunicPowerCommand(char* args)
 
     PSendSysMessage(LANG_YOU_CHANGE_RUNIC_POWER, GetNameLink(chr).c_str(), rune / 10, runem / 10);
     if (needReportToTarget(chr))
+    {
         ChatHandler(chr).PSendSysMessage(LANG_YOURS_RUNIC_POWER_CHANGED, GetNameLink().c_str(), rune / 10, runem / 10);
+    }
 
     chr->SetMaxPower(POWER_RUNIC_POWER, runem);
     chr->SetPower(POWER_RUNIC_POWER, rune);
@@ -1411,7 +1419,9 @@ bool ChatHandler::HandleModifyFlyCommand(char* args)
 
     PSendSysMessage(LANG_YOU_CHANGE_FLY_SPEED, modSpeed, GetNameLink(chr).c_str());
     if (needReportToTarget(chr))
+    {
         ChatHandler(chr).PSendSysMessage(LANG_YOURS_FLY_SPEED_CHANGED, GetNameLink().c_str(), modSpeed);
+    }
 
     chr->UpdateSpeed(MOVE_FLIGHT, true, modSpeed, true);
 
@@ -1791,7 +1801,9 @@ bool ChatHandler::HandleModifyMoneyCommand(char* args)
 
             PSendSysMessage(LANG_YOU_TAKE_MONEY, MoneyToString(abs(addmoney)).c_str(), GetNameLink(chr).c_str());
             if (needReportToTarget(chr))
+            {
                 ChatHandler(chr).PSendSysMessage(LANG_YOURS_MONEY_TAKEN, GetNameLink().c_str(), MoneyToString(abs(addmoney)).c_str());
+            }
             chr->SetMoney(newmoney);
         }
     }
@@ -1799,7 +1811,9 @@ bool ChatHandler::HandleModifyMoneyCommand(char* args)
     {
         PSendSysMessage(LANG_YOU_GIVE_MONEY, MoneyToString(addmoney).c_str(), GetNameLink(chr).c_str());
         if (needReportToTarget(chr))
+        {
             ChatHandler(chr).PSendSysMessage(LANG_YOURS_MONEY_GIVEN, GetNameLink().c_str(), MoneyToString(addmoney).c_str());
+        }
 
         if (addmoney >= MAX_MONEY_AMOUNT)
         {
@@ -2603,10 +2617,14 @@ bool ChatHandler::HandleModifyDrunkCommand(char* args)
 
     uint8 drunkValue = (uint8)atoi(args);
     if (drunkValue > 100)
+    {
         drunkValue = 100;
+    }
 
     if (Player* target = getSelectedPlayer())
+    {
         target->SetDrunkValue(drunkValue);
+    }
 
     return true;
 }

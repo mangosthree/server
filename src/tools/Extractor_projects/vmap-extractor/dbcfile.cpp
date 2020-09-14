@@ -108,7 +108,9 @@ DBCFile::~DBCFile()
 {
     delete [] _data;
     if (_file != NULL)
+    {
         SFileCloseFile(_file);
+    }
 }
 
 DBCFile::Record DBCFile::getRecord(size_t id)
@@ -124,7 +126,9 @@ size_t DBCFile::getMaxId()
     size_t maxId = 0;
     for (size_t i = 0; i < getRecordCount(); ++i)
         if (maxId < getRecord(i).getUInt(0))
+        {
             maxId = getRecord(i).getUInt(0);
+        }
 
     return maxId;
 }

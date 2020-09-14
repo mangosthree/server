@@ -14,7 +14,9 @@ MPQFile::MPQFile(HANDLE mpq, const char* filename):
     {
         int error = GetLastError();
         if ( error != ERROR_FILE_NOT_FOUND )
+        {
             fprintf(stderr, "Can't open %s, err=%u!\n", filename, GetLastError());
+        }
         eof = true;
         return;
     }
@@ -84,6 +86,8 @@ void MPQFile::seekRelative(int offset)
 void MPQFile::close()
 {
     if (buffer) delete[] buffer;
-    buffer = 0;
+    {
+        buffer = 0;
+    }
     eof = true;
 }

@@ -180,7 +180,9 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
                 Spell::SendCastResult(_player,spellInfo,cast_count,SPELL_FAILED_NO_VALID_TARGETS);
             // for explicit target spells
             else
+            {
                 Spell::SendCastResult(_player, spellInfo, cast_count, SPELL_FAILED_BAD_TARGETS);
+            }
         }
         return;
     }
@@ -280,7 +282,9 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         stmt.PExecute(pItem->GetGUIDLow());
     }
     else
+    {
         pUser->SendLoot(pItem->GetObjectGuid(), LOOT_CORPSE);
+    }
 }
 
 void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
@@ -414,7 +418,9 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     Unit::AuraList swaps = mover->GetAurasByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
     Unit::AuraList const& swaps2 = mover->GetAurasByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2);
     if (!swaps2.empty())
+    {
         swaps.insert(swaps.end(), swaps2.begin(), swaps2.end());
+    }
 
     for (Unit::AuraList::const_iterator itr = swaps.begin(); itr != swaps.end(); ++itr)
     {
@@ -441,7 +447,9 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     {
         // if rank not found then function return NULL but in explicit cast case original spell can be casted and later failed with appropriate error message
         if (SpellEntry const* actualSpellInfo = sSpellMgr.SelectAuraRankForLevel(spellInfo, target->getLevel()))
+        {
             spellInfo = actualSpellInfo;
+        }
     }
 
     Spell* spell = new Spell(mover, spellInfo, triggeredByAura ? true : false, mover->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : NULL);
@@ -471,7 +479,9 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
     }
 
     if (mover->IsNonMeleeSpellCasted(false))
+    {
         mover->InterruptNonMeleeSpells(false, spellId);
+    }
 }
 
 void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
@@ -530,7 +540,9 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     {
         if (Spell* curSpell = _player->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
             if (curSpell->m_spellInfo->Id == spellId)
+            {
                 _player->InterruptSpell(CURRENT_CHANNELED_SPELL);
+            }
         return;
     }
 
@@ -636,7 +648,9 @@ void WorldSession::HandleTotemDestroyed(WorldPacket& recvPacket)
     }
 
     if (Totem* totem = GetPlayer()->GetTotem(TotemSlot(slotId)))
+    {
         totem->UnSummon();
+    }
 }
 
 void WorldSession::HandleSelfResOpcode(WorldPacket& /*recv_data*/)
@@ -652,7 +666,9 @@ void WorldSession::HandleSelfResOpcode(WorldPacket& /*recv_data*/)
     {
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL));
         if (spellInfo)
+        {
             _player->CastSpell(_player, spellInfo, false);
+        }
 
         _player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
     }
@@ -689,9 +705,13 @@ void WorldSession::HandleSpellClick(WorldPacket& recv_data)
             Unit* target = (itr->second.castFlags & 0x2) ? (Unit*)_player : (Unit*)unit;
 
             if (itr->second.spellId)
+            {
                 caster->CastSpell(target, itr->second.spellId, true);
+            }
             else
+            {
                 sLog.outError("WorldSession::HandleSpellClick: npc_spell_click with entry %u has 0 in spell_id. Not handled custom case?", unit->GetEntry());
+            }
         }
     }
 }
@@ -746,9 +766,13 @@ void WorldSession::HandleGetMirrorimageData(WorldPacket& recv_data)
         data << pPlayer->GetGuildGuid();
 
         if (pPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
+        {
             data << (uint32)0;
+        }
         else
+        {
             data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HEAD);
+        }
 
         data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_SHOULDERS);
         data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_BODY);
@@ -760,9 +784,13 @@ void WorldSession::HandleGetMirrorimageData(WorldPacket& recv_data)
         data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HANDS);
 
         if (pPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
+        {
             data << (uint32)0;
+        }
         else
+        {
             data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_BACK);
+        }
 
         data << (uint32)pPlayer->GetItemDisplayIdInSlot(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_TABARD);
     }

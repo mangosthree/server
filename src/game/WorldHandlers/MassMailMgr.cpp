@@ -110,7 +110,9 @@ void MassMailMgr::Update(bool sendall /*= false*/)
                 task.m_protoMail->SendMailTo(MailReceiver(receiver, receiver_guid), task.m_sender, MAIL_CHECK_MASK_RETURNED);
 
                 if (!sendall)
+                {
                     --maxcount;
+                }
                 break;
             }
 
@@ -122,11 +124,15 @@ void MassMailMgr::Update(bool sendall /*= false*/)
             draft.SendMailTo(MailReceiver(receiver, receiver_guid), task.m_sender, MAIL_CHECK_MASK_RETURNED);
 
             if (!sendall)
+            {
                 --maxcount;
+            }
         }
 
         if (task.m_receivers.empty())
+        {
             m_massMails.pop_front();
+        }
     }
     while (!m_massMails.empty() && (sendall || maxcount > 0));
 }

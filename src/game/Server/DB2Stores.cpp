@@ -73,7 +73,9 @@ inline void LoadDB2(LocalDB2Data& localeData, StoreProblemList1& errors, DB2Stor
         for(uint8 i = 0; fullLocaleNameList[i].name; ++i)
         {
             if (!(localeData.availableDb2Locales & (1 << i)))
+            {
                 continue;
+            }
 
             LocaleNameStr const* localStr = &fullLocaleNameList[i];
 
@@ -95,7 +97,9 @@ inline void LoadDB2(LocalDB2Data& localeData, StoreProblemList1& errors, DB2Stor
             fclose(f);
         }
         else
+        {
             errors.push_back(db2Filename);
+        }
     }
 }
 

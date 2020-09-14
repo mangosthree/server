@@ -814,7 +814,9 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                         {
                             SpellRangeEntry const* spellRange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
                             if (spellRange)
+                            {
                                 m_LastSpellMaxRange = spellRange->maxRange;
+                            }
                         }
                     }
                     break;
@@ -1024,7 +1026,9 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
                 for (ThreatList::const_iterator i = threatList.begin(); i != threatList.end(); ++i)
                     if (Player* temp = m_creature->GetMap()->GetPlayer((*i)->getUnitGuid()))
+                    {
                         temp->GroupEventHappens(action.quest_event_all.questId, m_creature);
+                    }
             }
             else if (pActionInvoker && pActionInvoker->GetTypeId() == TYPEID_PLAYER)
             {
@@ -1280,7 +1284,9 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         case ACTION_T_DYNAMIC_MOVEMENT:
         {
             if ((!!action.dynamicMovement.state) == m_DynamicMovement)
+            {
                 break;
+            }
 
             m_DynamicMovement = !!action.dynamicMovement.state;
             SetCombatMovement(!m_DynamicMovement, true);
@@ -1330,7 +1336,9 @@ void CreatureEventAI::Reset()
             case EVENT_T_TIMER_OOC:
             {
                 if (i->UpdateRepeatTimer(m_creature, event.timer.initialMin, event.timer.initialMax))
+                {
                     i->Enabled = true;
+                }
                 break;
             }
             default:
@@ -1467,7 +1475,9 @@ void CreatureEventAI::ReceiveAIEvent(AIEventType eventType, Creature* pSender, U
     {
         if (itr->Event.event_type == EVENT_T_RECEIVE_AI_EVENT &&
             itr->Event.receiveAIEvent.eventType == eventType && (!itr->Event.receiveAIEvent.senderEntry || itr->Event.receiveAIEvent.senderEntry == pSender->GetEntry()))
-            { ProcessEvent(*itr, pInvoker, pSender); }
+            {
+                ProcessEvent(*itr, pInvoker, pSender);
+            }
     }
 }
 
@@ -1612,18 +1622,26 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                 {
                     // Do not decrement timers if event cannot trigger in this phase
                     if (!(i->Event.event_inverse_phase_mask & (1 << m_Phase)))
+                    {
                         i->Time -= m_EventDiff;
+                    }
                 }
                 else
+                {
                     i->Time = 0;
+                }
             }
 
             // Skip processing of events that have time remaining or are disabled
             if (!(i->Enabled) || i->Time)
+            {
                 continue;
+            }
 
             if (IsTimerBasedEvent(i->Event.event_type))
+            {
                 ProcessEvent(*i);
+            }
         }
 
         m_EventDiff = 0;
@@ -1645,16 +1663,24 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
             if (m_creature->IsWithinLOSInMap(victim))
             {
                 if (m_LastSpellMaxRange && m_creature->IsInRange(victim, 0, (m_LastSpellMaxRange / 1.5f)))
+                {
                     SetCombatMovement(false, true);
+                }
                 else
+                {
                     SetCombatMovement(true, true);
+                }
             }
             else
+            {
                 SetCombatMovement(true, true);
+            }
         }
         else if (m_MeleeEnabled && m_creature->CanReachWithMeleeAttack(victim)
             && !(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE))
-        { DoMeleeAttackIfReady(); }
+        {
+            DoMeleeAttackIfReady();
+        }
     }
 }
 
@@ -1845,7 +1871,9 @@ void CreatureEventAI::DamageTaken(Unit* dealer, uint32& damage)
         AIEventType sendEvent[HEALTH_STEPS] = { AI_EVENT_LOST_SOME_HEALTH, AI_EVENT_LOST_HEALTH, AI_EVENT_CRITICAL_HEALTH };
 
         if (newHealthPercent > healthSteps[step])
-            { return; }                                         // Not reached the next mark
+        {
+            return;                                          // Not reached the next mark
+        }
 
         // search for highest reached mark (with actual event attached)
         for (uint32 i = HEALTH_STEPS - 1; i > step; --i)

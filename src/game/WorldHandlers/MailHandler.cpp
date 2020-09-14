@@ -189,7 +189,9 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
 
     ObjectGuid rc;
     if (normalizePlayerName(receiver))
+    {
         rc = sObjectMgr.GetPlayerGuidByName(receiver);
+    }
 
     if (!rc)
     {
@@ -389,7 +391,9 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket& recv_data)
     if (Mail* m = pl->GetMail(mailId))
     {
         if (pl->unReadMails)
+        {
             --pl->unReadMails;
+        }
         m->checked = m->checked | MAIL_CHECK_MASK_READ;
         pl->m_mailsUpdated = true;
         m->state = MAIL_STATE_CHANGED;
@@ -477,16 +481,22 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recv_data)
     {
         MailDraft draft;
         if (m->mailTemplateId)
+        {
             draft.SetMailTemplate(m->mailTemplateId, false);// items already included
+        }
         else
+        {
             draft.SetSubjectAndBody(m->subject, m->body);
+        }
 
         if (m->HasItems())
         {
             for (MailItemInfoVec::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
             {
                 if (Item* item = pl->GetMItem(itr2->item_guid))
+                {
                     draft.AddItem(item);
+                }
 
                 pl->RemoveMItem(itr2->item_guid);
             }
@@ -562,13 +572,17 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recv_data)
                     sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
 
                     if (!sObjectMgr.GetPlayerNameByGUID(sender_guid, sender_name))
+                    {
                         sender_name = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
+                    }
                 }
                 sLog.outCommand(GetAccountId(), "GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
                                 GetPlayerName(), GetAccountId(), it->GetProto()->Name1, it->GetEntry(), it->GetCount(), m->COD, sender_name.c_str(), sender_accId);
             }
             else if (!sender)
+            {
                 sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
+            }
 
             // check player existence
             if (sender || sender_accId)
@@ -596,7 +610,9 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recv_data)
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_OK, 0, itemId, count);
     }
     else
+    {
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_EQUIP_ERROR, msg);
+    }
 }
 /**
  * Handles the packet sent by the client when taking money from the mail.
@@ -674,7 +690,9 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
 
         // skip deleted or not delivered (deliver delay not expired) mails
         if ((*itr)->state == MAIL_STATE_DELETED || cur_time < (*itr)->deliver_time)
+        {
             continue;
+        }
 
         uint8 item_count = (*itr)->items.size();            // max count is MAX_MAIL_ITEMS (12)
 
@@ -812,7 +830,9 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recv_data)
         bodyItem->SetText(mailTemplateEntry->content[GetSessionDbcLocale()]);
     }
     else
+    {
         bodyItem->SetText(m->body);
+    }
 
     bodyItem->SetGuidValue(ITEM_FIELD_CREATOR, ObjectGuid(HIGHGUID_PLAYER, m->sender));
     bodyItem->SetFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_READABLE | ITEM_DYNFLAG_UNK15 | ITEM_DYNFLAG_UNK16);
@@ -856,11 +876,15 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket & /**recv_data*/)
             Mail* m = (*itr);
             // must be not checked yet
             if (m->checked & MAIL_CHECK_MASK_READ)
+            {
                 continue;
+            }
 
             // and already delivered
             if (now < m->deliver_time)
+            {
                 continue;
+            }
 
             data << ObjectGuid(HIGHGUID_PLAYER, m->sender); // sender guid
 
@@ -881,7 +905,9 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket & /**recv_data*/)
 
             ++count;
             if (count == 2)                                 // do not display more than 2 mails
+            {
                 break;
+            }
         }
         data.put<uint32>(4, count);
     }

@@ -118,7 +118,9 @@ void HostileReference::fireStatusChanged(ThreatRefStatusChangeEvent& pThreatRefS
 void HostileReference::addThreat(float pMod)
 {
     if (pMod + iThreat < 0)
+    {
         pMod = -iThreat;
+    }
 
     iThreat += pMod;
     // the threat is changed. Source and target unit have to be availabe
@@ -137,7 +139,9 @@ void HostileReference::addThreat(float pMod)
     {
         Unit* victim_owner = getTarget()->GetOwner();
         if (victim_owner && victim_owner->IsAlive())
-            { getSource()->addThreat(victim_owner, 0.0f); }     // create a threat to the owner of a pet, if the pet attacks
+        {
+            getSource()->addThreat(victim_owner, 0.0f);      // create a threat to the owner of a pet, if the pet attacks
+        }
     }
 }
 
@@ -169,7 +173,9 @@ void HostileReference::updateOnlineStatus()
         if (!online)
         {
             if (creature->AI()->canReachByRangeAttack(getTarget()))
-                { online = true; }                              // not accessable but stays online
+            {
+                online = true;                               // not accessable but stays online
+            }
         }
         else
         {
@@ -189,7 +195,9 @@ void HostileReference::setOnlineOfflineState(bool pIsOnline)
     {
         iOnline = pIsOnline;
         if (!iOnline)
-            { setAccessibleState(false); }                      // if not online that not accessable as well
+        {
+            setAccessibleState(false);                       // if not online that not accessable as well
+        }
 
         ThreatRefStatusChangeEvent event(UEV_THREAT_REF_ONLINE_STATUS, this);
         fireStatusChanged(event);
@@ -491,10 +499,14 @@ void ThreatManager::addThreatDirectly(Unit* pVictim, float threat)
     HostileReference* ref = iThreatContainer.addThreat(pVictim, threat);
     // Ref is online
     if (ref)
+    {
         iUpdateNeed = true;
+    }
     // Ref is not in the online refs, search the offline refs next
     else
+    {
         ref = iThreatOfflineContainer.addThreat(pVictim, threat);
+    }
 
     if (!ref)                                               // there was no ref => create a new one
     {
@@ -504,7 +516,9 @@ void ThreatManager::addThreatDirectly(Unit* pVictim, float threat)
         hostileReference->addThreat(threat);                // now we add the real threat
         iUpdateNeed = true;
         if (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->isGameMaster())
-            { hostileReference->setOnlineOfflineState(false); } // GM is always offline
+        {
+            hostileReference->setOnlineOfflineState(false);  // GM is always offline
+        }
     }
 }
 
@@ -538,9 +552,13 @@ float ThreatManager::getThreat(Unit* pVictim, bool pAlsoSearchOfflineList)
     float threat = 0.0f;
 
     if (HostileReference* ref = iThreatContainer.getReferenceByTarget(pVictim))
+    {
         threat = ref->getThreat();
+    }
     else if (pAlsoSearchOfflineList)
+    {
         threat = iThreatOfflineContainer.getReferenceByTarget(pVictim)->getThreat();
+    }
 
     return threat;
 }
@@ -585,7 +603,9 @@ void ThreatManager::setCurrentVictim(HostileReference* pHostileReference)
     }
 
     if (pHostileReference)
+    {
         iOwner->SendHighestThreatUpdate(pHostileReference);
+    }
 
     iCurrentVictim = pHostileReference;
     iUpdateNeed = true;
@@ -606,7 +626,9 @@ void ThreatManager::processThreatEvent(ThreatRefStatusChangeEvent* threatRefStat
         case UEV_THREAT_REF_THREAT_CHANGE:
             if ((getCurrentVictim() == hostileReference && threatRefStatusChangeEvent->getFValue() < 0.0f) ||
                 (getCurrentVictim() != hostileReference && threatRefStatusChangeEvent->getFValue() > 0.0f))
-                { setDirty(true); }                             // the order in the threat list might have changed
+            {
+                setDirty(true);                              // the order in the threat list might have changed
+            }
             break;
         case UEV_THREAT_REF_ONLINE_STATUS:
             if (!hostileReference->isOnline())

@@ -36,7 +36,9 @@ const char* GetPlainName(const char* FileName)
     const char* szTemp;
 
     if ((szTemp = strrchr(FileName, '\\')) != NULL)
+    {
         FileName = szTemp + 1;
+    }
     return FileName;
 }
 
@@ -45,7 +47,9 @@ char* GetPlainName(char* FileName)
     char* szTemp;
 
     if ((szTemp = strrchr(FileName, '\\')) != NULL)
+    {
         FileName = szTemp + 1;
+    }
     return FileName;
 }
 
@@ -74,7 +78,9 @@ void fixname2(char* name, size_t len)
     for (size_t i = 0; i < len - 3; i++)
     {
         if (name[i] == ' ')
+        {
             name[i] = '_';
+        }
     }
 }
 

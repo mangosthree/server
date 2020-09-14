@@ -47,12 +47,16 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
     dungeons.resize(dungeonsCount);
 
     for (uint8 i = 0; i < dungeonsCount; ++i)
+    {
         recv_data >> dungeons[i];                           // dungeons id/type
+    }
 
     recv_data >> counter2;                                  // const count = 3, lua: GetLFGInfoLocal
 
     for (uint8 i = 0; i < counter2; ++i)
+    {
         recv_data >> Unused<uint8>();                       // lua: GetLFGInfoLocal
+    }
 
     recv_data >> comment;                                   // lfg comment
 
@@ -133,7 +137,9 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
         if (flags & 0x10)
         {
             for (uint32 j = 0; j < 3; ++j)
+            {
                 data << uint8(0);                           // roles
+            }
         }
 
         if (flags & 0x80)
@@ -154,10 +160,14 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
         Player* plr = iter->second;
 
         if (!plr || plr->GetTeam() != _player->GetTeam())
+        {
             continue;
+        }
 
         if (!plr->IsInWorld())
+        {
             continue;
+        }
 
         data << plr->GetObjectGuid();                       // guid
 
@@ -171,7 +181,9 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
             data << uint8(plr->getRace());
 
             for (uint32 i = 0; i < 3; ++i)
+            {
                 data << uint8(0);                           // talent spec x/x/x
+            }
 
             data << uint32(0);                              // armor
             data << uint32(0);                              // spd/heal
@@ -196,22 +208,34 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
         }
 
         if (flags & 0x2)
+        {
             data << "";                                     // comment
+        }
 
         if (flags & 0x4)
+        {
             data << uint8(0);                               // group leader
+        }
 
         if (flags & 0x8)
+        {
             data << uint64(1);                              // group guid
+        }
 
         if (flags & 0x10)
+        {
             data << uint8(0);                               // roles
+        }
 
         if (flags & 0x20)
+        {
             data << uint32(plr->GetZoneId());               // areaid
+        }
 
         if (flags & 0x40)
+        {
             data << uint8(0);                               // status
+        }
 
         if (flags & 0x80)
         {
@@ -312,13 +336,17 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
         isQueued = true;
     case LFG_UPDATE_PROPOSAL_BEGIN:
         if (isGroup)
+        {
             joinLFG = true;
+        }
         break;
     case LFG_UPDATE_STATUS:
         isQueued = (status.state == LFG_STATE_QUEUED);
 
         if (isGroup)
+        {
             joinLFG = (status.state != LFG_STATE_ROLECHECK) && (status.state != LFG_STATE_NONE);
+        }
         break;
     default:
         break;
@@ -332,7 +360,9 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
     if (dungeonSize)
     {
         if (isGroup)
+        {
             data << uint8(joinLFG);
+        }
         data << uint8(isQueued);
         data << uint8(0);
         data << uint8(0);
@@ -383,9 +413,13 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
 
     std::set<uint32> dungeons;
     if (roleCheck.randomDungeonID)
+    {
         dungeons.insert(roleCheck.randomDungeonID);
+    }
     else
+    {
         dungeons = roleCheck.dungeonList;
+    }
 
     data << uint8(dungeons.size());
     if (!dungeons.empty())
@@ -409,7 +443,9 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
         for (roleMap::const_iterator rItr = roleCheck.currentRoles.begin(); rItr != roleCheck.currentRoles.end(); ++rItr)
         {
             if (rItr->first == leaderGuid)
+            {
                 continue; // exclude the leader
+            }
 
             ObjectGuid plrGuid = rItr->first;
 
@@ -511,7 +547,9 @@ void WorldSession::SendLfgRewards(LFGRewards const& rewards)
         }
     }
     else
+    {
         data << uint8(0);
+    }
     SendPacket(&data);
 }
 
@@ -529,7 +567,9 @@ void WorldSession::SendLfgBootUpdate(LFGBoot const& boot)
         {
             ++voteCount;
             if (it->second == LFG_ANSWER_AGREE)
+            {
                 ++yayCount;
+            }
         }
     }
 

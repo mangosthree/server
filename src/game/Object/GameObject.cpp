@@ -114,7 +114,9 @@ void GameObject::AddToWorld()
 
 #ifdef ENABLE_ELUNA
     if (!inWorld)
+    {
         sEluna->OnAddToWorld(this);
+    }
 #endif /* ENABLE_ELUNA */
 }
 
@@ -179,9 +181,13 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     }
 
     if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+    {
         Object::_Create(guidlow, 0, HIGHGUID_MO_TRANSPORT);
+    }
     else
+    {
         Object::_Create(guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
+    }
 
     m_goInfo = goinfo;
 
@@ -205,9 +211,13 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     SetWorldRotation(rotation.x, rotation.y, rotation.z, rotation.w);
     // For most of gameobjects is (0, 0, 0, 1) quaternion, only some transports has not standart rotation
     if (const GameObjectDataAddon* addon = sGameObjectDataAddonStorage.LookupEntry<GameObjectDataAddon>(guidlow))
+    {
         SetTransportPathRotation(addon->path_rotation);
+    }
     else
+    {
         SetTransportPathRotation(QuaternionData(0, 0, 0, 1));
+    }
 
     SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
     SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
@@ -238,7 +248,9 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         case GAMEOBJECT_TYPE_TRANSPORT:
             SetUInt32Value(GAMEOBJECT_LEVEL, WorldTimer::getMSTime());
             if (goinfo->transport.startOpen)
+            {
                 SetGoState(GO_STATE_ACTIVE);
+            }
             break;
     }
 
@@ -450,9 +462,13 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     if (m_groupLootId)
                     {
                         if (m_groupLootTimer <= update_diff)
+                        {
                             StopGroupLoot();
+                        }
                         else
+                        {
                             m_groupLootTimer -= update_diff;
+                        }
                     }
                     break;
                 case GAMEOBJECT_TYPE_GOOBER:
@@ -902,7 +918,9 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                     return true;
                 }
                 else
+                {
                     trapNotVisible = true;
+                }
             }
 
             // only rogue have skill for traps detection
@@ -975,7 +993,9 @@ bool GameObject::ActivateToQuest(Player* pTarget) const
             {
                 if ((pTarget->GetQuestStatus(itr->second) == QUEST_STATUS_INCOMPLETE || pTarget->GetQuestStatus(itr->second) == QUEST_STATUS_COMPLETE)
                     && !pTarget->GetQuestRewardStatus(itr->second))
-                    { return true; }
+                {
+                    return true;
+                }
             }
 
             break;
@@ -1304,7 +1324,9 @@ void GameObject::Use(Unit* user)
 
             // FIXME: when GO casting will be implemented trap must cast spell to target
             if ((spellId = goInfo->trap.spellId))
+            {
                 caster->CastSpell(user, spellId, true, NULL, NULL, GetObjectGuid());
+            }
             // use template cooldown if provided
             m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown : uint32(4));
 
@@ -1591,7 +1613,9 @@ void GameObject::Use(Unit* user)
                     // just search fishhole for success case
                     else
                         // TODO: find reasonable value for fishing hole search
-                        { fishingHole = LookupFishingHoleAround(20.0f + CONTACT_DISTANCE); }
+                    {
+                        fishingHole = LookupFishingHoleAround(20.0f + CONTACT_DISTANCE);
+                    }
 
                     if (success || sWorld.getConfig(CONFIG_BOOL_SKILL_FAIL_GAIN_FISHING))
                     {
@@ -1721,7 +1745,9 @@ void GameObject::Use(Unit* user)
             spellId = info->summoningRitual.spellId;
 
             if (spellId == 62330)                           // GO store nonexistent spell, replace by expected
+            {
                 spellId = 61993;
+            }
 
             // spell have reagent and mana cost but it not expected use its
             // it triggered spell in fact casted at currently channeled GO
@@ -1809,9 +1835,13 @@ void GameObject::Use(Unit* user)
             }
 
             if (info->id == 194097)
+            {
                 spellId = 61994;                            // Ritual of Summoning
+            }
             else
+            {
                 spellId = 59782;                            // Summoning Stone Effect
+            }
 
             break;
         }
@@ -1895,7 +1925,9 @@ void GameObject::Use(Unit* user)
                             break;
                         case 184142:                        // Netherstorm Flag
                             if (bg->GetTypeID() == BATTLEGROUND_EY)
+                            {
                                 bg->EventPlayerClickedOnFlag(player, this);
+                            }
                             break;
                     }
                 }
@@ -2015,7 +2047,9 @@ void GameObject::SetWorldRotation(float qx, float qy, float qz, float qw)
     Quat rotation(qx, qy, qz, qw);
     // Temporary solution for gameobjects that has no rotation data in DB:
     if (qz == 0.f && qw == 0.f)
+    {
         rotation = Quat::fromAxisAngleRotation(G3D::Vector3::unitZ(), GetOrientation());
+    }
 
     rotation.unitize();
     m_packedRotation = QuaternionCompressed(rotation).m_raw;
@@ -2678,12 +2712,18 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s taken damage %u dealt by %s", GetGuidStr().c_str(), uint32(-diff), caster->GetGuidStr().c_str());
 #ifdef ENABLE_ELUNA
         if (caster && caster->ToPlayer())
+        {
             sEluna->OnDamaged(this, caster->ToPlayer());
+        }
 #endif
         if (m_useTimes > uint32(-diff))
+        {
             m_useTimes += diff;
+        }
         else
+        {
             m_useTimes = 0;
+        }
     }
     else if (diff == 0 && GetMaxHealth())                   // Rebuild - TODO: Rebuilding over time with special display-id?
     {
@@ -2692,10 +2732,14 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
         m_useTimes = GetMaxHealth();
         // Start Event if exist
         if (caster && m_goInfo->destructibleBuilding.rebuildingEvent)
+        {
             StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.rebuildingEvent, this, caster->GetCharmerOrOwnerOrSelf(), true, caster->GetCharmerOrOwnerOrSelf());
+        }
     }
     else                                                    // Set to value
+    {
         m_useTimes = uint32(diff);
+    }
 
     uint32 newDisplayId = 0xFFFFFFFF;                       // Set to invalid -1 to track if we switched to a change state
     DestructibleModelDataEntry const* destructibleInfo = sDestructibleModelDataStore.LookupEntry(m_goInfo->destructibleBuilding.destructibleData);
@@ -2710,7 +2754,9 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
 
         // Start Event if exist
         if (caster && m_goInfo->destructibleBuilding.intactEvent)
+        {
             StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.intactEvent, this, caster->GetCharmerOrOwnerOrSelf(), true, caster->GetCharmerOrOwnerOrSelf());
+        }
     }
     else if (m_useTimes == 0)                               // Destroyed
     {
@@ -2719,28 +2765,40 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
             DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s got destroyed", GetGuidStr().c_str());
 #ifdef ENABLE_ELUNA
             if(caster && caster->ToPlayer())
+            {
                 sEluna->OnDestroyed(this, caster->ToPlayer());
+            }
 #endif
             RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_9 | GO_FLAG_UNK_10);
             SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_11);
 
             // Get destroyed DisplayId
             if ((!m_goInfo->destructibleBuilding.destroyedDisplayId || m_goInfo->destructibleBuilding.destroyedDisplayId == 1) && destructibleInfo)
+            {
                 newDisplayId = destructibleInfo->destroyedDisplayId;
+            }
             else
+            {
                 newDisplayId = m_goInfo->destructibleBuilding.destroyedDisplayId;
+            }
 
             if (!newDisplayId)                              // No proper destroyed display ID exists, fetch damaged
             {
                 if ((!m_goInfo->destructibleBuilding.damagedDisplayId || m_goInfo->destructibleBuilding.damagedDisplayId == 1) && destructibleInfo)
+                {
                     newDisplayId = destructibleInfo->damagedDisplayId;
+                }
                 else
+                {
                     newDisplayId = m_goInfo->destructibleBuilding.damagedDisplayId;
+                }
             }
 
             // Start Event if exist
             if (caster && m_goInfo->destructibleBuilding.destroyedEvent)
+            {
                 StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.destroyedEvent, this, caster->GetCharmerOrOwnerOrSelf(), true, caster->GetCharmerOrOwnerOrSelf());
+            }
         }
     }
     else if (m_useTimes <= m_goInfo->destructibleBuilding.damagedNumHits) // Damaged
@@ -2753,19 +2811,27 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
 
             // Get damaged DisplayId
             if ((!m_goInfo->destructibleBuilding.damagedDisplayId || m_goInfo->destructibleBuilding.damagedDisplayId == 1) && destructibleInfo)
+            {
                 newDisplayId = destructibleInfo->damagedDisplayId;
+            }
             else
+            {
                 newDisplayId = m_goInfo->destructibleBuilding.damagedDisplayId;
+            }
 
             // Start Event if exist
             if (caster && m_goInfo->destructibleBuilding.damagedEvent)
+            {
                 StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.damagedEvent, this, caster->GetCharmerOrOwnerOrSelf(), true, caster->GetCharmerOrOwnerOrSelf());
+            }
         }
     }
 
     // Set display Id
     if (newDisplayId != 0xFFFFFFFF && newDisplayId != GetDisplayId() && newDisplayId)
+    {
         SetDisplayId(newDisplayId);
+    }
 
     // Set health
     SetGoAnimProgress(GetMaxHealth() ? m_useTimes * 255 / GetMaxHealth() : 255);
@@ -2775,9 +2841,13 @@ void GameObject::SetInUse(bool use)
 {
     m_isInUse = use;
     if (use)
+    {
         SetGoState(GO_STATE_ACTIVE);
+    }
     else
+    {
         SetGoState(GO_STATE_READY);
+    }
 }
 
 uint32 GameObject::GetScriptId()

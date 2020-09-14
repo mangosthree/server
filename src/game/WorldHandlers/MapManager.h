@@ -82,15 +82,21 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         void SetGridCleanUpDelay(uint32 t)
         {
             if (t < MIN_GRID_DELAY)
+            {
                 i_gridCleanUpDelay = MIN_GRID_DELAY;
+            }
             else
+            {
                 i_gridCleanUpDelay = t;
+            }
         }
 
         void SetMapUpdateInterval(uint32 t)
         {
             if (t > MIN_MAP_UPDATE_DELAY)
+            {
                 t = MIN_MAP_UPDATE_DELAY;
+            }
 
             i_timer.SetInterval(t);
             i_timer.Reset();

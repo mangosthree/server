@@ -30,14 +30,18 @@
 int32 SpellEntry::CalculateSimpleValue(SpellEffectIndex eff) const
 {
     if(SpellEffectEntry const* effectEntry = GetSpellEffectEntry(Id, eff))
+    {
         return effectEntry->CalculateSimpleValue();
+    }
     return 0;
 }
 
 ClassFamilyMask const& SpellEntry::GetEffectSpellClassMask(SpellEffectIndex eff) const
 {
     if (SpellEffectEntry const* effectEntry = GetSpellEffectEntry(Id, eff))
+    {
         return effectEntry->EffectSpellClassMask;
+    }
 
     static ClassFamilyMask const emptyCFM;
 

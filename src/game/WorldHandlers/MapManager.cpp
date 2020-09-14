@@ -216,7 +216,9 @@ void MapManager::Update(uint32 diff)
             i_maps.erase(iter++);
         }
         else
+        {
             ++iter;
+        }
     }
 
     i_timer.SetCurrent(0);
@@ -270,7 +272,9 @@ uint32 MapManager::GetNumInstances()
     {
         Map* map = itr->second;
         if (!map->IsDungeon()) continue;
-        ret += 1;
+        {
+            ret += 1;
+        }
     }
     return ret;
 }
@@ -282,7 +286,9 @@ uint32 MapManager::GetNumPlayersInInstances()
     {
         Map* map = itr->second;
         if (!map->IsDungeon()) continue;
-        ret += map->GetPlayers().getSize();
+        {
+            ret += map->GetPlayers().getSize();
+        }
     }
     return ret;
 }
@@ -311,7 +317,9 @@ Map* MapManager::CreateInstance(uint32 id, Player* player)
         map = FindMap(id, NewInstanceId);
         // it is possible that the save exists but the map doesn't
         if (!map)
+        {
             pNewMap = CreateDungeonMap(id, NewInstanceId, pSave->GetDifficulty(), pSave);
+        }
     }
     else
     {
@@ -349,7 +357,9 @@ DungeonMap* MapManager::CreateDungeonMap(uint32 id, uint32 InstanceId, Difficult
 
     // some instances only have one difficulty
     if (!GetMapDifficultyData(id, difficulty))
+    {
         difficulty = DUNGEON_DIFFICULTY_NORMAL;
+    }
 
     DEBUG_LOG("MapInstanced::CreateDungeonMap: %s map instance %d for %d created with difficulty %d", save ? "" : "new ", InstanceId, id, difficulty);
 

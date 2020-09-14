@@ -82,7 +82,9 @@ void WorldSession::SendAuctionCommandResult(AuctionEntry* auc, AuctionAction Act
     {
         case AUCTION_OK:
             if (Action == AUCTION_BID_PLACED)
+            {
                 data << uint64(auc->GetAuctionOutBid());        // new AuctionOutBid?
+            }
             break;
         case AUCTION_ERR_INVENTORY:
             data << uint32(invError);
@@ -126,7 +128,9 @@ void WorldSession::SendAuctionOwnerNotification(AuctionEntry* auction)
 
     ObjectGuid bidder_guid = ObjectGuid();
     if (!auction->moneyDeliveryTime)                        // not sold yet
+    {
         bidder_guid = ObjectGuid(HIGHGUID_PLAYER, auction->bidder);
+    }
 
     // bidder==0 and moneyDeliveryTime==0 for expired auctions, and client shows error messages as described above
     // if bidder!=0 client updates auctions with new bid, outbid and bidderGuid
@@ -160,7 +164,9 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry* auction)
 
     uint32 oldBidder_accId = 0;
     if (!oldBidder)
+    {
         oldBidder_accId = sObjectMgr.GetPlayerAccountIdByGUID(oldBidder_guid);
+    }
 
     // old bidder exist
     if (oldBidder || oldBidder_accId)
@@ -169,7 +175,9 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry* auction)
         msgAuctionOutbiddedSubject << auction->itemTemplate << ":" << auction->itemRandomPropertyId << ":" << AUCTION_OUTBIDDED << ":" << auction->Id << ":" << auction->itemCount;
 
         if (oldBidder)
+        {
             oldBidder->GetSession()->SendAuctionBidderNotification(auction);
+        }
 
         MailDraft(msgAuctionOutbiddedSubject.str(), "")     // TODO: fix body
         .SetMoney(auction->bid)
@@ -185,7 +193,9 @@ void WorldSession::SendAuctionCancelledToBidderMail(AuctionEntry* auction)
 
     uint32 bidder_accId = 0;
     if (!bidder)
+    {
         bidder_accId = sObjectMgr.GetPlayerAccountIdByGUID(bidder_guid);
+    }
 
     // bidder exist
     if (bidder || bidder_accId)
@@ -194,7 +204,9 @@ void WorldSession::SendAuctionCancelledToBidderMail(AuctionEntry* auction)
         msgAuctionCancelledSubject << auction->itemTemplate << ":" << auction->itemRandomPropertyId << ":" << AUCTION_CANCELLED_TO_BIDDER << ":" << auction->Id << ":" << auction->itemCount;
 
         if (bidder)
+        {
             bidder->GetSession()->SendAuctionRemovedNotification(auction);
+        }
 
         MailDraft(msgAuctionCancelledSubject.str(), "")     // TODO: fix body
         .SetMoney(auction->bid)
@@ -300,7 +312,9 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
         ObjectGuid itemGuid = guids[i];
 
         if (!itemGuid)
+        {
             continue;
+        }
 
         uint32 stackSize = stackSizes[i];
 
@@ -348,13 +362,19 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
         }
 
         if (stackSize == 0)
+        {
             stackSize = 1;
+        }
 
         if (stackSize > it->GetMaxStackCount())             // too big stack size
+        {
             stackSize = it->GetMaxStackCount();
+        }
 
         if (!pl->HasItemCount(it->GetEntry(), stackSize))   // not enough items
+        {
             continue;
+        }
 
         Item* newItem = it->CloneItem(stackSize);
 
@@ -455,9 +475,13 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recv_data)
     SendAuctionCommandResult(auction, AUCTION_BID_PLACED, AUCTION_OK);
 
     if (auction->UpdateBid(price, pl))
+    {
         pl->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_BID, price);
+    }
     else
+    {
         pl->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_AUCTION_BID, auction->buyout);
+    }
 }
 
 // this void is called when auction_owner cancels his auction
@@ -507,7 +531,9 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recv_data)
         }
 
         if (auction->bidder)                                // if auction have real existed bidder send mail
+        {
             SendAuctionCancelledToBidderMail(auction);
+        }
 
         pl->ModifyMoney(-int64(auctionCut));
     }

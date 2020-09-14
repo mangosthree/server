@@ -193,11 +193,15 @@ int WorldSocket::SendPacket(const WorldPacket& pct)
     {
         // Put the packet on the buffer.
         if (m_OutBuffer->copy((char*) header.header, header.getHeaderLength()) == -1)
+        {
             MANGOS_ASSERT(false);
+        }
 
         if (!pct.empty())
             if (m_OutBuffer->copy((char*) pct.contents(), pct.size()) == -1)
+            {
                 MANGOS_ASSERT(false);
+            }
     }
     else
     {
@@ -209,7 +213,9 @@ int WorldSocket::SendPacket(const WorldPacket& pct)
         mb->copy((char*) header.header, header.getHeaderLength());
 
         if (!pct.empty())
+        {
             mb->copy((const char*)pct.contents(), pct.size());
+        }
 
         if (msg_queue()->enqueue_tail(mb, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
         {
@@ -1052,8 +1058,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     std::string address = GetRemoteAddress();
 
     DEBUG_LOG("WorldSocket::HandleAuthSession: Client '%s' authenticated successfully from %s.",
-                accountName.c_str (),
-              address.c_str());
+                account.c_str (), address.c_str());
 
     // Update the last_ip in the database
     // No SQL injection, username escaped.
@@ -1076,7 +1081,9 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     // Warden: Initialize Warden system only if it is enabled by config
     if (wardenActive)
+    {
         m_Session->InitWarden(uint16(BuiltNumberClient), &K, os);
+    }
 
     sWorld.AddSession(m_Session);
 
@@ -1093,7 +1100,9 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
     recvPacket >> latency;
 
     if (m_LastPingTime == ACE_Time_Value::zero)
-        { m_LastPingTime = ACE_OS::gettimeofday(); }            // for 1st ping
+    {
+        m_LastPingTime = ACE_OS::gettimeofday();             // for 1st ping
+    }
     else
     {
         ACE_Time_Value cur_time = ACE_OS::gettimeofday();

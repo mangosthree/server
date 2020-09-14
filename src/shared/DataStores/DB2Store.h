@@ -45,7 +45,9 @@ public:
         DB2FileLoader db2;
         // Check if load was sucessful, only then continue
         if(!db2.Load(fn, fmt))
+        {
             return false;
+        }
 
         fieldCount = db2.GetCols();
 
@@ -66,12 +68,16 @@ public:
     {
         // DBC must be already loaded using Load
         if(!indexTable)
+        {
             return false;
+        }
 
         DB2FileLoader db2;
         // Check if load was successful, only then continue
         if(!db2.Load(fn, fmt))
+        {
             return false;
+        }
 
         // load strings from another locale dbc data
         m_stringPoolList.push_back(db2.AutoProduceStrings(fmt,(char*)m_dataTable,loc));
@@ -82,7 +88,9 @@ public:
     void Clear()
     {
         if (!indexTable)
+        {
             return;
+        }
 
         delete[] ((char*)indexTable);
         indexTable = NULL;

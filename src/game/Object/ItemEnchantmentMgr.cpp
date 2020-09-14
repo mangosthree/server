@@ -76,9 +76,13 @@ void LoadRandomEnchantmentsTable()
             if (chance > 0.000001f && chance <= 100.0f)
             {
                 if (entry > 0)
+                {
                     RandomItemPropEnch[entry].push_back(EnchStoreItem(ench, chance));
+                }
                 else
+                {
                     RandomItemSuffixEnch[-entry].push_back(EnchStoreItem(ench, chance));
+                }
             }
             else
             {

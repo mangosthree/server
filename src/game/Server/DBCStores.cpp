@@ -330,7 +330,9 @@ static uint32 ReadDBCBuild(const std::string& dbc_path, LocaleNameStr const*&loc
         }
     }
     else
+    {
         ReadDBCBuildFileText(dbc_path, localeNameStr->name, text);
+    }
 
     if (text.empty())
     {
@@ -390,7 +392,9 @@ inline void LoadDBC(LocalData& localeData, BarGoLink& bar, StoreProblemList& err
         for (uint8 i = 0; fullLocaleNameList[i].name; ++i)
         {
             if (!(localeData.availableDbcLocales & (1 << i)))
+            {
                 continue;
+            }
 
             LocaleNameStr const* localStr = &fullLocaleNameList[i];
 
@@ -435,7 +439,9 @@ inline void LoadDBC(LocalData& localeData, BarGoLink& bar, StoreProblemList& err
             fclose(f);
         }
         else
+        {
             errlist.push_back(dbc_filename);
+        }
     }
 }
 
@@ -452,7 +458,9 @@ void LoadDBCStores(const std::string& dataPath)
         if (build)
             sLog.outError("Found DBC files for build %u but mangosd expected DBC for one from builds: %s Please extract correct DBC files.", build, AcceptableClientBuildsListStr().c_str());
         else
+        {
             sLog.outError("Incorrect DataDir value in mangosd.conf or not found build info (outdated DBC files). Required one from builds: %s Please extract correct DBC files.", AcceptableClientBuildsListStr().c_str());
+        }
         Log::WaitBeforeContinueIfNeed();
         exit(1);
     }
@@ -477,7 +485,9 @@ void LoadDBCStores(const std::string& dataPath)
 
             // fill MapId->DBC records ( skip sub zones and continents )
             if (area->zone == 0 && area->mapid != 0 && area->mapid != 1 && area->mapid != 530 && area->mapid != 571)
+            {
                 sAreaFlagByMapID.insert(AreaFlagByMapID::value_type(area->mapid, area->exploreFlag));
+            }
         }
     }
 
@@ -510,7 +520,9 @@ void LoadDBCStores(const std::string& dataPath)
     {
         ChrPowerTypesEntry const* entry = sChrPowerTypesStore.LookupEntry(i);
         if (!entry)
+        {
             continue;
+        }
 
         MANGOS_ASSERT(entry->classId < MAX_CLASSES && "MAX_CLASSES not updated");
         MANGOS_ASSERT(entry->power < MAX_POWERS && "MAX_POWERS not updated");
@@ -520,7 +532,9 @@ void LoadDBCStores(const std::string& dataPath)
         for (uint32 j = 0; j < MAX_POWERS; ++j)
         {
             if (sChrClassXPowerTypesStore[entry->classId][j] != INVALID_POWER_INDEX)
+            {
                 ++index;
+            }
         }
 
         MANGOS_ASSERT(index < MAX_STORED_POWERS && "MAX_STORED_POWERS not updated");
@@ -607,7 +621,9 @@ void LoadDBCStores(const std::string& dataPath)
     // fill data
     for (uint32 i = 1; i < sMapDifficultyStore.GetNumRows(); ++i)
         if (MapDifficultyEntry const* entry = sMapDifficultyStore.LookupEntry(i))
+        {
             sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = entry;
+        }
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sMovieStore,               dbcPath, "Movie.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files, sMountCapabilityStore,     dbcPath,"MountCapability.dbc");
@@ -623,7 +639,9 @@ void LoadDBCStores(const std::string& dataPath)
     for (uint32 i = 0; i < sPvPDifficultyStore.GetNumRows(); ++i)
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
             if (entry->bracketId > MAX_BATTLEGROUND_BRACKETS)
+            {
                 MANGOS_ASSERT(false && "Need update MAX_BATTLEGROUND_BRACKETS by DBC data");
+            }
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sRandomPropertiesPointsStore, dbcPath, "RandPropPoints.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sScalingStatDistributionStore, dbcPath, "ScalingStatDistribution.dbc");
@@ -648,7 +666,9 @@ void LoadDBCStores(const std::string& dataPath)
         {
             if(SpellCategoriesEntry const* category = spell->GetSpellCategories())
                 if(uint32 cat = category->Category)
+                {
                     sSpellCategoryStore[cat].insert(i);
+                }
 
             // DBC not support uint64 fields but SpellEntry have SpellFamilyFlags mapped at 2 uint32 fields
             // uint32 field already converted to bigendian if need, but must be swapped for correct uint64 bigendian view
@@ -692,7 +712,9 @@ void LoadDBCStores(const std::string& dataPath)
         SkillLineAbilityEntry const* skillLine = sSkillLineAbilityStore.LookupEntry(j);
 
         if (!skillLine)
+        {
             continue;
+        }
 
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
         if (spellInfo && (spellInfo->Attributes & (SPELL_ATTR_UNK4 | SPELL_ATTR_PASSIVE | SPELL_ATTR_UNK7 | SPELL_ATTR_UNK8)) == (SPELL_ATTR_UNK4 | SPELL_ATTR_PASSIVE | SPELL_ATTR_UNK7 | SPELL_ATTR_UNK8))
@@ -701,10 +723,14 @@ void LoadDBCStores(const std::string& dataPath)
             {
                 CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(i);
                 if (!cFamily)
+                {
                     continue;
+                }
 
                 if (skillLine->skillId != cFamily->skillLine[0] && skillLine->skillId != cFamily->skillLine[1])
+                {
                     continue;
+                }
 
                 sPetFamilySpellsStore[i].insert(spellInfo->Id);
             }
@@ -732,7 +758,9 @@ void LoadDBCStores(const std::string& dataPath)
         if (!talentInfo) continue;
         for (int j = 0; j < MAX_TALENT_RANK; j++)
             if (talentInfo->RankID[j])
+            {
                 sTalentSpellPosMap[talentInfo->RankID[j]] = TalentSpellPos(i, j);
+            }
     }
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sTalentTabStore,           dbcPath, "TalentTab.dbc");
@@ -744,21 +772,29 @@ void LoadDBCStores(const std::string& dataPath)
         {
             TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentTabId);
             if (!talentTabInfo)
+            {
                 continue;
+            }
 
             for (uint32 i = 0; i < MAX_MASTERY_SPELLS; ++i)
                 if (uint32 spellid = talentTabInfo->masterySpells[i])
                     if (sSpellStore.LookupEntry(spellid))
+                    {
                         sTalentTreeMasterySpellsMap[talentTabId].push_back(spellid);
+                    }
 
             // prevent memory corruption; otherwise cls will become 12 below
             if ((talentTabInfo->ClassMask & CLASSMASK_ALL_PLAYABLE) == 0)
+            {
                 continue;
+            }
 
             // store class talent tab pages
             for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
                 if (talentTabInfo->ClassMask & (1 << (cls - 1)))
+                {
                     sTalentTabPages[cls][talentTabInfo->tabpage] = talentTabId;
+                }
 
             sTalentTreeRolesMap[talentTabId] = talentTabInfo->rolesMask;
         }
@@ -768,7 +804,9 @@ void LoadDBCStores(const std::string& dataPath)
     for (uint32 i = 0; i < sTalentTreePrimarySpellsStore.GetNumRows(); ++i)
         if (TalentTreePrimarySpellsEntry const* talentSpell = sTalentTreePrimarySpellsStore.LookupEntry(i))
             if (sSpellStore.LookupEntry(talentSpell->SpellId))
+            {
                 sTalentTreePrimarySpellsMap[talentSpell->TalentTree].push_back(talentSpell->SpellId);
+            }
     sTalentTreePrimarySpellsStore.Clear();
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sTaxiNodesStore,           dbcPath, "TaxiNodes.dbc");
@@ -776,7 +814,9 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sTaxiPathStore,            dbcPath, "TaxiPath.dbc");
     for (uint32 i = 1; i < sTaxiPathStore.GetNumRows(); ++i)
         if (TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(i))
+        {
             sTaxiPathSetBySource[entry->from][entry->to] = TaxiPathBySourceAndDestination(entry->ID, entry->price);
+        }
     uint32 pathCount = sTaxiPathStore.GetNumRows();
 
     //## TaxiPathNode.dbc ## Loaded only for initialization different structures
@@ -788,7 +828,9 @@ void LoadDBCStores(const std::string& dataPath)
         if (TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
         {
             if (pathLength[entry->path] < entry->index + 1)
+            {
                 pathLength[entry->path] = entry->index + 1;
+            }
         }
     // Set path length
     sTaxiPathNodesByPath.resize(pathCount);                 // 0 and some other indexes not used
@@ -799,7 +841,9 @@ void LoadDBCStores(const std::string& dataPath)
     // fill data (pointers to sTaxiPathNodeStore elements
     for (uint32 i = 1; i < sTaxiPathNodeStore.GetNumRows(); ++i)
         if (TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
+        {
             sTaxiPathNodesByPath[entry->path].set(entry->index, entry);
+        }
 
     // Initialize global taxinodes mask
     // include existing nodes that have at least single not spell base (scripted) path
@@ -810,7 +854,9 @@ void LoadDBCStores(const std::string& dataPath)
                 for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
                     if(SpellEffectEntry const* effect = sInfo->GetSpellEffect(SpellEffectIndex(j)))
                         if(effect->Effect==123 /*SPELL_EFFECT_SEND_TAXI*/)
+                        {
                             spellPaths.insert(effect->EffectMiscValue);
+                        }
 
         memset(sTaxiNodesMask, 0, sizeof(sTaxiNodesMask));
         memset(sOldContinentsNodesMask, 0, sizeof(sTaxiNodesMask));
@@ -821,7 +867,9 @@ void LoadDBCStores(const std::string& dataPath)
         {
             TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(i);
             if (!node)
+            {
                 continue;
+            }
 
             TaxiPathSetBySource::const_iterator src_i = sTaxiPathSetBySource.find(i);
             if (src_i != sTaxiPathSetBySource.end() && !src_i->second.empty())
@@ -838,7 +886,9 @@ void LoadDBCStores(const std::string& dataPath)
                 }
 
                 if (!ok)
+                {
                     continue;
+                }
             }
 
             // valid taxi network node
@@ -847,19 +897,29 @@ void LoadDBCStores(const std::string& dataPath)
             sTaxiNodesMask[field] |= submask;
 
             if (node->MountCreatureID[0] && node->MountCreatureID[0] != 32981)
+            {
                 sHordeTaxiNodesMask[field] |= submask;
+            }
             if (node->MountCreatureID[1] && node->MountCreatureID[1] != 32981)
+            {
                 sAllianceTaxiNodesMask[field] |= submask;
+            }
             if (node->MountCreatureID[0] == 32981 || node->MountCreatureID[1] == 32981)
+            {
                 sDeathKnightTaxiNodesMask[field] |= submask;
+            }
 
             // old continent node (+ nodes virtually at old continents, check explicitly to avoid loading map files for zone info)
             if (node->map_id < 2 || i == 82 || i == 83 || i == 93 || i == 94)
+            {
                 sOldContinentsNodesMask[field] |= submask;
+            }
 
             // fix DK node at Ebon Hold
             if (i == 315)
+            {
                 (const_cast<TaxiNodesEntry*>(node))->MountCreatureID[1] = node->MountCreatureID[0];
+            }
         }
     }
 
@@ -868,7 +928,9 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sTransportAnimationStore,  dbcPath,"TransportAnimation.dbc");
     for (uint32 i = 0; i < sTransportAnimationStore.GetNumRows(); ++i)
         if (TransportAnimationEntry const* entry = sTransportAnimationStore.LookupEntry(i))
+        {
             sTransportAnimationsByEntry[entry->transportEntry][entry->timeFrame] = entry;
+        }
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sVehicleStore,             dbcPath, "Vehicle.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sVehicleSeatStore,         dbcPath, "VehicleSeat.dbc");
@@ -1166,7 +1228,9 @@ ContentLevels GetContentLevelsForMapAndZone(uint32 mapId, uint32 zoneId)
     }
 
     if (mapEntry->rootPhaseMap != -1)
+    {
         mapId = mapEntry->rootPhaseMap;
+    }
 
     switch (mapId)
     {
@@ -1212,7 +1276,9 @@ PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 lev
         {
             // skip unrelated and too-high brackets
             if (entry->mapId != mapid || entry->minLevel > level)
+            {
                 continue;
+            }
 
             // exactly fit
             if (entry->maxLevel >= level)
@@ -1222,7 +1288,9 @@ PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 lev
 
             // remember for possible out-of-range case (search higher from existed)
             if (!maxEntry || maxEntry->maxLevel < entry->maxLevel)
+            {
                 maxEntry = entry;
+            }
         }
     }
 

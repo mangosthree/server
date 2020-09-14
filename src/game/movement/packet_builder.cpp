@@ -195,14 +195,20 @@ namespace Movement
             bool hasSplineVerticalAcceleration = (move_spline.splineflags & MoveSplineFlag::Trajectory) && move_spline.effect_start_time < move_spline.Duration();
 
             if (hasSplineVerticalAcceleration)
+            {
                 data << float(move_spline.vertical_acceleration);   // added in 3.1
+            }
 
             data << int32(move_spline.timePassed());
 
             if (move_spline.splineflags & MoveSplineFlag::Final_Angle)
+            {
                 data << float(NormalizeOrientation(move_spline.facing.angle));
+            }
             else if (move_spline.splineflags & MoveSplineFlag::Final_Target)
-                 data.WriteGuidBytes<5, 3, 7, 1, 6, 4, 2, 0>(ObjectGuid(move_spline.facing.target));
+            {
+                data.WriteGuidBytes<5, 3, 7, 1, 6, 4, 2, 0>(ObjectGuid(move_spline.facing.target));
+            }
 
             for (uint32 i = 0; i < nodes; ++i)
             {
@@ -212,12 +218,16 @@ namespace Movement
             }
 
             if (move_spline.splineflags & MoveSplineFlag::Final_Point)
+            {
                 data << float(move_spline.facing.f.x) << float(move_spline.facing.f.z) << float(move_spline.facing.f.y);
+            }
 
             data << float(1.f);
             data << int32(move_spline.Duration());
             if (hasSplineStartTime)
+            {
                 data << int32(move_spline.effect_start_time);   // added in 3.1
+            }
 
             data << float(1.f);
         }
@@ -230,7 +240,9 @@ namespace Movement
             data << float(dest.y);
         }
         else
+        {
             data << Vector3::zero();
+        }
 
         data << uint32(move_spline.GetId());
     }

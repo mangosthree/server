@@ -199,7 +199,9 @@ void WorldSession::SendTrainerList(ObjectGuid guid, const std::string& strTitle)
 
             uint32 reqLevel = 0;
             if (!_player->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
+            {
                 continue;
+            }
 
             reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
 
@@ -219,7 +221,9 @@ void WorldSession::SendTrainerList(ObjectGuid guid, const std::string& strTitle)
 
             uint32 reqLevel = 0;
             if (!_player->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
+            {
                 continue;
+            }
 
             reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
 
@@ -257,41 +261,55 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
     uint32 trainState = 2;
 
     if (!unit->IsTrainerOf(_player, true))
+    {
         trainState = 1;
+    }
 
     // check present spell in trainer spell list
     TrainerSpellData const* cSpells = unit->GetTrainerSpells();
     TrainerSpellData const* tSpells = unit->GetTrainerTemplateSpells();
 
     if (!cSpells && !tSpells)
+    {
         trainState = 1;
+    }
 
     // Try find spell in npc_trainer
     TrainerSpell const* trainer_spell = cSpells ? cSpells->Find(spellId) : NULL;
 
     // Not found, try find in npc_trainer_template
     if (!trainer_spell && tSpells)
+    {
         trainer_spell = tSpells->Find(spellId);
+    }
 
     // Not found anywhere, cheating?
     if (!trainer_spell)
+    {
         trainState = 1;
+    }
 
     // can't be learn, cheat? Or double learn with lags...
     uint32 reqLevel = 0;
     if (!_player->IsSpellFitByClassAndRace(trainer_spell->learnedSpell, &reqLevel))
+    {
         trainState = 1;
+    }
 
     reqLevel = trainer_spell->isProvidedReqLevel ? trainer_spell->reqLevel : std::max(reqLevel, trainer_spell->reqLevel);
     if (_player->GetTrainerSpellState(trainer_spell, reqLevel) != TRAINER_SPELL_GREEN)
+    {
         trainState = 1;
+    }
 
     // apply reputation discount
     uint32 nSpellCost = uint32(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));
 
     // check money requirement
     if (_player->GetMoney() < nSpellCost && trainState > 1)
+    {
         trainState = 0;
+    }
 
     if (trainState != 2)
     {
@@ -316,9 +334,13 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
     // learn explicitly or cast explicitly
     // TODO - Are these spells really cast correctly this way?
     if (trainer_spell->IsCastable())
+    {
         _player->CastSpell(_player, trainer_spell->spell, true);
+    }
     else
+    {
         _player->learnSpell(spellId, false);
+    }
 
         sendData << ObjectGuid(guid);
         sendData << uint32(spellId);                                // should be same as in packet from client
@@ -344,7 +366,9 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recv_data)
     pCreature->StopMoving();
 
     if (pCreature->IsSpiritGuide())
+    {
         pCreature->SendAreaSpiritHealerQueryOpcode(_player);
+    }
 
     if (!sScriptMgr.OnGossipHello(_player, pCreature))
     {
@@ -384,7 +408,9 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
         }
 
         if (!sScriptMgr.OnGossipSelect(_player, pCreature, sender, action, code.empty() ? NULL : code.c_str()))
+        {
             _player->OnGossipSelect(pCreature, gossipListId, menuId);
+        }
     }
     else if (guid.IsGameObject())
     {
@@ -397,7 +423,9 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
         }
 
         if (!sScriptMgr.OnGossipSelect(_player, pGo, sender, action, code.empty() ? NULL : code.c_str()))
+        {
             _player->OnGossipSelect(pGo, gossipListId, menuId);
+        }
     }
 }
 
@@ -442,7 +470,9 @@ void WorldSession::SendSpiritResurrect()
                 _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetMapId(), _player->GetTeam());
 
         if (corpseGrave != ghostGrave)
+        {
             _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
+        }
         // or update at original position
         else
         {
@@ -660,7 +690,9 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
 
             // slots ordered in query, and if not equal then free
             if (slot != free_slot)
+            {
                 break;
+            }
 
             // this slot not free, skip
             ++free_slot;
@@ -676,7 +708,9 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
         SendStableResult(STABLE_SUCCESS_STABLE);
     }
     else
+    {
         SendStableResult(STABLE_ERR_STABLE);
+    }
 }
 
 void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
@@ -717,9 +751,13 @@ void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
     {
         // if problem in exotic pet
         if (creatureInfo && creatureInfo->isTameable(true))
+        {
             SendStableResult(STABLE_ERR_EXOTIC);
+        }
         else
+        {
             SendStableResult(STABLE_ERR_STABLE);
+        }
         return;
     }
 
@@ -732,7 +770,9 @@ void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
 
     // delete dead pet
     if (pet)
+    {
         pet->Unsummon(PET_SAVE_AS_DELETED, _player);
+    }
 
     Pet* newpet = new Pet(HUNTER_PET);
     if (!newpet->LoadPetFromDB(_player, creature_id, petnumber))
@@ -813,9 +853,13 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recv_data)
     {
         // if problem in exotic pet
         if (creatureInfo && creatureInfo->isTameable(true))
+        {
             SendStableResult(STABLE_ERR_EXOTIC);
+        }
         else
+        {
             SendStableResult(STABLE_ERR_STABLE);
+        }
         return;
     }
 
@@ -830,7 +874,9 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recv_data)
         SendStableResult(STABLE_ERR_STABLE);
     }
     else
+    {
         SendStableResult(STABLE_SUCCESS_UNSTABLE);
+    }
 }
 
 void WorldSession::HandleRepairItemOpcode(WorldPacket& recv_data)
@@ -861,7 +907,9 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recv_data)
         Item* item = _player->GetItemByGuid(itemGuid);
 
         if (item)
+        {
             TotalCost = _player->DurabilityRepair(item->GetPos(), true, discountMod, (guildBank > 0));
+        }
     }
     else
     {

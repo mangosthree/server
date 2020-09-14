@@ -204,7 +204,9 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recv_data)
 
     // result==NULL also correct in case no sign yet
     if (result)
+    {
         signs = (uint8)result->GetRowCount();
+    }
 
     DEBUG_LOG("CMSG_PETITION_SHOW_SIGNATURES petition: %s", petitionguid.GetString().c_str());
 
@@ -287,7 +289,9 @@ void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid)
     data << uint32(0);                                      // 13 count of next strings?
 
     for (int i = 0; i < 10; ++i)
+    {
         data << uint8(0);                                   // some string
+    }
 
     data << uint32(0);                                      // 14
     data << uint32(0);                                      // 15 0 - guild, 1 - arena team
@@ -419,7 +423,9 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
 
             // update for owner if online
             if (Player* owner = sObjectMgr.GetPlayer(ownerGuid))
+            {
                 owner->SendPetitionSignResult(petitionGuid, _player, PETITION_SIGN_ALREADY_SIGNED);
+            }
             return;
         }
         else if (playerGuid == _player->GetObjectGuid())
@@ -429,7 +435,9 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
 
             // update for owner if online
             if (Player* owner = sObjectMgr.GetPlayer(ownerGuid))
+            {
                 owner->SendPetitionSignResult(petitionGuid, _player, PETITION_SIGN_ALREADY_SIGNED_OTHER);
+            }
             return;
         }
     }
@@ -449,7 +457,9 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
 
     // update for owner if online
     if (Player* owner = sObjectMgr.GetPlayer(ownerGuid))
+    {
         owner->SendPetitionSignResult(petitionGuid, _player, PETITION_SIGN_OK);
+    }
 }
 
 void WorldSession::HandlePetitionDeclineOpcode(WorldPacket& recv_data)
@@ -533,7 +543,9 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket& recv_data)
     result = CharacterDatabase.PQuery("SELECT `playerguid` FROM `petition_sign` WHERE `petitionguid` = '%u'", petitionGuid.GetCounter());
     // result==NULL also correct charter without signs
     if (result)
+    {
         signs = (uint8)result->GetRowCount();
+    }
 
     /// Send response
     WorldPacket data(SMSG_PETITION_SHOW_SIGNATURES, (8 + 8 + 4 + signs + signs * 12));
@@ -648,7 +660,9 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
 
         ObjectGuid signGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
         if (!signGuid)
+        {
             continue;
+        }
 
         guild->AddMember(signGuid, guild->GetLowestRank());
         result->NextRow();

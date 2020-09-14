@@ -321,9 +321,13 @@ std::string MoneyToString(uint64 money)
     uint32 copp = (money % 10000) % 100;
     std::stringstream ss;
     if (gold)
+    {
         ss << gold << "g";
+    }
     if (silv || gold)
+    {
         ss << silv << "s";
+    }
     ss << copp << "c";
 
     return ss.str();

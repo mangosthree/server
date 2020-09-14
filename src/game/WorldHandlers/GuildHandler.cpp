@@ -100,7 +100,9 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
     Invitedname = recvPacket.ReadString(recvPacket.ReadBits(7));
 
     if (normalizePlayerName(Invitedname))
+    {
         player = ObjectAccessor::FindPlayerByName(Invitedname.c_str());
+    }
 
     if (!player)
     {
@@ -305,7 +307,9 @@ void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
     DEBUG_LOG("WORLD: Received opcode %s", LookupOpcodeName(recvPacket.GetOpcode()));
 
     if (Player* inviter = sObjectMgr.GetPlayer(GetPlayer()->GetGuildInviterGuid()))
+    {
         inviter->SendGuildDeclined(GetPlayer()->GetName(), recvPacket.GetOpcode() == CMSG_GUILD_AUTO_DECLINE);
+    }
 
     GetPlayer()->SetGuildIdInvited(0);
     GetPlayer()->SetInGuild(0);
@@ -363,7 +367,9 @@ void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)
         guid1.GetString().c_str(), guid1.GetRawValue(), guid2.GetString().c_str(), guid2.GetRawValue());
 
     if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
+    {
         guild->Roster(this);
+    }
 }
 
 void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
@@ -808,9 +814,13 @@ void WorldSession::HandleGuildSetNoteOpcode(WorldPacket& recvPacket)
     }
 
     if (officer)
+    {
         slot->SetOFFNOTE(note);
+    }
     else
+    {
         slot->SetPNOTE(note);
+    }
 
     guild->Roster(this);
 }
@@ -865,7 +875,9 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     guild->SetRankName(rankId, rankname);
 
     if (rankId == GR_GUILDMASTER)                           // prevent loss leader rights
+    {
         rights = GR_RIGHT_ALL;
+    }
 
     guild->SetRankRights(rankId, rights);
 
@@ -1030,7 +1042,9 @@ void WorldSession::HandleGuildEventLogQueryOpcode(WorldPacket& /* recvPacket */)
 
     if (uint32 GuildId = GetPlayer()->GetGuildId())
         if (Guild* pGuild = sGuildMgr.GetGuildById(GuildId))
+        {
             pGuild->DisplayGuildEventLog(this);
+        }
 }
 
 /******  GUILD BANK  *******/
@@ -1041,7 +1055,9 @@ void WorldSession::HandleGuildBankMoneyWithdrawn(WorldPacket& /* recv_data */)
 
     if (uint32 GuildId = GetPlayer()->GetGuildId())
         if (Guild* pGuild = sGuildMgr.GetGuildById(GuildId))
+        {
             pGuild->SendMoneyInfo(this, GetPlayer()->GetGUIDLow());
+        }
 }
 
 void WorldSession::HandleGuildPermissions(WorldPacket& /* recv_data */)
@@ -1356,9 +1372,13 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recv_data)
 
     // BankToChar swap or char to bank remaining
     if (ToChar)                                             // Bank -> Char cases
+    {
         pGuild->MoveFromBankToChar(_player, BankTab, BankTabSlot, PlayerBag, PlayerSlot, SplitedAmount);
+    }
     else                                                    // Char -> Bank cases
+    {
         pGuild->MoveFromCharToBank(_player, PlayerBag, PlayerSlot, BankTab, BankTabSlot, SplitedAmount);
+    }
 }
 
 void WorldSession::HandleGuildBankBuyTab(WorldPacket& recv_data)
@@ -1571,7 +1591,9 @@ void WorldSession::HandleGuildQueryRanksOpcode(WorldPacket& recv_data)
     recv_data.ReadGuidMask<2, 3, 0, 6, 4, 7, 5, 1>(guildGuid);
     recv_data.ReadGuidBytes<3, 4, 5, 7, 1, 0, 6, 2>(guildGuid);
     if (Guild* guild = sGuildMgr.GetGuildByGuid(guildGuid))
+    {
         guild->QueryRanks(this);
+    }
 }
 
 void WorldSession::HandleGuildAutoDeclineToggleOpcode(WorldPacket& recv_data)

@@ -761,13 +761,19 @@ namespace MaNGOS
             {
                 Player* pPlayer = itr->getSource();
                 if (!pPlayer->IsAlive() || pPlayer->IsTaxiFlying())
+                {
                     continue;
+                }
 
                 if (i_originalCaster->IsFriendlyTo(pPlayer))
+                {
                     continue;
+                }
 
                 if (pPlayer->IsWithinDist3d(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ, i_radius))
+                {
                     i_data.push_back(pPlayer);
+                }
             }
         }
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
@@ -796,7 +802,9 @@ namespace MaNGOS
               i_originalCaster(originalCaster), i_castingObject(i_spell.GetCastingObject())
         {
             if (!i_originalCaster)
+            {
                 i_originalCaster = i_spell.GetAffectiveCasterObject();
+            }
             i_playerControlled = i_originalCaster  ? i_originalCaster->IsControlledByPlayer() : false;
 
             switch (i_push_type)
@@ -815,9 +823,13 @@ namespace MaNGOS
                     break;
                 case PUSH_DEST_CENTER:
                     if (i_spell.m_targets.m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
+                    {
                         i_spell.m_targets.getSource(i_centerX, i_centerY, i_centerZ);
+                    }
                     else
+                    {
                         i_spell.m_targets.getDestination(i_centerX, i_centerY, i_centerZ);
+                    }
                     break;
                 case PUSH_TARGET_CENTER:
                     if (Unit* target = i_spell.m_targets.getUnitTarget())
@@ -853,34 +865,48 @@ namespace MaNGOS
                 {
                     case SPELL_TARGETS_HOSTILE:
                         if (!i_originalCaster->IsHostileTo(itr->getSource()))
+                        {
                             continue;
+                        }
                         break;
                     case SPELL_TARGETS_NOT_FRIENDLY:
                         if (i_originalCaster->IsFriendlyTo(itr->getSource()))
+                        {
                             continue;
+                        }
                         break;
                     case SPELL_TARGETS_NOT_HOSTILE:
                         if (i_originalCaster->IsHostileTo(itr->getSource()))
+                        {
                             continue;
+                        }
                         break;
                     case SPELL_TARGETS_FRIENDLY:
                         if (!i_originalCaster->IsFriendlyTo(itr->getSource()))
+                        {
                             continue;
+                        }
                         break;
                     case SPELL_TARGETS_AOE_DAMAGE:
                     {
                         if (itr->getSource()->GetTypeId() == TYPEID_UNIT && ((Creature*)itr->getSource())->IsTotem())
+                        {
                             continue;
+                        }
 
                         if (i_playerControlled)
                         {
                             if (i_originalCaster->IsFriendlyTo(itr->getSource()))
+                            {
                                 continue;
+                            }
                         }
                         else
                         {
                             if (!i_originalCaster->IsHostileTo(itr->getSource()))
+                            {
                                 continue;
+                            }
                         }
                     }
                     break;
@@ -894,35 +920,51 @@ namespace MaNGOS
                 {
                     case PUSH_IN_FRONT:
                         if (i_castingObject->IsInFront((Unit*)(itr->getSource()), i_radius, 2 * M_PI_F / 3))
+                        {
                             i_data->push_back(itr->getSource());
+                        }
                         break;
                     case PUSH_IN_FRONT_90:
                         if (i_castingObject->IsInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 2))
+                        {
                             i_data->push_back(itr->getSource());
+                        }
                         break;
                     case PUSH_IN_FRONT_30:
                         if (i_castingObject->IsInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 6))
+                        {
                             i_data->push_back(itr->getSource());
+                        }
                         break;
                     case PUSH_IN_FRONT_15:
                         if (i_castingObject->IsInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 12))
+                        {
                             i_data->push_back(itr->getSource());
+                        }
                         break;
                     case PUSH_IN_BACK:
                         if (i_castingObject->IsInBack((Unit*)(itr->getSource()), i_radius, 2 * M_PI_F / 3))
+                        {
                             i_data->push_back(itr->getSource());
+                        }
                         break;
                     case PUSH_SELF_CENTER:
                         if (i_castingObject->IsWithinDist((Unit*)(itr->getSource()), i_radius))
+                        {
                             i_data->push_back(itr->getSource());
+                        }
                         break;
                     case PUSH_DEST_CENTER:
                         if (itr->getSource()->IsWithinDist3d(i_centerX, i_centerY, i_centerZ, i_radius))
+                        {
                             i_data->push_back(itr->getSource());
+                        }
                         break;
                     case PUSH_TARGET_CENTER:
                         if (i_spell.m_targets.getUnitTarget() && i_spell.m_targets.getUnitTarget()->IsWithinDist((Unit*)(itr->getSource()), i_radius))
+                        {
                             i_data->push_back(itr->getSource());
+                        }
                         break;
                 }
             }

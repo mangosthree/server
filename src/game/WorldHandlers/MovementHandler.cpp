@@ -83,7 +83,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     if (mEntry->IsBattleGroundOrArena())
     {
         if (GetPlayer()->GetBattleGroundId())
+        {
             map = sMapMgr.FindMap(loc.mapid, GetPlayer()->GetBattleGroundId());
+        }
 
         if (!map)
         {
@@ -108,13 +110,17 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
     // reset instance validity, except if going to an instance inside an instance
     if (GetPlayer()->m_InstanceValid == false && !mInstance)
+    {
         GetPlayer()->m_InstanceValid = true;
+    }
 
     GetPlayer()->SetSemaphoreTeleportFar(false);
 
     // relocate the player to the teleport destination
     if (!map)
+    {
         map = sMapMgr.CreateMap(loc.mapid, GetPlayer());
+    }
 
     GetPlayer()->SetMap(map);
     GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
@@ -157,7 +163,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         else if (BattleGround* bg = _player->GetBattleGround())
         {
             if (_player->IsInvitedForBattleGroundInstance(_player->GetBattleGroundId()))
+            {
                 bg->AddPlayer(_player);
+            }
         }
     }
 
@@ -222,7 +230,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
             if (entry->Id != aura->GetModifier()->m_amount)
             {
                 if (MountCapabilityEntry const* oldEntry = sMountCapabilityStore.LookupEntry(aura->GetModifier()->m_amount))
+                {
                     _player->RemoveAurasDueToSpell(oldEntry->SpeedModSpell);
+                }
 
                 _player->CastSpell(_player, entry->SpeedModSpell, true);
 
@@ -252,7 +262,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
     // honorless target
     if (GetPlayer()->pvpInfo.inHostileArea)
+    {
         GetPlayer()->CastSpell(GetPlayer(), 2479, true);
+    }
 
     // resummon pet
     GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
@@ -305,7 +317,9 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
     {
         // honorless target
         if (plMover->pvpInfo.inHostileArea)
+        {
             plMover->CastSpell(plMover, 2479, true);
+        }
     }
 
     // resummon pet
@@ -346,17 +360,23 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
 
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
     if (opcode == CMSG_MOVE_FALL_LAND && plMover && !plMover->IsTaxiFlying())
+    {
         plMover->HandleFall(movementInfo);
+    }
 
     /* process position-change */
     HandleMoverRelocation(movementInfo);
 
     if (plMover)
+    {
         plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
+    }
 
     // stop some emotes at player move
     if (mover && (mover->GetUInt32Value(UNIT_NPC_EMOTESTATE) != 0))
+    {
         mover->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+    }
 
     WorldPacket data(SMSG_PLAYER_MOVE, recv_data.size());
     data << movementInfo;
@@ -456,7 +476,9 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket& recv_data)
     else
     {
         if (Unit* mover = ObjectAccessor::GetUnit(*GetPlayer(), guid))
+        {
             _player->SetMover(mover);
+        }
     }
 }
 
@@ -618,7 +640,9 @@ bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGu
 void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
 {
     if (m_clientTimeDelay == 0)
+    {
         m_clientTimeDelay = WorldTimer::getMSTime() - movementInfo.GetTime();
+    }
     movementInfo.UpdateTime(movementInfo.GetTime() + m_clientTimeDelay + MOVEMENT_PACKET_TIME_DELAY);
 
     Unit* mover = _player->GetMover();
@@ -659,7 +683,9 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
 
         /* Movement should cancel looting */
         if(ObjectGuid lootGUID = plMover->GetLootGuid())
+        {
             plMover->SendLootRelease(lootGUID);
+        }
 
         if (movementInfo.GetPos()->z < -500.0f)
         {
@@ -694,6 +720,8 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
     else                                                    // creature charmed
     {
         if (mover->IsInWorld())
+        {
             mover->GetMap()->CreatureRelocation((Creature*)mover, movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z, movementInfo.GetPos()->o);
+        }
     }
 }

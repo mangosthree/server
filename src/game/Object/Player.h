@@ -257,9 +257,13 @@ struct Glyph
         else if (newId == 0)
         {
             if (uState == GLYPH_NEW)                        // delete before add new -> no change
+            {
                 uState = GLYPH_UNCHANGED;
+            }
             else                                            // delete existing data
+            {
                 uState = GLYPH_DELETED;
+            }
         }
         else if (uState != GLYPH_NEW)                       // if not new data, change current data
         {
@@ -404,9 +408,13 @@ struct Runes
     void SetRuneState(uint8 index, bool set = true)
     {
         if (set)
+        {
             runeState |= (1 << index);                      // usable
+        }
         else
+        {
             runeState &= ~(1 << index);                     // on cooldown
+        }
     }
 };
 
@@ -1661,13 +1669,19 @@ class Player : public Unit
         void ModifyMoney(int64 d)
         {
             if (d < 0)
+            {
                 SetMoney(GetMoney() > uint64(-d) ? GetMoney() + d : 0);
+            }
             else
+            {
                 SetMoney(GetMoney() < uint64(MAX_MONEY_AMOUNT - d) ? GetMoney() + d : MAX_MONEY_AMOUNT);
+            }
 
             // "At Gold Limit"
             if (GetMoney() >= MAX_MONEY_AMOUNT)
+            {
                 SendEquipError(EQUIP_ERR_TOO_MUCH_GOLD, NULL, NULL);
+            }
         }
         void SetMoney(uint64 value)
         {

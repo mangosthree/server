@@ -167,7 +167,9 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         // check if already in queue
         if (_player->GetBattleGroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES)
             // player is already in this queue
-            { return; }
+        {
+            return;
+        }
         // check if has free queue slots
         if (!_player->HasFreeBattleGroundQueueId())
         {
@@ -213,7 +215,9 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         {
             Player* member = itr->getSource();
             if (!member)
-                { continue; }                                   // this should never happen
+            {
+                continue;                                    // this should never happen
+            }
 
             uint32 queueSlot = member->AddBattleGroundQueueId(bgQueueTypeId);           // add to queue
 
@@ -262,16 +266,22 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket & /*recv_
         case BATTLEGROUND_WS:
         {
             if ((flagCarrierA = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetAllianceFlagCarrierGuid())))
+            {
                 ++flagCarrierCountH;
+            }
 
             if ((flagCarrierH = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetHordeFlagCarrierGuid())))
+            {
                 ++flagCarrierCountH;
+            }
             break;
         }
         case BATTLEGROUND_EY:
         {
             if ((flagCarrierH = sObjectMgr.GetPlayer(((BattleGroundEY*)bg)->GetFlagCarrierGuid())))
+            {
                 ++flagCarrierCountH;
+            }
             break;
         }
         case BATTLEGROUND_AB:
@@ -287,9 +297,13 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket & /*recv_
     data.WriteBits(flagCarrierCountA, 22);
     data.WriteBits(flagCarrierCountH, 22);
     if (flagCarrierA)
+    {
         data.WriteGuidMask<6, 5, 4, 7, 2, 1, 0, 3>(flagCarrierA->GetObjectGuid());
+    }
     if (flagCarrierH)
+    {
         data.WriteGuidMask<6, 5, 4, 7, 2, 1, 0, 3>(flagCarrierH->GetObjectGuid());
+    }
 
     if (flagCarrierA)
     {
@@ -457,10 +471,14 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
     {
         case 1:                                         // port to battleground
             if (!_player->IsInvitedForBattleGroundQueueType(bgQueueTypeId))
-                { return; }                                 // cheating?
+            {
+                return;                                  // cheating?
+            }
 
             if (!_player->InBattleGround())
+            {
                 _player->SetBattleGroundEntryPoint();
+            }
 
             // resurrect the player
             if (!_player->IsAlive())
@@ -513,7 +531,9 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
             bgQueue.RemovePlayer(_player->GetObjectGuid(), true);
             // player left queue, we should update it - do not update Arena Queue
             if (ginfo.arenaType == ARENA_TYPE_NONE)
+            {
                 sBattleGroundMgr.ScheduleQueueUpdate(ginfo.ArenaTeamRating, ginfo.arenaType, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
+            }
             SendPacket(&data);
             DEBUG_LOG("Battleground: player %s (%u) left queue for bgtype %u, queue type %u.", _player->GetName(), _player->GetGUIDLow(), bg->GetTypeID(), bgQueueTypeId);
             break;
@@ -601,7 +621,9 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket & /*recv_data*/)
             // expected bracket entry
             PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), _player->getLevel());
             if (!bracketEntry)
+            {
                 continue;
+            }
 
             uint32 avgTime = bgQueue.GetAverageQueueWaitTime(&ginfo, bracketEntry->GetBracketId());
             // send status in BattleGround Queue
@@ -746,7 +768,9 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
 
     // if avg personal rating is more than 150 points below the teams rating, the team will be queued against an opponent matching or similar to the average personal rating
     if (avg_pers_rating + 150 < arenaRating)
+    {
         arenaRating = avg_pers_rating;
+    }
 
     BattleGroundQueue& bgQueue = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId];
     uint32 avgTime = 0;
@@ -766,7 +790,9 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
     {
         Player* member = itr->getSource();
         if (!member)
+        {
             continue;
+        }
 
         WorldPacket data;
 

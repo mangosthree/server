@@ -182,7 +182,9 @@ uint32 DBCFileLoader::GetFormatStringsFields(const char * format)
     uint32 stringfields = 0;
     for(uint32 x=0; format[x];++x)
         if (format[x] == DBC_FF_STRING)
+        {
             ++stringfields;
+        }
 
     return stringfields;
 }

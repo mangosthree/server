@@ -132,23 +132,35 @@ void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char cons
 {
     char dirname[512];
     if (subdir)
+    {
         sprintf(dirname, "%s/Data/%s", input_path, subdir);
+    }
     else
+    {
         sprintf(dirname, "%s/Data", input_path);
+    }
 
     char scanname[512];
     if (suffix)
+    {
         sprintf(scanname, "wow-update-%s-%%u.MPQ", suffix);
+    }
     else
+    {
         sprintf(scanname, "wow-update-%%u.MPQ");
+    }
 
 #ifdef WIN32
 
     char maskname[512];
     if (suffix)
+    {
         sprintf(maskname, "%s/wow-update-%s-*.MPQ", dirname, suffix);
+    }
     else
+    {
         sprintf(maskname, "%s/wow-update-*.MPQ", dirname);
+    }
 
     WIN32_FIND_DATA ffd;
     HANDLE hFind = FindFirstFile(maskname, &ffd);
@@ -158,11 +170,15 @@ void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char cons
         do
         {
             if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+            {
                 continue;
+            }
 
             uint32 ubuild = 0;
             if (sscanf(ffd.cFileName, scanname, &ubuild) == 1 && (!CONF_max_build || ubuild <= CONF_max_build))
+            {
                 updates[ubuild] = UpdatesPair(ffd.cFileName, section);
+            }
         }
         while (FindNextFile(hFind, &ffd) != 0);
 
@@ -177,7 +193,9 @@ void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char cons
         dirent* dirp;
         while ((dirp = readdir(dp)) != NULL)
             if (sscanf(dirp->d_name, scanname, &ubuild) == 1 && (!CONF_max_build || ubuild <= CONF_max_build))
+            {
                 updates[ubuild] = UpdatesPair(dirp->d_name, section);
+            }
 
         closedir(dp);
     }
@@ -214,21 +232,29 @@ bool LoadLocaleMPQFile(int const locale)
 
         //if (!OpenArchive(filename))
         if (!SFileOpenPatchArchive(LocaleMpq, filename, "", 0))
+        {
             printf("Error open patch archive: %s\n\n", filename);
+        }
     }
 
     for (Updates::const_iterator itr = updates.begin(); itr != updates.end(); ++itr)
     {
         if (!itr->second.second)
+        {
             sprintf(filename, "%s/Data/%s/%s", input_path, Locales[locale], itr->second.first.c_str());
+        }
         else
+        {
             sprintf(filename, "%s/Data/%s", input_path, itr->second.first.c_str());
+        }
 
         printf("\nPatching : %s\n", filename);
 
         //if (!OpenArchive(filename))
         if (!SFileOpenPatchArchive(LocaleMpq, filename, itr->second.second ? itr->second.second : "", 0))
+        {
             printf("Error open patch archive: %s\n\n", filename);
+        }
     }
 
     // ./Data/Cache patch-base files
@@ -240,7 +266,9 @@ bool LoadLocaleMPQFile(int const locale)
 
         //if (!OpenArchive(filename))
         if (!SFileOpenPatchArchive(LocaleMpq, filename, "", 0))
+        {
             printf("Error open patch archive: %s\n\n", filename);
+        }
     }
 
     // ./Data/Cache/<locale> patch files
@@ -252,7 +280,9 @@ bool LoadLocaleMPQFile(int const locale)
 
         //if (!OpenArchive(filename))
         if (!SFileOpenPatchArchive(LocaleMpq, filename, "", 0))
+        {
             printf("Error open patch archive: %s\n\n", filename);
+        }
     }
 
     return true;
@@ -265,7 +295,9 @@ void LoadCommonMPQFiles(uint32 build)
     if (!SFileOpenArchive(filename, 0, MPQ_OPEN_READ_ONLY, &WorldMpq))
     {
         if (GetLastError() != ERROR_FILE_NOT_FOUND)
+        {
             _tprintf(_T("Cannot open archive %s\n"), filename);
+        }
         return;
     }
 
@@ -273,15 +305,21 @@ void LoadCommonMPQFiles(uint32 build)
     for (int i = 1; i < count; ++i)
     {
         if (build < 15211 && !strcmp("world2.MPQ", CONF_mpq_list[i]))   // 4.3.2 and higher MPQ
+        {
             continue;
+        }
 
         _stprintf(filename, _T("%s/Data/%s"), input_path, CONF_mpq_list[i]);
         if (!SFileOpenPatchArchive(WorldMpq, filename, "", 0))
         {
             if (GetLastError() != ERROR_FILE_NOT_FOUND)
+            {
                 _tprintf(_T("Cannot open archive %s\n"), filename);
+            }
             else
+            {
                 _tprintf(_T("Not found %s\n"), filename);
+            }
         }
         else
         {
@@ -327,9 +365,13 @@ void LoadCommonMPQFiles(uint32 build)
         if (!SFileOpenPatchArchive(WorldMpq, filename, prefix, 0))
         {
             if (GetLastError() != ERROR_FILE_NOT_FOUND)
+            {
                 _tprintf(_T("Cannot open patch archive %s\n"), filename);
+            }
             else
+            {
                 _tprintf(_T("Not found %s\n"), filename);
+            }
             continue;
         }
         else
@@ -367,7 +409,9 @@ void LoadCommonMPQFiles(uint32 build)
         printf("\nPatching : %s\n", filename);
 
         if (!SFileOpenPatchArchive(WorldMpq, filename, "", 0))
+        {
             printf("Error open patch archive: %s\n\n", filename);
+        }
     }
 }
 void strToLower(char* str)
@@ -468,7 +512,9 @@ bool ExtractWmo()
     SFileFindClose(find);
 
     if (success)
+    {
         printf("\nExtract wmo complete (No (fatal) errors)\n");
+    }
 
     return success;
 }
@@ -498,7 +544,9 @@ bool ExtractSingleWmo(std::string& fname)
         {
             int m = cpy[i];
             if (isdigit(m))
+            {
                 p++;
+            }
         }
     }
 
@@ -554,7 +602,9 @@ bool ExtractSingleWmo(std::string& fname)
 
     // Delete the extracted file in the case of an error
     if (!file_ok)
+    {
         remove(szLocalFile);
+    }
     return true;
 }
 
@@ -616,7 +666,9 @@ bool processArgv(int argc, char** argv)
                 hasInputPathParam = true;
                 strcpy(input_path, argv[i + 1]);
                 if (input_path[strlen(input_path) - 1] != '\\' || input_path[strlen(input_path) - 1] != '/')
+                {
                     strcat(input_path, "/");
+                }
                 ++i;
             }
             else
@@ -635,7 +687,9 @@ bool processArgv(int argc, char** argv)
         else if (strcmp("-b", argv[i]) == 0)
         {
             if (i + 1 < argc)                            // all ok
+            {
                 CONF_TargetBuild = atoi(argv[i++ + 1]);
+            }
         }
         else
         {
@@ -724,7 +778,9 @@ int main(int argc, char** argv)
         if (!LoadLocaleMPQFile(i))
         {
             if (GetLastError() != ERROR_FILE_NOT_FOUND)
+            {
                 printf("Unable to load %s locale archives!\n", Locales[i]);
+            }
             continue;
         }
 
@@ -782,9 +838,13 @@ int main(int argc, char** argv)
 
     printf("Extract for %s. Work complete. ", szRawVMAPMagic);
     if (!bCreatedVmapsFolder || !bExtractedWMOfiles)
+    {
         printf("There were errors.\n");
+    }
     else
+    {
         printf("No errors.\n");
+    }
 
     delete [] LiqType;
     return 0;

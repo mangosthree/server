@@ -1440,7 +1440,9 @@ class  Unit : public WorldObject
         {
             AttackerSet::const_iterator itr = m_attackers.find(pAttacker);
             if (itr == m_attackers.end())
+            {
                 m_attackers.insert(pAttacker);
+            }
         }
         /**
          * Internal function, must only be called from Unit::AttackStop()
@@ -3312,9 +3314,13 @@ class  Unit : public WorldObject
         void SetVisibleAura(uint8 slot, SpellAuraHolder* holder)
         {
             if (!holder)
+            {
                 m_visibleAuras.erase(slot);
+            }
             else
+            {
                 m_visibleAuras[slot] = holder;
+            }
         }
         VisibleAuraMap const& GetVisibleAuras() const { return m_visibleAuras; }
         uint8 GetVisibleAurasCount() const { return m_visibleAuras.size(); }

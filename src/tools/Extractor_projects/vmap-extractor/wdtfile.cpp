@@ -32,7 +32,9 @@ char* wdtGetPlainName(char* FileName)
     char* szTemp;
 
     if ((szTemp = strrchr(FileName, '\\')) != NULL)
+    {
         FileName = szTemp + 1;
+    }
     return FileName;
 }
 

@@ -25,10 +25,10 @@
 #ifndef MANGOS_OBJECT_GUID_H
 #define MANGOS_OBJECT_GUID_H
 
-#include <functional>
-
 #include "Common.h"
 #include "ByteBuffer.h"
+
+#include <functional>
 
 enum TypeID
 {
@@ -338,38 +338,46 @@ HASH_NAMESPACE_END
 #endif
 
 
-#define DEFINE_READGUIDMASK(T1, T2) template <T1> \
-    void ByteBuffer::ReadGuidMask(ObjectGuid& guid) \
-    { \
-        uint8 maskArr[] = { T2 }; \
+#define DEFINE_READGUIDMASK(T1, T2) template <T1>    \
+    void ByteBuffer::ReadGuidMask(ObjectGuid& guid)  \
+    {                                                \
+        uint8 maskArr[] = { T2 };                    \
         for (uint8 i = 0; i < countof(maskArr); ++i) \
-            guid[maskArr[i]] = ReadBit(); \
+        {                                            \
+            guid[maskArr[i]] = ReadBit();            \
+        }                                            \
     }
 
-#define DEFINE_WRITEGUIDMASK(T1, T2) template <T1> \
-    void ByteBuffer::WriteGuidMask(ObjectGuid guid) \
-    { \
-        uint8 maskArr[] = { T2 }; \
+#define DEFINE_WRITEGUIDMASK(T1, T2) template <T1>   \
+    void ByteBuffer::WriteGuidMask(ObjectGuid guid)  \
+    {                                                \
+        uint8 maskArr[] = { T2 };                    \
         for (uint8 i = 0; i < countof(maskArr); ++i) \
-            WriteBit(guid[maskArr[i]]); \
+        {                                            \
+            WriteBit(guid[maskArr[i]]);              \
+        }                                            \
     }
 
-#define DEFINE_READGUIDBYTES(T1, T2) template <T1> \
+#define DEFINE_READGUIDBYTES(T1, T2) template <T1>   \
     void ByteBuffer::ReadGuidBytes(ObjectGuid& guid) \
-    { \
-        uint8 maskArr[] = { T2 }; \
+    {                                                \
+        uint8 maskArr[] = { T2 };                    \
         for (uint8 i = 0; i < countof(maskArr); ++i) \
-            if (guid[maskArr[i]] != 0) \
-                guid[maskArr[i]] ^= read<uint8>(); \
+            if (guid[maskArr[i]] != 0)               \
+            {                                        \
+                guid[maskArr[i]] ^= read<uint8>();   \
+            }                                        \
     }
 
-#define DEFINE_WRITEGUIDBYTES(T1, T2) template <T1> \
-    void ByteBuffer::WriteGuidBytes(ObjectGuid guid) \
-    { \
-        uint8 maskArr[] = { T2 }; \
-        for (uint8 i = 0; i < countof(maskArr); ++i) \
-            if (guid[maskArr[i]] != 0) \
+#define DEFINE_WRITEGUIDBYTES(T1, T2) template <T1>     \
+    void ByteBuffer::WriteGuidBytes(ObjectGuid guid)    \
+    {                                                   \
+        uint8 maskArr[] = { T2 };                       \
+        for (uint8 i = 0; i < countof(maskArr); ++i)    \
+            if (guid[maskArr[i]] != 0)                  \
+            {                                           \
                 (*this) << uint8(guid[maskArr[i]] ^ 1); \
+            }                                           \
     }
 
 DEFINE_READGUIDMASK(BITS_1, BIT_VALS_1)

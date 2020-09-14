@@ -76,12 +76,16 @@ namespace MMAP
                         break;
                     }
                     if (*str == '\0')
-                        { return false; }   // reached end of string without matching next filter character
+                    {
+                        return false;    // reached end of string without matching next filter character
+                    }
                     str++;
                 }
             }
             else if (*filter != *str)
-                { return false; }           // mismatch
+            {
+                return false;            // mismatch
+            }
 
             filter++;
             str++;

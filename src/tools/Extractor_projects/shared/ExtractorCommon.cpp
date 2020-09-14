@@ -77,10 +77,14 @@ FILE* openWoWExe()
     {
 #ifdef WIN32
         if (fopen_s(&pFile, ExeFileName[iFileCount], "rb") == 0)
+        {
             return pFile; ///< successfully located the WoW executable
+        }
 #else
         if ((pFile = fopen(ExeFileName[iFileCount], "rb")))
+        {
             return pFile; ///< successfully located the WoW executable
+        }
 #endif
     }
 
@@ -120,7 +124,9 @@ int getBuildNumber()
 
     FILE *pFile;
     if (!(pFile = openWoWExe()))
+    {
         return 0; ///> failed to locate exe file
+    }
 
     /// jump over as much of the file as possible, before we start searching for the base #
     for (int i = 0; i < 3300; i++)

@@ -94,14 +94,18 @@ class WaypointManager
             WaypointPath* path = GetPath(lowGuid);
             path = GetPath(lowGuid);
             if (path && wpOrigin)
+            {
                 *wpOrigin = PATH_FROM_GUID;
+            }
 
             // No movement found for guid
             if (!path)
             {
                 path = GetPathTemplate(entry);
                 if (path && wpOrigin)
+                {
                     *wpOrigin = PATH_FROM_ENTRY;
+                }
             }
 
             return path;

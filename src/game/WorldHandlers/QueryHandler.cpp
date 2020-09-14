@@ -65,7 +65,9 @@ void WorldSession::SendNameQueryOpcode(Player* p)
         }
     }
     else
+    {
         data << uint8(0);                                   // is not declined
+    }
 
     SendPacket(&data);
 }
@@ -107,7 +109,9 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32
     std::string name = fields[1].GetCppString();
     uint8 pRace = 0, pGender = 0, pClass = 0;
     if (name.empty())
+    {
         name         = session->GetMangosString(LANG_NON_EXIST_CHARACTER);
+    }
     else
     {
         pRace        = fields[2].GetUInt8();
@@ -135,7 +139,9 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32
         }
     }
     else
+    {
         data << uint8(0);                                   // is not declined
+    }
 
     session->SendPacket(&data);
     delete result;
@@ -150,9 +156,13 @@ void WorldSession::HandleNameQueryOpcode(WorldPacket& recv_data)
     Player* pChar = sObjectMgr.GetPlayer(guid);
 
     if (pChar)
+    {
         SendNameQueryOpcode(pChar);
+    }
     else
+    {
         SendNameQueryOpcodeFromDB(guid);
+    }
 }
 
 void WorldSession::HandleQueryTimeOpcode(WorldPacket & /*recv_data*/)
@@ -184,7 +194,9 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         data << name;
 
         for (uint8 i = 0; i < 7; ++i)
+        {
             data << uint8(0);            // name2, name3, name4, always empty
+        }
 
         data << subName;
         data << ci->IconName;                               // "Directions" for guard, string for Icons 2.3.0
@@ -205,7 +217,9 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         data << float(ci->PowerMultiplier);                   // power modifier
         data << uint8(ci->RacialLeader);
         for (uint32 i = 0; i < 6; ++i)
+        {
             data << uint32(ci->QuestItems[i]);              // itemId[6], quest drop
+        }
         data << uint32(ci->MovementTemplateId);                     // CreatureMovementInfo.dbc
         data << uint32(0);                                  //unk
         SendPacket(&data);
@@ -248,9 +262,13 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
             if (gl)
             {
                 if (gl->Name.size() > size_t(loc_idx) && !gl->Name[loc_idx].empty())
+                {
                     Name = gl->Name[loc_idx];
+                }
                 if (gl->CastBarCaption.size() > size_t(loc_idx) && !gl->CastBarCaption[loc_idx].empty())
+                {
                     CastBarCaption = gl->CastBarCaption[loc_idx];
+                }
             }
         }
         DETAIL_LOG("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name, entryID);
@@ -266,7 +284,9 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
         data.append(info->raw.data, 24);
         data << float(info->size);                          // go size
         for (uint32 i = 0; i < 6; ++i)
+        {
             data << uint32(info->questItems[i]);            // itemId[6], quest drop
+        }
         SendPacket(&data);
         DEBUG_LOG("WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }
@@ -383,14 +403,22 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recv_data)
             data << pGossip->Options[i].Probability;
 
             if (Text_0[i].empty())
+            {
                 data << Text_1[i];
+            }
             else
+            {
                 data << Text_0[i];
+            }
 
             if (Text_1[i].empty())
+            {
                 data << Text_0[i];
+            }
             else
+            {
                 data << Text_1[i];
+            }
 
             data << pGossip->Options[i].Language;
 
@@ -440,7 +468,9 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket& recv_data)
                 if (pl)
                 {
                     if (pl->Text.size() > size_t(loc_idx) && !pl->Text[loc_idx].empty())
+                    {
                         Text = pl->Text[loc_idx];
+                    }
                 }
             }
 
@@ -512,7 +542,9 @@ void WorldSession::HandleQuestPOIQueryOpcode(WorldPacket& recv_data)
         uint16 questSlot = _player->FindQuestSlot(questId);
 
         if (questSlot != MAX_QUEST_LOG_SIZE)
+        {
             questOk = _player->GetQuestSlotQuestId(questSlot) == questId;
+        }
 
         if (questOk)
         {

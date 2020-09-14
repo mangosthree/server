@@ -84,10 +84,14 @@ void VisibleNotifier::Notify()
         for (GuidSet::const_iterator iter = oor.begin(); iter != oor.end(); ++iter)
         {
             if (!iter->IsPlayer())
+            {
                 continue;
+            }
 
             if (Player* plr = ObjectAccessor::FindPlayer(*iter))
+            {
                 plr->UpdateVisibilityOf(plr->GetCamera().GetBody(), &player);
+            }
         }
     }
 
@@ -98,7 +102,9 @@ void VisibleNotifier::Notify()
     {
         // target aura duration for caster show only if target exist at caster client
         if ((*vItr) != &player && (*vItr)->isType(TYPEMASK_UNIT))
+        {
             player.SendAurasForTarget((Unit*)(*vItr));
+        }
     }
 }
 
@@ -111,10 +117,14 @@ void MessageDeliverer::Visit(CameraMapType& m)
         if (i_toSelf || owner != &i_player)
         {
             if (!i_player.InSamePhase(iter->getSource()->GetBody()))
+            {
                 continue;
+            }
 
             if (WorldSession* session = owner->GetSession())
+            {
                 session->SendPacket(i_message);
+            }
         }
     }
 }
@@ -126,10 +136,14 @@ void MessageDelivererExcept::Visit(CameraMapType& m)
         Player* owner = iter->getSource()->GetOwner();
 
         if (!owner->InSamePhase(i_phaseMask) || owner == i_skipped_receiver)
+        {
             continue;
+        }
 
         if (WorldSession* session = owner->GetSession())
+        {
             session->SendPacket(i_message);
+        }
     }
 }
 
@@ -138,10 +152,14 @@ void ObjectMessageDeliverer::Visit(CameraMapType& m)
     for (CameraMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
         if (!iter->getSource()->GetBody()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (WorldSession* session = iter->getSource()->GetOwner()->GetSession())
+        {
             session->SendPacket(i_message);
+        }
     }
 }
 
@@ -156,10 +174,14 @@ void MessageDistDeliverer::Visit(CameraMapType& m)
                 (!i_dist || iter->getSource()->GetBody()->IsWithinDist(&i_player, i_dist)))
         {
             if (!i_player.InSamePhase(iter->getSource()->GetBody()))
+            {
                 continue;
+            }
 
             if (WorldSession* session = owner->GetSession())
+            {
                 session->SendPacket(i_message);
+            }
         }
     }
 }
@@ -171,10 +193,14 @@ void ObjectMessageDistDeliverer::Visit(CameraMapType& m)
         if (!i_dist || iter->getSource()->GetBody()->IsWithinDist(&i_object, i_dist))
         {
             if (!i_object.InSamePhase(iter->getSource()->GetBody()))
+            {
                 continue;
+            }
 
             if (WorldSession* session = iter->getSource()->GetOwner()->GetSession())
+            {
                 session->SendPacket(i_message);
+            }
         }
     }
 }
@@ -269,7 +295,9 @@ void MaNGOS::CallOfHelpCreatureInRangeDo::operator()(Creature* u)
     }
 
     if (u->AI())
+    {
         u->AI()->AttackStart(i_enemy);
+    }
 }
 
 bool MaNGOS::AnyAssistCreatureInRangeCheck::operator()(Creature* u)

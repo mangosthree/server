@@ -171,7 +171,9 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     if (isType(TYPEMASK_UNIT))
     {
         if (((Unit*)this)->getVictim())
+        {
             updateFlags |= UPDATEFLAG_HAS_ATTACKING_TARGET;
+        }
     }
 
     // DEBUG_LOG("BuildCreateUpdate: update-type: %u, object-type: %u got updateFlags: %X", updatetype, m_objectTypeId, updateFlags);
@@ -299,7 +301,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
         data->WriteGuidMask<7, 3, 2>(Guid);
 
         if (unit->m_movementInfo.GetMovementFlags())
+        {
             data->WriteBits(unit->m_movementInfo.GetMovementFlags(), 30);
+        }
 
         data->WriteBit(false);
         data->WriteBit(!hasPitch);
@@ -324,19 +328,25 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
         data->WriteGuidMask<4>(Guid);
 
         if (isSplineEnabled)
+        {
             Movement::PacketBuilder::WriteCreateBits(*unit->movespline, *data);
+        }
 
         data->WriteGuidMask<6>(Guid);
 
         if (hasFallData)
+        {
             data->WriteBit(hasFallDirection);
+        }
 
         data->WriteGuidMask<0, 1>(Guid);
         data->WriteBit(false);    // Unknown 4.3.3
         data->WriteBit(!unit->m_movementInfo.GetMovementFlags2());
 
         if (unit->m_movementInfo.GetMovementFlags2())
+        {
             data->WriteBits(unit->m_movementInfo.GetMovementFlags2(), 12);
+        }
     }
 
     // used only with GO's, placeholder
@@ -354,7 +364,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     {
         ObjectGuid guid;
         if (Unit* victim = ((Unit*)this)->getVictim())
+        {
             guid = victim->GetObjectGuid();
+        }
 
         data->WriteGuidMask<2, 7, 0, 4, 5, 6, 1, 3>(guid);
     }
@@ -392,10 +404,14 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
         *data << float(unit->GetSpeed(MOVE_SWIM_BACK));
 
         if (hasElevation)
+        {
             *data << float(unit->m_movementInfo.GetSplineElevation());
+        }
 
         if (isSplineEnabled)
+        {
             Movement::PacketBuilder::WriteCreateBytes(*unit->movespline, *data);
+        }
 
         *data << float(unit->GetPositionZ());
         data->WriteGuidBytes<5>(Guid);
@@ -409,7 +425,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
             *data << float(NormalizeOrientation(unit->m_movementInfo.GetTransportPos()->o));
 
             if (hasTransportTime2)
+            {
                 *data << uint32(unit->m_movementInfo.GetTransportTime2());
+            }
 
             *data << float(unit->m_movementInfo.GetTransportPos()->y);
             *data << float(unit->m_movementInfo.GetTransportPos()->x);
@@ -418,7 +436,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
             data->WriteGuidBytes<0>(tGuid);
 
             if (hasTransportTime3)
+            {
                 *data << uint32(unit->m_movementInfo.GetFallTime());
+            }
 
             *data << int8(unit->m_movementInfo.GetTransportSeat());
             data->WriteGuidBytes<1, 6, 2, 4>(tGuid);
@@ -439,12 +459,16 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
         *data << float(unit->GetSpeed(MOVE_TURN_RATE));
 
         if (hasOrientation)
+        {
             *data << float(NormalizeOrientation(unit->GetOrientation()));
+        }
 
         *data << float(unit->GetSpeed(MOVE_RUN));
 
         if (hasPitch)
+        {
             *data << float(unit->m_movementInfo.GetPitch());
+        }
 
         *data << float(unit->GetSpeed(MOVE_FLIGHT));
     }
@@ -462,7 +486,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
 
         data->WriteGuidBytes<0, 5>(transGuid);
         if (hasTransportTime3)
+        {
             *data << uint32(0);
+        }
 
         data->WriteGuidBytes<3>(transGuid);
         *data << float(0.0f);   // x offset
@@ -475,11 +501,15 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
         *data << float(0.0f);   // o offset
 
         if (hasTransportTime2)
+        {
             *data << uint32(0);
+        }
     }
 
     if (updateFlags & UPDATEFLAG_ROTATION)
+    {
         *data << int64(((GameObject*)this)->GetPackedWorldRotation());
+    }
 
     if (updateFlags & UPDATEFLAG_TRANSPORT_ARR)
     {
@@ -514,13 +544,17 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     {
         ObjectGuid guid;
         if (Unit* victim = ((Unit*)this)->getVictim())
+        {
             guid = victim->GetObjectGuid();
+        }
 
         data->WriteGuidBytes<4, 0, 3, 5, 7, 6, 2, 1>(guid);
     }
 
     if (updateFlags & UPDATEFLAG_TRANSPORT)
+    {
         *data << uint32(WorldTimer::getMSTime());
+    }
 }
 
 void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* updateMask, Player* target) const
@@ -532,7 +566,9 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
 
     uint32 valuesCount = m_valuesCount;
     if(GetTypeId() == TYPEID_PLAYER && target != this)
+    {
         valuesCount = PLAYER_END_NOT_SELF;
+    }
 
     bool IsActivateToQuest = false;
     bool IsPerCasterAuraState = false;
@@ -598,12 +634,16 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     if (GetTypeId() == TYPEID_UNIT)
                     {
                         if (!target->canSeeSpellClickOn((Creature*)this))
+                        {
                             appendValue &= ~UNIT_NPC_FLAG_SPELLCLICK;
+                        }
 
                         if (appendValue & UNIT_NPC_FLAG_TRAINER)
                         {
                             if (!((Creature*)this)->IsTrainerOf(target, false))
+                            {
                                 appendValue &= ~(UNIT_NPC_FLAG_TRAINER | UNIT_NPC_FLAG_TRAINER_CLASS | UNIT_NPC_FLAG_TRAINER_PROFESSION);
+                            }
                         }
 
                         if (appendValue & UNIT_NPC_FLAG_STABLEMASTER)
@@ -623,12 +663,18 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     {
                         // IsPerCasterAuraState set if related pet caster aura state set already
                         if (((Unit*)this)->HasAuraStateForCaster(AURA_STATE_CONFLAGRATE, target->GetObjectGuid()))
+                        {
                             *data << m_uint32Values[index];
+                        }
                         else
+                        {
                             *data << (m_uint32Values[index] & ~(1 << (AURA_STATE_CONFLAGRATE - 1)));
+                        }
                     }
                     else
+                    {
                         *data << m_uint32Values[index];
+                    }
                 }
                 // FIXME: Some values at server stored in float format but must be sent to client in uint32 format
                 else if (index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME)
@@ -740,12 +786,18 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 else if (index == GAMEOBJECT_BYTES_1)
                 {
                     if (((GameObject*)this)->GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT)
+                    {
                         *data << uint32(m_uint32Values[index] | GO_STATE_TRANSPORT_SPEC);
+                    }
                     else
+                    {
                         *data << uint32(m_uint32Values[index]);
+                    }
                 }
                 else
-                    { *data << m_uint32Values[index]; }         // other cases
+                {
+                    *data << m_uint32Values[index];          // other cases
+                }
             }
         }
     }
@@ -810,7 +862,9 @@ void Object::_SetUpdateBits(UpdateMask* updateMask, Player* target) const
 {
     uint32 valuesCount = m_valuesCount;
     if(GetTypeId() == TYPEID_PLAYER && target != this)
+    {
         valuesCount = PLAYER_END_NOT_SELF;
+    }
 
     for (uint16 index = 0; index < valuesCount; ++index )
         if (m_changedValues[index])
@@ -823,7 +877,9 @@ void Object::_SetCreateBits(UpdateMask* updateMask, Player* target) const
 {
     uint32 valuesCount = m_valuesCount;
     if(GetTypeId() == TYPEID_PLAYER && target != this)
+    {
         valuesCount = PLAYER_END_NOT_SELF;
+    }
 
     for (uint16 index = 0; index < valuesCount; ++index)
         if (GetUInt32Value(index) != 0)
@@ -1523,15 +1579,23 @@ void WorldObject::GetRandomPoint(float x, float y, float z, float distance, floa
     // angle to face `obj` to `this`
     float angle;
     if (!ori)
+    {
         angle = rand_norm_f() * 2 * M_PI_F;
+    }
     else
+    {
         angle = *ori;
+    }
 
     float new_dist;
     if (minDist == 0.0f)
+    {
         new_dist = rand_norm_f() * distance;
+    }
     else
+    {
         new_dist = minDist + rand_norm_f() * (distance - minDist);
+    }
 
     rand_x = x + new_dist * cos(angle);
     rand_y = y + new_dist * sin(angle);
@@ -1546,7 +1610,9 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float& z) const
 {
     float new_z = GetMap()->GetHeight(GetPhaseMask(), x, y, z);
     if (new_z > INVALID_HEIGHT)
-    { z = new_z + 0.05f; }                                  // just to be sure that we are not a few pixel under the surface
+    {
+        z = new_z + 0.05f;                                   // just to be sure that we are not a few pixel under the surface
+    }
 }
 
 void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=NULL*/) const
@@ -1614,7 +1680,9 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
             {
                 float ground_z = atMap->GetHeight(GetPhaseMask(), x, y, z);
                 if (z < ground_z)
+                {
                     z = ground_z;
+                }
             }
             break;
         }
@@ -1894,7 +1962,9 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 
 #ifdef ENABLE_ELUNA
     if (Unit* summoner = ToUnit())
+    {
         sEluna->OnSummoned(pCreature, summoner);
+    }
 #endif /* ENABLE_ELUNA */
 
     // Creature Linking, Initial load is handled like respawn
@@ -2045,7 +2115,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     if (!sWorld.getConfig(CONFIG_BOOL_DETECT_POS_COLLISION))
     {
         if (searcher)
-            { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
+        {
+            searcher->UpdateAllowedPositionZ(x, y, z, GetMap());       // update to LOS height if available
+        }
         else
         {
             UpdateGroundPositionZ(x, y, z);
@@ -2075,7 +2147,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     if (selector.CheckOriginalAngle())
     {
         if (searcher)
-            { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
+        {
+            searcher->UpdateAllowedPositionZ(x, y, z, GetMap());       // update to LOS height if available
+        }
         else
         {
             UpdateGroundPositionZ(x, y, z);
@@ -2101,7 +2175,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         z = GetPositionZ();
 
         if (searcher)
-            { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
+        {
+            searcher->UpdateAllowedPositionZ(x, y, z, GetMap());       // update to LOS height if available
+        }
         else
         {
             UpdateGroundPositionZ(x, y, z);
@@ -2121,7 +2197,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         y = first_y;
 
         if (searcher)
-            { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
+        {
+            searcher->UpdateAllowedPositionZ(x, y, z, GetMap());       // update to LOS height if available
+        }
         else
         {
             UpdateGroundPositionZ(x, y, z);
@@ -2139,7 +2217,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
         z = GetPositionZ();
 
         if (searcher)
-            { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }      // update to LOS height if available
+        {
+            searcher->UpdateAllowedPositionZ(x, y, z, GetMap());       // update to LOS height if available
+        }
         else
         {
             UpdateGroundPositionZ(x, y, z);
@@ -2156,7 +2236,9 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     y = first_y;
 
     if (searcher)
-        { searcher->UpdateAllowedPositionZ(x, y, z, GetMap()); }          // update to LOS height if available
+    {
+        searcher->UpdateAllowedPositionZ(x, y, z, GetMap());           // update to LOS height if available
+    }
     else
     {
         UpdateGroundPositionZ(x, y, z);
@@ -2168,7 +2250,9 @@ void WorldObject::SetPhaseMask(uint32 newPhaseMask, bool update)
     m_phaseMask = newPhaseMask;
 
     if (update && IsInWorld())
+    {
         UpdateVisibilityAndView();
+    }
 }
 
 void WorldObject::PlayDistanceSound(uint32 sound_id, Player const* target /*= NULL*/) const

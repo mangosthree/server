@@ -371,9 +371,13 @@ int main(int argc, char** argv)
         builder.buildSingleTile(mapnum, tileX, tileY);
     }
     else if (mapnum >= 0)
+    {
         builder.buildMap(uint32(mapnum));
+    }
     else
+    {
         builder.buildAllMaps();
+    }
 
 
     return silent ? 1 : finish(" Movemap build is complete! Press enter to exit\n", 1);

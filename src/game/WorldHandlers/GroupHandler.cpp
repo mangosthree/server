@@ -149,7 +149,9 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
 
     Group* group = GetPlayer()->GetGroup();
     if (group && group->isBGGroup())
+    {
         group = GetPlayer()->GetOriginalGroup();
+    }
 
     if (group && group->isRaidGroup() && !player->GetAllowLowLevelRaid() && (player->getLevel() < sWorld.getConfig(CONFIG_UINT32_MIN_LEVEL_FOR_RAID)))
     {
@@ -166,7 +168,9 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
 
     Group* group2 = player->GetGroup();
     if (group2 && group2->isBGGroup())
+    {
         group2 = player->GetOriginalGroup();
+    }
 
     // player already in another group
     if (group2)
@@ -231,7 +235,9 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recv_data)
     bool unk = recv_data.ReadBit();
     bool accepted = recv_data.ReadBit();
     if (unk)
+    {
         recv_data.read_skip<uint32>();
+    }
 
     Group* group = GetPlayer()->GetGroupInvite();
     if (!group)
@@ -267,9 +273,13 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recv_data)
         if (!group->IsCreated())
         {
             if (leader)
+            {
                 group->RemoveInvite(leader);
+            }
             if (group->Create(group->GetLeaderGuid(), group->GetLeaderName()))
+            {
                 sObjectMgr.AddGroup(group);
+            }
             else
             {
                 return;
@@ -549,9 +559,13 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
     data << uint32(roll);
     data << GetPlayer()->GetObjectGuid();
     if (GetPlayer()->GetGroup())
+    {
         GetPlayer()->GetGroup()->BroadcastPacket(&data, false);
+    }
     else
+    {
         SendPacket(&data);
+    }
 }
 
 void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recv_data)
@@ -644,11 +658,15 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recv_data)
 
     // everything is fine, do it
     if (Player* player = sObjectMgr.GetPlayer(name.c_str()))
+    {
         group->ChangeMembersGroup(player, groupNr);
+    }
     else
     {
         if (ObjectGuid guid = sObjectMgr.GetPlayerGuidByName(name.c_str()))
+        {
             group->ChangeMembersGroup(guid, groupNr);
+        }
     }
 }
 
@@ -712,9 +730,13 @@ void WorldSession::HandlePartyAssignmentOpcode(WorldPacket& recv_data)
     else
     {
         if (group->GetMainTankGuid() == guid)
+        {
             group->SetMainTank(ObjectGuid());
+        }
         if (group->GetMainAssistantGuid() == guid)
+        {
             group->SetMainAssistant(ObjectGuid());
+        }
     }
 }
 
@@ -777,15 +799,21 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     uint32 mask = player->GetGroupUpdateFlag();
 
     if (mask & GROUP_UPDATE_FLAG_POWER_TYPE)                // if update power type, update current/max power also
+    {
         mask |= (GROUP_UPDATE_FLAG_CUR_POWER | GROUP_UPDATE_FLAG_MAX_POWER);
+    }
 
     if (mask & GROUP_UPDATE_FLAG_PET_POWER_TYPE)            // same for pets
+    {
         mask |= (GROUP_UPDATE_FLAG_PET_CUR_POWER | GROUP_UPDATE_FLAG_PET_MAX_POWER);
+    }
 
     uint32 byteCount = 0;
     for (int i = 1; i < GROUP_UPDATE_FLAGS_COUNT; ++i)
         if (mask & (1 << i))
+        {
             byteCount += GroupUpdateLength[i];
+        }
 
     data->Initialize(SMSG_PARTY_MEMBER_STATS, 8 + 4 + byteCount);
     *data << player->GetPackGUID();
@@ -794,38 +822,60 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     if (mask & GROUP_UPDATE_FLAG_STATUS)
     {
         if (player->IsPvP())
+        {
             *data << uint16(MEMBER_STATUS_ONLINE | MEMBER_STATUS_PVP);
+        }
         else
+        {
             *data << uint16(MEMBER_STATUS_ONLINE);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_CUR_HP)
+    {
         *data << uint32(player->GetHealth());
+    }
 
     if (mask & GROUP_UPDATE_FLAG_MAX_HP)
+    {
         *data << uint32(player->GetMaxHealth());
+    }
 
     Powers powerType = player->GetPowerType();
     if (mask & GROUP_UPDATE_FLAG_POWER_TYPE)
+    {
         *data << uint8(powerType);
+    }
 
     if (mask & GROUP_UPDATE_FLAG_CUR_POWER)
+    {
         *data << uint16(player->GetPower(powerType));
+    }
 
     if (mask & GROUP_UPDATE_FLAG_MAX_POWER)
+    {
         *data << uint16(player->GetMaxPower(powerType));
+    }
 
     if (mask & GROUP_UPDATE_FLAG_LEVEL)
+    {
         *data << uint16(player->getLevel());
+    }
 
     if (mask & GROUP_UPDATE_FLAG_ZONE)
+    {
         *data << uint16(player->GetZoneId());
+    }
 
     if (mask & GROUP_UPDATE_FLAG_UNK)
+    {
         *data << uint16(0);
+    }
 
     if (mask & GROUP_UPDATE_FLAG_POSITION)
+    {
         *data << uint16(player->GetPositionX()) << uint16(player->GetPositionY()) << uint16(player->GetPositionZ());
+    }
 
     if (mask & GROUP_UPDATE_FLAG_AURAS)
     {
@@ -868,62 +918,92 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
 
     Pet* pet = player->GetPet();
     if (mask & GROUP_UPDATE_FLAG_PET_GUID)
+    {
         *data << (pet ? pet->GetObjectGuid() : ObjectGuid());
+    }
 
     if (mask & GROUP_UPDATE_FLAG_PET_NAME)
     {
         if (pet)
+        {
             *data << pet->GetName();
+        }
         else
+        {
             *data << uint8(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_MODEL_ID)
     {
         if (pet)
+        {
             *data << uint16(pet->GetDisplayId());
+        }
         else
+        {
             *data << uint16(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_CUR_HP)
     {
         if (pet)
+        {
             *data << uint32(pet->GetHealth());
+        }
         else
+        {
             *data << uint32(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_MAX_HP)
     {
         if (pet)
+        {
             *data << uint32(pet->GetMaxHealth());
+        }
         else
+        {
             *data << uint32(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_POWER_TYPE)
     {
         if (pet)
+        {
             *data << uint8(pet->GetPowerType());
+        }
         else
+        {
             *data << uint8(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_CUR_POWER)
     {
         if (pet)
+        {
             *data << uint16(pet->GetPower(pet->GetPowerType()));
+        }
         else
+        {
             *data << uint16(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_MAX_POWER)
     {
         if (pet)
+        {
             *data << uint16(pet->GetMaxPower(pet->GetPowerType()));
+        }
         else
+        {
             *data << uint16(0);
+        }
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_AURAS)
@@ -975,7 +1055,9 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     }
 
     if (mask & GROUP_UPDATE_FLAG_VEHICLE_SEAT)
+    {
         *data << int32(0);
+    }
 
     if (mask & GROUP_UPDATE_FLAG_PHASE)
     {
@@ -987,9 +1069,13 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     if (mask & GROUP_UPDATE_FLAG_VEHICLE_SEAT)
     {
         if (player->GetTransportInfo())
+        {
             *data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->m_seatID[player->GetTransportInfo()->GetTransportSeat()]);
+        }
         else
+        {
             *data << uint32(0);
+        }
     }
 }
 
@@ -1025,7 +1111,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         GROUP_UPDATE_FLAG_PHASE;
 
     if (pet)
+    {
         mask1 = 0x7FEFFEFF; // full mask & ~(GROUP_UPDATE_FLAG_VEHICLE_SEAT | GROUP_UPDATE_FLAG_UNK)
+    }
 
     Powers powerType = player->GetPowerType();
     data << uint32(mask1);                                  // group update mask
@@ -1151,7 +1239,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     }
 
     if (player->GetTransportInfo())                         // GROUP_UPDATE_FLAG_VEHICLE_SEAT
+    {
         data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->m_seatID[player->GetTransportInfo()->GetTransportSeat()]);
+    }
 
     data << uint32(8);                                      // GROUP_UPDATE_FLAG_PHASE
     data << uint32(0);                                      // GROUP_UPDATE_FLAG_PHASE
@@ -1182,7 +1272,9 @@ void WorldSession::HandleOptOutOfLootOpcode(WorldPacket& recv_data)
     }
 
     if (unkn != 0)
+    {
         sLog.outError("CMSG_GROUP_PASS_ON_LOOT: activation not implemented!");
+    }
 }
 
 void WorldSession::HandleSetAllowLowLevelRaidOpcode(WorldPacket& recv_data)

@@ -62,7 +62,9 @@ namespace MMAP
             }
 
             if (navMesh)
+            {
                 dtFreeNavMesh(navMesh);
+            }
         }
 
         dtNavMesh* navMesh;

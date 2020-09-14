@@ -169,13 +169,21 @@ bool Weather::ReGenerate()
 
     uint32 rnd = urand(1, 100);
     if (rnd <= chance1)
+    {
         m_type = WEATHER_TYPE_RAIN;
+    }
     else if (rnd <= chance2)
+    {
         m_type = WEATHER_TYPE_SNOW;
+    }
     else if (rnd <= chance3)
+    {
         m_type = WEATHER_TYPE_STORM;
+    }
     else
+    {
         m_type = WEATHER_TYPE_FINE;
+    }
 
     /// New weather statistics (if not fine):
     ///- 85% light
@@ -258,9 +266,13 @@ bool Weather::UpdateWeather()
 
     ///- Send the weather packet to all players in this zone
     if (m_grade >= 1)
+    {
         m_grade = 0.9999f;
+    }
     else if (m_grade < 0)
+    {
         m_grade = 0.0001f;
+    }
 
     WeatherState state = GetWeatherState();
 
@@ -499,7 +511,9 @@ void WeatherSystem::UpdateWeathers(uint32 diff)
             m_weathers.erase(itr++);
         }
         else
+        {
             ++itr;
+        }
     }
 }
 

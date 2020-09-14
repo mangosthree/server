@@ -148,7 +148,9 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
 
             // Creature should always stop before it will cast a non-instant spell
             if (GetSpellCastTime(pSpell))
+            {
                 pCaster->StopMoving();
+            }
 
             // Creature should interrupt any current melee spell
             pCaster->InterruptSpell(CURRENT_MELEE_SPELL);
@@ -206,7 +208,9 @@ void CreatureAI::HandleMovementOnAttackStart(Unit* victim)
 {
     MotionMaster* creatureMotion = m_creature->GetMotionMaster();
     if (m_isCombatMovement)
+    {
         creatureMotion->MoveChase(victim, m_attackDistance, m_attackAngle);
+    }
     // TODO - adapt this to only stop OOC-MMGens when MotionMaster rewrite is finished
     else if (creatureMotion->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE || creatureMotion->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
     {

@@ -60,7 +60,9 @@ inline void PlayerCreatureRelocationWorker(Player* pl, Creature* c)
     if (!c->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
         if (c->AI() && c->AI()->IsVisible(pl) && !c->IsInEvadeMode())
+        {
             c->AI()->MoveInLineOfSight(pl);
+        }
     }
 }
 
@@ -69,13 +71,17 @@ inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
     if (!c1->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
         if (c1->AI() && c1->AI()->IsVisible(c2) && !c1->IsInEvadeMode())
+        {
             c1->AI()->MoveInLineOfSight(c2);
+        }
     }
 
     if (!c2->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
         if (c2->AI() && c2->AI()->IsVisible(c1) && !c2->IsInEvadeMode())
+        {
             c2->AI()->MoveInLineOfSight(c1);
+        }
     }
 }
 
@@ -90,7 +96,9 @@ inline void MaNGOS::PlayerRelocationNotifier::Visit(CreatureMapType& m)
     {
         Creature* c = iter->getSource();
         if (c->IsAlive())
+        {
             PlayerCreatureRelocationWorker(&i_player, c);
+        }
     }
 }
 
@@ -106,7 +114,9 @@ inline void MaNGOS::CreatureRelocationNotifier::Visit(PlayerMapType& m)
     {
         Player* player = iter->getSource();
         if (player->IsAlive() && !player->IsTaxiFlying())
+        {
             PlayerCreatureRelocationWorker(player, &i_creature);
+        }
     }
 }
 
@@ -122,7 +132,9 @@ inline void MaNGOS::CreatureRelocationNotifier::Visit(CreatureMapType& m)
     {
         Creature* c = iter->getSource();
         if (c != &i_creature && c->IsAlive())
+        {
             CreatureCreatureRelocationWorker(c, &i_creature);
+        }
     }
 }
 
@@ -257,7 +269,9 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(GameObjectMapType& m)
     for (GameObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -279,7 +293,9 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(PlayerMapType& m)
     for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -301,7 +317,9 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(CreatureMapType& m)
     for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -323,7 +341,9 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(CorpseMapType& m)
     for (CorpseMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -345,7 +365,9 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(DynamicObjectMapType& m)
     for (DynamicObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -361,7 +383,9 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(GameObjectMapType& m)
     for (GameObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -377,7 +401,9 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(PlayerMapType& m)
     for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -393,7 +419,9 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(CreatureMapType& m)
     for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -409,7 +437,9 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(CorpseMapType& m)
     for (CorpseMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -425,7 +455,9 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(DynamicObjectMapType& m)
     for (DynamicObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -442,7 +474,9 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(PlayerMapType& m)
     for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
         if (itr->getSource()->InSamePhase(i_phaseMask))
             if (i_check(itr->getSource()))
+            {
                 i_objects.push_back(itr->getSource());
+            }
 }
 
 template<class Check>
@@ -451,7 +485,9 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(CreatureMapType& m)
     for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
         if (itr->getSource()->InSamePhase(i_phaseMask))
             if (i_check(itr->getSource()))
+            {
                 i_objects.push_back(itr->getSource());
+            }
 }
 
 template<class Check>
@@ -460,7 +496,9 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(CorpseMapType& m)
     for (CorpseMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
         if (itr->getSource()->InSamePhase(i_phaseMask))
             if (i_check(itr->getSource()))
+            {
                 i_objects.push_back(itr->getSource());
+            }
 }
 
 template<class Check>
@@ -469,7 +507,9 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(GameObjectMapType& m)
     for (GameObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
         if (itr->getSource()->InSamePhase(i_phaseMask))
             if (i_check(itr->getSource()))
+            {
                 i_objects.push_back(itr->getSource());
+            }
 }
 
 template<class Check>
@@ -478,7 +518,9 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(DynamicObjectMapType& m)
     for (DynamicObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
         if (itr->getSource()->InSamePhase(i_phaseMask))
             if (i_check(itr->getSource()))
+            {
                 i_objects.push_back(itr->getSource());
+            }
 }
 
 // Gameobject searchers
@@ -495,7 +537,9 @@ void MaNGOS::GameObjectSearcher<Check>::Visit(GameObjectMapType& m)
     for (GameObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -511,10 +555,14 @@ void MaNGOS::GameObjectLastSearcher<Check>::Visit(GameObjectMapType& m)
     for (GameObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
+        {
             i_object = itr->getSource();
+        }
     }
 }
 
@@ -524,7 +572,9 @@ void MaNGOS::GameObjectListSearcher<Check>::Visit(GameObjectMapType& m)
     for (GameObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
         if (itr->getSource()->InSamePhase(i_phaseMask))
             if (i_check(itr->getSource()))
+            {
                 i_objects.push_back(itr->getSource());
+            }
 }
 
 // Unit searchers
@@ -541,7 +591,9 @@ void MaNGOS::UnitSearcher<Check>::Visit(CreatureMapType& m)
     for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -563,7 +615,9 @@ void MaNGOS::UnitSearcher<Check>::Visit(PlayerMapType& m)
     for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -579,10 +633,14 @@ void MaNGOS::UnitLastSearcher<Check>::Visit(CreatureMapType& m)
     for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
+        {
             i_object = itr->getSource();
+        }
     }
 }
 
@@ -592,10 +650,14 @@ void MaNGOS::UnitLastSearcher<Check>::Visit(PlayerMapType& m)
     for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
+        {
             i_object = itr->getSource();
+        }
     }
 }
 
@@ -605,7 +667,9 @@ void MaNGOS::UnitListSearcher<Check>::Visit(PlayerMapType& m)
     for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
         if (itr->getSource()->InSamePhase(i_phaseMask))
             if (i_check(itr->getSource()))
+            {
                 i_objects.push_back(itr->getSource());
+            }
 }
 
 template<class Check>
@@ -614,7 +678,9 @@ void MaNGOS::UnitListSearcher<Check>::Visit(CreatureMapType& m)
     for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
         if (itr->getSource()->InSamePhase(i_phaseMask))
             if (i_check(itr->getSource()))
+            {
                 i_objects.push_back(itr->getSource());
+            }
 }
 
 // Creature searchers
@@ -631,7 +697,9 @@ void MaNGOS::CreatureSearcher<Check>::Visit(CreatureMapType& m)
     for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -647,10 +715,14 @@ void MaNGOS::CreatureLastSearcher<Check>::Visit(CreatureMapType& m)
     for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
+        {
             i_object = itr->getSource();
+        }
     }
 }
 
@@ -660,7 +732,9 @@ void MaNGOS::CreatureListSearcher<Check>::Visit(CreatureMapType& m)
     for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
         if (itr->getSource()->InSamePhase(i_phaseMask))
             if (i_check(itr->getSource()))
+            {
                 i_objects.push_back(itr->getSource());
+            }
 }
 
 template<class Check>
@@ -675,7 +749,9 @@ void MaNGOS::PlayerSearcher<Check>::Visit(PlayerMapType& m)
     for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
+        {
             continue;
+        }
 
         if (i_check(itr->getSource()))
         {
@@ -691,7 +767,9 @@ void MaNGOS::PlayerListSearcher<Check>::Visit(PlayerMapType& m)
     for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
         if (itr->getSource()->InSamePhase(i_phaseMask))
             if (i_check(itr->getSource()))
+            {
                 i_objects.push_back(itr->getSource());
+            }
 }
 
 template<class Builder>
@@ -705,7 +783,9 @@ void MaNGOS::LocalizedPacketDo<Builder>::operator()(Player* p)
     if (i_data_cache.size() < cache_idx + 1 || !i_data_cache[cache_idx])
     {
         if (i_data_cache.size() < cache_idx + 1)
+        {
             i_data_cache.resize(cache_idx + 1);
+        }
 
         data = new WorldPacket();
 
@@ -714,7 +794,9 @@ void MaNGOS::LocalizedPacketDo<Builder>::operator()(Player* p)
         i_data_cache[cache_idx] = data;
     }
     else
+    {
         data = i_data_cache[cache_idx];
+    }
 
     p->SendDirectMessage(data);
 }
@@ -730,14 +812,18 @@ void MaNGOS::LocalizedPacketListDo<Builder>::operator()(Player* p)
     if (i_data_cache.size() < cache_idx + 1 || i_data_cache[cache_idx].empty())
     {
         if (i_data_cache.size() < cache_idx + 1)
+        {
             i_data_cache.resize(cache_idx + 1);
+        }
 
         data_list = &i_data_cache[cache_idx];
 
         i_builder(*data_list, loc_idx);
     }
     else
+    {
         data_list = &i_data_cache[cache_idx];
+    }
 
     for (size_t i = 0; i < data_list->size(); ++i)
     {

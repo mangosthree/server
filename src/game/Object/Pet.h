@@ -166,18 +166,26 @@ class Pet : public Creature
         uint32 GetPetAutoSpellOnPos(uint8 pos) const override
         {
             if (pos >= m_autospells.size())
+            {
                 return 0;
+            }
             else
+            {
                 return m_autospells[pos];
+            }
         }
 
         virtual bool CanSwim() const override
         {
             Unit const* owner = GetOwner();
             if (owner)
+            {
                 return owner->GetTypeId() == TYPEID_PLAYER ? true : ((Creature const*)owner)->CanSwim();
+            }
             else
+            {
                 return Creature::CanSwim();
+            }
         }
 
         void RegenerateAll(uint32 update_diff) override;    // overwrite Creature::RegenerateAll

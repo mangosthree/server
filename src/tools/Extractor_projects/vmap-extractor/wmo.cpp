@@ -356,7 +356,9 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
             // Skip no collision triangles
             if (MOPY[2 * i]&WMO_MATERIAL_NO_COLLISION ||
                 !(MOPY[2 * i] & (WMO_MATERIAL_HINT | WMO_MATERIAL_COLLIDE_HIT)))
-                { continue; }
+                {
+                    continue;
+                }
             // Use this triangle
             for (int j = 0; j < 3; ++j)
             {

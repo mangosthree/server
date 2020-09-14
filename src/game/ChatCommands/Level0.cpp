@@ -191,7 +191,9 @@ bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
             AccountTypes security = player->GetSession()->GetSecurity();
             if ((player->isGameMaster() || (security > SEC_PLAYER && security <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
                 (!m_session || player->IsVisibleGloballyFor(m_session->GetPlayer())))
-                { names.push_back(std::make_pair<std::string, bool>(GetNameLink(player), player->isAcceptWhispers())); }
+            {
+                names.push_back(std::make_pair<std::string, bool>(GetNameLink(player), player->isAcceptWhispers()));
+            }
         }
     }
 

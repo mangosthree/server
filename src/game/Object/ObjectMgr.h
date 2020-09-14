@@ -1271,7 +1271,9 @@ class ObjectMgr
         static inline void GetLocaleString(const StringVector& data, int loc_idx, std::string& value)
         {
             if (data.size() > size_t(loc_idx) && !data[loc_idx].empty())
+            {
                 value = data[loc_idx];
+            }
         }
 
         int GetOrNewIndexForLocale(LocaleConstant loc);
@@ -1371,7 +1373,9 @@ class ObjectMgr
             for (HotfixData::const_iterator itr = m_hotfixData.begin(); itr != m_hotfixData.end(); ++itr)
                 if (itr->Entry == entry && itr->Type == type)
                     if (itr->Timestamp > ret)
+                    {
                         ret = itr->Timestamp;
+                    }
 
             return ret ? ret : uint32(time(NULL));
         }

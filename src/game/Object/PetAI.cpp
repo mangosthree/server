@@ -71,7 +71,9 @@ void PetAI::MoveInLineOfSight(Unit* pWho)
             AttackStart(pWho);
 
             if (Unit* owner = m_creature->GetOwner())
+            {
                 owner->SetInCombatState(true, pWho);
+            }
         }
     }
 }
@@ -90,7 +92,9 @@ void PetAI::AttackStart(Unit* u)
         // hope it doesn't start to leak memory without this :-/
         // i_pet->Clear();
         if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+        {
             HandleMovementOnAttackStart(u);
+        }
 
         inCombat = true;
     }
@@ -145,7 +149,9 @@ void PetAI::UpdateAI(const uint32 diff)
     Unit* victim = NULL;
 
     if (!((Pet*)m_creature)->isControlled())
+    {
         m_creature->SelectHostileTarget();
+    }
 
     // Creature pets and guardians will always look in threat list for victim
     if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
@@ -154,7 +160,9 @@ void PetAI::UpdateAI(const uint32 diff)
 
     if (m_updateAlliesTimer <= diff)
         // UpdateAllies self set update timer
-        { UpdateAllies(); }
+    {
+        UpdateAllies();
+    }
     else
     {
         m_updateAlliesTimer -= diff;
@@ -171,12 +179,16 @@ void PetAI::UpdateAI(const uint32 diff)
         if (!owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
         {
             if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
+            {
                 m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+            }
 
             return;
         }
         else
-           ((Pet*)m_creature)->SetIsRetreating();
+        {
+            ((Pet*)m_creature)->SetIsRetreating();
+        }
     }
     else if (((Pet*)m_creature)->GetSpellOpener() != 0) // have opener stored
     {
@@ -195,10 +207,14 @@ void PetAI::UpdateAI(const uint32 diff)
             m_creature->SetInFront(victim);
 
             if (victim->GetTypeId() == TYPEID_PLAYER)
+            {
                 m_creature->SendCreateUpdateToPlayer((Player*)victim);
+            }
 
             if (owner->GetTypeId() == TYPEID_PLAYER)
+            {
                 m_creature->SendCreateUpdateToPlayer((Player*)owner);
+            }
 
             uint32 spell_id = ((Pet*)m_creature)->GetSpellOpener();
             SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
@@ -213,7 +229,9 @@ void PetAI::UpdateAI(const uint32 diff)
                 spell->SpellStart(&(spell->m_targets));
             }
             else
+            {
                 delete spell;
+            }
 
             ((Pet*)m_creature)->SetSpellOpener();
         }
@@ -280,7 +298,9 @@ void PetAI::UpdateAI(const uint32 diff)
             }
             // just ignore non-combat spells
             else if (IsNonCombatSpell(spellInfo))
+            {
                 continue;
+            }
 
             Spell* spell = new Spell(m_creature, spellInfo, false);
 
@@ -357,7 +377,9 @@ void PetAI::UpdateAI(const uint32 diff)
 
     // Guardians will always look in threat list for victim
     if (!((Pet*)m_creature)->isControlled())
+    {
         m_creature->SelectHostileTarget();
+    }
 
     if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
         || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
@@ -390,14 +412,20 @@ void PetAI::UpdateAI(const uint32 diff)
             {
                 m_creature->SetInFront(victim);
                 if (victim->GetTypeId() == TYPEID_PLAYER)
+                {
                     m_creature->SendCreateUpdateToPlayer((Player*)victim);
+                }
 
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                {
                     m_creature->SendCreateUpdateToPlayer((Player*)owner);
+                }
             }
 
             if (DoMeleeAttackIfReady())
+            {
                 victim->AddThreat(m_creature);
+            }
         }
         else if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE)
             || m_creature->hasUnitState(UNIT_STAT_MOVING)))
@@ -418,7 +446,9 @@ void PetAI::UpdateAI(const uint32 diff)
                 {
                     //if stay command is set but we dont have stay pos set then we need to establish current pos as stay position
                     if (!pet->IsStayPosSet())
+                    {
                         pet->SetStayPosition(true);
+                    }
 
                     float stayPosX = pet->GetStayPosX();
                     float stayPosY = pet->GetStayPosY();
@@ -436,10 +466,14 @@ void PetAI::UpdateAI(const uint32 diff)
                             m_creature->GetMotionMaster()->MoveIdle();
                         }
                         else if (m_creature->GetOrientation() != StayPosO)
+                        {
                             m_creature->SetOrientation(StayPosO);
+                        }
                     }
                     else
+                    {
                         pet->GetMotionMaster()->MovePoint(0, stayPosX, stayPosY, stayPosZ, false);
+                    }
                 }
             }
             else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW))
@@ -522,5 +556,7 @@ void PetAI::AttackedBy(Unit* attacker)
     if (!(m_creature->getVictim() || ((Pet*)m_creature)->GetIsRetreating() == true)
         && !(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
         || (m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE))))
-        { AttackStart(attacker); }
+        {
+            AttackStart(attacker);
+        }
 }

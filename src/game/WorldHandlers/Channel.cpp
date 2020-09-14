@@ -41,15 +41,23 @@ Channel::Channel(const std::string& name, uint32 channel_id)
         m_flags |= CHANNEL_FLAG_GENERAL;                    // for all built-in channels
 
         if (ch->flags & CHANNEL_DBC_FLAG_TRADE)             // for trade channel
+        {
             m_flags |= CHANNEL_FLAG_TRADE;
+        }
 
         if (ch->flags & CHANNEL_DBC_FLAG_CITY_ONLY2)        // for city only channels
+        {
             m_flags |= CHANNEL_FLAG_CITY;
+        }
 
         if (ch->flags & CHANNEL_DBC_FLAG_LFG)               // for LFG channel
+        {
             m_flags |= CHANNEL_FLAG_LFG;
+        }
         else                                                // for all other channels
+        {
             m_flags |= CHANNEL_FLAG_NOT_LFG;
+        }
     }
     else                                                    // it's custom channel
     {
@@ -227,7 +235,9 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
         MakePlayerBanned(&data, targetGuid, guid);
     }
     else
+    {
         MakePlayerKicked(&data, targetGuid, guid);
+    }
 
     SendToAll(&data);
     m_players.erase(targetGuid);
@@ -378,9 +388,13 @@ void Channel::SetMode(Player* player, const char* targetName, bool moderator, bo
 
     // set channel moderator
     if (moderator)
+    {
         SetModerator(targetGuid, set);
+    }
     else
+    {
         SetMute(targetGuid, set);
+    }
 }
 
 void Channel::SetOwner(ObjectGuid guid, bool exclaim)
@@ -390,7 +404,9 @@ void Channel::SetOwner(ObjectGuid guid, bool exclaim)
         // [] will re-add player after it possible removed
         PlayerList::iterator p_itr = m_players.find(m_ownerGuid);
         if (p_itr != m_players.end())
+        {
             p_itr->second.SetOwner(false);
+        }
     }
 
     m_ownerGuid = guid;
@@ -550,9 +566,13 @@ void Channel::Announce(Player* player)
 
     WorldPacket data;
     if (m_announce)
+    {
         MakeAnnouncementsOn(&data, guid);
+    }
     else
+    {
         MakeAnnouncementsOff(&data, guid);
+    }
 
     SendToAll(&data);
 }
@@ -582,9 +602,13 @@ void Channel::Moderate(Player* player)
 
     WorldPacket data;
     if (m_moderate)
+    {
         MakeModerationOn(&data, guid);
+    }
     else
+    {
         MakeModerationOff(&data, guid);
+    }
 
     SendToAll(&data);
 }
@@ -624,7 +648,9 @@ void Channel::Say(Player* player, const char* text, uint32 lang)
 
     // send channel message
     if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
+    {
         lang = LANG_UNIVERSAL;
+    }
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_CHANNEL, text, Language(lang), player->GetChatTag(), guid, player->GetName(), ObjectGuid(), "", m_name.c_str());
     SendToAll(&data, !m_players[guid].IsModerator() ? guid : ObjectGuid());
@@ -694,13 +720,17 @@ void Channel::SendToAll(WorldPacket* data, ObjectGuid guid)
     for (PlayerList::const_iterator i = m_players.begin(); i != m_players.end(); ++i)
         if (Player* plr = sObjectMgr.GetPlayer(i->first))
             if (!guid || !plr->GetSocial()->HasIgnore(guid))
+            {
                 plr->GetSession()->SendPacket(data);
+            }
 }
 
 void Channel::SendToOne(WorldPacket* data, ObjectGuid who)
 {
     if (Player* plr = ObjectMgr::GetPlayer(who))
+    {
         plr->GetSession()->SendPacket(data);
+    }
 }
 
 void Channel::Voice(ObjectGuid /*guid1*/, ObjectGuid /*guid2*/)
@@ -788,7 +818,9 @@ void Channel::MakeChannelOwner(WorldPacket* data)
     std::string name = "";
 
     if (!sObjectMgr.GetPlayerNameByGUID(m_ownerGuid, name) || name.empty())
+    {
         name = "PLAYER_NOT_FOUND";
+    }
 
     MakeNotifyPacket(data, CHAT_CHANNEL_OWNER_NOTICE);
     *data << ((IsConstant() || !m_ownerGuid) ? "Nobody" : name);
@@ -939,9 +971,13 @@ void Channel::JoinNotify(ObjectGuid guid)
     WorldPacket data;
 
     if (IsConstant())
+    {
         data.Initialize(SMSG_USERLIST_ADD, 8 + 1 + 1 + 4 + GetName().size() + 1);
+    }
     else
+    {
         data.Initialize(SMSG_USERLIST_UPDATE, 8 + 1 + 1 + 4 + GetName().size() + 1);
+    }
 
     data << ObjectGuid(guid);
     data << uint8(GetPlayerFlags(guid));

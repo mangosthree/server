@@ -156,7 +156,9 @@ namespace MaNGOS
             i_check = caster;
             Unit* owner = i_check->GetOwner();
             if (owner)
+            {
                 i_check = owner;
+            }
         }
 
         template<class T> inline void Visit(GridRefManager<T>  &) {}
@@ -187,10 +189,14 @@ namespace MaNGOS
             for(CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
             {
                 if (!itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     continue;
+                }
 
                 if (!i_check(itr->getSource()))
+                {
                     continue;
+                }
 
                 ..some code for update result and possible stop search
             }
@@ -290,34 +296,44 @@ namespace MaNGOS
         {
             for (GameObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
 
         void Visit(PlayerMapType& m)
         {
             for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
         void Visit(CreatureMapType& m)
         {
             for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
 
         void Visit(CorpseMapType& m)
         {
             for (CorpseMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
 
         void Visit(DynamicObjectMapType& m)
         {
             for (DynamicObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
 
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
@@ -485,7 +501,9 @@ namespace MaNGOS
         {
             for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
 
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
@@ -536,7 +554,9 @@ namespace MaNGOS
         {
             for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
                 if (itr->getSource()->InSamePhase(i_phaseMask))
+                {
                     i_do(itr->getSource());
+                }
         }
 
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
@@ -558,7 +578,9 @@ namespace MaNGOS
             {
                 Camera* camera = itr->getSource();
                 if (camera->GetBody()->InSamePhase(i_searcher) && camera->GetBody()->IsWithinDist(i_searcher, i_dist))
+                {
                     i_do(camera->GetOwner());
+                }
             }
         }
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}

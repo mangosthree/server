@@ -228,7 +228,9 @@ namespace Movement
             {
                 MANGOS_ASSERT(Initialized());
                 do
-                    { handler(_updateState(difftime)); }
+                {
+                    handler(_updateState(difftime));
+                }
                 while (difftime > 0);
             }
 

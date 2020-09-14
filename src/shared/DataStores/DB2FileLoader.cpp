@@ -156,9 +156,13 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
     {
         fieldsOffset[i] = fieldsOffset[i - 1];
         if (fmt[i - 1] == 'b' || fmt[i - 1] == 'X')         // byte fields
+        {
             fieldsOffset[i] += 1;
+        }
         else                                                // 4 byte fields (int32/float/strings)
+        {
             fieldsOffset[i] += 4;
+        }
     }
 
     data = new unsigned char[recordSize*recordCount+stringSize];
@@ -177,9 +181,13 @@ bool DB2FileLoader::Load(const char *filename, const char *fmt)
 DB2FileLoader::~DB2FileLoader()
 {
     if(data)
+    {
         delete [] data;
+    }
     if(fieldsOffset)
+    {
         delete [] fieldsOffset;
+    }
 }
 
 DB2FileLoader::Record DB2FileLoader::getRecord(size_t id)
@@ -240,7 +248,9 @@ uint32 DB2FileLoader::GetFormatStringsFields(const char * format)
     uint32 stringfields = 0;
     for(uint32 x=0; format[x];++x)
         if (format[x] == DBC_FF_STRING)
+        {
             ++stringfields;
+        }
 
     return stringfields;
 }

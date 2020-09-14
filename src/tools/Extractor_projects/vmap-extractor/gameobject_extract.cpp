@@ -65,7 +65,9 @@ void ExtractGameobjectModels()
         path = it->getString(1);
 
         if (path.length() < 4)
+        {
             continue;
+        }
 
         fixnamen((char*)path.c_str(), path.size());
         char* name = GetPlainName((char*)path.c_str());
@@ -73,7 +75,9 @@ void ExtractGameobjectModels()
 
         char const* ch_ext = GetExtension(name);
         if (!ch_ext)
+        {
             continue;
+        }
 
         //strToLower(ch_ext);
 

@@ -145,47 +145,69 @@ void HandleArgs(int argc, char* arg[])
         // f - use float to int conversion
         // h - limit minimum height
         if (arg[c][0] != '-')
+        {
             Usage(arg[0]);
+        }
 
         switch (arg[c][1])
         {
             case 'i':
                 if (c + 1 < argc)                           // all ok
+                {
                     strcpy(input_path, arg[(c++) + 1]);
+                }
                 else
+                {
                     Usage(arg[0]);
+                }
                 break;
             case 'o':
                 if (c + 1 < argc)                           // all ok
+                {
                     strcpy(output_path, arg[(c++) + 1]);
+                }
                 else
+                {
                     Usage(arg[0]);
+                }
                 break;
             case 'f':
                 if (c + 1 < argc)                           // all ok
+                {
                     CONF_allow_float_to_int = atoi(arg[(c++) + 1]) != 0;
+                }
                 else
+                {
                     Usage(arg[0]);
+                }
                 break;
             case 'e':
                 if (c + 1 < argc)                           // all ok
                 {
                     CONF_extract = atoi(arg[(c++) + 1]);
                     if (!(CONF_extract > 0 && CONF_extract < 4))
+                    {
                         Usage(arg[0]);
+                    }
                 }
                 else
+                {
                     Usage(arg[0]);
+                }
                 break;
             case 'b':
                 if (c + 1 < argc)                           // all ok
                 {
                     CONF_max_build = atoi(arg[(c++) + 1]);
                     if (CONF_max_build < MIN_SUPPORTED_BUILD)
+                    {
                         Usage(arg[0]);
+                    }
                 }
                 else
+                {
                     Usage(arg[0]);
+                }
                 break;
             default:
                 Usage(arg[0]);
@@ -290,7 +312,9 @@ uint32 ReadMapDBC(int const locale)
     char localMPQ[512];
     sprintf(localMPQ, "%s/Data/%s/locale-%s.MPQ", input_path, Locales[locale], Locales[locale]);
     if (!SFileOpenArchive(localMPQ, 0, MPQ_OPEN_READ_ONLY, &localeFile))
+    {
         exit(1);
+    }
 
     printf("\n Reading maps from Map.dbc... ");
 
@@ -325,7 +349,9 @@ void ReadAreaTableDBC(int const locale)
     char localMPQ[512];
     sprintf(localMPQ, "%s/Data/%s/locale-%s.MPQ", input_path, Locales[locale], Locales[locale]);
     if (!SFileOpenArchive(localMPQ, 0, MPQ_OPEN_READ_ONLY, &localeFile))
+    {
         exit(1);
+    }
 
     printf("Read AreaTable.dbc file...");
 
@@ -365,7 +391,9 @@ void ReadLiquidTypeTableDBC(int const locale)
     char localMPQ[512];
     sprintf(localMPQ, "%s/Data/%s/locale-%s.MPQ", input_path, Locales[locale], Locales[locale]);
     if (!SFileOpenArchive(localMPQ, 0, MPQ_OPEN_READ_ONLY, &localeFile))
+    {
         exit(1);
+    }
 
     printf("Read LiquidType.dbc file...");
 
@@ -1192,7 +1220,9 @@ void ExtractMapsFromMpq(uint32 build, const int locale)
         sprintf(mpq_map_name, "World\\Maps\\%s\\%s.wdt", map_ids[z].name, map_ids[z].name);
         WDT_file wdt;
         if (!wdt.loadFile(mpq_map_name, false))
+        {
             continue;
+        }
 
         for (uint32 y = 0; y < WDT_MAP_SIZE; ++y)
         {
@@ -1269,23 +1299,35 @@ void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char cons
 {
     char dirname[512];
     if (subdir)
+    {
         sprintf(dirname, "%s/Data/%s", input_path, subdir);
+    }
     else
+    {
         sprintf(dirname, "%s/Data", input_path);
+    }
 
     char scanname[512];
     if (suffix)
+    {
         sprintf(scanname, "wow-update-%s-%%u.MPQ", suffix);
+    }
     else
+    {
         sprintf(scanname, "wow-update-%%u.MPQ");
+    }
 
 #ifdef WIN32
 
     char maskname[512];
     if (suffix)
+    {
         sprintf(maskname, "%s/wow-update-%s-*.MPQ", dirname, suffix);
+    }
     else
+    {
         sprintf(maskname, "%s/wow-update-*.MPQ", dirname);
+    }
 
     WIN32_FIND_DATA ffd;
     HANDLE hFind = FindFirstFile(maskname, &ffd);
@@ -1295,11 +1337,15 @@ void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char cons
         do
         {
             if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+            {
                 continue;
+            }
 
             uint32 ubuild = 0;
             if (sscanf(ffd.cFileName, scanname, &ubuild) == 1 && (!CONF_max_build || ubuild <= CONF_max_build))
+            {
                 updates[ubuild] = UpdatesPair(ffd.cFileName, section);
+            }
         }
         while (FindNextFile(hFind, &ffd) != 0);
 
@@ -1314,7 +1360,9 @@ void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char cons
         dirent* dirp;
         while ((dirp = readdir(dp)) != NULL)
             if (sscanf(dirp->d_name, scanname, &ubuild) == 1 && (!CONF_max_build || ubuild <= CONF_max_build))
+            {
                 updates[ubuild] = UpdatesPair(dirp->d_name, section);
+            }
 
         closedir(dp);
     }
@@ -1353,21 +1401,29 @@ void LoadLocaleMPQFiles(int const locale)
 
         //if (!OpenArchive(filename))
         if (!SFileOpenPatchArchive(localeMpqHandle, filename, "", 0))
+        {
             printf("Error open patch archive: %s\n\n", filename);
+        }
     }
 
     for (Updates::const_iterator itr = updates.begin(); itr != updates.end(); ++itr)
     {
         if (!itr->second.second)
+        {
             sprintf(filename, "%s/Data/%s/%s", input_path, Locales[locale], itr->second.first.c_str());
+        }
         else
+        {
             sprintf(filename, "%s/Data/%s", input_path, itr->second.first.c_str());
+        }
 
         printf("\nPatching : %s\n", filename);
 
         //if (!OpenArchive(filename))
         if (!SFileOpenPatchArchive(localeMpqHandle, filename, itr->second.second ? itr->second.second : "", 0))
+        {
             printf("Error open patch archive: %s\n\n", filename);
+        }
     }
 
     // ./Data/Cache patch-base files
@@ -1379,7 +1435,9 @@ void LoadLocaleMPQFiles(int const locale)
 
         //if (!OpenArchive(filename))
         if (!SFileOpenPatchArchive(localeMpqHandle, filename, "", 0))
+        {
             printf("Error open patch archive: %s\n\n", filename);
+        }
     }
 
     // ./Data/Cache/<locale> patch files
@@ -1391,7 +1449,9 @@ void LoadLocaleMPQFiles(int const locale)
 
         //if (!OpenArchive(filename))
         if (!SFileOpenPatchArchive(localeMpqHandle, filename, "", 0))
+        {
             printf("Error open patch archive: %s\n\n", filename);
+        }
     }
 }
 
@@ -1455,7 +1515,9 @@ void LoadBaseMPQFiles()
 
         //if (!OpenArchive(filename))
         if (!SFileOpenPatchArchive(worldMpqHandle, filename, "", 0))
+        {
             printf("Error open patch archive: %s\n\n", filename);
+        }
     }
 }
 
@@ -1497,7 +1559,9 @@ int main(int argc, char* arg[])
                 ExtractDBCFiles(i, true);
             }
             else
+            {
                 ExtractDBCFiles(i, false);
+            }
 
             //Close MPQs
             CloseArchives();

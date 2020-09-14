@@ -41,10 +41,14 @@ DelayExecutor::DelayExecutor()
 DelayExecutor::~DelayExecutor()
 {
     if (pre_svc_hook_)
+    {
         delete pre_svc_hook_;
+    }
 
     if (post_svc_hook_)
+    {
         delete post_svc_hook_;
+    }
 
     deactivate();
 }
@@ -66,21 +70,27 @@ int DelayExecutor::deactivate()
 int DelayExecutor::svc()
 {
     if (pre_svc_hook_)
+    {
         pre_svc_hook_->call();
+    }
 
     for (;;)
     {
         ACE_Method_Request* rq = queue_.dequeue();
 
         if (!rq)
+        {
             break;
+        }
 
         rq->call();
         delete rq;
     }
 
     if (post_svc_hook_)
+    {
         post_svc_hook_->call();
+    }
 
     return 0;
 }
@@ -98,10 +108,14 @@ int DelayExecutor::activate(int num_threads, ACE_Method_Request* pre_svc_hook, A
     }
 
     if (pre_svc_hook_)
+    {
         delete pre_svc_hook_;
+    }
 
     if (post_svc_hook_)
+    {
         delete post_svc_hook_;
+    }
 
     pre_svc_hook_ = pre_svc_hook;
     post_svc_hook_ = post_svc_hook;

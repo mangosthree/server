@@ -74,12 +74,18 @@ void WorldSession::HandleGMTicketGetTicketOpcode(WorldPacket & /*recv_data*/)
     if (ticket)
     {
         if (ticket->HasResponse())
+        {
             SendGMResponse(ticket);
+        }
         else
+        {
             SendGMTicketGetTicket(0x06, ticket);
+        }
     }
     else
+    {
         SendGMTicketGetTicket(0x0A);
+    }
 }
 
 void WorldSession::HandleGMTicketUpdateTextOpcode(WorldPacket& recv_data)
@@ -88,9 +94,13 @@ void WorldSession::HandleGMTicketUpdateTextOpcode(WorldPacket& recv_data)
     recv_data >> ticketText;
 
     if (GMTicket* ticket = sTicketMgr.GetGMTicket(GetPlayer()->GetObjectGuid()))
+    {
         ticket->SetText(ticketText.c_str());
+    }
     else
+    {
         sLog.outError("Ticket update: Player %s (GUID: %u) doesn't have active ticket", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
+    }
 }
 
 void WorldSession::HandleGMTicketDeleteTicketOpcode(WorldPacket & /*recv_data*/)
@@ -130,7 +140,9 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recv_data)
     }
 
     if (isFollowup)
+    {
         sTicketMgr.Delete(_player->GetObjectGuid());
+    }
 
     sTicketMgr.Create(_player->GetObjectGuid(), ticketText.c_str());
 
@@ -145,7 +157,9 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recv_data)
     for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if (itr->second->GetSession()->GetSecurity() >= SEC_GAMEMASTER && itr->second->isAcceptTickets())
+        {
             ChatHandler(itr->second).PSendSysMessage(LANG_COMMAND_TICKETNEW, GetPlayer()->GetName());
+        }
     }
 }
 
@@ -171,7 +185,9 @@ void WorldSession::HandleGMSurveySubmitOpcode(WorldPacket& recv_data)
         uint32 questionID;
         recv_data >> questionID;                            // GMSurveyQuestions.dbc
         if (!questionID)
+        {
             break;
+        }
 
         uint8 value;
         std::string unk_text;

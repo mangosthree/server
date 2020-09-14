@@ -94,7 +94,9 @@ bool VendorItemData::RemoveItem(uint32 item_id, uint8 type)
             found = true;
         }
         else
+        {
             ++i;
+        }
     }
 
     return found;
@@ -339,7 +341,9 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
         {
             cinfo = ObjectMgr::GetCreatureTemplate(normalInfo->DifficultyEntry[diff - 1]);
             if (cinfo)
+            {
                 break;                                      // template found
+            }
 
             // check and reported at startup, so just ignore (restore normalInfo)
             cinfo = normalInfo;
@@ -410,7 +414,9 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=NULL*/, GameE
             LoadEquipment(normalInfo->EquipmentTemplateId); // use default from normal template if diff does not have any
         }
         else
+        {
             LoadEquipment(cinfo->EquipmentTemplateId);      // else use from diff template
+        }
     }
     else if (data && data->equipmentId != -1)
     {
@@ -458,7 +464,9 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
         SetHealthPercent(healthPercent);
     }
     else
+    {
         SelectLevel();
+    }
 
     if (team == HORDE)
     {
@@ -685,7 +693,9 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                 break;
             }
             else
+            {
                 m_corpseDecayTimer -= update_diff;
+            }
 
             if (m_groupLootId)                              // Loot is stopped already if corpse got removed.
             {
@@ -720,7 +730,9 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                     break;
                 }
                 else
+                {
                     m_corpseDecayTimer -= update_diff;
+                }
             }
 
             Unit::Update(update_diff, diff);
@@ -1430,7 +1442,9 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     uint32 const maxlevel = cinfo->MaxLevel;
 
     if (level == USE_DEFAULT_DATABASE_LEVEL)
+    {
         level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
+    }
 
     SetLevel(level);
 
@@ -1479,7 +1493,9 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
 
     health *= _GetHealthMod(rank); // Apply custom config settting
     if (health < 1)
+    {
         health = 1;
+    }
 
     //////////////////////////////////////////////////////////////////////////
     // Set values
@@ -1511,11 +1527,15 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
 
         // For non regenerating powers set 0
         if ((i == POWER_ENERGY || i == POWER_MANA) && !IsRegeneratingPower())
+        {
             value = 0;
+        }
 
         // Mana requires an extra field to be set
         if (i == POWER_MANA)
+        {
             SetCreateMana(value);
+        }
 
         SetMaxPower(Powers(i), maxValue);
         SetPower(Powers(i), value);
@@ -2159,9 +2179,13 @@ void Creature::SetLootStatus(CreatureLootStatus status)
     {
         case CREATURE_LOOT_STATUS_LOOTED:
             if (m_creatureInfo->SkinningLootId)
+            {
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+            }
             else
+            {
                 RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            }
             break;
         case CREATURE_LOOT_STATUS_SKINNED:
             m_corpseDecayTimer = 0; // remove corpse at next update
@@ -2228,7 +2252,9 @@ SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
         {
             SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(j));
             if(!spellEffect)
+            {
                 continue;
+            }
             if( (spellEffect->Effect == SPELL_EFFECT_SCHOOL_DAMAGE )       ||
                 (spellEffect->Effect == SPELL_EFFECT_INSTAKILL)            ||
                 (spellEffect->Effect == SPELL_EFFECT_ENVIRONMENTAL_DAMAGE) ||
@@ -2519,7 +2545,9 @@ void Creature::SaveRespawnTime()
         GetMap()->GetPersistentState()->SaveCreatureRespawnTime(GetGUIDLow(), m_respawnTime);
     }
     else if (m_corpseDecayTimer > 0)                        // dead (corpse)
+    {
         GetMap()->GetPersistentState()->SaveCreatureRespawnTime(GetGUIDLow(), time(NULL) + m_respawnDelay + m_corpseDecayTimer / IN_MILLISECONDS);
+    }
 }
 
 bool Creature::IsOutOfThreatArea(Unit* pVictim) const
@@ -2633,7 +2661,9 @@ bool Creature::LoadCreatureAddon(bool reload)
     }
 
     if (cainfo->splineFlags & SPLINEFLAG_FLYING)
+    {
         SetLevitate(true);
+    }
 
     if (cainfo->auras)
     {
@@ -2654,7 +2684,9 @@ bool Creature::LoadCreatureAddon(bool reload)
             // Get Difficulty mode for initial case (npc not yet added to world)
             if (spellInfo->SpellDifficultyId && !reload && GetMap()->IsDungeon())
                 if (SpellEntry const* spellEntry = GetSpellEntryByDifficulty(spellInfo->SpellDifficultyId, GetMap()->GetDifficulty(), GetMap()->IsRaid()))
+                {
                     spellInfo = spellEntry;
+                }
 
             CastSpell(this, spellInfo, true);
         }
@@ -2976,12 +3008,18 @@ void Creature::AllLootRemovedFromCorpse()
             // spawntimesecs=3min:  corpse decay after 1min
             // spawntimesecs=4hour: corpse decay after 1hour 20min
             if (sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED) > 0.0f)
+            {
                 corpseLootedDelay = (uint32)((m_corpseDelay * IN_MILLISECONDS) * sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED));
+            }
             else
+            {
                 corpseLootedDelay = (m_respawnDelay * IN_MILLISECONDS) / 3;
+            }
         }
         else                                                // corpse was skinned, corpse will despawn next update
+        {
             corpseLootedDelay = 0;
+        }
 
         // if m_respawnTime is not expired already
         if (m_respawnTime >= time(NULL))
@@ -2995,7 +3033,9 @@ void Creature::AllLootRemovedFromCorpse()
             {
                 // if m_respawnDelay is relatively short and corpseDecayTimer is larger than corpseLootedDelay
                 if (m_corpseDecayTimer > corpseLootedDelay)
+                {
                     m_corpseDecayTimer = corpseLootedDelay;
+                }
             }
         }
         else

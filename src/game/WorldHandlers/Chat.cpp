@@ -1310,7 +1310,7 @@ void ChatHandler::ExecuteCommand(const char* text)
             // some commands have custom error messages. Don't send the default one in these cases.
             else if (!HasSentErrorMessage())
             {
-                if (!command->Help.empty())
+                if (command && !command->Help.empty())
                 {
                     std::string helpText = command->Help;
 

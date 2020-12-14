@@ -35,6 +35,8 @@ else(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
       "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.1/include/mysql"
       "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.2/include/mysql"
       "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.3/include/mysql"
+      "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.4/include/mysql"
+      "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.5/include/mysql"
     )
     find_library(MYSQL_LIBRARY
       NAMES
@@ -52,6 +54,8 @@ else(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
         "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.1/lib"
         "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.2/lib"
         "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.3/lib"
+        "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.4/lib"
+        "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.5/lib"
       )
   else(WIN32)
     find_path(MYSQL_INCLUDE_DIR mysql.h

@@ -27,7 +27,7 @@
     #define REVISION_NR "2114001"
 
     #define REALMD_DB_VERSION_NR 21
-    #define REALMD_DB_STRUCTURE_NR 3
+    #define REALMD_DB_STRUCTURE_NR 4
     #define REALMD_DB_CONTENT_NR 001
     #define REALMD_DB_UPDATE_DESCRIPTION "Update Row format and engine"
 

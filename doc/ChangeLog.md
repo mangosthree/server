@@ -3,28 +3,569 @@
 This change log references the relevant changes (bug and security fixes) done
 in recent versions.
 
-0.21 (2016-xx-01) - "The Battle for the Elemental Planes"
+0.22 (2021-xx-xx to now) - "Answer the Volcano's Call"
+------------------------------------------------------
+* Due for release imminently
+
+
+0.21 (2016-04-01 to 2021-xx-xx) - "The Battle for the Elemental Planes"
 ---------------------------------------------------------
 Many Thanks to all the groups and individuals who contributed to this release.
-- xxx+ Commits since the previous release.
 
-* TODO: Add full list of fixes from Rel18 to 21 for both Server, Scripts and Database
 
-MaNGOS 0.18   (?? ??? 20??)
+Code Changes:
+=============
+* [12778] Add 5th field in reputation_spillover_template for Bilgewater Cartel/Gilneas spillover reputation.
+* [Appveyor] Remove no-longer needed file
+* [Build] Add OpemSSL1.0.2j installers
+* [Build] Added MySQL 5.7 support
+* [Build] Attempt to make travis happy
+* [Build] Cmake fixes from Zero
+* [Build] Enhanced Build System
+* [BUILD] Fixed SARC4 errors in shared.vcxproj project
+* [Build] Fixed up Stormlib
+* [Build] Force building SOAP and PlayerBots in testing
+* [Build] Improved Build System, based on the work of H0zen (#131)
+* [Build] Larger build system update
+* [Build] More Project build cleanup
+* [Build] Most errors fixed
+* [Build] Some cleanup to the Windows build - not complete
+* [Build] updated build tools
+* [Core] Enable using table creature_linking with empty table creature_linking_template [c12670]
+* [Core] Fix tabs
+* [Core] REalmdb sync with Zero
+* [Core] Remove another obsolete util
+* [Core] Remove obsolete directive
+* [Core] Removed duplicate files
+* [Core] Updated build defintions. Thanks lfxgroove
+* [DB] Database table update
+* [DB] Rename scripted_event_id table as scripted_event
+* [DB] Set min db levels
+* [DbDocs] The Big DB documentation update
+* [DEP] Update Stormlib v9.21
+* [DEP] Updated library
+* [Deps] Adjusted to use the standard Deps library
+* [Deps] Corrected case sensitive library name for unix compatibility
+* [Deps] Update Dep Library
+* [DEPS] Update zlib version to 1.2.8
+* [Easybuild] Fixed a crash. Thanks MadMaxMangos for finding.
+* [EasyBuild] Hotfix Revert OpenSSL binaries.
+* [EasyBuild] ignore easybuild created debug files
+* [EasyBuild] Minor update to include some additional checks
+* [EasyBuild] Remove static files
+* [EasyBuild] Updated base versions of libraries
+* [EasyBuild] Updated MySQL and Cmake library locations
+* [EasyBuild] Updated to Support modified build system and enhancements
+* [Eluna] Add conditionals around code
+* [Eluna] Applied a load of missing hooks
+* [Eluna] Patched to allow compilation
+* [Extractors] Updated extractors to fix movement bug. Will need to reextract
+* [FIX] correct easybuild patch script
+* [Fix] Correct incorrectly renamed GAMEOBJECT_TYPE
+* [FIX] Fixed a logic error in EasyBuild
+* [FIX] Make Travis happy. Thanks H0zen
+* [Install] Changes ported from Zero
+* [Install] Extended lazymangos.sh to support M3
+* [Linux] Fix playerbots in getmangos.sh. Thanks Tom Peters
+* [Linux] Minor script fix
+* [m]  corrected some text typos
+* [m] Fixed VS2013 MMaps build
+* [m] Updated website URL
+* [Realm] Update realm daemon so that it only presents clients with realms that it is compatible with.
+* [Realm] Updated Realmd required version
+* [Realmd] Added submodule back in
+* [Realmd] Correct the submodule revision
+* [Realmd] Resolve SRP6a authentication bypass issue. Thanks DevDaemon
+* [realmd] Resolved authentication bypass. Thanks namreeb
+* [Rel21] Stage 1 of updates for Rel21 Build System
+* [Rel21] Stage 2 of updates for Rel21 Build System
+* [SD3] Added SD3 as a submodule
+* [SD3] first commit with SD3 inplace - not complete yet
+* [SD3] Fix BRD issues and server crash. Thanks H0zen
+* [SD3] Fix item_petrov_cluster_bombs
+* [SD3] Fix quest Kodo Roundup (#69)
+* [SD3] Update Onyxia script
+* [SD3] Updated for BRD arena fix
+* [Sync] Build system and docs proj sync
+* [Sync] Project header sync
+* [Sync] Project sync
+* [Sync] Project Sync plus Revision changes
+* [Sync] Some long overdue project sync
+* [Sync] Some long overdue project sync pt2
+* [Sync] Some minor cross project sync
+* [Sync] Some minor project sync
+* [Sync] Some minor updates from Two
+* [Sync] Some project sync
+* [Tools] Extraction Project Sync
+* [Tools] Fixed movemaps compile
+* [Warden] Refactor to match other cores
+* 13 cmangos commits implemented
+* 50 plus cmangos updates implemented (to c12832)
+* A few more build error fixes
+* Add Codacy badge and status
+* Add Disables table based on the work of Olion on Zero
+* Add mangosd full versioning information on windows
+* Add missing file from last commit
+* add new mangos 'family' icons. Thanks UnkleNuke for the original design
+* Add pet support at first login for hunter and warlock
+* Add positive exception for spell 56099
+* Add possibility to write cmangos command via a whisp.
+* Add realmd full versioning information on windows
+* Add state for GM command completed quests. Thanks H0zen for assistance
+* Add support for new comment column
+* Add Temp patch for easybuild
+* Add Ubuntu 19.04 case for Prerequisites install (#77)
+* Added AppVeyor Build Status
+* Added compile status to readme
+* Added deps submodule
+* Added Linux build helper
+* Added mangosproof
+* Added missing call to LoadDB2Stores( )
+* added missing dependencies for travis
+* Added missing folders for mangosd cmake project also reordered this list
+* added missing header
+* added missing tool
+* Added Patch removal script
+* Added Realmd submodule
+* Adding new distribution support (Fedora) (#16)
+* Adding support for Player Bots submodule in installer. (#20)
+* Adding support for Ubuntu: Curl dependencies added - Adding support when several WoW clients path are detected. Only the first one is selected - Adding support for database updates. Only last folder (alphabetically sorted) will be takenxw
+* Adding support of several known Linux distribution for dependancies setup (#175)
+* Adds custom emote to wyrmthalak script
+* AddSC_scholomance() added to ScriptLoader
+* AHBot rollup from previous cores
+* All required patch files are now being applied (#123)
+* Ammend Core name
+* An ACE build fix.  Allows for building on FreeBSD 10 with the clang stack
+* And more build errors fixed
+* Another attempt to fix OSX pt2. Thanks H0zen
+* Another attempt to fix OSX. Thanks H0zen
+* another error correction
+* Applied dep and realm updates
+* apply latest Dep library
+* Apply style fix
+* Appveyor supplied fix for openSSL 1.0
+* At last, changing opcode to enable flying (#7)
+* AutoBroadcast system.
+* Build error and warning fixes
+* Build error fix - undefined SFileExtractFile (#65)
+* Build fixes made and tabs turned  into spaces
+* Cata areas added to SD3
+* changed ```MAX_ACCOUNT_STR``` from 16 to 32 chars
+* Changed doxygen settings (#5)
+* Changed email return for item that can't be equiped anymore. Before the email was sent with an empty body and the subject was to long to be displayed in the player email. Now the Email is sent with the subject 'Item could not be loaded to inventory.' and the body as the subject message before. (#71)
+* ChatChannels fix - test PR
+* Check for Buildings folder
+* Check player exiting waiting area while starting battleground
+* Checking of TrainerTemplateId fixed
+* Clean up readme a little
+* Cmangos Cata commits applied
+* Cmangos commits applied
+* Code change for the acquisition of the locale
+* code style
+* Core updated to use the latest version of ScriptDev3
+* correct "/home/travis/build/mangosthree/server/CMakeLists.txt:117 (if)"
+* Correct Typo for default status
+* corrected cmake build
+* Corrected path to Stormlib.h
+* corrected tabs
+* corrected two more headers
+* Correction for unix
+* Correction made to BuildChatPacket(( ) declaration
+* Correction made to DBC file format strings
+* Correction made to file name
+* Correction made to function name
+* Correction made to script
+* Correction, build fix
+* Corrections made (oops)
+* Corrections made to the extractor
+* Crash on exit to login screen resolved
+* Create a docker container image and runing it with docker-compose (#164)
+* creature_template table's format string corrected
+* dammit
+* debug recv Command added
+* dep folder is up one dir
+* Description of the meaning of the format strings added
+* Disable OSX build checking until we have an OSX dev to get them fixed
+* disabled CMSG_SET_TITLE_SUFFIX handled - no real opcode for this handler was not found
+* Displaying of the portait window fixed
+* Dropped the new SD2 Module in
+* eh i thought i pushed this definition already...
+* Eliminated tabs!
+* Enabled CMSG_SET_CHANNEL_WATCH
+* enabled SMSG_CALENDAR_SEND_EVENT
+* ensure bins are marked as executable (#108)
+* finally fixed clangs...
+* Fix applied for Quest Log, Bags, and money issues
+* Fix build and tidy up file
+* Fix build errors after previous commit
+* Fix CMSG_DISMISS_CONTROLLED_VEHICLE
+* Fix crash at startUp due to command localization loading
+* Fix crash in BIH module due to uninitialized member variable. (#172)
+* Fix crash when using command helps
+* Fix crash when using command helps (#93)
+* Fix Death Knight rune cooldown
+* Fix Eluna build after https://github.com/mangosthree/server/commit/b13453cc89c53d1f95107ee744821235af468671
+* Fix Eluna crash.
+* fix error ÔÇÿatoiÔÇÖ was not declared in this scope. Thanks to drarkanex for pointing
+* Fix error on INSERT query in mangos.sql. Fixes #21.
+* Fix floating point model for VS 2015 (#52)
+* Fix for Powers defaults always being 0
+* Fix Gameobject loading issue
+* Fix instance cleanup at startup (#99)
+* Fix Latest MariaDB cmake detection
+* Fix login issue. Thanks rochet
+* Fix mac build
+* Fix mangos three build errors - eluna version before fix is https://github.com/ElunaLuaEngine/Eluna/commit/6804f6e90f5ed3bccbad3dcea5a3d97b2db09249
+* Fix Merge error
+* Fix Merge error pt2. damn git
+* Fix missing delimiter
+* Fix OpenSSL travis for mac
+* Fix OSX build on Travis (#94)
+* Fix part of NPC localized text cannot be displayed.
+* Fix pdump write command and add check to pdump load (#106)
+* Fix player kicking
+* Fix possible problem with 'allow two side interaction' and loot.
+* Fix potential NullPointerException on C'Thun (#107)
+* Fix PvPstats table to fit with its web app
+* fix reference to dockerFiles to match with real files name (#92)
+* Fix SD3 Compile fail pt1 of 2
+* Fix send mail and send item commands
+* Fix server crash. Thank H0zen/mpfans
+* Fix server startup. Thanks Rochet and H0zen
+* Fix simultaneous connection contention issue
+* Fix socket gems
+* Fix some codacy detected issues
+* Fix some code porting discrepancies
+* Fix sound BG (SMSG_PLAY_SOUND)
+* Fix static linking in shared libs
+* Fix typo
+* Fix typo in VMap BIH generation
+* Fix unholy blight in DKs
+* Fix VS debug build
+* Fix VS2017 build. Needs cmake 3.8.0 minimum
+* Fix whisper blocking
+* FIX-CENTOS-BUILD Added epel repo
+* FIX-CENTOS-BUILD Fixed centos 7 build
+* Fixed  chest game objects interactions
+* Fixed " invalid suffix on literal; C++11 requires a space between literal and identifier [-Wreserved-user-defined-literal]"
+* Fixed a couple of typos
+* fixed banresult
+* Fixed build
+* Fixed build errors related to the static_assert instructions (#64)
+* Fixed clang build
+* Fixed dbc and map extractor
+* Fixed memory issue with msbuild build
+* fixed more build warnings reported by clang/gcc
+* fixed more headers
+* fixed one more forgotten merge conflict
+* fixed other issue reported via clang
+* Fixed SMSG_SHOW_MAILBOX opcode, moved to mailhandler.cpp
+* Fixed some additional found nullptrs
+* fixed travis build for gcc
+* Fixed travis issue where gcc+4.8 is not installed.
+* fixed unix build
+* Fixed version
+* Fixed vs2012 build
+* Fixes Error "There is no game at this location" (#172)
+* Fixes the build problem with g3d on FreeBSD 10 in System.h
+* Fixes the hash definition in ObjectGuid.h. This looks like it allows mangos to compile on FreeBSD 10 with clang
+* Fixing a bug that made the DBC enUS being ignored while they are valid. (#122)
+* force clang to use libcxx
+* Forced clang compiler to use c++11 - fixes clang build
+* Format specifiers was not correct in lootmgr
+* Function added back
+* g++ was not installed without build-essential (#80)
+* GroupHandler: prevent cheater self-invite
+* Hai'shulud script updated. Updated Hai'shulud to the correct database entry (#22038). Fixed the targeting error that would not allow Hai'shulud to be sumoned.
+* Implement CAST_FLAG_HEAL_PREDICTION
+* Implement CMSG_DISMISS_CRITTER handler
+* Implement command localization
+* Implement OpenSSL 1.1.x support
+* Implement profession skillgains != 1 (+2, +3)
+* Implement quest_relations table. Based on work by 
+* Implemented CMSG_GROUP_REQUEST_JOIN_UPDATES and updated SMSG_REAL_GROUP_UPDATE
+* Implemented SMSG_START_TIMER (Implement bg countdown timer)
+* Implemented vehicle opcodes that allow seat changing
+* Improving Build system and removing Common.h clutter
+* Incorrect cast fixed (#120)
+* Initial project location adjustment
+* its nasty thing when vbox even can't load freebsd to make full tests with clang, linux situation is same. There still exists pitty code style issues where clang still issues...
+* I've updated some Opcodes
+* lets build release mode on travis (reduces warnings list, to devs - use debian based server to test it with gc if wants debug messages)
+* LfgDungeonsEntryfmt structure corrected
+* LFGMgr.cpp and LFGMgr.h added to Three
+* Linux build error fix
+* linux/getmangos.sh: default to build client tools (#19)
+* LoadCreatureClassLvlStats() fixed
+* Lots of cmangos commirs applied
+* made function isActiveObject consistant to other cores
+* Make Mangos Three compatible with newer MySQL. Based by work by leprasmurf
+* Mana tombs added to ScriptLoader
+* Mant more cmangos Cata commits applied
+* Many cmangos commits applied
+* Many fixes made to get the server to run again
+* Many, many cmangos Cata commits applied
+* Merge branch 'master' into sqlDelimit
+* Merge branch 'master' of https://github.com/mangosthree/server
+* Merge pull request #1 from leprasmurf/sqlDelimit
+* Minor file changes
+* Minor styling tidy up
+* Minor typo corrected (#184)
+* Missing change for clang build fix
+* missing changes for last commit
+* missing code for last commit
+* Missing code related to Warden added
+* Missing delimit
+* Missing Delimiter
+* Missing function added back (#62)
+* missing part for last
+* Missing script fixed
+* Modify default options
+* More build errors and warnings fixed
+* More build errors fixed
+* more c++11 standarts income
+* more code corrections
+* More delimiting
+* more packets updates
+* More SQL delimiting for modern servers (#166)
+* more travis options
+* Move the license file
+* New thread pool reactor implementation and refactoring world daemon. (#8)
+* Now that tools work, build them by default
+* Now we can inspect player when GM mode is ON (#98)
+* nuke tabs
+* Older versions of clang ( 3.6 and older) still uses tr1 namespace for some types
+* On travis we do not need install prefix
+* once again i forget about save button
+* Over 100 camangos Cata commits applied (to c12950)
+* Overwritten CMakeLists entried put back
+* partial fix for calendar
+* Partially apply https://github.com/mangoszero/server/commit/f81e455e3a68012ce7e7e9c78100e7907fab8672
+* Player health regen fixed - temporary fix
+* Player/Emotes: Fix infinite dance and read map animation
+* Port OSX fix from Zero
+* Project tidy up and sync
+* quest_template columns now read and stored in the correct order
+* Refactored db_scripts The unity! - Based on the original work of H0zen for Zero.
+* Regex requires gcc 4.9 or higher
+* Rel21 prep
+* Remove deps in prep for submodule
+* Remove duplicate eluna world update call
+* Remove last remnants of obsolete npc_gossip table
+* Remove obsolete code
+* Remove -rdynamic. on Unix/Linux.
+* Remove realmd in prep for submodule
+* Remove Remnants of Two obsolete tables: npc_trainer_template & npc_vendor_template
+* remove unused file
+* Remove unused include directives pt1
+* Removed createprojects.bat
+* removed dublicate variable definition
+* Removed local realmd repo and added universal realmd submodule
+* removed one more soap option usage from cmake lists
+* Removed OpenSSL1.1.x blocker
+* Removed soap options from cmake build There is already option to enable or disable it in configs This feature should come with full mangos package
+* Removed some useless CMake options Removed commented "possible" bindings folder
+* Removed umwanted text from CMakeList file
+* Removed unwanted "return"
+* Replacing aptitude by apt-get on Ubuntu by default. Added support for Red Har 'Experimental'
+* Script added - npc_kharan_mighthammer
+* Script refactoring done as per previous cores
+* Scripts set up to work for Cata
+* SD3 compile fix pt2 of 2. Thanks H0zen
+* Second set of Moves and Year update
+* Server Banner and Status redone
+* Server start up error fixes
+* Server-owned world channel
+* Several major improvements to Linux installer. (#15)
+* Should limit the change to just clang since gcc does not have a problem building Mangos on FreeBSD 9 and lower with the current code
+* show email in .pinfo command. Based on the work of 
+* slap som,e warnings and other correction
+* slapped more old warnings
+* SMSG_ARENA_TEAM_CHANGE_FAILED
+* SMSG_SET_PLAYER_DECLINED_NAMES_RESULT structure
+* Some adjustments for last pull request
+* Some build errors and warning fixed
+* Some build errors fixed
+* Some build errors fixed
+* Some code cleanup.
+* some sync from previous cores
+* SpellEffect.dbc - correction to format string
+* StormLib ver 9.2 implemented
+* StormLib's CMakeList reverted to pre last OSX issue fix
+* Style cleanup from the Mangos Futures Team
+* Synchronized Conf files for easier comparison (#96)
+* Temporally commented out two packets in movement handler to solve compilation Until these two packets are not updated they will stay as commented
+* The rest of the fix for ACE_Wrappers compiling on FreeBSD 10
+* The tools folder structure redone
+* This Fixes the build problem in the database code revolving around the UNORDERED_MAP type
+* This is bad, this is BADDDD! :D
+* this should be commited for public yet
+* Trimming Ubuntu dependencies (#17)
+* Unused code removed
+* Update CMakelist.txt
+* Update Dep submodule to the main Rel21 module
+* Update deprecated ROW_FORMAT
+* Update getmangos.sh
+* Update getmangos.sh (#3)
+* Update mangosd.conf.dist.in
+* Update map list that allow mounts
+* Update missed year changes
+* Update Opcodes.cpp
+* Update Opcodes.h
+* Update Player.cpp
+* Update Player.cpp
+* Update README.md (#109)
+* Update README.md (#96)
+* update SMSG_FORCED_DEATH_UPDATE
+* Update SMSG_IGNORE_DIMINISHING_RETURNS_CHEAT
+* update SMSG_MOVE_UPDATE_CAN_FLY
+* Update SMSG_PLAYER_SKINNED
+* Update Waypoint System and Commands
+* Updated CMSG_CANCEL_GROWTH_AURA
+* updated CMSG_CHAT_FILTERED
+* Updated Dep Submodule
+* Updated dep/StormLib branch to lastest commit
+* updated linked header source
+* Updated opcode handlers for last 
+* Updated patch scripts
+* Updated Readme - Changed Appveyor to test the correct branch
+* Updated README.md
+* Updated Readme.md and icons
+* updated SMSG_BATTLEFIELD_LIST structure (rbg needs to be merged from two) updated CMSG_BATTLEMASTER_HELLO
+* Updated SMSG_DAMAGE_CALC_LOG ps: set all non handled packets to have unhandled packet state
+* updated SMSG_ECHO_PARTY_SQUELCH
+* updated SMSG_EXPECTED_SPAM_RECORDS
+* Updated SMSG_GAMEOBJECT_RESET_STATE
+* updated SMSG_GM_MESSAGECHAT, CMSG_COMMENTATOR_ENABLE, SMSG_COMMENTATOR_STATE_CHANGED, CMSG_COMMENTATOR_GET_MAP_INFO, SMSG_COMMENTATOR_MAP_INFO, CMSG_COMMENTATOR_GET_PLAYER_INFO, SMSG_COMMENTATOR_PLAYER_INFO, CMSG_COMMENTATOR_ENTER_INSTANCE, CMSG_COMMENTATOR_EXIT_INSTANCE, CMSG_COMMENTATOR_INSTANCE_COMMAND packets
+* updated SMSG_LFG_DISABLED
+* Updated SMSG_MINIGAME_SETUP, SMSG_MINIGAME_STATE, CMSG_MINIGAME_MOVE
+* Updated SMSG_OFFER_PETITION_ERROR
+* updated SMSG_PLAY_TIME_WARNING * this packet is not handled in server * this packet should activate specific UI which inform that you play too long * issue related to this opcode was created as todo feature.
+* Updated SMSG_RWHOIS to 4.3.4 15595 Nulled all currently unknown opcodes
+* updated SMSG_SET_FACTION_ATWAR, SMSG_SET_FACTION_NOT_VISIBLE opcodes
+* Updated SMSG_SHOW_MAILBOX
+* Updated some emotes list to cata Updated release build info
+* Updated to use the latest version of ScriptDev3
+* Updated to World database revision 21 4 8
+* Updating Debian Sources (#169)
+* Updating to latest version of ScriptDev3
+* URL update
+* VMAP creation fixed - files are now created
+* Warden added
+* Warden issue - disabled to prevent crash
+* Weather issue - disabled to prevent crash
+* Weather system changed to that of the previous cores.
+* Weather system fixed
 
- MaNGOS 0.18 - adds further improvements to the
- server core as well as to the majority of game classes and the game content
- database.
+ 
+DB Changes:
+===========
+* [French] Updated Translations
+* [Locale] Fix 'replace_BaseEnglish_with_xxx' file
+* [Locale] Fix up installation script
+* [Locale] Updated Translations submodule
+* [Locales] Add multi translations. Thanks Elmsroth and Gromchek
+* [Localisation] Format updates and minor changes. Thanks all authors
+* [Localisation] Multiple updates. Thanks Gromchek and everyone else
+* [Localisation] Updated various texts
+* [Localisation] various Text translations. Thanks Gromcheck/Elmsroth
+* [Localisation] Various updates. Thanks galathil and other contributors
+* [Russian] Added some new translations
+* [Trans] Updated the trnalsations submodule
+* Add missing Fel Fire aura to Warbringer Arix'Amal.
+* Add some missing phase defs
+* Add some old fixes
+* Agatha, Aradne and Daschla should fly.
+* Allows for auto update with DB installer
+* Anton 24291
+* Asghar 22025 EventAI
+* Bishop Street script rework.
+* Brainwashed Noble 596
+* carriage returns gossip_menu_option
+* carriage returns quest
+* Clefthoof Calf 19183 EventAI added.
+* compress files that are not required in normal use
+* Crazed Dragonhawk EventAI
+* Create Rel21_12_002_structure_fix.sql
+* D.E.H.T.A. Quest Series - Borean Tundra
+* DB script for command localization
+* Durkot Wolfbrother & Armorer Orkuruk
+* Fel Reaver 18733 - Remove Fel Reaver Warning Aura on Death
+* Fel Reaver 18733 EventAI update pt2.
+* Felfire Diemetradon 21408 AI.
+* Feral Dragonhawk Hatchling EventAI
+* Fix a load of startup errors
+* Fix NPC positions
+* fix typo in quest beer basted boar ribs
+* Fix typo 'Skuller' -> 'Skulker'
+* Fixed a type on creature_ai_texts.
+* Fixed installdatabase.bat script not creating the DB if defaults left in
+* Fixed text for item 10022
+* game_tele Northrend Update
+* game_tele updates
+* GO. 183853 and 183854 rotation updated.
+* Gossip script updated
+* Haaleshi Talonguard 16967
+* Happy New Year 2021 from everyone at getMangos.eu :tada:
+* Illidari Jailor AI script
+* Illidari Ravager
+* Illidari Succubus 22860 EventAI
+* Implement script for quest 12049
+* Implement script for Warbringer Arix'Amal.
+* Improve Broken Skeleton 16805.
+* Keeper of the Cistern 20795
+* Large Bonfire damage range lowered updated.
+* Laris Geardawdl complete rework.
+* Mammoth Shark EventAI
+* Minor banner update
+* Moaki Bottom Thresher 26511
+* Moa'ki Harbor added to game_tele location list.
+* NPC 23691 scripted
+* NPC 29579 script updated
+* NPC_24464_scripted.
+* Overlord Gorefist 18160
+* Prevent Training Dummy Movement.
+* q.11314 'The Fallen Sisters'
+* q.11593 'The Honored Dead'
+* q.12182 'To Venomspite!'
+* Quest 10422 fixed.
+* Quest 26919, kill credit fix.
+* Quest 'Dead Man's Debt" script.
+* Quests - Borean Tundra  updates.
+* Remove comment from previous commit to avoid confusion.
+* Remove duplicate Kaskala Supplies object.
+* Remove unnecessary spacing from mangos_string
+* Remove XP gain from Unstable Fel Imps
+* Rename two commands to match core
+* River Thresher 27617
+* Saronite Animus EventAI
+* Shatterhorn script reworked
+* Skull pile GO z position fixed.
+* Slaag 22199 - Frenzy should be used at any HP%
+* Start tidying up the outstanding update files
+* Summon Fissure movement update
+* The Big Command Help Sync Pt2
+* The big Command help syncup
+* Tok'kar z_position update.
+* Update deprecated ROW_FORMAT
+* Update reward text for quest 5064
+* Update script for creatures 25618 and 25730.
+* Updated script to apply update from Rel21 folder (#98)
+* Valiance Keep Rifleman
+* Venomspite quest relations.
+* Vindicator Haylen AI script.
+* Warden refactor
+* WIP: Setup database with docker (#166)
+* Wrath Lord 20929
+* Zabrajin/Swamprat/Telredor-Guard Orebor Harborage Defenâ€¦  â€¦der 18909/18910/18922/18943
 
-==== Game Features ====
-==== Server Features ====
-==== Statistics ====
-* Fixed Bugs: ??? tickets and many bugs reported at forum resolved
-* Total number of changes: ??? revisions (??? commits)
+
+MaNGOS 0.18 to 0.20 No definitive changelog exists
 
 
 MaNGOS 0.17   (17 November 2012)
-
+================================
  MaNGOS 0.17 - adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.

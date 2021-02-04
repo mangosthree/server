@@ -53,7 +53,7 @@ extern "C" SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap* soap)
     }
     while (1);
 #else
-    }
+    } 
     while (soap->keep_alive);
 #endif
 return SOAP_OK;
@@ -113,7 +113,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns1__executeCommand(struct soap* soap)
             || soap_envelope_end_out(soap))
         {
             return soap->error;
-        }
+        }    
     };
 
     if (soap_end_count(soap)

@@ -44,10 +44,10 @@ generate_product_version(
     VERSION_MINOR 21
     VERSION_PATH ${BUILD_COUNTER}
     VERSION_REVISION ${BUILD_REVISION}
-	COMPANY_NAME "getmangos.eu"
+    COMPANY_NAME "getmangos.eu"
 # Do not alter, remove or prevent COMPANY_COPYRIGHT from displaying
-	COMPANY_COPYRIGHT
-	FILE_DESCRIPTION "Mangos Three Server Daemon"
+    COMPANY_COPYRIGHT
+    FILE_DESCRIPTION "Mangos Three Server Daemon"
 )
 endif()
 

@@ -152,12 +152,12 @@ namespace LuaObject
 
     /**
      * Returns the GUID of the [Object].
-     * 
+     *
      * GUID is an unique identifier for the object.
-     * 
+     *
      * However on MaNGOS and cMangos creatures and gameobjects inside different maps can share
      * the same GUID but not on the same map.
-     * 
+     *
      * On TrinityCore this value is unique across all maps
      *
      * @return uint64 guid
@@ -170,10 +170,10 @@ namespace LuaObject
 
     /**
      * Returns the low-part of the [Object]'s GUID.
-     * 
+     *
      * On TrinityCore all low GUIDs are different for all objects of the same type.
      * For example creatures in instances are assigned new GUIDs when the Map is created.
-     * 
+     *
      * On MaNGOS and cMaNGOS low GUIDs are unique only on the same map.
      * For example creatures in instances use the same low GUID assigned for that spawn in the database.
      * This is why to identify a creature you have to know the instanceId and low GUID. See [Map:GetIntstanceId]

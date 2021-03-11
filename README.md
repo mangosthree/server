@@ -4,7 +4,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Build Status:</b>
  Linux/MAC: [<img src='https://travis-ci.com/mangosthree/server.png' border=0 valign="middle">][10]
  Windows: [<img src='https://ci.appveyor.com/api/projects/status/github/mangosthree/server?branch=master&svg=true' border=0 valign="middle">][11]
- <br><b>Repository Status:</b> 
+ <br><b>Repository Status:</b>
 [<img src='https://api.codacy.com/project/badge/Grade/58227f14b9024384a22e4e12e3cf7a89' border=0 valign="middle"/>][12]
 [<img src='https://www.codefactor.io/repository/github/mangosthree/server/badge' border=0 valign="middle"/>][13]
 [<img src='https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat' border=0 valign="middle"/>][14]
@@ -17,11 +17,11 @@
 ===
 
 **Mangos** is an open source project written in [C++][7]. It's fast, runs on multiple
-platforms and stores game data in [MySQL][40] or [MariaDB][41]. It also has 
+platforms and stores game data in [MySQL][40] or [MariaDB][41]. It also has
 optional support for SOAP.
 
 If you liked the fourth incarnation of [World of Warcraft][2] and still want to play it,
-this is the branch for you. We provide an authentication server where you can manage your users, 
+this is the branch for you. We provide an authentication server where you can manage your users,
 and a world server which serves game content just like the original did back then.
 
 It aims to be 100% compatible with the final version of CATA [World of Warcraft][2],
@@ -88,7 +88,7 @@ Optional dependencies
 <br>We have a small, but extremely friendly and helpful community managed by MadMax and Antz.
 
 
-Our discord/forum motto is: 
+Our discord/forum motto is:
 ```js
 'Be nice or Be somewhere else'
 ```
@@ -99,7 +99,7 @@ Any trolling or unpleasantness is swiftly dealt with !!
 
 We welcome anyone who is interested in enjoying older versions of wow or contributing and helping out !
 
-* [**Official MaNGOS Website**][3]  
+* [**Official MaNGOS Website**][3]
 
 **Discord Server**
 ----
@@ -128,7 +128,7 @@ Found an issue or something which doesn't seem right, please log it in the relev
 
 Installation instructions for various operation systems can be found here.
 
-* [**Installation Guides**][17] 
+* [**Installation Guides**][17]
 
 
 License

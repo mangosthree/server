@@ -449,7 +449,7 @@ namespace LuaUnit
         return 1;
     }
 #endif
-    
+
     /**
      * Returns true if the [Unit] is in combat.
      *
@@ -464,7 +464,7 @@ namespace LuaUnit
 #endif
         return 1;
     }
-    
+
     /**
      * Returns true if the [Unit] is under water.
      *
@@ -475,7 +475,7 @@ namespace LuaUnit
         Eluna::Push(L, unit->IsUnderWater());
         return 1;
     }
-    
+
     /**
      * Returns true if the [Unit] is in water.
      *
@@ -486,7 +486,7 @@ namespace LuaUnit
         Eluna::Push(L, unit->IsInWater());
         return 1;
     }
-    
+
     /**
      * Returns true if the [Unit] is not moving.
      *
@@ -497,7 +497,7 @@ namespace LuaUnit
         Eluna::Push(L, unit->IsStopped());
         return 1;
     }
-    
+
     /**
      * Returns true if the [Unit] is a quest giver.
      *
@@ -512,7 +512,7 @@ namespace LuaUnit
 #endif
         return 1;
     }
-    
+
     /**
      * Returns true if the [Unit]'s health is below the given percentage.
      *
@@ -524,7 +524,7 @@ namespace LuaUnit
         Eluna::Push(L, unit->HealthBelowPct(Eluna::CHECKVAL<int32>(L, 2)));
         return 1;
     }
-    
+
     /**
      * Returns true if the [Unit]'s health is above the given percentage.
      *
@@ -536,7 +536,7 @@ namespace LuaUnit
         Eluna::Push(L, unit->HealthAbovePct(Eluna::CHECKVAL<int32>(L, 2)));
         return 1;
     }
-    
+
     /**
      * Returns true if the [Unit] has an aura from the given spell entry.
      *
@@ -600,7 +600,7 @@ namespace LuaUnit
         Eluna::Push(L, unit->IsFlying());
         return 1;
     }*/
-    
+
     /**
      * Returns the [Unit]'s owner.
      *
@@ -611,7 +611,7 @@ namespace LuaUnit
         Eluna::Push(L, unit->GetOwner());
         return 1;
     }
-    
+
     /**
      * Returns the [Unit]'s owner's GUID.
      *
@@ -626,7 +626,7 @@ namespace LuaUnit
 #endif
         return 1;
     }
-    
+
     /**
      * Returns the [Unit]'s mount's modelID.
      *
@@ -637,7 +637,7 @@ namespace LuaUnit
         Eluna::Push(L, unit->GetMountID());
         return 1;
     }
-    
+
     /**
      * Returns the [Unit]'s creator's GUID.
      *
@@ -652,7 +652,7 @@ namespace LuaUnit
 #endif
         return 1;
     }
-    
+
     /**
      * Returns the [Unit]'s charmer's GUID.
      *
@@ -667,7 +667,7 @@ namespace LuaUnit
 #endif
         return 1;
     }
-    
+
     /**
      * Returns the GUID of the [Unit]'s charmed entity.
      *
@@ -682,7 +682,7 @@ namespace LuaUnit
 #endif
         return 1;
     }
-    
+
     /**
      * Returns the GUID of the [Unit]'s pet.
      *
@@ -697,7 +697,7 @@ namespace LuaUnit
 #endif
         return 1;
     }
-    
+
     /**
      * Returns the GUID of the [Unit]'s charmer or owner.
      *
@@ -712,7 +712,7 @@ namespace LuaUnit
 #endif
         return 1;
     }
-    
+
     /**
      * Returns the GUID of the [Unit]'s charmer or owner or its own GUID.
      *
@@ -761,7 +761,7 @@ namespace LuaUnit
         Eluna::Push(L, unit->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + spellschool));
         return 1;
     }
-    
+
     /**
      * Returns the [Unit]'s current victim target or nil.
      *
@@ -802,7 +802,7 @@ namespace LuaUnit
         Eluna::Push(L, unit->GetCurrentSpell(type));
         return 1;
     }
-    
+
     /**
      * Returns the [Unit]'s current stand state.
      *
@@ -817,7 +817,7 @@ namespace LuaUnit
 #endif
         return 1;
     }
-    
+
     /**
      * Returns the [Unit]'s current display ID.
      *
@@ -828,7 +828,7 @@ namespace LuaUnit
         Eluna::Push(L, unit->GetDisplayId());
         return 1;
     }
-    
+
     /**
      * Returns the [Unit]'s native/original display ID.
      *
@@ -839,7 +839,7 @@ namespace LuaUnit
         Eluna::Push(L, unit->GetNativeDisplayId());
         return 1;
     }
-    
+
     /**
      * Returns the [Unit]'s level.
      *
@@ -850,7 +850,7 @@ namespace LuaUnit
         Eluna::Push(L, unit->getLevel());
         return 1;
     }
-    
+
     /**
      * Returns the [Unit]'s health amount.
      *
@@ -1342,7 +1342,7 @@ namespace LuaUnit
      *     WAYPOINT_MOTION_TYPE            = 2,
      *     MAX_DB_MOTION_TYPE              = 3,
      *     ANIMAL_RANDOM_MOTION_TYPE       = 3, // TC
-     * 
+     *
      *     CONFUSED_MOTION_TYPE            = 4,
      *     CHASE_MOTION_TYPE               = 5,
      *     HOME_MOTION_TYPE                = 6,
@@ -1351,7 +1351,7 @@ namespace LuaUnit
      *     FLEEING_MOTION_TYPE             = 9,
      *     DISTRACT_MOTION_TYPE            = 10,
      *     ASSISTANCE_MOTION_TYPE          = 11,
-     *     ASSISTANCE_DISTRACT_MOTION_TYPE = 12,          
+     *     ASSISTANCE_DISTRACT_MOTION_TYPE = 12,
      *     TIMED_FLEEING_MOTION_TYPE       = 13,
      *     FOLLOW_MOTION_TYPE              = 14,
      *     EFFECT_MOTION_TYPE              = 15, // mangos
@@ -1899,7 +1899,7 @@ namespace LuaUnit
 #endif
         return 0;
     }
-    
+
     /**
      * Mounts the [Unit] on the given displayID/modelID.
      *
@@ -1912,7 +1912,7 @@ namespace LuaUnit
         unit->Mount(displayId);
         return 0;
     }
-    
+
     /**
      * Dismounts the [Unit].
      */
@@ -1931,7 +1931,7 @@ namespace LuaUnit
 
         return 0;
     }
-    
+
     /**
      * Makes the [Unit] perform the given emote.
      *
@@ -2342,7 +2342,7 @@ namespace LuaUnit
         unit->CastCustomSpell(target, spell, has_bp0 ? &bp0 : NULL, has_bp1 ? &bp1 : NULL, has_bp2 ? &bp2 : NULL, triggered, castItem, NULL, ObjectGuid(originalCaster));
         return 0;
     }
-    
+
     /**
      * Makes the [Unit] cast the spell to the given coordinates, used for area effect spells.
      *
@@ -2421,7 +2421,7 @@ namespace LuaUnit
         unit->InterruptSpell((CurrentSpellTypes)spellType, delayed);
         return 0;
     }
-    
+
     /**
      * Adds the [Aura] of the given spell entry on the given target from the [Unit].
      *
@@ -2473,7 +2473,7 @@ namespace LuaUnit
 #endif
         return 1;
     }
-    
+
     /**
      * Removes [Aura] of the given spell entry from the [Unit].
      *
@@ -2485,7 +2485,7 @@ namespace LuaUnit
         unit->RemoveAurasDueToSpell(spellId);
         return 0;
     }
-    
+
     /**
      * Removes all [Aura]'s from the [Unit].
      *
@@ -2496,7 +2496,7 @@ namespace LuaUnit
         unit->RemoveAllAuras();
         return 0;
     }
-    
+
     /**
      * Adds the given unit state for the [Unit].
      *
@@ -2513,7 +2513,7 @@ namespace LuaUnit
 #endif
         return 0;
     }
-    
+
     /**
      * Removes the given unit state from the [Unit].
      *
@@ -2530,7 +2530,7 @@ namespace LuaUnit
 #endif
         return 0;
     }
-    
+
     /**
      * Makes the [Unit] teleport to given coordinates within same map.
      *

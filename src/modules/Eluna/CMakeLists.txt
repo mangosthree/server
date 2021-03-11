@@ -58,7 +58,7 @@ if( ${CMAKE_PROJECT_NAME} STREQUAL "MaNGOS" )
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers
     ${CMAKE_SOURCE_DIR}/src/game/Object
   )
-  
+
   if( WIN32 )
     if ( MSVC )
       add_custom_command(TARGET LuaEngine
@@ -74,7 +74,7 @@ if( ${CMAKE_PROJECT_NAME} STREQUAL "MaNGOS" )
       )
     endif()
   endif()
-  
+
   install(DIRECTORY extensions DESTINATION "${BIN_DIR}/lua_scripts/")
-  
+
 endif()

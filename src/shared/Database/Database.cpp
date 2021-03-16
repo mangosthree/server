@@ -40,7 +40,7 @@ struct DBVersion
     std::string dbname;
     uint32 expected_version;
     uint32 expected_structure;
-    uint32 expected_content;
+    uint32 minimal_expected_content; // Minimal because core can starts with some missing contents
     std::string description;
 };
 
@@ -534,9 +534,41 @@ bool Database::RollbackTransaction()
     return true;
 }
 
+void PrintNormalYouHaveDatabaseVersion(uint32 current_db_version, uint32 current_db_structure, uint32 current_db_content, std::string description)
+{
+    sLog.outString("  [A] You have database Version: %u", current_db_version);
+    sLog.outString("                      Structure: %u", current_db_structure);
+    sLog.outString("                        Content: %u", current_db_content);
+    sLog.outString("                    Description: %s", description.c_str());
+}
+
+void PrintErrorYouHaveDatabaseVersion(uint32 current_db_version, uint32 current_db_structure, uint32 current_db_content, std::string description)
+{
+    sLog.outErrorDb("  [A] You have database Version: %u", current_db_version);
+    sLog.outErrorDb("                      Structure: %u", current_db_structure);
+    sLog.outErrorDb("                        Content: %u", current_db_content);
+    sLog.outErrorDb("                    Description: %s", description.c_str());
+}
+
+void PrintNormalDatabaseVersionReferencedByCore(const DBVersion& core_db_requirements)
+{
+    sLog.outString("  [B] The core references last database Version: %u", core_db_requirements.expected_version);
+    sLog.outString("                                      Structure: %u", core_db_requirements.expected_structure);
+    sLog.outString("                                        Content: %u", core_db_requirements.minimal_expected_content);
+    sLog.outString("                                    Description: %s", core_db_requirements.description.c_str());
+}
+
+void PrintErrorYouNeedDatabaseVersionExpectedByCore(const DBVersion& core_db_requirements)
+{
+    sLog.outErrorDb("  [B] The core needs database Version: %u", core_db_requirements.expected_version);
+    sLog.outErrorDb("                            Structure: %u", core_db_requirements.expected_structure);
+    sLog.outErrorDb("                              Content: %u", core_db_requirements.minimal_expected_content);
+    sLog.outErrorDb("                          Description: %s", core_db_requirements.description.c_str());
+}
+
 bool Database::CheckDatabaseVersion(DatabaseTypes database)
 {
-    const DBVersion& dbversion = databaseVersions[database];
+    const DBVersion& core_db_requirements = databaseVersions[database];
 
     // Fetch the database version table information
     QueryResult* result = Query("SELECT `version`, `structure`, `content`, `description` FROM `db_version` ORDER BY `version` DESC, `structure` DESC, `content` DESC LIMIT 1");
@@ -544,72 +576,84 @@ bool Database::CheckDatabaseVersion(DatabaseTypes database)
     // db_version table does not exist or is empty
     if (!result)
     {
-        sLog.outErrorDb("The table `db_version` in your [%s] database is missing or corrupt.", dbversion.dbname.c_str());
+        sLog.outErrorDb("The table `db_version` in your [%s] database is missing or corrupt.", core_db_requirements.dbname.c_str());
         sLog.outErrorDb();
         sLog.outErrorDb("  [A] You have database Version: MaNGOS can not verify your database version or its existence!");
         sLog.outErrorDb();
-        sLog.outErrorDb("  [B] You need database Version: %u", dbversion.expected_version);
-        sLog.outErrorDb("                      Structure: %u", dbversion.expected_structure);
-        sLog.outErrorDb("                        Content: %u", dbversion.expected_content);
-        sLog.outErrorDb("                    Description: %s", dbversion.description.c_str());
+        PrintErrorYouNeedDatabaseVersionExpectedByCore(core_db_requirements);
         sLog.outErrorDb();
         sLog.outErrorDb("Please verify your database location or your database integrity.");
+
+        // The core loading will no go further :
         return false;
     }
 
     Field* fields = result->Fetch();
-    uint32 version = fields[0].GetUInt32();
-    uint32 structure = fields[1].GetUInt32();
-    uint32 content = fields[2].GetUInt32();
+    uint32 current_db_version = fields[0].GetUInt32();
+    uint32 current_db_structure = fields[1].GetUInt32();
+    uint32 current_db_content = fields[2].GetUInt32();
     std::string description = fields[3].GetCppString();
 
     delete result;
 
     // Structure does not match the required version
-    if (version != dbversion.expected_version || structure != dbversion.expected_structure)
+    if (current_db_version != core_db_requirements.expected_version || current_db_structure != core_db_requirements.expected_structure)
     {
-        sLog.outErrorDb("The table `db_version` indicates that your [%s] database does not match the expected structure!", dbversion.dbname.c_str());
+        sLog.outErrorDb("The table `db_version` indicates that your [%s] database does not match the expected structure!", core_db_requirements.dbname.c_str());
         sLog.outErrorDb();
-        sLog.outErrorDb("  [A] You have database Version: %u", version);
-        sLog.outErrorDb("                      Structure: %u", structure);
-        sLog.outErrorDb("                        Content: %u", content);
-        sLog.outErrorDb("                    Description: %s", description.c_str());
+        PrintErrorYouHaveDatabaseVersion(current_db_version, current_db_structure, current_db_content, description);
         sLog.outErrorDb();
-        sLog.outErrorDb("  [B] You need database Version: %u", dbversion.expected_version);
-        sLog.outErrorDb("                      Structure: %u", dbversion.expected_structure);
-        sLog.outErrorDb("                        Content: %u", dbversion.expected_content);
-        sLog.outErrorDb("                    Description: %s", dbversion.description.c_str());
+        PrintErrorYouNeedDatabaseVersionExpectedByCore(core_db_requirements);
         sLog.outErrorDb();
         sLog.outErrorDb("You must apply all updates after [A] to [B] to use MaNGOS with this database.");
-        sLog.outErrorDb("These updates are included in the database/%s/Updates folder.", dbversion.dbname.c_str());
+        sLog.outErrorDb("These updates are included in the database/%s/Updates folder.", core_db_requirements.dbname.c_str());
         return false;
     }
 
-    // DB is not up to date, but structure is correct. Send warning but start core
-    if (content > dbversion.expected_content)
+    bool db_vs_core_content_version_mismatch = false;
+
+    // DB is not up to date, but structure is correct.
+    // The 'content' version in the 'db_version' table can be < from the one required by the core
+    // See  enum values for :
+    //  WORLD_DB_CONTENT_NR
+    //  CHAR_DB_CONTENT_NR
+    //  REALMD_DB_CONTENT_NR
+    // for more information.
+    if (current_db_content < core_db_requirements.minimal_expected_content)
     {
-        sLog.outErrorDb("You have not updated the core for few DB [%s] updates!", dbversion.dbname.c_str());
-        sLog.outErrorDb("Current DB content is %u, core expects %u", content, dbversion.expected_content);
-        sLog.outErrorDb("This is ok for now but should not last long.");
-    }
-    else if (content != dbversion.expected_content)
-    {
-        sLog.outErrorDb("The table `db_version` indicates that your [%s] database does not match the expected version!", dbversion.dbname.c_str());
-        sLog.outErrorDb();
-        sLog.outErrorDb("  [A] You have database Version: %u", version);
-        sLog.outErrorDb("                      Structure: %u", structure);
-        sLog.outErrorDb("                        Content: %u", content);
-        sLog.outErrorDb("                    Description: %s", description.c_str());
-        sLog.outErrorDb();
-        sLog.outErrorDb("  [B] You need database Version: %u", dbversion.expected_version);
-        sLog.outErrorDb("                      Structure: %u", dbversion.expected_structure);
-        sLog.outErrorDb("                        Content: %u", dbversion.expected_content);
-        sLog.outErrorDb("                    Description: %s", dbversion.description.c_str());
-        sLog.outErrorDb();
-        sLog.outErrorDb("You are missing content updates or you have content updates beyond the expected core version.");
+        // TODO : Should not display with error color but warning (e.g YELLOW) => Create a sLog.outWarningDb() and sLog.outWarning()
+        sLog.outErrorDb("You have not updated the core for few DB [%s] updates!", core_db_requirements.dbname.c_str());
+        sLog.outErrorDb("Current DB content is %u, core expects %u", current_db_content, core_db_requirements.minimal_expected_content);
         sLog.outErrorDb("It is recommended to run ALL database updates up to the required core version.");
-        sLog.outErrorDb("These updates are included in the database/%s/Updates folder.", dbversion.dbname.c_str());
-    };
+        sLog.outErrorDb("These updates are included in the database/%s/Updates folder.", core_db_requirements.dbname.c_str());
+        sLog.outErrorDb("This is ok for now but should not last long.");
+        db_vs_core_content_version_mismatch = true;
+    }
+
+    // Do not alert if current_db_content > core_db_requirements.minimal_expected_content it can mislead newcomers !
+
+    // In anys cases if there are differences in content : output a recap of the differences :
+    if (db_vs_core_content_version_mismatch)
+    {
+        // TODO : Should not display with error color but warning (e.g YELLOW) => Create a sLog.outWarningDb() and sLog.outWarning()
+        sLog.outErrorDb("The table `db_version` indicates that your [%s] database does not match the expected version!", core_db_requirements.dbname.c_str());
+        sLog.outErrorDb();
+        PrintErrorYouHaveDatabaseVersion(current_db_version, current_db_structure, current_db_content, description);
+        sLog.outErrorDb();
+        PrintErrorYouNeedDatabaseVersionExpectedByCore(core_db_requirements);
+    }
+    else
+    {
+        sLog.outString("The table `db_version` indicates that your [%s] database has a higher version than the one referenced by the core."
+                       "\nYou have probably applied DB updates, and that's a good thing to keep your server up to date.", core_db_requirements.dbname.c_str());
+        sLog.outString();
+        PrintNormalYouHaveDatabaseVersion(current_db_version, current_db_structure, current_db_content, description);
+        sLog.outString();
+        PrintNormalDatabaseVersionReferencedByCore(core_db_requirements);
+        sLog.outString();
+        sLog.outString("You can run the core without any problem like that.");
+        sLog.outString();
+    }
 
     return true;
 }
@@ -663,6 +707,7 @@ SqlStatement Database::CreateStatement(SqlStatementID& index, const char* fmt)
         int nParams = std::count(szFmt.begin(), szFmt.end(), '?');
         // find existing or add a new record in registry
         LOCK_GUARD _guard(m_stmtGuard);
+        MANGOS_ASSERT(_guard.locked());
         PreparedStmtRegistry::const_iterator iter = m_stmtRegistry.find(szFmt);
         if (iter == m_stmtRegistry.end())
         {
@@ -683,22 +728,23 @@ SqlStatement Database::CreateStatement(SqlStatementID& index, const char* fmt)
 
 std::string Database::GetStmtString(const int stmtId) const
 {
-    LOCK_GUARD _guard(m_stmtGuard);
-
     if (stmtId == -1 || stmtId > m_iStmtIndex)
     {
         return std::string();
     }
 
-    PreparedStmtRegistry::const_iterator iter_last = m_stmtRegistry.end();
-    for (PreparedStmtRegistry::const_iterator iter = m_stmtRegistry.begin(); iter != iter_last; ++iter)
+    LOCK_GUARD _guard(m_stmtGuard);
+    if (_guard.locked())
     {
-        if (iter->second == stmtId)
+        PreparedStmtRegistry::const_iterator iter_last = m_stmtRegistry.end();
+        for (PreparedStmtRegistry::const_iterator iter = m_stmtRegistry.begin(); iter != iter_last; ++iter)
         {
-            return iter->first;
+            if (iter->second == stmtId)
+            {
+                return iter->first;
+            }
         }
     }
-
     return std::string();
 }
 

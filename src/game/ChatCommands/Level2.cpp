@@ -2391,13 +2391,20 @@ bool ChatHandler::HandleNpcSetModelCommand(char* args)
         return false;
     }
 
-    uint32 displayId = (uint32) atoi(args);
+    uint32 displayId = (uint32)atoi(args);
 
     Creature* pCreature = getSelectedCreature();
 
     if (!pCreature || pCreature->IsPet())
     {
         SendSysMessage(LANG_SELECT_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (!sCreatureDisplayInfoStore.LookupEntry(displayId))
+    {
+        SendSysMessage(LANG_BAD_VALUE);
         SetSentErrorMessage(true);
         return false;
     }
@@ -2412,6 +2419,7 @@ bool ChatHandler::HandleNpcSetModelCommand(char* args)
 
     return true;
 }
+
 // set faction of creature
 bool ChatHandler::HandleNpcFactionIdCommand(char* args)
 {
@@ -2420,7 +2428,7 @@ bool ChatHandler::HandleNpcFactionIdCommand(char* args)
         return false;
     }
 
-    uint32 factionId = (uint32) atoi(args);
+    uint32 factionId = (uint32)atoi(args);
 
     if (!sFactionTemplateStore.LookupEntry(factionId))
     {
@@ -2454,6 +2462,7 @@ bool ChatHandler::HandleNpcFactionIdCommand(char* args)
 
     return true;
 }
+
 // set spawn dist of creature
 bool ChatHandler::HandleNpcSpawnDistCommand(char* args)
 {

@@ -458,6 +458,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Th
 #ifdef ENABLE_ELUNA
         FILE* elunaErrLogfile; /**< TODO */
 #endif /* ENABLE_ELUNA */
+
         FILE* eventAiErLogfile; /**< TODO */
         FILE* scriptErrLogFile; /**< TODO */
         FILE* worldLogfile; /**< TODO */

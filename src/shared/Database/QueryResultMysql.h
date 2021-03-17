@@ -73,6 +73,10 @@ class QueryResultMysql : public QueryResult
          */
     private:
         enum Field::DataTypes ConvertNativeType(enum_field_types mysqlType) const;
+        /**
+         * @brief
+         *
+         */
         void EndQuery();
 
         MYSQL_RES* mResult; /**< TODO */

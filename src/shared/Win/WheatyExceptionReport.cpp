@@ -610,6 +610,7 @@ void WheatyExceptionReport::WriteStackDetails(
 #ifdef _M_IX86
         _tprintf(_T("%08X  %08X  "), sf.AddrPC.Offset, sf.AddrFrame.Offset);
 #endif
+
 #ifdef _M_X64
         _tprintf(_T("%016I64X  %016I64X  "), sf.AddrPC.Offset, sf.AddrFrame.Offset);
 #endif

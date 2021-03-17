@@ -25,11 +25,11 @@
 #ifndef MANGOS_SYSTEMCONFIG_H
 #define MANGOS_SYSTEMCONFIG_H
 
+#include "Platform/Define.h"
+
 #ifndef MANGOS_PACKAGENAME
 #define MANGOS_PACKAGENAME "MaNGOS Three"
 #endif
-
-#include "Platform/Define.h"
 
 #ifndef MANGOS_VERSION
 #if PLATFORM == PLATFORM_WINDOWS

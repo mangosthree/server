@@ -130,7 +130,7 @@ void Log::SetColor(bool stdout_stream, Color color)
         FOREGROUND_GREEN,                                                          // GREEN
         FOREGROUND_RED | FOREGROUND_GREEN,                                         // BROWN
         FOREGROUND_BLUE,                                                           // BLUE
-        FOREGROUND_RED | FOREGROUND_BLUE,                                          // MAGENTA
+        FOREGROUND_RED |                    FOREGROUND_BLUE,                       // MAGENTA
         FOREGROUND_GREEN | FOREGROUND_BLUE,                                        // CYAN
         FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE,                       // WHITE
         FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,                  // YELLOW

@@ -28,6 +28,14 @@
 #include <deque>
 #include <map>
 #include <set>
+
+#include "dbcfile.h"
+#include "sl/adt.h"
+#include "sl/wdt.h"
+#include "../shared/ExtractorCommon.h"
+#ifndef WIN32
+#include <unistd.h>
+#endif
 #include <cstdlib>
 
 #ifdef WIN32
@@ -38,17 +46,10 @@
 #include <sys/stat.h>
 #endif
 
-#include "dbcfile.h"
 
-#include "sl/adt.h"
-#include "sl/wdt.h"
 #include <fcntl.h>
 
-#include "../shared/ExtractorCommon.h"
 
-#ifndef WIN32
-#include <unistd.h>
-#endif
 
 #if defined( __GNUC__ )
 #define _open   open
@@ -66,42 +67,42 @@
 #define OPEN_FLAGS (O_RDONLY | O_BINARY)
 #endif
 
+/**
+ * @brief
+ *
+ */
 typedef struct
 {
-    char name[64];
-    uint32 id;
+    char name[64];                  /**< TODO */
+    uint32 id;                      /**< TODO */
 } map_id;
 
-map_id* map_ids;
-uint16* areas;
-uint16* LiqType;
-char output_path[128] = ".";
-char input_path[128] = ".";
-uint32 maxAreaId = 0;
+map_id* map_ids;                    /**< TODO */
+uint16* areas;                      /**< TODO */
+uint16* LiqType;                    /**< TODO */
+char output_path[128] = ".";        /**< TODO */
+char input_path[128] = ".";         /**< TODO */
+uint32 maxAreaId = 0;               /**< TODO */
 uint32 CONF_max_build = 0;
-
-//**************************************************
-// Extractor options
-//**************************************************
+/**
+ * @brief Data types which can be extracted
+ *
+ */
 enum Extract
 {
     EXTRACT_MAP = 1,
     EXTRACT_DBC = 2
 };
 
-// Select data for extract
-int   CONF_extract = EXTRACT_MAP | EXTRACT_DBC;
-// This option allow limit minimum height to some value (Allow save some memory)
-// see contrib/mmap/src/Tilebuilder.h, INVALID_MAP_LIQ_HEIGHT
-bool  CONF_allow_height_limit = true;
-float CONF_use_minHeight = -500.0f;
+int   CONF_extract = EXTRACT_MAP | EXTRACT_DBC; /**< Select data for extract */
+bool  CONF_allow_height_limit       = true;     /**< Allows to limit minimum height */
+float CONF_use_minHeight            = -500.0f;  /**< Default minimum height */
 
-// This option allow use float to int conversion
-bool  CONF_allow_float_to_int   = true;
-float CONF_float_to_int8_limit  = 2.0f;      // Max accuracy = val/256
-float CONF_float_to_int16_limit = 2048.0f;   // Max accuracy = val/65536
-float CONF_flat_height_delta_limit = 0.005f; // If max - min less this value - surface is flat
-float CONF_flat_liquid_delta_limit = 0.001f; // If max - min less this value - liquid surface is flat
+bool  CONF_allow_float_to_int      = false;      /**< Allows float to int conversion */
+float CONF_float_to_int8_limit     = 2.0f;      /**< Max accuracy = val/256 */
+float CONF_float_to_int16_limit    = 2048.0f;   /**< Max accuracy = val/65536 */
+float CONF_flat_height_delta_limit = 0.005f;    /**< If max - min less this value - surface is flat */
+float CONF_flat_liquid_delta_limit = 0.001f;    /**< If max - min less this value - liquid surface is flat */
 
 #define MIN_SUPPORTED_BUILD 15595                           // code expect mpq files and mpq content files structure for this build or later
 #define EXPANSION_COUNT 3
@@ -120,21 +121,35 @@ bool FileExists(const char* FileName)
     return false;
 }
 
+/**
+ * @brief
+ *
+ * @param prg
+ */
 void Usage(char* prg)
 {
-    printf(
-        "Usage:\n"
-        "%s -[var] [value]\n"
-        "-i set input path\n"
-        "-o set output path\n"
-        "-e extract only MAP(1)/DBC(2) - standard: both(3)\n"
-        "-e extract only MAP(1)/DBC(2) - temporary only: DBC(2)\n"
-        "-f height stored as int (less map size but lost some accuracy) 1 by default\n"
-        "-b extract data for specific build (at least not greater it from available). Min supported build %u.\n"
-        "Example: %s -f 0 -i \"c:\\games\\game\"", prg, MIN_SUPPORTED_BUILD, prg);
+    printf(" Usage: %s [OPTION]\n\n", prg);
+    printf(" Extract client database files and generate map files.\n");
+    printf("   -h, --help            show the usage\n");
+    printf("   -i, --input <path>    search path for game client archives\n");
+    printf("   -o, --output <path>   target path for generated files\n");
+    printf("   -f, --flat #          store height information as integers reducing map\n");
+    printf("                         size, but also accuracy\n");
+    printf("   -e, --extract #       extract specified client data. 1 = maps, 2 = DBCs,\n");
+    printf("                         3 = both. Defaults to extracting both.\n");
+    printf("\n");
+    printf(" Example:\n");
+    printf(" - use input path and do not flatten maps:\n");
+    printf("   %s -f 0 -i \"c:\\games\\world of warcraft\"\n", prg);
     exit(1);
 }
 
+/**
+ * @brief
+ *
+ * @param argc
+ * @param argv
+ */
 void HandleArgs(int argc, char* arg[])
 {
     for (int c = 1; c < argc; ++c)
@@ -306,6 +321,11 @@ uint32 ReadBuild(int locale)
     return build;
 }
 
+/**
+ * @brief
+ *
+ * @return uint32
+ */
 uint32 ReadMapDBC(int const locale)
 {
     HANDLE localeFile;
@@ -321,9 +341,12 @@ uint32 ReadMapDBC(int const locale)
     HANDLE dbcFile;
     if (!SFileOpenFileEx(localeFile, "DBFilesClient\\Map.dbc", SFILE_OPEN_FROM_MPQ, &dbcFile))
     {
-        printf("Fatal error: Cannot find Map.dbc in archive!\n");
+        printf("Error: Cannot find Map.dbc in archive!\n");
         exit(1);
     }
+
+    printf("Found Map.dbc in archive!\n");
+    printf("\n Reading maps from Map.dbc... ");
 
     DBCFile dbc(dbcFile);
     if (!dbc.open())
@@ -339,10 +362,15 @@ uint32 ReadMapDBC(int const locale)
         map_ids[x].id = dbc.getRecord(x).getUInt(0);
         strcpy(map_ids[x].name, dbc.getRecord(x).getString(1));
     }
-    printf(" Success! %lu maps loaded.\n", map_count);
+    printf(" Success! %zu maps loaded.\n", map_count);
+
     return map_count;
 }
 
+/**
+ * @brief
+ *
+ */
 void ReadAreaTableDBC(int const locale)
 {
     HANDLE localeFile;
@@ -353,12 +381,12 @@ void ReadAreaTableDBC(int const locale)
         exit(1);
     }
 
-    printf("Read AreaTable.dbc file...");
+    printf("\n Read areas from AreaTable.dbc ...");
 
     HANDLE dbcFile;
     if (!SFileOpenFileEx(localeFile, "DBFilesClient\\AreaTable.dbc", SFILE_OPEN_FROM_MPQ, &dbcFile))
     {
-        printf("Fatal error: Cannot find AreaTable.dbc in archive!\n");
+        printf("Error: Cannot find AreaTable.dbc in archive!\n");
         exit(1);
     }
 
@@ -382,9 +410,13 @@ void ReadAreaTableDBC(int const locale)
 
     maxAreaId = dbc.getMaxId();
 
-    printf(" Success! %lu areas loaded.\n", area_count);
+    printf(" Success! %zu areas loaded.\n", area_count);
 }
 
+/**
+ * @brief
+ *
+ */
 void ReadLiquidTypeTableDBC(int const locale)
 {
     HANDLE localeFile;
@@ -395,12 +427,12 @@ void ReadLiquidTypeTableDBC(int const locale)
         exit(1);
     }
 
-    printf("Read LiquidType.dbc file...");
+    printf("\n Reading liquid types from LiquidType.dbc...");
 
     HANDLE dbcFile;
     if (!SFileOpenFileEx(localeFile, "DBFilesClient\\LiquidType.dbc", SFILE_OPEN_FROM_MPQ, &dbcFile))
     {
-        printf("Fatal error: Cannot find LiquidType.dbc in archive!\n");
+        printf("Error: Cannot find LiquidType.dbc in archive!\n");
         exit(1);
     }
 
@@ -421,7 +453,7 @@ void ReadLiquidTypeTableDBC(int const locale)
         LiqType[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
     }
 
-    printf(" Success! %lu liquid types loaded.\n", LiqType_count);
+    printf(" Success! %zu liquid types loaded.\n", LiqType_count);
 }
 
 //
@@ -787,7 +819,7 @@ bool ConvertADT(char* filename, char* filename2, int cell_y, int cell_x, uint32 
     // Try store as packed in uint16 or uint8 values
     if (!(heightHeader.flags & MAP_HEIGHT_NO_HEIGHT))
     {
-        float step;
+        float step = 0.0f;
         // Try Store as uint values
         if (CONF_allow_float_to_int)
         {
@@ -1215,7 +1247,7 @@ void ExtractMapsFromMpq(uint32 build, const int locale)
     printf("\n Converting map files\n");
     for (uint32 z = 0; z < map_count; ++z)
     {
-        printf("System.cpp:ExtractMapsFromMpq( ) - Extract %s (%d/%d)                  \n", map_ids[z].name, z + 1, map_count);
+        printf(" Extract %s (%d/%d)                      \n", map_ids[z].name, z + 1, map_count);
         // Loadup map grid data
         sprintf(mpq_map_name, "World\\Maps\\%s\\%s.wdt", map_ids[z].name, map_ids[z].name);
         WDT_file wdt;
@@ -1244,6 +1276,10 @@ void ExtractMapsFromMpq(uint32 build, const int locale)
     delete [] map_ids;
 }
 
+/**
+ * @brief
+ *
+ */
 void ExtractDBCFiles(int locale, bool basicLocale)
 {
     printf(" ___________________________________    \n");
@@ -1521,6 +1557,13 @@ void LoadBaseMPQFiles()
     }
 }
 
+/**
+ * @brief
+ *
+ * @param argc
+ * @param argv
+ * @return int
+ */
 int main(int argc, char* arg[])
 {
     printf("Map & DBC Extractor\n");

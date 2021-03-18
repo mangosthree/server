@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <http://getmangos.eu>
+ * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,13 +111,11 @@ uint32 CONF_max_build = 0;
 const char* szWorkDirWmo = "./Buildings";
 const char* szRawVMAPMagic = "VMAPc06";
 
-
-
 // Local testing functions
 
 bool FileExists(const char* file)
 {
-    if (FILE* n = fopen(file, "rb"))
+    if (FILE* n = std::fopen(file, "rb"))
     {
         fclose(n);
         return true;
@@ -179,15 +177,14 @@ void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char cons
             {
                 updates[ubuild] = UpdatesPair(ffd.cFileName, section);
             }
-        }
-        while (FindNextFile(hFind, &ffd) != 0);
+        } while (FindNextFile(hFind, &ffd) != 0);
 
         FindClose(hFind);
     }
 
 #else
 
-    if (DIR* dp  = opendir(dirname))
+    if (DIR* dp = opendir(dirname))
     {
         int ubuild = 0;
         dirent* dirp;
@@ -288,6 +285,10 @@ bool LoadLocaleMPQFile(int const locale)
     return true;
 }
 
+/**
+ * @brief
+ *
+ */
 void LoadCommonMPQFiles(uint32 build)
 {
     TCHAR filename[512];
@@ -445,6 +446,17 @@ void ReadLiquidTypeTableDBC()
     }
 
     printf(" Success! (%u LiqTypes loaded)\n", (unsigned int)LiqType_count);
+}
+
+void Usage(char* prg)
+{
+    printf(" Usage: %s [OPTION]\n\n", prg);
+    printf(" Extract client database files and generate map files.\n");
+    printf("   -s : (default) small size (data size optimization), ~500MB less vmap data.\n");
+    printf("   -l : large size, ~500MB more vmap data. (might contain more details)\n");
+    printf("   -d <path>: Path to the vector data source folder.\n");
+    printf("   -b : target build (default %u)", CONF_TargetBuild);
+    printf("   -? : This message.\n");
 }
 
 void ParsMapFiles()
@@ -697,15 +709,10 @@ bool processArgv(int argc, char** argv)
             break;
         }
     }
+
     if (!result)
     {
-        printf("Extract for %s.\n", szRawVMAPMagic);
-        printf("%s [-?][-s][-l][-d <path>]\n", argv[0]);
-        printf("   -s : (default) small size (data size optimization), ~500MB less vmap data.\n");
-        printf("   -l : large size, ~500MB more vmap data. (might contain more details)\n");
-        printf("   -d <path>: Path to the vector data source folder.\n");
-        printf("   -b : target build (default %u)", CONF_TargetBuild);
-        printf("   -? : This message.\n");
+        Usage(argv[0]);
     }
     return result;
 }

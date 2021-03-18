@@ -1,0 +1,3 @@
+The default files for G3DLITE were ammended in commit:
+
+https://github.com/mangos/mangosDeps/commit/e135e5971c9588258174c37ce544991374a17562

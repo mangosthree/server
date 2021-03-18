@@ -259,7 +259,7 @@ struct is_temple_of_ahnqiraj : public InstanceScript
             std::istringstream loadStream(chrIn);
             loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                 >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
-#if defined (CLASSIC)  
+#if defined (CLASSIC)
                 >> m_auiEncounter[8] >> m_auiEncounter[9];
 #else
                >> m_auiEncounter[8];

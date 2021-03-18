@@ -414,7 +414,7 @@ struct npc_threshwackonator : public CreatureScript
     }
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
-    {        
+    {
         if (pPlayer->GetQuestStatus(QUEST_GYROMAST_REV) == QUEST_STATUS_INCOMPLETE)
         {
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TURN_KEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);

@@ -46,7 +46,7 @@ enum
     SAY_PHASE_2_INTRO_3                         = -1603263,
     SAY_PHASE_2_INTRO_4                         = -1603264,
     SAY_PHASE_2_INTRO_5                         = -1603265,
-    
+
     // phase 2 and 3 yells
     SAY_SARA_PHYCHOSIS                          = -1603207,
     SAY_SARA_DEATH_RAY                          = -1603208,
@@ -148,7 +148,7 @@ enum
     SPELL_FOCUSED_ANGER                         = 57688,
     SPELL_SQUEEZE                               = 64125,
     SPELL_SQUEEZE_H                             = 64126,
-    
+
     // Vision spells
     SPELL_LUNATIC_GAZE_SKULL                    = 64167,
     SPELL_NONDESCRIPT_ARMOR                     = 64013,                    // stun auras for illusions
@@ -157,7 +157,7 @@ enum
     SPELL_SHATTERED_ILLUSION                    = 64173,                    // send event 21669
     SPELL_SHATTERED_ILLUSION_REMOVE             = 65238,                    // remove aura 64173; send event 21671
     SPELL_INDUCE_MADNESS                        = 64059,                    // reduce sanity by 100% to all players with aura 63988
-    
+
     // Old God phase spells
     SPELL_LUNATIC_GAZE_YOGG                     = 64163,
     SPELL_SHADOW_BEACON                         = 64465,                    // triggers 64468
@@ -178,7 +178,7 @@ enum
     SPELL_TELEPORT_TO_CHAMBER_ILLUSION          = 63997,
     SPELL_TELEPORT_TO_ICEECROWN_ILLUSION        = 63998,
     //SPELL_TELEPORT_BACK_TO_MAIN_ROOM            = 63992,                  // triggered by spell 63993
-    
+
     // immortal guardian spells
     SPELL_EMPOWERED                             = 64161,
     SPELL_EMPOWERED_MOD                         = 65294,
@@ -238,7 +238,7 @@ enum
     // Thorim spells
     SPELL_FURY_OF_THE_STORM                     = 62702,
     SPELL_TITANIC_STORM                         = 64171,
-    
+
     // other
     FACTION_SARA_HOSTILE                        = 16,
     MAX_ILLUSIONS                               = 3,
@@ -1756,7 +1756,7 @@ void AddSC_boss_yogg_saron()
 
     s = new spell_yogg_empowered();
     s->RegisterSelf();
-    
+
     //pNewScript = new Script;
     //pNewScript->Name = "boss_yogg_saron";
     //pNewScript->GetAI = &GetAI_boss_yogg_saron;

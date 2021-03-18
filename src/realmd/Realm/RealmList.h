@@ -107,22 +107,22 @@ class RealmList
         typedef std::list<const Realm*> RealmStlList;
         typedef std::pair<RealmStlList::const_iterator, RealmStlList::const_iterator> RealmListIterators;
         typedef std::map<uint32, RealmVersion> RealmBuildVersionMap;
-        
+
         static RealmList& Instance();
-        
+
         RealmList();
         ~RealmList() {};
-        
+
         void Initialize(uint32 updateInterval);
-        /** 
+        /**
          * Initializes a map holding a link from build number to a version.
          * \see RealmVersion
          */
         void InitVersionToBuild();
-        
+
         void UpdateIfNeed();
-        
-        /** 
+
+        /**
          * Get's the iterators for all realms supporting the given version as a pair,
          * the first member is a iterator to the begin() and the second is an iterator
          * to the end().
@@ -133,33 +133,33 @@ class RealmList
          */
         RealmListIterators GetIteratorsForBuild(uint32 build) const;
 
-        /** 
+        /**
          * Returns how many realms we have available for the current build
          * @param build the build we want to know number of available realms for
          * @return the number of available realms
          */
         uint32 NumRealmsForBuild(uint32 build) const;
 
-        /** 
+        /**
          * @return the total number of realms available
          * \see RealmList::NumRealmsForBuild
          */
         uint32 size() const { return m_realms.size(); };
     private:
-        /** 
+        /**
          * Checks what version (ie, vanilla, tbc) a certain build number belongs to
          * @param build the build you want to check the version for
          * @return the corresponding version to the given build number
          */
         RealmVersion BelongsToVersion(uint32 build) const;
 
-        /** 
+        /**
          * Adds entries to a map containing a link from a build number to a certain
          * wow version, ie: \ref RealmVersion::REALM_VERSION_VANILLA.
          * \see RealmVersion
          */
         void InitBuildToVersion();
-        /** 
+        /**
          * Adds the given \ref Realm to a list sorted by version, ie: vanilla, tbc etc. This
          * in turn is used to only present the compatible realms to the clients connecting,
          * ie: vanilla clients will only see vanilla realms.
@@ -172,7 +172,7 @@ class RealmList
          * \see RealmVersion
          */
         void AddRealmToBuildList(const Realm& realm);
-    
+
         void UpdateRealms(bool init);
         /**
          * @brief

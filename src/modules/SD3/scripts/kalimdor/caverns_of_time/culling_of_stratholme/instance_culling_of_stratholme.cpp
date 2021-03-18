@@ -78,20 +78,20 @@ enum
     MAX_GRAIN_CRATES            = 5,
     MAX_SCOURGE_SPAWN_POS       = 5,
     MAX_BURNING_SCOURGE_POS     = 15,
-    
+
     SAY_SCOURGE_FESTIVAL_LANE   = -1595003,
     SAY_SCOURGE_KINGS_SQUARE    = -1595004,
     SAY_SCOURGE_MARKET_ROW      = -1595005,
     SAY_SCOURGE_TOWN_HALL       = -1595006,
     SAY_SCOURGE_ELDERS_SQUARE   = -1595007,
-    
+
     SAY_MEET_TOWN_HALL          = -1595008,
     SAY_CORRUPTOR_DESPAWN       = -1595041,
 
     WHISPER_CHROMIE_CRATES      = -1595001,
     WHISPER_CHROMIE_GUARDIAN    = -1595002,
     WHISPER_CHROMIE_HURRY       = -1000000,                         // TODO
-    
+
     SPELL_CORRUPTION_OF_TIME    = 60422,                            // triggers 60451
 };
 

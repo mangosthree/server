@@ -78,7 +78,7 @@ void AddSC_boss_vexallus();
 void AddSC_boss_priestess_delrissa();
 void AddSC_instance_magisters_terrace();
 void AddSC_magisters_terrace();
-#endif  
+#endif
 
 void AddSC_boss_lucifron();                          // molten_core
 void AddSC_boss_magmadar();
@@ -121,7 +121,7 @@ void AddSC_boss_mograine_and_whitemane();
 
 #if defined (TBC) || defined (WOTLK) || defined (CATA) || defined(MISTS)
 void AddSC_boss_headless_horseman();
-#endif  
+#endif
 
 void AddSC_instance_scarlet_monastery();
 void AddSC_boss_darkmaster_gandling();               // scholomance
@@ -171,7 +171,7 @@ void AddSC_boss_nalorakk();
 void AddSC_instance_zulaman();
 void AddSC_zulaman();
 void AddSC_boss_zuljin();
-#endif  
+#endif
 
 void AddSC_boss_arlokk();                            // zulgurub
 void AddSC_boss_hakkar();
@@ -190,7 +190,7 @@ void AddSC_alterac_mountains();
 void AddSC_arathi_highlands();
 void AddSC_blasted_lands();
 
-#if defined (CLASSIC)  
+#if defined (CLASSIC)
 void AddSC_boss_kazzakAI();
 #endif
 void AddSC_burning_steppes();
@@ -201,7 +201,7 @@ void AddSC_elwynn_forest();
 #if defined (TBC) || defined (WOTLK) || defined (CATA) || defined(MISTS)
 void AddSC_eversong_woods();
 void AddSC_ghostlands();
-#endif  
+#endif
 
 void AddSC_hinterlands();
 void AddSC_ironforge();
@@ -234,7 +234,7 @@ void AddSC_gilneas();
 void AddSC_gilneas_city();
 void AddSC_twilight_highlands();
 void AddSC_vashjir();
-#endif  
+#endif
 
 void AddEasternKingdomsScripts()
 {
@@ -399,7 +399,7 @@ void AddEasternKingdomsScripts()
     AddSC_arathi_highlands();
     AddSC_blasted_lands();
 
-#if defined (CLASSIC)  
+#if defined (CLASSIC)
     AddSC_boss_kazzakAI();
 #endif
 
@@ -532,7 +532,7 @@ void AddSC_winterspring();
 #if defined (CATA) || defined(MISTS)
 void AddSC_uldum();
 void AddSC_mount_hyjal();
-#endif  
+#endif
 
 void AddKalimdorScripts()
 {
@@ -621,7 +621,7 @@ void AddKalimdorScripts()
 #if defined (CATA) || defined(MISTS)
     AddSC_uldum();
     AddSC_mount_hyjal();
-#endif  
+#endif
 }
 
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
@@ -1150,7 +1150,7 @@ void AddScripts()
 
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
     AddNorthrendScripts();
-#endif    
+#endif
 
     AddBattlegroundScripts();
 }

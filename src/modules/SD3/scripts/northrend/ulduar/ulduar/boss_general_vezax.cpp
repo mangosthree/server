@@ -50,12 +50,12 @@ enum
     SPELL_SURGE_OF_DARKNESS             = 62662,
     SPELL_SUMMON_VAPORS                 = 63081,            // cast by Vezax bunny
     SPELL_BERSERK                       = 26662,
-    
+
     // hard mode spells
     SPELL_SARONITE_BARRIER              = 63364,            // also sends event 9735
     SPELL_SUMMON_ANIMUS                 = 63145,            // the animus should spam 63420 on target - to be done in acid
     SPELL_ANIMUS_FORMATION              = 63319,            // visual aura on Saronite summoner bunny
-    
+
     // other spells
     SPELL_SARONITE_VAPORS               = 63323,            // cast by vapor on death
     SPELL_CORRUPTED_RAGE                = 68415,            // Unused

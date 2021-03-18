@@ -1724,25 +1724,25 @@ void CalculateDataBlockHash(void * pvDataBlock, DWORD cbDataBlock, LPBYTE md5_ha
 // Swaps a signed 16-bit integer
 int16_t SwapInt16(uint16_t data)
 {
-	return (int16_t)CFSwapInt16(data);
+    return (int16_t)CFSwapInt16(data);
 }
 
 // Swaps an unsigned 16-bit integer
 uint16_t SwapUInt16(uint16_t data)
 {
-	return CFSwapInt16(data);
+    return CFSwapInt16(data);
 }
 
 // Swaps signed 32-bit integer
 int32_t SwapInt32(uint32_t data)
 {
-	return (int32_t)CFSwapInt32(data);
+    return (int32_t)CFSwapInt32(data);
 }
 
 // Swaps an unsigned 32-bit integer
 uint32_t SwapUInt32(uint32_t data)
 {
-	return CFSwapInt32(data);
+    return CFSwapInt32(data);
 }
 
 // Swaps signed 64-bit integer
@@ -1764,10 +1764,10 @@ void ConvertUInt16Buffer(void * ptr, size_t length)
     uint32_t nElements = (uint32_t)(length / sizeof(uint16_t));
 
     while(nElements-- > 0)
-	{
-		*buffer = SwapUInt16(*buffer);
-		buffer++;
-	}
+    {
+        *buffer = SwapUInt16(*buffer);
+        buffer++;
+    }
 }
 
 // Swaps array of unsigned 32-bit integers
@@ -1776,11 +1776,11 @@ void ConvertUInt32Buffer(void * ptr, size_t length)
     uint32_t * buffer = (uint32_t *)ptr;
     uint32_t nElements = (uint32_t)(length / sizeof(uint32_t));
 
-	while(nElements-- > 0)
-	{
-		*buffer = SwapUInt32(*buffer);
-		buffer++;
-	}
+    while(nElements-- > 0)
+    {
+        *buffer = SwapUInt32(*buffer);
+        buffer++;
+    }
 }
 
 // Swaps array of unsigned 64-bit integers
@@ -1789,37 +1789,37 @@ void ConvertUInt64Buffer(void * ptr, size_t length)
     uint64_t * buffer = (uint64_t *)ptr;
     uint32_t nElements = (uint32_t)(length / sizeof(uint64_t));
 
-	while(nElements-- > 0)
-	{
-		*buffer = SwapUInt64(*buffer);
-		buffer++;
-	}
+    while(nElements-- > 0)
+    {
+        *buffer = SwapUInt64(*buffer);
+        buffer++;
+    }
 }
 
 // Swaps the TMPQHeader structure
 void ConvertTMPQHeader(void *header, uint16_t version)
 {
-	TMPQHeader * theHeader = (TMPQHeader *)header;
+    TMPQHeader * theHeader = (TMPQHeader *)header;
 
     // Swap header part version 1
     if(version == MPQ_FORMAT_VERSION_1)
     {
-	    theHeader->dwID = SwapUInt32(theHeader->dwID);
-	    theHeader->dwHeaderSize = SwapUInt32(theHeader->dwHeaderSize);
-	    theHeader->dwArchiveSize = SwapUInt32(theHeader->dwArchiveSize);
-	    theHeader->wFormatVersion = SwapUInt16(theHeader->wFormatVersion);
-	    theHeader->wSectorSize = SwapUInt16(theHeader->wSectorSize);
-	    theHeader->dwHashTablePos = SwapUInt32(theHeader->dwHashTablePos);
-	    theHeader->dwBlockTablePos = SwapUInt32(theHeader->dwBlockTablePos);
-	    theHeader->dwHashTableSize = SwapUInt32(theHeader->dwHashTableSize);
-	    theHeader->dwBlockTableSize = SwapUInt32(theHeader->dwBlockTableSize);
+        theHeader->dwID = SwapUInt32(theHeader->dwID);
+        theHeader->dwHeaderSize = SwapUInt32(theHeader->dwHeaderSize);
+        theHeader->dwArchiveSize = SwapUInt32(theHeader->dwArchiveSize);
+        theHeader->wFormatVersion = SwapUInt16(theHeader->wFormatVersion);
+        theHeader->wSectorSize = SwapUInt16(theHeader->wSectorSize);
+        theHeader->dwHashTablePos = SwapUInt32(theHeader->dwHashTablePos);
+        theHeader->dwBlockTablePos = SwapUInt32(theHeader->dwBlockTablePos);
+        theHeader->dwHashTableSize = SwapUInt32(theHeader->dwHashTableSize);
+        theHeader->dwBlockTableSize = SwapUInt32(theHeader->dwBlockTableSize);
     }
 
-	if(version == MPQ_FORMAT_VERSION_2)
-	{
-		theHeader->HiBlockTablePos64 = SwapUInt64(theHeader->HiBlockTablePos64);
+    if(version == MPQ_FORMAT_VERSION_2)
+    {
+        theHeader->HiBlockTablePos64 = SwapUInt64(theHeader->HiBlockTablePos64);
         theHeader->wHashTablePosHi = SwapUInt16(theHeader->wHashTablePosHi);
-		theHeader->wBlockTablePosHi = SwapUInt16(theHeader->wBlockTablePosHi);
+        theHeader->wBlockTablePosHi = SwapUInt16(theHeader->wBlockTablePosHi);
     }
 
     if(version == MPQ_FORMAT_VERSION_3)
@@ -1830,7 +1830,7 @@ void ConvertTMPQHeader(void *header, uint16_t version)
     }
 
     if(version == MPQ_FORMAT_VERSION_4)
-	{
+    {
         theHeader->HashTableSize64    = SwapUInt64(theHeader->HashTableSize64);
         theHeader->BlockTableSize64   = SwapUInt64(theHeader->BlockTableSize64);
         theHeader->HiBlockTableSize64 = SwapUInt64(theHeader->HiBlockTableSize64);

@@ -133,14 +133,14 @@ struct is_sunwell_plateau : public InstanceScript
         if (!GetSingleCreatureFromStorage(NPC_FELMYST, true))
             pPlayer->SummonCreature(NPC_FELMYST, aMadrigosaLoc[0].m_fX, aMadrigosaLoc[0].m_fY, aMadrigosaLoc[0].m_fZ, aMadrigosaLoc[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
     }
-    
+
     // Spawn M'uru after the Eredar Twins
     if (m_auiEncounter[TYPE_EREDAR_TWINS] == DONE && m_auiEncounter[TYPE_MURU] != DONE)
     {
         if (!GetSingleCreatureFromStorage(NPC_MURU, true))
             pPlayer->SummonCreature(NPC_MURU, afMuruSpawnLoc[0], afMuruSpawnLoc[1], afMuruSpawnLoc[2], afMuruSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
     }
-#endif    
+#endif
         }
 
         void OnObjectCreate(GameObject* pGo) override

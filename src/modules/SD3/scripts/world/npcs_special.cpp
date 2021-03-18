@@ -57,7 +57,7 @@
  * npc_redemption_target      100%    Used for the paladin quests: 1779,1781,9600,9685
  * EndContentData
  */
- 
+
 #if defined (TBC) || defined (WOTLK) || defined (CATA) || defined(MISTS)
 /*########
 # npc_air_force_bots

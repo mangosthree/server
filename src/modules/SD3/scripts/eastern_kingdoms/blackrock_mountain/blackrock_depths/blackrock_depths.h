@@ -90,7 +90,7 @@ enum
 
     // Spawned on Shadowforge bridge
     NPC_ANVILRAGE_GUARDMAN  = 8891,
-    
+
     // Grim Guzzler bar events
     NPC_PHALANX             = 9502,
     NPC_GRIM_PATRON         = 9545,
@@ -145,8 +145,8 @@ enum
     FACTION_DWARF_HOSTILE   = 754,                          // Hostile faction for the Tomb of the Seven dwarfs
     FACTION_ARENA_NEUTRAL   = 15,                           // Neutral faction for NPC in top of Arena after event complete
     FACTION_DARK_IRON       = 54,                           // Hostile faction for the Grim Guzzler
-    FACTION_IRONFORGE       = 122, 
-    
+    FACTION_IRONFORGE       = 122,
+
     // enum used to handle the various Grim Guzzler  bar patron's reaction
     // depending on the actions and events triggered by players
     PATRON_EMOTE            = 0,
@@ -159,7 +159,7 @@ enum
     YELL_PATROL_1           = -1230048,
     YELL_PATROL_2           = -1230049,
     SPELL_NAGMARA_VANISH    = 15341,
-    
+
     // Emperor Dagran Thaurissan
     YELL_SENATOR_1          = -1230060,
     YELL_SENATOR_2          = -1230061,
@@ -227,7 +227,7 @@ static const float aVaultPositions[4] = {821.905f, -338.382f, -50.134f, 3.78736f
 
 // Used to summon Hurley Blackbreath
 static const float aHurleyPositions[4] = {856.0867f, -149.7469f, -49.6719f, 0.05949629f};
- 
+
 // Used to summon the patrol in Grim Guzzler
 static const float aBarPatrolPositions[2][4] = {
     {872.7059f, -232.5491f, -43.7525f, 2.069044f},
@@ -276,7 +276,7 @@ class instance_blackrock_depths : public ScriptedInstance
 
     private:
         void DoCallNextDwarf();
-        
+
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
@@ -288,7 +288,7 @@ class instance_blackrock_depths : public ScriptedInstance
         uint32 m_uiPatrolTimer;
         uint8 m_uiStolenAles;
         uint32 m_uiDagranTimer;
-        
+
         uint8 m_uiCofferDoorsOpened;
 
         uint32 m_uiDwarfFightTimer;

@@ -6,7 +6,7 @@
 /* ScriptData
 SDName: Npc_Onyxian_Warder
 SD%Complete:
-SDComment: 
+SDComment:
 SDCategory: Onyxia's Lair
 EndScriptData */
 

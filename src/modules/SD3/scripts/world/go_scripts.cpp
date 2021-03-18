@@ -332,7 +332,7 @@ struct go_andorhal_tower : public GameObjectScript
 };
 
 #if defined (CLASSIC) || defined (TBC)
-enum 
+enum
 {
     GOSSIP_TABLE_THEKA = 1653,
     QUEST_SPIDER_GOD = 2936

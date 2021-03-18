@@ -996,22 +996,22 @@ static const float aGraveYardLocation[11][4] =
 };
 
 struct npc_caretaker_dilandrus : public CreatureScript
-{        
+{
        npc_caretaker_dilandrus() : CreatureScript("npc_caretaker_dilandrus") {}
 
     struct npc_caretaker_dilandrusAI : public ScriptedAI
     {
-        npc_caretaker_dilandrusAI(Creature* pCreature) : ScriptedAI(pCreature) 
-        { 
-            Reset(); 
+        npc_caretaker_dilandrusAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+            Reset();
         }
-        
+
         uint32 uVisitGraveTimer, uCurrentStage, uLastGraveVisited;
 
-        void Reset() override 
+        void Reset() override
         {
-            uVisitGraveTimer = 0; 
-            uCurrentStage = 1;    
+            uVisitGraveTimer = 0;
+            uCurrentStage = 1;
             uLastGraveVisited = 0;
         }
 
@@ -1083,7 +1083,7 @@ struct npc_caretaker_dilandrus : public CreatureScript
         }
 
     };
-        
+
     CreatureAI* GetAI(Creature* pCreature) override
     {
         return new npc_caretaker_dilandrusAI(pCreature);
@@ -1208,7 +1208,7 @@ struct  npc_magister_aledisAI : public ScriptedAI
             m_uiFrostNovaTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
-    }  
+    }
 };
 
 CreatureAI* GetAI_npc_magister_aledis(Creature* pCreature)
@@ -1287,11 +1287,11 @@ void AddSC_hellfire_peninsula()
     //pNewScript->pGossipHello = &GossipHello_npc_colonel_jules;
     //pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_colonel_jules;
     //pNewScript->RegisterSelf();
-    
+
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
     s = new npc_magister_aledis();
     s->RegisterSelf();
-    
+
     //pNewScript = new Script;
     //pNewScript->Name = "npc_magister_aledis";
     //pNewScript->GetAI = &GetAI_npc_magister_aledis;

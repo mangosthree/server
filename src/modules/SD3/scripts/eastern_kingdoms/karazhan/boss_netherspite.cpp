@@ -122,7 +122,7 @@ enum NetherspitePhases
 
 enum PortalProperties
 {
-    PORTAL_ENTRY = 0,    
+    PORTAL_ENTRY = 0,
     PORTAL_VISUAL = 1,
     PORTAL_VISUAL_PLR = 2,
     PORTAL_VISUAL_NS = 3,
@@ -140,7 +140,7 @@ static const uint32 auiPortalVector[MAX_PORTAL_PROPERTIES][MAX_PORTALS] =
     { SPELL_BEAM_GREEN, SPELL_BEAM_BLUE, SPELL_BEAM_RED },    // 3 - visual spells for netherspite
     { SPELL_SERENITY_PLR, SPELL_DOMINANCE_PLR, SPELL_PERSEVERENCE_PLR },  // 4 - buffs for players
     { SPELL_SERENITY_NS, SPELL_DOMINANCE_NS, SPELL_PERSEVERENCE_NS },  // 5 - buffs for netherspite
-    { SPELL_EXHAUSTION_SER, SPELL_EXHAUSTION_DOM, SPELL_EXHAUSTION_PER },    // 6 - debuffs    
+    { SPELL_EXHAUSTION_SER, SPELL_EXHAUSTION_DOM, SPELL_EXHAUSTION_PER },    // 6 - debuffs
 };
 
 //adjust how easy it is to catch the beam

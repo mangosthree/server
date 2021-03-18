@@ -28,7 +28,7 @@
  * ScriptData
  * SDName:      Scholomance
  * SD%Complete: 100
- * SDComment: 
+ * SDComment:
  * SDCategory:  Scholomance
  * EndScriptData
  */

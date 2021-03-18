@@ -140,7 +140,7 @@ struct is_blackfathom_deeps : public InstanceScript
     if (pCreature->GetEntry() == NPC_BARON_AQUANIS)
         { SetData(TYPE_AQUANIS, DONE); }
 #endif
-        
+
             // Only use this function if shrine event is in progress
             if (m_auiEncounter[1] != IN_PROGRESS)
             {

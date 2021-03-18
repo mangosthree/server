@@ -69,9 +69,9 @@ instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstan
 void instance_blackrock_depths::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
-    
+
 };
-    
+
 void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
@@ -227,8 +227,8 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
                 DoScriptText(uiTextId, pDagran);
                 m_uiDagranTimer = 30000;    // set a timer of 30 sec to avoid Emperor Thaurissan to spam yells in case many senators are killed in a short amount of time
             }
-            break;   
-                
+            break;
+
     }
 }
 
@@ -560,9 +560,9 @@ uint32 instance_blackrock_depths::GetData(uint32 uiType) const
     case TYPE_QUEST_JAIL_BREAK:
         return m_auiEncounter[6];
     case TYPE_SIGNAL:
-        return m_uiArenaCenterAT;  
+        return m_uiArenaCenterAT;
     case TYPE_FLAMELASH:
-        return m_auiEncounter[7];      
+        return m_auiEncounter[7];
     case TYPE_HURLEY:
         return m_auiEncounter[8];
     case TYPE_BRIDGE:
@@ -600,7 +600,7 @@ void instance_blackrock_depths::Load(const char* chrIn)
 
     OUT_LOAD_INST_DATA_COMPLETE;
 }
-                
+
 void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
 {
     switch (uiEventType)
@@ -674,8 +674,8 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
         default:
             return;
     }
-} 
-           
+}
+
 void instance_blackrock_depths::HandleBarPatrol(uint8 uiStep)
 {
     if (GetData(TYPE_BAR) == DONE)
@@ -744,7 +744,7 @@ void instance_blackrock_depths::HandleBarPatrol(uint8 uiStep)
             break;
     }
 }
-        
+
 void instance_blackrock_depths::Update(uint32 uiDiff)
 {
     if (m_uiDwarfFightTimer)

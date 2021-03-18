@@ -222,7 +222,7 @@ struct mob_firesworn : public CreatureScript
                 m_bExploding = true;
             }
         }
-    
+
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
     void JustDied(Unit* /*pKiller*/) override
     {
@@ -252,7 +252,7 @@ struct mob_firesworn : public CreatureScript
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
             if (!m_pInstance)
                 return;
-#endif            
+#endif
                 // Distance guesswork, but should be ok
                 Creature* pGarr = m_pInstance->GetSingleCreatureFromStorage(NPC_GARR);
                 if (pGarr && pGarr->IsAlive() && !m_creature->IsWithinDist2d(pGarr->GetPositionX(), pGarr->GetPositionY(), 50.0f))
@@ -275,7 +275,7 @@ struct mob_firesworn : public CreatureScript
                 m_creature->SetDeathState(JUST_DIED);
                 m_creature->RemoveCorpse();
             }
-#endif    
+#endif
 
             DoMeleeAttackIfReady();
         }

@@ -157,7 +157,7 @@ struct at_shadowforge_bridge : public AreaTriggerScript
             {
                 return false;
             }
- 
+
             Creature* pPyromancer = pInstance->GetSingleCreatureFromStorage(NPC_LOREGRAIN);
 
             if (!pPyromancer)
@@ -888,7 +888,7 @@ struct npc_mistress_nagmara : public CreatureScript
     {
         return new npc_mistress_nagmaraAI(pCreature);
     }
-    
+
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pCreature->IsQuestGiver())
@@ -1726,7 +1726,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
         m_pInstance = (instance_blackrock_depths*)pCreature->GetInstanceData();
         Reset();
     }
-        
+
     instance_blackrock_depths* m_pInstance;
 
     uint32 m_uiOocSayTimer;
@@ -2132,7 +2132,7 @@ void AddSC_blackrock_depths()
     s->RegisterSelf();
     s = new spell_banner_of_provocation();
     s->RegisterSelf();
-    
+
     //pNewScript = new Script;
     //pNewScript->Name = "go_shadowforge_brazier";
     //pNewScript->pGOUse = &GOUse_go_shadowforge_brazier;

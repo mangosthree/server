@@ -763,7 +763,7 @@ struct spell_inoculate_owlkin : public SpellScript
  //           }
  //           return true;
  //       }
- //#endif    
+ //#endif
 struct spell_fel_siphon_dummy : public SpellScript
 {
     spell_fel_siphon_dummy() : SpellScript("spell_fel_siphon_dummy") {}

@@ -53,7 +53,7 @@ enum
     SAY_SMEED_HOME_1                = -1000348,
     SAY_SMEED_HOME_2                = -1000349,
     SAY_SMEED_HOME_3                = -1000350,
-    
+
     GOSSIP_TAMED_KODO               = 60003,
 
     QUEST_KODO                      = 5561,
@@ -95,7 +95,7 @@ struct npc_aged_dying_ancient_kodo : public CreatureScript
                     case 1: DoScriptText(SAY_SMEED_HOME_2, pWho); break;
                     case 2: DoScriptText(SAY_SMEED_HOME_3, pWho); break;
                 }
-                
+
                 // spell have no implemented effect (dummy), so useful to notify spellHit
                 m_creature->GetMotionMaster()->MoveIdle();
                 m_creature->CastSpell(m_creature, SPELL_KODO_KOMBO_GOSSIP, true);
@@ -506,25 +506,25 @@ static const uint32 AmbushersGizleton[3] = { NPC_NETHER_SORCERESS, NPC_LESSER_IN
 struct npc_cork_gizelton : public CreatureScript
 {
     npc_cork_gizelton() : CreatureScript("npc_cork_gizelton") {}
-    
+
     struct npc_cork_gizeltonAI : public ScriptedAI
     {
         npc_cork_gizeltonAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-        
+
         ObjectGuid m_playerGuid;
         uint8 uiQuestStatus;
-        
+
         void Reset() override
         {
             uiQuestStatus = 0;
         }
-        
+
         void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
         {
             if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
                 m_playerGuid = pInvoker->GetObjectGuid();
         }
-        
+
         // Custom function to handle event ambushes
         void DoAmbush(uint32 uiQuestId, uint8 uiAmbushPoint)
         {
@@ -549,22 +549,22 @@ struct npc_cork_gizelton : public CreatureScript
                         m_creature->SummonCreature(AmbushersGizleton[i], fX, fY, fZ, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
                     }
                     break;
-        
+
             }
-            
+
             return;
         }
-        
+
         void MovementInform(uint32 uiType, uint32 uiPointId) override
         {
             if (uiType != WAYPOINT_MOTION_TYPE)
                 return;
-            
+
             // No player assigned as quest taker: abort to avoid summoning adds
             Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
             if (!pPlayer)
                 return;
-            
+
             if (pPlayer->GetQuestStatus(QUEST_BODYGUARD_TO_HIRE) == QUEST_STATUS_INCOMPLETE)
             {
                 switch (uiPointId)
@@ -635,7 +635,7 @@ struct npc_cork_gizelton : public CreatureScript
                 }
             }
         }
-        
+
         void JustSummoned(Creature* pSummoned) override
         {
             // By default: summoned for the two escort quests will attack
@@ -643,13 +643,13 @@ struct npc_cork_gizelton : public CreatureScript
             if (pSummoned->GetEntry() != NPC_VENDOR_TRON && pSummoned->GetEntry() != NPC_SUPER_SELLER)
                 pSummoned->AI()->AttackStart(m_creature);
         }
-        
+
         void JustDied(Unit* /*pKiller*/) override
         {
             Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
             if (!pPlayer)
                 return;
-            
+
             // Handle all players in group (if they took quest)
             if (Group* pGroup = pPlayer->GetGroup())
             {
@@ -673,12 +673,12 @@ struct npc_cork_gizelton : public CreatureScript
             }
         }
     };
-    
+
     CreatureAI* GetAI_npc_cork_gizelton(Creature* pCreature)
     {
         return new npc_cork_gizeltonAI(pCreature);
     }
-    
+
     bool QuestAccept_npc_cork_gizelton(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
     {
         if (pQuest->GetQuestId() == QUEST_BODYGUARD_TO_HIRE)
@@ -692,9 +692,9 @@ struct npc_cork_gizelton : public CreatureScript
             if (npc_cork_gizeltonAI* pCork = dynamic_cast<npc_cork_gizeltonAI*>(pCreature->AI()))
                 pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
         }
-        
+
         return true;
-    }        
+    }
 };
 
 /*######
@@ -704,35 +704,35 @@ struct npc_cork_gizelton : public CreatureScript
 struct npc_rigger_gizelton : public CreatureScript
 {
     npc_rigger_gizelton() : CreatureScript("npc_rigger_gizelton") {}
-    
+
     struct npc_rigger_gizeltonAI : public ScriptedAI
     {
         npc_rigger_gizeltonAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-        
+
         void Reset() override {}
     };
-    
+
     CreatureAI* GetAI_npc_rigger_gizelton(Creature* pCreature)
     {
         return new npc_rigger_gizeltonAI(pCreature);
     }
-    
+
     bool QuestAccept_npc_rigger_gizelton(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
     {
         if (pQuest->GetQuestId() == QUEST_GIZELTON_CARAVAN)
         {
             if (pPlayer->GetTeam() == ALLIANCE)
                 pCreature->SetFactionTemporary(FACTION_ESCORT_A_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
-            
+
             if (pPlayer->GetTeam() == HORDE)
                 pCreature->SetFactionTemporary(FACTION_ESCORT_H_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
-            
+
             // Now the quest is accepted, tell NPC Cork what player took it so it can handle quest credit/failure
             // because NPC Cork will handle both escort quests
             if (Creature* pCork = GetClosestCreatureWithEntry(pCreature, NPC_CORK_GIZELTON, 100.0f))
                 pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCork, pQuest->GetQuestId());
         }
-        
+
         return true;
     }
 };

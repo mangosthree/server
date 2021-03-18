@@ -28,18 +28,18 @@
  * ScriptData
  * SDName:      Gilneas City
  * SD%Complete: 0 Work in progress...
- * SDComment:   
+ * SDComment:
  * SDCategory:  Gilneas City
  * EndScriptData
  */
 
-/** 
+/**
  * ContentData
  * npc_prince_liam_greymane_phase1     - Fully Scripted
  * npc_prince_liam_greymane_phase2     - Fully Scripted
  * rampaging_worgen                    - Enrage Spell Scripted
- * frightened_citizen_quest            
- * EndContentData 
+ * frightened_citizen_quest
+ * EndContentData
  */
 
 #include "precompiled.h"
@@ -62,7 +62,7 @@ struct npc_prince_liam_greymane_phase1 : public CreatureScript
 
     struct npc_prince_liam_greymane_phase1AI : public ScriptedAI
     {
-        npc_prince_liam_greymane_phase1AI(Creature* pCreature) : ScriptedAI(pCreature) 
+        npc_prince_liam_greymane_phase1AI(Creature* pCreature) : ScriptedAI(pCreature)
         {
             m_uiNpcFlags = pCreature->GetUInt32Value(UNIT_NPC_FLAGS);
             Reset();
@@ -114,7 +114,7 @@ struct npc_prince_liam_greymane_phase1 : public CreatureScript
             }
             else m_uiSayStoryTimer -= uiDiff;
         }
-        
+
     };
 
     CreatureAI* GetAI(Creature* pCreature) override
@@ -139,11 +139,11 @@ enum {
     SAY_STORYLINE6        = -1654006,
     SAY_STORYLINE7        = -1654007,
     SAY_STORYLINE8        = -1654008,
-    
+
     SAY_STORY_DELAY        = 30000,
     SPELL_SHOOT            = 50092,
     SPELL_CNOCKING        = 67869,
-    
+
     QUEST_EVAQUATE_THE_MERCHANT_SQUARE = 14098
 };
 
@@ -153,16 +153,16 @@ struct npc_prince_liam_greymane_phase2 : public CreatureScript
 
     struct npc_prince_liam_greymane_phase2AI : public ScriptedAI
     {
-        npc_prince_liam_greymane_phase2AI(Creature* pCreature) : ScriptedAI(pCreature) 
+        npc_prince_liam_greymane_phase2AI(Creature* pCreature) : ScriptedAI(pCreature)
         {
             Reset();
         }
 
         uint32 m_uiNpcFlags;
         uint32 m_uiSayStoryTimer;
-        
+
         Unit* lastVictim;
-        
+
         int m_uiSayStoryLast;
 
         bool m_bCanSayStory;
@@ -195,7 +195,7 @@ struct npc_prince_liam_greymane_phase2 : public CreatureScript
 
             if (m_creature->IsFriendlyTo(pAttacker))
                 return;
-                
+
             lastVictim = pAttacker;
             AttackStart(pAttacker);
         }
@@ -227,12 +227,12 @@ struct npc_prince_liam_greymane_phase2 : public CreatureScript
                 m_uiSayStoryTimer = SAY_STORY_DELAY;
             }
             else m_uiSayStoryTimer -= uiDiff;
-            
-        
+
+
             // Return since we have no target
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
                 return;
-            
+
             // Equipped ranged weapon usable and not close to victim
             if (m_creature->GetCombatDistance(m_creature->getVictim(), false) > 0 && m_creature->CanUseEquippedWeapon(RANGED_ATTACK) )
             {
@@ -243,7 +243,6 @@ struct npc_prince_liam_greymane_phase2 : public CreatureScript
                     //m_creature->AttackerStateUpdate(m_creature->getVictim(),RANGED_ATTACK);
                     m_creature->resetAttackTimer(RANGED_ATTACK);
                 }
-                    
             }
             else if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
             {
@@ -256,7 +255,7 @@ struct npc_prince_liam_greymane_phase2 : public CreatureScript
 
                     m_creature->resetAttackTimer();
                 }
-                
+
             }
             else if (IsSelfRooted)
             {
@@ -264,9 +263,9 @@ struct npc_prince_liam_greymane_phase2 : public CreatureScript
                 m_creature->InterruptNonMeleeSpells(false);
                 IsSelfRooted = false;
             }
-                
+
         }
-        
+
     };
 
     CreatureAI* GetAI(Creature* pCreature) override
@@ -354,9 +353,9 @@ struct rampaging_worgen : public CreatureScript
                 m_creature->InterruptNonMeleeSpells(false);
                 IsSelfRooted = false;
             }
-            
-        }        
-        
+
+        }
+
     };
 
     CreatureAI* GetAI(Creature* pCreature) override
@@ -391,7 +390,7 @@ struct frightened_citizen_quest : public CreatureScript
 
         uint32 m_uiSayOnEscapeTimer;
         bool m_bCanSayOnEscape;
-        
+
         void Reset() override
         {
             m_uiSayOnEscapeTimer = SAY_ON_ESCAPE_DELAY;
@@ -428,8 +427,8 @@ struct frightened_citizen_quest : public CreatureScript
             }
             else m_uiSayOnEscapeTimer -= uiDiff;
 
-        }        
-        
+        }
+
     };
 
     CreatureAI* GetAI(Creature* pCreature) override
@@ -441,12 +440,12 @@ struct frightened_citizen_quest : public CreatureScript
 void AddSC_gilneas_city()
 {
     Script* s;
-    s = new npc_prince_liam_greymane_phase1(); 
+    s = new npc_prince_liam_greymane_phase1();
     s->RegisterSelf();
-    s = new npc_prince_liam_greymane_phase2(); 
+    s = new npc_prince_liam_greymane_phase2();
     s->RegisterSelf();
-    s = new rampaging_worgen(); 
+    s = new rampaging_worgen();
     s->RegisterSelf();
-    s = new frightened_citizen_quest(); 
+    s = new frightened_citizen_quest();
     s->RegisterSelf();
 }

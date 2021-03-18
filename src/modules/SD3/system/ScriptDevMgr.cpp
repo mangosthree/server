@@ -463,10 +463,10 @@ bool SD3::AreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
 bool SD3::NpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId)
 {
     Script* pTempScript = m_scripts[pClickedCreature->GetScriptId()];
-    
+
     if (!pTempScript || !pTempScript->ToCreatureScript())
         return false;
-    
+
     return pTempScript->ToCreatureScript()->OnSpellClick(pPlayer, pClickedCreature, uiSpellId);
 }
 #endif

@@ -1414,7 +1414,7 @@ struct warlord_kromzar : public CreatureScript
         }
 
     };
-    
+
     CreatureAI* GetAI(Creature* pCreature) override
     {
         return new npc_warlord_kromzarAI(pCreature);

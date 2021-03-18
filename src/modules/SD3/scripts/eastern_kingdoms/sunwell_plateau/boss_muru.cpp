@@ -76,12 +76,12 @@ enum
     NPC_VOID_SENTINEL               = 25772,    // scripted in Acid
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
     NPC_DARK_FIEND                  = 25744,
-    
+
     // darkness spells
     SPELL_VOID_ZONE_VISUAL          = 46265,
     SPELL_VOID_ZONE_PERIODIC        = 46262,
     SPELL_SUMMON_DARK_FIEND         = 46263,
-    
+
     // singularity spells
     SPELL_BLACK_HOLE_VISUAL         = 46242,
     SPELL_BLACK_HOLE_VISUAL_2       = 46247,

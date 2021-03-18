@@ -2619,13 +2619,13 @@ int DefragmentFileTable(TMPQArchive * ha)
                 // Update the block table size
                 dwBlockTableSize = (DWORD)(pTarget - ha->pFileTable);
             }
-			else
-			{
-				// If there is file name left, free it
-				if(pSource->szFileName != NULL)
-					STORM_FREE(pSource->szFileName);
-				pSource->szFileName = NULL;
-			}
+            else
+            {
+                // If there is file name left, free it
+                if(pSource->szFileName != NULL)
+                    STORM_FREE(pSource->szFileName);
+                pSource->szFileName = NULL;
+            }
         }
 
         // Did we defragment something?
@@ -2639,17 +2639,17 @@ int DefragmentFileTable(TMPQArchive * ha)
             {
                 TMPQHash * pHashTableEnd = ha->pHashTable + ha->pHeader->dwHashTableSize;
                 TMPQHash * pHash;
-				DWORD dwNewBlockIndex;
+                DWORD dwNewBlockIndex;
 
                 for(pHash = ha->pHashTable; pHash < pHashTableEnd; pHash++)
                 {
                     if(MPQ_BLOCK_INDEX(pHash) < ha->dwFileTableSize)
-					{
-						// If that block entry is there, set it to the hash entry
-						// If not, set it as DELETED
-						dwNewBlockIndex = DefragmentTable[MPQ_BLOCK_INDEX(pHash)];
-						pHash->dwBlockIndex = (dwNewBlockIndex != HASH_ENTRY_FREE) ? dwNewBlockIndex : HASH_ENTRY_DELETED;
-					}
+                    {
+                        // If that block entry is there, set it to the hash entry
+                        // If not, set it as DELETED
+                        dwNewBlockIndex = DefragmentTable[MPQ_BLOCK_INDEX(pHash)];
+                        pHash->dwBlockIndex = (dwNewBlockIndex != HASH_ENTRY_FREE) ? dwNewBlockIndex : HASH_ENTRY_DELETED;
+                    }
                 }
             }
         }

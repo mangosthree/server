@@ -406,7 +406,7 @@ struct boss_thekal : public CreatureScript
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_TIGERS) == CAST_OK)
                     {
 
-#if defined (CLASSIC) || defined (WOTLK) 
+#if defined (CLASSIC) || defined (WOTLK)
                         m_uiSummonTigersTimer = 50000;
 #endif
 #if defined (TBC)

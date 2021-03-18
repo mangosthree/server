@@ -43,7 +43,7 @@ enum
     SPELL_KNOCKAWAY            = 20686,
 
     NPC_SPIRESTONE_WARLORD     = 9216,
-    NPC_SMOLDERTHORN_BERSERKER = 9268,    
+    NPC_SMOLDERTHORN_BERSERKER = 9268,
     NPC_BLOODAXE_VETERAN       = 9583,
 
     // Overlord emote calls for help
@@ -51,7 +51,7 @@ enum
 };
 
 const float afLocations[4][4] =
-{    
+{
     { -51.6805f, -439.831f, 78.2874f, 4.657f},              // spawn points
     { -54.4554f, -439.679f, 78.2884f, 4.657f},
     { -39.355381f, -513.456482f, 88.472046f, 4.679872f},    // destination

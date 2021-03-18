@@ -25,7 +25,7 @@
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
- 
+
 /**
  * ScriptData
  * SDName:      Vashjir

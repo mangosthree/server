@@ -35,7 +35,7 @@
 
 /**
  * ContentData
-#if defined (WOTLK)    
+#if defined (WOTLK)
  * at_aldurthar_gate                5284, 5285, 5286, 5287
 #endif
 #if defined (TBC) || defined (WOTLK) || defined (CATA) || defined(MISTS)
@@ -43,7 +43,7 @@
  * at_legion_teleporter             4560 Teleporter TO Invasion Point: Cataclysm
 #endif
  * at_ravenholdt
-#if defined (WOTLK)    
+#if defined (WOTLK)
  * at_spearborn_encampment          5030
  * at_warsong_farms
  * at_stormwright_shelf             5108
@@ -51,7 +51,7 @@
  * at_childrens_week_spot           3546, 3547, 3548, 3549, 3550, 3552
  * at_scent_larkorwi                1726, 1727, 1728, 1729, 1730, 1731, 1732, 1733, 1734, 1735, 1736, 1737, 1738, 1739, 1740
  * at_murkdeep                      1966
-#if defined (WOTLK)    
+#if defined (WOTLK)
  * at_hot_on_the_trail              5710, 5711, 5712, 5714, 5715, 5716
  * at_ancient_leaf                  3587
 #endif
@@ -532,7 +532,7 @@ void AddSC_areatrigger_scripts()
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
     s = new at_aldurthar_gate();
     s->RegisterSelf();
-#endif    
+#endif
     s = new at_ravenholdt();
     s->RegisterSelf();
 

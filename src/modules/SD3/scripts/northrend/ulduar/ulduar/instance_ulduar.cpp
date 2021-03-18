@@ -34,7 +34,7 @@ enum
     SAY_HODIR_HELP                          = -1603093,
     SAY_THORIM_HELP                         = -1603155,
     SAY_MIMIRON_HELP                        = -1603195,
-    
+
     SAY_GROUNDED                            = -1603040,
 
     SPELL_KEEPER_ACTIVE                     = 62647,

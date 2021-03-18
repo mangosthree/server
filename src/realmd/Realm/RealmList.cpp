@@ -125,9 +125,9 @@ RealmList::RealmListIterators RealmList::GetIteratorsForBuild(uint32 build) cons
 void RealmList::Initialize(uint32 updateInterval)
 {
     m_UpdateInterval = updateInterval;
-    
+
     InitBuildToVersion();
-    
+
     ///- Get the content of the realmlist table in the database
     UpdateRealms(true);
 }
@@ -149,19 +149,19 @@ void RealmList::InitBuildToVersion()
     m_buildToVersion[5875] = REALM_VERSION_VANILLA;
     m_buildToVersion[6005] = REALM_VERSION_VANILLA;
     m_buildToVersion[6141] = REALM_VERSION_VANILLA;
-    
+
     m_buildToVersion[8606] = REALM_VERSION_TBC;
-    
+
     m_buildToVersion[10505] = REALM_VERSION_WOTLK;
     m_buildToVersion[11159] = REALM_VERSION_WOTLK;
     m_buildToVersion[11403] = REALM_VERSION_WOTLK;
     m_buildToVersion[11723] = REALM_VERSION_WOTLK;
     m_buildToVersion[12340] = REALM_VERSION_WOTLK;
-    
+
     m_buildToVersion[13623] = REALM_VERSION_CATA;
     m_buildToVersion[15050] = REALM_VERSION_CATA;
     m_buildToVersion[15595] = REALM_VERSION_CATA;
-    
+
     m_buildToVersion[16357] = REALM_VERSION_MOP;
     m_buildToVersion[16992] = REALM_VERSION_MOP;
     m_buildToVersion[17055] = REALM_VERSION_MOP;
@@ -173,7 +173,7 @@ void RealmList::UpdateRealm(uint32 ID, const std::string& name, ACE_INET_Addr co
 {
     ///- Create new if not exist or update existed
     Realm& realm = m_realms[name];
-    
+
     realm.m_ID       = ID;
     realm.name       = name;
     realm.icon       = icon;
@@ -199,7 +199,7 @@ void RealmList::UpdateRealm(uint32 ID, const std::string& name, ACE_INET_Addr co
         sLog.outError("You don't seem to have added any allowed realmbuilds to the realm: %s"
                       " and therefore it will not be listed to anyone",
                       name.c_str());
-    
+
     realm.realmBuildInfo.build = first_build;
     realm.realmBuildInfo.major_version = 0;
     realm.realmBuildInfo.minor_version = 0;
@@ -229,7 +229,7 @@ void RealmList::UpdateIfNeed()
     m_realms.clear();
     for (int i = 0; i < REALM_VERSION_COUNT; ++i)
         m_realmsByVersion[i].clear();
-    
+
     // Get the content of the realmlist table in the database
     UpdateRealms(false);
 }

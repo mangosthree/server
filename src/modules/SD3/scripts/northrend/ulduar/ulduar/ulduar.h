@@ -177,7 +177,7 @@ enum
     NPC_VOICE_OF_YOGG           = 33280,
     NPC_OMINOUS_CLOUD           = 33292,
     NPC_GUARDIAN_OF_YOGG        = 33136,
-    
+
     // Yogg Saron illusions actors
     NPC_YSERA                   = 33495,
     NPC_NELTHARION              = 33523,
@@ -464,7 +464,7 @@ enum
     ACHIEV_CRIT_ALONE_DARK_H    = 10417,
     ACHIEV_CRIT_DRIVE_CRAZY_N   = 10185,                    // Yogg-Saron, achievs 3008, 3010
     ACHIEV_CRIT_DRIVE_CRAZY_H   = 10296,
-    
+
     // Champion / Conquerer of Ulduar, achievs 2903, 2904
     ACHIEV_CRIT_CHAMP_LEVI      = 10042,
     ACHIEV_CRIT_CHAMP_RAZOR     = 10340,

@@ -51,7 +51,7 @@ enum
 
     // submerge spells
     SPELL_SUBMERGE_VISUAL   = 26063,
-#if defined (CLASSIC)  
+#if defined (CLASSIC)
     SPELL_SUMMON_OURO_MOUNDS = 26058,                       // summons 5 dirt mounds
 #else
     SPELL_SUMMON_OURO_MOUND = 26058,                        // summons 5 dirt mounds
@@ -66,14 +66,14 @@ enum
 
     // other spells - not used TODO check this "synced mess"
     // SPELL_SUMMON_SCARABS    = 26060,                     // triggered after 30 secs - cast by the Dirt Mounds
-#if defined (CLASSIC)  
+#if defined (CLASSIC)
     SPELL_DIRTMOUND_PASSIVE = 26092,                        // casts 26093 every 1 sec
 #endif
     // SPELL_SET_OURO_HEALTH   = 26075,                     // removed from DBC
     // SPELL_SAVE_OURO_HEALTH  = 26076,                     // removed from DBC
     // SPELL_TELEPORT_TRIGGER  = 26285,                     // removed from DBC
     // SPELL_SUBMERGE_TRIGGER  = 26104,                     // removed from DBC
-#if defined (CLASSIC)  
+#if defined (CLASSIC)
     SPELL_SUMMON_OURO_MOUND = 26617,
 #endif
     // SPELL_SCARABS_PERIODIC  = 26619,                     // cast by the Dirt Mounds in order to spawn the scarabs - removed from DBC
@@ -230,7 +230,7 @@ struct boss_ouro : public CreatureScript
                     {
                         if (DoCastSpellIfCan(m_creature, SPELL_SUBMERGE_VISUAL) == CAST_OK)
                         {
-#if defined (CLASSIC)  
+#if defined (CLASSIC)
                             DoCastSpellIfCan(m_creature, SPELL_SUMMON_OURO_MOUNDS, CAST_TRIGGERED);
 #else
                             DoCastSpellIfCan(m_creature, SPELL_SUMMON_OURO_MOUND, CAST_TRIGGERED);
@@ -254,7 +254,7 @@ struct boss_ouro : public CreatureScript
                     if (m_uiSummonMoundTimer < uiDiff)
                     {
 
-#if defined (CLASSIC)  
+#if defined (CLASSIC)
                         if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_OURO_MOUND) == CAST_OK)
 #else
                     DoSpawnCreature(NPC_DIRT_MOUND, 0, 0, 0, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
@@ -350,13 +350,13 @@ struct npc_ouro_spawner : public CreatureScript
             if (!m_bHasSummoned && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 50.0f))
             {
 
-#if defined (CLASSIC)  
+#if defined (CLASSIC)
                 if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_OURO, CAST_TRIGGERED) == CAST_OK)
 #else
                 if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_OURO) == CAST_OK)
 #endif
                 {
-#if defined (CLASSIC)  
+#if defined (CLASSIC)
                     DoCastSpellIfCan(m_creature, SPELL_DIRTMOUND_PASSIVE, CAST_TRIGGERED);
 #endif
                     m_bHasSummoned = true;

@@ -221,7 +221,6 @@ enum eConfigUInt32Values
     CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY,
     CONFIG_UINT32_RANDOM_BG_RESET_HOUR,
     CONFIG_UINT32_MAX_WHOLIST_RETURNS,
-    CONFIG_UINT32_VALUE_COUNT,
     // Warden
     CONFIG_UINT32_WARDEN_CLIENT_RESPONSE_DELAY,
     CONFIG_UINT32_WARDEN_CLIENT_CHECK_HOLDOFF,
@@ -230,7 +229,9 @@ enum eConfigUInt32Values
     CONFIG_UINT32_WARDEN_NUM_MEM_CHECKS,
     CONFIG_UINT32_WARDEN_NUM_OTHER_CHECKS,
     CONFIG_UINT32_WARDEN_DB_LOGLEVEL,
+
     CONFIG_UINT32_AUTOBROADCAST_INTERVAL,
+    CONFIG_UINT32_VALUE_COUNT
 };
 
 /// Configuration elements
@@ -648,7 +649,7 @@ class World
 
         void UpdateRealmCharCount(uint32 accid);
 
-        LocaleConstant GetAvailableDbcLocale(LocaleConstant locale) const { if (m_availableDbcLocaleMask & (1 << locale)) return locale; else return m_defaultDbcLocale; }
+        LocaleConstant GetAvailableDbcLocale(LocaleConstant locale) const { if (m_availableDbcLocaleMask & (1 << locale)) { return locale; } else { return m_defaultDbcLocale; } }
 
         // used World DB version
         void LoadDBVersion();

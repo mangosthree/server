@@ -698,8 +698,8 @@ class WorldObject : public Object
         Creature* SummonCreature(uint32 id, float x, float y, float z, float ang, TempSpawnType spwtype, uint32 despwtime, bool asActiveObject = false, bool setRun = false);
         GameObject* SummonGameObject(uint32 id, float x, float y, float z, float angle, uint32 despwtime);
 
-        bool isActiveObject() const { return m_isActiveObject || m_viewPoint.hasViewers(); }
-        bool IsActiveObject() const { return isActiveObject(); } // This is for Eluna to build. Should be removed in the future!
+        bool IsActiveObject() const { return m_isActiveObject || m_viewPoint.hasViewers(); }
+        bool isActiveObject() const { return IsActiveObject(); } // This is for Eluna to build. Should be removed in the future!
 
         void SetActiveObjectState(bool active);
 

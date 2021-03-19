@@ -441,7 +441,6 @@ void ScriptMgr::LoadScripts(DBScriptType type)
             case SCRIPT_COMMAND_CLOSE_DOOR:                 // 12
             {
                 uint32 goEntry = 0;
-
                 if (!tmp.GetGOGuid())
                 {
                     if (!tmp.buddyEntry)
@@ -802,7 +801,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
 
             default:
             {
-                sLog.outErrorDb("Table `db_scripts [type = %d]` unknown command %u, skipping.", type, tmp.command);
+                sLog.outErrorDb("Table `db_scripts [type = %d]` uses unknown command %u, skipping.", type, tmp.command);
                 continue;
             }
         }
@@ -2133,13 +2132,13 @@ bool ScriptAction::HandleScriptStep()
             }
             break;
         }
-        case SCRIPT_COMMAND_TURN_TO:                 // 36
+        case SCRIPT_COMMAND_TURN_TO:                        // 36
         {
             if (LogIfNotUnit(pSource))
             {
                 break;
             }
-
+            //note for self: this command has different impl. and usage in other core(s)
             ((Unit*)pSource)->SetFacingTo(pSource->GetAngle(pTarget));
             break;
         }

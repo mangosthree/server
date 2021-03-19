@@ -23,6 +23,7 @@
  */
 
 #include "GameObject.h"
+#include "G3D/Quat.h"
 #include "QuestDef.h"
 #include "ObjectMgr.h"
 #include "PoolManager.h"
@@ -51,7 +52,7 @@
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
-#include <G3D/Quat.h>
+
 
 GameObject::GameObject() : WorldObject(),
     loot(this),
@@ -160,7 +161,9 @@ void GameObject::RemoveFromWorld()
     Object::RemoveFromWorld();
 }
 
-bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, const QuaternionData& rotation, uint8 animprogress, GOState go_state)
+bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask,
+                        float x, float y, float z, float ang,
+                        const QuaternionData& rotation, uint8 animprogress, GOState go_state)
 {
     MANGOS_ASSERT(map);
     Relocate(x, y, z, ang);
@@ -251,6 +254,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
             {
                 SetGoState(GO_STATE_ACTIVE);
             }
+            break;
+        default:
             break;
     }
 

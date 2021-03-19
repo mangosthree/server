@@ -25,11 +25,11 @@
 #ifndef MANGOS_H_MOVE_MAP
 #define MANGOS_H_MOVE_MAP
 
-#include "Utilities/UnorderedMapSet.h"
-
 #include "../../dep/recastnavigation/Detour/Include/DetourAlloc.h"
 #include "../../dep/recastnavigation/Detour/Include/DetourNavMesh.h"
 #include "../../dep/recastnavigation/Detour/Include/DetourNavMeshQuery.h"
+
+#include "Utilities/UnorderedMapSet.h"
 
 class Unit;
 

@@ -130,7 +130,7 @@ class Grid
          */
         bool AddGridObject(SPECIFIC_OBJECT* obj)
         {
-            if (obj->isActiveObject())
+            if (obj->IsActiveObject())
             {
                 m_activeGridObjects.insert(obj);
             }
@@ -147,7 +147,7 @@ class Grid
          */
         bool RemoveGridObject(SPECIFIC_OBJECT* obj)
         {
-            if (obj->isActiveObject())
+            if (obj->IsActiveObject())
             {
                 m_activeGridObjects.erase(obj);
             }

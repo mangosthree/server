@@ -584,8 +584,8 @@ class Creature : public Unit
                 return false;
             }
 
-            uint32 Rank = GetCreatureInfo()->Rank;
-            return Rank != CREATURE_ELITE_NORMAL && Rank != CREATURE_ELITE_RARE;
+            uint32 rank = GetCreatureInfo()->Rank;
+            return rank != CREATURE_ELITE_NORMAL && rank != CREATURE_ELITE_RARE;
         }
 
         bool IsWorldBoss() const

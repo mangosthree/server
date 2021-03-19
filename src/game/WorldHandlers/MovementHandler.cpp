@@ -271,6 +271,12 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
     // lets process all delayed operations on successful teleport
     GetPlayer()->ProcessDelayedOperations();
+
+    // notify group after successful teleport
+    if (_player->GetGroup())
+    {
+        _player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
+    }
 }
 
 void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
@@ -690,7 +696,7 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
         if (movementInfo.GetPos()->z < -500.0f)
         {
             if (plMover->GetBattleGround()
-                    && plMover->GetBattleGround()->HandlePlayerUnderMap(_player))
+                && plMover->GetBattleGround()->HandlePlayerUnderMap(_player))
             {
                 // do nothing, the handle already did if returned true
             }

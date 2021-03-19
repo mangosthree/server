@@ -10676,7 +10676,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
     {
         m_speed_rate[mtype] = rate;
 
-        propagateSpeedChange();
+        PropagateSpeedChange();
 
         WorldPacket data;
         ObjectGuid guid = GetObjectGuid();

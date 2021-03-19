@@ -2397,11 +2397,11 @@ void WorldObject::SetActiveObjectState(bool active)
         // player's update implemented in a different from other active worldobject's way
         // it's considired to use generic way in future
     {
-        if (isActiveObject() && !active)
+        if (IsActiveObject() && !active)
         {
             GetMap()->RemoveFromActive(this);
         }
-        else if (!isActiveObject() && active)
+        else if (!IsActiveObject() && active)
         {
             GetMap()->AddToActive(this);
         }

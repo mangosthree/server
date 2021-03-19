@@ -3506,7 +3506,7 @@ class  Unit : public WorldObject
         void SendPetAIReaction();
         ///----------End of Pet responses methods----------
 
-        void propagateSpeedChange() { GetMotionMaster()->propagateSpeedChange(); }
+        void PropagateSpeedChange() { GetMotionMaster()->PropagateSpeedChange(); }
 
         // reactive attacks
         void ClearAllReactives();

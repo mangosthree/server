@@ -258,7 +258,7 @@ struct GameObjectInfo
             uint32 worldState1;                             //7
         } moTransport;
         // 16 GAMEOBJECT_TYPE_DUELFLAG - empty
-        //17 GAMEOBJECT_TYPE_FISHINGNODE - empty
+        // 17 GAMEOBJECT_TYPE_FISHINGNODE - empty
         // 18 GAMEOBJECT_TYPE_SUMMONING_RITUAL
         struct
         {
@@ -295,7 +295,7 @@ struct GameObjectInfo
             uint32 maxLevel;                                // 1
             uint32 areaID;                                  // 2
         } meetingstone;
-        // 24 GAMEOBJECT_CreatureTypeFlagsTAND
+        // 24 GAMEOBJECT_TYPE_FLAGSTAND
         struct
         {
             uint32 lockId;                                  // 0
@@ -578,7 +578,7 @@ struct QuaternionData
 // from `gameobject`
 struct GameObjectData
 {
-    uint32 id;                                              // entry in gamobject_template
+    uint32 id;                                              // entry in gameobject_template
     uint16 mapid;
     uint32 phaseMask;
     float posX;
@@ -640,6 +640,7 @@ struct GameObjectDisplayInfoEntry;
 
 class GameObject : public WorldObject
 {
+
     public:
         explicit GameObject();
         ~GameObject();

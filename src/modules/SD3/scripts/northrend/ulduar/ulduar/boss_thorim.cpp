@@ -208,7 +208,9 @@ struct boss_thorim : public CreatureScript
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
         }
@@ -220,7 +222,9 @@ struct boss_thorim : public CreatureScript
             m_creature->CombatStop(true);
 
             if (m_creature->IsAlive() && !m_bEventFinished)
+            {
                 m_creature->GetMotionMaster()->MoveTargetedHome();
+            }
 
             m_creature->SetLootRecipient(nullptr);
 
@@ -239,7 +243,9 @@ struct boss_thorim : public CreatureScript
                 if (m_pInstance && m_pInstance->GetData(TYPE_THORIM_HARD) != FAIL)
                 {
                     if (Creature* pSif = m_pInstance->GetSingleCreatureFromStorage(NPC_SIF))
+                    {
                         pSif->InterruptNonMeleeSpells(false);
+                    }
 
                     m_pInstance->SetData(TYPE_THORIM_HARD, DONE);
                 }
@@ -259,9 +265,13 @@ struct boss_thorim : public CreatureScript
 
                         // start a different outro version for hard mode
                         if (m_pInstance->GetData(TYPE_THORIM_HARD) == DONE)
+                        {
                             StartNextDialogueText(SPELL_STORMHAMMER_OUTRO);
+                        }
                         else
+                        {
                             StartNextDialogueText(SAY_DEFEATED);
+                        }
                     }
 
                     m_creature->CastSpell(m_creature, SPELL_THORIM_CREDIT, true);
@@ -287,7 +297,9 @@ struct boss_thorim : public CreatureScript
         {
             // don't attack again after being defeated
             if (m_bEventFinished)
+            {
                 return;
+            }
 
             ScriptedAI::AttackStart(pWho);
         }
@@ -298,7 +310,9 @@ struct boss_thorim : public CreatureScript
             if (!m_bArenaSpawned && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsAlive() && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, DEFAULT_VISIBILITY_INSTANCE))
             {
                 if (m_pInstance && m_pInstance->GetData(TYPE_THORIM) != DONE)
+                {
                     m_pInstance->SetData64(DATA64_THORIM_TRIGGERED_BY, pWho->GetObjectGuid().GetRawValue());
+                }
 
                 m_bArenaSpawned = true;
             }
@@ -309,13 +323,17 @@ struct boss_thorim : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_THORIM, FAIL);
+            }
         }
 
         void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
         {
             if (uiMotionType != EFFECT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             m_uiPhase = PHASE_SOLO;
             m_uiAttackTimer = 1000;
@@ -364,7 +382,9 @@ struct boss_thorim : public CreatureScript
             case NPC_DARK_RUNE_COMMONER:
             case NPC_DARK_RUNE_ACOLYTE:
                 if (Creature* pTarget = GetClosestLowerBunny(pSummoned))
+                {
                     pSummoned->CastSpell(pTarget, SPELL_LEAP, true);
+                }
                 pSummoned->SetInCombatWithZone();
                 break;
             }
@@ -373,18 +393,24 @@ struct boss_thorim : public CreatureScript
         void JustDidDialogueStep(int32 iEntry) override
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             switch (iEntry)
             {
             case NPC_SIF:
                 DoCastSpellIfCan(m_creature, SPELL_SHEAT_OF_LIGHTNING, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                 if (Creature* pSif = m_creature->SummonCreature(NPC_SIF, afSifSpawnLoc[0], afSifSpawnLoc[1], afSifSpawnLoc[2], afSifSpawnLoc[3], TEMPSUMMON_CORPSE_DESPAWN, 0))
+                {
                     DoScriptText(SAY_SIF_BEGIN, pSif);
+                }
                 break;
             case SPELL_TOUCH_OF_DOMINION:
                 if (Creature* pSif = m_pInstance->GetSingleCreatureFromStorage(NPC_SIF))
+                {
                     pSif->CastSpell(m_creature, SPELL_TOUCH_OF_DOMINION, false);
+                }
                 break;
             case PHASE_SOLO:
                 m_creature->GetMotionMaster()->MoveJump(afArenaCenterLoc[0], afArenaCenterLoc[1], afArenaCenterLoc[2], 45.55969f, 5.0f, 1);
@@ -398,10 +424,14 @@ struct boss_thorim : public CreatureScript
             case SPELL_TELEPORT:
             case SPELL_THORIM_CREDIT:
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
+                {
                     m_creature->ForcedDespawn(2000);
+                }
                 // despawn Sif if not despawned by accident
                 if (Creature* pSif = m_pInstance->GetSingleCreatureFromStorage(NPC_SIF))
+                {
                     pSif->ForcedDespawn();
+                }
                 break;
             }
         }
@@ -411,7 +441,9 @@ struct boss_thorim : public CreatureScript
             if (pSpellEntry->Id == SPELL_LIGHTNING_CHARGE_DAMAGE && pTarget->GetTypeId() == TYPEID_PLAYER)
             {
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_ACHIEV_LIGHTNING, uint32(false));
+                }
             }
         }
 
@@ -419,7 +451,9 @@ struct boss_thorim : public CreatureScript
         ObjectGuid SelectRandomOrbGuid()
         {
             if (m_pInstance)
+            {
                 return ObjectGuid(m_pInstance->GetData64(DATA64_THORIM_RANDOM_ORB));
+            }
 
             return ObjectGuid();
         }
@@ -428,7 +462,9 @@ struct boss_thorim : public CreatureScript
         Creature* SelectRandomUpperBunny()
         {
             if (m_pInstance)
+            {
                 return m_pInstance->instance->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_RANDOM_UPPER_BUNNY)));
+            }
 
             return nullptr;
         }
@@ -437,7 +473,9 @@ struct boss_thorim : public CreatureScript
         Creature* GetClosestLowerBunny(Creature* pSource)
         {
             if (m_pInstance)
+            {
                 return m_pInstance->instance->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_THORIM_BUNNY)));
+            }
 
             return nullptr;
         }
@@ -446,11 +484,15 @@ struct boss_thorim : public CreatureScript
         Unit* GetRandomArenaPlayer()
         {
             if (!m_pInstance)
+            {
                 return nullptr;
+            }
 
             Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_THORIM_COMBAT_TRIGGER);
             if (!pTrigger)
+            {
                 return nullptr;
+            }
 
             std::vector<Unit*> suitableTargets;
             ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
@@ -460,7 +502,9 @@ struct boss_thorim : public CreatureScript
                 if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
                     if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->IsWithinDistInMap(pTrigger, 50.0f) && pTarget->IsWithinLOSInMap(pTrigger))
+                    {
                         suitableTargets.push_back(pTarget);
+                    }
                 }
             }
 
@@ -472,7 +516,9 @@ struct boss_thorim : public CreatureScript
                 return nullptr;
             }
             else
+            {
                 return suitableTargets[urand(0, suitableTargets.size() - 1)];
+            }
         }
 
         // function to spawn a random pack of dwarfes
@@ -482,21 +528,29 @@ struct boss_thorim : public CreatureScript
             {
             case 0:                     // commoners (always in groups of 6-7)
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_DO_THORIM_SPAWN_PACK, 0);
+                }
                 break;
             case 1:                     // warbringers (along with champions or evokers)
                 if (Creature* pBunny = SelectRandomUpperBunny())
+                {
                     m_creature->SummonCreature(NPC_DARK_RUNE_WARBRINGER, pBunny->GetPositionX(), pBunny->GetPositionY(), pBunny->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                }
                 // warbringers can have another buddy summoned at the same time
                 if (roll_chance_i(75))
                 {
                     if (Creature* pBunny = SelectRandomUpperBunny())
+                    {
                         m_creature->SummonCreature(roll_chance_i(70) ? NPC_DARK_RUNE_CHAMPION : NPC_DARK_RUNE_EVOKER, pBunny->GetPositionX(), pBunny->GetPositionY(), pBunny->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    }
                 }
                 break;
             case 2:                     // evokers alone
                 if (Creature* pBunny = SelectRandomUpperBunny())
+                {
                     m_creature->SummonCreature(NPC_DARK_RUNE_EVOKER, pBunny->GetPositionX(), pBunny->GetPositionY(), pBunny->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                }
                 break;
             }
 
@@ -510,7 +564,9 @@ struct boss_thorim : public CreatureScript
             DialogueUpdate(uiDiff);
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             switch (m_uiPhase)
             {
@@ -529,7 +585,9 @@ struct boss_thorim : public CreatureScript
                         }
                     }
                     else
+                    {
                         m_uiBerserkTimer -= uiDiff;
+                    }
                 }
 
                 if (m_uiArenaDwarfTimer < uiDiff)
@@ -538,7 +596,9 @@ struct boss_thorim : public CreatureScript
                     m_uiArenaDwarfTimer = 10000;
                 }
                 else
+                {
                     m_uiArenaDwarfTimer -= uiDiff;
+                }
 
                 if (m_uiChargeOrbTimer < uiDiff)
                 {
@@ -546,22 +606,30 @@ struct boss_thorim : public CreatureScript
                     if (Creature* pTarget = m_creature->GetMap()->GetCreature(SelectRandomOrbGuid()))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_CHARGE_ORB) == CAST_OK)
+                        {
                             m_uiChargeOrbTimer = 20000;
+                        }
                     }
                 }
                 else
+                {
                     m_uiChargeOrbTimer -= uiDiff;
+                }
 
                 if (m_uiStormHammerTimer < uiDiff)
                 {
                     if (Unit* pTarget = GetRandomArenaPlayer())
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_STORMHAMMER) == CAST_OK)
+                        {
                             m_uiStormHammerTimer = 15000;
+                        }
                     }
                 }
                 else
+                {
                     m_uiStormHammerTimer -= uiDiff;
+                }
 
                 break;
                 // solo phase abilities
@@ -578,7 +646,9 @@ struct boss_thorim : public CreatureScript
                         }
                     }
                     else
+                    {
                         m_uiBerserkTimer -= uiDiff;
+                    }
                 }
 
                 if (m_uiAttackTimer)
@@ -592,7 +662,9 @@ struct boss_thorim : public CreatureScript
                         m_uiAttackTimer = 0;
                     }
                     else
+                    {
                         m_uiAttackTimer -= uiDiff;
+                    }
                 }
 
                 if (m_uiChargeOrbTimer < uiDiff)
@@ -604,32 +676,44 @@ struct boss_thorim : public CreatureScript
 
                         // charge the lower orb as well
                         if (Unit* pOrb = GetClosestCreatureWithEntry(pTarget, NPC_THUNDER_ORB, 25.0f, true, false, true))
+                        {
                             pTarget->CastSpell(pOrb, SPELL_LIGHTNING_PILLAR, true);
+                        }
 
                         m_uiChargeOrbTimer = 20000;
                     }
                 }
                 else
+                {
                     m_uiChargeOrbTimer -= uiDiff;
+                }
 
                 if (m_uiChainLightningTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
                         if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
+                        {
                             m_uiChainLightningTimer = urand(10000, 15000);
+                        }
                     }
                 }
                 else
+                {
                     m_uiChainLightningTimer -= uiDiff;
+                }
 
                 if (m_uiUnbalancingStrikeTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
+                    {
                         m_uiUnbalancingStrikeTimer = 25000;
+                    }
                 }
                 else
+                {
                     m_uiUnbalancingStrikeTimer -= uiDiff;
+                }
 
                 DoMeleeAttackIfReady();
                 break;
@@ -691,7 +775,9 @@ struct boss_sif : public CreatureScript
         {
             // custom attack; only in hard mode
             if (!m_bAttackReady)
+            {
                 return;
+            }
 
             ScriptedAI::AttackStart(pWho);
         }
@@ -702,7 +788,9 @@ struct boss_sif : public CreatureScript
         {
             // custom evade; Sif doesn't need to move to home position
             if (!m_bAttackReady)
+            {
                 return;
+            }
 
             m_creature->RemoveAllAurasOnEvade();
             m_creature->DeleteThreatList();
@@ -725,7 +813,9 @@ struct boss_sif : public CreatureScript
         ObjectGuid SelectRandomBunnyGuid()
         {
             if (m_lBunniesGuids.empty())
+            {
                 return ObjectGuid();
+            }
 
             GuidList::iterator iter = m_lBunniesGuids.begin();
             advance(iter, urand(0, m_lBunniesGuids.size() - 1));
@@ -736,34 +826,48 @@ struct boss_sif : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiFrostBoltTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FROSTBOLT : SPELL_FROSTBOLT_H) == CAST_OK)
+                    {
                         m_uiFrostBoltTimer = urand(2000, 3000);
+                    }
                 }
             }
             else
+            {
                 m_uiFrostBoltTimer -= uiDiff;
+            }
 
             if (m_uiVolleyTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FROSTBOLT_VOLLEY : SPELL_FROSTBOLT_VOLLEY_H) == CAST_OK)
+                {
                     m_uiVolleyTimer = urand(15000, 18000);
+                }
             }
             else
+            {
                 m_uiVolleyTimer -= uiDiff;
+            }
 
             if (m_uiFrostNovaTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FROST_NOVA : SPELL_FROST_NOVA_H) == CAST_OK)
+                {
                     m_uiFrostNovaTimer = urand(20000, 25000);
+                }
             }
             else
+            {
                 m_uiFrostNovaTimer -= uiDiff;
+            }
 
             if (m_uiBlizzardTimer < uiDiff)
             {
@@ -771,22 +875,30 @@ struct boss_sif : public CreatureScript
                 if (Unit* pTarget = m_creature->GetMap()->GetUnit(SelectRandomBunnyGuid()))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_BLIZZARD : SPELL_BLIZZARD_H) == CAST_OK)
+                    {
                         m_uiBlizzardTimer = 40000;
+                    }
                 }
             }
             else
+            {
                 m_uiBlizzardTimer -= uiDiff;
+            }
 
             if (m_uiBlinkTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_BLINK) == CAST_OK)
+                    {
                         m_uiBlinkTimer = urand(20000, 25000);
+                    }
                 }
             }
             else
+            {
                 m_uiBlinkTimer -= uiDiff;
+            }
         }
     };
 
@@ -876,14 +988,18 @@ struct npc_runic_colossus : public CreatureScript
         void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
         {
             if ((pSpellEntry->Id == SPELL_CHARGE || pSpellEntry->Id == SPELL_CHARGE_H) && pTarget->GetTypeId() == TYPEID_PLAYER)
+            {
                 m_uiSmashTimer = 1000;
+            }
         }
 
         // Wrapper to keep Runic Smash in a distinct function
         void UpdateRunicSmash(const uint32 uiDiff)
         {
             if (!m_bSmashActive)
+            {
                 return;
+            }
 
             if (m_uiSmashUpdateTimer < uiDiff)
             {
@@ -905,7 +1021,9 @@ struct npc_runic_colossus : public CreatureScript
                 m_uiSmashUpdateTimer = 250;
             }
             else
+            {
                 m_uiSmashUpdateTimer -= uiDiff;
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -915,27 +1033,37 @@ struct npc_runic_colossus : public CreatureScript
                 if (m_uiRunicSmashTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, urand(0, 1) ? SPELL_RUNIC_SMASH_L : SPELL_RUNIC_SMASH_R) == CAST_OK)
+                    {
                         m_uiRunicSmashTimer = 7000;
+                    }
                 }
                 else
+                {
                     m_uiRunicSmashTimer -= uiDiff;
+                }
 
                 UpdateRunicSmash(uiDiff);
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiChargeTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_bIsRegularMode ? SPELL_CHARGE : SPELL_CHARGE_H, SELECT_FLAG_NOT_IN_MELEE_RANGE))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHARGE : SPELL_CHARGE_H) == CAST_OK)
+                    {
                         m_uiChargeTimer = urand(10000, 15000);
+                    }
                 }
             }
             else
+            {
                 m_uiChargeTimer -= uiDiff;
+            }
 
             // smash is cast right after charge
             if (m_uiSmashTimer)
@@ -943,10 +1071,14 @@ struct npc_runic_colossus : public CreatureScript
                 if (m_uiSmashTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SMASH) == CAST_OK)
+                    {
                         m_uiSmashTimer = 0;
+                    }
                 }
                 else
+                {
                     m_uiSmashTimer -= uiDiff;
+                }
             }
 
             if (m_uiBarrierTimer < uiDiff)
@@ -958,7 +1090,9 @@ struct npc_runic_colossus : public CreatureScript
                 }
             }
             else
+            {
                 m_uiBarrierTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -998,11 +1132,15 @@ struct npc_thunder_orb : public CreatureScript
             if (pSpell->Id == SPELL_CHARGE_ORB)
             {
                 if (Creature* pOrb = GetClosestCreatureWithEntry(m_creature, NPC_THUNDER_ORB, 25.0f, true, false, true))
+                {
                     pOrb->CastSpell(pOrb, SPELL_LIGHTNING_PILLAR_ORB, false);
+                }
             }
             // SPECIAL NOTE: this aura has a duration lower than the trigger period for the next spell; so we need to force this by timer
             else if (pSpell->Id == SPELL_LIGHTNING_ORG_CHARGED)
+            {
                 m_uiTriggerTimer = 8000;
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -1012,10 +1150,14 @@ struct npc_thunder_orb : public CreatureScript
                 if (m_uiTriggerTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_LIGHTNING_ORB_TRIGGER) == CAST_OK)
+                    {
                         m_uiTriggerTimer = 0;
+                    }
                 }
                 else
+                {
                     m_uiTriggerTimer -= uiDiff;
+                }
             }
         }
     };

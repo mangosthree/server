@@ -86,13 +86,17 @@ struct boss_maiden_of_grief : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_MAIDEN, IN_PROGRESS);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_MAIDEN, FAIL);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -111,43 +115,59 @@ struct boss_maiden_of_grief : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_MAIDEN, DONE);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiPartingSorrowTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PARTING_SORROW, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_PARTING_SORROW) == CAST_OK)
+                    {
                         m_uiPartingSorrowTimer = 12000 + rand() % 5000;
+                    }
                 }
             }
             else
+            {
                 m_uiPartingSorrowTimer -= uiDiff;
+            }
 
             if (m_uiStormTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_STORM_OF_GRIEF : SPELL_STORM_OF_GRIEF_H) == CAST_OK)
+                {
                     m_uiStormTimer = 20000;
+                }
             }
             else
+            {
                 m_uiStormTimer -= uiDiff;
+            }
 
             if (m_uiPillarTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_bIsRegularMode ? SPELL_PILLAR_OF_WOE_H : SPELL_PILLAR_OF_WOE, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_PILLAR_OF_WOE : SPELL_PILLAR_OF_WOE_H) == CAST_OK)
+                    {
                         m_uiPillarTimer = 10000;
+                    }
                 }
             }
             else
+            {
                 m_uiPillarTimer -= uiDiff;
+            }
 
             if (m_uiShockTimer < uiDiff)
             {
@@ -158,7 +178,9 @@ struct boss_maiden_of_grief : public CreatureScript
                 }
             }
             else
+            {
                 m_uiShockTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

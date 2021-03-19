@@ -71,9 +71,13 @@ struct npc_beast_combat_stalker : public CreatureScript
             m_uiPhase = PHASE_GORMOK;
 
             if (m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+            {
                 m_uiBerserkTimer = 15 * MINUTE * IN_MILLISECONDS;
+            }
             else
+            {
                 m_uiBerserkTimer = 9 * MINUTE * IN_MILLISECONDS;
+            }
         }
 
         void MoveInLineOfSight(Unit* /*pWho*/) override {}
@@ -86,12 +90,16 @@ struct npc_beast_combat_stalker : public CreatureScript
         void EnterEvadeMode() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+            }
 
             for (uint8 i = 0; i < 4; ++i)
             {
                 if (Creature* pBoss = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[i]))
+                {
                     pBoss->ForcedDespawn();
+                }
             }
 
             m_creature->ForcedDespawn();
@@ -100,7 +108,9 @@ struct npc_beast_combat_stalker : public CreatureScript
         void Aggro(Unit* /*pWho*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_NORTHREND_BEASTS, IN_PROGRESS);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -123,7 +133,9 @@ struct npc_beast_combat_stalker : public CreatureScript
 
             // Next beasts are summoned only for heroic modes
             if (m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+            {
                 m_uiNextBeastTimer = 150 * IN_MILLISECONDS;     // 2 min 30
+            }
 
             m_uiAttackDelayTimer = 15000;                       // TODO, must be checked.
         }
@@ -134,14 +146,18 @@ struct npc_beast_combat_stalker : public CreatureScript
             if (uiBeastEntry == NPC_DREADSCALE)
             {
                 if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_A))
+                {
                     DoScriptText(SAY_TIRION_BEAST_2, pTirion);
+                }
 
                 m_creature->SummonCreature(NPC_DREADSCALE, aSpawnPositions[2][0], aSpawnPositions[2][1], aSpawnPositions[2][2], aSpawnPositions[2][3], TEMPSUMMON_DEAD_DESPAWN, 0);
             }
             else
             {
                 if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_A))
+                {
                     DoScriptText(SAY_TIRION_BEAST_3, pTirion);
+                }
 
                 m_creature->SummonCreature(NPC_ICEHOWL, aSpawnPositions[4][0], aSpawnPositions[4][1], aSpawnPositions[4][2], aSpawnPositions[4][3], TEMPSUMMON_DEAD_DESPAWN, 0);
             }
@@ -150,21 +166,29 @@ struct npc_beast_combat_stalker : public CreatureScript
         void SummonedCreatureJustDied(Creature* pSummoned) override
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             switch (pSummoned->GetEntry())
             {
             case NPC_GORMOK:
                 if (m_uiPhase == PHASE_GORMOK)
+                {
                     DoSummonNextBeast(NPC_DREADSCALE);
+                }
                 break;
 
             case NPC_DREADSCALE:
             case NPC_ACIDMAW:
                 if (m_bFirstWormDied && m_uiPhase == PHASE_WORMS)
+                {
                     DoSummonNextBeast(NPC_ICEHOWL);
+                }
                 else
+                {
                     m_bFirstWormDied = true;
+                }
                 break;
 
             case NPC_ICEHOWL:
@@ -181,14 +205,20 @@ struct npc_beast_combat_stalker : public CreatureScript
                 if (m_uiNextBeastTimer <= uiDiff)
                 {
                     if (m_uiPhase == PHASE_GORMOK)
+                    {
                         DoSummonNextBeast(NPC_DREADSCALE);
+                    }
                     else if (m_uiPhase == PHASE_WORMS)
+                    {
                         DoSummonNextBeast(NPC_ICEHOWL);
+                    }
 
                     m_uiNextBeastTimer = 0;
                 }
                 else
+                {
                     m_uiNextBeastTimer -= uiDiff;
+                }
             }
 
             if (m_uiAttackDelayTimer)
@@ -196,15 +226,21 @@ struct npc_beast_combat_stalker : public CreatureScript
                 if (m_uiAttackDelayTimer <= uiDiff)
                 {
                     if (m_uiPhase == PHASE_WORMS)
+                    {
                         m_creature->SummonCreature(NPC_ACIDMAW, aSpawnPositions[3][0], aSpawnPositions[3][1], aSpawnPositions[3][2], aSpawnPositions[3][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                    }
 
                     if (Creature* pBeast = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[m_uiPhase]))
+                    {
                         pBeast->SetInCombatWithZone();
+                    }
 
                     m_uiAttackDelayTimer = 0;
                 }
                 else
+                {
                     m_uiAttackDelayTimer -= uiDiff;
+                }
             }
 
             if (m_uiBerserkTimer)
@@ -215,11 +251,15 @@ struct npc_beast_combat_stalker : public CreatureScript
                     {
                         Creature* pBoss = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[i]);
                         if (pBoss && pBoss->IsAlive())
+                        {
                             pBoss->CastSpell(pBoss, SPELL_BERSERK, true);
+                        }
                     }
                 }
                 else
+                {
                     m_uiBerserkTimer -= uiDiff;
+                }
             }
 
             m_creature->SelectHostileTarget();
@@ -262,7 +302,9 @@ struct boss_gormok : public CreatureScript
         void UpdateAI(const uint32 /*uiDiff*/) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -304,7 +346,9 @@ struct boss_acidmaw : public CreatureScript
         void UpdateAI(const uint32 /*uiDiff*/) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -346,7 +390,9 @@ struct boss_dreadscale : public CreatureScript
         void UpdateAI(const uint32 /*uiDiff*/) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -393,7 +439,9 @@ struct boss_icehowl : public CreatureScript
         void UpdateAI(const uint32 /*uiDiff*/) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             DoMeleeAttackIfReady();
         }

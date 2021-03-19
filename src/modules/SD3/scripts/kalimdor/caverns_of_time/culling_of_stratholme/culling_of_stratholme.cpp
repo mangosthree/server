@@ -70,7 +70,9 @@ struct npc_chromie : public CreatureScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pCreature->IsQuestGiver())
+        {
             pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+        }
 
         if (InstanceData* m_pInstance = pCreature->GetInstanceData())
         {
@@ -80,7 +82,9 @@ struct npc_chromie : public CreatureScript
                 if (m_pInstance->GetData(TYPE_GRAIN_EVENT) != DONE)
                 {
                     if (pPlayer->GetQuestRewardStatus(QUEST_DISPELLING_ILLUSIONS) && !pPlayer->HasItemCount(ITEM_ARCANE_DISRUPTOR, 1))
+                    {
                         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_INN_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                    }
                 }
                 // intro skip option is available since 3.3.x
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_INN_SKIP, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
@@ -88,7 +92,9 @@ struct npc_chromie : public CreatureScript
                 break;
             case NPC_CHROMIE_ENTRANCE:
                 if (m_pInstance->GetData(TYPE_GRAIN_EVENT) == DONE && m_pInstance->GetData(TYPE_ARTHAS_INTRO_EVENT) == NOT_STARTED && pPlayer->GetQuestRewardStatus(QUEST_A_ROYAL_ESCORT))
+                {
                     pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ENTRANCE_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                }
                 pPlayer->SEND_GOSSIP_MENU(TEXT_ID_ENTRANCE_1, pCreature->GetObjectGuid());
                 break;
             }
@@ -121,7 +127,9 @@ struct npc_chromie : public CreatureScript
                         if (InstanceData* pInstance = pCreature->GetInstanceData())
                         {
                             if (pInstance->GetData(TYPE_GRAIN_EVENT) == NOT_STARTED)
+                            {
                                 pInstance->SetData(TYPE_GRAIN_EVENT, SPECIAL);
+                            }
                         }
                     }
                 }
@@ -184,7 +192,9 @@ struct npc_chromie : public CreatureScript
             if (InstanceData* pInstance = pCreature->GetInstanceData())
             {
                 if (pInstance->GetData(TYPE_GRAIN_EVENT) == NOT_STARTED)
+                {
                     pInstance->SetData(TYPE_GRAIN_EVENT, SPECIAL);
+                }
             }
             break;
         case QUEST_A_ROYAL_ESCORT:
@@ -217,10 +227,14 @@ struct aura_cos_arcane_disruption : public AuraScript
             if (Creature* pTarget = (Creature*)pAura->GetTarget())
             {
                 if (pTarget->GetEntry() != NPC_GRAIN_CRATE_HELPER)
+                {
                     return true;
+                }
 
                 if (InstanceData* pInstance = pTarget->GetInstanceData())
+                {
                     pInstance->SetData64(TYPE_DATA64_AD_TARGET, pTarget->GetObjectGuid().GetRawValue());
+                }
             }
         }
         return true;
@@ -403,7 +417,9 @@ struct npc_arthas : public CreatureScript
             DoScriptText(SAY_ARTHAS_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ARTHAS_ESCORT_EVENT, FAIL);
+            }
         }
 
     void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 uiMiscValue) override
@@ -417,7 +433,9 @@ struct npc_arthas : public CreatureScript
         }
 
         if (pInvoker->GetTypeId() != TYPEID_PLAYER)
+        {
             return;
+        }
 
         if (eventType == AI_EVENT_START_ESCORT)
         {
@@ -449,7 +467,9 @@ struct npc_arthas : public CreatureScript
             {
                 // resume escort or start on point if start from reset
                 if (HasEscortState(STATE_ESCORT_PAUSED))
+                {
                     SetEscortPaused(false);
+                }
                 else
                 {
                     Start(true, (Player*)pInvoker);
@@ -463,7 +483,9 @@ struct npc_arthas : public CreatureScript
 
                 // spawn Malganis if required
                 if (m_pInstance && !m_pInstance->GetSingleCreatureFromStorage(NPC_MALGANIS, true))
+                {
                     m_creature->SummonCreature(NPC_MALGANIS, 2296.862F, 1501.015F, 128.445F, 5.13f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                }
             }
         }
 
@@ -473,10 +495,14 @@ struct npc_arthas : public CreatureScript
         {
             // set the intro event as done and start the undead waves
             if (uiPointId == POINT_ID_INTRO_COMPLETE && m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ARTHAS_INTRO_EVENT, DONE);
+            }
         }
         else
+        {
             npc_escortAI::MovementInform(uiType, uiPointId);
+        }
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -508,7 +534,9 @@ struct npc_arthas : public CreatureScript
                 m_lSummonedGuidsList.remove(pSummoned->GetObjectGuid());
 
                 if (m_lSummonedGuidsList.empty())
+                {
                     SetEscortPaused(false);
+                }
                 break;
             case NPC_LORD_EPOCH:
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -523,11 +551,17 @@ struct npc_arthas : public CreatureScript
                 // spawn citizens - ground floor
             case 1:
                 if (Creature* pCitizen = m_creature->SummonCreature(NPC_TOWNHALL_CITIZEN, 2401.265f, 1202.789f, 134.103f, 1.466f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000))
+                {
                     m_firstCitizenGuid = pCitizen->GetObjectGuid();
+                }
                 if (Creature* pCitizen = m_creature->SummonCreature(NPC_TOWNHALL_RESIDENT, 2402.654f, 1205.786f, 134.122f, 2.89f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000))
+                {
                     m_secondCitizenGuid = pCitizen->GetObjectGuid();
+                }
                 if (Creature* pCitizen = m_creature->SummonCreature(NPC_TOWNHALL_CITIZEN, 2398.715f, 1207.334f, 134.122f, 5.27f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000))
+                {
                     m_thirdCitizenGuid = pCitizen->GetObjectGuid();
+                }
                 break;
             case 3:
                 StartNextDialogueText(NPC_TOWNHALL_CITIZEN);
@@ -619,7 +653,9 @@ struct npc_arthas : public CreatureScript
                 // townhall escort complete
             case 46:
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_ARTHAS_TOWNHALL_EVENT, DONE);
+                }
                 break;
 
                 // burning stratholme
@@ -634,7 +670,9 @@ struct npc_arthas : public CreatureScript
                 StartNextDialogueText(SAY_ARTHAS_CRUSADER_SQUARE);
                 SetEscortPaused(true);
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_ARTHAS_ESCORT_EVENT, DONE);
+                }
                 break;
 
                 // malganis fight
@@ -660,27 +698,41 @@ struct npc_arthas : public CreatureScript
                 // townhall entrance dialogue
             case NPC_TOWNHALL_CITIZEN:
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_firstCitizenGuid))
+                {
                     pCitizen->SetFacingToObject(m_creature);
+                }
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_secondCitizenGuid))
+                {
                     pCitizen->SetFacingToObject(m_creature);
+                }
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_thirdCitizenGuid))
+                {
                     pCitizen->SetFacingToObject(m_creature);
+                }
                 break;
             case TEXT_ID_TOWN_HALL_1:
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_thirdCitizenGuid))
+                {
                     DoScriptText(SAY_CITIZEN_ARRIVED, pCitizen);
+                }
                 break;
             case SPELL_CRUSADER_STRIKE:
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_thirdCitizenGuid))
+                {
                     DoCastSpellIfCan(pCitizen, SPELL_CRUSADER_STRIKE);
+                }
                 break;
             case NPC_TOWNHALL_RESIDENT:
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_thirdCitizenGuid))
+                {
                     pCitizen->HandleEmote(EMOTE_ONESHOT_LAUGH);
+                }
                 break;
             case TEXT_ID_TOWN_HALL_2:
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_thirdCitizenGuid))
+                {
                     DoScriptText(SAY_CITIZEN_NO_UNDERSTAD, pCitizen);
+                }
                 break;
             case NPC_INFINITE_HUNTER:
                 if (Creature* pCitizen = m_creature->GetMap()->GetCreature(m_firstCitizenGuid))
@@ -714,7 +766,9 @@ struct npc_arthas : public CreatureScript
                 break;
             case NPC_LORD_EPOCH:
                 if (!m_pInstance)
+                {
                     return;
+                }
 
                 if (Creature* pEpoch = m_pInstance->GetSingleCreatureFromStorage(NPC_LORD_EPOCH))
                 {
@@ -726,7 +780,9 @@ struct npc_arthas : public CreatureScript
                 // bookcase passage delay
             case GO_DOOR_BOOKCASE:
                 if (m_pInstance)
+                {
                     m_pInstance->DoUseDoorOrButton(GO_DOOR_BOOKCASE);
+                }
                 break;
 
                 // burning city complete delay
@@ -737,7 +793,9 @@ struct npc_arthas : public CreatureScript
                 // malganis attack
             case NPC_MALGANIS:
                 if (!m_pInstance)
+                {
                     return;
+                }
 
                 if (Creature* pMalganis = m_pInstance->GetSingleCreatureFromStorage(NPC_MALGANIS))
                 {
@@ -751,7 +809,9 @@ struct npc_arthas : public CreatureScript
                 m_creature->PlayMusic(MUSIC_ID_EVENT_COMPLETE);
 
                 if (!m_pInstance)
+                {
                     return;
+                }
 
                 if (Creature* pMalganis = m_pInstance->GetSingleCreatureFromStorage(NPC_MALGANIS))
                 {
@@ -768,7 +828,9 @@ struct npc_arthas : public CreatureScript
                 DoCastSpellIfCan(m_creature, SPELL_MALGANIS_KILL_CREDIT, CAST_TRIGGERED);
 
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_MALGANIS_EVENT, DONE);
+                }
                 break;
             }
         }
@@ -778,26 +840,36 @@ struct npc_arthas : public CreatureScript
             DialogueUpdate(uiDiff);
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiExorcismTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_EXORCISM : SPELL_EXORCISM_H) == CAST_OK)
+                {
                     m_uiExorcismTimer = urand(9000, 13000);
+                }
             }
             else
+            {
                 m_uiExorcismTimer -= uiDiff;
+            }
 
             if (m_uiHolyLightTimer < uiDiff)
             {
                 if (Unit* pTarget = DoSelectLowestHpFriendly(40.0f))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_HOLY_LIGHT) == CAST_OK)
+                    {
                         m_uiHolyLightTimer = urand(18000, 25000);
+                    }
                 }
             }
             else
+            {
                 m_uiHolyLightTimer -= uiDiff;
+            }
 
             if (!m_bYell50Pct && m_creature->GetHealthPercent() < 50.0f)
             {
@@ -908,7 +980,9 @@ struct spell_cos_crusader_strike : public SpellScript
             Creature* pCreatureTarget = pTarget->ToCreature();
             // only apply this for certain citizens
             if (pCreatureTarget->GetEntry() == NPC_STRATHOLME_RESIDENT || pCreatureTarget->GetEntry() == NPC_STRATHOLME_CITIZEN)
+            {
                 pCreatureTarget->DealDamage(pCreatureTarget, pCreatureTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+            }
             // always return true when we are handling this spell and effect
             return true;
         }

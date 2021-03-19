@@ -201,7 +201,9 @@ struct boss_twin_emperorsAI : public ScriptedAI
             }
         }
         else
-            { m_uiTeleportTimer -= uiDiff; }
+        {
+            m_uiTeleportTimer -= uiDiff;
+        }
 
         if (m_uiBugAbilityTimer < uiDiff)
         {
@@ -211,7 +213,9 @@ struct boss_twin_emperorsAI : public ScriptedAI
             }
         }
         else
-            { m_uiBugAbilityTimer -= uiDiff; }
+        {
+            m_uiBugAbilityTimer -= uiDiff;
+        }
 
         if (m_uiBerserkTimer)
         {

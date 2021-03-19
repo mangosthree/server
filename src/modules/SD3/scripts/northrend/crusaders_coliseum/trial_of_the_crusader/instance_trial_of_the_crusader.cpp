@@ -172,7 +172,9 @@ struct is_trial_of_the_crusader : public InstanceScript
             for (uint8 i = TYPE_NORTHREND_BEASTS; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     return true;
+                }
             }
 
             return false;
@@ -241,7 +243,9 @@ struct is_trial_of_the_crusader : public InstanceScript
         void OnPlayerEnter(Player* pPlayer) override
         {
             if (m_uiTeam)
+            {
                 return;
+            }
 
             m_uiTeam = pPlayer->GetTeam();
             SetDialogueSide(m_uiTeam == ALLIANCE);
@@ -264,13 +268,17 @@ struct is_trial_of_the_crusader : public InstanceScript
                 // Update data before updating worldstate
                 m_auiEncounter[uiType] = uiData;
                 if (IsHeroicDifficulty())
+                {
                     DoUpdateWorldState(WORLD_STATE_WIPES_COUNT, MAX_WIPES_ALLOWED >= GetData(TYPE_WIPE_COUNT) ? MAX_WIPES_ALLOWED - GetData(TYPE_WIPE_COUNT) : 0);
+                }
                 break;
             case TYPE_NORTHREND_BEASTS:
                 if (uiData == SPECIAL)
                 {
                     if (Creature* pTirion = GetSingleCreatureFromStorage(NPC_TIRION_A))
+                    {
                         DoScriptText(m_auiEncounter[uiType] != FAIL ? SAY_TIRION_RAID_INTRO_LONG : SAY_RAID_TRIALS_INTRO, pTirion);
+                    }
                     StartNextDialogueText(TYPE_NORTHREND_BEASTS);
                 }
                 else if (uiData == FAIL)
@@ -279,7 +287,9 @@ struct is_trial_of_the_crusader : public InstanceScript
                     StartNextDialogueText(SAY_TIRION_BEAST_WIPE);
                 }
                 else if (uiData == DONE)
+                {
                     StartNextDialogueText(SAY_TIRION_BEAST_SLAY);
+                }
                 m_auiEncounter[uiType] = uiData;
                 break;
             case TYPE_JARAXXUS:
@@ -292,12 +302,16 @@ struct is_trial_of_the_crusader : public InstanceScript
                     StartNextDialogueText(NPC_RAMSEY_2);
                 }
                 else if (uiData == DONE)
+                {
                     StartNextDialogueText(SAY_JARAXXUS_DEATH);
+                }
                 m_auiEncounter[uiType] = uiData;
                 break;
             case TYPE_FACTION_CHAMPIONS:
                 if (uiData == SPECIAL)
+                {
                     StartNextDialogueText(m_auiEncounter[uiType] != FAIL ? uint8(SAY_TIRION_PVP_INTRO_1) : uint8(TYPE_FACTION_CHAMPIONS));
+                }
                 else if (uiData == FAIL)
                 {
                     SetData(TYPE_WIPE_COUNT, m_auiEncounter[TYPE_WIPE_COUNT] + 1);
@@ -314,7 +328,9 @@ struct is_trial_of_the_crusader : public InstanceScript
                 if (uiData == SPECIAL)
                 {
                     if (Creature* pTirion = GetSingleCreatureFromStorage(NPC_TIRION_A))
+                    {
                         DoScriptText(m_auiEncounter[uiType] != FAIL ? SAY_TIRION_TWINS_INTRO : SAY_RAID_INTRO_SHORT, pTirion);
+                    }
                     StartNextDialogueText(TYPE_TWIN_VALKYR);
                 }
                 else if (uiData == FAIL)
@@ -323,19 +339,29 @@ struct is_trial_of_the_crusader : public InstanceScript
                     StartNextDialogueText(NPC_RAMSEY_4);
                 }
                 else if (uiData == DONE)
+                {
                     StartNextDialogueText(EVENT_TWINS_KILLED);
+                }
                 m_auiEncounter[uiType] = uiData;
                 break;
             case TYPE_ANUBARAK:
                 if (uiData == SPECIAL)
+                {
                     StartNextDialogueText(TYPE_ANUBARAK);
+                }
                 else if (uiData == FAIL)
+                {
                     SetData(TYPE_WIPE_COUNT, m_auiEncounter[TYPE_WIPE_COUNT] + 1);
+                }
                 else if (uiData == DONE)
+                {
                     DoHandleEventEpilogue();
+                }
                 // Handle combat door
                 if (uiData != SPECIAL)
+                {
                     DoUseDoorOrButton(GO_WEB_DOOR);
+                }
                 m_auiEncounter[uiType] = uiData;
                 break;
             default:
@@ -361,10 +387,14 @@ struct is_trial_of_the_crusader : public InstanceScript
         uint32 GetData(uint32 uiType) const override
         {
             if (uiType < MAX_ENCOUNTER)
+            {
                 return m_auiEncounter[uiType];
+            }
 
             if (uiType == TYPE_DATA_IS_HEROIC)
+            {
                 return uint32(IsHeroicDifficulty());
+            }
 
             return 0;
         }
@@ -390,7 +420,9 @@ struct is_trial_of_the_crusader : public InstanceScript
 
             for (uint8 i = TYPE_NORTHREND_BEASTS; i < MAX_ENCOUNTER; ++i)
             if (m_auiEncounter[i] == IN_PROGRESS)            // Do not load an encounter as "In Progress" - reset it instead.
+            {
                 m_auiEncounter[i] = NOT_STARTED;
+            }
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
@@ -402,21 +434,35 @@ struct is_trial_of_the_crusader : public InstanceScript
         {
             Player* pPlayer = GetPlayerInMap();
             if (!pPlayer)
+            {
                 return;
+            }
 
             if (uiEntry)
+            {
                 ;
+            }
             // For initial case, figure which Ramsay to summon
             else if (m_auiEncounter[TYPE_TWIN_VALKYR] == DONE)
+            {
                 uiEntry = NPC_RAMSEY_5;
+            }
             else if (m_auiEncounter[TYPE_FACTION_CHAMPIONS] == DONE)
+            {
                 uiEntry = NPC_RAMSEY_4;
+            }
             else if (m_auiEncounter[TYPE_JARAXXUS] == DONE)
+            {
                 uiEntry = NPC_RAMSEY_3;
+            }
             else if (m_auiEncounter[TYPE_NORTHREND_BEASTS] == DONE)
+            {
                 uiEntry = NPC_RAMSEY_2;
+            }
             else
+            {
                 uiEntry = NPC_RAMSEY_1;
+            }
 
             pPlayer->SummonCreature(uiEntry, aRamsayPositions[0][0], aRamsayPositions[0][1], aRamsayPositions[0][2], aRamsayPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0);
         }
@@ -436,12 +482,16 @@ struct is_trial_of_the_crusader : public InstanceScript
                 if (Player* pPlayer = GetPlayerInMap())
                 {
                     if (Creature* pBeasts = pPlayer->SummonCreature(NPC_BEAST_COMBAT_STALKER, aSpawnPositions[0][0], aSpawnPositions[0][1], aSpawnPositions[0][2], aSpawnPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0))
+                    {
                         pBeasts->SummonCreature(NPC_GORMOK, aSpawnPositions[1][0], aSpawnPositions[1][1], aSpawnPositions[1][2], aSpawnPositions[1][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                    }
                 }
                 break;
             case NPC_FIZZLEBANG:
                 if (Player* pPlayer = GetPlayerInMap())
+                {
                     pPlayer->SummonCreature(NPC_FIZZLEBANG, aSpawnPositions[5][0], aSpawnPositions[5][1], aSpawnPositions[5][2], aSpawnPositions[5][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                }
                 break;
             case SAY_WILFRED_JARAXXUS_INTRO_1:
                 DoUseDoorOrButton(GO_MAIN_GATE); // Close main gate
@@ -463,15 +513,21 @@ struct is_trial_of_the_crusader : public InstanceScript
             case SAY_WILFRED_JARAXXUS_INTRO_3:
                 if (Player* pPlayer = GetPlayerInMap())
                 if (Creature* pJaraxxus = pPlayer->SummonCreature(NPC_JARAXXUS, aSpawnPositions[6][0], aSpawnPositions[6][1], aSpawnPositions[6][2], aSpawnPositions[6][3], TEMPSUMMON_DEAD_DESPAWN, 0))
+                {
                     pJaraxxus->GetMotionMaster()->MovePoint(POINT_COMBAT_POSITION, aMovePositions[3][0], aMovePositions[3][1], aMovePositions[3][2]);
+                }
                 break;
             case EVENT_KILL_FIZZLEBANG:
                 if (Creature* pJaraxxus = GetSingleCreatureFromStorage(NPC_JARAXXUS))
+                {
                     pJaraxxus->CastSpell(pJaraxxus, SPELL_FEL_LIGHTNING_KILL, true);
+                }
                 break;
             case EVENT_JARAXXUS_START_ATTACK:
                 if (Creature* pJaraxxus = GetSingleCreatureFromStorage(NPC_JARAXXUS))
+                {
                     pJaraxxus->SetInCombatWithZone();
+                }
                 break;
             case EVENT_SUMMON_TWINS:
                 if (Player* pPlayer = GetPlayerInMap())
@@ -482,15 +538,21 @@ struct is_trial_of_the_crusader : public InstanceScript
                 break;
             case SAY_LKING_ANUB_INTRO_1:
                 if (Player* pPlayer = GetPlayerInMap())
+                {
                     pPlayer->SummonCreature(NPC_WORLD_TRIGGER_LARGE, aSpawnPositions[9][0], aSpawnPositions[9][1], aSpawnPositions[9][2], aSpawnPositions[9][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                }
                 break;
             case EVENT_ARTHAS_PORTAL:
                 if (Creature* pWorldTriggerLarge = GetSingleCreatureFromStorage(NPC_WORLD_TRIGGER_LARGE))
+                {
                     pWorldTriggerLarge->CastSpell(pWorldTriggerLarge, SPELL_ARTHAS_PORTAL, true);
+                }
                 break;
             case EVENT_SUMMON_THE_LICHKING:
                 if (Player* pPlayer = GetPlayerInMap())
+                {
                     pPlayer->SummonCreature(NPC_THE_LICHKING_VISUAL, aSpawnPositions[10][0], aSpawnPositions[10][1], aSpawnPositions[10][2], aSpawnPositions[10][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                }
                 break;
             case EVENT_DESTROY_FLOOR:
                 if (GameObject* pColiseumFloor = GetSingleGameObjectFromStorage(GO_COLISEUM_FLOOR))
@@ -508,10 +570,14 @@ struct is_trial_of_the_crusader : public InstanceScript
                 }
 
                 if (Creature* pLichKing = GetSingleCreatureFromStorage(NPC_THE_LICHKING))
+                {
                     pLichKing->CastSpell(pLichKing, SPELL_DESTROY_FLOOR_KNOCKUP, true);
+                }
 
                 if (Creature* pWorldTriggerLarge = GetSingleCreatureFromStorage(NPC_WORLD_TRIGGER_LARGE))
+                {
                     pWorldTriggerLarge->ForcedDespawn();
+                }
                 break;
             }
         }
@@ -520,11 +586,15 @@ struct is_trial_of_the_crusader : public InstanceScript
         {
             Player* pPlayer = GetPlayerInMap();
             if (!pPlayer)
+            {
                 return;
+            }
 
             // Spawn Tirion and the mage
             if (Creature* pTirion = pPlayer->SummonCreature(NPC_TIRION_B, aSpawnPositions[12][0], aSpawnPositions[12][1], aSpawnPositions[12][2], aSpawnPositions[12][3], TEMPSUMMON_CORPSE_DESPAWN, 0))
+            {
                 DoScriptText(SAY_TIRION_EPILOGUE, pTirion);
+            }
 
             pPlayer->SummonCreature(NPC_ARGENT_MAGE, aSpawnPositions[13][0], aSpawnPositions[13][1], aSpawnPositions[13][2], aSpawnPositions[13][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
 
@@ -534,13 +604,21 @@ struct is_trial_of_the_crusader : public InstanceScript
             if (IsHeroicDifficulty())
             {
                 if (GetData(TYPE_WIPE_COUNT) == 0)
+                {
                     DoRespawnGameObject(Is25ManDifficulty() ? GO_TRIBUTE_CHEST_25H_50 : GO_TRIBUTE_CHEST_10H_50, 60 * MINUTE);
+                }
                 else if (GetData(TYPE_WIPE_COUNT) < 5)
+                {
                     DoRespawnGameObject(Is25ManDifficulty() ? GO_TRIBUTE_CHEST_25H_45 : GO_TRIBUTE_CHEST_10H_45, 60 * MINUTE);
+                }
                 else if (GetData(TYPE_WIPE_COUNT) < 25)
+                {
                     DoRespawnGameObject(Is25ManDifficulty() ? GO_TRIBUTE_CHEST_25H_25 : GO_TRIBUTE_CHEST_10H_25, 60 * MINUTE);
+                }
                 else
+                {
                     DoRespawnGameObject(Is25ManDifficulty() ? GO_TRIBUTE_CHEST_25H_01 : GO_TRIBUTE_CHEST_10H_01, 60 * MINUTE);
+                }
             }
         }
 

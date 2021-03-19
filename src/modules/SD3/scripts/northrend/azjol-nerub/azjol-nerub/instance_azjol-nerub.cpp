@@ -67,7 +67,9 @@ struct is_azjol_nerub : public InstanceScript
             {
             case GO_DOOR_KRIKTHIR:
                 if (m_auiEncounter[TYPE_KRIKTHIR] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_DOOR_ANUBARAK_1:
             case GO_DOOR_ANUBARAK_2:
@@ -109,13 +111,17 @@ struct is_azjol_nerub : public InstanceScript
             {
                 // Creature enter combat is not equal to having a victim yet.
                 if (!m_playerGuid && pCreature->getVictim())
+                {
                     m_playerGuid = pCreature->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself()->GetObjectGuid();
+                }
             }
             else if (uiEntry == NPC_ANUBAR_CRUSHER)
             {
                 // Only for the first try
                 if (m_bGauntletStarted)
+                {
                     return;
+                }
 
                 DoScriptText(SAY_CRUSHER_AGGRO, pCreature);
 
@@ -143,7 +149,9 @@ struct is_azjol_nerub : public InstanceScript
         {
             uint32 uiEntry = pCreature->GetEntry();
             if (uiEntry == NPC_GASHRA || uiEntry == NPC_NARJIL || uiEntry == NPC_SILTHIK)
+            {
                 m_playerGuid.Clear();
+            }
         }
 
         void OnCreatureDeath(Creature* pCreature) override
@@ -152,7 +160,9 @@ struct is_azjol_nerub : public InstanceScript
             if (uiEntry == NPC_GASHRA || uiEntry == NPC_NARJIL || uiEntry == NPC_SILTHIK)
             {
                 if (m_auiEncounter[TYPE_KRIKTHIR] == NOT_STARTED)
+                {
                     m_uiWatcherTimer = 5000;
+                }
 
                 // Set achiev criteriat to false if one of the watchers dies
                 m_bWatchHimDie = false;
@@ -166,12 +176,16 @@ struct is_azjol_nerub : public InstanceScript
             case TYPE_KRIKTHIR:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == DONE)
+                {
                     DoUseDoorOrButton(GO_DOOR_KRIKTHIR);
+                }
                 break;
             case TYPE_HADRONOX:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == DONE)
+                {
                     ResetHadronoxTriggers();
+                }
                 break;
             case TYPE_ANUBARAK:
                 m_auiEncounter[uiType] = uiData;
@@ -226,7 +240,9 @@ struct is_azjol_nerub : public InstanceScript
         uint32 GetData(uint32 uiType) const override
         {
             if (uiType < MAX_ENCOUNTER)
+            {
                 return m_auiEncounter[uiType];
+            }
 
             return 0;
         }
@@ -240,7 +256,9 @@ struct is_azjol_nerub : public InstanceScript
             case DATA64_ANUB_ASSASIN:
                 // Get a random summon target
                 if (m_vAssassinSummonTargetsVect.size() > 0)
+                {
                     return m_vAssassinSummonTargetsVect[urand(0, m_vAssassinSummonTargetsVect.size() - 1)].GetRawValue();
+                }
                 break;
             case DATA64_ANUB_GUARDIAN:
                 return m_guardianSummonTarget.GetRawValue();
@@ -283,7 +301,9 @@ struct is_azjol_nerub : public InstanceScript
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     m_auiEncounter[i] = NOT_STARTED;
+                }
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;
@@ -299,7 +319,9 @@ struct is_azjol_nerub : public InstanceScript
                     m_uiWatcherTimer = 0;
                 }
                 else
+                {
                     m_uiWatcherTimer -= uiDiff;
+                }
             }
 
             if (m_uiGauntletEndTimer)
@@ -316,12 +338,16 @@ struct is_azjol_nerub : public InstanceScript
 
                     // Allow him to evade - this will start the waypoint movement
                     if (Creature* pHadronox = GetSingleCreatureFromStorage(NPC_HADRONOX))
+                    {
                         pHadronox->AI()->EnterEvadeMode();
+                    }
 
                     m_uiGauntletEndTimer = 0;
                 }
                 else
+                {
                     m_uiGauntletEndTimer -= uiDiff;
+                }
             }
         }
 
@@ -332,7 +358,9 @@ struct is_azjol_nerub : public InstanceScript
             for (GuidList::const_iterator itr = m_lSpiderTriggersGuids.begin(); itr != m_lSpiderTriggersGuids.end(); ++itr)
             {
                 if (Creature* pTrigger = instance->GetCreature(*itr))
+                {
                     pTrigger->RemoveAllAurasOnEvade();
+                }
             }
         }
 
@@ -342,7 +370,9 @@ struct is_azjol_nerub : public InstanceScript
             Creature* pKrikthir = GetSingleCreatureFromStorage(NPC_KRIKTHIR);
 
             if (!pKrikthir)
+            {
                 return;
+            }
 
             for (uint8 i = 0; i < countof(aWatchers); ++i)
             {
@@ -351,9 +381,13 @@ struct is_azjol_nerub : public InstanceScript
                     if (pTemp->IsAlive())
                     {
                         if (pAttacker && urand(0, 1))
+                        {
                             continue;
+                        }
                         else
+                        {
                             pAttacker = pTemp;
+                        }
                     }
                 }
             }
@@ -368,12 +402,16 @@ struct is_azjol_nerub : public InstanceScript
                 }
             }
             else
+            {
                 pAttacker = pKrikthir;
+            }
 
             if (Player* pTarget = instance->GetPlayer(m_playerGuid))
             {
                 if (pTarget->IsAlive())
+                {
                     pAttacker->AI()->AttackStart(pTarget);
+                }
             }
         }
 
@@ -395,16 +433,24 @@ struct is_azjol_nerub : public InstanceScript
 
                             // One npc below the platform
                             if (fTriggZ < fZ + aSortDistance[0])
+                            {
                                 m_darterSummonTarget = pTrigg->GetObjectGuid();
+                            }
                             // One npc on the boss platform - used to handle the summoned movement
                             else if (fTriggZ < fZ + aSortDistance[1])
+                            {
                                 m_anubSummonTarget = pTrigg->GetObjectGuid();
+                            }
                             // One npc on the upper pathway
                             else if (fTriggZ < fZ + aSortDistance[2])
+                            {
                                 m_guardianSummonTarget = pTrigg->GetObjectGuid();
+                            }
                             // Eight npcs on the upper ledges
                             else if (fTriggZ < fZ + aSortDistance[3])
+                            {
                                 m_vAssassinSummonTargetsVect.push_back(pTrigg->GetObjectGuid());
+                            }
                         }
                     }
                 }

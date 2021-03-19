@@ -398,7 +398,9 @@ struct essence_base_AI : public ScriptedAI
         if (m_pInstance)
         {
             if (Creature* pReliquary = m_pInstance->GetSingleCreatureFromStorage(NPC_RELIQUARY_OF_SOULS))
-            { pReliquary->AI()->EnterEvadeMode(); }
+            {
+                pReliquary->AI()->EnterEvadeMode();
+            }
         }
 
         m_creature->ForcedDespawn();
@@ -407,7 +409,9 @@ struct essence_base_AI : public ScriptedAI
     void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage) override
     {
         if (uiDamage < m_creature->GetHealth())
-        { return; }
+        {
+            return;
+        }
 
         // Prevent glitch if in fake death
         if (m_bIsPhaseFinished)
@@ -430,11 +434,15 @@ struct essence_base_AI : public ScriptedAI
         m_creature->GetMotionMaster()->Clear();
 
         if (!m_pInstance)
-        { return; }
+        {
+            return;
+        }
 
         // Move to home position
         if (Creature* pReliquary = m_pInstance->GetSingleCreatureFromStorage(NPC_RELIQUARY_OF_SOULS))
-        { m_creature->GetMotionMaster()->MovePoint(1, pReliquary->GetPositionX(), pReliquary->GetPositionY(), pReliquary->GetPositionZ()); }
+        {
+            m_creature->GetMotionMaster()->MovePoint(1, pReliquary->GetPositionX(), pReliquary->GetPositionY(), pReliquary->GetPositionZ());
+        }
 
         m_bIsPhaseFinished = true;
 

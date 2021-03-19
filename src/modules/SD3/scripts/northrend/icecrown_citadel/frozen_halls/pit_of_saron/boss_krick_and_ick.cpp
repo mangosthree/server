@@ -127,7 +127,9 @@ struct boss_ick : public CreatureScript
             if (m_pInstance)
             {
                 if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
+                {
                     DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, pKrick);
+                }
             }
         }
 
@@ -148,20 +150,26 @@ struct boss_ick : public CreatureScript
                 }
 
                 if (Creature* pTyrannus = m_pInstance->GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO))
+                {
                     pTyrannus->NearTeleportTo(afTyrannusTeleLoc[0], afTyrannusTeleLoc[1], afTyrannusTeleLoc[2], afTyrannusTeleLoc[3]);
+                }
             }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_KRICK, FAIL);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             // He needs to be mounted manually, not by vehicle_accessories
             if (m_uiMountTimer)
@@ -169,24 +177,34 @@ struct boss_ick : public CreatureScript
                 if (m_uiMountTimer <= uiDiff)
                 {
                     if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
+                    {
                         pKrick->CastSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, true);
+                    }
 
                     m_uiMountTimer = 0;
                 }
                 else
+                {
                     m_uiMountTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Cooldown timer - we need to block all Krick spell during some events
             if (m_uiCooldownTimer)
             {
                 if (m_uiCooldownTimer <= uiDiff)
+                {
                     m_uiCooldownTimer = 0;
+                }
                 else
+                {
                     m_uiCooldownTimer -= uiDiff;
+                }
 
                 return;
             }
@@ -206,7 +224,9 @@ struct boss_ick : public CreatureScript
                 }
             }
             else
+            {
                 m_uiPoisonNovaTimer -= uiDiff;
+            }
 
             if (m_uiPursueTimer < uiDiff)
             {
@@ -227,41 +247,55 @@ struct boss_ick : public CreatureScript
                 }
             }
             else
+            {
                 m_uiPursueTimer -= uiDiff;
+            }
 
             if (m_uiMightKickTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MIGHTY_KICK) == CAST_OK)
+                {
                     m_uiMightKickTimer = 10000;
+                }
             }
             else
+            {
                 m_uiMightKickTimer -= uiDiff;
+            }
 
             if (m_uiToxicWasteTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
+                    {
                         pKrick->CastSpell(pTarget, SPELL_TOXIC_WASTE, true);
+                    }
 
                     m_uiToxicWasteTimer = urand(3000, 5000);
                 }
             }
             else
+            {
                 m_uiToxicWasteTimer -= uiDiff;
+            }
 
             if (m_uiShadowboltTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
+                    {
                         pKrick->CastSpell(pTarget, SPELL_SHADOW_BOLT, true);
+                    }
 
                     m_uiShadowboltTimer = urand(4000, 8000);
                 }
             }
             else
+            {
                 m_uiShadowboltTimer -= uiDiff;
+            }
 
             if (m_uiExplosivBarrageTimer < uiDiff)
             {
@@ -280,7 +314,9 @@ struct boss_ick : public CreatureScript
                 }
             }
             else
+            {
                 m_uiExplosivBarrageTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -348,16 +384,22 @@ struct boss_krick : public CreatureScript
         void SummonedMovementInform(Creature* /*pSummoned*/, uint32 uiMotionType, uint32 uiPointId) override
         {
             if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_KRICK, SPECIAL);
+            }
         }
 
         void UpdateAI(const uint32 /*uiDiff*/) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
         }
     };
 

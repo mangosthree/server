@@ -117,7 +117,9 @@ struct boss_ignis : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_IGNIS, DONE);
+            }
 
             DoCastSpellIfCan(m_creature, SPELL_KILL_ALL_CONSTRUCTS, CAST_TRIGGERED);
             DoScriptText(SAY_DEATH, m_creature);
@@ -126,7 +128,9 @@ struct boss_ignis : public CreatureScript
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
         }
@@ -134,7 +138,9 @@ struct boss_ignis : public CreatureScript
         void Aggro(Unit* /*pWho*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_IGNIS, IN_PROGRESS);
+            }
 
             DoScriptText(SAY_AGGRO, m_creature);
         }
@@ -142,30 +148,40 @@ struct boss_ignis : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_IGNIS, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_SCORCH)
+            {
                 pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_SCORCH_AURA : SPELL_SCORCH_AURA_H, true);
+            }
         }
 
         // TODO: Use the vehicle boarding wrappers when they are implemented in core
         void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
         {
             if (pCaster->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             // Handle the case when passenger is loaded to the second seat
             if (pSpell->Id == SPELL_GRAB_POT)
+            {
                 DoCastSpellIfCan(pCaster, SPELL_SLAG_POT, CAST_TRIGGERED);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiBerserkTimer)
             {
@@ -178,7 +194,9 @@ struct boss_ignis : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiBerserkTimer -= uiDiff;
+                }
             }
 
             if (m_uiFlameJetsTimer < uiDiff)
@@ -191,7 +209,9 @@ struct boss_ignis : public CreatureScript
                 }
             }
             else
+            {
                 m_uiFlameJetsTimer -= uiDiff;
+            }
 
             if (m_uiSlagPotTimer < uiDiff)
             {
@@ -205,7 +225,9 @@ struct boss_ignis : public CreatureScript
                 }
             }
             else
+            {
                 m_uiSlagPotTimer -= uiDiff;
+            }
 
             if (m_uiConstructTimer < uiDiff)
             {
@@ -216,7 +238,9 @@ struct boss_ignis : public CreatureScript
                 }
             }
             else
+            {
                 m_uiConstructTimer -= uiDiff;
+            }
 
             if (m_uiScorchTimer < uiDiff)
             {
@@ -227,7 +251,9 @@ struct boss_ignis : public CreatureScript
                 }
             }
             else
+            {
                 m_uiScorchTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -269,7 +295,9 @@ struct npc_iron_construct : public CreatureScript
         {
             // reset flags if necessary
             if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            {
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            }
 
             DoCastSpellIfCan(m_creature, SPELL_STONED, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_CONSTRUCT_HITTING_YA, CAST_TRIGGERED);
@@ -299,7 +327,9 @@ struct npc_iron_construct : public CreatureScript
                 if (SpellAuraHolder* pHeatAura = m_creature->GetSpellAuraHolder(SPELL_HEAT))
                 {
                     if (pHeatAura && pHeatAura->GetStackAmount() == MAX_HEAT_STACKS)
+                    {
                         DoCastSpellIfCan(m_creature, SPELL_MOLTEN);
+                    }
                 }
             }
         }
@@ -307,11 +337,15 @@ struct npc_iron_construct : public CreatureScript
         void UpdateAI(const uint32 /*uiDiff*/) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // stop attacking after shattered
             if (m_bHasShattered)
+            {
                 return;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -335,7 +369,9 @@ struct spell_ulduar_water_effect : public SpellScript
             {
                 // chill the iron construct if molten (effect handled in core)
                 if (pCreatureTarget->HasAura(SPELL_MOLTEN))
+                {
                     pCreatureTarget->CastSpell(pCreatureTarget, SPELL_CHILL, true);
+                }
             }
             else if (pCreatureTarget->GetEntry() == NPC_SCORCH)
             {

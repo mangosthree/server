@@ -170,10 +170,14 @@ struct is_sethekk_halls : public InstanceScript
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* /*pTarget*/, uint32 /*uiMiscValue1 = 0*/) const override
         {
             if (uiCriteriaId != ACHIEV_CRITA_TURKEY_TIME)
+            {
                 return false;
+            }
 
             if (!pSource)
+            {
                 return false;
+            }
 
             return pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_HAT, 1) && (pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_DRESS, 1)
                     || pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_ROBE, 1) || pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_ATTIRE, 1));

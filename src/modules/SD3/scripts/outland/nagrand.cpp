@@ -269,9 +269,13 @@ struct npc_nagrand_captive : public CreatureScript
             {
             case 7:
                 if (m_creature->GetEntry() == NPC_MAGHAR_CAPTIVE)
+                {
                     DoScriptText(SAY_MAG_MORE, m_creature);
+                }
                 else if (m_creature->GetEntry() == NPC_KURENAI_CAPTIVE)
+                {
                     DoScriptText(urand(0, 1) ? SAY_KUR_AMBUSH_1 : SAY_KUR_AMBUSH_2, m_creature);
+                }
 
                 if (Creature* pTemp = m_creature->SummonCreature(NPC_MURK_PUTRIFIER, m_afAmbushB[0], m_afAmbushB[1], m_afAmbushB[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 25000))
                 {
@@ -285,12 +289,18 @@ struct npc_nagrand_captive : public CreatureScript
                 break;
             case 16:
                 if (m_creature->GetEntry() == NPC_MAGHAR_CAPTIVE)
+                {
                     DoScriptText(SAY_MAG_COMPLETE, m_creature);
+                }
                 else if (m_creature->GetEntry() == NPC_KURENAI_CAPTIVE)
+                {
                     DoScriptText(urand(0, 1) ? SAY_KUR_COMPLETE_1 : SAY_KUR_COMPLETE_2, m_creature);
+                }
 
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     pPlayer->GroupEventHappens(m_creature->GetEntry() == NPC_MAGHAR_CAPTIVE ? QUEST_TOTEM_KARDASH_H : QUEST_TOTEM_KARDASH_A, m_creature);
+                }
 
                 SetRun();
                 break;
@@ -336,7 +346,9 @@ struct npc_nagrand_captive : public CreatureScript
             if (m_uiChainLightningTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAIN_LIGHTNING) == CAST_OK)
+                {
                     m_uiChainLightningTimer = urand(7000, 14000);
+                }
             }
             else
             {
@@ -348,7 +360,9 @@ struct npc_nagrand_captive : public CreatureScript
                 if (m_uiHealTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_HEALING_WAVE) == CAST_OK)
+                    {
                         m_uiHealTimer = 5000;
+                    }
                 }
                 else
                 {
@@ -359,7 +373,9 @@ struct npc_nagrand_captive : public CreatureScript
             if (m_uiFrostShockTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_SHOCK) == CAST_OK)
+                {
                     m_uiFrostShockTimer = urand(7500, 15000);
+                }
             }
             else
             {
@@ -514,13 +530,17 @@ struct npc_rethhedron : public CreatureScript
 
             // npc is not allowed to die
             if (m_creature->GetHealth() < uiDamage)
+            {
                 uiDamage = 0;
+            }
         }
 
         void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
         {
             if (uiMoveType != POINT_MOTION_TYPE)
+            {
                 return;
+            }
 
             if (uiPointId == POINT_ID_PORTAL_FRONT)
             {
@@ -540,7 +560,9 @@ struct npc_rethhedron : public CreatureScript
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_RETHHEDRONS_TARGET)
+            {
                 pSummoned->CastSpell(pSummoned, SPELL_ABYSSAL_IMPACT, true);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -554,38 +576,56 @@ struct npc_rethhedron : public CreatureScript
                     m_uiDelayTimer = 0;
                 }
                 else
+                {
                     m_uiDelayTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_bEventFinished)
+            {
                 return;
+            }
 
             if (m_uiCrippleTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CRIPPLE) == CAST_OK)
+                {
                     m_uiCrippleTimer = urand(20000, 30000);
+                }
             }
             else
+            {
                 m_uiCrippleTimer -= uiDiff;
+            }
 
             if (m_uiShadowBoltTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT) == CAST_OK)
+                {
                     m_uiShadowBoltTimer = urand(3000, 5000);
+                }
             }
             else
+            {
                 m_uiShadowBoltTimer -= uiDiff;
+            }
 
             if (m_uiAbyssalTossTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ABYSSAL_TOSS) == CAST_OK)
+                {
                     m_uiAbyssalTossTimer = urand(500, 2000);
+                }
             }
             else
+            {
                 m_uiAbyssalTossTimer -= uiDiff;
+            }
 
             if (!m_bLowHpYell && m_creature->GetHealthPercent() < 40.0f)
             {

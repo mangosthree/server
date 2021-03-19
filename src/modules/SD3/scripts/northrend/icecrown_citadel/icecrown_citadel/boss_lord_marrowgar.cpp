@@ -112,16 +112,22 @@ struct boss_lord_marrowgar : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_MARROWGAR, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             if (urand(0, 1))
+            {
                 DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -129,19 +135,25 @@ struct boss_lord_marrowgar : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_MARROWGAR, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_MARROWGAR, FAIL);
+            }
         }
 
         void MovementInform(uint32 uiType, uint32 uiPointId) override
         {
             if (uiType != POINT_MOTION_TYPE)
+            {
                 return;
+            }
 
             if (uiPointId)
             {
@@ -167,7 +179,9 @@ struct boss_lord_marrowgar : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             switch (m_uiPhase)
             {
@@ -177,10 +191,14 @@ struct boss_lord_marrowgar : public CreatureScript
                 if (m_uiColdflameTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_COLDFLAME) == CAST_OK)
+                    {
                         m_uiColdflameTimer = 5000;
+                    }
                 }
                 else
+                {
                     m_uiColdflameTimer -= uiDiff;
+                }
 
                 // Bone Storm
                 if (m_uiBoneStormTimer < uiDiff)
@@ -196,16 +214,22 @@ struct boss_lord_marrowgar : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiBoneStormTimer -= uiDiff;
+                }
 
                 // Bone Slice
                 if (m_uiBoneSliceTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BONE_SLICE) == CAST_OK)
+                    {
                         m_uiBoneSliceTimer = 1000;
+                    }
                 }
                 else
+                {
                     m_uiBoneSliceTimer -= uiDiff;
+                }
 
                 DoMeleeAttackIfReady();
 
@@ -226,7 +250,9 @@ struct boss_lord_marrowgar : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiBoneStormChargeTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_BONE_STORM_CHARGING:
@@ -250,13 +276,17 @@ struct boss_lord_marrowgar : public CreatureScript
                             m_uiPhase = PHASE_NORMAL;
                         }
                         else
+                        {
                             m_uiPhase = PHASE_BONE_STORM_CHARGE;
+                        }
 
                         m_uiBoneStormColdflameTimer = 1000;
                     }
                 }
                 else
+                {
                     m_uiBoneStormColdflameTimer -= uiDiff;
+                }
 
                 break;
             }
@@ -279,7 +309,9 @@ struct boss_lord_marrowgar : public CreatureScript
             }
             }
             else
-            m_uiBoneSpikeTimer -= uiDiff;
+            {
+                m_uiBoneSpikeTimer -= uiDiff;
+            }
             }*/
 
             // Berserk
@@ -294,7 +326,9 @@ struct boss_lord_marrowgar : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiBerserkTimer -= uiDiff;
+                }
             }
         }
     };

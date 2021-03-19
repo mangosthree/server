@@ -153,7 +153,9 @@ struct boss_deathbringer_saurfang : public CreatureScript
             m_uiBerserkTimer = 8 * MINUTE * IN_MILLISECONDS;
 
             if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
+            {
                 m_uiBerserkTimer = 6 * MINUTE * IN_MILLISECONDS;
+            }
 
             m_bIsFrenzied = false;
 
@@ -166,7 +168,9 @@ struct boss_deathbringer_saurfang : public CreatureScript
             DoCastSpellIfCan(m_creature, SPELL_BLOOD_POWER, CAST_TRIGGERED);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, IN_PROGRESS);
+            }
         }
 
         void MoveInLineOfSight(Unit* pWho) override
@@ -175,7 +179,9 @@ struct boss_deathbringer_saurfang : public CreatureScript
             {
                 m_creature->GetMotionMaster()->MovePoint(POINT_ID_INTRO, fIntroPosition[0], fIntroPosition[1], fIntroPosition[2]);
                 if (m_pInstance)
+                {
                     m_pInstance->DoUseDoorOrButton(GO_SAURFANG_DOOR);
+                }
                 m_bIsIntroDone = true;
             }
 
@@ -185,10 +191,14 @@ struct boss_deathbringer_saurfang : public CreatureScript
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             if (urand(0, 1))
+            {
                 DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -197,13 +207,17 @@ struct boss_deathbringer_saurfang : public CreatureScript
             DoCastSpellIfCan(m_creature, SPELL_REMOVE_MARKS, CAST_TRIGGERED);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, FAIL);
+            }
         }
 
         void EnterEvadeMode() override
@@ -214,7 +228,9 @@ struct boss_deathbringer_saurfang : public CreatureScript
 
             // Boss needs to evade to the point in front of the door
             if (m_creature->IsAlive())
+            {
                 m_creature->GetMotionMaster()->MovePoint(POINT_ID_EVADE, fIntroPosition[0], fIntroPosition[1], fIntroPosition[2]);
+            }
 
             m_creature->SetLootRecipient(nullptr);
 
@@ -224,19 +240,25 @@ struct boss_deathbringer_saurfang : public CreatureScript
         void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
         {
             if (uiMoveType != POINT_MOTION_TYPE)
+            {
                 return;
+            }
 
             if (uiPointId == POINT_ID_EVADE)
             {
                 m_creature->SetFacingTo(fIntroPosition[3]);
 
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, FAIL);
+                }
             }
             else if (uiPointId == POINT_ID_INTRO)
             {
                 if (m_pInstance)
+                {
                     m_pInstance->DoUseDoorOrButton(GO_SAURFANG_DOOR);
+                }
 
                 // Note: this should be done only after the intro event is finished
                 // ToDo: move this to the proper place after the intro will be implemented
@@ -254,7 +276,9 @@ struct boss_deathbringer_saurfang : public CreatureScript
 
             // Note: the summoned should be activated only after 2-3 seconds after summon - can be done in eventAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
                 pSummoned->AI()->AttackStart(pTarget);
+            }
         }
 
         // Wrapper to help get a random player for the Mark of the Fallen Champion
@@ -269,20 +293,28 @@ struct boss_deathbringer_saurfang : public CreatureScript
                 if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
                     if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget != m_creature->getVictim() && !pTarget->HasAura(SPELL_MARK_FALLEN_CHAMPION))
+                    {
                         suitableTargets.push_back(pTarget);
+                    }
                 }
             }
 
             if (suitableTargets.empty())
+            {
                 return m_creature->getVictim();
+            }
             else
+            {
                 return suitableTargets[urand(0, suitableTargets.size() - 1)];
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Mark of the Fallen Champion
             // ToDo: enable this when blood power is fully supported by the core
@@ -323,35 +355,49 @@ struct boss_deathbringer_saurfang : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiBerserkTimer -= uiDiff;
+                }
             }
 
             // Rune of Blood
             if (m_uiRuneOfBloodTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RUNE_OF_BLOOD) == CAST_OK)
+                {
                     m_uiRuneOfBloodTimer = 25000;
+                }
             }
             else
+            {
                 m_uiRuneOfBloodTimer -= uiDiff;
+            }
 
             // Boiling Blood
             if (m_uiBoilingBloodTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BOILING_BLOOD) == CAST_OK)
+                {
                     m_uiBoilingBloodTimer = 15000;
+                }
             }
             else
+            {
                 m_uiBoilingBloodTimer -= uiDiff;
+            }
 
             // Blood Nova
             if (m_uiBloodNovaTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BLOOD_NOVA) == CAST_OK)
+                {
                     m_uiBloodNovaTimer = 20000;
+                }
             }
             else
+            {
                 m_uiBloodNovaTimer -= uiDiff;
+            }
 
             // Call Blood Beasts
             if (m_uiBloodBeastsTimer < uiDiff)
@@ -372,7 +418,9 @@ struct boss_deathbringer_saurfang : public CreatureScript
                 m_uiScentOfBloodTimer = 7000;
             }
             else
+            {
                 m_uiBloodBeastsTimer -= uiDiff;
+            }
 
             // Scent of Blood
             if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
@@ -386,7 +434,9 @@ struct boss_deathbringer_saurfang : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiScentOfBloodTimer -= uiDiff;
+                }
             }
 
             DoMeleeAttackIfReady();

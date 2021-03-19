@@ -88,7 +88,9 @@ struct npc_oculus_drake : public CreatureScript
 
             // Another aura for the Ruby drake
             if (m_creature->GetEntry() == NPC_RUBY_DRAKE)
+            {
                 DoCastSpellIfCan(m_creature, SPELL_EVASIVE_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -109,10 +111,14 @@ struct npc_oculus_drake : public CreatureScript
         void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
         {
             if (pCaster->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             if (pSpell->Id == 49464 || pSpell->Id == 49346 || pSpell->Id == 49460)
+            {
                 DoCastSpellIfCan(m_creature, SPELL_FLIGHT, CAST_TRIGGERED);
+            }
         }
 
         // TODO: Enable the wrappers below, when they will be properly supported by the core
@@ -120,7 +126,9 @@ struct npc_oculus_drake : public CreatureScript
         void PassengerBoarded(Unit* pPassenger, uint8 uiSeat) override
         {
         if (pPassenger->GetTypeId() != TYPEID_PLAYER)
-        return;
+        {
+            return;
+        }
 
         // Set vehicle auras
         DoCastSpellIfCan(m_creature, SPELL_FLIGHT, CAST_TRIGGERED);

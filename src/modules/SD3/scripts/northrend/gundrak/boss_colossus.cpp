@@ -91,7 +91,9 @@ struct boss_drakkari_elemental : public CreatureScript
         void DamageTaken(Unit* /*pDoneBy*/, uint32& /*uiDamage*/) override
         {
             if (!m_bIsFirstEmerge)
+            {
                 return;
+            }
 
             if (m_creature->GetHealthPercent() < 50.0f)
             {
@@ -105,7 +107,9 @@ struct boss_drakkari_elemental : public CreatureScript
             if (m_pInstance)
             {
                 if (Creature* pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
+                {
                     pColossus->AI()->EnterEvadeMode();
+                }
             }
 
             m_creature->ForcedDespawn();
@@ -117,7 +121,9 @@ struct boss_drakkari_elemental : public CreatureScript
             {
                 // kill colossus on death - this will finish the encounter
                 if (Creature* pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
+                {
                     pColossus->DealDamage(pColossus, pColossus->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                }
             }
         }
 
@@ -134,18 +140,24 @@ struct boss_drakkari_elemental : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiSurgeTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_SURGE) == CAST_OK)
+                    {
                         m_uiSurgeTimer = urand(12000, 17000);
+                    }
                 }
             }
             else
+            {
                 m_uiSurgeTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -199,19 +211,25 @@ struct boss_drakkari_colossus : public CreatureScript
             DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_MORTAL_STRIKES : SPELL_MORTAL_STRIKES_H);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_COLOSSUS, IN_PROGRESS);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_COLOSSUS, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_COLOSSUS, FAIL);
+            }
         }
 
         void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
@@ -237,19 +255,25 @@ struct boss_drakkari_colossus : public CreatureScript
                 if (!m_bFirstEmerge)
                 {
                     if (CreatureAI* pBossAI = pSummoned->AI())
+                    {
                         pBossAI->ReceiveAIEvent(AI_EVENT_CUSTOM_A, m_creature, m_creature, 0);
+                    }
                 }
 
                 m_bFirstEmerge = false;
                 if (m_creature->getVictim())
+                {
                     pSummoned->AI()->AttackStart(m_creature->getVictim());
+                }
             }
         }
 
         void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
         {
             if (m_bFirstEmerge && m_creature->GetHealthPercent() < 50.0f)
+            {
                 DoEmergeElemental();
+            }
             else if (uiDamage >= m_creature->GetHealth())
             {
                 uiDamage = 0;
@@ -265,7 +289,9 @@ struct boss_drakkari_colossus : public CreatureScript
                 ++m_uiMojosGathered;
 
                 if (m_uiMojosGathered == MAX_COLOSSUS_MOJOS)
+                {
                     m_uiColossusStartTimer = 1000;
+                }
             }
         }
 
@@ -273,7 +299,9 @@ struct boss_drakkari_colossus : public CreatureScript
         {
             // Avoid casting the merge spell twice
             if (m_creature->HasAura(SPELL_FREEZE_ANIM))
+            {
                 return;
+            }
 
             if (DoCastSpellIfCan(m_creature, SPELL_EMERGE, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
             {
@@ -295,11 +323,15 @@ struct boss_drakkari_colossus : public CreatureScript
                     m_uiColossusStartTimer = 0;
                 }
                 else
+                {
                     m_uiColossusStartTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiMightyBlowTimer < uiDiff)
             {
@@ -307,7 +339,9 @@ struct boss_drakkari_colossus : public CreatureScript
                 m_uiMightyBlowTimer = 10000;
             }
             else
+            {
                 m_uiMightyBlowTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -351,7 +385,9 @@ struct npc_living_mojo : public CreatureScript
         {
             // Don't attack if is part of the Colossus event
             if (m_bIsPartOfColossus)
+            {
                 return;
+            }
 
             ScriptedAI::AttackStart(pWho);
         }
@@ -359,7 +395,9 @@ struct npc_living_mojo : public CreatureScript
         void MovementInform(uint32 uiType, uint32 uiPointId) override
         {
             if (uiType != POINT_MOTION_TYPE)
+            {
                 return;
+            }
 
             if (uiPointId)
             {
@@ -371,7 +409,9 @@ struct npc_living_mojo : public CreatureScript
                     if (Creature* pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
                     {
                         if (CreatureAI* pBossAI = pColossus->AI())
+                        {
                             pBossAI->ReceiveAIEvent(AI_EVENT_CUSTOM_A, m_creature, m_creature, 0);
+                        }
                     }
                 }
             }
@@ -380,7 +420,9 @@ struct npc_living_mojo : public CreatureScript
         void EnterEvadeMode() override
         {
             if (!m_bIsPartOfColossus)
+            {
                 ScriptedAI::EnterEvadeMode();
+            }
             // Force the Mojo to move to the Colossus position
             else
             {
@@ -390,7 +432,9 @@ struct npc_living_mojo : public CreatureScript
                     m_creature->GetPosition(fX, fY, fZ);
 
                     if (Creature* pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
+                    {
                         pColossus->GetPosition(fX, fY, fZ);
+                    }
 
                     m_creature->SetWalk(false);
                     m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
@@ -406,15 +450,21 @@ struct npc_living_mojo : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiMojoWaveTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_MOJO_WAVE : SPELL_MOJO_WAVE_H) == CAST_OK)
+                {
                     m_uiMojoWaveTimer = urand(15000, 18000);
+                }
             }
             else
+            {
                 m_uiMojoWaveTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

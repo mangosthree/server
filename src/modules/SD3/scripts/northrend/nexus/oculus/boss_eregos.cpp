@@ -99,7 +99,9 @@ struct boss_eregos : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_EREGOS, IN_PROGRESS);
+            }
         }
 
         void AttackStart(Unit* pWho) override
@@ -128,13 +130,17 @@ struct boss_eregos : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_EREGOS, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_EREGOS, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -145,28 +151,40 @@ struct boss_eregos : public CreatureScript
 
                 // If this happens then something is really wrong
                 if (m_vAnomalyTargets.empty())
+                {
                     return;
+                }
 
                 if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_vAnomalyTargets[m_uiAnomalyTargetIndex]))
+                {
                     pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
+                }
 
                 if (m_uiAnomalyTargetIndex < m_vAnomalyTargets.size() - 1)
+                {
                     ++m_uiAnomalyTargetIndex;
+                }
             }
             else if (pSummoned->GetEntry() == NPC_GREATER_LEY_WHELP)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     pSummoned->AI()->AttackStart(pTarget);
+                }
             }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_creature->HasAura(SPELL_PLANAR_SHIFT))
+            {
                 return;
+            }
 
             if (m_creature->GetHealthPercent() < m_fHpPercent)
             {
@@ -182,7 +200,9 @@ struct boss_eregos : public CreatureScript
                         if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
                         {
                             if (pTarget->GetEntry() == NPC_RUBY_DRAKE || pTarget->GetEntry() == NPC_AMBER_DRAKE || pTarget->GetEntry() == NPC_EMERALD_DRAKE)
+                            {
                                 m_vAnomalyTargets.push_back(pTarget->GetObjectGuid());
+                            }
                         }
                     }
 
@@ -207,11 +227,15 @@ struct boss_eregos : public CreatureScript
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ARCANE_BARRAGE : SPELL_ARCANE_BARRAGE_H) == CAST_OK)
+                    {
                         m_uiArcaneBarrageTimer = urand(2000, 3000);
+                    }
                 }
             }
             else
+            {
                 m_uiArcaneBarrageTimer -= uiDiff;
+            }
 
             if (m_uiSummonWhelpsTimer < uiDiff)
             {
@@ -219,19 +243,27 @@ struct boss_eregos : public CreatureScript
                 for (uint8 i = 0; i < 4; ++i)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_LEY_WHELP, CAST_TRIGGERED) == CAST_OK)
+                    {
                         m_uiSummonWhelpsTimer = 20000;
+                    }
                 }
             }
             else
+            {
                 m_uiSummonWhelpsTimer -= uiDiff;
+            }
 
             if (m_uiArcaneVolleyTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ARCANE_VOLLEY : SPELL_ARCANE_VOLLEY_H) == CAST_OK)
+                {
                     m_uiArcaneVolleyTimer = urand(10000, 15000);
+                }
             }
             else
+            {
                 m_uiArcaneVolleyTimer -= uiDiff;
+            }
 
             if (m_uiEnrageTimer < uiDiff)
             {
@@ -242,7 +274,9 @@ struct boss_eregos : public CreatureScript
                 }
             }
             else
+            {
                 m_uiEnrageTimer -= uiDiff;
+            }
         }
     };
 
@@ -278,7 +312,9 @@ struct npc_planar_anomaly : public CreatureScript
         void MoveInLineOfSight(Unit* pWho) override
         {
             if (m_bHasBlastCasted)
+            {
                 return;
+            }
 
             // Check for the players mounted on the vehicles
             if (pWho->GetTypeId() == TYPEID_PLAYER)
@@ -297,7 +333,9 @@ struct npc_planar_anomaly : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (m_bHasBlastCasted)
+            {
                 return;
+            }
 
             if (m_uiPlanarBlastTimer < uiDiff)
             {
@@ -308,7 +346,9 @@ struct npc_planar_anomaly : public CreatureScript
                 }
             }
             else
+            {
                 m_uiPlanarBlastTimer -= uiDiff;
+            }
         }
     };
 

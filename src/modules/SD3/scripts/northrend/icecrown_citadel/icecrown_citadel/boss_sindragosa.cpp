@@ -180,9 +180,13 @@ struct boss_sindragosa : public CreatureScript
         void SetFlying(bool bIsFlying)
         {
             if (bIsFlying)
+            {
                 m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            }
             else
+            {
                 m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            }
 
             m_creature->SetLevitate(bIsFlying);
             m_creature->SetWalk(bIsFlying);
@@ -197,7 +201,9 @@ struct boss_sindragosa : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SINDRAGOSA, FAIL);
+            }
 
             m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_EAST, SindragosaPosition[8][0], SindragosaPosition[8][1], SindragosaPosition[8][2], false);
         }
@@ -233,13 +239,17 @@ struct boss_sindragosa : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SINDRAGOSA, DONE);
+            }
         }
 
         void MovementInform(uint32 uiMovementType, uint32 uiPointId) override
         {
             if (uiMovementType != POINT_MOTION_TYPE)
+            {
                 return;
+            }
 
             if (uiPointId == SINDRAGOSA_POINT_AIR_EAST)
             {
@@ -267,7 +277,9 @@ struct boss_sindragosa : public CreatureScript
                         DoCastSpellIfCan(m_creature, SPELL_PERMEATING_CHILL, CAST_TRIGGERED);
 
                         if (m_pInstance)
+                        {
                             m_pInstance->SetData(TYPE_SINDRAGOSA, IN_PROGRESS);
+                        }
                     }
 
                     m_uiPhase = SINDRAGOSA_PHASE_GROUND;
@@ -275,7 +287,9 @@ struct boss_sindragosa : public CreatureScript
                     SetCombatMovement(true);
 
                     if (Unit* pVictim = m_creature->getVictim())
+                    {
                         m_creature->GetMotionMaster()->MoveChase(pVictim);
+                    }
                 }
             }
             else if (uiPointId == SINDRAGOSA_POINT_AIR_CENTER)
@@ -313,7 +327,9 @@ struct boss_sindragosa : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Berserk
             if (m_uiBerserkTimer)
@@ -327,7 +343,9 @@ struct boss_sindragosa : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiBerserkTimer -= uiDiff;
+                }
             }
 
             switch (m_uiPhase)
@@ -339,11 +357,15 @@ struct boss_sindragosa : public CreatureScript
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_ICE_TOMB_SINGLE, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_ICE_TOMB) == CAST_OK)
+                        {
                             m_uiIceTombSingleTimer = 15000;
+                        }
                     }
                 }
                 else
+                {
                     m_uiIceTombSingleTimer -= uiDiff;
+                }
 
                 // no break
             case SINDRAGOSA_PHASE_GROUND:
@@ -369,35 +391,49 @@ struct boss_sindragosa : public CreatureScript
                         m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_GROUND_CENTER, SindragosaPosition[0][0], SindragosaPosition[0][1], SindragosaPosition[0][2], false);
                     }
                     else
+                    {
                         m_uiPhaseTimer -= uiDiff;
+                    }
                 }
 
                 // Cleave
                 if (m_uiCleaveTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    {
                         m_uiCleaveTimer = urand(5000, 15000);
+                    }
                 }
                 else
+                {
                     m_uiCleaveTimer -= uiDiff;
+                }
 
                 // Tail Smash
                 if (m_uiTailSmashTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_TAIL_SMASH) == CAST_OK)
+                    {
                         m_uiTailSmashTimer = urand(10000, 20000);
+                    }
                 }
                 else
+                {
                     m_uiTailSmashTimer -= uiDiff;
+                }
 
                 // Frost Breath
                 if (m_uiFrostBreathTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_BREATH) == CAST_OK)
+                    {
                         m_uiFrostBreathTimer = urand(15000, 20000);
+                    }
                 }
                 else
+                {
                     m_uiFrostBreathTimer -= uiDiff;
+                }
 
                 // Unchained Magic
                 if (m_uiUnchainedMagicTimer <= uiDiff)
@@ -409,7 +445,9 @@ struct boss_sindragosa : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiUnchainedMagicTimer -= uiDiff;
+                }
 
                 // Icy Grip and Blistering Cold
                 if (m_uiIcyGripTimer <= uiDiff)
@@ -421,7 +459,9 @@ struct boss_sindragosa : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiIcyGripTimer -= uiDiff;
+                }
 
                 DoMeleeAttackIfReady();
                 break;
@@ -437,7 +477,9 @@ struct boss_sindragosa : public CreatureScript
                     m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_CENTER, SindragosaPosition[1][0], SindragosaPosition[1][1], SindragosaPosition[1][2], false);
                 }
                 else
+                {
                     m_uiPhaseTimer -= uiDiff;
+                }
 
                 // Frost Bomb
                 if (m_uiFrostBombTimer <= uiDiff)
@@ -446,7 +488,9 @@ struct boss_sindragosa : public CreatureScript
                     m_uiFrostBombTimer = 6000;
                 }
                 else
+                {
                     m_uiFrostBombTimer -= uiDiff;
+                }
 
                 break;
             }
@@ -475,7 +519,9 @@ struct npc_rimefang_icc : public CreatureScript
             // Icy Blast - 3 casts on 10man, 6 on 25man
             m_uiIcyBlastMaxCount = 3;
             if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_25MAN))
+            {
                 m_uiIcyBlastMaxCount = 6;
+            }
 
             m_bHasLanded = false;
             m_bIsReady = false;
@@ -506,9 +552,13 @@ struct npc_rimefang_icc : public CreatureScript
         void SetFlying(bool bIsFlying)
         {
             if (bIsFlying)
+            {
                 m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            }
             else
+            {
                 m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            }
 
             m_creature->SetLevitate(bIsFlying);
             m_creature->SetWalk(bIsFlying);
@@ -538,13 +588,17 @@ struct npc_rimefang_icc : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pSpinestalker = m_pInstance->GetSingleCreatureFromStorage(NPC_SPINESTALKER);
             if (!pSpinestalker || !pSpinestalker->IsAlive())
             {
                 if (Creature* pSindragosa = m_creature->SummonCreature(NPC_SINDRAGOSA, SindragosaPosition[7][0], SindragosaPosition[7][1], SindragosaPosition[7][2], 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                {
                     pSindragosa->SetInCombatWithZone();
+                }
             }
         }
 
@@ -556,7 +610,9 @@ struct npc_rimefang_icc : public CreatureScript
             m_creature->CombatStop(true);
 
             if (m_creature->IsAlive())
+            {
                 m_creature->GetMotionMaster()->MovePoint(RIMEFANG_POINT_INITIAL_LAND, SindragosaPosition[3][0], SindragosaPosition[3][1], SindragosaPosition[3][2], false);
+            }
 
             m_creature->SetLootRecipient(nullptr);
 
@@ -566,7 +622,9 @@ struct npc_rimefang_icc : public CreatureScript
         void MovementInform(uint32 uiMovementType, uint32 uiPointId) override
         {
             if (uiMovementType != POINT_MOTION_TYPE)
+            {
                 return;
+            }
 
             if (uiPointId == RIMEFANG_POINT_INITIAL_LAND_AIR)
             {
@@ -586,7 +644,9 @@ struct npc_rimefang_icc : public CreatureScript
                 SetCombatMovement(true);
 
                 if (Unit* pVictim = m_creature->getVictim())
+                {
                     m_creature->GetMotionMaster()->MoveChase(pVictim);
+                }
             }
             else if (uiPointId == RIMEFANG_POINT_AIR)
             {
@@ -597,7 +657,9 @@ struct npc_rimefang_icc : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiPhase == RIMEFANG_PHASE_GROUND)
             {
@@ -605,10 +667,14 @@ struct npc_rimefang_icc : public CreatureScript
                 if (m_uiFrostBreathTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RIMEFANG_FROST_BREATH) == CAST_OK)
+                    {
                         m_uiFrostBreathTimer = urand(5000, 8000);
+                    }
                 }
                 else
+                {
                     m_uiFrostBreathTimer -= uiDiff;
+                }
 
                 // Icy Blast - air phase
                 if (m_uiPhaseTimer <= uiDiff)
@@ -621,7 +687,9 @@ struct npc_rimefang_icc : public CreatureScript
                     return;
                 }
                 else
+                {
                     m_uiPhaseTimer -= uiDiff;
+                }
 
                 DoMeleeAttackIfReady();
             }
@@ -649,7 +717,9 @@ struct npc_rimefang_icc : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiIcyBlastTimer -= uiDiff;
+                }
             }
         }
     };
@@ -691,9 +761,13 @@ struct npc_spinestalker_icc : public CreatureScript
         void SetFlying(bool bIsFlying)
         {
             if (bIsFlying)
+            {
                 m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            }
             else
+            {
                 m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            }
 
             m_creature->SetLevitate(bIsFlying);
             m_creature->SetWalk(bIsFlying);
@@ -702,13 +776,17 @@ struct npc_spinestalker_icc : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pRimefang = m_pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG);
             if (!pRimefang || !pRimefang->IsAlive())
             {
                 if (Creature* pSindragosa = m_creature->SummonCreature(NPC_SINDRAGOSA, SindragosaPosition[7][0], SindragosaPosition[7][1], SindragosaPosition[7][2], 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                {
                     pSindragosa->SetInCombatWithZone();
+                }
             }
         }
 
@@ -735,7 +813,9 @@ struct npc_spinestalker_icc : public CreatureScript
             m_creature->CombatStop(true);
 
             if (m_creature->IsAlive())
+            {
                 m_creature->GetMotionMaster()->MovePoint(SPINESTALKER_POINT_INITIAL_LAND, SindragosaPosition[5][0], SindragosaPosition[5][1], SindragosaPosition[5][2]);
+            }
 
             m_creature->SetLootRecipient(nullptr);
 
@@ -745,7 +825,9 @@ struct npc_spinestalker_icc : public CreatureScript
         void MovementInform(uint32 uiMovementType, uint32 uiPointId) override
         {
             if (uiMovementType != POINT_MOTION_TYPE)
+            {
                 return;
+            }
 
             if (uiPointId == SPINESTALKER_POINT_INITIAL_LAND_AIR)
             {
@@ -763,34 +845,48 @@ struct npc_spinestalker_icc : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Cleave
             if (m_uiCleaveTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SPINESTALKER_CLEAVE) == CAST_OK)
+                {
                     m_uiCleaveTimer = urand(5000, 8000);
+                }
             }
             else
+            {
                 m_uiCleaveTimer -= uiDiff;
+            }
 
             // Tail Sweep
             if (m_uiTailSweepTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SPINESTALKER_TAIL_SWEEP) == CAST_OK)
+                {
                     m_uiTailSweepTimer = urand(4000, 8000);
+                }
             }
             else
+            {
                 m_uiTailSweepTimer -= uiDiff;
+            }
 
             // Bellowing Roar
             if (m_uiBellowingRoarTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SPINESTALKER_BELLOWING_ROAR) == CAST_OK)
+                {
                     m_uiBellowingRoarTimer = urand(8000, 24000);
+                }
             }
             else
+            {
                 m_uiBellowingRoarTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -849,7 +945,9 @@ struct mob_frost_bomb : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiFrostBombTimer -= uiDiff;
+                }
             }
         }
     };

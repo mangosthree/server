@@ -239,7 +239,9 @@ struct npc_shay_leafrunner : public CreatureScript
             {
                 Player* pPlayer = GetLeaderForFollower();
                 if (!pPlayer)
+                {
                     return;
+                }
 
                 DoScriptText(SAY_EVENT_COMPLETE_1, m_creature);
                 DoScriptText(SAY_EVENT_COMPLETE_2, pWho);
@@ -312,7 +314,9 @@ struct npc_shay_leafrunner : public CreatureScript
                         m_creature->GetMotionMaster()->MoveRandomAroundPoint(fX, fY, fZ, 20.0f);
                     }
                     else
+                    {
                         m_uiWanderTimer -= uiDiff;
+                    }
                 }
 
                 return;
@@ -347,7 +351,9 @@ struct spell_npc_shay_leafrunner : public SpellScript
         if (uiSpellId == SPELL_SHAYS_BELL && uiEffIndex == EFFECT_INDEX_0)
         {
             if (pCaster->GetTypeId() != TYPEID_PLAYER)
+            {
                 return true;
+            }
 
             pCreatureTarget->ToCreature()->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget->ToCreature());
             return true;

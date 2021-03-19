@@ -95,14 +95,18 @@ struct boss_hadronox : public CreatureScript
         void Aggro(Unit* pWho) override
         {
             if (pWho->GetTypeId() == TYPEID_PLAYER && m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_HADRONOX, IN_PROGRESS);
+            }
         }
 
         void AttackStart(Unit* pWho) override
         {
             // No more attacks during the movement upstairs
             if ((m_pInstance && m_pInstance->GetData(TYPE_HADRONOX) == SPECIAL) && pWho->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             ScriptedAI::AttackStart(pWho);
         }
@@ -115,13 +119,17 @@ struct boss_hadronox : public CreatureScript
                 for (uint8 i = 0; i < MAX_SPIDERS; ++i)
                 {
                     if (pWho->GetEntry() == aSpiderEntries[i])
+                    {
                         ((Creature*)pWho)->AI()->AttackStart(m_creature);
+                    }
                 }
             }
 
             // No more attacks during the movement upstairs
             if ((m_pInstance && m_pInstance->GetData(TYPE_HADRONOX) == SPECIAL) && pWho->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             ScriptedAI::MoveInLineOfSight(pWho);
         }
@@ -134,7 +142,9 @@ struct boss_hadronox : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_HADRONOX, DONE);
+            }
         }
 
         void EnterEvadeMode() override
@@ -149,7 +159,9 @@ struct boss_hadronox : public CreatureScript
             Reset();
 
             if (!m_creature->IsAlive() || !m_pInstance)
+            {
                 return;
+            }
 
             // Moving upstairs, don't disturb
             if (m_pInstance->GetData(TYPE_HADRONOX) == SPECIAL)
@@ -159,9 +171,13 @@ struct boss_hadronox : public CreatureScript
             }
             // Stay upstairs if evade from players
             else if (m_pInstance->GetData(TYPE_HADRONOX) == IN_PROGRESS)
+            {
                 m_creature->GetMotionMaster()->MovePoint(1, 530.42f, 560.003f, 733.0308f);
+            }
             else
+            {
                 m_creature->GetMotionMaster()->MoveTargetedHome();
+            }
         }
 
         void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
@@ -170,7 +186,9 @@ struct boss_hadronox : public CreatureScript
             if (uiMoveType == POINT_MOTION_TYPE && uiPointId)
             {
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_HADRONOX, FAIL);
+                }
             }
             // Web the doors when upstairs
             else if (uiMoveType == WAYPOINT_MOTION_TYPE && uiPointId == 10)
@@ -214,60 +232,84 @@ struct boss_hadronox : public CreatureScript
                     m_uiGauntletStartTimer = 0;
                 }
                 else
+                {
                     m_uiGauntletStartTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiPierceTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PIERCE_ARMOR) == CAST_OK)
+                {
                     m_uiPierceTimer = urand(8000, 15000);
+                }
             }
             else
+            {
                 m_uiPierceTimer -= uiDiff;
+            }
 
             if (m_uiAcidTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ACID_CLOUD : SPELL_ACID_CLOUD_H) == CAST_OK)
+                    {
                         m_uiAcidTimer = urand(10000, 15000);
+                    }
                 }
             }
             else
+            {
                 m_uiAcidTimer -= uiDiff;
+            }
 
             if (m_uiLeechTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_LEECH_POISON : SPELL_LEECH_POISON_H) == CAST_OK)
+                    {
                         m_uiLeechTimer = urand(10000, 15000);
+                    }
                 }
             }
             else
+            {
                 m_uiLeechTimer -= uiDiff;
+            }
 
             if (m_uiGrabTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_WEB_GRAB : SPELL_WEB_GRAB_H) == CAST_OK)
+                {
                     m_uiGrabTimer = urand(25000, 30000);
+                }
             }
             else
+            {
                 m_uiGrabTimer -= uiDiff;
+            }
 
             if (m_uiTauntTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_TAUNT) == CAST_OK)
+                    {
                         m_uiTauntTimer = urand(7000, 14000);
+                    }
                 }
             }
             else
+            {
                 m_uiTauntTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

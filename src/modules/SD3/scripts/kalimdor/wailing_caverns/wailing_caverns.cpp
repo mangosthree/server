@@ -363,7 +363,7 @@ struct npc_disciple_of_naralex : public CreatureScript
                             {
                                 DoSpawnMob(NPC_NIGHTMARE_ECTOPLASM, aSummonPositions[3][0], aSummonPositions[3][1] + M_PI_F / 7 * i);
                             }
-                            m_uiEventTimer = 0;
+                            m_uiEventTimer = 20000;
                             ++m_uiSubeventPhase;
                             break;
                         case 5:
@@ -382,7 +382,7 @@ struct npc_disciple_of_naralex : public CreatureScript
                                 DoScriptText(EMOTE_VISION, pNaralex);
                             }
                             DoSpawnMob(NPC_MUTANUS, aSummonPositions[4][0], aSummonPositions[4][1]);
-                            m_uiEventTimer = 0;
+                            m_uiEventTimer = 60000;
                             ++m_uiSubeventPhase;
                             break;
                         case 7:

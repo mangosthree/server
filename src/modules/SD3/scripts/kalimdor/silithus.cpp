@@ -673,7 +673,9 @@ struct npc_anachronos_the_ancient : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature && pInvoker->GetTypeId() == TYPEID_PLAYER)
+            {
                 m_playerGuid = pInvoker->GetObjectGuid();
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -771,6 +773,30 @@ struct go_crystalline_tear : public GameObjectScript
     }
 };
 
+
+enum
+{
+    SPELL_FOOLS_PLIGHT = 23504,
+
+    SPELL_SOUL_FLAME = 23272,
+    SPELL_DREADFUL_FRIGHT = 23275,
+    SPELL_CREEPING_DOOM = 23589,
+    SPELL_CRIPPLING_CLIP = 23279,
+
+    EMOTE_IMMOBILIZED = -1001252,
+    SAY_THE_CLEANER_AGGRO = -1001253,
+
+    SPELL_FROST_TRAP = 13810,
+
+    NPC_NELSON_THE_NICE = 14536,
+    GOSSIP_ITEM_NELSON_THE_NICE = -3509002,
+
+    NPC_SOLENOR_THE_SLAYER = 14530,
+    NPC_CREEPING_DOOM = 14761,
+    NPC_THE_CLEANER = 14503,
+
+    QUEST_STAVE_OF_THE_ANCIENTS = 7636,
+};
 void AddSC_silithus()
 {
     Script* s;

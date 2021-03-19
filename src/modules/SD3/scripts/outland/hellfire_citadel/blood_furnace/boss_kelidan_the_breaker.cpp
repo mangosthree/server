@@ -161,7 +161,9 @@ struct boss_kelidan_the_breaker : public CreatureScript
             {
             case AI_EVENT_CUSTOM_A:
                 if (pSender->GetEntry() == NPC_SHADOWMOON_CHANNELER)
+                {
                     m_uiSetupAddsTimer = 2000;
+                }
                 break;
             case AI_EVENT_CUSTOM_B:
                 if (pSender->GetEntry() == NPC_SHADOWMOON_CHANNELER)
@@ -347,7 +349,9 @@ struct mob_shadowmoon_channeler : public CreatureScript
             }
 
             if (Creature* pKelidan = m_pInstance->GetSingleCreatureFromStorage(NPC_KELIDAN_THE_BREAKER))
+            {
                 SendAIEvent(AI_EVENT_CUSTOM_B, pKiller, pKelidan);
+            }
         }
 
         void JustReachedHome() override
@@ -358,7 +362,9 @@ struct mob_shadowmoon_channeler : public CreatureScript
             }
 
             if (Creature* pKelidan = m_pInstance->GetSingleCreatureFromStorage(NPC_KELIDAN_THE_BREAKER))
+            {
                 SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pKelidan);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override

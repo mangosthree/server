@@ -122,20 +122,26 @@ struct boss_krikthir : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_KRIKTHIR, DONE);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
         {
             uint32 uiEntry = pSummoned->GetEntry();
             if (uiEntry == NPC_SKITTERING_SWARMER || uiEntry == NPC_SKITTERING_INFECTOR)
+            {
                 pSummoned->AI()->AttackStart(m_creature->getVictim());
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (!m_bFrenzy && m_creature->GetHealthPercent() <= 10.0f)
             {
@@ -149,18 +155,26 @@ struct boss_krikthir : public CreatureScript
             if (m_uiCurseTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_CURSE_OF_FATIGUE : SPELL_CURSE_OF_FATIGUE_H) == CAST_OK)
+                {
                     m_uiCurseTimer = 20000;
+                }
             }
             else
+            {
                 m_uiCurseTimer -= uiDiff;
+            }
 
             if (m_uiMindFlayTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_MINDFLAY : SPELL_MINDFLAY_H) == CAST_OK)
+                {
                     m_uiMindFlayTimer = 8000;
+                }
             }
             else
+            {
                 m_uiMindFlayTimer -= uiDiff;
+            }
 
             if (m_uiSwarmTimer < uiDiff)
             {
@@ -171,7 +185,9 @@ struct boss_krikthir : public CreatureScript
                 }
             }
             else
+            {
                 m_uiSwarmTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

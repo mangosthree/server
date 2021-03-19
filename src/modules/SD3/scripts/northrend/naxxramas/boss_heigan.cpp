@@ -105,7 +105,9 @@ struct boss_heigan : public CreatureScript
             }
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_HEIGAN, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -118,19 +120,25 @@ struct boss_heigan : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_HEIGAN, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_HEIGAN, FAIL);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiPhase == PHASE_GROUND)
             {
@@ -148,7 +156,9 @@ struct boss_heigan : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiPhaseTimer -= uiDiff;
+                }
 
                 // Fever
                 if (m_uiFeverTimer < uiDiff)
@@ -157,7 +167,9 @@ struct boss_heigan : public CreatureScript
                     m_uiFeverTimer = 21000;
                 }
                 else
+                {
                     m_uiFeverTimer -= uiDiff;
+                }
 
                 // Disruption
                 if (m_uiDisruptionTimer < uiDiff)
@@ -166,7 +178,9 @@ struct boss_heigan : public CreatureScript
                     m_uiDisruptionTimer = 10000;
                 }
                 else
+                {
                     m_uiDisruptionTimer -= uiDiff;
+                }
             }
             else                                                // Platform Phase
             {
@@ -181,7 +195,9 @@ struct boss_heigan : public CreatureScript
                     return;
                 }
                 else
+                {
                     m_uiPhaseTimer -= uiDiff;
+                }
 
                 if (m_uiStartChannelingTimer)
                 {
@@ -192,7 +208,9 @@ struct boss_heigan : public CreatureScript
                         m_uiStartChannelingTimer = 0;           // no more
                     }
                     else
+                    {
                         m_uiStartChannelingTimer -= uiDiff;
+                    }
                 }
             }
 
@@ -209,13 +227,17 @@ struct boss_heigan : public CreatureScript
                 m_uiTauntTimer = urand(20000, 70000);
             }
             else
+            {
                 m_uiTauntTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
 
             // Handling of the erruptions, this is not related to melee attack or spell-casting
             if (!m_pInstance)
+            {
                 return;
+            }
 
             // Eruption
             if (m_uiEruptionTimer < uiDiff)
@@ -224,7 +246,9 @@ struct boss_heigan : public CreatureScript
                 {
                     // Actually this is correct :P
                     if (uiArea == (m_uiPhaseEruption % 6) || uiArea == 6 - (m_uiPhaseEruption % 6))
+                    {
                         continue;
+                    }
 
                     m_pInstance->SetData(TYPE_DO_HEIGAN_TRAPS, uiArea);
                 }
@@ -233,7 +257,9 @@ struct boss_heigan : public CreatureScript
                 ++m_uiPhaseEruption;
             }
             else
+            {
                 m_uiEruptionTimer -= uiDiff;
+            }
         }
     };
 

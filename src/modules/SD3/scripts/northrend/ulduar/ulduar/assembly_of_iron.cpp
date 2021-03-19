@@ -160,7 +160,9 @@ struct boss_brundir : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             // If we are not on the last phase then cast Supercharge and set as unlootable
             if (m_uiPhase != PHASE_CHARGE_TWO)
@@ -183,7 +185,9 @@ struct boss_brundir : public CreatureScript
             DoScriptText(SAY_BRUNDIR_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ASSEMBLY, IN_PROGRESS);
+            }
 
             m_creature->InterruptNonMeleeSpells(false);
             DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_TRIGGERED);
@@ -197,7 +201,9 @@ struct boss_brundir : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ASSEMBLY, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -228,17 +234,23 @@ struct boss_brundir : public CreatureScript
 
                 // set the instace data to special in order to mark the last phase - this is used to check the achiev criteria
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_ASSEMBLY, SPECIAL);
+                }
             }
         }
 
         void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
         {
             if (pTarget->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             // Check achiev criterias
             switch (pSpell->Id)
@@ -255,7 +267,9 @@ struct boss_brundir : public CreatureScript
         void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
         {
             if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             switch (uiPointId)
             {
@@ -276,7 +290,9 @@ struct boss_brundir : public CreatureScript
                 m_creature->SetLevitate(false);
                 SetCombatMovement(true);
                 if (m_creature->getVictim())
+                {
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                }
 
                 m_creature->RemoveAurasDueToSpell(SPELL_TENDRILS_VISUAL);
                 m_creature->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_LIGHTNING_TENDRILS : SPELL_LIGHTNING_TENDRILS_H);
@@ -302,14 +318,20 @@ struct boss_brundir : public CreatureScript
                 if (m_uiVisualTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_LIGHTNING_CHANNEL_PREFIGHT) == CAST_OK)
+                    {
                         m_uiVisualTimer = 0;
+                    }
                 }
                 else
+                {
                     m_uiVisualTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             switch (m_uiPhase)
             {
@@ -329,7 +351,9 @@ struct boss_brundir : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiTendrilsTimer -= uiDiff;
+                }
 
                 if (m_uiTendrilsEndTimer)
                 {
@@ -345,7 +369,9 @@ struct boss_brundir : public CreatureScript
                         m_uiTendrilsTargetTimer = 0;
                     }
                     else
+                    {
                         m_uiTendrilsEndTimer -= uiDiff;
+                    }
 
                     // Change follow target every 5 seconds
                     if (m_uiTendrilsTargetTimer)
@@ -363,17 +389,23 @@ struct boss_brundir : public CreatureScript
                             m_uiTendrilsFollowTimer = 500;
                         }
                         else
+                        {
                             m_uiTendrilsTargetTimer -= uiDiff;
+                        }
 
                         // Workaround to follow the target
                         if (m_uiTendrilsFollowTimer < uiDiff)
                         {
                             if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_followTargetGuid))
+                            {
                                 DoMoveToTarget(pTarget);
+                            }
                             m_uiTendrilsFollowTimer = 500;
                         }
                         else
+                        {
                             m_uiTendrilsFollowTimer -= uiDiff;
+                        }
                     }
 
                     // no other spells during tendrils
@@ -392,7 +424,9 @@ struct boss_brundir : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiWhirlTimer -= uiDiff;
+                }
 
                 // no break here; he uses the other spells as well
             case PHASE_NO_CHARGE:
@@ -402,19 +436,27 @@ struct boss_brundir : public CreatureScript
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
                         if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
+                        {
                             m_uiChainLightningTimer = 2000;
+                        }
                     }
                 }
                 else
+                {
                     m_uiChainLightningTimer -= uiDiff;
+                }
 
                 if (m_uiOverloadTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_OVERLOAD) == CAST_OK)
+                    {
                         m_uiOverloadTimer = 80000;
+                    }
                 }
                 else
+                {
                     m_uiOverloadTimer -= uiDiff;
+                }
 
                 break;
             }
@@ -464,7 +506,9 @@ struct boss_molgeim : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             // If we are not on the last phase then cast Supercharge and set as unlootable
             if (m_uiPhase != PHASE_CHARGE_TWO)
@@ -487,7 +531,9 @@ struct boss_molgeim : public CreatureScript
             DoScriptText(SAY_MOLGEIM_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ASSEMBLY, IN_PROGRESS);
+            }
 
             m_creature->InterruptNonMeleeSpells(false);
             DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_TRIGGERED);
@@ -501,21 +547,29 @@ struct boss_molgeim : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ASSEMBLY, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_RUNE_OF_SUMMONING)
+            {
                 pSummoned->CastSpell(pSummoned, SPELL_RUNE_OF_SUMMONING_AURA, true, nullptr, nullptr, m_creature->GetObjectGuid());
+            }
             else if (pSummoned->GetEntry() == NPC_RUNE_OF_POWER)
+            {
                 pSummoned->CastSpell(pSummoned, SPELL_RUNE_OF_POWER_AURA, true);
+            }
             else if (pSummoned->GetEntry() == NPC_LIGHTNING_ELEMENTAL)
             {
                 pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_LIGHTNING_ELEMENTAL_PASSIVE : SPELL_LIGHTNING_ELEMENTAL_PASSIVE_H, true);
 
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     pSummoned->AI()->AttackStart(pTarget);
+                }
             }
         }
 
@@ -533,7 +587,9 @@ struct boss_molgeim : public CreatureScript
             {
                 // set the instace data to special in order to mark the last phase - this is used to check the achiev criteria
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_ASSEMBLY, SPECIAL);
+                }
             }
         }
 
@@ -545,14 +601,20 @@ struct boss_molgeim : public CreatureScript
                 if (m_uiVisualTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_RUNE_OF_POWER_PREFIGHT) == CAST_OK)
+                    {
                         m_uiVisualTimer = 0;
+                    }
                 }
                 else
+                {
                     m_uiVisualTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             switch (m_uiPhase)
             {
@@ -567,7 +629,9 @@ struct boss_molgeim : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiRuneSummonTimer -= uiDiff;
+                }
 
                 // no break here; he uses the other spells as well
             case PHASE_CHARGE_ONE:
@@ -584,7 +648,9 @@ struct boss_molgeim : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiRuneDeathTimer -= uiDiff;
+                }
 
                 // no break here; he uses the other spells as well
             case PHASE_NO_CHARGE:
@@ -592,18 +658,26 @@ struct boss_molgeim : public CreatureScript
                 if (m_uiShieldTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHIELD : SPELL_SHIELD_H) == CAST_OK)
+                    {
                         m_uiShieldTimer = 40000;
+                    }
                 }
                 else
+                {
                     m_uiShieldTimer -= uiDiff;
+                }
 
                 if (m_uiRunePowerTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_RUNE_OF_POWER) == CAST_OK)
+                    {
                         m_uiRunePowerTimer = 45000;
+                    }
                 }
                 else
+                {
                     m_uiRunePowerTimer -= uiDiff;
+                }
 
                 break;
             }
@@ -649,7 +723,9 @@ struct boss_steelbreaker : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             // If we are not on the last phase then cast Supercharge and set as unlootable
             if (m_uiPhase != PHASE_CHARGE_TWO)
@@ -672,7 +748,9 @@ struct boss_steelbreaker : public CreatureScript
             DoScriptText(SAY_STEEL_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ASSEMBLY, IN_PROGRESS);
+            }
 
             DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HIGH_VOLTAGE : SPELL_HIGH_VOLTAGE_H, CAST_TRIGGERED);
@@ -686,7 +764,9 @@ struct boss_steelbreaker : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ASSEMBLY, FAIL);
+            }
         }
 
         void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
@@ -706,14 +786,18 @@ struct boss_steelbreaker : public CreatureScript
 
                 // set the instace data to special in order to mark the last phase - this is used to check the achiev criteria
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_ASSEMBLY, SPECIAL);
+                }
             }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             switch (m_uiPhase)
             {
@@ -728,7 +812,9 @@ struct boss_steelbreaker : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiPowerTimer -= uiDiff;
+                }
 
                 // no break here; he uses the other spells as well
             case PHASE_CHARGE_ONE:
@@ -740,13 +826,19 @@ struct boss_steelbreaker : public CreatureScript
                     Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, uint32(0), SELECT_FLAG_NOT_IN_MELEE_RANGE);
 
                     if (!pTarget)
+                    {
                         pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+                    }
 
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_STATIC_DISRUPTION : SPELL_STATIC_DISRUPTION_H) == CAST_OK)
+                    {
                         m_uiDisruptionTimer = urand(10000, 15000);
+                    }
                 }
                 else
+                {
                     m_uiDisruptionTimer -= uiDiff;
+                }
 
                 // no break here; he uses the other spells as well
             case PHASE_NO_CHARGE:
@@ -754,10 +846,14 @@ struct boss_steelbreaker : public CreatureScript
                 if (m_uiFusionPunchTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FUSION_PUNCH : SPELL_FUSION_PUNCH_H) == CAST_OK)
+                    {
                         m_uiFusionPunchTimer = 15000;
+                    }
                 }
                 else
+                {
                     m_uiFusionPunchTimer -= uiDiff;
+                }
 
                 break;
             }

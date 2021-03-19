@@ -81,16 +81,22 @@ struct boss_saviana : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SAVIANA, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             if (urand(0, 1))
+            {
                 DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -98,7 +104,9 @@ struct boss_saviana : public CreatureScript
             DoPlaySoundToSet(m_creature, SOUND_DEATH);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SAVIANA, DONE);
+            }
         }
 
         void JustReachedHome() override
@@ -108,13 +116,17 @@ struct boss_saviana : public CreatureScript
             m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SAVIANA, FAIL);
+            }
         }
 
         void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
         {
             if (uiMoveType != POINT_MOTION_TYPE)
+            {
                 return;
+            }
 
             switch (uiPointId)
             {
@@ -136,7 +148,9 @@ struct boss_saviana : public CreatureScript
                 m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
 
                 if (m_creature->getVictim())
+                {
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                }
 
                 break;
             }
@@ -145,7 +159,9 @@ struct boss_saviana : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             switch (m_uiPhase)
             {
@@ -154,10 +170,14 @@ struct boss_saviana : public CreatureScript
                 if (m_uiFlameBreathTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_FLAME_BREATH) == CAST_OK)
+                    {
                         m_uiFlameBreathTimer = urand(20000, 25000);
+                    }
                 }
                 else
+                {
                     m_uiFlameBreathTimer -= uiDiff;
+                }
 
                 if (m_uiEnrageTimer < uiDiff)
                 {
@@ -168,7 +188,9 @@ struct boss_saviana : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiEnrageTimer -= uiDiff;
+                }
 
                 if (m_uiPhaseSwitchTimer < uiDiff)
                 {
@@ -183,7 +205,9 @@ struct boss_saviana : public CreatureScript
                     m_creature->GetMotionMaster()->MovePoint(POINT_AIR, aAirPositions[0], aAirPositions[1], aAirPositions[2]);
                 }
                 else
+                {
                     m_uiPhaseSwitchTimer -= uiDiff;
+                }
 
                 DoMeleeAttackIfReady();
 
@@ -202,7 +226,9 @@ struct boss_saviana : public CreatureScript
                         m_creature->GetMotionMaster()->MovePoint(POINT_GROUND, fX, fY, fZ);
                     }
                     else
+                    {
                         m_uiPhaseSwitchTimer -= uiDiff;
+                    }
                 }
                 break;
             case PHASE_TRANSITION:

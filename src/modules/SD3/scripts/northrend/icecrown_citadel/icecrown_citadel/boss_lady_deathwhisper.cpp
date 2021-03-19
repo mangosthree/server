@@ -122,9 +122,13 @@ struct boss_lady_deathwhisper : public CreatureScript
             if (m_pInstance)
             {
                 if (m_pInstance->GetData(TYPE_DATA_IS_25MAN))
+                {
                     m_uiMindControlCount = m_pInstance->GetData(TYPE_DATA_IS_HEROIC) ? 3 : 1;
+                }
                 else
+                {
                     m_uiMindControlCount = m_pInstance->GetData(TYPE_DATA_IS_HEROIC) ? 1 : 0;
+                }
             }
         }
 
@@ -144,10 +148,14 @@ struct boss_lady_deathwhisper : public CreatureScript
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             if (urand(0, 1))
+            {
                 DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -155,13 +163,17 @@ struct boss_lady_deathwhisper : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_LADY_DEATHWHISPER, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_LADY_DEATHWHISPER, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -175,13 +187,17 @@ struct boss_lady_deathwhisper : public CreatureScript
             }
 
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
                 pSummoned->AI()->AttackStart(pTarget);
+            }
         }
 
         void SummonedCreatureJustDied(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() != NPC_VENGEFUL_SHADE)
+            {
                 m_lCultistSpawnedGuidList.remove(pSummoned->GetObjectGuid());
+            }
         }
 
         // Wrapper to select a random cultist
@@ -196,14 +212,20 @@ struct boss_lady_deathwhisper : public CreatureScript
                 {
                     // Allow to be sorted them by entry
                     if (!uiEntry)
+                    {
                         vCultists.push_back(pCultist);
+                    }
                     else if (pCultist->GetEntry() == uiEntry)
+                    {
                         vCultists.push_back(pCultist);
+                    }
                 }
             }
 
             if (vCultists.empty())
+            {
                 return nullptr;
+            }
 
             return vCultists[urand(0, vCultists.size() - 1)];
         }
@@ -223,7 +245,9 @@ struct boss_lady_deathwhisper : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiBerserkTimer)
             {
@@ -236,7 +260,9 @@ struct boss_lady_deathwhisper : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiBerserkTimer -= uiDiff;
+                }
             }
 
             if (m_uiDeathAndDecayTimer < uiDiff)
@@ -244,11 +270,15 @@ struct boss_lady_deathwhisper : public CreatureScript
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_DEATH_AND_DECAY) == CAST_OK)
+                    {
                         m_uiDeathAndDecayTimer = 20000;
+                    }
                 }
             }
             else
+            {
                 m_uiDeathAndDecayTimer -= uiDiff;
+            }
 
             if (m_uiMindControlCount)
             {
@@ -257,14 +287,18 @@ struct boss_lady_deathwhisper : public CreatureScript
                     for (uint8 i = 0; i < m_uiMindControlCount; ++i)
                     {
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_DOMINATE_MIND, SELECT_FLAG_PLAYER))
+                        {
                             DoCastSpellIfCan(pTarget, SPELL_DOMINATE_MIND, CAST_TRIGGERED);
+                        }
                     }
 
                     DoScriptText(SAY_DOMINATE_MIND, m_creature);
                     m_uiDominateMindTimer = 40000;
                 }
                 else
+                {
                     m_uiDominateMindTimer -= uiDiff;
+                }
             }
 
             // Summon waves - in phase 1 or on heroic
@@ -278,7 +312,9 @@ struct boss_lady_deathwhisper : public CreatureScript
                     m_uiSummonWaveTimer = m_pInstance->GetData(TYPE_DATA_IS_HEROIC) ? 45000 : 60000;
                 }
                 else
+                {
                     m_uiSummonWaveTimer -= uiDiff;
+                }
 
                 if (m_uiCultistBuffTimer)
                 {
@@ -300,7 +336,9 @@ struct boss_lady_deathwhisper : public CreatureScript
                         }
                     }
                     else
+                    {
                         m_uiCultistBuffTimer -= uiDiff;
+                    }
                 }
 
                 if (m_uiDarkMartyrdomTimer)
@@ -317,10 +355,14 @@ struct boss_lady_deathwhisper : public CreatureScript
                             }
                         }
                         else
+                        {
                             m_uiDarkMartyrdomTimer = 0;
+                        }
                     }
                     else
+                    {
                         m_uiDarkMartyrdomTimer -= uiDiff;
+                    }
                 }
             }
 
@@ -332,11 +374,15 @@ struct boss_lady_deathwhisper : public CreatureScript
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_BOLT) == CAST_OK)
+                        {
                             m_uiShadowBoltTimer = 2000;
+                        }
                     }
                 }
                 else
+                {
                     m_uiShadowBoltTimer -= uiDiff;
+                }
             }
             // Phase 2 specific spells
             else
@@ -344,37 +390,53 @@ struct boss_lady_deathwhisper : public CreatureScript
                 if (m_uiTouchOfInsignificanceTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_INSIGNIFICANCE) == CAST_OK)
+                    {
                         m_uiTouchOfInsignificanceTimer = 7000;
+                    }
                 }
                 else
+                {
                     m_uiTouchOfInsignificanceTimer -= uiDiff;
+                }
 
                 if (m_uiFrostboltTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_FROSTBOLT) == CAST_OK)
+                        {
                             m_uiFrostboltTimer = urand(2000, 4000);
+                        }
                     }
                 }
                 else
+                {
                     m_uiFrostboltTimer -= uiDiff;
+                }
 
                 if (m_uiFrostboltVolleyTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_FROSTBOLT_VOLLEY) == CAST_OK)
+                    {
                         m_uiFrostboltVolleyTimer = urand(15000, 20000);
+                    }
                 }
                 else
+                {
                     m_uiFrostboltVolleyTimer -= uiDiff;
+                }
 
                 if (m_uiVengefulShadeTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPIRIT) == CAST_OK)
+                    {
                         m_uiVengefulShadeTimer = 10000;
+                    }
                 }
                 else
+                {
                     m_uiVengefulShadeTimer -= uiDiff;
+                }
 
                 DoMeleeAttackIfReady();
             }
@@ -399,7 +461,9 @@ struct spell_mana_barrier : public SpellScript
             Creature* pCreatureTarget = pTarget->ToCreature();
             uint32 uiDamage = pCreatureTarget->GetMaxHealth() - pCreatureTarget->GetHealth();
             if (!uiDamage)
+            {
                 return true;
+            }
 
             if (pCreatureTarget->GetPower(POWER_MANA) < uiDamage)
             {
@@ -407,7 +471,9 @@ struct spell_mana_barrier : public SpellScript
                 pCreatureTarget->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
 
                 if (CreatureAI* pBossAI = pCreatureTarget->AI())
+                {
                     pBossAI->ReceiveAIEvent(AI_EVENT_CUSTOM_A, (Creature*)nullptr, (Unit*)nullptr, 0);
+                }
             }
 
             pCreatureTarget->DealHeal(pCreatureTarget, uiDamage, GetSpellStore()->LookupEntry(SPELL_MANA_BARRIER));

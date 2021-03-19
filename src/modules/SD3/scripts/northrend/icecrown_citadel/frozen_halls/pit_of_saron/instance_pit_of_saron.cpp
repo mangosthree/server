@@ -233,7 +233,9 @@ struct is_pit_of_saron : public InstanceScript
             InitializeDialogueHelper(this);
 
             for (uint8 i = 0; i < MAX_SPECIAL_ACHIEV_CRITS; ++i)
+            {
                 m_abAchievCriteria[i] = false;
+            }
         }
 
         void OnCreatureCreate(Creature* pCreature) override
@@ -267,15 +269,21 @@ struct is_pit_of_saron : public InstanceScript
             case NPC_COLDWRAITH:
                 // Sort only the temporary summons
                 if (pCreature->IsTemporarySummon())
+                {
                     m_lAmbushNpcsGuidList.push_back(pCreature->GetObjectGuid());
+                }
                 break;
             case NPC_GENERAL_BUNNY:
                 if (pCreature->GetPositionY() < 130.0f)
                 {
                     if (pCreature->GetOrientation() != 0)
+                    {
                         m_lArcaneShieldBunniesGuidList.push_back(pCreature->GetObjectGuid());
+                    }
                     else
+                    {
                         m_lFrozenAftermathBunniesGuidList.push_back(pCreature->GetObjectGuid());
+                    }
                 }
                 break;
             }
@@ -287,7 +295,9 @@ struct is_pit_of_saron : public InstanceScript
             {
             case GO_ICEWALL:
                 if (m_auiEncounter[TYPE_GARFROST] == DONE && m_auiEncounter[TYPE_KRICK] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_HALLS_OF_REFLECT_PORT:
                 break;
@@ -319,7 +329,9 @@ struct is_pit_of_saron : public InstanceScript
                 {
                     Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO);
                     if (!pTyrannus)
+                    {
                         return;
+                    }
 
                     DoScriptText(SAY_TYRANNUS_AMBUSH_2, pTyrannus);
                     pTyrannus->SetWalk(false);
@@ -358,7 +370,9 @@ struct is_pit_of_saron : public InstanceScript
                     {
                         Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO);
                         if (!pTyrannus)
+                        {
                             return;
+                        }
 
                         DoScriptText(SAY_GAUNTLET, pTyrannus);
                         pTyrannus->SetWalk(false);
@@ -379,16 +393,24 @@ struct is_pit_of_saron : public InstanceScript
             {
             case TYPE_GARFROST:
                 if (uiData == DONE && m_auiEncounter[TYPE_KRICK] == DONE)
+                {
                     DoUseDoorOrButton(GO_ICEWALL);
+                }
                 if (uiData == IN_PROGRESS)
+                {
                     SetSpecialAchievementCriteria(TYPE_ACHIEV_DOESNT_GO_ELEVEN, true);
+                }
                 else if (uiData == DONE)
+                {
                     StartNextDialogueText(NPC_GARFROST);
+                }
                 m_auiEncounter[uiType] = uiData;
                 break;
             case TYPE_KRICK:
                 if (uiData == DONE && m_auiEncounter[TYPE_GARFROST] == DONE)
+                {
                     DoUseDoorOrButton(GO_ICEWALL);
+                }
                 if (uiData == SPECIAL)
                 {
                     // Used just to start the epilogue
@@ -399,7 +421,9 @@ struct is_pit_of_saron : public InstanceScript
                 break;
             case TYPE_TYRANNUS:
                 if (uiData == DONE)
+                {
                     StartNextDialogueText(NPC_SINDRAGOSA);
+                }
                 else if (uiData == SPECIAL)
                 {
                     // Used just to start the intro
@@ -413,12 +437,16 @@ struct is_pit_of_saron : public InstanceScript
                 {
                     // Complete tunnel achievement
                     if (Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS))
+                    {
                         pTyrannus->CastSpell(pTyrannus, SPELL_ACHIEVEMENT_CHECK, true);
+                    }
 
                     m_uiIciclesTimer = 0;
                 }
                 else if (uiData == IN_PROGRESS)
+                {
                     DoStartAmbushEvent();
+                }
 
                 m_auiEncounter[uiType] = uiData;
                 break;
@@ -447,10 +475,14 @@ struct is_pit_of_saron : public InstanceScript
         uint32 GetData(uint32 uiType) const override
         {
             if (uiType < MAX_ENCOUNTER)
+            {
                 return m_auiEncounter[uiType];
+            }
 
             if (uiType == TYPE_DATA_PLAYER_TEAM)
+            {
                 return m_uiTeam;
+            }
 
             return 0;
         }
@@ -486,7 +518,9 @@ struct is_pit_of_saron : public InstanceScript
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     m_auiEncounter[i] = NOT_STARTED;
+                }
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;
@@ -504,15 +538,21 @@ struct is_pit_of_saron : public InstanceScript
                     {
                         // Only 5% of the stalkers will actually spawn an icicle
                         if (roll_chance_i(95))
+                        {
                             continue;
+                        }
 
                         if (Creature* pStalker = instance->GetCreature(*itr))
+                        {
                             pStalker->CastSpell(pStalker, SPELL_ICICLE_SUMMON, true);
+                        }
                     }
                     m_uiIciclesTimer = urand(3000, 5000);
                 }
                 else
+                {
                     m_uiIciclesTimer -= uiDiff;
+                }
             }
         }
 
@@ -521,7 +561,9 @@ struct is_pit_of_saron : public InstanceScript
         {
             Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO);
             if (!pTyrannus)
+            {
                 return;
+            }
 
             DoScriptText(SAY_TYRANNUS_AMBUSH_1, pTyrannus);
 
@@ -540,7 +582,9 @@ struct is_pit_of_saron : public InstanceScript
         void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet)
         {
             if (uiType < MAX_SPECIAL_ACHIEV_CRITS)
+            {
                 m_abAchievCriteria[uiType] = bIsMet;
+            }
         }
 
         void JustDidDialogueStep(int32 iEntry) override
@@ -550,7 +594,9 @@ struct is_pit_of_saron : public InstanceScript
             case SPELL_NECROMATIC_POWER:
                 // Transfor all soldiers into undead
                 if (Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO))
+                {
                     pTyrannus->CastSpell(pTyrannus, SPELL_NECROMATIC_POWER, true);
+                }
                 break;
             case SAY_OUTRO_3:
                 // Move Tyrannus into position
@@ -581,13 +627,17 @@ struct is_pit_of_saron : public InstanceScript
             case SAY_JAINA_KRICK_3:
                 // Move Tyrannus to a safe position
                 if (Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO))
+                {
                     pTyrannus->GetMotionMaster()->MovePoint(0, afTyrannusMovePos[0][0], afTyrannusMovePos[0][1], afTyrannusMovePos[0][2]);
+                }
                 break;
             case NPC_TYRANNUS:
             {
                                  Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS);
                                  if (!pTyrannus)
+                                 {
                                      return;
+                                 }
 
                                  // Spawn tunnel end event mobs
                                  for (uint8 i = 0; i < countof(aEventTunnelEndLocations); ++i)
@@ -610,13 +660,17 @@ struct is_pit_of_saron : public InstanceScript
                     pRimefang->GetMotionMaster()->MovePoint(0, afTyrannusMovePos[3][0], afTyrannusMovePos[3][1], afTyrannusMovePos[3][2]);
                 }
                 if (Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS))
+                {
                     pTyrannus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
                 break;
             case SAY_VICTUS_OUTRO_1:
             {
                                        Player* pPlayer = GetPlayerInMap();
                                        if (!pPlayer)
+                                       {
                                            return;
+                                       }
 
                                        // Spawn Sindragosa
                                        if (Creature* pSummon = pPlayer->SummonCreature(aEventOutroLocations[0].uiEntryHorde, aEventOutroLocations[0].fX, aEventOutroLocations[0].fY,
@@ -639,7 +693,9 @@ struct is_pit_of_saron : public InstanceScript
                 for (GuidList::const_iterator itr = m_lArcaneShieldBunniesGuidList.begin(); itr != m_lArcaneShieldBunniesGuidList.end(); ++itr)
                 {
                     if (Creature* pBunny = instance->GetCreature(*itr))
+                    {
                         pBunny->CastSpell(pBunny, SPELL_ARCANE_FORM, true);
+                    }
                 }
                 // Teleport players
                 if (Creature* pTemp = GetSingleCreatureFromStorage(m_uiTeam == HORDE ? NPC_SYLVANAS_PART2 : NPC_JAINA_PART2))
@@ -651,12 +707,16 @@ struct is_pit_of_saron : public InstanceScript
             case SPELL_FROST_BOMB:
                 // Frost bomb on the platform
                 if (Creature* pSindragosa = GetSingleCreatureFromStorage(NPC_SINDRAGOSA))
+                {
                     pSindragosa->CastSpell(pSindragosa, SPELL_FROST_BOMB, true);
+                }
                 // Visual effect
                 for (GuidList::const_iterator itr = m_lFrozenAftermathBunniesGuidList.begin(); itr != m_lFrozenAftermathBunniesGuidList.end(); ++itr)
                 {
                     if (Creature* pBunny = instance->GetCreature(*itr))
+                    {
                         pBunny->CastSpell(pBunny, SPELL_FROZEN_AFTERMATH, true);
+                    }
                 }
                 break;
             case NPC_JAINA_PART2:
@@ -664,11 +724,15 @@ struct is_pit_of_saron : public InstanceScript
                 for (GuidList::const_iterator itr = m_lArcaneShieldBunniesGuidList.begin(); itr != m_lArcaneShieldBunniesGuidList.end(); ++itr)
                 {
                     if (Creature* pBunny = instance->GetCreature(*itr))
+                    {
                         pBunny->RemoveAurasDueToSpell(SPELL_ARCANE_FORM);
+                    }
                 }
                 // Sindragosa exit
                 if (Creature* pSindragosa = GetSingleCreatureFromStorage(NPC_SINDRAGOSA))
+                {
                     pSindragosa->GetMotionMaster()->MovePoint(0, 759.148f, 199.955f, 720.857f);
+                }
                 // Jaina / Sylvanas starts moving (should use wp)
                 if (Creature* pTemp = GetSingleCreatureFromStorage(m_uiTeam == HORDE ? NPC_SYLVANAS_PART2 : NPC_JAINA_PART2))
                 {
@@ -678,7 +742,9 @@ struct is_pit_of_saron : public InstanceScript
                 break;
             case SAY_JAINA_OUTRO_2:
                 if (Creature* pTemp = GetSingleCreatureFromStorage(m_uiTeam == HORDE ? NPC_SYLVANAS_PART2 : NPC_JAINA_PART2))
+                {
                     pTemp->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                }
 
                 // ToDo: Jaina / Sylvanas should have some waypoint movement here and the door should be opened only when they get in front of it.
                 DoUseDoorOrButton(GO_HALLS_OF_REFLECT_PORT);
@@ -689,11 +755,15 @@ struct is_pit_of_saron : public InstanceScript
         void ProcessIntroEventNpcs(Player* pPlayer)
         {
             if (!pPlayer)
+            {
                 return;
+            }
 
             // Not if the bosses are already killed
             if (GetData(TYPE_GARFROST) == DONE || GetData(TYPE_KRICK) == DONE)
+            {
                 return;
+            }
 
             StartNextDialogueText(NPC_TYRANNUS_INTRO);
 

@@ -122,7 +122,9 @@ struct boss_blood_queen_lanathel : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_QUEEN_LANATHEL, FAIL);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -140,7 +142,9 @@ struct boss_blood_queen_lanathel : public CreatureScript
                 m_pInstance->SetData(TYPE_QUEEN_LANATHEL, IN_PROGRESS);
 
                 if (m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
+                {
                     DoCastSpellIfCan(m_creature, SPELL_PRESENCE_OF_DARKFALLEN, CAST_TRIGGERED);
+                }
             }
         }
 
@@ -149,13 +153,17 @@ struct boss_blood_queen_lanathel : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_QUEEN_LANATHEL, DONE);
+            }
         }
 
         void MovementInform(uint32 uiMovementType, uint32 uiPointId) override
         {
             if (uiMovementType != POINT_MOTION_TYPE)
+            {
                 return;
+            }
 
             if (uiPointId == POINT_CENTER_GROUND)
             {
@@ -183,7 +191,9 @@ struct boss_blood_queen_lanathel : public CreatureScript
 
                     m_creature->GetMotionMaster()->Clear();
                     if (m_creature->getVictim())
+                    {
                         m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    }
                 }
             }
             else if (uiPointId == POINT_CENTER_AIR)
@@ -200,7 +210,9 @@ struct boss_blood_queen_lanathel : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiEnrageTimer)
             {
@@ -213,7 +225,9 @@ struct boss_blood_queen_lanathel : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiEnrageTimer -= uiDiff;
+                }
             }
 
             switch (m_uiPhase)
@@ -230,7 +244,9 @@ struct boss_blood_queen_lanathel : public CreatureScript
                     m_uiPhaseTimer = 0;
                 }
                 else
+                {
                     m_uiPhaseTimer -= uiDiff;
+                }
 
                 // Only one bite per fight
                 if (m_uiVampiricBiteTimer)
@@ -244,24 +260,34 @@ struct boss_blood_queen_lanathel : public CreatureScript
                         }
                     }
                     else
+                    {
                         m_uiVampiricBiteTimer -= uiDiff;
+                    }
                 }
 
                 if (m_uiBloodMirrorTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_BLOOD_MIRROR) == CAST_OK)
+                    {
                         m_uiBloodMirrorTimer = 5000;
+                    }
                 }
                 else
+                {
                     m_uiBloodMirrorTimer -= uiDiff;
+                }
 
                 if (m_uiBloodboltTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_BLOODBOLT) == CAST_OK)
+                    {
                         m_uiBloodboltTimer = urand(15000, 20000);
+                    }
                 }
                 else
+                {
                     m_uiBloodboltTimer -= uiDiff;
+                }
 
                 if (m_uiPactDarkfallenTimer < uiDiff)
                 {
@@ -272,7 +298,9 @@ struct boss_blood_queen_lanathel : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiPactDarkfallenTimer -= uiDiff;
+                }
 
                 if (m_uiSwarmingShadowsTimer <= uiDiff)
                 {
@@ -283,7 +311,9 @@ struct boss_blood_queen_lanathel : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiSwarmingShadowsTimer -= uiDiff;
+                }
 
                 // Heroic spells
                 if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
@@ -291,10 +321,14 @@ struct boss_blood_queen_lanathel : public CreatureScript
                     if (m_uiDeliriousSlashTimer < uiDiff)
                     {
                         if (DoCastSpellIfCan(m_creature, SPELL_DELIRIOUS_SLASH) == CAST_OK)
+                        {
                             m_uiDeliriousSlashTimer = 15000;
+                        }
                     }
                     else
+                    {
                         m_uiDeliriousSlashTimer -= uiDiff;
+                    }
                 }
 
                 DoMeleeAttackIfReady();
@@ -314,7 +348,9 @@ struct boss_blood_queen_lanathel : public CreatureScript
                     m_creature->GetMotionMaster()->MovePoint(POINT_CENTER_GROUND, aQueenPosition[0][0], aQueenPosition[0][1], aQueenPosition[0][2]);
                 }
                 else
+                {
                     m_uiPhaseTimer -= uiDiff;
+                }
 
                 break;
             }

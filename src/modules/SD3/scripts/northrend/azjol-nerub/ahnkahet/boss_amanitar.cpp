@@ -86,27 +86,37 @@ struct boss_amanitar : public CreatureScript
             DoSummonMushrooms(true);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_AMANITAR, IN_PROGRESS);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_AMANITAR, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_AMANITAR, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_POISONOUS_MUSHROOM)
+            {
                 pSummoned->CastSpell(pSummoned, SPELL_POISON_MUSHROOM_VISUAL, true);
+            }
             else if (pSummoned->GetEntry() == NPC_HEALTHY_MUSHROOM)
+            {
                 pSummoned->CastSpell(pSummoned, SPELL_POWER_MUSHROOM_VISUAL, true);
+            }
 
             // ToDo: research if the mushrooms should have a grow effect!
             pSummoned->CastSpell(pSummoned, SPELL_MUSHROOM_FORM, true);
@@ -115,9 +125,13 @@ struct boss_amanitar : public CreatureScript
         void SummonedCreatureJustDied(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_POISONOUS_MUSHROOM)
+            {
                 pSummoned->CastSpell(pSummoned, SPELL_POISON_CLOUD, true);
+            }
             else if (pSummoned->GetEntry() == NPC_HEALTHY_MUSHROOM)
+            {
                 pSummoned->CastSpell(pSummoned, SPELL_POTENT_FUNGUS, true);
+            }
         }
 
         void DoSummonMushrooms(bool bIsFirstSummon)
@@ -141,42 +155,60 @@ struct boss_amanitar : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiBashTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BASH) == CAST_OK)
+                {
                     m_uiBashTimer = urand(8000, 13000);
+                }
             }
             else
+            {
                 m_uiBashTimer -= uiDiff;
+            }
 
             if (m_uiVenomBoltTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_VENOM_BOLT_VOLLEY) == CAST_OK)
+                {
                     m_uiVenomBoltTimer = urand(15000, 20000);
+                }
             }
             else
+            {
                 m_uiVenomBoltTimer -= uiDiff;
+            }
 
             if (m_uiRootsTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_ENTANGLING_ROOTS) == CAST_OK)
+                    {
                         m_uiRootsTimer = urand(20000, 25000);
+                    }
                 }
             }
             else
+            {
                 m_uiRootsTimer -= uiDiff;
+            }
 
             if (m_uiMiniTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_MINI) == CAST_OK)
+                {
                     m_uiMiniTimer = 30000;
+                }
             }
             else
+            {
                 m_uiMiniTimer -= uiDiff;
+            }
 
             if (m_uiMushroomTimer < uiDiff)
             {
@@ -184,7 +216,9 @@ struct boss_amanitar : public CreatureScript
                 m_uiMushroomTimer = urand(10000, 20000);
             }
             else
+            {
                 m_uiMushroomTimer -= uiDiff;
+            }
 
             // ToDo: Research if he requires out of combat area evade check
 

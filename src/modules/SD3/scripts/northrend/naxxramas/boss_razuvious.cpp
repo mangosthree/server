@@ -78,7 +78,9 @@ struct boss_razuvious : public CreatureScript
         void KilledUnit(Unit* /*Victim*/) override
         {
             if (urand(0, 3))
+            {
                 return;
+            }
 
             switch (urand(0, 1))
             {
@@ -94,7 +96,9 @@ struct boss_razuvious : public CreatureScript
             DoCastSpellIfCan(m_creature, SPELL_HOPELESS, CAST_TRIGGERED);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_RAZUVIOUS, DONE);
+            }
         }
 
         void Aggro(Unit* /*pWho*/) override
@@ -107,37 +111,51 @@ struct boss_razuvious : public CreatureScript
             }
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_RAZUVIOUS, IN_PROGRESS);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_RAZUVIOUS, FAIL);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Unbalancing Strike
             if (m_uiUnbalancingStrikeTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
+                {
                     m_uiUnbalancingStrikeTimer = 30000;
+                }
             }
             else
+            {
                 m_uiUnbalancingStrikeTimer -= uiDiff;
+            }
 
             // Disrupting Shout
             if (m_uiDisruptingShoutTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DISRUPTING_SHOUT : SPELL_DISRUPTING_SHOUT_H) == CAST_OK)
+                {
                     m_uiDisruptingShoutTimer = 25000;
+                }
             }
             else
+            {
                 m_uiDisruptingShoutTimer -= uiDiff;
+            }
 
             // Jagged Knife
             if (m_uiJaggedKnifeTimer < uiDiff)
@@ -145,11 +163,15 @@ struct boss_razuvious : public CreatureScript
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_JAGGED_KNIFE) == CAST_OK)
+                    {
                         m_uiJaggedKnifeTimer = 10000;
+                    }
                 }
             }
             else
+            {
                 m_uiJaggedKnifeTimer -= uiDiff;
+            }
 
             // Random say
             if (m_uiCommandSoundTimer < uiDiff)
@@ -165,7 +187,9 @@ struct boss_razuvious : public CreatureScript
                 m_uiCommandSoundTimer = 40000;
             }
             else
+            {
                 m_uiCommandSoundTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

@@ -130,19 +130,25 @@ struct boss_sapphiron : public CreatureScript
             DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FROST_AURA : SPELL_FROST_AURA_H);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SAPPHIRON, IN_PROGRESS);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SAPPHIRON, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SAPPHIRON, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -150,7 +156,9 @@ struct boss_sapphiron : public CreatureScript
             if (pSummoned->GetEntry() == NPC_YOU_KNOW_WHO)
             {
                 if (Unit* pEnemy = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     pSummoned->AI()->AttackStart(pEnemy);
+                }
             }
         }
 
@@ -172,7 +180,9 @@ struct boss_sapphiron : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             switch (m_Phase)
             {
@@ -180,34 +190,50 @@ struct boss_sapphiron : public CreatureScript
                 if (m_uiCleaveTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    {
                         m_uiCleaveTimer = urand(5000, 10000);
+                    }
                 }
                 else
+                {
                     m_uiCleaveTimer -= uiDiff;
+                }
 
                 if (m_uiTailSweepTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_TAIL_SWEEP : SPELL_TAIL_SWEEP_H) == CAST_OK)
+                    {
                         m_uiTailSweepTimer = urand(7000, 10000);
+                    }
                 }
                 else
+                {
                     m_uiTailSweepTimer -= uiDiff;
+                }
 
                 if (m_uiLifeDrainTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIFE_DRAIN : SPELL_LIFE_DRAIN_H) == CAST_OK)
+                    {
                         m_uiLifeDrainTimer = 23000;
+                    }
                 }
                 else
+                {
                     m_uiLifeDrainTimer -= uiDiff;
+                }
 
                 if (m_uiBlizzardTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_BLIZZARD) == CAST_OK)
+                    {
                         m_uiBlizzardTimer = 20000;
+                    }
                 }
                 else
+                {
                     m_uiBlizzardTimer -= uiDiff;
+                }
 
                 if (m_creature->GetHealthPercent() > 10.0f)
                 {
@@ -223,7 +249,9 @@ struct boss_sapphiron : public CreatureScript
                         return;
                     }
                     else
+                    {
                         m_uiFlyTimer -= uiDiff;
+                    }
                 }
 
                 // Only Phase in which we have melee attack!
@@ -243,7 +271,9 @@ struct boss_sapphiron : public CreatureScript
                         m_uiFrostBreathTimer = 7000;
                     }
                     else
+                    {
                         m_uiFrostBreathTimer -= uiDiff;
+                    }
                 }
                 else
                 {
@@ -255,7 +285,9 @@ struct boss_sapphiron : public CreatureScript
                         m_uiIceboltTimer = 4000;
                     }
                     else
+                    {
                         m_uiIceboltTimer -= uiDiff;
+                    }
                 }
 
                 break;
@@ -271,7 +303,9 @@ struct boss_sapphiron : public CreatureScript
                         m_uiLandTimer = 4000;
                     }
                     else
+                    {
                         m_uiFrostBreathTimer -= uiDiff;
+                    }
                 }
 
                 if (m_uiLandTimer)
@@ -287,7 +321,9 @@ struct boss_sapphiron : public CreatureScript
                         m_uiLandTimer = 2000;
                     }
                     else
+                    {
                         m_uiLandTimer -= uiDiff;
+                    }
                 }
 
                 break;
@@ -304,7 +340,9 @@ struct boss_sapphiron : public CreatureScript
                     m_uiLandTimer = 0;
                 }
                 else
+                {
                     m_uiLandTimer -= uiDiff;
+                }
 
                 break;
             }
@@ -319,7 +357,9 @@ struct boss_sapphiron : public CreatureScript
                 }
             }
             else
+            {
                 m_uiBerserkTimer -= uiDiff;
+            }
         }
     };
 
@@ -338,14 +378,20 @@ struct go_sapphiron_birth : public GameObjectScript
         ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 
         if (!pInstance)
+        {
             return true;
+        }
 
         if (pInstance->GetData(TYPE_SAPPHIRON) != NOT_STARTED)
+        {
             return true;
+        }
 
         // If already summoned return (safety check)
         if (pInstance->GetSingleCreatureFromStorage(NPC_SAPPHIRON, true))
+        {
             return true;
+        }
 
         // Set data to special and allow the Go animation to proceed
         pInstance->SetData(TYPE_SAPPHIRON, SPECIAL);

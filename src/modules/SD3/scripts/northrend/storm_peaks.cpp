@@ -156,9 +156,13 @@ struct npc_injured_miner : public CreatureScript
 
                 // set alternative waypoints if required
                 if (m_creature->GetPositionX() > 6650.0f)
+                {
                     SetCurrentWaypoint(7);
+                }
                 else if (m_creature->GetPositionX() > 6635.0f)
+                {
                     SetCurrentWaypoint(35);
+                }
 
                 DoScriptText(SAY_MINER_READY, m_creature);
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
@@ -206,7 +210,9 @@ struct npc_injured_miner : public CreatureScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pCreature->IsQuestGiver())
+        {
             pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+        }
 
         if (!pCreature->HasAura(SPELL_FEIGN_DEATH))
         {

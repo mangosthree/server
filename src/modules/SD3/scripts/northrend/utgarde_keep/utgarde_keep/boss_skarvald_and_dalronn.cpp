@@ -93,7 +93,9 @@ struct boss_s_and_d_dummyAI : public ScriptedAI
     Creature* GetBuddy()
     {
         if (!m_pInstance)
+        {
             return nullptr;
+        }
 
         return m_pInstance->GetSingleCreatureFromStorage(m_creature->GetEntry() == NPC_DALRONN ? NPC_SKARVALD : NPC_DALRONN);
     }
@@ -105,25 +107,33 @@ struct boss_s_and_d_dummyAI : public ScriptedAI
         if (Creature* pBuddy = GetBuddy())
         {
             if (pBuddy->IsDead())
+            {
                 pBuddy->Respawn();
+            }
         }
 
         if (Creature* pGhost = m_creature->GetMap()->GetCreature(m_ghostGuid))
         {
             if (pGhost->IsAlive())
+            {
                 pGhost->ForcedDespawn();
+            }
         }
     }
 
     void EnterCombat(Unit* pWho) override
     {
         if (!pWho)
+        {
             return;
+        }
 
         if (Creature* pBuddy = GetBuddy())
         {
             if (!pBuddy->getVictim())
+            {
                 pBuddy->AI()->AttackStart(pWho);
+            }
         }
 
         Aggro(pWho);
@@ -133,12 +143,16 @@ struct boss_s_and_d_dummyAI : public ScriptedAI
     {
         // EventAI can probably handle ghosts
         if (pSummoned->GetEntry() == NPC_DAL_GHOST || pSummoned->GetEntry() == NPC_SKA_GHOST)
+        {
             m_ghostGuid = pSummoned->GetObjectGuid();
+        }
 
         Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 1);
 
         if (m_creature->getVictim())
+        {
             pSummoned->AI()->AttackStart(pTarget ? pTarget : m_creature->getVictim());
+        }
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -157,7 +171,9 @@ struct boss_s_and_d_dummyAI : public ScriptedAI
             else
             {
                 if (Creature* pGhost = m_creature->GetMap()->GetCreature(m_ghostGuid))
+                {
                     pGhost->ForcedDespawn();
+                }
 
                 pBuddy->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             }
@@ -204,30 +220,40 @@ struct boss_skarvald : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiYellDelayTimer)
             {
                 if (m_uiYellDelayTimer <= uiDiff)
                 {
                     if (Creature* pBuddy = GetBuddy())
+                    {
                         DoScriptText(m_aYell[0].m_iTextReplyId, pBuddy);
+                    }
 
                     m_uiYellDelayTimer = 0;
                 }
                 else
+                {
                     m_uiYellDelayTimer -= uiDiff;
+                }
             }
 
             if (m_uiChargeTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                {
                     DoCastSpellIfCan(pTarget, SPELL_CHARGE);
+                }
 
                 m_uiChargeTimer = urand(8000, 16000);
             }
             else
+            {
                 m_uiChargeTimer -= uiDiff;
+            }
 
             if (m_uiEnrageTimer < uiDiff)
             {
@@ -235,7 +261,9 @@ struct boss_skarvald : public CreatureScript
                 m_uiEnrageTimer = 20000;
             }
             else
+            {
                 m_uiEnrageTimer -= uiDiff;
+            }
 
             if (m_uiStoneStrikeTimer < uiDiff)
             {
@@ -243,7 +271,9 @@ struct boss_skarvald : public CreatureScript
                 m_uiStoneStrikeTimer = urand(5000, 15000);
             }
             else
+            {
                 m_uiStoneStrikeTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -286,39 +316,53 @@ struct boss_dalronn : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiDebilitateTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_DEBILITATE : SPELL_DEBILITATE_H);
+                }
 
                 m_uiDebilitateTimer = urand(12000, 20000);
             }
             else
+            {
                 m_uiDebilitateTimer -= uiDiff;
+            }
 
             if (m_uiShadowBoltTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H);
+                }
 
                 m_uiShadowBoltTimer = urand(3000, 6000);
             }
             else
+            {
                 m_uiShadowBoltTimer -= uiDiff;
+            }
 
             if (!m_bIsRegularMode)
             {
                 if (m_uiSkeletonTimer < uiDiff)
                 {
                     if (!m_creature->FindGuardianWithEntry(NPC_SKELETAL))
+                    {
                         DoCastSpellIfCan(m_creature, SPELL_SUMMON_SKELETONS);
+                    }
 
                     m_uiSkeletonTimer = 30000;
                 }
                 else
+                {
                     m_uiSkeletonTimer -= uiDiff;
+                }
             }
 
             DoMeleeAttackIfReady();

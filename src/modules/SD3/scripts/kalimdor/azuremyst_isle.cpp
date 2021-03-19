@@ -176,7 +176,10 @@ struct npc_draenei_survivor : public CreatureScript
                     m_uiRunAwayTimer = 10000;
                     m_uiSayThanksTimer = 0;
                 }
-                else { m_uiSayThanksTimer -= uiDiff; }
+                else
+                {
+                    m_uiSayThanksTimer -= uiDiff;
+                }
 
                 return;
             }
@@ -200,7 +203,10 @@ struct npc_draenei_survivor : public CreatureScript
                 m_bCanSayHelp = true;
                 m_uiSayHelpTimer = 20000;
             }
-            else { m_uiSayHelpTimer -= uiDiff; }
+            else
+            {
+                m_uiSayHelpTimer -= uiDiff;
+            }
         }
     };
 
@@ -268,7 +274,10 @@ struct npc_engineer_spark_overgrind : public CreatureScript
                     DoScriptText(EMOTE_SHELL, m_creature);
                     m_uiEmoteTimer = urand(120000, 150000);
                 }
-                else { m_uiEmoteTimer -= diff; }
+                else
+                {
+                    m_uiEmoteTimer -= diff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -281,7 +290,10 @@ struct npc_engineer_spark_overgrind : public CreatureScript
                 DoCastSpellIfCan(m_creature->getVictim(), SPELL_DYNAMITE);
                 m_uiDynamiteTimer = 8000;
             }
-            else { m_uiDynamiteTimer -= diff; }
+            else
+            {
+                m_uiDynamiteTimer -= diff;
+            }
 
             DoMeleeAttackIfReady();
         }

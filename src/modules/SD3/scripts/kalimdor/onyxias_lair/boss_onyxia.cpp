@@ -610,7 +610,9 @@ struct boss_onyxia : public CreatureScript
                           }
                       }
                       else
+                      {
                           m_uiSummonGuardTimer -= uiDiff;
+                      }
 #endif
 
                       break;
@@ -655,16 +657,35 @@ struct boss_onyxia : public CreatureScript
             }
         }
 
-#if defined (WOTLK) || defined (CATA) || defined (MISTS)
+#if defined (WOTLK) || defined (CATA)
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
         // Check if players are hit by Onyxia's Deep Breath
         if (pTarget->GetTypeId() != TYPEID_PLAYER || !m_pInstance)
+        {
             return;
+        }
 
         // All and only the Onyxia Deep Breath Spells have these visuals
         if (pSpell->SpellVisual[0] == SPELL_VISUAL_BREATH_A || pSpell->SpellVisual[0] == SPELL_VISUAL_BREATH_B)
+        {
             m_pInstance->SetData(TYPE_ONYXIA, DATA_PLAYER_TOASTED);
+        }
+    }
+#elif defined (MISTS)
+    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    {
+        // Check if players are hit by Onyxia's Deep Breath
+        if (pTarget->GetTypeId() != TYPEID_PLAYER || !m_pInstance)
+        {
+            return;
+        }
+
+        // All and only the Onyxia Deep Breath Spells have these visuals
+        if (pSpell->GetSpellVisual(0) == SPELL_VISUAL_BREATH_A || pSpell->GetSpellVisual(0) == SPELL_VISUAL_BREATH_B)
+        {
+            m_pInstance->SetData(TYPE_ONYXIA, DATA_PLAYER_TOASTED);
+        }
     }
 #endif
     };

@@ -169,7 +169,9 @@ struct npc_manaforge_control_console : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32/*data*/) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature && pInvoker->GetTypeId() == TYPEID_PLAYER)
+            {
                 m_playerGuid = pInvoker->GetObjectGuid();
+            }
         }
 
         void DoWaveSpawnForCreature(Creature* pCreature)
@@ -563,7 +565,9 @@ struct npc_commander_dawnforge : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature *pSender, Unit *pInvoker, uint32 /*data*/) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature && pInvoker->GetTypeId() == TYPEID_PLAYER)
+            {
                 CanStartEvent((Player*)pInvoker);
+            }
         }
 
         bool CanStartEvent(Player* pPlayer)
@@ -1395,14 +1399,18 @@ struct npc_drijya : public CreatureScript
             if (pWho->GetEntry() == NPC_TERROR_IMP || pWho->GetEntry() == NPC_LEGION_TROOPER || pWho->GetEntry() == NPC_LEGION_DESTROYER)
             {
                 if (urand(0, 1))
+                {
                     DoScriptText(SAY_DRIJYA_3, m_creature);
+                }
             }
         }
 
         void DoSpawnCreature(uint32 uiEntry)
         {
             if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_explodeTriggerGuid))
+            {
                 m_creature->SummonCreature(uiEntry, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), pTrigger->GetOrientation(), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -1438,13 +1446,17 @@ struct npc_drijya : public CreatureScript
                 m_uiSpawnCount = 0;
                 m_creature->HandleEmoteCommand(EMOTE_STATE_WORK);
                 if (Creature* pTrigger = GetClosestCreatureWithEntry(m_creature, NPC_EXPLODE_TRIGGER, 30.0f))
+                {
                     m_explodeTriggerGuid = pTrigger->GetObjectGuid();
+                }
                 break;
             case 8:
                 if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOKE) == CAST_OK)
                 {
                     if (Player* pPlayer = GetPlayerForEscort())
+                    {
                         m_creature->SetFacingToObject(pPlayer);
+                    }
 
                     DoScriptText(SAY_DRIJYA_4, m_creature);
                 }
@@ -1460,7 +1472,9 @@ struct npc_drijya : public CreatureScript
                 if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOKE) == CAST_OK)
                 {
                     if (Player* pPlayer = GetPlayerForEscort())
+                    {
                         m_creature->SetFacingToObject(pPlayer);
+                    }
 
                     DoScriptText(SAY_DRIJYA_5, m_creature);
                 }
@@ -1475,7 +1489,9 @@ struct npc_drijya : public CreatureScript
                 if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOKE) == CAST_OK)
                 {
                     if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_explodeTriggerGuid))
+                    {
                         m_creature->SetFacingToObject(pTrigger);
+                    }
 
                     DoScriptText(SAY_DRIJYA_6, m_creature);
                 }
@@ -1522,12 +1538,18 @@ struct npc_drijya : public CreatureScript
                     ++m_uiSpawnCount;
 
                     if (m_uiSpawnCount == MAX_IMPS)
+                    {
                         m_uiSpawnImpTimer = 0;
+                    }
                     else
+                    {
                         m_uiSpawnImpTimer = 3500;
+                    }
                 }
                 else
+                {
                     m_uiSpawnImpTimer -= uiDiff;
+                }
             }
 
             if (m_uiSpawnTrooperTimer)
@@ -1538,12 +1560,18 @@ struct npc_drijya : public CreatureScript
                     ++m_uiSpawnCount;
 
                     if (m_uiSpawnCount == MAX_TROOPERS)
+                    {
                         m_uiSpawnTrooperTimer = 0;
+                    }
                     else
+                    {
                         m_uiSpawnTrooperTimer = 3500;
+                    }
                 }
                 else
+                {
                     m_uiSpawnTrooperTimer -= uiDiff;
+                }
             }
 
             if (m_uiSpawnDestroyerTimer)
@@ -1554,7 +1582,9 @@ struct npc_drijya : public CreatureScript
                     m_uiSpawnDestroyerTimer = 0;
                 }
                 else
+                {
                     m_uiSpawnDestroyerTimer -= uiDiff;
+                }
             }
 
             if (m_uiDestroyingTimer)
@@ -1566,11 +1596,15 @@ struct npc_drijya : public CreatureScript
                     m_uiDestroyingTimer = 0;
                 }
                 else
+                {
                     m_uiDestroyingTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -1655,7 +1689,9 @@ struct  npc_dimensiusAI : public Scripted_NoMovementAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_SPAWN_OF_DIMENSIUS)
+        {
             pSummoned->CastSpell(m_creature, SPELL_DIMENSIUS_FEEDING, true);
+        }
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
@@ -1676,13 +1712,17 @@ struct  npc_dimensiusAI : public Scripted_NoMovementAI
     {
         // event is sent by dbscript
         if (eventType == AI_EVENT_CUSTOM_EVENTAI_B && pSender->GetEntry() == NPC_CAPTAIN_SAEED)
+        {
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PASSIVE);
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         if (!m_bSpawnsFeeding && m_creature->GetHealthPercent() < 75.0f)
         {
@@ -1710,7 +1750,9 @@ struct  npc_dimensiusAI : public Scripted_NoMovementAI
                 }
             }
             else
+            {
                 m_uiRainTimer -= uiDiff;
+            }
 
             return;
         }
@@ -1720,22 +1762,30 @@ struct  npc_dimensiusAI : public Scripted_NoMovementAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_SPIRAL) == CAST_OK)
+                {
                     m_uiSpiralTimer = urand(3000, 4000);
+                }
             }
         }
         else
+        {
             m_uiSpiralTimer -= uiDiff;
+        }
 
         if (m_uiVaultTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_VAULT) == CAST_OK)
+                {
                     m_uiVaultTimer = urand(20000, 30000);
+                }
             }
         }
         else
+        {
             m_uiVaultTimer -= uiDiff;
+        }
 
         DoMeleeAttackIfReady();
     }

@@ -293,7 +293,9 @@ struct is_old_hillsbrad : public InstanceScript
             }
 
             if (uiType == TYPE_THRALL_EVENT_COUNT)
+            {
                 return m_uiThrallEventCount;
+            }
 
             return 0;
         }

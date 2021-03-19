@@ -121,7 +121,9 @@ struct boss_svala : public CreatureScript
             if (m_creature->IsAlive() && m_pInstance && m_pInstance->GetData(TYPE_SVALA) > IN_PROGRESS)
             {
                 if (m_creature->GetEntry() != NPC_SVALA_SORROW)
+                {
                     m_creature->UpdateEntry(NPC_SVALA_SORROW);
+                }
 
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
@@ -134,7 +136,9 @@ struct boss_svala : public CreatureScript
             DoMoveToPosition();
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SVALA, FAIL);
+            }
         }
 
         void MoveInLineOfSight(Unit* pWho) override
@@ -175,17 +179,23 @@ struct boss_svala : public CreatureScript
             else if (pSummoned->GetEntry() == NPC_CHANNELER)
             {
                 if (!m_bIsRegularMode)
+                {
                     pSummoned->CastSpell(pSummoned, SPELL_SHADOWS_IN_THE_DARK, true);
+                }
 
                 if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_ritualTargetGuid))
+                {
                     pSummoned->CastSpell(pTarget, SPELL_PARALIZE, true);
+                }
             }
         }
 
         void SummonedCreatureDespawn(Creature* pDespawned) override
         {
             if (pDespawned->GetEntry() == NPC_ARTHAS_IMAGE)
+            {
                 pArthas = nullptr;
+            }
         }
 
         void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
@@ -193,7 +203,9 @@ struct boss_svala : public CreatureScript
             if (pSpell->Id == SPELL_TRANSFORMING)
             {
                 if (pArthas)
+                {
                     pArthas->InterruptNonMeleeSpells(true);
+                }
 
                 m_creature->RemoveAurasDueToSpell(SPELL_TRANSFORMING_FLOATING);
                 m_creature->UpdateEntry(NPC_SVALA_SORROW);
@@ -204,7 +216,9 @@ struct boss_svala : public CreatureScript
         {
             // set achiev to true if boss kills a hulk
             if (pVictim->GetEntry() == NPC_SCOURGE_HULK && m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ACHIEV_INCREDIBLE_HULK, uint32(true));
+            }
 
             switch (urand(0, 2))
             {
@@ -219,7 +233,9 @@ struct boss_svala : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SVALA, DONE);
+            }
         }
 
         void DoMoveToPosition()
@@ -236,7 +252,9 @@ struct boss_svala : public CreatureScript
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
                 if (m_bIsIntroDone)
+                {
                     return;
+                }
 
                 if (pArthas && pArthas->IsAlive())
                 {
@@ -276,7 +294,9 @@ struct boss_svala : public CreatureScript
                         ++m_uiIntroCount;
                     }
                     else
+                    {
                         m_uiIntroTimer -= uiDiff;
+                    }
                 }
 
                 return;
@@ -285,18 +305,26 @@ struct boss_svala : public CreatureScript
             if (m_uiSinisterStrikeTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SINISTER_STRIKE : SPELL_SINISTER_STRIKE_H) == CAST_OK)
+                {
                     m_uiSinisterStrikeTimer = 10000;
+                }
             }
             else
+            {
                 m_uiSinisterStrikeTimer -= uiDiff;
+            }
 
             if (m_uiCallFlamesTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_CALL_FLAMES) == CAST_OK)
+                {
                     m_uiCallFlamesTimer = urand(10000, 20000);
+                }
             }
             else
+            {
                 m_uiCallFlamesTimer -= uiDiff;
+            }
 
             if (m_uiRitualStrikeTimer)
             {
@@ -307,7 +335,9 @@ struct boss_svala : public CreatureScript
                     m_uiRitualStrikeTimer = 0;
                 }
                 else
+                {
                     m_uiRitualStrikeTimer -= uiDiff;
+                }
             }
 
             // As from patch notes: Svala Sorrowgrave now casts Ritual of the Sword 1 time during the encounter, down from 3.
@@ -355,12 +385,16 @@ struct at_svala_intro : public AreaTriggerScript
     bool OnTrigger(Player* pPlayer, AreaTriggerEntry const* /*pAt*/) override
     {
         if (pPlayer->isGameMaster())
+        {
             return false;
+        }
 
         if (InstanceData* pInstance = pPlayer->GetInstanceData())
         {
             if (pInstance->GetData(TYPE_SVALA) == NOT_STARTED)
+            {
                 pInstance->SetData(TYPE_SVALA, IN_PROGRESS);
+            }
         }
 
         return false;

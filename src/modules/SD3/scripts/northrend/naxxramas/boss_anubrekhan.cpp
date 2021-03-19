@@ -104,10 +104,14 @@ struct boss_anubrekhan : public CreatureScript
         {
             // Force the player to spawn corpse scarabs via spell
             if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            {
                 pVictim->CastSpell(pVictim, SPELL_SELF_SPAWN_5, true, nullptr, nullptr, m_creature->GetObjectGuid());
+            }
 
             if (urand(0, 4))
+            {
                 return;
+            }
 
             DoScriptText(SAY_SLAY, m_creature);
         }
@@ -122,19 +126,25 @@ struct boss_anubrekhan : public CreatureScript
             }
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ANUB_REKHAN, IN_PROGRESS);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ANUB_REKHAN, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ANUB_REKHAN, FAIL);
+            }
         }
 
         void MoveInLineOfSight(Unit* pWho) override
@@ -151,17 +161,23 @@ struct boss_anubrekhan : public CreatureScript
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_CRYPT_GUARD)
+            {
                 DoScriptText(EMOTE_CRYPT_GUARD, pSummoned);
+            }
 
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
                 pSummoned->AI()->AttackStart(pTarget);
+            }
         }
 
         void SummonedCreatureDespawn(Creature* pSummoned) override
         {
             // If creature despawns on out of combat, skip this
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (pSummoned->GetEntry() == NPC_CRYPT_GUARD)
             {
@@ -175,7 +191,9 @@ struct boss_anubrekhan : public CreatureScript
             m_introDialogue.DialogueUpdate(uiDiff);
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Impale
             if (m_uiImpaleTimer < uiDiff)
@@ -185,13 +203,17 @@ struct boss_anubrekhan : public CreatureScript
                 if (!m_creature->HasAura(SPELL_LOCUSTSWARM) && !m_creature->HasAura(SPELL_LOCUSTSWARM_H))
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
                         DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_IMPALE : SPELL_IMPALE_H);
+                    }
                 }
 
                 m_uiImpaleTimer = 15000;
             }
             else
+            {
                 m_uiImpaleTimer -= uiDiff;
+            }
 
             // Locust Swarm
             if (m_uiLocustSwarmTimer < uiDiff)
@@ -206,7 +228,9 @@ struct boss_anubrekhan : public CreatureScript
                 }
             }
             else
+            {
                 m_uiLocustSwarmTimer -= uiDiff;
+            }
 
             // Summon
             if (m_uiSummonTimer)
@@ -218,7 +242,9 @@ struct boss_anubrekhan : public CreatureScript
                     m_uiSummonTimer = 0;
                 }
                 else
+                {
                     m_uiSummonTimer -= uiDiff;
+                }
             }
 
             DoMeleeAttackIfReady();

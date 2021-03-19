@@ -119,7 +119,9 @@ struct boss_tharonja : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_THARONJA, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -135,10 +137,14 @@ struct boss_tharonja : public CreatureScript
 
             // TODO check if this spell casting is infact also needed on phase-switch or only here (possible that there is also some sort of hp% dependency
             if (m_uiPhase == PHASE_FLESH)
+            {
                 DoCastSpellIfCan(m_creature, SPELL_CLEAR_GIFT_OF_THARONJA, CAST_TRIGGERED | CAST_FORCE_CAST);
+            }
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_THARONJA, DONE);
+            }
         }
 
         void JustReachedHome() override
@@ -148,17 +154,23 @@ struct boss_tharonja : public CreatureScript
             {
                 uint32 uiDisplayId = Creature::ChooseDisplayId(pCreatureInfo);
                 if (m_creature->GetDisplayId() != uiDisplayId)
+                {
                     m_creature->SetDisplayId(uiDisplayId);
+                }
             }
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_THARONJA, FAIL);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             switch (m_uiPhase)
             {
@@ -181,27 +193,39 @@ struct boss_tharonja : public CreatureScript
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CURSE_OF_LIFE : SPELL_CURSE_OF_LIFE_H) == CAST_OK)
+                    {
                         m_uiCurseLifeTimer = urand(12000, 18000);
+                    }
                 }
                 else
+                {
                     m_uiCurseLifeTimer -= uiDiff;
+                }
 
                 if (m_uiRainFireTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_RAIN_OF_FIRE : SPELL_RAIN_OF_FIRE_H) == CAST_OK)
+                    {
                         m_uiRainFireTimer = urand(22000, 29000);
+                    }
                 }
                 else
+                {
                     m_uiRainFireTimer -= uiDiff;
+                }
 
                 if (m_uiShadowVolleyTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SHADOW_VOLLEY : SPELL_SHADOW_VOLLEY_H) == CAST_OK)
+                    {
                         m_uiShadowVolleyTimer = urand(6000, 12000);
+                    }
                 }
                 else
+                {
                     m_uiShadowVolleyTimer -= uiDiff;
+                }
 
                 DoMeleeAttackIfReady();
                 break;
@@ -220,32 +244,46 @@ struct boss_tharonja : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiReturnFleshTimer -= uiDiff;
+                }
 
                 if (m_uiPoisonCloudTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_POISON_CLOUD : SPELL_POISON_CLOUD_H) == CAST_OK)
+                    {
                         m_uiPoisonCloudTimer = urand(7000, 12000);
+                    }
                 }
                 else
+                {
                     m_uiPoisonCloudTimer -= uiDiff;
+                }
 
                 if (m_uiLightningBreathTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_LIGHTNING_BREATH : SPELL_LIGHTNING_BREATH_H) == CAST_OK)
+                    {
                         m_uiLightningBreathTimer = urand(5000, 8000);
+                    }
                 }
                 else
+                {
                     m_uiLightningBreathTimer -= uiDiff;
+                }
 
                 if (m_uiEyeBeamTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_EYE_BEAM : SPELL_EYE_BEAM_H) == CAST_OK)
+                    {
                         m_uiEyeBeamTimer = urand(12000, 15000);
+                    }
                 }
                 else
+                {
                     m_uiEyeBeamTimer -= uiDiff;
+                }
 
                 DoMeleeAttackIfReady();
                 break;

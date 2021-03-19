@@ -107,7 +107,9 @@ struct is_icecrown_citadel : public InstanceScript
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     return true;
+                }
             }
 
             return false;
@@ -116,7 +118,9 @@ struct is_icecrown_citadel : public InstanceScript
         void OnPlayerEnter(Player* pPlayer) override
         {
             if (!m_uiTeam)                                          // very first player to enter
+            {
                 m_uiTeam = pPlayer->GetTeam();
+            }
         }
 
         void OnCreatureCreate(Creature* pCreature) override
@@ -145,11 +149,17 @@ struct is_icecrown_citadel : public InstanceScript
                 break;
             case NPC_DEATHWHISPER_SPAWN_STALKER:
                 if (pCreature->GetPositionZ() > 60.0f)
+                {
                     m_middleStalkerGuid = pCreature->GetObjectGuid();
+                }
                 else if (pCreature->GetPositionY() < 2215.0f)
+                {
                     m_lRightStalkers.push_back(pCreature->GetObjectGuid());
+                }
                 else
+                {
                     m_lLeftStalkers.push_back(pCreature->GetObjectGuid());
+                }
                 return;
             }
         }
@@ -162,7 +172,9 @@ struct is_icecrown_citadel : public InstanceScript
             case GO_ICEWALL_2:
             case GO_ORATORY_DOOR:
                 if (m_auiEncounter[TYPE_MARROWGAR] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_DEATHWHISPER_ELEVATOR:
                 // ToDo: set in motion when TYPE_LADY_DEATHWHISPER == DONE
@@ -172,42 +184,62 @@ struct is_icecrown_citadel : public InstanceScript
             case GO_CRIMSON_HALL_DOOR:
             case GO_GREEN_DRAGON_ENTRANCE:
                 if (m_auiEncounter[TYPE_DEATHBRINGER_SAURFANG] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_ORANGE_TUBE:
                 if (m_auiEncounter[TYPE_FESTERGUT] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_GREEN_TUBE:
                 if (m_auiEncounter[TYPE_ROTFACE] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_SCIENTIST_DOOR_GREEN:
                 // If both Festergut and Rotface are DONE, set as ACTIVE_ALTERNATIVE
                 if (m_auiEncounter[TYPE_FESTERGUT] == DONE && m_auiEncounter[TYPE_ROTFACE] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                }
                 else if (m_auiEncounter[TYPE_ROTFACE] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_READY);
+                }
                 break;
             case GO_SCIENTIST_DOOR_ORANGE:
                 // If both Festergut and Rotface are DONE, set as ACTIVE_ALTERNATIVE
                 if (m_auiEncounter[TYPE_FESTERGUT] == DONE && m_auiEncounter[TYPE_ROTFACE] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                }
                 else if (m_auiEncounter[TYPE_FESTERGUT] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_READY);
+                }
                 break;
             case GO_SCIENTIST_DOOR_COLLISION:
                 if (m_auiEncounter[TYPE_FESTERGUT] == DONE && m_auiEncounter[TYPE_ROTFACE] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_COUNCIL_DOOR_1:
             case GO_COUNCIL_DOOR_2:
                 if (m_auiEncounter[TYPE_BLOOD_PRINCE_COUNCIL] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_GREEN_DRAGON_EXIT:
                 if (m_auiEncounter[TYPE_VALITHRIA] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_SAURFANG_CACHE:
             case GO_SAURFANG_CACHE_25:
@@ -269,14 +301,18 @@ struct is_icecrown_citadel : public InstanceScript
                 if (Creature* pFestergut = GetSingleCreatureFromStorage(NPC_FESTERGUT))
                 {
                     if (pFestergut->IsAlive())
+                    {
                         DoScriptText(SAY_STINKY_DIES, pFestergut);
+                    }
                 }
                 break;
             case NPC_PRECIOUS:
                 if (Creature* pRotface = GetSingleCreatureFromStorage(NPC_ROTFACE))
                 {
                     if (pRotface->IsAlive())
+                    {
                         DoScriptText(SAY_PRECIOUS_DIES, pRotface);
+                    }
                 }
                 break;
             }
@@ -311,7 +347,9 @@ struct is_icecrown_citadel : public InstanceScript
             case TYPE_GUNSHIP_BATTLE:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == DONE)
+                {
                     DoRespawnGameObject(m_uiTeam == ALLIANCE ? GO_GUNSHIP_ARMORY_A : GO_GUNSHIP_ARMORY_H, 60 * MINUTE);
+                }
                 break;
             case TYPE_DEATHBRINGER_SAURFANG:
                 m_auiEncounter[uiType] = uiData;
@@ -330,13 +368,17 @@ struct is_icecrown_citadel : public InstanceScript
                 m_auiEncounter[uiType] = uiData;
                 DoUseDoorOrButton(GO_ORANGE_PLAGUE);
                 if (uiData == DONE)
+                {
                     DoToggleGameObjectFlags(GO_ORANGE_VALVE, GO_FLAG_NO_INTERACT, false);
+                }
                 break;
             case TYPE_ROTFACE:
                 m_auiEncounter[uiType] = uiData;
                 DoUseDoorOrButton(GO_GREEN_PLAGUE);
                 if (uiData == DONE)
+                {
                     DoToggleGameObjectFlags(GO_GREEN_VALVE, GO_FLAG_NO_INTERACT, false);
+                }
                 break;
             case TYPE_PROFESSOR_PUTRICIDE:
                 m_auiEncounter[uiType] = uiData;
@@ -355,7 +397,9 @@ struct is_icecrown_citadel : public InstanceScript
                 m_auiEncounter[uiType] = uiData;
                 DoUseDoorOrButton(GO_BLOODPRINCE_DOOR);
                 if (uiData == DONE)
+                {
                     DoUseDoorOrButton(GO_ICECROWN_GRATE);
+                }
                 break;
             case TYPE_VALITHRIA:
                 m_auiEncounter[uiType] = uiData;
@@ -418,7 +462,9 @@ struct is_icecrown_citadel : public InstanceScript
         uint32 GetData(uint32 uiType) const override
         {
             if (uiType < MAX_ENCOUNTER)
+            {
                 return m_auiEncounter[uiType];
+            }
 
             // Difficulty wrappers
             switch (uiType)
@@ -464,7 +510,9 @@ struct is_icecrown_citadel : public InstanceScript
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     m_auiEncounter[i] = NOT_STARTED;
+                }
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;
@@ -487,14 +535,20 @@ struct is_icecrown_citadel : public InstanceScript
                     // Open the pathway to Putricide when the timer expires
                     DoUseDoorOrButton(GO_SCIENTIST_DOOR_COLLISION);
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_SCIENTIST_DOOR_GREEN))
+                    {
                         pDoor->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                    }
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_SCIENTIST_DOOR_ORANGE))
+                    {
                         pDoor->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                    }
 
                     m_uiPutricideValveTimer = 0;
                 }
                 else
+                {
                     m_uiPutricideValveTimer -= uiDiff;
+                }
             }
         }
 
@@ -504,7 +558,9 @@ struct is_icecrown_citadel : public InstanceScript
         {
             Creature* lady = instance->GetCreature(ObjectGuid(m_mNpcEntryGuidStore[NPC_LADY_DEATHWHISPER]));
             if (!lady || lady->IsDead())
+            {
                 return;
+            }
 
             // On 25 man mode we need to summon on all points
             if (GetData(TYPE_DATA_IS_25MAN))
@@ -514,13 +570,19 @@ struct is_icecrown_citadel : public InstanceScript
                 for (uint8 i = 0; i < 3; ++i, ++rcit, ++lcit)
                 {
                     if (Creature* pStalker = instance->GetCreature(*lcit))
+                    {
                         lady->SummonCreature(aLeftSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    }
                     if (Creature* pStalker = instance->GetCreature(*rcit))
+                    {
                         lady->SummonCreature(aRightSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    }
                 }
 
                 if (Creature* pStalker = instance->GetCreature(m_middleStalkerGuid))
+                {
                     lady->SummonCreature(roll_chance_i(50) ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                }
             }
             // On 10 man mode we summon on the left or on the right
             else
@@ -529,7 +591,9 @@ struct is_icecrown_citadel : public InstanceScript
                 if (GetData(TYPE_DATA_IS_HEROIC) && !isPhaseOne)
                 {
                     if (Creature* pStalker = instance->GetCreature(m_middleStalkerGuid))
+                    {
                         lady->SummonCreature(roll_chance_i(50) ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    }
                 }
                 else
                 {
@@ -537,7 +601,9 @@ struct is_icecrown_citadel : public InstanceScript
                     for (uint8 i = 0; i < 3; ++i, ++cit)
                     {
                         if (Creature* pStalker = instance->GetCreature(*cit))
+                        {
                             lady->SummonCreature(m_bIsLeftSideSummon ? aLeftSummonedCultists[i] : aRightSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        }
                     }
 
                     // change sides for next summoning
@@ -569,7 +635,9 @@ struct is_icecrown_citadel : public InstanceScript
                 if (Creature* pSindragosa = GetSingleCreatureFromStorage(NPC_SINDRAGOSA))
                 {
                     if (pSindragosa->IsAlive() && !pSindragosa->IsInCombat())
+                    {
                         pSindragosa->SetInCombatWithZone();
+                    }
                 }
                 else
                 {
@@ -628,7 +696,9 @@ struct at_icecrown_citadel : public AreaTriggerScript
             pAt->id == AREATRIGGER_SINDRAGOSA_PLATFORM)
         {
             if (pPlayer->isGameMaster() || pPlayer->IsDead())
+            {
                 return false;
+            }
 
             if (InstanceData* pInstance = pPlayer->GetInstanceData())
             {
@@ -653,7 +723,9 @@ struct event_gameobject_citadel_valve : public MapEventScript
             {
                 // Note: the Tubes and doors are activated by DB script
                 if (pInstance->GetData(TYPE_FESTERGUT) == DONE && pInstance->GetData(TYPE_ROTFACE) == DONE)
+                {
                     pInstance->SetData(TYPE_DO_PREPARE_PROF_DOOR, 0);
+                }
 
                 return false;
             }

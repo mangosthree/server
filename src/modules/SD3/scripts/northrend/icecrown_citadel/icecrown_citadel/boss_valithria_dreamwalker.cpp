@@ -125,14 +125,18 @@ struct boss_valithria_dreamwalker : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_VALITHRIA, FAIL);
+            }
         }
 
         // actually, when summoned creature kills a player
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            {
                 DoScriptText(SAY_PLAYER_DIES, m_creature, pVictim);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -140,7 +144,9 @@ struct boss_valithria_dreamwalker : public CreatureScript
             DoScriptText(SAY_0_HEALTH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_VALITHRIA, FAIL);
+            }
         }
 
         void UpdateAI(const uint32 /*uiDiff*/) override

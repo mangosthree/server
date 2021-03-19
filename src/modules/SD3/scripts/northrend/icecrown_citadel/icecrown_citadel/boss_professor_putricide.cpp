@@ -169,7 +169,9 @@ struct boss_professor_putricide : public CreatureScript
         void Aggro(Unit* /*pWho*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, IN_PROGRESS);
+            }
 
             DoScriptText(SAY_AGGRO, m_creature);
         }
@@ -177,7 +179,9 @@ struct boss_professor_putricide : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, DONE);
+            }
 
             DoScriptText(SAY_DEATH, m_creature);
         }
@@ -185,13 +189,17 @@ struct boss_professor_putricide : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, FAIL);
+            }
         }
 
         void MovementInform(uint32 uiMovementType, uint32 uiData) override
         {
             if (uiMovementType != POINT_MOTION_TYPE)
+            {
                 return;
+            }
 
             if (uiData == POINT_PUTRICIDE_SPAWN)
             {
@@ -233,7 +241,9 @@ struct boss_professor_putricide : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Enrage
             if (m_uiEnrageTimer)
@@ -247,7 +257,9 @@ struct boss_professor_putricide : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiEnrageTimer -= uiDiff;
+                }
             }
 
             switch (m_uiPhase)
@@ -272,7 +284,9 @@ struct boss_professor_putricide : public CreatureScript
                     m_uiHealthCheckTimer = 1000;
                 }
                 else
+                {
                     m_uiHealthCheckTimer -= uiDiff;
+                }
 
                 // Unbound Plague
                 if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
@@ -282,11 +296,15 @@ struct boss_professor_putricide : public CreatureScript
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_UNBOUND_PLAGUE, SELECT_FLAG_PLAYER))
                         {
                             if (DoCastSpellIfCan(pTarget, SPELL_UNBOUND_PLAGUE) == CAST_OK)
+                            {
                                 m_uiUnboundPlagueTimer = 70000;
+                            }
                         }
                     }
                     else
+                    {
                         m_uiUnboundPlagueTimer -= uiDiff;
+                    }
                 }
 
                 // Slime Puddle
@@ -295,21 +313,29 @@ struct boss_professor_putricide : public CreatureScript
                     for (int i = 0; i < 2; ++i)
                     {
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SLIME_PUDDLE_SUMMON, SELECT_FLAG_PLAYER))
+                        {
                             DoCastSpellIfCan(pTarget, SPELL_SLIME_PUDDLE, CAST_TRIGGERED);
+                        }
                     }
                     m_uiPuddleTimer = 30000;
                 }
                 else
+                {
                     m_uiPuddleTimer -= uiDiff;
+                }
 
                 // Unstable Experiment
                 if (m_uiUnstableExperimentTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_UNSTABLE_EXPERIMENT) == CAST_OK)
+                    {
                         m_uiUnstableExperimentTimer = 30000;
+                    }
                 }
                 else
+                {
                     m_uiUnstableExperimentTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_TRANSITION_ONE:
@@ -326,10 +352,14 @@ struct boss_professor_putricide : public CreatureScript
                         DoScriptText(SAY_TRANSFORM_1, m_creature);
                     }
                     else
+                    {
                         DoCastSpellIfCan(m_creature, SPELL_TEAR_GAS_CANCEL, CAST_INTERRUPT_PREVIOUS);
+                    }
                 }
                 else
+                {
                     m_uiTransitionTimer -= uiDiff;
+                }
 
                 return;
             case PHASE_TWO:
@@ -355,7 +385,9 @@ struct boss_professor_putricide : public CreatureScript
                     m_uiHealthCheckTimer = 1000;
                 }
                 else
+                {
                     m_uiHealthCheckTimer -= uiDiff;
+                }
 
                 // Unbound Plague
                 if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
@@ -365,11 +397,15 @@ struct boss_professor_putricide : public CreatureScript
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_UNBOUND_PLAGUE, SELECT_FLAG_PLAYER))
                         {
                             if (DoCastSpellIfCan(pTarget, SPELL_UNBOUND_PLAGUE) == CAST_OK)
+                            {
                                 m_uiUnboundPlagueTimer = 70000;
+                            }
                         }
                     }
                     else
+                    {
                         m_uiUnboundPlagueTimer -= uiDiff;
+                    }
                 }
 
                 // Slime Puddle
@@ -378,31 +414,43 @@ struct boss_professor_putricide : public CreatureScript
                     for (int i = 0; i < 2; ++i)
                     {
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SLIME_PUDDLE_SUMMON, SELECT_FLAG_PLAYER))
+                        {
                             DoCastSpellIfCan(pTarget, SPELL_SLIME_PUDDLE, CAST_TRIGGERED);
+                        }
                     }
 
                     m_uiPuddleTimer = 30000;
                 }
                 else
+                {
                     m_uiPuddleTimer -= uiDiff;
+                }
 
                 // Unstable Experiment
                 if (m_uiUnstableExperimentTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_UNSTABLE_EXPERIMENT) == CAST_OK)
+                    {
                         m_uiUnstableExperimentTimer = 30000;
+                    }
                 }
                 else
+                {
                     m_uiUnstableExperimentTimer -= uiDiff;
+                }
 
                 // Choking Gas
                 if (m_uiChokingGasBombTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_CHOKING_GAS_BOMB) == CAST_OK)
+                    {
                         m_uiChokingGasBombTimer = urand(25000, 30000);
+                    }
                 }
                 else
+                {
                     m_uiChokingGasBombTimer -= uiDiff;
+                }
 
                 // TODO: Malleable Goo
 
@@ -421,10 +469,14 @@ struct boss_professor_putricide : public CreatureScript
                         DoScriptText(SAY_TRANSFORM_2, m_creature);
                     }
                     else
+                    {
                         DoCastSpellIfCan(m_creature, SPELL_TEAR_GAS_CANCEL, CAST_INTERRUPT_PREVIOUS);
+                    }
                 }
                 else
+                {
                     m_uiTransitionTimer -= uiDiff;
+                }
 
                 return;
             case PHASE_THREE:
@@ -436,11 +488,15 @@ struct boss_professor_putricide : public CreatureScript
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_UNBOUND_PLAGUE, SELECT_FLAG_PLAYER))
                         {
                             if (DoCastSpellIfCan(pTarget, SPELL_UNBOUND_PLAGUE) == CAST_OK)
+                            {
                                 m_uiUnboundPlagueTimer = 70000;
+                            }
                         }
                     }
                     else
+                    {
                         m_uiUnboundPlagueTimer -= uiDiff;
+                    }
                 }
 
                 // Slime Puddle
@@ -449,21 +505,29 @@ struct boss_professor_putricide : public CreatureScript
                     for (int i = 0; i < 2; ++i)
                     {
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SLIME_PUDDLE_SUMMON, SELECT_FLAG_PLAYER))
+                        {
                             DoCastSpellIfCan(pTarget, SPELL_SLIME_PUDDLE, CAST_TRIGGERED);
+                        }
                     }
                     m_uiPuddleTimer = 30000;
                 }
                 else
+                {
                     m_uiPuddleTimer -= uiDiff;
+                }
 
                 // Choking Gas
                 if (m_uiChokingGasBombTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_CHOKING_GAS_BOMB) == CAST_OK)
+                    {
                         m_uiChokingGasBombTimer = urand(25000, 30000);
+                    }
                 }
                 else
+                {
                     m_uiChokingGasBombTimer -= uiDiff;
+                }
 
                 // TODO: Malleable Goo
 

@@ -82,7 +82,9 @@ struct boss_ambassador_hellmaw : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_HELLMAW, FAIL);
+            }
         }
 
         void Aggro(Unit* /*pWho*/) override
@@ -95,7 +97,9 @@ struct boss_ambassador_hellmaw : public CreatureScript
             }
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_HELLMAW, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -108,7 +112,9 @@ struct boss_ambassador_hellmaw : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_HELLMAW, DONE);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -118,7 +124,9 @@ struct boss_ambassador_hellmaw : public CreatureScript
                 if (m_uiBanishTimer <= uiDiff)
                 {
                     if (!m_pInstance)
+                    {
                         return;
+                    }
 
                     // Check for banish
                     if (m_pInstance->GetData(TYPE_IS_UNBANISHED))
@@ -129,37 +137,53 @@ struct boss_ambassador_hellmaw : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiBanishTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiCorrosiveAcidTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_CORROSIVE_ACID) == CAST_OK)
+                {
                     m_uiCorrosiveAcidTimer = urand(23000, 35000);
+                }
             }
             else
+            {
                 m_uiCorrosiveAcidTimer -= uiDiff;
+            }
 
             if (m_uiFearTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_FEAR) == CAST_OK)
+                {
                     m_uiFearTimer = urand(20000, 38000);
+                }
             }
             else
+            {
                 m_uiFearTimer -= uiDiff;
+            }
 
             if (!m_bIsRegularMode && !m_bIsEnraged)
             {
                 if (m_uiEnrageTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+                    {
                         m_bIsEnraged = true;
+                    }
                 }
                 else
+                {
                     m_uiEnrageTimer -= uiDiff;
+                }
             }
 
             DoMeleeAttackIfReady();

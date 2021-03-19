@@ -115,13 +115,17 @@ struct boss_ormorok : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ORMOROK, DONE);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
         {
             if (urand(0, 1))
+            {
                 DoScriptText(SAY_KILL, m_creature);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -130,7 +134,9 @@ struct boss_ormorok : public CreatureScript
             {
             case NPC_CRYSTALLINE_TANGLER:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                {
                     pSummoned->AI()->AttackStart(pTarget);
+                }
                 break;
             case NPC_CRYSTAL_SPIKE_TRIGGER:
                 pSummoned->CastSpell(pSummoned, SPELL_CRYSTAL_SPIKE_PRE, true);
@@ -142,7 +148,9 @@ struct boss_ormorok : public CreatureScript
 
                 // allow continuous summoning only until we reach the limit
                 if (m_uiSpikeCount < MAX_ALLOWED_SPIKES)
+                {
                     pSummoned->CastSpell(pSummoned, SPELL_CRYSTAL_SPIKE_AURA, true);
+                }
                 break;
             }
         }
@@ -150,7 +158,9 @@ struct boss_ormorok : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (!m_bIsEnraged && m_creature->GetHealthPercent() < 25.0f)
             {
@@ -164,24 +174,34 @@ struct boss_ormorok : public CreatureScript
             if (m_uiTrampleTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_TRAMPLE : SPELL_TRAMPLE_H) == CAST_OK)
+                {
                     m_uiTrampleTimer = urand(20000, 25000);
+                }
             }
             else
+            {
                 m_uiTrampleTimer -= uiDiff;
+            }
 
             if (m_uiSpellReflectTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_REFLECTION) == CAST_OK)
+                {
                     m_uiSpellReflectTimer = urand(26000, 30000);
+                }
             }
             else
+            {
                 m_uiSpellReflectTimer -= uiDiff;
+            }
 
             if (m_uiCrystalSpikeTimer < uiDiff)
             {
                 uint32 uiSpikeSpell = SPELL_CRYSTAL_SPIKES;
                 if (!m_bIsRegularMode)
+                {
                     uiSpikeSpell = urand(0, 1) ? SPELL_CRYSTAL_SPIKES_H1 : SPELL_CRYSTAL_SPIKES_H2;
+                }
 
                 if (DoCastSpellIfCan(m_creature, uiSpikeSpell) == CAST_OK)
                 {
@@ -191,17 +211,23 @@ struct boss_ormorok : public CreatureScript
                 }
             }
             else
+            {
                 m_uiCrystalSpikeTimer -= uiDiff;
+            }
 
             if (!m_bIsRegularMode)
             {
                 if (m_uiTanglerTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_TANGLER_H) == CAST_OK)
+                    {
                         m_uiTanglerTimer = urand(15000, 25000);
+                    }
                 }
                 else
+                {
                     m_uiTanglerTimer -= uiDiff;
+                }
             }
 
             DoMeleeAttackIfReady();
@@ -228,20 +254,28 @@ struct spell_crystal_spike_aura : public SpellScript
             {
                 ScriptedInstance* pInstance = (ScriptedInstance*)pCreatureTarget->GetInstanceData();
                 if (!pInstance)
+                {
                     return true;
+                }
 
                 Creature* pOrmorok = pInstance->GetSingleCreatureFromStorage(NPC_ORMOROK);
                 if (!pOrmorok)
+                {
                     return true;
+                }
 
                 // The following spells define the direction of the spike line
                 // All of the spells are targeting the back of the caster, but some take a small turn to left or right
                 // The exact algorithm is unk but we know that the chances of getting a straight line are about 75%. The other two directions are about 12.5% each
                 uint32 uiSpellId = 0;
                 if (roll_chance_i(75))
+                {
                     uiSpellId = SPELL_CRYSTAL_SPIKE_BACK;
+                }
                 else
+                {
                     uiSpellId = urand(0, 1) ? SPELL_CRYSTAL_SPIKE_LEFT : SPELL_CRYSTAL_SPIKE_RIGHT;
+                }
 
                 pCreatureTarget->CastSpell(pCreatureTarget, uiSpellId, true, nullptr, nullptr, pOrmorok->GetObjectGuid());
                 // always return true when we are handling this spell and effect
@@ -264,7 +298,9 @@ struct aura_crystal_spike_pre : public AuraScript
             if (Creature* pTarget = (Creature*)pAura->GetTarget())
             {
                 if (pTarget->GetEntry() != NPC_CRYSTAL_SPIKE_TRIGGER)
+                {
                     return true;
+                }
 
                 // Use the Spike gameobject so we can summon the npc which actual does the damage
                 if (GameObject* pSpike = GetClosestGameObjectWithEntry(pTarget, GO_CRYSTAL_SPIKE, 10.0f))

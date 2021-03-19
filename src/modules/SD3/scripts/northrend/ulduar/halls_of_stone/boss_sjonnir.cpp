@@ -122,7 +122,9 @@ struct boss_sjonnir : public CreatureScript
             DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SUMMON_IRON_DWARF : SPELL_SUMMON_IRON_DWARF_H, CAST_TRIGGERED);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SJONNIR, IN_PROGRESS);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -130,13 +132,17 @@ struct boss_sjonnir : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SJONNIR, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SJONNIR, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -175,7 +181,9 @@ struct boss_sjonnir : public CreatureScript
         void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
         {
             if (uiType != POINT_MOTION_TYPE || pSummoned->GetEntry() != NPC_MALFORMED_OOZE || !uiPointId)
+            {
                 return;
+            }
 
             pSummoned->GetMotionMaster()->MoveRandomAroundPoint(pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 10.0f);
         }
@@ -193,7 +201,9 @@ struct boss_sjonnir : public CreatureScript
         bool DoFrenzyIfCan()
         {
             if (!m_uiFrenzyTimer)
+            {
                 return true;
+            }
 
             if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
             {
@@ -209,7 +219,9 @@ struct boss_sjonnir : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_creature->GetHealthPercent() <= (float)m_uiHpCheck)
             {
@@ -217,15 +229,21 @@ struct boss_sjonnir : public CreatureScript
                 {
                 case 75:
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SUMMON_IRON_TROGG : SPELL_SUMMON_IRON_TROGG_H, CAST_TRIGGERED) == CAST_OK)
+                    {
                         m_uiHpCheck = 50;
+                    }
                     break;
                 case 50:
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SUMMON_MALFORMED_OOZE : SPELL_SUMMON_MALFORMED_OOZE_H, CAST_TRIGGERED) == CAST_OK)
+                    {
                         m_uiHpCheck = 15;
+                    }
                     break;
                 case 15:
                     if (DoFrenzyIfCan())
+                    {
                         m_uiHpCheck = 0;
+                    }
 
                     break;
                 }
@@ -236,40 +254,60 @@ struct boss_sjonnir : public CreatureScript
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
+                    {
                         m_uiChainLightningTimer = urand(10000, 15000);
+                    }
                 }
             }
             else
+            {
                 m_uiChainLightningTimer -= uiDiff;
+            }
 
             if (m_uiLightningShieldTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_SHIELD : SPELL_LIGHTNING_SHIELD_H) == CAST_OK)
+                {
                     m_uiLightningShieldTimer = urand(20000, 25000);
+                }
             }
             else
+            {
                 m_uiLightningShieldTimer -= uiDiff;
+            }
 
             if (m_uiStaticChargeTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_STATIC_CHARGE : SPELL_STATIC_CHARGE_H) == CAST_OK)
+                {
                     m_uiStaticChargeTimer = urand(20000, 25000);
+                }
             }
             else
+            {
                 m_uiStaticChargeTimer -= uiDiff;
+            }
 
             if (m_uiLightningRingTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_RING : SPELL_LIGHTNING_RING_H) == CAST_OK)
+                {
                     m_uiLightningRingTimer = urand(30000, 35000);
+                }
             }
             else
+            {
                 m_uiLightningRingTimer -= uiDiff;
+            }
 
             if (m_uiFrenzyTimer <= uiDiff)
+            {
                 DoFrenzyIfCan();
+            }
             else
+            {
                 m_uiFrenzyTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

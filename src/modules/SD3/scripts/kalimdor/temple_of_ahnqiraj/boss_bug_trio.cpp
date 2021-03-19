@@ -121,7 +121,9 @@ struct boss_kri : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
         {
             if (!(pSender->GetEntry() == NPC_VEM || pSender->GetEntry() == NPC_YAUJ))
+            {
                 return;
+            }
 
             if (m_creature->IsInCombat())
             {
@@ -235,7 +237,9 @@ struct boss_vem : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
         {
             if (!(pSender->GetEntry() == NPC_KRI || pSender->GetEntry() == NPC_YAUJ))
+            {
                 return;
+            }
 
             if (m_creature->IsInCombat())
             {
@@ -294,7 +298,9 @@ struct boss_vem : public CreatureScript
                 }
             }
             else
+            {
                 m_uiKnockDownTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -373,7 +379,9 @@ struct boss_yauj : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
         {
             if (!(pSender->GetEntry() == NPC_KRI || pSender->GetEntry() == NPC_VEM))
+            {
                 return;
+            }
 
             if (m_creature->IsInCombat())
             {
@@ -428,7 +436,9 @@ struct boss_yauj : public CreatureScript
                 }
             }
             else
+            {
                 m_uiRavageTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

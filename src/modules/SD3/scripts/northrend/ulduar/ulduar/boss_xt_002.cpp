@@ -149,7 +149,9 @@ struct boss_xt_002 : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_XT002, DONE);
+            }
 
             DoScriptText(SAY_DEATH, m_creature);
         }
@@ -157,7 +159,9 @@ struct boss_xt_002 : public CreatureScript
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
         }
@@ -194,7 +198,9 @@ struct boss_xt_002 : public CreatureScript
                 m_uiHeartStage = 4;
 
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_XT002_HARD, DONE);
+                }
 
                 DoScriptText(EMOTE_KILL_HEART, m_creature);
                 DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HEARTBREAK : SPELL_HEARTBREAK_H, CAST_TRIGGERED);
@@ -236,7 +242,9 @@ struct boss_xt_002 : public CreatureScript
                     {
                         // safeguard in case the Heart isn't respawned
                         if (!pHeart->IsAlive())
+                        {
                             pHeart->Respawn();
+                        }
 
                         pHeart->AI()->EnterEvadeMode();
                         m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
@@ -247,11 +255,15 @@ struct boss_xt_002 : public CreatureScript
                     m_uiMountTimer = 0;
                 }
                 else
+                {
                     m_uiMountTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiBerserkTimer)
             {
@@ -264,7 +276,9 @@ struct boss_xt_002 : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiBerserkTimer -= uiDiff;
+                }
             }
 
             switch (m_uiPhase)
@@ -274,18 +288,26 @@ struct boss_xt_002 : public CreatureScript
                 if (m_uiLightBombTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SEARING_LIGHT : SPELL_SEARING_LIGHT_H) == CAST_OK)
+                    {
                         m_uiLightBombTimer = 20000;
+                    }
                 }
                 else
+                {
                     m_uiLightBombTimer -= uiDiff;
+                }
 
                 if (m_uiGravityBombTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_GRAVITY_BOMB : SPELL_GRAVITY_BOMB_H) == CAST_OK)
+                    {
                         m_uiGravityBombTimer = 20000;
+                    }
                 }
                 else
+                {
                     m_uiGravityBombTimer -= uiDiff;
+                }
 
                 if (m_uiTanctrumTimer < uiDiff)
                 {
@@ -297,7 +319,9 @@ struct boss_xt_002 : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiTanctrumTimer -= uiDiff;
+                }
 
                 // start heart stage transition
                 if (m_creature->GetHealthPercent() < float(100 - 25 * m_uiHeartStage))
@@ -321,7 +345,9 @@ struct boss_xt_002 : public CreatureScript
                 {
                     // inform the heart about the phase switch
                     if (Creature* pHeart = m_pInstance->GetSingleCreatureFromStorage(NPC_HEART_DECONSTRUCTOR))
+                    {
                         SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pHeart);
+                    }
 
                     DoScriptText(EMOTE_HEART, m_creature);
 
@@ -332,7 +358,9 @@ struct boss_xt_002 : public CreatureScript
                     m_uiPhase = PHASE_HEART;
                 }
                 else
+                {
                     m_uiHeartTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_HEART:
@@ -358,7 +386,9 @@ struct boss_xt_002 : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiHeartTimer -= uiDiff;
+                }
 
                 break;
             }
@@ -401,7 +431,9 @@ struct boss_heart_deconstructor : public CreatureScript
             if (m_pInstance)
             {
                 if (Creature* pDeconstructor = m_pInstance->GetSingleCreatureFromStorage(NPC_XT002))
+                {
                     SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pDeconstructor);
+                }
             }
         }
 
@@ -443,7 +475,9 @@ struct boss_heart_deconstructor : public CreatureScript
             {
                 // spawn a bunch of scrap bots
                 for (uint8 i = 0; i < MAX_SCRAPBOTS; ++i)
+                {
                     pTarget->CastSpell(pTarget, SPELL_RECHARGE_ROBOT_1, true, nullptr, nullptr, m_creature->GetObjectGuid());
+                }
 
                 // spawn a boombot or pummeller, depending on chance
                 pTarget->CastSpell(pTarget, roll_chance_i(80) ? SPELL_RECHARGE_ROBOT_2 : SPELL_RECHARGE_ROBOT_3, true, nullptr, nullptr, m_creature->GetObjectGuid());
@@ -465,16 +499,24 @@ struct boss_heart_deconstructor : public CreatureScript
                     // cast the enerby orb on each pile one by one
                     if (m_pInstance)
                         if (Creature* pToyPile = m_creature->GetMap()->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_XT_TOY_PILE))))
+                        {
                             DoCastSpellIfCan(pToyPile, SPELL_ENERGY_ORB, CAST_TRIGGERED);
+                        }
 
                     // reset timer after the overload aura expires
                     if (m_creature->HasAura(SPELL_EXPOSED_HEART))
+                    {
                         m_uiRobotTimer = urand(1000, 3000);
+                    }
                     else
+                    {
                         m_uiRobotTimer = 0;
+                    }
                 }
                 else
+                {
                     m_uiRobotTimer -= uiDiff;
+                }
             }
         }
     };

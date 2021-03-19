@@ -52,7 +52,9 @@ struct is_ruby_sanctum : public InstanceScript
             for (uint8 i = 1; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     return true;
+                }
             }
 
             return false;
@@ -62,14 +64,20 @@ struct is_ruby_sanctum : public InstanceScript
         {
             // Return if Halion already dead, or Zarithrian alive
             if (m_auiEncounter[TYPE_ZARITHRIAN] != DONE || m_auiEncounter[TYPE_HALION] == DONE)
+            {
                 return;
+            }
 
             // Return if already summoned
             if (GetSingleCreatureFromStorage(NPC_HALION_REAL, true))
+            {
                 return;
+            }
 
             if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
+            {
                 pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSUMMON_DEAD_DESPAWN, 0);
+            }
         }
 
         void OnCreatureCreate(Creature* pCreature) override
@@ -79,12 +87,16 @@ struct is_ruby_sanctum : public InstanceScript
             case NPC_XERESTRASZA:
                 // Special case for Xerestrasza: she only needs to have questgiver flag if Baltharus is killed
                 if (m_auiEncounter[TYPE_BALTHARUS] != DONE)
+                {
                     pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                }
                 m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
             case NPC_ZARITHRIAN:
                 if (m_auiEncounter[TYPE_SAVIANA] == DONE && m_auiEncounter[TYPE_BALTHARUS] == DONE)
+                {
                     pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
                 // no break;
             case NPC_BALTHARUS:
             case NPC_HALION_REAL:
@@ -104,11 +116,15 @@ struct is_ruby_sanctum : public InstanceScript
             {
             case GO_FLAME_WALLS:
                 if (m_auiEncounter[TYPE_SAVIANA] == DONE && m_auiEncounter[TYPE_BALTHARUS] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_FIRE_FIELD:
                 if (m_auiEncounter[TYPE_BALTHARUS] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_FLAME_RING:
                 break;
@@ -117,7 +133,9 @@ struct is_ruby_sanctum : public InstanceScript
             case GO_BURNING_TREE_3:
             case GO_BURNING_TREE_4:
                 if (m_auiEncounter[TYPE_ZARITHRIAN] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_TWILIGHT_PORTAL_ENTER_1:
             case GO_TWILIGHT_PORTAL_ENTER_2:
@@ -136,7 +154,9 @@ struct is_ruby_sanctum : public InstanceScript
             case TYPE_SAVIANA:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == DONE)
+                {
                     DoHandleZarithrianDoor();
+                }
                 break;
             case TYPE_BALTHARUS:
                 m_auiEncounter[uiType] = uiData;
@@ -147,7 +167,9 @@ struct is_ruby_sanctum : public InstanceScript
 
                     // Start outro event by DB script
                     if (Creature* pXerestrasza = GetSingleCreatureFromStorage(NPC_XERESTRASZA))
+                    {
                         pXerestrasza->GetMotionMaster()->MoveWaypoint();
+                    }
                 }
                 break;
             case TYPE_ZARITHRIAN:
@@ -166,7 +188,9 @@ struct is_ruby_sanctum : public InstanceScript
             case TYPE_HALION:
                 // Don't set the same data twice
                 if (m_auiEncounter[uiType] == uiData)
+                {
                     return;
+                }
                 m_auiEncounter[uiType] = uiData;
                 DoUseDoorOrButton(GO_FLAME_RING);
                 switch (uiData)
@@ -174,9 +198,13 @@ struct is_ruby_sanctum : public InstanceScript
                 case FAIL:
                     // Despawn the boss
                     if (Creature* pHalion = GetSingleCreatureFromStorage(NPC_HALION_REAL))
+                    {
                         pHalion->ForcedDespawn();
+                    }
                     if (Creature* pHalion = GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
+                    {
                         pHalion->ForcedDespawn();
+                    }
                     // Note: rest of the cleanup is handled by creature_linking
 
                     m_uiHalionResetTimer = 30000;
@@ -184,11 +212,15 @@ struct is_ruby_sanctum : public InstanceScript
                 case DONE:
                     // clear debuffs
                     if (Creature* pController = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
+                    {
                         pController->CastSpell(pController, SPELL_CLEAR_DEBUFFS, true);
+                    }
 
                     // Despawn the portals
                     if (GameObject* pPortal = GetSingleGameObjectFromStorage(GO_TWILIGHT_PORTAL_ENTER_1))
+                    {
                         pPortal->SetLootState(GO_JUST_DEACTIVATED);
+                    }
 
                     // ToDo: despawn the other portals as well, and disable world state
                     break;
@@ -213,10 +245,14 @@ struct is_ruby_sanctum : public InstanceScript
         uint32 GetData(uint32 uiType) const override
         {
             if (uiType < MAX_ENCOUNTER)
+            {
                 return m_auiEncounter[uiType];
+            }
 
             if (uiType == TYPE_DATA_IS_25MAN)
+            {
                 return uint32(instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC);
+            }
 
             return 0;
         }
@@ -228,7 +264,9 @@ struct is_ruby_sanctum : public InstanceScript
                 for (GuidList::const_iterator itr = m_lSpawnStalkersGuidList.begin(); itr != m_lSpawnStalkersGuidList.end(); ++itr)
                 {
                     if (Creature* pStalker = instance->GetCreature(*itr))
+                    {
                         pStalker->CastSpell(pStalker, SPELL_SUMMON_FLAMECALLER, true, nullptr, nullptr, ObjectGuid(uiData));
+                    }
                 }
             }
         }
@@ -256,14 +294,18 @@ struct is_ruby_sanctum : public InstanceScript
                     case 2:
                         // Cast Fiery explosion
                         if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
+                        {
                             pSummoner->CastSpell(pSummoner, SPELL_FIERY_EXPLOSION, true);
+                        }
                         m_uiHalionSummonTimer = 2000;
                     case 3:
                         // Spawn Halion
                         if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
                         {
                             if (Creature* pHalion = pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSUMMON_DEAD_DESPAWN, 0))
+                            {
                                 DoScriptText(SAY_HALION_SPAWN, pHalion);
+                            }
                         }
                         m_uiHalionSummonTimer = 0;
                         break;
@@ -271,7 +313,9 @@ struct is_ruby_sanctum : public InstanceScript
                     ++m_uiHalionSummonStage;
                 }
                 else
+                {
                     m_uiHalionSummonTimer -= uiDiff;
+                }
             }
 
             // Resummon Halion if the encounter resets
@@ -280,15 +324,21 @@ struct is_ruby_sanctum : public InstanceScript
                 if (m_uiHalionResetTimer <= uiDiff)
                 {
                     if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
+                    {
                         pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    }
 
                     if (Creature* pHalion = GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
+                    {
                         pHalion->Respawn();
+                    }
 
                     m_uiHalionResetTimer = 0;
                 }
                 else
+                {
                     m_uiHalionResetTimer -= uiDiff;
+                }
             }
         }
 
@@ -309,7 +359,9 @@ struct is_ruby_sanctum : public InstanceScript
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     m_auiEncounter[i] = NOT_STARTED;
+                }
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;
@@ -328,7 +380,9 @@ struct is_ruby_sanctum : public InstanceScript
 
                 // Also remove not_selectable unit flag
                 if (Creature* pZarithrian = GetSingleCreatureFromStorage(NPC_ZARITHRIAN))
+                {
                     pZarithrian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
             }
         }
 

@@ -78,7 +78,9 @@ struct npc_gurgthock : public CreatureScript
                 if (uiEntry == m_auiBosses[i])
                 {
                     if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                    {
                         pPlayer->GroupEventHappens(QUEST_FROM_BEYOND, m_creature);
+                    }
 
                     m_playerGuid.Clear();
                     return;
@@ -94,7 +96,9 @@ struct npc_gurgthock : public CreatureScript
             pCreature->SummonCreature(m_auiBosses[urand(0, 3)], m_afSpawnLocation[0], m_afSpawnLocation[1], m_afSpawnLocation[2], 0.0f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 600000);
 
             if (npc_gurgthockAI* pGurthockAI = dynamic_cast<npc_gurgthockAI*>(pCreature->AI()))
+            {
                 pGurthockAI->SetPlayer(pPlayer);
+            }
         }
         return true;
     }
@@ -143,7 +147,9 @@ struct npc_ghoul_feeding_bunny : public CreatureScript
                     TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
 
                     if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                    {
                         DoCastSpellIfCan(pSummoner, SPELL_GHOUL_KILL_CREDIT, CAST_TRIGGERED);
+                    }
                 }
             }
         }
@@ -156,12 +162,18 @@ struct npc_ghoul_feeding_bunny : public CreatureScript
                 {
                     // try to target a nearby ghoul
                     if (DoCastSpellIfCan(m_creature, SPELL_ATTRACT_GHOUL) == CAST_OK)
+                    {
                         m_uiAttractTimer = 0;
+                    }
                     else
+                    {
                         m_uiAttractTimer = 5000;
+                    }
                 }
                 else
+                {
                     m_uiAttractTimer -= uiDiff;
+                }
             }
         }
     };
@@ -214,7 +226,9 @@ struct npc_decaying_ghoul : public CreatureScript
         void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
         {
             if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             // handle the animation and despawn
             m_creature->GetMotionMaster()->MoveIdle();
@@ -223,7 +237,9 @@ struct npc_decaying_ghoul : public CreatureScript
 
             // send AI event for the quest credit
             if (Creature* pBunny = m_creature->GetMap()->GetCreature(m_feedingBunnyGuid))
+            {
                 SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pBunny);
+            }
         }
 
         void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
@@ -232,7 +248,9 @@ struct npc_decaying_ghoul : public CreatureScript
             {
                 // check if the ghoul has already a feeding bunny set
                 if (m_feedingBunnyGuid)
+                {
                     return;
+                }
 
                 // move the ghoul to the feeding target
                 float fX, fY, fZ;
@@ -251,19 +269,27 @@ struct npc_decaying_ghoul : public CreatureScript
             if (!m_bSpawnAnim)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BIRTH) == CAST_OK)
+                {
                     m_bSpawnAnim = true;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiFleshRotTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FLESH_ROT) == CAST_OK)
+                {
                     m_uiFleshRotTimer = urand(7000, 15000);
+                }
             }
             else
+            {
                 m_uiFleshRotTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -285,7 +311,9 @@ struct spell_attract_ghoul : public SpellScript
         if (uiSpellId == SPELL_ATTRACT_GHOUL && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_DECAYING_GHOUL)
         {
             if (pCaster->GetEntry() != NPC_GHOUL_FEEDING_BUNNY)
+            {
                 return true;
+            }
 
             pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
             return true;

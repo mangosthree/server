@@ -64,7 +64,9 @@ struct npc_ymirjar_deathbringer : public CreatureScript
         void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
         {
             if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             DoCastSpellIfCan(m_creature, SPELL_SUMMON_UNDEAD);
         }
@@ -72,18 +74,24 @@ struct npc_ymirjar_deathbringer : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiShadowBoltTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_EMPOWERED_SHADOW_BOLT) == CAST_OK)
+                    {
                         m_uiShadowBoltTimer = urand(2000, 3000);
+                    }
                 }
             }
             else
+            {
                 m_uiShadowBoltTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -107,7 +115,9 @@ struct spell_pos_summon_undead : public SpellScript
             Creature* pCreatureTarget = pTarget->ToCreature();
 
             if (pCreatureTarget->GetEntry() != NPC_YMIRJAR_DEATHBRINGER)
+            {
                 return true;
+            }
 
             float fX, fY, fZ;
             for (uint8 i = 0; i < 4; ++i)
@@ -152,7 +162,9 @@ struct npc_collapsing_icicle : public CreatureScript
         {
             // Mark the achiev failed
             if (pSpell->Id == SPELL_ICE_SHARDS_H && pTarget->GetTypeId() == TYPEID_PLAYER && m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ACHIEV_DONT_LOOK_UP, uint32(false));
+            }
         }
 
         void AttackStart(Unit* /*pWho*/) override { }
@@ -177,11 +189,15 @@ struct at_pit_of_saron : public AreaTriggerScript
     bool OnTrigger(Player* pPlayer, AreaTriggerEntry const* pAt) override
     {
         if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
+        {
             return false;
+        }
 
         InstanceData* pInstance = pPlayer->GetInstanceData();
         if (!pInstance)
+        {
             return false;
+        }
 
         if (pAt->id == AREATRIGGER_ID_TUNNEL_START)
         {
@@ -195,7 +211,9 @@ struct at_pit_of_saron : public AreaTriggerScript
         else if (pAt->id == AREATRIGGER_ID_TUNNEL_END)
         {
             if (pInstance->GetData(TYPE_AMBUSH) != IN_PROGRESS)
+            {
                 return false;
+            }
 
             pInstance->SetData(TYPE_AMBUSH, DONE);
             return true;

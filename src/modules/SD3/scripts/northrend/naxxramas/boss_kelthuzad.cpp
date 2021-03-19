@@ -166,10 +166,14 @@ struct boss_kelthuzad : public CreatureScript
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             if (urand(0, 1))
+            {
                 DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -178,7 +182,9 @@ struct boss_kelthuzad : public CreatureScript
             DespawnAdds();
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_KELTHUZAD, DONE);
+            }
         }
 
         void JustReachedHome() override
@@ -187,13 +193,17 @@ struct boss_kelthuzad : public CreatureScript
             DespawnAdds();
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_KELTHUZAD, NOT_STARTED);
+            }
         }
 
         void MoveInLineOfSight(Unit* pWho) override
         {
             if (m_pInstance && m_pInstance->GetData(TYPE_KELTHUZAD) != IN_PROGRESS)
+            {
                 return;
+            }
 
             ScriptedAI::MoveInLineOfSight(pWho);
         }
@@ -205,7 +215,9 @@ struct boss_kelthuzad : public CreatureScript
                 for (GuidSet::const_iterator itr = m_lIntroMobsSet.begin(); itr != m_lIntroMobsSet.end(); ++itr)
                 {
                     if (Creature* pCreature = m_pInstance->instance->GetCreature(*itr))
+                    {
                         pCreature->ForcedDespawn();
+                    }
                 }
             }
 
@@ -251,7 +263,9 @@ struct boss_kelthuzad : public CreatureScript
         void SummonIntroCreatures(uint32 packId)
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             float fAngle = GetLocationAngle(packId + 1);
 
@@ -272,9 +286,13 @@ struct boss_kelthuzad : public CreatureScript
                 if (uiI > 0)
                 {
                     if (uiI < 4)
+                    {
                         uiNpcEntry = NPC_UNSTOPPABLE_ABOM;
+                    }
                     else
+                    {
                         uiNpcEntry = NPC_SOLDIER_FROZEN;
+                    }
                 }
 
                 float fNewX, fNewY, fNewZ;
@@ -287,7 +305,9 @@ struct boss_kelthuzad : public CreatureScript
         void SummonMob(uint32 uiType)
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             float fAngle = GetLocationAngle(urand(1, 7));
 
@@ -320,7 +340,9 @@ struct boss_kelthuzad : public CreatureScript
             case NPC_UNSTOPPABLE_ABOM:
             case NPC_SOUL_WEAVER:
                 if (m_uiIntroPackCount < 7)
+                {
                     m_lIntroMobsSet.insert(pSummoned->GetObjectGuid());
+                }
                 else
                 {
                     m_lAddsSet.insert(pSummoned->GetObjectGuid());
@@ -351,7 +373,9 @@ struct boss_kelthuzad : public CreatureScript
 
                 ++m_uiKilledAbomination;
                 if (m_uiKilledAbomination >= ACHIEV_REQ_KILLED_ABOMINATIONS)
+                {
                     m_pInstance->SetData(TYPE_ACHIEV_GET_ENOUGH, uint32(true));
+                }
 
                 break;
             }
@@ -360,16 +384,22 @@ struct boss_kelthuzad : public CreatureScript
         void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override
         {
             if (uiMotionType == POINT_MOTION_TYPE && uiPointId == 0)
+            {
                 pSummoned->SetInCombatWithZone();
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (!m_pInstance || m_pInstance->GetData(TYPE_KELTHUZAD) != IN_PROGRESS)
+            {
                 return;
+            }
 
             if (m_uiPhase == PHASE_INTRO)
             {
@@ -378,14 +408,18 @@ struct boss_kelthuzad : public CreatureScript
                     if (m_uiSummonIntroTimer < uiDiff)
                     {
                         if (!m_uiIntroPackCount)
+                        {
                             DoScriptText(SAY_SUMMON_MINIONS, m_creature);
+                        }
 
                         SummonIntroCreatures(m_uiIntroPackCount);
                         ++m_uiIntroPackCount;
                         m_uiSummonIntroTimer = 2000;
                     }
                     else
+                    {
                         m_uiSummonIntroTimer -= uiDiff;
+                    }
                 }
                 else
                 {
@@ -408,7 +442,9 @@ struct boss_kelthuzad : public CreatureScript
                         };
                     }
                     else
+                    {
                         m_uiPhase1Timer -= uiDiff;
+                    }
 
                     if (m_uiSoldierCount < MAX_SOLDIER_COUNT)
                     {
@@ -419,7 +455,9 @@ struct boss_kelthuzad : public CreatureScript
                             m_uiSoldierTimer = 3000;
                         }
                         else
+                        {
                             m_uiSoldierTimer -= uiDiff;
+                        }
                     }
 
                     if (m_uiAbominationCount < MAX_ABOMINATION_COUNT)
@@ -431,7 +469,9 @@ struct boss_kelthuzad : public CreatureScript
                             m_uiAbominationTimer = 25000;
                         }
                         else
+                        {
                             m_uiAbominationTimer -= uiDiff;
+                        }
                     }
 
                     if (m_uiBansheeCount < MAX_BANSHEE_COUNT)
@@ -443,7 +483,9 @@ struct boss_kelthuzad : public CreatureScript
                             m_uiBansheeTimer = 25000;
                         }
                         else
+                        {
                             m_uiBansheeTimer -= uiDiff;
+                        }
                     }
                 }
             }
@@ -452,18 +494,26 @@ struct boss_kelthuzad : public CreatureScript
                 if (m_uiFrostBoltTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FROST_BOLT : SPELL_FROST_BOLT_H) == CAST_OK)
+                    {
                         m_uiFrostBoltTimer = urand(1000, 60000);
+                    }
                 }
                 else
+                {
                     m_uiFrostBoltTimer -= uiDiff;
+                }
 
                 if (m_uiFrostBoltNovaTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FROST_BOLT_NOVA : SPELL_FROST_BOLT_NOVA_H) == CAST_OK)
+                    {
                         m_uiFrostBoltNovaTimer = 15000;
+                    }
                 }
                 else
+                {
                     m_uiFrostBoltNovaTimer -= uiDiff;
+                }
 
                 if (m_uiManaDetonationTimer < uiDiff)
                 {
@@ -472,14 +522,18 @@ struct boss_kelthuzad : public CreatureScript
                         if (DoCastSpellIfCan(pTarget, SPELL_MANA_DETONATION) == CAST_OK)
                         {
                             if (urand(0, 1))
+                            {
                                 DoScriptText(SAY_SPECIAL1_MANA_DET, m_creature);
+                            }
 
                             m_uiManaDetonationTimer = 20000;
                         }
                     }
                 }
                 else
+                {
                     m_uiManaDetonationTimer -= uiDiff;
+                }
 
                 if (m_uiShadowFissureTimer < uiDiff)
                 {
@@ -488,27 +542,35 @@ struct boss_kelthuzad : public CreatureScript
                         if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_FISSURE) == CAST_OK)
                         {
                             if (urand(0, 1))
+                            {
                                 DoScriptText(SAY_SPECIAL3_MANA_DET, m_creature);
+                            }
 
                             m_uiShadowFissureTimer = 25000;
                         }
                     }
                 }
                 else
+                {
                     m_uiShadowFissureTimer -= uiDiff;
+                }
 
                 if (m_uiFrostBlastTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_BLAST) == CAST_OK)
                     {
                         if (urand(0, 1))
+                        {
                             DoScriptText(SAY_FROST_BLAST, m_creature);
+                        }
 
                         m_uiFrostBlastTimer = urand(30000, 60000);
                     }
                 }
                 else
+                {
                     m_uiFrostBlastTimer -= uiDiff;
+                }
 
                 if (!m_bIsRegularMode)
                 {
@@ -522,7 +584,9 @@ struct boss_kelthuzad : public CreatureScript
                         }
                     }
                     else
+                    {
                         m_uiChainsTimer -= uiDiff;
+                    }
                 }
 
                 if (m_uiPhase == PHASE_NORMAL)
@@ -542,18 +606,24 @@ struct boss_kelthuzad : public CreatureScript
                         m_uiGuardiansTimer = 5000;
                     }
                     else
+                    {
                         m_uiGuardiansTimer -= uiDiff;
+                    }
 
                     if (m_uiLichKingAnswerTimer && m_pInstance)
                     {
                         if (m_uiLichKingAnswerTimer <= uiDiff)
                         {
                             if (Creature* pLichKing = m_pInstance->GetSingleCreatureFromStorage(NPC_THE_LICHKING))
+                            {
                                 DoScriptText(SAY_ANSWER_REQUEST, pLichKing);
+                            }
                             m_uiLichKingAnswerTimer = 0;
                         }
                         else
+                        {
                             m_uiLichKingAnswerTimer -= uiDiff;
+                        }
                     }
                 }
 

@@ -97,7 +97,9 @@ struct npc_mist : public CreatureScript
         /*void UpdateFollowerAI(const uint32 uiDiff) override
         {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        return;
+        {
+            return;
+        }
 
         DoMeleeAttackIfReady();
         }*/

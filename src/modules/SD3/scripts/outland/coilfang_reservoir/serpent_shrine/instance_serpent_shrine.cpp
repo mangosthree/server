@@ -218,7 +218,9 @@ struct is_serpentshrine_cavern : public InstanceScript
                         {
                             Creature *hydross = GetSingleCreatureFromStorage(NPC_HYDROSS_THE_UNSTABLE);
                             if (hydross)
+                            {
                                 pBeam->CastSpell(hydross, SPELL_BLUE_BEAM, false);
+                            }
                         }
                     }
                 }

@@ -134,7 +134,9 @@ struct boss_telestra : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_TELESTRA, IN_PROGRESS);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -142,13 +144,17 @@ struct boss_telestra : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_TELESTRA, DONE);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
         {
             if (urand(0, 1))
+            {
                 DoScriptText(SAY_KILL, m_creature);
+            }
         }
 
         void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
@@ -181,7 +187,9 @@ struct boss_telestra : public CreatureScript
                     if (m_uiPersonalityTimer > 5000)
                     {
                         if (m_pInstance)
+                        {
                             m_pInstance->SetData(TYPE_ACHIEV_SPLIT_PERSONALITY, uint32(false));
+                        }
                     }
                     m_bCanCheckAchiev = false;
 
@@ -207,10 +215,14 @@ struct boss_telestra : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_bCanCheckAchiev)
+            {
                 m_uiPersonalityTimer += uiDiff;
+            }
 
             switch (m_uiPhase)
             {
@@ -222,18 +234,26 @@ struct boss_telestra : public CreatureScript
                     if (m_uiFirebombTimer < uiDiff)
                     {
                         if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FIREBOMB : SPELL_FIREBOMB_H) == CAST_OK)
+                        {
                             m_uiFirebombTimer = urand(4000, 6000);
+                        }
                     }
                     else
+                    {
                         m_uiFirebombTimer -= uiDiff;
+                    }
 
                     if (m_uiIceNovaTimer < uiDiff)
                     {
                         if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ICE_NOVA : SPELL_ICE_NOVA_H) == CAST_OK)
+                        {
                             m_uiIceNovaTimer = urand(10000, 15000);
+                        }
                     }
                     else
+                    {
                         m_uiIceNovaTimer -= uiDiff;
+                    }
 
                     if (m_uiPhase == PHASE_1 && m_creature->GetHealthPercent() < 50.0f)
                     {
@@ -259,10 +279,14 @@ struct boss_telestra : public CreatureScript
                 if (m_uiGravityWellTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_GRAVITY_WELL) == CAST_OK)
+                    {
                         m_uiGravityWellTimer = urand(15000, 30000);
+                    }
                 }
                 else
+                {
                     m_uiGravityWellTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_2:

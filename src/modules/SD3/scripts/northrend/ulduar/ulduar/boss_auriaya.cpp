@@ -109,13 +109,17 @@ struct boss_auriaya : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_AURIAYA, DONE);
+            }
         }
 
         void Aggro(Unit* /*pWho*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_AURIAYA, IN_PROGRESS);
+            }
 
             DoScriptText(SAY_AGGRO, m_creature);
         }
@@ -128,20 +132,26 @@ struct boss_auriaya : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_AURIAYA, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
         {
             // Summon the feral defender
             if (pSummoned->GetEntry() == NPC_FERAL_DEFENDER_STALKER)
+            {
                 DoCastSpellIfCan(pSummoned, SPELL_ACTIVATE_FERAL_DEFENDER, CAST_INTERRUPT_PREVIOUS);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiTerrifyingScreechTimer < uiDiff)
             {
@@ -153,16 +163,22 @@ struct boss_auriaya : public CreatureScript
                 }
             }
             else
+            {
                 m_uiTerrifyingScreechTimer -= uiDiff;
+            }
 
             if (m_uiSentinelBlastTimer < uiDiff)
             {
                 // Cast Sentinel blast right after terrifying screech
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SENTINEL_BLAST : SPELL_SENTINEL_BLAST_H) == CAST_OK)
+                {
                     m_uiSentinelBlastTimer = 35000;
+                }
             }
             else
+            {
                 m_uiSentinelBlastTimer -= uiDiff;
+            }
 
             if (m_uiDefenderTimer)
             {
@@ -170,30 +186,42 @@ struct boss_auriaya : public CreatureScript
                 {
                     // Summon the feral defender trigger
                     if (DoCastSpellIfCan(m_creature, SPELL_ACTIVATE_FERAL_DEFENDER_TRIGG) == CAST_OK)
+                    {
                         m_uiDefenderTimer = 0;
+                    }
                 }
                 else
+                {
                     m_uiDefenderTimer -= uiDiff;
+                }
             }
 
             if (m_uiSonicScreechTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SONIC_SCREECH : SPELL_SONIC_SCREECH_H) == CAST_OK)
+                {
                     m_uiSonicScreechTimer = 27000;
+                }
             }
             else
+            {
                 m_uiSonicScreechTimer -= uiDiff;
+            }
 
             if (m_uiSwarmTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_GUARDIAN_SWARM) == CAST_OK)
+                    {
                         m_uiSwarmTimer = 37000;
+                    }
                 }
             }
             else
+            {
                 m_uiSwarmTimer -= uiDiff;
+            }
 
             if (m_uiEnrageTimer < uiDiff)
             {
@@ -204,7 +232,9 @@ struct boss_auriaya : public CreatureScript
                 }
             }
             else
+            {
                 m_uiEnrageTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -260,14 +290,18 @@ struct boss_feral_defender : public CreatureScript
         {
             // Set achiev criteria to true
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ACHIEV_NINE_LIVES, uint32(true));
+            }
         }
 
         void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
         {
             // If we don't have the feral essence anymore then ignore this
             if (m_uiKilledCount >= 8)                           // 9-1 == 8
+            {
                 return;
+            }
 
             if (m_uiReviveDelayTimer)                           // Already faking
             {
@@ -304,13 +338,17 @@ struct boss_feral_defender : public CreatureScript
         {
             // Cast seeping feral essence on the summoned
             if (pSummoned->GetEntry() == NPC_SEEPING_FERAL_ESSENCE)
+            {
                 pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_SEEPING_FERAL_ESSENCE : SPELL_SEEPING_FERAL_ESSENCE_H, true, nullptr, nullptr, m_creature->GetObjectGuid());
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiReviveDelayTimer)
             {
@@ -322,7 +360,9 @@ struct boss_feral_defender : public CreatureScript
                     m_uiAttackDelayTimer = 3000;
                 }
                 else
+                {
                     m_uiReviveDelayTimer -= uiDiff;
+                }
 
                 // No Further action while faking
                 return;
@@ -343,7 +383,9 @@ struct boss_feral_defender : public CreatureScript
                     m_uiAttackDelayTimer = 0;
                 }
                 else
+                {
                     m_uiAttackDelayTimer -= uiDiff;
+                }
 
                 // No Further action while faking
                 return;
@@ -354,11 +396,15 @@ struct boss_feral_defender : public CreatureScript
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FERAL_POUNCE : SPELL_FERAL_POUNCE_H) == CAST_OK)
+                    {
                         m_uiPounceTimer = urand(13000, 16000);
+                    }
                 }
             }
             else
+            {
                 m_uiPounceTimer -= uiDiff;
+            }
 
             if (m_uiFeralRushTimer < uiDiff)
             {
@@ -372,11 +418,15 @@ struct boss_feral_defender : public CreatureScript
                         m_uiFeralRushTimer = 12000;
                     }
                     else
+                    {
                         m_uiFeralRushTimer = 400;
+                    }
                 }
             }
             else
+            {
                 m_uiFeralRushTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

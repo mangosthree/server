@@ -123,14 +123,18 @@ struct is_forge_of_souls : public InstanceScript
                 for (GuidList::const_iterator itr = m_luiSoulFragmentAliveGUIDs.begin(); itr != m_luiSoulFragmentAliveGUIDs.end(); ++itr)
                 {
                     if (Creature* pFragment = instance->GetCreature(*itr))
+                    {
                         pFragment->ForcedDespawn();
+                    }
                 }
                 m_luiSoulFragmentAliveGUIDs.clear();
                 break;
             case TYPE_DEVOURER_OF_SOULS:
                 m_auiEncounter[1] = uiData;
                 if (uiData == DONE)
+                {
                     ProcessEventNpcs(GetPlayerInMap(), true);
+                }
                 break;
             case TYPE_ACHIEV_PHANTOM_BLAST:
                 m_bCriteriaPhantomBlastFailed = (uiData == FAIL);
@@ -167,7 +171,9 @@ struct is_forge_of_souls : public InstanceScript
         void SetData64(uint32 uiType, uint64 uiData) override
         {
             if (uiType == DATA_SOULFRAGMENT_REMOVE)
+            {
                 m_luiSoulFragmentAliveGUIDs.remove(ObjectGuid(uiData));
+            }
         }
 
         void OnPlayerEnter(Player* pPlayer) override
@@ -209,7 +215,9 @@ struct is_forge_of_souls : public InstanceScript
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     m_auiEncounter[i] = NOT_STARTED;
+                }
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;
@@ -219,7 +227,9 @@ struct is_forge_of_souls : public InstanceScript
         void ProcessEventNpcs(Player* pPlayer, bool bChanged)
         {
             if (!pPlayer)
+            {
                 return;
+            }
 
             if (m_auiEncounter[0] != DONE || m_auiEncounter[1] != DONE)
             {
@@ -239,7 +249,9 @@ struct is_forge_of_souls : public InstanceScript
                     for (GuidList::const_iterator itr = m_lEventMobGUIDs.begin(); itr != m_lEventMobGUIDs.end(); ++itr)
                     {
                         if (Creature* pSummoned = instance->GetCreature(*itr))
+                        {
                             pSummoned->ForcedDespawn();
+                        }
                     }
 
                     for (uint8 i = 0; i < countof(aEventEndLocations); ++i)

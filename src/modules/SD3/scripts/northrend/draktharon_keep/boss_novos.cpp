@@ -47,11 +47,11 @@ enum
     SPELL_ARCANE_BLAST_H            = 59909,
     SPELL_BLIZZARD                  = 49034,
     SPELL_BLIZZARD_H                = 59854,
-    SPELL_TOUCH_OF_MISERY           = 50090,                // TODO - purpose of this spell (triggers SPELL_WRATH_OF_MISERY) unknown
+    SPELL_TOUCH_OF_MISERY           = 50090,                /* TODO - purpose of this spell (triggers SPELL_WRATH_OF_MISERY) unknown */
     SPELL_WRATH_OF_MISERY           = 50089,
     SPELL_WRATH_OF_MISERY_H         = 59856,
 
-    // SPELL_SUMMON_CRYSTAL_HANDLER    = 49179,             // Spell seems to be unused, perhaps only server-side, and especially no suitable positioned caster are found for this spell
+    /* SPELL_SUMMON_CRYSTAL_HANDLER    = 49179,             // Spell seems to be unused, perhaps only server-side, and especially no suitable positioned caster are found for this spell */
     SPELL_SUMMON_FETID_TROLL_CORPSE = 49103,
     SPELL_SUMMON_HULKING_CORPSE     = 49104,
     SPELL_SUMMON_RISON_SHADOWCASTER = 49105,
@@ -62,7 +62,7 @@ enum
     NPC_HULKING_CORPSE              = 27597,
     NPC_FETID_TROLL_CORPSE          = 27598,
     NPC_RISON_SHADOWCASTER          = 27600,
-    NPC_ROTTED_TROLL_CORPSE         = 32786,                // On heroic as effect of SPELL_SUMMON_MINIONS_H
+    NPC_ROTTED_TROLL_CORPSE         = 32786,                /* On heroic as effect of SPELL_SUMMON_MINIONS_H */
 };
 
 // The Crystal Handlers are summoned around the two entrances of the room
@@ -137,7 +137,9 @@ struct boss_novos : public CreatureScript
             DoScriptText(urand(0, 1) ? SAY_BUBBLE_1 : SAY_BUBBLE_2, m_creature);
 
             if (m_uiLostCrystals == MAX_CRYSTALS)               // Enter Phase 2
+            {
                 m_uiPhase = PHASE_WAITING;
+            }
         }
 
         void MoveInLineOfSight(Unit* pWho) override
@@ -147,7 +149,9 @@ struct boss_novos : public CreatureScript
             {
                 // Add reached ground, and the failure has not yet been reported
                 if (pWho->GetPositionZ() < m_creature->GetPositionZ() + 1.5f && m_pInstance && m_pInstance->GetData(TYPE_NOVOS) == IN_PROGRESS)
+                {
                     m_pInstance->SetData(TYPE_NOVOS, SPECIAL);
+                }
                 return;
             }
 
@@ -166,7 +170,9 @@ struct boss_novos : public CreatureScript
             DoCastSpellIfCan(m_creature, SPELL_ARCANE_FIELD);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_NOVOS, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -179,13 +185,17 @@ struct boss_novos : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_NOVOS, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_NOVOS, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -195,7 +205,9 @@ struct boss_novos : public CreatureScript
             case NPC_CRYSTAL_HANDLER:
             case NPC_ROTTED_TROLL_CORPSE:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     pSummoned->AI()->AttackStart(pTarget);
+                }
                 break;
             }
         }
@@ -206,7 +218,9 @@ struct boss_novos : public CreatureScript
             {
                 m_pInstance->SetData64(DATA64_NOVOS_CRYSTAL_HANDLER, pSummoned->GetObjectGuid().GetRawValue());
                 if (Creature* pTarget = m_pInstance->instance->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_NOVOS_CRYSTAL_HANDLER))))
+                {
                     pSummoned->CastSpell(pTarget, aCrystalHandlerDeathSpells[m_pInstance->GetData(TYPE_DATA_NOVOS_CRYSTAL_INDEX)], true, nullptr, nullptr, m_creature->GetObjectGuid());
+                }
             }
         }
 
@@ -221,7 +235,9 @@ struct boss_novos : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             switch (m_uiPhase)
             {
@@ -239,34 +255,48 @@ struct boss_novos : public CreatureScript
                     m_uiSummonHandlerTimer = 40000;
                 }
                 else
+                {
                     m_uiSummonHandlerTimer -= uiDiff;
+                }
 
                 if (m_uiSummonShadowcasterTimer < uiDiff)
                 {
                     if (Creature* pSummoner = m_pInstance->instance->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_NOVOS_SUMMON_DUMMY))))
+                    {
                         pSummoner->CastSpell(pSummoner, SPELL_SUMMON_RISON_SHADOWCASTER, false, nullptr, nullptr, m_creature->GetObjectGuid());
+                    }
                     m_uiSummonShadowcasterTimer = 25000;
                 }
                 else
+                {
                     m_uiSummonShadowcasterTimer -= uiDiff;
+                }
 
                 if (m_uiSummonFetidTrollTimer < uiDiff)
                 {
                     if (Creature* pSummoner = m_pInstance->instance->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_NOVOS_SUMMON_DUMMY))))
+                    {
                         pSummoner->CastSpell(pSummoner, SPELL_SUMMON_FETID_TROLL_CORPSE, false, nullptr, nullptr, m_creature->GetObjectGuid());
+                    }
                     m_uiSummonFetidTrollTimer = 5000;
                 }
                 else
+                {
                     m_uiSummonFetidTrollTimer -= uiDiff;
+                }
 
                 if (m_uiSummonHulkingCorpseTimer < uiDiff)
                 {
                     if (Creature* pSummoner = m_pInstance->instance->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_NOVOS_SUMMON_DUMMY))))
+                    {
                         pSummoner->CastSpell(pSummoner, SPELL_SUMMON_HULKING_CORPSE, false, nullptr, nullptr, m_creature->GetObjectGuid());
+                    }
                     m_uiSummonHulkingCorpseTimer = 30000;
                 }
                 else
+                {
                     m_uiSummonHulkingCorpseTimer -= uiDiff;
+                }
 
                 break;
 
@@ -279,12 +309,18 @@ struct boss_novos : public CreatureScript
                     m_creature->RemoveAllAuras();
 
                     if (!m_bIsRegularMode)
+                    {
                         DoCastSpellIfCan(m_creature, SPELL_SUMMON_MINIONS_H, CAST_INTERRUPT_PREVIOUS);
+                    }
                     else
+                    {
                         m_creature->InterruptNonMeleeSpells(true);
+                    }
                 }
                 else
+                {
                     m_uiPhaseTimer -= uiDiff;
+                }
 
                 break;
 
@@ -293,32 +329,46 @@ struct boss_novos : public CreatureScript
                 {
                     // TODO - might be possible that this spell is only casted, when there is an enemy in range
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ARCANE_BLAST : SPELL_ARCANE_BLAST_H) == CAST_OK)
+                    {
                         m_uiArcaneBlastTimer = urand(7000, 9000);
+                    }
                 }
                 else
+                {
                     m_uiArcaneBlastTimer -= uiDiff;
+                }
 
                 if (m_uiBlizzardTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_BLIZZARD : SPELL_BLIZZARD_H) == CAST_OK)
+                    {
                         m_uiBlizzardTimer = urand(9000, 13500);
+                    }
                 }
                 else
+                {
                     m_uiBlizzardTimer -= uiDiff;
+                }
 
                 if (m_uiWrathTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_WRATH_OF_MISERY : SPELL_WRATH_OF_MISERY_H) == CAST_OK)
+                    {
                         m_uiWrathTimer = urand(12500, 17200);
+                    }
                 }
                 else
+                {
                     m_uiWrathTimer -= uiDiff;
+                }
 
                 if (!m_creature->IsNonMeleeSpellCasted(true))       // TODO Use this additional check, because might want to change the random target to be a target that is in LoS (which then is expensive)
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FROSTBOLT : SPELL_FROSTBOLT_H);
+                }
 
                 break;
             }
@@ -369,14 +419,18 @@ struct npc_crystal_channel_target : public CreatureScript
         void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override
         {
             if (uiPointId != 1 || uiMotionType != POINT_MOTION_TYPE || (pSummoned->GetEntry() != NPC_HULKING_CORPSE && pSummoned->GetEntry() != NPC_FETID_TROLL_CORPSE && pSummoned->GetEntry() != NPC_RISON_SHADOWCASTER))
+            {
                 return;
+            }
 
             if (!pSummoned->IsInCombat() && m_pInstance)
             {
                 if (Creature* pNovos = m_pInstance->GetSingleCreatureFromStorage(NPC_NOVOS))
                 {
                     if (Unit* pTarget = pNovos->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
                         pSummoned->AI()->AttackStart(pTarget);
+                    }
                 }
             }
         }
@@ -406,14 +460,18 @@ struct aura_npc_crystal_channel_target : public AuraScript
                         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
                         {
                             if (pInstance->GetData(TYPE_NOVOS) == NOT_STARTED || pInstance->GetData(TYPE_NOVOS) == FAIL)
+                            {
                                 return true;
+                            }
 
                             pInstance->SetData(TYPE_DATA_NOVOS_CRYSTAL_INDEX, uint32(i));
 
                             // Inform Novos about removed
                             if (Creature* pNovos = pInstance->GetSingleCreatureFromStorage(NPC_NOVOS))
                             if (CreatureAI* pNovosAI = pNovos->AI())
+                            {
                                 pNovosAI->ReceiveAIEvent(AI_EVENT_CUSTOM_A, pNovos, pNovos, i);
+                            }
                         }
                     }
                 }

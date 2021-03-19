@@ -101,16 +101,22 @@ struct boss_ionar : public CreatureScript
             m_uiHealthAmountModifier = 1;
 
             if (m_creature->GetVisibility() == VISIBILITY_OFF)
+            {
                 m_creature->SetVisibility(VISIBILITY_ON);
+            }
         }
 
         void AttackedBy(Unit* pAttacker) override
         {
             if (m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_creature->GetVisibility() == VISIBILITY_OFF)
+            {
                 return;
+            }
 
             AttackStart(pAttacker);
         }
@@ -120,13 +126,17 @@ struct boss_ionar : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_IONAR, IN_PROGRESS);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_IONAR, FAIL);
+            }
 
             DespawnSpark();
         }
@@ -140,7 +150,9 @@ struct boss_ionar : public CreatureScript
                 pWho->SetInCombatWith(m_creature);
 
                 if (m_creature->GetVisibility() != VISIBILITY_OFF)
+                {
                     m_creature->GetMotionMaster()->MoveChase(pWho);
+                }
             }
         }
 
@@ -150,7 +162,9 @@ struct boss_ionar : public CreatureScript
             DespawnSpark();
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_IONAR, DONE);
+            }
         }
 
         void KilledUnit(Unit* /*victim*/) override
@@ -166,9 +180,13 @@ struct boss_ionar : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* sender, Unit* invoker, uint32 /**/) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && sender == invoker)
+            {
                 DespawnSpark();
+            }
             else if (eventType == AI_EVENT_CUSTOM_B && sender != invoker)
+            {
                 RegisterSparkAtHome();
+            }
         }
 
         void DespawnSpark()
@@ -178,7 +196,9 @@ struct boss_ionar : public CreatureScript
                 if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
                 {
                     if (pTemp->IsAlive())
+                    {
                         pTemp->ForcedDespawn();
+                    }
                 }
             }
 
@@ -196,7 +216,9 @@ struct boss_ionar : public CreatureScript
                     {
                         // Required to prevent combat movement, elsewise they might switch movement on aggro-change
                         if (ScriptedAI* pSparkAI = dynamic_cast<ScriptedAI*>(pSpark->AI()))
+                        {
                             pSparkAI->SetCombatMovement(false);
+                        }
 
                         pSpark->GetMotionMaster()->MovePoint(POINT_CALLBACK, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
                     }
@@ -216,7 +238,9 @@ struct boss_ionar : public CreatureScript
                 pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_SPARK_VISUAL_TRIGGER_N : SPELL_SPARK_VISUAL_TRIGGER_H, true);
 
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     pSummoned->AI()->AttackStart(pTarget);
+                }
 
                 m_lSparkGUIDList.push_back(pSummoned->GetObjectGuid());
             }
@@ -225,7 +249,9 @@ struct boss_ionar : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Splitted
             if (m_creature->GetVisibility() == VISIBILITY_OFF)
@@ -254,12 +280,16 @@ struct boss_ionar : public CreatureScript
                         if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
                         {
                             if (m_creature->getVictim())
+                            {
                                 m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                            }
                         }
                     }
                 }
                 else
+                {
                     m_uiSplitTimer -= uiDiff;
+                }
 
                 return;
             }
@@ -269,22 +299,30 @@ struct boss_ionar : public CreatureScript
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_STATIC_OVERLOAD_N : SPELL_STATIC_OVERLOAD_H) == CAST_OK)
+                    {
                         m_uiStaticOverloadTimer = urand(5000, 6000);
+                    }
                 }
             }
             else
+            {
                 m_uiStaticOverloadTimer -= uiDiff;
+            }
 
             if (m_uiBallLightningTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_BALL_LIGHTNING_N : SPELL_BALL_LIGHTNING_H) == CAST_OK)
+                    {
                         m_uiBallLightningTimer = urand(10000, 11000);
+                    }
                 }
             }
             else
+            {
                 m_uiBallLightningTimer -= uiDiff;
+            }
 
             // Health check
             if (m_creature->GetHealthPercent() < float(100 - 20 * m_uiHealthAmountModifier))
@@ -318,16 +356,22 @@ struct spell_ionar_disperse : public SpellScript
         {
             Creature* pCreatureTarget = pTarget->ToCreature();
             if (pCreatureTarget->GetEntry() != NPC_IONAR)
+            {
                 return true;
+            }
 
             for (uint8 i = 0; i < MAX_SPARKS; ++i)
+            {
                 pCreatureTarget->CastSpell(pCreatureTarget, SPELL_SUMMON_SPARK, true);
+            }
 
             pCreatureTarget->AttackStop();
             pCreatureTarget->SetVisibility(VISIBILITY_OFF);
 
             if (pCreatureTarget->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+            {
                 pCreatureTarget->GetMotionMaster()->MovementExpired();
+            }
 
             return true;
         }
@@ -345,10 +389,14 @@ struct spell_ionar_spark_despawn : public SpellScript
         {
             Creature* pCreatureTarget = pTarget->ToCreature();
             if (pCreatureTarget->GetEntry() != NPC_IONAR)
+            {
                 return true;
+            }
 
             if (CreatureAI* pIonarAI = pCreatureTarget->AI())
+            {
                 pIonarAI->ReceiveAIEvent(AI_EVENT_CUSTOM_A, pCreatureTarget, pCreatureTarget, 0);
+            }
 
             return true;
         }
@@ -378,7 +426,9 @@ struct mob_spark_of_ionar : public CreatureScript
         void MovementInform(uint32 uiType, uint32 uiPointId) override
         {
             if (uiType != POINT_MOTION_TYPE || !m_pInstance)
+            {
                 return;
+            }
 
             if (uiPointId == POINT_CALLBACK)
             {
@@ -391,10 +441,14 @@ struct mob_spark_of_ionar : public CreatureScript
                     }
 
                     if (CreatureAI* pIonarAI = pIonar->AI())
+                    {
                         pIonarAI->ReceiveAIEvent(AI_EVENT_CUSTOM_B, pIonar, m_creature, 0);
+                    }
                 }
                 else
+                {
                     m_creature->ForcedDespawn();
+                }
             }
         }
     };

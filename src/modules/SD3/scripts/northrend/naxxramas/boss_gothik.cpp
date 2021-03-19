@@ -124,7 +124,9 @@ struct boss_gothik : public CreatureScript
             for (GuidList::const_iterator itr = m_lSummonedAddGuids.begin(); itr != m_lSummonedAddGuids.end(); itr++)
             {
                 if (Creature* pCreature = m_creature->GetMap()->GetCreature(*itr))
+                {
                     pCreature->ForcedDespawn();
+                }
             }
 
             m_lSummonedAddGuids.clear();
@@ -133,7 +135,9 @@ struct boss_gothik : public CreatureScript
         void Aggro(Unit* /*pWho*/) override
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             m_pInstance->SetData(TYPE_GOTHIK, IN_PROGRESS); //here the triggers also are setted up
 
@@ -160,14 +164,18 @@ struct boss_gothik : public CreatureScript
             Map::PlayerList const& lPlayers = m_pInstance->instance->GetPlayers();
 
             if (lPlayers.isEmpty())
+            {
                 return false;
+            }
 
             for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
             {
                 if (Player* pPlayer = itr->getSource())
                 {
                     if (!IsInRightSideGothArea(pPlayer) && pPlayer->IsAlive())
+                    {
                         return true;
+                    }
                 }
             }
 
@@ -177,7 +185,9 @@ struct boss_gothik : public CreatureScript
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            {
                 DoScriptText(SAY_KILL, m_creature);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -185,20 +195,26 @@ struct boss_gothik : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_GOTHIK, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_GOTHIK, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
         {
             m_lSummonedAddGuids.push_back(pSummoned->GetObjectGuid());
             if (!IsCentralDoorClosed())
+            {
                 pSummoned->SetInCombatWithZone();
+            }
         }
 
         void SummonedCreatureJustDied(Creature* pSummoned) override
@@ -206,7 +222,9 @@ struct boss_gothik : public CreatureScript
             m_lSummonedAddGuids.remove(pSummoned->GetObjectGuid());
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             m_pInstance->SetData64(DATA64_GOTH_RIGHT_ANCHOR, pSummoned->GetObjectGuid().GetRawValue());
             if (Creature* pAnchor = m_creature->GetMap()->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_GOTH_RIGHT_ANCHOR))))
@@ -226,7 +244,9 @@ struct boss_gothik : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             switch (m_uiPhase)
             {
@@ -243,7 +263,9 @@ struct boss_gothik : public CreatureScript
                     m_uiSpeech++;
                 }
                 else
+                {
                     m_uiSpeechTimer -= uiDiff;
+                }
 
                 // No break here
 
@@ -251,27 +273,39 @@ struct boss_gothik : public CreatureScript
                 if (m_uiTraineeTimer < uiDiff)
                 {
                     if (m_pInstance)
+                    {
                         m_pInstance->SetData(TYPE_DO_GOTH_SUMMON, NPC_UNREL_TRAINEE);
+                    }
                     m_uiTraineeTimer = 20 * IN_MILLISECONDS;
                 }
                 else
+                {
                     m_uiTraineeTimer -= uiDiff;
+                }
                 if (m_uiDeathKnightTimer < uiDiff)
                 {
                     if (m_pInstance)
+                    {
                         m_pInstance->SetData(TYPE_DO_GOTH_SUMMON, NPC_UNREL_DEATH_KNIGHT);
+                    }
                     m_uiDeathKnightTimer = 25 * IN_MILLISECONDS;
                 }
                 else
+                {
                     m_uiDeathKnightTimer -= uiDiff;
+                }
                 if (m_uiRiderTimer < uiDiff)
                 {
                     if (m_pInstance)
+                    {
                         m_pInstance->SetData(TYPE_DO_GOTH_SUMMON, NPC_UNREL_RIDER);
+                    }
                     m_uiRiderTimer = 30 * IN_MILLISECONDS;
                 }
                 else
+                {
                     m_uiRiderTimer -= uiDiff;
+                }
 
                 if (m_uiPhaseTimer < uiDiff)
                 {
@@ -279,7 +313,9 @@ struct boss_gothik : public CreatureScript
                     m_uiPhaseTimer = 27 * IN_MILLISECONDS;
                 }
                 else
+                {
                     m_uiPhaseTimer -= uiDiff;
+                }
 
                 break;
 
@@ -301,7 +337,9 @@ struct boss_gothik : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiPhaseTimer -= uiDiff;
+                }
 
                 break;
 
@@ -316,7 +354,9 @@ struct boss_gothik : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiTeleportTimer -= uiDiff;
+                }
 
                 if (m_creature->GetHealthPercent() <= 30.0f)
                 {
@@ -331,24 +371,34 @@ struct boss_gothik : public CreatureScript
                 if (m_uiHarvestSoulTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_HARVESTSOUL) == CAST_OK)
+                    {
                         m_uiHarvestSoulTimer = 15 * IN_MILLISECONDS;
+                    }
                 }
                 else
+                {
                     m_uiHarvestSoulTimer -= uiDiff;
+                }
 
                 if (m_uiShadowboltTimer)
                 {
                     if (m_uiShadowboltTimer <= uiDiff)
+                    {
                         m_uiShadowboltTimer = 0;
+                    }
                     else
+                    {
                         m_uiShadowboltTimer -= uiDiff;
+                    }
                 }
                 // Shadowbold cooldown finished, cast when ready
                 else if (!m_creature->IsNonMeleeSpellCasted(true))
                 {
                     // Select valid target
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_SHADOWBOLT, SELECT_FLAG_IN_LOS))
+                    {
                         DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOWBOLT : SPELL_SHADOWBOLT_H);
+                    }
                 }
 
                 break;
@@ -369,13 +419,17 @@ struct boss_gothik : public CreatureScript
                             if (Creature* pCreature = m_pInstance->instance->GetCreature(*itr))
                             {
                                 if (!pCreature->IsInCombat())
+                                {
                                     pCreature->SetInCombatWithZone();
+                                }
                             }
                         }
                     }
                 }
                 else
+                {
                     m_uiControlZoneTimer -= uiDiff;
+                }
             }
         }
         private:
@@ -384,7 +438,9 @@ struct boss_gothik : public CreatureScript
         {
             if (m_pInstance)
                 if (GameObject* pCombatGate = m_pInstance->GetSingleGameObjectFromStorage(GO_MILI_GOTH_COMBAT_GATE))
+                {
                     return (pCombatGate->GetPositionY() >= pUnit->GetPositionY());
+                }
 
             script_error_log("left/right side check, Gothik combat area failed.");
             return true;
@@ -409,12 +465,16 @@ struct spell_x_to_anchor1 : public SpellScript
     {
         Creature* pCreatureTarget = pTarget->ToCreature();
         if (uiEffIndex != EFFECT_INDEX_0 || pCreatureTarget->GetEntry() != NPC_SUB_BOSS_TRIGGER)
+        {
             return true;
+        }
 
         ScriptedInstance* pInstance = (ScriptedInstance*)pCreatureTarget->GetInstanceData();
 
         if (!pInstance)
+        {
             return true;
+        }
 
         pInstance->SetData64(DATA64_GOTH_LEFT_ANCHOR, pCreatureTarget->GetObjectGuid().GetRawValue());
         if (Creature* pAnchor2 = pCreatureTarget->GetMap()->GetCreature(ObjectGuid(pInstance->GetData64(DATA64_GOTH_LEFT_ANCHOR))))
@@ -422,9 +482,13 @@ struct spell_x_to_anchor1 : public SpellScript
             uint32 uiTriggered = SPELL_A_TO_ANCHOR_2;
 
             if (uiSpellId == SPELL_B_TO_ANCHOR_1)
+            {
                 uiTriggered = SPELL_B_TO_ANCHOR_2;
+            }
             else if (uiSpellId == SPELL_C_TO_ANCHOR_1)
+            {
                 uiTriggered = SPELL_C_TO_ANCHOR_2;
+            }
 
             pCreatureTarget->CastSpell(pAnchor2, uiTriggered, true);
         }
@@ -445,21 +509,29 @@ struct spell_x_to_anchor2 : public SpellScript
     {
         Creature* pCreatureTarget = pTarget->ToCreature();
         if (uiEffIndex != EFFECT_INDEX_0 || pCreatureTarget->GetEntry() != NPC_SUB_BOSS_TRIGGER)
+        {
             return true;
+        }
 
         ScriptedInstance* pInstance = (ScriptedInstance*)pCreatureTarget->GetInstanceData();
 
         if (!pInstance)
+        {
             return true;
+        }
 
         if (Creature* ptarget = pCreatureTarget->GetMap()->GetCreature(ObjectGuid(pInstance->GetData64(DATA64_GOTH_RANDOM_LEFT))))
         {
             uint32 uiTriggered = SPELL_A_TO_SKULL;
 
             if (uiSpellId == SPELL_B_TO_ANCHOR_2)
+            {
                 uiTriggered = SPELL_B_TO_SKULL;
+            }
             else if (uiSpellId == SPELL_C_TO_ANCHOR_2)
+            {
                 uiTriggered = SPELL_C_TO_SKULL;
+            }
 
             pCreatureTarget->CastSpell(ptarget, uiTriggered, true);
         }
@@ -479,26 +551,36 @@ struct spell_x_to_skull : public SpellScript
     {
         Creature* pCreatureTarget = pTarget->ToCreature();
         if (uiEffIndex != EFFECT_INDEX_0 || pCreatureTarget->GetEntry() != NPC_SUB_BOSS_TRIGGER)
+        {
             return true;
+        }
 
         ScriptedInstance* pInstance = (ScriptedInstance*)pCreatureTarget->GetInstanceData();
 
         if (!pInstance)
+        {
             return true;
+        }
 
         if (Creature* pGoth = pInstance->GetSingleCreatureFromStorage(NPC_GOTHIK))
         {
             uint32 uiNpcEntry = NPC_SPECT_TRAINEE;
 
             if (uiSpellId == SPELL_B_TO_SKULL)
+            {
                 uiNpcEntry = NPC_SPECT_DEATH_KNIGHT;
+            }
             else if (uiSpellId == SPELL_C_TO_SKULL)
+            {
                 uiNpcEntry = NPC_SPECT_RIDER;
+            }
 
             pGoth->SummonCreature(uiNpcEntry, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
 
             if (uiNpcEntry == NPC_SPECT_RIDER)
+            {
                 pGoth->SummonCreature(NPC_SPECT_HORSE, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+            }
         }
         return true;
     }

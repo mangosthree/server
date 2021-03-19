@@ -219,7 +219,9 @@ struct npc_time_rift : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature *pSender, Unit *pInvoker, uint32 /*data*/) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature)
+            {
                 DoSummon();
+            }
         }
 
         void DoSummon()

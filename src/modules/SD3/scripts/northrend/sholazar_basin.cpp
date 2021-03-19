@@ -116,7 +116,9 @@ struct npc_helice : public CreatureScript
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             {
                 if (!HasEscortState(STATE_ESCORT_ESCORTING))
+                {
                     return;
+                }
 
                 if (HasEscortState(STATE_ESCORT_PAUSED))
                 {
@@ -130,14 +132,18 @@ struct npc_helice : public CreatureScript
                                 DoCastSpellIfCan(m_creature, SPELL_DETONATE_EXPLOSIVES_1);
 
                                 if (Player* pPlayer = GetPlayerForEscort())
+                                {
                                     DoScriptText(SAY_HELICE_EXPLODE_1, m_creature, pPlayer);
+                                }
 
                                 m_uiExplodeTimer = 2500;
                                 ++m_uiExplodePhase;
                                 break;
                             case 1:
                                 if (Player* pPlayer = GetPlayerForEscort())
+                                {
                                     DoScriptText(SAY_HELICE_MOVE_ON, m_creature, pPlayer);
+                                }
 
                                 m_uiExplodeTimer = 2500;
                                 ++m_uiExplodePhase;
@@ -158,7 +164,9 @@ struct npc_helice : public CreatureScript
                                 DoCastSpellIfCan(m_creature, SPELL_DETONATE_EXPLOSIVES_2);
 
                                 if (Player* pPlayer = GetPlayerForEscort())
+                                {
                                     DoScriptText(SAY_HELICE_EXPLODE_2, m_creature, pPlayer);
+                                }
 
                                 m_uiExplodeTimer = 2500;
                                 ++m_uiExplodePhase;
@@ -173,7 +181,9 @@ struct npc_helice : public CreatureScript
                         }
                     }
                     else
+                    {
                         m_uiExplodeTimer -= uiDiff;
+                    }
                 }
 
                 return;
@@ -280,7 +290,9 @@ struct npc_injured_rainspeaker : public CreatureScript
         void UpdateEscortAI(const uint32 /*uiDiff*/) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -330,7 +342,9 @@ bool GossipSelect_npc_injured_rainspeaker(Player* pPlayer, Creature* pCreature, 
         pPlayer->CLOSE_GOSSIP_MENU();
 
         if (npc_injured_rainspeakerAI* pEscortAI = dynamic_cast<npc_injured_rainspeakerAI*>(pCreature->AI()))
+        {
             pEscortAI->Start(true, pPlayer);
+        }
     }
 
     return false;
@@ -375,7 +389,9 @@ struct npc_mosswalker_victim : public CreatureScript
         {
             // doesn't appear they always emote
             if (urand(0, 3) == 0)
+            {
                 DoScriptText(EMOTE_PAIN, pCreature);
+            }
 
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_PULSE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
         }
@@ -392,9 +408,13 @@ struct npc_mosswalker_victim : public CreatureScript
 
             // just to prevent double credit
             if (pCreature->GetLootRecipient())
+            {
                 return true;
+            }
             else
+            {
                 pCreature->SetLootRecipient(pPlayer);
+            }
 
             if (urand(0, 2))                                    // die
             {
@@ -512,7 +532,9 @@ struct npc_tipsy_mcmanus : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
         {
             if (pInvoker->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             // start event
             if (eventType == AI_EVENT_START_EVENT)
@@ -527,7 +549,9 @@ struct npc_tipsy_mcmanus : public CreatureScript
                 for (uint8 i = 0; i < 3; ++i)
                 {
                     if (aStillAtItFruits[i].uiOwnerEntry == uiMiscValue)
+                    {
                         DoCheckDistillationTask(uiMiscValue);
+                    }
                 }
             }
             // check machine tasks
@@ -536,7 +560,9 @@ struct npc_tipsy_mcmanus : public CreatureScript
                 for (uint8 i = 0; i < 2; ++i)
                 {
                     if (aStillAtItMachines[i].uiOwnerEntry == uiMiscValue)
+                    {
                         DoCheckDistillationTask(uiMiscValue);
+                    }
                 }
             }
         }
@@ -621,7 +647,9 @@ struct npc_tipsy_mcmanus : public CreatureScript
                     ++m_uiTaskIndex;
                 }
                 else
+                {
                     m_uiTaskTimer -= uiDiff;
+                }
             }
 
             // timer delay to allow player to complete the task
@@ -634,11 +662,15 @@ struct npc_tipsy_mcmanus : public CreatureScript
                     m_uiActionTimer = 0;
                 }
                 else
+                {
                     m_uiActionTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -652,7 +684,9 @@ struct npc_tipsy_mcmanus : public CreatureScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->GetQuestStatus(QUEST_ID_STILL_AT_IT) == QUEST_STATUS_INCOMPLETE)
+        {
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TIPSY_MCMANUS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
 
         pPlayer->SEND_GOSSIP_MENU(TEXT_ID_READY, pCreature->GetObjectGuid());
         return true;
@@ -661,7 +695,9 @@ struct npc_tipsy_mcmanus : public CreatureScript
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
     {
         if (uiAction != GOSSIP_ACTION_INFO_DEF + 1)
+        {
             return false;
+        }
 
         pPlayer->CLOSE_GOSSIP_MENU();
         pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
@@ -706,10 +742,14 @@ struct go_quest_still_at_it_credit : public GameObjectScript
     bool OnUse(Player* pPlayer, GameObject* pGo) override
     {
         if (pPlayer->GetQuestStatus(QUEST_ID_STILL_AT_IT) != QUEST_STATUS_INCOMPLETE)
+        {
             return true;
+        }
 
         if (Creature* pTipsyMcmanus = GetClosestCreatureWithEntry(pPlayer, NPC_TIPSY_MCMANUS, 2 * INTERACTION_DISTANCE))
+        {
             pTipsyMcmanus->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pPlayer, pTipsyMcmanus, pGo->GetEntry());
+        }
 
         return false;
     }

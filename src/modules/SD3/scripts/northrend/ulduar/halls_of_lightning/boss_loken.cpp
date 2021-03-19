@@ -91,7 +91,9 @@ struct boss_loken : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_LOKEN, IN_PROGRESS);
+            }
 
             // Cast Pulsing Shockwave at aggro - ToDo: enable this when the core will properly support this spell
             // DoCastSpellIfCan(m_creature, SPELL_PULSING_SHOCKWAVE_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
@@ -103,7 +105,9 @@ struct boss_loken : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_LOKEN, DONE);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -119,25 +123,33 @@ struct boss_loken : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_LOKEN, FAIL);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             // Return since we have no target
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiArcLightningTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_ARC_LIGHTNING) == CAST_OK)
+                    {
                         m_uiArcLightningTimer = urand(15000, 16000);
+                    }
                 }
             }
             else
+            {
                 m_uiArcLightningTimer -= uiDiff;
+            }
 
             if (m_uiLightningNovaTimer < uiDiff)
             {
@@ -153,7 +165,9 @@ struct boss_loken : public CreatureScript
                 }
             }
             else
+            {
                 m_uiLightningNovaTimer -= uiDiff;
+            }
 
             // Health check
             if (m_creature->GetHealthPercent() < float(100 - 25 * m_uiHealthAmountModifier))

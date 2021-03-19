@@ -154,7 +154,9 @@ struct npc_shaheen : public CreatureScript
         void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override
         {
             if (pSummoned->GetEntry() == NPC_SHADOW_LORD_XIRAXIS && uiMotionType == POINT_MOTION_TYPE && uiPointId == 1)
+            {
                 StartNextDialogueText(SAY_FINAL_STOP_1);
+            }
         }
 
         void SummonedCreatureJustDied(Creature* pSummoned) override
@@ -226,7 +228,9 @@ struct npc_shaheen : public CreatureScript
                     break;
                 case 43:
                     if (Player* pPlayer = GetPlayerForEscort())
+                    {
                         pPlayer->GroupEventHappens(QUEST_ID_HARD_WORK_PAYS_OFF, m_creature);
+                    }
                     break;
             }
         }
@@ -245,7 +249,9 @@ struct npc_shaheen : public CreatureScript
                         TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
 
                         if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                        {
                             DoScriptText(SAY_SPAWN, m_creature, pSummoner);
+                        }
                     }
                     break;
                 case SAY_ESCORT_READY:
@@ -285,7 +291,9 @@ struct npc_shaheen : public CreatureScript
             DialogueUpdate(uiDiff);
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // ToDo: add combat spells
 

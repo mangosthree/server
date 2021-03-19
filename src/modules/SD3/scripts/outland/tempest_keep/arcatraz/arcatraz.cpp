@@ -151,7 +151,10 @@ struct npc_millhouse_manastorm : public CreatureScript
 
             /*for questId 10886 (heroic mode only)
             if (m_pInstance && m_pInstance->GetData(TYPE_HARBINGERSKYRISS) != DONE)
-            ->FailQuest();*/
+            {
+                ->FailQuest();
+            }
+            */
         }
 
         void EnterEvadeMode() override

@@ -347,7 +347,9 @@ struct is_temple_of_ahnqiraj : public InstanceScript
                 if (GetData(TYPE_SARTURA) == NOT_STARTED || GetData(TYPE_SARTURA) == FAIL)
                 {
                     if (Creature* pSartura = GetSingleCreatureFromStorage(NPC_SARTURA))
+                    {
                         pSartura->SetInCombatWithZone();
+                    }
                 }
             }
         }

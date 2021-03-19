@@ -117,7 +117,9 @@ struct boss_ymiron : public CreatureScript
             m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
 
             for (uint8 i = 0; i < MAX_BOATS; ++i)
+            {
                 m_vuiBoatPhases.push_back(i);
+            }
         }
 
         ScriptedInstance* m_pInstance;
@@ -172,7 +174,9 @@ struct boss_ymiron : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_YMIRON, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -198,7 +202,9 @@ struct boss_ymiron : public CreatureScript
             }
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_YMIRON, DONE);
+            }
         }
 
         void JustReachedHome() override
@@ -206,26 +212,34 @@ struct boss_ymiron : public CreatureScript
             DoResetSpirits();
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_YMIRON, FAIL);
+            }
         }
 
         // Wrapper which handles the spirits reset
         void DoResetSpirits()
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             for (uint8 i = 0; i < MAX_BOATS; ++i)
             {
                 if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aYmironBoatsSpirits[i].uiSpiritTarget))
+                {
                     pSpirit->AI()->EnterEvadeMode();
+                }
             }
         }
 
         void DoChannelSpiritYmiron()
         {
             if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
+            {
                 pSpirit->CastSpell(m_creature, SPELL_CHANNEL_SPIRIT_YMIRON, false);
+            }
 
             // Channeling is finished - resume combat
             if (m_creature->getVictim())
@@ -244,13 +258,17 @@ struct boss_ymiron : public CreatureScript
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_SPIRIT_FOUNT)
+            {
                 DoCastSpellIfCan(pSummoned, SPELL_SPIRIT_FOUNT_BEAM, CAST_INTERRUPT_PREVIOUS);
+            }
         }
 
         void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
         {
             if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             if (Creature* pSpirit = m_creature->GetMap()->GetCreature(m_uiCurrentSpiritGuid))
             {
@@ -264,7 +282,9 @@ struct boss_ymiron : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiSpiritTransformTimer)
             {
@@ -278,7 +298,9 @@ struct boss_ymiron : public CreatureScript
                     m_uiSpiritTransformTimer = 0;
                 }
                 else
+                {
                     m_uiSpiritTransformTimer -= uiDiff;
+                }
             }
 
             if (m_uiCombatResumeTimer)
@@ -290,36 +312,52 @@ struct boss_ymiron : public CreatureScript
                     m_uiCombatResumeTimer = 0;
                 }
                 else
+                {
                     m_uiCombatResumeTimer -= uiDiff;
+                }
             }
 
             // Don't attack while channeling on the boats
             if (m_bIsChannelingSpirit)
+            {
                 return;
+            }
 
             if (m_uiBaneTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_BANE : SPELL_BANE_H) == CAST_OK)
+                {
                     m_uiBaneTimer = urand(20000, 25000);
+                }
             }
             else
+            {
                 m_uiBaneTimer -= uiDiff;
+            }
 
             if (m_uiFetidRotTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FETID_ROT : SPELL_FETID_ROT_H) == CAST_OK)
+                {
                     m_uiFetidRotTimer = urand(10000, 15000);
+                }
             }
             else
+            {
                 m_uiFetidRotTimer -= uiDiff;
+            }
 
             if (m_uiDarkSlashTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DARK_SLASH) == CAST_OK)
+                {
                     m_uiDarkSlashTimer = urand(30000, 35000);
+                }
             }
             else
+            {
                 m_uiDarkSlashTimer -= uiDiff;
+            }
 
             // Check the spirit phases (also don't allow him to change phase if below 1%)
             if (m_creature->GetHealthPercent() < 100 - m_fHealthCheck && m_creature->GetHealthPercent() > 1.0f)
@@ -360,10 +398,14 @@ struct boss_ymiron : public CreatureScript
                     if (m_uiSpiritFountTimer <= uiDiff)
                     {
                         if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPIRIT_FOUNT) == CAST_OK)
+                        {
                             m_uiSpiritFountTimer = 0;
+                        }
                     }
                     else
+                    {
                         m_uiSpiritFountTimer -= uiDiff;
+                    }
                 }
 
                 break;
@@ -372,10 +414,14 @@ struct boss_ymiron : public CreatureScript
                 if (m_uiSpiritStrikeTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SPIRIT_STRIKE : SPELL_SPIRIT_STRIKE_H) == CAST_OK)
+                    {
                         m_uiSpiritStrikeTimer = 5000;
+                    }
                 }
                 else
+                {
                     m_uiSpiritStrikeTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_RANULF:
@@ -383,10 +429,14 @@ struct boss_ymiron : public CreatureScript
                 if (m_uiSpiritBurstTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SPIRIT_BURST : SPELL_SPIRIT_BURST_H) == CAST_OK)
+                    {
                         m_uiSpiritBurstTimer = 10000;
+                    }
                 }
                 else
+                {
                     m_uiSpiritBurstTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_TORGYN:
@@ -394,10 +444,14 @@ struct boss_ymiron : public CreatureScript
                 if (m_uiAvengingSpiritsTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_AVENGING_SPIRITS) == CAST_OK)
+                    {
                         m_uiAvengingSpiritsTimer = 15000;
+                    }
                 }
                 else
+                {
                     m_uiAvengingSpiritsTimer -= uiDiff;
+                }
 
                 break;
             }
@@ -421,7 +475,9 @@ struct event_achiev_kings_bane : public MapEventScript
         if (InstanceData* pInstance = ((Creature*)pSource)->GetInstanceData())
         {
             if (pInstance->GetData(TYPE_YMIRON) != IN_PROGRESS)
+            {
                 return false;
+            }
 
             pInstance->SetData(TYPE_YMIRON, SPECIAL);
             return true;

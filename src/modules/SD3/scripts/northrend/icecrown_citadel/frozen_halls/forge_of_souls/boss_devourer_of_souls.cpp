@@ -126,16 +126,22 @@ struct boss_devourer_of_souls : public CreatureScript
         {
             DoScriptText(aTexts[0][m_uiFace], m_creature);
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_DEVOURER_OF_SOULS, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             if (urand(0, 1))
+            {
                 DoScriptText(aTexts[urand(1, 2)][m_uiFace], m_creature);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -143,12 +149,16 @@ struct boss_devourer_of_souls : public CreatureScript
             DoScriptText(aTexts[3][m_uiFace], m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_DEVOURER_OF_SOULS, DONE);
+            }
 
             for (GuidList::const_iterator itr = m_lWellGuids.begin(); itr != m_lWellGuids.end(); ++itr)
             {
                 if (Creature* pWell = m_creature->GetMap()->GetCreature(*itr))
+                {
                     pWell->ForcedDespawn();
+                }
             }
             m_lWellGuids.clear();
         }
@@ -165,7 +175,9 @@ struct boss_devourer_of_souls : public CreatureScript
             for (GuidList::const_iterator itr = m_lWellGuids.begin(); itr != m_lWellGuids.end(); ++itr)
             {
                 if (Creature* pWell = m_creature->GetMap()->GetCreature(*itr))
+                {
                     pWell->ForcedDespawn();
+                }
             }
             m_lWellGuids.clear();
         }
@@ -200,7 +212,9 @@ struct boss_devourer_of_souls : public CreatureScript
             case SPELL_PHANTOM_BLAST:
             case SPELL_PHANTOM_BLAST_H:
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_ACHIEV_PHANTOM_BLAST, FAIL);
+                }
                 break;
                 // Might be placed somewhere else better, important is to note that this text is said after the 3s cast time
             case SPELL_WAILING_SOULS:
@@ -212,7 +226,9 @@ struct boss_devourer_of_souls : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->IsInCombat())
+            {
                 return;
+            }
 
             // Ending a phase
             if (m_uiEndPhaseTimer)
@@ -227,7 +243,9 @@ struct boss_devourer_of_souls : public CreatureScript
                     m_uiFace = FACE_NORMAL;
                 }
                 else
+                {
                     m_uiEndPhaseTimer -= uiDiff;
+                }
             }
 
             // No additional spells, no target selection for wailing souls
@@ -237,21 +255,29 @@ struct boss_devourer_of_souls : public CreatureScript
                 if (ObjectGuid targetGuid = m_creature->GetTargetGuid())
                 {
                     if (Unit* pTarget = m_creature->GetMap()->GetUnit(targetGuid))
+                    {
                         m_creature->SetFacingTo(m_creature->GetAngle(pTarget));
+                    }
                 }
 
                 if (m_creature->GetThreatManager().isThreatListEmpty() || !m_creature->GetThreatManager().getHostileTarget())
+                {
                     m_creature->SelectHostileTarget();          // Most likely must evade, use additional checks in case evading would be prevented
+                }
                 return;
             }
 
             // Update Target and do Combat Spells
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // No additional abilities while unleashing
             if (m_uiFace == FACE_UNLEASHING)
+            {
                 return;
+            }
 
             // Phantom Blast
             if (m_uiPhantomBlastTimer < uiDiff)
@@ -259,11 +285,15 @@ struct boss_devourer_of_souls : public CreatureScript
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_PHANTOM_BLAST : SPELL_PHANTOM_BLAST_H) == CAST_OK)
+                    {
                         m_uiPhantomBlastTimer = urand(5000, 10000); // TODO
+                    }
                 }
             }
             else
+            {
                 m_uiPhantomBlastTimer -= uiDiff;
+            }
 
             // Jump towards random enemy
             if (m_uiWellTimer < uiDiff)
@@ -271,11 +301,15 @@ struct boss_devourer_of_souls : public CreatureScript
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_WELL_OF_SOULS) == CAST_OK)
+                    {
                         m_uiWellTimer = urand(15000, 25000);    // TODO
+                    }
                 }
             }
             else
+            {
                 m_uiWellTimer -= uiDiff;
+            }
 
             // DMG reflection
             if (m_uiMirrorTimer < uiDiff)
@@ -288,7 +322,9 @@ struct boss_devourer_of_souls : public CreatureScript
                 }
             }
             else
+            {
                 m_uiMirrorTimer -= uiDiff;
+            }
 
             // Spawning of Adds
             if (m_uiUnleashTimer < uiDiff)
@@ -304,7 +340,9 @@ struct boss_devourer_of_souls : public CreatureScript
                 }
             }
             else
+            {
                 m_uiUnleashTimer -= uiDiff;
+            }
 
             if (m_uiWailingTimer < uiDiff)
             {
@@ -318,7 +356,9 @@ struct boss_devourer_of_souls : public CreatureScript
                 }
             }
             else
+            {
                 m_uiWailingTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

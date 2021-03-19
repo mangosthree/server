@@ -63,7 +63,9 @@ struct boss_fjola : CreatureScript
         void UpdateAI(const uint32 /*uiDiff*/) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -97,7 +99,9 @@ struct boss_eydis : public CreatureScript
         void UpdateAI(const uint32 /*uiDiff*/) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             DoMeleeAttackIfReady();
         }

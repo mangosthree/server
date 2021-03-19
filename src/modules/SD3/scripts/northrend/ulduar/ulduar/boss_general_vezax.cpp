@@ -129,13 +129,17 @@ struct boss_general_vezax : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_VEZAX, FAIL);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_VEZAX, DONE);
+            }
 
             DoScriptText(SAY_DEATH, m_creature);
         }
@@ -153,10 +157,14 @@ struct boss_general_vezax : public CreatureScript
 
                 // if vapors have reached the max number for hard mode then summon animus
                 if (m_lVaporsGuids.size() == MAX_HARD_MODE_VAPORS)
+                {
                     DoPrepareAnimusIfCan();
+                }
             }
             else if (pSummoned->GetEntry() == NPC_SARONITE_ANIMUS)
+            {
                 pSummoned->SetInCombatWithZone();
+            }
         }
 
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
@@ -165,7 +173,9 @@ struct boss_general_vezax : public CreatureScript
             {
                 // decrease the number of vapors when they die
                 if (eventType == AI_EVENT_CUSTOM_A)
+                {
                     m_lVaporsGuids.remove(pSender->GetObjectGuid());
+                }
                 else if (eventType == AI_EVENT_CUSTOM_B)
                 {
                     ++m_uiVaporsGathered;
@@ -177,14 +187,18 @@ struct boss_general_vezax : public CreatureScript
                         if (m_pInstance)
                         {
                             if (Creature* pBunny = m_creature->GetMap()->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_VEZAX_ANIMUS))))
+                            {
                                 pBunny->CastSpell(pBunny, SPELL_ANIMUS_FORMATION, true);
+                            }
                         }
 
                         // Despawn the vapors
                         for (GuidList::const_iterator itr = m_lVaporsGuids.begin(); itr != m_lVaporsGuids.end(); ++itr)
                         {
                             if (Creature* pVapor = m_creature->GetMap()->GetCreature(*itr))
+                            {
                                 pVapor->ForcedDespawn();
+                            }
                         }
 
                         DoScriptText(EMOTE_ANIMUS, m_creature);
@@ -195,28 +209,38 @@ struct boss_general_vezax : public CreatureScript
 
             // remove saronite barrier when animus dies
             else if (pSender->GetEntry() == NPC_SARONITE_ANIMUS && eventType == AI_EVENT_CUSTOM_C)
+            {
                 m_creature->RemoveAurasDueToSpell(SPELL_SARONITE_BARRIER);
+            }
         }
 
         void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
         {
             if (pTarget->GetTypeId() != TYPEID_PLAYER || !m_pInstance)
+            {
                 return;
+            }
 
             // Check achiev criterias
             if (pSpell->Id == SPELL_SHADOW_CRASH_DAMAGE)
+            {
                 m_pInstance->SetData(TYPE_ACHIEV_SHADOWDODGER, uint32(false));
+            }
         }
 
         // Merge vapors
         void DoPrepareAnimusIfCan()
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pBunny = m_creature->GetMap()->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_VEZAX_ANIMUS)));
             if (!pBunny)
+            {
                 return;
+            }
 
             // Gather the vapors to the spawn point
             for (GuidList::const_iterator itr = m_lVaporsGuids.begin(); itr != m_lVaporsGuids.end(); ++itr)
@@ -232,7 +256,9 @@ struct boss_general_vezax : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiHardModeTimer)
             {
@@ -266,7 +292,9 @@ struct boss_general_vezax : public CreatureScript
                     ++m_uiHardModeStage;
                 }
                 else
+                {
                     m_uiHardModeTimer -= uiDiff;
+                }
             }
 
             // summon saronite vapors before the hard mode
@@ -287,7 +315,9 @@ struct boss_general_vezax : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiSaroniteVaporTimer -= uiDiff;
+                }
             }
 
             // Searing flames only while animus is not around
@@ -296,10 +326,14 @@ struct boss_general_vezax : public CreatureScript
                 if (m_uiFlamesTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SEARING_FLAMES) == CAST_OK)
+                    {
                         m_uiFlamesTimer = urand(9000, 16000);
+                    }
                 }
                 else
+                {
                     m_uiFlamesTimer -= uiDiff;
+                }
             }
 
             if (m_uiSurgeTimer < uiDiff)
@@ -312,29 +346,39 @@ struct boss_general_vezax : public CreatureScript
                 }
             }
             else
+            {
                 m_uiSurgeTimer -= uiDiff;
+            }
 
             if (m_uiMarkTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_MARK_OF_FACELESS) == CAST_OK)
+                    {
                         m_uiMarkTimer = urand(25000, 30000);
+                    }
                 }
             }
             else
+            {
                 m_uiMarkTimer -= uiDiff;
+            }
 
             if (m_uiCrashTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_CRASH) == CAST_OK)
+                    {
                         m_uiCrashTimer = 15000;
+                    }
                 }
             }
             else
+            {
                 m_uiCrashTimer -= uiDiff;
+            }
 
             if (m_uiEnrageTimer < uiDiff)
             {
@@ -345,7 +389,9 @@ struct boss_general_vezax : public CreatureScript
                 }
             }
             else
+            {
                 m_uiEnrageTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -382,7 +428,9 @@ struct npc_saronite_vapor : public CreatureScript
             if (m_pInstance)
             {
                 if (Creature* pVezax = m_pInstance->GetSingleCreatureFromStorage(NPC_VEZAX))
+                {
                     SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pVezax);
+                }
             }
 
             DoCastSpellIfCan(m_creature, SPELL_SARONITE_VAPORS, CAST_TRIGGERED);
@@ -391,11 +439,15 @@ struct npc_saronite_vapor : public CreatureScript
         void MovementInform(uint32 uiType, uint32 uiPointId) override
         {
             if (uiType != POINT_MOTION_TYPE || !uiPointId || !m_pInstance)
+            {
                 return;
+            }
 
             // inform vezax of point reached
             if (Creature* pVezax = m_pInstance->GetSingleCreatureFromStorage(NPC_VEZAX))
+            {
                 SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pVezax);
+            }
         }
 
         void AttackStart(Unit* /*pWho*/) override { }

@@ -165,7 +165,9 @@ struct boss_anubarak_trial : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ANUBARAK, FAIL);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -173,7 +175,9 @@ struct boss_anubarak_trial : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ANUBARAK, DONE);
+            }
         }
 
         void MoveInLineOfSight(Unit* pWho) override
@@ -202,21 +206,29 @@ struct boss_anubarak_trial : public CreatureScript
             for (uint8 i = 0; i < MAX_FROSTSPHERES; ++i)
             {
                 if (Creature* pTemp = m_creature->SummonCreature(NPC_FROSTSPHERE, aFrostSphereSpawnPositions[i][0], aFrostSphereSpawnPositions[i][1], aFrostSphereSpawnPositions[i][2], 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                {
                     m_vSpheresGuidVector[i] = pTemp->GetObjectGuid();
+                }
             }
 
             // It's not clear if these should be spawned by DB or summoned
             for (uint8 i = 0; i < MAX_BURROWS; ++i)
+            {
                 m_creature->SummonCreature(NPC_BURROW, aBurrowSpawnPositions[i][0], aBurrowSpawnPositions[i][1], aBurrowSpawnPositions[i][2], aBurrowSpawnPositions[i][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            }
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             DoScriptText((urand(0, 1)) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
         }
@@ -229,13 +241,17 @@ struct boss_anubarak_trial : public CreatureScript
 
                 // Extra check here, because AnubArak must be submerged by default
                 if (m_Phase != PHASE_SUBMERGING)
+                {
                     return;
+                }
 
                 m_Phase = PHASE_UNDERGROUND;
 
                 // Refresh spheres only on normal difficulty
                 if (m_pInstance && !m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
+                {
                     DoRefreshSpheres();
+                }
 
                 DoCastSpellIfCan(m_creature, SPELL_CLEAR_ALL_DEBUFFS, CAST_TRIGGERED);
                 DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPIKES, CAST_TRIGGERED);
@@ -265,11 +281,15 @@ struct boss_anubarak_trial : public CreatureScript
                 // If the sphere is alive and hasn't transfomed to permafrost yet summon a new one
                 Creature* pTemp = m_creature->GetMap()->GetCreature(m_vSpheresGuidVector[i]);
                 if (pTemp && !pTemp->HasAura(SPELL_PERMAFROST_TRANSFORM))
+                {
                     continue;
+                }
 
                 // Summon a new frost sphere instead of the killed one
                 if (Creature* pTemp = m_creature->SummonCreature(NPC_FROSTSPHERE, aFrostSphereSpawnPositions[i][0], aFrostSphereSpawnPositions[i][1], aFrostSphereSpawnPositions[i][2], 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                {
                     m_vSpheresGuidVector[i] = pTemp->GetObjectGuid();
+                }
             }
         }
 
@@ -277,7 +297,9 @@ struct boss_anubarak_trial : public CreatureScript
         void DoDespawnPursuingSpikes()
         {
             if (Creature* pPursuingSpikes = m_creature->GetMap()->GetCreature(m_PursuingSpikesGuid))
+            {
                 pPursuingSpikes->ForcedDespawn();
+            }
 
             m_PursuingSpikesGuid.Clear();
         }
@@ -285,7 +307,9 @@ struct boss_anubarak_trial : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             switch (m_Phase)
             {
@@ -304,7 +328,9 @@ struct boss_anubarak_trial : public CreatureScript
                     }
                 }
                 else
+                {
                     m_PhaseSwitchTimer -= uiDiff;
+                }
 
                 // Switch to phase 3 when below 30%
                 if (m_creature->GetHealthPercent() <= 30.0f)
@@ -323,18 +349,26 @@ struct boss_anubarak_trial : public CreatureScript
                 if (m_uiFreezingSlashTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FREEZING_SLASH) == CAST_OK)
+                    {
                         m_uiFreezingSlashTimer = 20000;
+                    }
                 }
                 else
+                {
                     m_uiFreezingSlashTimer -= uiDiff;
+                }
 
                 if (m_uiPenetratingColdTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_PENETRATING_COLD) == CAST_OK)
+                    {
                         m_uiPenetratingColdTimer = 15000;
+                    }
                 }
                 else
+                {
                     m_uiPenetratingColdTimer -= uiDiff;
+                }
 
                 // The Borrowers are summoned in Ground phase only on normal mode or during Ground and Swarm phase on heroic mode
                 if (m_Phase == PHASE_GROUND || (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC)))
@@ -343,10 +377,14 @@ struct boss_anubarak_trial : public CreatureScript
                     {
                         // The number of targets is handled in core, based on difficulty
                         if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_NERUBIAN_BURROWER) == CAST_OK)
+                        {
                             m_uiBurrowerSummonTimer = 45000;
+                        }
                     }
                     else
+                    {
                         m_uiBurrowerSummonTimer -= uiDiff;
+                    }
                 }
 
                 DoMeleeAttackIfReady();
@@ -368,13 +406,17 @@ struct boss_anubarak_trial : public CreatureScript
 
                     // Refresh spheres only on normal difficulty
                     if (m_pInstance && !m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
+                    {
                         DoRefreshSpheres();
+                    }
 
                     m_PhaseSwitchTimer = 80000;
                     m_Phase = PHASE_GROUND;
                 }
                 else
+                {
                     m_PhaseSwitchTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_SUBMERGING:                          // Do nothing, but continue berserk timer
@@ -395,7 +437,9 @@ struct boss_anubarak_trial : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiBerserkTimer -= uiDiff;
+                }
             }
         }
     };
@@ -443,11 +487,15 @@ struct npc_anubarak_trial_spike : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature*, Unit* pPermafrost, uint32 /**/) override
         {
             if (eventType != AI_EVENT_CUSTOM_A)
+            {
                 return;
+            }
 
             // To prevent more than one call
             if (m_Phase == PHASE_NO_MOVEMENT)
+            {
                 return;
+            }
 
             // Remove the speed auras
             switch (m_Phase)
@@ -469,7 +517,9 @@ struct npc_anubarak_trial_spike : public CreatureScript
             DoCastSpellIfCan(m_creature, SPELL_PURSUING_SPIKES_FAIL, CAST_TRIGGERED);
 
             if (pPermafrost)
+            {
                 pPermafrost->ToCreature()->ForcedDespawn(2000);
+            }
 
             // After the spikes hit the icy surface they can't move for about ~5 seconds
             m_Phase = PHASE_NO_MOVEMENT;
@@ -484,7 +534,9 @@ struct npc_anubarak_trial_spike : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_PhaseSwitchTimer)
             {
@@ -520,7 +572,9 @@ struct npc_anubarak_trial_spike : public CreatureScript
                     }
                 }
                 else
+                {
                     m_PhaseSwitchTimer -= uiDiff;
+                }
             }
         }
     };
@@ -542,7 +596,9 @@ struct spell_permafrost_dummy : public SpellScript
         {
             Creature* pCreatureTarget = pTarget->ToCreature();
             if (CreatureAI* pSpikeAI = pCreatureTarget->AI())
+            {
                 pSpikeAI->ReceiveAIEvent(AI_EVENT_CUSTOM_A, pCreatureTarget, pCaster, 0);
+            }
 
             // always return true when we are handling this spell and effect
             return true;
@@ -579,13 +635,17 @@ struct npc_anubarak_trial_frostsphere : public CreatureScript
         void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
         {
             if (uiDamage < m_creature->GetHealth())
+            {
                 return;
+            }
 
             // Set fake death in order to apply permafrost
             uiDamage = 0;
 
             if (m_bPermafrost)
+            {
                 return;
+            }
 
             m_creature->InterruptNonMeleeSpells(false);
             m_creature->SetHealth(0);
@@ -612,7 +672,9 @@ struct npc_anubarak_trial_frostsphere : public CreatureScript
         void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
         {
             if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_VISUAL, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_TRANSFORM, CAST_TRIGGERED);

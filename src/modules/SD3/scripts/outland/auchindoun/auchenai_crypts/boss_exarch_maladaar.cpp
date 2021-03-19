@@ -254,7 +254,9 @@ struct boss_exarch_maladaar : public CreatureScript
         void KilledUnit(Unit* /*pVictim*/) override
         {
             if (urand(0, 1))
+            {
                 DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override

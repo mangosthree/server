@@ -269,7 +269,9 @@ struct Council_Base_AI : public ScriptedAI
     void JustDied(Unit* /*pVictim*/) override
     {
         if (!m_pInstance)
-        { return; }
+        {
+            return;
+        }
 
         Creature* pMaulgar = m_pInstance->GetSingleCreatureFromStorage(NPC_MAULGAR);
         if (pMaulgar && pMaulgar->IsAlive())

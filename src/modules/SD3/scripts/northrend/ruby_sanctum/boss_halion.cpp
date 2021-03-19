@@ -180,7 +180,9 @@ struct boss_halion_real : public CreatureScript
         void Aggro(Unit* /*pWho*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_HALION, IN_PROGRESS);
+            }
 
             DoScriptText(SAY_AGGRO, m_creature);
             DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_PRECISION, CAST_TRIGGERED);
@@ -201,7 +203,9 @@ struct boss_halion_real : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_HALION, DONE);
+            }
 
             DoScriptText(SAY_DEATH, m_creature);
         }
@@ -209,7 +213,9 @@ struct boss_halion_real : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_HALION, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -230,7 +236,9 @@ struct boss_halion_real : public CreatureScript
         void DoPrepareTwilightPhase()
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             // Spawn the orbs and the carriers. Use the twilight Halion version to preserve the phase
             if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
@@ -241,20 +249,22 @@ struct boss_halion_real : public CreatureScript
                 // NOTE: the spawn coords seem to be totally off, compared to the actual map layout - requires additional research!!!
 
                 // Spawn the rotation focus first
-                // pHalion->SummonCreature(NPC_ORB_ROTATION_FOCUS, aRotationFocusPosition[0], aRotationFocusPosition[1], aRotationFocusPosition[2], aRotationFocusPosition[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                // pHalion->SummonCreature(NPC_ORB_ROTATION_FOCUS, aRotationFocusPosition[0], aRotationFocusPosition[1], aRotationFocusPosition[2], aRotationFocusPosition[3], TEMPSPAWN_DEAD_DESPAWN, 0);
 
                 // Then spawn the orb carriers and the shadow orbs. ToDo: research if it's possible to make this dynamic
-                // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-                // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-                // pHalion->SummonCreature(NPC_SHADOW_ORB_1, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
-                // pHalion->SummonCreature(NPC_SHADOW_ORB_2, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+                // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+                // pHalion->SummonCreature(NPC_SHADOW_ORB_1, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+                // pHalion->SummonCreature(NPC_SHADOW_ORB_2, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiBerserkTimer)
             {
@@ -266,7 +276,9 @@ struct boss_halion_real : public CreatureScript
                         if (m_pInstance)
                         {
                             if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT, true))
+                            {
                                 pHalion->CastSpell(pHalion, SPELL_BERSERK, true);
+                            }
                         }
 
                         DoScriptText(SAY_BERSERK, m_creature);
@@ -274,7 +286,9 @@ struct boss_halion_real : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiBerserkTimer -= uiDiff;
+                }
             }
 
             switch (m_uiPhase)
@@ -287,37 +301,53 @@ struct boss_halion_real : public CreatureScript
                 if (m_uiTailLashTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_TAIL_LASH) == CAST_OK)
+                    {
                         m_uiTailLashTimer = urand(15000, 25000);
+                    }
                 }
                 else
+                {
                     m_uiTailLashTimer -= uiDiff;
+                }
 
                 if (m_uiCleaveTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    {
                         m_uiCleaveTimer = urand(10000, 15000);
+                    }
                 }
                 else
+                {
                     m_uiCleaveTimer -= uiDiff;
+                }
 
                 if (m_uiFlameBreathTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_FLAME_BREATH) == CAST_OK)
+                    {
                         m_uiFlameBreathTimer = urand(15000, 20000);
+                    }
                 }
                 else
+                {
                     m_uiFlameBreathTimer -= uiDiff;
+                }
 
                 if (m_uiFieryCombustionTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_FIERY_COMBUSTION, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_FIERY_COMBUSTION) == CAST_OK)
+                        {
                             m_uiFieryCombustionTimer = 25000;
+                        }
                     }
                 }
                 else
+                {
                     m_uiFieryCombustionTimer -= uiDiff;
+                }
 
                 if (m_uiMeteorTimer < uiDiff)
                 {
@@ -331,7 +361,9 @@ struct boss_halion_real : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiMeteorTimer -= uiDiff;
+                }
 
                 // Switch to phase 2
                 if (m_creature->GetHealthPercent() < 75.0f && m_uiPhase == PHASE_PHISYCAL_REALM)
@@ -413,7 +445,9 @@ struct boss_halion_twilight : public CreatureScript
             if (m_pInstance)
             {
                 if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
+                {
                     pHalion->AI()->EnterEvadeMode();
+                }
             }
         }
 
@@ -448,7 +482,9 @@ struct boss_halion_twilight : public CreatureScript
             case NPC_SHADOW_ORB_3:
             case NPC_SHADOW_ORB_4:
                 if (Creature* pCarrier = GetClosestCreatureWithEntry(pSummoned, NPC_ORB_CARRIER, 5.0f))
+                {
                     pSummoned->CastSpell(pCarrier, SPELL_RIDE_VEHICLE_HARDCODED, true);
+                }
                 break;
             case NPC_ORB_CARRIER:
                 pSummoned->CastSpell(pSummoned, SPELL_TRACK_ROTATION, true);
@@ -459,7 +495,9 @@ struct boss_halion_twilight : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             switch (m_uiPhase)
             {
@@ -474,37 +512,53 @@ struct boss_halion_twilight : public CreatureScript
                 if (m_uiTailLashTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_TAIL_LASH) == CAST_OK)
+                    {
                         m_uiTailLashTimer = urand(15000, 25000);
+                    }
                 }
                 else
+                {
                     m_uiTailLashTimer -= uiDiff;
+                }
 
                 if (m_uiCleaveTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    {
                         m_uiCleaveTimer = urand(10000, 15000);
+                    }
                 }
                 else
+                {
                     m_uiCleaveTimer -= uiDiff;
+                }
 
                 if (m_uiDarkBreathTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DARK_BREATH) == CAST_OK)
+                    {
                         m_uiDarkBreathTimer = urand(15000, 20000);
+                    }
                 }
                 else
+                {
                     m_uiDarkBreathTimer -= uiDiff;
+                }
 
                 if (m_uiSoulConsumptionTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SOUL_CONSUMPTION, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_SOUL_CONSUMPTION) == CAST_OK)
+                        {
                             m_uiSoulConsumptionTimer = 25000;
+                        }
                     }
                 }
                 else
+                {
                     m_uiSoulConsumptionTimer -= uiDiff;
+                }
 
                 // Switch to phase 3
                 if (m_creature->GetHealthPercent() < 50.0f && m_uiPhase == PHASE_TWILIGHT_REALM)
@@ -517,7 +571,9 @@ struct boss_halion_twilight : public CreatureScript
 
                             // Set the real Halion health, so it can also begin phase 3
                             if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
+                            {
                                 pHalion->SetHealth(m_creature->GetHealth());
+                            }
                         }
 
                         DoScriptText(SAY_PHASE_3, m_creature);

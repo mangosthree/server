@@ -79,40 +79,54 @@ struct boss_loatheb : public CreatureScript
         void Aggro(Unit* /*pWho*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_LOATHEB, IN_PROGRESS);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_LOATHEB, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_LOATHEB, NOT_STARTED);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() != NPC_SPORE)
+            {
                 return;
+            }
 
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
                 pSummoned->AddThreat(pTarget);
+            }
         }
 
         void SummonedCreatureJustDied(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_SPORE && m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ACHIEV_SPORE_LOSER, uint32(false));
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Berserk (only heroic)
             if (!m_bIsRegularMode)
@@ -123,7 +137,9 @@ struct boss_loatheb : public CreatureScript
                     m_uiBerserkTimer = 300000;
                 }
                 else
+                {
                     m_uiBerserkTimer -= uiDiff;
+                }
             }
 
             // Inevitable Doom
@@ -133,7 +149,9 @@ struct boss_loatheb : public CreatureScript
                 m_uiInevitableDoomTimer = (m_uiNecroticAuraCount <= 40) ? 30000 : 15000;
             }
             else
+            {
                 m_uiInevitableDoomTimer -= uiDiff;
+            }
 
             // Necrotic Aura
             if (m_uiNecroticAuraTimer < uiDiff)
@@ -157,7 +175,9 @@ struct boss_loatheb : public CreatureScript
                 ++m_uiNecroticAuraCount;
             }
             else
+            {
                 m_uiNecroticAuraTimer -= uiDiff;
+            }
 
             // Summon
             if (m_uiSummonTimer < uiDiff)
@@ -166,7 +186,9 @@ struct boss_loatheb : public CreatureScript
                 m_uiSummonTimer = m_bIsRegularMode ? 36000 : 18000;
             }
             else
+            {
                 m_uiSummonTimer -= uiDiff;
+            }
 
             // Deathbloom
             if (m_uiDeathbloomTimer < uiDiff)
@@ -175,7 +197,9 @@ struct boss_loatheb : public CreatureScript
                 m_uiDeathbloomTimer = 30000;
             }
             else
+            {
                 m_uiDeathbloomTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

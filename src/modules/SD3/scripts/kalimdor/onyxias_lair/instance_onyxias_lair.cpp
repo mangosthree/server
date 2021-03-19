@@ -74,7 +74,9 @@ struct is_onyxias_lair : public InstanceScript
 #if defined (WOTLK) || defined (CATA) || defined (MISTS)
             case NPC_ONYXIA_WHELP:
                 if (m_uiEncounter >= DATA_LIFTOFF && time_t(m_tPhaseTwoStart + TIME_LIMIT_MANY_WHELPS) >= time(nullptr))
+                {
                     ++m_uiAchievWhelpsCount;
+                }
                 break;
 #endif
             }

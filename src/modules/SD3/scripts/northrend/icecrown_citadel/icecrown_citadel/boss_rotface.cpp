@@ -113,7 +113,9 @@ struct boss_rotface : public CreatureScript
         void Aggro(Unit* /*pWho*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ROTFACE, IN_PROGRESS);
+            }
 
             DoScriptText(SAY_AGGRO, m_creature);
 
@@ -124,7 +126,9 @@ struct boss_rotface : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ROTFACE, FAIL);
+            }
 
             DoCastSpellIfCan(m_creature, SPELL_OOZE_FLOOD_REMOVE, CAST_TRIGGERED);
         }
@@ -132,13 +136,17 @@ struct boss_rotface : public CreatureScript
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            {
                 DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature, pVictim);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ROTFACE, DONE);
+            }
 
             DoScriptText(SAY_DEATH, m_creature);
         }
@@ -146,7 +154,9 @@ struct boss_rotface : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Slime Spray
             if (m_uiSlimeSprayTimer <= uiDiff)
@@ -158,7 +168,9 @@ struct boss_rotface : public CreatureScript
                 }
             }
             else
+            {
                 m_uiSlimeSprayTimer -= uiDiff;
+            }
 
             // Mutated Infection - faster with time
             // implemented this instead of phases
@@ -175,19 +187,25 @@ struct boss_rotface : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiMutatedInfectionTimer -= uiDiff;
+                }
             }
 
             // Slime Flow
             if (m_uiSlimeFlowTimer <= uiDiff)
             {
                 if (Creature* pProfessor = m_pInstance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
+                {
                     DoScriptText(urand(0, 1) ? SAY_SLIME_FLOW_1 : SAY_SLIME_FLOW_2, pProfessor);
+                }
 
                 m_uiSlimeFlowTimer = 20000;
             }
             else
+            {
                 m_uiSlimeFlowTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -233,15 +251,21 @@ struct mob_little_ooze : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiStickyOozeTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_STICKY_OOZE) == CAST_OK)
+                {
                     m_uiStickyOozeTimer = urand(10000, 15000);
+                }
             }
             else
+            {
                 m_uiStickyOozeTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -290,7 +314,9 @@ struct mob_big_ooze : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Unstable Ooze
             if (m_uiUnstableExplosionCheckTimer)
@@ -307,23 +333,31 @@ struct mob_big_ooze : public CreatureScript
                             if (m_pInstance)
                             {
                                 if (Creature* pRotface = m_pInstance->GetSingleCreatureFromStorage(NPC_ROTFACE))
+                                {
                                     DoScriptText(SAY_OOZE_EXPLODE, pRotface);
+                                }
                             }
                         }
                     }
                 }
                 else
+                {
                     m_uiUnstableExplosionCheckTimer -= uiDiff;
+                }
             }
 
             // Sticky Ooze
             if (m_uiStickyOozeTimer <= uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_STICKY_OOZE) == CAST_OK)
+                {
                     m_uiStickyOozeTimer = urand(10000, 15000);
+                }
             }
             else
+            {
                 m_uiStickyOozeTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

@@ -97,7 +97,9 @@ struct mob_ahnkahar_egg : public CreatureScript
             if (pSummoned->GetEntry() == NPC_AHNKAHAR_GUARDIAN)
             {
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_NADOX, SPECIAL);
+                }
             }
         }
     };
@@ -147,13 +149,17 @@ struct boss_nadox : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_NADOX, IN_PROGRESS);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_NADOX, FAIL);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -171,13 +177,17 @@ struct boss_nadox : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_NADOX, DONE);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (!m_bGuardianSummoned && m_creature->GetHealthPercent() < 50.0f)
             {
@@ -193,7 +203,9 @@ struct boss_nadox : public CreatureScript
             if (m_uiSummonTimer < uiDiff)
             {
                 if (roll_chance_i(50))
+                {
                     DoScriptText(urand(0, 1) ? SAY_SUMMON_EGG_1 : SAY_SUMMON_EGG_2, m_creature);
+                }
 
                 if (m_pInstance)
                 {
@@ -203,33 +215,45 @@ struct boss_nadox : public CreatureScript
                 m_uiSummonTimer = urand(5000, 10000);
             }
             else
+            {
                 m_uiSummonTimer -= uiDiff;
+            }
 
             if (m_uiBroodPlagueTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_BROOD_PLAGUE : SPELL_BROOD_PLAGUE_H);
+                }
 
                 m_uiBroodPlagueTimer = 20000;
             }
             else
+            {
                 m_uiBroodPlagueTimer -= uiDiff;
+            }
 
             if (!m_bIsRegularMode)
             {
                 if (m_uiBroodRageTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_BROOD_RAGE) == CAST_OK)
+                    {
                         m_uiBroodRageTimer = 20000;
+                    }
                 }
                 else
+                {
                     m_uiBroodRageTimer -= uiDiff;
+                }
             }
 
             if (!m_bBerserk && m_creature->GetPositionZ() < 24.0)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                {
                     m_bBerserk = true;
+                }
             }
 
             DoMeleeAttackIfReady();

@@ -118,7 +118,9 @@ struct boss_varos : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_VAROS, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -132,13 +134,17 @@ struct boss_varos : public CreatureScript
             DoCastSpellIfCan(m_creature, SPELL_DEATH_SPELL, CAST_TRIGGERED);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_VAROS, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_VAROS, FAIL);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -148,7 +154,9 @@ struct boss_varos : public CreatureScript
                 if (m_uiShieldTimer <= uiDiff)
                 {
                     if (!m_pInstance)
+                    {
                         return;
+                    }
 
                     // Check for shield first
                     if (bool(m_pInstance->GetData(TYPE_DATA_SHIELD_BROKEN)))
@@ -164,30 +172,42 @@ struct boss_varos : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiShieldTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiAmplifyMagicTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_AMPLIFY_MAGIC : SPELL_AMPLIFY_MAGIC_H) == CAST_OK)
+                    {
                         m_uiAmplifyMagicTimer = urand(15000, 20000);
+                    }
                 }
             }
             else
+            {
                 m_uiAmplifyMagicTimer -= uiDiff;
+            }
 
             if (m_uiEnergizeCoresTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ENERGIZE_CORES : SPELL_ENERGIZE_CORES_H) == CAST_OK)
+                {
                     m_uiEnergizeCoresTimer = urand(5000, 7000);
+                }
             }
             else
+            {
                 m_uiEnergizeCoresTimer -= uiDiff;
+            }
 
             if (m_uiCallCaptainTimer < uiDiff)
             {
@@ -215,7 +235,9 @@ struct boss_varos : public CreatureScript
                 }
             }
             else
+            {
                 m_uiCallCaptainTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -241,7 +263,9 @@ struct event_spell_call_captain : public MapEventScript
         {
             Creature* pVaros = (Creature*)pSource;
             if (!pVaros)
+            {
                 return false;
+            }
 
             // each guardian has it's own spawn position
             for (uint8 i = 0; i < MAX_CAPTAIN_EVENTS; ++i)
@@ -298,17 +322,23 @@ struct npc_azure_ring_captain : public CreatureScript
         {
             // Despawn the arcane beam in case of getting killed
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(m_arcaneBeamGuid))
+            {
                 pTemp->ForcedDespawn();
+            }
         }
 
         void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
         {
             if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             // Spawn arcane beam when the position is reached. Also prepare to despawn after the beam event is finished
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_ARCANE_BEAM) == CAST_OK)
+            {
                 m_creature->ForcedDespawn(11000);
+            }
         }
 
         void UpdateAI(const uint32 /*uiDiff*/) override { }
@@ -340,7 +370,9 @@ struct npc_arcane_beam : public CreatureScript
                 TemporarySummon* pTemporary = (TemporarySummon*)m_creature;
 
                 if (Player* pSummoner = m_creature->GetMap()->GetPlayer(pTemporary->GetSummonerGuid()))
+                {
                     m_creature->GetMotionMaster()->MoveFollow(pSummoner, 0, 0);
+                }
             }
 
             // despawn manually because of combat bug

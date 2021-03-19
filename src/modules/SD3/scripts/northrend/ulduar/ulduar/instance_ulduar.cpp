@@ -183,7 +183,9 @@ struct is_ulduar : public InstanceScript
             InitializeDialogueHelper(this);
 
             for (uint8 i = 0; i < MAX_SPECIAL_ACHIEV_CRITS; ++i)
+            {
                 m_abAchievCriteria[i] = false;
+            }
         }
 
         bool IsEncounterInProgress() const override
@@ -191,7 +193,9 @@ struct is_ulduar : public InstanceScript
             for (uint8 i = 0; i <= TYPE_ALGALON; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     return true;
+                }
             }
             return false;
         }
@@ -222,7 +226,9 @@ struct is_ulduar : public InstanceScript
             if (GetData(TYPE_ALGALON_TIMER))
             {
                 if (!GetSingleCreatureFromStorage(NPC_ALGALON, true))
+                {
                     pPlayer->SummonCreature(NPC_ALGALON, afAlgalonMovePos[0], afAlgalonMovePos[1], afAlgalonMovePos[2], afAlgalonMovePos[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+                }
 
                 pPlayer->SendUpdateWorldState(WORLD_STATE_TIMER, 1);
                 pPlayer->SendUpdateWorldState(WORLD_STATE_TIMER_COUNT, GetData(TYPE_ALGALON_TIMER));
@@ -234,13 +240,17 @@ struct is_ulduar : public InstanceScript
                 for (uint8 i = 0; i < countof(m_aKeepersSpawnLocs); ++i)
                 {
                     if (GetData(m_aKeepersSpawnLocs[i].uiType) == DONE)
+                    {
                         pPlayer->SummonCreature(m_aKeepersSpawnLocs[i].uiEntry, m_aKeepersSpawnLocs[i].fX, m_aKeepersSpawnLocs[i].fY, m_aKeepersSpawnLocs[i].fZ, m_aKeepersSpawnLocs[i].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true);
+                    }
                 }
 
                 for (uint8 i = 0; i < countof(m_aKeeperHelperLocs); ++i)
                 {
                     if (GetData(m_aKeeperHelperLocs[i].uiType) == DONE)
+                    {
                         pPlayer->SummonCreature(m_aKeeperHelperLocs[i].uiEntry, m_aKeeperHelperLocs[i].fX, m_aKeeperHelperLocs[i].fY, m_aKeeperHelperLocs[i].fZ, m_aKeeperHelperLocs[i].fO, TEMPSUMMON_CORPSE_DESPAWN, 0, true);
+                    }
                 }
 
                 DoSpawnHodirNpcs(pPlayer);
@@ -251,7 +261,9 @@ struct is_ulduar : public InstanceScript
         void OnPlayerDeath(Player* pPlayer) override
         {
             if (IsEncounterInProgress())
+            {
                 SetData(TYPE_CHAMPION_FAILED, DONE);
+            }
         }
 
         void OnCreatureCreate(Creature* pCreature) override
@@ -322,7 +334,9 @@ struct is_ulduar : public InstanceScript
 
             case NPC_ULDUAR_COLOSSUS:
                 if (pCreature->GetPositionX() > 300.0f)
+                {
                     m_sColossusGuidSet.insert(pCreature->GetObjectGuid());
+                }
                 return;
             case NPC_EXPEDITION_DEFENDER:
                 m_lDefendersGuids.push_back(pCreature->GetObjectGuid());
@@ -346,21 +360,31 @@ struct is_ulduar : public InstanceScript
                 return;
             case NPC_RUBBLE_STALKER:
                 if (pCreature->GetPositionY() > -10.0f)
+                {
                     m_rightKoloStalkerGuid = pCreature->GetObjectGuid();
+                }
                 else
+                {
                     m_leftKoloStalkerGuid = pCreature->GetObjectGuid();
+                }
                 return;
             case NPC_THORIM_EVENT_BUNNY:
                 // sort the event bunnies between the arena and tribune spawns; the platform spawns are ignored for the moment
                 if (pCreature->GetPositionZ() < 420.0f)
+                {
                     m_lThorimBunniesGuids.push_back(pCreature->GetObjectGuid());
+                }
                 else if (pCreature->GetPositionZ() > 438.5f)
+                {
                     m_lUpperBunniesGuids.push_back(pCreature->GetObjectGuid());
+                }
                 return;
             case NPC_THUNDER_ORB:
                 // get only the upper ones; the lower ones are searched dynamically in order to be paired correctly
                 if (pCreature->GetPositionZ() > 430.0f)
+                {
                     m_lUpperThunderOrbsGuids.push_back(pCreature->GetObjectGuid());
+                }
                 return;
             case NPC_LEFT_HAND_BUNNY:
                 m_lLeftHandBunniesGuids.push_back(pCreature->GetObjectGuid());
@@ -373,9 +397,13 @@ struct is_ulduar : public InstanceScript
                 return;
             case NPC_VEZAX_BUNNY:
                 if (pCreature->GetPositionY() < 100.0f)
+                {
                     m_animusVezaxBunnyGuid = pCreature->GetObjectGuid();
+                }
                 else
+                {
                     m_vaporVezaxBunnyGuid = pCreature->GetObjectGuid();
+                }
                 return;
 
             default:
@@ -400,12 +428,16 @@ struct is_ulduar : public InstanceScript
             {
             case NPC_SANCTUM_SENTRY:
                 if (GetData(TYPE_AURIAYA) == IN_PROGRESS)
+                {
                     SetSpecialAchievementCriteria(TYPE_ACHIEV_CAT_LADY, false);
+                }
                 break;
             case NPC_ULDUAR_COLOSSUS:
             {
                 if (m_sColossusGuidSet.find(pCreature->GetObjectGuid()) != m_sColossusGuidSet.end())
+                {
                     m_sColossusGuidSet.erase(pCreature->GetObjectGuid());
+                }
 
                 // start pre Leviathan event
                 if (m_sColossusGuidSet.empty())
@@ -434,7 +466,9 @@ struct is_ulduar : public InstanceScript
             case NPC_PRIEST_ALLIANCE_N:
             case NPC_PRIEST_ALLIANCE_H:
                 if (GetData(TYPE_HODIR) == IN_PROGRESS)
+                {
                     SetSpecialAchievementCriteria(TYPE_ACHIEV_COOL_FRIENDS, false);
+                }
                 break;
             case NPC_JORMUNGAR_BEHEMOTH:
             case NPC_SOLDIER_ALLIANCE:
@@ -448,7 +482,9 @@ struct is_ulduar : public InstanceScript
                 if (m_uiSlayedArenaMobs == 6)
                 {
                     if (Creature* pThorim = GetSingleCreatureFromStorage(NPC_THORIM))
+                    {
                         pThorim->SetInCombatWithZone();
+                    }
                 }
                 break;
             case NPC_RUNIC_COLOSSUS:
@@ -481,34 +517,50 @@ struct is_ulduar : public InstanceScript
                 break;
             case GO_LIGHTNING_DOOR:
                 if (m_auiEncounter[TYPE_LEVIATHAN] == SPECIAL || m_auiEncounter[TYPE_LEVIATHAN] == FAIL)
+                {
                     pGo->SetGoState(GO_STATE_READY);
+                }
                 break;
             case GO_LEVIATHAN_GATE:
                 if (m_auiEncounter[TYPE_LEVIATHAN] != NOT_STARTED)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_XT002_GATE:
                 pGo->SetGoState(GO_STATE_READY);
                 if (m_auiEncounter[TYPE_XT002] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 if (m_auiEncounter[TYPE_LEVIATHAN] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_HODIR_CRYSTAL:
                 if (m_auiUlduarTowers[0] == FAIL)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_THORIM_CRYSTAL:
                 if (m_auiUlduarTowers[1] == FAIL)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_FREYA_CRYSTAL:
                 if (m_auiUlduarTowers[2] == FAIL)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_MIMIRON_CRYSTAL:
                 if (m_auiUlduarTowers[3] == FAIL)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
 
                 // Archivum
@@ -516,7 +568,9 @@ struct is_ulduar : public InstanceScript
                 break;
             case GO_ARCHIVUM_DOOR:
                 if (m_auiEncounter[TYPE_ASSEMBLY])
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
                 // Celestial Planetarium
             case GO_CELESTIAL_ACCES:
@@ -527,7 +581,9 @@ struct is_ulduar : public InstanceScript
             case GO_CELESTIAL_DOOR_1:
             case GO_CELESTIAL_DOOR_2:
                 if (m_auiEncounter[TYPE_ALGALON] != NOT_STARTED)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_CELESTIAL_DOOR_COMBAT:
             case GO_UNIVERSE_FLOOR:
@@ -537,7 +593,9 @@ struct is_ulduar : public InstanceScript
                 // Shattered Hallway
             case GO_KOLOGARN_BRIDGE:
                 if (m_auiEncounter[TYPE_KOLOGARN] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_READY);
+                }
                 break;
 
                 // -----------------    The Keepers    -----------------
@@ -545,7 +603,9 @@ struct is_ulduar : public InstanceScript
             case GO_HODIR_EXIT:
             case GO_HODIR_ICE_WALL:
                 if (m_auiEncounter[TYPE_HODIR] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_HODIR_ENTER:
                 break;
@@ -566,11 +626,15 @@ struct is_ulduar : public InstanceScript
                 // Prison
             case GO_ANCIENT_GATE:
                 if (m_auiEncounter[TYPE_MIMIRON] == DONE && m_auiEncounter[TYPE_HODIR] == DONE && m_auiEncounter[TYPE_THORIM] == DONE && m_auiEncounter[TYPE_FREYA] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_VEZAX_GATE:
                 if (m_auiEncounter[TYPE_VEZAX] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_YOGG_GATE:
             case GO_BRAIN_DOOR_CHAMBER:
@@ -630,14 +694,18 @@ struct is_ulduar : public InstanceScript
             case TYPE_LEVIATHAN:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData != SPECIAL)
+                {
                     DoUseDoorOrButton(GO_SHIELD_WALL);
+                }
                 if (uiData == IN_PROGRESS)
                 {
                     // make sure that the Lightning door is closed when engaged in combat
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_LIGHTNING_DOOR))
                     {
                         if (pDoor->GetGoState() != GO_STATE_READY)
+                        {
                             DoUseDoorOrButton(GO_LIGHTNING_DOOR);
+                        }
                     }
 
                     SetSpecialAchievementCriteria(TYPE_ACHIEV_SHUTOUT, true);
@@ -648,7 +716,9 @@ struct is_ulduar : public InstanceScript
                     DoUseDoorOrButton(GO_LIGHTNING_DOOR);
                 }
                 else if (uiData == FAIL)
+                {
                     DoCallLeviathanHelp();
+                }
                 break;
             case TYPE_IGNIS:
                 m_auiEncounter[uiType] = uiData;
@@ -660,12 +730,16 @@ struct is_ulduar : public InstanceScript
                 break;
             case TYPE_RAZORSCALE:
                 if (uiData == IN_PROGRESS)
+                {
                     SetSpecialAchievementCriteria(TYPE_ACHIEV_QUICK_SHAVE, true);
+                }
                 else if (uiData == FAIL)
                 {
                     // reset the commander
                     if (Creature* pCommander = GetSingleCreatureFromStorage(NPC_EXPEDITION_COMMANDER))
+                    {
                         pCommander->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    }
 
                     // reset all creatures
                     for (GuidList::const_iterator itr = m_lDefendersGuids.begin(); itr != m_lDefendersGuids.end(); ++itr)
@@ -673,9 +747,13 @@ struct is_ulduar : public InstanceScript
                         if (Creature* pDefender = instance->GetCreature(*itr))
                         {
                             if (!pDefender->IsAlive())
+                            {
                                 pDefender->Respawn();
+                            }
                             else
+                            {
                                 pDefender->GetMotionMaster()->MoveTargetedHome();
+                            }
                         }
                     }
                     for (GuidList::const_iterator itr = m_lEngineersGuids.begin(); itr != m_lEngineersGuids.end(); ++itr)
@@ -683,9 +761,13 @@ struct is_ulduar : public InstanceScript
                         if (Creature* pEngineer = instance->GetCreature(*itr))
                         {
                             if (!pEngineer->IsAlive())
+                            {
                                 pEngineer->Respawn();
+                            }
                             else
+                            {
                                 pEngineer->GetMotionMaster()->MoveTargetedHome();
+                            }
                         }
                     }
                     for (GuidList::const_iterator itr = m_lTrappersGuids.begin(); itr != m_lTrappersGuids.end(); ++itr)
@@ -693,15 +775,21 @@ struct is_ulduar : public InstanceScript
                         if (Creature* pTrapper = instance->GetCreature(*itr))
                         {
                             if (!pTrapper->IsAlive())
+                            {
                                 pTrapper->Respawn();
+                            }
                             else
+                            {
                                 pTrapper->GetMotionMaster()->MoveTargetedHome();
+                            }
                         }
                     }
                     for (GuidList::const_iterator itr = m_lHarpoonDummyGuids.begin(); itr != m_lHarpoonDummyGuids.end(); ++itr)
                     {
                         if (Creature* pHarpoon = instance->GetCreature(*itr))
+                        {
                             pHarpoon->InterruptNonMeleeSpells(false);
+                        }
                     }
 
                     // reset Harpoons: respawn the broken ones and despawn the repaired ones
@@ -710,7 +798,9 @@ struct is_ulduar : public InstanceScript
                         if (GameObject* pHarpoon = instance->GetGameObject(*itr))
                         {
                             if (!pHarpoon->isSpawned())
+                            {
                                 pHarpoon->Respawn();
+                            }
                         }
                     }
                     for (GuidList::const_iterator itr = m_lRepairedHarpoonsGuids.begin(); itr != m_lRepairedHarpoonsGuids.end(); ++itr)
@@ -718,7 +808,9 @@ struct is_ulduar : public InstanceScript
                         if (GameObject* pHarpoon = instance->GetGameObject(*itr))
                         {
                             if (pHarpoon->isSpawned())
+                            {
                                 pHarpoon->SetLootState(GO_JUST_DEACTIVATED);
+                            }
                         }
                     }
                 }
@@ -738,11 +830,15 @@ struct is_ulduar : public InstanceScript
             case TYPE_ASSEMBLY:
                 // Don't set the same encounter data twice
                 if (uiData == m_auiEncounter[uiType])
+                {
                     return;
+                }
                 m_auiEncounter[uiType] = uiData;
                 // don't continue for encounter = special
                 if (uiData == SPECIAL)
+                {
                     return;
+                }
                 DoUseDoorOrButton(GO_IRON_ENTRANCE_DOOR);
                 if (uiData == DONE)
                 {
@@ -790,7 +886,9 @@ struct is_ulduar : public InstanceScript
             case TYPE_MIMIRON:
                 // Don't set the same encounter data twice
                 if (uiData == m_auiEncounter[uiType])
+                {
                     return;
+                }
                 m_auiEncounter[uiType] = uiData;
                 DoUseDoorOrButton(GO_MIMIRON_DOOR_1);
                 DoUseDoorOrButton(GO_MIMIRON_DOOR_2);
@@ -798,24 +896,34 @@ struct is_ulduar : public InstanceScript
                 if (uiData == DONE)
                 {
                     if (GetData(TYPE_MIMIRON_HARD) == DONE)
+                    {
                         DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_CACHE_OF_INOV_10_H : GO_CACHE_OF_INOV_25_H, 30 * MINUTE);
+                    }
                     else
+                    {
                         DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_CACHE_OF_INOV_10 : GO_CACHE_OF_INOV_25, 30 * MINUTE);
+                    }
 
                     SpawnFriendlyKeeper(NPC_KEEPER_MIMIRON);
                     DoOpenMadnessDoorIfCan();
                 }
                 else if (uiData == IN_PROGRESS)
+                {
                     DoToggleGameObjectFlags(GO_MIMIRON_BUTTON, GO_FLAG_NO_INTERACT, true);
+                }
                 else if (uiData == FAIL)
                 {
                     // reset objects
                     DoToggleGameObjectFlags(GO_MIMIRON_BUTTON, GO_FLAG_NO_INTERACT, false);
 
                     if (GameObject* pButton = GetSingleGameObjectFromStorage(GO_MIMIRON_BUTTON))
+                    {
                         pButton->ResetDoorOrButton();
+                    }
                     if (GameObject* pElevator = GetSingleGameObjectFromStorage(GO_MIMIRON_ELEVATOR))
+                    {
                         pElevator->SetGoState(GO_STATE_ACTIVE);
+                    }
 
                     // reset vehicles
                     if (Creature* pLeviathan = GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
@@ -834,9 +942,13 @@ struct is_ulduar : public InstanceScript
                         pAerial->ForcedDespawn(1000);
                     }
                     if (Creature* pMimiron = GetSingleCreatureFromStorage(NPC_MIMIRON))
+                    {
                         pMimiron->AI()->EnterEvadeMode();
+                    }
                     if (Creature* pComputer = GetSingleCreatureFromStorage(NPC_COMPUTER))
+                    {
                         pComputer->AI()->EnterEvadeMode();
+                    }
 
                     SetData(TYPE_MIMIRON_HARD, FAIL);
                 }
@@ -851,7 +963,9 @@ struct is_ulduar : public InstanceScript
 
                     DoToggleGameObjectFlags(instance->IsRegularDifficulty() ? GO_CACHE_OF_WINTER_10 : GO_CACHE_OF_WINTER_25, GO_FLAG_NO_INTERACT, false);
                     if (GetData(TYPE_HODIR_HARD) == DONE)
+                    {
                         DoToggleGameObjectFlags(instance->IsRegularDifficulty() ? GO_CACHE_OF_RARE_WINTER_10 : GO_CACHE_OF_RARE_WINTER_25, GO_FLAG_NO_INTERACT, false);
+                    }
 
                     SpawnFriendlyKeeper(NPC_KEEPER_HODIR);
                     DoOpenMadnessDoorIfCan();
@@ -859,10 +973,14 @@ struct is_ulduar : public InstanceScript
                 else if (uiData == FAIL)
                 {
                     if (GameObject* pChest = GetSingleGameObjectFromStorage(instance->IsRegularDifficulty() ? GO_CACHE_OF_RARE_WINTER_10 : GO_CACHE_OF_RARE_WINTER_25))
+                    {
                         pChest->Respawn();
+                    }
 
                     if (Player* pPlayer = GetPlayerInMap())
+                    {
                         DoSpawnHodirNpcs(pPlayer);
+                    }
 
                     SetData(TYPE_HODIR_HARD, FAIL);
                 }
@@ -900,13 +1018,19 @@ struct is_ulduar : public InstanceScript
                 {
                     DoToggleGameObjectFlags(GO_DOOR_LEVER, GO_FLAG_NO_INTERACT, true);
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_RUNED_STONE_DOOR))
+                    {
                         pDoor->ResetDoorOrButton();
+                    }
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_THORIM_STONE_DOOR))
+                    {
                         pDoor->ResetDoorOrButton();
+                    }
                     if (Creature* pColossus = GetSingleCreatureFromStorage(NPC_RUNIC_COLOSSUS))
                     {
                         if (pColossus->IsAlive())
+                        {
                             pColossus->AI()->EnterEvadeMode();
+                        }
                     }
 
                     m_uiStairsSpawnTimer = 0;
@@ -921,17 +1045,23 @@ struct is_ulduar : public InstanceScript
                     if (Creature* pElder = GetSingleCreatureFromStorage(NPC_ELDER_BRIGHTLEAF))
                     {
                         if (pElder->IsAlive())
+                        {
                             pElder->ForcedDespawn();
+                        }
                     }
                     if (Creature* pElder = GetSingleCreatureFromStorage(NPC_ELDER_IRONBRACH))
                     {
                         if (pElder->IsAlive())
+                        {
                             pElder->ForcedDespawn();
+                        }
                     }
                     if (Creature* pElder = GetSingleCreatureFromStorage(NPC_ELDER_STONEBARK))
                     {
                         if (pElder->IsAlive())
+                        {
                             pElder->ForcedDespawn();
+                        }
                     }
 
                     SpawnFriendlyKeeper(NPC_KEEPER_FREYA);
@@ -943,14 +1073,20 @@ struct is_ulduar : public InstanceScript
             case TYPE_VEZAX:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == DONE)
+                {
                     DoUseDoorOrButton(GO_VEZAX_GATE);
+                }
                 else if (uiData == IN_PROGRESS)
+                {
                     SetSpecialAchievementCriteria(TYPE_ACHIEV_SHADOWDODGER, true);
+                }
                 break;
             case TYPE_YOGGSARON:
                 // Don't set the same encounter data twice
                 if (uiData == m_auiEncounter[uiType])
+                {
                     return;
+                }
                 m_auiEncounter[uiType] = uiData;
                 DoUseDoorOrButton(GO_YOGG_GATE);
                 if (uiData == FAIL || uiData == DONE)
@@ -959,7 +1095,9 @@ struct is_ulduar : public InstanceScript
                     for (GuidList::const_iterator itr = m_lOminousCloudsGuids.begin(); itr != m_lOminousCloudsGuids.end(); ++itr)
                     {
                         if (Creature* pCloud = instance->GetCreature(*itr))
+                        {
                             pCloud->ForcedDespawn();
+                        }
                     }
 
                     if (Creature* pVoice = GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
@@ -969,17 +1107,27 @@ struct is_ulduar : public InstanceScript
                     }
 
                     if (Creature* pSara = GetSingleCreatureFromStorage(NPC_SARA))
+                    {
                         pSara->ForcedDespawn();
+                    }
                     if (Creature* pBrain = GetSingleCreatureFromStorage(NPC_YOGG_BRAIN))
+                    {
                         pBrain->ForcedDespawn();
+                    }
 
                     // reset illusion doors
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_BRAIN_DOOR_CHAMBER))
+                    {
                         pDoor->ResetDoorOrButton();
+                    }
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_BRAIN_DOOR_ICECROWN))
+                    {
                         pDoor->ResetDoorOrButton();
+                    }
                     if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_BRAIN_DOOR_STORMWIND))
+                    {
                         pDoor->ResetDoorOrButton();
+                    }
 
                     // reset all helpers
                     for (uint8 i = 0; i < countof(m_aKeeperHelperLocs); ++i)
@@ -996,7 +1144,9 @@ struct is_ulduar : public InstanceScript
 
                     // full reset only on fail
                     if (uiData == FAIL)
+                    {
                         m_uiYoggResetTimer = 60000;
+                    }
                 }
                 else if (uiData == IN_PROGRESS)
                 {
@@ -1029,7 +1179,9 @@ struct is_ulduar : public InstanceScript
                     {
                         DoUpdateWorldState(WORLD_STATE_TIMER, 0);
                         if (Creature* pAlgalon = GetSingleCreatureFromStorage(NPC_ALGALON))
+                        {
                             pAlgalon->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pAlgalon, pAlgalon);
+                        }
                     }
                 }
                 break;
@@ -1070,25 +1222,33 @@ struct is_ulduar : public InstanceScript
                 // Ulduar keepers
             case TYPE_KEEPER_HODIR:
                 if (uiData == m_auiUlduarKeepers[0] || uiData != DONE)
+                {
                     return;
+                }
                 SpawnKeeperHelper(NPC_HODIR_HELPER);
                 m_auiUlduarKeepers[0] = uiData;
                 break;
             case TYPE_KEEPER_THORIM:
                 if (uiData == m_auiUlduarKeepers[1] || uiData != DONE)
+                {
                     return;
+                }
                 SpawnKeeperHelper(NPC_THORIM_HELPER);
                 m_auiUlduarKeepers[1] = uiData;
                 break;
             case TYPE_KEEPER_FREYA:
                 if (uiData == m_auiUlduarKeepers[2] || uiData != DONE)
+                {
                     return;
+                }
                 SpawnKeeperHelper(NPC_FREYA_HELPER);
                 m_auiUlduarKeepers[2] = uiData;
                 break;
             case TYPE_KEEPER_MIMIRON:
                 if (uiData == m_auiUlduarKeepers[3] || uiData != DONE)
+                {
                     return;
+                }
                 SpawnKeeperHelper(NPC_MIMIRON_HELPER);
                 m_auiUlduarKeepers[3] = uiData;
                 break;
@@ -1096,30 +1256,46 @@ struct is_ulduar : public InstanceScript
                 // Ulduar towers
             case TYPE_TOWER_HODIR:
                 if (m_auiUlduarTowers[0] == uiData)
+                {
                     return;
+                }
                 if (uiData == FAIL)
+                {
                     DoUseDoorOrButton(GO_HODIR_CRYSTAL);
+                }
                 m_auiUlduarTowers[0] = uiData;
                 break;
             case TYPE_TOWER_THORIM:
                 if (m_auiUlduarTowers[1] == uiData)
+                {
                     return;
+                }
                 if (uiData == FAIL)
+                {
                     DoUseDoorOrButton(GO_THORIM_CRYSTAL);
+                }
                 m_auiUlduarTowers[1] = uiData;
                 break;
             case TYPE_TOWER_FREYA:
                 if (m_auiUlduarTowers[2] == uiData)
+                {
                     return;
+                }
                 if (uiData == FAIL)
+                {
                     DoUseDoorOrButton(GO_FREYA_CRYSTAL);
+                }
                 m_auiUlduarTowers[2] = uiData;
                 break;
             case TYPE_TOWER_MIMIRON:
                 if (m_auiUlduarTowers[3] == uiData)
+                {
                     return;
+                }
                 if (uiData == FAIL)
+                {
                     DoUseDoorOrButton(GO_MIMIRON_CRYSTAL);
+                }
                 m_auiUlduarTowers[3] = uiData;
                 break;
 
@@ -1190,7 +1366,9 @@ struct is_ulduar : public InstanceScript
                 for (GuidList::const_iterator itr = m_lEngineersGuids.begin(); itr != m_lEngineersGuids.end(); ++itr)
                 {
                     if (Creature* pEngineer = instance->GetCreature(*itr))
+                    {
                         pEngineer->GetMotionMaster()->MoveTargetedHome();
+                    }
                 }
                 return;
             case TYPE_DO_TRAPPERS_MOVE:
@@ -1215,7 +1393,9 @@ struct is_ulduar : public InstanceScript
                     }
                     // yell that Razor is grounded
                     if (Creature* pCommander = GetSingleCreatureFromStorage(NPC_EXPEDITION_COMMANDER))
+                    {
                         DoScriptText(SAY_GROUNDED, pCommander);
+                    }
                 }
                 return;
             case TYPE_DO_TRAPPERS_CAST:
@@ -1224,7 +1404,9 @@ struct is_ulduar : public InstanceScript
                     for (GuidList::const_iterator itr = m_lTrappersGuids.begin(); itr != m_lTrappersGuids.end(); ++itr)
                     {
                         if (Creature* pTrapper = instance->GetCreature(*itr))
+                        {
                             pTrapper->CastSpell(razorscale, uiData, false);
+                        }
                     }
                 }
                 return;
@@ -1232,7 +1414,9 @@ struct is_ulduar : public InstanceScript
                 for (GuidList::const_iterator itr = m_lTrappersGuids.begin(); itr != m_lTrappersGuids.end(); ++itr)
                 {
                     if (Creature* pTrapper = instance->GetCreature(*itr))
+                    {
                         pTrapper->AI()->EnterEvadeMode();
+                    }
                 }
                 return;
             case TYPE_DO_THORIM_SPAWN_PACK:
@@ -1242,16 +1426,22 @@ struct is_ulduar : public InstanceScript
                     for (GuidList::const_iterator itr = m_lUpperBunniesGuids.begin(); itr != m_lUpperBunniesGuids.end(); ++itr)
                     {
                         if (Creature* pBunny = instance->GetCreature(*itr))
+                        {
                             vBunnies.push_back(pBunny);
+                        }
                     }
                     std::random_shuffle(vBunnies.begin(), vBunnies.end());
 
                     uint8 uiMaxCommoners = urand(6, 7);
                     if (uiMaxCommoners > vBunnies.size() - 1)
+                    {
                         uiMaxCommoners = vBunnies.size();
+                    }
 
                     for (uint8 i = 0; i < uiMaxCommoners; ++i)
+                    {
                         thorim->SummonCreature(NPC_DARK_RUNE_COMMONER, vBunnies[i]->GetPositionX(), vBunnies[i]->GetPositionY(), vBunnies[i]->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    }
                 }
                 return;
             case TYPE_DATA_THORIM_SMASH_SIDE:
@@ -1264,7 +1454,9 @@ struct is_ulduar : public InstanceScript
                 for (GuidList::const_iterator itr = m_lOminousCloudsGuids.begin(); itr != m_lOminousCloudsGuids.end(); ++itr)
                 {
                     if (Creature* pCloud = instance->GetCreature(*itr))
+                    {
                         pCloud->ForcedDespawn();
+                    }
                 }
                 return;
             }
@@ -1389,7 +1581,9 @@ struct is_ulduar : public InstanceScript
                 return m_leftKoloStalkerGuid.GetRawValue();
             case DATA64_BROKEN_HARPOON:
                 if (m_uiRazorCurrentHarpoon > 0)
+                {
                     return m_vBrokenHarpoonsGuids[m_uiRazorCurrentHarpoon - 1].GetRawValue();
+                }
             case DATA64_THORIM_RANDOM_ORB:
                 if (!m_lUpperThunderOrbsGuids.empty())
                 {
@@ -1417,7 +1611,9 @@ struct is_ulduar : public InstanceScript
                         for (GuidList::const_iterator itr = m_lThorimBunniesGuids.begin(); itr != m_lThorimBunniesGuids.end(); ++itr)
                         {
                             if (Creature* pBunny = instance->GetCreature(*itr))
+                            {
                                 lBunnies.push_back(pBunny);
+                            }
                         }
 
                         lBunnies.sort(ObjectDistanceOrder(pSource));
@@ -1486,7 +1682,9 @@ struct is_ulduar : public InstanceScript
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     m_auiEncounter[i] = NOT_STARTED;
+                }
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;
@@ -1511,15 +1709,21 @@ struct is_ulduar : public InstanceScript
             case ACHIEV_CRIT_BRUNDIR_N:
             case ACHIEV_CRIT_BRUNDIR_H:
                 if (GetData(TYPE_ASSEMBLY) == SPECIAL)
+                {
                     return m_abAchievCriteria[TYPE_ACHIEV_BRUNDIR - TYPE_ACHIEV_CAT_LADY];
+                }
             case ACHIEV_CRIT_MOLGEIM_N:
             case ACHIEV_CRIT_MOLGEIM_H:
                 if (GetData(TYPE_ASSEMBLY) == SPECIAL)
+                {
                     return m_abAchievCriteria[TYPE_ACHIEV_MOLGEIM - TYPE_ACHIEV_CAT_LADY];
+                }
             case ACHIEV_CRIT_STEELBREAKER_N:
             case ACHIEV_CRIT_STEELBREAKER_H:
                 if (GetData(TYPE_ASSEMBLY) == SPECIAL)
+                {
                     return m_abAchievCriteria[TYPE_ACHIEV_STEELBREAKER - TYPE_ACHIEV_CAT_LADY];
+                }
             case ACHIEV_CRIT_STUNNED_BRUND_N:
             case ACHIEV_CRIT_STUNNED_STEEL_N:
             case ACHIEV_CRIT_STUNNED_MOLG_N:
@@ -1527,7 +1731,9 @@ struct is_ulduar : public InstanceScript
             case ACHIEV_CRIT_STUNNED_STEEL_H:
             case ACHIEV_CRIT_STUNNED_MOLG_H:
                 if (GetData(TYPE_ASSEMBLY) == SPECIAL)
+                {
                     return m_abAchievCriteria[TYPE_ACHIEV_STUNNED - TYPE_ACHIEV_CAT_LADY];
+                }
             case ACHIEV_CRIT_SHATTERED_N:
             case ACHIEV_CRIT_SHATTERED_H:
                 return m_abAchievCriteria[TYPE_ACHIEV_SHATTERED - TYPE_ACHIEV_CAT_LADY];
@@ -1644,7 +1850,9 @@ struct is_ulduar : public InstanceScript
                 uint8 uiEncounterDone = 0;
                 for (uint8 i = 0; i < TYPE_YOGGSARON; ++i)
                 if (m_auiEncounter[i] == DONE)
+                {
                     ++uiEncounterDone;
+                }
 
                 return uiEncounterDone >= 13 && GetData(TYPE_CHAMPION_FAILED) != DONE;
             }
@@ -1665,7 +1873,9 @@ struct is_ulduar : public InstanceScript
             case INSTANCE_CONDITION_ID_HARD_MODE_4:
             {
                 if (!pConditionSource)
+                {
                     break;
+                }
 
                 uint32 uiCondId = 0;
                 switch (pConditionSource->GetEntry())
@@ -1675,11 +1885,15 @@ struct is_ulduar : public InstanceScript
                     break;
                 case NPC_XT002:
                     if (GetData(TYPE_XT002_HARD) == DONE)
+                    {
                         uiCondId = 1;
+                    }
                     break;
                 case NPC_VEZAX:
                     if (GetData(TYPE_VEZAX_HARD) == DONE)
+                    {
                         uiCondId = 1;
+                    }
                     break;
                 case NPC_YOGGSARON:
                     uiCondId = 4 - GetData(TYPE_YOGGSARON_HARD);
@@ -1690,7 +1904,9 @@ struct is_ulduar : public InstanceScript
             }
             case INSTANCE_CONDITION_ID_ULDUAR:
                 if (!pConditionSource)
+                {
                     break;
+                }
 
                 // handle vehicle spell clicks - are available only after the gauntlet was started by gossip or when Leviathan is active
                 return GetData(TYPE_LEVIATHAN_GAUNTLET) == IN_PROGRESS || GetData(TYPE_LEVIATHAN) == SPECIAL || GetData(TYPE_LEVIATHAN) == FAIL;
@@ -1711,9 +1927,13 @@ struct is_ulduar : public InstanceScript
                 {
                     // Just set the timer to 0 when it expires
                     if (m_uiShatterAchievTimer <= uiDiff)
+                    {
                         m_uiShatterAchievTimer = 0;
+                    }
                     else
+                    {
                         m_uiShatterAchievTimer -= uiDiff;
+                    }
                 }
             }
 
@@ -1726,10 +1946,14 @@ struct is_ulduar : public InstanceScript
                     m_uiAlgalonTimer = MINUTE * IN_MILLISECONDS;
 
                     if (m_auiEncounter[TYPE_ALGALON_TIMER] == 0)
+                    {
                         SetData(TYPE_ALGALON, FAIL);
+                    }
                 }
                 else
+                {
                     m_uiAlgalonTimer -= uiDiff;
+                }
             }
 
             if (m_uiYoggResetTimer)
@@ -1740,20 +1964,30 @@ struct is_ulduar : public InstanceScript
                     for (GuidList::const_iterator itr = m_lOminousCloudsGuids.begin(); itr != m_lOminousCloudsGuids.end(); ++itr)
                     {
                         if (Creature* pCloud = instance->GetCreature(*itr))
+                        {
                             pCloud->Respawn();
+                        }
                     }
 
                     if (Creature* pVoice = GetSingleCreatureFromStorage(NPC_VOICE_OF_YOGG))
+                    {
                         pVoice->Respawn();
+                    }
                     if (Creature* pSara = GetSingleCreatureFromStorage(NPC_SARA))
+                    {
                         pSara->Respawn();
+                    }
                     if (Creature* pBrain = GetSingleCreatureFromStorage(NPC_YOGG_BRAIN))
+                    {
                         pBrain->Respawn();
+                    }
 
                     m_uiYoggResetTimer = 0;
                 }
                 else
+                {
                     m_uiYoggResetTimer -= uiDiff;
+                }
             }
 
             if (m_uiStairsSpawnTimer)
@@ -1765,14 +1999,20 @@ struct is_ulduar : public InstanceScript
                     if (Creature* pGiant = GetSingleCreatureFromStorage(NPC_RUNE_GIANT))
                     {
                         if (urand(0, 1))
+                        {
                             pGiant->SummonCreature(NPC_HONOR_GUARD_STAIRS, 2101.2f, -434.135f, 438.331f, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        }
                         else
+                        {
                             pGiant->SummonCreature(NPC_RUNE_ACOLYTE_STAIRS, 2100.41f, -446.712f, 438.331f, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        }
                     }
                     m_uiStairsSpawnTimer = urand(20000, 30000);
                 }
                 else
+                {
                     m_uiStairsSpawnTimer -= uiDiff;
+                }
             }
         }
 
@@ -1780,16 +2020,22 @@ struct is_ulduar : public InstanceScript
         void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet)
         {
             if (uiType < MAX_SPECIAL_ACHIEV_CRITS)
+            {
                 m_abAchievCriteria[uiType] = bIsMet;
+            }
         }
 
         void DoProcessShatteredEvent()
         {
             // If timer is already running set achiev criteria to true, else start the timer
             if (m_uiShatterAchievTimer)
+            {
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_SHATTERED, true);
+            }
             else
+            {
                 m_uiShatterAchievTimer = 5000;
+            }
         }
 
         void DoSpawnThorimNpcs(ObjectGuid plGuid)
@@ -1798,7 +2044,9 @@ struct is_ulduar : public InstanceScript
             {
                 if (Player* pSummoner = instance->GetPlayer(plGuid))
                 for (uint8 i = 0; i < countof(afThorimSpawns); ++i)
+                {
                     pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? afThorimSpawns[i].uiAllyEntry : afThorimSpawns[i].uiHordeEntry, afThorimSpawns[i].fX, afThorimSpawns[i].fY, afThorimSpawns[i].fZ, afThorimSpawns[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+                }
             }
         }
 
@@ -1837,7 +2085,9 @@ struct is_ulduar : public InstanceScript
         {
             Player* pPlayer = GetPlayerInMap();
             if (!pPlayer)
+            {
                 return;
+            }
 
             switch (uiWho)
             {
@@ -1853,7 +2103,9 @@ struct is_ulduar : public InstanceScript
         {
             Player* pPlayer = GetPlayerInMap();
             if (!pPlayer)
+            {
                 return;
+            }
 
             switch (uiWho)
             {
@@ -1893,12 +2145,16 @@ struct is_ulduar : public InstanceScript
             if (GetData(TYPE_HODIR) != DONE)
             {
                 for (uint8 i = 0; i < countof(afHodirHelpersNormal); ++i)
+                {
                     pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? afHodirHelpersNormal[i].uiAllyEntry : afHodirHelpersNormal[i].uiHordeEntry, afHodirHelpersNormal[i].fX, afHodirHelpersNormal[i].fY, afHodirHelpersNormal[i].fZ, afHodirHelpersNormal[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+                }
 
                 if (!instance->IsRegularDifficulty())
                 {
                     for (uint8 i = 0; i < countof(afHodirHelpersHeroic); ++i)
+                    {
                         pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? afHodirHelpersHeroic[i].uiAllyEntry : afHodirHelpersHeroic[i].uiHordeEntry, afHodirHelpersHeroic[i].fX, afHodirHelpersHeroic[i].fY, afHodirHelpersHeroic[i].fZ, afHodirHelpersHeroic[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+                    }
                 }
             }
         }
@@ -1907,7 +2163,9 @@ struct is_ulduar : public InstanceScript
         void DoOpenMadnessDoorIfCan()
         {
             if (m_auiEncounter[TYPE_MIMIRON] == DONE && m_auiEncounter[TYPE_HODIR] == DONE && m_auiEncounter[TYPE_THORIM] == DONE && m_auiEncounter[TYPE_FREYA] == DONE)
+            {
                 DoUseDoorOrButton(GO_ANCIENT_GATE);
+            }
         }
 
         // function which will handle the Flame Leviathan backup spawns
@@ -1915,15 +2173,21 @@ struct is_ulduar : public InstanceScript
         {
             Creature* pLeviathan = GetSingleCreatureFromStorage(NPC_LEVIATHAN);
             if (!pLeviathan)
+            {
                 return;
+            }
 
             for (uint8 i = 0; i < countof(afReinforcementsNormal); ++i)
+            {
                 pLeviathan->SummonCreature(afReinforcementsNormal[i].uiEntry, afReinforcementsNormal[i].fX, afReinforcementsNormal[i].fY, afReinforcementsNormal[i].fZ, afReinforcementsNormal[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            }
 
             if (!instance->IsRegularDifficulty())
             {
                 for (uint8 i = 0; i < countof(afReinforcementsHeroic); ++i)
+                {
                     pLeviathan->SummonCreature(afReinforcementsHeroic[i].uiEntry, afReinforcementsHeroic[i].fX, afReinforcementsHeroic[i].fY, afReinforcementsHeroic[i].fZ, afReinforcementsHeroic[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+                }
             }
         }
 

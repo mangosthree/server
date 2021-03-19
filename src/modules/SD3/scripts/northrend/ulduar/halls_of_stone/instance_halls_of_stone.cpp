@@ -66,7 +66,9 @@ static void GetValidNPCsOfList(Map* pMap, GuidList& lGUIDs, std::list<Creature*>
     for (GuidList::const_iterator itr = lGUIDs.begin(); itr != lGUIDs.end(); ++itr)
     {
         if (Creature* pMob = pMap->GetCreature(*itr))
+        {
             lNPCs.push_back(pMob);
+        }
     }
 }
 
@@ -101,11 +103,17 @@ struct is_halls_of_stone : public InstanceScript
             case NPC_LIGHTNING_STALKER:
                 // Sort the dwarf summoning stalkers
                 if (pCreature->GetPositionY() > 400.0f)
+                {
                     m_protectorStalkerGuid = pCreature->GetObjectGuid();
+                }
                 else if (pCreature->GetPositionY() > 380.0f)
+                {
                     m_stormcallerStalkerGuid = pCreature->GetObjectGuid();
+                }
                 else
+                {
                     m_custodianStalkerGuid = pCreature->GetObjectGuid();
+                }
                 break;
             case NPC_DARK_MATTER:
             case NPC_SJONNIR:
@@ -122,7 +130,9 @@ struct is_halls_of_stone : public InstanceScript
             case GO_TRIBUNAL_CHEST:
             case GO_TRIBUNAL_CHEST_H:
                 if (m_auiEncounter[TYPE_TRIBUNAL] == DONE)
+                {
                     pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                }
                 break;
             case GO_TRIBUNAL_HEAD_RIGHT:
                 m_aFaces[FACE_MARNAK].m_goFaceGuid = pGo->GetObjectGuid();
@@ -151,7 +161,9 @@ struct is_halls_of_stone : public InstanceScript
         void OnCreatureDeath(Creature* pCreature) override
         {
             if (pCreature->GetEntry() == NPC_IRON_SLUDGE && GetData(TYPE_SJONNIR) == IN_PROGRESS)
+            {
                 ++m_uiIronSludgeKilled;
+            }
         }
 
         void SetData(uint32 uiType, uint32 uiData) override
@@ -168,7 +180,9 @@ struct is_halls_of_stone : public InstanceScript
                 case DONE:
                     // Cast achiev check spell - Note: it's not clear who casts this spell, but for the moment we'll use Abedneum
                     if (Creature* pEye = instance->GetCreature(m_aFaces[1].m_leftEyeGuid))
+                    {
                         pEye->CastSpell(pEye, SPELL_ACHIEVEMENT_CHECK, true);
+                    }
                     // Spawn the loot
                     DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_TRIBUNAL_CHEST : GO_TRIBUNAL_CHEST_H, 30 * MINUTE);
                     DoToggleGameObjectFlags(instance->IsRegularDifficulty() ? GO_TRIBUNAL_CHEST : GO_TRIBUNAL_CHEST_H, GO_FLAG_NO_INTERACT, false);
@@ -180,7 +194,9 @@ struct is_halls_of_stone : public InstanceScript
                     {
                         // Shut down the faces
                         if (m_aFaces[i].m_bIsActive)
+                        {
                             DoUseDoorOrButton(m_aFaces[i].m_goFaceGuid);
+                        }
                         m_aFaces[i].m_bIsActive = false;
                         m_aFaces[i].m_uiTimer = 1000;
                     }
@@ -194,9 +210,13 @@ struct is_halls_of_stone : public InstanceScript
 
                         // Cleanup when finished
                         if (Creature* pEye = instance->GetCreature(m_aFaces[i].m_leftEyeGuid))
+                        {
                             pEye->CastSpell(pEye, SPELL_KILL_TRIBUNAL_ADD, true);
+                        }
                         if (Creature* pEye = instance->GetCreature(m_aFaces[i].m_rightEyeGuid))
+                        {
                             pEye->CastSpell(pEye, SPELL_KILL_TRIBUNAL_ADD, true);
+                        }
                     }
                     break;
                 }
@@ -204,7 +224,9 @@ struct is_halls_of_stone : public InstanceScript
             case TYPE_MAIDEN:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == IN_PROGRESS)
+                {
                     DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_MAIDEN_ID);
+                }
                 break;
             case TYPE_KRYSTALLUS:
                 m_auiEncounter[uiType] = uiData;
@@ -213,7 +235,9 @@ struct is_halls_of_stone : public InstanceScript
                 m_auiEncounter[uiType] = uiData;
                 DoUseDoorOrButton(GO_DOOR_SJONNIR);
                 if (uiData == IN_PROGRESS)
+                {
                     m_uiIronSludgeKilled = 0;
+                }
                 break;
             case TYPE_ACHIEV_BRANN_SPANKIN:
                 m_bIsBrannSpankin = bool(uiData);
@@ -227,7 +251,9 @@ struct is_halls_of_stone : public InstanceScript
                     {
                         uint32 uiSpawnNumber = (instance->IsRegularDifficulty() ? 2 : 3);
                         for (uint8 i = 0; i < uiSpawnNumber; ++i)
+                        {
                             pStalker->CastSpell(pStalker, SPELL_SUMMON_PROTECTOR, true, nullptr, nullptr, m_mNpcEntryGuidStore[NPC_BRANN_HOS]);
+                        }
                         pStalker->CastSpell(pStalker, SPELL_SUMMON_STORMCALLER, true, nullptr, nullptr, m_mNpcEntryGuidStore[NPC_BRANN_HOS]);
                     }
                     break;
@@ -235,12 +261,16 @@ struct is_halls_of_stone : public InstanceScript
                     if (Creature* pStalker = instance->GetCreature(m_stormcallerStalkerGuid))
                     {
                         for (uint8 i = 0; i < 2; ++i)
+                        {
                             pStalker->CastSpell(pStalker, SPELL_SUMMON_STORMCALLER, true, nullptr, nullptr, m_mNpcEntryGuidStore[NPC_BRANN_HOS]);
+                        }
                     }
                     break;
                 case NPC_IRON_GOLEM_CUSTODIAN:
                     if (Creature* pStalker = instance->GetCreature(m_custodianStalkerGuid))
+                    {
                         pStalker->CastSpell(pStalker, SPELL_SUMMON_CUSTODIAN, true, nullptr, nullptr, m_mNpcEntryGuidStore[NPC_BRANN_HOS]);
+                    }
                     break;
                 }
                 return;
@@ -273,7 +303,9 @@ struct is_halls_of_stone : public InstanceScript
         uint32 GetData(uint32 uiType) const override
         {
             if (uiType < MAX_ENCOUNTER)
+            {
                 return m_auiEncounter[uiType];
+            }
 
             return 0;
         }
@@ -295,7 +327,9 @@ struct is_halls_of_stone : public InstanceScript
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     m_auiEncounter[i] = NOT_STARTED;
+                }
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;
@@ -308,12 +342,18 @@ struct is_halls_of_stone : public InstanceScript
                 for (uint8 i = 0; i < MAX_FACES; ++i)
                 {
                     if (!m_aFaces[i].m_bIsActive)
+                    {
                         continue;
+                    }
 
                     if (m_aFaces[i].m_uiTimer < uiDiff)
+                    {
                         ProcessFace(i);
+                    }
                     else
+                    {
                         m_aFaces[i].m_uiTimer -= uiDiff;
+                    }
                 }
             }
         }
@@ -336,10 +376,14 @@ struct is_halls_of_stone : public InstanceScript
         void ActivateFace(uint8 uiFace, bool bAfterEvent)   //@TODO get rid of the method
         {
             if (uiFace >= MAX_FACES)
+            {
                 return;
+            }
 
             if (bAfterEvent)
+            {
                 DoUseDoorOrButton(m_aFaces[uiFace].m_goFaceGuid);
+            }
             else
             {
                 // TODO: How to get them red?
@@ -351,10 +395,14 @@ struct is_halls_of_stone : public InstanceScript
         void DoFaceSpeak(uint8 uiFace, int32 iTextId)   //@TODO get rid of the method
         {
             if (uiFace >= MAX_FACES)
+            {
                 return;
+            }
 
             if (Creature* pSpeaker = instance->GetCreature(m_aFaces[uiFace].m_speakerGuid))
+            {
                 DoScriptText(iTextId, pSpeaker);
+            }
         }
 
         void SortFaces()
@@ -442,14 +490,20 @@ struct is_halls_of_stone : public InstanceScript
             {
             case FACE_KADDRAK:
                 if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_leftEyeGuid))
+                {
                     pEye->CastSpell(pEye, instance->IsRegularDifficulty() ? SPELL_GLARE_OF_THE_TRIBUNAL : SPELL_GLARE_OF_THE_TRIBUNAL_H, true);
+                }
                 if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_rightEyeGuid))
+                {
                     pEye->CastSpell(pEye, instance->IsRegularDifficulty() ? SPELL_GLARE_OF_THE_TRIBUNAL : SPELL_GLARE_OF_THE_TRIBUNAL_H, true, nullptr, nullptr, m_aFaces[uiFace].m_leftEyeGuid);
+                }
                 m_aFaces[uiFace].m_uiTimer = urand(1000, 2000);
                 break;
             case FACE_MARNAK:
                 if (Creature* pDarkMatter = GetSingleCreatureFromStorage(NPC_DARK_MATTER))
+                {
                     pDarkMatter->CastSpell(pDarkMatter, SPELL_DARK_MATTER_START, true);
+                }
                 // Note: Marnak doesn't cast anything directly. Keep this code for reference only.
                 // if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_leftEyeGuid))
                 //    pEye->CastSpell(pEye, SPELL_SUMMON_DARK_MATTER_TARGET, true);
@@ -460,7 +514,9 @@ struct is_halls_of_stone : public InstanceScript
                 break;
             case FACE_ABEDNEUM:
                 if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_leftEyeGuid))
+                {
                     pEye->CastSpell(pEye, SPELL_SUMMON_SEARING_GAZE_TARGET, true);
+                }
                 // One should be enough..
                 // if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_rightEyeGuid))
                 //    pEye->CastSpell(pEye, SPELL_SUMMON_SEARING_GAZE_TARGET, true);

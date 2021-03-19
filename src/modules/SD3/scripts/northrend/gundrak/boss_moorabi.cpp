@@ -97,7 +97,9 @@ struct boss_moorabi : public CreatureScript
             DoCastSpellIfCan(m_creature, SPELL_MOJO_FRENZY);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_MOORABI, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -115,13 +117,17 @@ struct boss_moorabi : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_MOORABI, DONE);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_creature->HasAura(SPELL_TRANSFORMATION) && !m_bMammothPhase)
             {
@@ -130,7 +136,9 @@ struct boss_moorabi : public CreatureScript
 
                 // Set the achievement to failed
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_ACHIEV_LESS_RABI, uint32(false));
+                }
             }
 
             if (m_uiRoarTimer < uiDiff)
@@ -139,7 +147,9 @@ struct boss_moorabi : public CreatureScript
                 m_uiRoarTimer = 20000;
             }
             else
+            {
                 m_uiRoarTimer -= uiDiff;
+            }
 
             if (m_uiQuakeTimer < uiDiff)
             {
@@ -148,19 +158,27 @@ struct boss_moorabi : public CreatureScript
                 m_uiQuakeTimer = m_bMammothPhase ? 13000 : 18000;
             }
             else
+            {
                 m_uiQuakeTimer -= uiDiff;
+            }
 
             if (m_uiStabTimer < uiDiff)
             {
                 if (m_bMammothPhase)
+                {
                     DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DETERMINED_GORE : SPELL_DETERMINED_GORE_H);
+                }
                 else
+                {
                     DoCastSpellIfCan(m_creature->getVictim(), SPELL_DETERMINED_STAB);
+                }
 
                 m_uiStabTimer = 7000;
             }
             else
+            {
                 m_uiStabTimer -= uiDiff;
+            }
 
             // check only in troll phase
             if (!m_bMammothPhase)
@@ -174,7 +192,9 @@ struct boss_moorabi : public CreatureScript
                     m_uiTransformationTimer = m_uiPreviousTimer;
                 }
                 else
+                {
                     m_uiTransformationTimer -= uiDiff;
+                }
             }
 
             DoMeleeAttackIfReady();

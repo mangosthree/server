@@ -143,7 +143,9 @@ struct npc_squad_leader : public CreatureScript
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_YMIRHEIM_DEFENDER)
+            {
                 pSummoned->AI()->AttackStart(m_creature);
+            }
         }
 
         void WaypointReached(uint32 uiPointId) override
@@ -243,7 +245,9 @@ struct npc_squad_leader : public CreatureScript
             {
                        // event complete
                        if (Player* pPlayer = GetPlayerForEscort())
+                       {
                            m_creature->SetFacingToObject(pPlayer);
+                       }
                        DoScriptText(SAY_EVENT_COMPLETE, m_creature);
 
                        // get all the soldiers around
@@ -271,23 +275,33 @@ struct npc_squad_leader : public CreatureScript
         void UpdateEscortAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiFrostShotTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_SHOT) == CAST_OK)
+                {
                     m_uiFrostShotTimer = urand(1000, 3000);
+                }
             }
             else
+            {
                 m_uiFrostShotTimer -= uiDiff;
+            }
 
             if (m_uiCleaveTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                {
                     m_uiCleaveTimer = urand(3000, 5000);
+                }
             }
             else
+            {
                 m_uiCleaveTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -356,15 +370,21 @@ struct npc_infantry : public CreatureScript
             Reset();
 
             if (!m_creature->IsAlive())
+            {
                 return;
+            }
 
             if (m_bEscortActive)
             {
                 if (Creature* pLeader = m_creature->GetMap()->GetCreature(m_squadLeaderGuid))
+                {
                     m_creature->GetMotionMaster()->MoveFollow(pLeader, m_creature->GetDistance(pLeader), M_PI_F / 2 + m_creature->GetAngle(pLeader));
+                }
             }
             else
+            {
                 m_creature->GetMotionMaster()->MoveTargetedHome();
+            }
         }
 
         void JustRespawned() override
@@ -387,23 +407,33 @@ struct npc_infantry : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiShootTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT) == CAST_OK)
+                {
                     m_uiShootTimer = urand(1000, 3000);
+                }
             }
             else
+            {
                 m_uiShootTimer -= uiDiff;
+            }
 
             if (m_uiHeroicStrikeTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HEROIC_STRIKE) == CAST_OK)
+                {
                     m_uiHeroicStrikeTimer = urand(3000, 5000);
+                }
             }
             else
+            {
                 m_uiHeroicStrikeTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -482,7 +512,9 @@ struct npc_father_kamaros : public CreatureScript
             if (DoCastSpellIfCan(m_creature, SPELL_POWER_WORD_SHIELD) != CAST_OK)
             {
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     DoCastSpellIfCan(pPlayer, SPELL_POWER_WORD_SHIELD);
+                }
             }
         }
 
@@ -514,18 +546,24 @@ struct npc_father_kamaros : public CreatureScript
             case 13:
             case 16:
                 if (Creature* pGhoul = GetClosestCreatureWithEntry(m_creature, NPC_SPIKED_GHOUL, 25.0f))
+                {
                     pGhoul->AI()->AttackStart(m_creature);
+                }
                 break;
             case 23:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     m_creature->SetFacingToObject(pPlayer);
+                }
                 DoScriptText(SAY_KAMAROS_COMPLETE_1, m_creature);
                 break;
             case 24:
                 SetRun();
                 DoScriptText(SAY_KAMAROS_COMPLETE_2, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     pPlayer->GroupEventHappens(m_uiCurrentQuestId, m_creature);
+                }
                 break;
             }
         }
@@ -533,23 +571,33 @@ struct npc_father_kamaros : public CreatureScript
         void UpdateEscortAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiSmiteTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HOLY_SMITE) == CAST_OK)
+                {
                     m_uiSmiteTimer = urand(3000, 4000);
+                }
             }
             else
+            {
                 m_uiSmiteTimer -= uiDiff;
+            }
 
             if (m_uiShadowWordTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_WORD_PAIN) == CAST_OK)
+                {
                     m_uiShadowWordTimer = urand(15000, 20000);
+                }
             }
             else
+            {
                 m_uiShadowWordTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -611,7 +659,9 @@ struct npc_saronite_mine_slave : public CreatureScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->GetQuestStatus(QUEST_SLAVES_TO_SARONITE_A) == QUEST_STATUS_INCOMPLETE || pPlayer->GetQuestStatus(QUEST_SLAVES_TO_SARONITE_H) == QUEST_STATUS_INCOMPLETE)
+        {
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_SLAVE_FREE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
 
         pPlayer->SEND_GOSSIP_MENU(TEXT_ID, pCreature->GetObjectGuid());
         return true;
@@ -620,7 +670,9 @@ struct npc_saronite_mine_slave : public CreatureScript
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction) override
     {
         if (uiAction != GOSSIP_ACTION_INFO_DEF + 1)
+        {
             return false;
+        }
 
         pPlayer->CLOSE_GOSSIP_MENU();
 

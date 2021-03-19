@@ -116,7 +116,9 @@ struct boss_festergut : public CreatureScript
             DoCastSpellIfCan(m_creature, SPELL_GASEUS_BLIGHT_DUMMY, CAST_TRIGGERED); // visual cast on dummy npc
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FESTERGUT, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -127,7 +129,9 @@ struct boss_festergut : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FESTERGUT, FAIL);
+            }
 
             DoCastSpellIfCan(m_creature, SPELL_REMOVE_INOCULENT, CAST_TRIGGERED);
         }
@@ -135,7 +139,9 @@ struct boss_festergut : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FESTERGUT, DONE);
+            }
 
             DoScriptText(SAY_DEATH, m_creature);
             DoCastSpellIfCan(m_creature, SPELL_REMOVE_INOCULENT, CAST_TRIGGERED);
@@ -144,7 +150,9 @@ struct boss_festergut : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Berserk
             if (m_uiBerserkTimer <= uiDiff)
@@ -156,7 +164,9 @@ struct boss_festergut : public CreatureScript
                 }
             }
             else
+            {
                 m_uiBerserkTimer -= uiDiff;
+            }
 
             // Inhale Blight and Pungent Blight
             if (m_uiInhaleBlightTimer <= uiDiff)
@@ -164,7 +174,9 @@ struct boss_festergut : public CreatureScript
                 SpellAuraHolder* holder = m_creature->GetSpellAuraHolder(SPELL_INHALED_BLIGHT_10);
 
                 if (!holder)
+                {
                     holder = m_creature->GetSpellAuraHolder(SPELL_INHALED_BLIGHT_25);
+                }
 
                 // inhale the gas or if already have 3 stacks - release it
                 if (holder && holder->GetStackAmount() >= 3)
@@ -181,13 +193,17 @@ struct boss_festergut : public CreatureScript
                     if (m_pInstance)
                     {
                         if (Creature* pProfessor = m_pInstance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
+                        {
                             DoScriptText(SAY_BLIGHT, pProfessor);
+                        }
                     }
                     m_uiInhaleBlightTimer = 30000;
                 }
             }
             else
+            {
                 m_uiInhaleBlightTimer -= uiDiff;
+            }
 
             // Gas Spore
             if (m_uiGasSporeTimer <= uiDiff)
@@ -199,7 +215,9 @@ struct boss_festergut : public CreatureScript
                 }
             }
             else
+            {
                 m_uiGasSporeTimer -= uiDiff;
+            }
 
             // Vile Gas
             if (m_uiVileGasTimer <= uiDiff)
@@ -207,11 +225,15 @@ struct boss_festergut : public CreatureScript
                 if (DoCastSpellIfCan(m_creature, SPELL_VILE_GAS_SUMMON, CAST_TRIGGERED) == CAST_OK)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_VILE_GAS) == CAST_OK)
+                    {
                         m_uiVileGasTimer = 30000;
+                    }
                 }
             }
             else
+            {
                 m_uiVileGasTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

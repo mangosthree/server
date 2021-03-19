@@ -93,46 +93,64 @@ struct boss_gortok : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_GORTOK, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_GORTOK, FAIL);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiRoarTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_WITHERING_ROAR : SPELL_WITHERING_ROAR_H) == CAST_OK)
+                {
                     m_uiRoarTimer = 10000;
+                }
             }
             else
+            {
                 m_uiRoarTimer -= uiDiff;
+            }
 
             if (m_uiImpaleTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_IMPALE : SPELL_IMPALE_H) == CAST_OK)
+                    {
                         m_uiImpaleTimer = urand(8000, 15000);
+                    }
                 }
             }
             else
+            {
                 m_uiImpaleTimer -= uiDiff;
+            }
 
             if (m_uiArcingSmashTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCING_SMASH) == CAST_OK)
+                {
                     m_uiArcingSmashTimer = urand(5000, 13000);
+                }
             }
             else
+            {
                 m_uiArcingSmashTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -162,7 +180,9 @@ struct spell_awaken_gorthok : public SpellScript
             if (InstanceData* pInstance = pCreatureTarget->GetInstanceData())
             {
                 if (Unit* pStarter = pCreatureTarget->GetMap()->GetUnit(ObjectGuid(pInstance->GetData64(DATA64_GORTHOK_EVENT_STARTER))))
+                {
                     pCreatureTarget->AI()->AttackStart(pStarter);
+                }
             }
 
             // always return true when we are handling this spell and effect
@@ -190,7 +210,9 @@ struct aura_awaken_subboss : public AuraScript
                 if (InstanceData* pInstance = pTarget->GetInstanceData())
                 {
                     if (Unit* pStarter = pTarget->GetMap()->GetUnit(ObjectGuid(pInstance->GetData64(DATA64_GORTHOK_EVENT_STARTER))))
+                    {
                         pTarget->AI()->AttackStart(pStarter);
+                    }
                 }
             }
         }
@@ -207,7 +229,9 @@ struct event_spell_gorthok : public MapEventScript
         if (InstanceData* pInstance = ((Creature*)pSource)->GetInstanceData())
         {
             if (pInstance->GetData(TYPE_GORTOK) == IN_PROGRESS || pInstance->GetData(TYPE_GORTOK) == DONE)
+            {
                 return false;
+            }
 
             pInstance->SetData(TYPE_GORTOK, IN_PROGRESS);
             pInstance->SetData64(DATA64_GORTHOK_EVENT_STARTER, pSource->GetObjectGuid().GetRawValue());

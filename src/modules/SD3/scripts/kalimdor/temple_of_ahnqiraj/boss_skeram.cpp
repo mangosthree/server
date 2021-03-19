@@ -295,11 +295,15 @@ struct boss_skeram : public CreatureScript
                 if (!m_creature->CanReachWithMeleeAttack(m_creature->getVictim()) || !m_creature->getVictim()->hasUnitState(UNIT_STAT_MELEE_ATTACKING))
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EARTH_SHOCK) == CAST_OK)
+                    {
                         m_uiEarthShockTimer = 1200;
+                    }
                 }
             }
             else
+            {
                 m_uiEarthShockTimer -= uiDiff;
+            }
 
             // Summon images at 75%, 50% and 25%
             if (!m_bIsImage && m_creature->GetHealthPercent() < m_fHpCheck)

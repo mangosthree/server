@@ -89,7 +89,9 @@ struct npc_web_wrap : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* /*sender*/, Unit* pVictim, uint32 /**/) override
         {
             if (eventType != AI_EVENT_CUSTOM_A)
+            {
                 return;
+            }
 
             if (pVictim)
             {
@@ -103,11 +105,17 @@ struct npc_web_wrap : public CreatureScript
                 // Switch the speed multiplier based on the distance from the web wrap
                 uint32 uiEffectMiscValue = 500;
                 if (fDist < 25.0f)
+                {
                     uiEffectMiscValue = 200;
+                }
                 else if (fDist < 50.0f)
+                {
                     uiEffectMiscValue = 300;
+                }
                 else if (fDist < 75.0f)
+                {
                     uiEffectMiscValue = 400;
+                }
 
                 // Note: normally we should use the Knockback effect to handle this, but because this doesn't behave as expected we'll just use Jump Movement
                 // pVictim->KnockBackFrom(m_creature, -fDist, uiEffectMiscValue * 0.1f);
@@ -127,7 +135,9 @@ struct npc_web_wrap : public CreatureScript
                 if (Player* pVictim = m_creature->GetMap()->GetPlayer(m_victimGuid))
                 {
                     if (pVictim->IsAlive())
+                    {
                         pVictim->RemoveAurasDueToSpell(SPELL_WEBWRAP);
+                    }
                 }
             }
         }
@@ -140,12 +150,16 @@ struct npc_web_wrap : public CreatureScript
                 if (m_uiWebWrapTimer <= uiDiff)
                 {
                     if (Player* pVictim = m_creature->GetMap()->GetPlayer(m_victimGuid))
+                    {
                         pVictim->CastSpell(pVictim, SPELL_WEBWRAP, true, nullptr, nullptr, m_creature->GetObjectGuid());
+                    }
 
                     m_uiWebWrapTimer = 0;
                 }
                 else
+                {
                     m_uiWebWrapTimer -= uiDiff;
+                }
             }
         }
     };
@@ -191,19 +205,25 @@ struct boss_maexxna : public CreatureScript
         void Aggro(Unit* /*pWho*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_MAEXXNA, IN_PROGRESS);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_MAEXXNA, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_MAEXXNA, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -218,7 +238,9 @@ struct boss_maexxna : public CreatureScript
             else if (pSummoned->GetEntry() == NPC_SPIDERLING)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     pSummoned->AI()->AttackStart(pTarget);
+                }
             }
         }
 
@@ -226,7 +248,9 @@ struct boss_maexxna : public CreatureScript
         {
             // If we can't select a player for web wrap then skip the summoning
             if (!m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, uint32(0), SELECT_FLAG_PLAYER))
+            {
                 return false;
+            }
 
             uint8 uiPos1 = urand(0, MAX_WEB_WRAP_POSITIONS - 1);
             m_creature->SummonCreature(NPC_WEB_WRAP, aWebWrapLoc[uiPos1][0], aWebWrapLoc[uiPos1][1], aWebWrapLoc[uiPos1][2], 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
@@ -245,24 +269,32 @@ struct boss_maexxna : public CreatureScript
         void SummonSpiderlings()
         {
             for (uint8 i = 0; i < MAX_SPIDERLINGS; ++i)
+            {
                 m_creature->SummonCreature(NPC_SPIDERLING, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Web Wrap
             if (m_uiWebWrapTimer < uiDiff)
             {
                 if (DoCastWebWrap())
+                {
                     DoScriptText(EMOTE_SPIN_WEB, m_creature);
+                }
 
                 m_uiWebWrapTimer = 40000;
             }
             else
+            {
                 m_uiWebWrapTimer -= uiDiff;
+            }
 
             // Web Spray
             if (m_uiWebSprayTimer < uiDiff)
@@ -274,25 +306,35 @@ struct boss_maexxna : public CreatureScript
                 }
             }
             else
+            {
                 m_uiWebSprayTimer -= uiDiff;
+            }
 
             // Poison Shock
             if (m_uiPoisonShockTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_POISONSHOCK : SPELL_POISONSHOCK_H) == CAST_OK)
+                {
                     m_uiPoisonShockTimer = urand(10000, 20000);
+                }
             }
             else
+            {
                 m_uiPoisonShockTimer -= uiDiff;
+            }
 
             // Necrotic Poison
             if (m_uiNecroticPoisonTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_NECROTICPOISON : SPELL_NECROTICPOISON_H) == CAST_OK)
+                {
                     m_uiNecroticPoisonTimer = urand(20000, 30000);
+                }
             }
             else
+            {
                 m_uiNecroticPoisonTimer -= uiDiff;
+            }
 
             // Summon Spiderling
             if (m_uiSummonSpiderlingTimer < uiDiff)
@@ -302,7 +344,9 @@ struct boss_maexxna : public CreatureScript
                 m_uiSummonSpiderlingTimer = 30000;
             }
             else
+            {
                 m_uiSummonSpiderlingTimer -= uiDiff;
+            }
 
             // Enrage if not already enraged and below 30%
             if (!m_bEnraged && m_creature->GetHealthPercent() < 30.0f)

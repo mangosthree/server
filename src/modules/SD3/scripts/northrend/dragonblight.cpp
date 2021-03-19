@@ -92,7 +92,9 @@ struct npc_destructive_ward : public CreatureScript
             if (m_bCanPulse)
             {
                 if (DoCastSpellIfCan(m_creature, m_uiStack > MAX_STACK ? SPELL_DESTRUCTIVE_BARRAGE : SPELL_DESTRUCTIVE_PULSE) == CAST_OK)
+                {
                     m_bCanPulse = false;
+                }
             }
 
             if (m_uiSummonTimer)
@@ -100,9 +102,13 @@ struct npc_destructive_ward : public CreatureScript
                 if (m_uiSummonTimer <= uiDiff)
                 {
                     if (m_bFirst)
+                    {
                         m_uiSummonTimer = 25000;
+                    }
                     else
+                    {
                         m_uiSummonTimer = 0;
+                    }
 
                     switch (m_uiStack)
                     {
@@ -113,13 +119,17 @@ struct npc_destructive_ward : public CreatureScript
                         DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOLDERING_CONSTRUCT, CAST_TRIGGERED);
 
                         if (m_bFirst)
+                        {
                             break;
+                        }
 
                         DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOLDERING_CONSTRUCT, CAST_TRIGGERED);
                         break;
                     case 2:
                         if (m_bFirst)
+                        {
                             break;
+                        }
 
                         DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOLDERING_SKELETON, CAST_TRIGGERED);
                         DoCastSpellIfCan(m_creature, SPELL_SUMMON_SMOLDERING_SKELETON, CAST_TRIGGERED);
@@ -130,11 +140,15 @@ struct npc_destructive_ward : public CreatureScript
                     m_bFirst = !m_bFirst;
                 }
                 else
+                {
                     m_uiSummonTimer -= uiDiff;
+                }
             }
 
             if (!m_uiPowerTimer)
+            {
                 return;
+            }
 
             if (m_uiPowerTimer <= uiDiff)
             {
@@ -162,7 +176,9 @@ struct npc_destructive_ward : public CreatureScript
                 }
             }
             else
+            {
                 m_uiPowerTimer -= uiDiff;
+            }
         }
     };
 

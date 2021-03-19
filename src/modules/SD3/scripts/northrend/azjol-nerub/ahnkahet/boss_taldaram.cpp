@@ -100,13 +100,17 @@ struct boss_taldaram : public CreatureScript
         {
             // Aggro is called after the boss vanish expires. There is no need to call this multiple times
             if (m_bIsFirstAggro)
+            {
                 return;
+            }
 
             DoScriptText(SAY_AGGRO, m_creature);
             m_bIsFirstAggro = true;
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_TALDARAM, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -124,20 +128,26 @@ struct boss_taldaram : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_TALDARAM, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_TALDARAM, FAIL);
+            }
         }
 
         void EnterEvadeMode() override
         {
             // Don't allow him to evade during vanish
             if (m_uiEmbraceTimer)
+            {
                 return;
+            }
 
             m_creature->RemoveAllAurasOnEvade();
             m_creature->DeleteThreatList();
@@ -146,7 +156,9 @@ struct boss_taldaram : public CreatureScript
 
             // should evade on the ground
             if (m_creature->IsAlive())
+            {
                 m_creature->GetMotionMaster()->MovePoint(1, aTaldaramLandingLoc[0], aTaldaramLandingLoc[1], aTaldaramLandingLoc[2]);
+            }
 
             m_creature->SetLootRecipient(nullptr);
 
@@ -156,7 +168,9 @@ struct boss_taldaram : public CreatureScript
         void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
         {
             if (uiMoveType != POINT_MOTION_TYPE)
+            {
                 return;
+            }
 
             // Adjust orientation
             if (uiPointId)
@@ -183,7 +197,9 @@ struct boss_taldaram : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* /*sender*/, Unit* invoker, uint32 /**/) override
         {
             if (eventType != AI_EVENT_CUSTOM_A || invoker != m_creature)
+            {
                 return;
+            }
 
             float fX, fY;
             uint8 uiIndex = m_bIsRegularMode ? urand(0, 2) : 0;
@@ -207,15 +223,21 @@ struct boss_taldaram : public CreatureScript
                 if (m_uiVisualTimer <= uiDiff)
                 {
                     if (m_pInstance)
+                    {
                         m_pInstance->SetData(TYPE_DO_TALDARAM, 0);
+                    }
                     m_uiVisualTimer = 0;
                 }
                 else
+                {
                     m_uiVisualTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Cast Embrace of the Vampyr after Vanish expires - note: because of the invisibility effect, the timers won't decrease during vanish
             if (m_uiEmbraceTimer)
@@ -232,7 +254,9 @@ struct boss_taldaram : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiEmbraceTimer -= uiDiff;
+                }
 
                 // do not use other abilities during vanish
                 return;
@@ -250,16 +274,22 @@ struct boss_taldaram : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiVanishTimer -= uiDiff;
+                }
             }
 
             if (m_uiBloodthirstTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BLOODTHIRST) == CAST_OK)
+                {
                     m_uiBloodthirstTimer = urand(20000, 25000);
+                }
             }
             else
+            {
                 m_uiBloodthirstTimer -= uiDiff;
+            }
 
             if (m_uiFlameOrbTimer < uiDiff)
             {
@@ -282,7 +312,9 @@ struct boss_taldaram : public CreatureScript
                 }
             }
             else
+            {
                 m_uiFlameOrbTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -304,7 +336,9 @@ struct spell_conjure_flame_sphere : public SpellScript
         if (uiSpellId == SPELL_CONJURE_FLAME_SPHERE && uiEffIndex == EFFECT_INDEX_0)
         {
             if (CreatureAI* pBossAI = pTarget->ToCreature()->AI())
+            {
                 pBossAI->SendAIEvent(AI_EVENT_CUSTOM_A, pTarget->ToCreature(), pTarget->ToCreature());
+            }
 
             // always return true when we are handling this spell and effect
             return true;
@@ -327,11 +361,15 @@ struct go_nerubian_device : public GameObjectScript
         ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 
         if (!pInstance)
+        {
             return false;
+        }
 
         // Don't allow players to use the devices if encounter is already finished or in progress (reload case)
         if (pInstance->GetData(TYPE_TALDARAM) == SPECIAL || pInstance->GetData(TYPE_TALDARAM) == DONE)
+        {
             return false;
+        }
 
         pInstance->SetData(TYPE_TALDARAM, SPECIAL);
         return false;

@@ -1,6 +1,6 @@
-﻿/*
+/*
  * Copyright (C) 2010-2012 Anathema Script Engine project <http://valkyrie-wow.com/>
- * Copyright (C) 2013-2019 MaNGOS <https://getmangos.eu/>
+ * Copyright (C) 2013-2021 MaNGOS <https://getmangos.eu/>
  */
 
 /* ScriptData
@@ -50,7 +50,9 @@ struct npc_onyxian_warder : public CreatureScript
         void UpdateAI(const uint32 uiDiff)
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (Cleave_Timer < uiDiff)
             {
@@ -58,7 +60,9 @@ struct npc_onyxian_warder : public CreatureScript
                 DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE);
             }
             else
+            {
                 Cleave_Timer -= uiDiff;
+            }
 
             if (Fire_Nova_Timer < uiDiff)
             {
@@ -66,7 +70,9 @@ struct npc_onyxian_warder : public CreatureScript
                 DoCastSpellIfCan(m_creature, SPELL_FIRE_NOVA);
             }
             else
+            {
                 Fire_Nova_Timer -= uiDiff;
+            }
 
             if (Flame_Lash_Timer < uiDiff)
             {
@@ -74,7 +80,9 @@ struct npc_onyxian_warder : public CreatureScript
                 DoCastSpellIfCan(m_creature->getVictim(), SPELL_FLAME_LASH);
             }
             else
+            {
                 Flame_Lash_Timer -= uiDiff;
+            }
 
             if (Pierce_Armor_Timer < uiDiff)
             {
@@ -82,7 +90,9 @@ struct npc_onyxian_warder : public CreatureScript
                 DoCastSpellIfCan(m_creature->getVictim(), SPELL_PIERCE_ARMOR);
             }
             else
+            {
                 Pierce_Armor_Timer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

@@ -66,32 +66,46 @@ struct is_utgarde_keep : public InstanceScript
             {
             case GO_BELLOW_1:
                 if (m_auiEncounter[TYPE_BELLOW_1] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_BELLOW_2:
                 if (m_auiEncounter[TYPE_BELLOW_2] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_BELLOW_3:
                 if (m_auiEncounter[TYPE_BELLOW_3] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_FORGEFIRE_1:
                 if (m_auiEncounter[TYPE_BELLOW_1] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_FORGEFIRE_2:
                 if (m_auiEncounter[TYPE_BELLOW_2] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_FORGEFIRE_3:
                 if (m_auiEncounter[TYPE_BELLOW_3] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_PORTCULLIS_EXIT_1:
             case GO_PORTCULLIS_EXIT_2:
                 if (m_auiEncounter[TYPE_INGVAR] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_PORTCULLIS_COMBAT:
                 break;
@@ -105,7 +119,9 @@ struct is_utgarde_keep : public InstanceScript
         void OnCreatureDeath(Creature* pCreature) override
         {
             if (pCreature->GetEntry() == NPC_FROST_TOMB)
+            {
                 m_bKelesethAchievFailed = true;
+            }
         }
 
         void SetData(uint32 uiType, uint32 uiData) override
@@ -114,7 +130,9 @@ struct is_utgarde_keep : public InstanceScript
             {
             case TYPE_KELESETH:
                 if (uiData == IN_PROGRESS)
+                {
                     m_bKelesethAchievFailed = false;
+                }
                 m_auiEncounter[uiType] = uiData;
                 break;
             case TYPE_SKARVALD_DALRONN:
@@ -122,7 +140,9 @@ struct is_utgarde_keep : public InstanceScript
                 break;
             case TYPE_INGVAR:
                 if (m_auiEncounter[uiType] == uiData)
+                {
                     return;
+                }
                 DoUseDoorOrButton(GO_PORTCULLIS_COMBAT);
                 if (uiData == DONE)
                 {
@@ -160,7 +180,9 @@ struct is_utgarde_keep : public InstanceScript
         uint32 GetData(uint32 uiType) const override
         {
             if (uiType < MAX_ENCOUNTER)
+            {
                 return m_auiEncounter[uiType];
+            }
 
             return 0;
         }
@@ -182,7 +204,9 @@ struct is_utgarde_keep : public InstanceScript
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     m_auiEncounter[i] = NOT_STARTED;
+                }
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;
@@ -191,7 +215,9 @@ struct is_utgarde_keep : public InstanceScript
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override
         {
             if (uiCriteriaId == ACHIEV_CRIT_ON_THE_ROCKS)
+            {
                 return !m_bKelesethAchievFailed;
+            }
 
             return false;
         }

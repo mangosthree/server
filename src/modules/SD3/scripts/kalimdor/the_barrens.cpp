@@ -463,7 +463,9 @@ struct npc_twiggy_flathead : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature && pInvoker->GetTypeId() == TYPEID_PLAYER)
+            {
                 CanStartEvent(pInvoker->ToPlayer());
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -959,10 +961,14 @@ struct npc_regthar_deathgate : public CreatureScript
                     }
                 }
                 if (m_uiWaitSummonTimerHorde < 1000)
+                {
                     m_uiWaitSummonTimerHorde = 1000;
+                }
 
                 if (urand(0, 1))
+                {
                     DoScriptText(SAY_DEFENDER, m_creature);
+                }
             }
 
             if (pKilled->GetEntry() == NPC_HORDE_AXE_THROWER) //find spawnpoint of died creature spawnpoint = position in creature list
@@ -978,10 +984,14 @@ struct npc_regthar_deathgate : public CreatureScript
                     }
                 }
                 if (m_uiWaitSummonTimerHorde < 1000)
+                {
                     m_uiWaitSummonTimerHorde = 1000;
+                }
 
                 if (urand(0, 1))
+                {
                     DoScriptText(SAY_DEFENDER, m_creature);
+                }
             }
 
             if (pKilled->GetEntry() == NPC_WARLORD_KROMZAR)
@@ -1028,7 +1038,9 @@ struct npc_regthar_deathgate : public CreatureScript
         void UpdateAI(const uint32 uiDiff)
         {
             if (m_uiPhaseCount <= 2 && m_uiEventTimer < uiDiff)
+            {
                 m_uiPhaseCount = 4;
+            }
 
             if (m_uiPhaseCount == 4)
             {
@@ -1071,17 +1083,25 @@ struct npc_regthar_deathgate : public CreatureScript
                         m_creature->SummonCreature(NPC_HORDE_DEFENDER, SpawnPointsHorde[lSpawnListHorde.front()].fX, SpawnPointsHorde[lSpawnListHorde.front()].fY, SpawnPointsHorde[lSpawnListHorde.front()].fZ, SpawnPointsHorde[lSpawnListHorde.front()].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
                         ++m_uiSummonCountHorde;
                         if (m_uiSummonCountHorde <= 4)
+                        {
                             m_uiWaitSummonTimerHorde = 1000;
+                        }
                         else
+                        {
                             m_uiWaitSummonTimerHorde = 12000;
+                        }
                         break;
                     case 1:
                         m_creature->SummonCreature(NPC_HORDE_AXE_THROWER, SpawnPointsHorde[lSpawnListHorde.front()].fX, SpawnPointsHorde[lSpawnListHorde.front()].fY, SpawnPointsHorde[lSpawnListHorde.front()].fZ, SpawnPointsHorde[lSpawnListHorde.front()].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
                         ++m_uiSummonCountHorde;
                         if (m_uiSummonCountHorde <= 4)
+                        {
                             m_uiWaitSummonTimerHorde = 1000;
+                        }
                         else
+                        {
                             m_uiWaitSummonTimerHorde = 12000;
+                        }
                         break;
                 }
 
@@ -1159,12 +1179,16 @@ struct npc_regthar_deathgate : public CreatureScript
     {
         pPlayer->PlayerTalkClass->ClearMenus();
         if (pCreature->IsQuestGiver())
+        {
             pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+        }
 
         if (npc_regthar_deathgateAI* pRegtharAI = dynamic_cast<npc_regthar_deathgateAI*>(pCreature->AI()))
         {
             if (!pRegtharAI->m_bEventStarted && (pPlayer->GetQuestStatus(QUEST_COUNTERATTACK) == QUEST_STATUS_INCOMPLETE))
-              pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Where is warlord Krom'zar?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Where is warlord Krom'zar?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
               //pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "督军克罗姆扎在哪里？", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
         }
         pPlayer->SEND_GOSSIP_MENU(2533, pCreature->GetObjectGuid());
@@ -1180,7 +1204,9 @@ struct npc_regthar_deathgate : public CreatureScript
             //pPlayer->CLOSE_GOSSIP_MENU();
             pPlayer->SEND_GOSSIP_MENU(2534, pCreature->GetObjectGuid());
             if (npc_regthar_deathgateAI* pRegtharAI = dynamic_cast<npc_regthar_deathgateAI*>(pCreature->AI()))
+            {
                 pRegtharAI->StartEvent(pPlayer->GetObjectGuid().GetRawValue());
+            }
         }
         return true;
     }
@@ -1408,7 +1434,9 @@ struct warlord_kromzar : public CreatureScript
         void UpdateEscortAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             DoMeleeAttackIfReady();
         }

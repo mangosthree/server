@@ -47,7 +47,9 @@ struct go_activation_crystal : public GameObjectScript
     bool OnUse(Player* pPlayer, GameObject* pGo) override
     {
         if (InstanceData* pInstance = pGo->GetInstanceData())
+        {
             pInstance->SetData64(DATA64_CRYSTAL_ACTIVATOR, pPlayer->GetObjectGuid().GetRawValue());
+        }
 
         return false;
     }
@@ -67,7 +69,9 @@ struct spell_destroy_door_seal : public SpellScript
         if (uiSpellId == SPELL_DESTROY_DOOR_SEAL && uiEffIndex == EFFECT_INDEX_0)
         {
             if (InstanceData* pInstance = pTarget->ToCreature()->GetInstanceData())
+            {
                 pInstance->SetData(TYPE_SEAL, SPECIAL);
+            }
 
             // always return true when we are handling this spell and effect
             return true;
@@ -119,7 +123,9 @@ struct npc_sinclari : public CreatureScript
         void WaypointReached(uint32 uiPointId) override
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             switch (uiPointId)
             {
@@ -152,7 +158,9 @@ struct npc_sinclari : public CreatureScript
         void JustRespawned() override
         {
             if (m_pInstance && m_pInstance->GetData(TYPE_MAIN) != DONE)
+            {
                 m_pInstance->SetData(TYPE_MAIN, NOT_STARTED);
+            }
 
             npc_escortAI::JustRespawned();                      // Needed, to reset escort state, waypoints, etc
         }
@@ -178,9 +186,13 @@ struct npc_sinclari : public CreatureScript
         if (InstanceData* pInstance = pCreature->GetInstanceData())
         {
             if (pInstance->GetData(TYPE_MAIN) != IN_PROGRESS)
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_INTRO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
             else
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELEPORT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+            }
         }
 
         pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_INTRO, pCreature->GetObjectGuid());
@@ -200,7 +212,9 @@ struct npc_sinclari : public CreatureScript
                 }
             }
             else
+            {
                 pPlayer->CLOSE_GOSSIP_MENU();
+            }
         }
 
         if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
@@ -214,11 +228,15 @@ struct npc_sinclari : public CreatureScript
                     pInstance->SetData(TYPE_MAIN, SPECIAL);
 
                     if (npc_sinclariAI* pEscortAI = dynamic_cast<npc_sinclariAI*>(pCreature->AI()))
+                    {
                         pEscortAI->Start();
+                    }
                 }
             }
             else
+            {
                 pPlayer->CLOSE_GOSSIP_MENU();
+            }
         }
 
         if (uiAction == GOSSIP_ACTION_INFO_DEF + 3)
@@ -269,7 +287,9 @@ struct npc_prison_event_controller : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* sender, Unit* invoker, uint32 data)
         {
             if (eventType == AI_EVENT_CUSTOM_A && sender == invoker)
+            {
                 DoSetCurrentTrashPortal(data);
+            }
         }
 
         void DoSetCurrentTrashPortal(uint8 uiPortalId) { m_uiCurrentTrashPortalId = uiPortalId; }
@@ -296,7 +316,9 @@ struct npc_prison_event_controller : public CreatureScript
                 break;
             case NPC_AZURE_SABOTEUR:
                 if (!m_pInstance)
+                {
                     return;
+                }
                 m_currentSaboteurGuid = pSummoned->GetObjectGuid();
                 m_pInstance->SetData64(DATA64_SABOTEUR, pSummoned->GetObjectGuid().GetRawValue());
                 break;
@@ -306,7 +328,9 @@ struct npc_prison_event_controller : public CreatureScript
         void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override
         {
             if (uiMotionType != POINT_MOTION_TYPE && !uiPointId)
+            {
                 return;
+            }
 
             if (pSummoned->GetEntry() == NPC_AZURE_SABOTEUR)
             {
@@ -317,7 +341,9 @@ struct npc_prison_event_controller : public CreatureScript
             }
             // For other summons, cast destroy seal when they reach the door
             else
+            {
                 pSummoned->CastSpell(pSummoned, SPELL_DESTROY_DOOR_SEAL, false);
+            }
         }
 
         void SummonedCreatureJustDied(Creature* pSummoned) override
@@ -329,13 +355,17 @@ struct npc_prison_event_controller : public CreatureScript
             case NPC_AZURE_SORCEROR:
             case NPC_AZURE_STALKER:
                 if (m_sTrashPackSet.find(pSummoned->GetObjectGuid()) != m_sTrashPackSet.end())
+                {
                     m_sTrashPackSet.erase(pSummoned->GetObjectGuid());
+                }
 
                 if (m_sTrashPackSet.empty())
                 {
                     // no need if a new portal was made while this was in progress
                     if (m_uiCurrentTrashPortalId == m_pInstance->GetData(TYPE_DATA_PORTAL_NUMBER))
+                    {
                         m_pInstance->SetData(TYPE_PORTAL, DONE);
+                    }
                 }
                 break;
             }
@@ -349,7 +379,9 @@ struct npc_prison_event_controller : public CreatureScript
                 {
                     Creature* pSaboteur = m_creature->GetMap()->GetCreature(m_currentSaboteurGuid);
                     if (!pSaboteur)
+                    {
                         return;
+                    }
 
                     switch (m_uiSaboteurPhase)
                     {
@@ -363,7 +395,9 @@ struct npc_prison_event_controller : public CreatureScript
                         break;
                     case 2:
                         if (m_pInstance)
+                        {
                             m_pInstance->SetData(TYPE_DO_RELEASE_BOSS, 1);
+                        }
                         pSaboteur->CastSpell(pSaboteur, SPELL_SIMPLE_TELEPORT, false);
                         pSaboteur->ForcedDespawn(1000);
                         m_uiSaboteurTimer = 0;
@@ -372,7 +406,9 @@ struct npc_prison_event_controller : public CreatureScript
                     ++m_uiSaboteurPhase;
                 }
                 else
+                {
                     m_uiSaboteurTimer -= uiDiff;
+                }
             }
         }
     };
@@ -417,13 +453,17 @@ struct npc_teleportation_portal : public CreatureScript
             m_uiCyanigosaMoveTimer = 0;
 
             if (m_pInstance)
+            {
                 m_uiMyPortalNumber = m_pInstance->GetData(TYPE_DATA_PORTAL_NUMBER);
+            }
         }
 
         void ReceiveAIEvent(AIEventType eventType, Creature* /*sender*/, Unit* /*invoker*/, uint32 /**/)
         {
             if (!m_pInstance || eventType != AI_EVENT_CUSTOM_A)
+            {
                 return;
+            }
 
             // Portal event used for intro
             if (m_creature->GetEntry() == NPC_PORTAL_INTRO)
@@ -440,16 +480,22 @@ struct npc_teleportation_portal : public CreatureScript
                 {
                     // Summon a guardian keeper or Cyanigosa
                     if (m_uiMyPortalNumber == 18)
+                    {
                         m_creature->SummonCreature(NPC_CYANIGOSA, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
+                    }
                     else
+                    {
                         m_creature->SummonCreature(m_pInstance->GetData(TYPE_DATA_PORTAL_ELITE), 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
+                    }
                 }
                 else if (m_creature->GetEntry() == NPC_PORTAL_ELITE)
                 {
                     // Allow the event controller to summon the mobs, for better movement handling
                     Creature* pController = m_pInstance->GetSingleCreatureFromStorage(NPC_EVENT_CONTROLLER);
                     if (!pController)
+                    {
                         return;
+                    }
 
                     // Summon a squad or a saboteur
                     if (bool(m_pInstance->GetData(TYPE_DATA_IS_TRASH_PORTAL)))
@@ -466,17 +512,23 @@ struct npc_teleportation_portal : public CreatureScript
 
                         // If this is a trash portal, set the current number in the
                         if (CreatureAI* pControllerAI = pController->AI())
+                        {
                             pControllerAI->ReceiveAIEvent(AI_EVENT_CUSTOM_A, m_creature, m_creature, m_uiMyPortalNumber);
+                        }
                     }
                     else
+                    {
                         pController->SummonCreature(NPC_AZURE_SABOTEUR, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
+                    }
 
                     m_creature->ForcedDespawn(5000);
                 }
 
                 // Set special data for all the portals, except the last one
                 if (m_pInstance && m_uiMyPortalNumber != 18)
+                {
                     m_pInstance->SetData(TYPE_PORTAL, SPECIAL);
+                }
 
                 m_bIntro = false;
             }
@@ -484,7 +536,9 @@ struct npc_teleportation_portal : public CreatureScript
             {
                 // Allow the normal mobs to be summoned by the event controller
                 if (Creature* pController = m_pInstance->GetSingleCreatureFromStorage(NPC_EVENT_CONTROLLER))
+                {
                     pController->SummonCreature(m_pInstance->GetData(TYPE_DATA_GET_MOB_NORMAL), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+                }
             }
         }
 
@@ -525,7 +579,9 @@ struct npc_teleportation_portal : public CreatureScript
                 m_creature->ForcedDespawn(3000);
                 // no need if a new portal was made while this was in progress
                 if (m_pInstance && m_uiMyPortalNumber == m_pInstance->GetData(TYPE_DATA_PORTAL_NUMBER))
+                {
                     m_pInstance->SetData(TYPE_PORTAL, DONE);
+                }
                 break;
             }
         }
@@ -549,12 +605,16 @@ struct npc_teleportation_portal : public CreatureScript
                 if (m_uiCyanigosaMoveTimer <= uiDiff)
                 {
                     if (Creature* pCyanigosa = m_creature->GetMap()->GetCreature(m_cyanigosaGuid))
+                    {
                         pCyanigosa->GetMotionMaster()->MoveJump(afPortalLocation[8].fX, afPortalLocation[8].fY, afPortalLocation[8].fZ, pCyanigosa->GetSpeed(MOVE_RUN) * 2, 10.0f);
+                    }
 
                     m_uiCyanigosaMoveTimer = 0;
                 }
                 else
+                {
                     m_uiCyanigosaMoveTimer -= uiDiff;
+                }
             }
         }
     };
@@ -575,7 +635,9 @@ struct spell_vh_portal_periodic : public SpellScript
         if (uiSpellId == SPELL_PORTAL_PERIODIC && uiEffIndex == EFFECT_INDEX_0)
         {
             if (CreatureAI* pPortalAI = pTarget->ToCreature()->AI())
+            {
                 pPortalAI->ReceiveAIEvent(AI_EVENT_CUSTOM_A, (Creature*)nullptr, (Unit*)nullptr, 0);
+            }
 
             // always return true when we are handling this spell and effect
             return true;

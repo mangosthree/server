@@ -80,7 +80,9 @@ struct npc_lazy_peon : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature)
+            {
                 StartLumbering(pInvoker);
+            }
         }
 
         // Can also be self invoked for random working

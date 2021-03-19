@@ -147,7 +147,9 @@ struct boss_bjarngrim : public CreatureScript
             {
                 // Set the achiev in progress
                 if (m_creature->HasAura(SPELL_TEMPORARY_ELECTRICAL_CHARGE))
+                {
                     m_pInstance->SetData(TYPE_BJARNGRIM, SPECIAL);
+                }
 
                 m_pInstance->SetData(TYPE_BJARNGRIM, IN_PROGRESS);
             }
@@ -168,32 +170,42 @@ struct boss_bjarngrim : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_BJARNGRIM, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_BJARNGRIM, FAIL);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             // Return since we have no target
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Change stance
             if (m_uiChangeStanceTimer < uiDiff)
             {
                 // wait for current spell to finish before change stance
                 if (m_creature->IsNonMeleeSpellCasted(false))
+                {
                     return;
+                }
 
                 int uiTempStance = rand() % (3 - 1);
 
                 if (uiTempStance >= m_uiStance)
+                {
                     ++uiTempStance;
+                }
 
                 m_uiStance = uiTempStance;
 
@@ -220,7 +232,9 @@ struct boss_bjarngrim : public CreatureScript
                 return;
             }
             else
+            {
                 m_uiChangeStanceTimer -= uiDiff;
+            }
 
             switch (m_uiStance)
             {
@@ -228,34 +242,50 @@ struct boss_bjarngrim : public CreatureScript
                 if (m_uiReflectionTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SPELL_REFLECTION) == CAST_OK)
+                    {
                         m_uiReflectionTimer = urand(8000, 9000);
+                    }
                 }
                 else
+                {
                     m_uiReflectionTimer -= uiDiff;
+                }
 
                 if (m_uiKnockAwayTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_KNOCK_AWAY) == CAST_OK)
+                    {
                         m_uiKnockAwayTimer = urand(20000, 21000);
+                    }
                 }
                 else
+                {
                     m_uiKnockAwayTimer -= uiDiff;
+                }
 
                 if (m_uiPummelTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PUMMEL) == CAST_OK)
+                    {
                         m_uiPummelTimer = urand(10000, 11000);
+                    }
                 }
                 else
+                {
                     m_uiPummelTimer -= uiDiff;
+                }
 
                 if (m_uiIronformTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_IRONFORM) == CAST_OK)
+                    {
                         m_uiIronformTimer = urand(25000, 26000);
+                    }
                 }
                 else
+                {
                     m_uiIronformTimer -= uiDiff;
+                }
 
                 break;
             case STANCE_BERSERKER:
@@ -263,44 +293,64 @@ struct boss_bjarngrim : public CreatureScript
                 {
                     // not much point is this, better random target and more often?
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_INTERCEPT) == CAST_OK)
+                    {
                         m_uiInterceptTimer = urand(45000, 46000);
+                    }
                 }
                 else
+                {
                     m_uiInterceptTimer -= uiDiff;
+                }
 
                 if (m_uiWhirlwindTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_WHIRLWIND) == CAST_OK)
+                    {
                         m_uiWhirlwindTimer = urand(10000, 11000);
+                    }
                 }
                 else
+                {
                     m_uiWhirlwindTimer -= uiDiff;
+                }
 
                 if (m_uiCleaveTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    {
                         m_uiCleaveTimer = urand(8000, 9000);
+                    }
                 }
                 else
+                {
                     m_uiCleaveTimer -= uiDiff;
+                }
 
                 break;
             case STANCE_BATTLE:
                 if (m_uiMortalStrikeTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
+                    {
                         m_uiMortalStrikeTimer = urand(20000, 21000);
+                    }
                 }
                 else
+                {
                     m_uiMortalStrikeTimer -= uiDiff;
+                }
 
                 if (m_uiSlamTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SLAM) == CAST_OK)
+                    {
                         m_uiSlamTimer = urand(15000, 16000);
+                    }
                 }
                 else
+                {
                     m_uiSlamTimer -= uiDiff;
+                }
 
                 break;
             }
@@ -347,15 +397,21 @@ struct mob_stormforged_lieutenant : public CreatureScript
         {
             // Return since we have no target
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiArcWeldTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARC_WELD) == CAST_OK)
+                {
                     m_uiArcWeldTimer = urand(20000, 21000);
+                }
             }
             else
+            {
                 m_uiArcWeldTimer -= uiDiff;
+            }
 
             if (m_uiRenewSteelTimer < uiDiff)
             {
@@ -364,13 +420,17 @@ struct mob_stormforged_lieutenant : public CreatureScript
                     if (Creature* pBjarngrim = m_pInstance->GetSingleCreatureFromStorage(NPC_BJARNGRIM))
                     {
                         if (pBjarngrim->IsAlive())
+                        {
                             DoCastSpellIfCan(pBjarngrim, m_bIsRegularMode ? SPELL_RENEW_STEEL_N : SPELL_RENEW_STEEL_H);
+                        }
                     }
                 }
                 m_uiRenewSteelTimer = urand(10000, 14000);
             }
             else
+            {
                 m_uiRenewSteelTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

@@ -165,7 +165,9 @@ struct boss_thaddius : public CreatureScript
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             DoScriptText(SAY_SLAY, m_creature);
         }
@@ -183,28 +185,40 @@ struct boss_thaddius : public CreatureScript
                 Creature* pStalagg = m_pInstance->GetSingleCreatureFromStorage(NPC_STALAGG);
 
                 if (pFeugen)
+                {
                     pFeugen->ForcedDespawn();
+                }
                 if (pStalagg)
+                {
                     pStalagg->ForcedDespawn();
+                }
             }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Berserk
             if (m_uiBerserkTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BESERK) == CAST_OK)                  // allow combat movement?
+                {
                     m_uiBerserkTimer = 10 * MINUTE * IN_MILLISECONDS;
+                }
             }
             else
+            {
                 m_uiBerserkTimer -= uiDiff;
+            }
 
             // Polarity Shift
             if (m_uiPolarityShiftTimer < uiDiff)
@@ -217,17 +231,23 @@ struct boss_thaddius : public CreatureScript
                 }
             }
             else
+            {
                 m_uiPolarityShiftTimer -= uiDiff;
+            }
 
             // Chain Lightning
             if (m_uiChainLightningTimer < uiDiff)
             {
                 Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
                 if (pTarget && DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
+                {
                     m_uiChainLightningTimer = 15 * IN_MILLISECONDS;
+                }
             }
             else
+            {
                 m_uiChainLightningTimer -= uiDiff;
+            }
 
             // Ball Lightning if target not in melee range
             // TODO: Verify, likely that the boss should attack any enemy in melee range before starting to cast
@@ -236,13 +256,19 @@ struct boss_thaddius : public CreatureScript
                 if (m_uiBallLightningTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BALL_LIGHTNING) == CAST_OK)
+                    {
                         m_uiBallLightningTimer = 1 * IN_MILLISECONDS;
+                    }
                 }
                 else
+                {
                     m_uiBallLightningTimer -= uiDiff;
+                }
             }
             else
+            {
                 DoMeleeAttackIfReady();
+            }
         }
     };
 
@@ -264,7 +290,9 @@ struct spell_shock_overload : public SpellScript
         {
             // Only do something to Thaddius, and on the first hit.
             if (pCreatureTarget->GetEntry() != NPC_THADDIUS || !pCreatureTarget->HasAura(SPELL_THADIUS_SPAWN))
+            {
                 return true;
+            }
             // remove Stun and then Cast
             pCreatureTarget->RemoveAurasDueToSpell(SPELL_THADIUS_SPAWN);
             pCreatureTarget->CastSpell(pCreatureTarget, SPELL_THADIUS_LIGHTNING_VISUAL, false);
@@ -287,7 +315,9 @@ struct spell_thad_lightning_visual : public SpellScript
             if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreatureTarget->GetInstanceData())
             {
                 if (Player* pPlayer = pInstance->GetPlayerInMap(true, false))
+                {
                     pCreatureTarget->AI()->AttackStart(pPlayer);
+                }
             }
             return true;
         }
@@ -341,19 +371,25 @@ struct npc_tesla_coil : public CreatureScript
         {
             // Check, if instance_ script failed or encounter finished
             if (!m_pInstance || m_pInstance->GetData(TYPE_THADDIUS) == DONE)
+            {
                 return true;
+            }
 
             GameObject* pNoxTeslaFeugen = m_pInstance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_FEUGEN);
             GameObject* pNoxTeslaStalagg = m_pInstance->GetSingleGameObjectFromStorage(GO_CONS_NOX_TESLA_STALAGG);
 
             // Try again, till Tesla GOs are spawned
             if (!pNoxTeslaFeugen || !pNoxTeslaStalagg)
+            {
                 return false;
+            }
 
             m_bToFeugen = m_creature->GetDistanceOrder(pNoxTeslaFeugen, pNoxTeslaStalagg);
 
             if (DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN) == CAST_OK)
+            {
                 return true;
+            }
 
             return false;
         }
@@ -379,7 +415,9 @@ struct npc_tesla_coil : public CreatureScript
             {
                 // Only apply chain to own add
                 if ((uiEntry == NPC_FEUGEN && !m_bToFeugen) || (uiEntry == NPC_STALAGG && m_bToFeugen))
+                {
                     return;
+                }
 
                 m_bReapply = true;                              // Reapply Chains on next tick
             }
@@ -390,7 +428,9 @@ struct npc_tesla_coil : public CreatureScript
                 GameObject* pGo = m_pInstance->GetSingleGameObjectFromStorage(m_bToFeugen ? GO_CONS_NOX_TESLA_FEUGEN : GO_CONS_NOX_TESLA_STALAGG);
 
                 if (pGo && pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON && pGo->getLootState() == GO_ACTIVATED)
+                {
                     pGo->ResetDoorOrButton();
+                }
 
                 DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_CHAIN : SPELL_STALAGG_CHAIN);
             }
@@ -406,19 +446,27 @@ struct npc_tesla_coil : public CreatureScript
             m_creature->SelectHostileTarget();
 
             if (!m_uiOverloadTimer && !m_uiSetupTimer && !m_bReapply)
+            {
                 return;                                         // Nothing to do this tick
+            }
 
             if (m_uiSetupTimer)
             {
                 if (m_uiSetupTimer <= uiDiff)
                 {
                     if (SetupChain())
+                    {
                         m_uiSetupTimer = 0;
+                    }
                     else
+                    {
                         m_uiSetupTimer = 5 * IN_MILLISECONDS;
+                    }
                 }
                 else
+                {
                     m_uiSetupTimer -= uiDiff;
+                }
             }
 
             if (m_uiOverloadTimer)
@@ -432,11 +480,15 @@ struct npc_tesla_coil : public CreatureScript
                     m_pInstance->DoUseDoorOrButton(m_bToFeugen ? GO_CONS_NOX_TESLA_FEUGEN : GO_CONS_NOX_TESLA_STALAGG);
                 }
                 else
+                {
                     m_uiOverloadTimer -= uiDiff;
+                }
             }
 
             if (m_bReapply)
+            {
                 ReApplyChain(0);
+            }
         }
     };
 
@@ -497,14 +549,18 @@ struct boss_thaddiusAddsAI : public ScriptedAI
     void Aggro(Unit* pWho) override
     {
         if (!m_pInstance)
+        {
             return;
+        }
 
         m_pInstance->SetData(TYPE_THADDIUS, IN_PROGRESS);
 
         if (Creature* pOtherAdd = GetOtherAdd())
         {
             if (!pOtherAdd->IsInCombat())
+            {
                 pOtherAdd->AI()->AttackStart(pWho);
+            }
         }
     }
 
@@ -513,7 +569,9 @@ struct boss_thaddiusAddsAI : public ScriptedAI
         Reset();                                            // Needed to reset the flags properly
 
         if (!m_pInstance)
+        {
             return;
+        }
 
         m_pInstance->SetData(TYPE_DO_THAD_CHAIN, m_creature->GetEntry());
     }
@@ -521,7 +579,9 @@ struct boss_thaddiusAddsAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (!m_pInstance)
+        {
             return;
+        }
 
         if (Creature* pOther = GetOtherAdd())
         {
@@ -537,7 +597,9 @@ struct boss_thaddiusAddsAI : public ScriptedAI
 
         // Reapply Chains if needed
         if (!m_creature->HasAura(SPELL_FEUGEN_CHAIN) && !m_creature->HasAura(SPELL_STALAGG_CHAIN))
+        {
             JustRespawned();
+        }
 
         m_pInstance->SetData(TYPE_THADDIUS, FAIL);
     }
@@ -565,7 +627,9 @@ struct boss_thaddiusAddsAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (m_bBothDead)                                    // This is the case while fighting Thaddius
+        {
             return;
+        }
 
         if (m_bFakeDeath)
         {
@@ -576,7 +640,9 @@ struct boss_thaddiusAddsAI : public ScriptedAI
                     if (boss_thaddiusAddsAI* pOtherAI = dynamic_cast<boss_thaddiusAddsAI*>(pOther->AI()))
                     {
                         if (!pOtherAI->IsCountingDead())    // Raid was to slow to kill the second add
+                        {
                             Revive();
+                        }
                         else
                         {
                             m_bBothDead = true;             // Now both adds are counting dead
@@ -588,12 +654,16 @@ struct boss_thaddiusAddsAI : public ScriptedAI
                 }
             }
             else
+            {
                 m_uiReviveTimer -= uiDiff;
+            }
             return;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         if (m_uiHoldTimer)                                  // A short timer preventing combat movement after revive
         {
@@ -604,17 +674,23 @@ struct boss_thaddiusAddsAI : public ScriptedAI
                 m_uiHoldTimer = 0;
             }
             else
+            {
                 m_uiHoldTimer -= uiDiff;
+            }
         }
 
         /*  Doesn't happen in wotlk version any more
         if (m_uiWarStompTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_WARSTOMP) == CAST_OK)
+            {
                 m_uiWarStompTimer = urand(8*IN_MILLISECONDS, 10*IN_MILLISECONDS);
+            }
         }
         else
-            m_uiWarStompTimer -= uiDiff;*/
+        {
+            m_uiWarStompTimer -= uiDiff;
+        } */
 
         UpdateAddAI(uiDiff);                    // For Add Specific Abilities
 
@@ -624,7 +700,9 @@ struct boss_thaddiusAddsAI : public ScriptedAI
     void DamageTaken(Unit* pKiller, uint32& uiDamage) override
     {
         if (uiDamage < m_creature->GetHealth())
+        {
             return;
+        }
 
         // Prevent glitch if in fake death
         if (m_bFakeDeath)
@@ -689,7 +767,9 @@ struct boss_stalagg : public CreatureScript
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            {
                 DoScriptText(SAY_STAL_SLAY, m_creature);
+            }
         }
 
         void UpdateAddAI(const uint32 uiDiff)
@@ -697,10 +777,14 @@ struct boss_stalagg : public CreatureScript
             if (m_uiPowerSurgeTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_POWERSURGE : SPELL_POWERSURGE_H) == CAST_OK)
+                {
                     m_uiPowerSurgeTimer = urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
+                }
             }
             else
+            {
                 m_uiPowerSurgeTimer -= uiDiff;
+            }
         }
     };
 
@@ -747,7 +831,9 @@ struct boss_feugen : public CreatureScript
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            {
                 DoScriptText(SAY_FEUG_SLAY, m_creature);
+            }
         }
 
         void UpdateAddAI(const uint32 uiDiff)
@@ -755,10 +841,14 @@ struct boss_feugen : public CreatureScript
             if (m_uiStaticFieldTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_STATIC_FIELD : SPELL_STATIC_FIELD_H) == CAST_OK)
+                {
                     m_uiStaticFieldTimer = urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
+                }
             }
             else
+            {
                 m_uiStaticFieldTimer -= uiDiff;
+            }
         }
     };
 

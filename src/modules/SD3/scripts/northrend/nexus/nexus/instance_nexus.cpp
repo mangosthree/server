@@ -39,7 +39,9 @@ struct is_nexus : public InstanceScript
             Initialize();
 
             for (uint8 i = 0; i < MAX_SPECIAL_ACHIEV_CRITS; ++i)
+            {
                 m_abAchievCriteria[i] = false;
+            }
         }
 
         void Initialize() override
@@ -53,15 +55,21 @@ struct is_nexus : public InstanceScript
             {
             case GO_CONTAINMENT_SPHERE_TELESTRA:
                 if (m_auiEncounter[TYPE_TELESTRA] == DONE)
+                {
                     pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                }
                 break;
             case GO_CONTAINMENT_SPHERE_ANOMALUS:
                 if (m_auiEncounter[TYPE_ANOMALUS] == DONE)
+                {
                     pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                }
                 break;
             case GO_CONTAINMENT_SPHERE_ORMOROK:
                 if (m_auiEncounter[TYPE_ORMOROK] == DONE)
+                {
                     pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                }
                 break;
 
             default:
@@ -84,7 +92,9 @@ struct is_nexus : public InstanceScript
         uint32 GetData(uint32 uiType) const override
         {
             if (uiType < MAX_ENCOUNTER)
+            {
                 return m_auiEncounter[uiType];
+            }
 
             return 0;
         }
@@ -96,31 +106,45 @@ struct is_nexus : public InstanceScript
             case TYPE_TELESTRA:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == IN_PROGRESS)
+                {
                     SetSpecialAchievementCriteria(TYPE_ACHIEV_SPLIT_PERSONALITY, true);
+                }
                 if (uiData == DONE)
+                {
                     DoToggleGameObjectFlags(GO_CONTAINMENT_SPHERE_TELESTRA, GO_FLAG_NO_INTERACT, false);
+                }
                 break;
             case TYPE_ANOMALUS:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == IN_PROGRESS)
+                {
                     SetSpecialAchievementCriteria(TYPE_ACHIEV_CHAOS_THEORY, true);
+                }
                 if (uiData == DONE)
+                {
                     DoToggleGameObjectFlags(GO_CONTAINMENT_SPHERE_ANOMALUS, GO_FLAG_NO_INTERACT, false);
+                }
                 break;
             case TYPE_ORMOROK:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == DONE)
+                {
                     DoToggleGameObjectFlags(GO_CONTAINMENT_SPHERE_ORMOROK, GO_FLAG_NO_INTERACT, false);
+                }
                 break;
             case TYPE_KERISTRASZA:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == IN_PROGRESS)
+                {
                     m_sIntenseColdFailPlayers.clear();
+                }
                 break;
             case TYPE_INTENSE_COLD_FAILED:
                 // Insert the players who fail the achiev and haven't been already inserted in the set
                 if (m_sIntenseColdFailPlayers.find(uiData) == m_sIntenseColdFailPlayers.end())
+                {
                     m_sIntenseColdFailPlayers.insert(uiData);
+                }
                 break;
             case TYPE_ACHIEV_SPLIT_PERSONALITY:
             case TYPE_ACHIEV_CHAOS_THEORY:
@@ -193,7 +217,9 @@ struct is_nexus : public InstanceScript
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     m_auiEncounter[i] = NOT_STARTED;
+                }
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;
@@ -203,7 +229,9 @@ struct is_nexus : public InstanceScript
         void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet)
         {
             if (uiType < MAX_SPECIAL_ACHIEV_CRITS)
+            {
                 m_abAchievCriteria[uiType] = bIsMet;
+            }
         }
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
@@ -229,7 +257,9 @@ struct go_containment_sphere : public GameObjectScript
         ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
 
         if (!pInstance)
+        {
             return false;
+        }
 
         switch (pGo->GetEntry())
         {

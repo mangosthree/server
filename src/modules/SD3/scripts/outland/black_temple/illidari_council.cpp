@@ -391,10 +391,14 @@ struct boss_illidari_councilAI : public ScriptedAI
             // Note: council respawn handled by creature linking
 
             if (Creature* pVoiceTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_COUNCIL_VOICE))
-            { pVoiceTrigger->AI()->EnterEvadeMode(); }
+            {
+                pVoiceTrigger->AI()->EnterEvadeMode();
+            }
 
             if (Creature* pController = m_pInstance->GetSingleCreatureFromStorage(NPC_ILLIDARI_COUNCIL))
-            { pController->AI()->EnterEvadeMode(); }
+            {
+                pController->AI()->EnterEvadeMode();
+            }
 
             m_pInstance->SetData(TYPE_COUNCIL, FAIL);
         }

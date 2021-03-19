@@ -386,7 +386,9 @@ struct npc_kroshius : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature && pInvoker->GetTypeId() == TYPEID_PLAYER)
+            {
                 DoRevive(pInvoker->ToPlayer());
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -528,7 +530,9 @@ struct npc_captured_arkonarin : public CreatureScript
         void Reset() override
         {
             if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            {
                 m_bCanAttack = false;
+            }
 
             m_uiMortalStrikeTimer = urand(5000, 7000);
             m_uiCleaveTimer = urand(1000, 4000);
@@ -537,15 +541,21 @@ struct npc_captured_arkonarin : public CreatureScript
         void Aggro(Unit* pWho) override
         {
             if (pWho->GetEntry() == NPC_SPIRT_TREY)
+            {
                 DoScriptText(SAY_TREY_ATTACK, m_creature);
+            }
             else if (roll_chance_i(25))
+            {
                 DoScriptText(SAY_AGGRO, m_creature, pWho);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_JAEDENAR_LEGIONNAIRE)
+            {
                 pSummoned->AI()->AttackStart(m_creature);
+            }
             else if (pSummoned->GetEntry() == NPC_SPIRT_TREY)
             {
 #if defined(TBC) || defined(WOTLK)
@@ -564,7 +574,9 @@ struct npc_captured_arkonarin : public CreatureScript
                 Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
 
                 if (GameObject* pCage = GetClosestGameObjectWithEntry(m_creature, GO_ARKONARIN_CAGE, 5.0f))
+                {
                     pCage->Use(m_creature);
+                }
 #if defined(CLASSIC)
                 m_creature->RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 m_creature->RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
@@ -578,7 +590,9 @@ struct npc_captured_arkonarin : public CreatureScript
             {
             case 0:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     DoScriptText(SAY_ESCORT_START, m_creature, pPlayer);
+                }
                 break;
             case 14:
                 DoScriptText(SAY_FIRST_STOP, m_creature);
@@ -594,7 +608,9 @@ struct npc_captured_arkonarin : public CreatureScript
                 break;
             case 38:
                 if (GameObject* pChest = GetClosestGameObjectWithEntry(m_creature, GO_ARKONARIN_CHEST, 5.0f))
+                {
                     pChest->Use(m_creature);
+                }
                 m_creature->HandleEmote(EMOTE_ONESHOT_KNEEL);
                 break;
             case 39:
@@ -602,7 +618,9 @@ struct npc_captured_arkonarin : public CreatureScript
                 break;
             case 40:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     m_creature->SetFacingToObject(pPlayer);
+                }
                 m_bCanAttack = true;
                 DoScriptText(SAY_FOUND_EQUIPMENT, m_creature);
                 // ToDo: change equipment!
@@ -668,16 +686,22 @@ struct npc_captured_arkonarin : public CreatureScript
                 break;
             case 107:
                 if (Creature* pTrey = m_creature->GetMap()->GetCreature(m_treyGuid))
+                {
                     AttackStart(pTrey);
+                }
                 break;
             case 108:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     m_creature->SetFacingToObject(pPlayer);
+                }
                 DoScriptText(SAY_ESCORT_COMPLETE, m_creature);
                 break;
             case 109:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     pPlayer->GroupEventHappens(QUEST_ID_RESCUE_JAEDENAR, m_creature);
+                }
                 SetRun();
                 break;
             }
@@ -686,25 +710,35 @@ struct npc_captured_arkonarin : public CreatureScript
         void UpdateEscortAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_bCanAttack)
             {
                 if (m_uiMortalStrikeTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
+                    {
                         m_uiMortalStrikeTimer = urand(7000, 10000);
+                    }
                 }
                 else
+                {
                     m_uiMortalStrikeTimer -= uiDiff;
+                }
 
                 if (m_uiCleaveTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    {
                         m_uiCleaveTimer = urand(3000, 6000);
+                    }
                 }
                 else
+                {
                     m_uiCleaveTimer -= uiDiff;
+                }
             }
 
             DoMeleeAttackIfReady();
@@ -719,7 +753,9 @@ struct npc_captured_arkonarin : public CreatureScript
     bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
     {
         if (pQuest->GetQuestId() == QUEST_ID_RESCUE_JAEDENAR)
+        {
             pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+        }
 
         return true;
     }
@@ -796,7 +832,9 @@ struct npc_arei : public CreatureScript
             else if (pWho->GetEntry() == NPC_TOXIC_HORROR && !m_bAggroHorror)
             {
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     DoScriptText(SAY_ATTACK_TOXIC_HORROR, m_creature, pPlayer);
+                }
                 m_bAggroHorror = true;
             }
         }
@@ -822,7 +860,9 @@ struct npc_arei : public CreatureScript
                 m_lSummonsGuids.remove(pSummoned->GetObjectGuid());
 
                 if (m_lSummonsGuids.empty())
+                {
                     StartNextDialogueText(SAY_CLEAR_PATH);
+                }
             }
         }
 
@@ -852,7 +892,9 @@ struct npc_arei : public CreatureScript
         Creature* GetSpeakerByEntry(uint32 uiEntry) override
         {
             if (uiEntry == NPC_AREI)
+            {
                 return m_creature;
+            }
 
             return nullptr;
         }
@@ -863,12 +905,16 @@ struct npc_arei : public CreatureScript
             {
             case SPELL_WITHER_STRIKE:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     DoScriptText(SAY_ASHENVALE, m_creature, pPlayer);
+                }
                 break;
             case SPELL_AREI_TRANSFORM:
                 DoCastSpellIfCan(m_creature, SPELL_AREI_TRANSFORM);
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     DoScriptText(SAY_LIFT_CURSE, m_creature, pPlayer);
+                }
                 break;
             case QUEST_ID_ANCIENT_SPIRIT:
                 if (Player* pPlayer = GetPlayerForEscort())
@@ -886,15 +932,21 @@ struct npc_arei : public CreatureScript
             DialogueUpdate(uiDiff);
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiWitherStrikeTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WITHER_STRIKE) == CAST_OK)
+                {
                     m_uiWitherStrikeTimer = urand(3000, 6000);
+                }
             }
             else
+            {
                 m_uiWitherStrikeTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -908,7 +960,9 @@ struct npc_arei : public CreatureScript
     bool OnQuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest) override
     {
         if (pQuest->GetQuestId() == QUEST_ID_ANCIENT_SPIRIT)
+        {
             pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pCreature, pQuest->GetQuestId());
+        }
 
         return true;
     }
@@ -958,7 +1012,9 @@ struct go_corrupted_plant : public GameObjectScript
             for (index = 0; index < 9; index++)
             {
                 if (uQuestId == aCorruptedSongflowerQuestId[index])
+                {
                     return QUEST_CORRUPTED_SONGFLOWER;
+                }
             }
         }
         else if (uQuestToSearchFor == QUEST_CORRUPTED_NIGHT_DRAGON)
@@ -967,7 +1023,9 @@ struct go_corrupted_plant : public GameObjectScript
             for (int index = 0; index < 4; index++)
             {
                 if (uQuestId == aCorruptedNightDragonQuestId[index])
+                {
                     return QUEST_CORRUPTED_NIGHT_DRAGON;
+                }
             }
         }
         else if (uQuestToSearchFor == QUEST_CORRUPTED_WINDBLOSSOM)
@@ -976,7 +1034,9 @@ struct go_corrupted_plant : public GameObjectScript
             for (int index = 0; index < 10; index++)
             {
                 if (uQuestId == aCorruptedWindblossomQuestId[index])
+                {
                     return QUEST_CORRUPTED_WINDBLOSSOM;
+                }
             }
         }
         else if (uQuestToSearchFor == QUEST_CORRUPTED_WHIPPER_ROOT)
@@ -985,7 +1045,9 @@ struct go_corrupted_plant : public GameObjectScript
             for (int index = 0; index < 6; index++)
             {
                 if (uQuestId == aCorruptedWhipperRootQuestId[index])
+                {
                     return QUEST_CORRUPTED_WHIPPER_ROOT;
+                }
             }
         }
 
@@ -1035,7 +1097,9 @@ struct go_corrupted_plant : public GameObjectScript
             pPlayer->SummonGameObject(GO_CLEANSED_WHIPPER_ROOT, fX, fY, fZ, 0.0f, PLANT_SPAWN_DURATION);
         }
         else
+        {
             return false;
+        }
 
         return true;
     }

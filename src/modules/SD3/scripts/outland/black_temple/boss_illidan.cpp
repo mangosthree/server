@@ -618,11 +618,15 @@ struct boss_illidan_stormrage : public CreatureScript
             {
             case AI_EVENT_CUSTOM_A:
                 if (pSender->GetEntry() == NPC_AKAMA)
+                {
                     DoStartCombatEvent();
+                }
                 break;
             case AI_EVENT_CUSTOM_B:
                 if (pSender->GetEntry() == NPC_BLADE_OF_AZZINOTH)
+                {
                     DoInformFlameKilled();
+                }
                 break;
             default:
                 break;

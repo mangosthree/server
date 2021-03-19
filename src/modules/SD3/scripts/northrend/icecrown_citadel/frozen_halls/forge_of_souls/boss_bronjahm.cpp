@@ -87,7 +87,9 @@ struct boss_bronjahm : public CreatureScript
             DoScriptText(urand(0, 1) ? SAY_AGGRO_1 : SAY_AGGRO_2, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_BRONJAHM, IN_PROGRESS);
+            }
 
             // Remove OOC visual soulstorm effect (added in creature_template_addon
             m_creature->RemoveAurasDueToSpell(SPELL_SOULSTORM_VISUAL_OOC);
@@ -96,10 +98,14 @@ struct boss_bronjahm : public CreatureScript
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             if (urand(0, 1))
+            {
                 DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -107,13 +113,17 @@ struct boss_bronjahm : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_BRONJAHM, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_BRONJAHM, FAIL);
+            }
         }
 
         void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
@@ -130,7 +140,9 @@ struct boss_bronjahm : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiPhase == 0)                                 // Phase 1
             {
@@ -138,7 +150,9 @@ struct boss_bronjahm : public CreatureScript
                 if (m_creature->GetHealthPercent() < 30.0f)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
+                    {
                         m_uiPhase = 1;
+                    }
                 }
 
                 // Corrupt Soul
@@ -154,22 +168,32 @@ struct boss_bronjahm : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiCorruptSoulTimer -= uiDiff;
+                }
 
                 // Magic's Bane
                 if (m_uiMagicsBaneTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_MAGICS_BANE) == CAST_OK)
+                    {
                         m_uiMagicsBaneTimer = urand(7000, 15000);
+                    }
                 }
                 else
+                {
                     m_uiMagicsBaneTimer -= uiDiff;
+                }
 
                 // Used to prevent Shadowbolt-Casting on Aggro for a few seconds
                 if (m_uiShadowboltTimer <= uiDiff)
+                {
                     m_uiShadowboltTimer = 0;
+                }
                 else
+                {
                     m_uiShadowboltTimer -= uiDiff;
+                }
 
                 // Use ShadowBolt as default attack if victim is not in range
                 // TODO - not entirely clear how this works in case the tank is out of shadow-bolt range
@@ -200,14 +224,20 @@ struct boss_bronjahm : public CreatureScript
                 if (m_uiFearTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_FEAR) == CAST_OK)
+                    {
                         m_uiFearTimer = urand(10000, 15000);
+                    }
                 }
                 else
+                {
                     m_uiFearTimer -= uiDiff;
+                }
 
                 // Default attack
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     DoCastSpellIfCan(pTarget, SPELL_SHADOW_BOLT);
+                }
             }
         }
     };
@@ -237,7 +267,9 @@ struct npc_corrupted_soul_fragment : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (InstanceData* pInstance = m_creature->GetInstanceData())
+            {
                 pInstance->SetGuid(DATA_SOULFRAGMENT_REMOVE, m_creature->GetObjectGuid());
+            }
         }
 
         void MoveInLineOfSight(Unit* pWho) override
@@ -250,7 +282,9 @@ struct npc_corrupted_soul_fragment : public CreatureScript
 
                     // Inform the instance about a used soul fragment
                     if (InstanceData* pInstance = m_creature->GetInstanceData())
+                    {
                         pInstance->SetGuid(DATA_SOULFRAGMENT_REMOVE, m_creature->GetObjectGuid());
+                    }
 
                     m_creature->ForcedDespawn();
                     return;

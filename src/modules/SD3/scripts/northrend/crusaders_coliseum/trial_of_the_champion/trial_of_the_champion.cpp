@@ -50,7 +50,9 @@ struct npc_toc_herald : public CreatureScript
     {
         ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         if (!pInstance)
+        {
             return true;
+        }
 
         if (pInstance->GetData(TYPE_GRAND_CHAMPIONS) == NOT_STARTED)
         {
@@ -76,7 +78,9 @@ struct npc_toc_herald : public CreatureScript
     {
         ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         if (!pInstance)
+        {
             return true;
+        }
 
         switch (uiAction)
         {

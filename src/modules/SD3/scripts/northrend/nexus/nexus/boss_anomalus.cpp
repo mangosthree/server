@@ -94,7 +94,9 @@ struct boss_anomalus : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ANOMALUS, IN_PROGRESS);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -102,13 +104,17 @@ struct boss_anomalus : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_ANOMALUS, DONE);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
         {
             if (urand(0, 1))
+            {
                 DoScriptText(SAY_KILL, m_creature);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -120,7 +126,9 @@ struct boss_anomalus : public CreatureScript
                 DoScriptText(SAY_RIFT, m_creature);
 
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     pSummoned->AI()->AttackStart(pTarget);
+                }
             }
         }
 
@@ -132,12 +140,16 @@ struct boss_anomalus : public CreatureScript
 
                 // If players kill the Chaotic Rifts then mark the achievement as false
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_ACHIEV_CHAOS_THEORY, uint32(false));
+                }
 
                 if (!m_uiChaoticRiftCount)
                 {
                     if (m_creature->HasAura(SPELL_RIFT_SHIELD))
+                    {
                         m_creature->RemoveAurasDueToSpell(SPELL_RIFT_SHIELD);
+                    }
                 }
             }
         }
@@ -145,7 +157,9 @@ struct boss_anomalus : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || m_creature->HasAura(SPELL_RIFT_SHIELD))
+            {
                 return;
+            }
 
             // Create additional Chaotic Rift at 50% HP
             if (!m_bChaoticRift && m_creature->GetHealthPercent() < 50.0f)
@@ -175,17 +189,23 @@ struct boss_anomalus : public CreatureScript
                 }
             }
             else
+            {
                 m_uiCreateRiftTimer -= uiDiff;
+            }
 
             if (m_uiSparkTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SPARK : SPELL_SPARK_H);
+                }
 
                 m_uiSparkTimer = 5000;
             }
             else
+            {
                 m_uiSparkTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -224,7 +244,9 @@ struct mob_chaotic_rift : public CreatureScript
             if (pSummoned->GetEntry() == NPC_CRAZED_MANA_WRAITH)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     pSummoned->AI()->AttackStart(pTarget);
+                }
             }
         }
 
@@ -242,7 +264,9 @@ struct mob_chaotic_rift : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiChargedRemoveTimer)
             {
@@ -254,7 +278,9 @@ struct mob_chaotic_rift : public CreatureScript
                     m_uiChargedRemoveTimer = 0;
                 }
                 else
+                {
                     m_uiChargedRemoveTimer -= uiDiff;
+                }
             }
         }
     };

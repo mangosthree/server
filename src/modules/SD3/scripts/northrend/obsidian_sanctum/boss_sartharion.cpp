@@ -271,7 +271,9 @@ struct boss_sartharion : public CreatureScript
             DoScriptText(SAY_SARTHARION_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SARTHARION_EVENT, DONE);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -287,11 +289,15 @@ struct boss_sartharion : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_SARTHARION_EVENT, FAIL);
+            }
 
             // Despawn portal
             if (GameObject* pPortal = GetClosestGameObjectWithEntry(m_creature, GO_TWILIGHT_PORTAL, 50.0f))
+            {
                 pPortal->SetLootState(GO_JUST_DEACTIVATED);
+            }
         }
 
         void FetchDragons()
@@ -309,7 +315,9 @@ struct boss_sartharion : public CreatureScript
                 pTene->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aTene[0].m_fX, m_aTene[0].m_fY, m_aTene[0].m_fZ);
 
                 if (!pTene->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                {
                     pTene->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                }
             }
 
             if (pShad && pShad->IsAlive() && !pShad->getVictim())
@@ -318,7 +326,9 @@ struct boss_sartharion : public CreatureScript
                 pShad->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aShad[0].m_fX, m_aShad[0].m_fY, m_aShad[0].m_fZ);
 
                 if (!pShad->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                {
                     pShad->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                }
             }
 
             if (pVesp && pVesp->IsAlive() && !pVesp->getVictim())
@@ -327,11 +337,15 @@ struct boss_sartharion : public CreatureScript
                 pVesp->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aVesp[0].m_fX, m_aVesp[0].m_fY, m_aVesp[0].m_fZ);
 
                 if (!pVesp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                {
                     pVesp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                }
             }
 
             if (uiCountFetchableDragons)
+            {
                 DoCastSpellIfCan(m_creature, SPELL_WILL_OF_SARTHARION);
+            }
 
             m_pInstance->SetData(TYPE_ALIVE_DRAGONS, uiCountFetchableDragons);
         }
@@ -344,10 +358,14 @@ struct boss_sartharion : public CreatureScript
                 if (pTemp && pTemp->IsAlive())
                 {
                     if (pTemp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                    {
                         pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    }
 
                     if (pTemp->getVictim())
+                    {
                         return;
+                    }
 
                     pTemp->SetWalk(false);
 
@@ -387,14 +405,18 @@ struct boss_sartharion : public CreatureScript
             }
 
             for (uint8 i = uiTsunamiStartLoc; i < uiTsunamiEndLoc; ++i)
+            {
                 m_creature->SummonCreature(NPC_FLAME_TSUNAMI, m_aTsunamiLoc[i].m_fX, m_aTsunamiLoc[i].m_fY, m_aTsunamiLoc[i].m_fZ, m_aTsunamiLoc[i].m_fO, TEMPSUMMON_TIMED_DESPAWN, 15000);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             // Return since we have no target
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // spell will target dragons, if they are still alive at 35%
             if (!m_bIsBerserk && m_creature->GetHealthPercent() < 35.0f)
@@ -419,10 +441,14 @@ struct boss_sartharion : public CreatureScript
                 if (m_uiEnrageTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_PYROBUFFET, CAST_TRIGGERED) == CAST_OK)
+                    {
                         m_bIsHardEnraged = true;
+                    }
                 }
                 else
+                {
                     m_uiEnrageTimer -= uiDiff;
+                }
             }
 
             // flame tsunami
@@ -432,7 +458,9 @@ struct boss_sartharion : public CreatureScript
                 m_uiFlameTsunamiTimer = 30000;
             }
             else
+            {
                 m_uiFlameTsunamiTimer -= uiDiff;
+            }
 
             // flame breath
             if (m_uiFlameBreathTimer < uiDiff)
@@ -444,25 +472,35 @@ struct boss_sartharion : public CreatureScript
                 }
             }
             else
+            {
                 m_uiFlameBreathTimer -= uiDiff;
+            }
 
             // Tail Sweep
             if (m_uiTailSweepTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_TAIL_LASH : SPELL_TAIL_LASH_H) == CAST_OK)
+                {
                     m_uiTailSweepTimer = urand(15000, 20000);
+                }
             }
             else
+            {
                 m_uiTailSweepTimer -= uiDiff;
+            }
 
             // Cleave
             if (m_uiCleaveTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                {
                     m_uiCleaveTimer = urand(7000, 10000);
+                }
             }
             else
+            {
                 m_uiCleaveTimer -= uiDiff;
+            }
 
             // Lavas Strike
             if (m_uiLavaStrikeTimer < uiDiff)
@@ -470,7 +508,9 @@ struct boss_sartharion : public CreatureScript
                 if (m_pInstance)
                 {
                     if (Creature* pCyclone = m_creature->GetMap()->GetCreature(ObjectGuid(m_pInstance->GetData64(DATA64_FIRE_CYCLONE))))
+                    {
                         pCyclone->CastSpell(pCyclone, SPELL_CYCLONE_AURA_STRIKE, true);
+                    }
 
                     switch (urand(0, 5))
                     {
@@ -483,7 +523,9 @@ struct boss_sartharion : public CreatureScript
                 m_uiLavaStrikeTimer = 30000;
             }
             else
+            {
                 m_uiLavaStrikeTimer -= uiDiff;
+            }
 
             // call tenebron
             if (!m_bHasCalledTenebron)
@@ -494,7 +536,9 @@ struct boss_sartharion : public CreatureScript
                     m_bHasCalledTenebron = true;
                 }
                 else
+                {
                     m_uiTenebronTimer -= uiDiff;
+                }
             }
 
             // call shadron
@@ -506,7 +550,9 @@ struct boss_sartharion : public CreatureScript
                     m_bHasCalledShadron = true;
                 }
                 else
+                {
                     m_uiShadronTimer -= uiDiff;
+                }
             }
 
             // call vesperon
@@ -518,7 +564,9 @@ struct boss_sartharion : public CreatureScript
                     m_bHasCalledVesperon = true;
                 }
                 else
+                {
                     m_uiVesperonTimer -= uiDiff;
+                }
             }
 
             DoMeleeAttackIfReady();
@@ -607,22 +655,30 @@ struct dummy_dragonAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+        {
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
 
         // Despawn portal
         if (GameObject* pPortal = GetClosestGameObjectWithEntry(m_creature, GO_TWILIGHT_PORTAL, 50.0f))
+        {
             pPortal->SetLootState(GO_JUST_DEACTIVATED);
+        }
 
         // reset portal events (in case some remain active); summons cleanup handled by creature linking
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_DATA_PORTAL_OFF, m_uiPortalId);
+        }
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         // despawn portal if Sartharion is not in combat
         if (GameObject* pPortal = GetClosestGameObjectWithEntry(m_creature, GO_TWILIGHT_PORTAL, 50.0f))
+        {
             pPortal->SetLootState(GO_JUST_DEACTIVATED);
+        }
 
         // eject players and despawn portal owner
         if (Creature* pTemp = m_creature->GetMap()->GetCreature(m_portalOwnerGuid))
@@ -635,7 +691,9 @@ struct dummy_dragonAI : public ScriptedAI
     void MovementInform(uint32 uiType, uint32 uiPointId) override
     {
         if (!m_pInstance || uiType != POINT_MOTION_TYPE)
+        {
             return;
+        }
 
         debug_log("dummy_dragonAI: %s reached point %u", m_creature->GetName(), uiPointId);
 
@@ -662,7 +720,9 @@ struct dummy_dragonAI : public ScriptedAI
         if (m_uiWaypointId >= countof(m_aDragonCommon))
         {
             if (!m_bCanMoveFree)
+            {
                 m_bCanMoveFree = true;
+            }
 
             m_uiWaypointId = 0;
         }
@@ -690,7 +750,9 @@ struct dummy_dragonAI : public ScriptedAI
 
         // set portal status as active when Sartharion is in progress
         if (m_pInstance && m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+        {
             m_pInstance->SetData(TYPE_DATA_PORTAL_ON, m_uiPortalId);
+        }
 
         // Unclear what are expected to happen if one drake has a portal open already
         // Refresh respawnTime so time again are set to 30secs?
@@ -706,12 +768,16 @@ struct dummy_dragonAI : public ScriptedAI
             Map::PlayerList const& PlayerList = pMap->GetPlayers();
 
             if (PlayerList.isEmpty())
+            {
                 return;
+            }
 
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
             {
                 if (i->getSource()->IsAlive() && i->getSource()->HasAura(uiSpellId))
+                {
                     i->getSource()->RemoveAurasDueToSpell(uiSpellId);
+                }
             }
         }
     }
@@ -720,14 +786,18 @@ struct dummy_dragonAI : public ScriptedAI
     void DoEjectTwilightPlayersIfCan(Creature* pCreature)
     {
         if (!m_pInstance || !pCreature)
+        {
             return;
+        }
 
         if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) != IN_PROGRESS || !m_pInstance->GetData(TYPE_DATA_PORTAL_STATUS))
         {
             pCreature->CastSpell(pCreature, SPELL_TWILIGHT_SHIFT_REMOVAL_ALL, true);
 
             if (GameObject* pPortal = GetClosestGameObjectWithEntry(m_creature, GO_TWILIGHT_PORTAL, 50.0f))
+            {
                 pPortal->SetLootState(GO_JUST_DEACTIVATED);
+            }
         }
     }
 
@@ -750,12 +820,16 @@ struct dummy_dragonAI : public ScriptedAI
                 m_uiMoveNextTimer = 0;
             }
             else
+            {
                 m_uiMoveNextTimer -= uiDiff;
+            }
         }
 
         // if no target return
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
 
         // Call dragon specific virtual function
         UpdateDragonAI(uiDiff);
@@ -764,7 +838,9 @@ struct dummy_dragonAI : public ScriptedAI
         if (m_uiPortalRespawnTimer < uiDiff)
         {
             if (m_pInstance && m_pInstance->GetData(TYPE_DATA_PORTAL_STATUS))
+            {
                 m_uiPortalRespawnTimer = 10000;
+            }
             else
             {
                 m_uiPortalRespawnTimer = 60000;
@@ -772,7 +848,9 @@ struct dummy_dragonAI : public ScriptedAI
             }
         }
         else
+        {
             m_uiPortalRespawnTimer -= uiDiff;
+        }
 
         // shadow fissure
         if (m_uiShadowFissureTimer < uiDiff)
@@ -780,11 +858,15 @@ struct dummy_dragonAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_FISSURE : SPELL_SHADOW_FISSURE_H) == CAST_OK)
+                {
                     m_uiShadowFissureTimer = urand(15000, 20000);
+                }
             }
         }
         else
+        {
             m_uiShadowFissureTimer -= uiDiff;
+        }
 
         // shadow breath
         if (m_uiShadowBreathTimer < uiDiff)
@@ -796,7 +878,9 @@ struct dummy_dragonAI : public ScriptedAI
             }
         }
         else
+        {
             m_uiShadowBreathTimer -= uiDiff;
+        }
 
         DoMeleeAttackIfReady();
     }
@@ -845,16 +929,22 @@ struct mob_tenebron : public CreatureScript
             {
                 // Cast Twilight Revent - script target on Sartharion
                 if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                {
                     DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_REVENGE, CAST_TRIGGERED);
+                }
                 else
+                {
                     dummy_dragonAI::JustDied(pKiller);
+                }
             }
         }
 
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_TWILIGHT_EGG_CONTROLLER)
+            {
                 m_portalOwnerGuid = pSummoned->GetObjectGuid();
+            }
 
             // update phasemask manually
             pSummoned->SetPhaseMask(PHASEMASK_TWILIGHT_REALM, true);
@@ -865,7 +955,9 @@ struct mob_tenebron : public CreatureScript
             if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_TWILIGHT_EGG_CONTROLLER)
             {
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_DATA_PORTAL_OFF, m_uiPortalId);
+                }
 
                 DoEjectTwilightPlayersIfCan((Creature*)pInvoker);
             }
@@ -884,7 +976,9 @@ struct mob_tenebron : public CreatureScript
                 if (m_pInstance)
                 {
                     if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                    {
                         uiSpawnEntry = NPC_SARTHARION_TWILIGHT_EGG;
+                    }
                 }
 
                 float fX, fY, fZ;
@@ -903,13 +997,17 @@ struct mob_tenebron : public CreatureScript
                 {
                     DoScriptText(EMOTE_HATCH_EGGS, m_creature);
                     if (urand(0, 1))
+                    {
                         DoScriptText(urand(0, 1) ? SAY_TENEBRON_SPECIAL_1 : SAY_TENEBRON_SPECIAL_2, m_creature);
+                    }
                 }
 
                 m_uiSpawnEggsTimer = 60000;
             }
             else
+            {
                 m_uiSpawnEggsTimer -= uiDiff;
+            }
         }
     };
 
@@ -962,9 +1060,13 @@ struct mob_shadron : public CreatureScript
             {
                 // Cast Twilight Revent - script target on Sartharion
                 if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                {
                     DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_REVENGE, CAST_TRIGGERED);
+                }
                 else
+                {
                     dummy_dragonAI::JustDied(pKiller);
+                }
             }
         }
 
@@ -976,7 +1078,9 @@ struct mob_shadron : public CreatureScript
                 m_portalOwnerGuid = pSummoned->GetObjectGuid();
             }
             else if (pSummoned->GetEntry() == NPC_ACOLYTE_OF_SHADRON)
+            {
                 pSummoned->CastSpell(pSummoned, SPELL_GIFT_OF_TWILIGTH_SAR, true);
+            }
 
             // update phasemask manually
             pSummoned->SetPhaseMask(PHASEMASK_TWILIGHT_REALM, true);
@@ -991,10 +1095,14 @@ struct mob_shadron : public CreatureScript
                 if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
                 {
                     if (Creature* pSartharion = m_pInstance->GetSingleCreatureFromStorage(NPC_SARTHARION))
+                    {
                         pSartharion->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SAR);
+                    }
                 }
                 else
+                {
                     m_creature->RemoveAurasDueToSpell(SPELL_GIFT_OF_TWILIGTH_SHA);
+                }
             }
 
             DoEjectTwilightPlayersIfCan(pSummoned);
@@ -1014,13 +1122,17 @@ struct mob_shadron : public CreatureScript
                 {
                     DoScriptText(EMOTE_SHADRON_DICIPLE, m_creature);
                     if (urand(0, 1))
+                    {
                         DoScriptText(urand(0, 1) ? SAY_SHADRON_SPECIAL_1 : SAY_SHADRON_SPECIAL_2, m_creature);
+                    }
 
                     uint32 uiSpawnEntry = NPC_DISCIPLE_OF_SHADRON;
                     if (m_pInstance)
                     {
                         if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                        {
                             uiSpawnEntry = NPC_ACOLYTE_OF_SHADRON;
+                        }
                     }
 
                     float fX, fY, fZ;
@@ -1030,7 +1142,9 @@ struct mob_shadron : public CreatureScript
                     m_uiAcolyteShadronTimer = 0;
                 }
                 else
+                {
                     m_uiAcolyteShadronTimer -= uiDiff;
+                }
             }
         }
     };
@@ -1084,9 +1198,13 @@ struct mob_vesperon : public CreatureScript
             {
                 // Cast Twilight Revent - script target on Sartharion
                 if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                {
                     DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_REVENGE, CAST_TRIGGERED);
+                }
                 else
+                {
                     dummy_dragonAI::JustDied(pKiller);
+                }
             }
         }
 
@@ -1109,7 +1227,9 @@ struct mob_vesperon : public CreatureScript
         {
             // ToDo: remove Twilight Torment debuff
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_DATA_PORTAL_OFF, m_uiPortalId);
+            }
 
             DoEjectTwilightPlayersIfCan(pSummoned);
             m_uiAcolyteVesperonTimer = m_uiPortalRespawnTimer + 5000;
@@ -1128,13 +1248,17 @@ struct mob_vesperon : public CreatureScript
                 {
                     DoScriptText(EMOTE_VESPERON_DICIPLE, m_creature);
                     if (urand(0, 1))
+                    {
                         DoScriptText(urand(0, 1) ? SAY_VESPERON_SPECIAL_1 : SAY_VESPERON_SPECIAL_2, m_creature);
+                    }
 
                     uint32 uiSpawnEntry = NPC_DISCIPLE_OF_VESPERON;
                     if (m_pInstance)
                     {
                         if (m_pInstance->GetData(TYPE_SARTHARION_EVENT) == IN_PROGRESS)
+                        {
                             uiSpawnEntry = NPC_ACOLYTE_OF_VESPERON;
+                        }
                     }
 
                     float fX, fY, fZ;
@@ -1144,7 +1268,9 @@ struct mob_vesperon : public CreatureScript
                     m_uiAcolyteVesperonTimer = 0;
                 }
                 else
+                {
                     m_uiAcolyteVesperonTimer -= uiDiff;
+                }
             }
         }
     };
@@ -1180,7 +1306,9 @@ struct mob_twilight_eggs : public CreatureScript
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_TWILIGHT_WHELP || pSummoned->GetEntry() == NPC_SHARTHARION_TWILIGHT_WHELP)
+            {
                 pSummoned->SetInCombatWithZone();
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -1201,7 +1329,9 @@ struct mob_twilight_eggs : public CreatureScript
                 m_uiHatchTimer = 0;
             }
             else
+            {
                 m_uiHatchTimer -= uiDiff;
+            }
         }
     };
 
@@ -1248,13 +1378,17 @@ struct npc_tenebron_egg_controller : public CreatureScript
                     {
                         // Inform Tenebron to hatch the eggs
                         if (Creature* pTenebron = m_pInstance->GetSingleCreatureFromStorage(NPC_TENEBRON))
+                        {
                             m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pTenebron);
+                        }
                     }
                     m_creature->ForcedDespawn(1000);
                     m_uiHatchTimer = 0;
                 }
                 else
+                {
                     m_uiHatchTimer -= uiDiff;
+                }
             }
         }
     };
@@ -1293,7 +1427,9 @@ struct npc_flame_tsunami : public CreatureScript
         void MovementInform(uint32 uiType, uint32 uiPointId) override
         {
             if (uiType != POINT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             m_creature->RemoveAllAurasOnEvade();
         }
@@ -1312,7 +1448,9 @@ struct npc_flame_tsunami : public CreatureScript
                     m_uiTsunamiTimer = 0;
                 }
                 else
+                {
                     m_uiTsunamiTimer -= uiDiff;
+                }
             }
         }
     };
@@ -1349,13 +1487,17 @@ struct npc_fire_cyclone : public CreatureScript
         {
             // Mark the achiev failed for the hit target
             if (pSpell->Id == SPELL_LAVA_STRIKE_IMPACT && pTarget->GetTypeId() == TYPEID_PLAYER && m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_VOLCANO_BLOW_FAILED, pTarget->GetGUIDLow());
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_LAVA_BLAZE)
+            {
                 pSummoned->SetInCombatWithZone();
+            }
         }
     };
 

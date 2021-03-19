@@ -456,7 +456,9 @@ struct npc_keeper_remulos : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature)
+            {
                 DoHandleOutro(pInvoker->ToCreature());
+            }
         }
 
         Creature* GetSpeakerByEntry(uint32 uiEntry) override

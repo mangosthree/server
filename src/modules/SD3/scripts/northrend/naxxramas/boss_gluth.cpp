@@ -95,13 +95,17 @@ struct boss_gluth : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_GLUTH, DONE);
+            }
         }
 
         void Aggro(Unit* /*pWho*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_GLUTH, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* pVictim) override
@@ -117,7 +121,9 @@ struct boss_gluth : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_GLUTH, FAIL);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -137,7 +143,9 @@ struct boss_gluth : public CreatureScript
             for (GuidList::const_iterator itr = m_lZombieChowGuidList.begin(); itr != m_lZombieChowGuidList.end(); ++itr)
             {
                 if (Creature* pZombie = m_creature->GetMap()->GetCreature(*itr))
+                {
                     pZombie->GetMotionMaster()->MoveFollow(m_creature, ATTACK_DISTANCE, 0);
+                }
             }
         }
 
@@ -149,11 +157,15 @@ struct boss_gluth : public CreatureScript
                 if (Creature* pZombie = m_creature->GetMap()->GetCreature(*itr))
                 {
                     if (!pZombie->IsAlive())
+                    {
                         continue;
+                    }
 
                     // Devour a Zombie
                     if (pZombie->IsWithinDistInMap(m_creature, 15.0f))
+                    {
                         m_creature->DealDamage(pZombie, pZombie->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                    }
                 }
             }
         }
@@ -161,7 +173,9 @@ struct boss_gluth : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiZombieSearchTimer < uiDiff)
             {
@@ -169,16 +183,22 @@ struct boss_gluth : public CreatureScript
                 m_uiZombieSearchTimer = 3000;
             }
             else
+            {
                 m_uiZombieSearchTimer -= uiDiff;
+            }
 
             // Mortal Wound
             if (m_uiMortalWoundTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTALWOUND) == CAST_OK)
+                {
                     m_uiMortalWoundTimer = 10000;
+                }
             }
             else
+            {
                 m_uiMortalWoundTimer -= uiDiff;
+            }
 
             // Decimate
             if (m_uiDecimateTimer < uiDiff)
@@ -191,7 +211,9 @@ struct boss_gluth : public CreatureScript
                 }
             }
             else
+            {
                 m_uiDecimateTimer -= uiDiff;
+            }
 
             // Enrage
             if (m_uiEnrageTimer < uiDiff)
@@ -203,7 +225,9 @@ struct boss_gluth : public CreatureScript
                 }
             }
             else
+            {
                 m_uiEnrageTimer -= uiDiff;
+            }
 
             // Summon
             if (m_uiSummonTimer < uiDiff)
@@ -220,16 +244,22 @@ struct boss_gluth : public CreatureScript
                 m_uiSummonTimer = 10000;
             }
             else
+            {
                 m_uiSummonTimer -= uiDiff;
+            }
 
             // Berserk
             if (m_uiBerserkTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                {
                     m_uiBerserkTimer = MINUTE * 5 * IN_MILLISECONDS;
+                }
             }
             else
+            {
                 m_uiBerserkTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

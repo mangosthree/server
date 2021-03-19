@@ -144,7 +144,9 @@ struct boss_lady_blaumeux : CreatureScript
             m_creature->GetMotionMaster()->MovePoint(1, aHorseMenMoveCoords[0][0], aHorseMenMoveCoords[0][1], aHorseMenMoveCoords[0][2]);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FOUR_HORSEMEN, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -162,20 +164,26 @@ struct boss_lady_blaumeux : CreatureScript
 
                 // Cast achiev check for last boss killed
                 if (m_pInstance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
+                {
                     m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, true);
+                }
             }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FOUR_HORSEMEN, FAIL);
+            }
         }
 
         void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
         {
             if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             // Stop moving when it reaches the corner
             m_bIsCornerMovement = false;
@@ -186,33 +194,47 @@ struct boss_lady_blaumeux : CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Don't attack while moving
             if (m_bIsCornerMovement)
+            {
                 return;
+            }
 
             if (m_uiMarkTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_BLAUMEUX) == CAST_OK)
+                {
                     m_uiMarkTimer = 12000;
+                }
             }
             else
+            {
                 m_uiMarkTimer -= uiDiff;
+            }
 
             if (m_uiVoidZoneTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_VOID_ZONE : SPELL_VOID_ZONE_H) == CAST_OK)
+                {
                     m_uiVoidZoneTimer = 15000;
+                }
             }
             else
+            {
                 m_uiVoidZoneTimer -= uiDiff;
+            }
 
             if (m_uiShadowBoltTimer < uiDiff)
             {
                 // If we can find a target in range of 45.0f, then cast Shadowbolt
                 if (m_creature->IsWithinDist(m_creature->getVictim(), 45.0f))
+                {
                     DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H);
+                }
                 else
                 {
                     DoCastSpellIfCan(m_creature, SPELL_UNYILDING_PAIN);
@@ -221,7 +243,9 @@ struct boss_lady_blaumeux : CreatureScript
                 m_uiShadowBoltTimer = urand(2000, 3000);
             }
             else
+            {
                 m_uiShadowBoltTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -273,7 +297,9 @@ struct boss_rivendare_naxx : public CreatureScript
             m_creature->GetMotionMaster()->MovePoint(1, aHorseMenMoveCoords[1][0], aHorseMenMoveCoords[1][1], aHorseMenMoveCoords[1][2]);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FOUR_HORSEMEN, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -291,53 +317,73 @@ struct boss_rivendare_naxx : public CreatureScript
 
                 // Cast achiev check for last boss killed
                 if (m_pInstance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
+                {
                     m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, true);
+                }
             }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FOUR_HORSEMEN, FAIL);
+            }
         }
 
         void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
         {
             if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             // Start moving when it reaches the corner
             SetCombatMovement(true);
             m_bIsCornerMovement = false;
             m_creature->GetMotionMaster()->Clear();
             if (m_creature->getVictim())
+            {
                 m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Don't attack while moving
             if (m_bIsCornerMovement)
+            {
                 return;
+            }
 
             if (m_uiMarkTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_RIVENDARE) == CAST_OK)
+                {
                     m_uiMarkTimer = 12000;
+                }
             }
             else
+            {
                 m_uiMarkTimer -= uiDiff;
+            }
 
             if (m_uiUnholyShadowTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_UNHOLY_SHADOW : SPELL_UNHOLY_SHADOW_H) == CAST_OK)
+                {
                     m_uiUnholyShadowTimer = 15000;
+                }
             }
             else
+            {
                 m_uiUnholyShadowTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -384,7 +430,9 @@ struct boss_thane_korthazz : public CreatureScript
             m_creature->GetMotionMaster()->MovePoint(1, aHorseMenMoveCoords[2][0], aHorseMenMoveCoords[2][1], aHorseMenMoveCoords[2][2]);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FOUR_HORSEMEN, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -402,53 +450,73 @@ struct boss_thane_korthazz : public CreatureScript
 
                 // Cast achiev check for last boss killed
                 if (m_pInstance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
+                {
                     m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, true);
+                }
             }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FOUR_HORSEMEN, FAIL);
+            }
         }
 
         void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
         {
             if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             // Start moving when it reaches the corner
             SetCombatMovement(true);
             m_bIsCornerMovement = false;
             m_creature->GetMotionMaster()->Clear();
             if (m_creature->getVictim())
+            {
                 m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Don't attack while moving
             if (m_bIsCornerMovement)
+            {
                 return;
+            }
 
             if (m_uiMarkTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_KORTHAZZ) == CAST_OK)
+                {
                     m_uiMarkTimer = 12000;
+                }
             }
             else
+            {
                 m_uiMarkTimer -= uiDiff;
+            }
 
             if (m_uiMeteorTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_METEOR : SPELL_METEOR_H) == CAST_OK)
+                {
                     m_uiMeteorTimer = 20000;
+                }
             }
             else
+            {
                 m_uiMeteorTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -497,7 +565,9 @@ struct boss_sir_zeliek :CreatureScript
             m_creature->GetMotionMaster()->MovePoint(1, aHorseMenMoveCoords[3][0], aHorseMenMoveCoords[3][1], aHorseMenMoveCoords[3][2]);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FOUR_HORSEMEN, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -515,20 +585,26 @@ struct boss_sir_zeliek :CreatureScript
 
                 // Cast achiev check for last boss killed
                 if (m_pInstance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
+                {
                     m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, true);
+                }
             }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FOUR_HORSEMEN, FAIL);
+            }
         }
 
         void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
         {
             if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             // Stop moving when it reaches the corner
             m_bIsCornerMovement = false;
@@ -539,36 +615,50 @@ struct boss_sir_zeliek :CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Don't attack while moving
             if (m_bIsCornerMovement)
+            {
                 return;
+            }
 
             if (m_uiMarkTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_ZELIEK) == CAST_OK)
+                {
                     m_uiMarkTimer = 12000;
+                }
             }
             else
+            {
                 m_uiMarkTimer -= uiDiff;
+            }
 
             if (m_uiHolyWrathTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_HOLY_WRATH) == CAST_OK)
+                    {
                         m_uiHolyWrathTimer = 15000;
+                    }
                 }
             }
             else
+            {
                 m_uiHolyWrathTimer -= uiDiff;
+            }
 
             if (m_uiHolyBoltTimer < uiDiff)
             {
                 // If we can find a target in range of 45.0f, then cast Holy Bolt
                 if (m_creature->IsWithinDist(m_creature->getVictim(), 45.0f))
+                {
                     DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_HOLY_BOLT : SPELL_HOLY_BOLT_H);
+                }
                 else
                 {
                     DoCastSpellIfCan(m_creature, SPELL_CONDEMNATION);
@@ -577,7 +667,9 @@ struct boss_sir_zeliek :CreatureScript
                 m_uiHolyBoltTimer = urand(2000, 3000);
             }
             else
+            {
                 m_uiHolyBoltTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

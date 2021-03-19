@@ -451,7 +451,9 @@ struct npc_ranshalla : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 uiMiscValue) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature)
+            {
                 DoContinueEscort(bool(uiMiscValue));
+            }
         }
 
         void UpdateEscortAI(const uint32 uiDiff) override
@@ -531,6 +533,25 @@ struct go_elune_fire : public GameObjectScript
     }
 };
 
+enum
+{
+    SPELL_FOOLS_PLIGHT = 23504,
+
+    SPELL_DEMONIC_FRENZY = 23257,
+    SPELL_DEMONIC_DOOM = 23298,
+    SPELL_STINGING_TRAUMA = 23299,
+
+    EMOTE_POISON = -1001251,
+
+    NPC_ARTORIUS_THE_AMIABLE = 14531,
+    GOSSIP_ITEM_ARTORIUS_THE_AMIABLE = -3509003, /* TODO */
+
+    NPC_ARTORIUS_THE_DOOMBRINGER = 14535,
+    NPC_THE_CLEANER = 14503,
+    SAY_THE_CLEANER_AGGRO = -1001253,
+
+    QUEST_STAVE_OF_THE_ANCIENTS = 7636
+};
 void AddSC_winterspring()
 {
     Script* s;

@@ -90,7 +90,9 @@ struct is_violet_hold : public InstanceScript
             for (std::vector<BossSpawn*>::const_iterator itr = m_vRandomBosses.begin(); itr != m_vRandomBosses.end(); ++itr)
             {
                 if (*itr)
+                {
                     delete(*itr);
+                }
             }
         }
 
@@ -191,17 +193,23 @@ struct is_violet_hold : public InstanceScript
             BossToCellMap::const_iterator itrCellUpper = m_mBossToCellMap.upper_bound(uiBossEntry);
 
             if (itrCellLower == itrCellUpper)
+            {
                 return;
+            }
 
             for (BossToCellMap::const_iterator itr = itrCellLower; itr != itrCellUpper; ++itr)
             {
                 if (!bForceClosing)
+                {
                     DoUseDoorOrButton(itr->second);
+                }
                 else
                 {
                     GameObject* pGo = instance->GetGameObject(itr->second);
                     if (pGo && pGo->GetGoType() == GAMEOBJECT_TYPE_DOOR && pGo->GetGoState() == GO_STATE_ACTIVE)
+                    {
                         pGo->ResetDoorOrButton();
+                    }
                 }
             }
         }
@@ -217,7 +225,9 @@ struct is_violet_hold : public InstanceScript
             }
 
             if (bIsIntro)
+            {
                 DoUseDoorOrButton(GO_INTRO_CRYSTAL);
+            }
 
             // else, kill (and despawn?) certain trash mobs. Also boss affected, but not killed.
         }
@@ -368,7 +378,9 @@ struct is_violet_hold : public InstanceScript
                 break;
             case NPC_VOID_SENTRY:
                 if (GetData(TYPE_ZURAMAT) == IN_PROGRESS)
+                {
                     m_bIsVoidDance = false;
+                }
                 break;
             }
         }
@@ -381,9 +393,13 @@ struct is_violet_hold : public InstanceScript
             {
             case TYPE_MAIN:
                 if (uiData == m_auiEncounter[uiType])
+                {
                     return;
+                }
                 if (m_auiEncounter[uiType] == DONE)
+                {
                     return;
+                }
 
                 switch (uiData)
                 {
@@ -397,9 +413,13 @@ struct is_violet_hold : public InstanceScript
                     break;
                 case FAIL:
                     if (Creature* pSinclari = GetSingleCreatureFromStorage(NPC_SINCLARI))
+                    {
                         pSinclari->DealDamage(pSinclari, pSinclari->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                    }
                     if (Creature* pController = GetSingleCreatureFromStorage(NPC_EVENT_CONTROLLER))
+                    {
                         pController->AI()->EnterEvadeMode();
+                    }
                     // Reset the event (creature cleanup is handled in creature_linking)
                     DoUseDoorOrButton(GO_PRISON_SEAL_DOOR); // open instance door
                     ResetAll();
@@ -434,7 +454,9 @@ struct is_violet_hold : public InstanceScript
 
                     // set achiev to failed
                     if (m_bIsDefenseless)
+                    {
                         m_bIsDefenseless = false;
+                    }
 
                     if (!m_uiWorldStateSealCount)
                     {
@@ -462,27 +484,43 @@ struct is_violet_hold : public InstanceScript
             case TYPE_XEVOZZ:
             case TYPE_ZURAMAT:
                 if (uiData == DONE)
+                {
                     m_uiPortalTimer = 35000;
+                }
                 if (m_auiEncounter[uiType] != DONE)             // Keep the DONE-information stored
+                {
                     m_auiEncounter[uiType] = uiData;
+                }
                 // Handle achievements if necessary
                 if (uiData == IN_PROGRESS)
                 {
                     if (uiType == TYPE_ZURAMAT)
+                    {
                         m_bIsVoidDance = true;
+                    }
                     else if (uiType == TYPE_ICHORON)
+                    {
                         m_bIsDehydratation = true;
+                    }
                 }
                 if (uiData == SPECIAL && uiType == TYPE_ICHORON)
+                {
                     m_bIsDehydratation = false;
+                }
                 if (uiData == FAIL)
+                {
                     SetData(TYPE_MAIN, FAIL);
+                }
                 break;
             case TYPE_CYANIGOSA:
                 if (uiData == DONE)
+                {
                     SetData(TYPE_MAIN, DONE);
+                }
                 if (uiData == FAIL)
+                {
                     SetData(TYPE_MAIN, FAIL);
+                }
                 m_auiEncounter[uiType] = uiData;
                 break;
             case TYPE_DO_SINCLARI_BEGIN:
@@ -516,7 +554,9 @@ struct is_violet_hold : public InstanceScript
         uint32 GetData(uint32 uiType) const override
         {
             if (uiType < MAX_ENCOUNTER)
+            {
                 return m_auiEncounter[uiType];
+            }
 
             switch (uiType)
             {
@@ -540,11 +580,15 @@ struct is_violet_hold : public InstanceScript
             {
             case DATA64_CRYSTAL_ACTIVATOR:
                 if (Player* pl = instance->GetPlayer(ObjectGuid(uiData)))
+                {
                     ProcessActivationCrystal(pl);
+                }
                 break;
             case DATA64_CRYSTAL_ACTIVATOR_INT:
                 if (Unit* pl = instance->GetUnit(ObjectGuid(uiData)))
+                {
                     ProcessActivationCrystal(pl, true);
+                }
                 break;
             case DATA64_SABOTEUR:
                 if (const BossInformation* pData = GetBossInformation())
@@ -595,7 +639,9 @@ struct is_violet_hold : public InstanceScript
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     m_auiEncounter[i] = NOT_STARTED;
+                }
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;
@@ -608,16 +654,22 @@ struct is_violet_hold : public InstanceScript
                 if (m_uiEventResetTimer <= uiDiff)
                 {
                     if (Creature* pSinclari = GetSingleCreatureFromStorage(NPC_SINCLARI))
+                    {
                         pSinclari->Respawn();
+                    }
 
                     m_uiEventResetTimer = 0;
                 }
                 else
+                {
                     m_uiEventResetTimer -= uiDiff;
+                }
             }
 
             if (m_auiEncounter[TYPE_MAIN] != IN_PROGRESS)
+            {
                 return;
+            }
 
             if (m_uiPortalTimer)
             {
@@ -631,7 +683,9 @@ struct is_violet_hold : public InstanceScript
                     m_uiPortalTimer = 0;
                 }
                 else
+                {
                     m_uiPortalTimer -= uiDiff;
+                }
             }
         }
 
@@ -643,7 +697,9 @@ struct is_violet_hold : public InstanceScript
         bool IsCurrentPortalForTrash() const
         {
             if (m_uiWorldStatePortalCount % MAX_MINIBOSSES)
+            {
                 return true;
+            }
 
             return false;
         }
@@ -654,18 +710,26 @@ struct is_violet_hold : public InstanceScript
             if (!mEntry)
             {
                 if (m_uiWorldStatePortalCount == 6 && m_vRandomBosses.size() >= 1)
+                {
                     mEntry = m_vRandomBosses[0]->uiEntry;
+                }
                 else if (m_uiWorldStatePortalCount == 12 && m_vRandomBosses.size() >= 2)
+                {
                     mEntry = m_vRandomBosses[1]->uiEntry;
+                }
             }
 
             if (!mEntry)
+            {
                 return nullptr;
+            }
 
             for (uint8 i = 0; i < MAX_MINIBOSSES; ++i)
             {
                 if (aBossInformation[i].uiEntry == mEntry)
+                {
                     return &aBossInformation[i];
+                }
             }
 
             return nullptr;
@@ -678,9 +742,13 @@ struct is_violet_hold : public InstanceScript
                 if (Creature* pPortal = instance->GetCreature(*itr))
                 {
                     if (bDeactivate)
+                    {
                         pPortal->ForcedDespawn();
+                    }
                     else
+                    {
                         pPortal->Respawn();
+                    }
                 }
             }
         }
@@ -692,7 +760,9 @@ struct is_violet_hold : public InstanceScript
                 if (Creature* pGuard = instance->GetCreature(*itr))
                 {
                     if (bRespawn)
+                    {
                         pGuard->Respawn();
+                    }
                     else if (pGuard->IsAlive())
                     {
                         pGuard->SetWalk(false);
@@ -712,7 +782,9 @@ struct is_violet_hold : public InstanceScript
                 {
                     UpdateCellForBoss(pData->uiEntry);
                     if (pData->iSayEntry)
+                    {
                         DoScriptText(pData->iSayEntry, pBoss);
+                    }
 
                     pBoss->GetMotionMaster()->MovePoint(1, pData->fX, pData->fY, pData->fZ);
                     pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
@@ -755,7 +827,9 @@ struct is_violet_hold : public InstanceScript
             for (uint8 i = 0; i < MAX_MINIBOSSES; ++i)
             {
                 if (m_auiEncounter[aBossInformation[i].uiType] == DONE)
+                {
                     m_vRandomBosses.push_back(CreateBossSpawnByEntry(aBossInformation[i].uiEntry));
+                }
             }
 
             if (m_vRandomBosses.size() < 2)                         // Get some new random bosses
@@ -763,20 +837,28 @@ struct is_violet_hold : public InstanceScript
                 std::random_shuffle(m_vRandomBossList.begin(), m_vRandomBossList.end());
                 // two required, in case the first is already pushed to m_vRandomBosses
                 if (m_vRandomBossList.size() < 2)
+                {
                     script_error_log("instance_violet_hold, Mini Bosses are not properly spawned");
+                }
                 else
+                {
                     m_vRandomBossList.resize(2);
+                }
 
                 // Fill up some random bosses
                 for (std::vector<uint32>::const_iterator itr = m_vRandomBossList.begin(); itr != m_vRandomBossList.end(); ++itr)
                 {
                     if (m_vRandomBosses.empty() || m_vRandomBosses[0]->uiEntry != *itr)
+                    {
                         m_vRandomBosses.push_back(CreateBossSpawnByEntry(*itr));
+                    }
                 }
             }
 
             for (uint8 i = 0; i < m_vRandomBosses.size(); ++i)
+            {
                 debug_log("SD3: instance_violet_hold random boss %u is entry %u", i, m_vRandomBosses[i]->uiEntry);
+            }
         }
 
         void SpawnPortal()
@@ -832,11 +914,15 @@ struct is_violet_hold : public InstanceScript
                 {
                     // Despawn ghost boss
                     if (Creature* pGhostBoss = GetSingleCreatureFromStorage(pData->uiGhostEntry))
+                    {
                         pGhostBoss->ForcedDespawn();
+                    }
 
                     // Spawn new boss replacement
                     if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_SINCLARI_ALT))
+                    {
                         pSummoner->SummonCreature(pData->uiGhostEntry, (*itr)->fX, (*itr)->fY, (*itr)->fZ, (*itr)->fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    }
 
                     // Replace Erekem guards
                     if (pData->uiType == TYPE_EREKEM)
@@ -845,7 +931,9 @@ struct is_violet_hold : public InstanceScript
                         for (GuidList::const_iterator itr = m_lArakkoaGuardList.begin(); itr != m_lArakkoaGuardList.end(); ++itr)
                         {
                             if (Creature* pGhostGuard = instance->GetCreature(*itr))
+                            {
                                 pGhostGuard->ForcedDespawn();
+                            }
                         }
 
                         m_lArakkoaGuardList.clear();
@@ -858,7 +946,9 @@ struct is_violet_hold : public InstanceScript
                             {
                                 // Don't allow alive original guards while the boss is dead
                                 if (!pGuard->IsDead())
+                                {
                                     pGuard->ForcedDespawn();
+                                }
 
                                 // Spawn a ghost guard for each original guard
                                 pGuard->GetRespawnCoord(fX, fY, fZ, &fO);
@@ -870,7 +960,9 @@ struct is_violet_hold : public InstanceScript
 
                 // Close Door if still open
                 if (pData && (m_auiEncounter[pData->uiType] == DONE || m_auiEncounter[pData->uiType] == FAIL))
+                {
                     UpdateCellForBoss(pData->uiEntry, true);
+                }
             }
         }
 
@@ -884,7 +976,9 @@ struct is_violet_hold : public InstanceScript
         bool IsNextPortalForTrash()
         {
             if ((m_uiWorldStatePortalCount + 1) % MAX_MINIBOSSES)
+            {
                 return true;
+            }
 
             return false;
         }
@@ -895,7 +989,9 @@ struct is_violet_hold : public InstanceScript
             pBossSpawn->uiEntry = uiEntry;
 
             if (Creature* pBoss = GetSingleCreatureFromStorage(uiEntry))
+            {
                 pBoss->GetRespawnCoord(pBossSpawn->fX, pBossSpawn->fY, pBossSpawn->fZ, &(pBossSpawn->fO));
+            }
 
             return pBossSpawn;
         }

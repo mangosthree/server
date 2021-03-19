@@ -421,7 +421,9 @@ struct npc_threshwackonator : public CreatureScript
             pPlayer->SEND_GOSSIP_MENU(TEXT_ID_KEY_READY, pCreature->GetObjectGuid());
         }
         else
+        {
             pPlayer->SEND_GOSSIP_MENU(TEXT_ID_THRESH_DEFAULT, pCreature->GetObjectGuid());
+        }
 
         return true;
     }

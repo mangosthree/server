@@ -129,7 +129,9 @@ struct boss_jedoga : public CreatureScript
         ObjectGuid SelectRandomVolunteer()
         {
             if (m_lVolunteerGuidList.empty())
+            {
                 return ObjectGuid();
+            }
 
             GuidList::iterator iter = m_lVolunteerGuidList.begin();
             advance(iter, urand(0, m_lVolunteerGuidList.size() - 1));
@@ -143,7 +145,9 @@ struct boss_jedoga : public CreatureScript
             DoCallVolunteers();
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_JEDOGA, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -161,13 +165,17 @@ struct boss_jedoga : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_JEDOGA, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_JEDOGA, FAIL);
+            }
         }
 
         void MoveInLineOfSight(Unit* pWho) override
@@ -207,9 +215,13 @@ struct boss_jedoga : public CreatureScript
                         float fDist = i < 7 ? 20.0f : 30.0f;
                         float fAngle = 0;
                         if (!j)
+                        {
                             fAngle = i < 7 ? (i - 2) * (3 * M_PI_F / 35) : (i - 6) * (M_PI_F / 16);
+                        }
                         else
+                        {
                             fAngle = i < 7 ? (i - 10) * (3 * M_PI_F / 35) : 3 * M_PI_F / 2 - (i - 6) * (M_PI_F / 16);
+                        }
 
                         m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, fDist, fAngle);
                         pVolunteer->GetMotionMaster()->MovePoint(POINT_ID_PREPARE, fX, fY, fZ);
@@ -254,7 +266,9 @@ struct boss_jedoga : public CreatureScript
         void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
         {
             if (uiType != POINT_MOTION_TYPE || pSummoned->GetEntry() != NPC_TWILIGHT_VOLUNTEER)
+            {
                 return;
+            }
 
             if (uiPointId == POINT_ID_PREPARE)
             {
@@ -272,7 +286,9 @@ struct boss_jedoga : public CreatureScript
         void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
         {
             if (uiMoveType != POINT_MOTION_TYPE)
+            {
                 return;
+            }
 
             switch (uiPointId)
             {
@@ -323,7 +339,9 @@ struct boss_jedoga : public CreatureScript
                 SetCombatMovement(true);
                 m_creature->SetLevitate(false);
                 if (m_creature->getVictim())
+                {
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                }
                 break;
             }
         }
@@ -335,21 +353,31 @@ struct boss_jedoga : public CreatureScript
                 if (m_uiVisualTimer <= uiDiff)
                 {
                     if (m_pInstance)
+                    {
                         m_pInstance->SetData(TYPE_DO_JEDOGA, 2);
+                    }
 
                     if (DoCastSpellIfCan(m_creature, SPELL_LIGHTNING_VISUAL) == CAST_OK)
+                    {
                         m_uiVisualTimer = 0;
+                    }
                 }
                 else
+                {
                     m_uiVisualTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Don't use abilities while sacrificing
             if (m_bIsSacrificing)
+            {
                 return;
+            }
 
             // Note: this was changed in 3.3.2 and now it does this only once
             if (m_creature->GetHealthPercent() < 50.0f && !m_bSacrifice)
@@ -364,22 +392,30 @@ struct boss_jedoga : public CreatureScript
             if (m_uiThundershockTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_THUNDERSHOCK : SPELL_THUNDERSHOCK_H);
+                }
 
                 m_uiThundershockTimer = 40000;
             }
             else
+            {
                 m_uiThundershockTimer -= uiDiff;
+            }
 
             if (m_uiLightningBoltTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_LIGHTNING_BOLT : SPELL_LIGHTNING_BOLT_H);
+                }
 
                 m_uiLightningBoltTimer = 7000;
             }
             else
+            {
                 m_uiLightningBoltTimer -= uiDiff;
+            }
 
             if (m_uiCycloneStrikeTimer < uiDiff)
             {
@@ -387,7 +423,9 @@ struct boss_jedoga : public CreatureScript
                 m_uiCycloneStrikeTimer = 15000;
             }
             else
+            {
                 m_uiCycloneStrikeTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -422,10 +460,14 @@ struct npc_twilight_volunteer : public CreatureScript
         {
             // If it's not killed by Jedoga then set the achiev to fail
             if (pKiller->GetEntry() == NPC_JEDOGA_SHADOWSEEKER)
+            {
                 return;
+            }
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_JEDOGA, SPECIAL);
+            }
         }
 
         void AttackStart(Unit* /*pWho*/) override { }
@@ -452,7 +494,9 @@ struct aura_sacrifice_beam : public AuraScript
                 if (ScriptedInstance* pInstance = (ScriptedInstance*)pTarget->GetInstanceData())
                 {
                     if (Creature* pJedoga = pInstance->GetSingleCreatureFromStorage(NPC_JEDOGA_SHADOWSEEKER))
+                    {
                         pJedoga->DealDamage(pTarget, pTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                    }
                 }
             }
         }

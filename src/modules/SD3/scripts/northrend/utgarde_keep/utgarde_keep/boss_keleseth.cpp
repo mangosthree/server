@@ -86,7 +86,9 @@ struct mob_vrykul_skeleton : public CreatureScript
         void MoveInLineOfSight(Unit* pWho) override
         {
             if (!pWho || m_uiReviveTimer)
+            {
                 return;
+            }
 
             ScriptedAI::MoveInLineOfSight(pWho);
         }
@@ -94,7 +96,9 @@ struct mob_vrykul_skeleton : public CreatureScript
         void AttackStart(Unit* pWho) override
         {
             if (!pWho || m_uiReviveTimer)
+            {
                 return;
+            }
 
             ScriptedAI::AttackStart(pWho);
         }
@@ -106,7 +110,9 @@ struct mob_vrykul_skeleton : public CreatureScript
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
 
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
                 m_creature->GetMotionMaster()->MoveChase(pTarget);
+            }
 
             DoResetThreat();
             m_uiReviveTimer = 0;
@@ -137,14 +143,20 @@ struct mob_vrykul_skeleton : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiReviveTimer)
             {
                 if (m_uiReviveTimer <= uiDiff)
+                {
                     Revive();
+                }
                 else
+                {
                     m_uiReviveTimer -= uiDiff;
+                }
 
                 return;
             }
@@ -152,22 +164,30 @@ struct mob_vrykul_skeleton : public CreatureScript
             if (m_uiCastTimer < uiDiff)
             {
                 if (m_bIsRegularMode)
+                {
                     DoCastSpellIfCan(m_creature->getVictim(), SPELL_DECREPIFY);
+                }
                 else
                 {
                     if (urand(0, 3))
+                    {
                         DoCastSpellIfCan(m_creature->getVictim(), SPELL_DECREPIFY_H);
+                    }
                     else if (m_pInstance && m_pInstance->GetData(TYPE_KELESETH) == IN_PROGRESS)
                     {
                         if (Creature* pKeleseth = m_pInstance->GetSingleCreatureFromStorage(NPC_KELESETH))
+                        {
                             DoCastSpellIfCan(pKeleseth, SPELL_BONE_ARMOR);
+                        }
                     }
                 }
 
                 m_uiCastTimer = urand(5000, 15000);
             }
             else
+            {
                 m_uiCastTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -231,13 +251,17 @@ struct boss_keleseth : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_KELESETH, IN_PROGRESS);
+            }
         }
 
         void SummonAdds()
         {
             for (uint8 i = 0; i < 4; ++i)
+            {
                 m_creature->SummonCreature(NPC_VRYKUL_SKELETON, fAddPosition[0] + rand() % 7, fAddPosition[1] + rand() % 7, fAddPosition[2], fAddPosition[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            }
         }
 
         void DespawnOrKillAdds(bool bDespawn)
@@ -247,7 +271,9 @@ struct boss_keleseth : public CreatureScript
                 if (Creature* pAdd = m_creature->GetMap()->GetCreature(*itr))
                 {
                     if (bDespawn)
+                    {
                         pAdd->ForcedDespawn();
+                    }
                     else
                     {
                         pAdd->SetDeathState(JUST_DIED);
@@ -268,7 +294,9 @@ struct boss_keleseth : public CreatureScript
             }
 
             if (pSummoned->GetEntry() == NPC_FROST_TOMB)
+            {
                 pSummoned->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_FROST, true);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -276,7 +304,9 @@ struct boss_keleseth : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_KELESETH, DONE);
+            }
 
             DespawnOrKillAdds(false);
         }
@@ -284,7 +314,9 @@ struct boss_keleseth : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_KELESETH, FAIL);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -295,7 +327,9 @@ struct boss_keleseth : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiSummonTimer)
             {
@@ -305,7 +339,9 @@ struct boss_keleseth : public CreatureScript
                     m_uiSummonTimer = 0;
                 }
                 else
+                {
                     m_uiSummonTimer -= uiDiff;
+                }
             }
 
             if (m_uiShadowboltTimer < uiDiff)
@@ -314,7 +350,9 @@ struct boss_keleseth : public CreatureScript
                 m_uiShadowboltTimer = 3000;
             }
             else
+            {
                 m_uiShadowboltTimer -= uiDiff;
+            }
 
             if (m_uiFrostTombTimer < uiDiff)
             {
@@ -337,7 +375,9 @@ struct boss_keleseth : public CreatureScript
                 m_uiFrostTombTimer = 25000;
             }
             else
+            {
                 m_uiFrostTombTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

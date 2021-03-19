@@ -324,7 +324,9 @@ struct is_dark_portal : public InstanceScript
             }
 
             if (uiType == TYPE_RIFT_ID)
+            {
                 return m_uiWorldStateRiftCount;
+            }
 
             return 0;
         }

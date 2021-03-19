@@ -71,11 +71,15 @@ struct is_halls_of_lightning : public InstanceScript
             {
             case GO_VOLKHAN_DOOR:
                 if (m_auiEncounter[TYPE_VOLKHAN] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_IONAR_DOOR:
                 if (m_auiEncounter[TYPE_IONAR] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_LOKEN_THRONE:
                 break;
@@ -92,32 +96,48 @@ struct is_halls_of_lightning : public InstanceScript
             {
             case TYPE_BJARNGRIM:
                 if (uiData == SPECIAL)
+                {
                     m_bLightningStruck = true;
+                }
                 else if (uiData == FAIL)
+                {
                     m_bLightningStruck = false;
+                }
                 m_auiEncounter[uiType] = uiData;
                 break;
             case TYPE_VOLKHAN:
                 if (uiData == DONE)
+                {
                     DoUseDoorOrButton(GO_VOLKHAN_DOOR);
+                }
                 else if (uiData == IN_PROGRESS)
+                {
                     m_bIsShatterResistant = true;
+                }
                 else if (uiData == SPECIAL)
+                {
                     m_bIsShatterResistant = false;
+                }
                 m_auiEncounter[uiType] = uiData;
                 break;
             case TYPE_IONAR:
                 if (uiData == DONE)
+                {
                     DoUseDoorOrButton(GO_IONAR_DOOR);
+                }
                 m_auiEncounter[uiType] = uiData;
                 break;
             case TYPE_LOKEN:
                 if (uiData == IN_PROGRESS)
+                {
                     DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_LOKEN_ID);
+                }
                 else if (uiData == DONE)
                 {
                     if (GameObject* pGlobe = GetSingleGameObjectFromStorage(GO_LOKEN_THRONE))
+                    {
                         pGlobe->SendGameObjectCustomAnim(pGlobe->GetObjectGuid());
+                    }
                 }
                 m_auiEncounter[uiType] = uiData;
                 break;
@@ -140,7 +160,9 @@ struct is_halls_of_lightning : public InstanceScript
         uint32 GetData(uint32 uiType) const override
         {
             if (uiType < MAX_ENCOUNTER)
+            {
                 return m_auiEncounter[uiType];
+            }
 
             return 0;
         }
@@ -175,7 +197,9 @@ struct is_halls_of_lightning : public InstanceScript
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
                 if (m_auiEncounter[i] == IN_PROGRESS)
+                {
                     m_auiEncounter[i] = NOT_STARTED;
+                }
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;

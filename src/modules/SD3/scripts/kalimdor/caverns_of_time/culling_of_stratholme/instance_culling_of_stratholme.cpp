@@ -248,15 +248,23 @@ struct is_culling_of_stratholme : public InstanceScript
             // Show World States if needed
             // Grain event world states
             if (GetData(TYPE_GRAIN_EVENT) == IN_PROGRESS || GetData(TYPE_GRAIN_EVENT) == SPECIAL)
+            {
                 pPlayer->SendUpdateWorldState(WORLD_STATE_CRATES, 1);      // Show Crates Counter
+            }
             else
+            {
                 pPlayer->SendUpdateWorldState(WORLD_STATE_CRATES, 0);      // Remove Crates Counter
+            }
 
             // Scourge waves
             if (GetData(TYPE_MEATHOOK_EVENT) == IN_PROGRESS || GetData(TYPE_SALRAMM_EVENT) == IN_PROGRESS)
+            {
                 pPlayer->SendUpdateWorldState(WORLD_STATE_WAVE, m_uiScourgeWaveCount);      // Add WaveCounter
+            }
             else
+            {
                 pPlayer->SendUpdateWorldState(WORLD_STATE_WAVE, 0);                         // Remove WaveCounter
+            }
 
             // Infinite corruptor
             if (GetData(TYPE_INFINITE_CORRUPTER_TIME))
@@ -267,7 +275,9 @@ struct is_culling_of_stratholme : public InstanceScript
                 pPlayer->SendUpdateWorldState(WORLD_STATE_TIME_COUNTER, GetData(TYPE_INFINITE_CORRUPTER_TIME) / (MINUTE * IN_MILLISECONDS));
             }
             else
+            {
                 pPlayer->SendUpdateWorldState(WORLD_STATE_TIME, 0);        // Remove Timer
+            }
         }
 
         void OnCreatureCreate(Creature* pCreature) override
@@ -302,7 +312,9 @@ struct is_culling_of_stratholme : public InstanceScript
             case NPC_LORDAERON_FOOTMAN:
             case NPC_HIGH_ELF_MAGE_PRIEST:
                 if (pCreature->GetPositionX() > 2000.0f)
+                {
                     m_luiGateSoldiersGUIDs.push_back(pCreature->GetObjectGuid());
+                }
                 break;
 
             case NPC_STRATHOLME_CITIZEN:
@@ -310,9 +322,13 @@ struct is_culling_of_stratholme : public InstanceScript
             case NPC_AGIATED_STRATHOLME_CITIZEN:
             case NPC_AGIATED_STRATHOLME_RESIDENT:
                 if (m_auiEncounter[TYPE_ARTHAS_INTRO_EVENT] == DONE)
+                {
                     pCreature->UpdateEntry(NPC_ZOMBIE);
+                }
                 else
+                {
                     m_luiResidentGUIDs.push_back(pCreature->GetObjectGuid());
+                }
                 break;
 
             case NPC_ENRAGING_GHOUL:
@@ -325,7 +341,9 @@ struct is_culling_of_stratholme : public InstanceScript
             case NPC_BILE_GOLEM:
             case NPC_DEVOURING_GHOUL:
                 if (pCreature->IsTemporarySummon() && GetData(TYPE_SALRAMM_EVENT) != DONE)
+                {
                     m_luiCurrentScourgeWaveGUIDs.push_back(pCreature->GetObjectGuid());
+                }
                 break;
             }
         }
@@ -336,7 +354,9 @@ struct is_culling_of_stratholme : public InstanceScript
             {
             case GO_DOOR_BOOKCASE:
                 if (m_auiEncounter[TYPE_EPOCH_EVENT] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_DARK_RUNED_CHEST:
             case GO_DARK_RUNED_CHEST_H:
@@ -373,7 +393,9 @@ struct is_culling_of_stratholme : public InstanceScript
 
                     // send next scourge wave
                     if (m_luiCurrentScourgeWaveGUIDs.empty())
+                    {
                         m_uiScourgeWaveTimer = 2000;
+                    }
                 }
                 break;
             }
@@ -386,12 +408,16 @@ struct is_culling_of_stratholme : public InstanceScript
             case TYPE_GRAIN_EVENT:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == SPECIAL)
+                {
                     DoUpdateWorldState(WORLD_STATE_CRATES, 1);
+                }
                 else if (uiData == IN_PROGRESS)
                 {
                     // safety check
                     if (m_uiGrainCrateCount >= MAX_GRAIN_CRATES)
+                    {
                         return;
+                    }
 
                     ++m_uiGrainCrateCount;
                     DoUpdateWorldState(WORLD_STATE_CRATES_COUNT, m_uiGrainCrateCount);
@@ -425,7 +451,9 @@ struct is_culling_of_stratholme : public InstanceScript
             case TYPE_SALRAMM_EVENT:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == DONE)
+                {
                     m_uiScourgeWaveTimer = 5000;
+                }
                 break;
             case TYPE_ARTHAS_TOWNHALL_EVENT:
                 m_auiEncounter[uiType] = uiData;
@@ -476,7 +504,9 @@ struct is_culling_of_stratholme : public InstanceScript
                     DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_DARK_RUNED_CHEST : GO_DARK_RUNED_CHEST_H, 30 * MINUTE);
 
                     if (Player* pPlayer = GetPlayerInMap())
+                    {
                         DoSpawnChromieIfNeeded(pPlayer);
+                    }
                 }
                 break;
             case TYPE_INFINITE_CORRUPTER_TIME:
@@ -487,7 +517,9 @@ struct is_culling_of_stratholme : public InstanceScript
                     DoUpdateWorldState(WORLD_STATE_TIME_COUNTER, 0);
                 }
                 else
+                {
                     DoUpdateWorldState(WORLD_STATE_TIME_COUNTER, uiData / (MINUTE * IN_MILLISECONDS));
+                }
                 break;
             case TYPE_INFINITE_CORRUPTER:
                 m_auiEncounter[uiType] = uiData;
@@ -502,7 +534,9 @@ struct is_culling_of_stratholme : public InstanceScript
 
                         // spawn the corruptor for the first time
                         if (Creature* pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS))
+                        {
                             DoSpawnCorruptorIfNeeded(pArthas);
+                        }
                     }
                     break;
                 case DONE:
@@ -520,7 +554,9 @@ struct is_culling_of_stratholme : public InstanceScript
                         DoOrSimulateScriptTextForThisInstance(SAY_CORRUPTOR_DESPAWN, NPC_INFINITE_CORRUPTER);
 
                         if (pCorrupter->IsAlive())
+                        {
                             pCorrupter->ForcedDespawn();
+                        }
                     }
                     break;
                 }
@@ -550,7 +586,9 @@ struct is_culling_of_stratholme : public InstanceScript
         uint32 GetData(uint32 uiType) const override
         {
             if (uiType < MAX_ENCOUNTER)
+            {
                 return m_auiEncounter[uiType];
+            }
 
             return 0;
         }
@@ -561,11 +599,15 @@ struct is_culling_of_stratholme : public InstanceScript
             {
             case TYPE_DATA64_PLAYER_BOTH:
                 if (Player *pPlayer = instance->GetPlayer(ObjectGuid(uiData)))
+                {
                     DoSpawnChromieIfNeeded(pPlayer);
+                }
                     // no break intended!
             case TYPE_DATA64_PLAYER_ARTHAS:
                 if (Player *pPlayer = instance->GetPlayer(ObjectGuid(uiData)))
+                {
                     DoSpawnArthasIfNeeded(pPlayer);
+                }
                 break;
             case TYPE_DATA64_AD_TARGET:
                 if (Creature *pTarget = instance->GetCreature(ObjectGuid(uiData)))
@@ -580,7 +622,9 @@ struct is_culling_of_stratholme : public InstanceScript
                         {
                             // check if the event can proceed
                             if (!CanGrainEventProgress(pTarget))
+                            {
                                 return;
+                            }
 
                             break;
                         }
@@ -599,12 +643,16 @@ struct is_culling_of_stratholme : public InstanceScript
                     case 2:
                         // Start NPC_SERGEANT_MORIGAN  Event
                         if (Creature* pMorigan = GetSingleCreatureFromStorage(NPC_SERGEANT_MORIGAN))
+                        {
                             pMorigan->GetMotionMaster()->MoveWaypoint();
+                        }
                         break;
                     case 3:
                         // Start NPC_JENA_ANDERSON Event
                         if (Creature* pJena = GetSingleCreatureFromStorage(NPC_JENA_ANDERSON))
+                        {
                             pJena->GetMotionMaster()->MoveWaypoint();
+                        }
                         break;
                     case 4:
                         // Start NPC_MALCOM_MOORE Event
@@ -613,7 +661,9 @@ struct is_culling_of_stratholme : public InstanceScript
                     case 5:
                         // Start NPC_BARTLEBY_BATTSON Event
                         if (Creature* pBartleby = GetSingleCreatureFromStorage(NPC_BARTLEBY_BATTSON))
+                        {
                             pBartleby->GetMotionMaster()->MoveWaypoint();
+                        }
                         break;
                     }
 
@@ -626,9 +676,13 @@ struct is_culling_of_stratholme : public InstanceScript
 
                     // despawn the GO visuals and spanw the plague crate
                     if (GameObject* pCrate = GetClosestGameObjectWithEntry(pTarget, GO_SUSPICIOUS_GRAIN_CRATE, 5.0f))
+                    {
                         pCrate->SetLootState(GO_JUST_DEACTIVATED);
+                    }
                     if (GameObject* pHighlight = GetClosestGameObjectWithEntry(pTarget, GO_CRATE_HIGHLIGHT, 5.0f))
+                    {
                         pHighlight->SetLootState(GO_JUST_DEACTIVATED);
+                    }
                     if (GameObject* pCrate = GetClosestGameObjectWithEntry(pTarget, GO_PLAGUE_GRAIN_CRATE, 5.0f))
                     {
                         pCrate->SetRespawnTime(6 * HOUR * IN_MILLISECONDS);
@@ -665,13 +719,17 @@ struct is_culling_of_stratholme : public InstanceScript
                 if (i != TYPE_INFINITE_CORRUPTER_TIME)
                 {
                     if (m_auiEncounter[i] == IN_PROGRESS)
+                    {
                         m_auiEncounter[i] = NOT_STARTED;
+                    }
                 }
             }
 
             // If already started counting down time, the event is "in progress"
             if (m_auiEncounter[TYPE_INFINITE_CORRUPTER_TIME])
+            {
                 m_auiEncounter[TYPE_INFINITE_CORRUPTER] = IN_PROGRESS;
+            }
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
@@ -683,17 +741,23 @@ struct is_culling_of_stratholme : public InstanceScript
             if (m_auiEncounter[TYPE_INFINITE_CORRUPTER_TIME])
             {
                 if (m_auiEncounter[TYPE_INFINITE_CORRUPTER_TIME] <= uiDiff)
+                {
                     SetData(TYPE_INFINITE_CORRUPTER, FAIL);
+                }
                 else
                 {
                     m_auiEncounter[TYPE_INFINITE_CORRUPTER_TIME] -= uiDiff;
                     if (m_auiEncounter[TYPE_INFINITE_CORRUPTER_TIME] / IN_MILLISECONDS % 20 == 0)
+                    {
                         SetData(TYPE_INFINITE_CORRUPTER_TIME, m_auiEncounter[TYPE_INFINITE_CORRUPTER_TIME]);
+                    }
                 }
 
                 // This part is needed for a small "hurry up guys" note, TODO, verify 20min
                 if (m_auiEncounter[TYPE_INFINITE_CORRUPTER] == IN_PROGRESS && m_auiEncounter[TYPE_INFINITE_CORRUPTER_TIME] <= 24 * MINUTE * IN_MILLISECONDS)
+                {
                     SetData(TYPE_INFINITE_CORRUPTER, SPECIAL);
+                }
             }
 
             // Small Timer, to remove Grain-Crate WorldState and Spawn Second Chromie
@@ -702,14 +766,18 @@ struct is_culling_of_stratholme : public InstanceScript
                 if (m_uiRemoveCrateStateTimer <= uiDiff)
                 {
                     if (Player* pPlayer = GetPlayerInMap())
+                    {
                         DoSpawnChromieIfNeeded(pPlayer);
+                    }
 
                     DoUpdateWorldState(WORLD_STATE_CRATES, 0);
                     DoChromieWhisper(WHISPER_CHROMIE_CRATES);
                     m_uiRemoveCrateStateTimer = 0;
                 }
                 else
+                {
                     m_uiRemoveCrateStateTimer -= uiDiff;
+                }
             }
 
             // Respawn Arthas after some time
@@ -718,12 +786,16 @@ struct is_culling_of_stratholme : public InstanceScript
                 if (m_uiArthasRespawnTimer <= uiDiff)
                 {
                     if (Player* pPlayer = GetPlayerInMap())
+                    {
                         DoSpawnArthasIfNeeded(pPlayer);
+                    }
 
                     m_uiArthasRespawnTimer = 0;
                 }
                 else
+                {
                     m_uiArthasRespawnTimer -= uiDiff;
+                }
             }
 
             // Handle undead waves
@@ -738,9 +810,13 @@ struct is_culling_of_stratholme : public InstanceScript
 
                         // despawn and respawn Arthas in the new location
                         if (Creature* pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS))
+                        {
                             pArthas->ForcedDespawn();
+                        }
                         if (Player* pPlayer = GetPlayerInMap())
+                        {
                             DoSpawnArthasIfNeeded(pPlayer);
+                        }
                     }
                     else
                     {
@@ -752,7 +828,9 @@ struct is_culling_of_stratholme : public InstanceScript
                     m_uiScourgeWaveTimer = 0;
                 }
                 else
+                {
                     m_uiScourgeWaveTimer -= uiDiff;
+                }
             }
         }
 
@@ -764,10 +842,14 @@ struct is_culling_of_stratholme : public InstanceScript
             for (GuidList::const_iterator itr = m_luiCratesBunnyGUIDs.begin(); itr != m_luiCratesBunnyGUIDs.end(); ++itr)
             {
                 if (Creature* pBunny = instance->GetCreature(*itr))
+                {
                     lCratesBunnyList.push_back(pBunny);
+                }
             }
             if (lCratesBunnyList.empty())
+            {
                 return;
+            }
 
             lCratesBunnyList.sort(sortFromEastToWest);
             lList = lCratesBunnyList;
@@ -777,13 +859,17 @@ struct is_culling_of_stratholme : public InstanceScript
         void DoSpawnChromieIfNeeded(Unit* pSummoner)
         {
             if (!pSummoner)
+            {
                 return;
+            }
 
             if (GetInstancePosition() == POS_INSTANCE_FINISHED)
             {
                 Creature* pChromie = GetSingleCreatureFromStorage(NPC_CHROMIE_END, true);
                 if (!pChromie)
+                {
                     pSummoner->SummonCreature(NPC_CHROMIE_END, m_aChromieSpawnLocs[1].m_fX, m_aChromieSpawnLocs[1].m_fY, m_aChromieSpawnLocs[1].m_fZ, m_aChromieSpawnLocs[1].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+                }
             }
             else if (GetInstancePosition() >= POS_ARTHAS_INTRO)
             {
@@ -800,21 +886,29 @@ struct is_culling_of_stratholme : public InstanceScript
         void DoSpawnArthasIfNeeded(Unit* pSummoner)
         {
             if (!pSummoner)
+            {
                 return;
+            }
 
             Creature* pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS, true);
             if (pArthas && pArthas->IsAlive())
+            {
                 return;
+            }
 
             uint8 uiPosition = GetInstancePosition();
             if (uiPosition && uiPosition <= MAX_ARTHAS_SPAWN_POS)
+            {
                 pSummoner->SummonCreature(NPC_ARTHAS, m_aArthasSpawnLocs[uiPosition - 1].m_fX, m_aArthasSpawnLocs[uiPosition - 1].m_fY, m_aArthasSpawnLocs[uiPosition - 1].m_fZ, m_aArthasSpawnLocs[uiPosition - 1].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000, true);
+            }
 
             // no gossip flag in the following positions
             if (uiPosition == POS_ARTHAS_INTRO || uiPosition == POS_ARTHAS_WAVES)
             {
                 if (Creature* pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS))
+                {
                     pArthas->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                }
             }
 
             // summon the other intro actors
@@ -829,7 +923,9 @@ struct is_culling_of_stratholme : public InstanceScript
 
                 // spawn Jaina and Uther
                 if (Creature* pJaina = pSummoner->SummonCreature(NPC_JAINA_PROUDMOORE, m_aIntroActorsSpawnLocs[0].m_fX, m_aIntroActorsSpawnLocs[0].m_fY, m_aIntroActorsSpawnLocs[0].m_fZ, m_aIntroActorsSpawnLocs[0].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                {
                     pJaina->GetMotionMaster()->MoveWaypoint();
+                }
                 if (Creature* pUther = pSummoner->SummonCreature(NPC_UTHER_LIGHTBRINGER, m_aIntroActorsSpawnLocs[1].m_fX, m_aIntroActorsSpawnLocs[1].m_fY, m_aIntroActorsSpawnLocs[1].m_fZ, m_aIntroActorsSpawnLocs[1].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
                 {
                     pUther->SetWalk(false);
@@ -837,29 +933,43 @@ struct is_culling_of_stratholme : public InstanceScript
 
                     // spawn the knights
                     if (Creature* pKnight = pSummoner->SummonCreature(NPC_KNIGHT_SILVERHAND, m_aIntroActorsSpawnLocs[2].m_fX, m_aIntroActorsSpawnLocs[2].m_fY, m_aIntroActorsSpawnLocs[2].m_fZ, m_aIntroActorsSpawnLocs[2].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                    {
                         pKnight->GetMotionMaster()->MoveFollow(pUther, pKnight->GetDistance(pUther), 2 * M_PI_F - pKnight->GetAngle(pUther));
+                    }
                     if (Creature* pKnight = pSummoner->SummonCreature(NPC_KNIGHT_SILVERHAND, m_aIntroActorsSpawnLocs[3].m_fX, m_aIntroActorsSpawnLocs[3].m_fY, m_aIntroActorsSpawnLocs[3].m_fZ, m_aIntroActorsSpawnLocs[3].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                    {
                         pKnight->GetMotionMaster()->MoveFollow(pUther, pKnight->GetDistance(pUther), 2 * M_PI_F - pKnight->GetAngle(pUther));
+                    }
                     if (Creature* pKnight = pSummoner->SummonCreature(NPC_KNIGHT_SILVERHAND, m_aIntroActorsSpawnLocs[4].m_fX, m_aIntroActorsSpawnLocs[4].m_fY, m_aIntroActorsSpawnLocs[4].m_fZ, m_aIntroActorsSpawnLocs[4].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                    {
                         pKnight->GetMotionMaster()->MoveFollow(pUther, pKnight->GetDistance(pUther), 2 * M_PI_F - pKnight->GetAngle(pUther));
+                    }
                 }
             }
             // setup the entrance soldiers in case of reload or intro skip
             else if (uiPosition == POS_ARTHAS_WAVES)
+            {
                 DoSetupEntranceSoldiers(pSummoner);
+            }
         }
 
         // Function to check if the grain event can progress
         bool CanGrainEventProgress(Creature* pCrate)
         {
             if (!pCrate)
+            {
                 return false;
+            }
 
             if (m_sGrainCratesGuidSet.find(pCrate->GetObjectGuid()) != m_sGrainCratesGuidSet.end())
+            {
                 return false;
+            }
 
             if (GetData(TYPE_GRAIN_EVENT) != DONE)
+            {
                 SetData(TYPE_GRAIN_EVENT, IN_PROGRESS);
+            }
 
             m_sGrainCratesGuidSet.insert(pCrate->GetObjectGuid());
             return true;
@@ -872,7 +982,9 @@ struct is_culling_of_stratholme : public InstanceScript
             {
                 uint32 uiEntry = GetRandomMobOfType(m_aBurningScourgeLocs[i].m_uiType);
                 if (!uiEntry)
+                {
                     continue;
+                }
 
                 float fX, fY, fZ;
 
@@ -884,14 +996,18 @@ struct is_culling_of_stratholme : public InstanceScript
                         pSummoner->GetRandomPoint(m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 5.0f, fX, fY, fZ);
 
                         if (Creature* pUndead = pSummoner->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                        {
                             pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
+                        }
                     }
                 }
                 // spawn the selected mob
                 else
                 {
                     if (Creature* pUndead = pSummoner->SummonCreature(uiEntry, m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                    {
                         pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
+                    }
                 }
 
                 // spawn a few random zombies
@@ -900,7 +1016,9 @@ struct is_culling_of_stratholme : public InstanceScript
                     pSummoner->GetRandomPoint(m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 20.0f, fX, fY, fZ);
 
                     if (Creature* pUndead = pSummoner->SummonCreature(NPC_ZOMBIE, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
+                    {
                         pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
+                    }
                 }
             }
         }
@@ -912,7 +1030,9 @@ struct is_culling_of_stratholme : public InstanceScript
             {
             case AREATRIGGER_INN:
                 if (m_bStartedInnEvent)
+                {
                     return;
+                }
 
                 // start dialogue
                 if (Creature* pMichael = GetSingleCreatureFromStorage(NPC_MICHAEL_BELFAST))
@@ -929,13 +1049,17 @@ struct is_culling_of_stratholme : public InstanceScript
         void DoSetupEntranceSoldiers(Unit* pSummoner)
         {
             if (!pSummoner)
+            {
                 return;
+            }
 
             // despawn the current set of soldiers
             for (GuidList::const_iterator itr = m_luiGateSoldiersGUIDs.begin(); itr != m_luiGateSoldiersGUIDs.end(); ++itr)
             {
                 if (Creature* pSoldier = instance->GetCreature(*itr))
+                {
                     pSoldier->ForcedDespawn();
+                }
             }
 
             // spawn others in the right spot
@@ -951,17 +1075,23 @@ struct is_culling_of_stratholme : public InstanceScript
         void DoSpawnCorruptorIfNeeded(Unit* pSummoner)
         {
             if (!pSummoner)
+            {
                 return;
+            }
 
             Creature* pCorruptor = GetSingleCreatureFromStorage(NPC_INFINITE_CORRUPTER, true);
             if (pCorruptor)
+            {
                 return;
+            }
 
             pSummoner->SummonCreature(NPC_TIME_RIFT, m_aHeroicEventSpawnLocs[1].m_fX, m_aHeroicEventSpawnLocs[1].m_fY, m_aHeroicEventSpawnLocs[1].m_fZ, m_aHeroicEventSpawnLocs[1].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
             pSummoner->SummonCreature(NPC_GUARDIAN_OF_TIME, m_aHeroicEventSpawnLocs[2].m_fX, m_aHeroicEventSpawnLocs[2].m_fY, m_aHeroicEventSpawnLocs[2].m_fZ, m_aHeroicEventSpawnLocs[2].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
 
             if (Creature* pCorruptor = pSummoner->SummonCreature(NPC_INFINITE_CORRUPTER, m_aHeroicEventSpawnLocs[0].m_fX, m_aHeroicEventSpawnLocs[0].m_fY, m_aHeroicEventSpawnLocs[0].m_fZ, m_aHeroicEventSpawnLocs[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+            {
                 pCorruptor->CastSpell(pCorruptor, SPELL_CORRUPTION_OF_TIME, false);
+            }
         }
 
         // Function that will make Chromie to send a whisper to all players in map
@@ -975,7 +1105,9 @@ struct is_culling_of_stratholme : public InstanceScript
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                     {
                         if (Player* pPlayer = itr->getSource())
+                        {
                             DoScriptText(iEntry, pChromie, pPlayer);
+                        }
                     }
                 }
             }
@@ -988,7 +1120,9 @@ struct is_culling_of_stratholme : public InstanceScript
             for (GuidList::const_iterator itr = m_luiResidentGUIDs.begin(); itr != m_luiResidentGUIDs.end(); ++itr)
             {
                 if (Creature* pResident = instance->GetCreature(*itr))
+                {
                     pResident->UpdateEntry(NPC_ZOMBIE);
+                }
             }
         }
 
@@ -997,7 +1131,9 @@ struct is_culling_of_stratholme : public InstanceScript
         {
             Creature* pSummoner = GetSingleCreatureFromStorage(NPC_ARTHAS);
             if (!pSummoner)
+            {
                 return;
+            }
 
             DoOrSimulateScriptTextForThisInstance(m_aScourgeWavesLocs[m_uiCurrentUndeadPos].m_iYellId, NPC_LORDAERON_CRIER);
 
@@ -1006,7 +1142,9 @@ struct is_culling_of_stratholme : public InstanceScript
                 // get the mob entry
                 uint32 uiEntry = GetRandomMobOfType(uiScourgeWaveDef[m_uiScourgeWaveCount - 1][i]);
                 if (!uiEntry)
+                {
                     continue;
+                }
 
                 float fX, fY, fZ, fO;
                 fO = m_aScourgeWavesLocs[m_uiCurrentUndeadPos].m_fO;
@@ -1020,7 +1158,9 @@ struct is_culling_of_stratholme : public InstanceScript
                 }
                 // random position around point
                 else
+                {
                     pSummoner->GetRandomPoint(m_aScourgeWavesLocs[m_uiCurrentUndeadPos].m_fX, m_aScourgeWavesLocs[m_uiCurrentUndeadPos].m_fY, m_aScourgeWavesLocs[m_uiCurrentUndeadPos].m_fZ, 5.0f, fX, fY, fZ);
+                }
 
                 // special requirement for acolytes - spawn a pack of 4
                 if (uiScourgeWaveDef[m_uiScourgeWaveCount - 1][i] == SCOURGE_TYPE_ACOLYTES)
@@ -1033,12 +1173,16 @@ struct is_culling_of_stratholme : public InstanceScript
                 }
                 // spawn the selected mob
                 else
+                {
                     pSummoner->SummonCreature(uiEntry, fX, fY, fZ, fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                }
             }
 
             // start infinite curruptor event on the first wave
             if (m_uiScourgeWaveCount == 1 && !instance->IsRegularDifficulty() && GetData(TYPE_INFINITE_CORRUPTER) != DONE)
+            {
                 SetData(TYPE_INFINITE_CORRUPTER, IN_PROGRESS);
+            }
 
             // get a random position that is different from the previous one for the next round
             uint8 uiCurrentPos = urand(POS_FESTIVAL_LANE, POS_ELDERS_SQUARE);
@@ -1066,9 +1210,13 @@ struct is_culling_of_stratholme : public InstanceScript
                 return urand(0, 1) ? NPC_BILE_GOLEM : NPC_PATCHWORK_CONSTRUCT;
             case SCOURGE_TYPE_BOSS:
                 if (GetData(TYPE_MEATHOOK_EVENT) == IN_PROGRESS)
+                {
                     return NPC_MEATHOOK;
+                }
                 else if (GetData(TYPE_SALRAMM_EVENT) == IN_PROGRESS)
+                {
                     return NPC_SALRAMM_THE_FLESHCRAFTER;
+                }
             }
 
             return 0;
@@ -1078,21 +1226,37 @@ struct is_culling_of_stratholme : public InstanceScript
         uint8 GetInstancePosition()
         {
             if (m_auiEncounter[TYPE_MALGANIS_EVENT] == DONE)
+            {
                 return POS_INSTANCE_FINISHED;
+            }
             else if (m_auiEncounter[TYPE_ARTHAS_ESCORT_EVENT] == DONE)
+            {
                 return POS_ARTHAS_MALGANIS;
+            }
             else if (m_auiEncounter[TYPE_EPOCH_EVENT] == DONE)
+            {
                 return POS_ARTHAS_ESCORTING;
+            }
             else if (m_auiEncounter[TYPE_SALRAMM_EVENT] == DONE)
+            {
                 return POS_ARTHAS_TOWNHALL;
+            }
             else if (m_auiEncounter[TYPE_MEATHOOK_EVENT] == DONE)
+            {
                 return POS_ARTHAS_WAVES;
+            }
             else if (m_auiEncounter[TYPE_ARTHAS_INTRO_EVENT] == DONE)
+            {
                 return POS_ARTHAS_WAVES;
+            }
             else if (m_auiEncounter[TYPE_GRAIN_EVENT] == DONE)
+            {
                 return POS_ARTHAS_INTRO;
+            }
             else
+            {
                 return 0;
+            }
         }
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
@@ -1132,10 +1296,14 @@ struct at_culling_of_stratholme : public AreaTriggerScript
         if (pAt->id == AREATRIGGER_INN)
         {
             if (pPlayer->isGameMaster() || pPlayer->IsDead())
+            {
                 return false;
+            }
 
             if (InstanceData* pInstance = pPlayer->GetInstanceData())
+            {
                 pInstance->SetData(TYPE_DO_AREATRIGGER, pAt->id);
+            }
         }
 
         return false;

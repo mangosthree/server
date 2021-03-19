@@ -91,7 +91,9 @@ struct boss_faerlina : public CreatureScript
             }
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FAERLINA, IN_PROGRESS);
+            }
         }
 
         void MoveInLineOfSight(Unit* pWho) override
@@ -115,13 +117,17 @@ struct boss_faerlina : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FAERLINA, DONE);
+            }
         }
 
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FAERLINA, FAIL);
+            }
         }
 
         // Widow's Embrace prevents frenzy and poison bolt, if it removes frenzy, next frenzy is sceduled in 60s
@@ -144,7 +150,9 @@ struct boss_faerlina : public CreatureScript
 
                 // Achievement 'Momma said Knock you out': If we removed OR delayed the frenzy, the criteria is failed
                 if ((bIsFrenzyRemove || m_uiEnrageTimer < 30000) && m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_ACHIEV_KNOCK_YOU_OUT, uint32(false));
+                }
 
                 // In any case we prevent Frenzy and Poison Bolt Volley for Widow's Embrace Duration (30s)
                 // We do this be setting the timers to at least bigger than 30s
@@ -156,16 +164,22 @@ struct boss_faerlina : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Poison Bolt Volley
             if (m_uiPoisonBoltVolleyTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_POSIONBOLT_VOLLEY : SPELL_POSIONBOLT_VOLLEY_H) == CAST_OK)
+                {
                     m_uiPoisonBoltVolleyTimer = 11000;
+                }
             }
             else
+            {
                 m_uiPoisonBoltVolleyTimer -= uiDiff;
+            }
 
             // Rain Of Fire
             if (m_uiRainOfFireTimer < uiDiff)
@@ -173,11 +187,15 @@ struct boss_faerlina : public CreatureScript
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_RAIN_OF_FIRE : SPELL_RAIN_OF_FIRE_H) == CAST_OK)
+                    {
                         m_uiRainOfFireTimer = 16000;
+                    }
                 }
             }
             else
+            {
                 m_uiRainOfFireTimer -= uiDiff;
+            }
 
             // Enrage Timer
             if (m_uiEnrageTimer < uiDiff)
@@ -189,7 +207,9 @@ struct boss_faerlina : public CreatureScript
                 }
             }
             else
+            {
                 m_uiEnrageTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

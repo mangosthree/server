@@ -123,7 +123,9 @@ struct npc_barrett_ramsey : public CreatureScript
         void MovementInform(uint32 uiType, uint32 uiPointId) override
         {
             if (uiType == POINT_MOTION_TYPE && uiPointId == 1)
+            {
                 m_creature->ForcedDespawn();
+            }
         }
     };
 
@@ -138,7 +140,9 @@ struct npc_barrett_ramsey : public CreatureScript
             if (pCreature->GetEntry() == aRamseyInfo[i].uiEntry)
             {
                 if (!aRamseyInfo[i].uiOptionId)
+                {
                     uiPos = i;
+                }
                 else
                 {
                     uiType = aRamseyInfo[i].uiOptionId;
@@ -148,7 +152,9 @@ struct npc_barrett_ramsey : public CreatureScript
         }
 
         if (!uiType || !pInstance)
+        {
             return true;
+        }
 
         if (pInstance->GetData(uiType) == FAIL)
         {
@@ -168,14 +174,18 @@ struct npc_barrett_ramsey : public CreatureScript
     {
         ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         if (!pInstance)
+        {
             return true;
+        }
 
         if (uiAction > GOSSIP_ACTION_INFO_DEF)
         {
             // Begin Event
             uint32 uiType = uiAction - GOSSIP_ACTION_INFO_DEF;
             if (pInstance->GetData(uiType) == FAIL || pInstance->GetData(uiType) == NOT_STARTED)
+            {
                 pInstance->SetData(uiAction - GOSSIP_ACTION_INFO_DEF, SPECIAL);
+            }
 
             pPlayer->CLOSE_GOSSIP_MENU();
             pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);

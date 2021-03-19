@@ -104,7 +104,9 @@ struct boss_buru : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender->GetEntry() == NPC_BURU_EGG)
+            {
                 DoAttackNewTarget();
+            }
         }
 
         // Wrapper to attack a new target and remove the speed gathering buff

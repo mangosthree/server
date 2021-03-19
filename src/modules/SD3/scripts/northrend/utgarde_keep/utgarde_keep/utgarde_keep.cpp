@@ -84,20 +84,28 @@ struct mob_dragonflayer_forge_master : public CreatureScript
                 }
 
                 if (GameObject* pGOTemp = m_pInstance->GetSingleGameObjectFromStorage(uiGOBellow))
+                {
                     lGOList.push_back(pGOTemp);
+                }
             }
 
             if (!lGOList.empty())
             {
                 if (lGOList.size() != MAX_FORGE)
+                {
                     script_error_log("mob_dragonflayer_forge_master expected %u in lGOList, but does not match.", MAX_FORGE);
+                }
 
                 lGOList.sort(ObjectDistanceOrder(m_creature));
 
                 if (lGOList.front()->getLootState() == GO_READY)
+                {
                     lGOList.front()->UseDoorOrButton(DAY);
+                }
                 else if (lGOList.front()->getLootState() == GO_ACTIVATED)
+                {
                     lGOList.front()->ResetDoorOrButton();
+                }
 
                 switch (lGOList.front()->GetEntry())
                 {
@@ -109,9 +117,13 @@ struct mob_dragonflayer_forge_master : public CreatureScript
                 if (GameObject* pGOTemp = m_pInstance->GetSingleGameObjectFromStorage(uiGOFire))
                 {
                     if (pGOTemp->getLootState() == GO_READY)
+                    {
                         pGOTemp->UseDoorOrButton(DAY);
+                    }
                     else if (pGOTemp->getLootState() == GO_ACTIVATED)
+                    {
                         pGOTemp->ResetDoorOrButton();
+                    }
                 }
             }
         }
@@ -129,13 +141,17 @@ struct mob_dragonflayer_forge_master : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(m_uiForgeEncounterId, DONE);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiBurningBrandTimer < uiDiff)
             {

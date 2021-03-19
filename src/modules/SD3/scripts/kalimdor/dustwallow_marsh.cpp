@@ -879,7 +879,9 @@ struct npc_stinky_ignatz : public CreatureScript
                 break;
             case 26:
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     DoScriptText(SAY_STINKY_THIRD_STOP_3, m_creature, pPlayer);
+                }
                 break;
             case 29:
                 m_creature->HandleEmote(EMOTE_STATE_USESTANDING);
@@ -997,7 +999,9 @@ struct boss_tethyr : public CreatureScript
         {
             // send world states to player summoner
             if (m_creature->IsTemporarySummon())
+            {
                 m_summonerGuid = ((TemporarySummon*)m_creature)->GetSummonerGuid();
+            }
 
             if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_summonerGuid))
             {
@@ -1034,7 +1038,9 @@ struct boss_tethyr : public CreatureScript
         {
             // quest complete and cleanup
             if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_summonerGuid))
+            {
                 pSummoner->GroupEventHappens(QUEST_ID_TETHYR, m_creature);
+            }
 
             // ToDo: trigger some fireworks!
             DoEncounterCleanup();
@@ -1052,7 +1058,9 @@ struct boss_tethyr : public CreatureScript
                     GetGameObjectListWithEntryInGrid(lCannonsInRange, m_creature, GO_COVE_CANNON, 100.0f);
 
                     for (std::list<GameObject*>::const_iterator itr = lCannonsInRange.begin(); itr != lCannonsInRange.end(); ++itr)
+                    {
                         (*itr)->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                    }
 
                     // attack all marksmen
                     std::list<Creature*> lMarksmenInRange;
@@ -1084,7 +1092,9 @@ struct boss_tethyr : public CreatureScript
         {
             // count the marksmen
             if (pVictim->GetEntry() != NPC_THERAMORE_MARKSMAN)
+            {
                 return;
+            }
 
             ++m_uiMarksmenKilled;
 
@@ -1108,7 +1118,9 @@ struct boss_tethyr : public CreatureScript
             if (pCaster->GetEntry() == NPC_THERAMORE_CANNON && pSpell->Id == SPELL_CANNON_BLAST_DMG)
             {
                 if (m_uiPhase == PHASE_SPOUT)
+                {
                     return;
+                }
 
                 // not all cannons have same distance range
                 uint8 uiDistMod = pCaster->GetPositionY() > -4650.0f ? 6 : 5;
@@ -1126,21 +1138,27 @@ struct boss_tethyr : public CreatureScript
         {
             // remove world state
             if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_summonerGuid))
+            {
                 pSummoner->SendUpdateWorldState(WORLD_STATE_TETHYR_SHOW, 0);
+            }
 
             // reset all cannons
             std::list<GameObject*> lCannonsInRange;
             GetGameObjectListWithEntryInGrid(lCannonsInRange, m_creature, GO_COVE_CANNON, 100.0f);
 
             for (std::list<GameObject*>::const_iterator itr = lCannonsInRange.begin(); itr != lCannonsInRange.end(); ++itr)
+            {
                 (*itr)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            }
 
             // despawn all marksmen
             std::list<Creature*> lMarksmenInRange;
             GetCreatureListWithEntryInGrid(lMarksmenInRange, m_creature, NPC_THERAMORE_MARKSMAN, 100.0f);
 
             for (std::list<Creature*>::const_iterator itr = lMarksmenInRange.begin(); itr != lMarksmenInRange.end(); ++itr)
+            {
                 (*itr)->ForcedDespawn(30000);
+            }
         }
 
         // Custom threat management
@@ -1148,14 +1166,18 @@ struct boss_tethyr : public CreatureScript
         {
             // Not started combat or evading prevented
             if (!m_creature->IsInCombat() || m_creature->HasAuraType(SPELL_AURA_MOD_TAUNT))
+            {
                 return false;
+            }
 
             // Check if there are still enemies (marksmen) in the threatList
             ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
             for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
             {
                 if ((*itr)->getUnitGuid().IsCreature())
+                {
                     return true;
+                }
             }
 
             EnterEvadeMode();
@@ -1165,7 +1187,9 @@ struct boss_tethyr : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!SelectCustomHostileTarget())
+            {
                 return;
+            }
 
             if (m_uiPhase == PHASE_SPOUT)
             {
@@ -1180,7 +1204,9 @@ struct boss_tethyr : public CreatureScript
                     m_uiWaterBoltTimer = urand(0, 1000);
                 }
                 else
+                {
                     m_uiSpoutEndTimer -= uiDiff;
+                }
             }
             else if (m_uiPhase == PHASE_NORMAL)
             {
@@ -1199,7 +1225,9 @@ struct boss_tethyr : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiWaterBoltTimer -= uiDiff;
+                }
             }
         }
     };

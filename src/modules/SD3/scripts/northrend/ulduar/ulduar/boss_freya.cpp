@@ -199,7 +199,9 @@ struct boss_freya : public CreatureScript
             // init the Allies of Nature spells
             spawnSpellsVector.reserve(MAX_ALLIES_SPELLS);
             for (uint8 i = 0; i < MAX_ALLIES_SPELLS; ++i)
+            {
                 spawnSpellsVector.push_back(aAlliesSpawnSpells[i]);
+            }
 
             m_bEventFinished = false;
             m_uiEpilogueTimer = 0;
@@ -253,10 +255,14 @@ struct boss_freya : public CreatureScript
         {
             // don't attack again after being defeated
             if (m_bEventFinished)
+            {
                 return;
+            }
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_FREYA, IN_PROGRESS);
+            }
 
             DoCastSpellIfCan(m_creature, SPELL_ATTUNED_TO_NATURE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
             DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_TOUCH_OF_EONAR : SPELL_TOUCH_OF_EONAR_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
@@ -268,7 +274,9 @@ struct boss_freya : public CreatureScript
         {
             // don't attack again after being defeated
             if (m_bEventFinished)
+            {
                 return;
+            }
 
             ScriptedAI::AttackStart(pWho);
         }
@@ -277,7 +285,9 @@ struct boss_freya : public CreatureScript
         {
             // don't attack again after being defeated
             if (m_bEventFinished)
+            {
                 return;
+            }
 
             ScriptedAI::MoveInLineOfSight(pWho);
         }
@@ -292,17 +302,23 @@ struct boss_freya : public CreatureScript
                 if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_BRIGHTLEAF))
                 {
                     if (pElder->IsAlive())
+                    {
                         pElder->AI()->EnterEvadeMode();
+                    }
                 }
                 if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_IRONBRACH))
                 {
                     if (pElder->IsAlive())
+                    {
                         pElder->AI()->EnterEvadeMode();
+                    }
                 }
                 if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_STONEBARK))
                 {
                     if (pElder->IsAlive())
+                    {
                         pElder->AI()->EnterEvadeMode();
+                    }
                 }
             }
         }
@@ -314,7 +330,9 @@ struct boss_freya : public CreatureScript
             m_creature->CombatStop(true);
 
             if (m_creature->IsAlive() && !m_bEventFinished)
+            {
                 m_creature->GetMotionMaster()->MoveTargetedHome();
+            }
 
             m_creature->SetLootRecipient(nullptr);
 
@@ -346,7 +364,9 @@ struct boss_freya : public CreatureScript
                         if (SpellAuraHolder* pNatureAura = m_creature->GetSpellAuraHolder(SPELL_ATTUNED_TO_NATURE))
                         {
                             if (pNatureAura && pNatureAura->GetStackAmount() >= MIN_ATTUNED_NATURE_STACKS)
+                            {
                                 m_pInstance->SetData(TYPE_ACHIEV_BACK_NATURE, uint32(true));
+                            }
                         }
                     }
 
@@ -363,7 +383,9 @@ struct boss_freya : public CreatureScript
         void KilledUnit(Unit* pVictim) override
         {
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            {
                 return;
+            }
 
             DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
         }
@@ -425,7 +447,9 @@ struct boss_freya : public CreatureScript
                 // adjust the index to the size of the vector
                 uint8 uiIndex = m_uiAlliesWaveCount;
                 if (uiIndex >= MAX_ALLIES_SPELLS)
+                {
                     uiIndex = m_uiAlliesWaveCount - MAX_ALLIES_SPELLS;
+                }
 
                 switch (spawnSpellsVector[uiIndex])
                 {
@@ -452,7 +476,9 @@ struct boss_freya : public CreatureScript
             else if (eventType == AI_EVENT_CUSTOM_B)
             {
                 if (!m_uiThreeAlliesTimer)
+                {
                     m_uiThreeAlliesTimer = 12000;
+                }
             }
         }
 
@@ -460,7 +486,9 @@ struct boss_freya : public CreatureScript
         void FetchElders()
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             uint8 uiEldersAlive = 0;
 
@@ -502,9 +530,13 @@ struct boss_freya : public CreatureScript
             m_pInstance->SetData(TYPE_FREYA_HARD, uiEldersAlive);
 
             if (uiEldersAlive)
+            {
                 DoScriptText(SAY_AGGRO_HARD, m_creature);
+            }
             else
+            {
                 DoScriptText(SAY_AGGRO, m_creature);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -520,11 +552,15 @@ struct boss_freya : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiEpilogueTimer -= uiDiff;
+                }
             }
 
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiBerserkTimer)
             {
@@ -537,7 +573,9 @@ struct boss_freya : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiBerserkTimer -= uiDiff;
+                }
             }
 
             if (m_uiThreeAlliesTimer)
@@ -548,7 +586,9 @@ struct boss_freya : public CreatureScript
                     Creature* pStormLasher = m_creature->GetMap()->GetCreature(m_stormLasherGuid);
                     Creature* pSnapLasher = m_creature->GetMap()->GetCreature(m_snaplasherGuid);
                     if (!pSpirit || !pStormLasher || !pSnapLasher)
+                    {
                         return;
+                    }
 
                     if (pSpirit->HasAura(SPELL_FEIGN_DEATH) && pStormLasher->HasAura(SPELL_FEIGN_DEATH) && pSnapLasher->HasAura(SPELL_FEIGN_DEATH))
                     {
@@ -566,7 +606,9 @@ struct boss_freya : public CreatureScript
                     m_uiThreeAlliesTimer = 0;
                 }
                 else
+                {
                     m_uiThreeAlliesTimer -= uiDiff;
+                }
             }
 
             if (m_uiAlliesWaveCount < MAX_ALLIES_WAVES)
@@ -580,17 +622,23 @@ struct boss_freya : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiAlliesNatureTimer -= uiDiff;
+                }
             }
             else
             {
                 if (m_uiNatureBombTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_NATURE_BOMB_SUMMON) == CAST_OK)
+                    {
                         m_uiNatureBombTimer = 15000;
+                    }
                 }
                 else
+                {
                     m_uiNatureBombTimer -= uiDiff;
+                }
             }
 
             if (m_uiSunbeamTimer < uiDiff)
@@ -598,19 +646,27 @@ struct boss_freya : public CreatureScript
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SUNBEAM : SPELL_SUNBEAM_H) == CAST_OK)
+                    {
                         m_uiSunbeamTimer = 15000;
+                    }
                 }
             }
             else
+            {
                 m_uiSunbeamTimer -= uiDiff;
+            }
 
             if (m_uiLifebindersGiftTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_LIFEBINDERS_GIFT_SUMMON) == CAST_OK)
+                {
                     m_uiLifebindersGiftTimer = 40000;
+                }
             }
             else
+            {
                 m_uiLifebindersGiftTimer -= uiDiff;
+            }
 
             // Brightleaf ability
             if (m_uiUnstableEnergyTimer)
@@ -618,10 +674,14 @@ struct boss_freya : public CreatureScript
                 if (m_uiUnstableEnergyTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_UNSTABLE_SUN_BEAM : SPELL_UNSTABLE_SUN_BEAM_H) == CAST_OK)
+                    {
                         m_uiUnstableEnergyTimer = 25000;
+                    }
                 }
                 else
+                {
                     m_uiUnstableEnergyTimer -= uiDiff;
+                }
             }
 
             // Ironbranch ability
@@ -630,10 +690,14 @@ struct boss_freya : public CreatureScript
                 if (m_uiIronRootsTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_IRON_ROOTS : SPELL_IRON_ROOTS_H) == CAST_OK)
+                    {
                         m_uiIronRootsTimer = 60000;
+                    }
                 }
                 else
+                {
                     m_uiIronRootsTimer -= uiDiff;
+                }
             }
 
             // Stonebark ability
@@ -642,10 +706,14 @@ struct boss_freya : public CreatureScript
                 if (m_uiGroundTremorTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_GROUND_TREMOR : SPELL_GROUND_TREMOR_H) == CAST_OK)
+                    {
                         m_uiGroundTremorTimer = 30000;
+                    }
                 }
                 else
+                {
                     m_uiGroundTremorTimer -= uiDiff;
+                }
             }
 
             DoMeleeAttackIfReady();
@@ -667,7 +735,9 @@ struct spell_ulduar_summon_allies : public SpellScript
         if ((uiSpellId == SPELL_SUMMON_ALLIES_OF_NATURE || uiSpellId == SPELL_SUMMON_ALLIES_OF_NATURE_H) && uiEffIndex == EFFECT_INDEX_0)
         {
             if (pCreatureTarget->GetEntry() == NPC_FREYA)
+            {
                 pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
+            }
 
             return true;
         }
@@ -701,19 +771,25 @@ struct three_nature_alliesAI : public ScriptedAI
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
     {
         if (pDoneBy->GetEntry() == NPC_FREYA)
+        {
             return;
+        }
 
         if (uiDamage >= m_creature->GetHealth())
         {
             uiDamage = 0;
 
             if (m_bIsFakeDeath)
+            {
                 return;
+            }
 
             if (m_pInstance)
             {
                 if (Creature* pFreya = m_pInstance->GetSingleCreatureFromStorage(NPC_FREYA))
+                {
                     SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pFreya);
+                }
             }
 
             DoCastSpellIfCan(m_creature, SPELL_CLEAR_DEBUFFS, CAST_TRIGGERED);
@@ -770,7 +846,9 @@ struct npc_water_spirit : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiTidalWaveTimer < uiDiff)
             {
@@ -781,7 +859,9 @@ struct npc_water_spirit : public CreatureScript
                 }
             }
             else
+            {
                 m_uiTidalWaveTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -846,29 +926,39 @@ struct npc_storm_lasher : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiLightningLashTimer < uiDiff)
             {
                 if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_LASH : SPELL_LIGHTNING_LASH_H) == CAST_OK)
+                    {
                         m_uiLightningLashTimer = urand(5000, 10000);
+                    }
                 }
             }
             else
+            {
                 m_uiLightningLashTimer -= uiDiff;
+            }
 
             if (m_uiStormBoltTimer < uiDiff)
             {
                 if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_STORMBOLT : SPELL_STORMBOLT_H) == CAST_OK)
+                    {
                         m_uiStormBoltTimer = 5000;
+                    }
                 }
             }
             else
+            {
                 m_uiStormBoltTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -911,10 +1001,14 @@ struct npc_eonars_gift : public CreatureScript
             if (m_uiGiftTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIFEBINDERS_GIFT : SPELL_LIFEBINDERS_GIFT_H) == CAST_OK)
+                {
                     m_uiGiftTimer = 10000;
+                }
             }
             else
+            {
                 m_uiGiftTimer -= uiDiff;
+            }
         }
     };
 
@@ -961,14 +1055,18 @@ struct npc_nature_bomb : public CreatureScript
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_NATURE_BOMB : SPELL_NATURE_BOMB_H) == CAST_OK)
                 {
                     if (GameObject* pBomb = m_creature->GetMap()->GetGameObject(m_natureBombGuid))
+                    {
                         pBomb->Use(m_creature);
+                    }
 
                     m_creature->ForcedDespawn(2000);
                     m_uiNatureBombTimer = 10000;
                 }
             }
             else
+            {
                 m_uiNatureBombTimer -= uiDiff;
+            }
         }
     };
 
@@ -1002,12 +1100,18 @@ struct npc_iron_roots : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (!m_creature->IsTemporarySummon())
+            {
                 return;
+            }
 
             if (m_creature->GetEntry() == NPC_IRON_ROOTS)
+            {
                 DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_IRON_ROOTS_REMOVE : SPELL_IRON_ROOTS_REMOVE_H, CAST_TRIGGERED);
+            }
             else if (m_creature->GetEntry() == NPC_STRENGHENED_IRON_ROOTS)
+            {
                 DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_STRENGTHEN_IRON_ROOTS : SPELL_STRENGTHEN_IRON_ROOTS_H, CAST_TRIGGERED);
+            }
         }
 
         void UpdateAI(const uint32 /*uiDiff*/) override { }

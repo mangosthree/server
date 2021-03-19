@@ -138,7 +138,9 @@ struct is_blackfathom_deeps : public InstanceScript
         {
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
     if (pCreature->GetEntry() == NPC_BARON_AQUANIS)
-        { SetData(TYPE_AQUANIS, DONE); }
+    {
+        SetData(TYPE_AQUANIS, DONE);
+    }
 #endif
 
             // Only use this function if shrine event is in progress

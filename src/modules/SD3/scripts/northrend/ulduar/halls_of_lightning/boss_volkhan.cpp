@@ -108,7 +108,9 @@ struct boss_volkhan : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_VOLKHAN, IN_PROGRESS);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -117,7 +119,9 @@ struct boss_volkhan : public CreatureScript
             DespawnGolems();
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_VOLKHAN, DONE);
+            }
         }
 
         void JustReachedHome() override
@@ -125,7 +129,9 @@ struct boss_volkhan : public CreatureScript
             DespawnGolems();
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_VOLKHAN, FAIL);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -141,14 +147,18 @@ struct boss_volkhan : public CreatureScript
         void DespawnGolems()
         {
             if (m_lGolemGUIDList.empty())
+            {
                 return;
+            }
 
             for (GuidList::const_iterator itr = m_lGolemGUIDList.begin(); itr != m_lGolemGUIDList.end(); ++itr)
             {
                 if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
                 {
                     if (pTemp->IsAlive())
+                    {
                         pTemp->ForcedDespawn();
+                    }
                 }
             }
         }
@@ -156,7 +166,9 @@ struct boss_volkhan : public CreatureScript
         void ShatterGolems()
         {
             if (m_lGolemGUIDList.empty())
+            {
                 return;
+            }
 
             uint8 m_uiBrittleGolemsCount = 0;
 
@@ -177,7 +189,9 @@ struct boss_volkhan : public CreatureScript
             if (m_uiBrittleGolemsCount > MAX_ACHIEV_GOLEMS)
             {
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_VOLKHAN, SPECIAL);
+                }
             }
         }
 
@@ -188,14 +202,18 @@ struct boss_volkhan : public CreatureScript
                 m_lGolemGUIDList.push_back(pSummoned->GetObjectGuid());
 
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     pSummoned->AI()->AttackStart(pTarget);
+                }
             }
         }
 
         void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
         {
             if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+            {
                 return;
+            }
 
             DoCastSpellIfCan(m_creature, SPELL_TEMPER);
             SetCombatMovement(true);
@@ -205,7 +223,9 @@ struct boss_volkhan : public CreatureScript
         {
             // Return since we have no target
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // he shatters only one time, at 25%
             if (m_creature->GetHealthPercent() <= 25.0f && !m_bHasShattered)
@@ -229,7 +249,9 @@ struct boss_volkhan : public CreatureScript
                     m_uiShatterTimer = 0;
                 }
                 else
+                {
                     m_uiShatterTimer -= uiDiff;
+                }
             }
 
             // Summon Golems only when over 25% hp
@@ -250,21 +272,29 @@ struct boss_volkhan : public CreatureScript
                             m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
                         }
                         else
+                        {
                             script_error_log("Npc %u couldn't be found or something really bad happened.", NPC_VOLKHAN_ANVIL);
+                        }
                     }
                     m_uiTemperTimer = 30000;
                 }
                 else
+                {
                     m_uiTemperTimer -= uiDiff;
+                }
             }
 
             if (m_uiHeatTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HEAT : SPELL_HEAT_H) == CAST_OK)
+                {
                     m_uiHeatTimer = urand(10000, 15000);
+                }
             }
             else
+            {
                 m_uiHeatTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }
@@ -287,10 +317,14 @@ struct spell_volkhan_temper_dummy : public SpellScript
         {
             Creature* pCreatureTarget = pTarget->ToCreature();
             if (pCaster->GetEntry() != NPC_VOLKHAN_ANVIL || pCreatureTarget->GetEntry() != NPC_VOLKHAN)
+            {
                 return true;
+            }
 
             for (uint8 i = 0; i < MAX_GOLEM; ++i)
+            {
                 pCreatureTarget->CastSpell(pCaster, SPELL_SUMMON_MOLTEN_GOLEM, true);
+            }
 
             // always return true when we are handling this spell and effect
             return true;
@@ -315,7 +349,9 @@ struct spell_volkhan_temper : public SpellScript
         {
             Creature* pCreatureTarget = pTarget->ToCreature();
             if (pCaster->GetEntry() != NPC_VOLKHAN || pCreatureTarget->GetEntry() != NPC_VOLKHAN_ANVIL)
+            {
                 return true;
+            }
 
             pCreatureTarget->CastSpell(pCaster, SPELL_TEMPER_DUMMY, false);
             // ToDo: research how the visual spell is used
@@ -386,7 +422,9 @@ struct mob_molten_golem : public CreatureScript
                 uiDamage = 0;
 
                 if (m_creature->IsNonMeleeSpellCasted(false))
+                {
                     m_creature->InterruptNonMeleeSpells(false);
+                }
 
                 EnterEvadeMode();
             }
@@ -398,7 +436,9 @@ struct mob_molten_golem : public CreatureScript
             if (pSpell->Id == SPELL_SHATTER || pSpell->Id == SPELL_SHATTER_H)
             {
                 if (m_creature->GetEntry() == NPC_BRITTLE_GOLEM)
+                {
                     m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                }
             }
         }
 
@@ -406,23 +446,33 @@ struct mob_molten_golem : public CreatureScript
         {
             // Return since we have no target or if we are frozen
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiBlastTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BLAST_WAVE) == CAST_OK)
+                {
                     m_uiBlastTimer = 20000;
+                }
             }
             else
+            {
                 m_uiBlastTimer -= uiDiff;
+            }
 
             if (m_uiImmolationTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_IMMOLATION_STRIKE : SPELL_IMMOLATION_STRIKE_H) == CAST_OK)
+                {
                     m_uiImmolationTimer = 5000;
+                }
             }
             else
+            {
                 m_uiImmolationTimer -= uiDiff;
+            }
 
             DoMeleeAttackIfReady();
         }

@@ -64,11 +64,15 @@ struct is_shadow_labyrinth : public InstanceScript
             {
             case GO_REFECTORY_DOOR:
                 if (m_auiEncounter[2] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
             case GO_SCREAMING_HALL_DOOR:
                 if (m_auiEncounter[3] == DONE)
+                {
                     pGo->SetGoState(GO_STATE_ACTIVE);
+                }
                 break;
 
             default:
@@ -119,13 +123,17 @@ struct is_shadow_labyrinth : public InstanceScript
 
             case TYPE_INCITER:
                 if (uiData == DONE)
+                {
                     DoUseDoorOrButton(GO_REFECTORY_DOOR);
+                }
                 m_auiEncounter[1] = uiData;
                 break;
 
             case TYPE_VORPIL:
                 if (uiData == DONE)
+                {
                     DoUseDoorOrButton(GO_SCREAMING_HALL_DOOR);
+                }
                 m_auiEncounter[2] = uiData;
                 break;
 
@@ -168,12 +176,16 @@ struct is_shadow_labyrinth : public InstanceScript
         {
             // If Hellmaw already completed, just ignore
             if (GetData(TYPE_HELLMAW) == DONE)
+            {
                 return;
+            }
 
             // Note: this is handled in Acid. The purpose is check which Cabal Ritualists is alive, in case of server reset
             // The function is triggered by eventAI on generic timer
             if (uiType == DATA_CABAL_RITUALIST)
+            {
                 m_sRitualistsAliveGUIDSet.insert(ObjectGuid(uiGuid));
+            }
         }
 
         const char* Save() const override { return m_strInstData.c_str(); }

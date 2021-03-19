@@ -108,7 +108,9 @@ struct boss_galdarah : public CreatureScript
             DoScriptText(SAY_AGGRO, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_GALDARAH, IN_PROGRESS);
+            }
         }
 
         void KilledUnit(Unit* /*pVictim*/) override
@@ -124,7 +126,9 @@ struct boss_galdarah : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_GALDARAH, FAIL);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
@@ -132,7 +136,9 @@ struct boss_galdarah : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_GALDARAH, DONE);
+            }
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -145,7 +151,9 @@ struct boss_galdarah : public CreatureScript
 
                     // Store the player guid in order to count it for the achievement
                     if (m_pInstance)
+                    {
                         m_pInstance->SetData(TYPE_ACHIEV_SHARE_LOVE, pTarget->GetGUIDLow());
+                    }
                 }
             }
         }
@@ -153,12 +161,16 @@ struct boss_galdarah : public CreatureScript
         void DoPhaseSwitch()
         {
             if (!m_bIsTrollPhase)
+            {
                 m_creature->RemoveAurasDueToSpell(SPELL_RHINO_TRANSFORM);
+            }
 
             m_bIsTrollPhase = !m_bIsTrollPhase;
 
             if (m_bIsTrollPhase)
+            {
                 DoCastSpellIfCan(m_creature, SPELL_TROLL_TRANSFORM);
+            }
             else
             {
                 DoScriptText(urand(0, 1) ? SAY_TRANSFORM_1 : SAY_TRANSFORM_2, m_creature);
@@ -176,14 +188,20 @@ struct boss_galdarah : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             if (m_uiAbilityCount == 2)
             {
                 if (m_uiPhaseChangeTimer < uiDiff)
+                {
                     DoPhaseSwitch();
+                }
                 else
+                {
                     m_uiPhaseChangeTimer -= uiDiff;
+                }
             }
 
             if (m_bIsTrollPhase)
@@ -194,7 +212,9 @@ struct boss_galdarah : public CreatureScript
                     m_uiPunctureTimer = 25000;
                 }
                 else
+                {
                     m_uiPunctureTimer -= uiDiff;
+                }
 
                 if (m_uiStampedeTimer < uiDiff)
                 {
@@ -209,17 +229,23 @@ struct boss_galdarah : public CreatureScript
                     m_uiStampedeTimer = 15000;
                 }
                 else
+                {
                     m_uiStampedeTimer -= uiDiff;
+                }
 
                 if (m_uiSpecialAbilityTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WHIRLING_SLASH : SPELL_WHIRLING_SLASH_H) == CAST_OK)
+                    {
                         m_uiSpecialAbilityTimer = 12000;
+                    }
 
                     ++m_uiAbilityCount;
                 }
                 else
+                {
                     m_uiSpecialAbilityTimer -= uiDiff;
+                }
             }
             else
             {
@@ -229,7 +255,9 @@ struct boss_galdarah : public CreatureScript
                     m_uiEnrageTimer = 15000;
                 }
                 else
+                {
                     m_uiEnrageTimer -= uiDiff;
+                }
 
                 if (m_uiStompTimer < uiDiff)
                 {
@@ -237,13 +265,17 @@ struct boss_galdarah : public CreatureScript
                     m_uiStompTimer = 10000;
                 }
                 else
+                {
                     m_uiStompTimer -= uiDiff;
+                }
 
                 if (m_uiSpecialAbilityTimer < uiDiff)
                 {
                     Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
                     if (!pTarget)
+                    {
                         pTarget = m_creature->getVictim();
+                    }
 
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_IMPALING_CHARGE : SPELL_IMPALING_CHARGE_H) == CAST_OK)
                     {
@@ -254,7 +286,9 @@ struct boss_galdarah : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiSpecialAbilityTimer -= uiDiff;
+                }
             }
 
             DoMeleeAttackIfReady();

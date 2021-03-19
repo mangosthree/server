@@ -385,10 +385,14 @@ struct npc_ouro_spawner : public CreatureScript
             if (m_uiQuakeTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_QUAKE) == CAST_OK)
-                { m_uiQuakeTimer = 1000; }
+                {
+                    m_uiQuakeTimer = 1000;
+                }
             }
             else
-            { m_uiQuakeTimer -= uiDiff; }
+            {
+                m_uiQuakeTimer -= uiDiff;
+            }
         }
 #endif
     }

@@ -498,7 +498,9 @@ struct boss_vazruden : public CreatureScript
             if (!m_bHealthBelow && m_pInstance && (float(m_creature->GetHealth() - uiDamage) / m_creature->GetMaxHealth()) < 0.30f)
             {
                 if (Creature* pNazan = m_pInstance->GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
+                {
                     SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pNazan);
+                }
 
                 m_bHealthBelow = true;
             }

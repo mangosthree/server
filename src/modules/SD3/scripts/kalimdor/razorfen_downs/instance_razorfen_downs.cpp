@@ -94,7 +94,9 @@ struct is_razorfen_downs : public InstanceScript
             {
             case TYPE_GONG_USED:
                 if (bWaveInMotion)
+                {
                     return;
+                }
                 if (Player *pPlayer = instance->GetPlayer(ObjectGuid(data)))
                 {
                     bWaveInMotion = true;

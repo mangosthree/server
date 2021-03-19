@@ -193,7 +193,9 @@ struct boss_razorscale : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_RAZORSCALE, DONE);
+            }
         }
 
         void Aggro(Unit* /*pWho*/) override
@@ -212,7 +214,9 @@ struct boss_razorscale : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_RAZORSCALE, FAIL);
+            }
 
             m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f);
         }
@@ -220,14 +224,18 @@ struct boss_razorscale : public CreatureScript
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_DEVOURING_FLAME)
+            {
                 pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_DEVOURING_FLAME_AURA : SPELL_DEVOURING_FLAME_AURA_H, true);
+            }
             else if (pSummoned->GetEntry() == NPC_RAZORSCALE_SPAWNER)
             {
                 pSummoned->CastSpell(pSummoned, SPELL_SUMMON_MOLE_MACHINE, true);
 
                 // for central spawners inform that they should spawn a sentinel
                 if (pSummoned->GetPositionY() > -220.0f)
+                {
                     SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pSummoned);
+                }
             }
         }
 
@@ -283,7 +291,9 @@ struct boss_razorscale : public CreatureScript
         {
             // get the current harpoon and move the engineers in front of it
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_DO_MOVE_TO_HARPOON, 0);
+            }
         }
 
         // function to repair nearby harpoon
@@ -292,11 +302,17 @@ struct boss_razorscale : public CreatureScript
             // search for each entry of the nearby harpoon
             GameObject* pNewHarpoon = GetClosestGameObjectWithEntry(pSource, GO_HARPOON_GUN_1, 5.0f);
             if (!pNewHarpoon)
+            {
                 pNewHarpoon = GetClosestGameObjectWithEntry(pSource, GO_HARPOON_GUN_2, 5.0f);
+            }
             if (!pNewHarpoon)
+            {
                 pNewHarpoon = GetClosestGameObjectWithEntry(pSource, GO_HARPOON_GUN_3, 5.0f);
+            }
             if (!pNewHarpoon)
+            {
                 pNewHarpoon = GetClosestGameObjectWithEntry(pSource, GO_HARPOON_GUN_4, 5.0f);
+            }
 
             if (pNewHarpoon)
             {
@@ -309,20 +325,26 @@ struct boss_razorscale : public CreatureScript
         bool SelectCustomHostileTarget()
         {
             if (m_uiPhase == PHASE_ONLY_GROUND || m_uiPhase == PHASE_GROUNDED)
+            {
                 return m_creature->SelectHostileTarget() && m_creature->getVictim();
+            }
 
             // Special handling for PHASE_AIR
 
             // Not started combat or evading prevented
             if (!m_creature->IsInCombat() || m_creature->HasAuraType(SPELL_AURA_MOD_TAUNT))
+            {
                 return false;
+            }
 
             // Check if there are still enemies (players)
             ThreatList const& threatList = m_creature->GetThreatManager().getThreatList();
             for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
             {
                 if ((*itr)->getUnitGuid().IsPlayer())
+                {
                     return true;
+                }
             }
 
             // Evade in air-phase
@@ -333,17 +355,23 @@ struct boss_razorscale : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!SelectCustomHostileTarget())
+            {
                 return;
+            }
 
             if (m_uiBerserkTimer)
             {
                 if (m_uiBerserkTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                    {
                         m_uiBerserkTimer = 0;
+                    }
                 }
                 else
+                {
                     m_uiBerserkTimer -= uiDiff;
+                }
             }
 
             switch (m_uiPhase)
@@ -355,22 +383,30 @@ struct boss_razorscale : public CreatureScript
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
                         if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H) == CAST_OK)
+                        {
                             m_uiFireballTimer = 2000;
+                        }
                     }
                 }
                 else
+                {
                     m_uiFireballTimer -= uiDiff;
+                }
 
                 if (m_uiDevouringFlameTimer < uiDiff)
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_DEVOURING_FLAME) == CAST_OK)
+                        {
                             m_uiDevouringFlameTimer = 10000;
+                        }
                     }
                 }
                 else
+                {
                     m_uiDevouringFlameTimer -= uiDiff;
+                }
 
                 // harpoon is repaired; move to next one, or to home position if all are completed
                 if (m_uiRepairHarpoonTimer)
@@ -386,7 +422,9 @@ struct boss_razorscale : public CreatureScript
                                 if (Creature* pCommander = m_pInstance->GetSingleCreatureFromStorage(NPC_EXPEDITION_COMMANDER))
                                 {
                                     if (Creature* pEngineer = GetClosestCreatureWithEntry(pCommander, NPC_EXPEDITION_ENGINEER, 15.0f))
+                                    {
                                         DoScriptText(SAY_EXTINGUISH_FIRE, pEngineer);
+                                    }
                                 }
                             }
 
@@ -423,7 +461,9 @@ struct boss_razorscale : public CreatureScript
                         }
                     }
                     else
+                    {
                         m_uiRepairHarpoonTimer -= uiDiff;
+                    }
                 }
 
                 // spawn Mole Machines with dwarfes
@@ -433,7 +473,9 @@ struct boss_razorscale : public CreatureScript
                     m_uiDwarfSpawnTimer = 40000;
                 }
                 else
+                {
                     m_uiDwarfSpawnTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_TRANSITION:
@@ -456,7 +498,9 @@ struct boss_razorscale : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiShackleTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_GROUNDED:
@@ -475,11 +519,15 @@ struct boss_razorscale : public CreatureScript
                         break;
                     case 1:
                         if (DoCastSpellIfCan(m_creature, SPELL_WING_BUFFET) == CAST_OK)
+                        {
                             m_uiGroundedTimer = 1500;
+                        }
                         break;
                     case 2:
                         if (DoCastSpellIfCan(m_creature, SPELL_FIREBOLT) == CAST_OK)
+                        {
                             m_uiGroundedTimer = 2000;
+                        }
                         break;
                     case 3:
                         // if fully grounded then go to ground phase
@@ -516,7 +564,9 @@ struct boss_razorscale : public CreatureScript
 
                             // set achiev criteria as failed
                             if (m_uiFlyPhaseCount >= 2 && m_pInstance)
+                            {
                                 m_pInstance->SetData(TYPE_ACHIEV_QUICK_SHAVE, uint32(false));
+                            }
                         }
 
                         // make the Trappers evade or move to home position
@@ -526,7 +576,9 @@ struct boss_razorscale : public CreatureScript
                     ++m_uiGroundedStep;
                 }
                 else
+                {
                     m_uiGroundedTimer -= uiDiff;
+                }
 
                 // make boss land at 50% hp
                 if (!m_bIsGrounded && m_creature->GetHealthPercent() < 50.0f)
@@ -546,27 +598,39 @@ struct boss_razorscale : public CreatureScript
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_DEVOURING_FLAME) == CAST_OK)
+                        {
                             m_uiDevouringFlameTimer = 10000;
+                        }
                     }
                 }
                 else
+                {
                     m_uiDevouringFlameTimer -= uiDiff;
+                }
 
                 if (m_uiFuseArmorTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FUSE_ARMOR) == CAST_OK)
+                    {
                         m_uiFuseArmorTimer = 13000;
+                    }
                 }
                 else
+                {
                     m_uiFuseArmorTimer -= uiDiff;
+                }
 
                 if (m_uiFlameBuffetTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FLAME_BUFFET : SPELL_FLAME_BUFFET_H) == CAST_OK)
+                    {
                         m_uiFlameBuffetTimer = 10000;
+                    }
                 }
                 else
+                {
                     m_uiFlameBuffetTimer -= uiDiff;
+                }
 
                 if (m_uiFlameBreathTimer < uiDiff)
                 {
@@ -577,7 +641,9 @@ struct boss_razorscale : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiFlameBreathTimer -= uiDiff;
+                }
 
                 DoMeleeAttackIfReady();
                 break;
@@ -643,7 +709,9 @@ struct npc_expedition_commander : public CreatureScript
             case NPC_EXPEDITION_ENGINEER:
             {
                 if (Creature* pEngineer = GetClosestCreatureWithEntry(m_creature, NPC_EXPEDITION_ENGINEER, 15.0f))
+                {
                     DoScriptText(SAY_INTRO_1, pEngineer);
+                }
 
                 // move the defenders into attack position
                 m_pInstance->SetData(TYPE_DO_MOVE_DEFENDERS, 0);
@@ -653,16 +721,22 @@ struct npc_expedition_commander : public CreatureScript
                 if (Creature* pRazorscale = m_pInstance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
                 {
                     if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                    {
                         pRazorscale->AI()->AttackStart(pPlayer);
+                    }
                 }
                 break;
             case NPC_EXPEDITION_DEFENDER:
                 if (Creature* pEngineer = GetClosestCreatureWithEntry(m_creature, NPC_EXPEDITION_ENGINEER, 15.0f))
+                {
                     DoScriptText(SAY_INTRO_3, pEngineer);
+                }
 
                 // inform Razorscale about the start of the harpoon event
                 if (Creature* pRazorscale = m_pInstance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
+                {
                     m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pRazorscale);
+                }
                 break;
             }
         }
@@ -690,7 +764,9 @@ struct npc_expedition_commander : public CreatureScript
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if (pInstance->GetData(TYPE_RAZORSCALE) == NOT_STARTED || pInstance->GetData(TYPE_RAZORSCALE) == FAIL)
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_START_RAZORSCALE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
 
             pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_WELCOME, pCreature->GetObjectGuid());
             return true;
@@ -748,7 +824,9 @@ struct npc_razorscale_spawner : public CreatureScript
         {
             // inform that it should spawn a sentinel
             if (eventType == AI_EVENT_CUSTOM_A)
+            {
                 m_bIsSentinelSpawn = true;
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -758,7 +836,9 @@ struct npc_razorscale_spawner : public CreatureScript
                 if (m_uiSpawnTimer <= uiDiff)
                 {
                     if (m_bIsSentinelSpawn)
+                    {
                         DoCastSpellIfCan(m_creature, SPELL_SUMMON_IRON_VRYKUL, CAST_TRIGGERED);
+                    }
                     else
                     {
                         DoCastSpellIfCan(m_creature, SPELL_SUMMON_DWARF_GUARDIAN, CAST_TRIGGERED);
@@ -767,7 +847,9 @@ struct npc_razorscale_spawner : public CreatureScript
                     m_uiSpawnTimer = 0;
                 }
                 else
+                {
                     m_uiSpawnTimer -= uiDiff;
+                }
             }
         }
     };
@@ -818,23 +900,35 @@ struct spell_ulduar_firebolt : public SpellScript
             // search for each entry of the nearby harpoon
             GameObject* pHarpoon = GetClosestGameObjectWithEntry(pCreatureTarget, GO_HARPOON_GUN_1, 5.0f);
             if (!pHarpoon)
+            {
                 pHarpoon = GetClosestGameObjectWithEntry(pCreatureTarget, GO_HARPOON_GUN_2, 5.0f);
+            }
             if (!pHarpoon)
+            {
                 pHarpoon = GetClosestGameObjectWithEntry(pCreatureTarget, GO_HARPOON_GUN_3, 5.0f);
+            }
             if (!pHarpoon)
+            {
                 pHarpoon = GetClosestGameObjectWithEntry(pCreatureTarget, GO_HARPOON_GUN_4, 5.0f);
+            }
 
             // despawn the repaired harpoon
             if (pHarpoon)
+            {
                 pHarpoon->SetLootState(GO_JUST_DEACTIVATED);
+            }
 
             // respawn broken harpoon
             if (GameObject* pNewHarpoon = GetClosestGameObjectWithEntry(pCreatureTarget, GO_BROKEN_HARPOON, 5.0f))
+            {
                 pNewHarpoon->Respawn();
+            }
 
             // force reset for harpoon trigger npcs
             if (Creature* pTrigger = GetClosestCreatureWithEntry(pCreatureTarget, NPC_RAZORSCALE_CONTROLLER, 5.0f))
+            {
                 pTrigger->InterruptNonMeleeSpells(false);
+            }
 
             // always return true when we are handling this spell and effect
             return true;
@@ -860,7 +954,9 @@ struct event_spell_harpoon_shot : public MapEventScript
             {
                 // event doesn't have target, so we need to give an explicit one
                 if (Creature* pRazorscale = pInstance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
+                {
                     ((Creature*)pSource)->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, (Creature*)pSource, pRazorscale);
+                }
 
                 return true;
             }

@@ -293,7 +293,9 @@ struct boss_the_lich_king_icc : public CreatureScript
         void Aggro(Unit* /*pWho*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_LICH_KING, IN_PROGRESS);
+            }
 
             DoScriptText(SAY_AGGRO, m_creature);
             m_uiPhase = PHASE_ONE;
@@ -302,13 +304,17 @@ struct boss_the_lich_king_icc : public CreatureScript
         void KilledUnit(Unit* pWho) override
         {
             if (pWho->GetTypeId() == TYPEID_PLAYER)
+            {
                 DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+            }
         }
 
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_LICH_KING, DONE);
+            }
 
             DoScriptText(SAY_OUTRO_14, m_creature);
 
@@ -318,13 +324,17 @@ struct boss_the_lich_king_icc : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_LICH_KING, FAIL);
+            }
         }
 
         void MovementInform(uint32 uiMovementType, uint32 uiData) override
         {
             if (uiMovementType != POINT_MOTION_TYPE)
+            {
                 return;
+            }
 
             switch (uiData)
             {
@@ -369,7 +379,9 @@ struct boss_the_lich_king_icc : public CreatureScript
             {
                 // check evade
                 if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                {
                     return;
+                }
 
                 // Berserk
                 if (m_uiBerserkTimer)
@@ -383,7 +395,9 @@ struct boss_the_lich_king_icc : public CreatureScript
                         }
                     }
                     else
+                    {
                         m_uiBerserkTimer -= uiDiff;
+                    }
                 }
             }
 
@@ -410,38 +424,54 @@ struct boss_the_lich_king_icc : public CreatureScript
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_NECROTIC_PLAGUE, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_NECROTIC_PLAGUE) == CAST_OK)
+                        {
                             m_uiNecroticPlagueTimer = 30000;
+                        }
                     }
                 }
                 else
+                {
                     m_uiNecroticPlagueTimer -= uiDiff;
+                }
 
                 // Infest
                 if (m_uiInfestTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_INFEST) == CAST_OK)
+                    {
                         m_uiInfestTimer = urand(20000, 25000);
+                    }
                 }
                 else
+                {
                     m_uiInfestTimer -= uiDiff;
+                }
 
                 // Summon Ghouls
                 if (m_uiGhoulsTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_GHOULS) == CAST_OK)
+                    {
                         m_uiGhoulsTimer = 32000;
+                    }
                 }
                 else
+                {
                     m_uiGhoulsTimer -= uiDiff;
+                }
 
                 // Summon Shambling Horror
                 if (m_uiHorrorTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_HORROR) == CAST_OK)
+                    {
                         m_uiHorrorTimer = 60000;
+                    }
                 }
                 else
+                {
                     m_uiHorrorTimer -= uiDiff;
+                }
 
                 // Shadow Trap (heroic)
                 if (m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC))
@@ -451,11 +481,15 @@ struct boss_the_lich_king_icc : public CreatureScript
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SHADOW_TRAP, SELECT_FLAG_PLAYER))
                         {
                             if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_TRAP) == CAST_OK)
+                            {
                                 m_uiShadowTrapTimer = 15000;
+                            }
                         }
                     }
                     else
+                    {
                         m_uiShadowTrapTimer -= uiDiff;
+                    }
                 }
 
                 DoMeleeAttackIfReady();
@@ -478,7 +512,9 @@ struct boss_the_lich_king_icc : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiPhaseTimer -= uiDiff;
+                }
 
                 // Pain and Suffering
                 if (m_uiPainSufferingTimer < uiDiff)
@@ -486,20 +522,28 @@ struct boss_the_lich_king_icc : public CreatureScript
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PAIN_AND_SUFFERING, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_PAIN_AND_SUFFERING) == CAST_OK)
+                        {
                             m_uiPainSufferingTimer = urand(1500, 3000);
+                        }
                     }
                 }
                 else
+                {
                     m_uiPainSufferingTimer -= uiDiff;
+                }
 
                 // Summon Ice Sphere
                 if (m_uiIceSphereTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_ICE_SPHERE) == CAST_OK)
+                    {
                         m_uiIceSphereTimer = 6000;
+                    }
                 }
                 else
+                {
                     m_uiIceSphereTimer -= uiDiff;
+                }
 
                 // Summon Raging Spirit
                 if (m_uiRagingSpiritTimer < uiDiff)
@@ -507,11 +551,15 @@ struct boss_the_lich_king_icc : public CreatureScript
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_RAGING_SPIRIT, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_RAGING_SPIRIT, CAST_TRIGGERED) == CAST_OK)
+                        {
                             m_uiRagingSpiritTimer = (m_uiPhase == PHASE_TRANSITION_ONE ? 20000 : 15000);
+                        }
                     }
                 }
                 else
+                {
                     m_uiRagingSpiritTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_QUAKE_ONE:
@@ -527,7 +575,9 @@ struct boss_the_lich_king_icc : public CreatureScript
                     return;
                 }
                 else
+                {
                     m_uiPhaseTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_TWO:
@@ -545,19 +595,27 @@ struct boss_the_lich_king_icc : public CreatureScript
                 if (m_uiSoulReaperTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SOUL_REAPER) == CAST_OK)
+                    {
                         m_uiSoulReaperTimer = 30000;
+                    }
                 }
                 else
+                {
                     m_uiSoulReaperTimer -= uiDiff;
+                }
 
                 // Infest
                 if (m_uiInfestTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_INFEST) == CAST_OK)
+                    {
                         m_uiInfestTimer = urand(20000, 25000);
+                    }
                 }
                 else
+                {
                     m_uiInfestTimer -= uiDiff;
+                }
 
                 // Defile
                 if (m_uiDefileTimer < uiDiff)
@@ -566,11 +624,15 @@ struct boss_the_lich_king_icc : public CreatureScript
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_DEFILE, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_DEFILE) == CAST_OK)
+                        {
                             m_uiDefileTimer = 30000;
+                        }
                     }
                 }
                 else
+                {
                     m_uiDefileTimer -= uiDiff;
+                }
 
                 // Summon Val'kyr
                 if (m_uiValkyrTimer < uiDiff)
@@ -582,7 +644,9 @@ struct boss_the_lich_king_icc : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiValkyrTimer -= uiDiff;
+                }
 
                 DoMeleeAttackIfReady();
 
@@ -606,10 +670,14 @@ struct boss_the_lich_king_icc : public CreatureScript
                 if (m_uiSoulReaperTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SOUL_REAPER) == CAST_OK)
+                    {
                         m_uiSoulReaperTimer = 30000;
+                    }
                 }
                 else
+                {
                     m_uiSoulReaperTimer -= uiDiff;
+                }
 
                 // Defile
                 if (m_uiDefileTimer < uiDiff)
@@ -618,11 +686,15 @@ struct boss_the_lich_king_icc : public CreatureScript
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_DEFILE, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_DEFILE) == CAST_OK)
+                        {
                             m_uiDefileTimer = 30000;
+                        }
                     }
                 }
                 else
+                {
                     m_uiDefileTimer -= uiDiff;
+                }
 
                 // Harvest Soul
                 if (m_uiHarvestSoulTimer < uiDiff)
@@ -630,9 +702,13 @@ struct boss_the_lich_king_icc : public CreatureScript
                     Unit* pTarget = nullptr;
                     bool m_bIsHeroic = m_pInstance && m_pInstance->GetData(TYPE_DATA_IS_HEROIC);
                     if (m_bIsHeroic)
+                    {
                         pTarget = m_creature;
+                    }
                     else
+                    {
                         pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_HARVEST_SOUL, SELECT_FLAG_PLAYER);
+                    }
 
                     if (pTarget)
                     {
@@ -655,16 +731,22 @@ struct boss_the_lich_king_icc : public CreatureScript
                     }
                 }
                 else
+                {
                     m_uiHarvestSoulTimer -= uiDiff;
+                }
 
                 // Vile Spirits
                 if (m_uiVileSpiritsTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_VILE_SPIRITS) == CAST_OK)
+                    {
                         m_uiVileSpiritsTimer = 30000;
+                    }
                 }
                 else
+                {
                     m_uiVileSpiritsTimer -= uiDiff;
+                }
 
                 DoMeleeAttackIfReady();
 
@@ -676,11 +758,15 @@ struct boss_the_lich_king_icc : public CreatureScript
                 {
                     m_uiPhase = PHASE_THREE;
                     if (m_creature->getVictim())
+                    {
                         m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    }
                     return;
                 }
                 else
+                {
                     m_uiFrostmournePhaseTimer -= uiDiff;
+                }
 
                 break;
             case PHASE_DEATH_AWAITS:

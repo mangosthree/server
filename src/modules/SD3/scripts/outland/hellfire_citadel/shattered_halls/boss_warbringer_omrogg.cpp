@@ -128,7 +128,9 @@ struct mob_omrogg_heads : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature *pSender, Unit* pInvoker, uint32 /*data*/) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender->GetEntry() == NPC_WARBRINGER_OMROGG)
+            {
                 m_bDeathYell = true;
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override

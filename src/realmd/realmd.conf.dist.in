@@ -9,7 +9,7 @@ ConfVersion=2010062001
 # REALMD SETTINGS
 #
 #    LoginDatabaseInfo
-#    Connection settings for the script library database
+#    Connection settings for the realm/authentication database
 #        Default: hostname;port;username;password;database
 #                 Use named pipes at Windows
 #                 .;somenumber;username;password;database
@@ -107,7 +107,7 @@ ConfVersion=2010062001
 #                 1 (Ban Account)
 #
 ################################################################################
-LoginDatabaseInfo      = "127.0.0.1;3306;mangos;mangos;realmd"
+LoginDatabaseInfo      = "127.0.0.1;3306;root;mangos;realmd"
 LogsDir                = ""
 PidFile                = ""
 

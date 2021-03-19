@@ -96,7 +96,9 @@ struct is_molten_core : public InstanceScript
                 break;
             case NPC_LAVA_SURGER:
                 if (GetData(TYPE_GARR) == DONE)
+                {
                     pCreature->ForcedDespawn(500);
+                }
                 break;
             }
         }
@@ -115,7 +117,9 @@ struct is_molten_core : public InstanceScript
                         pGarr->CastSpell(pGarr, SPELL_GARR_ARMOR_DEBUFF, true);
 
                         if (!m_sFireswornGUID.size())
+                        {
                             pGarr->AI()->ReceiveAIEvent(AI_EVENT_CUSTOM_B, pGarr, pGarr, 0);
+                        }
                     }
                 }
                 break;
@@ -233,8 +237,12 @@ struct is_molten_core : public InstanceScript
                     ObjectGuid guid = *it;
                     int32 bp0 = 0;
                     if (Creature* firesworn = instance->GetCreature(guid))
+                    {
                         if (firesworn->IsAlive())
+                        {
                             firesworn->CastCustomSpell(firesworn, SPELL_SEPARATION_ANXIETY, &bp0, nullptr, nullptr, true);
+                        }
+                    }
                 }
                 return;
             }
@@ -247,7 +255,9 @@ struct is_molten_core : public InstanceScript
                 {
                     m_auiRuneState[rstr->getRuneType()] = SPECIAL;
                     if (GameObject *trap = GetSingleGameObjectFromStorage(rstr->m_uiTrapEntry))
+                    {
                         trap->SetGoState(GO_STATE_READY);
+                    }
                 }
 #endif
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
@@ -282,7 +292,9 @@ struct is_molten_core : public InstanceScript
                 return m_auiEncounter[uiType];
             }
             else if (sRuneEncounters const *rstr = GetRuneStructForTrapEntry(uiType))
+            {
                 return m_auiRuneState[rstr->getRuneType()];
+            }
 
             return 0;
         }
@@ -298,8 +310,12 @@ struct is_molten_core : public InstanceScript
                 {
                     ObjectGuid guid = *it;
                     if (Creature* firesworn = instance->GetCreature(guid))
+                    {
                         if (firesworn->IsAlive() && firesworn->IsWithinDistInMap(garr, 20.0f, false))
+                        {
                             return guid.GetRawValue();
+                        }
+                    }
                 }
                 break;
             }
@@ -398,18 +414,24 @@ struct is_molten_core : public InstanceScript
         sRuneEncounters const *GetRuneStructForBoss(uint32 uiType) const
         {
             for (int i = 0; i < MAX_MOLTEN_RUNES; ++i)
+            {
                 if (m_aMoltenCoreRunes[i].m_bossType == uiType)
+                {
                     return &m_aMoltenCoreRunes[i];
-
+                }
+            }
             return nullptr;
         }
 
         sRuneEncounters const *GetRuneStructForTrapEntry(uint32 entry) const
         {
             for (int i = 0; i < MAX_MOLTEN_RUNES; ++i)
-            if (m_aMoltenCoreRunes[i].m_uiTrapEntry == entry)
-                return &m_aMoltenCoreRunes[i];
-
+            {
+                if (m_aMoltenCoreRunes[i].m_uiTrapEntry == entry)
+                {
+                    return &m_aMoltenCoreRunes[i];
+                }
+            }
             return nullptr;
         }
 
@@ -424,7 +446,9 @@ struct is_molten_core : public InstanceScript
                     trap->SetLootState(GO_JUST_DEACTIVATED);    //TODO fix GameObject::Use for traps
                 }
                 if (GameObject *rune = GetSingleGameObjectFromStorage(rstr->m_uiRuneEntry))
+                {
                     rune->SetGoState(GO_STATE_READY);
+                }
             }
         }
 

@@ -307,7 +307,9 @@ struct is_dire_maul : public InstanceScript
 
                             // only evade if required
                             if (pOgre->getVictim())
+                            {
                                 pOgre->AI()->EnterEvadeMode();
+                            }
                         }
                     }
 

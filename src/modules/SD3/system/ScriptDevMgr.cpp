@@ -465,7 +465,9 @@ bool SD3::NpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 uiSp
     Script* pTempScript = m_scripts[pClickedCreature->GetScriptId()];
 
     if (!pTempScript || !pTempScript->ToCreatureScript())
+    {
         return false;
+    }
 
     return pTempScript->ToCreatureScript()->OnSpellClick(pPlayer, pClickedCreature, uiSpellId);
 }
@@ -495,7 +497,9 @@ CreatureAI* SD3::GetCreatureAI(Creature* pCreature)
 
     CreatureAI* ai = pTempScript->ToCreatureScript()->GetAI(pCreature);
     if (ai)
+    {
         ai->Reset();
+    }
 
     return ai;
 }

@@ -295,7 +295,9 @@ void BattleGroundQueue::PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* g
     else
     {
         if (ginfo->IsRated)
+        {
             team_index = TEAM_INDEX_HORDE;                     // for rated arenas use TEAM_INDEX_HORDE
+        }
     }
 
     // store pointer to arrayindex of player that was added first
@@ -324,7 +326,9 @@ uint32 BattleGroundQueue::GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattleG
     else
     {
         if (ginfo->IsRated)
+        {
             team_index = TEAM_INDEX_HORDE;                     // for rated arenas use TEAM_INDEX_HORDE
+        }
     }
     // check if there is enought values(we always add values > 0)
     if (m_WaitTimes[team_index][bracket_id][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME - 1])
@@ -796,10 +800,12 @@ bool BattleGroundQueue::CheckSkirmishForSameFaction(BattleGroundBracketId bracke
     // set itr_team to group that was added to selection pool latest
     GroupsQueueType::iterator itr_team = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + teamIdx].begin();
     for (; itr_team != m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + teamIdx].end(); ++itr_team)
+    {
         if (ginfo == *itr_team)
         {
             break;
         }
+    }
     if (itr_team == m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE + teamIdx].end())
     {
         return false;
@@ -855,9 +861,9 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
         m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].empty() &&
         m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_ALLIANCE].empty() &&
         m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].empty())
-        {
-            return;
-        }
+    {
+        return;
+    }
 
     // battleground with free slot for player should be always in the beggining of the queue
     // maybe it would be better to create bgfreeslotqueue for each bracket_id
@@ -1200,8 +1206,8 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
     Player* plr = sObjectMgr.GetPlayer(m_PlayerGuid);
     if (!plr)
-        // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
     {
+        // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
         return true;
     }
 
@@ -1223,7 +1229,9 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
             // update queues if battleground isn't ended
             if (bg && bg->isBattleGround() && bg->GetStatus() != STATUS_WAIT_LEAVE)
             {
+
                 sBattleGroundMgr.ScheduleQueueUpdate(0, ARENA_TYPE_NONE, m_BgQueueTypeId, m_BgTypeId, bg->GetBracketId());
+
             }
 
             WorldPacket data;
@@ -1569,6 +1577,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
     }
 
     data->WriteBits(bg->GetPlayerScoresSize(), 21);
+
     for (BattleGround::BattleGroundScoreMap::const_iterator itr = bg->GetPlayerScoresBegin(); itr != bg->GetPlayerScoresEnd(); ++itr)
     {
         ObjectGuid memberGuid = itr->first;
@@ -1653,7 +1662,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
             case BATTLEGROUND_RB:                           // wotlk
                 data->WriteBits(0, 24);                     // count of next fields
                 break;
-             default:
+            default:
                 sLog.outError("Unhandled SMSG_PVP_LOG_DATA for BG id %u", bg->GetTypeID());
                 data->WriteBits(0, 24);                     // count of next fields
                 break;
@@ -2020,11 +2029,9 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 battlegrounds. DB table `battleground_template` is empty.");
+        sLog.outString();
         return;
     }
 
@@ -2056,6 +2063,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         uint32 MinPlayersPerTeam = fields[1].GetUInt32();
         uint32 MaxPlayersPerTeam = fields[2].GetUInt32();
 
+        // check values from DB
         if (MaxPlayersPerTeam == 0)
         {
             sLog.outErrorDb("Table `battleground_template` for id %u doesn't allow any player per team settings. BG not created.", bgTypeID);
@@ -2129,8 +2137,8 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u battlegrounds", count);
+    sLog.outString();
 }
 
 void BattleGroundMgr::InitAutomaticArenaPointDistribution()

@@ -75,6 +75,7 @@
 #define BG_AV_REP_OWNED_MINE_HOLIDAY        36
 
 #define BG_AV_EVENT_START_BATTLE            9166
+
 /**
  * @brief
  *

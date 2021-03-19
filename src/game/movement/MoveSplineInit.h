@@ -137,6 +137,9 @@ namespace Movement
              */
             void SetFirstPointId(int32 pointId) { args.path_Idx_offset = pointId; }
 
+            /* Enables CatmullRom spline interpolation mode(makes path smooth)
+             * if not enabled linear spline mode will be choosen. Disabled by default
+             */
             void SetSmooth();
             /**
              * @brief Enables CatmullRom spline interpolation mode, enables flying animation.
@@ -191,6 +194,7 @@ namespace Movement
              * @return PointsArray
              */
             PointsArray& Path() { return args.path; }
+
         protected:
 
             MoveSplineInitArgs args; /**< TODO */

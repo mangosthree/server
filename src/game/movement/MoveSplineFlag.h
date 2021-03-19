@@ -244,4 +244,5 @@ namespace Movement
 #endif
 
 }
-#endif
+
+#endif // MANGOSSERVER_MOVESPLINEFLAG_H

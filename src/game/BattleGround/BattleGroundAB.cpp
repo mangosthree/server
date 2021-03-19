@@ -255,8 +255,10 @@ bool BattleGroundAB::HandleAreaTrigger(Player* source, uint32 trigger)
                 source->LeaveBattleground();
             }
             break;
+
         default:
             return false;
+
     }
     return true;
 }
@@ -446,7 +448,7 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player* source, GameObject* target
     }
 
     source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
-    uint32 sound;
+    uint32 sound = 0;
 
     // TODO in the following code we should restructure a bit to avoid
     // duplication (or maybe write functions?)

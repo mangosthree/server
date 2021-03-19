@@ -43,7 +43,7 @@ class ACTIVE_OBJECT,
  * @brief Grid is a logical segment of the game world represented inside MaNGOS.
  *
  * Grid is bind at compile time to a particular type of object which
- * we call it the object of interested.  There are many types of loader,
+ * we call it the object of interest.  There are many types of loader,
  * specially, dynamic loader, static loader, or on-demand loader.  There's
  * a subtle difference between dynamic loader and on-demand loader but
  * this is implementation specific to the loader class.  From the

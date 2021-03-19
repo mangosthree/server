@@ -139,7 +139,6 @@ enum BG_WS_Events
     WS_EVENT_SPIRITGUIDES_SPAWN   = 2
 };
 
-
 /**
  * @brief
  *

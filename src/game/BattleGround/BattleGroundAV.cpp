@@ -30,7 +30,8 @@
 #include "GameObject.h"
 #include "Language.h"
 #include "WorldPacket.h"
-#include "DBCStores.h"                                   // TODO REMOVE this when graveyard handling for pvp is updated
+// TODO REMOVE this when graveyard handling for pvp is updated
+#include "DBCStores.h"
 
 BattleGroundAV::BattleGroundAV(): m_HonorMapComplete(0), m_RepTowerDestruction(0), m_RepCaptain(0), m_RepBoss(0), m_RepOwnedGrave(0), m_RepOwnedMine(0), m_RepSurviveCaptain(0), m_RepSurviveTower(0)
 {
@@ -813,7 +814,9 @@ uint32 BattleGroundAV::GetNodeName(BG_AV_Nodes node) const
         case BG_AV_NODES_FROSTWOLF_ETOWER:  return LANG_BG_AV_NODE_TOWER_FROST_E;
         case BG_AV_NODES_FROSTWOLF_WTOWER:  return LANG_BG_AV_NODE_TOWER_FROST_W;
         case BG_AV_NODES_FROSTWOLF_HUT:     return LANG_BG_AV_NODE_GRAVE_FROST_HUT;
-        default: return 0; break;
+        default:
+            return 0;
+            break;
     }
 }
 
@@ -937,6 +940,9 @@ void BattleGroundAV::Reset()
     InitNode(BG_AV_NODES_SNOWFALL_GRAVE, BG_AV_TEAM_NEUTRAL, false);                            // give snowfall neutral owner
 }
 
+/// <summary>
+/// Gets the premature finish winning team.
+/// </summary>
 Team BattleGroundAV::GetPrematureWinner()
 {
     int32 hordeScore = m_TeamScores[TEAM_INDEX_HORDE];

@@ -59,7 +59,6 @@ void CreatureEventAIMgr::CheckUnusedAITexts()
     sLog.outString("Checking EventAI for unused texts, this might take a while");
 
     std::set<int32> idx_set;
-    // check not used strings this is negative range
     for (int32 i = MAX_CREATURE_AI_TEXT_STRING_ID + 1; i <= MIN_CREATURE_AI_TEXT_STRING_ID; ++i)
         if (sObjectMgr.GetMangosStringLocale(i))
         {
@@ -94,10 +93,107 @@ void CreatureEventAIMgr::CheckUnusedAITexts()
             }
         }
     }
-
     for (std::set<int32>::const_iterator itr = idx_set.begin(); itr != idx_set.end(); ++itr)
     {
         sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` but not used in EventAI scripts.", *itr);
+    }
+}
+
+// -------------------
+void CreatureEventAIMgr::LoadCreatureEventAI_Summons(bool check_entry_use)
+{
+    // Drop Existing EventSummon Map
+    m_CreatureEventAI_Summon_Map.clear();
+
+    // Gather additional data for EventAI
+    QueryResult* result = WorldDatabase.Query("SELECT `id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs` FROM `creature_ai_summons`");
+    if (result)
+    {
+        BarGoLink bar(result->GetRowCount());
+        uint32 Count = 0;
+
+        do
+        {
+            bar.step();
+            Field* fields = result->Fetch();
+
+            CreatureEventAI_Summon temp;
+
+            temp.id             = fields[0].GetUInt32();
+            temp.position_x     = fields[1].GetFloat();
+            temp.position_y     = fields[2].GetFloat();
+            temp.position_z     = fields[3].GetFloat();
+            temp.orientation    = fields[4].GetFloat();
+            temp.SpawnTimeSecs  = fields[5].GetUInt32();
+
+            if (!MaNGOS::IsValidMapCoord(temp.position_x, temp.position_y, temp.position_z, temp.orientation))
+            {
+                sLog.outErrorEventAI("Summon id %u have wrong coordinates (%f, %f, %f, %f), skipping.", temp.id, temp.position_x, temp.position_y, temp.position_z, temp.orientation);
+                continue;
+            }
+
+            // Add to map
+            m_CreatureEventAI_Summon_Map[temp.id] = temp;
+            ++Count;
+        }
+        while (result->NextRow());
+
+        delete result;
+
+        if (check_entry_use)
+        {
+            CheckUnusedAISummons();
+        }
+
+        sLog.outString(">> Loaded %u CreatureEventAI summon definitions", Count);
+        sLog.outString();
+    }
+    else
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outString(">> Loaded 0 CreatureEventAI Summon definitions. DB table `creature_ai_summons` is empty.");
+        sLog.outString();
+    }
+}
+
+void CreatureEventAIMgr::CheckUnusedAISummons()
+{
+    std::set<int32> idx_set;
+    // check not used strings this is negative range
+    for (CreatureEventAI_Summon_Map::const_iterator itr = m_CreatureEventAI_Summon_Map.begin(); itr != m_CreatureEventAI_Summon_Map.end(); ++itr)
+    {
+        idx_set.insert(itr->first);
+    }
+
+    for (CreatureEventAI_Event_Map::const_iterator itr = m_CreatureEventAI_Event_Map.begin(); itr != m_CreatureEventAI_Event_Map.end(); ++itr)
+    {
+        for (size_t i = 0; i < itr->second.size(); ++i)
+        {
+            CreatureEventAI_Event const& event = itr->second[i];
+
+            for (int j = 0; j < MAX_ACTIONS; ++j)
+            {
+                CreatureEventAI_Action const& action = event.action[j];
+                switch (action.type)
+                {
+                    case ACTION_T_SUMMON_ID:
+                    {
+                        if (action.summon_id.spawnId)
+                        {
+                            idx_set.erase(action.summon_id.spawnId);
+                        }
+                        break;
+                    }
+                    default: break;
+                }
+            }
+        }
+    }
+
+    for (std::set<int32>::const_iterator itr = idx_set.begin(); itr != idx_set.end(); ++itr)
+    {
+        sLog.outErrorEventAI("Entry %i in table `creature_ai_summons` but not used in EventAI scripts.", *itr);
     }
 }
 
@@ -167,104 +263,6 @@ bool IsValidTargetType(EventAI_Type eventType, EventAI_ActionType actionType, ui
         default:
             sLog.outErrorEventAI("Event %u Action%u uses incorrect Target type", eventId, action);
             return false;
-    }
-}
-
-// -------------------
-void CreatureEventAIMgr::LoadCreatureEventAI_Summons(bool check_entry_use)
-{
-    // Drop Existing EventSummon Map
-    m_CreatureEventAI_Summon_Map.clear();
-
-    // Gather additional data for EventAI
-    QueryResult* result = WorldDatabase.Query("SELECT `id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs` FROM `creature_ai_summons`");
-    if (result)
-    {
-        BarGoLink bar(result->GetRowCount());
-        uint32 Count = 0;
-
-        do
-        {
-            bar.step();
-            Field* fields = result->Fetch();
-
-            CreatureEventAI_Summon temp;
-
-            temp.id             = fields[0].GetUInt32();
-            temp.position_x     = fields[1].GetFloat();
-            temp.position_y     = fields[2].GetFloat();
-            temp.position_z     = fields[3].GetFloat();
-            temp.orientation    = fields[4].GetFloat();
-            temp.SpawnTimeSecs  = fields[5].GetUInt32();
-
-            if (!MaNGOS::IsValidMapCoord(temp.position_x, temp.position_y, temp.position_z, temp.orientation))
-            {
-                sLog.outErrorEventAI("Summon id %u have wrong coordinates (%f, %f, %f, %f), skipping.", temp.id, temp.position_x, temp.position_y, temp.position_z, temp.orientation);
-                continue;
-            }
-
-            // Add to map
-            m_CreatureEventAI_Summon_Map[temp.id] = temp;
-            ++Count;
-        }
-        while (result->NextRow());
-
-        delete result;
-
-        if (check_entry_use)
-        {
-            CheckUnusedAISummons();
-        }
-
-        sLog.outString();
-        sLog.outString(">> Loaded %u CreatureEventAI summon definitions", Count);
-    }
-    else
-    {
-        BarGoLink bar(1);
-        bar.step();
-        sLog.outString();
-        sLog.outString(">> Loaded 0 CreatureEventAI Summon definitions. DB table `creature_ai_summons` is empty.");
-    }
-}
-
-void CreatureEventAIMgr::CheckUnusedAISummons()
-{
-    std::set<int32> idx_set;
-    // check not used strings this is negative range
-    for (CreatureEventAI_Summon_Map::const_iterator itr = m_CreatureEventAI_Summon_Map.begin(); itr != m_CreatureEventAI_Summon_Map.end(); ++itr)
-    {
-        idx_set.insert(itr->first);
-    }
-
-    for (CreatureEventAI_Event_Map::const_iterator itr = m_CreatureEventAI_Event_Map.begin(); itr != m_CreatureEventAI_Event_Map.end(); ++itr)
-    {
-        for (size_t i = 0; i < itr->second.size(); ++i)
-        {
-            CreatureEventAI_Event const& event = itr->second[i];
-
-            for (int j = 0; j < MAX_ACTIONS; ++j)
-            {
-                CreatureEventAI_Action const& action = event.action[j];
-                switch (action.type)
-                {
-                    case ACTION_T_SUMMON_ID:
-                    {
-                        if (action.summon_id.spawnId)
-                        {
-                            idx_set.erase(action.summon_id.spawnId);
-                        }
-                        break;
-                    }
-                    default: break;
-                }
-            }
-        }
-    }
-
-    for (std::set<int32>::const_iterator itr = idx_set.begin(); itr != idx_set.end(); ++itr)
-    {
-        sLog.outErrorEventAI("Entry %i in table `creature_ai_summons` but not used in EventAI scripts.", *itr);
     }
 }
 
@@ -1086,14 +1084,14 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
         CheckUnusedAITexts();
         CheckUnusedAISummons();
 
-        sLog.outString();
         sLog.outString(">> Loaded %u CreatureEventAI scripts", Count);
+        sLog.outString();
     }
     else
     {
         BarGoLink bar(1);
         bar.step();
-        sLog.outString();
         sLog.outString(">> Loaded 0 CreatureEventAI scripts. DB table `creature_ai_scripts` is empty.");
+        sLog.outString();
     }
 }

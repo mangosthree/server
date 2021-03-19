@@ -106,3 +106,4 @@ void BattleGroundNA::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, 0xa10, GetAlivePlayersCountByTeam(HORDE));
     FillInitialWorldState(data, count, 0xa11, 1);
 }
+

@@ -39,7 +39,6 @@ PathFinder::PathFinder(const Unit* owner) :
     DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::PathInfo for %u \n", m_sourceUnit->GetGUIDLow());
 
     uint32 mapId = m_sourceUnit->GetMapId();
-
     if (MMAP::MMapFactory::IsPathfindingEnabled(mapId, owner))
     {
         MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
@@ -57,13 +56,14 @@ PathFinder::~PathFinder()
 
 bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest)
 {
+    // Vector3 oldDest = getEndPosition();
+    Vector3 dest(destX, destY, destZ);
+    setEndPosition(dest);
+
     float x, y, z;
     m_sourceUnit->GetPosition(x, y, z);
     Vector3 start(x, y, z);
     setStartPosition(start);
-
-    Vector3 dest(destX, destY, destZ);
-    setEndPosition(dest);
 
     m_forceDestination = forceDest;
 
@@ -666,9 +666,9 @@ bool PathFinder::getSteerTarget(const float* startPos, const float* endPos,
         // Stop at Off-Mesh link or when point is further than slop away.
         if ((steerPathFlags[ns] & DT_STRAIGHTPATH_OFFMESH_CONNECTION) ||
             !inRangeYZX(&steerPath[ns * VERTEX_SIZE], startPos, minTargetDist, 1000.0f))
-            {
-                break;
-            }
+        {
+            break;
+        }
         ++ns;
     }
     // Failed to find good point to steer to.

@@ -746,7 +746,7 @@ uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config)
             ItemPrototype const* prototype = item->GetProto();
             if (prototype)
             {
-                BuyerItemInfo& buyerItem = config.SameItemInfo[item->GetEntry()];    // Structure constructor will make sure Element are correctly initialised if entry is created here.
+                BuyerItemInfo& buyerItem = config.SameItemInfo[item->GetEntry()];  // Structure constructor will make sure Element are correctly initialised if entry is created here.
                 ++buyerItem.ItemCount;
                 buyerItem.BuyPrice = buyerItem.BuyPrice + (Aentry->buyout / item->GetCount());
                 buyerItem.BidPrice = buyerItem.BidPrice + (Aentry->startbid / item->GetCount());
@@ -772,7 +772,7 @@ uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config)
 
                 if (Aentry->owner == sAuctionBotConfig.GetAHBotId())
                 {
-                    if ((Aentry->bid != 0) && Aentry->bidder) // Add bided by player
+                    if ((Aentry->bid != 0) && Aentry->bidder)                      // Add bided by player
                     {
                         config.CheckedEntry[Aentry->Id].LastExist = Now;
                         config.CheckedEntry[Aentry->Id].AuctionId = Aentry->Id;
@@ -2196,10 +2196,12 @@ void AuctionHouseBot::Rebuild(bool all)
         {
             AuctionEntry* entry = itr->second;
             if (entry->owner == sAuctionBotConfig.GetAHBotId())                                    // ahbot auction
+            {
                 if (all || entry->bid == 0)                                                        // expire auction now if no bid or forced
                 {
                     entry->expireTime = sWorld.GetGameTime();
                 }
+            }
         }
     }
 }

@@ -180,11 +180,12 @@ void BattleGroundEY::EndBattleGround(Team winner)
 
     // disable capture points
     for (uint8 i = 0; i < EY_NODES_MAX; ++i)
+    {
         if (GameObject* go = GetBgMap()->GetGameObject(m_towers[i]))
         {
             go->SetLootState(GO_JUST_DEACTIVATED);
         }
-
+    }
     BattleGround::EndBattleGround(winner);
 }
 

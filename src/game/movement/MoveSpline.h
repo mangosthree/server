@@ -30,6 +30,10 @@
 
 namespace Movement
 {
+    /**
+     * @brief
+     *
+     */
     enum MonsterMoveType
     {
         MonsterMoveNormal = 0,
@@ -39,6 +43,10 @@ namespace Movement
         MonsterMoveFacingAngle = 4
     };
 
+    /**
+     * @brief
+     *
+     */
     struct Location : public Vector3
     {
         /**

@@ -507,10 +507,12 @@ void BattleGround::Update(uint32 diff)
                 PlaySoundToAll(SOUND_BG_START);
 
                 for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+                {
                     if (Player* plr = sObjectMgr.GetPlayer(itr->first))
                     {
                         plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
                     }
+                }
                 // Announce BG starting
                 if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_QUEUE_ANNOUNCER_START))
                 {
@@ -847,6 +849,7 @@ void BattleGround::EndBattleGround(Team winner)
     if (winner == ALLIANCE)
     {
         winmsg_id = isBattleGround() ? LANG_BG_A_WINS : LANG_ARENA_GOLD_WINS;
+
         PlaySoundToAll(SOUND_ALLIANCE_WINS);                // alliance wins sound
 
         // reversed index for the bg score storage system
@@ -855,6 +858,7 @@ void BattleGround::EndBattleGround(Team winner)
     else if (winner == HORDE)
     {
         winmsg_id = isBattleGround() ? LANG_BG_H_WINS : LANG_ARENA_GREEN_WINS;
+
         PlaySoundToAll(SOUND_HORDE_WINS);                   // horde wins sound
 
         // reversed index for the bg score storage system
@@ -1049,6 +1053,9 @@ void BattleGround::EndBattleGround(Team winner)
 
     if (isArena() && isRated() && winner_arena_team && loser_arena_team)
     {
+        // update arena points only after increasing the player's match count!
+        // obsolete: winner_arena_team->UpdateArenaPointsHelper();
+        // obsolete: loser_arena_team->UpdateArenaPointsHelper();
         // save the stat changes
         winner_arena_team->SaveToDB();
         loser_arena_team->SaveToDB();
@@ -1190,10 +1197,12 @@ void BattleGround::RewardItem(Player* plr, uint32 item_id, uint32 count)
     }
 
     if (count != 0 && !dest.empty())                        // can add some
+    {
         if (Item* item = plr->StoreNewItem(dest, item_id, true, 0))
         {
             plr->SendNewItem(item, count, true, false);
         }
+    }
 
     if (no_space_count > 0)
     {
@@ -1499,6 +1508,10 @@ void BattleGround::StartTimedAchievement(AchievementCriteriaTypes type, uint32 e
         }
 }
 
+/// <summary>
+/// Adds the player.
+/// </summary>
+/// <param name="plr">The PLR.</param>
 void BattleGround::AddPlayer(Player* plr)
 {
     // remove afk from player
@@ -1614,10 +1627,12 @@ void BattleGround::AddOrSetPlayerToCorrectBgGroup(Player* plr, ObjectGuid plr_gu
         {
             group->AddMember(plr_guid, plr->GetName());
             if (Group* originalGroup = plr->GetOriginalGroup())
+            {
                 if (originalGroup->IsLeader(plr_guid))
                 {
                     group->ChangeLeader(plr_guid);
                 }
+            }
         }
     }
     else                                                    // first player joined
@@ -1634,18 +1649,18 @@ void BattleGround::AddOrSetPlayerToCorrectBgGroup(Player* plr, ObjectGuid plr_gu
 /// <param name="player">The player.</param>
 void BattleGround::EventPlayerLoggedIn(Player* player)
 {
-    ObjectGuid plr_guid = player->GetObjectGuid();
+    ObjectGuid playerGuid = player->GetObjectGuid();
 
     // player is correct pointer
     for (OfflineQueue::iterator itr = m_OfflineQueue.begin(); itr != m_OfflineQueue.end(); ++itr)
     {
-        if (*itr == plr_guid)
+        if (*itr == playerGuid)
         {
             m_OfflineQueue.erase(itr);
             break;
         }
     }
-    m_Players[plr_guid].OfflineRemoveTime = 0;
+    m_Players[playerGuid].OfflineRemoveTime = 0;
     PlayerAddedToBGCheckIfBGIsRunning(player);
     // if battleground is starting, then add preparation aura
     // we don't have to do that, because preparation aura isn't removed when player logs out
@@ -1667,10 +1682,12 @@ void BattleGround::EventPlayerLoggedOut(Player* player)
 
         // 1 player is logging out, if it is the last, then end arena!
         if (isArena())
+        {
             if (GetAlivePlayersCountByTeam(player->GetTeam()) <= 1 && GetPlayersCountByTeam(GetOtherTeam(player->GetTeam())))
             {
                 EndBattleGround(GetOtherTeam(player->GetTeam()));
             }
+        }
     }
 }
 
@@ -1965,7 +1982,7 @@ void BattleGround::SpawnEvent(uint8 event1, uint8 event2, bool spawn)
     }
     else
     {
-        m_ActiveEvents[event1] = BG_EVENT_NONE;              // no event active if event2 gets despawned
+        m_ActiveEvents[event1] = BG_EVENT_NONE;             // no event active if event2 gets despawned
     }
 
     GuidVector::const_iterator itr = m_EventObjects[MAKE_PAIR32(event1, event2)].creatures.begin();
@@ -1973,6 +1990,7 @@ void BattleGround::SpawnEvent(uint8 event1, uint8 event2, bool spawn)
     {
         SpawnBGCreature(*itr, (spawn) ? RESPAWN_IMMEDIATELY : RESPAWN_ONE_DAY);
     }
+
     GuidVector::const_iterator itr2 = m_EventObjects[MAKE_PAIR32(event1, event2)].gameobjects.begin();
     for (; itr2 != m_EventObjects[MAKE_PAIR32(event1, event2)].gameobjects.end(); ++itr2)
     {
@@ -1994,6 +2012,7 @@ void BattleGround::SpawnBGObject(ObjectGuid guid, uint32 respawntime)
     {
         return;
     }
+
     if (respawntime == 0)
     {
         // we need to change state from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
@@ -2026,6 +2045,7 @@ void BattleGround::SpawnBGCreature(ObjectGuid guid, uint32 respawntime)
     {
         return;
     }
+
     if (respawntime == 0)
     {
         obj->Respawn();

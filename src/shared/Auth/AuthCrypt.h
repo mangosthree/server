@@ -26,7 +26,6 @@
 #define MANGOS_H_AUTHCRYPT
 
 #include "Common/Common.h"
-#include <vector>
 #include "ARC4.h"
 
 class BigNumber;

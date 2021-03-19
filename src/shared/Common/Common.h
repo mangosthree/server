@@ -89,7 +89,6 @@
 #include <queue>
 #include <sstream>
 #include <algorithm>
-#include <unordered_map>
 
 #include "Utilities/Errors.h"
 #include "LockedQueue/LockedQueue.h"
@@ -133,7 +132,7 @@ typedef off_t ACE_OFF_T;
 
 #  define I32FMT "%08I32X"
 #  define I64FMT "%016I64X"
-#  define snprintf _snprintf
+#
 #  define vsnprintf _vsnprintf
 #  define finite(X) _finite(X)
 

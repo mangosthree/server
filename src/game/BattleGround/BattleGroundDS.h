@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __BATTLEGROUNDDS_H
-#define __BATTLEGROUNDDS_H
+#ifndef MANGOS_H_BATTLEGROUNDDS
+#define MANGOS_H_BATTLEGROUNDDS
 
 class BattleGround;
 

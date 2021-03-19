@@ -36,7 +36,7 @@
 // those generic events should get a high event id
 #define BG_EVENT_DOOR 254
 // only arena event
-// cause this buff apears 90sec after start in every bg i implement it here
+// cause this buff to appear 90secs after start in every bg i implement it here
 #define ARENA_BUFF_EVENT 253
 #define ARENA_TIMELIMIT_POINTS_LOSS -16
 
@@ -233,6 +233,7 @@ enum BattleGroundQueueTypeId
     BATTLEGROUND_QUEUE_3v3      = 10,
     BATTLEGROUND_QUEUE_5v5      = 11,
 };
+
 #define MAX_BATTLEGROUND_QUEUE_TYPES 12
 
 /**
@@ -272,6 +273,7 @@ enum BattleGroundType
     TYPE_BATTLEGROUND     = 3,
     TYPE_ARENA            = 4
 };
+
 /**
  * @brief
  *
@@ -298,6 +300,10 @@ enum BattleGroundStartingEventsIds
 };
 #define BG_STARTING_EVENT_COUNT 4
 
+/**
+ * @brief
+ *
+ */
 enum GroupJoinBattlegroundResult
 {
     // positive values are indexes in BattlemasterList.dbc
@@ -429,10 +435,10 @@ class BattleGround
          */
         char const* GetName() const         { return m_Name; }
         /**
-        * @brief
-        *
-        * @return BattleGroundTypeId
-        */
+         * @brief
+         *
+         * @return BattleGroundTypeId
+         */
         BattleGroundTypeId GetTypeID(bool GetRandom = false) const { return GetRandom ? m_RandomTypeID : m_TypeID; }
         /**
          * @brief

@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -194,7 +194,9 @@ struct is_sunken_temple : public InstanceScript
                 if (uiData == DONE)
                 {
                     if (Creature* pEranikus = GetSingleCreatureFromStorage(NPC_SHADE_OF_ERANIKUS))
+                    {
                         pEranikus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    }
                 }
                 m_auiEncounter[uiType] = uiData;
                 break;
@@ -336,7 +338,9 @@ struct is_sunken_temple : public InstanceScript
                 return m_auiEncounter[uiType];
             }
             else if (uiType == TYPE_SIGNAL)
+            {
                 return uint32(m_bStatueEventStatus);
+            }
 
             return 0;
         }

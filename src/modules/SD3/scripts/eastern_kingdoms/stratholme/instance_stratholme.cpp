@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -568,14 +568,18 @@ struct is_stratholme : public InstanceScript
     if (m_auiEncounter[TYPE_BARON_RUN] == DONE)
     {
         if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
+        {
             pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[9].m_fX, aStratholmeLocation[9].m_fY, aStratholmeLocation[9].m_fZ, aStratholmeLocation[9].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+        }
     }
     // Baron ultimatum failed: summon Ysida outside the cage dead
     if (m_auiEncounter[TYPE_BARON_RUN] == FAIL)
     {
         if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
             if (Creature* pYsida = pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[9].m_fX, aStratholmeLocation[9].m_fY, aStratholmeLocation[9].m_fZ, aStratholmeLocation[9].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+            {
                 pYsida->DealDamage(pYsida, pYsida->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+            }
     }
 
             OUT_LOAD_INST_DATA_COMPLETE;
@@ -784,7 +788,9 @@ struct is_stratholme : public InstanceScript
                         // Baron ultimatum failed: let the Baron kill her
                         if (Creature* pYsida = GetSingleCreatureFromStorage(NPC_YSIDA))
                             if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
-                            pBaron->CastSpell(pYsida, SPELL_BARON_SOUL_DRAIN, true);
+                            {
+                                pBaron->CastSpell(pYsida, SPELL_BARON_SOUL_DRAIN, true);
+                            }
 
                         DoOrSimulateScriptTextForThisInstance(YSIDA_SAY_RUN_FAIL, NPC_YSIDA);
 

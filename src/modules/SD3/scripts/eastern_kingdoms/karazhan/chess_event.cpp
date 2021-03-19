@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -235,13 +235,17 @@ struct npc_echo_of_medivh : public CreatureScript
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_FURY_MEDIVH_VISUAL)
+            {
                 pSummoned->CastSpell(pSummoned, SPELL_FURY_OF_MEDIVH_AURA, true);
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_pInstance || m_pInstance->GetData(TYPE_CHESS) != IN_PROGRESS)
+            {
                 return;
+            }
 
             if (m_uiCheatTimer < uiDiff)
             {
@@ -259,7 +263,9 @@ struct npc_echo_of_medivh : public CreatureScript
                 m_uiCheatTimer = 90000;
             }
             else
+            {
                 m_uiCheatTimer -= uiDiff;
+            }
         }
     };
 
@@ -273,11 +279,15 @@ struct npc_echo_of_medivh : public CreatureScript
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if (pInstance->GetData(TYPE_CHESS) != DONE && pInstance->GetData(TYPE_CHESS) != SPECIAL)
+            {
                 pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_MEDIVH, pCreature->GetObjectGuid());
+            }
             else
             {
                 if (pInstance->GetData(TYPE_CHESS) == SPECIAL)
+                {
                     pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_RESET_BOARD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                }
 
                 pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_MEDIVH_BEATEN, pCreature->GetObjectGuid());
             }
@@ -295,7 +305,9 @@ struct npc_echo_of_medivh : public CreatureScript
         {
             // reset the board
             if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
+            {
                 pInstance->SetData(TYPE_CHESS, DONE);
+            }
 
             pPlayer->CLOSE_GOSSIP_MENU();
         }
@@ -325,9 +337,13 @@ struct ChessPieceScript : public CreatureScript
                 pPlayer->CastSpell(pCreature, SPELL_CONTROL_PIECE, true);
 
                 if (pInstance->GetData(TYPE_CHESS) == NOT_STARTED)
+                {
                     pInstance->SetData(TYPE_CHESS, IN_PROGRESS);
+                }
                 else if (pInstance->GetData(TYPE_CHESS) == DONE)
+                {
                     pInstance->SetData(TYPE_CHESS, SPECIAL);
+                }
             }
 
             pPlayer->CLOSE_GOSSIP_MENU();
@@ -380,7 +396,9 @@ struct npc_chess_piece_genericAI : public ScriptedAI
     void JustDied(Unit* /*pKiller*/) override
     {
         if (Creature* pSquare = m_creature->GetMap()->GetCreature(m_currentSquareGuid))
+        {
             pSquare->RemoveAllAuras();
+        }
 
         // ToDo: remove corpse after 10 sec
     }
@@ -392,7 +410,9 @@ struct npc_chess_piece_genericAI : public ScriptedAI
         {
             // clear the current square
             if (Creature* pSquare = m_creature->GetMap()->GetCreature(m_currentSquareGuid))
+            {
                 pSquare->RemoveAllAuras();
+            }
 
             m_currentSquareGuid = pInvoker->GetObjectGuid();
             m_uiMoveTimer = 2000;
@@ -419,20 +439,28 @@ struct npc_chess_piece_genericAI : public ScriptedAI
     void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
     {
         if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+        {
             return;
+        }
 
         // update facing
         if (Unit* pTarget = GetTargetByType(TARGET_TYPE_RANDOM, 5.0f))
+        {
             DoCastSpellIfCan(pTarget, SPELL_CHANGE_FACING);
+        }
         else
+        {
             m_creature->SetFacingTo(m_fCurrentOrientation);
+        }
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
     {
         // do a soft reset when the piece is controlled
         if (pCaster->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_CONTROL_PIECE)
+        {
             Reset();
+        }
     }
 
     // Function which returns a random target by type and range
@@ -447,7 +475,9 @@ struct npc_chess_piece_genericAI : public ScriptedAI
             uint64 guid = m_pInstance->GetData64(TYPE_CHESS_TARGET);
 
             if (Creature *target = m_pInstance->instance->GetCreature(ObjectGuid(guid)))
+            {
                 return target;
+            }
         }
         return nullptr;
     }
@@ -461,7 +491,9 @@ struct npc_chess_piece_genericAI : public ScriptedAI
             uint64 guid = m_pInstance->GetData64(TYPE_CHESS_MOVEMENT_SQUARE);
 
             if (Creature *square = m_pInstance->instance->GetCreature(ObjectGuid(guid)))
+            {
                 return square;
+            }
         }
         return nullptr;
     }
@@ -472,7 +504,9 @@ struct npc_chess_piece_genericAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_pInstance || m_pInstance->GetData(TYPE_CHESS) != IN_PROGRESS)
+        {
             return;
+        }
 
         // issue move command
         if (m_uiMoveCommandTimer)
@@ -481,7 +515,9 @@ struct npc_chess_piece_genericAI : public ScriptedAI
             {
                 // just update facing if some enemy is near
                 if (Unit* pTarget = GetTargetByType(TARGET_TYPE_RANDOM, 5.0f))
+                {
                     DoCastSpellIfCan(pTarget, SPELL_CHANGE_FACING);
+                }
                 else
                 {
                     // the npc doesn't have a 100% chance to move; also there should be some GCD check in core for this part
@@ -503,7 +539,9 @@ struct npc_chess_piece_genericAI : public ScriptedAI
 
                         // workaround which provides specific move target
                         if (Unit* pTarget = GetMovementSquare())
+                        {
                             DoCastSpellIfCan(pTarget, SPELL_MOVE_GENERIC, CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS);
+                        }
 
                         m_fCurrentOrientation = m_creature->GetOrientation();
                     }
@@ -512,7 +550,9 @@ struct npc_chess_piece_genericAI : public ScriptedAI
                 m_uiMoveCommandTimer = 5000;
             }
             else
+            {
                 m_uiMoveCommandTimer -= uiDiff;
+            }
         }
 
         // issue spell command
@@ -525,7 +565,9 @@ struct npc_chess_piece_genericAI : public ScriptedAI
                 m_bIsPrimarySpell = !m_bIsPrimarySpell;
             }
             else
+            {
                 m_uiSpellCommandTimer -= uiDiff;
+            }
         }
 
         // finish move timer
@@ -541,11 +583,15 @@ struct npc_chess_piece_genericAI : public ScriptedAI
                 m_uiMoveTimer = 0;
             }
             else
+            {
                 m_uiMoveTimer -= uiDiff;
+            }
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
             return;
+        }
     }
 
     protected:
@@ -634,7 +680,9 @@ struct spell_face_square : public SpellScript
         {
             Creature *pCreatureTarget = pTarget->ToCreature();
             if (pCaster->GetTypeId() == TYPEID_UNIT)
+            {
                 pCreatureTarget->SetFacingToObject(pCaster);
+            }
 
             return true;
         }
@@ -662,14 +710,20 @@ struct npc_king_llane : public ChessPieceScript
         void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
         {
             if (!uiDamage || !m_bIsAttacked || !m_pInstance || pDoneBy->GetTypeId() != TYPEID_UNIT)
+            {
                 return;
+            }
 
             if (Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH))
             {
                 if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == ALLIANCE)
+                {
                     DoPlaySoundToSet(pMedivh, SOUND_ID_CHECK_PLAYER);
+                }
                 else
+                {
                     DoPlaySoundToSet(pMedivh, SOUND_ID_CHECK_MEDIVH);
+                }
             }
 
             m_bIsAttacked = true;
@@ -680,14 +734,20 @@ struct npc_king_llane : public ChessPieceScript
             npc_chess_piece_genericAI::JustDied(pKiller);
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH);
             if (!pMedivh)
+            {
                 return;
+            }
 
             if (m_pInstance->GetData(TYPE_CHESS) == SPECIAL)
+            {
                 m_pInstance->SetData(TYPE_CHESS, DONE);
+            }
             else
             {
                 if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == HORDE)
@@ -752,12 +812,16 @@ struct npc_king_llane : public ChessPieceScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->HasAura(SPELL_RECENTLY_IN_GAME) || pCreature->HasAura(SPELL_CONTROL_PIECE))
+        {
             return true;
+        }
 
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if ((pInstance->GetData(TYPE_CHESS) != DONE && pPlayer->GetTeam() == ALLIANCE) || pInstance->GetData(TYPE_CHESS_GAME_READY))
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_KING_LLANE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
         }
 
         pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_LLANE, pCreature->GetObjectGuid());
@@ -785,14 +849,20 @@ struct npc_warchief_blackhand : public ChessPieceScript
         void DamageTaken(Unit* pDoneBy, uint32& uiDamage) override
         {
             if (!uiDamage || !m_bIsAttacked || !m_pInstance || pDoneBy->GetTypeId() != TYPEID_UNIT)
+            {
                 return;
+            }
 
             if (Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH))
             {
                 if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == HORDE)
+                {
                     DoPlaySoundToSet(pMedivh, SOUND_ID_CHECK_PLAYER);
+                }
                 else
+                {
                     DoPlaySoundToSet(pMedivh, SOUND_ID_CHECK_MEDIVH);
+                }
             }
 
             m_bIsAttacked = true;
@@ -803,14 +873,20 @@ struct npc_warchief_blackhand : public ChessPieceScript
             npc_chess_piece_genericAI::JustDied(pKiller);
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH);
             if (!pMedivh)
+            {
                 return;
+            }
 
             if (m_pInstance->GetData(TYPE_CHESS) == SPECIAL)
+            {
                 m_pInstance->SetData(TYPE_CHESS, DONE);
+            }
             else
             {
                 if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == ALLIANCE)
@@ -875,12 +951,16 @@ struct npc_warchief_blackhand : public ChessPieceScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->HasAura(SPELL_RECENTLY_IN_GAME) || pCreature->HasAura(SPELL_CONTROL_PIECE))
+        {
             return true;
+        }
 
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if (pInstance->GetData(TYPE_CHESS) != DONE && pPlayer->GetTeam() == HORDE || pInstance->GetData(TYPE_CHESS_GAME_READY))
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_WARCHIEF_BLACKHAND, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
         }
 
         pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_BLACKHAND, pCreature->GetObjectGuid());
@@ -905,16 +985,24 @@ struct npc_human_conjurer : public ChessPieceScript
             npc_chess_piece_genericAI::JustDied(pKiller);
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH);
             if (!pMedivh)
+            {
                 return;
+            }
 
             if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == ALLIANCE)
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_QUEEN_PLAYER);
+            }
             else
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_QUEEN_MEDIVH);
+            }
 
             DoMoveChessPieceToSides(SPELL_TRANSFORM_CONJURER, FACTION_ID_CHESS_ALLIANCE);
         }
@@ -964,12 +1052,16 @@ struct npc_human_conjurer : public ChessPieceScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->HasAura(SPELL_RECENTLY_IN_GAME) || pCreature->HasAura(SPELL_CONTROL_PIECE))
+        {
             return true;
+        }
 
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if ((pInstance->GetData(TYPE_CHESS) == IN_PROGRESS && pPlayer->GetTeam() == ALLIANCE) || pInstance->GetData(TYPE_CHESS) == SPECIAL)
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_HUMAN_CONJURER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
         }
 
         pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_CONJURER, pCreature->GetObjectGuid());
@@ -994,16 +1086,24 @@ struct npc_orc_warlock : public ChessPieceScript
             npc_chess_piece_genericAI::JustDied(pKiller);
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH);
             if (!pMedivh)
+            {
                 return;
+            }
 
             if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == HORDE)
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_QUEEN_PLAYER);
+            }
             else
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_QUEEN_MEDIVH);
+            }
 
             DoMoveChessPieceToSides(SPELL_TRANSFORM_WARLOCK, FACTION_ID_CHESS_HORDE);
         }
@@ -1053,12 +1153,16 @@ struct npc_orc_warlock : public ChessPieceScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->HasAura(SPELL_RECENTLY_IN_GAME) || pCreature->HasAura(SPELL_CONTROL_PIECE))
+        {
             return true;
+        }
 
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if ((pInstance->GetData(TYPE_CHESS) == IN_PROGRESS && pPlayer->GetTeam() == HORDE) || pInstance->GetData(TYPE_CHESS) == SPECIAL)
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ORC_WARLOCK, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
         }
 
         pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_WARLOCK, pCreature->GetObjectGuid());
@@ -1083,11 +1187,15 @@ struct npc_human_footman : public ChessPieceScript
             npc_chess_piece_genericAI::JustDied(pKiller);
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH);
             if (!pMedivh)
+            {
                 return;
+            }
 
             if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == ALLIANCE)
             {
@@ -1156,12 +1264,16 @@ struct npc_human_footman : public ChessPieceScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->HasAura(SPELL_RECENTLY_IN_GAME) || pCreature->HasAura(SPELL_CONTROL_PIECE))
+        {
             return true;
+        }
 
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if ((pInstance->GetData(TYPE_CHESS) == IN_PROGRESS && pPlayer->GetTeam() == ALLIANCE) || pInstance->GetData(TYPE_CHESS) == SPECIAL)
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_HUMAN_FOOTMAN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
         }
 
         pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_FOOTMAN, pCreature->GetObjectGuid());
@@ -1186,11 +1298,15 @@ struct npc_orc_grunt : public ChessPieceScript
             npc_chess_piece_genericAI::JustDied(pKiller);
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH);
             if (!pMedivh)
+            {
                 return;
+            }
 
             if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == HORDE)
             {
@@ -1259,12 +1375,16 @@ struct npc_orc_grunt : public ChessPieceScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->HasAura(SPELL_RECENTLY_IN_GAME) || pCreature->HasAura(SPELL_CONTROL_PIECE))
+        {
             return true;
+        }
 
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if ((pInstance->GetData(TYPE_CHESS) == IN_PROGRESS && pPlayer->GetTeam() == HORDE) || pInstance->GetData(TYPE_CHESS) == SPECIAL)
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ORC_GRUNT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
         }
 
         pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_GRUNT, pCreature->GetObjectGuid());
@@ -1289,16 +1409,24 @@ struct npc_water_elemental : public ChessPieceScript
             npc_chess_piece_genericAI::JustDied(pKiller);
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH);
             if (!pMedivh)
+            {
                 return;
+            }
 
             if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == ALLIANCE)
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_ROOK_PLAYER);
+            }
             else
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_ROOK_MEDIVH);
+            }
 
             DoMoveChessPieceToSides(SPELL_TRANSFORM_WATER_ELEM, FACTION_ID_CHESS_ALLIANCE);
         }
@@ -1348,12 +1476,16 @@ struct npc_water_elemental : public ChessPieceScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->HasAura(SPELL_RECENTLY_IN_GAME) || pCreature->HasAura(SPELL_CONTROL_PIECE))
+        {
             return true;
+        }
 
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if ((pInstance->GetData(TYPE_CHESS) == IN_PROGRESS && pPlayer->GetTeam() == ALLIANCE) || pInstance->GetData(TYPE_CHESS) == SPECIAL)
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_WATER_ELEMENTAL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
         }
 
         pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_ELEMENTAL, pCreature->GetObjectGuid());
@@ -1378,16 +1510,24 @@ struct npc_summoned_daemon : public ChessPieceScript
             npc_chess_piece_genericAI::JustDied(pKiller);
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH);
             if (!pMedivh)
+            {
                 return;
+            }
 
             if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == HORDE)
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_ROOK_PLAYER);
+            }
             else
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_ROOK_MEDIVH);
+            }
 
             DoMoveChessPieceToSides(SPELL_TRANSFORM_DAEMON, FACTION_ID_CHESS_HORDE);
         }
@@ -1437,12 +1577,16 @@ struct npc_summoned_daemon : public ChessPieceScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->HasAura(SPELL_RECENTLY_IN_GAME) || pCreature->HasAura(SPELL_CONTROL_PIECE))
+        {
             return true;
+        }
 
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if ((pInstance->GetData(TYPE_CHESS) == IN_PROGRESS && pPlayer->GetTeam() == HORDE) || pInstance->GetData(TYPE_CHESS) == SPECIAL)
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_SUMMONED_DEAMON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
         }
 
         pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_DEAMON, pCreature->GetObjectGuid());
@@ -1467,16 +1611,24 @@ struct npc_human_charger : public ChessPieceScript
             npc_chess_piece_genericAI::JustDied(pKiller);
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH);
             if (!pMedivh)
+            {
                 return;
+            }
 
             if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == ALLIANCE)
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_KNIGHT_PLAYER);
+            }
             else
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_KNIGHT_MEDIVH);
+            }
 
             DoMoveChessPieceToSides(SPELL_TRANSFORM_CHARGER, FACTION_ID_CHESS_ALLIANCE);
         }
@@ -1526,12 +1678,16 @@ struct npc_human_charger : public ChessPieceScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->HasAura(SPELL_RECENTLY_IN_GAME) || pCreature->HasAura(SPELL_CONTROL_PIECE))
+        {
             return true;
+        }
 
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if ((pInstance->GetData(TYPE_CHESS) == IN_PROGRESS && pPlayer->GetTeam() == ALLIANCE) || pInstance->GetData(TYPE_CHESS) == SPECIAL)
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_HUMAN_CHARGER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
         }
 
         pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_CHARGER, pCreature->GetObjectGuid());
@@ -1556,16 +1712,24 @@ struct npc_orc_wolf : public ChessPieceScript
             npc_chess_piece_genericAI::JustDied(pKiller);
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH);
             if (!pMedivh)
+            {
                 return;
+            }
 
             if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == HORDE)
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_KNIGHT_PLAYER);
+            }
             else
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_KNIGHT_MEDIVH);
+            }
 
             DoMoveChessPieceToSides(SPELL_TRANSFORM_WOLF, FACTION_ID_CHESS_HORDE);
         }
@@ -1615,12 +1779,16 @@ struct npc_orc_wolf : public ChessPieceScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->HasAura(SPELL_RECENTLY_IN_GAME) || pCreature->HasAura(SPELL_CONTROL_PIECE))
+        {
             return true;
+        }
 
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if ((pInstance->GetData(TYPE_CHESS) == IN_PROGRESS && pPlayer->GetTeam() == HORDE) || pInstance->GetData(TYPE_CHESS) == SPECIAL)
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ORC_WOLF, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
         }
 
         pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_WOLF, pCreature->GetObjectGuid());
@@ -1645,16 +1813,24 @@ struct npc_human_cleric : public ChessPieceScript
             npc_chess_piece_genericAI::JustDied(pKiller);
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH);
             if (!pMedivh)
+            {
                 return;
+            }
 
             if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == ALLIANCE)
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_BISHOP_PLAYER);
+            }
             else
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_BISHOP_MEDIVH);
+            }
 
             DoMoveChessPieceToSides(SPELL_TRANSFORM_CLERIC, FACTION_ID_CHESS_ALLIANCE);
         }
@@ -1704,12 +1880,16 @@ struct npc_human_cleric : public ChessPieceScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->HasAura(SPELL_RECENTLY_IN_GAME) || pCreature->HasAura(SPELL_CONTROL_PIECE))
+        {
             return true;
+        }
 
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if ((pInstance->GetData(TYPE_CHESS) == IN_PROGRESS && pPlayer->GetTeam() == ALLIANCE) || pInstance->GetData(TYPE_CHESS) == SPECIAL)
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_HUMAN_CLERIC, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
         }
 
         pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_CLERIC, pCreature->GetObjectGuid());
@@ -1734,16 +1914,24 @@ struct npc_orc_necrolyte : public ChessPieceScript
             npc_chess_piece_genericAI::JustDied(pKiller);
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH);
             if (!pMedivh)
+            {
                 return;
+            }
 
             if (m_pInstance->GetData(TYPE_PLAYER_TEAM) == HORDE)
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_BISHOP_PLAYER);
+            }
             else
+            {
                 DoPlaySoundToSet(pMedivh, SOUND_ID_LOSE_BISHOP_MEDIVH);
+            }
 
             DoMoveChessPieceToSides(SPELL_TRANSFORM_NECROLYTE, FACTION_ID_CHESS_HORDE);
         }
@@ -1794,12 +1982,16 @@ struct npc_orc_necrolyte : public ChessPieceScript
     bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
     {
         if (pPlayer->HasAura(SPELL_RECENTLY_IN_GAME) || pCreature->HasAura(SPELL_CONTROL_PIECE))
+        {
             return true;
+        }
 
         if (ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData())
         {
             if ((pInstance->GetData(TYPE_CHESS) == IN_PROGRESS && pPlayer->GetTeam() == HORDE) || pInstance->GetData(TYPE_CHESS) == SPECIAL)
+            {
                 pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ORC_NECROLYTE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            }
         }
 
         pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_NECROLYTE, pCreature->GetObjectGuid());

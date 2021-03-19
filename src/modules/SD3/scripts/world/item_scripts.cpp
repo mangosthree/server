@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@
 
 #include "precompiled.h"
 #if defined (TBC) || defined (WOTLK) || defined (CATA) || defined (MISTS)
-#include "Spell.h"
+#include "Spell.h" // This include is not needed in Zero, but is in the rest
 
 /*#####
 # item_ogre_brew
@@ -196,14 +196,18 @@ struct item_petrov_cluster_bombs : public ItemScript
     bool OnUse(Player* pPlayer, Item* pItem, const SpellCastTargets& /*pTargets*/)
     {
         if (pPlayer->GetZoneId() != ZONE_ID_HOWLING)
+        {
             return false;
+        }
 
         if (!pPlayer->GetTransport() || pPlayer->GetAreaId() != AREA_ID_SHATTERED_STRAITS)
         {
             pPlayer->SendEquipError(EQUIP_ERR_NONE, pItem, nullptr);
 
             if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry(SPELL_PETROV_BOMB))
+            {
                 Spell::SendCastResult(pPlayer, pSpellInfo, 1, SPELL_FAILED_NOT_HERE);
+            }
 
             return true;
         }

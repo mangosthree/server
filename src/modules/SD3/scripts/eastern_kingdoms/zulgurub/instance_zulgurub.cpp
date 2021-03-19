@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -203,7 +203,9 @@ struct is_zulgurub : public InstanceScript
             case TYPE_SIGNAL_2:
             case TYPE_SIGNAL_3:
                 if (Creature *p = (const_cast<instance_zulgurub*>(this))->SelectRandomPantherTrigger(type == TYPE_SIGNAL_2))
+                {
                     return p->GetObjectGuid().GetRawValue();
+                }
                 break;
             default:
                 break;

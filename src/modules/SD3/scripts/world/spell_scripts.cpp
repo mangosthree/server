@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,17 +111,23 @@ struct spell_cast_fishing_net : public SpellScript
             if (uiEffIndex == EFFECT_INDEX_0)
             {
                 if (pGOTarget->GetRespawnTime() != 0 || pGOTarget->GetEntry() != GO_TASTY_REEF_FISH || pCaster->GetTypeId() != TYPEID_PLAYER)
+                {
                     return true;
+                }
 
                 if (urand(0, 3))
                 {
                     if (Item* pItem = ((Player*)pCaster)->StoreNewItemInInventorySlot(ITEM_TASTY_REEF_FISH, 1))
+                    {
                         ((Player*)pCaster)->SendNewItem(pItem, 1, true, false);
+                    }
                 }
                 else
                 {
                     if (Creature* pShark = pCaster->SummonCreature(NPC_REEF_SHARK, pGOTarget->GetPositionX(), pGOTarget->GetPositionY(), pGOTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 30000))
+                    {
                         pShark->AI()->AttackStart(pCaster);
+                    }
                 }
 
                 pGOTarget->SetLootState(GO_JUST_DEACTIVATED);
@@ -501,7 +507,9 @@ struct aura_recharging_battery : public AuraScript
     bool OnDummyApply(const Aura* pAura, bool bApply) override
     {
         if (pAura->GetId() != SPELL_RECHARGING_BATTERY || pAura->GetEffIndex() != EFFECT_INDEX_0)
+        {
             return true;
+        }
 
         if (!bApply)
         {
@@ -911,7 +919,9 @@ struct spell_orb_of_murloc_control : public SpellScript
     {
         Creature* pCreatureTarget = pTarget->ToCreature();
         if (!pCreatureTarget)
+        {
             return true;
+        }
 
         pCreatureTarget->CastSpell(pCaster, SPELL_GREENGILL_SLAVE_FREED, true);
 
@@ -932,7 +942,9 @@ struct spell_fumping : public SpellScript
     {
         Creature *pCreatureTarget = pTarget->ToCreature();
         if (!pCreatureTarget)
+        {
             return true;
+        }
 
         if (uiSpellId == SPELL_FUMPING && uiEffIndex == EFFECT_INDEX_2)
         {
@@ -1043,7 +1055,9 @@ struct spell_throw_gordawg_boulder : public SpellScript
     {
         Creature *pCreatureTarget = pTarget->ToCreature();
         if (!pCreatureTarget)
+        {
             return true;
+        }
 
         if (uiSpellId == SPELL_THROW_GORDAWG_BOULDER && uiEffIndex == EFFECT_INDEX_0)
         {
@@ -1177,12 +1191,16 @@ struct spell_throw_ice : public SpellScript
         {
             Creature *pCreatureTarget = pTarget->ToCreature();
             if (!pCreatureTarget || pCreatureTarget->GetEntry() != NPC_SMOLDERING_SCRAP_BUNNY)
+            {
                 return true;
+            }
 
             if (GameObject* pScrap = GetClosestGameObjectWithEntry(pCreatureTarget, GO_SMOLDERING_SCRAP, 5.0f))
             {
                 if (pScrap->GetRespawnTime() != 0)
+                {
                     return true;
+                }
 
                 pCreatureTarget->CastSpell(pCreatureTarget, SPELL_FROZEN_IRON_SCRAP, true);
                 pScrap->SetLootState(GO_JUST_DEACTIVATED);

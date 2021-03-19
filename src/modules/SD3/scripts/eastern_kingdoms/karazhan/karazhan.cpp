@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -204,7 +204,9 @@ struct npc_barnes : public CreatureScript
         {
             // Check if opera event is not yet in progress
             if (pInstance->GetData(TYPE_OPERA) == IN_PROGRESS || pInstance->GetData(TYPE_OPERA) == DONE)
-            { return true; }
+            {
+                return true;
+            }
 
             // Check for death of Moroes
             if (pInstance->GetData(TYPE_MOROES) == DONE)
@@ -242,7 +244,9 @@ struct npc_barnes : public CreatureScript
                 DoScriptText(SAY_BARNES_EVENT_START, pCreature);
                 // start the stage escort
                 if (npc_barnesAI* pBarnesAI = dynamic_cast<npc_barnesAI*>(pCreature->AI()))
-                { pBarnesAI->Start(false, nullptr, nullptr, true); }
+                {
+                    pBarnesAI->Start(false, nullptr, nullptr, true);
+                }
                 break;
                 // GM gossip options
             case GOSSIP_ACTION_INFO_DEF+3:
@@ -485,7 +489,9 @@ struct npc_image_of_medivh : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*data*/) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature && pInvoker->GetTypeId() == TYPEID_PLAYER)
+            {
                 m_eventStarterGuid = pInvoker->GetObjectGuid();
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override { DialogueUpdate(uiDiff); }

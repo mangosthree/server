@@ -85,7 +85,9 @@ struct npc_valentine_boss_manager : public CreatureScript
         void JustDidDialogueStep(int32 iEntry) override
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             Creature* pHummel = m_pInstance->GetSingleCreatureFromStorage(NPC_HUMMEL);
             switch (iEntry)
@@ -98,14 +100,18 @@ struct npc_valentine_boss_manager : public CreatureScript
                     pHummel->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_NON_ATTACKABLE);
 
                     if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_EventStarterGuid))
+                    {
                         pHummel->AI()->AttackStart(pPlayer);
+                    }
                 }
 
                 m_pInstance->SetData(TYPE_APOTHECARY, IN_PROGRESS);
                 break;
             case NPC_BAXTER:
                 if (!pHummel)
+                {
                     return;
+                }
 
                 if (Creature* pBaxter = m_pInstance->GetSingleCreatureFromStorage(NPC_BAXTER))
                 {
@@ -115,12 +121,16 @@ struct npc_valentine_boss_manager : public CreatureScript
                     pBaxter->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
                     pBaxter->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_NON_ATTACKABLE);
                     if (pHummel->getVictim())
+                    {
                         pBaxter->AI()->AttackStart(pHummel->getVictim());
+                    }
                 break;
             }
             case NPC_FRYE:
                 if (!pHummel)
+                {
                     return;
+                }
 
                 if (Creature* pFrye = m_pInstance->GetSingleCreatureFromStorage(NPC_FRYE))
                 {
@@ -130,7 +140,9 @@ struct npc_valentine_boss_manager : public CreatureScript
                     pFrye->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
                     pFrye->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE | UNIT_FLAG_NON_ATTACKABLE);
                     if (pHummel->getVictim())
+                    {
                         pFrye->AI()->AttackStart(pHummel->getVictim());
+                    }
                 }
                 break;
             }
@@ -141,34 +153,48 @@ struct npc_valentine_boss_manager : public CreatureScript
             if (pSummoned->GetEntry() == NCP_CRAZED_APOTHECARY)
             {
                 if (!m_pInstance)
+                {
                     return;
+                }
 
                 // Make it attack a random Target
                 Creature* pBoss = m_pInstance->GetSingleCreatureFromStorage(NPC_HUMMEL);
                 if (!pBoss || !pBoss->IsAlive())
+                {
                     pBoss = m_pInstance->GetSingleCreatureFromStorage(NPC_BAXTER);
+                }
                 if (!pBoss || !pBoss->IsAlive())
+                {
                     pBoss = m_pInstance->GetSingleCreatureFromStorage(NPC_FRYE);
+                }
                 if (!pBoss || !pBoss->IsAlive())
+                {
                     return;
+                }
 
                 // Attack a random target
                 if (Unit* pTarget = pBoss->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     pSummoned->AI()->AttackStart(pTarget);
+                }
             }
         }
 
         void ReceiveAIEvent(AIEventType type, Creature* sender, Unit* invoker, uint32 /*data*/)
         {
             if (type == AI_EVENT_CUSTOM_A && invoker && sender == m_creature)
+            {
                 DoStartValentineEvent(invoker->GetObjectGuid());
+            }
         }
 
         // Wrapper to get the event started
         void DoStartValentineEvent(ObjectGuid starterGuid)
         {
             if (!m_pInstance)
+            {
                 return;
+            }
 
             m_EventStarterGuid = starterGuid;
 
@@ -197,7 +223,9 @@ struct npc_valentine_boss_manager : public CreatureScript
                     pBaxter->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
                 }
                 else
+                {
                     script_error_log("Gameobject %u couldn't be found or something really bad happened.", GO_APOTHECARE_VIALS);
+                }
             }
 
             // Move Frye to position
@@ -215,7 +243,9 @@ struct npc_valentine_boss_manager : public CreatureScript
                     pFrye->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
                 }
                 else
+                {
                     script_error_log("Gameobject %u couldn't be found or something really bad happened.", GO_CHEMISTRY_SET);
+                }
             }
         }
 
@@ -224,20 +254,28 @@ struct npc_valentine_boss_manager : public CreatureScript
             DialogueUpdate(uiDiff);
 
             if (!m_pInstance)
+            {
                 return;
+            }
 
             if (m_pInstance->GetData(TYPE_APOTHECARY) != IN_PROGRESS)
+            {
                 return;
+            }
 
             if (m_uiCrazedApothecaryTimer < uiDiff)
             {
                 if (Creature* pGenerator = m_pInstance->GetSingleCreatureFromStorage(NPC_APOTHECARY_GENERATOR))
+                {
                     pGenerator->CastSpell(pGenerator, SPELL_SUMMON_VALENTINE_ADD, true, nullptr, nullptr, m_creature->GetObjectGuid());
+                }
 
                 m_uiCrazedApothecaryTimer = 30000;
             }
             else
+            {
                 m_uiCrazedApothecaryTimer -= uiDiff;
+            }
         }
     };
 
@@ -260,7 +298,9 @@ struct npc_apothecary_hummel : public CreatureScript
                 if (Creature* pValentineMgr = pInstance->GetSingleCreatureFromStorage(NPC_VALENTINE_BOSS_MGR))
                 {
                     if (CreatureAI* pManagerAI = pValentineMgr->AI())
+                    {
                         pManagerAI->SendAIEvent(AI_EVENT_CUSTOM_A, pPlayer, pValentineMgr);
+                    }
                 }
             }
         }

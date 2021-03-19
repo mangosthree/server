@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -190,7 +190,9 @@ struct boss_netherspite : public CreatureScript
             m_vPortalEntryList.resize(MAX_PORTALS);
 
             for (uint8 i = 0; i < MAX_PORTALS; ++i)
+            {
                 m_vPortalEntryList[i] = auiPortalVector[PORTAL_ENTRY][i];
+            }
 
             DoResetPortals();
         }
@@ -198,7 +200,9 @@ struct boss_netherspite : public CreatureScript
         void Aggro(Unit* /*pWho*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_NETHERSPITE, IN_PROGRESS);
+            }
 
             DoSummonPortals();
             DoCastSpellIfCan(m_creature, SPELL_NETHERBURN);
@@ -207,7 +211,9 @@ struct boss_netherspite : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_NETHERSPITE, DONE);
+            }
 
             DoDespawnPortalsImmediately();
         }
@@ -215,7 +221,9 @@ struct boss_netherspite : public CreatureScript
         void JustReachedHome() override
         {
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_NETHERSPITE, FAIL);
+            }
 
             DoDespawnPortalsImmediately();
         }
@@ -264,7 +272,9 @@ struct boss_netherspite : public CreatureScript
         void DoSummonPortals()
         {
             for (uint8 i = 0; i < MAX_PORTALS; ++i)
+            {
                 m_creature->SummonCreature(m_vPortalEntryList[i], aPortalCoordinates[i].fX, aPortalCoordinates[i].fY, aPortalCoordinates[i].fZ, aPortalCoordinates[i].fO, TEMPSUMMON_TIMED_DESPAWN, 60000);
+            }
 
             // randomize the portals after the first summon
             std::random_shuffle(m_vPortalEntryList.begin(), m_vPortalEntryList.end());
@@ -297,7 +307,9 @@ struct boss_netherspite : public CreatureScript
         void DoDebuffPortalHolder(uint8 portalIndex)
         {
             if (m_portalHolder[portalIndex] && m_portalHolder[portalIndex] != m_creature)
+            {
                 m_portalHolder[portalIndex]->CastSpell(m_portalHolder[portalIndex], auiPortalVector[PORTAL_DEBUFF][portalIndex], true);
+            }
         }
 
         void DoDebuffPortalHolderInBanishPhase()
@@ -382,7 +394,9 @@ struct boss_netherspite : public CreatureScript
                 float delta = m_portal[portalIndex]->GetDistance2d(pPlayer) + pPlayer->GetDistance2d(m_creature) - m_portal[portalIndex]->GetDistance2d(m_creature);
 
                 if (delta >= -beamHitbox && delta <= 0)
+                {
                     success = true;
+                }
             }
 
             return success;
@@ -400,7 +414,9 @@ struct boss_netherspite : public CreatureScript
                     if (m_portal[portalIndex] && !pPlayer->HasAura(auiPortalVector[PORTAL_DEBUFF][portalIndex]) && IsPlayerPositionBetweenPortalAndNetherspite(portalIndex, pPlayer) && m_portal[portalIndex]->GetDistance2d(m_creature) > m_portal[portalIndex]->GetDistance2d(pPlayer))
                     {
                         if (!closestPlayer || m_portal[portalIndex]->GetDistance2d(closestPlayer) > m_portal[portalIndex]->GetDistance2d(pPlayer))
+                        {
                             closestPlayer = pPlayer;
+                        }
                     }
                 }
             }
@@ -411,13 +427,19 @@ struct boss_netherspite : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             //PHASE SWITCH
             if (m_uiPhaseSwitchTimer <= uiDiff)
+            {
                 SwitchPhases();
+            }
             else
+            {
                 m_uiPhaseSwitchTimer -= uiDiff;
+            }
 
             //ENRAGE
             if (m_uiEnrageTimer)
@@ -425,10 +447,14 @@ struct boss_netherspite : public CreatureScript
                 if (m_uiEnrageTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_NETHER_INFUSION) == CAST_OK)
+                    {
                         m_uiEnrageTimer = 0;
+                    }
                 }
                 else
+                {
                     m_uiEnrageTimer -= uiDiff;
+                }
             }
 
             if (m_uiVoidZoneTimer < uiDiff)
@@ -436,11 +462,15 @@ struct boss_netherspite : public CreatureScript
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_VOID_ZONE) == CAST_OK)
+                    {
                         m_uiVoidZoneTimer = 15000;
+                    }
                 }
             }
             else
+            {
                 m_uiVoidZoneTimer -= uiDiff;
+            }
 
             //BEAM PHASE
             if (m_uiActivePhase == BEAM_PHASE)
@@ -451,7 +481,9 @@ struct boss_netherspite : public CreatureScript
                     m_uiConnectionTimer = 1000;
                 }
                 else
+                {
                     m_uiConnectionTimer -= uiDiff;
+                }
 
                 if (m_uiEmpowermentTimer)
                 {
@@ -464,7 +496,9 @@ struct boss_netherspite : public CreatureScript
                         }
                     }
                     else
+                    {
                         m_uiEmpowermentTimer -= uiDiff;
+                    }
                 }
 
                 DoMeleeAttackIfReady();
@@ -475,10 +509,14 @@ struct boss_netherspite : public CreatureScript
                 if (m_uiNetherbreathTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_NETHERBREATH) == CAST_OK)
+                    {
                         m_uiNetherbreathTimer = urand(4000, 5000);
+                    }
                 }
                 else
+                {
                     m_uiNetherbreathTimer -= uiDiff;
+                }
             }
         }
     };

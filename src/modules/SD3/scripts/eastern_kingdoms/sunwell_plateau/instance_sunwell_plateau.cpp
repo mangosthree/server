@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,14 +131,18 @@ struct is_sunwell_plateau : public InstanceScript
     {
         // Summon Felmyst in reload case if not already summoned
         if (!GetSingleCreatureFromStorage(NPC_FELMYST, true))
+        {
             pPlayer->SummonCreature(NPC_FELMYST, aMadrigosaLoc[0].m_fX, aMadrigosaLoc[0].m_fY, aMadrigosaLoc[0].m_fZ, aMadrigosaLoc[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0, true);
+        }
     }
 
     // Spawn M'uru after the Eredar Twins
     if (m_auiEncounter[TYPE_EREDAR_TWINS] == DONE && m_auiEncounter[TYPE_MURU] != DONE)
     {
         if (!GetSingleCreatureFromStorage(NPC_MURU, true))
+        {
             pPlayer->SummonCreature(NPC_MURU, afMuruSpawnLoc[0], afMuruSpawnLoc[1], afMuruSpawnLoc[2], afMuruSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+        }
     }
 #endif
         }
@@ -227,11 +231,15 @@ struct is_sunwell_plateau : public InstanceScript
             case NPC_WORLD_TRIGGER:
                 // sort triggers for flightpath
                 if (pCreature->GetPositionZ() < 51.0f)
+                {
                     m_lAllFlightTriggersList.push_back(pCreature->GetObjectGuid());
+                }
                 break;
             case NPC_WORLD_TRIGGER_LARGE:
                 if (pCreature->GetPositionY() < 523.0f)
+                {
                     m_lBackdoorTriggersList.push_back(pCreature->GetObjectGuid());
+                }
                 break;
             }
         }
@@ -300,7 +308,9 @@ struct is_sunwell_plateau : public InstanceScript
             case TYPE_FELMYST:
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == DONE)
+                {
                     StartNextDialogueText(NPC_KALECGOS_MADRIGOSA);
+                }
                 else if (uiData == IN_PROGRESS)
                 {
                     DoSortFlightTriggers();
@@ -316,7 +326,9 @@ struct is_sunwell_plateau : public InstanceScript
 #endif
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
                 if (Player* pPlayer = GetPlayerInMap())
+                {
                     pPlayer->SummonCreature(NPC_MURU, afMuruSpawnLoc[0], afMuruSpawnLoc[1], afMuruSpawnLoc[2], afMuruSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+                }
 #endif
                 }
                 break;
@@ -533,14 +545,18 @@ struct is_sunwell_plateau : public InstanceScript
                 break;
             case NPC_FELMYST:
                 if (Creature* pKalec = GetSingleCreatureFromStorage(NPC_KALECGOS_MADRIGOSA))
+                {
                     pKalec->GetMotionMaster()->MovePoint(0, aKalecLoc[2].m_fX, aKalecLoc[2].m_fY, aKalecLoc[2].m_fZ, false);
+                }
                 break;
             case SPELL_OPEN_BACK_DOOR:
                 if (Creature* pKalec = GetSingleCreatureFromStorage(NPC_KALECGOS_MADRIGOSA))
                 {
                     // ToDo: update this when the AoE spell targeting will support many explicit target. Kalec should target all creatures from the list
                     if (Creature* pTrigger = instance->GetCreature(m_lBackdoorTriggersList.front()))
+                    {
                         pKalec->CastSpell(pTrigger, SPELL_OPEN_BACK_DOOR, true);
+                    }
                 }
                 break;
             case NPC_BRUTALLUS:
@@ -616,7 +632,9 @@ struct is_sunwell_plateau : public InstanceScript
                 if (Player* pPlayer = instance->GetPlayer(*itr))
                 {
                     if (!pPlayer->HasAura(SPELL_SPECTRAL_REALM_AURA))
+                    {
                         continue;
+                    }
 
                     pPlayer->CastSpell(pPlayer, SPELL_TELEPORT_NORMAL_REALM, true);
                     pPlayer->CastSpell(pPlayer, SPELL_SPECTRAL_EXHAUSTION, true);

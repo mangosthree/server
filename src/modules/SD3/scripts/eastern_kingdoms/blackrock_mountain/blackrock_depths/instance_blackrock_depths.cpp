@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,7 +122,9 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
             break;
         m_sArenaCrowdNpcGuids.insert(pCreature->GetObjectGuid());
         if (m_auiEncounter[0] == DONE)
+        {
             pCreature->SetFactionTemporary(FACTION_ARENA_NEUTRAL, TEMPFACTION_RESTORE_RESPAWN);
+        }
         break;
     // Grim Guzzler bar crowd
     case NPC_GRIM_PATRON:
@@ -130,15 +132,21 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
     case NPC_HAMMERED_PATRON:
         m_sBarPatronNpcGuids.insert(pCreature->GetObjectGuid());
         if (m_auiEncounter[11] == DONE)
+        {
             pCreature->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_RESTORE_RESPAWN);
+        }
             pCreature->SetStandState(UNIT_STAND_STATE_STAND);
         break;
     case NPC_PRIVATE_ROCKNOT:
     case NPC_MISTRESS_NAGMARA:
         if (m_auiEncounter[11] == DONE)
+        {
             pCreature->ForcedDespawn();
+        }
         else
+        {
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+        }
         break;
     }
 }
@@ -163,7 +171,9 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
 
                 // If all event npcs dead then set event to done
                 if (m_sVaultNpcGuids.empty())
+                {
                     SetData(TYPE_VAULT, DONE);
+                }
             }
             break;
         case NPC_OGRABISI:
@@ -171,7 +181,9 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
         case NPC_CREST:
         case NPC_JAZ:
             if (GetData(TYPE_QUEST_JAIL_BREAK) == IN_PROGRESS)
+            {
                 SetData(TYPE_QUEST_JAIL_BREAK, SPECIAL);
+            }
             break;
             // Handle Tomb of the Seven dwarf death event
         case NPC_HATEREL:
@@ -182,10 +194,14 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
         case NPC_DOPEREL:
             // Only handle the event when event is in progress
             if (GetData(TYPE_TOMB_OF_SEVEN) != IN_PROGRESS)
+            {
                 return;
+            }
             // Call the next dwarf only if it's the last one which joined the fight
             if (pCreature->GetEntry() == aTombDwarfes[m_uiDwarfRound - 1])
+            {
                 DoCallNextDwarf();
+            }
             break;
         case NPC_DOOMREL:
             SetData(TYPE_TOMB_OF_SEVEN, DONE);
@@ -200,9 +216,13 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
             // Do nothing if the patrol was already spawned or is about to:
             // Plugger has made the bar hostile
             if (GetData(TYPE_BAR) == IN_PROGRESS || GetData(TYPE_PLUGGER) == IN_PROGRESS || GetData(TYPE_BAR) == DONE || GetData(TYPE_PLUGGER) == DONE)
+            {
                 return;
+            }
             else
+            {
                 SetData(TYPE_BAR, IN_PROGRESS);
+            }
             break;
         case NPC_SHADOWFORGE_SENATOR:
             // Emperor Dagran Thaurissan performs a random yell upon the death
@@ -212,10 +232,14 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
                 uint32 uiTextId;
 
                 if (!pDagran->IsAlive())
+                {
                     return;
+                }
 
                 if (m_uiDagranTimer > 0)
+                {
                     return;
+                }
 
                 switch (urand(0, 3))
                 {
@@ -373,7 +397,9 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
         break;
     case TYPE_ROCKNOT:
         if (uiData == SPECIAL)
+        {
             ++m_uiBarAleCount;
+        }
         else
         {
             if (uiData == DONE)
@@ -453,11 +479,15 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
         return;
     case TYPE_SIGNAL:
         if (AreaTriggerEntry const *at = sAreaTriggerStore.LookupEntry(uiData))
+        {
             m_uiArenaCenterAT = uiData;
+        }
         return;
     case TYPE_FLAMELASH:
         for (int i = 0; i < MAX_DWARF_RUNES; ++i)
+        {
             DoUseDoorOrButton(GO_DWARFRUNE_A01 + i);
+        }
         return;
     case TYPE_HURLEY:
         if (uiData == SPECIAL)
@@ -472,7 +502,9 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
                     Creature* pHurley = pPlugger->SummonCreature(NPC_HURLEY_BLACKBREATH, aHurleyPositions[0], aHurleyPositions[1], aHurleyPositions[2], aHurleyPositions[3], TEMPSUMMON_DEAD_DESPAWN, 0);
 
                     if (!pHurley)
+                    {
                         return;
+                    }
 
                     // Summon cronies around Hurley
                     for (uint8 i = 0; i < MAX_CRONIES; ++i)
@@ -493,14 +525,18 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
             }
         }
         else
+        {
             m_auiEncounter[8] = uiData;
+        }
         break;
     case TYPE_BRIDGE:
         m_auiEncounter[9] = uiData;
         return;
     case TYPE_BAR:
         if (uiData == IN_PROGRESS)
+        {
             HandleBarPatrol(0);
+        }
         m_auiEncounter[10] = uiData;
         break;
     case TYPE_PLUGGER:
@@ -510,7 +546,9 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
             {
                 ++m_uiStolenAles;
                 if (m_uiStolenAles == 3)
+                {
                     uiData = IN_PROGRESS;
+                }
             }
         }
         m_auiEncounter[11] = uiData;
@@ -548,9 +586,13 @@ uint32 instance_blackrock_depths::GetData(uint32 uiType) const
         return m_auiEncounter[1];
     case TYPE_ROCKNOT:
         if (m_auiEncounter[2] == IN_PROGRESS && m_uiBarAleCount == 3)
+        {
             return SPECIAL;
+        }
     else
+    {
         return m_auiEncounter[2];
+    }
     case TYPE_TOMB_OF_SEVEN:
         return m_auiEncounter[3];
     case TYPE_LYCEUM:
@@ -596,7 +638,9 @@ void instance_blackrock_depths::Load(const char* chrIn)
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
         if (m_auiEncounter[i] == IN_PROGRESS && i != TYPE_IRON_HALL) // specific check for Iron Hall event: once started, it never stops, the Ironhall Guardians switch to flamethrower mode and never stop even after event completion, i.e. the event remains started if Magmus resets
+        {
             m_auiEncounter[i] = NOT_STARTED;
+        }
 
     OUT_LOAD_INST_DATA_COMPLETE;
 }
@@ -617,7 +661,9 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
                     // the last one appearing the least and the first one appearing the most
                     // emotes are stored in a table and frequency is handled there
                     if (Creature* pPatron = instance->GetCreature(*itr))
+                    {
                         pPatron->HandleEmote(aPatronsEmotes[urand(0, 5)]);
+                    }
                 }
             }
             return;
@@ -679,7 +725,9 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
 void instance_blackrock_depths::HandleBarPatrol(uint8 uiStep)
 {
     if (GetData(TYPE_BAR) == DONE)
+    {
         return;
+    }
 
     switch (uiStep)
     {
@@ -757,18 +805,26 @@ void instance_blackrock_depths::Update(uint32 uiDiff)
                 m_uiDwarfFightTimer = 30000;
             }
             else
+            {
                 m_uiDwarfFightTimer = 0;
+            }
         }
         else
+        {
             m_uiDwarfFightTimer -= uiDiff;
+        }
     }
 
     if (m_uiDagranTimer)
     {
         if (m_uiDagranTimer <= uiDiff)
+        {
             m_uiDagranTimer = 0;
+        }
         else
+        {
             m_uiDagranTimer -= uiDiff;
+        }
     }
 
     // Every second some of the patrons will do one random emote if they are not hostile (i.e. Plugger event is not done/in progress)
@@ -780,7 +836,9 @@ void instance_blackrock_depths::Update(uint32 uiDiff)
             m_uiPatronEmoteTimer = 1000;
         }
         else
+        {
             m_uiPatronEmoteTimer -= uiDiff;
+        }
     }
 
     if (m_uiPatrolTimer)
@@ -800,7 +858,9 @@ void instance_blackrock_depths::Update(uint32 uiDiff)
             }
         }
         else
+        {
             m_uiPatrolTimer -= uiDiff;
+        }
     }
 }
 

@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -152,7 +152,10 @@ struct boss_dathrohan_balnazzar : public CreatureScript
                     DoCastSpellIfCan(m_creature->getVictim(), SPELL_MINDBLAST);
                     m_uiMindBlast_Timer = urand(15000, 20000);
                 }
-                else { m_uiMindBlast_Timer -= uiDiff; }
+                else
+                {
+                    m_uiMindBlast_Timer -= uiDiff;
+                }
 
                 // CrusadersHammer
                 if (m_uiCrusadersHammer_Timer < uiDiff)
@@ -160,7 +163,10 @@ struct boss_dathrohan_balnazzar : public CreatureScript
                     DoCastSpellIfCan(m_creature->getVictim(), SPELL_CRUSADERSHAMMER);
                     m_uiCrusadersHammer_Timer = 12000;
                 }
-                else { m_uiCrusadersHammer_Timer -= uiDiff; }
+                else
+                {
+                    m_uiCrusadersHammer_Timer -= uiDiff;
+                }
 
                 // CrusaderStrike
                 if (m_uiCrusaderStrike_Timer < uiDiff)
@@ -168,7 +174,10 @@ struct boss_dathrohan_balnazzar : public CreatureScript
                     DoCastSpellIfCan(m_creature->getVictim(), SPELL_CRUSADERSTRIKE);
                     m_uiCrusaderStrike_Timer = 15000;
                 }
-                else { m_uiCrusaderStrike_Timer -= uiDiff; }
+                else
+                {
+                    m_uiCrusaderStrike_Timer -= uiDiff;
+                }
 
                 // HolyStrike
                 if (m_uiHolyStrike_Timer < uiDiff)
@@ -176,7 +185,10 @@ struct boss_dathrohan_balnazzar : public CreatureScript
                     DoCastSpellIfCan(m_creature->getVictim(), SPELL_HOLYSTRIKE);
                     m_uiHolyStrike_Timer = 15000;
                 }
-                else { m_uiHolyStrike_Timer -= uiDiff; }
+                else
+                {
+                    m_uiHolyStrike_Timer -= uiDiff;
+                }
 
                 // BalnazzarTransform
                 if (m_creature->GetHealthPercent() < 40.0f)
@@ -198,7 +210,10 @@ struct boss_dathrohan_balnazzar : public CreatureScript
                     DoCastSpellIfCan(m_creature->getVictim(), SPELL_MINDBLAST);
                     m_uiMindBlast_Timer = urand(15000, 20000);
                 }
-                else { m_uiMindBlast_Timer -= uiDiff; }
+                else
+                {
+                    m_uiMindBlast_Timer -= uiDiff;
+                }
 
                 // ShadowShock
                 if (m_uiShadowShock_Timer < uiDiff)
@@ -206,7 +221,10 @@ struct boss_dathrohan_balnazzar : public CreatureScript
                     DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWSHOCK);
                     m_uiShadowShock_Timer = 11000;
                 }
-                else { m_uiShadowShock_Timer -= uiDiff; }
+                else
+                {
+                    m_uiShadowShock_Timer -= uiDiff;
+                }
 
                 // PsychicScream
                 if (m_uiPsychicScream_Timer < uiDiff)
@@ -218,7 +236,10 @@ struct boss_dathrohan_balnazzar : public CreatureScript
 
                     m_uiPsychicScream_Timer = 20000;
                 }
-                else { m_uiPsychicScream_Timer -= uiDiff; }
+                else
+                {
+                    m_uiPsychicScream_Timer -= uiDiff;
+                }
 
                 // DeepSleep
                 if (m_uiDeepSleep_Timer < uiDiff)
@@ -230,7 +251,10 @@ struct boss_dathrohan_balnazzar : public CreatureScript
 
                     m_uiDeepSleep_Timer = 15000;
                 }
-                else { m_uiDeepSleep_Timer -= uiDiff; }
+                else
+                {
+                    m_uiDeepSleep_Timer -= uiDiff;
+                }
 
                 // MindControl
                 if (m_uiMindControl_Timer < uiDiff)
@@ -238,7 +262,10 @@ struct boss_dathrohan_balnazzar : public CreatureScript
                     DoCastSpellIfCan(m_creature->getVictim(), SPELL_MINDCONTROL);
                     m_uiMindControl_Timer = 15000;
                 }
-                else { m_uiMindControl_Timer -= uiDiff; }
+                else
+                {
+                    m_uiMindControl_Timer -= uiDiff;
+                }
             }
 
             DoMeleeAttackIfReady();

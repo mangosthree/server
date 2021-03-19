@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -198,7 +198,9 @@ struct boss_thermaplugg : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 data) override
         {
             if (pSender != m_creature)  //handling only events from himself (casts of activate bomb), to be refactored
+            {
                 return;
+            }
 
             switch (eventType)
             {
@@ -210,7 +212,9 @@ struct boss_thermaplugg : public CreatureScript
                 break;
             case AI_EVENT_CUSTOM_C:
                 for (uint8 i = 0; i < MAX_GNOME_FACES; ++i)
+                {
                     DoDeactivateBombFace(i);
+                }
                 break;
             default:
                 break;
@@ -362,7 +366,9 @@ struct spell_boss_thermaplugg : public SpellScript
 
         // This spell should select a random Bomb-Face and activate it if needed
         if (pCaster->GetEntry() == NPC_MEKGINEER_THERMAPLUGG && pCaster->ToCreature()->AI())
+        {
             pCaster->ToCreature()->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCaster->ToCreature(), urand(0, MAX_GNOME_FACES - 1));
+        }
 
         return true;
     }

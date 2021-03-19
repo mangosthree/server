@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -385,10 +385,14 @@ struct priestess_companion_commonAI : public ScriptedAI
     void KilledUnit(Unit* pVictim) override
     {
         if (!m_pInstance)
-        { return; }
+        {
+            return;
+        }
 
         if (Creature* pDelrissa = m_pInstance->GetSingleCreatureFromStorage(NPC_DELRISSA))
-        { pDelrissa->AI()->KilledUnit(pVictim); }
+        {
+            pDelrissa->AI()->KilledUnit(pVictim);
+        }
     }
 
     // Return true to handle shared timers and MeleeAttack
@@ -398,16 +402,22 @@ struct priestess_companion_commonAI : public ScriptedAI
     {
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-        { return; }
+        {
+            return;
+        }
 
         // Call specific virtual function
         if (!UpdateCompanionAI(uiDiff))
-        { return; }
+        {
+            return;
+        }
 
         if (!m_bUsedPotion && m_creature->GetHealthPercent() < 25.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_HEALING_POTION) == CAST_OK)
-            { m_bUsedPotion = true; }
+            {
+                m_bUsedPotion = true;
+            }
         }
 
         // Change target
@@ -421,7 +431,9 @@ struct priestess_companion_commonAI : public ScriptedAI
             }
         }
         else
-        { m_uiResetThreatTimer -= uiDiff; }
+        {
+            m_uiResetThreatTimer -= uiDiff;
+        }
 
         // Use the Medallion if CC - only on heroic. Not sure how many times they are allowed to use it.
         if (!m_bIsRegularMode && m_uiMedallionTimer)
@@ -431,10 +443,14 @@ struct priestess_companion_commonAI : public ScriptedAI
                 if (m_uiMedallionTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_MEDALLION, CAST_TRIGGERED) == CAST_OK)
-                    { m_uiMedallionTimer = 0; }
+                    {
+                        m_uiMedallionTimer = 0;
+                    }
                 }
                 else
-                { m_uiMedallionTimer -= uiDiff; }
+                {
+                    m_uiMedallionTimer -= uiDiff;
+                }
             }
         }
 

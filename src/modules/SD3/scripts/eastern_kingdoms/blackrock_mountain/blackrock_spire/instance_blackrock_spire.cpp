@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -511,7 +511,9 @@ struct is_blackrock_spire : public InstanceScript
 #if defined (CLASSIC)
             case MAX_ENCOUNTER:
                 if (Player* pPlayer = instance->GetPlayer(ObjectGuid(guid)))
+                {
                     DoOpenUpperDoorIfCan(pPlayer);
+                }
                 break;
 #endif
             default:
@@ -550,7 +552,9 @@ struct is_blackrock_spire : public InstanceScript
         void DoOpenUpperDoorIfCan(Player* pPlayer)
         {
             if (m_bUpperDoorOpened)
+            {
                 return;
+            }
 
             if (pPlayer->HasItemCount(ITEM_SEAL_OF_ASCENSION, 1))
             {
@@ -616,12 +620,18 @@ struct is_blackrock_spire : public InstanceScript
                     ++m_uiDragonspineGoCount;
 
                     if (m_uiDragonspineGoCount >= 4)
+                    {
                         m_uiDragonspineDoorTimer = 0;
+                    }
                     else
+                    {
                         m_uiDragonspineDoorTimer = 1000;
+                    }
                 }
                 else
+                {
                     m_uiDragonspineDoorTimer -= uiDiff;
+                }
             }
 #endif
         }

@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -240,7 +240,9 @@ struct at_spearborn_encampment : public AreaTriggerScript
         {
             // can only spawn one at a time, it's not a too good solution
             if (GetClosestCreatureWithEntry(pPlayer, NPC_TARTEK, 50.0f))
+            {
                 return false;
+            }
 
             pPlayer->SummonCreature(NPC_TARTEK, pAt->x, pAt->y, pAt->z, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
         }
@@ -451,7 +453,9 @@ struct at_hot_on_the_trail : public AreaTriggerScript
     bool OnTrigger(Player* pPlayer, AreaTriggerEntry const* pAt) override
     {
         if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
+        {
             return false;
+        }
 
         for (uint8 i = 0; i < 6; ++i)
         {
@@ -505,17 +509,23 @@ struct at_ancient_leaf : public AreaTriggerScript
     bool OnTrigger(Player* pPlayer, AreaTriggerEntry const* pAt) override
     {
         if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
+        {
             return false;
+        }
 
         // Handle Call Ancients event start - The area trigger summons 3 ancients
         if (pPlayer->GetQuestStatus(QUEST_ANCIENT_LEAF) == QUEST_STATUS_COMPLETE)
         {
             // If ancients are already spawned, skip the rest
             if (GetClosestCreatureWithEntry(pPlayer, NPC_VARTRUS, 50.0f) || GetClosestCreatureWithEntry(pPlayer, NPC_STOMA, 50.0f) || GetClosestCreatureWithEntry(pPlayer, NPC_HASTAT, 50.0f))
+            {
                 return true;
+            }
 
             for (uint8 i = 0; i < MAX_ANCIENTS; ++i)
+            {
                 pPlayer->SummonCreature(afSpawnLocations[i].uiEntry, afSpawnLocations[i].fX, afSpawnLocations[i].fY, afSpawnLocations[i].fZ, afSpawnLocations[i].fO, TEMPSUMMON_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+            }
         }
 
         return false;

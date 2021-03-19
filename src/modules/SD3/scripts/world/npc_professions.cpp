@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -240,7 +240,9 @@ bool EquippedOk(Player* pPlayer, uint32 spellId)
 #if defined(CATA) || defined (MISTS)
         SpellEffectEntry const* pSpellEffect = spell->GetSpellEffect(SpellEffectIndex(i));
         if (!pSpellEffect)
+        {
             continue;
+        }
 
         uint32 reqSpell = pSpellEffect->EffectTriggerSpell;
 #else
@@ -707,10 +709,14 @@ private:
 /*bool QuestComplete_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
     if ((pQuest->GetQuestId() == 5283) || (pQuest->GetQuestId() == 5301))             // armorsmith
+    {
         pCreature->CastSpell(pPlayer, 17451, true);
+    }
 
     if ((pQuest->GetQuestId() == 5284) || (pQuest->GetQuestId() == 5302))             // weaponsmith
+    {
         pCreature->CastSpell(pPlayer, 17452, true);
+    }
 
     return true;
 }*/

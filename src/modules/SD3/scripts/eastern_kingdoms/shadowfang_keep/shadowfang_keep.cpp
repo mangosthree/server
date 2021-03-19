@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,7 +121,9 @@ struct npc_shadowfang_prisoner : public CreatureScript
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
             case 12:
                 if (m_uiNpcEntry != NPC_ASH)
+                {
                     m_creature->HandleEmote(EMOTE_ONESHOT_USESTANDING);
+                }
                 break;
 #endif
             case 13:
@@ -325,7 +327,9 @@ struct mob_arugal_voidwalker : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 data) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender->GetEntry() == NPC_ARCHMAGE_ARUGAL)
+            {
                 SetPosition(data, pInvoker->ToCreature());
+            }
         }
 
         void UpdateAI(const uint32 uiDiff) override

@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -600,7 +600,9 @@ struct is_naxxramas : public InstanceScript
                 break;
             case TYPE_SIGNAL_1:
                 if (AreaTriggerEntry const *at = sAreaTriggerStore.LookupEntry(uiData))
+                {
                     SetChamberCenterCoords(at);
+                }
                 return;
             case TYPE_SIGNAL_2:
                 if (Creature *pCreatureTarget = instance->GetCreature(ObjectGuid(m_tempCreatureGuid)))
@@ -737,9 +739,13 @@ struct is_naxxramas : public InstanceScript
                     return m_uiChanberCenterAT;
                 case TYPE_SIGNAL_4:
                     if (Player *pPlayer = instance->GetPlayer(m_playerNearGothik))
+                    {
                         return uint32(const_cast<instance_naxxramas*>(this)->IsInRightSideGothArea(pPlayer));
+                    }
                     else
+                    {
                         return uint32(false);
+                    }
                     break;
                 case TYPE_SIGNAL_7:
                     return uint32(const_cast<instance_naxxramas*>(this)->IsInRightSideGothArea(instance->GetCreature(m_tempCreatureGuid)));
@@ -784,13 +790,17 @@ struct is_naxxramas : public InstanceScript
                     while (gtit != m_mGothTriggerMap.end() && (gtit->second.bIsAnchorHigh || !gtit->second.bIsRightSide))
                         ++(const_cast<instance_naxxramas*>(this))->gtit;
                     if (gtit == m_mGothTriggerMap.end())
+                    {
                         return 0;
+                    }
                     return gtit->first.GetRawValue();
                 }
                 break;
             case TYPE_SIGNAL_6: //the same design flaw...
                 if (Creature *anchor = (const_cast<instance_naxxramas*>(this))->GetClosestAnchorForGoth(instance->GetCreature(ObjectGuid(m_tempCreatureGuid)), true))
+                {
                     return anchor->GetObjectGuid().GetRawValue();
+                }
             }
             return 0;
         }
@@ -1083,7 +1093,9 @@ struct at_naxxramas : public AreaTriggerScript
                 }
             }
             else
+            {
                 return false;
+            }
             break;
         case AREATRIGGER_THADDIUS_DOOR:
             if (pInstance && pInstance->GetData(TYPE_THADDIUS) == NOT_STARTED)

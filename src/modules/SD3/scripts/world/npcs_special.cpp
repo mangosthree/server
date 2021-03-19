@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -346,9 +346,13 @@ struct npc_chicken_cluck : public CreatureScript
 
                         /* are there any difference in texts, after 3.x ?
                         if (pPlayer->GetTeam() == HORDE)
-                        DoScriptText(EMOTE_H_HELLO, m_creature);
+                        {
+                            DoScriptText(EMOTE_H_HELLO, m_creature);
+                        }
                         else
-                        DoScriptText(EMOTE_A_HELLO, m_creature);
+                        {
+                            DoScriptText(EMOTE_A_HELLO, m_creature);
+                        }
                         */
                     }
                 }
@@ -577,7 +581,9 @@ struct npc_doctor : public CreatureScript
             if (!m_vPatientSummonCoordinates.empty())
             {
                 for (std::vector<Location*>::iterator itr = m_vPatientSummonCoordinates.begin(); itr != m_vPatientSummonCoordinates.end(); ++itr)
+                {
                     delete (*itr);
+                }
                 m_vPatientSummonCoordinates.clear();
             }
 
@@ -888,7 +894,9 @@ struct npc_injured_patient : public CreatureScript
             if (eventType == AI_EVENT_CUSTOM_A && (pSender->GetEntry() == DOCTOR_ALLIANCE || pSender->GetEntry() == DOCTOR_HORDE))
             {
                 if (!m_pCoord)
+                {
                     m_pCoord = new Location();
+                }
                 m_pCoord->x = m_creature->GetPositionX();
                 m_pCoord->y = m_creature->GetPositionY();
                 m_pCoord->z = m_creature->GetPositionZ();
@@ -1344,10 +1352,14 @@ struct npc_spring_rabbit : public CreatureScript
         npc_spring_rabbitAI* GetPartnerAI(Creature* pBunny = nullptr)
         {
             if (!pBunny)
+            {
                 pBunny = m_creature->GetMap()->GetAnyTypeCreature(m_partnerGuid);
+            }
 
             if (!pBunny)
+            {
                 return nullptr;
+            }
 
             return dynamic_cast<npc_spring_rabbitAI*>(pBunny->AI());
         }
@@ -1356,7 +1368,9 @@ struct npc_spring_rabbit : public CreatureScript
         void MoveInLineOfSight(Unit* pWho) override
         {
             if (m_creature->getVictim())
+            {
                 return;
+            }
 
             if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_SPRING_RABBIT && CanStartWhatRabbitsDo() && m_creature->IsFriendlyTo(pWho) && m_creature->IsWithinDistInMap(pWho, DIST_START_EVENT, true))
             {
@@ -1383,16 +1397,22 @@ struct npc_spring_rabbit : public CreatureScript
                 return true;
             }
             else
+            {
                 return false;
+            }
         }
 
         void MovementInform(uint32 uiMovementType, uint32 uiData) override
         {
             if (uiMovementType != POINT_MOTION_TYPE || uiData != 1)
+            {
                 return;
+            }
 
             if (!m_partnerGuid)
+            {
                 return;
+            }
 
             m_uiStep = 3;
             if (npc_spring_rabbitAI* pOtherBunnyAI = GetPartnerAI())
@@ -1403,7 +1423,9 @@ struct npc_spring_rabbit : public CreatureScript
                     m_uiStepTimer = 3000;
                 }
                 else
+                {
                     m_creature->SetFacingTo(m_fMoveAngle + M_PI_F * 0.5f);
+                }
             }
 
             // m_creature->GetMotionMaster()->MoveRandom(); // does not move around current position, hence not usefull right now
@@ -1420,7 +1442,9 @@ struct npc_spring_rabbit : public CreatureScript
             }
 
             if (m_uiStep == 6)
+            {
                 ScriptedPetAI::UpdateAI(uiDiff);                // Event nearly finished, do normal following
+            }
 
             if (m_uiStepTimer <= uiDiff)
             {
@@ -1432,7 +1456,9 @@ struct npc_spring_rabbit : public CreatureScript
 
                 case 2:                                     // Called for the rabbit first reached meeting point
                     if (Creature* pBunny = m_creature->GetMap()->GetAnyTypeCreature(m_partnerGuid))
+                    {
                         pBunny->CastSpell(pBunny, SPELL_SPRING_RABBIT_IN_LOVE, false);
+                    }
 
                     DoCastSpellIfCan(m_creature, SPELL_SPRING_RABBIT_IN_LOVE);
                     // no break here
@@ -1447,7 +1473,9 @@ struct npc_spring_rabbit : public CreatureScript
                 case 5:
                     // Let owner cast achievement related spell
                     if (Unit* pOwner = m_creature->GetCharmerOrOwner())
+                    {
                         pOwner->CastSpell(pOwner, SPELL_SPRING_FLING, true);
+                    }
 
                     m_uiStep = 6;
                     m_uiStepTimer = 30000;
@@ -1459,7 +1487,9 @@ struct npc_spring_rabbit : public CreatureScript
                 }
             }
             else
+            {
                 m_uiStepTimer -= uiDiff;
+            }
         }
     };
 
@@ -1694,7 +1724,9 @@ struct npc_burster_worm : public CreatureScript
 
             // only spawned creatures have the submerge visual
             if (!m_creature->IsTemporarySummon())
+            {
                 DoCastSpellIfCan(m_creature, SPELL_SANDWORM_SUBMERGE_VISUAL, CAST_AURA_NOT_PRESENT);
+            }
         }
 
         void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
@@ -1716,7 +1748,9 @@ struct npc_burster_worm : public CreatureScript
             m_creature->RemoveAurasDueToSpell(SPELL_TUNNEL_BORE_BONE_PASSIVE);
 
             if (DoCastSpellIfCan(m_creature, SPELL_BIRTH) == CAST_OK)
+            {
                 m_uiBirthDelayTimer = 2000;
+            }
         }
 
         void EnterEvadeMode() override
@@ -1750,15 +1784,21 @@ struct npc_burster_worm : public CreatureScript
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // animation delay
             if (m_uiBirthDelayTimer)
             {
                 if (m_uiBirthDelayTimer <= uiDiff)
+                {
                     m_uiBirthDelayTimer = 0;
+                }
                 else
+                {
                     m_uiBirthDelayTimer -= uiDiff;
+                }
 
                 // no action during birth animaiton
                 return;
@@ -1773,9 +1813,13 @@ struct npc_burster_worm : public CreatureScript
                     {
                         // sone creatures have bone bore spell
                         if (IsBoneWorm())
+                        {
                             DoCastSpellIfCan(m_creature, SPELL_TUNNEL_BORE_BONE_PASSIVE, CAST_TRIGGERED);
+                        }
                         else
+                        {
                             DoCastSpellIfCan(m_creature, SPELL_TUNNEL_BORE_PASSIVE, CAST_TRIGGERED);
+                        }
 
                         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         m_uiPhase = PHASE_CHASE;
@@ -1784,7 +1828,9 @@ struct npc_burster_worm : public CreatureScript
                         m_uiChaseTimer = 0;
                     }
                     else
+                    {
                         m_uiChaseTimer -= uiDiff;
+                    }
 
                     // return when doing phase change
                     return;
@@ -1792,17 +1838,23 @@ struct npc_burster_worm : public CreatureScript
 
                 // If we are within range melee the target
                 if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+                {
                     DoMeleeAttackIfReady();
+                }
                 else
                 {
                     if (!m_creature->IsNonMeleeSpellCasted(false))
+                    {
                         DoCastSpellIfCan(m_creature->getVictim(), SPELL_POISON);
+                    }
 
                     // if target not in range, submerge and chase
                     if (!m_creature->IsInRange(m_creature->getVictim(), 0, 50.0f))
                     {
                         if (DoCastSpellIfCan(m_creature, SPELL_SANDWORM_SUBMERGE_VISUAL, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                        {
                             m_uiChaseTimer = 1500;
+                        }
                     }
                 }
 
@@ -1812,10 +1864,14 @@ struct npc_burster_worm : public CreatureScript
                     if (m_uiBoreTimer < uiDiff)
                     {
                         if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BORE) == CAST_OK)
+                        {
                             m_uiBoreTimer = 45000;
+                        }
                     }
                     else
+                    {
                         m_uiBoreTimer -= uiDiff;
+                    }
                 }
 
                 // enrage spell
@@ -1824,10 +1880,14 @@ struct npc_burster_worm : public CreatureScript
                     if (m_uiEnrageTimer < uiDiff)
                     {
                         if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+                        {
                             m_uiEnrageTimer = urand(12000, 17000);
+                        }
                     }
                     else
+                    {
                         m_uiEnrageTimer -= uiDiff;
+                    }
                 }
             }
             // chase target

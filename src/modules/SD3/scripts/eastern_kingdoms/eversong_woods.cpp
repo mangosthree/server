@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,7 +133,9 @@ struct npc_kelerun_bloodmourn : public CreatureScript
         void ReceiveAIEvent(AIEventType eventType, Creature *pSender, Unit *pInvoker, uint32 data) override
         {
             if (eventType == AI_EVENT_CUSTOM_A && pSender == m_creature)
+            {
                 CanProgressEvent(pInvoker->ToPlayer());
+            }
         }
 
         bool CanProgressEvent(Player* pPlayer)

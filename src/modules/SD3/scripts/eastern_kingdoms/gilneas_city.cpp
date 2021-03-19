@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -191,10 +191,14 @@ struct npc_prince_liam_greymane_phase2 : public CreatureScript
         {
             // Check if Liam is attacking who attack he and don't jump on multiple attackers
             if (m_creature->getVictim() && (m_creature->getVictim() == pAttacker || lastVictim == pAttacker))
+            {
                 return;
+            }
 
             if (m_creature->IsFriendlyTo(pAttacker))
+            {
                 return;
+            }
 
             lastVictim = pAttacker;
             AttackStart(pAttacker);
@@ -231,7 +235,9 @@ struct npc_prince_liam_greymane_phase2 : public CreatureScript
 
             // Return since we have no target
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Equipped ranged weapon usable and not close to victim
             if (m_creature->GetCombatDistance(m_creature->getVictim(), false) > 0 && m_creature->CanUseEquippedWeapon(RANGED_ATTACK) )
@@ -243,6 +249,7 @@ struct npc_prince_liam_greymane_phase2 : public CreatureScript
                     //m_creature->AttackerStateUpdate(m_creature->getVictim(),RANGED_ATTACK);
                     m_creature->resetAttackTimer(RANGED_ATTACK);
                 }
+
             }
             else if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
             {
@@ -314,7 +321,9 @@ struct rampaging_worgen : public CreatureScript
         {
             // Always decrease our spell cooldown first
             if (spellCooldown > diff)
+            {
                 spellCooldown -= diff;
+            }
             else spellCooldown = 0;
 
             // Enrage timer (only enrage when we are alive and  in combat)
@@ -322,7 +331,9 @@ struct rampaging_worgen : public CreatureScript
             {
                 // Cast enrage spell if less than 70% hp ONLY and not casted already
                 if (m_creature->GetHealthPercent() < 70.0f && !spellCooldown) {
+                {
                     DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
+                }
                     spellCooldown = SPELL_ENRAGE_DELAY;
                 }
 
@@ -330,11 +341,15 @@ struct rampaging_worgen : public CreatureScript
 
             // Return since we have no target
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             // Return if we already cast a spell
             if (m_creature->IsNonMeleeSpellCasted(false))
+            {
                 return;
+            }
 
             // If we are within range melee the target
             if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))

@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -212,7 +212,9 @@ struct is_gnomeregan : public InstanceScript
 
                     // Always directly activates this bomb-face
                     if (thermaplugg && thermaplugg->AI())
+                    {
                         thermaplugg->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, thermaplugg, thermaplugg, 2);
+                    }
                 }
                 else if (uiData == DONE || uiData == FAIL)
                 {
@@ -228,7 +230,9 @@ struct is_gnomeregan : public InstanceScript
 
                     // Deactivate all remaining BombFaces
                     if (thermaplugg && thermaplugg->AI())
+                    {
                         thermaplugg->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, thermaplugg, thermaplugg);
+                    }
                 }
                 break;
                 }
@@ -236,7 +240,9 @@ struct is_gnomeregan : public InstanceScript
                 if (Creature *thermaplugg = GetSingleCreatureFromStorage(NPC_MEKGINEER_THERMAPLUGG))
                 {
                     if (thermaplugg->AI())
+                    {
                         thermaplugg->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, thermaplugg, thermaplugg, uiData);
+                    }
                 }
                 return;
             }
@@ -272,7 +278,9 @@ struct is_gnomeregan : public InstanceScript
         {
             EntryGuidMap::const_iterator find = m_mGoEntryGuidStore.find(type);
             if (find != m_mGoEntryGuidStore.end())
+            {
                 return find->second.GetRawValue();
+            }
 
             return 0;
         }

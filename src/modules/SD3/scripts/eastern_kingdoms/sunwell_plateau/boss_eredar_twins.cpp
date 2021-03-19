@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -215,7 +215,11 @@ struct boss_alythess : public CreatureScript
                 return;
             }
 
+#if defined(MISTS)
+            if (pSpell->GetSchoolMask() == SPELL_SCHOOL_MASK_FIRE)
+#else
             if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
+#endif
             {
                 if (pTarget->HasAura(SPELL_DARK_TOUCHED))
                 {
@@ -227,7 +231,11 @@ struct boss_alythess : public CreatureScript
                     pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true);
                 }
             }
+#if defined(MISTS)
+            else if (pSpell->GetSchoolMask() == SPELL_SCHOOL_MASK_SHADOW)
+#else
             else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
+#endif
             {
                 if (pTarget->HasAura(SPELL_FLAME_TOUCHED))
                 {
@@ -438,7 +446,11 @@ struct boss_sacrolash : public CreatureScript
                 return;
             }
 
+#if defined(MISTS)
+            if (pSpell->GetSchoolMask() == SPELL_SCHOOL_MASK_FIRE)
+#else
             if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
+#endif
             {
                 if (pTarget->HasAura(SPELL_DARK_TOUCHED))
                 {
@@ -450,7 +462,11 @@ struct boss_sacrolash : public CreatureScript
                     pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, true);
                 }
             }
+#if defined(MISTS)
+            else if (pSpell->GetSchoolMask() == SPELL_SCHOOL_MASK_SHADOW)
+#else
             else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
+#endif
             {
                 if (pTarget->HasAura(SPELL_FLAME_TOUCHED))
                 {

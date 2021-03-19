@@ -77,7 +77,9 @@ struct map_ebon_hold : public ZoneScript
         void OnCreatureDeath(Creature* pCreature) override
         {
             if (GetData(TYPE_BATTLE) != IN_PROGRESS)
+            {
                 return;
+            }
 
             switch (pCreature->GetEntry())
             {
@@ -90,7 +92,9 @@ struct map_ebon_hold : public ZoneScript
                     // the new summoned mob should attack
                     Creature* pDarion = GetSingleCreatureFromStorage(NPC_HIGHLORD_DARION_MOGRAINE);
                     if (pDarion && pDarion->getVictim())
+                    {
                         pTemp->AI()->AttackStart(pDarion->getVictim());
+                    }
                 }
                 pCreature->ForcedDespawn(1000);
                 break;
@@ -100,7 +104,9 @@ struct map_ebon_hold : public ZoneScript
         void OnCreatureEvade(Creature* pCreature) override
         {
             if (GetData(TYPE_BATTLE) != IN_PROGRESS)
+            {
                 return;
+            }
 
             switch (pCreature->GetEntry())
             {
@@ -112,10 +118,14 @@ struct map_ebon_hold : public ZoneScript
                 if (Creature* pDarion = GetSingleCreatureFromStorage(NPC_HIGHLORD_DARION_MOGRAINE))
                 {
                     if (!pDarion->IsInCombat())
+                    {
                         return;
+                    }
 
                     if (Unit* pTarget = pDarion->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
                         pCreature->AI()->AttackStart(pTarget);
+                    }
                 }
             case NPC_KORFAX_CHAMPION_OF_THE_LIGHT:
             case NPC_LORD_MAXWELL_TYROSUS:
@@ -126,7 +136,9 @@ struct map_ebon_hold : public ZoneScript
             case NPC_RAYNE:
             case NPC_DEFENDER_OF_THE_LIGHT:
                 if (Creature* pDarion = GetSingleCreatureFromStorage(NPC_HIGHLORD_DARION_MOGRAINE))
+                {
                     pCreature->AI()->AttackStart(pDarion);
+                }
                 break;
             }
         }
@@ -224,9 +236,13 @@ struct map_ebon_hold : public ZoneScript
             if (m_uiGothikYellTimer)
             {
                 if (m_uiGothikYellTimer <= uiDiff)
+                {
                     m_uiGothikYellTimer = 0;
+                }
                 else
+                {
                     m_uiGothikYellTimer -= uiDiff;
+                }
             }
         }
 
@@ -241,7 +257,9 @@ struct map_ebon_hold : public ZoneScript
                 {
                     // we need to manually check the phase mask because the value from DBC is not used yet
                     if (pPlayer->HasAura(SPELL_CHAPTER_IV) || pPlayer->isGameMaster())
+                    {
                         pPlayer->SendUpdateWorldState(uiStateId, uiStateData);
+                    }
                 }
             }
         }
@@ -250,28 +268,40 @@ struct map_ebon_hold : public ZoneScript
         {
             // reset all npcs to the original state
             if (Creature* pKoltira = GetSingleCreatureFromStorage(NPC_KOLTIRA_DEATHWEAVER))
+            {
                 pKoltira->Respawn();
+            }
             if (Creature* pThassarian = GetSingleCreatureFromStorage(NPC_THASSARIAN))
+            {
                 pThassarian->Respawn();
+            }
             if (Creature* pOrbaz = GetSingleCreatureFromStorage(NPC_ORBAZ_BLOODBANE))
+            {
                 pOrbaz->Respawn();
+            }
 
             // respawn all abominations
             for (GuidList::const_iterator itr = m_lArmyGuids.begin(); itr != m_lArmyGuids.end(); ++itr)
             {
                 if (Creature* pTemp = instance->GetCreature(*itr))
+                {
                     pTemp->Respawn();
+                }
             }
 
             // despawn the argent dawn
             for (uint8 i = 0; i < MAX_LIGHT_CHAMPIONS; i++)
             {
                 if (Creature* pTemp = GetSingleCreatureFromStorage(aLightArmySpawnLoc[i].m_uiEntry))
+                {
                     pTemp->ForcedDespawn();
+                }
             }
 
             if (Creature* pTirion = GetSingleCreatureFromStorage(NPC_HIGHLORD_TIRION_FORDRING))
+            {
                 pTirion->ForcedDespawn();
+            }
         }
 
         // Move the behemots and abominations and make them attack
@@ -298,7 +328,9 @@ struct map_ebon_hold : public ZoneScript
                 if (Creature* pTemp = instance->GetCreature(*itr))
                 {
                     if (pTemp->IsAlive())
+                    {
                         pTemp->DealDamage(pTemp, pTemp->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                    }
                 }
             }
         }
@@ -306,13 +338,17 @@ struct map_ebon_hold : public ZoneScript
         void DoEnableHolyTraps()
         {
             for (GuidList::const_iterator itr = m_lLightTrapsGuids.begin(); itr != m_lLightTrapsGuids.end(); ++itr)
+            {
                 DoRespawnGameObject(*itr, 25);
+            }
         }
 
         bool CanAndToggleGothikYell()
         {
             if (m_uiGothikYellTimer)
+            {
                 return false;
+            }
 
             m_uiGothikYellTimer = 2000;
             return true;

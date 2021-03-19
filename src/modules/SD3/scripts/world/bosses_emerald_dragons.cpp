@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,7 +146,9 @@ struct boss_emerald_dragonAI : public ScriptedAI
             m_uiSeepingFogTimer = urand(120000, 150000);    // Rather Guesswork, but one Fog has 2min duration, hence a bit longer
         }
         else
-            { m_uiSeepingFogTimer -= uiDiff; }
+        {
+            m_uiSeepingFogTimer -= uiDiff;
+        }
 
         if (m_uiNoxiousBreathTimer < uiDiff)
         {
@@ -156,7 +158,9 @@ struct boss_emerald_dragonAI : public ScriptedAI
             }
         }
         else
-            { m_uiNoxiousBreathTimer -= uiDiff; }
+        {
+            m_uiNoxiousBreathTimer -= uiDiff;
+        }
 
         if (m_uiTailsweepTimer < uiDiff)
         {
@@ -166,7 +170,9 @@ struct boss_emerald_dragonAI : public ScriptedAI
             }
         }
         else
-            { m_uiTailsweepTimer -= uiDiff; }
+        {
+            m_uiTailsweepTimer -= uiDiff;
+        }
 
         DoMeleeAttackIfReady();
     }

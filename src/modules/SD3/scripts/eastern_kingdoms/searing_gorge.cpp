@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,7 +97,9 @@ struct npc_dorius_stonetender : public CreatureScript
             case 33:
                 // ToDo: research if there is any event and text here!
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
                     pPlayer->GroupEventHappens(QUEST_ID_SUNTARA_STONES, m_creature);
+                }
                 m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
                 break;
             }
@@ -106,13 +108,17 @@ struct npc_dorius_stonetender : public CreatureScript
         void JustSummoned(Creature* pSummoned) override
         {
             if (pSummoned->GetEntry() == NPC_DARK_IRON_STEELSHIFTER)
+            {
                 pSummoned->AI()->AttackStart(m_creature);
+            }
         }
 
         void UpdateEscortAI(const uint32 /*uiDiff*/) override
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
                 return;
+            }
 
             DoMeleeAttackIfReady();
         }

@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,7 +105,9 @@ void ScriptedAI::AttackStart(Unit* pWho)
 {
 #if defined (WOTLK) || defined (CATA) || defined (MISTS)
     if (!m_creature->CanInitiateAttack())
+    {
         return;
+    }
 #endif
     if (pWho && m_creature->Attack(pWho, true))             // The Attack function also uses basic checks if pWho can be attacked
     {
@@ -149,7 +151,9 @@ void ScriptedAI::UpdateAI(const uint32 /*uiDiff*/)
 
     const SpellEntry* potentialSpell = m_creature->ReachWithSpellAttack(victim);
     if (potentialSpell)
+    {
         m_creature->CastSpell(victim, potentialSpell->Id, true);
+    }
 #endif
 }
 
@@ -303,7 +307,9 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, int32 uiSchool, int32 i
         // Check for school if specified
 #if defined (TBC) || defined (WOTLK) || defined (CATA) || defined (MISTS)
         if (uiSchool >= 0 && pTempSpell->SchoolMask & uiSchool)
-        { continue; }
+        {
+            continue;
+        }
 #endif
 
         // Check for spell mechanic if specified
@@ -451,7 +457,9 @@ void FillSpellSummary()
 #if defined (CATA) || defined (MISTS)
             SpellEffectEntry const* pSpellEffect = pTempSpell->GetSpellEffect(SpellEffectIndex(j));
             if (!pSpellEffect)
+            {
                 continue;
+            }
 #endif
             // Spell targets self
 #if defined (CATA) || defined (MISTS)
@@ -767,42 +775,58 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 uiDiff)
 #if defined (TBC) || defined (WOTLK) || defined (CATA) || defined(MISTS)
         case NPC_VOID_REAVER:                               // void reaver (calculate from center of room)
             if (m_creature->GetDistance2d(432.59f, 371.93f) < 105.0f)
-            { return false; }
+            {
+                return false;
+            }
             break;
         case NPC_JAN_ALAI:                                  // jan'alai (calculate by Z)
             if (fZ > 12.0f)
-            { return false; }
+            {
+                return false;
+            }
             break;
         case NPC_SARTHARION:                                // sartharion (calculate box)
             if (fX > 3218.86f && fX < 3275.69f && fY < 572.40f && fY > 484.68f)
-            { return false; }
+            {
+                return false;
+            }
             break;
         case NPC_TALON_KING_IKISS:
         {
             float fX, fY, fZ;
             m_creature->GetRespawnCoord(fX, fY, fZ);
             if (m_creature->GetDistance2d(fX, fY) < 70.0f)
-            { return false; }
+            {
+                return false;
+            }
             break;
         }
         case NPC_KARGATH_BLADEFIST:
             if (fX < 255.0f && fX > 205.0f)
-            { return false; }
+            {
+                return false;
+            }
             break;
 
 #endif
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
         case NPC_ANUBARAK:
             if (fY < 281.0f && fY > 228.0f)
+            {
                 return false;
+            }
             break;
         case NPC_SINDRAGOSA:
             if (fX > 4314.0f)
+            {
                 return false;
+            }
             break;
         case NPC_ZARITHRIAN:
             if (fZ > 87.0f)
+            {
                 return false;
+            }
             break;
 #endif
         default:
@@ -823,7 +847,9 @@ void Scripted_NoMovementAI::AttackStart(Unit* pWho)
 {
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
     if (!m_creature->CanInitiateAttack())
+    {
         return;
+    }
 #endif
     if (pWho && m_creature->Attack(pWho, true))
     {

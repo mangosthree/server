@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,10 @@ struct generic_creature : public CreatureScript
             {
                 GlobalCooldown -= diff;
             }
-            else { GlobalCooldown = 0; }
+            else
+            {
+                GlobalCooldown = 0;
+            }
 
             // Buff timer (only buff when we are alive and not in combat
             if (!m_creature->IsInCombat() && m_creature->IsAlive())
@@ -92,9 +95,15 @@ struct generic_creature : public CreatureScript
                         // Set our timer to 10 minutes before rebuff
                         BuffTimer = 600000;
                     }// Try agian in 30 seconds
-                    else { BuffTimer = 30000; }
+                    else
+                    {
+                        BuffTimer = 30000;
+                    }
                 }
-                else { BuffTimer -= diff; }
+                else
+                {
+                    BuffTimer -= diff;
+                }
             }
 
             // Return since we have no target
@@ -125,20 +134,35 @@ struct generic_creature : public CreatureScript
                     }
 
                     // No healing spell available, select a hostile spell
-                    if (info) { Healing = true; }
-                    else { info = SelectSpell(m_creature->getVictim(), -1, -1, SELECT_TARGET_ANY_ENEMY, 0, 0, 0, 0, SELECT_EFFECT_DONTCARE); }
+                    if (info)
+                    {
+                        Healing = true;
+                    }
+                    else
+                    {
+                        info = SelectSpell(m_creature->getVictim(), -1, -1, SELECT_TARGET_ANY_ENEMY, 0, 0, 0, 0, SELECT_EFFECT_DONTCARE);
+                    }
 
                     // 50% chance if elite or higher, 20% chance if not, to replace our white hit with a spell
                     if (info && (rand() % (m_creature->GetCreatureInfo()->Rank > 1 ? 2 : 5) == 0) && !GlobalCooldown)
                     {
                         // Cast the spell
-                        if (Healing) { DoCastSpell(m_creature, info); }
-                        else { DoCastSpell(m_creature->getVictim(), info); }
+                        if (Healing)
+                        {
+                            DoCastSpell(m_creature, info);
+                        }
+                        else
+                        {
+                            DoCastSpell(m_creature->getVictim(), info);
+                        }
 
                         // Set our global cooldown
                         GlobalCooldown = GENERIC_CREATURE_COOLDOWN;
                     }
-                    else { m_creature->AttackerStateUpdate(m_creature->getVictim()); }
+                    else
+                    {
+                        m_creature->AttackerStateUpdate(m_creature->getVictim());
+                    }
 
                     m_creature->resetAttackTimer();
                 }
@@ -155,8 +179,14 @@ struct generic_creature : public CreatureScript
                 }
 
                 // No healing spell available, See if we can cast a ranged spell (Range must be greater than ATTACK_DISTANCE)
-                if (info) { Healing = true; }
-                else { info = SelectSpell(m_creature->getVictim(), -1, -1, SELECT_TARGET_ANY_ENEMY, 0, 0, ATTACK_DISTANCE, 0, SELECT_EFFECT_DONTCARE); }
+                if (info)
+                {
+                    Healing = true;
+                }
+                else
+                {
+                    info = SelectSpell(m_creature->getVictim(), -1, -1, SELECT_TARGET_ANY_ENEMY, 0, 0, ATTACK_DISTANCE, 0, SELECT_EFFECT_DONTCARE);
+                }
 
                 // Found a spell, check if we arn't on cooldown
                 if (info && !GlobalCooldown)
@@ -168,8 +198,14 @@ struct generic_creature : public CreatureScript
                     }
 
                     // Cast spell
-                    if (Healing) { DoCastSpell(m_creature, info); }
-                    else { DoCastSpell(m_creature->getVictim(), info); }
+                    if (Healing)
+                    {
+                        DoCastSpell(m_creature, info);
+                    }
+                    else
+                    {
+                        DoCastSpell(m_creature->getVictim(), info);
+                    }
 
                     // Set our global cooldown
                     GlobalCooldown = GENERIC_CREATURE_COOLDOWN;

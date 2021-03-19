@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -169,8 +169,8 @@ void ScriptedInstance::DoRespawnGameObject(uint32 uiEntry, uint32 uiTimeToDespaw
         DoRespawnGameObject(find->second, uiTimeToDespawn);
     }
     else
-        // Output log, possible reason is not added GO to storage, or not yet loaded;
     {
+        // Output log, possible reason is not added GO to storage, or not yet loaded;
         debug_log("SD3: Script call DoRespawnGameObject(by Entry), but no gameobject of entry %u was created yet, or it was not stored by script for map %u.", uiEntry, instance->GetId());
     }
 }
@@ -267,11 +267,15 @@ void ScriptedInstance::DoStartTimedAchievement(AchievementCriteriaTypes criteria
         for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
         {
             if (Player* pPlayer = itr->getSource())
+            {
                 pPlayer->StartTimedAchievementCriteria(criteriaType, uiTimedCriteriaMiscId);
+            }
         }
     }
     else
+    {
         debug_log("SD3: DoStartTimedAchievement attempt start achievements but no players in map.");
+    }
 }
 #endif
 

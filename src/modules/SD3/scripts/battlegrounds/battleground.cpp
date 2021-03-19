@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2019  MaNGOS  <https://getmangos.eu>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,7 +118,9 @@ struct npc_spirit_guide : public CreatureScript
         {
             if (pSpellEntry->Id == SPELL_SPIRIT_HEAL && pUnit->GetTypeId() == TYPEID_PLAYER
                 && pUnit->HasAura(SPELL_WAITING_TO_RESURRECT))
-            { pUnit->CastSpell(pUnit, SPELL_SPIRIT_HEAL_MANA, true); }
+            {
+                pUnit->CastSpell(pUnit, SPELL_SPIRIT_HEAL_MANA, true);
+            }
         }
 #endif
     };

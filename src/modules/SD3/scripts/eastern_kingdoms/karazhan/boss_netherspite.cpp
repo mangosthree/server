@@ -273,7 +273,7 @@ struct boss_netherspite : public CreatureScript
         {
             for (uint8 i = 0; i < MAX_PORTALS; ++i)
             {
-                m_creature->SummonCreature(m_vPortalEntryList[i], aPortalCoordinates[i].fX, aPortalCoordinates[i].fY, aPortalCoordinates[i].fZ, aPortalCoordinates[i].fO, TEMPSUMMON_TIMED_DESPAWN, 60000);
+                m_creature->SummonCreature(m_vPortalEntryList[i], aPortalCoordinates[i].fX, aPortalCoordinates[i].fY, aPortalCoordinates[i].fZ, aPortalCoordinates[i].fO, TEMPSPAWN_TIMED_DESPAWN, 60000);
             }
 
             // randomize the portals after the first summon

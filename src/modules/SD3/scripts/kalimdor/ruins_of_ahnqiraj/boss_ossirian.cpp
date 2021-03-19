@@ -116,7 +116,7 @@ struct boss_ossirian : public CreatureScript
 
             for (uint8 i = 0; i < countof(aSandVortexSpawnPos); ++i)
             {
-                m_creature->SummonCreature(NPC_SAND_VORTEX, aSandVortexSpawnPos[i][0], aSandVortexSpawnPos[i][1], aSandVortexSpawnPos[i][2], aSandVortexSpawnPos[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_SAND_VORTEX, aSandVortexSpawnPos[i][0], aSandVortexSpawnPos[i][1], aSandVortexSpawnPos[i][2], aSandVortexSpawnPos[i][3], TEMPSPAWN_CORPSE_DESPAWN, 0);
             }
         }
 
@@ -153,7 +153,7 @@ struct boss_ossirian : public CreatureScript
                 // Note: the summon points seem to be very random; requires additional research
                 float fX, fY, fZ;
                 m_creature->GetRandomPoint(aCrystalSpawnPos[0], aCrystalSpawnPos[1], aCrystalSpawnPos[2], 100.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_OSSIRIAN_TRIGGER, fX, fY, fZ, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_OSSIRIAN_TRIGGER, fX, fY, fZ, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
             }
             if (!pOssirianTrigger)
             {

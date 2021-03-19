@@ -114,7 +114,7 @@ struct boss_garr : public CreatureScript
         {
             if (type == AI_EVENT_CUSTOM_B && pSender == m_creature)
             {
-                if (Creature* spawn = m_creature->SummonCreature(NPC_FIRESWORN, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, true))
+                if (Creature* spawn = m_creature->SummonCreature(NPC_FIRESWORN, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSPAWN_CORPSE_DESPAWN, true))
                 {
                     spawn->SetOwnerGuid(ObjectGuid());  // trying to prevent despawn of the summon at Garr death
                 }

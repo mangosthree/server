@@ -430,7 +430,7 @@ struct boss_sathrovarr : public CreatureScript
             }
 
             // spawn human Kalec; he starts to attack
-            m_creature->SummonCreature(NPC_KALECGOS_HUMAN, aKalecHumanLoc[0], aKalecHumanLoc[1], aKalecHumanLoc[2], aKalecHumanLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true);
+            m_creature->SummonCreature(NPC_KALECGOS_HUMAN, aKalecHumanLoc[0], aKalecHumanLoc[1], aKalecHumanLoc[2], aKalecHumanLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
         }
 
         void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override

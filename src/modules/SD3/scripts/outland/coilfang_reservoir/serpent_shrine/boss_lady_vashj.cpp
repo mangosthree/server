@@ -397,7 +397,7 @@ struct boss_lady_vashj : public CreatureScript
                     // ToDo: this is not very clear how it should work - requires additional research!
                     if (m_uiSummonSporebatTimer < uiDiff)
                     {
-                        m_creature->SummonCreature(NPC_TOXIC_SPOREBAT, afSporebatPos[0], afSporebatPos[1], afSporebatPos[2], afSporebatPos[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_TOXIC_SPOREBAT, afSporebatPos[0], afSporebatPos[1], afSporebatPos[2], afSporebatPos[3], TEMPSPAWN_DEAD_DESPAWN, 0);
 
                         // summon sporebats faster and faster
                         if (m_uiSummonSporebatStaticTimer > 1000)
@@ -455,7 +455,7 @@ struct boss_lady_vashj : public CreatureScript
                 if (m_uiEnchantedElementalTimer < uiDiff)
                 {
                     uint8 uiPos = urand(0, 7);
-                    m_creature->SummonCreature(NPC_ENCHANTED_ELEMENTAL, afElementPos[uiPos][0], afElementPos[uiPos][1], afElementPos[uiPos][2], afElementPos[uiPos][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_ENCHANTED_ELEMENTAL, afElementPos[uiPos][0], afElementPos[uiPos][1], afElementPos[uiPos][2], afElementPos[uiPos][3], TEMPSPAWN_DEAD_DESPAWN, 0);
 
                     m_uiEnchantedElementalTimer = urand(5000, 10000);
                 }
@@ -470,7 +470,7 @@ struct boss_lady_vashj : public CreatureScript
                     {
                         uint8 uiPos = urand(0, 7);
 
-                        m_creature->SummonCreature(NPC_TAINTED_ELEMENTAL, afElementPos[uiPos][0], afElementPos[uiPos][1], afElementPos[uiPos][2], afElementPos[uiPos][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_TAINTED_ELEMENTAL, afElementPos[uiPos][0], afElementPos[uiPos][1], afElementPos[uiPos][2], afElementPos[uiPos][3], TEMPSPAWN_DEAD_DESPAWN, 0);
                         m_uiTaintedElementalTimer = 0;
                     }
                     else
@@ -483,7 +483,7 @@ struct boss_lady_vashj : public CreatureScript
                 {
                     uint8 uiPos = urand(0, 2);
 
-                    m_creature->SummonCreature(NPC_COILFANG_ELITE, afCoilfangElitePos[uiPos][0], afCoilfangElitePos[uiPos][1], afCoilfangElitePos[uiPos][2], afCoilfangElitePos[uiPos][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_COILFANG_ELITE, afCoilfangElitePos[uiPos][0], afCoilfangElitePos[uiPos][1], afCoilfangElitePos[uiPos][2], afCoilfangElitePos[uiPos][3], TEMPSPAWN_DEAD_DESPAWN, 0);
                     m_uiCoilfangEliteTimer = urand(45000, 50000);
                 }
                 else
@@ -495,7 +495,7 @@ struct boss_lady_vashj : public CreatureScript
                 {
                     uint8 uiPos = urand(0, 2);
 
-                    m_creature->SummonCreature(NPC_COILFANG_STRIDER, afCoilfangStriderPos[uiPos][0], afCoilfangStriderPos[uiPos][1], afCoilfangStriderPos[uiPos][2], afCoilfangStriderPos[uiPos][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_COILFANG_STRIDER, afCoilfangStriderPos[uiPos][0], afCoilfangStriderPos[uiPos][1], afCoilfangStriderPos[uiPos][2], afCoilfangStriderPos[uiPos][3], TEMPSPAWN_DEAD_DESPAWN, 0);
                     m_uiCoilfangStriderTimer = urand(60000, 70000);
                 }
                 else

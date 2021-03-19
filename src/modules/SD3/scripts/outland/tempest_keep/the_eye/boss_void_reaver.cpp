@@ -176,7 +176,7 @@ struct boss_void_reaver : public CreatureScript
 
                     if (pTarget)
                     {
-                        m_creature->SummonCreature(NPC_ARCANE_ORB_TARGET, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_ARCANE_ORB_TARGET, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
                     }
 
                     m_uiArcaneOrbTimer = 3000;

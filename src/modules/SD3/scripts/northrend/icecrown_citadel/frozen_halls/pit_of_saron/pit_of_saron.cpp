@@ -123,7 +123,7 @@ struct spell_pos_summon_undead : public SpellScript
             for (uint8 i = 0; i < 4; ++i)
             {
                 pCreatureTarget->GetNearPoint(pCreatureTarget, fX, fY, fZ, 0, frand(8.0f, 12.0f), M_PI_F * 0.5f * i);
-                pCreatureTarget->SummonCreature(i % 2 ? NPC_YMIRJAR_WRATHBRINGER : NPC_YMIRJAR_FLAMEBEARER, fX, fY, fZ, 3.75f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                pCreatureTarget->SummonCreature(i % 2 ? NPC_YMIRJAR_WRATHBRINGER : NPC_YMIRJAR_FLAMEBEARER, fX, fY, fZ, 3.75f, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
 
             // always return true when we are handling this spell and effect

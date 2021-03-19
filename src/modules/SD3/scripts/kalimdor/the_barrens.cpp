@@ -397,7 +397,7 @@ struct npc_twiggy_flathead : public CreatureScript
 
             for (uint8 i = 0; i < MAX_CHALLENGERS; ++i)
             {
-                m_creature->SummonCreature(NPC_AFFRAY_CHALLENGER, aAffrayChallengerLoc[i][0], aAffrayChallengerLoc[i][1], aAffrayChallengerLoc[i][2], aAffrayChallengerLoc[i][3], TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
+                m_creature->SummonCreature(NPC_AFFRAY_CHALLENGER, aAffrayChallengerLoc[i][0], aAffrayChallengerLoc[i][1], aAffrayChallengerLoc[i][2], aAffrayChallengerLoc[i][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600000);
             }
         }
 
@@ -513,7 +513,7 @@ struct npc_twiggy_flathead : public CreatureScript
                     }
                     break;
                 case 2:
-                    m_creature->SummonCreature(NPC_BIG_WILL, aAffrayChallengerLoc[6][0], aAffrayChallengerLoc[6][1], aAffrayChallengerLoc[6][2], aAffrayChallengerLoc[6][3], TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 300000);
+                    m_creature->SummonCreature(NPC_BIG_WILL, aAffrayChallengerLoc[6][0], aAffrayChallengerLoc[6][1], aAffrayChallengerLoc[6][2], aAffrayChallengerLoc[6][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 300000);
                     m_uiEventTimer = 15000;
                     ++m_uiStep;
                     break;
@@ -627,10 +627,10 @@ struct npc_wizzlecranks_shredder : public CreatureScript
                 SetRun(false);
                 break;
             case 17:
-                if (Creature* pTemp = m_creature->SummonCreature(NPC_MERCENARY, 1128.489f, -3037.611f, 92.701f, 1.472f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000))
+                if (Creature* pTemp = m_creature->SummonCreature(NPC_MERCENARY, 1128.489f, -3037.611f, 92.701f, 1.472f, TEMPSPAWN_TIMED_OOC_DESPAWN, 120000))
                 {
                     DoScriptText(SAY_MERCENARY, pTemp);
-                    m_creature->SummonCreature(NPC_MERCENARY, 1160.172f, -2980.168f, 97.313f, 3.690f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000);
+                    m_creature->SummonCreature(NPC_MERCENARY, 1160.172f, -2980.168f, 97.313f, 3.690f, TEMPSPAWN_TIMED_OOC_DESPAWN, 120000);
                 }
                 break;
             case 24:
@@ -695,7 +695,7 @@ struct npc_wizzlecranks_shredder : public CreatureScript
                             if (Player* pPlayer = GetPlayerForEscort())
                             {
                                 pPlayer->GroupEventHappens(QUEST_ESCAPE, m_creature);
-                                m_creature->SummonCreature(NPC_PILOT_WIZZ, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 180000);
+                                m_creature->SummonCreature(NPC_PILOT_WIZZ, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_DESPAWN, 180000);
                             }
                             break;
                         }
@@ -1069,9 +1069,9 @@ struct npc_regthar_deathgate : public CreatureScript
             if (m_uiPhaseCount == 2 && m_uiKillCount >= 20)
             {
                 m_uiPhaseCount = 3;
-                m_creature->SummonCreature(NPC_KOLKAR_INVADER, SpawnPointsKromzar[0].fX, SpawnPointsKromzar[0].fY, SpawnPointsKromzar[0].fZ, SpawnPointsKromzar[0].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
-                m_creature->SummonCreature(NPC_WARLORD_KROMZAR, SpawnPointsKromzar[1].fX, SpawnPointsKromzar[1].fY, SpawnPointsKromzar[1].fZ, SpawnPointsKromzar[1].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
-                m_creature->SummonCreature(NPC_KOLKAR_STORMSEER, SpawnPointsKromzar[2].fX, SpawnPointsKromzar[2].fY, SpawnPointsKromzar[2].fZ, SpawnPointsKromzar[2].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                m_creature->SummonCreature(NPC_KOLKAR_INVADER, SpawnPointsKromzar[0].fX, SpawnPointsKromzar[0].fY, SpawnPointsKromzar[0].fZ, SpawnPointsKromzar[0].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40000);
+                m_creature->SummonCreature(NPC_WARLORD_KROMZAR, SpawnPointsKromzar[1].fX, SpawnPointsKromzar[1].fY, SpawnPointsKromzar[1].fZ, SpawnPointsKromzar[1].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40000);
+                m_creature->SummonCreature(NPC_KOLKAR_STORMSEER, SpawnPointsKromzar[2].fX, SpawnPointsKromzar[2].fY, SpawnPointsKromzar[2].fZ, SpawnPointsKromzar[2].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40000);
             }
 
             if (m_uiPhaseCount <= 2 && m_uiWaitSummonTimerHorde < uiDiff && m_uiSummonCountHorde < 7)
@@ -1080,7 +1080,7 @@ struct npc_regthar_deathgate : public CreatureScript
                     switch (urand(0, 1))
                 {
                     case 0:
-                        m_creature->SummonCreature(NPC_HORDE_DEFENDER, SpawnPointsHorde[lSpawnListHorde.front()].fX, SpawnPointsHorde[lSpawnListHorde.front()].fY, SpawnPointsHorde[lSpawnListHorde.front()].fZ, SpawnPointsHorde[lSpawnListHorde.front()].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                        m_creature->SummonCreature(NPC_HORDE_DEFENDER, SpawnPointsHorde[lSpawnListHorde.front()].fX, SpawnPointsHorde[lSpawnListHorde.front()].fY, SpawnPointsHorde[lSpawnListHorde.front()].fZ, SpawnPointsHorde[lSpawnListHorde.front()].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40000);
                         ++m_uiSummonCountHorde;
                         if (m_uiSummonCountHorde <= 4)
                         {
@@ -1092,7 +1092,7 @@ struct npc_regthar_deathgate : public CreatureScript
                         }
                         break;
                     case 1:
-                        m_creature->SummonCreature(NPC_HORDE_AXE_THROWER, SpawnPointsHorde[lSpawnListHorde.front()].fX, SpawnPointsHorde[lSpawnListHorde.front()].fY, SpawnPointsHorde[lSpawnListHorde.front()].fZ, SpawnPointsHorde[lSpawnListHorde.front()].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                        m_creature->SummonCreature(NPC_HORDE_AXE_THROWER, SpawnPointsHorde[lSpawnListHorde.front()].fX, SpawnPointsHorde[lSpawnListHorde.front()].fY, SpawnPointsHorde[lSpawnListHorde.front()].fZ, SpawnPointsHorde[lSpawnListHorde.front()].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40000);
                         ++m_uiSummonCountHorde;
                         if (m_uiSummonCountHorde <= 4)
                         {
@@ -1109,11 +1109,11 @@ struct npc_regthar_deathgate : public CreatureScript
                     switch (urand(0, 1))
                 {
                     case 0:
-                        m_creature->SummonCreature(NPC_HORDE_DEFENDER, SpawnPointsHorde[m_uiSummonCountHorde].fX, SpawnPointsHorde[m_uiSummonCountHorde].fY, SpawnPointsHorde[m_uiSummonCountHorde].fZ, SpawnPointsHorde[m_uiSummonCountHorde].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                        m_creature->SummonCreature(NPC_HORDE_DEFENDER, SpawnPointsHorde[m_uiSummonCountHorde].fX, SpawnPointsHorde[m_uiSummonCountHorde].fY, SpawnPointsHorde[m_uiSummonCountHorde].fZ, SpawnPointsHorde[m_uiSummonCountHorde].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40000);
                         ++m_uiSummonCountHorde;
                         break;
                     case 1:
-                        m_creature->SummonCreature(NPC_HORDE_AXE_THROWER, SpawnPointsHorde[m_uiSummonCountHorde].fX, SpawnPointsHorde[m_uiSummonCountHorde].fY, SpawnPointsHorde[m_uiSummonCountHorde].fZ, SpawnPointsHorde[m_uiSummonCountHorde].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                        m_creature->SummonCreature(NPC_HORDE_AXE_THROWER, SpawnPointsHorde[m_uiSummonCountHorde].fX, SpawnPointsHorde[m_uiSummonCountHorde].fY, SpawnPointsHorde[m_uiSummonCountHorde].fZ, SpawnPointsHorde[m_uiSummonCountHorde].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40000);
                         ++m_uiSummonCountHorde;
                         break;
                 }
@@ -1128,13 +1128,13 @@ struct npc_regthar_deathgate : public CreatureScript
 
                     if (m_uiPhaseCount == 2)
                     {
-                        m_creature->SummonCreature(NPC_KOLKAR_INVADER, SpawnPointsKolkar[lSpawnList.front()].fX, SpawnPointsKolkar[lSpawnList.front()].fY, SpawnPointsKolkar[lSpawnList.front()].fZ, SpawnPointsKolkar[lSpawnList.front()].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                        m_creature->SummonCreature(NPC_KOLKAR_INVADER, SpawnPointsKolkar[lSpawnList.front()].fX, SpawnPointsKolkar[lSpawnList.front()].fY, SpawnPointsKolkar[lSpawnList.front()].fZ, SpawnPointsKolkar[lSpawnList.front()].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40000);
                         m_uiWaitSummonTimer = 10000;
                     }
 
                     if (m_uiPhaseCount == 1)
                     {
-                        m_creature->SummonCreature(NPC_KOLKAR_INVADER, SpawnPointsKolkar[m_uiCreatureCount].fX, SpawnPointsKolkar[m_uiCreatureCount].fY, SpawnPointsKolkar[m_uiCreatureCount].fZ, SpawnPointsKolkar[m_uiCreatureCount].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                        m_creature->SummonCreature(NPC_KOLKAR_INVADER, SpawnPointsKolkar[m_uiCreatureCount].fX, SpawnPointsKolkar[m_uiCreatureCount].fY, SpawnPointsKolkar[m_uiCreatureCount].fZ, SpawnPointsKolkar[m_uiCreatureCount].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40000);
                         ++m_uiCreatureCount;
                     }
                 }
@@ -1144,13 +1144,13 @@ struct npc_regthar_deathgate : public CreatureScript
                     ++m_uiSummonCountStormseer;
                     if (m_uiPhaseCount == 2)
                     {
-                        m_creature->SummonCreature(NPC_KOLKAR_STORMSEER, SpawnPointsKolkar[lSpawnList.front()].fX, SpawnPointsKolkar[lSpawnList.front()].fY, SpawnPointsKolkar[lSpawnList.front()].fZ, SpawnPointsKolkar[lSpawnList.front()].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                        m_creature->SummonCreature(NPC_KOLKAR_STORMSEER, SpawnPointsKolkar[lSpawnList.front()].fX, SpawnPointsKolkar[lSpawnList.front()].fY, SpawnPointsKolkar[lSpawnList.front()].fZ, SpawnPointsKolkar[lSpawnList.front()].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40000);
                         m_uiWaitSummonTimer = 10000;
                     }
 
                     if (m_uiPhaseCount == 1)
                     {
-                        m_creature->SummonCreature(NPC_KOLKAR_STORMSEER, SpawnPointsKolkar[m_uiCreatureCount].fX, SpawnPointsKolkar[m_uiCreatureCount].fY, SpawnPointsKolkar[m_uiCreatureCount].fZ, SpawnPointsKolkar[m_uiCreatureCount].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+                        m_creature->SummonCreature(NPC_KOLKAR_STORMSEER, SpawnPointsKolkar[m_uiCreatureCount].fX, SpawnPointsKolkar[m_uiCreatureCount].fY, SpawnPointsKolkar[m_uiCreatureCount].fZ, SpawnPointsKolkar[m_uiCreatureCount].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40000);
                         ++m_uiCreatureCount;
                     }
                 }
@@ -1426,8 +1426,8 @@ struct warlord_kromzar : public CreatureScript
         void JustRespawned() override
         {
             DoScriptText(YELL_STRONGEST, m_creature);
-            m_creature->SummonCreature(NPC_KOLKAR_INVADER, SpawnPointsKromzar[0].fX, SpawnPointsKromzar[0].fY, SpawnPointsKromzar[0].fZ, SpawnPointsKromzar[0].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
-            m_creature->SummonCreature(NPC_KOLKAR_STORMSEER, SpawnPointsKromzar[2].fX, SpawnPointsKromzar[2].fY, SpawnPointsKromzar[2].fZ, SpawnPointsKromzar[2].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 40000);
+            m_creature->SummonCreature(NPC_KOLKAR_INVADER, SpawnPointsKromzar[0].fX, SpawnPointsKromzar[0].fY, SpawnPointsKromzar[0].fZ, SpawnPointsKromzar[0].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40000);
+            m_creature->SummonCreature(NPC_KOLKAR_STORMSEER, SpawnPointsKromzar[2].fX, SpawnPointsKromzar[2].fY, SpawnPointsKromzar[2].fZ, SpawnPointsKromzar[2].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 40000);
             Start(false, nullptr, nullptr, false, true);
         }
 

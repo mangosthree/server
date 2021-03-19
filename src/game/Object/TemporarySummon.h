@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef MANGOSSERVER_TEMPSUMMON_H
-#define MANGOSSERVER_TEMPSUMMON_H
+#ifndef MANGOSSERVER_TEMPSPAWN_H
+#define MANGOSSERVER_TEMPSPAWN_H
 
 #include "Creature.h"
 #include "ObjectAccessor.h"
@@ -35,8 +35,8 @@ class TemporarySummon : public Creature
         virtual ~TemporarySummon() {};
 
         void Update(uint32 update_diff, uint32 time) override;
-        void SetSummonProperties(TempSummonType type, uint32 lifetime);
-        void Summon(TempSummonType type, uint32 lifetime);
+        void SetSummonProperties(TempSpawnType type, uint32 lifetime);
+        void Summon(TempSpawnType type, uint32 lifetime);
         void MANGOS_DLL_SPEC UnSummon();
         void SaveToDB();
         ObjectGuid const& GetSummonerGuid() const { return m_summoner ; }
@@ -53,7 +53,7 @@ class TemporarySummon : public Creature
             MANGOS_ASSERT(false);
         }
 
-        TempSummonType m_type;
+        TempSpawnType m_type;
         uint32 m_timer;
         uint32 m_lifetime;
         ObjectGuid m_summoner;

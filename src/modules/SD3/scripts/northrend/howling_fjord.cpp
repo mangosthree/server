@@ -245,7 +245,7 @@ struct npc_daegarn : public CreatureScript
 
         void SummonGladiator(uint32 uiEntry)
         {
-            m_creature->SummonCreature(uiEntry, afSummon[0], afSummon[1], afSummon[2], 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 20 * IN_MILLISECONDS);
+            m_creature->SummonCreature(uiEntry, afSummon[0], afSummon[1], afSummon[2], 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 20 * IN_MILLISECONDS);
         }
 
         void SummonedMovementInform(Creature* pSummoned, uint32 /*uiMotionType*/, uint32 /*uiPointId*/) override

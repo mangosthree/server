@@ -159,7 +159,7 @@ struct npc_kelerun_bloodmourn : public CreatureScript
                 if (Creature* pCreature = m_creature->SummonCreature(uiChallengerId[i],
                     fChallengerLoc[i][0], fChallengerLoc[i][1],
                     fChallengerLoc[i][2], fChallengerLoc[i][3],
-                    TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 600000))
+                    TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600000))
                 {
                     m_aChallengerGuids[i] = pCreature->GetObjectGuid();
                     pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -458,9 +458,9 @@ struct npc_apprentice_mirveda : public CreatureScript
             m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
             m_playerGuid = pPlayer->GetObjectGuid();
 
-            m_creature->SummonCreature(NPC_GHARSUL, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 4000);
-            m_creature->SummonCreature(NPC_ANGERSHADE, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 4000);
-            m_creature->SummonCreature(NPC_ANGERSHADE, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 4000);
+            m_creature->SummonCreature(NPC_GHARSUL, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 4000);
+            m_creature->SummonCreature(NPC_ANGERSHADE, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 4000);
+            m_creature->SummonCreature(NPC_ANGERSHADE, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 4000);
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -568,7 +568,7 @@ struct npc_infused_crystal : public CreatureScript
                     {
                         for (uint8 i = 0; i < 3; ++i)
                         {
-                            m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE);
+                            m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE);
                         }
                         m_uiWaveTimer = 29000;
                         m_bFirstWave = false;
@@ -577,7 +577,7 @@ struct npc_infused_crystal : public CreatureScript
                     {
                         for (uint8 i = 3; i < 6; ++i)
                         {
-                            m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE);
+                            m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE);
                         }
                         m_uiWaveTimer = 0;
                     }

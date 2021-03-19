@@ -399,7 +399,7 @@ struct boss_mimiron : public CreatureScript
                 {
                     pElevator->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
                 }
-                m_creature->SummonCreature(NPC_VX001, afRobotSpawnPos[0], afRobotSpawnPos[1], afRobotSpawnPos[2], afRobotSpawnPos[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_VX001, afRobotSpawnPos[0], afRobotSpawnPos[1], afRobotSpawnPos[2], afRobotSpawnPos[3], TEMPSPAWN_DEAD_DESPAWN, 0);
                 break;
             case SPELL_JET_PACK_VISUAL:
                 DoCastSpellIfCan(m_creature, SPELL_JET_PACK_VISUAL);
@@ -452,7 +452,7 @@ struct boss_mimiron : public CreatureScript
                 }
                 break;
             case NPC_AERIAL_UNIT:
-                m_creature->SummonCreature(NPC_AERIAL_UNIT, afAerialSpawnPos[0], afAerialSpawnPos[1], afAerialSpawnPos[2], afAerialSpawnPos[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_AERIAL_UNIT, afAerialSpawnPos[0], afAerialSpawnPos[1], afAerialSpawnPos[2], afAerialSpawnPos[3], TEMPSPAWN_DEAD_DESPAWN, 0);
                 break;
             case PHASE_TRANSITION:
                 DoCastSpellIfCan(m_creature, SPELL_JET_PACK_VISUAL);

@@ -549,7 +549,7 @@ namespace LuaPlayer
      * Returns 'true' if the [Player] can see anoter [Player] specified by object, 'false' otherwise.
      *
      * @param [Player] player
-     * @return bool isVisibleForPlayer
+     * @return bool IsVisibleForPlayer
      */
     int IsVisibleForPlayer(lua_State* L, Player* player)
     {

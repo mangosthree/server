@@ -83,9 +83,9 @@ struct npc_kaya : public CreatureScript
                 // apparently NPC say _after_ the ambush is over, and is most likely a bug at you-know-where.
                 // we simplify this, and make say when the ambush actually start.
                 DoScriptText(SAY_AMBUSH, m_creature);
-                m_creature->SummonCreature(NPC_GRIMTOTEM_RUFFIAN, -50.75f, -500.77f, -46.13f, 0.4f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_GRIMTOTEM_BRUTE, -40.05f, -510.89f, -46.05f, 1.7f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_GRIMTOTEM_SORCERER, -32.21f, -499.20f, -45.35f, 2.8f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_GRIMTOTEM_RUFFIAN, -50.75f, -500.77f, -46.13f, 0.4f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_GRIMTOTEM_BRUTE, -40.05f, -510.89f, -46.05f, 1.7f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_GRIMTOTEM_SORCERER, -32.21f, -499.20f, -45.35f, 2.8f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
                 break;
                 // Award quest credit
             case 18:
@@ -284,25 +284,25 @@ struct npc_piznik : public CreatureScript
                     {
 
                     case 0:
-                        m_creature->SummonCreature(NPC_WINDSHEAR_VERMIN, SpawnPointsst[2].fX, SpawnPointsst[2].fY, SpawnPointsst[2].fZ, SpawnPointsst[2].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
-                        m_creature->SummonCreature(NPC_WINDSHEAR_TUNNEL_RAT, SpawnPointsst[0].fX, SpawnPointsst[0].fY, SpawnPointsst[0].fZ, SpawnPointsst[0].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
-                        m_creature->SummonCreature(NPC_WINDSHEAR_VERMIN, SpawnPointsst[1].fX, SpawnPointsst[1].fY, SpawnPointsst[1].fZ, SpawnPointsst[1].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
+                        m_creature->SummonCreature(NPC_WINDSHEAR_VERMIN, SpawnPointsst[2].fX, SpawnPointsst[2].fY, SpawnPointsst[2].fZ, SpawnPointsst[2].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 20000);
+                        m_creature->SummonCreature(NPC_WINDSHEAR_TUNNEL_RAT, SpawnPointsst[0].fX, SpawnPointsst[0].fY, SpawnPointsst[0].fZ, SpawnPointsst[0].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 20000);
+                        m_creature->SummonCreature(NPC_WINDSHEAR_VERMIN, SpawnPointsst[1].fX, SpawnPointsst[1].fY, SpawnPointsst[1].fZ, SpawnPointsst[1].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 20000);
                         m_uiWaveTimer = 45000;
                         m_uiMoveCount = 0;
                         break;
                     case 1:
-                        m_creature->SummonCreature(NPC_WINDSHEAR_GEOMANCER, SpawnPointsst[2].fX, SpawnPointsst[2].fY, SpawnPointsst[2].fZ, SpawnPointsst[2].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
-                        m_creature->SummonCreature(NPC_WINDSHEAR_STONECUTTER, SpawnPointsst[0].fX, SpawnPointsst[0].fY, SpawnPointsst[0].fZ, SpawnPointsst[0].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
-                        m_creature->SummonCreature(NPC_WINDSHEAR_GEOMANCER, SpawnPointsst[1].fX, SpawnPointsst[1].fY, SpawnPointsst[1].fZ, SpawnPointsst[1].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
-                        m_creature->SummonCreature(NPC_WINDSHEAR_STONECUTTER, SpawnPointsst[3].fX, SpawnPointsst[3].fY, SpawnPointsst[3].fZ, SpawnPointsst[3].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
+                        m_creature->SummonCreature(NPC_WINDSHEAR_GEOMANCER, SpawnPointsst[2].fX, SpawnPointsst[2].fY, SpawnPointsst[2].fZ, SpawnPointsst[2].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 20000);
+                        m_creature->SummonCreature(NPC_WINDSHEAR_STONECUTTER, SpawnPointsst[0].fX, SpawnPointsst[0].fY, SpawnPointsst[0].fZ, SpawnPointsst[0].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 20000);
+                        m_creature->SummonCreature(NPC_WINDSHEAR_GEOMANCER, SpawnPointsst[1].fX, SpawnPointsst[1].fY, SpawnPointsst[1].fZ, SpawnPointsst[1].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 20000);
+                        m_creature->SummonCreature(NPC_WINDSHEAR_STONECUTTER, SpawnPointsst[3].fX, SpawnPointsst[3].fY, SpawnPointsst[3].fZ, SpawnPointsst[3].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 20000);
                         m_uiWaveTimer = 45000;
                         m_uiMoveCount = 0;
                         break;
                     case 2:
-                        m_creature->SummonCreature(NPC_WINDSHEAR_TUNNEL_RAT, SpawnPointsst[2].fX, SpawnPointsst[2].fY, SpawnPointsst[2].fZ, SpawnPointsst[2].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
-                        m_creature->SummonCreature(NPC_WINDSHEAR_OVERLORD, SpawnPointsst[0].fX, SpawnPointsst[0].fY, SpawnPointsst[0].fZ, SpawnPointsst[0].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
-                        m_creature->SummonCreature(NPC_WINDSHEAR_TUNNEL_RAT, SpawnPointsst[1].fX, SpawnPointsst[1].fY, SpawnPointsst[1].fZ, SpawnPointsst[1].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
-                        m_creature->SummonCreature(NPC_WINDSHEAR_TUNNEL_RAT, SpawnPointsst[3].fX, SpawnPointsst[3].fY, SpawnPointsst[3].fZ, SpawnPointsst[3].fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
+                        m_creature->SummonCreature(NPC_WINDSHEAR_TUNNEL_RAT, SpawnPointsst[2].fX, SpawnPointsst[2].fY, SpawnPointsst[2].fZ, SpawnPointsst[2].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 20000);
+                        m_creature->SummonCreature(NPC_WINDSHEAR_OVERLORD, SpawnPointsst[0].fX, SpawnPointsst[0].fY, SpawnPointsst[0].fZ, SpawnPointsst[0].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 20000);
+                        m_creature->SummonCreature(NPC_WINDSHEAR_TUNNEL_RAT, SpawnPointsst[1].fX, SpawnPointsst[1].fY, SpawnPointsst[1].fZ, SpawnPointsst[1].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 20000);
+                        m_creature->SummonCreature(NPC_WINDSHEAR_TUNNEL_RAT, SpawnPointsst[3].fX, SpawnPointsst[3].fY, SpawnPointsst[3].fZ, SpawnPointsst[3].fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 20000);
                         m_uiMoveCount = 0;
                         break;
                     }

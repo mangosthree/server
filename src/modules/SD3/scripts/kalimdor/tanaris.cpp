@@ -306,18 +306,18 @@ struct npc_oox17tn : public CreatureScript
                 // 1. Ambush: 3 scorpions
             case 22:
                 DoScriptText(SAY_OOX_AMBUSH, m_creature);
-                m_creature->SummonCreature(NPC_SCORPION, -8340.70f, -4448.17f, 9.17f, 3.10f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_SCORPION, -8343.18f, -4444.35f, 9.44f, 2.35f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
-                m_creature->SummonCreature(NPC_SCORPION, -8348.70f, -4457.80f, 9.58f, 2.02f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_SCORPION, -8340.70f, -4448.17f, 9.17f, 3.10f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_SCORPION, -8343.18f, -4444.35f, 9.44f, 2.35f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_SCORPION, -8348.70f, -4457.80f, 9.58f, 2.02f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
                 break;
                 // 2. Ambush: 2 Rogues & 1 Shadow Mage
             case 28:
                 DoScriptText(SAY_OOX_AMBUSH, m_creature);
 
-                m_creature->SummonCreature(NPC_SCOFFLAW, -7488.02f, -4786.56f, 10.67f, 3.74f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
-                m_creature->SummonCreature(NPC_SHADOW_MAGE, -7486.41f, -4791.55f, 10.54f, 3.26f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+                m_creature->SummonCreature(NPC_SCOFFLAW, -7488.02f, -4786.56f, 10.67f, 3.74f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 10000);
+                m_creature->SummonCreature(NPC_SHADOW_MAGE, -7486.41f, -4791.55f, 10.54f, 3.26f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
 
-                if (Creature* pCreature = m_creature->SummonCreature(NPC_SCOFFLAW, -7488.47f, -4800.77f, 9.77f, 2.50f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+                if (Creature* pCreature = m_creature->SummonCreature(NPC_SCOFFLAW, -7488.47f, -4800.77f, 9.77f, 2.50f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000))
                 {
                     DoScriptText(SAY_OOX17_AMBUSH_REPLY, pCreature);
                 }
@@ -677,13 +677,13 @@ struct go_inconspicuous_landmark : public GameObjectScript
             switch (rand() % 3)
             {
             case 0: // spawn treasure hunting pirate
-                pCreature = pPlayer->SummonCreature(NPC_TREASURE_HUNTING_PIRATE, fX, fY, fPlayerZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, SPAWN_DURATION);
+                pCreature = pPlayer->SummonCreature(NPC_TREASURE_HUNTING_PIRATE, fX, fY, fPlayerZ, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, SPAWN_DURATION);
                 break;
             case 1: // spawn treasure hunting swashbuckler
-                pCreature = pPlayer->SummonCreature(NPC_TREASURE_HUNTING_SWASHBUCKLER, fX, fY, fPlayerZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, SPAWN_DURATION);
+                pCreature = pPlayer->SummonCreature(NPC_TREASURE_HUNTING_SWASHBUCKLER, fX, fY, fPlayerZ, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, SPAWN_DURATION);
                 break;
             default: // spawn treasure hunting buccaneer
-                pCreature = pPlayer->SummonCreature(NPC_TREASURE_HUNTING_BUCCANEER, fX, fY, fPlayerZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, SPAWN_DURATION);
+                pCreature = pPlayer->SummonCreature(NPC_TREASURE_HUNTING_BUCCANEER, fX, fY, fPlayerZ, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, SPAWN_DURATION);
                 break;
             }
             pCreature->SetWalk(false, true); // run, fat boy, RUN!!!!

@@ -229,14 +229,14 @@ struct npc_eris_havenfire : public CreatureScript
                     for (uint8 i = 0; i < uiRand; ++i)
                     {
                         m_creature->GetRandomPoint(aPeasantSpawnLoc[0], aPeasantSpawnLoc[1], aPeasantSpawnLoc[2], 15.0f, fX, fY, fZ);
-                        m_creature->SummonCreature(NPC_SCOURGE_FOOTSOLDIER, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_SCOURGE_FOOTSOLDIER, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
                 }
                 break;
             case NPC_SCOURGE_ARCHER:
                 for (uint8 i = 0; i < MAX_ARCHERS; ++i)
                 {
-                    m_creature->SummonCreature(NPC_SCOURGE_ARCHER, aArcherSpawn[i][0], aArcherSpawn[i][1], aArcherSpawn[i][2], aArcherSpawn[i][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_SCOURGE_ARCHER, aArcherSpawn[i][0], aArcherSpawn[i][1], aArcherSpawn[i][2], aArcherSpawn[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
                 break;
             default:
@@ -244,7 +244,7 @@ struct npc_eris_havenfire : public CreatureScript
                 {
                     uint32 uiSummonEntry = roll_chance_i(70) ? NPC_INJURED_PEASANT : NPC_PLAGUED_PEASANT;
                     m_creature->GetRandomPoint(aPeasantSpawnLoc[0], aPeasantSpawnLoc[1], aPeasantSpawnLoc[2], 10.0f, fX, fY, fZ);
-                    if (Creature* pTemp = m_creature->SummonCreature(uiSummonEntry, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 10*MINUTE*IN_MILLISECONDS))
+                    if (Creature* pTemp = m_creature->SummonCreature(uiSummonEntry, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 10*MINUTE*IN_MILLISECONDS))
                     {
                         // Only the first mob needs to yell
                         if (!i)

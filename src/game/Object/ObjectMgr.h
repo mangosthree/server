@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _OBJECTMGR_H
-#define _OBJECTMGR_H
+#ifndef MANGOS_H_OBJECTMGR
+#define MANGOS_H_OBJECTMGR
 
 #include "Common.h"
 #include "Log.h"
@@ -286,7 +286,7 @@ struct GossipMenuItems
     uint8           option_icon;
     std::string     option_text;
     uint32          option_id;
-    uint32          npc_option_NpcFlags;
+    uint32          npc_option_npcflag;
     int32           action_menu_id;
     uint32          action_poi_id;
     uint32          action_script_id;
@@ -772,7 +772,7 @@ class ObjectMgr
 
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
-        static Player* GetPlayer(const char* name);         ///< Wrapper for ObjectAccessor::FindPlayerByName
+        static Player* GetPlayer(const char* name);                                 ///< Wrapper for ObjectAccessor::FindPlayerByName
         static Player* GetPlayer(ObjectGuid guid, bool inWorld = true);             ///< Wrapper for ObjectAccessor::FindPlayer
         static CreatureInfo const* GetCreatureTemplate(uint32 id);                  ///< Wrapper for sCreatureStorage.LookupEntry
         static CreatureModelInfo const* GetCreatureModelInfo(uint32 modelid);       ///< Wrapper for sCreatureModelStorage.LookupEntry

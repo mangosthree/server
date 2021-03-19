@@ -69,10 +69,10 @@ struct at_shade_of_eranikus : public AreaTriggerScript
                 if (pInstance->GetData(TYPE_MALFURION) != DONE)
                 {
 #if defined (CLASSIC) || defined (TBC)
-                    pPlayer->SummonCreature(NPC_MALFURION, aSunkenTempleLocation[2].m_fX, aSunkenTempleLocation[2].m_fY, aSunkenTempleLocation[2].m_fZ, aSunkenTempleLocation[2].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    pPlayer->SummonCreature(NPC_MALFURION, aSunkenTempleLocation[2].m_fX, aSunkenTempleLocation[2].m_fY, aSunkenTempleLocation[2].m_fZ, aSunkenTempleLocation[2].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
 #endif
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
-                pPlayer->SummonCreature(NPC_MALFURION, aSunkenTempleLocation[2].m_fX, aSunkenTempleLocation[2].m_fY, aSunkenTempleLocation[2].m_fZ, aSunkenTempleLocation[2].m_Orientation, TEMPSUMMON_DEAD_DESPAWN, 0);
+                pPlayer->SummonCreature(NPC_MALFURION, aSunkenTempleLocation[2].m_fX, aSunkenTempleLocation[2].m_fY, aSunkenTempleLocation[2].m_fZ, aSunkenTempleLocation[2].m_Orientation, TEMPSPAWN_DEAD_DESPAWN, 0);
 #endif
                     pInstance->SetData(TYPE_MALFURION, DONE);
                 }
@@ -302,7 +302,7 @@ struct spell_summon_hakkar : public SpellScript
             }
 
             // Actually summon the avatar of Hakkar and cast some visuals
-            if (Creature *pAvatar = pCaster->SummonCreature(NPC_AVATAR_OF_HAKKAR, pCaster->GetPositionX(), pCaster->GetPositionY(), pCaster->GetPositionZ(), pCaster->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1 * DAY*IN_MILLISECONDS))
+            if (Creature *pAvatar = pCaster->SummonCreature(NPC_AVATAR_OF_HAKKAR, pCaster->GetPositionX(), pCaster->GetPositionY(), pCaster->GetPositionZ(), pCaster->GetOrientation(), TEMPSPAWN_CORPSE_TIMED_DESPAWN, 1 * DAY*IN_MILLISECONDS))
             {
                 pAvatar->CastSpell(pAvatar, SPELL_AVATAR_SUMMONED, true);
             }

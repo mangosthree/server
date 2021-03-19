@@ -437,7 +437,7 @@ struct boss_algalon : public CreatureScript
                 break;
             case NPC_ALGALON:
                 // spawn Brann for epilogue dialogue
-                m_creature->SummonCreature(NPC_BRANN_ALGALON, 1631.962f, -208.6464f, 420.8867f, 4.71f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_BRANN_ALGALON, 1631.962f, -208.6464f, 420.8867f, 4.71f, TEMPSPAWN_DEAD_DESPAWN, 0);
                 break;
             case SAY_OUTRO_1:
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
@@ -471,7 +471,7 @@ struct boss_algalon : public CreatureScript
         {
             for (uint8 i = 0; i < MAX_CONSTELATIONS; ++i)
             {
-                m_creature->SummonCreature(NPC_LIVING_CONSTELLATION, afConstellations[i][0], afConstellations[i][1], afConstellations[i][2], afConstellations[i][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_LIVING_CONSTELLATION, afConstellations[i][0], afConstellations[i][1], afConstellations[i][2], afConstellations[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
 
@@ -508,7 +508,7 @@ struct boss_algalon : public CreatureScript
         {
             float fX, fY, fZ;
             m_creature->GetRandomPoint(afAlgalonMovePos[0], afAlgalonMovePos[1], afAlgalonMovePos[2], 30.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_COLLAPSING_STAR, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_COLLAPSING_STAR, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
 
         void UpdateAI(const uint32 uiDiff) override
@@ -655,7 +655,7 @@ struct boss_algalon : public CreatureScript
                 // spawn new worm holes
                 for (uint8 i = 0; i < MAX_WORM_HOLES; ++i)
                 {
-                    m_creature->SummonCreature(NPC_WORM_HOLE, afWormHoles[i][0], afWormHoles[i][1], afWormHoles[i][2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_WORM_HOLE, afWormHoles[i][0], afWormHoles[i][1], afWormHoles[i][2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
             }
 

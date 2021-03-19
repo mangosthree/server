@@ -134,7 +134,7 @@ struct npc_belnistrasz : public CreatureScript
         {
             if (m_uiRitualPhase > 7)
             {
-                pSummoner->SummonCreature(NPC_PLAGUEMAW_THE_ROTTING, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), pSummoner->GetOrientation(), TEMPSUMMON_TIMED_OOC_DESPAWN, 60000);
+                pSummoner->SummonCreature(NPC_PLAGUEMAW_THE_ROTTING, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), pSummoner->GetOrientation(), TEMPSPAWN_TIMED_OOC_DESPAWN, 60000);
                 return;
             }
 
@@ -161,7 +161,7 @@ struct npc_belnistrasz : public CreatureScript
                     break;
                 }
 
-                pSummoner->SummonCreature(uiEntry, fX, fZ, fY, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 60000);
+                pSummoner->SummonCreature(uiEntry, fX, fZ, fY, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 60000);
             }
         }
 
@@ -172,7 +172,7 @@ struct npc_belnistrasz : public CreatureScript
 
         void DoSummonSpawner(int32 iType)
         {
-            m_creature->SummonCreature(NPC_IDOL_ROOM_SPAWNER, m_fSpawnerCoord[iType][0], m_fSpawnerCoord[iType][1], m_fSpawnerCoord[iType][2], m_fSpawnerCoord[iType][3], TEMPSUMMON_TIMED_DESPAWN, 10000);
+            m_creature->SummonCreature(NPC_IDOL_ROOM_SPAWNER, m_fSpawnerCoord[iType][0], m_fSpawnerCoord[iType][1], m_fSpawnerCoord[iType][2], m_fSpawnerCoord[iType][3], TEMPSPAWN_TIMED_DESPAWN, 10000);
         }
 
         void WaypointReached(uint32 uiPointId) override

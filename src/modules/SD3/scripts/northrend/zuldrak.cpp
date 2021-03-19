@@ -93,7 +93,7 @@ struct npc_gurgthock : public CreatureScript
     {
         if (pQuest->GetQuestId() == QUEST_FROM_BEYOND)
         {
-            pCreature->SummonCreature(m_auiBosses[urand(0, 3)], m_afSpawnLocation[0], m_afSpawnLocation[1], m_afSpawnLocation[2], 0.0f, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 600000);
+            pCreature->SummonCreature(m_auiBosses[urand(0, 3)], m_afSpawnLocation[0], m_afSpawnLocation[1], m_afSpawnLocation[2], 0.0f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 600000);
 
             if (npc_gurgthockAI* pGurthockAI = dynamic_cast<npc_gurgthockAI*>(pCreature->AI()))
             {

@@ -1915,7 +1915,7 @@ void WorldObject::AddObjectToRemoveList()
     GetMap()->AddObjectToRemoveList(this);
 }
 
-Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSummonType spwtype, uint32 despwtime, bool asActiveObject, bool setRun)
+Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSpawnType spwtype, uint32 despwtime, bool asActiveObject, bool setRun)
 {
     CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(id);
     if (!cinfo)
@@ -2397,11 +2397,11 @@ void WorldObject::SetActiveObjectState(bool active)
         // player's update implemented in a different from other active worldobject's way
         // it's considired to use generic way in future
     {
-        if (IsActiveObject() && !active)
+        if (isActiveObject() && !active)
         {
             GetMap()->RemoveFromActive(this);
         }
-        else if (!IsActiveObject() && active)
+        else if (!isActiveObject() && active)
         {
             GetMap()->AddToActive(this);
         }

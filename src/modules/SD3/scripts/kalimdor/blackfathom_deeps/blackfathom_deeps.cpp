@@ -91,7 +91,7 @@ struct go_fathom_stone : public GameObjectScript
         }
         else
         {
-            pPlayer->SummonCreature(NPC_BARON_AQUANIS, -782.21f, -63.26f, -42.43f, 2.36f, TEMPSUMMON_TIMED_OOC_DESPAWN, 120000);
+            pPlayer->SummonCreature(NPC_BARON_AQUANIS, -782.21f, -63.26f, -42.43f, 2.36f, TEMPSPAWN_TIMED_OOC_DESPAWN, 120000);
         }
 
         pInstance->SetData(TYPE_STONE, DONE);
@@ -105,7 +105,7 @@ struct go_fathom_stone : public GameObjectScript
 
         if (pInstance->GetData(TYPE_AQUANIS) == NOT_STARTED)
         {
-            pPlayer->SummonCreature(NPC_BARON_AQUANIS, afAquanisPos[0], afAquanisPos[1], afAquanisPos[2], afAquanisPos[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            pPlayer->SummonCreature(NPC_BARON_AQUANIS, afAquanisPos[0], afAquanisPos[1], afAquanisPos[2], afAquanisPos[3], TEMPSPAWN_DEAD_DESPAWN, 0);
             pInstance->SetData(TYPE_AQUANIS, IN_PROGRESS);
         }
 

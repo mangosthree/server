@@ -464,7 +464,7 @@ struct is_trial_of_the_crusader : public InstanceScript
                 uiEntry = NPC_RAMSEY_1;
             }
 
-            pPlayer->SummonCreature(uiEntry, aRamsayPositions[0][0], aRamsayPositions[0][1], aRamsayPositions[0][2], aRamsayPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            pPlayer->SummonCreature(uiEntry, aRamsayPositions[0][0], aRamsayPositions[0][1], aRamsayPositions[0][2], aRamsayPositions[0][3], TEMPSPAWN_DEAD_DESPAWN, 0);
         }
 
         void JustDidDialogueStep(int32 iEntry) override
@@ -481,16 +481,16 @@ struct is_trial_of_the_crusader : public InstanceScript
             case SAY_VARIAN_BEAST_1:
                 if (Player* pPlayer = GetPlayerInMap())
                 {
-                    if (Creature* pBeasts = pPlayer->SummonCreature(NPC_BEAST_COMBAT_STALKER, aSpawnPositions[0][0], aSpawnPositions[0][1], aSpawnPositions[0][2], aSpawnPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0))
+                    if (Creature* pBeasts = pPlayer->SummonCreature(NPC_BEAST_COMBAT_STALKER, aSpawnPositions[0][0], aSpawnPositions[0][1], aSpawnPositions[0][2], aSpawnPositions[0][3], TEMPSPAWN_DEAD_DESPAWN, 0))
                     {
-                        pBeasts->SummonCreature(NPC_GORMOK, aSpawnPositions[1][0], aSpawnPositions[1][1], aSpawnPositions[1][2], aSpawnPositions[1][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                        pBeasts->SummonCreature(NPC_GORMOK, aSpawnPositions[1][0], aSpawnPositions[1][1], aSpawnPositions[1][2], aSpawnPositions[1][3], TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
                 }
                 break;
             case NPC_FIZZLEBANG:
                 if (Player* pPlayer = GetPlayerInMap())
                 {
-                    pPlayer->SummonCreature(NPC_FIZZLEBANG, aSpawnPositions[5][0], aSpawnPositions[5][1], aSpawnPositions[5][2], aSpawnPositions[5][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                    pPlayer->SummonCreature(NPC_FIZZLEBANG, aSpawnPositions[5][0], aSpawnPositions[5][1], aSpawnPositions[5][2], aSpawnPositions[5][3], TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
                 break;
             case SAY_WILFRED_JARAXXUS_INTRO_1:
@@ -499,7 +499,7 @@ struct is_trial_of_the_crusader : public InstanceScript
             case SAY_WILFRED_JARAXXUS_INTRO_2:
                 if (Creature* pFizzlebang = GetSingleCreatureFromStorage(NPC_FIZZLEBANG))
                 {
-                    pFizzlebang->SummonCreature(NPC_PURPLE_RUNE, aSpawnPositions[11][0], aSpawnPositions[11][1], aSpawnPositions[11][2], aSpawnPositions[11][3], TEMPSUMMON_TIMED_DESPAWN, 15000);
+                    pFizzlebang->SummonCreature(NPC_PURPLE_RUNE, aSpawnPositions[11][0], aSpawnPositions[11][1], aSpawnPositions[11][2], aSpawnPositions[11][3], TEMPSPAWN_TIMED_DESPAWN, 15000);
                     pFizzlebang->CastSpell(pFizzlebang, SPELL_OPEN_PORTAL, false);
                 }
                 break;
@@ -512,7 +512,7 @@ struct is_trial_of_the_crusader : public InstanceScript
                 break;
             case SAY_WILFRED_JARAXXUS_INTRO_3:
                 if (Player* pPlayer = GetPlayerInMap())
-                if (Creature* pJaraxxus = pPlayer->SummonCreature(NPC_JARAXXUS, aSpawnPositions[6][0], aSpawnPositions[6][1], aSpawnPositions[6][2], aSpawnPositions[6][3], TEMPSUMMON_DEAD_DESPAWN, 0))
+                if (Creature* pJaraxxus = pPlayer->SummonCreature(NPC_JARAXXUS, aSpawnPositions[6][0], aSpawnPositions[6][1], aSpawnPositions[6][2], aSpawnPositions[6][3], TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     pJaraxxus->GetMotionMaster()->MovePoint(POINT_COMBAT_POSITION, aMovePositions[3][0], aMovePositions[3][1], aMovePositions[3][2]);
                 }
@@ -532,14 +532,14 @@ struct is_trial_of_the_crusader : public InstanceScript
             case EVENT_SUMMON_TWINS:
                 if (Player* pPlayer = GetPlayerInMap())
                 {
-                    pPlayer->SummonCreature(NPC_FJOLA, aSpawnPositions[7][0], aSpawnPositions[7][1], aSpawnPositions[7][2], aSpawnPositions[7][3], TEMPSUMMON_DEAD_DESPAWN, 0);
-                    pPlayer->SummonCreature(NPC_EYDIS, aSpawnPositions[8][0], aSpawnPositions[8][1], aSpawnPositions[8][2], aSpawnPositions[8][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                    pPlayer->SummonCreature(NPC_FJOLA, aSpawnPositions[7][0], aSpawnPositions[7][1], aSpawnPositions[7][2], aSpawnPositions[7][3], TEMPSPAWN_DEAD_DESPAWN, 0);
+                    pPlayer->SummonCreature(NPC_EYDIS, aSpawnPositions[8][0], aSpawnPositions[8][1], aSpawnPositions[8][2], aSpawnPositions[8][3], TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
                 break;
             case SAY_LKING_ANUB_INTRO_1:
                 if (Player* pPlayer = GetPlayerInMap())
                 {
-                    pPlayer->SummonCreature(NPC_WORLD_TRIGGER_LARGE, aSpawnPositions[9][0], aSpawnPositions[9][1], aSpawnPositions[9][2], aSpawnPositions[9][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                    pPlayer->SummonCreature(NPC_WORLD_TRIGGER_LARGE, aSpawnPositions[9][0], aSpawnPositions[9][1], aSpawnPositions[9][2], aSpawnPositions[9][3], TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
                 break;
             case EVENT_ARTHAS_PORTAL:
@@ -551,7 +551,7 @@ struct is_trial_of_the_crusader : public InstanceScript
             case EVENT_SUMMON_THE_LICHKING:
                 if (Player* pPlayer = GetPlayerInMap())
                 {
-                    pPlayer->SummonCreature(NPC_THE_LICHKING_VISUAL, aSpawnPositions[10][0], aSpawnPositions[10][1], aSpawnPositions[10][2], aSpawnPositions[10][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                    pPlayer->SummonCreature(NPC_THE_LICHKING_VISUAL, aSpawnPositions[10][0], aSpawnPositions[10][1], aSpawnPositions[10][2], aSpawnPositions[10][3], TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
                 break;
             case EVENT_DESTROY_FLOOR:
@@ -591,12 +591,12 @@ struct is_trial_of_the_crusader : public InstanceScript
             }
 
             // Spawn Tirion and the mage
-            if (Creature* pTirion = pPlayer->SummonCreature(NPC_TIRION_B, aSpawnPositions[12][0], aSpawnPositions[12][1], aSpawnPositions[12][2], aSpawnPositions[12][3], TEMPSUMMON_CORPSE_DESPAWN, 0))
+            if (Creature* pTirion = pPlayer->SummonCreature(NPC_TIRION_B, aSpawnPositions[12][0], aSpawnPositions[12][1], aSpawnPositions[12][2], aSpawnPositions[12][3], TEMPSPAWN_CORPSE_DESPAWN, 0))
             {
                 DoScriptText(SAY_TIRION_EPILOGUE, pTirion);
             }
 
-            pPlayer->SummonCreature(NPC_ARGENT_MAGE, aSpawnPositions[13][0], aSpawnPositions[13][1], aSpawnPositions[13][2], aSpawnPositions[13][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+            pPlayer->SummonCreature(NPC_ARGENT_MAGE, aSpawnPositions[13][0], aSpawnPositions[13][1], aSpawnPositions[13][2], aSpawnPositions[13][3], TEMPSPAWN_CORPSE_DESPAWN, 0);
 
             DoRespawnGameObject(GO_PORTAL_DALARAN, 60 * MINUTE);
 

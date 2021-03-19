@@ -247,7 +247,7 @@ struct boss_headless_horseman : public CreatureScript
             {
                 float fX, fY, fZ;
                 m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_HEAD_OF_HORSEMAN, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_HEAD_OF_HORSEMAN, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
 
             // make head available

@@ -320,7 +320,7 @@ struct npc_harrison_jones : public CreatureScript
                 DoScriptText(SAY_HARRISON_CHAMBER_5, m_creature);
                 SetRun();
                 // summon snake
-                m_creature->SummonCreature(NPC_TECAHUNA, 4907.077f, -4819.035f, 32.55f, 2.32f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_TECAHUNA, 4907.077f, -4819.035f, 32.55f, 2.32f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
             case 23:
                 DoScriptText(SAY_HARRISON_CHAMBER_6, m_creature);
@@ -548,7 +548,7 @@ struct npc_emily : public CreatureScript
                 break;
             case 10:
                 DoScriptText(SAY_FIRST_WOLF, m_creature);
-                m_creature->SummonCreature(NPC_HUNGRY_WORG, 4305.514f, -3799.008f, 237.034f, 2.20f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_HUNGRY_WORG, 4305.514f, -3799.008f, 237.034f, 2.20f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
             case 11:
                 SetEscortPaused(true);
@@ -557,7 +557,7 @@ struct npc_emily : public CreatureScript
             case 22:
                 SetEscortPaused(true);
                 DoScriptText(SAY_SECOND_WOLF, m_creature);
-                m_creature->SummonCreature(NPC_RAVENOUS_WORG, 4339.643f, -3948.972f, 194.904f, 0.90f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                m_creature->SummonCreature(NPC_RAVENOUS_WORG, 4339.643f, -3948.972f, 194.904f, 0.90f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
             case 24:
                 DoScriptText(SAY_RESUME_ESCORT, m_creature);

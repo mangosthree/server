@@ -158,7 +158,7 @@ struct boss_priestess_delrissa : public CreatureScript
                 // Summon the 4 entries
                 for (uint8 i = 0; i < MAX_DELRISSA_ADDS; ++i)
                 {
-                    m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSPAWN_CORPSE_DESPAWN, 0);
                 }
             }
             // Resummon the killed adds
@@ -177,7 +177,7 @@ struct boss_priestess_delrissa : public CreatureScript
                         continue;
                     }
 
-                    m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSPAWN_CORPSE_DESPAWN, 0);
                 }
             }
         }
@@ -1191,7 +1191,7 @@ struct npc_garaxxas : public CreatureScript
             // Check if the pet was killed
             if (!GetClosestCreatureWithEntry(m_creature, NPC_SLIVER, 50.0f))
             {
-                m_creature->SummonCreature(NPC_SLIVER, 0, 0, 0, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_SLIVER, 0, 0, 0, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
             }
         }
 

@@ -326,7 +326,7 @@ struct is_blackfathom_deeps : public InstanceScript
                             fPosY = fPosY - INTERACTION_DISTANCE / 2 + k * INTERACTION_DISTANCE / aWaveSummonInformation[i].m_aCountAndPos[j].m_uiCount;
                         }
 
-                        if (Creature* pSummoned = pKelris->SummonCreature(aWaveSummonInformation[i].m_uiNpcEntry, fPosX, fPosY, fPosZ, fPosO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                        if (Creature* pSummoned = pKelris->SummonCreature(aWaveSummonInformation[i].m_uiNpcEntry, fPosX, fPosY, fPosZ, fPosO, TEMPSPAWN_DEAD_DESPAWN, 0))
                         {
                             pSummoned->GetMotionMaster()->MovePoint(0, fX_resp, fY_resp, fZ_resp);
                             m_lWaveMobsGuids[uiWaveIndex].push_back(pSummoned->GetGUIDLow());

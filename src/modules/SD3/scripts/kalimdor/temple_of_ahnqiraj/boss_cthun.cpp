@@ -199,7 +199,7 @@ struct boss_eye_of_cthun : public CreatureScript
                     pSummoned->AI()->AttackStart(pTarget);
                 }
 
-                pSummoned->SummonCreature(NPC_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                pSummoned->SummonCreature(NPC_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
                 break;
             }
         }
@@ -348,7 +348,7 @@ struct boss_eye_of_cthun : public CreatureScript
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     // Spawn claw tentacle on the random target on both phases
-                    m_creature->SummonCreature(NPC_CLAW_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_CLAW_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                     m_uiClawTentacleTimer = urand(7000, 13000);
                 }
             }
@@ -367,7 +367,7 @@ struct boss_eye_of_cthun : public CreatureScript
                 for (uint8 i = 0; i < MAX_EYE_TENTACLES; ++i)
                 {
                     m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 30.0f, M_PI_F / 4 * i);
-                    m_creature->SummonCreature(NPC_EYE_TENTACLE, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_EYE_TENTACLE, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
 
                 m_uiEyeTentacleTimer = 45000;
@@ -519,7 +519,7 @@ struct boss_cthun : public CreatureScript
                 }
 
                 m_lEyeTentaclesList.push_back(pSummoned->GetObjectGuid());
-                pSummoned->SummonCreature(NPC_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                pSummoned->SummonCreature(NPC_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
                 break;
             case NPC_GIANT_EYE_TENTACLE:
             case NPC_GIANT_CLAW_TENTACLE:
@@ -528,7 +528,7 @@ struct boss_cthun : public CreatureScript
                     pSummoned->AI()->AttackStart(pTarget);
                 }
 
-                pSummoned->SummonCreature(NPC_GIANT_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                pSummoned->SummonCreature(NPC_GIANT_TENTACLE_PORTAL, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
                 break;
             }
         }
@@ -583,7 +583,7 @@ struct boss_cthun : public CreatureScript
             // Spawn 2 flesh tentacles
             for (uint8 i = 0; i < MAX_FLESH_TENTACLES; ++i)
             {
-                m_creature->SummonCreature(NPC_FLESH_TENTACLE, afCthunLocations[i][0], afCthunLocations[i][1], afCthunLocations[i][2], afCthunLocations[i][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_FLESH_TENTACLE, afCthunLocations[i][0], afCthunLocations[i][1], afCthunLocations[i][2], afCthunLocations[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
 
@@ -747,7 +747,7 @@ struct boss_cthun : public CreatureScript
                 // Summon 1 Giant Claw Tentacle every 60 seconds
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_LOS))
                 {
-                    m_creature->SummonCreature(NPC_GIANT_CLAW_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_GIANT_CLAW_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
 
                 m_uiGiantClawTentacleTimer = 60000;
@@ -762,7 +762,7 @@ struct boss_cthun : public CreatureScript
                 // Summon 1 Giant Eye Tentacle every 60 seconds
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_LOS))
                 {
-                    m_creature->SummonCreature(NPC_GIANT_EYE_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_GIANT_EYE_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
 
                 m_uiGiantEyeTentacleTimer = 60000;
@@ -781,7 +781,7 @@ struct boss_cthun : public CreatureScript
                 for (uint8 i = 0; i < MAX_EYE_TENTACLES; ++i)
                 {
                     m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 30.0f, M_PI_F / 4 * i);
-                    m_creature->SummonCreature(NPC_EYE_TENTACLE, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_EYE_TENTACLE, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
 
                 m_uiEyeTentacleTimer = 30000;
@@ -864,7 +864,7 @@ struct npc_giant_claw_tentacle : public CreatureScript
                     {
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_NOT_IN_MELEE_RANGE))
                         {
-                            pCthun->SummonCreature(NPC_GIANT_CLAW_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                            pCthun->SummonCreature(NPC_GIANT_CLAW_TENTACLE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                             // Self kill when a new tentacle is spawned
                             m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);

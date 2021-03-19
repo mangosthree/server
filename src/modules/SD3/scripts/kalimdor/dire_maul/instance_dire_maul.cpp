@@ -322,7 +322,7 @@ struct is_dire_maul : public InstanceScript
                         }
 
                         // start WP movement for Mizzle; event handled by movement and gossip dbscripts
-                        if (Creature* pMizzle = pOgre->SummonCreature(NPC_MIZZLE_THE_CRAFTY, afMizzleSpawnLoc[0], afMizzleSpawnLoc[1], afMizzleSpawnLoc[2], afMizzleSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0, true))
+                        if (Creature* pMizzle = pOgre->SummonCreature(NPC_MIZZLE_THE_CRAFTY, afMizzleSpawnLoc[0], afMizzleSpawnLoc[1], afMizzleSpawnLoc[2], afMizzleSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0, true))
                         {
                             pMizzle->SetWalk(false);
                             pMizzle->GetMotionMaster()->MoveWaypoint();

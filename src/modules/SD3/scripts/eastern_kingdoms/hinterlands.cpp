@@ -99,7 +99,7 @@ struct npc_00x09hl : public CreatureScript
                     float fX, fY, fZ;
                     m_creature->GetRandomPoint(147.927444f, -3851.513428f, 130.893f, 7.0f, fX, fY, fZ);
 
-                    m_creature->SummonCreature(NPC_MARAUDING_OWL, fX, fY, fZ, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000);
+                    m_creature->SummonCreature(NPC_MARAUDING_OWL, fX, fY, fZ, 0.0f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
                 }
                 break;
             case 44:
@@ -108,7 +108,7 @@ struct npc_00x09hl : public CreatureScript
                     float fX, fY, fZ;
                     m_creature->GetRandomPoint(-141.151581f, -4291.213867f, 120.130f, 7.0f, fX, fY, fZ);
 
-                    m_creature->SummonCreature(NPC_VILE_AMBUSHER, fX, fY, fZ, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000);
+                    m_creature->SummonCreature(NPC_VILE_AMBUSHER, fX, fY, fZ, 0.0f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 25000);
                 }
                 break;
             }
@@ -250,13 +250,13 @@ struct npc_rinji : public CreatureScript
 
             m_creature->SummonCreature(NPC_RANGER,
                 m_afAmbushSpawn[m_iSpawnId].m_fX, m_afAmbushSpawn[m_iSpawnId].m_fY, m_afAmbushSpawn[m_iSpawnId].m_fZ, 0.0f,
-                TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 60000);
+                TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000);
 
             for (int i = 0; i < 2; ++i)
             {
                 m_creature->SummonCreature(NPC_OUTRUNNER,
                     m_afAmbushSpawn[m_iSpawnId].m_fX, m_afAmbushSpawn[m_iSpawnId].m_fY, m_afAmbushSpawn[m_iSpawnId].m_fZ, 0.0f,
-                    TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 60000);
+                    TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000);
             }
         }
 

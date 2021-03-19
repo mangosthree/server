@@ -312,7 +312,7 @@ struct boss_brutallus : public CreatureScript
             case NPC_MADRIGOSA:
                 if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_FLIGHT_TRIGGER_LEFT))
                 {
-                    m_creature->SummonCreature(NPC_MADRIGOSA, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_MADRIGOSA, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
                 m_bIsIntroInProgress = true;
                 break;

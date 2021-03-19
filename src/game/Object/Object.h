@@ -51,24 +51,24 @@
 
 #define MAX_STEALTH_DETECT_RANGE    45.0f
 
-enum TempSummonType
+enum TempSpawnType
 {
-    TEMPSUMMON_MANUAL_DESPAWN              = 0,             // despawns when UnSummon() is called
-    TEMPSUMMON_DEAD_DESPAWN                = 1,             // despawns when the creature disappears
-    TEMPSUMMON_CORPSE_DESPAWN              = 2,             // despawns instantly after death
-    TEMPSUMMON_CORPSE_TIMED_DESPAWN        = 3,             // despawns after a specified time after death (or when the creature disappears)
-    TEMPSUMMON_TIMED_DESPAWN               = 4,             // despawns after a specified time
-    TEMPSUMMON_TIMED_OOC_DESPAWN           = 5,             // despawns after a specified time after the creature is out of combat
-    TEMPSUMMON_TIMED_OR_DEAD_DESPAWN       = 6,             // despawns after a specified time OR when the creature disappears
-    TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN     = 7,             // despawns after a specified time OR when the creature dies
-    TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN   = 8,             // despawns after a specified time (OOC) OR when the creature disappears
-    TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN = 9,             // despawns after a specified time (OOC) OR when the creature dies
+    TEMPSPAWN_MANUAL_DESPAWN               = 0,             // despawns when UnSummon() is called
+    TEMPSPAWN_DEAD_DESPAWN                 = 1,             // despawns when the creature disappears
+    TEMPSPAWN_CORPSE_DESPAWN               = 2,             // despawns instantly after death
+    TEMPSPAWN_CORPSE_TIMED_DESPAWN         = 3,             // despawns after a specified time after death (or when the creature disappears)
+    TEMPSPAWN_TIMED_DESPAWN                = 4,             // despawns after a specified time
+    TEMPSPAWN_TIMED_OOC_DESPAWN            = 5,             // despawns after a specified time after the creature is out of combat
+    TEMPSPAWN_TIMED_OR_DEAD_DESPAWN        = 6,             // despawns after a specified time OR when the creature disappears
+    TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN      = 7,             // despawns after a specified time OR when the creature dies
+    TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN    = 8,             // despawns after a specified time (OOC) OR when the creature disappears
+    TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN  = 9,             // despawns after a specified time (OOC) OR when the creature dies
 };
 
 enum TempSummonLinkedAura
 {
-    TEMPSUMMON_LINKED_AURA_OWNER_CHECK  = 0x00000001,
-    TEMPSUMMON_LINKED_AURA_REMOVE_OWNER = 0x00000002
+    TEMPSPAWN_LINKED_AURA_OWNER_CHECK  = 0x00000001,
+    TEMPSPAWN_LINKED_AURA_REMOVE_OWNER = 0x00000002
 };
 
 enum PhaseMasks
@@ -678,10 +678,10 @@ class WorldObject : public Object
         virtual void UpdateVisibilityAndView();             // update visibility for object and object for all around
 
         // main visibility check function in normal case (ignore grey zone distance check)
-        bool isVisibleFor(Player const* u, WorldObject const* viewPoint) const { return isVisibleForInState(u, viewPoint, false); }
+        bool IsVisibleFor(Player const* u, WorldObject const* viewPoint) const { return IsVisibleForInState(u, viewPoint, false); }
 
         // low level function for visibility change code, must be define in all main world object subclasses
-        virtual bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const = 0;
+        virtual bool IsVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const = 0;
 
         void SetMap(Map* map);
         Map* GetMap() const { MANGOS_ASSERT(m_currMap); return m_currMap; }
@@ -695,11 +695,12 @@ class WorldObject : public Object
         void RemoveFromClientUpdateList() override;
         void BuildUpdateData(UpdateDataMapType&) override;
 
-        Creature* SummonCreature(uint32 id, float x, float y, float z, float ang, TempSummonType spwtype, uint32 despwtime, bool asActiveObject = false, bool setRun = false);
+        Creature* SummonCreature(uint32 id, float x, float y, float z, float ang, TempSpawnType spwtype, uint32 despwtime, bool asActiveObject = false, bool setRun = false);
         GameObject* SummonGameObject(uint32 id, float x, float y, float z, float angle, uint32 despwtime);
 
-        bool IsActiveObject() const { return m_isActiveObject || m_viewPoint.hasViewers(); }
-        bool isActiveObject() const { return IsActiveObject(); } // This is for Eluna to build. Should be removed in the future!
+        bool isActiveObject() const { return m_isActiveObject || m_viewPoint.hasViewers(); }
+        bool IsActiveObject() const { return isActiveObject(); } // This is for Eluna to build. Should be removed in the future!
+
         void SetActiveObjectState(bool active);
 
         ViewPoint& GetViewPoint() { return m_viewPoint; }

@@ -266,20 +266,20 @@ struct npc_kiljaeden_controller : public CreatureScript
                     pKalec->CastSpell(pKalec, SPELL_KALEC_TELEPORT, true);
                     pKalec->SetLevitate(false);
                 }
-                m_creature->SummonCreature(NPC_CORE_ENTROPIUS, aOutroLocations[5].m_fX, aOutroLocations[5].m_fY, aOutroLocations[5].m_fZ, aOutroLocations[5].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_CORE_ENTROPIUS, aOutroLocations[5].m_fX, aOutroLocations[5].m_fY, aOutroLocations[5].m_fZ, aOutroLocations[5].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 0);
                 break;
             case NPC_INERT_PORTAL:
                 // ToDo: summon soldiers to the right
-                m_creature->SummonCreature(NPC_INERT_PORTAL, aOutroLocations[0].m_fX, aOutroLocations[0].m_fY, aOutroLocations[0].m_fZ, aOutroLocations[0].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_INERT_PORTAL, aOutroLocations[0].m_fX, aOutroLocations[0].m_fY, aOutroLocations[0].m_fZ, aOutroLocations[0].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 0);
                 break;
             case POINT_SUMMON_SOLDIERS:
                 // ToDo: summon soldiers to the left
                 break;
             case NPC_VELEN:
-                m_creature->SummonCreature(NPC_VELEN, aOutroLocations[1].m_fX, aOutroLocations[1].m_fY, aOutroLocations[1].m_fZ, aOutroLocations[1].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_VELEN, aOutroLocations[1].m_fX, aOutroLocations[1].m_fY, aOutroLocations[1].m_fZ, aOutroLocations[1].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 0);
                 break;
             case NPC_LIADRIN:
-                m_creature->SummonCreature(NPC_LIADRIN, aOutroLocations[2].m_fX, aOutroLocations[2].m_fY, aOutroLocations[2].m_fZ, aOutroLocations[2].m_fO, TEMPSUMMON_TIMED_DESPAWN, 4 * MINUTE * IN_MILLISECONDS);
+                m_creature->SummonCreature(NPC_LIADRIN, aOutroLocations[2].m_fX, aOutroLocations[2].m_fY, aOutroLocations[2].m_fZ, aOutroLocations[2].m_fO, TEMPSPAWN_TIMED_DESPAWN, 4 * MINUTE * IN_MILLISECONDS);
                 break;
             case SPELL_CALL_ENTROPIUS:
                 if (Creature* pVelen = m_pInstance->GetSingleCreatureFromStorage(NPC_VELEN))
@@ -735,7 +735,7 @@ struct boss_kiljaeden : public CreatureScript
                 {
                     if (m_uiKalecSummonTimer <= uiDiff)
                     {
-                        m_creature->SummonCreature(NPC_KALECGOS, aKalegSpawnLoc[0], aKalegSpawnLoc[1], aKalegSpawnLoc[2], aKalegSpawnLoc[3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_KALECGOS, aKalegSpawnLoc[0], aKalegSpawnLoc[1], aKalegSpawnLoc[2], aKalegSpawnLoc[3], TEMPSPAWN_CORPSE_DESPAWN, 0);
                         m_uiKalecSummonTimer = 0;
                     }
                     else
@@ -793,7 +793,7 @@ struct boss_kiljaeden : public CreatureScript
                         m_creature->GetNearPoint2D(fX, fY, 25.0f, frand(0, 2 * M_PI_F));
                         fZ = frand(35.0f, 45.0f);
 
-                        m_creature->SummonCreature(NPC_SHIELD_ORB, fX, fY, fZ, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_SHIELD_ORB, fX, fY, fZ, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
                         ++m_uiShieldOrbCount;
                         m_uiShieldOrbTimer = 30000;
                     }

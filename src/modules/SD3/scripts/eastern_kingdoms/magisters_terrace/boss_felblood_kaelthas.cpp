@@ -568,7 +568,7 @@ struct mob_felkael_phoenix : public CreatureScript
 
             // Spawn egg and make invisible
             DoCastSpellIfCan(m_creature, SPELL_EMBER_BLAST, CAST_TRIGGERED);
-            m_creature->SummonCreature(NPC_PHOENIX_EGG, 0, 0, 0, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
+            m_creature->SummonCreature(NPC_PHOENIX_EGG, 0, 0, 0, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
         }
 
         void SummonedCreatureDespawn(Creature* /*pSummoned*/) override

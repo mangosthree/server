@@ -234,9 +234,9 @@ struct boss_flame_leviathan : public CreatureScript
             DoScriptText(SAY_DEATH, m_creature);
 
             // start epilogue event
-            if (Creature* pFlyMachine = m_creature->SummonCreature(NPC_BRANN_FLYING_MACHINE, 175.2838f, -210.4325f, 501.2375f, 1.42f, TEMPSUMMON_CORPSE_DESPAWN, 0))
+            if (Creature* pFlyMachine = m_creature->SummonCreature(NPC_BRANN_FLYING_MACHINE, 175.2838f, -210.4325f, 501.2375f, 1.42f, TEMPSPAWN_CORPSE_DESPAWN, 0))
             {
-                if (Creature* pBrann = m_creature->SummonCreature(NPC_BRANN_BRONZEBEARD_LEVIATHAN, 175.2554f, -210.6305f, 500.7375f, 1.42f, TEMPSUMMON_CORPSE_DESPAWN, 0))
+                if (Creature* pBrann = m_creature->SummonCreature(NPC_BRANN_BRONZEBEARD_LEVIATHAN, 175.2554f, -210.6305f, 500.7375f, 1.42f, TEMPSPAWN_CORPSE_DESPAWN, 0))
                 {
                     pBrann->CastSpell(pFlyMachine, SPELL_RIDE_VEHICLE, true);
                 }
@@ -304,7 +304,7 @@ struct boss_flame_leviathan : public CreatureScript
             if (pSummoned->GetEntry() == NPC_BRANN_FLYING_MACHINE)
             {
                 // spawn the Archmange and eject Brann
-                if (Creature* pArchmage = m_creature->SummonCreature(NPC_ARCHMANGE_RHYDIAN, 235.5596f, -136.1876f, 409.6508f, 1.78f, TEMPSUMMON_CORPSE_DESPAWN, 0))
+                if (Creature* pArchmage = m_creature->SummonCreature(NPC_ARCHMANGE_RHYDIAN, 235.5596f, -136.1876f, 409.6508f, 1.78f, TEMPSPAWN_CORPSE_DESPAWN, 0))
                 {
                     pArchmage->SetWalk(false);
                     pArchmage->GetMotionMaster()->MovePoint(1, 239.3158f, -123.6443f, 409.8174f);
@@ -415,7 +415,7 @@ struct boss_flame_leviathan : public CreatureScript
         {
             for (uint8 i = 0; i < MAX_HODIR_FURY; ++i)
             {
-                m_creature->SummonCreature(NPC_HODIR_FURY_VEHICLE, afHodirFury[i][0], afHodirFury[i][1], afHodirFury[i][2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_HODIR_FURY_VEHICLE, afHodirFury[i][0], afHodirFury[i][1], afHodirFury[i][2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
 
@@ -423,14 +423,14 @@ struct boss_flame_leviathan : public CreatureScript
         {
             for (uint8 i = 0; i < MAX_FREYA_WARD; ++i)
             {
-                m_creature->SummonCreature(NPC_FREYA_WARD_VEHICLE, afFreyaWard[i][0], afFreyaWard[i][1], afFreyaWard[i][2], afFreyaWard[i][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_FREYA_WARD_VEHICLE, afFreyaWard[i][0], afFreyaWard[i][1], afFreyaWard[i][2], afFreyaWard[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
 
         void DoSpawnMimironInferno()
         {
             // Mimiron inferno has waypoint movement
-            m_creature->SummonCreature(NPC_MIMIRON_INFERNO_VEHICLE, afMimironInferno[0], afMimironInferno[1], afMimironInferno[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_MIMIRON_INFERNO_VEHICLE, afMimironInferno[0], afMimironInferno[1], afMimironInferno[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
 
         void DoSpawnThorimHammer()
@@ -445,7 +445,7 @@ struct boss_flame_leviathan : public CreatureScript
             {
                 float fX, fY, fZ;
                 m_creature->GetRandomPoint(pOrbital->GetPositionX(), pOrbital->GetPositionY(), pOrbital->GetPositionZ(), 150.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_THORIM_HAMMER_VEHICLE, fX, fY, fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 8000);
+                m_creature->SummonCreature(NPC_THORIM_HAMMER_VEHICLE, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 8000);
             }
         }
 

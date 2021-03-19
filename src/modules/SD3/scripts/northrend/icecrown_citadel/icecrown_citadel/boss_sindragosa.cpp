@@ -595,7 +595,7 @@ struct npc_rimefang_icc : public CreatureScript
             Creature* pSpinestalker = m_pInstance->GetSingleCreatureFromStorage(NPC_SPINESTALKER);
             if (!pSpinestalker || !pSpinestalker->IsAlive())
             {
-                if (Creature* pSindragosa = m_creature->SummonCreature(NPC_SINDRAGOSA, SindragosaPosition[7][0], SindragosaPosition[7][1], SindragosaPosition[7][2], 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                if (Creature* pSindragosa = m_creature->SummonCreature(NPC_SINDRAGOSA, SindragosaPosition[7][0], SindragosaPosition[7][1], SindragosaPosition[7][2], 0.0f, TEMPSPAWN_MANUAL_DESPAWN, 0))
                 {
                     pSindragosa->SetInCombatWithZone();
                 }
@@ -783,7 +783,7 @@ struct npc_spinestalker_icc : public CreatureScript
             Creature* pRimefang = m_pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG);
             if (!pRimefang || !pRimefang->IsAlive())
             {
-                if (Creature* pSindragosa = m_creature->SummonCreature(NPC_SINDRAGOSA, SindragosaPosition[7][0], SindragosaPosition[7][1], SindragosaPosition[7][2], 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                if (Creature* pSindragosa = m_creature->SummonCreature(NPC_SINDRAGOSA, SindragosaPosition[7][0], SindragosaPosition[7][1], SindragosaPosition[7][2], 0.0f, TEMPSPAWN_MANUAL_DESPAWN, 0))
                 {
                     pSindragosa->SetInCombatWithZone();
                 }

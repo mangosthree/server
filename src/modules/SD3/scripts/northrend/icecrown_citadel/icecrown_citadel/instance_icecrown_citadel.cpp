@@ -571,17 +571,17 @@ struct is_icecrown_citadel : public InstanceScript
                 {
                     if (Creature* pStalker = instance->GetCreature(*lcit))
                     {
-                        lady->SummonCreature(aLeftSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        lady->SummonCreature(aLeftSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
                     if (Creature* pStalker = instance->GetCreature(*rcit))
                     {
-                        lady->SummonCreature(aRightSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        lady->SummonCreature(aRightSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
                 }
 
                 if (Creature* pStalker = instance->GetCreature(m_middleStalkerGuid))
                 {
-                    lady->SummonCreature(roll_chance_i(50) ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    lady->SummonCreature(roll_chance_i(50) ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
                 }
             }
             // On 10 man mode we summon on the left or on the right
@@ -592,7 +592,7 @@ struct is_icecrown_citadel : public InstanceScript
                 {
                     if (Creature* pStalker = instance->GetCreature(m_middleStalkerGuid))
                     {
-                        lady->SummonCreature(roll_chance_i(50) ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                        lady->SummonCreature(roll_chance_i(50) ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
                     }
                 }
                 else
@@ -602,7 +602,7 @@ struct is_icecrown_citadel : public InstanceScript
                     {
                         if (Creature* pStalker = instance->GetCreature(*cit))
                         {
-                            lady->SummonCreature(m_bIsLeftSideSummon ? aLeftSummonedCultists[i] : aRightSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                            lady->SummonCreature(m_bIsLeftSideSummon ? aLeftSummonedCultists[i] : aRightSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                         }
                     }
 

@@ -281,7 +281,7 @@ struct npc_injured_rainspeaker : public CreatureScript
                        float fX, fY, fZ;
                        m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0.0f, 15.0f, fAngle);
 
-                       m_creature->SummonCreature(NPC_FRENZYHEART_TRACKER, fX, fY, fZ, m_creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000);
+                       m_creature->SummonCreature(NPC_FRENZYHEART_TRACKER, fX, fY, fZ, m_creature->GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 30000);
                        break;
             }
             }

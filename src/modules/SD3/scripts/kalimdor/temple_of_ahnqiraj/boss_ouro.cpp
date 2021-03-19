@@ -257,7 +257,7 @@ struct boss_ouro : public CreatureScript
 #if defined (CLASSIC)
                         if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_OURO_MOUND) == CAST_OK)
 #else
-                    DoSpawnCreature(NPC_DIRT_MOUND, 0, 0, 0, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    DoSpawnCreature(NPC_DIRT_MOUND, 0, 0, 0, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
 #endif
                         {
                             m_uiSummonMoundTimer = 10000;

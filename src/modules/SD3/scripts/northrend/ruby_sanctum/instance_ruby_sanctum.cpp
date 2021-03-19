@@ -76,7 +76,7 @@ struct is_ruby_sanctum : public InstanceScript
 
             if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
             {
-                pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
 
@@ -302,7 +302,7 @@ struct is_ruby_sanctum : public InstanceScript
                         // Spawn Halion
                         if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
                         {
-                            if (Creature* pHalion = pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSUMMON_DEAD_DESPAWN, 0))
+                            if (Creature* pHalion = pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSPAWN_DEAD_DESPAWN, 0))
                             {
                                 DoScriptText(SAY_HALION_SPAWN, pHalion);
                             }
@@ -325,7 +325,7 @@ struct is_ruby_sanctum : public InstanceScript
                 {
                     if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
                     {
-                        pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
 
                     if (Creature* pHalion = GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))

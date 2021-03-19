@@ -621,7 +621,7 @@ struct boss_arugal : public CreatureScript
                               for (uint8 i = 0; i < 4; ++i)
                               {
                                   pVoidwalker = m_creature->SummonCreature(NPC_VOIDWALKER, VWSpawns[i].fX,
-                                      VWSpawns[i].fY, VWSpawns[i].fZ, VWSpawns[i].fO, TEMPSUMMON_DEAD_DESPAWN, 1);
+                                      VWSpawns[i].fY, VWSpawns[i].fZ, VWSpawns[i].fO, TEMPSPAWN_DEAD_DESPAWN, 1);
 
                                   if (!pVoidwalker)
                                   {

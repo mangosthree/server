@@ -41,7 +41,7 @@ class ObjectGridRespawnMover
 
         void Move(GridType& grid);
 
-        template<class T> void Visit(GridRefManager<T> &) {}
+        template<class T> void Visit(GridRefManager<T>&) {}
         void Visit(CreatureMapType& m);
 };
 
@@ -134,7 +134,7 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& 
         addUnitState(obj, cell);
         obj->SetMap(map);
         obj->AddToWorld();
-        if (obj->IsActiveObject())
+        if (obj->isActiveObject())
         {
             map->AddToActive(obj);
         }
@@ -177,7 +177,7 @@ void LoadHelper(CellCorpseSet const& cell_corpses, CellPair& cell, CorpseMapType
         addUnitState(obj, cell);
         obj->SetMap(map);
         obj->AddToWorld();
-        if (obj->IsActiveObject())
+        if (obj->isActiveObject())
         {
             map->AddToActive(obj);
         }
@@ -284,7 +284,7 @@ ObjectGridUnloader::Unload(GridType& grid)
 
 template<class T>
 void
-ObjectGridUnloader::Visit(GridRefManager<T> &m)
+ObjectGridUnloader::Visit(GridRefManager<T>& m)
 {
     // remove all cross-reference before deleting
     for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)

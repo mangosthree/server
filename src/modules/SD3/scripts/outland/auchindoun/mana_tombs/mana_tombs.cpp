@@ -186,10 +186,10 @@ struct npc_shaheen : public CreatureScript
                     SetEscortPaused(true);
                     DoScriptText(SAY_FIRST_STOP, m_creature);
                     // summon first wave
-                    m_creature->SummonCreature(NPC_ETHEREAL_THEURGIST, -375.86f, -129.16f, -0.95f, 4.82f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                    m_creature->SummonCreature(NPC_ETHEREAL_THEURGIST, -370.67f, -199.79f, -0.95f, 1.52f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                    m_creature->SummonCreature(NPC_ETHEREAL_SPELLBINDER, -371.12f, -129.07f, -0.95f, 4.82f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                    m_creature->SummonCreature(NPC_ETHEREAL_SPELLBINDER, -375.18f, -199.58f, -0.95f, 1.52f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                    m_creature->SummonCreature(NPC_ETHEREAL_THEURGIST, -375.86f, -129.16f, -0.95f, 4.82f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                    m_creature->SummonCreature(NPC_ETHEREAL_THEURGIST, -370.67f, -199.79f, -0.95f, 1.52f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                    m_creature->SummonCreature(NPC_ETHEREAL_SPELLBINDER, -371.12f, -129.07f, -0.95f, 4.82f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                    m_creature->SummonCreature(NPC_ETHEREAL_SPELLBINDER, -375.18f, -199.58f, -0.95f, 1.52f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                     break;
                 case 8:
                     DoScriptText(SAY_FIRST_STOP_COMPLETE, m_creature);
@@ -201,15 +201,15 @@ struct npc_shaheen : public CreatureScript
                     SetEscortPaused(true);
                     DoScriptText(SAY_SECOND_STOP, m_creature);
                     // summon second wave
-                    m_creature->SummonCreature(NPC_ETHEREAL_SORCERER, -278.17f, -195.50f, 0.68f, 1.22f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                    m_creature->SummonCreature(NPC_ETHEREAL_SORCERER, -234.51f, -197.03f, -0.95f, 1.92f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                    m_creature->SummonCreature(NPC_ETHEREAL_CRYPT_RAIDER, -282.28f, -194.44f, 0.44f, 1.22f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
-                    m_creature->SummonCreature(NPC_ETHEREAL_CRYPT_RAIDER, -231.15f, -194.53f, -0.95f, 1.52f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                    m_creature->SummonCreature(NPC_ETHEREAL_SORCERER, -278.17f, -195.50f, 0.68f, 1.22f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                    m_creature->SummonCreature(NPC_ETHEREAL_SORCERER, -234.51f, -197.03f, -0.95f, 1.92f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                    m_creature->SummonCreature(NPC_ETHEREAL_CRYPT_RAIDER, -282.28f, -194.44f, 0.44f, 1.22f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                    m_creature->SummonCreature(NPC_ETHEREAL_CRYPT_RAIDER, -231.15f, -194.53f, -0.95f, 1.52f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                     break;
                 case 24:
                     // summon third wave
-                    m_creature->SummonCreature(NPC_NEXUS_TERROR, -37.30f, -222.44f, -0.33f, 3.01f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
-                    m_creature->SummonCreature(NPC_NEXUS_TERROR, -15.76f, -225.36f,  0.79f, 2.93f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
+                    m_creature->SummonCreature(NPC_NEXUS_TERROR, -37.30f, -222.44f, -0.33f, 3.01f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
+                    m_creature->SummonCreature(NPC_NEXUS_TERROR, -15.76f, -225.36f,  0.79f, 2.93f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
                     break;
                 case 26:
                     SetEscortPaused(true);
@@ -224,7 +224,7 @@ struct npc_shaheen : public CreatureScript
                     break;
                 case 40:
                     SetEscortPaused(true);
-                    m_creature->SummonCreature(NPC_SHADOW_LORD_XIRAXIS, -47.10f, -0.49f, -0.95f, 3.45f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                    m_creature->SummonCreature(NPC_SHADOW_LORD_XIRAXIS, -47.10f, -0.49f, -0.95f, 3.45f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                     break;
                 case 43:
                     if (Player* pPlayer = GetPlayerForEscort())

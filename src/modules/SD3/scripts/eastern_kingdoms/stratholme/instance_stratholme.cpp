@@ -229,7 +229,7 @@ struct is_stratholme : public InstanceScript
                     if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
                     {
                         DoOrSimulateScriptTextForThisInstance(SAY_ANNOUNCE_RUN_START, NPC_BARON);
-                        pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[7].m_fX, aStratholmeLocation[7].m_fY, aStratholmeLocation[7].m_fZ, aStratholmeLocation[7].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[7].m_fX, aStratholmeLocation[7].m_fY, aStratholmeLocation[7].m_fZ, aStratholmeLocation[7].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
 
                     m_uiBaronRunTimer = 45 * MINUTE * IN_MILLISECONDS;
@@ -298,7 +298,7 @@ struct is_stratholme : public InstanceScript
                         if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
                         {
                             DoScriptText(SAY_ANNOUNCE_RAMSTEIN, pBaron);
-                            if (Creature* pRamstein = pBaron->SummonCreature(NPC_RAMSTEIN, aStratholmeLocation[2].m_fX, aStratholmeLocation[2].m_fY, aStratholmeLocation[2].m_fZ, aStratholmeLocation[2].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                            if (Creature* pRamstein = pBaron->SummonCreature(NPC_RAMSTEIN, aStratholmeLocation[2].m_fX, aStratholmeLocation[2].m_fY, aStratholmeLocation[2].m_fZ, aStratholmeLocation[2].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                             {
                                 pRamstein->GetMotionMaster()->MovePoint(0, aStratholmeLocation[3].m_fX, aStratholmeLocation[3].m_fY, aStratholmeLocation[3].m_fZ);
                             }
@@ -332,7 +332,7 @@ struct is_stratholme : public InstanceScript
                         {
                             float fX, fY, fZ;
                             pBaron->GetRandomPoint(aStratholmeLocation[6].m_fX, aStratholmeLocation[6].m_fY, aStratholmeLocation[6].m_fZ, 5.0f, fX, fY, fZ);
-                            if (Creature* pTemp = pBaron->SummonCreature(NPC_BLACK_GUARD, aStratholmeLocation[6].m_fX, aStratholmeLocation[6].m_fY, aStratholmeLocation[6].m_fZ, aStratholmeLocation[6].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                            if (Creature* pTemp = pBaron->SummonCreature(NPC_BLACK_GUARD, aStratholmeLocation[6].m_fX, aStratholmeLocation[6].m_fY, aStratholmeLocation[6].m_fZ, aStratholmeLocation[6].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                             {
                                 m_luiGuardGUIDs.push_back(pTemp->GetObjectGuid());
                             }
@@ -569,14 +569,14 @@ struct is_stratholme : public InstanceScript
     {
         if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
         {
-            pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[9].m_fX, aStratholmeLocation[9].m_fY, aStratholmeLocation[9].m_fZ, aStratholmeLocation[9].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+            pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[9].m_fX, aStratholmeLocation[9].m_fY, aStratholmeLocation[9].m_fZ, aStratholmeLocation[9].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
     // Baron ultimatum failed: summon Ysida outside the cage dead
     if (m_auiEncounter[TYPE_BARON_RUN] == FAIL)
     {
         if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
-            if (Creature* pYsida = pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[9].m_fX, aStratholmeLocation[9].m_fY, aStratholmeLocation[9].m_fZ, aStratholmeLocation[9].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+            if (Creature* pYsida = pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[9].m_fX, aStratholmeLocation[9].m_fY, aStratholmeLocation[9].m_fZ, aStratholmeLocation[9].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
             {
                 pYsida->DealDamage(pYsida, pYsida->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
             }
@@ -718,7 +718,7 @@ struct is_stratholme : public InstanceScript
                     // If all courtyard mobs are dead then summon Timmy
                     if (m_suiCrimsonLowGuids.empty())
                     {
-                        pCreature->SummonCreature(NPC_TIMMY_THE_CRUEL, aTimmyLocation[0].m_fX, aTimmyLocation[0].m_fY, aTimmyLocation[0].m_fZ, aTimmyLocation[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        pCreature->SummonCreature(NPC_TIMMY_THE_CRUEL, aTimmyLocation[0].m_fX, aTimmyLocation[0].m_fY, aTimmyLocation[0].m_fZ, aTimmyLocation[0].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
                 }
                 break;
@@ -813,7 +813,7 @@ struct is_stratholme : public InstanceScript
                         if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
                         {
                             // Summon mindless skeletons and move them to random point in the center of the square
-                            if (Creature* pTemp = pBaron->SummonCreature(NPC_MINDLESS_UNDEAD, aStratholmeLocation[4].m_fX, aStratholmeLocation[4].m_fY, aStratholmeLocation[4].m_fZ, aStratholmeLocation[4].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                            if (Creature* pTemp = pBaron->SummonCreature(NPC_MINDLESS_UNDEAD, aStratholmeLocation[4].m_fX, aStratholmeLocation[4].m_fY, aStratholmeLocation[4].m_fZ, aStratholmeLocation[4].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                             {
                                 float fX, fY, fZ;
                                 pBaron->GetRandomPoint(aStratholmeLocation[5].m_fX, aStratholmeLocation[5].m_fY, aStratholmeLocation[5].m_fZ, 20.0f, fX, fY, fZ);
@@ -892,14 +892,14 @@ struct is_stratholme : public InstanceScript
 
                         if (pPlayer->IsNearWaypoint(fPlayerXposition, fPlayerYposition, fPlayerZposition, aStratholmeLocation[9].m_fX, aStratholmeLocation[9].m_fY, aStratholmeLocation[9].m_fZ, 4, 4, 4))
                         {
-                            Creature* pTheUnforgiven = pPlayer->SummonCreature(NPC_THE_UNFORGIVEN, aStratholmeLocation[9].m_fX, aStratholmeLocation[9].m_fY, aStratholmeLocation[9].m_fZ, aStratholmeLocation[9].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
+                            Creature* pTheUnforgiven = pPlayer->SummonCreature(NPC_THE_UNFORGIVEN, aStratholmeLocation[9].m_fX, aStratholmeLocation[9].m_fY, aStratholmeLocation[9].m_fZ, aStratholmeLocation[9].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 7200000);
                             pTheUnforgiven->SetRespawnTime(1800); // 30 minutes
                             // Now spawn 3 or 4 adds (NPC_VENGEFUL_PHANTOM)
                             Creature* pVengfulPhantom[4];
                             uint8 iTotalAddsToSpawn = 3 + rand() % 2;
                             for (uint8 i = 0; i < iTotalAddsToSpawn; i++)
                             {
-                                pVengfulPhantom[i] = pPlayer->SummonCreature(NPC_VENGEFUL_PHANTOM, aStratholmeLocation[9].m_fX, aStratholmeLocation[9].m_fY, aStratholmeLocation[9].m_fZ, aStratholmeLocation[9].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
+                                pVengfulPhantom[i] = pPlayer->SummonCreature(NPC_VENGEFUL_PHANTOM, aStratholmeLocation[9].m_fX, aStratholmeLocation[9].m_fY, aStratholmeLocation[9].m_fZ, aStratholmeLocation[9].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 7200000);
                                 pVengfulPhantom[i]->SetRespawnTime(900); // 15 minutes
                             }
                             m_bTheUnforgivenSpawnHasTriggered = true;

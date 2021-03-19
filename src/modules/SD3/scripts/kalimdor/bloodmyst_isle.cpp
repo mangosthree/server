@@ -81,7 +81,7 @@ struct mob_webbed_creature : public CreatureScript
 
             if (uiSpawnCreatureEntry)
             {
-                m_creature->SummonCreature(uiSpawnCreatureEntry, 0.0f, 0.0f, 0.0f, m_creature->GetOrientation(), TEMPSUMMON_TIMED_OOC_DESPAWN, 25000);
+                m_creature->SummonCreature(uiSpawnCreatureEntry, 0.0f, 0.0f, 0.0f, m_creature->GetOrientation(), TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
             }
         }
     };

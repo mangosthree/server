@@ -282,7 +282,7 @@ struct boss_razorscale : public CreatureScript
             for (uint8 i = 0; i < uiMaxMachines; ++i)
             {
                 m_creature->GetRandomPoint(afRazorscaleSpawnersPos[i][0], afRazorscaleSpawnersPos[i][1], afRazorscaleSpawnersPos[i][2], 10.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_RAZORSCALE_SPAWNER, fX, fY, fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 10000);
+                m_creature->SummonCreature(NPC_RAZORSCALE_SPAWNER, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 10000);
             }
         }
 

@@ -168,7 +168,7 @@ struct boss_jindo : public CreatureScript
                 {
                     float fX, fY, fZ;
                     m_creature->GetRandomPoint(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 5.0f, fX, fY, fZ);
-                    if (Creature* pSummoned = m_creature->SummonCreature(NPC_SHADE_OF_JINDO, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 15000))
+                    if (Creature* pSummoned = m_creature->SummonCreature(NPC_SHADE_OF_JINDO, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 15000))
                     {
 #if defined (CLASSIC) || defined (TBC)
                         pSummoned->AI()->AttackStart(pTarget);
@@ -198,7 +198,7 @@ struct boss_jindo : public CreatureScript
                     for (uint8 i = 0; i < MAX_SKELETONS; ++i)
                     {
                         m_creature->GetRandomPoint(aPitTeleportLocs[0], aPitTeleportLocs[1], aPitTeleportLocs[2], 4.0f, fX, fY, fZ);
-                        if (Creature* pSummoned = m_creature->SummonCreature(NPC_SACRIFICED_TROLL, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 15000))
+                        if (Creature* pSummoned = m_creature->SummonCreature(NPC_SACRIFICED_TROLL, fX, fY, fZ, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 15000))
                         {
                             pSummoned->AI()->AttackStart(pTarget);
                         }

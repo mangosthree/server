@@ -133,7 +133,7 @@ struct is_naxxramas : public InstanceScript
                 return;
             }
 
-            pPlayer->SummonCreature(NPC_SAPPHIRON, aSapphPositions[0], aSapphPositions[1], aSapphPositions[2], aSapphPositions[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+            pPlayer->SummonCreature(NPC_SAPPHIRON, aSapphPositions[0], aSapphPositions[1], aSapphPositions[2], aSapphPositions[3], TEMPSPAWN_DEAD_DESPAWN, 0);
         }
 
         void OnCreatureCreate(Creature* pCreature) override
@@ -793,7 +793,7 @@ struct is_naxxramas : public InstanceScript
                     {
                         // Spawn 3 living poisons every 5 secs and make them cross the corridor and then despawn, for ever and ever
                         for (uint8 i = 0; i < 3; i++)
-                            if (Creature* pPoison = pPlayer->SummonCreature(NPC_LIVING_POISON, aLivingPoisonPositions[i].m_fX, aLivingPoisonPositions[i].m_fY, aLivingPoisonPositions[i].m_fZ, aLivingPoisonPositions[i].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                            if (Creature* pPoison = pPlayer->SummonCreature(NPC_LIVING_POISON, aLivingPoisonPositions[i].m_fX, aLivingPoisonPositions[i].m_fY, aLivingPoisonPositions[i].m_fZ, aLivingPoisonPositions[i].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                             {
                                 pPoison->GetMotionMaster()->MovePoint(0, aLivingPoisonPositions[i + 3].m_fX, aLivingPoisonPositions[i + 3].m_fY, aLivingPoisonPositions[i + 3].m_fZ);
                                 pPoison->ForcedDespawn(15000);
@@ -838,7 +838,7 @@ struct is_naxxramas : public InstanceScript
                 {
                     if (Player* pPlayer = GetPlayerInMap())
                     {
-                        pPlayer->SummonCreature(NPC_SAPPHIRON, aSapphPositions[0], aSapphPositions[1], aSapphPositions[2], aSapphPositions[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                        pPlayer->SummonCreature(NPC_SAPPHIRON, aSapphPositions[0], aSapphPositions[1], aSapphPositions[2], aSapphPositions[3], TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
 
                     m_uiSapphSpawnTimer = 0;
@@ -1079,7 +1079,7 @@ struct is_naxxramas : public InstanceScript
             {
                 if (Creature* pPos = instance->GetCreature(*itr))
                 {
-                    pGoth->SummonCreature(uiSummonEntry, pPos->GetPositionX(), pPos->GetPositionY(), pPos->GetPositionZ(), pPos->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+                    pGoth->SummonCreature(uiSummonEntry, pPos->GetPositionX(), pPos->GetPositionY(), pPos->GetPositionZ(), pPos->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
             }
         }

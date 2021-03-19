@@ -323,7 +323,7 @@ struct is_black_temple : public InstanceScript
                             for (uint8 j = 0; j < 4; ++j)
                             {
                                 pGenerator->GetRandomPoint(pGenerator->GetPositionX(), pGenerator->GetPositionY(), pGenerator->GetPositionZ(), 10.0f, fX, fY, fZ);
-                                akama->SummonCreature(NPC_ASH_BROKEN, fX, fY, fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 10 * MINUTE * IN_MILLISECONDS);
+                                akama->SummonCreature(NPC_ASH_BROKEN, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 10 * MINUTE * IN_MILLISECONDS);
                             }
                         }
                     }
@@ -401,7 +401,7 @@ struct is_black_temple : public InstanceScript
             // Summon Akama after the council has been defeated
             if (Player* pPlayer = GetPlayerInMap())
             {
-                pPlayer->SummonCreature(NPC_AKAMA, 617.754f, 307.768f, 271.735f, 6.197f, TEMPSUMMON_DEAD_DESPAWN, 0);
+                pPlayer->SummonCreature(NPC_AKAMA, 617.754f, 307.768f, 271.735f, 6.197f, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
 

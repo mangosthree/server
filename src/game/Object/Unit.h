@@ -2743,7 +2743,7 @@ class  Unit : public WorldObject
         * Returns the current \ref DeathState for this \ref Unit.
         * @return the value of the member \ref Unit::m_deathState
         */
-        DeathState getDeathState() const { return m_deathState; };
+        DeathState GetDeathState() const { return m_deathState; };
         /**
         * Changes the \ref DeathState for this \ref Unit and making sure that some things that should
         * happen when that changes happen, ie: you just died, then you're auras should be removed,
@@ -3276,7 +3276,7 @@ class  Unit : public WorldObject
         void SetPhaseMask(uint32 newPhaseMask, bool update) override;// overwrite WorldObject::SetPhaseMask
 
         // virtual functions for all world objects types
-        bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
+        bool IsVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
         // function for low level grid visibility checks in player/creature cases
         virtual bool IsVisibleInGridForPlayer(Player* pl) const = 0;
         bool isInvisibleForAlive() const;

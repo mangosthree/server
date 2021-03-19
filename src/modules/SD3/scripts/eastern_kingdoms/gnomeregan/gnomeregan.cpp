@@ -190,7 +190,7 @@ struct npc_blastmaster_emi_shortfuse : public CreatureScript
                 }
                 if (asSummonInfo[i].uiPosition == uiIndex)
                 {
-                    m_creature->SummonCreature(asSummonInfo[i].uiEntry, asSummonInfo[i].fX, asSummonInfo[i].fY, asSummonInfo[i].fZ, asSummonInfo[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(asSummonInfo[i].uiEntry, asSummonInfo[i].fX, asSummonInfo[i].fY, asSummonInfo[i].fZ, asSummonInfo[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
             }
         }

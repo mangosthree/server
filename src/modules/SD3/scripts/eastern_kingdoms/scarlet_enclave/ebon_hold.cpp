@@ -942,7 +942,7 @@ struct npc_koltira_deathweaver : public CreatureScript
         {
             for (uint32 i = 0; i < uiAmount; ++i)
             {
-                m_creature->SummonCreature(NPC_CRIMSON_ACOLYTE, 1642.329f, -6045.818f, 127.583f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                m_creature->SummonCreature(NPC_CRIMSON_ACOLYTE, 1642.329f, -6045.818f, 127.583f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
             }
         }
 
@@ -971,7 +971,7 @@ struct npc_koltira_deathweaver : public CreatureScript
                         break;
                     case 3:
                         DoScriptText(SAY_BREAKOUT6, m_creature);
-                        m_creature->SummonCreature(NPC_HIGH_INQUISITOR_VALROTH, 1642.329f, -6045.818f, 127.583f, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 1000);
+                        m_creature->SummonCreature(NPC_HIGH_INQUISITOR_VALROTH, 1642.329f, -6045.818f, 127.583f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 1000);
                         m_uiWave_Timer = 1000;
                         break;
                     case 4:
@@ -1902,7 +1902,7 @@ struct npc_highlord_darion_mograine : public CreatureScript
                         {
                             uint32 uiSummonEntry = urand(0, 1) ? NPC_VOLATILE_GHOUL : NPC_WARRIOR_OF_THE_FROZEN_WASTES;
                             m_creature->GetRandomPoint(aEventLocations[1].m_fX, aEventLocations[1].m_fY, aEventLocations[1].m_fZ, 30.0f, fX, fY, fZ);
-                            m_creature->SummonCreature(uiSummonEntry, fX, fY, fZ, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 5000);
+                            m_creature->SummonCreature(uiSummonEntry, fX, fY, fZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 5000);
                         }
                     }
                     break;
@@ -1922,7 +1922,7 @@ struct npc_highlord_darion_mograine : public CreatureScript
                         for (uint8 i = 0; i < MAX_WARRIORS_SUMMONED_PER_TURN; i++)
                         {
                             m_creature->GetRandomPoint(aEventLocations[1].m_fX, aEventLocations[1].m_fY, aEventLocations[1].m_fZ, 30.0f, fX, fY, fZ);
-                            m_creature->SummonCreature(NPC_DEFENDER_OF_THE_LIGHT, fX, fY, fZ, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 5000);
+                            m_creature->SummonCreature(NPC_DEFENDER_OF_THE_LIGHT, fX, fY, fZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 5000);
                         }
                     }
                     break;
@@ -2040,7 +2040,7 @@ struct npc_highlord_darion_mograine : public CreatureScript
                     // spawn soldiers
                     for (uint8 i = 0; i < MAX_LIGHT_GUARDS; ++i)
                     {
-                        if (Creature* pGuard = m_creature->SummonCreature(NPC_DEFENDER_OF_THE_LIGHT, aGuardsSpawnLoc[i].m_fX, aGuardsSpawnLoc[i].m_fY, aGuardsSpawnLoc[i].m_fZ, aGuardsSpawnLoc[i].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 0))
+                        if (Creature* pGuard = m_creature->SummonCreature(NPC_DEFENDER_OF_THE_LIGHT, aGuardsSpawnLoc[i].m_fX, aGuardsSpawnLoc[i].m_fY, aGuardsSpawnLoc[i].m_fZ, aGuardsSpawnLoc[i].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 0))
                         {
                             // make guard passive and with weapon
                             pGuard->SetFacingToObject(m_creature);
@@ -2095,7 +2095,7 @@ struct npc_highlord_darion_mograine : public CreatureScript
                     // summon light champions
                     for (uint8 i = 0; i < MAX_LIGHT_CHAMPIONS; i++)
                     {
-                        m_creature->SummonCreature(aLightArmySpawnLoc[i].m_uiEntry, aLightArmySpawnLoc[i].m_fX, aLightArmySpawnLoc[i].m_fY, aLightArmySpawnLoc[i].m_fZ, aLightArmySpawnLoc[i].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+                        m_creature->SummonCreature(aLightArmySpawnLoc[i].m_uiEntry, aLightArmySpawnLoc[i].m_fX, aLightArmySpawnLoc[i].m_fY, aLightArmySpawnLoc[i].m_fZ, aLightArmySpawnLoc[i].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
                     }
 
                     // summon light soldiers
@@ -2103,7 +2103,7 @@ struct npc_highlord_darion_mograine : public CreatureScript
                     for (uint8 i = 0; i < 5 * MAX_WARRIORS_SUMMONED_PER_TURN; ++i)
                     {
                         m_creature->GetRandomPoint(aEventLocations[1].m_fX, aEventLocations[1].m_fY, aEventLocations[1].m_fZ, 30.0f, fX, fY, fZ);
-                        m_creature->SummonCreature(NPC_DEFENDER_OF_THE_LIGHT, fX, fY, fZ, 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 5000);
+                        m_creature->SummonCreature(NPC_DEFENDER_OF_THE_LIGHT, fX, fY, fZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 5000);
                     }
                     break;
                 case 2:
@@ -2297,7 +2297,7 @@ struct npc_highlord_darion_mograine : public CreatureScript
                                 {
                                     uint32 uiSummonEntry = urand(0, 1) ? NPC_VOLATILE_GHOUL : NPC_WARRIOR_OF_THE_FROZEN_WASTES;
                                     m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 50.0f, fX, fY, fZ);
-                                    m_creature->SummonCreature(uiSummonEntry, fX, fY, fZ, 4.7f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+                                    m_creature->SummonCreature(uiSummonEntry, fX, fY, fZ, 4.7f, TEMPSPAWN_CORPSE_DESPAWN, 0);
                                 }
                                 m_uiEventTimer = 6000;
                                 break;
@@ -2387,7 +2387,7 @@ struct npc_highlord_darion_mograine : public CreatureScript
                                 break;
                             case 13:
                                 // start Alexandros vision
-                                if (Creature* pAlexandros = m_creature->SummonCreature(NPC_HIGHLORD_ALEXANDROS_MOGRAINE, aEventLocations[4].m_fX, aEventLocations[4].m_fY, aEventLocations[4].m_fZ, aEventLocations[4].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
+                                if (Creature* pAlexandros = m_creature->SummonCreature(NPC_HIGHLORD_ALEXANDROS_MOGRAINE, aEventLocations[4].m_fX, aEventLocations[4].m_fY, aEventLocations[4].m_fZ, aEventLocations[4].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 3000))
                                 {
                                     DoScriptText(EMOTE_LIGHT_OF_DAWN_ALEXANDROS, pAlexandros);
                                     pAlexandros->CastSpell(pAlexandros, SPELL_ALEXANDROS_MOGRAINE_SPAWN, true);
@@ -2411,7 +2411,7 @@ struct npc_highlord_darion_mograine : public CreatureScript
                                 DoScriptText(SAY_LIGHT_OF_DAWN_VISION_3, m_creature);
                                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                                 // summon young Darion for 1 min
-                                if (Creature* pDarion = m_creature->SummonCreature(NPC_DARION_MOGRAINE, aEventLocations[6].m_fX, aEventLocations[6].m_fY, aEventLocations[6].m_fZ, aEventLocations[6].m_fO, TEMPSUMMON_TIMED_DESPAWN, 1 * MINUTE * IN_MILLISECONDS))
+                                if (Creature* pDarion = m_creature->SummonCreature(NPC_DARION_MOGRAINE, aEventLocations[6].m_fX, aEventLocations[6].m_fY, aEventLocations[6].m_fZ, aEventLocations[6].m_fO, TEMPSPAWN_TIMED_DESPAWN, 1 * MINUTE * IN_MILLISECONDS))
                                 {
                                     DoScriptText(EMOTE_LIGHT_OF_DAWN_SHADE, pDarion);
                                 }
@@ -2494,7 +2494,7 @@ struct npc_highlord_darion_mograine : public CreatureScript
                                 break;
                             case 26:
                                 // Lich king visit
-                                if (Creature* pLichKing = m_creature->SummonCreature(NPC_THE_LICH_KING, aEventLocations[8].m_fX, aEventLocations[8].m_fY, aEventLocations[8].m_fZ, aEventLocations[8].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 5000))
+                                if (Creature* pLichKing = m_creature->SummonCreature(NPC_THE_LICH_KING, aEventLocations[8].m_fX, aEventLocations[8].m_fY, aEventLocations[8].m_fZ, aEventLocations[8].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 5000))
                                 {
                                     DoScriptText(SAY_LIGHT_OF_DAWN_KING_VISIT_1, pLichKing);
                                 }
@@ -2949,7 +2949,7 @@ struct npc_highlord_darion_mograine : public CreatureScript
                     if (m_uiFightTimer <= uiDiff || m_uiLightWarriorsDead >= 100)
                     {
                         // summon Tirion and move him to the chapel
-                        if (Creature* pTirion = m_creature->SummonCreature(NPC_HIGHLORD_TIRION_FORDRING, aEventLocations[0].m_fX, aEventLocations[0].m_fY, aEventLocations[0].m_fZ, aEventLocations[0].m_fO, TEMPSUMMON_CORPSE_DESPAWN, 5000, true))
+                        if (Creature* pTirion = m_creature->SummonCreature(NPC_HIGHLORD_TIRION_FORDRING, aEventLocations[0].m_fX, aEventLocations[0].m_fY, aEventLocations[0].m_fZ, aEventLocations[0].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 5000, true))
                         {
                             // decrease Darion's damage
                             DoCastSpellIfCan(m_creature, SPELL_THE_LIGHT_OF_DAWN_DAMAGE_LOSS, CAST_TRIGGERED);

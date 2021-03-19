@@ -341,7 +341,7 @@ struct is_pit_of_saron : public InstanceScript
                     for (uint8 i = 0; i < countof(aEventSecondAmbushLocations); ++i)
                     {
                         if (Creature* pSummon = pTyrannus->SummonCreature(aEventSecondAmbushLocations[i].uiEntryHorde, aEventSecondAmbushLocations[i].fX, aEventSecondAmbushLocations[i].fY,
-                            aEventSecondAmbushLocations[i].fZ, aEventSecondAmbushLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                            aEventSecondAmbushLocations[i].fZ, aEventSecondAmbushLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                         {
                             pSummon->SetWalk(false);
                             pSummon->GetMotionMaster()->MovePoint(1, aEventSecondAmbushLocations[i].fMoveX, aEventSecondAmbushLocations[i].fMoveY, aEventSecondAmbushLocations[i].fMoveZ);
@@ -571,7 +571,7 @@ struct is_pit_of_saron : public InstanceScript
             for (uint8 i = 0; i < countof(aEventFirstAmbushLocations); ++i)
             {
                 if (Creature* pSummon = pTyrannus->SummonCreature(aEventFirstAmbushLocations[i].uiEntryHorde, aEventFirstAmbushLocations[i].fX, aEventFirstAmbushLocations[i].fY,
-                    aEventFirstAmbushLocations[i].fZ, aEventFirstAmbushLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                    aEventFirstAmbushLocations[i].fZ, aEventFirstAmbushLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     pSummon->SetWalk(false);
                     pSummon->GetMotionMaster()->MovePoint(1, aEventFirstAmbushLocations[i].fMoveX, aEventFirstAmbushLocations[i].fMoveY, aEventFirstAmbushLocations[i].fMoveZ);
@@ -643,7 +643,7 @@ struct is_pit_of_saron : public InstanceScript
                                  for (uint8 i = 0; i < countof(aEventTunnelEndLocations); ++i)
                                  {
                                      if (Creature* pSummon = pTyrannus->SummonCreature(m_uiTeam == HORDE ? aEventTunnelEndLocations[i].uiEntryHorde : aEventTunnelEndLocations[i].uiEntryAlliance,
-                                         aEventTunnelEndLocations[i].fX, aEventTunnelEndLocations[i].fY, aEventTunnelEndLocations[i].fZ, aEventTunnelEndLocations[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                                         aEventTunnelEndLocations[i].fX, aEventTunnelEndLocations[i].fY, aEventTunnelEndLocations[i].fZ, aEventTunnelEndLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                                      {
                                          pSummon->SetWalk(false);
                                          pSummon->GetMotionMaster()->MovePoint(0, aEventTunnelEndLocations[i].fMoveX, aEventTunnelEndLocations[i].fMoveY, aEventTunnelEndLocations[i].fMoveZ);
@@ -674,14 +674,14 @@ struct is_pit_of_saron : public InstanceScript
 
                                        // Spawn Sindragosa
                                        if (Creature* pSummon = pPlayer->SummonCreature(aEventOutroLocations[0].uiEntryHorde, aEventOutroLocations[0].fX, aEventOutroLocations[0].fY,
-                                           aEventOutroLocations[0].fZ, aEventOutroLocations[0].fO, TEMPSUMMON_TIMED_DESPAWN, 2 * MINUTE * IN_MILLISECONDS))
+                                           aEventOutroLocations[0].fZ, aEventOutroLocations[0].fO, TEMPSPAWN_TIMED_DESPAWN, 2 * MINUTE * IN_MILLISECONDS))
                                        {
                                            pSummon->SetWalk(false);
                                            pSummon->GetMotionMaster()->MovePoint(0, aEventOutroLocations[0].fMoveX, aEventOutroLocations[0].fMoveY, aEventOutroLocations[0].fMoveZ);
                                        }
                                        // Spawn Jaina or Sylvanas
                                        if (Creature* pSummon = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventOutroLocations[1].uiEntryHorde : aEventOutroLocations[1].uiEntryAlliance,
-                                           aEventOutroLocations[1].fX, aEventOutroLocations[1].fY, aEventOutroLocations[1].fZ, aEventOutroLocations[1].fO, TEMPSUMMON_TIMED_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
+                                           aEventOutroLocations[1].fX, aEventOutroLocations[1].fY, aEventOutroLocations[1].fZ, aEventOutroLocations[1].fO, TEMPSPAWN_TIMED_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
                                        {
                                            pSummon->SetWalk(false);
                                            pSummon->GetMotionMaster()->MovePoint(0, aEventOutroLocations[1].fMoveX, aEventOutroLocations[1].fMoveY, aEventOutroLocations[1].fMoveZ);
@@ -772,7 +772,7 @@ struct is_pit_of_saron : public InstanceScript
             {
                 // ToDo: maybe despawn the intro npcs when the other events occur
                 if (Creature* pSummon = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocations[i].uiEntryHorde : aEventBeginLocations[i].uiEntryAlliance,
-                    aEventBeginLocations[i].fX, aEventBeginLocations[i].fY, aEventBeginLocations[i].fZ, aEventBeginLocations[i].fO, TEMPSUMMON_TIMED_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
+                    aEventBeginLocations[i].fX, aEventBeginLocations[i].fY, aEventBeginLocations[i].fZ, aEventBeginLocations[i].fO, TEMPSPAWN_TIMED_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
                 {
                     pSummon->SetWalk(false);
                     pSummon->GetMotionMaster()->MovePoint(0, aEventBeginLocations[i].fMoveX, aEventBeginLocations[i].fMoveY, aEventBeginLocations[i].fMoveZ);

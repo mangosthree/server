@@ -388,7 +388,7 @@ struct npc_akama : public CreatureScript
                 for (uint8 i = 0; i < countof(auiRandSpawnEntry); ++i)
                 {
                     pGenerator->GetRandomPoint(pGenerator->GetPositionX(), pGenerator->GetPositionY(), pGenerator->GetPositionZ(), 5.0f, fX, fY, fZ);
-                    m_creature->SummonCreature(auiRandSpawnEntry[i], fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(auiRandSpawnEntry[i], fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
             }
         }
@@ -412,7 +412,7 @@ struct npc_akama : public CreatureScript
                     fY = afBrokenSpawnLoc[i].m_fY + (j * 7);
                     fZ = afBrokenSpawnLoc[i].m_fZ;
 
-                    m_creature->SummonCreature(NPC_ASH_BROKEN, fX, fY, fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 10 * MINUTE * IN_MILLISECONDS);
+                    m_creature->SummonCreature(NPC_ASH_BROKEN, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 10 * MINUTE * IN_MILLISECONDS);
                 }
             }
 

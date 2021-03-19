@@ -150,7 +150,7 @@ struct npc_beast_combat_stalker : public CreatureScript
                     DoScriptText(SAY_TIRION_BEAST_2, pTirion);
                 }
 
-                m_creature->SummonCreature(NPC_DREADSCALE, aSpawnPositions[2][0], aSpawnPositions[2][1], aSpawnPositions[2][2], aSpawnPositions[2][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_DREADSCALE, aSpawnPositions[2][0], aSpawnPositions[2][1], aSpawnPositions[2][2], aSpawnPositions[2][3], TEMPSPAWN_DEAD_DESPAWN, 0);
             }
             else
             {
@@ -159,7 +159,7 @@ struct npc_beast_combat_stalker : public CreatureScript
                     DoScriptText(SAY_TIRION_BEAST_3, pTirion);
                 }
 
-                m_creature->SummonCreature(NPC_ICEHOWL, aSpawnPositions[4][0], aSpawnPositions[4][1], aSpawnPositions[4][2], aSpawnPositions[4][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_ICEHOWL, aSpawnPositions[4][0], aSpawnPositions[4][1], aSpawnPositions[4][2], aSpawnPositions[4][3], TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
 
@@ -227,7 +227,7 @@ struct npc_beast_combat_stalker : public CreatureScript
                 {
                     if (m_uiPhase == PHASE_WORMS)
                     {
-                        m_creature->SummonCreature(NPC_ACIDMAW, aSpawnPositions[3][0], aSpawnPositions[3][1], aSpawnPositions[3][2], aSpawnPositions[3][3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                        m_creature->SummonCreature(NPC_ACIDMAW, aSpawnPositions[3][0], aSpawnPositions[3][1], aSpawnPositions[3][2], aSpawnPositions[3][3], TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
 
                     if (Creature* pBeast = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[m_uiPhase]))

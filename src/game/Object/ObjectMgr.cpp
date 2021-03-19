@@ -282,10 +282,7 @@ void ObjectMgr::LoadCreatureLocales()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outString(">> Loaded 0 creature locale strings. DB table `locales_creature` is empty.");
         return;
     }
@@ -343,8 +340,8 @@ void ObjectMgr::LoadCreatureLocales()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " creature locale strings", mCreatureLocaleMap.size());
+    sLog.outString();
 }
 
 void ObjectMgr::LoadGossipMenuItemsLocales()
@@ -438,8 +435,8 @@ void ObjectMgr::LoadGossipMenuItemsLocales()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " gossip_menu_option locale strings", mGossipMenuItemsLocaleMap.size());
+    sLog.outString();
 }
 
 void ObjectMgr::LoadPointOfInterestLocales()
@@ -451,10 +448,7 @@ void ObjectMgr::LoadPointOfInterestLocales()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outString(">> Loaded 0 points_of_interest locale strings. DB table `locales_points_of_interest` is empty.");
         return;
     }
@@ -500,8 +494,8 @@ void ObjectMgr::LoadPointOfInterestLocales()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " points_of_interest locale strings", mPointOfInterestLocaleMap.size());
+    sLog.outString();
 }
 
 struct SQLCreatureLoader : public SQLStorageLoaderBase<SQLCreatureLoader, SQLStorage>
@@ -666,25 +660,25 @@ void ObjectMgr::LoadCreatureTemplates()
         // used later for scale
         CreatureDisplayInfoEntry const* displayScaleEntry = NULL;
 
-        for (int i = 0; i < MAX_CREATURE_MODEL; ++i)
+        for (int j = 0; j < MAX_CREATURE_MODEL; ++j)
         {
-            if (cInfo->ModelId[i])
+            if (cInfo->ModelId[j])
             {
-                CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->ModelId[i]);
+                CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->ModelId[j]);
                 if (!displayEntry)
                 {
-                    sLog.outErrorDb("Creature (Entry: %u) has nonexistent modelid_%d (%u), can crash client", cInfo->Entry, i + 1, cInfo->ModelId[i]);
-                    const_cast<CreatureInfo*>(cInfo)->ModelId[i] = 0;
+                    sLog.outErrorDb("Creature (Entry: %u) has nonexistent modelid_%d (%u), can crash client", cInfo->Entry, j + 1, cInfo->ModelId[j]);
+                    const_cast<CreatureInfo*>(cInfo)->ModelId[j] = 0;
                 }
                 else if (!displayScaleEntry)
                 {
                     displayScaleEntry = displayEntry;
                 }
 
-                CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->ModelId[i]);
+                CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->ModelId[j]);
                 if (!minfo)
                 {
-                    sLog.outErrorDb("Creature (Entry: %u) are using modelid_%d (%u), but creature_model_info are missing for this model.", cInfo->Entry, i + 1, cInfo->ModelId[i]);
+                    sLog.outErrorDb("Creature (Entry: %u) are using modelid_%d (%u), but creature_model_info are missing for this model.", cInfo->Entry, j + 1, cInfo->ModelId[j]);
                 }
             }
         }
@@ -724,9 +718,10 @@ void ObjectMgr::LoadCreatureTemplates()
             const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
         }
 
+        // use below code for 0-checks for unit_class
         if (!cInfo->UnitClass || (((1 << (cInfo->UnitClass - 1)) & CLASSMASK_ALL_CREATURES) == 0))
         {
-            ERROR_DB_STRICT_LOG("Creature (Entry: %u) does not have proper `UnitClass` (%u) in creature_template", cInfo->Entry, cInfo->UnitClass);
+            sLog.outErrorDb("Creature (Entry: %u) does not have proper `UnitClass(%u)` in creature_template", cInfo->Entry, cInfo->UnitClass);
            // Mark NPC as having improper data by his expansion
             const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
         }
@@ -738,16 +733,17 @@ void ObjectMgr::LoadCreatureTemplates()
             {
                 if (!GetCreatureClassLvlStats(level, cInfo->UnitClass, cInfo->Expansion))
                 {
-                    sLog.outErrorDb("Creature (Entry: %u), level(%u) has no data in `creature_template_classlevelstats`", cInfo->Entry, level);
+                    sLog.outErrorDb("Creature (Entry: %u), Class(%u), level(%u) has no data in `creature_template_classlevelstats`", cInfo->Entry, cInfo->UnitClass, level);
                          // Deactivate using ClassLevelStats for this NPC
                     const_cast<CreatureInfo*>(cInfo)->Expansion = -1;
+                    break;
                 }
             }
         }
 
         if (cInfo->DamageSchool >= MAX_SPELL_SCHOOL)
         {
-            sLog.outErrorDb("Creature (Entry: %u) has invalid spell school value (%u) in `DamageSchool`", cInfo->Entry, cInfo->DamageSchool);
+            sLog.outErrorDb("Creature (Entry: %u) has invalid spell school value (%u) in `dmgschool`", cInfo->Entry, cInfo->DamageSchool);
             const_cast<CreatureInfo*>(cInfo)->DamageSchool = SPELL_SCHOOL_NORMAL;
         }
 
@@ -842,6 +838,9 @@ void ObjectMgr::LoadCreatureTemplates()
             }
         }
     }
+
+    sLog.outString(">> Loaded %u creature definitions", sCreatureStorage.GetRecordCount());
+    sLog.outString();
 }
 
 void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* table, char const* guidEntryStr)
@@ -930,9 +929,6 @@ void ObjectMgr::LoadCreatureAddons(SQLStorage& creatureaddons, char const* entry
 {
     creatureaddons.Load();
 
-    sLog.outString(">> Loaded %u %s", creatureaddons.GetRecordCount(), comment);
-    sLog.outString();
-
     // check data correctness and convert 'auras'
     for (uint32 i = 1; i < creatureaddons.GetMaxEntry(); ++i)
     {
@@ -964,6 +960,8 @@ void ObjectMgr::LoadCreatureAddons(SQLStorage& creatureaddons, char const* entry
 
         ConvertCreatureAddonAuras(const_cast<CreatureDataAddon*>(addon), creatureaddons.GetTableName(), entryName);
     }
+
+    sLog.outString(">> Loaded %u %s", creatureaddons.GetRecordCount(), comment);
 }
 
 void ObjectMgr::LoadCreatureAddons()
@@ -972,21 +970,29 @@ void ObjectMgr::LoadCreatureAddons()
 
     // check entry ids
     for (uint32 i = 1; i < sCreatureInfoAddonStorage.GetMaxEntry(); ++i)
+    {
         if (CreatureDataAddon const* addon = sCreatureInfoAddonStorage.LookupEntry<CreatureDataAddon>(i))
+        {
             if (!sCreatureStorage.LookupEntry<CreatureInfo>(addon->guidOrEntry))
             {
                 sLog.outErrorDb("Creature (Entry: %u) does not exist but has a record in `%s`", addon->guidOrEntry, sCreatureInfoAddonStorage.GetTableName());
             }
+        }
+    }
 
     LoadCreatureAddons(sCreatureDataAddonStorage, "GUID", "creature addons");
 
     // check entry ids
     for (uint32 i = 1; i < sCreatureDataAddonStorage.GetMaxEntry(); ++i)
+    {
         if (CreatureDataAddon const* addon = sCreatureDataAddonStorage.LookupEntry<CreatureDataAddon>(i))
+        {
             if (mCreatureDataMap.find(addon->guidOrEntry) == mCreatureDataMap.end())
             {
                 sLog.outErrorDb("Creature (GUID: %u) does not exist but has a record in `creature_addon`", addon->guidOrEntry);
             }
+        }
+    }
 }
 
 void ObjectMgr::LoadCreatureClassLvlStats()
@@ -1004,16 +1010,15 @@ void ObjectMgr::LoadCreatureClassLvlStats()
     }
 
     queryStr.append(" FROM `creature_template_classlevelstats` ORDER BY `Class`, `Level`");
+
     QueryResult* result = WorldDatabase.Query(queryStr.c_str());
 
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb("DB table `creature_template_classlevelstats` is empty.");
+        sLog.outString();
         return;
     }
 
@@ -1030,13 +1035,13 @@ void ObjectMgr::LoadCreatureClassLvlStats()
 
         if (creatureLevel == 0 || creatureLevel > DEFAULT_MAX_CREATURE_LEVEL)
         {
-            sLog.outErrorDb("Found stats for creature level [%u] with incorrect level. Skipping!", creatureLevel);
+            sLog.outErrorDb("Found stats for creature level [%u], incorrect level for this core. Skip!", creatureLevel);
             continue;
         }
 
         if (((1 << (creatureClass - 1)) & CLASSMASK_ALL_CREATURES) == 0)
         {
-            sLog.outErrorDb("Found stats for creature class [%u] with incorrect class. Skipping!", creatureClass);
+            sLog.outErrorDb("Found stats for creature class [%u], incorrect class for this core. Skip!", creatureClass);
             continue;
         }
 
@@ -1062,8 +1067,8 @@ void ObjectMgr::LoadCreatureClassLvlStats()
 
     delete result;
 
+    sLog.outString(">> Found %u creature stats definitions.", DataCount);
     sLog.outString();
-    sLog.outString(">> Loaded %u creature class level stats definitions.", DataCount);
 }
 
 CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, uint32 unitClass, int32 expansion) const
@@ -1337,13 +1342,13 @@ void ObjectMgr::LoadCreatureModelRace()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
 
         sLog.outString();
         sLog.outErrorDb(">> Loaded creature_model_race, table is empty!");
         return;
     }
+
 
     BarGoLink bar(result->GetRowCount());
 
@@ -1355,7 +1360,6 @@ void ObjectMgr::LoadCreatureModelRace()
     do
     {
         bar.step();
-
         Field* fields = result->Fetch();
 
         CreatureModelRace raceData;
@@ -1466,11 +1470,9 @@ void ObjectMgr::LoadCreatures()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 creature. DB table `creature` is empty.");
+        sLog.outString();
         return;
     }
 
@@ -1588,18 +1590,18 @@ void ObjectMgr::LoadCreatures()
             data.curhealth = cInfo->MinLevelHealth;
         }
 
-        if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_INSTANCE_BIND)
+        if (cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
         {
             if (!mapEntry || !mapEntry->IsDungeon())
-                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_EXTRA_FLAG_INSTANCE_BIND (%u) but creature are not in instance.",
-                                guid, data.id, CREATURE_EXTRA_FLAG_INSTANCE_BIND);
+                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_FLAG_EXTRA_INSTANCE_BIND (%u) but creature are not in instance.",
+                                guid, data.id, CREATURE_FLAG_EXTRA_INSTANCE_BIND);
         }
 
-        if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_AGGRO_ZONE)
+        if (cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_AGGRO_ZONE)
         {
             if (!mapEntry || !mapEntry->IsDungeon())
-                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_EXTRA_FLAG_AGGRO_ZONE (%u) but creature are not in instance.",
-                                guid, data.id, CREATURE_EXTRA_FLAG_AGGRO_ZONE);
+                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_FLAG_EXTRA_AGGRO_ZONE (%u) but creature are not in instance.",
+                                guid, data.id, CREATURE_FLAG_EXTRA_AGGRO_ZONE);
         }
 
         if (data.curmana < cInfo->MinLevelMana)
@@ -1640,7 +1642,7 @@ void ObjectMgr::LoadCreatures()
         {
             AddCreatureToGrid(guid, &data);
 
-            if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE)
+            if (cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_ACTIVE)
             {
                 m_activeCreatures.insert(ActiveCreatureGuidsOnMap::value_type(data.mapid, guid));
             }
@@ -1652,8 +1654,8 @@ void ObjectMgr::LoadCreatures()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " creatures", mCreatureDataMap.size());
+    sLog.outString();
 }
 
 void ObjectMgr::AddCreatureToGrid(uint32 guid, CreatureData const* data)
@@ -1692,11 +1694,15 @@ void ObjectMgr::LoadGameObjects()
 {
     uint32 count = 0;
 
-    //                                                              0                    1                  2                   3                          4                          5                          6
-    QueryResult* result = WorldDatabase.Query("SELECT `gameobject`.`guid`, `gameobject`.`id`, `gameobject`.`map`, `gameobject`.`position_x`, `gameobject`.`position_y`, `gameobject`.`position_z`, `gameobject`.`orientation`, "
-                          //             7                         8                         9                         10                        11                            12                           13                    14                        15
-                          "`gameobject`.`rotation0`, `gameobject`.`rotation1`, `gameobject`.`rotation2`, `gameobject`.`rotation3`, `gameobject`.`spawntimesecs`, `gameobject`.`animprogress`, `gameobject`.`state`, `gameobject`.`spawnMask`, `gameobject`.`phaseMask`, "
-                          //             16                         17                                       18
+    //                                                              0                    1                  2                   3
+    QueryResult* result = WorldDatabase.Query("SELECT `gameobject`.`guid`, `gameobject`.`id`, `gameobject`.`map`, `gameobject`.`position_x`, "
+    //                                   4                          5                          6                           7
+                          "`gameobject`.`position_y`, `gameobject`.`position_z`, `gameobject`.`orientation`, `gameobject`.`rotation0`, "
+    //                                   8                         9                         10                        11
+                          "`gameobject`.`rotation1`, `gameobject`.`rotation2`, `gameobject`.`rotation3`, `gameobject`.`spawntimesecs`, "
+    //                                   12                           13                    14                        15
+                          "`gameobject`.`animprogress`, `gameobject`.`state`, `gameobject`.`spawnMask`, `gameobject`.`phaseMask`, "
+    //                                             16                          17                                       18
                           "`game_event_gameobject`.`event`, `pool_gameobject`.`pool_entry`, `pool_gameobject_template`.`pool_entry` "
                           "FROM `gameobject` "
                           "LEFT OUTER JOIN `game_event_gameobject` ON `gameobject`.`guid` = `game_event_gameobject`.`guid` "
@@ -1706,11 +1712,9 @@ void ObjectMgr::LoadGameObjects()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 gameobjects. DB table `gameobject` is empty.");
+        sLog.outString();
         return;
     }
 
@@ -1851,6 +1855,7 @@ void ObjectMgr::LoadGameObjects()
         {
             AddGameobjectToGrid(guid, &data);
         }
+
 
         //uint32 zoneId, areaId;
         //sTerrainMgr.LoadTerrain(data.mapid)->GetZoneAndAreaId(zoneId, areaId, data.posX, data.posY, data.posZ);
@@ -2596,7 +2601,7 @@ void ObjectMgr::LoadItemPrototypes()
                     continue;
                 }
 
-                /*if(BAG_FAMILY_MASK_CURRENCY_TOKENS & mask)
+                /*if(BAG_FAMILY_MASK_MASK_CURRENCY_TOKENS & mask)
                 {
                     CurrencyTypesEntry const* ctEntry = sCurrencyTypesStore.LookupEntry(proto->ItemId);
                     if(!ctEntry)
@@ -2902,11 +2907,9 @@ void ObjectMgr::LoadItemRequiredTarget()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 ItemRequiredTarget. DB table `item_required_target` is empty.");
+        sLog.outString();
         return;
     }
 
@@ -3000,27 +3003,27 @@ void ObjectMgr::LoadItemRequiredTarget()
 
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded %u Item required targets", count);
+    sLog.outString();
 }
 
 void ObjectMgr::LoadPetLevelInfo()
 {
+    uint32 count = 0;
+
     // Loading levels data
     {
         //                                                 0               1      2   3     4    5    6    7     8    9
         QueryResult* result  = WorldDatabase.Query("SELECT `creature_entry`, `level`, `hp`, `mana`, `str`, `agi`, `sta`, `inte`, `spi`, `armor` FROM `pet_levelstats`");
 
-        uint32 count = 0;
 
         if (!result)
         {
             BarGoLink bar(1);
             bar.step();
-
-            sLog.outString();
             sLog.outString(">> Loaded %u level pet stats definitions", count);
             sLog.outErrorDb("Error loading `pet_levelstats` table or empty table.");
+            sLog.outString();
             return;
         }
 
@@ -3082,9 +3085,6 @@ void ObjectMgr::LoadPetLevelInfo()
         while (result->NextRow());
 
         delete result;
-
-        sLog.outString();
-        sLog.outString(">> Loaded %u level pet stats definitions", count);
     }
 
     // Fill gaps and check integrity
@@ -3110,6 +3110,9 @@ void ObjectMgr::LoadPetLevelInfo()
             }
         }
     }
+
+    sLog.outString(">> Loaded %u level pet stats definitions", count);
+    sLog.outString();
 }
 
 PetLevelInfo const* ObjectMgr::GetPetLevelInfo(uint32 creature_id, uint32 level) const
@@ -10424,7 +10427,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
         gMenuItem.option_icon           = fields[2].GetUInt8();
         gMenuItem.option_text           = fields[3].GetCppString();
         gMenuItem.option_id             = fields[4].GetUInt32();
-        gMenuItem.npc_option_NpcFlags    = fields[5].GetUInt32();
+        gMenuItem.npc_option_npcflag    = fields[5].GetUInt32();
         gMenuItem.action_menu_id        = fields[6].GetInt32();
         gMenuItem.action_poi_id         = fields[7].GetUInt32();
         gMenuItem.action_script_id      = fields[8].GetUInt32();
@@ -10471,7 +10474,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
             sLog.outErrorDb("Table gossip_menu_option for menu %u, id %u has unknown option id %u. Option will not be used", gMenuItem.menu_id, gMenuItem.id, gMenuItem.option_id);
         }
 
-        if (gMenuItem.menu_id && gMenuItem.npc_option_NpcFlags)
+        if (gMenuItem.menu_id && gMenuItem.npc_option_npcflag)
         {
             bool found_menu_uses = false;
             bool found_flags_uses = false;
@@ -10484,7 +10487,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
                 found_menu_uses = true;
 
                 // some from creatures with gossip menu can use gossip option base at npc_flags
-                if (gMenuItem.npc_option_NpcFlags & cInfo->NpcFlags)
+                if (gMenuItem.npc_option_npcflag & cInfo->NpcFlags)
                 {
                     found_flags_uses = true;
                 }
@@ -10492,7 +10495,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
 
             if (found_menu_uses && !found_flags_uses)
             {
-                sLog.outErrorDb("Table gossip_menu_option for menu %u, id %u has `npc_option_npcflag` = %u but creatures using this menu does not have corresponding`npcflag`. Option will not accessible in game.", gMenuItem.menu_id, gMenuItem.id, gMenuItem.npc_option_NpcFlags);
+                sLog.outErrorDb("Table gossip_menu_option for menu %u, id %u has `npc_option_npcflag` = %u but creatures using this menu does not have corresponding`npcflag`. Option will not accessible in game.", gMenuItem.menu_id, gMenuItem.id, gMenuItem.npc_option_npcflag);
             }
         }
 

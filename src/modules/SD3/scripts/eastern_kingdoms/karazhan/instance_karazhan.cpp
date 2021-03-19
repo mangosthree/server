@@ -265,7 +265,7 @@ struct is_karazhan : public InstanceScript
                 // Summon Chrone when all 4 Oz mobs are killed
                 if (m_uiOzDeathCount == MAX_OZ_OPERA_MOBS)
                 {
-                    if (Creature* pCrone = pCreature->SummonCreature(NPC_CRONE, afChroneSpawnLoc[0], afChroneSpawnLoc[1], afChroneSpawnLoc[2], afChroneSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0))
+                    if (Creature* pCrone = pCreature->SummonCreature(NPC_CRONE, afChroneSpawnLoc[0], afChroneSpawnLoc[1], afChroneSpawnLoc[2], afChroneSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0))
                     {
                         if (pCreature->getVictim())
                         {
@@ -720,7 +720,7 @@ struct is_karazhan : public InstanceScript
             case OPERA_EVENT_WIZARD_OZ:
                 for (uint8 i = 0; i < MAX_OZ_OPERA_MOBS; ++i)
                 {
-                    pOrganizer->SummonCreature(aOperaLocOz[i].uiEntry, aOperaLocOz[i].fX, aOperaLocOz[i].fY, aOperaLocOz[i].fZ, aOperaLocOz[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    pOrganizer->SummonCreature(aOperaLocOz[i].uiEntry, aOperaLocOz[i].fX, aOperaLocOz[i].fY, aOperaLocOz[i].fZ, aOperaLocOz[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0);
                 }
                 DoRespawnGameObject(GO_OZ_BACKDROP, 12 * HOUR);
                 for (GuidList::const_iterator itr = m_lOperaHayGuidList.begin(); itr != m_lOperaHayGuidList.end(); ++itr)
@@ -729,7 +729,7 @@ struct is_karazhan : public InstanceScript
                 }
                 break;
             case OPERA_EVENT_RED_RIDING_HOOD:
-                pOrganizer->SummonCreature(aOperaLocWolf.uiEntry, aOperaLocWolf.fX, aOperaLocWolf.fY, aOperaLocWolf.fZ, aOperaLocWolf.fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                pOrganizer->SummonCreature(aOperaLocWolf.uiEntry, aOperaLocWolf.fX, aOperaLocWolf.fY, aOperaLocWolf.fZ, aOperaLocWolf.fO, TEMPSPAWN_DEAD_DESPAWN, 0);
                 DoRespawnGameObject(GO_HOOD_BACKDROP, 12 * HOUR);
                 DoRespawnGameObject(GO_HOOD_HOUSE, 12 * HOUR);
                 for (GuidList::const_iterator itr = m_lOperaTreeGuidList.begin(); itr != m_lOperaTreeGuidList.end(); ++itr)
@@ -738,7 +738,7 @@ struct is_karazhan : public InstanceScript
                 }
                 break;
             case OPERA_EVENT_ROMULO_AND_JUL:
-                pOrganizer->SummonCreature(aOperaLocJul.uiEntry, aOperaLocJul.fX, aOperaLocJul.fY, aOperaLocJul.fZ, aOperaLocJul.fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                pOrganizer->SummonCreature(aOperaLocJul.uiEntry, aOperaLocJul.fX, aOperaLocJul.fY, aOperaLocJul.fZ, aOperaLocJul.fO, TEMPSPAWN_DEAD_DESPAWN, 0);
                 DoRespawnGameObject(GO_RAJ_BACKDROP, 12 * HOUR);
                 DoRespawnGameObject(GO_RAJ_MOON, 12 * HOUR);
                 DoRespawnGameObject(GO_RAJ_BALCONY, 12 * HOUR);

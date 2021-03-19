@@ -166,7 +166,7 @@ struct boss_fathomlord_karathress : public CreatureScript
             }
 
             // support for quest 10944
-            m_creature->SummonCreature(NPC_SEER_OLUM, afCoordsOlum[0], afCoordsOlum[1], afCoordsOlum[2], afCoordsOlum[3], TEMPSUMMON_TIMED_DESPAWN, 1 * HOUR * IN_MILLISECONDS);
+            m_creature->SummonCreature(NPC_SEER_OLUM, afCoordsOlum[0], afCoordsOlum[1], afCoordsOlum[2], afCoordsOlum[3], TEMPSPAWN_TIMED_DESPAWN, 1 * HOUR * IN_MILLISECONDS);
         }
 
         void JustReachedHome() override

@@ -116,7 +116,7 @@ struct boss_forgemaster_garfrost : public CreatureScript
 
                 // Summon Ironskull or Victus for outro
                 m_creature->SummonCreature(m_pInstance->GetData(TYPE_DATA_PLAYER_TEAM) == HORDE ? NPC_IRONSKULL_PART1 : NPC_VICTUS_PART1,
-                    afOutroNpcSpawnLoc[0], afOutroNpcSpawnLoc[1], afOutroNpcSpawnLoc[2], afOutroNpcSpawnLoc[3], TEMPSUMMON_TIMED_DESPAWN, 2 * MINUTE * IN_MILLISECONDS);
+                    afOutroNpcSpawnLoc[0], afOutroNpcSpawnLoc[1], afOutroNpcSpawnLoc[2], afOutroNpcSpawnLoc[3], TEMPSPAWN_TIMED_DESPAWN, 2 * MINUTE * IN_MILLISECONDS);
 
                 // ToDo: handle the other npcs movement
             }

@@ -14806,7 +14806,7 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
 
             uint32 NpcFlagss = pCreature->GetUInt32Value(UNIT_NPC_FLAGS);
 
-            if (!(itr->second.npc_option_NpcFlags & NpcFlagss))
+            if (!(itr->second.npc_option_npcflag & NpcFlagss))
             {
                 continue;
             }
@@ -23246,7 +23246,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
 {
     if (HaveAtClient(target))
     {
-        if (!target->isVisibleForInState(this, viewPoint, true))
+        if (!target->IsVisibleForInState(this, viewPoint, true))
         {
             ObjectGuid t_guid = target->GetObjectGuid();
 
@@ -23269,7 +23269,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
     }
     else
     {
-        if (target->isVisibleForInState(this, viewPoint, false))
+        if (target->IsVisibleForInState(this, viewPoint, false))
         {
             target->SendCreateUpdateToPlayer(this);
             if (target->GetTypeId() != TYPEID_GAMEOBJECT || !((GameObject*)target)->IsTransport())
@@ -23309,7 +23309,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateD
 {
     if (HaveAtClient(target))
     {
-        if (!target->isVisibleForInState(this, viewPoint, true))
+        if (!target->IsVisibleForInState(this, viewPoint, true))
         {
             BeforeVisibilityDestroy<T>(target, this);
 
@@ -23323,7 +23323,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateD
     }
     else
     {
-        if (target->isVisibleForInState(this, viewPoint, false))
+        if (target->IsVisibleForInState(this, viewPoint, false))
         {
             visibleNow.insert(target);
             target->BuildCreateUpdateBlockForPlayer(&data, this);
@@ -24475,7 +24475,7 @@ bool Player::isHonorOrXPTarget(Unit* pVictim) const
     {
         if (((Creature*)pVictim)->IsTotem() ||
                 ((Creature*)pVictim)->IsPet() ||
-                ((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_XP_AT_KILL)
+                ((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL)
             return false;
     }
     return true;
@@ -25010,7 +25010,7 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
                                 }
                                 else
                                 {
-                                    SummonCreature(21508, 0, 0, 0, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 2000);
+                                    SummonCreature(21508, 0, 0, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 2000);
                                     // Special update timer for the SSC water
                                     m_positionStatusUpdateTimer = 2000;
                                 }

@@ -40,7 +40,7 @@
 
 #define MOVEMENT_PACKET_TIME_DELAY 0
 
-void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket & /*recv_data*/)
+void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: got MSG_MOVE_WORLDPORT_ACK.");
     HandleMoveWorldportAckOpcode();
@@ -95,10 +95,10 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
             GetPlayer()->SetSemaphoreTeleportFar(false);
 
-            // Teleport to previous place, if cannot be ported back TP to homebind place
+            // Teleport to previous place, if can not be ported back TP to homebind place
             if (!GetPlayer()->TeleportTo(old_loc))
             {
-                DETAIL_LOG("WorldSession::HandleMoveWorldportAckOpcode: %s cannot be ported to his previous place, teleporting him to his homebind place...",
+                DETAIL_LOG("WorldSession::HandleMoveWorldportAckOpcode: %s can not be ported to his previous place, teleporting him to his homebind place...",
                            GetPlayer()->GetGuidStr().c_str());
                 GetPlayer()->TeleportToHomebind();
             }
@@ -137,10 +137,10 @@ void WorldSession::HandleMoveWorldportAckOpcode()
                    " (map:%u, x:%f, y:%f, z:%f) Trying to port him to his previous place..",
                    GetPlayer()->GetGuidStr().c_str(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
 
-        // Teleport to previous place, if cannot be ported back TP to homebind place
+        // Teleport to previous place, if can not be ported back TP to homebind place
         if (!GetPlayer()->TeleportTo(old_loc))
         {
-            DETAIL_LOG("WorldSession::HandleMoveWorldportAckOpcode: %s cannot be ported to his previous place, teleporting him to his homebind place...",
+            DETAIL_LOG("WorldSession::HandleMoveWorldportAckOpcode: %s can not be ported to his previous place, teleporting him to his homebind place...",
                        GetPlayer()->GetGuidStr().c_str());
             GetPlayer()->TeleportToHomebind();
         }

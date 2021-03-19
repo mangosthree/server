@@ -258,7 +258,7 @@ struct npc_disciple_of_naralex : public CreatureScript
             float fX, fY, fZ;
             m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, fDistance, fAngle);
 
-            m_creature->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 20000);
+            m_creature->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000);
         }
 
         void UpdateEscortAI(const uint32 uiDiff) override

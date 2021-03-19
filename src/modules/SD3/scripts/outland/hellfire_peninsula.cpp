@@ -279,7 +279,7 @@ struct npc_demoniac_scryer : public CreatureScript
             m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0.0f, 5.0f, fAngle);
 
             uint32 uiTime = TIME_TOTAL - (m_uiSpawnButtressTimer * m_uiButtressCount);
-            m_creature->SummonCreature(NPC_BUTTRESS, fX, fY, fZ, m_creature->GetAngle(fX, fY), TEMPSUMMON_TIMED_DESPAWN, uiTime);
+            m_creature->SummonCreature(NPC_BUTTRESS, fX, fY, fZ, m_creature->GetAngle(fX, fY), TEMPSPAWN_TIMED_DESPAWN, uiTime);
         }
 
         void DoSpawnDemon()
@@ -287,7 +287,7 @@ struct npc_demoniac_scryer : public CreatureScript
             float fX, fY, fZ;
             m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
 
-            m_creature->SummonCreature(NPC_HELLFIRE_WARDLING, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+            m_creature->SummonCreature(NPC_HELLFIRE_WARDLING, fX, fY, fZ, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
         }
 
         void JustSummoned(Creature* pSummoned) override
@@ -440,8 +440,8 @@ struct npc_wounded_blood_elf : public CreatureScript
             case 9:
                 DoScriptText(SAY_ELF_SUMMON1, m_creature, pPlayer);
                 // Spawn two Haal'eshi Talonguard
-                DoSpawnCreature(NPC_WINDWALKER, -15, -15, 0, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
-                DoSpawnCreature(NPC_WINDWALKER, -17, -17, 0, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                DoSpawnCreature(NPC_WINDWALKER, -15, -15, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
+                DoSpawnCreature(NPC_WINDWALKER, -17, -17, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
                 break;
             case 13:
                 DoScriptText(SAY_ELF_RESTING, m_creature, pPlayer);
@@ -449,8 +449,8 @@ struct npc_wounded_blood_elf : public CreatureScript
             case 14:
                 DoScriptText(SAY_ELF_SUMMON2, m_creature, pPlayer);
                 // Spawn two Haal'eshi Windwalker
-                DoSpawnCreature(NPC_WINDWALKER, -15, -15, 0, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
-                DoSpawnCreature(NPC_WINDWALKER, -17, -17, 0, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                DoSpawnCreature(NPC_WINDWALKER, -15, -15, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
+                DoSpawnCreature(NPC_WINDWALKER, -17, -17, 0, 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
                 break;
             case 27:
                 DoScriptText(SAY_ELF_COMPLETE, m_creature, pPlayer);
@@ -985,7 +985,7 @@ struct spell_just_release_darkness : public SpellScript
             pCreatureTarget->GetNearPoint(pCreatureTarget, fX, fY, fZ, 5.0f, 10.0f, frand(0, M_PI_F / 2));
 
             // spawn a Darkness Released npc and move around the room
-            if (Creature* pDarkness = pCreatureTarget->SummonCreature(NPC_DARKNESS_RELEASED, 0, 0, 0, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 20000))
+            if (Creature* pDarkness = pCreatureTarget->SummonCreature(NPC_DARKNESS_RELEASED, 0, 0, 0, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 20000))
             {
                 pDarkness->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
             }

@@ -265,7 +265,7 @@ struct is_mount_hyjal : public InstanceScript
             // Summon Archimonde
             if (Player* pPlayer = GetPlayerInMap())
             {
-                pPlayer->SummonCreature(NPC_ARCHIMONDE, aArchimondeSpawnLoc[0], aArchimondeSpawnLoc[1], aArchimondeSpawnLoc[2], aArchimondeSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                pPlayer->SummonCreature(NPC_ARCHIMONDE, aArchimondeSpawnLoc[0], aArchimondeSpawnLoc[1], aArchimondeSpawnLoc[2], aArchimondeSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
 

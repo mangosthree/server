@@ -276,7 +276,7 @@ struct boss_malygos : public CreatureScript
         void JustDied(Unit* /*pKiller*/) override
         {
             DoScriptText(SAY_DEATH, m_creature);
-            m_creature->SummonCreature(NPC_ALEXSTRASZA, aAlextraszaSpawnPos[0], aAlextraszaSpawnPos[1], aAlextraszaSpawnPos[2], aAlextraszaSpawnPos[3], TEMPSUMMON_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+            m_creature->SummonCreature(NPC_ALEXSTRASZA, aAlextraszaSpawnPos[0], aAlextraszaSpawnPos[1], aAlextraszaSpawnPos[2], aAlextraszaSpawnPos[3], TEMPSPAWN_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
 
             if (m_pInstance)
             {
@@ -418,15 +418,15 @@ struct boss_malygos : public CreatureScript
             for (uint8 i = 0; i < m_uiMaxNexusLords; ++i)
             {
                 m_creature->GetRandomPoint(aCenterMovePos[0], aCenterMovePos[1], aCenterMovePos[2], 50.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_HOVER_DISK, fX, fY, fZ + 30.0f, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
-                m_creature->SummonCreature(NPC_NEXUS_LORD, fX, fY, fZ + 30.0f, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_HOVER_DISK, fX, fY, fZ + 30.0f, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_NEXUS_LORD, fX, fY, fZ + 30.0f, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
 
             for (uint8 i = 0; i < m_uiMaxScions; ++i)
             {
                 m_creature->GetRandomPoint(aCenterMovePos[0], aCenterMovePos[1], aCenterMovePos[2], 50.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_HOVER_DISK, fX, fY, fZ + 30.0f, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
-                m_creature->SummonCreature(NPC_SCION_OF_ETERNITY, fX, fY, fZ + 30.0f, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_HOVER_DISK, fX, fY, fZ + 30.0f, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(NPC_SCION_OF_ETERNITY, fX, fY, fZ + 30.0f, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
 

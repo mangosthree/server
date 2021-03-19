@@ -285,7 +285,7 @@ struct boss_malacrass : public CreatureScript
                 {
                     uint8 uiAddVersion = urand(0, 1);
                     m_vAddsEntryList[i] = aSpawnEntries[i][uiAddVersion];
-                    m_creature->SummonCreature(aSpawnEntries[i][uiAddVersion], m_aAddPositions[i][0], m_aAddPositions[i][1], m_aAddPositions[i][2], m_aAddPositions[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    m_creature->SummonCreature(aSpawnEntries[i][uiAddVersion], m_aAddPositions[i][0], m_aAddPositions[i][1], m_aAddPositions[i][2], m_aAddPositions[i][3], TEMPSPAWN_CORPSE_DESPAWN, 0);
                 }
             }
             // Resummon the killed adds
@@ -304,7 +304,7 @@ struct boss_malacrass : public CreatureScript
                         continue;
                     }
 
-                    m_creature->SummonCreature(m_vAddsEntryList[i], m_aAddPositions[i][0], m_aAddPositions[i][1], m_aAddPositions[i][2], m_aAddPositions[i][3], TEMPSUMMON_CORPSE_DESPAWN, 0);
+                    m_creature->SummonCreature(m_vAddsEntryList[i], m_aAddPositions[i][0], m_aAddPositions[i][1], m_aAddPositions[i][2], m_aAddPositions[i][3], TEMPSPAWN_CORPSE_DESPAWN, 0);
                 }
             }
         }

@@ -38,6 +38,10 @@
 #include "ObjectGuid.h"
 #include "SpellMgr.h"
 
+/**********************************************************************
+     CommandTable : debugCommandTable
+/***********************************************************************/
+
 bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
 {
     if (!*args)
@@ -535,7 +539,7 @@ bool ChatHandler::HandleDebugGetLootRecipientCommand(char* /*args*/)
 
 bool ChatHandler::HandleDebugSendQuestInvalidMsgCommand(char* args)
 {
-    uint32 msg = std::stoul(args);
+    uint32 msg = atol(args);
     m_session->GetPlayer()->SendCanTakeQuestResponse(msg);
     return true;
 }
@@ -898,24 +902,8 @@ bool ChatHandler::HandleDebugSendSetPhaseShiftCommand(char* args)
         return false;
     }
 
-    char* m = strtok((char*)args, " ");
-    char* p = strtok(NULL, " ");
-
-    uint16 MapId = atoi(m);
-    uint32 PhaseShift = atoi(p);
-    m_session->SendSetPhaseShift(PhaseShift, MapId);
-    return true;
-}
-
-bool ChatHandler::HandleDebugPhaseCommand(char* args)
-{
-    uint32 emote_id;
-    if (!ExtractUInt32(&args, emote_id))
-    {
-        return false;
-    }
-
-    m_session->GetPlayer()->HandleEmoteCommand(emote_id);
+    uint32 PhaseShift = atoi(args);
+    m_session->SendSetPhaseShift(PhaseShift);
     return true;
 }
 
@@ -1408,7 +1396,7 @@ bool ChatHandler::HandleDebugSpellCoefsCommand(char* args)
     for (int i = 0; i < 3; ++i)
     {
         SpellEffectEntry const* spellEffect = spellEntry->GetSpellEffect(SpellEffectIndex(i));
-        if(!spellEffect)
+        if (!spellEffect)
         {
             continue;
         }
@@ -1425,7 +1413,7 @@ bool ChatHandler::HandleDebugSpellCoefsCommand(char* args)
     for (int i = 0; i < 3; ++i)
     {
         SpellEffectEntry const* spellEffect = spellEntry->GetSpellEffect(SpellEffectIndex(i));
-        if(!spellEffect)
+        if (!spellEffect)
         {
             continue;
         }
@@ -1443,9 +1431,9 @@ bool ChatHandler::HandleDebugSpellCoefsCommand(char* args)
     char const* dotDamageStr = GetMangosString(LANG_DOT_DAMAGE);
 
     PSendSysMessage(LANG_SPELLCOEFS, spellid, isDirectHeal ? directHealStr : directDamageStr,
-                    direct_calc, direct_calc * SCALE_SPELLPOWER_HEALING, bonus ? bonus->direct_damage : 0.0f, bonus ? bonus->ap_bonus : 0.0f);
+        direct_calc, direct_calc * SCALE_SPELLPOWER_HEALING, bonus ? bonus->direct_damage : 0.0f, bonus ? bonus->ap_bonus : 0.0f);
     PSendSysMessage(LANG_SPELLCOEFS, spellid, isDotHeal ? dotHealStr : dotDamageStr,
-                    dot_calc, dot_calc * SCALE_SPELLPOWER_HEALING, bonus ? bonus->dot_damage : 0.0f, bonus ? bonus->ap_dot_bonus : 0.0f);
+        dot_calc, dot_calc * SCALE_SPELLPOWER_HEALING, bonus ? bonus->dot_damage : 0.0f, bonus ? bonus->ap_dot_bonus : 0.0f);
 
     return true;
 }
@@ -1511,12 +1499,22 @@ bool ChatHandler::HandleDebugSpellModsCommand(char* args)
                                          opcode == SMSG_SET_FLAT_SPELL_MODIFIER ? "flat" : "pct", spellmodop, value, effidx);
 
     WorldPacket data(opcode, (1 + 1 + 2 + 2));
-    data << uint32(1);
-    data << uint32(1);
-    data << uint8(spellmodop);
     data << uint8(effidx);
+    data << uint8(spellmodop);
     data << int32(value);
     chr->GetSession()->SendPacket(&data);
 
+    return true;
+}
+
+bool ChatHandler::HandleDebugPhaseCommand(char* args)
+{
+    uint32 emote_id;
+    if (!ExtractUInt32(&args, emote_id))
+    {
+        return false;
+    }
+
+    m_session->GetPlayer()->HandleEmoteCommand(emote_id);
     return true;
 }

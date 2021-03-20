@@ -25,7 +25,7 @@
 #ifndef MANGOS_TIMER_H
 #define MANGOS_TIMER_H
 
-#include "Common\Common.h"
+#include "Common.h"
 #include "Duration.h"
 
 // New Method

@@ -73,6 +73,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/dep
     ${CMAKE_SOURCE_DIR}/dep/utf8cpp
     ${CMAKE_SOURCE_DIR}/src/framework
+    ${CMAKE_SOURCE_DIR}/src/shared/Common
     ${CMAKE_SOURCE_DIR}/src/shared/Utilities
     ${CMAKE_BINARY_DIR}
     ${ACE_INCLUDE_DIR}

@@ -58,6 +58,7 @@
 #include "movement/MoveSpline.h"
 #include "CreatureLinkingMgr.h"
 #include "movement/MovementStructures.h"
+#include "GameTime.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #include "ElunaEventMgr.h"
@@ -579,12 +580,12 @@ void MovementInfo::Write(ByteBuffer& data, uint16 opcode) const
 bool GlobalCooldownMgr::HasGlobalCooldown(SpellEntry const* spellInfo) const
 {
     GlobalCooldownList::const_iterator itr = m_GlobalCooldowns.find(spellInfo->GetStartRecoveryCategory());
-    return itr != m_GlobalCooldowns.end() && itr->second.duration && WorldTimer::getMSTimeDiff(itr->second.cast_time, WorldTimer::getMSTime()) < itr->second.duration;
+    return itr != m_GlobalCooldowns.end() && itr->second.duration && getMSTimeDiff(itr->second.cast_time, GameTime::GetGameTimeMS()) < itr->second.duration;
 }
 
 void GlobalCooldownMgr::AddGlobalCooldown(SpellEntry const* spellInfo, uint32 gcd)
 {
-    m_GlobalCooldowns[spellInfo->GetStartRecoveryCategory()] = GlobalCooldown(gcd, WorldTimer::getMSTime());
+    m_GlobalCooldowns[spellInfo->GetStartRecoveryCategory()] = GlobalCooldown(gcd, GameTime::GetGameTimeMS());
 }
 
 void GlobalCooldownMgr::CancelGlobalCooldown(SpellEntry const* spellInfo)
@@ -910,7 +911,7 @@ bool Unit::haveOffhandWeapon() const
 
 void Unit::SendHeartBeat()
 {
-    m_movementInfo.UpdateTime(WorldTimer::getMSTime());
+    m_movementInfo.UpdateTime(GameTime::GetGameTimeMS());
     WorldPacket data(MSG_MOVE_HEARTBEAT, 64);
     data << GetPackGUID();
     data << m_movementInfo;
@@ -4400,11 +4401,11 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit* pVict
     {
         switch (attackType)
         {
-            case BASE_ATTACK:
-                crit = GetFloatValue(PLAYER_CRIT_PERCENTAGE);
-                break;
             case OFF_ATTACK:
                 crit = GetFloatValue(PLAYER_OFFHAND_CRIT_PERCENTAGE);
+                break;
+            case BASE_ATTACK:
+                crit = GetFloatValue(PLAYER_CRIT_PERCENTAGE);
                 break;
             case RANGED_ATTACK:
                 crit = GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE);
@@ -5329,9 +5330,12 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
     uint32 spellId = holder->GetId();
 
     // passive spell special case (only non stackable with ranks)
-    if (IsPassiveSpell(spellProto) && IsPassiveSpellStackableWithRanks(spellProto))
+    if (IsPassiveSpell(spellProto))
     {
-        return true;
+        if (IsPassiveSpellStackableWithRanks(spellProto))
+        {
+            return true;
+        }
     }
 
     SpellSpecific spellId_spec = GetSpellSpecific(spellId);
@@ -10086,8 +10090,6 @@ bool Unit::IsTargetableForAttack(bool inverseAlive /*=false*/) const
 
 int32 Unit::ModifyHealth(int32 dVal)
 {
-    int32 gain = 0;
-
     if (dVal == 0)
     {
         return 0;
@@ -10104,6 +10106,7 @@ int32 Unit::ModifyHealth(int32 dVal)
 
     int32 maxHealth = (int32)GetMaxHealth();
 
+    int32 gain;
     if (val < maxHealth)
     {
         SetHealth(val);
@@ -10120,8 +10123,6 @@ int32 Unit::ModifyHealth(int32 dVal)
 
 int32 Unit::ModifyPower(Powers power, int32 dVal)
 {
-    int32 gain = 0;
-
     if (dVal == 0)
     {
         return 0;
@@ -10138,6 +10139,7 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
 
     int32 maxPower = (int32)GetMaxPower(power);
 
+    int32 gain;
     if (val < maxPower)
     {
         SetPower(power, val);
@@ -10792,7 +10794,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
             ((Player*)this)->GetSession()->SendPacket(&data);
         }
 
-        m_movementInfo.UpdateTime(WorldTimer::getMSTime());
+        m_movementInfo.UpdateTime(GameTime::GetGameTimeMS());
 
         // TODO: Actually such opcodes should (always?) be packed with SMSG_COMPRESSED_MOVES
         switch (mtype)
@@ -11209,8 +11211,8 @@ bool Unit::SelectHostileTarget()
         for (AuraList::const_reverse_iterator aura = tauntAuras.rbegin(); aura != tauntAuras.rend(); ++aura)
         {
             if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
-                    caster->IsTargetableForAttack() && caster->isInAccessablePlaceFor((Creature*)this) &&
-                    !IsSecondChoiceTarget(caster, true))
+                caster->IsTargetableForAttack() && caster->isInAccessablePlaceFor((Creature*)this) &&
+                !IsSecondChoiceTarget(caster, true))
             {
                 target = caster;
                 break;
@@ -11434,7 +11436,9 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
     // random damage
     if (comboDamage != 0 && unitPlayer &&
         (target && target->GetObjectGuid() == unitPlayer->GetComboTargetGuid() || spellProto->HasAttribute(SPELL_ATTR_EX8_IGNORE_TARGET_FOR_COMBO_POINTS)))
+    {
         value += (int32)(comboDamage * comboPoints);
+    }
 
     if (Player* modOwner = GetSpellModOwner())
     {
@@ -11458,7 +11462,9 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
             spellEffect->Effect != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
             spellEffect->Effect != SPELL_EFFECT_KNOCK_BACK &&
             (spellEffect->Effect != SPELL_EFFECT_APPLY_AURA || spellEffect->EffectApplyAuraName != SPELL_AURA_MOD_DECREASE_SPEED))
-        value = int32(value * 0.25f * exp(level * (70 - spellLevel) / 1000.0f));
+        {
+            value = int32(value * 0.25f * exp(level * (70 - spellLevel) / 1000.0f));
+        }
 
     return value;
 }
@@ -11578,7 +11584,7 @@ DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
         }
 
         // If last spell was casted more than 15 seconds ago - reset the count.
-        if (i->stack == 0 && WorldTimer::getMSTimeDiff(i->hitTime, WorldTimer::getMSTime()) > 15 * IN_MILLISECONDS)
+        if (i->stack == 0 && getMSTimeDiff(i->hitTime, GameTime::GetGameTimeMS()) > 15 * IN_MILLISECONDS)
         {
             i->hitCount = DIMINISHING_LEVEL_1;
             return DIMINISHING_LEVEL_1;
@@ -11607,7 +11613,7 @@ void Unit::IncrDiminishing(DiminishingGroup group)
         }
         return;
     }
-    m_Diminishing.push_back(DiminishingReturn(group, WorldTimer::getMSTime(), DIMINISHING_LEVEL_2));
+    m_Diminishing.push_back(DiminishingReturn(group, GameTime::GetGameTimeMS(), DIMINISHING_LEVEL_2));
 }
 
 void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, Unit* caster, DiminishingLevels Level, int32 limitduration, bool isReflected)
@@ -11672,7 +11678,7 @@ void Unit::ApplyDiminishingAura(DiminishingGroup group, bool apply)
             // Remember time after last aura from group removed
             if (i->stack == 0)
             {
-                i->hitTime = WorldTimer::getMSTime();
+                i->hitTime = GameTime::GetGameTimeMS();
             }
         }
         break;
@@ -12594,7 +12600,7 @@ void CharmInfo::LoadPetActionBar(const std::string& data)
 
     if (tokens.size() != (ACTION_BAR_INDEX_END - ACTION_BAR_INDEX_START) * 2)
     {
-        return;                                             // non critical, will reset to default
+        return;                                              // non critical, will reset to default
     }
 
     int index;
@@ -12870,13 +12876,13 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                 SpellAuraProcResult procResult = (*this.*AuraProcHandler[spellEffect->EffectApplyAuraName])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
                 switch (procResult)
                 {
-                case SPELL_AURA_PROC_CANT_TRIGGER:
-                    continue;
-                case SPELL_AURA_PROC_FAILED:
-                    procSuccess = false;
-                    break;
-                case SPELL_AURA_PROC_OK:
-                    break;
+                    case SPELL_AURA_PROC_CANT_TRIGGER:
+                        continue;
+                    case SPELL_AURA_PROC_FAILED:
+                        procSuccess = false;
+                        break;
+                    case SPELL_AURA_PROC_OK:
+                        break;
                 }
 
                 anyAuraProc = true;
@@ -13064,30 +13070,34 @@ void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
 {
     if (apply)
     {
-        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
 
-        CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
+         CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
 
-        GetMotionMaster()->MoveConfused();
+         if (GetTypeId() == TYPEID_UNIT)
+         {
+             SetTargetGuid(ObjectGuid());
+             GetMotionMaster()->MoveConfused();
+         }
     }
     else
     {
-        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
 
-        GetMotionMaster()->MovementExpired(false);
+         GetMotionMaster()->MovementExpired(false);
 
-        if (GetTypeId() != TYPEID_PLAYER && IsAlive())
-        {
-            // restore appropriate movement generator
-            if (getVictim())
-            {
-                GetMotionMaster()->MoveChase(getVictim());
-            }
-            else
-            {
-                GetMotionMaster()->Initialize();
-            }
-        }
+         if (GetTypeId() != TYPEID_PLAYER && IsAlive())
+         {
+         // restore appropriate movement generator
+                if (getVictim())
+                {
+                       GetMotionMaster()->MoveChase(getVictim());
+                 }
+                 else
+                 {
+                     GetMotionMaster()->Initialize();
+                 }
+          }
     }
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -13229,7 +13239,7 @@ void Unit::UpdateModelData()
 {
     if (CreatureModelInfo const* modelInfo = sObjectMgr.GetCreatureModelInfo(GetDisplayId()))
     {
-        // we expect values in database to be relative to Scale = 1.0
+        // we expect values in database to be relative to scale = 1.0
         SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, GetObjectScale() * modelInfo->bounding_radius);
 
         // never actually update combat_reach for player, it's always the same. Below player case is for initialization
@@ -13253,11 +13263,11 @@ void Unit::ClearComboPointHolders()
         Player* plr = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, lowguid));
         if (plr && plr->GetComboTargetGuid() == GetObjectGuid())// recheck for safe
         {
-            plr->ClearComboPoints();                        // remove also guid from m_ComboPointHolders;
+            plr->ClearComboPoints();                         // remove also guid from m_ComboPointHolders;
         }
         else
         {
-            m_ComboPointHolders.erase(lowguid);             // or remove manually
+            m_ComboPointHolders.erase(lowguid);              // or remove manually
         }
     }
 }
@@ -13497,7 +13507,7 @@ float Unit::GetAPMultiplier(WeaponAttackType attType, bool normalized)
     Item* Weapon = ((Player*)this)->GetWeaponForAttack(attType, true, false);
     if (!Weapon)
     {
-        return 2.4f;                                        // fist attack
+        return 2.4f;                                         // fist attack
     }
 
     switch (Weapon->GetProto()->InventoryType)

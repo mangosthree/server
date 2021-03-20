@@ -22,54 +22,58 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "ace/OS.h"
-#include "AFThread.h"
-#include "World.h"
-#include "Log.h"
+#ifndef MANGOS_RNG_H
+#define MANGOS_RNG_H
 
+#include <random>
 
-AntiFreezeThread::AntiFreezeThread(uint32 delay) : delaytime_(delay)
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
+#include "Platform/Define.h"
+
+class RNGen
 {
-    m_loops = 0;
-    w_loops = 0;
-    m_lastchange = 0;
-    w_lastchange = 0;
-}
-
-int AntiFreezeThread::open(void* unused)
-{
-    activate();
-    return 0;
-}
-
-int AntiFreezeThread::svc(void)
-{
-    if (!delaytime_)
+public:
+    RNGen()
     {
-        return 0;
+        std::random_device rd;
+        gen_.seed(rd());
     }
 
-    sLog.outString("AntiFreeze Thread started (%u seconds max stuck time)", delaytime_/1000);
-    while (!World::IsStopped())
+    int32 rand_i(int32 min, int32 max)
     {
-        ACE_OS::sleep(1);
-
-        uint32 curtime = getMSTime();
-
-        // normal work
-        if (w_loops != World::m_worldLoopCounter.value())
-        {
-              w_lastchange = curtime;
-              w_loops = World::m_worldLoopCounter.value();
-        }
-        // possible freeze
-        else if (getMSTimeDiff(w_lastchange, curtime) > delaytime_)
-        {
-            sLog.outError("World Thread hangs, kicking out server!");
-            *((uint32 volatile*)NULL) = 0;          // bang crash
-        }
+        std::uniform_int_distribution<int32> dist{min, max};
+        return dist(gen_);
     }
-    sLog.outString("AntiFreeze Thread stopped.");
-    return 0;
-}
 
+    uint32 rand_u(uint32 min, uint32 max)
+    {
+        std::uniform_int_distribution<uint32> dist{min, max};
+        return dist(gen_);
+    }
+
+    uint32 rand()
+    {
+        std::uniform_int_distribution<uint32> dist;
+        return dist(gen_);
+    }
+
+    float rand_f(float min, float max)
+    {
+        std::uniform_real_distribution<float> dist{min, max};
+        return dist(gen_);
+    }
+
+    double rand_d(double min, double max)
+    {
+        std::uniform_real_distribution<double> dist{min, max};
+        return dist(gen_);
+    }
+
+private:
+    std::mt19937 gen_;
+};
+
+typedef ACE_TSS_Singleton<RNGen, ACE_SYNCH_MUTEX> RNG;
+
+#endif

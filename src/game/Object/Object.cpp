@@ -50,6 +50,8 @@
 #include "movement/packet_builder.h"
 #include "CreatureLinkingMgr.h"
 #include "Chat.h"
+#include "GameTime.h"
+
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #include "ElunaEventMgr.h"
@@ -452,7 +454,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
         data->WriteGuidBytes<7, 1, 2>(Guid);
         *data << float(unit->GetSpeed(MOVE_WALK));
 
-        *data << uint32(WorldTimer::getMSTime());
+        *data << uint32(GameTime::GetGameTimeMS());
 
         *data << float(unit->GetSpeed(MOVE_FLIGHT_BACK));
         data->WriteGuidBytes<6>(Guid);
@@ -508,7 +510,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
 
     if (updateFlags & UPDATEFLAG_ROTATION)
     {
-        *data << int64(((GameObject*)this)->GetPackedWorldRotation());
+        *data << uint32(GameTime::GetGameTimeMS());           // ms time
     }
 
     if (updateFlags & UPDATEFLAG_TRANSPORT_ARR)
@@ -553,7 +555,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
 
     if (updateFlags & UPDATEFLAG_TRANSPORT)
     {
-        *data << uint32(WorldTimer::getMSTime());
+        *data << uint32(GameTime::GetGameTimeMS());
     }
 }
 

@@ -8318,7 +8318,7 @@ bool ChatHandler::HandleMmapTestArea(char* args)
         PSendSysMessage("Found " SIZEFMTD " Creatures.", creatureList.size());
 
         uint32 paths = 0;
-        uint32 uStartTime = WorldTimer::getMSTime();
+        uint32 uStartTime = GameTime::GetGameTimeMS();
 
         float gx, gy, gz;
         m_session->GetPlayer()->GetPosition(gx, gy, gz);
@@ -8329,7 +8329,7 @@ bool ChatHandler::HandleMmapTestArea(char* args)
             ++paths;
         }
 
-        uint32 uPathLoadTime = WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime());
+        uint32 uPathLoadTime = getMSTimeDiff(uStartTime, GameTime::GetGameTimeMS());
         PSendSysMessage("Generated %i paths in %i ms", paths, uPathLoadTime);
     }
     else
@@ -8387,7 +8387,7 @@ bool ChatHandler::HandleMmapTestHeight(char* args)
     summoned->CastSpell(summoned, 8599, false);
     uint32 tries = 1;
     uint32 successes = 0;
-    uint32 startTime = WorldTimer::getMSTime();
+    uint32 startTime = GameTime::GetGameTimeMS();
     for (; tries < 500; ++tries)
     {
         unit->GetPosition(gx, gy, gz);
@@ -8401,7 +8401,7 @@ bool ChatHandler::HandleMmapTestHeight(char* args)
             }
         }
     }
-    uint32 genTime = WorldTimer::getMSTimeDiff(startTime, WorldTimer::getMSTime());
+    uint32 genTime = getMSTimeDiff(startTime, GameTime::GetGameTimeMS());
     PSendSysMessage("Generated %u valid points for %u try in %ums.", successes, tries, genTime);
     return true;
 }

@@ -71,17 +71,15 @@ endif()
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/dep
+    ${CMAKE_SOURCE_DIR}/dep/utf8cpp
     ${CMAKE_SOURCE_DIR}/src/framework
+    ${CMAKE_SOURCE_DIR}/src/shared/Utilities
     ${CMAKE_BINARY_DIR}
     ${ACE_INCLUDE_DIR}
     ${OPENSSL_INCLUDE_DIR}
 )
 
-if(POSTGRESQL)
-    include_directories(${PostgreSQL_INCLUDE_DIRS})
-else()
     include_directories(${MYSQL_INCLUDE_DIR})
-endif()
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/SystemConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/SystemConfig.h")
 

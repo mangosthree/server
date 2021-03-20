@@ -40,6 +40,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/game/References
     ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators
     ${CMAKE_SOURCE_DIR}/src/game/vmap
+    ${CMAKE_SOURCE_DIR}/src/game/Time
     ${CMAKE_SOURCE_DIR}/src/shared
     ${CMAKE_SOURCE_DIR}/src/shared/Utilities
     ${CMAKE_SOURCE_DIR}/src/shared/Log

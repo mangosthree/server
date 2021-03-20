@@ -79,6 +79,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers
     ${CMAKE_SOURCE_DIR}/src/game/Maps
     ${CMAKE_SOURCE_DIR}/src/game/Object
+    ${CMAKE_SOURCE_DIR}/src/game/Time
     ${CMAKE_SOURCE_DIR}/src/game/Tools
     ${CMAKE_SOURCE_DIR}/src/game/References
     ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators

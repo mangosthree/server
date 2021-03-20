@@ -32,7 +32,7 @@
 #include "ObjectGuid.h"
 #include "Camera.h"
 #include "Util.h"
-#include "../Time/GameTime.h"
+#include "GameTime.h"
 
 #include <set>
 #include <string>

@@ -37,6 +37,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
     ${CMAKE_CURRENT_SOURCE_DIR}/References
     ${CMAKE_CURRENT_SOURCE_DIR}/Server
+    ${CMAKE_CURRENT_SOURCE_DIR}/Time
     ${CMAKE_CURRENT_SOURCE_DIR}/Tools
     ${CMAKE_CURRENT_SOURCE_DIR}/vmap
     ${CMAKE_CURRENT_SOURCE_DIR}/Warden
@@ -44,7 +45,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/WorldHandlers
     ${CMAKE_CURRENT_SOURCE_DIR}/framework/Platform
     ${CMAKE_SOURCE_DIR}/src/framework/Platform
-    ${CMAKE_SOURCE_DIR}/src/game/Time/
+    ${CMAKE_SOURCE_DIR}/src/game/Time
     ${CMAKE_SOURCE_DIR}/dep/g3dlite
     ${CMAKE_SOURCE_DIR}/dep/zlib
     ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour/Include

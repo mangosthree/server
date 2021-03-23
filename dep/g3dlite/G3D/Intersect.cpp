@@ -25,7 +25,7 @@ namespace G3D {
 #pragma float_control( precise, off )
 #endif
 
-bool __fastcall Intersect::rayAABox(const Ray& ray, const AABox& box) {
+bool  Intersect::rayAABox(const Ray& ray, const AABox& box) {
     switch (ray.classification) {
     case Ray::MMM:
         
@@ -331,7 +331,7 @@ bool __fastcall Intersect::rayAABox(const Ray& ray, const AABox& box) {
 }
 
 
-bool __fastcall Intersect::rayAABox(const Ray& ray, const AABox& box, float& time) {
+bool  Intersect::rayAABox(const Ray& ray, const AABox& box, float& time) {
 
     switch (ray.classification) {
     case Ray::MMM:

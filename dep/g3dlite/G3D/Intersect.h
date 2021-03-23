@@ -34,7 +34,7 @@ public:
       Computer Graphics Lab, TU Braunschweig, Germany and
       University of Koblenz-Landau, Germany
     */
-    static bool __fastcall rayAABox(const Ray& ray, const AABox& box);
+    static bool  rayAABox(const Ray& ray, const AABox& box);
 
     /** \brief Returns true if the intersection of the ray and the solid box is non-empty. 
      
@@ -47,7 +47,7 @@ public:
       Computer Graphics Lab, TU Braunschweig, Germany and
       University of Koblenz-Landau, Germany
       */
-     static bool __fastcall rayAABox(const Ray& ray, const AABox& box, float& time);
+     static bool  rayAABox(const Ray& ray, const AABox& box, float& time);
 };
 
 }

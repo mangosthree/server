@@ -44,14 +44,6 @@
 #define G3D_WINSOCK_MAJOR_VERSION 2
 #define G3D_WINSOCK_MINOR_VERSION 0
 
-#ifndef _MSC_VER
-/// Fast call is a register-based optimized calling convention supported only by Visual C++
-#ifdef __FreeBSD__
-#undef __fastcall
-#endif
-#define __fastcall
-#endif
-
 #ifdef _MSC_VER 
     #define G3D_WIN32
 #elif  defined(__FreeBSD__) || defined(__OpenBSD__)
@@ -273,6 +265,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {\
 #       ifndef __stdcall
 #           define __stdcall
 #       endif
+#   elif defined(__arm__)
+        // CDECL does not apply to arm.
+#       define __cdecl
 #   endif // calling conventions
 
 /** @def G3D_CHECK_PRINTF_METHOD_ARGS()

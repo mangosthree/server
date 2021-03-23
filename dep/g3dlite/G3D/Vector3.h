@@ -103,7 +103,7 @@ public:
     // WARNING.  These member functions rely on
     // (1) Vector3 not having virtual functions
     // (2) the data packed in a 3*sizeof(float) memory block
-    const float& __fastcall operator[] (int i) const;
+    const float&  operator[] (int i) const;
     float& operator[] (int i);
 
     enum Axis {X_AXIS=0, Y_AXIS=1, Z_AXIS=2, DETECT_AXIS=-1};
@@ -115,7 +115,7 @@ public:
     Axis primaryAxis() const;
 
     // assignment and comparison
-    Vector3& __fastcall operator= (const Vector3& rkVector);
+    Vector3&  operator= (const Vector3& rkVector);
     bool operator== (const Vector3& rkVector) const;
     bool operator!= (const Vector3& rkVector) const;
     size_t hashCode() const;
@@ -132,25 +132,25 @@ public:
     bool isUnit() const;
     
     // arithmetic operations
-    Vector3 __fastcall operator+ (const Vector3& v) const;
-    Vector3 __fastcall operator- (const Vector3& v) const;
-    Vector3 __fastcall operator* (float s) const;
-    inline Vector3 __fastcall operator/ (float s) const {
+    Vector3  operator+ (const Vector3& v) const;
+    Vector3  operator- (const Vector3& v) const;
+    Vector3  operator* (float s) const;
+    inline Vector3  operator/ (float s) const {
         return *this * (1.0f / s);
     }
-    Vector3 __fastcall operator* (const Vector3& v) const;
-    Vector3 __fastcall operator/ (const Vector3& v) const;
-    Vector3 __fastcall operator- () const;
+    Vector3  operator* (const Vector3& v) const;
+    Vector3  operator/ (const Vector3& v) const;
+    Vector3  operator- () const;
 
     // arithmetic updates
-    Vector3& __fastcall operator+= (const Vector3& v);
-    Vector3& __fastcall operator-= (const Vector3& v);
-    Vector3& __fastcall operator*= (float s);
-    inline Vector3& __fastcall operator/= (float s) {
+    Vector3&  operator+= (const Vector3& v);
+    Vector3&  operator-= (const Vector3& v);
+    Vector3&  operator*= (float s);
+    inline Vector3&  operator/= (float s) {
         return (*this *= (1.0f / s));
     }
-    Vector3& __fastcall operator*= (const Vector3& v);
-    Vector3& __fastcall operator/= (const Vector3& v);
+    Vector3&  operator*= (const Vector3& v);
+    Vector3&  operator/= (const Vector3& v);
 
     /** Same as magnitude */
     float length() const;
@@ -266,14 +266,14 @@ public:
 
     float squaredMagnitude () const;
     
-    float __fastcall dot(const Vector3& rkVector) const;
+    float  dot(const Vector3& rkVector) const;
     
     float unitize(float tolerance = 1e-06);
 
     /** Cross product.  Note that two cross products in a row
         can be computed more cheaply: v1 x (v2 x v3) = (v1 dot v3) v2  - (v1 dot v2) v3.
       */
-    Vector3 __fastcall cross(const Vector3& rkVector) const;
+    Vector3  cross(const Vector3& rkVector) const;
     Vector3 unitCross(const Vector3& rkVector) const;
 
     /**
@@ -286,8 +286,8 @@ public:
      */
     class Matrix3 cross() const;
 
-    Vector3 __fastcall min(const Vector3 &v) const;
-    Vector3 __fastcall max(const Vector3 &v) const;
+    Vector3  min(const Vector3 &v) const;
+    Vector3  max(const Vector3 &v) const;
 
     /** Smallest element */
     inline float min() const {

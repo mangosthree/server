@@ -38,7 +38,7 @@
 #include "G3D/fileutils.h"
 #include "G3D/Log.h"
 #include "G3D/FileSystem.h"
-#include <zlib.h>
+#include "zlib.h"
 #if _HAVE_ZIP /* G3DFIX: Use ZIP-library only if defined */
 #include "zip.h"
 #endif /* G3DFIX: Use ZIP-library only if defined */

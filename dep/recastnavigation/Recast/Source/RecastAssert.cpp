@@ -16,36 +16,20 @@
 // 3. This notice may not be removed or altered from any source distribution.
 //
 
-#ifndef NAVMESHPRUNETOOL_H
-#define NAVMESHPRUNETOOL_H
+#include "RecastAssert.h"
 
-#include "Sample.h"
+#ifndef NDEBUG
 
-// Prune navmesh to accessible locations from a point.
+static rcAssertFailFunc* sRecastAssertFailFunc = 0;
 
-class NavMeshPruneTool : public SampleTool
+void rcAssertFailSetCustom(rcAssertFailFunc *assertFailFunc)
 {
-    Sample* m_sample;
-    
-    class NavmeshFlags* m_flags;
+    sRecastAssertFailFunc = assertFailFunc;
+}
 
-    float m_hitPos[3];
-    bool m_hitPosSet;
-    
-public:
-    NavMeshPruneTool();
-    ~NavMeshPruneTool();
-    
-    virtual int type() { return TOOL_NAVMESH_PRUNE; }
-    virtual void init(Sample* sample);
-    virtual void reset();
-    virtual void handleMenu();
-    virtual void handleClick(const float* s, const float* p, bool shift);
-    virtual void handleToggle();
-    virtual void handleStep();
-    virtual void handleUpdate(const float dt);
-    virtual void handleRender();
-    virtual void handleRenderOverlay(double* proj, double* model, int* view);
-};
+rcAssertFailFunc* rcAssertFailGetCustom()
+{
+    return sRecastAssertFailFunc;
+}
 
-#endif // NAVMESHPRUNETOOL_H
+#endif

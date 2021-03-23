@@ -16,36 +16,20 @@
 // 3. This notice may not be removed or altered from any source distribution.
 //
 
-#ifndef MESHLOADER_OBJ
-#define MESHLOADER_OBJ
+#include "DetourAssert.h"
 
-class rcMeshLoaderObj
+#ifndef NDEBUG
+
+static dtAssertFailFunc* sAssertFailFunc = 0;
+
+void dtAssertFailSetCustom(dtAssertFailFunc *assertFailFunc)
 {
-public:
-    rcMeshLoaderObj();
-    ~rcMeshLoaderObj();
-    
-    bool load(const char* fileName);
+    sAssertFailFunc = assertFailFunc;
+}
 
-    inline const float* getVerts() const { return m_verts; }
-    inline const float* getNormals() const { return m_normals; }
-    inline const int* getTris() const { return m_tris; }
-    inline int getVertCount() const { return m_vertCount; }
-    inline int getTriCount() const { return m_triCount; }
-    inline const char* getFileName() const { return m_filename; }
+dtAssertFailFunc* dtAssertFailGetCustom()
+{
+    return sAssertFailFunc;
+}
 
-private:
-    
-    void addVertex(float x, float y, float z, int& cap);
-    void addTriangle(int a, int b, int c, int& cap);
-    
-    char m_filename[260];
-    float m_scale;    
-    float* m_verts;
-    int* m_tris;
-    float* m_normals;
-    int m_vertCount;
-    int m_triCount;
-};
-
-#endif // MESHLOADER_OBJ
+#endif

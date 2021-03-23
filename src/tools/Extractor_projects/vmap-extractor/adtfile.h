@@ -25,7 +25,7 @@
 #ifndef ADT_H
 #define ADT_H
 
-#include <mpq.h>
+#include "mpqfile.h"
 #include "wmo.h"
 #include "vmapexport.h"
 #include "model.h"
@@ -33,6 +33,7 @@
 #define TILESIZE (533.33333f)
 #define CHUNKSIZE ((TILESIZE) / 16.0f)
 #define UNITSIZE (CHUNKSIZE / 8.0f)
+class Liquid;
 
 /**
  * @brief
@@ -170,9 +171,15 @@ class ADTFile
          * @param failedPaths
          * @return bool
          */
-        bool init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths,int iCoreNumber, const void *szRawVMAPMagic);
+        bool init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths);
     private:
+        MPQFile ADT; /**< TODO */
         string AdtFilename; /**< TODO */
 };
 
+const char* GetPlainName(const char* FileName);
+char* GetPlainName(char* FileName);
+char const* GetExtension(char const* FileName);
+void fixnamen(char* name, size_t len);
+void fixname2(char* name, size_t len);
 #endif

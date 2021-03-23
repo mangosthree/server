@@ -27,21 +27,82 @@
 #include "vmapexport.h"
 #include "adtfile.h"
 
-ADTFile::ADTFile(char* filename): AdtFilename(filename)
+#ifdef WIN32
+#define snprintf _snprintf
+#endif
+
+const char* GetPlainName(const char* FileName)
 {
+    const char* szTemp;
+
+    if ((szTemp = strrchr(FileName, '\\')) != NULL)
+    {
+        FileName = szTemp + 1;
+    }
+    return FileName;
 }
 
-bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths,int iCoreNumber, const void *szRawVMAPMagic)
+char* GetPlainName(char* FileName)
 {
-    HANDLE adtHandle;
+    char* szTemp;
 
-    if (!OpenNewestFile(AdtFilename.c_str(), &adtHandle))
+    if ((szTemp = strrchr(FileName, '\\')) != NULL)
     {
-        printf("Error initializing ADT %s\n", AdtFilename.c_str());
+        FileName = szTemp + 1;
     }
+    return FileName;
+}
 
-    MPQFile ADT(adtHandle, AdtFilename.c_str());
+void fixnamen(char* name, size_t len)
+{
+    for (size_t i = 0; i < len - 3; i++)
+    {
+        if (i > 0 && name[i] >= 'A' && name[i] <= 'Z' && isalpha(name[i - 1]))
+        {
+            name[i] |= 0x20;
+        }
+        else if ((i == 0 || !isalpha(name[i - 1])) && name[i] >= 'a' && name[i] <= 'z')
+        {
+            name[i] &= ~0x20;
+        }
+    }
+    //extension in lowercase
+    for (size_t i = len - 3; i < len; i++)
+    {
+        name[i] |= 0x20;
+    }
+}
 
+void fixname2(char* name, size_t len)
+{
+    for (size_t i = 0; i < len - 3; i++)
+    {
+        if (name[i] == ' ')
+        {
+            name[i] = '_';
+        }
+    }
+}
+
+char const* GetExtension(char const* FileName)
+{
+    char const* szTemp;
+    if ((szTemp = strrchr(FileName, '.')) != NULL)
+    {
+        return szTemp;
+    }
+    return NULL;
+}
+
+extern HANDLE WorldMpq;
+
+ADTFile::ADTFile(char* filename): ADT(WorldMpq, filename)
+{
+    AdtFilename.append(filename);
+}
+
+bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failedPaths)
+{
     if (ADT.isEof())
     {
         return false;
@@ -51,17 +112,16 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
 
     std::string xMap;
     std::string yMap;
-    std::string filename = AdtFilename;
 
-    filename.erase(filename.find(".adt"), 4);
+    AdtFilename.erase(AdtFilename.find(".adt"), 4);
     std::string TempMapNumber;
 
-    TempMapNumber = filename.substr(filename.length() - 6, 6);
+    TempMapNumber = AdtFilename.substr(AdtFilename.length() - 6, 6);
     xMap = TempMapNumber.substr(TempMapNumber.find("_") + 1, (TempMapNumber.find_last_of("_") - 1) - (TempMapNumber.find("_")));
     yMap = TempMapNumber.substr(TempMapNumber.find_last_of("_") + 1, (TempMapNumber.length()) - (TempMapNumber.find_last_of("_")));
-    filename.erase((filename.length() - xMap.length() - yMap.length() - 2), (xMap.length() + yMap.length() + 2));
+    AdtFilename.erase((AdtFilename.length() - xMap.length() - yMap.length() - 2), (xMap.length() + yMap.length() + 2));
 
-    std::string AdtMapNumber = xMap + ' ' + yMap + ' ' + GetUniformName(filename);
+    string AdtMapNumber = xMap + ' ' + yMap + ' ' + GetPlainName((char*)AdtFilename.c_str());
 
     std::string dirname = std::string(szWorkDirWmo) + "/dir_bin";
     FILE* dirfile;
@@ -99,9 +159,12 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
                 ModelInstansName = new std::string[size];
                 while (p < buf + size)
                 {
+                    fixnamen(p, strlen(p));
+                    char* s = GetPlainName(p);
+                    fixname2(s, strlen(s));
                     std::string path(p);                         // Store copy after name fixed
                     std::string uName;
-                    ExtractSingleModel(path, uName, failedPaths, iCoreNumber, szRawVMAPMagic);
+                    ExtractSingleModel(path, uName, failedPaths);
                     ModelInstansName[t++] = uName;
                     p = p + strlen(p) + 1;
                 }
@@ -120,8 +183,11 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
                 while (p < buf + size)
                 {
                     std::string path(p);
-                    WmoInstansName[q++] = GetUniformName(path);
+                    char* s = GetPlainName(p);
+                    fixnamen(s, strlen(s));
+                    fixname2(s, strlen(s));
                     p = p + strlen(p) + 1;
+                    WmoInstansName[q++] = s;
                 }
                 delete[] buf;
             }
@@ -136,7 +202,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
                 {
                     uint32 id;
                     ADT.read(&id, 4);
-                    ModelInstance inst(ADT, ModelInstansName[id], map_num, tileX, tileY, dirfile, iCoreNumber);
+                    ModelInstance inst(ADT, ModelInstansName[id].c_str(), map_num, tileX, tileY, dirfile);
                 }
                 delete[] ModelInstansName;
             }
@@ -150,7 +216,7 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
                 {
                     uint32 id;
                     ADT.read(&id, 4);
-                    WMOInstance inst(ADT, WmoInstansName[id], map_num, tileX, tileY, dirfile);
+                    WMOInstance inst(ADT, WmoInstansName[id].c_str(), map_num, tileX, tileY, dirfile);
                 }
                 delete[] WmoInstansName;
             }
@@ -166,4 +232,5 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
 
 ADTFile::~ADTFile()
 {
+    ADT.close();
 }

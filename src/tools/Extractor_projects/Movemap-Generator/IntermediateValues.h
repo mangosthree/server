@@ -64,7 +64,7 @@ namespace MMAP
          * @param tileX
          * @param tileY
          */
-        void writeIV(int mapID, int tileX, int tileY);
+        void writeIV(uint32 mapID, uint32 tileX, uint32 tileY);
 
         /**
          * @brief
@@ -110,7 +110,7 @@ namespace MMAP
          * @param tileY
          * @param meshData
          */
-        void generateObjFile(int mapID, int tileX, int tileY, MeshData& meshData);
+        void generateObjFile(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData);
     };
 }
 #endif

@@ -110,18 +110,6 @@ class DBCFile
                 /**
                  * @brief
                  *
-                 * @param r
-                 * @return Record &operator
-                 */
-                Record& operator= (const Record& r)
-                {
-                    file = r.file;
-                    offset = r.offset;
-                    return *this;
-                }
-                /**
-                 * @brief
-                 *
                  * @param field
                  * @return float
                  */
@@ -151,17 +139,6 @@ class DBCFile
                 {
                     assert(field < file.fieldCount);
                     return *reinterpret_cast<int*>(offset + (field * 4));
-                }
-                /**
-                 * @brief
-                 *
-                 * @param ofs
-                 * @return unsigned char
-                 */
-                unsigned char getByte(size_t ofs) const
-                {
-                    assert(ofs < file.recordSize);
-                    return *reinterpret_cast<unsigned char*>(offset + ofs);
                 }
                 /**
                  * @brief

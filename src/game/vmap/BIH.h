@@ -25,17 +25,17 @@
 #ifndef MANGOS_H_BIH
 #define MANGOS_H_BIH
 
+#include <G3D/Vector3.h>
+#include <G3D/Ray.h>
+#include <G3D/AABox.h>
+
+#include <Platform/Define.h>
+
 #include <stdexcept>
 #include <vector>
 #include <algorithm>
 #include <limits>
 #include <cmath>
-
-#include <Platform/Define.h>
-
-#include <G3D/Vector3.h>
-#include <G3D/Ray.h>
-#include <G3D/AABox.h>
 
 #define MAX_STACK_SIZE 64
 
@@ -454,14 +454,14 @@ class BIH
          * @param wf
          * @return bool
          */
-        bool WriteToFile(FILE* wf) const;
+        bool writeToFile(FILE* wf) const;
         /**
          * @brief
          *
          * @param rf
          * @return bool
          */
-        bool ReadFromFile(FILE* rf);
+        bool readFromFile(FILE* rf);
 
     protected:
         std::vector<uint32> tree; /**< TODO */

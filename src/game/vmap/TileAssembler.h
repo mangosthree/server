@@ -148,7 +148,7 @@ namespace VMAP
          * @param path
          * @return bool
          */
-        bool Read(const char* path, const char *RAW_VMAP_MAGIC);
+        bool Read(const char* path);
     };
 
     /**
@@ -191,7 +191,7 @@ namespace VMAP
              *
              * @return bool
              */
-            bool convertWorld2(const char *RAW_VMAP_MAGIC);
+            bool convertWorld2();
             /**
              * @brief
              *
@@ -204,20 +204,20 @@ namespace VMAP
              * @param spawn
              * @return bool
              */
-            bool calculateTransformedBound(ModelSpawn& spawn, const char *RAW_VMAP_MAGIC);
+            bool calculateTransformedBound(ModelSpawn& spawn);
 
             /**
              * @brief
              *
              */
-            void exportGameobjectModels(const char *RAW_VMAP_MAGIC);
+            void exportGameobjectModels();
             /**
              * @brief
              *
              * @param pModelFilename
              * @return bool
              */
-            bool convertRawFile(const std::string& pModelFilename, const char *RAW_VMAP_MAGIC);
+            bool convertRawFile(const std::string& pModelFilename);
             /**
              * @brief
              *

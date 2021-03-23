@@ -17,157 +17,45 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-# Used for install targets
+#Used by vmap-assembler and mmap-generator
+include_directories(
+    ${CMAKE_SOURCE_DIR}/src/shared
+    ${CMAKE_SOURCE_DIR}/src/game/vmap
+    ${CMAKE_SOURCE_DIR}/dep/g3dlite
+    ${CMAKE_SOURCE_DIR}/src/framework
+    ${ACE_INCLUDE_DIR}
+)
+
+add_definitions(-DMMAP_GENERATOR -DNO_CORE_FUNCS)
+
+add_library(vmap
+    ${CMAKE_SOURCE_DIR}/src/game/vmap/BIH.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/vmap/VMapManager2.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/vmap/MapTree.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/vmap/TileAssembler.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/vmap/WorldModel.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/vmap/ModelInstance.cpp
+)
+
+target_link_libraries(vmap g3dlite zlib)
+
+# Used for install targets in subdirs
 set(TOOLS_DIR "tools")
-set(EXTRACTOR_BINARIES_DIR "${CMAKE_SOURCE_DIR}/src/tools/Extractor_Binaries")
 
-set(SHARED_SRCS
-    shared/ExtractorCommon.cpp
-    shared/ExtractorCommon.h
-)
+add_subdirectory(Movemap-Generator)
+add_subdirectory(map-extractor)
+add_subdirectory(vmap-assembler)
+add_subdirectory(vmap-extractor)
 
-#=======================================================#
-#map-extractor
-#=======================================================#
-add_executable(map-extractor
-    map-extractor/System.cpp
-    map-extractor/dbcfile.cpp
-    ${SHARED_SRCS}
-    $<$<BOOL:${WIN32}>:map-extractor/map-extractor.rc>
-)
-
-target_include_directories(map-extractor
-    PUBLIC
-        shared
-        map-extractor
-)
-
-target_link_libraries(map-extractor
-    PUBLIC
-    loadlib
-)
-
+#install documentation and generation scripts
 install(
-    TARGETS map-extractor
-    DESTINATION "${BIN_DIR}/${TOOLS_DIR}"
+    FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries/ExtractResources.sh"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries/make_vmaps.bat"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries/mmap_excluded.txt"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries/MoveMapGen.sh"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries/offmesh.txt"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Extractor_Binaries/README.txt"
+    DESTINATION
+        "${BIN_DIR}/${TOOLS_DIR}"
 )
-
-if(WIN32 AND MSVC)
-    install(
-        FILES $<TARGET_PDB_FILE:map-extractor>
-        DESTINATION ${BIN_DIR}/${TOOLS_DIR}
-        OPTIONAL)
-endif()
-
-#=======================================================#
-#vmap-extractor
-#=======================================================#
-add_executable(vmap-extractor
-    vmap-extractor/adtfile.cpp
-    vmap-extractor/adtfile.h
-    vmap-extractor/dbcfile.cpp
-    vmap-extractor/dbcfile.h
-    vmap-extractor/assembler.cpp
-    vmap-extractor/model.cpp
-    vmap-extractor/model.h
-    vmap-extractor/modelheaders.h
-    vmap-extractor/vec3d.h
-    vmap-extractor/vmapexport.cpp
-    vmap-extractor/vmapexport.h
-    vmap-extractor/wdtfile.cpp
-    vmap-extractor/wdtfile.h
-    vmap-extractor/wmo.cpp
-    vmap-extractor/wmo.h
-    ${SHARED_SRCS}
-    $<$<BOOL:${WIN32}>:vmap-extractor/vmap-extractor.rc>
-)
-
-target_include_directories(vmap-extractor
-    PUBLIC
-        shared
-        vmap-extractor
-)
-
-target_link_libraries(vmap-extractor
-    PUBLIC
-        loadlib
-        vmap2
-)
-
-install(
-    TARGETS vmap-extractor
-    DESTINATION ${BIN_DIR}/${TOOLS_DIR}
-)
-
-if(WIN32 AND MSVC)
-    install(
-        FILES $<TARGET_PDB_FILE:vmap-extractor>
-        DESTINATION ${BIN_DIR}/${TOOLS_DIR}
-        OPTIONAL
-)
-endif()
-
-#=======================================================#
-#mmap-extractor
-#=======================================================#
-add_executable(mmap-extractor
-    Movemap-Generator/generator.cpp
-    Movemap-Generator/IntermediateValues.cpp
-    Movemap-Generator/IntermediateValues.h
-    Movemap-Generator/MangosMap.h
-    Movemap-Generator/MapBuilder.cpp
-    Movemap-Generator/MapBuilder.h
-    Movemap-Generator/MMapCommon.h
-    Movemap-Generator/TerrainBuilder.cpp
-    Movemap-Generator/TerrainBuilder.h
-    Movemap-Generator/TileMsgBlock.h
-    Movemap-Generator/TileThreadPool.cpp
-    Movemap-Generator/TileThreadPool.h
-    Movemap-Generator/VMapExtensions.cpp
-    shared/ExtractorCommon.cpp
-    shared/ExtractorCommon.h
-    $<$<BOOL:${WIN32}>:Movemap-Generator/Movemap-Generator.rc>
-)
-
-target_include_directories(mmap-extractor
-    PUBLIC
-        shared
-        Movemap-Generator
-)
-
-target_link_libraries(mmap-extractor
-    PUBLIC
-        loadlib
-        vmap2
-        shared
-        RecastNavigation::Recast
-        Threads::Threads
-        DL::DL
-)
-
-install(
-    TARGETS mmap-extractor
-    DESTINATION ${BIN_DIR}/${TOOLS_DIR}
-)
-
-install (
-    FILES "${EXTRACTOR_BINARIES_DIR}/MoveMapGen.sh"
-         DESTINATION ${BIN_DIR}/${TOOLS_DIR}
-)
-install (
-    FILES "${EXTRACTOR_BINARIES_DIR}/offmesh.txt"
-         DESTINATION ${BIN_DIR}/${TOOLS_DIR}
-)
-
-install (
-    FILES "${EXTRACTOR_BINARIES_DIR}/mmap_excluded.txt"
-         DESTINATION ${BIN_DIR}/${TOOLS_DIR}
-)
-
-if(WIN32 AND MSVC)
-    install(
-        FILES $<TARGET_PDB_FILE:mmap-extractor>
-        DESTINATION ${BIN_DIR}/${TOOLS_DIR}
-        OPTIONAL
-)
-endif()

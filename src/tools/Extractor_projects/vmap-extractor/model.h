@@ -26,10 +26,14 @@
 #define MODEL_H
 
 #include <vector>
-#include <loadlib.h>
 #include "vec3d.h"
 #include "modelheaders.h"
-#include "wmo.h"
+#include "vmapexport.h"
+
+class WMOInstance;
+class MPQFile;
+
+Vec3D fixCoordSystem(Vec3D v);
 
 /**
  * @brief
@@ -38,11 +42,10 @@
 class Model
 {
     public:
-        ModelHeaderClassicTBC headerClassicTBC; /**< TODO */
-        ModelHeaderOthers headerOthers; /**< TODO */
-        ModelBoundingVertex* boundingVertices; /**< TODO */
-        Vec3D* vertices; /**< TODO */
-        uint16* indices; /**< TODO */
+        ModelHeader header;
+        uint32 offsBB_vertices, offsBB_indices;
+        Vec3D* BB_vertices, *vertices;
+        uint16* BB_indices, *indices;
         size_t nIndices; /**< TODO */
 
         /**
@@ -51,14 +54,14 @@ class Model
          * @param failedPaths
          * @return bool
          */
-        bool open(std::set<std::string>& failedPaths, int iCoreNumber);
+        bool open(StringSet& failedPaths);
         /**
          * @brief
          *
          * @param outfilename
          * @return bool
          */
-        bool ConvertToVMAPModel(std::string& outfilename, int iCoreNumber, const void *szRawVMAPMagic);
+        bool ConvertToVMAPModel(const char* outfilename);
 
         bool ok; /**< TODO */
 
@@ -87,6 +90,7 @@ class Model
             indices = NULL;
         }
         std::string filename; /**< TODO */
+        char outfilename;
 };
 
 /**
@@ -100,11 +104,8 @@ class ModelInstance
 
         uint32 id; /**< TODO */
         Vec3D pos, rot; /**< TODO */
-        unsigned int d1;
+        unsigned int d1, Scale;
         float w, sc;
-        unsigned int scaleZeroOnly;
-        //unsigned int scale; // This line introduced a regression bug in Mangos Zero, is Fine for other cores.
-        uint16 scaleOthers;
 
         /**
          * @brief
@@ -121,24 +122,8 @@ class ModelInstance
          * @param tileY
          * @param pDirfile
          */
-        ModelInstance(MPQFile& f, std::string& ModelInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile, int iCoreNumber);
+        ModelInstance(MPQFile& f, const char* ModelInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile);
 
 };
-
-/**
- * @brief
- *
- * @param origPath original path of the model, cleaned with fixnamen and fixname2
- * @param fixedName will store the translated name (if changed)
- * @param failedPaths Set to collect errors
- * @return bool
- */
-bool ExtractSingleModel(std::string& origPath, std::string& fixedName, std::set<std::string>& failedPaths, int iCoreNumber, const void *szRawVMAPMagic);
-
-/**
- * @brief
- *
- */
-void ExtractGameobjectModels(int iCoreNumber, const void *szRawVMAPMagic);
 
 #endif

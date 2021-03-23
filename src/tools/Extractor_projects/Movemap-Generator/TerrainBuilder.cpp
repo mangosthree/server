@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2015 MaNGOS <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,19 +71,19 @@ namespace MMAP
     }
 
     /**************************************************************************/
-    void TerrainBuilder::loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData,char const* MAP_VERSION_MAGIC)
+    void TerrainBuilder::loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData)
     {
-        if (loadMap(mapID, tileX, tileY, meshData, ENTIRE, MAP_VERSION_MAGIC))
+        if (loadMap(mapID, tileX, tileY, meshData, ENTIRE))
         {
-            loadMap(mapID, tileX + 1, tileY, meshData, LEFT, MAP_VERSION_MAGIC);
-            loadMap(mapID, tileX - 1, tileY, meshData, RIGHT, MAP_VERSION_MAGIC);
-            loadMap(mapID, tileX, tileY + 1, meshData, TOP, MAP_VERSION_MAGIC);
-            loadMap(mapID, tileX, tileY - 1, meshData, BOTTOM, MAP_VERSION_MAGIC);
+            loadMap(mapID, tileX + 1, tileY, meshData, LEFT);
+            loadMap(mapID, tileX - 1, tileY, meshData, RIGHT);
+            loadMap(mapID, tileX, tileY + 1, meshData, TOP);
+            loadMap(mapID, tileX, tileY - 1, meshData, BOTTOM);
         }
     }
 
     /**************************************************************************/
-    bool TerrainBuilder::loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData, Spot portion,char const* MAP_VERSION_MAGIC)
+    bool TerrainBuilder::loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData, Spot portion)
     {
         char mapFileName[255];
         sprintf(mapFileName, "maps/%04u%02u%02u.map", mapID, tileY, tileX);
@@ -95,14 +95,7 @@ namespace MMAP
         }
 
         GridMapFileHeader fheader;
-        size_t file_read = fread(&fheader, sizeof(GridMapFileHeader), 1, mapFile);
-
-        if (file_read <= 0)
-        {
-            fclose(mapFile);
-            printf("Could not read map data from %s.\n", mapFileName);
-            return false;
-        }
+        fread(&fheader, sizeof(GridMapFileHeader), 1, mapFile);
 
         if (fheader.versionMagic != *((uint32 const*)(MAP_VERSION_MAGIC)))
         {
@@ -113,14 +106,7 @@ namespace MMAP
 
         GridMapHeightHeader hheader;
         fseek(mapFile, fheader.heightMapOffset, SEEK_SET);
-        file_read = fread(&hheader, sizeof(GridMapHeightHeader), 1, mapFile);
-
-        if (file_read <= 0)
-        {
-            fclose(mapFile);
-            printf("Could not read map data from %s.\n", mapFileName);
-            return false;
-        }
+        fread(&hheader, sizeof(GridMapHeightHeader), 1, mapFile);
 
         bool haveTerrain = !(hheader.flags & MAP_HEIGHT_NO_HEIGHT);
         bool haveLiquid = fheader.liquidMapOffset && !m_skipLiquid;
@@ -151,20 +137,8 @@ namespace MMAP
             {
                 uint8 v9[V9_SIZE_SQ];
                 uint8 v8[V8_SIZE_SQ];
-                file_read = fread(v9, sizeof(uint8), V9_SIZE_SQ, mapFile);
-                if (file_read <= 0)
-                {
-                    fclose(mapFile);
-                    printf("Could not read map data from %s.\n", mapFileName);
-                    return false;
-                }
-                file_read = fread(v8, sizeof(uint8), V8_SIZE_SQ, mapFile);
-                if (file_read <= 0)
-                {
-                    fclose(mapFile);
-                    printf("Could not read map data from %s.\n", mapFileName);
-                    return false;
-                }
+                fread(v9, sizeof(uint8), V9_SIZE_SQ, mapFile);
+                fread(v8, sizeof(uint8), V8_SIZE_SQ, mapFile);
                 heightMultiplier = (hheader.gridMaxHeight - hheader.gridHeight) / 255;
 
                 for (i = 0; i < V9_SIZE_SQ; ++i)
@@ -181,20 +155,8 @@ namespace MMAP
             {
                 uint16 v9[V9_SIZE_SQ];
                 uint16 v8[V8_SIZE_SQ];
-                file_read = fread(v9, sizeof(uint16), V9_SIZE_SQ, mapFile);
-                if (file_read <= 0)
-                {
-                    fclose(mapFile);
-                    printf("Could not read map data from %s.\n", mapFileName);
-                    return false;
-                }
-                file_read = fread(v8, sizeof(uint16), V8_SIZE_SQ, mapFile);
-                if (file_read <= 0)
-                {
-                    fclose(mapFile);
-                    printf("Could not read map data from %s.\n", mapFileName);
-                    return false;
-                }
+                fread(v9, sizeof(uint16), V9_SIZE_SQ, mapFile);
+                fread(v8, sizeof(uint16), V8_SIZE_SQ, mapFile);
                 heightMultiplier = (hheader.gridMaxHeight - hheader.gridHeight) / 65535;
 
                 for (i = 0; i < V9_SIZE_SQ; ++i)
@@ -209,32 +171,14 @@ namespace MMAP
             }
             else
             {
-                file_read = fread(V9, sizeof(float), V9_SIZE_SQ, mapFile);
-                if (file_read <= 0)
-                {
-                    fclose(mapFile);
-                    printf("Could not read map data from %s.\n", mapFileName);
-                    return false;
-                }
-                file_read = fread(V8, sizeof(float), V8_SIZE_SQ, mapFile);
-                if (file_read <= 0)
-                {
-                    fclose(mapFile);
-                    printf("Could not read map data from %s.\n", mapFileName);
-                    return false;
-                }
+                fread(V9, sizeof(float), V9_SIZE_SQ, mapFile);
+                fread(V8, sizeof(float), V8_SIZE_SQ, mapFile);
             }
 
             // hole data
             memset(holes, 0, fheader.holesSize);
             fseek(mapFile, fheader.holesOffset, SEEK_SET);
-            file_read = fread(holes, fheader.holesSize, 1, mapFile);
-            if (file_read <= 0)
-            {
-                fclose(mapFile);
-                printf("Could not read map data from %s.\n", mapFileName);
-                return false;
-            }
+            fread(holes, fheader.holesSize, 1, mapFile);
 
             int count = meshData.solidVerts.size() / 3;
             float xoffset = (float(tileX) - 32) * GRID_SIZE;
@@ -275,38 +219,19 @@ namespace MMAP
         {
             GridMapLiquidHeader lheader;
             fseek(mapFile, fheader.liquidMapOffset, SEEK_SET);
-            file_read = fread(&lheader, sizeof(GridMapLiquidHeader), 1, mapFile);
-            if (file_read <= 0)
-            {
-                fclose(mapFile);
-                printf("Could not read map data from %s.\n", mapFileName);
-                return false;
-            }
+            fread(&lheader, sizeof(GridMapLiquidHeader), 1, mapFile);
 
             float* liquid_map = NULL;
 
             if (!(lheader.flags & MAP_LIQUID_NO_TYPE))
             {
-                file_read = fread(liquid_type, sizeof(liquid_type), 1, mapFile);
-                if (file_read <= 0)
-                {
-                    fclose(mapFile);
-                    printf("Could not read map data from %s.\n", mapFileName);
-                    return false;
-                }
+                fread(liquid_type, sizeof(liquid_type), 1, mapFile);
             }
 
             if (!(lheader.flags & MAP_LIQUID_NO_HEIGHT))
             {
                 liquid_map = new float [lheader.width * lheader.height];
-                file_read = fread(liquid_map, sizeof(float), lheader.width * lheader.height, mapFile);
-                if (file_read <= 0)
-                {
-                    fclose(mapFile);
-                    delete [] liquid_map;
-                    printf("Could not read map data from %s.\n", mapFileName);
-                    return false;
-                }
+                fread(liquid_map, sizeof(float), lheader.width * lheader.height, mapFile);
             }
 
             if (liquid_type && liquid_map)

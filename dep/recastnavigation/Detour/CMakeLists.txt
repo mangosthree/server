@@ -1,22 +1,41 @@
-project(Detour VERSION 1.0.0)
+# MaNGOS is a full featured server for World of Warcraft, supporting
+# the following clients: 1.12.x, 2.4.3, 3.2.5a, 4.2.3 and 5.4.8
+#
+# Copyright (C) 2005-2019  MaNGOS project <http://getmangos.eu>
+#
+# ***** BEGIN GPL LICENSE BLOCK *****
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# ***** END GPL LICENSE BLOCK *****
+#
+# World of Warcraft, and all World of Warcraft or Warcraft art, images,
+# and lore are copyrighted by Blizzard Entertainment, Inc.
 
-file(GLOB DTR_SOURCES Source/*.cpp)
-file(GLOB DTR_INCLUDES Include/*.h)
+#-----------------------------------------------------------------------------
+# Define the Detour library
+file(GLOB sources Source/*.cpp)
+file(GLOB headers Include/*.h)
 
-add_library(Detour STATIC ${DTR_SOURCES} ${DTR_INCLUDES})
-add_library(RecastNavigation::Detour ALIAS Detour)
+set(Detour_LIB_SRCS ${sources} ${headers})
 
-target_include_directories(Detour
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/Include
+include_directories(
+    "${CMAKE_CURRENT_SOURCE_DIR}/Include"
 )
 
-target_compile_definitions(Detour
-    PUBLIC
-        DT_POLYREF64
-)
-
-set_target_properties(Detour
-    PROPERTIES
-        VERSION 1.0.0
-)
+#-----------------------------------------------------------------------------
+# Build the Detour library
+#add_library(detour STATIC ${Detour_LIB_SRCS})
+add_subdirectory(Source)

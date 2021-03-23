@@ -80,13 +80,13 @@ void LoadGameObjectModelList()
             break;
         }
 
-        G3D::Vector3 v1, v2;
-        if (fread(&v1, sizeof(G3D::Vector3), 1, model_list_file) <= 0)
+        Vector3 v1, v2;
+        if (fread(&v1, sizeof(Vector3), 1, model_list_file) <= 0)
         {
             sLog.outDebug("File %s seems to be corrupted", VMAP::GAMEOBJECT_MODELS);
             break;
         }
-        if (fread(&v2, sizeof(G3D::Vector3), 1, model_list_file) <= 0)
+        if (fread(&v2, sizeof(Vector3), 1, model_list_file) <= 0)
         {
             sLog.outDebug("File %s seems to be corrupted", VMAP::GAMEOBJECT_MODELS);
             break;
@@ -129,8 +129,8 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     }
 
     name = it->second.name;
-    phasemask = pGo->GetPhaseMask();
     iPos = Vector3(pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ());
+    phasemask = pGo->GetPhaseMask();
     iScale = pGo->GetObjectScale();
     iInvScale = 1.f / iScale;
 
@@ -138,9 +138,7 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     iInvRot = iRotation.inverse();
     // transform bounding box:
     mdl_box = AABox(mdl_box.low() * iScale, mdl_box.high() * iScale);
-
-    G3D::AABox rotated_bounds;
-
+    AABox rotated_bounds;
     for (int i = 0; i < 8; ++i)
     {
         rotated_bounds.merge(iRotation * mdl_box.corner(i));
@@ -164,7 +162,7 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     return true;
 }
 
-GameObjectModel* GameObjectModel::Create(const GameObject* const pGo)
+GameObjectModel* GameObjectModel::construct(const GameObject* const pGo)
 {
     const GameObjectDisplayInfoEntry* info = sGameObjectDisplayInfoStore.LookupEntry(pGo->GetDisplayId());
     if (!info)
@@ -182,7 +180,7 @@ GameObjectModel* GameObjectModel::Create(const GameObject* const pGo)
     return mdl;
 }
 
-bool GameObjectModel::IntersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const
+bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const
 {
     if (!(phasemask & ph_mask))
     {
@@ -207,4 +205,3 @@ bool GameObjectModel::IntersectRay(const G3D::Ray& ray, float& MaxDist, bool Sto
     }
     return hit;
 }
-

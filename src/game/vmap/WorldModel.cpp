@@ -230,7 +230,7 @@ namespace VMAP
                iTilesX * iTilesY;
     }
 
-    bool WmoLiquid::WriteToFile(FILE* wf)
+    bool WmoLiquid::writeToFile(FILE* wf)
     {
         bool result = true;
         if (result && fwrite(&iTilesX, sizeof(uint32), 1, wf) != 1)
@@ -262,7 +262,7 @@ namespace VMAP
         return result;
     }
 
-    bool WmoLiquid::ReadFromFile(FILE* rf, WmoLiquid*& out)
+    bool WmoLiquid::readFromFile(FILE* rf, WmoLiquid*& out)
     {
         bool result = true;
         WmoLiquid* liquid = new WmoLiquid();
@@ -317,7 +317,7 @@ namespace VMAP
         }
     }
 
-    void GroupModel::SetMeshData(std::vector<Vector3>& vert, std::vector<MeshTriangle>& tri)
+    void GroupModel::setMeshData(std::vector<Vector3>& vert, std::vector<MeshTriangle>& tri)
     {
         vertices.swap(vert);
         triangles.swap(tri);
@@ -325,7 +325,7 @@ namespace VMAP
         meshTree.build(triangles, bFunc);
     }
 
-    bool GroupModel::WriteToFile(FILE* wf)
+    bool GroupModel::writeToFile(FILE* wf)
     {
         bool result = true;
         uint32 chunkSize, count;
@@ -395,7 +395,7 @@ namespace VMAP
         }
         if (result)
         {
-            result = meshTree.WriteToFile(wf);
+            result = meshTree.writeToFile(wf);
         }
 
         // write liquid data
@@ -411,13 +411,13 @@ namespace VMAP
         if (chunkSize)
             if (result)
             {
-                result = iLiquid->WriteToFile(wf);
+                result = iLiquid->writeToFile(wf);
             }
 
         return result;
     }
 
-    bool GroupModel::ReadFromFile(FILE* rf)
+    bool GroupModel::readFromFile(FILE* rf)
     {
         char chunk[8];
         bool result = true;
@@ -499,7 +499,7 @@ namespace VMAP
         }
         if (result)
         {
-            result = meshTree.ReadFromFile(rf);
+            result = meshTree.readFromFile(rf);
         }
 
         // read liquid data
@@ -513,7 +513,7 @@ namespace VMAP
         }
         if (result && chunkSize > 0)
         {
-            result = WmoLiquid::ReadFromFile(rf, iLiquid);
+            result = WmoLiquid::readFromFile(rf, iLiquid);
         }
         return result;
     }
@@ -585,7 +585,7 @@ namespace VMAP
 
     // ===================== WorldModel ==================================
 
-    void WorldModel::SetGroupModels(std::vector<GroupModel>& models)
+    void WorldModel::setGroupModels(std::vector<GroupModel>& models)
     {
         groupModels.swap(models);
         groupTree.build(groupModels, BoundsTrait<GroupModel>::getBounds, 1);
@@ -609,11 +609,6 @@ namespace VMAP
 
     bool WorldModel::IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit) const
     {
-        // M2 models are not taken into account for LoS calculation
-        if (Flags & MOD_M2)
-        {
-            return false;
-        }
         // small M2 workaround, maybe better make separate class with virtual intersection funcs
         // in any case, there's no need to use a bound tree if we only have one submodel
         if (groupModels.size() == 1)
@@ -664,7 +659,7 @@ namespace VMAP
             }
     };
 
-    bool WorldModel::GetAreaInfo(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, AreaInfo& info) const
+    bool WorldModel::IntersectPoint(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, AreaInfo& info) const
     {
         if (groupModels.empty())
         {
@@ -741,7 +736,7 @@ namespace VMAP
             }
             for (uint32 i = 0; i < groupModels.size() && result; ++i)
             {
-                result = groupModels[i].WriteToFile(wf);
+                result = groupModels[i].writeToFile(wf);
             }
 
             // write group BIH
@@ -751,7 +746,7 @@ namespace VMAP
             }
             if (result)
             {
-                result = groupTree.WriteToFile(wf);
+                result = groupTree.writeToFile(wf);
             }
         }
 
@@ -805,7 +800,7 @@ namespace VMAP
             // if (result && fread(&groupModels[0], sizeof(GroupModel), count, rf) != count) result = false;
             for (uint32 i = 0; i < count && result; ++i)
             {
-                result = groupModels[i].ReadFromFile(rf);
+                result = groupModels[i].readFromFile(rf);
             }
 
             // read group BIH
@@ -815,7 +810,7 @@ namespace VMAP
             }
             if (result)
             {
-                result = groupTree.ReadFromFile(rf);
+                result = groupTree.readFromFile(rf);
             }
         }
 

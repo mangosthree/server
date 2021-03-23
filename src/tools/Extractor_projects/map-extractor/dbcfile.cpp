@@ -23,9 +23,7 @@
  */
 
 #include "dbcfile.h"
-#undef min
-#undef max
-#include <mpq.h>
+#include "sl/loadlib.h"
 
 #include <cstdio>
 
@@ -49,42 +47,42 @@ bool DBCFile::open()
     if (!SFileReadFile(fileHandle, header, 4, NULL, NULL))              // Magic header
     {
         SFileCloseFile(fileHandle);
-        printf("Could not read header in DBCFile %s. err=%u\n", filename.c_str(), GetLastError());
+        printf("Could not read header in DBCFile %s.\n", filename.c_str());
         return false;
     }
 
     if (header[0] != 'W' || header[1] != 'D' || header[2] != 'B' || header[3] != 'C')
     {
         SFileCloseFile(fileHandle);
-        printf("The header in DBCFile %s did not match. err=%u\n", filename.c_str(), GetLastError());
+        printf("The header in DBCFile %s did not match.\n", filename.c_str());
         return false;
     }
 
     if (!SFileReadFile(fileHandle, &na, 4, NULL, NULL))                 // Number of records
     {
         SFileCloseFile(fileHandle);
-        printf("Could not read number of records from DBCFile %s. err=%u\n", filename.c_str(), GetLastError());
+        printf("Could not read number of records from DBCFile %s.\n", filename.c_str());
         return false;
     }
 
     if (!SFileReadFile(fileHandle, &nb, 4, NULL, NULL))                 // Number of fields
     {
         SFileCloseFile(fileHandle);
-        printf("Could not read number of fields from DBCFile %s. err=%u\n", filename.c_str(), GetLastError());
+        printf("Could not read number of fields from DBCFile %s.\n", filename.c_str());
         return false;
     }
 
     if (!SFileReadFile(fileHandle, &es, 4, NULL, NULL))                 // Size of a record
     {
         SFileCloseFile(fileHandle);
-        printf("Could not read record size from DBCFile %s. err=%u\n", filename.c_str(), GetLastError());
+        printf("Could not read record size from DBCFile %s.\n", filename.c_str());
         return false;
     }
 
     if (!SFileReadFile(fileHandle, &ss, 4, NULL, NULL))                 // String size
     {
         SFileCloseFile(fileHandle);
-        printf("Could not read string block size from DBCFile %s. err=%u\n", filename.c_str(), GetLastError());
+        printf("Could not read string block size from DBCFile %s.\n", filename.c_str());
         return false;
     }
 

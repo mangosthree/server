@@ -600,9 +600,9 @@ void WheatyExceptionReport::WriteStackDetails(
                           SymFunctionTableAccess64,
                           SymGetModuleBase64,
                           0))
-                          {
-                              break;
-                          }
+        {
+            break;
+        }
         if (0 == sf.AddrFrame.Offset)                       // Basic sanity check to make sure
         {
             break;                                           // the frame is OK.  Bail if not.

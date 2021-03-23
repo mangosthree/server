@@ -26,11 +26,19 @@
 #define WDTFILE_H
 
 #include <string>
-#include "mpqfile.h"
+#include <mpq.h>
 #include "wmo.h"
-#include "stdlib.h"
+#include "adtfile.h"
 
-class ADTFile;
+enum TerrainFlags {
+    TERRAIN_HAS_ADT = 0x01
+};
+
+struct SMAreaInfo     // -> CMapAreaTableEntry
+{
+    uint32_t flags;
+    uint32_t asyncId;    // only set during runtime.
+};
 
 /**
  * @brief
@@ -45,7 +53,7 @@ class WDTFile
          * @param file_name
          * @param file_name1
          */
-        WDTFile(char* file_name, char* file_name1);
+        WDTFile(HANDLE handle, char* file_name, char* file_name1);
         /**
          * @brief
          *
@@ -60,6 +68,8 @@ class WDTFile
          */
         bool init(char* map_id, unsigned int mapID);
 
+        bool hasTerrain(int x, int y);
+
         std::string* gWmoInstansName; /**< TODO */
         int gnWMO, nMaps; /**< TODO */
 
@@ -70,11 +80,12 @@ class WDTFile
          * @param z
          * @return ADTFile
          */
-        ADTFile* GetMap(int x, int z);
+        ADTFile* GetMap(int x, int y);
 
     private:
         MPQFile WDT; /**< TODO */
-        bool maps[64][64]; /**< TODO */
+        static const int MAP_TILE_SIZE = 64;
+        SMAreaInfo* mapAreaInfo[MAP_TILE_SIZE * MAP_TILE_SIZE];
         std::string filename; /**< TODO */
 };
 

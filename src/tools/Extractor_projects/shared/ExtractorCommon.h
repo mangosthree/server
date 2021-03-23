@@ -26,17 +26,18 @@
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
-#include "sl/loadlib.h"
+#include "loadlib.h"
 
-FILE* openWoWExe();
-int getBuildNumber();
+FILE* openWoWExe(char const* path = NULL);
+int getBuildNumber(char const* path = NULL);
 int getCoreNumber();
 int getCoreNumberFromBuild(int iBuildNumber);
 void showBanner(const std::string& title, int iCoreNumber);
 void showWebsiteBanner();
 void setMapMagicVersion(int iCoreNumber, char* magic);
 void setVMapMagicVersion(int iCoreNumber, char* magic);
-bool CreateDir(const std::string& sPath);
+void setMMapMagicVersion(int iCoreNumber, char* magic);
+void CreateDir(const std::string& sPath);
 bool ClientFileExists(const char* sFileName);
 bool isTransportMap(int mapID);
 bool shouldSkipMap(int mapID, bool m_skipContinents, bool m_skipJunkMaps, bool m_skipBattlegrounds);

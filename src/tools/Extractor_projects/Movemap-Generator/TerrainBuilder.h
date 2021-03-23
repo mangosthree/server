@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <http://getmangos.eu>
+ * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,7 +76,6 @@ namespace MMAP
     // see following files:
     // src/tools/map-extractor/system.cpp
     // src/game/GridMap.cpp
-    static char const* MAP_VERSION_MAGIC = "c1.4";
     /**
      * @brief
      *
@@ -125,7 +124,7 @@ namespace MMAP
              * @param tileY
              * @param meshData
              */
-            void loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData);
+            void loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData, char const* MAP_VERSION_MAGIC);
             /**
              * @brief
              *
@@ -207,7 +206,7 @@ namespace MMAP
              * @param portion
              * @return bool
              */
-            bool loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData, Spot portion);
+            bool loadMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData, Spot portion, char const* MAP_VERSION_MAGIC);
 
             /**
              * @brief Sets loop variables for selecting only certain parts of a map's terrain

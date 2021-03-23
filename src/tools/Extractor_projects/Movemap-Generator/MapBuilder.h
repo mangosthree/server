@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <http://getmangos.eu>
+ * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@
 #include "IVMapManager.h"
 #include "WorldModel.h"
 
+#include "TileThreadPool.h"
 
 using namespace std;
 using namespace VMAP;
@@ -99,7 +100,8 @@ namespace MMAP
              * @param bigBaseUnit
              * @param offMeshFilePath
              */
-            MapBuilder(float maxWalkableAngle   = 60.f,
+            MapBuilder(const char* magic,
+                       float maxWalkableAngle   = 60.f,
                        bool skipLiquid          = false,
                        bool skipContinents      = false,
                        bool skipJunkMaps        = true,
@@ -119,7 +121,7 @@ namespace MMAP
              *
              * @param mapID
              */
-            void buildMap(uint32 mapID);
+            void buildMap(int mapID, bool standAlone = true);
 
             /**
              * @brief builds an mmap tile for the specified map and its mesh
@@ -128,13 +130,17 @@ namespace MMAP
              * @param tileX
              * @param tileY
              */
-            void buildSingleTile(uint32 mapID, uint32 tileX, uint32 tileY);
+            void buildSingleTile(int mapID, int tileX, int tileY);
 
             /**
              * @brief builds list of maps, then builds all of mmap tiles (based on the skip settings)
              *
              */
             void buildAllMaps();
+
+            int activate(int num_threads);
+
+            bool activated() const { return m_poolActivated; }
 
             /**
              * @brief
@@ -144,7 +150,7 @@ namespace MMAP
              * @param tileY
              * @param navMesh
              */
-            void buildTile(uint32 mapID, uint32 tileX, uint32 tileY, dtNavMesh* navMesh);
+            void buildTile(int mapID, int tileX, int tileY, dtNavMesh* navMesh);
 
         private:
             /**
@@ -158,7 +164,7 @@ namespace MMAP
              * @param mapID
              * @return set<uint32>
              */
-            set<uint32>* getTileList(uint32 mapID);
+            set<uint32>* getTileList(int mapID);
 
             /**
              * @brief
@@ -166,7 +172,8 @@ namespace MMAP
              * @param mapID
              * @param navMesh
              */
-            void buildNavMesh(uint32 mapID, dtNavMesh*& navMesh);
+            void buildNavMesh(int mapID, dtNavMesh*& navMesh, dtNavMeshParams*& navMeshParams);
+
 
             /**
              * @brief move map building
@@ -179,9 +186,9 @@ namespace MMAP
              * @param bmax[]
              * @param navMesh
              */
-            void buildMoveMapTile(uint32 mapID,
-                                  uint32 tileX,
-                                  uint32 tileY,
+            void buildMoveMapTile(int mapID,
+                                  int tileX,
+                                  int tileY,
                                   MeshData& meshData,
                                   float bmin[3],
                                   float bmax[3],
@@ -197,7 +204,7 @@ namespace MMAP
              * @param bmin
              * @param bmax
              */
-            void getTileBounds(uint32 tileX, uint32 tileY,
+            void getTileBounds(int tileX, int tileY,
                                float* verts, int vertCount,
                                float* bmin, float* bmax);
             /**
@@ -209,10 +216,7 @@ namespace MMAP
              * @param maxX
              * @param maxY
              */
-            void getGridBounds(uint32 mapID, uint32& minX, uint32& minY, uint32& maxX, uint32& maxY);
-
-            bool shouldSkipMap(uint32 mapID);
-            bool isTransportMap(uint32 mapID);
+            void getGridBounds(int mapID, uint32& minX, uint32& minY, uint32& maxX, uint32& maxY);
 
             /**
              * @brief
@@ -222,7 +226,7 @@ namespace MMAP
              * @param tileY
              * @return bool
              */
-            bool shouldSkipTile(uint32 mapID, uint32 tileX, uint32 tileY);
+            bool shouldSkipTile(int mapID, int tileX, int tileY);
 
             TerrainBuilder* m_terrainBuilder; /**< TODO */
             TileList m_tiles; /**< TODO */
@@ -236,6 +240,11 @@ namespace MMAP
 
             float m_maxWalkableAngle; /**< TODO */
             bool m_bigBaseUnit; /**< TODO */
+            char const* m_magic;
+
+            int             m_numThreads;
+            TileThreadPool* m_threadPool;
+            bool            m_poolActivated;
 
             rcContext* m_rcContext; /**< build performance - not really used for now */
     };

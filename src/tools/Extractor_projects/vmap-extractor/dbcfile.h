@@ -36,7 +36,13 @@
 class DBCFile
 {
 public:
-    DBCFile(HANDLE mpq, const char* filename);
+    /**
+     * @brief
+     *
+     * @param filename
+     */
+    DBCFile(const std::string& filename);
+    DBCFile(HANDLE file);
     /**
      * @brief
      *
@@ -104,13 +110,25 @@ public:
         /**
          * @brief
          *
+         * @param r
+         * @return Record &operator
+         */
+        Record& operator= (const Record& r)
+        {
+            file = r.file;
+            offset = r.offset;
+            return *this;
+        }
+        /**
+         * @brief
+         *
          * @param field
          * @return float
          */
         float getFloat(size_t field) const
         {
-            assert(field < file._fieldCount);
-            return *reinterpret_cast<float*>(offset + field * 4);
+            assert(field < file.fieldCount);
+            return *reinterpret_cast<float*>(offset + (field * 4));
         }
         /**
          * @brief
@@ -120,8 +138,8 @@ public:
          */
         unsigned int getUInt(size_t field) const
         {
-            assert(field < file._fieldCount);
-            return *reinterpret_cast<unsigned int*>(offset + field * 4);
+            assert(field < file.fieldCount);
+            return *reinterpret_cast<unsigned int*>(offset + (field * 4));
         }
         /**
          * @brief
@@ -131,10 +149,20 @@ public:
          */
         int getInt(size_t field) const
         {
-            assert(field < file._fieldCount);
-            return *reinterpret_cast<int*>(offset + field * 4);
+            assert(field < file.fieldCount);
+            return *reinterpret_cast<int*>(offset + (field * 4));
         }
-
+        /**
+         * @brief
+         *
+         * @param ofs
+         * @return unsigned char
+         */
+        unsigned char getByte(size_t ofs) const
+        {
+            assert(ofs < file.recordSize);
+            return *reinterpret_cast<unsigned char*>(offset + ofs);
+        }
         /**
          * @brief
          *
@@ -143,10 +171,10 @@ public:
          */
         const char* getString(size_t field) const
         {
-            assert(field < file._fieldCount);
+            assert(field < file.fieldCount);
             size_t stringOffset = getUInt(field);
-            assert(stringOffset < file._stringSize);
-            return reinterpret_cast<char*>(file._stringTable + stringOffset);
+            assert(stringOffset < file.stringSize);
+            return reinterpret_cast<char*>(file.stringTable + stringOffset);
         }
     private:
         /**
@@ -176,7 +204,8 @@ public:
          * @param file
          * @param offset
          */
-        Iterator(DBCFile& file, unsigned char* offset) : record(file, offset) {}
+        Iterator(DBCFile& file, unsigned char* offset) :
+            record(file, offset) {}
         /**
          * @brief Advance (prefix only)
          *
@@ -184,7 +213,7 @@ public:
          */
         Iterator& operator++()
         {
-            record.offset += record.file._recordSize;
+            record.offset += record.file.recordSize;
             return *this;
         }
         /**
@@ -250,13 +279,13 @@ public:
      *
      * @return size_t
      */
-    size_t getRecordCount() const { return _recordCount; }
+    size_t getRecordCount() const { return recordCount; }
     /**
      * @brief
      *
      * @return size_t
      */
-    size_t getFieldCount() const { return _fieldCount; }
+    size_t getFieldCount() const { return fieldCount; }
     /**
      * @brief
      *
@@ -264,15 +293,14 @@ public:
      */
     size_t getMaxId();
 private:
-    HANDLE _mpq;
-    const char* _filename;
-    HANDLE _file;
-    size_t _recordSize;
-    size_t _recordCount;
-    size_t _fieldCount;
-    size_t _stringSize;
-    unsigned char* _data;
-    unsigned char* _stringTable;
+    std::string filename; /**< TODO */
+    HANDLE fileHandle; /**< TODO */
+    size_t recordSize; /**< TODO */
+    size_t recordCount; /**< TODO */
+    size_t fieldCount; /**< TODO */
+    size_t stringSize; /**< TODO */
+    unsigned char* data; /**< TODO */
+    unsigned char* stringTable; /**< TODO */
 };
 
 #endif

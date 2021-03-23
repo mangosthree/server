@@ -26,6 +26,7 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <algorithm>
 #include <errno.h>
 
 #if defined WIN32
@@ -35,8 +36,12 @@
 #define mkdir _mkdir
 #else
 #include <sys/stat.h>
-#include <sys/types.h>
+
 #include <dirent.h>
+/* This isn't the nicest way to do things
+ * TODO: Fix this with snprintf instead and check it still works
+ */
+#define sprintf_s sprintf
 #endif
 
 #undef min
@@ -52,10 +57,11 @@
 #include "wdtfile.h"
 #include "dbcfile.h"
 #include "wmo.h"
-#include "mpqfile.h"
+#include <mpq.h>
 #include "vmapexport.h"
+#include "Auth/md5.h"
 
-#include "../shared/ExtractorCommon.h"
+#include "ExtractorCommon.h"
 
 //------------------------------------------------------------------------------
 // Defines
@@ -63,33 +69,8 @@
 #define MPQ_BLOCK_SIZE 0x1000
 //-----------------------------------------------------------------------------
 
-HANDLE WorldMpq = NULL;
-HANDLE LocaleMpq = NULL;
-
-// List MPQ for extract maps from
-char const* CONF_mpq_list[] =
-{
-    "world.MPQ",
-    "art.MPQ",
-    "expansion1.MPQ",
-    "expansion2.MPQ",
-    "expansion3.MPQ",
-    "world2.MPQ",
-};
-
-#define LAST_DBC_IN_DATA_BUILD 13623    // after this build mpqs with dbc are back to locale folder
-
-TCHAR const* LocalesT[] =
-{
-    _T("enGB"), _T("enUS"),
-    _T("deDE"), _T("esES"),
-    _T("frFR"), _T("koKR"),
-    _T("zhCN"), _T("zhTW"),
-    _T("enCN"), _T("enTW"),
-    _T("esMX"), _T("ruRU"),
-};
-
-#define LOCALES_COUNT 12
+bool AssembleVMAP(std::string src, std::string dest, const char* szMagic);
+extern ArchiveSet gOpenArchives;
 
 typedef struct
 {
@@ -102,14 +83,86 @@ uint16* LiqType = 0;
 uint32 map_count;
 char output_path[128] = ".";
 char input_path[1024] = ".";
+bool hasInputPathParam = false;
 bool preciseVectorData = true;
-uint32 CONF_max_build = 0;
+int iCoreNumber;
+typedef std::pair < std::string /*full_filename*/, char const* /*locale_prefix*/ > UpdatesPair;
+typedef std::map < int /*build*/, UpdatesPair > Updates;
 
 // Constants
+static const int LANG_COUNT = 12;
+
+static const char* kClassicMPQList[] =
+{
+    "patch-2.MPQ",
+    "patch.MPQ",
+    "wmo.MPQ",
+    "texture.MPQ",
+    "terrain.MPQ",
+    "speech.MPQ",
+    "sound.MPQ",
+    "model.MPQ",
+    "misc.MPQ",
+    "dbc.MPQ",
+    "base.MPQ"
+};
+
+static const char* kTBCMPQList[] =
+{
+    "patch-2.MPQ",
+    "patch.MPQ",
+    "%s/patch-%s-2.MPQ",
+    "%s/patch-%s.MPQ",
+    "expansion.MPQ",
+    "common.MPQ",
+    "%s/locale-%s.MPQ",
+    "%s/speech-%s.MPQ",
+    "%s/expansion-locale-%s.MPQ",
+    "%s/expansion-speech-%s.MPQ"
+};
+
+static const char* kWOTLKMPQList[] =
+{
+    "%s/patch-%s.MPQ",
+    "patch.MPQ",
+    "%s/patch-%s-2.MPQ",
+    "%s/patch-%s-3.MPQ",
+    "patch-2.MPQ",
+    "patch-3.MPQ",
+    "expansion.MPQ",
+    "lichking.MPQ",
+    "common.MPQ",
+    "common-2.MPQ",
+    "%s/locale-%s.MPQ",
+    "%s/speech-%s.MPQ",
+    "%s/expansion-locale-%s.MPQ",
+    "%s/lichking-locale-%s.MPQ",
+    "%s/expansion-speech-%s.MPQ",
+    "%s/lichking-speech-%s.MPQ"
+};
+
+static const char* kCATAMPQList[] =
+{
+    "art.MPQ",
+    "alternate.MPQ",
+    "world1.MPQ",
+    "world2.MPQ",
+    "%s/locale-%s.MPQ",
+    "%s/speech-%s.MPQ",
+    "expansion1.MPQ",
+    "%s/expansion1-locale-%s.MPQ",
+    "%s/expansion1-speech-%s.MPQ",
+    "expansion2.MPQ",
+    "%s/expansion2-locale-%s.MPQ",
+    "%s/expansion2-speech-%s.MPQ"
+    "expansion3.MPQ",
+    "%s/expansion3-locale-%s.MPQ",
+    "%s/expansion3-speech-%s.MPQ"
+};
 
 //static const char * szWorkDirMaps = ".\\Maps";
-const char* szWorkDirWmo = "./Buildings";
-const char* szRawVMAPMagic = "VMAPc06";
+char const szWorkDirWmo[]   = "./Buildings";
+char       szRawVMAPMagic[] = "VMAP000";
 
 // Local testing functions
 
@@ -123,8 +176,193 @@ bool FileExists(const char* file)
     return false;
 }
 
-typedef std::pair < std::string /*full_filename*/, char const* /*locale_prefix*/ > UpdatesPair;
-typedef std::map < int /*build*/, UpdatesPair > Updates;
+void compute_md5(const char* value, char* result)
+{
+    md5_byte_t digest[16];
+    md5_state_t ctx;
+
+    mangos_md5_init(&ctx);
+    md5_append(&ctx, (const unsigned char*)value, strlen(value));
+    md5_finish(&ctx, digest);
+
+    for(int i=0;i<16;i++)
+    {
+        sprintf(result+2*i,"%02x",digest[i]);
+    }
+    result[32]='\0';
+}
+
+std::string GetUniformName(std::string& path)
+{
+    std::transform(path.begin(),path.end(),path.begin(),::tolower);
+
+    string tempPath;
+    string file;
+    char digest[33];
+
+    std::size_t found = path.find_last_of("/\\");
+    if (found != string::npos)
+    {
+      file = path.substr(found+1);
+      tempPath = path.substr(0,found);
+    }
+    else
+    {
+        file = tempPath = path;
+    }
+
+    if(!tempPath.empty())
+    {
+        compute_md5(tempPath.c_str(),digest);
+    }
+    else
+    {
+        compute_md5("\\",digest);
+    }
+
+    string result;
+    result = result.assign(digest) + "-" + file;
+
+    return result;
+}
+
+std::string GetExtension(std::string& path)
+{
+    string ext;
+    size_t foundExt = path.find_last_of(".");
+    if (foundExt != std::string::npos)
+    {
+        ext=path.substr(foundExt+1);
+    }
+    else
+    {
+        ext.clear();
+    }
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    return ext;
+}
+
+/**
+ * @brief
+ *
+ */
+void ReadLiquidTypeTableDBC()
+{
+    printf("\n Reading liquid types from LiquidType.dbc...");
+
+    HANDLE dbcFile;
+    if (!OpenNewestFile("DBFilesClient\\LiquidType.dbc", &dbcFile))
+    {
+        printf("Error: Cannot find LiquidType.dbc in archive!\n");
+        exit(1);
+    }
+
+    DBCFile dbc(dbcFile);
+    if (!dbc.open())
+    {
+        printf("Fatal error: Could not read LiquidType.dbc!\n");
+        exit(1);
+    }
+
+    size_t LiqType_count = dbc.getRecordCount();
+    size_t LiqType_maxid = dbc.getMaxId();
+    LiqType = new uint16[LiqType_maxid + 1];
+    memset(LiqType, 0xff, (LiqType_maxid + 1) * sizeof(uint16));
+
+    for (uint32 x = 0; x < LiqType_count; ++x)
+    {
+        LiqType[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
+    }
+
+    printf(" Success! %zu liquid types loaded.\n", LiqType_count);
+}
+
+void ParseMapFiles(int iCoreNumber)
+{
+    char fn[512];
+    //char id_filename[64];
+    char id[10];
+    StringSet failedPaths;
+    printf("\n");
+    for (unsigned int i = 0; i < map_count; ++i)
+    {
+        sprintf(id, "%03u", map_ids[i].id);
+        sprintf(fn, "World\\Maps\\%s\\%s.wdt", map_ids[i].name, map_ids[i].name);
+
+        HANDLE handleWDT;
+        if (!OpenNewestFile(fn, &handleWDT))
+        {
+            printf("Error opening WDT file %s\n", fn);
+            continue;
+        }
+
+        WDTFile WDT(handleWDT, fn, map_ids[i].name);
+        if (WDT.init(id, map_ids[i].id))
+        {
+            printf(" Processing Map %u (%s)\n[", map_ids[i].id, map_ids[i].name);
+            for (int x = 0; x < 64; ++x)
+            {
+                for (int y = 0; y < 64; ++y)
+                {
+                    if (ADTFile* ADT = WDT.GetMap(x, y))
+                    {
+                        //sprintf(id_filename,"%02u %02u %03u",x,y,map_ids[i].id);//!!!!!!!!!
+                        ADT->init(map_ids[i].id, x, y, failedPaths, iCoreNumber, szRawVMAPMagic);
+                        delete ADT;
+                    }
+                }
+                printf("#");
+                fflush(stdout);
+            }
+            printf("]\n");
+        }
+    }
+
+    if (!failedPaths.empty())
+    {
+        printf(" Warning: Some models could not be extracted, see below\n");
+        for (StringSet::const_iterator itr = failedPaths.begin(); itr != failedPaths.end(); ++itr)
+        {
+            printf("Could not find file of model %s\n", itr->c_str());
+        }
+        printf(" A few not found models can be expected and are not alarming.\n");
+    }
+}
+
+void getGamePath()
+{
+    strcpy(input_path, "Data/");
+}
+
+bool scan_patches(char* scanmatch, std::vector<std::string>& pArchiveNames)
+{
+    int i;
+    char path[512];
+
+    for (i = 1; i <= 99; i++)
+    {
+        if (i != 1)
+        {
+            sprintf(path, "%s-%d.MPQ", scanmatch, i);
+        }
+        else
+        {
+            sprintf(path, "%s.MPQ", scanmatch);
+        }
+#ifdef __linux__
+        if (FILE* h = fopen64(path, "rb"))
+#else
+        if (FILE* h = fopen(path, "rb"))
+#endif
+        {
+            fclose(h);
+            //matches.push_back(path);
+            pArchiveNames.push_back(path);
+        }
+    }
+
+    return(true);
+}
 
 void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char const* section, Updates& updates)
 {
@@ -173,7 +411,7 @@ void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char cons
             }
 
             uint32 ubuild = 0;
-            if (sscanf(ffd.cFileName, scanname, &ubuild) == 1 && (!CONF_max_build || ubuild <= CONF_max_build))
+            if (sscanf(ffd.cFileName, scanname, &ubuild) == 1 && (!iCoreNumber || ubuild <= iCoreNumber))
             {
                 updates[ubuild] = UpdatesPair(ffd.cFileName, section);
             }
@@ -189,7 +427,7 @@ void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char cons
         int ubuild = 0;
         dirent* dirp;
         while ((dirp = readdir(dp)) != NULL)
-            if (sscanf(dirp->d_name, scanname, &ubuild) == 1 && (!CONF_max_build || ubuild <= CONF_max_build))
+            if (sscanf(dirp->d_name, scanname, &ubuild) == 1 && (!iCoreNumber || ubuild <= iCoreNumber))
             {
                 updates[ubuild] = UpdatesPair(dirp->d_name, section);
             }
@@ -200,508 +438,216 @@ void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char cons
 #endif
 }
 
-bool LoadLocaleMPQFile(int const locale)
+void LoadLocaleMPQFiles(int const locale)
 {
     char filename[512];
 
     // first base old version of dbc files
     sprintf(filename, "%s/Data/%s/locale-%s.MPQ", input_path, Locales[locale], Locales[locale]);
 
-    if (!OpenArchive(filename, &LocaleMpq))
+    HANDLE localeMpqHandle;
+
+    if (!OpenArchive(filename, &localeMpqHandle))
     {
         printf("Error open archive: %s\n\n", filename);
-        return false;
+        return;
     }
 
-    // prepare sorted list patches in locale dir and Data root
-    Updates updates;
-    // now update to newer view, locale
-    AppendPatchMPQFilesToList(Locales[locale], Locales[locale], NULL, updates);
-    // now update to newer view, root
-    AppendPatchMPQFilesToList(NULL, NULL, Locales[locale], updates);
+    switch (iCoreNumber) {
+        case CLIENT_TBC:
+        case CLIENT_WOTLK:
+            for (int i = 1; i < 5; ++i)
+            {
+                char ext[3] = "";
+                if (i > 1)
+                {
+                    sprintf(ext, "-%i", i);
+                }
 
-    // ./Data wow-update-base files
-    for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
-    {
-        sprintf(filename, "%s/Data/wow-update-base-%u.MPQ", input_path, Builds[i]);
+                sprintf(filename, "%s/Data/%s/patch-%s%s.MPQ", input_path, Locales[locale], Locales[locale], ext);
+                if (!OpenArchive(filename))
+                {
+                    printf("Error open patch archive: %s\n", filename);
+                }
+            }
+            break;
+        case CLIENT_CATA:
+            // prepare sorted list patches in locale dir and Data root
+            Updates updates;
+            // now update to newer view, locale
+            AppendPatchMPQFilesToList(Locales[locale], Locales[locale], NULL, updates);
+            // now update to newer view, root
+            AppendPatchMPQFilesToList(NULL, NULL, Locales[locale], updates);
 
-        printf("\nPatching : %s\n", filename);
+            // ./Data wow-update-base files
+            for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
+            {
+                sprintf(filename, "%s/Data/wow-update-base-%u.MPQ", input_path, Builds[i]);
 
-        //if (!OpenArchive(filename))
-        if (!SFileOpenPatchArchive(LocaleMpq, filename, "", 0))
-        {
-            printf("Error open patch archive: %s\n\n", filename);
+                printf("\nPatching : %s\n", filename);
+
+                //if (!OpenArchive(filename))
+                if (!SFileOpenPatchArchive(localeMpqHandle, filename, "", 0))
+                {
+                    printf("Error open patch archive: %s\n\n", filename);
+                }
+            }
+
+            for (Updates::const_iterator itr = updates.begin(); itr != updates.end(); ++itr)
+            {
+                if (!itr->second.second)
+                {
+                    sprintf(filename, "%s/Data/%s/%s", input_path, Locales[locale], itr->second.first.c_str());
+                }
+                else
+                {
+                    sprintf(filename, "%s/Data/%s", input_path, itr->second.first.c_str());
+                }
+
+                printf("\nPatching : %s\n", filename);
+
+                //if (!OpenArchive(filename))
+                if (!SFileOpenPatchArchive(localeMpqHandle, filename, itr->second.second ? itr->second.second : "", 0))
+                {
+                    printf("Error open patch archive: %s\n\n", filename);
+                }
+            }
+
+            // ./Data/Cache patch-base files
+            for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
+            {
+                sprintf(filename, "%s/Data/Cache/patch-base-%u.MPQ", input_path, Builds[i]);
+
+                printf("\nPatching : %s\n", filename);
+
+                //if (!OpenArchive(filename))
+                if (!SFileOpenPatchArchive(localeMpqHandle, filename, "", 0))
+                {
+                    printf("Error open patch archive: %s\n\n", filename);
+                }
+            }
+
+            // ./Data/Cache/<locale> patch files
+            for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
+            {
+                sprintf(filename, "%s/Data/Cache/%s/patch-%s-%u.MPQ", input_path, Locales[locale], Locales[locale], Builds[i]);
+
+                printf("\nPatching : %s\n", filename);
+
+                //if (!OpenArchive(filename))
+                if (!SFileOpenPatchArchive(localeMpqHandle, filename, "", 0))
+                {
+                    printf("Error open patch archive: %s\n\n", filename);
+                }
+            }
+            break;
         }
-    }
-
-    for (Updates::const_iterator itr = updates.begin(); itr != updates.end(); ++itr)
-    {
-        if (!itr->second.second)
-        {
-            sprintf(filename, "%s/Data/%s/%s", input_path, Locales[locale], itr->second.first.c_str());
-        }
-        else
-        {
-            sprintf(filename, "%s/Data/%s", input_path, itr->second.first.c_str());
-        }
-
-        printf("\nPatching : %s\n", filename);
-
-        //if (!OpenArchive(filename))
-        if (!SFileOpenPatchArchive(LocaleMpq, filename, itr->second.second ? itr->second.second : "", 0))
-        {
-            printf("Error open patch archive: %s\n\n", filename);
-        }
-    }
-
-    // ./Data/Cache patch-base files
-    for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
-    {
-        sprintf(filename, "%s/Data/Cache/patch-base-%u.MPQ", input_path, Builds[i]);
-
-        printf("\nPatching : %s\n", filename);
-
-        //if (!OpenArchive(filename))
-        if (!SFileOpenPatchArchive(LocaleMpq, filename, "", 0))
-        {
-            printf("Error open patch archive: %s\n\n", filename);
-        }
-    }
-
-    // ./Data/Cache/<locale> patch files
-    for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
-    {
-        sprintf(filename, "%s/Data/Cache/%s/patch-%s-%u.MPQ", input_path, Locales[locale], Locales[locale], Builds[i]);
-
-        printf("\nPatching : %s\n", filename);
-
-        //if (!OpenArchive(filename))
-        if (!SFileOpenPatchArchive(LocaleMpq, filename, "", 0))
-        {
-            printf("Error open patch archive: %s\n\n", filename);
-        }
-    }
-
-    return true;
 }
 
 /**
  * @brief
  *
  */
-void LoadCommonMPQFiles(uint32 build)
+void LoadCommonMPQFiles(int client)
 {
-    TCHAR filename[512];
-    _stprintf(filename, _T("%s/Data/world.MPQ"), input_path);
-    if (!SFileOpenArchive(filename, 0, MPQ_OPEN_READ_ONLY, &WorldMpq))
+    char filename[512];
+    char temp_file[512];
+    int count = 0;
+    string temp[256];
+    switch (client)
     {
-        if (GetLastError() != ERROR_FILE_NOT_FOUND)
-        {
-            _tprintf(_T("Cannot open archive %s\n"), filename);
-        }
-        return;
+        case CLIENT_CLASSIC:
+            count = sizeof(kClassicMPQList) / sizeof(char*);
+            std::copy(std::begin(kClassicMPQList), std::end(kClassicMPQList), std::begin(temp));
+            break;
+        case CLIENT_TBC:
+            count = sizeof(kTBCMPQList) / sizeof(char*);
+            std::copy(std::begin(kTBCMPQList), std::end(kTBCMPQList), std::begin(temp));
+            break;
+        case CLIENT_WOTLK:
+            count = sizeof(kWOTLKMPQList) / sizeof(char*);
+            std::copy(std::begin(kWOTLKMPQList), std::end(kWOTLKMPQList), std::begin(temp));
+            break;
+        case CLIENT_CATA:
+            count = sizeof(kCATAMPQList) / sizeof(char*);
+            std::copy(std::begin(kCATAMPQList), std::end(kCATAMPQList), std::begin(temp));
+            break;
     }
 
-    int count = sizeof(CONF_mpq_list) / sizeof(char*);
-    for (int i = 1; i < count; ++i)
+    char dirname[512];
+    struct stat info;
+    string locale;
+    for (int i = 0; i < LOCALES_COUNT; i++)
     {
-        if (build < 15211 && !strcmp("world2.MPQ", CONF_mpq_list[i]))   // 4.3.2 and higher MPQ
+        sprintf_s(dirname, "%s/Data/%s", input_path, Locales[i]);
+        if (!stat(dirname, &info))
         {
-            continue;
+            locale = Locales[i];
+            printf("Detected locale: %s\n", locale.c_str());
+            break;
         }
+    }
 
-        _stprintf(filename, _T("%s/Data/%s"), input_path, CONF_mpq_list[i]);
-        if (!SFileOpenPatchArchive(WorldMpq, filename, "", 0))
+    for (int i = (count-1); i >= 0; i--)
+    {
+        // Replace possible locale info.
+        sprintf_s(temp_file, temp[i].c_str(), locale.c_str(), locale.c_str());
+        // Definitive filename.
+        sprintf_s(filename, "%s/Data/%s", input_path, temp_file);
+        printf("Loading archive %s\n", filename);
+        if (ClientFileExists(filename))
         {
-            if (GetLastError() != ERROR_FILE_NOT_FOUND)
+            HANDLE fileHandle;
+            if (!OpenArchive(filename, &fileHandle))
             {
-                _tprintf(_T("Cannot open archive %s\n"), filename);
+                printf("Error open archive: %s\n\n", filename);
             }
-            else
-            {
-                _tprintf(_T("Not found %s\n"), filename);
-            }
-        }
-        else
-        {
-            _tprintf(_T("Loaded %s\n"), filename);
-
-            bool found = false;
-            int count = 0;
-            SFILE_FIND_DATA data;
-            HANDLE find = SFileFindFirstFile(WorldMpq, "*.*", &data, NULL);
-            if (find != NULL)
-            {
-                do
-                {
-                    ++count;
-                    if (data.dwFileFlags & MPQ_FILE_PATCH_FILE)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                while (SFileFindNextFile(find, &data));
-            }
-            SFileFindClose(find);
-            printf("Scanned %d files, found patch = %d\n", count, found);
+            //new MPQFile(fileHandle, filename);
         }
     }
-
-    char const* prefix = NULL;
-    for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
-    {
-        memset(filename, 0, sizeof(filename));
-        if (Builds[i] > LAST_DBC_IN_DATA_BUILD)
-        {
-            prefix = "";
-            _stprintf(filename, _T("%s/Data/wow-update-base-%u.MPQ"), input_path, Builds[i]);
-        }
-        else
-        {
-            prefix = "base";
-            _stprintf(filename, _T("%s/Data/wow-update-%u.MPQ"), input_path, Builds[i]);
-        }
-
-        if (!SFileOpenPatchArchive(WorldMpq, filename, prefix, 0))
-        {
-            if (GetLastError() != ERROR_FILE_NOT_FOUND)
-            {
-                _tprintf(_T("Cannot open patch archive %s\n"), filename);
-            }
-            else
-            {
-                _tprintf(_T("Not found %s\n"), filename);
-            }
-            continue;
-        }
-        else
-        {
-            _tprintf(_T("Loaded %s\n"), filename);
-
-
-            bool found = false;
-            int count = 0;
-            SFILE_FIND_DATA data;
-            HANDLE find = SFileFindFirstFile(WorldMpq, "*.*", &data, NULL);
-            if (find != NULL)
-            {
-                do
-                {
-                    ++count;
-                    if (data.dwFileFlags & MPQ_FILE_PATCH_FILE)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                while (SFileFindNextFile(find, &data));
-            }
-            SFileFindClose(find);
-            printf("Scanned %d files, found patch = %d\n", count, found);
-        }
-    }
-
-    // ./Data/Cache patch-base files
-    for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
-    {
-        sprintf(filename, "%s/Data/Cache/patch-base-%u.MPQ", input_path, Builds[i]);
-
-        printf("\nPatching : %s\n", filename);
-
-        if (!SFileOpenPatchArchive(WorldMpq, filename, "", 0))
-        {
-            printf("Error open patch archive: %s\n\n", filename);
-        }
-    }
-}
-void strToLower(char* str)
-{
-    while (*str)
-    {
-        *str = tolower(*str);
-        ++str;
-    }
-}
-
-// copied from contrib/extractor/System.cpp
-void ReadLiquidTypeTableDBC()
-{
-    printf(" Reading liquid types from LiquidType.dbc...");
-    DBCFile dbc(LocaleMpq, "DBFilesClient\\LiquidType.dbc");
-    if (!dbc.open())
-    {
-        printf("Fatal error: Could not read LiquidType.dbc!\n");
-        exit(1);
-    }
-
-    size_t LiqType_count = dbc.getRecordCount();
-    size_t LiqType_maxid = dbc.getRecord(LiqType_count - 1).getUInt(0);
-    LiqType = new uint16[LiqType_maxid + 1];
-    memset(LiqType, 0xff, (LiqType_maxid + 1) * sizeof(uint16));
-
-    for (uint32 x = 0; x < LiqType_count; ++x)
-    {
-        LiqType[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
-    }
-
-    printf(" Success! (%u LiqTypes loaded)\n", (unsigned int)LiqType_count);
 }
 
 void Usage(char* prg)
 {
     printf(" Usage: %s [OPTION]\n\n", prg);
     printf(" Extract client database files and generate map files.\n");
-    printf("   -s : (default) small size (data size optimization), ~500MB less vmap data.\n");
-    printf("   -l : large size, ~500MB more vmap data. (might contain more details)\n");
-    printf("   -d <path>: Path to the vector data source folder.\n");
-    printf("   -b : target build (default %u)", CONF_TargetBuild);
-    printf("   -? : This message.\n");
-}
-
-void ParsMapFiles()
-{
-    char fn[512];
-    //char id_filename[64];
-    char id[10];
-    StringSet failedPaths;
+    printf("   -h, --help            show the usage\n");
+    printf("   -i, --input <path>     search path for game client archives\n");
+    printf("   -s, --small           extract smaller vmaps by optimizing data. Reduces\n");
+    printf("                         size by ~ 500MB\n");
     printf("\n");
-    for (unsigned int i = 0; i < map_count; ++i)
-    {
-        sprintf(id, "%03u", map_ids[i].id);
-        sprintf(fn, "World\\Maps\\%s\\%s.wdt", map_ids[i].name, map_ids[i].name);
-        WDTFile WDT(fn, map_ids[i].name);
-        if (WDT.init(id, map_ids[i].id))
-        {
-            printf(" Processing Map %u (%s)\n[", map_ids[i].id, map_ids[i].name);
-            for (int x = 0; x < 64; ++x)
-            {
-                for (int y = 0; y < 64; ++y)
-                {
-                    if (ADTFile* ADT = WDT.GetMap(x, y))
-                    {
-                        //sprintf(id_filename,"%02u %02u %03u",x,y,map_ids[i].id);//!!!!!!!!!
-                        ADT->init(map_ids[i].id, x, y, failedPaths);
-                        delete ADT;
-                    }
-                }
-                printf("#");
-                fflush(stdout);
-            }
-            printf("]\n");
-        }
-    }
-
-    if (!failedPaths.empty())
-    {
-        printf(" Warning: Some models could not be extracted, see below\n");
-        for (StringSet::const_iterator itr = failedPaths.begin(); itr != failedPaths.end(); ++itr)
-        {
-            printf("Could not find file of model %s\n", itr->c_str());
-        }
-        printf(" A few not found models can be expected and are not alarming.\n");
-    }
-}
-
-bool ExtractWmo()
-{
-    bool success = false;
-
-    //const char* ParsArchiveNames[] = {"patch-2.MPQ", "patch.MPQ", "common.MPQ", "expansion.MPQ"};
-
-    SFILE_FIND_DATA data;
-    HANDLE find = SFileFindFirstFile(WorldMpq, "*.wmo", &data, NULL);
-    if (find != NULL)
-    {
-        do
-        {
-            std::string str = data.cFileName;
-            //printf("Extracting wmo %s\n", str.c_str());
-            success |= ExtractSingleWmo(str);
-        }
-        while (SFileFindNextFile(find, &data));
-    }
-    SFileFindClose(find);
-
-    if (success)
-    {
-        printf("\nExtract wmo complete (No (fatal) errors)\n");
-    }
-
-    return success;
-}
-
-bool ExtractSingleWmo(std::string& fname)
-{
-    // Copy files from archive
-
-    char szLocalFile[1024];
-    const char* plain_name = GetPlainName(fname.c_str());
-    sprintf(szLocalFile, "%s/%s", szWorkDirWmo, plain_name);
-    fixnamen(szLocalFile, strlen(szLocalFile));
-
-    if (FileExists(szLocalFile))
-    {
-        return true;
-    }
-
-    int p = 0;
-    //Select root wmo files
-    const char* rchr = strrchr(plain_name, '_');
-    if (rchr != NULL)
-    {
-        char cpy[4];
-        strncpy((char*)cpy, rchr, 4);
-        for (int i = 0; i < 4; ++i)
-        {
-            int m = cpy[i];
-            if (isdigit(m))
-            {
-                p++;
-            }
-        }
-    }
-
-    if (p == 3)
-    {
-        return true;
-    }
-
-    bool file_ok = true;
-    std::cout << "Extracting " << fname << std::endl;
-    WMORoot froot(fname);
-    if (!froot.open())
-    {
-        printf("Couldn't open RootWmo!!!\n");
-        return true;
-    }
-    FILE* output = fopen(szLocalFile, "wb");
-    if (!output)
-    {
-        printf("couldn't open %s for writing!\n", szLocalFile);
-        return false;
-    }
-    froot.ConvertToVMAPRootWmo(output);
-    int Wmo_nVertices = 0;
-    //printf("root has %d groups\n", froot->nGroups);
-    if (froot.nGroups != 0)
-    {
-        for (uint32 i = 0; i < froot.nGroups; ++i)
-        {
-            char temp[1024];
-            strcpy(temp, fname.c_str());
-            temp[fname.length() - 4] = 0;
-            char groupFileName[1024];
-            sprintf(groupFileName, "%s_%03d.wmo", temp, i);
-            //printf("Trying to open groupfile %s\n",groupFileName);
-
-            string s = groupFileName;
-            WMOGroup fgroup(s);
-            if (!fgroup.open())
-            {
-                printf("Could not open all Group file for: %s\n", plain_name);
-                file_ok = false;
-                break;
-            }
-
-            Wmo_nVertices += fgroup.ConvertToVMAPGroupWmo(output, &froot, preciseVectorData);
-        }
-    }
-
-    fseek(output, 8, SEEK_SET); // store the correct no of vertices
-    fwrite(&Wmo_nVertices, sizeof(int), 1, output);
-    fclose(output);
-
-    // Delete the extracted file in the case of an error
-    if (!file_ok)
-    {
-        remove(szLocalFile);
-    }
-    return true;
-}
-
-void getGamePath()
-{
-#ifdef _WIN32
-    strcpy(input_path, "Data\\");
-#else
-    strcpy(input_path, "Data/");
-#endif
-}
-
-bool scan_patches(char* scanmatch, std::vector<std::string>& pArchiveNames)
-{
-    int i;
-    char path[512];
-
-    for (i = 1; i <= 99; i++)
-    {
-        if (i != 1)
-        {
-            sprintf(path, "%s-%d.MPQ", scanmatch, i);
-        }
-        else
-        {
-            sprintf(path, "%s.MPQ", scanmatch);
-        }
-#ifdef __linux__
-        if (FILE* h = fopen64(path, "rb"))
-#else
-        if (FILE* h = fopen(path, "rb"))
-#endif
-        {
-            fclose(h);
-            //matches.push_back(path);
-            pArchiveNames.push_back(path);
-        }
-    }
-
-    return(true);
+    printf(" Example:\n");
+    printf(" - use data path and create larger vmaps:\n");
+    printf("   %s -l -i \"c:\\games\\world of warcraft\"\n", prg);
 }
 
 bool processArgv(int argc, char** argv)
 {
     bool result = true;
-    bool hasInputPathParam = false;
-    bool preciseVectorData = true;
+    char* param = NULL;
 
     for (int i = 1; i < argc; ++i)
     {
-        if (strcmp("-s", argv[i]) == 0)
-        {
-            preciseVectorData = false;
-        }
-        else if (strcmp("-d", argv[i]) == 0)
-        {
-            if ((i + 1) < argc)
-            {
-                hasInputPathParam = true;
-                strcpy(input_path, argv[i + 1]);
-                if (input_path[strlen(input_path) - 1] != '\\' || input_path[strlen(input_path) - 1] != '/')
-                {
-                    strcat(input_path, "/");
-                }
-                ++i;
-            }
-            else
-            {
-                result = false;
-            }
-        }
-        else if (strcmp("-?", argv[1]) == 0)
+        if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0 )
         {
             result = false;
+            break;
         }
-        else if (strcmp("-l", argv[i]) == 0)
+        else if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--small") == 0 )
         {
-            preciseVectorData = true;
+            result = true;
         }
-        else if (strcmp("-b", argv[i]) == 0)
+        else if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--input") == 0 )
         {
-            if (i + 1 < argc)                            // all ok
+            param = argv[++i];
+            if (!param)
             {
-                CONF_TargetBuild = atoi(argv[i++ + 1]);
+                result = false;
+                break;
             }
+
+            result = true;
+            strcpy(input_path, param);
         }
         else
         {
@@ -729,130 +675,128 @@ bool processArgv(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-    bool bCreatedVmapsFolder = false;
-    bool bExtractedWMOfiles = false;
-    std::string outDir = std::string(output_path) + "/vmaps";
-
     // Use command line arguments, when some
     if (!processArgv(argc, argv))
     {
         return 1;
     }
 
-    // some simple check if working dir is dirty
-    else
+    int thisBuild = getBuildNumber(input_path);
+    iCoreNumber = getCoreNumberFromBuild(thisBuild);
+    std::string outDir = std::string(output_path) + "/vmaps";
+
+    showBanner("Vertical Map Asset Extractor", iCoreNumber);
+    setVMapMagicVersion(iCoreNumber, szRawVMAPMagic);
+    showWebsiteBanner();
+
+    bool success = true;
+    std::string sdir = std::string(szWorkDirWmo) + "/dir";
+    std::string sdir_bin = std::string(szWorkDirWmo) + "/dir_bin";
+    struct stat status;
+    bool dirty = false;
+
+    if (!stat(sdir.c_str(), &status) || !stat(sdir_bin.c_str(), &status))
     {
-        std::string sdir = std::string(szWorkDirWmo) + "/dir";
-        std::string sdir_bin = std::string(szWorkDirWmo) + "/dir_bin";
-        struct stat status;
-        bool dirty = false;
+        printf(" Your %s directory seems to exist, please delete it!\n", szWorkDirWmo);
+        dirty = true;
+    }
 
-        if (!stat(sdir.c_str(), &status) || !stat(sdir_bin.c_str(), &status))
-        {
-            printf(" Your %s directory seems to exist, please delete it!\n", szWorkDirWmo);
-            dirty = true;
-        }
+    if (!stat(outDir.c_str(), &status))
+    {
+        printf(" Your %s directory seems to exist, please delete it!\n", outDir.c_str());
+        dirty = true;
+    }
 
-        if (!stat(outDir.c_str(), &status))
-        {
-            printf(" Your %s directory seems to exist, please delete it!\n", outDir.c_str());
-            dirty = true;
-        }
-
-        if (dirty)
-        {
-            printf(" <press return to exit>");
-            char garbage[2];
-            int ret = scanf("%c", garbage);
-            return 1;
-        }
+    if (dirty)
+    {
+        printf(" <press return to exit>");
+        char garbage[2];
+        int ret = scanf("%c", garbage);
+        return 1;
     }
 
     printf(" Beginning work ....\n");
     //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     // Create the working and ouput directories
     CreateDir(std::string(szWorkDirWmo));
-    bCreatedVmapsFolder = CreateDir(outDir);
+    CreateDir(outDir);
 
-    printf("Loading common MPQ files\n");
-    LoadCommonMPQFiles(CONF_TargetBuild);
+    // prepare archive name list
+    LoadCommonMPQFiles(iCoreNumber);
 
-    int FirstLocale = -1;
-
-    for (int i = 0; i < LOCALES_COUNT; ++i)
+    if (gOpenArchives.empty())
     {
-        //Open MPQs
-        if (!LoadLocaleMPQFile(i))
-        {
-            if (GetLastError() != ERROR_FILE_NOT_FOUND)
-            {
-                printf("Unable to load %s locale archives!\n", Locales[i]);
-            }
-            continue;
-        }
-
-        printf("Detected and using locale locale: %s\n", Locales[i]);
-        break;
+        printf("FATAL ERROR: None MPQ archive found by path '%s'. Use -d option with proper path.\n", input_path);
+        return 1;
     }
-    ReadLiquidTypeTableDBC();
+    if (iCoreNumber == CLIENT_CLASSIC)
+    {
+        ReadLiquidTypeTableDBC();
+    }
 
     // extract data
-    if (bCreatedVmapsFolder)
+    if (success)
     {
-        printf("Extracting WMO file\n");
-        bExtractedWMOfiles = ExtractWmo();
+        success = ExtractWmo(iCoreNumber, szRawVMAPMagic);
     }
 
-    //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    //map.dbc
-    if (bExtractedWMOfiles)
+    // Open map.dbc
+    if (success)
     {
-        DBCFile* dbc = new DBCFile(LocaleMpq, "DBFilesClient\\Map.dbc");
-        if (!dbc->open())
+        HANDLE dbcFile;
+        if (!OpenNewestFile("DBFilesClient\\Map.dbc", &dbcFile))
         {
-            delete dbc;
-            printf("FATAL ERROR: Map.dbc not found in data file.\n");
-            return 1;
+            printf("Error: Cannot find Map.dbc in archive!\n");
+            exit(1);
         }
-        map_count = dbc->getRecordCount();
+
+        printf("Found Map.dbc in archive!\n");
+        printf("\n Reading maps from Map.dbc... ");
+
+        DBCFile dbc(dbcFile);
+        if (!dbc.open())
+        {
+            printf("Fatal error: Could not read Map.dbc!\n");
+            exit(1);
+        }
+
+        map_count = dbc.getRecordCount();
         map_ids = new map_id[map_count];
         for (unsigned int x = 0; x < map_count; ++x)
         {
-            map_ids[x].id = dbc->getRecord(x).getUInt(0);
-            strcpy(map_ids[x].name, dbc->getRecord(x).getString(1));
+            map_ids[x].id = dbc.getRecord(x).getUInt(0);
+            strcpy(map_ids[x].name, dbc.getRecord(x).getString(1));
             printf(" Map %d - %s\n", map_ids[x].id, map_ids[x].name);
         }
 
 
-        delete dbc;
-        ParsMapFiles();
+        ParseMapFiles(iCoreNumber);
         delete [] map_ids;
         //nError = ERROR_SUCCESS;
         // Extract models, listed in DameObjectDisplayInfo.dbc
-        ExtractGameobjectModels();
+        ExtractGameobjectModels(iCoreNumber, szRawVMAPMagic);
     }
 
-    SFileCloseArchive(LocaleMpq);
-    SFileCloseArchive(WorldMpq);
+    delete [] LiqType;
 
-    printf("\n");
-    if (!bExtractedWMOfiles)
+    if (!success)
     {
         printf("ERROR: Extract for %s. Work NOT complete.\n   Precise vector data=%d.\nPress any key.\n", szRawVMAPMagic, preciseVectorData);
         getchar();
         return 1;
     }
 
-    printf("Extract for %s. Work complete. ", szRawVMAPMagic);
-    if (!bCreatedVmapsFolder || !bExtractedWMOfiles)
+    success = AssembleVMAP(std::string(szWorkDirWmo), outDir, szRawVMAPMagic);
+
+    if (!success)
     {
-        printf("There were errors.\n");
-    }
-    else
-    {
-        printf("No errors.\n");
+        printf("ERROR: VMAP building for %s NOT completed", szRawVMAPMagic);
+        getchar();
+        return 1;
     }
 
-    delete [] LiqType;
+    printf("\n");
+    printf(" VMAP building complete. No errors.\n");
+
     return 0;
 }

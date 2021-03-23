@@ -25,24 +25,14 @@
 #include <cstdio>
 #include "vmapexport.h"
 #include "wdtfile.h"
-#include "adtfile.h"
 
-char* wdtGetPlainName(char* FileName)
+WDTFile::WDTFile(HANDLE handle, char* file_name, char* file_name1): WDT(handle, file_name)
 {
-    char* szTemp;
-
-    if ((szTemp = strrchr(FileName, '\\')) != NULL)
+    filename.assign(file_name1);
+    for (int i = 0; i < MAP_TILE_SIZE * MAP_TILE_SIZE; i++)
     {
-        FileName = szTemp + 1;
+        mapAreaInfo[i] = NULL;
     }
-    return FileName;
-}
-
-extern HANDLE WorldMpq;
-
-WDTFile::WDTFile(char* file_name, char* file_name1): WDT(WorldMpq, file_name)
-{
-    filename.append(file_name1, strlen(file_name1));
 }
 
 bool WDTFile::init(char* map_id, unsigned int mapID)
@@ -77,6 +67,20 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
 
         if (!strcmp(fourcc, "MAIN"))
         {
+            // Area Info
+            if (size != (MAP_TILE_SIZE * MAP_TILE_SIZE * sizeof(SMAreaInfo)))
+            {
+                printf("The size for the ADT Map Tile is not the expected one. This file looks corrupted: %s", filename.c_str());
+                return false;
+            }
+
+            for (int i = 0; i < MAP_TILE_SIZE * MAP_TILE_SIZE; i++)
+            {
+                SMAreaInfo* info = new SMAreaInfo();
+                WDT.read(&(info->flags), 4);
+                WDT.read(&(info->asyncId), 4);
+                mapAreaInfo[i] = info;
+            }
         }
         if (!strcmp(fourcc, "MWMO"))
         {
@@ -91,10 +95,8 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
                 while (p < buf + size)
                 {
                     string path(p);
-                    char* s = wdtGetPlainName(p);
-                    fixnamen(s, strlen(s));
+                    gWmoInstansName[q++] = GetUniformName(path);
                     p = p + strlen(p) + 1;
-                    gWmoInstansName[q++] = s;
                 }
                 delete[] buf;
             }
@@ -114,7 +116,7 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
                 {
                     int id;
                     WDT.read(&id, 4);
-                    WMOInstance inst(WDT, gWmoInstansName[id].c_str(), mapID, 65, 65, dirfile);
+                    WMOInstance inst(WDT, gWmoInstansName[id], mapID, 65, 65, dirfile);
                 }
                 delete[] gWmoInstansName;
             }
@@ -122,7 +124,6 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
         WDT.seek((int)nextpos);
     }
 
-    WDT.close();
     fclose(dirfile);
     return true;
 }
@@ -130,17 +131,26 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
 WDTFile::~WDTFile(void)
 {
     WDT.close();
+    for (int i = 0; i < MAP_TILE_SIZE * MAP_TILE_SIZE; i++)
+    {
+        delete mapAreaInfo[i];
+    }
 }
 
-ADTFile* WDTFile::GetMap(int x, int z)
+bool WDTFile::hasTerrain(int x, int y)
 {
-    if (!(x >= 0 && z >= 0 && x < 64 && z < 64))
+    return (mapAreaInfo[x * MAP_TILE_SIZE + y]->flags & TERRAIN_HAS_ADT);
+}
+
+ADTFile* WDTFile::GetMap(int x, int y)
+{
+    if (!(x >= 0 && y >= 0 && x < 64 && y < 64) || !hasTerrain(y, x))
     {
         return NULL;
     }
 
     char name[512];
 
-    sprintf(name, "World\\Maps\\%s\\%s_%d_%d_obj0.adt", filename.c_str(), filename.c_str(), x, z);
+    sprintf(name, "World\\Maps\\%s\\%s_%d_%d.adt", filename.c_str(), filename.c_str(), x, y);
     return new ADTFile(name);
 }

@@ -260,108 +260,6 @@ class Vec3D
         }
 };
 
-
-class Vec2D
-{
-    public:
-        float x, y;
-
-        Vec2D(float x0 = 0.0f, float y0 = 0.0f) : x(x0), y(y0) {}
-
-        Vec2D(const Vec2D& v) : x(v.x), y(v.y) {}
-
-        Vec2D& operator= (const Vec2D& v)
-        {
-            x = v.x;
-            y = v.y;
-            return *this;
-        }
-
-        Vec2D operator+ (const Vec2D& v) const
-        {
-            Vec2D r(x + v.x, y + v.y);
-            return r;
-        }
-
-        Vec2D operator- (const Vec2D& v) const
-        {
-            Vec2D r(x - v.x, y - v.y);
-            return r;
-        }
-
-        float operator* (const Vec2D& v) const
-        {
-            return x * v.x + y * v.y;
-        }
-
-        Vec2D operator* (float d) const
-        {
-            Vec2D r(x * d, y * d);
-            return r;
-        }
-
-        friend Vec2D operator* (float d, const Vec2D& v)
-        {
-            return v * d;
-        }
-
-        Vec2D& operator+= (const Vec2D& v)
-        {
-            x += v.x;
-            y += v.y;
-            return *this;
-        }
-
-        Vec2D& operator-= (const Vec2D& v)
-        {
-            x -= v.x;
-            y -= v.y;
-            return *this;
-        }
-
-        Vec2D& operator*= (float d)
-        {
-            x *= d;
-            y *= d;
-            return *this;
-        }
-
-        float lengthSquared() const
-        {
-            return x * x + y * y;
-        }
-
-        float length() const
-        {
-            return sqrt(x * x + y * y);
-        }
-
-        Vec2D& normalize()
-        {
-            this->operator*= (1.0f / length());
-            return *this;
-        }
-
-        Vec2D operator~() const
-        {
-            Vec2D r(*this);
-            r.normalize();
-            return r;
-        }
-
-
-        friend std::istream& operator>>(std::istream& in, Vec2D& v)
-        {
-            in >> v.x >> v.y;
-            return in;
-        }
-
-        operator float* ()
-        {
-            return (float*)this;
-        }
-};
-
 /**
  * @brief
  *
@@ -377,5 +275,13 @@ inline void rotate(float x0, float y0, float* x, float* y, float angle)
     *x = xa * cosf(angle) - ya * sinf(angle) + x0;
     *y = xa * sinf(angle) + ya * cosf(angle) + y0;
 }
+
+/**
+ * @brief for whatever reason a certain company just can't stick to one coordinate system...
+ *
+ * @param v
+ * @return Vec3D
+ */
+inline Vec3D fixCoords(const Vec3D& v) { return Vec3D(v.z, v.x, v.y); }
 
 #endif

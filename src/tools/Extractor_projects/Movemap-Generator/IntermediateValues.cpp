@@ -35,7 +35,7 @@ namespace MMAP
         rcFreePolyMeshDetail(polyMeshDetail);
     }
 
-    void IntermediateValues::writeIV(uint32 mapID, uint32 tileX, uint32 tileY)
+    void IntermediateValues::writeIV(int mapID, int tileX, int tileY)
     {
         char fileName[255];
         char tileString[25];
@@ -252,7 +252,7 @@ namespace MMAP
         fwrite(mesh->meshes, sizeof(int), mesh->nmeshes * 4, file);
     }
 
-    void IntermediateValues::generateObjFile(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData)
+    void IntermediateValues::generateObjFile(int mapID, int tileX, int tileY, MeshData& meshData)
     {
         char objFileName[255];
         sprintf(objFileName, "meshes/map%04u%02u%02u.obj", mapID, tileY, tileX);

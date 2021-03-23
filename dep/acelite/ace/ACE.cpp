@@ -394,7 +394,7 @@ evaluated)            evaluated)
 libnetsvc.dll        libnetsvc.dll         libnetsvc.dll + warning
 netsvc.so            netsvc.so + warning   libnetsvc.so
 
-    .\../libs/netsvc    ..\..\libs\netsvc.dll ../../libs/netsvc.so
+..\../libs/netsvc    ..\..\libs\netsvc.dll ../../libs/netsvc.so
 (absolute path used)  (absolute path used)
 
 */

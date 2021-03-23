@@ -22,7 +22,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #if !defined (ACE_LACKS_SYS_SYSCTL_H)
-#  include /**/ <sys/sysctl.h>
+#  include /**/ <linux/sysctl.h>
 #endif /* !ACE_LACKS_SYS_SYSCTL_H */
 
 #include /**/ "ace/post.h"

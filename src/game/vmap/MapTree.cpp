@@ -32,8 +32,6 @@
 #include <iomanip>
 #include <limits>
 
-#include <unordered_map>
-
 using G3D::Vector3;
 
 namespace VMAP
@@ -332,7 +330,7 @@ namespace VMAP
             }
             if (success)
             {
-                success = iTree.readFromFile(rf);
+                success = iTree.ReadFromFile(rf);
             }
             if (success)
             {
@@ -350,7 +348,7 @@ namespace VMAP
 #ifdef VMAP_DEBUG
             DEBUG_LOG("Map isTiled: %u", static_cast<uint32>(iIsTiled));
 #endif
-            if (!iIsTiled && ModelSpawn::readFromFile(rf, spawn))
+            if (!iIsTiled && ModelSpawn::ReadFromFile(rf, spawn))
             {
                 WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name);
                 DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "StaticMapTree::InitMap(): loading %s", spawn.name.c_str());
@@ -424,7 +422,7 @@ namespace VMAP
             {
                 // read model spawns
                 ModelSpawn spawn;
-                result = ModelSpawn::readFromFile(tf, spawn);
+                result = ModelSpawn::ReadFromFile(tf, spawn);
                 if (result)
                 {
                     // acquire model instance
@@ -508,7 +506,7 @@ namespace VMAP
                 {
                     // read model spawns
                     ModelSpawn spawn;
-                    result = ModelSpawn::readFromFile(tf, spawn);
+                    result = ModelSpawn::ReadFromFile(tf, spawn);
                     if (result)
                     {
                         // release model instance

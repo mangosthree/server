@@ -14,14 +14,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-set(LIBRARY_NAME gsoap)
-
-file(GLOB_RECURSE GSOAP_LIBRARY_SRCS *.cpp *.h)
-
-include_directories(
-    "${CMAKE_CURRENT_SOURCE_DIR}"
-    # Used to get access to config.h
-    "${CMAKE_BINARY_DIR}"
+add_library(gsoap STATIC
+    soapC.cpp
+    soapServer.cpp
+    stdsoap2.cpp
+    soapH.h
+    soapStub.h
+    stdsoap2.h
 )
 
-add_library(${LIBRARY_NAME} STATIC ${GSOAP_LIBRARY_SRCS})
+target_include_directories(gsoap
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+)

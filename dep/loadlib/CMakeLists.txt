@@ -14,20 +14,12 @@
 # These can definitely be merged at some point, however we need to document and understand the differences to do so.
 
 
-if(USE_STORMLIB)
-    include_directories(
-        ${CMAKE_SOURCE_DIR}/dep/StormLib/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/sl
-    )
-    add_library(loadlib sl/loadlib.cpp sl/adt.cpp sl/wdt.cpp sl/mpq.cpp)
-    target_link_libraries(loadlib storm)
-else()
-    include_directories(
-        ${CMAKE_SOURCE_DIR}/dep/libmpq
-        ${CMAKE_CURRENT_SOURCE_DIR}/ml
-    )
-    add_library(loadlib ml/loadlib.cpp ml/adt.cpp ml/wdt.cpp ml/mpq.cpp)
-endif()
+add_library(loadlib STATIC
+  loadlib.cpp
+  adt.cpp
+  wdt.cpp
+  mpq.cpp)
 
-# link loadlib with zlib
-target_link_libraries(loadlib zlib)
+target_include_directories(loadlib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/sl)
+
+target_link_libraries(loadlib PUBLIC stormlib)

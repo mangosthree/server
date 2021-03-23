@@ -225,11 +225,6 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
     SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
 
-    if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
-    {
-        SetFlag(GAMEOBJECT_FLAGS, (GO_FLAG_TRANSPORT | GO_FLAG_NODESPAWN));
-    }
-
     SetEntry(goinfo->id);
     SetDisplayId(goinfo->displayId);
 
@@ -238,6 +233,11 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     SetGoType(GameobjectTypes(goinfo->type));
     SetGoArtKit(0);                                         // unknown what this is
     SetGoAnimProgress(animprogress);
+
+    if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+    {
+        SetFlag(GAMEOBJECT_FLAGS, (GO_FLAG_TRANSPORT | GO_FLAG_NODESPAWN));
+    }
 
     switch (GetGoType())
     {
@@ -802,11 +802,6 @@ void GameObject::DeleteFromDB()
     WorldDatabase.PExecuteLog("DELETE FROM `gameobject` WHERE `guid` = '%u'", GetGUIDLow());
     WorldDatabase.PExecuteLog("DELETE FROM `game_event_gameobject` WHERE `guid` = '%u'", GetGUIDLow());
     WorldDatabase.PExecuteLog("DELETE FROM `gameobject_battleground` WHERE `guid` = '%u'", GetGUIDLow());
-}
-
-GameObjectInfo const* GameObject::GetGOInfo() const
-{
-    return m_goInfo;
 }
 
 /*********************************************************/
@@ -2241,7 +2236,7 @@ void GameObject::UpdateModel()
     }
     delete m_model;
 
-    m_model = GameObjectModel::construct(this);
+    m_model = GameObjectModel::Create(this);
     if (m_model)
     {
         GetMap()->InsertGameObjectModel(*m_model);
@@ -2876,5 +2871,3 @@ float GameObject::GetInteractionDistance()
             return INTERACTION_DISTANCE;
     }
 }
-
-

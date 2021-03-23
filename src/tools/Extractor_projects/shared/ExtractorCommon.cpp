@@ -51,6 +51,7 @@
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
+
 #else
 #include <io.h>
 #endif
@@ -66,7 +67,7 @@
 *
 *  @RETURN pFile the pointer to the file, so that it can be worked on
 */
-FILE* openWoWExe()
+FILE* openWoWExe(char const* path)
 {
     FILE *pFile;
     const char* ExeFileName[] = { "WoW.exe", "Wow.exe", "wow.exe" ,"World of Warcraft.exe", "World of Warcraft.app/Contents/MacOS/World of Warcraft"};
@@ -75,13 +76,15 @@ FILE* openWoWExe()
     /// loop through all possible file names
     for (int iFileCount = 0; iFileCount < iExeSpelling; iFileCount++)
     {
+        char tmp1[512];
+        sprintf(tmp1, "%s/%s", path, ExeFileName[iFileCount]);
 #ifdef WIN32
-        if (fopen_s(&pFile, ExeFileName[iFileCount], "rb") == 0)
+        if (fopen_s(&pFile, tmp1, "rb") == 0)
         {
             return pFile; ///< successfully located the WoW executable
         }
 #else
-        if ((pFile = fopen(ExeFileName[iFileCount], "rb")))
+        if ((pFile = fopen(tmp1, "rb")))
         {
             return pFile; ///< successfully located the WoW executable
         }
@@ -98,34 +101,36 @@ FILE* openWoWExe()
 *  @PARAM sFilename is the filename of the WoW executable to be loaded
 *  @RETURN iBuild the build number of the WoW executable, or 0 if failed
 */
-int getBuildNumber()
+int getBuildNumber(char const* path)
 {
     int iBuild = -1; ///< build version # of the WoW executable (returned value)
 
-    bool bBuildFound = false;
-
-    /// hex values of the text/bytes we need to search for:
-    /// WoW [
-    int iHexValue_W = 0x57;
-    int iHexValue_o = 0x6F;
-    int iHexValue_space = 0x20;
-    int iHexValue_OpeningBracket = 0x5B; // [
-
     /// buffers used for working on the file's bytes
     unsigned char byteSearchBuffer[1]; ///< used for reading in a single character, ready to be
-                                       ///< tested for the required text we are searching for: "WoW [Rel"
+                                       ///< tested for the required text we are searching for: 1, 5, 6, or 8
     unsigned char jumpBytesBuffer[128]; ///< used for skipping past the bytes from the file's start
                                         ///< to the base # area, before we start searching for the base #, for faster processing
-    unsigned char jumpNonAssertionBytesBuffer[7]; ///< used for skipping past the bytes between the text being
-                                        ///< searched for and the Base #, so that we can then get at the Base #
-    unsigned char jumpAssertionBytesBuffer[26]; ///< skip the 'assertions enabled' part of the version string in an OS X based
-                                        ///< version of the game.
-    unsigned char buildNumber[6]; ///< stored here prior to conversion to an integer
+    unsigned char preWOTLKbuildNumber[3]; ///< will hold the last 3 digits of the build number
+    unsigned char postTBCbuildNumber[4]; ///< will hold the last 4 digits of the build number
+
+    // These do not include the first digit
+    // as the first digit is used to locate the possible location of the build number
+    // then the following bytes are grabbed, 3 for pre WOTLK, 4 for WOTLK and later.
+    // Those grabbed bytes are then compared with the below variables in order to idenity the exe's build
+    unsigned char vanillaBuild1[3] = { 0x38, 0x37, 0x35 };       // (5)875
+    unsigned char vanillaBuild2[3] = { 0x30, 0x30, 0x35 };       // (6)005
+    unsigned char vanillaBuild3[3] = { 0x31, 0x34, 0x31 };       // (6)141
+    unsigned char tbcBuild[3]      = { 0x36, 0x30, 0x36 };       // (8)606
+    unsigned char wotlkBuild[4]    = { 0x32, 0x33, 0x34, 0x30 }; // (1)2340
+    unsigned char cataBuild[4]     = { 0x35, 0x35, 0x39, 0x35 }; // (1)5595
+    unsigned char mopBuild[4]      = { 0x38, 0x34, 0x31, 0x34 }; // (1)8414
 
     FILE *pFile;
-    if (!(pFile = openWoWExe()))
+    if (!(pFile = openWoWExe(path)))
     {
-        return 0; ///> failed to locate exe file
+        printf("\nFatal Error: failed to locate the WoW executable!\n\n");
+        printf("\nExiting program!!\n");
+        exit(0); ///> failed to locate exe file
     }
 
     /// jump over as much of the file as possible, before we start searching for the base #
@@ -135,78 +140,65 @@ int getBuildNumber()
     }
 
     /// Search for the build #
-    while (!bBuildFound && fread(byteSearchBuffer, 1, 1, pFile))
+    while (fread(byteSearchBuffer, 1, 1, pFile))
     {
-        /// find W
-        if (byteSearchBuffer[0] == 0x57)
+        /// we are looking for 1, 5, 6, or 8
+        /// these values are the first digit of the build versions we are interested in
+
+        // Vanilla and TBC
+        if (byteSearchBuffer[0] == 0x35 || byteSearchBuffer[0] == 0x36 || byteSearchBuffer[0] == 0x38)
         {
-            /// is the next byte an o
-            fread(byteSearchBuffer, 1, 1, pFile);
-            if (byteSearchBuffer[0] == iHexValue_o)
+            /// grab the next 4 bytes
+            fread(preWOTLKbuildNumber, sizeof(preWOTLKbuildNumber), 1, pFile);
+
+            if (!memcmp(preWOTLKbuildNumber, vanillaBuild1, sizeof(preWOTLKbuildNumber))) /// build is Vanilla?
             {
-                /// is the next byte a W
-                fread(byteSearchBuffer, 1, 1, pFile);
-                if (byteSearchBuffer[0] == iHexValue_W)
-                {
-                    /// is the next byte a space
-                    fread(byteSearchBuffer, 1, 1, pFile);
-                    if (byteSearchBuffer[0] == iHexValue_space)
-                    {
-                        /// is the next byte an open square bracket
-                        fread(byteSearchBuffer, 1, 1, pFile);
-                        if (byteSearchBuffer[0] == iHexValue_OpeningBracket)
-                        {
-                            // Check for assertions
-                            unsigned char releaseBuffer[7];
-                            fread(releaseBuffer, sizeof(releaseBuffer), 1, pFile);
+                return 5875;
+            }
+            else if (!memcmp(preWOTLKbuildNumber, vanillaBuild2, sizeof(preWOTLKbuildNumber))) /// build is Vanilla?
+            {
+                return 6005;
+            }
+            else if (!memcmp(preWOTLKbuildNumber, vanillaBuild3, sizeof(preWOTLKbuildNumber))) /// build is Vanilla?
+            {
+                return 6141;
+            }
+            else if (!memcmp(preWOTLKbuildNumber, tbcBuild, sizeof(preWOTLKbuildNumber))) /// build is TBC?
+            {
+                return 8606;
+            }
+        }
 
-                            fread(byteSearchBuffer, 1, 1, pFile);
-                            if (byteSearchBuffer[0] == iHexValue_space)
-                            {
-                                /*
-                                 * Longer version name found. E.g.;
-                                 * WoW [Release Assertions Enabled] Build 5875
-                                 */
-                                fread(jumpAssertionBytesBuffer, sizeof(jumpAssertionBytesBuffer), 1, pFile);
-                            } else {
-                                /**
-                                 * Regular build version found. E.g.;
-                                 * WoW [Release] Build 5875
-                                 */
-                                /// grab data leading up to the build #
-                                fread(jumpNonAssertionBytesBuffer, sizeof(jumpNonAssertionBytesBuffer), 1, pFile);
-                            }
+        /// WOTLK, CATA, MoP
+        if (byteSearchBuffer[0] == 0x31)
+        {
+            /// grab the next 4 bytes
+            fread(postTBCbuildNumber, sizeof(postTBCbuildNumber), 1, pFile);
 
-                            bBuildFound = true;
-                        }
-                    }
-                }
+            if (!memcmp(postTBCbuildNumber, wotlkBuild, sizeof(postTBCbuildNumber))) /// build is WOTLK?
+            {
+                return 12340;
+            }
+            else if (!memcmp(postTBCbuildNumber, cataBuild, sizeof(postTBCbuildNumber))) /// build is CATA?
+            {
+                return 15595;
+            }
+            else if (!memcmp(postTBCbuildNumber, mopBuild, sizeof(postTBCbuildNumber))) /// build is MoP?
+            {
+                return 18414;
             }
         }
     }
 
-    if (!bBuildFound)
-    {
-        /// close the file
-        fclose(pFile); ///< housekeping
-        return 0; ///< we reached the end of the file without locating the build #, exit funcion
-    }
-
-    /// grab the bytes containing the number
-    fread(buildNumber, sizeof(buildNumber), 1, pFile);
-
-    /// place the build number into a string (easy conversion to int)
-    std::stringstream ss;
-    std::string sbuildNumber;
-    ss << buildNumber[0] << buildNumber[1] << buildNumber[2] << buildNumber[3] << buildNumber[4];
-    ss >> sbuildNumber;
-
-    fclose(pFile); ///< housekeping
-
-    /// convert build number into an int
-    iBuild = atoi(sbuildNumber.c_str());
-
-    return iBuild; ///< build # found
+    printf("\nFatal Error: failed to identify build version!\n\n");
+    printf("\nSupported build versions:\n");
+    printf("\nVanilla: 5875, 6005, 6141\n");
+    printf("TBC:      8606\n");
+    printf("WOTLK:    12340\n");
+    printf("CATA:     15595\n");
+    printf("MOP:      18414\n");
+    printf("\n\nExiting program!!\n");
+    exit(0);
 }
 
 /**
@@ -329,25 +321,25 @@ void setMapMagicVersion(int iCoreNumber, char* magic)
     switch (iCoreNumber)
     {
     case CLIENT_CLASSIC:
-        std::strcpy(magic,"z1.4");
+        std::strcpy(magic,"z1.5");
         break;
     case CLIENT_TBC:
-        std::strcpy(magic,"s1.4");
+        std::strcpy(magic,"s1.5");
         break;
     case CLIENT_WOTLK:
-        std::strcpy(magic,"v1.4");
+        std::strcpy(magic,"v1.5");
         break;
     case CLIENT_CATA:
-        std::strcpy(magic,"c1.4");
+        std::strcpy(magic,"c1.5");
         break;
     case CLIENT_MOP:
-        std::strcpy(magic,"p1.4");
+        std::strcpy(magic,"p1.5");
         break;
     case CLIENT_WOD:
-        std::strcpy(magic,"w1.4");
+        std::strcpy(magic,"w1.5");
         break;
     case CLIENT_LEGION:
-        std::strcpy(magic,"l1.4");
+        std::strcpy(magic,"l1.5");
         break;
     default:
         std::strcpy(magic,"UNKN");
@@ -365,25 +357,25 @@ void setVMapMagicVersion(int iCoreNumber, char* magic)
     switch (iCoreNumber)
     {
     case CLIENT_CLASSIC:
-        std::strcpy(magic,"VMAPz06");
+        std::strcpy(magic,"VMAPz07");
         break;
     case CLIENT_TBC:
-        std::strcpy(magic,"VMAPs06");
+        std::strcpy(magic,"VMAPs07");
         break;
     case CLIENT_WOTLK:
-        std::strcpy(magic,"VMAPt06");
+        std::strcpy(magic,"VMAPt07");
         break;
     case CLIENT_CATA:
-        std::strcpy(magic,"VMAPc06");
+        std::strcpy(magic,"VMAPc07");
         break;
     case CLIENT_MOP:
-        std::strcpy(magic,"VMAPp06");
+        std::strcpy(magic,"VMAPp07");
         break;
     case CLIENT_WOD:
-        std::strcpy(magic,"VMAPw06");
+        std::strcpy(magic,"VMAPw07");
         break;
     case CLIENT_LEGION:
-        std::strcpy(magic,"VMAPl06");
+        std::strcpy(magic,"VMAPl07");
         break;
     default:
         std::strcpy(magic,"VMAPUNK");
@@ -392,24 +384,58 @@ void setVMapMagicVersion(int iCoreNumber, char* magic)
 }
 
 /**
+*  This function returns the .mmap file 'magic' number based on the core number
+*
+*  @PARAM iCoreNumber is the Core Number
+*/
+void setMMapMagicVersion(int iCoreNumber, char* magic)
+{
+    switch (iCoreNumber)
+    {
+    case CLIENT_CLASSIC:
+        std::strcpy(magic, "z06");
+        break;
+    case CLIENT_TBC:
+        std::strcpy(magic, "s06");
+        break;
+    case CLIENT_WOTLK:
+        std::strcpy(magic, "t06");
+        break;
+    case CLIENT_CATA:
+        std::strcpy(magic, "c06");
+        break;
+    case CLIENT_MOP:
+        std::strcpy(magic, "p06");
+        break;
+    case CLIENT_WOD:
+        std::strcpy(magic, "w06");
+        break;
+    case CLIENT_LEGION:
+        std::strcpy(magic, "l06");
+        break;
+    default:
+        std::strcpy(magic, "UNK");
+        break;
+    }
+}
+
+//#define MMAP_VERSION 4
+
+
+
+/**
 * @Create Folders based on the path provided
 *
 * @param sPath
 */
-bool CreateDir(const std::string& sPath)
+void CreateDir(const std::string& sPath)
 {
 #ifdef WIN32
-    if (_mkdir(sPath.c_str()) == 0)
-    {
-        return 1;
-    }
+    _mkdir(sPath.c_str());
 #else
-    if (mkdir(sPath.c_str(), 0777) == 0)
-    {
-        return 1;
-    }
+    mkdir(sPath.c_str(), 0777);
 #endif
-    return 0; // failed to create the directory
+
 }
 
 /**

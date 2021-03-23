@@ -22,8 +22,6 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#define _CRT_SECURE_NO_WARNINGS
-
 #include "vmapexport.h"
 #include "wmo.h"
 #include "vec3d.h"
@@ -32,22 +30,26 @@
 #include <cassert>
 #include <map>
 #include <fstream>
+#include <ExtractorCommon.h>
 #undef min
 #undef max
-#include "mpqfile.h"
 
-using namespace std;
 extern uint16* LiqType;
+extern bool preciseVectorData;
+extern ArchiveSet gOpenArchives;
 
 WMORoot::WMORoot(std::string& filename) : filename(filename)
 {
 }
 
-extern HANDLE WorldMpq;
-
 bool WMORoot::open()
 {
-    MPQFile f(WorldMpq, filename.c_str());
+    HANDLE mpqFile;
+    if (!OpenNewestFile(filename.c_str(), &mpqFile))
+    {
+        printf("Error opening WMO Root %s\n", filename.c_str());
+    }
+    MPQFile f(mpqFile, filename.c_str());
     if (f.isEof())
     {
         printf(" No such file %s.\n", filename.c_str());
@@ -130,7 +132,7 @@ bool WMORoot::open()
     return true;
 }
 
-bool WMORoot::ConvertToVMAPRootWmo(FILE* pOutfile)
+bool WMORoot::ConvertToVMAPRootWmo(FILE* pOutfile, const void *szRawVMAPMagic)
 {
     //printf("Convert RootWmo...\n");
 
@@ -153,7 +155,14 @@ WMOGroup::WMOGroup(std::string& filename) : filename(filename),
 
 bool WMOGroup::open()
 {
-    MPQFile f(WorldMpq, filename.c_str());
+    HANDLE mpqHandle;
+
+    if (!OpenNewestFile(filename.c_str(), &mpqHandle))
+    {
+        printf("Error opening WMOGroup %s\n", filename.c_str());
+    }
+
+    MPQFile f(mpqHandle, filename.c_str());
     if (f.isEof())
     {
         printf(" No such file.\n");
@@ -247,7 +256,7 @@ bool WMOGroup::open()
     return true;
 }
 
-int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPreciseVectorData)
+int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPreciseVectorData, int iCoreNumber)
 {
     fwrite(&mogpFlags, sizeof(uint32), 1, output);
     fwrite(&groupWMOID, sizeof(uint32), 1, output);
@@ -285,7 +294,7 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
         if (fwrite(&wsize, sizeof(int), 1, output) != 1)
         {
             printf("Error while writing file wsize");
-            // no need to exit?
+            exit(0);
         }
         if (fwrite(&nIdexes, sizeof(uint32), 1, output) != 1)
         {
@@ -310,7 +319,7 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
         if (fwrite(&wsize, sizeof(int), 1, output) != 1)
         {
             printf("Error while writing file wsize");
-            // no need to exit?
+            exit(0);
         }
         if (fwrite(&nVertices, sizeof(int), 1, output) != 1)
         {
@@ -458,19 +467,61 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
             switch (((uint8)liquidEntry - 1) & 3)
             {
                 case 0:
+                    if (iCoreNumber == CLIENT_WOTLK || iCoreNumber == CLIENT_CATA)
                     {
                         liquidEntry = ((mogpFlags & 0x80000) != 0) + 13;
                     }
+                    if (iCoreNumber == CLIENT_CLASSIC || iCoreNumber == CLIENT_TBC)
+                    {
+                        liquidEntry = ((mogpFlags & 0x80000) != 0) + 1;
+                        if (iCoreNumber == CLIENT_TBC)
+                        {
+                            if (liquidEntry == 1)   // water type
+                            {
+                                if (filename.find("coilfang_raid") != string::npos)
+                                {
+                                    // set water type to special coilfang raid water
+                                    liquidEntry = 41;
+                                }
+                            }
+                        }
+                    }
                     break;
                 case 1:
-                    liquidEntry = 14;
+                    if (iCoreNumber == CLIENT_CLASSIC || iCoreNumber == CLIENT_TBC)
+                    {
+                        liquidEntry = 2;        // ocean
+                    }
+                    if (iCoreNumber == CLIENT_WOTLK || iCoreNumber == CLIENT_CATA)
+                    {
+                        liquidEntry = 14;
+                    }
                     break;
                 case 2:
-                    liquidEntry = 19;
+                    if (iCoreNumber == CLIENT_CLASSIC || iCoreNumber == CLIENT_TBC)
+                    {
+                    liquidEntry = 3;        // magma
+                    }
+                    if (iCoreNumber == CLIENT_WOTLK || iCoreNumber == CLIENT_CATA)
+                    {
+                        liquidEntry = 19;
+                    }
                     break;
                 case 3:
+                    if (iCoreNumber == CLIENT_CLASSIC || iCoreNumber == CLIENT_TBC)
                     {
-                    liquidEntry = 20;
+                        if ((filename.find("stratholme_raid") != string::npos) || (filename.find("Stratholme_raid") != string::npos))
+                        {
+                            liquidEntry = 21;   // Naxxramas slime
+                        }
+                        else
+                        {
+                            liquidEntry = 4;
+                        }    // Normal slime
+                    }
+                    if (iCoreNumber == CLIENT_WOTLK || iCoreNumber == CLIENT_CATA)
+                    {
+                        liquidEntry = 20;
                     }
                     break;
                 default:
@@ -510,7 +561,7 @@ WMOGroup::~WMOGroup()
 }
 
 //WmoInstName is in the form MD5/name.wmo
-WMOInstance::WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile)
+WMOInstance::WMOInstance(MPQFile& f, std::string& WmoInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile)
 {
     pos = Vec3D(0, 0, 0);
 
@@ -533,7 +584,7 @@ WMOInstance::WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint
     //-----------add_in _dir_file----------------
 
     char tempname[512];
-    sprintf(tempname, "%s/%s", szWorkDirWmo, WmoInstName);
+    sprintf(tempname, "%s/%s", szWorkDirWmo, WmoInstName.c_str());
     FILE* input;
     input = fopen(tempname, "r+b");
 
@@ -545,10 +596,10 @@ WMOInstance::WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint
 
     fseek(input, 8, SEEK_SET); // get the correct no of vertices
     int nVertices;
-    fread(&nVertices, sizeof(int), 1, input);
+    size_t file_read = fread(&nVertices, sizeof(int), 1, input);
     fclose(input);
 
-    if (nVertices == 0)
+    if (nVertices == 0 || file_read <= 0)
     {
         return;
     }
@@ -583,8 +634,138 @@ WMOInstance::WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint
     fwrite(&scale, sizeof(float), 1, pDirfile);
     fwrite(&pos2, sizeof(float), 3, pDirfile);
     fwrite(&pos3, sizeof(float), 3, pDirfile);
-    uint32 nlen = strlen(WmoInstName);
+    uint32 nlen = WmoInstName.length();
     fwrite(&nlen, sizeof(uint32), 1, pDirfile);
-    fwrite(WmoInstName, sizeof(char), nlen, pDirfile);
+    fwrite(WmoInstName.c_str(), sizeof(char), nlen, pDirfile);
 
+}
+
+bool ExtractSingleWmo(std::string& fname, int iCoreNumber, const void *szRawVMAPMagic)
+{
+    // Copy files from archive
+    char szLocalFile[1024];
+    string plain_name = GetUniformName(fname);
+
+    sprintf(szLocalFile, "%s/%s", szWorkDirWmo, plain_name.c_str());
+
+
+    if (FileExists(szLocalFile))
+    {
+        return true;
+    }
+
+    int p = 0;
+    //Select root wmo files
+    const char* rchr = strrchr(plain_name.c_str(), '_');
+    if (rchr != NULL)
+    {
+        char cpy[4];
+        strncpy((char*)cpy, rchr, 4);
+        for (int i = 0; i < 4; ++i)
+        {
+            int m = cpy[i];
+            if (isdigit(m))
+            {
+                p++;
+            }
+        }
+    }
+
+    if (p == 3)
+    {
+        return true;
+    }
+
+    bool file_ok = true;
+    printf(" Extracting %s\n", fname.c_str());
+
+    HANDLE wmoHandle;
+
+    if (!OpenNewestFile(fname.c_str(), &wmoHandle))
+    {
+        printf("Error opening WMO file %s\n", fname.c_str());
+    }
+
+    WMORoot froot(fname);
+    if (!froot.open())
+    {
+        printf("Couldn't open RootWmo!!!\n");
+        return true;
+    }
+
+    FILE* output = fopen(szLocalFile, "wb");
+    if (!output)
+    {
+        printf("Couldn't open %s for writing!\n", szLocalFile);
+        return false;
+    }
+
+    froot.ConvertToVMAPRootWmo(output,szRawVMAPMagic);
+    int Wmo_nVertices = 0;
+    if (froot.nGroups != 0)
+    {
+        for (uint32 i = 0; i < froot.nGroups; ++i)
+        {
+            char temp[1024];
+            strcpy(temp, fname.c_str());
+            temp[fname.length() - 4] = 0;
+            char groupFileName[1024];
+            sprintf(groupFileName, "%s_%03d.wmo", temp, i);
+
+            string s(groupFileName);
+
+            WMOGroup fgroup(s);
+            if (!fgroup.open())
+            {
+                printf("Could not open all Group file for: %s\n", plain_name.c_str());
+                file_ok = false;
+                break;
+            }
+
+            Wmo_nVertices += fgroup.ConvertToVMAPGroupWmo(output, &froot, preciseVectorData, iCoreNumber);
+        }
+    }
+
+    fseek(output, 8, SEEK_SET); // store the correct no of vertices
+    fwrite(&Wmo_nVertices, sizeof(int), 1, output);
+    fclose(output);
+
+    // Delete the extracted file in the case of an error
+    if (!file_ok)
+    {
+        remove(szLocalFile);
+    }
+    return true;
+}
+
+bool ExtractWmo(int iCoreNumber, const void *szRawVMAPMagic)
+{
+    bool success = true;
+
+    // Extract WMO in the reverse-order of the MPQ priority (ensure the highest priority WMO is erasing others)
+
+    for (ArchiveSet::reverse_iterator ar_itr = gOpenArchives.rbegin(); ar_itr != gOpenArchives.rend() && success; ++ar_itr)
+    {
+        SFILE_FIND_DATA data;
+        HANDLE find = SFileFindFirstFile(*ar_itr, "*.wmo", &data, NULL);
+        if (find != NULL)
+        {
+            do
+            {
+                std::string str = data.cFileName;
+                printf("Extracting wmo %s\n", str.c_str());
+                success |= ExtractSingleWmo(str, iCoreNumber, szRawVMAPMagic);
+            } while (SFileFindNextFile(find, &data));
+        }
+        SFileFindClose(find);
+    }
+
+    if (success)
+    {
+        printf("\n Extraction of WMO's complete, No fatal errors\n");
+    }
+    printf("\n Reading Maps\n");
+    printf(" _______________________________________________________\n");
+
+    return success;
 }

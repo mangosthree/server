@@ -651,7 +651,8 @@ class GameObject : public WorldObject
         bool Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang,
                     const QuaternionData& rotation = QuaternionData(), uint8 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY);
         void Update(uint32 update_diff, uint32 p_time) override;
-        GameObjectInfo const* GetGOInfo() const;
+
+        const GameObjectInfo* GetGOInfo() const { return m_goInfo; }
 
         bool IsTransport() const;
 

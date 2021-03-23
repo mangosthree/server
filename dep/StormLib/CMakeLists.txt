@@ -6,9 +6,10 @@ set(LIBRARY_NAME storm)
 include(CMakeDependentOption)
 
 option(BUILD_SHARED_LIBS "Compile shared libraries" OFF)
-cmake_dependent_option(STORM_BUILD_TESTS
+option(STORM_SKIP_INSTALL "Skip installing files" OFF)
+option(STORM_BUILD_TESTS
     "Compile StormLib test application" OFF
-    "BUILD_TESTING" OFF # Stay coherent with CTest variables
+#   "BUILD_TESTING" OFF # Stay coherent with CTest variables
 )
 
 set(SRC_FILES
@@ -252,6 +253,7 @@ set(TOMMATH_FILES
            src/libtommath/bn_s_mp_sub.c
 )
 
+# Needed for Windows
 set(ZLIB_BZIP2_FILES
            src/bzip2/blocksort.c
            src/bzip2/bzlib.c
@@ -283,8 +285,12 @@ if(WIN32)
 else()
     find_package(ZLIB REQUIRED)
     find_package(BZip2 REQUIRED)
+
     include_directories(${ZLIB_INCLUDE_DIR} ${BZIP2_INCLUDE_DIR})
     set(LINK_LIBS ${ZLIB_LIBRARY} ${BZIP2_LIBRARIES})
+
+    add_definitions(-D__SYS_ZLIB -D__SYS_BZLIB)
+
     option(WITH_LIBTOMCRYPT "Use system LibTomCrypt library" OFF)
     if(WITH_LIBTOMCRYPT)
         set(LINK_LIBS ${LINK_LIBS} tomcrypt)
@@ -323,43 +329,46 @@ else()
     message(STATUS "Linking against dependent libraries statically")
 endif()
 
-install(TARGETS ${LIBRARY_NAME} 
-	RUNTIME DESTINATION bin 
-	LIBRARY DESTINATION lib 
-	ARCHIVE DESTINATION lib 
-	FRAMEWORK DESTINATION /Library/Frameworks
-	PUBLIC_HEADER DESTINATION include
-	INCLUDES DESTINATION include)
+if (NOT STORM_SKIP_INSTALL)
+    install(TARGETS ${LIBRARY_NAME} 
+        RUNTIME DESTINATION bin 
+        LIBRARY DESTINATION lib 
+        ARCHIVE DESTINATION lib 
+        FRAMEWORK DESTINATION /Library/Frameworks
+        PUBLIC_HEADER DESTINATION include
+        INCLUDES DESTINATION include)
 
-    #CPack configurtion
-    SET(CPACK_GENERATOR "DEB" "RPM")
-    SET(CPACK_PACKAGE_NAME ${PROJECT_NAME})
-    SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MPQ manipulation library")
-    SET(CPACK_PACKAGE_VENDOR "Ladislav Zezula")
+        #CPack configurtion
+        SET(CPACK_GENERATOR "DEB" "RPM")
+        SET(CPACK_PACKAGE_NAME ${PROJECT_NAME})
+        SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MPQ manipulation library")
+        SET(CPACK_PACKAGE_VENDOR "Ladislav Zezula")
         SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
-    SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-    SET(CPACK_PACKAGE_VERSION_MAJOR "${VERSION_MAJOR}")
-    SET(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
-    SET(CPACK_PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}")
+        SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+        SET(CPACK_PACKAGE_VERSION_MAJOR "${VERSION_MAJOR}")
+        SET(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
+        SET(CPACK_PACKAGE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}")
 
-    #DEB configuration
-    SET(CPACK_DEBIAN_PACKAGE_SECTION "libs")
-    SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://www.zezula.net/en/mpq/stormlib.html")
-    SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "imbacen@gmail.com")
-    SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "zlib1g,bzip2")
+        #DEB configuration
+        SET(CPACK_DEBIAN_PACKAGE_SECTION "libs")
+        SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://www.zezula.net/en/mpq/stormlib.html")
+        SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "imbacen@gmail.com")
+        SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+        SET(CPACK_DEBIAN_PACKAGE_DEPENDS "zlib1g,bzip2")
 
-    #RPM configuration
-    SET(CPACK_RPM_PACKAGE_RELEASE 1)
-    SET(CPACK_RPM_PACKAGE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-    SET(CPACK_RPM_PACKAGE_GROUP "${PROJECT_NAME}")
-    SET(CPACK_RPM_PACKAGE_URL "http://www.zezula.net/en/mpq/stormlib.html")
-    SET(CPACK_RPM_PACKAGE_REQUIRES "zlib,bzip2")
+        #RPM configuration
+        SET(CPACK_RPM_PACKAGE_RELEASE 1)
+        SET(CPACK_RPM_PACKAGE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+        SET(CPACK_RPM_PACKAGE_GROUP "${PROJECT_NAME}")
+        SET(CPACK_RPM_PACKAGE_URL "http://www.zezula.net/en/mpq/stormlib.html")
+        SET(CPACK_RPM_PACKAGE_REQUIRES "zlib,bzip2")
 
-    INCLUDE(CPack)
+        INCLUDE(CPack)
+endif()
 
 if(STORM_BUILD_TESTS)
     add_executable(storm_test ${TEST_SRC_FILES})
     target_link_libraries(storm_test ${LIBRARY_NAME})
     install(TARGETS storm_test RUNTIME DESTINATION bin)
 endif()
+

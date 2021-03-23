@@ -28,12 +28,17 @@ source_group("Common" FILES ${SRC_GRP_COMMON})
 file(GLOB SRC_GRP_CONFIG Config/*.cpp Config/*.h)
 source_group("Config" FILES ${SRC_GRP_CONFIG})
 
-file(GLOB SRC_GRP_DATABASE Database/*.cpp Database/*.h)
-source_group("Database" FILES ${SRC_GRP_DATABASE})
-
 file(GLOB SRC_GRP_DATASTORE DataStores/*.cpp DataStores/*.h)
 source_group("DataStores" FILES ${SRC_GRP_DATASTORE})
 
+file(GLOB SRC_GRP_DATABASE Database/*.cpp Database/*.h)
+source_group("Database" FILES ${SRC_GRP_DATABASE})
+
+file(GLOB SRC_GRP_DYNAMIC Dynamic/*.cpp Dynamic/*.h)
+source_group("Dynamic" FILES ${SRC_GRP_DYNAMIC})
+
+file(GLOB SRC_GRP_GAMESYSTEM GameSystem/*.cpp GameSystem/*.h)
+source_group("GameSystem" FILES ${SRC_GRP_GAMESYSTEM})
 file(GLOB SRC_GRP_LOCKQ LockedQueue/*.cpp LockedQueue/*.h)
 source_group("LockedQueue" FILES ${SRC_GRP_LOCKQ})
 
@@ -43,19 +48,30 @@ source_group("Log" FILES ${SRC_GRP_LOG})
 file(GLOB SRC_GRP_THREAD Threading/*.cpp Threading/*.h)
 source_group("Threading" FILES ${SRC_GRP_THREAD})
 
-file(GLOB SRC_GRP_UTIL Utilities/*.cpp Utilities/*.h)
-source_group("Utilities" FILES ${SRC_GRP_UTIL})
+file(GLOB SRC_GRP_PLATFORM Platform/*.cpp Platform/*.h)
+source_group("Platform" FILES ${SRC_GRP_PLATFORM})
+
+file(GLOB SRC_GRP_POLICIES Policies/*.cpp Policies/*.h)
+source_group("Policies" FILES ${SRC_GRP_POLICIES})
+
+file(GLOB SRC_GRP_UTILITIES Utilities/*.cpp Utilities/*.h)
+source_group("Utilities" FILES ${SRC_GRP_UTILITIES})
 
 set(LIBRARY_SRCS
     ${SRC_GRP_AUTH}
     ${SRC_GRP_COMMON}
     ${SRC_GRP_CONFIG}
-    ${SRC_GRP_DATABASE}
     ${SRC_GRP_DATASTORE}
+    ${SRC_GRP_DATABASE}
+    ${SRC_GRP_DYNAMIC}
+    ${SRC_GRP_GAMESYSTEM}
     ${SRC_GRP_LOCKQ}
     ${SRC_GRP_LOG}
     ${SRC_GRP_THREAD}
-    ${SRC_GRP_UTIL}
+    ${SRC_GRP_PLATFORM}
+    ${SRC_GRP_POLICIES}
+    ${SRC_GRP_SVC}
+    ${SRC_GRP_UTILITIES}
     revision.h
 )
 

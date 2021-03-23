@@ -71,8 +71,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/shared/DataStores
     ${CMAKE_SOURCE_DIR}/src/shared/Win
     ${CMAKE_SOURCE_DIR}/src/shared/Linux
-    ${CMAKE_SOURCE_DIR}/src/framework
-    ${CMAKE_SOURCE_DIR}/src/framework/Platform
+    ${CMAKE_SOURCE_DIR}/src/shared/Platform
     ${CMAKE_SOURCE_DIR}/src/game/AuctionHouseBot
     ${CMAKE_SOURCE_DIR}/src/game/BattleGround
     ${CMAKE_SOURCE_DIR}/src/game/Server
@@ -115,7 +114,6 @@ add_executable(${EXECUTABLE_NAME} ${EXECUTABLE_SRCS})
 target_link_libraries(${EXECUTABLE_NAME}
     game
     shared
-    framework
     g3dlite
     ${OPENSSL_LIBRARIES}
 )

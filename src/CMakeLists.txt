@@ -25,9 +25,6 @@ if(WIN32)
     endif()
 endif()
 
-# Build the mangos framework library
-add_subdirectory(framework)
-
 # Build the mangos shared library
 add_subdirectory(shared)
 

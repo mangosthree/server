@@ -31,8 +31,6 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/base
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/src/shared
-    ${CMAKE_SOURCE_DIR}/src/framework
-    ${CMAKE_SOURCE_DIR}/src/framework/Platform
     ${CMAKE_SOURCE_DIR}/src/game/Server
     ${CMAKE_SOURCE_DIR}/src/game/BattleGround
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers
@@ -42,6 +40,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/game/vmap
     ${CMAKE_SOURCE_DIR}/src/game/Time
     ${CMAKE_SOURCE_DIR}/src/shared
+    ${CMAKE_SOURCE_DIR}/src/shared/Platform
     ${CMAKE_SOURCE_DIR}/src/shared/Utilities
     ${CMAKE_SOURCE_DIR}/src/shared/Log
     ${CMAKE_SOURCE_DIR}/src/shared/DataStores

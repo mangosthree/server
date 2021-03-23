@@ -77,7 +77,6 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/shared/DataStores
     ${CMAKE_SOURCE_DIR}/src/shared/Win
     ${CMAKE_SOURCE_DIR}/src/shared/Linux
-    ${CMAKE_SOURCE_DIR}/src/framework
     ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}/src/shared
     ${ACE_INCLUDE_DIR}
@@ -88,7 +87,6 @@ add_executable(${EXECUTABLE_NAME} ${EXECUTABLE_SRCS})
 
 target_link_libraries(${EXECUTABLE_NAME}
     shared
-    framework
     ${OPENSSL_LIBRARIES}
 )
 
@@ -100,13 +98,8 @@ else()
 endif()
 
 
-if(POSTGRESQL)
-    include_directories(${PostgreSQL_INCLUDE_DIR})
-    target_link_libraries(${EXECUTABLE_NAME} ${PostgreSQL_LIBRARIES})
-else()
     include_directories(${MYSQL_INCLUDE_DIR})
     target_link_libraries(${EXECUTABLE_NAME} ${MYSQL_LIBRARY})
-endif()
 
 if(UNIX)
     target_link_libraries(${EXECUTABLE_NAME} ${OPENSSL_EXTRA_LIBRARIES})

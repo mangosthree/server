@@ -43,8 +43,8 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/Warden
     ${CMAKE_CURRENT_SOURCE_DIR}/Warden/Modules
     ${CMAKE_CURRENT_SOURCE_DIR}/WorldHandlers
-    ${CMAKE_CURRENT_SOURCE_DIR}/framework/Platform
-    ${CMAKE_SOURCE_DIR}/src/framework/Platform
+    ${CMAKE_CURRENT_SOURCE_DIR}/shared/Platform
+    ${CMAKE_SOURCE_DIR}/src/shared/Platform
     ${CMAKE_SOURCE_DIR}/src/game/Time
     ${CMAKE_SOURCE_DIR}/dep/g3dlite
     ${CMAKE_SOURCE_DIR}/dep/zlib
@@ -61,7 +61,6 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/shared/Utilities
     ${CMAKE_SOURCE_DIR}/src/shared/Log
     ${CMAKE_SOURCE_DIR}/src/shared/Threading
-    ${CMAKE_SOURCE_DIR}/src/framework
     ${CMAKE_BINARY_DIR}/src/shared
     ${MYSQL_INCLUDE_DIR}
     ${OPENSSL_INCLUDE_DIR}

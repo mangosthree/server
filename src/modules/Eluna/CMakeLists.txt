@@ -46,8 +46,7 @@ if( ${CMAKE_PROJECT_NAME} STREQUAL "MaNGOS" )
     ${CMAKE_SOURCE_DIR}/src/shared/Log
     ${CMAKE_SOURCE_DIR}/src/shared/DataStores
     ${CMAKE_SOURCE_DIR}/src/shared/Threading
-    ${CMAKE_SOURCE_DIR}/src/framework
-    ${CMAKE_SOURCE_DIR}/src/framework/Platform
+    ${CMAKE_SOURCE_DIR}/src/shared/Platform
     ${CMAKE_SOURCE_DIR}/src/game/BattleGround
     ${CMAKE_SOURCE_DIR}/src/game/Server
     ${CMAKE_SOURCE_DIR}/src/game/vmap

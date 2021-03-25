@@ -451,7 +451,7 @@ int main(int argc, char** argv)
     }
     timer.stop();
     timer.elapsed_time(elapsed);
-    printf(" \n Total build time: %ld seconds\n\n", elapsed.sec());
+    printf(" \n Total build time: %l64d seconds\n\n", (long)elapsed.sec());
 
     return silent ? 1 : finish(" Movemap build is complete! Press enter to exit\n", 1);
 }

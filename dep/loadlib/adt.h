@@ -1,5 +1,8 @@
 /**
- * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2021  MaNGOS project <http://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef ADT_H
@@ -139,13 +145,17 @@ class adt_MCNK
         adt_MCVT* getMCVT()
         {
             if (offsMCVT)
+            {
                 return (adt_MCVT*)((uint8*)this + offsMCVT);
+            }
             return 0;
         }
         adt_MCLQ* getMCLQ()
         {
             if (offsMCLQ)
+            {
                 return (adt_MCLQ*)((uint8*)this + offsMCLQ);
+            }
             return 0;
         }
 };
@@ -175,7 +185,9 @@ class adt_MCIN
         adt_MCNK* getMCNK(int x, int y)
         {
             if (cells[x][y].offsMCNK)
+            {
                 return (adt_MCNK*)((uint8*)this + cells[x][y].offsMCNK - 84);
+            }
             return 0;
         }
 };
@@ -222,27 +234,39 @@ class adt_MH2O
         adt_liquid_header* getLiquidData(int x, int y)
         {
             if (liquid[x][y].used && liquid[x][y].offsData1)
+            {
                 return (adt_liquid_header*)((uint8*)this + 8 + liquid[x][y].offsData1);
+            }
             return 0;
         }
 
         float* getLiquidHeightMap(adt_liquid_header* h)
         {
             if (h->formatFlags & ADT_LIQUID_HEADER_NO_HIGHT)
+            {
                 return 0;
+            }
+
             if (h->offsData2b)
+            {
                 return (float*)((uint8*)this + 8 + h->offsData2b);
+            }
             return 0;
         }
 
         uint8* getLiquidLightMap(adt_liquid_header* h)
         {
             if (h->formatFlags & ADT_LIQUID_HEADER_FULL_LIGHT)
+            {
                 return 0;
+            }
+
             if (h->offsData2b)
             {
                 if (h->formatFlags & ADT_LIQUID_HEADER_NO_HIGHT)
+                {
                     return (uint8*)((uint8*)this + 8 + h->offsData2b);
+                }
                 return (uint8*)((uint8*)this + 8 + h->offsData2b + (h->width + 1) * (h->height + 1) * 4);
             }
             return 0;
@@ -251,11 +275,16 @@ class adt_MH2O
         uint32* getLiquidFullLightMap(adt_liquid_header* h)
         {
             if (!(h->formatFlags & ADT_LIQUID_HEADER_FULL_LIGHT))
+            {
                 return 0;
+            }
+
             if (h->offsData2b)
             {
                 if (h->formatFlags & ADT_LIQUID_HEADER_NO_HIGHT)
+                {
                     return (uint32*)((uint8*)this + 8 + h->offsData2b);
+                }
                 return (uint32*)((uint8*)this + 8 + h->offsData2b + (h->width + 1) * (h->height + 1) * 4);
             }
             return 0;
@@ -264,9 +293,13 @@ class adt_MH2O
         uint64 getLiquidShowMap(adt_liquid_header* h)
         {
             if (h->offsData2a)
+            {
                 return *((uint64*)((uint8*)this + 8 + h->offsData2a));
+            }
             else
-                return 0xFFFFFFFFFFFFFFFFLL;
+            {
+                return (uint64)0xFFFFFFFFFFFFFFFFLL;
+            }
         }
 
 };
@@ -289,8 +322,8 @@ class adt_MHDR
         uint32 offsTex;            // MTEX
         uint32 offsModels;         // MMDX
         uint32 offsModelsIds;      // MMID
-        uint32 offsMapObejcts;     // MWMO
-        uint32 offsMapObejctsIds;  // MWID
+        uint32 offsMapObjects;     // MWMO
+        uint32 offsMapObjectsIds;  // MWID
         uint32 offsDoodsDef;       // MDDF
         uint32 offsObjectsDef;     // MODF
         uint32 offsMFBO;           // MFBO
@@ -302,8 +335,14 @@ class adt_MHDR
         uint32 data5;
     public:
         bool prepareLoadedData();
-        adt_MCIN* getMCIN() { return offsMCIN ? (adt_MCIN*)((uint8*)&flags + offsMCIN) : 0; }
-        adt_MH2O* getMH2O() { return offsMH2O ? (adt_MH2O*)((uint8*)&flags + offsMH2O) : 0; }
+        adt_MCIN* getMCIN()
+        {
+            return offsMCIN ? (adt_MCIN*)((uint8*)&flags + offsMCIN) : 0;
+        }
+        adt_MH2O* getMH2O()
+        {
+            return offsMH2O ? (adt_MH2O*)((uint8*)&flags + offsMH2O) : 0;
+        }
 };
 
 class ADT_file : public FileLoader

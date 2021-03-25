@@ -145,21 +145,21 @@ static const char* kWOTLKMPQList[] =
 
 static const char* kCATAMPQList[] =
 {
-    "art.MPQ",
-    "alternate.MPQ",
-    "world1.MPQ",
-    "world2.MPQ",
-    "%s/locale-%s.MPQ",
-    "%s/speech-%s.MPQ",
-    "expansion1.MPQ",
-    "%s/expansion1-locale-%s.MPQ",
-    "%s/expansion1-speech-%s.MPQ",
-    "expansion2.MPQ",
-    "%s/expansion2-locale-%s.MPQ",
-    "%s/expansion2-speech-%s.MPQ"
-    "expansion3.MPQ",
     "%s/expansion3-locale-%s.MPQ",
     "%s/expansion3-speech-%s.MPQ"
+    "expansion3.MPQ",
+    "%s/expansion2-locale-%s.MPQ",
+    "%s/expansion2-speech-%s.MPQ"
+    "expansion2.MPQ",
+    "%s/expansion1-locale-%s.MPQ",
+    "%s/expansion1-speech-%s.MPQ",
+    "expansion1.MPQ",
+    "%s/locale-%s.MPQ",
+    "%s/speech-%s.MPQ",
+    "world.MPQ",
+    "world2.MPQ",
+    "alternate.MPQ",
+    "art.MPQ",
 };
 /**
  * @brief
@@ -257,44 +257,6 @@ bool HandleArgs(int argc, char** argv)
 
     return true;
 
-}
-
-uint32 ReadBuildOldWay(int thisLocale)
-{
-    // include build info file also
-    std::string filename = std::string("component.wow-") + Locales[thisLocale] + ".txt";
-    //printf("Read %s file... ", filename.c_str());
-
-    HANDLE fileHandle{};
-
-    MPQFile m(fileHandle, filename.c_str());
-    if (m.isEof())
-    {
-        printf("Fatal error: Not found %s file!\n", filename.c_str());
-        exit(1);
-    }
-
-    std::string text = m.getPointer();
-    m.close();
-
-    size_t pos = text.find("version=\"");
-    size_t pos1 = pos + strlen("version=\"");
-    size_t pos2 = text.find("\"", pos1);
-    if (pos == text.npos || pos2 == text.npos || pos1 >= pos2)
-    {
-        printf("Fatal error: Invalid  %s file format!\n", filename.c_str());
-        exit(1);
-    }
-
-    std::string build_str = text.substr(pos1, pos2 - pos1);
-
-    int build = atoi(build_str.c_str());
-    if (build <= 0)
-    {
-        printf("Fatal error: Invalid  %s file format!\n", filename.c_str());
-        exit(1);
-    }
-    return build;
 }
 
 void AppendDBCFileListTo(HANDLE mpqHandle, std::set<std::string>& filelist)
@@ -592,7 +554,7 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
     memset(liquid_entry, 0, sizeof(liquid_entry));
 
     // Prepare map header
-    map_fileheader map;
+    map_fileheader map{};
     map.mapMagic = *(uint32 const*)MAP_MAGIC;
     map.versionMagic = *(uint32 const*)MAP_VERSION_MAGIC;
     map.buildMagic = build;
@@ -636,7 +598,7 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
     map.areaMapOffset = sizeof(map);
     map.areaMapSize   = sizeof(map_areaHeader);
 
-    map_areaHeader areaHeader;
+    map_areaHeader areaHeader{};
     areaHeader.fourcc = *(uint32 const*)MAP_AREA_MAGIC;
     areaHeader.flags = 0;
     if (fullAreaData)
@@ -789,7 +751,7 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
     map.heightMapOffset = map.areaMapOffset + map.areaMapSize;
     map.heightMapSize = sizeof(map_heightHeader);
 
-    map_heightHeader heightHeader;
+    map_heightHeader heightHeader{};
     heightHeader.fourcc = *(uint32 const*)MAP_HEIGHT_MAGIC;
     heightHeader.flags = 0;
     heightHeader.gridHeight    = minHeight;
@@ -1028,7 +990,7 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
         }
     }
 
-    map_liquidHeader liquidHeader;
+    map_liquidHeader liquidHeader{};
 
     // no water data (if all grid have 0 liquid type)
     if (type == 0 && !fullType)
@@ -1243,7 +1205,7 @@ void ExtractMapsFromMpq(uint32 build)
         WDT_file wdt;
         if (!wdt.loadFile(mpq_map_name, false))
         {
-            //printf("Warning: Failed loading %s map WDT data (This message can be safely ignored)\n", map_ids[z].name);
+            printf("Warning: Failed loading map %s.wdt (This message can be safely ignored)\n", map_ids[z].name);
             continue;
         }
 
@@ -1453,7 +1415,7 @@ void LoadLocaleMPQFiles(int const locale)
             AppendPatchMPQFilesToList(NULL, NULL, Locales[locale], updates);
 
             // ./Data wow-update-base files
-            for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
+            for (int i = 0; Builds[i] && Builds[i] == CONF_TargetBuild; ++i)
             {
                 sprintf(filename, "%s/Data/wow-update-base-%u.MPQ", input_path, Builds[i]);
 
@@ -1462,7 +1424,7 @@ void LoadLocaleMPQFiles(int const locale)
                 //if (!OpenArchive(filename))
                 if (!SFileOpenPatchArchive(localeMpqHandle, filename, "", 0))
                 {
-//                    printf("Error open patch archive: %s\n\n", filename);
+                    printf("Error open patch archive: %s\n\n", filename);
                 }
             }
 
@@ -1482,12 +1444,12 @@ void LoadLocaleMPQFiles(int const locale)
                 //if (!OpenArchive(filename))
                 if (!SFileOpenPatchArchive(localeMpqHandle, filename, itr->second.second ? itr->second.second : "", 0))
                 {
-//                    printf("Error open patch archive: %s\n\n", filename);
+                    printf("Error open patch archive: %s\n\n", filename);
                 }
             }
 
             // ./Data/Cache patch-base files
-            for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
+            for (int i = 0; Builds[i] && Builds[i] == CONF_TargetBuild; ++i)
             {
                 sprintf(filename, "%s/Data/Cache/patch-base-%u.MPQ", input_path, Builds[i]);
 
@@ -1496,12 +1458,12 @@ void LoadLocaleMPQFiles(int const locale)
                 //if (!OpenArchive(filename))
                 if (!SFileOpenPatchArchive(localeMpqHandle, filename, "", 0))
                 {
-//                    printf("Error open patch archive: %s\n\n", filename);
+                    printf("Error open patch archive: %s\n\n", filename);
                 }
             }
 
             // ./Data/Cache/<locale> patch files
-            for (int i = 0; Builds[i] && Builds[i] <= CONF_TargetBuild; ++i)
+            for (int i = 0; Builds[i] && Builds[i] == CONF_TargetBuild; ++i)
             {
                 sprintf(filename, "%s/Data/Cache/%s/patch-%s-%u.MPQ", input_path, Locales[locale], Locales[locale], Builds[i]);
 
@@ -1510,7 +1472,7 @@ void LoadLocaleMPQFiles(int const locale)
                 //if (!OpenArchive(filename))
                 if (!SFileOpenPatchArchive(localeMpqHandle, filename, "", 0))
                 {
-//                    printf("Error open patch archive: %s\n\n", filename);
+                    printf("Error open patch archive: %s\n\n", filename);
                 }
             }
             //break;
@@ -1548,7 +1510,7 @@ void LoadCommonMPQFiles(int client)
     }
 
     char dirname[512];
-    struct stat info;
+    struct stat info{};
     string locale;
     for (int i = 0; i < LOCALES_COUNT; i++)
     {

@@ -22,7 +22,7 @@ MPQFile::MPQFile(HANDLE file, const char* filename):
 
     if (size <= 1)
     {
-        fprintf(stderr, "Can't open %s, size = %u!\n", filename, size);
+        fprintf(stderr, "Can't open %s, size = %zu!\n", filename, size);
         SFileCloseFile(file);
         eof = true;
         return;
@@ -32,7 +32,7 @@ MPQFile::MPQFile(HANDLE file, const char* filename):
     buffer = new char[size];
     if (!SFileReadFile(file, buffer, size, &read, NULL) || size != read)
     {
-        fprintf(stderr, "Can't read %s, size=%u read=%u!\n", filename, size, read);
+        fprintf(stderr, "Can't read %s, size=%zu read=%u!\n", filename, size, read);
         SFileCloseFile(file);
         eof = true;
         return;

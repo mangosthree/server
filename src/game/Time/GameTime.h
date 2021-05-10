@@ -25,7 +25,7 @@
 #ifndef GAMETIME_H
 #define GAMETIME_H
 
-#include "define.h"
+#include "Define.h"
 
 #include <chrono>
 

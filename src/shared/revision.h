@@ -32,9 +32,9 @@
     #define REALMD_DB_UPDATE_DESCRIPTION "Release 22"
 
     #define CHAR_DB_VERSION_NR 21
-    #define CHAR_DB_STRUCTURE_NR 5
+    #define CHAR_DB_STRUCTURE_NR 6
     #define CHAR_DB_CONTENT_NR 001
-    #define CHAR_DB_UPDATE_DESCRIPTION "Update deprecated ROW_FORMAT"
+    #define CHAR_DB_UPDATE_DESCRIPTION "add_character_createdDate_col"
 
     #define WORLD_DB_VERSION_NR 21
     #define WORLD_DB_STRUCTURE_NR 14

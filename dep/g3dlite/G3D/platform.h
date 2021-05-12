@@ -52,7 +52,10 @@
 #elif defined(__linux__)
     #define G3D_LINUX
 #elif defined(__APPLE__)
-    #define G3D_OSX
+    /** it's very unusual, but works on OSX since 2011
+         remove #define G3D_OSX for
+   */
+    #define G3D_LINUX
 
    // Prevent OS X fp.h header from being included; it defines
    // pi as a constant, which creates a conflict with G3D

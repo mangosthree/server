@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-project(ACE VERSION 6.5.5)
+project(ACE VERSION 6.5.9)
 
 set(ACE_SOURCES
   ace/ACE.cpp

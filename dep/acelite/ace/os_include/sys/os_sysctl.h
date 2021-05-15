@@ -22,7 +22,13 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #if !defined (ACE_LACKS_SYS_SYSCTL_H)
-#  include /**/ <linux/sysctl.h>
+  #if defined(__linux__) /* linux */
+#include /**/ <linux/sysctl.h>
+  #elif  defined(__APPLE__) /* MacOS */
+#include /***/  <sys/sysctl.h>
+  #elif defined(__unix__) /* other unix like */
+#include  /**/  <sys/sysctl.h>
+  #endif
 #endif /* !ACE_LACKS_SYS_SYSCTL_H */
 
 #include /**/ "ace/post.h"

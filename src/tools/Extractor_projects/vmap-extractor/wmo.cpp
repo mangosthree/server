@@ -659,7 +659,7 @@ bool ExtractSingleWmo(std::string& fname, int iCoreNumber, const void *szRawVMAP
     const char* rchr = strrchr(plain_name.c_str(), '_');
     if (rchr != NULL)
     {
-        char cpy[4]{};
+        char cpy[4];
         strncpy((char*)cpy, rchr, 4);
         for (int i = 0; i < 4; ++i)
         {

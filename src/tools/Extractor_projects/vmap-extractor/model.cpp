@@ -175,10 +175,6 @@ bool Model::ConvertToVMAPModel(std::string& outfilename,int iCoreNumber, const v
     fwrite(&nVertices, sizeof(int), 1, output);
     if (nVertices > 0)
     {
-//        for (uint32 vpos = 0; vpos < nVertices; ++vpos)
-//        {
-//            std::swap(vertices[vpos].y, vertices[vpos].z);
-//        }
         fwrite(vertices, sizeof(float) * 3, nVertices, output);
     }
 

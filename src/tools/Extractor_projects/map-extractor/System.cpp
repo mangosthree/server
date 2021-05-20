@@ -554,7 +554,7 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
     memset(liquid_entry, 0, sizeof(liquid_entry));
 
     // Prepare map header
-    map_fileheader map{};
+    map_fileheader map;
     map.mapMagic = *(uint32 const*)MAP_MAGIC;
     map.versionMagic = *(uint32 const*)MAP_VERSION_MAGIC;
     map.buildMagic = build;
@@ -598,7 +598,7 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
     map.areaMapOffset = sizeof(map);
     map.areaMapSize   = sizeof(map_areaHeader);
 
-    map_areaHeader areaHeader{};
+    map_areaHeader areaHeader;
     areaHeader.fourcc = *(uint32 const*)MAP_AREA_MAGIC;
     areaHeader.flags = 0;
     if (fullAreaData)
@@ -751,7 +751,7 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
     map.heightMapOffset = map.areaMapOffset + map.areaMapSize;
     map.heightMapSize = sizeof(map_heightHeader);
 
-    map_heightHeader heightHeader{};
+    map_heightHeader heightHeader;
     heightHeader.fourcc = *(uint32 const*)MAP_HEIGHT_MAGIC;
     heightHeader.flags = 0;
     heightHeader.gridHeight    = minHeight;
@@ -990,7 +990,7 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
         }
     }
 
-    map_liquidHeader liquidHeader{};
+    map_liquidHeader liquidHeader;
 
     // no water data (if all grid have 0 liquid type)
     if (type == 0 && !fullType)
@@ -1419,7 +1419,7 @@ void LoadLocaleMPQFiles(int const locale)
             {
                 sprintf(filename, "%s/Data/wow-update-base-%u.MPQ", input_path, Builds[i]);
 
-                printf("Patching : %s\n", filename);
+                printf("\nPatching : %s\n", filename);
 
                 //if (!OpenArchive(filename))
                 if (!SFileOpenPatchArchive(localeMpqHandle, filename, "", 0))
@@ -1439,7 +1439,7 @@ void LoadLocaleMPQFiles(int const locale)
                     sprintf(filename, "%s/Data/%s", input_path, itr->second.first.c_str());
                 }
 
-                printf("Patching : %s\n", filename);
+                printf("\nPatching : %s\n", filename);
 
                 //if (!OpenArchive(filename))
                 if (!SFileOpenPatchArchive(localeMpqHandle, filename, itr->second.second ? itr->second.second : "", 0))
@@ -1453,7 +1453,7 @@ void LoadLocaleMPQFiles(int const locale)
             {
                 sprintf(filename, "%s/Data/Cache/patch-base-%u.MPQ", input_path, Builds[i]);
 
-                printf("Patching : %s\n", filename);
+                printf("\nPatching : %s\n", filename);
 
                 //if (!OpenArchive(filename))
                 if (!SFileOpenPatchArchive(localeMpqHandle, filename, "", 0))
@@ -1467,7 +1467,7 @@ void LoadLocaleMPQFiles(int const locale)
             {
                 sprintf(filename, "%s/Data/Cache/%s/patch-%s-%u.MPQ", input_path, Locales[locale], Locales[locale], Builds[i]);
 
-                printf("Patching : %s\n", filename);
+                printf("\nPatching : %s\n", filename);
 
                 //if (!OpenArchive(filename))
                 if (!SFileOpenPatchArchive(localeMpqHandle, filename, "", 0))
@@ -1475,7 +1475,7 @@ void LoadLocaleMPQFiles(int const locale)
                     printf("Error open patch archive: %s\n\n", filename);
                 }
             }
-            //break;
+            break;
     }
 }
 
@@ -1510,7 +1510,7 @@ void LoadCommonMPQFiles(int client)
     }
 
     char dirname[512];
-    struct stat info{};
+    struct stat info;
     string locale;
     for (int i = 0; i < LOCALES_COUNT; i++)
     {
@@ -1647,7 +1647,7 @@ int main(int argc, char** argv)
 
                     //Close MPQs
                     CloseArchives();
-                    //break;
+                    break;
                 }
             }
 
@@ -1671,7 +1671,7 @@ int main(int argc, char** argv)
                 // Close MPQs
                 CloseArchives();
             }
-            //break;
+            break;
     }
     return 0;
 }

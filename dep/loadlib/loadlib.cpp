@@ -1,6 +1,7 @@
 //#define _CRT_SECURE_NO_DEPRECATE
 
 #include "loadlib.h"
+#include <iostream>
 #include <cstdio>
 
 u_map_fcc MverMagic = { {'R','E','V','M'} };
@@ -23,7 +24,7 @@ bool ChunkedFile::loadFile(HANDLE mpq, char* filename, bool log)
     if (!SFileOpenFileEx(mpq, filename, SFILE_OPEN_FROM_MPQ, &file))
     {
         if (log)
-            printf("No such file %s\n", filename);
+            std::cout << "No such file %s <<" << filename << std::endl;
         return false;
     }
 
@@ -37,7 +38,7 @@ bool ChunkedFile::loadFile(HANDLE mpq, char* filename, bool log)
         return true;
     }
 
-    printf("Error loading %s\n", filename);
+    std::cout << "Error loading " << filename << std::endl;
     SFileCloseFile(file);
     free();
     return false;
@@ -219,14 +220,14 @@ bool ExtractFile(char const* mpq_name, std::string const& filename)
 
         if (!SFileExtractFile(*i, mpq_name, filename.c_str(), SFILE_OPEN_FROM_MPQ))
         {
-            printf("Can't extract file: %s\n", mpq_name);
+            std::cout << "Can't extract file: " << mpq_name;
             return false;
         }
 
         return true;
     }
 
-    printf("Extracting file not found: %s\n", filename.c_str());
+    std::cout << "Extracting file not found: " << filename << std::endl;
     return false;
 }
 
@@ -252,14 +253,12 @@ FileLoader::~FileLoader()
 
 bool FileLoader::loadFile(char* filename, bool log)
 {
-    free();
-
     HANDLE fileHandle = 0;
 
     if (!OpenNewestFile(filename, &fileHandle))
     {
         if (log)
-            printf("No such file %s\n", filename);
+            std::cout << "No such file " << filename << std::endl;
         return false;
     }
 
@@ -268,27 +267,27 @@ bool FileLoader::loadFile(char* filename, bool log)
     data = new uint8 [data_size];
     if (!data)
     {
-        SFileCloseFile(fileHandle);
+        std::cerr << "Not enough memory for file  " << filename << std::endl;
         return false;
     }
 
     if (!SFileReadFile(fileHandle, data, data_size, NULL, NULL))
     {
-        if (log)
-            printf("Can't read file %s\n", filename);
+        std::cerr << "Can't read file " << filename << std::endl;
+        SFileCloseFile(fileHandle);
+        return false;
+    }
+
+    // ToDo: Fix WDT errors...
+    if (!prepareLoadedData())
+    {
+        std::cout << "Error loading " << filename << std::endl;
         SFileCloseFile(fileHandle);
         return false;
     }
 
     SFileCloseFile(fileHandle);
 
-    // ToDo: Fix WDT errors...
-    if (!prepareLoadedData())
-    {
-        //printf("Error loading %s\n\n", filename);
-        //free();
-        return false;
-    }
 
     return true;
 }

@@ -35,14 +35,14 @@ bool checkDirectories(bool debugOutput)
 
     if (getDirContents(dirFiles, "maps") == LISTFILE_DIRECTORY_NOT_FOUND || !dirFiles.size())
     {
-        printf(" 'maps' directory is empty or does not exist\n");
+        std::cerr << " 'maps' directory is empty or does not exist" << std::endl;
         return false;
     }
 
     dirFiles.clear();
     if (getDirContents(dirFiles, "vmaps", "*.vmtree") == LISTFILE_DIRECTORY_NOT_FOUND || !dirFiles.size())
     {
-        printf(" 'vmaps' directory is empty or does not exist\n");
+        std:cerr <<" 'vmaps' directory is empty or does not exist" << std::endl;
         return false;
     }
 
@@ -58,7 +58,7 @@ bool checkDirectories(bool debugOutput)
     {
         if (getDirContents(dirFiles, "meshes") == LISTFILE_DIRECTORY_NOT_FOUND)
         {
-            printf(" 'meshes' directory does not exist (no place to put debugOutput files)\n");
+            std::cerr << " 'meshes' directory does not exist (no place to put debugOutput files)" << std::endl;
             return false;
         }
     }
@@ -140,7 +140,7 @@ bool handleArgs(int argc, char** argv,
             }
             else
             {
-                printf("invalid option for '--maxAngle', using default\n");
+                std::cout << "invalid option for '--maxAngle', using default" << std::endl;
             }
         }
         else if (strcmp(argv[i], "--threads") == 0)
@@ -158,7 +158,7 @@ bool handleArgs(int argc, char** argv,
             }
             else
             {
-                printf("invalid option for '--threads', using single threaded build\n");
+                std::cout << "invalid option for '--threads', using single threaded build" << std::endl;
             }
         }
         else if (strcmp(argv[i], "--tile") == 0)

@@ -216,7 +216,7 @@ int getBuildNumber(const char *path)
 */
 int getCoreNumber()
 {
-    getCoreNumberFromBuild(getBuildNumber());
+    return getCoreNumberFromBuild(getBuildNumber());
 }
 
 /**

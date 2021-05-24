@@ -27,8 +27,9 @@
 #include <set>
 #include <cstdlib>
 #include <cstring>
-#include "ExtractorCommon.h"
+#include <vector>
 
+#include "ExtractorCommon.h"
 #ifdef WIN32
 #include <direct.h>
 #else
@@ -67,26 +68,33 @@
 *
 *  @RETURN pFile the pointer to the file, so that it can be worked on
 */
-FILE* openWoWExe(char const* path)
+FILE* openWoWExe(const char *path)
 {
     FILE *pFile;
-    const char* ExeFileName[] = { "WoW.exe", "Wow.exe", "wow.exe" ,"World of Warcraft.exe", "World of Warcraft.app/Contents/MacOS/World of Warcraft"};
-    int iExeSpelling = 5; ///> WoW.exe (Classic, CATA), Wow.exe (TBC, MoP, WoD), wow.exe (WOTLK) and a variant
+    std::vector<std::string> excec_names {
+        "wow.exe",
+        "Wow.exe",
+        "WoW.exe",
+        "wow.exe",
+        "World of Warcraft.exe",
+        "World of Warcraft.app/Contents/MacOS/World of Warcraft"
+    };
 
-    /// loop through all possible file names
-    for (int iFileCount = 0; iFileCount < iExeSpelling; iFileCount++)
+    for (int i = 0; i < excec_names.size(); i++)
     {
-        char tmp1[512];
-        sprintf(tmp1, "%s/%s", path, ExeFileName[iFileCount]);
+        std::stringstream exec;
+        exec << path << "/" << excec_names[i].c_str();
 #ifdef WIN32
-        if (fopen_s(&pFile, tmp1, "rb") == 0)
+        if (fopen_s(&pFile, exec.str().c_str(), "rb") == 0)
         {
-            return pFile; ///< successfully located the WoW executable
+            std::cout << "Found exec: " << exec.str() << std::endl;
+            return pFile;
         }
 #else
-        if ((pFile = fopen(tmp1, "rb")))
+        if ((pFile = fopen(exec.str().c_str(), "rb")))
         {
-            return pFile; ///< successfully located the WoW executable
+            std::cout << "Found exec: " << exec.str() << std::endl;
+            return pFile;
         }
 #endif
     }
@@ -101,7 +109,7 @@ FILE* openWoWExe(char const* path)
 *  @PARAM sFilename is the filename of the WoW executable to be loaded
 *  @RETURN iBuild the build number of the WoW executable, or 0 if failed
 */
-int getBuildNumber(char const* path)
+int getBuildNumber(const char *path)
 {
     int iBuild = -1; ///< build version # of the WoW executable (returned value)
 
@@ -128,9 +136,9 @@ int getBuildNumber(char const* path)
     FILE *pFile;
     if (!(pFile = openWoWExe(path)))
     {
-        printf("\nFatal Error: failed to locate the WoW executable!\n\n");
-        printf("\nExiting program!!\n");
-        exit(0); ///> failed to locate exe file
+        std::cout << "Fatal Error: failed to locate the WoW executable!" << std::endl;
+        std::cout << "Exiting program!!" << std::endl;
+        exit(1); ///> failed to locate exe file
     }
 
     /// jump over as much of the file as possible, before we start searching for the base #
@@ -148,7 +156,7 @@ int getBuildNumber(char const* path)
         // Vanilla and TBC
         if (byteSearchBuffer[0] == 0x35 || byteSearchBuffer[0] == 0x36 || byteSearchBuffer[0] == 0x38)
         {
-            /// grab the next 4 bytes
+            /// grab the next 3 bytes
             fread(preWOTLKbuildNumber, sizeof(preWOTLKbuildNumber), 1, pFile);
 
             if (!memcmp(preWOTLKbuildNumber, vanillaBuild1, sizeof(preWOTLKbuildNumber))) /// build is Vanilla?
@@ -190,15 +198,15 @@ int getBuildNumber(char const* path)
         }
     }
 
-    printf("\nFatal Error: failed to identify build version!\n\n");
-    printf("\nSupported build versions:\n");
-    printf("\nVanilla: 5875, 6005, 6141\n");
-    printf("TBC:      8606\n");
-    printf("WOTLK:    12340\n");
-    printf("CATA:     15595\n");
-    printf("MOP:      18414\n");
-    printf("\n\nExiting program!!\n");
-    exit(0);
+    std::cout << "Fatal Error: failed to identify build version!" << std::endl << std::endl;
+    std::cout << "Supported build versions:" << std::endl;
+    std::cout << "Vanilla: 5875, 6005, 6141" << std::endl;
+    std::cout << "TBC:      8606" << std::endl;
+    std::cout << "WOTLK:    12340" << std::endl;
+    std::cout << "CATA:     15595" << std::endl;
+    std::cout << "MOP:      18414"  << std::endl;
+    std::cout << "Exiting program!!" << std::endl;
+    exit(1);
 }
 
 /**
@@ -208,7 +216,7 @@ int getBuildNumber(char const* path)
 */
 int getCoreNumber()
 {
-    return getCoreNumberFromBuild(getBuildNumber());
+    getCoreNumberFromBuild(getBuildNumber());
 }
 
 /**
@@ -259,41 +267,42 @@ int getCoreNumberFromBuild(int iBuildNumber)
 */
 void showBanner(const std::string& sTitle, int iCoreNumber)
 {
-    printf(
-        "        __  __      _  _  ___  ___  ___      \n"
-        "       |  \\/  |__ _| \\| |/ __|/ _ \\/ __|  \n"
-        "       | |\\/| / _` | .` | (_ | (_) \\__ \\  \n"
-        "       |_|  |_\\__,_|_|\\_|\\___|\\___/|___/ \n"
-        "       %s for ", sTitle.c_str());
+    std::cout << \
+        "        __  __      _  _  ___  ___  ___      " << std::endl << \
+        "       |  \\/  |__ _| \\| |/ __|/ _ \\/ __|  " << std::endl << \
+        "       | |\\/| / _` | .` | (_ | (_) \\__ \\  " << std::endl << \
+        "       |_|  |_\\__,_|_|\\_|\\___|\\___/|___/ " << std::endl << \
+        std::endl << \
+        "       " << sTitle << " for ";
 
     switch (iCoreNumber)
     {
     case CLIENT_CLASSIC:
-        printf("MaNGOSZero\n");
+        std::cout << "MaNGOSZero" << std::endl;
         break;
     case CLIENT_TBC:
-        printf("MaNGOSOne\n");
+        std::cout << "MaNGOSOne" << std::endl;
         break;
     case CLIENT_WOTLK:
-        printf("MaNGOSTwo\n");
+        std::cout << "MaNGOSTwo" << std::endl;
         break;
     case CLIENT_CATA:
-        printf("MaNGOSThree\n");
+        std::cout << "MaNGOSThree\n" << std::endl;
         break;
     case CLIENT_MOP:
-        printf("MaNGOSFour\n");
+        std::cout << "MaNGOSFour" << std::endl;
         break;
     case CLIENT_WOD:
-        printf("MaNGOSFive\n");
+        std::cout << "MaNGOSFive" << std::endl;
         break;
     case CLIENT_LEGION:
-        printf("MaNGOSSix\n");
+        std::cout << "MaNGOSSix" << std::endl;
         break;
     default:
-        printf("Unknown Version\n");
+        std::cout << "Unknown Version" << std::endl;
         break;
     }
-    printf("  ________________________________________________\n");
+    std::cout << "  ________________________________________________" << std::endl;
 
 }
 
@@ -302,12 +311,11 @@ void showBanner(const std::string& sTitle, int iCoreNumber)
 */
 void showWebsiteBanner()
 {
-    printf(
-        "  ________________________________________________\n\n"
-        "    For help and support please visit:            \n"
-        "    Website / Forum / Wiki: https://getmangos.eu  \n"
-        "  ________________________________________________\n"
-        );
+    std::cout << \
+        "  ________________________________________________" << std::endl << std::endl << \
+        "    For help and support please visit:            " << std::endl << \
+        "    Website / Forum / Wiki: https://getmangos.eu  " << std::endl << \
+        "  ________________________________________________" << std::endl ;
 }
 
 

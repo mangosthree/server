@@ -100,14 +100,14 @@ namespace MMAP
         if (file_read <= 0)
         {
             fclose(mapFile);
-            printf("Could not read map data from %s.\n", mapFileName);
+            std::cout << "Could not read map data from " << mapFileName << std::endl;
             return false;
         }
 
         if (fheader.versionMagic != *((uint32 const*)(MAP_VERSION_MAGIC)))
         {
             fclose(mapFile);
-            printf("%s is the wrong version, please extract new .map files\n", mapFileName);
+            std::cout << mapFileName << " id is the wrong version '" << *((uint32 const*)(MAP_VERSION_MAGIC)) << "', please extract new .map files with " << fheader.versionMagic << std::endl;
             return false;
         }
 
@@ -118,7 +118,7 @@ namespace MMAP
         if (file_read <= 0)
         {
             fclose(mapFile);
-            printf("Could not read map data from %s.\n", mapFileName);
+            std::cout << "Could not read map data from " << mapFileName << std::endl;
             return false;
         }
 

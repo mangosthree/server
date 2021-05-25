@@ -295,7 +295,7 @@ uint32 ReadMapDBC()
     HANDLE dbcFile;
     if (!OpenNewestFile("DBFilesClient\\Map.dbc", &dbcFile))
     {
-        std:cerr << "Error: Cannot find Map.dbc in archive!" << std::endl;
+        std::cerr << "Error: Cannot find Map.dbc in archive!" << std::endl;
         exit(1);
     }
 
@@ -1298,11 +1298,11 @@ void AppendPatchMPQFilesToList(char const* subdir, char const* suffix, char cons
     char dirname[512];
     if (subdir)
     {
-        sprintf(dirname, "%s/Data/%s", input_path, subdir);
+        sprintf(dirname, "%s/Data/%s", input_path->c_str(), subdir);
     }
     else
     {
-        sprintf(dirname, "%s/Data", input_path);
+        sprintf(dirname, "%s/Data", input_path->c_str());
     }
 
     char scanname[512];
@@ -1391,7 +1391,7 @@ void LoadLocaleMPQFiles(int const locale)
                 filename.str("");
                 filename << input_path->c_str() << "/Data/" << Locales[locale] << "/patch-" << Locales[locale];
                 // on wolk we add an extension
-                if (i > 1) filename << "-" + i;
+                if (i > 1) filename << "-" << i;
 
                 filename << ".MPQ";
 

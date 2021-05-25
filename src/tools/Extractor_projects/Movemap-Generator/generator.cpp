@@ -42,7 +42,7 @@ bool checkDirectories(bool debugOutput)
     dirFiles.clear();
     if (getDirContents(dirFiles, "vmaps", "*.vmtree") == LISTFILE_DIRECTORY_NOT_FOUND || !dirFiles.size())
     {
-        std:cerr <<" 'vmaps' directory is empty or does not exist" << std::endl;
+        std::cerr <<" 'vmaps' directory is empty or does not exist" << std::endl;
         return false;
     }
 

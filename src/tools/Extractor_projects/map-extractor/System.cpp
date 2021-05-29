@@ -1658,7 +1658,7 @@ int main(int argc, char** argv)
 
             if (FirstLocale < 0)
             {
-                std::cout << "No locales detected" << std::endl;
+                std::cout << "No locale detected" << std::endl;
                 return 0;
             }
 

@@ -33,12 +33,15 @@ else()
     set(CONF_DIR "etc/" CACHE STRING "Path to the configs, can be absolute or relative.")
 endif()
 option(DEBUG                "Debug mode (strict compile, all warnings)"     OFF)
+###
+# THIS IS A TEMPORARY FIX UNTIL WE GO TO REL22 - THIS SEPARATION BETWEEN WINDOWS AND OTHERS NEEDS TO BE REMOVED, AND DEFAULT BACK TO "OFF"
 if (WIN32)
-option(ACE_USE_EXTERNAL     "Use external ACE"                              OFF)
-endif (WIN32)
-if (UNIX)
-option(ACE_USE_EXTERNAL     "Use external ACE"                              ON)
-endif (UNIX)
+    option(ACE_USE_EXTERNAL     "Use external ACE"                              OFF)
+else()
+    option(ACE_USE_EXTERNAL     "Use external ACE"                              ON)
+endif()
+# END TEMPORARY FIX
+###
 option(POSTGRESQL           "Use PostgreSQL instead of MySQL"               OFF)
 option(BUILD_MANGOSD        "Build the main server"                         ON)
 option(BUILD_REALMD         "Build the login server"                        ON)

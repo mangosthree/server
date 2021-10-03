@@ -26,12 +26,11 @@
 #define MANGOS_H_UTIL
 
 #include "Common/Common.h"
+#include <ace/Null_Mutex.h>
 #include <ace/INET_Addr.h>
 
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <cctype>
 
 /**
  * @brief
@@ -75,13 +74,6 @@ void stripLineInvisibleChars(std::string& src);
 /**
  * @brief
  *
- * @param localtime
- */
-std::tm localtime_r(const time_t& time);
-
-/**
- * @brief
- *
  * @param timeInSecs
  * @param shortText
  * @param hoursOnly
@@ -102,8 +94,6 @@ uint32 TimeStringToSecs(const std::string& timestring);
  * @return std::string
  */
 std::string TimeToTimestampStr(time_t t);
-
-
 time_t timeBitFieldsToSecs(uint32 packedDate);
 
 std::string MoneyToString(uint64 money);
@@ -119,6 +109,19 @@ inline uint32 secsToTimeBitFields(time_t secs)
     return (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 | (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 | lt->tm_hour << 6 | lt->tm_min;
 }
 
+/**
+ * @brief Initializes the TSS for MersenneTwister
+ *
+ *
+ */
+void initMTRandTSS();
+
+/**
+ * @brief Cleanups the TSS for MersenneTwister
+ *
+ *
+ */
+void deleteMTRandTSS();
 
 /**
  * @brief Return a random number in the range min..max; (max-min) must be smaller than 32768.

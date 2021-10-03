@@ -645,12 +645,11 @@ bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGu
 
 void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
 {
-    //uint32 mstime = GameTime::GetGameTimeMS();
-    //if (m_clientTimeDelay == 0)
-    //    m_clientTimeDelay = mstime - movementInfo.GetTime();
-
-    //movementInfo.UpdateTime(movementInfo.GetTime() + m_clientTimeDelay + MOVEMENT_PACKET_TIME_DELAY);
-    movementInfo.UpdateTime(movementInfo.GetTime() + GetLatency());
+    if (m_clientTimeDelay == 0)
+    {
+        m_clientTimeDelay = WorldTimer::getMSTime() - movementInfo.GetTime();
+    }
+    movementInfo.UpdateTime(movementInfo.GetTime() + m_clientTimeDelay + MOVEMENT_PACKET_TIME_DELAY);
 
     Unit* mover = _player->GetMover();
 

@@ -36,7 +36,6 @@
 #include "Util.h"
 #include "WardenMac.h"
 #include "WardenModuleMac.h"
-#include "GameTime.h"
 
 WardenMac::WardenMac() : Warden() { }
 
@@ -178,7 +177,7 @@ void WardenMac::HandleHashResult(ByteBuffer &buff)
     _inputCrypto.Init(_inputKey);
     _outputCrypto.Init(_outputKey);
 
-    _previousTimestamp = GameTime::GetGameTimeMS();
+    _previousTimestamp = WorldTimer::getMSTime();
 }
 
 void WardenMac::RequestData()

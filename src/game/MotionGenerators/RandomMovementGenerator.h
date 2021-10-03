@@ -47,7 +47,7 @@ class RandomMovementGenerator
         bool Update(T&, const uint32&);
         MovementGeneratorType GetMovementGeneratorType() const override { return RANDOM_MOTION_TYPE; }
     private:
-        TimeTracker i_nextMoveTime;
+        ShortTimeTracker i_nextMoveTime;
         float i_x, i_y, i_z;
         float i_radius;
         float i_verticalZ;

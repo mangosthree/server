@@ -192,7 +192,7 @@ class OutdoorPvPMgr
          */
         CapturePointSliderMap m_capturePointSlider;
 
-        IntervalTimer m_updateTimer; /**< update interval */
+        ShortIntervalTimer m_updateTimer; /**< update interval */
 };
 
 #define sOutdoorPvPMgr MaNGOS::Singleton<OutdoorPvPMgr>::Instance()

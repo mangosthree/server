@@ -46,7 +46,6 @@
 #include "Path.h"
 #include "WorldPacket.h"
 #include "Timer.h"
-#include "Log.h"
 #include <list>
 
 enum SpellInterruptFlags
@@ -785,7 +784,6 @@ class MovementInfo
         ObjectGuid const& GetTransportGuid() const { return t_guid; }
         Position const* GetTransportPos() const { return &t_pos; }
         int8 GetTransportSeat() const { return t_seat; }
-        uint32 GetTime() const { return time; }
         uint32 GetTransportTime() const { return t_time; }
         uint32 GetTransportTime2() const { return t_time2; }
         uint32 GetFallTime() const { return fallTime; }
@@ -3640,7 +3638,7 @@ class  Unit : public WorldObject
         UnitVisibility m_Visibility;
         Position m_last_notified_position;
         bool m_AINotifyScheduled;
-        TimeTracker m_movesplineTimer;
+        ShortTimeTracker m_movesplineTimer;
 
         Diminishing m_Diminishing;
         // Manage all Units threatening us

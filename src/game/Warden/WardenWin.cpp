@@ -39,7 +39,6 @@
 #include "WardenWin.h"
 #include "WardenModuleWin.h"
 #include "WardenCheckMgr.h"
-#include "GameTime.h"
 
 WardenWin::WardenWin() : Warden(), _serverTicks(0) {}
 
@@ -157,7 +156,7 @@ void WardenWin::HandleHashResult(ByteBuffer &buff)
     _inputCrypto.Init(_inputKey);
     _outputCrypto.Init(_outputKey);
 
-    _previousTimestamp = GameTime::GetGameTimeMS();
+    _previousTimestamp = WorldTimer::getMSTime();
 }
 
 void WardenWin::RequestData()
@@ -180,7 +179,7 @@ void WardenWin::RequestData()
         sWardenCheckMgr->GetWardenCheckIds(false, build, _otherChecksTodo);
     }
 
-    _serverTicks = GameTime::GetGameTimeMS();
+    _serverTicks = WorldTimer::getMSTime();
 
     _currentChecks.clear();
 
@@ -356,7 +355,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
         uint32 newClientTicks;
         buff >> newClientTicks;
 
-        uint32 ticksNow = GameTime::GetGameTimeMS();
+        uint32 ticksNow = WorldTimer::getMSTime();
         uint32 ourTicks = newClientTicks + (ticksNow - _serverTicks);
 
         sLog.outWarden("ServerTicks %u, RequestTicks %u, ClientTicks %u", ticksNow, _serverTicks, newClientTicks);  // Now, At request, At response

@@ -425,6 +425,8 @@ int main(int argc, char** argv)
     ///- Set Realm to Offline, if crash happens. Only used once.
     LoginDatabase.DirectPExecute("UPDATE `realmlist` SET `realmflags` = `realmflags` | %u WHERE `id` = '%u'", REALM_FLAG_OFFLINE, realmID);
 
+    initMTRandTSS();
+
     ///- Initialize the World
     sWorld.SetInitialWorldSettings();
 
@@ -557,6 +559,8 @@ int main(int argc, char** argv)
     CharacterDatabase.HaltDelayThread();
     WorldDatabase.HaltDelayThread();
     LoginDatabase.HaltDelayThread();
+
+    deleteMTRandTSS();
 
     // This is done to make sure that we cleanup our so file before it's
     // unloaded automatically, since the ~ScriptMgr() is called to late

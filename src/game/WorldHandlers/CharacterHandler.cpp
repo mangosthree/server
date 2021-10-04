@@ -43,8 +43,6 @@
 #include "Language.h"
 #include "SpellMgr.h"
 #include "Calendar.h"
-#include "GameTime.h"
-
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
@@ -881,8 +879,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     stmt = LoginDatabase.CreateStatement(updAccount, "UPDATE `account` SET `active_realm_id` = ? WHERE `id` = ?");
     stmt.PExecute(realmID, GetAccountId());
 
-    /* Sync player's in-game time with server time */
-    pCurrChar->SetInGameTime(GameTime::GetGameTimeMS());
+    pCurrChar->SetInGameTime(WorldTimer::getMSTime());
 
     // announce group about member online (must be after add to player list to receive announce to self)
     if (Group* group = pCurrChar->GetGroup())

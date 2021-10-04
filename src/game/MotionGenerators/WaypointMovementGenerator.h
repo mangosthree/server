@@ -100,7 +100,7 @@ class WaypointMovementGenerator<Creature>
         void OnArrived(Creature&);
         void StartMove(Creature&);
 
-        TimeTracker i_nextMoveTime;
+        ShortTimeTracker i_nextMoveTime;
         bool m_isArrivalDone;
         uint32 m_lastReachedWaypoint;
 

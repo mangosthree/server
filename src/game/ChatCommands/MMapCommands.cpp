@@ -391,7 +391,7 @@ bool ChatHandler::HandleMmapTestHeight(char* args)
     summoned->CastSpell(summoned, 8599, false);
     uint32 tries = 1;
     uint32 successes = 0;
-    WorldTimer::getMSTime();
+    uint32 startTime = WorldTimer::getMSTime();
     for (; tries < 500; ++tries)
     {
         unit->GetPosition(gx, gy, gz);

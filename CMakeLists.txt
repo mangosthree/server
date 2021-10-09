@@ -171,10 +171,10 @@ else()
 endif()
 
 if(DEBUG)
-    set(CMAKE_BUILD_TYPE "Debug")
+    set(CMAKE_BUILD_TYPE Debug)
     message(STATUS "Build in debug-mode   : Yes")
 else()
-    set(CMAKE_BUILD_TYPE "Release")
+    set(CMAKE_BUILD_TYPE Release)
     message(STATUS "Build in debug-mode   : No  (default)")
 endif()
 

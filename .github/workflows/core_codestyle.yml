@@ -1,7 +1,7 @@
 name: Codestyle Checks
 on:
   push:
-      branches: [ master ]
+      branches: [ master, workflows ]
   pull_request:
       branches: [ master ]
   

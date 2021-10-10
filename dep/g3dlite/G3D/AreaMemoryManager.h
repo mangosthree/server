@@ -1,6 +1,6 @@
 /**
  @file AreaMemoryManager.h
-  
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
 
  @created 2009-01-20
@@ -21,10 +21,10 @@
 
 namespace G3D {
 
-/** 
+/**
   \brief Allocates memory in large blocks and then frees it as an area.
 
-  Useful for ensuring cache coherence and for reducing the time cost of 
+  Useful for ensuring cache coherence and for reducing the time cost of
   multiple allocations and deallocations.
 
   <b>Not threadsafe</b>
@@ -47,7 +47,7 @@ private:
         /** Returns NULL if out of space */
         void* alloc(size_t s);
     };
-    
+
     size_t                  m_sizeHint;
 
     /** The underlying array is stored in regular MemoryManager heap memory */
@@ -59,7 +59,7 @@ public:
 
     typedef ReferenceCountedPointer<AreaMemoryManager> Ref;
 
-    /** 
+    /**
         \param sizeHint Total amount of memory expected to be allocated.
         The allocator will allocate memory from the system in increments
         of this size.
@@ -71,7 +71,7 @@ public:
 
     size_t bytesAllocated() const;
 
-    /** Allocates memory out of the buffer pool. 
+    /** Allocates memory out of the buffer pool.
         @param s must be no larger than sizeHint */
     virtual void* alloc(size_t s);
 

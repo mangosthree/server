@@ -1,6 +1,6 @@
-/** 
+/**
   @file GMutex.h
-   
+
   @created 2005-09-22
   @edited  2009-03-25
  */

@@ -21,7 +21,7 @@
 
 namespace G3D {
 
-/** 
+/**
     Provides generalized Windows registry querying.
 
     All key names are one string in the format:
@@ -41,7 +41,7 @@ namespace G3D {
         HKEY_USERS
 
     valueExists() should be used to validate a key+value before reading or writing
-    to ensure that a debug assert or false return is for a different error during 
+    to ensure that a debug assert or false return is for a different error during
     reads and writes.
 
     All read and write calls will assert when a key will not open for reasons other
@@ -60,10 +60,10 @@ public:
     /** returns false if the key could not be read for any reason. */
     static bool readInt32(const std::string& key, const std::string& value, int32& data);
 
-    /** 
+    /**
       Reads an arbitrary amount of data from a binary registry key.
       returns false if the key could not be read for any reason.
-    
+
       @beta
       @param data pointer to the output buffer of sufficient size. Pass NULL as data in order to have available data size returned in dataSize.
       @param dataSize size of the output buffer.  When NULL is passed for data, contains the size of available data on successful return.
@@ -76,10 +76,10 @@ public:
     /** returns false if the key could not be written for any reason. */
     static bool writeInt32(const std::string& key, const std::string& value, int32 data);
 
-    /** 
+    /**
       Writes an arbitrary amount of data to a binary registry key.
       returns false if the key could not be written for any reason.
-    
+
       @param data pointer to the input buffer
       @param dataSize size of the input buffer that should be written
     */

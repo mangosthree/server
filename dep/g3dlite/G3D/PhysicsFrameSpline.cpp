@@ -21,7 +21,7 @@ PhysicsFrameSpline& PhysicsFrameSpline::operator=(const Any& any) {
 
     if (n == "physicsframespline" || n == "pframespline") {
         any.verifyName("PhysicsFrameSpline", "PFrameSpline");
-        
+
         for (Any::AnyTable::Iterator it = any.table().begin(); it.hasMore(); ++it) {
             const std::string& k = toLower(it->key);
             if (k == "cyclic") {

@@ -1,8 +1,8 @@
 /**
  @file Color3uint8.cpp
- 
+
  @author Morgan McGuire, http://graphics.cs.williams.edu
-  
+
  @created 2003-04-07
  @edited  2006-01-07
  */

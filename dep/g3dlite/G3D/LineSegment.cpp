@@ -1,8 +1,8 @@
 /**
  @file LineSegment.cpp
-  
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @created 2003-02-08
  @edited  2008-02-02
  */
@@ -20,7 +20,7 @@ Vector3 LineSegment::closestPoint(const Vector3& p) const {
     // The vector from the end of the capsule to the point in question.
     Vector3 v(p - _point);
 
-    // Projection of v onto the line segment scaled by 
+    // Projection of v onto the line segment scaled by
     // the length of direction.
     float t = direction.dot(v);
 
@@ -29,11 +29,11 @@ Vector3 LineSegment::closestPoint(const Vector3& p) const {
     //      t <= direction.squaredLength()
 
     if ((t >= 0) && (t <= direction.squaredMagnitude())) {
-    
+
         // The point falls within the segment.  Normalize direction,
         // divide t by the length of direction.
         return _point + direction * t / direction.squaredMagnitude();
-    
+
     } else {
 
         // The point does not fall within the segment; see which end is closer.
@@ -53,7 +53,7 @@ Vector3 LineSegment::closestPoint(const Vector3& p) const {
 
             // Point 1 is closer
             return _point + direction;
-        
+
         }
     }
 
@@ -126,7 +126,7 @@ Vector2 LineSegment2D::closestPoint(const Vector2& Q) const {
     // Two constants that appear in the result
     const Vector2 k1(m_origin - Q);
     const Vector2& k2 = m_direction;
-    
+
     if (fuzzyEq(m_length, 0)) {
         // This line segment has no length
         return m_origin;
@@ -144,7 +144,7 @@ Vector2 LineSegment2D::closestPoint(const Vector2& Q) const {
         // Clipped to high end point
         return m_origin + m_direction;
     } else {
-        // Subsitute into the line equation to find 
+        // Subsitute into the line equation to find
         // the point on the segment.
         return m_origin + k2 * t;
     }
@@ -191,7 +191,7 @@ Vector2 LineSegment2D::intersection(const LineSegment2D& other) const {
 
     // t1 = ((other.m_origin.x - m_origin.x) + other.m_direction.x * t2) / m_direction.x
     //
-    // ((other.m_origin.x - m_origin.x) + other.m_direction.x * t2) * m_direction.y / m_direction.x = 
+    // ((other.m_origin.x - m_origin.x) + other.m_direction.x * t2) * m_direction.y / m_direction.x =
     //        (other.m_origin.y - m_origin.y) + other.m_direction.y * t2
     //
     // m = m_direction.y / m_direction.x
@@ -226,10 +226,10 @@ Vector2 LineSegment2D::intersection(const LineSegment2D& other) const {
         return Vector2::inf();
     }
 
-    // Return the intersection point (computed from non-transposed 
+    // Return the intersection point (computed from non-transposed
     // variables even if we flipped above)
     return m_origin + m_direction * t1;
-    
+
 }
 
 }

@@ -330,10 +330,10 @@ else()
 endif()
 
 if (NOT STORM_SKIP_INSTALL)
-    install(TARGETS ${LIBRARY_NAME} 
-        RUNTIME DESTINATION bin 
-        LIBRARY DESTINATION lib 
-        ARCHIVE DESTINATION lib 
+    install(TARGETS ${LIBRARY_NAME}
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
         FRAMEWORK DESTINATION /Library/Frameworks
         PUBLIC_HEADER DESTINATION include
         INCLUDES DESTINATION include)

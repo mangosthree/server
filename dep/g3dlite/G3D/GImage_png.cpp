@@ -50,10 +50,10 @@ static void png_flush_data(
 static void png_error(
     png_structp png_ptr,
     png_const_charp error_msg) {
-    
+
     (void)png_ptr;
     debugAssert( error_msg != NULL );
-    throw GImage::Error(error_msg, "PNG"); 
+    throw GImage::Error(error_msg, "PNG");
 }
 
 
@@ -186,7 +186,7 @@ void GImage::decodePNG(
     // to use G3D functions so that BinaryInput can be used.
 
     png_set_read_fn(png_ptr, (png_voidp)&input, png_read_data);
-    
+
     // read in sequentially so that three copies of the file are not in memory at once
     png_read_info(png_ptr, info_ptr);
 
@@ -236,7 +236,7 @@ void GImage::decodePNG(
         m_channels = 4;
         m_byte = (uint8*)m_memMan->alloc(m_width * m_height * 4);
 
-    } else if ((color_type == PNG_COLOR_TYPE_RGB) || 
+    } else if ((color_type == PNG_COLOR_TYPE_RGB) ||
                (color_type == PNG_COLOR_TYPE_PALETTE)) {
 
         m_channels = 3;
@@ -262,7 +262,7 @@ void GImage::decodePNG(
 
     for (uint32 pass = 0; pass < number_passes; ++pass) {
         for (uint32 y = 0; y < (uint32)m_height; ++y) {
-            png_bytep rowPointer = &m_byte[m_width * m_channels * y]; 
+            png_bytep rowPointer = &m_byte[m_width * m_channels * y];
             png_read_rows(png_ptr, &rowPointer, NULL, 1);
         }
     }

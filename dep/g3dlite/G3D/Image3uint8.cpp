@@ -133,7 +133,7 @@ void Image3uint8::copyGImage(const GImage& im) {
     case 4:
         copyArray(im.pixel4(), im.width(), im.height());
         break;
-    } 
+    }
 }
 
 
@@ -177,7 +177,7 @@ void Image3uint8::copyArray(const Color3* src, int w, int h) {
 
 void Image3uint8::copyArray(const Color4uint8* ptr, int w, int h) {
     resize(w, h);
-    
+
     // Copy 3/4 bytes
     GImage::RGBAtoRGB((const uint8*)ptr, (uint8*)getCArray(), w * h);
 }

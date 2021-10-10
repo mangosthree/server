@@ -36,11 +36,11 @@ public:
          time[time.size() - 1] - time[time.size() - 2]) / 2.
     */
     float                   finalInterval;
-    
+
     SplineBase() : cyclic(true), finalInterval(-1) {}
 
     virtual ~SplineBase() {}
-    
+
     /** See specification for Spline::finalInterval; this handles the
       non-positive case.  Returns 0 if not cyclic. */
     float getFinalInterval() const;
@@ -52,20 +52,20 @@ public:
 
     /** Computes the derivative spline basis from the control point version. */
     static Matrix4 computeBasis();
-    
+
 protected:
 
     /** Assumes that t0 <= s < tn.  called by computeIndex. */
     void computeIndexInBounds(float s, int& i, float& u) const;
 
 public:
-    
+
     /**
        Given a time @a s, finds @a i and 0 <= @a u < 1 such that
        @a s = time[@a i] * @a u + time[@a i + 1] * (1 - @a u).  Note that
        @a i may be outside the bounds of the time and control arrays;
        use getControl to handle wraparound and extrapolation issues.
-       
+
        This function takes expected O(1) time for control points with
        uniform time sampled control points or for uniformly
        distributed random time samples, but may take O( log time.size() ) time
@@ -126,7 +126,7 @@ public:
     /** Appends a control point at a specific time that must be
         greater than that of the previous point. */
     void append(float t, const Control& c) {
-        debugAssertM((time.size() == 0) || (t > time.last()), 
+        debugAssertM((time.size() == 0) || (t > time.last()),
                      "Control points must have monotonically increasing times.");
         time.append(t);
         control.append(c);
@@ -157,7 +157,7 @@ public:
         debugAssert(control.size() == time.size());
     }
 
-    /** Erases all control points and times, but retains the state of 
+    /** Erases all control points and times, but retains the state of
         cyclic and finalInterval.
      */
     void clear() {
@@ -171,7 +171,7 @@ public:
         debugAssert(time.size() == control.size());
         return control.size();
     }
-    
+
 
     /** Returns the requested control point and time sample based on
         array index.  If the array index is out of bounds, wraps (for
@@ -199,7 +199,7 @@ public:
                 // Wrapped around bottom
 
                 // Number of times we wrapped around the cyclic array
-                int wraps = (N + 1 - i) / N;                    
+                int wraps = (N + 1 - i) / N;
                 int j = (i + wraps * N) % N;
                 t = time[j] - wraps * duration();
 
@@ -211,7 +211,7 @@ public:
                 // Wrapped around top
 
                 // Number of times we wrapped around the cyclic array
-                int wraps = i / N;                    
+                int wraps = i / N;
                 int j = i % N;
                 t = time[j] + wraps * duration();
             }
@@ -221,7 +221,7 @@ public:
             if (N >= 2) {
                 // Step away from control point 0
                 float dt = time[1] - time[0];
-                
+
                 // Extrapolate (note; i is negative)
                 c = control[1] * float(i) + control[0] * float(1 - i);
                 correct(c);
@@ -280,7 +280,7 @@ protected:
     virtual void correct(Control& A) const { (void)A; }
 
 public:
-   
+
 
     /**
        Return the position at time s.  The spline is defined outside
@@ -290,10 +290,10 @@ public:
         debugAssertM(control.size() == time.size(), "Corrupt spline: wrong number of control points.");
 
         /*
-        @cite http://www.gamedev.net/reference/articles/article1497.asp 
+        @cite http://www.gamedev.net/reference/articles/article1497.asp
         Derivation of basis matrix follows.
-        
-        Given control points with positions p[i] at times t[i], 0 <= i <= 3, find the position 
+
+        Given control points with positions p[i] at times t[i], 0 <= i <= 3, find the position
         at time t[1] <= s <= t[2].
 
         Let u = s - t[0]
@@ -324,7 +324,7 @@ public:
 
         // Compute the weights on each of the control points.
         const Vector4& weights = uvec * basis;
-        
+
         // Compute the weighted sum of the neighboring control points.
         Control sum;
 
@@ -333,9 +333,9 @@ public:
         const Control& p2 = p[2];
         const Control& p3 = p[3];
 
-        // The factor of 1/2 from averaging two time intervals is 
+        // The factor of 1/2 from averaging two time intervals is
         // already factored into the basis
-        
+
         // tan1 = (dp0 / dt0 + dp1 / dt1) * ((dt0 + dt1) * 0.5);
         // The last term normalizes for unequal time intervals
         float x = (dt0 + dt1) * 0.5f;
@@ -351,12 +351,12 @@ public:
         const Control& tan1 = dp0 * n0 + dp1n1;
         const Control& tan2 = dp1n1 + dp2 * n2;
 
-        sum = 
+        sum =
             tan1 * weights[0] +
              p1  * weights[1] +
              p2  * weights[2] +
-            tan2 * weights[3]; 
-            
+            tan2 * weights[3];
+
 
         correct(sum);
         return sum;

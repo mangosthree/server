@@ -1,8 +1,8 @@
-/** 
+/**
   @file WrapMode.h
- 
+
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
   @created 2007-04-17
   @edited  2010-04-17
 
@@ -29,18 +29,18 @@
 
 namespace G3D {
 
-/** 
+/**
   Describes the behavior of G3D::Texture, G3D::Map2D, G3D::Image3,
   etc. when accessing an out-of-bounds pixel.  Not all classes support
   all modes.
 
   Refer to these as scoped enums, e.g., <code>WrapMode m = WrapMode::CLAMP;</code>.
 
-  WrapMode::IGNORE silently discards attempts to write to out 
+  WrapMode::IGNORE silently discards attempts to write to out
      of bounds locations and returns an undefined value for reading
      from out of bounds locations.
 
-  WrapMode::ERROR generates an error when the 
+  WrapMode::ERROR generates an error when the
      pixel indices are out of bounds
 
   WrapMode::CLAMP makes out of bounds pixels equal to the last in-range pixel along that dimension.
@@ -50,24 +50,24 @@ namespace G3D {
   WrapMode::ZERO treats out of bounds values as the zero value, which varies in definition
   according to the class used.  For example, with a G3D::Texture, ZERO = Color4(0,0,0,0).
 
-  Uses the "Intelligent Enum" design pattern 
+  Uses the "Intelligent Enum" design pattern
   http://www.codeguru.com/cpp/cpp/cpp_mfc/article.php/c4001/
- */ 
+ */
 class WrapMode {
 public:
     /** Don't use this enum; use WrapMode instances instead. */
     enum Value {
-        CLAMP, 
-        TILE, 
+        CLAMP,
+        TILE,
         ZERO,
-        IGNORE, 
+        IGNORE,
         ERROR
     };
 
 private:
-    
+
     static const char* toString(int i, Value& v) {
-        static const char* str[] = {"CLAMP", "TILE", "ZERO", "IGNORE", "ERROR", NULL}; 
+        static const char* str[] = {"CLAMP", "TILE", "ZERO", "IGNORE", "ERROR", NULL};
         static const Value val[] = {CLAMP, TILE, ZERO, IGNORE, ERROR};
         const char* s = str[i];
         if (s) {

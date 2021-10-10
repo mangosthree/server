@@ -1,10 +1,10 @@
 /**
   @file Vector4int8.cpp
- 
+
   Homogeneous vector class.
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
   @created 2007-02-09
   @edited  2007-02-09
 

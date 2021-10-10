@@ -1,11 +1,11 @@
 /**
   @file ConvexPolyhedron.h
-  
+
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
 
   @created 2001-11-11
   @edited  2006-04-10
- 
+
   Copyright 2000-2006, Morgan McGuire.
   All rights reserved.
  */
@@ -44,27 +44,27 @@ public:
     virtual ~ConvexPolygon() {}
 
     /**
-     Counter clockwise winding order.  
+     Counter clockwise winding order.
      */
     inline const Vector3& vertex(int i) const {
         return _vertex[i];
     }
-    
+
     inline void setVertex(int i, const Vector3& v) {
         _vertex[i] = v;
     }
-    
+
     /**
        Zero vertices indicates an empty polygon (zero area).
     */
     inline int numVertices() const {
         return _vertex.size();
     }
-    
+
     inline void setNumVertices(int n) {
         _vertex.resize(n);
     }
-    
+
     /**
        O(n) in the number of edges
     */
@@ -73,7 +73,7 @@ public:
     /**
        Cuts the polygon at the plane. If the polygon is entirely above or below
        the plane, one of the returned polygons will be empty.
-     
+
        @param above The part of the polygon above (on the side the
               normal points to or in the plane) the plane
        @param below The part of the polygon below the plane.
@@ -84,14 +84,14 @@ public:
 
     /**
        When a cut plane grazes a vertex in the polygon, two near-identical vertices may be created.
-       The closeness of these two points can cause a number of problems, such as ConvexPolygon::normal() 
-       returning an infinite vector.  It should be noted, however, that not all applications are 
+       The closeness of these two points can cause a number of problems, such as ConvexPolygon::normal()
+       returning an infinite vector.  It should be noted, however, that not all applications are
        sensitive to near-identical vertices.
-       
+
        removeDuplicateVertices() detects and eliminates redundant vertices.
     */
     void removeDuplicateVertices();
-    
+
     /**
      O(n) in the number of edges
      */
@@ -116,7 +116,7 @@ public:
      Zero faces indicates an empty polyhedron
      */
     Array<ConvexPolygon> face;
-    
+
     ConvexPolyhedron() {}
     ConvexPolyhedron(const Array<ConvexPolygon>& _face);
 
@@ -133,7 +133,7 @@ public:
     /**
        Cuts the polyhedron at the plane. If the polyhedron is entirely above or below
        the plane, one of the returned polyhedra will be empty.
-     
+
        @param above The part of the polyhedron above (on the side the
               normal points to or in the plane) the plane
        @param below The part of the polyhedron below the plane.
@@ -153,7 +153,7 @@ public:
 
     ConvexPolygon2D() {}
 
-    /** 
+    /**
      Points are counter-clockwise in a Y = down, X = right coordinate
      system.
 

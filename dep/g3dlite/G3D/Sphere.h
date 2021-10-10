@@ -1,10 +1,10 @@
 /**
  @file Sphere.h
- 
+
  Sphere class
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @created 2001-06-02
  @edited  2008-10-07
  */
@@ -74,7 +74,7 @@ public:
                   int32&              cullingPlaneIndex,
                   const uint32        testMask,
                   uint32&             childMask) const;
-    
+
     /**
        @deprecated Use culledBy(Array<Plane>&)
      */
@@ -92,7 +92,7 @@ public:
                   int32&                    cullingPlaneIndex,
                   const uint32              testMask,
                   uint32&                 childMask) const;
-    
+
     /**
      Conservative culling test that does not produce a mask for children.
      */
@@ -138,7 +138,7 @@ public:
 }
 
 template <> struct HashTrait<G3D::Sphere> {
-    static size_t hashCode(const G3D::Sphere& key) { 
+    static size_t hashCode(const G3D::Sphere& key) {
         return static_cast<size_t>(key.center.hashCode() + (key.radius * 13));
     }
 };

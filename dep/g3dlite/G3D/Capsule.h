@@ -1,8 +1,8 @@
 /**
  @file Capsule.h
-  
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-  
+
  @created 2003-02-07
  @edited  2005-08-20
 
@@ -39,7 +39,7 @@ public:
     Capsule(const Vector3& _p1, const Vector3& _p2, float _r);
     void serialize(class BinaryOutput& b) const;
     void deserialize(class BinaryInput& b);
-    
+
     /** The line down the center of the capsule */
     Line axis() const;
 
@@ -53,7 +53,7 @@ public:
         return (i == 0) ? p1 : p2;
     }
 
-    /** Distance between the sphere centers.  The total extent of the cylinder is 
+    /** Distance between the sphere centers.  The total extent of the cylinder is
         2r + h. */
     inline float height() const {
         return (p1 - p2).magnitude();

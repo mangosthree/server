@@ -1,8 +1,8 @@
-/** 
+/**
   @file Color1uint8.h
- 
+
   @maintainer Morgan McGuire, graphics3d.com
- 
+
   @created 2007-01-30
   @edited  2007-01-30
 
@@ -20,7 +20,7 @@ namespace G3D {
 
 /**
  Represents a Color1 as a packed integer.  Convenient
- for creating unsigned int vertex arrays. 
+ for creating unsigned int vertex arrays.
 
  <B>WARNING</B>: Integer color formats are different than
  integer vertex formats.  The color channels are automatically
@@ -29,7 +29,7 @@ namespace G3D {
  but Vector3(1,1,1) == Vector3int16(1,1,1).
 
  <B>Note</B>:
- Conversion of a float32 to uint8 is accomplished by min(iFloor(f * 256)) and 
+ Conversion of a float32 to uint8 is accomplished by min(iFloor(f * 256)) and
  back to float32 by u / 255.0f.  This gives equal size intervals.
 Consider a number line from 0 to 1 and a corresponding one from 0 to 255.  If we use iRound(x * 255), then the mapping for three critical intervals are:
 

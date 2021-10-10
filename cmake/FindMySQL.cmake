@@ -4,92 +4,195 @@
 
 # This module defines
 # MYSQL_INCLUDE_DIR, where to find mysql.h
-# MYSQL_LIBRARY, the libraries needed to use MySQL.
-# MYSQL_FOUND, If false, do not try to use MySQL.
+# MYSQL_LIBRARIES, the libraries to link against to connect to MySQL
+# MYSQL_FOUND, if false, you cannot build anything that requires MySQL.
 
-if(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
-  set(MYSQL_FOUND TRUE)
-else(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
-  if(WIN32)
-    SET(PROGRAM_FILES_ARCH_PATH)
-    if(PLATFORM EQUAL 32)
-      SET(PROGRAM_FILES_ARCH_PATH $ENV{ProgramFiles})
-    elseif(PLATFORM EQUAL 64)
-      SET(PROGRAM_FILES_ARCH_PATH $ENV{ProgramW6432})
-    endif()
+# also defined, but not for general use are
+# MYSQL_LIBRARY, where to find the MySQL library.
 
-    if (${PROGRAM_FILES_ARCH_PATH})
-      STRING(REPLACE "\\\\" "/" PROGRAM_FILES_ARCH_PATH ${PROGRAM_FILES_ARCH_PATH})
-    endif(${PROGRAM_FILES_ARCH_PATH})
+set(MYSQL_FOUND 0)
 
-    find_path(MYSQL_INCLUDE_DIR mysql.h
-      "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.0/include"
-      "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.1/include"
-      "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.2/include"
-      "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.3/include"
-      "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.4/include"
-      "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.5/include"
-      "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.6/include"
-      "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.7/include"
-      "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.0/include/mysql"
-      "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.1/include/mysql"
-      "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.2/include/mysql"
-      "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.3/include/mysql"
-      "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.4/include/mysql"
-      "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.5/include/mysql"
-    )
-    find_library(MYSQL_LIBRARY
-      NAMES
-        libmysql libmariadb
-      PATHS
-        "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.0/lib/opt"
-        "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.1/lib/opt"
-        "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.2/lib"
-        "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.3/lib"
-        "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.4/lib"
-        "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.5/lib"
-        "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.6/lib"
-        "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.7/lib"
-        "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.0/lib"
-        "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.1/lib"
-        "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.2/lib"
-        "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.3/lib"
-        "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.4/lib"
-        "${PROGRAM_FILES_ARCH_PATH}/MariaDB 10.5/lib"
-      )
-  else(WIN32)
-    find_path(MYSQL_INCLUDE_DIR mysql.h
-      /usr/include
-      /usr/include/mysql
-      /usr/local/include
-      /usr/local/include/mysql
-      /usr/local/mysql/include
-      /opt/local/include/mysql*/mysql
+if(UNIX)
+  set(MYSQL_CONFIG_PREFER_PATH "$ENV{MYSQL_HOME}/bin" CACHE FILEPATH
+    "preferred path to MySQL (mysql_config)"
+  )
+
+  find_program(MYSQL_CONFIG mysql_config
+    ${MYSQL_CONFIG_PREFER_PATH}
+    /usr/local/mysql/bin/
+    /usr/local/bin/
+    /usr/bin/
+  )
+
+  if(MYSQL_CONFIG)
+    message(STATUS "Using mysql-config: ${MYSQL_CONFIG}")
+    # set INCLUDE_DIR
+    exec_program(${MYSQL_CONFIG}
+      ARGS --include
+      OUTPUT_VARIABLE MY_TMP
     )
 
+    string(REGEX REPLACE "-I([^ ]*)( .*)?" "\\1" MY_TMP "${MY_TMP}")
+    set(MYSQL_ADD_INCLUDE_PATH ${MY_TMP} CACHE FILEPATH INTERNAL)
+    #message("[DEBUG] MYSQL ADD_INCLUDE_PATH : ${MYSQL_ADD_INCLUDE_PATH}")
+    # set LIBRARY_DIR
+    exec_program(${MYSQL_CONFIG}
+      ARGS --libs_r
+      OUTPUT_VARIABLE MY_TMP
+    )
+    set(MYSQL_ADD_LIBRARIES "")
+    string(REGEX MATCHALL "-l[^ ]*" MYSQL_LIB_LIST "${MY_TMP}")
+    foreach(LIB ${MYSQL_LIB_LIST})
+      string(REGEX REPLACE "[ ]*-l([^ ]*)" "\\1" LIB "${LIB}")
+      list(APPEND MYSQL_ADD_LIBRARIES "${LIB}")
+      #message("[DEBUG] MYSQL ADD_LIBRARIES : ${MYSQL_ADD_LIBRARIES}")
+    endforeach(LIB ${MYSQL_LIB_LIST})
+
+    set(MYSQL_ADD_LIBRARIES_PATH "")
+    string(REGEX MATCHALL "-L[^ ]*" MYSQL_LIBDIR_LIST "${MY_TMP}")
+    foreach(LIB ${MYSQL_LIBDIR_LIST})
+      string(REGEX REPLACE "[ ]*-L([^ ]*)" "\\1" LIB "${LIB}")
+      list(APPEND MYSQL_ADD_LIBRARIES_PATH "${LIB}")
+      #message("[DEBUG] MYSQL ADD_LIBRARIES_PATH : ${MYSQL_ADD_LIBRARIES_PATH}")
+    endforeach(LIB ${MYSQL_LIBS})
+
+  else(MYSQL_CONFIG)
+    set(MYSQL_ADD_LIBRARIES "")
+    list(APPEND MYSQL_ADD_LIBRARIES "mysqlclient_r")
+  endif(MYSQL_CONFIG)
+endif(UNIX)
+
+if(WIN32)
+  # read environment variables and change \ to /
+  SET(PROGRAM_FILES_32 $ENV{ProgramFiles})
+  if(${PROGRAM_FILES_32})
+    STRING(REPLACE "\\\\" "/" PROGRAM_FILES_32 ${PROGRAM_FILES_32})
+  endif(${PROGRAM_FILES_32})
+
+  SET(PROGRAM_FILES_64 $ENV{ProgramW6432})
+  if(${PROGRAM_FILES_64})
+     STRING(REPLACE "\\\\" "/" PROGRAM_FILES_64 ${PROGRAM_FILES_64})
+  endif(${PROGRAM_FILES_64})
+endif(WIN32)
+
+find_path(MYSQL_INCLUDE_DIR
+  NAMES
+    mysql.h
+  PATHS
+    ${MYSQL_ADD_INCLUDE_PATH}
+    /usr/include
+    /usr/include/mysql
+    /usr/local/include
+    /usr/local/include/mysql
+    /usr/local/mysql/include
+    "${PROGRAM_FILES_64}/MySQL/MySQL Server 8.0/include"
+    "${PROGRAM_FILES_64}/MySQL/MySQL Server 5.7/include"
+    "${PROGRAM_FILES_64}/MySQL/include"
+    "${PROGRAM_FILES_32}/MySQL/MySQL Server 8.0/include"
+    "${PROGRAM_FILES_32}/MySQL/MySQL Server 5.7/include"
+    "${PROGRAM_FILES_32}/MySQL/include"
+    "C:/MySQL/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.0;Location]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.7;Location]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 8.0;Location]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.7;Location]/include"
+    "$ENV{ProgramFiles}/MySQL/MySQL Server 8.0/include"
+    "$ENV{ProgramFiles}/MySQL/MySQL Server 5.7/include"
+    "$ENV{SystemDrive}/MySQL/MySQL Server 8.0/include"
+    "$ENV{SystemDrive}/MySQL/MySQL Server 5.7/include"
+    "c:/msys/local/include"
+    "$ENV{MYSQL_ROOT}/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.4;INSTALLDIR]/include/mysql"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.4 (x64);INSTALLDIR]/include/mysql"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.5;INSTALLDIR]/include/mysql"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.5 (x64);INSTALLDIR]/include/mysql"
+  DOC
+    "Specify the directory containing mysql.h."
+)
+
+if(UNIX)
+  foreach(LIB ${MYSQL_ADD_LIBRARIES})
     find_library(MYSQL_LIBRARY
       NAMES
-        mysqlclient
-        mysqlclient_r
-        mysql
-        libmysql
+        mysql libmysql ${LIB}
       PATHS
+        ${MYSQL_ADD_LIBRARIES_PATH}
+        /usr/lib
         /usr/lib/mysql
+        /usr/local/lib
         /usr/local/lib/mysql
         /usr/local/mysql/lib
-        /opt/local/lib/mysql*/mysql
-      )
-  endif(WIN32)
+      DOC "Specify the location of the mysql library here."
+    )
+  endforeach(LIB ${MYSQL_ADD_LIBRARY})
+endif(UNIX)
 
-  if(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
-    set(MYSQL_FOUND TRUE)
+if(WIN32)
+  find_library(MYSQL_LIBRARY
+    NAMES
+      libmysql libmariadb
+    PATHS
+      ${MYSQL_ADD_LIBRARIES_PATH}
+      "${PROGRAM_FILES_64}/MySQL/MySQL Server 8.0/lib"
+      "${PROGRAM_FILES_64}/MySQL/MySQL Server 5.7/lib"
+      "${PROGRAM_FILES_64}/MySQL/MySQL Server 8.0/lib/opt"
+      "${PROGRAM_FILES_64}/MySQL/MySQL Server 5.7/lib/opt"
+      "${PROGRAM_FILES_64}/MySQL/lib"
+      "${PROGRAM_FILES_32}/MySQL/MySQL Server 8.0/lib"
+      "${PROGRAM_FILES_32}/MySQL/MySQL Server 5.7/lib"
+      "${PROGRAM_FILES_32}/MySQL/MySQL Server 8.0/lib/opt"
+      "${PROGRAM_FILES_32}/MySQL/MySQL Server 5.7/lib/opt"
+      "${PROGRAM_FILES_32}/MySQL/lib"
+      "C:/MySQL/lib/debug"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.0;Location]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.7;Location]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 8.0;Location]/lib/opt"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.7;Location]/lib/opt"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 8.0;Location]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.7;Location]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 8.0;Location]/lib/opt"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.7;Location]/lib/opt"
+      "$ENV{ProgramFiles}/MySQL/MySQL Server 8.0/lib/opt"
+      "$ENV{ProgramFiles}/MySQL/MySQL Server 5.7/lib/opt"
+      "$ENV{SystemDrive}/MySQL/MySQL Server 8.0/lib/opt"
+      "$ENV{SystemDrive}/MySQL/MySQL Server 5.7/lib/opt"
+      "c:/msys/local/include"
+      "$ENV{MYSQL_ROOT}/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.4;INSTALLDIR]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.4 (x64);INSTALLDIR]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.5;INSTALLDIR]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.5 (x64);INSTALLDIR]/lib"
+    DOC "Specify the location of the mysql library here."
+  )
+endif(WIN32)
+
+# On Windows you typically don't need to include any extra libraries
+# to build MYSQL stuff.
+
+if(NOT WIN32)
+  find_library(MYSQL_EXTRA_LIBRARIES
+    NAMES
+      z zlib
+    PATHS
+      /usr/lib
+      /usr/local/lib
+    DOC
+      "if more libraries are necessary to link in a MySQL client (typically zlib), specify them here."
+  )
+else(NOT WIN32)
+  set(MYSQL_EXTRA_LIBRARIES "")
+endif(NOT WIN32)
+
+if(MYSQL_LIBRARY)
+  if(MYSQL_INCLUDE_DIR)
+    set(MYSQL_FOUND 1)
     message(STATUS "Found MySQL library: ${MYSQL_LIBRARY}")
     message(STATUS "Found MySQL headers: ${MYSQL_INCLUDE_DIR}")
-  else(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
-    set(MYSQL_FOUND FALSE)
-    message(FATAL_ERROR "Could not find ${PLATFORM}-bit MySQL headers or libraries! Please install the development libraries and headers.")
-  endif(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
+  else(MYSQL_INCLUDE_DIR)
+    message(FATAL_ERROR "Could not find MySQL headers! Please install the development libraries and headers")
+  endif(MYSQL_INCLUDE_DIR)
 
-  mark_as_advanced(MYSQL_INCLUDE_DIR MYSQL_LIBRARY)
-
-endif(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
+  mark_as_advanced(MYSQL_FOUND MYSQL_LIBRARY MYSQL_EXTRA_LIBRARIES MYSQL_INCLUDE_DIR)
+else(MYSQL_LIBRARY)
+  message(FATAL_ERROR "Could not find the MySQL libraries! Please install the development libraries and headers")
+endif(MYSQL_LIBRARY)

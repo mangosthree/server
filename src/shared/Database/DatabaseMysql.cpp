@@ -22,8 +22,6 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef DO_POSTGRESQL
-
 #include "Utilities/Util.h"
 #include "Policies/Singleton.h"
 #include "Platform/Define.h"
@@ -545,4 +543,3 @@ enum_field_types MySqlPreparedStatement::ToMySQLType(const SqlStmtFieldData& dat
 
     return dataType;
 }
-#endif

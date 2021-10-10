@@ -1,7 +1,7 @@
 name: Linux Build
 on:
   push:
-      branches: [ master, workflows ]
+      branches: [ master ]
   pull_request:
       branches: [ master ]
 

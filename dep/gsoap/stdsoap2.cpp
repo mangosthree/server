@@ -7444,7 +7444,7 @@ soap_done(struct soap* soap)
     if (soap->state == SOAP_INIT)
         if (soap->ctx)
             gsk_environment_close(&soap->ctx);
-#endif  
+#endif
 #ifdef WITH_C_LOCALE
     SOAP_FREELOCALE(soap);
 #endif

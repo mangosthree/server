@@ -58,7 +58,7 @@
     typedef int SOCKET;
     typedef struct sockaddr_in SOCKADDR_IN;
 
-#else 
+#else
 
     // Windows
     static std::string socketErrorCode(int code) {

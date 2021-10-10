@@ -1,9 +1,9 @@
 /**
  @file uint128.h
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
  @author Kyle Whitson
- 
+
  @created 2008-07-17
  @edited  2008-07-17
  */

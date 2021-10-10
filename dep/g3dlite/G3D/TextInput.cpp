@@ -1,10 +1,10 @@
 /**
  @file TextInput.cpp
-  
+
  @author Morgan McGuire, graphics3d.com
- 
- @cite Based on a lexer written by Aaron Orenstein. 
- 
+
+ @cite Based on a lexer written by Aaron Orenstein.
+
  @created 2001-11-27
  @edited  2010-07-03
  */
@@ -24,7 +24,7 @@ namespace G3D {
 
 Token TextInput::readSignificant() {
     Token t;
-    do { 
+    do {
         t = read();
     } while ((t.type() == Token::COMMENT) || (t.type() == Token::NEWLINE));
     return t;
@@ -49,15 +49,15 @@ double TextInput::parseNumber(const std::string& _string) {
     if (s == "-1.#ind00" || s == "nan") {
         return nan();
     }
-    
+
     if (s == "1.#inf00" || s == "inf" || s == "+inf") {
         return inf();
     }
-    
+
     if (s == "-1.#inf00" || s == "-inf") {
         return -inf();
     }
-    
+
     double n;
     if ((_string.length() > 2) &&
         (_string[0] == '0') &&
@@ -77,7 +77,7 @@ TextInput::Settings::Settings () :
     cppBlockComments(true),
     cppLineComments(true),
     otherLineComments(true),
-    escapeSequencesInStrings(true), 
+    escapeSequencesInStrings(true),
     otherCommentCharacter('\0'),
     otherCommentCharacter2('\0'),
     generateCommentTokens(false),
@@ -91,7 +91,7 @@ TextInput::Settings::Settings () :
     simpleFloatSpecials(true),
     proofSymbols(false),
     caseSensitive(true)
-{ 
+{
     trueSymbols.insert("true");
     falseSymbols.insert("false");
 }
@@ -158,7 +158,7 @@ std::string TextInput::readUntilNewlineAsString() {
         }
     } while (currentCharOffset < buffer.size());
 
-    return s;    
+    return s;
 }
 
 
@@ -300,12 +300,12 @@ Token TextInput::nextToken() {
             isLineComment = true;
             eatInputChar();
             eatInputChar();
-        } else if ( options.otherCommentCharacter && 
+        } else if ( options.otherCommentCharacter &&
                    (options.otherCommentCharacter != '\0' && c == options.otherCommentCharacter) ) {
             // set start of line comment and eat markers
             isLineComment = true;
             eatInputChar();
-        } else if ( options.otherCommentCharacter && 
+        } else if ( options.otherCommentCharacter &&
                    (options.otherCommentCharacter2 != '\0' && c == options.otherCommentCharacter2) ) {
             // set start of line comment and eat markers
             isLineComment = true;
@@ -386,10 +386,10 @@ Token TextInput::nextToken() {
 
     // Extended ASCII parses as itself, except for EOF
     if (c > 127 && c < 255) {
-        t._type = Token::SYMBOL;                                                
-        t._extendedType = Token::SYMBOL_TYPE;                                   
-        t._string = c;                                                          
-        c = eatAndPeekInputChar();                                              
+        t._type = Token::SYMBOL;
+        t._extendedType = Token::SYMBOL_TYPE;
+        t._string = c;
+        c = eatAndPeekInputChar();
     }
 
 
@@ -407,7 +407,7 @@ Token TextInput::nextToken() {
     switch (c) {
 
     case '@':                   // Simple symbols -> just themselves.
-    case '(': 
+    case '(':
     case ')':
     case ',':
     case ';':
@@ -442,7 +442,7 @@ Token TextInput::nextToken() {
                 goto numLabel;
             } else {
                 char terminal = peekInputChar(3);
-                if (options.simpleFloatSpecials && (c == 'i') && (peekInputChar(1) == 'n') && (peekInputChar(2) == 'f') && 
+                if (options.simpleFloatSpecials && (c == 'i') && (peekInputChar(1) == 'n') && (peekInputChar(2) == 'f') &&
                     ! isLetter(terminal) && (terminal != '_')) {
                     // negative infinity
                     t._type = Token::NUMBER;
@@ -479,7 +479,7 @@ Token TextInput::nextToken() {
                 goto numLabel;
             } else {
                 char terminal = peekInputChar(3);
-                if (options.simpleFloatSpecials && (c == 'i') && (peekInputChar(1) == 'n') && (peekInputChar(2) == 'f') && 
+                if (options.simpleFloatSpecials && (c == 'i') && (peekInputChar(1) == 'n') && (peekInputChar(2) == 'f') &&
                     ! isLetter(terminal) && (terminal != '_')) {
                     // positive infinity
                     t._type = Token::NUMBER;
@@ -497,14 +497,14 @@ Token TextInput::nextToken() {
 
     case ':':                   // : or :: or ::> or ::= or := or :>
         SETUP_SYMBOL(c);
-        
+
         if (c == ':') {
             t._string += c;
             eatInputChar();
 
             if (options.proofSymbols) {
                 c = peekInputChar(0);
-                
+
                 if ((c == '>') || (c == '=')) {
                     t._string += c;
                     eatInputChar();
@@ -537,7 +537,7 @@ Token TextInput::nextToken() {
     case '~':                   // ~ or ~=
     case '^':                   // ^ or ^=
         SETUP_SYMBOL(c);
-        
+
         if (c == '=') {
             t._string += c;
             eatInputChar();
@@ -577,7 +577,7 @@ Token TextInput::nextToken() {
             }
         }
         return t;
-            
+
     case '\\':                // backslash or escaped comment char.
         SETUP_SYMBOL(c);
 
@@ -585,7 +585,7 @@ Token TextInput::nextToken() {
              && c == options.otherCommentCharacter)
             || (options.otherCommentCharacter2 != '\0'
                 && c == options.otherCommentCharacter2)) {
-            
+
             // escaped comment character.  Return the raw comment
             // char (no backslash).
 
@@ -626,7 +626,7 @@ numLabel:
         // A number.  Note-- single dots have been
         // parsed already, so a . indicates a number
         // less than 1 in floating point form.
-    
+
         // [0-9]*(\.[0-9][f]) or [0-9]+ or 0x[0-9,A-F]+
 
         if (t._string != "-") {
@@ -640,7 +640,7 @@ numLabel:
         } else {
             t._extendedType = Token::INTEGER_TYPE;
         }
-        
+
         if ((c == '0') && (peekInputChar(1) == 'x')) {
             // Hex number
             t._string += "0x";
@@ -663,7 +663,7 @@ numLabel:
                 t._string += c;
                 c = eatAndPeekInputChar();
             }
-    
+
             // True if we are reading a floating-point special type
             bool isSpecial = false;
 
@@ -748,7 +748,7 @@ numLabel:
                 c = eatAndPeekInputChar();
                 if ((c == '-') || (c == '+')) {
                     t._string += c;
-                    c = eatAndPeekInputChar();                    
+                    c = eatAndPeekInputChar();
                 }
 
                 while (isDigit(c)) {
@@ -834,8 +834,8 @@ numLabel:
     }
 
     // Some unknown token
-    debugAssertM(false, 
-                 format("Unrecognized token type beginning with character '%c' (ASCII %d)", 
+    debugAssertM(false,
+                 format("Unrecognized token type beginning with character '%c' (ASCII %d)",
                         c, c));
     return t;
 }
@@ -892,12 +892,12 @@ void TextInput::parseQuotedString(unsigned char delimiter, Token& t) {
                     break;
                 }
 
-                if (((c == options.otherCommentCharacter) && 
+                if (((c == options.otherCommentCharacter) &&
                      (options.otherCommentCharacter != '\0')) ||
-                    ((c == options.otherCommentCharacter2) && 
+                    ((c == options.otherCommentCharacter2) &&
                      (options.otherCommentCharacter2 != '\0'))) {
                     t._string += c;
-                } 
+                }
                 // otherwise, some illegal escape sequence; skip it.
                 break;
 
@@ -927,7 +927,7 @@ bool TextInput::readBoolean() {
     // Logically, the number started there.
     push(t);
     throw WrongTokenType(options.sourceFileName, t.line(), t.character(),
-                         Token::BOOLEAN, t._type); 
+                         Token::BOOLEAN, t._type);
 }
 
 double TextInput::readNumber() {
@@ -941,7 +941,7 @@ double TextInput::readNumber() {
     // read a signed number, so we handle that case here.
     if (! options.signedNumbers
         && (t._type == Token::SYMBOL)
-        && ((t._string == "-") 
+        && ((t._string == "-")
              || (t._string == "+"))) {
 
         Token t2(read());
@@ -965,7 +965,7 @@ double TextInput::readNumber() {
     // Logically, the number started there.
     push(t);
     throw WrongTokenType(options.sourceFileName, t.line(), t.character(),
-                         Token::NUMBER, t._type); 
+                         Token::NUMBER, t._type);
 }
 
 
@@ -1055,7 +1055,7 @@ void TextInput::readNewline(const std::string& s) {
 
 Token TextInput::readSymbolToken() {
     Token t(read());
-    
+
     if (t._type == Token::SYMBOL) {               // fast path
         return t;
     }
@@ -1151,7 +1151,7 @@ TextInput::WrongTokenType::WrongTokenType(
     Token::Type         e,
     Token::Type         a) :
     TokenException(src, ln, ch), expected(e), actual(a) {
-         
+
     message += format("Expected token of type %s, found type %s.",
                       tokenTypeToString(e), tokenTypeToString(a));
 }
@@ -1170,7 +1170,7 @@ TextInput::WrongSymbol::WrongSymbol(
     int                 ln,
     int                 ch,
     const std::string&  e,
-    const std::string&  a) : 
+    const std::string&  a) :
     TokenException(src, ln, ch), expected(e), actual(a) {
 
     message += format("Expected symbol '%s', found symbol '%s'.",
@@ -1183,7 +1183,7 @@ TextInput::WrongString::WrongString(
     int                 ln,
     int                 ch,
     const std::string&  e,
-    const std::string&  a) : 
+    const std::string&  a) :
     TokenException(src, ln, ch), expected(e), actual(a) {
 
     message += format("Expected string '%s', found string '%s'.",

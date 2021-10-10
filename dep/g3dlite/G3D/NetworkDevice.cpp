@@ -60,7 +60,7 @@ static int selectOneReadSocket(const SOCKET& sock) {
 
     // Create a set that contains just this one socket
     fd_set socketSet;
-    FD_ZERO(&socketSet); 
+    FD_ZERO(&socketSet);
     FD_SET(sock, &socketSet);
 
     int ret = select(sock + 1, &socketSet, NULL, NULL, &timeout);
@@ -99,7 +99,7 @@ static int selectOneWriteSocket(const SOCKET& sock) {
 
     // Create a set that contains just this one socket
     fd_set socketSet;
-    FD_ZERO(&socketSet); 
+    FD_ZERO(&socketSet);
     FD_SET(sock, &socketSet);
 
     return select(sock + 1, NULL, &socketSet, NULL, &timeout);
@@ -137,7 +137,7 @@ NetworkDevice::~NetworkDevice() {
 }
 
 
-std::string NetworkDevice::localHostName() const {   
+std::string NetworkDevice::localHostName() const {
     char ac[128];
     if (gethostname(ac, sizeof(ac)) == -1) {
         Log::common()->printf("Error while getting local host name\n");
@@ -152,11 +152,11 @@ const char* errnoToString() {
     case EBADF:
         return "file descriptor is invalid.";
 
-    case EINVAL: 
+    case EINVAL:
         return "Request or argp is not valid.";
-        
+
     case ENOTTY:
-        return 
+        return
             "file descriptor is not associated with a character special device OR "
             "The specified request does not apply to the "
             "kind of object that the descriptor fildes references.";
@@ -190,30 +190,30 @@ void NetworkDevice::EthernetAdapter::describe(TextOutput& t) const {
     t.writeSymbol("{");
     t.pushIndent();
     t.writeNewline();
-    
+
     t.writeSymbols("hostname", "=");
     t.writeString(hostname);
     t.writeNewline();
 
     t.writeSymbols("name", "=");
     t.writeString(name);
-    t.writeNewline();    
+    t.writeNewline();
 
     t.writeSymbols("ip", "=");
     t.writeSymbol(formatIP(ip));
-    t.writeNewline();    
+    t.writeNewline();
 
     t.writeSymbols("subnet", "=");
     t.writeSymbol(formatIP(subnet));
-    t.writeNewline();    
+    t.writeNewline();
 
     t.writeSymbols("broadcast", "=");
     t.writeSymbol(formatIP(broadcast));
-    t.writeNewline();    
+    t.writeNewline();
 
     t.writeSymbols("mac", "=");
     t.writeSymbol(formatMAC(mac));
-    t.writeNewline();    
+    t.writeNewline();
 
     t.popIndent();
     t.writeSymbol("}");
@@ -250,9 +250,9 @@ bool NetworkDevice::init() {
 
     logPrintf("Network Startup");
     logPrintf("Starting WinSock networking.\n");
-    WSADATA wsda;            
+    WSADATA wsda;
     WSAStartup(MAKEWORD(G3D_WINSOCK_MAJOR_VERSION, G3D_WINSOCK_MINOR_VERSION), &wsda);
-        
+
     std::string hostname = "localhost";
     {
         char ac[128];
@@ -262,7 +262,7 @@ bool NetworkDevice::init() {
             hostname = gethostbyname(ac)->h_name;
         }
     }
-    
+
     EthernetAdapter a;
     a.hostname = hostname;
     a.name = "";
@@ -270,14 +270,14 @@ bool NetworkDevice::init() {
 
     // TODO: Find subnet on Win32
     a.subnet = 0x0000FFFF;
-    
+
     // TODO: Find broadcast on Win32
     a.broadcast = 0xFFFFFFFF;
 
     // TODO: find MAC on Win32
-    
+
     addAdapter(a);
-    
+
     std::string machine = localHostName();
     std::string addr    = NetAddress(machine, 0).ipString();
     logPrintf(
@@ -293,11 +293,11 @@ bool NetworkDevice::init() {
               wsda.wHighVersion,
               wsda.iMaxSockets,
               wsda.iMaxUdpDg);
-    
+
     // TODO: WSAIoctl for subnet and broadcast addresses
     // http://msdn.microsoft.com/en-us/library/ms741621(VS.85).aspx
-    // 
-    // TODO: SIO_GET_INTERFACE_LIST 
+    //
+    // TODO: SIO_GET_INTERFACE_LIST
 
     initialized = true;
 
@@ -354,7 +354,7 @@ bool NetworkDevice::init() {
         EthernetAdapter a;
         a.name = "fallback";
         a.hostname = "localhost";
-        a.ip = (127 << 24) | 1;       
+        a.ip = (127 << 24) | 1;
         a.broadcast = 0xFFFFFFFF;
         a.subnet    = 0x000000FF;
         addAdapter(a);
@@ -363,7 +363,7 @@ bool NetworkDevice::init() {
 
         while (current != NULL) {
 
-            bool up = (current->ifa_flags & IFF_UP); 
+            bool up = (current->ifa_flags & IFF_UP);
             bool loopback = (current->ifa_flags & IFF_LOOPBACK);
 
             if (! up || loopback) {
@@ -388,7 +388,7 @@ bool NetworkDevice::init() {
             uint32 ip = getIP(interfaceAddress);
             uint32 ba = getIP(broadcastAddress);
             uint32 sn = getIP(subnetMask);
-            
+
             if (ip != 0) {
                 adapter.ip = ip;
             }
@@ -408,27 +408,27 @@ bool NetworkDevice::init() {
                 {
                     // Linux
                     struct ifreq ifr;
-                    
+
                     int fd = socket(AF_INET, SOCK_DGRAM, 0);
-                    
+
                     ifr.ifr_addr.sa_family = AF_INET;
                     strcpy(ifr.ifr_name, current->ifa_name);
                     ioctl(fd, SIOCGIFHWADDR, &ifr);
                     close(fd);
-                    
+
                     MAC = reinterpret_cast<uint8_t*>(ifr.ifr_hwaddr.sa_data);
                 }
 #               else
                 {
                     // The MAC address and the interfaceAddress come in as
                     // different interfaces with the same name.
-                    
+
                     // Posix/FreeBSD/Mac OS
                     sockaddr_dl* sdl = (struct sockaddr_dl *)current->ifa_addr;
                     MAC = reinterpret_cast<uint8_t*>(LLADDR(sdl));
                 }
 #               endif
-                
+
                 // See if there was a MAC address
                 if (MAC != NULL) {
                     bool anyNonZero = false;
@@ -440,7 +440,7 @@ bool NetworkDevice::init() {
                     }
                 }
             }
-     
+
             current = current->ifa_next;
         }
 
@@ -451,7 +451,7 @@ bool NetworkDevice::init() {
     // Extract all interesting adapters from the table
     for (AdapterTable::Iterator it = table.begin(); it.hasMore(); ++it) {
         const EthernetAdapter& adapter = it->value;
-        
+
         // Only add adapters that have IP addresses
         if (adapter.ip != 0) {
             addAdapter(adapter);
@@ -479,9 +479,9 @@ void NetworkDevice::_cleanup() {
 }
 
 bool NetworkDevice::bind(SOCKET sock, const NetAddress& addr) const {
-    Log::common()->printf("Binding socket %d on port %d ", 
+    Log::common()->printf("Binding socket %d on port %d ",
                      sock, htons(addr.addr.sin_port));
-    if (::bind(sock, (struct sockaddr*)&(addr.addr), sizeof(addr.addr)) == 
+    if (::bind(sock, (struct sockaddr*)&(addr.addr), sizeof(addr.addr)) ==
         SOCKET_ERROR) {
 
         Log::common()->println("FAIL");
@@ -529,7 +529,7 @@ void NetworkDevice::localHostAddresses(Array<NetAddress>& array) const {
         struct in_addr addr;
         memcpy(&addr, phe->h_addr_list[i], sizeof(struct in_addr));
         array.append(NetAddress(addr));
-    }    
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -587,14 +587,14 @@ static void increaseBufferSize(SOCKET sock) {
     // overflow when the network latency is high.
     {
         uint32 val = 1024 * 1024 * 2;
-        if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF, 
+        if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF,
                        (char*)&val, sizeof(val)) == SOCKET_ERROR) {
             Log::common()->printf("WARNING: Increasing socket "
                                  "receive buffer to %d failed.\n", val);
             Log::common()->println(socketErrorCode());
         }
 
-        if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, 
+        if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF,
                        (char*)&val, sizeof(val)) == SOCKET_ERROR) {
             Log::common()->printf("WARNING: Increasing socket "
                                  "send buffer to %d failed.\n", val);
@@ -615,13 +615,13 @@ ReliableConduit::ReliableConduit(
     receiveBufferTotalSize(0), receiveBufferUsedSize(0) {
 
     NetworkDevice* nd = NetworkDevice::instance();
-    
+
     messageType         = 0;
 
     addr = _addr;
     Log::common()->print("Creating a TCP socket       ");
     sock = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
-    
+
     if (sock == SOCKET_ERROR) {
         Log::common()->println("FAIL");
         Log::common()->println(socketErrorCode());
@@ -635,9 +635,9 @@ ReliableConduit::ReliableConduit(
 
     // Disable Nagle's algorithm (we send lots of small packets)
     const int T = true;
-    if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, 
+    if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
                    (const char*)&T, sizeof(T)) == SOCKET_ERROR) {
-        
+
         Log::common()->println("WARNING: Disabling Nagel's "
                               "algorithm failed.");
         Log::common()->println(socketErrorCode());
@@ -650,9 +650,9 @@ ReliableConduit::ReliableConduit(
     struct linger ling;
     ling.l_onoff  = 0;
     ling.l_linger = 0;
-    if (setsockopt(sock, SOL_SOCKET, SO_LINGER, 
+    if (setsockopt(sock, SOL_SOCKET, SO_LINGER,
                    (const char*)&ling, sizeof(ling)) == SOCKET_ERROR) {
-        
+
         Log::common()->println("WARNING: Setting socket no linger failed.");
         Log::common()->println(socketErrorCode());
     } else {
@@ -661,9 +661,9 @@ ReliableConduit::ReliableConduit(
 
     // Set reuse address so that a new server can start up soon after
     // an old one has closed.
-    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, 
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
                    (const char*)&T, sizeof(T)) == SOCKET_ERROR) {
-        
+
         Log::common()->println("WARNING: Setting socket reuseaddr failed.");
         Log::common()->println(socketErrorCode());
     } else {
@@ -704,11 +704,11 @@ ReliableConduit::ReliableConduit(
 
 
 ReliableConduit::ReliableConduit(
-    const SOCKET&      _sock, 
-    const NetAddress&  _addr) : 
-    state(NO_MESSAGE), 
-    receiveBuffer(NULL), 
-    receiveBufferTotalSize(0), 
+    const SOCKET&      _sock,
+    const NetAddress&  _addr) :
+    state(NO_MESSAGE),
+    receiveBuffer(NULL),
+    receiveBufferTotalSize(0),
     receiveBufferUsedSize(0) {
     sock                = _sock;
     addr                = _addr;
@@ -719,9 +719,9 @@ ReliableConduit::ReliableConduit(
 
     // Disable Nagle's algorithm (we send lots of small packets)
     const int T = true;
-    if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, 
+    if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
                    (const char*)&T, sizeof(T)) == SOCKET_ERROR) {
-        
+
         Log::common()->println("WARNING: Disabling Nagel's algorithm failed.");
         Log::common()->println(socketErrorCode());
     } else {
@@ -733,9 +733,9 @@ ReliableConduit::ReliableConduit(
     struct linger ling;
     ling.l_onoff  = 0;
     ling.l_linger = 0;
-    if (setsockopt(sock, SOL_SOCKET, SO_LINGER, 
+    if (setsockopt(sock, SOL_SOCKET, SO_LINGER,
                    (const char*)&ling, sizeof(ling)) == SOCKET_ERROR) {
-        
+
         Log::common()->println("WARNING: Setting socket no linger failed.");
         Log::common()->println(socketErrorCode());
     } else {
@@ -744,9 +744,9 @@ ReliableConduit::ReliableConduit(
 
     // Set reuse address so that a new server can start up soon after
     // an old one has closed.
-    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, 
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
                    (const char*)&T, sizeof(T)) == SOCKET_ERROR) {
-        
+
         Log::common()->println("WARNING: Setting socket reuseaddr failed.");
         Log::common()->println(socketErrorCode());
     } else {
@@ -781,9 +781,9 @@ bool ReliableConduit::messageWaiting() {
         }
         // We're currently receiving the message.  Read a little more.
         receiveIntoBuffer();
-     
+
         if (messageSize == receiveBufferUsedSize) {
-            // We've read the whole mesage.  Switch to holding state 
+            // We've read the whole mesage.  Switch to holding state
             // and return true.
             state = HOLDING;
             return true;
@@ -801,9 +801,9 @@ bool ReliableConduit::messageWaiting() {
 
             state = RECEIVING;
             receiveHeader();
-            
+
             // Loop back around now that we're in the receive state; we
-            // may be able to read the whole message before returning 
+            // may be able to read the whole message before returning
             // to the caller.
             return messageWaiting();
         } else {
@@ -830,7 +830,7 @@ uint32 ReliableConduit::waitingMessageType() {
 void ReliableConduit::sendBuffer(const BinaryOutput& b) {
     NetworkDevice* nd = NetworkDevice::instance();
     int ret = ::send(sock, (const char*)b.getCArray(), b.size(), 0);
-    
+
     if (ret == SOCKET_ERROR) {
         Log::common()->println("Error occured while sending message.");
         Log::common()->println(socketErrorCode());
@@ -886,7 +886,7 @@ void ReliableConduit::receiveHeader() {
 
     if ((ret == SOCKET_ERROR) || (ret != sizeof(messageType))) {
         Log::common()->printf("Call to recv failed.  ret = %d,"
-                             " sizeof(messageType) = %d\n", 
+                             " sizeof(messageType) = %d\n",
                              (int)ret, (int)sizeof(messageType));
         Log::common()->println(socketErrorCode());
         nd->closesocket(sock);
@@ -984,19 +984,19 @@ LightweightConduitRef LightweightConduit::create(
     uint16                      receivePort,
     bool                        enableReceive,
     bool                        enableBroadcast) {
-    
+
     return new LightweightConduit(receivePort, enableReceive, enableBroadcast);
 }
 
 LightweightConduit::LightweightConduit(
     uint16 port,
-    bool enableReceive, 
+    bool enableReceive,
     bool enableBroadcast) {
     NetworkDevice* nd = NetworkDevice::instance();
 
     Log::common()->print("Creating a UDP socket        ");
     sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    
+
     if (sock == SOCKET_ERROR) {
         sock = 0;
         Log::common()->println("FAIL");
@@ -1021,7 +1021,7 @@ LightweightConduit::LightweightConduit(
 
     if (enableBroadcast) {
         int TR = true;
-        if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, 
+        if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST,
                        (const char*)&TR, sizeof(TR)) != 0) {
             Log::common()->println("Call to setsockopt failed");
             Log::common()->println(socketErrorCode());
@@ -1087,7 +1087,7 @@ uint32 LightweightConduit::waitingMessageType() {
     NetworkDevice* nd = NetworkDevice::instance();
     if (! messageWaiting()) {
         return 0;
-    } 
+    }
 
     if (! alreadyReadMessage) {
         messageBuffer.resize(8192);
@@ -1095,8 +1095,8 @@ uint32 LightweightConduit::waitingMessageType() {
         SOCKADDR_IN remote_addr;
         int iRemoteAddrLen = sizeof(sockaddr);
 
-        int ret = recvfrom(sock, (char*)messageBuffer.getCArray(), 
-            messageBuffer.size(), 0, (struct sockaddr *) &remote_addr, 
+        int ret = recvfrom(sock, (char*)messageBuffer.getCArray(),
+            messageBuffer.size(), 0, (struct sockaddr *) &remote_addr,
             (socklen_t*)&iRemoteAddrLen);
 
         if (ret == SOCKET_ERROR) {
@@ -1147,7 +1147,7 @@ NetListener::NetListener(uint16 port) {
     // Start the listener socket
     Log::common()->print("Creating a listener            ");
     sock = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
-    
+
     if (sock == SOCKET_ERROR) {
         Log::common()->printf("FAIL");
         Log::common()->println(socketErrorCode());
@@ -1159,16 +1159,16 @@ NetListener::NetListener(uint16 port) {
 
     // Set reuse address so that a new server can start up soon after
     // an old one has closed.
-    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, 
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
                    (const char*)&T, sizeof(T)) == SOCKET_ERROR) {
-        
+
         Log::common()->println("WARNING: Setting socket reuseaddr failed.");
         Log::common()->println(socketErrorCode());
     } else {
         Log::common()->println("Set socket option reuseaddr.");
     }
 
-    
+
     if (! nd->bind(sock, NetAddress(0, port))) {
         Log::common()->printf("Unable to bind!\n");
         nd->closesocket(sock);
@@ -1208,7 +1208,7 @@ ReliableConduitRef NetListener::waitForConnection() {
 
     Log::common()->println("Blocking in NetListener::waitForConnection().");
 
-    SOCKET sClient = accept(sock, (struct sockaddr*) &remote_addr, 
+    SOCKET sClient = accept(sock, (struct sockaddr*) &remote_addr,
                             (socklen_t*)&iAddrLen);
 
     if (sClient == SOCKET_ERROR) {
@@ -1218,16 +1218,16 @@ ReliableConduitRef NetListener::waitForConnection() {
         return NULL;
     }
 
-    Log::common()->printf("%s connected, transferred to socket %d.\n", 
+    Log::common()->printf("%s connected, transferred to socket %d.\n",
                          inet_ntoa(remote_addr.sin_addr), sClient);
 
     #ifndef G3D_WIN32
-        return new ReliableConduit(sClient, 
-                     NetAddress(htonl(remote_addr.sin_addr.s_addr), 
+        return new ReliableConduit(sClient,
+                     NetAddress(htonl(remote_addr.sin_addr.s_addr),
                                 ntohs(remote_addr.sin_port)));
     #else
-        return new ReliableConduit(sClient, 
-                    NetAddress(ntohl(remote_addr.sin_addr.S_un.S_addr), 
+        return new ReliableConduit(sClient,
+                    NetAddress(ntohl(remote_addr.sin_addr.S_un.S_addr),
                                ntohs(remote_addr.sin_port)));
     #endif
 }
@@ -1250,7 +1250,7 @@ void NetworkDevice::describeSystem(
     t.writeSymbols("Network", "{");
     t.writeNewline();
     t.pushIndent();
-    
+
     for (int i = 0; i < m_adapterArray.size(); ++i) {
         m_adapterArray[i].describe(t);
     }

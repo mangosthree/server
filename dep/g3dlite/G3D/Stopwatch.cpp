@@ -1,8 +1,8 @@
 /**
  @file Stopwatch.cpp
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-  
+
  @created 2005-10-05
  @edited  2009-03-14
 
@@ -15,9 +15,9 @@
 
 namespace G3D {
 
-Stopwatch::Stopwatch(const std::string& myName) : 
-    myName(myName), 
-    inBetween(false), lastTockTime(-1), 
+Stopwatch::Stopwatch(const std::string& myName) :
+    myName(myName),
+    inBetween(false), lastTockTime(-1),
     lastDuration(0), lastCycleCount(0), m_fps(0), emwaFPS(0),
     m_smoothFPS(0), emwaDuration(0) {
     computeOverhead();
@@ -76,8 +76,8 @@ void Stopwatch::tock() {
         }
 
         // Update m_smoothFPS only when the value varies significantly.
-        // We round so as to not mislead the user as to the accuracy of 
-        // the number.        
+        // We round so as to not mislead the user as to the accuracy of
+        // the number.
         if (m_smoothFPS == 0) {
             m_smoothFPS = m_fps;
         } else if (emwaFPS <= 20) {
@@ -88,7 +88,7 @@ void Stopwatch::tock() {
         } else if (::fabs(m_smoothFPS - emwaFPS) > 1.25) {
             // Large number and display is off by more than 1.25; round to the nearest 1.0
             m_smoothFPS = floor(emwaFPS + 0.5);
-        }        
+        }
     }
     lastTockTime = now;
 

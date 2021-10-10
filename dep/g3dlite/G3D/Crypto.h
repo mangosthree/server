@@ -1,8 +1,8 @@
-/** 
+/**
   @file Crypto.h
- 
+
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
 
   @created 2006-03-29
   @edited  2006-04-06

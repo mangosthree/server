@@ -83,7 +83,7 @@ std::ostream& operator<<(std::ostream& os, const NetAddress&);
 } // namespace G3D
 
 template <> struct HashTrait<G3D::NetAddress> {
-    static size_t hashCode(const G3D::NetAddress& key) { 
+    static size_t hashCode(const G3D::NetAddress& key) {
         return static_cast<size_t>(key.ip() + (static_cast<G3D::uint32>(key.port()) << 16));
     }
 };

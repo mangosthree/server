@@ -1,12 +1,12 @@
 /**
  @file Color4.h
- 
+
  Color class
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
  @cite Portions based on Dave Eberly's Magic Software Library
       at <A HREF="http://www.magic-software.com">http://www.magic-software.com</A>
- 
+
  @created 2002-06-25
  @edited  2009-11-15
 
@@ -40,13 +40,13 @@ private:
 
 public:
 
-    /** \param any Must be in one of the following forms: 
+    /** \param any Must be in one of the following forms:
         - Color4(#, #, #, #)
         - Color4::fromARGB(#)
         - Color4{r = #, g = #, b = #, a = #)
         */
     Color4(const Any& any);
-    
+
     /** Converts the Color4 to an Any. */
     operator Any() const;
 
@@ -66,7 +66,7 @@ public:
     Color4(float r, float g, float b, float a = 1.0);
 
     static const Color4& one();
- 
+
     Color4(float value[4]);
 
     /**
@@ -118,7 +118,7 @@ public:
     Color4 operator- (const Color4& rkVector) const;
     Color4 operator* (float fScalar) const;
     Color4 operator* (const Color4& k) const {
-        return Color4(r*k.r, g*k.g, b*k.b, a * k.a); 
+        return Color4(r*k.r, g*k.g, b*k.b, a * k.a);
     }
 
     Color4& operator*= (const Color4& c) {
@@ -158,7 +158,7 @@ public:
     }
 
     inline Color4 lerp(const Color4& other, float a) const {
-        return (*this) + (other - *this) * a; 
+        return (*this) + (other - *this) * a;
 
     }
 

@@ -1,8 +1,8 @@
 /**
  @file PrecomputedRandom.h
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @created 2009-03-31
  @edited  2009-03-31
 
@@ -17,12 +17,12 @@
 
 namespace G3D {
 
-/** Fast random numbers using a precomputed data table. 
+/** Fast random numbers using a precomputed data table.
 
     e.g., generates cosHemi about 13x faster than Random.
-    This is useful for quickly generating seeded random 
+    This is useful for quickly generating seeded random
     numbers for reproducibility.  G3D::Random takes a long
-    time to seed; this is instantaneous (providing the 
+    time to seed; this is instantaneous (providing the
     precomputed data is already available.)
 
     Not threadsafe.*/
@@ -76,7 +76,7 @@ public:
 
     ~PrecomputedRandom();
 
-    /** Each bit is random.  Subclasses can choose to override just 
+    /** Each bit is random.  Subclasses can choose to override just
        this method and the other methods will all work automatically. */
     virtual uint32 bits();
 
@@ -90,7 +90,7 @@ public:
 
     // gaussian is inherited
 
-    /** Returns 3D unit vectors distributed according to 
+    /** Returns 3D unit vectors distributed according to
         a cosine distribution about the z axis. */
     virtual void cosHemi(float& x, float& y, float& z);
 

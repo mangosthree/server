@@ -27,11 +27,11 @@ void GImage::encodePPMASCII(
     case 1:
         {
             ppm.printf("P2\n%d %d\n255\n", m_width, m_height);
-            
+
             const Color1uint8* c = this->pixel1();
             // Insert newlines every 70 characters max
             for (uint32 i = 0; i < (uint32)(m_width * m_height); ++i) {
-                ppm.printf("%d%c", c[i].value, (i % (70/4) == 0) ? '\n' : ' '); 
+                ppm.printf("%d%c", c[i].value, (i % (70/4) == 0) ? '\n' : ' ');
             }
         }
         break;
@@ -39,13 +39,13 @@ void GImage::encodePPMASCII(
     case 3:
         {
             ppm.printf("P3\n%d %d\n255\n", m_width, m_height);
-            
+
             const Color3uint8* c = this->pixel3();
             // Insert newlines every 70 characters max
             for (uint32 i = 0; i < (uint32)(m_width * m_height); ++i) {
-                ppm.printf("%d %d %d%c", c[i].r, c[i].g, c[i].b, 
+                ppm.printf("%d %d %d%c", c[i].r, c[i].g, c[i].b,
                     (i % (70/12) == 0) ?
-                    '\n' : ' '); 
+                    '\n' : ' ');
             }
         }
         break;
@@ -85,7 +85,7 @@ void GImage::decodePPMASCII(
     double maxColor;
 
     // Create a TextInput object to parse ascii format
-    // Mixed binary/ascii formats will require more 
+    // Mixed binary/ascii formats will require more
 
     const std::string inputStr = input.readString();
 

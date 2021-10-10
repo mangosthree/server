@@ -1,9 +1,9 @@
 /**
  \file XML.h
-  
+
  \author Morgan McGuire
  \maintainer Morgan McGuire
-  
+
  \created 2010-02-11
  \edited  2010-02-24
 
@@ -50,7 +50,7 @@ void XML::save(const std::string& filename) const {
     writeWholeFile(filename, s);
 }
 
-    
+
 void XML::unparse(std::string &s) const {
     TextOutput::Settings set;
     set.wordWrap = TextOutput::Settings::WRAP_WITHOUT_BREAKING;
@@ -132,12 +132,12 @@ void XML::deserialize(TextInput& t) {
 
     if ((n.type() == Token::SYMBOL) && (n.string() == "<")) {
         // Beginning a tag
-        
+
         // Read name
         n = t.read();
         debugAssert(n.type() == Token::SYMBOL);
-        bool isComment = 
-            (n.string() == "!") && 
+        bool isComment =
+            (n.string() == "!") &&
             (t.peek().type() == Token::SYMBOL) &&
             (t.peek().string() == "--");
 
@@ -168,7 +168,7 @@ void XML::deserialize(TextInput& t) {
             m_name += ":" + t.readSymbol();
             n = t.read();
         }
-        
+
         // Read end of tag/close
         bool done = false;
         while (! done) {
@@ -187,7 +187,7 @@ void XML::deserialize(TextInput& t) {
 
                 // Read close tag (we wouldn't be here unless it parses correctly)
                 while (t.hasMore() && ! (t.readSymbol() == ">")) {}
-                
+
                 done = true;
             } else {
                 // Attribute pair

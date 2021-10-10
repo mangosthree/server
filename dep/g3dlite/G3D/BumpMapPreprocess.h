@@ -18,7 +18,7 @@
 namespace G3D {
 class Any;
 
-/** 
+/**
 Not in the BumpMap class to avoid a circular dependency between Texture and BumpMap.
 G3D::GImage::computeNormalMap().
 */
@@ -38,7 +38,7 @@ public:
      */
     float           zExtentPixels;
 
-    /** After computing normals, scale the height by |N.z|, a trick that reduces texture swim in steep areas for parallax offset 
+    /** After computing normals, scale the height by |N.z|, a trick that reduces texture swim in steep areas for parallax offset
       mapping. Defaults to false.*/
     bool            scaleZByNz;
 
@@ -49,7 +49,7 @@ public:
     operator Any() const;
 
     bool operator==(const BumpMapPreprocess& other) const {
-        return 
+        return
             (lowPassFilter == other.lowPassFilter) &&
             (zExtentPixels == other.zExtentPixels) &&
             (scaleZByNz == other.scaleZByNz);

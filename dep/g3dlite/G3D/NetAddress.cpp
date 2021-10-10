@@ -70,7 +70,7 @@ void NetAddress::init(
     uint16                      port) {
 
     uint32 addr;
-    
+
     if (hostname == "") {
         addr = INADDR_NONE;
     } else {

@@ -36,11 +36,11 @@ void GImage::encodeBMP(
 
     // First write the BITMAPFILEHEADER
     //
-    //  WORD    bfType; 
-    //  DWORD   bfSize; 
-    //  WORD    bfReserved1; 
-    //  WORD    bfReserved2; 
-    //  DWORD   bfOffBits; 
+    //  WORD    bfType;
+    //  DWORD   bfSize;
+    //  WORD    bfReserved1;
+    //  WORD    bfReserved2;
+    //  DWORD   bfOffBits;
 
     // Type
     out.writeUInt8('B');
@@ -59,21 +59,21 @@ void GImage::encodeBMP(
 
     // Now the BITMAPINFOHEADER
     //
-    //  DWORD  biSize; 
-    //  LONG   biWidth; 
-    //  LONG   biHeight; 
-    //  WORD   biPlanes; 
-    //  WORD   biBitCount 
-    //  DWORD  biCompression; 
-    //  DWORD  biSizeImage; 
-    //  LONG   biXPelsPerMeter; 
-    //  LONG   biYPelsPerMeter; 
-    //  DWORD  biClrUsed; 
-    //  DWORD  biClrImportant; 
+    //  DWORD  biSize;
+    //  LONG   biWidth;
+    //  LONG   biHeight;
+    //  WORD   biPlanes;
+    //  WORD   biBitCount
+    //  DWORD  biCompression;
+    //  DWORD  biSizeImage;
+    //  LONG   biXPelsPerMeter;
+    //  LONG   biYPelsPerMeter;
+    //  DWORD  biClrUsed;
+    //  DWORD  biClrImportant;
 
     // Size of the info header
     out.writeUInt32(infoHeaderSize);
- 
+
     // Width and height of the image
     out.writeUInt32(m_width);
     out.writeUInt32(m_height);
@@ -94,11 +94,11 @@ void GImage::encodeBMP(
     out.writeUInt32(0);
 
     // biClrUsed
-    out.writeUInt32(0); 
+    out.writeUInt32(0);
 
     // biClrImportant
-    out.writeUInt32(0); 
-    
+    out.writeUInt32(0);
+
     BMScanWidth = m_width * 3;
 
     if (BMScanWidth & 3) {
@@ -282,11 +282,11 @@ void GImage::decodeBMP(
                 for (int i = 7; i >= 0; --i) {
                     if (currPixel < m_width) {
                         int src  = 3 * ((BMGroup & pow2[i]) >> i);
-                    
+
                         m_byte[dest]     = palette[src];
                         m_byte[dest + 1] = palette[src + 1];
                         m_byte[dest + 2] = palette[src + 2];
-                    
+
                         ++currPixel;
                         dest += 3;
                     }
@@ -326,7 +326,7 @@ void GImage::decodeBMP(
                 for (int i = 0; i < 2; ++i) {
                     if (currPixel < m_width) {
                         int tsrc  = src[i];
-                    
+
                         m_byte[dest]     = palette[tsrc];
                         m_byte[dest + 1] = palette[tsrc + 1];
                         m_byte[dest + 2] = palette[tsrc + 2];
@@ -339,7 +339,7 @@ void GImage::decodeBMP(
         }
 
     } else if (bitCount == 8) {
-        
+
         flags = PICTURE_BITMAP | PICTURE_UNCOMPRESSED | PICTURE_8BIT;
 
         // For bitmaps, each scanline is dword-aligned.
@@ -359,11 +359,11 @@ void GImage::decodeBMP(
                 if (currPixel < m_width) {
                     dest = 3 * ((h * m_width) + currPixel);
                     int src  = 3 * BMPixel8;
-                    
+
                     m_byte[dest]     = palette[src];
                     m_byte[dest + 1] = palette[src + 1];
                     m_byte[dest + 2] = palette[src + 2];
-                    
+
                     ++currPixel;
                 }
             }
@@ -373,7 +373,7 @@ void GImage::decodeBMP(
 
         m_memMan->free(m_byte);
         m_byte = NULL;
-        System::free(palette); 
+        System::free(palette);
         palette = NULL;
         throw Error("16-bit bitmaps not supported", input.getFilename());
 
@@ -415,10 +415,10 @@ void GImage::decodeBMP(
 
         m_memMan->free(m_byte);
         m_byte = NULL;
-        System::free(palette); 
+        System::free(palette);
         palette = NULL;
         throw Error("32 bit bitmaps not supported", input.getFilename());
-    
+
     } else {
         // We support all possible bit depths, so if the
         //     code gets here, it's not even a real bitmap.
@@ -427,7 +427,7 @@ void GImage::decodeBMP(
         throw Error("Not a bitmap!", input.getFilename());
     }
 
-    System::free(palette); 
+    System::free(palette);
     palette = NULL;
 }
 
@@ -453,7 +453,7 @@ void GImage::decodeICO(
     int maxWidth = 0, maxHeight = 0;
     int maxHeaderNum = 0;
     for (int currentHeader = 0; currentHeader < count; ++currentHeader) {
-        
+
         const uint8* curHeaderBuffer = headerBuffer + (currentHeader * 16);
         int tmpWidth = curHeaderBuffer[0];
         int tmpHeight = curHeaderBuffer[1];
@@ -470,26 +470,26 @@ void GImage::decodeICO(
     m_width = input.readUInt8();
     m_height = input.readUInt8();
     int numColors = input.readUInt8();
-    
+
     m_byte = (uint8*)m_memMan->alloc(m_width * m_height * m_channels);
     debugAssert(m_byte);
 
     // Bit mask for packed bits
     int mask = 0;
-    
+
     int bitsPerPixel = 8;
-    
+
     switch (numColors) {
     case 2:
         mask      = 0x01;
         bitsPerPixel = 1;
         break;
-        
+
     case 16:
         mask      = 0x0F;
         bitsPerPixel = 4;
         break;
-        
+
     case 0:
         numColors = 256;
         mask      = 0xFF;
@@ -503,15 +503,15 @@ void GImage::decodeICO(
     input.skip(5);
     // Skip 'size' unused
     input.skip(4);
-    
+
     int offset = input.readUInt32();
-    
+
     // Skip over any other icon descriptions
     input.setPosition(offset);
-    
+
     // Skip over bitmap header; it is redundant
     input.skip(40);
-    
+
     Array<Color4uint8> palette;
     palette.resize(numColors, true);
     for (int c = 0; c < numColors; ++c) {
@@ -523,13 +523,13 @@ void GImage::decodeICO(
 
     // The actual image and mask follow
 
-    // The XOR Bitmap is stored as 1-bit, 4-bit or 8-bit uncompressed Bitmap 
-    // using the same encoding as BMP files. The AND Bitmap is stored in as 
+    // The XOR Bitmap is stored as 1-bit, 4-bit or 8-bit uncompressed Bitmap
+    // using the same encoding as BMP files. The AND Bitmap is stored in as
     // 1-bit uncompressed Bitmap.
-    // 
-    // Pixels are stored bottom-up, left-to-right. Pixel lines are padded 
-    // with zeros to end on a 32bit (4byte) boundary. Every line will have the 
-    // same number of bytes. Color indices are zero based, meaning a pixel color 
+    //
+    // Pixels are stored bottom-up, left-to-right. Pixel lines are padded
+    // with zeros to end on a 32bit (4byte) boundary. Every line will have the
+    // same number of bytes. Color indices are zero based, meaning a pixel color
     // of 0 represents the first color table entry, a pixel color of 255 (if there
     // are that many) represents the 256th entry.
 /*
@@ -605,11 +605,11 @@ void GImage::decodeICO(
                 for (int i = 7; i >= 0; --i) {
                     if (currPixel < m_width) {
                         int src  = ((BMGroup & pow2[i]) >> i);
-                    
+
                         m_byte[dest]     = palette[src].r;
                         m_byte[dest + 1] = palette[src].g;
                         m_byte[dest + 2] = palette[src].b;
-                    
+
                         ++currPixel;
                         dest += 4;
                     }
@@ -647,7 +647,7 @@ void GImage::decodeICO(
                 for (int i = 0; i < 2; ++i) {
                     if (currPixel < m_width) {
                         int tsrc  = src[i];
-                    
+
                         m_byte[dest]     = palette[tsrc].r;
                         m_byte[dest + 1] = palette[tsrc].g;
                         m_byte[dest + 2] = palette[tsrc].b;
@@ -660,7 +660,7 @@ void GImage::decodeICO(
         }
 
     } else if (bitsPerPixel == 8) {
-        
+
         // For bitmaps, each scanline is dword-aligned.
         BMScanWidth = m_width;
         if (BMScanWidth & 3) {
@@ -678,11 +678,11 @@ void GImage::decodeICO(
                 if (currPixel < m_width) {
                     dest = 4 * ((h * m_width) + currPixel);
                     int src  = BMPixel8;
-                    
+
                     m_byte[dest]     = palette[src].r;
                     m_byte[dest + 1] = palette[src].g;
                     m_byte[dest + 2] = palette[src].b;
-                    
+
                     ++currPixel;
                 }
             }
@@ -698,7 +698,7 @@ void GImage::decodeICO(
     if (bytesPerRow & 3) {
         bytesPerRow += 4 - (bytesPerRow & 3);
     }
-    
+
     for (int y = m_height - 1; y >= 0; --y) {
         int x = 0;
         // Read the row

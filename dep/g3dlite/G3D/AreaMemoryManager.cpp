@@ -1,6 +1,6 @@
 /**
  @file AreaMemoryManager.cpp
-  
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
 
  @created 2009-01-20

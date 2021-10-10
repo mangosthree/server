@@ -1,6 +1,6 @@
 /**
   @file Vector3int32.h
-  
+
   @maintainer Morgan McGuire, matrix@brown.edu
 
   @created 2008-07-01
@@ -120,7 +120,7 @@ template <> struct HashTrait<G3D::Vector3int32> {
         const G3D::uint32 top = (1UL << 31);
         // Mask for the bottom 10 bits of a uint32
         const G3D::uint32 bot = 0x000003FF;
-        return static_cast<size_t>(((key.x & top) | ((key.y & top) >> 1) | ((key.z & top) >> 2)) | 
+        return static_cast<size_t>(((key.x & top) | ((key.y & top) >> 1) | ((key.z & top) >> 2)) |
                                    (((key.x & bot) << 19) ^ ((key.y & bot) << 10) ^ (key.z & bot)));
     }
 };

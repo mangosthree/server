@@ -1,8 +1,8 @@
 /**
  @file fileutils.h
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @author  2002-06-06
  @edited  2010-03-06
 
@@ -33,7 +33,7 @@ namespace G3D {
 
 /** Returns all the files used by G3D and GLG3D during the current execution. */
 Array<std::string> filesUsed();
-    
+
 std::string readWholeFile(
     const std::string&          filename);
 
@@ -64,8 +64,8 @@ void zipClose(void* data);
  writes the file in the background.
  */
 void writeWholeFile(
-    const std::string& filename, 
-    const std::string& str, 
+    const std::string& filename,
+    const std::string& str,
     bool    flush = true);
 
 
@@ -98,12 +98,12 @@ bool zipfileExists(const std::string& filename);
 
   Examples:
 
-  c:\\a\\b\\d.e   
+  c:\\a\\b\\d.e
     root  = "c:\\"
     path  = "a" "b"
     base  = "d"
     ext   = "e"
- 
+
   /a/b/d.e
     root = "/"
     path  = "a" "b"
@@ -119,7 +119,7 @@ bool zipfileExists(const std::string& filename);
  */
 void parseFilename(
     const std::string&  filename,
-    std::string&        drive,    
+    std::string&        drive,
     Array<std::string>& path,
     std::string&        base,
     std::string&        ext);
@@ -146,8 +146,8 @@ std::string filenameBase(const std::string& filename);
     specified prefix and suffix.*/
 std::string generateFilenameBase(const std::string& prefix = "", const std::string& suffix = "");
 
-/** 
- Returns the drive (if Win32) and path from a filename, including 
+/**
+ Returns the drive (if Win32) and path from a filename, including
  a slash if there was one.
  <CODE>filenamePath(f) + filenameBaseExt(f) == f</CODE>
  */

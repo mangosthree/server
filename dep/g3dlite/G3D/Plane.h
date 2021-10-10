@@ -73,7 +73,7 @@ public:
     virtual ~Plane() {}
 
     /**
-     Returns true if point is on the side the normal points to or 
+     Returns true if point is on the side the normal points to or
      is in the plane.
      */
     inline bool halfSpaceContains(Vector3 point) const {
@@ -86,7 +86,7 @@ public:
     }
 
     /**
-     Returns true if point is on the side the normal points to or 
+     Returns true if point is on the side the normal points to or
      is in the plane.
      */
     inline bool halfSpaceContains(const Vector4& point) const {
@@ -98,7 +98,7 @@ public:
     }
 
     /**
-     Returns true if point is on the side the normal points to or 
+     Returns true if point is on the side the normal points to or
      is in the plane.  Only call on finite points.  Faster than halfSpaceContains.
      */
     inline bool halfSpaceContainsFinite(const Vector3& point) const {

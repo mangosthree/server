@@ -73,7 +73,7 @@ bool GThread::started() const {
 }
 
 bool GThread::start(SpawnBehavior behavior) {
-    
+
     debugAssertM(! started(), "Thread has already executed.");
     if (started()) {
         return false;

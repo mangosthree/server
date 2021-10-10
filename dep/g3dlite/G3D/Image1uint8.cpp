@@ -133,7 +133,7 @@ void Image1uint8::copyGImage(const GImage& im) {
     case 4:
         copyArray(im.pixel4(), im.width(), im.height());
         break;
-    } 
+    }
 }
 
 

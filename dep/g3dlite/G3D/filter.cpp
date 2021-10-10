@@ -25,7 +25,7 @@ void gaussian1D(Array<float>& coeff, int N, float std) {
 
     for (int i = 0; i < N; ++i) {
         coeff[i] /= sum;
-    }   
+    }
 }
 
 

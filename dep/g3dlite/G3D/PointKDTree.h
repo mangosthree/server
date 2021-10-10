@@ -1,14 +1,14 @@
 /**
   @file PointKDTree.h
-  
+
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
   @created 2004-01-11
   @edited  2008-11-02
 
   Copyright 2000-2009, Morgan McGuire.
   All rights reserved.
-  
+
   */
 
 #ifndef X_PointKDTree_H
@@ -70,13 +70,13 @@ namespace G3D {
  <B>Moving %Set Members</B>
  <DT>It is important that objects do not move without updating the
  PointKDTree.  If the position of an object is about
- to change, PointKDTree::remove it before they change and 
+ to change, PointKDTree::remove it before they change and
  PointKDTree::insert it again afterward.  For objects
- where the hashCode and == operator are invariant with respect 
+ where the hashCode and == operator are invariant with respect
  to the 3D position,
  you can use the PointKDTree::update method as a shortcut to
  insert/remove an object in one step after it has moved.
- 
+
 
  Note: Do not mutate any value once it has been inserted into PointKDTree. Values
  are copied interally. All PointKDTree iterators convert to pointers to constant
@@ -96,9 +96,9 @@ namespace G3D {
 
 */
 template<class T,
-         class PositionFunc = PositionTrait<T>, 
-         class HashFunc     = HashTrait<T>, 
-         class EqualsFunc   = EqualsTrait<T> > 
+         class PositionFunc = PositionTrait<T>,
+         class HashFunc     = HashTrait<T>,
+         class EqualsFunc   = EqualsTrait<T> >
 class PointKDTree {
 protected:
 #define TreeType PointKDTree<T, PositionFunc, HashFunc, EqualsFunc>
@@ -132,7 +132,7 @@ protected:
     /** Returns the bounds of the sub array. Used by makeNode. */
     static AABox computeBounds(
         const Array<Handle>&  point) {
-    
+
         if (point.size() == 0) {
             return AABox(Vector3::inf(), Vector3::inf());
         }
@@ -157,8 +157,8 @@ protected:
 
         /** Location along the specified axis */
         float               splitLocation;
- 
-        /** child[0] contains all values strictly 
+
+        /** child[0] contains all values strictly
             smaller than splitLocation along splitAxis.
 
             child[1] contains all values strictly
@@ -188,7 +188,7 @@ protected:
         Node(const Node& other) : valueArray(other.valueArray) {
             splitAxis       = other.splitAxis;
             splitLocation   = other.splitLocation;
-            splitBounds     = other.splitBounds;            
+            splitBounds     = other.splitBounds;
             for (int i = 0; i < 2; ++i) {
                 child[i] = NULL;
             }
@@ -268,7 +268,7 @@ protected:
 
         /**
           Stores the locations of the splitting planes (the structure but not the content)
-          so that the tree can be quickly rebuilt from a previous configuration without 
+          so that the tree can be quickly rebuilt from a previous configuration without
           calling balance.
          */
         static void serializeStructure(const Node* n, BinaryOutput& bo) {
@@ -323,7 +323,7 @@ protected:
             return this;
         }
 
-        /** Appends all members that intersect the box. 
+        /** Appends all members that intersect the box.
             If useSphere is true, members are tested against the sphere instead. */
         void getIntersectingMembers(
             const AABox&        sphereBounds,
@@ -334,11 +334,11 @@ protected:
             // underlying C array for speed
             const int N = valueArray.size();
             const Handle* handleArray = valueArray.getCArray();
-            
+
             const float r2 = square(sphere.radius);
 
             // Copy the sphere center so that it is on the stack near the radius
-            const Vector3 center = sphere.center; 
+            const Vector3 center = sphere.center;
             for (int v = 0; v < N; ++v) {
                 if ((center - handleArray[v].position()).squaredLength() <= r2) {
                     members.append(handleArray[v].value);
@@ -356,15 +356,15 @@ protected:
             }
         }
 
-        /** Appends all members that intersect the box. 
-            If useSphere is true, members are tested against the sphere instead. 
-            
+        /** Appends all members that intersect the box.
+            If useSphere is true, members are tested against the sphere instead.
+
             Implemented using both box and sphere tests to simplify the implementation
             of a future beginSphereInteresection iterator using the same underlying
-            BoxIterator class.           
+            BoxIterator class.
             */
         void getIntersectingMembers(
-            const AABox&        box, 
+            const AABox&        box,
             const Sphere&       sphere,
             Array<T>&           members,
             bool                useSphere) const {
@@ -439,39 +439,39 @@ protected:
      Call assignSplitBounds() on the root node after making a tree.
      */
     Node* makeNode(
-        Array<Handle>& source, 
+        Array<Handle>& source,
         Array<Handle>& temp,
-        int valuesPerNode, 
+        int valuesPerNode,
         int numMeanSplits)  {
 
         Node* node = NULL;
-        
+
         if (source.size() <= valuesPerNode) {
             // Make a new leaf node
             node = new Node(source);
-            
+
             // Set the pointers in the memberTable
             for (int i = 0; i < source.size(); ++i) {
                 memberTable.set(source[i].value, node);
             }
-            
+
         } else {
             // Make a new internal node
             node = new Node();
-            
+
             const AABox bounds = computeBounds(source);
             const Vector3 extent = bounds.high() - bounds.low();
-            
+
             Vector3::Axis splitAxis = extent.primaryAxis();
-            
+
             float splitLocation;
-            
+
             Array<Handle> lt, gt;
 
             if (numMeanSplits <= 0) {
                 source.medianPartition(lt, node->valueArray, gt, temp, AxisComparator(splitAxis));
                 splitLocation = node->valueArray[0].position()[splitAxis];
-                
+
                 if ((node->valueArray.size() > source.size() / 2) &&
                     (source.size() > 10)) {
                     // Our median split put an awful lot of points on the splitting plane.  Try a mean
@@ -483,7 +483,7 @@ protected:
             if (numMeanSplits > 0) {
                 // Compute the mean along the axis
 
-                splitLocation = (bounds.high()[splitAxis] + 
+                splitLocation = (bounds.high()[splitAxis] +
                                  bounds.low()[splitAxis]) / 2.0;
 
                 Handle splitHandle;
@@ -496,7 +496,7 @@ protected:
 
 #           if defined(G3D_DEBUG) && defined(VERIFY_TREE)
                 for (int i = 0; i < lt.size(); ++i) {
-                    const Vector3& v = lt[i].position(); 
+                    const Vector3& v = lt[i].position();
                     debugAssert(v[splitAxis] < splitLocation);
                 }
                 for (int i = 0; i < gt.size(); ++i) {
@@ -512,7 +512,7 @@ protected:
 
             // Throw away the source array to save memory
             source.fastClear();
-        
+
             if (lt.size() > 0) {
                 node->child[0] = makeNode(lt, temp, valuesPerNode, numMeanSplits - 1);
             }
@@ -525,9 +525,9 @@ protected:
             for(int i = 0; i < node->valueArray.size(); ++i) {
                 memberTable.set(node->valueArray[i].value, node);
             }
-            
+
         }
-        
+
         return node;
     }
 
@@ -637,7 +637,7 @@ public:
 
         // Insert into the node
         node->valueArray.append(h);
-        
+
         // Insert into the node table
         memberTable.set(value, node);
     }
@@ -684,8 +684,8 @@ public:
     /**
      Removes an object from the set in O(1) time.
      It is an error to remove members that are not already
-     present.  May unbalance the tree.  
-     
+     present.  May unbalance the tree.
+
      Removing an element never causes a node (split plane) to be removed...
      nodes are only changed when the tree is rebalanced.  This behavior
      is desirable because it allows the split planes to be serialized,
@@ -717,7 +717,7 @@ public:
      on <I>T</I> are independent of the bounds.  In
      that case, you may call update(v) to insert an
      element for the first time and call update(v)
-     again every time it moves to keep the tree 
+     again every time it moves to keep the tree
      up to date.
      */
     void update(const T& value) {
@@ -733,20 +733,20 @@ public:
      have moved substantially from their original positions
      (which unbalances the tree and causes the spatial
      queries to be slow).
-     
-     @param valuesPerNode Maximum number of elements to put at
-     a node. 
 
-     @param numMeanSplits numMeanSplits = 0 gives a 
+     @param valuesPerNode Maximum number of elements to put at
+     a node.
+
+     @param numMeanSplits numMeanSplits = 0 gives a
      fully axis aligned BSP-tree, where the balance operation attempts to balance
      the tree so that every splitting plane has an equal number of left
-     and right children (i.e. it is a <B>median</B> split along that axis).  
+     and right children (i.e. it is a <B>median</B> split along that axis).
      This tends to maximize average performance; all querries will return in the same amount of time.
 
      You can override this behavior by
      setting a number of <B>mean</B> (average) splits.  numMeanSplits = MAX_INT
      creates a full oct-tree, which tends to optimize peak performance (some areas of the scene will terminate after few recursive splits) at the expense of
-     peak performance. 
+     peak performance.
      */
     void balance(int valuesPerNode = 40, int numMeanSplits = 3) {
         if (root == NULL) {
@@ -838,7 +838,7 @@ private:
 public:
 
     /**
-     Returns all members inside the set of planes.  
+     Returns all members inside the set of planes.
       @param members The results are appended to this array.
      */
     void getIntersectingMembers(const Array<Plane>& plane, Array<T>& members) const {
@@ -864,7 +864,7 @@ public:
       */
     void getIntersectingMembers(const GCamera::Frustum& frustum, Array<T>& members) const {
         Array<Plane> plane;
-        
+
         for (int i = 0; i < frustum.faceArray.size(); ++i) {
             plane.append(frustum.faceArray[i].plane);
         }
@@ -903,14 +903,14 @@ public:
         // caller uses post increment (which they shouldn't!).
         Array<Node*>    stack;
 
-        /** The next index of current->valueArray to return. 
+        /** The next index of current->valueArray to return.
             Undefined when isEnd is true.*/
         int             nextValueArrayIndex;
 
         BoxIntersectionIterator() : isEnd(true) {}
-        
-        BoxIntersectionIterator(const AABox& b, const Node* root) : 
-           isEnd(root == NULL), box(b), 
+
+        BoxIntersectionIterator(const AABox& b, const Node* root) :
+           isEnd(root == NULL), box(b),
            node(const_cast<Node*>(root)), nextValueArrayIndex(-1) {
 
            // We intentionally start at the "-1" index of the current
@@ -933,10 +933,10 @@ public:
             } else if (other.isEnd) {
                 return false;
             } else {
-                // Two non-end iterators; see if they match.  This is kind of 
+                // Two non-end iterators; see if they match.  This is kind of
                 // silly; users shouldn't call == on iterators in general unless
                 // one of them is the end iterator.
-                if ((box != other.box) || (node != other.node) || 
+                if ((box != other.box) || (node != other.node) ||
                     (nextValueArrayIndex != other.nextValueArrayIndex) ||
                     (stack.length() != other.stack.length())) {
                     return false;
@@ -965,7 +965,7 @@ public:
 
                 // Search for the next node if we've exhausted this one
                 while ((! isEnd) &&  (nextValueArrayIndex >= node->valueArray.length())) {
-                    // If we entered this loop, then the iterator has exhausted the elements at 
+                    // If we entered this loop, then the iterator has exhausted the elements at
                     // node (possibly because it just switched to a child node with no members).
                     // This loop continues until it finds a node with members or reaches
                     // the end of the whole intersection search.
@@ -976,7 +976,7 @@ public:
                         (box.high()[node->splitAxis] > node->splitLocation)) {
                         stack.push(node->child[1]);
                     }
-                
+
                     // If the left child overlaps the box, push it onto the stack for
                     // processing.
                     if ((node->child[0] != NULL) &&
@@ -985,7 +985,7 @@ public:
                     }
 
                     if (stack.length() > 0) {
-                        // Go on to the next node (which may be either one of the ones we 
+                        // Go on to the next node (which may be either one of the ones we
                         // just pushed, or one from farther back the tree).
                         node = stack.pop();
                         nextValueArrayIndex = 0;
@@ -1001,7 +1001,7 @@ public:
                         foundIntersection = true;
                     } else {
                         ++nextValueArrayIndex;
-                        // If we exhaust this node, we'll loop around the master loop 
+                        // If we exhaust this node, we'll loop around the master loop
                         // to find a new node.
                     }
                 }
@@ -1083,7 +1083,7 @@ public:
 
     /**
       Stores the locations of the splitting planes (the structure but not the content)
-      so that the tree can be quickly rebuilt from a previous configuration without 
+      so that the tree can be quickly rebuilt from a previous configuration without
       calling balance.
      */
     void serializeStructure(BinaryOutput& bo) const {
@@ -1160,9 +1160,9 @@ public:
 
 
     /**
-     C++ STL style iterator method.  Returns the first member.  
+     C++ STL style iterator method.  Returns the first member.
      Use preincrement (++entry) to get to the next element (iteration
-     order is arbitrary).  
+     order is arbitrary).
      Do not modify the set while iterating.
      */
     Iterator begin() const {

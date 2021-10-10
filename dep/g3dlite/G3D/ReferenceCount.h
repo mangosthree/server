@@ -50,11 +50,11 @@ public:
 };
 
 /**
- Objects that are reference counted inherit from this.  Subclasses 
+ Objects that are reference counted inherit from this.  Subclasses
  <B>must</B> have a public destructor (the default destructor is fine)
  and <B>publicly</B> inherit ReferenceCountedObject.
 
- Multiple inheritance from a reference counted object is dangerous-- use 
+ Multiple inheritance from a reference counted object is dangerous-- use
  at your own risk.
 
  ReferenceCountedPointer and ReferenceCountedObject are threadsafe.
@@ -127,7 +127,7 @@ public:
      of the supported API.
      */
     AtomicInt32                 ReferenceCountedObject_refCount;
- 
+
     /**
      Linked list of all weak pointers that reference this (some may be
      on the stack!).  Do not use or explicitly manipulate this value.
@@ -140,7 +140,7 @@ protected:
 
 public:
 
-    /** Automatically called immediately before the object is deleted. 
+    /** Automatically called immediately before the object is deleted.
         This is not called from the destructor because it needs to be invoked
         before the subclass destructor.
       */
@@ -150,7 +150,7 @@ public:
 
 
     /**
-      Note: copies will initially start out with 0 
+      Note: copies will initially start out with 0
       references and 0 weak references like any other object.
      */
     ReferenceCountedObject(const ReferenceCountedObject& notUsed);
@@ -230,30 +230,30 @@ private:
                 // Note that the ref count can be zero if this is the
                 // first pointer to it
                 ReferenceCountedObject* pointer = (ReferenceCountedObject*)m_pointer;
-                debugAssertM(pointer->ReferenceCountedObject_refCount.value() >= 0, 
+                debugAssertM(pointer->ReferenceCountedObject_refCount.value() >= 0,
                              "Negative reference count detected.");
                 pointer->ReferenceCountedObject_refCount.increment();
             }
         }
     }
 
-public:      
+public:
 
     inline ReferenceCountedPointer() : m_pointer(NULL) {}
 
     /**
       Allow silent cast <i>to</i> the base class.
-    
+
       <pre>
         SubRef  s = new Sub();
         BaseRef b = s;
       </pre>
 
-      i.e., compile-time subtyping rule 
+      i.e., compile-time subtyping rule
       RCP&lt;<I>T</I>&gt; &lt;: RCP&lt;<I>S</I>&gt; if <I>T</I> &lt;: <I>S</I>
      */
     template <class S>
-    inline ReferenceCountedPointer(const ReferenceCountedPointer<S>& p) : 
+    inline ReferenceCountedPointer(const ReferenceCountedPointer<S>& p) :
         m_pointer(NULL) {
         setPointer(p.pointer());
     }
@@ -279,7 +279,7 @@ public:
     }
 #   endif
 
-    // We need an explicit version of the copy constructor as well or 
+    // We need an explicit version of the copy constructor as well or
     // the default copy constructor will be used.
     inline ReferenceCountedPointer(const ReferenceCountedPointer<T>& p) : m_pointer(NULL) {
         setPointer(p.m_pointer);
@@ -289,16 +289,16 @@ public:
         reference counted -- do not call delete on it.
 
         Use of const allows downcast on const references */
-    inline ReferenceCountedPointer(const T* p) : m_pointer(NULL) { 
+    inline ReferenceCountedPointer(const T* p) : m_pointer(NULL) {
         // only const constructor is defined to remove ambiguity using NULL
-        setPointer(const_cast<T*>(p)); 
+        setPointer(const_cast<T*>(p));
     }
 
-    
+
     inline ~ReferenceCountedPointer() {
         zeroPointer();
     }
-  
+
     inline size_t hashCode() const {
         return reinterpret_cast<size_t>(m_pointer);;
     }
@@ -313,30 +313,30 @@ public:
         return *this;
     }
 
-    inline bool operator==(const ReferenceCountedPointer<T>& y) const { 
-        return (m_pointer == y.m_pointer); 
+    inline bool operator==(const ReferenceCountedPointer<T>& y) const {
+        return (m_pointer == y.m_pointer);
     }
 
-    inline bool operator!=(const ReferenceCountedPointer<T>& y) const { 
-        return (m_pointer != y.m_pointer); 
+    inline bool operator!=(const ReferenceCountedPointer<T>& y) const {
+        return (m_pointer != y.m_pointer);
     }
 
     bool operator < (const ReferenceCountedPointer<T>& y) const {
-        return (m_pointer < y.m_pointer); 
+        return (m_pointer < y.m_pointer);
     }
-    
+
     bool operator > (const ReferenceCountedPointer<T>& y) const {
-        return (m_pointer > y.m_pointer); 
+        return (m_pointer > y.m_pointer);
     }
-    
+
     bool operator <= (const ReferenceCountedPointer<T>& y) const {
-        return (m_pointer <= y.m_pointer); 
+        return (m_pointer <= y.m_pointer);
     }
-    
+
     bool operator >= (const ReferenceCountedPointer<T>& y) const {
-        return (m_pointer >= y.m_pointer); 
+        return (m_pointer >= y.m_pointer);
     }
-    
+
     inline T& operator*() const {
         debugAssertM(m_pointer != NULL, "Dereferenced a NULL ReferenceCountedPointer");
         return (*m_pointer);
@@ -425,9 +425,9 @@ private:
             // TODO: threadsafe: must update the list atomically
 
             // Add myself to the head of my target's list of weak pointers
-            _WeakPtrLinkedList* head = 
+            _WeakPtrLinkedList* head =
                 new _WeakPtrLinkedList
-                (this, 
+                (this,
                  pointer->ReferenceCountedObject_weakPointer);
 
             pointer->ReferenceCountedObject_weakPointer = head;
@@ -437,7 +437,7 @@ private:
     }
 
 
-    /** 
+    /**
         Removes this from its target's list of weak pointers.  Called
         when the weak pointer goes out of scope.
 
@@ -453,12 +453,12 @@ private:
         if (strong.notNull()) {
             debugAssertM(((ReferenceCountedObject*)pointer)->ReferenceCountedObject_weakPointer != NULL,
                 "Weak pointer exists without a backpointer from the object.");
-            
+
             // Remove myself from my target's list of weak pointers
             _WeakPtrLinkedList** node = &((ReferenceCountedObject*)pointer)->ReferenceCountedObject_weakPointer;
             while ((*node)->weakPtr != this) {
                 node = &((*node)->next);
-                debugAssertM(*node != NULL, 
+                debugAssertM(*node != NULL,
                     "Weak pointer exists without a backpointer from the object (2).");
             }
 
@@ -466,7 +466,7 @@ private:
             // close the linked list behind it.
             _WeakPtrLinkedList* temp = *node;
             *node = temp->next;
-            
+
             // Now delete the node corresponding to me
             delete temp;
         }
@@ -479,7 +479,7 @@ public:
     WeakReferenceCountedPointer() : pointer(0) {}
 
     /**
-      Allow compile time subtyping rule 
+      Allow compile time subtyping rule
       RCP&lt;<I>T</I>&gt; &lt;: RCP&lt;<I>S</I>&gt; if <I>T</I> &lt;: <I>S</I>
      */
     template <class S>
@@ -538,21 +538,21 @@ public:
     }
 
     bool operator < (const WeakReferenceCountedPointer<T>& y) const {
-        return (pointer < y.pointer); 
+        return (pointer < y.pointer);
     }
 
     bool operator > (const WeakReferenceCountedPointer<T>& y) const {
-        return (pointer > y.pointer); 
+        return (pointer > y.pointer);
     }
-    
+
     bool operator <= (const WeakReferenceCountedPointer<T>& y) const {
-        return (pointer <= y.pointer); 
+        return (pointer <= y.pointer);
     }
-    
+
     bool operator >= (const ReferenceCountedPointer<T>& y) const {
-        return (pointer >= y.pointer); 
+        return (pointer >= y.pointer);
     }
-    
+
 protected:
 
     /** Invoked by the destructor on ReferenceCountedPointer. */

@@ -1,11 +1,11 @@
 /**
  @file g3dmath.h
- 
+
  Math util class.
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
  @cite highestBit by Jukka Liimatta
- 
+
  @created 2001-06-02
  @edited  2009-04-07
 
@@ -41,7 +41,7 @@
 
 /*These defines enable functionality introduced with the 1999 ISO C
 **standard. They must be defined before the inclusion of math.h to
-**engage them. If optimisation is enabled, these functions will be 
+**engage them. If optimisation is enabled, these functions will be
 **inlined. With optimisation switched off, you have to link in the
 **maths library using -lm.
 */
@@ -67,14 +67,14 @@ inline double  drand48() {
 
 /**
    Win32 implementation of the C99 fast rounding routines.
-   
+
    @cite routines are
    Copyright (C) 2001 Erik de Castro Lopo <erikd AT mega-nerd DOT com>
-   
-   Permission to use, copy, modify, distribute, and sell this file for any 
-   purpose is hereby granted without fee, provided that the above copyright 
+
+   Permission to use, copy, modify, distribute, and sell this file for any
+   purpose is hereby granted without fee, provided that the above copyright
    and this permission notice appear in all copies.  No representations are
-   made about the suitability of this software for any purpose.  It is 
+   made about the suitability of this software for any purpose.  It is
    provided "as is" without express or implied warranty.
 */
 
@@ -117,7 +117,7 @@ __inline long int lrintf(float flt) {
 
 
 #define fuzzyEpsilon (0.00001f)
-/** 
+/**
     This value should not be tested against directly, instead
     G3D::isNan() and G3D::isFinite() will return reliable results. */
 double inf();
@@ -207,7 +207,7 @@ inline int iSign(float f) {
 }
 
 
-/** 
+/**
     Fast round to integer using the lrint routine.
     Typically 6x faster than casting to integer.
  */
@@ -215,7 +215,7 @@ inline int iRound(double fValue) {
     return lrint(fValue);
 }
 
-/** 
+/**
     Fast round to integer using the lrint routine.
     Typically 6x faster than casting to integer.
  */
@@ -262,15 +262,15 @@ int iMod3(int x);
 
 /**
  Uniform random number between low and hi, inclusive. [low, hi]
- @deprecated 
+ @deprecated
  @sa Random::uniform
  */
 float uniformRandom(float low = 0.0f, float hi = 1.0f);
 
 /**
- Normally distributed random number. 
+ Normally distributed random number.
 
- @deprecated 
+ @deprecated
  @sa Random::gaussian
  */
 float gaussRandom(float mean = 0.0f, float stdev = 1.0f);
@@ -328,7 +328,7 @@ double distance(double x, double y, double z);
   the left.  -1 means the number was 0.
 
   @cite Based on code by jukka@liimatta.org
- */ 
+ */
 int highestBit(uint32 x);
 
 /**
@@ -338,8 +338,8 @@ int highestBit(uint32 x);
  */
 bool fuzzyEq(double a, double b);
 
-/** True if a is definitely not equal to b.  
-    Guaranteed false if a == b. 
+/** True if a is definitely not equal to b.
+    Guaranteed false if a == b.
     Possibly false when a != b.*/
 bool fuzzyNe(double a, double b);
 
@@ -365,7 +365,7 @@ inline float rsq(float x) {
 
 /**
  Return the next power of 2 higher than the input
- If the input is already a power of 2, the output will be the same 
+ If the input is already a power of 2, the output will be the same
  as the input.
  */
 int ceilPow2(unsigned int in);
@@ -838,7 +838,7 @@ inline int iMod3(int x) {
  Given a 32-bit integer, returns the integer with the bytes in the opposite order.
  */
 inline uint32 flipEndian32(const uint32 x) {
-    return (x << 24) | ((x & 0xFF00) << 8) | 
+    return (x << 24) | ((x & 0xFF00) << 8) |
            ((x & 0xFF0000) >> 8) | ((x & 0xFF000000) >> 24);
 }
 

@@ -25,7 +25,7 @@
 #ifdef NDEBUG
 
 // From http://cnicholson.net/2009/02/stupid-c-tricks-adventures-in-assert/
-#    define dtAssert(x) do { (void)sizeof(x); } while((void)(__LINE__==-1),false)  
+#    define dtAssert(x) do { (void)sizeof(x); } while((void)(__LINE__==-1),false)
 
 #else
 
@@ -43,7 +43,7 @@ void dtAssertFailSetCustom(dtAssertFailFunc *assertFailFunc);
 /// Gets the base custom assertion failure function to be used by Detour.
 dtAssertFailFunc* dtAssertFailGetCustom();
 
-#    include <assert.h> 
+#    include <assert.h>
 #    define dtAssert(expression) \
         { \
             dtAssertFailFunc* failFunc = dtAssertFailGetCustom(); \

@@ -42,7 +42,7 @@
 
 namespace G3D {
 
-#if defined(G3D_WIN32) 
+#if defined(G3D_WIN32)
 
 #   if ! defined(FNM_NOMATCH)
 #       define FNM_NOMATCH        1      /* Match failed. */
@@ -54,7 +54,7 @@ namespace G3D {
 #       define FNM_PREFIX_DIRS 0x20      /* Directory prefixes of pattern match too. */
 #    endif
 
-#else 
+#else
 
     // On non-windows systems, include fnmatch directly
 #   include <fnmatch.h>

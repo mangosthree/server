@@ -22,7 +22,7 @@ namespace G3D {
  are normalized such that the sum across coeff is 1.0.
 
  Matches the results returned by Matlab <code>fspecial('gaussian', [1, N], std)</code>
- */ 
+ */
 void gaussian1D(Array<float>& coeff, int N = 5, float std = 0.5f);
 }
 

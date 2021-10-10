@@ -1,43 +1,49 @@
-# Try to find the OpenSSL encryption library
-# Once done this will define
+# MaNGOS is a full featured server for World of Warcraft, supporting
+# the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
 #
-#  OPENSSL_ROOT_DIR - Set this variable to the root installation of OpenSSL
+# Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
 #
-# Read-Only variables:
-#  OPENSSL_FOUND - system has the OpenSSL library
-#  OPENSSL_INCLUDE_DIR - the OpenSSL include directory
-#  OPENSSL_LIBRARIES - The libraries needed to use OpenSSL
-
-#=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
-# Copyright 2006 Alexander Neundorf <neundorf@kde.org>
-# Copyright 2009-2010 Mathieu Malaterre <mathieu.malaterre@gmail.com>
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
 #
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distributed this file outside of CMake, substitute the full
-#  License text for the above reference.)
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-# http://www.slproweb.com/products/Win32OpenSSL.html
+set(OPENSSL_EXPECTED_VERSION "1.0")
+set(OPENSSL_MAX_VERSION "1.2")
 
+SET(_OPENSSL_ROOT_HINTS
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
+  )
 
-SET(_OPENSSL_ROOT_PATHS
-  "C:/OpenSSL-Win${PLATFORM}-v11/"
-  "C:/OpenSSL-Win${PLATFORM}/"
-  "C:/OpenSSL/"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (${PLATFORM}-bit)_is1;InstallLocation]"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (${PLATFORM}-bit)_is1;InstallLocation]"
-  "/usr/local/opt/openssl/"
-)
+IF(PLATFORM EQUAL 64)
+  SET(_OPENSSL_ROOT_PATHS
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;InstallLocation]"
+    "C:/OpenSSL-Win64/"
+    "C:/OpenSSL/"
+  )
+ELSE()
+  SET(_OPENSSL_ROOT_PATHS
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;InstallLocation]"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;InstallLocation]"
+    "C:/OpenSSL/"
+  )
+ENDIF()
 
 FIND_PATH(OPENSSL_ROOT_DIR
   NAMES
     include/openssl/ssl.h
+  HINTS
+    ${_OPENSSL_ROOT_HINTS}
   PATHS
     ${_OPENSSL_ROOT_PATHS}
 )
@@ -66,41 +72,48 @@ IF(WIN32 AND NOT CYGWIN)
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
 
+    # Since OpenSSL 1.1, lib names are like libcrypto32MTd.lib and libssl32MTd.lib
+    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+        set(_OPENSSL_MSVC_ARCH_SUFFIX "64")
+    else()
+        set(_OPENSSL_MSVC_ARCH_SUFFIX "32")
+    endif()
+
     FIND_LIBRARY(LIB_EAY_DEBUG
       NAMES
-        libeay32MDd libeay32 libcrypto${PLATFORM}MDd libcrypto${PLATFORM}
+        libcrypto${_OPENSSL_MSVC_ARCH_SUFFIX}MDd libeay32MDd libeay32
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/VC
     )
 
     FIND_LIBRARY(LIB_EAY_RELEASE
       NAMES
-        libeay32MD libeay32 libcrypto${PLATFORM}MD libcrypto${PLATFORM}
+        libcrypto${_OPENSSL_MSVC_ARCH_SUFFIX}MD libeay32MD libeay32
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/VC
     )
 
     FIND_LIBRARY(SSL_EAY_DEBUG
       NAMES
-        ssleay32MDd ssleay32 ssl libssl${PLATFORM}MDd libssl${PLATFORM} libssl
+        libssl${_OPENSSL_MSVC_ARCH_SUFFIX}MDd ssleay32MDd ssleay32 ssl
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/VC
     )
 
     FIND_LIBRARY(SSL_EAY_RELEASE
       NAMES
-        ssleay32MD ssleay32 ssl libssl${PLATFORM}MD libssl${PLATFORM} libssl
+        libssl${_OPENSSL_MSVC_ARCH_SUFFIX}MD ssleay32MD ssleay32 ssl
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/VC
     )
 
-    if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
-      set( OPENSSL_LIBRARIES
+    if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+      set(OPENSSL_LIBRARIES
         optimized ${SSL_EAY_RELEASE} ${LIB_EAY_RELEASE}
         debug ${SSL_EAY_DEBUG} ${LIB_EAY_DEBUG}
       )
     else()
-      set( OPENSSL_LIBRARIES
+      set(OPENSSL_LIBRARIES
         ${SSL_EAY_RELEASE}
         ${LIB_EAY_RELEASE}
       )
@@ -112,21 +125,21 @@ IF(WIN32 AND NOT CYGWIN)
     # same player, for MingW
     FIND_LIBRARY(LIB_EAY
       NAMES
-        libeay32 libcrypto
+        libeay32
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/MinGW
     )
 
     FIND_LIBRARY(SSL_EAY NAMES
       NAMES
-        ssleay32 libssl
+        ssleay32
       PATHS
         ${OPENSSL_ROOT_DIR}/lib/MinGW
     )
 
     MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
 
-    set( OPENSSL_LIBRARIES
+    set(OPENSSL_LIBRARIES
       ${SSL_EAY}
       ${LIB_EAY}
     )
@@ -134,7 +147,7 @@ IF(WIN32 AND NOT CYGWIN)
     # Not sure what to pick for -say- intel, let's use the toplevel ones and hope someone report issues:
     FIND_LIBRARY(LIB_EAY
       NAMES
-        libeay32 libcrypto
+        libeay32
       PATHS
         ${OPENSSL_ROOT_DIR}/lib
         ${OPENSSL_ROOT_DIR}/lib/VC
@@ -142,14 +155,14 @@ IF(WIN32 AND NOT CYGWIN)
 
     FIND_LIBRARY(SSL_EAY
       NAMES
-        ssleay32 libssl
+        ssleay32
       PATHS
         ${OPENSSL_ROOT_DIR}/lib
         ${OPENSSL_ROOT_DIR}/lib/VC
     )
     MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
 
-    SET( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
+    SET(OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY})
   ENDIF(MSVC)
 ELSE(WIN32 AND NOT CYGWIN)
   FIND_LIBRARY(OPENSSL_SSL_LIBRARIES NAMES ssl ssleay32 ssleay32MD)
@@ -160,7 +173,7 @@ ELSE(WIN32 AND NOT CYGWIN)
 
 ENDIF(WIN32 AND NOT CYGWIN)
 
-if (NOT OPENSSL_INCLUDE_DIR)
+if(NOT OPENSSL_INCLUDE_DIR)
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(OpenSSL DEFAULT_MSG
     OPENSSL_LIBRARIES
@@ -168,10 +181,12 @@ if (NOT OPENSSL_INCLUDE_DIR)
   )
 endif()
 
-if (OPENSSL_INCLUDE_DIR)
-  if (_OPENSSL_VERSION)
+if(OPENSSL_INCLUDE_DIR)
+  message(STATUS "Found OpenSSL library: ${OPENSSL_LIBRARIES}")
+  message(STATUS "Found OpenSSL headers: ${OPENSSL_INCLUDE_DIR}")
+  if(_OPENSSL_VERSION)
     set(OPENSSL_VERSION "${_OPENSSL_VERSION}")
-  else (_OPENSSL_VERSION)
+  else(_OPENSSL_VERSION)
     file(STRINGS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" openssl_version_str
          REGEX "^# *define[\t ]+OPENSSL_VERSION_NUMBER[\t ]+0x[0-9][0-9][0-9][0-9][0-9][0-9].*")
 
@@ -192,22 +207,25 @@ if (OPENSSL_INCLUDE_DIR)
     string(REGEX REPLACE "^0(.)" "\\1" OPENSSL_VERSION_MINOR "${OPENSSL_VERSION_MINOR}")
     string(REGEX REPLACE "^0(.)" "\\1" OPENSSL_VERSION_FIX "${OPENSSL_VERSION_FIX}")
 
-    if (NOT OPENSSL_VERSION_PATCH STREQUAL "00")
+    if(NOT OPENSSL_VERSION_PATCH STREQUAL "00")
       # 96 is the ASCII code of 'a' minus 1
       math(EXPR OPENSSL_VERSION_PATCH_ASCII "${OPENSSL_VERSION_PATCH} + 96")
       # Once anyone knows how OpenSSL would call the patch versions beyond 'z'
       # this should be updated to handle that, too. This has not happened yet
       # so it is simply ignored here for now.
       string(ASCII "${OPENSSL_VERSION_PATCH_ASCII}" OPENSSL_VERSION_PATCH_STRING)
-    endif (NOT OPENSSL_VERSION_PATCH STREQUAL "00")
+    endif(NOT OPENSSL_VERSION_PATCH STREQUAL "00")
 
     set(OPENSSL_VERSION "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_FIX}${OPENSSL_VERSION_PATCH_STRING}")
-  endif (_OPENSSL_VERSION)
+  endif(_OPENSSL_VERSION)
 
-  message( STATUS "OpenSSL library: ${OPENSSL_LIBRARIES}")
-  message( STATUS "OpenSSL headers: ${OPENSSL_INCLUDE_DIR}")
-  message( STATUS "OpenSSL version: ${OPENSSL_VERSION}")
-
-endif (OPENSSL_INCLUDE_DIR)
+  include(EnsureVersion)
+  ENSURE_VERSION_RANGE("${OPENSSL_EXPECTED_VERSION}" "${OPENSSL_VERSION}" "${OPENSSL_MAX_VERSION}" OPENSSL_VERSION_OK)
+  if(NOT OPENSSL_VERSION_OK)
+      message(FATAL_ERROR "MaNGOS requires OpenSSL version ${OPENSSL_EXPECTED_VERSION} but you have version ${OPENSSL_VERSION} installed. Please upgrade to ${OPENSSL_EXPECTED_VERSION} or better.")
+  else()
+      message(STATUS "Installed OpenSSL Version: ${OPENSSL_VERSION}")
+  endif()
+endif(OPENSSL_INCLUDE_DIR)
 
 MARK_AS_ADVANCED(OPENSSL_INCLUDE_DIR OPENSSL_LIBRARIES)

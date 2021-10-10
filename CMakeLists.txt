@@ -81,13 +81,9 @@ message(
 )
 message("")
 
-# Search for and set up the needed packages
-set(OPENSSL_EXPECTED_VERSION 1.1.0)
-
 find_package(Platform REQUIRED)
 find_package(Git)
 find_package(PCHSupport)
-find_package(OpenSSL REQUIRED)
 
 if(ACE_USE_EXTERNAL)
     find_package(ACE)
@@ -110,6 +106,9 @@ if(UNIX)
     find_package(ZLIB)
     find_package(BZip2)
 endif()
+
+include(${CMAKE_SOURCE_DIR}/cmake/EnsureVersion.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/FindOpenSSL.cmake)
 
 #Include platform/compiler-specific definitions
 include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)

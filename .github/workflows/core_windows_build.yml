@@ -9,16 +9,16 @@ jobs:
   build:
     strategy:
       fail-fast: false
-      
+
     runs-on: windows-2019
     name: Windows Server 2019
-    
+
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Configure Windows
         run: choco install --no-progress openssl
-        
+
       - name: Build Project
         shell: bash
         run: |

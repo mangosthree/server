@@ -106,6 +106,10 @@ find_path(MYSQL_INCLUDE_DIR
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.4 (x64);INSTALLDIR]/include/mysql"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.5;INSTALLDIR]/include/mysql"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.5 (x64);INSTALLDIR]/include/mysql"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.6;INSTALLDIR]/include/mysql"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.6 (x64);INSTALLDIR]/include/mysql"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.7;INSTALLDIR]/include/mysql"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.7 (x64);INSTALLDIR]/include/mysql"
   DOC
     "Specify the directory containing mysql.h."
 )
@@ -162,6 +166,10 @@ if(WIN32)
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.4 (x64);INSTALLDIR]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.5;INSTALLDIR]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.5 (x64);INSTALLDIR]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.6;INSTALLDIR]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.6 (x64);INSTALLDIR]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.7;INSTALLDIR]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MariaDB 10.7 (x64);INSTALLDIR]/lib"
     DOC "Specify the location of the mysql library here."
   )
 endif(WIN32)

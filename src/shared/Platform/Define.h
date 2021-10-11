@@ -119,42 +119,42 @@ typedef ACE_SHLIB_HANDLE MANGOS_LIBRARY_HANDLE;
  * @brief A signed integer of 64 bits
  *
  */
-typedef ACE_INT64 int64;
+typedef int64_t int64;
 /**
  * @brief A signed integer of 32 bits
  *
  */
-typedef ACE_INT32 int32;
+typedef int32_t int32;
 /**
  * @brief A signed integer of 16 bits
  *
  */
-typedef ACE_INT16 int16;
+typedef int16_t int16;
 /**
  * @brief A signed integer of 8 bits
  *
  */
-typedef ACE_INT8 int8;
+typedef int8_t int8;
 /**
  * @brief An unsigned integer of 64 bits
  *
  */
-typedef ACE_UINT64 uint64;
+typedef uint64_t uint64;
 /**
  * @brief An unsigned integer of 32 bits
  *
  */
-typedef ACE_UINT32 uint32;
+typedef uint32_t uint32;
 /**
  * @brief An unsigned integer of 16 bits
  *
  */
-typedef ACE_UINT16 uint16;
+typedef uint16_t uint16;
 /**
  * @brief An unsigned integer of 8 bits
  *
  */
-typedef ACE_UINT8 uint8;
+typedef uint8_t uint8;
 
 #if COMPILER != COMPILER_MICROSOFT
 /**

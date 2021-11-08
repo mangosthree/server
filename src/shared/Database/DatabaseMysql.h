@@ -22,8 +22,6 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef DO_POSTGRESQL
-
 #ifndef MANGOS_H_DATABASEMYSQL
 #define MANGOS_H_DATABASEMYSQL
 
@@ -265,5 +263,4 @@ class DatabaseMysql : public Database
         static size_t db_count; /**< TODO */
 };
 
-#endif
 #endif

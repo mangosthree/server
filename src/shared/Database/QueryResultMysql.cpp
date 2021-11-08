@@ -22,8 +22,6 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef DO_POSTGRESQL
-
 #include "DatabaseEnv.h"
 #include "Utilities/Errors.h"
 
@@ -110,4 +108,3 @@ enum Field::DataTypes QueryResultMysql::ConvertNativeType(enum_field_types mysql
             return Field::DB_TYPE_UNKNOWN;
     }
 }
-#endif

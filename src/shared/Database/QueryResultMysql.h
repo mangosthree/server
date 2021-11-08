@@ -22,8 +22,6 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef DO_POSTGRESQL
-
 #if !defined(QUERYRESULTMYSQL_H)
 #define QUERYRESULTMYSQL_H
 
@@ -81,5 +79,4 @@ class QueryResultMysql : public QueryResult
 
         MYSQL_RES* mResult; /**< TODO */
 };
-#endif
 #endif

@@ -107,8 +107,9 @@ if(UNIX)
     find_package(BZip2)
 endif()
 
+find_package(OpenSSL REQUIRED)
+
 include(${CMAKE_SOURCE_DIR}/cmake/EnsureVersion.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/FindOpenSSL.cmake)
 
 #Include platform/compiler-specific definitions
 include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)

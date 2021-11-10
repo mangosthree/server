@@ -339,22 +339,37 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
         DoLootRelease(lootGuid);
     }
 
-    // Can not logout if...
-    if (GetPlayer()->IsInCombat() ||                        //...is in combat
-            //...is jumping ...is falling
-            GetPlayer()->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR)))
+    bool instantLogout = (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->IsTaxiFlying() || GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT));
+
+    bool canLogoutInCombat = GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+
+    uint8 reason = 0;
+    if (GetPlayer()->IsInCombat() && !canLogoutInCombat)
     {
-        WorldPacket data(SMSG_LOGOUT_RESPONSE, 5);
-        data << uint32(1);
-        data << uint8(0);
-        SendPacket(&data);
-        LogoutRequest(0);
+        reason = 1;
+    }
+    else if (GetPlayer()->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR)))
+    {
+        reason = 3;                                         // is jumping or falling
+    }
+    else if (GetPlayer()->duel || GetPlayer()->HasAura(9454)) // is dueling or frozen by GM via freeze command
+    {
+        reason = 2;                                         // FIXME - Need the correct value
+    }
+
+    WorldPacket data(SMSG_LOGOUT_RESPONSE, 1 + 4);
+    data << uint32(reason);
+    data << uint8(instantLogout);
+    SendPacket(&data);
+
+    if (reason)
+    {
+        LogoutRequest(time(0));
         return;
     }
 
     // instant logout in taverns/cities or on taxi or for admins, gm's, mod's if its enabled in mangosd.conf
-    if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->IsTaxiFlying() ||
-            GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT))
+    if (instantLogout)
     {
         LogoutPlayer(true);
         return;
@@ -373,10 +388,6 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
         GetPlayer()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
     }
 
-    WorldPacket data(SMSG_LOGOUT_RESPONSE, 5);
-    data << uint32(0);
-    data << uint8(0);
-    SendPacket(&data);
     LogoutRequest(time(NULL));
 }
 

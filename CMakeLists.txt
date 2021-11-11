@@ -42,7 +42,6 @@ else()
 endif()
 # END TEMPORARY FIX
 ###
-option(POSTGRESQL           "Use PostgreSQL instead of MySQL"               OFF)
 option(BUILD_MANGOSD        "Build the main server"                         ON)
 option(BUILD_REALMD         "Build the login server"                        ON)
 option(BUILD_TOOLS          "Build the map/vmap/mmap extractors"            ON)
@@ -96,11 +95,7 @@ else()
     include(cmake/ImportACE.cmake)
 endif()
 
-if(POSTGRESQL)
-    find_package(PostgreSQL REQUIRED)
-else()
-    find_package(MySQL REQUIRED)
-endif()
+find_package(MySQL REQUIRED)
 
 if(UNIX)
     find_package(ZLIB)

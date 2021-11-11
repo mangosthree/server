@@ -1404,7 +1404,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadPageTextLocales();                       // must be after PageText loading
     sObjectMgr.LoadGossipMenuItemsLocales();                // must be after gossip menu items loading
     sObjectMgr.LoadPointOfInterestLocales();                // must be after POI loading
-    sCommandMgr.LoadCommandHelpLocale();
+    //sCommandMgr.LoadCommandHelpLocale();                  TODO: Need to figure out why this crashes
     sLog.outString(">>> Localization strings loaded");
     sLog.outString();
 

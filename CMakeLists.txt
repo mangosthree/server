@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 project(MaNGOS)
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 
 set(MANGOS_VERSION 0.21)
 set(MANGOS_EXP "CATA")

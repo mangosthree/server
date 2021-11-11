@@ -125,13 +125,8 @@ else()
     target_link_libraries(${EXECUTABLE_NAME} ACE)
 endif()
 
-if(POSTGRESQL)
-    include_directories(${PostgreSQL_INCLUDE_DIR})
-    target_link_libraries(${EXECUTABLE_NAME} ${PostgreSQL_LIBRARIES})
-else()
-    include_directories(${MYSQL_INCLUDE_DIR})
-    target_link_libraries(${EXECUTABLE_NAME} ${MYSQL_LIBRARY})
-endif()
+include_directories(${MYSQL_INCLUDE_DIR})
+target_link_libraries(${EXECUTABLE_NAME} ${MYSQL_LIBRARY})
 
 add_dependencies(${EXECUTABLE_NAME} game)
 

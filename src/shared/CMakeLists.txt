@@ -93,21 +93,13 @@ include_directories(
     ${OPENSSL_INCLUDE_DIR}
 )
 
-if(POSTGRESQL)
-    include_directories(${PostgreSQL_INCLUDE_DIRS})
-else()
-    include_directories(${MYSQL_INCLUDE_DIR})
-endif()
+include_directories(${MYSQL_INCLUDE_DIR})
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/SystemConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/SystemConfig.h")
 
 add_library(${LIBRARY_NAME} STATIC ${LIBRARY_SRCS})
 
-if(POSTGRESQL)
-    target_link_libraries(${LIBRARY_NAME} ${PostgreSQL_LIBRARIES})
-else()
-    target_link_libraries(${LIBRARY_NAME} ${MYSQL_LIBRARY})
-endif()
+target_link_libraries(${LIBRARY_NAME} ${MYSQL_LIBRARY})
 
 if(NOT ACE_USE_EXTERNAL)
     add_dependencies(${LIBRARY_NAME} ace)

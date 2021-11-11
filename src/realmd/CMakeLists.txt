@@ -31,7 +31,7 @@ source_group("Authentication" FILES ${SRC_GRP_AUTH})
 
 #Patch Files
 file(GLOB_RECURSE SRC_GRP_PATCH Patch/*.cpp Patch/*.h)
-source_group("Authentication" FILES ${SRC_GRP_PATCH})
+source_group("Patch" FILES ${SRC_GRP_PATCH})
 
 #Realm Files
 file(GLOB_RECURSE SRC_GRP_REALM Realm/*.cpp Realm/*.h)

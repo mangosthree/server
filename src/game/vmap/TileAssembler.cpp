@@ -216,7 +216,7 @@ namespace VMAP
                 }
                 fclose(tilefile);
             }
-            // break; // test, extract only first map; TODO: remvoe this line
+            // break; // test, extract only first map; TODO: remove this line
         }
 
         // add an object models, listed in temp_gameobject_models file

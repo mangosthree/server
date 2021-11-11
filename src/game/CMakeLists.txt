@@ -122,7 +122,7 @@ source_group("Warden\\Modules" FILES ${SRC_GRP_WARDEN_MODULES})
 
 #World and Handlers group
 file(GLOB SRC_GRP_WORLD_HANDLERS WorldHandlers/*.cpp WorldHandlers/*.h)
-source_group("World/Handlers" FILES ${SRC_GRP_WORLD_HANDLERS})
+source_group("World\\Handlers" FILES ${SRC_GRP_WORLD_HANDLERS})
 
 set(LIBRARY_SRCS
     ${SRC_GRP_AHBOT}

@@ -145,23 +145,17 @@ bool WorldSocket::IsClosed(void) const
 
 void WorldSocket::CloseSocket(void)
 {
+    ACE_GUARD(LockType, Guard, m_OutBufferLock);
+
+    if (closing_)
     {
-        ACE_GUARD(LockType, Guard, m_OutBufferLock);
-
-        if (closing_)
-        {
-            return;
-        }
-
-        closing_ = true;
-        peer().close_writer();
+        return;
     }
 
-    {
-        ACE_GUARD(LockType, Guard, m_SessionLock);
+    closing_ = true;
+    peer().close_writer();
 
-        m_Session = NULL;
-    }
+    m_Session = NULL;
 }
 
 const std::string& WorldSocket::GetRemoteAddress(void) const
@@ -169,7 +163,7 @@ const std::string& WorldSocket::GetRemoteAddress(void) const
     return m_Address;
 }
 
-int WorldSocket::SendPacket(const WorldPacket& pct)
+int WorldSocket::SendPacket(const WorldPacket& pkt)
 {
     ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
 
@@ -178,13 +172,17 @@ int WorldSocket::SendPacket(const WorldPacket& pct)
         return -1;
     }
 
+    WorldPacket pct = pkt;
+
     // Dump outgoing packet.
     sLog.outWorldPacketDump(uint32(get_handle()), pct.GetOpcode(), pct.GetOpcodeName(), &pct, false);
 
-//#ifdef ENABLE_ELUNA
-//    if (!sEluna->OnPacketSend(m_Session, pct))
-//        { return 0; }
-//#endif /* ENABLE_ELUNA */
+#ifdef ENABLE_ELUNA
+    if (!sEluna->OnPacketSend(m_Session, pct))
+    {
+        return 0;
+    }
+#endif
 
     ServerPktHeader header(pct.size() + 2, pct.GetOpcode());
     m_Crypt.EncryptSend((uint8*)header.header, header.getHeaderLength());
@@ -541,7 +539,7 @@ int WorldSocket::handle_input_header(void)
     EndianConvertReverse(header.size);
     EndianConvert(header.cmd);
 
-    if ((header.size < 4) || (header.size > 10240))
+    if ((header.size < 4) || (header.size > 10240) || (header.cmd  > 10240))
     {
         sLog.outError("WorldSocket::handle_input_header: client sent malformed packet size = %d , cmd = %d",
                       header.size, header.cmd);
@@ -735,6 +733,12 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
 
     const ACE_UINT16 opcode = new_pct->GetOpcode();
 
+    if (opcode >= NUM_MSG_TYPES)
+    {
+        sLog.outError("SESSION: received nonexistent opcode 0x%.4X", opcode);
+        return -1;
+    }
+
     if (closing_)
     {
         return -1;
@@ -901,7 +905,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     // Get the account information from the realmd database
     std::string safe_account = account; // Duplicate, else will screw the SHA hash verification below
-    LoginDatabase.escape_string (safe_account);
+    LoginDatabase.escape_string(safe_account);
     // No SQL injection, username escaped.
 
     QueryResult* result =
@@ -990,6 +994,8 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         locale = LOCALE_enUS;
     }
 
+    os = fields[10].GetString();
+
     delete result;
 
     // Re-check account ban (same check as in realmd)
@@ -1029,13 +1035,25 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         return -1;
     }
 
+    // Warden: Must be done before WorldSession is created
+    if (wardenActive && os != "Win" && os != "OSX")
+    {
+        WorldPacket Packet(SMSG_AUTH_RESPONSE, 1);
+        Packet << uint8(AUTH_REJECT);
+
+        SendPacket(packet);
+
+        BASIC_LOG("WorldSocket::HandleAuthSession: Client %s attempted to log in using invalid client OS (%s).", GetRemoteAddress().c_str(), os.c_str());
+        return -1;
+    }
+
     // Check that Key and account name are the same on client and server
     Sha1Hash sha;
 
     uint32 t = 0;
     uint32 seed = m_Seed;
 
-    sha.UpdateData (account);
+    sha.UpdateData(account);
     sha.UpdateData((uint8*) & t, 4);
     sha.UpdateData((uint8*) & clientSeed, 4);
     sha.UpdateData((uint8*) & seed, 4);
@@ -1058,7 +1076,8 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     std::string address = GetRemoteAddress();
 
     DEBUG_LOG("WorldSocket::HandleAuthSession: Client '%s' authenticated successfully from %s.",
-                account.c_str (), address.c_str());
+              account.c_str(),
+              address.c_str());
 
     // Update the last_ip in the database
     // No SQL injection, username escaped.

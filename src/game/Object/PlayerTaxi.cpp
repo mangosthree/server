@@ -29,12 +29,6 @@
 #include <limits>
 #include <sstream>
 
-PlayerTaxi::PlayerTaxi()
-{
-    // Taxi nodes
-    memset(m_taximask, 0, sizeof(m_taximask));
-}
-
 void PlayerTaxi::InitTaxiNodes(uint32 race, uint32 chrClass, uint8 level)
 {
     InitTaxiNodesForClass(chrClass);
@@ -259,6 +253,7 @@ std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
     {
         ss << uint32(taxi.m_taximask[i]) << " ";    // cast to prevent conversion to char
     }
+
     return ss;
 }
 

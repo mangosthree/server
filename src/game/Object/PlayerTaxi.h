@@ -30,12 +30,13 @@
 #include "Common.h"
 #include "DBCEnums.h"
 
+class ByteBuffer;
 struct FactionTemplateEntry;
 
 class PlayerTaxi
 {
     public:
-        PlayerTaxi() : m_flightMasterFactionId(0) { }
+        PlayerTaxi() : m_flightMasterFactionId(0) { memset(m_taximask, 0, sizeof(m_taximask)); }
         ~PlayerTaxi() { }
 
         // Nodes

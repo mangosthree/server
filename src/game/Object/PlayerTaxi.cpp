@@ -221,6 +221,8 @@ std::string PlayerTaxi::SaveTaxiDestinationsToString()
         return "";
     }
 
+    MANGOS_ASSERT(m_TaxiDestinations.size() >= 2);
+
     std::ostringstream ss;
     ss << m_flightMasterFactionId << ' ';
 

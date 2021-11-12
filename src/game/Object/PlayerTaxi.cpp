@@ -24,8 +24,10 @@
 
 #include "PlayerTaxi.h"
 
-#include "Common.h"
 #include "ObjectMgr.h"
+
+#include <limits>
+#include <sstream>
 
 PlayerTaxi::PlayerTaxi()
 {
@@ -62,45 +64,45 @@ void PlayerTaxi::InitTaxiNodesForRace(uint32 race)
     // race specific initial known nodes: capital and taxi hub masks
     switch (race)
     {
-        case RACE_HUMAN: // Human
-            SetTaximaskNode(2);
+        case RACE_HUMAN:
+        case RACE_DWARF:
+        case RACE_NIGHTELF:
+        case RACE_GNOME:
+        case RACE_DRAENEI:
+        case RACE_WORGEN:
+            SetTaximaskNode(2);     // Stormwind, Elwynn
+            SetTaximaskNode(6);     // Ironforge, Dun Morogh
+            SetTaximaskNode(26);    // Lor'danel, Darkshore
+            SetTaximaskNode(27);    // Rut'theran Village, Teldrassil
+            SetTaximaskNode(49);    // Moonglade (Alliance)
+            SetTaximaskNode(94);    // The Exodar
+            SetTaximaskNode(456);   // Dolanaar, Teldrassil
+            SetTaximaskNode(457);   // Darnassus, Teldrassil
+            SetTaximaskNode(582);   // Goldshire, Elwynn
+            SetTaximaskNode(589);   // Eastvale Logging Camp, Elwynn
+            SetTaximaskNode(619);   // Kharanos, Dun Morogh
+            SetTaximaskNode(620);   // Gol'Bolar Quarry, Dun Morogh
+            SetTaximaskNode(624);   // Azure Watch, Azuremyst Isle
             break;
 
-        case RACE_ORC: // Orc
-            SetTaximaskNode(23);
-            break;
-
-        case RACE_DWARF: // Dwarf
-            SetTaximaskNode(6);
-            break;
-
-        case RACE_NIGHTELF: // Night Elf
-            SetTaximaskNode(26);
-            SetTaximaskNode(27);
-            break;
-
-        case RACE_UNDEAD: // Undead
-            SetTaximaskNode(11);
-            break;
-
-        case RACE_TAUREN: // Tauren
-            SetTaximaskNode(22);
-            break;
-
-        case RACE_GNOME: // Gnome
-            SetTaximaskNode(6);
-            break;
-
-        case RACE_TROLL: // Troll
-            SetTaximaskNode(23);
-            break;
-
-        case RACE_BLOODELF: // Blood Elf
-            SetTaximaskNode(82);
-            break;
-
-        case RACE_DRAENEI: // Draenei
-            SetTaximaskNode(94);
+        case RACE_ORC:
+        case RACE_UNDEAD:
+        case RACE_TAUREN:
+        case RACE_TROLL:
+        case RACE_BLOODELF:
+        case RACE_GOBLIN:
+            SetTaximaskNode(11);    // Undercity, Tirisfal
+            SetTaximaskNode(22);    // Thunder Bluff, Mulgore
+            SetTaximaskNode(23);    // Orgrimmar, Durotar
+            SetTaximaskNode(69);    // Moonglade (Horde)
+            SetTaximaskNode(82);    // Silvermoon City
+            SetTaximaskNode(384);   // The Bulwark, Tirisfal
+            SetTaximaskNode(402);   // Bloodhoof Village, Mulgore
+            SetTaximaskNode(460);   // Brill, Tirisfal Glades
+            SetTaximaskNode(536);   // Sen'jin Village, Durotar
+            SetTaximaskNode(537);   // Razor Hill, Durotar
+            SetTaximaskNode(625);   // Fairbreeze Village, Eversong Woods
+            SetTaximaskNode(631);   // Falconwing Square, Eversong Woods
             break;
     }
 }

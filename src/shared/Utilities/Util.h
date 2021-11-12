@@ -109,19 +109,6 @@ inline uint32 secsToTimeBitFields(time_t secs)
     return (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 | (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 | lt->tm_hour << 6 | lt->tm_min;
 }
 
-/**
- * @brief Initializes the TSS for MersenneTwister
- *
- *
- */
-void initMTRandTSS();
-
-/**
- * @brief Cleanups the TSS for MersenneTwister
- *
- *
- */
-void deleteMTRandTSS();
 
 /**
  * @brief Return a random number in the range min..max; (max-min) must be smaller than 32768.
@@ -158,7 +145,7 @@ void deleteMTRandTSS();
  *
  * @return int32
  */
- int32 rand32();
+uint32 rand32();
 
 /**
  * @brief Return a random double from 0.0 to 1.0 (exclusive).

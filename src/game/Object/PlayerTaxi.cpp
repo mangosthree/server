@@ -178,6 +178,10 @@ bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, Team 
     ClearTaxiDestinations();
 
     Tokens tokens = StrSplit(values, " ");
+    for (auto iter = tokens.begin(); iter != tokens.end(); ++iter)
+    {
+        m_flightMasterFactionId = stoul(*iter);
+    }
 
     for (Tokens::iterator iter = tokens.begin(); iter != tokens.end(); ++iter)
     {
@@ -224,6 +228,7 @@ std::string PlayerTaxi::SaveTaxiDestinationsToString()
     }
 
     std::ostringstream ss;
+    ss << m_flightMasterFactionId << ' ';
 
     for (size_t i = 0; i < m_TaxiDestinations.size(); ++i)
     {
@@ -255,4 +260,9 @@ std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
         ss << uint32(taxi.m_taximask[i]) << " ";    // cast to prevent conversion to char
     }
     return ss;
+}
+
+FactionTemplateEntry const* PlayerTaxi::GetFlightMasterFactionTemplate() const
+{
+    return sFactionTemplateStore.LookupEntry(m_flightMasterFactionId);
 }

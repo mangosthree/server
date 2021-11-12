@@ -30,10 +30,12 @@
 #include "Common.h"
 #include "DBCEnums.h"
 
+struct FactionTemplateEntry;
+
 class PlayerTaxi
 {
     public:
-        PlayerTaxi();
+        PlayerTaxi() : m_flightMasterFactionId(0) { }
         ~PlayerTaxi() { }
 
         // Nodes
@@ -106,11 +108,18 @@ class PlayerTaxi
             return m_TaxiDestinations.empty();
         }
 
+        FactionTemplateEntry const* GetFlightMasterFactionTemplate() const;
+        void SetFlightMasterFactionTemplateId(uint32 factionTemplateId)
+        {
+            m_flightMasterFactionId = factionTemplateId;
+        }
+
         friend std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
 
     private:
         TaxiMask m_taximask;
         std::deque<uint32> m_TaxiDestinations;
+        uint32 m_flightMasterFactionId;
 };
 
 std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);

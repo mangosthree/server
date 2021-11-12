@@ -1376,6 +1376,7 @@ class Player : public Unit
         bool BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 currencyId, uint32 count);
 
         float GetReputationPriceDiscount(Creature const* pCreature) const;
+        float GetReputationPriceDiscount(FactionTemplateEntry const* factionTemplate) const;
 
         Player* GetTrader() const { return m_trade ? m_trade->GetTrader() : NULL; }
         TradeData* GetTradeData() const { return m_trade; }

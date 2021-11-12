@@ -21717,6 +21717,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     // fill destinations path tail
     uint32 sourcepath = 0;
     uint32 totalcost = 0;
+    uint32 firstcost = 0;
 
     uint32 prevnode = sourcenode;
     uint32 lastnode = 0;
@@ -21736,9 +21737,9 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
         totalcost += cost;
 
-        if (prevnode == sourcenode)
+        if (i == 1)
         {
-            sourcepath = path;
+            firstcost = cost;
         }
 
         m_taxi.AddTaxiDestination(lastnode);
@@ -21762,7 +21763,16 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
     if (npc)
     {
-        totalcost = (uint32)ceil(totalcost * GetReputationPriceDiscount(npc));
+        float discount = GetReputationPriceDiscount(npc);
+
+        totalcost = uint32(ceil(totalcost * discount));
+        firstcost = uint32(ceil(firstcost * discount));
+
+        m_taxi.SetFlightMasterFactionTemplateId(npc->getFaction());
+    }
+    else
+    {
+        m_taxi.SetFlightMasterFactionTemplateId(0);
     }
 
     if (money < totalcost)
@@ -23866,13 +23876,17 @@ bool Player::GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const
 
 float Player::GetReputationPriceDiscount(Creature const* pCreature) const
 {
-    FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
-    if (!vendor_faction || !vendor_faction->faction)
+    return GetReputationPriceDiscount(pCreature->getFactionTemplateEntry());
+}
+
+float Player::GetReputationPriceDiscount(FactionTemplateEntry const* factionTemplate) const
+{
+    if (!factionTemplate || !factionTemplate->faction)
     {
         return 1.0f;
     }
 
-    ReputationRank rank = GetReputationRank(vendor_faction->faction);
+    ReputationRank rank = GetReputationRank(factionTemplate->faction);
     if (rank <= REP_NEUTRAL)
     {
         return 1.0f;

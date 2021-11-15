@@ -302,6 +302,8 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recv_data)
     recv_data >> unkPackedTime;
     recv_data >> flags;
 
+    eventPackedTime = uint32(LocalTimeToUTCTime(eventPackedTime));
+
     // 946684800 is 01/01/2000 00:00:00 - default response time
     CalendarEvent* cal =  sCalendarMgr.AddEvent(_player->GetObjectGuid(), title, description, type, repeatable, maxInvites, dungeonId, timeBitFieldsToSecs(eventPackedTime), timeBitFieldsToSecs(unkPackedTime), flags);
 
@@ -354,6 +356,8 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
     recv_data >> eventPackedTime;
     recv_data >> UnknownPackedTime;
     recv_data >> flags;
+
+    eventPackedTime = uint32(LocalTimeToUTCTime(eventPackedTime));
 
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "], InviteId [" UI64FMTD "] Title %s, Description %s, type %u "
                      "Repeatable %u, MaxInvites %u, Dungeon ID %d, Flags %u", eventId, inviteId, title.c_str(),
@@ -430,6 +434,9 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recv_data)
 
     recv_data >> eventId >> inviteId;
     recv_data >> packedTime;
+
+    packedTime = uint32(LocalTimeToUTCTime(packedTime));
+    
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "EventId [" UI64FMTD "] inviteId [" UI64FMTD "]",
                      eventId, inviteId);
 

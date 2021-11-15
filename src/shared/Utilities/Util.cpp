@@ -266,7 +266,7 @@ std::string secsToTimeString(time_t timeInSecs, TimeFormat timeFormat, bool hour
             }
         }
     }
-    
+
     if (!hoursOnly)
     {
         ss << minutes;

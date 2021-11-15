@@ -26,6 +26,7 @@
 #include "Language.h"
 #include "World.h"
 #include "AccountMgr.h"
+#include "Util.h"
 
  /**********************************************************************
      CommandTable : banCommandTable
@@ -177,7 +178,7 @@ bool ChatHandler::HandleBanHelper(BanMode mode, char* args)
         case BAN_SUCCESS:
             if (duration_secs > 0)
             {
-                PSendSysMessage(LANG_BAN_YOUBANNED, nameOrIP.c_str(), secsToTimeString(duration_secs, true).c_str(), reason);
+                PSendSysMessage(LANG_BAN_YOUBANNED, nameOrIP.c_str(), secsToTimeString(duration_secs, TimeFormat::ShortText).c_str(), reason);
             }
             else
             {
@@ -288,7 +289,7 @@ bool ChatHandler::HandleBanInfoIPCommand(char* args)
     bool permanent = !fields[6].GetUInt64();
     PSendSysMessage(LANG_BANINFO_IPENTRY,
                     fields[0].GetString(), fields[1].GetString(), permanent ? GetMangosString(LANG_BANINFO_NEVER) : fields[2].GetString(),
-                    permanent ? GetMangosString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetString(), fields[5].GetString());
+                    permanent ? GetMangosString(LANG_BANINFO_INFINITE) : secsToTimeString(fields[3].GetUInt64(), TimeFormat::ShortText).c_str(), fields[4].GetString(), fields[5].GetString());
     delete result;
     return true;
 }

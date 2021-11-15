@@ -32,6 +32,13 @@
 #include <string>
 #include <vector>
 
+enum class TimeFormat : uint8
+{
+    FullText,       // 1 Days 2 Hours 3 Minutes 4 Seconds
+    ShortText,      // 1d 2h 3m 4s
+    Numeric         // 1:2:3:4
+};
+
 /**
  * @brief
  *
@@ -79,7 +86,7 @@ void stripLineInvisibleChars(std::string& src);
  * @param hoursOnly
  * @return std::string
  */
-std::string secsToTimeString(time_t timeInSecs, bool shortText = false, bool hoursOnly = false);
+std::string secsToTimeString(time_t timeInSecs, TimeFormat timeFormat = TimeFormat::FullText, bool hoursOnly = false);
 /**
  * @brief
  *

@@ -468,14 +468,7 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
         SelectLevel();
     }
 
-    if (team == HORDE)
-    {
-        setFaction(GetCreatureInfo()->FactionHorde);
-    }
-    else
-    {
-        setFaction(GetCreatureInfo()->FactionAlliance);
-    }
+    setFaction(GetCreatureInfo()->Faction);
 
     SetUInt32Value(UNIT_NPC_FLAGS, GetCreatureInfo()->NpcFlags);
 
@@ -513,7 +506,7 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     UpdateAllStats();
 
     // checked and error show at loading templates
-    if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(GetCreatureInfo()->FactionAlliance))
+    if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(GetCreatureInfo()->Faction))
     {
         if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLAG_PVP)
         {
@@ -3242,7 +3235,8 @@ void Creature::ClearTemporaryFaction()
     }
 
     // Reset to original faction
-    setFaction(GetCreatureInfo()->FactionAlliance);
+    setFaction(GetCreatureInfo()->Faction);
+
     // Reset UNIT_FLAG_NON_ATTACKABLE, UNIT_FLAG_OOC_NOT_ATTACKABLE, UNIT_FLAG_PASSIVE, UNIT_FLAG_PACIFIED or UNIT_FLAG_NOT_SELECTABLE flags
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_NON_ATTACKABLE && GetCreatureInfo()->UnitFlags & UNIT_FLAG_NON_ATTACKABLE)
     {

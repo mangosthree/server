@@ -5023,12 +5023,8 @@ void Aura::HandleModCharm(bool apply, bool Real)
                 }
                 else if (cinfo)
                 {
-                    target->setFaction(cinfo->FactionAlliance);
+                    target->setFaction(cinfo->Faction);
                 }
-            }
-            else if (cinfo)                             // normal creature
-            {
-                target->setFaction(cinfo->FactionAlliance);
             }
 
             // restore UNIT_FIELD_BYTES_0

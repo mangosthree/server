@@ -13740,7 +13740,7 @@ void Unit::RestoreOriginalFaction()
         }
         else
         {
-            setFaction(creature->GetCreatureInfo()->FactionAlliance);
+            setFaction(creature->GetCreatureInfo()->Faction);
         }
     }
 }
@@ -14557,7 +14557,7 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         else if (attackCharmer)
         {
             CreatureInfo const* cinfo = possessedCreature->GetCreatureInfo();
-            possessedCreature->setFaction(cinfo->FactionAlliance);
+            possessedCreature->setFaction(cinfo->Faction);
             possessedCreature->AIM_Initialize();
             possessedCreature->AttackedBy(this);
         }

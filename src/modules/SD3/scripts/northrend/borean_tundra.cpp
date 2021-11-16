@@ -328,7 +328,7 @@ struct aura_wolf_has_eaten : public AuraScript
             else
             {
                 Creature* pCreature = (Creature*)pAura->GetTarget();
-                pCreature->setFaction(pCreature->GetCreatureInfo()->FactionAlliance);
+                pCreature->setFaction(pCreature->GetCreatureInfo()->Faction);
             }
 
             return true;

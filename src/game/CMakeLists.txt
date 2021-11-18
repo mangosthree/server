@@ -45,7 +45,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/WorldHandlers
     ${CMAKE_CURRENT_SOURCE_DIR}/Platform
     ${CMAKE_SOURCE_DIR}/src/Platform
-    ${CMAKE_SOURCE_DIR}/src/game/Time/    
+    ${CMAKE_SOURCE_DIR}/src/game/Time/
     ${CMAKE_SOURCE_DIR}/dep/g3dlite
     ${CMAKE_SOURCE_DIR}/dep/zlib
     ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour/Include

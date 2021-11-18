@@ -31,6 +31,9 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <cctype>
+#include <functional>
 
 enum class TimeFormat : uint8
 {
@@ -77,6 +80,13 @@ float NormalizeOrientation(float o);
  * @param src
  */
 void stripLineInvisibleChars(std::string& src);
+
+/**
+ * @brief
+ *
+ * @param localtime
+ */
+std::tm localtime_r(const time_t& time);
 
 /**
  * @brief

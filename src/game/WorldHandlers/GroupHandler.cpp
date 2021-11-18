@@ -78,7 +78,7 @@ void WorldSession::SendGroupInvite(Player* player, bool alreadyInGroup /*= false
     data.WriteGuidMask<1, 7>(player->GetObjectGuid());
 
     data.WriteGuidBytes<1, 4>(player->GetObjectGuid());
-    data << uint32(WorldTimer::getMSTime());
+    data << uint32(GameTime::GetGameTimeMS());
     data << uint32(0) << uint32(0);
     data.WriteGuidBytes<6, 0, 2, 3>(player->GetObjectGuid());
     // for(int i = 0; i < count; ++i)

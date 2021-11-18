@@ -57,6 +57,7 @@
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
 #include "CreatureLinkingMgr.h"
+#include "GameTime.h"
 #include "movement/MovementStructures.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -579,12 +580,12 @@ void MovementInfo::Write(ByteBuffer& data, uint16 opcode) const
 bool GlobalCooldownMgr::HasGlobalCooldown(SpellEntry const* spellInfo) const
 {
     GlobalCooldownList::const_iterator itr = m_GlobalCooldowns.find(spellInfo->GetStartRecoveryCategory());
-    return itr != m_GlobalCooldowns.end() && itr->second.duration && WorldTimer::getMSTimeDiff(itr->second.cast_time, WorldTimer::getMSTime()) < itr->second.duration;
+    return itr != m_GlobalCooldowns.end() && itr->second.duration && getMSTimeDiff(itr->second.cast_time, GameTime::GetGameTimeMS()) < itr->second.duration;
 }
 
 void GlobalCooldownMgr::AddGlobalCooldown(SpellEntry const* spellInfo, uint32 gcd)
 {
-    m_GlobalCooldowns[spellInfo->GetStartRecoveryCategory()] = GlobalCooldown(gcd, WorldTimer::getMSTime());
+    m_GlobalCooldowns[spellInfo->GetStartRecoveryCategory()] = GlobalCooldown(gcd, GameTime::GetGameTimeMS());
 }
 
 void GlobalCooldownMgr::CancelGlobalCooldown(SpellEntry const* spellInfo)
@@ -910,7 +911,7 @@ bool Unit::haveOffhandWeapon() const
 
 void Unit::SendHeartBeat()
 {
-    m_movementInfo.UpdateTime(WorldTimer::getMSTime());
+    m_movementInfo.UpdateTime(GameTime::GetGameTimeMS());
     WorldPacket data(MSG_MOVE_HEARTBEAT, 64);
     data << GetPackGUID();
     data << m_movementInfo;
@@ -10792,7 +10793,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
             ((Player*)this)->GetSession()->SendPacket(&data);
         }
 
-        m_movementInfo.UpdateTime(WorldTimer::getMSTime());
+        m_movementInfo.UpdateTime(GameTime::GetGameTimeMS());
 
         // TODO: Actually such opcodes should (always?) be packed with SMSG_COMPRESSED_MOVES
         switch (mtype)
@@ -11578,7 +11579,7 @@ DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
         }
 
         // If last spell was casted more than 15 seconds ago - reset the count.
-        if (i->stack == 0 && WorldTimer::getMSTimeDiff(i->hitTime, WorldTimer::getMSTime()) > 15 * IN_MILLISECONDS)
+        if (i->stack == 0 && getMSTimeDiff(i->hitTime, GameTime::GetGameTimeMS()) > 15 * IN_MILLISECONDS)
         {
             i->hitCount = DIMINISHING_LEVEL_1;
             return DIMINISHING_LEVEL_1;
@@ -11607,7 +11608,7 @@ void Unit::IncrDiminishing(DiminishingGroup group)
         }
         return;
     }
-    m_Diminishing.push_back(DiminishingReturn(group, WorldTimer::getMSTime(), DIMINISHING_LEVEL_2));
+    m_Diminishing.push_back(DiminishingReturn(group, GameTime::GetGameTimeMS(), DIMINISHING_LEVEL_2));
 }
 
 void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, Unit* caster, DiminishingLevels Level, int32 limitduration, bool isReflected)
@@ -11672,7 +11673,7 @@ void Unit::ApplyDiminishingAura(DiminishingGroup group, bool apply)
             // Remember time after last aura from group removed
             if (i->stack == 0)
             {
-                i->hitTime = WorldTimer::getMSTime();
+                i->hitTime = GameTime::GetGameTimeMS();
             }
         }
         break;

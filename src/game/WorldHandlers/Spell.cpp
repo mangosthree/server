@@ -4907,7 +4907,7 @@ void Spell::SendSpellGo()
     data << uint32(m_spellInfo->Id);                        // spellId
     data << uint32(castFlags);                              // cast flags
     data << uint32(m_timer);
-    data << uint32(WorldTimer::getMSTime());                // timestamp
+    data << uint32(GameTime::GetGameTimeMS());              // timestamp
 
     WriteSpellGoTargets(&data);
 

@@ -22,58 +22,54 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef MANGOS_RNG_H
-#define MANGOS_RNG_H
+#include "GameTime.h"
+#include "Timer.h"
 
-#include <random>
-
-#include "ace/Singleton.h"
-#include "ace/Synch_Traits.h"
-#include "Platform/Define.h"
-
-class RNGen
+namespace GameTime
 {
-public:
-    RNGen()
+    time_t const StartTime = time(nullptr);
+
+    time_t GameTime = 0;
+    uint32 GameMSTime = 0;
+
+    std::chrono::system_clock::time_point GameTimeSystemPoint = std::chrono::system_clock::time_point::min();
+    std::chrono::steady_clock::time_point GameTimeSteadyPoint = std::chrono::steady_clock::time_point::min();
+
+    time_t GetStartTime()
     {
-        std::random_device rd;
-        gen_.seed(rd());
+        return StartTime;
     }
 
-    int32 rand_i(int32 min, int32 max)
+    time_t GetGameTime()
     {
-        std::uniform_int_distribution<int32> dist{min, max};
-        return dist(gen_);
+        return GameTime;
     }
 
-    uint32 rand_u(uint32 min, uint32 max)
+    uint32 GetGameTimeMS()
     {
-        std::uniform_int_distribution<uint32> dist{min, max};
-        return dist(gen_);
+        return GameMSTime;
     }
 
-    uint32 rand()
+    std::chrono::system_clock::time_point GetGameTimeSystemPoint()
     {
-        std::uniform_int_distribution<uint32> dist;
-        return dist(gen_);
+        return GameTimeSystemPoint;
     }
 
-    float rand_f(float min, float max)
+    std::chrono::steady_clock::time_point GetGameTimeSteadyPoint()
     {
-        std::uniform_real_distribution<float> dist{min, max};
-        return dist(gen_);
+        return GameTimeSteadyPoint;
     }
 
-    double rand_d(double min, double max)
+    uint32 GetUptime()
     {
-        std::uniform_real_distribution<double> dist{min, max};
-        return dist(gen_);
+        return uint32(GameTime - StartTime);
     }
 
-private:
-    std::mt19937 gen_;
-};
-
-typedef ACE_TSS_Singleton<RNGen, ACE_SYNCH_MUTEX> RNG;
-
-#endif
+    void UpdateGameTimers()
+    {
+        GameTime = time(nullptr);
+        GameMSTime = getMSTime();
+        GameTimeSystemPoint = std::chrono::system_clock::now();
+        GameTimeSteadyPoint = std::chrono::steady_clock::now();
+    }
+}

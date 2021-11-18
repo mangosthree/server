@@ -43,6 +43,9 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/Warden
     ${CMAKE_CURRENT_SOURCE_DIR}/Warden/Modules
     ${CMAKE_CURRENT_SOURCE_DIR}/WorldHandlers
+    ${CMAKE_CURRENT_SOURCE_DIR}/Platform
+    ${CMAKE_SOURCE_DIR}/src/Platform
+    ${CMAKE_SOURCE_DIR}/src/game/Time/    
     ${CMAKE_SOURCE_DIR}/dep/g3dlite
     ${CMAKE_SOURCE_DIR}/dep/zlib
     ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour/Include
@@ -104,6 +107,10 @@ source_group("References" FILES ${SRC_GRP_REFERENCES})
 file(GLOB SRC_GRP_SERVER Server/*.cpp Server/*.h)
 source_group("Server" FILES ${SRC_GRP_SERVER})
 
+#Time group
+file(GLOB SRC_GRP_TIME Time/*.cpp Time/*.h)
+source_group("Time" FILES ${SRC_GRP_TIME})
+
 #Tools group
 file(GLOB SRC_GRP_TOOL Tools/*.cpp Tools/*.h)
 source_group("Tool" FILES ${SRC_GRP_TOOL})
@@ -135,6 +142,7 @@ set(LIBRARY_SRCS
     ${SRC_GRP_OUTDOOR_PVP}
     ${SRC_GRP_REFERENCES}
     ${SRC_GRP_SERVER}
+    ${SRC_GRP_TIME}
     ${SRC_GRP_TOOL}
     ${SRC_GRP_VMAPS}
     ${SRC_GRP_WARDEN}

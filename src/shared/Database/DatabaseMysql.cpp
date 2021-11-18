@@ -205,7 +205,7 @@ bool MySQLConnection::_Query(const char* sql, MYSQL_RES** pResult, MYSQL_FIELD**
         return 0;
     }
 
-    uint32 _s = WorldTimer::getMSTime();
+    uint32 _s = getMSTime();
 
     if (mysql_query(mMysql, sql))
     {
@@ -215,7 +215,7 @@ bool MySQLConnection::_Query(const char* sql, MYSQL_RES** pResult, MYSQL_FIELD**
     }
     else
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", WorldTimer::getMSTimeDiff(_s, WorldTimer::getMSTime()), sql);
+        DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", getMSTimeDiff(_s, getMSTime()), sql);
     }
 
     *pResult = mysql_store_result(mMysql);
@@ -287,7 +287,7 @@ bool MySQLConnection::Execute(const char* sql)
     }
 
     {
-        uint32 _s = WorldTimer::getMSTime();
+        uint32 _s = getMSTime();
 
         if (mysql_query(mMysql, sql))
         {
@@ -297,7 +297,7 @@ bool MySQLConnection::Execute(const char* sql)
         }
         else
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", WorldTimer::getMSTimeDiff(_s, WorldTimer::getMSTime()), sql);
+            DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", getMSTimeDiff(_s, getMSTime()), sql);
         }
         // end guarded block
     }

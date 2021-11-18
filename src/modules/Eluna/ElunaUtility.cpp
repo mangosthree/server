@@ -10,20 +10,31 @@
 #include "Unit.h"
 #include "GameObject.h"
 #include "DBCStores.h"
+#ifdef MANGOS
+#include "Timer.h"
+#endif
 
 uint32 ElunaUtil::GetCurrTime()
 {
+
 #ifndef TRINITY
-    return WorldTimer::getMSTime();
+    #if def MANGOS
+        return WorldTimer::getMSTime();
+    #else
+        return getMSTime();
+    #endif
 #else
-    return getMSTime();
 #endif
 }
 
 uint32 ElunaUtil::GetTimeDiff(uint32 oldMSTime)
 {
 #ifndef TRINITY
-    return WorldTimer::getMSTimeDiff(oldMSTime, GetCurrTime());
+    #ifdef MANGOS
+        return GetMSTimeDiffToNow(oldMSTime);
+    #else
+        return WorldTimer::getMSTimeDiff(oldMSTime, GetCurrTime());
+    #endif
 #else
     return GetMSTimeDiffToNow(oldMSTime);
 #endif

@@ -37,7 +37,7 @@
     #define CHAR_DB_UPDATE_DESCRIPTION "add_character_createdDate_col"
 
     #define WORLD_DB_VERSION_NR 21
-    #define WORLD_DB_STRUCTURE_NR 14
+    #define WORLD_DB_STRUCTURE_NR 15
     #define WORLD_DB_CONTENT_NR 001
-    #define WORLD_DB_UPDATE_DESCRIPTION "Update deprecated ROW_FORMAT"
+    #define WORLD_DB_UPDATE_DESCRIPTION "Alter_conditions_char_length"
 #endif // __REVISION_H__

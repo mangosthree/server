@@ -21,9 +21,9 @@
 include(MacroMangosSourceGroup)
 
 #Add PCH Files
-set(mangosscript_PCH "${CMAKE_CURRENT_SOURCE_DIR}/precompiled.h")
+set(mangosscript_PCH "${CMAKE_CURRENT_SOURCE_DIR}/pch.h")
 if(PCH)
-    LIST(APPEND mangosscript_PCH "${CMAKE_CURRENT_SOURCE_DIR}/precompiled.cpp")
+    LIST(APPEND mangosscript_PCH "${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp")
 endif()
 
 include_directories(
@@ -544,6 +544,10 @@ file(GLOB sources_maelstrom scripts/maelstrom/*.cpp scripts/maelstrom/*.h)
 file(GLOB sources_instance_m_sc scripts/maelstrom/stonecore/*.cpp scripts/maelstrom/stonecore/*.h)
     LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_m_sc})
     source_group("Eastern Kingdoms Scripts\\Instances\\Stonecore" FILES ${sources_instance_m_sc})
+#Raid: Baradin Hold
+file(GLOB sources_raid_ek_bh scripts/eastern_kingdoms/baradin_hold/*.cpp scripts/eastern_kingdoms/baradin_hold/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_ek_bh})
+  source_group("Eastern Kingdoms Scripts\\Raids\\Baradin Hold" FILES ${sources_raid_ek_bh})
 endif()
 # --- END IF ---
 

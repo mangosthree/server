@@ -46,6 +46,8 @@ enum
     SPELL_CAUSE_INSANITY        = 24327,
     SPELL_WILL_OF_HAKKAR        = 24178,
     SPELL_ENRAGE                = 24318,
+    SPELL_DOUBLE_ATTACK         = 19818,
+    SPELL_HAKKAR_POWER          = 24692,
 
     // The Aspects of all High Priests
     SPELL_ASPECT_OF_JEKLIK      = 24687,
@@ -93,6 +95,10 @@ struct boss_hakkar : public CreatureScript
             m_uiAspectOfMarliTimer = 12000;
             m_uiAspectOfThekalTimer = 8000;
             m_uiAspectOfArlokkTimer = 18000;
+
+            DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+
+            InitiateHakkarPowerStacks();
         }
 
         void Aggro(Unit* /*who*/) override
@@ -122,6 +128,16 @@ struct boss_hakkar : public CreatureScript
                 {
                     m_uiAspectOfArlokkTimer = 0;
                 }
+            }
+        }
+
+        void InitiateHakkarPowerStacks()
+        {
+            m_creature->RemoveAurasDueToSpell(SPELL_HAKKAR_POWER);
+            for (uint8 i = 0; i < MAX_PRIESTS; i++)
+            {
+                if (m_pInstance->GetData(i) != DONE)
+                    m_creature->CastSpell(m_creature, SPELL_HAKKAR_POWER,false);
             }
         }
 

@@ -200,25 +200,9 @@ void SD3::InitScriptLibrary()
     outstring_log("                |_|                          ");
     outstring_log("                     https://getmangos.eu/\n");
 
-    // Get configuration file
-    bool configFailure = false;
-    if (!SD3Config.SetSource(MANGOSD_CONFIG_LOCATION))
-    {
-        configFailure = true;
-    }
-    else
-    {
-        outstring_log("[SD3]: Using configuration file %s", MANGOSD_CONFIG_LOCATION);
-    }
-
     // Set SD3 Error Log File
     std::string SD3LogFile = sConfig.GetStringDefault("SD3ErrorLogFile", "scriptdev3-errors.log");
     setScriptLibraryErrorFile(SD3LogFile.c_str(), "SD3");
-
-    if (configFailure)
-    {
-        script_error_log("[SD3]: Unable to open configuration file. Configuration values will use default.");
-    }
 
     outstring_log("\n");
 
@@ -281,6 +265,22 @@ bool SD3::GOGossipHello(Player* pPlayer, GameObject* pGo)
     return pTempScript->ToGameObjectScript()->OnGossipHello(pPlayer, pGo);
 }
 
+bool SD3::ItemGossipHello(Player* pPlayer, Item* pItem)
+{
+    Script* pTempScript = m_scripts[pItem->GetScriptId()];
+
+    if (!pTempScript || !pTempScript->ToItemScript())
+    {
+        return false;
+    }
+
+    // Clear menus
+    pPlayer->PlayerTalkClass->ClearMenus();
+
+    return pTempScript->ToItemScript()->OnGossipHello(pPlayer, pItem);
+}
+
+
 bool SD3::GossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
     debug_log("[SD3]: Gossip selection, sender: %u, action: %u", uiSender, uiAction);
@@ -309,6 +309,20 @@ bool SD3::GOGossipSelect(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint
     return pTempScript->ToGameObjectScript()->OnGossipSelect(pPlayer, pGo, uiSender, uiAction);
 }
 
+bool SD3::ItemGossipSelect(Player* pPlayer, Item* pItem, uint32 uiSender, uint32 uiAction)
+{
+    debug_log("[SD3]: ITEM Gossip selection, sender: %u, action: %u", uiSender, uiAction);
+
+    Script* pTempScript = m_scripts[pItem->GetScriptId()];
+
+    if (!pTempScript || !pTempScript->ToItemScript())
+    {
+        return false;
+    }
+
+    return pTempScript->ToItemScript()->OnGossipSelect(pPlayer, pItem, uiSender, uiAction);
+}
+
 bool SD3::GossipSelectWithCode(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction, const char* sCode)
 {
     debug_log("[SD3]: Gossip selection with code, sender: %u, action: %u", uiSender, uiAction);
@@ -335,6 +349,20 @@ bool SD3::GOGossipSelectWithCode(Player* pPlayer, GameObject* pGo, uint32 uiSend
     }
 
     return pTempScript->ToGameObjectScript()->OnGossipSelectWithCode(pPlayer, pGo, uiSender, uiAction, sCode);
+}
+
+bool SD3::ItemGossipSelectWithCode(Player* pPlayer, Item* pItem, uint32 uiSender, uint32 uiAction, const char* sCode)
+{
+    debug_log("[SD3]: ITEM Gossip selection with code, sender: %u, action: %u, code : %s", uiSender, uiAction, sCode);
+
+    Script* pTempScript = m_scripts[pItem->GetScriptId()];
+
+    if (!pTempScript || !pTempScript->ToItemScript())
+    {
+        return false;
+    }
+
+    return pTempScript->ToItemScript()->OnGossipSelectWithCode(pPlayer, pItem, uiSender, uiAction, sCode);
 }
 
 bool SD3::QuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
@@ -417,6 +445,18 @@ bool SD3::GOUse(Player* pPlayer, GameObject* pGo)
     }
 
     return pTempScript->ToGameObjectScript()->OnUse(pPlayer, pGo);
+}
+
+bool SD3::GOUse(Unit* pUnit, GameObject* pGo)
+{
+    Script* pTempScript = m_scripts[pGo->GetScriptId()];
+
+    if (!pTempScript || !pTempScript->ToGameObjectScript())
+    {
+        return false;
+    }
+
+    return pTempScript->ToGameObjectScript()->OnUse(pUnit, pGo);
 }
 
 bool SD3::GOQuestAccept(Player* pPlayer, GameObject* pGo, const Quest* pQuest)
@@ -502,6 +542,20 @@ CreatureAI* SD3::GetCreatureAI(Creature* pCreature)
     }
 
     return ai;
+}
+
+GameObjectAI* SD3::GetGameObjectAI(GameObject* pGo)
+{
+    Script* pTempScript = m_scripts[pGo->GetScriptId()];
+
+    if (!pTempScript || !pTempScript->ToGameObjectScript())
+    {
+        return nullptr;
+    }
+
+    GameObjectAI * goAI = pTempScript->ToGameObjectScript()->GetAI(pGo);
+
+    return goAI;
 }
 
 bool SD3::ItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)

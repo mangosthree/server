@@ -99,7 +99,7 @@ struct npc_lazy_peon : public CreatureScript
 
                 if (pInvoker->GetTypeId() == TYPEID_PLAYER)
                 {
-                    DoScriptText(SAY_PEON_AWAKE_1, m_creature);
+                    DoScriptText(SAY_PEON_AWAKE_1, m_creature, pInvoker);
                     ((Player*)pInvoker)->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
                     m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
                 }

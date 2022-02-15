@@ -1,9 +1,10 @@
 /**
- * ScriptDev2 is an extension for mangos providing enhanced features for
+ * ScriptDev3 is an extension for mangos providing enhanced features for
  * area triggers, creatures, game objects, instances, items, and spells beyond
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
+ * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,21 +24,22 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef SC_PRECOMPILED_H
-#define SC_PRECOMPILED_H
+#ifndef DEF_BARADIN_HOLD_H
+#define DEF_BARADIN_HOLD_H
 
-#include "ScriptMgr.h"
-#include "Object.h"
-#include "Unit.h"
-#include "Creature.h"
-#include "CreatureAI.h"
-#include "GameObject.h"
-#include "GameObjectAI.h"
-#include "sc_creature.h"
-#include "sc_gossip.h"
-#include "sc_grid_searchers.h"
-#include "sc_instance.h"
-#include "SpellAuras.h"
+enum 
+{
+    MAX_ENCOUNTER           = 3,
 
+    TYPE_ARGALOTH           = 0,
+    TYPE_OCCUTHAR           = 1,
+    TYPE_ALIZABAL           = 2,
+
+    // NPCs
+    NPC_ARGALOTH            = 47120,
+    NPC_OCCUTHAR            = 52363,
+    NPC_ALIZABAL            = 55869
+
+};
 
 #endif

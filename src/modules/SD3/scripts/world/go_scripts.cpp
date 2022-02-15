@@ -54,6 +54,7 @@
  */
 
 #include "precompiled.h"
+#include "GameObjectAI.h"
 
 /*######
 ## go_barov_journal

@@ -4036,7 +4036,7 @@ void ObjectMgr::LoadQuests()
                           //   76             77                78                79
                           "`ReqCurrencyId1`, `ReqCurrencyId2`, `ReqCurrencyId3`, `ReqCurrencyId4`,"
                           //   80                81                   82                   83
-                          "`ReqCurrencyCount1`, `ReqCurrencyCount1`, `ReqCurrencyCount1`, `ReqCurrencyCount1`,"
+                          "`ReqCurrencyCount1`, `ReqCurrencyCount2`, `ReqCurrencyCount3`, `ReqCurrencyCount4`,"
                           //   84            85               86               87               88
                           "`ReqSpellCast1`, `ReqSpellCast2`, `ReqSpellCast3`, `ReqSpellCast4`, `ReqSpellLearned`,"
                           //   89               90                  91                  92                  93                  94

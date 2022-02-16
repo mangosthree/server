@@ -234,6 +234,9 @@ void AddSC_gilneas();
 void AddSC_gilneas_city();
 void AddSC_twilight_highlands();
 void AddSC_vashjir();
+void AddSC_instance_baradin_hold();
+void AddSC_boss_alizabal();
+
 #endif
 
 void AddEasternKingdomsScripts()
@@ -442,6 +445,8 @@ void AddEasternKingdomsScripts()
 #if defined (CATA) || defined(MISTS)
     AddSC_gilneas();
     AddSC_gilneas_city();
+    AddSC_instance_baradin_hold();
+    AddSC_boss_alizabal();
 #endif
 
 }

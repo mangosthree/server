@@ -848,6 +848,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
     data << uint32(pQuest->GetSoundTurnInId());
 
     GetMenuSession()->SendPacket(&data);
+
     DEBUG_LOG("WORLD: Sent SMSG_QUEST_QUERY_RESPONSE questid=%u", pQuest->GetQuestId());
 }
 
@@ -1061,7 +1062,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
 
     if (Completable)
     {
-        data << pQuest->GetCompleteEmote();                 // emote id
+        data << pQuest->GetCompleteEmote();                  // emote id
     }
     else
     {
@@ -1071,7 +1072,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
     // Close Window after cancel
     if (CloseOnCancel)
     {
-        data << uint32(0x01);                               // auto finish
+        data << uint32(0x01);                                // auto finish
     }
     else
     {
@@ -1120,7 +1121,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
 
     if (!Completable)                                       // Completable = flags1 && flags2 && flags3 && flags4
     {
-        data << uint32(0x00);                               // flags1
+        data << uint32(0x00);                                // flags1
     }
     else
     {

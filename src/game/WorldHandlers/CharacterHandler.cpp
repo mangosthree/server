@@ -84,15 +84,15 @@ bool LoginQueryHolder::Initialize()
                      "`totalKills`, `todayKills`, `yesterdayKills`, `chosenTitle`, `watchedFaction`, `drunk`,"
                      "`health`, `power1`, `power2`, `power3`, `power4`, `power5`, `specCount`, `activeSpec`, `exploredZones`, `equipmentCache`, `knownTitles`, `actionBars`, `slot`, `createdDate` FROM `characters` WHERE `guid` = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGROUP,           "SELECT `groupId` FROM group_member WHERE `memberGuid` ='%u'", m_guid.GetCounter());
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES,  "SELECT id, permanent, map, difficulty, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%u'", m_guid.GetCounter());
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADAURAS,           "SELECT caster_guid,item_guid,spell,stackcount,remaincharges,basepoints0,basepoints1,basepoints2,periodictime0,periodictime1,periodictime2,maxduration,remaintime,effIndexMask FROM character_aura WHERE guid = '%u'", m_guid.GetCounter());
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES,  "SELECT `id`, `permanent`, `map`, `difficulty`, `resettime` FROM `character_instance` LEFT JOIN `instance` ON `instance` = `id` WHERE `guid` = '%u'", m_guid.GetCounter());
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADAURAS,           "SELECT `caster_guid`,`item_guid`,`spell`,`stackcount`,`remaincharges`,`basepoints0`,`basepoints1`,`basepoints2`,`periodictime0`,`periodictime1`,`periodictime2`,`maxduration`,`remaintime`,`effIndexMask` FROM `character_aura` WHERE `guid` = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLS,          "SELECT `spell`,`active`,`disabled` FROM `character_spell` WHERE `guid` = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADQUESTSTATUS,     "SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`,`itemcount5`,`itemcount6` FROM `character_queststatus` WHERE `guid` = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS, "SELECT `quest` FROM `character_queststatus_daily` WHERE `guid` = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADWEEKLYQUESTSTATUS, "SELECT `quest` FROM `character_queststatus_weekly` WHERE `guid` = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADMONTHLYQUESTSTATUS, "SELECT `quest` FROM `character_queststatus_monthly` WHERE `guid` = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADREPUTATION,      "SELECT `faction`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u'", m_guid.GetCounter());
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADINVENTORY,       "SELECT data,text,bag,slot,item,item_template FROM character_inventory JOIN item_instance ON character_inventory.item = item_instance.guid WHERE character_inventory.guid = '%u' ORDER BY bag,slot", m_guid.GetCounter());
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADINVENTORY,       "SELECT `data`,`text`,`bag`,`slot`,`item`,`item_template` FROM `character_inventory` JOIN `item_instance` ON `character_inventory`.`item` = `item_instance`.`guid` WHERE `character_inventory`.`guid` = '%u' ORDER BY `bag`,`slot`", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADITEMLOOT,        "SELECT `guid`,`itemid`,`amount`,`suffix`,`property` FROM `item_loot` WHERE `owner_guid` = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADACTIONS,         "SELECT `spec`,`button`,`action`,`type` FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSOCIALLIST,      "SELECT `friend`,`flags`,`note` FROM `character_social` WHERE `guid` = '%u' LIMIT 255", m_guid.GetCounter());
@@ -500,7 +500,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
 
     if ((have_same_race && skipCinematics == CINEMATICS_SKIP_SAME_RACE) || skipCinematics == CINEMATICS_SKIP_ALL)
     {
-        pNewChar->setCinematic(1);                          // not show intro
+        pNewChar->setCinematic(1);                           // not show intro
     }
 
     pNewChar->SetAtLoginFlag(AT_LOGIN_FIRST);               // First login
@@ -689,23 +689,33 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 {
+    /* Store the player's GUID for later reference */
     ObjectGuid playerGuid = holder->GetGuid();
 
+    /* Create a new instance of the player object */
     Player* pCurrChar = new Player(this);
+
+    /* Initialize a motion generator */
     pCurrChar->GetMotionMaster()->Initialize();
 
-    // "GetAccountId()==db stored account id" checked in LoadFromDB (prevent login not own character using cheating tools)
-    if (!pCurrChar->LoadFromDB(playerGuid, holder))
+    /* Account ID is validated in LoadFromDB (prevents cheaters logging in to characters not on their account) */
+    if (!pCurrChar->LoadFromDB(playerGuid, holder))         /// Could not load character from database, cancel login
     {
-        KickPlayer();                                       // disconnect client, player no set to session and it will not deleted or saved at kick
-        delete pCurrChar;                                   // delete it manually
-        delete holder;                                      // delete all unprocessed queries
+        /* Disconnect the game client */
+        KickPlayer();
+
+        /* Remove references to avoid dangling pointers */
+        delete pCurrChar;
+        delete holder;
+
+        /* Checked in WorldSession::Update */
         m_playerLoading = false;
+
         return;
     }
 
+    /* Validation check completely, assign player to WorldSession::_player for later use */
     SetPlayer(pCurrChar);
-
     pCurrChar->SendDungeonDifficulty(false);
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
@@ -744,20 +754,27 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         data << (uint32)0;
 
         uint32 linecount = 0;
+        /* The MOTD itself */
         std::string str_motd = sWorld.GetMotd();
-        std::string::size_type pos, nextpos;
+        /* Used for tracking our position within the MOTD while iterating through it */
+        std::string::size_type pos = 0, nextpos;
 
-        pos = 0;
+        /* Find the next occurance of @ in the string
+         * This is how newlines are represented */
         while ((nextpos = str_motd.find('@', pos)) != std::string::npos)
         {
+            /* If these are not equal, it means a '@' was found
+             * These are used to represent newlines in the string
+             * It is set by the code above here */
             if (nextpos != pos)
             {
+                /* Send the player a system message containing the substring from pos to nextpos - pos */
                 data << str_motd.substr(pos, nextpos - pos);
                 ++linecount;
             }
             pos = nextpos + 1;
         }
-
+        /* There are no more newlines in our MOTD, so we send whatever is left */
         if (pos < str_motd.length())
         {
             data << str_motd.substr(pos);
@@ -775,25 +792,33 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     if (resultGuild)
     {
+        /* We're in a guild, so set the player's guild data to represent that */
         Field* fields = resultGuild->Fetch();
         pCurrChar->SetInGuild(fields[0].GetUInt32());
         pCurrChar->SetRank(fields[1].GetUInt32());
+        /* Avoid dangling pointers */
         delete resultGuild;
     }
-    else if (pCurrChar->GetGuildId())                       // clear guild related fields in case wrong data about nonexistent membership
+    /* Player thinks they have a guild, but it isn't in the database. Clear that information */
+    else if (pCurrChar->GetGuildId())
     {
         pCurrChar->SetInGuild(0);
         pCurrChar->SetGuildLevel(0);
         pCurrChar->SetRank(0);
     }
 
+    /* Player is in a guild
+     * TODO: Can we move this code into the block above? Not sure why it's down here */
     if (pCurrChar->GetGuildId() != 0)
     {
+        /* Get guild based on what we set the player's guild to above */
         Guild* guild = sGuildMgr.GetGuildById(pCurrChar->GetGuildId());
+
+        /* More checks to see if they're in a guild? I'm sure this is redundant */
         if (guild)
         {
             pCurrChar->SetGuildLevel(guild->GetLevel());
-
+            /* Build MOTD packet and send it to the player */
             data.Initialize(SMSG_GUILD_EVENT, (1 + 1 + guild->GetMOTD().size() + 1));
             data << uint8(GE_MOTD);
             data << uint8(1);
@@ -802,9 +827,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
             DEBUG_LOG("WORLD: Sent guild-motd (SMSG_GUILD_EVENT)");
 
             guild->DisplayGuildBankTabsInfo(this);
-
+            /* Let everyone in the guild know you've just signed in */
             guild->BroadcastEvent(GE_SIGNED_ON, pCurrChar->GetObjectGuid(), pCurrChar->GetName());
         }
+        /* If the player is not in a guild */
         else
         {
             // remove wrong guild data
@@ -820,7 +846,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     pCurrChar->SendInitialPacketsBeforeAddToMap();
 
-    // Show cinematic at the first time that player login
+    // Show cinematic at the first time that player login (TODO: activate world grids first, then cinematic)
+    // move this code past the "SendInitialPacketsAfterAddToMap();" line?
     if (!pCurrChar->getCinematic())
     {
         pCurrChar->setCinematic(1);
@@ -857,14 +884,18 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
             lockStatus = AREA_LOCKSTATUS_INSUFFICIENT_EXPANSION;
         }
     }
+
+    /* This code is run if we can not add the player to the map for some reason */
     if (lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->GetMap()->Add(pCurrChar))
     {
-        // normal delayed teleport protection not applied (and this correct) for this case (Player object just created)
+        /* Attempt to find an areatrigger to teleport the player for us */
         AreaTrigger const* at = sObjectMgr.GetGoBackTrigger(pCurrChar->GetMapId());
         if (at)
         {
             lockStatus = pCurrChar->GetAreaTriggerLockStatus(at, pCurrChar->GetDifficulty(pCurrChar->GetMap()->IsRaid()), miscRequirement);
         }
+
+        /* We couldn't find an areatrigger to teleport, so just move the player back to their home bind */
         if (!at || lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, pCurrChar->GetOrientation()))
         {
             pCurrChar->TeleportToHomebind();
@@ -876,6 +907,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     pCurrChar->SendInitialPacketsAfterAddToMap();
 
+    /* Mark player as online in the database */
     static SqlStatementID updChars;
     static SqlStatementID updAccount;
 
@@ -888,31 +920,36 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     /* Sync player's in-game time with server time */
     pCurrChar->SetInGameTime(GameTime::GetGameTimeMS());
 
-    // announce group about member online (must be after add to player list to receive announce to self)
+    /* Send logon notification to player's group
+     * This is sent after player is added to the world so that player receives it too */
     if (Group* group = pCurrChar->GetGroup())
     {
         group->SendUpdate();
     }
 
-    // friend status
+    /* Inform player's friends that player has come online */
     sSocialMgr.SendFriendStatus(pCurrChar, FRIEND_ONLINE, pCurrChar->GetObjectGuid(), true);
 
-    // Place character in world (and load zone) before some object loading
+    /* Load the player's corpse if it exists, or resurrect the player if not */
     pCurrChar->LoadCorpse();
 
-    // setting Ghost+speed if dead
+    /* If the player is dead, we need to set them as a ghost and increase movespeed */
     if (pCurrChar->m_deathState != ALIVE)
     {
-        // not blizz like, we must correctly save and load player instead...
+        /* If player is a night elf, wisp racial should be applied */
         if (pCurrChar->getRace() == RACE_NIGHTELF)
         {
             pCurrChar->CastSpell(pCurrChar, 20584, true);   // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
         }
+
+        /* Apply ghost spell to player */
         pCurrChar->CastSpell(pCurrChar, 8326, true);        // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
 
+        /* Allow player to walk on water */
         pCurrChar->SetWaterWalk(true);
     }
 
+    /* If player is on a taxi, continue their flight */
     pCurrChar->ContinueTaxiFlight();
 
     // reset for all pets before pet loading
@@ -924,7 +961,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     // Load pet if any (if player not alive and in taxi flight or another then pet will remember as temporary unsummoned)
     pCurrChar->LoadPet();
 
-    // Set FFA PvP for non GM in non-rest mode
+    /* If we're running an FFA PvP realm and the player isn't a GM, mark them as PvP flagged */
     if (sWorld.IsFFAPvPRealm() && !pCurrChar->isGameMaster() && !pCurrChar->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
         pCurrChar->SetFFAPvP(true);
@@ -935,7 +972,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         pCurrChar->SetContestedPvP();
     }
 
-    // Apply at_login requests
+    /* Apply onLogon requests (such as talent resets) */
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_SPELLS))
     {
         pCurrChar->resetSpells();
@@ -970,11 +1007,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         sWorld.ShutdownMsg(true, pCurrChar);
     }
 
+    /* If player should have all taxi paths, give them to the player */
     if (sWorld.getConfig(CONFIG_BOOL_ALL_TAXI_PATHS))
     {
         pCurrChar->SetTaxiCheater(true);
     }
 
+    /* Send GM notifications */
     if (pCurrChar->isGameMaster())
     {
         SendNotification(LANG_GM_ON);
@@ -994,6 +1033,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     sLog.outChar("Account: %d (IP: %s) Login Character:[%s] (guid: %u)",
                  GetAccountId(), IP_str.c_str(), pCurrChar->GetName(), pCurrChar->GetGUIDLow());
 
+    /* Make player stand up if they're not already stood up and not stunned */
     if (!pCurrChar->IsStandState() && !pCurrChar->hasUnitState(UNIT_STAT_STUNNED))
     {
         pCurrChar->SetStandState(UNIT_STAND_STATE_STAND);
@@ -1001,13 +1041,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     m_playerLoading = false;
 
-    // Handle Login-Achievements (should be handled after loading)
-    pCurrChar->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ON_LOGIN, 1);
-
     // Used by Eluna
 #ifdef ENABLE_ELUNA
     sEluna->OnLogin(pCurrChar);
 #endif /* ENABLE_ELUNA */
+
+    // Handle Login-Achievements (should be handled after loading)
+    pCurrChar->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ON_LOGIN, 1);
 
     delete holder;
 }
@@ -1143,7 +1183,10 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(QueryResult* result, uin
     WorldSession* session = sWorld.FindSession(accountId);
     if (!session)
     {
-        delete result;
+        if (result)
+        {
+            delete result;
+        }
         return;
     }
 

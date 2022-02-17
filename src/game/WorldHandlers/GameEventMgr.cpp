@@ -46,8 +46,10 @@ bool GameEventMgr::CheckOneGameEvent(uint16 entry, time_t currenttime) const
 {
     // Get the event information
     if (mGameEvent[entry].start < currenttime && currenttime < mGameEvent[entry].end &&
-            ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * MINUTE)) < (mGameEvent[entry].length * MINUTE))
+        ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * MINUTE)) < (mGameEvent[entry].length * MINUTE))
+    {
         return true;
+    }
     else
     {
         return false;
@@ -74,7 +76,9 @@ uint32 GameEventMgr::NextCheck(uint16 entry) const
     // in event, we return the end of it
     if ((((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60)) < (mGameEvent[entry].length * 60)))
         // we return the delay before it ends
+    {
         delay = (mGameEvent[entry].length * MINUTE) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * MINUTE));
+    }
     else                                                    // not in window, we return the delay before next start
     {
         delay = (mGameEvent[entry].occurence * MINUTE) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * MINUTE));
@@ -237,7 +241,6 @@ void GameEventMgr::LoadFromDB()
     }
     else
     {
-
         BarGoLink bar(result->GetRowCount());
         do
         {
@@ -276,7 +279,9 @@ void GameEventMgr::LoadFromDB()
                     if (eventRef != 0)
                     {
                         if (eventRef != event_id)
+                        {
                             sLog.outErrorDb("`game_event_creature` have creature (GUID: %u) for event %i from pool or subpool of pool (ID: %u) but pool have already content from event %i. Pool don't must have content for different events!", guid, event_id, topPoolId, eventRef);
+                        }
                     }
                     else
                     {
@@ -353,7 +358,9 @@ void GameEventMgr::LoadFromDB()
                     if (eventRef != 0)
                     {
                         if (eventRef != event_id)
+                        {
                             sLog.outErrorDb("`game_event_gameobject` have gameobject (GUID: %u) for event %i from pool or subpool of pool (ID: %u) but pool have already content from event %i. Pool don't must have content for different events!", guid, event_id, topPoolId, eventRef);
+                        }
                     }
                     else
                     {
@@ -1043,7 +1050,7 @@ int16 GameEventMgr::GetGameEventId<Creature>(uint32 guid_or_poolid)
         for (GuidList::const_iterator itr = mGameEventCreatureGuids[i].begin(); itr != mGameEventCreatureGuids[i].end(); ++itr)
             if (*itr == guid_or_poolid)
             {
-                return i + 1 - mGameEvent.size();       // -S *1 + 1 <= . <= 1*S - 1
+                return i + 1 - mGameEvent.size();        // -S *1 + 1 <= . <= 1*S - 1
             }
     return 0;
 }
@@ -1056,7 +1063,7 @@ int16 GameEventMgr::GetGameEventId<GameObject>(uint32 guid_or_poolid)
         for (GuidList::const_iterator itr = mGameEventGameobjectGuids[i].begin(); itr != mGameEventGameobjectGuids[i].end(); ++itr)
             if (*itr == guid_or_poolid)
             {
-                return i + 1 - mGameEvent.size();       // -S *1 + 1 <= . <= 1*S - 1
+                return i + 1 - mGameEvent.size();        // -S *1 + 1 <= . <= 1*S - 1
             }
     return 0;
 }

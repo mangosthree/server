@@ -129,10 +129,12 @@ Group::~Group()
     // will be unloaded first so we must be prepared for both cases
     // this may unload some dungeon persistent state
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+    {
         for (BoundInstancesMap::iterator itr2 = m_boundInstances[i].begin(); itr2 != m_boundInstances[i].end(); ++itr2)
         {
             itr2->second.state->RemoveGroup(this);
         }
+    }
 
     // Sub group counters clean up
     delete[] m_subGroupsCounts;
@@ -525,7 +527,7 @@ void Group::Disband(bool hideDestroy)
             continue;
         }
 
-        // we cannot call _removeMember because it would invalidate member iterator
+        // we can not call _removeMember because it would invalidate member iterator
         // if we are removing player from battleground raid
         if (isBGGroup())
         {
@@ -868,7 +870,9 @@ bool Group::CountRollVote(ObjectGuid const& playerGUID, Rolls::iterator& rollI, 
     Roll::PlayerVote::iterator itr = roll->playerVote.find(playerGUID);
     // this condition means that player joins to the party after roll begins
     if (itr == roll->playerVote.end())
-        return true;                                        // result used for need iterator ++, so avoid for end of list
+    {
+        return true;                                         // result used for need iterator ++, so avoid for end of list
+    }
 
     if (roll->getLoot())
         if (roll->getLoot()->items.empty())
@@ -997,6 +1001,7 @@ void Group::EndRoll()
 void Group::CountTheRoll(Rolls::iterator& rollI)
 {
     Roll* roll = *rollI;
+
     if (!roll->isValid())                                   // is loot already deleted ?
     {
         rollI = RollId.erase(rollI);
@@ -1127,8 +1132,12 @@ void Group::CountTheRoll(Rolls::iterator& rollI)
     {
         SendLootAllPassed(*roll);
         LootItem* item = &(roll->getLoot()->items[roll->itemSlot]);
-        if (item) item->is_blocked = false;
+        if (item)
+        {
+            item->is_blocked = false;
+        }
     }
+
     rollI = RollId.erase(rollI);
     delete roll;
 }
@@ -1158,7 +1167,7 @@ void Group::SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid)
     BroadcastPacket(&data, true);
 }
 
-static void GetDataForXPAtKill_helper(Player* player, Unit const* victim, uint32& sum_level, Player* & member_with_max_level, Player* & not_gray_member_with_max_level)
+static void GetDataForXPAtKill_helper(Player* player, Unit const* victim, uint32& sum_level, Player*& member_with_max_level, Player*& not_gray_member_with_max_level)
 {
     sum_level += player->getLevel();
     if (!member_with_max_level || member_with_max_level->getLevel() < player->getLevel())
@@ -1169,10 +1178,12 @@ static void GetDataForXPAtKill_helper(Player* player, Unit const* victim, uint32
     uint32 gray_level = MaNGOS::XP::GetGrayLevel(player->getLevel());
     if (victim->getLevel() > gray_level && (!not_gray_member_with_max_level
                                             || not_gray_member_with_max_level->getLevel() < player->getLevel()))
+    {
         not_gray_member_with_max_level = player;
+    }
 }
 
-void Group::GetDataForXPAtKill(Unit const* victim, uint32& count, uint32& sum_level, Player* & member_with_max_level, Player* & not_gray_member_with_max_level, Player* additional)
+void Group::GetDataForXPAtKill(Unit const* victim, uint32& count, uint32& sum_level, Player*& member_with_max_level, Player*& not_gray_member_with_max_level, Player* additional)
 {
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
@@ -1764,7 +1775,9 @@ void Group::ChangeMembersGroup(ObjectGuid guid, uint8 group)
     }
     else
         // This methods handles itself groupcounter decrease
+    {
         ChangeMembersGroup(player, group);
+    }
 }
 
 // only for online members
@@ -2242,7 +2255,7 @@ void Group::UnbindInstance(uint32 mapid, uint8 difficulty, bool unload)
         if (!unload)
             CharacterDatabase.PExecute("DELETE FROM `group_instance` WHERE `leaderGuid` = '%u' AND `instance` = '%u'",
                                        GetLeaderGuid().GetCounter(), itr->second.state->GetInstanceId());
-        itr->second.state->RemoveGroup(this);               // state can become invalid
+        itr->second.state->RemoveGroup(this);               // save can become invalid
         m_boundInstances[difficulty].erase(itr);
     }
 }
@@ -2284,7 +2297,7 @@ static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
 
         // XP updated only for alive group member
         if (pGroupGuy->IsAlive() && not_gray_member_with_max_level &&
-                pGroupGuy->getLevel() <= not_gray_member_with_max_level->getLevel())
+            pGroupGuy->getLevel() <= not_gray_member_with_max_level->getLevel())
         {
             uint32 itr_xp = (member_with_max_level == not_gray_member_with_max_level) ? uint32(xp * rate) : uint32((xp * rate / 2) + 1);
 
@@ -2355,7 +2368,7 @@ void Group::RewardGroupAtKill(Unit* pVictim, Player* player_tap)
 
             if (!pGroupGuy->IsAtGroupRewardDistance(pVictim))
             {
-                continue;                               // member (alive or dead) or his corpse at req. distance
+                continue;                                // member (alive or dead) or his corpse at req. distance
             }
 
             RewardGroupAtKill_helper(pGroupGuy, pVictim, count, PvP, group_rate, sum_level, is_dungeon, not_gray_member_with_max_level, member_with_max_level, xp);

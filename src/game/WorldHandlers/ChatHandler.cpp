@@ -55,7 +55,7 @@ bool WorldSession::processChatmessageFurtherAfterSecurityChecks(std::string& msg
         }
 
         if (sWorld.getConfig(CONFIG_UINT32_CHAT_STRICT_LINK_CHECKING_SEVERITY) && GetSecurity() < SEC_MODERATOR
-                && !ChatHandler(this).isValidChatMessage(msg.c_str()))
+            && !ChatHandler(this).isValidChatMessage(msg.c_str()))
         {
             sLog.outError("Player %s (GUID: %u) sent a chatmessage with an invalid link: %s", GetPlayer()->GetName(),
                           GetPlayer()->GetGUIDLow(), msg.c_str());
@@ -101,102 +101,102 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
     {
         recv_data >> lang;
 
-    // prevent talking at unknown language (cheating)
-    LanguageDesc const* langDesc = GetLanguageDescByID(lang);
-    if (!langDesc)
-    {
-        SendNotification(LANG_UNKNOWN_LANGUAGE);
-        return;
-    }
-    if (langDesc->skill_id != 0 && !_player->HasSkill(langDesc->skill_id))
-    {
-        // also check SPELL_AURA_COMPREHEND_LANGUAGE (client offers option to speak in that language)
-        Unit::AuraList const& langAuras = _player->GetAurasByType(SPELL_AURA_COMPREHEND_LANGUAGE);
-        bool foundAura = false;
-        for (Unit::AuraList::const_iterator i = langAuras.begin(); i != langAuras.end(); ++i)
+        // prevent talking at unknown language (cheating)
+        LanguageDesc const* langDesc = GetLanguageDescByID(lang);
+        if (!langDesc)
         {
-            if ((*i)->GetModifier()->m_miscvalue == int32(lang))
+            SendNotification(LANG_UNKNOWN_LANGUAGE);
+            return;
+        }
+        if (langDesc->skill_id != 0 && !_player->HasSkill(langDesc->skill_id))
+        {
+            // also check SPELL_AURA_COMPREHEND_LANGUAGE (client offers option to speak in that language)
+            Unit::AuraList const& langAuras = _player->GetAurasByType(SPELL_AURA_COMPREHEND_LANGUAGE);
+            bool foundAura = false;
+            for (Unit::AuraList::const_iterator i = langAuras.begin(); i != langAuras.end(); ++i)
             {
-                foundAura = true;
-                break;
+                if ((*i)->GetModifier()->m_miscvalue == int32(lang))
+                {
+                    foundAura = true;
+                    break;
+                }
+            }
+            if (!foundAura)
+            {
+                SendNotification(LANG_NOT_LEARNED_LANGUAGE);
+                return;
             }
         }
-        if (!foundAura)
-        {
-            SendNotification(LANG_NOT_LEARNED_LANGUAGE);
-            return;
-        }
-    }
 
-    if (lang == LANG_ADDON)
-    {
-        // Disabled addon channel?
-        if (!sWorld.getConfig(CONFIG_BOOL_ADDON_CHANNEL))
+        if (lang == LANG_ADDON)
         {
-            return;
+            // Disabled addon channel?
+            if (!sWorld.getConfig(CONFIG_BOOL_ADDON_CHANNEL))
+            {
+                return;
+            }
         }
-    }
-    // LANG_ADDON should not be changed nor be affected by flood control
-    else
-    {
-        // send in universal language if player in .gmon mode (ignore spell effects)
-        if (_player->isGameMaster())
-        {
-            lang = LANG_UNIVERSAL;
-        }
+        // LANG_ADDON should not be changed nor be affected by flood control
         else
         {
-            // send in universal language in two side iteration allowed mode
-            if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHAT))
+            // send in universal language if player in .gmon mode (ignore spell effects)
+            if (_player->isGameMaster())
             {
                 lang = LANG_UNIVERSAL;
             }
             else
             {
-                switch (type)
+                // send in universal language in two side iteration allowed mode
+                if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHAT))
                 {
-                    case CHAT_MSG_PARTY:
+                    lang = LANG_UNIVERSAL;
+                }
+                else
+                {
+                    switch (type)
+                    {
+                        case CHAT_MSG_PARTY:
                         case CHAT_MSG_PARTY_LEADER:
-                    case CHAT_MSG_RAID:
-                    case CHAT_MSG_RAID_LEADER:
-                    case CHAT_MSG_RAID_WARNING:
-                        // allow two side chat at group channel if two side group allowed
-                        if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
-                        {
-                            lang = LANG_UNIVERSAL;
-                        }
-                        break;
-                    case CHAT_MSG_GUILD:
-                    case CHAT_MSG_OFFICER:
-                        // allow two side chat at guild channel if two side guild allowed
-                        if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GUILD))
-                        {
-                            lang = LANG_UNIVERSAL;
-                        }
-                        break;
+                        case CHAT_MSG_RAID:
+                        case CHAT_MSG_RAID_LEADER:
+                        case CHAT_MSG_RAID_WARNING:
+                            // allow two side chat at group channel if two side group allowed
+                            if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+                            {
+                                lang = LANG_UNIVERSAL;
+                            }
+                            break;
+                        case CHAT_MSG_GUILD:
+                        case CHAT_MSG_OFFICER:
+                            // allow two side chat at guild channel if two side guild allowed
+                            if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GUILD))
+                            {
+                                lang = LANG_UNIVERSAL;
+                            }
+                            break;
+                    }
+                }
+
+                // but overwrite it by SPELL_AURA_MOD_LANGUAGE auras (only single case used)
+                Unit::AuraList const& ModLangAuras = _player->GetAurasByType(SPELL_AURA_MOD_LANGUAGE);
+                if (!ModLangAuras.empty())
+                {
+                    lang = ModLangAuras.front()->GetModifier()->m_miscvalue;
                 }
             }
 
-            // but overwrite it by SPELL_AURA_MOD_LANGUAGE auras (only single case used)
-            Unit::AuraList const& ModLangAuras = _player->GetAurasByType(SPELL_AURA_MOD_LANGUAGE);
-            if (!ModLangAuras.empty())
+            if (type != CHAT_MSG_AFK && type != CHAT_MSG_DND)
             {
-                lang = ModLangAuras.front()->GetModifier()->m_miscvalue;
+                if (!_player->CanSpeak())
+                {
+                    std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
+                    SendNotification(GetMangosString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
+                    return;
+                }
+
+                GetPlayer()->UpdateSpeakTime();
             }
         }
-
-        if (type != CHAT_MSG_AFK && type != CHAT_MSG_DND)
-        {
-            if (!_player->CanSpeak())
-            {
-                std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
-                SendNotification(GetMangosString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
-                return;
-            }
-
-            GetPlayer()->UpdateSpeakTime();
-        }
-    }
     }
     else
     {
@@ -351,7 +351,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 break;
             }
 
-            // if player is in battleground, he cannot say to battleground members by /p
+            // if player is in battleground, he can not say to battleground members by /p
             Group* group = GetPlayer()->GetOriginalGroup();
             if (!group)
             {
@@ -366,6 +366,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             {
                 return;
             }
+
             // Used by Eluna
 #ifdef ENABLE_ELUNA
             if (!sEluna->OnChat(GetPlayer(), type, lang, msg, group))
@@ -487,7 +488,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 break;
             }
 
-            // if player is in battleground, he cannot say to battleground members by /ra
+            // if player is in battleground, he can not say to battleground members by /ra
             Group* group = GetPlayer()->GetOriginalGroup();
             if (!group)
             {
@@ -535,7 +536,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 break;
             }
 
-            // if player is in battleground, he cannot say to battleground members by /ra
+            // if player is in battleground, he can not say to battleground members by /ra
             Group* group = GetPlayer()->GetOriginalGroup();
             if (!group)
             {
@@ -576,8 +577,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
 
             Group* group = GetPlayer()->GetGroup();
             if (!group || !group->isRaidGroup() ||
-                    !(group->IsLeader(GetPlayer()->GetObjectGuid()) || group->IsAssistant(GetPlayer()->GetObjectGuid())))
-                return;
+                !(group->IsLeader(GetPlayer()->GetObjectGuid()) || group->IsAssistant(GetPlayer()->GetObjectGuid())))
+                {
+                    return;
+                }
 
             // Used by Eluna
 #ifdef ENABLE_ELUNA
@@ -692,10 +695,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                         return;
                     }
 #endif /* ENABLE_ELUNA */
+
                     chn->Say(_player, msg.c_str(), lang);
                 }
             }
-
         } break;
 
         case CHAT_MSG_AFK:
@@ -709,11 +712,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
                 {
                     if (msg.empty())
                     {
-                        _player->ToggleAFK();               // Remove AFK
+                        _player->ToggleAFK();                // Remove AFK
                     }
                     else
                     {
-                        _player->autoReplyMsg = msg;        // Update message
+                        _player->autoReplyMsg = msg;         // Update message
                     }
                 }
                 else                                        // New AFK mode
@@ -746,11 +749,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             {
                 if (msg.empty())
                 {
-                    _player->ToggleDND();                   // Remove DND
+                    _player->ToggleDND();                    // Remove DND
                 }
                 else
                 {
-                    _player->autoReplyMsg = msg;            // Update message
+                    _player->autoReplyMsg = msg;             // Update message
                 }
             }
             else                                            // New DND mode

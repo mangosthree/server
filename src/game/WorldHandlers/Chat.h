@@ -90,16 +90,16 @@ enum ChatCommandSearchResult
 
 enum PlayerChatTag
 {
-    CHAT_TAG_NONE = 0x00,
-    CHAT_TAG_AFK = 0x01,
-    CHAT_TAG_DND = 0x02,
-    CHAT_TAG_GM = 0x04,
-    CHAT_TAG_COM = 0x08,                     // Commentator
-    CHAT_TAG_DEV = 0x10,                     // Developer
+    CHAT_TAG_NONE               = 0x00,
+    CHAT_TAG_AFK                = 0x01,
+    CHAT_TAG_DND                = 0x02,
+    CHAT_TAG_GM                 = 0x04,
+    CHAT_TAG_COM                = 0x08,                     // Commentator
+    CHAT_TAG_DEV                = 0x10,                     // Developer
 };
 typedef uint32 ChatTagFlags;
 
-class  ChatHandler
+class ChatHandler
 {
     public:
         explicit ChatHandler(WorldSession* session);
@@ -122,7 +122,7 @@ class  ChatHandler
         ChatCommand const* FindCommand(char const* text);
 
         bool isValidChatMessage(const char* msg);
-        bool HasSentErrorMessage() { return sentErrorMessage; }
+        bool HasSentErrorMessage() { return sentErrorMessage;}
 
         /**
         * \brief Prepare SMSG_GM_MESSAGECHAT/SMSG_MESSAGECHAT
@@ -145,7 +145,8 @@ class  ChatHandler
         * \param uint32 achievementId          : Required only for *ACHIEVEMENT
         * \param const char* addonPrefix       : Required only for *CHAT_MSG_ADDON
         **/
-        static void BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const* message, Language language = LANG_UNIVERSAL, ChatTagFlags chatTag = CHAT_TAG_NONE,
+        static void BuildChatPacket(
+            WorldPacket& data, ChatMsg msgtype, char const* message, Language language = LANG_UNIVERSAL, ChatTagFlags chatTag = CHAT_TAG_NONE,
             ObjectGuid const& senderGuid = ObjectGuid(), char const* senderName = NULL,
             ObjectGuid const& targetGuid = ObjectGuid(), char const* targetName = NULL,
             char const* channelName = NULL, uint32 achievementId = 0, const char* addonPrefix = NULL);
@@ -455,11 +456,11 @@ class  ChatHandler
         bool HandleReloadAreaTriggerTeleportCommand(char* args);
         bool HandleReloadAutoBroadcastCommand(char* args);
         bool HandleReloadBattleEventCommand(char* args);
-        bool HandleReloadCreaturesStatsCommand(char* args);
         bool HandleReloadCommandCommand(char* args);
         bool HandleReloadConditionsCommand(char* args);
         bool HandleReloadCreatureQuestRelationsCommand(char* args);
         bool HandleReloadCreatureQuestInvRelationsCommand(char* args);
+        bool HandleReloadCreaturesStatsCommand(char* args);
         bool HandleReloadDbScriptStringCommand(char* args);
         bool HandleReloadDBScriptsOnCreatureDeathCommand(char* args);
         bool HandleReloadDBScriptsOnEventCommand(char* args);
@@ -798,8 +799,5 @@ class CliHandler : public ChatHandler
         void* m_callbackArg;
         Print* m_print;
 };
-
-
-
 
 #endif

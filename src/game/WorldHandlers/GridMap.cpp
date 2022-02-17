@@ -125,7 +125,7 @@ bool GridMap::loadData(char* filename)
         return true;
     }
 
-    sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.", filename);
+    sLog.outError("Map file '%s' is non-compatible version created with a different map-extractor version.", filename);
     fclose(in);
     return false;
 }
@@ -698,7 +698,7 @@ bool GridMap::ExistMap(uint32 mapid, int gx, int gy)
 
     if (!pf)
     {
-        sLog.outError("Check existing of map file '%s': not exist!", tmp);
+        sLog.outError("Please check for the existence of map file '%s'", tmp);
         delete[] tmp;
         return false;
     }
@@ -709,7 +709,7 @@ bool GridMap::ExistMap(uint32 mapid, int gx, int gy)
             header.versionMagic != *((uint32 const*)(MAP_VERSION_MAGIC)) ||
             !IsAcceptableClientBuild(header.buildMagic))
     {
-        sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.", tmp);
+        sLog.outError("Map file '%s' is non-compatible version created with a different map-extractor version.", tmp);
         delete[] tmp;
         fclose(pf);                                         // close file before return
         return false;
@@ -890,7 +890,9 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=tr
             // this prevent case when original Z "too high above ground and vmap height search fail"
             // this will not affect most normal cases (no map in instance, or stay at ground at continent)
             if (mapHeight > INVALID_HEIGHT && z2 - mapHeight > maxSearchDist)
-                maxSearchDist = z2 - mapHeight + 1.0f;      // 1.0 make sure that we not fail for case when map height near but above for vamp height
+            {
+                maxSearchDist = z2 - mapHeight + 1.0f;       // 1.0 make sure that we not fail for case when map height near but above for vamp height
+            }
 
             // look from a bit higher pos to find the floor
             vmapHeight = vmgr->getHeight(GetMapId(), x, y, z2, maxSearchDist);
@@ -924,12 +926,12 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=tr
             }
             else
             {
-                return mapHeight;                           // better use .map surface height
+                return mapHeight;                            // better use .map surface height
             }
         }
         else
         {
-            return vmapHeight;                              // we have only vmapHeight (if have)
+            return vmapHeight;                               // we have only vmapHeight (if have)
         }
     }
 
@@ -1237,7 +1239,7 @@ bool TerrainInfo::IsUnderWater(float x, float y, float z) const
     return false;
 }
 
-/*
+/**
  * Function find higher form water or ground height for current floor
  *
  * @param x, y, z    Coordinates original point at floor level

@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __MANGOS_REPUTATION_MGR_H
-#define __MANGOS_REPUTATION_MGR_H
+#ifndef MANGOS_H_MANGOS_REPUTATION_MGR
+#define MANGOS_H_MANGOS_REPUTATION_MGR
 
 #include "Common.h"
 #include "SharedDefines.h"

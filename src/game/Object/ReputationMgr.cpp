@@ -29,7 +29,7 @@
 #include "ObjectMgr.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
-#endif /* ENABLE_ELUNA */
+#endif /*ENABLE_ELUNA*/
 
 const int32 ReputationMgr::PointsInRank[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
 
@@ -152,10 +152,10 @@ void ReputationMgr::SendState(FactionState const* faction, bool anyRankIncreased
     data << uint8(anyRankIncreased ? 1 : 0);                // display visual effect
 
     size_t p_count = data.wpos();
-    data << uint32(count);                                  // placeholder
+    data << (uint32) count;                                 // placeholder
 
-    data << uint32(faction->ReputationListID);
-    data << uint32(faction->Standing);
+    data << (uint32) faction->ReputationListID;
+    data << (uint32) faction->Standing;
 
     for (FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
@@ -568,18 +568,26 @@ void ReputationMgr::LoadFromDB(QueryResult* result)
                 uint32 dbFactionFlags = fields[2].GetUInt32();
 
                 if (dbFactionFlags & FACTION_FLAG_VISIBLE)
-                    SetVisible(faction);                    // have internal checks for forced invisibility
+                {
+                    SetVisible(faction);                     // have internal checks for forced invisibility
+                }
 
                 if (dbFactionFlags & FACTION_FLAG_INACTIVE)
-                    SetInactive(faction, true);             // have internal checks for visibility requirement
+                {
+                    SetInactive(faction, true);              // have internal checks for visibility requirement
+                }
 
                 if (dbFactionFlags & FACTION_FLAG_AT_WAR)   // DB at war
-                    SetAtWar(faction, true);                // have internal checks for FACTION_FLAG_PEACE_FORCED
+                {
+                    SetAtWar(faction, true);                 // have internal checks for FACTION_FLAG_PEACE_FORCED
+                }
                 else                                        // DB not at war
                 {
                     // allow remove if visible (and then not FACTION_FLAG_INVISIBLE_FORCED or FACTION_FLAG_HIDDEN)
                     if (faction->Flags & FACTION_FLAG_VISIBLE)
-                        SetAtWar(faction, false);           // have internal checks for FACTION_FLAG_PEACE_FORCED
+                    {
+                        SetAtWar(faction, false);            // have internal checks for FACTION_FLAG_PEACE_FORCED
+                    }
                 }
 
                 // set atWar for hostile

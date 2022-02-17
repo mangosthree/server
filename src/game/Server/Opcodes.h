@@ -26,8 +26,8 @@
 /// @{
 /// \file
 
-#ifndef _OPCODES_H
-#define _OPCODES_H
+#ifndef MANGOS_H_OPCODES
+#define MANGOS_H_OPCODES
 
 #include "Common.h"
 

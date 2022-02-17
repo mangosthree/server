@@ -226,6 +226,9 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
     }
 
     uint32 num;
+    Player* target;
+    ObjectGuid target_guid;
+    std::string target_name;
 
     // delticket #num
     if (ExtractUInt32(&px, num))
@@ -263,9 +266,6 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
         return true;
     }
 
-    Player* target;
-    ObjectGuid target_guid;
-    std::string target_name;
     if (!ExtractPlayerTarget(&px, &target, &target_guid, &target_name))
     {
         return false;
@@ -285,4 +285,3 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
     PSendSysMessage(LANG_COMMAND_TICKETPLAYERDEL, nameLink.c_str());
     return true;
 }
-

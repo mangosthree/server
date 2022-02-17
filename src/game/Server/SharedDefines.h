@@ -73,8 +73,8 @@ enum Races
 
 #define RACEMASK_ALL_PLAYABLE \
     ((1<<(RACE_HUMAN-1))    |(1<<(RACE_ORC-1))      |(1<<(RACE_DWARF-1))   | \
-    (1<<(RACE_NIGHTELF-1))  |(1<<(RACE_UNDEAD-1))   |(1<<(RACE_TAUREN-1))  | \
-    (1<<(RACE_GNOME-1))     |(1<<(RACE_TROLL-1))    |(1<<(RACE_BLOODELF-1))| \
+     (1<<(RACE_NIGHTELF-1))  |(1<<(RACE_UNDEAD-1))   |(1<<(RACE_TAUREN-1))  | \
+     (1<<(RACE_GNOME-1))     |(1<<(RACE_TROLL-1))    |(1<<(RACE_BLOODELF-1))| \
     (1<<(RACE_DRAENEI-1))   |(1<<(RACE_GOBLIN-1))   |(1<<(RACE_WORGEN-1)))
 
 // for most cases batter use ChrRace data for team check as more safe, but when need full mask of team can be use this defines.
@@ -107,9 +107,9 @@ enum Classes
 
 #define CLASSMASK_ALL_PLAYABLE \
     ((1<<(CLASS_WARRIOR-1))|(1<<(CLASS_PALADIN-1))|(1<<(CLASS_HUNTER-1))| \
-    (1<<(CLASS_ROGUE-1))  |(1<<(CLASS_PRIEST-1)) |(1<<(CLASS_SHAMAN-1))| \
-    (1<<(CLASS_MAGE-1))   |(1<<(CLASS_WARLOCK-1))|(1<<(CLASS_DRUID-1)) | \
-    (1<<(CLASS_DEATH_KNIGHT-1)) )
+     (1<<(CLASS_ROGUE-1))  |(1<<(CLASS_PRIEST-1)) |(1<<(CLASS_SHAMAN-1))| \
+     (1<<(CLASS_MAGE-1))   |(1<<(CLASS_WARLOCK-1))|(1<<(CLASS_DRUID-1)) | \
+     (1<<(CLASS_DEATH_KNIGHT-1)) )
 
 #define CLASSMASK_ALL_CREATURES ((1<<(CLASS_WARRIOR-1)) | (1<<(CLASS_PALADIN-1)) | (1<<(CLASS_ROGUE-1)) | (1<<(CLASS_MAGE-1)) )
 #define MAX_CREATURE_CLASS 4
@@ -163,19 +163,19 @@ enum Stats
  */
 enum Powers
 {
-    POWER_MANA                          = 0,
-    POWER_RAGE                          = 1,
-    POWER_FOCUS                         = 2,
-    POWER_ENERGY                        = 3,
-    //POWER_HAPPINESS                     = 4,  unused 4.x.x
-    POWER_RUNE                          = 5,
-    POWER_RUNIC_POWER                   = 6,
+    POWER_MANA                          = 0,         ///< The most common one, mobs usually have this or rage
+    POWER_RAGE                          = 1,         ///< This is what warriors use to cast their spells
+    POWER_FOCUS                         = 2,         ///< Used by hunters after Cataclysm (4.x)
+    POWER_ENERGY                        = 3,         ///< Used by rouges to do their spells
+    //POWER_HAPPINESS                   = 4,         ///< unused 4.x.x
+    POWER_RUNE                          = 5,         ///< UNIT_FIELD_POWER6
+    POWER_RUNIC_POWER                   = 6,         ///< UNIT_FIELD_POWER7
     POWER_SOUL_SHARDS                   = 7,
     POWER_ECLIPSE                       = 8,
     POWER_HOLY_POWER                    = 9,
     POWER_ALTERNATIVE                   = 10,
     MAX_POWERS                          = 11,
-    POWER_HEALTH                        = 0xFFFFFFFE    // (-2 as signed value)
+    POWER_HEALTH                        = 0xFFFFFFFE ///< Health, everyone has this (-2 as signed value)
 };
 
 #define MAX_STORED_POWERS               5
@@ -185,15 +185,16 @@ enum Powers
 
 /**
  * The different spell schools that are available, used in both damage calculation
- * and spell casting to decide what should be affected, the SPELL_SCHOOL_NORMAL
+ * and spell casting to decide what should be affected, the \ref SpellSchools::SPELL_SCHOOL_NORMAL
  * is the armor, others should be self explanatory.
  *
  * Note that these are the values to use for changing ie, the armor via a
- * Modifier, and it is the Modifier::m_miscValue that should be set.
+ * \ref Modifier, and it is the \ref Modifier::m_miscValue that should be set.
  */
 enum SpellSchools
 {
-    SPELL_SCHOOL_NORMAL                 = 0,                // Physical, Armor
+    /// Physical, Armor
+    SPELL_SCHOOL_NORMAL                 = 0,
     SPELL_SCHOOL_HOLY                   = 1,
     SPELL_SCHOOL_FIRE                   = 2,
     SPELL_SCHOOL_NATURE                 = 3,
@@ -759,6 +760,10 @@ enum PvpTeamIndex
 
 #define PVP_TEAM_COUNT    2
 
+/**
+ * This are the different things that a spell can have as it's spell effect, see
+ * \ref SpellEntry::Effect for where in the DBC this is stored. Also see \ref HowSpellsWork
+ */
 enum SpellEffects
 {
     SPELL_EFFECT_NONE                      = 0,
@@ -1362,7 +1367,8 @@ enum Mechanics
     (1<<(MECHANIC_BANISH-1))|(1<<(MECHANIC_SHACKLE    -1))|(1<<(MECHANIC_HORROR-1))| \
     (1<<(MECHANIC_TURN  -1))|(1<<(MECHANIC_DAZE       -1))|(1<<(MECHANIC_SAPPED-1)))
 
-// Spell dispell type
+/// Different types of \ref Spell s that can be dispelled and what the reason for the dispel is.
+/// Also coupled with \ref Aura s as \ref Spell s have \ref Aura s.
 enum DispelType
 {
     DISPEL_NONE         = 0,
@@ -3806,8 +3812,8 @@ static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLAS
 
 enum TeleportLocation
 {
-    TELEPORT_LOCATION_HOMEBIND          = 0,
-    TELEPORT_LOCATION_BG_ENTRY_POINT    = 1,
+    TELEPORT_LOCATION_HOMEBIND       = 0,
+    TELEPORT_LOCATION_BG_ENTRY_POINT = 1,
 };
 
 // For Loot system

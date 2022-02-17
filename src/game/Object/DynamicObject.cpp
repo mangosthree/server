@@ -79,13 +79,6 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
         return false;
     }
 
-    SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
-    if (!spellProto)
-    {
-        sLog.outError("DynamicObject (spell %u) not created. Spell not exist!", spellId);
-        return false;
-    }
-
     SetEntry(spellId);
     SetObjectScale(DEFAULT_OBJECT_SCALE);
 
@@ -102,11 +95,18 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
     bytes |= 0x00 << 16;
     bytes |= 0x00 << 24;
     */
-    SetUInt32Value(DYNAMICOBJECT_BYTES, spellProto->SpellVisual[0] | (type << 28));
+    SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
 
+	SetUInt32Value(DYNAMICOBJECT_BYTES, spellProto->SpellVisual[0] | (type << 28));
     SetUInt32Value(DYNAMICOBJECT_SPELLID, spellId);
     SetFloatValue(DYNAMICOBJECT_RADIUS, radius);
     SetUInt32Value(DYNAMICOBJECT_CASTTIME, GameTime::GetGameTimeMS());    // new 2.4.0
+
+    if (!spellProto)
+    {
+        sLog.outError("DynamicObject (spell %u) not created. Spell not exist!", spellId);
+        return false;
+    }
 
     m_aliveDuration = duration;
     m_radius = radius;

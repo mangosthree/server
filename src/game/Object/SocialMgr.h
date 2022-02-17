@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __MANGOS_SOCIALMGR_H
-#define __MANGOS_SOCIALMGR_H
+#ifndef MANGOS_H_MANGOS_SOCIALMGR
+#define MANGOS_H_MANGOS_SOCIALMGR
 
 #include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"

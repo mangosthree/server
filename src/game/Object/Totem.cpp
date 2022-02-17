@@ -33,7 +33,7 @@
 #include "InstanceData.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
-#endif /* ENABLE_ELUNA */
+#endif /*ENABLE_ELUNA*/
 
 Totem::Totem() : Creature(CREATURE_SUBTYPE_TOTEM)
 {
@@ -217,7 +217,7 @@ void Totem::SetTypeBySummonSpell(SpellEntry const* spellProto)
     }
     if (spellProto->SpellIconID == 2056)
     {
-        m_type = TOTEM_STATUE;                              // Jewelery statue
+        m_type = TOTEM_STATUE;                               // Jewelery statue
     }
 }
 

@@ -139,7 +139,6 @@ namespace Movement
             bool isFacing() const { return raw() & Mask_Final_Facing;}
 
             uint8 getAnimationId() const { return animId;}
-
             /**
              * @brief
              *
@@ -242,7 +241,6 @@ namespace Movement
 #else
 #pragma pack(pop)
 #endif
-
 }
 
 #endif // MANGOSSERVER_MOVESPLINEFLAG_H

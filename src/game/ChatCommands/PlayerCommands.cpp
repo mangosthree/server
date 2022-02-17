@@ -2462,7 +2462,7 @@ bool ChatHandler::HandleModifyRepCommand(char* args)
 
     target->GetReputationMgr().SetReputation(factionEntry, amount);
     PSendSysMessage(LANG_COMMAND_MODIFY_REP, factionEntry->name[GetSessionDbcLocale()], factionId,
-        GetNameLink(target).c_str(), target->GetReputationMgr().GetReputation(factionEntry));
+                    GetNameLink(target).c_str(), target->GetReputationMgr().GetReputation(factionEntry));
     return true;
 }
 

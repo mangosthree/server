@@ -77,10 +77,6 @@ bool ChatHandler::HandleHonorAddKillCommand(char* /*args*/)
 }
 
 /**********************************************************************
-    CommandTable : modifyCommandTable
-/***********************************************************************/
-
-/**********************************************************************
     CommandTable : resetCommandTable
 /***********************************************************************/
 
@@ -119,3 +115,4 @@ bool ChatHandler::HandleHonorKillsUpdateCommand(char* /*args*/)
     target->UpdateHonorKills();
     return true;
 }
+

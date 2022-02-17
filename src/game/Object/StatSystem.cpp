@@ -557,17 +557,17 @@ void Player::UpdateParryPercentage()
 {
     const float parry_cap[MAX_CLASSES] =
     {
-        65.631440f,     // Warrior
-        65.631440f,     // Paladin
-        145.560408f,    // Hunter
-        145.560408f,    // Rogue
-        0.0f,           // Priest
-        65.631440f,     // DK
-        145.560408f,    // Shaman
-        0.0f,           // Mage
-        0.0f,           // Warlock
-        0.0f,           // ??
-        0.0f            // Druid
+        65.631440f,   // Warrior
+        65.631440f,   // Paladin
+        145.560408f,  // Hunter
+        145.560408f,  // Rogue
+        0.0f,         // Priest
+        65.631440f,   // DK
+        145.560408f,  // Shaman
+        0.0f,         // Mage
+        0.0f,         // Warlock
+        0.0f,         // ??
+        0.0f          // Druid
     };
 
     // No parry
@@ -595,17 +595,17 @@ void Player::UpdateDodgePercentage()
 {
     const float dodge_cap[MAX_CLASSES] =
     {
-        65.631440f,     // Warrior
-        65.631440f,     // Paladin
-        145.560408f,    // Hunter
-        145.560408f,    // Rogue
-        150.375940f,    // Priest
-        65.631440f,     // DK
-        145.560408f,    // Shaman
-        150.375940f,    // Mage
-        150.375940f,    // Warlock
-        0.0f,           // ??
-        116.890707f     // Druid
+        65.631440f,   // Warrior
+        65.631440f,   // Paladin
+        145.560408f,  // Hunter
+        145.560408f,  // Rogue
+        150.375940f,  // Priest
+        65.631440f,   // DK
+        145.560408f,  // Shaman
+        150.375940f,  // Mage
+        150.375940f,  // Warlock
+        0.0f,         // ??
+        116.890707f   // Druid
     };
 
     float diminishing = 0.0f;
@@ -1167,9 +1167,9 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
 
     // UNIT_FIELD_(RANGED)_ATTACK_POWER field
     SetInt32Value(UNIT_FIELD_ATTACK_POWER, (int32)base_attPower);
-    //UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
+    // UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
     SetInt32Value(UNIT_FIELD_ATTACK_POWER_MOD_POS, (int32)attPowerMod);
-    //UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
+    // UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
     SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, attPowerMultiplier);
 
     // automatically update weapon damage after attack power modification

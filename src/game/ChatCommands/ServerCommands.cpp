@@ -343,7 +343,7 @@ bool ChatHandler::HandleServerPLimitCommand(char* args)
 
     uint32 pLimit = sWorld.GetPlayerAmountLimit();
     AccountTypes allowedAccountType = sWorld.GetPlayerSecurityLimit();
-    char const* secName = "";
+    char const* secName;
     switch (allowedAccountType)
     {
         case SEC_PLAYER:        secName = "Player";        break;

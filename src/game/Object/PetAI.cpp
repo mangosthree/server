@@ -53,10 +53,12 @@ PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), inComb
 void PetAI::MoveInLineOfSight(Unit* pWho)
 {
     if (Unit* victim = m_creature->getVictim())
+    {
         if (victim->IsAlive())
         {
             return;
         }
+    }
 
     if (CharmInfo* charmInfo = m_creature->GetCharmInfo())
     {
@@ -556,7 +558,7 @@ void PetAI::AttackedBy(Unit* attacker)
     if (!(m_creature->getVictim() || ((Pet*)m_creature)->GetIsRetreating() == true)
         && !(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
         || (m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE))))
-        {
-            AttackStart(attacker);
-        }
+    {
+        AttackStart(attacker);
+    }
 }

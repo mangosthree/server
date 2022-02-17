@@ -821,8 +821,8 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                     }
                     break;
                 }
-                case CAST_FAIL_TOO_FAR:
                 case CAST_FAIL_POWER:
+                case CAST_FAIL_TOO_FAR:
                 case CAST_FAIL_NOT_IN_LOS:
                 {
                     if (!m_creature->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT))
@@ -968,6 +968,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             {
                 sLog.outErrorEventAI("Event %u - NULL target for ACTION_T_REMOVE_UNIT_FLAG(%u), target-type %u", EventId, action.type, action.unit_flag.target);
             }
+            break;
         case ACTION_T_AUTO_ATTACK:          //20
             m_MeleeEnabled = action.auto_attack.state != 0;
             break;
@@ -1620,7 +1621,7 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
             {
                 if (i->Time > m_EventDiff)
                 {
-                    // Do not decrement timers if event cannot trigger in this phase
+                    // Do not decrement timers if event can not trigger in this phase
                     if (!(i->Event.event_inverse_phase_mask & (1 << m_Phase)))
                     {
                         i->Time -= m_EventDiff;

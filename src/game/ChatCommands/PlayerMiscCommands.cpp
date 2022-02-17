@@ -351,6 +351,5 @@ bool ChatHandler::HandleResetAllCommand(char* args)
     {
         itr->second->SetAtLoginFlag(atLogin);
     }
-
     return true;
 }

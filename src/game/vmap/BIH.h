@@ -184,7 +184,7 @@ class BIH
          * @param maxDist
          * @param stopAtFirst
          */
-        void intersectRay(const Ray& r, RayCallback& intersectCallback, float& maxDist, bool stopAtFirst = false) const
+        void IntersectRay(const Ray& r, RayCallback& intersectCallback, float& maxDist, bool stopAtFirst = false) const
         {
             float intervalMin = -1.f;
             float intervalMax = -1.f;

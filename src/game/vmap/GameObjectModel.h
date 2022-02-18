@@ -112,7 +112,7 @@ class GameObjectModel
          * @param StopAtFirstHit
          * @return bool
          */
-        bool intersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const;
+        bool IntersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const;
 
         /**
          * @brief

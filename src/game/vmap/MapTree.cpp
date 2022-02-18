@@ -44,7 +44,7 @@ namespace VMAP
             MapRayCallback(ModelInstance* val): prims(val), hit(false) {}
             bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool pStopAtFirstHit = true)
             {
-                bool result = prims[entry].intersectRay(ray, distance, pStopAtFirstHit);
+                bool result = prims[entry].IntersectRay(ray, distance, pStopAtFirstHit);
                 if (result)
                 {
                     hit = true;
@@ -155,7 +155,7 @@ namespace VMAP
     {
         float distance = pMaxDist;
         MapRayCallback intersectionCallBack(iTreeValues);
-        iTree.intersectRay(pRay, intersectionCallBack, distance, pStopAtFirstHit);
+        iTree.IntersectRay(pRay, intersectionCallBack, distance, pStopAtFirstHit);
         if (intersectionCallBack.didHit())
         {
             pMaxDist = distance;

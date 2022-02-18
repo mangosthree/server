@@ -180,7 +180,7 @@ GameObjectModel* GameObjectModel::construct(const GameObject* const pGo)
     return mdl;
 }
 
-bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const
+bool GameObjectModel::IntersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const
 {
     if (!(phasemask & ph_mask))
     {

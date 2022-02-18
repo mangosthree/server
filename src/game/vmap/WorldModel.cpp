@@ -230,7 +230,7 @@ namespace VMAP
                iTilesX * iTilesY;
     }
 
-    bool WmoLiquid::writeToFile(FILE* wf)
+    bool WmoLiquid::WriteToFile(FILE* wf)
     {
         bool result = true;
         if (result && fwrite(&iTilesX, sizeof(uint32), 1, wf) != 1)
@@ -262,7 +262,7 @@ namespace VMAP
         return result;
     }
 
-    bool WmoLiquid::readFromFile(FILE* rf, WmoLiquid*& out)
+    bool WmoLiquid::ReadFromFile(FILE* rf, WmoLiquid*& out)
     {
         bool result = true;
         WmoLiquid* liquid = new WmoLiquid();
@@ -325,7 +325,7 @@ namespace VMAP
         meshTree.build(triangles, bFunc);
     }
 
-    bool GroupModel::writeToFile(FILE* wf)
+    bool GroupModel::WriteToFile(FILE* wf)
     {
         bool result = true;
         uint32 chunkSize, count;
@@ -395,7 +395,7 @@ namespace VMAP
         }
         if (result)
         {
-            result = meshTree.writeToFile(wf);
+            result = meshTree.WriteToFile(wf);
         }
 
         // write liquid data
@@ -411,13 +411,13 @@ namespace VMAP
         if (chunkSize)
             if (result)
             {
-                result = iLiquid->writeToFile(wf);
+                result = iLiquid->WriteToFile(wf);
             }
 
         return result;
     }
 
-    bool GroupModel::readFromFile(FILE* rf)
+    bool GroupModel::ReadFromFile(FILE* rf)
     {
         char chunk[8];
         bool result = true;
@@ -499,7 +499,7 @@ namespace VMAP
         }
         if (result)
         {
-            result = meshTree.readFromFile(rf);
+            result = meshTree.ReadFromFile(rf);
         }
 
         // read liquid data
@@ -513,7 +513,7 @@ namespace VMAP
         }
         if (result && chunkSize > 0)
         {
-            result = WmoLiquid::readFromFile(rf, iLiquid);
+            result = WmoLiquid::ReadFromFile(rf, iLiquid);
         }
         return result;
     }
@@ -736,7 +736,7 @@ namespace VMAP
             }
             for (uint32 i = 0; i < groupModels.size() && result; ++i)
             {
-                result = groupModels[i].writeToFile(wf);
+                result = groupModels[i].WriteToFile(wf);
             }
 
             // write group BIH
@@ -746,7 +746,7 @@ namespace VMAP
             }
             if (result)
             {
-                result = groupTree.writeToFile(wf);
+                result = groupTree.WriteToFile(wf);
             }
         }
 
@@ -800,7 +800,7 @@ namespace VMAP
             // if (result && fread(&groupModels[0], sizeof(GroupModel), count, rf) != count) result = false;
             for (uint32 i = 0; i < count && result; ++i)
             {
-                result = groupModels[i].readFromFile(rf);
+                result = groupModels[i].ReadFromFile(rf);
             }
 
             // read group BIH
@@ -810,7 +810,7 @@ namespace VMAP
             }
             if (result)
             {
-                result = groupTree.readFromFile(rf);
+                result = groupTree.ReadFromFile(rf);
             }
         }
 

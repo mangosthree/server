@@ -137,7 +137,7 @@ namespace VMAP
              * @param wf
              * @return bool
              */
-            bool writeToFile(FILE* wf);
+            bool WriteToFile(FILE* wf);
             /**
              * @brief
              *
@@ -145,7 +145,7 @@ namespace VMAP
              * @param liquid
              * @return bool
              */
-            static bool readFromFile(FILE* rf, WmoLiquid*& liquid);
+            static bool ReadFromFile(FILE* rf, WmoLiquid*& liquid);
         private:
             /**
              * @brief
@@ -248,14 +248,14 @@ namespace VMAP
              * @param wf
              * @return bool
              */
-            bool writeToFile(FILE* wf);
+            bool WriteToFile(FILE* wf);
             /**
              * @brief
              *
              * @param rf
              * @return bool
              */
-            bool readFromFile(FILE* rf);
+            bool ReadFromFile(FILE* rf);
             /**
              * @brief
              *

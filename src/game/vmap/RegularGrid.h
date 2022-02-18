@@ -240,9 +240,9 @@ class RegularGrid2D
          * @param intersectCallback
          * @param max_dist
          */
-        void intersectRay(const Ray& ray, RayCallback& intersectCallback, float max_dist)
+        void IntersectRay(const Ray& ray, RayCallback& intersectCallback, float max_dist)
         {
-            intersectRay(ray, intersectCallback, max_dist, ray.origin() + ray.direction() * max_dist);
+            IntersectRay(ray, intersectCallback, max_dist, ray.origin() + ray.direction() * max_dist);
         }
 
         template<typename RayCallback>
@@ -254,7 +254,7 @@ class RegularGrid2D
          * @param max_dist
          * @param end
          */
-        void intersectRay(const Ray& ray, RayCallback& intersectCallback, float& max_dist, const Vector3& end)
+        void IntersectRay(const Ray& ray, RayCallback& intersectCallback, float& max_dist, const Vector3& end)
         {
             Cell cell = Cell::ComputeCell(ray.origin().x, ray.origin().y);
             if (!cell.isValid())
@@ -268,7 +268,7 @@ class RegularGrid2D
             {
                 if (Node* node = nodes[cell.x][cell.y])
                 {
-                    node->intersectRay(ray, intersectCallback, max_dist);
+                    node->IntersectRay(ray, intersectCallback, max_dist);
                 }
                 return;
             }
@@ -315,7 +315,7 @@ class RegularGrid2D
                 if (Node* node = nodes[cell.x][cell.y])
                 {
                     //float enterdist = max_dist;
-                    node->intersectRay(ray, intersectCallback, max_dist);
+                    node->IntersectRay(ray, intersectCallback, max_dist);
                 }
                 if (cell == last_cell)
                 {
@@ -358,7 +358,7 @@ class RegularGrid2D
 
         template<typename RayCallback>
         /**
-         * @brief Optimized verson of intersectRay function for rays with vertical directions
+         * @brief Optimized verson of IntersectRay function for rays with vertical directions
          *
          * @param ray
          * @param intersectCallback
@@ -373,7 +373,7 @@ class RegularGrid2D
             }
             if (Node* node = nodes[cell.x][cell.y])
             {
-                node->intersectRay(ray, intersectCallback, max_dist);
+                node->IntersectRay(ray, intersectCallback, max_dist);
             }
         }
 };

@@ -155,7 +155,7 @@ struct DynamicTreeIntersectionCallback
     DynamicTreeIntersectionCallback(uint32 phasemask) : did_hit(false), phase_mask(phasemask) {}
     bool operator()(const G3D::Ray& r, const GameObjectModel& obj, float& distance)
     {
-        did_hit = obj.intersectRay(r, distance, true, phase_mask);
+        did_hit = obj.IntersectRay(r, distance, true, phase_mask);
         return did_hit;
     }
     bool didHit() const { return did_hit;}
@@ -172,7 +172,7 @@ struct DynamicTreeIntersectionCallback_WithLogger
     bool operator()(const G3D::Ray& r, const GameObjectModel& obj, float& distance)
     {
         DEBUG_LOG("testing intersection with %s", obj.name.c_str());
-        bool hit = obj.intersectRay(r, distance, true, phase_mask);
+        bool hit = obj.IntersectRay(r, distance, true, phase_mask);
         if (hit)
         {
             did_hit = true;
@@ -193,7 +193,7 @@ bool DynamicMapTree::getIntersectionTime(const uint32 phasemask, const G3D::Ray&
 {
     float distance = pMaxDist;
     DynamicTreeIntersectionCallback callback(phasemask);
-    impl.intersectRay(ray, callback, distance, endPos);
+    impl.IntersectRay(ray, callback, distance, endPos);
     if (callback.didHit())
     {
         pMaxDist = distance;
@@ -275,7 +275,7 @@ bool DynamicMapTree::isInLineOfSight(float x1, float y1, float z1, float x2, flo
 
     G3D::Ray r(v1, (v2 - v1) / maxDist);
     DynamicTreeIntersectionCallback callback(phasemask);
-    impl.intersectRay(r, callback, maxDist, v2);
+    impl.IntersectRay(r, callback, maxDist, v2);
 
     return !callback.did_hit;
 }

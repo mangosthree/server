@@ -543,7 +543,7 @@ namespace VMAP
             return false;
         }
         GModelRayCallback callback(triangles, vertices);
-        meshTree.intersectRay(ray, callback, distance, stopAtFirstHit);
+        meshTree.IntersectRay(ray, callback, distance, stopAtFirstHit);
         return callback.hit;
     }
 
@@ -617,7 +617,7 @@ namespace VMAP
         }
 
         WModelRayCallBack isc(groupModels);
-        groupTree.intersectRay(ray, isc, distance, stopAtFirstHit);
+        groupTree.IntersectRay(ray, isc, distance, stopAtFirstHit);
         return isc.hit;
     }
 

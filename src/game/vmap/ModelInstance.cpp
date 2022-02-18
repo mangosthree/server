@@ -38,7 +38,7 @@ namespace VMAP
         iInvScale = 1.f / iScale;
     }
 
-    bool ModelInstance::intersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit) const
+    bool ModelInstance::IntersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit) const
     {
         if (!iModel)
         {

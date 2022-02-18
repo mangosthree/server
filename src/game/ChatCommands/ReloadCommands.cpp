@@ -51,7 +51,7 @@ bool ChatHandler::HandleReloadAllSpellCommand(char* /*args*/)
     HandleReloadSpellBonusesCommand((char*)"a");
     HandleReloadSpellProcItemEnchantCommand((char*)"a");
     HandleReloadSpellScriptTargetCommand((char*)"a");
-    HandleReloadSpellTarGetPositionCommand((char*)"a");
+    HandleReloadSpellTargetPositionCommand((char*)"a");
     HandleReloadSpellThreatsCommand((char*)"a");
     HandleReloadSpellPetAurasCommand((char*)"a");
     return true;
@@ -608,7 +608,7 @@ bool ChatHandler::HandleReloadSpellScriptTargetCommand(char* /*args*/)
     return true;
 }
 
-bool ChatHandler::HandleReloadSpellTarGetPositionCommand(char* /*args*/)
+bool ChatHandler::HandleReloadSpellTargetPositionCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading spell target destination coordinates...");
     sSpellMgr.LoadSpellTarGetPositions();

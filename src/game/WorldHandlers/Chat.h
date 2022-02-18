@@ -529,7 +529,7 @@ class ChatHandler
         bool HandleReloadSpellProcItemEnchantCommand(char* args);
         bool HandleReloadSpellBonusesCommand(char* args);
         bool HandleReloadSpellScriptTargetCommand(char* args);
-        bool HandleReloadSpellTarGetPositionCommand(char* args);
+        bool HandleReloadSpellTargetPositionCommand(char* args);
         bool HandleReloadSpellThreatsCommand(char* args);
         bool HandleReloadSpellPetAurasCommand(char* args);
         bool HandleReloadDisablesCommand(char* args);

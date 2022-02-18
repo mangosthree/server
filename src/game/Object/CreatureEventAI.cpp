@@ -1515,7 +1515,7 @@ void CreatureEventAI::EnterCombat(Unit* enemy)
 
 void CreatureEventAI::AttackStart(Unit* who)
 {
-    if (!who || !m_creature->CanAttackByItself())
+    if (!who || !m_creature->CanInitiateAttack())
     {
         return;
     }

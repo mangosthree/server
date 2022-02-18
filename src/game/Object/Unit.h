@@ -1554,7 +1554,7 @@ class Unit : public WorldObject
          * Checks if a vehicle is allowed to attack other units by itself.
          * @return true if a vehicle can attack other units by itself (without any controller)
          */
-        bool CanAttackByItself() const;
+        bool CanInitiateAttack() const;
         /**
          * @return The victim that you are currently attacking
          */
@@ -3670,7 +3670,7 @@ class Unit : public WorldObject
         bool IsVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
         // function for low level grid visibility checks in player/creature cases
         virtual bool IsVisibleInGridForPlayer(Player* pl) const = 0;
-        bool isInvisibleForAlive() const;
+        bool IsInvisibleForAlive() const;
 
         TrackedAuraTargetMap&       GetTrackedAuraTargets(TrackedAuraType type)       { return m_trackedAuraTargets[type]; }
         TrackedAuraTargetMap const& GetTrackedAuraTargets(TrackedAuraType type) const { return m_trackedAuraTargets[type]; }

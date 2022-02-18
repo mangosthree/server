@@ -2538,7 +2538,7 @@ uint32 ScriptMgr::GetScriptId(const char* name) const
     return uint32(itr - m_scriptNames.begin());
 }
 
-uint32 ScriptMgr::GetBoundScrptId(ScriptedObjectType entity, int32 entry)
+uint32 ScriptMgr::GetBoundScriptId(ScriptedObjectType entity, int32 entry)
 {
 #ifdef _DEBUG
     m_bindMutex.acquire_read();

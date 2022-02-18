@@ -2678,7 +2678,7 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 NpcFlagsmask)
         return NULL;
     }
 
-    if (IsAlive() && unit->isInvisibleForAlive())
+    if (IsAlive() && unit->IsInvisibleForAlive())
     {
         return NULL;
     }

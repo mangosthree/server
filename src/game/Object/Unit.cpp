@@ -7399,7 +7399,7 @@ bool Unit::isAttackingPlayer() const
     return CheckAllControlledUnits(IsAttackingPlayerHelper(), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
-bool Unit::CanAttackByItself() const
+bool Unit::CanInitiateAttack() const
 {
     if (!IsVehicle())
     {
@@ -10281,10 +10281,10 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         return true;
     }
 
-    // isInvisibleForAlive() those units can only be seen by dead or if other
-    // unit is also invisible for alive.. if an isinvisibleforalive unit dies we
+    // IsInvisibleForAlive() those units can only be seen by dead or if other
+    // unit is also invisible for alive.. if an IsInvisibleForAlive unit dies we
     // should be able to see it too
-    if (u->IsAlive() && IsAlive() && isInvisibleForAlive() != u->isInvisibleForAlive())
+    if (u->IsAlive() && IsAlive() && IsInvisibleForAlive() != u->IsInvisibleForAlive())
         if (u->GetTypeId() != TYPEID_PLAYER || !((Player*)u)->isGameMaster())
         {
             return false;
@@ -11737,7 +11737,7 @@ bool Unit::IsVisibleForInState(Player const* u, WorldObject const* viewPoint, bo
 }
 
 /// returns true if creature can't be seen by alive units
-bool Unit::isInvisibleForAlive() const
+bool Unit::IsInvisibleForAlive() const
 {
     if (m_AuraFlags & UNIT_AURAFLAG_ALIVE_INVISIBLE)
     {

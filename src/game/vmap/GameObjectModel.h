@@ -76,7 +76,7 @@ class GameObjectModel
          *
          * @return const G3D::AABox
          */
-        const G3D::AABox& GetBounds() const { return iBound; }
+        const G3D::AABox& getBounds() const { return iBound; }
 
         /**
          * @brief
@@ -89,7 +89,7 @@ class GameObjectModel
          *
          * @return const G3D::Vector3
          */
-        const G3D::Vector3& GetPosition() const { return iPos;}
+        const G3D::Vector3& getPosition() const { return iPos;}
 
         /** Enables\disables collision. */
         /**

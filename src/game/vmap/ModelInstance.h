@@ -79,7 +79,7 @@ namespace VMAP
              *
              * @return const G3D::AABox
              */
-            const G3D::AABox& GetBounds() const { return iBound; }
+            const G3D::AABox& getBounds() const { return iBound; }
 
 
             /**

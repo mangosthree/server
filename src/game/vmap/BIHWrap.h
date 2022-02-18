@@ -165,7 +165,7 @@ class BIHWrap
             m_obj2Idx.getKeys(m_objects);
             m_objects_to_push.getMembers(m_objects);
 
-            m_tree.build(m_objects, BoundsFunc::GetBounds2);
+            m_tree.build(m_objects, BoundsFunc::getBounds2);
         }
 
         template<typename RayCallback>

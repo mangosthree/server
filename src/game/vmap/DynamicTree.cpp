@@ -36,13 +36,13 @@ template<> struct HashTrait< GameObjectModel>
 
 template<> struct PositionTrait< GameObjectModel>
 {
-    static void GetPosition(const GameObjectModel& g, Vector3& p) { p = g.GetPosition(); }
+    static void getPosition(const GameObjectModel& g, Vector3& p) { p = g.getPosition(); }
 };
 
 template<> struct BoundsTrait< GameObjectModel>
 {
-    static void GetBounds(const GameObjectModel& g, G3D::AABox& out) { out = g.GetBounds();}
-    static void GetBounds2(const GameObjectModel* g, G3D::AABox& out) { out = g->GetBounds();}
+    static void getBounds(const GameObjectModel& g, G3D::AABox& out) { out = g.getBounds();}
+    static void getBounds2(const GameObjectModel* g, G3D::AABox& out) { out = g->getBounds();}
 };
 
 /*

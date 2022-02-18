@@ -120,7 +120,7 @@ class RegularGrid2D
         void insert(const T& value)
         {
             Vector3 pos;
-            PositionFunc::GetPosition(value, pos);
+            PositionFunc::getPosition(value, pos);
             Node& node = getGridFor(pos.x, pos.y);
             node.insert(value);
             memberTable.set(&value, &node);

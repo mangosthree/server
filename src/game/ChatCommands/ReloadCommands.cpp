@@ -611,7 +611,7 @@ bool ChatHandler::HandleReloadSpellScriptTargetCommand(char* /*args*/)
 bool ChatHandler::HandleReloadSpellTargetPositionCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading spell target destination coordinates...");
-    sSpellMgr.LoadSpellTarGetPositions();
+    sSpellMgr.LoadSpellTargetPositions();
     SendGlobalSysMessage("DB table `spell_target_position` (destination coordinates for spell targets) reloaded.");
     return true;
 }

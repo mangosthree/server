@@ -2857,7 +2857,7 @@ void GameObject::SetInUse(bool use)
 
 uint32 GameObject::GetScriptId()
 {
-    return sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) ? sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) : sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, GetEntry());
+    return sScriptMgr.GetBoundScrptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) ? sScriptMgr.GetBoundScrptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) : sScriptMgr.GetBoundScrptId(SCRIPTED_GAMEOBJECT, GetEntry());
 }
 
 float GameObject::GetInteractionDistance()

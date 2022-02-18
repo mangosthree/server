@@ -127,11 +127,11 @@ class BIH
          * @brief
          *
          * @param primitives
-         * @param getBounds
+         * @param GetBounds
          * @param leafSize
          * @param printStats
          */
-        void build(const PrimArray& primitives, BoundsFunc& getBounds, uint32 leafSize = 3, bool printStats = false)
+        void build(const PrimArray& primitives, BoundsFunc& GetBounds, uint32 leafSize = 3, bool printStats = false)
         {
             if (primitives.size() == 0)
             {
@@ -143,11 +143,11 @@ class BIH
             dat.numPrims = primitives.size();
             dat.indices = new uint32[dat.numPrims];
             dat.primBound = new AABox[dat.numPrims];
-            getBounds(primitives[0], bounds);
+            GetBounds(primitives[0], bounds);
             for (uint32 i = 0; i < dat.numPrims; ++i)
             {
                 dat.indices[i] = i;
-                getBounds(primitives[i], dat.primBound[i]);
+                GetBounds(primitives[i], dat.primBound[i]);
                 bounds.merge(dat.primBound[i]);
             }
             std::vector<uint32> tempTree;

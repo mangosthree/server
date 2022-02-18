@@ -1318,7 +1318,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadGraveyardZones();
 
     sLog.outString("Loading spell target destination coordinates...");
-    sSpellMgr.LoadSpellTargetPositions();
+    sSpellMgr.LoadSpellTarGetPositions();
 
     sLog.outString("Loading spell pet auras...");
     sSpellMgr.LoadSpellPetAuras();

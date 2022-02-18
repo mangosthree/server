@@ -1701,7 +1701,7 @@ void Item::SetLootState(ItemLootUpdateState state)
 
 uint32 Item::GetScriptId() const
 {
-    return sScriptMgr.GetBoundScriptId(SCRIPTED_ITEM, GetEntry());
+    return sScriptMgr.GetBoundScrptId(SCRIPTED_ITEM, GetEntry());
 }
 
 uint32 Item::GetSpecialPrice(ItemPrototype const* proto, uint32 minimumPrice /*= 10000*/)

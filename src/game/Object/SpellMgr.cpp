@@ -1360,9 +1360,9 @@ SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 f
     return SPELL_CAST_OK;
 }
 
-void SpellMgr::LoadSpellTargetPositions()
+void SpellMgr::LoadSpellTarGetPositions()
 {
-    mSpellTargetPositions.clear();                          // need for reload case
+    mSpellTarGetPositions.clear();                          // need for reload case
 
     uint32 count = 0;
 
@@ -1387,7 +1387,7 @@ void SpellMgr::LoadSpellTargetPositions()
 
         uint32 Spell_ID = fields[0].GetUInt32();
 
-        SpellTargetPosition st;
+        SpellTarGetPosition st;
 
         st.target_mapId       = fields[1].GetUInt32();
         st.target_X           = fields[2].GetFloat();
@@ -1435,7 +1435,7 @@ void SpellMgr::LoadSpellTargetPositions()
             continue;
         }
 
-        mSpellTargetPositions[Spell_ID] = st;
+        mSpellTarGetPositions[Spell_ID] = st;
         ++count;
     }
     while (result->NextRow());
@@ -4184,7 +4184,7 @@ void SpellMgr::LoadSpellScriptTarget()
                 if (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT ||
                     spellEffect->EffectImplicitTargetA != TARGET_SELF && spellEffect->EffectImplicitTargetB == TARGET_SCRIPT)
                 {
-                    SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(i);
+                    SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.GetBounds<SpellTargetEntry>(i);
                     if (bounds.first == bounds.second)
                     {
                         sLog.outErrorDb("Spell (ID: %u) has effect EffectImplicitTargetA/EffectImplicitTargetB = %u (TARGET_SCRIPT), but does not have record in `spell_script_target`", spellInfo->Id, TARGET_SCRIPT);

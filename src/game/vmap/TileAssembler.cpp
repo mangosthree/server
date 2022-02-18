@@ -39,7 +39,7 @@ using std::pair;
 
 template<> struct BoundsTrait<VMAP::ModelSpawn*>
 {
-    static void getBounds(const VMAP::ModelSpawn* const& obj, G3D::AABox& out) { out = obj->getBounds(); }
+    static void GetBounds(const VMAP::ModelSpawn* const& obj, G3D::AABox& out) { out = obj->GetBounds(); }
 };
 
 namespace VMAP
@@ -114,7 +114,7 @@ namespace VMAP
 
             printf("Creating map tree...\n");
             BIH pTree;
-            pTree.build(mapSpawns, BoundsTrait<ModelSpawn*>::getBounds);
+            pTree.build(mapSpawns, BoundsTrait<ModelSpawn*>::GetBounds);
 
             // ===> possibly move this code to StaticMapTree class
             std::map<uint32, uint32> modelNodeIdx;

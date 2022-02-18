@@ -5060,7 +5060,7 @@ void Spell::EffectTeleportUnits(SpellEffectEntry const* effect)   // TODO - Use 
         case TARGET_AREAEFFECT_INSTANT:                     // in all cases first TARGET_TABLE_X_Y_Z_COORDINATES
         case TARGET_TABLE_X_Y_Z_COORDINATES:
         {
-            SpellTargetPosition const* st = sSpellMgr.GetSpellTargetPosition(m_spellInfo->Id);
+            SpellTarGetPosition const* st = sSpellMgr.GetSpellTarGetPosition(m_spellInfo->Id);
             if (!st)
             {
                 sLog.outError("Spell::EffectTeleportUnits - unknown Teleport coordinates for spell ID %u", m_spellInfo->Id);
@@ -13690,7 +13690,7 @@ void Spell::EffectBind(SpellEffectEntry const* effect)
     if (effect->EffectImplicitTargetA == TARGET_TABLE_X_Y_Z_COORDINATES ||
         effect->EffectImplicitTargetB == TARGET_TABLE_X_Y_Z_COORDINATES)
     {
-        SpellTargetPosition const* st = sSpellMgr.GetSpellTargetPosition(m_spellInfo->Id);
+        SpellTarGetPosition const* st = sSpellMgr.GetSpellTarGetPosition(m_spellInfo->Id);
         if (!st)
         {
             sLog.outError("Spell::EffectBind - unknown Teleport coordinates for spell ID %u", m_spellInfo->Id);

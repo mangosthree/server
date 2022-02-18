@@ -617,7 +617,7 @@ void ObjectMgr::LoadCreatureTemplates()
                 continue;
             }
 
-            if (sScriptMgr.GetBoundScriptId(SCRIPTED_UNIT, difficultyInfo->Entry))
+            if (sScriptMgr.GetBoundScrptId(SCRIPTED_UNIT, difficultyInfo->Entry))
             {
                 sLog.outErrorDb("Difficulty %u mode creature (Entry: %u) has `ScriptName`, but in any case will used difficulty 0 mode creature (Entry: %u) ScriptName.",
                                 diff + 1, cInfo->DifficultyEntry[diff], i);
@@ -2937,7 +2937,7 @@ void ObjectMgr::LoadItemRequiredTarget()
             {
                 if (pItemProto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_USE)
                 {
-                    SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(pSpellInfo->Id);
+                    SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.GetBounds<SpellTargetEntry>(pSpellInfo->Id);
                     if (bounds.first != bounds.second)
                     {
                         break;

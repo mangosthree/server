@@ -587,7 +587,7 @@ class SQLMultiStorage : public SQLStorageBase
          * @param key
          * @return SQLMSIteratorBounds<T>
          */
-        SQLMSIteratorBounds<T> getBounds(uint32 key) const { return SQLMSIteratorBounds<T>(m_indexMultiMap.equal_range(key)); }
+        SQLMSIteratorBounds<T> GetBounds(uint32 key) const { return SQLMSIteratorBounds<T>(m_indexMultiMap.equal_range(key)); }
 
         /**
          * @brief

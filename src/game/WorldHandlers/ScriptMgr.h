@@ -642,7 +642,7 @@ class ScriptMgr
             return m_scriptNames.size();
         }
 
-        uint32 GetBoundScriptId(ScriptedObjectType entity, int32 entry);
+        uint32 GetBoundScrptId(ScriptedObjectType entity, int32 entry);
 
         ScriptLoadResult LoadScriptLibrary(const char* libName);
         void UnloadScriptLibrary();

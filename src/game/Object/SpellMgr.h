@@ -898,7 +898,7 @@ struct SpellTargetEntry
 };
 
 // coordinates for spells (accessed using SpellMgr functions)
-struct SpellTargetPosition
+struct SpellTarGetPosition
 {
     uint32 target_mapId;
     float  target_X;
@@ -907,7 +907,7 @@ struct SpellTargetPosition
     float  target_Orientation;
 };
 
-typedef UNORDERED_MAP<uint32, SpellTargetPosition> SpellTargetPositionMap;
+typedef UNORDERED_MAP<uint32, SpellTarGetPosition> SpellTarGetPositionMap;
 
 // Spell pet auras
 class PetAura
@@ -1180,10 +1180,10 @@ class SpellMgr
         }
 
         // Spell target coordinates
-        SpellTargetPosition const* GetSpellTargetPosition(uint32 spell_id) const
+        SpellTarGetPosition const* GetSpellTarGetPosition(uint32 spell_id) const
         {
-            SpellTargetPositionMap::const_iterator itr = mSpellTargetPositions.find(spell_id);
-            if (itr != mSpellTargetPositions.end())
+            SpellTarGetPositionMap::const_iterator itr = mSpellTarGetPositions.find(spell_id);
+            if (itr != mSpellTarGetPositions.end())
             {
                 return &itr->second;
             }
@@ -1407,7 +1407,7 @@ class SpellMgr
         void LoadSpellProcEvents();
         void LoadSpellProcItemEnchant();
         void LoadSpellBonuses();
-        void LoadSpellTargetPositions();
+        void LoadSpellTarGetPositions();
         void LoadSpellThreats();
         void LoadSkillLineAbilityMap();
         void LoadSkillRaceClassInfoMap();
@@ -1423,7 +1423,7 @@ class SpellMgr
         SpellChainMapNext  mSpellChainsNext;
         SpellLearnSkillMap mSpellLearnSkills;
         SpellLearnSpellMap mSpellLearnSpells;
-        SpellTargetPositionMap mSpellTargetPositions;
+        SpellTarGetPositionMap mSpellTarGetPositions;
         SpellElixirMap     mSpellElixirs;
         SpellThreatMap     mSpellThreatMap;
         SpellProcEventMap  mSpellProcEventMap;

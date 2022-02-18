@@ -1505,7 +1505,7 @@ namespace LuaUnit
 
         if (Player* player = unit->ToPlayer())
         {
-            player->GiveLevel(newlevel);
+            player->SetLevel(newlevel);
             player->InitTalentForLevel();
             player->SetUInt32Value(PLAYER_XP, 0);
         }

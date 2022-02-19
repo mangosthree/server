@@ -1845,23 +1845,6 @@ void BattleGround::DoorOpen(ObjectGuid guid)
     }
 }
 
-Team BattleGround::GetPrematureWinner()
-{
-    uint32 hordePlayers = GetPlayersCountByTeam(HORDE);
-    uint32 alliancePlayers = GetPlayersCountByTeam(ALLIANCE);
-
-    if (hordePlayers > alliancePlayers)
-    {
-        return HORDE;
-    }
-    if (alliancePlayers > hordePlayers)
-    {
-        return ALLIANCE;
-    }
-
-    return TEAM_NONE;
-}
-
 /// <summary>
 /// Called when [object DB load].
 /// </summary>
@@ -2353,4 +2336,27 @@ void BattleGround::SetBracket(PvPDifficultyEntry const* bracketEntry)
 {
     m_BracketId  = bracketEntry->GetBracketId();
     SetLevelRange(bracketEntry->minLevel, bracketEntry->maxLevel);
+}
+
+/// <summary>
+/// Gets the winner in case of premature finish of the BG.
+/// Different BG's may have different criteria for choosing the winner besides simple player accounting
+/// </summary>
+/// <returns>The winner team</returns>
+Team BattleGround::GetPrematureWinner()
+{
+    uint32 hordePlayers = GetPlayersCountByTeam(HORDE);
+    uint32 alliancePlayers = GetPlayersCountByTeam(ALLIANCE);
+
+    if (alliancePlayers > hordePlayers)
+    {
+        return ALLIANCE;
+    }
+
+    if (hordePlayers > alliancePlayers)
+    {
+        return HORDE;
+    }
+
+    return TEAM_NONE;
 }

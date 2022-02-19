@@ -1041,6 +1041,16 @@ void Object::ApplyModPositiveFloatValue(uint16 index, float  val, bool apply)
     SetFloatValue(index, cur);
 }
 
+void Object::MarkFlagUpdateForClient(uint32 index)
+{
+    m_changedValues[index] = true;
+    if (m_inWorld && !m_objectUpdated)
+    {
+        AddToClientUpdateList();
+        m_objectUpdated = true;
+    }
+}
+
 void Object::SetFlag(uint16 index, uint32 newFlag)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -1186,16 +1196,6 @@ void Object::MarkForClientUpdate()
             AddToClientUpdateList();
             m_objectUpdated = true;
         }
-    }
-}
-
-void Object::ForceValuesUpdateAtIndex(uint32 index)
-{
-    m_changedValues[index] = true;
-    if (m_inWorld && !m_objectUpdated)
-    {
-        AddToClientUpdateList();
-        m_objectUpdated = true;
     }
 }
 
@@ -1904,6 +1904,8 @@ void WorldObject::ResetMap()
     delete elunaEvents;
     elunaEvents = NULL;
 #endif
+
+    m_currMap = NULL;
 }
 
 TerrainInfo const* WorldObject::GetTerrain() const
@@ -1999,6 +2001,7 @@ GameObject* WorldObject::SummonGameObject(uint32 id, float x, float y, float z, 
     pGameObj->SetRespawnTime(despwtime/IN_MILLISECONDS);
 
     map->Add(pGameObj);
+    pGameObj->AIM_Initialize();
 
     return pGameObj;
 }
@@ -2397,13 +2400,13 @@ void WorldObject::SetActiveObjectState(bool active)
 
     if (IsInWorld() && !isType(TYPEMASK_PLAYER))
         // player's update implemented in a different from other active worldobject's way
-        // it's considired to use generic way in future
+        // considered using a generic way in future
     {
         if (IsActiveObject() && !active)
         {
             GetMap()->RemoveFromActive(this);
         }
-        else if (!IsActiveObject() && active)
+        else if (IsActiveObject() && active)
         {
             GetMap()->AddToActive(this);
         }

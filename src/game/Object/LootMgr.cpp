@@ -108,6 +108,8 @@ void LootStore::LoadLootTable()
     // Clearing store (for reloading case)
     Clear();
 
+    sLog.outString("%s :", GetName());
+
     //                                                 0      1     2                    3        4              5         6
     QueryResult* result = WorldDatabase.PQuery("SELECT `entry`, `item`, `ChanceOrQuestChance`, `groupid`, `mincountOrRef`, `maxcount`, `condition_id` FROM `%s`", GetName());
 
@@ -621,17 +623,18 @@ void Loot::FillNotNormalLootFor(Player* pl)
 {
     uint32 plguid = pl->GetGUIDLow();
 
-    QuestItemMap::const_iterator qmapitr = m_playerCurrencies.find(plguid);
+    QuestItemMap::const_iterator qmapitr = m_playerQuestItems.find(plguid);
+    if (qmapitr == m_playerQuestItems.end())
+    {
+        FillQuestLoot(pl);
+    }
+
+    qmapitr = m_playerCurrencies.find(plguid);
     if (qmapitr == m_playerCurrencies.end())
     {
         FillCurrencyLoot(pl);
     }
 
-    qmapitr = m_playerQuestItems.find(plguid);
-    if (qmapitr == m_playerQuestItems.end())
-    {
-        FillQuestLoot(pl);
-    }
 
     qmapitr = m_playerFFAItems.find(plguid);
     if (qmapitr == m_playerFFAItems.end())

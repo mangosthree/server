@@ -31,6 +31,7 @@
 #include "LootMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Utilities/EventProcessor.h"
+#include <memory>
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
@@ -38,6 +39,8 @@
 #else
 #pragma pack(push,1)
 #endif
+
+class GameObjectAI;
 
 // from `gameobject_template`
 struct GameObjectInfo
@@ -809,6 +812,10 @@ class GameObject : public WorldObject
 
         uint32 GetScriptId();
 
+        bool AIM_Initialize();
+
+        GameObjectAI* AI() const { return m_AI.get(); }
+
         GridReference<GameObject>& GetGridRef() { return m_gridRef; }
 
         GameObjectModel* m_model;
@@ -849,10 +856,16 @@ class GameObject : public WorldObject
         ObjectGuid m_lootRecipientGuid;                     // player who will have rights for looting if m_lootGroupRecipient==0 or group disbanded
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
 
+                 // Used for trap type
+        time_t m_rearmTimer;                                // timer to rearm the trap once disarmed
+
         // Used for chest type
         bool m_isInUse;                                     // only one player at time are allowed to open chest
         time_t m_reStockTimer;                              // timer to refill the chest
         time_t m_despawnTimer;                              // timer to despawn the chest if something changed in it
+        bool m_AI_locked;
+
+        std::unique_ptr<GameObjectAI> m_AI;
 
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);

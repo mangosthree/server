@@ -197,10 +197,12 @@ ObjectMgr::~ObjectMgr()
     }
 
     for (int race = 0; race < MAX_RACES; ++race)
+    {
         for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
         {
             delete[] playerInfo[race][class_].levelInfo;
         }
+    }
 
     // free objects
     for (GroupMap::iterator itr = mGroupMap.begin(); itr != mGroupMap.end(); ++itr)
@@ -9091,6 +9093,19 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
 
             return creature;
         }
+        case CONDITION_GAMEOBJECT_IN_RANGE:
+        {
+            GameObject* pGo = NULL;
+
+            if (source)
+            {
+                MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*source, m_value1, m_value2);
+                MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> searcher(pGo, go_check);
+
+                Cell::VisitGridObjects(source, searcher, m_value2);
+            }
+            return pGo;
+        }
         default:
             return false;
     }
@@ -9570,6 +9585,21 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
                 sLog.outErrorDb("Creature in range condition (entry %u, type %u) has an invalid value in value2. (Range %u must be greater than 0), skipping.", entry, condition, value2);
                 return false;
             }
+            break;
+        }
+        case CONDITION_GAMEOBJECT_IN_RANGE:
+        {
+            if (!sGOStorage.LookupEntry<GameObjectInfo>(value1))
+            {
+                sLog.outErrorDb("Game object in range condition (entry %u, type %u) has an invalid value in value1 (gameobject). (Game object %u does not exist in the database), skipping.", entry, condition, value1);
+                return false;
+            }
+            if (value2 <= 0)
+            {
+                sLog.outErrorDb("Game object in range condition (entry %u, type %u) has an invalid value in value2 (range). (Range %u must be greater than 0), skipping.", entry, condition, value2);
+                return false;
+            }
+            break;
         }
         case CONDITION_NONE:
             break;
@@ -11176,59 +11206,6 @@ bool FindCreatureData::operator()(CreatureDataPair const& dataPair)
     return false;
 }
 
-bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=NULL*/)
-{
-    MangosStringLocale const* data = sObjectMgr.GetMangosStringLocale(entry);
-
-    if (!data)
-    {
-        _DoStringError(entry, "DoScriptText with source %s could not find text entry %i.", source->GetGuidStr().c_str(), entry);
-        return false;
-    }
-
-    if (data->SoundId)
-    {
-        if (data->Type == CHAT_TYPE_ZONE_YELL)
-        {
-            source->GetMap()->PlayDirectSoundToMap(data->SoundId, source->GetZoneId());
-        }
-        else if (data->Type == CHAT_TYPE_WHISPER || data->Type == CHAT_TYPE_BOSS_WHISPER)
-        {
-            // An error will be displayed for the text
-            if (target && target->GetTypeId() == TYPEID_PLAYER)
-            {
-                source->PlayDirectSound(data->SoundId, (Player const*)target);
-            }
-        }
-        else
-        {
-            source->PlayDirectSound(data->SoundId);
-        }
-    }
-
-    if (data->Emote)
-    {
-        if (source->GetTypeId() == TYPEID_UNIT || source->GetTypeId() == TYPEID_PLAYER)
-        {
-            ((Unit*)source)->HandleEmote(data->Emote);
-        }
-        else
-        {
-            _DoStringError(entry, "DoDisplayText entry %i tried to process emote for invalid source %s", entry, source->GetGuidStr().c_str());
-            return false;
-        }
-    }
-
-    if ((data->Type == CHAT_TYPE_WHISPER || data->Type == CHAT_TYPE_BOSS_WHISPER) && (!target || target->GetTypeId() != TYPEID_PLAYER))
-    {
-        _DoStringError(entry, "DoDisplayText entry %i can not whisper without target unit (TYPEID_PLAYER).", entry);
-        return false;
-    }
-
-    source->MonsterText(data, target);
-    return true;
-}
-
 CreatureDataPair const* FindCreatureData::GetResult() const
 {
     if (i_spawnedData)
@@ -11306,6 +11283,59 @@ GameObjectDataPair const* FindGOData::GetResult() const
     }
 
     return i_anyData;
+}
+
+bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=NULL*/)
+{
+    MangosStringLocale const* data = sObjectMgr.GetMangosStringLocale(entry);
+
+    if (!data)
+    {
+        _DoStringError(entry, "DoScriptText with source %s could not find text entry %i.", source->GetGuidStr().c_str(), entry);
+        return false;
+    }
+
+    if (data->SoundId)
+    {
+        if (data->Type == CHAT_TYPE_ZONE_YELL)
+        {
+            source->GetMap()->PlayDirectSoundToMap(data->SoundId, source->GetZoneId());
+        }
+        else if (data->Type == CHAT_TYPE_WHISPER || data->Type == CHAT_TYPE_BOSS_WHISPER)
+        {
+            // An error will be displayed for the text
+            if (target && target->GetTypeId() == TYPEID_PLAYER)
+            {
+                source->PlayDirectSound(data->SoundId, (Player const*)target);
+            }
+        }
+        else
+        {
+            source->PlayDirectSound(data->SoundId);
+        }
+    }
+
+    if (data->Emote)
+    {
+        if (source->GetTypeId() == TYPEID_UNIT || source->GetTypeId() == TYPEID_PLAYER)
+        {
+            ((Unit*)source)->HandleEmote(data->Emote);
+        }
+        else
+        {
+            _DoStringError(entry, "DoDisplayText entry %i tried to process emote for invalid source %s", entry, source->GetGuidStr().c_str());
+            return false;
+        }
+    }
+
+    if ((data->Type == CHAT_TYPE_WHISPER || data->Type == CHAT_TYPE_BOSS_WHISPER) && (!target || target->GetTypeId() != TYPEID_PLAYER))
+    {
+        _DoStringError(entry, "DoDisplayText entry %i can not whisper without target unit (TYPEID_PLAYER).", entry);
+        return false;
+    }
+
+    source->MonsterText(data, target);
+    return true;
 }
 
 void ObjectMgr::LoadHotfixData()

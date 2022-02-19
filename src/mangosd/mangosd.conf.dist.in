@@ -1188,10 +1188,10 @@ Channel.SilentlyGMJoin          = 0
 #        A spell that will be cast when a gm uses ".gm visible off" (Must be aura spell)
 #        Default: 37800 (50% Transparency)
 #                 0 (Disabled)
-#	 GM.MaxSpeedFactor
-#		Set the max speed factor whend using commands .mod speed / .mod aspeed  etc...
-#		Only Integer values
-#		Default: 10
+#    GM.MaxSpeedFactor
+#        Set the max speed factor whend using commands .mod speed / .mod aspeed  etc...
+#        Only Integer values
+#        Default: 10
 #
 ################################################################################
 

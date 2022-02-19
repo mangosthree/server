@@ -3013,7 +3013,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 
         if (level < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
         {
-            GiveLevel(level + 1);
+            SetLevel(level + 1);
         }
 
         level = getLevel();
@@ -3025,7 +3025,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 
 // Update player to next level
 // Current player experience not update (must be update by caller)
-void Player::GiveLevel(uint32 level)
+void Player::SetLevel(uint32 level)
 {
     if (level == getLevel())
     {

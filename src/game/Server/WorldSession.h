@@ -466,7 +466,8 @@ class WorldSession
         // Misc
         void SetClientTimeDelay(uint32 delay) { m_clientTimeDelay = delay; }
         void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
-
+        void HandleViolenceLevel(WorldPacket& recvPacket);
+        
     public:                                                 // opcodes handlers
 
         // opcodes handlers

@@ -1857,11 +1857,3 @@ void WorldSession::HandleObjectUpdateFailedOpcode(WorldPacket& recv_data)
     }
 }
 
-void WorldSession::HandleViolenceLevel(WorldPacket& recvPacket)
-{
-    uint8 violenceLevel;
-    recvPacket >> violenceLevel;
-
-    // do something?
-}
-

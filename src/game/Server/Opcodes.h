@@ -903,7 +903,7 @@ enum Opcodes
     CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK = 0x1341,
     MSG_MOVE_START_SWIM_CHEAT                             = 0x1342,
     MSG_MOVE_STOP_SWIM_CHEAT                              = 0x1343,
-    SMSG_MOVE_SET_CAN_FLY                                 = 0x720E, // 4.3.4 15595
+    SMSG_MOVE_SET_CAN_FLY                                 = 0x3DA1, // 4.3.4 15595
     SMSG_MOVE_UNSET_CAN_FLY                               = 0x15A2, // 4.3.4 15595
     CMSG_MOVE_SET_CAN_FLY_ACK                             = 0x790C, // 4.3.4 15595
     CMSG_MOVE_SET_FLY                                     = 0x1347,
@@ -1439,7 +1439,6 @@ enum Opcodes
     SMSG_REFORGE_RESULT                                   = 0x58A4, // 4.3.4 15595
     CMSG_LOAD_SCREEN                                      = 0x2422, // 4.3.4 15595
     SMSG_START_TIMER                                      = 0x59A5, // 4.3.4 15595
-    CMSG_VIOLENCE_LEVEL                                   = 0x7816,
 };
 
 // Don't forget to change this value and add opcode name to Opcodes.cpp when you add new opcode!

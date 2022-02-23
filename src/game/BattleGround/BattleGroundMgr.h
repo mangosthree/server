@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -473,6 +473,19 @@ class BattleGroundMgr
          * @param bg
          */
         void BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg);
+        /**
+         * @brief
+         *
+         * @param data
+         * @param bg
+         * @param player
+         * @param QueueSlot
+         * @param StatusID
+         * @param Time1
+         * @param Time2
+         * @param arenaType
+         * @param arenaTeam
+         */
         void BuildBattleGroundStatusPacket(WorldPacket* data, BattleGround* bg, Player* player, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, ArenaType arenatype);
         void BuildBattleGroundStatusFailedPacket(WorldPacket* data, BattleGround* bg, Player* player, uint8 QueueSlot, GroupJoinBattlegroundResult result);
         /**

@@ -1,7 +1,7 @@
 # MaNGOS is a full featured server for World of Warcraft, supporting
 # the following clients: 1.12.x, 2.4.3, 3.2.5a, 4.2.3 and 5.4.8
 #
-# Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+# Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
 #
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
@@ -42,6 +42,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src/framework/
     ${CMAKE_SOURCE_DIR}/src/shared/
     ${CMAKE_SOURCE_DIR}/src/game/
+    ${CMAKE_SOURCE_DIR}/src/game/Time/
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_BINARY_DIR}

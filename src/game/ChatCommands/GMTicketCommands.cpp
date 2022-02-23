@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -226,6 +226,9 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
     }
 
     uint32 num;
+    Player* target;
+    ObjectGuid target_guid;
+    std::string target_name;
 
     // delticket #num
     if (ExtractUInt32(&px, num))
@@ -263,9 +266,6 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
         return true;
     }
 
-    Player* target;
-    ObjectGuid target_guid;
-    std::string target_name;
     if (!ExtractPlayerTarget(&px, &target, &target_guid, &target_name))
     {
         return false;
@@ -285,4 +285,3 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
     PSendSysMessage(LANG_COMMAND_TICKETPLAYERDEL, nameLink.c_str());
     return true;
 }
-

@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2014-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -234,6 +234,9 @@ void AddSC_gilneas();
 void AddSC_gilneas_city();
 void AddSC_twilight_highlands();
 void AddSC_vashjir();
+void AddSC_instance_baradin_hold();
+void AddSC_boss_alizabal();
+
 #endif
 
 void AddEasternKingdomsScripts()
@@ -442,6 +445,8 @@ void AddEasternKingdomsScripts()
 #if defined (CATA) || defined(MISTS)
     AddSC_gilneas();
     AddSC_gilneas_city();
+    AddSC_instance_baradin_hold();
+    AddSC_boss_alizabal();
 #endif
 
 }

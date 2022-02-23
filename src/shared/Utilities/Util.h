@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,16 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <cctype>
+#include <functional>
+
+enum class TimeFormat : uint8
+{
+    FullText,       // 1 Days 2 Hours 3 Minutes 4 Seconds
+    ShortText,      // 1d 2h 3m 4s
+    Numeric         // 1:2:3:4
+};
 
 /**
  * @brief
@@ -74,12 +84,19 @@ void stripLineInvisibleChars(std::string& src);
 /**
  * @brief
  *
+ * @param localtime
+ */
+std::tm localtime_r(const time_t& time);
+
+/**
+ * @brief
+ *
  * @param timeInSecs
  * @param shortText
  * @param hoursOnly
  * @return std::string
  */
-std::string secsToTimeString(time_t timeInSecs, bool shortText = false, bool hoursOnly = false);
+std::string secsToTimeString(time_t timeInSecs, TimeFormat timeFormat = TimeFormat::FullText, bool hoursOnly = false);
 /**
  * @brief
  *

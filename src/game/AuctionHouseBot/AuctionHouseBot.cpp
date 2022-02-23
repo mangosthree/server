@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1895,10 +1895,16 @@ void AuctionBotSeller::SetPricesOfItem(ItemPrototype const* itemProto, AHB_Selle
                        (itemQuality < MAX_AUCTION_QUALITY ? config.GetPriceRatioPerQuality(AuctionQuality(itemQuality)) : 1) ;
 
     double randrange = temp_buyp * 0.4;
-    buyp = (urand(temp_buyp - randrange, temp_buyp + randrange) / 100) + 1;
+    uint32 buypMin = (uint32)temp_buyp - (uint32)randrange;
+    uint32 buypMax = ((uint32)temp_buyp + (uint32)randrange) < temp_buyp ? std::numeric_limits<uint32>::max() : temp_buyp + randrange;
+
+    buyp = (urand(buypMin, buypMax) / 100) + 1;
     double urandrange = buyp * 40;
     double temp_bidp = buyp * 50;
-    bidp = (urand(temp_bidp - urandrange, temp_bidp + urandrange) / 100) + 1;
+    uint32 bidPmin = (uint32)temp_bidp - (uint32)urandrange;
+    uint32 bidPmax = ((uint32)temp_bidp + (uint32)urandrange) < temp_bidp ? std::numeric_limits<uint32>::max() : temp_bidp + urandrange;
+
+    bidp = (urand(bidPmin, bidPmax) / 100) + 1;
 }
 
 void AuctionBotSeller::SetItemsRatio(uint32 al, uint32 ho, uint32 ne)

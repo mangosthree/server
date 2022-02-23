@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef MANGOSSERVER_TEMPSPAWN_H
-#define MANGOSSERVER_TEMPSPAWN_H
+#ifndef MANGOSSERVER_TEMPSUMMON_H
+#define MANGOSSERVER_TEMPSUMMON_H
 
 #include "Creature.h"
 #include "ObjectAccessor.h"
@@ -37,7 +37,7 @@ class TemporarySummon : public Creature
         void Update(uint32 update_diff, uint32 time) override;
         void SetSummonProperties(TempSpawnType type, uint32 lifetime);
         void Summon(TempSpawnType type, uint32 lifetime);
-        void MANGOS_DLL_SPEC UnSummon();
+        void UnSummon();
         void SaveToDB();
         ObjectGuid const& GetSummonerGuid() const { return m_summoner ; }
         Unit* GetSummoner() const { return ObjectAccessor::GetUnit(*this, m_summoner); }

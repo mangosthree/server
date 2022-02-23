@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -848,6 +848,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
     data << uint32(pQuest->GetSoundTurnInId());
 
     GetMenuSession()->SendPacket(&data);
+
     DEBUG_LOG("WORLD: Sent SMSG_QUEST_QUERY_RESPONSE questid=%u", pQuest->GetQuestId());
 }
 
@@ -1061,7 +1062,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
 
     if (Completable)
     {
-        data << pQuest->GetCompleteEmote();                 // emote id
+        data << pQuest->GetCompleteEmote();                  // emote id
     }
     else
     {
@@ -1071,7 +1072,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
     // Close Window after cancel
     if (CloseOnCancel)
     {
-        data << uint32(0x01);                               // auto finish
+        data << uint32(0x01);                                // auto finish
     }
     else
     {
@@ -1120,7 +1121,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
 
     if (!Completable)                                       // Completable = flags1 && flags2 && flags3 && flags4
     {
-        data << uint32(0x00);                               // flags1
+        data << uint32(0x00);                                // flags1
     }
     else
     {

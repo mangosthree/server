@@ -1,10 +1,8 @@
 /**
- * ScriptDev3 is an extension for mangos providing enhanced features for
- * area triggers, creatures, game objects, instances, items, and spells beyond
- * the default database scripting in mangos.
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,4 +22,30 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "precompiled.h"
+#ifndef DURATION_H
+#define DURATION_H
+
+#include <chrono>
+
+ /// Milliseconds shorthand typedef.
+typedef std::chrono::milliseconds Milliseconds;
+
+/// Seconds shorthand typedef.
+typedef std::chrono::seconds Seconds;
+
+/// Minutes shorthand typedef.
+typedef std::chrono::minutes Minutes;
+
+/// Hours shorthand typedef.
+typedef std::chrono::hours Hours;
+
+/// time_point shorthand typedefs
+typedef std::chrono::steady_clock::time_point TimePoint;
+typedef std::chrono::system_clock::time_point SystemTimePoint;
+
+constexpr std::chrono::hours operator "" _days(unsigned long long days)
+{
+    return std::chrono::hours(days * Hours(24));
+}
+
+#endif

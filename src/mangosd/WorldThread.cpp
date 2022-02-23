@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,9 @@
 #include "ObjectAccessor.h"
 #include "MapManager.h"
 #include "Database/DatabaseEnv.h"
+
+#include <chrono>
+#include <thread>
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -71,30 +74,27 @@ int WorldThread::open(void* unused)
 /// Heartbeat for the World
 int WorldThread::svc()
 {
-    uint32 prevSleepTime = 0;                               // used for balanced full tick time length near WORLD_SLEEP_CONST
+    uint32 realCurrTime = 0;
+    uint32 realPrevTime = getMSTime();
     sLog.outString("World Updater Thread started (%dms min update interval)", WORLD_SLEEP_CONST);
 
     ///- While we have not World::m_stopEvent, update the world
     while (!World::IsStopped())
     {
         ++World::m_worldLoopCounter;
+        realCurrTime = getMSTime();
 
-        uint32 diff = WorldTimer::tick();
+        uint32 diff = getMSTimeDiff(realPrevTime, realCurrTime);
 
         sWorld.Update(diff);
+        realPrevTime = realCurrTime;
 
-        // diff (D0) include time of previous sleep (d0) + tick time (t0)
-        // we want that next d1 + t1 == WORLD_SLEEP_CONST
-        // we can't know next t1 and then can use (t0 + d1) == WORLD_SLEEP_CONST requirement
-        // d1 = WORLD_SLEEP_CONST - t0 = WORLD_SLEEP_CONST - (D0 - d0) = WORLD_SLEEP_CONST + d0 - D0
-        if (diff <= WORLD_SLEEP_CONST + prevSleepTime)
+        uint32 executionTimeDiff = getMSTimeDiff(realCurrTime, getMSTime());
+
+        // we know exactly how long it took to update the world, if the update took less than WORLD_SLEEP_CONST, sleep for WORLD_SLEEP_CONST - world update time
+        if (executionTimeDiff < WORLD_SLEEP_CONST)
         {
-            prevSleepTime = WORLD_SLEEP_CONST + prevSleepTime - diff;
-            ACE_Based::Thread::Sleep(prevSleepTime);
-        }
-        else
-        {
-            prevSleepTime = 0;
+            std::this_thread::sleep_for(std::chrono::milliseconds(WORLD_SLEEP_CONST - executionTimeDiff));
         }
 #ifdef _WIN32
         if (m_ServiceStatus == 0) // service stopped

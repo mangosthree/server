@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -370,7 +370,7 @@ void Channel::SetMode(Player* player, const char* targetName, bool moderator, bo
     // allow make moderator from another team only if both is GMs
     // at this moment this only way to show channel post for GM from another team
     if ((player->GetSession()->GetSecurity() < SEC_GAMEMASTER || target->GetSession()->GetSecurity() < SEC_GAMEMASTER) &&
-        player->GetTeam() != target->GetTeam() && !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
+            player->GetTeam() != target->GetTeam() && !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
     {
         WorldPacket data;
         MakePlayerNotFound(&data, targetName);
@@ -528,7 +528,7 @@ void Channel::List(Player* player)
         // PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
         // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
         if (plr && (player->GetSession()->GetSecurity() > SEC_PLAYER || plr->GetSession()->GetSecurity() <= gmLevelInWhoList) &&
-            plr->IsVisibleGloballyFor(player))
+                plr->IsVisibleGloballyFor(player))
         {
             data << ObjectGuid(i->first);
             data << uint8(i->second.flags);                 // flags seems to be changed...
@@ -718,11 +718,15 @@ void Channel::Invite(Player* player, const char* targetName)
 void Channel::SendToAll(WorldPacket* data, ObjectGuid guid)
 {
     for (PlayerList::const_iterator i = m_players.begin(); i != m_players.end(); ++i)
+    {
         if (Player* plr = sObjectMgr.GetPlayer(i->first))
+        {
             if (!guid || !plr->GetSocial()->HasIgnore(guid))
             {
                 plr->GetSession()->SendPacket(data);
             }
+        }
+    }
 }
 
 void Channel::SendToOne(WorldPacket* data, ObjectGuid who)

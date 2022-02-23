@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #include "LootMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Utilities/EventProcessor.h"
+#include <memory>
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
@@ -38,6 +39,8 @@
 #else
 #pragma pack(push,1)
 #endif
+
+class GameObjectAI;
 
 // from `gameobject_template`
 struct GameObjectInfo
@@ -657,12 +660,6 @@ class GameObject : public WorldObject
 
         bool HasStaticDBSpawnData() const;                  // listed in `gameobject` table and have fixed in DB guid
 
-        // z_rot, y_rot, x_rot - rotation angles around z, y and x axes
-        void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot);
-        void SetWorldRotation(float qx, float qy, float qz, float qw);
-        void SetTransportPathRotation(const QuaternionData& rotation);      // transforms(rotates) transport's path
-        int64 GetPackedWorldRotation() const { return m_packedRotation; }
-
         // overwrite WorldObject function for proper name localization
         const char* GetNameForLocaleIdx(int32 locale_idx) const override;
 
@@ -670,6 +667,12 @@ class GameObject : public WorldObject
         void SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask);
         bool LoadFromDB(uint32 guid, Map* map);
         void DeleteFromDB();
+
+        // z_rot, y_rot, x_rot - rotation angles around z, y and x axes
+        void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot);
+        void SetWorldRotation(float qx, float qy, float qz, float qw);
+        void SetTransportPathRotation(const QuaternionData& rotation);      // transforms(rotates) transport's path
+        int64 GetPackedWorldRotation() const { return m_packedRotation; }
 
         void SetOwnerGuid(ObjectGuid ownerGuid)
         {
@@ -809,6 +812,10 @@ class GameObject : public WorldObject
 
         uint32 GetScriptId();
 
+        bool AIM_Initialize();
+
+        GameObjectAI* AI() const { return m_AI.get(); }
+
         GridReference<GameObject>& GetGridRef() { return m_gridRef; }
 
         GameObjectModel* m_model;
@@ -849,10 +856,16 @@ class GameObject : public WorldObject
         ObjectGuid m_lootRecipientGuid;                     // player who will have rights for looting if m_lootGroupRecipient==0 or group disbanded
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
 
+                 // Used for trap type
+        time_t m_rearmTimer;                                // timer to rearm the trap once disarmed
+
         // Used for chest type
         bool m_isInUse;                                     // only one player at time are allowed to open chest
         time_t m_reStockTimer;                              // timer to refill the chest
         time_t m_despawnTimer;                              // timer to despawn the chest if something changed in it
+        bool m_AI_locked;
+
+        std::unique_ptr<GameObjectAI> m_AI;
 
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);

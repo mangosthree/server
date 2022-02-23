@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,16 +49,24 @@
 #include "vmap/GameObjectModel.h"
 #include "CreatureAISelector.h"
 #include "SQLStorages.h"
+#include "GameObjectAI.h"
+#include <memory>
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
 
+enum
+{
+    GO_DIRE_MAUL_FIXED_TRAP = 179512,
+    NPC_SLIPKIK_GUARD = 14323
+};
 
 GameObject::GameObject() : WorldObject(),
     loot(this),
     m_model(NULL),
+    m_displayInfo(NULL),
     m_goInfo(NULL),
-    m_displayInfo(NULL)
+    m_AI_locked(false)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -83,7 +91,10 @@ GameObject::GameObject() : WorldObject(),
 
     m_isInUse = false;
     m_reStockTimer = 0;
+    m_rearmTimer = 0;
     m_despawnTimer = 0;
+
+    m_AI_locked;
 }
 
 GameObject::~GameObject()
@@ -183,6 +194,12 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         return false;
     }
 
+    if (goinfo->type >= MAX_GAMEOBJECT_TYPE)
+    {
+        sLog.outErrorDb("Gameobject (GUID: %u) not created: Entry %u has invalid type %u in `gameobject_template`. It may crash client if created.", guidlow, name_id, goinfo->type);
+        return false;
+    }
+
     if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
     {
         Object::_Create(guidlow, 0, HIGHGUID_MO_TRANSPORT);
@@ -193,12 +210,6 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     }
 
     m_goInfo = goinfo;
-
-    if (goinfo->type >= MAX_GAMEOBJECT_TYPE)
-    {
-        sLog.outErrorDb("Gameobject (GUID: %u) not created: Entry %u has invalid type %u in `gameobject_template`. It may crash client if created.", guidlow, name_id, goinfo->type);
-        return false;
-    }
 
     // transport gameobject must have entry in TransportAnimation.dbc or client will crash
     if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
@@ -224,20 +235,17 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
 
     SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
     SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
+    SetEntry(goinfo->id);
+    SetDisplayId(goinfo->displayId);
+    SetGoState(go_state);
+    SetGoType(GameobjectTypes(goinfo->type));
+    SetGoArtKit(0);                                         // unknown what this is
+    SetGoAnimProgress(animprogress);
 
     if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
     {
         SetFlag(GAMEOBJECT_FLAGS, (GO_FLAG_TRANSPORT | GO_FLAG_NODESPAWN));
     }
-
-    SetEntry(goinfo->id);
-    SetDisplayId(goinfo->displayId);
-
-    // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
-    SetGoState(go_state);
-    SetGoType(GameobjectTypes(goinfo->type));
-    SetGoArtKit(0);                                         // unknown what this is
-    SetGoAnimProgress(animprogress);
 
     switch (GetGoType())
     {
@@ -249,7 +257,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
             ForceGameObjectHealth(GetMaxHealth(), NULL);
             SetUInt32Value(GAMEOBJECT_PARENTROTATION, m_goInfo->destructibleBuilding.destructibleData);
         case GAMEOBJECT_TYPE_TRANSPORT:
-            SetUInt32Value(GAMEOBJECT_LEVEL, WorldTimer::getMSTime());
+            SetUInt32Value(GAMEOBJECT_LEVEL, getMSTime());
             if (goinfo->transport.startOpen)
             {
                 SetGoState(GO_STATE_ACTIVE);
@@ -336,6 +344,28 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     }
                     break;
                 }
+                case GAMEOBJECT_TYPE_CHEST:
+                {
+                    if (m_goInfo->chest.chestRestockTime)
+                    {
+                        if (m_reStockTimer != 0)
+                        {
+                            if (m_reStockTimer <= time(nullptr))
+                            {
+                                m_reStockTimer = 0;
+                                m_lootState = GO_READY;
+                                loot.clear();
+                                MarkFlagUpdateForClient(GAMEOBJECT_DYNAMIC); // GAMEOBJECT_DYN_FLAGS);
+                            }
+                        }
+                        else
+                        {
+                            m_lootState = GO_READY;
+                        }
+                        return;
+                    }
+                    m_lootState = GO_READY;
+                }
                 default:
                     break;
             }
@@ -402,6 +432,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
             {
                 // traps can have time and can not have
                 GameObjectInfo const* goInfo = GetGOInfo();
+                uint32 max_charges = goInfo->GetCharges();
+
                 if (goInfo->type == GAMEOBJECT_TYPE_TRAP)   // traps
                 {
                     if (m_cooldownTime >= time(NULL))
@@ -437,17 +469,28 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     Cell::VisitAllObjects(this, checker, radius);
                     if (enemy)
                     {
-                        Use(enemy);
+                        bool useTrap = true;
+                        // prevent use if GO entry is "Fixed Trap" and target is not SLIKIK
+                        if (GetEntry() == GO_DIRE_MAUL_FIXED_TRAP && enemy->GetEntry() != NPC_SLIPKIK_GUARD)
+                        {
+                            useTrap = false;
+                        }
+
+                        if (useTrap)
+                        {
+                            Use(enemy);
+                        }
                     }
                 }
 
-                if (uint32 max_charges = goInfo->GetCharges())
+                // Only despawn object if there are charges to "consume"
+                // it means (all GO with charges = 0 in DB should never be despawned)
+                // Check : https://www.getmangos.eu/wiki/referenceinfo/dbinfo/mangosdb/mangoszeroworlddb/gameobject_template-r1047
+                // for more information about charges field in db depending on object type
+                if (max_charges > 0 && m_useTimes >= max_charges)
                 {
-                    if (m_useTimes >= max_charges)
-                    {
-                        m_useTimes = 0;
-                        SetLootState(GO_JUST_DEACTIVATED);  // can be despawned or destroyed
-                    }
+                    m_useTimes = 0;
+                    SetLootState(GO_JUST_DEACTIVATED);  // can be despawned or destroyed
                 }
             }
             break;
@@ -464,16 +507,32 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     }
                     break;
                 case GAMEOBJECT_TYPE_CHEST:
-                    if (m_groupLootId)
+                    if (true)
                     {
-                        if (m_groupLootTimer <= update_diff)
+                        if (!loot.empty())
                         {
-                            StopGroupLoot();
+                            m_despawnTimer = time(nullptr) + 5 * MINUTE; // TODO:: need to add a define?
                         }
-                        else
+                        else if (m_despawnTimer != 0 && m_despawnTimer <= time(nullptr))
                         {
-                            m_groupLootTimer -= update_diff;
+                            m_lootState = GO_JUST_DEACTIVATED;
                         }
+
+                        // TODO : Missing Loot::Update() method found in CMangos
+                    }
+                    break;
+                case GAMEOBJECT_TYPE_TRAP:
+                    if (m_rearmTimer == 0)
+                    {
+                        m_rearmTimer = time(nullptr) + GetRespawnDelay();
+                        SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+                    }
+
+                    if (m_rearmTimer < time(nullptr))
+                    {
+                        SetGoState(GO_STATE_READY);
+                        m_lootState = GO_READY;
+                        m_rearmTimer = 0;
                     }
                     break;
                 case GAMEOBJECT_TYPE_GOOBER:
@@ -599,6 +658,14 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 
             break;
         }
+    }
+
+    if (AI())
+    {
+        // do not allow the AI to be changed during update
+        m_AI_locked = true;
+        AI()->UpdateAI(update_diff);   // AI not react good at real update delays (while freeze in non-active part of map)
+        m_AI_locked = false;
     }
 }
 
@@ -771,6 +838,8 @@ bool GameObject::LoadFromDB(uint32 guid, Map* map)
         }
     }
 
+    AIM_Initialize();
+
     return true;
 }
 
@@ -892,55 +961,86 @@ bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoi
         }
 
         // special invisibility cases
-        if (GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed)
+        /* TODO: implement trap stealth, take look at spell 2836
+        if(GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed && u->IsHostileTo(GetOwner()))
         {
-            bool trapNotVisible = false;
-
-            // handle summoned traps, usually by players
-            if (Unit* owner = GetOwner())
-            {
-                if (owner->GetTypeId() == TYPEID_PLAYER)
-                {
-                    Player* ownerPlayer = (Player*)owner;
-                    if ((GetMap()->IsBattleGroundOrArena() && ownerPlayer->GetBGTeam() != u->GetBGTeam()) ||
-                        (ownerPlayer->IsInDuelWith(u)) ||
-                        (ownerPlayer->GetTeam() != u->GetTeam()))
-                        trapNotVisible = true;
-                }
-                else
-                {
-                    if (u->IsFriendlyTo(owner))
-                    {
-                        return true;
-                    }
-                }
-            }
-            // handle environment traps (spawned by DB)
-            else
-            {
-                if (this->IsFriendlyTo(u))
-                {
-                    return true;
-                }
-                else
-                {
-                    trapNotVisible = true;
-                }
-            }
-
-            // only rogue have skill for traps detection
-            if (Aura* aura = ((Player*)u)->GetAura(2836, EFFECT_INDEX_0))
-            {
-                if (roll_chance_i(aura->GetModifier()->m_amount) && u->IsInFront(this, 15.0f))
-                {
-                    return true;
-                }
-            }
-
-            if (trapNotVisible)
+            if(check stuff here)
             {
                 return false;
             }
+        }*/
+
+        float visibleDistance = GetMap()->GetVisibilityDistance() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f);
+
+
+        // special invisibility cases
+        // special invisibility cases
+        switch (GetGOInfo()->type)
+        {
+            case GAMEOBJECT_TYPE_TRAP:
+            {
+                if (GetGOInfo()->trap.stealthed == 0 && GetGOInfo()->trap.stealthAffected == 0)
+                {
+                    break;
+                }
+
+                Unit* owner = GetOwner();
+
+                if (!owner || u->IsHostileTo(owner))
+                {
+
+                    visibleDistance = 10.5f;
+                    //2^3=8 and 300 - from spell 2836, EFFECT_INDEX_1 - SPELL_AURA_MOD_INVISIBILITY_DETECTION; TODO check 200 and improve
+                    if (u->GetMaxPositiveAuraModifierByMiscValue(SPELL_AURA_MOD_INVISIBILITY_DETECTION, 8) < 200)
+                    {
+                        if (u->getClass() != CLASS_ROGUE)
+                        {
+                            return false;       // a wild or enemy trap cannot be seen by non-rogues without proper invis detection
+                        }
+                        visibleDistance = 0.0f; // minimal detection distance, will be normalized below
+                    }
+
+                    if (owner)
+                    {
+                        // apply to the "owner" and "u" the rules for usual stealth detection; the fragment is taken from Unit::IsVisibleForOrDetect
+                        // Visible distance based on stealth value (stealth rank 4 300MOD, 10.5 - 3 = 7.5)
+                        visibleDistance -= (owner->getLevel() / 20.0f);  // for rogue stealth (4 spells): modifier = 5*level
+
+                        // Visible distance is modified by
+                        //-Level Diff (every level diff = 1.0f in visible distance)
+                        visibleDistance += int32(u->GetLevelForTarget(owner)) - int32(owner->GetLevelForTarget(u));
+                    }
+
+                    //-Stealth Detection(negative like paranoia)
+                    visibleDistance += (int32(u->GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_DETECT))) / 5.0f;
+
+                    // normalize visible distance
+                    if (visibleDistance > MAX_PLAYER_STEALTH_DETECT_RANGE)
+                    {
+                        visibleDistance = MAX_PLAYER_STEALTH_DETECT_RANGE;
+                    }
+                    else if (visibleDistance < GetGOInfo()->trap.radius + INTERACTION_DISTANCE)
+                    {
+                        visibleDistance = GetGOInfo()->trap.radius + INTERACTION_DISTANCE;
+                    }
+                }
+
+            }
+
+            case GAMEOBJECT_TYPE_SPELL_FOCUS:
+            {
+                if (GetGOInfo()->spellFocus.serverOnly == 1)
+                {
+                    return false;
+                }
+                break;
+            }
+        }
+
+        // Smuggled Mana Cell required 10 invisibility type detection/state
+        if (GetEntry() == 187039 && ((u->m_detectInvisibilityMask | u->m_invisibilityMask) & (1 << 10)) == 0)
+        {
+            return false;
         }
     }
 
@@ -1082,6 +1182,7 @@ void GameObject::SummonLinkedTrapIfAny()
         linkedGO->SetUInt32Value(GAMEOBJECT_LEVEL, GetUInt32Value(GAMEOBJECT_LEVEL));
     }
 
+    linkedGO->AIM_Initialize();
     GetMap()->Add(linkedGO);
 }
 
@@ -1154,7 +1255,8 @@ bool GameObject::IsCollisionEnabled() const
         case GAMEOBJECT_TYPE_DOOR:
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
             return GetGoState() != GO_STATE_ACTIVE && GetGoState() != GO_STATE_ACTIVE_ALTERNATIVE;
-
+        case GAMEOBJECT_TYPE_TRAP:
+            return false;
         default:
             return true;
     }
@@ -1328,9 +1430,9 @@ void GameObject::Use(Unit* user)
             bool IsBattleGroundTrap = !radius && goInfo->trap.cooldown == 3 && m_respawnTime == 0;
 
             // FIXME: when GO casting will be implemented trap must cast spell to target
-            if ((spellId = goInfo->trap.spellId))
+            if (goInfo->trap.spellId)
             {
-                caster->CastSpell(user, spellId, true, NULL, NULL, GetObjectGuid());
+                caster->CastSpell(user, goInfo->trap.spellId, true, NULL, NULL, GetObjectGuid());
             }
             // use template cooldown if provided
             m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown : uint32(4));
@@ -1357,6 +1459,11 @@ void GameObject::Use(Unit* user)
             if (GetDisplayId() == 4392 || GetDisplayId() == 4472 || GetDisplayId() == 4491 || GetDisplayId() == 6785 || GetDisplayId() == 3073 || GetDisplayId() == 7998)
             {
                 SendGameObjectCustomAnim(GetObjectGuid());
+            }
+
+            if (!scriptReturnValue && user->GetTypeId() == TYPEID_UNIT)
+            {
+                sScriptMgr.OnGameObjectUse(user, this);
             }
 
             // TODO: Despawning of traps? (Also related to code in ::Update)
@@ -2323,7 +2430,7 @@ void GameObject::SetLootRecipient(Unit* pUnit)
     {
         m_lootRecipientGuid.Clear();
         m_lootGroupRecipientId = 0;
-        ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);       // needed to be sure tapping status is updated
+        MarkFlagUpdateForClient(UNIT_DYNAMIC_FLAGS);       // needed to be sure tapping status is updated
         return;
     }
 
@@ -2342,7 +2449,7 @@ void GameObject::SetLootRecipient(Unit* pUnit)
         m_lootGroupRecipientId = group->GetId();
     }
 
-    ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);           // needed to be sure tapping status is updated
+    MarkFlagUpdateForClient(UNIT_DYNAMIC_FLAGS);           // needed to be sure tapping status is updated
 }
 
 float GameObject::GetObjectBoundingRadius() const
@@ -2858,6 +2965,21 @@ void GameObject::SetInUse(bool use)
 uint32 GameObject::GetScriptId()
 {
     return sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) ? sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, -int32(GetGUIDLow())) : sScriptMgr.GetBoundScriptId(SCRIPTED_GAMEOBJECT, GetEntry());
+}
+
+bool  GameObject::AIM_Initialize()
+{
+
+    // make sure nothing can change the AI during AI update
+    if (m_AI_locked)
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "AIM_Initialize: failed to init, locked.");
+        return false;
+    }
+
+    m_AI.reset(sScriptMgr.GetGameObjectAI(this));
+
+    return true;
 }
 
 float GameObject::GetInteractionDistance()

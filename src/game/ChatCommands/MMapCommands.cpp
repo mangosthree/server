@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #include "GridNotifiersImpl.h"          // for mmap manager
 #include "CellImpl.h"
 #include "movement/MoveSplineInit.h"
+#include "GameTime.h"
 #include <fstream>
 #include <map>
 #include <typeinfo>
@@ -322,7 +323,7 @@ bool ChatHandler::HandleMmapTestArea(char* args)
         PSendSysMessage("Found " SIZEFMTD " Creatures.", creatureList.size());
 
         uint32 paths = 0;
-        uint32 uStartTime = WorldTimer::getMSTime();
+        uint32 uStartTime = GameTime::GetGameTimeMS();
 
         float gx, gy, gz;
         m_session->GetPlayer()->GetPosition(gx, gy, gz);
@@ -333,7 +334,7 @@ bool ChatHandler::HandleMmapTestArea(char* args)
             ++paths;
         }
 
-        uint32 uPathLoadTime = WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime());
+        uint32 uPathLoadTime = getMSTimeDiff(uStartTime, GameTime::GetGameTimeMS());
         PSendSysMessage("Generated %i paths in %i ms", paths, uPathLoadTime);
     }
     else
@@ -391,7 +392,7 @@ bool ChatHandler::HandleMmapTestHeight(char* args)
     summoned->CastSpell(summoned, 8599, false);
     uint32 tries = 1;
     uint32 successes = 0;
-    uint32 startTime = WorldTimer::getMSTime();
+    uint32 startTime = GameTime::GetGameTimeMS();
     for (; tries < 500; ++tries)
     {
         unit->GetPosition(gx, gy, gz);
@@ -405,7 +406,7 @@ bool ChatHandler::HandleMmapTestHeight(char* args)
             }
         }
     }
-    uint32 genTime = WorldTimer::getMSTimeDiff(startTime, WorldTimer::getMSTime());
+    uint32 genTime = getMSTimeDiff(startTime, GameTime::GetGameTimeMS());
     PSendSysMessage("Generated %u valid points for %u try in %ums.", successes, tries, genTime);
     return true;
 }

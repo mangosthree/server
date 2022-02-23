@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,9 @@
 #include "movement/MoveSpline.h"
 #include "MapManager.h"
 #include "TemporarySummon.h"
+#ifdef ENABLE_ELUNA
+#include "LuaEngine.h"
+#endif /*ENABLE_ELUNA*/
 
 void ObjectMgr::LoadVehicleAccessory()
 {
@@ -150,6 +153,9 @@ void VehicleInfo::Initialize()
             m_accessoryGuids.insert(summoned->GetObjectGuid());
             int32 basepoint0 = itr->seatId + 1;
             summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, NULL, NULL, true);
+#ifdef ENABLE_ELUNA
+            sEluna->OnInstallAccessory(this, summoned);
+#endif
         }
     }
 
@@ -193,6 +199,10 @@ void VehicleInfo::Initialize()
     }
 
     m_isInitialized = true;
+
+#ifdef ENABLE_ELUNA
+    sEluna->OnInstall(this);
+#endif
 }
 
 /*
@@ -269,6 +279,10 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     // Apply passenger modifications
     ApplySeatMods(passenger, seatEntry->m_flags);
+
+#ifdef ENABLE_ELUNA
+    sEluna->OnAddPassenger(this, passenger, seat);
+#endif
 }
 
 /*
@@ -392,6 +406,9 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
             m_accessoryGuids.erase(passenger->GetObjectGuid());
         }
     }
+#ifdef ENABLE_ELUNA
+    sEluna->OnRemovePassenger(this, passenger);
+#endif
 
     // Some creature vehicles get despawned after passenger unboarding
     if (m_owner->GetTypeId() == TYPEID_UNIT)
@@ -560,7 +577,7 @@ uint8 VehicleInfo::GetTakenSeatsMask() const
     return takenSeatsMask;
 }
 
-bool VehicleInfo::IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) const
+bool VehicleInfo:: IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) const
 {
     return seatFlags & SEAT_FLAG_CAN_EXIT ||
            seatFlags & SEAT_FLAG_UNCONTROLLED ||

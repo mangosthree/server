@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2586,6 +2586,16 @@ CreatureAI* ScriptMgr::GetCreatureAI(Creature* pCreature)
 #endif
 }
 
+GameObjectAI* ScriptMgr::GetGameObjectAI(GameObject* pGo)
+{
+    // TODO - expose in ELuna
+    #ifdef ENABLE_SD3
+        return SD3::GetGameObjectAI(pGo);
+    #else
+        return NULL;
+    #endif
+}
+
 InstanceData* ScriptMgr::CreateInstanceData(Map* pMap)
 {
 #ifdef ENABLE_SD3
@@ -2624,6 +2634,20 @@ bool ScriptMgr::OnGossipHello(Player* pPlayer, GameObject* pGameObject)
 
 #ifdef ENABLE_SD3
     return SD3::GOGossipHello(pPlayer, pGameObject);
+#else
+    return false;
+#endif
+}
+
+bool ScriptMgr::OnGossipHello(Player* pPlayer, Item* pItem)
+{
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+// TODO ELUNA handler
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    return SD3::ItemGossipHello(pPlayer, pItem);
 #else
     return false;
 #endif
@@ -2692,6 +2716,27 @@ bool ScriptMgr::OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 
     else
     {
         return SD3::GOGossipSelect(pPlayer, pGameObject, sender, action);
+    }
+#else
+    return false;
+#endif
+}
+
+bool ScriptMgr::OnGossipSelect(Player* pPlayer, Item* pItem, uint32 sender, uint32 action, const char* code)
+{
+    // Used by Eluna
+#ifdef ENABLE_ELUNA
+// TODO Add Eluna handlers
+#endif /* ENABLE_ELUNA */
+
+#ifdef ENABLE_SD3
+    if (code)
+    {
+        return SD3::ItemGossipSelectWithCode(pPlayer, pItem, sender, action, code);
+    }
+    else
+    {
+        return SD3::ItemGossipSelect(pPlayer, pItem, sender, action);
     }
 #else
     return false;
@@ -2787,10 +2832,7 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pCreature))
-    {
-        return dialogId;
-    }
+    sEluna->GetDialogStatus(pPlayer, pCreature);
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2804,10 +2846,7 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pGameObject))
-    {
-        return dialogId;
-    }
+    sEluna->GetDialogStatus(pPlayer, pGameObject);
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2828,6 +2867,17 @@ bool ScriptMgr::OnGameObjectUse(Player* pPlayer, GameObject* pGameObject)
 
 #ifdef ENABLE_SD3
     return SD3::GOUse(pPlayer, pGameObject);
+#else
+    return false;
+#endif
+}
+
+bool ScriptMgr::OnGameObjectUse(Unit* pUnit, GameObject* pGameObject)
+{
+    // TODO Add Eluna support
+
+#ifdef ENABLE_SD3
+    return SD3::GOUse(pUnit, pGameObject);
 #else
     return false;
 #endif
@@ -2889,11 +2939,11 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (pTarget->ToCreature())
-        if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget->ToCreature()))
-        {
-            return true;
-        }
+    if (Creature* creature = pTarget->ToCreature())
+    {
+        sEluna->OnDummyEffect(pCaster, spellId, effIndex, creature);
+    }
+
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2907,10 +2957,7 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
-    {
-        return true;
-    }
+        sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget);
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2924,10 +2971,7 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
-    {
-        return true;
-    }
+    sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget);
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2958,7 +3002,7 @@ bool ScriptMgr::OnAuraDummy(Aura const* pAura, bool apply)
 ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
 {
 #ifdef ENABLE_SD3
-    if (std::strcmp(libName, MANGOS_SCRIPT_NAME) == 0)
+    if (std::strcmp(libName, "mangosscript") == 0)
     {
         SD3::FreeScriptLibrary();
         SD3::InitScriptLibrary();

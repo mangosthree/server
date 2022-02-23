@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1697,7 +1697,7 @@ bool ChatHandler::HandleModifyASpeedCommand(char* args)
 
     float modSpeed = (float)atof(args);
 
-    if (modSpeed > 10 || modSpeed < 0.1)
+    if (modSpeed > sWorld.getConfig(CONFIG_UINT32_GM_MAX_SPEED_FACTOR) || modSpeed < 0.1)
     {
         SendSysMessage(LANG_BAD_VALUE);
         SetSentErrorMessage(true);
@@ -1751,7 +1751,7 @@ bool ChatHandler::HandleModifySpeedCommand(char* args)
 
     float modSpeed = (float)atof(args);
 
-    if (modSpeed > 10 || modSpeed < 0.1)
+    if (modSpeed > sWorld.getConfig(CONFIG_UINT32_GM_MAX_SPEED_FACTOR) || modSpeed < 0.1)
     {
         SendSysMessage(LANG_BAD_VALUE);
         SetSentErrorMessage(true);
@@ -1802,7 +1802,7 @@ bool ChatHandler::HandleModifySwimCommand(char* args)
 
     float modSpeed = (float)atof(args);
 
-    if (modSpeed > 10 || modSpeed < 0.01f)
+    if (modSpeed > sWorld.getConfig(CONFIG_UINT32_GM_MAX_SPEED_FACTOR) || modSpeed < 0.01f)
     {
         SendSysMessage(LANG_BAD_VALUE);
         SetSentErrorMessage(true);
@@ -1895,7 +1895,7 @@ bool ChatHandler::HandleModifyBWalkCommand(char* args)
 
     float modSpeed = (float)atof(args);
 
-    if (modSpeed > 10 || modSpeed < 0.1f)
+    if (modSpeed > sWorld.getConfig(CONFIG_UINT32_GM_MAX_SPEED_FACTOR) || modSpeed < 0.1f)
     {
         SendSysMessage(LANG_BAD_VALUE);
         SetSentErrorMessage(true);
@@ -2462,7 +2462,7 @@ bool ChatHandler::HandleModifyRepCommand(char* args)
 
     target->GetReputationMgr().SetReputation(factionEntry, amount);
     PSendSysMessage(LANG_COMMAND_MODIFY_REP, factionEntry->name[GetSessionDbcLocale()], factionId,
-        GetNameLink(target).c_str(), target->GetReputationMgr().GetReputation(factionEntry));
+                    GetNameLink(target).c_str(), target->GetReputationMgr().GetReputation(factionEntry));
     return true;
 }
 

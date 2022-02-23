@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ void WorldSession::SendGroupInvite(Player* player, bool alreadyInGroup /*= false
     data.WriteGuidMask<1, 7>(player->GetObjectGuid());
 
     data.WriteGuidBytes<1, 4>(player->GetObjectGuid());
-    data << uint32(WorldTimer::getMSTime());
+    data << uint32(GameTime::GetGameTimeMS());
     data << uint32(0) << uint32(0);
     data.WriteGuidBytes<6, 0, 2, 3>(player->GetObjectGuid());
     // for(int i = 0; i < count; ++i)

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef _CHANNEL_H
-#define _CHANNEL_H
+#ifndef MANGOS_H_CHANNEL
+#define MANGOS_H_CHANNEL
 
 #include "Common.h"
 #include "ObjectGuid.h"
@@ -60,7 +60,7 @@ enum ChatNotify
     CHAT_PLAYER_UNBANNED_NOTICE       = 0x15,               //? "[%s] Player %s unbanned by %s.";
     CHAT_PLAYER_NOT_BANNED_NOTICE     = 0x16,               //+ "[%s] Player %s is not banned.";
     CHAT_PLAYER_ALREADY_MEMBER_NOTICE = 0x17,               //+ "[%s] Player %s is already on the channel.";
-    CHAT_INVITE_NOTICE = 0x18,               //+ "%2$s has invited you to join the channel '%1$s'.";
+    CHAT_INVITE_NOTICE                = 0x18,               //+ "%2$s has invited you to join the channel '%1$s'.";
     CHAT_INVITE_WRONG_FACTION_NOTICE  = 0x19,               //+ "Target is in the wrong alliance for %s.";
     CHAT_WRONG_FACTION_NOTICE         = 0x1A,               //+ "Wrong alliance for %s.";
     CHAT_INVALID_NAME_NOTICE          = 0x1B,               //+ "Invalid channel name";
@@ -128,7 +128,7 @@ class Channel
         uint8 flags;
 
         bool HasFlag(uint8 flag) { return flags & flag; }
-        void SetFlag(uint8 flag) { if (!HasFlag(flag)) flags |= flag; }
+        void SetFlag(uint8 flag) { if (!HasFlag(flag)) { flags |= flag; } }
         bool IsOwner() { return flags & MEMBER_FLAG_OWNER; }
         void SetOwner(bool state)
         {

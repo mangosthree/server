@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 #include "DBCStores.h"
 
 template<class T>
-inline void MaNGOS::VisibleNotifier::Visit(GridRefManager<T> &m)
+inline void MaNGOS::VisibleNotifier::Visit(GridRefManager<T>& m)
 {
     for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
@@ -380,7 +380,7 @@ void MaNGOS::WorldObjectSearcher<Check>::Visit(DynamicObjectMapType& m)
 template<class Check>
 void MaNGOS::WorldObjectLastSearcher<Check>::Visit(GameObjectMapType& m)
 {
-    for (GameObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+    for (GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
         {
@@ -398,7 +398,7 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(GameObjectMapType& m)
 template<class Check>
 void MaNGOS::WorldObjectLastSearcher<Check>::Visit(PlayerMapType& m)
 {
-    for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+    for (PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
         {
@@ -416,7 +416,7 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(PlayerMapType& m)
 template<class Check>
 void MaNGOS::WorldObjectLastSearcher<Check>::Visit(CreatureMapType& m)
 {
-    for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+    for (CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
         {
@@ -434,7 +434,7 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(CreatureMapType& m)
 template<class Check>
 void MaNGOS::WorldObjectLastSearcher<Check>::Visit(CorpseMapType& m)
 {
-    for (CorpseMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+    for (CorpseMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
         {
@@ -452,7 +452,7 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(CorpseMapType& m)
 template<class Check>
 void MaNGOS::WorldObjectLastSearcher<Check>::Visit(DynamicObjectMapType& m)
 {
-    for (DynamicObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+    for (DynamicObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if (!itr->getSource()->InSamePhase(i_phaseMask))
         {
@@ -466,7 +466,6 @@ void MaNGOS::WorldObjectLastSearcher<Check>::Visit(DynamicObjectMapType& m)
         }
     }
 }
-
 
 template<class Check>
 void MaNGOS::WorldObjectListSearcher<Check>::Visit(PlayerMapType& m)

@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2014-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -533,6 +533,14 @@ struct go_elune_fire : public GameObjectScript
     }
 };
 
+/*######
+## npc_artorius_the_amiable
+######*/
+
+/*######
+## npc_artorius_the_doombringer
+######*/
+
 enum
 {
     SPELL_FOOLS_PLIGHT = 23504,
@@ -552,12 +560,260 @@ enum
 
     QUEST_STAVE_OF_THE_ANCIENTS = 7636
 };
+
+struct npc_artorius_the_doombringer : public CreatureScript
+{
+    npc_artorius_the_doombringer() : CreatureScript("npc_artorius_the_doombringer") {}
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature) override
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        // Allow to begin the event only for a player (Hunter) who have not completed the quest yet.
+        if (pPlayer->GetQuestStatus(QUEST_STAVE_OF_THE_ANCIENTS) == QUEST_STATUS_INCOMPLETE)
+        {
+            pPlayer->ADD_GOSSIP_ITEM_ID(0, GOSSIP_ITEM_ARTORIUS_THE_AMIABLE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+        }
+
+        pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 /*uiAction*/) override
+    {
+        pPlayer->CLOSE_GOSSIP_MENU();
+        ((npc_artorius_the_doombringerAI*)pCreature->AI())->BeginEvent(pPlayer->GetObjectGuid());
+        return true;
+    }
+
+    struct npc_artorius_the_doombringerAI : public ScriptedAI
+    {
+        npc_artorius_the_doombringerAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiDespawn_Timer(0), m_bTransform(false)
+        {
+            Reset();
+        }
+
+        uint32 m_uiTransform_Timer;
+        uint32 m_uiTransformEmote_Timer;
+        bool m_bTransform;
+
+        ObjectGuid m_hunterGuid;
+        uint32 m_uiDemonic_Doom_Timer;
+        uint32 m_uiDemonic_Frenzy_Timer;
+        uint32 m_uiDespawn_Timer;
+
+        void Reset() override
+        {
+            switch (m_creature->GetEntry())
+            {
+            case NPC_ARTORIUS_THE_AMIABLE:
+                m_creature->SetRespawnDelay(35 * MINUTE);
+                m_creature->SetRespawnTime(35 * MINUTE);
+                m_creature->NearTeleportTo(7909.71f, -4598.67f, 710.008f, 0.606013f);
+                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != WAYPOINT_MOTION_TYPE)
+                {
+                    m_creature->SetDefaultMovementType(WAYPOINT_MOTION_TYPE);
+                    m_creature->GetMotionMaster()->Initialize();
+                }
+
+                m_creature->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+                m_uiTransform_Timer = 10000;
+                m_uiTransformEmote_Timer = 5000;
+                m_bTransform = false;
+                m_uiDespawn_Timer = 0;
+                break;
+            case NPC_ARTORIUS_THE_DOOMBRINGER:
+                if (!m_uiDespawn_Timer)
+                {
+                    m_uiDespawn_Timer = 20 * MINUTE * IN_MILLISECONDS;
+                }
+
+                m_hunterGuid.Clear();
+                m_uiDemonic_Doom_Timer = 7500;
+                m_uiDemonic_Frenzy_Timer = urand(5000, 8000);
+                break;
+            }
+        }
+
+        /** Artorius the Amiable */
+        void Transform()
+        {
+            m_creature->UpdateEntry(NPC_ARTORIUS_THE_DOOMBRINGER);
+            Reset();
+        }
+
+        void BeginEvent(ObjectGuid playerGuid)
+        {
+            m_hunterGuid = playerGuid;
+            m_creature->GetMotionMaster()->Clear(false);
+            m_creature->GetMotionMaster()->MoveIdle();
+            m_creature->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+            m_bTransform = true;
+        }
+
+        /** Artorius the Doombringer */
+        void Aggro(Unit* pWho) override
+        {
+            if (pWho->getClass() == CLASS_HUNTER && (m_hunterGuid.IsEmpty() || m_hunterGuid == pWho->GetObjectGuid()))
+            {
+                m_hunterGuid = pWho->GetObjectGuid();
+            }
+            else
+            {
+                DemonDespawn(pWho);
+            }
+        }
+
+        void JustDied(Unit* /*pKiller*/) override
+        {
+            uint32 m_respawn_delay_Timer = urand(2, 3) * HOUR;
+            m_creature->SetRespawnDelay(m_respawn_delay_Timer);
+            m_creature->SetRespawnTime(m_respawn_delay_Timer);
+            m_creature->SaveRespawnTime();
+        }
+
+        void DemonDespawn(Unit* playerFacing = nullptr, bool triggered = true)
+        {
+            uint32 respawnTime = urand(12, 15);
+            m_creature->SetRespawnDelay(respawnTime * MINUTE);
+            m_creature->SetRespawnTime(respawnTime * MINUTE);
+            m_creature->SaveRespawnTime();
+
+            if (triggered)
+            {
+                Creature* creature_the_cleaner = m_creature->SummonCreature(NPC_THE_CLEANER, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetAngle(playerFacing), TEMPSPAWN_CORPSE_DESPAWN, 20 * MINUTE * IN_MILLISECONDS);
+                if (creature_the_cleaner)
+                {
+                    DoScriptText(SAY_THE_CLEANER_AGGRO, creature_the_cleaner);
+                    ThreatList const& tList = m_creature->GetThreatManager().getThreatList();
+                    for (auto itr : tList)
+                    {
+                        if (Unit* pUnit = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
+                        {
+                            if (pUnit->IsAlive())
+                            {
+                                creature_the_cleaner->AI()->AttackStart(pUnit);
+                            }
+                        }
+                    }
+                }
+            }
+
+            m_creature->ForcedDespawn();
+        }
+
+        void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+        {
+            if (pSpell->Id == 13555 || pSpell->Id == 25295)             // Serpent Sting (Rank 8 or Rank 9)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_STINGING_TRAUMA, CAST_TRIGGERED) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_POISON, m_creature);
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff) override
+        {
+            /** Artorius the Amiable */
+            if (m_bTransform)
+            {
+                if (m_uiTransformEmote_Timer)
+                {
+                    if (m_uiTransformEmote_Timer <= uiDiff)
+                    {
+                        m_creature->HandleEmote(EMOTE_ONESHOT_ROAR);
+                        m_uiTransformEmote_Timer = 0;
+                    }
+                    else
+                    {
+                        m_uiTransformEmote_Timer -= uiDiff;
+                    }
+                }
+
+                if (m_uiTransform_Timer < uiDiff)
+                {
+                    m_bTransform = false;
+                    Transform();
+                }
+                else
+                {
+                    m_uiTransform_Timer -= uiDiff;
+                }
+            }
+
+            /** Artorius the Doombringer */
+            if (m_uiDespawn_Timer)
+            {
+                if (m_uiDespawn_Timer <= uiDiff)
+                {
+                    if (m_creature->IsAlive() && !m_creature->IsInCombat())
+                    {
+                        DemonDespawn(nullptr, false);
+                    }
+                }
+                else
+                {
+                    m_uiDespawn_Timer -= uiDiff;
+                }
+            }
+
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            {
+                return;
+            }
+
+            if (m_creature->GetThreatManager().getThreatList().size() > 1)
+            {
+                DemonDespawn(m_creature->getVictim());
+            }
+
+            if (m_uiDemonic_Frenzy_Timer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_DEMONIC_FRENZY) == CAST_OK)
+                {
+                    m_uiDemonic_Frenzy_Timer = urand(15000, 20000);
+                }
+            }
+            else
+            {
+                m_uiDemonic_Frenzy_Timer -= uiDiff;
+            }
+
+            if (m_uiDemonic_Doom_Timer < uiDiff)
+            {
+                m_uiDemonic_Doom_Timer = 7500;
+                // only attempt to cast this once every 7.5 seconds to give the hunter some leeway
+                // LOWER max range for lag...
+                if (m_creature->IsWithinDistInMap(m_creature->getVictim(), 25))
+                {
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_DEMONIC_DOOM);
+                }
+            }
+            else
+            {
+                m_uiDemonic_Doom_Timer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) override
+    {
+        return new npc_artorius_the_doombringerAI(pCreature);
+    }
+};
+
 void AddSC_winterspring()
 {
     Script* s;
     s = new npc_ranshalla();
     s->RegisterSelf();
     s = new go_elune_fire();
+    s->RegisterSelf();
+    s = new npc_artorius_the_doombringer();
     s->RegisterSelf();
 
     //pNewScript = new Script;

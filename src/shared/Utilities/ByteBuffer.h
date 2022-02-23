@@ -172,9 +172,24 @@ class ByteBuffer
         }
 
         // copy constructor
-        ByteBuffer(const ByteBuffer &buf) : _rpos(buf._rpos), _wpos(buf._wpos),
+        ByteBuffer(ByteBuffer&& buf) : _rpos(buf._rpos), _wpos(buf._wpos),
             _storage(buf._storage), _bitpos(buf._bitpos), _curbitval(buf._curbitval)
         {
+            buf._rpos = 0;
+            buf._wpos = 0;
+        }
+
+        ByteBuffer& operator=(ByteBuffer&& right)
+        {
+            if (this != &right)
+            {
+                _rpos = right._rpos;
+                right._rpos = 0;
+                _wpos = right._wpos;
+                right._wpos = 0;
+
+                _storage = std::move(right._storage);
+            }
         }
 
         /**
@@ -958,6 +973,11 @@ class ByteBuffer
             {
                 _storage.reserve(ressize);
             }
+        }
+
+        void shrink_to_fit()
+        {
+            _storage.shrink_to_fit();
         }
 
         /**

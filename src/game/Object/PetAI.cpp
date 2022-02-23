@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,10 +53,12 @@ PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), inComb
 void PetAI::MoveInLineOfSight(Unit* pWho)
 {
     if (Unit* victim = m_creature->getVictim())
+    {
         if (victim->IsAlive())
         {
             return;
         }
+    }
 
     if (CharmInfo* charmInfo = m_creature->GetCharmInfo())
     {
@@ -556,7 +558,7 @@ void PetAI::AttackedBy(Unit* attacker)
     if (!(m_creature->getVictim() || ((Pet*)m_creature)->GetIsRetreating() == true)
         && !(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
         || (m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE))))
-        {
-            AttackStart(attacker);
-        }
+    {
+        AttackStart(attacker);
+    }
 }

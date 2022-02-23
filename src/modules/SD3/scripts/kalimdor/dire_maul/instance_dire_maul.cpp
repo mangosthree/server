@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2014-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 
 #include "precompiled.h"
 #include "dire_maul.h"
+#include "GameObjectAI.h"
 
 struct is_dire_maul : public InstanceScript
 {
@@ -100,9 +101,18 @@ struct is_dire_maul : public InstanceScript
                 return;
 
                 // North
+            case NPC_CAPTAIN_KROMCRUSH:
+            {
+                // Reset Npc flag to None
+                pCreature->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+                break;
+            }
             case NPC_CHORUSH:
             case NPC_KING_GORDOK:
             case NPC_MIZZLE_THE_CRAFTY:
+            case NPC_GUARD_SLIPKIK:
+            case NPC_GUARD_MOLDAR:
+            case NPC_GUARD_FENGUS:
                 break;
 
             default:
@@ -298,21 +308,6 @@ struct is_dire_maul : public InstanceScript
                 m_auiEncounter[uiType] = uiData;
                 if (uiData == DONE)
                 {
-                    // change faction to certian ogres
-                    if (Creature* pOgre = GetSingleCreatureFromStorage(NPC_CAPTAIN_KROMCRUSH))
-                    {
-                        if (pOgre->IsAlive())
-                        {
-                            pOgre->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
-
-                            // only evade if required
-                            if (pOgre->getVictim())
-                            {
-                                pOgre->AI()->EnterEvadeMode();
-                            }
-                        }
-                    }
-
                     if (Creature* pOgre = GetSingleCreatureFromStorage(NPC_CHORUSH))
                     {
                         // Chorush evades and yells on king death (if alive)
@@ -322,6 +317,11 @@ struct is_dire_maul : public InstanceScript
                             pOgre->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
                             pOgre->AI()->EnterEvadeMode();
                         }
+                        else
+                        {
+                            // Well if you kill chorush, no tribute ! He is the one who summons Mizzle the Crafty
+                            break;
+                        }
 
                         // start WP movement for Mizzle; event handled by movement and gossip dbscripts
                         if (Creature* pMizzle = pOgre->SummonCreature(NPC_MIZZLE_THE_CRAFTY, afMizzleSpawnLoc[0], afMizzleSpawnLoc[1], afMizzleSpawnLoc[2], afMizzleSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0, true))
@@ -329,7 +329,57 @@ struct is_dire_maul : public InstanceScript
                             pMizzle->SetWalk(false);
                             pMizzle->GetMotionMaster()->MoveWaypoint();
                         }
+
+                        // change faction to certain ogres
+                        std::vector<uint32> specificOgresThatMustBecomeFriendly;
+                        specificOgresThatMustBecomeFriendly.push_back(NPC_GUARD_MOLDAR);
+                        specificOgresThatMustBecomeFriendly.push_back(NPC_GUARD_SLIPKIK);
+                        specificOgresThatMustBecomeFriendly.push_back(NPC_CAPTAIN_KROMCRUSH);
+                        specificOgresThatMustBecomeFriendly.push_back(NPC_GUARD_FENGUS);
+
+                        for (std::vector<uint32>::iterator ogreItr = specificOgresThatMustBecomeFriendly.begin(); ogreItr != specificOgresThatMustBecomeFriendly.end(); ++ogreItr)
+                        {
+                            if (Creature* pOgre = GetSingleCreatureFromStorage(*ogreItr))
+                            {
+                                if (pOgre->IsAlive())
+                                {
+                                    pOgre->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
+
+                                    bool enterEvadeMode = true;
+
+                                    switch (*ogreItr)
+                                    {
+                                        case NPC_GUARD_SLIPKIK:
+                                        {
+                                            // Risk of interrupting "Ice Block" spell if is affected by trap
+                                            if (pOgre->HasAura(SPELL_ICE_BLOCK))
+                                            {
+                                                enterEvadeMode = false;
+                                            }
+                                        }
+                                        case NPC_CAPTAIN_KROMCRUSH:
+                                        {
+                                            // Must reactive NPC flags for komcrush
+                                            pOgre->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                                            break;
+                                        }
+                                        default:
+                                        {
+                                            break;
+                                        }
+                                    }
+
+                                    // only evade if required
+                                    if (enterEvadeMode && pOgre->getVictim())
+                                    {
+                                        pOgre->AI()->EnterEvadeMode();
+                                    }
+                                }
+                            }
+                        }
+
                     }
+
                 }
                 break;
             case TYPE_MOLDAR:
@@ -620,9 +670,39 @@ struct is_dire_maul : public InstanceScript
     }
 };
 
+struct go_fixed_trap : public GameObjectScript
+{
+    go_fixed_trap() : GameObjectScript("go_fixed_trap")
+    {
+        sLog.outString("go_fixed_trap:: Constructor Called");
+    }
+
+    bool OnUse(Unit* p, GameObject* pGo) override
+    {
+
+        Creature* slipkik = (Creature*)p;
+        slipkik->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+        DoScriptText(SAY_SLIPKIK_TRAP, slipkik);
+        if (pGo->GetGOInfo()->trap.charges > 0)
+        {
+            pGo->AddUse();
+        }
+
+        pGo->SetLootState(GO_JUST_DEACTIVATED);    // Despawn the trap
+        sLog.outString("go_fixed_trap:: Used by %s", p->GetName());
+
+        return true;
+    }
+
+};
+
+
 void AddSC_instance_dire_maul()
 {
     Script* s;
     s = new is_dire_maul();
+    s->RegisterSelf();
+
+    s = new go_fixed_trap();
     s->RegisterSelf();
 }

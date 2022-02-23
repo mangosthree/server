@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,6 @@ void CreatureLinkingMgr::LoadFromDB()
     m_eventGuidTriggers.clear();
 
     // Load `creature_linking_template`
-    sLog.outString("> Loading table `creature_linking_template`");
     uint32 count = 0;
     QueryResult* result = WorldDatabase.Query("SELECT `entry`, `map`, `master_entry`, `flag`, `search_range` FROM `creature_linking_template`");
     if (!result)
@@ -85,8 +84,6 @@ void CreatureLinkingMgr::LoadFromDB()
 
         sLog.outString(">> Table creature_linking_template is empty.");
         sLog.outString();
-
-        return;
     }
     else
     {
@@ -120,14 +117,13 @@ void CreatureLinkingMgr::LoadFromDB()
         }
         while (result->NextRow());
 
-        sLog.outString(">> Loaded creature linking for %u creature-entries", count);
         sLog.outString();
+        sLog.outString(">> Loaded creature linking for %u creature-entries", count);
 
         delete result;
     }
 
     // Load `creature_linking`
-    sLog.outString("> Loading table `creature_linking`");
     count = 0;
     result = WorldDatabase.Query("SELECT `guid`, `master_guid`, `flag` FROM `creature_linking`");
     if (!result)
@@ -179,11 +175,11 @@ void CreatureLinkingMgr::LoadFromDB()
 
 /** This function is used to check if a DB-Entry is valid
  *
- *  @param byEntry: is the first parameter of the function a npc entry or a npc guid?
- *  @param slaveEntry: dependend on byEntry param this is either the slave's npc-entry or the npc-guid
- *  @param pTmp: Information about the CreatureLinking of the npc. Note that this information may be changed in some cases
+ * @param byEntry: is the first parameter of the function a npc entry or a npc guid?
+ * @param slaveEntry: dependend on byEntry param this is either the slave's npc-entry or the npc-guid
+ * @param pTmp: Information about the CreatureLinking of the npc. Note that this information may be changed in some cases
  *
- *  In case of checking by entry and in case of linked spawning and searchRange == 0, pTmp will be changed to keep information about the (unique!) master's db-guid
+ * In case of checking by entry and in case of linked spawning and searchRange == 0, pTmp will be changed to keep information about the (unique!) master's db-guid
  */
 bool CreatureLinkingMgr::IsLinkingEntryValid(uint32 slaveEntry, CreatureLinkingInfo* pTmp, bool byEntry)
 {
@@ -262,6 +258,7 @@ bool CreatureLinkingMgr::IsLinkingEntryValid(uint32 slaveEntry, CreatureLinkingI
                 delete result;
                 return false;
             }
+
             Field* fields = result->Fetch();
             pTmp->masterDBGuid = fields[0].GetUInt32();
             delete result;
@@ -319,6 +316,7 @@ bool CreatureLinkingMgr::IsSpawnedByLinkedMob(Creature* pCreature) const
 {
     return IsSpawnedByLinkedMob(GetLinkedTriggerInformation(pCreature));
 }
+
 bool CreatureLinkingMgr::IsSpawnedByLinkedMob(CreatureLinkingInfo const* pInfo) const
 {
     return pInfo && pInfo->linkingFlag & (FLAG_CANT_SPAWN_IF_BOSS_DEAD | FLAG_CANT_SPAWN_IF_BOSS_ALIVE) && (pInfo->masterDBGuid || pInfo->searchRange);
@@ -330,11 +328,12 @@ CreatureLinkingInfo const* CreatureLinkingMgr::GetLinkedTriggerInformation(Creat
 {
     return GetLinkedTriggerInformation(pCreature->GetEntry(), pCreature->GetGUIDLow(), pCreature->GetMapId());
 }
+
 CreatureLinkingInfo const* CreatureLinkingMgr::GetLinkedTriggerInformation(uint32 entry, uint32 lowGuid, uint32 mapId) const
 {
     // guid case
     CreatureLinkingMapBounds bounds = m_creatureLinkingGuidMap.equal_range(lowGuid);
-    for (CreatureLinkingMap::const_iterator iter = bounds.first; iter != bounds.second;)
+    for (CreatureLinkingMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
     {
         return &(iter->second);
     }
@@ -428,7 +427,7 @@ void CreatureLinkingHolder::AddMasterToHolder(Creature* pCreature)
     for (BossGuidMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
         if (itr->second == pCreature->GetObjectGuid())
         {
-            return;                                         // Already added
+            return;                                          // Already added
         }
 
     m_masterGuid.insert(BossGuidMap::value_type(pCreature->GetEntry(), pCreature->GetObjectGuid()));
@@ -692,6 +691,7 @@ bool CreatureLinkingHolder::IsSlaveInRangeOfBoss(Creature const* pSlave, Creatur
     pSlave->GetRespawnCoord(sX, sY, sZ);
     return IsSlaveInRangeOfBoss(pBoss, sX, sY, searchRange);
 }
+
 bool CreatureLinkingHolder::IsSlaveInRangeOfBoss(Creature const* pBoss, float sX, float sY, uint16 searchRange) const
 {
     if (!searchRange)
@@ -732,15 +732,15 @@ bool CreatureLinkingHolder::CanSpawn(Creature* pCreature) const
 
 /** Worker function to check if a spawning condition is met
  *
- *  This function is used directly from above function, and for recursive use
- *   in case of recursive use it is used only on _map with information of lowGuid.
+ * This function is used directly from above function, and for recursive use
+ * in case of recursive use it is used only on _map with information of lowGuid.
  *
- *  @param lowGuid (only relevant in case of recursive uses) -- db-guid of the npc that is checked
- *  @param _map Map on which things are checked
- *  @param pInfo (only shipped in case of initial use) -- used as marker of first use, also in first use filled directly
- *  @param sx, sy (spawn position of the checked npc with initial use)
+ * @param lowGuid (only relevant in case of recursive uses) -- db-guid of the npc that is checked
+ * @param _map Map on which things are checked
+ * @param pInfo (only shipped in case of initial use) -- used as marker of first use, also in first use filled directly
+ * @param sx, sy (spawn position of the checked npc with initial use)
  */
-bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingInfo const*  pInfo, float sx, float sy) const
+bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingInfo const* pInfo, float sx, float sy) const
 {
     if (!pInfo)                                             // Prepare data for recursive use
     {
@@ -749,11 +749,13 @@ bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingI
         {
             return true;
         }
+
         pInfo = sCreatureLinkingMgr.GetLinkedTriggerInformation(data->id, lowGuid, data->mapid);
         if (!pInfo)
         {
             return true;
         }
+
         // Has lowGuid npc actually spawning linked?
         if (!sCreatureLinkingMgr.IsSpawnedByLinkedMob(pInfo))
         {
@@ -768,7 +770,7 @@ bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingI
     {
         if (!pInfo->masterDBGuid)
         {
-            return false;                                   // This should never happen
+            return false;                                    // This should never happen
         }
 
         if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_DEAD)

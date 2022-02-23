@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #include "UpdateData.h"
 #include "ObjectGuid.h"
 #include "Camera.h"
+#include "GameTime.h"
 #include "Util.h"
 
 #include <set>
@@ -129,13 +130,13 @@ class WorldUpdateCounter
         {
             if (!m_tmStart)
             {
-                m_tmStart = WorldTimer::tickPrevTime();
+                m_tmStart = GameTime::GetGameTimeMS();
             }
 
-            return WorldTimer::getMSTimeDiff(m_tmStart, WorldTimer::tickTime());
+            return getMSTimeDiff(m_tmStart, GameTime::GetGameTimeMS());
         }
 
-        void Reset() { m_tmStart = WorldTimer::tickTime(); }
+        void Reset() { m_tmStart = GameTime::GetGameTimeMS(); }
 
     private:
         uint32 m_tmStart;
@@ -268,7 +269,6 @@ class Object
         void SetGuidValue(uint16 index, ObjectGuid const& value) { SetUInt64Value(index, value.GetRawValue()); }
         void SetStatFloatValue(uint16 index, float value);
         void SetStatInt32Value(uint16 index, int32 value);
-        void ForceValuesUpdateAtIndex(uint32 index);
 
         void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModInt32Value(uint16 index, int32 val, bool apply);
@@ -282,6 +282,12 @@ class Object
             SetFloatValue(index, GetFloatValue(index) * (apply ? (100.0f + val) / 100.0f : 100.0f / (100.0f + val)));
         }
 
+        /**
+        * method to force the update of a given flag to the client. The method is checking the index before indicating the flags need an update.
+        *
+        * \param index uint32 of the flag to be updated.
+        */
+        void MarkFlagUpdateForClient(uint32 index);
         void SetFlag(uint16 index, uint32 newFlag);
         void RemoveFlag(uint16 index, uint32 oldFlag);
 

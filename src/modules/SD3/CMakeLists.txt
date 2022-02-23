@@ -1,7 +1,7 @@
 # MaNGOS is a full featured server for World of Warcraft, supporting
 # the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
 #
-# Copyright (C) 2014-2021 MaNGOS <https://getmangos.eu>
+# Copyright (C) 2014-2022 MaNGOS <https://getmangos.eu>
 # Copyright (C) 2006-2013  ScriptDev2 project <http://www.scriptdev2.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -21,9 +21,9 @@
 include(MacroMangosSourceGroup)
 
 #Add PCH Files
-set(mangosscript_PCH "${CMAKE_CURRENT_SOURCE_DIR}/precompiled.h")
+set(mangosscript_PCH "${CMAKE_CURRENT_SOURCE_DIR}/pch.h")
 if(PCH)
-    LIST(APPEND mangosscript_PCH "${CMAKE_CURRENT_SOURCE_DIR}/precompiled.cpp")
+    LIST(APPEND mangosscript_PCH "${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp")
 endif()
 
 include_directories(
@@ -544,6 +544,10 @@ file(GLOB sources_maelstrom scripts/maelstrom/*.cpp scripts/maelstrom/*.h)
 file(GLOB sources_instance_m_sc scripts/maelstrom/stonecore/*.cpp scripts/maelstrom/stonecore/*.h)
     LIST(APPEND mangosscript_LIB_SRCS ${sources_instance_m_sc})
     source_group("Eastern Kingdoms Scripts\\Instances\\Stonecore" FILES ${sources_instance_m_sc})
+#Raid: Baradin Hold
+file(GLOB sources_raid_ek_bh scripts/eastern_kingdoms/baradin_hold/*.cpp scripts/eastern_kingdoms/baradin_hold/*.h)
+  LIST(APPEND mangosscript_LIB_SRCS ${sources_raid_ek_bh})
+  source_group("Eastern Kingdoms Scripts\\Raids\\Baradin Hold" FILES ${sources_raid_ek_bh})
 endif()
 # --- END IF ---
 

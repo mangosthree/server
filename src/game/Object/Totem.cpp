@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
 #include "InstanceData.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
-#endif /* ENABLE_ELUNA */
+#endif /*ENABLE_ELUNA*/
 
 Totem::Totem() : Creature(CREATURE_SUBTYPE_TOTEM)
 {
@@ -217,7 +217,7 @@ void Totem::SetTypeBySummonSpell(SpellEntry const* spellProto)
     }
     if (spellProto->SpellIconID == 2056)
     {
-        m_type = TOTEM_STATUE;                              // Jewelery statue
+        m_type = TOTEM_STATUE;                               // Jewelery statue
     }
 }
 

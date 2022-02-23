@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -59,7 +59,7 @@ void WardenCheckMgr::LoadWardenChecks()
         return;
     }
                                                   //  0   1      2     3     4       5        6       7    8
-    QueryResult *result = WorldDatabase.Query("SELECT id, build, type, data, result, address, length, str, comment FROM warden ORDER BY build ASC, id ASC");
+    QueryResult *result = WorldDatabase.Query("SELECT `id`, `build`, `type`, `data`, `result`, `address`, `length`, `str`, `comment` FROM `warden` ORDER BY `build` ASC, `id` ASC");
 
     if (!result)
     {
@@ -165,7 +165,7 @@ void WardenCheckMgr::LoadWardenOverrides()
     }
 
     //                                                    0         1
-    QueryResult* result = CharacterDatabase.Query("SELECT wardenId, action FROM warden_action");
+    QueryResult* result = CharacterDatabase.Query("SELECT `wardenId`, `action` FROM `warden_action`");
 
     if (!result)
     {

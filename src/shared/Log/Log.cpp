@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -358,34 +358,37 @@ FILE* Log::openGmlogPerAccount(uint32 account)
 
 void Log::outTimestamp(FILE* file)
 {
-    time_t t = time(NULL);
-    tm* aTm = localtime(&t);
+    time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::tm aTm = localtime_r(tt);
+
     //       YYYY   year
     //       MM     month (2 digits 01-12)
     //       DD     day (2 digits 01-31)
     //       HH     hour (2 digits 00-23)
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
-    fprintf(file, "%-4d-%02d-%02d %02d:%02d:%02d ", aTm->tm_year + 1900, aTm->tm_mon + 1, aTm->tm_mday, aTm->tm_hour, aTm->tm_min, aTm->tm_sec);
+    fprintf(file, "%-4d-%02d-%02d %02d:%02d:%02d ", aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
 }
 
 void Log::outTime()
 {
-    time_t t = time(NULL);
-    tm* aTm = localtime(&t);
+    time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::tm aTm = localtime_r(tt);
+
     //       YYYY   year
     //       MM     month (2 digits 01-12)
     //       DD     day (2 digits 01-31)
     //       HH     hour (2 digits 00-23)
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
-    printf("%02d:%02d:%02d ", aTm->tm_hour, aTm->tm_min, aTm->tm_sec);
+    printf("%02d:%02d:%02d ", aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
 }
 
 std::string Log::GetTimestampStr()
 {
-    time_t t = time(NULL);
-    tm* aTm = localtime(&t);
+    time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::tm aTm = localtime_r(tt);
+
     //       YYYY   year
     //       MM     month (2 digits 01-12)
     //       DD     day (2 digits 01-31)
@@ -393,7 +396,7 @@ std::string Log::GetTimestampStr()
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
     char buf[20];
-    snprintf(buf, 20, "%04d-%02d-%02d_%02d-%02d-%02d", aTm->tm_year + 1900, aTm->tm_mon + 1, aTm->tm_mday, aTm->tm_hour, aTm->tm_min, aTm->tm_sec);
+    snprintf(buf, 20, "%04d-%02d-%02d_%02d-%02d-%02d", aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
     return std::string(buf);
 }
 

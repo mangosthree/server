@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,45 +31,47 @@
 #include <ace/INET_Addr.h>
 #include "Log/Log.h"
 
-static ACE_Time_Value g_SystemTickTime = ACE_OS::gettimeofday();
+#include <iomanip>
 
-uint32 WorldTimer::m_iTime = 0;
-uint32 WorldTimer::m_iPrevTime = 0;
+//static ACE_Time_Value g_SystemTickTime = ACE_OS::gettimeofday();
 
-uint32 WorldTimer::tickTime() { return m_iTime; }
-uint32 WorldTimer::tickPrevTime() { return m_iPrevTime; }
-
-uint32 WorldTimer::tick()
-{
-    // save previous world tick time
-    m_iPrevTime = m_iTime;
-
-    // get the new one and don't forget to persist current system time in m_SystemTickTime
-    m_iTime = WorldTimer::getMSTime_internal();
-
-    // return tick diff
-    return getMSTimeDiff(m_iPrevTime, m_iTime);
-}
-
-uint32 WorldTimer::getMSTime()
-{
-    return getMSTime_internal();
-}
-
-uint32 WorldTimer::getMSTime_internal()
-{
-    // get current time
-    const ACE_Time_Value currTime = ACE_OS::gettimeofday();
-    // calculate time diff between two world ticks
-    // special case: curr_time < old_time - we suppose that our time has not ticked at all
-    // this should be constant value otherwise it is possible that our time can start ticking backwards until next world tick!!!
-    uint64 diff = 0;
-    (currTime - g_SystemTickTime).msec(diff);
-
-    // lets calculate current world time
-    uint32 iRes = uint32(diff % UI64LIT(0x00000000FFFFFFFF));
-    return iRes;
-}
+//uint32 WorldTimer::m_iTime = 0;
+//uint32 WorldTimer::m_iPrevTime = 0;
+//
+//uint32 WorldTimer::tickTime() { return m_iTime; }
+//uint32 WorldTimer::tickPrevTime() { return m_iPrevTime; }
+//
+//uint32 WorldTimer::tick()
+//{
+//    // save previous world tick time
+//    m_iPrevTime = m_iTime;
+//
+//    // get the new one and don't forget to persist current system time in m_SystemTickTime
+//    m_iTime = WorldTimer::getMSTime_internal();
+//
+//    // return tick diff
+//    return getMSTimeDiff(m_iPrevTime, m_iTime);
+//}
+//
+//uint32 WorldTimer::getMSTime()
+//{
+//    return getMSTime_internal();
+//}
+//
+//uint32 WorldTimer::getMSTime_internal()
+//{
+//    // get current time
+//    const ACE_Time_Value currTime = ACE_OS::gettimeofday();
+//    // calculate time diff between two world ticks
+//    // special case: curr_time < old_time - we suppose that our time has not ticked at all
+//    // this should be constant value otherwise it is possible that our time can start ticking backwards until next world tick!!!
+//    uint64 diff = 0;
+//    (currTime - g_SystemTickTime).msec(diff);
+//
+//    // lets calculate current world time
+//    uint32 iRes = uint32(diff % UI64LIT(0x00000000FFFFFFFF));
+//    return iRes;
+//}
 
 //////////////////////////////////////////////////////////////////////////
 int32 irand(int32 min, int32 max)
@@ -209,7 +211,18 @@ void stripLineInvisibleChars(std::string& str)
     }
 }
 
-std::string secsToTimeString(time_t timeInSecs, bool shortText, bool hoursOnly)
+std::tm localtime_r(const time_t& time)
+{
+    std::tm tm_snapshot;
+#if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
+    localtime_s(&tm_snapshot, &time);
+#else
+    localtime_r(&time, &tm_snapshot); // POSIX
+#endif
+    return tm_snapshot;
+}
+
+std::string secsToTimeString(time_t timeInSecs, TimeFormat timeFormat, bool hoursOnly)
 {
     time_t secs    = timeInSecs % MINUTE;
     time_t minutes = timeInSecs % HOUR / MINUTE;
@@ -219,21 +232,107 @@ std::string secsToTimeString(time_t timeInSecs, bool shortText, bool hoursOnly)
     std::ostringstream ss;
     if (days)
     {
-        ss << days << (shortText ? "d" : " Day(s) ");
+        ss << days;
+        if (timeFormat == TimeFormat::Numeric)
+        {
+            ss << ":";
+        }
+        else if (timeFormat == TimeFormat::ShortText)
+        {
+            ss << "d";
+        }
+        else // if (timeFormat == TimeFormat::FullText)
+        {
+            if (days == 1)
+            {
+                ss << " Day ";
+            }
+            else
+            {
+                ss << " Days ";
+            }
+        }
     }
+
     if (hours || hoursOnly)
     {
-        ss << hours << (shortText ? "h" : " Hour(s) ");
+        ss << hours;
+        if (timeFormat == TimeFormat::Numeric)
+        {
+            ss << ":";
+        }
+        else if (timeFormat == TimeFormat::ShortText)
+        {
+            ss << "h";
+        }
+        else // if (timeFormat == TimeFormat::FullText)
+        {
+            if (hours <= 1)
+            {
+                ss << " Hour ";
+            }
+            else
+            {
+                ss << " Hours ";
+            }
+        }
     }
+
     if (!hoursOnly)
     {
-        if (minutes)
+        ss << minutes;
+        if (timeFormat == TimeFormat::Numeric)
         {
-            ss << minutes << (shortText ? "m" : " Minute(s) ");
+            ss << ":";
         }
-        if (secs || (!days && !hours && !minutes))
+        else if (timeFormat == TimeFormat::ShortText)
         {
-            ss << secs << (shortText ? "s" : " Second(s).");
+            ss << "m";
+        }
+        else // if (timeFormat == TimeFormat::FullText)
+        {
+            if (minutes == 1)
+            {
+                ss << " Minute ";
+            }
+            else
+            {
+                ss << " Minutes ";
+            }
+        }
+    }
+    else
+    {
+        if (timeFormat == TimeFormat::Numeric)
+        {
+            ss << "0:";
+        }
+    }
+
+    if (secs || (!days && !hours && !minutes))
+    {
+        ss << std::setw(2) << std::setfill('0') << secs;
+        if (timeFormat == TimeFormat::ShortText)
+        {
+            ss << "s";
+        }
+        else if (timeFormat == TimeFormat::FullText)
+        {
+            if (secs <= 1)
+            {
+                ss << " Second.";
+            }
+            else
+            {
+                ss << " Seconds.";
+            }
+        }
+    }
+    else
+    {
+        if (timeFormat == TimeFormat::Numeric)
+        {
+            ss << "00";
         }
     }
 

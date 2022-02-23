@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ enum UnitThreatEventType
 
 //==============================================================
 
-class  UnitBaseEvent
+class UnitBaseEvent
 {
     private:
         uint32 iType;
@@ -81,7 +81,7 @@ class  UnitBaseEvent
 
 //==============================================================
 
-class  ThreatRefStatusChangeEvent : public UnitBaseEvent
+class ThreatRefStatusChangeEvent : public UnitBaseEvent
 {
     private:
         HostileReference* iHostileReference;
@@ -105,12 +105,14 @@ class  ThreatRefStatusChangeEvent : public UnitBaseEvent
 
         ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, float pValue) : UnitBaseEvent(pType), iThreatManager(NULL)
         {
-            iHostileReference = pHostileReference; iFValue = pValue;
+            iHostileReference = pHostileReference;
+            iFValue = pValue;
         }
 
         ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, bool pValue) : UnitBaseEvent(pType), iThreatManager(NULL)
         {
-            iHostileReference = pHostileReference; iBValue = pValue;
+            iHostileReference = pHostileReference;
+            iBValue = pValue;
         }
 
         int32 getIValue() const { return iIValue; }
@@ -130,7 +132,7 @@ class  ThreatRefStatusChangeEvent : public UnitBaseEvent
 
 //==============================================================
 
-class  ThreatManagerEvent : public ThreatRefStatusChangeEvent
+class ThreatManagerEvent : public ThreatRefStatusChangeEvent
 {
     private:
         ThreatContainer* iThreatContainer;

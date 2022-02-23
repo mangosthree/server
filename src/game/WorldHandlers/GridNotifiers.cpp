@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -170,8 +170,8 @@ void MessageDistDeliverer::Visit(CameraMapType& m)
         Player* owner = iter->getSource()->GetOwner();
 
         if ((i_toSelf || owner != &i_player) &&
-                (!i_ownTeamOnly || owner->GetTeam() == i_player.GetTeam()) &&
-                (!i_dist || iter->getSource()->GetBody()->IsWithinDist(&i_player, i_dist)))
+            (!i_ownTeamOnly || owner->GetTeam() == i_player.GetTeam()) &&
+            (!i_dist || iter->getSource()->GetBody()->IsWithinDist(&i_player, i_dist)))
         {
             if (!i_player.InSamePhase(iter->getSource()->GetBody()))
             {
@@ -206,7 +206,7 @@ void ObjectMessageDistDeliverer::Visit(CameraMapType& m)
 }
 
 template<class T>
-void ObjectUpdater::Visit(GridRefManager<T> &m)
+void ObjectUpdater::Visit(GridRefManager<T>& m)
 {
     for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
     {

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -447,6 +447,12 @@ void BattleGroundEY::HandleKillPlayer(Player* player, Player* killer)
 
 void BattleGroundEY::EventPlayerDroppedFlag(Player* source)
 {
+    if (GetStatus() != STATUS_IN_PROGRESS)
+    {
+        // do not cast auras or send messages after match has ended
+        return;
+    }
+
     if (!IsFlagPickedUp())
     {
         return;
@@ -459,13 +465,6 @@ void BattleGroundEY::EventPlayerDroppedFlag(Player* source)
 
     ClearFlagCarrier();
     source->RemoveAurasDueToSpell(EY_NETHERSTORM_FLAG_SPELL);
-
-    if (GetStatus() != STATUS_IN_PROGRESS)
-    {
-        // do not cast auras or send messages after match has ended
-        return;
-    }
-
     m_flagState = EY_FLAG_STATE_ON_GROUND;
     m_flagRespawnTimer = EY_FLAG_RESPAWN_TIME;
     source->CastSpell(source, SPELL_RECENTLY_DROPPED_FLAG, true);

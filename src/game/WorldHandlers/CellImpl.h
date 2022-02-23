@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,11 +112,11 @@ Cell::Visit(const CellPair& standing_cell, TypeContainerVisitor<T, CONTAINER> &v
     m.Visit(*this, visitor);
 
     // loop the cell range
-    for (uint32 x = begin_cell.x_coord; x <= end_cell.x_coord; ++x)
+    for (uint32 loopX = begin_cell.x_coord; loopX <= end_cell.x_coord; ++loopX)
     {
-        for (uint32 y = begin_cell.y_coord; y <= end_cell.y_coord; ++y)
+        for (uint32 loopY = begin_cell.y_coord; loopY <= end_cell.y_coord; ++loopY)
         {
-            CellPair cell_pair(x, y);
+            CellPair cell_pair(loopX, loopY);
             // lets skip standing cell since we already visited it
             if (cell_pair != standing_cell)
             {

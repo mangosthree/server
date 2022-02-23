@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -140,7 +140,7 @@ class CreatureLinkingMgr
         UNORDERED_SET<uint32> m_eventGuidTriggers;          // master by guid
 
         // Check-routine
-        bool IsLinkingEntryValid(uint32 slaveEntry, CreatureLinkingInfo* pInfo, bool byEntry);
+        static bool IsLinkingEntryValid(uint32 slaveEntry, CreatureLinkingInfo* pInfo, bool byEntry);
 };
 
 /**
@@ -202,7 +202,7 @@ class CreatureLinkingHolder
         // Another helper function
         bool IsRespawnReady(uint32 dbLowGuid, Map* _map) const;
         // Helper function for recursive spawning-checks of an additional linked
-        bool CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingInfo const*  pInfo, float sx, float sy) const;
+        bool CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingInfo const* pInfo, float sx, float sy) const;
 
         // Storage of Data (boss, flag, searchRange, GuidList) for action triggering
         HolderMap m_holderMap;

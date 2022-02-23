@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,13 +79,6 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
         return false;
     }
 
-    SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
-    if (!spellProto)
-    {
-        sLog.outError("DynamicObject (spell %u) not created. Spell not exist!", spellId);
-        return false;
-    }
-
     SetEntry(spellId);
     SetObjectScale(DEFAULT_OBJECT_SCALE);
 
@@ -102,11 +95,18 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
     bytes |= 0x00 << 16;
     bytes |= 0x00 << 24;
     */
-    SetUInt32Value(DYNAMICOBJECT_BYTES, spellProto->SpellVisual[0] | (type << 28));
+    SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
 
+    SetUInt32Value(DYNAMICOBJECT_BYTES, spellProto->SpellVisual[0] | (type << 28));
     SetUInt32Value(DYNAMICOBJECT_SPELLID, spellId);
     SetFloatValue(DYNAMICOBJECT_RADIUS, radius);
-    SetUInt32Value(DYNAMICOBJECT_CASTTIME, WorldTimer::getMSTime());    // new 2.4.0
+    SetUInt32Value(DYNAMICOBJECT_CASTTIME, GameTime::GetGameTimeMS());    // new 2.4.0
+
+    if (!spellProto)
+    {
+        sLog.outError("DynamicObject (spell %u) not created. Spell not exist!", spellId);
+        return false;
+    }
 
     m_aliveDuration = duration;
     m_radius = radius;

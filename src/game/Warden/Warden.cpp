@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -34,6 +34,7 @@
 #include "Util.h"
 #include "Warden.h"
 #include "AccountMgr.h"
+#include "GameTime.h"
 
 Warden::Warden() : _session(NULL), _inputCrypto(16), _outputCrypto(16), _checkTimer(10000/*10 sec*/), _clientResponseTimer(0),
                    _module(NULL), _state(WardenState::STATE_INITIAL)
@@ -41,7 +42,7 @@ Warden::Warden() : _session(NULL), _inputCrypto(16), _outputCrypto(16), _checkTi
     memset(_inputKey, 0, sizeof(_inputKey));
     memset(_outputKey, 0, sizeof(_outputKey));
     memset(_seed, 0, sizeof(_seed));
-    _previousTimestamp = WorldTimer::getMSTime();
+    _previousTimestamp = GameTime::GetGameTimeMS();
 }
 
 Warden::~Warden()
@@ -127,7 +128,7 @@ void Warden::RequestModule()
 
 void Warden::Update()
 {
-    uint32 currentTimestamp = WorldTimer::getMSTime();
+    uint32 currentTimestamp = GameTime::GetGameTimeMS();
     uint32 diff = currentTimestamp - _previousTimestamp;
     _previousTimestamp = currentTimestamp;
 
@@ -148,7 +149,7 @@ void Warden::Update()
                 if (_clientResponseTimer > maxClientResponseDelay * IN_MILLISECONDS)
                 {
                     sLog.outWarden("%s (latency: %u, IP: %s) exceeded Warden module response delay on state %s for more than %s - disconnecting client",
-                                   _session->GetPlayerName(), _session->GetLatency(), _session->GetRemoteAddress().c_str(), WardenState::to_string(_state), secsToTimeString(maxClientResponseDelay, true).c_str());
+                                   _session->GetPlayerName(), _session->GetLatency(), _session->GetRemoteAddress().c_str(), WardenState::to_string(_state), secsToTimeString(maxClientResponseDelay, TimeFormat::ShortText).c_str());
                     _session->KickPlayer();
                 }
                 else

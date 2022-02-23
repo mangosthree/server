@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ void WorldSession::SendGMResponse(GMTicket* ticket)
     SendPacket(&data);
 }
 
-void WorldSession::HandleGMTicketGetTicketOpcode(WorldPacket & /*recv_data*/)
+void WorldSession::HandleGMTicketGetTicketOpcode(WorldPacket& /*recv_data*/)
 {
     SendQueryTimeResponse();
 
@@ -101,9 +101,10 @@ void WorldSession::HandleGMTicketUpdateTextOpcode(WorldPacket& recv_data)
     {
         sLog.outError("Ticket update: Player %s (GUID: %u) doesn't have active ticket", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
     }
+
 }
 
-void WorldSession::HandleGMTicketDeleteTicketOpcode(WorldPacket & /*recv_data*/)
+void WorldSession::HandleGMTicketDeleteTicketOpcode(WorldPacket& /*recv_data*/)
 {
     sTicketMgr.Delete(GetPlayer()->GetObjectGuid());
 
@@ -163,7 +164,7 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recv_data)
     }
 }
 
-void WorldSession::HandleGMTicketSystemStatusOpcode(WorldPacket & /*recv_data*/)
+void WorldSession::HandleGMTicketSystemStatusOpcode(WorldPacket& /*recv_data*/)
 {
     WorldPacket data(SMSG_GMTICKET_SYSTEMSTATUS, 4);
     data << uint32(1);                                      // we can also disable ticket system by sending 0 value

@@ -24,24 +24,22 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef SC_PRECOMPILED_H
-#define SC_PRECOMPILED_H
+#ifndef DEF_BARADIN_HOLD_H
+#define DEF_BARADIN_HOLD_H
 
-#include "system/ScriptDevMgr.h"
-#include "Object.h"
-#include "ObjectGuid.h"
-#include "Unit.h"
-#include "Creature.h"
-#include "CreatureAI.h"
-#include "GameObject.h"
-#include "sc_creature.h"
-#include "sc_gossip.h"
-#include "sc_grid_searchers.h"
-#include "sc_instance.h"
-#include "SpellAuras.h"
-#include "World.h"
+enum
+{
+    MAX_ENCOUNTER           = 3,
 
-// sc_gossip.h:             ADD_GOSSIP_ITEM_EXTENDED outcommented box-money (Required until professions are fixed)
-// sc_creature.cpp:         Used in ScriptedAI::SelectSpell, outcommented SchoolMask
+    TYPE_ARGALOTH           = 0,
+    TYPE_OCCUTHAR           = 1,
+    TYPE_ALIZABAL           = 2,
+
+    // NPCs
+    NPC_ARGALOTH            = 47120,
+    NPC_OCCUTHAR            = 52363,
+    NPC_ALIZABAL            = 55869
+
+};
 
 #endif

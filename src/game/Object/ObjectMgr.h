@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -362,7 +362,7 @@ struct DungeonFinderRequirements
     DungeonFinderRequirements()
         : minItemLevel(0), item(0), item2(0), allianceQuestId(0), hordeQuestId(0), achievement(0) {}
     DungeonFinderRequirements(uint32 MinItemLevel, uint32 Item, uint32 Item2, uint32 AllianceQuestId,
-        uint32 HordeQuestId, uint32 Achievement, const char* QuestIncompleteText)
+                              uint32 HordeQuestId, uint32 Achievement, const char* QuestIncompleteText)
         : minItemLevel(MinItemLevel), item(Item), item2(Item2), allianceQuestId(AllianceQuestId),
         hordeQuestId(HordeQuestId), achievement(Achievement), questIncompleteText(QuestIncompleteText) {}
 };
@@ -426,7 +426,7 @@ enum ConditionType
     CONDITION_LEVEL                 = 15,                   // player_level 0, 1 or 2 (0: equal to, 1: equal or higher than, 2: equal or less than)
     CONDITION_NOITEM                = 16,                   // item_id      count   check not present req. amount items in inventory
     CONDITION_SPELL                 = 17,                   // spell_id     0, 1 (0: has spell, 1: hasn't spell)
-    CONDITION_INSTANCE_SCRIPT       = 18,                   // instance_condition_id (instance script specific enum) 0
+    CONDITION_INSTANCE_SCRIPT       = 18,                   // map_id       instance_condition_id (instance script specific enum)
     CONDITION_QUESTAVAILABLE        = 19,                   // quest_id     0       for case when loot/gossip possible only if player can start quest
     CONDITION_ACHIEVEMENT           = 20,                   // ach_id       0, 1 (0: has achievement, 1: hasn't achievement) for player
     CONDITION_ACHIEVEMENT_REALM     = 21,                   // ach_id       0, 1 (0: has achievement, 1: hasn't achievement) for server
@@ -452,6 +452,7 @@ enum ConditionType
     CONDITION_DEAD_OR_AWAY          = 36,                   // value1: 0=player dead, 1=player is dead (with group dead), 2=player in instance are dead, 3=creature is dead
                                                             // value2: if != 0 only consider players in range of this value
     CONDITION_CREATURE_IN_RANGE     = 37,                   // value1: creature entry; value2: range; returns only alive creatures
+    CONDITION_GAMEOBJECT_IN_RANGE   = 38,                   // value1: gameobject entry; value2: range
 };
 
 enum ConditionSource                                        // From where was the condition called?
@@ -885,7 +886,10 @@ class ObjectMgr
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint32 level) const;
         uint32 GetXPForLevel(uint32 level) const;
-        uint32 GetXPForPetLevel(uint32 level) const { return GetXPForLevel(level) / 20; }
+        uint32 GetXPForPetLevel(uint32 level) const
+        {
+            return GetXPForLevel(level) / 20;
+        }
 
         int32 GetFishingBaseSkillLevel(uint32 entry) const
         {

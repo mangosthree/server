@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -260,11 +260,7 @@ class WorldSession
         void SendNotification(int32 string_id, ...);
         void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName* declinedName);
         void SendLfgSearchResults(LfgType type, uint32 entry);
-
-        //    void SendLfgJoinResult(LfgJoinResult result); // delete this if the below proves to work
         void SendLfgJoinResult(LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons);
-
-      //  void SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 id); // delete this if the below proves to work
         void SendLfgUpdate(bool isGroup, LFGPlayerStatus status);
         void SendLfgQueueStatus(LFGQueueStatus const& status);
         void SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck);
@@ -273,10 +269,9 @@ class WorldSession
         void SendLfgTeleportError(uint8 error);
         void SendLfgRewards(LFGRewards const& rewards);
         void SendLfgBootUpdate(LFGBoot const& boot);
-
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
-        void SendGuildInvite(Player* player, bool alreadyInGuild = false);
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
+        void SendGuildInvite(Player* player, bool alreadyInGuild = false);
         void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2, 3);
         void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
         void SendSetPhaseShift(uint32 phaseMask, uint16 mapId = 0);
@@ -309,6 +304,7 @@ class WorldSession
             _player = plr;
         }
         uint8 Expansion() const { return m_expansion; }
+
         // Warden
         void InitWarden(uint16 build, BigNumber* k, std::string const& os);
 
@@ -465,9 +461,11 @@ class WorldSession
         {
             m_latency = latency;
         }
+        uint32 getDialogStatus(Player* pPlayer, Object* questgiver, uint32 defstatus);
+
+        // Misc
         void SetClientTimeDelay(uint32 delay) { m_clientTimeDelay = delay; }
         void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
-        uint32 getDialogStatus(Player* pPlayer, Object* questgiver, uint32 defstatus);
 
     public:                                                 // opcodes handlers
 

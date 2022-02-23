@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2021 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -533,7 +533,7 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
     // normalize the name if specified and check if it exists
     if (!normalizePlayerName(name))
     {
-        name = "";
+        name.clear();
     }
 
     if (ObjectMgr::CheckPlayerName(name, true) == CHAR_NAME_SUCCESS)
@@ -542,13 +542,13 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
         result = CharacterDatabase.PQuery("SELECT * FROM `characters` WHERE `name` = '%s'", name.c_str());
         if (result)
         {
-            name = "";                                      // use the one from the dump
+            name .clear();                                      // use the one from the dump
             delete result;
         }
     }
     else
     {
-        name = "";
+        name.clear();
     }
 
     // name encoded or empty

@@ -2998,5 +2998,3 @@ float GameObject::GetInteractionDistance()
             return INTERACTION_DISTANCE;
     }
 }
-
-

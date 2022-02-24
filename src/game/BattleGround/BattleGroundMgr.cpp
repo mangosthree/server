@@ -2067,7 +2067,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         // check values from DB
         if (MaxPlayersPerTeam == 0)
         {
-            sLog.outErrorDb("Table `battleground_template` for id %u have wrong min/max players per team settings. BG not created.", bgTypeID);
+            sLog.outErrorDb("Table `battleground_template` for id %u doesn't allow any player per team settings. BG not created.", bgTypeID);
             continue;
         }
 

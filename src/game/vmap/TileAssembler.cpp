@@ -91,7 +91,8 @@ namespace VMAP
             // build global map tree
             std::vector<ModelSpawn*> mapSpawns;
             UniqueEntryMap::iterator entry;
-            printf("Calculating model bounds for map %u...\n", map_iter->first);
+
+            std::cout << "Calculating model bounds for map " << map_iter->first << std::endl;
             for (entry = map_iter->second->UniqueEntries.begin(); entry != map_iter->second->UniqueEntries.end(); ++entry)
             {
                 // M2 models don't have a bound set in WDT/ADT placement data, i still think they're not used for LoS at all on retail
@@ -112,7 +113,7 @@ namespace VMAP
                 spawnedModelFiles.insert(entry->second.name);
             }
 
-            printf("Creating map tree...\n");
+            std::cout << "Creating map tree..." << std::endl;
             BIH pTree;
             pTree.build(mapSpawns, BoundsTrait<ModelSpawn*>::getBounds);
 
@@ -130,7 +131,7 @@ namespace VMAP
             if (!mapfile)
             {
                 success = false;
-                printf("Can not open %s\n", mapfilename.str().c_str());
+                std::cout << "Can not open " << mapfilename.str();
                 break;
             }
 
@@ -223,7 +224,7 @@ namespace VMAP
         exportGameobjectModels();
 
         // export objects
-        std::cout << "\nConverting Model Files" << std::endl;
+        std::cout <<  std::endl << "Converting Model Files" << std::endl;
         for (std::set<std::string>::iterator mfile = spawnedModelFiles.begin(); mfile != spawnedModelFiles.end(); ++mfile)
         {
             std::cout << "Converting " << *mfile << std::endl;
@@ -249,10 +250,10 @@ namespace VMAP
         FILE* dirf = fopen(fname.c_str(), "rb");
         if (!dirf)
         {
-            printf("Could not read dir_bin file!\n");
+            std::cout << "Could not read dir_bin file!" << std::endl;
             return false;
         }
-        printf("Read coordinate mapping...\n");
+        std::cout << "Read coordinate mapping..." << std::endl;
         uint32 mapID, tileX, tileY, check = 0;
         G3D::Vector3 v1, v2;
         ModelSpawn spawn;
@@ -276,7 +277,7 @@ namespace VMAP
             MapData::iterator map_iter = mapData.find(mapID);
             if (map_iter == mapData.end())
             {
-                printf("spawning Map %d\n", mapID);
+                std::cout << "spawning Map " <<  mapID << std::endl;
                 mapData[mapID] = current = new MapSpawns();
             }
             else
@@ -308,7 +309,7 @@ namespace VMAP
         uint32 groups = raw_model.groupsArray.size();
         if (groups != 1)
         {
-            printf("Warning: '%s' does not seem to be a M2 model!\n", modelFilename.c_str());
+            std::cout << "Warning: '" << modelFilename << "' does not seem to be a M2 model!" << std::endl;
         }
 
         AABox modelBound;
@@ -415,25 +416,25 @@ namespace VMAP
             {
                 if (!feof(model_list))
                 {
-                    std::cout << "\nFile '" << GAMEOBJECT_MODELS << "' seems to be corrupted" << std::endl;
+                    std::cout << std::endl << "File '" << GAMEOBJECT_MODELS << "' seems to be corrupted" << std::endl;
                 }
                 break;
             }
             if (fread(&name_length, sizeof(uint32), 1, model_list) <= 0)
             {
-                std::cout << "\nFile '" << GAMEOBJECT_MODELS << "' seems to be corrupted" << std::endl;
+                std::cout << std::endl << "File '" << GAMEOBJECT_MODELS << "' seems to be corrupted" << std::endl;
                 break;
             }
 
             if (name_length >= sizeof(buff))
             {
-                std::cout << "\nFile '" << GAMEOBJECT_MODELS << "' seems to be corrupted" << std::endl;
+                std::cout << std::endl << "File '" << GAMEOBJECT_MODELS << "' seems to be corrupted" << std::endl;
                 break;
             }
 
             if (fread(&buff, sizeof(char), name_length, model_list) <= 0)
             {
-                std::cout << "\nFile '" << GAMEOBJECT_MODELS << "' seems to be corrupted" << std::endl;
+                std::cout << std::endl << "File '" << GAMEOBJECT_MODELS << "' seems to be corrupted" << std::endl;
                 break;
             }
             std::string model_name(buff, name_length);
@@ -477,11 +478,19 @@ namespace VMAP
         fclose(model_list_copy);
     }
 
-    // temporary use defines to simplify read/check code (close file and return at fail)
-#define READ_OR_RETURN(V,S) if(fread((V), (S), 1, rf) != 1) { \
-        fclose(rf); printf("readfail, op = %i\n", readOperation); return(false); }
-#define CMP_OR_RETURN(V,S)  if(strcmp((V),(S)) != 0)        { \
-        fclose(rf); printf("cmpfail, %s!=%s\n", V, S);return(false); }
+// temporary use defines to simplify read/check code (close file and return at fail)
+#define READ_OR_RETURN(V,S) \
+        if(fread((V), (S), 1, rf) != 1) { \
+           fclose(rf); \
+           std::cout << "readfail, op = " << readOperation << std::endl;\
+           return(false); \
+        }
+#define CMP_OR_RETURN(V,S) \
+        if(strcmp((V),(S)) != 0) { \
+            fclose(rf); \
+            std::cout << "cmpfail, " << (V) << "!=" << (S) << std::endl;\
+            return(false);\
+        }
 
     bool GroupModel_Raw::Read(FILE* rf)
     {
@@ -526,7 +535,7 @@ namespace VMAP
             {
                 fclose(rf);
                 delete[] indexarray;
-                printf("readfail, op = %i\n", readOperation);
+                std::cout << "readfail, op = " << readOperation << std::endl;
                 return false;
             }
             triangles.reserve(nindexes / 3);
@@ -551,7 +560,7 @@ namespace VMAP
             {
                 fclose(rf);
                 delete[] vectorarray;
-                printf("readfail, op = %i\n", readOperation);
+                std::cout << "readfail, op = " << readOperation;
                 return false;
             }
 
@@ -590,7 +599,7 @@ namespace VMAP
         FILE* rf = fopen(path, "rb");
         if (!rf)
         {
-            printf("ERROR: Can't open raw model file: %s\n", path);
+            std::cout << "ERROR: Can't open raw model file: " << path << std::endl;
             return false;
         }
 

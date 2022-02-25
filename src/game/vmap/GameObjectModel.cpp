@@ -129,8 +129,8 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     }
 
     name = it->second.name;
-    iPos = Vector3(pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ());
     phasemask = pGo->GetPhaseMask();
+    iPos = Vector3(pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ());
     iScale = pGo->GetObjectScale();
     iInvScale = 1.f / iScale;
 
@@ -138,7 +138,9 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     iInvRot = iRotation.inverse();
     // transform bounding box:
     mdl_box = AABox(mdl_box.low() * iScale, mdl_box.high() * iScale);
+
     AABox rotated_bounds;
+
     for (int i = 0; i < 8; ++i)
     {
         rotated_bounds.merge(iRotation * mdl_box.corner(i));

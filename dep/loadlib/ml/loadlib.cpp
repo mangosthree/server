@@ -48,7 +48,9 @@ bool FileLoader::loadFile(char* filename, bool log)
     if (mf.isEof())
     {
         if (log)
-            { printf("No such file %s\n", filename); }
+        {
+            printf("No such file %s\n", filename);
+        }
         return false;
     }
 
@@ -60,7 +62,9 @@ bool FileLoader::loadFile(char* filename, bool log)
         mf.read(data, data_size);
         mf.close();
         if (prepareLoadedData())
-            { return true; }
+        {
+            return true;
+        }
     }
     printf("Error loading %s", filename);
     mf.close();
@@ -73,15 +77,22 @@ bool FileLoader::prepareLoadedData()
     // Check version
     version = (file_MVER*) data;
     if (version->fcc != 'MVER')
-        { return false; }
+    {
+        return false;
+    }
     if (version->ver != FILE_FORMAT_VERSION)
-        { return false; }
+    {
+        return false;
+    }
     return true;
 }
 
 void FileLoader::free()
 {
-    if (data) { delete[] data; }
+    if (data)
+    {
+        delete[] data;
+    }
     data = 0;
     data_size = 0;
     version = 0;

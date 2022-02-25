@@ -370,7 +370,7 @@ namespace VMAP
 
         // write WorldModel
         WorldModel model;
-        model.setRootWmoID(raw_model.RootWMOID);
+        model.SetRootWmoID(raw_model.RootWMOID);
         if (raw_model.groupsArray.size())
         {
             std::vector<GroupModel> groupsArray;
@@ -380,11 +380,11 @@ namespace VMAP
             {
                 GroupModel_Raw& raw_group = raw_model.groupsArray[g];
                 groupsArray.push_back(GroupModel(raw_group.mogpflags, raw_group.GroupWMOID, raw_group.bounds));
-                groupsArray.back().setMeshData(raw_group.vertexArray, raw_group.triangles);
+                groupsArray.back().SetMeshData(raw_group.vertexArray, raw_group.triangles);
                 groupsArray.back().setLiquidData(raw_group.liquid);
             }
 
-            model.setGroupModels(groupsArray);
+            model.SetGroupModels(groupsArray);
         }
 
         success = model.writeFile(iDestDir + "/" + pModelFilename + ".vmo");

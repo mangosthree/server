@@ -2348,7 +2348,7 @@ void GameObject::UpdateModel()
     }
     delete m_model;
 
-    m_model = GameObjectModel::construct(this);
+    m_model = GameObjectModel::Create(this);
     if (m_model)
     {
         GetMap()->InsertGameObjectModel(*m_model);

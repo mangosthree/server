@@ -4,16 +4,67 @@
 # Please see the included DOCS/LICENSE.md for more information
 #
 
-file(GLOB sources *.c)
-list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/lua.c)
-list(REMOVE_ITEM sources ${CMAKE_CURRENT_SOURCE_DIR}/luac.c)
+project(lualib VERSION 5.2.3)
 
-set(lua_STAT_SRCS
-  ${sources}
+add_library(lualib STATIC
+    lapi.c
+    lauxlib.c
+    lbaselib.c
+    lbitlib.c
+    lcode.c
+    lcorolib.c
+    lctype.c
+    ldblib.c
+    ldebug.c
+    ldo.c
+    ldump.c
+    lfunc.c
+    lgc.c
+    linit.c
+    liolib.c
+    llex.c
+    lmathlib.c
+    lmem.c
+    loadlib.c
+    lobject.c
+    lopcodes.c
+    loslib.c
+    lparser.c
+    lstate.c
+    lstring.c
+    lstrlib.c
+    ltable.c
+    ltablib.c
+    ltm.c
+    lundump.c
+    lvm.c
+    lzio.c
+    lapi.h
+    lauxlib.h
+    lcode.h
+    lctype.h
+    ldebug.h
+    ldo.h
+    lfunc.h
+    lgc.h
+    llex.h
+    llimits.h
+    lmem.h
+    lobject.h
+    lopcodes.h
+    lparser.h
+    lstate.h
+    lstring.h
+    ltable.h
+    ltm.h
+    lua.h
+    luaconf.h
+    lualib.h
+    lundump.h
+    lvm.h
+    lzio.h
 )
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
+target_include_directories(lualib
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-add_library(lualib STATIC ${lua_STAT_SRCS})

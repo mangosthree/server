@@ -26,7 +26,8 @@
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
-#include "sl/loadlib.h"
+// The following is a temp fix until the extractor is merged with the unified extractor
+#include "../loadlib/sl/loadlib.h"
 
 FILE* openWoWExe();
 int getBuildNumber();

@@ -162,7 +162,7 @@ inline uint32 secsToTimeBitFields(time_t secs)
  *
  * @return int32
  */
-uint32 rand32();
+ int32 rand32();
 
 /**
  * @brief Return a random double from 0.0 to 1.0 (exclusive).

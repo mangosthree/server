@@ -236,7 +236,6 @@ void AddSC_twilight_highlands();
 void AddSC_vashjir();
 void AddSC_instance_baradin_hold();
 void AddSC_boss_alizabal();
-
 #endif
 
 void AddEasternKingdomsScripts()

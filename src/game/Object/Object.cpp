@@ -1041,16 +1041,6 @@ void Object::ApplyModPositiveFloatValue(uint16 index, float  val, bool apply)
     SetFloatValue(index, cur);
 }
 
-void Object::MarkFlagUpdateForClient(uint32 index)
-{
-    m_changedValues[index] = true;
-    if (m_inWorld && !m_objectUpdated)
-    {
-        AddToClientUpdateList();
-        m_objectUpdated = true;
-    }
-}
-
 void Object::SetFlag(uint16 index, uint32 newFlag)
 {
     MANGOS_ASSERT(index < m_valuesCount || PrintIndexError(index, true));
@@ -1196,6 +1186,16 @@ void Object::MarkForClientUpdate()
             AddToClientUpdateList();
             m_objectUpdated = true;
         }
+    }
+}
+
+void Object::ForceValuesUpdateAtIndex(uint32 index)
+{
+    m_changedValues[index] = true;
+    if (m_inWorld && !m_objectUpdated)
+    {
+        AddToClientUpdateList();
+        m_objectUpdated = true;
     }
 }
 

@@ -406,7 +406,7 @@ void Log::outString()
     {
         outTime();
     }
-    printf("\n");
+    std::cout << std::endl;
     if (logfile)
     {
         outTimestamp(logfile);
@@ -445,7 +445,7 @@ void Log::outString(const char* str, ...)
         ResetColor(true);
     }
 
-    printf("\n");
+    std::cout << std::endl;
 
     if (logfile)
     {

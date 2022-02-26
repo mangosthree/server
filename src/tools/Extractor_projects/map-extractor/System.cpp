@@ -30,8 +30,12 @@
 #include <set>
 
 #include "dbcfile.h"
-#include "sl/adt.h"
-#include "sl/wdt.h"
+// The following is a temp fix until the extractor is merged with the unified extractor
+#include "../loadlib/sl/adt.h"
+//#include "sl/adt.h"
+// The following is a temp fix until the extractor is merged with the unified extractor
+#include "../loadlib/sl/wdt.h"
+//#include "sl/wdt.h"
 #include "../shared/ExtractorCommon.h"
 #ifndef WIN32
 #include <unistd.h>

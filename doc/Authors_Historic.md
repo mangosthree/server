@@ -29,14 +29,17 @@ for the community.
 
 Authors
 -------
-Prior to Release 0.21, the following helped get Mangos to where it was.
+Prior to Release 0.22, the following helped get Mangos to where it was.
 
 * *TeamPython*, *Wow Python* and *WoWd* teams
 * 123qwe
+* [D4RK]Doom-Lord
+* `win`
 * a1ien
 * AbsoluteZero
 * aerione_alt
 * akreao
+* aleigood
 * Alex
 * Alex Bolotsin
 * AlexDereka (a.k.a. alex_dereka)
@@ -53,10 +56,12 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * antiroot
 * Antonio593
 * anturbo (a.k.a. ant009)
-* antz (a.k.a. billy1arm)
+* Antz/Billy1arm
 * Anubisss
 * ApoC (a.k.a. apoc_mangos)
+* arcticmangos
 * arkan_xyz
+* Armand-Gabriel-Camner
 * arrai
 * Arthorius
 * ascent
@@ -70,7 +75,9 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * Backbone
 * Balrok
 * bastili
+* beefbroccoli
 * begemot
+* bels
 * benemorius
 * Blackhawk
 * Blaymoira (a.k.a. Neveragain)
@@ -100,6 +107,8 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * Caskast
 * cccyril
 * Ceris
+* chaosvex
+* Chuck5ta / Charles A Edwards
 * Charlie2025
 * CHEG
 * ChipLeo
@@ -110,9 +119,11 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * cmaranec
 * codels
 * Corfen
+* Corsol
 * crackm
 * cyberbrest2
 * Cyberium
+* Cylae
 * cyrex
 * danielich
 * Danstahr
@@ -126,14 +137,15 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * DasBlub
 * DasMy
 * Daveh
+* Dekadencee
 * delavega
 * dele
 * Deleterios
 * Den
+* DEN_North
 * Denn
 * Dennis
 * DENNO
-* DEN_North
 * DerDyddye
 * Derex (a.k.a. mr_derex)
 * Diablox
@@ -151,6 +163,7 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * eggxp
 * Electros
 * elecyb
+* Elmsroth
 * Elron
 * Emme
 * emsy
@@ -170,6 +183,7 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * finomen
 * fisherman
 * Fmut
+* Foereaper
 * Fog
 * Foks
 * foohey
@@ -183,9 +197,12 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * FrenchW
 * fulgas
 * FunkyBit
+* galathil
 * GalaxyMan
 * gc
 * Gendalph
+* Ghurok
+* GiantCrocodile
 * goldberg002
 * Gommes
 * gonnabustya
@@ -194,10 +211,14 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * Grandres
 * GriffonHeart
 * Grinder
+* gromchek
 * Grz3s
 * GS
+* H0zen
 * Hantet
+* Harshit-10-pal
 * hectolight
+* Helladan
 * herrtrigger
 * HipToday
 * Hiram
@@ -208,6 +229,7 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * ilija
 * imbecile
 * Infinity
+* inifield
 * invliD
 * Iriskin
 * Iron
@@ -216,6 +238,7 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * j4r0d
 * Janu
 * Jeffrey "Tigole" Kaplan
+* Jeremy lb
 * jethro84530
 * Jethrogibbs
 * Jolan
@@ -226,8 +249,8 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * Kaios
 * kamikazetg
 * KAPATEJIb (a.k.a. insider42, Insider)
-* kbz
 * kb_z
+* kbz
 * kid10 (a.k.a. kid 10)
 * killdozer
 * KillerFrca
@@ -239,12 +262,14 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * komdori
 * ksergik
 * Kubius
+* Kyel Woodard
 * kyle1
 * Laise (a.k.a. Beaste)
 * Laizerox
 * lasyan3
 * lavinelu
 * leak
+* LeFroid
 * Lightguard
 * lightman
 * Lightunit
@@ -257,12 +282,15 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * m4cm4n
 * Machiavelli
 * MacWarriors
+* MadMax/MadMaxMangos
 * maikash
+* Maki Chronik
 * Malah
 * malish
 * maly32167
 * Marik
 * marintrica
+* Markus
 * MaS0n
 * Maxxie
 * MaxXx2021
@@ -274,6 +302,7 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * Midna
 * miebaik
 * miranda.conrado
+* mityada
 * mmcs
 * mns
 * Mordred
@@ -288,6 +317,7 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * Nay
 * NeatElves
 * Necro
+* Necrovoice
 * Neggod
 * Neo2003 (a.k.a. =Neo2003, Neo2003-TBC)
 * NetSky
@@ -305,6 +335,8 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * nugu100
 * oceanor
 * Odyssey
+* Olion
+* Olion17
 * Olynn
 * Oniryck
 * OPenaz
@@ -316,6 +348,7 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * pasdVn
 * Pat S
 * Patman128 (a.k.a. Patman64)
+* Pavel Belev
 * phan
 * plaes
 * popovk
@@ -348,16 +381,19 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * Rhyll
 * rilex
 * Rob "EnoYls" Pardo
+* Rochet2
 * Rockette
 * rowman
 * rozr
-* rsa (a.k.a. C:/Program Files (x86)/git/dev/rsa)
+* rsa
 * Ryan "I'm Sabu" Cleary
 * Saeba
 * Salja
+* sanctum32
 * sani
 * Sarjuuk
 * Schmoozerd
+* Scott Stout
 * seirge
 * Seizerkiller (a.k.a. Seize, Seizer)
 * Seline
@@ -372,12 +408,14 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * Shauren
 * Shendor
 * Shin_Darth
+* shindarth
 * Shyax
 * Sid
 * siduskana
 * Silinoron
 * SilverIce
 * silviu2009
+* Simon Sandstr├Âm
 * siuolly
 * sixsixnine
 * Skirnir
@@ -398,15 +436,18 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * Syn
 * Tanatos
 * Tassadar (a.k.a. Tasssadar, Tassader, Tassader2)
+* tazboyz16
 * tehmarto
 * Tequila
 * TERRANZ
 * tester20tester20 tester20
 * TGM
-* TheLuda (a.k.a. MaNGOS foundation, root)
-* thenecromancer
 * The_Game_Master
+* TheLuda
+* thenecromancer
 * Thyros
+* Tim
+* Tim Forbes
 * Timawyn
 * timmit
 * tlexii
@@ -432,8 +473,10 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * virusav
 * VladimirMangos (a.k.a. Vladimir, vladimir-mangos, vladimir_mangos)
 * vladonix
+* Warkdev
 * Warlord123
 * wilibald09
+* willtuker
 * win
 * Win32
 * Wojta
@@ -444,25 +487,27 @@ Prior to Release 0.21, the following helped get Mangos to where it was.
 * x3mal
 * x3n
 * Xadiaris
+* Xalares
 * XEQT
 * Xfurry
 * xILOSWag
 * yad02
+* Yaki Khadafi
 * yavi
 * Yehonal
 * YuruY
 * Zakamurite
+* zamalaev
 * zerg
 * Zerg2000
 * zergtmn
 * zhanhang03
 * zhenya
 * zhyg
+* Zilvereyes
 * Zooey Aurora
 * Zor (a.k.a. XTZGZoReX)
 * zuudu
-* [D4RK]Doom-Lord
-* `win
 
 [1]: http://blizzard.com/games/wow/ "World of Warcraft"
 [2]: http://sourceforge.net/p/mangos/ "mangos on SourceForge"

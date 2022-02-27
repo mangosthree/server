@@ -23,67 +23,179 @@
  */
 
 #include "ByteBuffer.h"
-#include "Log/Log.h"
 
-void BitStream::Clear()
+#include "Errors.h"
+#include "Log.h"
+#include "Util.h"
+
+#include <sstream>
+#include <ctime>
+
+ByteBuffer::ByteBuffer(MessageBuffer&& buffer) :
+    _rpos(0), _wpos(0), _bitpos(InitialBitPos), _curbitval(0), _storage(buffer.Move()) { }
+
+ByteBufferPositionException::ByteBufferPositionException(bool add, size_t pos, size_t size, size_t valueSize)
 {
-    _data.clear();
-    _rpos = _wpos = 0;
+    std::ostringstream ss;
+
+    ss << "Attempted to " << (add ? "put" : "get") << " value with size: "
+       << valueSize << " in ByteBuffer (pos: " << pos << " size: " << size
+       << ")";
+
+    message().assign(ss.str());
 }
 
-uint8 BitStream::GetBit(uint32 bit)
+ByteBufferSourceException::ByteBufferSourceException(size_t pos, size_t size, size_t valueSize)
 {
-    MANGOS_ASSERT(_data.size() > bit);
-    return _data[bit];
+    std::ostringstream ss;
+
+    ss << "Attempted to put a "
+       << (valueSize > 0 ? "nullptr-pointer" : "zero-sized value")
+       << " in ByteBuffer (pos: " << pos << " size: " << size << ")";
+
+    message().assign(ss.str());   
 }
 
-uint8 BitStream::ReadBit()
+ByteBuffer& ByteBuffer::operator>>(double& value)
 {
-    MANGOS_ASSERT(_data.size() < _rpos);
-    uint8 b = _data[_rpos];
-    ++_rpos;
-    return b;
-}
+    value = read<double>();
 
-void BitStream::WriteBit(uint32 bit)
-{
-    _data.push_back(bit ? uint8(1) : uint8(0));
-    ++_wpos;
-}
-
-template <typename T> void BitStream::WriteBits(T value, size_t bits)
-{
-    for (int32 i = bits-1; i >= 0; --i)
+    if (!std::isfinite(value))
     {
-        WriteBit((value >> i) & 1);
-    }
-}
-
-bool BitStream::Empty()
-{
-    return _data.empty();
-}
-
-void BitStream::Reverse()
-{
-    uint32 len = GetLength();
-    std::vector<uint8> b = _data;
-    Clear();
-
-    for(uint32 i = len; i > 0; --i)
-    {
-        WriteBit(b[i-1]);
-    }
-}
-
-void BitStream::Print()
-{
-    std::stringstream ss;
-    ss << "BitStream: ";
-    for (uint32 i = 0; i < GetLength(); ++i)
-    {
-        ss << uint32(GetBit(i)) << " ";
+        throw ByteBufferException();
     }
 
-    sLog.outDebug("%s", ss.str().c_str());
+    return *this;
+}
+
+ByteBuffer& ByteBuffer::operator>>(double& value)
+{
+    value = read<double>();
+    
+    if (!std::isfinite(value))
+    {
+        throw ByteBufferException();
+    }
+
+    return *this;
+}
+
+uint32 ByteBuffer::ReadPackedTime()
+{
+    uint32 packedDate = read<uint32>();
+    tm lt = tm();
+
+    lt.tm_min = packedDate & 0x3F;
+    lt.tm_hour = (packedDate >> 6) & 0x1F;
+    //lt.tm_wday = (packedDate >> 11) & 7;
+    lt.tm_mday = ((packedDate >> 14) & 0x3F) + 1;
+    lt.tm_mon = (packedDate >> 20) & 0xF;
+    lt.tm_year = ((packedDate >> 24) & 0x1F) + 100;
+
+    return uint32(mktime(&lt));   
+}
+
+void ByteBuffer::append(uint8 const* src, size_t cnt)
+{
+    /**
+     * To Do: adjust Mangos Assert to work with 4 args
+     */
+
+    //MANGOS_ASSERT(src, "", _wpos, size());
+    //MANGOS_ASSERT(cnt, "", _wpos, size());
+    MANGOS_ASSERT(size() < 10000000);
+
+    FlushBits();
+
+    size_t const newSize = _wpos + cnt;
+    if (_storage.capacity() < newSize) /* cust memory allocation rules */
+    {
+        if (newSize < 100)
+        {
+            _storage.reserve(300);
+        }
+        else if (newSize < 750)
+        {
+            _storage.reserve(2500);
+        }
+        else if (newSize < 6000)
+        {
+            _storage.reserve(10000);
+        }
+        else
+        {
+            _storage.reserve(400000);
+        }
+    }
+
+    if (_storage.size() < newSize)
+    {
+        _storage.resize(newSize);
+    }
+
+    std::memcpy(&_storage[_wpos], src, cnt);
+    _wpos = newSize;
+}
+
+void ByteBuffer::AppendPackedTime(time_t time)
+{
+    tm lt;
+    localtime_r(&time, &lt);
+    append<uint32>((lt.tm_year - 100) << 24 | lt.tm_mon << 20 |
+        (lt.tm_mday - 1) << 14 | lt.tm_wday << 11 | lt.tm_hour << 6 | lt.tm_min);
+
+}
+
+void ByteBuffer::put(size_t pos, uint8 const* src, size_t cnt)
+{
+    /**
+     * To Do: adjust Mangos Assert to work with 4 args
+     */
+
+    //MANGOS_ASSERT(pos + cnt <= size(), "", cnt, pos, size());
+    //MANGOS_ASSERT(src, "", pos, size());
+    //MANGOS_ASSERT(cnt, "", pos, size());
+
+    std::memcpy(&_storage[pos], src, cnt);
+}
+
+void ByteBuffer::print_storage() const
+{
+    std::ostringstream o;
+    o << "STORAGE_SIZE: " << size();
+    for (uint32 i = 0; i < size(); ++i)
+    {
+        o << read<uint8>(i) << " - ";
+    }
+
+    o << " ";
+}
+
+void ByteBuffer::hexlike() const
+{
+    uint32 j = 1, k = 1;
+
+    std::ostringstream o;
+    o << "STORAGE_SIZE: " << size();
+
+    for (uint32 i = 0; i < size(); ++i)
+    {
+        char buf[3];
+        snprintf(buf, 3, "%2X", read<uint8>(i));
+        if ((i == (j * 8)) && ((i != (k * 16))))
+        {
+            o << "| ";
+            ++j;
+        }
+        else if (i == (k * 16))
+        {
+            o << "\n";
+            ++k;
+            ++j;
+        }
+
+        o << buf;
+    }
+
+    o << " ";
 }

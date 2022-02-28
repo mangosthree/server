@@ -90,7 +90,7 @@ bool ChatHandler::HandleResetHonorCommand(char* args)
 
     target->SetCurrencyCount(CURRENCY_HONOR_POINTS, 0);
     target->SetUInt32Value(PLAYER_FIELD_KILLS, 0);
-    target->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 0);
+    target->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);
     target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL);
 
     return true;

@@ -241,18 +241,18 @@ class ByteBuffer
         {
             if (!bitCount)
             {
-                throw ByteBufferSourceException((pos + bitCount) / 8, size(), 0);
+                throw ByteBufferSourceException((rpos + bitCount) / 8, size(), 0);
             }
 
-            if (pos + bitCount > size() * 8)
+            if (rpos + bitCount > size() * 8)
             {
-                throw ByteBufferPositionException(false, (pos + bitCount) / 8, size(), (bitCount - 1) / 8 + 1);
+                throw ByteBufferPositionException(false, (rpos + bitCount) / 8, size(), (bitCount - 1) / 8 + 1);
             }
 
             for (uint32 i = 0; i < bitCount; ++i)
             {
-                size_t wp = (pos + i) / 8;
-                size_t bit = (pos + i) % 8;
+                size_t wp = (rpos + i) / 8;
+                size_t bit = (rpos + i) % 8;
 
                 if ((value >> (bitCount - i - 1)) & 1)
                 {

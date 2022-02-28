@@ -174,7 +174,7 @@ class ByteBuffer
                 _bitpos = 0;
                 _curbitval = read<uint8>();
             }
-            
+
             return ((_curbitval >> (7 - _bitpos)) & 1) != 0;
         }
 
@@ -474,7 +474,7 @@ class ByteBuffer
 
             _rpos += skip;
         }
-        
+
         template <typename T> T read()
         {
             T r = read<T>(_rpos);
@@ -653,7 +653,7 @@ class ByteBuffer
                 guid >>= 8;
             }
 
-            append(packGUID, size);  
+            append(packGUID, size);
         }
 
         void AppendPackedTime(time_t time);

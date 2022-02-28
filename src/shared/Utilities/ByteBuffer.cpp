@@ -53,7 +53,7 @@ ByteBufferSourceException::ByteBufferSourceException(size_t pos, size_t size, si
        << (valueSize > 0 ? "nullptr-pointer" : "zero-sized value")
        << " in ByteBuffer (pos: " << pos << " size: " << size << ")";
 
-    message().assign(ss.str());   
+    message().assign(ss.str());
 }
 
 ByteBuffer& ByteBuffer::operator>>(double& value)
@@ -71,7 +71,7 @@ ByteBuffer& ByteBuffer::operator>>(double& value)
 ByteBuffer& ByteBuffer::operator>>(double& value)
 {
     value = read<double>();
-    
+
     if (!std::isfinite(value))
     {
         throw ByteBufferException();
@@ -92,7 +92,7 @@ uint32 ByteBuffer::ReadPackedTime()
     lt.tm_mon = (packedDate >> 20) & 0xF;
     lt.tm_year = ((packedDate >> 24) & 0x1F) + 100;
 
-    return uint32(mktime(&lt));   
+    return uint32(mktime(&lt));
 }
 
 void ByteBuffer::append(uint8 const* src, size_t cnt)

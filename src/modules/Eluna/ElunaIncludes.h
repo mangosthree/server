@@ -120,7 +120,8 @@ typedef ThreatContainer::StorageType ThreatList;
 #define MAX_TALENT_SPECS        MAX_TALENT_SPEC_COUNT
 #define TEAM_NEUTRAL            TEAM_INDEX_NEUTRAL
 
-#ifndef CLASSIC
+
+#if (defined(TBC) || defined(WOTLK) || defined(CATA)) && !defined(MANGOS)
 #define PLAYER_FIELD_LIFETIME_HONORABLE_KILLS   PLAYER_FIELD_LIFETIME_HONORBALE_KILLS
 #endif
 

@@ -26,74 +26,71 @@
 #define MANGOSSERVER_WORLDPACKET_H
 
 #include "Common.h"
-#include "ByteBuffer.h"
 #include "Opcodes.h"
+#include "ByteBuffer.h"
+#include <chrono>
 
-// Note: m_opcode and size stored in platfom dependent format
-// ignore endianess until send, and converted at receive
-/**
- * @brief
- *
- */
 class WorldPacket : public ByteBuffer
 {
     public:
-        /**
-         * @brief just container for later use
-         *
-         */
-        WorldPacket() : ByteBuffer(0), m_opcode(MSG_NULL_ACTION)
-        {
-        }
-        /**
-         * @brief
-         *
-         * @param opcode
-         * @param res
-         */
-        explicit WorldPacket(Opcodes opcode, size_t res = 200) : ByteBuffer(res), m_opcode(opcode) { }
-        /**
-         * @brief copy constructor
-         *
-         * @param packet
-         */
-        WorldPacket(const WorldPacket& packet) : ByteBuffer(packet), m_opcode(packet.m_opcode)
+        WorldPacket() : ByteBuffer(0), m_opcode(NULL_OPCODE) // just container for later use
         {
         }
 
-        /**
-         * @brief
-         *
-         * @param opcode
-         * @param newres
-         */
-        void Initialize(Opcodes opcode, size_t newres = 200)
+        WorldPacket(uint16 opcode, size_t res = 200) : ByteBuffer(res),
+            m_opcode(opcode) { }
+
+        WorldPacket(WorldPacket&& packet) : ByteBuffer(std::move(packet)), m_opcode(packet.m_opcode)
+        {
+        }
+
+        WorldPacket(WorldPacket&& packet, std::chrono::steady_clock::time_point receivedTime) : ByteBuffer(std::move(packet)), m_opcode(packet.m_opcode), m_receivedTime(receivedTime)
+        {
+        }
+
+        WorldPacket(WorldPacket const& right) : ByteBuffer(right), m_opcode(right.m_opcode)
+        {
+        }
+
+        WorldPacket& operator=(WorldPacket const& right)
+        {
+            if (this != &right)
+            {
+                m_opcode = right.m_opcode;
+                ByteBuffer::operator=(right);
+            }
+
+            return *this;
+        }
+
+        WorldPacket& operator=(WorldPacket&& right)
+        {
+            if (this != &right)
+            {
+                m_opcode = right.m_opcode;
+                ByteBuffer::operator=(std::move(right));
+            }
+
+            return *this;
+        }
+
+        WorldPacket(uint16 opcode, MessageBuffer&& buffer) : ByteBuffer(std::move(buffer)), m_opcode(opcode) { }
+
+        void Initialize(uint16 opcode, size_t newres = 200)
         {
             clear();
             _storage.reserve(newres);
             m_opcode = opcode;
         }
 
-        /**
-         * @brief
-         *
-         * @return uint16
-         */
-        Opcodes GetOpcode() const { return m_opcode; }
-        /**
-         * @brief
-         *
-         * @param opcode
-         */
-        void SetOpcode(Opcodes opcode) { m_opcode = opcode; }
-        /**
-         * @brief
-         *
-         * @return const char
-         */
-        inline const char* GetOpcodeName() const { return LookupOpcodeName(m_opcode); }
+        uint16 GetOpcode() const { return m_opcode; }
+        void SetOpcode(uint16 opcode) { m_opcode = opcode; }
+
+        std::chrono::steady_clock::time_point GetReceivedTime() const { return m_receivedTime; }
 
     protected:
-        Opcodes m_opcode;
+        uint16 m_opcode;
+        std::chrono::steady_clock::time_point m_receivedTime; // only set for a specific set of opcodes, for performance reasons.
 };
+
 #endif

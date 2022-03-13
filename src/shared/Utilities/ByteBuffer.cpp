@@ -26,6 +26,7 @@
 
 #include "Errors.h"
 #include "Log.h"
+#include "Utilities/MessageBuffer.h"
 #include "Util.h"
 
 #include <sstream>

@@ -237,7 +237,7 @@ class ByteBuffer
         */
 
         template <typename T>
-        void PutBits(size_t, T value, uint32 bitCount)
+        void PutBits(size_t pos, T value, uint32 bitCount)
         {
             if (!bitCount)
             {

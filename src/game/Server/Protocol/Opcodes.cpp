@@ -30,7 +30,7 @@
 #include "Opcodes.h"
 #include "WorldSession.h"
 
-#include "AllPackets.h"
+#include "Packets/AllPackets.h"
 
 template<class PacketClass, void(WorldSession::*HandlerFunction)(PacketClass&)>
 class PacketHandler : public ClientOpcodeHandler

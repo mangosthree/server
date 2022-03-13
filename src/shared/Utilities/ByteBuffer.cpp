@@ -69,18 +69,6 @@ ByteBuffer& ByteBuffer::operator>>(double& value)
     return *this;
 }
 
-ByteBuffer& ByteBuffer::operator>>(double& value)
-{
-    value = read<double>();
-
-    if (!std::isfinite(value))
-    {
-        throw ByteBufferException();
-    }
-
-    return *this;
-}
-
 uint32 ByteBuffer::ReadPackedTime()
 {
     uint32 packedDate = read<uint32>();

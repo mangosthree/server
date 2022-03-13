@@ -143,7 +143,7 @@ class MessageBuffer
     private:
         size_type _wpos;
         size_type _rpos;
-        std::vector<uint8> _storage;    
+        std::vector<uint8> _storage;
 };
 
 #endif

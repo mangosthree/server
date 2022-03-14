@@ -327,6 +327,17 @@ class ByteBuffer
             return *this;
         }
 
+        ByteBuffer &operator<<(const std::string &value)
+        {
+            if (size_t len = value.length())
+            {
+                append((uint8 const*)value.c_str(), len);
+            }
+
+            append((uint8)0);
+            return *this;
+        }
+
         ByteBuffer &operator<<(const char *str)
         {
             if (size_t len = (str ? strlen(str) : 0))

@@ -1027,8 +1027,8 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid)
 
                 pkt << uint32((*itr)->icon);                                        // realm type
                 pkt << uint8(realmflags);                                           // realmflags
-                pkt.append(name);                                                   // name
-                pkt.append(GetAddressString(GetAddressForClient((**itr), clientAddr))); // address
+                pkt << name;                                                        // name
+                pkt << GetAddressString(GetAddressForClient((**itr), clientAddr));  // address
                 pkt << float((*itr)->populationLevel);
                 pkt << uint8(AmountOfCharacters);
                 pkt << uint8((*itr)->timezone);                                     // realm category
@@ -1098,8 +1098,8 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid)
                 pkt << uint8((*itr)->icon);                                         // realm type (this is second column in Cfg_Configs.dbc)
                 pkt << uint8(lock);                                                 // flags, if 0x01, then realm locked
                 pkt << uint8(realmFlags);                                           // see enum RealmFlags
-                pkt.append((*itr)->name);                                           // name
-                pkt.append(GetAddressString(GetAddressForClient((**itr), clientAddr))); // address
+                pkt << (*itr)->name;                                                // name
+                pkt << GetAddressString(GetAddressForClient((**itr), clientAddr));  // address
                 pkt << float((*itr)->populationLevel);
                 pkt << uint8(AmountOfCharacters);
                 pkt << uint8((*itr)->timezone);                                     // realm category (Cfg_Categories.dbc)

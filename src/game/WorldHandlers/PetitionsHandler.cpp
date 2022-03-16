@@ -710,6 +710,7 @@ void WorldSession::SendPetitionShowList(ObjectGuid guid)
 
     WorldPacket data(SMSG_PETITION_SHOWLIST, 8 + 1 + 4 * 6);
     data << guid;                                           // npc guid
+    data << uint8(1);                                       // count
     data << uint32(1);                                      // index
     data << uint32(GUILD_CHARTER);                          // charter entry
     data << uint32(CHARTER_DISPLAY_ID);                     // charter display id

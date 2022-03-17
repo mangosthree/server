@@ -701,32 +701,20 @@ void WorldSession::SendPetitionShowList(ObjectGuid guid)
         return;
     }
 
-    // only guild petitions currently used
-    if (!pCreature->IsTabardDesigner())
+    WorldPacket data(SMSG_PETITION_SHOWLIST, 8 + 1 + 4 * 6);
+    data << guid;                           // npc guid
+
+    if (pCreature->IsTabardDesigner())
     {
-        DEBUG_LOG("WORLD: HandlePetitionShowListOpcode - %s is not supported npc type.", guid.GetString().c_str());
-        return;
+        data << uint8(1);                   // count
+        data << uint32(1);                  // index
+        data << uint32(GUILD_CHARTER);      // charter entry
+        data << uint32(CHARTER_DISPLAY_ID); // charter display id
+        data << uint32(GUILD_CHARTER_COST); // charter cost
+        data << uint32(0);                  // unknown
+        data << uint32(4);                  // required signs
     }
 
-    WorldPacket data(SMSG_PETITION_SHOWLIST, 8 + 1 + 4 * 6);
-    data << guid;                                           // npc guid
-    data << uint8(1);                                       // count
-    data << uint32(1);                                      // index
-    data << uint32(GUILD_CHARTER);                          // charter entry
-    data << uint32(CHARTER_DISPLAY_ID);                     // charter display id
-    data << uint32(GUILD_CHARTER_COST);                     // charter cost
-    data << uint32(0);                                      // unknown
-    data << uint32(4);                                      // required signs
-
-    // for(uint8 i = 0; i < count; ++i)
-    //{
-    //    data << uint32(i);                        // index
-    //    data << uint32(GUILD_CHARTER);            // charter entry
-    //    data << uint32(CHARTER_DISPLAY_ID);       // charter display id
-    //    data << uint32(GUILD_CHARTER_COST+i);     // charter cost
-    //    data << uint32(0);                        // unknown
-    //    data << uint32(9);                        // required signs
-    //}
     SendPacket(&data);
     DEBUG_LOG("Sent SMSG_PETITION_SHOWLIST");
 }

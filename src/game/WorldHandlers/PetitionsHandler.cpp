@@ -44,7 +44,6 @@
 
 // Charters ID in item_template
 #define GUILD_CHARTER               5863
-#define GUILD_CHARTER_COST          1000                    // 10 S
 #define CHARTER_DISPLAY_ID          16161
 
 void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
@@ -114,7 +113,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (_player->GetMoney() < GUILD_CHARTER_COST)
+    if (_player->GetMoney() < sWorld.getConfig(CONFIG_UNIT32_GUILD_PETITION_COST))
     {
         // player hasn't got enough money
         _player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, GUILD_CHARTER, 0);
@@ -129,7 +128,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
         return;
     }
 
-    _player->ModifyMoney(-(int64)GUILD_CHARTER_COST);
+    _player->ModifyMoney(-int64(sWorld.getConfig(CONFIG_UNIT32_GUILD_PETITION_COST)));
     Item* charter = _player->StoreNewItem(dest, GUILD_CHARTER, true);
     if (!charter)
     {
@@ -710,7 +709,7 @@ void WorldSession::SendPetitionShowList(ObjectGuid guid)
         data << uint32(1);                  // index
         data << uint32(GUILD_CHARTER);      // charter entry
         data << uint32(CHARTER_DISPLAY_ID); // charter display id
-        data << uint32(GUILD_CHARTER_COST); // charter cost
+        data << uint32(sWorld.getConfig(CONFIG_UNIT32_GUILD_PETITION_COST)); // charter cost
         data << uint32(0);                  // unknown
         data << uint32(4);                  // required signs
     }

@@ -398,7 +398,8 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (++signs > 4)                                        // client signs maximum
+    /* todo: this needs to be handled properly */
+    if (++signs > sWorld.getConfig(CONFIG_UINT32_MIN_PETITION_SIGNS))
     {
         // close at signer side
         _player->SendPetitionSignResult(petitionGuid, _player, PETITION_SIGN_PETITION_FULL);
@@ -711,7 +712,7 @@ void WorldSession::SendPetitionShowList(ObjectGuid guid)
         data << uint32(CHARTER_DISPLAY_ID); // charter display id
         data << uint32(sWorld.getConfig(CONFIG_UNIT32_GUILD_PETITION_COST)); // charter cost
         data << uint32(0);                  // unknown
-        data << uint32(4);                  // required signs
+        data << uint32(sWorld.getConfig(CONFIG_UINT32_MIN_PETITION_SIGNS));  // required signs
     }
 
     SendPacket(&data);

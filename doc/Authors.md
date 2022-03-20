@@ -28,64 +28,47 @@ server code, and furthered the development of a few [World of Warcraft][1] serve
 
 Authors
 -------
-For Authors prior to Release 0.21, please see the file [Historic Authors](Authors_historic.md)
+For Authors prior to Release 0.22, please see the file [Historic Authors](Authors_historic.md)
 
-We are grateful to the following who contributed to Release 0.21:
+We are grateful to the following who contributed to Release 0.22:
 
 * aleigood
-* Antz/Billy1arm
-* arcticmangos
-* Armand-Gabriel-Camner
+* Antz / billy1arm
 * beefbroccoli
-* bels
 * chaosvex
 * Charles A Edwards
-* Chuck5ta
 * Corsol
 * cyberium
 * Cylae
-* Dekadencee
 * Elmsroth
 * Foereaper
-* galathil
-* Ghurok
-* gromchek
-* GiantCrocodile
+* Fyre
 * H0zen
-* Harshit-10-pal
 * Helladan
+* i-am-fyre
 * inifield
 * Jeremy lb
-* Kyel Woodard
+* Julian
 * Laizerox
-* LeFroid
+* leprasmurf
 * MadMax/MadMaxMangos
-* Maki Chronik
+* Maki Chronik    
 * Markus
+* Meltie2013     
 * mityada
 * Necrovoice
-* Olion
-* Olion17
 * Oniryck
 * Pavel Belev
 * Rochet2
-* sanctum32
-* Schmoozerd
 * Scott Stout
 * shindarth
-* Simon Sandstr├Âm
-* stfx
+* Simon Sandström
 * tazboyz16
-* Tim
 * Tim Forbes
 * Warkdev
 * willtuker
-* Xalares
-* Xfurry
-* Yaki Khadafi
-* zamalaev
+* Xalares    
 * Zilvereyes
-
 
 [1]: http://blizzard.com/games/wow/ "World of Warcraft"
 [2]: http://sourceforge.net/p/mangos/ "mangos on SourceForge"

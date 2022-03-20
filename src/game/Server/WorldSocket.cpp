@@ -163,7 +163,7 @@ const std::string& WorldSocket::GetRemoteAddress(void) const
     return m_Address;
 }
 
-int WorldSocket::SendPacket(const WorldPacket& pkt)
+int WorldSocket::SendPacket(const WorldPacket& pct)
 {
     ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
 
@@ -171,8 +171,6 @@ int WorldSocket::SendPacket(const WorldPacket& pkt)
     {
         return -1;
     }
-
-    WorldPacket pct = pkt;
 
     // Dump outgoing packet.
     sLog.outWorldPacketDump(uint32(get_handle()), pct.GetOpcode(), pct.GetOpcodeName(), &pct, false);

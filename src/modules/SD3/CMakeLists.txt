@@ -18,39 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-include(MacroMangosSourceGroup)
-
 #Add PCH Files
 set(mangosscript_PCH "${CMAKE_CURRENT_SOURCE_DIR}/pch.h")
 if(PCH)
     LIST(APPEND mangosscript_PCH "${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp")
 endif()
-
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/base
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/src/shared
-    ${CMAKE_SOURCE_DIR}/src/framework
-    ${CMAKE_SOURCE_DIR}/src/game/Server
-    ${CMAKE_SOURCE_DIR}/src/game/BattleGround
-    ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers
-    ${CMAKE_SOURCE_DIR}/src/game/Object
-    ${CMAKE_SOURCE_DIR}/src/game/References
-    ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators
-    ${CMAKE_SOURCE_DIR}/src/game/vmap
-    ${CMAKE_SOURCE_DIR}/src/game/Time
-    ${CMAKE_SOURCE_DIR}/src/shared
-    ${CMAKE_SOURCE_DIR}/src/shared/Platform
-    ${CMAKE_SOURCE_DIR}/src/shared/Utilities
-    ${CMAKE_SOURCE_DIR}/src/shared/Log
-    ${CMAKE_SOURCE_DIR}/src/shared/DataStores
-    ${CMAKE_SOURCE_DIR}/src/shared/Common
-    ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}/src/shared
-    ${ACE_INCLUDE_DIR}
-    ${MYSQL_INCLUDE_DIR}
-)
 
 # Define the scriptdev3 library
 set(mangosscript_LIB_SRCS ${mangosscript_PCH})
@@ -557,39 +529,23 @@ file(GLOB sources_world_scarlet_enclave scripts/eastern_kingdoms/scarlet_enclave
   source_group("Eastern Kingdoms Scripts\\World\\Scarlet Enclave" FILES ${sources_world_scarlet_enclave})
 endif()
 # --- END IF ---
+
+
 add_library(mangosscript STATIC ${mangosscript_LIB_SRCS})
+
+target_include_directories(mangosscript
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/base
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_link_libraries(mangosscript
+    PUBLIC
+        game
+)
 
 # Generate PCH
 if(PCH)
     ADD_CXX_PCH(mangosscript ${mangosscript_PCH})
-endif()
-
-if(NOT ACE_USE_EXTERNAL)
-    add_dependencies(mangosscript ace)
-endif()
-
-if(UNIX)
-    set(mangosscript_LINK_FLAGS "-pthread")
-    if(APPLE)
-        set(mangosscript_LINK_FLAGS "-framework Carbon ${mangosscript_LINK_FLAGS}")
-        # Needed for the linking because of the missing symbols
-        set(mangosscript_LINK_FLAGS "-Wl,-undefined -Wl,dynamic_lookup ${mangosscript_LINK_FLAGS}")
-    endif()
-
-    if(APPLE)
-        set(mangosscript_PROPERTIES INSTALL_NAME_DIR ${LIBS_DIR})
-    else()
-        set(mangosscript_PROPERTIES INSTALL_RPATH ${LIBS_DIR})
-    endif()
-
-    # Run out of build tree
-    set(mangosscript_PROPERTIES
-        ${mangosscript_PROPERTIES}
-        BUILD_WITH_INSTALL_RPATH OFF
-    )
-
-    set_target_properties(mangosscript PROPERTIES
-        LINK_FLAGS ${mangosscript_LINK_FLAGS}
-        ${mangosscript_PROPERTIES}
-    )
 endif()

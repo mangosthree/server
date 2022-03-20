@@ -1,8 +1,5 @@
 /**
- * MaNGOS is a full featured server for World of Warcraft, supporting
- * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
- *
- * Copyright (C) 2005-2019  MaNGOS project <http://getmangos.eu>
+ * This code is part of MaNGOS. Contributor & Copyright details are in AUTHORS/THANKS.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * World of Warcraft, and all World of Warcraft or Warcraft art, images,
- * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
 #ifndef WDT_H
 #define WDT_H
-
 #include "loadlib.h"
 
 //**************************************************************************************
@@ -32,134 +25,70 @@
 //**************************************************************************************
 #define WDT_MAP_SIZE 64
 
-/**
- * @brief
- *
- */
 class wdt_MWMO
 {
-        /**
-         * @brief
-         *
-         */
         union
         {
-            uint32 fcc; /**< TODO */
-            char   fcc_txt[4]; /**< TODO */
+            uint32 fcc;
+            char   fcc_txt[4];
         };
     public:
-        uint32 size; /**< TODO */
-        /**
-         * @brief
-         *
-         * @return bool
-         */
+        uint32 size;
         bool prepareLoadedData();
 };
 
-/**
- * @brief
- *
- */
 class wdt_MPHD
 {
-        /**
-         * @brief
-         *
-         */
         union
         {
-            uint32 fcc; /**< TODO */
-            char   fcc_txt[4]; /**< TODO */
+            uint32 fcc;
+            char   fcc_txt[4];
         };
     public:
-        uint32 size; /**< TODO */
+        uint32 size;
 
-        uint32 data1; /**< TODO */
-        uint32 data2; /**< TODO */
-        uint32 data3; /**< TODO */
-        uint32 data4; /**< TODO */
-        uint32 data5; /**< TODO */
-        uint32 data6; /**< TODO */
-        uint32 data7; /**< TODO */
-        uint32 data8; /**< TODO */
-        /**
-         * @brief
-         *
-         * @return bool
-         */
+        uint32 data1;
+        uint32 data2;
+        uint32 data3;
+        uint32 data4;
+        uint32 data5;
+        uint32 data6;
+        uint32 data7;
+        uint32 data8;
         bool   prepareLoadedData();
 };
 
-/**
- * @brief
- *
- */
 class wdt_MAIN
 {
-        /**
-         * @brief
-         *
-         */
         union
         {
-            uint32 fcc; /**< TODO */
-            char   fcc_txt[4]; /**< TODO */
+            uint32 fcc;
+            char   fcc_txt[4];
         };
     public:
-        uint32 size; /**< TODO */
+        uint32 size;
 
-        /**
-         * @brief
-         *
-         */
         struct adtData
         {
-            uint32 exist; /**< TODO */
-            uint32 data1; /**< TODO */
-        } adt_list[64][64]; /**< TODO */
+            uint32 exist;
+            uint32 data1;
+        } adt_list[64][64];
 
-        /**
-         * @brief
-         *
-         * @return bool
-         */
         bool   prepareLoadedData();
 };
 
-/**
- * @brief
- *
- */
 class WDT_file : public FileLoader
 {
     public:
-        /**
-         * @brief
-         *
-         * @return bool
-         */
         bool   prepareLoadedData();
 
-        /**
-         * @brief
-         *
-         */
         WDT_file();
-        /**
-         * @brief
-         *
-         */
         ~WDT_file();
-        /**
-         * @brief
-         *
-         */
         void free();
 
-        wdt_MPHD* mphd; /**< TODO */
-        wdt_MAIN* main; /**< TODO */
-        wdt_MWMO* wmo; /**< TODO */
+        wdt_MPHD* mphd;
+        wdt_MAIN* main;
+        wdt_MWMO* wmo;
 };
 
 #endif

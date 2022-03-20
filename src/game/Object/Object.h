@@ -287,7 +287,7 @@ class Object
         *
         * \param index uint32 of the flag to be updated.
         */
-        void MarkFlagUpdateForClient(uint32 index);
+        void ForceValuesUpdateAtIndex(uint32 index);
         void SetFlag(uint16 index, uint32 newFlag);
         void RemoveFlag(uint16 index, uint32 oldFlag);
 

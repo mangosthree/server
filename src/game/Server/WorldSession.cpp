@@ -50,7 +50,7 @@
 #include "LuaEngine.h"
 #endif /*ENABLE_ELUNA*/
 #ifdef ENABLE_PLAYERBOTS
-#include "playerbot.h"
+//#include "playerbot.h"
 #endif
 
 // Warden
@@ -166,16 +166,16 @@ char const* WorldSession::GetPlayerName() const
 void WorldSession::SendPacket(WorldPacket const* packet)
 {
 #ifdef ENABLE_PLAYERBOTS
-    if (GetPlayer()) {
-        if (GetPlayer()->GetPlayerbotAI())
-        {
-            GetPlayer()->GetPlayerbotAI()->HandleBotOutgoingPacket(*packet);
-        }
-        else if (GetPlayer()->GetPlayerbotMgr())
-        {
-            GetPlayer()->GetPlayerbotMgr()->HandleMasterOutgoingPacket(*packet);
-        }
-    }
+    //if (GetPlayer()) {
+    //    if (GetPlayer()->GetPlayerbotAI())
+    //    {
+    //        GetPlayer()->GetPlayerbotAI()->HandleBotOutgoingPacket(*packet);
+    //    }
+    //    else if (GetPlayer()->GetPlayerbotMgr())
+    //    {
+    //        GetPlayer()->GetPlayerbotMgr()->HandleMasterOutgoingPacket(*packet);
+    //    }
+    //}
 #endif
 
     if (!m_Socket)
@@ -293,10 +293,10 @@ bool WorldSession::Update(PacketFilter& updater)
                     // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
 
 #ifdef ENABLE_PLAYERBOTS
-                    if (_player && _player->GetPlayerbotMgr())
+              /*      if (_player && _player->GetPlayerbotMgr())
                     {
                         _player->GetPlayerbotMgr()->HandleMasterIncomingPacket(*packet);
-                    }
+                    }*/
 #endif
                     break;
                 case STATUS_LOGGEDIN_OR_RECENTLY_LOGGEDOUT:
@@ -381,10 +381,10 @@ bool WorldSession::Update(PacketFilter& updater)
     }
 
 #ifdef ENABLE_PLAYERBOTS
-    if (GetPlayer() && GetPlayer()->GetPlayerbotMgr())
-    {
-        GetPlayer()->GetPlayerbotMgr()->UpdateSessions(0);
-    }
+    //if (GetPlayer() && GetPlayer()->GetPlayerbotMgr())
+    //{
+    //    GetPlayer()->GetPlayerbotMgr()->UpdateSessions(0);
+    //}
 #endif
 
     ///- Cleanup socket pointer if need
@@ -449,10 +449,10 @@ void WorldSession::LogoutPlayer(bool Save)
     if (_player)
     {
 #ifdef ENABLE_PLAYERBOTS
-        if (GetPlayer()->GetPlayerbotMgr())
+  /*      if (GetPlayer()->GetPlayerbotMgr())
         {
             GetPlayer()->GetPlayerbotMgr()->LogoutAllBots();
-        }
+        }*/
 #endif
 
         sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName() , _player->GetGUIDLow());
@@ -463,11 +463,11 @@ void WorldSession::LogoutPlayer(bool Save)
         }
 
 #ifdef ENABLE_PLAYERBOTS
-        if (_player->GetPlayerbotMgr())
-        {
-            _player->GetPlayerbotMgr()->LogoutAllBots();
-        }
-        sRandomPlayerbotMgr.OnPlayerLogout(_player);
+        //if (_player->GetPlayerbotMgr())
+        //{
+        //    _player->GetPlayerbotMgr()->LogoutAllBots();
+        //}
+        //sRandomPlayerbotMgr.OnPlayerLogout(_player);
 #endif
 
         ///- If the player just died before logging out, make him appear as a ghost
@@ -564,16 +564,16 @@ void WorldSession::LogoutPlayer(bool Save)
         // no point resetting online in character table here as Player::SaveToDB() will set it to 1 since player has not been removed from world at this stage
         // No SQL injection as AccountID is uint32
 #ifdef ENABLE_PLAYERBOTS
-        if (!GetPlayer()->GetPlayerbotAI())
-        {
-            static SqlStatementID id;
-            // playerbot mod
-            if (!_player->GetPlayerbotAI())
-            {
-                SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
-                stmt.PExecute(uint32(0), GetAccountId());
-            }
-        }
+        //if (!GetPlayer()->GetPlayerbotAI())
+        //{
+        //    static SqlStatementID id;
+        //    // playerbot mod
+        //    if (!_player->GetPlayerbotAI())
+        //    {
+        //        SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
+        //        stmt.PExecute(uint32(0), GetAccountId());
+        //    }
+        //}
 #else
         static SqlStatementID id;
 

@@ -25,7 +25,7 @@
 #include "Util.h"
 #include "Timer.h"
 
-#include "utf8cpp/utf8.h"
+#include "utf8.h"
 #include "RNGen.h"
 #include <ace/TSS_T.h>
 #include <ace/INET_Addr.h>
@@ -89,7 +89,7 @@ float frand(float min, float max)
     return RNG::instance()->rand_f(min, max);
 }
 
-uint32 rand32()
+int32 rand32()
 {
     return RNG::instance()->rand();
 }

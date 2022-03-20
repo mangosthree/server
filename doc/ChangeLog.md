@@ -3,12 +3,351 @@
 This change log references the relevant changes (bug and security fixes) done
 in recent versions.
 
-0.22 (2021-xx-xx to now) - "Answer the Volcano's Call"
+0.22 (2021-01-01 to 2022-02-26) - "Answer the Volcano's Call"
 ------------------------------------------------------
-* Due for release imminently
+* [Appveyor] Remove no-longer needed file    
+* [Build] Add OpemSSL1.0.2j installers    
+* [Build] Added MySQL 5.7 support    
+* [Build] Attempt to make travis happy    
+* [Build] Cmake fixes from Zero    
+* [Build] Enhanced Build System    
+* [Build] Force building SOAP and PlayerBots in testing    
+* [Build] Improved Build System, based on the work of H0zen (#131)
+* [Build] Updated EasyBuild to v1.5c    
+* [Core/Soap] Fix memory leak on shutdown (#159)    
+* [DB] Set min db levels    
+* [DbDocs] The Big DB documentation update    
+* [DEP] Added some ACE fixes    
+* [DEP] Attempt to fix Stormlib build    
+* [DEP] Stormlib updated to latest version    
+* [DEP] Update Stormlib v9.21    
+* [DEP] Updated ACE library    
+* [DEP] Updated g3glite to latest version    
+* [DEP] Updated library    
+* [DEP] Updated recast to latest version    
+* [Deps] Adjusted to use the standard Deps library    
+* [Deps] Corrected case sensitive library name for unix compatibility    
+* [Deps] Update Dep Library    
+* [DEPS] Update zlib version to 1.2.8    
+* [EasyBuild] Added EasyBuild subModule    
+* [EASYBUILD] Added temp patch files back    
+* [EasyBuild] EasyBuild updated to V2    
+* [Easybuild] Fixed a crash. Thanks     MadMaxMangos for finding.
+* [EasyBuild] Hotfix Revert OpenSSL binaries.    
+* [EasyBuild] ignore easybuild created debug files    
+* [EasyBuild] Minor update to include some additional checks    
+* [EasyBuild] Remove static files    
+* [EasyBuild] Updated base versions of libraries    
+* [EasyBuild] Updated MySQL and Cmake library locations    
+* [EasyBuild] Updated to Support modified build system and enhancements    
+* [Eluna] Add conditionals around code    
+* [Eluna] Applied a load of missing hooks    
+* [Eluna] Patched to allow compilation    
+* [Eluna] sync    
+* [Extractors] Correct Version mentioned in Readme's    
+* [Extractors] Some cleanup/sync in prep of merge    
+* [Extractors] Updated extractors to fix movement bug. Will need to reextract    
+* [FIX] correct easybuild patch script    
+* [Fix] Correct incorrectly renamed GAMEOBJECT_TYPE    
+* [FIX] Make Travis happy.
+* [Install] Changes ported from Zero    
+* [Install] Extended lazymangos.sh to support M3    
+* [Linux] Fix playerbots in getmangos.sh. Thanks Tom Peters    
+* [Linux] Fix Sync up script    
+* [Linux] Minor script fix    
+* [Maps] Allow map id's above 999. Thanks Meltie2013 & Foereaper    
+* [Port] Internal Timer Rewrite & Introduce GameTime by Meltie2013
+* [Ported] GM Commands files reorganisation. Based on Elmsroth's work    
+* [Realm] Sync up    
+* [Realm] Updated Realmd required version    
+* [Realmd] Correct the submodule revision    
+* [Realmd] Resolve SRP6a authentication bypass issue. Thanks     DevDaemon
+* [realmd] Resolved authentication bypass. Thanks namreeb    
+* [Rel21] Stage 1 of updates for Rel21 Build System    
+* [Rel21] Stage 2 of updates for Rel21 Build System    
+* [SD3] Added SD3 as a submodule    
+* [SD3] first commit with SD3 inplace - not complete yet    
+* [SD3] Fix BRD issues and server crash. Thanks 
+* [SD3] Fix item_petrov_cluster_bombs    
+* [SD3] Fix quest Kodo Roundup (#69)    
+* [SD3] Ported a lot of SD3 updates from main SD3 module    
+* [SD3] Update Onyxia script    
+* [SD3] Update SD3 submodule    
+* [SD3] Updated for BRD arena fix    
+* [SD3] Updated ScriptDev3    
+* [Styling] Another sweep on styling cleanups    
+* [Styling] Fix some minor errors    
+* [Styling] Remove tabs    
+* [Styling] Remove trailing spaces    
+* [Styling] Some styling corrections    
+* [Styling] Trailing space cleanup    
+* [Submodule] Updated submodules    
+* [Submodules] Updates dep and SD3    
+* [Sync] From Project Sync from MangosTwo    
+* [Tools] Extraction Project Sync    
+* [Tools] Fixed movemaps compile    
+* [Warden] Refactor to match other cores    
+* Add Character Date Create Column (#102)    
+* Add Codacy badge and status    
+* Add Disables table based on the work of     Olion on Zero
+* Add mangosd full versioning information on windows    
+* Add missing file from last commit    
+* Add missing quote which broke links in README    
+* add new mangos 'family' icons. Thanks UnkleNuke for the original design    
+* Add possibility to write mangos command via a whisper.    
+* Add realmd full versioning information on windows    
+* Add some missed Warden code    
+* Add state for GM command completed quests. Thanks H0zen for assistance    
+* Add support for new comment column    
+* Add Ubuntu 19.04 case for Prerequisites install (#77)    
+* Added AppVeyor Build Status    
+* Added compile status to readme    
+* Added deps submodule    
+* Added missing call to LoadDB2Stores( )    
+* Added Patch removal script    
+* Added Realmd submodule    
+* Added support for Red Hat 'Experimental'
+* Adding new distribution support (Fedora) (#16)    
+* Adding safeguard to prevent possible duping of gold in mail. (#131)    
+* Adding support for database updates. Only last folder (alphabetically sorted) will be takenxw    
+* Adding support for Player Bots submodule in installer. (#20)    
+* Adding support for Ubuntu: Curl dependencies added
+* Adding support of several known Linux distribution for dependancies setup (#175)    
+* Adding support when several WoW clients path are detected. Only the first one is selected
+* Adds custom emote to wyrmthalak script    
+* AddSC_scholomance() added to ScriptLoader    
+* AHBot rollup from previous cores    
+* All required patch files are now being applied (#123)    
+* Ammend Core name    
+* And more build errors fixed    
+* Another attempt to fix OSX. Thanks 
+* apply latest Dep library    
+* Apply MAC / Arm fixes for building    
+* Apply style fix    
+* Appveyor supplied fix for openSSL 1.0    
+* At last, changing opcode to enable flying (#7)
+* AutoBroadcast system.    
+* Avoid increasing player count per team when re-logging (#165)    
+* Build error and warning fixes    
+* Build error fix - undefined SFileExtractFile (#65)    
+* Build fixes made and tabs turned  into spaces    
+* Cata areas added to SD3    
+* Change function names to match other cores    
+* Changed doxygen settings (#5)    
+* Changing the Glancing Blow chance to 25% (#18)    
+* ChatChannels fix - test PR    
+* Check for Buildings folder    
+* Check player exiting waiting area while starting battleground    
+* Checking of TrainerTemplateId fixed    
+* Clean up readme a little    
+* Code change for the acquisition of the locale    
+* Core updated to use the latest version of ScriptDev3    
+* Correct Function Naming across cores pt1    
+* Correct Typo for default status    
+* Corrected path to Stormlib.h    
+* Correction for unix    
+* Correction made to BuildChatPacket(( ) declaration    
+* Correction made to DBC file format strings    
+* Correction made to file name    
+* Correction made to function name    
+* Correction made to script    
+* Corrections made to the extractor    
+* Crash on exit to login screen resolved    
+* Create a docker container image and runing it with docker-compose (#164)    
+* creature_template table's format string corrected    
+* debug recv Command added    
+* Description of the meaning of the format strings added    
+* Disable command locale loading as its hard crashing    
+* Disable OSX build checking until we have an OSX dev to get them fixed    
+* Displaying of the portait window fixed    
+* Drop Unused PostgreSQL (#25)    
+* Eliminated tabs!    
+* ensure bins are marked as executable (#108)    
+* Fix a crash when using an invalid display id with command
+* Fix applied for Quest Log, Bags, and money issues
+* Fix Baradin Hold and Alizabal script loading    
+* Fix core startup message when db version is same as core (#150)    
+* Fix crash at startUp due to command localization loading    
+* Fix crash in BIH module due to uninitialized member variable. (#172)    
+* Fix crash when using command helps (#93)    
+* Fix Eluna build after https://github.com/mangosthree/server/commit/b13453cc89c53d1f95107ee744821235af468671    
+* Fix Eluna crash.    
+* fix error ‘atoi’ was not declared in this scope. Thanks to drarkanex for pointing    
+* Fix floating point model for VS 2015 (#52)    
+* Fix for Powers defaults always being 0    
+* Fix Gameobject loading issue    
+* Fix Git Action Errors    
+* Fix incorrect logout error.
+* Fix instance cleanup at startup (#99)    
+* Fix Latest MariaDB cmake detection    
+* Fix login issue. Thanks rochet    
+* Fix mac build (#84)    
+* Fix Merge error    
+* Fix misleading core startup message (#147)    
+* Fix missing bzip2 dependency for CentOS (#187)    
+* Fix missing delimiter    
+* Fix OpenSSL travis for mac    
+* Fix OSX build on Travis (#94)    
+* Fix part of NPC localized text cannot be displayed.    
+* Fix pdump write command and add check to pdump load (#106)    
+* Fix player kicking    
+* Fix possible problem with 'allow two side interaction' and loot.    
+* Fix potential NullPointerException on C'Thun (#107)    
+* Fix PvPstats table to fit with its web app    
+* fix reference to dockerFiles to match with real files name (#92)    
+* Fix SD3 Compile fail pt1 of 2    
+* Fix send mail and send item commands    
+* Fix server crash. Thank H0zen/mpfans    
+* Fix server startup. Thanks Rochet and 
+* Fix simultaneous connection contention issue    
+* Fix some codacy detected issues    
+* Fix some code porting discrepancies    
+* fix some incorrect slashes    
+* Fix static linking in shared libs    
+* Fix typo in VMap BIH generation    
+* Fix unknown packet 0x720E    
+* Fix VS debug build    
+* Fix VS2010/2012 build. Thanks H0zen for help    
+* Fix VS2017 build. Needs cmake 3.8.0 minimum    
+* Fix whisper blocking    
+* FIX-CENTOS-BUILD Added epel repo    
+* FIX-CENTOS-BUILD Fixed centos 7 build    
+* Fixed  chest game objects interactions    
+* Fixed build errors related to the static_assert instructions (#64)    
+* Fixed dbc and map extractor    
+* Fixed memory issue with msbuild build    
+* Fixed possible logout problems in Major Cities and Inns.    
+* Fixed some additional found nullptrs    
+* Fixed the targeting error that would not allow Hai'shulud to be summoned.    
+* Fixed travis url change. Thanks Alarnis    
+* Fixed vs2012 build    
+* Fixes build issues for Linux (#17)    
+* Fixes Error "There is no game at this location" (#172)
+* Fixing a bug that made the DBC enUS being ignored while they are valid. (#122)    
+* Format specifiers was not correct in lootmgr    
+* Function added back    
+* g++ was not installed without build-essential (#80)    
+* GameObject port pt1    
+* GroupHandler: prevent cheater self-invite    
+* Hai'shulud script updated. Updated Hai'shulud to the correct database entry (#22038).
+* Implement Action Workflows (#24)    
+* Implement command localization    
+* Implement OpenSSL 1.1.x support    
+* Implement quest_relations table. Based on work by     Hozen
+* Implement Update Timer & Remove Ancient Timers
+* Implement Whitespace Cleaner (#27)    
+* Improve user experience & clean up (#135)    
+* Improving Build system and removing Common.h clutter    
+* Incorrect cast fixed (#120)    
+* Kill whitespaces in files (#26)    
+* LfgDungeonsEntryfmt structure corrected    
+* LFGMgr.cpp and LFGMgr.h added to Three    
+* linux/getmangos.sh: default to build client tools (#19)    
+* LoadCreatureClassLvlStats() fixed    
+* Lots of cmangos commirs applied    
+* made function isActiveObject consistant to other cores    
+* Make git actions happy    
+* Make GM max speed customisable through mangosd.conf    
+* Make Mangos compatible with newer MySQL pt3.
+* Make Mangos Three compatible with newer MySQL.
+* Mana tombs added to ScriptLoader    
+* Many fixes made to get the server to run again    
+* Minor file changes    
+* Minor styling change    
+* Minor styling tidy up    
+* Minor typo corrected (#184)    
+* Missing code related to Warden added    
+* Missing function added back (#62)    
+* Missing script fixed    
+* Modify default options    
+* More SQL delimiting for modern servers (#166)    
+* Move project files about to match currect build system    
+* Move the license file    
+* MySQL CMake Update (#29)    
+* New RNG engine for MaNGOS    
+* New thread pool reactor implementation and refactoring world daemon. (#8)    
+* Now we can inspect player when GM mode is ON (#98)    
+* nuke tabs    
+* OpenSSL Version Check & Ensure Version    
+* Overwritten CMakeLists entried put back    
+* Patch up tree    
+* Player health regen fixed - temporary fix    
+* Port OSX fix from Zero    
+* quest_template columns now read and stored in the correct order    
+* raise minimum cmake version to 3.12    
+* Refactor Logout Request Packet
+* Refactored db_scripts The unity! - Based on the original work of H0zen for Zero.    
+* Regex requires gcc 4.9 or higher    
+* Remove -rdynamic. on Unix/Linux.    
+* Remove duplicate eluna world update call    
+* Remove icon folder and fix broken links    
+* Remove in-house SSL script    
+* Remove last remnants of obsolete npc_gossip table    
+* Remove obsolete code    
+* Remove obsolete SD2 folder    
+* Remove old SD3    
+* Remove PostGre support in line with other cores    
+* Remove Remnants of Two obsolete tables: npc_trainer_template & npc_vendor_template    
+* remove some leftover PostGre references    
+* Remove some Visual Studio configurations
+* Remove travis badge/checks and add github actions    
+* Remove unneeded folder    
+* Remove unused include directives    
+* Removed OpenSSL1.1.x blocker    
+* Removed umwanted text from CMakeList file    
+* Removed unwanted "return"
+* Replace deprecated std::auto_ptr with std::shared_ptr (#133)    
+* Replacing aptitude by apt-get on Ubuntu by default.
+* Reved some unused files    
+* Revision.h update.    
+* Rewrite Soap Server (#130)    
+* Script added - npc_kharan_mighthammer    
+* Script refactoring done as per previous cores    
+* Scripts set up to work for Cata    
+* SD3 compile fix pt2 of 2. Thanks 
+* Server Banner and Status redone    
+* Server start up error fixes    
+* Server-owned world channel    
+* Several major improvements to Linux installer. (#15)    
+* show email in .pinfo command. Based on the work of Salja
+* Some code cleanup.    
+* some sync from previous cores    
+* SpellEffect.dbc - correction to format string    
+* StormLib ver 9.2 implemented    
+* StormLib's CMakeList reverted to pre last OSX issue fix    
+* Style cleanup from the Mangos Futures Team    
+* Synchronized Conf files for easier comparison (#96)    
+* The tools folder structure redone    
+* Tidy up AHBot prices code    
+* Time Format Update (#32)    
+* Trimming Ubuntu dependencies (#17)    
+* Unused code removed    
+* Update Badges and cleanup Dependancy Descriptions    
+* Update Dep submodule to the main Rel21 module    
+* Update deprecated ROW_FORMAT    
+* update easybuild patcher    
+* Update getmangos.sh (#3)    
+* update incorrect copyright information    
+* Update mangosd.conf.dist.in    
+* Update README.md (#109)    
+* Update Waypoint System and Commands    
+* Updated Dep Submodule    
+* Updated dep/StormLib branch to lastest commit    
+* Updated patch scripts    
+* Updated Readme - Changed Appveyor to test the correct branch    
+* Updated Readme.md and icons    
+* Updated to use the latest version of ScriptDev3    
+* Updating Debian Sources (#169)    
+* URL update    
+* VMAP creation fixed - files are now created    
+* Warden added    
+* Weather system changed to that of the previous cores.    
+* Weather system fixed    
+* World Delay Timer can be view in server info command.    
+* WorldTime will be replaced by GameTime which is more accurate.
 
 
-0.21 (2016-04-01 to 2021-xx-xx) - "The Battle for the Elemental Planes"
+0.21 (2016-04-01 to 2021-01-01) - "The Battle for the Elemental Planes"
 ---------------------------------------------------------
 Many Thanks to all the groups and individuals who contributed to this release.
 

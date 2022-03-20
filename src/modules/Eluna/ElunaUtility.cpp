@@ -16,28 +16,12 @@
 
 uint32 ElunaUtil::GetCurrTime()
 {
-
-#ifndef TRINITY
-    #if def MANGOS
-        return WorldTimer::getMSTime();
-    #else
-        return getMSTime();
-    #endif
-#else
-#endif
+    return getMSTime();
 }
 
 uint32 ElunaUtil::GetTimeDiff(uint32 oldMSTime)
 {
-#ifndef TRINITY
-    #ifdef MANGOS
-        return GetMSTimeDiffToNow(oldMSTime);
-    #else
-        return WorldTimer::getMSTimeDiff(oldMSTime, GetCurrTime());
-    #endif
-#else
     return GetMSTimeDiffToNow(oldMSTime);
-#endif
 }
 
 ElunaUtil::ObjectGUIDCheck::ObjectGUIDCheck(ObjectGuid guid) : _guid(guid)
@@ -101,7 +85,7 @@ bool ElunaUtil::WorldObjectInRangeCheck::operator()(WorldObject* u)
             {
                 if (i_obj_fact)
                 {
-#ifdef TRINITY
+#if defined TRINITY || AZEROTHCORE
                     if ((i_obj_fact->IsHostileTo(*target->GetFactionTemplateEntry())) != (i_hostile == 1))
                         return false;
 #else

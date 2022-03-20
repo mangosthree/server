@@ -13121,7 +13121,11 @@ void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
 
         CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
 
-        GetMotionMaster()->MoveConfused();
+         if (GetTypeId() == TYPEID_UNIT)
+         {
+             SetTargetGuid(ObjectGuid());
+             GetMotionMaster()->MoveConfused();
+         }
     }
     else
     {

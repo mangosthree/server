@@ -24,20 +24,20 @@
 
 #ifndef MANGOS_H_REVISION
 #define MANGOS_H_REVISION
-    #define REVISION_NR "2114001"
+    #define REVISION_NR "2201001"
 
     #define REALMD_DB_VERSION_NR 22
     #define REALMD_DB_STRUCTURE_NR 01
     #define REALMD_DB_CONTENT_NR 001
     #define REALMD_DB_UPDATE_DESCRIPTION "Release 22"
 
-    #define CHAR_DB_VERSION_NR 21
-    #define CHAR_DB_STRUCTURE_NR 6
+    #define CHAR_DB_VERSION_NR 22
+    #define CHAR_DB_STRUCTURE_NR 01
     #define CHAR_DB_CONTENT_NR 001
-    #define CHAR_DB_UPDATE_DESCRIPTION "add_character_createdDate_col"
+    #define CHAR_DB_UPDATE_DESCRIPTION "Release 22"
 
-    #define WORLD_DB_VERSION_NR 21
-    #define WORLD_DB_STRUCTURE_NR 15
+    #define WORLD_DB_VERSION_NR 22
+    #define WORLD_DB_STRUCTURE_NR 01
     #define WORLD_DB_CONTENT_NR 001
-    #define WORLD_DB_UPDATE_DESCRIPTION "Alter_conditions_char_length"
+    #define WORLD_DB_UPDATE_DESCRIPTION "Release 22"
 #endif // __REVISION_H__

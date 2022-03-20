@@ -600,17 +600,6 @@ uint8 ArenaTeam::GetSlotByType(ArenaType type)
     return 0xFF;
 }
 
-bool ArenaTeam::HaveMember(ObjectGuid guid) const
-{
-    for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-        if (itr->guid == guid)
-        {
-            return true;
-        }
-
-    return false;
-}
-
 ArenaType ArenaTeam::GetTypeBySlot(uint8 slot)
 {
     switch (slot)
@@ -658,6 +647,17 @@ uint32 ArenaTeam::GetPoints(uint32 MemberRating)
     }
 
     return (uint32) points;
+}
+
+bool ArenaTeam::HaveMember(ObjectGuid guid) const
+{
+    for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        if (itr->guid == guid)
+        {
+            return true;
+        }
+
+    return false;
 }
 
 float ArenaTeam::GetChanceAgainst(uint32 own_rating, uint32 enemy_rating)

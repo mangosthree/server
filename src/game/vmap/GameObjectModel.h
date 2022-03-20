@@ -29,6 +29,7 @@
 #include <G3D/Vector3.h>
 #include <G3D/AABox.h>
 #include <G3D/Ray.h>
+#include <G3D/Quat.h>
 #include "DBCStructure.h"
 #include "GameObject.h"
 
@@ -76,7 +77,7 @@ class GameObjectModel
          *
          * @return const G3D::AABox
          */
-        const G3D::AABox& getBounds() const { return iBound; }
+        const G3D::AABox& GetBounds() const { return iBound; }
 
         /**
          * @brief
@@ -89,7 +90,7 @@ class GameObjectModel
          *
          * @return const G3D::Vector3
          */
-        const G3D::Vector3& getPosition() const { return iPos;}
+        const G3D::Vector3& GetPosition() const { return iPos;}
 
         /** Enables\disables collision. */
         /**
@@ -112,7 +113,7 @@ class GameObjectModel
          * @param StopAtFirstHit
          * @return bool
          */
-        bool IntersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const;
+        bool IntersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 phaseMask) const;
 
         /**
          * @brief
@@ -120,6 +121,6 @@ class GameObjectModel
          * @param pGo
          * @return GameObjectModel
          */
-        static GameObjectModel* construct(const GameObject* const pGo);
+        static GameObjectModel* Create(const GameObject* const pGo);
 };
 #endif

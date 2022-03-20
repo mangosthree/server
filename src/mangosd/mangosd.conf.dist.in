@@ -3,7 +3,7 @@
 ################################################################################
 
 [MangosdConf]
-ConfVersion=2022021800
+ConfVersion=2022031900
 
 ################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -61,7 +61,7 @@ ConfVersion=2022021800
 ################################################################################
 
 RealmID                      = 1
-DataDir                      = "."
+DataDir                      = "@CONF_INSTALL_DIR@"
 LogsDir                      = ""
 LoginDatabaseInfo            = "127.0.0.1;3306;root;mangos;realmd"
 WorldDatabaseInfo            = "127.0.0.1;3306;root;mangos;mangos3"
@@ -657,6 +657,14 @@ SD3ErrorLogFile              = "scriptdev3-errors.log"
 #        Default: 0 (not allowed)
 #                 1 (allowed)
 #
+#    Guild.PetitionCost
+#        The cost for guild petition charter (in copper)
+#        Default: 1000 (10 silver)
+#
+#    Guild.PetitionSignatures
+#        Required signatures count to create a guild (0..4).
+#        Default: 4
+#
 #    Guild.EventLogRecordsCount
 #        Count of guild event log records stored in guild_eventlog table
 #        Increase to store more guild events in table, minimum is 100
@@ -721,9 +729,6 @@ SD3ErrorLogFile              = "scriptdev3-errors.log"
 #        GM level starting from trade skill skill requirement ignored.
 #        Default: 4 (Console as noneone)
 #
-#    MinPetitionSigns
-#        Min signatures count to creating guild (0..9).
-#        Default: 4
 #
 #    MaxGroupXPDistance
 #        Max distance to creature for group memeber to get XP at creature death.
@@ -842,6 +847,8 @@ Quests.Daily.ResetHour                    = 6
 Quests.Weekly.ResetWeekDay                = 3
 Quests.Weekly.ResetHour                   = 6
 Quests.IgnoreRaid                         = 0
+Guild.PetitionCost                        = 1000
+Guild.PetitionSignatures                  = 4
 Guild.EventLogRecordsCount                = 100
 Guild.BankEventLogRecordsCount            = 25
 Guild.UndeletableLevel                    = 4
@@ -856,7 +863,6 @@ MaxPrimaryTradeSkill                      = 2
 TradeSkill.GMIgnore.MaxPrimarySkillsCount = 4
 TradeSkill.GMIgnore.Level                 = 4
 TradeSkill.GMIgnore.Skill                 = 4
-MinPetitionSigns                          = 4
 MaxGroupXPDistance                        = 74
 MailDeliveryDelay                         = 3600
 MassMailer.SendPerTick                    = 10

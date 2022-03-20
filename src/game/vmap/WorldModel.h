@@ -203,7 +203,7 @@ namespace VMAP
              * @param vert
              * @param tri
              */
-            void setMeshData(std::vector<Vector3>& vert, std::vector<MeshTriangle>& tri);
+            void SetMeshData(std::vector<Vector3>& vert, std::vector<MeshTriangle>& tri);
             /**
              * @brief
              *
@@ -306,13 +306,13 @@ namespace VMAP
              *
              * @param models
              */
-            void setGroupModels(std::vector<GroupModel>& models);
+            void SetGroupModels(std::vector<GroupModel>& models);
             /**
              * @brief
              *
              * @param id
              */
-            void setRootWmoID(uint32 id) { RootWMOID = id; }
+            void SetRootWmoID(uint32 id) { RootWMOID = id; }
             /**
              * @brief
              *
@@ -331,7 +331,7 @@ namespace VMAP
              * @param info
              * @return bool
              */
-            bool IntersectPoint(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, AreaInfo& info) const;
+            bool GetAreaInfo(const G3D::Vector3& p, const G3D::Vector3& down, float& dist, AreaInfo& info) const;
             /**
              * @brief
              *
@@ -356,6 +356,7 @@ namespace VMAP
              * @return bool
              */
             bool readFile(const std::string& filename);
+            uint32 Flags;
         protected:
             uint32 RootWMOID; /**< TODO */
             std::vector<GroupModel> groupModels; /**< TODO */

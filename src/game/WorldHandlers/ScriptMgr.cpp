@@ -2832,7 +2832,10 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->GetDialogStatus(pPlayer, pCreature);
+    if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pCreature))
+    {
+        return dialogId;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2846,7 +2849,10 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->GetDialogStatus(pPlayer, pGameObject);
+    if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pGameObject))
+    {
+        return dialogId;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2939,11 +2945,11 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (Creature* creature = pTarget->ToCreature())
-    {
-        sEluna->OnDummyEffect(pCaster, spellId, effIndex, creature);
-    }
-
+    if (pTarget->ToCreature())
+        if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget->ToCreature()))
+        {
+            return true;
+        }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2957,7 +2963,10 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-        sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget);
+    if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
+    {
+        return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2971,7 +2980,10 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget);
+    if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
+    {
+        return true;
+    }
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -3002,7 +3014,7 @@ bool ScriptMgr::OnAuraDummy(Aura const* pAura, bool apply)
 ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
 {
 #ifdef ENABLE_SD3
-    if (std::strcmp(libName, "mangosscript") == 0)
+    if (std::strcmp(libName, MANGOS_SCRIPT_NAME) == 0)
     {
         SD3::FreeScriptLibrary();
         SD3::InitScriptLibrary();

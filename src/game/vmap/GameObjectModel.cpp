@@ -80,13 +80,13 @@ void LoadGameObjectModelList()
             break;
         }
 
-        Vector3 v1, v2;
-        if (fread(&v1, sizeof(Vector3), 1, model_list_file) <= 0)
+        G3D::Vector3 v1, v2;
+        if (fread(&v1, sizeof(G3D::Vector3), 1, model_list_file) <= 0)
         {
             sLog.outDebug("File %s seems to be corrupted", VMAP::GAMEOBJECT_MODELS);
             break;
         }
-        if (fread(&v2, sizeof(Vector3), 1, model_list_file) <= 0)
+        if (fread(&v2, sizeof(G3D::Vector3), 1, model_list_file) <= 0)
         {
             sLog.outDebug("File %s seems to be corrupted", VMAP::GAMEOBJECT_MODELS);
             break;
@@ -129,8 +129,8 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     }
 
     name = it->second.name;
-    iPos = Vector3(pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ());
     phasemask = pGo->GetPhaseMask();
+    iPos = Vector3(pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ());
     iScale = pGo->GetObjectScale();
     iInvScale = 1.f / iScale;
 
@@ -138,7 +138,9 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     iInvRot = iRotation.inverse();
     // transform bounding box:
     mdl_box = AABox(mdl_box.low() * iScale, mdl_box.high() * iScale);
-    AABox rotated_bounds;
+
+    G3D::AABox rotated_bounds;
+
     for (int i = 0; i < 8; ++i)
     {
         rotated_bounds.merge(iRotation * mdl_box.corner(i));
@@ -162,7 +164,7 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
     return true;
 }
 
-GameObjectModel* GameObjectModel::construct(const GameObject* const pGo)
+GameObjectModel* GameObjectModel::Create(const GameObject* const pGo)
 {
     const GameObjectDisplayInfoEntry* info = sGameObjectDisplayInfoStore.LookupEntry(pGo->GetDisplayId());
     if (!info)

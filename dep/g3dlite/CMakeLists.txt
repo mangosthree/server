@@ -14,9 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-set(LIBRARY_NAME g3dlite)
-
-set(LIBRARY_SRCS
+add_library(g3dlite STATIC
     G3D/AABox.cpp
     G3D/Any.cpp
     G3D/BinaryFormat.cpp
@@ -61,17 +59,11 @@ set(LIBRARY_SRCS
     G3D/uint128.cpp
 )
 
-include_directories(
-  "${CMAKE_CURRENT_SOURCE_DIR}"
-  "${CMAKE_SOURCE_DIR}/dep/zlib"
+target_link_libraries(g3dlite
+    PRIVATE
+        ZLIB::ZLIB
 )
 
-add_library(${LIBRARY_NAME} STATIC
-  ${LIBRARY_SRCS}
+target_include_directories(g3dlite
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-if(WIN32)
-  target_link_libraries(${LIBRARY_NAME}
-    zlib
-  )
-endif()

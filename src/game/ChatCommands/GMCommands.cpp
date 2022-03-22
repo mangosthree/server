@@ -23,11 +23,14 @@
  */
 
 #include "Chat.h"
+#include "DBCStores.h"
 #include "Language.h"
-#include "World.h"
-#include "Weather.h"
+#include "ObjectAccessor.h"
+#include "Player.h"
 #include "SpellMgr.h"
 #include "Util.h"
+#include "Weather.h"
+#include "World.h"
 
  /**********************************************************************
      CommandTable : commandTable
@@ -297,21 +300,15 @@ bool ChatHandler::HandleGMFlyCommand(char* args)
 bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
 {
     std::list< std::pair<std::string, bool> > names;
-
+    sObjectAccessor.DoForAllPlayers([&names, this](Player *player)
     {
-        HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
-        HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
-        for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+        AccountTypes security = player->GetSession()->GetSecurity();
+        if ((player->isGameMaster() || (security > SEC_PLAYER && security <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
+            (!m_session || player->IsVisibleGloballyFor(m_session->GetPlayer())))
         {
-            Player* player = itr->second;
-            AccountTypes security = player->GetSession()->GetSecurity();
-            if ((player->isGameMaster() || (security > SEC_PLAYER && security <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
-                (!m_session || player->IsVisibleGloballyFor(m_session->GetPlayer())))
-            {
-                names.push_back(std::make_pair<std::string, bool>(GetNameLink(player), player->isAcceptWhispers()));
-            }
+            names.push_back(std::make_pair<std::string, bool>(GetNameLink(player), player->isAcceptWhispers()));
         }
-    }
+    });
 
     if (!names.empty())
     {

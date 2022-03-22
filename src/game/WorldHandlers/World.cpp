@@ -1732,23 +1732,6 @@ void World::showFooter()
 
 void World::DetectDBCLang()
 {
-    // get the DBC Locale
-    int uLocale = ReadDBCLocale(m_dataPath);
-
-    if (uLocale == -1)
-    {
-        sLog.outError("Unable to determine your DBC Locale! (corrupt or missing component.wow-<locale>.txt file)");
-        Log::WaitBeforeContinueIfNeed();
-        exit(1);
-    }
-
-    m_defaultDbcLocale = LocaleConstant(uLocale);
-
-    sLog.outString("Using %s DBC Locale as default", localeNames[m_defaultDbcLocale]);
-    sLog.outString();
-
-    /* OLD VERSION - delete this code if the above proves to work as intended
-
     uint32 m_lang_confid = sConfig.GetIntDefault("DBC.Locale", 255);
 
     if (m_lang_confid != 255 && m_lang_confid >= MAX_LOCALE)
@@ -1775,7 +1758,7 @@ void World::DetectDBCLang()
     }
 
     if (default_locale != m_lang_confid && m_lang_confid < MAX_LOCALE &&
-            (m_availableDbcLocaleMask & (1 << m_lang_confid)))
+        (m_availableDbcLocaleMask & (1 << m_lang_confid)))
     {
         default_locale = m_lang_confid;
     }
@@ -1789,10 +1772,10 @@ void World::DetectDBCLang()
 
     m_defaultDbcLocale = LocaleConstant(default_locale);
 
-    sLog.outString("Using %s DBC Locale as default. All available DBC locales: %s", localeNames[m_defaultDbcLocale], availableLocalsStr.empty() ? "<none>" : availableLocalsStr.c_str());
-    sLog.outString();
+    sLog.outString("Using %s DBC Locale as default. All available DBC locales: %s",
+        localeNames[m_defaultDbcLocale], availableLocalsStr.empty() ? "<none>" : availableLocalsStr.c_str());
 
-    */
+    sLog.outString();
 }
 
 /// Update the World !

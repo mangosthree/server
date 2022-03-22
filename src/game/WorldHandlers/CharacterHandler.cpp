@@ -796,6 +796,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         Field* fields = resultGuild->Fetch();
         pCurrChar->SetInGuild(fields[0].GetUInt32());
         pCurrChar->SetRank(fields[1].GetUInt32());
+        if (Guild* guild = sGuildMgr.GetGuildById(pCurrChar->GetGuildId()))
+        {
+            pCurrChar->SetGuildLevel(guild->GetLevel());
+        }
+
         /* Avoid dangling pointers */
         delete resultGuild;
     }
@@ -803,8 +808,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     else if (pCurrChar->GetGuildId())
     {
         pCurrChar->SetInGuild(0);
-        pCurrChar->SetGuildLevel(0);
         pCurrChar->SetRank(0);
+        pCurrChar->SetGuildLevel(0);
     }
 
     /* Player is in a guild

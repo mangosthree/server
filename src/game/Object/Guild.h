@@ -223,6 +223,9 @@ enum GuildMemberFlags
     GUILDMEMBER_STATUS_MOBILE    = 0x0008,
 };
 
+/* ardcoded in client, starting from this level, guild daily experience gain is unlimited */
+#define GUILD_EXPERIENCE_UNCAPPED_LEVEL 20
+
 inline uint64 GetGuildBankTabPrice(uint8 Index)
 {
     switch (Index)
@@ -348,7 +351,6 @@ class Guild
         typedef std::vector<RankInfo> RankList;
 
         uint32 GetId() const { return m_Id; }
-        uint32 GetLevel() const { return m_Level; }
         ObjectGuid GetObjectGuid() const { return ObjectGuid(HIGHGUID_GUILD, 0, m_Id); }
         ObjectGuid GetLeaderGuid() const { return m_LeaderGuid; }
         std::string const& GetName() const { return m_Name; }
@@ -507,11 +509,18 @@ class Guild
         void   LogBankEvent(uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uint32 ItemOrMoney, uint8 ItemStackCount = 0, uint8 DestTabId = 0);
         bool   AddGBankItemToDB(uint32 GuildId, uint32 BankTab , uint32 BankTabSlot , uint32 GUIDLow, uint32 Entry);
 
+        /* Guild Leveling */
+        void SendGuildXP(WorldSession* session) const;
+        uint32 GetLevel() const { return m_level; }
+        void GiveEX(uint32 xp, Player* source);
+        uint64 GetExperience() const { return m_experience; }
+        uint64 GetTodayExperience() const { return m_todayExperience; }
+        void ResetDailyExperience();
+
     protected:
         void AddRank(const std::string& name, uint32 rights, uint32 money);
 
         uint32 m_Id;
-        uint32 m_Level;
         std::string m_Name;
         ObjectGuid m_LeaderGuid;
         std::string MOTD;
@@ -544,6 +553,11 @@ class Guild
         uint32 m_GuildBankEventLogNextGuid_Item[GUILD_BANK_MAX_TABS];
 
         uint64 m_GuildBankMoney;
+
+        /* Guild Leveling */
+        uint32 m_level;
+        uint64 m_experience;
+        uint64 m_todayExperience;
 
     private:
         void UpdateAccountsNumber();

@@ -91,7 +91,6 @@ void MemberSlot::ChangeRank(uint32 newRank)
 Guild::Guild()
 {
     m_Id = 0;
-    m_Level = 1;
     m_Name = "";
     GINFO = MOTD = "";
     m_EmblemStyle = 0;
@@ -101,16 +100,22 @@ Guild::Guild()
     m_BackgroundColor = 0;
     m_accountsNumber = 0;
 
-    m_CreatedDate = 0;
+    m_CreatedDate = time(0);
 
     m_GuildBankMoney = 0;
 
     m_GuildEventLogNextGuid = 0;
     m_GuildBankEventLogNextGuid_Money = 0;
+
     for (uint8 i = 0; i < GUILD_BANK_MAX_TABS; ++i)
     {
         m_GuildBankEventLogNextGuid_Item[i] = 0;
     }
+
+    /* Guild Level */
+    m_level = 1;
+    m_experience = 0;
+    m_todayExperience = 0;
 }
 
 Guild::~Guild()
@@ -131,13 +136,13 @@ bool Guild::Create(Player* leader, std::string gname)
         return false;
     }
 
+    m_Id = sObjectMgr.GenerateGuildId();
     m_LeaderGuid = leader->GetObjectGuid();
     m_Name = gname;
-    GINFO.clear();
+    GINFO = "";
     MOTD = "No message set.";
     m_GuildBankMoney = 0;
-    m_Id = sObjectMgr.GenerateGuildId();
-    m_CreatedDate = time(0);
+    m_level = 1;
 
     DEBUG_LOG("GUILD: creating guild %s to leader: %s", gname.c_str(), m_LeaderGuid.GetString().c_str());
 
@@ -961,12 +966,10 @@ void Guild::SetRankRights(uint32 rankId, uint32 rights)
     CharacterDatabase.PExecute("UPDATE `guild_rank` SET `rights`='%u' WHERE `rid`='%u' AND `guildid`='%u'", rights, rankId, m_Id);
 }
 
-/*void Guild::SaveToDB()
+void Guild::SaveToDB()
 {
-    SqlTransaction trans = CharacterDatabase.BeginTransaction();
-
-    CharacterDatabase.CommitTransaction(trans);
-}*/
+    /* ToDo: Implement */
+}
 
 /**
  * Disband guild including cleanup structures and DB
@@ -1086,7 +1089,7 @@ void Guild::Roster(WorldSession* session /*= NULL*/)
     data.WriteStringData(MOTD);
 
     data << uint32(m_accountsNumber);
-    data << uint32(0);                                      // weekly rep cap
+    data << uint32(sWorld.getConfig(CONFIG_UNIT32_GUILD_WEEKLY_REP_CAP));// weekly rep cap
     data << secsToTimeBitFields(m_CreatedDate);
     data << uint32(0);
 
@@ -1487,6 +1490,7 @@ Item* Guild::GetItem(uint8 TabId, uint8 SlotId)
     {
         return NULL;
     }
+
     return m_TabListMap[TabId]->Slots[SlotId];
 }
 
@@ -3017,8 +3021,10 @@ void Guild::DeleteGuildBankItems(bool alsoInDB /*= false*/)
                 delete pItem;
             }
         }
+
         delete m_TabListMap[i];
     }
+
     m_TabListMap.clear();
 }
 

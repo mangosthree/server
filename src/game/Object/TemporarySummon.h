@@ -40,7 +40,7 @@ class TemporarySummon : public Creature
         void UnSummon();
         void SaveToDB();
         ObjectGuid const& GetSummonerGuid() const { return m_summoner ; }
-        Unit* GetSummoner() const { return ObjectAccessor::GetUnit(*this, m_summoner); }
+        Unit* GetSummoner() const { return sObjectAccessor.GetUnit(*this, m_summoner); }
         void SetLinkedToOwnerAura(uint32 flags) { m_linkedToOwnerAura |= flags; };
     private:
         void RemoveAuraFromOwner();

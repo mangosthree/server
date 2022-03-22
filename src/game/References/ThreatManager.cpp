@@ -155,7 +155,7 @@ void HostileReference::updateOnlineStatus()
 
     if (!isValid())
     {
-        if (Unit* target = ObjectAccessor::GetUnit(*getSourceUnit(), getUnitGuid()))
+        if (Unit* target = sObjectAccessor.GetUnit(*getSourceUnit(), getUnitGuid()))
         {
             link(target, getSource());
         }

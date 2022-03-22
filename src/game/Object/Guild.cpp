@@ -248,10 +248,12 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
     newmember.Pnote   = (std::string)"";
     newmember.LogoutTime = time(NULL);
     newmember.BankResetTimeMoney = 0;                       // this will force update at first query
+
     for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
     {
         newmember.BankResetTimeTab[i] = 0;
     }
+
     members[lowguid] = newmember;
 
     std::string dbPnote   = newmember.Pnote;
@@ -471,6 +473,8 @@ bool Guild::LoadMembersFromDB(QueryResult* guildMembersResult)
     {
         return false;
     }
+
+    UpdateAccountsNumber();
 
     do
     {
@@ -957,6 +961,13 @@ void Guild::SetRankRights(uint32 rankId, uint32 rights)
     CharacterDatabase.PExecute("UPDATE `guild_rank` SET `rights`='%u' WHERE `rid`='%u' AND `guildid`='%u'", rights, rankId, m_Id);
 }
 
+/*void Guild::SaveToDB()
+{
+    SqlTransaction trans = CharacterDatabase.BeginTransaction();
+
+    CharacterDatabase.CommitTransaction(trans);
+}*/
+
 /**
  * Disband guild including cleanup structures and DB
  *
@@ -1190,18 +1201,12 @@ void Guild::SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle
 }
 
 /**
- * Return the number of accounts that are in the guild after possible update if required
+ * Updates the number of accounts that are in the guild
  * A player may have many characters in the guild, but with the same account
  */
-uint32 Guild::GetAccountsNumber()
+void Guild::UpdateAccountsNumber()
 {
-    // not need recalculation
-    if (m_accountsNumber)
-    {
-        return m_accountsNumber;
-    }
-
-    // We use a set to be sure each element will be unique
+    // we use a set to be sure each element will be unique
     std::set<uint32> accountsIdSet;
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
@@ -1209,8 +1214,6 @@ uint32 Guild::GetAccountsNumber()
     }
 
     m_accountsNumber = accountsIdSet.size();
-
-    return m_accountsNumber;
 }
 
 // *************************************************

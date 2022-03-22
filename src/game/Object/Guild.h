@@ -341,6 +341,8 @@ class Guild
         void CreateDefaultGuildRanks(int locale_idx);
         void Disband();
 
+        void SaveToDB();
+
         void DeleteGuildBankItems(bool alsoInDB = false);
         typedef UNORDERED_MAP<uint32, MemberSlot> MemberList;
         typedef std::vector<RankInfo> RankList;
@@ -544,7 +546,7 @@ class Guild
         uint64 m_GuildBankMoney;
 
     private:
-        void UpdateAccountsNumber() { m_accountsNumber = 0;}// mark for lazy calculation at request in GetAccountsNumber
+        void UpdateAccountsNumber();
         void _ChangeRank(ObjectGuid guid, MemberSlot* slot, uint32 newRank);
 
         // used only from high level Swap/Move functions

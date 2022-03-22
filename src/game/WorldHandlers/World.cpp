@@ -707,8 +707,6 @@ void World::LoadConfigSettings(bool reload)
     setConfigMinMax(CONFIG_UINT32_TRADE_SKILL_GMIGNORE_LEVEL, "TradeSkill.GMIgnore.Level", SEC_CONSOLE, SEC_PLAYER, SEC_CONSOLE);
     setConfigMinMax(CONFIG_UINT32_TRADE_SKILL_GMIGNORE_SKILL, "TradeSkill.GMIgnore.Skill", SEC_CONSOLE, SEC_PLAYER, SEC_CONSOLE);
 
-    setConfig(CONFIG_UINT32_MIN_PETITION_SIGNS, "Guild.PetitionSignatures", 4);
-
     setConfig(CONFIG_UINT32_GM_LOGIN_STATE,          "GM.LoginState",      2);
     setConfig(CONFIG_UINT32_GM_VISIBLE_STATE,        "GM.Visible",         2);
     setConfig(CONFIG_UINT32_GM_ACCEPT_TICKETS,       "GM.AcceptTickets",   2);
@@ -876,9 +874,12 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_UINT32_INSTANT_LOGOUT, "InstantLogout", SEC_MODERATOR);
 
+    setConfig(CONFIG_UINT32_MIN_PETITION_SIGNS, "Guild.PetitionSignatures", 4);
     setConfig(CONFIG_UNIT32_GUILD_PETITION_COST, "Guild.PetitionCost", 1000);
     setConfigMin(CONFIG_UINT32_GUILD_EVENT_LOG_COUNT, "Guild.EventLogRecordsCount", GUILD_EVENTLOG_MAX_RECORDS, GUILD_EVENTLOG_MAX_RECORDS);
     setConfigMin(CONFIG_UINT32_GUILD_BANK_EVENT_LOG_COUNT, "Guild.BankEventLogRecordsCount", GUILD_BANK_MAX_LOGS, GUILD_BANK_MAX_LOGS);
+    setConfig(CONFIG_UINT32_GUILD_MAX_LEVEL, "Guild.MaxLevel", 25);
+    setConfig(CONFIG_UINT32_GUILD_DAILY_XP_CAP, "Guild.DailyXPCap", 7807500);
     setConfig(CONGIG_UINT32_GUILD_UNDELETABLE_LEVEL, "Guild.UndeletableLevel", 4);
     setConfig(CONFIG_BOOL_GUILD_LEVELING_ENABLED, "Guild.LevelingEnabled", true);
 
@@ -1419,6 +1420,12 @@ void World::SetInitialWorldSettings()
     sLog.outString(">>> Auctions loaded");
     sLog.outString();
 
+    sLog.outString("Loading Guild XP for level...");
+    sGuildMgr.LoadGuildXpForLevel();
+
+    sLog.outString("Loading Guild rewards...");
+    sGuildMgr.LoadGuildRewards();
+
     sLog.outString("Loading Guilds...");
     sGuildMgr.LoadGuilds();
 
@@ -1841,6 +1848,8 @@ void World::Update(uint32 diff)
     if (m_gameTime > m_NextDailyQuestReset)
     {
         ResetDailyQuests();
+        m_NextDailyQuestReset += DAY;
+        sGuildMgr.ResetExperienceCaps();
     }
 
     /// <ul><li> Handle auctions when the timer has passed

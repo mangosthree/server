@@ -28,17 +28,16 @@
 #include "Common.h"
 #include "Policies/Singleton.h"
 
+#include <unordered_map>
+
 class Guild;
 class ObjectGuid;
 
 class GuildMgr
 {
-    private:
+    public:
         GuildMgr();
         ~GuildMgr();
-
-    public:
-        typedef UNORDERED_MAP<uint32, Guild*> GuildContainer;
 
         void AddGuild(Guild* guild);
         void RemoveGuild(uint32 guildId);
@@ -59,7 +58,11 @@ class GuildMgr
         void ResetExperienceCaps();
         void ResetReputationCaps();
 
+        uint32 GetXPForGuildLevel(uint8 level) const;
+
     protected:
+        typedef std::unordered_map<uint32, Guild*> GuildContainer;
+
         uint32 NextGuildId;
         GuildContainer GuildMap;
         std::vector<uint64> GuildXPperLevel;

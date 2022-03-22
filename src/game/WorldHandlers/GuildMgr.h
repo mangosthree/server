@@ -32,7 +32,7 @@ class Guild;
 class ObjectGuid;
 
 class GuildMgr
-{ 
+{
     private:
         GuildMgr();
         ~GuildMgr();
@@ -58,7 +58,7 @@ class GuildMgr
 
         void ResetExperienceCaps();
         void ResetReputationCaps();
-    
+
     protected:
         uint32 NextGuildId;
         GuildContainer GuildMap;

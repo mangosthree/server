@@ -73,7 +73,7 @@ namespace LuaGlobalFunctions
 #elif defined(CATA)
         Eluna::Push(L, 3);
 #endif
-        return 3;
+        return 1;
     }
 
     /**
@@ -123,6 +123,32 @@ namespace LuaGlobalFunctions
      */
     int GetGameTime(lua_State* L)
     {
+#ifdef TRINITY
+        Eluna::Push(L, GameTime::GetGameTime());
+#else
+        Eluna::Push(L, eWorld->GetGameTime());
+#endif
+        return 1;
+    }
+
+    /**
+     * Returns a table with all the current [Player]s in the world
+     *
+     * Does not return players that may be teleporting or otherwise not on any map.
+     *
+     *     enum TeamId
+     *     {
+     *         TEAM_ALLIANCE = 0,
+     *         TEAM_HORDE = 1,
+     *         TEAM_NEUTRAL = 2
+     *     };
+     *
+     * @param [TeamId] team = TEAM_NEUTRAL : optional check team of the [Player], Alliance, Horde or Neutral (All)
+     * @param bool onlyGM = false : optional check if GM only
+     * @return table worldPlayers
+     */
+    int GetPlayersInWorld(lua_State* L)
+    {
         uint32 team = Eluna::CHECKVAL<uint32>(L, 1, TEAM_NEUTRAL);
         bool onlyGM = Eluna::CHECKVAL<bool>(L, 2, false);
 
@@ -169,7 +195,6 @@ namespace LuaGlobalFunctions
             }
         }
 #endif
-
         lua_settop(L, tbl); // push table to top of stack
         return 1;
     }

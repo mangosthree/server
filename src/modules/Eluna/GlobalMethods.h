@@ -73,7 +73,7 @@ namespace LuaGlobalFunctions
 #elif defined(CATA)
         Eluna::Push(L, 3);
 #endif
-        return 1;
+        return 3;
     }
 
     /**
@@ -123,32 +123,6 @@ namespace LuaGlobalFunctions
      */
     int GetGameTime(lua_State* L)
     {
-#ifdef TRINITY
-        Eluna::Push(L, GameTime::GetGameTime());
-#else
-        Eluna::Push(L, eWorld->GetGameTime());
-#endif
-        return 1;
-    }
-
-    /**
-     * Returns a table with all the current [Player]s in the world
-     *
-     * Does not return players that may be teleporting or otherwise not on any map.
-     *
-     *     enum TeamId
-     *     {
-     *         TEAM_ALLIANCE = 0,
-     *         TEAM_HORDE = 1,
-     *         TEAM_NEUTRAL = 2
-     *     };
-     *
-     * @param [TeamId] team = TEAM_NEUTRAL : optional check team of the [Player], Alliance, Horde or Neutral (All)
-     * @param bool onlyGM = false : optional check if GM only
-     * @return table worldPlayers
-     */
-    int GetPlayersInWorld(lua_State* L)
-    {
         uint32 team = Eluna::CHECKVAL<uint32>(L, 1, TEAM_NEUTRAL);
         bool onlyGM = Eluna::CHECKVAL<bool>(L, 2, false);
 
@@ -156,15 +130,24 @@ namespace LuaGlobalFunctions
         int tbl = lua_gettop(L);
         uint32 i = 0;
 
+#if defined(MANGOS)
+        eObjectAccessor()DoForAllPlayers([&](Player* player)
         {
-#ifdef TRINITY
-            boost::shared_lock<boost::shared_mutex> lock(*HashMapHolder<Player>::GetLock());
+            if(player->IsInWorld())
+            {
+                if ((team == TEAM_NEUTRAL || player->GetTeamId() == team) && (!onlyGM || player->isGameMaster()))
+                {
+                    Eluna::Push(L, player);
+                    lua_rawseti(L, tbl, ++i);
+                }
+            }
+        });
 #else
-#ifdef MANGOS
-            ACE_READ_GUARD_RETURN(HashMapHolder<Player>::LockType, g, HashMapHolder<Player>::GetLock(), 0)
+        {
+#if defined TRINITY || AZEROTHCORE
+            std::shared_lock<std::shared_mutex> lock(*HashMapHolder<Player>::GetLock());
 #else
             HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
-#endif
 #endif
             const HashMapHolder<Player>::MapType& m = eObjectAccessor()GetPlayers();
             for (HashMapHolder<Player>::MapType::const_iterator it = m.begin(); it != m.end(); ++it)
@@ -173,10 +156,10 @@ namespace LuaGlobalFunctions
                 {
                     if (!player->IsInWorld())
                         continue;
-#ifndef TRINITY
-                    if ((team == TEAM_NEUTRAL || player->GetTeamId() == team) && (!onlyGM || player->isGameMaster()))
-#else
+#if defined TRINITY || AZEROTHCORE || CMANGOS
                     if ((team == TEAM_NEUTRAL || player->GetTeamId() == team) && (!onlyGM || player->IsGameMaster()))
+#else
+                    if ((team == TEAM_NEUTRAL || player->GetTeamId() == team) && (!onlyGM || player->isGameMaster()))
 #endif
                     {
                         Eluna::Push(L, player);
@@ -185,6 +168,7 @@ namespace LuaGlobalFunctions
                 }
             }
         }
+#endif
 
         lua_settop(L, tbl); // push table to top of stack
         return 1;

@@ -22,39 +22,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "ObjectAccessor.h"
-#include "ObjectMgr.h"
-#include "Policies/Singleton.h"
-#include "Player.h"
-#include "WorldPacket.h"
-#include "Item.h"
-#include "Corpse.h"
-#include "GridNotifiers.h"
 #include "MapManager.h"
-#include "Map.h"
-#include "CellImpl.h"
-#include "GridNotifiersImpl.h"
-#include "ObjectGuid.h"
+#include "ObjectMgr.h"
+#include "ObjectAccessor.h"
 #include "World.h"
 
-#include <mutex>
-
-#include <cmath>
-
-#define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, ACE_Recursive_Thread_Mutex>
-INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
-INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ACE_Recursive_Thread_Mutex);
-
-ObjectAccessor::ObjectAccessor() : i_playerMap(), i_corpseMap(), i_corpseGuard() { }
-
-ObjectAccessor::~ObjectAccessor()
-{
-    for (Player2CorpsesMapType::const_iterator itr = i_player2corpse.begin(); itr != i_player2corpse.end(); ++itr)
-    {
-        itr->second->RemoveFromWorld();
-        delete itr->second;
-    }
-}
+#include <forward_list>
 
 Unit* ObjectAccessor::GetUnit(WorldObject const& u, ObjectGuid guid)
 {
@@ -76,22 +49,6 @@ Unit* ObjectAccessor::GetUnit(WorldObject const& u, ObjectGuid guid)
     return u.GetMap()->GetAnyTypeCreature(guid);
 }
 
-Corpse* ObjectAccessor::GetCorpseInMap(ObjectGuid guid, uint32 mapid)
-{
-    Corpse* ret = i_corpseMap.Find(guid);
-    if (!ret)
-    {
-        return nullptr;
-    }
-
-    if (ret->GetMapId() != mapid)
-    {
-        return nullptr;
-    }
-
-    return ret;
-}
-
 Player* ObjectAccessor::FindPlayer(ObjectGuid guid, bool inWorld /*= true*/)
 {
     if (!guid)
@@ -99,48 +56,37 @@ Player* ObjectAccessor::FindPlayer(ObjectGuid guid, bool inWorld /*= true*/)
         return nullptr;
     }
 
-    Player* plr = i_playerMap.Find(guid);
-    if (!plr || (!plr->IsInWorld() && inWorld))
+    return m_playersMap.FindWith([&guid, &inWorld](const ObjectGuid& g, Player* plr)->bool
     {
-        return nullptr;
-    }
-
-    return plr;
+        return ((g == guid) && (plr->IsInWorld() || !inWorld));
+    });
 }
 
 Player* ObjectAccessor::FindPlayerByName(const char* name)
 {
-    ACE_READ_GUARD_RETURN(HashMapHolder<Player>::LockType, guard, i_playerMap.GetLock(), nullptr)
-    for (auto& iter : i_playerMap.GetContainer())
+    return m_playersMap.FindWith([name](const ObjectGuid& g, Player* plr)->bool
     {
-        if (iter.second->IsInWorld() && (::strcmp(name, iter.second->GetName()) == 0))
-        {
-            return iter.second;
-        }
-    }
-
-    return nullptr;
+        return (plr->IsInWorld() && (::strcmp(name, plr->GetName()) == 0));
+    });
 }
 
 void ObjectAccessor::SaveAllPlayers()
 {
-   SessionMap const& smap = sWorld.GetAllSessions();
-   SessionMap::const_iterator iter;
-   for (iter = smap.begin(); iter != smap.end(); ++iter)
-   {
-       if (Player* player = iter->second->GetPlayer())
-       {
-           if (player->IsInWorld())
-           {
-               player->SaveToDB();
-           }
-       }
-   }
+    for (auto const& iter : sWorld.GetAllSessions())
+    {
+        if (Player* player = iter.second->GetPlayer())
+        {
+            if (player->IsInWorld())
+            {
+                player->SaveToDB();
+            }
+        }
+    }
 }
 
 void ObjectAccessor::KickPlayer(ObjectGuid guid)
 {
-    if (Player* p = ObjectAccessor::FindPlayer(guid, false))
+    if (Player* p = FindPlayer(guid, false))
     {
         WorldSession* s = p->GetSession();
         s->KickPlayer();                            // mark session to remove at next session list update
@@ -148,29 +94,45 @@ void ObjectAccessor::KickPlayer(ObjectGuid guid)
     }
 }
 
+
+Corpse* ObjectAccessor::FindCorpse(ObjectGuid guid)
+{
+    return m_corpsesMap.Find(guid);
+}
+
+Corpse* ObjectAccessor::GetCorpseInMap(ObjectGuid guid, uint32 mapid)
+{
+    Corpse* ret = m_corpsesMap.Find(guid);
+    if (!ret)
+    {
+        return nullptr;
+    }
+    if (ret->GetMapId() != mapid)
+    {
+        return nullptr;
+    }
+    return ret;
+}
+
 Corpse* ObjectAccessor::GetCorpseForPlayerGUID(ObjectGuid guid)
 {
-    ACE_GUARD_RETURN(LockType, guard, i_corpseGuard, nullptr)
+    Corpse* c = m_player2corpse.Find(guid);
 
-    Player2CorpsesMapType::iterator iter = i_player2corpse.find(guid);
-
-    if (iter == i_player2corpse.end())
+    if (!c)
     {
         return nullptr;
     }
 
-    MANGOS_ASSERT(iter->second->GetType() != CORPSE_BONES);
-    return iter->second;
+    MANGOS_ASSERT(c->GetType() != CORPSE_BONES);
+    return c;
 }
 
-void ObjectAccessor::RemoveCorpse(Corpse* corpse)
+
+void Player2Corpse::Remove(Corpse* corpse)
 {
-    MANGOS_ASSERT(corpse && corpse->GetType() != CORPSE_BONES);
+    ACE_WRITE_GUARD(LockType, guard, i_lock)
 
-    ACE_GUARD(LockType, guard, i_corpseGuard)
-
-    Player2CorpsesMapType::iterator iter = i_player2corpse.find(corpse->GetOwnerGuid());
-    if (iter == i_player2corpse.end())
+    if( m_objectMap.end() == m_objectMap.find(corpse->GetOwnerGuid()))
     {
         return;
     }
@@ -179,50 +141,57 @@ void ObjectAccessor::RemoveCorpse(Corpse* corpse)
     CellPair cell_pair = MaNGOS::ComputeCellPair(corpse->GetPositionX(), corpse->GetPositionY());
     uint32 cell_id = (cell_pair.y_coord * TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-    sObjectMgr.DeleteCorpseCellData(corpse->GetMapId(), cell_id, corpse->GetOwnerGuid().GetCounter());
+    sObjectMgr.DeleteCorpseCellData(corpse->GetMapId(), cell_id, corpse->GetObjectGuid().GetCounter());
     corpse->RemoveFromWorld();
 
-    i_player2corpse.erase(iter);
+    m_objectMap.erase(corpse->GetOwnerGuid());
 }
 
-void ObjectAccessor::AddCorpse(Corpse* corpse)
+
+void ObjectAccessor::RemoveCorpse(Corpse* corpse)
 {
     MANGOS_ASSERT(corpse && corpse->GetType() != CORPSE_BONES);
+    m_player2corpse.Remove(corpse);
 
-    ACE_GUARD(LockType, guard, i_corpseGuard)
+}
 
-    MANGOS_ASSERT(i_player2corpse.find(corpse->GetOwnerGuid()) == i_player2corpse.end());
-    i_player2corpse[corpse->GetOwnerGuid()] = corpse;
+void Player2Corpse::Insert(Corpse* corpse)
+{
+    ACE_WRITE_GUARD(LockType, guard, i_lock)
+    m_objectMap[corpse->GetOwnerGuid()] = corpse;
 
-    // build mapid*cellid -> guid_set map
     CellPair cell_pair = MaNGOS::ComputeCellPair(corpse->GetPositionX(), corpse->GetPositionY());
     uint32 cell_id = (cell_pair.y_coord * TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
     sObjectMgr.AddCorpseCellData(corpse->GetMapId(), cell_id, corpse->GetOwnerGuid().GetCounter(), corpse->GetInstanceId());
 }
 
+void ObjectAccessor::AddCorpse(Corpse* corpse)
+{
+    MANGOS_ASSERT(corpse && corpse->GetType() != CORPSE_BONES);
+    m_player2corpse.Insert(corpse);
+}
+
 void ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair, GridType& grid, Map* map)
 {
-    ACE_GUARD(LockType, guard, i_corpseGuard)
-
-    for (Player2CorpsesMapType::iterator iter = i_player2corpse.begin(); iter != i_player2corpse.end(); ++iter)
+    m_player2corpse.Do([&gridpair, &grid, map](Corpse* c) -> void
     {
-        if (iter->second->GetGrid() == gridpair)
-        {
-            // verify, if the corpse in our instance (add only corpses which are)
-            if (map->Instanceable())
-            {
-                if (iter->second->GetInstanceId() == map->GetInstanceId())
-                {
-                    grid.AddWorldObject(iter->second);
-                }
-            }
-            else
-            {
-                grid.AddWorldObject(iter->second);
-            }
-        }
-    }
+      if (c->GetGrid() == gridpair)
+      {
+          // verify, if the corpse in our instance (add only corpses which are)
+          if (map->Instanceable())
+          {
+              if (c->GetInstanceId() == map->GetInstanceId())
+              {
+                  grid.AddWorldObject(c);
+              }
+          }
+          else
+          {
+              grid.AddWorldObject(c);
+          }
+      }
+    });
 }
 
 Corpse* ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
@@ -298,17 +267,18 @@ Corpse* ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insi
 void ObjectAccessor::RemoveOldCorpses()
 {
     time_t now = time(NULL);
-    Player2CorpsesMapType::iterator next;
-    for (Player2CorpsesMapType::iterator itr = i_player2corpse.begin(); itr != i_player2corpse.end(); itr = next)
+    std::forward_list<ObjectGuid> expired_corpses{};
+
+    m_player2corpse.Do([&now, &expired_corpses](Corpse* c)->void
     {
-        next = itr;
-        ++next;
-
-        if (!itr->second->IsExpired(now))
+        if (c->IsExpired(now))
         {
-            continue;
+            expired_corpses.emplace_front(c->GetOwnerGuid());
         }
+    });
 
-        ConvertCorpseForPlayer(itr->first);
+    for (auto g : expired_corpses)
+    {
+        ConvertCorpseForPlayer(g);
     }
 }

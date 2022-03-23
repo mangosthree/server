@@ -49,55 +49,90 @@ class Unit;
 class WorldObject;
 class Map;
 
-class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLevelLockable<ObjectAccessor, ACE_Recursive_Thread_Mutex> >
+template <class T>
+class HashMapHolder
 {
-        friend class MaNGOS::OperatorNew<ObjectAccessor>;
+    public:
+        HashMapHolder(): i_lock{}, m_objectMap{}
+        {}
 
-        ObjectAccessor();
-        ~ObjectAccessor();
-        ObjectAccessor(const ObjectAccessor&);
-        ObjectAccessor& operator=(const ObjectAccessor&);
-
-        template <class T>
-        struct HashMapHolder
+        void Insert(T* o)
         {
-            using MapType = std::unordered_map<ObjectGuid, T*>;
-            using LockType = ACE_RW_Thread_Mutex;
+            ACE_WRITE_GUARD(LockType, guard, i_lock)
+            m_objectMap[o->GetObjectGuid()] = o;
+        }
 
-            HashMapHolder() : i_lock(nullptr), m_objectMap() {}
+        void Remove(T* o)
+        {
+            ACE_WRITE_GUARD(LockType, guard, i_lock)
+            m_objectMap.erase(o->GetObjectGuid());
+        }
 
-            void Insert(T* o)
+        T* Find(ObjectGuid guid)
+        {
+            ACE_READ_GUARD_RETURN (LockType, guard, i_lock, nullptr)
+            auto const itr = m_objectMap.find(guid);
+            return (itr != m_objectMap.end()) ? itr->second : nullptr;
+        }
+
+        // bool Predicate(const ObjectGuid& guid, T*)
+        template <typename F>
+        T* FindWith(F&& pred)
+        {
+            ACE_READ_GUARD_RETURN (LockType, guard, i_lock, nullptr)
+            for(auto const& itr : m_objectMap)
             {
-                ACE_WRITE_GUARD(LockType, guard, i_lock)
-                m_objectMap[o->GetObjectGuid()] = o;
+                if(std::forward<F>(pred)(itr.first, itr.second))
+                {
+                    return itr.second;
+                }
             }
+            return nullptr;
+        }
 
-            void Remove(T* o)
+        // void Worker(const T*)
+        template <typename F>
+        void Do(F&& work)
+        {
+            ACE_READ_GUARD(LockType, guard, i_lock)
+            for(auto const& itr : m_objectMap)
             {
-                ACE_WRITE_GUARD(LockType, guard, i_lock)
-                m_objectMap.erase(o->GetObjectGuid());
+                std::forward<F>(work)(itr.second);
             }
+        }
 
-            T* Find(ObjectGuid guid)
+    protected:
+        using LockType = ACE_RW_Thread_Mutex;
+        LockType i_lock;
+        std::unordered_map<ObjectGuid, T*> m_objectMap;
+};
+
+class Player2Corpse: public HashMapHolder<Corpse>
+{
+    public:
+        Player2Corpse() : HashMapHolder<Corpse>(){}
+        ~Player2Corpse()
+        {
+            for (auto& itr : m_objectMap)
             {
-                ACE_READ_GUARD_RETURN (LockType, guard, i_lock, nullptr)
-                auto itr = m_objectMap.find(guid);
-                return (itr != m_objectMap.end()) ? itr->second : nullptr;
+                itr.second->RemoveFromWorld();
+                delete itr.second;
             }
+        }
 
-            inline MapType& GetContainer() { return m_objectMap; }
-            inline LockType& GetLock() { return i_lock; }
+        void Insert(Corpse* o);
+        void Remove(Corpse* o);
+};
 
-            LockType i_lock;
-            MapType  m_objectMap;
-            char _cache_guard[512];
 
-        };
-
-        using Player2CorpsesMapType = std::unordered_map<ObjectGuid, Corpse*>;
-        using LockType = ACE_Recursive_Thread_Mutex;
+class ObjectAccessor
+{
+        ObjectAccessor(const ObjectAccessor&) = delete;
+        ObjectAccessor& operator=(const ObjectAccessor&) = delete;
 
     public:
+        ObjectAccessor(): m_playersMap{}, m_corpsesMap{}, m_player2corpse{}
+        {}
 
         // Search player at any map in world and other objects at same map with `obj`
         // Note: recommended use Map::GetUnit version if player also expected at same map only
@@ -107,43 +142,42 @@ class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLev
         Player* FindPlayer(ObjectGuid guid, bool inWorld = true);// if need player at specific map better use Map::GetPlayer
         Player* FindPlayerByName(const char* name);
         void KickPlayer(ObjectGuid guid);
-
         void SaveAllPlayers();
+
+        template <typename F>
+        void DoForAllPlayers(F&& pred)
+        {
+            m_playersMap.Do(pred);
+        }
 
         // Corpse access
         Corpse* FindCorpse(ObjectGuid guid);
-        Corpse* GetCorpseForPlayerGUID(ObjectGuid guid);
-        Corpse* GetCorpseInMap(ObjectGuid guid, uint32 mapid);
         void RemoveCorpse(Corpse* corpse);
         void AddCorpse(Corpse* corpse);
         void AddCorpsesToGrid(GridPair const& gridpair, GridType& grid, Map* map);
+        Corpse* GetCorpseForPlayerGUID(ObjectGuid guid);
+        Corpse* GetCorpseInMap(ObjectGuid guid, uint32 mapid);
         Corpse* ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia = false);
         void RemoveOldCorpses();
 
         // For call from Player/Corpse AddToWorld/RemoveFromWorld only
-        void AddObject(Corpse* object) { i_corpseMap.Insert(object); }
-        void AddObject(Player* object) { i_playerMap.Insert(object); }
-        void RemoveObject(Corpse* object) { i_corpseMap.Remove(object); }
-        void RemoveObject(Player* object) { i_playerMap.Remove(object); }
+        void AddObject(Corpse* object) { m_corpsesMap.Insert(object); }
+        void AddObject(Player* object) { m_playersMap.Insert(object); }
+        void RemoveObject(Corpse* object) { m_corpsesMap.Remove(object); }
+        void RemoveObject(Player* object) { m_playersMap.Remove(object); }
 
-        template<typename F>
-        void DoForAllPlayers(F&& f)
+        static ObjectAccessor& Instance()
         {
-            ACE_READ_GUARD(HashMapHolder<Player>::LockType, g, i_playerMap.GetLock())
-            for (auto& iter : i_playerMap.GetContainer())
-            {
-                if(iter.second != nullptr)
-                {
-                    std::forward<F>(f)(iter.second);
-                }
-            }
+            static ObjectAccessor instance{};
+            return instance;
         }
 
     private:
-        Player2CorpsesMapType  i_player2corpse;
-        HashMapHolder<Player>  i_playerMap;
-        HashMapHolder<Corpse>  i_corpseMap;
-        LockType i_corpseGuard;
+        HashMapHolder<Player> m_playersMap;
+        char _cg1[256];  //cache guard 1
+        HashMapHolder<Corpse> m_corpsesMap;
+        char _cg2[256]; //cache guard 2
+        Player2Corpse         m_player2corpse;
 };
 
 #define sObjectAccessor ObjectAccessor::Instance()

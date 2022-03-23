@@ -307,7 +307,7 @@ int ReadDBCLocale(const std::string sDataPath)
         sFilename  = sDBCpath + "component.wow-" + fullLocaleNameList[uLocaleIndex].name + ".txt";
         if (FILE* file = fopen(sFilename.c_str(), "rb"))
         {
-            return uLocaleIndex; // Successfully located the locale
+            return uLocaleIndex - 1; // Successfully located the locale
         }
     }
 

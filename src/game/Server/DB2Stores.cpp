@@ -38,7 +38,8 @@ DB2Storage <ItemEntry>                    sItemStore(Itemfmt);
 DB2Storage <ItemCurrencyCostEntry>        sItemCurrencyCostStore(ItemCurrencyCostfmt);
 DB2Storage <ItemExtendedCostEntry>        sItemExtendedCostStore(ItemExtendedCostEntryfmt);
 
-typedef std::list<std::string> StoreProblemList1;
+typedef std::list<std::string> DB2StoreProblemList;
+
 uint32 DB2FileCount = 0;
 
 static bool LoadDB2_assert_print(uint32 fsize,uint32 rsize, const std::string& filename)
@@ -49,19 +50,8 @@ static bool LoadDB2_assert_print(uint32 fsize,uint32 rsize, const std::string& f
     return false;
 }
 
-struct LocalDB2Data
-{
-    LocalDB2Data(LocaleConstant loc)
-        : defaultLocale(loc), availableDb2Locales(0xFFFFFFFF) {}
-
-    LocaleConstant defaultLocale;
-
-    // bitmasks for index of fullLocaleNameList
-    uint32 availableDb2Locales;
-};
-
 template<class T>
-inline void LoadDB2(LocalDB2Data& localeData, StoreProblemList1& errors, DB2Storage<T>& storage, std::string const& db2Path, std::string const& filename)
+inline void LoadDB2(uint32& availableDb2Locales, DB2StoreProblemList& errors, DB2Storage<T>& storage, std::string const& db2Path, std::string const& filename)
 {
     // compatibility format and C++ structure sizes
     MANGOS_ASSERT(DB2FileLoader::GetFormatRecordSize(storage.GetFormat()) == sizeof(T) || LoadDB2_assert_print(DB2FileLoader::GetFormatRecordSize(storage.GetFormat()), sizeof(T), filename));
@@ -70,20 +60,15 @@ inline void LoadDB2(LocalDB2Data& localeData, StoreProblemList1& errors, DB2Stor
     std::string db2Filename = db2Path + filename;
     if (storage.Load(db2Filename.c_str(), localeData.defaultLocale))
     {
-        for(uint8 i = 0; fullLocaleNameList[i].name; ++i)
+        for (uint32 i = 0; i < TOTAL_LOCALES; ++i)
         {
-            if (!(localeData.availableDb2Locales & (1 << i)))
+            if (availableDb2Locales & (1 << i))
             {
-                continue;
+                if (!storage.LoadStringsFrom((db2Filename + localeNames[i] + '/'), i))
+                {
+                    availableDb2Locales &= ~(1 << i); // mark as not available for speedup next checks
+                }
             }
-
-            LocaleNameStr const* localStr = &fullLocaleNameList[i];
-
-            std::string db2_dir_loc = db2Path + localStr->name + "/";
-
-            std::string localizedName = db2Path + localStr->name + "/" + filename;
-            if(!storage.LoadStringsFrom(localizedName.c_str(), localStr->locale))
-                localeData.availableDb2Locales &= ~(1<<i);  // mark as not available for speedup next checks
         }
     }
     else
@@ -107,15 +92,12 @@ void LoadDB2Stores(const std::string& dataPath)
 {
     std::string db2Path = dataPath + "dbc/";
 
-    LocaleNameStr const* defaultLocaleNameStr = NULL;
+    DB2StoreProblemList bad_db2_files;
+    uint32 availableDb2Locales = 0xFFFFFFFF;
 
-    StoreProblemList1 bad_db2_files;
-
-    LocalDB2Data availableDb2Locales(LocaleConstant(0));//defaultLocaleNameStr->locale));
-
-    LoadDB2(availableDb2Locales,bad_db2_files,sItemStore,                db2Path,"Item.db2");
-    LoadDB2(availableDb2Locales,bad_db2_files,sItemCurrencyCostStore,    db2Path,"ItemCurrencyCost.db2");
-    LoadDB2(availableDb2Locales,bad_db2_files,sItemExtendedCostStore,    db2Path,"ItemExtendedCost.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemStore,             db2Path, "Item.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemCurrencyCostStore, db2Path, "ItemCurrencyCost.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemExtendedCostStore, db2Path, "ItemExtendedCost.db2");
 
     // error checks
     if (bad_db2_files.size() >= DB2FileCount)
@@ -126,7 +108,7 @@ void LoadDB2Stores(const std::string& dataPath)
     else if (!bad_db2_files.empty())
     {
         std::string str;
-        for (StoreProblemList1::iterator i = bad_db2_files.begin(); i != bad_db2_files.end(); ++i)
+        for (DB2StoreProblemList::iterator i = bad_db2_files.begin(); i != bad_db2_files.end(); ++i)
         {
             str += *i + "\n";
         }

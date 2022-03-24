@@ -214,13 +214,16 @@ enum LocaleConstant : uint8
     LOCALE_esES = 6,
     LOCALE_esMX = 7,
     LOCALE_ruRU = 8,
+    LOCALE_NONE = 9,
+    LOCALE_ptBR = 10,
+    LOCALE_itIT = 11,
 
     TOTAL_LOCALES
 };
 
 #define DEFAULT_LOCALE LOCALE_enUS
 
-#define MAX_LOCALES 8
+#define MAX_LOCALES 10
 
 extern char const* localeNames[TOTAL_LOCALES];
 

@@ -229,6 +229,8 @@ extern char const* localeNames[TOTAL_LOCALES];
 
 LocaleConstant GetLocaleByName(std::string const& name);
 
+typedef std::vector<std::string> StringVector;
+
 /**
  * @brief operator new[] based version of strdup() function! Release memory by using operator delete[] !
  *

@@ -214,10 +214,12 @@ template<class Do>
 void BattleGround::BroadcastWorker(Do& _do)
 {
     for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
-        if (Player* plr = ObjectAccessor::FindPlayer(itr->first))
+    {
+        if (Player* plr = sObjectAccessor.FindPlayer(itr->first))
         {
             _do(plr);
         }
+    }
 }
 
 BattleGround::BattleGround(): m_BuffChange(false), m_ArenaBuffSpawned(false), m_StartDelayTime(0), m_startMaxDist(0)

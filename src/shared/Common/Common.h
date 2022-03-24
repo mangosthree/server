@@ -203,13 +203,9 @@ enum TimeConstants
     IN_MILLISECONDS = 1000
 };
 
-/**
- * @brief
- *
- */
-enum LocaleConstant
+enum LocaleConstant : uint8
 {
-    LOCALE_enUS = 0,                                        // also enGB
+    LOCALE_enUS = 0,
     LOCALE_koKR = 1,
     LOCALE_frFR = 2,
     LOCALE_deDE = 3,
@@ -217,35 +213,18 @@ enum LocaleConstant
     LOCALE_zhTW = 5,
     LOCALE_esES = 6,
     LOCALE_esMX = 7,
-    LOCALE_ruRU = 8
+    LOCALE_ruRU = 8,
+
+    TOTAL_LOCALES
 };
 
-#define MAX_LOCALE 9
 #define DEFAULT_LOCALE LOCALE_enUS
 
-/**
- * @brief
- *
- * @param name
- * @return LocaleConstant
- */
-LocaleConstant GetLocaleByName(const std::string& name);
+#define MAX_LOCALES 8
 
-typedef std::vector<std::string> StringVector;
+extern char const* localeNames[TOTAL_LOCALES];
 
-extern char const* localeNames[MAX_LOCALE]; /**< TODO */
-
-/**
- * @brief
- *
- */
-struct LocaleNameStr
-{
-    char const* name; /**< TODO */
-    LocaleConstant locale; /**< TODO */
-};
-
-extern LocaleNameStr const fullLocaleNameList[]; /**< used for iterate all names including alternative */
+LocaleConstant GetLocaleByName(std::string const& name);
 
 /**
  * @brief operator new[] based version of strdup() function! Release memory by using operator delete[] !

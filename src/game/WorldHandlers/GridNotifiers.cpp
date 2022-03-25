@@ -88,7 +88,7 @@ void VisibleNotifier::Notify()
                 continue;
             }
 
-            if (Player* plr = ObjectAccessor::FindPlayer(*iter))
+            if (Player* plr = sObjectAccessor.FindPlayer(*iter))
             {
                 plr->UpdateVisibilityOf(plr->GetCamera().GetBody(), &player);
             }
@@ -223,7 +223,7 @@ bool CannibalizeObjectCheck::operator()(Corpse* u)
         return false;
     }
 
-    Player* owner = ObjectAccessor::FindPlayer(u->GetOwnerGuid());
+    Player* owner = sObjectAccessor.FindPlayer(u->GetOwnerGuid());
 
     if (!owner || i_fobj->IsFriendlyTo(owner))
     {

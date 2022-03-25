@@ -166,7 +166,7 @@ void WorldSession::HandleArenaTeamInviteOpcode(WorldPacket& recv_data)
             return;
         }
 
-        player = ObjectAccessor::FindPlayerByName(Invitedname.c_str());
+        player = sObjectAccessor.FindPlayerByName(Invitedname.c_str());
     }
 
     if (!player)

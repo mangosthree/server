@@ -1414,11 +1414,13 @@ struct MapEntry
                MapID == 509 || MapID == 534 || MapID == 560 || // AhnQiraj, HyjalPast, HillsbradPast
                MapID == 568 || MapID == 580 || MapID == 595 || // ZulAman, Sunwell Plateau, Culling of Stratholme
                MapID == 603 || MapID == 615 || MapID == 616 || // Ulduar, The Obsidian Sanctum, The Eye Of Eternity
-               MapID == 631 || MapID == 658 || MapID == 724 || // Icecrown Citadel, Pit of Saron, Ruby Sanctum
-               MapID == 644 || MapID == 720 || MapID == 721 || // Halls of Origination, Firelands
-               MapID == 734 || MapID == 755 || MapID == 859 || // Ahn'Qiraj Terrace, Lost City of Tol'Vir, Zul'Gurub
-               MapID == 938 || MapID == 939 || MapID == 940 || // End Time, Well of Eternity, Hour of Twilight
-               MapID == 967;                                   // Dragon Soul
+               MapID == 631 ||                                 // Icecrown Citadel,
+               MapID == 654 || MapID == 655 || MapID == 656 || // Gilneas, Gilneas Phase 1, Gilneas Phase 2
+               MapID == 658 || MapID == 720 || MapID == 724 || // Pit of Saron, Firelands, Ruby Sanctum
+               MapID == 644 || MapID == 721 || MapID == 734 || // Halls of Origination, Firelands, ?????????
+               MapID == 754 || MapID == 755 || MapID == 859 || // Throne of Four Winds, Lost City of Tol'Vir, Zul'Gurub
+               MapID == 861 || MapID == 938 || MapID == 939 || // Firelands Dailies, End Time, Well of Eternity
+               MapID == 940 || MapID == 962 || MapID == 967;   // Hour of Twilight, Gate of Setting Sun, Dragon Soul
     }
 
     bool IsContinent() const
@@ -1590,17 +1592,29 @@ struct ScalingStatValuesEntry
     {
         if (mask & 0x4001F)
         {
-            if(mask & 0x00000001) return ssdMultiplier[1];
+            if(mask & 0x00000001)
             {
-                if(mask & 0x00000002) return ssdMultiplier[2]; // 0 and 1 were duplicated
+                return ssdMultiplier[1];
             }
-            if(mask & 0x00000004) return ssdMultiplier[3];
+            if(mask & 0x00000002)
             {
-                if(mask & 0x00000008) return ssdMultiplier[0];
+                return ssdMultiplier[2]; // 0 and 1 were duplicated
             }
-            if(mask & 0x00000010) return ssdMultiplier[4];
+            if(mask & 0x00000004)
             {
-                if(mask & 0x00040000) return ssdMultiplier[2]; // 4.0.0
+                return ssdMultiplier[3];
+            }
+            if(mask & 0x00000008)
+            {
+                return ssdMultiplier[0];
+            }
+            if(mask & 0x00000010)
+            {
+                return ssdMultiplier[4];
+            }
+            if(mask & 0x00040000)
+            {
+                return ssdMultiplier[2]; // 4.0.0
             }
         }
         return 0;
@@ -1610,22 +1624,37 @@ struct ScalingStatValuesEntry
     {
         if (mask & 0x00F001E0)
         {
-            if (mask & 0x00000020) return armorMod[0];
+            if (mask & 0x00000020)
             {
-                if (mask & 0x00000040) return armorMod[1];
+                return armorMod[0];
             }
-            if (mask & 0x00000080) return armorMod[2];
+            if (mask & 0x00000040)
             {
-                if (mask & 0x00000100) return armorMod[3];
+                return armorMod[1];
             }
-
-            if (mask & 0x00100000) return armorMod2[0];     // cloth
+            if (mask & 0x00000080)
             {
-                if (mask & 0x00200000) return armorMod2[1];     // leather
+                return armorMod[2];
             }
-            if (mask & 0x00400000) return armorMod2[2];     // mail
+            if (mask & 0x00000100)
             {
-                if (mask & 0x00800000) return armorMod2[3];     // plate
+                return armorMod[3];
+            }
+            if (mask & 0x00100000)
+            {
+                return armorMod2[0];     // cloth
+            }
+            if (mask & 0x00200000)
+            {
+                return armorMod2[1];     // leather
+            }
+            if (mask & 0x00400000)
+            {
+                return armorMod2[2];     // mail
+            }
+            if (mask & 0x00800000)
+            {
+                return armorMod2[3];     // plate
             }
         }
         return 0;
@@ -1635,17 +1664,29 @@ struct ScalingStatValuesEntry
     {
         if (mask & 0x7E00)
         {
-            if (mask & 0x00000200) return dpsMod[0];
+            if (mask & 0x00000200)
             {
-                if (mask & 0x00000400) return dpsMod[1];
+                return dpsMod[0];
             }
-            if (mask & 0x00000800) return dpsMod[2];
+            if (mask & 0x00000400)
             {
-                if (mask & 0x00001000) return dpsMod[3];
+                return dpsMod[1];
             }
-            if (mask & 0x00002000) return dpsMod[4];
+            if (mask & 0x00000800)
             {
-                if (mask & 0x00004000) return dpsMod[5];        // not used?
+                return dpsMod[2];
+            }
+            if (mask & 0x00001000)
+            {
+                return dpsMod[3];
+            }
+            if (mask & 0x00002000)
+            {
+                return dpsMod[4];
+            }
+            if (mask & 0x00004000)
+            {
+                return dpsMod[5];        // not used?
             }
         }
         return 0;
@@ -2255,9 +2296,9 @@ struct  SpellEntry
         inline bool HasAttribute(SpellAttributesEx5 attribute) const { return AttributesEx5 & attribute; }
         inline bool HasAttribute(SpellAttributesEx6 attribute) const { return AttributesEx6 & attribute; }
         inline bool HasAttribute(SpellAttributesEx7 attribute) const { return AttributesEx7 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx8 attribute) const { return AttributesEx8 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx9 attribute) const { return AttributesEx9 & attribute; }
-    inline bool HasAttribute(SpellAttributesEx10 attribute) const { return AttributesEx10 & attribute; }
+        inline bool HasAttribute(SpellAttributesEx8 attribute) const { return AttributesEx8 & attribute; }
+        inline bool HasAttribute(SpellAttributesEx9 attribute) const { return AttributesEx9 & attribute; }
+        inline bool HasAttribute(SpellAttributesEx10 attribute) const { return AttributesEx10 & attribute; }
 
     private:
         // prevent creating custom entries (copy data from original in fact)

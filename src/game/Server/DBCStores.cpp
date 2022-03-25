@@ -302,12 +302,15 @@ int ReadDBCLocale(const std::string sDataPath)
     std::string sDBCpath = sDataPath + "dbc/";
     std::string sFilename;
 
-    for (int uLocaleIndex = 0; uLocaleIndex < MAX_LOCALE; ++uLocaleIndex)
+    sLog.outString ("%i Locales defined in core", MAX_LOCALE);
+    for (int uLocaleIndex = 0; uLocaleIndex <= MAX_LOCALE; ++uLocaleIndex)
     {
         sFilename  = sDBCpath + "component.wow-" + fullLocaleNameList[uLocaleIndex].name + ".txt";
         if (FILE* file = fopen(sFilename.c_str(), "rb"))
         {
-            return uLocaleIndex; // Successfully located the locale
+            if(uLocaleIndex==0) {uLocaleIndex=1;}  // Map enus and engb to 0
+
+            return uLocaleIndex-1; // Successfully located the locale
         }
     }
 

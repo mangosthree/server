@@ -37,7 +37,7 @@
     #define CHAR_DB_UPDATE_DESCRIPTION "Release 22"
 
     #define WORLD_DB_VERSION_NR 22
-    #define WORLD_DB_STRUCTURE_NR 01
+    #define WORLD_DB_STRUCTURE_NR 02
     #define WORLD_DB_CONTENT_NR 001
-    #define WORLD_DB_UPDATE_DESCRIPTION "Release 22"
+    #define WORLD_DB_UPDATE_DESCRIPTION "Add new localisation fields"
 #endif // __REVISION_H__

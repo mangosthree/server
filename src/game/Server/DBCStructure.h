@@ -1414,11 +1414,13 @@ struct MapEntry
                MapID == 509 || MapID == 534 || MapID == 560 || // AhnQiraj, HyjalPast, HillsbradPast
                MapID == 568 || MapID == 580 || MapID == 595 || // ZulAman, Sunwell Plateau, Culling of Stratholme
                MapID == 603 || MapID == 615 || MapID == 616 || // Ulduar, The Obsidian Sanctum, The Eye Of Eternity
-               MapID == 631 || MapID == 658 || MapID == 724 || // Icecrown Citadel, Pit of Saron, Ruby Sanctum
-               MapID == 644 || MapID == 720 || MapID == 721 || // Halls of Origination, Firelands
-               MapID == 734 || MapID == 755 || MapID == 859 || // Ahn'Qiraj Terrace, Lost City of Tol'Vir, Zul'Gurub
-               MapID == 938 || MapID == 939 || MapID == 940 || // End Time, Well of Eternity, Hour of Twilight
-               MapID == 967;                                   // Dragon Soul
+               MapID == 631 ||                                 // Icecrown Citadel,
+               MapID == 654 || MapID == 655 || MapID == 656 || // Gilneas, Gilneas Phase 1, Gilneas Phase 2
+               MapID == 658 || MapID == 720 || MapID == 724 || // Pit of Saron, Firelands, Ruby Sanctum
+               MapID == 644 || MapID == 721 || MapID == 734 || // Halls of Origination, Firelands, ?????????
+               MapID == 754 || MapID == 755 || MapID == 859 || // Throne of Four Winds, Lost City of Tol'Vir, Zul'Gurub
+               MapID == 861 || MapID == 938 || MapID == 939 || // Firelands Dailies, End Time, Well of Eternity
+               MapID == 940 || MapID == 962 || MapID == 967;   // Hour of Twilight, Gate of Setting Sun, Dragon Soul
     }
 
     bool IsContinent() const

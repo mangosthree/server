@@ -217,10 +217,13 @@ enum LocaleConstant
     LOCALE_zhTW = 5,
     LOCALE_esES = 6,
     LOCALE_esMX = 7,
-    LOCALE_ruRU = 8
+    LOCALE_ruRU = 8,
+    LOCALE_ptPT = 9,
+    LOCALE_ptBR = 10,
+    LOCALE_itIT = 11
 };
 
-#define MAX_LOCALE 9
+#define MAX_LOCALE 12 // LOCALE_itIT+1
 #define DEFAULT_LOCALE LOCALE_enUS
 
 /**

@@ -33,10 +33,7 @@
 
 INSTANTIATE_SINGLETON_1(GuildMgr);
 
-GuildMgr::GuildMgr()
-{
-    NextGuildId = 1;
-}
+GuildMgr::GuildMgr() : NextGuildId(1) { }
 
 GuildMgr::~GuildMgr()
 {
@@ -177,7 +174,7 @@ void GuildMgr::LoadGuilds()
         sLog.outString(">> Loaded %u guild definitions", count);
         return;
     }
-    
+
     // load guild ranks
     //                                                                 0         1     2       3        4
     QueryResult* guildRanksResult   = CharacterDatabase.Query("SELECT `guildid`,`rid`,`rname`,`rights`,`BankMoneyPerDay` FROM `guild_rank` ORDER BY `guildid` ASC, `rid` ASC");

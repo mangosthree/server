@@ -646,7 +646,7 @@ bool Database::CheckDatabaseVersion(DatabaseTypes database)
     {
         if (current_db_version == core_db_requirements.expected_version && current_db_structure == core_db_requirements.expected_structure)
         {
-            sLog.outString("The table `db_version` indicates that your [%s] database hase the same version as the core requirements.", core_db_requirements.dbname.c_str());
+            sLog.outString("The table `db_version` indicates that your [%s] database has the same version as the core requirements.", core_db_requirements.dbname.c_str());
             sLog.outString();
         }
         else

@@ -279,8 +279,14 @@ void ObjectMgr::LoadCreatureLocales()
 {
     mCreatureLocaleMap.clear();                             // need for reload case
 
-    QueryResult* result = WorldDatabase.Query("SELECT `entry`,`name_loc1`,`subname_loc1`,`name_loc2`,`subname_loc2`,`name_loc3`,`subname_loc3`,`name_loc4`,`subname_loc4`,`name_loc5`,`subname_loc5`,`name_loc6`,`subname_loc6`,`name_loc7`,`subname_loc7`,`name_loc8`,`subname_loc8` FROM `locales_creature`");
-
+    QueryResult* result = WorldDatabase.Query("SELECT `entry`,"
+                                              "`name_loc1`,`subname_loc1`,`name_loc2`,`subname_loc2`,"
+                                              "`name_loc3`,`subname_loc3`,`name_loc4`,`subname_loc4`,"
+                                              "`name_loc5`,`subname_loc5`,`name_loc6`,`subname_loc6`,"
+                                              "`name_loc7`,`subname_loc7`,`name_loc8`,`subname_loc8`,"
+                                              "`name_loc9`,`subname_loc9`,`name_loc10`,`subname_loc10`,"
+                                              "`name_loc11`,`subname_loc11`"
+                                              " FROM `locales_creature`");
     if (!result)
     {
         BarGoLink bar(1);
@@ -351,11 +357,13 @@ void ObjectMgr::LoadGossipMenuItemsLocales()
     mGossipMenuItemsLocaleMap.clear();                      // need for reload case
 
     QueryResult* result = WorldDatabase.Query("SELECT `menu_id`,`id`,"
-                          "`option_text_loc1`,`box_text_loc1`,`option_text_loc2`,`box_text_loc2`,"
-                          "`option_text_loc3`,`box_text_loc3`,`option_text_loc4`,`box_text_loc4`,"
-                          "`option_text_loc5`,`box_text_loc5`,`option_text_loc6`,`box_text_loc6`,"
-                          "`option_text_loc7`,`box_text_loc7`,`option_text_loc8`,`box_text_loc8` "
-                          "FROM `locales_gossip_menu_option`");
+                                              "`option_text_loc1`,`box_text_loc1`,`option_text_loc2`,`box_text_loc2`,"
+                                              "`option_text_loc3`,`box_text_loc3`,`option_text_loc4`,`box_text_loc4`,"
+                                              "`option_text_loc5`,`box_text_loc5`,`option_text_loc6`,`box_text_loc6`,"
+                                              "`option_text_loc7`,`box_text_loc7`,`option_text_loc8`,`box_text_loc8`,"
+                                              "`option_text_loc9`,`box_text_loc9`,`option_text_loc10`,`box_text_loc10`,"
+                                              "`option_text_loc11`,`box_text_loc11` "
+                                              "FROM `locales_gossip_menu_option`");
 
     if (!result)
     {
@@ -445,7 +453,11 @@ void ObjectMgr::LoadPointOfInterestLocales()
 {
     mPointOfInterestLocaleMap.clear();                      // need for reload case
 
-    QueryResult* result = WorldDatabase.Query("SELECT `entry`,`icon_name_loc1`,`icon_name_loc2`,`icon_name_loc3`,`icon_name_loc4`,`icon_name_loc5`,`icon_name_loc6`,`icon_name_loc7`,`icon_name_loc8` FROM `locales_points_of_interest`");
+    QueryResult* result = WorldDatabase.Query("SELECT `entry`,"
+                                                "`icon_name_loc1`,`icon_name_loc2`,`icon_name_loc3`,`icon_name_loc4`,"
+                                                "`icon_name_loc5`,`icon_name_loc6`,`icon_name_loc7`,`icon_name_loc8`,"
+                                                "`icon_name_loc9`,`icon_name_loc10`,`icon_name_loc11`"
+                                                " FROM `locales_points_of_interest`");
 
     if (!result)
     {
@@ -2041,8 +2053,14 @@ void ObjectMgr::LoadItemLocales()
 {
     mItemLocaleMap.clear();                                 // need for reload case
 
-    QueryResult* result = WorldDatabase.Query("SELECT `entry`,`name_loc1`,`description_loc1`,`name_loc2`,`description_loc2`,`name_loc3`,`description_loc3`,`name_loc4`,`description_loc4`,`name_loc5`,`description_loc5`,`name_loc6`,`description_loc6`,`name_loc7`,`description_loc7`,`name_loc8`,`description_loc8` FROM `locales_item`");
-
+    QueryResult* result = WorldDatabase.Query("SELECT `entry`,"
+                                              "`name_loc1`,`description_loc1`,`name_loc2`,`description_loc2`,"
+                                              "`name_loc3`,`description_loc3`,`name_loc4`,`description_loc4`,"
+                                              "`name_loc5`,`description_loc5`,`name_loc6`,`description_loc6`,"
+                                              "`name_loc7`,`description_loc7`,`name_loc8`,`description_loc8`,"
+                                              "`name_loc9`,`description_loc9`,`name_loc10`,`description_loc10`,"
+                                              "`name_loc11`,`description_loc11`"
+                                              " FROM `locales_item`");
     if (!result)
     {
         BarGoLink bar(1);
@@ -3757,8 +3775,8 @@ void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, Play
 /* *                                Static Wrappers                                              */
 /* ********************************************************************************************* */
 GameObjectInfo const* ObjectMgr::GetGameObjectInfo(uint32 id) { return sGOStorage.LookupEntry<GameObjectInfo>(id); }
-Player* ObjectMgr::GetPlayer(const char* name) { return ObjectAccessor::FindPlayerByName(name); }
-Player* ObjectMgr::GetPlayer(ObjectGuid guid, bool inWorld /*=true*/) { return ObjectAccessor::FindPlayer(guid, inWorld); }
+Player* ObjectMgr::GetPlayer(const char* name) { return sObjectAccessor.FindPlayerByName(name); }
+Player* ObjectMgr::GetPlayer(ObjectGuid guid, bool inWorld /*=true*/) { return sObjectAccessor.FindPlayer(guid, inWorld); }
 CreatureInfo const* ObjectMgr::GetCreatureTemplate(uint32 id) { return sCreatureStorage.LookupEntry<CreatureInfo>(id); }
 CreatureModelInfo const* ObjectMgr::GetCreatureModelInfo(uint32 modelid) { return sCreatureModelStorage.LookupEntry<CreatureModelInfo>(modelid); }
 EquipmentInfo const* ObjectMgr::GetEquipmentInfo(uint32 entry) { return sEquipmentStorage.LookupEntry<EquipmentInfo>(entry); }
@@ -4882,7 +4900,10 @@ void ObjectMgr::LoadQuestLocales()
                           "`Title_loc5`,`Details_loc5`,`Objectives_loc5`,`OfferRewardText_loc5`,`RequestItemsText_loc5`,`EndText_loc5`,`CompletedText_loc5`,`ObjectiveText1_loc5`,`ObjectiveText2_loc5`,`ObjectiveText3_loc5`,`ObjectiveText4_loc5`,`PortraitGiverName_loc5`,`PortraitGiverText_loc5`,`PortraitTurnInName_loc5`,`PortraitTurnInText_loc5`,"
                           "`Title_loc6`,`Details_loc6`,`Objectives_loc6`,`OfferRewardText_loc6`,`RequestItemsText_loc6`,`EndText_loc6`,`CompletedText_loc6`,`ObjectiveText1_loc6`,`ObjectiveText2_loc6`,`ObjectiveText3_loc6`,`ObjectiveText4_loc6`,`PortraitGiverName_loc6`,`PortraitGiverText_loc6`,`PortraitTurnInName_loc6`,`PortraitTurnInText_loc6`,"
                           "`Title_loc7`,`Details_loc7`,`Objectives_loc7`,`OfferRewardText_loc7`,`RequestItemsText_loc7`,`EndText_loc7`,`CompletedText_loc7`,`ObjectiveText1_loc7`,`ObjectiveText2_loc7`,`ObjectiveText3_loc7`,`ObjectiveText4_loc7`,`PortraitGiverName_loc7`,`PortraitGiverText_loc7`,`PortraitTurnInName_loc7`,`PortraitTurnInText_loc7`,"
-                          "`Title_loc8`,`Details_loc8`,`Objectives_loc8`,`OfferRewardText_loc8`,`RequestItemsText_loc8`,`EndText_loc8`,`CompletedText_loc8`,`ObjectiveText1_loc8`,`ObjectiveText2_loc8`,`ObjectiveText3_loc8`,`ObjectiveText4_loc8`,`PortraitGiverName_loc8`,`PortraitGiverText_loc8`,`PortraitTurnInName_loc8`,`PortraitTurnInText_loc8`"
+                          "`Title_loc8`,`Details_loc8`,`Objectives_loc8`,`OfferRewardText_loc8`,`RequestItemsText_loc8`,`EndText_loc8`,`CompletedText_loc8`,`ObjectiveText1_loc8`,`ObjectiveText2_loc8`,`ObjectiveText3_loc8`,`ObjectiveText4_loc8`,`PortraitGiverName_loc8`,`PortraitGiverText_loc8`,`PortraitTurnInName_loc8`,`PortraitTurnInText_loc8`,"
+                          "`Title_loc9`,`Details_loc9`,`Objectives_loc9`,`OfferRewardText_loc9`,`RequestItemsText_loc9`,`EndText_loc9`,`CompletedText_loc9`,`ObjectiveText1_loc9`,`ObjectiveText2_loc9`,`ObjectiveText3_loc9`,`ObjectiveText4_loc9`,`PortraitGiverName_loc9`,`PortraitGiverText_loc9`,`PortraitTurnInName_loc9`,`PortraitTurnInText_loc9`,"
+                          "`Title_loc10`,`Details_loc10`,`Objectives_loc10`,`OfferRewardText_loc10`,`RequestItemsText_loc10`,`EndText_loc10`,`CompletedText_loc10`,`ObjectiveText1_loc10`,`ObjectiveText2_loc10`,`ObjectiveText3_loc10`,`ObjectiveText4_loc10`,`PortraitGiverName_loc10`,`PortraitGiverText_loc10`,`PortraitTurnInName_loc10`,`PortraitTurnInText_loc10`,"
+                          "`Title_loc11`,`Details_loc11`,`Objectives_loc11`,`OfferRewardText_loc11`,`RequestItemsText_loc11`,`EndText_loc11`,`CompletedText_loc11`,`ObjectiveText1_loc11`,`ObjectiveText2_loc11`,`ObjectiveText3_loc11`,`ObjectiveText4_loc11`,`PortraitGiverName_loc11`,`PortraitGiverText_loc11`,`PortraitTurnInName_loc11`,`PortraitTurnInText_loc11`"
                           " FROM `locales_quest`"
                                              );
 
@@ -5146,8 +5167,11 @@ void ObjectMgr::LoadPageTextLocales()
 {
     mPageTextLocaleMap.clear();                             // need for reload case
 
-    QueryResult* result = WorldDatabase.Query("SELECT `entry`,`text_loc1`,`text_loc2`,`text_loc3`,`text_loc4`,`text_loc5`,`text_loc6`,`text_loc7`,`text_loc8` FROM `locales_page_text`");
-
+    QueryResult* result = WorldDatabase.Query("SELECT `entry`,"
+                                              "`text_loc1`,`text_loc2`,`text_loc3`,`text_loc4`,"
+                                              "`text_loc5`,`text_loc6`,`text_loc7`,`text_loc8`,"
+                                              "`text_loc9`,`text_loc10`,`text_loc11`"
+                                              " FROM `locales_page_text`");
     if (!result)
     {
         BarGoLink bar(1);
@@ -5476,16 +5500,18 @@ void ObjectMgr::LoadGossipTextLocales()
     mNpcTextLocaleMap.clear();                              // need for reload case
 
     QueryResult* result = WorldDatabase.Query("SELECT `entry`,"
-                          "`Text0_0_loc1`,`Text0_1_loc1`,`Text1_0_loc1`,`Text1_1_loc1`,`Text2_0_loc1`,`Text2_1_loc1`,`Text3_0_loc1`,`Text3_1_loc1`,`Text4_0_loc1`,`Text4_1_loc1`,`Text5_0_loc1`,`Text5_1_loc1`,`Text6_0_loc1`,`Text6_1_loc1`,`Text7_0_loc1`,`Text7_1_loc1`,"
-                          "`Text0_0_loc2`,`Text0_1_loc2`,`Text1_0_loc2`,`Text1_1_loc2`,`Text2_0_loc2`,`Text2_1_loc2`,`Text3_0_loc2`,`Text3_1_loc2`,`Text4_0_loc2`,`Text4_1_loc2`,`Text5_0_loc2`,`Text5_1_loc2`,`Text6_0_loc2`,`Text6_1_loc2`,`Text7_0_loc2`,`Text7_1_loc2`,"
-                          "`Text0_0_loc3`,`Text0_1_loc3`,`Text1_0_loc3`,`Text1_1_loc3`,`Text2_0_loc3`,`Text2_1_loc3`,`Text3_0_loc3`,`Text3_1_loc3`,`Text4_0_loc3`,`Text4_1_loc3`,`Text5_0_loc3`,`Text5_1_loc3`,`Text6_0_loc3`,`Text6_1_loc3`,`Text7_0_loc3`,`Text7_1_loc3`,"
-                          "`Text0_0_loc4`,`Text0_1_loc4`,`Text1_0_loc4`,`Text1_1_loc4`,`Text2_0_loc4`,`Text2_1_loc4`,`Text3_0_loc4`,`Text3_1_loc4`,`Text4_0_loc4`,`Text4_1_loc4`,`Text5_0_loc4`,`Text5_1_loc4`,`Text6_0_loc4`,`Text6_1_loc4`,`Text7_0_loc4`,`Text7_1_loc4`,"
-                          "`Text0_0_loc5`,`Text0_1_loc5`,`Text1_0_loc5`,`Text1_1_loc5`,`Text2_0_loc5`,`Text2_1_loc5`,`Text3_0_loc5`,`Text3_1_loc5`,`Text4_0_loc5`,`Text4_1_loc5`,`Text5_0_loc5`,`Text5_1_loc5`,`Text6_0_loc5`,`Text6_1_loc5`,`Text7_0_loc5`,`Text7_1_loc5`,"
-                          "`Text0_0_loc6`,`Text0_1_loc6`,`Text1_0_loc6`,`Text1_1_loc6`,`Text2_0_loc6`,`Text2_1_loc6`,`Text3_0_loc6`,`Text3_1_loc6`,`Text4_0_loc6`,`Text4_1_loc6`,`Text5_0_loc6`,`Text5_1_loc6`,`Text6_0_loc6`,`Text6_1_loc6`,`Text7_0_loc6`,`Text7_1_loc6`,"
-                          "`Text0_0_loc7`,`Text0_1_loc7`,`Text1_0_loc7`,`Text1_1_loc7`,`Text2_0_loc7`,`Text2_1_loc7`,`Text3_0_loc7`,`Text3_1_loc7`,`Text4_0_loc7`,`Text4_1_loc7`,`Text5_0_loc7`,`Text5_1_loc7`,`Text6_0_loc7`,`Text6_1_loc7`,`Text7_0_loc7`,`Text7_1_loc7`, "
-                          "`Text0_0_loc8`,`Text0_1_loc8`,`Text1_0_loc8`,`Text1_1_loc8`,`Text2_0_loc8`,`Text2_1_loc8`,`Text3_0_loc8`,`Text3_1_loc8`,`Text4_0_loc8`,`Text4_1_loc8`,`Text5_0_loc8`,`Text5_1_loc8`,`Text6_0_loc8`,`Text6_1_loc8`,`Text7_0_loc8`,`Text7_1_loc8` "
-                          " FROM `locales_npc_text`");
-
+                                              "`Text0_0_loc1`,`Text0_1_loc1`,`Text1_0_loc1`,`Text1_1_loc1`,`Text2_0_loc1`,`Text2_1_loc1`,`Text3_0_loc1`,`Text3_1_loc1`,`Text4_0_loc1`,`Text4_1_loc1`,`Text5_0_loc1`,`Text5_1_loc1`,`Text6_0_loc1`,`Text6_1_loc1`,`Text7_0_loc1`,`Text7_1_loc1`,"
+                                              "`Text0_0_loc2`,`Text0_1_loc2`,`Text1_0_loc2`,`Text1_1_loc2`,`Text2_0_loc2`,`Text2_1_loc2`,`Text3_0_loc2`,`Text3_1_loc2`,`Text4_0_loc2`,`Text4_1_loc2`,`Text5_0_loc2`,`Text5_1_loc2`,`Text6_0_loc2`,`Text6_1_loc2`,`Text7_0_loc2`,`Text7_1_loc2`,"
+                                              "`Text0_0_loc3`,`Text0_1_loc3`,`Text1_0_loc3`,`Text1_1_loc3`,`Text2_0_loc3`,`Text2_1_loc3`,`Text3_0_loc3`,`Text3_1_loc3`,`Text4_0_loc3`,`Text4_1_loc3`,`Text5_0_loc3`,`Text5_1_loc3`,`Text6_0_loc3`,`Text6_1_loc3`,`Text7_0_loc3`,`Text7_1_loc3`,"
+                                              "`Text0_0_loc4`,`Text0_1_loc4`,`Text1_0_loc4`,`Text1_1_loc4`,`Text2_0_loc4`,`Text2_1_loc4`,`Text3_0_loc4`,`Text3_1_loc4`,`Text4_0_loc4`,`Text4_1_loc4`,`Text5_0_loc4`,`Text5_1_loc4`,`Text6_0_loc4`,`Text6_1_loc4`,`Text7_0_loc4`,`Text7_1_loc4`,"
+                                              "`Text0_0_loc5`,`Text0_1_loc5`,`Text1_0_loc5`,`Text1_1_loc5`,`Text2_0_loc5`,`Text2_1_loc5`,`Text3_0_loc5`,`Text3_1_loc5`,`Text4_0_loc5`,`Text4_1_loc5`,`Text5_0_loc5`,`Text5_1_loc5`,`Text6_0_loc5`,`Text6_1_loc5`,`Text7_0_loc5`,`Text7_1_loc5`,"
+                                              "`Text0_0_loc6`,`Text0_1_loc6`,`Text1_0_loc6`,`Text1_1_loc6`,`Text2_0_loc6`,`Text2_1_loc6`,`Text3_0_loc6`,`Text3_1_loc6`,`Text4_0_loc6`,`Text4_1_loc6`,`Text5_0_loc6`,`Text5_1_loc6`,`Text6_0_loc6`,`Text6_1_loc6`,`Text7_0_loc6`,`Text7_1_loc6`,"
+                                              "`Text0_0_loc7`,`Text0_1_loc7`,`Text1_0_loc7`,`Text1_1_loc7`,`Text2_0_loc7`,`Text2_1_loc7`,`Text3_0_loc7`,`Text3_1_loc7`,`Text4_0_loc7`,`Text4_1_loc7`,`Text5_0_loc7`,`Text5_1_loc7`,`Text6_0_loc7`,`Text6_1_loc7`,`Text7_0_loc7`,`Text7_1_loc7`, "
+                                              "`Text0_0_loc8`,`Text0_1_loc8`,`Text1_0_loc8`,`Text1_1_loc8`,`Text2_0_loc8`,`Text2_1_loc8`,`Text3_0_loc8`,`Text3_1_loc8`,`Text4_0_loc8`,`Text4_1_loc8`,`Text5_0_loc8`,`Text5_1_loc8`,`Text6_0_loc8`,`Text6_1_loc8`,`Text7_0_loc8`,`Text7_1_loc8`,"
+                                              "`Text0_0_loc9`,`Text0_1_loc9`,`Text1_0_loc9`,`Text1_1_loc9`,`Text2_0_loc9`,`Text2_1_loc9`,`Text3_0_loc9`,`Text3_1_loc9`,`Text4_0_loc9`,`Text4_1_loc9`,`Text5_0_loc9`,`Text5_1_loc9`,`Text6_0_loc9`,`Text6_1_loc9`,`Text7_0_loc9`,`Text7_1_loc9`,"
+                                              "`Text0_0_loc10`,`Text0_1_loc10`,`Text1_0_loc10`,`Text1_1_loc10`,`Text2_0_loc10`,`Text2_1_loc10`,`Text3_0_loc10`,`Text3_1_loc10`,`Text4_0_loc10`,`Text4_1_loc10`,`Text5_0_loc10`,`Text5_1_loc10`,`Text6_0_loc10`,`Text6_1_loc10`,`Text7_0_loc10`,`Text7_1_loc10`,"
+                                              "`Text0_0_loc11`,`Text0_1_loc11`,`Text1_0_loc11`,`Text1_1_loc11`,`Text2_0_loc11`,`Text2_1_loc11`,`Text3_0_loc11`,`Text3_1_loc11`,`Text4_0_loc11`,`Text4_1_loc11`,`Text5_0_loc11`,`Text5_1_loc11`,`Text6_0_loc11`,`Text6_1_loc11`,`Text7_0_loc11`,`Text7_1_loc11` "
+                                              " FROM `locales_npc_text`");
     if (!result)
     {
         BarGoLink bar(1);
@@ -6533,10 +6559,16 @@ void ObjectMgr::LoadGameObjectLocales()
     mGameObjectLocaleMap.clear();                           // need for reload case
 
     QueryResult* result = WorldDatabase.Query("SELECT `entry`,"
-                          "`name_loc1`,`name_loc2`,`name_loc3`,`name_loc4`,`name_loc5`,`name_loc6`,`name_loc7`,`name_loc8`,"
-                          "`castbarcaption_loc1`,`castbarcaption_loc2`,`castbarcaption_loc3`,`castbarcaption_loc4`,"
-                          "`castbarcaption_loc5`,`castbarcaption_loc6`,`castbarcaption_loc7`,`castbarcaption_loc8` FROM `locales_gameobject`");
-
+                                              "`name_loc1`,`name_loc2`,`name_loc3`,`name_loc4`,"
+                                              "`name_loc5`,`name_loc6`,`name_loc7`,`name_loc8`,"
+                                              "`name_loc9`,`name_loc10`,`name_loc11`,"
+                                              "`castbarcaption_loc1`,`castbarcaption_loc2`,"
+                                              "`castbarcaption_loc3`,`castbarcaption_loc4`,"
+                                              "`castbarcaption_loc5`,`castbarcaption_loc6`,"
+                                              "`castbarcaption_loc7`,`castbarcaption_loc8`,"
+                                              "`castbarcaption_loc9`,`castbarcaption_loc10`,"
+                                              "`castbarcaption_loc11`"
+                                              " FROM `locales_gameobject`");
     if (!result)
     {
         BarGoLink bar(1);
@@ -8486,8 +8518,11 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
 
     sLog.outString("Loading texts from %s%s", table, extra_content ? ", with additional data" : "");
 
-    QueryResult* result = db.PQuery("SELECT `entry`,`content_default`,`content_loc1`,`content_loc2`,`content_loc3`,`content_loc4`,`content_loc5`,`content_loc6`,`content_loc7`,`content_loc8` %s FROM %s",
-                                    extra_content ? ",sound,type,language,emote" : "", table);
+    QueryResult* result = db.PQuery("SELECT `entry`,`content_default`,"
+                                    "`content_loc1`,`content_loc2`,`content_loc3`,`content_loc4`,"
+                                    "`content_loc5`,`content_loc6`,`content_loc7`,`content_loc8`,"
+                                    "`content_loc9`,`content_loc10`,`content_loc11`"
+                                    " %s FROM %s", extra_content ? ",sound,type,language,emote" : "", table);
 
     if (!result)
     {
@@ -8565,10 +8600,10 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
         // Load additional string content if necessary
         if (extra_content)
         {
-            data.SoundId     = fields[10].GetUInt32();
-            data.Type        = fields[11].GetUInt32();
-            data.LanguageId  = Language(fields[12].GetUInt32());
-            data.Emote       = fields[13].GetUInt32();
+            data.SoundId     = fields[13].GetUInt32();
+            data.Type        = fields[14].GetUInt32();
+            data.LanguageId  = Language(fields[15].GetUInt32());
+            data.Emote       = fields[16].GetUInt32();
 
             if (data.SoundId && !sSoundEntriesStore.LookupEntry(data.SoundId))
             {

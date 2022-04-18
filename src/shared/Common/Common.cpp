@@ -34,7 +34,10 @@ char const* localeNames[MAX_LOCALE] =
     "zhTW",
     "esES",
     "esMX",
-    "ruRU"
+    "ruRU",
+    "ptPT",
+    "ptBR",
+    "itIT"
 };
 
 // used for search by name or iterate all names
@@ -50,6 +53,9 @@ LocaleNameStr const fullLocaleNameList[] =
     { "esES", LOCALE_esES },
     { "esMX", LOCALE_esMX },
     { "ruRU", LOCALE_ruRU },
+    { "ptPT", LOCALE_ptPT },
+    { "prBR", LOCALE_ptBR },
+    { "itIT", LOCALE_itIT },
     { NULL,   LOCALE_enUS }
 };
 

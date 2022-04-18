@@ -1,4 +1,4 @@
-project (zlib VERSION 1.2.11)
+project (zlib VERSION 1.2.12)
 
 add_library(zlib STATIC
     adler32.c

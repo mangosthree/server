@@ -36,8 +36,8 @@ using namespace VMAP;
 namespace MMAP
 {
     MapBuilder::MapBuilder(float maxWalkableAngle, bool skipLiquid,
-                           bool skipContinents, bool skipJunkMaps, bool skipBattlegrounds,
-                           bool debugOutput, bool bigBaseUnit, const char* offMeshFilePath) :
+            bool skipContinents, bool skipJunkMaps, bool skipBattlegrounds, bool debugOutput,
+            bool bigBaseUnit, int mapid, const char* offMeshFilePath) :
         m_terrainBuilder(NULL),
         m_debugOutput(debugOutput),
         m_skipContinents(skipContinents),
@@ -45,6 +45,7 @@ namespace MMAP
         m_skipBattlegrounds(skipBattlegrounds),
         m_maxWalkableAngle(maxWalkableAngle),
         m_bigBaseUnit(bigBaseUnit),
+        m_mapid(mapid),
         m_rcContext(NULL),
         m_offMeshFilePath(offMeshFilePath)
     {
@@ -131,7 +132,28 @@ namespace MMAP
                     count++;
                 }
             }
+
+            // make sure we process maps which don't have tiles
+            if (tiles->empty())
+            {
+                // convert coord bounds to grid bounds
+                uint32 minX, minY, maxX, maxY;
+                getGridBounds(mapID, minX, minY, maxX, maxY);
+
+                // add all tiles within bounds to tile list.
+                for (uint32 i = minX; i <= maxX; ++i)
+                {
+                    for (uint32 j = minY; j <= maxY; ++j)
+                    {
+                        if (tiles->insert(StaticMapTree::packTileID(i, j)).second)
+                        {
+                            count++;
+                        }
+                    }
+                }
+            }
         }
+
         printf(" found %u.\n\n", count);
     }
 
@@ -184,21 +206,6 @@ namespace MMAP
 
         set<uint32>* tiles = getTileList(mapID);
 
-        // make sure we process maps which don't have tiles
-        if (!tiles->size())
-        {
-            // convert coord bounds to grid bounds
-            uint32 minX, minY, maxX, maxY;
-            getGridBounds(mapID, minX, minY, maxX, maxY);
-
-            // add all tiles within bounds to tile list.
-            for (uint32 i = minX; i <= maxX; ++i)
-                for (uint32 j = minY; j <= maxY; ++j)
-                {
-                    tiles->insert(StaticMapTree::packTileID(i, j));
-                }
-        }
-
         if (!tiles->size())
         {
             return;
@@ -214,7 +221,7 @@ namespace MMAP
         }
 
         // now start building mmtiles for each tile
-        printf("We have %u tiles.                          \n", (unsigned int)tiles->size());
+        printf("We have %u tiles.                         \n", (unsigned int)tiles->size());
         for (set<uint32>::iterator it = tiles->begin(); it != tiles->end(); ++it)
         {
             uint32 tileX, tileY;
@@ -224,10 +231,8 @@ namespace MMAP
 
             if (shouldSkipTile(mapID, tileX, tileY))
             {
-                continue;
+                buildTile(mapID, tileX, tileY, navMesh);
             }
-
-            buildTile(mapID, tileX, tileY, navMesh);
         }
 
         dtFreeNavMesh(navMesh);
@@ -784,19 +789,28 @@ namespace MMAP
     /**************************************************************************/
     bool MapBuilder::shouldSkipMap(uint32 mapID)
     {
+        if (m_mapid >= 0)
+        {
+            return static_cast<uint32>(m_mapid) != mapID;
+        }
+
         if (m_skipContinents)
+        {
             switch (mapID)
             {
-                case 0:        // Eastern Kingdoms
-                case 1:        // Kalimdor
+                case 0:      // Eastern Kingdoms
+                case 1:      // Kalimdor
                 case 530:    // Outland
                 case 571:    // Northrend
                     return true;
+
                 default:
                     break;
             }
+        }
 
         if (m_skipJunkMaps)
+        {
             switch (mapID)
             {
                 case 13:    // test.wdt
@@ -811,6 +825,7 @@ namespace MMAP
                 case 606:   // QA_DVD.wdt
                 case 627:   // unused.wdt
                     return true;
+
                 default:
                     if (isTransportMap(mapID))
                     {
@@ -818,8 +833,10 @@ namespace MMAP
                     }
                     break;
             }
+        }
 
         if (m_skipBattlegrounds)
+        {
             switch (mapID)
             {
                 case 30:    // AV
@@ -835,9 +852,11 @@ namespace MMAP
                 case 761:   // BfG2
                 case 968:   // EotS2
                     return true;
+
                 default:
                     break;
             }
+        }
 
         return false;
     }
@@ -847,7 +866,7 @@ namespace MMAP
     {
         switch (mapID)
         {
-                // transport maps
+            // transport maps
             case 582:    // Transport: Rut'theran to Auberdine
             case 584:    // Transport: Menethil to Theramore
             case 586:    // Transport: Exodar to Auberdine
@@ -895,6 +914,7 @@ namespace MMAP
             case 766:    // Transport: Gilneas Moving Gunship 02
             case 767:    // Transport: Gilneas Moving Gunship 03
                 return true;
+
             default: // no transport maps
                 return false;
         }
@@ -951,5 +971,7 @@ namespace MMAP
         config.maxSimplificationError = 1.8f;                   // eliminates most jagged edges (tiny polygons)
         config.detailSampleDist = config.cs * 16;
         config.detailSampleMaxError = config.ch * 1;
+
+        return config;
     }
 }

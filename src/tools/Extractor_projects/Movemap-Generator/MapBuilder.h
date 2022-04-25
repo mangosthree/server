@@ -120,13 +120,14 @@ namespace MMAP
              * @param bigBaseUnit
              * @param offMeshFilePath
              */
-            MapBuilder(float maxWalkableAngle   = 60.f,
+            MapBuilder(float maxWalkableAngle   = 70.f,
                        bool skipLiquid          = false,
                        bool skipContinents      = false,
                        bool skipJunkMaps        = true,
                        bool skipBattlegrounds   = false,
                        bool debugOutput         = false,
                        bool bigBaseUnit         = false,
+                       int mapid                = -1,
                        const char* offMeshFilePath = NULL);
 
             /**
@@ -271,6 +272,8 @@ namespace MMAP
 
             float m_maxWalkableAngle; /**< TODO */
             bool m_bigBaseUnit; /**< TODO */
+
+            int32 m_mapid;
 
             rcContext* m_rcContext; /**< build performance - not really used for now */
     };

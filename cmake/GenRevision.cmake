@@ -51,7 +51,7 @@ else()
     set(rev_date "1970-01-01 00:00:00 +0000")
     set(rev_hash "unknown")
     set(rev_branch "Archived")
-    
+
     # No valid git commit date, use compiled date
     string(TIMESTAMP rev_date_fallback "%Y-%m-%d %H:%M:%S" UTC)
   else()
@@ -70,9 +70,9 @@ set(rev_month ${CMAKE_MATCH_2})
 set(rev_day ${CMAKE_MATCH_3})
 
 # Create the actual revision_data.h file from the above params
-if(NOT "${rev_hash_cached}" MATCHES "${rev_hash}" OR NOT "${rev_branch_cached}" MATCHES "${rev_branch}" OR NOT EXISTS ${CMAKE_SOURCE_DIR}/src/shared/revision_data.h")
+if(NOT "${rev_hash_cached}" MATCHES "${rev_hash}" OR NOT "${rev_branch_cached}" MATCHES "${rev_branch}" OR NOT EXISTS "${CMAKE_SOURCE_DIR}/revision_data.h")
   configure_file(
-    "${CMAKE_SOURCE_DIR}/src/shared/revision_data.h.in"
+    "${CMAKE_SOURCE_DIR}/revision_data.h.in"
     "${CMAKE_SOURCE_DIR}/src/shared/revision_data.h"
     @ONLY
   )

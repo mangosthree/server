@@ -22,31 +22,19 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef GITREVISION_H
-#define GITREVISION_H
+#ifndef REVISION_DATA_H
+#define REVISION_DATA_H
+    #define REVISION_HASH               "unknown"
+    #define REVISION_DATE               "1970-01-01 00:00:00 +0000"
+    #define REVISION_BRANCH             "Archived"
 
-#include "Define.h"
+    #define CMAKE_VERSION               R"(3.23.1)"
+    #define CMAKE_HOST_SYSTEM           R"(Linux 5.15.38-1-MANJARO)"
 
-#include "revision_data.h"
-
-namespace GitRevision
-{
-    // github data
-    char const* GetHash();
-    char const* GetDate();
-    char const* GetBranch();
-
-    // system data
-    char const* GetCMakeVersion();
-    char const* GetHostOSVersion();
-    char const* GetRunningSystem();
-
-    // application data
-    char const* GetFullRevision();
-    char const* GetCompanyNameStr();
-    char const* GetLegalCopyrightStr();
-    char const* GetFileVersionStr();
-    char const* GetProductVersionStr();
-}
-
+    #define VER_COMPANY_NAME_STR        "MaNGOS Developers"
+    #define VER_LEGALCOPYRIGHT_STR      "(c)2005-2022 MaNGOS"
+    #define VER_FILEVERSION             0,0,0
+    #define VER_FILEVERSION_STR         "unknown 1970-01-01 00:00:00 +0000 (Archived branch)"
+    #define VER_PRODUCTVERSION          VER_FILEVERSION
+    #define VER_PRODUCTVERSION_STR      VER_FILEVERSION_STR
 #endif

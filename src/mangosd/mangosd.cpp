@@ -34,11 +34,13 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"
+#include "GitRevision.h"
 #include "ProgressBar.h"
 #include "Log.h"
 #include "SystemConfig.h"
 #include "AuctionHouseBot.h"
 #include "revision.h"
+#include "revision_data.h"
 #include "World.h"
 #include "Util.h"
 #include "DBCStores.h"
@@ -385,6 +387,7 @@ int main(int argc, char** argv)
 #endif
 
     sLog.outString("%s [world-daemon]", REVISION_NR);
+    sLog.outString("%s", GitRevision::GetFullRevision());
     print_banner();
     sLog.outString("Using configuration file %s.", cfg_file);
 

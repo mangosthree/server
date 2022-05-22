@@ -107,6 +107,7 @@ find_package(BZip2 QUIET)
 
 find_package(OpenSSL REQUIRED)
 
+include(${CMAKE_SOURCE_DIR}/cmake/GenRevision.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/EnsureVersion.cmake)
 
 include(${CMAKE_SOURCE_DIR}/cmake/MangosParams.cmake)

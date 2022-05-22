@@ -1,5 +1,5 @@
 message("===================================================")
-message("Mangos revision       : ${rev_hash} ${rev_date} (${rev_branch} branch)
+message("Mangos revision       : ${rev_hash} ${rev_date} (${rev_branch} branch)")
 message("Build type            : ${CMAKE_BUILD_TYPE}")
 message("Install server(s) to  : ${BIN_DIR}")
 message("Install configs to    : ${CONF_INSTALL_DIR}")

@@ -24,9 +24,9 @@
 
 #ifndef REVISION_DATA_H
 #define REVISION_DATA_H
-    #define REVISION_HASH               "unknown"
-    #define REVISION_DATE               "1970-01-01 00:00:00 +0000"
-    #define REVISION_BRANCH             "Archived"
+    #define REVISION_HASH               "1e7aa1eb4e8d+"
+    #define REVISION_DATE               "2022-05-22 15:45:18 -0500"
+    #define REVISION_BRANCH             "revision"
 
     #define CMAKE_VERSION               R"(3.23.1)"
     #define CMAKE_HOST_SYSTEM           R"(Linux 5.15.38-1-MANJARO)"
@@ -34,7 +34,7 @@
     #define VER_COMPANY_NAME_STR        "MaNGOS Developers"
     #define VER_LEGALCOPYRIGHT_STR      "(c)2005-2022 MaNGOS"
     #define VER_FILEVERSION             0,0,0
-    #define VER_FILEVERSION_STR         "unknown 1970-01-01 00:00:00 +0000 (Archived branch)"
+    #define VER_FILEVERSION_STR         "1e7aa1eb4e8d+ 2022-05-22 15:45:18 -0500 (revision branch)"
     #define VER_PRODUCTVERSION          VER_FILEVERSION
     #define VER_PRODUCTVERSION_STR      VER_FILEVERSION_STR
 #endif

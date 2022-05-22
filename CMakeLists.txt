@@ -98,6 +98,10 @@ else()
     endif()
 endif()
 
+if(NOT WITHOUT_GIT)
+  find_package(Git)
+endif()
+
 find_package(Threads REQUIRED)
 find_package(MySQL   REQUIRED)
 find_package(DL      REQUIRED)

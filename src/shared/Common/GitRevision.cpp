@@ -73,7 +73,7 @@ char const* GitRevision::GetFullRevision()
 
 char const* GitRevision::GetRunningSystem()
 {
-    return "Running on: " MANGOS_PLATFORM_STR " - " CMAKE_HOST_SYSTEM;
+    return "Running on: " CMAKE_HOST_SYSTEM;
 }
 
 char const* GitRevision::GetCompanyNameStr()

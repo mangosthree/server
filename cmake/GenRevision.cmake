@@ -72,7 +72,7 @@ set(rev_day ${CMAKE_MATCH_3})
 # Create the actual revision_data.h file from the above params
 if(NOT "${rev_hash_cached}" MATCHES "${rev_hash}" OR NOT "${rev_branch_cached}" MATCHES "${rev_branch}" OR NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/src/shared/revision_data.h")
   configure_file(
-    "${CMAKE_SOURCE_DIR}/revision_data.h.in"
+    "${CMAKE_SOURCE_DIR}/src/shared/revision_data.h.in"
     "${CMAKE_CURRENT_BINARY_DIR}/src/shared/revision_data.h"
     @ONLY
   )

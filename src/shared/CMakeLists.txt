@@ -189,6 +189,7 @@ set(TGT_INCL
   Policies
 )
 
+configure_file(revision_data.h.in ${CMAKE_CURRENT_BINARY_DIR}/revision_data.h)
 configure_file(SystemConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/SystemConfig.h)
 
 TEST_BIG_ENDIAN(ENDIAN_VALUE)

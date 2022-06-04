@@ -37,7 +37,6 @@ INSTANTIATE_SINGLETON_1(WaypointManager);
  * If the emote, spell, model1, or model2 variables are not 0, then the function returns false.
  * Otherwise, if any of the textid variables are not 0, then the function returns false. Otherwise, the
  * function returns true
- * 
  * @return a boolean value.
  */
 bool WaypointBehavior::isEmpty()
@@ -58,7 +57,6 @@ bool WaypointBehavior::isEmpty()
 
 /**
  * This function is a copy constructor for the WaypointBehavior class.
- * 
  * @param b The waypoint behavior to copy.
  */
 WaypointBehavior::WaypointBehavior(const WaypointBehavior& b)
@@ -75,7 +73,6 @@ WaypointBehavior::WaypointBehavior(const WaypointBehavior& b)
 
 /**
  * It loads the waypoints from the database
- * 
  * @return a pointer to a WaypointPath object.
  */
 void WaypointManager::Load()
@@ -466,7 +463,6 @@ void WaypointManager::Unload()
 
 /**
  * It deletes all the waypoints in a path
- * 
  * @param path The path to clear.
  */
 void WaypointManager::_clearPath(WaypointPath& path)
@@ -480,7 +476,6 @@ void WaypointManager::_clearPath(WaypointPath& path)
 
 /**
  * It adds a waypoint to the external waypoint map
- * 
  * @param entry The entry of the NPC you want to add the waypoint to.
  * @param pathId This is the path ID. It's a number between 0 and 255.
  * @param pointId The point ID of the waypoint.
@@ -490,7 +485,6 @@ void WaypointManager::_clearPath(WaypointPath& path)
  * @param o The orientation
  * @param waittime The time in milliseconds that the NPC will wait at this node before moving to the
  * next node.
- * 
  * @return a boolean value.
  */
 bool WaypointManager::AddExternalNode(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime)
@@ -513,7 +507,6 @@ bool WaypointManager::AddExternalNode(uint32 entry, int32 pathId, uint32 pointId
 
 /**
  * It adds a new waypoint to the waypoint path
- * 
  * @param entry The entry of the creature.
  * @param dbGuid The GUID of the creature in the database.
  * @param pointId The waypoint ID.
@@ -521,7 +514,6 @@ bool WaypointManager::AddExternalNode(uint32 entry, int32 pathId, uint32 pointId
  * @param x The X coordinate of the waypoint.
  * @param y The Y coordinate of the waypoint.
  * @param z The Z coordinate of the waypoint.
- * 
  * @return A pointer to the WaypointNode object that was just created.
  */
 WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32& pointId, WaypointPathOrigin wpDest, float x, float y, float z)
@@ -583,13 +575,11 @@ WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32
 
 /**
  * It deletes a waypoint from the database
- * 
  * @param entry The entry of the creature.
  * @param dbGuid The GUID of the creature in the database.
  * @param point The point number to delete.
  * @param pathId The path ID of the waypoint path you want to delete a node from.
  * @param wpOrigin This is the type of waypoint path you want to delete.
- * 
  * @return a pointer to a WaypointPath object.
  */
 void WaypointManager::DeleteNode(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin)
@@ -616,7 +606,6 @@ void WaypointManager::DeleteNode(uint32 entry, uint32 dbGuid, uint32 point, int3
 
 /**
  * It deletes a path from the database, but not from the map
- * 
  * @param id The ID of the path you want to delete.
  */
 void WaypointManager::DeletePath(uint32 id)
@@ -635,7 +624,6 @@ void WaypointManager::DeletePath(uint32 id)
 
 /**
  * It updates the position of a waypoint in the database
- * 
  * @param entry The entry of the creature.
  * @param dbGuid The GUID of the creature in the database.
  * @param point The point number in the path.
@@ -645,7 +633,6 @@ void WaypointManager::DeletePath(uint32 id)
  * @param x The X coordinate of the waypoint.
  * @param y The Y coordinate of the waypoint.
  * @param z The Z coordinate of the waypoint.
- * 
  * @return a pointer to a WaypointPath object.
  */
 void WaypointManager::SetNodePosition(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin, float x, float y, float z)
@@ -678,7 +665,6 @@ void WaypointManager::SetNodePosition(uint32 entry, uint32 dbGuid, uint32 point,
 
 /**
  * It updates the waittime of a waypoint in the database
- * 
  * @param entry The entry of the creature.
  * @param dbGuid The GUID of the creature in the database.
  * @param point The point number in the path.
@@ -686,7 +672,6 @@ void WaypointManager::SetNodePosition(uint32 entry, uint32 dbGuid, uint32 point,
  * @param wpOrigin This is the type of waypoint path you want to modify.
  * @param waittime The time in milliseconds that the NPC will wait at the waypoint before moving to the
  * next one.
- * 
  * @return a pointer to a WaypointPath object.
  */
 void WaypointManager::SetNodeWaittime(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin, uint32 waittime)
@@ -717,14 +702,12 @@ void WaypointManager::SetNodeWaittime(uint32 entry, uint32 dbGuid, uint32 point,
 
 /**
  * It updates the orientation of a waypoint in the database
- * 
  * @param entry The entry of the creature.
  * @param dbGuid The GUID of the creature in the database.
  * @param point The point number in the path.
  * @param pathId The path ID of the waypoint path you want to modify.
  * @param wpOrigin This is the type of waypoint path you want to modify.
  * @param orientation The new orientation of the waypoint.
- * 
  * @return a pointer to a WaypointPath object.
  */
 void WaypointManager::SetNodeOrientation(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin, float orientation)
@@ -756,14 +739,12 @@ void WaypointManager::SetNodeOrientation(uint32 entry, uint32 dbGuid, uint32 poi
 /**
  * It updates the script_id field of the creature_movement table for the given entry, dbGuid, point,
  * pathId, and wpOrigin
- * 
  * @param entry The entry of the creature.
  * @param dbGuid The GUID of the creature in the database.
  * @param point The waypoint number.
  * @param pathId The path ID of the waypoint path you want to modify.
  * @param wpOrigin This is the type of waypoint path you want to modify.
  * @param scriptId The scriptId of the script you want to run.
- * 
  * @return The script_id of the waypoint.
  */
 bool WaypointManager::SetNodeScriptId(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin, uint32 scriptId)
@@ -801,8 +782,7 @@ bool WaypointManager::SetNodeScriptId(uint32 entry, uint32 dbGuid, uint32 point,
 }
 
 /**
- * It checks if the textid is valid and if it is, it removes it from the set of textids
- * 
+ * It checks if the textid is valid and if it is, it removes it from the set of textids.
  * @param isTemplate Whether the waypoint is for a creature template or a creature.
  * @param entryOrGuid The entry or guid of the creature.
  * @param point The point ID of the waypoint.
@@ -841,7 +821,6 @@ inline void CheckWPText(bool isTemplate, uint32 entryOrGuid, uint32 point, Waypo
 
 /**
  * It checks if the waypoint text exists in the database
- * 
  * @param ids The set of ids that are being checked for existence.
  */
 void WaypointManager::CheckTextsExistance(std::set<int32>& ids)

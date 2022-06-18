@@ -433,6 +433,14 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
         {
             if (pProto->SellPrice > 0)
             {
+                uint64 money = pProto->SellPrice * count;
+                if (_player->GetMoney() >= MAX_MONEY_AMOUNT - money) // prevent exceeding gold limit
+                {
+                    _player->SendEquipError(EQUIP_ERR_TOO_MUCH_GOLD, nullptr, nullptr);
+                    _player->SendSellError(SELL_ERR_UNK, pCreature, itemGuid, 0);
+                    return;
+                }
+
                 if (count < pItem->GetCount())              // need split items
                 {
                     Item* pNewItem = pItem->CloneItem(count, _player);
@@ -464,8 +472,6 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
                     pItem->RemoveFromUpdateQueueOf(_player);
                     _player->AddItemToBuyBackSlot(pItem);
                 }
-
-                uint64 money = pProto->SellPrice * count;
 
                 _player->ModifyMoney(money);
                 _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_VENDORS, money);

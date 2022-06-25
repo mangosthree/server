@@ -623,7 +623,7 @@ bool Database::CheckDatabaseVersion(DatabaseTypes database)
     {
         // TODO : Should not display with error color but warning (e.g YELLOW) => Create a sLog.outWarningDb() and sLog.outWarning()
         sLog.outErrorDb("You have not updated the core for few DB [%s] updates!", core_db_requirements.dbname.c_str());
-        sLog.outErrorDb("Current DB content is %s, core expects %s", current_db_content, core_db_requirements.minimal_expected_content);
+        sLog.outErrorDb("Current DB content is %s, core expects %s", current_db_content.c_str(), core_db_requirements.minimal_expected_content.c_str());
         sLog.outErrorDb("It is recommended to run ALL database updates up to the required core version.");
         sLog.outErrorDb("These updates are included in the database/%s/Updates folder.", core_db_requirements.dbname.c_str());
         sLog.outErrorDb("This is ok for now but should not last long.");

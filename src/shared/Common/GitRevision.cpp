@@ -122,6 +122,11 @@ char const* GitRevision::GetWorldDBStructure()
     return WORLD_DB_STRUCTURE_NR;
 }
 
+char const* GitRevision::GetWorldDBContent()
+{
+    return WORLD_DB_CONTENT_NR;
+}
+
 char const* GitRevision::GetWorldDBUpdateDescription()
 {
     return WORLD_DB_UPDATE_DESCRIPT;

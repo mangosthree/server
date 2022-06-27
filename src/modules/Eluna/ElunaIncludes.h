@@ -56,7 +56,7 @@
 #endif
 #include "BattleGroundMgr.h"
 #include "SQLStorages.h"
-#include "revision.h"
+#include "GitRevision.h"
 #endif
 
 #if (!defined(TBC) && !defined(CLASSIC))
@@ -77,7 +77,7 @@ typedef Opcodes                 OpcodesList;
  */
 #ifdef MANGOS
 #define CORE_NAME               "MaNGOS"
-#define CORE_VERSION            REVISION_NR
+#define CORE_VERSION            (GitRevision::GetDate())
 #endif
 
 #ifdef CMANGOS

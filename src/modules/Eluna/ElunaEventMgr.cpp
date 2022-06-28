@@ -6,7 +6,11 @@
 
 #include "ElunaEventMgr.h"
 #include "LuaEngine.h"
+#ifndef CMANGOS
 #include "Object.h"
+#else
+#include "Entities/Object.h"
+#endif
 
 extern "C"
 {
@@ -16,6 +20,7 @@ extern "C"
 
 ElunaEventProcessor::ElunaEventProcessor(Eluna** _E, WorldObject* _obj) : m_time(0), obj(_obj), E(_E)
 {
+    // can be called from multiple threads
     if (obj)
     {
         EventMgr::Guard guard((*E)->eventMgr->GetLock());
@@ -25,7 +30,11 @@ ElunaEventProcessor::ElunaEventProcessor(Eluna** _E, WorldObject* _obj) : m_time
 
 ElunaEventProcessor::~ElunaEventProcessor()
 {
-    RemoveEvents_internal();
+    // can be called from multiple threads
+    {
+        LOCK_ELUNA;
+        RemoveEvents_internal();
+    }
 
     if (obj && Eluna::IsInitialized())
     {
@@ -47,12 +56,13 @@ void ElunaEventProcessor::Update(uint32 diff)
 
         if (luaEvent->state == LUAEVENT_STATE_RUN)
         {
+            uint32 delay = luaEvent->delay;
             bool remove = luaEvent->repeats == 1;
             if (!remove)
                 AddEvent(luaEvent); // Reschedule before calling incase RemoveEvents used
 
             // Call the timed event
-            (*E)->OnTimedEvent(luaEvent->funcRef, luaEvent->delay, luaEvent->repeats ? luaEvent->repeats-- : luaEvent->repeats, obj);
+            (*E)->OnTimedEvent(luaEvent->funcRef, delay, luaEvent->repeats ? luaEvent->repeats-- : luaEvent->repeats, obj);
 
             if (!remove)
                 continue;
@@ -97,13 +107,14 @@ void ElunaEventProcessor::SetState(int eventId, LuaEventState state)
 
 void ElunaEventProcessor::AddEvent(LuaEvent* luaEvent)
 {
+    luaEvent->GenerateDelay();
     eventList.insert(std::pair<uint64, LuaEvent*>(m_time + luaEvent->delay, luaEvent));
     eventMap[luaEvent->funcRef] = luaEvent;
 }
 
-void ElunaEventProcessor::AddEvent(int funcRef, uint32 delay, uint32 repeats)
+void ElunaEventProcessor::AddEvent(int funcRef, uint32 min, uint32 max, uint32 repeats)
 {
-    AddEvent(new LuaEvent(funcRef, delay, repeats));
+    AddEvent(new LuaEvent(funcRef, min, max, repeats));
 }
 
 void ElunaEventProcessor::RemoveEvent(LuaEvent* luaEvent)

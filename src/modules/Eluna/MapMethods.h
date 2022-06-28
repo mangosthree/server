@@ -37,10 +37,10 @@ namespace LuaMap
      */
     int IsBattleground(lua_State* L, Map* map)
     {
-#ifndef TRINITY
-        Eluna::Push(L, map->IsBattleGround());
-#else
+#if defined TRINITY || AZEROTHCORE
         Eluna::Push(L, map->IsBattleground());
+#else
+        Eluna::Push(L, map->IsBattleGround());
 #endif
         return 1;
     }
@@ -182,6 +182,7 @@ namespace LuaMap
      * @param float x
      * @param float y
      * @param float z
+     * @param uint32 phasemask = PHASEMASK_NORMAL
      * @return uint32 areaId
      */
     int GetAreaId(lua_State* L, Map* map)
@@ -189,11 +190,12 @@ namespace LuaMap
         float x = Eluna::CHECKVAL<float>(L, 2);
         float y = Eluna::CHECKVAL<float>(L, 3);
         float z = Eluna::CHECKVAL<float>(L, 4);
+#if defined TRINITY || defined AZEROTHCORE
+        float phasemask = Eluna::CHECKVAL<uint32>(L, 5, PHASEMASK_NORMAL);
 
-#ifndef TRINITY
-        Eluna::Push(L, map->GetTerrain()->GetAreaId(x, y, z));
+        Eluna::Push(L, map->GetAreaId(phasemask, x, y, z));
 #else
-        Eluna::Push(L, map->GetAreaId(x, y, z));
+        Eluna::Push(L, map->GetTerrain()->GetAreaId(x, y, z));
 #endif
         return 1;
     }
@@ -201,41 +203,42 @@ namespace LuaMap
     /**
      * Returns a [WorldObject] by its GUID from the map if it is spawned.
      *
-     * @param uint64 guid
+     * @param ObjectGuid guid
+     * @return [WorldObject] object
      */
     int GetWorldObject(lua_State* L, Map* map)
     {
-        uint64 guid = Eluna::CHECKVAL<uint64>(L, 2);
+        ObjectGuid guid = Eluna::CHECKVAL<ObjectGuid>(L, 2);
 
-#ifndef TRINITY
-        Eluna::Push(L, map->GetWorldObject(ObjectGuid(guid)));
-#else
-        switch (GUID_HIPART(guid))
+#if defined TRINITY || AZEROTHCORE
+        switch (guid.GetHigh())
         {
             case HIGHGUID_PLAYER:
-                Eluna::Push(L, eObjectAccessor()GetPlayer(map, ObjectGuid(guid)));
+                Eluna::Push(L, eObjectAccessor()GetPlayer(map, guid));
                 break;
             case HIGHGUID_TRANSPORT:
             case HIGHGUID_MO_TRANSPORT:
             case HIGHGUID_GAMEOBJECT:
-                Eluna::Push(L, map->GetGameObject(ObjectGuid(guid)));
+                Eluna::Push(L, map->GetGameObject(guid));
                 break;
             case HIGHGUID_VEHICLE:
             case HIGHGUID_UNIT:
-                Eluna::Push(L, map->GetCreature(ObjectGuid(guid)));
+                Eluna::Push(L, map->GetCreature(guid));
                 break;
             case HIGHGUID_PET:
-                Eluna::Push(L, map->GetPet(ObjectGuid(guid)));
+                Eluna::Push(L, map->GetPet(guid));
                 break;
             case HIGHGUID_DYNAMICOBJECT:
-                Eluna::Push(L, map->GetDynamicObject(ObjectGuid(guid)));
+                Eluna::Push(L, map->GetDynamicObject(guid));
                 break;
             case HIGHGUID_CORPSE:
-                Eluna::Push(L, map->GetCorpse(ObjectGuid(guid)));
+                Eluna::Push(L, map->GetCorpse(guid));
                 break;
             default:
                 break;
         }
+#else
+        Eluna::Push(L, map->GetWorldObject(guid));
 #endif
         return 1;
     }
@@ -259,11 +262,15 @@ namespace LuaMap
      */
     int SetWeather(lua_State* L, Map* map)
     {
+        (void)map; // ensure that the variable is referenced in order to pass compiler checks
         uint32 zoneId = Eluna::CHECKVAL<uint32>(L, 2);
         uint32 weatherType = Eluna::CHECKVAL<uint32>(L, 3);
         float grade = Eluna::CHECKVAL<float>(L, 4);
 
-#if defined(TRINITY)
+#if defined TRINITY
+        if (Weather * weather = map->GetOrGenerateZoneDefaultWeather(zoneId))
+            weather->SetWeather((WeatherType)weatherType, grade);
+#elif defined AZEROTHCORE
         Weather* weather = WeatherMgr::FindWeather(zoneId);
         if (!weather)
             weather = WeatherMgr::AddWeather(zoneId);
@@ -286,7 +293,7 @@ namespace LuaMap
      */
     int GetInstanceData(lua_State* L, Map* map)
     {
-#ifdef TRINITY
+#if defined TRINITY || AZEROTHCORE
         ElunaInstanceAI* iAI = NULL;
         if (InstanceMap* inst = map->ToInstanceMap())
             iAI = dynamic_cast<ElunaInstanceAI*>(inst->GetInstanceScript());
@@ -307,7 +314,7 @@ namespace LuaMap
      */
     int SaveInstanceData(lua_State* /*L*/, Map* map)
     {
-#ifdef TRINITY
+#if defined TRINITY || AZEROTHCORE
         ElunaInstanceAI* iAI = NULL;
         if (InstanceMap* inst = map->ToInstanceMap())
             iAI = dynamic_cast<ElunaInstanceAI*>(inst->GetInstanceScript());
@@ -319,6 +326,48 @@ namespace LuaMap
             iAI->SaveToDB();
 
         return 0;
+    }
+
+    /**
+    * Returns a table with all the current [Player]s in the map
+    *
+    *     enum TeamId
+    *     {
+    *         TEAM_ALLIANCE = 0,
+    *         TEAM_HORDE = 1,
+    *         TEAM_NEUTRAL = 2
+    *     };
+    *
+    * @param [TeamId] team : optional check team of the [Player], Alliance, Horde or Neutral (All)
+    * @return table mapPlayers
+    */
+    int GetPlayers(lua_State* L, Map* map)
+    {
+        uint32 team = Eluna::CHECKVAL<uint32>(L, 2, TEAM_NEUTRAL);
+
+        lua_newtable(L);
+        int tbl = lua_gettop(L);
+        uint32 i = 0;
+
+        Map::PlayerList const& players = map->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        {
+#if defined TRINITY || AZEROTHCORE
+            Player* player = itr->GetSource();
+#else
+            Player* player = itr->getSource();
+#endif
+            if (!player)
+                continue;
+            if (player->GetSession() && (team >= TEAM_NEUTRAL || player->GetTeamId() == team))
+            {
+                Eluna::Push(L, player);
+                lua_rawseti(L, tbl, ++i);
+            }
+        }
+
+        lua_settop(L, tbl);
+        return 1;
     }
 };
 #endif

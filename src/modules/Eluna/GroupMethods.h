@@ -52,7 +52,7 @@ namespace LuaGroup
         return 1;
     }
 #endif
-    
+   
     /**
      * Returns 'true' if the [Group] is a raid [Group]
      *
@@ -76,7 +76,7 @@ namespace LuaGroup
     int IsBGGroup(lua_State* L, Group* group)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, group->IsBattleGroup());        
+        Eluna::Push(L, group->IsBattleGroup());       
 #else
         Eluna::Push(L, group->isBGGroup());
 #endif

@@ -31,11 +31,13 @@
 #include "Realm/RealmList.h"
 
 #include "Config/Config.h"
+#include "GitRevision.h"
 #include "Log.h"
 #include "Auth/AuthSocket.h"
 #include "SystemConfig.h"
-#include "revision.h"
+#include "revision_data.h"
 #include "Util.h"
+
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 
@@ -111,7 +113,7 @@ extern int main(int argc, char** argv)
                 cfg_file = cmd_opts.opt_arg();
                 break;
             case 'v':
-                printf("%s\n", REVISION_NR);
+                printf("%s\n", GitRevision::GetProjectRevision());
                 return 0;
 
             case 's':
@@ -201,7 +203,8 @@ extern int main(int argc, char** argv)
 
     sLog.Initialize();
 
-    sLog.outString("%s [realm-daemon]", REVISION_NR);
+    sLog.outString("%s [realm-daemon]", GitRevision::GetProjectRevision());
+    sLog.outString("%s", GitRevision::GetFullRevision());
     sLog.outString("<Ctrl-C> to stop.\n");
     sLog.outString("Using configuration file %s.", cfg_file);
 

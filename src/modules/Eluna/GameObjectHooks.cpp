@@ -30,20 +30,20 @@ using namespace Hooks;
         return RETVAL;\
     LOCK_ELUNA
 
-bool Eluna::OnDummyEffect(Unit* pCaster, uint32 spellId, SpellEffIndex effIndex, GameObject* pTarget)
+void Eluna::OnDummyEffect(WorldObject* pCaster, uint32 spellId, SpellEffIndex effIndex, GameObject* pTarget)
 {
-    START_HOOK_WITH_RETVAL(GAMEOBJECT_EVENT_ON_DUMMY_EFFECT, pTarget->GetEntry(), false);
+    START_HOOK(GAMEOBJECT_EVENT_ON_DUMMY_EFFECT, pTarget->GetEntry());
     Push(pCaster);
     Push(spellId);
     Push(effIndex);
     Push(pTarget);
-    return CallAllFunctionsBool(GameObjectEventBindings, key);
+    CallAllFunctions(GameObjectEventBindings, key);
 }
 
 void Eluna::UpdateAI(GameObject* pGameObject, uint32 diff)
 {
-    START_HOOK(GAMEOBJECT_EVENT_ON_AIUPDATE, pGameObject->GetEntry());
     pGameObject->elunaEvents->Update(diff);
+    START_HOOK(GAMEOBJECT_EVENT_ON_AIUPDATE, pGameObject->GetEntry());
     Push(pGameObject);
     Push(diff);
     CallAllFunctions(GameObjectEventBindings, key);
@@ -68,30 +68,29 @@ bool Eluna::OnQuestReward(Player* pPlayer, GameObject* pGameObject, Quest const*
     return CallAllFunctionsBool(GameObjectEventBindings, key);
 }
 
-uint32 Eluna::GetDialogStatus(const Player* pPlayer, const GameObject* pGameObject)
+void Eluna::GetDialogStatus(const Player* pPlayer, const GameObject* pGameObject)
 {
-    START_HOOK_WITH_RETVAL(GAMEOBJECT_EVENT_ON_DIALOG_STATUS, pGameObject->GetEntry(), false);
+    START_HOOK(GAMEOBJECT_EVENT_ON_DIALOG_STATUS, pGameObject->GetEntry());
     Push(pPlayer);
     Push(pGameObject);
     CallAllFunctions(GameObjectEventBindings, key);
-    return DIALOG_STATUS_SCRIPTED_NO_STATUS; // DIALOG_STATUS_UNDEFINED
 }
 
 #ifndef CLASSIC
 #ifndef TBC
-void Eluna::OnDestroyed(GameObject* pGameObject, Player* pPlayer)
+void Eluna::OnDestroyed(GameObject* pGameObject, WorldObject* attacker)
 {
     START_HOOK(GAMEOBJECT_EVENT_ON_DESTROYED, pGameObject->GetEntry());
     Push(pGameObject);
-    Push(pPlayer);
+    Push(attacker);
     CallAllFunctions(GameObjectEventBindings, key);
 }
 
-void Eluna::OnDamaged(GameObject* pGameObject, Player* pPlayer)
+void Eluna::OnDamaged(GameObject* pGameObject, WorldObject* attacker)
 {
     START_HOOK(GAMEOBJECT_EVENT_ON_DAMAGED, pGameObject->GetEntry());
     Push(pGameObject);
-    Push(pPlayer);
+    Push(attacker);
     CallAllFunctions(GameObjectEventBindings, key);
 }
 #endif

@@ -8,6 +8,7 @@
 #define _ELUNA_INCLUDES_H
 
 // Required
+#ifndef CMANGOS
 #include "AccountMgr.h"
 #include "AuctionHouseMgr.h"
 #include "Cell.h"
@@ -15,6 +16,7 @@
 #include "Chat.h"
 #include "Channel.h"
 #include "DBCStores.h"
+#include "GameEventMgr.h"
 #include "GossipDef.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
@@ -23,7 +25,6 @@
 #include "GuildMgr.h"
 #include "Language.h"
 #include "Mail.h"
-#include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
@@ -35,36 +36,98 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
-#include "WorldPacket.h"
 #include "WorldSession.h"
+#else
+#include "Accounts/AccountMgr.h"
+#include "AuctionHouse/AuctionHouseMgr.h"
+#include "Grids/Cell.h"
+#include "Grids/CellImpl.h"
+#include "Chat/Chat.h"
+#include "Chat/Channel.h"
+#include "Server/DBCStores.h"
+#include "GameEvents/GameEventMgr.h"
+#include "Entities/GossipDef.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Groups/Group.h"
+#include "Guilds/Guild.h"
+#include "Guilds/GuildMgr.h"
+#include "Tools/Language.h"
+#include "Mails/Mail.h"
+#include "Maps/MapManager.h"
+#include "Globals/ObjectAccessor.h"
+#include "Globals/ObjectMgr.h"
+#include "Server/Opcodes.h"
+#include "Entities/Player.h"
+#include "Entities/Pet.h"
+#include "Reputation/ReputationMgr.h"
+#include "DBScripts/ScriptMgr.h"
+#include "Spells/Spell.h"
+#include "Spells/SpellAuras.h"
+#include "Spells/SpellMgr.h"
+#include "Entities/TemporarySpawn.h"
+#include "Server/WorldSession.h"
+#endif
+#include "WorldPacket.h"
 
-#ifdef TRINITY
+#if defined TRINITY
+#include "SpellHistory.h"
+#endif
+
+#if defined AZEROTHCORE
+#include "MapMgr.h"
+#elif defined CMANGOS
+#include "Maps/MapManager.h"
+#else
+#include "MapManager.h"
+#endif
+
+#if defined TRINITY || defined AZEROTHCORE
 #include "Config.h"
+#include "GameEventMgr.h"
+#include "GitRevision.h"
 #include "GroupMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellInfo.h"
 #include "WeatherMgr.h"
 #include "Battleground.h"
-#include "GitRevision.h"
-#include "SpellHistory.h"
+#include "MotionMaster.h"
+#include "DatabaseEnv.h"
+#include "Bag.h"
 #else
 #include "Config/Config.h"
 #ifdef CMANGOS
-#include "AI/AggressorAI.h"
+#include "AI/BaseAI/UnitAI.h"
 #else
 #include "AggressorAI.h"
 #endif
 #include "BattleGroundMgr.h"
+#ifndef CMANGOS
 #include "SQLStorages.h"
+#else
+#include "Server/SQLStorages.h"
+#endif
+#ifndef MANGOS
 #include "revision.h"
+#else
+#include "GitRevision.h"
+#endif
 #endif
 
 #if (!defined(TBC) && !defined(CLASSIC))
+#ifndef CMANGOS
 #include "Vehicle.h"
+#else
+#include "Entities/Vehicle.h"
+#endif
 #endif
 
 #ifndef CLASSIC
+#ifndef CMANGOS
 #include "ArenaTeam.h"
+#else
+#include "Arena/ArenaTeam.h"
+#endif
 #endif
 
 #ifndef CLASSIC
@@ -82,12 +145,20 @@ typedef Opcodes                 OpcodesList;
 
 #ifdef CMANGOS
 #define CORE_NAME               "cMaNGOS"
-#define CORE_VERSION            REVISION_DATE " " REVISION_TIME
+#define CORE_VERSION            REVISION_DATE " " REVISION_ID
 #endif
 
 #ifdef TRINITY
 #define CORE_NAME               "TrinityCore"
-#define CORE_VERSION            (GitRevision::GetDate())
+#define REGEN_TIME_FULL
+#endif
+
+#ifdef AZEROTHCORE
+#define CORE_NAME               "AzerothCore"
+#endif
+
+#if defined TRINITY || defined AZEROTHCORE
+#define CORE_VERSION            (GitRevision::GetFullVersion())
 #define eWorld                  (sWorld)
 #define eMapMgr                 (sMapMgr)
 #define eConfigMgr              (sConfigMgr)
@@ -95,16 +166,16 @@ typedef Opcodes                 OpcodesList;
 #define eObjectMgr              (sObjectMgr)
 #define eAccountMgr             (sAccountMgr)
 #define eAuctionMgr             (sAuctionMgr)
+#define eGameEventMgr           (sGameEventMgr)
 #define eObjectAccessor()       ObjectAccessor::
-#define REGEN_TIME_FULL
-typedef ThreatContainer::StorageType ThreatList;
+#endif
 
-#ifdef CATA
+/*#ifdef CATA
 #define NUM_MSG_TYPES           NUM_OPCODE_HANDLERS
 #endif
-#endif
+*/
 
-#ifndef TRINITY
+#if !defined TRINITY && !AZEROTHCORE
 #define eWorld                  (&sWorld)
 #define eMapMgr                 (&sMapMgr)
 #define eConfigMgr              (&sConfig)
@@ -112,10 +183,10 @@ typedef ThreatContainer::StorageType ThreatList;
 #define eObjectMgr              (&sObjectMgr)
 #define eAccountMgr             (&sAccountMgr)
 #define eAuctionMgr             (&sAuctionMgr)
+#define eGameEventMgr           (&sGameEventMgr)
 #define eObjectAccessor()       sObjectAccessor.
 #define SERVER_MSG_STRING       SERVER_MSG_CUSTOM
 #define TOTAL_LOCALES           MAX_LOCALE
-#define DIALOG_STATUS_SCRIPTED_NO_STATUS    DIALOG_STATUS_UNDEFINED
 #define TARGETICONCOUNT         TARGET_ICON_COUNT
 #define MAX_TALENT_SPECS        MAX_TALENT_SPEC_COUNT
 #define TEAM_NEUTRAL            TEAM_INDEX_NEUTRAL
@@ -129,20 +200,16 @@ typedef ThreatContainer::StorageType ThreatList;
 #define SPELL_AURA_MOD_KILL_XP_PCT  SPELL_AURA_MOD_XP_PCT
 #endif
 
-#if defined(CATA) || (defined(WOTLK) && !defined(MANGOS))
+#if defined(CATA) || defined(MISTS) || (defined(WOTLK) && !defined(MANGOS))
 #define UNIT_BYTE2_FLAG_SANCTUARY   UNIT_BYTE2_FLAG_SUPPORTABLE
 #endif
 
+#ifndef CMANGOS
 typedef TemporarySummon TempSummon;
+#else
+typedef TemporarySpawn TempSummon;
+#endif
 typedef SpellEntry SpellInfo;
-enum SelectAggroTarget
-{
-    SELECT_TARGET_RANDOM = 0,   // Just selects a random target
-    SELECT_TARGET_TOPAGGRO,     // Selects targes from top aggro to bottom
-    SELECT_TARGET_BOTTOMAGGRO,  // Selects targets from bottom aggro to top
-    SELECT_TARGET_NEAREST,
-    SELECT_TARGET_FARTHEST
-};
 #endif // TRINITY
 
 #endif // _ELUNA_INCLUDES_H

@@ -66,7 +66,7 @@ namespace LuaGuild
      */
     int GetMemberCount(lua_State* L, Guild* guild)
     {
-#ifdef TRINITY
+#if defined TRINITY || AZEROTHCORE
         Eluna::Push(L, guild->GetMemberCount());
 #else
         Eluna::Push(L, guild->GetMemberSize());
@@ -81,10 +81,10 @@ namespace LuaGuild
      */
     int GetLeader(lua_State* L, Guild* guild)
     {
-#ifndef TRINITY
-        Eluna::Push(L, eObjectAccessor()FindPlayer(guild->GetLeaderGuid()));
-#else
+#if defined TRINITY || AZEROTHCORE
         Eluna::Push(L, eObjectAccessor()FindPlayer(guild->GetLeaderGUID()));
+#else
+        Eluna::Push(L, eObjectAccessor()FindPlayer(guild->GetLeaderGuid()));
 #endif
         return 1;
     }
@@ -92,14 +92,14 @@ namespace LuaGuild
     /**
      * Returns [Guild] leader GUID
      *
-     * @return uint64 leaderGUID
+     * @return ObjectGuid leaderGUID
      */
     int GetLeaderGUID(lua_State* L, Guild* guild)
     {
-#ifndef TRINITY
-        Eluna::Push(L, guild->GetLeaderGuid());
-#else
+#if defined TRINITY || AZEROTHCORE
         Eluna::Push(L, guild->GetLeaderGUID());
+#else
+        Eluna::Push(L, guild->GetLeaderGuid());
 #endif
         return 1;
     }
@@ -144,15 +144,15 @@ namespace LuaGuild
      */
     int GetInfo(lua_State* L, Guild* guild)
     {
-#ifndef TRINITY
-        Eluna::Push(L, guild->GetGINFO());
-#else
+#if defined TRINITY || AZEROTHCORE
         Eluna::Push(L, guild->GetInfo());
+#else
+        Eluna::Push(L, guild->GetGINFO());
 #endif
         return 1;
     }
 
-#ifndef CATA
+#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
     /**
      * Sets the leader of this [Guild]
      *
@@ -162,10 +162,10 @@ namespace LuaGuild
     {
         Player* player = Eluna::CHECKOBJ<Player>(L, 2);
 
-#ifndef TRINITY
-        guild->SetLeader(player->GET_GUID());
-#else
+#if defined TRINITY || AZEROTHCORE
         guild->HandleSetLeader(player->GetSession(), player->GetName());
+#else
+        guild->SetLeader(player->GET_GUID());
 #endif
         return 0;
     }
@@ -182,10 +182,10 @@ namespace LuaGuild
     {
         uint8 tabId = Eluna::CHECKVAL<uint8>(L, 2);
         const char* text = Eluna::CHECKVAL<const char*>(L, 3);
-#ifndef TRINITY
-        guild->SetGuildBankTabText(tabId, text);
-#else
+#if defined TRINITY || AZEROTHCORE
         guild->SetBankTabText(tabId, text);
+#else
+        guild->SetGuildBankTabText(tabId, text);
 #endif
         return 0;
     }
@@ -252,7 +252,7 @@ namespace LuaGuild
         uint8 rankId = Eluna::CHECKVAL<uint8>(L, 3, GUILD_RANK_NONE);
 
 #ifdef TRINITY
-        SQLTransaction trans(nullptr);
+        CharacterDatabaseTransaction trans(nullptr);
         guild->AddMember(trans, player->GET_GUID(), rankId);
 #else
         guild->AddMember(player->GET_GUID(), rankId);
@@ -271,9 +271,11 @@ namespace LuaGuild
         Player* player = Eluna::CHECKOBJ<Player>(L, 2);
         bool isDisbanding = Eluna::CHECKVAL<bool>(L, 3, false);
 
-#ifdef TRINITY
-        SQLTransaction trans(nullptr);
+#if defined TRINITY
+        CharacterDatabaseTransaction trans(nullptr);
         guild->DeleteMember(trans, player->GET_GUID(), isDisbanding);
+#elif defined AZEROTHCORE
+        guild->DeleteMember(player->GET_GUID(), isDisbanding);
 #else
         guild->DelMember(player->GET_GUID(), isDisbanding);
 #endif
@@ -292,55 +294,12 @@ namespace LuaGuild
         uint8 newRank = Eluna::CHECKVAL<uint8>(L, 3);
 
 #ifdef TRINITY
-        SQLTransaction trans(nullptr);
+        CharacterDatabaseTransaction trans(nullptr);
         guild->ChangeMemberRank(trans, player->GET_GUID(), newRank);
 #else
         guild->ChangeMemberRank(player->GET_GUID(), newRank);
 #endif
         return 0;
     }
-
-#ifndef CLASSIC
-    // Move to Player methods
-    /**
-     * Windraws money from the [Guild] bank
-     *
-     * @param [Player] player
-     * @param uint32 money
-     */
-    int WithdrawBankMoney(lua_State* L, Guild* guild)
-    {
-        Player* player = Eluna::CHECKOBJ<Player>(L, 2);
-        uint32 money = Eluna::CHECKVAL<uint32>(L, 3);
-#ifndef TRINITY
-        if (guild->GetGuildBankMoney() < money)
-            return 0;
-        guild->SetBankMoney(guild->GetGuildBankMoney() - money);
-#else
-        guild->HandleMemberWithdrawMoney(player->GetSession(), money);
-#endif
-        return 0;
-    }
-
-    // Move to Player methods
-    /**
-     * Deposits money to the [Guild] bank
-     *
-     * @param [Player] player
-     * @param uint32 money
-     */
-    int DepositBankMoney(lua_State* L, Guild* guild)
-    {
-        Player* player = Eluna::CHECKOBJ<Player>(L, 2);
-        uint32 money = Eluna::CHECKVAL<uint32>(L, 3);
-
-#ifndef TRINITY
-        guild->SetBankMoney(guild->GetGuildBankMoney() + money);
-#else
-        guild->HandleMemberDepositMoney(player->GetSession(), money);
-#endif
-        return 0;
-    }
-#endif
 };
 #endif

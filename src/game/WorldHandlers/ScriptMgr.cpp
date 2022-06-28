@@ -2830,10 +2830,7 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pCreature))
-    {
-        return dialogId;
-    }
+    sEluna->GetDialogStatus(pPlayer, pCreature);
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2847,10 +2844,7 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pGameObject))
-    {
-        return dialogId;
-    }
+    sEluna->GetDialogStatus(pPlayer, pGameObject);
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2943,11 +2937,11 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (pTarget->ToCreature())
-        if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget->ToCreature()))
-        {
-            return true;
-        }
+    if (Creature* creature = pTarget->ToCreature())
+    {
+        sEluna->OnDummyEffect(pCaster, spellId, effIndex, creature);
+    }
+
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2961,10 +2955,7 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
-    {
-        return true;
-    }
+        sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget);
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3
@@ -2978,10 +2969,7 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
 {
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
-    {
-        return true;
-    }
+    sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget);
 #endif /* ENABLE_ELUNA */
 
 #ifdef ENABLE_SD3

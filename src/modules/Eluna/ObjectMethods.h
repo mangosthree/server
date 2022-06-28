@@ -133,7 +133,11 @@ namespace LuaObject
      */
     int GetScale(lua_State* L, Object* obj)
     {
+#ifndef AZEROTHCORE
         Eluna::Push(L, obj->GetObjectScale());
+#else
+        Eluna::Push(L, obj->GetFloatValue(OBJECT_FIELD_SCALE_X));
+#endif
         return 1;
     }
 
@@ -160,7 +164,7 @@ namespace LuaObject
      *
      * On TrinityCore this value is unique across all maps
      *
-     * @return uint64 guid
+     * @return ObjectGuid guid
      */
     int GetGUID(lua_State* L, Object* obj)
     {
@@ -182,7 +186,7 @@ namespace LuaObject
      */
     int GetGUIDLow(lua_State* L, Object* obj)
     {
-#ifdef TRINITY
+#if defined TRINITY || AZEROTHCORE
         Eluna::Push(L, obj->GetGUID().GetCounter());
 #else
         Eluna::Push(L, obj->GetGUIDLow());
@@ -222,8 +226,8 @@ namespace LuaObject
     int GetUInt64Value(lua_State* L, Object* obj)
     {
         uint16 index = Eluna::CHECKVAL<uint16>(L, 2);
-        obj->GetUInt64Value(index);
-        return 0;
+        Eluna::Push(L, obj->GetUInt64Value(index));
+        return 1;
     }
 
     /**

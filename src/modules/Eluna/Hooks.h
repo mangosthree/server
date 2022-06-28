@@ -93,7 +93,7 @@ namespace Hooks
     {
         PACKET_EVENT_ON_PACKET_RECEIVE          =     5,       // (event, packet, player) - Player only if accessible. Can return false, newPacket
         PACKET_EVENT_ON_PACKET_RECEIVE_UNKNOWN  =     6,       // Not Implemented
-        PACKET_EVENT_ON_PACKET_SEND             =     7,       // (event, packet, player) - Player only if accessible. Can return false, newPacket
+        PACKET_EVENT_ON_PACKET_SEND             =     7,       // (event, packet, player) - Player only if accessible. Can return false
 
         PACKET_EVENT_COUNT
     };
@@ -107,7 +107,7 @@ namespace Hooks
         SERVER_EVENT_ON_SOCKET_CLOSE            =     4,       // Not Implemented
         SERVER_EVENT_ON_PACKET_RECEIVE          =     5,       // (event, packet, player) - Player only if accessible. Can return false, newPacket
         SERVER_EVENT_ON_PACKET_RECEIVE_UNKNOWN  =     6,       // Not Implemented
-        SERVER_EVENT_ON_PACKET_SEND             =     7,       // (event, packet, player) - Player only if accessible. Can return false, newPacket
+        SERVER_EVENT_ON_PACKET_SEND             =     7,       // (event, packet, player) - Player only if accessible. Can return false
 
         // World
         WORLD_EVENT_ON_OPEN_STATE_CHANGE        =     8,        // (event, open) - Needs core support on Mangos
@@ -192,7 +192,7 @@ namespace Hooks
         // Custom
         PLAYER_EVENT_ON_EQUIP                   =     29,       // (event, player, item, bag, slot)
         PLAYER_EVENT_ON_FIRST_LOGIN             =     30,       // (event, player)
-        PLAYER_EVENT_ON_CAN_USE_ITEM            =     31,       // (event, player, itemEntry) - Can return InventoryResult
+        PLAYER_EVENT_ON_CAN_USE_ITEM            =     31,       // (event, player, itemEntry) - Can return InventoryResult enum value
         PLAYER_EVENT_ON_LOOT_ITEM               =     32,       // (event, player, item, count)
         PLAYER_EVENT_ON_ENTER_COMBAT            =     33,       // (event, player, enemy)
         PLAYER_EVENT_ON_LEAVE_COMBAT            =     34,       // (event, player)
@@ -261,7 +261,7 @@ namespace Hooks
         CREATURE_EVENT_ON_REACH_WP                        = 6,  // (event, creature, type, id) - Can return true to stop normal action
         CREATURE_EVENT_ON_AIUPDATE                        = 7,  // (event, creature, diff) - Can return true to stop normal action
         CREATURE_EVENT_ON_RECEIVE_EMOTE                   = 8,  // (event, creature, player, emoteid) - Can return true to stop normal action
-        CREATURE_EVENT_ON_DAMAGE_TAKEN                    = 9,  // (event, creature, attacker, damage) - Can return new damage
+        CREATURE_EVENT_ON_DAMAGE_TAKEN                    = 9,  // (event, creature, attacker, damage) - Can return true to stop normal action, can return new damage as second return value.
         CREATURE_EVENT_ON_PRE_COMBAT                      = 10, // (event, creature, target) - Can return true to stop normal action
         // UNUSED
         CREATURE_EVENT_ON_OWNER_ATTACKED                  = 12, // (event, creature, target) - Can return true to stop normal action            // Not on mangos
@@ -278,11 +278,11 @@ namespace Hooks
         CREATURE_EVENT_ON_RESET                           = 23, // (event, creature)
         CREATURE_EVENT_ON_REACH_HOME                      = 24, // (event, creature) - Can return true to stop normal action
         // UNUSED                                         = 25, // (event, creature)
-        CREATURE_EVENT_ON_CORPSE_REMOVED                  = 26, // (event, creature, respawndelay) - Can return true, newRespawnDelay
+        CREATURE_EVENT_ON_CORPSE_REMOVED                  = 26, // (event, creature, respawndelay) - Can return true to stop normal action, can return new respawndelay as second return value
         CREATURE_EVENT_ON_MOVE_IN_LOS                     = 27, // (event, creature, unit) - Can return true to stop normal action. Does not actually check LOS, just uses the sight range
         // UNUSED                                         = 28, // (event, creature)
         // UNUSED                                         = 29, // (event, creature)
-        CREATURE_EVENT_ON_DUMMY_EFFECT                    = 30, // (event, caster, spellid, effindex, creature) - Can return true
+        CREATURE_EVENT_ON_DUMMY_EFFECT                    = 30, // (event, caster, spellid, effindex, creature)
         CREATURE_EVENT_ON_QUEST_ACCEPT                    = 31, // (event, player, creature, quest) - Can return true
         // UNUSED                                         = 32, // (event, creature)
         // UNUSED                                         = 33, // (event, creature)
@@ -297,24 +297,24 @@ namespace Hooks
     {
         GAMEOBJECT_EVENT_ON_AIUPDATE                    = 1,    // (event, go, diff)
         GAMEOBJECT_EVENT_ON_SPAWN                       = 2,    // (event, go)
-        GAMEOBJECT_EVENT_ON_DUMMY_EFFECT                = 3,    // (event, caster, spellid, effindex, go) - Can return true
-        GAMEOBJECT_EVENT_ON_QUEST_ACCEPT                = 4,    // (event, player, go, quest) - Can return true
-        GAMEOBJECT_EVENT_ON_QUEST_REWARD                = 5,    // (event, player, go, quest, opt) - Can return true
+        GAMEOBJECT_EVENT_ON_DUMMY_EFFECT                = 3,    // (event, caster, spellid, effindex, go) - Can return true to stop normal action
+        GAMEOBJECT_EVENT_ON_QUEST_ACCEPT                = 4,    // (event, player, go, quest) - Can return true to stop normal action
+        GAMEOBJECT_EVENT_ON_QUEST_REWARD                = 5,    // (event, player, go, quest, opt) - Can return true to stop normal action
         GAMEOBJECT_EVENT_ON_DIALOG_STATUS               = 6,    // (event, player, go)
-        GAMEOBJECT_EVENT_ON_DESTROYED                   = 7,    // (event, go, player)
-        GAMEOBJECT_EVENT_ON_DAMAGED                     = 8,    // (event, go, player)
+        GAMEOBJECT_EVENT_ON_DESTROYED                   = 7,    // (event, go, attacker)
+        GAMEOBJECT_EVENT_ON_DAMAGED                     = 8,    // (event, go, attacker)
         GAMEOBJECT_EVENT_ON_LOOT_STATE_CHANGE           = 9,    // (event, go, state)
         GAMEOBJECT_EVENT_ON_GO_STATE_CHANGED            = 10,   // (event, go, state)
         // UNUSED                                       = 11,   // (event, gameobject)
         GAMEOBJECT_EVENT_ON_ADD                         = 12,   // (event, gameobject)
         GAMEOBJECT_EVENT_ON_REMOVE                      = 13,   // (event, gameobject)
-        GAMEOBJECT_EVENT_ON_USE                         = 14,   // (event, go, player)
+        GAMEOBJECT_EVENT_ON_USE                         = 14,   // (event, go, player) - Can return true to stop normal action
         GAMEOBJECT_EVENT_COUNT
     };
 
     enum ItemEvents
     {
-        ITEM_EVENT_ON_DUMMY_EFFECT                      = 1,    // (event, caster, spellid, effindex, item) - Can return true
+        ITEM_EVENT_ON_DUMMY_EFFECT                      = 1,    // (event, caster, spellid, effindex, item)
         ITEM_EVENT_ON_USE                               = 2,    // (event, player, item, target) - Can return false to stop the spell casting
         ITEM_EVENT_ON_QUEST_ACCEPT                      = 3,    // (event, player, item, quest) - Can return true
         ITEM_EVENT_ON_EXPIRE                            = 4,    // (event, player, itemid) - Can return true

@@ -22,6 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#ifndef GAME_PCH_H
+#define GAME_PCH_H
+
 // add here most rarely modified headers to speed up debug build compilation
 #ifndef GAME_PCH_H
 #define GAME_PCH_H

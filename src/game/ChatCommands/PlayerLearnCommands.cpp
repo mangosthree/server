@@ -25,6 +25,10 @@
 #include "Chat.h"
 #include "Language.h"
 #include "SpellMgr.h"
+#include "Player.h"
+#include "DBCStores.h"
+#include "Language.h"
+#include "ObjectMgr.h"
 
  /**********************************************************************
       CommandTable : learnCommandTable

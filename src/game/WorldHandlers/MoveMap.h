@@ -25,6 +25,8 @@
 #ifndef MANGOS_H_MOVE_MAP
 #define MANGOS_H_MOVE_MAP
 
+#include "Define.h"
+
 #include "../../dep/recastnavigation/Detour/Include/DetourAlloc.h"
 #include "../../dep/recastnavigation/Detour/Include/DetourNavMesh.h"
 #include "../../dep/recastnavigation/Detour/Include/DetourNavMeshQuery.h"

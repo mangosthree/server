@@ -25,9 +25,14 @@
 #ifndef MANGOS_SPELLAURAS_H
 #define MANGOS_SPELLAURAS_H
 
+#include "Spell.h"
 #include "SpellAuraDefines.h"
 #include "DBCEnums.h"
 #include "ObjectGuid.h"
+#include "Object.h"
+#include "Item.h"
+#include "DBCStores.h"
+#include "Unit.h"
 
 /**
  * Used to modify what an Aura does to a player/npc.

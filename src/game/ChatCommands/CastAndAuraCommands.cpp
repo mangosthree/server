@@ -26,6 +26,8 @@
 #include "Language.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
+#include "Player.h"
+#include "DBCStores.h"
 
 /**********************************************************************
     CommandTable : castCommandTable

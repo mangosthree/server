@@ -24,6 +24,10 @@
 
 #include "Chat.h"
 #include "Language.h"
+#include "Player.h"
+#include "DBCStores.h"
+#include "ObjectMgr.h"
+#include "WorldSession.h"
 
  /**********************************************************************
      CommandTable : auctionCommandTable

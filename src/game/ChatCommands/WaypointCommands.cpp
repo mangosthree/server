@@ -32,6 +32,8 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "ObjectMgr.h"
+
 #include "movement/MoveSplineInit.h"
 #include <fstream>
 #include <map>

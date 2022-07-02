@@ -32,6 +32,7 @@
 #include "Config/Config.h"
 #include "WorldSocket.h"
 #include "WorldSocketMgr.h"
+#include "Opcodes.h"
 
 #include <ace/ACE.h>
 #include <ace/TP_Reactor.h>

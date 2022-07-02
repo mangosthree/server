@@ -35,6 +35,7 @@
 #include "Warden.h"
 #include "AccountMgr.h"
 #include "GameTime.h"
+#include "Player.h"
 
 Warden::Warden() : _session(NULL), _inputCrypto(16), _outputCrypto(16), _checkTimer(10000/*10 sec*/), _clientResponseTimer(0),
                    _module(NULL), _state(WardenState::STATE_INITIAL)

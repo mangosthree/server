@@ -26,6 +26,9 @@
 #include "Language.h"
 #include "MapManager.h"
 #include "InstanceData.h"
+#include "Player.h"
+#include "DBCStores.h"
+#include "MapPersistentStateMgr.h"
 
  /**********************************************************************
      CommandTable : instanceCommandTable

@@ -31,6 +31,9 @@
 #include "DBCEnums.h"
 #include "BattleGround.h"
 
+// Ace metux not defined, this header is required
+#include "ace/Recursive_Thread_Mutex.h"
+
 #include <mutex>
 
 /**

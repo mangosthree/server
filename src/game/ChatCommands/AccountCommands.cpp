@@ -30,7 +30,8 @@
 #include "Chat.h"
 #include "Language.h"
 #include "AccountMgr.h"
-
+#include "DatabaseEnv.h"
+#include "Player.h"
 
 /**********************************************************************
     CommandTable : accountCommandTable

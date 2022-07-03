@@ -26,7 +26,6 @@ EndScriptData */
 
 #include "precompiled.h"
 #include "ulduar.h"
-#include "HackedFunctions.h"
 
 enum
 {
@@ -249,7 +248,7 @@ struct boss_freya : public CreatureScript
             m_uiGroundTremorTimer = 0;
 
             // make the spawn spells random
-            Mangos::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
+            std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), nullptr);
         }
 
         void Aggro(Unit* /*pWho*/) override
@@ -467,11 +466,11 @@ struct boss_freya : public CreatureScript
                 if (m_uiAlliesWaveCount == MAX_ALLIES_SPELLS)
                 {
                     uint32 uiLastSpell = spawnSpellsVector[MAX_ALLIES_SPELLS - 1];
-                    Mangos::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
+                    std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), nullptr);
 
                     // make sure we won't repeat the last spell
                     while (spawnSpellsVector[0] == uiLastSpell)
-                        Mangos::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
+                        std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), nullptr);
                 }
             }
             else if (eventType == AI_EVENT_CUSTOM_B)

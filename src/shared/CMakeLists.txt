@@ -169,6 +169,7 @@ set(SRC_GRP_UTILITIES
   Utilities/LinkedReference/Reference.h
   Utilities/TypeList.h
   Utilities/UnorderedMapSet.h
+  Utilities/BinaryFunction.h
 )
 source_group("Utilities" FILES ${SRC_GRP_UTILITIES})
 

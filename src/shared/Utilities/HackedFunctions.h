@@ -26,6 +26,7 @@
 // Hack, function taken from c++ standard files
 namespace Mangos
 {
+    /* original binary_function code */
     template<typename _Arg1, typename _Arg2, typename _Result>
     struct binary_function
     {
@@ -33,4 +34,24 @@ namespace Mangos
         typedef _Arg2   second_argument_type;
         typedef _Result result_type;
     };
+
+    /* original random_shuffle code */
+    template<typename _RandomAccessIterator>
+    inline void random_shuffle(_RandomAccessIterator __first, _RandomAccessIterator __last)
+    {
+        __glibcxx_function_requires(_Mutable_RandomAccessIteratorConcept<_RandomAccessIterator>)
+        __glibcxx_requires_valid_range(__first, __last);
+
+        if (__first != __last)
+        {
+            for (_RandomAccessIterator __i = __first + 1; __i != __last; ++__i)
+            {
+                _RandomAccessIterator __j = __first + std::rand() % ((__i - __first) + 1);
+                if (__i != __j)
+                {
+                    std::iter_swap(__i, __j);
+                }
+            }
+        }
+    }
 };

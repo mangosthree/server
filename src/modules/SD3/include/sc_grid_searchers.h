@@ -28,7 +28,7 @@
 #define SC_GRIDSEARCH_H
 
 #include "Object.h"
-#include "BinaryFunctions.h"
+#include "HackedFunctions.h"
 
 class GameObject;
 class Creature;

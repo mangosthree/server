@@ -248,7 +248,7 @@ struct boss_freya : public CreatureScript
             m_uiGroundTremorTimer = 0;
 
             // make the spawn spells random
-            std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), nullptr);
+            std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
         }
 
         void Aggro(Unit* /*pWho*/) override
@@ -466,11 +466,11 @@ struct boss_freya : public CreatureScript
                 if (m_uiAlliesWaveCount == MAX_ALLIES_SPELLS)
                 {
                     uint32 uiLastSpell = spawnSpellsVector[MAX_ALLIES_SPELLS - 1];
-                    std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), nullptr);
+                    std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
 
                     // make sure we won't repeat the last spell
                     while (spawnSpellsVector[0] == uiLastSpell)
-                        std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), nullptr);
+                        std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
                 }
             }
             else if (eventType == AI_EVENT_CUSTOM_B)

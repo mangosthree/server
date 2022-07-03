@@ -1432,7 +1432,7 @@ struct is_ulduar : public InstanceScript
                             vBunnies.push_back(pBunny);
                         }
                     }
-                    std::shuffle(vBunnies.begin(), vBunnies.end(), rand());
+                    std::shuffle(vBunnies.begin(), vBunnies.end(), rand() % 100);
 
                     uint8 uiMaxCommoners = urand(6, 7);
                     if (uiMaxCommoners > vBunnies.size() - 1)

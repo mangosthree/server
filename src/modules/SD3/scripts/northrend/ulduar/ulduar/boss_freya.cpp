@@ -27,6 +27,8 @@ EndScriptData */
 #include "precompiled.h"
 #include "ulduar.h"
 
+#include <algorithm>
+
 enum
 {
     SAY_AGGRO                           = -1603000,
@@ -248,7 +250,7 @@ struct boss_freya : public CreatureScript
             m_uiGroundTremorTimer = 0;
 
             // make the spawn spells random
-            std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
+            //std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), rand() % 100);
         }
 
         void Aggro(Unit* /*pWho*/) override
@@ -466,11 +468,11 @@ struct boss_freya : public CreatureScript
                 if (m_uiAlliesWaveCount == MAX_ALLIES_SPELLS)
                 {
                     uint32 uiLastSpell = spawnSpellsVector[MAX_ALLIES_SPELLS - 1];
-                    std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
+                    //(spawnSpellsVector.begin(), spawnSpellsVector.end(), rand() % 100);
 
                     // make sure we won't repeat the last spell
-                    while (spawnSpellsVector[0] == uiLastSpell)
-                        std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
+                    //while (spawnSpellsVector[0] == uiLastSpell)
+                        //std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), rand() % 100);
                 }
             }
             else if (eventType == AI_EVENT_CUSTOM_B)

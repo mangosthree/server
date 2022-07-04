@@ -24,6 +24,8 @@ EndScriptData */
 #include "precompiled.h"
 #include "ulduar.h"
 
+#include <algorithm>
+
 enum
 {
     SAY_PRE_LEVIATHAN_1                     = -1603239,
@@ -1430,7 +1432,7 @@ struct is_ulduar : public InstanceScript
                             vBunnies.push_back(pBunny);
                         }
                     }
-                    std::random_shuffle(vBunnies.begin(), vBunnies.end());
+                    //std::shuffle(vBunnies.begin(), vBunnies.end(), rand() % 100);
 
                     uint8 uiMaxCommoners = urand(6, 7);
                     if (uiMaxCommoners > vBunnies.size() - 1)

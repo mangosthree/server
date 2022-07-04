@@ -28,10 +28,12 @@
 #define SC_GRIDSEARCH_H
 
 #include "Object.h"
+#include "HackedFunctions.h"
+
 class GameObject;
 class Creature;
 
-struct ObjectDistanceOrder : public std::binary_function<const WorldObject, const WorldObject, bool>
+struct ObjectDistanceOrder : public Mangos::binary_function<const WorldObject, const WorldObject, bool>
 {
     const Unit* m_pSource;
 
@@ -43,7 +45,7 @@ struct ObjectDistanceOrder : public std::binary_function<const WorldObject, cons
     }
 };
 
-struct ObjectDistanceOrderReversed : public std::binary_function<const WorldObject, const WorldObject, bool>
+struct ObjectDistanceOrderReversed : public Mangos::binary_function<const WorldObject, const WorldObject, bool>
 {
     const Unit* m_pSource;
 

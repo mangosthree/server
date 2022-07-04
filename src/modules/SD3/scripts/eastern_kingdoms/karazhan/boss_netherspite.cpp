@@ -277,7 +277,7 @@ struct boss_netherspite : public CreatureScript
             }
 
             // randomize the portals after the first summon
-            std::random_shuffle(m_vPortalEntryList.begin(), m_vPortalEntryList.end());
+            //std::random_shuffle(m_vPortalEntryList.begin(), m_vPortalEntryList.end());
         }
 
         void DoDespawnPortalsImmediately()

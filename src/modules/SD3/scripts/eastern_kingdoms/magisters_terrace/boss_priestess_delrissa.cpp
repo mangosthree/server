@@ -153,7 +153,7 @@ struct boss_priestess_delrissa : public CreatureScript
                     m_vuiLackeyEnties[i] = aDelrissaLackeys[i];
                 }
 
-                std::random_shuffle(m_vuiLackeyEnties.begin(), m_vuiLackeyEnties.end());
+                //std::random_shuffle(m_vuiLackeyEnties.begin(), m_vuiLackeyEnties.end());
 
                 // Summon the 4 entries
                 for (uint8 i = 0; i < MAX_DELRISSA_ADDS; ++i)

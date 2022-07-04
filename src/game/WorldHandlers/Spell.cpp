@@ -56,6 +56,9 @@
 #include "TemporarySummon.h"
 #include "SQLStorages.h"
 #include "DisableMgr.h"
+
+#include "HackedFunctions.h"
+
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
@@ -1865,7 +1868,7 @@ bool Spell::IsAliveUnitPresentInTargetList()
 // Spell target first
 // Raidmates then descending by injury suffered (MaxHealth - Health)
 // Other players/mobs then descending by injury suffered (MaxHealth - Health)
-struct ChainHealingOrder : public std::binary_function<const Unit*, const Unit*, bool>
+struct ChainHealingOrder : public Mangos::binary_function<const Unit*, const Unit*, bool>
 {
     const Unit* MainTarget;
     ChainHealingOrder(Unit const* Target) : MainTarget(Target) {};
@@ -1899,7 +1902,7 @@ struct ChainHealingOrder : public std::binary_function<const Unit*, const Unit*,
     }
 };
 
-class ChainHealingFullHealth: std::unary_function<const Unit*, bool>
+class ChainHealingFullHealth: Mangos::unary_function<const Unit*, bool>
 {
     public:
         const Unit* MainTarget;
@@ -1913,7 +1916,7 @@ class ChainHealingFullHealth: std::unary_function<const Unit*, bool>
 
 // Helper for targets nearest to the spell target
 // The spell target is always first unless there is a target at _completely_ the same position (unbelievable case)
-struct TargetDistanceOrderNear : public std::binary_function<const Unit, const Unit, bool>
+struct TargetDistanceOrderNear : public Mangos::binary_function<const Unit, const Unit, bool>
 {
     const Unit* MainTarget;
     TargetDistanceOrderNear(const Unit* Target) : MainTarget(Target) {};
@@ -1926,7 +1929,7 @@ struct TargetDistanceOrderNear : public std::binary_function<const Unit, const U
 
 // Helper for targets furthest away to the spell target
 // The spell target is always first unless there is a target at _completely_ the same position (unbelievable case)
-struct TargetDistanceOrderFarAway : public std::binary_function<const Unit, const Unit, bool>
+struct TargetDistanceOrderFarAway : public Mangos::binary_function<const Unit, const Unit, bool>
 {
     const Unit* MainTarget;
     TargetDistanceOrderFarAway(const Unit* Target) : MainTarget(Target) {};

@@ -219,7 +219,7 @@ struct is_trial_of_the_champion : public InstanceScript
                     }
 
                     // set a random champion list
-                    std::random_shuffle(m_vChampionsIndex.begin(), m_vChampionsIndex.end());
+                    //std::random_shuffle(m_vChampionsIndex.begin(), m_vChampionsIndex.end());
                 }
             }
 

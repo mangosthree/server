@@ -38,6 +38,14 @@ namespace Mangos
         typedef _Arg2   second_argument_type;
         typedef _Result result_type;
     };
+
+    /* original unary_function code */
+    template<typename _Arg, typename _Result>
+    struct unary_function
+    {
+        typedef _Arg    argument_type;
+        typedef _Result result_type;
+    };
 };
 
 #endif

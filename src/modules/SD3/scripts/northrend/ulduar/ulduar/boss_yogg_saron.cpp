@@ -858,7 +858,7 @@ struct npc_voice_yogg_saron : public CreatureScript
             m_uiPortalsCount = 0;
             m_uiMaxPortals = m_bIsRegularMode ? 4 : 10;
 
-            std::shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end(), rand() % 100);
+            //std::shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end(), rand() % 100);
         }
 
         void AttackStart(Unit* /*pWho*/) override { }

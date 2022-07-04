@@ -537,6 +537,20 @@ bool ChatHandler::HandleReloadSkillExtraItemTemplateCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleReloadScriptBindingCommand(char* /*args*/)
+{
+    sLog.outString("Trying to re-load `script_binding` Table!");
+    if (sScriptMgr.ReloadScriptBinding())
+    {
+        SendGlobalSysMessage("DB table `script_binding` reloaded.", SEC_MODERATOR);
+    }
+    else
+    {
+        SendSysMessage("DENIED: DB table `script_binding` is reloadable only in Debug build.");
+    }
+    return true;
+}
+
 bool ChatHandler::HandleReloadSkillFishingBaseLevelCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading Skill Fishing base level requirements...");

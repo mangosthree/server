@@ -422,7 +422,7 @@ struct is_blackwing_lair : public InstanceScript
                 }
 
                 // Randomize generators
-                std::random_shuffle(m_vGeneratorGuids.begin(), m_vGeneratorGuids.end());
+                ///std::random_shuffle(m_vGeneratorGuids.begin(), m_vGeneratorGuids.end());
 
                 // Spawn the defenders
                 for (uint8 i = 0; i < MAX_EGGS_DEFENDERS; ++i)

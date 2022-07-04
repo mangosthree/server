@@ -28,6 +28,8 @@ EndScriptData */
 #include "ulduar.h"
 #include "TemporarySummon.h"
 
+#include <algorithm>
+
 enum
 {
     // phase 1 yells
@@ -856,7 +858,7 @@ struct npc_voice_yogg_saron : public CreatureScript
             m_uiPortalsCount = 0;
             m_uiMaxPortals = m_bIsRegularMode ? 4 : 10;
 
-            std::random_shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end());
+            //std::shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end(), rand() % 100);
         }
 
         void AttackStart(Unit* /*pWho*/) override { }

@@ -166,7 +166,7 @@ struct boss_ymiron : public CreatureScript
             m_uiCurrentSpiritGuid.Clear();
 
             // Randomize spirit order
-            std::random_shuffle(m_vuiBoatPhases.begin(), m_vuiBoatPhases.end());
+            //std::random_shuffle(m_vuiBoatPhases.begin(), m_vuiBoatPhases.end());
         }
 
         void Aggro(Unit* /*pWho*/) override

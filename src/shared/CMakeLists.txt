@@ -170,6 +170,7 @@ set(SRC_GRP_UTILITIES
   Utilities/TypeList.h
   Utilities/UnorderedMapSet.h
   Utilities/HackedFunctions.h
+  Utilities/Optional.h
 )
 source_group("Utilities" FILES ${SRC_GRP_UTILITIES})
 

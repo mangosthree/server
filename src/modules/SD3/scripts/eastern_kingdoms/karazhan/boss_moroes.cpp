@@ -178,7 +178,7 @@ struct boss_moroes : public CreatureScript
                     m_vGuestsEntryList[i] = auiGuests[i];
                 }
 
-                std::random_shuffle(m_vGuestsEntryList.begin(), m_vGuestsEntryList.end());
+                //std::random_shuffle(m_vGuestsEntryList.begin(), m_vGuestsEntryList.end());
 
                 // Summon the 4 entries
                 for (uint8 i = 0; i < MAX_ACTIVE_GUESTS; ++i)

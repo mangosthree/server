@@ -125,7 +125,7 @@ struct boss_urom : public CreatureScript
 
             ResetPlatformVariables();
 
-            std::random_shuffle(m_vuiTrashPacksIds.begin(), m_vuiTrashPacksIds.end());
+            //std::random_shuffle(m_vuiTrashPacksIds.begin(), m_vuiTrashPacksIds.end());
         }
 
         void ResetPlatformVariables()

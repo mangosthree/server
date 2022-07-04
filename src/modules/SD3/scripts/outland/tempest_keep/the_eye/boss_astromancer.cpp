@@ -404,7 +404,7 @@ struct boss_high_astromancer_solarian : public CreatureScript
                     {
                         m_Phase = PHASE_NORMAL;
                         // Randomize the portals
-                        std::random_shuffle(m_vSpotLightsGuidVector.begin(), m_vSpotLightsGuidVector.end());
+                        //std::random_shuffle(m_vSpotLightsGuidVector.begin(), m_vSpotLightsGuidVector.end());
                         // Summon 2 priests
                         for (uint8 i = 0; i < 2; ++i)
                         {

@@ -1,9 +1,9 @@
 name: Codestyle Checks
 on:
   push:
-      branches: [ master ]
+      branches: [ master, C17 ]
   pull_request:
-      branches: [ master ]
+      branches: [ master, C17 ]
 
 jobs:
   check-codestyle:

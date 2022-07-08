@@ -9,7 +9,7 @@ alt="GitHub last commit" border=0 valign="top"/>][61]
  Linux/MAC: [<img src='https://github.com/mangosthree/server/actions/workflows/core_build.yml/badge.svg' border=0 valign="middle">][10]
  Windows: [<img src='https://ci.appveyor.com/api/projects/status/github/mangosthree/server?branch=master&svg=true' border=0 valign="middle">][11]
  <br><b>Repository Status:</b>
-[<img src='https://api.codacy.com/project/badge/Grade/58227f14b9024384a22e4e12e3cf7a89' border=0 valign="middle"/>][12]
+[<img src='https://api.codacy.com/project/badge/Grade/d54b4c8fec4746498fd05f84a4e7e5d4' border=0 valign="middle"/>][12]
 [<img src='https://www.codefactor.io/repository/github/mangosthree/server/badge' border=0 valign="middle"/>][13]
 [<img src='https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat' border=0 valign="middle"/>][14]
 [<img src='https://img.shields.io/discord/286167585270005763.svg' border=0 valign="middle"/>][9]

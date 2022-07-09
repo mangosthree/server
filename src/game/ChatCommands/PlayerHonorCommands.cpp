@@ -24,6 +24,7 @@
 
 #include "Chat.h"
 #include "Language.h"
+#include "Player.h"
 
  /**********************************************************************
      CommandTable : honorCommandTable

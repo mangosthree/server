@@ -13,6 +13,14 @@
 
 using namespace Hooks;
 
+#define START_HOOK(EVENT, ENTRY) \
+    if (!IsEnabled())\
+        return;\
+    auto key = EntryKey<ItemEvents>(EVENT, ENTRY);\
+    if (!ItemEventBindings->HasBindingsFor(key))\
+        return;\
+    LOCK_ELUNA
+
 #define START_HOOK_WITH_RETVAL(EVENT, ENTRY, RETVAL) \
     if (!IsEnabled())\
         return RETVAL;\
@@ -21,14 +29,14 @@ using namespace Hooks;
         return RETVAL;\
     LOCK_ELUNA
 
-bool Eluna::OnDummyEffect(Unit* pCaster, uint32 spellId, SpellEffIndex effIndex, Item* pTarget)
+void Eluna::OnDummyEffect(WorldObject* pCaster, uint32 spellId, SpellEffIndex effIndex, Item* pTarget)
 {
-    START_HOOK_WITH_RETVAL(ITEM_EVENT_ON_DUMMY_EFFECT, pTarget->GetEntry(), false);
+    START_HOOK(ITEM_EVENT_ON_DUMMY_EFFECT, pTarget->GetEntry());
     Push(pCaster);
     Push(spellId);
     Push(effIndex);
     Push(pTarget);
-    return CallAllFunctionsBool(ItemEventBindings, key);
+    CallAllFunctions(ItemEventBindings, key);
 }
 
 bool Eluna::OnQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
@@ -63,7 +71,7 @@ bool Eluna::OnUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
     // This is a hack fix to stop spell casting visual bug when a spell is not cast on use
     WorldPacket data(SMSG_INVENTORY_CHANGE_FAILURE, 18);
     data << uint8(59); // EQUIP_ERR_NONE / EQUIP_ERR_CANT_BE_DISENCHANTED
-    data << ObjectGuid(guid);
+    data << guid;
     data << ObjectGuid(uint64(0));
     data << uint8(0);
 #ifdef CMANGOS
@@ -79,18 +87,7 @@ bool Eluna::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targ
     START_HOOK_WITH_RETVAL(ITEM_EVENT_ON_USE, pItem->GetEntry(), true);
     Push(pPlayer);
     Push(pItem);
-#ifndef TRINITY
-    if (GameObject* target = targets.getGOTarget())
-        Push(target);
-    else if (Item* target = targets.getItemTarget())
-        Push(target);
-    else if (Corpse* target = pPlayer->GetMap()->GetCorpse(targets.getCorpseTargetGuid()))
-        Push(target);
-    else if (Unit* target = targets.getUnitTarget())
-        Push(target);
-    else
-        Push();
-#else
+#if defined TRINITY || AZEROTHCORE
     if (GameObject* target = targets.GetGOTarget())
         Push(target);
     else if (Item* target = targets.GetItemTarget())
@@ -100,6 +97,17 @@ bool Eluna::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targ
     else if (Unit* target = targets.GetUnitTarget())
         Push(target);
     else if (WorldObject* target = targets.GetObjectTarget())
+        Push(target);
+    else
+        Push();
+#else
+    if (GameObject* target = targets.getGOTarget())
+        Push(target);
+    else if (Item* target = targets.getItemTarget())
+        Push(target);
+    else if (Corpse* target = pPlayer->GetMap()->GetCorpse(targets.getCorpseTargetGuid()))
+        Push(target);
+    else if (Unit* target = targets.getUnitTarget())
         Push(target);
     else
         Push();

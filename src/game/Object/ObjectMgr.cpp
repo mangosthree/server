@@ -10633,6 +10633,15 @@ void ObjectMgr::AddVendorItem(uint32 entry, uint32 item, uint8 type, uint32 maxc
     WorldDatabase.PExecuteLog("INSERT INTO `npc_vendor` (`entry`,`item`,`maxcount`,`incrtime`,`extendedcost`) VALUES('%u','%i','%u','%u','%u')", entry, type == VENDOR_ITEM_TYPE_CURRENCY ? -int32(item) : item, maxcount, incrtime, extendedcost);
 }
 
+void ObjectMgr::AddVendorItem(uint32 entry, uint32 item, uint32 maxcount, uint32 incrtime, uint32 extendedcost)
+{
+    VendorItemData& vList = m_mCacheVendorItemMap[entry];
+    uint8 type = VENDOR_ITEM_TYPE_CURRENCY ? -int32(item) : item;
+    vList.AddItem(item, type, maxcount, incrtime, extendedcost, 0);
+
+    WorldDatabase.PExecuteLog("INSERT INTO `npc_vendor` (`entry`,`item`,`maxcount`,`incrtime`,`extendedcost`) VALUES('%u','%i','%u','%u','%u')", entry, type == VENDOR_ITEM_TYPE_CURRENCY ? -int32(item) : item, maxcount, incrtime, extendedcost);
+}
+
 bool ObjectMgr::RemoveVendorItem(uint32 entry, uint32 item, uint8 type)
 {
     CacheVendorItemMap::iterator  iter = m_mCacheVendorItemMap.find(entry);

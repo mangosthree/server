@@ -27,6 +27,7 @@
 
 #include "Common.h"
 
+/* An enumeration of the possible results of an account operation. */
 enum AccountOpResult
 {
     AOR_OK,
@@ -39,6 +40,7 @@ enum AccountOpResult
 
 #define MAX_ACCOUNT_STR 32
 
+/* A class that is used to manage accounts. */
 class AccountMgr
 {
     public:
@@ -57,9 +59,8 @@ class AccountMgr
         bool GetName(uint32 acc_id, std::string& name);
         uint32 GetCharactersCount(uint32 acc_id);
         std::string CalculateShaPassHash(std::string& name, std::string& password);
-
-        static bool normalizeString(std::string& utf8str);
 };
 
+/* A macro that creates a global variable called `sAccountMgr` that is an instance of the `AccountMgr` class. */
 #define sAccountMgr MaNGOS::Singleton<AccountMgr>::Instance()
 #endif

@@ -29,6 +29,10 @@
 #include "MovementGenerator.h"
 #include "FollowerReference.h"
 #include "G3D/Vector3.h"
+#include "WorldSession.h"
+#include "Unit.h"
+#include "Player.h"
+#include "DBCStores.h"
 
  /**********************************************************************
       CommandTable : commandTable

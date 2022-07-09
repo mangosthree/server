@@ -22,34 +22,48 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef GAMETIME_H
-#define GAMETIME_H
+#ifndef GITREVISION_H
+#define GITREVISION_H
 
 #include "Define.h"
 
-#include <chrono>
+#include "revision_data.h"
 
-namespace GameTime
+namespace GitRevision
 {
-    // Server Start Time
-    time_t GetStartTime();
+    // github data
+    char const* GetHash();
+    char const* GetDate();
+    char const* GetBranch();
 
-    // Current Server Time (unix) in seconds
-    time_t GetGameTime();
+    // system data
+    char const* GetCMakeVersion();
+    char const* GetHostOSVersion();
+    char const* GetRunningSystem();
 
-    // Milliseconds since Server Start
-    uint32 GetGameTimeMS();
+    // database data
+    char const* GetProjectRevision();
+    char const* GetRealmDBVersion();
+    char const* GetRealmDBStructure();
+    char const* GetRealmDBContent();
+    char const* GetRealmDBUpdateDescription();
 
-    // Current chrono system_clock time point
-    std::chrono::system_clock::time_point GetGameTimeSystemPoint();
+    char const* GetCharDBVersion();
+    char const* GetCharDBStructure();
+    char const* GetCharDBContent();
+    char const* GetCharDBUpdateDescription();
 
-    // Current chrono steady_clock time point
-    std::chrono::steady_clock::time_point GetGameTimeSteadyPoint();
+    char const* GetWorldDBVersion();
+    char const* GetWorldDBStructure();
+    char const* GetWorldDBContent();
+    char const* GetWorldDBUpdateDescription();
 
-    // Uptime (in seconds)
-    uint32 GetUptime();
-
-    void UpdateGameTimers();
+    // application data
+    char const* GetFullRevision();
+    char const* GetCompanyNameStr();
+    char const* GetLegalCopyrightStr();
+    char const* GetFileVersionStr();
+    char const* GetProductVersionStr();
 }
 
 #endif

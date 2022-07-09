@@ -40,6 +40,7 @@
 
 #include "Common.h"
 #include "DBCStructure.h"
+#include "World.h"
 
 /** \addtogroup auctionhouse
  * @{

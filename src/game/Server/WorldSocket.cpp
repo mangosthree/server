@@ -335,8 +335,7 @@ int WorldSocket::handle_input(ACE_HANDLE)
     {
         case -1 :
         {
-            if ((errno == EWOULDBLOCK) ||
-                (errno == EAGAIN))
+            if ((errno == EWOULDBLOCK) || (errno == EAGAIN))
             {
                 return Update();                            // interesting line ,isn't it ?
             }
@@ -759,7 +758,6 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                     sLog.outError("WorldSocket::ProcessIncoming: Player send CMSG_AUTH_SESSION again");
                     return -1;
                 }
-
 #ifdef ENABLE_ELUNA
                 if (!sEluna->OnPacketReceive(m_Session, *new_pct))
                 {

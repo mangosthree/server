@@ -30,6 +30,8 @@
 #include "SystemConfig.h"
 #include "BattleGroundMgr.h"
 #include "UpdateTime.h"
+#include "MapPersistentStateMgr.h"
+#include "ObjectAccessor.h"
 #include "revision_data.h"
 
  /**********************************************************************

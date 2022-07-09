@@ -26,6 +26,9 @@
 #include "Language.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
+#include "Unit.h"
+#include "Player.h"
+#include "ObjectMgr.h"
 
 static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
 {

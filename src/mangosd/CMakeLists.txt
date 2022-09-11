@@ -65,6 +65,11 @@ target_include_directories(mangosd
         ${CMAKE_CURRENT_BINARY_DIR}
 )
 
+target_compile_definitions(mangosd
+    PUBLIC
+        $<$<BOOL:${SCRIPT_LIB_ELUNA}>:ENABLE_ELUNA>
+)
+
 target_link_libraries(mangosd
     PUBLIC
         game

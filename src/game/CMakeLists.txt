@@ -57,6 +57,14 @@ source_group("References" FILES ${SRC_GRP_REFERENCES})
 file(GLOB SRC_GRP_SERVER Server/*.cpp Server/*.h)
 source_group("Server" FILES ${SRC_GRP_SERVER})
 
+#Protocol group
+file(GLOB SRC_GRP_PROTOCOL Server/Protocol/*.cpp Server/Protocol/*.h)
+source_group("Protocol" FILE ${SRC_GRP_PROTOCOL})
+
+#Packets group
+file(GLOB SRC_GRP_PACKETS Server/Packets/*.cpp Server/Packets/*.h)
+source_group("Packets" FILE ${SRC_GRP_PACKETS})
+
 #Time group
 file(GLOB SRC_GRP_TIME Time/*.cpp Time/*.h)
 source_group("Time" FILES ${SRC_GRP_TIME})
@@ -223,6 +231,8 @@ add_library(game STATIC
     ${SRC_GRP_OUTDOOR_PVP}
     ${SRC_GRP_REFERENCES}
     ${SRC_GRP_SERVER}
+    ${SRC_GRP_PROTOCOL}
+    ${SRC_GRP_PACKETS}
     ${SRC_GRP_TIME}
     ${SRC_GRP_TOOL}
     ${SRC_GRP_VMAPS}
@@ -249,6 +259,8 @@ target_include_directories(game
         OutdoorPvP
         References
         Server
+        Server/Protocol
+        Server/Packets
         Time
         Tools
         vmap

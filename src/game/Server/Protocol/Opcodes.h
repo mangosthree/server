@@ -29,17 +29,13 @@
 #ifndef MANGOS_H_OPCODES
 #define MANGOS_H_OPCODES
 
-#include "Common.h"
+#include "Define.h"
 
-// Note: this include need for be sure have full definition of class WorldSession
-//       if this class definition not complite then VS for x64 release use different size for
-//       struct OpcodeHandler in this header and Opcode.cpp and get totally wrong data from
-//       table opcodeTable in source when Opcode.h included but WorldSession.h not included
-#include "WorldSession.h"
+#include <string>
 
 /// List of Opcodes
 /// Max Opcode value in 4.3.4.15595 is 65535
-enum Opcodes
+enum Opcodes : uint16
 {
     MSG_WOW_CONNECTION                                    = 0x4F57, // 4.3.4 15595
     SMSG_AUTH_CHALLENGE                                   = 0x4542, // 4.3.4 15595
@@ -1445,9 +1441,16 @@ enum Opcodes
 // Don't forget to change this value and add opcode name to Opcodes.cpp when you add new opcode!
 #define NUM_MSG_TYPES 0xFFFF
 
-#define NUM_MSG_TYPES 0xFFFF
+enum OpcodeMisc : uint16
+{
+    NUM_OPCODE_HANDLERS = NUM_MSG_TYPES,
+    NULL_OPCODE         = 0x0000
+};
 
-extern void InitializeOpcodes();
+typedef Opcodes OpcodeClient;
+typedef Opcodes OpcodeServer;
+
+extern void Initialize();
 
 /// Player state
 enum SessionStatus
@@ -1467,22 +1470,77 @@ enum PacketProcessing
     PROCESS_THREADSAFE                                      // packet is thread-safe - process it in Map::Update()
 };
 
+class WorldSession;
 class WorldPacket;
 
-struct OpcodeHandler
+class OpcodeHandler
 {
-    char const* name;
-    SessionStatus status;
-    PacketProcessing packetProcessing;
-    void (WorldSession::*handler)(WorldPacket& recvPacket);
+    public:
+        OpcodeHandler(char const* name, SessionStatus status) : Name(name), Status(status) { }
+        virtual ~OpcodeHandler() { }
+
+    char const* Name;
+    SessionStatus Status;
 };
 
-extern OpcodeHandler opcodeTable[NUM_MSG_TYPES];
-
-/// Lookup opcode name for human understandable logging
-inline const char* LookupOpcodeName(uint16 id)
+class ClientOpcodeHandler : public OpcodeHandler
 {
-    return opcodeTable[id].name;
-}
+    public:
+        ClientOpcodeHandler(char const* name, SessionStatus status, PacketProcessing processing) :
+            OpcodeHandler(name, status), ProcessingPlace(processing) { }
+
+        virtual void Call(WorldSession* session, WorldPacket& packet) const = 0;
+
+        PacketProcessing ProcessingPlace;
+};
+
+class ServerOpcodeHandler : public OpcodeHandler
+{
+    public:
+        ServerOpcodeHandler(char const* name, SessionStatus status) :
+            OpcodeHandler(name, status) { }
+};
+
+class OpcodeTable
+{
+    public:
+        OpcodeTable()
+        {
+            memset(_internalTableClient, 0, sizeof(_internalTableClient));
+        }
+
+        OpcodeTable(OpcodeTable const&) = delete;
+        OpcodeTable& operator=(OpcodeTable const&) = delete;
+
+        ~OpcodeTable()
+        {
+            for (uint16 i = 0; i < NUM_OPCODE_HANDLERS; ++i)
+            {
+                delete _internalTableClient[i];
+            }
+        }
+
+        void Initialize();
+
+        ClientOpcodeHandler const* operator[](Opcodes index) const
+        {
+            return _internalTableClient[index];
+        }
+
+    private:
+        template<typename Handler, Handler HandlerFunction>
+        void ValidateAndSetClientOpcode(OpcodeClient opcode, char const* name, SessionStatus status, PacketProcessing processing);
+        void ValidateAndSetServerOpcode(OpcodeServer opcode, char const* name, SessionStatus status);
+
+        ClientOpcodeHandler* _internalTableClient[NUM_OPCODE_HANDLERS];
+};
+
+extern OpcodeTable opcodeTable;
+
+#pragma pack(pop)
+
+// Lookup opcode name for human understandable logging
+std::string GetOpcodeNameForLogging(Opcodes opcode);
+
 #endif
 /// @}

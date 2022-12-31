@@ -1,8 +1,8 @@
 /**
  @file ImageFormat.cpp
-
+ 
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-
+ 
  @created 2003-05-23
  @edited  2010-03-30
  */
@@ -31,7 +31,7 @@ ImageFormat::ImageFormat(
     bool            _floatingPoint,
     Code            _code,
     ColorSpace      _colorSpace,
-    BayerPattern    _bayerPattern) :
+    BayerPattern    _bayerPattern) : 
 
     numComponents(_numComponents),
     compressed(_compressed),
@@ -98,9 +98,9 @@ const ImageFormat* ImageFormat::stencil(int bits) {
 }
 
 
-    static const std::string nameArray[] =
+    static const std::string nameArray[] = 
     {
-        "L8",
+        "L8", 
         "L16",
         "L16F",
         "L32F",
@@ -186,7 +186,7 @@ const ImageFormat* ImageFormat::stencil(int bits) {
         "DEPTH24",
         "DEPTH32",
         "DEPTH32F",
-
+        
         "STENCIL1",
         "STENCIL4",
         "STENCIL8",
@@ -203,7 +203,7 @@ const std::string& ImageFormat::name() const {
 
 
 const ImageFormat* ImageFormat::fromString(const std::string& s) {
-
+    
     for (int i = 0; ! nameArray[i].empty(); ++i) {
         if (s == nameArray[i]) {
             return fromCode(ImageFormat::Code(i));

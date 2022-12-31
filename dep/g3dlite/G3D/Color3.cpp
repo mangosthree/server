@@ -67,7 +67,7 @@ Color3::Color3(const Any& any) {
         any.verify(false, "Bad Color3 constructor");
     }
 }
-
+   
 
 Color3::operator Any() const {
     Any a(Any::ARRAY, "Color3");
@@ -77,10 +77,10 @@ Color3::operator Any() const {
 
 
 Color3 Color3::ansiMap(uint32 i) {
-    static const Color3 map[] =
-        {Color3::black(), Color3::red() * 0.75f, Color3::green() * 0.75f, Color3::yellow() * 0.75f,
+    static const Color3 map[] = 
+        {Color3::black(), Color3::red() * 0.75f, Color3::green() * 0.75f, Color3::yellow() * 0.75f, 
          Color3::blue() * 0.75f, Color3::purple() * 0.75f, Color3::cyan() * 0.75f, Color3::white() * 0.75f,
-         Color3::white() * 0.90f, Color3::red(), Color3::green(), Color3::yellow(), Color3::blue(),
+         Color3::white() * 0.90f, Color3::red(), Color3::green(), Color3::yellow(), Color3::blue(), 
          Color3::purple(), Color3::cyan(), Color3::white()};
 
     return map[i & 15];
@@ -91,7 +91,7 @@ Color3 Color3::pastelMap(uint32 i) {
     uint32 x = Crypto::crc32(&i, sizeof(uint32));
     // Create fairly bright, saturated colors
     Vector3 v(((x >> 22) & 1023) / 1023.0f,
-              (((x >> 11) & 2047) / 2047.0f) * 0.5f + 0.25f,
+              (((x >> 11) & 2047) / 2047.0f) * 0.5f + 0.25f, 
               ((x & 2047) / 2047.0f) * 0.75f + 0.25f);
     return Color3::fromHSV(v);
 }
@@ -201,7 +201,7 @@ void Color3::serialize(BinaryOutput& bo) const {
 const Color3& Color3::wheelRandom() {
     static const Color3 colorArray[8] =
     {Color3::blue(),   Color3::red(),    Color3::green(),
-     Color3::orange(), Color3::yellow(),
+     Color3::orange(), Color3::yellow(), 
      Color3::cyan(),   Color3::purple(), Color3::brown()};
 
     return colorArray[iRandom(0, 7)];
@@ -239,7 +239,7 @@ Color3 Color3::fromARGB(uint32 x) {
 
 
 Color3 Color3::random() {
-    return Color3(uniformRandom(),
+    return Color3(uniformRandom(), 
                   uniformRandom(),
                   uniformRandom()).direction();
 }
@@ -279,7 +279,7 @@ float Color3::unitize (float fTolerance) {
 //----------------------------------------------------------------------------
 Color3 Color3::fromHSV(const Vector3& _hsv) {
     debugAssertM((_hsv.x <= 1.0f && _hsv.x >= 0.0f)
-                 && (_hsv.y <= 1.0f && _hsv.y >= 0.0f)
+                 && (_hsv.y <= 1.0f && _hsv.y >= 0.0f) 
                  && ( _hsv.z <= 1.0f && _hsv.z >= 0.0f), "H,S,V must be between [0,1]");
     const int i = iMin(5, G3D::iFloor(6.0 * _hsv.x));
     const float f = 6.0f * _hsv.x - i;
@@ -289,22 +289,22 @@ Color3 Color3::fromHSV(const Vector3& _hsv) {
     switch(i) {
     case 0:
         return Color3(_hsv.z, k, m);
-
+        
     case 1:
         return Color3(n, _hsv.z, m);
-
+        
     case 2:
         return Color3(m, _hsv.z, k);
-
+        
     case 3:
         return Color3(m, n, _hsv.z);
-
+        
     case 4:
         return Color3(k, m, _hsv.z);
-
+        
     case 5:
         return Color3(_hsv.z, m, n);
-
+        
     default:
         debugAssertM(false, "fell through switch..");
     }
@@ -313,7 +313,7 @@ Color3 Color3::fromHSV(const Vector3& _hsv) {
 
 
 Vector3 Color3::toHSV(const Color3& _rgb) {
-    debugAssertM((_rgb.r <= 1.0f && _rgb.r >= 0.0f)
+    debugAssertM((_rgb.r <= 1.0f && _rgb.r >= 0.0f) 
             && (_rgb.g <= 1.0f && _rgb.g >= 0.0f)
             && (_rgb.b <= 1.0f && _rgb.b >= 0.0f), "R,G,B must be between [0,1]");
     Vector3 hsv = Vector3::zero();
@@ -321,9 +321,9 @@ Vector3 Color3::toHSV(const Color3& _rgb) {
     if (G3D::fuzzyEq(hsv.z, 0.0f)) {
         return hsv;
     }
-
+    
     const float x =  G3D::min(G3D::min(_rgb.r, _rgb.g), _rgb.b);
-    hsv.y = (hsv.z - x) / hsv.z;
+    hsv.y = (hsv.z - x) / hsv.z; 
 
     if (G3D::fuzzyEq(hsv.y, 0.0f)) {
         return hsv;
@@ -341,7 +341,7 @@ Vector3 Color3::toHSV(const Color3& _rgb) {
     } else {
         hsv.x = (_rgb.r == x)? 3.0f + rgbN.y : 5.0f - rgbN.x;
     }
-
+    
     hsv.x /= 6.0f;
 
     return hsv;

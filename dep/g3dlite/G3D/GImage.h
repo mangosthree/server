@@ -40,8 +40,8 @@ class BinaryOutput;
 
 
 /**
-  Interface to image compression & file formats.
-
+  Interface to image compression & file formats. 
+ 
   Supported formats (decode and encode): Color JPEG, PNG,
   (Uncompressed) TGA 24, (Uncompressed) TGA 32, BMP 1, BMP 4, BMP 8, BMP
   24, PPM (P6), and PPM ASCII (P1, P2, P3), which includes PPM, PGM,
@@ -53,7 +53,7 @@ class BinaryOutput;
   \verbatim
     // Loading from disk:
     G3D::GImage im1("test.jpg");
-
+    
     // Loading from memory:
     G3D::GImage im2(data, length);
 
@@ -63,7 +63,7 @@ class BinaryOutput;
 
     // Saving to memory:
     G3D::GImage im3(width, height);
-    // (Set the pixels of im3...)
+    // (Set the pixels of im3...) 
     uint8* data2;
     int    len2;
     im3.encode(G3D::GImage::JPEG, data2, len2);
@@ -72,9 +72,9 @@ class BinaryOutput;
     im3.save("out.jpg");
   \endverbatim
 
-  The free Image Magick Magick Wand API
+  The free Image Magick Magick Wand API 
   (http://www.imagemagick.org/www/api/magick_wand.html) provides a more powerful
-  API for image manipulation and wider set of image load/save formats.  It is
+  API for image manipulation and wider set of image load/save formats.  It is 
   recommended over GImage (we don't include it directly in G3D because their license
   is more restrictive than the BSD one).
 
@@ -86,7 +86,7 @@ class BinaryOutput;
 class GImage {
 private:
 
-    /** Used exclusively for allocating m_byte; this may be an
+    /** Used exclusively for allocating m_byte; this may be an 
      implementation that allocates directly on a GPU.*/
     MemoryManager::Ref      m_memMan;
     uint8*                  m_byte;
@@ -103,13 +103,13 @@ public:
             const std::string& reason,
             const std::string& filename = "") :
         reason(reason), filename(filename) {}
-
+        
         std::string reason;
         std::string filename;
     };
 
     /** PGM, PPM, and PBM all come in two versions and are classified as PPM_* files */
-    enum Format {JPEG, BMP, TGA, PCX, ICO, PNG,
+    enum Format {JPEG, BMP, TGA, PCX, ICO, PNG, 
         PPM_BINARY, PGM_BINARY = PPM_BINARY,
         PPM_ASCII, PGM_ASCII = PPM_ASCII,
         AUTODETECT, UNKNOWN};
@@ -150,12 +150,12 @@ public:
     }
 
     inline const Color1uint8* pixel1() const {
-        debugAssertM(m_channels == 1, format("Tried to call GImage::pixel1 on an image with %d channels", m_channels));
+        debugAssertM(m_channels == 1, format("Tried to call GImage::pixel1 on an image with %d channels", m_channels));            
         return (Color1uint8*)m_byte;
     }
 
     inline Color1uint8* pixel1() {
-        debugAssertM(m_channels == 1, format("Tried to call GImage::pixel1 on an image with %d channels", m_channels));
+        debugAssertM(m_channels == 1, format("Tried to call GImage::pixel1 on an image with %d channels", m_channels));            
         return (Color1uint8*)m_byte;
     }
 
@@ -163,7 +163,7 @@ public:
         as Color4uint8.
      */
     inline const Color4uint8* pixel4() const {
-        debugAssertM(m_channels == 4, format("Tried to call GImage::pixel4 on an image with %d channels", m_channels));
+        debugAssertM(m_channels == 4, format("Tried to call GImage::pixel4 on an image with %d channels", m_channels));            
         return (Color4uint8*)m_byte;
     }
 
@@ -176,7 +176,7 @@ public:
         as Color3uint8.
      */
     inline const Color3uint8* pixel3() const {
-         debugAssertM(m_channels == 3, format("Tried to call GImage::pixel3 on an image with %d channels", m_channels));
+         debugAssertM(m_channels == 3, format("Tried to call GImage::pixel3 on an image with %d channels", m_channels));            
          return (Color3uint8*)m_byte;
     }
 
@@ -284,7 +284,7 @@ private:
         BinaryInput&        input);
 
     /**
-     Given [maybe] a filename, memory buffer, and [maybe] a format,
+     Given [maybe] a filename, memory buffer, and [maybe] a format, 
      returns the most likely format of this file.
      */
     static Format resolveFormat(
@@ -344,7 +344,7 @@ public:
      taken from this GImage and the alpha from the red
      channel of the supplied image. The new GImage is passed
      as a reference parameter for speed.
-     */
+     */ 
     void insertRedAsAlpha(const GImage& alpha, GImage& output) const;
 
     /**
@@ -366,7 +366,7 @@ public:
      Frees memory and resets to a 0x0 image.
      */
     void clear();
-
+        
     /**
      Deallocates the pixels.
      */
@@ -374,14 +374,14 @@ public:
 
     /**
      Resizes the internal buffer to (\a width x \a height) with the
-     number of \a channels specified.
-
+     number of \a channels specified.  
+     
      \param zero If true, all data is set to 0 (black).
      */
     void resize(int width, int height, int channels, bool zero = true);
 
     /**
-     Copies src sub-image data into dest at a certain offset.
+     Copies src sub-image data into dest at a certain offset.  
      The dest variable must already contain an image that is large
      enough to contain the src sub-image at the specified offset.
      Returns true on success and false if the src sub-image cannot
@@ -389,17 +389,17 @@ public:
      src and dest must have the same number of channels.
      */
     static bool pasteSubImage(
-        GImage& dest,
+        GImage& dest, 
         const GImage& src,
-        int destX,
-        int destY,
-        int srcX,
-        int srcY,
+        int destX, 
+        int destY, 
+        int srcX, 
+        int srcY, 
         int srcWidth,
         int srcHeight);
 
     /**
-     creates dest from src sub-image data.
+     creates dest from src sub-image data.  
      Returns true on success and false if the src sub-image
      is not within src.
      */
@@ -432,7 +432,7 @@ public:
     void save(
         const std::string& filename,
         Format             format = AUTODETECT) const;
-
+   
     /**
      The caller must delete the returned buffer.
      TODO: provide a memory manager
@@ -490,7 +490,7 @@ public:
     (const uint8*            in,
      uint8*                  out,
      int                     numPixels);
-
+    
     /** Safe for in == out */
     static void RGBtoBGR(
         const uint8*            in,
@@ -517,7 +517,7 @@ public:
         const uint8*            alphaRGB,
         uint8*                  out,
         int                     numPixels);
-
+        
     /**
     Flips the image along the vertical axis.
     Safe for in == out.
@@ -539,7 +539,7 @@ public:
     RGB channels are a tangent space normal map and the alpha channel
     is the original bump map.  Assumes the input image is tileable.
 
-    In the resulting image, x = red = tangent, y = green = binormal, and z = blue = normal.
+    In the resulting image, x = red = tangent, y = green = binormal, and z = blue = normal. 
 
     Particularly useful as part of the idiom:
     <PRE>
@@ -550,7 +550,7 @@ public:
 
       */
     static void computeNormalMap(
-        const class GImage& bump,
+        const class GImage& bump, 
         class GImage& normal,
         const BumpMapPreprocess& preprocess = BumpMapPreprocess());
 
@@ -563,7 +563,7 @@ public:
         const BumpMapPreprocess& preprocess = BumpMapPreprocess());
 
     /**
-    Bayer demosaicing using the filter proposed in
+    Bayer demosaicing using the filter proposed in 
 
     HIGH-QUALITY LINEAR INTERPOLATION FOR DEMOSAICING OF BAYER-PATTERNED COLOR IMAGES
     Henrique S. Malvar, Li-wei He, and Ross Cutler
@@ -581,28 +581,28 @@ public:
     See G3D::BAYER_G8B8_R8G8_to_R8G8B8_MHC for a much better result. */
     static void BAYER_G8B8_R8G8_to_Quarter_R8G8B8
        (int inWidth,
-        int inHeight,
-        const uint8* in,
+        int inHeight, 
+        const uint8* in, 
         uint8* out);
 
-    /** Attempt to undo fast conversion of G3D::BAYER_G8B8_R8G8_to_Quarter_R8G8B8;
-        the green channel will lose data. Assumes in != out
+    /** Attempt to undo fast conversion of G3D::BAYER_G8B8_R8G8_to_Quarter_R8G8B8; 
+        the green channel will lose data. Assumes in != out 
         The input should have size 3 * inWidth * inHeight.  The output should have size
         2 * inWidth * 2 * inHeight.
     */
     static void Quarter_R8G8B8_to_BAYER_G8B8_R8G8
-       (int inWidth,
-        int inHeight,
-        const uint8* in,
+       (int inWidth, 
+        int inHeight, 
+        const uint8* in, 
         uint8* out);
 
     /** Overwrites every pixel with one of the two colors in a checkerboard pattern.
-        The fields used from the two colors depend on the current number of channels in @a im.
+        The fields used from the two colors depend on the current number of channels in @a im. 
         */
     static void makeCheckerboard
-       (GImage& im,
-        int checkerSize = 1,
-        const Color4uint8& color1 = Color4uint8(255,255,255,255),
+       (GImage& im, 
+        int checkerSize = 1, 
+        const Color4uint8& color1 = Color4uint8(255,255,255,255), 
         const Color4uint8& color2 = Color4uint8(0,0,0,255));
 };
 

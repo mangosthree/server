@@ -53,7 +53,7 @@ Color4::Color4(const Any& any) {
         *this = Color4::fromARGB((int)any[0].number());
     }
 }
-
+   
 
 Color4::operator Any() const {
     Any any(Any::ARRAY, "Color4");
@@ -114,9 +114,9 @@ size_t Color4::hashCode() const {
 
 Color4 Color4::fromARGB(uint32 x) {
     return Color4(
-        (float)((x >> 16) & 0xFF),
+        (float)((x >> 16) & 0xFF), 
         (float)((x >> 8) & 0xFF),
-        (float)(x & 0xFF),
+        (float)(x & 0xFF), 
         (float)((x >> 24) & 0xFF)) / 255.0;
 }
 

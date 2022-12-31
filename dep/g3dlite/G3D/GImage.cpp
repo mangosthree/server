@@ -43,7 +43,7 @@ void GImage::LtoRGBA(
         out[i4 + 0] = v;
         out[i4 + 1] = v;
         out[i4 + 2] = v;
-        out[i4 + 3] = 255;
+        out[i4 + 3] = 255; 
     }
 }
 
@@ -63,7 +63,7 @@ void GImage::LtoRGB(
     }
 }
 
-
+   
 void GImage::RGBtoRGBA(
     const uint8*    in,
     uint8*          out,
@@ -73,10 +73,10 @@ void GImage::RGBtoRGBA(
         int i3 = i * 3;
         int i4 = i3 + i;
 
-        out[i4 + 0] = in[i3 + 0];
-        out[i4 + 1] = in[i3 + 1];
-        out[i4 + 2] = in[i3 + 2];
-        out[i4 + 3] = 255;
+        out[i4 + 0] = in[i3 + 0]; 
+        out[i4 + 1] = in[i3 + 1]; 
+        out[i4 + 2] = in[i3 + 2]; 
+        out[i4 + 3] = 255; 
     }
 }
 
@@ -90,9 +90,9 @@ void GImage::RGBAtoRGB(
         int i3 = i * 3;
         int i4 = i3 + i;
 
-        out[i3 + 0] = in[i4 + 0];
-        out[i3 + 1] = in[i4 + 1];
-        out[i3 + 2] = in[i4 + 2];
+        out[i3 + 0] = in[i4 + 0]; 
+        out[i3 + 1] = in[i4 + 1]; 
+        out[i3 + 2] = in[i4 + 2]; 
     }
 }
 
@@ -106,10 +106,10 @@ void GImage::RGBtoBGRA(
         int i3 = i * 3;
         int i4 = i3 + i;
 
-        out[i4 + 2] = in[i3 + 0];
-        out[i4 + 1] = in[i3 + 1];
-        out[i4 + 0] = in[i3 + 2];
-        out[i4 + 3] = 255;
+        out[i4 + 2] = in[i3 + 0]; 
+        out[i4 + 1] = in[i3 + 1]; 
+        out[i4 + 0] = in[i3 + 2]; 
+        out[i4 + 3] = 255; 
     }
 }
 
@@ -127,8 +127,8 @@ void GImage::RGBtoBGR(
         int g = in[i3 + 1];
         int b = in[i3 + 2];
 
-        out[i3 + 2] = r;
-        out[i3 + 1] = g;
+        out[i3 + 2] = r; 
+        out[i3 + 1] = g; 
         out[i3 + 0] = b;
     }
 }
@@ -161,9 +161,9 @@ void GImage::RGBtoARGB(
         int i3 = i * 3;
         int i4 = i3 + i;
 
-        out[i4 + 0] = 255;
-        out[i4 + 1] = in[i3 + 0];
-        out[i4 + 2] = in[i3 + 1];
+        out[i4 + 0] = 255; 
+        out[i4 + 1] = in[i3 + 0]; 
+        out[i4 + 2] = in[i3 + 1]; 
         out[i4 + 3] = in[i3 + 2];
     }
 }
@@ -175,11 +175,11 @@ void GImage::flipRGBVertical(
     int                     width,
     int                     height) {
 
-
+    
     // Allocate a temp row so the operation
     // is still safe if in == out
     uint8* temp = (uint8*)System::malloc(width * 3);
-    alwaysAssertM(temp != NULL, "Out of memory");
+    alwaysAssertM(temp != NULL, "Out of memory"); 
 
     int oneRow = width * 3;
     int N = height / 2;
@@ -203,7 +203,7 @@ void GImage::flipRGBAVertical(
     int                     width,
     int                     height) {
 
-
+    
     // Allocate a temp row so the operation
     // is still safe if in == out
     uint8* temp = (uint8*)System::malloc(width * 4);
@@ -333,7 +333,7 @@ void GImage::decodePCX(
                 while (p < p1) {
                     uint8 value = input.readUInt8();
                     int length = 1;
-
+            
                     if (value >= 192) {
                         // This is the length, not the value.  Mask off
                         // the two high bits and read the true index.
@@ -368,9 +368,9 @@ void GImage::decodePCX(
 
         input.readBytes(palette, sizeof(palette));
         input.setPosition(imageBeginning);
-
+        
         Color3uint8* pixel = pixel3();
-
+        
         // The palette indices are run length encoded.
         int p = 0;
         while (p < m_width * m_height) {
@@ -445,7 +445,7 @@ GImage::Format GImage::resolveFormat(
     // character.
 
     // We can't look at the character if it is null.
-    debugAssert(data != NULL);
+    debugAssert(data != NULL);              
 
     if ((dataLen > 3) && (! memcmp(data, "P3", 2) || (! memcmp(data, "P2", 2)) || (! memcmp(data, "P1", 2)))) {
         return PPM_ASCII;
@@ -493,13 +493,13 @@ GImage::Format GImage::resolveFormat(
 GImage::GImage(
     const std::string&  filename,
     Format              format,
-    const MemoryManager::Ref& m) :
+    const MemoryManager::Ref& m) : 
     m_memMan(m),
-    m_byte(NULL),
+    m_byte(NULL), 
     m_channels(0),
     m_width(0),
     m_height(0) {
-
+    
     load(filename, format);
 }
 
@@ -528,7 +528,7 @@ GImage::GImage(
     const uint8*        data,
     int                 length,
     Format              format,
-    const MemoryManager::Ref& m) :
+    const MemoryManager::Ref& m) : 
     m_memMan(m),
     m_byte(NULL),
     m_channels(0),
@@ -547,13 +547,13 @@ GImage::GImage(
     int                 width,
     int                 height,
     int                 channels,
-    const MemoryManager::Ref& mem) :
+    const MemoryManager::Ref& mem) : 
     m_memMan(mem),
     m_byte(0),
-    m_channels(0),
-    m_width(0),
+    m_channels(0), 
+    m_width(0), 
     m_height(0) {
-
+    
     resize(width, height, channels);
 }
 
@@ -604,8 +604,8 @@ void GImage::flipHorizontal() {
     uint8 temp[4];
     int rowBytes = m_width * m_channels;
     for (int y = 0; y < m_height; ++y) {
-        uint8* row = m_byte + y * rowBytes;
-        for (int x = 0; x < m_width / 2; ++x) {
+        uint8* row = m_byte + y * rowBytes; 
+        for (int x = 0; x < m_width / 2; ++x) { 
             System::memcpy(temp, row + x * m_channels, m_channels);
             System::memcpy(row + x * m_channels, row + (m_width - x - 1) * m_channels, m_channels);
             System::memcpy(row + (m_width - x - 1) * m_channels, temp, m_channels);
@@ -642,13 +642,13 @@ void GImage::rotate90CW(int numTimes) {
             old = m_byte;
             m_byte = temp;
         }
-
+        
         {
             int temp = m_width;
             m_width = m_height;
             m_height = temp;
         }
-
+        
         int rowBytes = m_width * m_channels;
         for (int y = 0; y < m_height; ++y) {
             for (int x = 0; x < m_width; ++x) {
@@ -702,7 +702,7 @@ bool GImage::copySubImage(
     }
 
     dest.resize(srcWidth, srcHeight, src.m_channels);
-
+    
     bool ret;
     ret = pasteSubImage(dest, src, 0, 0, srcX, srcY, srcWidth, srcHeight);
     debugAssert(ret);
@@ -877,8 +877,8 @@ void GImage::computeNormalMap(
     const GImage&       bump,
     GImage&             normal,
     const BumpMapPreprocess& preprocess) {
-    computeNormalMap(bump.m_width, bump.m_height, bump.m_channels,
-        bump.byte(), normal, preprocess);
+    computeNormalMap(bump.m_width, bump.m_height, bump.m_channels, 
+        bump.byte(), normal, preprocess);    
 }
 
 void GImage::computeNormalMap(
@@ -896,7 +896,7 @@ void GImage::computeNormalMap(
     if (whiteHeightInPixels < 0.0f) {
         // Default setting scales so that a gradient ramp
         // over the whole image becomes a 45-degree angle
-
+        
         // Account for potentially non-square aspect ratios
         whiteHeightInPixels = max(width, height) * -whiteHeightInPixels;
     }
@@ -932,7 +932,7 @@ void GImage::computeNormalMap(
                                                 ((DY + y + h) % h) * w) * stride])
 
 
-            // Sobel filter to compute the normal.
+            // Sobel filter to compute the normal.  
             //
             // Y Filter (X filter is the transpose)
             //  [ -1 -2 -1 ]
@@ -940,20 +940,20 @@ void GImage::computeNormalMap(
             //  [  1  2  1 ]
 
             // Write the Y value directly into the x-component so we don't have
-            // to explicitly compute a cross product at the end.  Does not
+            // to explicitly compute a cross product at the end.  Does not 
             // go out of bounds because the above is computed mod (width, height)
             delta.y = -( ELEVATION(-1, -1) * 1 +  ELEVATION( 0, -1) * 2 +  ELEVATION( 1, -1) * 1 +
                         -ELEVATION(-1,  1) * 1 + -ELEVATION( 0,  1) * 2 + -ELEVATION( 1,  1) * 1);
 
-            delta.x = -(-ELEVATION(-1, -1) * 1 + ELEVATION( 1, -1) * 1 +
-                        -ELEVATION(-1,  0) * 2 + ELEVATION( 1,  0) * 2 +
+            delta.x = -(-ELEVATION(-1, -1) * 1 + ELEVATION( 1, -1) * 1 + 
+                        -ELEVATION(-1,  0) * 2 + ELEVATION( 1,  0) * 2 + 
                         -ELEVATION(-1,  1) * 1 + ELEVATION( 1,  1) * 1);
 
             // The scale of each filter row is 4, the filter width is two pixels,
             // and the "normal" range is 0-255.
             delta.z = 4 * 2 * elevationInvScale;
 
-            // Delta is now scaled in pixels; normalize
+            // Delta is now scaled in pixels; normalize 
             delta = delta.direction();
 
             // Copy over the bump value into the alpha channel.
@@ -992,14 +992,14 @@ void GImage::convertToL8() {
         return;
 
     case 3:
-        {
+        {            
             // Average
             Color3uint8* src = (Color3uint8*)m_byte;
             m_byte = NULL;
             resize(m_width, m_height, 1);
             for (int i = m_width * m_height - 1; i >= 0; --i) {
                 const Color3uint8   s = src[i];
-                uint8&              d = m_byte[i];
+                uint8&              d = m_byte[i]; 
                 d = ((int)s.r + (int)s.g + (int)s.b) / 3;
             }
             m_memMan->free(src);
@@ -1007,14 +1007,14 @@ void GImage::convertToL8() {
         break;
 
     case 4:
-        {
+        {            
             // Average
             Color4uint8* src = (Color4uint8*)m_byte;
             m_byte = NULL;
             resize(m_width, m_height, 1);
             for (int i = m_width * m_height - 1; i >= 0; --i) {
                 const Color4uint8   s = src[i];
-                uint8&              d = m_byte[i];
+                uint8&              d = m_byte[i]; 
                 d = ((int)s.r + (int)s.g + (int)s.b) / 3;
             }
             m_memMan->free(src);
@@ -1030,14 +1030,14 @@ void GImage::convertToL8() {
 void GImage::convertToRGBA() {
     switch (m_channels) {
     case 1:
-        {
+        {            
             // Spread
             uint8* old = m_byte;
             m_byte = NULL;
             resize(m_width, m_height, 4);
             for (int i = m_width * m_height - 1; i >= 0; --i) {
                 const uint8  s = old[i];
-                Color4uint8& d = ((Color4uint8*)m_byte)[i];
+                Color4uint8& d = ((Color4uint8*)m_byte)[i]; 
                 d.r = d.g = d.b = s;
                 d.a = 255;
             }
@@ -1046,14 +1046,14 @@ void GImage::convertToRGBA() {
         break;
 
     case 3:
-        {
+        {            
             // Add alpha
             Color3uint8* old = (Color3uint8*)m_byte;
             m_byte = NULL;
             resize(m_width, m_height, 4);
             for (int i = m_width * m_height - 1; i >= 0; --i) {
                 const Color3uint8   s = old[i];
-                Color4uint8&        d = ((Color4uint8*)m_byte)[i];
+                Color4uint8&        d = ((Color4uint8*)m_byte)[i]; 
                 d.r = s.r;
                 d.g = s.g;
                 d.b = s.b;
@@ -1076,14 +1076,14 @@ void GImage::convertToRGBA() {
 void GImage::convertToRGB() {
     switch (m_channels) {
     case 1:
-        {
+        {            
             // Spread
             uint8* old = m_byte;
             m_byte = NULL;
             resize(m_width, m_height, 3);
             for (int i = m_width * m_height - 1; i >= 0; --i) {
                 const uint8  s = old[i];
-                Color3uint8& d = ((Color3uint8*)m_byte)[i];
+                Color3uint8& d = ((Color3uint8*)m_byte)[i]; 
                 d.r = d.g = d.b = s;
             }
             m_memMan->free(old);
@@ -1095,13 +1095,13 @@ void GImage::convertToRGB() {
 
     case 4:
         // Strip alpha
-        {
+        {            
             Color4uint8* old = (Color4uint8*)m_byte;
             m_byte = NULL;
             resize(m_width, m_height, 3);
             for (int i = m_width * m_height - 1; i >= 0; --i) {
                 const Color4uint8   s = old[i];
-                Color3uint8&        d = ((Color3uint8*)m_byte)[i];
+                Color3uint8&        d = ((Color3uint8*)m_byte)[i]; 
                 d.r = s.r;
                 d.g = s.g;
                 d.b = s.b;

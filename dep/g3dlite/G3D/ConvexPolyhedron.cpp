@@ -1,11 +1,11 @@
 /**
   @file ConvexPolyhedron.cpp
-
+  
   @author Morgan McGuire, http://graphics.cs.williams.edu
 
   @created 2001-11-11
   @edited  2009-08-10
-
+ 
   Copyright 2000-2009, Morgan McGuire.
   All rights reserved.
  */
@@ -46,7 +46,7 @@ float ConvexPolygon::getArea() const {
         int i1 = v - 1;
         int i2 = v;
 
-        sum += (_vertex[i1] - _vertex[i0]).cross(_vertex[i2] - _vertex[i0]).magnitude() / 2;
+        sum += (_vertex[i1] - _vertex[i0]).cross(_vertex[i2] - _vertex[i0]).magnitude() / 2; 
     }
 
     return sum;
@@ -97,7 +97,7 @@ void ConvexPolygon::cut(const Plane& plane, ConvexPolygon &above, ConvexPolygon 
     }
 
 
-    // Number of edges crossing the plane.  Used for
+    // Number of edges crossing the plane.  Used for 
     // debug assertions.
     int count = 0;
 
@@ -112,17 +112,17 @@ void ConvexPolygon::cut(const Plane& plane, ConvexPolygon &above, ConvexPolygon 
 
     for (v = 1; v < length; v++) {
         bool isAbove = plane.halfSpaceContains(_vertex[v]);
-
+    
         if (lastAbove ^ isAbove) {
             // Switched sides.
             // Create an interpolated point that lies
             // in the plane, between the two points.
             Line line = Line::fromTwoPoints(_vertex[v - 1], _vertex[v]);
             Vector3 interp = line.intersection(plane);
-
+            
             if (! interp.isFinite()) {
 
-                // Since the polygon is not in the plane (we checked above),
+                // Since the polygon is not in the plane (we checked above), 
                 // it must be the case that this edge (and only this edge)
                 // is in the plane.  This only happens when the polygon is
                 // entirely below the plane except for one edge.  This edge
@@ -132,7 +132,7 @@ void ConvexPolygon::cut(const Plane& plane, ConvexPolygon &above, ConvexPolygon 
                 above._vertex.resize(0);
                 //debugPrintf("Entirely below\n");
                 return;
-            }
+            }                
 
             above._vertex.append(interp);
             below._vertex.append(interp);
@@ -159,7 +159,7 @@ void ConvexPolygon::cut(const Plane& plane, ConvexPolygon &above, ConvexPolygon 
         Line line = Line::fromTwoPoints(_vertex[length - 1], _vertex[0]);
         Vector3 interp = line.intersection(plane);
         if (! interp.isFinite()) {
-            // Since the polygon is not in the plane (we checked above),
+            // Since the polygon is not in the plane (we checked above), 
             // it must be the case that this edge (and only this edge)
             // is in the plane.  This only happens when the polygon is
             // entirely below the plane except for one edge.  This edge
@@ -169,7 +169,7 @@ void ConvexPolygon::cut(const Plane& plane, ConvexPolygon &above, ConvexPolygon 
             above._vertex.resize(0);
             //debugPrintf("Entirely below\n");
             return;
-        }
+        }                
 
         above._vertex.append(interp);
         below._vertex.append(interp);
@@ -190,7 +190,7 @@ ConvexPolygon ConvexPolygon::inverse() const {
     ConvexPolygon result;
     int length = _vertex.length();
     result._vertex.resize(length);
-
+    
     for (int v = 0; v < length; v++) {
         result._vertex[v] = _vertex[length - v - 1];
     }
@@ -210,7 +210,7 @@ void ConvexPolygon::removeDuplicateVertices(){
                 --i; // Don't move forward.
             }
         }
-
+    
         // Check the last vertex against the first.
         if (_vertex[_vertex.size()-1].fuzzyEq(_vertex[0])){
             _vertex.pop();
@@ -239,9 +239,9 @@ float ConvexPolyhedron::getVolume() const {
     // Choose the first _vertex of the first face as the origin.
     // This lets us skip one face, too, and avoids negative heights.
     Vector3 v0 = face[0]._vertex[0];
-    for (int f = 1; f < face.length(); f++) {
+    for (int f = 1; f < face.length(); f++) {        
         const ConvexPolygon& poly = face[f];
-
+        
         float height = (poly._vertex[0] - v0).dot(poly.normal());
         float base   = poly.getArea();
 
@@ -262,7 +262,7 @@ void ConvexPolyhedron::cut(const Plane& plane, ConvexPolyhedron &above, ConvexPo
     Array<DirectedEdge> edge;
 
     int f;
-
+    
     // See if the plane cuts this polyhedron at all.  Detect when
     // the polyhedron is entirely to one side or the other.
     //{
@@ -277,7 +277,7 @@ void ConvexPolyhedron::cut(const Plane& plane, ConvexPolyhedron &above, ConvexPo
         const float eps = 0.005f;
         for (f = face.length() - 1; (f >= 0) && (!ruledOut); f--) {
             const ConvexPolygon& poly = face[f];
-            for (int v = poly._vertex.length() - 1; (v >= 0) && (!ruledOut); v--) {
+            for (int v = poly._vertex.length() - 1; (v >= 0) && (!ruledOut); v--) { 
                 double r = abc.dot(poly._vertex[v]) + d;
                 if (r > eps) {
                     numAbove++;
@@ -324,10 +324,10 @@ void ConvexPolyhedron::cut(const Plane& plane, ConvexPolyhedron &above, ConvexPo
             //debugPrintf(" == Split\n");
             edge.append(e);
         } else {
-            // Might be the case that the polygon is entirely on
+            // Might be the case that the polygon is entirely on 
             // one side of the plane yet there is an edge we need
             // because it touches the plane.
-            //
+            // 
             // Extract the non-empty _vertex list and examine it.
             // If we find exactly one edge in the plane, add that edge.
             const Array<Vector3>& _vertex = (aEmpty ? b._vertex : a._vertex);
@@ -348,7 +348,7 @@ void ConvexPolyhedron::cut(const Plane& plane, ConvexPolyhedron &above, ConvexPo
     }
 
     if (above.face.length() == 1) {
-        // Only one face above means that this entire
+        // Only one face above means that this entire 
         // polyhedron is below the plane.  Move that face over.
         below.face.append(above.face[0]);
         above.face.resize(0);
@@ -380,7 +380,7 @@ for (int xx=0; xx < numVertices; xx++) {
         cap._vertex.append(last_vertex);
 
         // Search for the next _vertex.  Because of accumulating
-        // numerical error, we have to find the closest match, not
+        // numerical error, we have to find the closest match, not 
         // just the one we expect.
         for (int v = numVertices - 1; v >= 0; v--) {
             // matching edge index
@@ -403,7 +403,7 @@ for (int xx=0; xx < numVertices; xx++) {
             last_vertex = edge[index].stop;
             cap._vertex.append(last_vertex);
         }
-
+        
         //debugPrintf("\n");
         //debugPrintf("Cap (both) %f\n", cap.getArea());
         above.face.append(cap);
@@ -411,7 +411,7 @@ for (int xx=0; xx < numVertices; xx++) {
     }
 
     // Make sure we put enough faces on each polyhedra
-    debugAssert((above.face.length() == 0) || (above.face.length() >= 4));
+    debugAssert((above.face.length() == 0) || (above.face.length() >= 4));   
     debugAssert((below.face.length() == 0) || (below.face.length() >= 4));
 }
 
@@ -425,8 +425,8 @@ ConvexPolygon2D::ConvexPolygon2D(const Array<Vector2>& pts, bool reverse) : m_ve
 
 
 bool ConvexPolygon2D::contains(const Vector2& p, bool reverse) const {
-    // Compute the signed area of each polygon from p to an edge.
-    // If the area is non-negative for all polygons then p is inside
+    // Compute the signed area of each polygon from p to an edge.  
+    // If the area is non-negative for all polygons then p is inside 
     // the polygon.  (To adapt this algorithm for a concave polygon,
     // the *sum* of the areas must be non-negative).
 

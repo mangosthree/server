@@ -40,20 +40,20 @@ namespace G3D {
 
   These routines provide <I>moving</I> and static collision detection.
   Moving collision detection allows the calculation of collisions that
-  occur during a period of time -- as opposed to the intersection of
+  occur during a period of time -- as opposed to the intersection of 
   two static bodies.
-
+  
   Moving collision detection routines detect collisions between
-  <I>only</I> static primitives and moving spheres or points.  Since the
+  <I>only</I> static primitives and moving spheres or points.  Since the 
   reference frame can be user defined, these functions can be used to
   detect the collision between two moving bodies by subtracting
-  the velocity vector of one object from the velocity vector of the
-  sphere or point the detection is to occur with.  This unified
+  the velocity vector of one object from the velocity vector of the 
+  sphere or point the detection is to occur with.  This unified 
   velocity vector will act as if both objects are moving simultaneously.
 
   Collisions are detected for single-sided objects only.  That is,
   no collision is detected when <I>leaving</I> a primitive or passing
-  through a plane or triangle opposite the normal... except for the
+  through a plane or triangle opposite the normal... except for the 
   point-sphere calculation or when otherwise noted.
 
   For a sphere, the collision location returned is the point in world
@@ -553,7 +553,7 @@ public:
 
         float t = collisionTimeForMovingPointFixedTriangle(
             orig, dir, tri.vertex(0), tri.vertex(1), tri.vertex(2));
-
+        
         if ((t < finf()) && (&location != &ignore)) {
             location = orig + dir * t;
             normal   = tri.normal();
@@ -644,9 +644,9 @@ public:
      @brief Calculates intersection of a ray and a static
      Axis-Aligned Box (AABox).
 
-     @note Avoids the sqrt from collisionTimeForMovingPointFixedAABox;
+     @note Avoids the sqrt from collisionTimeForMovingPointFixedAABox; 
       early-out branches and operations optimized for Intel Core2 architecture.
-
+     
      @param invDir      1/dir
      @param location    Location of collision. [Post Condition]
      @param inside        Does the ray originate inside the box? [Post Condition]
@@ -854,19 +854,19 @@ public:
         Vector3&                outNormal = ignore);
 
     /** Calculates time between the intersection of a moving sphere
-        and a fixed sphere.
+        and a fixed sphere. 
 
         If they are already interpenetrating, returns 0 and @a
         location is the closest point on the surface of the fixed sphere
         to the center of the moving sphere.
-
+        
         @param sphere            Moving sphere.
         @param velocity         Sphere's velocity.
         @param fixedSphere        Fixed Sphere.
         @param outLocation        Location of collision -- not center position of sphere
         at the collision time. [Post Condition]
         @param outNormal        Moving sphere's surface normal to collision [Post Condition]
-
+        
         @return Time until collision.  If there is no collision then the return
         value will be inf().
     */
@@ -902,8 +902,8 @@ public:
         Vector3&                outNormal = ignore);
 
     /**
-     Finds the direction of bounce that a sphere would have when it
-     intersects an object with the  given time of collision, the
+     Finds the direction of bounce that a sphere would have when it 
+     intersects an object with the  given time of collision, the 
      collision location and the collision normal.
 
      @note This function works like a pong style ball bounce.
@@ -1133,7 +1133,7 @@ public:
         const Triangle&         triangle);
 
     static bool fixedSolidBoxIntersectsFixedTriangle(
-        const AABox&            box,
+        const AABox&            box, 
         const Triangle&         triangle);
 
     /**

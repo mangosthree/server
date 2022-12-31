@@ -1,8 +1,8 @@
 /**
  @file g3dmath.cpp
-
+ 
  @author Morgan McGuire, graphics3d.com
-
+  
  @created 2001-06-02
  @edited  2004-02-24
  */
@@ -30,10 +30,10 @@ float gaussRandom(float mean, float stdev) {
 
     // Transform to gassian distribution
     // Multiply by sigma (stdev ^ 2) and add mean.
-    return x2 * (float)square(stdev) * sqrtf((-2.0f * logf(w) ) / w) + mean;
+    return x2 * (float)square(stdev) * sqrtf((-2.0f * logf(w) ) / w) + mean; 
 }
 
-/**
+/** 
     This value should not be tested against directly, instead
     G3D::isNan() and G3D::isFinite() will return reliable results. */
 double inf() {
@@ -51,7 +51,7 @@ bool isNaN(double x) {
 }
 
 
-/**
+/** 
     This value should not be tested against directly, instead
     G3D::isNan() and G3D::isFinite() will return reliable results. */
 float finf() {
@@ -87,7 +87,7 @@ int highestBit(uint32 x) {
         base += 4;
         x >>= 4;
     }
-
+    
     static const int lut[] = {-1,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3};
     return base + lut[x];
 }
@@ -95,7 +95,7 @@ int highestBit(uint32 x) {
 
 int iRandom(int low, int high) {
     int r = iFloor(low + (high - low + 1) * (double)rand() / RAND_MAX);
-
+    
     // There is a *very small* chance of generating
     // a number larger than high.
     if (r > high) {

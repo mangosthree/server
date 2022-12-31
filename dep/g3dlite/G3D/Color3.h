@@ -1,12 +1,12 @@
 /**
  @file Color3.h
-
+ 
  Color class
-
+ 
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
  @cite Portions based on Dave Eberly's Magic Software Library
       at <A HREF="http://www.magic-software.com">http://www.magic-software.com</A>
-
+ 
  @created 2001-06-02
  @edited  2009-04-28
 
@@ -44,7 +44,7 @@ public:
      */
     Color3();
 
-    /** \param any Must be in one of the following forms:
+    /** \param any Must be in one of the following forms: 
         - Color3(#, #, #)
         - Color3::fromARGB(#)
         - Color3{r = #, g = #, b = #)
@@ -52,7 +52,7 @@ public:
         - Color3::zero()
         */
     Color3(const Any& any);
-
+    
     /** Converts the Color3 to an Any. */
     operator Any() const;
 
@@ -62,7 +62,7 @@ public:
     Color3(float v) : r(v), g(v), b(v) {}
 
     explicit Color3(const class Vector3& v);
-
+    
     explicit Color3(const float value[3]);
 
     /** Returns this color */
@@ -106,7 +106,7 @@ public:
 
        Useful for rendering with
        stable but arbitrary colors, e.g., when debugging a mesh
-       algorithm.
+       algorithm. 
 
        \sa ansiMap
      */
@@ -168,7 +168,7 @@ public:
     inline Color3 pow(const Color3& other) const {
         return Color3(::pow(r, other.r), ::pow(g, other.g), ::pow(b, other.b));
     }
-
+    
     inline Color3 pow(float other) const {
         return Color3(::pow(r, other), ::pow(g, other), ::pow(b, other));
     }
@@ -192,7 +192,7 @@ public:
     }
 
     inline Color3 lerp(const Color3& other, float a) const {
-        return (*this) + (other - *this) * a;
+        return (*this) + (other - *this) * a; 
 
     }
 
@@ -207,15 +207,15 @@ public:
 
     /**
      *  Converts from HSV to RGB , note: toHSV(fromHSV(_hsv)) may not be _hsv, if it is at a grey point or black point.
-     *  The components of _hsv should lie in the unit interval.
+     *  The components of _hsv should lie in the unit interval. 
      *  @cite Alvy Ray Smith SIGGRAPH 1978 "Color Gamut Transform Pairs"
      **/
     static Color3 fromHSV(const Vector3& _hsv);
     static Vector3 toHSV(const Color3& _rgb);
-
+    
     /** Duplicates the matlab jet colormap maps [0,1] --> (r,g,b) where blue is close to  0 and red is close to 1. */
     static Color3 jetColorMap(const float& val);
-
+    
     /** Returns colors with maximum saturation and value @param hue [0, 1]*/
     static Color3 rainbowColorMap(float hue);
 

@@ -32,11 +32,11 @@ public:
     /** In radians about the Y-axis */
     float           yaw;
 
-    inline UprightFrame(const Vector3& t = Vector3::zero(), float p = 0, float y = 0)
+    inline UprightFrame(const Vector3& t = Vector3::zero(), float p = 0, float y = 0) 
         : translation(t), pitch(p), yaw(y) {}
 
     UprightFrame(const CoordinateFrame& cframe);
-
+    
     CoordinateFrame toCoordinateFrame() const;
 
     /** Supports implicit cast to CoordinateFrame */
@@ -72,7 +72,7 @@ protected:
     }
 
 public:
-
+    
     void serialize(class BinaryOutput& b) const;
     void deserialize(class BinaryInput& b);
 

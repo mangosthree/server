@@ -1,7 +1,7 @@
 /**
   @file Matrix4.cpp
-
-
+ 
+ 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
 
   @created 2003-10-02
@@ -22,7 +22,7 @@
 
 namespace G3D {
 
-
+    
 Matrix4::Matrix4(const Any& any) {
     any.verifyName("Matrix4");
     any.verifyType(Any::ARRAY);
@@ -139,7 +139,7 @@ Matrix4 Matrix4::orthogonalProjection(
     float            farval,
     float            upDirection) {
 
-    // Adapted from Mesa.  Note that Microsoft (http://msdn.microsoft.com/library/default.asp?url=/library/en-us/opengl/glfunc03_8qnj.asp)
+    // Adapted from Mesa.  Note that Microsoft (http://msdn.microsoft.com/library/default.asp?url=/library/en-us/opengl/glfunc03_8qnj.asp) 
     // and Linux (http://www.xfree86.org/current/glOrtho.3.html) have different matrices shown in their documentation.
 
     float x, y, z;
@@ -155,7 +155,7 @@ Matrix4 Matrix4::orthogonalProjection(
     y  *= upDirection;
     ty *= upDirection;
 
-    return
+    return 
         Matrix4( x , 0.0f, 0.0f,  tx,
                 0.0f,  y , 0.0f,  ty,
                 0.0f, 0.0f,  z ,  tz,
@@ -164,11 +164,11 @@ Matrix4 Matrix4::orthogonalProjection(
 
 
 Matrix4 Matrix4::perspectiveProjection(
-    float left,
+    float left,    
     float right,
-    float bottom,
+    float bottom,  
     float top,
-    float nearval,
+    float nearval, 
     float farval,
     float upDirection) {
 
@@ -201,11 +201,11 @@ Matrix4 Matrix4::perspectiveProjection(
 
 
 void Matrix4::getPerspectiveProjectionParameters(
-    float& left,
+    float& left,    
     float& right,
-    float& bottom,
+    float& bottom,  
     float& top,
-    float& nearval,
+    float& nearval, 
     float& farval,
     float upDirection) const {
 
@@ -460,16 +460,16 @@ float Matrix4::subDeterminant(int excludeRow, int excludeCol) const {
         }
     }
 
-    // Compute the first row of cofactors
-    float cofactor00 =
+    // Compute the first row of cofactors 
+    float cofactor00 = 
       elt[row[1]][col[1]] * elt[row[2]][col[2]] -
       elt[row[1]][col[2]] * elt[row[2]][col[1]];
 
-    float cofactor10 =
+    float cofactor10 = 
       elt[row[1]][col[2]] * elt[row[2]][col[0]] -
       elt[row[1]][col[0]] * elt[row[2]][col[2]];
 
-    float cofactor20 =
+    float cofactor20 = 
       elt[row[1]][col[0]] * elt[row[2]][col[1]] -
       elt[row[1]][col[1]] * elt[row[2]][col[0]];
 
@@ -516,7 +516,7 @@ void Matrix4::deserialize(class BinaryInput& b) {
 }
 
 std::string Matrix4::toString() const {
-    return G3D::format("[%g, %g, %g, %g; %g, %g, %g, %g; %g, %g, %g, %g; %g, %g, %g, %g]",
+    return G3D::format("[%g, %g, %g, %g; %g, %g, %g, %g; %g, %g, %g, %g; %g, %g, %g, %g]", 
             elt[0][0], elt[0][1], elt[0][2], elt[0][3],
             elt[1][0], elt[1][1], elt[1][2], elt[1][3],
             elt[2][0], elt[2][1], elt[2][2], elt[2][3],

@@ -1,9 +1,9 @@
 /**
  @file XML.h
-
+  
  @author Morgan McGuire
  @maintainer Morgan McGuire
-
+  
  @created 2010-02-11
  @edited  2010-02-24
 
@@ -25,7 +25,7 @@ namespace G3D {
 class TextInput;
 class TextOutput;
 
-/**
+/** 
 \brief Easy loading and saving of XML and HTML files.
 
 The XML class is intended primarily for interchange with other
@@ -120,7 +120,7 @@ public:
     const Array<XML> childArray() const {
         return m_child;
     }
-
+    
     /** Array size; zero for a VALUE */
     int numChildren() const {
         return m_child.size();

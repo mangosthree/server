@@ -14,7 +14,7 @@ namespace G3D {
 /** Globally unique identifiers. The probability of two different
     programs generating the same value from UniqueID::create is
     vanishingly small.
-
+    
     UniqueIDs optionally contain a 10-bit application specific tag
     that distinguishes their type.
 */
@@ -59,7 +59,7 @@ public:
     static GUniqueID create(uint16 tag = 0);
 };
 
-} // G3D
+} // G3D 
 
 /** For Table and Set */
 template<> struct HashTrait<class G3D::GUniqueID> {

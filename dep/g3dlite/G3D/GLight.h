@@ -61,7 +61,7 @@ public:
     bool                diffuse;
 
     GLight();
-
+   
     /** Accepted forms:
         - GLight::directional( vector3, color3, [bool, [bool]])
         - GLight::spot(vector3, vector3, #, color3, [#, [#, [#, [#, [bool, [bool]]]])
@@ -69,7 +69,7 @@ public:
         - GLight { [all fields] }
     */
     GLight(const Any& any);
-
+    
     /** Converts the Color3 to an Any. */
     operator Any() const;
 
@@ -83,15 +83,15 @@ public:
 
         @param cutOffAngleDegrees Must be on the range [0, 90]. This
         is the angle from the point direction to the edge of the light
-        cone.  I.e., a value of 45 produces a light with a 90-degree
+        cone.  I.e., a value of 45 produces a light with a 90-degree 
         cone of view.
     */
-    static GLight spot(const Vector3& pos, const Vector3& pointDirection, float cutOffAngleDegrees,
+    static GLight spot(const Vector3& pos, const Vector3& pointDirection, float cutOffAngleDegrees, 
                        const Color3& color, float constAtt = 1, float linAtt = 0, float quadAtt = 0,
                        bool specular = true, bool diffuse = true);
 
     /** Creates a spot light that looks at a specific point (by calling spot() ) */
-    static GLight spotTarget(const Vector3& pos, const Vector3& target, float cutOffAngleDegrees,
+    static GLight spotTarget(const Vector3& pos, const Vector3& target, float cutOffAngleDegrees, 
                        const Color3& color, float constAtt = 1, float linAtt = 0, float quadAtt = 0,
                        bool specular = true, bool diffuse = true) {
            return spot(pos, target - pos, cutOffAngleDegrees, color, constAtt, linAtt, quadAtt, specular, diffuse);

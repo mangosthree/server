@@ -22,13 +22,13 @@ namespace G3D {
  An integer that may safely be used on different threads without
  external locking.
 
- On Win32, Linux, FreeBSD, and Mac OS X this is implemented without locks.
+ On Win32, Linux, FreeBSD, and Mac OS X this is implemented without locks.  
 
  <B>BETA API</B>  This is unsupported and may change
  */
 class AtomicInt32 {
 private:
-#   if defined(G3D_WIN32)
+#   if defined(G3D_WIN32) 
     volatile long           m_value;
 #   elif defined(G3D_OSX)
     int32_t                 m_value;
@@ -84,7 +84,7 @@ public:
                   : "0"(x), "m"(m_value)   /* inputs */
                   : "memory", "cc");
             return old;
-
+            
 #       elif defined(G3D_OSX)
 
             int32 old = m_value;
@@ -138,13 +138,13 @@ public:
 
     /** Atomic test-and-set:  if <code>*this == comperand</code> then <code>*this := exchange</code> else do nothing.
         In both cases, returns the old value of <code>*this</code>.
-
-        Performs an atomic comparison of this with the Comperand value.
+    
+        Performs an atomic comparison of this with the Comperand value. 
         If this is equal to the Comperand value, the Exchange value is stored in this.
         Otherwise, no operation is performed.
 
         Under VC6 the sign bit may be lost.
-     */
+     */ 
     int32 compareAndSet(const int32 comperand, const int32 exchange) {
 #       if defined(G3D_WIN32)
             return InterlockedCompareExchange(&m_value, exchange, comperand);

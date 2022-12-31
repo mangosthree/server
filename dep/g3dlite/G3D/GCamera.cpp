@@ -3,7 +3,7 @@
 
   @author Morgan McGuire, http://graphics.cs.williams.edu
   @author Jeff Marsceill, 08jcm@williams.edu
-
+ 
   @created 2005-07-20
   @edited  2010-02-22
 */
@@ -105,12 +105,12 @@ void GCamera::setCoordinateFrame(const CoordinateFrame& c) {
 
 void GCamera::setFieldOfView(float angle, FOVDirection dir) {
     debugAssert((angle < pi()) && (angle > 0));
-
+    
     m_fieldOfView = angle;
     m_direction = dir;
 }
 
-
+ 
 float GCamera::imagePlaneDepth() const{
     return -m_nearPlaneZ;
 }
@@ -238,7 +238,7 @@ Vector3 GCamera::unprojectUnit(const Vector3& v, const Rect2D& viewport) const {
 
 
 Vector3 GCamera::unproject(const Vector3& v, const Rect2D& viewport) const {
-
+    
     const float n = m_nearPlaneZ;
     const float f = m_farPlaneZ;
 
@@ -280,7 +280,7 @@ void GCamera::getClipPlanes(
         clip[f] = fr.faceArray[f].plane;
     }
 }
-
+ 
 
 GCamera::Frustum GCamera::frustum(const Rect2D& viewport) const {
     Frustum f;
@@ -302,7 +302,7 @@ void GCamera::frustum(const Rect2D& viewport, Frustum& fr) const {
 
     float halfFOV = m_fieldOfView * 0.5f;
 
-    // This computes the normal, which is based on the complement of the
+    // This computes the normal, which is based on the complement of the 
     // halfFOV angle, so the equations are "backwards"
     if (m_direction == VERTICAL) {
         yy = -cosf(halfFOV);
@@ -312,7 +312,7 @@ void GCamera::frustum(const Rect2D& viewport, Frustum& fr) const {
         xx = -cosf(halfFOV);
         yy = xx * viewport.width() / viewport.height();
         zz = -sinf(halfFOV);
-    }
+    } 
 
     // Near face (ccw from UR)
     fr.vertexPos.append(
@@ -397,15 +397,15 @@ void GCamera::frustum(const Rect2D& viewport, Frustum& fr) const {
 
     // Transform planes to world space
     for (int p = 0; p < fr.faceArray.size(); ++p) {
-        // Since there is no scale factor, we don't have to
+        // Since there is no scale factor, we don't have to 
         // worry about the inverse transpose of the normal.
         Vector3 normal;
         float d;
-
+        
         fr.faceArray[p].plane.getEquation(normal, d);
-
+        
         Vector3 newNormal = m_cframe.rotation * normal;
-
+        
         if (isFinite(d)) {
             d = (newNormal * -d + m_cframe.translation).dot(newNormal);
             fr.faceArray[p].plane = Plane(newNormal, newNormal * d);
@@ -423,7 +423,7 @@ void GCamera::getNearViewportCorners
  Vector3&      outUL,
  Vector3&      outLL,
  Vector3&      outLR) const {
-
+    
     // Must be kept in sync with getFrustum()
     const float w  = viewportWidth(viewport) / 2.0f;
     const float h  = viewportHeight(viewport) / 2.0f;
@@ -453,7 +453,7 @@ void GCamera::getFarViewportCorners(
     const float w = viewportWidth(viewport) * m_farPlaneZ / m_nearPlaneZ;
     const float h = viewportHeight(viewport) * m_farPlaneZ / m_nearPlaneZ;
     const float z = m_farPlaneZ;
-
+    
     // Compute the points
     outUR = Vector3( w/2,  h/2, z);
     outUL = Vector3(-w/2,  h/2, z);
@@ -469,12 +469,12 @@ void GCamera::getFarViewportCorners(
 
 
 
-void GCamera::setPosition(const Vector3& t) {
+void GCamera::setPosition(const Vector3& t) { 
     m_cframe.translation = t;
 }
 
 
-void GCamera::lookAt(const Vector3& position, const Vector3& up) {
+void GCamera::lookAt(const Vector3& position, const Vector3& up) { 
     m_cframe.lookAt(position, up);
 }
 
@@ -505,7 +505,7 @@ void GCamera::deserialize(BinaryInput& bi) {
 
 
 Vector3 GCamera::convertFromUnitToNormal(const Vector3& in, const Rect2D& viewport) const{
-    return (in + Vector3(1,1,1)) * 0.5 * Vector3(viewport.width(), -viewport.height(), 1) +
+    return (in + Vector3(1,1,1)) * 0.5 * Vector3(viewport.width(), -viewport.height(), 1) + 
            Vector3(viewport.x0(), viewport.y1(), 0);
 }
 } // namespace

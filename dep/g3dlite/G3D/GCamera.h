@@ -51,7 +51,7 @@ public:
     enum FOVDirection {HORIZONTAL, VERTICAL};
 
 private:
-
+    
     /** Full field of view (in radians) */
     float                       m_fieldOfView;
 
@@ -98,7 +98,7 @@ public:
             /** The plane containing the face. */
             Plane           plane;
         };
-
+        
         /** The vertices, in homogeneous space.  If w == 0,
             a vertex is at infinity. */
         Array<Vector4>      vertexPos;
@@ -133,13 +133,13 @@ public:
     const Vector2& pixelOffset() const {
         return m_pixelOffset;
     }
-
+    
     /** Sets c to the camera's coordinate frame */
     void getCoordinateFrame(CoordinateFrame& c) const;
 
     /** Sets a new coordinate frame for the camera */
     void setCoordinateFrame(const CoordinateFrame& c);
-
+           
     /** Sets \a P equal to the camera's projection matrix. This is the
         matrix that maps points to the homogeneous clip cube that
         varies from -1 to 1 on all axes.  The projection matrix does
@@ -157,14 +157,14 @@ public:
     void getProjectPixelMatrix(const Rect2D& viewport, Matrix4& P) const;
 
     /** Converts projected points from OpenGL standards
-        (-1, 1) to normal 3D coordinate standards (0, 1)
+        (-1, 1) to normal 3D coordinate standards (0, 1) 
 
         \deprecated
     */ // TODO: Remove
     Vector3 convertFromUnitToNormal(const Vector3& in, const Rect2D& viewport) const;
 
     /**
-       Sets the field of view, in radians.  The
+       Sets the field of view, in radians.  The 
        initial angle is toRadians(55).  Must specify
        the direction of the angle.
 
@@ -259,7 +259,7 @@ public:
 
       Integer (x, y) values correspond to
       the upper left corners of pixels.  If you want to cast rays
-      through pixel centers, add 0.5 to x and y.
+      through pixel centers, add 0.5 to x and y.        
       */
     Ray worldRay(
         float                                  x,
@@ -288,7 +288,7 @@ public:
         debugAssert(z < 0);
         m_farPlaneZ = z;
     }
-
+    
     /**
      Sets a new value for the near clipping plane
      Expects a negative value
@@ -318,15 +318,15 @@ public:
     void lookAt(const Vector3& position, const Vector3& up = Vector3::unitY());
 
     /**
-       Returns the clipping planes of the frustum, in world space.
+       Returns the clipping planes of the frustum, in world space.  
        The planes have normals facing <B>into</B> the view frustum.
-
+       
        The plane order is guaranteed to be:
        Near, Right, Left, Top, Bottom, [Far]
-
-       If the far plane is at infinity, the resulting array will have
+       
+       If the far plane is at infinity, the resulting array will have 
        5 planes, otherwise there will be 6.
-
+       
        The viewport is used only to determine the aspect ratio of the screen; the
        absolute dimensions and xy values don't matter.
     */
@@ -342,11 +342,11 @@ public:
     void frustum(const Rect2D& viewport, GCamera::Frustum& f) const;
 
     GCamera::Frustum frustum(const Rect2D& viewport) const;
-
+    
     /** Read and Write camera parameters */
     void serialize(class BinaryOutput& bo) const;
     void deserialize(class BinaryInput& bi);
-
+   
 };
 
 } // namespace G3D

@@ -24,7 +24,7 @@
 
 namespace G3D {
 
-/**
+/** 
     Storage of data in a sparse 3D grid of point-based data.  The
     space cost for <I>n</I> elements is O(<I>n</I>).  For data with
     approximately uniform density (with respect to the radius hint),
@@ -41,7 +41,7 @@ namespace G3D {
             return p == q;
         }
     };
-
+    
     class PosFunc {
     public:
         static void getPosition(const Data& d, Vector3& pos) {
@@ -60,7 +60,7 @@ namespace G3D {
 
 */
 template<class Value,
-         class PosFunc    = PositionTrait<Value>,
+         class PosFunc    = PositionTrait<Value>, 
          class EqualsFunc = EqualsTrait<Value> >
 class PointHashGrid {
 private:
@@ -83,7 +83,7 @@ private:
     /** The cube of +/-1 along each dimension. Initialized by initOffsetArray.*/
     Vector3int32        m_offsetArray[3*3*3];
 
-    /** Incremented every time the data structure is mutated.
+    /** Incremented every time the data structure is mutated. 
         Used by the iterators to determine if the data structure
         has changed since iteration began. */
     int                 m_epoch;
@@ -100,7 +100,7 @@ private:
     /** Number of elements. */
     int                 m_size;
 
-    /** Non-empty cells indexed by grid position. Actual 3D position is
+    /** Non-empty cells indexed by grid position. Actual 3D position is 
         <code>position * m_cellWidth</code>*/
     CellTable           m_data;
 
@@ -116,11 +116,11 @@ private:
 
     /** Locate the cell and index within that cell containing v. Called by
         remove() and contains(). */
-    bool find(const Value&    v,
-              Vector3int32&   foundCellCoord,
-              Cell*&          foundCell,
+    bool find(const Value&    v, 
+              Vector3int32&   foundCellCoord, 
+              Cell*&          foundCell, 
               int&            index) {
-
+        
         Vector3 pos;
         PosFunc::getPosition(v, pos);
 
@@ -139,14 +139,14 @@ private:
                         return true;
                     }
                 }
-            }
+            }            
         }
 
         // Not found
-        return false;
+        return false;        
     }
 
-    /** Given a real-space position, returns the cell coord
+    /** Given a real-space position, returns the cell coord 
         containing it.*/
     inline void getCellCoord(const Vector3& pos, Vector3int32& cellCoord) const {
         for (int a = 0; a < 3; ++a) {
@@ -166,7 +166,7 @@ private:
                 }
             }
         }
-
+        
         // Put (0, 0, 0) first, so that contains() is most likely to find
         // the value quickly.
         i = (1 * 3 + 1) * 3 + 1;
@@ -178,8 +178,8 @@ private:
 
 public:
 
-    /**
-        @param radiusHint the radius that will typically be used with
+    /** 
+        @param radiusHint the radius that will typically be used with 
         beginSphereIntersection and beginBoxIntersection. If two <i>Value</i>s are equal,
         their positions must be within this radius as well.
     */
@@ -193,11 +193,11 @@ public:
     }
 
     /**
-       If radiusHint is negative, it is automatically chosen to put
-       about 5 values in each grid cell (which means about 27 * 5
+       If radiusHint is negative, it is automatically chosen to put 
+       about 5 values in each grid cell (which means about 27 * 5 
        values for each beginIntersection call).
     */
-    PointHashGrid(const Array<Value>& init, float radiusHint = -1.0f, const MemoryManager::Ref& m = MemoryManager::create()) : m_size(0), m_memoryManager(m) {
+    PointHashGrid(const Array<Value>& init, float radiusHint = -1.0f, const MemoryManager::Ref& m = MemoryManager::create()) : m_size(0), m_memoryManager(m) {        
         initOffsetArray();
         m_data.clearAndSetMemoryManager(m_memoryManager);
 
@@ -228,7 +228,7 @@ public:
             // volume        r^3
 
             float numPerCell = 5;
-            radiusHint =
+            radiusHint = 
                 (float)pow(numPerCell * m_bounds.volume() / init.size(), 1.0 / 3.0);
 
             if (radiusHint == 0) {
@@ -245,13 +245,13 @@ public:
         return m_size;
     }
 
-    /** Returns a conservative bounding box around the contents. This is
+    /** Returns a conservative bounding box around the contents. This is 
         conservative because it is not updated when elements are removed. */
     const AABox& conservativeBoxBounds() const {
         return m_bounds;
     }
 
-    /** Insert @a v at position @a p given by <code>getPosition(v, p)</code>.
+    /** Insert @a v at position @a p given by <code>getPosition(v, p)</code>.  
         Multiple elements that are equal may be inserted; all copies will be
         in the data structure. */
     void insert(const Value& v) {
@@ -295,10 +295,10 @@ public:
     /** If there are multiple copies of an element, you must
         delete them multiple times.
 
-        @param shrinkIfNecessary If <b>true</b>, deallocate underlying data
-        structures as they are emptied.  False increases performace at
+        @param shrinkIfNecessary If <b>true</b>, deallocate underlying data 
+        structures as they are emptied.  False increases performace at 
         the cost of memory overhead for dynamic structures.
-
+        
         @return true if the element was found.
     */
     bool remove(const Value& v, bool shrinkIfNecessary = true) {
@@ -345,7 +345,7 @@ public:
         bool                                    m_isEnd;
 
         const ThisType*                         m_grid;
-
+        
         typename CellTable::Iterator            m_tableIterator;
 
         /** Index within m_tableIterator->value of the current value. */
@@ -354,12 +354,12 @@ public:
         const int                               m_epoch;
 
         /** End iterator. Note that the m_tableIterator is initialized to the end iterator
-            of a temporary value!  This is ok because we'll never look at the value of the
+            of a temporary value!  This is ok because we'll never look at the value of the 
             m_tableIterator, since we're initializing the "end" Iterator.*/
-        Iterator() : m_isEnd(true), m_grid(NULL), m_tableIterator(CellTable().end()),
+        Iterator() : m_isEnd(true), m_grid(NULL), m_tableIterator(CellTable().end()), 
                      m_arrayIndex(0), m_epoch(0) {}
 
-        Iterator(const ThisType* grid) :
+        Iterator(const ThisType* grid) : 
             m_isEnd(grid->size() == 0),
             m_grid(grid),
             m_tableIterator( grid->m_data.begin() ),
@@ -370,7 +370,7 @@ public:
 
         const Value& value() const {
             debugAssert(! m_isEnd);
-            debugAssertM(m_tableIterator->value.size() > m_arrayIndex,
+            debugAssertM(m_tableIterator->value.size() > m_arrayIndex, 
                          "No more elements");
             return m_tableIterator->value[m_arrayIndex].value;
         }
@@ -382,7 +382,7 @@ public:
                 return false;
             } else {
                 return (m_isEnd         != other.m_isEnd) ||
-                    (m_tableIterator != other.m_tableIterator) ||
+                    (m_tableIterator != other.m_tableIterator) || 
                     (m_arrayIndex    != other.m_arrayIndex);
             }
         }
@@ -398,7 +398,7 @@ public:
         /** Preincrement */
         Iterator& operator++() {
             debugAssert(! m_isEnd);
-            debugAssertM(m_epoch == m_grid->m_epoch,
+            debugAssertM(m_epoch == m_grid->m_epoch, 
                          "It is illegal to mutate the HashGrid "
                          "while iterating through it.");
 
@@ -430,10 +430,10 @@ public:
     }; // Iterator
 
 
-    /** Iterate through all members.  It is an error to mutate the HashGrid
+    /** Iterate through all members.  It is an error to mutate the HashGrid 
         while iterating through it. Each member can be accessed by "dereferencing"
         the iterator:
-
+        
         <pre>
         for (Grid::Iterator i = grid.begin(); i != grid.end(), ++i) {
         const Value& = *i;
@@ -469,7 +469,7 @@ public:
 
         /** Upper bound on the boxes covered, inclusive.*/
         Vector3int32                            m_hi;
-
+        
         /** If true, test values against m_box before returning them.*/
         bool                                    m_exact;
 
@@ -480,7 +480,7 @@ public:
             Z,Y,X-major order.  This is the index keeping track of how
             far it has come */
         Vector3int32                            m_current;
-
+        
         /** The current cell. */
         Cell*                                   m_cell;
 
@@ -488,7 +488,7 @@ public:
         int                                     m_arrayIndex;
 
         const int                               m_epoch;
-
+      
 
         /** Called from advance() */
         void advanceCell() {
@@ -532,7 +532,7 @@ public:
                 }
 
                 // Advance until we have a value that can be returned, either
-                // because we don't care about exactness or because it is
+                // because we don't care about exactness or because it is 
                 // guaranteed to be within the box.
             } while (m_exact && ! m_box.contains(position()));
         }
@@ -542,7 +542,7 @@ public:
         BoxIterator() : m_isEnd(true), m_grid(NULL), m_exact(true), m_current(0,0,0), m_cell(NULL), m_arrayIndex(0), m_epoch(0) {}
 
         /** Begin iterator */
-        BoxIterator(const ThisType* grid, bool exact, const AABox& box) :
+        BoxIterator(const ThisType* grid, bool exact, const AABox& box) : 
             m_isEnd(false),
             m_grid(grid),
             m_exact(exact),
@@ -550,11 +550,11 @@ public:
             m_current(-1, 0 ,0),
             m_cell(NULL),
             m_arrayIndex(0),
-            m_epoch(grid->m_epoch) {
+            m_epoch(grid->m_epoch) { 
 
             m_grid->getCellCoord(box.low(), m_lo);
             m_grid->getCellCoord(box.high(), m_hi);
-
+            
             // Get to the first value
             m_current = m_lo;
             // Back up one so that advancing takes us to the first
@@ -583,7 +583,7 @@ public:
                 return false;
             } else {
                 return (m_isEnd         != other.m_isEnd) ||
-                    (m_cell          != other.m_cell) ||
+                    (m_cell          != other.m_cell) || 
                     (m_arrayIndex    != other.m_arrayIndex);
             }
         }
@@ -595,7 +595,7 @@ public:
         /** Preincrement */
         BoxIterator& operator++() {
             debugAssert(! m_isEnd);
-            debugAssertM(m_epoch == m_grid->m_epoch,
+            debugAssertM(m_epoch == m_grid->m_epoch, 
                          "It is illegal to mutate the HashGrid "
                          "while iterating through it.");
 
@@ -620,12 +620,12 @@ public:
         }
     }; // BoxIterator
 
-    /**
-        Finds all values whose positions are within @a box.  It is an error to
+    /** 
+        Finds all values whose positions are within @a box.  It is an error to 
         mutate the PointHashGrid while iterating through it.
 
         @param exact If false, the iterator will execute more quickly but will likely return some
-        values that lie outside the box. Set exact = false if you are going to test the
+        values that lie outside the box. Set exact = false if you are going to test the 
         results against the yourself box anyway.
     */
     BoxIterator beginBoxIntersection(const AABox& box, bool exact = true) const {
@@ -639,7 +639,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////
-
+    
     class SphereIterator {
     private:
 
@@ -659,12 +659,12 @@ public:
 
             while (! m_sphere.contains(m_boxIterator.position())) {
                 ++m_boxIterator;
-
+                
                 if (! m_boxIterator.hasMore()) {
                     m_isEnd = true;
                     return;
                 }
-            }
+            } 
         }
 
         static AABox getBoundingBox(const Sphere& s) {
@@ -673,17 +673,17 @@ public:
             return box;
         }
 
-        SphereIterator(const ThisType* grid, const Sphere& sphere) :
+        SphereIterator(const ThisType* grid, const Sphere& sphere) : 
             m_isEnd(false),
             m_sphere(sphere),
             m_boxIterator(grid, false, getBoundingBox(sphere)) {
-
+            
             // Find the first element that is actually in the sphere,
             // not just the box.
             advance();
         }
 
-        const Value& value() const {
+        const Value& value() const {            
             return *m_boxIterator;
         }
 
@@ -699,7 +699,7 @@ public:
             if (other.m_isEnd && m_isEnd) {
                 return false;
             } else {
-                return
+                return 
                     (m_isEnd         != other.m_isEnd) ||
                     (m_sphere        != other.m_sphere) ||
                     (m_boxIterator   != other.m_boxIterator);
@@ -710,7 +710,7 @@ public:
             return !(*this != other);
         }
 
-
+    
 
         /** Preincrement */
         SphereIterator& operator++() {
@@ -738,7 +738,7 @@ public:
         }
     }; // SphereIterator
 
-    /**
+    /** 
         Finds all values whose positions are within @a sphere.  It is an error
         to mutate the HashGrid while iterating through it.
     */
@@ -760,7 +760,7 @@ public:
 
        Example:
        <pre>
-       for(PointHashGrid<Vector3>::CellIterator iter = grid.beginCells(); iter != grid.endCells(); ++iter) {
+       for(PointHashGrid<Vector3>::CellIterator iter = grid.beginCells(); iter != grid.endCells(); ++iter) {    
        entriesFound += iter->size();
        }
        </pre>
@@ -780,7 +780,7 @@ public:
         }
 
     public:
-
+        
         class CellObject {
             friend class CellIterator;
         private:
@@ -793,7 +793,7 @@ public:
             /** Returns the bounds on this cell */
             AABox bounds() const {
                 const Vector3int32& k = m_parent->m_tableIterator->key;
-                return AABox(Vector3(k) * m_parent->m_cellWidth,
+                return AABox(Vector3(k) * m_parent->m_cellWidth, 
                              Vector3(k + Vector3int32(1, 1, 1)) * m_parent->m_cellWidth);
             }
 
@@ -809,15 +809,15 @@ public:
         CellObject m_indirection;
 
         /** End iterator. Note that the m_tableIterator is initialized to the end iterator
-            of a temporary value!  This is ok because we'll never look at the value of the
+            of a temporary value!  This is ok because we'll never look at the value of the 
             m_tableIterator, since we're initializing the "end" Iterator.*/
-        CellIterator() :
+        CellIterator() : 
             m_isEnd(true),
             m_grid(NULL),
             m_tableIterator( CellTable().end() ),
             m_epoch(0) {}
-
-        CellIterator(const ThisType* grid) :
+        
+        CellIterator(const ThisType* grid) : 
             m_isEnd(false),
             m_grid(grid),
             m_tableIterator( grid->m_data.begin()),
@@ -825,7 +825,7 @@ public:
             m_indirection.m_parent = this;
             m_isEnd = ! m_tableIterator.hasMore();
         }
-
+        
         // Intentionally unimplemented
         CellIterator& operator=(const CellIterator&);
 
@@ -839,7 +839,7 @@ public:
             // != is called more often than == during iteration
             return !(
                      (m_isEnd && other.m_isEnd) ||
-                     ((m_isEnd == other.m_isEnd) &&
+                     ((m_isEnd == other.m_isEnd) && 
                       (m_tableIterator != other.m_tableIterator)));
         }
 
@@ -849,7 +849,7 @@ public:
 
         /** Preincrement */
         CellIterator& operator++() {
-            debugAssertM(m_epoch == m_grid->m_epoch,
+            debugAssertM(m_epoch == m_grid->m_epoch, 
                          "It is illegal to mutate the HashGrid while "
                          "iterating through it.");
             ++m_tableIterator;
@@ -883,8 +883,8 @@ public:
     ///////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////
 
-    /** Returns true if there is a value that is exactly equal to @a v. This will
-        check all neighboring cells to avoid roundoff error at cell boundaries.
+    /** Returns true if there is a value that is exactly equal to @a v. This will 
+        check all neighboring cells to avoid roundoff error at cell boundaries. 
     */
     bool contains(const Value& v) const {
         Cell* cell = NULL;
@@ -893,12 +893,12 @@ public:
         return const_cast<ThisType*>(this)->find(v, cellCoord, cell, index);
     }
 
-    /** Calls delete on all of the values, which are assumed to be pointers.
-        This is a helper to avoid requiring you to iterate through the data
+    /** Calls delete on all of the values, which are assumed to be pointers. 
+        This is a helper to avoid requiring you to iterate through the data 
         structure, removing and deleting each one. Clears the PointHashGrid at the
         end.
-
-        Using objects (instead of pointers) or reference counted pointers is
+        
+        Using objects (instead of pointers) or reference counted pointers is 
         recommended over using pointers and this deleteAll method.*/
     void deleteAll() {
         for (Iterator it = begin(); it.hasMore(); ++it) {
@@ -916,7 +916,7 @@ public:
         m_memoryManager = m;
     }
 
-    /** Removes all data.
+    /** Removes all data. 
         @param shrink If true, underlying structures are deallocated as
         they are freed.*/
     void clear(bool shrink = true) {
@@ -940,7 +940,7 @@ public:
     float debugGetAverageBucketSize() const {
         return m_data.debugGetAverageBucketSize();
     }
-#undef ThisType
+#undef ThisType 
 };
 
 } // G3D

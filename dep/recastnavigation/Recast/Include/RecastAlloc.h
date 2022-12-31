@@ -332,7 +332,7 @@ public:
     /// The root array pointer.
     ///  @return The root array pointer.
     inline operator T*() { return ptr; }
-
+    
 private:
     // Explicitly disabled copy constructor and copy assignment operator.
     rcScopedDelete(const rcScopedDelete&);

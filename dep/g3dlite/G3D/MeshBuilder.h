@@ -5,7 +5,7 @@
 
   @created 2002-02-27
   @edited  2004-10-04
- */
+ */ 
 #ifndef G3D_MESHBUILDER_H
 #define G3D_MESHBUILDER_H
 
@@ -32,9 +32,9 @@ public:
 private:
     /** Indices of vertices in <B>or near</B>  a grid cell. */
     typedef Array<int> List;
-
+   
     std::string                 name;
-
+    
     /**
      All of the triangles, as a long triangle list.
      */
@@ -70,7 +70,7 @@ public:
 
     void setName(const std::string& n);
 
-    /** Vertices within this distance are considered identical.
+    /** Vertices within this distance are considered identical.  
         Use AUTO_WELD (the default) to have the distance be a function of the model size.*/
     void setWeldRadius(double r) {
         close = r;

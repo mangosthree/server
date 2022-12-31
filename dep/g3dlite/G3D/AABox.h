@@ -1,10 +1,10 @@
 /**
   @file AABox.h
-
+ 
   Axis-aligned box class
-
+ 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-
+ 
   @created 2004-01-10
   @edited  2009-02-10
 
@@ -82,7 +82,7 @@ public:
     }
 
     void serialize(class BinaryOutput& b) const;
-
+    
     void deserialize(class BinaryInput& b);
 
     inline bool isFinite() const {
@@ -141,7 +141,7 @@ public:
     void split(const Vector3::Axis& axis, float location, AABox& low, AABox& high) const;
 
     /**
-     Conservative culling test for up to 32 planes.
+     Conservative culling test for up to 32 planes.    
      Returns true if there exists a <CODE>plane[p]</CODE> for
      which the entire object is in the negative half space
      (opposite the plane normal).
@@ -157,7 +157,7 @@ public:
       exits early when one plane is found.  -1 when the function
       returns false (i.e. when no plane culls the whole object).
 
-     @param testMask  If bit <I>p</I> is 0, the
+     @param testMask  If bit <I>p</I> is 0, the 
        bounding volume automatically passes the culling test for
        <CODE>plane[p]</CODE> (i.e. it is known that the volume
        is entirely within the positive half space).  The function
@@ -165,7 +165,7 @@ public:
        when testMask is -1 (0xFFFFFFFF).
 
      @param childMask Test mask for the children of this volume.
-
+       
      */
     bool culledBy(
         const Array<Plane>&        plane,
@@ -183,7 +183,7 @@ public:
 
     /** less than or equal to containment */
     inline bool contains(const AABox& other) const {
-        return
+        return 
             (other.hi.x <= hi.x) &&
             (other.hi.y <= hi.y) &&
             (other.hi.z <= hi.z) &&

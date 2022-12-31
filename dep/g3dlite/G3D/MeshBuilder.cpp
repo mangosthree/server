@@ -80,7 +80,7 @@ void MeshBuilder::centerTriList() {
 
 
 void MeshBuilder::computeBounds(Vector3& min, Vector3& max) {
-    min = Vector3::inf();
+    min = Vector3::inf(); 
     max = -min;
 
     int v;

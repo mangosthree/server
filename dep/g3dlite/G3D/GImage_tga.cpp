@@ -89,7 +89,7 @@ void GImage::encodeTGA(
         }
     }
 
-    // Write "TRUEVISION-XFILE " 18 bytes from the end
+    // Write "TRUEVISION-XFILE " 18 bytes from the end 
     // (with null termination)
     out.writeString("TRUEVISION-XFILE ");
 }
@@ -113,7 +113,7 @@ void GImage::decodeTGA(
     BinaryInput&        input) {
 
     // This is a simple TGA loader that can handle uncompressed
-    // truecolor TGA files (TGA type 2).
+    // truecolor TGA files (TGA type 2). 
     // Verify this is a TGA file by looking for the TRUEVISION tag.
     int pos = input.getPosition();
     input.setPosition(input.size() - 18);
@@ -129,19 +129,19 @@ void GImage::decodeTGA(
     int imageType    = input.readUInt8();
 
     (void)colorMapType;
-
+    
     // 2 is the type supported by this routine.
     if (imageType != 2 && imageType != 10) {
         throw Error("TGA images must be type 2 (Uncompressed truecolor) or 10 (Run-length truecolor)", input.getFilename());
     }
-
+    
     // Color map specification
     input.skip(5);
 
     // Image specification
 
     // Skip x and y offsets
-    input.skip(4);
+    input.skip(4); 
 
     m_width  = input.readInt16();
     m_height = input.readInt16();
@@ -162,13 +162,13 @@ void GImage::decodeTGA(
     // as data indicating where the origin is
     int imageDescriptor = input.readUInt8();
     (void)imageDescriptor;
-
+    
     // Image ID
     input.skip(IDLength);
 
     m_byte = (uint8*)m_memMan->alloc(m_width * m_height * m_channels);
     debugAssert(m_byte);
-
+    
     // Pixel data
     int x;
     int y;
@@ -192,7 +192,7 @@ void GImage::decodeTGA(
         }
     } else if (imageType == 10) {
 
-        // Run-length encoded
+        // Run-length encoded 
         for (y = m_height - 1; y >= 0; --y) {
             for (int x = 0; x < m_width; /* intentionally no x increment */) {
                 // The specification guarantees that no packet will wrap past the end of a row

@@ -11,7 +11,7 @@
 
 #include <cstring>
 
-extern "C" {
+extern "C" { 
 #ifdef G3D_LINUX
 #   include <jconfig.h>
 #   include <jpeglib.h>
@@ -28,11 +28,11 @@ const int jpegQuality = 96;
 
 /**
  The IJG library needs special setup for compress/decompressing
- from memory.  These classes provide them.
-
+ from memory.  These classes provide them.  
+ 
  The format of this class is defined by the IJG library; do not
  change it.
- */
+ */ 
 class memory_destination_mgr {
 public:
     struct jpeg_destination_mgr pub;
@@ -94,7 +94,7 @@ static void jpeg_memory_dest (
         // First time for this JPEG object; call the
         // IJG allocator to get space.
         cinfo->dest = (struct jpeg_destination_mgr*)
-            (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo,
+            (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, 
                                         JPOOL_PERMANENT,
                                            sizeof(memory_destination_mgr));
     }
@@ -106,7 +106,7 @@ static void jpeg_memory_dest (
     dest->pub.empty_output_buffer   = empty_output_buffer;
     dest->pub.term_destination      = term_destination;
 }
-
+  
 ////////////////////////////////////////////////////////////////////////////////////////
 
 #define INPUT_BUF_SIZE  4096
@@ -217,9 +217,9 @@ static void jpeg_memory_src (
                 (j_common_ptr) cinfo,
                 JPOOL_PERMANENT,
                 sizeof(memory_source_mgr));
-
+        
         src = (mem_src_ptr)cinfo->src;
-
+        
         src->buffer = (JOCTET*)
             (*cinfo->mem->alloc_small)(
                 (j_common_ptr) cinfo,
@@ -240,9 +240,9 @@ static void jpeg_memory_src (
 
     // forces fill_input_buffer on first read
     src->pub.bytes_in_buffer    = 0;
-
+    
     // until buffer loaded
-    src->pub.next_input_byte = NULL;
+    src->pub.next_input_byte = NULL; 
 }
 
 
@@ -281,9 +281,9 @@ void GImage::encodeJPEG(
     cinfo.input_components  = 3;
 
     // colorspace of input image
-    cinfo.in_color_space    = JCS_RGB;
+    cinfo.in_color_space    = JCS_RGB; 
     cinfo.input_gamma       = 1.0;
-
+    
     // Set parameters for compression, including image size & colorspace
     jpeg_set_defaults(&cinfo);
     jpeg_set_quality(&cinfo, jpegQuality, false);
@@ -299,7 +299,7 @@ void GImage::encodeJPEG(
     // Iterate over all scanlines from top to bottom
     // pointer to a single row
     JSAMPROW row_pointer[1];
-
+    
     // JSAMPLEs per row in image_buffer
     int row_stride = cinfo.image_width * 3;
     while (cinfo.next_scanline < cinfo.image_height) {
@@ -309,7 +309,7 @@ void GImage::encodeJPEG(
 
     // Shut down the compressor
     jpeg_finish_compress(&cinfo);
-
+    
     // Figure out how big the result was.
     int outLength = ((mem_dest_ptr)cinfo.dest)->count;
 
@@ -420,7 +420,7 @@ void GImage::decodeJPEG(
                     scan[0] = t[0];
                     scan[1] = t[1];
                     scan[2] = t[2];
-
+                    
                     scan    += 3;
                     t       += 4;
                 }

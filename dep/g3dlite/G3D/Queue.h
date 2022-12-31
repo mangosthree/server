@@ -1,8 +1,8 @@
-/**
+/** 
   @file Queue.h
-
+ 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-
+ 
   @created 2002-07-09
   @edited  2008-12-20
  */
@@ -17,7 +17,7 @@
 namespace G3D {
 
 /**
- Locate the indices of the break between of the two
+ Locate the indices of the break between of the two 
  sections of the circular queue.  These are used to
  construct two for loops that iterate over the whole
  sequence without using the modulo operator.
@@ -41,10 +41,10 @@ namespace G3D {
 template <class T>
 class Queue {
 private:
-    //
+    //                
     //             |<----  num  ---->|
     // [  |  |  |  |  |  |  |  |  |  |  |  |  |  ]
-    //              ^
+    //              ^ 
     //              |
     //             head
     //
@@ -64,7 +64,7 @@ private:
      Number of elements (including head) that are visible and initialized.
      */
     int                 num;
-
+    
     /**
      Size of data array in elements.
      */
@@ -139,7 +139,7 @@ private:
 
 public:
 
-    Queue() :
+    Queue() : 
       data(NULL),
       head(0),
       num(0),
@@ -157,7 +157,7 @@ public:
 
    /**
     Destructor does not delete() the objects if T is a pointer type
-    (e.g. T = int*) instead, it deletes the pointers themselves and
+    (e.g. T = int*) instead, it deletes the pointers themselves and 
     leaves the objects.  Call deleteAll if you want to dealocate
     the objects referenced.
     */
@@ -246,12 +246,12 @@ public:
     @param freeStorage If false, the underlying array is not deallocated
     (allowing fast push in the future), however, the size of the Queue
     is reported as zero.
-
+    
     */
    void clear(bool freeStorage = true) {
 
        FIND_ENDS;
-
+       
        // Invoke the destructors on the elements
        int i;
        for (i = head; i < firstEnd; ++i) {
@@ -261,7 +261,7 @@ public:
        for (i = 0; i < secondEnd; ++i) {
            (data + i)->~T();
        }
-
+       
        num = 0;
        head = 0;
        if (freeStorage) {
@@ -344,7 +344,7 @@ public:
     */
     void deleteAll() {
         FIND_ENDS;
-
+        
         int i;
         for (i = 0; i < secondEnd; ++i) {
             delete data[i];

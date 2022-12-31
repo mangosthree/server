@@ -1,8 +1,8 @@
-/**
+/** 
   @file Pointer.h
-
+ 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-
+ 
   @created 2007-05-16
   @edited  2009-03-26
 
@@ -36,7 +36,7 @@ namespace G3D {
 
    Foo  f;
    bool b;
-
+   
    Pointer<bool> p1(&b);
    Pointer<bool> p2(&f, &Foo::getEnabled, &Foo::setEnabled);
 
@@ -56,7 +56,7 @@ namespace G3D {
    <i>Note:</i> Because of the way that dereference is implemented, you cannot pass <code>*p</code> through a function
    that takes varargs (...), e.g., <code>printf("%d", *p)</code> will produce a compile-time error.  Instead use
    <code>printf("%d",(bool)*p)</code> or <code>printf("%d", p.getValue())</code>.
-
+   
  */
 template<class ValueType>
 class Pointer {
@@ -77,7 +77,7 @@ private:
         ValueType* value;
 
     public:
-
+        
         Memory(ValueType* value) : value(value) {
             //debugAssert(value != NULL);
         }
@@ -108,9 +108,9 @@ private:
         SetMethod   setMethod;
 
     public:
-
-        Accessor(T* object,
-                 GetMethod getMethod,
+        
+        Accessor(T* object, 
+                 GetMethod getMethod, 
                  SetMethod setMethod) : object(object), getMethod(getMethod), setMethod(setMethod) {
             debugAssert(object != NULL);
         }
@@ -142,10 +142,10 @@ private:
         SetMethod   setMethod;
 
     public:
-
+        
         RefAccessor(
-            const ReferenceCountedPointer<T>& object,
-            GetMethod getMethod,
+            const ReferenceCountedPointer<T>& object, 
+            GetMethod getMethod, 
             SetMethod setMethod) : object(object), getMethod(getMethod), setMethod(setMethod) {
 
             debugAssert(object != NULL);
@@ -200,49 +200,49 @@ public:
     template<class Class>
     Pointer(const ReferenceCountedPointer<Class>& object,
             ValueType (Class::*getMethod)() const,
-            void (Class::*setMethod)(ValueType)) :
+            void (Class::*setMethod)(ValueType)) : 
         m_interface(new RefAccessor<Class, ValueType (Class::*)() const, void (Class::*)(ValueType)>(object, getMethod, setMethod)) {}
 
     template<class Class>
     Pointer(const ReferenceCountedPointer<Class>& object,
             const ValueType& (Class::*getMethod)() const,
-            void (Class::*setMethod)(ValueType)) :
+            void (Class::*setMethod)(ValueType)) : 
         m_interface(new RefAccessor<Class, const ValueType& (Class::*)() const, void (Class::*)(ValueType)>(object, getMethod, setMethod)) {}
 
     template<class Class>
     Pointer(const ReferenceCountedPointer<Class>& object,
             ValueType (Class::*getMethod)() const,
-            void (Class::*setMethod)(const ValueType&)) :
+            void (Class::*setMethod)(const ValueType&)) : 
         m_interface(new RefAccessor<Class, ValueType (Class::*)() const, void (Class::*)(const ValueType&)>(object, getMethod, setMethod)) {}
 
     template<class Class>
     Pointer(const ReferenceCountedPointer<Class>& object,
             const ValueType& (Class::*getMethod)() const,
-            void (Class::*setMethod)(const ValueType&)) :
+            void (Class::*setMethod)(const ValueType&)) : 
         m_interface(new RefAccessor<Class, const ValueType& (Class::*)() const, void (Class::*)(const ValueType&)>(object, getMethod, setMethod)) {}
 
     template<class Class>
     Pointer(Class* object,
             const ValueType& (Class::*getMethod)() const,
-            void (Class::*setMethod)(const ValueType&)) :
+            void (Class::*setMethod)(const ValueType&)) : 
         m_interface(new Accessor<Class, const ValueType& (Class::*)() const, void (Class::*)(const ValueType&)>(object, getMethod, setMethod)) {}
 
     template<class Class>
     Pointer(Class* object,
             ValueType (Class::*getMethod)() const,
-            void (Class::*setMethod)(const ValueType&)) :
+            void (Class::*setMethod)(const ValueType&)) : 
         m_interface(new Accessor<Class, ValueType (Class::*)() const, void (Class::*)(const ValueType&)>(object, getMethod, setMethod)) {}
 
     template<class Class>
     Pointer(Class* object,
             const ValueType& (Class::*getMethod)() const,
-            void (Class::*setMethod)(ValueType)) :
+            void (Class::*setMethod)(ValueType)) : 
         m_interface(new Accessor<Class, const ValueType& (Class::*)() const, void (Class::*)(ValueType)>(object, getMethod, setMethod)) {}
 
     template<class Class>
     Pointer(Class* object,
             ValueType (Class::*getMethod)() const,
-            void (Class::*setMethod)(ValueType)) :
+            void (Class::*setMethod)(ValueType)) : 
         m_interface(new Accessor<Class, ValueType (Class::*)() const, void (Class::*)(ValueType)>(object, getMethod, setMethod)) {}
 
     ~Pointer() {

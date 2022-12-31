@@ -44,7 +44,7 @@ typedef struct md5_state_s {
 } md5_state_t;
 
 #ifdef __cplusplus
-extern "C"
+extern "C" 
 {
 #endif
 
@@ -57,7 +57,7 @@ static void md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes);
 /* Finish the message and return the digest. */
 void md5_finish(md5_state_t *pms, md5_byte_t digest[16]);
 #ifdef __cplusplus
-}
+}    
 #endif
 
 

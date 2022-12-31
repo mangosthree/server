@@ -1,8 +1,8 @@
 /**
  @file LineSegment.h
-
+  
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-
+ 
  @created 2003-02-08
  @edited  2008-02-02
  */
@@ -91,12 +91,12 @@ private:
     float           m_length;
 
 public:
-
+    
     LineSegment2D() {}
 
     static LineSegment2D fromTwoPoints(const Vector2& p0, const Vector2& p1);
 
-    /** Returns the intersection of these segements (including
+    /** Returns the intersection of these segements (including 
        testing endpoints), or Vector2::inf() if they do not intersect. */
     Vector2 intersection(const LineSegment2D& other) const;
 

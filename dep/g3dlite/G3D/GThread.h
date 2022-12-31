@@ -1,6 +1,6 @@
-/**
+/** 
   @file GThread.h
-
+ 
   @created 2005-09-22
   @edited  2007-01-31
 
@@ -20,16 +20,16 @@
 
 
 namespace G3D {
-
+        
 typedef ReferenceCountedPointer<class GThread> GThreadRef;
 
 /**
- Platform independent thread implementation.  You can either subclass and
+ Platform independent thread implementation.  You can either subclass and 
  override GThread::threadMain or call the create method with a method.
 
  Beware of reference counting and threads.  If circular references exist between
- GThread subclasses then neither class will ever be deallocated.  Also,
- dropping all pointers (and causing deallocation) of a GThread does NOT
+ GThread subclasses then neither class will ever be deallocated.  Also, 
+ dropping all pointers (and causing deallocation) of a GThread does NOT 
  stop the underlying process.
 
  @sa G3D::GMutex, G3D::Spinlock, G3D::AtomicInt32
@@ -83,7 +83,7 @@ public:
     /** Starts the thread and executes threadMain().  Returns false if
        the thread failed to start (either because it was already started
        or because the OS refused).
-
+       
        @param behavior If USE_CURRENT_THREAD, rather than spawning a new thread, this routine
        runs threadMain on the current thread.
        */

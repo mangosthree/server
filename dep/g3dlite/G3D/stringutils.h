@@ -1,8 +1,8 @@
 /**
  @file stringutils.h
-
+ 
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-
+ 
  @author  2000-09-09
  @edited  2010-03-05
  */
@@ -19,7 +19,7 @@ namespace G3D {
 extern const char* NEWLINE;
 
 /** Separates a comma-separated line, properly escaping commas within
-    double quotes (") and super quotes ("""). This matches Microsoft Excel's
+    double quotes (") and super quotes ("""). This matches Microsoft Excel's 
     CSV output.
 
     \param stripQuotes If true, strips leading and trailing " and """
@@ -28,7 +28,7 @@ extern const char* NEWLINE;
 */
 void parseCommaSeparated(const std::string s, Array<std::string>& array, bool stripQuotes = true);
 
-/** Finds the index of the first '\\' or '/' character, starting at index \a start.
+/** Finds the index of the first '\\' or '/' character, starting at index \a start. 
   \sa G3D::findLastSlash, G3D::isSlash
 */
 inline int findSlash(const std::string& f, int start = 0) {

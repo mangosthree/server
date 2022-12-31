@@ -1,10 +1,10 @@
 /**
   @file Matrix4.h
-
+ 
   4x4 matrix class
-
+ 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-
+ 
   @created 2003-10-02
   @edited  2009-10-20
  */
@@ -39,7 +39,7 @@ private:
 
     /**
       Computes the determinant of the 3x3 matrix that lacks excludeRow
-      and excludeCol.
+      and excludeCol. 
     */
     float subDeterminant(int excludeRow, int excludeCol) const;
 
@@ -65,7 +65,7 @@ public:
      init should be <B>row major</B>.
      */
     Matrix4(const float* init);
-
+    
     /**
         a is the upper left 3x3 submatrix and b is the upper right 3x1 submatrix. The last row of the created matrix is (0,0,0,1).
     */
@@ -92,12 +92,12 @@ public:
     void getPerspectiveProjectionParameters
     (float& left,
      float& right,
-     float& bottom,
+     float& bottom,  
      float& top,
-     float& nearval,
+     float& nearval, 
      float& farval,
      float updirection = -1.0f) const;
-
+        
     inline float* operator[](int r) {
         debugAssert(r >= 0);
         debugAssert(r < 4);
@@ -108,7 +108,7 @@ public:
         debugAssert(r >= 0);
         debugAssert(r < 4);
         return (const float*)&elt[r];
-    }
+    } 
 
     inline operator float* () {
         return (float*)&elt[0][0];
@@ -139,7 +139,7 @@ public:
      Near and far are the <b>NEGATIVE</b> of the near and far plane Z values
      (to follow OpenGL conventions).
 
-    \param upDirection Use -1.0 for 2D Y increasing downwards (the G3D 8.x default convention),
+    \param upDirection Use -1.0 for 2D Y increasing downwards (the G3D 8.x default convention), 
     1.0 for 2D Y increasing upwards (the G3D 7.x default and OpenGL convention)
      */
     static Matrix4 orthogonalProjection(
@@ -152,7 +152,7 @@ public:
         float            upDirection = -1.0f);
 
 
-    /** \param upDirection Use -1.0 for 2D Y increasing downwards (the G3D 8.x default convention),
+    /** \param upDirection Use -1.0 for 2D Y increasing downwards (the G3D 8.x default convention), 
     1.0 for 2D Y increasing upwards (the G3D 7.x default and OpenGL convention)
       */
     static Matrix4 orthogonalProjection(
@@ -161,7 +161,7 @@ public:
         float            farval,
         float            upDirection = -1.0f);
 
-    /** \param upDirection Use -1.0 for 2D Y increasing downwards (the G3D 8.x default convention),
+    /** \param upDirection Use -1.0 for 2D Y increasing downwards (the G3D 8.x default convention), 
     1.0 for 2D Y increasing upwards (the G3D 7.x default and OpenGL convention)
       */
     static Matrix4 perspectiveProjection(
@@ -190,10 +190,10 @@ public:
     float determinant() const;
     Matrix4 inverse() const;
 
-    /**
+    /** 
      Transpose of the cofactor matrix (used in computing the inverse).
      Note: This is in fact only one type of adjoint. More generally,
-     an adjoint of a matrix is any mapping of a matrix which possesses
+     an adjoint of a matrix is any mapping of a matrix which possesses 
      certain properties.  This returns the so-called adjugate
      or classical adjoint.
     */
@@ -213,7 +213,7 @@ public:
                        0, 0, v.z, 0,
                        0, 0, 0, 1);
     }
-
+    
     /** 3D scale matrix */
     inline static Matrix4 scale(float x, float y, float z) {
         return scale(Vector3(x, y, z));
@@ -233,7 +233,7 @@ public:
         return Matrix4(Matrix3::identity(), Vector3(x, y, z));
     }
 
-    /** Create a rotation matrix that rotates \a deg degrees around the Y axis */
+    /** Create a rotation matrix that rotates \a deg degrees around the Y axis */ 
     inline static Matrix4 yawDegrees(float deg) {
         return Matrix4(Matrix3::fromAxisAngle(Vector3::unitY(), toRadians(deg)));
     }

@@ -2,7 +2,7 @@
  @file CoordinateFrame.h
 
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-
+ 
  @created 2001-03-04
  @edited  2009-04-29
 
@@ -36,21 +36,21 @@ class Any;
 
 /**
  A rigid body RT (rotation-translation) transformation.
-
+    
 CoordinateFrame abstracts a 4x4 matrix that maps object space to world space:
-
+  
   v_world = C * v_object
 
 CoordinateFrame::rotation is the upper 3x3 submatrix, CoordinateFrame::translation
-is the right 3x1 column.  The 4th row is always [0 0 0 1], so it isn't stored.
+is the right 3x1 column.  The 4th row is always [0 0 0 1], so it isn't stored.  
 So you don't have to remember which way the multiplication and transformation work,
-it provides explicit toWorldSpace and toObjectSpace methods.  Also, points, vectors
+it provides explicit toWorldSpace and toObjectSpace methods.  Also, points, vectors 
 (directions), and surface normals transform differently, so they have separate methods.
-
+ 
 Some helper functions transform whole primitives like boxes in and out of object space.
 
 Convert to Matrix4 using CoordinateFrame::toMatrix4.  You <I>can</I> construct a CoordinateFrame
-from a Matrix4 using Matrix4::approxCoordinateFrame, however, because a Matrix4 is more
+from a Matrix4 using Matrix4::approxCoordinateFrame, however, because a Matrix4 is more 
 general than a CoordinateFrame, some information may be lost.
 
 @sa G3D::UprightFrame, G3D::PhysicsFrame, G3D::Matrix4, G3D::Quat
@@ -64,7 +64,7 @@ public:
     /** Takes object space points to world space. */
     Vector3                            translation;
 
-    /** \param any Must be in one of the following forms:
+    /** \param any Must be in one of the following forms: 
         - CFrame((matrix3 expr), (vector3 expr))
         - CFrame::fromXYZYPRDegrees(#, #, #, #, #, #)
         - CFrame {  rotation = (matrix3 expr), translation = (vector3 expr) }
@@ -72,7 +72,7 @@ public:
         - Matrix3( ... )
         */
     CoordinateFrame(const Any& any);
-
+    
     /** Converts the CFrame to an Any. */
     operator Any() const;
 
@@ -98,7 +98,7 @@ public:
     CoordinateFrame(const Vector3& _translation) :
         rotation(Matrix3::identity()), translation(_translation) {
     }
-
+    
     CoordinateFrame(const Matrix3 &rotation, const Vector3 &translation) :
         rotation(rotation), translation(translation) {
     }
@@ -119,7 +119,7 @@ public:
      equivalent to Euler angles; they are known as Tait-Bryan
      rotations and are more convenient for intuitive positioning.*/
     static CoordinateFrame fromXYZYPRDegrees(float x, float y, float z, float yaw = 0.0f, float pitch = 0.0f, float roll = 0.0f);
-
+    
     CoordinateFrame(class BinaryInput& b);
 
     void deserialize(class BinaryInput& b);
@@ -156,7 +156,7 @@ public:
 
     /**
      Returns the heading of the lookVector as an angle in radians relative to
-     the world -z axis.  That is, a counter-clockwise heading where north (-z)
+     the world -z axis.  That is, a counter-clockwise heading where north (-z) 
      is 0 and west (-x) is PI/2.
 
      Note that the heading ignores the Y axis, so an inverted
@@ -268,7 +268,7 @@ public:
     class Box toObjectSpace(const Box& b) const;
 
     class Plane toObjectSpace(const Plane& p) const;
-
+ 
     class Sphere toObjectSpace(const Sphere& b) const;
 
     Triangle toObjectSpace(const Triangle& t) const;

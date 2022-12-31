@@ -17,7 +17,7 @@
 
   \brief Creates a series of methods that turn a class into a scoped enumeration.
 
-  Uses the "Intelligent Enum" design pattern
+  Uses the "Intelligent Enum" design pattern 
   http://www.codeguru.com/cpp/cpp/cpp_mfc/article.php/c4001/
 
   Enum classes are initialized to their zero value by default.

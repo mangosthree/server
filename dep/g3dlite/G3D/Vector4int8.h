@@ -1,10 +1,10 @@
 /**
   @file Vector4int8.h
-
+ 
   Homogeneous vector class.
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-
+ 
   @created 2007-02-09
   @edited  2007-02-09
 
@@ -35,8 +35,8 @@ private:
     bool operator<=(const Vector4int8&) const;
     bool operator>=(const Vector4int8&) const;
 
-
-    /** For fast operations, treat this packed data structure as
+  
+    /** For fast operations, treat this packed data structure as 
       an int32 */
     inline uint32& asInt32() {
         return *reinterpret_cast<uint32*>(this);
@@ -49,7 +49,7 @@ private:
 public:
     // construction
     inline Vector4int8() : x(0), y(0), z(0), w(0) {}
-
+    
     /** Multiplies the source by 127 and clamps to (-128, 127) when converting */
     Vector4int8(const Vector4& source);
 

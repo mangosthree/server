@@ -1,9 +1,9 @@
 /**
  @file BinaryOutput.cpp
-
+ 
  @author Morgan McGuire, http://graphics.cs.williams.edu
  Copyright 2002-2010, Morgan McGuire, All rights reserved.
-
+ 
  @created 2002-02-20
  @edited  2010-03-17
  */
@@ -62,11 +62,11 @@ IMPLEMENT_WRITER(Int32,   int32)
 IMPLEMENT_WRITER(UInt64,  uint64)
 IMPLEMENT_WRITER(Int64,   int64)
 IMPLEMENT_WRITER(Float32, float32)
-IMPLEMENT_WRITER(Float64, float64)
+IMPLEMENT_WRITER(Float64, float64)    
 
 #undef IMPLEMENT_WRITER
 
-// Data structures that are one byte per element can be
+// Data structures that are one byte per element can be 
 // directly copied, regardles of endian-ness.
 #define IMPLEMENT_WRITER(ucase, lcase)\
 void BinaryOutput::write##ucase(const lcase* out, int n) {\
@@ -105,7 +105,7 @@ IMPLEMENT_WRITER(Int32,   int32)
 IMPLEMENT_WRITER(UInt64,  uint64)
 IMPLEMENT_WRITER(Int64,   int64)
 IMPLEMENT_WRITER(Float32, float32)
-IMPLEMENT_WRITER(Float64, float64)
+IMPLEMENT_WRITER(Float64, float64)    
 
 #undef IMPLEMENT_WRITER
 
@@ -120,7 +120,7 @@ void BinaryOutput::reallocBuffer(size_t bytes, size_t oldBufferLen) {
         // We're either writing to memory (in which case we *have* to try and allocate)
         // or we've been asked to allocate a reasonable size buffer.
 
-        //debugPrintf("  realloc(%d)\n", newBufferLen);
+        //debugPrintf("  realloc(%d)\n", newBufferLen); 
         newBuffer = (uint8*)System::realloc(m_buffer, newBufferLen);
         if (newBuffer != NULL) {
             m_maxBufferLen = newBufferLen;
@@ -146,7 +146,7 @@ void BinaryOutput::reserveBytesWhenOutOfMemory(size_t bytes) {
         throw "Out of memory while writing to disk in BinaryOutput (could not create a large enough buffer).";
     } else {
 
-        // Dump the contents to disk.  In order to enable seeking backwards,
+        // Dump the contents to disk.  In order to enable seeking backwards, 
         // we keep the last 10 MB in memory.
         int writeBytes = m_bufferLen - 10 * 1024 * 1024;
 
@@ -184,11 +184,11 @@ void BinaryOutput::reserveBytesWhenOutOfMemory(size_t bytes) {
         System::memcpy(m_buffer, m_buffer + writeBytes, m_bufferLen);
         debugAssert(isValidHeapPointer(m_buffer));
 
-        // *now* we allocate bytes (there should presumably be enough
-        // space in the buffer; if not, we'll come back through this
-        // code and dump the last 10MB to disk as well.  Note that the
+        // *now* we allocate bytes (there should presumably be enough 
+        // space in the buffer; if not, we'll come back through this 
+        // code and dump the last 10MB to disk as well.  Note that the 
         // bytes > maxBufferLen case above would already have triggered
-        // if this call couldn't succeed.
+        // if this call couldn't succeed. 
         reserveBytes(bytes);
     }
 }
@@ -226,7 +226,7 @@ BinaryOutput::BinaryOutput(
     m_bitPos = 0;
     m_committed = false;
 
-    m_ok = true;
+    m_ok = true;    
     /** Verify ability to write to disk */
     commit(false);
     m_committed = false;
@@ -235,7 +235,7 @@ BinaryOutput::BinaryOutput(
 
 void BinaryOutput::reset() {
     debugAssert(m_beginEndBits == 0);
-    alwaysAssertM(m_filename == "<memory>",
+    alwaysAssertM(m_filename == "<memory>", 
         "Can only reset a BinaryOutput that writes to memory.");
 
     // Do not reallocate, just clear the size of the buffer.
@@ -281,7 +281,7 @@ void BinaryOutput::compress() {
     // Zlib requires the output buffer to be this big
     unsigned long newSize = iCeil(m_bufferLen * 1.01) + 12;
     uint8* temp = (uint8*)System::malloc(newSize);
-    int result = compress2(temp, &newSize, m_buffer, m_bufferLen, 9);
+    int result = compress2(temp, &newSize, m_buffer, m_bufferLen, 9); 
 
     debugAssert(result == Z_OK); (void)result;
 
@@ -319,7 +319,7 @@ void BinaryOutput::commit(bool flush) {
     // Make sure the directory exists.
     std::string root, base, ext, path;
     Array<std::string> pathArray;
-    parseFilename(m_filename, root, pathArray, base, ext);
+    parseFilename(m_filename, root, pathArray, base, ext); 
 
     path = root + stringJoin(pathArray, '/');
     if (! FileSystem::exists(path, false)) {

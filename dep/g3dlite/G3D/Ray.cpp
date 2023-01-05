@@ -1,8 +1,8 @@
 /**
- @file Ray.cpp 
- 
+ @file Ray.cpp
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @created 2002-07-12
  @edited  2004-03-19
  */
@@ -36,7 +36,7 @@ void Ray::set(const Vector3& origin, const Vector3& direction) {
     c_yx = m_origin.x - ibyj * m_origin.y;
     c_yz = m_origin.z - kbyj * m_origin.y;
     c_zx = m_origin.x - ibyk * m_origin.z;
-    c_zy = m_origin.y - jbyk * m_origin.z;    
+    c_zy = m_origin.y - jbyk * m_origin.z;
 
     //ray slope classification
     if (m_direction.x < 0) {
@@ -117,7 +117,7 @@ void Ray::set(const Vector3& origin, const Vector3& direction) {
                         classification = PPP;
                     }
                 }
-            }            
+            }
         }
     }
 }

@@ -1,8 +1,8 @@
 /**
  @file Color1.h
- 
+
  Monochrome Color class
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
  @created 2007-01-31
  @edited  2009-03-20
@@ -122,7 +122,7 @@ public:
     }
 
     inline Color1 lerp(const Color1& other, float a) const {
-        return Color1(value + (other.value - value) * a); 
+        return Color1(value + (other.value - value) * a);
 
     }
 

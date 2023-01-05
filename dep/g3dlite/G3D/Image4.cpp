@@ -134,7 +134,7 @@ void Image4::copyGImage(const GImage& im) {
     case 4:
         copyArray(im.pixel4(), im.width(), im.height());
         break;
-    } 
+    }
 }
 
 
@@ -155,7 +155,7 @@ void Image4::copyArray(const Color3uint8* src, int w, int h) {
 
     int N = w * h;
     Color4* dst = data.getCArray();
-    
+
     // Add alpha and convert
     for (int i = 0; i < N; ++i) {
         dst[i] = Color4(Color3(src[i]), 1.0f);
@@ -174,7 +174,7 @@ void Image4::copyArray(const Color3* src, int w, int h) {
 
     int N = w * h;
     Color4* dst = data.getCArray();
-    
+
     // Add alpha
     for (int i = 0; i < N; ++i) {
         dst[i] = Color4(src[i], 1.0f);
@@ -215,7 +215,7 @@ void Image4::save(const std::string& filename, GImage::Format fmt) {
     for (int i = 0; i < N; ++i) {
         dst[i] = Color4uint8(data[i]);
     }
-    
+
     im.save(filename, fmt);
 }
 

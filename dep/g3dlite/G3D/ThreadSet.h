@@ -10,7 +10,7 @@
 namespace G3D {
 
 /** Manages a set of threads. All methods are threadsafe except for
-    the iterator begin/end. 
+    the iterator begin/end.
 
     @beta*/
 class ThreadSet : public ReferenceCountedObject {
@@ -32,7 +32,7 @@ private:
     Array<ThreadRef>      m_thread;
 
 public:
-    
+
     /** Total number of threads (some of which may be completed). */
     int size() const;
 
@@ -45,7 +45,7 @@ public:
         the current thread.  This helps to take full advantage of the machine when
         running a large number of jobs and avoids the overhead of a thread start for single-thread groups.
         Note that this forces start() to block until
-        that thread is complete.        
+        that thread is complete.
       */
     void start(GThread::SpawnBehavior lastThreadBehavior = GThread::USE_NEW_THREAD) const;
 
@@ -61,7 +61,7 @@ public:
     /** Removes completed threads and returns the new size.*/
     int removeCompleted();
 
-    /** Inserts a new thread, if it is not already present, and 
+    /** Inserts a new thread, if it is not already present, and
         returns the new number of threads.*/
     int insert(const ThreadRef& t);
 
@@ -70,7 +70,7 @@ public:
     bool remove(const ThreadRef& t);
 
     bool contains(const ThreadRef& t) const;
-   
+
     /** It is an error to mutate the ThreadSet while iterating through it. */
     Iterator begin();
 

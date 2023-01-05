@@ -19,14 +19,14 @@
 namespace G3D {
 
 const AABox& AABox::maxFinite() {
-    static const AABox b = AABox(Vector3::minFinite(), 
+    static const AABox b = AABox(Vector3::minFinite(),
                                  Vector3::maxFinite());
     return b;
 }
 
 
 const AABox& AABox::large() {
-    static const AABox b = AABox(Vector3::minFinite() * 0.5f, 
+    static const AABox b = AABox(Vector3::minFinite() * 0.5f,
                                  Vector3::maxFinite() * 0.5f);
     return b;
 }
@@ -87,22 +87,22 @@ Vector3 AABox::randomSurfacePoint() const {
     // The probability of choosing a given face is proportional to
     // its area.
     if (r < aXY) {
-        return 
-            lo + 
+        return
+            lo +
             Vector3(
                 (float)uniformRandom(0.0f, extent.x),
                 (float)uniformRandom(0.0f, extent.y),
                 d * extent.z);
     } else if (r < aYZ) {
-        return 
-            lo + 
+        return
+            lo +
             Vector3(
                 d * extent.x,
                 (float)uniformRandom(0, extent.y),
                 (float)uniformRandom(0, extent.z));
     } else {
-        return 
-            lo + 
+        return
+            lo +
             Vector3(
                 (float)uniformRandom(0, extent.x),
                 d * extent.y,
@@ -113,8 +113,8 @@ Vector3 AABox::randomSurfacePoint() const {
 
 Vector3 AABox::randomInteriorPoint() const {
     return Vector3(
-        (float)uniformRandom(lo.x, hi.x), 
-        (float)uniformRandom(lo.y, hi.y), 
+        (float)uniformRandom(lo.x, hi.x),
+        (float)uniformRandom(lo.y, hi.y),
         (float)uniformRandom(lo.z, hi.z));
 }
 
@@ -150,7 +150,7 @@ bool AABox::culledBy(
 
     childMask = 0;
 
-    const bool finite = 
+    const bool finite =
         (abs(lo.x) < G3D::finf()) &&
         (abs(hi.x) < G3D::finf()) &&
         (abs(lo.y) < G3D::finf()) &&
@@ -164,7 +164,7 @@ bool AABox::culledBy(
 
         // Only test planes that are not masked
         if ((inMask & 1) != 0) {
-        
+
             Vector3 corner;
 
             int numContained = 0;
@@ -179,7 +179,7 @@ bool AABox::culledBy(
                 corner.x = (v & 1) ? hi.x : lo.x;
                 corner.y = (v & 2) ? hi.y : lo.y;
                 corner.z = (v & 4) ? hi.z : lo.z;
-        
+
                 if (finite) { // this branch is highly predictable
                     if (plane[p].halfSpaceContainsFinite(corner)) {
                         ++numContained;
@@ -226,8 +226,8 @@ bool AABox::culledBy(
 
     uint32 inMask = _inMask;
     assert(plane.size() < 31);
-    
-    const bool finite = 
+
+    const bool finite =
         (abs(lo.x) < G3D::finf()) &&
         (abs(hi.x) < G3D::finf()) &&
         (abs(lo.y) < G3D::finf()) &&
@@ -241,7 +241,7 @@ bool AABox::culledBy(
 
         // Only test planes that are not masked
         if ((inMask & 1) != 0) {
-        
+
             bool culled = true;
             Vector3 corner;
 
@@ -257,7 +257,7 @@ bool AABox::culledBy(
                 corner.x = (v & 1) ? hi.x : lo.x;
                 corner.y = (v & 2) ? hi.y : lo.y;
                 corner.z = (v & 4) ? hi.z : lo.z;
-        
+
                 if (finite) { // this branch is highly predictable
                     culled = ! plane[p].halfSpaceContainsFinite(corner);
                 } else {
@@ -288,7 +288,7 @@ void AABox::getBounds(Sphere& s) const {
 }
 
 bool AABox::intersects(const class Sphere& sphere) const {
-    double d = 0; 
+    double d = 0;
 
     //find the square of the distance
     //from the sphere to the box

@@ -1,8 +1,8 @@
 /**
  @file BinaryInput.h
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @created 2001-08-09
  @edited  2010-03-19
 
@@ -58,17 +58,17 @@ namespace G3D {
  a memory block at least large enough to hold <I>n</I> elements.
 
  Most classes define serialize/deserialize methods that use BinaryInput,
- BinaryOutput, TextInput, and TextOutput.  There are text serializer 
- functions for primitive types (e.g. int, std::string, float, double) but not 
+ BinaryOutput, TextInput, and TextOutput.  There are text serializer
+ functions for primitive types (e.g. int, std::string, float, double) but not
  binary serializers-- you <B>must</b> call the BinaryInput::readInt32 or
- other appropriate function.  This is because it would be very hard to 
+ other appropriate function.  This is because it would be very hard to
  debug the error sequence: <CODE>serialize(1.0, bo); ... float f; deserialize(f, bi);</CODE>
- in which a double is serialized and then deserialized as a float. 
+ in which a double is serialized and then deserialized as a float.
  */
 class BinaryInput {
 private:
 
-    // The initial buffer will be no larger than this, but 
+    // The initial buffer will be no larger than this, but
     // may grow if a large memory read occurs.  50 MB
     enum {INITIAL_BUFFER_LENGTH = 50000000};
 
@@ -83,7 +83,7 @@ private:
     /** Next position to read from in bitString during readBits. */
     int             m_bitPos;
 
-    /** Bits currently being read by readBits.  
+    /** Bits currently being read by readBits.
         Contains at most 8 (low) bits.  Note that
         beginBits/readBits actually consumes one extra byte, which
         will be restored by writeBits.*/
@@ -98,7 +98,7 @@ private:
     int64           m_alreadyRead;
 
     /**
-     Length of the entire file, in bytes.  
+     Length of the entire file, in bytes.
      For the length of the buffer, see bufferLength
      */
     int64           m_length;
@@ -127,7 +127,7 @@ private:
         debugAssertM(m_pos + nbytes + m_alreadyRead <= m_length, "Read past end of file.");
 
         if (m_pos + nbytes > m_bufferLength) {
-            loadIntoMemory(m_pos + m_alreadyRead, nbytes);    
+            loadIntoMemory(m_pos + m_alreadyRead, nbytes);
         }
     }
 
@@ -170,7 +170,7 @@ public:
 
         // read from master to point where compressed data exists.
 
-        BinaryInput subset(master.getCArray() + master.getPosition(), 
+        BinaryInput subset(master.getCArray() + master.getPosition(),
                            master.length() - master.getPosition(),
                            master.endian(), true, true);
 
@@ -213,7 +213,7 @@ public:
     /**
      Performs bounds checks in debug mode.  [] are relative to
      the start of the file, not the current position.
-     Seeks to the new position before reading (and leaves 
+     Seeks to the new position before reading (and leaves
      that as the current position)
      */
     inline uint8 operator[](int64 n) {
@@ -345,7 +345,7 @@ public:
         };
         a = readUInt32();
         return b;
-    }    
+    }
 
     inline float64 readFloat64() {
         union {
@@ -375,7 +375,7 @@ public:
 
     /**
      Reads until NULL or the end of the file is encountered.
-     If the string has odd length (including NULL), reads 
+     If the string has odd length (including NULL), reads
      another byte.
      */
     std::string readStringEven();
@@ -430,7 +430,7 @@ public:
     DECLARE_READER(UInt64,  uint64)
     DECLARE_READER(Int64,   int64)
     DECLARE_READER(Float32, float32)
-    DECLARE_READER(Float64, float64)    
+    DECLARE_READER(Float64, float64)
 #   undef DECLARE_READER
 };
 

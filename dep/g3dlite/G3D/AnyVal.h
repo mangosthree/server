@@ -35,12 +35,12 @@ class AABox;
 
 /**
  \deprecated
- <b>Use the G3D::Any class instead.  This is only provided for 
+ <b>Use the G3D::Any class instead.  This is only provided for
    backwards compatibility to G3D 7.xx.</b>
 
  A generic value, useful for defining property trees that can
  be loaded from and saved to disk.  The values are intentionally
- restricted to a small set.  
+ restricted to a small set.
 
  When written to files, the syntax is as follows.  Note that you can
  nest arrays and tables in order to create full tree (i.e., XML-like)
@@ -76,7 +76,7 @@ class AABox;
 
   <tr><td>Array</td><td><code>[</code><i>element<sub>0</sub></i><code>, </code><i>element<sub>1</sub></i><code>, </code> ... <code>, </code><i>element<sub>n-1</sub></i><code>]</code></td></tr>
   <tr><td>Table</td><td><code>{</code><i>symbol<sub>0</sub></i><code> = </code><i>value<sub>0</sub></i>
-                               <br><code>&nbsp;</code><i>symbol<sub>1</sub></i><code> = </code><i>value<sub>1</sub></i>  
+                               <br><code>&nbsp;</code><i>symbol<sub>1</sub></i><code> = </code><i>value<sub>1</sub></i>
                                <br><code>&nbsp;</code>...
                                <br><code>&nbsp;</code><i>symbol<sub>n-1</sub></i><code> = </code><i>value<sub>n-1</sub></i><code>}</code></td></tr>
   </table>
@@ -121,7 +121,7 @@ class AABox;
   <pre>
    {
       heights = [1, 17, 32]
-      model = 
+      model =
         {
            color = C3(1, 1, 1)
            filename = "foo.md2"
@@ -135,8 +135,8 @@ class AABox;
   <b>What's the difference from boost::any?</b>
   <br>I think that AnyVal will be easier for novice C++ users.  It addresses the problem that
    even though G3D::TextInput makes reading configuration files extremely simple, many people
-   still don't use it.  So AnyVal makes it ridiculously simple to read and write a tree of G3D 
-   types to a file. 
+   still don't use it.  So AnyVal makes it ridiculously simple to read and write a tree of G3D
+   types to a file.
 
    <i>AnyVal:</i>
 <pre>
@@ -184,17 +184,17 @@ public:
 
     /** Array and table values are all Any.*/
     enum Type {
-        NIL, 
+        NIL,
         NUMBER,
-        BOOLEAN, 
-        STRING, 
-        VECTOR2, 
-        VECTOR3, 
-        VECTOR4, 
+        BOOLEAN,
+        STRING,
+        VECTOR2,
+        VECTOR3,
+        VECTOR4,
         MATRIX2,
-        MATRIX3, 
-        MATRIX4, 
-        QUAT, 
+        MATRIX3,
+        MATRIX4,
+        QUAT,
         COORDINATEFRAME,
         COORDINATEFRAME2D,
         CFRAME = COORDINATEFRAME,
@@ -205,7 +205,7 @@ public:
         RECT2D,
         AABOX2D = RECT2D,
         AABOX,
-        ARRAY, 
+        ARRAY,
         TABLE};
 
     /** Base class for all AnyVal exceptions.*/
@@ -434,7 +434,7 @@ public:
 
     const G3D::Vector3& vector3() const;
     const G3D::Vector3& vector3(const G3D::Vector3& defaultVal) const;
-    
+
     operator const Vector3& () {
         return vector3();
     }

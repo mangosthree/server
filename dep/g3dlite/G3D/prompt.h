@@ -1,6 +1,6 @@
-/** 
+/**
  @file prompt.h
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
  @cite   Windows GUI code by Max McGuire
 
@@ -19,8 +19,8 @@ namespace G3D {
 /**
   Prints a prompt to stdout and waits for user input.  The return value is
   the number of the user's choice (the first is 0, if there are no
-  choices, returns 0). 
- 
+  choices, returns 0).
+
   @param useGui Under Win32, use a GUI, not stdout prompt.
   @param windowTitle The title for the prompt window
   @param promptx The text string to prompt the user with

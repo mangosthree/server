@@ -23,16 +23,16 @@ namespace G3D {
   <P>
 
   The core writeString, writeNumber, and writeSymbol methods map to TextInput's
-  methods.  Number and Symbol each print an additional space that is used to 
+  methods.  Number and Symbol each print an additional space that is used to
   separate adjacent tokens.
-  
+
   TextOutput::printf allows arbitrary text to be conveniently dumped
   en-masse.  Use [de]serialize(bool, TextOutput) and other overloads to read/write
-  primitive types in a standardized manner and 
+  primitive types in a standardized manner and
 
   <P>
-  When a word-wrap line break occurs, all whitespace between words is replaced 
-  with a single newline (the newline may be two characters-- see 
+  When a word-wrap line break occurs, all whitespace between words is replaced
+  with a single newline (the newline may be two characters-- see
   G3D::TextOutput::Options::NewlineStyle).  Word wrapping occurs against
   the number of columns specified by Options::numColumns, <I>minus</I> the current
   indent level.
@@ -43,7 +43,7 @@ namespace G3D {
   indents after the last newline of a file (if the indent level is non-zero at the end).
 
   <P><B>Serialization/Marshalling</B>
-  <DT>Text serialization is accomplished using TextOutput by defining the pair of 
+  <DT>Text serialization is accomplished using TextOutput by defining the pair of
   methods:
 
   <PRE>
@@ -62,7 +62,7 @@ public:
 
     class Settings {
     public:
-        /** 
+        /**
           WRAP_NONE             Word wrapping is disabled
           WRAP_WITHOUT_BREAKING Word-wrap, but don't break continuous lines that
                                 are longer than numColumns (default)
@@ -94,7 +94,7 @@ public:
 
         NewlineStyle        newlineStyle;
 
-        /** If true, all newlines are converted to NewlineStyle regardless of 
+        /** If true, all newlines are converted to NewlineStyle regardless of
             how they start out. Default: true. */
         bool                convertNewlines;
 
@@ -123,11 +123,11 @@ public:
 private:
 
     /** Used by indentAndAppend to tell when we are writing the
-        first character of a new line. 
-      
+        first character of a new line.
+
         So that push/popIndent work correctly, we cannot indent
         immediately after writing a newline.  Instead we must
-        indent on writing the first character <B>after</B> that 
+        indent on writing the first character <B>after</B> that
         newline.
       */
     bool                    startingNewLine;
@@ -175,10 +175,10 @@ public:
     /** Constructs a text output that can later be commited to a string instead of a file.*/
     explicit TextOutput(const Settings& options = Settings());
 
-    /** Commit to the filename specified on the constructor. 
+    /** Commit to the filename specified on the constructor.
          <B>Not</B> called from the destructor; you must call
      it yourself.
-    @param flush If true (default) the file is ready for reading when the method returns, otherwise 
+    @param flush If true (default) the file is ready for reading when the method returns, otherwise
      the method returns immediately and writes the file in the background.*/
     void commit(bool flush = true);
 
@@ -193,7 +193,7 @@ public:
     /** Produces a new string that contains the output */
     std::string commitString();
 
-    /** Writes a quoted string. Special characters in the string (e.g., \\, \\t, \\n) are escaped so that 
+    /** Writes a quoted string. Special characters in the string (e.g., \\, \\t, \\n) are escaped so that
         TextInput will produce the identical string on reading.*/
     void writeString(const std::string& string);
 
@@ -207,7 +207,7 @@ public:
     void writeNewlines(int numLines);
 
     /** The symbol is written without quotes.  Symbols are required to begin with a
-        letter or underscore and contain only letters, underscores, and numbers 
+        letter or underscore and contain only letters, underscores, and numbers
         or be a C++ symbol (e.g. "{", "(", "++", etc.)
         so that they may be properly parsed by TextInput::readSymbol. Symbols are
         printed with a trailing space.*/
@@ -231,7 +231,7 @@ public:
 
     // Can't pass by reference because that confuses va_start
     void __cdecl printf(const std::string fmt, ...);
-    void __cdecl vprintf(const char* fmt, va_list argPtr) 
+    void __cdecl vprintf(const char* fmt, va_list argPtr)
         G3D_CHECK_VPRINTF_METHOD_ARGS;
 };
 

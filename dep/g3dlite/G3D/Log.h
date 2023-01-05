@@ -20,12 +20,12 @@
 
 namespace G3D {
 
-/** Prints to the common system log, log.txt, which is usually 
-    in the working directory of the program.  If your disk is 
+/** Prints to the common system log, log.txt, which is usually
+    in the working directory of the program.  If your disk is
     not writable or is slow, it will attempt to write to "c:/tmp/log.txt" or
-     "c:/temp/log.txt" on Windows systems instead. 
+     "c:/temp/log.txt" on Windows systems instead.
 
-    Unlike printf or debugPrintf, 
+    Unlike printf or debugPrintf,
     this function guarantees that all output is committed before it returns.
     This is very useful for debugging a crash, which might hide the last few
     buffered print statements otherwise.

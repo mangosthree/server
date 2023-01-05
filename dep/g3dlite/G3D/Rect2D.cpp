@@ -1,8 +1,8 @@
 /**
  @file Rect2D.cpp
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-  
+
   @created 2003-11-13
   @created 2009-11-16
 

@@ -1,7 +1,7 @@
 /**
  @file BinaryFormat.h
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @author  2005-06-03
  @edited  2005-06-03
 
@@ -87,7 +87,7 @@ public:
     DECLARE_BINARYFORMATOF(Vector4, VECTOR4_BINFMT)
   </PRE>
 
-  Use this so you can make vertex arrays of your own classes and not just 
+  Use this so you can make vertex arrays of your own classes and not just
   the standard ones.
  */
 #define DECLARE_BINARYFORMATOF(CType, EnumType)      \
@@ -131,10 +131,10 @@ DECLARE_BINARYFORMATOF( Color4uint8,   COLOR4UINT8_BINFMT )
 namespace G3D {
 
 /** Returns -1 if the format is custom, otherwise the byte size
-    of a single element in this format.*/ 
+    of a single element in this format.*/
 int32 byteSize(BinaryFormat f);
 
 
 } //G3D
 
-#endif 
+#endif

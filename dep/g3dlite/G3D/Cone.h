@@ -1,11 +1,11 @@
 /**
  @file Cone.h
- 
+
  Cone class
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
  @cite Portions based on Dave Eberly's Magic Software Library at <A HREF="http://www.magic-software.com">http://www.magic-software.com</A>
-  
+
  @created 2001-06-02
  @edited  2006-02-23
 

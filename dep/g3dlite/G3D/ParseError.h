@@ -1,8 +1,8 @@
 /**
  @file ParseError.h
-  
+
  @maintainer Morgan McGuire
-  
+
  @created 2009-11-15
  @edited  2009-11-15
 
@@ -22,15 +22,15 @@ namespace G3D {
 class ParseError {
 public:
     enum {UNKNOWN = -1};
-    
+
     /** Empty means unknown */
     std::string     filename;
-    
+
     /** For a binary file, the location of the parse error. -1 if unknown.*/
     int64           byte;
 
     /** For a text file, the line number is the line number of start of token which caused the exception.  1 is
-        the first line of the file.  -1 means unknown.  Note that you can use 
+        the first line of the file.  -1 means unknown.  Note that you can use
         TextInput::Settings::startingLineNumberOffset to shift the effective line
         number that is reported by that class.
     */
@@ -42,7 +42,7 @@ public:
     int             character;
 
     std::string     message;
- 
+
     ParseError() : byte(UNKNOWN), line(UNKNOWN), character(UNKNOWN) {}
 
     virtual ~ParseError() {}

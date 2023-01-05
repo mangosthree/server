@@ -1,8 +1,8 @@
 /**
  @file FileSystem.h
- 
+
  @author Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @author  2002-06-06
  @edited  2010-02-05
  */
@@ -15,7 +15,7 @@
 
 namespace G3D {
 
-/** 
+/**
  OS-independent file system layer that optimizes the performance
  of queries by caching and prefetching.
 
@@ -82,13 +82,13 @@ private:
 
     enum Type {
         /** Not yet checked */
-        UNKNOWN, 
-        FILE_TYPE, 
+        UNKNOWN,
+        FILE_TYPE,
         DIR_TYPE
     };
 
     class Entry {
-    public: 
+    public:
         /** Name, not including parent path */
         std::string             name;
         Type                    type;
@@ -98,7 +98,7 @@ private:
 
     class Dir {
     public:
-        
+
         /** If false, this path did not exist (even inside a zipfile) when last checked, or it is not a directory. */
         bool                    exists;
 
@@ -107,7 +107,7 @@ private:
 
         /** Files and directories */
         Array<Entry>            nodeArray;
-        
+
         /** When this entry was last updated */
         double                  lastChecked;
 
@@ -136,12 +136,12 @@ private:
 #   ifdef G3D_WIN32
     /** On Windows, the drive letters that form the file system roots.*/
     const Array<std::string>& _drives();
-#   endif 
+#   endif
 
-    /** Returns true if some sub-path of \a path is a zipfile. 
-        
+    /** Returns true if some sub-path of \a path is a zipfile.
+
        If the path itself is a zipfile, returns false.
-       
+
        \param zipfile The part of \a path that was the zipfile */
     bool _inZipfile(const std::string& path, std::string& zipfile);
 
@@ -165,7 +165,7 @@ private:
         return m_cacheLifetime;
     }
 
-    /** Creates the directory named, including any subdirectories 
+    /** Creates the directory named, including any subdirectories
         that do not already exist.
 
         The directory must not be inside a zipfile.
@@ -176,23 +176,23 @@ private:
 
     /** Returns true if a node named \a f exists.
 
-        \param f If \a f contains wildcards, the function returns true if any file 
+        \param f If \a f contains wildcards, the function returns true if any file
         matches those wildcards.  Wildcards may only appear in the base or ext, not the
         path.
 
-        \param trustCache If true, uses the cache for optimizing repeated calls 
-        in the same parent directory. 
+        \param trustCache If true, uses the cache for optimizing repeated calls
+        in the same parent directory.
      */
     bool _exists(const std::string& f, bool trustCache = true);
 
     /** Known bug: does not work inside zipfiles */
     bool _isDirectory(const std::string& path);
-    
+
     /** Known bug: does not work inside zipfiles */
     bool _isFile(const std::string& path) {
         return ! isDirectory(path);
     }
-    
+
     /**
     \param srcPath Must name a file.
     \param dstPath Must not contain a zipfile.
@@ -205,14 +205,14 @@ private:
 
         The filename may contain wildcards, in which case the wildcards will be preserved in the returned value.
 
-        \param cwd The directory to treat as the "current" directory when resolving a relative path.  The default 
-        value is the actual current directory.  (G3D::Any::sourceDirectory is a common alternative) 
+        \param cwd The directory to treat as the "current" directory when resolving a relative path.  The default
+        value is the actual current directory.  (G3D::Any::sourceDirectory is a common alternative)
     */
     std::string _resolve(const std::string& path, const std::string& cwd = currentDirectory());
 
     /** Returns true if \param dst does not exist or \param src is newer than \param dst,
        according to their time stamps.
-       
+
        Known bug: does not work inside zipfiles.
        */
     bool _isNewer(const std::string& src, const std::string& dst);
@@ -230,10 +230,10 @@ private:
 
       Wildcards can only appear to the right of the last slash in \a spec.
 
-      The names will not contain parent paths unless \a includePath == true. 
-      These may be relative to the current directory unless \a spec 
-      is fully qualified (can be done with resolveFilename). 
-      
+      The names will not contain parent paths unless \a includePath == true.
+      These may be relative to the current directory unless \a spec
+      is fully qualified (can be done with resolveFilename).
+
      */
     void _list(const std::string& spec, Array<std::string>& result, const ListSettings& listSettings = ListSettings());
 
@@ -380,7 +380,7 @@ public:
 };
 
 
-/** \brief Parsing of file system paths.  
+/** \brief Parsing of file system paths.
 
     None of these routines touch the disk--they are purely string manipulation.
 
@@ -428,12 +428,12 @@ public:
 
       Examples:
 
-      c:\\a\\b\\d.e   
+      c:\\a\\b\\d.e
         root  = "c:\\"
         path  = "a" "b"
         base  = "d"
         ext   = "e"
-     
+
       /a/b/d.e
         root = "/"
         path  = "a" "b"
@@ -449,7 +449,7 @@ public:
      */
     static void parse
     (const std::string&  filename,
-     std::string&        drive,    
+     std::string&        drive,
      Array<std::string>& path,
      std::string&        base,
      std::string&        ext);

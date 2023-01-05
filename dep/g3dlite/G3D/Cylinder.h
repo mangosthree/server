@@ -1,8 +1,8 @@
 /**
  @file Cylinder.h
-  
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-  
+
  @created 2003-02-07
  @edited  2005-09-26
 
@@ -39,11 +39,11 @@ public:
     Cylinder(const Vector3& _p1, const Vector3& _p2, float _r);
     void serialize(class BinaryOutput& b) const;
     void deserialize(class BinaryInput& b);
-    
+
     /** The line down the center of the Cylinder */
     Line axis() const;
 
-    /** 
+    /**
       A reference frame in which the center of mass is at the origin and
       the Y-axis is the cylinder's axis.  If the cylinder is transformed, this reference frame
       may freely rotate around its axis.*/
@@ -64,7 +64,7 @@ public:
 
     float volume() const;
 
-    float radius() const; 
+    float radius() const;
 
     /** Center of mass */
     inline Vector3 center() const {

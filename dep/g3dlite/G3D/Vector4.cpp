@@ -1,8 +1,8 @@
 /**
  @file Vector4.cpp
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-  
+
  @created 2001-07-09
  @edited  2010-07-05
  */
@@ -51,20 +51,20 @@ Vector4::Vector4(const Vector4int8& v) : x(v.x / 127.0f), y(v.y / 127.0f), z(v.z
 }
 
 
-const Vector4& Vector4::inf() { 
-    static const Vector4 v((float)G3D::finf(), (float)G3D::finf(), (float)G3D::finf(), (float)G3D::finf()); 
-    return v; 
-}
-
-
-const Vector4& Vector4::zero() { 
-    static const Vector4 v(0,0,0,0); 
+const Vector4& Vector4::inf() {
+    static const Vector4 v((float)G3D::finf(), (float)G3D::finf(), (float)G3D::finf(), (float)G3D::finf());
     return v;
 }
 
-const Vector4& Vector4::nan() { 
-    static Vector4 v((float)G3D::fnan(), (float)G3D::fnan(), (float)G3D::fnan(), (float)G3D::fnan()); 
-    return v; 
+
+const Vector4& Vector4::zero() {
+    static const Vector4 v(0,0,0,0);
+    return v;
+}
+
+const Vector4& Vector4::nan() {
+    static Vector4 v((float)G3D::fnan(), (float)G3D::fnan(), (float)G3D::fnan(), (float)G3D::fnan());
+    return v;
 }
 
 

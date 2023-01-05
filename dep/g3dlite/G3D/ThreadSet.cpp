@@ -23,8 +23,8 @@ int ThreadSet::numStarted() const {
     me->m_lock.unlock();
     return count;
 }
-    
-    
+
+
 void ThreadSet::start(GThread::SpawnBehavior lastBehavior) const {
     ThreadSet* me = const_cast<ThreadSet*>(this);
 
@@ -54,7 +54,7 @@ void ThreadSet::start(GThread::SpawnBehavior lastBehavior) const {
         unstarted.last()->start(GThread::USE_CURRENT_THREAD);
     }
 }
-    
+
 
 void ThreadSet::terminate() const {
     ThreadSet* me = const_cast<ThreadSet*>(this);
@@ -66,7 +66,7 @@ void ThreadSet::terminate() const {
     }
     me->m_lock.unlock();
 }
-    
+
 
 void ThreadSet::waitForCompletion() const {
     ThreadSet* me = const_cast<ThreadSet*>(this);
@@ -78,7 +78,7 @@ void ThreadSet::waitForCompletion() const {
     }
     me->m_lock.unlock();
 }
-    
+
 
 int ThreadSet::removeCompleted() {
     m_lock.lock();
@@ -88,7 +88,7 @@ int ThreadSet::removeCompleted() {
             --i;
         }
     }
-    
+
     int s = m_thread.size();
     m_lock.unlock();
     return s;
@@ -100,7 +100,7 @@ void ThreadSet::clear() {
     m_thread.clear();
     m_lock.unlock();
 }
-    
+
 
 int ThreadSet::insert(const ThreadRef& t) {
     m_lock.lock();
@@ -115,7 +115,7 @@ int ThreadSet::insert(const ThreadRef& t) {
     m_lock.unlock();
     return s;
 }
-    
+
 
 bool ThreadSet::remove(const ThreadRef& t) {
     m_lock.lock();
@@ -129,7 +129,7 @@ bool ThreadSet::remove(const ThreadRef& t) {
     m_lock.unlock();
     return found;
 }
-    
+
 
 bool ThreadSet::contains(const ThreadRef& t) const {
     ThreadSet* me = const_cast<ThreadSet*>(this);
@@ -142,22 +142,22 @@ bool ThreadSet::contains(const ThreadRef& t) const {
     return found;
 }
 
-   
+
 ThreadSet::Iterator ThreadSet::begin() {
     return m_thread.begin();
 }
-    
+
 
 ThreadSet::Iterator ThreadSet::end() {
     return m_thread.end();
 }
-    
+
 
 ThreadSet::ConstIterator ThreadSet::begin() const {
     return m_thread.begin();
 }
-    
-    
+
+
 ThreadSet::ConstIterator ThreadSet::end() const {
     return m_thread.end();
 }

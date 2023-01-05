@@ -1,13 +1,13 @@
-/** 
+/**
   @file G3DAll.h
- 
+
   Includes all G3D and GLG3D files and uses the G3D namespace.
-  
+
   This requires OpenGL and SDL headers.  If you don't want all of this,
   \#include <G3D.h> separately.
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
   @created 2002-01-01
   @edited  2006-08-13
 

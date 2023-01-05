@@ -1,8 +1,8 @@
 /**
  @file PrecomputedRandom.cpp
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @created 2009-03-31
  @edited  2009-07-01
 
@@ -15,7 +15,7 @@
 
 namespace G3D {
 
-PrecomputedRandom::PrecomputedRandom(int dataSize, uint32 seed) : 
+PrecomputedRandom::PrecomputedRandom(int dataSize, uint32 seed) :
  Random((void*)NULL),
  m_hemiUniform(NULL),
  m_sphereBits(NULL),
@@ -34,16 +34,16 @@ PrecomputedRandom::PrecomputedRandom(int dataSize, uint32 seed) :
 
     for (int i = 0; i < dataSize; ++i) {
         h[i].uniform = r.uniform();
-        r.cosHemi(h[i].cosHemiX, h[i].cosHemiY, h[i].cosHemiZ); 
+        r.cosHemi(h[i].cosHemiX, h[i].cosHemiY, h[i].cosHemiZ);
 
         s[i].bits = r.bits();
-        r.sphere(s[i].sphereX, s[i].sphereY, s[i].sphereZ);         
+        r.sphere(s[i].sphereX, s[i].sphereY, s[i].sphereZ);
     }
 
 }
 
 
-PrecomputedRandom::PrecomputedRandom(const HemiUniformData* data1, const SphereBitsData* data2, int dataSize, uint32 seed) : 
+PrecomputedRandom::PrecomputedRandom(const HemiUniformData* data1, const SphereBitsData* data2, int dataSize, uint32 seed) :
  Random((void*)NULL),
  m_hemiUniform(data1),
  m_sphereBits(data2),
@@ -94,7 +94,7 @@ void PrecomputedRandom::cosPowHemi(const float k, float& x, float& y, float& z) 
 
     // Fix the distribution by adjusting the cosine:
     // rnd(cos^k t) = (rnd(cos(t))^2)^(1/k)
-    
+
     // produces cos^k distribution sample
     z = pow(cos1, 2.0f / (1.0f + k));
 

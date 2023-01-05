@@ -1,8 +1,8 @@
 /**
  @file Stopwatch.h
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-  
+
  @created 2005-10-05
  @edited  2009-05-10
 
@@ -77,7 +77,7 @@ private:
 
     /** The overhead for calling into the class. */
     int64                   cycleOverhead;
-   
+
     /** Called from the constructor. */
     void computeOverhead();
 
@@ -85,7 +85,7 @@ public:
 
     Stopwatch(const std::string& name = "Stopwatch");
 
-    /** Returns the number of times that tick was called per wall-clock second; 
+    /** Returns the number of times that tick was called per wall-clock second;
         e.g. frames-per-second. */
     double FPS() const {
         return m_fps;
@@ -98,13 +98,13 @@ public:
     }
 
     /** Time-smoothed value that is stable to the nearest 1%.
-        This is useful if you are displaying elapsed time in real-time 
+        This is useful if you are displaying elapsed time in real-time
         and want a stable number.*/
     RealTime smoothElapsedTime() const {
         return emwaDuration;
     }
 
-    /** Time-smoothed value of fps that is stable to the nearest integer for fps > 10 and 
+    /** Time-smoothed value of fps that is stable to the nearest integer for fps > 10 and
       to the first decimal place for fps <= 10.
       This is useful if you
       are displaying the frame rate in real-time and want a stable (readable) number.*/
@@ -113,7 +113,7 @@ public:
     }
 
     /** The elapsed cycle time between tick and tock.  An attempt is made to factor out all
-        tick/tock overhead, so that back-to-back calls should return zero.  
+        tick/tock overhead, so that back-to-back calls should return zero.
         Unreliable on non-x86 platforms.*/
     uint64 elapsedCycles() const {
         return lastCycleCount;
@@ -125,7 +125,7 @@ public:
     /** Call at the end of the period that you want timed. */
     void tock();
 
-    
+
     /** Reset the start time used by after() and the emwa value.*/
     void reset();
 

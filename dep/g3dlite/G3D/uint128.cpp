@@ -1,9 +1,9 @@
 /**
  @file uint128.cpp
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
  @author Kyle Whitson
- 
+
  @created 2008-07-17
  @edited  2008-07-17
  */
@@ -14,7 +14,7 @@ namespace G3D {
 
 /** Adds two 64-bit integers, placing the result and the overflow into 64-bit integers.*/
 static void addAndCarry(const uint64& _a, const uint64& _b, uint64& carry, uint64& result) {
-        
+
     // Break each number into 4 32-bit chunks. Since we are using uints, right-shifting will fill with zeros.
     // This eliminates the need to and with 0xFFFFFFFF.
     uint32 a [2] = {static_cast<uint32>(_a & 0xFFFFFFFF), static_cast<uint32>(_a >> 32)};
@@ -130,7 +130,7 @@ uint128& uint128::operator>>=(const int x) {
 
     //Shift lo and add the bits shifted down from hi
     lo = (lo >> x) + (tmp << (64 - x));
-    
+
     return *this;
 }
 
@@ -145,7 +145,7 @@ uint128& uint128::operator<<=(const int x) {
 
     //Shift hi and add the bits shifted up from lo
     hi = (hi << x) + (tmp >> (64 - x));
-    
+
     return *this;
 }
 

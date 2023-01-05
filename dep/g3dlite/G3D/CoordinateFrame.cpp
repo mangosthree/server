@@ -34,9 +34,9 @@ namespace G3D {
 
 std::string CoordinateFrame::toXYZYPRDegreesString() const {
     UprightFrame uframe(*this);
-    
-    return format("CFrame::fromXYZYPRDegrees(% 5.1ff, % 5.1ff, % 5.1ff, % 5.1ff, % 5.1ff, % 5.1ff)", 
-                  uframe.translation.x, uframe.translation.y, uframe.translation.z, 
+
+    return format("CFrame::fromXYZYPRDegrees(% 5.1ff, % 5.1ff, % 5.1ff, % 5.1ff, % 5.1ff, % 5.1ff)",
+                  uframe.translation.x, uframe.translation.y, uframe.translation.z,
                   toDegrees(uframe.yaw), toDegrees(uframe.pitch), 0.0f);
 }
 
@@ -77,7 +77,7 @@ CoordinateFrame::CoordinateFrame(const Any& any) {
 
         int s = any.size();
 
-        *this = fromXYZYPRDegrees(any[0], any[1], any[2], 
+        *this = fromXYZYPRDegrees(any[0], any[1], any[2],
                                   (s > 3) ? any[3].number() : 0.0f,
                                   (s > 4) ? any[4].number() : 0.0f,
                                   (s > 5) ? any[5].number() : 0.0f);
@@ -87,7 +87,7 @@ CoordinateFrame::CoordinateFrame(const Any& any) {
 
 CoordinateFrame::operator Any() const {
     float x, y, z, yaw, pitch, roll;
-    getXYZYPRDegrees(x, y, z, yaw, pitch, roll); 
+    getXYZYPRDegrees(x, y, z, yaw, pitch, roll);
     Any a(Any::ARRAY, "CFrame::fromXYZYPRDegrees");
     a.append(x, y, z, yaw);
     if ( ! G3D::fuzzyEq(yaw, 0.0f) || ! G3D::fuzzyEq(pitch, 0.0f) || ! G3D::fuzzyEq(roll, 0.0f)) {
@@ -108,29 +108,29 @@ CoordinateFrame::CoordinateFrame(const class UprightFrame& f) {
 }
 
 
-CoordinateFrame::CoordinateFrame() : 
+CoordinateFrame::CoordinateFrame() :
     rotation(Matrix3::identity()), translation(Vector3::zero()) {
 }
 
-CoordinateFrame CoordinateFrame::fromXYZYPRRadians(float x, float y, float z, float yaw, 
+CoordinateFrame CoordinateFrame::fromXYZYPRRadians(float x, float y, float z, float yaw,
                                                    float pitch, float roll) {
     Matrix3 rotation = Matrix3::fromAxisAngle(Vector3::unitY(), yaw);
-    
+
     rotation = Matrix3::fromAxisAngle(rotation.column(0), pitch) * rotation;
     rotation = Matrix3::fromAxisAngle(rotation.column(2), roll) * rotation;
 
     const Vector3 translation(x, y, z);
-    
+
     return CoordinateFrame(rotation, translation);
 }
 
 
-void CoordinateFrame::getXYZYPRRadians(float& x, float& y, float& z, 
+void CoordinateFrame::getXYZYPRRadians(float& x, float& y, float& z,
                                        float& yaw, float& pitch, float& roll) const {
     x = translation.x;
     y = translation.y;
     z = translation.z;
-    
+
     const Vector3& look = lookVector();
 
     if (abs(look.y) > 0.99f) {
@@ -139,15 +139,15 @@ void CoordinateFrame::getXYZYPRRadians(float& x, float& y, float& z,
         yaw   = G3D::pi() + atan2(look.x, look.z);
         pitch = asin(look.y);
         roll  = 0.0f;
-        
+
     } else {
 
         // Yaw cannot be affected by others, so pull it first
         yaw = G3D::pi() + atan2(look.x, look.z);
-        
+
         // Pitch is the elevation of the yaw vector
         pitch = asin(look.y);
-        
+
         Vector3 actualRight = rightVector();
         Vector3 expectedRight = look.cross(Vector3::unitY());
 
@@ -156,16 +156,16 @@ void CoordinateFrame::getXYZYPRRadians(float& x, float& y, float& z,
 }
 
 
-void CoordinateFrame::getXYZYPRDegrees(float& x, float& y, float& z, 
+void CoordinateFrame::getXYZYPRDegrees(float& x, float& y, float& z,
                                        float& yaw, float& pitch, float& roll) const {
     getXYZYPRRadians(x, y, z, yaw, pitch, roll);
     yaw   = toDegrees(yaw);
     pitch = toDegrees(pitch);
     roll  = toDegrees(roll);
 }
-    
 
-CoordinateFrame CoordinateFrame::fromXYZYPRDegrees(float x, float y, float z, 
+
+CoordinateFrame CoordinateFrame::fromXYZYPRDegrees(float x, float y, float z,
                                                    float yaw, float pitch, float roll) {
     return fromXYZYPRRadians(x, y, z, toRadians(yaw), toRadians(pitch), toRadians(roll));
 }
@@ -212,7 +212,7 @@ bool CoordinateFrame::fuzzyIsIdentity() const {
 
 
 bool CoordinateFrame::isIdentity() const {
-    return 
+    return
         (translation == Vector3::zero()) &&
         (rotation == Matrix3::identity());
 }
@@ -271,16 +271,16 @@ Triangle CoordinateFrame::toWorldSpace(const Triangle& t) const {
 
 Cylinder CoordinateFrame::toWorldSpace(const Cylinder& c) const {
     return Cylinder(
-        pointToWorldSpace(c.point(0)), 
-        pointToWorldSpace(c.point(1)), 
+        pointToWorldSpace(c.point(0)),
+        pointToWorldSpace(c.point(1)),
         c.radius());
 }
 
 
 Capsule CoordinateFrame::toWorldSpace(const Capsule& c) const {
     return Capsule(
-        pointToWorldSpace(c.point(0)), 
-        pointToWorldSpace(c.point(1)), 
+        pointToWorldSpace(c.point(0)),
+        pointToWorldSpace(c.point(1)),
         c.radius());
 }
 
@@ -406,7 +406,7 @@ CoordinateFrame CoordinateFrame::lerp(
             q1.slerp(q2, alpha).toRotationMatrix(),
             translation * (1 - alpha) + other.translation * alpha);
     }
-} 
+}
 
 
 void CoordinateFrame::pointToWorldSpace(const Array<Vector3>& v, Array<Vector3>& vout) const {

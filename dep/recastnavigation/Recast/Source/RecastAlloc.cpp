@@ -51,7 +51,7 @@ void* rcAlloc(size_t size, rcAllocHint hint)
 ///
 /// @warning This function leaves the value of @p ptr unchanged.  So it still
 /// points to the same (now invalid) location, and not to null.
-/// 
+///
 /// @see rcAllocSetCustom
 void rcFree(void* ptr)
 {

@@ -57,26 +57,26 @@ GLight::GLight(const Any& any) {
         }
     } else if (toLower(any.name()) == "glight::directional") {
 
-        *this = directional(any[0], any[1], 
-            (any.size() > 2) ? any[2] : Any(true), 
+        *this = directional(any[0], any[1],
+            (any.size() > 2) ? any[2] : Any(true),
             (any.size() > 3) ? any[3] : Any(true));
 
     } else if (toLower(any.name()) == "glight::point") {
 
-        *this = point(any[0], any[1], 
-            (any.size() > 2) ? any[2] : Any(1), 
-            (any.size() > 3) ? any[3] : Any(0), 
-            (any.size() > 4) ? any[4] : Any(0.5f), 
-            (any.size() > 5) ? any[5] : Any(true), 
+        *this = point(any[0], any[1],
+            (any.size() > 2) ? any[2] : Any(1),
+            (any.size() > 3) ? any[3] : Any(0),
+            (any.size() > 4) ? any[4] : Any(0.5f),
+            (any.size() > 5) ? any[5] : Any(true),
             (any.size() > 6) ? any[6] : Any(true));
 
     } else if (toLower(any.name()) == "glight::spot") {
 
         *this = spot(any[0], any[1], any[2], any[3],
-            (any.size() > 4) ? any[4] : Any(1), 
-            (any.size() > 5) ? any[5] : Any(0), 
-            (any.size() > 6) ? any[6] : Any(0), 
-            (any.size() > 7) ? any[7] : Any(true), 
+            (any.size() > 4) ? any[4] : Any(1),
+            (any.size() > 5) ? any[5] : Any(0),
+            (any.size() > 6) ? any[6] : Any(0),
+            (any.size() > 7) ? any[7] : Any(true),
             (any.size() > 8) ? any[8] : Any(true));
     } else {
         any.verify(false, "Unrecognized name");
@@ -160,7 +160,7 @@ GLight GLight::spot(const Vector3& pos, const Vector3& pointDirection, float cut
 
 
 bool GLight::operator==(const GLight& other) const {
-    return (position == other.position) && 
+    return (position == other.position) &&
         (rightDirection == other.rightDirection) &&
         (spotDirection == other.spotDirection) &&
         (spotCutoff == other.spotCutoff) &&
@@ -190,23 +190,23 @@ Sphere GLight::effectSphere(float cutoff) const {
         float maxIntensity = max(color.r, max(color.g, color.b));
 
         float radius = finf();
-            
+
         if (attenuation[2] != 0) {
 
             // Solve I / attenuation.dot(1, r, r^2) < cutoff for r
             //
             //  a[0] + a[1] r + a[2] r^2 > I/cutoff
             //
-            
+
             float a = attenuation[2];
             float b = attenuation[1];
             float c = attenuation[0] - maxIntensity / cutoff;
-            
+
             float discrim = square(b) - 4 * a * c;
-            
+
             if (discrim >= 0) {
                 discrim = sqrt(discrim);
-                
+
                 float r1 = (-b + discrim) / (2 * a);
                 float r2 = (-b - discrim) / (2 * a);
 
@@ -220,9 +220,9 @@ Sphere GLight::effectSphere(float cutoff) const {
                     radius = r1;
                 }
             }
-                
+
         } else if (attenuation[1] != 0) {
-            
+
             // Solve I / attenuation.dot(1, r) < cutoff for r
             //
             // r * a[1] + a[0] = I / cutoff

@@ -78,7 +78,7 @@ DECLARE_COMPUTE_TYPE( Color4uint8,  Color4)
 namespace G3D {
 
 /**
-  Map of values across a discrete 2D plane.  Can be thought of as a generic class for 2D images, 
+  Map of values across a discrete 2D plane.  Can be thought of as a generic class for 2D images,
   allowing flexibility as to pixel format and convenient methods.
   In fact, the "pixels" can be any values
   on a grid that can be sensibly interpolated--RGB colors, scalars, 4D vectors, and so on.
@@ -97,12 +97,12 @@ namespace G3D {
 
   G3D::Image4uint8 -  A subclass of Map2D<Color4uint8> that supports image loading and saving and conversion to Texture.
 
-  There are two type parameters-- the first (@ Storage) is the type 
-  used to store the "pixel" values efficiently and 
+  There are two type parameters-- the first (@ Storage) is the type
+  used to store the "pixel" values efficiently and
   the second (@a Compute) is
   the type operated on by computation.  The Compute::Compute(Storage&) constructor
   is used to convert between storage and computation types.
-  @a Storage is often an integer version of @a Compute, for example 
+  @a Storage is often an integer version of @a Compute, for example
   <code>Map2D<double, uint8></code>.  By default, the computation type is:
 
   <pre>
@@ -137,12 +137,12 @@ namespace G3D {
     </pre>
   Any other storage type defaults to itself as the computation type.
 
-  The computation type can be any that 
+  The computation type can be any that
   supports lerp, +, -, *, /, and an empty constructor.
 
   Assign value:
 
-    <code>im->set(x, y, 7);</code> or 
+    <code>im->set(x, y, 7);</code> or
     <code>im->get(x, y) = 7;</code>
 
   Read value:
@@ -150,11 +150,11 @@ namespace G3D {
     <code>int c = im(x, y);</code>
 
   Can also sample with nearest neighbor, bilinear, and bicubic
-  interpolation.  
-  
-  Sampling follows OpenGL conventions, where 
+  interpolation.
+
+  Sampling follows OpenGL conventions, where
   pixel values represent grid points and (0.5, 0.5) is half-way
-  between two vertical and two horizontal grid points.  
+  between two vertical and two horizontal grid points.
   To draw an image of dimensions w x h with nearest neighbor
   sampling, render pixels from [0, 0] to [w - 1, h - 1].
 
@@ -163,10 +163,10 @@ namespace G3D {
   interpolation is constant outside [0, w - 1] and bicubic outside
   [3, w - 4].  The class does not offer quadratic interpolation because
   the interpolation filter could not center over a pixel.
-  
+
   @author Morgan McGuire, http://graphics.cs.williams.edu
  */
-template< typename Storage, 
+template< typename Storage,
 typename Compute = typename G3D::_internal::_GetComputeType<Storage>::Type>
 class Map2D : public ReferenceCountedObject {
 
@@ -184,7 +184,7 @@ public:
     typedef ReferenceCountedPointer<Map2D> Ref;
 
 protected:
-    
+
     Storage ZERO;
 
     /** Width, in pixels. */
@@ -195,7 +195,7 @@ protected:
 
     WrapMode            _wrapMode;
 
-    /** 0 if no mutating method has been invoked 
+    /** 0 if no mutating method has been invoked
         since the last call to setChanged(); */
     AtomicInt32         m_changed;
 
@@ -214,7 +214,7 @@ protected:
             return ZERO;
 
         case WrapMode::ERROR:
-            alwaysAssertM(((uint32)x < w) && ((uint32)y < h), 
+            alwaysAssertM(((uint32)x < w) && ((uint32)y < h),
                 format("Index out of bounds: (%d, %d), w = %d, h = %d",
                 x, y, w, h));
 
@@ -257,7 +257,7 @@ protected:
             { 0.0, -0.5,  1.0, -0.5},
             { 1.0,  0.0, -2.5,  1.5},
             { 0.0,  0.5,  2.0, -1.5},
-            { 0.0,  0.0, -0.5,  0.5}}; 
+            { 0.0,  0.0, -0.5,  0.5}};
 
         // S: Powers of the fraction
         double S[4];
@@ -310,7 +310,7 @@ public:
         }
     }
 
-    /** 
+    /**
      Returns true if this map has been written to since the last call to setChanged(false).
      This is useful if you are caching a texture map other value that must be recomputed
      whenever this changes.
@@ -357,8 +357,8 @@ public:
     }
 
     /** Get the value at (x, y).
-    
-        Note that the type of image->get(x, y) is 
+
+        Note that the type of image->get(x, y) is
         the storage type, not the computation
         type.  If the constructor promoting Storage to Compute rescales values
         (as, for example Color3(Color3uint8&) does), this will not match the value
@@ -488,7 +488,7 @@ public:
         alwaysAssertM(newY + newH <= (int)h, "Cannot grow when cropping");
         alwaysAssertM(newX >= 0 && newY >= 0, "Origin out of bounds.");
 
-        // Always safe to copy towards the upper left, provided 
+        // Always safe to copy towards the upper left, provided
         // that we're iterating towards the lower right.  This lets us avoid
         // reallocating the underlying array.
         for (int y = 0; y < newH; ++y) {
@@ -543,17 +543,17 @@ public:
         return rowSum * (1.0f / h);
     }
 
-    /** 
+    /**
       Needs to access elements from (floor(x), floor(y))
       to (floor(x) + 1, floor(y) + 1) and will use
-      the wrap mode appropriately (possibly generating 
+      the wrap mode appropriately (possibly generating
       out of bounds errors).
 
-      Guaranteed to match nearest(x, y) at integers. */ 
+      Guaranteed to match nearest(x, y) at integers. */
     Compute bilinear(float x, float y, WrapMode wrap) const {
         const int i = iFloor(x);
         const int j = iFloor(y);
-    
+
         const float fX = x - i;
         const float fY = y - j;
 
@@ -602,7 +602,7 @@ public:
             for (int u = 0; u < 4; ++u) {
                 hsample[u] = Compute(get(i + u - 1, j + v - 1, wrap));
             }
-    
+
             vsample[v] = bicubic(hsample, fX);
         }
 

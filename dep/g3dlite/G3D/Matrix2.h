@@ -32,7 +32,7 @@ public:
         return Vector2(data[0][0] * v[0] + data[0][1] * v[1],
                        data[1][0] * v[0] + data[1][1] * v[1]);
     }
-    
+
     Matrix2 inverse() const {
         return Matrix2(data[1][1], -data[0][1],
                        -data[1][0], data[0][0]) * (1.0f / determinant());

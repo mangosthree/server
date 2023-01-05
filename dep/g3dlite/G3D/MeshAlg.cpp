@@ -29,19 +29,19 @@ void MeshAlg::generateGrid(
     Array<Vector3>&     vertex,
     Array<Vector2>&     texCoord,
     Array<int>&         index,
-    int                 wCells, 
+    int                 wCells,
     int                 hCells,
     const Vector2&      textureScale,
     bool                spaceCentered,
     bool                twoSided,
     const CoordinateFrame& xform,
     const Image1::Ref&  height) {
-        
+
     vertex.fastClear();
     texCoord.fastClear();
     index.fastClear();
 
-    // Generate vertices                  
+    // Generate vertices
     for (int z = 0; z <= hCells; ++z) {
         for (int x = 0; x <= wCells; ++x) {
             Vector3 v(x / (float)wCells, 0, z / (float)hCells);
@@ -136,7 +136,7 @@ void MeshAlg::computeNormals(
 
     computeAdjacency(geometry.vertexArray, indexArray, faceArray, edgeArray, vertexArray);
 
-    computeNormals(geometry.vertexArray, faceArray, vertexArray, 
+    computeNormals(geometry.vertexArray, faceArray, vertexArray,
                    geometry.normalArray, faceNormalArray);
 }
 
@@ -160,11 +160,11 @@ void MeshAlg::computeNormals(
         // We leave out the edges because they aren't used to compute normals
     }
 
-    computeNormals(vertexGeometry, faceArray, fakeVertexArray, 
+    computeNormals(vertexGeometry, faceArray, fakeVertexArray,
         vertexNormalArray, faceNormalArray);
 }
 
-    
+
 void MeshAlg::computeNormals(
     const Array<Vector3>&   vertexGeometry,
     const Array<Face>&      faceArray,
@@ -231,7 +231,7 @@ void MeshAlg::computeFaceNormals(
         const Vector3& v0 = vertexArray[face.vertexIndex[0]];
         const Vector3& v1 = vertexArray[face.vertexIndex[1]];
         const Vector3& v2 = vertexArray[face.vertexIndex[2]];
-        
+
         faceNormals[f] = (v1 - v0).cross(v2 - v0);
     }
 
@@ -261,7 +261,7 @@ void MeshAlg::identifyBackfaces(
             const Vector3& v0 = vertexArray[face.vertexIndex[0]];
             const Vector3& v1 = vertexArray[face.vertexIndex[1]];
             const Vector3& v2 = vertexArray[face.vertexIndex[2]];
-        
+
             const Vector3 N = (v1 - v0).cross(v2 - v0);
 
             backface[f] = N.dot(P) < 0;
@@ -274,7 +274,7 @@ void MeshAlg::identifyBackfaces(
             const Vector3& v0 = vertexArray[face.vertexIndex[0]];
             const Vector3& v1 = vertexArray[face.vertexIndex[1]];
             const Vector3& v2 = vertexArray[face.vertexIndex[2]];
-        
+
             const Vector3 N = (v1 - v0).cross(v2 - v0);
 
             backface[f] = N.dot(P - v0) < 0;
@@ -303,7 +303,7 @@ void MeshAlg::identifyBackfaces(
     } else {
         // Finite case
         for (int f = faceArray.size() - 1; f >= 0; --f) {
-            const MeshAlg::Face& face = faceArray[f];        
+            const MeshAlg::Face& face = faceArray[f];
             const Vector3& v0 = vertexArray[face.vertexIndex[0]];
             const Vector3& N = faceNormals[f];
 
@@ -353,7 +353,7 @@ void MeshAlg::computeAreaStatistics(
     double&                 maxFaceArea) {
 
     debugAssert(indexArray.size() % 3 == 0);
-    
+
     Array<double> area;
     area.resize(indexArray.size() / 3);
     Array<double> magnitude;
@@ -414,7 +414,7 @@ int MeshAlg::countBoundaryEdges(const Array<MeshAlg::Edge>& edgeArray) {
 void MeshAlg::computeBounds(
     const Array<Vector3>&   vertexArray,
     const Array<int>&       indexArray,
-    AABox&                  box, 
+    AABox&                  box,
     Sphere&                 sphere) {
 
     Array<Vector3> newArray;
@@ -428,7 +428,7 @@ void MeshAlg::computeBounds(
 
 void MeshAlg::computeBounds(
     const Array<Vector3>&   vertexArray,
-    AABox&                  box, 
+    AABox&                  box,
     Sphere&                 sphere) {
 
     Vector3 xmin, xmax, ymin, ymax, zmin, zmax;
@@ -466,7 +466,7 @@ void MeshAlg::computeBounds(
     }
 
     // Set points dia1 & dia2 to the maximally separated pair
-    Vector3 dia1 = xmin; 
+    Vector3 dia1 = xmin;
     Vector3 dia2 = xmax;
     {
         // Set xspan = distance between the 2 points xmin & xmax (squared)
@@ -475,7 +475,7 @@ void MeshAlg::computeBounds(
         // Same for y & z spans
         double yspan = (ymax - ymin).squaredMagnitude();
         double zspan = (zmax - zmin).squaredMagnitude();
-    
+
         double maxspan = xspan;
 
         if (yspan > maxspan) {
@@ -497,7 +497,7 @@ void MeshAlg::computeBounds(
     // calc initial center
     Vector3 center = (dia1 + dia2) / 2.0;
 
-    // calculate initial radius^2 and radius 
+    // calculate initial radius^2 and radius
     Vector3 d = dia2 - sphere.center;
 
     double radSq = d.squaredMagnitude();
@@ -513,7 +513,7 @@ void MeshAlg::computeBounds(
 
         double old_to_p_sq = d.squaredMagnitude();
 
-        // do r^2 test first 
+        // do r^2 test first
         if (old_to_p_sq > radSq) {
              // this point is outside of current sphere
             old_to_p = sqrt(old_to_p_sq);
@@ -522,12 +522,12 @@ void MeshAlg::computeBounds(
             rad = (rad + old_to_p) / 2.0;
 
             // for next r^2 compare
-            radSq = rad * rad;     
+            radSq = rad * rad;
             old_to_new = old_to_p - rad;
 
             // calc center of new sphere
             center = (rad * center + old_to_new * vertex) / old_to_p;
-        }    
+        }
     }
 
     const Vector3 min(xmin.x, ymin.y, zmin.z);
@@ -565,7 +565,7 @@ void MeshAlg::computeTangentSpaceBasis(
     System::memset(tangent.getCArray(), 0, sizeof(Vector3) * tangent.size());
     System::memset(binormal.getCArray(), 0, sizeof(Vector3) * binormal.size());
 
-    // Iterate over faces, computing the tangent vectors for each 
+    // Iterate over faces, computing the tangent vectors for each
     // vertex.  Accumulate those into the tangent and binormal arrays
     // and then orthonormalize at the end.
 
@@ -575,7 +575,7 @@ void MeshAlg::computeTangentSpaceBasis(
         const int i0 = face.vertexIndex[0];
         const int i1 = face.vertexIndex[1];
         const int i2 = face.vertexIndex[2];
-        
+
         const Vector3& v0 = vertexArray[i0];
         const Vector3& v1 = vertexArray[i1];
         const Vector3& v2 = vertexArray[i2];
@@ -596,15 +596,15 @@ void MeshAlg::computeTangentSpaceBasis(
 
         Vector3 n(ve1.cross(ve2).direction());
         Vector3 t, b;
-    
+
         float r = te1.x * te2.y - te1.y * te2.x;
         if (r == 0.0) {
             // degenerate case
             Vector3::generateOrthonormalBasis(t, b, n, true);
         } else {
-            r = 1.0f / r;        
+            r = 1.0f / r;
             t = (te2.y * ve1 - te1.y * ve2) * r;
-            b = (te2.x * ve1 - te1.x * ve2) * r;   
+            b = (te2.x * ve1 - te1.x * ve2) * r;
         }
 
         for (int v = 0; v < 3; ++v) {

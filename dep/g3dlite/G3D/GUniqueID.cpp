@@ -37,17 +37,17 @@ void GUniqueID::deserialize(TextInput& t) {
 GUniqueID GUniqueID::create(uint16 tag) {
     static uint64 counter = 0;
     static uint64 systemID = 0;
-    
+
     if (systemID == 0) {
         // Create a unique ID for this machine/program instance
-        
+
         // TODO: see ioctl(skfd, SIOCGIFHWADDR, &if_hwaddr)
         Array<NetAddress> addr;
         NetworkDevice::instance()->localHostAddresses(addr);
         if (addr.size() > 0) {
             systemID |= addr[0].ip();
         }
-        
+
         union {
             float64 ft;
             uint64 ut;
@@ -55,7 +55,7 @@ GUniqueID GUniqueID::create(uint16 tag) {
         ft = System::time();
         systemID = ut << 22;
         systemID ^= ((uint64)iRandom(0, 32768)) << 8;
-        
+
         systemID &= ~((uint64)1023 << 54);
 
         // Ensure that the systemID is non-zero (vanishingly small probability)
@@ -63,16 +63,16 @@ GUniqueID GUniqueID::create(uint16 tag) {
             systemID = 1;
         }
     }
-    
+
     // No need for modulo; we'll all be dead before this counter
     // overflows 54 bits
     ++counter;
-    
+
     GUniqueID i;
-    
+
     i.id = (((uint64)(tag & 1023)) << 54) | (counter ^ systemID);
-    
+
     return i;
 }
 
-} // G3D 
+} // G3D

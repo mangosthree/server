@@ -1,8 +1,8 @@
 /**
  @file Vector3int32.cpp
- 
+
  @author Morgan McGuire, http://graphics.cs.williams.edu
-  
+
  @created 2008-07-01
  @edited  2008-07-01
  */

@@ -1,4 +1,4 @@
-/** 
+/**
  @file AnyVal.cpp
  @author Morgan McGuire
  @maintainer Morgan McGuire
@@ -187,7 +187,7 @@ void AnyVal::deleteValue() {
             m_referenceCount = NULL;
             // Pass through and delete the real object now
         } else {
-            // Someone else is holding a reference, so we can't delete 
+            // Someone else is holding a reference, so we can't delete
             // the object.
             m_referenceCount = NULL;
             return;
@@ -210,7 +210,7 @@ void AnyVal::deleteValue() {
     case STRING:
         delete (std::string*)m_value;
         break;
-        
+
     case RECT2D:
         delete (Rect2D*)m_value;
         break;
@@ -273,8 +273,8 @@ void AnyVal::deleteValue() {
 
     default:
         debugAssertM(false, "Internal error: no destructor for this type.");
-    } 
-   
+    }
+
     m_value = NULL;
 }
 
@@ -285,7 +285,7 @@ AnyVal& AnyVal::operator=(const AnyVal& v) {
     m_type = v.m_type;
 
     m_referenceCount = v.m_referenceCount;
-    
+
     if (isSharedType()) {
         ++(*m_referenceCount);
         m_value = v.m_value;
@@ -310,7 +310,7 @@ void* AnyVal::copyValue() const {
 
     case STRING:
         return new std::string(*(std::string*)m_value);
-        
+
     case RECT2D:
         return new Rect2D(*(Rect2D*)m_value);
 
@@ -376,12 +376,12 @@ static bool legalIdentifier(const std::string& s) {
         return false;
     }
 
-    bool ok = true;    
+    bool ok = true;
 
     for (unsigned int i = 1; i < s.size(); ++i) {
         ok &= isDigit(s[i]) || isLetter(s[i]) || (s[i] == '_');
     }
-   
+
     return ok;
 }
 
@@ -403,14 +403,14 @@ void AnyVal::serialize(G3D::TextOutput& t) const {
     case STRING:
         t.writeString(*(std::string*)m_value);
         break;
-        
+
     case RECT2D:
         t.printf("R(%g, %g, %g, %g)", ((Rect2D*)m_value)->x0(), ((Rect2D*)m_value)->y0(),
                  ((Rect2D*)m_value)->width(), ((Rect2D*)m_value)->height());
         break;
 
     case AABOX:
-        t.printf("AAB(V3(%g, %g, %g), V3(%g, %g, %g))", 
+        t.printf("AAB(V3(%g, %g, %g), V3(%g, %g, %g))",
                  aabox().low().x,
                  aabox().low().y,
                  aabox().low().z,
@@ -541,7 +541,7 @@ void AnyVal::serialize(G3D::TextOutput& t) const {
                         t.writeSymbol(i->key);
                     }
                     t.printf("= ");
-                    
+
                     i->value.serialize(t);
 
                     if (i != end) {
@@ -615,17 +615,17 @@ void AnyVal::deserialize(G3D::TextInput& t) {
                 break;
 
             } else if (s == "true") {
-                
+
                 m_type = BOOLEAN;
                 m_value = new bool(true);
 
             } else if (s == "false") {
-                
+
                 m_type = BOOLEAN;
                 m_value = new bool(false);
 
             } else if (s == "R") {
-                
+
                 m_type = RECT2D;
                 t.readSymbol("(");
                 float x,y,w,h;
@@ -662,7 +662,7 @@ void AnyVal::deserialize(G3D::TextInput& t) {
             } else if (s == "V2") {
 
                 t.readSymbol("(");
-                Vector2 v; 
+                Vector2 v;
                 v.x = (float)t.readNumber();
                 t.readSymbol(",");
                 v.y = (float)t.readNumber();
@@ -673,7 +673,7 @@ void AnyVal::deserialize(G3D::TextInput& t) {
             } else if (s == "V3") {
 
                 t.readSymbol("(");
-                Vector3 v; 
+                Vector3 v;
                 v.x = (float)t.readNumber();
                 t.readSymbol(",");
                 v.y = (float)t.readNumber();
@@ -686,7 +686,7 @@ void AnyVal::deserialize(G3D::TextInput& t) {
             } else if (s == "V4") {
 
                 t.readSymbol("(");
-                Vector4 v; 
+                Vector4 v;
                 v.x = (float)t.readNumber();
                 t.readSymbol(",");
                 v.y = (float)t.readNumber();
@@ -782,7 +782,7 @@ void AnyVal::deserialize(G3D::TextInput& t) {
                     if (t.peek().string() == ",") {
                         t.readSymbol(",");
                         roll = (float)t.readNumber();
-                    }                        
+                    }
                     m = CoordinateFrame::fromXYZYPRDegrees(x, y, z, yaw, pitch, roll);
                 } else {
                     // Matrix format

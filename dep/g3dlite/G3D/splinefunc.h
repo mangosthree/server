@@ -1,8 +1,8 @@
 /**
  @file spline.h
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @created 2004-07-25
  @edited  2007-05-05
  */
@@ -19,7 +19,7 @@ namespace G3D {
 
 /**
  Interpolates a property according to a piecewise linear spline.  This provides
- C0 continuity but the derivatives are not smooth.  
+ C0 continuity but the derivatives are not smooth.
  <P>
  Example:
  <CODE>
@@ -58,7 +58,7 @@ YType linearSpline(double x, const XType* controlX, const YType* controlY, int n
     return controlY[numControl - 1];
 }
 
- 
+
     /** See also G3D::Spline*/
 template<class YType> YType cyclicCatmullRomSpline(
     double       t,
@@ -69,9 +69,9 @@ template<class YType> YType cyclicCatmullRomSpline(
 
     t = wrap(t, numPoints);
 
-    // Find the indices of adjacent control points    
+    // Find the indices of adjacent control points
     int i = iFloor(t);
-    
+
     // Compute the distance from the control point
     t = t - i;
 
@@ -84,14 +84,14 @@ template<class YType> YType cyclicCatmullRomSpline(
     const YType& P2 = controlY[(i + 2) % numPoints];
     const YType& P3 = controlY[(i + 3) % numPoints];
 
-    return 0.5 * ((2 * P1) + 
+    return 0.5 * ((2 * P1) +
                   (-P0 + P2) * t +
                   (2*P0 - 5*P1 + 4*P2 - P3) * t*t +
                   (-P0 + 3*P1- 3*P2 + P3) * t*t*t);
 }
 
 /**
- A cubic spline with regularly spaced 
+ A cubic spline with regularly spaced
  control points.  The spline interpolates
  the control points.  The spline
  will wrap from the last point back to the first.

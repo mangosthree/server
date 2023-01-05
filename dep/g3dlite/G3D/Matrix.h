@@ -18,9 +18,9 @@
 
 namespace G3D {
 
-/** 
- N x M matrix.  
- 
+/**
+ N x M matrix.
+
  The actual data is tracked internally by a reference counted pointer;
  it is efficient to pass and assign Matrix objects because no data is actually copied.
  This avoids the headache of pointers and allows natural math notation:
@@ -47,7 +47,7 @@ namespace G3D {
   Some methods accept an output argument instead of returning a value.  For example,
   <CODE>A = B.transpose()</CODE> can also be invoked as <CODE>B.transpose(A)</CODE>.
   The latter may be more efficient, since Matrix may be able to re-use the storage of
-  A (if it has approximatly the right size and isn't currently shared with another matrix).  
+  A (if it has approximatly the right size and isn't currently shared with another matrix).
 
   @sa G3D::Matrix3, G3D::Matrix4, G3D::Vector2, G3D::Vector3, G3D::Vector4, G3D::CoordinateFrame
 
@@ -55,11 +55,11 @@ namespace G3D {
  */
 class Matrix {
 public:
-    /** 
+    /**
       Internal precision.  Currently float, but this may become a templated class in the future
       to allow operations like Matrix<double> and Matrix<ComplexFloat>.
 
-      Not necessarily a plain-old-data type (e.g., could ComplexFloat), but must be something 
+      Not necessarily a plain-old-data type (e.g., could ComplexFloat), but must be something
       with no constructor, that can be safely memcpyd, and that has a bit pattern of all zeros
       when zero.*/
     typedef float T;
@@ -76,8 +76,8 @@ private:
 public:
 
     /** Used internally by Matrix.
-    
-        Does not throw exceptions-- assumes the caller has taken care of 
+
+        Does not throw exceptions-- assumes the caller has taken care of
         argument checking. */
     class Impl : public ReferenceCountedObject {
     public:
@@ -191,7 +191,7 @@ public:
         /**
          Cofactor [r][c] is defined as C[r][c] = -1 ^(r+c) * det(A[r][c]),
          where A[r][c] is the (R-1)x(C-1) matrix formed by removing row r and
-         column c from the original matrix. 
+         column c from the original matrix.
         */
         T cofactor(int r, int c) const;
 
@@ -250,19 +250,19 @@ private:
         inline bool operator>(const SortRank& x) const {
             return x.value > value;
         }
-        
+
         inline bool operator<(const SortRank& x) const {
             return x.value < value;
         }
-        
+
         inline bool operator>=(const SortRank& x) const {
             return x.value >= value;
         }
-        
+
         inline bool operator<=(const SortRank& x) const {
             return x.value <= value;
         }
-        
+
         inline bool operator==(const SortRank& x) const {
             return x.value == value;
         }
@@ -357,7 +357,7 @@ public:
         from r1:r2 to c1:c2, inclusive.*/
     Matrix subMatrix(int r1, int r2, int c1, int c2) const;
 
-    /** Matrix multiplication.  To perform element-by-element multiplication, 
+    /** Matrix multiplication.  To perform element-by-element multiplication,
         see arrayMul. */
     inline Matrix operator*(const Matrix& B) const {
         Matrix C(impl->R, B.impl->C);
@@ -429,7 +429,7 @@ public:
     Matrix3 toMatrix3() const;
 
     Matrix4 toMatrix4() const;
-    
+
     Vector2 toVector2() const;
 
     Vector3 toVector3() const;
@@ -469,7 +469,7 @@ public:
     /**
      A<SUP>-1</SUP> computed using the Gauss-Jordan algorithm,
      for square matrices.
-     Run time is <I>O(R<sup>3</sup>)</I>, where <I>R</i> is the 
+     Run time is <I>O(R<sup>3</sup>)</I>, where <I>R</i> is the
      number of rows.
      */
     inline Matrix inverse() const {
@@ -500,8 +500,8 @@ public:
         return Matrix(A);
     }
 
-    /**     
-     (A<SUP>T</SUP>A)<SUP>-1</SUP>A<SUP>T</SUP>) computed 
+    /**
+     (A<SUP>T</SUP>A)<SUP>-1</SUP>A<SUP>T</SUP>) computed
      using SVD.
 
      @param tolerance Use -1 for automatic tolerance.
@@ -520,11 +520,11 @@ public:
         return (trans * (*this)).inverse() * trans;
     }
 
-    /** Singular value decomposition.  Factors into three matrices 
+    /** Singular value decomposition.  Factors into three matrices
         such that @a this = @a U * fromDiagonal(@a d) * @a V.transpose().
 
         The matrix must have at least as many rows as columns.
-        
+
         Run time is <I>O(C<sup>2</sup>*R)</I>.
 
         @param sort If true (default), the singular values
@@ -602,9 +602,9 @@ public:
       @param D vector of singular values of a (diagonal of the D matrix).  Length cols.
       @param V returns the right orthonormal transformation matrix, size cols x cols
 
-      @cite Based on Dianne Cook's implementation, which is adapted from 
-      svdecomp.c in XLISP-STAT 2.1, which is code from Numerical Recipes 
-      adapted by Luke Tierney and David Betz.  The Numerical Recipes code 
+      @cite Based on Dianne Cook's implementation, which is adapted from
+      svdecomp.c in XLISP-STAT 2.1, which is code from Numerical Recipes
+      adapted by Luke Tierney and David Betz.  The Numerical Recipes code
       is adapted from Forsythe et al, who based their code on Golub and
       Reinsch's original implementation.
     */

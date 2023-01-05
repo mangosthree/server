@@ -1,10 +1,10 @@
 /**
   @file Quat.cpp
- 
+
   Quaternion implementation based on Watt & Watt page 363
-  
+
   @author Morgan McGuire, graphics3d.com
-  
+
   @created 2002-01-23
   @edited  2010-03-31
  */
@@ -24,7 +24,7 @@ Quat Quat::fromAxisAngleRotation(
     Quat q;
 
     q.w = cos(angle / 2.0f);
-    q.imag() = axis.direction() * sin(angle / 2.0f); 
+    q.imag() = axis.direction() * sin(angle / 2.0f);
 
     return q;
 }
@@ -102,9 +102,9 @@ Quat::Quat(const Matrix3& rot) {
 void Quat::toAxisAngleRotation(
     Vector3&            axis,
     double&             angle) const {
-   
+
     // Decompose the quaternion into an angle and an axis.
-    
+
     axis = Vector3(x, y, z);
     angle = 2 * acos(w);
 
@@ -116,7 +116,7 @@ void Quat::toAxisAngleRotation(
 
     // Reduce the range of the angle.
 
-    if (angle < 0) {        
+    if (angle < 0) {
         angle = -angle;
         axis = -axis;
     }
@@ -131,7 +131,7 @@ void Quat::toAxisAngleRotation(
 
     // Make the angle positive.
 
-    if (angle < 0.0f) {        
+    if (angle < 0.0f) {
         angle = -angle;
         axis = -axis;
     }
@@ -153,7 +153,7 @@ void Quat::toRotationMatrix(
     rot = Matrix3(*this);
 }
 
-    
+
 Quat Quat::slerp(
     const Quat&         _quat1,
     float               alpha,
@@ -183,14 +183,14 @@ Quat Quat::slerp(
 
     // Using G3D::aCos will clamp the angle to 0 and pi
     phi = static_cast<float>(G3D::aCos(cosphi));
-    
+
     if (phi >= threshold) {
         // For large angles, slerp
         float scale0, scale1;
 
         scale0 = sin((1.0f - alpha) * phi);
         scale1 = sin(alpha * phi);
-        
+
         return ( (quat0 * scale0) + (quat1 * scale1) ) / sin(phi);
     } else {
         // For small angles, linear interpolate
@@ -223,13 +223,13 @@ Quat Quat::operator*(const Quat& other) const {
 // From "Uniform Random Rotations", Ken Shoemake, Graphics Gems III.
 Quat Quat::unitRandom() {
     float x0 = uniformRandom();
-    float r1 = sqrtf(1 - x0), 
+    float r1 = sqrtf(1 - x0),
           r2 = sqrtf(x0);
     float t1 = (float)G3D::twoPi() * uniformRandom();
     float t2 = (float)G3D::twoPi() * uniformRandom();
-    float c1 = cosf(t1), 
+    float c1 = cosf(t1),
           s1 = sinf(t1);
-    float c2 = cosf(t2), 
+    float c2 = cosf(t2),
           s2 = sinf(t2);
     return Quat(s1 * r1, c1 * r1, s2 * r2, c2 * r2);
 }

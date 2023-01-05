@@ -22,7 +22,7 @@ void GImage::BAYER_G8B8_R8G8_to_Quarter_R8G8B8(int width, int height, const uint
             int src_off = x*2 + y*2*width;
             out[dst_off] = in[src_off+width]; // red
             out[dst_off+1] = ((int)in[src_off] + (int)in[src_off+width+1])/2; // green
-            out[dst_off+2] = in[src_off+1]; // blue            
+            out[dst_off+2] = in[src_off+1]; // blue
 
             dst_off = dst_off + 3;
         }
@@ -107,8 +107,8 @@ static uint8 applyFilter(
 //    GRG, GRG, BGB, BGG
 //
 // There are three kinds of OUTPUT pixels: R, G, B.
-// Thus there are nominally 12 different I/O combinations, 
-// but several are impulses because needed output at that 
+// Thus there are nominally 12 different I/O combinations,
+// but several are impulses because needed output at that
 // location *is* the input (e.g., G_GRG and G_BGG).
 //
 // The following 5x5 row-major filters are named as output_input.
@@ -128,7 +128,7 @@ static const float G_BGB[5][5] =
 {     0.0f,      0.0f,      2.0f,      0.0f,      0.0f},
 {     0.0f,      0.0f,     -1.0f,      0.0f,      0.0f}};
 
-// Red 
+// Red
 //(the caption in the paper is wrong for this case:
 // "R row B column really means R row G column"
 static const float R_GRG[5][5] =
@@ -153,7 +153,7 @@ static const float R_BGB[5][5] =
 {     0.0f,      0.0f, -3.0f/2.0f,      0.0f,      0.0f}};
 
 
-// Blue 
+// Blue
 //(the caption in the paper is wrong for this case:
 // "B row R column really means B row G column")
 #define B_BGG R_GRG

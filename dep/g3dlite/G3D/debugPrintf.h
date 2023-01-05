@@ -1,8 +1,8 @@
 /**
  @file debugPrintf.h
- 
+
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
  @created 2001-08-26
  @edited  2007-07-20
 
@@ -49,7 +49,7 @@ std::string consolePrint(const std::string&);
    On unix-based operating systems the output is sent to stderr.
 
    Also sends output to the console (G3D::consolePrintf) if there is a consolePrintHook,
-   and log (G3D::logPrintf), and flushes before returning.   
+   and log (G3D::logPrintf), and flushes before returning.
 
    @return The string that was printed
 */

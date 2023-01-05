@@ -1,10 +1,10 @@
 /**
   @file Vector4.h
- 
+
   Homogeneous vector class.
- 
+
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
   @created 2002-07-09
   @edited  2008-11-01
 
@@ -26,7 +26,7 @@
 
 namespace G3D {
 
-class Vector2;    
+class Vector2;
 class Vector3;
 class Vector4;
 class Vector4int8;
@@ -48,7 +48,7 @@ public:
 
     /** \param any Must either Vector4(#, #, #, #) or Vector3 {x = #, y = #, z = #, w =#}*/
     Vector4(const Any& any);
-    
+
     /** Converts the Vector4 to an Any. */
     operator Any() const;
 
@@ -135,7 +135,7 @@ public:
     // arithmetic operations
     Vector4 operator+ (const Vector4& rkVector) const;
     Vector4 operator- (const Vector4& rkVector) const;
-    
+
     inline Vector4 operator*(const Vector4& rkVector) const {
         return Vector4(x * rkVector.x, y * rkVector.y, z * rkVector.z, w * rkVector.w);
     }
@@ -640,7 +640,7 @@ inline Vector4& Vector4::operator-= (const Vector4& rkVector) {
 //----------------------------------------------------------------------------
 
 inline Vector4 Vector4::lerp(const Vector4& v, float alpha) const {
-    return (*this) + (v - *this) * alpha; 
+    return (*this) + (v - *this) * alpha;
 }
 
 

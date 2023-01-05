@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -599,6 +599,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "reserved_name",               SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadReservedNameCommand,            "", NULL },
         { "reputation_reward_rate",      SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadReputationRewardRateCommand,    "", NULL },
         { "reputation_spillover_template", SEC_ADMINISTRATOR, true, &ChatHandler::HandleReloadReputationSpilloverTemplateCommand, "", NULL },
+        { "script_binding",              SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadScriptBindingCommand,           "", NULL },
         { "skill_discovery_template",    SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSkillDiscoveryTemplateCommand,  "", NULL },
         { "skill_extra_item_template",   SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSkillExtraItemTemplateCommand,  "", NULL },
         { "skill_fishing_base_level",    SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSkillFishingBaseLevelCommand,   "", NULL },
@@ -842,6 +843,8 @@ ChatCommand* ChatHandler::getCommandTable()
         { "repairitems",    SEC_GAMEMASTER,     true,  &ChatHandler::HandleRepairitemsCommand,         "", NULL },
         { "stable",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleStableCommand,              "", NULL },
         { "waterwalk",      SEC_GAMEMASTER,     false, &ChatHandler::HandleWaterwalkCommand,           "", NULL },
+        { "freezeplayer",   SEC_GAMEMASTER,     false, &ChatHandler::HandleFreezePlayerCommand,        "", NULL },
+        { "unfreezeplayer", SEC_GAMEMASTER,     false, &ChatHandler::HandleUnfreezePlayerCommand,      "", NULL },
         { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", NULL },
         { "gearscore",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleShowGearScoreCommand,       "", NULL },
         { "mmap",           SEC_GAMEMASTER,     false, NULL,                                           "", mmapCommandTable },
@@ -1025,7 +1028,7 @@ void ChatHandler::SendSysMessage(const char* str)
     delete[] buf;
 }
 
-void ChatHandler::SendGlobalSysMessage(const char* str)
+void ChatHandler::SendGlobalSysMessage(const char* str, AccountTypes minSec)
 {
     // Chat output
     WorldPacket data;
@@ -1033,12 +1036,19 @@ void ChatHandler::SendGlobalSysMessage(const char* str)
     // need copy to prevent corruption by strtok call in LineFromMessage original string
     char* buf = mangos_strdup(str);
     char* pos = buf;
-    ObjectGuid guid = m_session ? m_session->GetPlayer()->GetObjectGuid() : ObjectGuid();
+    ObjectGuid senderGuid = m_session ? m_session->GetPlayer()->GetObjectGuid() : ObjectGuid();
 
     while (char* line = LineFromMessage(pos))
     {
-        ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, line, LANG_UNIVERSAL, CHAT_TAG_NONE, guid);
-        sWorld.SendGlobalMessage(&data);
+        // m_session == null when we're accessing these command from the console.
+        ObjectGuid senderGuid;
+        if (m_session)
+        {
+            senderGuid = m_session->GetPlayer()->GetObjectGuid();
+        }
+
+        ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, line, LANG_UNIVERSAL, CHAT_TAG_NONE, senderGuid);
+        sWorld.SendGlobalMessage(&data, minSec);
     }
 
     delete[] buf;
@@ -3850,7 +3860,7 @@ uint32 ChatHandler::ExtractAccountId(char** args, std::string* accountName /*= N
     else
     {
         account_name = account_str;
-        if (!AccountMgr::normalizeString(account_name))
+        if (!Utf8ToUpperOnlyLatin(account_name))
         {
             PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, account_name.c_str());
             SetSentErrorMessage(true);
@@ -4214,3 +4224,38 @@ template void ChatHandler::ShowNpcOrGoSpawnInformation<GameObject>(uint32 guid);
 
 template std::string ChatHandler::PrepareStringNpcOrGoSpawnInformation<Creature>(uint32 guid);
 template std::string ChatHandler::PrepareStringNpcOrGoSpawnInformation<GameObject>(uint32 guid);
+
+bool AddAuraToPlayer(const SpellEntry* spellInfo, Unit* target, WorldObject* caster)
+{
+    // We assume the spellInfo has been checked and teh spell has aura effects
+    /*
+        if (!IsSpellAppliesAura(spellInfo, (1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)) &&
+        !spellInfo->HasSpellEffect(SPELL_EFFECT_PERSISTENT_AREA_AURA))
+    */
+    if (!spellInfo)
+    {
+        return false;
+    }
+
+    SpellAuraHolder* holder = CreateSpellAuraHolder(spellInfo, target, caster);
+
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
+        uint8 eff = spellEffect->Effect;
+        if (eff >= TOTAL_SPELL_EFFECTS)
+        {
+            continue;
+        }
+        if (IsAreaAuraEffect(eff) ||
+            eff == SPELL_EFFECT_APPLY_AURA ||
+            eff == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+        {
+            Aura* aur = CreateAura(spellInfo, SpellEffectIndex(i), NULL, holder, target);
+            holder->AddAura(aur, SpellEffectIndex(i));
+        }
+    }
+    target->AddSpellAuraHolder(holder);
+
+    return true;
+}

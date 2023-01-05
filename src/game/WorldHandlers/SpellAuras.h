@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,14 @@
 #ifndef MANGOS_SPELLAURAS_H
 #define MANGOS_SPELLAURAS_H
 
+#include "Spell.h"
 #include "SpellAuraDefines.h"
 #include "DBCEnums.h"
 #include "ObjectGuid.h"
+#include "Object.h"
+#include "Item.h"
+#include "DBCStores.h"
+#include "Unit.h"
 
 /**
  * Used to modify what an Aura does to a player/npc.

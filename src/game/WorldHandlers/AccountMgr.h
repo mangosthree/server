@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 
 #include "Common.h"
 
+/* An enumeration of the possible results of an account operation. */
 enum AccountOpResult
 {
     AOR_OK,
@@ -39,6 +40,7 @@ enum AccountOpResult
 
 #define MAX_ACCOUNT_STR 32
 
+/* A class that is used to manage accounts. */
 class AccountMgr
 {
     public:
@@ -57,9 +59,8 @@ class AccountMgr
         bool GetName(uint32 acc_id, std::string& name);
         uint32 GetCharactersCount(uint32 acc_id);
         std::string CalculateShaPassHash(std::string& name, std::string& password);
-
-        static bool normalizeString(std::string& utf8str);
 };
 
+/* A macro that creates a global variable called `sAccountMgr` that is an instance of the `AccountMgr` class. */
 #define sAccountMgr MaNGOS::Singleton<AccountMgr>::Instance()
 #endif

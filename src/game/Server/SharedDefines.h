@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -3826,4 +3826,11 @@ enum CreatureLootStatus
     CREATURE_LOOT_STATUS_SKINNED        = 4
 };
 
+enum SpellEntriesConsts
+{
+    SPELL_FILLING_EMPTY_JAR__CURSED_OOZE    = 15698,
+    SPELL_FILLING_EMPTY_JAR__TAINTED_OOZE   = 15699,
+    SPELL_FILLING_EMPTY_JAR__PURE_OOZE      = 15702, // (Works on  Primal, Muculent and Glutonous Ooze)
+    SPELL_GM_FREEZE                         = 9454,
+};
 #endif

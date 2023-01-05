@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -378,7 +378,6 @@ bool ChatHandler::HandleModifyStandStateCommand(char* args)
     return true;
 }
 
-
 bool ChatHandler::HandleChangeWeatherCommand(char* args)
 {
     // Weather is OFF
@@ -424,3 +423,125 @@ bool ChatHandler::HandleChangeWeatherCommand(char* args)
 
     return true;
 }
+
+// Internal shortcut function to freeze a player
+bool freezePlayer(Player* player, WorldObject* caster)
+{
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(SPELL_GM_FREEZE);
+    return AddAuraToPlayer(spellInfo, player, caster);
+}
+
+// Internal shortcut function to freeze a player
+void unFreezePlayer(Player* player)
+{
+    player->RemoveAurasDueToSpell(SPELL_GM_FREEZE);
+}
+
+
+bool ChatHandler::HandleFreezePlayerCommand(char* args)
+{
+    Player* targetPlayer = nullptr;
+
+    // 1. Try to extract player name from args if not empty
+    if (*args)
+    {
+        char* playerName = ExtractLiteralArg(&args);
+
+        if (!ExtractPlayerTarget(&playerName, &targetPlayer))
+        {
+            SendSysMessage(LANG_COMMAND_FREEZE_PLAYER_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+    }
+
+    // 2. If arg is empty, gets the current selected target (returns current player if no unit selected)
+    if (!targetPlayer)
+    {
+        Unit* selectedTtarget = getSelectedPlayer();
+
+        if (!selectedTtarget)
+        {
+            SendSysMessage(LANG_NO_CHAR_SELECTED);
+            SetSentErrorMessage(true);
+            return false;
+        }
+        targetPlayer = (Player*)selectedTtarget;
+    }
+
+
+    const char* targetName = targetPlayer->GetName();
+    Player * currentGM = m_session->GetPlayer();
+
+    // Prevent freezing yourself !
+    if (targetPlayer == currentGM)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        SendSysMessage(LANG_COMMAND_FREEZE_PLAYER_CANNOT_FREEZE_YOURSELF);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    // Check if target can be freezed
+    if (targetPlayer->GetSession()->GetSecurity() > m_session->GetSecurity())
+    {
+        PSendSysMessage(LANG_COMMAND_FREEZE_PLAYER_CANNOT_FREEZE_HIGHER_SECLEVEL, targetName);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    freezePlayer(targetPlayer, currentGM);
+
+    // Notif GM
+    PSendSysMessage(LANG_COMMAND_FREEZE_PLAYER, targetName);
+
+    // Send message to player to prevent he has been frozen
+    ChatHandler(targetPlayer).SendSysMessage(LANG_COMMAND_FREEZE_PLAYER_YOU_HAVE_BEEN_FROZEN);
+
+    return true;
+}
+
+
+bool ChatHandler::HandleUnfreezePlayerCommand(char* args)
+{
+
+    Player* targetPlayer = nullptr;
+
+    // 1. Try to extract player name from args if not empty
+    if (*args)
+    {
+        char* playerName = ExtractLiteralArg(&args);
+
+        if (!ExtractPlayerTarget(&playerName, &targetPlayer))
+        {
+            SendSysMessage(LANG_COMMAND_UNFREEZE_PLAYER_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+    }
+
+    // 2. If arg is empty, gets the current selected target (returns current player if no unit selected)
+    if (!targetPlayer)
+    {
+        Unit* selectedTtarget = getSelectedPlayer();
+
+        if (!selectedTtarget)
+        {
+            SendSysMessage(LANG_NO_CHAR_SELECTED);
+            SetSentErrorMessage(true);
+            return false;
+        }
+        targetPlayer = (Player*)selectedTtarget;
+    }
+
+    unFreezePlayer(targetPlayer);
+
+    // Notif GM
+    PSendSysMessage(LANG_COMMAND_UNFREEZE_PLAYER, targetPlayer->GetName());
+
+    // Send message to player to prevent he has been unfrozen
+    ChatHandler(targetPlayer).SendSysMessage(LANG_COMMAND_FREEZE_PLAYER_YOU_HAVE_BEEN_UNFROZEN);
+
+    return true;
+}
+

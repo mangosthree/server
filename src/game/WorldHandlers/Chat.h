@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,31 +54,31 @@ class Unit;
 class ChatCommand
 {
     public:
-    uint32             Id;
-    const char* Name;
-    uint32             SecurityLevel;                   // function pointer required correct align (use uint32)
-    bool               AllowConsole;
-    bool (ChatHandler::* Handler)(char* args);
-    std::string        Help;
-    ChatCommand* ChildCommands;
+        uint32             Id;
+        const char* Name;
+        uint32             SecurityLevel;                   // function pointer required correct align (use uint32)
+        bool               AllowConsole;
+        bool (ChatHandler::* Handler)(char* args);
+        std::string        Help;
+        ChatCommand* ChildCommands;
 
-      ChatCommand(
+        ChatCommand(
           const char* pName,
           uint32 pSecurityLevel,
           bool pAllowConsole,
           bool (ChatHandler::* pHandler)(char* args),
           std::string pHelp,
           ChatCommand* pChildCommands
-      )
+        )
          : Id(-1)
-      {
+        {
           Name = pName;
           SecurityLevel = pSecurityLevel;
           AllowConsole = pAllowConsole;
           Handler = pHandler;
           Help = pHelp;
           ChildCommands = pChildCommands;
-      }
+        }
 };
 
 enum ChatCommandSearchResult
@@ -168,7 +168,7 @@ class ChatHandler
         bool HasLowerSecurity(Player* target, ObjectGuid guid = ObjectGuid(), bool strong = false);
         bool HasLowerSecurityAccount(WorldSession* target, uint32 account, bool strong = false);
 
-        void SendGlobalSysMessage(const char* str);
+        void SendGlobalSysMessage(const char* str, AccountTypes minSec = SEC_PLAYER);
 
         bool SetDataForCommandInTable(ChatCommand* table, uint32 id, const char* text, uint32 security, std::string const& help);
         void ExecuteCommand(const char* text);
@@ -518,6 +518,7 @@ class ChatHandler
         bool HandleReloadReservedNameCommand(char* args);
         bool HandleReloadReputationRewardRateCommand(char* args);
         bool HandleReloadReputationSpilloverTemplateCommand(char* args);
+        bool HandleReloadScriptBindingCommand(char* args);
         bool HandleReloadSkillDiscoveryTemplateCommand(char* args);
         bool HandleReloadSkillExtraItemTemplateCommand(char* args);
         bool HandleReloadSkillFishingBaseLevelCommand(char* args);
@@ -600,6 +601,8 @@ class ChatHandler
         bool HandleSummonCommand(char* args);
         bool HandleAppearCommand(char* args);
         bool HandleGroupgoCommand(char* args);
+        bool HandleAuraGroupCommand(char* args);
+        bool HandleUnAuraGroupCommand(char* args);
         bool HandleRecallCommand(char* args);
         bool HandleAnnounceCommand(char* args);
         bool HandleNotifyCommand(char* args);
@@ -663,6 +666,9 @@ class ChatHandler
         bool HandleMmap(char* args);
         bool HandleMmapTestArea(char* args);
         bool HandleMmapTestHeight(char* args);
+
+        bool HandleFreezePlayerCommand(char* args);
+        bool HandleUnfreezePlayerCommand(char* args);
 
         //! Development Commands
         bool HandleSaveAllCommand(char* args);
@@ -799,5 +805,7 @@ class CliHandler : public ChatHandler
         void* m_callbackArg;
         Print* m_print;
 };
+
+bool AddAuraToPlayer(const SpellEntry* spellInfo, Unit* target, WorldObject* caster);
 
 #endif

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2008,13 +2008,17 @@ void World::SendWorldText(int32 string_id, ...)
     va_end(ap);
 }
 
-/// Sends a packet to all players with optional team and instance restrictions
-void World::SendGlobalMessage(WorldPacket* packet)
+/// Sends a packet to all players with optional account access level restrictions
+void World::SendGlobalMessage(WorldPacket* packet, AccountTypes minSec)
 {
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
         if (WorldSession* session = itr->second)
         {
+            if (session->GetSecurity() < minSec)
+            {
+                continue;
+            }
             Player* player = session->GetPlayer();
             if (player && player->IsInWorld())
             {

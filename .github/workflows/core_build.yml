@@ -23,5 +23,8 @@ jobs:
       - name: Update Compilers
         run: source ./apps/ci/ci-compiler-update.sh
 
+      - name: Check for Submodule Updates
+        run: source ./apps/ci/ci-submodule-update.sh
+
       - name: Build Mangos Project
         run: source ./apps/ci/ci-compile.sh

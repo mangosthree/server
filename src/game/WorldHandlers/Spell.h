@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef __SPELL_H
-#define __SPELL_H
+#ifndef MANGOS_H_SPELL
+#define MANGOS_H_SPELL
 
 #include "Common.h"
 #include "GridDefines.h"
@@ -857,9 +857,11 @@ namespace MaNGOS
                 // there are still more spells which can be casted on dead, but
                 // they are no AOE and don't have such a nice SPELL_ATTR flag
                 if ((i_TargetType != SPELL_TARGETS_ALL && !itr->getSource()->IsTargetableForAttack(i_spell.m_spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD)))
-                        // mostly phase check
-                        || !itr->getSource()->IsInMap(i_originalCaster))
-                    continue;
+                    // mostly phase check
+                    || !itr->getSource()->IsInMap(i_originalCaster))
+                    {
+                        continue;
+                    }
 
                 switch (i_TargetType)
                 {

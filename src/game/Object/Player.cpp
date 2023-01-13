@@ -17803,16 +17803,20 @@ void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
 
 bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 {
-    //         0     1        2     3     4      5       6      7   8      9            10            11
-    // SELECT guid, account, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags,"
-    // 12          13          14          15   16           17        18         19         20         21          22           23                 24
-    //"position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost,"
-    // 25                 26             27       28       29       30       31         32           33            34        35    36      37                 38         39
-    //"resettalents_time, primary_trees, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, dungeon_difficulty,"
-    // 40          41          42              43           44              45
-    //"totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk,"
-    // 46      47      48      49      50      51      52         53          54             55              56           57          58    59
-    //"health, power1, power2, power3, power4, power5, specCount, activeSpec, exploredZones, equipmentCache, knownTitles, actionBars, slot, createdDate FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
+
+    //         0      1         2      3      4       5        6       7    8       9             10             11
+    // SELECT `guid`,`account`,`name`,`race`,`class`,`gender`,`level`,`xp`,`money`,`playerBytes`,`playerBytes2`,`playerFlags`,
+    //  12           13           14           15    16                   17            18         19       20          21          22          23            24                  25           26
+    // `position_x`,`position_y`,`position_z`,`map`,`dungeon_difficulty`,`orientation`,`taximask`,`online`,`cinematic`,`totaltime`,`leveltime`,`logout_time`,`is_logout_resting`,`rest_bonus`,`resettalents_cost`,
+    //  27                  28              29        30        31        32        33          34            35             36         37     38                  39
+    // `resettalents_time`,`primary_trees`,`trans_x`,`trans_y`,`trans_z`,`trans_o`,`transguid`,`extra_flags`,`stable_slots`,`at_login`,`zone`,`death_expire_time`,`taxi_path`,
+    //  40           41           42               43            44               45
+    // `totalKills`,`todayKills`,`yesterdayKills`,`chosenTitle`,`watchedFaction`,`drunk`,
+    //  46       47       48       49       50       51       52          53           54              55               56            57           58     59                    60                 61           62
+    // `health`,`power1`,`power2`,`power3`,`power4`,`power5`,`specCount`,`activeSpec`,`exploredZones`,`equipmentCache`,`knownTitles`,`actionBars`,`slot`,`deleteInfos_Account`,`deleteInfos_Name`,`deleteDate`,`createdDate`
+
+
+
     QueryResult *result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
     if (!result)
@@ -19913,7 +19917,8 @@ void Player::SaveToDB()
                               "`death_expire_time`, `taxi_path`, `totalKills`, "
                               "`todayKills`, `yesterdayKills`, `chosenTitle`, "
                               "`watchedFaction`, `drunk`, `health`, `power1`, `power2`, `power3`, "
-                              "`power4`, `power5`, `specCount`, `activeSpec`, `exploredZones`, `equipmentCache`, `knownTitles`, `actionBars`, `slot`, `createdDate`) "
+                              "`power4`, `power5`, `specCount`, `activeSpec`, `exploredZones`, `equipmentCache`, `knownTitles`, "
+                              "`actionBars`, `slot`,   `deleteInfos_Account`, `deleteInfos_Name`, `deleteDate`, `createdDate`) "
                               "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, "
@@ -19921,7 +19926,8 @@ void Player::SaveToDB()
                               "?, ?, ?, ?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, "
                               "?, ?, ?, ?, ?, ?, ?, ?, ?, "
-                              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+                              "?, ?, ?, ?, ?, ?, ?, "
+                              "?, ?, null, null, null, ?) ");
 
     uberInsert.addUInt32(GetGUIDLow());
     uberInsert.addUInt32(GetSession()->GetAccountId());

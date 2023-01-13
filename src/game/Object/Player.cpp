@@ -133,174 +133,6 @@ enum CharacterCustomizeFlags
 
 static const uint32 corpseReclaimDelay[MAX_DEATH_COUNT] = {30, 60, 120};
 
-//== PlayerTaxi ================================================
-
-PlayerTaxi::PlayerTaxi()
-{
-    // Taxi nodes
-    memset(m_taximask, 0, sizeof(m_taximask));
-}
-
-void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint32 level)
-{
-    // class specific initial known nodes
-    switch (chrClass)
-    {
-        case CLASS_DEATH_KNIGHT:
-        {
-            for (int i = 0; i < TaxiMaskSize; ++i)
-            {
-                m_taximask[i] |= sOldContinentsNodesMask[i];
-            }
-            break;
-        }
-    }
-
-    // race specific initial known nodes: capital and taxi hub masks
-    switch (race)
-    {
-        case RACE_HUMAN:    SetTaximaskNode(2);  break;     // Human
-        case RACE_ORC:      SetTaximaskNode(23); break;     // Orc
-        case RACE_DWARF:    SetTaximaskNode(6);  break;     // Dwarf
-        case RACE_NIGHTELF: SetTaximaskNode(26);
-            SetTaximaskNode(27); break;     // Night Elf
-        case RACE_UNDEAD:   SetTaximaskNode(11); break;     // Undead
-        case RACE_TAUREN:   SetTaximaskNode(22); break;     // Tauren
-        case RACE_GNOME:    SetTaximaskNode(6);  break;     // Gnome
-        case RACE_TROLL:    SetTaximaskNode(23); break;     // Troll
-        case RACE_BLOODELF: SetTaximaskNode(82); break;     // Blood Elf
-        case RACE_DRAENEI:  SetTaximaskNode(94); break;     // Draenei
-    }
-
-    // new continent starting masks (It will be accessible only at new map)
-    switch (Player::TeamForRace(race))
-    {
-        case ALLIANCE: SetTaximaskNode(100); break;
-        case HORDE:    SetTaximaskNode(99);  break;
-        default: break;
-    }
-    // level dependent taxi hubs
-    if (level >= 68)
-    {
-        SetTaximaskNode(213);                               // Shattered Sun Staging Area
-    }
-}
-
-void PlayerTaxi::LoadTaxiMask(const char* data)
-{
-    Tokens tokens = StrSplit(data, " ");
-
-    int index;
-    Tokens::iterator iter;
-    for (iter = tokens.begin(), index = 0; (index < TaxiMaskSize) && (iter != tokens.end()); ++iter, ++index)
-    {
-        // load and set bits only for existing taxi nodes
-        m_taximask[index] = sTaxiNodesMask[index] & uint8(std::stoul((*iter).c_str()));
-    }
-}
-
-void PlayerTaxi::AppendTaximaskTo(ByteBuffer& data, bool all)
-{
-    data << uint32(TaxiMaskSize);
-    if (all)
-    {
-        for (uint8 i = 0; i < TaxiMaskSize; ++i)
-        {
-            data << uint8(sTaxiNodesMask[i]);               // all existing nodes
-        }
-    }
-    else
-    {
-        for (uint8 i = 0; i < TaxiMaskSize; ++i)
-        {
-            data << uint8(m_taximask[i]);                   // known nodes
-        }
-    }
-}
-
-bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, Team team)
-{
-    ClearTaxiDestinations();
-
-    Tokens tokens = StrSplit(values, " ");
-
-    for (Tokens::iterator iter = tokens.begin(); iter != tokens.end(); ++iter)
-    {
-        uint32 node = std::stoul(iter->c_str());
-        AddTaxiDestination(node);
-    }
-
-    if (m_TaxiDestinations.empty())
-    {
-        return true;
-    }
-
-    // Check integrity
-    if (m_TaxiDestinations.size() < 2)
-    {
-        return false;
-    }
-
-    for (size_t i = 1; i < m_TaxiDestinations.size(); ++i)
-    {
-        uint32 cost;
-        uint32 path;
-        sObjectMgr.GetTaxiPath(m_TaxiDestinations[i - 1], m_TaxiDestinations[i], path, cost);
-        if (!path)
-        {
-            return false;
-        }
-    }
-
-    // can't load taxi path without mount set (quest taxi path?)
-    if (!sObjectMgr.GetTaxiMountDisplayId(GetTaxiSource(), team, true))
-    {
-        return false;
-    }
-
-    return true;
-}
-
-std::string PlayerTaxi::SaveTaxiDestinationsToString()
-{
-    if (m_TaxiDestinations.empty())
-    {
-        return "";
-    }
-
-    std::ostringstream ss;
-
-    for (size_t i = 0; i < m_TaxiDestinations.size(); ++i)
-    {
-        ss << m_TaxiDestinations[i] << " ";
-    }
-
-    return ss.str();
-}
-
-uint32 PlayerTaxi::GetCurrentTaxiPath() const
-{
-    if (m_TaxiDestinations.size() < 2)
-    {
-        return 0;
-    }
-
-    uint32 path;
-    uint32 cost;
-
-    sObjectMgr.GetTaxiPath(m_TaxiDestinations[0], m_TaxiDestinations[1], path, cost);
-
-    return path;
-}
-
-std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
-{
-    for (int i = 0; i < TaxiMaskSize; ++i)
-    {
-        ss << uint32(taxi.m_taximask[i]) << " ";    // cast to prevent conversion to char
-    }
-    return ss;
-}
 //== TradeData =================================================
 
 TradeData* TradeData::GetTraderData() const
@@ -21918,6 +21750,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     // fill destinations path tail
     uint32 sourcepath = 0;
     uint32 totalcost = 0;
+    uint32 firstcost = 0;
 
     uint32 prevnode = sourcenode;
     uint32 lastnode = 0;
@@ -21937,9 +21770,9 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
         totalcost += cost;
 
-        if (prevnode == sourcenode)
+        if (i == 1)
         {
-            sourcepath = path;
+            firstcost = cost;
         }
 
         m_taxi.AddTaxiDestination(lastnode);
@@ -21963,7 +21796,16 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
     if (npc)
     {
-        totalcost = (uint32)ceil(totalcost * GetReputationPriceDiscount(npc));
+        float discount = GetReputationPriceDiscount(npc);
+
+        totalcost = uint32(ceil(totalcost * discount));
+        firstcost = uint32(ceil(firstcost * discount));
+
+        m_taxi.SetFlightMasterFactionTemplateId(npc->getFaction());
+    }
+    else
+    {
+        m_taxi.SetFlightMasterFactionTemplateId(0);
     }
 
     if (money < totalcost)
@@ -24072,13 +23914,17 @@ bool Player::GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const
 
 float Player::GetReputationPriceDiscount(Creature const* pCreature) const
 {
-    FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
-    if (!vendor_faction || !vendor_faction->faction)
+    return GetReputationPriceDiscount(pCreature->getFactionTemplateEntry());
+}
+
+float Player::GetReputationPriceDiscount(FactionTemplateEntry const* factionTemplate) const
+{
+    if (!factionTemplate || !factionTemplate->faction)
     {
         return 1.0f;
     }
 
-    ReputationRank rank = GetReputationRank(vendor_faction->faction);
+    ReputationRank rank = GetReputationRank(factionTemplate->faction);
     if (rank <= REP_NEUTRAL)
     {
         return 1.0f;

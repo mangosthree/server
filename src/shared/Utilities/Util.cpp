@@ -224,9 +224,9 @@ std::tm localtime_r(const time_t& time)
 
 /**
  * It takes a time_t value and returns a tm structure with the same time, but in local time
- * 
+ *
  * @param time The time to break down.
- * 
+ *
  * @return A struct tm
  */
 tm TimeBreakdown(time_t time)
@@ -238,9 +238,9 @@ tm TimeBreakdown(time_t time)
 
 /**
  * Convert local time to UTC time.
- * 
+ *
  * @param time The time to convert.
- * 
+ *
  * @return The time in UTC.
  */
 time_t LocalTimeToUTCTime(time_t time)
@@ -254,17 +254,17 @@ time_t LocalTimeToUTCTime(time_t time)
 
 /**
  * "Get the timestamp of the next time the given hour occurs in the local timezone."
- * 
+ *
  * The function takes a timestamp, an hour, and a boolean. The timestamp is the time you want to find
  * the next occurrence of the given hour. The hour is the hour you want to find the next occurrence of.
  * The boolean is whether or not you want to find the next occurrence of the hour after the given
  * timestamp
- * 
+ *
  * @param time The time you want to get the hour timestamp for.
  * @param hour The hour of the day you want to get the timestamp for.
  * @param onlyAfterTime If true, the function will return the next hour after the current time. If
  * false, it will return the current hour.
- * 
+ *
  * @return A timestamp for the given hour of the day.
  */
 time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime)

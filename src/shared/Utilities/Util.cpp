@@ -219,15 +219,13 @@ void stripLineInvisibleChars(std::string& str)
  *
  * @return A pointer to the result.
  */
-struct tm* localtime_r(time_t* time, struct tm *result)
-{
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
+struct tm* localtime_r(time_t const* time, struct tm *result)
+{
     localtime_s(result, time);
     return result;
-#else
-    return localtime_r(time, result);
-#endif
 }
+#endif
 
 /**
  * It takes a time_t value and returns a tm structure with the same time, but in local time

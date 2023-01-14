@@ -5589,7 +5589,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
     localtime_r(&curTime, &lt);
     uint64 basetime(curTime);
     sLog.outString("Returning mails current time: hour: %d, minute: %d, second: %d ", lt.tm_hour, lt.tm_min, lt.tm_sec);
-    
+
     // delete all old mails without item and without body immediately, if starting server
     if (!serverUp)
     {

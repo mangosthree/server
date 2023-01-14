@@ -223,7 +223,7 @@ struct tm* localtime_r(time_t* time, struct tm *result)
 {
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
     localtime_s(result, time);
-    return tresult;
+    return result;
 #else
     return localtime_r(time, result);
 #endif

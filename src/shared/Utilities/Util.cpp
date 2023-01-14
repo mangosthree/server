@@ -213,10 +213,10 @@ void stripLineInvisibleChars(std::string& str)
 
 /**
  * It's a wrapper for the localtime_r function that works on Windows
- * 
+ *
  * @param time The time to convert.
  * @param result A pointer to a tm structure to receive the broken-down time.
- * 
+ *
  * @return A pointer to the result.
  */
 struct tm* localtime_r(time_t* time, struct tm *result)

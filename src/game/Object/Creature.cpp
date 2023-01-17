@@ -1303,6 +1303,10 @@ void Creature::SetLootRecipient(Unit* unit)
         return;
     }
 
+    // pet-only kills don't drop when pet is killing a creature on its own without assistance from its owner (player)
+    if (unit->GetTypeId() != TYPEID_PLAYER && !unit->IsVehicle())
+        return;
+
     Player* player = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
     if (!player)                                            // normal creature, no player involved
     {

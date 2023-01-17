@@ -2998,9 +2998,9 @@ void Creature::ResetRespawnCoord()
 
 void Creature::AllLootRemovedFromCorpse()
 {
-    if (loot.loot_type != LOOT_SKINNING && !IsPet() && GetCreatureInfo()->SkinningLootId && !HasLootRecipient())
+    if (loot.loot_type != LOOT_SKINNING && !IsPet() && GetCreatureInfo()->LootId && !HasLootRecipient())
     {
-        if (LootTemplates_Skinning.HaveLootFor(GetCreatureInfo()->SkinningLootId))
+        if (LootTemplates_Skinning.HaveLootFor(GetCreatureInfo()->LootId))
         {
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
         }

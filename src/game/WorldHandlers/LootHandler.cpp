@@ -357,6 +357,12 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
     }
 
     GetPlayer()->SendLoot(guid, LOOT_CORPSE);
+
+    /* Checking if the player is casting a spell, and if so, it is interrupting it. */
+    if (GetPlayer()->IsNonMeleeSpellCasted(false))
+    {
+        GetPlayer()->InterruptNonMeleeSpells(false);
+    }
 }
 
 void WorldSession::HandleLootReleaseOpcode(WorldPacket& recv_data)

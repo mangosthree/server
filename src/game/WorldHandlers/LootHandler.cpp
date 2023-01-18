@@ -223,6 +223,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
 
     Loot* pLoot = NULL;
     Item* pItem = NULL;
+    bool shareMoney = true;
 
     switch (guid.GetHigh())
     {
@@ -245,19 +246,18 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
             if (bones && bones->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
             {
                 pLoot = &bones->loot;
+                shareMoney = false;
             }
 
             break;
         }
         case HIGHGUID_ITEM:
         {
-            pItem = GetPlayer()->GetItemByGuid(guid);
-            if (!pItem || !pItem->HasGeneratedLoot())
+            if (Item* item = GetPlayer()->GetItemByGuid(guid))
             {
-                return;
+                pLoot = &item->loot;
+                shareMoney = false;
             }
-
-            pLoot = &pItem->loot;
             break;
         }
         case HIGHGUID_UNIT:
@@ -270,6 +270,10 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
             if (ok_loot && pCreature->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
             {
                 pLoot = &pCreature->loot ;
+                if (pCreature->IsAlive())
+                {
+                    shareMoney = false;
+                }
             }
 
             break;
@@ -282,7 +286,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
     {
         pLoot->NotifyMoneyRemoved();
 
-        if (!guid.IsItem() && player->GetGroup())           // item can be looted only single player
+        if (shareMoney && player->GetGroup())           // item, pickpocket and players can be looted only single player
         {
             Group* group = player->GetGroup();
 

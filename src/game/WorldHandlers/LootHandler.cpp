@@ -116,6 +116,12 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
         }
     }
 
+    /* Checking if the loot is looted and if the guid is an item. If it is, it will release the loot. */
+    if (loot->isLooted() && lguid.IsItem())
+    {
+        player->GetSession()->DoLootRelease(lguid);
+    }
+
     QuestItem* qitem = NULL;
     QuestItem* ffaitem = NULL;
     QuestItem* conditem = NULL;

@@ -358,7 +358,6 @@ class WorldSession
         void SendSpiritResurrect();
         void SendBindPoint(Creature* npc);
         void SendGMTicketGetTicket(uint32 status, GMTicket* ticket = NULL);
-        void SendGMResponse(GMTicket* ticket);
 
         void SendAttackStop(Unit const* enemy);
 
@@ -543,11 +542,11 @@ class WorldSession
         void HandleGMTicketGetTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketCreateOpcode(WorldPacket& recvPacket);
         void HandleGMTicketSystemStatusOpcode(WorldPacket& recvPacket);
-
+        void SendGMTicketStatusUpdate(GMTicketStatus statusCode);
         void HandleGMTicketDeleteTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketUpdateTextOpcode(WorldPacket& recvPacket);
 
-        void HandleGMSurveySubmitOpcode(WorldPacket& recvPacket);
+        void HandleGMTicketSurveySubmitOpcode(WorldPacket& recvPacket);
         void HandleGMResponseResolveOpcode(WorldPacket& recv_data);
 
         void HandleTogglePvP(WorldPacket& recvPacket);

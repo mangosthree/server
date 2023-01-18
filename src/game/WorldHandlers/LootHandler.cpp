@@ -36,6 +36,7 @@
 #include "Group.h"
 #include "World.h"
 #include "Util.h"
+#include "Unit.h"
 #include "DBCStores.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -629,6 +630,13 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 
     if (_player->GetLootGuid() != lootguid)
     {
+        return;
+    }
+
+    /* Checking if the player is in the same raid as the target and if the player is in the same map as the target. */
+    if (!_player->IsInSameRaidWith(target->ToPlayer()) || !_player->IsInMap(target))
+    {
+        sLog.outBasic("MasterLootItem: Player %s tried to give an item to ineligible player %s!", GetPlayer()->GetName(), target->GetName());
         return;
     }
 

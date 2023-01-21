@@ -28,14 +28,13 @@
 #include "Common.h"
 #include "Policies/Singleton.h"
 
+#include <unordered_map>
+
 class Guild;
 class ObjectGuid;
 
 class GuildMgr
 {
-        typedef UNORDERED_MAP<uint32, Guild*> GuildMap;
-
-        GuildMap m_GuildMap;
     public:
         GuildMgr();
         ~GuildMgr();
@@ -51,7 +50,22 @@ class GuildMgr
         std::string GetGuildNameById(uint32 guildId) const;
         std::string GetGuildNameByGuid(ObjectGuid guildGuid) const;
 
+        void LoadGuildXpForLevel();
+        void LoadGuildRewards();
+
         void LoadGuilds();
+
+        void ResetExperienceCaps();
+        void ResetReputationCaps();
+
+        uint32 GetXPForGuildLevel(uint8 level) const;
+
+    protected:
+        typedef std::unordered_map<uint32, Guild*> GuildContainer;
+
+        uint32 NextGuildId;
+        GuildContainer GuildMap;
+        std::vector<uint64> GuildXPperLevel;
 };
 
 #define sGuildMgr MaNGOS::Singleton<GuildMgr>::Instance()

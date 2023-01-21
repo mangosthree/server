@@ -33,13 +33,11 @@
 
 INSTANTIATE_SINGLETON_1(GuildMgr);
 
-GuildMgr::GuildMgr()
-{
-}
+GuildMgr::GuildMgr() : NextGuildId(1) { }
 
 GuildMgr::~GuildMgr()
 {
-    for (GuildMap::iterator itr = m_GuildMap.begin(); itr != m_GuildMap.end(); ++itr)
+    for (GuildContainer::iterator itr = GuildMap.begin(); itr != GuildMap.end(); ++itr)
     {
         delete itr->second;
     }
@@ -47,12 +45,12 @@ GuildMgr::~GuildMgr()
 
 void GuildMgr::AddGuild(Guild* guild)
 {
-    m_GuildMap[guild->GetId()] = guild;
+    GuildMap[guild->GetId()] = guild;
 }
 
 void GuildMgr::RemoveGuild(uint32 guildId)
 {
-    m_GuildMap.erase(guildId);
+    GuildMap.erase(guildId);
 }
 
 void GuildMgr::RemoveGuild(ObjectGuid guildGuid)
@@ -67,8 +65,8 @@ void GuildMgr::RemoveGuild(ObjectGuid guildGuid)
 
 Guild* GuildMgr::GetGuildById(uint32 guildId) const
 {
-    GuildMap::const_iterator itr = m_GuildMap.find(guildId);
-    if (itr != m_GuildMap.end())
+    GuildContainer::const_iterator itr = GuildMap.find(guildId);
+    if (itr != GuildMap.end())
     {
         return itr->second;
     }
@@ -88,32 +86,39 @@ Guild* GuildMgr::GetGuildByGuid(ObjectGuid guildGuid) const
 
 Guild* GuildMgr::GetGuildByName(std::string const& name) const
 {
-    for (GuildMap::const_iterator itr = m_GuildMap.begin(); itr != m_GuildMap.end(); ++itr)
-        if (itr->second->GetName() == name)
+    std::string search = name;
+    std::transform(search.begin(), search.end(), search.begin(), ::toupper);
+    for (GuildContainer::const_iterator itr = GuildMap.begin(); itr != GuildMap.end(); ++itr)
+    {
+        std::string gname = itr->second->GetName();
+        std::transform(gname.begin(), gname.end(), gname.begin(), ::toupper);
+        if (search == gname)
         {
             return itr->second;
         }
+    }
 
     return NULL;
 }
 
 Guild* GuildMgr::GetGuildByLeader(ObjectGuid const& guid) const
 {
-    for (GuildMap::const_iterator itr = m_GuildMap.begin(); itr != m_GuildMap.end(); ++itr)
+    for (GuildContainer::const_iterator itr = GuildMap.begin(); itr != GuildMap.end(); ++itr)
+    {
         if (itr->second->GetLeaderGuid() == guid)
         {
             return itr->second;
         }
+    }
 
     return NULL;
 }
 
 std::string GuildMgr::GetGuildNameById(uint32 guildId) const
 {
-    GuildMap::const_iterator itr = m_GuildMap.find(guildId);
-    if (itr != m_GuildMap.end())
+    if (Guild* guild = GetGuildById(guildId))
     {
-        return itr->second->GetName();
+        return guild->GetName();
     }
 
     return "";
@@ -127,6 +132,26 @@ std::string GuildMgr::GetGuildNameByGuid(ObjectGuid guildGuid) const
     }
 
     return GetGuildNameById(guildGuid.GetCounter());
+}
+
+uint32 GuildMgr::GetXPForGuildLevel(uint8 level) const
+{
+    if (level < GuildXPperLevel.size())
+    {
+        return GuildXPperLevel[level];
+    }
+
+    return 0;
+}
+
+void GuildMgr::ResetExperienceCaps()
+{
+    /* ToDo: Implement */
+}
+
+void GuildMgr::ResetReputationCaps()
+{
+    /* ToDo: Implement */
 }
 
 void GuildMgr::LoadGuilds()
@@ -210,4 +235,58 @@ void GuildMgr::LoadGuilds()
 
     sLog.outString();
     sLog.outString(">> Loaded %u guild definitions", count);
+}
+
+void GuildMgr::LoadGuildXpForLevel()
+{
+    uint32 oldMSTime = getMSTime();
+
+    GuildXPperLevel.resize(sWorld.getConfig(CONFIG_UINT32_GUILD_MAX_LEVEL));
+    for (uint8 level = 0; level < sWorld.getConfig(CONFIG_UINT32_GUILD_MAX_LEVEL); ++level)
+    {
+        GuildXPperLevel[level] = 0;
+    }
+
+    QueryResult* result = WorldDatabase.Query("SELECT level, xp_for_next_level FROM guild_xp_for_level");
+    if (!result)
+    {
+        sLog.outError(">> Loaded 0 experience for guild level definitions.");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields     = result->Fetch();
+
+        uint32 level      = fields[0].GetUInt8();
+        uint32 requiredXP = fields[1].GetUInt64();
+
+        if (level >= sWorld.getConfig(CONFIG_UINT32_GUILD_MAX_LEVEL))
+        {
+            sLog.outBasic("Guild.MaxLevel in mangosd.conf - has no level %u record in guild_xp_for_level table, ignoring.", uint32(level));
+            continue;
+        }
+
+        GuildXPperLevel[level] = requiredXP;
+        ++count;
+    }
+    while (result->NextRow());
+
+    for (uint8 level = 1; level < sWorld.getConfig(CONFIG_UINT32_GUILD_MAX_LEVEL); ++level)
+    {
+        if (!GuildXPperLevel[level])
+        {
+            sLog.outError("Level %i does not have XP for guild level data. Using data of level [%i] + 1660000.", level + 1, level);
+            GuildXPperLevel[level] = GuildXPperLevel[level - 1] + 1660000;
+        }
+    }
+
+    sLog.outBasic(">> Loaded %u xp for guild level definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void GuildMgr::LoadGuildRewards()
+{
+    /* ToDo: Implement */
 }

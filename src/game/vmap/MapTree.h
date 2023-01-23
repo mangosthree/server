@@ -26,8 +26,9 @@
 #define MANGOS_H_MAPTREE
 
 #include "Platform/Define.h"
-#include "Utilities/UnorderedMapSet.h"
 #include "BIH.h"
+
+#include <unordered_map>
 
 namespace VMAP
 {
@@ -61,12 +62,12 @@ namespace VMAP
              * @brief
              *
              */
-            typedef UNORDERED_MAP<uint32, bool> loadedTileMap;
+            typedef std::unordered_map<uint32, bool> loadedTileMap;
             /**
              * @brief
              *
              */
-            typedef UNORDERED_MAP<uint32, uint32> loadedSpawnMap;
+            typedef std::unordered_map<uint32, uint32> loadedSpawnMap;
         private:
             uint32 iMapID; /**< TODO */
             bool iIsTiled; /**< TODO */

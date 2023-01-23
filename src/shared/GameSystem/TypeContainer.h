@@ -35,7 +35,6 @@
 #include <vector>
 #include "Platform/Define.h"
 #include "Utilities/TypeList.h"
-#include "Utilities/UnorderedMapSet.h"
 #include "GameSystem/GridRefManager.h"
 
 template<class OBJECT, class KEY_TYPE>
@@ -45,7 +44,7 @@ template<class OBJECT, class KEY_TYPE>
  */
 struct ContainerUnorderedMap
 {
-    UNORDERED_MAP<KEY_TYPE, OBJECT*> _element; /**< TODO */
+    std::unordered_map<KEY_TYPE, OBJECT*> _element; /**< TODO */
 };
 
 template<class KEY_TYPE>
@@ -133,7 +132,7 @@ class TypeUnorderedMapContainer
          */
         static bool insert(ContainerUnorderedMap<SPECIFIC_TYPE, KEY_TYPE>& elements, KEY_TYPE handle, SPECIFIC_TYPE* obj)
         {
-            typename UNORDERED_MAP<KEY_TYPE, SPECIFIC_TYPE*>::iterator i = elements._element.find(handle);
+            typename std::unordered_map<KEY_TYPE, SPECIFIC_TYPE*>::iterator i = elements._element.find(handle);
             if (i == elements._element.end())
             {
                 elements._element[handle] = obj;
@@ -206,7 +205,7 @@ class TypeUnorderedMapContainer
          */
         static SPECIFIC_TYPE* find(ContainerUnorderedMap<SPECIFIC_TYPE, KEY_TYPE>& elements, KEY_TYPE hdl, SPECIFIC_TYPE* /*obj*/)
         {
-            typename UNORDERED_MAP<KEY_TYPE, SPECIFIC_TYPE*>::iterator i = elements._element.find(hdl);
+            typename std::unordered_map<KEY_TYPE, SPECIFIC_TYPE*>::iterator i = elements._element.find(hdl);
             if (i == elements._element.end())
             {
                 return NULL;

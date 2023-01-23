@@ -52,17 +52,17 @@ typedef std::list<BattleGround*> BGFreeSlotQueueType;
  * @brief
  *
  */
-typedef UNORDERED_MAP<uint32, BattleGroundTypeId> BattleMastersMap;
+typedef std::unordered_map<uint32, BattleGroundTypeId> BattleMastersMap;
 /**
  * @brief
  *
  */
-typedef UNORDERED_MAP<uint32, BattleGroundEventIdx> CreatureBattleEventIndexesMap;
+typedef std::unordered_map<uint32, BattleGroundEventIdx> CreatureBattleEventIndexesMap;
 /**
  * @brief
  *
  */
-typedef UNORDERED_MAP<uint32, BattleGroundEventIdx> GameObjectBattleEventIndexesMap;
+typedef std::unordered_map<uint32, BattleGroundEventIdx> GameObjectBattleEventIndexesMap;
 
 #define BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY 86400     // seconds in a day
 #define COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME 10

@@ -26,9 +26,10 @@
 #define _VMAPMANAGER2_H
 
 #include "IVMapManager.h"
-#include "Utilities/UnorderedMapSet.h"
 #include "Platform/Define.h"
 #include <G3D/Vector3.h>
+
+#include <unordered_map>
 
 //===========================================================
 
@@ -95,12 +96,12 @@ namespace VMAP
      * @brief
      *
      */
-    typedef UNORDERED_MAP<uint32 , StaticMapTree*> InstanceTreeMap;
+    typedef std::unordered_map<uint32 , StaticMapTree*> InstanceTreeMap;
     /**
      * @brief
      *
      */
-    typedef UNORDERED_MAP<std::string, ManagedModel> ModelFileMap;
+    typedef std::unordered_map<std::string, ManagedModel> ModelFileMap;
 
     enum DisableTypes
     {

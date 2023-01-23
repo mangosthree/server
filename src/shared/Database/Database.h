@@ -26,7 +26,6 @@
 #define DATABASE_H
 
 #include "Threading/Threading.h"
-#include "Utilities/UnorderedMapSet.h"
 #include "Database/SqlDelayThread.h"
 #include <ace/Recursive_Thread_Mutex.h>
 #include "Policies/ThreadingModel.h"
@@ -812,7 +811,7 @@ class Database
          * @brief
          *
          */
-        typedef UNORDERED_MAP<std::string, int> PreparedStmtRegistry;
+        typedef std::unordered_map<std::string, int> PreparedStmtRegistry;
         PreparedStmtRegistry m_stmtRegistry;                ///< /**< TODO */
 
         int m_iStmtIndex; /**< TODO */

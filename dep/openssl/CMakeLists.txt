@@ -14,39 +14,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-if (NOT TARGET "ZLIB::ZLIB")
-    add_subdirectory(zlib)
-endif()
+find_package(OpenSSL REQUIRED)
 
-if (NOT TARGET "BZip2::BZip2")
-    add_subdirectory(bzip2)
-endif()
-
-add_subdirectory(acelite)
-add_subdirectory(utf8cpp)
-add_subdirectory(openssl)
-
-if(BUILD_MANGOSD)
-    if(SCRIPT_LIB_ELUNA)
-        add_subdirectory(lualib)
+if (NOT OpenSSL_FOUND AND NOT OPENSSL_FOUND)
+    message(FATAL_ERROR "OpenSSL was not found!")
+else()
+    if (OpenSSL_FOUND AND NOT OPENSSL_VERSION)
+        set(OPENSSL_VERSION ${OpenSSL_VERSION})
     endif()
-    if(SOAP)
-        add_subdirectory(gsoap)
+
+    if (OPENSSL_VERSION VERSION_LESS 1.1)
+        message(SEND_ERROR "OpenSSL: This project requires OpenSSL version 1.1.0 or higher")
     endif()
 endif()
-
-if(BUILD_MANGOSD OR BUILD_TOOLS)
-    add_subdirectory(recastnavigation)
-    add_subdirectory(g3dlite)
-endif()
-
-if(BUILD_TOOLS)
-    if(USE_STORMLIB)
-        add_subdirectory(StormLib)
-        add_subdirectory(tomlib)
-    else()
-        add_subdirectory(libmpq)
-    endif()
-    add_subdirectory(loadlib)
-endif()
-

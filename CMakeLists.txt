@@ -109,8 +109,6 @@ find_package(DL      REQUIRED)
 find_package(ZLIB  QUIET)
 find_package(BZip2 QUIET)
 
-find_package(OpenSSL REQUIRED)
-
 include(${CMAKE_SOURCE_DIR}/cmake/GenRevision.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/EnsureVersion.cmake)
 

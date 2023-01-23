@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-find_package(OpenSSL REQUIRED)
+find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
 
 if (NOT OpenSSL_FOUND AND NOT OPENSSL_FOUND)
     message(FATAL_ERROR "OpenSSL was not found!")
@@ -27,3 +27,10 @@ else()
         message(SEND_ERROR "OpenSSL: This project requires OpenSSL version 1.1.0 or higher")
     endif()
 endif()
+
+add_library(openssl)
+
+target_include_directories(openssl
+    PUBLIC
+    OpenSSL::Crypto
+    OpenSSL::SSL)

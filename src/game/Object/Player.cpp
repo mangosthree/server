@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,174 +133,6 @@ enum CharacterCustomizeFlags
 
 static const uint32 corpseReclaimDelay[MAX_DEATH_COUNT] = {30, 60, 120};
 
-//== PlayerTaxi ================================================
-
-PlayerTaxi::PlayerTaxi()
-{
-    // Taxi nodes
-    memset(m_taximask, 0, sizeof(m_taximask));
-}
-
-void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint32 level)
-{
-    // class specific initial known nodes
-    switch (chrClass)
-    {
-        case CLASS_DEATH_KNIGHT:
-        {
-            for (int i = 0; i < TaxiMaskSize; ++i)
-            {
-                m_taximask[i] |= sOldContinentsNodesMask[i];
-            }
-            break;
-        }
-    }
-
-    // race specific initial known nodes: capital and taxi hub masks
-    switch (race)
-    {
-        case RACE_HUMAN:    SetTaximaskNode(2);  break;     // Human
-        case RACE_ORC:      SetTaximaskNode(23); break;     // Orc
-        case RACE_DWARF:    SetTaximaskNode(6);  break;     // Dwarf
-        case RACE_NIGHTELF: SetTaximaskNode(26);
-            SetTaximaskNode(27); break;     // Night Elf
-        case RACE_UNDEAD:   SetTaximaskNode(11); break;     // Undead
-        case RACE_TAUREN:   SetTaximaskNode(22); break;     // Tauren
-        case RACE_GNOME:    SetTaximaskNode(6);  break;     // Gnome
-        case RACE_TROLL:    SetTaximaskNode(23); break;     // Troll
-        case RACE_BLOODELF: SetTaximaskNode(82); break;     // Blood Elf
-        case RACE_DRAENEI:  SetTaximaskNode(94); break;     // Draenei
-    }
-
-    // new continent starting masks (It will be accessible only at new map)
-    switch (Player::TeamForRace(race))
-    {
-        case ALLIANCE: SetTaximaskNode(100); break;
-        case HORDE:    SetTaximaskNode(99);  break;
-        default: break;
-    }
-    // level dependent taxi hubs
-    if (level >= 68)
-    {
-        SetTaximaskNode(213);                               // Shattered Sun Staging Area
-    }
-}
-
-void PlayerTaxi::LoadTaxiMask(const char* data)
-{
-    Tokens tokens = StrSplit(data, " ");
-
-    int index;
-    Tokens::iterator iter;
-    for (iter = tokens.begin(), index = 0; (index < TaxiMaskSize) && (iter != tokens.end()); ++iter, ++index)
-    {
-        // load and set bits only for existing taxi nodes
-        m_taximask[index] = sTaxiNodesMask[index] & uint8(std::stoul((*iter).c_str()));
-    }
-}
-
-void PlayerTaxi::AppendTaximaskTo(ByteBuffer& data, bool all)
-{
-    data << uint32(TaxiMaskSize);
-    if (all)
-    {
-        for (uint8 i = 0; i < TaxiMaskSize; ++i)
-        {
-            data << uint8(sTaxiNodesMask[i]);               // all existing nodes
-        }
-    }
-    else
-    {
-        for (uint8 i = 0; i < TaxiMaskSize; ++i)
-        {
-            data << uint8(m_taximask[i]);                   // known nodes
-        }
-    }
-}
-
-bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, Team team)
-{
-    ClearTaxiDestinations();
-
-    Tokens tokens = StrSplit(values, " ");
-
-    for (Tokens::iterator iter = tokens.begin(); iter != tokens.end(); ++iter)
-    {
-        uint32 node = std::stoul(iter->c_str());
-        AddTaxiDestination(node);
-    }
-
-    if (m_TaxiDestinations.empty())
-    {
-        return true;
-    }
-
-    // Check integrity
-    if (m_TaxiDestinations.size() < 2)
-    {
-        return false;
-    }
-
-    for (size_t i = 1; i < m_TaxiDestinations.size(); ++i)
-    {
-        uint32 cost;
-        uint32 path;
-        sObjectMgr.GetTaxiPath(m_TaxiDestinations[i - 1], m_TaxiDestinations[i], path, cost);
-        if (!path)
-        {
-            return false;
-        }
-    }
-
-    // can't load taxi path without mount set (quest taxi path?)
-    if (!sObjectMgr.GetTaxiMountDisplayId(GetTaxiSource(), team, true))
-    {
-        return false;
-    }
-
-    return true;
-}
-
-std::string PlayerTaxi::SaveTaxiDestinationsToString()
-{
-    if (m_TaxiDestinations.empty())
-    {
-        return "";
-    }
-
-    std::ostringstream ss;
-
-    for (size_t i = 0; i < m_TaxiDestinations.size(); ++i)
-    {
-        ss << m_TaxiDestinations[i] << " ";
-    }
-
-    return ss.str();
-}
-
-uint32 PlayerTaxi::GetCurrentTaxiPath() const
-{
-    if (m_TaxiDestinations.size() < 2)
-    {
-        return 0;
-    }
-
-    uint32 path;
-    uint32 cost;
-
-    sObjectMgr.GetTaxiPath(m_TaxiDestinations[0], m_TaxiDestinations[1], path, cost);
-
-    return path;
-}
-
-std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
-{
-    for (int i = 0; i < TaxiMaskSize; ++i)
-    {
-        ss << uint32(taxi.m_taximask[i]) << " ";    // cast to prevent conversion to char
-    }
-    return ss;
-}
 //== TradeData =================================================
 
 TradeData* TradeData::GetTraderData() const
@@ -4928,6 +4760,11 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
  */
 void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRealmChars, bool deleteFinally)
 {
+    //Make sure to delete unresolved tickets so they don't take up place in the open tickets list
+    CharacterDatabase.PExecute("DELETE FROM `character_ticket` "
+                               "WHERE `resolved` = 0 AND `guid` = %u",
+                               playerguid.GetCounter());
+
     // for nonexistent account avoid update realm
     if (accountId == 0)
     {
@@ -17971,16 +17808,20 @@ void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
 
 bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 {
-    //         0     1        2     3     4      5       6      7   8      9            10            11
-    // SELECT guid, account, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags,"
-    // 12          13          14          15   16           17        18         19         20         21          22           23                 24
-    //"position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost,"
-    // 25                 26             27       28       29       30       31         32           33            34        35    36      37                 38         39
-    //"resettalents_time, primary_trees, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, dungeon_difficulty,"
-    // 40          41          42              43           44              45
-    //"totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk,"
-    // 46      47      48      49      50      51      52         53          54             55              56           57          58    59
-    //"health, power1, power2, power3, power4, power5, specCount, activeSpec, exploredZones, equipmentCache, knownTitles, actionBars, slot, createdDate FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
+
+    //         0      1         2      3      4       5        6       7    8       9             10             11
+    // SELECT `guid`,`account`,`name`,`race`,`class`,`gender`,`level`,`xp`,`money`,`playerBytes`,`playerBytes2`,`playerFlags`,
+    //  12           13           14           15    16                   17            18         19       20          21          22          23            24                  25           26
+    // `position_x`,`position_y`,`position_z`,`map`,`dungeon_difficulty`,`orientation`,`taximask`,`online`,`cinematic`,`totaltime`,`leveltime`,`logout_time`,`is_logout_resting`,`rest_bonus`,`resettalents_cost`,
+    //  27                  28              29        30        31        32        33          34            35             36         37     38                  39
+    // `resettalents_time`,`primary_trees`,`trans_x`,`trans_y`,`trans_z`,`trans_o`,`transguid`,`extra_flags`,`stable_slots`,`at_login`,`zone`,`death_expire_time`,`taxi_path`,
+    //  40           41           42               43            44               45
+    // `totalKills`,`todayKills`,`yesterdayKills`,`chosenTitle`,`watchedFaction`,`drunk`,
+    //  46       47       48       49       50       51       52          53           54              55               56            57           58     59                    60                 61           62
+    // `health`,`power1`,`power2`,`power3`,`power4`,`power5`,`specCount`,`activeSpec`,`exploredZones`,`equipmentCache`,`knownTitles`,`actionBars`,`slot`,`deleteInfos_Account`,`deleteInfos_Name`,`deleteDate`,`createdDate`
+
+
+
     QueryResult *result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
     if (!result)
@@ -20081,7 +19922,8 @@ void Player::SaveToDB()
                               "`death_expire_time`, `taxi_path`, `totalKills`, "
                               "`todayKills`, `yesterdayKills`, `chosenTitle`, "
                               "`watchedFaction`, `drunk`, `health`, `power1`, `power2`, `power3`, "
-                              "`power4`, `power5`, `specCount`, `activeSpec`, `exploredZones`, `equipmentCache`, `knownTitles`, `actionBars`, `slot`, `createdDate`) "
+                              "`power4`, `power5`, `specCount`, `activeSpec`, `exploredZones`, `equipmentCache`, `knownTitles`, "
+                              "`actionBars`, `slot`,   `deleteInfos_Account`, `deleteInfos_Name`, `deleteDate`, `createdDate`) "
                               "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, "
@@ -20089,7 +19931,8 @@ void Player::SaveToDB()
                               "?, ?, ?, ?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, "
                               "?, ?, ?, ?, ?, ?, ?, ?, ?, "
-                              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+                              "?, ?, ?, ?, ?, ?, ?, "
+                              "?, ?, null, null, null, ?) ");
 
     uberInsert.addUInt32(GetGUIDLow());
     uberInsert.addUInt32(GetSession()->GetAccountId());
@@ -21312,6 +21155,57 @@ void Player::TextEmote(const std::string& text)
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE), true, !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHAT));
 }
 
+void Player::LogWhisper(const std::string& text, ObjectGuid receiver)
+{
+    WhisperLoggingLevels loggingLevel = WhisperLoggingLevels(sWorld.getConfig(CONFIG_UINT32_LOG_WHISPERS));
+
+    if (loggingLevel == WHISPER_LOGGING_NONE)
+    {
+        return;
+    }
+
+    //Try to find ticket by either this player or the receiver
+    GMTicket* ticket = sTicketMgr.GetGMTicket(GetObjectGuid());
+    if (!ticket)
+    {
+        ticket = sTicketMgr.GetGMTicket(receiver);
+    }
+
+    uint32 ticketId = 0;
+    if (ticket)
+    {
+        ticketId = ticket->GetId();
+    }
+
+    bool isSomeoneGM = false;
+
+    //Find out if at least one of them is a GM for ticket logging
+    if (GetSession()->GetSecurity() >= SEC_GAMEMASTER)
+    {
+        isSomeoneGM = true;
+    }
+    else
+    {
+        Player* pRecvPlayer = sObjectMgr.GetPlayer(receiver);
+        if (pRecvPlayer && pRecvPlayer->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
+        {
+            isSomeoneGM = true;
+        }
+    }
+
+    if ((loggingLevel == WHISPER_LOGGING_TICKETS && ticket && isSomeoneGM)
+        || loggingLevel == WHISPER_LOGGING_EVERYTHING)
+    {
+        static SqlStatementID wlog;
+        SqlStatement stmt = CharacterDatabase.CreateStatement(wlog, "INSERT INTO `character_whispers` (`to_guid`, `from_guid`, `message`, `regarding_ticket_id`) VALUES (?, ?, ?, ?)");
+        stmt.addUInt32(receiver.GetCounter());          // to_guid
+        stmt.addUInt32(GetObjectGuid().GetCounter());   // from_guid
+        stmt.addString(text.c_str());                   // message
+        stmt.addUInt32(ticketId);                       // regarding_ticket_id
+        stmt.Execute();
+    }
+}
+
 void Player::Whisper(const std::string& text, uint32 language, ObjectGuid receiver)
 {
     Player* rPlayer = sObjectMgr.GetPlayer(receiver);
@@ -21323,7 +21217,10 @@ void Player::Whisper(const std::string& text, uint32 language, ObjectGuid receiv
     // do not send confirmations, afk, dnd or system notifications for addon messages
     if (language == LANG_ADDON)
     {
-        return;
+        data.clear();
+        ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, text.c_str(), Language(language), CHAT_TAG_NONE, rPlayer->GetObjectGuid());
+        LogWhisper(text, receiver);
+        GetSession()->SendPacket(&data);
     }
 
     data.clear();
@@ -21912,6 +21809,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     // fill destinations path tail
     uint32 sourcepath = 0;
     uint32 totalcost = 0;
+    uint32 firstcost = 0;
 
     uint32 prevnode = sourcenode;
     uint32 lastnode = 0;
@@ -21931,9 +21829,9 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
         totalcost += cost;
 
-        if (prevnode == sourcenode)
+        if (i == 1)
         {
-            sourcepath = path;
+            firstcost = cost;
         }
 
         m_taxi.AddTaxiDestination(lastnode);
@@ -21957,7 +21855,16 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
     if (npc)
     {
-        totalcost = (uint32)ceil(totalcost * GetReputationPriceDiscount(npc));
+        float discount = GetReputationPriceDiscount(npc);
+
+        totalcost = uint32(ceil(totalcost * discount));
+        firstcost = uint32(ceil(firstcost * discount));
+
+        m_taxi.SetFlightMasterFactionTemplateId(npc->getFaction());
+    }
+    else
+    {
+        m_taxi.SetFlightMasterFactionTemplateId(0);
     }
 
     if (money < totalcost)
@@ -24066,13 +23973,17 @@ bool Player::GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const
 
 float Player::GetReputationPriceDiscount(Creature const* pCreature) const
 {
-    FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
-    if (!vendor_faction || !vendor_faction->faction)
+    return GetReputationPriceDiscount(pCreature->getFactionTemplateEntry());
+}
+
+float Player::GetReputationPriceDiscount(FactionTemplateEntry const* factionTemplate) const
+{
+    if (!factionTemplate || !factionTemplate->faction)
     {
         return 1.0f;
     }
 
-    ReputationRank rank = GetReputationRank(vendor_faction->faction);
+    ReputationRank rank = GetReputationRank(factionTemplate->faction);
     if (rank <= REP_NEUTRAL)
     {
         return 1.0f;

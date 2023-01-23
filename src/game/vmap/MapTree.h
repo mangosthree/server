@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,9 @@
 #define MANGOS_H_MAPTREE
 
 #include "Platform/Define.h"
-#include "Utilities/UnorderedMapSet.h"
 #include "BIH.h"
+
+#include <unordered_map>
 
 namespace VMAP
 {
@@ -61,12 +62,12 @@ namespace VMAP
              * @brief
              *
              */
-            typedef UNORDERED_MAP<uint32, bool> loadedTileMap;
+            typedef std::unordered_map<uint32, bool> loadedTileMap;
             /**
              * @brief
              *
              */
-            typedef UNORDERED_MAP<uint32, uint32> loadedSpawnMap;
+            typedef std::unordered_map<uint32, uint32> loadedSpawnMap;
         private:
             uint32 iMapID; /**< TODO */
             bool iIsTiled; /**< TODO */

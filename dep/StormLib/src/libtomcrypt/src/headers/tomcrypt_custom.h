@@ -1,6 +1,8 @@
 #ifndef TOMCRYPT_CUSTOM_H_
 #define TOMCRYPT_CUSTOM_H_
 
+#include "tomcrypt_cfg.h"
+
 #define LTC_NO_CIPHERS
 #define LTC_NO_HASHES
 #define LTC_NO_MACS
@@ -409,6 +411,16 @@
 #define LTC_MUTEX_UNLOCK(x)
 
 #endif
+
+/* forward declaration c++11 - C99
+   for misc/crypt_libc.c
+*/
+
+LTC_EXPORT void * LTC_CALL LibTomMalloc(size_t n);
+LTC_EXPORT void * LTC_CALL XCALLOC(size_t n, size_t s);
+LTC_EXPORT void * LTC_CALL XREALLOC(void *p, size_t n);
+LTC_EXPORT void LTC_CALL XFREE(void *p);
+LTC_EXPORT void LTC_CALL XQSORT(void *base, size_t nmemb, size_t size, int(*compar)(const void *, const void *));
 
 /* Debuggers */
 

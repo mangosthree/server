@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "ItemPrototype.h"
 #include "Unit.h"
 #include "Item.h"
+#include "PlayerTaxi.h"
 
 #include "Database/DatabaseEnv.h"
 #include "NPCHandler.h"
@@ -42,8 +43,10 @@
 #include "AchievementMgr.h"
 #include "ReputationMgr.h"
 #include "BattleGround.h"
+#include "DBCStores.h"
 #include "SharedDefines.h"
 #include "Chat.h"
+#include "GMTicketMgr.h"
 
 #include<string>
 #include<vector>
@@ -143,9 +146,9 @@ struct PlayerTalent
     PlayerSpellState state;
 };
 
-typedef UNORDERED_MAP<uint32, PlayerCurrency> PlayerCurrenciesMap;
-typedef UNORDERED_MAP<uint32, PlayerSpell> PlayerSpellMap;
-typedef UNORDERED_MAP<uint32, PlayerTalent> PlayerTalentMap;
+typedef std::unordered_map<uint32, PlayerCurrency> PlayerCurrenciesMap;
+typedef std::unordered_map<uint32, PlayerSpell> PlayerSpellMap;
+typedef std::unordered_map<uint32, PlayerTalent> PlayerTalentMap;
 
 struct SpellCooldown
 {
@@ -637,7 +640,7 @@ struct SkillStatusData
     SkillUpdateState uState;
 };
 
-typedef UNORDERED_MAP<uint32, SkillStatusData> SkillStatusMap;
+typedef std::unordered_map<uint32, SkillStatusData> SkillStatusMap;
 
 enum PlayerSlots
 {
@@ -915,76 +918,6 @@ enum PlayerRestState
     REST_STATE_RAF_LINKED       = 0x04                      // Exact use unknown
 };
 
-class PlayerTaxi
-{
-    public:
-        PlayerTaxi();
-        ~PlayerTaxi() {}
-        // Nodes
-        void InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint32 level);
-        void LoadTaxiMask(const char* data);
-
-        bool IsTaximaskNodeKnown(uint32 nodeidx) const
-        {
-            uint8 field   = uint8((nodeidx - 1) / 8);
-            uint8 submask = 1 << ((nodeidx - 1) % 8);
-            return (m_taximask[field] & submask) == submask;
-        }
-        bool SetTaximaskNode(uint32 nodeidx)
-        {
-            uint8 field   = uint8((nodeidx - 1) / 8);
-            uint8 submask = 1 << ((nodeidx - 1) % 8);
-            if ((m_taximask[field] & submask) != submask)
-            {
-                m_taximask[field] |= submask;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        void AppendTaximaskTo(ByteBuffer& data, bool all);
-
-        // Destinations
-        bool LoadTaxiDestinationsFromString(const std::string& values, Team team);
-        std::string SaveTaxiDestinationsToString();
-
-        void ClearTaxiDestinations()
-        {
-            m_TaxiDestinations.clear();
-        }
-        void AddTaxiDestination(uint32 dest)
-        {
-            m_TaxiDestinations.push_back(dest);
-        }
-        uint32 GetTaxiSource() const
-        {
-            return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front();
-        }
-        uint32 GetTaxiDestination() const
-        {
-            return m_TaxiDestinations.size() < 2 ? 0 : m_TaxiDestinations[1];
-        }
-        uint32 GetCurrentTaxiPath() const;
-        uint32 NextTaxiDestination()
-        {
-            m_TaxiDestinations.pop_front();
-            return GetTaxiDestination();
-        }
-        bool empty() const
-        {
-            return m_TaxiDestinations.empty();
-        }
-
-        friend std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
-    private:
-        TaxiMask m_taximask;
-        std::deque<uint32> m_TaxiDestinations;
-};
-
-std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
-
 /// Holder for BattleGround data
 struct BGData
 {
@@ -1181,7 +1114,11 @@ class Player : public Unit
         }
 
         PlayerTaxi m_taxi;
-        void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(getRace(), getClass(), getLevel()); }
+        void InitTaxiNodesForLevel()
+        {
+            m_taxi.InitTaxiNodes(getRace(), getClass(), getLevel());
+        }
+
         bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc = NULL, uint32 spellid = 0);
         bool ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid = 0);
         // mount_id can be used in scripting calls
@@ -1296,6 +1233,18 @@ class Player : public Unit
         void Say(const std::string& text, const uint32 language);
         void Yell(const std::string& text, const uint32 language);
         void TextEmote(const std::string& text);
+        /**
+         * This will log a whisper depending on the setting LogWhispers in mangosd.conf, for a list
+         * of available levels please see \ref WhisperLoggingLevels. The logging is done to database
+         * in the table characters.character_whispers and includes to/from, text and when the whisper
+         * was sent.
+         *
+         * @param text the text that was sent
+         * @param receiver guid of the receiver of the message
+         * \see WhisperLoggingLevels
+         * \see eConfigUInt32Values::CONFIG_UINT32_LOG_WHISPERS
+         */
+        void LogWhisper(const std::string& text, ObjectGuid receiver);
         void Whisper(const std::string& text, const uint32 language, ObjectGuid receiver);
 
         /*********************************************************/
@@ -1451,6 +1400,7 @@ class Player : public Unit
         bool BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 currencyId, uint32 count);
 
         float GetReputationPriceDiscount(Creature const* pCreature) const;
+        float GetReputationPriceDiscount(FactionTemplateEntry const* factionTemplate) const;
 
         Player* GetTrader() const { return m_trade ? m_trade->GetTrader() : NULL; }
         TradeData* GetTradeData() const { return m_trade; }
@@ -1748,7 +1698,7 @@ class Player : public Unit
         uint8 unReadMails;
         time_t m_nextMailDelivereTime;
 
-        typedef UNORDERED_MAP<uint32, Item*> ItemMap;
+        typedef std::unordered_map<uint32, Item*> ItemMap;
 
         ItemMap mMitems;                                    // template defined in objectmgr.cpp
 
@@ -2567,7 +2517,7 @@ class Player : public Unit
         /***                 INSTANCE SYSTEM                   ***/
         /*********************************************************/
 
-        typedef UNORDERED_MAP < uint32 /*mapId*/, InstancePlayerBind > BoundInstancesMap;
+        typedef std::unordered_map < uint32 /*mapId*/, InstancePlayerBind > BoundInstancesMap;
 
         void UpdateHomebindTime(uint32 time);
 

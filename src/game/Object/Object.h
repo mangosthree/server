@@ -96,7 +96,7 @@ class ElunaEventProcessor;
 class TransportInfo;
 struct MangosStringLocale;
 
-typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
+typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 
 struct Position
 {

@@ -25,12 +25,6 @@
 #ifndef MANGOS_UNORDERED_MAP_H
 #define MANGOS_UNORDERED_MAP_H
 
-#include <unordered_map>
-#include <unordered_set>
-
-#define UNORDERED_MAP std::unordered_map
-#define UNORDERED_SET std::unordered_set
-
 #define HASH_NAMESPACE_START namespace std {
 #define HASH_NAMESPACE_END }
 

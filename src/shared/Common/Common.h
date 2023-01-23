@@ -90,6 +90,9 @@
 #include <sstream>
 #include <algorithm>
 
+#include <unordered_map>
+#include <unordered_set>
+
 #include "Utilities/Errors.h"
 #include "LockedQueue/LockedQueue.h"
 #include "Threading/Threading.h"

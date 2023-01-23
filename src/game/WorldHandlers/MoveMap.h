@@ -31,8 +31,6 @@
 #include "../../dep/recastnavigation/Detour/Include/DetourNavMesh.h"
 #include "../../dep/recastnavigation/Detour/Include/DetourNavMeshQuery.h"
 
-#include "Utilities/UnorderedMapSet.h"
-
 class Unit;
 
 //  memory management

@@ -33,8 +33,6 @@
 #include "SpellAuraDefines.h"
 #include "DBCStructure.h"
 
-#include "Utilities/UnorderedMapSet.h"
-
 #include <map>
 
 class Player;

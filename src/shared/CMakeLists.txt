@@ -238,4 +238,5 @@ target_link_libraries(shared
         utf8
         MySQL::MySQL
         OpenSSL::Crypto
+        OpenSSL::SSL
 )

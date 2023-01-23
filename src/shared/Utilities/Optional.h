@@ -23,12 +23,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef MANGOS_OPTIONAL_H
-#define MANGOS_OPTIONAL_H
+#ifndef OPTIONAL_H
+#define OPTIONAL_H
 
 #include <optional>
 
-//! Optional helper class to wrap optional values within.
+// Optional helper class to wrap optional values within
 template <class T>
 using Optional = std::optional<T>;
 

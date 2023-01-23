@@ -195,7 +195,7 @@ class WaypointManager
 
         void _clearPath(WaypointPath& path);
 
-        typedef UNORDERED_MAP<uint32 /*guidOrEntry*/, WaypointPath> WaypointPathMap;
+        typedef std::unordered_map<uint32 /*guidOrEntry*/, WaypointPath> WaypointPathMap;
         WaypointPathMap m_pathMap;
         WaypointPathMap m_pathTemplateMap;
         WaypointPathMap m_externalPathTemplateMap;

@@ -61,12 +61,12 @@ namespace VMAP
              * @brief
              *
              */
-            typedef UNORDERED_MAP<uint32, bool> loadedTileMap;
+            typedef std::unordered_map<uint32, bool> loadedTileMap;
             /**
              * @brief
              *
              */
-            typedef UNORDERED_MAP<uint32, uint32> loadedSpawnMap;
+            typedef std::unordered_map<uint32, uint32> loadedSpawnMap;
         private:
             uint32 iMapID; /**< TODO */
             bool iIsTiled; /**< TODO */

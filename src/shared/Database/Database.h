@@ -812,7 +812,7 @@ class Database
          * @brief
          *
          */
-        typedef UNORDERED_MAP<std::string, int> PreparedStmtRegistry;
+        typedef std::unordered_map<std::string, int> PreparedStmtRegistry;
         PreparedStmtRegistry m_stmtRegistry;                ///< /**< TODO */
 
         int m_iStmtIndex; /**< TODO */

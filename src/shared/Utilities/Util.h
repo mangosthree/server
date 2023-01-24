@@ -28,6 +28,7 @@
 #include "Common/Common.h"
 #include <ace/Null_Mutex.h>
 #include <ace/INET_Addr.h>
+#include "HackedFunctions.h"
 
 #include <string>
 #include <vector>
@@ -138,7 +139,11 @@ inline std::string& ltrim(std::string& s)
 
 inline std::string& rtrim(std::string& s)
 {
-    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int c)
+    {
+        return !std::isspace(c);
+    }));
+
     return s;
 }
 

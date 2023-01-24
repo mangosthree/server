@@ -71,9 +71,9 @@ HMACSHA1::~HMACSHA1()
 #endif
 }
 
-void HMACSHA1::UpdateBigNumber(BigNumber *bn)
+void HMACSHA1::UpdateData(const std::string& str)
 {
-    UpdateData(bn->AsByteArray(), bn->GetNumBytes());
+    UpdateData(reinterpret_cast<const uint8*>(str.c_str()), str.length());
 }
 
 void HMACSHA1::UpdateData(const uint8 *data, int length)

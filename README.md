@@ -1,11 +1,15 @@
 [<img src='https://www.getmangos.eu/!assets_mangos/currentlogo.gif' width="48" border=0>][8]
 [<img src='https://www.getmangos.eu/!assets_mangos/logo2.png' border=0>][3]
+[<img alt="Latest GitHub release" src="https://img.shields.io/github/release/mangosthree/server.svg?style=flat-square" border=0 valign="top"/>][60]
+[<img src="https://img.shields.io/github/last-commit/mangosthree/server.svg?style=flat-square&logo=github&logoColor=white"
+alt="GitHub last commit" border=0 valign="top"/>][61]
+[<img alt="Downloads on GitHub" src="https://img.shields.io/github/downloads/mangosthree/server/total.svg?style=flat-square" border=0 valign="top"/>][61]
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Build Status:</b>
  Linux/MAC: [<img src='https://github.com/mangosthree/server/actions/workflows/core_build.yml/badge.svg' border=0 valign="middle">][10]
  Windows: [<img src='https://ci.appveyor.com/api/projects/status/github/mangosthree/server?branch=master&svg=true' border=0 valign="middle">][11]
  <br><b>Repository Status:</b>
-[<img src='https://api.codacy.com/project/badge/Grade/58227f14b9024384a22e4e12e3cf7a89' border=0 valign="middle"/>][12]
+[<img src='https://api.codacy.com/project/badge/Grade/d54b4c8fec4746498fd05f84a4e7e5d4' border=0 valign="middle"/>][12]
 [<img src='https://www.codefactor.io/repository/github/mangosthree/server/badge' border=0 valign="middle"/>][13]
 [<img src='https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat' border=0 valign="middle"/>][14]
 [<img src='https://img.shields.io/discord/286167585270005763.svg' border=0 valign="middle"/>][9]
@@ -203,3 +207,6 @@ World of Warcraft, and all related art, images, and lore are copyright [Blizzard
 [53]: http://www.zlib.net/ "Zlib"
 [54]: http://www.bzip.org/ "Bzip2"
 [55]: http://slproweb.com/products/Win32OpenSSL.html "OpenSSL for Windows"
+[60]: https://github.com/mangosthree/server/releases/latest
+[61]: https://github.com/mangosthree/server/releases
+[62]: https://github.com/mangosthree/server/commits/master

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@
 #define DATABASE_H
 
 #include "Threading/Threading.h"
-#include "Utilities/UnorderedMapSet.h"
 #include "Database/SqlDelayThread.h"
 #include <ace/Recursive_Thread_Mutex.h>
 #include "Policies/ThreadingModel.h"
@@ -812,7 +811,7 @@ class Database
          * @brief
          *
          */
-        typedef UNORDERED_MAP<std::string, int> PreparedStmtRegistry;
+        typedef std::unordered_map<std::string, int> PreparedStmtRegistry;
         PreparedStmtRegistry m_stmtRegistry;                ///< /**< TODO */
 
         int m_iStmtIndex; /**< TODO */

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -712,6 +712,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_GM_LOGIN_STATE,          "GM.LoginState",      2);
     setConfig(CONFIG_UINT32_GM_VISIBLE_STATE,        "GM.Visible",         2);
     setConfig(CONFIG_UINT32_GM_ACCEPT_TICKETS,       "GM.AcceptTickets",   2);
+    setConfig(CONFIG_UINT32_GM_TICKET_LIST_SIZE,     "GM.TicketListSize", 30);
+    setConfig(CONFIG_BOOL_GM_TICKET_OFFLINE_CLOSING, "GM.TicketOfflineClosing", false);
     setConfig(CONFIG_UINT32_GM_CHAT,                 "GM.Chat",            2);
     setConfig(CONFIG_UINT32_GM_WISPERING_TO,         "GM.WhisperingTo",    2);
 
@@ -888,6 +890,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_TIMERBAR_BREATH_MAX,      "TimerBar.Breath.Max", 180);
     setConfig(CONFIG_UINT32_TIMERBAR_FIRE_GMLEVEL,    "TimerBar.Fire.GMLevel", SEC_CONSOLE);
     setConfig(CONFIG_UINT32_TIMERBAR_FIRE_MAX,        "TimerBar.Fire.Max", 1);
+
+    setConfig(CONFIG_UINT32_LOG_WHISPERS,             "LogWhispers", 1);
 
     setConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT,      "PetUnsummonAtMount", true);
 
@@ -2430,7 +2434,8 @@ void World::InitWeeklyQuestResetTime()
 
     // generate time by config
     time_t curTime = time(NULL);
-    tm localTm = *localtime(&curTime);
+    tm localTm;
+    localtime_r(&curTime, &localTm);
 
     int week_day_offset = localTm.tm_wday - int(getConfig(CONFIG_UINT32_QUEST_WEEKLY_RESET_WEEK_DAY));
 
@@ -2474,7 +2479,9 @@ void World::InitDailyQuestResetTime()
 
     // generate time by config
     time_t curTime = time(NULL);
-    tm localTm = *localtime(&curTime);
+    tm localTm;
+    localtime_r(&curTime, &localTm);
+
     localTm.tm_hour = getConfig(CONFIG_UINT32_QUEST_DAILY_RESET_HOUR);
     localTm.tm_min  = 0;
     localTm.tm_sec  = 0;
@@ -2521,7 +2528,8 @@ void World::SetMonthlyQuestResetTime(bool initialize)
 
     // generate time
     time_t currentTime = time(NULL);
-    tm localTm = *localtime(&currentTime);
+    tm localTm;
+    localtime_r(&currentTime, &localTm);
 
     int month = localTm.tm_mon;
     int year = localTm.tm_year;
@@ -2568,7 +2576,8 @@ void World::InitCurrencyResetTime()
     {
         // generate time by config
         time_t curTime = time(NULL);
-        tm localTm = *localtime(&curTime);
+        tm localTm;
+        localtime_r(&curTime, &localTm);
 
         int week_day_offset = localTm.tm_wday - int(getConfig(CONFIG_UINT32_CURRENCY_RESET_TIME_WEEK_DAY));
 
@@ -2613,7 +2622,9 @@ void World::InitRandomBGResetTime()
 
     // generate time by config
     time_t curTime = time(NULL);
-    tm localTm = *localtime(&curTime);
+    tm localTm;
+    localtime_r(&curTime, &localTm);
+
     localTm.tm_hour = getConfig(CONFIG_UINT32_RANDOM_BG_RESET_HOUR);
     localTm.tm_min = 0;
     localTm.tm_sec = 0;

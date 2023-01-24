@@ -4,7 +4,7 @@
  * the default database scripting in mangos.
  *
  * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2014-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +53,7 @@ void SystemMgr::LoadScriptTextsCustom()
 void SystemMgr::LoadScriptGossipTexts()
 {
     outstring_log("[SD3]: Loading Gossip Texts...");
+    //LoadMangosStringsOneWordId(WorldDatabase, "gossip_texts", TEXT_SOURCE_GOSSIP_START, TEXT_SOURCE_GOSSIP_END);
     LoadMangosStrings(WorldDatabase, "gossip_texts", TEXT_SOURCE_GOSSIP_START, TEXT_SOURCE_GOSSIP_END);
 }
 

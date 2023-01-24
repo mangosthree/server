@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -896,7 +896,7 @@ void InitializeOpcodes()
     //OPCODE(CMSG_GM_UPDATE_TICKET_STATUS,                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     OPCODE(SMSG_GM_TICKET_STATUS_UPDATE,                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(MSG_SET_DUNGEON_DIFFICULTY,                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSetDungeonDifficultyOpcode);
-    OPCODE(CMSG_GMSURVEY_SUBMIT,                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGMSurveySubmitOpcode      );
+    OPCODE(CMSG_GMSURVEY_SUBMIT,                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGMTicketSurveySubmitOpcode);
     OPCODE(SMSG_UPDATE_INSTANCE_OWNERSHIP,               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(CMSG_IGNORE_KNOCKBACK_CHEAT,                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     OPCODE(SMSG_CHAT_PLAYER_AMBIGUOUS,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );

@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,6 +118,7 @@ class ChatHandler
         void SendSysMessage(int32     entry);
         void PSendSysMessage(const char* format, ...) ATTR_PRINTF(2, 3);
         void PSendSysMessage(int32     entry, ...);
+        void PSendSysMessageMultiline(int32 entry, ...);
 
         bool ParseCommands(const char* text);
         ChatCommand const* FindCommand(char const* text);
@@ -647,8 +648,17 @@ class ChatHandler
         bool HandleKickPlayerCommand(char* args);
         bool HandleMailBoxCommand(char* args);
 
-        bool HandleTicketCommand(char* args);
-        bool HandleDelTicketCommand(char* args);
+        bool HandleTicketAcceptCommand(char* args);
+        bool HandleTicketCloseCommand(char* args);
+        bool HandleTicketDeleteCommand(char* args);
+        bool HandleTicketInfoCommand(char* args);
+        bool HandleTicketListCommand(char* args);
+        bool HandleTicketMeAcceptCommand(char* args);
+        bool HandleTicketOnlineListCommand(char* args);
+        bool HandleTicketRespondCommand(char* args);
+        bool HandleTicketShowCommand(char* args);
+        bool HandleTickerSurveyClose(char* args);
+
         bool HandleMaxSkillCommand(char* args);
         bool HandleSetSkillCommand(char* args);
         bool HandleRespawnCommand(char* args);

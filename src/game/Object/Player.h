@@ -63,6 +63,7 @@ class PlayerSocial;
 class DungeonPersistentState;
 class Spell;
 class Item;
+class PlayerTaxi;
 
 struct AreaTrigger;
 

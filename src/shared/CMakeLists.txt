@@ -237,6 +237,4 @@ target_link_libraries(shared
         ace
         utf8
         MySQL::MySQL
-        OpenSSL::Crypto
-        OpenSSL::SSL
 )

@@ -28,13 +28,7 @@ else()
     endif()
 endif()
 
-add_library(openssl
-    STATIC
-    ${CMAKE_CURRENT_SOURCE_DIR})
-
-target_link_libraries(openssl
-    INTERFACE
-    ${OPENSSL_LIBRARIES})
+add_library(openssl INTERFACE)
 
 target_include_directories(openssl
     INTERFACE

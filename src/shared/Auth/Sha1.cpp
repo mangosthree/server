@@ -85,7 +85,7 @@ void Sha1Hash::UpdateBigNumbers(BigNumber* bn0, ...)
         UpdateData(bn->AsByteArray());
         bn = va_arg(v, BigNumber*);
     }
-    
+
     va_end(v);
 }
 

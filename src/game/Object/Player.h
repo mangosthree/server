@@ -30,6 +30,7 @@
 #include "Unit.h"
 #include "Item.h"
 #include "PlayerTaxi.h"
+#include "Object.h"
 
 #include "Database/DatabaseEnv.h"
 #include "NPCHandler.h"
@@ -48,8 +49,8 @@
 #include "Chat.h"
 #include "GMTicketMgr.h"
 
-#include<string>
-#include<vector>
+#include <string>
+#include <vector>
 
 struct Mail;
 class Channel;

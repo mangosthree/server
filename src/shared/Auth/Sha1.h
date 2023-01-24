@@ -28,74 +28,38 @@
 #include "Common/Common.h"
 #include <openssl/sha.h>
 #include <openssl/crypto.h>
+#include <openssl/evp.h>
+
+#include <cstring>
 
 class BigNumber;
 
-/**
- * @brief
- *
- */
 class Sha1Hash
 {
     public:
-        /**
-         * @brief
-         *
-         */
         Sha1Hash();
-        /**
-         * @brief
-         *
-         */
+        Sha1Hash(Sha1Hash const& other);     // copy
+        Sha1Hash(Sha1Hash&& other);          // move
+        Sha1Hash& operator=(Sha1Hash other); // assign
         ~Sha1Hash();
 
-        /**
-         * @brief
-         *
-         * @param bn0...
-         */
+        void swap(Sha1Hash& other) throw();
+        friend void swap(Sha1Hash& left, Sha1Hash& right) { left.swap(right); }
+
         void UpdateBigNumbers(BigNumber* bn0, ...);
 
-        /**
-         * @brief
-         *
-         * @param dta
-         * @param len
-         */
         void UpdateData(const uint8* dta, int len);
-        /**
-         * @brief
-         *
-         * @param str
-         */
         void UpdateData(const std::string& str);
 
-        /**
-         * @brief
-         *
-         */
         void Initialize();
-        /**
-         * @brief
-         *
-         */
         void Finalize();
 
-        /**
-         * @brief
-         *
-         * @return uint8
-         */
-        uint8* GetDigest(void) { return mDigest; };
-        /**
-         * @brief
-         *
-         * @return int
-         */
-        int GetLength(void) { return SHA_DIGEST_LENGTH; };
+        uint8* GetDigest() { return m_digest; };
+        static int GetLength() { return SHA_DIGEST_LENGTH; };
 
     private:
-        SHA_CTX mC; /**< TODO */
-        uint8 mDigest[SHA_DIGEST_LENGTH]; /**< TODO */
+        EVP_MD_CTX* m_ctx;
+        uint8 m_digest[SHA_DIGEST_LENGTH];
 };
+
 #endif

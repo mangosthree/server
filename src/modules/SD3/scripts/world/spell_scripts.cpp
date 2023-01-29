@@ -292,6 +292,7 @@ enum
     SPELL_STRENGTH_ANCIENTS             = 47575,
     SPELL_CREATE_BARK_WALKERS           = 47550,
     FACTION_HOSTILE                     = 16,
+    ITEM_BARK_OF_THE_WALKERS            = 36786,
 
     EMOTE_AGGRO                         = -1000551,
     EMOTE_CREATE                        = -1000552,
@@ -793,7 +794,7 @@ struct spell_fel_siphon_dummy : public SpellScript
     }
 };
 #endif
-//#if defined (WOTLK) || defined (CATA) || defined(MISTS)
+#if defined (WOTLK) || defined (CATA) || defined(MISTS)
 //        case SPELL_SEEDS_OF_NATURES_WRATH:
 //        {
 //            if (uiEffIndex == EFFECT_INDEX_0)
@@ -814,31 +815,48 @@ struct spell_fel_siphon_dummy : public SpellScript
 //            }
 //            return true;
 //        }
-//        case SPELL_STRENGTH_ANCIENTS:
-//        {
-//            if (uiEffIndex == EFFECT_INDEX_0)
-//            {
-//                if (pCaster->GetTypeId() == TYPEID_PLAYER)
-//                {
-//                    if (urand(0, 1))
-//                    {
-//                        DoScriptText(EMOTE_AGGRO, pCreatureTarget);
-//                        pCreatureTarget->setFaction(FACTION_HOSTILE);
-//                        pCreatureTarget->AI()->AttackStart(pCaster);
-//                    }
-//                    else
-//                    {
-//                        DoScriptText(EMOTE_CREATE, pCreatureTarget);
-//                        pCaster->CastSpell(pCaster, SPELL_CREATE_BARK_WALKERS, true);
-//                        pCreatureTarget->ForcedDespawn(5000);
-//                    }
-//                }
-//                return true;
-//            }
-//            return true;
-//        }
-//
-//#endif
+struct spell_strength_ancients : public SpellScript
+{
+    spell_strength_ancients() : SpellScript("spell_strength_ancients") {}
+
+    bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
+    {
+        if ((uiSpellId == SPELL_STRENGTH_ANCIENTS) && (uiEffIndex == EFFECT_INDEX_0))
+        {
+            Creature* pCreatureTarget = pTarget->ToCreature();
+            if ((pCaster->GetTypeId() == TYPEID_PLAYER) && pCreatureTarget)
+            {
+                if (urand(0, 1))
+                {
+                    DoScriptText(EMOTE_AGGRO, pCreatureTarget);
+                    pCreatureTarget->setFaction(FACTION_HOSTILE);
+                    pCreatureTarget->AI()->AttackStart(pCaster);
+                }
+                else
+                {
+                    DoScriptText(EMOTE_CREATE, pCreatureTarget);
+                    pCaster->CastSpell(pCaster, SPELL_CREATE_BARK_WALKERS, true);
+                    pCreatureTarget->ForcedDespawn(5000);
+                }
+            }
+        }
+        return true;
+    }
+};
+struct spell_create_bark_walkers : public SpellScript
+{
+    spell_create_bark_walkers() : SpellScript("spell_create_bark_walkers") {}
+
+    bool EffectDummy(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Object* pTarget, ObjectGuid /*originalCasterGuid*/) override
+    {
+        if (Item* pItem = ((Player*)pCaster)->StoreNewItemInInventorySlot(ITEM_BARK_OF_THE_WALKERS, 1))
+        {
+            ((Player*)pCaster)->SendNewItem(pItem, 1, true, false);
+        }
+        return true;
+    }
+};
+#endif
 #if defined (TBC) || defined (WOTLK) || defined (CATA) || defined(MISTS)
 struct spell_tag_murloc_proc : public SpellScript
 {
@@ -1257,6 +1275,10 @@ void AddSC_spell_scripts()
 #endif
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
     s = new spell_throw_ice();
+    s->RegisterSelf();
+    s = new spell_strength_ancients();
+    s->RegisterSelf();
+    s = new spell_create_bark_walkers();
     s->RegisterSelf();
 #endif
 }

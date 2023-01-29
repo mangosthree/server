@@ -2949,7 +2949,7 @@ void Player::GiveLevel(uint32 level)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnLevelChanged(this, oldLevel);
+    sEluna->OnLevelChanged(this, level);
 #endif /* ENABLE_ELUNA */
 
     if (MailLevelReward const* mailReward = sObjectMgr.GetMailLevelReward(level, getRaceMask()))

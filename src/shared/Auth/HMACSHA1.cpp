@@ -25,6 +25,8 @@
 #include "Auth/HMACSHA1.h"
 #include "BigNumber.h"
 
+#include <string>
+
 HMACSHA1::HMACSHA1(uint32 len, uint8 *seed)
 {
     memcpy(&m_key, seed, len);
@@ -69,6 +71,11 @@ HMACSHA1::~HMACSHA1()
 #else
     HMAC_CTX_free(m_ctx);
 #endif
+}
+
+void HMACSHA1::UpdateBigNumber(BigNumber* bn)
+{
+    UpdateData(bn->AsByteArray().data(), bn->GetNumBytes());
 }
 
 void HMACSHA1::UpdateData(const std::string& str)

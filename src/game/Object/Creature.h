@@ -26,6 +26,7 @@
 #define MANGOSSERVER_CREATURE_H
 
 #include "Common.h"
+#include "GameTime.h"
 #include "Unit.h"
 #include "SharedDefines.h"
 #include "LootMgr.h"
@@ -553,7 +554,14 @@ class Creature : public Unit
 
         bool IsCorpse() const { return GetDeathState() ==  CORPSE; }
         bool IsDespawned() const { return GetDeathState() ==  DEAD; }
-        void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
+        void SetCorpseDelay(uint32 delay, bool ignoreCorpseDecayRatio = false)
+        {
+            m_corpseDelay = delay;
+            if (ignoreCorpseDecayRatio)
+            {
+                m_ignoreCorpseDecayRatio = true;
+            }
+        }
         uint32 GetCorpseDelay() const { return m_corpseDelay; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool IsCivilian() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_CIVILIAN) != 0; }
@@ -859,6 +867,7 @@ class Creature : public Unit
         uint32 m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
         uint32 m_corpseDelay;                               // (secs) delay between death and corpse disappearance
         uint32 m_aggroDelay;                                // (msecs)delay between respawn and aggro due to movement
+        bool m_ignoreCorpseDecayRatio;
         float m_respawnradius;
 
         CreatureSubtype m_subtype;                          // set in Creatures subclasses for fast it detect without dynamic_cast use

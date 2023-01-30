@@ -171,8 +171,8 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     lootForPickPocketed(false), lootForBody(false), lootForSkin(false),
     m_groupLootTimer(0), m_groupLootId(0),
     m_lootMoney(0), m_lootGroupRecipientId(0),
-    m_corpseDecayTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_aggroDelay(0), m_respawnradius(5.0f),
-    m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
+    m_corpseDecayTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_ignoreCorpseDecayRatio(false), m_aggroDelay(0),
+    m_respawnradius(5.0f), m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
     m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false),
     m_AI_locked(false), m_IsDeadByDefault(false), m_temporaryFactionFlags(TEMPFACTION_NONE),
     m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_originalEntry(0),
@@ -1303,6 +1303,10 @@ void Creature::SetLootRecipient(Unit* unit)
         return;
     }
 
+    // pet-only kills don't drop when pet is killing a creature on its own without assistance from its owner (player)
+    if (unit->GetTypeId() != TYPEID_PLAYER && !unit->IsVehicle())
+        return;
+
     Player* player = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
     if (!player)                                            // normal creature, no player involved
     {
@@ -2029,6 +2033,17 @@ void Creature::SetDeathState(DeathState s)
     {
         SetTargetGuid(ObjectGuid());                        // remove target selection in any cases (can be set at aura remove in Unit::SetDeathState)
         SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+
+        if (!IsPet() && GetCreatureInfo()->SkinningLootId)
+        {
+            if (LootTemplates_Skinning.HaveLootFor(GetCreatureInfo()->SkinningLootId))
+            {
+                if (HasLootRecipient())
+                {
+                    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+                }
+            }
+        }
 
         if (HasSearchedAssistance())
         {
@@ -2998,59 +3013,31 @@ void Creature::ResetRespawnCoord()
 
 void Creature::AllLootRemovedFromCorpse()
 {
-    if (lootForBody && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
+    if (loot.loot_type != LOOT_SKINNING && !IsPet() && GetCreatureInfo()->LootId && !HasLootRecipient())
     {
-        uint32 corpseLootedDelay;
-
-        if (!lootForSkin)                                   // corpse was not skinned -> apply corpseLootedDelay
+        if (LootTemplates_Skinning.HaveLootFor(GetCreatureInfo()->LootId))
         {
-            // use a static spawntimesecs/3 modifier (guessed/made up value) unless config are more than 0.0
-            // spawntimesecs=3min:  corpse decay after 1min
-            // spawntimesecs=4hour: corpse decay after 1hour 20min
-            if (sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED) > 0.0f)
-            {
-                corpseLootedDelay = (uint32)((m_corpseDelay * IN_MILLISECONDS) * sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED));
-            }
-            else
-            {
-                corpseLootedDelay = (m_respawnDelay * IN_MILLISECONDS) / 3;
-            }
-        }
-        else                                                // corpse was skinned, corpse will despawn next update
-        {
-            corpseLootedDelay = 0;
-        }
-
-        // if m_respawnTime is not expired already
-        if (m_respawnTime >= time(NULL))
-        {
-            // if spawntimesecs is larger than default corpse delay always use corpseLootedDelay
-            if (m_respawnDelay > m_corpseDelay)
-            {
-                m_corpseDecayTimer = corpseLootedDelay;
-            }
-            else
-            {
-                // if m_respawnDelay is relatively short and corpseDecayTimer is larger than corpseLootedDelay
-                if (m_corpseDecayTimer > corpseLootedDelay)
-                {
-                    m_corpseDecayTimer = corpseLootedDelay;
-                }
-            }
-        }
-        else
-        {
-            m_corpseDecayTimer = 0;
-
-            // TODO: reaching here, means mob will respawn at next tick.
-            // This might be a place to set some aggro delay so creature has
-            // ~5 seconds before it can react to hostile surroundings.
-
-            // It's worth noting that it will not be fully correct either way.
-            // At this point another "instance" of the creature are presumably expected to
-            // be spawned already, while this corpse will not appear in respawned form.
+            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
         }
     }
+
+    time_t now = GameTime::GetGameTime();
+    // Do not reset corpse remove time if corpse is already removed
+    if (m_corpseDecayTimer <= now)
+        return;
+
+    float decayRate = m_ignoreCorpseDecayRatio ? 1.f : sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED);
+
+    if (loot.loot_type == LOOT_SKINNING)
+    {
+        m_corpseDecayTimer = now;
+    }
+    else
+    {
+        m_corpseDecayTimer = now + uint32(m_corpseDelay * decayRate);
+    }
+
+    m_respawnTime = std::max<time_t>(m_corpseDecayTimer + m_respawnDelay, m_respawnTime);
 }
 
 uint32 Creature::GetLevelForTarget(Unit const* target) const

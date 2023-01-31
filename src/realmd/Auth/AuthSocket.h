@@ -37,6 +37,8 @@
 
 #include "SocketBuffer/BufferedSocket.h"
 
+#include <cstring>
+
 class ACE_INET_Addr;
 struct Realm;
 

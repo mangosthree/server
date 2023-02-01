@@ -359,7 +359,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     recv_data >> movementInfo;
     /*----------------*/
 
-    if (!VerifyMovementInfo(movementInfo, movementInfo.GetGuid()))
+    if (!VerifyMovementInfo(movementInfo))
     {
         return;
     }
@@ -619,6 +619,11 @@ bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGu
         return false;
     }
 
+    return VerifyMovementInfo(movementInfo);
+}
+
+bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo) const
+{
     if (!MaNGOS::IsValidMapCoord(movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z, movementInfo.GetPos()->o))
     {
         return false;
@@ -689,7 +694,7 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
         plMover->m_movementInfo = movementInfo;
 
         /* Movement should cancel looting */
-        if(ObjectGuid lootGUID = plMover->GetLootGuid())
+        if (ObjectGuid lootGUID = plMover->GetLootGuid())
         {
             plMover->SendLootRelease(lootGUID);
         }

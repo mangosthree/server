@@ -1658,6 +1658,7 @@ void ObjectMgr::LoadCreatures()
 
             if (cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_ACTIVE)
             {
+                sLog.outString("Adding `creature` with Active Flag: Map: %u, Guid %u", data.mapid, guid);
                 m_activeCreatures.insert(ActiveCreatureGuidsOnMap::value_type(data.mapid, guid));
             }
         }
@@ -10249,7 +10250,7 @@ void ObjectMgr::LoadActiveEntities(Map* _map)
     // Special case on startup - load continents
     if (!_map)
     {
-        uint32 continents[] = {0, 1, 530, 571};
+        uint32 continents[] = {0, 1, 369, 530, 571};
         for (int i = 0; i < countof(continents); ++i)
         {
             _map = sMapMgr.FindMap(continents[i]);
@@ -10282,7 +10283,7 @@ void ObjectMgr::LoadActiveEntities(Map* _map)
             }
         }
     }
-    else                                                   // Normal case - Load all npcs that are active
+    else                                                    // Normal case - Load all npcs that are active
     {
         std::pair<ActiveCreatureGuidsOnMap::const_iterator, ActiveCreatureGuidsOnMap::const_iterator> bounds = m_activeCreatures.equal_range(_map->GetId());
         for (ActiveCreatureGuidsOnMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
@@ -10764,7 +10765,7 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
 
     if (!vItems && !tItems)
     {
-        return true;                                         // later checks for non-empty lists
+        return true;                                        // later checks for non-empty lists
     }
 
     if (vItems && vItems->FindItem(item_id))

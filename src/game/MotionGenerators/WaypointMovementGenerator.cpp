@@ -63,11 +63,11 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature, int32 pat
     {
         if (m_PathOrigin == PATH_FROM_EXTERNAL)
         {
-            sLog.outErrorScriptLib("WaypointMovementGenerator::LoadPath: %s doesn't have waypoint path %i", creature.GetGuidStr().c_str(), pathId);
+            sLog.outErrorScriptLib("#1 WaypointMovementGenerator::LoadPath: %s doesn't have waypoint path %i", creature.GetGuidStr().c_str(), pathId);
         }
         else
         {
-            sLog.outErrorDb("WaypointMovementGenerator::LoadPath: %s doesn't have waypoint path %i", creature.GetGuidStr().c_str(), pathId);
+            sLog.outErrorDb("#2 WaypointMovementGenerator::LoadPath: %s doesn't have waypoint path %i", creature.GetGuidStr().c_str(), pathId);
         }
         return;
     }

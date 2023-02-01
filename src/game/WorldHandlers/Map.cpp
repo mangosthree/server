@@ -329,6 +329,16 @@ void Map::ForceLoadGrid(float x, float y)
     }
 }
 
+void Map::LoadGrid(const Cell& cell, bool no_unload)
+{
+    EnsureGridLoaded(cell);
+
+    if (no_unload)
+    {
+        getNGrid(cell.GridX(), cell.GridY())->setUnloadExplicitLock(true);
+    }
+}
+
 bool Map::Add(Player* player)
 {
     player->GetMapRef().link(this, player);

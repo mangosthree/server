@@ -499,7 +499,6 @@ bool SD3::AreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
     return pTempScript->ToAreaTriggerScript()->OnTrigger(pPlayer, atEntry);
 }
 
-#if defined (WOTLK) || defined (CATA) || defined(MISTS)
 bool SD3::NpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId)
 {
     Script* pTempScript = m_scripts[pClickedCreature->GetScriptId()];
@@ -511,7 +510,7 @@ bool SD3::NpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 uiSp
 
     return pTempScript->ToCreatureScript()->OnSpellClick(pPlayer, pClickedCreature, uiSpellId);
 }
-#endif
+
 //the analogous method OnMapEvent exists also in the ZoneScript class and there it should have a higher priority. TODO
 bool SD3::ProcessEvent(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsStart)
 {

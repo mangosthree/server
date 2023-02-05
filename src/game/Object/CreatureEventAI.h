@@ -126,7 +126,9 @@ enum EventAI_ActionType
     ACTION_T_SET_THROW_MASK             = 46,               // EventTypeMask, unused, unused
     ACTION_T_SET_STAND_STATE            = 47,               // StandState, unused, unused
     ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance, unused
-    ACTION_T_DYNAMIC_MOVEMENT           = 49,               // EnableDynamicMovement (1 = on; 0 = off)
+    ACTION_T_SUMMON_UNIQUE              = 49,               // CreatureId, Target, SpawnId
+    ACTION_T_EMOTE_TARGET               = 50,               // EmoteId, TargetGuid
+    ACTION_T_DYNAMIC_MOVEMENT           = 51,               // EnableDynamicMovement (1 = on; 0 = off)
 
     ACTION_T_END
 };
@@ -424,6 +426,19 @@ struct CreatureEventAI_Action
             uint32 wanderDistance;
             uint32 unused1;
         } changeMovement;
+        // ACTION_T_SUMMON_ID                               = 49
+        struct
+        {
+            uint32 creatureId;
+            uint32 target;
+            uint32 spawnId;
+        } summon_unique;
+        // ACTION_T_EMOTE_TARGET                            = 50
+        struct
+        {
+            uint32 emoteId;
+            uint32 targetGuid;
+        } emoteTarget;
         // ACTION_T_DYNAMIC_MOVEMENT                        = 49
         struct
         {
@@ -431,6 +446,7 @@ struct CreatureEventAI_Action
             uint32 unused1;
             uint32 unused2;
         } dynamicMovement;
+
         // RAW
         struct
         {

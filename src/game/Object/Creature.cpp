@@ -230,6 +230,7 @@ void Creature::AddToWorld()
         sEluna->OnAddToWorld(this);
     }
 #endif /* ENABLE_ELUNA */
+
 }
 
 void Creature::RemoveFromWorld()

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <packages>
+        <package id="openssl32" url="http://assets.getmangos.eu/" file="Win32OpenSSL-1_1_1s.exe" website="https://slproweb.com/products/Win32OpenSSL.html" />
+        <package id="openssl64" url="http://assets.getmangos.eu/" file="Win64OpenSSL-1_1_1s.exe" website="https://slproweb.com/products/Win32OpenSSL.html" />
+        <package id="mysql32" url="http://assets.getmangos.eu/" file="mariadb-10.6.5-win32.msi" website="https://mariadb.com/" />
+        <package id="mysql64" url="http://assets.getmangos.eu/" file="mariadb-10.11.1-winx64.msi" website="https://mariadb.com/" />
+        <package id="cmake32" url="http://assets.getmangos.eu/" file="cmake-3.25.2-windows-i386.msi" website="http://www.cmake.org/download/" />
+        <package id="cmake64" url="http://assets.getmangos.eu/" file="cmake-3.25.2-windows-x86_64.msi" website="http://www.cmake.org/download/" />
+    </packages>
+</root>

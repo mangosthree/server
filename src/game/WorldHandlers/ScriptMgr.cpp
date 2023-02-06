@@ -29,6 +29,7 @@
 #include "ObjectMgr.h"
 #include "WaypointManager.h"
 #include "World.h"
+#include <DBCStores.h>
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "Cell.h"
@@ -38,10 +39,14 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "WaypointMovementGenerator.h"
 #include "Mail.h"
+#if defined(CLASSIC)
+#include "LFGMgr.h"
+#endif
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
+
 #ifdef ENABLE_SD3
 #include "system/ScriptDevMgr.h"
 #endif
@@ -50,7 +55,7 @@
 
 INSTANTIATE_SINGLETON_1(ScriptMgr);
 
-ScriptMgr::ScriptMgr() : m_scheduledScripts(0)
+ScriptMgr::ScriptMgr() : m_scheduledScripts(0), m_lock(0)
 {
     m_dbScripts.resize(DBS_END);
 
@@ -66,6 +71,18 @@ ScriptMgr::~ScriptMgr()
 {
     m_dbScripts.clear();
 }
+
+ScriptChainMap const* ScriptMgr::GetScriptChainMap(DBScriptType type)
+{
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, _guard, m_lock, NULL)
+    if ((type != DBS_INTERNAL) && type < DBS_END)
+    {
+        return &m_dbScripts[type];
+    }
+
+    return NULL;
+}
+
 
 // /////////////////////////////////////////////////////////
 //              DB SCRIPTS (loaders of static data)
@@ -380,15 +397,14 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 }
                 break;
             }
-            case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:         // 9
+            case SCRIPT_COMMAND_RESPAWN_GO:                 // 9
             {
-                uint32 goEntry = 0;
-
+                uint32 goEntry;
                 if (!tmp.GetGOGuid())
                 {
                     if (!tmp.buddyEntry)
                     {
-                        sLog.outErrorDb("Table `db_scripts [type = %d]` has no gameobject nor buddy defined in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u", type, tmp.id);
+                        sLog.outErrorDb("Table `db_scripts [type = %d]` has no gameobject nor buddy defined in SCRIPT_COMMAND_RESPAWN_GO for script id %u", type, tmp.id);
                         continue;
                     }
                     goEntry = tmp.buddyEntry;
@@ -398,7 +414,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                     GameObjectData const* data = sObjectMgr.GetGOData(tmp.GetGOGuid());
                     if (!data)
                     {
-                        sLog.outErrorDb("Table `db_scripts [type = %d]` has invalid gameobject (GUID: %u) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u", type, tmp.GetGOGuid(), tmp.id);
+                        sLog.outErrorDb("Table `db_scripts [type = %d]` has invalid gameobject (GUID: %u) in SCRIPT_COMMAND_RESPAWN_GO for script id %u", type, tmp.GetGOGuid(), tmp.id);
                         continue;
                     }
                     goEntry = data->id;
@@ -407,7 +423,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 GameObjectInfo const* info = ObjectMgr::GetGameObjectInfo(goEntry);
                 if (!info)
                 {
-                    sLog.outErrorDb("Table `db_scripts [type = %d]` has gameobject with invalid entry (GUID: %u Entry: %u) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u", type, tmp.GetGOGuid(), goEntry, tmp.id);
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` has gameobject with invalid entry (GUID: %u Entry: %u) in SCRIPT_COMMAND_RESPAWN_GO for script id %u", type, tmp.GetGOGuid(), goEntry, tmp.id);
                     continue;
                 }
 
@@ -415,7 +431,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                         info->type == GAMEOBJECT_TYPE_FISHINGHOLE ||
                         info->type == GAMEOBJECT_TYPE_DOOR)
                 {
-                    sLog.outErrorDb("Table `db_scripts [type = %d]` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u", type, info->type, tmp.id);
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_RESPAWN_GO for script id %u", type, info->type, tmp.id);
                     continue;
                 }
                 break;
@@ -438,7 +454,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
             case SCRIPT_COMMAND_OPEN_DOOR:                  // 11
             case SCRIPT_COMMAND_CLOSE_DOOR:                 // 12
             {
-                uint32 goEntry = 0;
+                uint32 goEntry;
                 if (!tmp.GetGOGuid())
                 {
                     if (!tmp.buddyEntry)
@@ -552,13 +568,19 @@ void ScriptMgr::LoadScripts(DBScriptType type)
             }
             case SCRIPT_COMMAND_PLAY_MOVIE:                 // 19
             {
+#if defined(CLASSIC) || defined(TBC)
+                sLog.outErrorDb("Table `db_scripts [type = %d]` use unsupported SCRIPT_COMMAND_PLAY_MOVIE for script id %u",
+                                type, tmp.id);
+                continue;
+#else
                 if (!sMovieStore.LookupEntry(tmp.playMovie.movieId))
                 {
-                    sLog.outErrorDb("Table `db_scripts [type = %d]` use unsupported SCRIPT_COMMAND_PLAY_MOVIE for script id %u",
-                                    type, tmp.id);
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` use non-existing movie_id (id: %u) in SCRIPT_COMMAND_PLAY_MOVIE for script id %u",
+                                type, tmp.playMovie.movieId, tmp.id);
                     continue;
                 }
                 break;
+#endif
             }
             case SCRIPT_COMMAND_MOVEMENT:                   // 20
             {
@@ -589,7 +611,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 {
                     if (tmp.morph.creatureOrModelEntry && !sCreatureDisplayInfoStore.LookupEntry(tmp.morph.creatureOrModelEntry))
                     {
-                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong2 = %u in SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL for script id %u, but this model does not exist.", type, tmp.morph.creatureOrModelEntry, tmp.id);
+                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong = %u in SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL for script id %u, but this model does not exist.", type, tmp.morph.creatureOrModelEntry, tmp.id);
                         continue;
                     }
                 }
@@ -597,7 +619,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 {
                     if (tmp.morph.creatureOrModelEntry && !ObjectMgr::GetCreatureTemplate(tmp.morph.creatureOrModelEntry))
                     {
-                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong2 = %u in SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL for script id %u, but this creature_template does not exist.", type, tmp.morph.creatureOrModelEntry, tmp.id);
+                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong = %u in SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL for script id %u, but this creature_template does not exist.", type, tmp.morph.creatureOrModelEntry, tmp.id);
                         continue;
                     }
                 }
@@ -610,7 +632,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 {
                     if (tmp.mount.creatureOrModelEntry && !sCreatureDisplayInfoStore.LookupEntry(tmp.mount.creatureOrModelEntry))
                     {
-                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong2 = %u in SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL for script id %u, but this model does not exist.", type, tmp.mount.creatureOrModelEntry, tmp.id);
+                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong = %u in SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL for script id %u, but this model does not exist.", type, tmp.mount.creatureOrModelEntry, tmp.id);
                         continue;
                     }
                 }
@@ -618,7 +640,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 {
                     if (tmp.mount.creatureOrModelEntry && !ObjectMgr::GetCreatureTemplate(tmp.mount.creatureOrModelEntry))
                     {
-                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong2 = %u in SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL for script id %u, but this creature_template does not exist.", type, tmp.mount.creatureOrModelEntry, tmp.id);
+                        sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong = %u in SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL for script id %u, but this creature_template does not exist.", type, tmp.mount.creatureOrModelEntry, tmp.id);
                         continue;
                     }
                 }
@@ -708,7 +730,8 @@ void ScriptMgr::LoadScripts(DBScriptType type)
             }
             case SCRIPT_COMMAND_PAUSE_WAYPOINTS:            // 32
                 break;
-            case SCRIPT_COMMAND_XP_USER:                    // 33
+            case SCRIPT_COMMAND_JOIN_LFG:                   // 33
+                //Only currently used in Zero
                 break;
             case SCRIPT_COMMAND_TERMINATE_COND:             // 34
             {
@@ -758,36 +781,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                 }
                 break;
             }
-            case SCRIPT_COMMAND_SET_FLY:                    // 39
-            case SCRIPT_COMMAND_DESPAWN_GO:                 // 40
-            case SCRIPT_COMMAND_RESPAWN:                    // 41
-                break;
-            case SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS:        // 42
-            {
-                if (tmp.textId[0] < 0 || tmp.textId[1] < 0 || tmp.textId[2] < 0)
-                {
-                    sLog.outErrorDb("Table `db_scripts [type = %d]` has invalid equipment slot (dataint = %u, dataint2 = %u, dataint3 = %u) in SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS for script id %u", type, tmp.textId[0], tmp.textId[1], tmp.textId[2], tmp.id);
-                    continue;
-                }
-                break;
-            }
-            case SCRIPT_COMMAND_RESET_GO:                   // 43
-                break;
-            case SCRIPT_COMMAND_UPDATE_TEMPLATE:            // 44
-            {
-                if (!sCreatureStorage.LookupEntry<CreatureInfo>(tmp.updateTemplate.newTemplate))
-                {
-                    sLog.outErrorDb("Table `db_scripts [type = %d]` uses nonexistent creature entry %u in SCRIPT_COMMAND_UPDATE_TEMPLATE for script id %u.", type, tmp.updateTemplate.newTemplate, tmp.id);
-                    continue;
-                }
-                if (tmp.updateTemplate.newFactionTeam != 0 && tmp.updateTemplate.newFactionTeam != 1)
-                {
-                    sLog.outErrorDb("Table `db_scripts [type = %d]` uses nonexistent faction team %u in SCRIPT_COMMAND_UPDATE_TEMPLATE for script id %u.", type, tmp.updateTemplate.newFactionTeam, tmp.id);
-                    continue;
-                }
-                break;
-            }
-            case SCRIPT_COMMAND_CHANGE_ENTRY:              // 45
+            case SCRIPT_COMMAND_CHANGE_ENTRY:              // 39
             {
                 if (tmp.changeEntry.creatureEntry && !ObjectMgr::GetCreatureTemplate(tmp.changeEntry.creatureEntry))
                     {
@@ -796,7 +790,66 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                     }
                 break;
             }
+            case SCRIPT_COMMAND_DESPAWN_GO:                   // 40
+            {
+                if (!tmp.despawnGo.goGuid)
+                {
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` has no gameobject defined in SCRIPT_COMMAND_DESPAWN_GO for script id %u", type, tmp.id);
+                    continue;
+                }
 
+                GameObjectData const* data = sObjectMgr.GetGOData(tmp.despawnGo.goGuid);
+                if (!data)
+                {
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` has invalid gameobject (GUID: %u) in SCRIPT_COMMAND_RESPAWN_GO for script id %u", type, tmp.despawnGo.goGuid, tmp.id);
+                    continue;
+                }
+
+                break;
+            }
+            case SCRIPT_COMMAND_RESPAWN:                      // 41
+                break;
+            case SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS:          // 42
+            {
+                if (tmp.textId[0] < 0 || tmp.textId[1] < 0 || tmp.textId[2] < 0)
+                {
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` has invalid equipment slot (dataint = %u, dataint2 = %u dataint3 = %u) in SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS for script id %u", type, tmp.textId[0], tmp.textId[1], tmp.textId[2], tmp.id);
+                    continue;
+                }
+                break;
+            }
+            case SCRIPT_COMMAND_RESET_GO:                     // 43
+                break;
+            case SCRIPT_COMMAND_UPDATE_TEMPLATE:              // 44
+            {
+#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
+                if (tmp.updateTemplate.entry && !ObjectMgr::GetCreatureTemplate(tmp.updateTemplate.entry))
+#else
+                if (!sCreatureStorage.LookupEntry<CreatureInfo>(tmp.updateTemplate.entry))
+#endif
+                {
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` has datalong = %u in SCRIPT_COMMAND_UPDATE_TEMPLATE for script id %u, but this creature_template does not exist.", type, tmp.updateTemplate.entry, tmp.id);
+                    continue;
+                }
+#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
+                if (tmp.updateTemplate.faction > 1)
+#else
+                if (tmp.updateTemplate.faction != 0 && tmp.updateTemplate.faction != 1)
+#endif
+                {
+                    sLog.outErrorDb("Table `db_scripts [type = %d]` uses invalid faction team (datalong2 = %u, must be 0 or 1) in SCRIPT_COMMAND_UPDATE_TEMPLATE for script id %u", type, tmp.updateTemplate.faction, tmp.id);
+                    continue;
+                }
+                break;
+            }
+            case SCRIPT_COMMAND_XP_USER:                      // 53
+            {
+                break;
+            }
+            case SCRIPT_COMMAND_SET_FLY:                      // 59
+            {
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `db_scripts [type = %d]` uses unknown command %u, skipping.", type, tmp.command);
@@ -830,7 +883,11 @@ void ScriptMgr::LoadDbScripts(DBScriptType t)
         CollectPossibleEventIds(eventIds);
     }
 
-    LoadScripts(t);
+    {
+        ACE_GUARD(ACE_Thread_Mutex, _g, m_lock)
+        LoadScripts(t);
+    }
+
     ScriptChainMap& scm = m_dbScripts[t];
 
     for (ScriptChainMap::const_iterator itr = scm.begin(); itr != scm.end(); ++itr)
@@ -974,7 +1031,9 @@ bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeIte
     switch (guid.GetHigh())
     {
         case HIGHGUID_UNIT:
+#if defined(WOTLK) || defined(CATA) || defined(MISTS)
         case HIGHGUID_VEHICLE:
+#endif
             resultObject = m_map->GetCreature(guid);
             break;
         case HIGHGUID_PET:
@@ -1467,11 +1526,9 @@ bool ScriptAction::HandleScriptStep()
 
             break;
         }
-        case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:             // 9
+        case SCRIPT_COMMAND_RESPAWN_GO:                     // 9
         {
-            GameObject* pGo = NULL;
-            uint32 time_to_despawn = m_script->respawnGo.despawnDelay < 5 ? 5 : m_script->respawnGo.despawnDelay;
-
+            GameObject* pGo;
             if (m_script->respawnGo.goGuid)
             {
                 GameObjectData const* goData = sObjectMgr.GetGOData(m_script->respawnGo.goGuid);
@@ -1511,6 +1568,8 @@ bool ScriptAction::HandleScriptStep()
                 break;                                       // gameobject already spawned
             }
 
+            uint32 time_to_despawn = m_script->respawnGo.despawnDelay < 5 ? 5 : m_script->respawnGo.despawnDelay;
+
             pGo->SetLootState(GO_READY);
             pGo->SetRespawnTime(time_to_despawn);           // despawn object in ? seconds
             pGo->Refresh();
@@ -1529,7 +1588,7 @@ bool ScriptAction::HandleScriptStep()
             float z = m_script->z;
             float o = m_script->o;
 
-            Creature* pCreature = pSource->SummonCreature(m_script->summonCreature.creatureEntry, x, y, z, o, m_script->summonCreature.despawnDelay ? TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN : TEMPSPAWN_DEAD_DESPAWN, m_script->summonCreature.despawnDelay, (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) ? true : false);
+            Creature* pCreature = pSource->SummonCreature(m_script->summonCreature.creatureEntry, x, y, z, o, m_script->summonCreature.despawnDelay ? TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN : TEMPSPAWN_DEAD_DESPAWN, m_script->summonCreature.despawnDelay, (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) ? true : false, m_script->textId[0] != 0);
             if (!pCreature)
             {
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `db_scripts [type = %d]` id %u, command %u failed for creature (entry: %u).", m_type, m_script->id, m_script->command, m_script->summonCreature.creatureEntry);
@@ -1726,6 +1785,7 @@ bool ScriptAction::HandleScriptStep()
         }
         case SCRIPT_COMMAND_PLAY_MOVIE:                     // 19
         {
+#if defined(WOTLK) || defined (CATA) || defined (MISTS)
             Player* pPlayer = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
             if (!pPlayer)
             {
@@ -1733,7 +1793,7 @@ bool ScriptAction::HandleScriptStep()
             }
 
             pPlayer->SendMovieStart(m_script->playMovie.movieId);
-
+#endif
             break;                                      // must be skipped at loading
         }
         case SCRIPT_COMMAND_MOVEMENT:                       // 20
@@ -2040,22 +2100,9 @@ bool ScriptAction::HandleScriptStep()
             }
             break;
         }
-        case SCRIPT_COMMAND_XP_USER:                        // 33
+        case SCRIPT_COMMAND_JOIN_LFG:                       // 33
         {
-            Player* pPlayer = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
-            if (!pPlayer)
-            {
-                break;
-            }
-
-            if (m_script->xpDisabled.flags)
-            {
-                pPlayer->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
-            }
-            else
-            {
-                pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
-            }
+            //Not supported
             break;
         }
         case SCRIPT_COMMAND_TERMINATE_COND:                 // 34
@@ -2118,6 +2165,9 @@ bool ScriptAction::HandleScriptStep()
                 break;
             }
 
+#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
+            ((Creature*)pSource)->AI()->SendAIEventAround(AIEventType(m_script->sendAIEvent.eventType), (Unit*)pTarget, 0, float(m_script->sendAIEvent.radius));
+#else
             // if radius is provided send AI event around
             if (m_script->sendAIEvent.radius)
             {
@@ -2128,6 +2178,7 @@ bool ScriptAction::HandleScriptStep()
             {
                 ((Creature*)pSource)->AI()->SendAIEvent(AIEventType(m_script->sendAIEvent.eventType), NULL, (Creature*)pTarget);
             }
+#endif
             break;
         }
         case SCRIPT_COMMAND_TURN_TO:                        // 36
@@ -2206,38 +2257,39 @@ bool ScriptAction::HandleScriptStep()
             MailDraft(m_script->sendMail.mailTemplateId).SendMailTo(static_cast<Player*>(pTarget), sender, MAIL_CHECK_MASK_HAS_BODY, deliverDelay);
             break;
         }
-        case SCRIPT_COMMAND_SET_FLY:                        // 39
+        case SCRIPT_COMMAND_CHANGE_ENTRY:                   // 39
         {
             if (LogIfNotCreature(pSource))
             {
                 break;
             }
 
-            // enable / disable the fly anim flag
-            if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-            {
-                if (m_script->fly.fly)
-                {
-                    pSource->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
-                }
-                else
-                {
-                    pSource->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
-                }
-            }
-
-            ((Creature*)pSource)->SetLevitate(!!m_script->fly.fly);
+            ((Creature*)pSource)->UpdateEntry(m_script->changeEntry.creatureEntry);
             break;
         }
         case SCRIPT_COMMAND_DESPAWN_GO:                     // 40
         {
-            if (LogIfNotGameObject(pTarget))
+
+            uint32 goEntry;
+            GameObject* pGo;
+            if (!m_script->despawnGo.goGuid)
             {
+                sLog.outErrorDb("Table `db_scripts [type = %d]` has no gameobject defined in SCRIPT_COMMAND_DESPAWN_GO for script id %u", m_type, m_script->id);
                 break;
             }
 
-            // ToDo: Change this to pGo->ForcedDespawn() when function is implemented!
-            ((GameObject*)pTarget)->SetLootState(GO_JUST_DEACTIVATED);
+            GameObjectData const* goData = sObjectMgr.GetGOData(m_script->despawnGo.goGuid);
+            if (!goData)
+            {
+                sLog.outErrorDb("Table `db_scripts [type = %d]` has invalid gameobject (GUID: %u) in SCRIPT_COMMAND_RESPAWN_GO for script id %u", m_type, m_script->despawnGo.goGuid, m_script->id);
+                break;
+            }
+
+            pGo = m_map->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, goData->id, m_script->despawnGo.goGuid));
+
+            pGo->SetRespawnTime(m_script->despawnGo.respawnTime);
+            pGo->SetLootState(GO_JUST_DEACTIVATED);
+
             break;
         }
         case SCRIPT_COMMAND_RESPAWN:                        // 41
@@ -2246,7 +2298,6 @@ bool ScriptAction::HandleScriptStep()
             {
                 break;
             }
-
             ((Creature*)pTarget)->Respawn();
             break;
         }
@@ -2254,10 +2305,11 @@ bool ScriptAction::HandleScriptStep()
         {
             if (LogIfNotCreature(pSource))
             {
-                return false;
+                break;
             }
 
             Creature* pCSource = static_cast<Creature*>(pSource);
+
             // reset default
             if (m_script->setEquipment.resetDefault)
             {
@@ -2292,6 +2344,7 @@ bool ScriptAction::HandleScriptStep()
             }
 
             GameObject* pGoTarget = static_cast<GameObject*>(pTarget);
+
             switch (pGoTarget->GetGoType())
             {
                 case GAMEOBJECT_TYPE_DOOR:
@@ -2308,29 +2361,69 @@ bool ScriptAction::HandleScriptStep()
         {
             if (LogIfNotCreature(pSource))
             {
-                return false;
+                break;
             }
 
-            Creature* pCSource = static_cast<Creature*>(pSource);
+            Creature* pCre = static_cast<Creature*>(pSource);
 
-            if (pCSource->GetEntry() != m_script->updateTemplate.newTemplate)
+            if (pCre->GetEntry() != m_script->updateTemplate.entry)
             {
-                pCSource->UpdateEntry(m_script->updateTemplate.newTemplate, m_script->updateTemplate.newFactionTeam ? HORDE : ALLIANCE);
+                pCre->UpdateEntry(m_script->updateTemplate.entry, m_script->updateTemplate.faction ? HORDE : ALLIANCE);
             }
             else
             {
-                sLog.outErrorDb(" DB-SCRIPTS: Process table `db_scripts [type = %d]` id %u, command %u failed. Source already has specified creature entry.", m_type, m_script->id, m_script->command);
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `db_scripts [type = %d]` id %u, command %u: source creature already has the specified creature entry %u", m_type, m_script->id, m_script->command, m_script->updateTemplate.entry);
             }
             break;
         }
-        case SCRIPT_COMMAND_CHANGE_ENTRY:                   // 45
+        case SCRIPT_COMMAND_XP_USER:                        // 53
+        {
+            Player* pPlayer = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
+            if (!pPlayer)
+            {
+                break;
+            }
+
+            if (m_script->xpDisabled.flags)
+            {
+                pPlayer->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
+            }
+            else
+            {
+                pPlayer->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED);
+            }
+            break;
+        }
+
+        case SCRIPT_COMMAND_SET_FLY:                        // 59
         {
             if (LogIfNotCreature(pSource))
             {
                 break;
             }
 
-            ((Creature*)pSource)->UpdateEntry(m_script->changeEntry.creatureEntry);
+            // enable / disable the fly anim flag
+            if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+            {
+                if (m_script->fly.enable)
+                {
+#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
+                    pSource->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+#else
+                    pSource->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+#endif
+                }
+                else
+                {
+#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
+                    pSource->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+#else
+                    pSource->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+#endif
+                }
+            }
+
+            ((Creature*)pSource)->SetLevitate((m_script->fly.enable == 0) ? false : true);
             break;
         }
         default:
@@ -3000,7 +3093,7 @@ bool ScriptMgr::OnAuraDummy(Aura const* pAura, bool apply)
 ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
 {
 #ifdef ENABLE_SD3
-    if (std::strcmp(libName, MANGOS_SCRIPT_NAME) == 0)
+    if (std::strcmp(libName, "mangosscript") == 0)
     {
         SD3::FreeScriptLibrary();
         SD3::InitScriptLibrary();
@@ -3046,12 +3139,14 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
                 eventIds.insert(itr->capturePoint.winEventID1);
                 eventIds.insert(itr->capturePoint.winEventID2);
                 break;
+#if defined(WOTLK) || defined (CATA) || defined (MISTS)
             case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
                 eventIds.insert(itr->destructibleBuilding.damagedEvent);
                 eventIds.insert(itr->destructibleBuilding.destroyedEvent);
                 eventIds.insert(itr->destructibleBuilding.intactEvent);
                 eventIds.insert(itr->destructibleBuilding.rebuildingEvent);
                 break;
+#endif
             default:
                 break;
         }

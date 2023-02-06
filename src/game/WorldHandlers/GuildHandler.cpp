@@ -305,6 +305,10 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& /*recvPacket*/)
 void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s", LookupOpcodeName(recvPacket.GetOpcode()));
+    if (GetPlayer()->GetGuildId())
+    {
+        return;
+    }
 
     if (Player* inviter = sObjectMgr.GetPlayer(GetPlayer()->GetGuildInviterGuid()))
     {
@@ -312,7 +316,6 @@ void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
     }
 
     GetPlayer()->SetGuildIdInvited(0);
-    GetPlayer()->SetInGuild(0);
     GetPlayer()->SetGuildLevel(0);
 }
 

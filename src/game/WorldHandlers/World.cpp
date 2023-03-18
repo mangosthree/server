@@ -897,6 +897,8 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT,      "PetUnsummonAtMount", true);
 
+    setConfig(CONFIG_BOOL_ENABLE_QUEST_TRACKER,        "QuestTracker.Enable", 0);
+    
     // Warden
 /* badly broken on m3 :( - this causes all these defaults to be set to 0
     setConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED, "Warden.WinEnabled", true);

@@ -21973,6 +21973,11 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
             firstcost = cost;
         }
 
+        if (prevnode == sourcenode)
+        {
+            sourcepath = path;
+        }
+        
         m_taxi.AddTaxiDestination(lastnode);
 
         prevnode = lastnode;

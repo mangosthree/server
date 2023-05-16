@@ -66,6 +66,7 @@ struct boss_hakkar : public CreatureScript
         boss_hakkarAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
             m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            Reset();
         }
 
         ScriptedInstance* m_pInstance;
@@ -96,9 +97,16 @@ struct boss_hakkar : public CreatureScript
             m_uiAspectOfThekalTimer = 8000;
             m_uiAspectOfArlokkTimer = 18000;
 
-            DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            //Needs more info. nullptr is unacceptable, see impl
+            //DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 
-            InitiateHakkarPowerStacks();
+            // Initiate Hakkar power stacks
+            m_creature->RemoveAurasDueToSpell(SPELL_HAKKAR_POWER);
+            for (uint8 i = 0; i < MAX_PRIESTS; i++)
+            {
+                if (m_pInstance->GetData(i) != DONE)
+                    m_creature->CastSpell(m_creature, SPELL_HAKKAR_POWER, false);
+            }
         }
 
         void Aggro(Unit* /*who*/) override
@@ -128,16 +136,6 @@ struct boss_hakkar : public CreatureScript
                 {
                     m_uiAspectOfArlokkTimer = 0;
                 }
-            }
-        }
-
-        void InitiateHakkarPowerStacks()
-        {
-            m_creature->RemoveAurasDueToSpell(SPELL_HAKKAR_POWER);
-            for (uint8 i = 0; i < MAX_PRIESTS; i++)
-            {
-                if (m_pInstance->GetData(i) != DONE)
-                    m_creature->CastSpell(m_creature, SPELL_HAKKAR_POWER,false);
             }
         }
 

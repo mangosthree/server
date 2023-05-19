@@ -17,7 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+# proper support for openssl3.x was added in CMake 3.18
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -109,6 +110,8 @@ find_package(DL      REQUIRED)
 find_package(ZLIB  QUIET)
 find_package(BZip2 QUIET)
 
+#static linkage for openssl libs
+set(OPENSSL_USE_STATIC_LIBS ON)
 find_package(OpenSSL REQUIRED)
 
 include(${CMAKE_SOURCE_DIR}/cmake/GenRevision.cmake)

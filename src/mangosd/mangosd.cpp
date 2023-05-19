@@ -28,6 +28,10 @@
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+#  include <openssl/provider.h>
+#endif
+
 #include <ace/Version.h>
 #include <ace/Get_Opt.h>
 
@@ -390,12 +394,27 @@ int main(int argc, char** argv)
     print_banner();
     sLog.outString("Using configuration file %s.", cfg_file);
 
-    DETAIL_LOG("Using SSL version: %s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
-    if (SSLeay() < 0x10100000L || SSLeay() > 0x10200000L)
-    {
-        DETAIL_LOG("WARNING: OpenSSL version may be out of date or unsupported. Logins to server may not work!");
-        DETAIL_LOG("WARNING: Minimal required version [OpenSSL 1.1.x] and Maximum supported version [OpenSSL 1.2]");
+    DETAIL_LOG("Using OpenSSL version: %s", OPENSSL_VERSION_TEXT);
+
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+    OSSL_PROVIDER* legacy;
+    OSSL_PROVIDER* deflt;
+
+    /* Load Multiple providers into the default (NULL) library context */
+    legacy = OSSL_PROVIDER_load(NULL, "legacy");
+    if (legacy == NULL) {
+        sLog.outError("Failed to load OpenSSL 3.x Legacy provider\n");
+        Log::WaitBeforeContinueIfNeed();
+        return 0;
     }
+    deflt = OSSL_PROVIDER_load(NULL, "default");
+    if (deflt == NULL) {
+        sLog.outError("Failed to load OpenSSL 3.x Default provider\n");
+        OSSL_PROVIDER_unload(legacy);
+        Log::WaitBeforeContinueIfNeed();
+        return 0;
+    }
+#endif
 
     DETAIL_LOG("Using ACE: %s", ACE_VERSION);
 

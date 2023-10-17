@@ -2351,7 +2351,7 @@ void GameObject::SetLootRecipient(Unit* pUnit)
     {
         m_lootRecipientGuid.Clear();
         m_lootGroupRecipientId = 0;
-        ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);       // needed to be sure tapping status is updated
+        //ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);       // needed to be sure tapping status is updated
         return;
     }
 
@@ -2370,7 +2370,7 @@ void GameObject::SetLootRecipient(Unit* pUnit)
         m_lootGroupRecipientId = group->GetId();
     }
 
-    ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);           // needed to be sure tapping status is updated
+    //ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);           // needed to be sure tapping status is updated
 }
 
 float GameObject::GetObjectBoundingRadius() const

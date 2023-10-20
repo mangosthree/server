@@ -64,6 +64,7 @@ target_include_directories(realmd
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}/VersionInfo.h
+        ${OPENSSL_INCLUDE_DIR}
 )
 
 target_link_libraries(realmd
@@ -71,6 +72,10 @@ target_link_libraries(realmd
         shared
         Threads::Threads
         DL::DL
+        ${OPENSSL_LIBRARIES}
+#if (defined(OPENSSL_VERSION_MAJOR) && OPENSSL_VERSION_MAJOR >= 3)
+        OpenSSL::Crypto
+#endif()
 )
 
 install(

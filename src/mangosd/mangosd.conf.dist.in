@@ -854,13 +854,6 @@ TimerBar.Breath.Max                       = 180
 TimerBar.Fire.GMLevel                     = 4
 TimerBar.Fire.Max                         = 1
 MaxPrimaryTradeSkill                      = 2
-<<<<<<< HEAD
-TradeSkill.GMIgnore.MaxPrimarySkillsCount = 4
-TradeSkill.GMIgnore.Level                 = 4
-TradeSkill.GMIgnore.Skill                 = 4
-=======
-MinPetitionSigns                          = 9
->>>>>>> 2212e1ef1 (Fix Trade Skill Limit (#192))
 MaxGroupXPDistance                        = 74
 MailDeliveryDelay                         = 3600
 MassMailer.SendPerTick                    = 10

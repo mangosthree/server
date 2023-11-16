@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <cstdint>
+#include "ElunaCompat.h"
 
 extern "C" {
 #include "lua.h"
@@ -292,8 +293,8 @@ static void mar_encode_value(lua_State *L, mar_Buffer *buf, int val, size_t *idx
 
                 buf_write(L, (const char*)&tag, MAR_CHR, buf);
                 buf_write(L, (const char*)&rec_buf.head, MAR_I32, buf);
-                buf_write(L, rec_buf.data, rec_buf.head, buf);
-                buf_done(L, &rec_buf);
+		        buf_write(L, rec_buf.data, rec_buf.head, buf);
+		        buf_done(L, &rec_buf);
             }
             else {
                 luaL_error(L, "attempt to encode userdata (no __persist hook)");
@@ -569,7 +570,7 @@ static const luaL_Reg R[] =
     {"encode",      mar_encode},
     {"decode",      mar_decode},
     {"clone",       mar_clone},
-    {NULL,        NULL}
+    {NULL,	    NULL}
 };
 
 int luaopen_marshal(lua_State *L)

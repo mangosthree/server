@@ -16,6 +16,9 @@
 struct ScriptedAI;
 #elif defined CMANGOS
 class CreatureAI;
+#elif defined VMANGOS
+class BasicAI;
+typedef BasicAI ScriptedAI;
 #else
 class AggressorAI;
 typedef AggressorAI ScriptedAI;
@@ -31,7 +34,7 @@ struct ElunaCreatureAI : CreatureAI
     bool justSpawned;
     // used to delay movementinform hook (WP hook)
     std::vector< std::pair<uint32, uint32> > movepoints;
-#if defined MANGOS || defined CMANGOS
+#if defined MANGOS || defined CMANGOS || defined VMANGOS
 #define me  m_creature
 #endif
 #ifndef CMANGOS
@@ -51,7 +54,7 @@ struct ElunaCreatureAI : CreatureAI
 #endif
     {
 #ifdef TRINITY
-        //Spawns are handled by Creature.cpp - in function Creature::Update()
+        //Spawns are handled by Creature.cpp - in function Creature::Update() 
 #else
         if (justSpawned)
         {
@@ -78,7 +81,7 @@ struct ElunaCreatureAI : CreatureAI
 
         if (!sEluna->UpdateAI(me, diff))
         {
-#if defined TRINITY || AZEROTHCORE
+#if defined TRINITY || AZEROTHCORE || VMANGOS
             if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
                 ScriptedAI::UpdateAI(diff);
 #elif defined CMANGOS
@@ -117,7 +120,9 @@ struct ElunaCreatureAI : CreatureAI
     // Called at any Damage from any attacker (before damage apply)
 #if defined AZEROTHCORE
     void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask) override
-#elif defined(TRINITY) || CMANGOS
+#elif ((defined (TRINITY) || CMANGOS) && !defined CATA)
+    void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType damageType, SpellInfo const* spellInfo) override
+#elif defined CATA && defined CMANGOS
     void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType damageType, SpellInfo const* spellInfo) override
 #else
     void DamageTaken(Unit* attacker, uint32& damage) override
@@ -127,7 +132,7 @@ struct ElunaCreatureAI : CreatureAI
         {
 #if defined AZEROTHCORE
             ScriptedAI::DamageTaken(attacker, damage, damagetype, damageSchoolMask);
-#elif defined TRINITY
+#elif defined TRINITY && !defined CATA
             ScriptedAI::DamageTaken(attacker, damage, damageType, spellInfo);
 #elif defined CMANGOS
             CreatureAI::DamageTaken(attacker, damage, damageType, spellInfo);
@@ -288,7 +293,7 @@ struct ElunaCreatureAI : CreatureAI
 #endif
     }
 
-#if !defined TRINITY && !AZEROTHCORE
+#if !defined TRINITY && !AZEROTHCORE && !VMANGOS
     // Enables use of MoveInLineOfSight
     bool IsVisible(Unit* who) const override
     {
@@ -310,6 +315,8 @@ struct ElunaCreatureAI : CreatureAI
     // Called when hit by a spell
 #if defined TRINITY
     void SpellHit(WorldObject* caster, SpellInfo const* spell) override
+#elif defined VMANGOS
+    void SpellHit(Unit* caster, SpellInfo const* spell)
 #else
     void SpellHit(Unit* caster, SpellInfo const* spell) override
 #endif
@@ -341,7 +348,7 @@ struct ElunaCreatureAI : CreatureAI
 
 #if defined TRINITY || AZEROTHCORE
 
-#if defined TRINITY
+#if defined TRINITY && !defined CATA
     // Called when the creature is summoned successfully by other creature
     void IsSummonedBy(WorldObject* summoner) override
     {

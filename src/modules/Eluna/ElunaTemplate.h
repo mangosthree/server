@@ -15,6 +15,7 @@ extern "C"
 };
 #include "LuaEngine.h"
 #include "ElunaUtility.h"
+#include "ElunaCompat.h"
 #ifndef CMANGOS
 #include "SharedDefines.h"
 #else
@@ -244,6 +245,7 @@ public:
         lua_rawget(E->L, LUA_REGISTRYINDEX);
         ASSERT(lua_istable(E->L, -1));
 
+        // load all core-specific methods
         for (; methodTable && methodTable->name && methodTable->mfunc; ++methodTable)
         {
             lua_pushstring(E->L, methodTable->name);

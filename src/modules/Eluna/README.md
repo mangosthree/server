@@ -3,7 +3,7 @@
 ## About
 
 Eluna Lua Engine &copy; is a lua engine embedded to World of Warcraft emulators. Eluna supports MaNGOS, CMaNGOS, TrinityCore and AzerothCore.
-We are currently working hard to make Eluna better from inside and outside.
+We are currently working hard to make Eluna better from inside and outside.  
 
 If you are having trouble with installation or scripts, please feel free to open an issue.
 For documentation and reference see [Eluna API](http://elunaluaengine.github.io/) and [Lua reference manual](http://www.lua.org/manual/5.2/).
@@ -32,21 +32,22 @@ You can join the official Eluna Discord server, where you'll be able to find res
 
 ## Source
 Eluna source code: [Source](https://github.com/ElunaLuaEngine/Eluna)
-Core forks with required modifications for Eluna:
 
-[![Build Status](https://api.travis-ci.org/mangoszero/server.svg)](https://travis-ci.org/mangoszero/server) [Official MaNGOS Zero with Eluna](https://github.com/mangoszero/server)
-[![Build Status](https://api.travis-ci.org/mangosone/server.svg)](https://travis-ci.org/mangosone/server) [Official MaNGOS One with Eluna](https://github.com/mangosone/server)
-[![Build Status](https://api.travis-ci.org/mangostwo/server.svg)](https://travis-ci.org/mangostwo/server) [Official MaNGOS Two with Eluna](https://github.com/mangostwo/server)
+Core sources and forks with required modifications for Eluna:
 
-[![Build Status](https://travis-ci.org/ElunaLuaEngine/ElunaTrinityWotlk.png?branch=master)](https://travis-ci.org/ElunaLuaEngine/ElunaTrinityWotlk) [Eluna TrinityCore WotLK](https://github.com/ElunaLuaEngine/ElunaTrinityWotlk)
+[TrinityCore WotLK](https://github.com/ElunaLuaEngine/ElunaTrinityWotlk) [![automerge](https://github.com/ElunaLuaEngine/ElunaTrinityWotlk/actions/workflows/auto-merge.yml/badge.svg)](https://github.com/ElunaLuaEngine/ElunaTrinityWotlk/actions/workflows/auto-merge.yml)
 
-[Eluna cMaNGOS Classic](https://github.com/Niam5/Eluna-CMaNGOS-Classic) - maintained by [Niam5](https://github.com/Niam5)
-[Eluna cMaNGOS TBC](https://github.com/Niam5/Eluna-CMaNGOS-TBC) - maintained by [Niam5](https://github.com/Niam5)
-[Eluna cMaNGOS WoTLK](https://github.com/Niam5/Eluna-CMaNGOS-WotLK) - maintained by [Niam5](https://github.com/Niam5)
+[Official MaNGOS Zero with Eluna](https://github.com/mangoszero/server)  
+[Official MaNGOS One with Eluna](https://github.com/mangosone/server)  
+[Official MaNGOS Two with Eluna](https://github.com/mangostwo/server)
 
-Core plugin modules for Eluna:
+[Eluna cMaNGOS Classic](https://github.com/Niam5/Eluna-CMaNGOS-Classic) - maintained by [Niam5](https://github.com/Niam5)  
+[Eluna cMaNGOS TBC](https://github.com/Niam5/Eluna-CMaNGOS-TBC) - maintained by [Niam5](https://github.com/Niam5)  
+[Eluna cMaNGOS WoTLK](https://github.com/Niam5/Eluna-CMaNGOS-WotLK) - maintained by [Niam5](https://github.com/Niam5)  
 
-- [AzerothCore Eluna Module](https://github.com/azerothcore/mod-eluna-lua-engine)
+[AzerothCore Eluna Module](https://github.com/azerothcore/mod-eluna)
+
+[Cataclysm Preservation Project](https://github.com/Niam5/ElunaCataPreservation) - maintained by [Niam5](https://github.com/Niam5)
 
 ## Links
 

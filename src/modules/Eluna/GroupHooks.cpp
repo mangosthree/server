@@ -20,6 +20,14 @@ using namespace Hooks;
         return;\
     LOCK_ELUNA
 
+#define START_HOOK_WITH_RETVAL(EVENT, RETVAL) \
+    if (!IsEnabled())\
+        return RETVAL;\
+    auto key = EventKey<GroupEvents>(EVENT);\
+    if (!GroupEventBindings->HasBindingsFor(key))\
+        return RETVAL;\
+    LOCK_ELUNA
+
 void Eluna::OnAddMember(Group* group, ObjectGuid guid)
 {
     START_HOOK(GROUP_EVENT_ON_MEMBER_ADD);
@@ -61,6 +69,16 @@ void Eluna::OnDisband(Group* group)
     CallAllFunctions(GroupEventBindings, key);
 }
 
+#if defined (TRINITY) && defined (CATA)
+void Eluna::OnCreate(Group* group, ObjectGuid leaderGuid, GroupFlags groupType)
+{
+    START_HOOK(GROUP_EVENT_ON_CREATE);
+    Push(group);
+    Push(leaderGuid);
+    Push(groupType);
+    CallAllFunctions(GroupEventBindings, key);
+}
+#else
 void Eluna::OnCreate(Group* group, ObjectGuid leaderGuid, GroupType groupType)
 {
     START_HOOK(GROUP_EVENT_ON_CREATE);
@@ -68,4 +86,13 @@ void Eluna::OnCreate(Group* group, ObjectGuid leaderGuid, GroupType groupType)
     Push(leaderGuid);
     Push(groupType);
     CallAllFunctions(GroupEventBindings, key);
+}
+#endif
+
+bool Eluna::OnMemberAccept(Group* group, Player* player)
+{
+    START_HOOK_WITH_RETVAL(GROUP_EVENT_ON_MEMBER_ACCEPT, true);
+    Push(group);
+    Push(player);
+    return CallAllFunctionsBool(GroupEventBindings, key, true);
 }

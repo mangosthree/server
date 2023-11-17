@@ -3,7 +3,7 @@
 ## About
 
 Eluna Lua Engine &copy; is a lua engine embedded to World of Warcraft emulators. Eluna supports MaNGOS, CMaNGOS, TrinityCore and AzerothCore.
-We are currently working hard to make Eluna better from inside and outside.  
+We are currently working hard to make Eluna better from inside and outside.
 
 If you are having trouble with installation or scripts, please feel free to open an issue.
 For documentation and reference see [Eluna API](http://elunaluaengine.github.io/) and [Lua reference manual](http://www.lua.org/manual/5.2/).
@@ -37,13 +37,13 @@ Core sources and forks with required modifications for Eluna:
 
 [TrinityCore WotLK](https://github.com/ElunaLuaEngine/ElunaTrinityWotlk) [![automerge](https://github.com/ElunaLuaEngine/ElunaTrinityWotlk/actions/workflows/auto-merge.yml/badge.svg)](https://github.com/ElunaLuaEngine/ElunaTrinityWotlk/actions/workflows/auto-merge.yml)
 
-[Official MaNGOS Zero with Eluna](https://github.com/mangoszero/server)  
-[Official MaNGOS One with Eluna](https://github.com/mangosone/server)  
+[Official MaNGOS Zero with Eluna](https://github.com/mangoszero/server)
+[Official MaNGOS One with Eluna](https://github.com/mangosone/server)
 [Official MaNGOS Two with Eluna](https://github.com/mangostwo/server)
 
-[Eluna cMaNGOS Classic](https://github.com/Niam5/Eluna-CMaNGOS-Classic) - maintained by [Niam5](https://github.com/Niam5)  
-[Eluna cMaNGOS TBC](https://github.com/Niam5/Eluna-CMaNGOS-TBC) - maintained by [Niam5](https://github.com/Niam5)  
-[Eluna cMaNGOS WoTLK](https://github.com/Niam5/Eluna-CMaNGOS-WotLK) - maintained by [Niam5](https://github.com/Niam5)  
+[Eluna cMaNGOS Classic](https://github.com/Niam5/Eluna-CMaNGOS-Classic) - maintained by [Niam5](https://github.com/Niam5)
+[Eluna cMaNGOS TBC](https://github.com/Niam5/Eluna-CMaNGOS-TBC) - maintained by [Niam5](https://github.com/Niam5)
+[Eluna cMaNGOS WoTLK](https://github.com/Niam5/Eluna-CMaNGOS-WotLK) - maintained by [Niam5](https://github.com/Niam5)
 
 [AzerothCore Eluna Module](https://github.com/azerothcore/mod-eluna)
 

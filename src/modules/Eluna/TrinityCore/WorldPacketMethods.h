@@ -306,7 +306,7 @@ namespace LuaPacket
         (*packet) << _val;
         return 0;
     }
-    
+
     ElunaRegister<WorldPacket> PacketMethods[] =
     {
         // Getters

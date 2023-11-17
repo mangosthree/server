@@ -805,7 +805,7 @@ namespace LuaItem
         item->SaveToDB(trans);
         return 0;
     }
-    
+
     ElunaRegister<Item> ItemMethods[] =
     {
         // Getters

@@ -301,7 +301,7 @@ namespace LuaGuild
 #endif
         return 0;
     }
-    
+
     ElunaRegister<Guild> GuildMethods[] =
     {
         // Getters

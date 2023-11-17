@@ -1499,7 +1499,7 @@ namespace LuaCreature
 #endif
         return 1;
     }
-    
+
     ElunaRegister<Creature> CreatureMethods[] =
     {
         // Getters

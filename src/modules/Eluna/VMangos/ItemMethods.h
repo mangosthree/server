@@ -188,7 +188,7 @@ namespace LuaItem
      * Returns 'true' if the [Item] is a potion, 'false' otherwise
      *
      * @return bool isPotion
-     
+
     int IsPotion(lua_State* L, Item* item)
     {
         Eluna::Push(L, item->IsPotion());
@@ -761,7 +761,7 @@ namespace LuaItem
 #endif
         return 0;
     }
-    
+
     ElunaRegister<Item> ItemMethods[] =
     {
         // Getters

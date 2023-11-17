@@ -54,7 +54,7 @@ struct ElunaCreatureAI : CreatureAI
 #endif
     {
 #ifdef TRINITY
-        //Spawns are handled by Creature.cpp - in function Creature::Update() 
+        //Spawns are handled by Creature.cpp - in function Creature::Update()
 #else
         if (justSpawned)
         {

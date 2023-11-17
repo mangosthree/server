@@ -1415,7 +1415,7 @@ namespace LuaCreature
             Eluna::Push(L, cInfo->pet_family);
         return 1;
     }
-    
+
     ElunaRegister<Creature> CreatureMethods[] =
     {
         // Getters

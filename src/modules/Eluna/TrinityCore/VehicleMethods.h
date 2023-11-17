@@ -92,7 +92,7 @@ namespace LuaVehicle
         vehicle->RemovePassenger(passenger);
         return 0;
     }
-    
+
     ElunaRegister<Vehicle> VehicleMethods[] =
     {
         // Getters

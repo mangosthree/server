@@ -77,7 +77,7 @@ namespace LuaCorpse
         corpse->SaveToDB();
         return 0;
     }
-    
+
     ElunaRegister<Corpse> CorpseMethods[] =
     {
         // Getters

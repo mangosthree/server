@@ -48,7 +48,7 @@ namespace LuaGroup
         return 1;
     }
 #endif
-    
+
     /**
      * Returns 'true' if the [Group] is a raid [Group]
      *
@@ -67,7 +67,7 @@ namespace LuaGroup
      */
     int IsBGGroup(lua_State* L, Group* group)
     {
-        Eluna::Push(L, group->IsBattleGroup());        
+        Eluna::Push(L, group->IsBattleGroup());
         return 1;
     }
 
@@ -374,7 +374,7 @@ namespace LuaGroup
         group->ConvertToLFG();
         return 0;
     }*/
-    
+
     ElunaRegister<Group> GroupMethods[] =
     {
         // Getters

@@ -279,7 +279,7 @@ public:
     {
         return std::hash<typename std::underlying_type<T>::type>()(t);
     }
-    
+
     template <typename T, typename std::enable_if<!std::is_enum<T>::value>::type* = nullptr>
     static inline result_type hash(T const & t)
     {

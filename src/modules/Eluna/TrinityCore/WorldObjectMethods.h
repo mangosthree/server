@@ -1121,7 +1121,7 @@ namespace LuaWorldObject
 
         return 0;
     }
-    
+
     ElunaRegister<WorldObject> WorldObjectMethods[] =
     {
         // Getters

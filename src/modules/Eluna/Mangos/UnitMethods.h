@@ -3115,7 +3115,7 @@ namespace LuaUnit
     Eluna::Push(L, summon);
     return 1;
     }*/
-    
+
     ElunaRegister<Unit> UnitMethods[] =
     {
         // Getters

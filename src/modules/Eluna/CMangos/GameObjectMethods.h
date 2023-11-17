@@ -302,7 +302,7 @@ namespace LuaGameObject
         go->SetRespawnTime(respawn);
         return 0;
     }
-    
+
     ElunaRegister<GameObject> GameObjectMethods[] =
     {
         // Getters

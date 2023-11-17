@@ -1237,7 +1237,7 @@ namespace LuaWorldObject
             obj->PlayDistanceSound(soundId);
         return 0;
     }
-    
+
     ElunaRegister<WorldObject> WorldObjectMethods[] =
     {
         // Getters

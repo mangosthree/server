@@ -1601,7 +1601,7 @@ namespace LuaUnit
     int SetRooted(lua_State* L, Unit* unit)
     {
         bool apply = Eluna::CHECKVAL<bool>(L, 2, true);
-        
+
         unit->SetImmobilizedState(apply);
         return 0;
     }
@@ -2496,7 +2496,7 @@ namespace LuaUnit
 #endif
         return 0;
     }
-    
+
     ElunaRegister<Unit> UnitMethods[] =
     {
         // Getters
@@ -2618,7 +2618,7 @@ namespace LuaUnit
         { "IsStandState", &LuaUnit::IsStandState },
 #if defined(TBC) || defined(WOTLK)
         { "IsOnVehicle", &LuaUnit::IsOnVehicle },
-#endif        
+#endif
 
         // Other
         { "AddAura", &LuaUnit::AddAura },

@@ -723,7 +723,7 @@ namespace LuaItem
         item->SaveToDB();
         return 0;
     }
-    
+
     ElunaRegister<Item> ItemMethods[] =
     {
         // Getters

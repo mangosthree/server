@@ -185,7 +185,7 @@ namespace LuaWorldObject
         ElunaUtil::WorldObjectInRangeCheck checker(true, obj, range, TYPEMASK_PLAYER, 0, hostile, dead);
         MaNGOS::UnitLastSearcher<ElunaUtil::WorldObjectInRangeCheck> searcher(target, checker);
         Cell::VisitWorldObjects(obj, searcher, range);
-        
+
         Eluna::Push(L, target);
         return 1;
     }
@@ -1099,7 +1099,7 @@ namespace LuaWorldObject
             obj->PlayDistanceSound(soundId);
         return 0;
     }
-    
+
     ElunaRegister<WorldObject> WorldObjectMethods[] =
     {
         // Getters

@@ -169,7 +169,7 @@ namespace LuaSpell
         spell->finish();
         return 0;
     }
-    
+
     ElunaRegister<Spell> SpellMethods[] =
     {
         // Getters

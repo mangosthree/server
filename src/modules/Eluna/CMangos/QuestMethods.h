@@ -170,7 +170,7 @@ namespace LuaQuest
         Eluna::Push(L, quest->GetType());
         return 1;
     }
-    
+
     ElunaRegister<Quest> QuestMethods[] =
     {
         // Getters

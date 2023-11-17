@@ -141,7 +141,7 @@ namespace LuaPlayer
             Eluna::Push(L, player->HasTitle(titleInfo));
         return 1;
     }
-    
+
     /**
      * Returns 'true' if the [Player] has the given amount of item entry specified, 'false' otherwise.
      *
@@ -158,7 +158,7 @@ namespace LuaPlayer
         Eluna::Push(L, player->HasItemCount(itemId, count, check_bank));
         return 1;
     }
-    
+
     /**
      * Returns 'true' if the [Player] has a quest for the item entry specified, 'false' otherwise.
      *
@@ -172,7 +172,7 @@ namespace LuaPlayer
         Eluna::Push(L, player->HasQuestForItem(entry));
         return 1;
     }
-    
+
     /**
      * Returns 'true' if the [Player] can use the item or item entry specified, 'false' otherwise.
      *
@@ -347,7 +347,7 @@ namespace LuaPlayer
             Eluna::Push(L, false);
         return 1;
     }
-    
+
     /**
      * Returns 'true' if the [Player] is immune to everything.
      *
@@ -1316,7 +1316,7 @@ namespace LuaPlayer
         Eluna::Push(L, player->GetItemByEntry(entry));
         return 1;
     }
-    
+
     /**
      * Returns the database textID of the [WorldObject]'s gossip header text for the [Player]
      *
@@ -1384,7 +1384,7 @@ namespace LuaPlayer
         Eluna::Push(L, player->GetTeamId());
         return 1;
     }
-    
+
     /**
      * Returns amount of the specified [Item] the [Player] has.
      *
@@ -2020,7 +2020,7 @@ namespace LuaPlayer
         player->ResetAchievements();
         return 0;
     }
-    
+
     /**
      * Shows the mailbox window to the player from specified guid.
      *
@@ -2194,7 +2194,7 @@ namespace LuaPlayer
         player->GetSession()->SendShowBank(obj->GET_GUID());
         return 0;
     }
-    
+
     /**
      * Sends a vendor window to the [Player] from the [WorldObject] specified.
      *
@@ -2952,7 +2952,7 @@ namespace LuaPlayer
         player->AutoUnequipOffhandIfNeed();
         return 1;
     }
-    
+
     /**
      * Returns true if the player can equip the given [Item] or item entry to the given slot, false otherwise.
      *
@@ -3111,7 +3111,7 @@ namespace LuaPlayer
         player->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, currentKills + val);
         return 0;
     }
-    
+
     /**
      * Adds the given amount of the specified item entry to the player.
      *
@@ -3141,7 +3141,7 @@ namespace LuaPlayer
         Eluna::Push(L, item);
         return 1;
     }
-    
+
     /**
      * Removes the given amount of the specified [Item] from the player.
      *
@@ -3402,9 +3402,9 @@ namespace LuaPlayer
     /**
      * Adds a new item to the gossip menu shown to the [Player] on next call to [Player:GossipSendMenu].
      *
-     * sender and intid are numbers which are passed directly to the gossip selection handler. Internally they are partly used for the database gossip handling.  
-     * code specifies whether to show a box to insert text to. The player inserted text is passed to the gossip selection handler.  
-     * money specifies an amount of money the player needs to have to click the option. An error message is shown if the player doesn't have enough money.  
+     * sender and intid are numbers which are passed directly to the gossip selection handler. Internally they are partly used for the database gossip handling.
+     * code specifies whether to show a box to insert text to. The player inserted text is passed to the gossip selection handler.
+     * money specifies an amount of money the player needs to have to click the option. An error message is shown if the player doesn't have enough money.
      * Note that the money amount is only checked client side and is not removed from the player either. You will need to check again in your code before taking action.
      *
      * See also: [Player:GossipSendMenu], [Player:GossipAddQuests], [Player:GossipComplete], [Player:GossipClearMenu]
@@ -3474,7 +3474,7 @@ namespace LuaPlayer
      * Clears the [Player]s current gossip item list.
      *
      * See also: [Player:GossipMenuAddItem], [Player:GossipSendMenu], [Player:GossipAddQuests], [Player:GossipComplete]
-     * 
+     *
      *     Note: This is needed when you show a gossip menu without using gossip hello or select hooks which do this automatically.
      *     Usually this is needed when using [Player] is the sender of a Gossip Menu.
      */
@@ -3807,7 +3807,7 @@ namespace LuaPlayer
         player->RemovePet(player->GetPet(), (PetSaveMode)mode, returnreagent);
         return 0;
     }
-    
+
     ElunaRegister<Player> PlayerMethods[] =
     {
         // Getters
@@ -3825,7 +3825,7 @@ namespace LuaPlayer
         { "GetArenaPoints", &LuaPlayer::GetArenaPoints },
         { "GetHonorPoints", &LuaPlayer::GetHonorPoints },
 #else
-        { "GetArenaPoints", nullptr }, 
+        { "GetArenaPoints", nullptr },
         { "GetHonorPoints", nullptr },
 #endif
         { "GetLifetimeKills", &LuaPlayer::GetLifetimeKills },

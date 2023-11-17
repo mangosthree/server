@@ -46,7 +46,7 @@ namespace LuaGroup
         Eluna::Push(L, group->isLFGGroup());
         return 1;
     }
-    
+
     /**
      * Returns 'true' if the [Group] is a raid [Group]
      *
@@ -258,7 +258,7 @@ namespace LuaGroup
      *     MEMBER_FLAG_MAINASSIST  = 4
      * };
      * </pre>
-     * 
+     *
      * @param ObjectGuid guid : guid of the player
      * @return uint8 flags
      */

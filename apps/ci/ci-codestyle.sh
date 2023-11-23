@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# exclude external libraries from code style check
+exclude=(
+    # dirs
+    "Eluna"
+)
+
+exclude_dirs=""
+for dir in "${exclude[@]}"; do
+    exclude_dirs+="--exclude-dir=$dir "
+done
+
 set -e
 
 echo "Starting Codestyling Script:"
@@ -13,7 +24,7 @@ declare -A singleLineRegexChecks=(
 for check in ${!singleLineRegexChecks[@]}; do
     echo "  Checking RegEx: '${check}'"
     
-    if grep -P -r -I -n ${check} src; then
+    if grep -P -r -I -n $exclude_dirs ${check} src; then
         echo
         echo "${singleLineRegexChecks[$check]}"
         exit 1

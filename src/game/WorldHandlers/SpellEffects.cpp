@@ -3759,7 +3759,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     uint32 item = 0;
 
                     uint32 level = unitTarget->getLevel();
-                    
+
                     if (level < 44) { item = 65500; }                                // Conjured Mana Cookie (lvl 34)
                     else if (level < 54) { item = 65515; }                           // Conjured Mana Brownie (lvl 44)
                     else if (level < 64) { item = 65516; }                           // Conjured Mana Cupcake (lvl 54)

@@ -3754,6 +3754,26 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     return;
                 }
+                case 42955:                                 // Conjure Refreshment
+                {
+                    uint32 item = 0;
+
+                    uint32 level = unitTarget->getLevel();
+                    
+                    if (level < 44) { item = 65500; }                                // Conjured Mana Cookie (lvl 34)
+                    else if (level < 54) { item = 65515; }                           // Conjured Mana Brownie (lvl 44)
+                    else if (level < 64) { item = 65516; }                           // Conjured Mana Cupcake (lvl 54)
+                    else if (level < 65) { item = 65517; }                           // Conjured Mana Lollipop (lvl 64)
+                    else if (level < 74) { item = 34062; }                           // Conjured Mana Biscuit (lvl 65)
+                    else if (level < 80) { item = 43518; }                           // Conjured Mana Pie (lvl 74)
+                    else if (level < 85) { item = 43523; }                           // Conjured Mana Strudel (lvl 80)
+                    else { item = 65499; }                                           // Conjured Mana Cake (lvl 85)
+
+                    damage = 20; // Used to set stack size.
+                    DoCreateItem(effect,item);
+
+                    return;
+                }
             }
 
             // Conjure Mana Gem

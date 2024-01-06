@@ -36,8 +36,8 @@ using namespace VMAP;
 namespace MMAP
 {
     MapBuilder::MapBuilder(float maxWalkableAngle, bool skipLiquid,
-                           bool skipContinents, bool skipJunkMaps, bool skipBattlegrounds,
-                           bool debugOutput, bool bigBaseUnit, const char* offMeshFilePath) :
+            bool skipContinents, bool skipJunkMaps, bool skipBattlegrounds, bool debugOutput,
+            bool bigBaseUnit, int mapid, const char* offMeshFilePath) :
         m_terrainBuilder(NULL),
         m_debugOutput(debugOutput),
         m_skipContinents(skipContinents),
@@ -45,6 +45,7 @@ namespace MMAP
         m_skipBattlegrounds(skipBattlegrounds),
         m_maxWalkableAngle(maxWalkableAngle),
         m_bigBaseUnit(bigBaseUnit),
+        m_mapid(mapid),
         m_rcContext(NULL),
         m_offMeshFilePath(offMeshFilePath)
     {
@@ -131,7 +132,28 @@ namespace MMAP
                     count++;
                 }
             }
+
+            // make sure we process maps which don't have tiles
+            if (tiles->empty())
+            {
+                // convert coord bounds to grid bounds
+                uint32 minX, minY, maxX, maxY;
+                getGridBounds(mapID, minX, minY, maxX, maxY);
+
+                // add all tiles within bounds to tile list.
+                for (uint32 i = minX; i <= maxX; ++i)
+                {
+                    for (uint32 j = minY; j <= maxY; ++j)
+                    {
+                        if (tiles->insert(StaticMapTree::packTileID(i, j)).second)
+                        {
+                            count++;
+                        }
+                    }
+                }
+            }
         }
+
         printf(" found %u.\n\n", count);
     }
 
@@ -184,21 +206,6 @@ namespace MMAP
 
         set<uint32>* tiles = getTileList(mapID);
 
-        // make sure we process maps which don't have tiles
-        if (!tiles->size())
-        {
-            // convert coord bounds to grid bounds
-            uint32 minX, minY, maxX, maxY;
-            getGridBounds(mapID, minX, minY, maxX, maxY);
-
-            // add all tiles within bounds to tile list.
-            for (uint32 i = minX; i <= maxX; ++i)
-                for (uint32 j = minY; j <= maxY; ++j)
-                {
-                    tiles->insert(StaticMapTree::packTileID(i, j));
-                }
-        }
-
         if (!tiles->size())
         {
             return;
@@ -214,7 +221,7 @@ namespace MMAP
         }
 
         // now start building mmtiles for each tile
-        printf("We have %u tiles.                          \n", (unsigned int)tiles->size());
+        printf("We have %u tiles.                         \n", (unsigned int)tiles->size());
         for (set<uint32>::iterator it = tiles->begin(); it != tiles->end(); ++it)
         {
             uint32 tileX, tileY;
@@ -224,10 +231,8 @@ namespace MMAP
 
             if (shouldSkipTile(mapID, tileX, tileY))
             {
-                continue;
+                buildTile(mapID, tileX, tileY, navMesh);
             }
-
-            buildTile(mapID, tileX, tileY, navMesh);
         }
 
         dtFreeNavMesh(navMesh);
@@ -435,37 +440,10 @@ namespace MMAP
         int lTriCount = meshData.liquidTris.size() / 3;
         uint8* lTriFlags = meshData.liquidType.getCArray();
 
-        // these are WORLD UNIT based metrics
-        // this are basic unit dimentions
-        // value have to divide GRID_SIZE(533.33333f) ( aka: 0.5333, 0.2666, 0.3333, 0.1333, etc )
-        const static float BASE_UNIT_DIM = m_bigBaseUnit ? 0.533333f : 0.266666f;
-
-        // All are in UNIT metrics!
-        const static int VERTEX_PER_MAP = int(GRID_SIZE / BASE_UNIT_DIM + 0.5f);
-        const static int VERTEX_PER_TILE = m_bigBaseUnit ? 40 : 80; // must divide VERTEX_PER_MAP
-        const static int TILES_PER_MAP = VERTEX_PER_MAP / VERTEX_PER_TILE;
-
-        rcConfig config;
-        memset(&config, 0, sizeof(rcConfig));
-
-        rcVcopy(config.bmin, bmin);
-        rcVcopy(config.bmax, bmax);
-
-        config.maxVertsPerPoly = DT_VERTS_PER_POLYGON;
-        config.cs = BASE_UNIT_DIM;
-        config.ch = BASE_UNIT_DIM;
-        config.walkableSlopeAngle = m_maxWalkableAngle;
-        config.tileSize = VERTEX_PER_TILE;
-        config.walkableRadius = m_bigBaseUnit ? 1 : 2;
-        config.borderSize = config.walkableRadius + 3;
-        config.maxEdgeLen = VERTEX_PER_TILE + 1;        //anything bigger than tileSize
-        config.walkableHeight = m_bigBaseUnit ? 3 : 6;
-        config.walkableClimb = m_bigBaseUnit ? 2 : 4;   // keep less than walkableHeight
-        config.minRegionArea = rcSqr(60);
-        config.mergeRegionArea = rcSqr(50);
-        config.maxSimplificationError = 2.0f;       // eliminates most jagged edges (tinny polygons)
-        config.detailSampleDist = config.cs * 64;
-        config.detailSampleMaxError = config.ch * 2;
+        const TileConfig tileConfig = TileConfig(m_bigBaseUnit);
+        int TILES_PER_MAP = tileConfig.TILES_PER_MAP;
+        float BASE_UNIT_DIM = tileConfig.BASE_UNIT_DIM;
+        rcConfig config = GetMapSpecificConfig(mapID, bmin, bmax, tileConfig);
 
         // this sets the dimensions of the heightfield - should maybe happen before border padding
         rcCalcGridSize(config.bmin, config.bmax, config.cs, &config.width, &config.height);
@@ -811,19 +789,28 @@ namespace MMAP
     /**************************************************************************/
     bool MapBuilder::shouldSkipMap(uint32 mapID)
     {
+        if (m_mapid >= 0)
+        {
+            return static_cast<uint32>(m_mapid) != mapID;
+        }
+
         if (m_skipContinents)
+        {
             switch (mapID)
             {
-                case 0:        // Eastern Kingdoms
-                case 1:        // Kalimdor
+                case 0:      // Eastern Kingdoms
+                case 1:      // Kalimdor
                 case 530:    // Outland
                 case 571:    // Northrend
                     return true;
+
                 default:
                     break;
             }
+        }
 
         if (m_skipJunkMaps)
+        {
             switch (mapID)
             {
                 case 13:    // test.wdt
@@ -838,6 +825,7 @@ namespace MMAP
                 case 606:   // QA_DVD.wdt
                 case 627:   // unused.wdt
                     return true;
+
                 default:
                     if (isTransportMap(mapID))
                     {
@@ -845,8 +833,10 @@ namespace MMAP
                     }
                     break;
             }
+        }
 
         if (m_skipBattlegrounds)
+        {
             switch (mapID)
             {
                 case 30:    // AV
@@ -862,9 +852,11 @@ namespace MMAP
                 case 761:   // BfG2
                 case 968:   // EotS2
                     return true;
+
                 default:
                     break;
             }
+        }
 
         return false;
     }
@@ -874,7 +866,7 @@ namespace MMAP
     {
         switch (mapID)
         {
-                // transport maps
+            // transport maps
             case 582:    // Transport: Rut'theran to Auberdine
             case 584:    // Transport: Menethil to Theramore
             case 586:    // Transport: Exodar to Auberdine
@@ -922,6 +914,7 @@ namespace MMAP
             case 766:    // Transport: Gilneas Moving Gunship 02
             case 767:    // Transport: Gilneas Moving Gunship 03
                 return true;
+
             default: // no transport maps
                 return false;
         }
@@ -953,5 +946,32 @@ namespace MMAP
         }
 
         return true;
+    }
+
+    rcConfig MapBuilder::GetMapSpecificConfig(uint32 mapID, float bmin[3], float bmax[3], const TileConfig &tileConfig)
+    {
+        rcConfig config;
+        memset(&config, 0, sizeof(rcConfig));
+
+        rcVcopy(config.bmin, bmin);
+        rcVcopy(config.bmax, bmax);
+
+        config.maxVertsPerPoly = DT_VERTS_PER_POLYGON;
+        config.cs = tileConfig.BASE_UNIT_DIM;
+        config.ch = tileConfig.BASE_UNIT_DIM;
+        config.walkableSlopeAngle = m_maxWalkableAngle;
+        config.tileSize = tileConfig.VERTEX_PER_TILE;
+        config.walkableRadius = m_bigBaseUnit ? 1 : 2;
+        config.borderSize = config.walkableRadius + 3;
+        config.maxEdgeLen = tileConfig.VERTEX_PER_TILE + 1;     // anything bigger than tileSize
+        config.walkableHeight = ceilf(agentHeight / config.ch);
+        config.walkableClimb = floorf(agentMaxClimbModelTerrainTransition / config.ch);
+        config.minRegionArea = rcSqr(60);
+        config.mergeRegionArea = rcSqr(50);
+        config.maxSimplificationError = 1.8f;                   // eliminates most jagged edges (tiny polygons)
+        config.detailSampleDist = config.cs * 16;
+        config.detailSampleMaxError = config.ch * 1;
+
+        return config;
     }
 }

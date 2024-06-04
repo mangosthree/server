@@ -83,8 +83,8 @@ class ByteBufferException
 #endif
 
             sLog.outError(
-                "Attempted to %s in ByteBuffer (pos: " SIZEFMTD " size: " SIZEFMTD ") "
-                "value with size: " SIZEFMTD "%s%s",
+                "Attempted to %s in ByteBuffer (pos: %zu size: %zu) "
+                "value with size: %zu%s%s",
                 (add ? "put" : "get"), pos, size, esize,
                 traceStr ? "\n" : "", traceStr ? traceStr : "");
         }

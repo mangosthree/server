@@ -66,6 +66,8 @@
 #include "Vehicle.h"
 #include "G3D/Vector3.h"
 #include "LootMgr.h"
+#include <random>
+
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
@@ -1449,10 +1451,14 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         m_caster->CastSpell(m_caster, 44824, true); // 60% flying Reindeer
                     else if (speed >= 2.0f)
                         // Reindeer
-                        m_caster->CastSpell(m_caster, 25859, true); // 100% ground Reindeer
+                    {
+                        m_caster->CastSpell(m_caster, 25859, true);  // 100% ground Reindeer
+                    }
                     else
                         // Reindeer
-                        m_caster->CastSpell(m_caster, 25858, true); // 60% ground Reindeer
+                    {
+                        m_caster->CastSpell(m_caster, 25858, true);  // 60% ground Reindeer
+                    }
 
                     return;
                 }
@@ -1659,7 +1665,10 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     uint32 possibleSpells[] = {36693, 36694, 36695, 36696, 36697, 36698, 36699, 36700} ;
                     std::vector<uint32> spellPool(possibleSpells, possibleSpells + countof(possibleSpells));
-                    std::random_shuffle(spellPool.begin(), spellPool.end());
+
+                    //std::random_shuffle(spellPool.begin(), spellPool.end());
+                    std::mt19937 rng(std::time(nullptr));
+                    std::shuffle(spellPool.begin(), spellPool.end(), rng);
 
                     for (uint8 i = 0; i < (m_caster->GetMap()->IsRegularDifficulty() ? 2 : 4); ++i)
                     {

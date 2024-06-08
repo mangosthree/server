@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,6 @@
 #include "SharedDefines.h"
 #include "SpellAuraDefines.h"
 #include "DBCStructure.h"
-
-#include "Utilities/UnorderedMapSet.h"
 
 #include <map>
 
@@ -855,8 +853,8 @@ struct SpellBonusEntry
     float  ap_dot_bonus;
 };
 
-typedef UNORDERED_MAP<uint32, SpellProcEventEntry> SpellProcEventMap;
-typedef UNORDERED_MAP<uint32, SpellBonusEntry>     SpellBonusMap;
+typedef std::unordered_map<uint32, SpellProcEventEntry> SpellProcEventMap;
+typedef std::unordered_map<uint32, SpellBonusEntry>     SpellBonusMap;
 
 #define ELIXIR_BATTLE_MASK    0x01
 #define ELIXIR_GUARDIAN_MASK  0x02
@@ -907,7 +905,7 @@ struct SpellTargetPosition
     float  target_Orientation;
 };
 
-typedef UNORDERED_MAP<uint32, SpellTargetPosition> SpellTargetPositionMap;
+typedef std::unordered_map<uint32, SpellTargetPosition> SpellTargetPositionMap;
 
 // Spell pet auras
 class PetAura
@@ -1003,7 +1001,7 @@ struct SpellChainNode
     uint8  rank;
 };
 
-typedef UNORDERED_MAP<uint32, SpellChainNode> SpellChainMap;
+typedef std::unordered_map<uint32, SpellChainNode> SpellChainMap;
 typedef std::multimap<uint32, uint32> SpellChainMapNext;
 
 // Spell learning properties (accessed using SpellMgr functions)

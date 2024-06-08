@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -198,7 +198,7 @@ class Roll : public LootValidatorRef
         int32  itemRandomPropId;
         uint32 itemRandomSuffix;
         uint8 itemCount;
-        typedef UNORDERED_MAP<ObjectGuid, RollVote> PlayerVote;
+        typedef std::unordered_map<ObjectGuid, RollVote> PlayerVote;
         PlayerVote playerVote;                              // vote position correspond with player position (in group)
         uint8 totalPlayersRolling;
         uint8 totalNeed;
@@ -244,7 +244,7 @@ class Group
         typedef std::list<MemberSlot> MemberSlotList;
         typedef MemberSlotList::const_iterator member_citerator;
 
-        typedef UNORDERED_MAP < uint32 /*mapId*/, InstanceGroupBind > BoundInstancesMap;
+        typedef std::unordered_map < uint32 /*mapId*/, InstanceGroupBind > BoundInstancesMap;
     protected:
         typedef MemberSlotList::iterator member_witerator;
         typedef std::set<Player*> InvitesList;

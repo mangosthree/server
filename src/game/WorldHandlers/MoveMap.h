@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,13 +25,12 @@
 #ifndef MANGOS_H_MOVE_MAP
 #define MANGOS_H_MOVE_MAP
 
+#include "Common.h"
 #include "Define.h"
 
 #include "../../dep/recastnavigation/Detour/Include/DetourAlloc.h"
 #include "../../dep/recastnavigation/Detour/Include/DetourNavMesh.h"
 #include "../../dep/recastnavigation/Detour/Include/DetourNavMeshQuery.h"
-
-#include "Utilities/UnorderedMapSet.h"
 
 class Unit;
 
@@ -49,8 +48,8 @@ inline void dtCustomFree(void* ptr)
 //  move map related classes
 namespace MMAP
 {
-    typedef UNORDERED_MAP<uint32, dtTileRef> MMapTileSet;
-    typedef UNORDERED_MAP<uint32, dtNavMeshQuery*> NavMeshQuerySet;
+    typedef std::unordered_map<uint32, dtTileRef> MMapTileSet;
+    typedef std::unordered_map<uint32, dtNavMeshQuery*> NavMeshQuerySet;
 
     // dummy struct to hold map's mmap data
     struct MMapData
@@ -77,7 +76,7 @@ namespace MMAP
     };
 
 
-    typedef UNORDERED_MAP<uint32, MMapData*> MMapDataSet;
+    typedef std::unordered_map<uint32, MMapData*> MMapDataSet;
 
     // singelton class
     // holds all all access to mmap loading unloading and meshes

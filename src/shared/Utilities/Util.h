@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include "Common/Common.h"
 #include <ace/Null_Mutex.h>
 #include <ace/INET_Addr.h>
+#include "HackedFunctions.h"
 
 #include <string>
 #include <vector>
@@ -81,12 +82,11 @@ float NormalizeOrientation(float o);
  */
 void stripLineInvisibleChars(std::string& src);
 
-/**
- * @brief
- *
- * @param localtime
- */
-std::tm localtime_r(const time_t& time);
+struct tm* localtime_r(const time_t* time, struct tm* result);
+
+time_t LocalTimeToUTCTime(time_t time);
+time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime = true);
+tm TimeBreakdown(time_t t);
 
 /**
  * @brief
@@ -126,6 +126,31 @@ inline uint32 secsToTimeBitFields(time_t secs)
     return (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 | (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 | lt->tm_hour << 6 | lt->tm_min;
 }
 
+
+inline std::string& ltrim(std::string& s)
+{
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch)
+    {
+        return !std::isspace(ch);
+    }));
+
+    return s;
+}
+
+inline std::string& rtrim(std::string& s)
+{
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int c)
+    {
+        return !std::isspace(c);
+    }));
+
+    return s;
+}
+
+inline std::string& trim(std::string& s)
+{
+    return ltrim(rtrim(s));
+}
 
 /**
  * @brief Return a random number in the range min..max; (max-min) must be smaller than 32768.

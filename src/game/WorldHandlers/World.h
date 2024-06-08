@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2022 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2005-2023 MaNGOS <https://getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -154,6 +154,7 @@ enum eConfigUInt32Values
     CONFIG_UINT32_GM_LOGIN_STATE,
     CONFIG_UINT32_GM_VISIBLE_STATE,
     CONFIG_UINT32_GM_ACCEPT_TICKETS,
+    CONFIG_UINT32_GM_TICKET_LIST_SIZE,
     CONFIG_UINT32_GM_CHAT,
     CONFIG_UINT32_GM_WISPERING_TO,
     CONFIG_UINT32_GM_LEVEL_IN_GM_LIST,
@@ -223,6 +224,8 @@ enum eConfigUInt32Values
     CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY,
     CONFIG_UINT32_RANDOM_BG_RESET_HOUR,
     CONFIG_UINT32_MAX_WHOLIST_RETURNS,
+    CONFIG_UINT32_LOG_WHISPERS,
+
     // Warden
     CONFIG_UINT32_WARDEN_CLIENT_RESPONSE_DELAY,
     CONFIG_UINT32_WARDEN_CLIENT_CHECK_HOLDOFF,
@@ -348,6 +351,7 @@ enum eConfigBoolValues
     CONFIG_BOOL_GM_LOG_TRADE,
     CONFIG_BOOL_GM_LOWER_SECURITY,
     CONFIG_BOOL_GM_ALLOW_ACHIEVEMENT_GAINS,
+    CONFIG_BOOL_GM_TICKET_OFFLINE_CLOSING,
     CONFIG_BOOL_SKILL_PROSPECTING,
     CONFIG_BOOL_WEATHER,
     CONFIG_BOOL_EVENT_ANNOUNCE,
@@ -495,7 +499,7 @@ struct CliCommandHolder
 
 /// The World
 
-typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
+typedef std::unordered_map<uint32, WorldSession*> SessionMap;
 
 class World
 {

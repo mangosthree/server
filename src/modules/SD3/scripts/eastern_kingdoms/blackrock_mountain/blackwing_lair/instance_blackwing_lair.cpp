@@ -35,6 +35,7 @@
 
 #include "precompiled.h"
 #include "blackwing_lair.h"
+#include <random>
 
 static const uint32 aRazorgoreSpawns[MAX_EGGS_DEFENDERS] = { NPC_BLACKWING_LEGIONNAIRE, NPC_BLACKWING_MAGE, NPC_DRAGONSPAWN, NPC_DRAGONSPAWN };
 
@@ -422,7 +423,8 @@ struct is_blackwing_lair : public InstanceScript
                 }
 
                 // Randomize generators
-                std::random_shuffle(m_vGeneratorGuids.begin(), m_vGeneratorGuids.end());
+                std::mt19937 rng(std::time(nullptr));
+                std::shuffle(m_vGeneratorGuids.begin(), m_vGeneratorGuids.end(), rng);
 
                 // Spawn the defenders
                 for (uint8 i = 0; i < MAX_EGGS_DEFENDERS; ++i)

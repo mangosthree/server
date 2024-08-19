@@ -27,6 +27,7 @@ EndScriptData */
 #include "precompiled.h"
 #include "ulduar.h"
 #include "TemporarySummon.h"
+#include <random>
 
 enum
 {
@@ -856,7 +857,9 @@ struct npc_voice_yogg_saron : public CreatureScript
             m_uiPortalsCount = 0;
             m_uiMaxPortals = m_bIsRegularMode ? 4 : 10;
 
-            std::random_shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end());
+            //std::random_shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end());
+            std::mt19937 rng(std::time(nullptr));
+            std::shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end(), rng);
         }
 
         void AttackStart(Unit* /*pWho*/) override { }

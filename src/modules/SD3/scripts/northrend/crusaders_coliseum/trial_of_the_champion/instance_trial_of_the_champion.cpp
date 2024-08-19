@@ -26,6 +26,7 @@ EndScriptData */
 
 #include "precompiled.h"
 #include "trial_of_the_champion.h"
+#include <random>
 
 /* Trial of the Champion encounters:
 0 - Grand Champions
@@ -219,7 +220,9 @@ struct is_trial_of_the_champion : public InstanceScript
                     }
 
                     // set a random champion list
-                    std::random_shuffle(m_vChampionsIndex.begin(), m_vChampionsIndex.end());
+                    //std::random_shuffle(m_vChampionsIndex.begin(), m_vChampionsIndex.end());
+                    std::mt19937 rng(std::time(nullptr));
+                    std::shuffle(m_vChampionsIndex.begin(), m_vChampionsIndex.end(), rng);
                 }
             }
 

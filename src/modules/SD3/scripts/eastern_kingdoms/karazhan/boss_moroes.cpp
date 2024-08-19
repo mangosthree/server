@@ -33,6 +33,7 @@ EndScriptData */
 
 #include "precompiled.h"
 #include "karazhan.h"
+#include <random>
 
 enum
 {
@@ -178,7 +179,9 @@ struct boss_moroes : public CreatureScript
                     m_vGuestsEntryList[i] = auiGuests[i];
                 }
 
-                std::random_shuffle(m_vGuestsEntryList.begin(), m_vGuestsEntryList.end());
+                //std::random_shuffle(m_vGuestsEntryList.begin(), m_vGuestsEntryList.end());
+                std::mt19937 rng(std::time(nullptr));
+                std::shuffle(m_vGuestsEntryList.begin(), m_vGuestsEntryList.end(), rng);
 
                 // Summon the 4 entries
                 for (uint8 i = 0; i < MAX_ACTIVE_GUESTS; ++i)

@@ -33,6 +33,7 @@ EndScriptData */
 
 #include "precompiled.h"
 #include "magisters_terrace.h"
+#include <random>
 
 enum
 {
@@ -153,7 +154,9 @@ struct boss_priestess_delrissa : public CreatureScript
                     m_vuiLackeyEnties[i] = aDelrissaLackeys[i];
                 }
 
-                std::random_shuffle(m_vuiLackeyEnties.begin(), m_vuiLackeyEnties.end());
+                //std::random_shuffle(m_vuiLackeyEnties.begin(), m_vuiLackeyEnties.end());
+                std::mt19937 rng(std::time(nullptr));
+                std::shuffle(m_vuiLackeyEnties.begin(), m_vuiLackeyEnties.end(), rng);
 
                 // Summon the 4 entries
                 for (uint8 i = 0; i < MAX_DELRISSA_ADDS; ++i)

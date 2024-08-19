@@ -26,6 +26,7 @@ EndScriptData */
 
 #include "precompiled.h"
 #include "utgarde_pinnacle.h"
+#include <random>
 
 enum
 {
@@ -166,7 +167,9 @@ struct boss_ymiron : public CreatureScript
             m_uiCurrentSpiritGuid.Clear();
 
             // Randomize spirit order
-            std::random_shuffle(m_vuiBoatPhases.begin(), m_vuiBoatPhases.end());
+            //std::random_shuffle(m_vuiBoatPhases.begin(), m_vuiBoatPhases.end());
+            std::mt19937 rng(std::time(nullptr));
+            std::shuffle(m_vuiBoatPhases.begin(), m_vuiBoatPhases.end(), rng);
         }
 
         void Aggro(Unit* /*pWho*/) override

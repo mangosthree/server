@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "precompiled.h"
 #include "ulduar.h"
+#include <random>
 
 enum
 {
@@ -1430,7 +1431,9 @@ struct is_ulduar : public InstanceScript
                             vBunnies.push_back(pBunny);
                         }
                     }
-                    std::random_shuffle(vBunnies.begin(), vBunnies.end());
+                    //std::random_shuffle(vBunnies.begin(), vBunnies.end());
+                    std::mt19937 rng(std::time(nullptr));
+                    std::shuffle(vBunnies.begin(), vBunnies.end(), rng);
 
                     uint8 uiMaxCommoners = urand(6, 7);
                     if (uiMaxCommoners > vBunnies.size() - 1)

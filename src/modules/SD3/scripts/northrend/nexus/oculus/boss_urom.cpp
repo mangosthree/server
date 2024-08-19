@@ -26,6 +26,7 @@ EndScriptData */
 
 #include "precompiled.h"
 #include "oculus.h"
+#include <random>
 
 enum
 {
@@ -125,7 +126,10 @@ struct boss_urom : public CreatureScript
 
             ResetPlatformVariables();
 
-            std::random_shuffle(m_vuiTrashPacksIds.begin(), m_vuiTrashPacksIds.end());
+            //std::random_shuffle(m_vuiTrashPacksIds.begin(), m_vuiTrashPacksIds.end());
+            std::mt19937 rng(std::time(nullptr));
+            std::shuffle(m_vuiTrashPacksIds.begin(), m_vuiTrashPacksIds.end(), rng);
+
         }
 
         void ResetPlatformVariables()

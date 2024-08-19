@@ -26,6 +26,7 @@ EndScriptData */
 
 #include "precompiled.h"
 #include "violet_hold.h"
+#include <random>
 
 struct BossInformation
 {
@@ -834,7 +835,10 @@ struct is_violet_hold : public InstanceScript
 
             if (m_vRandomBosses.size() < 2)                         // Get some new random bosses
             {
-                std::random_shuffle(m_vRandomBossList.begin(), m_vRandomBossList.end());
+                //std::random_shuffle(m_vRandomBossList.begin(), m_vRandomBossList.end());
+                std::mt19937 rng(std::time(nullptr));
+                std::shuffle(m_vRandomBossList.begin(), m_vRandomBossList.end(), rng);
+
                 // two required, in case the first is already pushed to m_vRandomBosses
                 if (m_vRandomBossList.size() < 2)
                 {

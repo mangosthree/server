@@ -533,6 +533,9 @@ endif()
 
 add_library(mangosscript STATIC ${mangosscript_LIB_SRCS})
 
+#target_compile_features(mangosscript PUBLIC cxx_std_17)
+#set_target_properties(mangosscript PROPERTIES CXX_EXTENSIONS OFF)
+
 target_include_directories(mangosscript
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}

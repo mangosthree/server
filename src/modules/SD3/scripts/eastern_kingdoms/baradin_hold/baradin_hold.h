@@ -27,7 +27,7 @@
 #ifndef DEF_BARADIN_HOLD_H
 #define DEF_BARADIN_HOLD_H
 
-enum 
+enum
 {
     MAX_ENCOUNTER           = 3,
 

@@ -52,7 +52,7 @@ class BattleGroundSA : public BattleGround
         void AddPlayer(Player* plr) override;
 
         /* Scorekeeping */
-        UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
+        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
 
     private:
 };

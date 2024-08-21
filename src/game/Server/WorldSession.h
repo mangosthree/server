@@ -208,9 +208,9 @@ class MapSessionFilter : public PacketFilter
         explicit MapSessionFilter(WorldSession* pSession) : PacketFilter(pSession) {}
         ~MapSessionFilter() {}
 
-        virtual bool Process(WorldPacket* packet) override;
+        bool Process(WorldPacket* packet) override;
         // in Map::Update() we do not process player logout!
-        virtual bool ProcessLogout() const override
+        bool ProcessLogout() const override
         {
             return false;
         }
@@ -224,7 +224,7 @@ class WorldSessionFilter : public PacketFilter
         explicit WorldSessionFilter(WorldSession* pSession) : PacketFilter(pSession) {}
         ~WorldSessionFilter() {}
 
-        virtual bool Process(WorldPacket* packet) override;
+        bool Process(WorldPacket* packet) override;
 };
 
 /// Player session in the World

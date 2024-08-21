@@ -63,9 +63,9 @@ struct npc_escortAI : public ScriptedAI
 
         void GetAIInformation(ChatHandler& reader) override;
 
-        virtual void Aggro(Unit*) override;
+        void Aggro(Unit*) override;
 
-        virtual void Reset() override {}
+        void Reset() override {}
 
         // CreatureAI functions
         bool IsVisible(Unit*) const override;

@@ -154,7 +154,7 @@ class PatchHandler: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
         int open(void* = 0) override;
 
     protected:
-        virtual int svc(void) override;
+        int svc(void) override;
 
     private:
         ACE_HANDLE patch_fd_; /**< TODO */

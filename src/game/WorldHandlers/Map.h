@@ -450,7 +450,7 @@ class DungeonMap : public Map
         // can't be NULL for loaded map
         DungeonPersistentState* GetPersistanceState() const;
 
-        virtual void InitVisibilityDistance() override;
+        void InitVisibilityDistance() override;
     private:
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
@@ -471,7 +471,7 @@ class BattleGroundMap : public Map
         void SetUnload();
         void UnloadAll(bool pForce) override;
 
-        virtual void InitVisibilityDistance() override;
+        void InitVisibilityDistance() override;
         BattleGround* GetBG() { return m_bg; }
         void SetBG(BattleGround* bg) { m_bg = bg; }
 

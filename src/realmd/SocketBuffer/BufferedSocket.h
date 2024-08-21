@@ -124,7 +124,7 @@ class BufferedSocket: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
          */
         const std::string& get_remote_address(void) const;
 
-        virtual int open(void*) override;
+        int open(void*) override;
 
         /**
          * @brief
@@ -132,8 +132,8 @@ class BufferedSocket: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
          */
         void close_connection(void);
 
-        virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE) override;
-        virtual int handle_output(ACE_HANDLE = ACE_INVALID_HANDLE) override;
+        int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE) override;
+        int handle_output(ACE_HANDLE = ACE_INVALID_HANDLE) override;
 
         /**
          * @brief

@@ -1306,7 +1306,9 @@ void Creature::SetLootRecipient(Unit* unit)
 
     // pet-only kills don't drop when pet is killing a creature on its own without assistance from its owner (player)
     if (unit->GetTypeId() != TYPEID_PLAYER && !unit->IsVehicle())
+    {
         return;
+    }
 
     Player* player = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
     if (!player)                                            // normal creature, no player involved
@@ -3025,7 +3027,9 @@ void Creature::AllLootRemovedFromCorpse()
     time_t now = GameTime::GetGameTime();
     // Do not reset corpse remove time if corpse is already removed
     if (m_corpseDecayTimer <= now)
+    {
         return;
+    }
 
     float decayRate = m_ignoreCorpseDecayRatio ? 1.f : sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED);
 

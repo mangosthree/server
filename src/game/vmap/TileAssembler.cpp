@@ -480,13 +480,15 @@ namespace VMAP
 
 // temporary use defines to simplify read/check code (close file and return at fail)
 #define READ_OR_RETURN(V,S) \
-        if(fread((V), (S), 1, rf) != 1) { \
-           fclose(rf); \
+        if(fread((V), (S), 1, rf) != 1) \
+        { \
+            fclose(rf); \
            std::cout << "readfail, op = " << readOperation << std::endl;\
            return(false); \
         }
 #define CMP_OR_RETURN(V,S) \
-        if(strcmp((V),(S)) != 0) { \
+        if(strcmp((V),(S)) != 0) \
+        { \
             fclose(rf); \
             std::cout << "cmpfail, " << (V) << "!=" << (S) << std::endl;\
             return(false);\

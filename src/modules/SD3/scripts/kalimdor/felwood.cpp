@@ -64,7 +64,7 @@ enum
     NPC_CORRUPT_SABER           = 10042
 };
 //TODO
-#define GOSSIP_ITEM_RELEASE     "I want to release the corrupted saber to Winna."
+constexpr auto GOSSIP_ITEM_RELEASE = "I want to release the corrupted saber to Winna.";
 
 struct npc_kitten : public CreatureScript
 {
@@ -991,13 +991,21 @@ enum
 };
 
 static const uint32 aCorruptedSongflowerQuestId[] =
-{ 2278, 2523, 3363, 4113, 4116, 4118, 4401, 4464, 4465 };            // Corrupted Songflower
+{
+    2278, 2523, 3363, 4113, 4116, 4118, 4401, 4464, 4465             // Corrupted Songflower
+};
 static const uint32 aCorruptedNightDragonQuestId[] =
-{ 4119, 4447, 4448, 4462 };                                          // Corrupted Night Dragon
+{
+    4119, 4447, 4448, 4462                                           // Corrupted Night Dragon
+};
 static const uint32 aCorruptedWindblossomQuestId[] =
-{ 996, 998, 1514, 4115, 4221, 4222, 4343, 4403, 4466, 4466, 4467 };  // Corrupted Windblossom
+{
+    996, 998, 1514, 4115, 4221, 4222, 4343, 4403, 4466, 4466, 4467   // Corrupted Windblossom
+};
 static const uint32 aCorruptedWhipperRootQuestId[] =
-{ 4117, 4443, 4444, 4445, 4446, 4461 };                              // Corrupted Whipper Root
+{
+    4117, 4443, 4444, 4445, 4446, 4461                               // Corrupted Whipper Root
+};
 
 struct go_corrupted_plant : public GameObjectScript
 {

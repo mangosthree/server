@@ -1893,7 +1893,9 @@ void WorldObject::SetMap(Map* map)
 
 #ifdef ENABLE_ELUNA
     if (!elunaEvents)
+    {
         elunaEvents = new ElunaEventProcessor(&Eluna::GEluna, this);
+    }
 #endif
 }
 

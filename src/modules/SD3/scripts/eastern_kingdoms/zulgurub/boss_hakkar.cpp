@@ -105,7 +105,9 @@ struct boss_hakkar : public CreatureScript
             for (uint8 i = 0; i < MAX_PRIESTS; i++)
             {
                 if (m_pInstance->GetData(i) != DONE)
+                {
                     m_creature->CastSpell(m_creature, SPELL_HAKKAR_POWER, false);
+                }
             }
         }
 

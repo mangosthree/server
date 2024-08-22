@@ -442,7 +442,9 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
     {
         Corpse* corpse = _player->GetMap()->GetCorpse(lguid);
         if (!corpse || !corpse->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
+        {
             return;
+        }
 
         loot = &corpse->loot;
 
@@ -458,7 +460,9 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
     {
         Item* pItem = player->GetItemByGuid(lguid);
         if (!pItem)
+        {
             return;
+        }
 
         /* Checking if the item is prospectable or millable, if it is, it will clear the loot, then it
          * will check if the count is greater than 5, if it is, it will set the count to 5, then it
@@ -496,7 +500,9 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
         /* Checking if the creature is alive and if the player is a rogue. */
         bool lootAllowed = creature && creature->IsAlive() == (player->getClass() == CLASS_ROGUE && creature->loot.loot_type == LOOT_PICKPOCKETING);
         if (!lootAllowed || !creature->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
+        {
             return;
+        }
 
         loot = &creature->loot;
 
@@ -581,7 +587,9 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
     }
 
     if (!pLoot)
+    {
         return;
+    }
 
     if (slotid >= pLoot->items.size())
     {

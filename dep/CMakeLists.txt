@@ -40,12 +40,6 @@ if(BUILD_MANGOSD OR BUILD_TOOLS)
 endif()
 
 if(BUILD_TOOLS)
-    if(USE_STORMLIB)
-        add_subdirectory(StormLib)
-        add_subdirectory(tomlib)
-    else()
-        add_subdirectory(libmpq)
-    endif()
+    add_subdirectory(StormLib)
     add_subdirectory(loadlib)
 endif()
-

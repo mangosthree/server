@@ -1594,13 +1594,19 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
 void CreatureEventAI::SpellHit(Unit* pUnit, const SpellEntry* pSpell)
 {
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
+    {
         if (i->Event.event_type == EVENT_T_SPELLHIT)
+        {
             // If spell id matches (or no spell id) & if spell school matches (or no spell school)
             if (!i->Event.spell_hit.spellId || pSpell->Id == i->Event.spell_hit.spellId)
+            {
                 if (pSpell->SchoolMask & i->Event.spell_hit.schoolMask)
                 {
                     ProcessEvent(*i, pUnit);
                 }
+            }
+        }
+    }
 }
 
 void CreatureEventAI::UpdateAI(const uint32 diff)
@@ -1847,7 +1853,7 @@ void CreatureEventAI::ReceiveEmote(Player* pPlayer, uint32 text_emote)
     }
 }
 
-#define HEALTH_STEPS 3
+constexpr auto HEALTH_STEPS = 3;
 
 void CreatureEventAI::DamageTaken(Unit* dealer, uint32& damage)
 {
@@ -1873,7 +1879,7 @@ void CreatureEventAI::DamageTaken(Unit* dealer, uint32& damage)
 
         if (newHealthPercent > healthSteps[step])
         {
-            return;                                          // Not reached the next mark
+            return; // Not reached the next mark
         }
 
         // search for highest reached mark (with actual event attached)

@@ -1262,7 +1262,18 @@ bool IsSingleTargetSpell(SpellEntry const* spellInfo)
 {
     // all other single target spells have if it has AttributesEx5
     if (spellInfo->HasAttribute(SPELL_ATTR_EX5_SINGLE_TARGET_SPELL))
+    {
+        return true;
+    }
 
+    // TODO - need found Judgements rule
+    switch (GetSpellSpecific(spellInfo->Id))
+    {
+        case SPELL_JUDGEMENT:
+            return true;
+        default:
+            break;
+    }
     // single target triggered spell.
     // Not real client side single target spell, but it' not triggered until prev. aura expired.
     // This is allow store it in single target spells list for caster for spell proc checking
@@ -1288,6 +1299,7 @@ bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellI
     // spell with single target specific types
     switch (spec1)
     {
+        case SPELL_JUDGEMENT:
         case SPELL_MAGE_POLYMORPH:
             if (GetSpellSpecific(spellInfo2->Id) == spec1)
             {
@@ -2426,22 +2438,30 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Male Shadowy Disguise
                     if ((spellInfo_1->Id == 32756 && spellInfo_2->Id == 38080) ||
                             (spellInfo_2->Id == 32756 && spellInfo_1->Id == 38080))
+                    {
                         return false;
+                    }
 
                     // Female Shadowy Disguise
                     if ((spellInfo_1->Id == 32756 && spellInfo_2->Id == 38081) ||
                             (spellInfo_2->Id == 32756 && spellInfo_1->Id == 38081))
+                    {
                         return false;
+                    }
 
                     // Cool Down (See PeriodicAuraTick())
                     if ((spellInfo_1->Id == 52441 && spellInfo_2->Id == 52443) ||
                             (spellInfo_2->Id == 52441 && spellInfo_1->Id == 52443))
+                    {
                         return false;
+                    }
 
                     // See Chapel Invisibility and See Noth Invisibility
                     if ((spellInfo_1->Id == 52950 && spellInfo_2->Id == 52707) ||
                             (spellInfo_2->Id == 52950 && spellInfo_1->Id == 52707))
+                    {
                         return false;
+                    }
 
                     // Regular and Night Elf Ghost
                     if ((spellInfo_1->Id == 8326 && spellInfo_2->Id == 20584) ||
@@ -2453,7 +2473,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Aura of Despair auras
                     if ((spellInfo_1->Id == 64848 && spellInfo_2->Id == 62692) ||
                             (spellInfo_2->Id == 64848 && spellInfo_1->Id == 62692))
+                    {
                         return false;
+                    }
 
                     // Blood Fury and Rage of the Unraveller
                     if (spellInfo_1->SpellIconID == 1662 && spellInfo_2->SpellIconID == 1662)
@@ -2476,37 +2498,51 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Unstable Sphere Timer and Unstable Sphere Passive
                     if ((spellInfo_1->Id == 50758 && spellInfo_2->Id == 50756) ||
                             (spellInfo_2->Id == 50758 && spellInfo_1->Id == 50756))
+                    {
                         return false;
+                    }
 
                     // Arcane Beam Periodic and Arcane Beam Visual
                     if ((spellInfo_1->Id == 51019 && spellInfo_2->Id == 51024) ||
                             (spellInfo_2->Id == 51019 && spellInfo_1->Id == 51024))
+                    {
                         return false;
+                    }
 
                     // Crystal Spike Pre-visual and Crystal Spike aura
                     if ((spellInfo_1->Id == 50442 && spellInfo_2->Id == 47941) ||
                             (spellInfo_2->Id == 50442 && spellInfo_1->Id == 47941))
+                    {
                         return false;
+                    }
 
                     // Impale aura and Submerge
                     if ((spellInfo_1->Id == 53456 && spellInfo_2->Id == 53421) ||
                             (spellInfo_2->Id == 53456 && spellInfo_1->Id == 53421))
+                    {
                         return false;
+                    }
 
                     // Summon Anub'ar Champion Periodic and Summon Anub'ar Necromancer Periodic
                     if ((spellInfo_1->Id == 53035 && spellInfo_2->Id == 53036) ||
                             (spellInfo_2->Id == 53035 && spellInfo_1->Id == 53036))
+                    {
                         return false;
+                    }
 
                     // Summon Anub'ar Necromancer Periodic and Summon Anub'ar Crypt Fiend Periodic
                     if ((spellInfo_1->Id == 53036 && spellInfo_2->Id == 53037) ||
                             (spellInfo_2->Id == 53036 && spellInfo_1->Id == 53037))
+                    {
                         return false;
+                    }
 
                     // Summon Anub'ar Crypt Fiend Periodic and Summon Anub'ar Champion Periodic
                     if ((spellInfo_1->Id == 53037 && spellInfo_2->Id == 53035) ||
                             (spellInfo_2->Id == 53037 && spellInfo_1->Id == 53035))
+                    {
                         return false;
+                    }
 
                     // Possess visual and Possess
                     if ((spellInfo_1->Id == 23014 && spellInfo_2->Id == 19832) ||
@@ -2518,82 +2554,114 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     // Shade Soul Channel and Akama Soul Channel
                     if ((spellInfo_1->Id == 40401 && spellInfo_2->Id == 40447) ||
                             (spellInfo_2->Id == 40401 && spellInfo_1->Id == 40447))
+                    {
                         return false;
+                    }
 
                     // Eye Blast visual and Eye Blast
                     if ((spellInfo_1->Id == 39908 && spellInfo_2->Id == 40017) ||
                             (spellInfo_2->Id == 39908 && spellInfo_1->Id == 40017))
+                    {
                         return false;
+                    }
 
                     // Encapsulate and Encapsulate (channeled)
                     if ((spellInfo_1->Id == 45665 && spellInfo_2->Id == 45661) ||
                             (spellInfo_2->Id == 45665 && spellInfo_1->Id == 45661))
+                    {
                         return false;
+                    }
 
                     // Flame Tsunami Visual and Flame Tsunami Damage Aura
                     if ((spellInfo_1->Id == 57494 && spellInfo_2->Id == 57492) ||
                             (spellInfo_2->Id == 57494 && spellInfo_1->Id == 57492))
+                    {
                         return false;
+                    }
 
                     // Cyclone Aura 2 and Cyclone Aura
                     if ((spellInfo_1->Id == 57598 && spellInfo_2->Id == 57560) ||
                             (spellInfo_2->Id == 57598 && spellInfo_1->Id == 57560))
+                    {
                         return false;
+                    }
 
                     // Shard of Flame and Mote of Flame
                     if ((spellInfo_1->SpellIconID == 2302 && spellInfo_1->SpellVisual[0] == 0) ||
                             (spellInfo_2->SpellIconID == 2302 && spellInfo_2->SpellVisual[0] == 0))
+                    {
                         return false;
+                    }
 
                     // Felblaze Visual and Fog of Corruption
                     if ((spellInfo_1->Id == 45068 && spellInfo_2->Id == 45582) ||
                             (spellInfo_2->Id == 45068 && spellInfo_1->Id == 45582))
+                    {
                         return false;
+                    }
 
                     // Simon Game START timer, (DND) and Simon Game Pre-game timer
                     if ((spellInfo_1->Id == 39993 && spellInfo_2->Id == 40041) ||
                             (spellInfo_2->Id == 39993 && spellInfo_1->Id == 40041))
+                    {
                         return false;
+                    }
 
                     // Karazhan - Chess: Is Square OCCUPIED aura Karazhan - Chess: Create Move Marker
                     if ((spellInfo_1->Id == 39400 && spellInfo_2->Id == 32261) ||
                             (spellInfo_2->Id == 39400 && spellInfo_1->Id == 32261))
+                    {
                         return false;
+                    }
 
                     // Black Hole (damage) and Black Hole (phase)
                     if ((spellInfo_1->Id == 62169 && spellInfo_2->Id == 62168) ||
                             (spellInfo_2->Id == 62169 && spellInfo_1->Id == 62168))
+                    {
                         return false;
+                    }
 
                     // Black Hole (damage) and Worm Hole (phase)
                     if ((spellInfo_1->Id == 62169 && spellInfo_2->Id == 65250) ||
                             (spellInfo_2->Id == 62169 && spellInfo_1->Id == 65250))
+                    {
                         return false;
+                    }
 
                     // Black Hole (damage) and Phase Punch (phase)
                     if ((spellInfo_1->Id == 62169 && spellInfo_2->Id == 64417) ||
                             (spellInfo_2->Id == 62169 && spellInfo_1->Id == 64417))
+                    {
                         return false;
+                    }
 
                     // Auto Grow and Healthy Spore Visual
                     if ((spellInfo_1->Id == 62559 && spellInfo_2->Id == 62538) ||
                             (spellInfo_2->Id == 62559 && spellInfo_1->Id == 62538))
+                    {
                         return false;
+                    }
 
                     // Phase 2 Transform and Shadowy Barrier
                     if ((spellInfo_1->Id == 65157 && spellInfo_2->Id == 64775) ||
                         (spellInfo_2->Id == 65157 && spellInfo_1->Id == 64775))
+                    {
                         return false;
+                    }
 
                     // Empowered (dummy) and Empowered
                     if ((spellInfo_1->Id == 64161 && spellInfo_2->Id == 65294) ||
                         (spellInfo_2->Id == 64161 && spellInfo_1->Id == 65294))
+                    {
                         return false;
+                    }
 
                     // Spectral Realm (reaction) and Spectral Realm (invisibility)
                     if ((spellInfo_1->Id == 44852 && spellInfo_2->Id == 46021) ||
                         (spellInfo_2->Id == 44852 && spellInfo_1->Id == 46021))
+                    {
                         return false;
+                    }
 
                     // Halls of Reflection Clone
                     if (spellInfo_1->SpellIconID == 692 && spellInfo_2->SpellIconID == 692)
@@ -2770,7 +2838,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Corruption and Unstable Affliction
                 if ((spellInfo_1->SpellIconID == 313 && spellInfo_2->SpellIconID == 2039) ||
                         (spellInfo_2->SpellIconID == 313 && spellInfo_1->SpellIconID == 2039))
+                {
                     return false;
+                }
 
                 // (Corruption or Unstable Affliction) and (Curse of Agony or Curse of Doom)
                 if (((spellInfo_1->SpellIconID == 313 || spellInfo_1->SpellIconID == 2039) && (spellInfo_2->SpellIconID == 544  || spellInfo_2->SpellIconID == 91)) ||
@@ -2782,12 +2852,16 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Shadowflame and Curse of Agony
                 if ((spellInfo_1->SpellIconID == 544 && spellInfo_2->SpellIconID == 3317) ||
                         (spellInfo_2->SpellIconID == 544 && spellInfo_1->SpellIconID == 3317))
+                {
                     return false;
+                }
 
                 // Shadowflame and Curse of Doom
                 if ((spellInfo_1->SpellIconID == 91 && spellInfo_2->SpellIconID == 3317) ||
                         (spellInfo_2->SpellIconID == 91 && spellInfo_1->SpellIconID == 3317))
+                {
                     return false;
+                }
 
                 // Metamorphosis, diff effects
                 if (spellInfo_1->SpellIconID == 3314 && spellInfo_2->SpellIconID == 3314)
@@ -2821,12 +2895,16 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Glyph of Revenge (triggered), and Sword and Board (triggered)
                 if ((spellInfo_1->SpellIconID == 856 && spellInfo_2->SpellIconID == 2780) ||
                         (spellInfo_2->SpellIconID == 856 && spellInfo_1->SpellIconID == 2780))
+                {
                     return false;
+                }
 
                 // Defensive/Berserker/Battle stance aura can not stack (needed for dummy auras)
                 if (((classOptions1->SpellFamilyFlags & UI64LIT(0x800000)) && (classOptions2->SpellFamilyFlags & UI64LIT(0x800000))) ||
                     ((classOptions2->SpellFamilyFlags & UI64LIT(0x800000)) && (classOptions1->SpellFamilyFlags & UI64LIT(0x800000))))
+                {
                     return true;
+                }
             }
 
             // Hamstring -> Improved Hamstring (multi-family check)
@@ -2868,7 +2946,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Dispersion
                 if ((spellInfo_1->Id == 47585 && spellInfo_2->Id == 60069) ||
                         (spellInfo_2->Id == 47585 && spellInfo_1->Id == 60069))
+                {
                     return false;
+                }
             }
             break;
         case SPELLFAMILY_DRUID:
@@ -2884,12 +2964,16 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 //  Tree of Life (Shapeshift) and 34123 Tree of Life (Passive)
                 if ((spellId_1 == 33891 && spellId_2 == 34123) ||
                         (spellId_2 == 33891 && spellId_1 == 34123))
+                {
                     return false;
+                }
 
                 // Lifebloom and Wild Growth
                 if ((spellInfo_1->SpellIconID == 2101 && spellInfo_2->SpellIconID == 2864) ||
                         (spellInfo_2->SpellIconID == 2101 && spellInfo_1->SpellIconID == 2864))
+                {
                     return false;
+                }
 
                 //  Innervate and Glyph of Innervate and some other spells
                 if (spellInfo_1->SpellIconID == 62 && spellInfo_2->SpellIconID == 62)
@@ -2921,7 +3005,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Survival Instincts and Survival Instincts
                 if ((spellInfo_1->Id == 61336 && spellInfo_2->Id == 50322) ||
                         (spellInfo_2->Id == 61336 && spellInfo_1->Id == 50322))
+                {
                     return false;
+                }
 
                 // Savage Roar and Savage Roar (triggered)
                 if (spellInfo_1->SpellIconID == 2865 && spellInfo_2->SpellIconID == 2865)
@@ -2932,7 +3018,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Frenzied Regeneration and Savage Defense
                 if ((spellInfo_1->Id == 22842 && spellInfo_2->Id == 62606) ||
                         (spellInfo_2->Id == 22842 && spellInfo_1->Id == 62606))
+                {
                     return false;
+                }
             }
 
             // Leader of the Pack and Scroll of Stamina (multi-family check)
@@ -2954,13 +3042,17 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Master of Subtlety
                 if ((spellId_1 == 31665 && spellId_2 == 31666) ||
                         (spellId_1 == 31666 && spellId_2 == 31665))
+                {
                     return false;
+                }
 
                 // Sprint & Sprint (waterwalk)
                 if (spellInfo_1->SpellIconID == 516 && spellInfo_2->SpellIconID == 516 &&
                     ((spellInfo_1->GetCategory() == 44 && spellInfo_2->GetCategory() == 0) ||
                     (spellInfo_2->GetCategory() == 44 && spellInfo_1->GetCategory() == 0)))
+                {
                     return false;
+                }
             }
 
             // Overkill
@@ -3035,7 +3127,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Swift Retribution / Improved Devotion Aura (talents) and Paladin Auras
                 if ((spellInfo_1->IsFitToFamilyMask(UI64LIT(0x0), 0x00000020) && (spellInfo_2->SpellIconID == 291 || spellInfo_2->SpellIconID == 3028)) ||
                         (spellInfo_2->IsFitToFamilyMask(UI64LIT(0x0), 0x00000020) && (spellInfo_1->SpellIconID == 291 || spellInfo_1->SpellIconID == 3028)))
+                {
                     return false;
+                }
 
                 // Beacon of Light and Light's Beacon
                 if ((spellInfo_1->SpellIconID == 3032) && (spellInfo_2->SpellIconID == 3032))
@@ -3064,7 +3158,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Blood Corruption, Holy Vengeance, Righteous Vengeance
                 if ((spellInfo_1->SpellIconID == 2292 && spellInfo_2->SpellIconID == 3025) ||
                         (spellInfo_2->SpellIconID == 2292 && spellInfo_1->SpellIconID == 3025))
+                {
                     return false;
+                }
             }
 
             // Blessing of Sanctuary (multi-family check, some from 16 spell icon spells)

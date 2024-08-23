@@ -194,10 +194,12 @@ int WorldSocket::SendPacket(const WorldPacket& pct)
         }
 
         if (!pct.empty())
+        {
             if (m_OutBuffer->copy((char*) pct.contents(), pct.size()) == -1)
             {
                 MANGOS_ASSERT(false);
             }
+        }
     }
     else
     {
@@ -758,6 +760,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                     sLog.outError("WorldSocket::ProcessIncoming: Player send CMSG_AUTH_SESSION again");
                     return -1;
                 }
+
 #ifdef ENABLE_ELUNA
                 if (!sEluna->OnPacketReceive(m_Session, *new_pct))
                 {

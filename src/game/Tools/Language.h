@@ -93,10 +93,10 @@ enum MangosStrings
     LANG_GM_NO_WHISPER                                        = 64,    /* Doesn't accept whispers */
     LANG_USING_SCRIPT_LIB_UNKNOWN                             = 65,    /* Using script library: <Unknown Script Library> */
     LANG_USING_SCRIPT_LIB_NONE                                = 66,    /* Using script library: <No Script Library Loaded> */
-    LANG_WRONG_TEAM_HORDE                                    = 67,    /* You must be member of the Horde to enter. */
-    LANG_WRONG_TEAM_ALLIANCE                                 = 68,    /* You must be member of the Alliance to enter. */
-    LANG_LEVEL_MAXREQUIRED                                   = 69,    /* You must be at most level %u to enter. */
-    LANG_LEVEL_EQUALREQUIRED                                 = 70,    /* You must have level %u to enter. */
+    LANG_WRONG_TEAM_HORDE                                     = 67,    /* You must be member of the Horde to enter. */
+    LANG_WRONG_TEAM_ALLIANCE                                  = 68,    /* You must be member of the Alliance to enter. */
+    LANG_LEVEL_MAXREQUIRED                                    = 69,    /* You must be at most level %u to enter. */
+    LANG_LEVEL_EQUALREQUIRED                                  = 70,    /* You must have level %u to enter. */
     // Room for more level 0              67-99 not used
 
     LANG_GLOBAL_NOTIFY                                        = 100,    /* Global notify:  */
@@ -146,7 +146,6 @@ enum MangosStrings
     LANG_YOURS_BACK_SPEED_CHANGED                             = 144,    /* %s set your backwards run speed to %2.2f from normal. */
     LANG_YOU_CHANGE_FLY_SPEED                                 = 145,
     LANG_YOURS_FLY_SPEED_CHANGED                              = 146,
-
     LANG_YOU_CHANGE_SIZE                                      = 147,    /* You set the size %2.2f of %s. */
     LANG_YOURS_SIZE_CHANGED                                   = 148,    /* %s set your size to %2.2f. */
     LANG_NO_MOUNT                                             = 149,    /* There is no such mount. */
@@ -167,7 +166,7 @@ enum MangosStrings
     LANG_COMMAND_TELE_NOTFOUND                                = 164,    /* Teleport location not found! */
     LANG_COMMAND_TELE_PARAMETER                               = 165,    /* Requires search parameter. */
     LANG_COMMAND_TELE_NOLOCATION                              = 166,    /* There are no teleport locations matching your request. */
-    LANG_YOURS_HOLY_POWER_CHANGED                            = 167,
+    LANG_YOURS_HOLY_POWER_CHANGED                             = 167,
     LANG_COMMAND_TELE_LOCATION                                = 168,    /* Locations found are: %s */
     LANG_MAIL_SENT                                            = 169,    /* Mail sent to %s */
     LANG_SOUND_NOT_EXIST                                      = 170,    /* You try to hear sound %u but it doesn't exist. */
@@ -176,7 +175,7 @@ enum MangosStrings
     LANG_YOU_CHANGE_RUNIC_POWER                               = 173,
     LANG_YOURS_RUNIC_POWER_CHANGED                            = 174,
     LANG_LIQUID_STATUS                                        = 175,    /* Liquid level: %f, ground: %f, type flags %u, status: %d. */
-    LANG_YOU_CHANGE_HOLY_POWER                               = 176,
+    LANG_YOU_CHANGE_HOLY_POWER                                = 176,
     // Room for more level 1              176-199 not used
     LANG_NO_SELECTION                                         = 200,    /* No selection. */
     LANG_OBJECT_GUID                                          = 201,    /* Object GUID is: %s */
@@ -247,7 +246,7 @@ enum MangosStrings
     LANG_COMMAND_TARGETOBJNOTFOUND                            = 266,    /* Nothing found! */
     LANG_COMMAND_GOOBJNOTFOUND                                = 267,    /* Object not found! */
     LANG_COMMAND_GOCREATNOTFOUND                              = 268,    /* Creature not found! */
-    LANG_CURRENCY_NOT_FOUND                                  = 269,
+    LANG_CURRENCY_NOT_FOUND                                   = 269,
     LANG_COMMAND_DELCREATMESSAGE                              = 270,    /* Creature Removed */
     LANG_COMMAND_CREATUREMOVED                                = 271,    /* Creature moved. */
     LANG_COMMAND_CREATUREATSAMEMAP                            = 272,    /* Creature (GUID:%u) must be on the same map as player! */
@@ -261,7 +260,7 @@ enum MangosStrings
     LANG_COMMAND_ADDVENDORITEMITEMS                           = 280,    /* Vendor has too many items (max 128) */
     LANG_COMMAND_KICKSELF                                     = 281,    /* You can't kick self, logout instead */
     LANG_COMMAND_KICKMESSAGE                                  = 282,    /* Player %s kicked. */
-    LANG_VENDOR_META_CURRENCY_NOT_ALLOWED                    = 283,
+    LANG_VENDOR_META_CURRENCY_NOT_ALLOWED                     = 283,
     LANG_COMMAND_WHISPERACCEPTING                             = 284,    /* Accepting Whisper: %s */
     LANG_COMMAND_WHISPERON                                    = 285,    /* Accepting Whisper: ON */
     LANG_COMMAND_WHISPEROFF                                   = 286,    /* Accepting Whisper: OFF */
@@ -277,14 +276,14 @@ enum MangosStrings
     LANG_COMMAND_TICKETDEL                                    = 296,    /* Ticket deleted. */
     LANG_COMMAND_SPAWNDIST                                    = 297,    /* Spawn distance changed to: %f */
     LANG_COMMAND_SPAWNTIME                                    = 298,    /* Spawn time changed to: %i */
-    LANG_COMMAND_MODIFY_CURRENCY                             = 299,
+    LANG_COMMAND_MODIFY_CURRENCY                              = 299,
     LANG_YOUR_CHAT_DISABLED                                   = 300,    /* Your chat has been disabled for %u minutes. */
     LANG_YOU_DISABLE_CHAT                                     = 301,    /* You have disabled %s's chat for %u minutes. */
     LANG_CHAT_ALREADY_ENABLED                                 = 302,    /* Player's chat is already enabled. */
     LANG_YOUR_CHAT_ENABLED                                    = 303,    /* Your chat has been enabled. */
     LANG_YOU_ENABLE_CHAT                                      = 304,    /* You have enabled %s's chat. */
     LANG_COMMAND_MODIFY_REP                                   = 305,    /* Faction %s (%u) reputation of %s was set to %5d! */
-    LANG_CURRENCY_AMOUNT                                     = 306,
+    LANG_CURRENCY_AMOUNT                                      = 306,
     LANG_COMMAND_FACTION_NOTFOUND                             = 307,    /* No faction found! */
     LANG_COMMAND_FACTION_UNKNOWN                              = 308,    /* Faction %i unknown! */
     LANG_COMMAND_FACTION_INVPARAM                             = 309,    /* Invalid parameter %s */
@@ -432,7 +431,7 @@ enum MangosStrings
     LANG_COMMAND_GRAVEYARDALRLINKED                           = 450,    /* Graveyard #%u already linked to zone #%u (current). */
     LANG_COMMAND_GRAVEYARDLINKED                              = 451,    /* Graveyard #%u linked to zone #%u (current). */
     LANG_COMMAND_GRAVEYARDWRONGZONE                           = 452,    /* Graveyard #%u can't be linked to subzone or not existed zone #%u (internal error). */
-    LANG_COMMAND_NOCURRENCYFOUND        = 453,
+    LANG_COMMAND_NOCURRENCYFOUND                              = 453,
     LANG_COMMAND_GRAVEYARDERROR                               = 454,    /* No faction in Graveyard with id= #%u , fix your DB */
     LANG_COMMAND_GRAVEYARD_NOTEAM                             = 455,    /* invalid team, please fix database */
     LANG_COMMAND_GRAVEYARD_ANY                                = 456,    /* any */
@@ -880,46 +879,46 @@ Faction Template: %u. */
     LANG_DIRECT_DAMAGE                                        = 1204,    /* direct damage */
     LANG_DOT_HEAL                                             = 1205,    /* dot heal */
     LANG_DOT_DAMAGE                                           = 1206,    /* dot damage */
-    LANG_ALI_PRIVATE                                         = 1400,    /* Private  */
-    LANG_ALI_CORPORAL                                        = 1401,    /* Corporal  */
-    LANG_ALI_SERGEANT                                        = 1402,    /* Sergeant  */
-    LANG_ALI_MASTER_SERGEANT                                 = 1403,    /* Master Sergeant  */
-    LANG_ALI_SERGEANT_MAJOR                                  = 1404,    /* Sergeant Major  */
-    LANG_ALI_KNIGHT                                          = 1405,    /* Knight  */
-    LANG_ALI_KNIGHT_LIEUTENANT                               = 1406,    /* Knight-Lieutenant  */
-    LANG_ALI_KNIGHT_CAPTAIN                                  = 1407,    /* Knight-Captain  */
-    LANG_ALI_KNIGHT_CHAMPION                                 = 1408,    /* Knight-Champion  */
-    LANG_ALI_LIEUTENANT_COMMANDER                            = 1409,    /* Lieutenant Commander  */
-    LANG_ALI_COMMANDER                                       = 1410,    /* Commander  */
-    LANG_ALI_MARSHAL                                         = 1411,    /* Marshal  */
-    LANG_ALI_FIELD_MARSHAL                                   = 1412,    /* Field Marshal  */
-    LANG_ALI_GRAND_MARSHAL                                   = 1413,    /* Grand Marshal  */
-    LANG_HRD_SCOUT                                           = 1414,    /* Scout  */
-    LANG_HRD_GRUNT                                           = 1415,    /* Grunt  */
-    LANG_HRD_SERGEANT                                        = 1416,    /* Sergeant  */
-    LANG_HRD_SENIOR_SERGEANT                                 = 1417,    /* Senior Sergeant  */
-    LANG_HRD_FIRST_SERGEANT                                  = 1418,    /* First Sergeant  */
-    LANG_HRD_STONE_GUARD                                     = 1419,    /* Stone Guard  */
-    LANG_HRD_BLOOD_GUARD                                     = 1420,    /* Blood Guard  */
-    LANG_HRD_LEGIONNARE                                      = 1421,    /* Legionnaire  */
-    LANG_HRD_CENTURION                                       = 1422,    /* Centurion  */
-    LANG_HRD_CHAMPION                                        = 1423,    /* Champion  */
-    LANG_HRD_LIEUTENANT_GENERAL                              = 1424,    /* Lieutenant General  */
-    LANG_HRD_GENERAL                                         = 1425,    /* General  */
-    LANG_HRD_WARLORD                                         = 1426,    /* Warlord  */
-    LANG_HRD_HIGH_WARLORD                                    = 1427,    /* High Warlord  */
-    LANG_GAME_MASTER                                         = 1428,    /* Game Master  */
-    LANG_NO_RANK                                             = 1429,    /* No Rank  */
-    LANG_RANK_DISHONORED                                     = 1430,    /* Dishonored  */
-    LANG_RANK_EXILED                                         = 1431,    /* Exiled  */
-    LANG_RANK_OUTLAW                                         = 1432,    /* Outlaw  */
-    LANG_RANK_PARIAH                                         = 1433,    /* Pariah  */
-    LANG_RANK                                                = 1434,    /* Player: %s - %s (Rank %u) */
-    LANG_HONOR_TODAY                                         = 1435,    /* Today: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r] */
-    LANG_HONOR_YESTERDAY                                     = 1436,    /* Yesterday: [Kills: |c0000ff00%u|r] [Honor: %u] */
-    LANG_HONOR_THIS_WEEK                                     = 1437,    /* This Week: [Kills: |c0000ff00%u|r] [Honor: %u] */
-    LANG_HONOR_LAST_WEEK                                     = 1438,    /* Last Week: [Kills: |c0000ff00%u|r] [Honor: %u] [Standing: %u] */
-    LANG_HONOR_LIFE                                          = 1439,    /* Life Time: [Rank Points: |c0000ff00%f|r] [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r] [Highest Rank %u: %s] */
+    LANG_ALI_PRIVATE                                          = 1400,    /* Private  */
+    LANG_ALI_CORPORAL                                         = 1401,    /* Corporal  */
+    LANG_ALI_SERGEANT                                         = 1402,    /* Sergeant  */
+    LANG_ALI_MASTER_SERGEANT                                  = 1403,    /* Master Sergeant  */
+    LANG_ALI_SERGEANT_MAJOR                                   = 1404,    /* Sergeant Major  */
+    LANG_ALI_KNIGHT                                           = 1405,    /* Knight  */
+    LANG_ALI_KNIGHT_LIEUTENANT                                = 1406,    /* Knight-Lieutenant  */
+    LANG_ALI_KNIGHT_CAPTAIN                                   = 1407,    /* Knight-Captain  */
+    LANG_ALI_KNIGHT_CHAMPION                                  = 1408,    /* Knight-Champion  */
+    LANG_ALI_LIEUTENANT_COMMANDER                             = 1409,    /* Lieutenant Commander  */
+    LANG_ALI_COMMANDER                                        = 1410,    /* Commander  */
+    LANG_ALI_MARSHAL                                          = 1411,    /* Marshal  */
+    LANG_ALI_FIELD_MARSHAL                                    = 1412,    /* Field Marshal  */
+    LANG_ALI_GRAND_MARSHAL                                    = 1413,    /* Grand Marshal  */
+    LANG_HRD_SCOUT                                            = 1414,    /* Scout  */
+    LANG_HRD_GRUNT                                            = 1415,    /* Grunt  */
+    LANG_HRD_SERGEANT                                         = 1416,    /* Sergeant  */
+    LANG_HRD_SENIOR_SERGEANT                                  = 1417,    /* Senior Sergeant  */
+    LANG_HRD_FIRST_SERGEANT                                   = 1418,    /* First Sergeant  */
+    LANG_HRD_STONE_GUARD                                      = 1419,    /* Stone Guard  */
+    LANG_HRD_BLOOD_GUARD                                      = 1420,    /* Blood Guard  */
+    LANG_HRD_LEGIONNARE                                       = 1421,    /* Legionnaire  */
+    LANG_HRD_CENTURION                                        = 1422,    /* Centurion  */
+    LANG_HRD_CHAMPION                                         = 1423,    /* Champion  */
+    LANG_HRD_LIEUTENANT_GENERAL                               = 1424,    /* Lieutenant General  */
+    LANG_HRD_GENERAL                                          = 1425,    /* General  */
+    LANG_HRD_WARLORD                                          = 1426,    /* Warlord  */
+    LANG_HRD_HIGH_WARLORD                                     = 1427,    /* High Warlord  */
+    LANG_GAME_MASTER                                          = 1428,    /* Game Master  */
+    LANG_NO_RANK                                              = 1429,    /* No Rank  */
+    LANG_RANK_DISHONORED                                      = 1430,    /* Dishonored  */
+    LANG_RANK_EXILED                                          = 1431,    /* Exiled  */
+    LANG_RANK_OUTLAW                                          = 1432,    /* Outlaw  */
+    LANG_RANK_PARIAH                                          = 1433,    /* Pariah  */
+    LANG_RANK                                                 = 1434,    /* Player: %s - %s (Rank %u) */
+    LANG_HONOR_TODAY                                          = 1435,    /* Today: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r] */
+    LANG_HONOR_YESTERDAY                                      = 1436,    /* Yesterday: [Kills: |c0000ff00%u|r] [Honor: %u] */
+    LANG_HONOR_THIS_WEEK                                      = 1437,    /* This Week: [Kills: |c0000ff00%u|r] [Honor: %u] */
+    LANG_HONOR_LAST_WEEK                                      = 1438,    /* Last Week: [Kills: |c0000ff00%u|r] [Honor: %u] [Standing: %u] */
+    LANG_HONOR_LIFE                                           = 1439,    /* Life Time: [Rank Points: |c0000ff00%f|r] [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r] [Highest Rank %u: %s] */
     LANG_COMMAND_TICKETUPDATED                                = 1440,    /* Player %s has updated his ticket (ID %u). */
     LANG_POOL_CHANCE_POOL_LIST_CONSOLE                        = 1500,    /* %u - [%s] AutoSpawn: %u MaxLimit: %u Creatures: %u GameObjecs: %u Pools %u Chance: %f %s */
     LANG_POOL_POOL_LIST_CHAT                                  = 1501,    /* %u - |cffffffff|Hpool:%u|h[%s]|h|r AutoSpawn: %u MaxLimit: %u Creatures: %u GameObjecs: %u Pools %u %s */
@@ -943,18 +942,18 @@ Faction Template: %u. */
     LANG_COMMAND_TICKET_RESPOND_MAIL_SUBJECT                  = 1519,    /* Response to your ticket */
     LANG_COMMAND_TICKET_RESPOND_MAIL_SIGNATURE                = 1520,    /* $B$BBest regards, $B$B<GM>%s */
     LANG_COMMAND_TICKETCLOSED_PLAYER_NOTIF                    = 1521,    /* Your ticket has been closed.@@It has been serviced by <GM>%s, please check your ingame mailbox to see the answer. */
-    LANG_COMMAND_RESET_ITEMS_EQUIPED                         = 1522,    /* > %d Equiped items deleted for %s */
-    LANG_COMMAND_RESET_ITEMS_BAGS                            = 1523,    /* > %d items in equiped bags deleted for %s */
-    LANG_COMMAND_RESET_ITEMS_BANK                            = 1524,    /* > %d items in bank deleted for %s */
-    LANG_COMMAND_RESET_ITEMS_KEYRING                         = 1525,    /* > %d keys in keyring deleted for %s */
-    LANG_COMMAND_RESET_ITEMS_BUYBACK                         = 1526,    /* > %d items in vendors buyback deleted for %s */
-    LANG_COMMAND_RESET_ITEMS_ALL                             = 1527,    /* > All items were reset for %s */
-    LANG_COMMAND_RESET_ITEMS_ALLBAGS                         = 1528,    /* > All items were reset (even bags : %d equiped & %d in bank) for %s */
-    LANG_COMMAND_RESET_MAIL_COD                              = 1529,    /* > %d COD mails deleted for %s. */
-    LANG_COMMAND_RESET_MAIL_GM                               = 1530,    /* > %d GM mails deleted for %s. */
-    LANG_COMMAND_RESET_MAIL_FROM                             = 1531,    /* > %d mails from %s deleted for %s. */
-    LANG_COMMAND_RESET_MAIL_PLAYER_NOTIF                     = 1532,    /* GM %s has deleted %d mails from your mailbox. */
-    LANG_COMMAND_RESET_MAIL_RECAP                            = 1533,    /* > Total : %d mails deleted for %s (including normal mails). */
+    LANG_COMMAND_RESET_ITEMS_EQUIPED                          = 1522,    /* > %d Equiped items deleted for %s */
+    LANG_COMMAND_RESET_ITEMS_BAGS                             = 1523,    /* > %d items in equiped bags deleted for %s */
+    LANG_COMMAND_RESET_ITEMS_BANK                             = 1524,    /* > %d items in bank deleted for %s */
+    LANG_COMMAND_RESET_ITEMS_KEYRING                          = 1525,    /* > %d keys in keyring deleted for %s */
+    LANG_COMMAND_RESET_ITEMS_BUYBACK                          = 1526,    /* > %d items in vendors buyback deleted for %s */
+    LANG_COMMAND_RESET_ITEMS_ALL                              = 1527,    /* > All items were reset for %s */
+    LANG_COMMAND_RESET_ITEMS_ALLBAGS                          = 1528,    /* > All items were reset (even bags : %d equiped & %d in bank) for %s */
+    LANG_COMMAND_RESET_MAIL_COD                               = 1529,    /* > %d COD mails deleted for %s. */
+    LANG_COMMAND_RESET_MAIL_GM                                = 1530,    /* > %d GM mails deleted for %s. */
+    LANG_COMMAND_RESET_MAIL_FROM                              = 1531,    /* > %d mails from %s deleted for %s. */
+    LANG_COMMAND_RESET_MAIL_PLAYER_NOTIF                      = 1532,    /* GM %s has deleted %d mails from your mailbox. */
+    LANG_COMMAND_RESET_MAIL_RECAP                             = 1533,    /* > Total : %d mails deleted for %s (including normal mails). */
     LANG_OPVP_EP_CAPTURE_NPT_H                                = 1600,    /* |cffffff00Northpass Tower has been taken by the Horde!|r */
     LANG_OPVP_EP_CAPTURE_NPT_A                                = 1601,    /* |cffffff00Northpass Tower has been taken by the Alliance!|r */
     LANG_OPVP_EP_CAPTURE_CGT_H                                = 1602,    /* |cffffff00Crown Guard Tower has been taken by the Horde!|r */
@@ -1013,9 +1012,10 @@ Faction Template: %u. */
     LANG_COMMAND_FREEZE_PLAYER_YOU_HAVE_BEEN_UNFROZEN         = 1712,    /* You have been unfrozen. You can now move freely, use spells or even logout. */
     LANG_COMMAND_FREEZE_PLAYER_PLAYER_NOT_FOUND               = 1713,    /* You can only freeze online characters. */
     LANG_COMMAND_UNFREEZE_PLAYER_PLAYER_NOT_FOUND             = 1714,    /* You can only unfreeze online characters. */
-    LANG_VENDOR_WRONG_ITEM_TYPE                              = 1720,
-    LANG_VENDOR_WRONG_CURRENCY_MAXCOUNT                      = 1721,
+    LANG_VENDOR_WRONG_ITEM_TYPE                               = 1720,
+    LANG_VENDOR_WRONG_CURRENCY_MAXCOUNT                       = 1721,
 
+    // FREE IDS                           1801-9999
 
     // Use for not-in-official-sources patches
     //                                    10000-10999

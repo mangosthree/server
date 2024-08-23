@@ -990,10 +990,12 @@ void WorldSession::SendAccountDataTimes(uint32 mask)
     data << uint8(1);
     data << uint32(mask);                                   // type mask
     for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
+    {
         if (mask & (1 << i))
         {
             data << uint32(GetAccountData(AccountDataType(i))->Time);// also unix time
         }
+    }
     SendPacket(&data);
 }
 
@@ -1126,6 +1128,7 @@ void WorldSession::ReadAddonsInfo(ByteBuffer &data)
     {
         uint32 addonsCount;
         addonInfo >> addonsCount;                         // addons count
+        DEBUG_LOG("Addon count: %u", addonsCount);
 
         for (uint32 i = 0; i < addonsCount; ++i)
         {

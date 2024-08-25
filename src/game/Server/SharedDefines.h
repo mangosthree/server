@@ -282,7 +282,7 @@ enum SpellAttributes
     SPELL_ATTR_RANGED                          = 0x00000002,// 1 All ranged abilites have this flag
     SPELL_ATTR_ON_NEXT_SWING_1                 = 0x00000004,// 2 on next swing
     SPELL_ATTR_UNK3                            = 0x00000008,// 3 not set in 3.0.3
-    SPELL_ATTR_UNK4                            = 0x00000010,// 4 isAbility
+    SPELL_ATTR_ABILITY                            = 0x00000010,// 4 isAbility
     SPELL_ATTR_TRADESPELL                      = 0x00000020,// 5 trade spells, will be added by client to a sublist of profession spell
     SPELL_ATTR_PASSIVE                         = 0x00000040,// 6 Passive spell
     SPELL_ATTR_UNK7                            = 0x00000080,// 7 can't be linked in chat?
@@ -296,7 +296,7 @@ enum SpellAttributes
     SPELL_ATTR_OUTDOORS_ONLY                   = 0x00008000,// 15 Only useable outdoors.
     SPELL_ATTR_NOT_SHAPESHIFT                  = 0x00010000,// 16 Not while shapeshifted
     SPELL_ATTR_ONLY_STEALTHED                  = 0x00020000,// 17 Must be in stealth
-    SPELL_ATTR_UNK18                           = 0x00040000,// 18
+    SPELL_ATTR_DONT_AFFECT_SHEATH_STATE        = 0x00040000,// 18
     SPELL_ATTR_LEVEL_DAMAGE_CALCULATION        = 0x00080000,// 19 spelldamage depends on caster level
     SPELL_ATTR_STOP_ATTACK_TARGET              = 0x00100000,// 20 Stop attack after use this spell (and not begin attack if use)
     SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK    = 0x00200000,// 21 Cannot be dodged/parried/blocked
@@ -323,7 +323,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_CHANNELED_2                  = 0x00000040,// 6 channeled 2
     SPELL_ATTR_EX_UNK7                         = 0x00000080,// 7
     SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET         = 0x00000100,// 8 Spell req target not to be in combat state
-    SPELL_ATTR_EX_UNK9                         = 0x00000200,// 9
+    SPELL_ATTR_EX_FACING_TARGET                = 0x00000200,// 9
     SPELL_ATTR_EX_NO_THREAT                    = 0x00000400,// 10 no generates threat on cast 100%
     SPELL_ATTR_EX_UNK11                        = 0x00000800,// 11
     SPELL_ATTR_EX_UNK12                        = 0x00001000,// 12
@@ -370,7 +370,7 @@ enum SpellAttributesEx2
     SPELL_ATTR_EX2_UNK17                       = 0x00020000,// 17 suspend weapon timer instead of resetting it, (?Hunters Shot and Stings only have this flag?)
     SPELL_ATTR_EX2_UNK18                       = 0x00040000,// 18 Only Revive pet - possible req dead pet
     SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT         = 0x00080000,// 19 does not necessarily need shapeshift (pre-3.x not have passive spells with this attribute)
-    SPELL_ATTR_EX2_UNK20                       = 0x00100000,// 20
+    SPELL_ATTR_EX2_FACING_TARGETS_BACK         = 0x00100000,// 20
     SPELL_ATTR_EX2_DAMAGE_REDUCED_SHIELD       = 0x00200000,// 21 for ice blocks, pala immunity buffs, priest absorb shields, but used also for other spells -> not sure!
     SPELL_ATTR_EX2_UNK22                       = 0x00400000,// 22
     SPELL_ATTR_EX2_UNK23                       = 0x00800000,// 23 Only mage Arcane Concentration have this flag

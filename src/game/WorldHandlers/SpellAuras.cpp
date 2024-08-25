@@ -521,7 +521,7 @@ Aura::~Aura()
 
 AreaAura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target,
                    Unit* caster, Item* castItem, uint32 originalRankSpellId)
-    : Aura(spellproto, eff, currentBasePoints, holder, target, caster, castItem), m_originalRankSpellId(originalRankSpellId)
+                   : Aura(spellproto, eff, currentBasePoints, holder, target, caster, castItem), m_originalRankSpellId(originalRankSpellId)
 {
     m_isAreaAura = true;
 
@@ -922,10 +922,10 @@ void AreaAura::Update(uint32 diff)
         // or caster is (no longer) friendly
         bool needFriendly = (m_areaAuraType == AREA_AURA_ENEMY ? false : true);
         if (!caster ||
-                caster->hasUnitState(UNIT_STAT_ISOLATED)               ||
-                !caster->HasAura(originalRankSpellId, GetEffIndex())   ||
-                !caster->IsWithinDistInMap(target, m_radius)           ||
-                caster->IsFriendlyTo(target) != needFriendly
+            caster->hasUnitState(UNIT_STAT_ISOLATED)               ||
+            !caster->HasAura(originalRankSpellId, GetEffIndex())   ||
+            !caster->IsWithinDistInMap(target, m_radius)           ||
+            caster->IsFriendlyTo(target) != needFriendly
            )
         {
             target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(), GetCasterGuid());
@@ -1116,10 +1116,10 @@ void Aura::ReapplyAffectedPassiveAuras(Unit* target, bool owner_mode)
         // permanent passive or permanent area aura
         // passive spells can be affected only by own or owner spell mods)
         if ((itr->second->IsPermanent() && ((owner_mode && itr->second->IsPassive()) || itr->second->IsAreaAura())) &&
-                // non deleted and not same aura (any with same spell id)
-                !itr->second->IsDeleted() && itr->second->GetId() != GetId() &&
-                // and affected by aura
-                isAffectedOnSpell(itr->second->GetSpellProto()))
+            // non deleted and not same aura (any with same spell id)
+            !itr->second->IsDeleted() && itr->second->GetId() != GetId() &&
+            // and affected by aura
+            isAffectedOnSpell(itr->second->GetSpellProto()))
         {
             // only applied by self or aura caster
             if (itr->second->GetCasterGuid() == target->GetObjectGuid())
@@ -2424,8 +2424,10 @@ void Aura::TriggerSpell()
     if (triggeredSpellInfo)
     {
         if (triggerTargetObject)
+        {
             triggerCaster->CastSpell(triggerTargetObject->GetPositionX(), triggerTargetObject->GetPositionY(), triggerTargetObject->GetPositionZ(),
                                      triggeredSpellInfo, true, NULL, this, casterGUID);
+        }
         else
         {
             triggerCaster->CastSpell(triggerTarget, triggeredSpellInfo, true, NULL, this, casterGUID);
@@ -3741,6 +3743,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             break;
         }
         case SPELLFAMILY_ROGUE:
+        {
             switch (GetId())
             {
                 case 57934:                                 // Tricks of the Trade, main spell
@@ -3761,6 +3764,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
             }
             break;
+        }
         case SPELLFAMILY_HUNTER:
         {
             switch (GetId())
@@ -4052,7 +4056,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             for (Unit::AuraList::const_iterator iter = slowingAuras.begin(); iter != slowingAuras.end();)
             {
                 SpellEntry const* aurSpellInfo = (*iter)->GetSpellProto();
-            uint32 auraSpellIcon = aurSpellInfo->SpellIconID;
+                uint32 auraSpellIcon = aurSpellInfo->SpellIconID;
 
                 uint32 aurMechMask = GetAllSpellMechanicMask(aurSpellInfo);
 
@@ -4197,11 +4201,15 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         // a form can give the player a new castbar with some spells.. this is a clientside process..
         // serverside just needs to register the new spells so that player isn't kicked as cheater
         if (target->GetTypeId() == TYPEID_PLAYER)
+        {
             for (uint32 i = 0; i < 8; ++i)
+            {
                 if (ssEntry->spellId[i])
                 {
                     ((Player*)target)->addSpell(ssEntry->spellId[i], true, false, false, false);
                 }
+            }
+        }
     }
     else
     {
@@ -4240,11 +4248,15 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
         // look at the comment in apply-part
         if (target->GetTypeId() == TYPEID_PLAYER)
+        {
             for (uint32 i = 0; i < 8; ++i)
+            {
                 if (ssEntry->spellId[i])
                 {
                     ((Player*)target)->removeSpell(ssEntry->spellId[i], false, false, false);
                 }
+            }
+        }
     }
 
     // adding/removing linked auras
@@ -4535,7 +4547,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
         // update active transform spell only not set or not overwriting negative by positive case
         if (!target->getTransForm() || !IsPositiveSpell(GetId()) || IsPositiveSpell(target->getTransForm()))
         {
-            target->setTransForm(GetId());
+            target->SetTransform(GetId());
         }
 
         // polymorph case
@@ -4558,7 +4570,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
     else                                                    // !apply
     {
         // ApplyModifier(true) will reapply it if need
-        target->setTransForm(0);
+        target->SetTransform(0);
         target->SetDisplayId(target->GetNativeDisplayId());
 
         // apply default equipment for creature case
@@ -6869,7 +6881,7 @@ void Aura::HandleModTotalPercentStat(bool apply, bool /*Real*/)
     }
 
     // recalculate current HP/MP after applying aura modifications (only for spells with 0x10 flag)
-    if ((miscValueB & (1 << STAT_STAMINA)) && maxHPValue > 0 && GetSpellProto()->HasAttribute(SPELL_ATTR_UNK4))
+    if ((miscValueB & (1 << STAT_STAMINA)) && maxHPValue > 0 && GetSpellProto()->HasAttribute(SPELL_ATTR_ABILITY))
     {
         uint32 newHPValue = uint32(float(target->GetMaxHealth()) / maxHPValue * curHPValue);
         target->SetHealth(newHPValue);

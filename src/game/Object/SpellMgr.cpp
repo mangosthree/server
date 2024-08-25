@@ -195,7 +195,7 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
             modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CASTING_TIME, castTime, spell);
         }
 
-        if (!spellInfo->HasAttribute(SPELL_ATTR_UNK4) && !spellInfo->HasAttribute(SPELL_ATTR_TRADESPELL))
+        if (!spellInfo->HasAttribute(SPELL_ATTR_ABILITY) && !spellInfo->HasAttribute(SPELL_ATTR_TRADESPELL))
         {
             castTime = uint32(castTime * spell->GetCaster()->GetFloatValue(UNIT_MOD_CAST_SPEED));
         }

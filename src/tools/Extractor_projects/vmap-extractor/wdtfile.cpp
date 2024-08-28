@@ -77,6 +77,7 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
 
         if (!strcmp(fourcc, "MAIN"))
         {
+            // Do Nothing
         }
         if (!strcmp(fourcc, "MWMO"))
         {

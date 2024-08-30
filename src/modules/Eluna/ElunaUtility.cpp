@@ -1,11 +1,11 @@
 /*
-* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2024 Eluna Lua Engine <https://elunaluaengine.github.io/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
 
 #include "ElunaUtility.h"
-#ifndef CMANGOS
+#if !defined ELUNA_CMANGOS
 #include "World.h"
 #include "Object.h"
 #include "Unit.h"
@@ -19,13 +19,10 @@
 #include "Server/DBCStores.h"
 #include "Util/Timer.h"
 #endif
-#if defined MANGOS
-#include "Timer.h"
-#endif
 
 uint32 ElunaUtil::GetCurrTime()
 {
-#if !defined CMANGOS && !defined VMANGOS
+#if defined ELUNA_TRINITY || ELUNA_MANGOS
     return getMSTime();
 #else
     return WorldTimer::getMSTime();
@@ -34,7 +31,7 @@ uint32 ElunaUtil::GetCurrTime()
 
 uint32 ElunaUtil::GetTimeDiff(uint32 oldMSTime)
 {
-#if !defined CMANGOS && !defined VMANGOS
+#if defined ELUNA_TRINITY || ELUNA_MANGOS
     return GetMSTimeDiffToNow(oldMSTime);
 #else
     return WorldTimer::getMSTimeDiff(oldMSTime, WorldTimer::getMSTime());
@@ -67,7 +64,7 @@ ElunaUtil::WorldObjectInRangeCheck::WorldObjectInRangeCheck(bool nearest, WorldO
         if (GameObject const* go = i_obj->ToGameObject())
             i_obj_unit = go->GetOwner();
     if (!i_obj_unit)
-#ifndef VMANGOS
+#if !defined ELUNA_VMANGOS
         i_obj_fact = sFactionTemplateStore.LookupEntry(14);
 #else
         i_obj_fact = sObjectMgr.GetFactionTemplateEntry(14);
@@ -101,19 +98,12 @@ bool ElunaUtil::WorldObjectInRangeCheck::operator()(WorldObject* u)
             {
                 if (i_obj_fact)
                 {
-#if ((defined TRINITY || AZEROTHCORE || CMANGOS || VMANGOS) && !defined CATA)
+#if !defined ELUNA_MANGOS
                     if ((i_obj_fact->IsHostileTo(*target->GetFactionTemplateEntry())) != (i_hostile == 1))
-                        return false;
-#elif defined CATA && defined TRINITY
-                    if ((i_obj_fact->IsHostileTo(target->GetFactionTemplateEntry())) != (i_hostile == 1))
-                        return false;
-#elif defined CATA && defined CMANGOS
-                    if ((i_obj_fact->IsHostileTo(*target->GetFactionTemplateEntry())) != (i_hostile == 1))
-                        return false;
 #else
                     if ((i_obj_fact->IsHostileTo(*target->getFactionTemplateEntry())) != (i_hostile == 1))
-                        return false;
 #endif
+                        return false;
                 }
                 else if (i_hostile == 1)
                     return false;

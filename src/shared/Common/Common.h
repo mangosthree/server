@@ -89,6 +89,8 @@
 #include <queue>
 #include <sstream>
 #include <algorithm>
+#include <thread>
+#include <atomic>
 
 #include <unordered_map>
 #include <unordered_set>

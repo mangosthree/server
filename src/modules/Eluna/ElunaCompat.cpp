@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 - 2022 Eluna Lua Engine <https://elunaluaengine.github.io/>
+ * Copyright (C) 2010 - 2024 Eluna Lua Engine <https://elunaluaengine.github.io/>
  * This program is free software licensed under GPL version 3
  * Please see the included DOCS/LICENSE.md for more information
  */
@@ -61,4 +61,28 @@ int lua_absindex(lua_State* L, int i) {
         i += lua_gettop(L) + 1;
     return i;
 }
+
+#if !defined LUAJIT_VERSION
+void* luaL_testudata(lua_State* L, int index, const char* tname) {
+    void* ud = lua_touserdata(L, index);
+    if (ud)
+    {
+        if (lua_getmetatable(L, index))
+        {
+            luaL_getmetatable(L, tname);
+            if (!lua_rawequal(L, -1, -2))
+                ud = NULL;
+            lua_pop(L, 2);
+            return ud;
+        }
+    }
+    return NULL;
+}
+
+void luaL_setmetatable(lua_State* L, const char* tname) {
+    lua_pushstring(L, tname);
+    lua_rawget(L, LUA_REGISTRYINDEX);
+    lua_setmetatable(L, -2);
+}
+#endif
 #endif

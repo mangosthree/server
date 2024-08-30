@@ -192,6 +192,14 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
         --loot->unlootedCount;
 
         player->SendNewItem(newitem, uint32(item->count), false, false, true);
+
+#ifdef ENABLE_ELUNA
+        if (Eluna* e = player->GetEluna())
+        {
+            e->OnLootItem(player, newitem, item->count, lguid);
+        }
+#endif /* ENABLE_ELUNA */
+
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item->itemid, item->count);
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, loot->loot_type, item->count);
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_EPIC_ITEM, item->itemid, item->count);
@@ -239,6 +247,14 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
             {
                 pLoot = &bones->loot;
                 shareMoney = false;
+
+                // Used by Eluna
+                #ifdef ENABLE_ELUNA
+                if (Eluna* e = player->GetEluna())
+                {
+                    e->OnLootMoney(player, pLoot->gold);
+                }
+                #endif /* ENABLE_ELUNA */
             }
 
             break;
@@ -323,7 +339,10 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
 
         // Used by Eluna
 #ifdef ENABLE_ELUNA
-        sEluna->OnLootMoney(player, pLoot->gold);
+        if (Eluna* e = player->GetEluna())
+        {
+            e->OnLootMoney(player, pLoot->gold);
+        }
 #endif /* ENABLE_ELUNA */
 
         pLoot->gold = 0;
@@ -631,7 +650,10 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 
     // Used by Eluna
 #ifdef ENABLE_ELUNA
-    sEluna->OnLootItem(target, newitem, item.count, lootguid);
+    if (Eluna* e = target->GetEluna())
+    {
+        e->OnLootItem(target, newitem, item.count, lootguid);
+    }
 #endif /* ENABLE_ELUNA */
 
     // mark as looted

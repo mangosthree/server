@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2024 Eluna Lua Engine <https://elunaluaengine.github.io/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
@@ -23,7 +23,7 @@ extern "C"
  * A set of bindings from keys of type `K` to Lua references.
  */
 template<typename K>
-class BindingMap : public ElunaUtil::Lockable
+class BindingMap
 {
 private:
     lua_State* L;
@@ -78,8 +78,6 @@ public:
      */
     uint64 Insert(const K& key, int ref, uint32 shots)
     {
-        Guard guard(GetLock());
-
         uint64 id = (++maxBindingID);
         BindingList& list = bindings[key];
         list.push_back(std::unique_ptr<Binding>(new Binding(L, id, ref, shots)));
@@ -92,8 +90,6 @@ public:
      */
     void Clear(const K& key)
     {
-        Guard guard(GetLock());
-
         if (bindings.empty())
             return;
 
@@ -118,8 +114,6 @@ public:
      */
     void Clear()
     {
-        Guard guard(GetLock());
-
         if (bindings.empty())
             return;
 
@@ -134,8 +128,6 @@ public:
      */
     void Remove(uint64 id)
     {
-        Guard guard(GetLock());
-
         auto iter = id_lookup_table.find(id);
         if (iter == id_lookup_table.end())
             return;
@@ -163,8 +155,6 @@ public:
      */
     bool HasBindingsFor(const K& key)
     {
-        Guard guard(GetLock());
-
         if (bindings.empty())
             return false;
 
@@ -181,8 +171,6 @@ public:
      */
     void PushRefsFor(const K& key)
     {
-        Guard guard(GetLock());
-
         if (bindings.empty())
             return;
 
@@ -279,7 +267,7 @@ public:
     {
         return std::hash<typename std::underlying_type<T>::type>()(t);
     }
-
+    
     template <typename T, typename std::enable_if<!std::is_enum<T>::value>::type* = nullptr>
     static inline result_type hash(T const & t)
     {
@@ -367,7 +355,7 @@ namespace std
 
         hash_helper::result_type operator()(argument_type const& k) const
         {
-            return hash_helper::hash(k.event_id, k.instance_id, k.guid.GetRawValue());
+            return hash_helper::hash(k.event_id, k.instance_id, k.guid);
         }
     };
 }

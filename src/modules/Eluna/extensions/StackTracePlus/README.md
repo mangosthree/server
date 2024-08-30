@@ -9,10 +9,10 @@ function names when they're not available, etc, so, instead of
 
     lua5.1.exe: D:\trunk_git\sources\stacktraceplus\test\test.lua:10: attempt to concatenate a nil value
     stack traceback:
-    D:\trunk_git\sources\stacktraceplus\test\test.lua:10: in function <D:\trunk_git\sources\stacktraceplus\test\test.lua:7>
-    (tail call): ?
-    D:\trunk_git\sources\stacktraceplus\test\test.lua:15: in main chunk
-    [C]: ?
+	D:\trunk_git\sources\stacktraceplus\test\test.lua:10: in function <D:\trunk_git\sources\stacktraceplus\test\test.lua:7>
+	(tail call): ?
+	D:\trunk_git\sources\stacktraceplus\test\test.lua:15: in main chunk
+	[C]: ?
 
 you'll get
 
@@ -21,13 +21,13 @@ you'll get
     ===============
     (2)  C function 'function: 00A8F418'
     (3) Lua function 'g' at file 'D:\trunk_git\sources\stacktraceplus\test\test.lua:10' (best guess)
-    Local variables:
-     fun = table module
-     str = string: "hey"
-     tb = table: 027DCBE0  {dummy:1, blah:true, foo:bar}
-     (*temporary) = nil
-     (*temporary) = string: "text"
-     (*temporary) = string: "attempt to concatenate a nil value"
+	Local variables:
+	 fun = table module
+	 str = string: "hey"
+	 tb = table: 027DCBE0  {dummy:1, blah:true, foo:bar}
+	 (*temporary) = nil
+	 (*temporary) = string: "text"
+	 (*temporary) = string: "attempt to concatenate a nil value"
     (4) tail call
     (5) main chunk of file 'D:\trunk_git\sources\stacktraceplus\test\test.lua' at line 15
     (6)  C function 'function: 002CA480'
@@ -42,13 +42,13 @@ local STP = require "StackTracePlus"
 
 debug.traceback = STP.stacktrace
 function test()
-    local s = "this is a string"
-    local n = 42
-    local t = { foo = "bar" }
-    local co = coroutine
-    local cr = coroutine.create
+	local s = "this is a string"
+	local n = 42
+	local t = { foo = "bar" }
+	local co = coroutine
+	local cr = coroutine.create
 
-    error("an error")
+	error("an error")
 end
 test()
 ```
@@ -80,15 +80,15 @@ local STP = require "StackTracePlus"
 
 debug.traceback = STP.stacktrace
 local my_table = {
-    f = function() end
+	f = function() end
 }
 function my_function()
 end
 
 function test(data, func)
-    local s = "this is a string"
+	local s = "this is a string"
 
-    error("an error")
+	error("an error")
 end
 
 STP.add_known_table(my_table, "A description for my_table")

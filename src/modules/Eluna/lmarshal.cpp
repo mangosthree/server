@@ -1,7 +1,7 @@
 /*
  * lmarshal.c
  * A Lua library for serializing and deserializing Lua values
- * Richard Hundt <richardhundt@gmail.com>, Eluna Lua Engine <http://emudevs.com/>
+ * Richard Hundt <richardhundt@gmail.com>, Eluna Lua Engine <https://elunaluaengine.github.io/>
  *
  * License: MIT
  *
@@ -204,8 +204,8 @@ static void mar_encode_value(lua_State *L, mar_Buffer *buf, int val, size_t *idx
         }
         else {
             mar_Buffer rec_buf;
-            unsigned int i;
             lua_Debug ar;
+            decltype(ar.nups) i;
             lua_pop(L, 1); /* pop nil */
 
             lua_pushvalue(L, -1);
@@ -293,8 +293,8 @@ static void mar_encode_value(lua_State *L, mar_Buffer *buf, int val, size_t *idx
 
                 buf_write(L, (const char*)&tag, MAR_CHR, buf);
                 buf_write(L, (const char*)&rec_buf.head, MAR_I32, buf);
-                buf_write(L, rec_buf.data, rec_buf.head, buf);
-                buf_done(L, &rec_buf);
+		        buf_write(L, rec_buf.data, rec_buf.head, buf);
+		        buf_done(L, &rec_buf);
             }
             else {
                 luaL_error(L, "attempt to encode userdata (no __persist hook)");
@@ -322,14 +322,16 @@ static int mar_encode_table(lua_State *L, mar_Buffer *buf, size_t *idx)
 }
 
 #define mar_incr_ptr(l) \
-    if (((*p)-buf)+(ptrdiff_t)(l) > (ptrdiff_t)len) luaL_error(L, "bad code"); (*p) += (l);
+    if (((*p)-buf)+(ptrdiff_t)(l) > (ptrdiff_t)len) \
+        luaL_error(L, "bad code"); \
+    (*p) += (l);
 
 #define mar_next_len(l,T) \
-    if (((*p)-buf)+(ptrdiff_t)sizeof(T) > (ptrdiff_t)len) luaL_error(L, "bad code"); \
+    if (((*p)-buf)+(ptrdiff_t)sizeof(T) > (ptrdiff_t)len) \
+        luaL_error(L, "bad code"); \
     l = *(T*)*p; (*p) += sizeof(T);
 
-static void mar_decode_value
-    (lua_State *L, const char *buf, size_t len, const char **p, size_t *idx)
+static void mar_decode_value(lua_State *L, const char *buf, size_t len, const char **p, size_t *idx)
 {
     size_t l;
     char val_type = **p;
@@ -570,7 +572,7 @@ static const luaL_Reg R[] =
     {"encode",      mar_encode},
     {"decode",      mar_decode},
     {"clone",       mar_clone},
-    {NULL,        NULL}
+    {NULL,	    NULL}
 };
 
 int luaopen_marshal(lua_State *L)

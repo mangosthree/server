@@ -230,7 +230,7 @@ target_compile_definitions(shared
         $<$<CONFIG:Debug>:MANGOS_DEBUG>
         MANGOS_ENDIAN=${ENDIAN_VALUE}
         $<$<BOOL:${ENDIAN_VALUE}>:ARCH_IS_BIG_ENDIAN>
-        $<$<BOOL:${SCRIPT_LIB_ELUNA}>:ENABLE_ELUNA>
+        $<$<BOOL:${SCRIPT_LIB_ELUNA}>:ENABLE_ELUNA ELUNA_EXPANSION=3 ELUNA_MANGOS>
 )
 
 target_link_libraries(shared

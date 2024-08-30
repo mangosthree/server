@@ -54,6 +54,7 @@
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
+#include "ElunaConfig.h"
 #include "ElunaEventMgr.h"
 #endif /* ENABLE_ELUNA */
 
@@ -1201,7 +1202,7 @@ void Object::ForceValuesUpdateAtIndex(uint32 index)
 
 WorldObject::WorldObject() :
 #ifdef ENABLE_ELUNA
-    elunaEvents(NULL),
+    elunaEvents(nullptr),
 #endif /* ENABLE_ELUNA */
     m_transportInfo(NULL),
     m_currMap(NULL),
@@ -1214,7 +1215,7 @@ WorldObject::~WorldObject()
 {
 #ifdef ENABLE_ELUNA
     delete elunaEvents;
-    elunaEvents = NULL;
+    elunaEvents = nullptr;
 #endif /* ENABLE_ELUNA */
 }
 
@@ -1226,7 +1227,10 @@ void WorldObject::CleanupsBeforeDelete()
 void WorldObject::Update(uint32 update_diff, uint32 time_diff)
 {
 #ifdef ENABLE_ELUNA
-    elunaEvents->Update(update_diff);
+    if (elunaEvents) // can be null on maps without eluna
+    {
+        elunaEvents->Update(update_diff);
+    }
 #endif /* ENABLE_ELUNA */
 }
 
@@ -1890,13 +1894,6 @@ void WorldObject::SetMap(Map* map)
     // lets save current map's Id/instanceId
     m_mapId = map->GetId();
     m_InstanceId = map->GetInstanceId();
-
-#ifdef ENABLE_ELUNA
-    if (!elunaEvents)
-    {
-        elunaEvents = new ElunaEventProcessor(&Eluna::GEluna, this);
-    }
-#endif
 }
 
 void WorldObject::ResetMap()
@@ -1963,7 +1960,10 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 #ifdef ENABLE_ELUNA
     if (Unit* summoner = ToUnit())
     {
-        sEluna->OnSummoned(pCreature, summoner);
+        if (Eluna* e = GetEluna())
+        {
+            e->OnSummoned(pCreature, summoner);
+        }
     }
 #endif /* ENABLE_ELUNA */
 
@@ -2409,3 +2409,15 @@ void WorldObject::SetActiveObjectState(bool active)
     }
     m_isActiveObject = active;
 }
+
+#ifdef ENABLE_ELUNA
+Eluna* WorldObject::GetEluna() const
+{
+    if (IsInWorld())
+    {
+        return GetMap()->GetEluna();
+    }
+
+    return nullptr;
+}
+#endif /* ENABLE_ELUNA */

@@ -701,7 +701,8 @@ namespace LuaCreature
         return 1;
     }
 
-#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
+// TODO: ELUNAFIX
+#if defined(CLASSIC) || defined(TBC) || defined(WOTLK) || defined(CATA)
     /**
      * Returns the [Creature]'s shield block value.
      *
@@ -709,7 +710,11 @@ namespace LuaCreature
      */
     int GetShieldBlockValue(Eluna* E, Creature* creature)
     {
+#if defined(CATA)
+        E->Push(creature->GetShieldBlockDamageValue());
+#else
         E->Push(creature->GetShieldBlockValue());
+#endif
         return 1;
     }
 #endif

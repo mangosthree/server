@@ -115,7 +115,8 @@ namespace LuaGuild
         return 1;
     }
 
-#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
+// TODO: ELUNAFIX
+#if defined(CLASSIC) || defined(TBC) || defined(WOTLK) || defined(CATA)
     /**
      * Sets the leader of this [Guild]
      *

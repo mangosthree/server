@@ -724,7 +724,8 @@ namespace LuaPlayer
         return 1;
     }
 #endif
-#if defined(CLASSIC) || defined(TBC) || defined (WOTLK)
+// TODO: ELUNAFIX
+#if defined(CLASSIC) || defined(TBC) || defined (WOTLK) || defined(CATA)
     /**
      * Returns the [Player]s current shield block value
      *
@@ -732,7 +733,12 @@ namespace LuaPlayer
      */
     int GetShieldBlockValue(Eluna* E, Player* player)
     {
+// TODO: ELUNAFIX
+#if defined(CATA)
+        E->Push(player->GetShieldBlockDamageValue());
+#else
         E->Push(player->GetShieldBlockValue());
+#endif
         return 1;
     }
 #endif

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2024 Eluna Lua Engine <https://elunaluaengine.github.io/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
@@ -8,16 +8,13 @@
 #define _ELUNA_INSTANCE_DATA_H
 
 #include "LuaEngine.h"
-#if defined(TRINITY) || AZEROTHCORE
+#if defined ELUNA_TRINITY
 #include "InstanceScript.h"
-#elif defined CMANGOS
+#include "Map.h"
+#elif defined ELUNA_CMANGOS
 #include "Maps/InstanceData.h"
 #else
 #include "InstanceData.h"
-#endif
-
-#ifdef TRINITY
-#include "Map.h"
 #endif
 
 /*
@@ -66,7 +63,7 @@ private:
     std::string lastSaveData;
 
 public:
-#ifdef TRINITY
+#if defined ELUNA_TRINITY
     ElunaInstanceAI(Map* map) : InstanceData(map->ToInstanceMap())
     {
     }
@@ -76,7 +73,7 @@ public:
     }
 #endif
 
-#ifndef TRINITY
+#if !defined ELUNA_TRINITY
     void Initialize() override;
 #endif
 
@@ -85,14 +82,14 @@ public:
      *   data table to/from the core.
      */
     void Load(const char* data) override;
-#if defined TRINITY || AZEROTHCORE
+#if defined ELUNA_TRINITY
     // Simply calls Save, since the functions are a bit different in name and data types on different cores
     std::string GetSaveData() override
     {
         return Save();
     }
     const char* Save() const;
-#elif defined VMANGOS
+#elif defined ELUNA_VMANGOS
     const char* Save() const;
 #else
     const char* Save() const override;
@@ -113,14 +110,14 @@ public:
     /*
      * These methods allow non-Lua scripts (e.g. DB, C++) to get/set instance data.
      */
-#ifndef VMANGOS
+#if !defined ELUNA_VMANGOS
     uint32 GetData(uint32 key) const override;
 #else
     uint32 GetData(uint32 key) const;
 #endif
     void SetData(uint32 key, uint32 value) override;
 
-#ifndef VMANGOS
+#if !defined ELUNA_VMANGOS
     uint64 GetData64(uint32 key) const override;
 #else
     uint64 GetData64(uint32 key) const;
@@ -135,34 +132,34 @@ public:
         // If Eluna is reloaded, it will be missing our instance data.
         // Reload here instead of waiting for the next hook call (possibly never).
         // This avoids having to have an empty Update hook handler just to trigger the reload.
-        if (!sEluna->HasInstanceData(instance))
+        if (!instance->GetEluna()->HasInstanceData(instance))
             Reload();
 
-        sEluna->OnUpdateInstance(this, diff);
+        instance->GetEluna()->OnUpdateInstance(this, diff);
     }
 
     bool IsEncounterInProgress() const override
     {
-        return sEluna->OnCheckEncounterInProgress(const_cast<ElunaInstanceAI*>(this));
+        return instance->GetEluna()->OnCheckEncounterInProgress(const_cast<ElunaInstanceAI*>(this));
     }
 
     void OnPlayerEnter(Player* player) override
     {
-        sEluna->OnPlayerEnterInstance(this, player);
+        instance->GetEluna()->OnPlayerEnterInstance(this, player);
     }
 
-#if defined TRINITY || AZEROTHCORE
+#if defined ELUNA_TRINITY
     void OnGameObjectCreate(GameObject* gameobject) override
 #else
     void OnObjectCreate(GameObject* gameobject) override
 #endif
     {
-        sEluna->OnGameObjectCreate(this, gameobject);
+        instance->GetEluna()->OnGameObjectCreate(this, gameobject);
     }
 
     void OnCreatureCreate(Creature* creature) override
     {
-        sEluna->OnCreatureCreate(this, creature);
+        instance->GetEluna()->OnCreatureCreate(this, creature);
     }
 };
 

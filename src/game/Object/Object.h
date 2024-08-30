@@ -34,6 +34,10 @@
 #include "GameTime.h"
 #include "Util.h"
 
+#ifdef ENABLE_ELUNA
+#include "LuaValue.h"
+#endif /* ENABLE_ELUNA */
+
 #include <set>
 #include <string>
 
@@ -91,7 +95,9 @@ class UpdateMask;
 class InstanceData;
 class TerrainInfo;
 #ifdef ENABLE_ELUNA
+class Eluna;
 class ElunaEventProcessor;
+class LuaVal;
 #endif /* ENABLE_ELUNA */
 class TransportInfo;
 struct MangosStringLocale;
@@ -718,6 +724,10 @@ class WorldObject : public Object
 
 #ifdef ENABLE_ELUNA
         ElunaEventProcessor* elunaEvents;
+
+        Eluna* GetEluna() const;
+
+        LuaVal lua_data = LuaVal({});
 #endif /* ENABLE_ELUNA */
 
     protected:

@@ -44,12 +44,18 @@
 #include "ScriptMgr.h"
 #include "CreatureLinkingMgr.h"
 #include "DynamicTree.h"
+#ifdef ENABLE_ELUNA
+#include "LuaValue.h"
+#endif /* ENABLE_ELUNA */
 
 #include <bitset>
 #include <list>
 
 struct CreatureInfo;
 class Creature;
+#ifdef ENABLE_ELUNA
+class Eluna;
+#endif /* ENABLE_ELUNA */
 class Unit;
 class WorldPacket;
 class InstanceData;
@@ -320,6 +326,12 @@ class Map : public GridRefManager<NGridType>
         void SetWeather(uint32 zoneId, WeatherType type, float grade, bool permanently);
 
 
+#ifdef ENABLE_ELUNA
+        Eluna* GetEluna() const;
+
+        LuaVal lua_data = LuaVal({});
+#endif /* ENABLE_ELUNA */
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 
@@ -415,6 +427,10 @@ class Map : public GridRefManager<NGridType>
 
         // WeatherSystem
         WeatherSystem* m_weatherSystem;
+
+#ifdef ENABLE_ELUNA
+        Eluna* eluna;
+#endif /* ENABLE_ELUNA */
 };
 
 class WorldMap : public Map

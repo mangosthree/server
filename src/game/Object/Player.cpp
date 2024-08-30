@@ -21618,7 +21618,7 @@ void Player::RemovePetActionBar()
 void Player::AddSpellMod(Aura* aura, bool apply)
 {
     Modifier const* mod = aura->GetModifier();
-    Opcodes opcode = (mod->m_auraname == SPELL_AURA_ADD_FLAT_MODIFIER) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
+    OpcodesList opcode = (mod->m_auraname == SPELL_AURA_ADD_FLAT_MODIFIER) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
 
     uint32 modTypeCount = 0;    // count of mods per one mod->op
     WorldPacket data(opcode, 4 + 4 + 1 + 1 + 4);

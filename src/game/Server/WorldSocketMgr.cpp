@@ -53,9 +53,13 @@ WorldSocketMgr::WorldSocketMgr()
 
 WorldSocketMgr::~WorldSocketMgr()
 {
-    if (reactor_) delete reactor_;
+    if (reactor_)
     {
-        if (acceptor_) delete acceptor_;
+        delete reactor_;
+    }
+    if (acceptor_)
+    {
+        delete acceptor_;
     }
 }
 
@@ -142,9 +146,13 @@ int WorldSocketMgr::StartNetwork(ACE_INET_Addr& addr)
 
 void WorldSocketMgr::StopNetwork()
 {
-    if (acceptor_) acceptor_->close();
+    if (acceptor_)
     {
-        if (reactor_)  reactor_->end_reactor_event_loop();
+        acceptor_->close();
+    }
+    if (reactor_)
+    {
+        reactor_->end_reactor_event_loop();
     }
     wait();
 }

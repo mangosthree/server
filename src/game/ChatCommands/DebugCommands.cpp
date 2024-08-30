@@ -169,7 +169,7 @@ bool ChatHandler::HandleDebugRecvOpcodeCommand(char* /*args*/)
         return false;
     }
 
-    WorldPacket *data = new WorldPacket(Opcodes(opcode), 10);
+    WorldPacket *data = new WorldPacket(OpcodesList(opcode), 10);
 
     std::string type;
     while (stream >> type)
@@ -276,7 +276,7 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
         return false;
     }
 
-    WorldPacket data(Opcodes(opcode), 0);
+    WorldPacket data(OpcodesList(opcode), 0);
 
     std::string type;
     while (stream >> type)
@@ -1446,7 +1446,7 @@ bool ChatHandler::HandleDebugSpellModsCommand(char* args)
         return false;
     }
 
-    Opcodes opcode;
+    OpcodesList opcode;
     if (strncmp(typeStr, "flat", strlen(typeStr)) == 0)
     {
         opcode = SMSG_SET_FLAT_SPELL_MODIFIER;

@@ -147,10 +147,6 @@ typedef Opcodes OpcodesList;
 #if defined ELUNA_MANGOS
 #define CORE_NAME               "MaNGOS"
 #define CORE_VERSION            PROJECT_REVISION_NR
-// TODO: ELUNAFIX
-//#if ELUNA_EXPANSION >= EXP_CATA
-//#define NUM_MSG_TYPES           NUM_OPCODE_HANDLERS
-//#endif
 #endif
 
 #if defined ELUNA_TRINITY
@@ -186,7 +182,7 @@ typedef Opcodes OpcodesList;
 #define TEAM_NEUTRAL            TEAM_INDEX_NEUTRAL
 #endif
 
-// TODO: ELUNAFIX
+
 #if defined ELUNA_VMANGOS
 #define PLAYER_FIELD_LIFETIME_HONORABLE_KILLS   PLAYER_FIELD_LIFETIME_HONORBALE_KILLS
 #endif

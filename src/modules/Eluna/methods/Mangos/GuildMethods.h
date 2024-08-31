@@ -115,8 +115,6 @@ namespace LuaGuild
         return 1;
     }
 
-// TODO: ELUNAFIX
-#if defined(CLASSIC) || defined(TBC) || defined(WOTLK) || defined(CATA)
     /**
      * Sets the leader of this [Guild]
      *
@@ -129,7 +127,6 @@ namespace LuaGuild
         guild->SetLeader(player->GET_GUID());
         return 0;
     }
-#endif
 
 #ifndef CLASSIC
     /**

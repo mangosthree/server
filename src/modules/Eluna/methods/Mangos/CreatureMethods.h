@@ -701,8 +701,6 @@ namespace LuaCreature
         return 1;
     }
 
-// TODO: ELUNAFIX
-#if defined(CLASSIC) || defined(TBC) || defined(WOTLK) || defined(CATA)
     /**
      * Returns the [Creature]'s shield block value.
      *
@@ -710,14 +708,13 @@ namespace LuaCreature
      */
     int GetShieldBlockValue(Eluna* E, Creature* creature)
     {
-#if defined(CATA)
+#if ELUNA_EXPANSION == EXP_CATA
         E->Push(creature->GetShieldBlockDamageValue());
 #else
         E->Push(creature->GetShieldBlockValue());
 #endif
         return 1;
     }
-#endif
 
     /**
      * Returns the guid of the [Creature] that is used as the ID in the database

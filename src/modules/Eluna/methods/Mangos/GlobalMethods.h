@@ -1748,8 +1748,12 @@ namespace LuaGlobalFunctions
 
         auto const itemlist = items->m_items;
         for (auto itr = itemlist.begin(); itr != itemlist.end(); ++itr)
+// TODO: ELUNAFIX
+#if defined(CATA)
+            eObjectMgr->RemoveVendorItem(entry, (*itr)->item, (*itr)->type);
+#else
             eObjectMgr->RemoveVendorItem(entry, (*itr)->item);
-
+#endif
         return 0;
     }
 

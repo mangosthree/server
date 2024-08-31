@@ -1935,7 +1935,8 @@ namespace LuaUnit
         float maxHeight = E->CHECKVAL<float>(6);
         uint32 id = E->CHECKVAL<uint32>(7, 0);
 
-#if WOTLK
+// TODO: ELUNAFIX
+#if WOTLK || CATA
         unit->GetMotionMaster()->MoveJump(x, y, z, zSpeed, maxHeight, id);
 #else
         Position pos(x, y, z);
@@ -2178,8 +2179,14 @@ namespace LuaUnit
 
         for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
-            uint8 eff = spellEntry->Effect[i];
-            if (eff >= TOTAL_SPELL_EFFECTS)
+// TODO: ELUNAFIX
+#if defined(CATA)
+            SpellEffectEntry const* spellEffect = spellEntry->GetSpellEffect(SpellEffectIndex(i));
+            uint8 eff = spellEffect->Effect;
+#else
+                uint8 eff = spellEntry->Effect[i];
+#endif
+                if (eff >= TOTAL_SPELL_EFFECTS)
                 continue;
 
             if (IsAreaAuraEffect(eff) ||

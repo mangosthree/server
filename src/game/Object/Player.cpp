@@ -26532,7 +26532,7 @@ void Player::LearnPetTalent(ObjectGuid petGuid, uint32 talentId, uint32 talentRa
     DETAIL_LOG("PetTalentID: %u Rank: %u Spell: %u\n", talentId, talentRank, spellid);
 #ifdef ENABLE_ELUNA
     if (Eluna* e = pet->GetEluna())
-    {    
+    {
         e->OnLearnTalents(this, talentId, talentRank, spellid);
     }
 #endif /*ENABLE_ELUNA*/

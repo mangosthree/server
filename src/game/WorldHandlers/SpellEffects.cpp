@@ -351,8 +351,6 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
     if (unitTarget && unitTarget->IsAlive())
     {
         SpellClassOptionsEntry const* classOptions = m_spellInfo->GetSpellClassOptions();
-        uint32 spellIcon = m_spellInfo->SpellIconID;
-        uint32 schoolMask = m_spellInfo->SchoolMask;
 
         switch(m_spellInfo->GetSpellFamilyName())
         {
@@ -475,7 +473,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
             case SPELLFAMILY_MAGE:
                 // remove Arcane Blast buffs at any non-Arcane Blast arcane damage spell.
                 // NOTE: it removed at hit instead cast because currently spell done-damage calculated at hit instead cast
-                if ((schoolMask & SPELL_SCHOOL_MASK_ARCANE) && !(classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x20000000)))
+                if ((m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_ARCANE) && !(classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x20000000)))
                 {
                     m_caster->RemoveAurasDueToSpell(36032); // Arcane Blast buff
                 }
@@ -527,9 +525,8 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
             }
             case SPELLFAMILY_WARLOCK:
             {
-                uint32 spellIcon = m_spellInfo->SpellIconID;
                 // Incinerate Rank 1 & 2
-                if ((classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x00004000000000)) && spellIcon==2128)
+                if ((classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x00004000000000)) && m_spellInfo->SpellIconID==2128)
                 {
                     // Incinerate does more dmg (dmg*0.25) if the target have Immolate debuff.
                     // Check aura state for speed but aura state set not only for Immolate spell
@@ -644,9 +641,8 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     Unit::AuraList const& ImprMindBlast = m_caster->GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
                     for (Unit::AuraList::const_iterator i = ImprMindBlast.begin(); i != ImprMindBlast.end(); ++i)
                     {
-                        uint32 itrSpellProtoIcon = (*i)->GetSpellProto()->SpellIconID;
                         if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_PRIEST &&
-                            (itrSpellProtoIcon == 95))
+                            ((*i)->GetSpellProto()->SpellIconID == 95))
                         {
                             int chance = (*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1);
                             if (roll_chance_i(chance))
@@ -661,9 +657,8 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
             case SPELLFAMILY_DRUID:
             {
                 SpellEffectEntry const* rakeSpellEffect = m_spellInfo->GetSpellEffect(EFFECT_INDEX_2);
-                uint32 spellVisual = m_spellInfo->SpellVisual[0];
                 // Ferocious Bite
-                if (m_caster->GetTypeId()==TYPEID_PLAYER && (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x000800000)) && spellVisual == 6587)
+                if (m_caster->GetTypeId()==TYPEID_PLAYER && (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x000800000)) && m_spellInfo->SpellVisual[0]==6587)
                 {
                     // converts up to 30 points of energy into ($f1+$AP/410) additional damage
                     float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
@@ -728,8 +723,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                             Unit::AuraList const& auraList = ((Player*)m_caster)->GetAurasByType(SPELL_AURA_MOD_DURATION_OF_EFFECTS_BY_DISPEL);
                             for (Unit::AuraList::const_iterator iter = auraList.begin(); iter != auraList.end(); ++iter)
                             {
-                                uint32 itrSpellProtoIcon = (*iter)->GetSpellProto()->SpellIconID;
-                                if ((*iter)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_ROGUE && itrSpellProtoIcon == 1960)
+                                if ((*iter)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_ROGUE && (*iter)->GetSpellProto()->SpellIconID == 1960)
                                 {
                                     if (int32 chance = (*iter)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2))
                                         if (roll_chance_i(chance))
@@ -776,7 +770,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
             case SPELLFAMILY_HUNTER:
             {
                 // Gore
-                if (spellIcon == 1578)
+                if (m_spellInfo->SpellIconID == 1578)
                 {
                     if (m_caster->HasAura(57627))           // Charge 6 sec post-affect
                     {
@@ -805,7 +799,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     damage += int32(ap * 0.2f) + int32(holy * 32 / 100);
                 }
                 // Judgement of Vengeance/Corruption ${1+0.22*$SPH+0.14*$AP} + 10% for each application of Holy Vengeance/Blood Corruption on the target
-                else if ((classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x800000000)) && spellIcon == 2292)
+                else if ((classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x800000000)) && m_spellInfo->SpellIconID==2292)
                 {
                     uint32 debuf_id;
                     switch (m_spellInfo->Id)
@@ -892,8 +886,6 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
     {
         return;
     }
-    uint32 spellIcon = m_spellInfo->SpellIconID;
-    uint32 spellVisual = m_spellInfo->SpellVisual[0];
 
     // selection by spell family
     switch(m_spellInfo->GetSpellFamilyName())
@@ -2171,9 +2163,8 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     // big fire
                     GameObject* pGo = NULL;
-                    uint32 rangeIndex = m_spellInfo->rangeIndex;
 
-                    float fMaxDist = GetSpellMaxRange(sSpellRangeStore.LookupEntry(rangeIndex));
+                    float fMaxDist = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
 
                     MaNGOS::NearestGameObjectEntryInPosRangeCheck go_check_big(*unitTarget, 187675, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), fMaxDist);
                     MaNGOS::GameObjectSearcher<MaNGOS::NearestGameObjectEntryInPosRangeCheck> checker1(pGo, go_check_big);
@@ -2336,8 +2327,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     // look for gameobject within max spell range of unitTarget, and respawn if found
                     GameObject* pGo = NULL;
 
-                    uint32 rangeIndex = m_spellInfo->rangeIndex;
-                    float fMaxDist = GetSpellMaxRange(sSpellRangeStore.LookupEntry(rangeIndex));
+                    float fMaxDist = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
 
                     MaNGOS::NearestGameObjectEntryInPosRangeCheck go_check(*unitTarget, 187675, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), fMaxDist);
                     MaNGOS::GameObjectSearcher<MaNGOS::NearestGameObjectEntryInPosRangeCheck> checker(pGo, go_check);
@@ -2884,8 +2874,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     // Expecting pTargetDummy to be summoned by AI at death of target creatures.
 
                     Creature* pTargetDummy = NULL;
-                    uint32 rangeIndex = m_spellInfo->rangeIndex;
-                    float fRange = GetSpellMaxRange(sSpellRangeStore.LookupEntry(rangeIndex));
+                    float fRange = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
 
                     MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster, 28523, true, false, fRange * 2);
                     MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pTargetDummy, u_check);
@@ -2992,8 +2981,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     // look for gameobjects within max spell range of unitTarget, and respawn if found
                     std::list<GameObject*> lList;
 
-                    uint32 rangeIndex = m_spellInfo->rangeIndex;
-                    float fMaxDist = GetSpellMaxRange(sSpellRangeStore.LookupEntry(rangeIndex));
+                    float fMaxDist = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
 
                     MaNGOS::GameObjectEntryInPosRangeCheck go_check(*unitTarget, 182071, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), fMaxDist);
                     MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectEntryInPosRangeCheck> checker(lList, go_check);
@@ -3892,9 +3880,8 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     Unit::AuraList const& auras = m_caster->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
                     for (Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                     {
-                        uint32 itrSpellProtoIcon = (*itr)->GetSpellProto()->SpellIconID;
                         // Only Sudden Death have this SpellIconID with SPELL_AURA_PROC_TRIGGER_SPELL
-                        if (itrSpellProtoIcon == 1989)
+                        if ((*itr)->GetSpellProto()->SpellIconID == 1989)
                         {
                             // saved rage top stored in next affect
                             uint32 lastrage = (*itr)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1) * 10;
@@ -4010,8 +3997,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
                     for(Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
                     {
-                        uint32 itrSpellProtoIcon = (*itr)->GetSpellProto()->SpellIconID;
-                        if((*itr)->GetSpellProto()->GetSpellFamilyName()==SPELLFAMILY_WARLOCK && itrSpellProtoIcon == 208)
+                        if((*itr)->GetSpellProto()->GetSpellFamilyName()==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 208)
                         {
                             mana = ((*itr)->GetModifier()->m_amount + 100)* mana / 100;
                         }
@@ -4023,8 +4009,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     Unit::AuraList const& mod = m_caster->GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
                     for (Unit::AuraList::const_iterator itr = mod.begin(); itr != mod.end(); ++itr)
                     {
-                        uint32 itrSpellProtoIcon = (*itr)->GetSpellProto()->SpellIconID;
-                        if((*itr)->GetSpellProto()->GetSpellFamilyName()==SPELLFAMILY_WARLOCK && itrSpellProtoIcon == 1982)
+                        if((*itr)->GetSpellProto()->GetSpellFamilyName()==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 1982)
                         {
                             manaFeedVal+= (*itr)->GetModifier()->m_amount;
                         }
@@ -4225,8 +4210,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 Unit::AuraList const& decSpeedList = unitTarget->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
                 for (Unit::AuraList::const_iterator iter = decSpeedList.begin(); iter != decSpeedList.end(); ++iter)
                 {
-                    uint32 itrSpellProtoIcon = (*iter)->GetSpellProto()->SpellIconID;
-                    if (itrSpellProtoIcon == 15 && (*iter)->GetSpellProto()->GetDispel()==0)
+                    if ((*iter)->GetSpellProto()->SpellIconID==15 && (*iter)->GetSpellProto()->GetDispel()==0)
                     {
                         found = true;
                         break;
@@ -4327,7 +4311,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
         }
         case SPELLFAMILY_PALADIN:
         {
-            switch (spellIcon)
+            switch (m_spellInfo->SpellIconID)
             {
                 case 156:                                   // Holy Shock
                 {
@@ -4461,7 +4445,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
         {
             SpellClassOptionsEntry const* shamClassOptions = m_spellInfo->GetSpellClassOptions();
             // Cleansing Totem
-            if (shamClassOptions && (shamClassOptions->SpellFamilyFlags & UI64LIT(0x0000000004000000)) && spellIcon == 1673)
+            if (shamClassOptions && (shamClassOptions->SpellFamilyFlags & UI64LIT(0x0000000004000000)) && m_spellInfo->SpellIconID==1673)
             {
                 if (unitTarget)
                 {
@@ -4487,10 +4471,8 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         Unit::AuraList const& mDummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
                         for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
                         {
-                            uint32 itrSpellProtoIcon = (*i)->GetSpellProto()->SpellIconID;
-
                             // only its have dummy with specific icon
-                            if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_SHAMAN && itrSpellProtoIcon == 338)
+                            if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_SHAMAN && (*i)->GetSpellProto()->SpellIconID == 338)
                             {
                                 damage += (*i)->GetModifier()->m_amount * damage / 100;
                             }
@@ -4576,7 +4558,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 return;
             }
             // Fire Nova
-            if (spellIcon == 33)
+            if (m_spellInfo->SpellIconID == 33)
             {
                 // fire totems slot
                 Totem* totem = m_caster->GetTotem(TOTEM_SLOT_FIRE);
@@ -4663,9 +4645,8 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 Unit::AuraList const& auraMod = m_caster->GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
                 for (Unit::AuraList::const_iterator iter = auraMod.begin(); iter != auraMod.end(); ++iter)
                 {
-                    uint32 itrSpellProtoIcon = (*iter)->GetSpellProto()->SpellIconID;
                     // only required spell have spellicon for SPELL_AURA_ADD_FLAT_MODIFIER
-                    if (itrSpellProtoIcon == 2751 && (*iter)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT)
+                    if ((*iter)->GetSpellProto()->SpellIconID == 2751 && (*iter)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT)
                     {
                         bp += (*iter)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2) * bp / 100;
                         break;
@@ -4707,8 +4688,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 Unit::AuraList const& dummyList = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
                 for (Unit::AuraList::const_iterator itr = dummyList.begin(); itr != dummyList.end(); ++itr)
                 {
-                    uint32 itrSpellProtoIcon = (*itr)->GetSpellProto()->SpellIconID;
-                    if ((*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT && itrSpellProtoIcon == 2710)
+                    if ((*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DEATHKNIGHT && (*itr)->GetSpellProto()->SpellIconID == 2710)
                     {
                         if (roll_chance_i((*itr)->GetModifier()->m_amount)) // don't consume if found
                         {
@@ -5084,9 +5064,7 @@ void Spell::EffectJump(SpellEffectEntry const* effect)
     // Try to normalize Z coord because GetContactPoint do nothing with Z axis
     m_caster->UpdateAllowedPositionZ(x, y, z);
 
-    uint32 spellSpeed = m_spellInfo->speed;
-
-    float speed = spellSpeed ? spellSpeed : 27.0f;
+    float speed = m_spellInfo->speed ? m_spellInfo->speed : 27.0f;
     m_caster->GetMotionMaster()->MoveDestination(x, y, z, o, speed, 2.5f);
 }
 
@@ -6402,9 +6380,6 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
     }
 
     bool summonResult = false;
-
-    uint32 spellIcon = m_spellInfo->SpellIconID;
-
     switch (summon_prop->Group)
     {
             // faction handled later on, or loaded from template
@@ -6438,7 +6413,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
                     if (prop_id == 61)                      // mixed guardians, totems, statues
                     {
                         // * Stone Statue, etc  -- fits much better totem AI
-                        if (spellIcon == 2056)
+                        if (m_spellInfo->SpellIconID == 2056)
                         {
                             summonResult = DoSummonTotem(effect);
                         }
@@ -7711,7 +7686,6 @@ void Spell::EffectEnchantItemTmp(SpellEffectEntry const* effect)
     }
 
     uint32 enchant_id = effect->EffectMiscValue;
-            uint32 spellVisual = m_spellInfo->SpellVisual[0];
 
     if (!enchant_id)
     {
@@ -7745,17 +7719,17 @@ void Spell::EffectEnchantItemTmp(SpellEffectEntry const* effect)
         duration = 1800;                                    // 30 mins
     }
     // other cases with this SpellVisual already selected
-    else if (spellVisual == 215)
+    else if (m_spellInfo->SpellVisual[0] == 215)
     {
         duration = 1800;                                    // 30 mins
     }
     // some fishing pole bonuses
-    else if (spellVisual == 563)
+    else if (m_spellInfo->SpellVisual[0] == 563)
     {
         duration = 600;                                     // 10 mins
     }
     // shaman rockbiter enchantments
-    else if (spellVisual == 0)
+    else if (m_spellInfo->SpellVisual[0] == 0)
     {
         duration = 1800;                                    // 30 mins
     }
@@ -8105,7 +8079,6 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
     int32 spell_bonus = 0;                                  // bonus specific for spell
 
     SpellClassOptionsEntry const* classOptions = m_spellInfo->GetSpellClassOptions();
-    uint32 spellIcon = m_spellInfo->SpellIconID;
 
     switch(m_spellInfo->GetSpellFamilyName())
     {
@@ -8134,9 +8107,8 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
         }
         case SPELLFAMILY_WARRIOR:
         {
-            uint32 spellVisual = m_spellInfo->SpellVisual[0];
             // Devastate
-            if (spellVisual == 12295 && spellIcon == 1508)
+            if (m_spellInfo->SpellVisual[0] == 12295 && m_spellInfo->SpellIconID == 1508)
             {
                 // Sunder Armor
                 Aura* sunder = unitTarget->GetAura(SPELL_AURA_MOD_RESISTANCE_PCT, SPELLFAMILY_WARRIOR, UI64LIT(0x0000000000004000), 0x00000000, m_caster->GetObjectGuid());
@@ -8265,7 +8237,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
         {
             // Blood Strike, Heart Strike, Obliterate
             // Blood-Caked Strike
-            if (spellIcon == 1736)
+            if (m_spellInfo->SpellIconID == 1736)
             {
                 uint32 count = 0;
                 Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
@@ -8279,17 +8251,17 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                 if (count)
                 {
                     // Effect 1(for Blood-Caked Strike)/3(other) damage is bonus
-                    float bonus = count * CalculateDamage(spellIcon == 1736 ? EFFECT_INDEX_0 : EFFECT_INDEX_2, unitTarget) / 100.0f;
+                    float bonus = count * CalculateDamage(m_spellInfo->SpellIconID == 1736 ? EFFECT_INDEX_0 : EFFECT_INDEX_2, unitTarget) / 100.0f;
                     // Blood Strike, Blood-Caked Strike and Obliterate store bonus*2
                     if ((classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0002000000400000)) ||
-                        spellIcon == 1736)
+                        m_spellInfo->SpellIconID == 1736)
                         bonus /= 2.0f;
 
                     totalDamagePercentMod *= 1.0f + bonus;
                 }
 
                 // Heart Strike secondary target
-                if (spellIcon == 3145)
+                if (m_spellInfo->SpellIconID == 3145)
                     if (m_targets.getUnitTarget() != unitTarget)
                     {
                         weaponDamagePercentMod /= 2.0f;
@@ -11791,9 +11763,8 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
                     for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
                     {
-                        uint32 itrSpellProtoIcon = (*i)->GetSpellProto()->SpellIconID;
                         // Invigoration (master talent)
-                        if ((*i)->GetModifier()->m_miscvalue == 8 && itrSpellProtoIcon == 3487)
+                        if ((*i)->GetModifier()->m_miscvalue == 8 && (*i)->GetSpellProto()->SpellIconID == 3487)
                         {
                             if (roll_chance_i((*i)->GetModifier()->m_amount))
                             {
@@ -12734,8 +12705,7 @@ void Spell::EffectBlock(SpellEffectEntry const* /*effect*/)
 
 void Spell::EffectLeapForward(SpellEffectEntry const* effect)
 {
-    uint32 rangeIndex = m_spellInfo->rangeIndex;
-    float dist = GetSpellRadius(sSpellRadiusStore.LookupEntry(rangeIndex));
+    float dist = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->rangeIndex));
     const float IN_OR_UNDER_LIQUID_RANGE = 0.8f;                // range to make player under liquid or on liquid surface from liquid level
 
     G3D::Vector3 prevPos, nextPos;
@@ -13133,9 +13103,7 @@ void Spell::EffectPlayerPull(SpellEffectEntry const* effect)
     // Try to normalize Z coord because GetContactPoint do nothing with Z axis
     unitTarget->UpdateAllowedPositionZ(x, y, z);
 
-    uint32 spellSpeed = m_spellInfo->speed;
-
-    float speed = spellSpeed ? spellSpeed : 27.0f;
+    float speed = m_spellInfo->speed ? m_spellInfo->speed : 27.0f;
     unitTarget->GetMotionMaster()->MoveJump(x, y, z, speed, 2.5f);
 }
 
@@ -13364,24 +13332,21 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
     }
 
     float fx, fy, fz;
-    uint32 spellSpeed = m_spellInfo->speed;
 
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
         m_targets.getDestination(fx, fy, fz);
     }
     // FIXME: this can be better check for most objects but still hack
-    else if (effect->GetRadiusIndex() && spellSpeed == 0)
+    else if (effect->GetRadiusIndex() && m_spellInfo->speed == 0)
     {
         float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->GetRadiusIndex()));
         m_caster->GetClosePoint(fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
     }
     else
     {
-        uint32 rangeIndex = m_spellInfo->rangeIndex;
-
-        float min_dis = GetSpellMinRange(sSpellRangeStore.LookupEntry(rangeIndex));
-        float max_dis = GetSpellMaxRange(sSpellRangeStore.LookupEntry(rangeIndex));
+        float min_dis = GetSpellMinRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
+        float max_dis = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
         float dis = rand_norm_f() * (max_dis - min_dis) + min_dis;
 
         // special code for fishing bobber (TARGET_SELF_FISHING), should not try to avoid objects

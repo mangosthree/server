@@ -17741,6 +17741,7 @@ void Player::SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, ObjectGuid guid
 void Player::SendQuestGiverStatusMultiple()
 {
     uint32 count = 0;
+    uint32 dialogStatus = DIALOG_STATUS_NONE;
 
     WorldPacket data(SMSG_QUESTGIVER_STATUS_MULTIPLE, 4);
     data << uint32(count);                                  // placeholder
@@ -17762,15 +17763,15 @@ void Player::SendQuestGiverStatusMultiple()
                 continue;
             }
 
-            uint8 dialogStatus = sScriptMgr.GetDialogStatus(this, questgiver);
+            dialogStatus = sScriptMgr.GetDialogStatus(this, questgiver);
 
-            if (dialogStatus == DIALOG_STATUS_REWARD_REP)
+            if (dialogStatus > DIALOG_STATUS_REWARD_REP)
             {
                 dialogStatus = GetSession()->getDialogStatus(this, questgiver, DIALOG_STATUS_NONE);
             }
 
             data << questgiver->GetObjectGuid();
-            data << uint8(dialogStatus);
+            data << dialogStatus;
             ++count;
         }
         else if (itr->IsGameObject())
@@ -17787,15 +17788,15 @@ void Player::SendQuestGiverStatusMultiple()
                 continue;
             }
 
-            uint8 dialogStatus = sScriptMgr.GetDialogStatus(this, questgiver);
+            dialogStatus = sScriptMgr.GetDialogStatus(this, questgiver);
 
-            if (dialogStatus == DIALOG_STATUS_REWARD_REP)
+            if (dialogStatus > DIALOG_STATUS_REWARD_REP)
             {
                 dialogStatus = GetSession()->getDialogStatus(this, questgiver, DIALOG_STATUS_NONE);
             }
 
             data << questgiver->GetObjectGuid();
-            data << uint8(dialogStatus);
+            data << dialogStatus;
             ++count;
         }
     }

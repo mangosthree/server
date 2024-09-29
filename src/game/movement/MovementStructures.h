@@ -2158,6 +2158,63 @@ MovementStatusElements MovementFallResetSequence[] =
     MSEEnd,
 };
 
+/*
+ *   This sequence is incomplete, but we can capture the
+ *   player coordinates to avoid issues with
+ *   location/position mismatch.
+ *
+ *   Further trial and error is required to figure out
+ *   the proper sequence, but this works for now.
+ */
+MovementStatusElements MovementSetCanFlySequence[] =
+{
+    MSEPositionZ,
+    MSEPositionX,
+    MSEPositionY,
+    MSEHasTransportData,
+    MSEHasFallData,
+    MSEHasMovementFlags,
+    MSEHasMovementFlags2,
+    MSEHasTimestamp,
+    MSEHasSplineElevation,
+    MSEHasSpline,
+    MSEHasPitch,
+    MSEHasTransportTime2,
+    MSEHasFallDirection,
+    MSEGuidByte2,
+    MSEGuidByte0,
+    MSEGuidByte4,
+    MSEGuidByte7,
+    MSEGuidByte5,
+    MSEGuidByte1,
+    MSEGuidByte3,
+    MSEGuidByte6,
+    MSETransportPositionZ,
+    MSETransportGuidByte3,
+    MSETransportGuidByte5,
+    MSETransportGuidByte4,
+    MSETransportSeat,
+    MSETransportPositionX,
+    MSETransportGuidByte2,
+    MSETransportTime2,
+    MSETransportPositionY,
+    MSETransportGuidByte1,
+    MSETransportTime,
+    MSETransportGuidByte7,
+    MSETransportGuidByte0,
+    MSETransportGuidByte6,
+    MSESplineElevation,
+    MSEFallSinAngle,
+    MSEFallCosAngle,
+    MSEFallHorizontalSpeed,
+    MSEFallVerticalSpeed,
+    MSEFallTime,
+    MSEPitch,
+    MSETimestamp,
+    MSEHasOrientation,
+    MSEEnd,
+};
+
 MovementStatusElements MovementSetCanFlyAckSequence[] =
 {
     MSEPositionY,
@@ -2693,6 +2750,8 @@ MovementStatusElements* GetMovementStatusElementsSequence(uint16 opcode)
             return MovementFallResetSequence;
         case CMSG_MOVE_JUMP:
             return MovementJumpSequence;
+        case CMSG_MOVE_SET_CAN_FLY:
+            return MovementSetCanFlySequence;
         case CMSG_MOVE_SET_CAN_FLY_ACK:
             return MovementSetCanFlyAckSequence;
         case CMSG_MOVE_SET_FACING:

@@ -8,7 +8,7 @@ We recommend using the [installation guide](INSTALL.md) especially if you are no
 It allows you to simply use `git pull` followed by `git submodule update` to update your source and we will handle the merging and maintenance with the official core source. Naturally you still need to handle updating the database as instructed by the core's wiki or instructions.
 
 ### Merging Eluna with MaNGOS
-Eluna is merged with [official MaNGOS](http://getmangos.eu/) by default.
+Eluna is merged with [official MaNGOS](https://www.getmangos.eu/) by default.
 
 ### Merging Eluna with cMaNGOS
 ```

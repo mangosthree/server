@@ -8,7 +8,7 @@ We are currently working hard to make Eluna better from inside and outside.
 If you are having trouble with installation or scripts, please feel free to open an issue.
 For documentation and reference see [Eluna API](http://elunaluaengine.github.io/) and [Lua reference manual](http://www.lua.org/manual/5.2/).
 
-Special thanks to [MaNGOS](http://getmangos.eu/) for their continued support and use of Eluna. Please head over to their forums and show them some love!
+Special thanks to [MaNGOS](https://www.getmangos.eu/) for their continued support and use of Eluna. Please head over to their forums and show them some love!
 
 ## Community
 
@@ -49,7 +49,7 @@ Core sources and forks with required modifications for Eluna:
 
 ## Links
 
-* [MaNGOS](http://getmangos.eu/)
+* [MaNGOS](https://www.getmangos.eu/)
 * [cMaNGOS](http://cmangos.net/)
 * [TrinityCore](http://www.trinitycore.org/)
 * [AzerothCore](http://www.azerothcore.org/)

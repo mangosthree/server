@@ -50,6 +50,10 @@
 
 class ObjectGuid;
 
+/**
+ * @brief
+ *
+ */
 class ByteBufferException
 {
     public:
@@ -721,6 +725,11 @@ class ByteBuffer
             _rpos = wpos();
         }
 
+        /**
+         * @brief
+         *
+         * @return size_t
+         */
         size_t wpos() const { return _wpos; }
 
         /**
@@ -779,7 +788,14 @@ class ByteBuffer
             {
                 throw ByteBufferException(false, pos, sizeof(T), size());
             }
+#if defined(__arm__)
+            // ARM has alignment issues, we need to use memcpy to avoid them
+            T val;
+            memcpy((void*)&val, (void*)&_storage[pos], sizeof(T));
+#else
             T val = *((T const*)&_storage[pos]);
+#endif
+
             EndianConvert(val);
             return val;
         }
@@ -920,6 +936,11 @@ class ByteBuffer
             return f;
         }
 
+        /**
+         * @brief
+         *
+         * @return const uint8
+         */
         const uint8* contents() const { return &_storage[0]; }
 
         /**

@@ -3,8 +3,8 @@
  * area triggers, creatures, game objects, instances, items, and spells beyond
  * the default database scripting in mangos-one.
  *
- * Copyright (C) 2006-2013  ScriptDev2 <http://www.scriptdev2.com/>
- * Copyright (C) 2014-2023 MaNGOS <https://getmangos.eu>
+ * Copyright (C) 2006-2013 ScriptDev2 <http://www.scriptdev2.com/>
+ * Copyright (C) 2014-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

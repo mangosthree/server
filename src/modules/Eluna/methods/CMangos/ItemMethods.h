@@ -257,7 +257,7 @@ namespace LuaItem
         const ItemTemplate* temp = item->GetTemplate();
         std::string name = temp->Name1;
         if (ItemLocale const* il = eObjectMgr->GetItemLocale(temp->ItemId))
-            ObjectMgr::GetLocaleString(il->Name, static_cast<LocaleConstant>(locale), name);
+            eObjectMgr->GetItemLocaleStrings(temp->ItemId, locale, &name);
 
 #if ELUNA_EXPANSION >= EXP_TBC
         if (int32 itemRandPropId = item->GetItemRandomPropertyId())
@@ -612,6 +612,114 @@ namespace LuaItem
 #endif
 
     /**
+     * Returns the stat info of the specified stat slot of this [Item]
+     *
+     * @param uint8 statSlot : the stat slot specified
+     * @return int32 statValue
+     * @return int32 statType
+     */
+    int GetStatInfo(Eluna* E, Item* item)
+    {
+        uint8 statSlot = E->CHECKVAL<uint8>(2);
+        int32 statValue = 0;
+        int32 statType = 0;
+
+        if (statSlot > 0 && statSlot <= MAX_ITEM_PROTO_STATS)
+        {
+            auto& statEntry = item->GetTemplate()->ItemStat[statSlot - 1];
+            statValue = statEntry.ItemStatValue;
+            statType = statEntry.ItemStatType;
+        }
+
+        E->Push(statValue);
+        E->Push(statType);
+        return 2;
+    }
+
+    /**
+     * Returns the damage info of the specified damage slot of this [Item]
+     *
+     * @param uint8 damageSlot : the damage slot specified (1 or 2), slot does not apply to Cata
+     * @return uint32 damageType
+     * @return float minDamage
+     * @return float maxDamage
+     */
+    int GetDamageInfo(Eluna* E, Item* item)
+    {
+        uint8 damageSlot = E->CHECKVAL<uint8>(2); // Not used in Cata but reading for compatibility
+#if ELUNA_EXPANSION < EXP_CATA
+        uint32 damageType = 0;
+        float damageMin = 0;
+        float damageMax = 0;
+
+        if (damageSlot > 0 && damageSlot <= MAX_ITEM_PROTO_DAMAGES)
+        {
+            auto& damageEntry = item->GetTemplate()->Damage[damageSlot - 1];
+            damageType = damageEntry.DamageType;
+            damageMin = damageEntry.DamageMin;
+            damageMax = damageEntry.DamageMax;
+        }
+
+        E->Push(damageType);
+        E->Push(damageMin);
+        E->Push(damageMax);
+#else
+        E->Push(item->GetTemplate()->DamageType);
+        E->Push(item->GetTemplate()->GetMinDamage());
+        E->Push(item->GetTemplate()->GetMaxDamage());
+#endif
+        return 3;
+    }
+
+    /**
+     * Returns the base attack speed of this [Item]
+     *
+     * @return uint32 speed
+     */
+    int GetSpeed(Eluna* E, Item* item)
+    {
+        E->Push(item->GetTemplate()->Delay);
+        return 1;
+    }
+
+    /**
+     * Returns the base armor of this [Item]
+     *
+     * @return uint32 armor
+     */
+    int GetArmor(Eluna* E, Item* item)
+    {
+#if ELUNA_EXPANSION < EXP_CATA
+        E->Push(item->GetTemplate()->Armor);
+#else
+        E->Push(item->GetTemplate()->GetArmor());
+#endif
+        return 1;
+    }
+
+    /**
+     * Returns the max durability of this [Item]
+     *
+     * @return uint32 maxDurability
+     */
+    int GetMaxDurability(Eluna* E, Item* item)
+    {
+        E->Push(item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY));
+        return 1;
+    }
+
+    /**
+     * Returns the current durability of this [Item]
+     *
+     * @return uint32 durabiliy
+     */
+    int GetDurability(Eluna* E, Item* item)
+    {
+        E->Push(item->GetUInt32Value(ITEM_FIELD_DURABILITY));
+        return 1;
+    }
+
+    /**
      * Returns the random property ID of this [Item]
      *
      * @return uint32 randomPropertyId
@@ -807,6 +915,12 @@ namespace LuaItem
         { "GetRandomProperty", &LuaItem::GetRandomProperty },
         { "GetItemSet", &LuaItem::GetItemSet },
         { "GetBagSize", &LuaItem::GetBagSize },
+        { "GetStatInfo",& LuaItem::GetStatInfo },
+        { "GetDamageInfo", &LuaItem::GetDamageInfo },
+        { "GetSpeed", &LuaItem::GetSpeed },
+        { "GetArmor", &LuaItem::GetArmor },
+        { "GetMaxDurability", &LuaItem::GetMaxDurability },
+        { "GetDurability", &LuaItem::GetDurability },
 #if ELUNA_EXPANSION >= EXP_TBC
         { "GetRandomSuffix", &LuaItem::GetRandomSuffix },
 #else

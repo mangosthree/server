@@ -68,23 +68,41 @@ class ParameterDoc(object):
 
 class MethodDoc(object):
     """The documentation data of an Eluna method."""
-    @params(self=object, name=str, description=str, table=TableDict, prototypes=[str], parameters=[ParameterDoc], returned=[ParameterDoc])
-    def __init__(self, name, description, table, prototypes, parameters, returned):
+    @params(self=object, name=str, description=str, tables=[TableDict], prototypes=[str], parameters=[ParameterDoc], returned=[ParameterDoc])
+    def __init__(self, name, description, tables, prototypes, parameters, returned):
         self.name = name
         self.prototypes = prototypes
-        self.table = table
+        self.tables = tables
         self.parameters = parameters
         self.returned = returned
-        
-        if table:
-            # Generate Markdown Table
-            md_table = '| ' + ' | '.join(table['columns']) + ' |\n'  # Header
-            md_table += '| ' + ' | '.join(['---'] * len(table['columns'])) + ' |\n'  # Separator
 
-            for row in table['values']:
-                md_table += '| ' + ' | '.join(row) + ' |\n'  # Rows
+        if tables:
+            html_tables = []
+            
+            for table in tables:
+                # Generate Markdown Table for each table
+                md_table = '| ' + ' | '.join(table['columns']) + ' |\n'  # Header
+                md_table += '| ' + ' | '.join(['---'] * len(table['columns'])) + ' |\n'  # Separator
+
+                for row in table['values']:
+                    md_row = '| '
+                    for value in row:
+                        if isinstance(value, dict):
+                            # If the value is a dictionary, format the values and preserve the type in the documentation
+                            md_row += self._format_dict_values(value)
+                        else:
+                            md_row += value
+                        md_row += ' | '
+                    md_table += md_row + '\n'
                 
-            self.table = markdown.markdown(md_table, extensions=['tables'])
+                # Convert the generated Markdown table to HTML
+                html_table = markdown.markdown(md_table, extensions=['tables'])
+                
+                # Append the HTML table to the list
+                html_tables.append(html_table)
+
+            # Combine all HTML tables into a single string (separated by two newlines)
+            self.tables = ''.join(html_tables)
         
         # Parse the description as Markdown.
         self.description = markdown.markdown(description)
@@ -92,6 +110,17 @@ class MethodDoc(object):
         self.short_description = self.description.split('</p>')[0][3:]
         # If it has a description, it is "documented".
         self.documented = self.description != ''
+
+    """Helper function to parse table dictionaries. Only used in Register methods for now."""
+    def _format_dict_values(self, d):
+        html_str = ""
+        html_parts = []
+
+        for key, value in d.items():
+            html_parts.append(f'<span title="{value}">{key}</span>')
+
+        html_str = ', '.join(html_parts)
+        return html_str
 
 
 class MangosClassDoc(object):
@@ -140,12 +169,12 @@ class ClassParser(object):
     # Regular expressions for parsing a table.
     table_regex = re.compile(r"\s*\*\s@table")
     table_columns_regex = re.compile(r"\s*\*\s@columns\s*\[(.+)\]")
-    table_values_regex = re.compile(r"\s*\*\s@values\s*\[(.+)\]")
+    table_values_regex = re.compile(r"\s*\*\s@values\s*\[(.+?)\]")
     
-    param_regex = re.compile(r"""\s*\*\s@param\s    # The @param tag starts with opt. whitespace followed by "* @param ".
-                                 ([^\s]+)\s(\w+)?   # The data type, a space, and the name of the param.
-                                 (?:\s=\s(\w+))?    # The default value: a = surrounded by spaces, followed by text.
-                                 (?:\s:\s(.+))?     # The description: a colon surrounded by spaces, followed by text.
+    param_regex = re.compile(r"""\s*\*\s@param\s        # The @param tag starts with opt. whitespace followed by "* @param ".
+                                 ([^\s]+)\s(\w+)?       # The data type, a space, and the name of the param.
+                                 (?:\s=\s([^\s:]+))?    # The default value: a space, =, and a value that can include periods but stops at whitespace or a colon.
+                                 (?:\s:\s(.+))?         # The description: a colon surrounded by spaces, followed by text.
                                  """, re.X)
     # This is the same as the @param tag, minus the default value part.
     return_regex = re.compile(r"""\s*\*\s@return\s
@@ -153,9 +182,9 @@ class ClassParser(object):
                                   (?:\s:\s(.+))?
                                   """, re.X)
     proto_regex = re.compile(r"""\s*\*\s@proto\s
-                                 ([\w\s,]+)?          # The list of arguments.
-                                 (?:=\s)?             # An equals sign and a space separate the args and returns.
-                                 (?:\(([\w\s,]+)\))?  # The list of return values, in parens.
+                                 ([\w\s,]+)?            # The list of arguments.
+                                 (?:=\s)?               # An equals sign and a space separate the args and returns.
+                                 (?:\(([\w\s,]+)\))?    # The list of return values, in parens.
                                  """, re.X)
 
     comment_end_regex = re.compile(r"\s*\*/")  # The end of the comment portion, i.e. */
@@ -182,7 +211,7 @@ class ClassParser(object):
         self.returned = []
         self.method_name = None
         self.prototypes = []
-        self.table = {}
+        self.tables = []
 
     def handle_class_body(self, match):
         text = match.group(1)
@@ -193,19 +222,36 @@ class ClassParser(object):
         self.description += text + '\n'
 
     def handle_table(self, line):
-        self.table = {
+        new_table = {
             "columns": [],
             "values": []
         }
+        self.tables.append(new_table)
 
     def handle_table_columns(self, match):
-        if self.table:
-            self.table["columns"] = match.group(1).split(", ")
-    
+        if self.tables:
+            self.tables[-1]["columns"] = match.group(1).split(", ")
+
     def handle_table_values(self, match):
-        if self.table:
-            values = re.findall(r'(?:[^,"]|"(?:\\.|[^"])*")+', match.group(1))
-            self.table["values"].append([v.strip(' "') for v in values])
+        if self.tables:
+            values = re.findall(r'(?:[^,<>"]|"(?:\\.|[^"])*"|<[^>]*>)+', match.group(1))
+            processed_values = []
+
+            for value in values:
+                stripped_value = value.strip(' "')
+                # Parse the content inside < >
+                if stripped_value.startswith("<") and stripped_value.endswith(">"):
+                    # Remove prefix and suffix
+                    inner_content = stripped_value[1:-1]
+
+                    # Convert inner key-value pairs to a dict
+                    pair_regex = re.compile(r"(\w+):\s*([\w\s]+)")
+                    stripped_value = dict(pair_regex.findall(inner_content))
+                
+                processed_values.append(stripped_value)
+            
+            # Append the processed values to the last table
+            self.tables[-1]["values"].append(processed_values)
 
     def handle_param(self, match):
         data_type, name, default, description = match.group(1), match.group(2), match.group(3), match.group(4)
@@ -282,7 +328,7 @@ class ClassParser(object):
             # Format the method name into each prototype.
             self.prototypes = [proto.format(self.method_name) for proto in self.prototypes]
 
-        self.methods.append(MethodDoc(self.method_name, self.description, self.table, self.prototypes, self.params, self.returned))
+        self.methods.append(MethodDoc(self.method_name, self.description, self.tables, self.prototypes, self.params, self.returned))
 
     # Table of which handler is used to handle each regular expressions.
     regex_handlers = {
@@ -313,7 +359,7 @@ class ClassParser(object):
         proto_regex: [table_regex, param_regex, return_regex, proto_regex, comment_end_regex, body_regex],
         table_regex: [table_regex, table_columns_regex, param_regex, return_regex, comment_end_regex, body_regex],
         table_columns_regex: [table_values_regex, param_regex, return_regex, comment_end_regex, body_regex],
-        table_values_regex: [table_values_regex, param_regex, return_regex, comment_end_regex, body_regex],
+        table_values_regex: [table_values_regex, table_regex, param_regex, return_regex, comment_end_regex, body_regex],
         param_regex: [table_regex, param_regex, return_regex, comment_end_regex, body_regex],
         return_regex: [return_regex, comment_end_regex],
         comment_end_regex: [end_regex],

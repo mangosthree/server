@@ -85,14 +85,11 @@ namespace LuaGameObject
      * Returns the state of a [GameObject]
      * Below are client side [GOState]s off of 3.3.5a
      *
-     * <pre>
-     * enum GOState
-     * {
-     *     GO_STATE_ACTIVE             = 0,                        // show in world as used and not reset (closed door open)
-     *     GO_STATE_READY              = 1,                        // show in world as ready (closed door close)
-     *     GO_STATE_ACTIVE_ALTERNATIVE = 2                         // show in world as used in alt way and not reset (closed door open by cannon fire)
-     * };
-     * </pre>
+     * @table
+     * @columns [GOState, ID, Comment]
+     * @values [GO_STATE_ACTIVE, 0, "show in world as used and not reset (closed door open)"]
+     * @values [GO_STATE_READY, 1, "show in world as ready (closed door close)"]
+     * @values [GO_STATE_ACTIVE_ALTERNATIVE, 2, "show in world as used in alt way and not reset (closed door open by cannon fire)"]
      *
      * @return [GOState] goState
      */
@@ -106,15 +103,12 @@ namespace LuaGameObject
      * Returns the [LootState] of a [GameObject]
      * Below are [LootState]s off of 3.3.5a
      *
-     * <pre>
-     * enum LootState
-     * {
-     *     GO_NOT_READY = 0,
-     *     GO_READY,                                               // can be ready but despawned, and then not possible activate until spawn
-     *     GO_ACTIVATED,
-     *     GO_JUST_DEACTIVATED
-     * };
-     * </pre>
+     * @table
+     * @columns [LootState, ID, Comment]
+     * @values [GO_NOT_READY, 0, ""]
+     * @values [GO_READY, 1, "can be ready but despawned, and then not possible activate until spawn"]
+     * @values [GO_ACTIVATED, 2, ""]
+     * @values [GO_JUST_DEACTIVATED, 3, ""]
      *
      * @return [LootState] lootState
      */
@@ -164,14 +158,11 @@ namespace LuaGameObject
     /**
      * Sets the state of a [GameObject]
      *
-     * <pre>
-     * enum GOState
-     * {
-     *     GO_STATE_ACTIVE             = 0,                        // show in world as used and not reset (closed door open)
-     *     GO_STATE_READY              = 1,                        // show in world as ready (closed door close)
-     *     GO_STATE_ACTIVE_ALTERNATIVE = 2                         // show in world as used in alt way and not reset (closed door open by cannon fire)
-     * };
-     * </pre>
+     * @table
+     * @columns [GOState, ID, Comment]
+     * @values [GO_STATE_ACTIVE, 0, "show in world as used and not reset (closed door open)"]
+     * @values [GO_STATE_READY, 1, "show in world as ready (closed door close)"]
+     * @values [GO_STATE_ACTIVE_ALTERNATIVE, 2, "show in world as used in alt way and not reset (closed door open by cannon fire)"]
      *
      * @param [GOState] state : all available go states can be seen above
      */
@@ -193,15 +184,12 @@ namespace LuaGameObject
      * Sets the [LootState] of a [GameObject]
      * Below are [LootState]s off of 3.3.5a
      *
-     * <pre>
-     * enum LootState
-     * {
-     *     GO_NOT_READY = 0,
-     *     GO_READY,                                               // can be ready but despawned, and then not possible activate until spawn
-     *     GO_ACTIVATED,
-     *     GO_JUST_DEACTIVATED
-     * };
-     * </pre>
+     * @table
+     * @columns [LootState, ID, Comment]
+     * @values [GO_NOT_READY, 0, ""]
+     * @values [GO_READY, 1, "can be ready but despawned, and then not possible activate until spawn"]
+     * @values [GO_ACTIVATED, 2, ""]
+     * @values [GO_JUST_DEACTIVATED, 3, ""]
      *
      * @param [LootState] state : all available loot states can be seen above
      */
@@ -310,6 +298,21 @@ namespace LuaGameObject
         return 0;
     }
 
+    /**
+     * Sets whether or not the [GameObject] will be spawned by default
+     *
+     * Primarily used for temporary spawns.
+     *
+     * @param bool spawn = true : if false, it will prevent the [GameObject] from respawning by default
+     */
+    int SetSpawnedByDefault(Eluna* E, GameObject* go)
+    {
+        bool spawn = E->CHECKVAL<bool>(2, true);
+
+        go->SetSpawnedByDefault(spawn);
+        return 0;
+    }
+
     ElunaRegister<GameObject> GameObjectMethods[] =
     {
         // Getters
@@ -324,6 +327,7 @@ namespace LuaGameObject
         { "SetGoState", &LuaGameObject::SetGoState },
         { "SetLootState", &LuaGameObject::SetLootState },
         { "SetRespawnTime", &LuaGameObject::SetRespawnTime },
+        { "SetSpawnedByDefault", &LuaGameObject::SetSpawnedByDefault },
 
         // Boolean
         { "IsTransport", &LuaGameObject::IsTransport },

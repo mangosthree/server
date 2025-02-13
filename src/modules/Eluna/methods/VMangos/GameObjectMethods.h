@@ -300,6 +300,21 @@ namespace LuaGameObject
         go->SetRespawnTime(respawn);
         return 0;
     }
+
+    /**
+     * Sets whether or not the [GameObject] will be spawned by default
+     *
+     * Primarily used for temporary spawns.
+     *
+     * @param bool spawn = true : if false, it will prevent the [GameObject] from respawning by default
+     */
+    int SetSpawnedByDefault(Eluna* E, GameObject* go)
+    {
+        bool spawn = E->CHECKVAL<bool>(2, true);
+
+        go->SetSpawnedByDefault(spawn);
+        return 0;
+    }
     
     ElunaRegister<GameObject> GameObjectMethods[] =
     {
@@ -315,6 +330,7 @@ namespace LuaGameObject
         { "SetGoState", &LuaGameObject::SetGoState },
         { "SetLootState", &LuaGameObject::SetLootState },
         { "SetRespawnTime", &LuaGameObject::SetRespawnTime },
+        { "SetSpawnedByDefault", &LuaGameObject::SetSpawnedByDefault },
 
         // Boolean
         { "IsTransport", &LuaGameObject::IsTransport },

@@ -15075,7 +15075,6 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
     switch (gossipOptionId)
     {
         case GOSSIP_OPTION_GOSSIP:
-        {
             if (menuData.m_gAction_poi)
             {
                 PlayerTalkClass->SendPointOfInterest(menuData.m_gAction_poi);
@@ -15094,7 +15093,6 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
             }
 
             break;
-        }
         case GOSSIP_OPTION_SPIRITHEALER:
             if (IsDead())
             {
@@ -15168,7 +15166,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
         }
     }
 
-    if (menuData.m_gAction_script)
+    if (pMenuData && menuData.m_gAction_script)
     {
         if (pSource->GetTypeId() == TYPEID_UNIT)
         {

@@ -92,6 +92,7 @@
 #define GOSSIP_TEXT_JEWELCRAFTING       "Jewelcrafting"
 #define GOSSIP_TEXT_INSCRIPTION         "Inscription"
 
+// Enumeration for trade skills and levels
 enum
 {
     // Skill defines
@@ -111,6 +112,7 @@ enum
     TRADESKILL_JEWLCRAFTING        = 14,
     TRADESKILL_INSCRIPTION         = 15,
 
+    // Skill levels
     TRADESKILL_LEVEL_NONE          = 0,
     TRADESKILL_LEVEL_APPRENTICE    = 1,
     TRADESKILL_LEVEL_JOURNEYMAN    = 2,
@@ -146,14 +148,20 @@ enum
     GOSSIP_SENDER_SEC_STABLEMASTER = 10
 };
 
+/**
+ * @brief Gets the skill level of a player for a specific skill.
+ * @param pPlayer Pointer to the player.
+ * @param uiSkill Skill ID.
+ * @return Skill level of the player.
+ */
 extern uint32 GetSkillLevel(Player* pPlayer, uint32 uiSkill);
 
-// Defined fuctions to use with player.
+// Defined functions to use with player.
 
-// This fuction add's a menu item,
+// This function adds a menu item,
 // Icon Id
 // Text
-// Sender(this is to identify the current Menu with this item)
+// Sender (this is to identify the current Menu with this item)
 // Option id (identifies this Menu Item)
 // Text to be displayed in pop up box
 // Money value in pop up box
@@ -167,7 +175,7 @@ extern uint32 GetSkillLevel(Player* pPlayer, uint32 uiSkill);
 #define ADD_GOSSIP_ITEM_EXTENDED(uiIcon, chrText, uiSender, uiOptionId, chrBoxMessage, uiBoxMoney, bCode)   PlayerTalkClass->GetGossipMenu().AddMenuItem(uiIcon, chrText, uiSender, uiOptionId, chrBoxMessage, uiBoxMoney, bCode)
 #endif
 
-// This fuction Sends the current menu to show to client
+// This function sends the current menu to show to client
 // uiTextId - NPCTEXTID (uint32)
 // guid - npc guid (ObjectGuid)
 #define SEND_GOSSIP_MENU(uiTextId, guid)      PlayerTalkClass->SendGossipMenu(uiTextId, guid)
@@ -175,7 +183,7 @@ extern uint32 GetSkillLevel(Player* pPlayer, uint32 uiSkill);
 // Closes the Menu
 #define CLOSE_GOSSIP_MENU()        PlayerTalkClass->CloseGossip()
 
-// Fuctions to send NPC lists
+// Functions to send NPC lists
 // a - is always the npc guid (ObjectGuid)
 #define SEND_VENDORLIST(a)         GetSession()->SendListInventory(a)
 #define SEND_TRAINERLIST(a)        GetSession()->SendTrainerList(a)

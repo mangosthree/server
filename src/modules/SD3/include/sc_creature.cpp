@@ -37,10 +37,14 @@
 // Spell summary for ScriptedAI::SelectSpell
 struct TSpellSummary
 {
-    uint8 Targets;                                          // set of enum SelectTarget
-    uint8 Effects;                                          // set of enum SelectEffect
+    uint8 Targets;  // set of enum SelectTarget
+    uint8 Effects;  // set of enum SelectEffect
 }* SpellSummary;
 
+/**
+ * @brief Constructor for ScriptedAI.
+ * @param pCreature Pointer to the creature.
+ */
 ScriptedAI::ScriptedAI(Creature* pCreature) : CreatureAI(pCreature),
     m_uiEvadeCheckCooldown(2500)
 {}
@@ -63,13 +67,8 @@ bool ScriptedAI::IsVisible(Unit* pWho) const
 }
 
 /**
- * This function triggers the creature attacking pWho, depending on conditions like:
- * - Can the creature start an attack?
- * - Is pWho hostile to the creature?
- * - Can the creature reach pWho?
- * - Is pWho in aggro-range?
- * If the creature can attack pWho, it will if it has no victim.
- * Inside dungeons, the creature will get into combat with pWho, even if it has already a victim
+ * @brief Handles the creature's behavior when a unit moves into its line of sight.
+ * @param pWho Pointer to the unit that moved into line of sight.
  */
 void ScriptedAI::MoveInLineOfSight(Unit* pWho)
 {
@@ -98,8 +97,8 @@ void ScriptedAI::MoveInLineOfSight(Unit* pWho)
 }
 
 /**
- * This function sets the TargetGuid for the creature if required
- * Also it will handle the combat movement (chase movement), depending on SetCombatMovement(bool)
+ * @brief Starts the creature's attack on a specified unit.
+ * @param pWho Pointer to the unit to attack.
  */
 void ScriptedAI::AttackStart(Unit* pWho)
 {
@@ -109,7 +108,7 @@ void ScriptedAI::AttackStart(Unit* pWho)
         return;
     }
 #endif
-    if (pWho && m_creature->Attack(pWho, true))             // The Attack function also uses basic checks if pWho can be attacked
+    if (pWho && m_creature->Attack(pWho, true))  // The Attack function also uses basic checks if pWho can be attacked
     {
         m_creature->AddThreat(pWho);
         m_creature->SetInCombatWith(pWho);
@@ -120,7 +119,8 @@ void ScriptedAI::AttackStart(Unit* pWho)
 }
 
 /**
- * This function only calls Aggro, which is to be used for scripting purposes
+ * @brief Handles the creature's behavior when entering combat.
+ * @param pEnemy Pointer to the enemy unit.
  */
 void ScriptedAI::EnterCombat(Unit* pEnemy)
 {
@@ -131,10 +131,8 @@ void ScriptedAI::EnterCombat(Unit* pEnemy)
 }
 
 /**
- * Main update function, by default let the creature behave as expected by a mob (threat management and melee dmg)
- * Always handle here threat-management with m_creature->SelectHostileTarget()
- * Handle (if required) melee attack with DoMeleeAttackIfReady()
- * This is usally overwritten to support timers for ie spells
+ * @brief Main update function for the AI.
+ * @param uiDiff Time since the last update.
  */
 void ScriptedAI::UpdateAI(const uint32 /*uiDiff*/)
 {
@@ -158,14 +156,7 @@ void ScriptedAI::UpdateAI(const uint32 /*uiDiff*/)
 }
 
 /**
- * This function cleans up the combat state if the creature evades
- * It will:
- * - Drop Auras
- * - Drop all threat
- * - Stop combat
- * - Move the creature home
- * - Clear tagging for loot
- * - call Reset()
+ * @brief Handles the creature's behavior when evading.
  */
 void ScriptedAI::EnterEvadeMode()
 {
@@ -189,6 +180,12 @@ void ScriptedAI::JustRespawned()
     Reset();
 }
 
+/**
+ * @brief Starts movement towards a specified victim.
+ * @param pVictim Pointer to the victim.
+ * @param fDistance Distance to maintain from the victim.
+ * @param fAngle Angle to maintain from the victim.
+ */
 void ScriptedAI::DoStartMovement(Unit* pVictim, float fDistance, float fAngle)
 {
     if (pVictim)
@@ -197,6 +194,10 @@ void ScriptedAI::DoStartMovement(Unit* pVictim, float fDistance, float fAngle)
     }
 }
 
+/**
+ * @brief Starts no movement towards a specified victim.
+ * @param pVictim Pointer to the victim.
+ */
 void ScriptedAI::DoStartNoMovement(Unit* pVictim)
 {
     if (!pVictim)
@@ -208,6 +209,9 @@ void ScriptedAI::DoStartNoMovement(Unit* pVictim)
     m_creature->StopMoving();
 }
 
+/**
+ * @brief Stops the creature's attack.
+ */
 void ScriptedAI::DoStopAttack()
 {
     if (m_creature->getVictim())
@@ -216,6 +220,12 @@ void ScriptedAI::DoStopAttack()
     }
 }
 
+/**
+ * @brief Casts a spell on a specified target.
+ * @param pTarget Pointer to the target.
+ * @param uiSpellId ID of the spell to cast.
+ * @param bTriggered Whether the spell is triggered.
+ */
 void ScriptedAI::DoCast(Unit* pTarget, uint32 uiSpellId, bool bTriggered)
 {
     if (m_creature->IsNonMeleeSpellCasted(false) && !bTriggered)
@@ -226,6 +236,12 @@ void ScriptedAI::DoCast(Unit* pTarget, uint32 uiSpellId, bool bTriggered)
     m_creature->CastSpell(pTarget, uiSpellId, bTriggered);
 }
 
+/**
+ * @brief Casts a spell on a specified target using spell info.
+ * @param pTarget Pointer to the target.
+ * @param pSpellInfo Pointer to the spell info.
+ * @param bTriggered Whether the spell is triggered.
+ */
 void ScriptedAI::DoCastSpell(Unit* pTarget, SpellEntry const* pSpellInfo, bool bTriggered)
 {
     if (m_creature->IsNonMeleeSpellCasted(false) && !bTriggered)
@@ -236,6 +252,11 @@ void ScriptedAI::DoCastSpell(Unit* pTarget, SpellEntry const* pSpellInfo, bool b
     m_creature->CastSpell(pTarget, pSpellInfo, bTriggered);
 }
 
+/**
+ * @brief Plays a sound to all nearby players.
+ * @param pSource Pointer to the source object.
+ * @param uiSoundId ID of the sound to play.
+ */
 void ScriptedAI::DoPlaySoundToSet(WorldObject* pSource, uint32 uiSoundId)
 {
     if (!pSource)
@@ -252,11 +273,35 @@ void ScriptedAI::DoPlaySoundToSet(WorldObject* pSource, uint32 uiSoundId)
     pSource->PlayDirectSound(uiSoundId);
 }
 
+/**
+ * @brief Spawns a creature relative to the current creature.
+ * @param uiId ID of the creature to spawn.
+ * @param fX X offset from the current creature.
+ * @param fY Y offset from the current creature.
+ * @param fZ Z offset from the current creature.
+ * @param fAngle Angle to spawn the creature at.
+ * @param uiType Type of the spawn.
+ * @param uiDespawntime Despawn time of the creature.
+ * @return Pointer to the spawned creature.
+ */
 Creature* ScriptedAI::DoSpawnCreature(uint32 uiId, float fX, float fY, float fZ, float fAngle, uint32 uiType, uint32 uiDespawntime)
 {
     return m_creature->SummonCreature(uiId, m_creature->GetPositionX() + fX, m_creature->GetPositionY() + fY, m_creature->GetPositionZ() + fZ, fAngle, (TempSpawnType)uiType, uiDespawntime);
 }
 
+/**
+ * @brief Selects a spell to cast based on specified criteria.
+ * @param pTarget Pointer to the target.
+ * @param uiSchool School of the spell.
+ * @param iMechanic Mechanic of the spell.
+ * @param selectTargets Target type of the spell.
+ * @param uiPowerCostMin Minimum power cost of the spell.
+ * @param uiPowerCostMax Maximum power cost of the spell.
+ * @param fRangeMin Minimum range of the spell.
+ * @param fRangeMax Maximum range of the spell.
+ * @param selectEffects Effect type of the spell.
+ * @return Pointer to the selected spell entry.
+ */
 SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, int32 uiSchool, int32 iMechanic, SelectTarget selectTargets, uint32 uiPowerCostMin, uint32 uiPowerCostMax, float fRangeMin, float fRangeMax, SelectEffect selectEffects)
 {
     // No target so we can't cast
@@ -402,6 +447,13 @@ SpellEntry const* ScriptedAI::SelectSpell(Unit* pTarget, int32 uiSchool, int32 i
     return apSpell[urand(0, uiSpellCount - 1)];
 }
 
+/**
+ * @brief Checks if the creature can cast a specified spell on a target.
+ * @param pTarget Pointer to the target.
+ * @param pSpellEntry Pointer to the spell entry.
+ * @param bTriggered Whether the spell is triggered.
+ * @return True if the creature can cast the spell, false otherwise.
+ */
 bool ScriptedAI::CanCast(Unit* pTarget, SpellEntry const* pSpellEntry, bool bTriggered)
 {
     // No target so we can't cast
@@ -449,6 +501,9 @@ bool ScriptedAI::CanCast(Unit* pTarget, SpellEntry const* pSpellEntry, bool bTri
     return true;
 }
 
+/**
+ * @brief Fills the spell summary with information about spells.
+ */
 void FillSpellSummary()
 {
     SpellSummary = new TSpellSummary[GetSpellStore()->GetNumRows()];
@@ -628,6 +683,9 @@ void FillSpellSummary()
     }
 }
 
+/**
+ * @brief Resets the threat of the creature.
+ */
 void ScriptedAI::DoResetThreat()
 {
     if (!m_creature->CanHaveThreatList() || m_creature->GetThreatManager().isThreatListEmpty())
@@ -648,6 +706,14 @@ void ScriptedAI::DoResetThreat()
     }
 }
 
+/**
+ * @brief Teleports a player to a specified location.
+ * @param pUnit Pointer to the unit to teleport.
+ * @param fX X coordinate of the destination.
+ * @param fY Y coordinate of the destination.
+ * @param fZ Z coordinate of the destination.
+ * @param fO Orientation at the destination.
+ */
 void ScriptedAI::DoTeleportPlayer(Unit* pUnit, float fX, float fY, float fZ, float fO)
 {
     if (!pUnit)
@@ -664,6 +730,12 @@ void ScriptedAI::DoTeleportPlayer(Unit* pUnit, float fX, float fY, float fZ, flo
     ((Player*)pUnit)->TeleportTo(pUnit->GetMapId(), fX, fY, fZ, fO, TELE_TO_NOT_LEAVE_COMBAT);
 }
 
+/**
+ * @brief Selects the friendly unit with the lowest HP within a specified range.
+ * @param fRange Range to search for friendly units.
+ * @param uiMinHPDiff Minimum HP difference to consider.
+ * @return Pointer to the unit with the lowest HP, or nullptr if none found.
+ */
 Unit* ScriptedAI::DoSelectLowestHpFriendly(float fRange, uint32 uiMinHPDiff)
 {
     Unit* pUnit = nullptr;
@@ -676,6 +748,11 @@ Unit* ScriptedAI::DoSelectLowestHpFriendly(float fRange, uint32 uiMinHPDiff)
     return pUnit;
 }
 
+/**
+ * @brief Finds friendly units that are crowd-controlled within a specified range.
+ * @param fRange Range to search for friendly units.
+ * @return List of friendly units that are crowd-controlled.
+ */
 std::list<Creature*> ScriptedAI::DoFindFriendlyCC(float fRange)
 {
     std::list<Creature*> pList;
@@ -688,6 +765,12 @@ std::list<Creature*> ScriptedAI::DoFindFriendlyCC(float fRange)
     return pList;
 }
 
+/**
+ * @brief Finds friendly units missing a specific buff within a specified range.
+ * @param fRange Range to search for friendly units.
+ * @param uiSpellId ID of the buff spell.
+ * @return List of friendly units missing the specified buff.
+ */
 std::list<Creature*> ScriptedAI::DoFindFriendlyMissingBuff(float fRange, uint32 uiSpellId)
 {
     std::list<Creature*> pList;
@@ -700,6 +783,11 @@ std::list<Creature*> ScriptedAI::DoFindFriendlyMissingBuff(float fRange, uint32 
     return pList;
 }
 
+/**
+ * @brief Gets a player at a minimum range from the creature.
+ * @param fMinimumRange Minimum range to search for players.
+ * @return Pointer to the player, or nullptr if none found.
+ */
 Player* ScriptedAI::GetPlayerAtMinimumRange(float fMinimumRange)
 {
     Player* pPlayer = nullptr;
@@ -712,6 +800,13 @@ Player* ScriptedAI::GetPlayerAtMinimumRange(float fMinimumRange)
     return pPlayer;
 }
 
+/**
+ * @brief Sets the equipment slots for the creature.
+ * @param bLoadDefault Whether to load the default equipment.
+ * @param iMainHand ID of the main hand item.
+ * @param iOffHand ID of the off hand item.
+ * @param iRanged ID of the ranged item.
+ */
 void ScriptedAI::SetEquipmentSlots(bool bLoadDefault, int32 iMainHand, int32 iOffHand, int32 iRanged)
 {
     if (bLoadDefault)
@@ -736,8 +831,8 @@ void ScriptedAI::SetEquipmentSlots(bool bLoadDefault, int32 iMainHand, int32 iOf
     }
 }
 
-// Hacklike storage used for misc creatures that are expected to evade of outside of a certain area.
-// It is assumed the information is found elswehere and can be handled by mangos. So far no luck finding such information/way to extract it.
+// Hacklike storage used for misc creatures that are expected to evade if outside of a certain area.
+// It is assumed the information is found elsewhere and can be handled by mangos. So far no luck finding such information/way to extract it.
 enum
 {
 
@@ -759,6 +854,11 @@ enum
 #endif
 };
 
+/**
+ * @brief Checks if the creature should enter evade mode if it is out of the combat area.
+ * @param uiDiff Time since the last update.
+ * @return True if the creature should enter evade mode, false otherwise.
+ */
 bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 uiDiff)
 {
     if (m_uiEvadeCheckCooldown < uiDiff)
@@ -782,26 +882,26 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 uiDiff)
 
     switch (m_creature->GetEntry())
     {
-        case NPC_BROODLORD:                                 // broodlord (not move down stairs)
+        case NPC_BROODLORD:  // broodlord (not move down stairs)
             if (fZ > 448.60f)
             {
                 return false;
             }
             break;
 #if defined (TBC) || defined (WOTLK) || defined (CATA) || defined(MISTS)
-        case NPC_VOID_REAVER:                               // void reaver (calculate from center of room)
+        case NPC_VOID_REAVER:  // void reaver (calculate from center of room)
             if (m_creature->GetDistance2d(432.59f, 371.93f) < 105.0f)
             {
                 return false;
             }
             break;
-        case NPC_JAN_ALAI:                                  // jan'alai (calculate by Z)
+        case NPC_JAN_ALAI:  // jan'alai (calculate by Z)
             if (fZ > 12.0f)
             {
                 return false;
             }
             break;
-        case NPC_SARTHARION:                                // sartharion (calculate box)
+        case NPC_SARTHARION:  // sartharion (calculate box)
             if (fX > 3218.86f && fX < 3275.69f && fY < 572.40f && fY > 484.68f)
             {
                 return false;
@@ -854,11 +954,19 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 uiDiff)
     return true;
 }
 
+/**
+ * @brief Provides AI information for Scripted_NoMovementAI.
+ * @param reader Reference to the ChatHandler.
+ */
 void Scripted_NoMovementAI::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage("Subclass of Scripted_NoMovementAI");
 }
 
+/**
+ * @brief Starts the creature's attack on a specified unit without movement.
+ * @param pWho Pointer to the unit to attack.
+ */
 void Scripted_NoMovementAI::AttackStart(Unit* pWho)
 {
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)

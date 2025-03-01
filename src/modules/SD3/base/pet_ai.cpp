@@ -34,15 +34,28 @@ EndScriptData */
 #include "precompiled.h"
 #include "pet_ai.h"
 
+/**
+ * @brief Constructor for ScriptedPetAI.
+ * @param pCreature Pointer to the creature this AI is associated with.
+ */
 ScriptedPetAI::ScriptedPetAI(Creature* pCreature) : CreatureAI(pCreature)
 {}
 
+/**
+ * @brief Checks if a unit is visible to the pet.
+ * @param pWho Pointer to the unit being checked.
+ * @return True if the unit is visible, false otherwise.
+ */
 bool ScriptedPetAI::IsVisible(Unit* pWho) const
 {
     return pWho && m_creature->IsWithinDist(pWho, VISIBLE_RANGE)
            && pWho->IsVisibleForOrDetect(m_creature, m_creature, true);
 }
 
+/**
+ * @brief Called when a unit comes into the pet's line of sight.
+ * @param pWho Pointer to the unit that came into sight.
+ */
 void ScriptedPetAI::MoveInLineOfSight(Unit* pWho)
 {
     if (m_creature->getVictim())
@@ -71,6 +84,10 @@ void ScriptedPetAI::MoveInLineOfSight(Unit* pWho)
     }
 }
 
+/**
+ * @brief Called when the pet starts attacking a unit.
+ * @param pWho Pointer to the unit being attacked.
+ */
 void ScriptedPetAI::AttackStart(Unit* pWho)
 {
     if (pWho && m_creature->Attack(pWho, true))
@@ -79,6 +96,10 @@ void ScriptedPetAI::AttackStart(Unit* pWho)
     }
 }
 
+/**
+ * @brief Called when the pet is attacked by a unit.
+ * @param pAttacker Pointer to the attacking unit.
+ */
 void ScriptedPetAI::AttackedBy(Unit* pAttacker)
 {
     if (m_creature->getVictim())
@@ -93,6 +114,9 @@ void ScriptedPetAI::AttackedBy(Unit* pAttacker)
     }
 }
 
+/**
+ * @brief Resets the pet's combat state.
+ */
 void ScriptedPetAI::ResetPetCombat()
 {
     Unit* pOwner = m_creature->GetCharmerOrOwner();
@@ -113,11 +137,19 @@ void ScriptedPetAI::ResetPetCombat()
     Reset();
 }
 
+/**
+ * @brief Updates the pet's AI while in combat.
+ * @param uiDiff Time since the last update.
+ */
 void ScriptedPetAI::UpdatePetAI(const uint32 /*uiDiff*/)
 {
     DoMeleeAttackIfReady();
 }
 
+/**
+ * @brief Updates the pet's AI.
+ * @param uiDiff Time since the last update.
+ */
 void ScriptedPetAI::UpdateAI(const uint32 uiDiff)
 {
     if (!m_creature->IsAlive())                             // should not be needed, IsAlive is checked in mangos before calling UpdateAI

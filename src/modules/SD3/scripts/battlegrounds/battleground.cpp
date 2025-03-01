@@ -61,16 +61,38 @@ enum
     SPELL_WAITING_TO_RESURRECT      = 2584                  // players who cancel this aura don't want a resurrection
 };
 
+/**
+ * @class npc_spirit_guide
+ * @brief Handles the behavior of spirit guides in battlegrounds.
+ *
+ * Spirit guides resurrect players every 30 seconds through a channeled spell.
+ * If a spirit guide despawns, players around it are teleported to the next spirit guide.
+ */
 struct npc_spirit_guide : public CreatureScript
 {
     npc_spirit_guide() : CreatureScript("npc_spirit_guide") {}
 
+    /**
+     * @brief Handles the gossip hello event.
+     *
+     * When a player interacts with the spirit guide, they receive the "waiting to resurrect" aura.
+     *
+     * @param pPlayer Pointer to the player interacting with the spirit guide.
+     * @param pCreature Pointer to the spirit guide creature.
+     * @return True if the interaction is successful.
+     */
     bool OnGossipHello(Player* pPlayer, Creature* /*pCreature*/) override
     {
         pPlayer->CastSpell(pPlayer, SPELL_WAITING_TO_RESURRECT, true);
         return true;
     }
 
+    /**
+     * @class npc_spirit_guideAI
+     * @brief AI for the spirit guide.
+     *
+     * Handles the resurrection of players and the autocast of the channeled spell.
+     */
     struct npc_spirit_guideAI : public ScriptedAI
     {
         npc_spirit_guideAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -79,6 +101,13 @@ struct npc_spirit_guide : public CreatureScript
             Reset();
         }
 
+        /**
+         * @brief Updates the AI.
+         *
+         * Continuously autocasts the spirit heal channel spell.
+         *
+         * @param uiDiff Time since the last update.
+         */
         void UpdateAI(const uint32 /*uiDiff*/) override
         {
             // auto cast the whole time this spell
@@ -88,6 +117,13 @@ struct npc_spirit_guide : public CreatureScript
             }
         }
 
+        /**
+         * @brief Handles the removal of the spirit guide's corpse.
+         *
+         * Teleports players around the spirit guide to the next spirit guide if they have the "waiting to resurrect" aura.
+         *
+         * @param uiDiff Time since the last update.
+         */
         void CorpseRemoved(uint32&) override
         {
             // TODO: would be better to cast a dummy spell
@@ -114,6 +150,14 @@ struct npc_spirit_guide : public CreatureScript
         }
 
 #if defined (TBC) || defined (WOTLK) || defined (CATA) || defined(MISTS)
+        /**
+         * @brief Handles the spell hit target event.
+         *
+         * Grants players the "spirit heal mana" buff when they are resurrected.
+         *
+         * @param pUnit Pointer to the unit hit by the spell.
+         * @param pSpellEntry Pointer to the spell entry.
+         */
         void SpellHitTarget(Unit* pUnit, const SpellEntry* pSpellEntry) override
         {
             if (pSpellEntry->Id == SPELL_SPIRIT_HEAL && pUnit->GetTypeId() == TYPEID_PLAYER
@@ -125,21 +169,26 @@ struct npc_spirit_guide : public CreatureScript
 #endif
     };
 
+    /**
+     * @brief Gets the AI for the spirit guide.
+     *
+     * @param pCreature Pointer to the spirit guide creature.
+     * @return Pointer to the spirit guide AI.
+     */
     CreatureAI* GetAI(Creature* pCreature) override
     {
         return new npc_spirit_guideAI(pCreature);
     }
 };
 
+/**
+ * @brief Adds the battleground script.
+ *
+ * Registers the spirit guide script.
+ */
 void AddSC_battleground()
 {
     Script *s;
     s = new npc_spirit_guide();
     s->RegisterSelf();
-
-    //pNewScript = new Script;
-    //pNewScript->Name = "npc_spirit_guide";
-    //pNewScript->GetAI = &GetAI_npc_spirit_guide;
-    //pNewScript->pGossipHello = &GossipHello_npc_spirit_guide;
-    //pNewScript->RegisterSelf();
 }

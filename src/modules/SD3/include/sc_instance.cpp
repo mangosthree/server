@@ -27,11 +27,10 @@
 #include "precompiled.h"
 
 /**
-   Function that uses a door or a button
-
-   @param   guid The ObjectGuid of the Door/ Button that will be used
-   @param   uiWithRestoreTime (in seconds) if == 0 autoCloseTime will be used (if not 0 by default in *_template)
-   @param   bUseAlternativeState Use to alternative state
+ * @brief Uses a door or a button.
+ * @param guid The ObjectGuid of the Door/Button that will be used.
+ * @param uiWithRestoreTime (in seconds) if == 0 autoCloseTime will be used (if not 0 by default in *_template).
+ * @param bUseAlternativeState Use to alternative state.
  */
 void ScriptedInstance::DoUseDoorOrButton(ObjectGuid guid, uint32 uiWithRestoreTime, bool bUseAlternativeState)
 {
@@ -65,7 +64,12 @@ void ScriptedInstance::DoUseDoorOrButton(ObjectGuid guid, uint32 uiWithRestoreTi
     }
 }
 
-/// Function that uses a door or button that is stored in m_mGoEntryGuidStore
+/**
+ * @brief Uses a door or button that is stored in m_mGoEntryGuidStore.
+ * @param uiEntry The entry ID of the door/button.
+ * @param uiWithRestoreTime (in seconds) if == 0 autoCloseTime will be used (if not 0 by default in *_template).
+ * @param bUseAlternativeState Use to alternative state.
+ */
 void ScriptedInstance::DoUseDoorOrButton(uint32 uiEntry, uint32 uiWithRestoreTime /*= 0*/, bool bUseAlternativeState /*= false*/)
 {
     EntryGuidMap::iterator find = m_mGoEntryGuidStore.find(uiEntry);
@@ -74,17 +78,16 @@ void ScriptedInstance::DoUseDoorOrButton(uint32 uiEntry, uint32 uiWithRestoreTim
         DoUseDoorOrButton(find->second, uiWithRestoreTime, bUseAlternativeState);
     }
     else
-        // Output log, possible reason is not added GO to storage, or not yet loaded
     {
+        // Output log, possible reason is not added GO to storage, or not yet loaded
         debug_log("SD3: Script call DoUseDoorOrButton(by Entry), but no gameobject of entry %u was created yet, or it was not stored by script for map %u.", uiEntry, instance->GetId());
     }
 }
 
 /**
-   Function that respawns a despawned GameObject with given time
-
-   @param   guid The ObjectGuid of the GO that will be respawned
-   @param   uiTimeToDespawn (in seconds) Despawn the GO after this time, default is a minute
+ * @brief Respawns a despawned GameObject with given time.
+ * @param guid The ObjectGuid of the GO that will be respawned.
+ * @param uiTimeToDespawn (in seconds) Despawn the GO after this time, default is a minute.
  */
 void ScriptedInstance::DoRespawnGameObject(ObjectGuid guid, uint32 uiTimeToDespawn)
 {
@@ -103,7 +106,6 @@ void ScriptedInstance::DoRespawnGameObject(ObjectGuid guid, uint32 uiTimeToDespa
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
             pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON)
 #endif
-
         {
             return;
         }
@@ -118,27 +120,11 @@ void ScriptedInstance::DoRespawnGameObject(ObjectGuid guid, uint32 uiTimeToDespa
     }
 }
 
-/// Function that uses a door or button that is stored in m_mGoEntryGuidStore
-void ScriptedInstance::DoToggleGameObjectFlags(uint32 uiEntry, uint32 uiGOflags, bool bApply)
-{
-    EntryGuidMap::iterator find = m_mGoEntryGuidStore.find(uiEntry);
-    if (find != m_mGoEntryGuidStore.end())
-    {
-        DoToggleGameObjectFlags(find->second, uiGOflags, bApply);
-    }
-    else
-        // Output log, possible reason is not added GO to storage, or not yet loaded
-    {
-        debug_log("SD3: Script call ToogleTameObjectFlags (by Entry), but no gameobject of entry %u was created yet, or it was not stored by script for map %u.", uiEntry, instance->GetId());
-    }
-}
-
 /**
-   Function that toggles the GO-flags of a GameObject
-
-   @param   guid The ObjectGuid of the GO that will be respawned
-   @param   uiGOflags Which GO-flags to toggle
-   @param   bApply should the GO-flags be applied or removed?
+ * @brief Toggles the GO-flags of a GameObject.
+ * @param guid The ObjectGuid of the GO that will be respawned.
+ * @param uiGOflags Which GO-flags to toggle.
+ * @param bApply Should the GO-flags be applied or removed?
  */
 void ScriptedInstance::DoToggleGameObjectFlags(ObjectGuid guid, uint32 uiGOflags, bool bApply)
 {
@@ -160,7 +146,31 @@ void ScriptedInstance::DoToggleGameObjectFlags(ObjectGuid guid, uint32 uiGOflags
     }
 }
 
-/// Function that respawns a despawned GO that is stored in m_mGoEntryGuidStore
+/**
+ * @brief Toggles the GO-flags of a GameObject that is stored in m_mGoEntryGuidStore.
+ * @param uiEntry The entry ID of the GO.
+ * @param uiGOflags Which GO-flags to toggle.
+ * @param bApply Should the GO-flags be applied or removed?
+ */
+void ScriptedInstance::DoToggleGameObjectFlags(uint32 uiEntry, uint32 uiGOflags, bool bApply)
+{
+    EntryGuidMap::iterator find = m_mGoEntryGuidStore.find(uiEntry);
+    if (find != m_mGoEntryGuidStore.end())
+    {
+        DoToggleGameObjectFlags(find->second, uiGOflags, bApply);
+    }
+    else
+    {
+        // Output log, possible reason is not added GO to storage, or not yet loaded
+        debug_log("SD3: Script call ToogleTameObjectFlags (by Entry), but no gameobject of entry %u was created yet, or it was not stored by script for map %u.", uiEntry, instance->GetId());
+    }
+}
+
+/**
+ * @brief Respawns a despawned GO that is stored in m_mGoEntryGuidStore.
+ * @param uiEntry The entry ID of the GO.
+ * @param uiTimeToDespawn (in seconds) Despawn the GO after this time, default is a minute.
+ */
 void ScriptedInstance::DoRespawnGameObject(uint32 uiEntry, uint32 uiTimeToDespawn)
 {
     EntryGuidMap::iterator find = m_mGoEntryGuidStore.find(uiEntry);
@@ -176,10 +186,9 @@ void ScriptedInstance::DoRespawnGameObject(uint32 uiEntry, uint32 uiTimeToDespaw
 }
 
 /**
-   Helper function to update a world state for all players in the map
-
-   @param   uiStateId The WorldState that will be set for all players in the map
-   @param   uiStateData The Value to which the State will be set to
+ * @brief Updates a world state for all players in the map.
+ * @param uiStateId The WorldState that will be set for all players in the map.
+ * @param uiStateData The Value to which the State will be set to.
  */
 void ScriptedInstance::DoUpdateWorldState(uint32 uiStateId, uint32 uiStateData)
 {
@@ -201,7 +210,12 @@ void ScriptedInstance::DoUpdateWorldState(uint32 uiStateId, uint32 uiStateData)
     }
 }
 
-/// Get the first found Player* (with requested properties) in the map. Can return nullptr.
+/**
+ * @brief Gets the first found Player* (with requested properties) in the map. Can return nullptr.
+ * @param bOnlyAlive If true, only alive players will be considered.
+ * @param bCanBeGamemaster If true, gamemaster players will be considered.
+ * @return Pointer to the first found Player, or nullptr if no player matches the criteria.
+ */
 Player* ScriptedInstance::GetPlayerInMap(bool bOnlyAlive /*=false*/, bool bCanBeGamemaster /*=true*/)
 {
     Map::PlayerList const& lPlayers = instance->GetPlayers();
@@ -218,7 +232,11 @@ Player* ScriptedInstance::GetPlayerInMap(bool bOnlyAlive /*=false*/, bool bCanBe
     return nullptr;
 }
 
-/// Returns a pointer to a loaded GameObject that was stored in m_mGoEntryGuidStore. Can return nullptr
+/**
+ * @brief Returns a pointer to a loaded GameObject that was stored in m_mGoEntryGuidStore. Can return nullptr.
+ * @param uiEntry The entry ID of the GameObject.
+ * @return Pointer to the GameObject, or nullptr if not found.
+ */
 GameObject* ScriptedInstance::GetSingleGameObjectFromStorage(uint32 uiEntry) const
 {
     EntryGuidMap::const_iterator find = m_mGoEntryGuidStore.find(uiEntry);
@@ -233,7 +251,12 @@ GameObject* ScriptedInstance::GetSingleGameObjectFromStorage(uint32 uiEntry) con
     return nullptr;
 }
 
-/// Returns a pointer to a loaded Creature that was stored in m_mGoEntryGuidStore. Can return nullptr
+/**
+ * @brief Returns a pointer to a loaded Creature that was stored in m_mGoEntryGuidStore. Can return nullptr.
+ * @param uiEntry The entry ID of the Creature.
+ * @param bSkipDebugLog If true, debug log will be skipped.
+ * @return Pointer to the Creature, or nullptr if not found.
+ */
 Creature* ScriptedInstance::GetSingleCreatureFromStorage(uint32 uiEntry, bool bSkipDebugLog /*=false*/) const
 {
     EntryGuidMap::const_iterator find = m_mNpcEntryGuidStore.find(uiEntry);
@@ -253,10 +276,9 @@ Creature* ScriptedInstance::GetSingleCreatureFromStorage(uint32 uiEntry, bool bS
 
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
 /**
-   Helper function to start a timed achievement criteria for players in the map
-
-   @param   criteriaType The Type that is required to complete the criteria, see enum AchievementCriteriaTypes in MaNGOS
-   @param   uiTimedCriteriaMiscId The ID that identifies how the criteria is started
+ * @brief Starts a timed achievement criteria for players in the map.
+ * @param criteriaType The Type that is required to complete the criteria, see enum AchievementCriteriaTypes in MaNGOS.
+ * @param uiTimedCriteriaMiscId The ID that identifies how the criteria is started.
  */
 void ScriptedInstance::DoStartTimedAchievement(AchievementCriteriaTypes criteriaType, uint32 uiTimedCriteriaMiscId)
 {
@@ -280,9 +302,8 @@ void ScriptedInstance::DoStartTimedAchievement(AchievementCriteriaTypes criteria
 #endif
 
 /**
-   Constructor for DialogueHelper
-
-   @param   pDialogueArray The static const array of DialogueEntry holding the information about the dialogue. This array MUST be terminated by {0,0,0}
+ * @brief Constructor for DialogueHelper.
+ * @param pDialogueArray The static const array of DialogueEntry holding the information about the dialogue. This array MUST be terminated by {0,0,0}.
  */
 DialogueHelper::DialogueHelper(DialogueEntry const* pDialogueArray) :
     m_pInstance(nullptr),
@@ -296,9 +317,8 @@ DialogueHelper::DialogueHelper(DialogueEntry const* pDialogueArray) :
 {}
 
 /**
-   Constructor for DialogueHelper (Two Sides)
-
-   @param   pDialogueTwoSideArray The static const array of DialogueEntryTwoSide holding the information about the dialogue. This array MUST be terminated by {0,0,0,0,0}
+ * @brief Constructor for DialogueHelper (Two Sides).
+ * @param pDialogueTwoSideArray The static const array of DialogueEntryTwoSide holding the information about the dialogue. This array MUST be terminated by {0,0,0,0,0}.
  */
 DialogueHelper::DialogueHelper(DialogueEntryTwoSide const* pDialogueTwoSideArray) :
     m_pInstance(nullptr),
@@ -312,9 +332,8 @@ DialogueHelper::DialogueHelper(DialogueEntryTwoSide const* pDialogueTwoSideArray
 {}
 
 /**
-   Function to start a (part of a) dialogue
-
-   @param   iTextEntry The TextEntry of the dialogue that will be started (must be always the entry of first side)
+ * @brief Starts a (part of a) dialogue.
+ * @param iTextEntry The TextEntry of the dialogue that will be started (must be always the entry of first side).
  */
 void DialogueHelper::StartNextDialogueText(int32 iTextEntry)
 {
@@ -355,7 +374,9 @@ void DialogueHelper::StartNextDialogueText(int32 iTextEntry)
     DoNextDialogueStep();
 }
 
-/// Internal helper function to do the actual say of a DialogueEntry
+/**
+ * @brief Internal helper function to do the actual say of a DialogueEntry.
+ */
 void DialogueHelper::DoNextDialogueStep()
 {
     // Last Dialogue Entry done?
@@ -421,7 +442,10 @@ void DialogueHelper::DoNextDialogueStep()
     }
 }
 
-/// Call this function within any DialogueUpdate method. This is required for saying next steps in a dialogue
+/**
+ * @brief Call this function within any DialogueUpdate method. This is required for saying next steps in a dialogue.
+ * @param uiDiff The time difference since the last update.
+ */
 void DialogueHelper::DialogueUpdate(uint32 uiDiff)
 {
     if (m_uiTimer)

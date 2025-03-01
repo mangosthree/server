@@ -30,26 +30,42 @@
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 
+/**
+ * @brief Constructor for SystemMgr.
+ */
 SystemMgr::SystemMgr() { }
 
+/**
+ * @brief Gets the singleton instance of SystemMgr.
+ * @return Reference to the SystemMgr instance.
+ */
 SystemMgr& SystemMgr::Instance()
 {
     static SystemMgr pSysMgr;
     return pSysMgr;
 }
 
+/**
+ * @brief Loads script texts from the database.
+ */
 void SystemMgr::LoadScriptTexts()
 {
     outstring_log("[SD3]: Loading Script Texts...");
     LoadMangosStrings(WorldDatabase, "script_texts", TEXT_SOURCE_TEXT_START, TEXT_SOURCE_TEXT_END, true);
 }
 
+/**
+ * @brief Loads custom script texts from the database.
+ */
 void SystemMgr::LoadScriptTextsCustom()
 {
     outstring_log("[SD3]: Loading Custom Texts...");
     LoadMangosStrings(WorldDatabase, "custom_texts", TEXT_SOURCE_CUSTOM_START, TEXT_SOURCE_CUSTOM_END, true);
 }
 
+/**
+ * @brief Loads script gossip texts from the database.
+ */
 void SystemMgr::LoadScriptGossipTexts()
 {
     outstring_log("[SD3]: Loading Gossip Texts...");
@@ -57,6 +73,9 @@ void SystemMgr::LoadScriptGossipTexts()
     LoadMangosStrings(WorldDatabase, "gossip_texts", TEXT_SOURCE_GOSSIP_START, TEXT_SOURCE_GOSSIP_END);
 }
 
+/**
+ * @brief Loads script waypoints from the database.
+ */
 void SystemMgr::LoadScriptWaypoints()
 {
     // Drop Existing Waypoint list

@@ -43,6 +43,9 @@ Config SD3Config;
 
 void FillSpellSummary();
 
+/**
+ * @brief Loads ScriptDev3 bindings from the database.
+ */
 void LoadSD3Bindings()
 {
     pSystemMgr.LoadScriptTexts();
@@ -53,20 +56,19 @@ void LoadSD3Bindings()
 
 struct TSpellSummary
 {
-    uint8 Targets;                                          // set of enum SelectTarget
-    uint8 Effects;                                          // set of enum SelectEffect
+    uint8 Targets;  // set of enum SelectTarget
+    uint8 Effects;  // set of enum SelectEffect
 } extern* SpellSummary;
 
 //*********************************
 //*** Functions used globally ***
 
 /**
-    * Function that does script text
-    *
-    * @param iTextEntry Entry of the text, stored in SD3-database
-    * @param pSource Source of the text
-    * @param pTarget Can be nullptr (depending on CHAT_TYPE of iTextEntry). Possible target for the text
-    */
+ * @brief Function that does script text.
+ * @param iTextEntry Entry of the text, stored in SD3-database.
+ * @param pSource Source of the text.
+ * @param pTarget Can be nullptr (depending on CHAT_TYPE of iTextEntry). Possible target for the text.
+ */
 void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
 {
     if (!pSource)
@@ -88,14 +90,13 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
 }
 
 /**
-    * Function that either simulates or does script text for a map
-    *
-    * @param iTextEntry Entry of the text, stored in SD3-database, only type CHAT_TYPE_ZONE_YELL supported
-    * @param uiCreatureEntry Id of the creature of whom saying will be simulated
-    * @param pMap Given Map on which the map-wide text is displayed
-    * @param pCreatureSource Can be nullptr. If pointer to Creature is given, then the creature does the map-wide text
-    * @param pTarget Can be nullptr. Possible target for the text
-    */
+ * @brief Function that either simulates or does script text for a map.
+ * @param iTextEntry Entry of the text, stored in SD3-database, only type CHAT_TYPE_ZONE_YELL supported.
+ * @param uiCreatureEntry Id of the creature of whom saying will be simulated.
+ * @param pMap Given Map on which the map-wide text is displayed.
+ * @param pCreatureSource Can be nullptr. If pointer to Creature is given, then the creature does the map-wide text.
+ * @param pTarget Can be nullptr. Possible target for the text.
+ */
 void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map* pMap, Creature* pCreatureSource /*=nullptr*/, Unit* pTarget /*=nullptr*/)
 {
     if (!pMap)
@@ -138,11 +139,11 @@ void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map*
         pMap->PlayDirectSoundToMap(pData->SoundId);
     }
 
-    if (pCreatureSource)                                // If provided pointer for sayer, use direct version
+    if (pCreatureSource)  // If provided pointer for sayer, use direct version
     {
         pMap->MonsterYellToMap(pCreatureSource->GetObjectGuid(), iTextEntry, pData->LanguageId, pTarget);
     }
-    else                                                // Simulate yell
+    else  // Simulate yell
     {
         pMap->MonsterYellToMap(pInfo, iTextEntry, pData->LanguageId, pTarget);
     }
@@ -151,6 +152,10 @@ void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map*
 //*********************************
 //*** Functions used internally ***
 
+/**
+ * @brief Registers the script.
+ * @param bReportError Whether to report an error if registration fails.
+ */
 void Script::RegisterSelf(bool bReportError)
 {
     if (uint32 id = GetScriptId(Name.c_str()))
@@ -172,6 +177,9 @@ void Script::RegisterSelf(bool bReportError)
 //************************************
 //*** Functions to be used by core ***
 
+/**
+ * @brief Frees the script library.
+ */
 void SD3::FreeScriptLibrary()
 {
     // Free Spell Summary
@@ -190,6 +198,9 @@ void SD3::FreeScriptLibrary()
     setScriptLibraryErrorFile(nullptr, nullptr);
 }
 
+/**
+ * @brief Initializes the script library.
+ */
 void SD3::InitScriptLibrary()
 {
     // ScriptDev3 startup
@@ -213,14 +224,14 @@ void SD3::InitScriptLibrary()
     BarGoLink bar(1);
     bar.step();
 
-    // Resize script ids to needed ammount of assigned ScriptNames (from core)
+    // Resize script ids to needed amount of assigned ScriptNames (from core)
     m_scripts.resize(GetScriptIdsCount(), nullptr);
 
     FillSpellSummary();
 
     AddScripts();
 
-    // Check existance scripts for all registered by core script names
+    // Check existence scripts for all registered by core script names
     for (uint32 i = 1; i < GetScriptIdsCount(); ++i)
     {
         if (!m_scripts[i])
@@ -232,11 +243,21 @@ void SD3::InitScriptLibrary()
     outstring_log(">> Loaded %i C++ Scripts.", num_sc_scripts);
 }
 
+/**
+ * @brief Gets the version of the script library.
+ * @return The version of the script library.
+ */
 char const* SD3::GetScriptLibraryVersion()
 {
     return "[SD3] for MaNGOS";
 }
 
+/**
+ * @brief Handles the gossip hello event for a creature.
+ * @param pPlayer Pointer to the player.
+ * @param pCreature Pointer to the creature.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::GossipHello(Player* pPlayer, Creature* pCreature)
 {
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
@@ -251,6 +272,12 @@ bool SD3::GossipHello(Player* pPlayer, Creature* pCreature)
     return pTempScript->ToCreatureScript()->OnGossipHello(pPlayer, pCreature);
 }
 
+/**
+ * @brief Handles the gossip hello event for a game object.
+ * @param pPlayer Pointer to the player.
+ * @param pGo Pointer to the game object.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::GOGossipHello(Player* pPlayer, GameObject* pGo)
 {
     Script* pTempScript = m_scripts[pGo->GetScriptId()];
@@ -265,6 +292,12 @@ bool SD3::GOGossipHello(Player* pPlayer, GameObject* pGo)
     return pTempScript->ToGameObjectScript()->OnGossipHello(pPlayer, pGo);
 }
 
+/**
+ * @brief Handles the gossip hello event for an item.
+ * @param pPlayer Pointer to the player.
+ * @param pItem Pointer to the item.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::ItemGossipHello(Player* pPlayer, Item* pItem)
 {
     Script* pTempScript = m_scripts[pItem->GetScriptId()];
@@ -280,7 +313,14 @@ bool SD3::ItemGossipHello(Player* pPlayer, Item* pItem)
     return pTempScript->ToItemScript()->OnGossipHello(pPlayer, pItem);
 }
 
-
+/**
+ * @brief Handles the gossip select event for a creature.
+ * @param pPlayer Pointer to the player.
+ * @param pCreature Pointer to the creature.
+ * @param uiSender Sender ID.
+ * @param uiAction Action ID.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::GossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
     debug_log("[SD3]: Gossip selection, sender: %u, action: %u", uiSender, uiAction);
@@ -295,6 +335,14 @@ bool SD3::GossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, ui
     return pTempScript->ToCreatureScript()->OnGossipSelect(pPlayer, pCreature, uiSender, uiAction);
 }
 
+/**
+ * @brief Handles the gossip select event for a game object.
+ * @param pPlayer Pointer to the player.
+ * @param pGo Pointer to the game object.
+ * @param uiSender Sender ID.
+ * @param uiAction Action ID.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::GOGossipSelect(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction)
 {
     debug_log("[SD3]: GO Gossip selection, sender: %u, action: %u", uiSender, uiAction);
@@ -309,6 +357,14 @@ bool SD3::GOGossipSelect(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint
     return pTempScript->ToGameObjectScript()->OnGossipSelect(pPlayer, pGo, uiSender, uiAction);
 }
 
+/**
+ * @brief Handles the gossip select event for an item.
+ * @param pPlayer Pointer to the player.
+ * @param pItem Pointer to the item.
+ * @param uiSender Sender ID.
+ * @param uiAction Action ID.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::ItemGossipSelect(Player* pPlayer, Item* pItem, uint32 uiSender, uint32 uiAction)
 {
     debug_log("[SD3]: ITEM Gossip selection, sender: %u, action: %u", uiSender, uiAction);
@@ -323,6 +379,15 @@ bool SD3::ItemGossipSelect(Player* pPlayer, Item* pItem, uint32 uiSender, uint32
     return pTempScript->ToItemScript()->OnGossipSelect(pPlayer, pItem, uiSender, uiAction);
 }
 
+/**
+ * @brief Handles the gossip select with code event for a creature.
+ * @param pPlayer Pointer to the player.
+ * @param pCreature Pointer to the creature.
+ * @param uiSender Sender ID.
+ * @param uiAction Action ID.
+ * @param sCode Code entered by the player.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::GossipSelectWithCode(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction, const char* sCode)
 {
     debug_log("[SD3]: Gossip selection with code, sender: %u, action: %u", uiSender, uiAction);
@@ -337,6 +402,15 @@ bool SD3::GossipSelectWithCode(Player* pPlayer, Creature* pCreature, uint32 uiSe
     return pTempScript->ToCreatureScript()->OnGossipSelectWithCode(pPlayer, pCreature, uiSender, uiAction, sCode);
 }
 
+/**
+ * @brief Handles the gossip select with code event for a game object.
+ * @param pPlayer Pointer to the player.
+ * @param pGo Pointer to the game object.
+ * @param uiSender Sender ID.
+ * @param uiAction Action ID.
+ * @param sCode Code entered by the player.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::GOGossipSelectWithCode(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction, const char* sCode)
 {
     debug_log("[SD3]: GO Gossip selection with code, sender: %u, action: %u", uiSender, uiAction);
@@ -351,6 +425,15 @@ bool SD3::GOGossipSelectWithCode(Player* pPlayer, GameObject* pGo, uint32 uiSend
     return pTempScript->ToGameObjectScript()->OnGossipSelectWithCode(pPlayer, pGo, uiSender, uiAction, sCode);
 }
 
+/**
+ * @brief Handles the gossip select with code event for an item.
+ * @param pPlayer Pointer to the player.
+ * @param pItem Pointer to the item.
+ * @param uiSender Sender ID.
+ * @param uiAction Action ID.
+ * @param sCode Code entered by the player.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::ItemGossipSelectWithCode(Player* pPlayer, Item* pItem, uint32 uiSender, uint32 uiAction, const char* sCode)
 {
     debug_log("[SD3]: ITEM Gossip selection with code, sender: %u, action: %u, code : %s", uiSender, uiAction, sCode);
@@ -365,6 +448,13 @@ bool SD3::ItemGossipSelectWithCode(Player* pPlayer, Item* pItem, uint32 uiSender
     return pTempScript->ToItemScript()->OnGossipSelectWithCode(pPlayer, pItem, uiSender, uiAction, sCode);
 }
 
+/**
+ * @brief Handles the quest accept event for a creature.
+ * @param pPlayer Pointer to the player.
+ * @param pCreature Pointer to the creature.
+ * @param pQuest Pointer to the quest.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::QuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
@@ -379,6 +469,13 @@ bool SD3::QuestAccept(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
     return pTempScript->ToCreatureScript()->OnQuestAccept(pPlayer, pCreature, pQuest);
 }
 
+/**
+ * @brief Handles the quest rewarded event for a creature.
+ * @param pPlayer Pointer to the player.
+ * @param pCreature Pointer to the creature.
+ * @param pQuest Pointer to the quest.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::QuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
@@ -393,6 +490,12 @@ bool SD3::QuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQues
     return pTempScript->ToCreatureScript()->OnQuestRewarded(pPlayer, pCreature, pQuest);
 }
 
+/**
+ * @brief Gets the dialog status for a creature.
+ * @param pPlayer Pointer to the player.
+ * @param pCreature Pointer to the creature.
+ * @return The dialog status.
+ */
 uint32 SD3::GetNPCDialogStatus(Player* pPlayer, Creature* pCreature)
 {
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
@@ -407,6 +510,12 @@ uint32 SD3::GetNPCDialogStatus(Player* pPlayer, Creature* pCreature)
     return pTempScript->ToCreatureScript()->OnDialogEnd(pPlayer, pCreature);
 }
 
+/**
+ * @brief Gets the dialog status for a game object.
+ * @param pPlayer Pointer to the player.
+ * @param pGo Pointer to the game object.
+ * @return The dialog status.
+ */
 uint32 SD3::GetGODialogStatus(Player* pPlayer, GameObject* pGo)
 {
     Script* pTempScript = m_scripts[pGo->GetScriptId()];
@@ -421,6 +530,13 @@ uint32 SD3::GetGODialogStatus(Player* pPlayer, GameObject* pGo)
     return pTempScript->ToGameObjectScript()->OnDialogEnd(pPlayer, pGo);
 }
 
+/**
+ * @brief Handles the quest accept event for an item.
+ * @param pPlayer Pointer to the player.
+ * @param pItem Pointer to the item.
+ * @param pQuest Pointer to the quest.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::ItemQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
 {
     Script* pTempScript = m_scripts[pItem->GetScriptId()];
@@ -435,6 +551,12 @@ bool SD3::ItemQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
     return pTempScript->ToItemScript()->OnQuestAccept(pPlayer, pItem, pQuest);
 }
 
+/**
+ * @brief Handles the use event for a game object by a player.
+ * @param pPlayer Pointer to the player.
+ * @param pGo Pointer to the game object.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::GOUse(Player* pPlayer, GameObject* pGo)
 {
     Script* pTempScript = m_scripts[pGo->GetScriptId()];
@@ -447,6 +569,12 @@ bool SD3::GOUse(Player* pPlayer, GameObject* pGo)
     return pTempScript->ToGameObjectScript()->OnUse(pPlayer, pGo);
 }
 
+/**
+ * @brief Handles the use event for a game object by a unit.
+ * @param pUnit Pointer to the unit.
+ * @param pGo Pointer to the game object.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::GOUse(Unit* pUnit, GameObject* pGo)
 {
     Script* pTempScript = m_scripts[pGo->GetScriptId()];
@@ -459,6 +587,13 @@ bool SD3::GOUse(Unit* pUnit, GameObject* pGo)
     return pTempScript->ToGameObjectScript()->OnUse(pUnit, pGo);
 }
 
+/**
+ * @brief Handles the quest accept event for a game object.
+ * @param pPlayer Pointer to the player.
+ * @param pGo Pointer to the game object.
+ * @param pQuest Pointer to the quest.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::GOQuestAccept(Player* pPlayer, GameObject* pGo, const Quest* pQuest)
 {
     Script* pTempScript = m_scripts[pGo->GetScriptId()];
@@ -473,6 +608,13 @@ bool SD3::GOQuestAccept(Player* pPlayer, GameObject* pGo, const Quest* pQuest)
     return pTempScript->ToGameObjectScript()->OnQuestAccept(pPlayer, pGo, pQuest);
 }
 
+/**
+ * @brief Handles the quest rewarded event for a game object.
+ * @param pPlayer Pointer to the player.
+ * @param pGo Pointer to the game object.
+ * @param pQuest Pointer to the quest.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::GOQuestRewarded(Player* pPlayer, GameObject* pGo, Quest const* pQuest)
 {
     Script* pTempScript = m_scripts[pGo->GetScriptId()];
@@ -487,6 +629,12 @@ bool SD3::GOQuestRewarded(Player* pPlayer, GameObject* pGo, Quest const* pQuest)
     return pTempScript->ToGameObjectScript()->OnQuestRewarded(pPlayer, pGo, pQuest);
 }
 
+/**
+ * @brief Handles the area trigger event.
+ * @param pPlayer Pointer to the player.
+ * @param atEntry Pointer to the area trigger entry.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::AreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
 {
     Script* pTempScript = m_scripts[sScriptMgr.GetBoundScriptId(SCRIPTED_AREATRIGGER, atEntry->id)];
@@ -499,6 +647,13 @@ bool SD3::AreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
     return pTempScript->ToAreaTriggerScript()->OnTrigger(pPlayer, atEntry);
 }
 
+/**
+ * @brief Handles the NPC spell click event.
+ * @param pPlayer Pointer to the player.
+ * @param pClickedCreature Pointer to the clicked creature.
+ * @param uiSpellId ID of the spell.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::NpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId)
 {
     Script* pTempScript = m_scripts[pClickedCreature->GetScriptId()];
@@ -511,7 +666,14 @@ bool SD3::NpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 uiSp
     return pTempScript->ToCreatureScript()->OnSpellClick(pPlayer, pClickedCreature, uiSpellId);
 }
 
-//the analogous method OnMapEvent exists also in the ZoneScript class and there it should have a higher priority. TODO
+/**
+ * @brief Processes a map event.
+ * @param uiEventId ID of the event.
+ * @param pSource Pointer to the source object.
+ * @param pTarget Pointer to the target object.
+ * @param bIsStart Whether the event is starting.
+ * @return True if the event was processed, false otherwise.
+ */
 bool SD3::ProcessEvent(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsStart)
 {
     Script* pTempScript = m_scripts[sScriptMgr.GetBoundScriptId(SCRIPTED_MAPEVENT, uiEventId)];
@@ -525,6 +687,11 @@ bool SD3::ProcessEvent(uint32 uiEventId, Object* pSource, Object* pTarget, bool 
     return pTempScript->ToMapEventScript()->OnReceived(uiEventId, pSource, pTarget, bIsStart);
 }
 
+/**
+ * @brief Gets the AI for a creature.
+ * @param pCreature Pointer to the creature.
+ * @return Pointer to the creature AI, or nullptr if not found.
+ */
 CreatureAI* SD3::GetCreatureAI(Creature* pCreature)
 {
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
@@ -543,6 +710,11 @@ CreatureAI* SD3::GetCreatureAI(Creature* pCreature)
     return ai;
 }
 
+/**
+ * @brief Gets the AI for a game object.
+ * @param pGo Pointer to the game object.
+ * @return Pointer to the game object AI, or nullptr if not found.
+ */
 GameObjectAI* SD3::GetGameObjectAI(GameObject* pGo)
 {
     Script* pTempScript = m_scripts[pGo->GetScriptId()];
@@ -552,11 +724,18 @@ GameObjectAI* SD3::GetGameObjectAI(GameObject* pGo)
         return nullptr;
     }
 
-    GameObjectAI * goAI = pTempScript->ToGameObjectScript()->GetAI(pGo);
+    GameObjectAI* goAI = pTempScript->ToGameObjectScript()->GetAI(pGo);
 
     return goAI;
 }
 
+/**
+ * @brief Handles the item use event.
+ * @param pPlayer Pointer to the player.
+ * @param pItem Pointer to the item.
+ * @param targets Spell cast targets.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::ItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {
     Script* pTempScript = m_scripts[pItem->GetScriptId()];
@@ -569,6 +748,13 @@ bool SD3::ItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
     return pTempScript->ToItemScript()->OnUse(pPlayer, pItem, targets);
 }
 
+/**
+ * @brief Handles the item equip event.
+ * @param pPlayer Pointer to the player.
+ * @param pItem Pointer to the item.
+ * @param on Whether the item is being equipped or unequipped.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::ItemEquip(Player* pPlayer, Item* pItem, bool on)
 {
     Script* pTempScript = m_scripts[pItem->GetScriptId()];
@@ -581,6 +767,12 @@ bool SD3::ItemEquip(Player* pPlayer, Item* pItem, bool on)
     return pTempScript->ToItemScript()->OnEquip(pPlayer, pItem, on);
 }
 
+/**
+ * @brief Handles the item delete event.
+ * @param pPlayer Pointer to the player.
+ * @param pItem Pointer to the item.
+ * @return True if the event was handled, false otherwise.
+ */
 bool SD3::ItemDelete(Player* pPlayer, Item* pItem)
 {
     Script* pTempScript = m_scripts[pItem->GetScriptId()];
@@ -593,7 +785,15 @@ bool SD3::ItemDelete(Player* pPlayer, Item* pItem)
     return pTempScript->ToItemScript()->OnDelete(pPlayer, pItem);
 }
 
-// NOTE! test if sScriptMgr is allowed here, or else add script id on upper level to the parameters
+/**
+ * @brief Handles the dummy effect for a unit.
+ * @param pCaster Pointer to the caster unit.
+ * @param spellId ID of the spell.
+ * @param effIndex Index of the spell effect.
+ * @param pTarget Pointer to the target unit.
+ * @param originalCasterGuid GUID of the original caster.
+ * @return True if the effect was handled, false otherwise.
+ */
 bool SD3::EffectDummyUnit(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Unit* pTarget, ObjectGuid originalCasterGuid)
 {
     Script* pTempScript = m_scripts[sScriptMgr.GetBoundScriptId(SCRIPTED_SPELL, spellId | effIndex << 24)];
@@ -606,6 +806,15 @@ bool SD3::EffectDummyUnit(Unit* pCaster, uint32 spellId, SpellEffectIndex effInd
     return pTempScript->ToSpellScript()->EffectDummy(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
+/**
+ * @brief Handles the dummy effect for a game object.
+ * @param pCaster Pointer to the caster unit.
+ * @param spellId ID of the spell.
+ * @param effIndex Index of the spell effect.
+ * @param pTarget Pointer to the target game object.
+ * @param originalCasterGuid GUID of the original caster.
+ * @return True if the effect was handled, false otherwise.
+ */
 bool SD3::EffectDummyGameObject(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, GameObject* pTarget, ObjectGuid originalCasterGuid)
 {
     Script* pTempScript = m_scripts[sScriptMgr.GetBoundScriptId(SCRIPTED_SPELL, spellId | effIndex << 24)];
@@ -618,6 +827,15 @@ bool SD3::EffectDummyGameObject(Unit* pCaster, uint32 spellId, SpellEffectIndex 
     return pTempScript->ToSpellScript()->EffectDummy(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
+/**
+ * @brief Handles the dummy effect for an item.
+ * @param pCaster Pointer to the caster unit.
+ * @param spellId ID of the spell.
+ * @param effIndex Index of the spell effect.
+ * @param pTarget Pointer to the target item.
+ * @param originalCasterGuid GUID of the original caster.
+ * @return True if the effect was handled, false otherwise.
+ */
 bool SD3::EffectDummyItem(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Item* pTarget, ObjectGuid originalCasterGuid)
 {
     Script* pTempScript = m_scripts[sScriptMgr.GetBoundScriptId(SCRIPTED_SPELL, spellId | effIndex << 24)];
@@ -630,6 +848,15 @@ bool SD3::EffectDummyItem(Unit* pCaster, uint32 spellId, SpellEffectIndex effInd
     return pTempScript->ToSpellScript()->EffectDummy(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
+/**
+ * @brief Handles the script effect for a unit.
+ * @param pCaster Pointer to the caster unit.
+ * @param spellId ID of the spell.
+ * @param effIndex Index of the spell effect.
+ * @param pTarget Pointer to the target unit.
+ * @param originalCasterGuid GUID of the original caster.
+ * @return True if the effect was handled, false otherwise.
+ */
 bool SD3::EffectScriptEffectUnit(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Unit* pTarget, ObjectGuid originalCasterGuid)
 {
     Script* pTempScript = m_scripts[sScriptMgr.GetBoundScriptId(SCRIPTED_SPELL, spellId | effIndex << 24)];
@@ -642,6 +869,12 @@ bool SD3::EffectScriptEffectUnit(Unit* pCaster, uint32 spellId, SpellEffectIndex
     return pTempScript->ToSpellScript()->EffectScriptEffect(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
+/**
+ * @brief Handles the dummy aura effect.
+ * @param pAura Pointer to the aura.
+ * @param bApply Whether the aura is being applied or removed.
+ * @return True if the effect was handled, false otherwise.
+ */
 bool SD3::AuraDummy(Aura const* pAura, bool bApply)
 {
     Script* pTempScript = m_scripts[sScriptMgr.GetBoundScriptId(SCRIPTED_AURASPELL, pAura->GetId() | pAura->GetEffIndex() << 24)];
@@ -653,8 +886,12 @@ bool SD3::AuraDummy(Aura const* pAura, bool bApply)
 
     return pTempScript->ToAuraScript()->OnDummyApply(pAura, bApply);
 }
-// END Note!
 
+/**
+ * @brief Creates instance data for a map.
+ * @param pMap Pointer to the map.
+ * @return Pointer to the instance data, or nullptr if not found.
+ */
 InstanceData* SD3::CreateInstanceData(Map* pMap)
 {
     Script* pTempScript = m_scripts[pMap->GetScriptId()];

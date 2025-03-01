@@ -27,16 +27,43 @@
 #ifndef SC_SCRIPTLOADER_H
 #define SC_SCRIPTLOADER_H
 
+/**
+ * @brief Adds all scripts to the script manager.
+ */
 void AddScripts();
+
+/**
+ * @brief Adds scripts for the Eastern Kingdoms.
+ */
 void AddEasternKingdomsScripts();
+
+/**
+ * @brief Adds scripts for Kalimdor.
+ */
 void AddKalimdorScripts();
+
 #if defined (TBC) || defined (WOTLK) || defined (CATA) || defined(MISTS)
+/**
+ * @brief Adds scripts for Outlands.
+ */
 void AddOutlandsScripts();
 #endif
+
 #if defined (WOTLK) || defined (CATA) || defined(MISTS)
+/**
+ * @brief Adds scripts for Northrend.
+ */
 void AddNorthrendScripts();
 #endif
+
+/**
+ * @brief Adds world scripts.
+ */
 void AddWorldScripts();
+
+/**
+ * @brief Adds battleground scripts.
+ */
 void AddBattlegroundScripts();
 
 #endif

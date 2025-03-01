@@ -31,24 +31,37 @@
 #include "Map.h"
 #include "system/ScriptDevMgr.h"
 
+/**
+ * @enum EncounterState
+ * @brief Enumeration for encounter states.
+ */
 enum EncounterState
 {
-    NOT_STARTED   = 0,
-    IN_PROGRESS   = 1,
-    FAIL          = 2,
-    DONE          = 3,
-    SPECIAL       = 4
+    NOT_STARTED   = 0,  ///< Encounter has not started
+    IN_PROGRESS   = 1,  ///< Encounter is in progress
+    FAIL          = 2,  ///< Encounter has failed
+    DONE          = 3,  ///< Encounter is completed
+    SPECIAL       = 4   ///< Special state for encounter
 };
 
+// Macros for logging instance data save/load operations
 #define OUT_SAVE_INST_DATA             debug_log("SD3: Saving Instance Data for Instance %s (Map %d, Instance Id %d)", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
 #define OUT_SAVE_INST_DATA_COMPLETE    debug_log("SD3: Saving Instance Data for Instance %s (Map %d, Instance Id %d) completed.", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
 #define OUT_LOAD_INST_DATA(a)          debug_log("SD3: Loading Instance Data for Instance %s (Map %d, Instance Id %d). Input is '%s'", instance->GetMapName(), instance->GetId(), instance->GetInstanceId(), a)
 #define OUT_LOAD_INST_DATA_COMPLETE    debug_log("SD3: Instance Data for Instance %s (Map %d, Instance Id: %d) is loaded.", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
 #define OUT_LOAD_INST_DATA_FAIL        script_error_log("Unable to load Instance Data for Instance %s (Map %d, Instance Id: %d).", instance->GetMapName(), instance->GetId(), instance->GetInstanceId())
 
+/**
+ * @class ScriptedInstance
+ * @brief Class for handling scripted instances.
+ */
 class ScriptedInstance : public InstanceData
 {
     public:
+        /**
+         * @brief Constructor for ScriptedInstance.
+         * @param pMap Pointer to the map associated with the instance.
+         */
         ScriptedInstance(Map* pMap) : InstanceData(pMap) {}
         ~ScriptedInstance() {}
 
@@ -93,14 +106,24 @@ class ScriptedInstance : public InstanceData
         EntryGuidMap m_mNpcEntryGuidStore;                  ///< Store unique NPC-Guids by entry
 };
 
-// Class for world maps (May need additional zone-wide functions later on)
+/**
+ * @class ScriptedMap
+ * @brief Class for world maps (May need additional zone-wide functions later on)
+ */
 class ScriptedMap : public ScriptedInstance
 {
     public:
+        /**
+         * @brief Constructor for ScriptedMap.
+         * @param pMap Pointer to the map associated with the instance.
+         */
         ScriptedMap(Map* pMap) : ScriptedInstance(pMap) {}
 };
 
-/// A static const array of this structure must be handled to DialogueHelper
+/**
+ * @struct DialogueEntry
+ * @brief Structure for handling dialogue entries.
+ */
 struct DialogueEntry
 {
     int32 iTextEntry;                                       ///< To be said text entry
@@ -108,7 +131,10 @@ struct DialogueEntry
     uint32 uiTimer;                                         ///< Time delay until next text of array is said (0 stops)
 };
 
-/// A static const array of this structure must be handled to DialogueHelper
+/**
+ * @struct DialogueEntryTwoSide
+ * @brief Structure for handling two-sided dialogue entries.
+ */
 struct DialogueEntryTwoSide
 {
     int32 iTextEntry;                                       ///< To be said text entry (first side)
@@ -118,7 +144,10 @@ struct DialogueEntryTwoSide
     uint32 uiTimer;                                         ///< Time delay until next text of array is said (0 stops)
 };
 
-/// Helper class handling a dialogue given as static const array of DialogueEntry or DialogueEntryTwoSide
+/**
+ * @class DialogueHelper
+ * @brief Helper class for handling dialogues.
+ */
 class DialogueHelper
 {
     public:

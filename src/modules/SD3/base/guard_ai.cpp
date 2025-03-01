@@ -35,22 +35,46 @@ EndScriptData */
 #include "guard_ai.h"
 
 // This script is for use within every single guard to save coding time
-
+/**
+ * @brief Constructor for guardAI.
+ *
+ * This constructor initializes the guardAI object with the given creature pointer.
+ * It also sets the initial values for the global cooldown and buff timer.
+ *
+ * @param pCreature Pointer to the creature this AI is associated with.
+ */
 guardAI::guardAI(Creature* pCreature) : ScriptedAI(pCreature),
-    m_uiGlobalCooldown(0),
-    m_uiBuffTimer(0)
+    m_uiGlobalCooldown(0),  // Initialize global cooldown to 0
+    m_uiBuffTimer(0)        // Initialize buff timer to 0
 {}
 
+/**
+ * @brief Resets the guard's AI state.
+ *
+ * This method resets the global cooldown and buff timer to their initial values.
+ * It is typically called when the guard is respawned or reset.
+ */
 void guardAI::Reset()
 {
-    m_uiGlobalCooldown = 0;
-    m_uiBuffTimer = 0;                                      // Rebuff as soon as we can
+    m_uiGlobalCooldown = 0;  // Reset global cooldown to 0
+    m_uiBuffTimer = 0;       // Reset buff timer to 0, allowing immediate rebuff
 }
 
+/**
+ * @brief Handles the guard's aggro behavior.
+ *
+ * This method is called when the guard aggroes on a unit. If the guard is a Cenarion Infantry,
+ * it will randomly choose one of three aggro sayings to shout. The guard will then attempt to
+ * cast a spell on the aggroed unit if it is within range.
+ *
+ * @param pWho Pointer to the unit being aggroed.
+ */
 void guardAI::Aggro(Unit* pWho)
 {
+    // Check if the guard is a Cenarion Infantry
     if (m_creature->GetEntry() == NPC_CENARION_INFANTRY)
     {
+        // Randomly choose one of three aggro sayings to shout
         switch (urand(0, 2))
         {
             case 0:
@@ -65,17 +89,27 @@ void guardAI::Aggro(Unit* pWho)
         }
     }
 
+    // Attempt to cast a spell on the aggroed unit if it is within range
     if (const SpellEntry* pSpellInfo = m_creature->ReachWithSpellAttack(pWho))
     {
         DoCastSpell(pWho, pSpellInfo);
     }
 }
 
+/**
+ * @brief Handles the guard's death behavior.
+ *
+ * This method is called when the guard dies. It sends a "Zone Under Attack" message to the
+ * LocalDefense and WorldDefense channels if the killer is a player or controlled by a player.
+ *
+ * @param pKiller Pointer to the unit that killed the guard.
+ */
 void guardAI::JustDied(Unit* pKiller)
 {
-    // Send Zone Under Attack message to the LocalDefense and WorldDefense Channels
+    // Check if the killer is a player or controlled by a player
     if (Player* pPlayer = pKiller->GetCharmerOrOwnerPlayerOrPlayerItself())
     {
+        // Send a "Zone Under Attack" message to the LocalDefense and WorldDefense channels
         m_creature->SendZoneUnderAttackMessage(pPlayer);
     }
 }
@@ -235,41 +269,67 @@ void guardAI::UpdateAI(const uint32 uiDiff)
     }
 }
 
+/**
+ * @brief Responds to text emotes directed at the guard.
+ *
+ * This method handles the guard's response to specific text emotes from players.
+ * Depending on the emote received, the guard will perform a corresponding emote action.
+ *
+ * @param uiTextEmote The text emote ID.
+ */
 void guardAI::DoReplyToTextEmote(uint32 uiTextEmote)
 {
     switch (uiTextEmote)
     {
         case TEXTEMOTE_KISS:
-            m_creature->HandleEmote(EMOTE_ONESHOT_BOW);
+            m_creature->HandleEmote(EMOTE_ONESHOT_BOW);  // Respond with a bow
             break;
         case TEXTEMOTE_WAVE:
-            m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);
+            m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);  // Respond with a wave
             break;
         case TEXTEMOTE_SALUTE:
-            m_creature->HandleEmote(EMOTE_ONESHOT_SALUTE);
+            m_creature->HandleEmote(EMOTE_ONESHOT_SALUTE);  // Respond with a salute
             break;
         case TEXTEMOTE_SHY:
-            m_creature->HandleEmote(EMOTE_ONESHOT_FLEX);
+            m_creature->HandleEmote(EMOTE_ONESHOT_FLEX);  // Respond with a flex
             break;
         case TEXTEMOTE_RUDE:
         case TEXTEMOTE_CHICKEN:
-            m_creature->HandleEmote(EMOTE_ONESHOT_POINT);
+            m_creature->HandleEmote(EMOTE_ONESHOT_POINT);  // Respond with a point
             break;
     }
 }
 
+/**
+ * @brief Handles emotes received by Orgrimmar guards.
+ *
+ * This method is called when an Orgrimmar guard receives an emote from a player.
+ * If the player is a member of the Horde, the guard will respond to the emote.
+ *
+ * @param pPlayer Pointer to the player sending the emote.
+ * @param uiTextEmote The text emote ID.
+ */
 void guardAI_orgrimmar::ReceiveEmote(Player* pPlayer, uint32 uiTextEmote)
 {
     if (pPlayer->GetTeam() == HORDE)
     {
-        DoReplyToTextEmote(uiTextEmote);
+        DoReplyToTextEmote(uiTextEmote);  // Respond to the emote if the player is Horde
     }
 }
 
+/**
+ * @brief Handles emotes received by Stormwind guards.
+ *
+ * This method is called when a Stormwind guard receives an emote from a player.
+ * If the player is a member of the Alliance, the guard will respond to the emote.
+ *
+ * @param pPlayer Pointer to the player sending the emote.
+ * @param uiTextEmote The text emote ID.
+ */
 void guardAI_stormwind::ReceiveEmote(Player* pPlayer, uint32 uiTextEmote)
 {
     if (pPlayer->GetTeam() == ALLIANCE)
     {
-        DoReplyToTextEmote(uiTextEmote);
+        DoReplyToTextEmote(uiTextEmote);  // Respond to the emote if the player is Alliance
     }
 }

@@ -28,33 +28,89 @@
 #define SC_PET_H
 
 // Using CreatureAI for now. Might change later and use PetAI (need to export for dll first)
+
+/**
+ * @class ScriptedPetAI
+ * @brief Custom AI for scripted pets, derived from CreatureAI.
+ */
 class ScriptedPetAI : public CreatureAI
 {
     public:
+        /**
+         * @brief Constructor for ScriptedPetAI.
+         * @param pCreature Pointer to the creature this AI is associated with.
+         */
         explicit ScriptedPetAI(Creature* pCreature);
+
+        /**
+         * @brief Destructor for ScriptedPetAI.
+         */
         ~ScriptedPetAI() {}
 
+        /**
+         * @brief Called when a unit comes into the pet's line of sight.
+         * @param pWho Pointer to the unit that came into sight.
+         */
         void MoveInLineOfSight(Unit* /*pWho*/) override;
 
+        /**
+         * @brief Called when the pet starts attacking a unit.
+         * @param pWho Pointer to the unit being attacked.
+         */
         void AttackStart(Unit* /*pWho*/) override;
 
+        /**
+         * @brief Called when the pet is attacked by a unit.
+         * @param pAttacker Pointer to the attacking unit.
+         */
         void AttackedBy(Unit* /*pAttacker*/) override;
 
+        /**
+         * @brief Checks if a unit is visible to the pet.
+         * @param pWho Pointer to the unit being checked.
+         * @return True if the unit is visible, false otherwise.
+         */
         bool IsVisible(Unit* /*pWho*/) const override;
 
+        /**
+         * @brief Called when the pet kills a unit.
+         * @param pVictim Pointer to the killed unit.
+         */
         void KilledUnit(Unit* /*pVictim*/) override {}
 
+        /**
+         * @brief Called when the pet's owner kills a unit.
+         * @param pVictim Pointer to the killed unit.
+         */
         void OwnerKilledUnit(Unit* /*pVictim*/) override {}
 
+        /**
+         * @brief Updates the pet's AI.
+         * @param uiDiff Time since the last update.
+         */
         void UpdateAI(const uint32 uiDiff) override;
 
+        /**
+         * @brief Resets the pet's state.
+         */
         virtual void Reset() {}
 
+        /**
+         * @brief Updates the pet's AI while in combat.
+         * @param uiDiff Time since the last update.
+         */
         virtual void UpdatePetAI(const uint32 uiDiff);      // while in combat
 
+        /**
+         * @brief Updates the pet's AI while out of combat.
+         * @param uiDiff Time since the last update.
+         */
         virtual void UpdatePetOOCAI(const uint32 /*uiDiff*/) {} // when not in combat
 
     protected:
+        /**
+         * @brief Resets the pet's combat state.
+         */
         void ResetPetCombat();
 };
 

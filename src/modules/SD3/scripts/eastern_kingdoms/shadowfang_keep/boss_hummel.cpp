@@ -31,7 +31,7 @@ SDComment: The bosses are handled in eventAI; The event needs more research; onl
 SDCategory: Shadowfang Keep
 EndScriptData */
 
-#if defined (WOTLK) || defined (CATA) || defined(MOP)
+#if defined (WOTLK) || defined (CATA) || defined(MISTS)
 #include "precompiled.h"
 #include "shadowfang_keep.h"
 

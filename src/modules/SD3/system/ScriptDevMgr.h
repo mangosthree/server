@@ -143,12 +143,24 @@ struct AuraScript;
 struct ConditionScript;
 struct AchievementScript;
 
+/**
+ * @brief Base structure for all script types.
+ */
 struct Script
 {
-    std::string Name;
-    ScriptedObjectType Type;
+    std::string Name;  ///< Name of the script.
+    ScriptedObjectType Type;  ///< Type of the scripted object.
 
+    /**
+     * @brief Registers the script.
+     * @param bReportError Whether to report an error if registration fails.
+     */
     void RegisterSelf(bool bReportError = true);
+
+    /**
+     * @brief Checks if the script is valid.
+     * @return True if the script is valid, false otherwise.
+     */
     virtual bool IsValid() { return true; }
 
     Script() : Name(""), Type(SCRIPTED_MAX_TYPE) {}
@@ -169,6 +181,9 @@ struct Script
     AchievementScript* ToAchievementScript() { return Type == SCRIPTED_ACHIEVEMENT && IsValid() ? (AchievementScript*)this : nullptr; }
 };
 
+/**
+ * @brief Structure for creature scripts.
+ */
 struct CreatureScript : public Script
 {
     CreatureScript(const char* name) : Script(SCRIPTED_UNIT, name) {}
@@ -184,6 +199,9 @@ struct CreatureScript : public Script
     virtual CreatureAI* GetAI(Creature*) { return nullptr; }
 };
 
+/**
+ * @brief Structure for game object scripts.
+ */
 struct GameObjectScript : public Script
 {
     GameObjectScript(const char* name) : Script(SCRIPTED_GAMEOBJECT, name) {}
@@ -200,6 +218,9 @@ struct GameObjectScript : public Script
     virtual GameObjectAI* GetAI(GameObject*) { return nullptr; }
 };
 
+/**
+ * @brief Structure for item scripts.
+ */
 struct ItemScript : public Script
 {
     ItemScript(const char* name) : Script(SCRIPTED_ITEM, name) {}
@@ -213,6 +234,9 @@ struct ItemScript : public Script
     virtual bool OnGossipSelectWithCode(Player*, Item*, uint32, uint32, const char*) { return false; }
 };
 
+/**
+ * @brief Structure for area trigger scripts.
+ */
 struct AreaTriggerScript : public Script
 {
     AreaTriggerScript(const char* name) : Script(SCRIPTED_AREATRIGGER, name) {}
@@ -220,6 +244,9 @@ struct AreaTriggerScript : public Script
     virtual bool OnTrigger(Player*, AreaTriggerEntry const*) { return false; }
 };
 
+/**
+ * @brief Structure for map event scripts.
+ */
 struct MapEventScript : public Script
 {
     MapEventScript(const char *name) : Script(SCRIPTED_MAPEVENT, name) {}
@@ -227,6 +254,9 @@ struct MapEventScript : public Script
     virtual bool OnReceived(uint32, Object*, Object*, bool) { return false; }
 };
 
+/**
+ * @brief Structure for zone scripts.
+ */
 struct ZoneScript : public Script
 {
     ZoneScript(const char* name) : Script(SCRIPTED_MAP, name) {}
@@ -237,23 +267,35 @@ struct ZoneScript : public Script
     virtual InstanceData* GetInstanceData(Map*) { return nullptr; }
 };
 
+/**
+ * @brief Structure for outdoor PvP scripts.
+ */
 struct OutdoorPvPScript : public ZoneScript
 {
     OutdoorPvPScript(const char* name) : ZoneScript(name, SCRIPTED_PVP_ZONE) {}
 };
 
+/**
+ * @brief Structure for battleground scripts.
+ */
 struct BattleGroundScript : public ZoneScript
 {
     BattleGroundScript(const char* name) : ZoneScript(name, SCRIPTED_BATTLEGROUND) {}
     //bool IsValid() override { return map && map->IsBattleGround(); }
 };
 
+/**
+ * @brief Structure for instance scripts.
+ */
 struct InstanceScript : public ZoneScript
 {
     InstanceScript(const char* name) : ZoneScript(name, SCRIPTED_INSTANCE) {}
     //bool IsValid() override { return map && map->IsDungeon(); }
 };
 
+/**
+ * @brief Structure for spell scripts.
+ */
 struct SpellScript : public Script
 {
     SpellScript(const char* name) : Script(SCRIPTED_SPELL, name) {}
@@ -263,6 +305,9 @@ struct SpellScript : public Script
     virtual bool EffectScriptEffect(Unit*, uint32, SpellEffectIndex, Unit*, ObjectGuid) { return false; }
 };
 
+/**
+ * @brief Structure for aura scripts.
+ */
 struct AuraScript : public Script
 {
     AuraScript(const char* name) : Script(SCRIPTED_AURASPELL, name) {}
@@ -274,11 +319,17 @@ struct AuraScript : public Script
 #endif
 };
 
+/**
+ * @brief Structure for condition scripts.
+ */
 struct ConditionScript : public Script
 {
     ConditionScript(const char* name) : Script(SCRIPTED_CONDITION, name) {}
 };
 
+/**
+ * @brief Structure for achievement scripts.
+ */
 struct AchievementScript : public Script
 {
     AchievementScript(const char* name) : Script(SCRIPTED_ACHIEVEMENT, name) {}
@@ -287,8 +338,22 @@ struct AchievementScript : public Script
 // *********************************************************
 // ************* Some functions used globally **************
 
-// Generic scripting text function
+/**
+ * @brief Generic scripting text function.
+ * @param iTextEntry Text entry ID.
+ * @param pSource Source of the text.
+ * @param pTarget Target of the text (optional).
+ */
 void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget = nullptr);
+
+/**
+ * @brief Simulates script text for a map.
+ * @param iTextEntry Text entry ID.
+ * @param uiCreatureEntry Creature entry ID.
+ * @param pMap Pointer to the map.
+ * @param pCreatureSource Source creature (optional).
+ * @param pTarget Target unit (optional).
+ */
 void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map* pMap, Creature* pCreatureSource = nullptr, Unit* pTarget = nullptr);
 
 #endif

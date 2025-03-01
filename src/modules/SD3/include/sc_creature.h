@@ -28,37 +28,38 @@
 #define SC_CREATURE_H
 
 #include "Chat.h"
-#include "DBCStores.h"                                      // Mostly only used the Lookup acces, but a few cases really do use the DBC-Stores
+#include "DBCStores.h"  // Mostly only used for Lookup access, but a few cases really do use the DBC-Stores
 
 // Spell targets used by SelectSpell
 enum SelectTarget
 {
-    SELECT_TARGET_DONTCARE = 0,                             // All target types allowed
+    SELECT_TARGET_DONTCARE = 0,  // All target types allowed
 
-    SELECT_TARGET_SELF,                                     // Only Self casting
+    SELECT_TARGET_SELF,  // Only Self casting
 
-    SELECT_TARGET_SINGLE_ENEMY,                             // Only Single Enemy
-    SELECT_TARGET_AOE_ENEMY,                                // Only AoE Enemy
-    SELECT_TARGET_ANY_ENEMY,                                // AoE or Single Enemy
+    SELECT_TARGET_SINGLE_ENEMY,  // Only Single Enemy
+    SELECT_TARGET_AOE_ENEMY,  // Only AoE Enemy
+    SELECT_TARGET_ANY_ENEMY,  // AoE or Single Enemy
 
-    SELECT_TARGET_SINGLE_FRIEND,                            // Only Single Friend
-    SELECT_TARGET_AOE_FRIEND,                               // Only AoE Friend
-    SELECT_TARGET_ANY_FRIEND,                               // AoE or Single Friend
+    SELECT_TARGET_SINGLE_FRIEND,  // Only Single Friend
+    SELECT_TARGET_AOE_FRIEND,  // Only AoE Friend
+    SELECT_TARGET_ANY_FRIEND,  // AoE or Single Friend
 };
 
 // Spell Effects used by SelectSpell
 enum SelectEffect
 {
-    SELECT_EFFECT_DONTCARE = 0,                             // All spell effects allowed
-    SELECT_EFFECT_DAMAGE,                                   // Spell does damage
-    SELECT_EFFECT_HEALING,                                  // Spell does healing
-    SELECT_EFFECT_AURA,                                     // Spell applies an aura
+    SELECT_EFFECT_DONTCARE = 0,  // All spell effects allowed
+    SELECT_EFFECT_DAMAGE,  // Spell does damage
+    SELECT_EFFECT_HEALING,  // Spell does healing
+    SELECT_EFFECT_AURA,  // Spell applies an aura
 };
 
+// Equipment states for creatures
 enum SCEquip
 {
     EQUIP_NO_CHANGE = -1,
-    EQUIP_UNEQUIP   = 0
+    EQUIP_UNEQUIP = 0
 };
 
 /// Documentation of CreatureAI functions can be found in MaNGOS source
@@ -85,7 +86,7 @@ struct ScriptedAI : public CreatureAI
         // Called for reaction at enter to combat if not in combat yet (enemy can be nullptr)
         void EnterCombat(Unit* pEnemy) override;
 
-        // Called at stoping attack by any attacker
+        // Called at stopping attack by any attacker
         void EnterEvadeMode() override;
 
         // Called when reached home after MoveTargetHome (in evade)
@@ -134,7 +135,7 @@ struct ScriptedAI : public CreatureAI
         /// This will by default result in reattacking, if the creature has no victim
         void AttackedBy(Unit* pAttacker) override { CreatureAI::AttackedBy(pAttacker); }
 
-        // Called when creature is respawned (for reseting variables)
+        // Called when creature is respawned (for resetting variables)
         void JustRespawned() override;
 
         // Called at waypoint reached or point movement finished
@@ -173,7 +174,7 @@ struct ScriptedAI : public CreatureAI
 
         /**
          * This is a SD3 internal function, that every AI must implement
-         * Usally used to reset combat variables
+         * Usually used to reset combat variables
          * Called by default on creature evade and respawn
          * In most scripts also called in the constructor of the AI
          */
@@ -246,6 +247,10 @@ struct ScriptedAI : public CreatureAI
         uint32 m_uiEvadeCheckCooldown;
 };
 
+/**
+ * @struct Scripted_NoMovementAI
+ * @brief AI for creatures that do not move during combat.
+ */
 struct Scripted_NoMovementAI : public ScriptedAI
 {
     Scripted_NoMovementAI(Creature* pCreature) : ScriptedAI(pCreature)

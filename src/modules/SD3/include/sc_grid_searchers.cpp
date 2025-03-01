@@ -31,7 +31,16 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 
-// return closest GO in grid, with range from pSource
+/**
+ * @brief Returns the closest GameObject with a specific entry within a given range.
+ * 
+ * This function searches for the closest GameObject with the specified entry ID within the given range from the source object.
+ * 
+ * @param pSource Pointer to the source WorldObject.
+ * @param uiEntry Entry ID of the GameObject.
+ * @param fMaxSearchRange Maximum search range.
+ * @return Pointer to the closest GameObject, or nullptr if not found.
+ */
 GameObject* GetClosestGameObjectWithEntry(WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange)
 {
     GameObject* pGo = nullptr;
@@ -44,7 +53,19 @@ GameObject* GetClosestGameObjectWithEntry(WorldObject* pSource, uint32 uiEntry, 
     return pGo;
 }
 
-// return closest creature alive in grid, with range from pSource
+/**
+ * @brief Returns the closest Creature with a specific entry within a given range.
+ * 
+ * This function searches for the closest Creature with the specified entry ID within the given range from the source object.
+ * 
+ * @param pSource Pointer to the source WorldObject.
+ * @param uiEntry Entry ID of the Creature.
+ * @param fMaxSearchRange Maximum search range.
+ * @param bOnlyAlive If true, only alive creatures will be considered.
+ * @param bOnlyDead If true, only dead creatures will be considered.
+ * @param bExcludeSelf If true, the source creature will be excluded from the search.
+ * @return Pointer to the closest Creature, or nullptr if not found.
+ */
 Creature* GetClosestCreatureWithEntry(WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange, bool bOnlyAlive/*=true*/, bool bOnlyDead/*=false*/, bool bExcludeSelf/*=false*/)
 {
     Creature* pCreature = nullptr;
@@ -57,6 +78,16 @@ Creature* GetClosestCreatureWithEntry(WorldObject* pSource, uint32 uiEntry, floa
     return pCreature;
 }
 
+/**
+ * @brief Gets a list of GameObjects with a specific entry within a given range.
+ * 
+ * This function searches for all GameObjects with the specified entry ID within the given range from the source object and stores them in the provided list.
+ * 
+ * @param lList Reference to the list to store the found GameObjects.
+ * @param pSource Pointer to the source WorldObject.
+ * @param uiEntry Entry ID of the GameObject.
+ * @param fMaxSearchRange Maximum search range.
+ */
 void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList , WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange)
 {
     MaNGOS::GameObjectEntryInPosRangeCheck check(*pSource, uiEntry, pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ(), fMaxSearchRange);
@@ -65,6 +96,16 @@ void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList , WorldObjec
     Cell::VisitGridObjects(pSource, searcher, fMaxSearchRange);
 }
 
+/**
+ * @brief Gets a list of Creatures with a specific entry within a given range.
+ * 
+ * This function searches for all Creatures with the specified entry ID within the given range from the source object and stores them in the provided list.
+ * 
+ * @param lList Reference to the list to store the found Creatures.
+ * @param pSource Pointer to the source WorldObject.
+ * @param uiEntry Entry ID of the Creature.
+ * @param fMaxSearchRange Maximum search range.
+ */
 void GetCreatureListWithEntryInGrid(std::list<Creature*>& lList, WorldObject* pSource, uint32 uiEntry, float fMaxSearchRange)
 {
     MaNGOS::AllCreaturesOfEntryInRangeCheck check(pSource, uiEntry, fMaxSearchRange);

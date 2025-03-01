@@ -40,32 +40,66 @@
 #define TEXT_SOURCE_GOSSIP_START    TEXT_SOURCE_RANGE*3
 #define TEXT_SOURCE_GOSSIP_END      TEXT_SOURCE_RANGE*4 + 1
 
+/**
+ * @struct ScriptPointMove
+ * @brief Structure to hold waypoint data for a creature.
+ */
 struct ScriptPointMove
 {
-    uint32 uiCreatureEntry;
-    uint32 uiPointId;
-    float  fX;
-    float  fY;
-    float  fZ;
-    uint32 uiWaitTime;
+    uint32 uiCreatureEntry;  ///< Entry ID of the creature
+    uint32 uiPointId;        ///< ID of the waypoint
+    float  fX;               ///< X coordinate of the waypoint
+    float  fY;               ///< Y coordinate of the waypoint
+    float  fZ;               ///< Z coordinate of the waypoint
+    uint32 uiWaitTime;       ///< Wait time at the waypoint
 };
 
+/**
+ * @class SystemMgr
+ * @brief Manager class for handling script texts, gossip texts, and waypoints.
+ */
 class SystemMgr
 {
     public:
+        /**
+         * @brief Constructor for SystemMgr.
+         */
         SystemMgr();
         ~SystemMgr() {}
 
+        /**
+         * @brief Gets the singleton instance of SystemMgr.
+         * @return Reference to the singleton instance.
+         */
         static SystemMgr& Instance();
 
         typedef std::unordered_map<uint32, std::vector<ScriptPointMove> > PointMoveMap;
 
-        // SD3 Database Bindings
+        /**
+         * @brief Loads script texts from the database.
+         */
         void LoadScriptTexts();
+
+        /**
+         * @brief Loads custom script texts from the database.
+         */
         void LoadScriptTextsCustom();
+
+        /**
+         * @brief Loads script gossip texts from the database.
+         */
         void LoadScriptGossipTexts();
+
+        /**
+         * @brief Loads script waypoints from the database.
+         */
         void LoadScriptWaypoints();
 
+        /**
+         * @brief Gets the list of waypoints for a given creature entry.
+         * @param uiCreatureEntry Entry ID of the creature.
+         * @return Vector of ScriptPointMove containing the waypoints.
+         */
         std::vector<ScriptPointMove> const& GetPointMoveList(uint32 uiCreatureEntry) const
         {
             static std::vector<ScriptPointMove> vEmpty;
@@ -81,7 +115,7 @@ class SystemMgr
         }
 
     protected:
-        PointMoveMap    m_mPointMoveMap;                    // coordinates for waypoints
+        PointMoveMap    m_mPointMoveMap;                    // Map of creature entry IDs to their waypoints
 };
 
 #define pSystemMgr SystemMgr::Instance()

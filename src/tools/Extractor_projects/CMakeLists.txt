@@ -59,6 +59,42 @@ if(WIN32 AND MSVC)
         OPTIONAL)
 endif()
 
+if(NOT BUILD_MANGOSD)
+if(BUILD_TOOLS)
+add_library(vmap2 STATIC
+    ../../game/vmap/BIH.cpp
+    ../../game/vmap/VMapManager2.cpp
+    ../../game/vmap/MapTree.cpp
+    ../../game/vmap/TileAssembler.cpp
+    ../../game/vmap/WorldModel.cpp
+    ../../game/vmap/ModelInstance.cpp
+    ../../game/vmap/BIH.h
+    ../../game/vmap/VMapManager2.h
+    ../../game/vmap/MapTree.h
+    ../../game/vmap/TileAssembler.h
+    ../../game/vmap/WorldModel.h
+    ../../game/vmap/ModelInstance.h
+)
+
+target_include_directories(vmap2
+    PUBLIC
+        ../../game/vmap
+        ../../game/WorldHandlers
+)
+
+target_compile_definitions(vmap2
+    PUBLIC
+        MMAP_GENERATOR
+        NO_CORE_FUNCS
+)
+target_link_libraries(vmap2
+    PUBLIC
+        shared
+        g3dlite
+        RecastNavigation::Detour
+)
+endif()
+endif()
 #=======================================================#
 #vmap-extractor
 #=======================================================#

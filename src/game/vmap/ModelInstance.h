@@ -39,8 +39,7 @@ namespace VMAP
     struct LocationInfo;
 
     /**
-     * @brief
-     *
+     * @brief Enumeration for model flags.
      */
     enum ModelFlags
     {
@@ -50,61 +49,59 @@ namespace VMAP
     };
 
     /**
-     * @brief
-     *
+     * @brief Class representing a model spawn.
      */
     class ModelSpawn
     {
-        public:
-            // mapID, tileX, tileY, Flags, ID, Pos, Rot, Scale, Bound_lo, Bound_hi, name
-            uint32 flags; /**< TODO */
-            uint16 adtId; /**< TODO */
-            uint32 ID; /**< TODO */
-            G3D::Vector3 iPos; /**< TODO */
-            G3D::Vector3 iRot; /**< TODO */
-            float iScale; /**< TODO */
-            G3D::AABox iBound; /**< TODO */
-            std::string name; /**< TODO */
-            /**
-             * @brief
-             *
-             * @param other
-             * @return bool operator
-             */
-            bool operator==(const ModelSpawn& other) const { return ID == other.ID; }
-            // uint32 hashCode() const { return ID; }
-            // temp?
-            /**
-             * @brief
-             *
-             * @return const G3D::AABox
-             */
-            const G3D::AABox& getBounds() const { return iBound; }
+    public:
+        // mapID, tileX, tileY, Flags, ID, Pos, Rot, Scale, Bound_lo, Bound_hi, name
+        uint32 flags; /**< Model flags. */
+        uint16 adtId; /**< ADT ID. */
+        uint32 ID; /**< Model ID. */
+        G3D::Vector3 iPos; /**< Position of the model. */
+        G3D::Vector3 iRot; /**< Rotation of the model. */
+        float iScale; /**< Scale of the model. */
+        G3D::AABox iBound; /**< Bounding box of the model. */
+        std::string name; /**< Name of the model. */
 
+        /**
+         * @brief Equality operator for ModelSpawn.
+         *
+         * @param other The other ModelSpawn to compare with.
+         * @return bool True if the ModelSpawns are equal, false otherwise.
+         */
+        bool operator==(const ModelSpawn& other) const { return ID == other.ID; }
 
-            /**
-             * @brief
-             *
-             * @param rf
-             * @param spawn
-             * @return bool
-             */
-            static bool ReadFromFile(FILE* rf, ModelSpawn& spawn);
-            /**
-             * @brief
-             *
-             * @param rw
-             * @param spawn
-             * @return bool
-             */
-            static bool WriteToFile(FILE* rw, const ModelSpawn& spawn);
+        /**
+         * @brief Gets the bounding box of the model.
+         *
+         * @return const G3D::AABox& The bounding box of the model.
+         */
+        const G3D::AABox& getBounds() const { return iBound; }
+
+        /**
+         * @brief Reads a ModelSpawn from a file.
+         *
+         * @param rf The file to read from.
+         * @param spawn The ModelSpawn to read into.
+         * @return bool True if the read was successful, false otherwise.
+         */
+        static bool ReadFromFile(FILE* rf, ModelSpawn& spawn);
+
+        /**
+         * @brief Writes a ModelSpawn to a file.
+         *
+         * @param rw The file to write to.
+         * @param spawn The ModelSpawn to write.
+         * @return bool True if the write was successful, false otherwise.
+         */
+        static bool WriteToFile(FILE* rw, const ModelSpawn& spawn);
     };
 
     /**
-     * @brief
-     *
+     * @brief Class representing a model instance.
      */
-    class ModelInstance: public ModelSpawn
+    class ModelInstance : public ModelSpawn
     {
         public:
             /**
@@ -163,10 +160,15 @@ namespace VMAP
             WorldModel* iModel; /**< TODO */
 
 #ifdef MMAP_GENERATOR
-        public:
-            WorldModel* const getWorldModel();
+    public:
+        /**
+         * @brief Gets the world model.
+         *
+         * @return WorldModel* Pointer to the world model.
+         */
+        WorldModel* const getWorldModel();
 #endif
     };
 } // namespace VMAP
 
-#endif // _MODELINSTANCE
+#endif // MANGOS_H_MODELINSTANCE

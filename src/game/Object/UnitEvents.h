@@ -118,28 +118,67 @@ class ThreatRefStatusChangeEvent : public UnitBaseEvent
         };
         ThreatManager* iThreatManager; /**< The threat manager associated with the event. */
     public:
-        ThreatRefStatusChangeEvent(uint32 pType) : UnitBaseEvent(pType), iThreatManager(NULL)
+
+        /**
+         * @brief Constructor for ThreatRefStatusChangeEvent.
+         *
+         * @param pType The type of the event.
+         */
+        ThreatRefStatusChangeEvent(uint32 pType) : UnitBaseEvent(pType)
         {
-            iHostileReference = NULL;
+            iHostileReference = nullptr;
+            iFValue = 0.0f;
+            iIValue = 0;
+            iBValue = false;
+            iThreatManager = nullptr;
         }
 
-        ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference) : UnitBaseEvent(pType), iThreatManager(NULL)
+        /**
+         * @brief Constructor for ThreatRefStatusChangeEvent with a hostile reference.
+         *
+         * @param pType The type of the event.
+         * @param pHostileReference The hostile reference associated with the event.
+         */
+        ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference) : UnitBaseEvent(pType)
         {
             iHostileReference = pHostileReference;
+            iFValue = 0.0f;
+            iIValue = 0;
+            iBValue = false;
+            iThreatManager = nullptr;
         }
 
-        ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, float pValue) : UnitBaseEvent(pType), iThreatManager(NULL)
+        /**
+         * @brief Constructor for ThreatRefStatusChangeEvent with a float value.
+         *
+         * @param pType The type of the event.
+         * @param pHostileReference The hostile reference associated with the event.
+         * @param pValue The float value associated with the event.
+         */
+        ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, float pValue) : UnitBaseEvent(pType)
         {
             iHostileReference = pHostileReference;
             iFValue = pValue;
+            iIValue = 0;
+            iBValue = false;
+            iThreatManager = nullptr;
         }
 
-        ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, bool pValue) : UnitBaseEvent(pType), iThreatManager(NULL)
+        /**
+         * @brief Constructor for ThreatRefStatusChangeEvent with a boolean value.
+         *
+         * @param pType The type of the event.
+         * @param pHostileReference The hostile reference associated with the event.
+         * @param pValue The boolean value associated with the event.
+         */
+        ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, bool pValue) : UnitBaseEvent(pType)
         {
             iHostileReference = pHostileReference;
+            iFValue = 0.0f;
+            iIValue = 0;
             iBValue = pValue;
+            iThreatManager = nullptr;
         }
-
 
         /**
          * @brief Gets the integer value associated with the event.
@@ -204,7 +243,10 @@ class ThreatManagerEvent : public ThreatRefStatusChangeEvent
          *
          * @param pType The type of the event.
          */
-        ThreatManagerEvent(uint32 pType) : ThreatRefStatusChangeEvent(pType), iThreatContainer(nullptr) {}
+        ThreatManagerEvent(uint32 pType) : ThreatRefStatusChangeEvent(pType)
+        {
+            iThreatContainer = nullptr;
+        }
 
         /**
          * @brief Constructor for ThreatManagerEvent with a hostile reference.
@@ -212,7 +254,11 @@ class ThreatManagerEvent : public ThreatRefStatusChangeEvent
          * @param pType The type of the event.
          * @param pHostileReference The hostile reference associated with the event.
          */
-        ThreatManagerEvent(uint32 pType, HostileReference* pHostileReference) : ThreatRefStatusChangeEvent(pType, pHostileReference), iThreatContainer(nullptr) {}
+        ThreatManagerEvent(uint32 pType, HostileReference* pHostileReference) : ThreatRefStatusChangeEvent(pType, pHostileReference)
+        {
+            iThreatContainer = nullptr;
+        }
+
 
         /**
          * @brief Sets the threat container associated with the event.

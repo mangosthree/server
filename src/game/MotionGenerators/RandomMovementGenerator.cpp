@@ -30,6 +30,14 @@
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
 
+/**
+ * @brief Constructor for RandomMovementGenerator with specified coordinates and radius.
+ * @param x X-coordinate of the center.
+ * @param y Y-coordinate of the center.
+ * @param z Z-coordinate of the center.
+ * @param radius Radius within which the unit will move.
+ * @param verticalZ Vertical offset for the movement.
+ */
 template<>
 RandomMovementGenerator<Creature>::RandomMovementGenerator(const Creature& creature): i_verticalZ(0)
 {
@@ -44,6 +52,10 @@ RandomMovementGenerator<Creature>::RandomMovementGenerator(const Creature& creat
     i_verticalZ = 0.0f;
 }
 
+/**
+ * @brief Sets a random location for the creature to move to.
+ * @param creature Reference to the creature.
+ */
 template<>
 void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
 {
@@ -53,7 +65,7 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
 
     creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
 
-    // check if new random position is assigned, GetReachableRandomPosition may fail
+    // Check if new random position is assigned, GetReachableRandomPosition may fail
     if (creature.GetMap()->GetReachableRandomPosition(&creature, destX, destY, destZ, i_radius))
     {
         Movement::MoveSplineInit init(creature);
@@ -76,6 +88,10 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
     return;
 }
 
+/**
+ * @brief Initializes the RandomMovementGenerator.
+ * @param creature Reference to the creature.
+ */
 template<>
 void RandomMovementGenerator<Creature>::Initialize(Creature& creature)
 {
@@ -89,12 +105,20 @@ void RandomMovementGenerator<Creature>::Initialize(Creature& creature)
     _setRandomLocation(creature);
 }
 
+/**
+ * @brief Resets the RandomMovementGenerator.
+ * @param creature Reference to the creature.
+ */
 template<>
 void RandomMovementGenerator<Creature>::Reset(Creature& creature)
 {
     Initialize(creature);
 }
 
+/**
+ * @brief Interrupts the RandomMovementGenerator.
+ * @param creature Reference to the creature.
+ */
 template<>
 void RandomMovementGenerator<Creature>::Interrupt(Creature& creature)
 {
@@ -103,6 +127,10 @@ void RandomMovementGenerator<Creature>::Interrupt(Creature& creature)
     creature.SetWalk(!creature.hasUnitState(UNIT_STAT_RUNNING_STATE), false);
 }
 
+/**
+ * @brief Finalizes the RandomMovementGenerator.
+ * @param creature Reference to the creature.
+ */
 template<>
 void RandomMovementGenerator<Creature>::Finalize(Creature& creature)
 {
@@ -110,6 +138,12 @@ void RandomMovementGenerator<Creature>::Finalize(Creature& creature)
     creature.SetWalk(!creature.hasUnitState(UNIT_STAT_RUNNING_STATE), false);
 }
 
+/**
+ * @brief Updates the RandomMovementGenerator.
+ * @param creature Reference to the creature.
+ * @param diff Time difference.
+ * @return True if the update was successful, false otherwise.
+ */
 template<>
 bool RandomMovementGenerator<Creature>::Update(Creature& creature, const uint32& diff)
 {

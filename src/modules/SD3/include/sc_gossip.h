@@ -180,6 +180,9 @@ extern uint32 GetSkillLevel(Player* pPlayer, uint32 uiSkill);
 // guid - npc guid (ObjectGuid)
 #define SEND_GOSSIP_MENU(uiTextId, guid)      PlayerTalkClass->SendGossipMenu(uiTextId, guid)
 
+// Clears the Menu
+#define CLEAR_GOSSIP_MENU()        PlayerTalkClass->ClearMenus()
+
 // Closes the Menu
 #define CLOSE_GOSSIP_MENU()        PlayerTalkClass->CloseGossip()
 

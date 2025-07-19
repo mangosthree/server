@@ -635,6 +635,8 @@ struct npc_death_knight_initiate : public CreatureScript
         void Reset() override
         {
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
+            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
             m_duelerGuid.Clear();
 
             m_uiDuelStartStage = 0;
@@ -689,6 +691,7 @@ struct npc_death_knight_initiate : public CreatureScript
                     {
                         m_creature->CastSpell(pPlayer, SPELL_DUEL_VICTORY, true);
                         m_creature->SetFacingToObject(pPlayer);
+                        pPlayer->RemoveAllAurasOnEvade();
                     }
 
                     // complete duel and evade (without home movemnet)
@@ -697,6 +700,7 @@ struct npc_death_knight_initiate : public CreatureScript
                     m_creature->DeleteThreatList();
                     m_creature->CombatStop(true);
                     m_creature->SetLootRecipient(nullptr);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
 
                     // remove duel flag
                     if (GameObject* pFlag = GetClosestGameObjectWithEntry(m_creature, GO_DUEL_FLAG, 30.0f))
@@ -742,6 +746,7 @@ struct npc_death_knight_initiate : public CreatureScript
                         break;
                     case 4:
                         m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
+                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                         AttackStart(pPlayer);
                         m_uiDuelTimer = 0;
                         break;
@@ -820,6 +825,7 @@ struct npc_death_knight_initiate : public CreatureScript
     {
         if (pPlayer->GetQuestStatus(QUEST_DEATH_CHALLENGE) == QUEST_STATUS_INCOMPLETE)
         {
+            pPlayer->CLEAR_GOSSIP_MENU();
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ACCEPT_DUEL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_DUEL, pCreature->GetObjectGuid());
             return true;
@@ -835,6 +841,7 @@ struct npc_death_knight_initiate : public CreatureScript
 
             pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_15);
+            pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
             pCreature->SetFacingToObject(pPlayer);
 
             DoScriptText(m_auiRandomSay[urand(0, countof(m_auiRandomSay) - 1)], pCreature, pPlayer);

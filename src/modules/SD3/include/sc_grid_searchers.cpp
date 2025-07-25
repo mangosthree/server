@@ -33,9 +33,9 @@
 
 /**
  * @brief Returns the closest GameObject with a specific entry within a given range.
- * 
+ *
  * This function searches for the closest GameObject with the specified entry ID within the given range from the source object.
- * 
+ *
  * @param pSource Pointer to the source WorldObject.
  * @param uiEntry Entry ID of the GameObject.
  * @param fMaxSearchRange Maximum search range.
@@ -55,9 +55,9 @@ GameObject* GetClosestGameObjectWithEntry(WorldObject* pSource, uint32 uiEntry, 
 
 /**
  * @brief Returns the closest Creature with a specific entry within a given range.
- * 
+ *
  * This function searches for the closest Creature with the specified entry ID within the given range from the source object.
- * 
+ *
  * @param pSource Pointer to the source WorldObject.
  * @param uiEntry Entry ID of the Creature.
  * @param fMaxSearchRange Maximum search range.
@@ -80,9 +80,9 @@ Creature* GetClosestCreatureWithEntry(WorldObject* pSource, uint32 uiEntry, floa
 
 /**
  * @brief Gets a list of GameObjects with a specific entry within a given range.
- * 
+ *
  * This function searches for all GameObjects with the specified entry ID within the given range from the source object and stores them in the provided list.
- * 
+ *
  * @param lList Reference to the list to store the found GameObjects.
  * @param pSource Pointer to the source WorldObject.
  * @param uiEntry Entry ID of the GameObject.
@@ -98,9 +98,9 @@ void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList , WorldObjec
 
 /**
  * @brief Gets a list of Creatures with a specific entry within a given range.
- * 
+ *
  * This function searches for all Creatures with the specified entry ID within the given range from the source object and stores them in the provided list.
- * 
+ *
  * @param lList Reference to the list to store the found Creatures.
  * @param pSource Pointer to the source WorldObject.
  * @param uiEntry Entry ID of the Creature.

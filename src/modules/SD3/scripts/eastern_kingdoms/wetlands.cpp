@@ -166,7 +166,7 @@ struct npc_tapoke_slim_jahn : public CreatureScript
                  if (Player* pPlayer = GetPlayerForEscort())
                  {
                      pPlayer->GroupEventHappens(QUEST_MISSING_DIPLO_PT11, m_creature);
-                     if(Creature* pFriend = m_creature->GetMap()->GetCreature(friendGUID))
+                     if (Creature* pFriend = m_creature->GetMap()->GetCreature(friendGUID))
                      {
                          pFriend->ForcedDespawn(0);
                      }

@@ -568,7 +568,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
     }
 
     uint32 valuesCount = m_valuesCount;
-    if(GetTypeId() == TYPEID_PLAYER && target != this)
+    if (GetTypeId() == TYPEID_PLAYER && target != this)
     {
         valuesCount = PLAYER_END_NOT_SELF;
     }
@@ -864,7 +864,7 @@ bool Object::LoadValues(const char* data)
 void Object::_SetUpdateBits(UpdateMask* updateMask, Player* target) const
 {
     uint32 valuesCount = m_valuesCount;
-    if(GetTypeId() == TYPEID_PLAYER && target != this)
+    if (GetTypeId() == TYPEID_PLAYER && target != this)
     {
         valuesCount = PLAYER_END_NOT_SELF;
     }
@@ -879,7 +879,7 @@ void Object::_SetUpdateBits(UpdateMask* updateMask, Player* target) const
 void Object::_SetCreateBits(UpdateMask* updateMask, Player* target) const
 {
     uint32 valuesCount = m_valuesCount;
-    if(GetTypeId() == TYPEID_PLAYER && target != this)
+    if (GetTypeId() == TYPEID_PLAYER && target != this)
     {
         valuesCount = PLAYER_END_NOT_SELF;
     }

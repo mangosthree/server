@@ -184,7 +184,7 @@ void DynamicObject::Delay(int32 delaytime)
             for (int32 i = m_effIndex + 1; i < MAX_EFFECT_INDEX; ++i)
             {
                 SpellEffectEntry const* effect = holder->GetSpellProto()->GetSpellEffect(SpellEffectIndex(i));
-                if(!effect)
+                if (!effect)
                 {
                     continue;
                 }

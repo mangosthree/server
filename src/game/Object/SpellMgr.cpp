@@ -242,7 +242,7 @@ uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType d
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         SpellEffectEntry const* spellEffect = spellProto->GetSpellEffect(SpellEffectIndex(i));
-        if(!spellEffect)
+        if (!spellEffect)
         {
             continue;
         }
@@ -255,7 +255,7 @@ uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType d
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         SpellEffectEntry const* spellEffect = spellProto->GetSpellEffect(SpellEffectIndex(i));
-        if(!spellEffect)
+        if (!spellEffect)
         {
             continue;
         }
@@ -380,7 +380,7 @@ uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo)
     for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
     {
         SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(j));
-        if(!spellEffect)
+        if (!spellEffect)
         {
             continue;
         }
@@ -506,7 +506,7 @@ bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2)
         for (int32 j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
             SpellEffectEntry const* effect_2 = spellInfo_2->GetSpellEffect(SpellEffectIndex(j));
-            if(!effect_1 || !effect_2)
+            if (!effect_1 || !effect_2)
             {
                 continue;
             }
@@ -540,7 +540,7 @@ int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2)
     {
         SpellEffectEntry const* spellEffect_1 = spellInfo_1->GetSpellEffect(SpellEffectIndex(i));
         SpellEffectEntry const* spellEffect_2 = spellInfo_2->GetSpellEffect(SpellEffectIndex(i));
-        if(!spellEffect_1 || !spellEffect_2)
+        if (!spellEffect_1 || !spellEffect_2)
         {
             continue;
         }
@@ -577,14 +577,14 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         case SPELLFAMILY_GENERIC:
         {
             // Food / Drinks (mostly)
-            if(interrupts && interrupts->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
+            if (interrupts && interrupts->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
             {
                 bool food = false;
                 bool drink = false;
                 for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
                 {
                     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
-                    if(!spellEffect)
+                    if (!spellEffect)
                     {
                         continue;
                     }
@@ -1289,7 +1289,7 @@ bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellI
 {
     // TODO - need better check
     // Equal icon and spellfamily
-    if( spellInfo1->GetSpellFamilyName() == spellInfo2->GetSpellFamilyName() &&
+    if ( spellInfo1->GetSpellFamilyName() == spellInfo2->GetSpellFamilyName() &&
         spellInfo1->SpellIconID == spellInfo2->SpellIconID )
     {
         return true;
@@ -1317,7 +1317,7 @@ SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 f
 {
     // talents that learn spells can have stance requirements that need ignore
     // (this requirement only for client-side stance show in talent description)
-    if( GetTalentSpellCost(spellInfo->Id) > 0 &&
+    if ( GetTalentSpellCost(spellInfo->Id) > 0 &&
         (spellInfo->GetSpellEffectIdByIndex(EFFECT_INDEX_0) == SPELL_EFFECT_LEARN_SPELL || spellInfo->GetSpellEffectIdByIndex(EFFECT_INDEX_1) == SPELL_EFFECT_LEARN_SPELL || spellInfo->GetSpellEffectIdByIndex(EFFECT_INDEX_2) == SPELL_EFFECT_LEARN_SPELL) )
     {
         return SPELL_CAST_OK;
@@ -1363,7 +1363,7 @@ SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 f
     else
     {
         // needs shapeshift
-        if(!(spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && shapeShift && shapeShift->Stances != 0)
+        if (!(spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && shapeShift && shapeShift->Stances != 0)
         {
             return SPELL_FAILED_ONLY_SHAPESHIFT;
         }
@@ -1431,7 +1431,7 @@ void SpellMgr::LoadSpellTargetPositions()
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
             SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
-            if(!spellEffect)
+            if (!spellEffect)
             {
                 continue;
             }
@@ -1909,7 +1909,7 @@ void SpellMgr::LoadSpellBonuses()
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
             SpellEffectEntry const* spellEffect = spell->GetSpellEffect(SpellEffectIndex(i));
-            if(!spellEffect)
+            if (!spellEffect)
             {
                 continue;
             }
@@ -1953,7 +1953,7 @@ void SpellMgr::LoadSpellBonuses()
             for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
                 SpellEffectEntry const* spellEffect = spell->GetSpellEffect(SpellEffectIndex(i));
-                if(!spellEffect)
+                if (!spellEffect)
                 {
                     continue;
                 }
@@ -1978,7 +1978,7 @@ void SpellMgr::LoadSpellBonuses()
             for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
                 SpellEffectEntry const* spellEffect = spell->GetSpellEffect(SpellEffectIndex(i));
-                if(!spellEffect)
+                if (!spellEffect)
                 {
                     continue;
                 }
@@ -2313,7 +2313,7 @@ bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
-        if(!spellEffect)
+        if (!spellEffect)
         {
             continue;
         }
@@ -2818,7 +2818,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 
             break;
         case SPELLFAMILY_WARLOCK:
-            if( classOptions2 && classOptions2->SpellFamilyName == SPELLFAMILY_WARLOCK )
+            if ( classOptions2 && classOptions2->SpellFamilyName == SPELLFAMILY_WARLOCK )
             {
                 // Siphon Life and Drain Life
                 if ((spellInfo_1->SpellIconID == 152 && spellInfo_2->SpellIconID == 546) ||
@@ -3256,7 +3256,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
         {
             SpellEffectEntry const* spellEffect1 = spellInfo_1->GetSpellEffect(SpellEffectIndex(i));
             SpellEffectEntry const* spellEffect2 = spellInfo_2->GetSpellEffect(SpellEffectIndex(i));
-            if(!spellEffect1 || !spellEffect2)
+            if (!spellEffect1 || !spellEffect2)
             {
                 continue;
             }
@@ -3477,7 +3477,7 @@ SpellEntry const* SpellMgr::SelectAuraRankForLevel(SpellEntry const* spellInfo, 
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
-        if(!spellEffect)
+        if (!spellEffect)
         {
             continue;
         }
@@ -3852,7 +3852,7 @@ void SpellMgr::LoadSpellChains()
                     continue;
                 }
 
-                /*if(node.req!=talentEntry->DependsOnSpell)
+                /*if (node.req!=talentEntry->DependsOnSpell)
                 {
                     sLog.outErrorDb("Talent %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has wrong required spell.",
                         spell_id,node.prev,node.first,node.rank,node.req);
@@ -4105,11 +4105,11 @@ void SpellMgr::LoadSpellLearnSpells()
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
             SpellEffectEntry const* spellEffect = entry->GetSpellEffect(SpellEffectIndex(i));
-            if(!spellEffect)
+            if (!spellEffect)
             {
                 continue;
             }
-            if(spellEffect->Effect == SPELL_EFFECT_LEARN_SPELL)
+            if (spellEffect->Effect == SPELL_EFFECT_LEARN_SPELL)
             {
                 SpellLearnSpellNode dbc_node;
                 dbc_node.spell       = spellEffect->EffectTriggerSpell;
@@ -4172,12 +4172,12 @@ void SpellMgr::LoadSpellScriptTarget()
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
             SpellEffectEntry const* spellEffect = spellProto->GetSpellEffect(SpellEffectIndex(i));
-            if(!spellEffect)
+            if (!spellEffect)
             {
                 continue;
             }
 
-            if( spellEffect->EffectImplicitTargetA == TARGET_SCRIPT ||
+            if ( spellEffect->EffectImplicitTargetA == TARGET_SCRIPT ||
                 spellEffect->EffectImplicitTargetB == TARGET_SCRIPT ||
                 spellEffect->EffectImplicitTargetA == TARGET_SCRIPT_COORDINATES ||
                 spellEffect->EffectImplicitTargetB == TARGET_SCRIPT_COORDINATES ||
@@ -4530,12 +4530,12 @@ void SpellMgr::LoadPetDefaultSpells()
         for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
         {
             SpellEffectEntry const* spellEffect = spellEntry->GetSpellEffect(SpellEffectIndex(k));
-            if(!spellEffect)
+            if (!spellEffect)
             {
                 continue;
             }
 
-            if(spellEffect->Effect==SPELL_EFFECT_SUMMON || spellEffect->Effect==SPELL_EFFECT_SUMMON_PET)
+            if (spellEffect->Effect==SPELL_EFFECT_SUMMON || spellEffect->Effect==SPELL_EFFECT_SUMMON_PET)
             {
                 uint32 creature_id = spellEffect->EffectMiscValue;
                 CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(creature_id);
@@ -4592,7 +4592,7 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
-        if(!spellEffect)
+        if (!spellEffect)
         {
             continue;
         }
@@ -4671,15 +4671,15 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
     if (need_check_reagents)
     {
         SpellReagentsEntry const* spellReagents = spellInfo->GetSpellReagents();
-        if(spellReagents)
+        if (spellReagents)
         {
             for(int j = 0; j < MAX_SPELL_REAGENTS; ++j)
             {
-                if(spellReagents->Reagent[j] > 0 && !ObjectMgr::GetItemPrototype( spellReagents->Reagent[j] ))
+                if (spellReagents->Reagent[j] > 0 && !ObjectMgr::GetItemPrototype( spellReagents->Reagent[j] ))
                 {
-                    if(msg)
+                    if (msg)
                     {
-                        if(pl)
+                        if (pl)
                         {
                             ChatHandler(pl).PSendSysMessage("Craft spell %u requires reagent item (Entry: %u) but item does not exist in item_template.",spellInfo->Id,spellReagents->Reagent[j]);
                         }
@@ -5252,7 +5252,7 @@ void SpellMgr::CheckUsedSpells(char const* table)
 
             SpellClassOptionsEntry const* classOptions = spellEntry->GetSpellClassOptions();
 
-            if(family >= 0 && classOptions && classOptions->SpellFamilyName != uint32(family))
+            if (family >= 0 && classOptions && classOptions->SpellFamilyName != uint32(family))
             {
                 sLog.outError("Spell %u '%s' family(%u) <> %u but used in %s.",spell,name.c_str(),classOptions->SpellFamilyName,family,code.c_str());
                 continue;
@@ -5291,7 +5291,7 @@ void SpellMgr::CheckUsedSpells(char const* table)
                 continue;
             }
 
-            if(category >= 0 && spellEntry->GetCategory() != uint32(category))
+            if (category >= 0 && spellEntry->GetCategory() != uint32(category))
             {
                 sLog.outError("Spell %u '%s' category(%u) <> %u but used in %s.",spell,name.c_str(),spellEntry->GetCategory(),category,code.c_str());
                 continue;
@@ -5301,13 +5301,13 @@ void SpellMgr::CheckUsedSpells(char const* table)
             {
                 SpellEffectEntry const* spellEffect = spellEntry->GetSpellEffect(SpellEffectIndex(effectIdx));
 
-                if(effectType >= 0 && spellEffect && spellEffect->Effect != uint32(effectType))
+                if (effectType >= 0 && spellEffect && spellEffect->Effect != uint32(effectType))
                 {
                     sLog.outError("Spell %u '%s' effect%d <> %u but used in %s.", spell, name.c_str(), effectIdx + 1, effectType, code.c_str());
                     continue;
                 }
 
-                if(auraType >= 0 && spellEffect && spellEffect->EffectApplyAuraName != uint32(auraType))
+                if (auraType >= 0 && spellEffect && spellEffect->EffectApplyAuraName != uint32(auraType))
                 {
                     sLog.outError("Spell %u '%s' aura%d <> %u but used in %s.", spell, name.c_str(), effectIdx + 1, auraType, code.c_str());
                     continue;
@@ -5343,7 +5343,7 @@ void SpellMgr::CheckUsedSpells(char const* table)
 
                 SpellClassOptionsEntry const* classOptions = spellEntry->GetSpellClassOptions();
 
-                if(family >=0 && classOptions && classOptions->SpellFamilyName != uint32(family))
+                if (family >=0 && classOptions && classOptions->SpellFamilyName != uint32(family))
                 {
                     continue;
                 }
@@ -5376,7 +5376,7 @@ void SpellMgr::CheckUsedSpells(char const* table)
                     continue;
                 }
 
-                if(category >= 0 && spellEntry->GetCategory() != uint32(category))
+                if (category >= 0 && spellEntry->GetCategory() != uint32(category))
                 {
                     continue;
                 }
@@ -5385,12 +5385,12 @@ void SpellMgr::CheckUsedSpells(char const* table)
                 {
                     SpellEffectEntry const* spellEffect = spellEntry->GetSpellEffect(SpellEffectIndex(effectIdx));
 
-                    if(effectType >=0 && spellEffect && spellEffect->Effect != uint32(effectType))
+                    if (effectType >=0 && spellEffect && spellEffect->Effect != uint32(effectType))
                     {
                         continue;
                     }
 
-                    if(auraType >=0 && spellEffect && spellEffect->EffectApplyAuraName != uint32(auraType))
+                    if (auraType >=0 && spellEffect && spellEffect->EffectApplyAuraName != uint32(auraType))
                     {
                         continue;
                     }

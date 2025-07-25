@@ -1544,7 +1544,7 @@ void Pet::_SaveAuras()
         {
             SpellEntry const* spellInfo = holder->GetSpellProto();
             SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(j));
-            if(!effectEntry)
+            if (!effectEntry)
             {
                 continue;
             }
@@ -1829,7 +1829,7 @@ void Pet::InitLevelupSpellsForLevel()
             }
 
             // will called first if level down
-            if(spellEntry->GetSpellLevel() > level)
+            if (spellEntry->GetSpellLevel() > level)
             {
                 unlearnSpell(spellEntry->Id, true);
             }

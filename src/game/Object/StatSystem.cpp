@@ -690,7 +690,7 @@ void Player::UpdateExpertise(WeaponAttackType attack)
     for (AuraList::const_iterator itr = expAuras.begin(); itr != expAuras.end(); ++itr)
     {
         // item neutral spell
-        if((*itr)->GetSpellProto()->GetEquippedItemClass() == -1)
+        if ((*itr)->GetSpellProto()->GetEquippedItemClass() == -1)
         {
             expertise += (*itr)->GetModifier()->m_amount;
         }

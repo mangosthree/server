@@ -386,7 +386,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     {
                         uint32 count = 0;
                         for(TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                            if(ihit->effectMask & (1<<effect->EffectIndex))
+                            if (ihit->effectMask & (1<<effect->EffectIndex))
                             {
                                 ++count;
                             }
@@ -537,11 +537,11 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         {
                             // Immolate
                             SpellClassOptionsEntry const* immSpellClassOpt = (*i)->GetSpellProto()->GetSpellClassOptions();
-                            if(!immSpellClassOpt)
+                            if (!immSpellClassOpt)
                             {
                                 continue;
                             }
-                            if(immSpellClassOpt->SpellFamilyName == SPELLFAMILY_WARLOCK &&
+                            if (immSpellClassOpt->SpellFamilyName == SPELLFAMILY_WARLOCK &&
                                 (immSpellClassOpt->SpellFamilyFlags & UI64LIT(0x00000000000004)))
                             {
                                 damage += damage / 4;
@@ -696,11 +696,11 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                         for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
                         {
                             SpellClassOptionsEntry const* poisonClassOptions = (*itr)->GetSpellProto()->GetSpellClassOptions();
-                            if(!poisonClassOptions)
+                            if (!poisonClassOptions)
                             {
                                 continue;
                             }
-                            if( poisonClassOptions->SpellFamilyName==SPELLFAMILY_ROGUE &&
+                            if ( poisonClassOptions->SpellFamilyName==SPELLFAMILY_ROGUE &&
                                 (poisonClassOptions->SpellFamilyFlags & UI64LIT(0x10000)) &&
                                 (*itr)->GetCasterGuid() == m_caster->GetObjectGuid())
                             {
@@ -2389,7 +2389,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                         if (SpellEffectEntry const* pSpellEffect = pSpell->GetSpellEffect(EFFECT_INDEX_0))
                             if (const SpellEntry *pSpellCredit = sSpellStore.LookupEntry(pSpellEffect->EffectTriggerSpell))
-                                if(SpellEffectEntry const* pSpellCreditEffect = pSpellCredit->GetSpellEffect(EFFECT_INDEX_0))
+                                if (SpellEffectEntry const* pSpellCreditEffect = pSpellCredit->GetSpellEffect(EFFECT_INDEX_0))
                                 {
                                     ((Player*)m_caster)->KilledMonsterCredit(pSpellCreditEffect->EffectMiscValue);
                                 }
@@ -3997,7 +3997,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
                     for(Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
                     {
-                        if((*itr)->GetSpellProto()->GetSpellFamilyName()==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 208)
+                        if ((*itr)->GetSpellProto()->GetSpellFamilyName()==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 208)
                         {
                             mana = ((*itr)->GetModifier()->m_amount + 100)* mana / 100;
                         }
@@ -4009,7 +4009,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     Unit::AuraList const& mod = m_caster->GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
                     for (Unit::AuraList::const_iterator itr = mod.begin(); itr != mod.end(); ++itr)
                     {
-                        if((*itr)->GetSpellProto()->GetSpellFamilyName()==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 1982)
+                        if ((*itr)->GetSpellProto()->GetSpellFamilyName()==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 1982)
                         {
                             manaFeedVal+= (*itr)->GetModifier()->m_amount;
                         }
@@ -5020,7 +5020,7 @@ void Spell::EffectJump(SpellEffectEntry const* effect)
     {
         m_targets.getDestination(x, y, z);
 
-        if(effect->EffectImplicitTargetA == TARGET_BEHIND_VICTIM)
+        if (effect->EffectImplicitTargetA == TARGET_BEHIND_VICTIM)
         {
             // explicit cast data from client or server-side cast
             // some spell at client send caster
@@ -5361,7 +5361,7 @@ void Spell::EffectUnlearnSpecialization(SpellEffectEntry const* effect)
 
 void Spell::EffectPowerDrain(SpellEffectEntry const* effect)
 {
-    if(effect->EffectMiscValue < 0 || effect->EffectMiscValue >= MAX_POWERS)
+    if (effect->EffectMiscValue < 0 || effect->EffectMiscValue >= MAX_POWERS)
     {
         return;
     }
@@ -5414,7 +5414,7 @@ void Spell::EffectPowerDrain(SpellEffectEntry const* effect)
     if (drain_power == POWER_MANA && m_caster != unitTarget)
     {
         float manaMultiplier = effect->EffectMultipleValue;
-        if(manaMultiplier==0)
+        if (manaMultiplier==0)
         {
             manaMultiplier = 1;
         }
@@ -5577,7 +5577,7 @@ void Spell::EffectHeal(SpellEffectEntry const* /*effect*/)
             while(idx < 3)
             {
                 targetSpellEffect = targetAura->GetSpellProto()->GetSpellEffect(SpellEffectIndex(idx));
-                if(targetSpellEffect && targetSpellEffect->EffectApplyAuraName == SPELL_AURA_PERIODIC_HEAL)
+                if (targetSpellEffect && targetSpellEffect->EffectApplyAuraName == SPELL_AURA_PERIODIC_HEAL)
                 {
                     break;
                 }
@@ -5920,7 +5920,7 @@ void Spell::EffectEnergize(SpellEffectEntry const* effect)
         return;
     }
 
-    if(effect->EffectMiscValue < 0 || effect->EffectMiscValue >= MAX_POWERS)
+    if (effect->EffectMiscValue < 0 || effect->EffectMiscValue >= MAX_POWERS)
     {
         return;
     }
@@ -6291,7 +6291,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
 
     uint32 prop_id = effect->EffectMiscValueB;
     SummonPropertiesEntry const *summon_prop = sSummonPropertiesStore.LookupEntry(prop_id);
-    if(!summon_prop)
+    if (!summon_prop)
     {
         sLog.outError("EffectSummonType: Unhandled summon type %u", prop_id);
         return;
@@ -7204,7 +7204,7 @@ void Spell::EffectDispel(SpellEffectEntry const* effect)
         SpellAuraHolder *holder = itr->second;
         if ((1<<holder->GetSpellProto()->GetDispel()) & dispelMask)
         {
-            if(holder->GetSpellProto()->GetDispel() == DISPEL_MAGIC)
+            if (holder->GetSpellProto()->GetDispel() == DISPEL_MAGIC)
             {
                 bool positive = true;
                 if (!holder->IsPositive())
@@ -7422,7 +7422,7 @@ void Spell::EffectAddFarsight(SpellEffectEntry const* effect)
     DynamicObject* dynObj = new DynamicObject;
 
     // set radius to 0: spell not expected to work as persistent aura
-    if(!dynObj->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, SpellEffectIndex(effect->EffectIndex), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, 0, DYNAMIC_OBJECT_FARSIGHT_FOCUS))
+    if (!dynObj->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, SpellEffectIndex(effect->EffectIndex), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, 0, DYNAMIC_OBJECT_FARSIGHT_FOCUS))
     {
         delete dynObj;
         return;
@@ -7709,12 +7709,12 @@ void Spell::EffectEnchantItemTmp(SpellEffectEntry const* effect)
         duration = 1800;                                    // 30 mins
     }
     // other rogue family enchantments always 1 hour (some have spell damage=0, but some have wrong data in EffBasePoints)
-    else if(classOptions && classOptions->SpellFamilyName == SPELLFAMILY_ROGUE)
+    else if (classOptions && classOptions->SpellFamilyName == SPELLFAMILY_ROGUE)
     {
         duration = 3600;                                    // 1 hour
     }
     // shaman family enchantments
-    else if(classOptions && classOptions->SpellFamilyName == SPELLFAMILY_SHAMAN)
+    else if (classOptions && classOptions->SpellFamilyName == SPELLFAMILY_SHAMAN)
     {
         duration = 1800;                                    // 30 mins
     }
@@ -7998,7 +7998,7 @@ void Spell::EffectLearnPetSpell(SpellEffectEntry const* effect)
     }
 
     SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(effect->EffectTriggerSpell);
-    if(!learn_spellproto)
+    if (!learn_spellproto)
     {
         return;
     }
@@ -8094,7 +8094,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                 {
                     uint32 count = 0;
                     for(TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-                        if(ihit->effectMask & (1<<effect->EffectIndex))
+                        if (ihit->effectMask & (1<<effect->EffectIndex))
                         {
                             ++count;
                         }
@@ -8132,7 +8132,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
         case SPELLFAMILY_ROGUE:
         {
             // Mutilate (for each hand)
-            if(classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x600000000))
+            if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x600000000))
             {
                 bool found = false;
                 // fast check
@@ -8146,7 +8146,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                     Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
                     for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                     {
-                        if(itr->second->GetSpellProto()->GetDispel() == DISPEL_POISON)
+                        if (itr->second->GetSpellProto()->GetDispel() == DISPEL_POISON)
                         {
                             found = true;
                             break;
@@ -8191,7 +8191,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
         case SPELLFAMILY_PALADIN:
         {
             // Judgement of Command - receive benefit from Spell Damage and Attack Power
-            if(classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x00020000000000))
+            if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x00020000000000))
             {
                 float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                 int32 holy = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo));
@@ -8218,7 +8218,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
         {
             // Skyshatter Harness item set bonus
             // Stormstrike
-            if(classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x001000000000))
+            if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x001000000000))
             {
                 Unit::AuraList const& m_OverrideClassScript = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
                 for (Unit::AuraList::const_iterator citr = m_OverrideClassScript.begin(); citr != m_OverrideClassScript.end(); ++citr)
@@ -8243,7 +8243,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                 Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
                 for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                 {
-                    if(itr->second->GetSpellProto()->GetDispel() == DISPEL_DISEASE &&
+                    if (itr->second->GetSpellProto()->GetDispel() == DISPEL_DISEASE &&
                         itr->second->GetCasterGuid() == m_caster->GetObjectGuid())
                         ++count;
                 }
@@ -8268,14 +8268,14 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                     }
             }
             // Glyph of Blood Strike
-            if( classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000400000) &&
+            if ( classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000400000) &&
                 m_caster->HasAura(59332) &&
                 unitTarget->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
             {
                 totalDamagePercentMod *= 1.2f;              // 120% if snared
             }
             // Glyph of Death Strike
-            if( classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000010) &&
+            if ( classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000010) &&
                 m_caster->HasAura(59336))
             {
                 int32 rp = m_caster->GetPower(POWER_RUNIC_POWER) / 10;
@@ -8286,7 +8286,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                 totalDamagePercentMod *= 1.0f + rp / 100.0f;
             }
             // Glyph of Plague Strike
-            if( classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000001) &&
+            if ( classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000001) &&
                 m_caster->HasAura(58657) )
             {
                 totalDamagePercentMod *= 1.2f;
@@ -8299,7 +8299,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
     for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
     {
         SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(SpellEffectIndex(j));
-        if(!spellEffect)
+        if (!spellEffect)
         {
             continue;
         }
@@ -11606,7 +11606,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     {
                         SpellEntry const *spellInfo = (*itr).second->GetSpellProto();
                         SpellClassOptionsEntry const* eaClassOptions = spellInfo->GetSpellClassOptions();
-                        if(eaClassOptions && eaClassOptions->SpellFamilyName == SPELLFAMILY_WARLOCK &&
+                        if (eaClassOptions && eaClassOptions->SpellFamilyName == SPELLFAMILY_WARLOCK &&
                             (eaClassOptions->SpellFamilyFlags & UI64LIT(0x0000000000000002)) &&
                            (*itr).second->GetCasterGuid() == m_caster->GetObjectGuid())
                            (*itr).second->RefreshHolder();
@@ -12371,7 +12371,7 @@ void Spell::EffectApplyGlyph(SpellEffectEntry const* effect)
     }
 
     // apply new one
-    if(uint32 glyph = effect->EffectMiscValue)
+    if (uint32 glyph = effect->EffectMiscValue)
     {
         if (GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyph))
         {

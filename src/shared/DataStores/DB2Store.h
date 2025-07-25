@@ -44,7 +44,7 @@ public:
     {
         DB2FileLoader db2;
         // Check if load was sucessful, only then continue
-        if(!db2.Load(fn, fmt))
+        if (!db2.Load(fn, fmt))
         {
             return false;
         }
@@ -67,14 +67,14 @@ public:
     bool LoadStringsFrom(char const* fn, LocaleConstant loc)
     {
         // DBC must be already loaded using Load
-        if(!indexTable)
+        if (!indexTable)
         {
             return false;
         }
 
         DB2FileLoader db2;
         // Check if load was successful, only then continue
-        if(!db2.Load(fn, fmt))
+        if (!db2.Load(fn, fmt))
         {
             return false;
         }

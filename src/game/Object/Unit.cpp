@@ -91,7 +91,7 @@ void MovementInfo::Read(ByteBuffer& data, uint16 opcode)
         hasMovementFlags2 = false;
 
     MovementStatusElements* sequence = GetMovementStatusElementsSequence(opcode);
-    if(!sequence)
+    if (!sequence)
     {
         sLog.outError("Unsupported MovementInfo::Read for 0x%X (%s)!", opcode, LookupOpcodeName(opcode));
         return;
@@ -728,7 +728,7 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
         return;
     }
 
-    /*if(p_time > m_AurasCheck)
+    /*if (p_time > m_AurasCheck)
     {
     m_AurasCheck = 2000;
     _UpdateAura();
@@ -1515,7 +1515,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
                     {
                         if (spell->getState() == SPELL_STATE_PREPARING)
                         {
-                            if(spell->m_spellInfo->GetInterruptFlags() & SPELL_INTERRUPT_FLAG_ABORT_ON_DMG)
+                            if (spell->m_spellInfo->GetInterruptFlags() & SPELL_INTERRUPT_FLAG_ABORT_ON_DMG)
                             {
                                 pVictim->InterruptSpell(CurrentSpellTypes(i));
                             }
@@ -2807,7 +2807,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
         SpellEntry const* i_spellProto = (*i)->GetSpellProto();
         SpellClassOptionsEntry const* adsClassOptions = i_spellProto->GetSpellClassOptions();
         // Fire Ward or Frost Ward
-        if(adsClassOptions && adsClassOptions->SpellFamilyName == SPELLFAMILY_MAGE && adsClassOptions->SpellFamilyFlags & UI64LIT(0x0000000000000108))
+        if (adsClassOptions && adsClassOptions->SpellFamilyName == SPELLFAMILY_MAGE && adsClassOptions->SpellFamilyFlags & UI64LIT(0x0000000000000108))
         {
             int chance = 0;
             Unit::AuraList const& auras = GetAurasByType(SPELL_AURA_ADD_PCT_MODIFIER);
@@ -3773,7 +3773,7 @@ void Unit::SendMeleeAttackStop(Unit* victim)
     SendMessageToSet(&data, true);
     DETAIL_FILTER_LOG(LOG_FILTER_COMBAT, "%s %u stopped attacking %s %u", (GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), GetGUIDLow(), (victim->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), victim->GetGUIDLow());
 
-    /*if(victim->GetTypeId() == TYPEID_UNIT)
+    /*if (victim->GetTypeId() == TYPEID_UNIT)
     ((Creature*)victim)->AI().EnterEvadeMode(this);*/
 }
 
@@ -5509,7 +5509,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
         }
 
         // Potions stack aura by aura (elixirs/flask already checked)
-        if( spellProto->GetSpellFamilyName() == SPELLFAMILY_POTION && i_spellProto->GetSpellFamilyName() == SPELLFAMILY_POTION )
+        if ( spellProto->GetSpellFamilyName() == SPELLFAMILY_POTION && i_spellProto->GetSpellFamilyName() == SPELLFAMILY_POTION )
         {
             if (IsNoStackAuraDueToAura(spellId, i_spellId))
             {
@@ -5603,7 +5603,7 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
 
     // Custom dispel case
     // Unstable Affliction
-    if(classOptions && classOptions->SpellFamilyName == SPELLFAMILY_WARLOCK && (classOptions->SpellFamilyFlags & UI64LIT(0x010000000000)))
+    if (classOptions && classOptions->SpellFamilyName == SPELLFAMILY_WARLOCK && (classOptions->SpellFamilyFlags & UI64LIT(0x010000000000)))
     {
         if (Aura* dotAura = GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, UI64LIT(0x010000000000), 0x00000000, casterGuid))
         {
@@ -6302,7 +6302,7 @@ Aura* Unit::GetTriggeredByClientAura(uint32 spellId) const
         }
 
         SpellEffectEntry const* spellEffect = holder->GetSpellProto()->GetSpellEffect(SpellEffectIndex((*itr)->GetEffIndex()));
-        if(!spellEffect)
+        if (!spellEffect)
         {
             continue;
         }
@@ -8286,7 +8286,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
                 Unit::SpellAuraHolderMap const& auras = pVictim->GetSpellAuraHolderMap();
                 for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                 {
-                    if(itr->second->GetSpellProto()->GetDispel() == DISPEL_DISEASE)
+                    if (itr->second->GetSpellProto()->GetDispel() == DISPEL_DISEASE)
                     {
                         found = true;
                         break;
@@ -8770,7 +8770,7 @@ uint32 Unit::SpellCriticalDamageBonus(SpellEntry const* spellProto, uint32 damag
     }
 
     int32 critPctDamageMod = 0;
-    if(spellProto->GetDmgClass() >= SPELL_DAMAGE_CLASS_MELEE)
+    if (spellProto->GetDmgClass() >= SPELL_DAMAGE_CLASS_MELEE)
     {
         if (GetWeaponAttackType(spellProto) == RANGED_ATTACK)
         {
@@ -9164,7 +9164,7 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf)
             }
     }
 
-    if(uint32 mechanic = spellInfo->GetMechanic())
+    if (uint32 mechanic = spellInfo->GetMechanic())
     {
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
@@ -9188,7 +9188,7 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
 {
     // If m_immuneToEffect type contain this effect type, IMMUNE effect.
     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(index);
-    if(!spellEffect)
+    if (!spellEffect)
     {
         return false;
     }
@@ -9201,7 +9201,7 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
             return true;
         }
 
-    if(uint32 mechanic = spellEffect->EffectMechanic)
+    if (uint32 mechanic = spellEffect->EffectMechanic)
     {
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
@@ -9218,7 +9218,7 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
             }
     }
 
-    if(uint32 aura = spellEffect->EffectApplyAuraName)
+    if (uint32 aura = spellEffect->EffectApplyAuraName)
     {
         SpellImmuneList const& list = m_spellImmune[IMMUNITY_STATE];
         for (SpellImmuneList::const_iterator itr = list.begin(); itr != list.end(); ++itr)
@@ -9452,7 +9452,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
             Unit::SpellAuraHolderMap const& auras = pVictim->GetSpellAuraHolderMap();
             for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
             {
-                if(itr->second->GetSpellProto()->GetDispel() == DISPEL_DISEASE)
+                if (itr->second->GetSpellProto()->GetDispel() == DISPEL_DISEASE)
                 {
                     found = true;
                     break;
@@ -11373,7 +11373,7 @@ bool Unit::SelectHostileTarget()
 int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* effBasePoints)
 {
     SpellEffectEntry const* spellEffect = spellProto->GetSpellEffect(effect_index);
-    if(!spellEffect)
+    if (!spellEffect)
     {
         return 0;
     }
@@ -12346,7 +12346,7 @@ uint32 Unit::GetCreatePowers(Powers power) const
         case POWER_MANA:        return GetCreateMana();
         case POWER_RAGE:        return POWER_RAGE_DEFAULT;
         case POWER_FOCUS:
-            if(GetTypeId() == TYPEID_PLAYER && ((Player const*)this)->getClass() == CLASS_HUNTER)
+            if (GetTypeId() == TYPEID_PLAYER && ((Player const*)this)->getClass() == CLASS_HUNTER)
             {
                 return POWER_FOCUS_DEFAULT;
             }
@@ -12573,11 +12573,11 @@ void CharmInfo::InitCharmCreateSpells()
             for (uint32 i = 0; i < 3 && onlyselfcast; ++i)  // nonexistent spell will not make any problems as onlyselfcast would be false -> break right away
             {
                 SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i));
-                if(!spellEffect)
+                if (!spellEffect)
                 {
                     continue;
                 }
-                if(spellEffect->EffectImplicitTargetA != TARGET_SELF && spellEffect->EffectImplicitTargetA != 0)
+                if (spellEffect->EffectImplicitTargetA != TARGET_SELF && spellEffect->EffectImplicitTargetA != 0)
                 {
                     onlyselfcast = false;
                 }
@@ -14125,7 +14125,7 @@ class RelocationNotifyEvent : public BasicEvent
                 MaNGOS::PlayerRelocationNotifier notify((Player&)m_owner);
                 Cell::VisitAllObjects(&m_owner, notify, radius);
             }
-            else // if(m_owner.GetTypeId() == TYPEID_UNIT)
+            else // if (m_owner.GetTypeId() == TYPEID_UNIT)
             {
                 MaNGOS::CreatureRelocationNotifier notify((Creature&)m_owner);
                 Cell::VisitAllObjects(&m_owner, notify, radius);

@@ -29,7 +29,7 @@
 
 int32 SpellEntry::CalculateSimpleValue(SpellEffectIndex eff) const
 {
-    if(SpellEffectEntry const* effectEntry = GetSpellEffectEntry(Id, eff))
+    if (SpellEffectEntry const* effectEntry = GetSpellEffectEntry(Id, eff))
     {
         return effectEntry->CalculateSimpleValue();
     }

@@ -2275,11 +2275,11 @@ SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
         for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
             SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(j));
-            if(!spellEffect)
+            if (!spellEffect)
             {
                 continue;
             }
-            if( (spellEffect->Effect == SPELL_EFFECT_SCHOOL_DAMAGE )       ||
+            if ( (spellEffect->Effect == SPELL_EFFECT_SCHOOL_DAMAGE )       ||
                 (spellEffect->Effect == SPELL_EFFECT_INSTAKILL)            ||
                 (spellEffect->Effect == SPELL_EFFECT_ENVIRONMENTAL_DAMAGE) ||
                 (spellEffect->Effect == SPELL_EFFECT_HEALTH_LEECH )
@@ -2294,7 +2294,7 @@ SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
             continue;
         }
 
-        if(spellInfo->GetManaCost() > GetPower(POWER_MANA))
+        if (spellInfo->GetManaCost() > GetPower(POWER_MANA))
         {
             continue;
         }
@@ -2304,17 +2304,17 @@ SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
 
         float dist = GetCombatDistance(pVictim, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
 
-        // if(!IsInFront( pVictim, range ) && spellInfo->AttributesEx )
+        // if (!IsInFront( pVictim, range ) && spellInfo->AttributesEx )
         //    continue;
         if (dist > range || dist < minrange)
         {
             continue;
         }
-        if(spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_SILENCE && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
+        if (spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_SILENCE && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
         {
             continue;
         }
-        if(spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_PACIFY && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+        if (spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_PACIFY && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
         {
             continue;
         }
@@ -2358,7 +2358,7 @@ SpellEntry const* Creature::ReachWithSpellCure(Unit* pVictim)
             continue;
         }
 
-        if(spellInfo->GetManaCost() > GetPower(POWER_MANA))
+        if (spellInfo->GetManaCost() > GetPower(POWER_MANA))
         {
             continue;
         }
@@ -2368,17 +2368,17 @@ SpellEntry const* Creature::ReachWithSpellCure(Unit* pVictim)
 
         float dist = GetCombatDistance(pVictim, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
 
-        // if(!IsInFront( pVictim, range ) && spellInfo->AttributesEx )
+        // if (!IsInFront( pVictim, range ) && spellInfo->AttributesEx )
         //    continue;
         if (dist > range || dist < minrange)
         {
             continue;
         }
-        if(spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_SILENCE && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
+        if (spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_SILENCE && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
         {
             continue;
         }
-        if(spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_PACIFY && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+        if (spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_PACIFY && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
         {
             continue;
         }
@@ -2919,7 +2919,7 @@ void Creature::AddCreatureSpellCooldown(uint32 spellid)
         _AddCreatureSpellCooldown(spellid, time(NULL) + cooldown / IN_MILLISECONDS);
     }
 
-    if(uint32 category = spellInfo->GetCategory())
+    if (uint32 category = spellInfo->GetCategory())
     {
         _AddCreatureCategoryCooldown(category, time(NULL));
     }

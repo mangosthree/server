@@ -187,7 +187,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     {
         ++count;
 
-        if(clientcount == 50)
+        if (clientcount == 50)
         {
             return;
         }

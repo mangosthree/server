@@ -1278,7 +1278,7 @@ bool ChatHandler::HandleNpcAddWeaponCommand(char* /*args*/)
 
     Creature *pCreature = sObjectAccessor.GetCreature(*m_session->GetPlayer(), guid);
 
-    if(!pCreature)
+    if (!pCreature)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
         return true;
@@ -1302,7 +1302,7 @@ bool ChatHandler::HandleNpcAddWeaponCommand(char* /*args*/)
     ItemPrototype* tmpItem = ObjectMgr::GetItemPrototype(ItemID);
 
     bool added = false;
-    if(tmpItem)
+    if (tmpItem)
     {
         switch(SlotID)
         {
@@ -1324,7 +1324,7 @@ bool ChatHandler::HandleNpcAddWeaponCommand(char* /*args*/)
                 break;
         }
 
-        if(added)
+        if (added)
         {
             PSendSysMessage(LANG_ITEM_ADDED_TO_SLOT,ItemID,tmpItem->Name1,SlotID);
         }

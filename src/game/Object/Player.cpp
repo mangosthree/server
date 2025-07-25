@@ -1666,7 +1666,7 @@ bool Player::BuildEnumData(QueryResult* result, ByteBuffer* data, ByteBuffer* bu
     {
         uint32 entry = fields[16].GetUInt32();
         CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
-        if(cInfo)
+        if (cInfo)
         {
             petDisplayId = fields[17].GetUInt32();
             petLevel     = fields[18].GetUInt32();
@@ -1692,7 +1692,7 @@ bool Player::BuildEnumData(QueryResult* result, ByteBuffer* data, ByteBuffer* bu
     }
     if (sWorld.getConfig(CONFIG_BOOL_DECLINED_NAMES_USED))
     {
-        if(!fields[21].GetCppString().empty())
+        if (!fields[21].GetCppString().empty())
         {
             char_flags |= CHARACTER_FLAG_DECLINED;
         }
@@ -3395,7 +3395,7 @@ void Player::SendInitialSpells()
 
         time_t cooldown = spellCooldown.end > curTime ? (spellCooldown.end - curTime) * IN_MILLISECONDS : 0;
 
-        if(sEntry->GetCategory())                           // may be wrong, but anyway better than nothing...
+        if (sEntry->GetCategory())                           // may be wrong, but anyway better than nothing...
         {
             data << uint32(0);                              // cooldown
             data << uint32(cooldown);                       // category cooldown
@@ -4604,9 +4604,9 @@ bool Player::resetTalents(bool no_cost, bool all_specs)
     // FIXME: remove pet before or after unlearn spells? for now after unlearn to allow removing of talent related, pet affecting auras
     RemovePet(PET_SAVE_REAGENTS);
     /* when prev line will dropped use next line
-    if(Pet* pet = GetPet())
+    if (Pet* pet = GetPet())
     {
-        if(pet->getPetType()==HUNTER_PET && !pet->GetCreatureInfo()->isTameable(CanTameExoticPets()))
+        if (pet->getPetType()==HUNTER_PET && !pet->GetCreatureInfo()->isTameable(CanTameExoticPets()))
         {
             pet->Unsummon(PET_SAVE_REAGENTS, this);
         }
@@ -4885,7 +4885,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     SpellEffectEntry const* spellEffect = spell->GetSpellEffect(EFFECT_INDEX_1);
     uint32 skill = spellEffect ? spellEffect->EffectMiscValue : 0;
 
-    if(spellEffect && (spellEffect->Effect != SPELL_EFFECT_SKILL || !IsPrimaryProfessionSkill(skill)))
+    if (spellEffect && (spellEffect->Effect != SPELL_EFFECT_SKILL || !IsPrimaryProfessionSkill(skill)))
     {
         return TRAINER_SPELL_GREEN;
     }
@@ -8629,7 +8629,7 @@ void Player::_ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackTy
 void Player::_ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attackType, Aura* aura, bool apply)
 {
     // generic not weapon specific case processes in aura code
-    if(aura->GetSpellProto()->GetEquippedItemClass() == -1)
+    if (aura->GetSpellProto()->GetEquippedItemClass() == -1)
     {
         return;
     }
@@ -8659,7 +8659,7 @@ void Player::_ApplyWeaponDependentAuraDamageMod(Item* item, WeaponAttackType att
     }
 
     // generic not weapon specific case processes in aura code
-    if(aura->GetSpellProto()->GetEquippedItemClass() == -1)
+    if (aura->GetSpellProto()->GetEquippedItemClass() == -1)
     {
         return;
     }
@@ -9340,23 +9340,23 @@ void Player::_ApplyAmmoBonuses()
 {
     //// check ammo
     //uint32 ammo_id = GetUInt32Value(PLAYER_AMMO_ID);
-    //if(!ammo_id)
+    //if (!ammo_id)
     //    return;
 
     //float currentAmmoDPS;
 
     //ItemPrototype const *ammo_proto = ObjectMgr::GetItemPrototype( ammo_id );
-    //if( !ammo_proto || ammo_proto->Class!=ITEM_CLASS_PROJECTILE || !CheckAmmoCompatibility(ammo_proto))
+    //if ( !ammo_proto || ammo_proto->Class!=ITEM_CLASS_PROJECTILE || !CheckAmmoCompatibility(ammo_proto))
     //    currentAmmoDPS = 0.0f;
     //else
     //    currentAmmoDPS = ammo_proto->Damage[0].DamageMin;
 
-    //if(currentAmmoDPS == GetAmmoDPS())
+    //if (currentAmmoDPS == GetAmmoDPS())
     //    return;
 
     //m_ammoDPS = currentAmmoDPS;
 
-    //if(CanModifyStats())
+    //if (CanModifyStats())
     //    UpdateDamagePhysical(RANGED_ATTACK);
 }
 
@@ -12445,7 +12445,7 @@ InventoryResult Player::CanUseAmmo(uint32 item) const
     {
         return EQUIP_ERR_YOU_ARE_DEAD;
     }
-    // if( isStunned() )
+    // if ( isStunned() )
     //    return EQUIP_ERR_YOU_ARE_STUNNED;
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(item);
     if (pProto)
@@ -12478,11 +12478,11 @@ InventoryResult Player::CanUseAmmo(uint32 item) const
 
 void Player::SetAmmo(uint32 item)
 {
-    //if(!item)
+    //if (!item)
     //    return;
 
     //// already set
-    //if( GetUInt32Value(PLAYER_AMMO_ID) == item )
+    //if ( GetUInt32Value(PLAYER_AMMO_ID) == item )
     //    return;
 
     //// check ammo
@@ -16774,7 +16774,7 @@ bool Player::SatisfyQuestPrevChain(Quest const* qInfo, bool msg) const
 
         // check for all quests further down the chain
         // only necessary if there are quest chains with more than one quest that can be skipped
-        // if( !SatisfyQuestPrevChain( prevId, msg ) )
+        // if ( !SatisfyQuestPrevChain( prevId, msg ) )
         //    return false;
     }
 
@@ -19253,7 +19253,7 @@ void Player::_LoadInventory(QueryResult* result, uint32 timediff)
         }
     }
 
-    // if(IsAlive())
+    // if (IsAlive())
     _ApplyAllItemMods();
 }
 
@@ -24011,9 +24011,9 @@ void Player::learnQuestRewardedSpells(Quest const* quest)
     bool found = false;
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if(SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
+        if (SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
         {
-            if(spellEffect->Effect == SPELL_EFFECT_LEARN_SPELL && !HasSpell(spellEffect->EffectTriggerSpell))
+            if (spellEffect->Effect == SPELL_EFFECT_LEARN_SPELL && !HasSpell(spellEffect->EffectTriggerSpell))
             {
                 found = true;
                 break;
@@ -24558,7 +24558,7 @@ void Player::AutoUnequipOffhandIfNeed()
 bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item const* ignoreItem)
 {
     int32 itemClass = spellInfo->GetEquippedItemClass();
-    if(itemClass < 0)
+    if (itemClass < 0)
     {
         return true;
     }
@@ -27443,7 +27443,7 @@ void Player::SendDuelCountdown(uint32 counter)
 bool Player::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
 {
     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(index);
-    if(spellEffect)
+    if (spellEffect)
     {
         switch(spellEffect->Effect)
         {

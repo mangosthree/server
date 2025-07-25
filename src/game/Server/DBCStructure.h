@@ -1592,27 +1592,27 @@ struct ScalingStatValuesEntry
     {
         if (mask & 0x4001F)
         {
-            if(mask & 0x00000001)
+            if (mask & 0x00000001)
             {
                 return ssdMultiplier[1];
             }
-            if(mask & 0x00000002)
+            if (mask & 0x00000002)
             {
                 return ssdMultiplier[2]; // 0 and 1 were duplicated
             }
-            if(mask & 0x00000004)
+            if (mask & 0x00000004)
             {
                 return ssdMultiplier[3];
             }
-            if(mask & 0x00000008)
+            if (mask & 0x00000008)
             {
                 return ssdMultiplier[0];
             }
-            if(mask & 0x00000010)
+            if (mask & 0x00000010)
             {
                 return ssdMultiplier[4];
             }
-            if(mask & 0x00040000)
+            if (mask & 0x00040000)
             {
                 return ssdMultiplier[2]; // 4.0.0
             }
@@ -1787,7 +1787,7 @@ struct ClassFamilyMask
 
     bool Empty() const { return Flags == 0 && Flags2 == 0; }
     bool operator! () const { return Empty(); }
-    operator void const* () const { return Empty() ? NULL : this; }// for allow normal use in if(mask)
+    operator void const* () const { return Empty() ? NULL : this; }// for allow normal use in if (mask)
 
     bool IsFitToFamilyMask(uint64 familyFlags, uint32 familyFlags2 = 0) const
     {

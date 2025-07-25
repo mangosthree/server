@@ -105,7 +105,7 @@ inline float GetSpellMaxRange(SpellRangeEntry const* range, bool friendly = fals
 }
 inline uint32 GetSpellRecoveryTime(SpellEntry const *spellInfo)
 {
-    if(SpellCooldownsEntry const* cooldowns = spellInfo->GetSpellCooldowns())
+    if (SpellCooldownsEntry const* cooldowns = spellInfo->GetSpellCooldowns())
     {
         return cooldowns->RecoveryTime > cooldowns->CategoryRecoveryTime ? cooldowns->RecoveryTime : cooldowns->CategoryRecoveryTime;
     }
@@ -122,8 +122,8 @@ inline bool IsSpellHaveEffect(SpellEntry const* spellInfo, SpellEffects effect)
 {
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if(SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
-            if(SpellEffects(effectEntry->Effect) == effect)
+        if (SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
+            if (SpellEffects(effectEntry->Effect) == effect)
             {
                 return true;
             }
@@ -168,7 +168,7 @@ inline bool IsSpellAppliesAura(SpellEntry const* spellInfo, uint32 effectMask = 
 inline bool IsEffectHandledOnDelayedSpellLaunch(SpellEntry const* spellInfo, SpellEffectIndex effecIdx)
 {
     SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(effecIdx);
-    if(!effectEntry)
+    if (!effectEntry)
     {
         return false;
     }
@@ -188,7 +188,7 @@ inline bool IsEffectHandledOnDelayedSpellLaunch(SpellEntry const* spellInfo, Spe
 inline bool IsPeriodicRegenerateEffect(SpellEntry const* spellInfo, SpellEffectIndex effecIdx)
 {
     SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(effecIdx);
-    if(!effectEntry)
+    if (!effectEntry)
     {
         return false;
     }
@@ -210,8 +210,8 @@ inline bool IsSpellHaveAura(SpellEntry const* spellInfo, AuraType aura, uint32 e
 {
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (effectMask & (1 << i))
-            if(SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
-                if(AuraType(effectEntry->EffectApplyAuraName) == aura)
+            if (SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
+                if (AuraType(effectEntry->EffectApplyAuraName) == aura)
                 {
                     return true;
                 }
@@ -222,8 +222,8 @@ inline bool IsSpellLastAuraEffect(SpellEntry const* spellInfo, SpellEffectIndex 
 {
     for (int i = effecIdx + 1; i < MAX_EFFECT_INDEX; ++i)
     {
-        if(SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
-            if(effectEntry->EffectApplyAuraName)
+        if (SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
+            if (effectEntry->EffectApplyAuraName)
             {
                 return false;
             }
@@ -371,7 +371,7 @@ inline bool IsSpellWithCasterSourceTargetsOnly(SpellEntry const* spellInfo)
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i));
-        if(!effectEntry)
+        if (!effectEntry)
         {
             continue;
         }
@@ -471,17 +471,17 @@ inline bool IsAreaEffectTarget(Targets target)
 inline bool IsAreaOfEffectSpell(SpellEntry const* spellInfo)
 {
     SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(EFFECT_INDEX_0);
-    if(effectEntry && (IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetA)) || IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetB))))
+    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetA)) || IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetB))))
     {
         return true;
     }
     effectEntry = spellInfo->GetSpellEffect(EFFECT_INDEX_1);
-    if(effectEntry && (IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetA)) || IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetB))))
+    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetA)) || IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetB))))
     {
         return true;
     }
     effectEntry = spellInfo->GetSpellEffect(EFFECT_INDEX_2);
-    if(effectEntry && (IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetA)) || IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetB))))
+    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetA)) || IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetB))))
     {
         return true;
     }
@@ -507,7 +507,7 @@ inline bool HasAreaAuraEffect(SpellEntry const* spellInfo)
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i));
-        if(!effectEntry)
+        if (!effectEntry)
         {
             continue;
         }
@@ -524,7 +524,7 @@ inline bool HasAuraWithTriggerEffect(SpellEntry const* spellInfo)
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i));
-        if(!effectEntry)
+        if (!effectEntry)
         {
             continue;
         }
@@ -546,7 +546,7 @@ inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i));
-        if(!effectEntry)
+        if (!effectEntry)
         {
             continue;
         }

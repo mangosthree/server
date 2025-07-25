@@ -2818,7 +2818,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
         {
             DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s got destroyed", GetGuidStr().c_str());
 #ifdef ENABLE_ELUNA
-            if(caster && caster->ToPlayer())
+            if (caster && caster->ToPlayer())
             {
                 if (Eluna* e = caster->GetEluna())
                 {

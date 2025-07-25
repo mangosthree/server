@@ -308,7 +308,7 @@ int ReadDBCLocale(const std::string sDataPath)
         sFilename  = sDBCpath + "component.wow-" + fullLocaleNameList[uLocaleIndex].name + ".txt";
         if (FILE* file = fopen(sFilename.c_str(), "rb"))
         {
-            if(uLocaleIndex==0)
+            if (uLocaleIndex==0)
             {
                 uLocaleIndex=1;  // Map enus and engb to 0
             }
@@ -392,7 +392,7 @@ inline void LoadDBC(LocalData& localeData, BarGoLink& bar, StoreProblemList& err
     MANGOS_ASSERT(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()) == sizeof(T) || LoadDBC_assert_print(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()), sizeof(T), filename));
 
     std::string dbc_filename = dbc_path + filename;
-    if(storage.Load(dbc_filename.c_str(),localeData.defaultLocale))
+    if (storage.Load(dbc_filename.c_str(),localeData.defaultLocale))
     {
         bar.step();
         for (uint8 i = 0; fullLocaleNameList[i].name; ++i)
@@ -429,7 +429,7 @@ inline void LoadDBC(LocalData& localeData, BarGoLink& bar, StoreProblemList& err
             }
 
             std::string dbc_filename_loc = dbc_path + localStr->name + "/" + filename;
-            if(!storage.LoadStringsFrom(dbc_filename_loc.c_str(),localStr->locale))
+            if (!storage.LoadStringsFrom(dbc_filename_loc.c_str(),localStr->locale))
                 localeData.availableDbcLocales &= ~(1 << i);// mark as not available for speedup next checks
         }
     }
@@ -668,10 +668,10 @@ void LoadDBCStores(const std::string& dataPath)
 
     for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
     {
-        if(SpellEntry const * spell = sSpellStore.LookupEntry(i))
+        if (SpellEntry const * spell = sSpellStore.LookupEntry(i))
         {
-            if(SpellCategoriesEntry const* category = spell->GetSpellCategories())
-                if(uint32 cat = category->Category)
+            if (SpellCategoriesEntry const* category = spell->GetSpellCategories())
+                if (uint32 cat = category->Category)
                 {
                     sSpellCategoryStore[cat].insert(i);
                 }
@@ -858,8 +858,8 @@ void LoadDBCStores(const std::string& dataPath)
         for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
             if (SpellEntry const* sInfo = sSpellStore.LookupEntry(i))
                 for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
-                    if(SpellEffectEntry const* effect = sInfo->GetSpellEffect(SpellEffectIndex(j)))
-                        if(effect->Effect==123 /*SPELL_EFFECT_SEND_TAXI*/)
+                    if (SpellEffectEntry const* effect = sInfo->GetSpellEffect(SpellEffectIndex(j)))
+                        if (effect->Effect==123 /*SPELL_EFFECT_SEND_TAXI*/)
                         {
                             spellPaths.insert(effect->EffectMiscValue);
                         }
@@ -1026,7 +1026,7 @@ TalentSpellPos const* GetTalentSpellPos(uint32 spellId)
 SpellEffectEntry const* GetSpellEffectEntry(uint32 spellId, SpellEffectIndex effect)
 {
     SpellEffectMap::const_iterator itr = sSpellEffectMap.find(spellId);
-    if(itr == sSpellEffectMap.end())
+    if (itr == sSpellEffectMap.end())
     {
         return NULL;
     }

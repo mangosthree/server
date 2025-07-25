@@ -2169,7 +2169,7 @@ void ObjectMgr::LoadItemPrototypes()
             }
             /* disabled: have some strange wrong cases for Subclass values.
                for enable also uncomment Subclass field in ItemEntry structure and in Itemfmt[]
-            if(proto->SubClass != dbcitem->SubClass)
+            if (proto->SubClass != dbcitem->SubClass)
             {
                 sLog.outErrorDb("Item (Entry: %u) not correct (Class: %u, Sub: %u) pair, must be (Class: %u, Sub: %u) (still using DB value).",i,proto->Class,proto->SubClass,dbcitem->Class,dbcitem->SubClass);
                 // It safe let use Subclass from DB
@@ -2619,10 +2619,10 @@ void ObjectMgr::LoadItemPrototypes()
                     continue;
                 }
 
-                /*if(BAG_FAMILY_MASK_MASK_CURRENCY_TOKENS & mask)
+                /*if (BAG_FAMILY_MASK_MASK_CURRENCY_TOKENS & mask)
                 {
                     CurrencyTypesEntry const* ctEntry = sCurrencyTypesStore.LookupEntry(proto->ItemId);
-                    if(!ctEntry)
+                    if (!ctEntry)
                     {
                         sLog.outErrorDb("Item (Entry: %u) has currency bag family bit set in BagFamily but not listed in CurrencyTypes.dbc, remove bit",i);
                         const_cast<ItemPrototype*>(proto)->BagFamily &= ~mask;
@@ -2967,7 +2967,7 @@ void ObjectMgr::LoadItemRequiredTarget()
                     for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
                     {
                         SpellEffectEntry const* spellEffect = pSpellInfo->GetSpellEffect(SpellEffectIndex(j));
-                        if(!spellEffect)
+                        if (!spellEffect)
                         {
                             continue;
                         }
@@ -4418,7 +4418,7 @@ void ObjectMgr::LoadQuests()
                     for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
                     {
                         SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(k));
-                        if(!spellEffect)
+                        if (!spellEffect)
                         {
                             continue;
                         }
@@ -4854,7 +4854,7 @@ void ObjectMgr::LoadQuests()
         for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
             SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(j));
-            if(!spellEffect)
+            if (!spellEffect)
             {
                 continue;
             }

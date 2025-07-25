@@ -82,7 +82,7 @@ inline void LoadDB2(LocalDB2Data& localeData, StoreProblemList1& errors, DB2Stor
             std::string db2_dir_loc = db2Path + localStr->name + "/";
 
             std::string localizedName = db2Path + localStr->name + "/" + filename;
-            if(!storage.LoadStringsFrom(localizedName.c_str(), localStr->locale))
+            if (!storage.LoadStringsFrom(localizedName.c_str(), localStr->locale))
                 localeData.availableDb2Locales &= ~(1<<i);  // mark as not available for speedup next checks
         }
     }

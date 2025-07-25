@@ -293,7 +293,7 @@ static char const* const nullStr = "";
 
 char* DBCFileLoader::AutoProduceStringsArrayHolders(const char* format, char* dataTable)
 {
-    if(strlen(format)!=fieldCount)
+    if (strlen(format)!=fieldCount)
     {
         return NULL;
     }

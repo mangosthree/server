@@ -864,7 +864,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     damage += count * int32(average * IN_MILLISECONDS) / m_caster->GetAttackTime(BASE_ATTACK);
                 }
                 // Judgement
-                else if (m_spellInfo->Id == 54158)
+                else if (m_spellInfo->Id == 20271)
                 {
                     // [1 + 0.25 * SPH + 0.16 * AP]
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.16f);
@@ -11844,7 +11844,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                         {
                             continue;
                         }
-                        spellId2 = 54158;
+                        spellId2 = 20271;
                         break;
                     }
                 }

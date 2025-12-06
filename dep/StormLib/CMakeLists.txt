@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-project(StormLib VERSION 9.22)
+project(StormLib VERSION 9.26)
 
 set(LIBRARY_NAME stormlib)
 
@@ -57,6 +57,7 @@ set(TOMCRYPT_FILES
            src/libtomcrypt/src/hashes/hash_memory.c
            src/libtomcrypt/src/hashes/md5.c
            src/libtomcrypt/src/hashes/sha1.c
+           src/libtomcrypt/src/hashes/sha256.c
            src/libtomcrypt/src/math/ltm_desc.c
            src/libtomcrypt/src/math/multi.c
            src/libtomcrypt/src/math/rand_prime.c

@@ -20,7 +20,7 @@
 /* 12.11.03  1.02  Dan  Macintosh compatibility                              */
 /* 24.07.04  1.03  Sam  Mac OS X compatibility                               */
 /* 22.11.06  1.04  Sam  Mac OS X compatibility (for StormLib 6.0)            */
-/* 31.12.06  1.05  XPinguin  Full GNU/Linux compatibility                     */
+/* 31.12.06  1.05  XPinguin  Full GNU/Linux compatibility                    */
 /* 17.10.12  1.05  Lad  Moved error codes so they don't overlap with errno.h */
 /*****************************************************************************/
 
@@ -65,7 +65,7 @@
   #define STORMLIB_CDECL __cdecl
 
   #define STORMLIB_WINDOWS
-  #define STORMLIB_PLATFORM_DEFINED             // The platform is known now
+  #define STORMLIB_PLATFORM_DEFINED                 // The platform is known now
 
 #endif
 
@@ -81,6 +81,10 @@
   #include <unistd.h>
   #include <fcntl.h>
   #include <stdlib.h>
+  #include <stdio.h>
+  #include <string.h>
+  #include <ctype.h>
+  #include <assert.h>
   #include <errno.h>
 
   // Support for PowerPC on Max OS X
@@ -90,17 +94,27 @@
   #endif
 
   #define    PKEXPORT
-  #define    __SYS_ZLIB
-  #define    __SYS_BZLIB
+
+  #ifndef __SYS_ZLIB 
+    #define    __SYS_ZLIB
+  #endif
+
+  #ifndef __SYS_BZLIB
+    #define    __SYS_BZLIB
+  #endif
 
   #ifndef __BIG_ENDIAN__
     #define STORMLIB_LITTLE_ENDIAN
   #endif
 
   #define STORMLIB_MAC
-  #define STORMLIB_PLATFORM_DEFINED                  // The platform is known now
+  #define STORMLIB_HAS_MMAP                         // Indicate that we have mmap support
+  #define STORMLIB_PLATFORM_DEFINED                 // The platform is known now
 
 #endif
+
+//-----------------------------------------------------------------------------
+// Defines for HAIKU platform
 
 #if !defined(STORMLIB_PLATFORM_DEFINED) && defined(__HAIKU__)
 
@@ -122,19 +136,75 @@
     #define STORMLIB_LITTLE_ENDIAN
   #endif
 
+  #define STORMLIB_MAC                              // Use Mac compatible code
   #define STORMLIB_HAIKU
-  #define STORMLIB_PLATFORM_DEFINED                  // The platform is known now
+  #define STORMLIB_PLATFORM_DEFINED                 // The platform is known now
 
 #endif
 
 //-----------------------------------------------------------------------------
-// Assumption: we are not on Windows nor Macintosh, so this must be linux *grin*
+// Defines for AMIGA platform
 
-#if !defined(STORMLIB_PLATFORM_DEFINED)
+#if !defined(STORMLIB_PLATFORM_DEFINED) && defined(__AMIGA__)
 
   #include <sys/types.h>
   #include <sys/stat.h>
-  #include <sys/mman.h>
+  #include <fcntl.h>
+  #include <unistd.h>
+  #include <stdint.h>
+  #include <stdlib.h>
+  #include <stdio.h>
+  #include <stdarg.h>
+  #include <string.h>
+  #include <ctype.h>
+  #include <assert.h>
+  #include <errno.h>
+
+  #ifndef __BIG_ENDIAN__
+    #define STORMLIB_LITTLE_ENDIAN
+  #endif
+
+  #define STORMLIB_MAC                              // Use Mac compatible code
+  #define STORMLIB_AMIGA
+  #define STORMLIB_PLATFORM_DEFINED
+
+#endif
+
+//-----------------------------------------------------------------------------
+// Defines for Switch platform
+
+#if !defined(STORMLIB_PLATFORM_DEFINED) && defined(__SWITCH__)
+
+  #include <sys/types.h>
+  #include <sys/stat.h>
+  #include <fcntl.h>
+  #include <unistd.h>
+  #include <stdint.h>
+  #include <stdlib.h>
+  #include <stdio.h>
+  #include <stdarg.h>
+  #include <string.h>
+  #include <strings.h>
+  #include <ctype.h>
+  #include <assert.h>
+  #include <errno.h>
+
+  #ifndef __BIG_ENDIAN__
+    #define STORMLIB_LITTLE_ENDIAN
+  #endif
+
+  #define STORMLIB_MAC                              // Use Mac compatible code
+  #define STORMLIB_SWITCH
+  #define STORMLIB_PLATFORM_DEFINED
+
+#endif
+
+//-----------------------------------------------------------------------------
+// Defines for 3DS platform
+
+#if !defined(STORMLIB_PLATFORM_DEFINED) && defined(__3DS__)
+
+  #include <sys/stat.h>
   #include <fcntl.h>
   #include <unistd.h>
   #include <stdint.h>
@@ -148,6 +218,99 @@
   #include <errno.h>
 
   #define STORMLIB_LITTLE_ENDIAN
+
+  #define STORMLIB_MAC                              // Use Mac compatible code
+  #define STORMLIB_CTR
+  #define STORMLIB_PLATFORM_DEFINED
+
+#endif
+
+//-----------------------------------------------------------------------------
+// Defines for Vita platform
+
+#if !defined(STORMLIB_PLATFORM_DEFINED) && defined(__vita__)
+
+  #include <sys/types.h>
+  #include <sys/stat.h>
+  #include <fcntl.h>
+  #include <unistd.h>
+  #include <stdint.h>
+  #include <stdlib.h>
+  #include <stdio.h>
+  #include <stdarg.h>
+  #include <string.h>
+  #include <strings.h>
+  #include <ctype.h>
+  #include <assert.h>
+  #include <errno.h>
+
+  #ifndef __BIG_ENDIAN__
+    #define STORMLIB_LITTLE_ENDIAN
+  #endif
+
+  #define STORMLIB_MAC                              // Use Mac compatible code
+  #define STORMLIB_VITA
+  #define STORMLIB_PLATFORM_DEFINED
+
+#endif
+
+//-----------------------------------------------------------------------------
+// Defines for Wii U platform
+
+#if !defined(STORMLIB_PLATFORM_DEFINED) && defined(__WIIU__)
+
+  #include <sys/types.h>
+  #include <sys/stat.h>
+  #include <fcntl.h>
+  #include <unistd.h>
+  #include <stdint.h>
+  #include <stdlib.h>
+  #include <stdio.h>
+  #include <stdarg.h>
+  #include <string.h>
+  #include <strings.h>
+  #include <ctype.h>
+  #include <assert.h>
+  #include <errno.h>
+  #include <malloc.h>
+
+  #undef STORMLIB_LITTLE_ENDIAN                     // Wii U is always big endian
+
+  #define STORMLIB_MAC                              // Use Mac compatible code
+  #define STORMLIB_WIIU
+  #define STORMLIB_PLATFORM_DEFINED
+
+#endif
+
+//-----------------------------------------------------------------------------
+// Assumption: If the platform is not defined, assume a Linux-like platform
+
+#if !defined(STORMLIB_PLATFORM_DEFINED)
+
+  #include <sys/types.h>
+  #include <sys/stat.h>
+  #include <fcntl.h>
+  #include <unistd.h>
+  #include <stdint.h>
+  #include <stdlib.h>
+  #include <stdio.h>
+  #include <stdarg.h>
+  #include <string.h>
+  #include <strings.h>
+  #include <ctype.h>
+  #include <assert.h>
+  #include <errno.h>
+
+  #ifndef __BIG_ENDIAN__
+    #define STORMLIB_LITTLE_ENDIAN
+  #endif
+
+  // Platforms with mmap support
+  #if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+    #include <sys/mman.h>
+    #define STORMLIB_HAS_MMAP
+  #endif
+
   #define STORMLIB_LINUX
   #define STORMLIB_PLATFORM_DEFINED
 
@@ -224,7 +387,7 @@
 #endif // !STORMLIB_WINDOWS
 
 // 64-bit calls are supplied by "normal" calls on Mac
-#if defined(STORMLIB_MAC) || defined(STORMLIB_HAIKU)
+#if defined(STORMLIB_MAC)
   #define stat64  stat
   #define fstat64 fstat
   #define lseek64 lseek
@@ -233,8 +396,8 @@
   #define O_LARGEFILE 0
 #endif
 
-// Platform-specific error codes for UNIX-based platforms
-#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX) || defined(STORMLIB_HAIKU)
+// Platform-specific error codes for non-Windows platforms
+#ifndef ERROR_SUCCESS
   #define ERROR_SUCCESS                  0
   #define ERROR_FILE_NOT_FOUND           ENOENT
   #define ERROR_ACCESS_DENIED            EPERM
@@ -251,8 +414,10 @@
   #define ERROR_HANDLE_EOF               1002        // No such error code under Linux
   #define ERROR_CAN_NOT_COMPLETE         1003        // No such error code under Linux
   #define ERROR_FILE_CORRUPT             1004        // No such error code under Linux
+  #define ERROR_BUFFER_OVERFLOW          1005        // No such error code under Linux
 #endif
 
+// Macros that can sometimes be missing
 #ifndef _countof
   #define _countof(x)  (sizeof(x) / sizeof(x[0]))
 #endif
@@ -305,32 +470,5 @@
     #define    BSWAP_TMPQHEADER(a,b)            ConvertTMPQHeader((a),(b))
     #define    BSWAP_TMPKHEADER(a)              ConvertTMPKHeader((a))
 #endif
-
-//-----------------------------------------------------------------------------
-// Macro for deprecated symbols
-
-/*
-#ifdef _MSC_VER
-  #if _MSC_FULL_VER >= 140050320
-    #define STORMLIB_DEPRECATED(_Text) __declspec(deprecated(_Text))
-  #else
-    #define STORMLIB_DEPRECATED(_Text) __declspec(deprecated)
-  #endif
-#else
-  #ifdef __GNUC__
-    #define STORMLIB_DEPRECATED(_Text) __attribute__((deprecated))
-  #else
-    #define STORMLIB_DEPRECATED(_Text) __attribute__((deprecated(_Text)))
-  #endif
-#endif
-
-// When a flag is deprecated, use this macro
-#ifndef _STORMLIB_NO_DEPRECATE
-  #define STORMLIB_DEPRECATED_FLAG(type, oldflag, newflag)    \
-    const STORMLIB_DEPRECATED(#oldflag " is deprecated. Use " #newflag ". To supress this warning, define _STORMLIB_NO_DEPRECATE") static type oldflag = (type)newflag;
-#else
-#define STORMLIB_DEPRECATED_FLAG(type, oldflag, newflag) static type oldflag = (type)newflag;
-#endif
-*/
 
 #endif // __STORMPORT_H__

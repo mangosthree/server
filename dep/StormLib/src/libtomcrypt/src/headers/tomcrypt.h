@@ -26,7 +26,7 @@ extern "C" {
 #define TAB_SIZE      32
 
 #ifdef _MSC_VER
-#pragma warning(disable: 4333)        // der_encode_utf8_string.c(91) : warning C4333: '>>' : right shift by too large amount, data loss
+#pragma warning(disable: 4333)		// der_encode_utf8_string.c(91) : warning C4333: '>>' : right shift by too large amount, data loss
 #endif
 
 /* error codes [will be expanded in future releases] */

@@ -22,6 +22,11 @@
 #include "huff.h"
 
 //-----------------------------------------------------------------------------
+// Local defined
+
+#define HUFF_DECOMPRESS_ERROR   0x1FF
+
+//-----------------------------------------------------------------------------
 // Table of byte-to-weight values
 
 // Table for (de)compression. Every compression type has 258 entries
@@ -269,65 +274,75 @@ TInputStream::TInputStream(void * pvInBuffer, size_t cbInBuffer)
     BitCount = 0;
 }
 
-// Gets 7 bits from the stream. DOES NOT remove the bits from input stream
-unsigned int TInputStream::Peek7Bits()
-{
-    unsigned int dwReloadByte = 0;
-
-    // If there is not enough bits to get the value,
-    // we have to add 8 more bits from the input buffer
-    if(BitCount < 7)
-    {
-        dwReloadByte = *pbInBuffer++;
-        BitBuffer |= dwReloadByte << BitCount;
-        BitCount += 8;
-    }
-
-    // Return the first available 7 bits. DO NOT remove them from the input stream
-    return (BitBuffer & 0x7F);
-}
-
 // Gets one bit from input stream
-unsigned int TInputStream::Get1Bit()
+bool TInputStream::Get1Bit(unsigned int & BitValue)
 {
-    unsigned int OneBit = 0;
-
     // Ensure that the input stream is reloaded, if there are no bits left
     if(BitCount == 0)
     {
+        // Buffer overflow check
+        if(pbInBuffer >= pbInBufferEnd)
+            return false;
+
         // Refill the bit buffer
         BitBuffer = *pbInBuffer++;
         BitCount = 8;
     }
 
     // Copy the bit from bit buffer to the variable
-    OneBit = (BitBuffer & 0x01);
+    BitValue = (BitBuffer & 0x01);
     BitBuffer >>= 1;
     BitCount--;
-
-    return OneBit;
+    return true;
 }
 
 // Gets the whole byte from the input stream.
-unsigned int TInputStream::Get8Bits()
+bool TInputStream::Get8Bits(unsigned int & ByteValue)
 {
     unsigned int dwReloadByte = 0;
-    unsigned int dwOneByte = 0;
 
     // If there is not enough bits to get the value,
     // we have to add 8 more bits from the input buffer
     if(BitCount < 8)
     {
+        // Buffer overflow check
+        if(pbInBuffer >= pbInBufferEnd)
+            return false;
+
         dwReloadByte = *pbInBuffer++;
         BitBuffer |= dwReloadByte << BitCount;
         BitCount += 8;
     }
 
     // Return the lowest 8 its
-    dwOneByte = (BitBuffer & 0xFF);
+    ByteValue = (BitBuffer & 0xFF);
     BitBuffer >>= 8;
     BitCount -= 8;
-    return dwOneByte;
+    return true;
+}
+
+// Gets 7 bits from the stream. DOES NOT remove the bits from input stream
+bool TInputStream::Peek7Bits(unsigned int & Value)
+{
+    unsigned int Value8Bits = 0;
+
+    // If there is not enough bits to get the value,
+    // we have to add 8 more bits from the input buffer
+    if(BitCount < 7)
+    {
+        // Load additional 8 bits. Be careful if we have no more data
+        if(pbInBuffer >= pbInBufferEnd)
+            return false;
+        Value8Bits = *pbInBuffer++;
+
+        // Add these 8 bits to the bit buffer
+        BitBuffer |= Value8Bits << BitCount;
+        BitCount += 8;
+    }
+
+    // Return 7 bits of data. DO NOT remove them from the input stream
+    Value = (BitBuffer & 0x7F);
+    return true;
 }
 
 void TInputStream::SkipBits(unsigned int dwBitsToSkip)
@@ -338,6 +353,10 @@ void TInputStream::SkipBits(unsigned int dwBitsToSkip)
     // we have to add 8 more bits from the input buffer
     if(BitCount < dwBitsToSkip)
     {
+        // Buffer overflow check
+        if(pbInBuffer >= pbInBufferEnd)
+            return;
+
         dwReloadByte = *pbInBuffer++;
         BitBuffer |= dwReloadByte << BitCount;
         BitCount += 8;
@@ -696,16 +715,13 @@ unsigned int THuffmannTree::DecodeOneByte(TInputStream * is)
     THTreeItem * pItem;
     unsigned int ItemLinkIndex;
     unsigned int BitCount = 0;
+    bool bHasItemLinkIndex;
 
-    // Check for the end of the input stream
-    if(is->pbInBuffer >= is->pbInBufferEnd && is->BitCount < 7)
-        return 0x1FF;
-
-    // Get the eventual quick-link index
-    ItemLinkIndex = is->Peek7Bits();
+    // Try to retrieve quick link index
+    bHasItemLinkIndex = is->Peek7Bits(ItemLinkIndex);
 
     // Is the quick-link item valid?
-    if(QuickLinks[ItemLinkIndex].ValidValue > MinValidValue)
+    if(bHasItemLinkIndex && QuickLinks[ItemLinkIndex].ValidValue > MinValidValue)
     {
         // If that item needs less than 7 bits, we can get decompressed value directly
         if(QuickLinks[ItemLinkIndex].ValidBits <= 7)
@@ -723,7 +739,7 @@ unsigned int THuffmannTree::DecodeOneByte(TInputStream * is)
     {
         // Just a sanity check
         if(pFirst == LIST_HEAD())
-            return 0x1FF;
+            return HUFF_DECOMPRESS_ERROR;
 
         // We don't have the quick-link item, we need to parse the tree from its root
         pItem = pFirst;
@@ -732,9 +748,14 @@ unsigned int THuffmannTree::DecodeOneByte(TInputStream * is)
     // Step down the tree until we find a terminal item
     while(pItem->pChildLo != NULL)
     {
+        unsigned int BitValue = 0;
+
         // If the next bit in the compressed stream is set, we get the higher-weight
         // child. Otherwise, get the lower-weight child.
-        pItem = is->Get1Bit() ? pItem->pChildLo->pPrev : pItem->pChildLo;
+        if(!is->Get1Bit(BitValue))
+            return HUFF_DECOMPRESS_ERROR;
+
+        pItem = BitValue ? pItem->pChildLo->pPrev : pItem->pChildLo;
         BitCount++;
 
         // If the number of loaded bits reached 7,
@@ -745,7 +766,7 @@ unsigned int THuffmannTree::DecodeOneByte(TInputStream * is)
 
     // If we didn't get the item from the quick-link array,
     // set the entry in it
-    if(QuickLinks[ItemLinkIndex].ValidValue < MinValidValue)
+    if(bHasItemLinkIndex && QuickLinks[ItemLinkIndex].ValidValue < MinValidValue)
     {
         // If the current compressed byte was more than 7 bits,
         // set a quick-link item with pointer to tree item
@@ -849,7 +870,8 @@ unsigned int THuffmannTree::Decompress(void * pvOutBuffer, unsigned int cbOutLen
         return 0;
 
     // Get the compression type from the input stream
-    CompressionType = is->Get8Bits();
+    if(!is->Get8Bits(CompressionType))
+        return 0;
     bIsCmp0 = (CompressionType == 0) ? 1 : 0;
 
     // Build the Huffman tree
@@ -860,14 +882,15 @@ unsigned int THuffmannTree::Decompress(void * pvOutBuffer, unsigned int cbOutLen
     while((DecompressedValue = DecodeOneByte(is)) != 0x100)
     {
         // Did an error occur?
-        if(DecompressedValue == 0x1FF)          // An error occurred
+        if(DecompressedValue == HUFF_DECOMPRESS_ERROR)
             return 0;
 
         // Huffman tree needs to be modified
         if(DecompressedValue == 0x101)
         {
             // The decompressed byte is stored in the next 8 bits
-            DecompressedValue = is->Get8Bits();
+            if(!is->Get8Bits(DecompressedValue))
+                return 0;
 
             if(!InsertNewBranchAndRebalance(pLast->DecompressedValue, DecompressedValue))
                 return 0;
@@ -876,10 +899,10 @@ unsigned int THuffmannTree::Decompress(void * pvOutBuffer, unsigned int cbOutLen
                 IncWeightsAndRebalance(ItemsByByte[DecompressedValue]);
         }
 
-        // A byte successfully decoded - store it in the output stream
-        *pbOutBuffer++ = (unsigned char)DecompressedValue;
+        // Store the byte to the output stream
         if(pbOutBuffer >= pbOutBufferEnd)
             break;
+        *pbOutBuffer++ = (unsigned char)DecompressedValue;
 
         if(bIsCmp0)
         {

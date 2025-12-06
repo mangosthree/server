@@ -27,8 +27,8 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,22,0,3
- PRODUCTVERSION 9,22,0,3
+ FILEVERSION 9,25,0,3
+ PRODUCTVERSION 9,25,0,3
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -45,12 +45,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "http://www.zezula.net/mpq.html"
             VALUE "FileDescription", "StormLib library for reading Blizzard MPQ archives"
-            VALUE "FileVersion", "9, 22, 0, 3\0"
+            VALUE "FileVersion", "9.25.0.4"
             VALUE "InternalName", "StormLib"
-            VALUE "LegalCopyright", "Copyright (c) 2014 - 2020 Ladislav Zezula"
+            VALUE "LegalCopyright", "Copyright (c) 2014 - 2023 Ladislav Zezula"
             VALUE "OriginalFilename", "StormLib.dll"
             VALUE "ProductName", "StormLib"
-            VALUE "ProductVersion", "9, 22, 0, 3\0"
+            VALUE "ProductVersion", "9.25.0.4"
         END
     END
     BLOCK "VarFileInfo"
@@ -78,19 +78,19 @@ LANGUAGE LANG_CZECH, SUBLANG_DEFAULT
 // TEXTINCLUDE
 //
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
     "\r\n"
     "\0"
 END
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END

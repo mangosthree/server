@@ -1,8 +1,6 @@
 #ifndef TOMCRYPT_CUSTOM_H_
 #define TOMCRYPT_CUSTOM_H_
 
-#include "tomcrypt_cfg.h"
-
 #define LTC_NO_CIPHERS
 #define LTC_NO_HASHES
 #define LTC_NO_MACS
@@ -13,13 +11,13 @@
 #define LTC_NO_ROLC
 
 #define LTC_SOURCE
+#define LTC_SHA256
 #define LTC_SHA1
 #define LTC_MD5
 #define LTC_DER
-#define LTC_RC4
 
-#define USE_LTM
 #define LTM_DESC
+#define USE_LTM
 
 /* macros for various libc functions you can change for embedded targets */
 #ifndef XMALLOC
@@ -49,25 +47,25 @@
 
 #ifndef XMEMSET
    #ifdef memset
-   #define LTC_NO_PROTOTYPES
+   #define LTC_NO_PROTOTYPES_MEMSET
    #endif
 #define XMEMSET  memset
 #endif
 #ifndef XMEMCPY
    #ifdef memcpy
-   #define LTC_NO_PROTOTYPES
+   #define LTC_NO_PROTOTYPES_MEMCPY
    #endif
 #define XMEMCPY  memcpy
 #endif
 #ifndef XMEMCMP
    #ifdef memcmp
-   #define LTC_NO_PROTOTYPES
+   #define LTC_NO_PROTOTYPES_MEMCMP
    #endif
 #define XMEMCMP  memcmp
 #endif
 #ifndef XSTRCMP
    #ifdef strcmp
-   #define LTC_NO_PROTOTYPES
+   #define LTC_NO_PROTOTYPES_STRCMP
    #endif
 #define XSTRCMP strcmp
 #endif
@@ -411,16 +409,6 @@
 #define LTC_MUTEX_UNLOCK(x)
 
 #endif
-
-/* forward declaration c++11 - C99
-   for misc/crypt_libc.c
-*/
-
-LTC_EXPORT void * LTC_CALL LibTomMalloc(size_t n);
-LTC_EXPORT void * LTC_CALL XCALLOC(size_t n, size_t s);
-LTC_EXPORT void * LTC_CALL XREALLOC(void *p, size_t n);
-LTC_EXPORT void LTC_CALL XFREE(void *p);
-LTC_EXPORT void LTC_CALL XQSORT(void *base, size_t nmemb, size_t size, int(*compar)(const void *, const void *));
 
 /* Debuggers */
 

@@ -90,6 +90,7 @@ static TListFileCache * CreateListFileCache(
     DWORD dwFlags)
 {
     TListFileCache * pCache = NULL;
+    size_t cchWildCardAligned = 0;
     size_t cchWildCard = 0;
     DWORD dwBytesRead = 0;
 
@@ -99,10 +100,13 @@ static TListFileCache * CreateListFileCache(
 
     // Append buffer for name mask, if any
     if(szWildCard != NULL)
+    {
         cchWildCard = strlen(szWildCard) + 1;
+        cchWildCardAligned = (cchWildCard + 3) & 0xFFFFFFFC;
+    }
 
     // Allocate cache for one file block
-    pCache = (TListFileCache *)STORM_ALLOC(BYTE, sizeof(TListFileCache) + cchWildCard + dwFileSize + 1);
+    pCache = (TListFileCache *)STORM_ALLOC(BYTE, sizeof(TListFileCache) + cchWildCardAligned + dwFileSize + 1);
     if(pCache != NULL)
     {
         // Clear the entire structure
@@ -117,7 +121,7 @@ static TListFileCache * CreateListFileCache(
         }
 
         // Fill-in the rest of the cache pointers
-        pCache->pBegin = (LPBYTE)(pCache + 1) + cchWildCard;
+        pCache->pBegin = (LPBYTE)(pCache + 1) + cchWildCardAligned;
 
         // Load the entire listfile to the cache
         PfnLoadFile(pHandle, pCache->pBegin, dwFileSize, &dwBytesRead);
@@ -402,11 +406,13 @@ static LPBYTE CreateListFile(TMPQArchive * ha, DWORD * pcbListFile)
 // Adds a name into the list of all names. For each locale in the MPQ,
 // one entry will be created
 // If the file name is already there, does nothing.
-static int SListFileCreateNodeForAllLocales(TMPQArchive * ha, const char * szFileName)
+static DWORD SListFileCreateNodeForAllLocales(TMPQArchive * ha, const char * szFileName)
 {
     TFileEntry * pFileEntry;
-    TMPQHash * pFirstHash;
+    TMPQHash * pHashEnd;
     TMPQHash * pHash;
+    DWORD dwName1;
+    DWORD dwName2;
 
     // If we have HET table, use that one
     if(ha->pHetTable != NULL)
@@ -424,16 +430,38 @@ static int SListFileCreateNodeForAllLocales(TMPQArchive * ha, const char * szFil
     // If we have hash table, we use it
     if(ha->pHashTable != NULL)
     {
-        // Go while we found something
-        pFirstHash = pHash = GetFirstHashEntry(ha, szFileName);
-        while(pHash != NULL)
-        {
-            // Allocate file name for the file entry
-            AllocateFileName(ha, ha->pFileTable + MPQ_BLOCK_INDEX(pHash), szFileName);
+        // Get the end of the hash table and both names
+        pHashEnd = ha->pHashTable + ha->pHeader->dwHashTableSize;
+        dwName1 = ha->pfnHashString(szFileName, MPQ_HASH_NAME_A);
+        dwName2 = ha->pfnHashString(szFileName, MPQ_HASH_NAME_B);
 
-            // Now find the next language version of the file
-            pHash = GetNextHashEntry(ha, pFirstHash, pHash);
+        // Some protectors set very high hash table size (0x00400000 items or more)
+        // in order to make this process very slow. We will ignore items
+        // in the hash table that would be beyond the end of the file.
+        // Example MPQ: MPQ_2022_v1_Sniper.scx
+        if(ha->dwFlags & MPQ_FLAG_HASH_TABLE_CUT)
+            pHashEnd = ha->pHashTable + (ha->dwRealHashTableSize / sizeof(TMPQHash));
+
+        // Go through the hash table and put the name in each item that has the same name pair
+        for(pHash = ha->pHashTable; pHash < pHashEnd; pHash++)
+        {
+            if(pHash->dwName1 == dwName1 && pHash->dwName2 == dwName2 && MPQ_BLOCK_INDEX(pHash) < ha->dwFileTableSize)
+            {
+                // Allocate file name for the file entry
+                AllocateFileName(ha, ha->pFileTable + MPQ_BLOCK_INDEX(pHash), szFileName);
+            }
         }
+
+        // Go while we found something
+        //pFirstHash = pHash = GetFirstHashEntry(ha, szFileName);
+        //while(pHash != NULL)
+        //{
+        //    // Allocate file name for the file entry
+        //    AllocateFileName(ha, ha->pFileTable + MPQ_BLOCK_INDEX(pHash), szFileName);
+
+        //    // Now find the next language version of the file
+        //    pHash = GetNextHashEntry(ha, pFirstHash, pHash);
+        //}
 
         return ERROR_SUCCESS;
     }
@@ -442,12 +470,12 @@ static int SListFileCreateNodeForAllLocales(TMPQArchive * ha, const char * szFil
 }
 
 // Saves the whole listfile to the MPQ
-int SListFileSaveToMpq(TMPQArchive * ha)
+DWORD SListFileSaveToMpq(TMPQArchive * ha)
 {
     TMPQFile * hf = NULL;
     LPBYTE pbListFile;
     DWORD cbListFile = 0;
-    int nError = ERROR_SUCCESS;
+    DWORD dwErrCode = ERROR_SUCCESS;
 
     // Only save the listfile if we should do so
     if(ha->dwFileFlags1 != 0)
@@ -468,7 +496,7 @@ int SListFileSaveToMpq(TMPQArchive * ha)
                 ha->dwFileFlags1 = GetDefaultSpecialFileFlags(cbListFile, ha->pHeader->wFormatVersion);
 
             // Create the listfile in the MPQ
-            nError = SFileAddFile_Init(ha, LISTFILE_NAME,
+            dwErrCode = SFileAddFile_Init(ha, LISTFILE_NAME,
                                            0,
                                            cbListFile,
                                            LANG_NEUTRAL,
@@ -476,10 +504,10 @@ int SListFileSaveToMpq(TMPQArchive * ha)
                                           &hf);
 
             // Write the listfile raw data to it
-            if(nError == ERROR_SUCCESS)
+            if(dwErrCode == ERROR_SUCCESS)
             {
                 // Write the content of the listfile to the MPQ
-                nError = SFileAddFile_Write(hf, pbListFile, cbListFile, MPQ_COMPRESSION_ZLIB);
+                dwErrCode = SFileAddFile_Write(hf, pbListFile, cbListFile, MPQ_COMPRESSION_ZLIB);
                 SFileAddFile_Finish(hf);
             }
 
@@ -493,14 +521,14 @@ int SListFileSaveToMpq(TMPQArchive * ha)
         else
         {
             // If the (listfile) file would be empty, its OK
-            nError = (cbListFile == 0) ? ERROR_SUCCESS : ERROR_NOT_ENOUGH_MEMORY;
+            dwErrCode = (cbListFile == 0) ? ERROR_SUCCESS : ERROR_NOT_ENOUGH_MEMORY;
         }
     }
 
-    return nError;
+    return dwErrCode;
 }
 
-static int SFileAddArbitraryListFile(
+static DWORD SFileAddArbitraryListFile(
     TMPQArchive * ha,
     HANDLE hMpq,
     const TCHAR * szListFile,
@@ -530,7 +558,28 @@ static int SFileAddArbitraryListFile(
     return (pCache != NULL) ? ERROR_SUCCESS : ERROR_FILE_CORRUPT;
 }
 
-static int SFileAddInternalListFile(
+static DWORD SFileAddArbitraryListFile(
+    TMPQArchive * ha,
+    const char ** listFileEntries,
+    DWORD dwEntryCount)
+{
+    if(listFileEntries != NULL && dwEntryCount > 0)
+    {
+        // Get the next line
+        for(DWORD dwListFileNum = 0; dwListFileNum < dwEntryCount; dwListFileNum++)
+        {
+            const char * listFileEntry = listFileEntries[dwListFileNum];
+            if(listFileEntry != NULL)
+            {
+                SListFileCreateNodeForAllLocales(ha, listFileEntry);
+            }
+        }
+    }
+
+    return (listFileEntries != NULL && dwEntryCount > 0) ? ERROR_SUCCESS : ERROR_INVALID_PARAMETER;
+}
+
+static DWORD SFileAddInternalListFile(
     TMPQArchive * ha,
     HANDLE hMpq)
 {
@@ -538,24 +587,24 @@ static int SFileAddInternalListFile(
     TMPQHash * pHash;
     LCID lcSaveLocale = g_lcFileLocale;
     DWORD dwMaxSize = MAX_LISTFILE_SIZE;
-    int nError = ERROR_SUCCESS;
+    DWORD dwErrCode = ERROR_SUCCESS;
 
     // If there is hash table, we need to support multiple listfiles
     // with different locales (BrooDat.mpq)
     if(ha->pHashTable != NULL)
     {
         // If the archive is a malformed map, ignore too large listfiles
-        if(ha->dwFlags & MPQ_FLAG_MALFORMED)
+        if(STORMLIB_TEST_FLAGS(ha->dwFlags, MPQ_FLAG_MALFORMED | MPQ_FLAG_PATCH, MPQ_FLAG_MALFORMED))
             dwMaxSize = 0x40000;
 
         pFirstHash = pHash = GetFirstHashEntry(ha, LISTFILE_NAME);
-        while(nError == ERROR_SUCCESS && pHash != NULL)
+        while(dwErrCode == ERROR_SUCCESS && pHash != NULL)
         {
             // Set the prefered locale to that from list file
-            SFileSetLocale(pHash->lcLocale);
+            SFileSetLocale(SFILE_MAKE_LCID(pHash->Locale, pHash->Platform));
 
             // Add that listfile
-            nError = SFileAddArbitraryListFile(ha, hMpq, NULL, dwMaxSize);
+            dwErrCode = SFileAddArbitraryListFile(ha, hMpq, NULL, dwMaxSize);
 
             // Move to the next hash
             pHash = GetNextHashEntry(ha, pFirstHash, pHash);
@@ -567,11 +616,11 @@ static int SFileAddInternalListFile(
     else
     {
         // Add the single listfile
-        nError = SFileAddArbitraryListFile(ha, hMpq, NULL, dwMaxSize);
+        dwErrCode = SFileAddArbitraryListFile(ha, hMpq, NULL, dwMaxSize);
     }
 
     // Return the result of the operation
-    return nError;
+    return dwErrCode;
 }
 
 static bool DoListFileSearch(TListFileCache * pCache, SFILE_FIND_DATA * lpFindFileData)
@@ -608,18 +657,18 @@ static bool DoListFileSearch(TListFileCache * pCache, SFILE_FIND_DATA * lpFindFi
 // File functions
 
 // Adds a listfile into the MPQ archive.
-int WINAPI SFileAddListFile(HANDLE hMpq, const TCHAR * szListFile)
+DWORD WINAPI SFileAddListFile(HANDLE hMpq, const TCHAR * szListFile)
 {
     TMPQArchive * ha = (TMPQArchive *)hMpq;
-    int nError = ERROR_SUCCESS;
+    DWORD dwErrCode = ERROR_SUCCESS;
 
     // Add the listfile for each MPQ in the patch chain
     while(ha != NULL)
     {
         if(szListFile != NULL)
-            nError = SFileAddArbitraryListFile(ha, NULL, szListFile, MAX_LISTFILE_SIZE);
+            dwErrCode = SFileAddArbitraryListFile(ha, NULL, szListFile, MAX_LISTFILE_SIZE);
         else
-            nError = SFileAddInternalListFile(ha, hMpq);
+            dwErrCode = SFileAddInternalListFile(ha, hMpq);
 
         // Also, add three special files to the listfile:
         // (listfile) itself, (attributes) and (signature)
@@ -631,7 +680,33 @@ int WINAPI SFileAddListFile(HANDLE hMpq, const TCHAR * szListFile)
         ha = ha->haPatch;
     }
 
-    return nError;
+    return dwErrCode;
+}
+
+DWORD WINAPI SFileAddListFileEntries(HANDLE hMpq, const char ** listFileEntries, DWORD dwEntryCount)
+{
+    TMPQArchive * ha = (TMPQArchive *)hMpq;
+    DWORD dwErrCode = ERROR_SUCCESS;
+
+    // Add the listfile for each MPQ in the patch chain
+    while(ha != NULL)
+    {
+        if(listFileEntries != NULL && dwEntryCount > 0)
+            dwErrCode = SFileAddArbitraryListFile(ha, listFileEntries, dwEntryCount);
+        else
+            dwErrCode = SFileAddInternalListFile(ha, hMpq);
+
+        // Also, add three special files to the listfile:
+        // (listfile) itself, (attributes) and (signature)
+        SListFileCreateNodeForAllLocales(ha, LISTFILE_NAME);
+        SListFileCreateNodeForAllLocales(ha, SIGNATURE_NAME);
+        SListFileCreateNodeForAllLocales(ha, ATTRIBUTES_NAME);
+
+        // Move to the next archive in the chain
+        ha = ha->haPatch;
+    }
+    
+    return dwErrCode;
 }
 
 //-----------------------------------------------------------------------------

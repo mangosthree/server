@@ -30,17 +30,25 @@ LTC_EXPORT void LTC_CALL XFREE(void *p);
 
 LTC_EXPORT void LTC_CALL XQSORT(void *base, size_t nmemb, size_t size, int(LTC_CALL * compar)(const void *, const void *));
 
-
 /* change the clock function too */
 LTC_EXPORT clock_t LTC_CALL XCLOCK(void);
+#endif // LTC_NO_PROTOTYPES
 
 /* various other functions */
+#ifndef LTC_NO_PROTOTYPES_MEMCPY
 LTC_EXPORT void * LTC_CALL XMEMCPY(void *dest, const void *src, size_t n);
+#endif
+
+#ifndef LTC_NO_PROTOTYPES_MEMCMP
 LTC_EXPORT int   LTC_CALL XMEMCMP(const void *s1, const void *s2, size_t n);
+#endif
+
+#ifndef LTC_NO_PROTOTYPES_MEMSET
 LTC_EXPORT void * LTC_CALL XMEMSET(void *s, int c, size_t n);
+#endif
 
+#ifndef LTC_NO_PROTOTYPES_STRCMP
 LTC_EXPORT int   LTC_CALL XSTRCMP(const char *s1, const char *s2);
-
 #endif
 
 /* type of argument checking, 0=default, 1=fatal and 2=error+continue, 3=nothing */
@@ -48,8 +56,8 @@ LTC_EXPORT int   LTC_CALL XSTRCMP(const char *s1, const char *s2);
    #define ARGTYPE  0
 #endif
 
-/* Controls endianess and size of registers.  Leave uncommented to get platform neutral [slower] code
- *
+/* Controls endianess and size of registers.  Leave uncommented to get platform neutral [slower] code 
+ * 
  * Note: in order to use the optimized macros your platform must support unaligned 32 and 64 bit read/writes.
  * The x86 platforms allow this but some others [ARM for instance] do not.  On those platforms you **MUST**
  * use the portable [slower] macros.
@@ -83,7 +91,7 @@ LTC_EXPORT int   LTC_CALL XSTRCMP(const char *s1, const char *s2);
    #define ENDIAN_32BITWORD
    #define LTC_FAST
    #define LTC_FAST_TYPE    unsigned long
-#endif
+#endif   
 
 /* detect sparc and sparc64 */
 #if defined(__sparc__)
@@ -111,7 +119,7 @@ LTC_EXPORT int   LTC_CALL XSTRCMP(const char *s1, const char *s2);
    #undef LTC_FAST
    #undef LTC_FAST_TYPE
    #define LTC_NO_ROLC
-    #define LTC_NO_BSWAP
+	#define LTC_NO_BSWAP
 #endif
 
 /* #define ENDIAN_LITTLE */

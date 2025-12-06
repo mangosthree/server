@@ -68,6 +68,10 @@ static bool GetInfo_BufferCheck(void * pvFileInfo, DWORD cbFileInfo, DWORD cbDat
 
 static bool GetInfo(void * pvFileInfo, DWORD cbFileInfo, const void * pvData, DWORD cbData, LPDWORD pcbLengthNeeded)
 {
+    // Verify the input parameter
+    if(pvData == NULL)
+        return GetInfo_ReturnError(ERROR_INVALID_PARAMETER);
+
     // Verify buffer pointer and buffer size
     if(!GetInfo_BufferCheck(pvFileInfo, cbFileInfo, cbData, pcbLengthNeeded))
         return false;
@@ -80,6 +84,10 @@ static bool GetInfo(void * pvFileInfo, DWORD cbFileInfo, const void * pvData, DW
 static bool GetInfo_Allocated(void * pvFileInfo, DWORD cbFileInfo, void * pvData, DWORD cbData, LPDWORD pcbLengthNeeded)
 {
     bool bResult;
+
+    // Verify the input parameter
+    if(pvData == NULL)
+        return GetInfo_ReturnError(ERROR_INVALID_PARAMETER);
 
     // Verify buffer pointer and buffer size
     if((bResult = GetInfo_BufferCheck(pvFileInfo, cbFileInfo, cbData, pcbLengthNeeded)) != false)
@@ -199,6 +207,7 @@ bool WINAPI SFileGetFileInfo(
     TFileEntry * pFileEntry = NULL;
     TMPQHeader * pHeader = NULL;
     ULONGLONG Int64Value = 0;
+    ULONGLONG ByteOffset;
     TMPQFile * hf = NULL;
     void * pvSrcFileInfo = NULL;
     DWORD cbSrcFileInfo = 0;
@@ -233,9 +242,13 @@ bool WINAPI SFileGetFileInfo(
             return GetInfo(pvFileInfo, cbFileInfo, &ha->UserDataPos, sizeof(ULONGLONG), pcbLengthNeeded);
 
         case SFileMpqUserDataHeader:
+            if(ha->pUserData == NULL)
+                return GetInfo_ReturnError(ERROR_INVALID_PARAMETER);
             return GetInfo_ReadFromFile(pvFileInfo, cbFileInfo, ha->pStream, ha->UserDataPos, sizeof(TMPQUserData), pcbLengthNeeded);
 
         case SFileMpqUserData:
+            if(ha->pUserData == NULL)
+                return GetInfo_ReturnError(ERROR_INVALID_PARAMETER);
             return GetInfo_ReadFromFile(pvFileInfo, cbFileInfo, ha->pStream, ha->UserDataPos + sizeof(TMPQUserData), ha->pUserData->dwHeaderOffs - sizeof(TMPQUserData), pcbLengthNeeded);
 
         case SFileMpqHeaderOffset:
@@ -313,7 +326,8 @@ bool WINAPI SFileGetFileInfo(
             return GetInfo(pvFileInfo, cbFileInfo, &pHeader->dwBlockTableSize, sizeof(DWORD), pcbLengthNeeded);
 
         case SFileMpqBlockTable:
-            if(MAKE_OFFSET64(pHeader->wBlockTablePosHi, pHeader->dwBlockTablePos) >= ha->FileSize)
+            ByteOffset = FileOffsetFromMpqOffset(ha, MAKE_OFFSET64(pHeader->wBlockTablePosHi, pHeader->dwBlockTablePos));
+            if(ByteOffset >= ha->FileSize)
                 return GetInfo_ReturnError(ERROR_FILE_NOT_FOUND);
             cbSrcFileInfo = pHeader->dwBlockTableSize * sizeof(TMPQBlock);
             pvSrcFileInfo = LoadBlockTable(ha, true);
@@ -395,19 +409,27 @@ bool WINAPI SFileGetFileInfo(
             return GetInfo(pvFileInfo, cbFileInfo, &hf->dwHashIndex, sizeof(DWORD), pcbLengthNeeded);
 
         case SFileInfoNameHash1:
+            if(hf->pHashEntry == NULL)
+                return GetInfo_ReturnError(ERROR_INVALID_PARAMETER);
             return GetInfo(pvFileInfo, cbFileInfo, &hf->pHashEntry->dwName1, sizeof(DWORD), pcbLengthNeeded);
 
         case SFileInfoNameHash2:
+            if(hf->pHashEntry == NULL)
+                return GetInfo_ReturnError(ERROR_INVALID_PARAMETER);
             return GetInfo(pvFileInfo, cbFileInfo, &hf->pHashEntry->dwName2, sizeof(DWORD), pcbLengthNeeded);
 
         case SFileInfoNameHash3:
             return GetInfo(pvFileInfo, cbFileInfo, &pFileEntry->FileNameHash, sizeof(ULONGLONG), pcbLengthNeeded);
 
         case SFileInfoLocale:
-            dwInt32Value = hf->pHashEntry->lcLocale;
+            if(hf->pHashEntry == NULL)
+                return GetInfo_ReturnError(ERROR_INVALID_PARAMETER);
+            dwInt32Value = SFILE_MAKE_LCID(hf->pHashEntry->Locale, hf->pHashEntry->Platform);
             return GetInfo(pvFileInfo, cbFileInfo, &dwInt32Value, sizeof(DWORD), pcbLengthNeeded);
 
         case SFileInfoFileIndex:
+            if(hf->ha == NULL)
+                return GetInfo_ReturnError(ERROR_INVALID_PARAMETER);
             dwInt32Value = (DWORD)(pFileEntry - hf->ha->pFileTable);
             return GetInfo(pvFileInfo, cbFileInfo, &dwInt32Value, sizeof(DWORD), pcbLengthNeeded);
 
@@ -430,17 +452,19 @@ bool WINAPI SFileGetFileInfo(
             return GetInfo(pvFileInfo, cbFileInfo, &hf->dwFileKey, sizeof(DWORD), pcbLengthNeeded);
 
         case SFileInfoEncryptionKeyRaw:
+            if(pFileEntry == NULL)
+                return GetInfo_ReturnError(ERROR_INVALID_PARAMETER);
             dwInt32Value = hf->dwFileKey;
-            if(pFileEntry->dwFlags & MPQ_FILE_FIX_KEY)
+            if(pFileEntry->dwFlags & MPQ_FILE_KEY_V2)
                 dwInt32Value = (dwInt32Value ^ pFileEntry->dwFileSize) - (DWORD)hf->MpqFilePos;
             return GetInfo(pvFileInfo, cbFileInfo, &dwInt32Value, sizeof(DWORD), pcbLengthNeeded);
 
         case SFileInfoCRC32:
             return GetInfo(pvFileInfo, cbFileInfo, &hf->pFileEntry->dwCrc32, sizeof(DWORD), pcbLengthNeeded);
+        default:
+            // Invalid info class
+            return GetInfo_ReturnError(ERROR_INVALID_PARAMETER);
     }
-
-    // Invalid info class
-    return GetInfo_ReturnError(ERROR_INVALID_PARAMETER);
 }
 
 bool WINAPI SFileFreeFileInfo(void * pvFileInfo, SFileInfoClass InfoClass)
@@ -501,6 +525,11 @@ static TFileHeader2Ext data2ext[] =
     {0x61754C1B, 0xFFFFFFFF, 0x00000000, 0x00000000, "lua"},    // Compiled LUA files
     {0x20534444, 0xFFFFFFFF, 0x00000000, 0x00000000, "dds"},    // DDS textures
     {0x43614C66, 0xFFFFFFFF, 0x00000000, 0x00000000, "flac"},   // FLAC sound files
+    {0x0000FBFF, 0x0000FFFF, 0x00000000, 0x00000000, "mp3"},    // MP3 sound files
+    {0x0000F3FF, 0x0000FFFF, 0x00000000, 0x00000000, "mp3"},    // MP3 sound files
+    {0x0000F2FF, 0x0000FFFF, 0x00000000, 0x00000000, "mp3"},    // MP3 sound files
+    {0x00334449, 0x00FFFFFF, 0x00000000, 0x00000000, "mp3"},    // MP3 sound files
+    {0x57334D48, 0xFFFFFFFF, 0x00000000, 0x00000000, "w3x"},    // Warcraft III map files, can also be w3m
     {0x6F643357, 0xFFFFFFFF, 0x00000000, 0x00000000, "doo"},    // Warcraft III doodad files
     {0x21453357, 0xFFFFFFFF, 0x00000000, 0x00000000, "w3e"},    // Warcraft III environment files
     {0x5733504D, 0xFFFFFFFF, 0x00000000, 0x00000000, "wpm"},    // Warcraft III pathing map files
@@ -509,7 +538,7 @@ static TFileHeader2Ext data2ext[] =
     {0, 0, 0, 0, NULL}                                          // Terminator
 };
 
-static int CreatePseudoFileName(HANDLE hFile, TFileEntry * pFileEntry, char * szFileName)
+static DWORD CreatePseudoFileName(HANDLE hFile, TFileEntry * pFileEntry, char * szFileName)
 {
     TMPQFile * hf = (TMPQFile *)hFile;  // MPQ File handle
     DWORD FirstBytes[2] = {0, 0};       // The first 4 bytes of the file
@@ -553,11 +582,11 @@ static int CreatePseudoFileName(HANDLE hFile, TFileEntry * pFileEntry, char * sz
 
 bool WINAPI SFileGetFileName(HANDLE hFile, char * szFileName)
 {
-    TMPQFile * hf = (TMPQFile *)hFile;  // MPQ File handle
-    int nError = ERROR_INVALID_HANDLE;
+    TMPQFile * hf;
+    DWORD dwErrCode = ERROR_INVALID_HANDLE;
 
     // Check valid parameters
-    if(IsValidFileHandle(hFile))
+    if((hf = IsValidFileHandle(hFile)) != NULL)
     {
         TFileEntry * pFileEntry = hf->pFileEntry;
 
@@ -568,13 +597,13 @@ bool WINAPI SFileGetFileName(HANDLE hFile, char * szFileName)
             {
                 // If the file name is not there yet, create a pseudo name
                 if(pFileEntry->szFileName == NULL)
-                    nError = CreatePseudoFileName(hFile, pFileEntry, szFileName);
+                    dwErrCode = CreatePseudoFileName(hFile, pFileEntry, szFileName);
 
                 // Copy the file name to the output buffer, if any
                 if(pFileEntry->szFileName && szFileName)
                 {
                     strcpy(szFileName, pFileEntry->szFileName);
-                    nError = ERROR_SUCCESS;
+                    dwErrCode = ERROR_SUCCESS;
                 }
             }
         }
@@ -587,12 +616,12 @@ bool WINAPI SFileGetFileName(HANDLE hFile, char * szFileName)
                 const TCHAR * szStreamName = FileStream_GetFileName(hf->pStream);
                 StringCopy(szFileName, MAX_PATH, szStreamName);
             }
-            nError = ERROR_SUCCESS;
+            dwErrCode = ERROR_SUCCESS;
         }
     }
 
-    if(nError != ERROR_SUCCESS)
-        SetLastError(nError);
-    return (nError == ERROR_SUCCESS);
+    if(dwErrCode != ERROR_SUCCESS)
+        SetLastError(dwErrCode);
+    return (dwErrCode == ERROR_SUCCESS);
 }
 

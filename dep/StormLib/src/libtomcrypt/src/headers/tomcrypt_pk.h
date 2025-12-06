@@ -19,19 +19,19 @@ typedef struct Rsa_key {
     /** Type of key, PK_PRIVATE or PK_PUBLIC */
     int type;
     /** The public exponent */
-    void *e;
+    void *e; 
     /** The private exponent */
-    void *d;
+    void *d; 
     /** The modulus */
-    void *N;
+    void *N; 
     /** The p factor of N */
-    void *p;
+    void *p; 
     /** The q factor of N */
-    void *q;
+    void *q; 
     /** The 1/q mod p CRT param */
-    void *qP;
+    void *qP; 
     /** The d mod (p - 1) CRT param */
-    void *dP;
+    void *dP; 
     /** The d mod (q - 1) CRT param */
     void *dQ;
 } rsa_key;
@@ -106,17 +106,17 @@ typedef struct KAT_key {
     /** Type of key, PK_PRIVATE or PK_PUBLIC */
     int type;
     /** The private exponent */
-    void *d;
+    void *d; 
     /** The modulus */
-    void *N;
+    void *N; 
     /** The p factor of N */
-    void *p;
+    void *p; 
     /** The q factor of N */
-    void *q;
+    void *q; 
     /** The 1/q mod p CRT param */
-    void *qP;
+    void *qP; 
     /** The d mod (p - 1) CRT param */
-    void *dP;
+    void *dP; 
     /** The d mod (q - 1) CRT param */
     void *dQ;
     /** The pq param */
@@ -136,9 +136,9 @@ int katja_encrypt_key(const unsigned char *in,     unsigned long inlen,
                             unsigned char *out,    unsigned long *outlen,
                       const unsigned char *lparam, unsigned long lparamlen,
                       prng_state *prng, int prng_idx, int hash_idx, katja_key *key);
-
+                                        
 int katja_decrypt_key(const unsigned char *in,       unsigned long inlen,
-                            unsigned char *out,      unsigned long *outlen,
+                            unsigned char *out,      unsigned long *outlen, 
                       const unsigned char *lparam,   unsigned long lparamlen,
                             int            hash_idx, int *stat,
                             katja_key       *key);
@@ -146,7 +146,7 @@ int katja_decrypt_key(const unsigned char *in,       unsigned long inlen,
 /* LTC_PKCS #1 import/export */
 int katja_export(unsigned char *out, unsigned long *outlen, int type, katja_key *key);
 int katja_import(const unsigned char *in, unsigned long inlen, katja_key *key);
-
+                        
 #endif
 
 /* ---- ECC Routines ---- */
@@ -164,7 +164,7 @@ typedef struct {
    int size;
 
    /** name of curve */
-   char *name;
+   char *name; 
 
    /** The prime that defines the field the curve is in (encoded in hex) */
    char *prime;
@@ -174,10 +174,10 @@ typedef struct {
 
    /** The order of the curve (hex) */
    char *order;
-
+  
    /** The x co-ordinate of the base point on the curve (hex) */
    char *Gx;
-
+ 
    /** The y co-ordinate of the base point on the curve (hex) */
    char *Gy;
 } ltc_ecc_set_type;
@@ -202,8 +202,8 @@ typedef struct {
     /** Index into the ltc_ecc_sets[] for the parameters of this curve; if -1, then this key is using user supplied curve in dp */
     int idx;
 
-    /** pointer to domain parameters; either points to NIST curves (identified by idx >= 0) or user supplied curve */
-    const ltc_ecc_set_type *dp;
+	/** pointer to domain parameters; either points to NIST curves (identified by idx >= 0) or user supplied curve */
+	const ltc_ecc_set_type *dp;
 
     /** The public key */
     ecc_point pubkey;
@@ -231,24 +231,24 @@ int ecc_ansi_x963_export(ecc_key *key, unsigned char *out, unsigned long *outlen
 int ecc_ansi_x963_import(const unsigned char *in, unsigned long inlen, ecc_key *key);
 int ecc_ansi_x963_import_ex(const unsigned char *in, unsigned long inlen, ecc_key *key, ltc_ecc_set_type *dp);
 
-int  ecc_shared_secret(ecc_key *private_key, ecc_key *public_key,
+int  ecc_shared_secret(ecc_key *private_key, ecc_key *public_key, 
                        unsigned char *out, unsigned long *outlen);
 
 int  ecc_encrypt_key(const unsigned char *in,   unsigned long inlen,
-                           unsigned char *out,  unsigned long *outlen,
-                           prng_state *prng, int wprng, int hash,
+                           unsigned char *out,  unsigned long *outlen, 
+                           prng_state *prng, int wprng, int hash, 
                            ecc_key *key);
 
 int  ecc_decrypt_key(const unsigned char *in,  unsigned long  inlen,
-                           unsigned char *out, unsigned long *outlen,
+                           unsigned char *out, unsigned long *outlen, 
                            ecc_key *key);
 
-int  ecc_sign_hash(const unsigned char *in,  unsigned long inlen,
-                         unsigned char *out, unsigned long *outlen,
+int  ecc_sign_hash(const unsigned char *in,  unsigned long inlen, 
+                         unsigned char *out, unsigned long *outlen, 
                          prng_state *prng, int wprng, ecc_key *key);
 
 int  ecc_verify_hash(const unsigned char *sig,  unsigned long siglen,
-                     const unsigned char *hash, unsigned long hashlen,
+                     const unsigned char *hash, unsigned long hashlen, 
                      int *stat, ecc_key *key);
 
 /* low level functions */
@@ -315,7 +315,7 @@ int ltc_ecc_map(ecc_point *P, void *modulus, void *mp);
 /** DSA key structure */
 typedef struct {
    /** The key type, PK_PRIVATE or PK_PUBLIC */
-   int type;
+   int type; 
 
    /** The order of the sub-group used in octets */
    int qord;
@@ -348,22 +348,22 @@ int dsa_sign_hash(const unsigned char *in,  unsigned long inlen,
                         prng_state *prng, int wprng, dsa_key *key);
 
 int dsa_verify_hash_raw(         void *r,          void *s,
-                    const unsigned char *hash, unsigned long hashlen,
+                    const unsigned char *hash, unsigned long hashlen, 
                                     int *stat,      dsa_key *key);
 
 int dsa_verify_hash(const unsigned char *sig,  unsigned long siglen,
-                    const unsigned char *hash, unsigned long hashlen,
+                    const unsigned char *hash, unsigned long hashlen, 
                           int           *stat, dsa_key       *key);
 
 int dsa_encrypt_key(const unsigned char *in,   unsigned long inlen,
-                          unsigned char *out,  unsigned long *outlen,
-                          prng_state *prng, int wprng, int hash,
+                          unsigned char *out,  unsigned long *outlen, 
+                          prng_state *prng, int wprng, int hash, 
                           dsa_key *key);
-
+                      
 int dsa_decrypt_key(const unsigned char *in,  unsigned long  inlen,
-                          unsigned char *out, unsigned long *outlen,
+                          unsigned char *out, unsigned long *outlen, 
                           dsa_key *key);
-
+                          
 int dsa_import(const unsigned char *in, unsigned long inlen, dsa_key *key);
 int dsa_export(unsigned char *out, unsigned long *outlen, int type, dsa_key *key);
 int dsa_verify_key(dsa_key *key, int *stat);
@@ -422,12 +422,12 @@ typedef struct ltc_asn1_list_ {
 /* SEQUENCE */
 int der_encode_sequence_ex(ltc_asn1_list *list, unsigned long inlen,
                            unsigned char *out,  unsigned long *outlen, int type_of);
-
-#define der_encode_sequence(list, inlen, out, outlen) der_encode_sequence_ex(list, inlen, out, outlen, LTC_ASN1_SEQUENCE)
+                          
+#define der_encode_sequence(list, inlen, out, outlen) der_encode_sequence_ex(list, inlen, out, outlen, LTC_ASN1_SEQUENCE)                        
 
 int der_decode_sequence_ex(const unsigned char *in, unsigned long  inlen,
                            ltc_asn1_list *list,     unsigned long  outlen, int ordered);
-
+                              
 #define der_decode_sequence(in, inlen, list, outlen) der_decode_sequence_ex(in, inlen, list, outlen, 1)
 
 int der_length_sequence(ltc_asn1_list *list, unsigned long inlen,
@@ -441,7 +441,7 @@ int der_encode_set(ltc_asn1_list *list, unsigned long inlen,
 
 int der_encode_setof(ltc_asn1_list *list, unsigned long inlen,
                      unsigned char *out,  unsigned long *outlen);
-
+                        
 /* VA list handy helpers with triplets of <type, size, data> */
 int der_encode_sequence_multi(unsigned char *out, unsigned long *outlen, ...);
 int der_decode_sequence_multi(const unsigned char *in, unsigned long inlen, ...);
@@ -453,10 +453,10 @@ void der_sequence_free(ltc_asn1_list *in);
 
 /* BOOLEAN */
 int der_length_boolean(unsigned long *outlen);
-int der_encode_boolean(int in,
+int der_encode_boolean(int in, 
                        unsigned char *out, unsigned long *outlen);
 int der_decode_boolean(const unsigned char *in, unsigned long inlen,
-                                       int *out);
+                                       int *out);		       
 /* INTEGER */
 int der_encode_integer(void *num, unsigned char *out, unsigned long *outlen);
 int der_decode_integer(const unsigned char *in, unsigned long inlen, void *num);
@@ -510,7 +510,7 @@ int der_printable_char_encode(int c);
 int der_printable_value_decode(int v);
 
 /* UTF-8 */
-#if (defined(SIZE_MAX) || __STDC_VERSION__ >= 199901L || defined(WCHAR_MAX) || defined(_WCHAR_T) || defined(_WCHAR_T_DEFINED) || defined (__WCHAR_TYPE__)) && !defined(LTC_NO_WCHAR)
+#if (defined(SIZE_MAX) || __STDC_VERSION__ >= 199901L || defined(WCHAR_MAX) || defined(_WCHAR_T) || defined(_WCHAR_T_DEFINED) || defined (__WCHAR_TYPE__)) && !defined(LTC_NO_WCHAR) 
 #include <wchar.h>
 #else
 typedef ulong32 wchar_t;
@@ -542,7 +542,7 @@ typedef struct {
             off_mm; /* timezone offset minutes */
 } ltc_utctime;
 
-int der_encode_utctime(ltc_utctime *utctime,
+int der_encode_utctime(ltc_utctime *utctime, 
                        unsigned char *out,   unsigned long *outlen);
 
 int der_decode_utctime(const unsigned char *in, unsigned long *inlen,

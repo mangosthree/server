@@ -34,16 +34,21 @@
 // Local functions - platform-specific functions
 
 #ifndef STORMLIB_WINDOWS
-static DWORD nLastError = ERROR_SUCCESS;
+
+#ifndef STORMLIB_WIIU
+static thread_local DWORD dwLastError = ERROR_SUCCESS;
+#else
+static DWORD dwLastError = ERROR_SUCCESS;
+#endif
 
 DWORD GetLastError()
 {
-    return nLastError;
+    return dwLastError;
 }
 
 void SetLastError(DWORD dwErrCode)
 {
-    nLastError = dwErrCode;
+    dwLastError = dwErrCode;
 }
 #endif
 
@@ -105,14 +110,15 @@ static bool BaseFile_Create(TFileStream * pStream)
     }
 #endif
 
-#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX) || defined(STORMLIB_HAIKU)
+#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX)
     {
         intptr_t handle;
 
         handle = open(pStream->szFileName, O_RDWR | O_CREAT | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
         if(handle == -1)
         {
-            nLastError = errno;
+            pStream->Base.File.hFile = INVALID_HANDLE_VALUE;
+            dwLastError = errno;
             return false;
         }
 
@@ -154,7 +160,7 @@ static bool BaseFile_Open(TFileStream * pStream, const TCHAR * szFileName, DWORD
     }
 #endif
 
-#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX) || defined(STORMLIB_HAIKU)
+#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX)
     {
         struct stat64 fileinfo;
         int oflag = (dwStreamFlags & STREAM_FLAG_READ_ONLY) ? O_RDONLY : O_RDWR;
@@ -164,14 +170,16 @@ static bool BaseFile_Open(TFileStream * pStream, const TCHAR * szFileName, DWORD
         handle = open(szFileName, oflag | O_LARGEFILE);
         if(handle == -1)
         {
-            nLastError = errno;
+            pStream->Base.File.hFile = INVALID_HANDLE_VALUE;
+            dwLastError = errno;
             return false;
         }
 
         // Get the file size
         if(fstat64(handle, &fileinfo) == -1)
         {
-            nLastError = errno;
+            pStream->Base.File.hFile = INVALID_HANDLE_VALUE;
+            dwLastError = errno;
             close(handle);
             return false;
         }
@@ -223,7 +231,7 @@ static bool BaseFile_Read(
     }
 #endif
 
-#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX) || defined(STORMLIB_HAIKU)
+#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX)
     {
         ssize_t bytes_read;
 
@@ -241,7 +249,7 @@ static bool BaseFile_Read(
             bytes_read = read((intptr_t)pStream->Base.File.hFile, pvBuffer, (size_t)dwBytesToRead);
             if(bytes_read == -1)
             {
-                nLastError = errno;
+                dwLastError = errno;
                 return false;
             }
 
@@ -294,7 +302,7 @@ static bool BaseFile_Write(TFileStream * pStream, ULONGLONG * pByteOffset, const
     }
 #endif
 
-#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX) || defined(STORMLIB_HAIKU)
+#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX)
     {
         ssize_t bytes_written;
 
@@ -310,7 +318,7 @@ static bool BaseFile_Write(TFileStream * pStream, ULONGLONG * pByteOffset, const
         bytes_written = write((intptr_t)pStream->Base.File.hFile, pvBuffer, (size_t)dwBytesToWrite);
         if(bytes_written == -1)
         {
-            nLastError = errno;
+            dwLastError = errno;
             return false;
         }
 
@@ -361,11 +369,11 @@ static bool BaseFile_Resize(TFileStream * pStream, ULONGLONG NewFileSize)
     }
 #endif
 
-#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX) || defined(STORMLIB_HAIKU)
+#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX)
     {
         if(ftruncate64((intptr_t)pStream->Base.File.hFile, (off64_t)NewFileSize) == -1)
         {
-            nLastError = errno;
+            dwLastError = errno;
             return false;
         }
 
@@ -405,11 +413,11 @@ static bool BaseFile_Replace(TFileStream * pStream, TFileStream * pNewStream)
     return (bool)MoveFile(pNewStream->szFileName, pStream->szFileName);
 #endif
 
-#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX) || defined(STORMLIB_HAIKU)
+#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX)
     // "rename" on Linux also works if the target file exists
     if(rename(pNewStream->szFileName, pStream->szFileName) == -1)
     {
-        nLastError = errno;
+        dwLastError = errno;
         return false;
     }
 
@@ -425,7 +433,7 @@ static void BaseFile_Close(TFileStream * pStream)
         CloseHandle(pStream->Base.File.hFile);
 #endif
 
-#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX) || defined(STORMLIB_HAIKU)
+#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX)
         close((intptr_t)pStream->Base.File.hFile);
 #endif
     }
@@ -500,8 +508,8 @@ static bool BaseMap_Open(TFileStream * pStream, LPCTSTR szFileName, DWORD dwStre
     HANDLE hMap = NULL;
     bool bResult = false;
 
-    // Keep compiler happy
-    dwStreamFlags = dwStreamFlags;
+    // Keep compilers happy
+    STORMLIB_UNUSED(dwStreamFlags);
 
     // 1) Try to treat "szFileName" as a section name
     hMap = OpenFileMapping(SECTION_QUERY | FILE_MAP_READ, FALSE, szFileName);
@@ -558,13 +566,11 @@ static bool BaseMap_Open(TFileStream * pStream, LPCTSTR szFileName, DWORD dwStre
     if(hFile != INVALID_HANDLE_VALUE)
         CloseHandle(hFile);
 
-    // If the file is not there and is not available for random access,
-    // report error
-    if(bResult == false)
-        return false;
-#endif
+    // Return the result of the operation
+    return bResult;
 
-#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX) || defined(STORMLIB_HAIKU)
+#elif defined(STORMLIB_HAS_MMAP)
+
     struct stat64 fileinfo;
     intptr_t handle;
     bool bResult = false;
@@ -593,13 +599,15 @@ static bool BaseMap_Open(TFileStream * pStream, LPCTSTR szFileName, DWORD dwStre
 
     // Did the mapping fail?
     if(bResult == false)
-    {
-        nLastError = errno;
-        return false;
-    }
-#endif
+        dwLastError = errno;
+    return bResult;
 
-    return true;
+#else
+
+    // File mapping is not supported
+    return false;
+
+#endif
 }
 
 static bool BaseMap_Read(
@@ -628,14 +636,17 @@ static bool BaseMap_Read(
 
 static void BaseMap_Close(TFileStream * pStream)
 {
+
 #ifdef STORMLIB_WINDOWS
+
     if(pStream->Base.Map.pbFile != NULL)
         UnmapViewOfFile(pStream->Base.Map.pbFile);
-#endif
 
-#if defined(STORMLIB_MAC) || defined(STORMLIB_LINUX) || defined(STORMLIB_HAIKU)
+#elif defined(STORMLIB_HAS_MMAP)
+
     if(pStream->Base.Map.pbFile != NULL)
         munmap(pStream->Base.Map.pbFile, (size_t )pStream->Base.Map.FileSize);
+
 #endif
 
     pStream->Base.Map.pbFile = NULL;
@@ -688,8 +699,8 @@ static bool BaseHttp_Open(TFileStream * pStream, const TCHAR * szFileName, DWORD
     HINTERNET hRequest;
     DWORD dwTemp = 0;
 
-    // Keep compiler happy
-    dwStreamFlags = dwStreamFlags;
+    // Keep compilers happy
+    STORMLIB_UNUSED(dwStreamFlags);
 
     // Don't connect to the internet
     if(!InternetGetConnectedState(&dwTemp, 0))
@@ -1187,7 +1198,7 @@ static bool FlatStream_LoadBitmap(TBlockStream * pStream)
             BSWAP_ARRAY32_UNSIGNED((LPDWORD)(&Footer), sizeof(FILE_BITMAP_FOOTER));
 
             // Verify if there is actually a footer
-            if(Footer.Signature == ID_FILE_BITMAP_FOOTER && Footer.Version == 0x03)
+            if(Footer.Signature == ID_FILE_BITMAP_FOOTER && Footer.Version == 0x03 && Footer.BlockSize != 0)
             {
                 // Get the offset of the bitmap, number of blocks and size of the bitmap
                 ByteOffset = MAKE_OFFSET64(Footer.MapOffsetHi, Footer.MapOffsetLo);
@@ -2234,9 +2245,9 @@ static bool Block4Stream_BlockRead(
     assert(StartOffset < EndOffset);
     assert(bAvailable == true);
 
-    // Keep compiler happy
-    bAvailable = bAvailable;
-    EndOffset = EndOffset;
+    // Keep compilers happy
+    STORMLIB_UNUSED(bAvailable);
+    STORMLIB_UNUSED(EndOffset);
 
     while(BytesNeeded != 0)
     {

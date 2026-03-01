@@ -191,37 +191,42 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         // guess size
         WorldPacket data(SMSG_CREATURE_QUERY_RESPONSE, 100);
         data << uint32(entry);                              // creature entry
-        data << name;
+        data << name;                                       // Name[0]
 
-        for (uint8 i = 0; i < 7; ++i)
+        for (uint8 i = 0; i < 3; ++i)
         {
-            data << uint8(0);            // name2, name3, name4, always empty
+            data << uint8(0);                               // Name[1-3], always empty
         }
 
-        data << subName;
-        data << ci->IconName;                               // "Directions" for guard, string for Icons 2.3.0
-        data << uint32(ci->CreatureTypeFlags);                     // flags
-        data << uint32(0);                                  // unk
+        for (uint8 i = 0; i < 4; ++i)
+        {
+            data << uint8(0);                               // NameAlt[0-3] (female names), always empty
+        }
+
+        data << subName;                                    // Title
+        data << ci->IconName;                               // CursorName / IconName
+        data << uint32(ci->CreatureTypeFlags);              // CreatureTypeFlags
+        data << uint32(0);                                  // CreatureTypeFlags2
         data << uint32(ci->CreatureType);                   // CreatureType.dbc
         data << uint32(ci->Family);                         // CreatureFamily.dbc
         data << uint32(ci->Rank);                           // Creature Rank (elite, boss, etc)
-        data << uint32(ci->KillCredit[0]);                  // new in 3.1, kill credit
-        data << uint32(ci->KillCredit[1]);                  // new in 3.1, kill credit
+        data << uint32(ci->KillCredit[0]);                  // KillCredit1
+        data << uint32(ci->KillCredit[1]);                  // KillCredit2
 
         for (int i = 0; i < MAX_CREATURE_MODEL; ++i)
         {
-            data << uint32(ci->ModelId[i]);
+            data << uint32(ci->ModelId[i]);                 // CreatureDisplayID
         }
 
-        data << float(ci->HealthMultiplier);                  // health modifier
-        data << float(ci->PowerMultiplier);                   // power modifier
-        data << uint8(ci->RacialLeader);
+        data << float(ci->HealthMultiplier);                // HpMulti
+        data << float(ci->PowerMultiplier);                 // EnergyMulti
+        data << uint8(ci->RacialLeader);                    // RacialLeader
         for (uint32 i = 0; i < 6; ++i)
         {
-            data << uint32(ci->QuestItems[i]);              // itemId[6], quest drop
+            data << uint32(ci->QuestItems[i]);              // QuestItem[6]
         }
-        data << uint32(ci->MovementTemplateId);                     // CreatureMovementInfo.dbc
-        data << uint32(0);                                  //unk
+        data << uint32(ci->MovementTemplateId);             // CreatureMovementInfoID
+        data << uint32(ci->Expansion >= 0 ? ci->Expansion : 0); // RequiredExpansion
         SendPacket(&data);
         DEBUG_LOG("WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");
     }
@@ -277,16 +282,17 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
         data << uint32(info->type);
         data << uint32(info->displayId);
         data << Name;
-        data << uint8(0) << uint8(0) << uint8(0);           // name2, name3, name4
-        data << IconName;                                   // 2.0.3, string. Icon name to use instead of default icon for go's (ex: "Attack" makes sword)
-        data << CastBarCaption;                             // 2.0.3, string. Text will appear in Cast Bar when using GO (ex: "Collecting")
-        data << info->unk1;                                 // 2.0.3, string
-        data.append(info->raw.data, 24);
-        data << float(info->size);                          // go size
+        data << uint8(0) << uint8(0) << uint8(0);           // Name[1-3], always empty
+        data << IconName;                                    // CursorName / IconName
+        data << CastBarCaption;                              // CastBarCaption
+        data << info->unk1;                                  // UnkString
+        data.append(info->raw.data, 24);                     // type-specific data fields
+        data << float(info->size);                           // Size
         for (uint32 i = 0; i < 6; ++i)
         {
-            data << uint32(info->questItems[i]);            // itemId[6], quest drop
+            data << uint32(info->questItems[i]);             // QuestItem[6]
         }
+        data << uint32(0);                                   // RequiredLevel (Cata+)
         SendPacket(&data);
         DEBUG_LOG("WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }

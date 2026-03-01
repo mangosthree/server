@@ -34,7 +34,7 @@
 #include "Database/DatabaseEnv.h"
 
 // the default client version with info in warden_checks; for other version checks, see warden_build_specific
-#define DEFAULT_CLIENT_BUILD  12340
+#define DEFAULT_CLIENT_BUILD  15595
 
 enum WardenOpcodes
 {

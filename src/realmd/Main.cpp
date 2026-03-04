@@ -187,9 +187,14 @@ extern int main(int argc, char** argv)
 
     if (!sConfig.SetSource(cfg_file))
     {
-        sLog.outError("Could not find configuration file %s.", cfg_file);
-        Log::WaitBeforeContinueIfNeed();
-        return 1;
+        // Try current folder as fallback if SYSCONFDIR path fails
+        if (!sConfig.SetSource(REALMD_CONFIG_NAME))
+        {
+            sLog.outError("Could not find configuration file %s.", cfg_file);
+            Log::WaitBeforeContinueIfNeed();
+            return 1;
+        }
+        cfg_file = REALMD_CONFIG_NAME;
     }
 
 #ifndef WIN32                                               // posix daemon commands need apply after config read

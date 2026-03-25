@@ -245,7 +245,9 @@ bool World::RemoveSession(uint32 id)
 
     if (itr != m_sessions.end() && itr->second)
     {
-        if (itr->second->PlayerLoading())
+        // Block re-login only if the session is loading AND its socket is still open.
+        // If the socket is already closed (client disconnected mid-load), allow replacement.
+        if (itr->second->PlayerLoading() && !itr->second->IsSocketClosed())
         {
             return false;
         }

@@ -106,6 +106,11 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
     return !MapSessionFilterHelper(m_pSession, opHandle);
 }
 
+bool WorldSession::IsSocketClosed() const
+{
+    return !m_Socket || m_Socket->IsClosed();
+}
+
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :
     m_muteTime(mute_time), _player(NULL), m_Socket(sock), _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),

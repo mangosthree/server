@@ -240,6 +240,8 @@ class WorldSession
         {
             return m_playerLoading;
         }
+        bool IsSocketClosed() const;
+
         bool PlayerLogout() const
         {
             return m_playerLogout;

@@ -144,7 +144,7 @@ class CharacterHandler
             }
 
             WorldSession* session = sWorld.FindSession(((LoginQueryHolder*)holder)->GetAccountId());
-            if (!session)
+            if (!session || !session->PlayerLoading())
             {
                 delete holder;
                 return;
@@ -677,8 +677,16 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
 
     ObjectGuid playerGuid;
 
-    recv_data.ReadGuidMask<2, 3, 0, 6, 4, 5, 1, 7>(playerGuid);
-    recv_data.ReadGuidBytes<2, 7, 0, 3, 5, 6, 1, 4>(playerGuid);
+    try
+    {
+        recv_data.ReadGuidMask<2, 3, 0, 6, 4, 5, 1, 7>(playerGuid);
+        recv_data.ReadGuidBytes<2, 7, 0, 3, 5, 6, 1, 4>(playerGuid);
+    }
+    catch (ByteBufferException&)
+    {
+        m_playerLoading = false;
+        throw;
+    }
 
     DEBUG_LOG("WORLD: Received opcode Player Logon Message from %s", playerGuid.GetString().c_str());
 

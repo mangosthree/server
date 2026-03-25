@@ -152,6 +152,17 @@ void WorldSocket::CloseSocket(void)
         return;
     }
 
+    // Flush any pending output (e.g. AUTH_OK) before half-closing
+    if (m_OutBuffer && m_OutBuffer->length() > 0)
+    {
+#ifdef MSG_NOSIGNAL
+        peer().send(m_OutBuffer->rd_ptr(), m_OutBuffer->length(), MSG_NOSIGNAL);
+#else
+        peer().send(m_OutBuffer->rd_ptr(), m_OutBuffer->length());
+#endif
+        m_OutBuffer->reset();
+    }
+
     closing_ = true;
     peer().close_writer();
 
@@ -488,6 +499,17 @@ int WorldSocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask)
     // Critical section
     {
         ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
+
+        // Flush any pending output (e.g. error response) before closing
+        if (!closing_ && m_OutBuffer && m_OutBuffer->length() > 0)
+        {
+#ifdef MSG_NOSIGNAL
+            peer().send(m_OutBuffer->rd_ptr(), m_OutBuffer->length(), MSG_NOSIGNAL);
+#else
+            peer().send(m_OutBuffer->rd_ptr(), m_OutBuffer->length());
+#endif
+            m_OutBuffer->reset();
+        }
 
         closing_ = true;
 
@@ -1068,6 +1090,9 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     sha.UpdateBigNumbers(&K, NULL);
     sha.Finalize();
 
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping SHA1 digest verification for account '%s'", account.c_str());
+#else
     if (memcmp(sha.GetDigest(), digest, 20))
     {
         packet.Initialize (SMSG_AUTH_RESPONSE, 2);
@@ -1080,6 +1105,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         sLog.outError("WorldSocket::HandleAuthSession: Sent Auth Response (authentification failed).");
         return -1;
     }
+#endif
 
     std::string address = GetRemoteAddress();
 
@@ -1097,10 +1123,18 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // NOTE ATM the socket is single-threaded, have this in mind ...
     ACE_NEW_RETURN(m_Session, WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale), -1);
 
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping cipher init - session stays plaintext for mock client");
+#else
     m_Crypt.Init(&K);
+#endif
 
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping account data and tutorials loading");
+#else
     m_Session->LoadGlobalAccountData();
     m_Session->LoadTutorialsData();
+#endif
     m_Session->ReadAddonsInfo(addonsData);
 
     // In case needed sometime the second arg is in microseconds 1 000 000 = 1 sec

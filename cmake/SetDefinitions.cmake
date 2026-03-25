@@ -188,3 +188,9 @@ unset(DEFAULT_COMPILE_OPTS)
 if(MSVC)
     set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD ON)
 endif()
+
+# Test mode: skip DBC/map/DB validation for running without game data
+if(MANGOS_TEST_MODE)
+    add_definitions(-DMANGOS_TEST_MODE)
+    message(STATUS "TEST MODE ENABLED: DBC/map/DB validation will be skipped")
+endif()

@@ -114,6 +114,9 @@ static bool start_db()
         return false;
     }
 
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping World database version check");
+#else
     ///- Check the World database version
     if (!WorldDatabase.CheckDatabaseVersion(DATABASE_WORLD))
     {
@@ -121,6 +124,7 @@ static bool start_db()
         WorldDatabase.HaltDelayThread();
         return false;
     }
+#endif
 
     dbstring = sConfig.GetStringDefault("CharacterDatabaseInfo", "");
     nConnections = sConfig.GetIntDefault("CharacterDatabaseConnections", 1);
@@ -144,6 +148,9 @@ static bool start_db()
         return false;
     }
 
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping Character database version check");
+#else
     ///- Check the Character database version
     if (!CharacterDatabase.CheckDatabaseVersion(DATABASE_CHARACTER))
     {
@@ -152,6 +159,7 @@ static bool start_db()
         CharacterDatabase.HaltDelayThread();
         return false;
     }
+#endif
 
     ///- Get login database info from configuration file
     dbstring = sConfig.GetStringDefault("LoginDatabaseInfo", "");
@@ -178,6 +186,9 @@ static bool start_db()
         return false;
     }
 
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping Realm database version check");
+#else
     ///- Check the Realm database version
     if (!LoginDatabase.CheckDatabaseVersion(DATABASE_REALMD))
     {
@@ -187,6 +198,7 @@ static bool start_db()
         LoginDatabase.HaltDelayThread();
         return false;
     }
+#endif
 
     sLog.outString();
 
@@ -206,10 +218,14 @@ static bool start_db()
     sLog.outString("Realm running as realm ID %d", realmID);
     sLog.outString();
 
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping online account cleanup and DB version load");
+#else
     ///- Clean the database before starting
     clear_online_accounts();
 
     sWorld.LoadDBVersion();
+#endif
 
     sLog.outString("Using World DB: %s", sWorld.GetDBVersion());
     sLog.outString();

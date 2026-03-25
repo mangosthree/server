@@ -50,6 +50,7 @@ option(PLAYERBOTS           "Enable Player Bots"                            OFF)
 option(SOAP                 "Enable remote access via SOAP"                 OFF)
 option(PCH                  "Enable precompiled headers"                    ON)
 option(DEBUG                "Enable debug build (only on non IDEs)"         OFF)
+option(MANGOS_TEST_MODE     "Enable test mode: skip DBC/map/DB validation" OFF)
 #==================================================================================
 message("")
 message(

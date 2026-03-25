@@ -1913,11 +1913,13 @@ void World::Update(uint32 diff)
     ///-Update mass mailer tasks if any
     sMassMailMgr.Update();
 
+#ifndef MANGOS_TEST_MODE
     /// Handle daily quests and dungeon reset time
     if (m_gameTime > m_NextDailyQuestReset)
     {
         ResetDailyQuests();
     }
+#endif
 
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
@@ -1953,9 +1955,12 @@ void World::Update(uint32 diff)
         uint32 maxClientsNum = GetMaxActiveSessionCount();
 
         m_timers[WUPDATE_UPTIME].Reset();
+#ifndef MANGOS_TEST_MODE
         LoginDatabase.PExecute("UPDATE `uptime` SET `uptime` = %u, `maxplayers` = %u WHERE `realmid` = %u AND `starttime` = " UI64FMTD, tmpDiff, maxClientsNum, realmID, uint64(m_startTime));
+#endif
     }
 
+#ifndef MANGOS_TEST_MODE
     /// <li> Handle all other objects
     ///- Update objects (maps, transport, creatures,...)
     sMapMgr.Update(diff);
@@ -2004,12 +2009,15 @@ void World::Update(uint32 diff)
 
     // update the instance reset times
     sMapPersistentStateMgr.Update();
+#endif /* !MANGOS_TEST_MODE */
 
     // And last, but not least handle the issued cli commands
     ProcessCliCommands();
 
+#ifndef MANGOS_TEST_MODE
     // cleanup unused GridMap objects as well as VMaps
     sTerrainMgr.Update(diff);
+#endif
 }
 
 namespace MaNGOS

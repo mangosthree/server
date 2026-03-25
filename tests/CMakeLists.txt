@@ -42,6 +42,9 @@ set(TEST_SOURCES
     test_ChatParser.cpp
     test_LootSystem.cpp
     test_PlayerStats.cpp
+    test_BufferStress.cpp
+    test_GameStress.cpp
+    test_NetworkStress.cpp
 )
 
 # Build test executable
@@ -97,6 +100,9 @@ add_test(NAME GridSystemTests      COMMAND mangos_tests WORKING_DIRECTORY ${CMAK
 add_test(NAME ChatParserTests      COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 add_test(NAME LootSystemTests      COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 add_test(NAME PlayerStatsTests     COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME BufferStressTests    COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME GameStressTests      COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME NetworkStressTests   COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 message(STATUS "MaNGOS test suite configured with ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "Build with: cmake <path> && cmake --build .")

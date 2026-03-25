@@ -183,6 +183,24 @@ struct TestRegistrar
         #suite, #name, TestFunc_##suite##_##name);                                   \
     static void TestFunc_##suite##_##name()
 
+// Fixture-based test macro: creates an instance of `fixture`, calls SetUp(),
+// runs the test body, then calls TearDown().
+#define TEST_F(fixture, name)                                                       \
+    struct TestFixtureImpl_##fixture##_##name : public fixture                       \
+    {                                                                               \
+        void TestBody();                                                            \
+    };                                                                              \
+    static void TestFunc_##fixture##_##name()                                        \
+    {                                                                               \
+        TestFixtureImpl_##fixture##_##name instance;                                 \
+        instance.SetUp();                                                           \
+        instance.TestBody();                                                        \
+        instance.TearDown();                                                        \
+    }                                                                               \
+    static MaNGOSTest::TestRegistrar TestReg_##fixture##_##name(                     \
+        #fixture, #name, TestFunc_##fixture##_##name);                               \
+    void TestFixtureImpl_##fixture##_##name::TestBody()
+
 // Assertion macros
 #define EXPECT_TRUE(expr)                                                           \
     do {                                                                            \

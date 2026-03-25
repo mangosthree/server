@@ -31,6 +31,17 @@ set(TEST_SOURCES
     test_WorldPacket.cpp
     test_GameLogic.cpp
     test_AuthTypes.cpp
+    test_EventProcessor.cpp
+    test_SpellEffects.cpp
+    test_AuraSystem.cpp
+    test_ThreatSystem.cpp
+    test_CombatFormulas.cpp
+    test_InventorySystem.cpp
+    test_MovementSystem.cpp
+    test_GridSystem.cpp
+    test_ChatParser.cpp
+    test_LootSystem.cpp
+    test_PlayerStats.cpp
 )
 
 # Build test executable
@@ -75,6 +86,17 @@ add_test(NAME CommonTests        COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_
 add_test(NAME WorldPacketTests   COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 add_test(NAME GameLogicTests     COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 add_test(NAME AuthTypesTests     COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME EventProcessorTests  COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME SpellEffectsTests    COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME AuraSystemTests      COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME ThreatSystemTests    COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME CombatFormulasTests  COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME InventorySystemTests COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME MovementSystemTests  COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME GridSystemTests      COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME ChatParserTests      COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME LootSystemTests      COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME PlayerStatsTests     COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 message(STATUS "MaNGOS test suite configured with ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "Build with: cmake <path> && cmake --build .")

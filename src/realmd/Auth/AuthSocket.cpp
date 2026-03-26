@@ -557,7 +557,7 @@ bool AuthSocket::_HandleLogonProof()
         // file looks like: 65535enGB.mpq
         char tmp[64];
 
-        snprintf(tmp, 24, "./patches/%d%s.mpq", _build, _localizationName.c_str());
+        snprintf(tmp, sizeof(tmp), "./patches/%d%s.mpq", _build, _localizationName.c_str());
 
         char filename[PATH_MAX];
         if (ACE_OS::realpath(tmp, filename) != NULL)

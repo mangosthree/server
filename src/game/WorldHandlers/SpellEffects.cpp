@@ -5641,7 +5641,7 @@ void Spell::EffectHealPct(SpellEffectEntry const* /*effect*/)
             return;
         }
 
-        uint32 addhealth = unitTarget->GetMaxHealth() * damage / 100;
+        uint32 addhealth = SafeUInt32FromFloat(float(unitTarget->GetMaxHealth()) * damage / 100);
 
         addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
         addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
@@ -12668,8 +12668,8 @@ void Spell::EffectResurrect(SpellEffectEntry const* /*effect*/)
         return;
     }
 
-    uint32 health = pTarget->GetMaxHealth() * damage / 100;
-    uint32 mana   = pTarget->GetMaxPower(POWER_MANA) * damage / 100;
+    uint32 health = SafeUInt32FromFloat(float(pTarget->GetMaxHealth()) * damage / 100);
+    uint32 mana   = SafeUInt32FromFloat(float(pTarget->GetMaxPower(POWER_MANA)) * damage / 100);
 
     pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest(pTarget);
@@ -13168,7 +13168,7 @@ void Spell::EffectSummonDeadPet(SpellEffectEntry const* /*effect*/)
     pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
     pet->SetDeathState(ALIVE);
     pet->clearUnitState(UNIT_STAT_ALL_STATE);
-    pet->SetHealth(uint32(pet->GetMaxHealth() * (float(damage) / 100)));
+    pet->SetHealth(SafeUInt32FromFloat(pet->GetMaxHealth() * (float(damage) / 100)));
 
     pet->AIM_Initialize();
 

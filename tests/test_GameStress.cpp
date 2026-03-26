@@ -63,7 +63,14 @@ inline float finiteAlways(float f) { return std::isfinite(f) ? f : 0.0f; }
 
 // ---- Damage helpers ----
 inline uint32_t CalculateDamage(uint32_t base, float pct)
-{ return uint32_t(float(base) * pct / 100.0f); }
+{
+    float result = float(base) * pct / 100.0f;
+    if (result < 0.0f) return 0;
+    // float(UINT32_MAX) rounds up to 4294967296.0f, so use double for comparison
+    if (result >= 4294967296.0f)
+        return std::numeric_limits<uint32_t>::max();
+    return uint32_t(result);
+}
 
 inline int32_t CalculateAbsorbAmount(int32_t damage, int32_t absorb)
 {
@@ -110,7 +117,10 @@ inline uint32_t CalculateQuestXP(uint32_t questLevel, uint32_t playerLevel, uint
     int32_t diff = int32_t(playerLevel) - int32_t(questLevel);
     float scale = 1.0f - float(diff) / 5.0f;
     if (scale < 0.1f) scale = 0.1f;
-    return uint32_t(questXP * scale);
+    float result = float(questXP) * scale;
+    if (result >= 4294967296.0f)
+        return std::numeric_limits<uint32_t>::max();
+    return uint32_t(result);
 }
 
 // ---- Money ----

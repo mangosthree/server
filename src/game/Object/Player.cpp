@@ -1003,7 +1003,7 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
             AuraList const& mModWaterBreathing = GetAurasByType(SPELL_AURA_MOD_WATER_BREATHING);
             for (AuraList::const_iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)
             {
-                UnderWaterTime = uint32(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
+                UnderWaterTime = SafeUInt32FromFloat(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
             }
             return UnderWaterTime;
         }
@@ -2944,7 +2944,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
         Unit::AuraList const& ModXPPctAuras = GetAurasByType(SPELL_AURA_MOD_KILL_XP_PCT);
         for (Unit::AuraList::const_iterator i = ModXPPctAuras.begin(); i != ModXPPctAuras.end(); ++i)
         {
-            xp = uint32(xp * (1.0f + (*i)->GetModifier()->m_amount / 100.0f));
+            xp = SafeUInt32FromFloat(xp * (1.0f + (*i)->GetModifier()->m_amount / 100.0f));
         }
     }
     else
@@ -2953,7 +2953,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
         Unit::AuraList const& ModXPPctAuras = GetAurasByType(SPELL_AURA_MOD_QUEST_XP_PCT);
         for (Unit::AuraList::const_iterator i = ModXPPctAuras.begin(); i != ModXPPctAuras.end(); ++i)
         {
-            xp = uint32(xp * (1.0f + (*i)->GetModifier()->m_amount / 100.0f));
+            xp = SafeUInt32FromFloat(xp * (1.0f + (*i)->GetModifier()->m_amount / 100.0f));
         }
     }
 
@@ -5685,9 +5685,9 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
             }
 
             uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class, ditemProto->SubClass)];
-            uint32 costs = uint32(LostDurability * dmultiplier * double(dQualitymodEntry->quality_mod));
+            uint32 costs = SafeUInt32FromDouble(LostDurability * dmultiplier * double(dQualitymodEntry->quality_mod));
 
-            costs = uint32(costs * discountMod);
+            costs = SafeUInt32FromDouble(costs * discountMod);
 
             if (costs == 0)                                 // fix for ITEM_QUALITY_ARTIFACT
             {
@@ -7387,11 +7387,11 @@ void Player::CheckAreaExploreAndOutdoor()
                         exploration_percent = 0;
                     }
 
-                    XP = uint32(sObjectMgr.GetBaseXP(p->area_level) * exploration_percent / 100 * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE));
+                    XP = SafeUInt32FromFloat(sObjectMgr.GetBaseXP(p->area_level) * exploration_percent / 100 * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE));
                 }
                 else
                 {
-                    XP = uint32(sObjectMgr.GetBaseXP(p->area_level) * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE));
+                    XP = SafeUInt32FromFloat(sObjectMgr.GetBaseXP(p->area_level) * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE));
                 }
 
                 GiveXP(XP, NULL);
@@ -9686,7 +9686,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                 }
                 // It may need a better formula
                 // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
-                bones->loot.gold = (uint32)(urand(50, 150) * 0.016f * pow(((float)pLevel) / 5.76f, 2.5f) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
+                bones->loot.gold = SafeUInt32FromFloat(urand(50, 150) * 0.016f * pow(((float)pLevel) / 5.76f, 2.5f) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
             }
 
             if (bones->lootRecipient != this)
@@ -9735,7 +9735,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                     // Generate extra money for pick pocket loot
                     const uint32 a = urand(0, creature->getLevel() / 2);
                     const uint32 b = urand(0, getLevel() / 2);
-                    loot->gold = uint32(10 * (a + b) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
+                    loot->gold = SafeUInt32FromFloat(10 * (a + b) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
                     permission = OWNER_PERMISSION;
                 }
             }
@@ -16184,7 +16184,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     QuestStatusData& q_status = mQuestStatus[quest_id];
 
     // Used for client inform but rewarded only in case not max level
-    uint32 xp = uint32(pQuest->XPValue(this) * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST));
+    uint32 xp = SafeUInt32FromFloat(pQuest->XPValue(this) * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST));
 
     if (getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
     {

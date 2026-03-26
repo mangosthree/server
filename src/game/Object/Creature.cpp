@@ -919,11 +919,11 @@ void Creature::RegenerateHealth()
         float Spirit = GetStat(STAT_SPIRIT); //for charmed creatures, spirit = 0!
         if (GetPower(POWER_MANA) > 0)
         {
-            addvalue = uint32(Spirit * 0.25 * HealthIncreaseRate);
+            addvalue = SafeUInt32FromFloat(Spirit * 0.25 * HealthIncreaseRate);
         }
         else
         {
-            addvalue = uint32(Spirit * 0.80 * HealthIncreaseRate);
+            addvalue = SafeUInt32FromFloat(Spirit * 0.80 * HealthIncreaseRate);
         }
     }
     else

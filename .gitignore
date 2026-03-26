@@ -133,5 +133,5 @@ msbuild.cmd
 # Build artifacts
 _build/
 _install/
-etc/*.conf
+/etc/
 tests/build/

@@ -129,3 +129,9 @@ msbuild.cmd
 
 # File generated during compile
 /dep/libmpq/compile
+
+# Build artifacts
+_build/
+_install/
+/etc/
+tests/build/

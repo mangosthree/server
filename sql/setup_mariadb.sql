@@ -294,6 +294,230 @@ CREATE TABLE IF NOT EXISTS `guild_member` (
     UNIQUE KEY `guid_key` (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `character_pet` (
+    `id`       INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `entry`    INT UNSIGNED NOT NULL DEFAULT 0,
+    `owner`    INT UNSIGNED NOT NULL DEFAULT 0,
+    `modelid`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `level`    INT UNSIGNED NOT NULL DEFAULT 1,
+    `exp`      INT UNSIGNED NOT NULL DEFAULT 0,
+    `Reactstate` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `slot`     TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `name`     VARCHAR(21) NOT NULL DEFAULT 'Pet',
+    `renamed`  TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `curhealth` INT UNSIGNED NOT NULL DEFAULT 1,
+    `curmana`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `abdata`   TEXT,
+    `savetime` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    `resettalents_cost` INT UNSIGNED NOT NULL DEFAULT 0,
+    `resettalents_time` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    `CreatedBySpell` INT UNSIGNED NOT NULL DEFAULT 0,
+    `PetType`  TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_owner` (`owner`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_declinedname` (
+    `guid`          INT UNSIGNED NOT NULL DEFAULT 0,
+    `genitive`      VARCHAR(15) NOT NULL DEFAULT '',
+    `dative`        VARCHAR(15) NOT NULL DEFAULT '',
+    `accusative`    VARCHAR(15) NOT NULL DEFAULT '',
+    `instrumental`  VARCHAR(15) NOT NULL DEFAULT '',
+    `prepositional` VARCHAR(15) NOT NULL DEFAULT '',
+    PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_queststatus_daily` (
+    `guid`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `quest` INT UNSIGNED NOT NULL DEFAULT 0,
+    `time`  BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`guid`, `quest`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_queststatus_weekly` (
+    `guid`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `quest` INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`guid`, `quest`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_queststatus_monthly` (
+    `guid`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `quest` INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`guid`, `quest`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_spell_cooldown` (
+    `guid`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `spell` INT UNSIGNED NOT NULL DEFAULT 0,
+    `item`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `time`  BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`guid`, `spell`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_account_data` (
+    `guid` INT UNSIGNED NOT NULL DEFAULT 0,
+    `type` INT UNSIGNED NOT NULL DEFAULT 0,
+    `time` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    `data` LONGBLOB,
+    PRIMARY KEY (`guid`, `type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_talent` (
+    `guid`         INT UNSIGNED NOT NULL DEFAULT 0,
+    `talent_id`    INT UNSIGNED NOT NULL DEFAULT 0,
+    `current_rank` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `spec`         TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`guid`, `talent_id`, `spec`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_skills` (
+    `guid`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `skill` INT UNSIGNED NOT NULL DEFAULT 0,
+    `value` INT UNSIGNED NOT NULL DEFAULT 0,
+    `max`   INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`guid`, `skill`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_glyphs` (
+    `guid`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `spec`  TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `slot`  TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `glyph` INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`guid`, `spec`, `slot`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_achievement` (
+    `guid`        INT UNSIGNED NOT NULL DEFAULT 0,
+    `achievement` INT UNSIGNED NOT NULL DEFAULT 0,
+    `date`        BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`guid`, `achievement`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_achievement_progress` (
+    `guid`    INT UNSIGNED NOT NULL DEFAULT 0,
+    `criteria` INT UNSIGNED NOT NULL DEFAULT 0,
+    `counter` INT UNSIGNED NOT NULL DEFAULT 0,
+    `date`    BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`guid`, `criteria`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_equipmentsets` (
+    `guid`        INT UNSIGNED NOT NULL DEFAULT 0,
+    `setguid`     BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `setindex`    TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `name`        VARCHAR(31) NOT NULL DEFAULT '',
+    `iconname`    VARCHAR(100) NOT NULL DEFAULT '',
+    `ignore_mask` INT UNSIGNED NOT NULL DEFAULT 0,
+    `item0`  INT UNSIGNED NOT NULL DEFAULT 0, `item1`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `item2`  INT UNSIGNED NOT NULL DEFAULT 0, `item3`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `item4`  INT UNSIGNED NOT NULL DEFAULT 0, `item5`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `item6`  INT UNSIGNED NOT NULL DEFAULT 0, `item7`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `item8`  INT UNSIGNED NOT NULL DEFAULT 0, `item9`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `item10` INT UNSIGNED NOT NULL DEFAULT 0, `item11` INT UNSIGNED NOT NULL DEFAULT 0,
+    `item12` INT UNSIGNED NOT NULL DEFAULT 0, `item13` INT UNSIGNED NOT NULL DEFAULT 0,
+    `item14` INT UNSIGNED NOT NULL DEFAULT 0, `item15` INT UNSIGNED NOT NULL DEFAULT 0,
+    `item16` INT UNSIGNED NOT NULL DEFAULT 0, `item17` INT UNSIGNED NOT NULL DEFAULT 0,
+    `item18` INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`setguid`),
+    UNIQUE KEY `idx_set` (`guid`, `setguid`, `setindex`),
+    KEY `idx_guid` (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_currencies` (
+    `guid`         INT UNSIGNED NOT NULL DEFAULT 0,
+    `id`           INT UNSIGNED NOT NULL DEFAULT 0,
+    `totalCount`   INT UNSIGNED NOT NULL DEFAULT 0,
+    `weekCount`    INT UNSIGNED NOT NULL DEFAULT 0,
+    `seasonCount`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `flags`        INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`guid`, `id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `character_battleground_data` (
+    `guid`        INT UNSIGNED NOT NULL DEFAULT 0,
+    `instance_id` INT UNSIGNED NOT NULL DEFAULT 0,
+    `team`        INT UNSIGNED NOT NULL DEFAULT 0,
+    `join_x`      FLOAT NOT NULL DEFAULT 0,
+    `join_y`      FLOAT NOT NULL DEFAULT 0,
+    `join_z`      FLOAT NOT NULL DEFAULT 0,
+    `join_o`      FLOAT NOT NULL DEFAULT 0,
+    `join_map`    INT UNSIGNED NOT NULL DEFAULT 0,
+    `taxi_start`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `taxi_end`    INT UNSIGNED NOT NULL DEFAULT 0,
+    `mount_spell` INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `group_member` (
+    `guid`      INT UNSIGNED NOT NULL DEFAULT 0,
+    `memberGuid` INT UNSIGNED NOT NULL DEFAULT 0,
+    `groupId`   INT UNSIGNED NOT NULL DEFAULT 0,
+    `assistant`  TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `subgroup`   TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`memberGuid`),
+    KEY `idx_group` (`groupId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `instance` (
+    `id`        INT UNSIGNED NOT NULL DEFAULT 0,
+    `map`       INT UNSIGNED NOT NULL DEFAULT 0,
+    `resettime` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    `difficulty` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `data`      LONGTEXT,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `item_loot` (
+    `guid`       INT UNSIGNED NOT NULL DEFAULT 0,
+    `owner_guid` INT UNSIGNED NOT NULL DEFAULT 0,
+    `itemid`     INT UNSIGNED NOT NULL DEFAULT 0,
+    `amount`     INT UNSIGNED NOT NULL DEFAULT 0,
+    `suffix`     INT NOT NULL DEFAULT 0,
+    `property`   INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`guid`, `itemid`),
+    KEY `idx_owner` (`owner_guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `mail` (
+    `id`             INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `messageType`    TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `stationery`     TINYINT NOT NULL DEFAULT 41,
+    `mailTemplateId` INT UNSIGNED NOT NULL DEFAULT 0,
+    `sender`         INT UNSIGNED NOT NULL DEFAULT 0,
+    `receiver`       INT UNSIGNED NOT NULL DEFAULT 0,
+    `subject`        VARCHAR(200) DEFAULT '',
+    `body`           VARCHAR(500) DEFAULT '',
+    `has_items`      TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    `expire_time`    BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    `deliver_time`   BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    `money`          INT UNSIGNED NOT NULL DEFAULT 0,
+    `cod`            INT UNSIGNED NOT NULL DEFAULT 0,
+    `checked`        TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_receiver` (`receiver`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `mail_items` (
+    `mail_id`       INT UNSIGNED NOT NULL DEFAULT 0,
+    `item_guid`     INT UNSIGNED NOT NULL DEFAULT 0,
+    `item_template` INT UNSIGNED NOT NULL DEFAULT 0,
+    `receiver`      INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`mail_id`, `item_guid`),
+    KEY `idx_receiver` (`receiver`),
+    KEY `idx_item_guid` (`item_guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `arena_team_member` (
+    `arenateamid`    INT UNSIGNED NOT NULL DEFAULT 0,
+    `guid`           INT UNSIGNED NOT NULL DEFAULT 0,
+    `played_week`    INT UNSIGNED NOT NULL DEFAULT 0,
+    `wons_week`      INT UNSIGNED NOT NULL DEFAULT 0,
+    `played_season`  INT UNSIGNED NOT NULL DEFAULT 0,
+    `wons_season`    INT UNSIGNED NOT NULL DEFAULT 0,
+    `personal_rating` INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`arenateamid`, `guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- ════════════════════════════════════════════════════════════════════════════
 -- MANGOS3 (World)
 -- ════════════════════════════════════════════════════════════════════════════

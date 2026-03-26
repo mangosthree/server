@@ -116,7 +116,9 @@ WorldSocket::WorldSocket(void) :
     m_OutBuffer(0),
     m_OutBufferSize(65536),
     m_OutActive(false),
-    m_Seed(rand32())
+    m_Seed(rand32()),
+    m_PacketCounter(0),
+    m_PacketWindowStart(ACE_Time_Value::zero)
 {
     reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 
@@ -755,6 +757,31 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     // manage memory ;)
     ACE_Auto_Ptr<WorldPacket> aptr(new_pct);
 
+    // Packet flood protection: limit packets per second per connection
+    ACE_Time_Value now = ACE_OS::gettimeofday();
+    if (m_PacketWindowStart == ACE_Time_Value::zero)
+    {
+        m_PacketWindowStart = now;
+    }
+
+    ACE_Time_Value elapsed(now);
+    elapsed -= m_PacketWindowStart;
+
+    if (elapsed.sec() >= PACKET_RATE_WINDOW_SEC)
+    {
+        // Reset window
+        m_PacketCounter = 0;
+        m_PacketWindowStart = now;
+    }
+
+    ++m_PacketCounter;
+    if (m_PacketCounter > PACKET_RATE_LIMIT)
+    {
+        sLog.outError("WorldSocket::ProcessIncoming: client %s exceeded packet rate limit (%u packets/sec), disconnecting.",
+                      GetRemoteAddress().c_str(), m_PacketCounter);
+        return -1;
+    }
+
     const ACE_UINT16 opcode = new_pct->GetOpcode();
 
     if (opcode >= NUM_MSG_TYPES)
@@ -902,9 +929,18 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     recvPacket >> m_addonSize;                            // addon data size
 
+    if (m_addonSize > 0xFFFFF)                            // cap at ~1MB to prevent memory exhaustion
+    {
+        sLog.outError("WorldSocket::HandleAuthSession: client sent oversized addon data (%u bytes), disconnecting.", m_addonSize);
+        return -1;
+    }
+
     ByteBuffer addonsData;
-    addonsData.resize(m_addonSize);
-    recvPacket.read((uint8*)addonsData.contents(), m_addonSize);
+    if (m_addonSize)
+    {
+        addonsData.resize(m_addonSize);
+        recvPacket.read((uint8*)addonsData.contents(), m_addonSize);
+    }
 
     uint8 nameLenLow, nameLenHigh;
     recvPacket >> nameLenHigh;
@@ -1029,11 +1065,14 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     delete result;
 
     // Re-check account ban (same check as in realmd)
+    std::string safe_ip = GetRemoteAddress();
+    LoginDatabase.escape_string(safe_ip);
+
     QueryResult* banresult =
         LoginDatabase.PQuery("SELECT 1 FROM `account_banned` WHERE `id` = %u AND `active` = 1 AND (`unbandate` > UNIX_TIMESTAMP() OR `unbandate` = `bandate`)"
                              "UNION "
                              "SELECT 1 FROM `ip_banned` WHERE (`unbandate` = `bandate` OR `unbandate` > UNIX_TIMESTAMP()) AND `ip` = '%s'",
-                             id, GetRemoteAddress().c_str());
+                             id, safe_ip.c_str());
 
     if (banresult) // if account banned
     {

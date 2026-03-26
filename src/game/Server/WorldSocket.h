@@ -224,6 +224,12 @@ class WorldSocket : protected WorldHandler
         uint32 m_Seed;
 
         BigNumber m_s;
+
+        /// Packet flood protection: track packets received in current window
+        uint32 m_PacketCounter;
+        ACE_Time_Value m_PacketWindowStart;
+        static const uint32 PACKET_RATE_LIMIT = 300;         // max packets per second
+        static const uint32 PACKET_RATE_WINDOW_SEC = 1;      // window duration in seconds
 };
 
 #endif  /* _WORLDSOCKET_H */

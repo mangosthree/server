@@ -2322,7 +2322,7 @@ static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
         if (pGroupGuy->IsAlive() && not_gray_member_with_max_level &&
             pGroupGuy->getLevel() <= not_gray_member_with_max_level->getLevel())
         {
-            uint32 itr_xp = (member_with_max_level == not_gray_member_with_max_level) ? uint32(xp * rate) : uint32((xp * rate / 2) + 1);
+            uint32 itr_xp = (member_with_max_level == not_gray_member_with_max_level) ? SafeUInt32FromFloat(xp * rate) : SafeUInt32FromFloat((xp * rate / 2) + 1);
 
             pGroupGuy->GiveXP(itr_xp, pVictim);
             if (Pet* pet = pGroupGuy->GetPet())

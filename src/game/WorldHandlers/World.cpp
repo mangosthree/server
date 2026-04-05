@@ -1977,6 +1977,7 @@ void World::Update(uint32 diff)
 
     // And last, but not least handle the issued cli commands
     ProcessCliCommands();
+    ProcessDelayedTasks();
 
     // cleanup unused GridMap objects as well as VMaps
     sTerrainMgr.Update(diff);
@@ -2055,6 +2056,22 @@ void World::SendWorldText(int32 string_id, ...)
     }
 
     va_end(ap);
+}
+
+/// Sends a system message to all players
+void World::SendGlobalSysMessage(const char* text, AccountTypes minSec)
+{
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    {
+        if (WorldSession* session = itr->second)
+        {
+            if (session->GetSecurity() < minSec)
+            {
+                continue;
+            }
+            session->SendNotification(text);
+        }
+    }
 }
 
 /// Sends a packet to all players with optional account access level restrictions
@@ -2435,6 +2452,19 @@ void World::ProcessCliCommands()
         }
 
         delete command;
+    }
+}
+
+// This handles delayed tasks queued from background threads (e.g. async reload completion)
+void World::ProcessDelayedTasks()
+{
+    std::lock_guard<std::mutex> guard(m_delayedTaskLock);
+
+    while (!m_delayedTasks.empty())
+    {
+        DelayedTask task = std::move(m_delayedTasks.front());
+        m_delayedTasks.pop_front();
+        task();
     }
 }
 

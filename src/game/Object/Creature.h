@@ -668,6 +668,7 @@ class Creature : public Unit
         TrainerSpellData const* GetTrainerSpells() const;
 
         CreatureInfo const* GetCreatureInfo() const { return m_creatureInfo; }
+        void SetCreatureInfo(CreatureInfo const* cinfo) { m_creatureInfo = cinfo; }
         CreatureDataAddon const* GetCreatureAddon() const;
 
         static uint32 ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* data = NULL, GameEventCreatureData const* eventData = NULL);

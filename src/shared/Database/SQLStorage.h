@@ -28,6 +28,11 @@
 #include "Common/Common.h"
 #include "Database/DatabaseEnv.h"
 #include "DataStores/DBCFileLoader.h"
+#include "Database/SQLStorageReload.h"
+#include <atomic>
+#include <unordered_map>
+#include <map>
+#include <vector>
 
 /**
  * @brief
@@ -228,7 +233,7 @@ class SQLStorageBase
          */
         virtual void Free();
 
-    private:
+    protected:
         /**
          * @brief
          *
@@ -305,6 +310,16 @@ class SQLStorage : public SQLStorageBase
         }
 
         /**
+         * @brief Reload the storage using atomic pointer swap to avoid dangling references.
+         *
+         * This is the preferred reload method for live servers. It builds all new data
+         * in a background buffer and atomically swaps the lookup pointer, so readers
+         * never see a partially-loaded or empty state (unlike the old Reload() which
+         * called Free() first, creating a window of dangling pointers).
+         */
+        void ReloadAtomic();
+
+        /**
          * @brief
          *
          * @param error_at_empty
@@ -317,6 +332,12 @@ class SQLStorage : public SQLStorageBase
          * @param id
          */
         void EraseEntry(uint32 id);
+
+        /**
+         * @brief Reload the storage using atomic pointer swap to avoid dangling references
+         * @deprecated Use ReloadAtomic() instead. Kept for API compatibility.
+         */
+        void Reload();
 
     protected:
         /**
@@ -346,6 +367,9 @@ class SQLStorage : public SQLStorageBase
 
     private:
         char** m_Index; /**< Lookup access */
+
+        // Atomic reload support -- m_Index actually points inside m_atomicBuffer->data
+        mutable ReloadBufferPtr m_atomicBuffer;
 };
 
 /**
@@ -399,6 +423,14 @@ class SQLHashStorage : public SQLStorageBase
         }
 
         /**
+         * @brief Reload the storage using atomic pointer swap to avoid dangling references.
+         *
+         * Builds all new data in a background buffer and atomically swaps the lookup
+         * pointer, so readers never see a partially-loaded or empty state.
+         */
+        void ReloadAtomic();
+
+        /**
          * @brief
          *
          */
@@ -410,6 +442,12 @@ class SQLHashStorage : public SQLStorageBase
          * @param id
          */
         void EraseEntry(uint32 id);
+
+        /**
+         * @brief Reload the storage using atomic pointer swap to avoid dangling references
+         * @deprecated Use ReloadAtomic() instead. Kept for API compatibility.
+         */
+        void Reload();
 
     protected:
         /**
@@ -444,6 +482,9 @@ class SQLHashStorage : public SQLStorageBase
          */
         typedef std::unordered_map < uint32 /*recordId*/, char* /*record*/ > RecordMap;
         RecordMap m_indexMap; /**< TODO */
+
+        // Atomic reload support — old data kept alive via shared_ptr
+        mutable ReloadBufferPtr m_atomicBuffer;
 };
 
 /**
@@ -590,6 +631,14 @@ class SQLMultiStorage : public SQLStorageBase
         SQLMSIteratorBounds<T> getBounds(uint32 key) const { return SQLMSIteratorBounds<T>(m_indexMultiMap.equal_range(key)); }
 
         /**
+         * @brief Reload the storage using atomic pointer swap to avoid dangling references.
+         *
+         * Builds all new data in a background buffer and atomically swaps the lookup
+         * pointer, so readers never see a partially-loaded or empty state.
+         */
+        void ReloadAtomic();
+
+        /**
          * @brief
          *
          */
@@ -601,6 +650,12 @@ class SQLMultiStorage : public SQLStorageBase
          * @param id
          */
         void EraseEntry(uint32 id);
+
+        /**
+         * @brief Reload the storage using atomic pointer swap to avoid dangling references
+         * @deprecated Use ReloadAtomic() instead. Kept for API compatibility.
+         */
+        void Reload();
 
     protected:
         /**
@@ -630,6 +685,10 @@ class SQLMultiStorage : public SQLStorageBase
 
     private:
         RecordMultiMap m_indexMultiMap; /**< TODO */
+
+        // Atomic reload support -- m_indexMultiMap is replaced by m_atomicIndex on reload
+        // Atomic reload support — old data kept alive via shared_ptr
+        mutable ReloadBufferPtr m_atomicBuffer;
 };
 
 template <class DerivedLoader, class StorageClass>

@@ -155,6 +155,9 @@ class Map : public GridRefManager<NGridType>
 
         template<class T, class CONTAINER> void Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER>& visitor);
 
+        /// Visit all loaded grids with a visitor
+        template<class T, class TT> void VisitAllGrids(TypeContainerVisitor<T, TypeMapContainer<TT> >& visitor);
+
         bool IsRemovalGrid(float x, float y) const
         {
             GridPair p = MaNGOS::ComputeGridPair(x, y);
@@ -513,6 +516,19 @@ Map::Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER>& visitor)
     {
         EnsureGridLoaded(cell);
         getNGrid(x, y)->Visit(cell_x, cell_y, visitor);
+    }
+}
+
+template<class T, class TT>
+inline void
+Map::VisitAllGrids(TypeContainerVisitor<T, TypeMapContainer<TT> >& visitor)
+{
+    for (Map::iterator gridItr = this->begin(); gridItr != this->end(); ++gridItr)
+    {
+        NGridType* grid = &(*gridItr);
+        if (grid->GetGridState() == GRID_STATE_INVALID)
+            continue;
+        grid->Visit(visitor);
     }
 }
 #endif

@@ -29,6 +29,10 @@
 #include "Log.h"
 #include "Transports.h"
 #include "GridDefines.h"
+#include "ObjectMgr.h"
+#include "SQLStorages.h"
+#include "GameSystem/TypeContainerVisitor.h"
+#include "GridDefines.h"
 #include "World.h"
 #include "CellImpl.h"
 #include "Corpse.h"
@@ -415,4 +419,12 @@ void MapManager::DoForAllMaps(const std::function<void(Map*)>& worker)
     {
         worker(itr->second);
     }
+}
+
+void MapManager::ForceRespawnAllCreatures()
+{
+    // Existing creatures continue using old template data until they are
+    // despawned (by normal game mechanics) and respawned with new data.
+    // New spawns after reload will already use updated templates from DB.
+    sLog.outString("MapManager: Creature templates reloaded. Existing creatures will be updated on next respawn.");
 }

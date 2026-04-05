@@ -38,6 +38,7 @@
 #include <set>
 #include <list>
 #include <mutex>
+#include <functional>
 
 #ifdef ENABLE_ELUNA
 class Eluna;
@@ -583,6 +584,7 @@ class World
 
         void SendWorldText(int32 string_id, ...);
         void SendGlobalMessage(WorldPacket* packet, AccountTypes minSec = SEC_PLAYER);
+        void SendGlobalSysMessage(const char* text, AccountTypes minSec = SEC_PLAYER);
         void SendServerMessage(ServerMessageType type, const char* text = "", Player* player = NULL);
         void SendZoneUnderAttackMessage(uint32 zoneId, Team team);
         void SendDefenseMessage(uint32 zoneId, int32 textId);
@@ -656,6 +658,11 @@ class World
 
         void ProcessCliCommands();
         void QueueCliCommand(CliCommandHolder* commandHolder) { std::lock_guard<std::mutex> guard(m_cliCommandQueueLock); m_cliCommandQueue.push_back(commandHolder); }
+
+        // Delayed general tasks (for async reload completion callbacks)
+        typedef std::function<void()> DelayedTask;
+        void QueueDelayedTask(DelayedTask task) { std::lock_guard<std::mutex> guard(m_delayedTaskLock); m_delayedTasks.push_back(std::move(task)); }
+        void ProcessDelayedTasks();
 
         void UpdateResultQueue();
         void InitResultQueue();
@@ -778,6 +785,10 @@ class World
 
         static float  m_relocation_lower_limit_sq;
         static uint32 m_relocation_ai_notify_delay;
+
+        // Delayed function callbacks
+        std::mutex m_delayedTaskLock;
+        std::deque<DelayedTask> m_delayedTasks;
 
         // CLI command holder to be thread safe
         std::mutex m_cliCommandQueueLock;

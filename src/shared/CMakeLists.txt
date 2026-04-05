@@ -76,6 +76,8 @@ set(SRC_GRP_DATABASE
   Database/SQLStorage.cpp
   Database/SQLStorage.h
   Database/SQLStorageImpl.h
+  Database/SQLStorageReload.h
+  Database/SQLStorageReload.cpp
   Database/SqlDelayThread.cpp
   Database/SqlDelayThread.h
   Database/SqlOperations.cpp

@@ -139,6 +139,9 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
 
         void InitializeVisibilityDistanceInfo();
 
+        /// Force respawn all live creatures so they reload templates from DB (placeholder, only logs now)
+        void ForceRespawnAllCreatures();
+
         /* statistics */
         uint32 GetNumInstances();
         uint32 GetNumPlayersInInstances();

@@ -42,6 +42,7 @@
 #include "ObjectAccessor.h"
 #include "ObjectGuid.h"
 #include "Policies/Singleton.h"
+#include "GameSystem/GridRefManager.h"
 
 #include <string>
 #include <map>

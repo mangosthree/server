@@ -23,6 +23,7 @@
  */
 
 #include "SQLStorage.h"
+#include "SQLStorageImpl.h"
 
 // -----------------------------------  SQLStorageBase  ---------------------------------------- //
 

@@ -35,6 +35,8 @@
 #include "ItemEnchantmentMgr.h"
 #include "CommandMgr.h"
 #include "ObjectMgr.h"
+#include "SQLStorages.h"
+#include "Object/ReloadMgr.h"
 
 /**********************************************************************
     CommandTable : reloadCommandTable
@@ -61,25 +63,26 @@ bool ChatHandler::HandleReloadAllSpellCommand(char* /*args*/)
 // reload commands
 bool ChatHandler::HandleReloadAllCommand(char* /*args*/)
 {
-    HandleReloadSkillFishingBaseLevelCommand((char*)"");
+    // Async reload: runs in a background thread, does not block the game loop.
+    // If a reload is already in progress, queue this one to run after it.
+    if (sReloadMgr.IsReloading())
+    {
+        SendSysMessage("A full reload is already in progress. This one will be queued.");
+    }
 
-    HandleReloadAllAchievementCommand((char*)"");
-    HandleReloadAllAreaCommand((char*)"");
-    HandleReloadAutoBroadcastCommand((char*)"");
-    HandleReloadAllEventAICommand((char*)"");
-    HandleReloadAllLootCommand((char*)"");
-    HandleReloadAllNpcCommand((char*)"");
-    HandleReloadAllQuestCommand((char*)"");
-    HandleReloadAllSpellCommand((char*)"");
-    HandleReloadAllItemCommand((char*)"");
-    HandleReloadAllGossipsCommand((char*)"");
-    HandleReloadAllLocalesCommand((char*)"");
+    SendSysMessage("|cFFFFCC00[Reload]|r Полный перезапуск базы данных запущен. Прогресс — в чате.");
+    sWorld.SendGlobalSysMessage("|cFFFFCC00[Reload]|r Начата полная перезагрузка БД. Ожидайте...", SEC_PLAYER);
+    sLog.outString("ChatHandler: Full async reload started by account %u", GetAccountId());
 
-    HandleReloadMailLevelRewardCommand((char*)"");
-    HandleReloadCommandCommand((char*)"");
-    HandleReloadReservedNameCommand((char*)"");
-    HandleReloadMangosStringCommand((char*)"");
-    HandleReloadGameTeleCommand((char*)"");
+    // Use a global print function since ChatHandler lifetime is not guaranteed
+    sReloadMgr.StartFullReload(
+        [](void* /*arg*/, char const* msg) {
+            sLog.outString("[Reload] %s", msg);
+        },
+        nullptr,
+        true // forceRespawn
+    );
+
     return true;
 }
 
@@ -1016,5 +1019,43 @@ bool ChatHandler::HandleReloadHotfixDataCommand(char* /*args*/)
     sLog.outString("Re-Loading hotfix data...");
     sObjectMgr.LoadHotfixData();
     SendGlobalSysMessage("DB table `hotfix_data` reloaded.", SEC_MODERATOR);
+    return true;
+}
+
+bool ChatHandler::HandleReloadCreatureTemplatesCommand(char* /*args*/)
+{
+    // Use ReloadAtomic() — builds new data in background, then atomically swaps.
+    // No Free-then-Load gap where readers would see dangling pointers.
+    sCreatureStorage.ReloadAtomic();
+    sGOStorage.ReloadAtomic();
+    sItemStorage.ReloadAtomic();
+    sCreatureModelStorage.ReloadAtomic();
+    sEquipmentStorage.ReloadAtomic();
+    sCreatureDataAddonStorage.ReloadAtomic();
+    sCreatureInfoAddonStorage.ReloadAtomic();
+    sCreatureTemplateSpellsStorage.ReloadAtomic();
+    sVehicleAccessoryStorage.ReloadAtomic();
+    sSpellScriptTargetStorage.ReloadAtomic();
+    sPageTextStore.ReloadAtomic();
+    sInstanceTemplate.ReloadAtomic();
+    sWorldTemplate.ReloadAtomic();
+    sConditionStorage.ReloadAtomic();
+
+    sObjectMgr.LoadCreatureModelInfo();          // rebuild model cache
+    sObjectMgr.LoadEquipmentTemplates();         // rebuild equipment cache
+    sObjectMgr.LoadCreatureAddons();             // rebuild addon cache
+    sObjectMgr.LoadConditions();                 // rebuild conditions cache
+    sObjectMgr.LoadSpellTemplate();              // rebuild spell template cache
+    sObjectMgr.LoadCreatureTemplateSpells();     // rebuild creature spells cache
+    sObjectMgr.LoadVehicleAccessory();           // rebuild vehicle accessory cache
+    sSpellMgr.LoadSpellScriptTarget();           // rebuild spell targets cache
+    sObjectMgr.LoadPageTexts();                  // rebuild page texts cache
+    sObjectMgr.LoadCreatureLocales();            // rebuild locale data
+
+    // Force respawn all live creatures so they get new template data on respawn
+    sMapMgr.ForceRespawnAllCreatures();
+
+    sLog.outString("ReloadCreatureTemplates: Done. Creature, GO, Item templates and related tables reloaded.");
+    SendGlobalSysMessage("DB tables `creature_template`, `gameobject_template`, `item_template`, and related tables reloaded.", SEC_MODERATOR);
     return true;
 }

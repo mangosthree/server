@@ -292,6 +292,21 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recv_data)
             {
                 _player->PlayerTalkClass->SendQuestGiverQuestDetails(nextquest, guid, true);
             }
+            else if (pObject->GetTypeId() == TYPEID_UNIT)
+            {
+                Creature* pCreature = (Creature*)pObject;
+                _player->PrepareGossipMenu(pCreature, pCreature->GetCreatureInfo()->GossipMenuId);
+
+                if (!_player->PlayerTalkClass->Empty())
+                {
+                    _player->SendPreparedGossip(pCreature);
+                }
+            }
+            else
+            {
+                _player->PrepareQuestMenu(guid);
+                _player->SendPreparedQuest(guid);
+            }
         }
         else
         {

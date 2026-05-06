@@ -3860,11 +3860,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         }
     }
 
-    // script has to "handle with care", only use where data are not ok to use in the above code.
-    if (target->GetTypeId() == TYPEID_UNIT)
-    {
-        sScriptMgr.OnAuraDummy(this, apply);
-    }
+    // Script has to "handle with care", only use where data are not ok to use in the above code.
+    // Aura scripts are DB-bound by spell/effect and can be needed for player self-use dummy auras.
+    sScriptMgr.OnAuraDummy(this, apply);
 }
 
 void Aura::HandleAuraMounted(bool apply, bool Real)

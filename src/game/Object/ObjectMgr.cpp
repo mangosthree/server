@@ -8410,7 +8410,8 @@ void ObjectMgr::LoadGameObjectForQuests()
                 uint32 loot_id = itr->GetLootId();
 
                 // always activate to quest, GO may not have loot, OR find if GO has loot for quest.
-                if (itr->chest.questId || LootTemplates_Gameobject.HaveQuestLootFor(loot_id))
+                if (itr->chest.questId || LootTemplates_Gameobject.HaveQuestLootFor(loot_id) ||
+                    LootTemplates_Gameobject.HaveConditionalLootFor(loot_id))
                 {
                     mGameObjectForQuestSet.insert(itr->id);
                     ++count;

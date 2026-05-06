@@ -1046,7 +1046,8 @@ bool GameObject::ActivateToQuest(Player* pTarget) const
                 return true;
             }
 
-            if (LootTemplates_Gameobject.HaveQuestLootForPlayer(GetGOInfo()->GetLootId(), pTarget))
+            if (LootTemplates_Gameobject.HaveQuestLootForPlayer(GetGOInfo()->GetLootId(), pTarget) ||
+                LootTemplates_Gameobject.HaveConditionalLootForPlayer(GetGOInfo()->GetLootId(), pTarget, this))
             {
                 // look for battlegroundAV for some objects which are only activated after mine gots captured by own team
                 if (GetEntry() == BG_AV_OBJECTID_MINE_N || GetEntry() == BG_AV_OBJECTID_MINE_S)

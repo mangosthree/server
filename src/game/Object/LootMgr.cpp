@@ -63,7 +63,8 @@ class LootTemplate::LootGroup                               // A set of loot def
         void AddEntry(LootStoreItem& item);                 // Adds an entry to the group (at loading stage)
         bool HasQuestDrop() const;                          // True if group includes at least 1 quest drop entry
         bool HasQuestDropForPlayer(Player const* player) const; // The same for active quests of the player
-        // The same for active quests of the player
+        bool HasConditionalDrop() const;                    // True if group includes at least 1 conditional entry
+        bool HasConditionalDropForPlayer(Player const* player, WorldObject const* lootTarget) const;
         void Process(Loot& loot) const;                     // Rolls an item from the group (if any) and adds the item to the loot
         float RawTotalChance() const;                       // Overall chance for the group (without equal chanced items)
         float TotalChance() const;                          // Overall chance for the group
@@ -217,6 +218,33 @@ bool LootStore::HaveQuestLootForPlayer(uint32 loot_id, Player* player) const
         }
 
     return false;
+}
+
+bool LootStore::HaveConditionalLootFor(uint32 loot_id) const
+{
+    LootTemplateMap::const_iterator itr = m_LootTemplates.find(loot_id);
+    if (itr == m_LootTemplates.end())
+    {
+        return false;
+    }
+
+    return itr->second->HasConditionalDrop(m_LootTemplates);
+}
+
+bool LootStore::HaveConditionalLootForPlayer(uint32 loot_id, Player* player, WorldObject const* lootTarget) const
+{
+    if (!player)
+    {
+        return false;
+    }
+
+    LootTemplateMap::const_iterator itr = m_LootTemplates.find(loot_id);
+    if (itr == m_LootTemplates.end())
+    {
+        return false;
+    }
+
+    return itr->second->HasConditionalDropForPlayer(m_LootTemplates, player, lootTarget);
 }
 
 LootTemplate const* LootStore::GetLootFor(uint32 loot_id) const
@@ -1176,6 +1204,38 @@ bool LootTemplate::LootGroup::HasQuestDropForPlayer(Player const* player) const
     return false;
 }
 
+// True if group includes at least 1 conditional entry
+bool LootTemplate::LootGroup::HasConditionalDrop() const
+{
+    for (LootStoreItemList::const_iterator i = ExplicitlyChanced.begin(); i != ExplicitlyChanced.end(); ++i)
+        if (i->conditionId)
+        {
+            return true;
+        }
+    for (LootStoreItemList::const_iterator i = EqualChanced.begin(); i != EqualChanced.end(); ++i)
+        if (i->conditionId)
+        {
+            return true;
+        }
+    return false;
+}
+
+// True if group includes at least 1 conditional entry available to the player
+bool LootTemplate::LootGroup::HasConditionalDropForPlayer(Player const* player, WorldObject const* lootTarget) const
+{
+    for (LootStoreItemList::const_iterator i = ExplicitlyChanced.begin(); i != ExplicitlyChanced.end(); ++i)
+        if (i->conditionId && sObjectMgr.IsPlayerMeetToCondition(i->conditionId, player, player->GetMap(), lootTarget, CONDITION_FROM_LOOT))
+        {
+            return true;
+        }
+    for (LootStoreItemList::const_iterator i = EqualChanced.begin(); i != EqualChanced.end(); ++i)
+        if (i->conditionId && sObjectMgr.IsPlayerMeetToCondition(i->conditionId, player, player->GetMap(), lootTarget, CONDITION_FROM_LOOT))
+        {
+            return true;
+        }
+    return false;
+}
+
 // Rolls an item from the group (if any takes its chance) and adds the item to the loot
 void LootTemplate::LootGroup::Process(Loot& loot) const
 {
@@ -1414,6 +1474,104 @@ bool LootTemplate::HasQuestDropForPlayer(LootTemplateMap const& store, Player co
     // Now checking groups
     for (LootGroups::const_iterator i = Groups.begin(); i != Groups.end(); ++i)
         if (i->HasQuestDropForPlayer(player))
+        {
+            return true;
+        }
+
+    return false;
+}
+
+// True if template includes at least 1 conditional entry
+bool LootTemplate::HasConditionalDrop(LootTemplateMap const& store, uint8 groupId) const
+{
+    if (groupId)                                            // Group reference
+    {
+        if (groupId > Groups.size())
+        {
+            return false;                                    // Error message [should be] already printed at loading stage
+        }
+        return Groups[groupId - 1].HasConditionalDrop();
+    }
+
+    for (LootStoreItemList::const_iterator i = Entries.begin(); i != Entries.end(); ++i)
+    {
+        if (i->conditionId)
+        {
+            return true;
+        }
+
+        if (i->mincountOrRef < 0)                           // References
+        {
+            LootTemplateMap::const_iterator Referenced = store.find(-i->mincountOrRef);
+            if (Referenced == store.end())
+            {
+                continue;                                    // Error message [should be] already printed at loading stage
+            }
+            if (Referenced->second->HasConditionalDrop(store, i->group))
+            {
+                return true;
+            }
+        }
+    }
+
+    for (LootGroups::const_iterator i = Groups.begin(); i != Groups.end(); ++i)
+        if (i->HasConditionalDrop())
+        {
+            return true;
+        }
+
+    return false;
+}
+
+// True if template includes at least 1 conditional entry available to the player
+bool LootTemplate::HasConditionalDropForPlayer(LootTemplateMap const& store, Player const* player, WorldObject const* lootTarget, uint8 groupId) const
+{
+    if (!player)
+    {
+        return false;
+    }
+
+    if (groupId)                                            // Group reference
+    {
+        if (groupId > Groups.size())
+        {
+            return false;                                    // Error message already printed at loading stage
+        }
+        return Groups[groupId - 1].HasConditionalDropForPlayer(player, lootTarget);
+    }
+
+    for (LootStoreItemList::const_iterator i = Entries.begin(); i != Entries.end(); ++i)
+    {
+        if (i->mincountOrRef < 0)                           // References
+        {
+            if (i->conditionId)
+            {
+                if (sObjectMgr.IsPlayerMeetToCondition(i->conditionId, player, player->GetMap(), lootTarget, CONDITION_FROM_REFERING_LOOT))
+                {
+                    return true;
+                }
+
+                continue;
+            }
+
+            LootTemplateMap::const_iterator Referenced = store.find(-i->mincountOrRef);
+            if (Referenced == store.end())
+            {
+                continue;                                    // Error message already printed at loading stage
+            }
+            if (Referenced->second->HasConditionalDropForPlayer(store, player, lootTarget, i->group))
+            {
+                return true;
+            }
+        }
+        else if (i->conditionId && sObjectMgr.IsPlayerMeetToCondition(i->conditionId, player, player->GetMap(), lootTarget, CONDITION_FROM_LOOT))
+        {
+            return true;
+        }
+    }
+
+    for (LootGroups::const_iterator i = Groups.begin(); i != Groups.end(); ++i)
+        if (i->HasConditionalDropForPlayer(player, lootTarget))
         {
             return true;
         }

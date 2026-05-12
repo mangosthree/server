@@ -58,6 +58,7 @@
 #include "Item.h"
 #include "GlyphMgr.h"   // GlyphMgr is held by value on Player; brings in Glyph struct + GlyphUpdateState enum
 #include "HonorMgr.h"   // HonorMgr is held by value on Player; owns daily-kill rollover + RewardHonor calculation
+#include "CurrencyMgr.h" // CurrencyMgr is held by value on Player; brings in PlayerCurrency struct + PlayerCurrencyState/Flag enums + PlayerCurrenciesMap typedef
 
 #include "Database/DatabaseEnv.h"
 #include "NPCHandler.h"
@@ -128,36 +129,7 @@ enum BuyBankSlotResult
     ERR_BANKSLOT_OK = 3                  ///< Success
 };
 
-enum PlayerCurrencyFlag
-{
-    PLAYERCURRENCY_FLAG_NONE                = 0x0,
-    PLAYERCURRENCY_FLAG_UNK1                = 0x1,  // unused?
-    PLAYERCURRENCY_FLAG_UNK2                = 0x2,  // unused?
-    PLAYERCURRENCY_FLAG_SHOW_IN_BACKPACK    = 0x4,
-    PLAYERCURRENCY_FLAG_UNUSED              = 0x8,
-
-    PLAYERCURRENCY_MASK_USED_BY_CLIENT =
-        PLAYERCURRENCY_FLAG_SHOW_IN_BACKPACK |
-        PLAYERCURRENCY_FLAG_UNUSED,
-};
-
-enum PlayerCurrencyState
-{
-    PLAYERCURRENCY_UNCHANGED        = 0,
-    PLAYERCURRENCY_CHANGED          = 1,
-    PLAYERCURRENCY_NEW              = 2,
-    PLAYERCURRENCY_REMOVED          = 3
-};
-
-struct PlayerCurrency
-{
-    PlayerCurrencyState state;
-    uint32 totalCount;
-    uint32 weekCount;
-    uint32 seasonCount;
-    uint8 flags;
-    CurrencyTypesEntry const * currencyEntry;
-};
+// PlayerCurrencyFlag / PlayerCurrencyState / PlayerCurrency moved to CurrencyMgr.h (2026-05-12).
 
 /**
  * @brief Player spell state enumeration
@@ -188,7 +160,7 @@ struct PlayerTalent
     PlayerSpellState state;
 };
 
-typedef std::unordered_map<uint32, PlayerCurrency> PlayerCurrenciesMap;
+// PlayerCurrenciesMap typedef moved to CurrencyMgr.h (2026-05-12).
 typedef std::unordered_map<uint32, PlayerSpell> PlayerSpellMap;
 typedef std::unordered_map<uint32, PlayerTalent> PlayerTalentMap;
 
@@ -3104,18 +3076,19 @@ class Player : public Unit
         /*********************************************************/
         /***                CURRENCY SYSTEM                    ***/
         /*********************************************************/
-        uint32 GetCurrencyCount(uint32 id) const;
-        uint32 GetCurrencySeasonCount(uint32 id) const;
-        uint32 GetCurrencyWeekCount(uint32 id) const;
-        void SendCurrencies() const;
-        void ModifyCurrencyCount(uint32 id, int32 count, bool modifyWeek = true, bool modifySeason = true, bool ignoreMultipliers = false);
+        // Currency API — thin delegating wrappers around m_currencyMgr (extracted 2026-05-12).
+        uint32 GetCurrencyCount(uint32 id) const { return m_currencyMgr.GetCount(id); }
+        uint32 GetCurrencySeasonCount(uint32 id) const { return m_currencyMgr.GetSeasonCount(id); }
+        uint32 GetCurrencyWeekCount(uint32 id) const { return m_currencyMgr.GetWeekCount(id); }
+        void SendCurrencies() const { m_currencyMgr.SendAll(); }
+        void ModifyCurrencyCount(uint32 id, int32 count, bool modifyWeek = true, bool modifySeason = true, bool ignoreMultipliers = false) { m_currencyMgr.ModifyCount(id, count, modifyWeek, modifySeason, ignoreMultipliers); }
         bool HasCurrencyCount(uint32 id, uint32 count) const { return GetCurrencyCount(id) >= count; }
         bool HasCurrencySeasonCount(uint32 id, uint32 count) const { return GetCurrencySeasonCount(id) >= count; }
-        void SetCurrencyCount(uint32 id, uint32 count);
-        void SendCurrencyWeekCap(uint32 id) const;
-        void SendCurrencyWeekCap(CurrencyTypesEntry const * currency) const;
-        void SetCurrencyFlags(uint32 currencyId, uint8 flags);
-        void ResetCurrencyWeekCounts();
+        void SetCurrencyCount(uint32 id, uint32 count) { m_currencyMgr.SetCount(id, count); }
+        void SendCurrencyWeekCap(uint32 id) const { m_currencyMgr.SendWeekCap(id); }
+        void SendCurrencyWeekCap(CurrencyTypesEntry const * currency) const { m_currencyMgr.SendWeekCap(currency); }
+        void SetCurrencyFlags(uint32 currencyId, uint8 flags) { m_currencyMgr.SetFlags(currencyId, flags); }
+        void ResetCurrencyWeekCounts() { m_currencyMgr.ResetWeekCounts(); }
 
         /*********************************************************/
         /***                  PVP SYSTEM                       ***/
@@ -3993,11 +3966,11 @@ class Player : public Unit
         /*********************************************************/
         /***                CURRENCY SYSTEM                    ***/
         /*********************************************************/
-        PlayerCurrenciesMap m_currencies;
-        uint32 GetCurrencyWeekCap(CurrencyTypesEntry const * currency) const;
-        uint32 GetCurrencyTotalCap(CurrencyTypesEntry const * currency) const;
-        void _LoadCurrencies(QueryResult* result);
-        void _SaveCurrencies();
+        CurrencyMgr m_currencyMgr;   // owns m_currencies map + 14 Get/Set/Modify/Send/Load/Save methods (extracted 2026-05-12)
+        uint32 GetCurrencyWeekCap(CurrencyTypesEntry const * currency) const { return m_currencyMgr.GetWeekCap(currency); }
+        uint32 GetCurrencyTotalCap(CurrencyTypesEntry const * currency) const { return m_currencyMgr.GetTotalCap(currency); }
+        void _LoadCurrencies(QueryResult* result) { m_currencyMgr.Load(result); }
+        void _SaveCurrencies() { m_currencyMgr.Save(); }
 
 
         // Output debug stats values

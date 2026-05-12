@@ -128,7 +128,11 @@ BindIP                       = "0.0.0.0"
 #        Default: 100
 #
 #    MapUpdateThreads
-#        Number of map update threads to run
+#        Number of threads used to tick maps in parallel via MapUpdater.
+#          0 or 1 = serial (pre-port behavior; force this to restore
+#                   single-threaded map ticking).
+#          >= 2   = parallel map ticking via MapUpdater. Matches mangostwo's
+#                   long-standing production default.
 #        Default: 2
 #
 #    ChangeWeatherInterval

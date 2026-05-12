@@ -77,6 +77,12 @@ MapManager::Initialize()
     }
 #endif /* ENABLE_ELUNA */
 
+    // Start mtmaps if needed.
+    if (num_threads > 0 && m_updater.activate(num_threads) == -1)
+    {
+        abort();
+    }
+
     InitStateMachine();
 }
 
@@ -208,7 +214,19 @@ void MapManager::Update(uint32 diff)
 
     for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
     {
-        iter->second->Update((uint32)i_timer.GetCurrent());
+        if (m_updater.activated())
+        {
+            m_updater.schedule_update(*iter->second, (uint32)i_timer.GetCurrent());
+        }
+        else
+        {
+            iter->second->Update((uint32)i_timer.GetCurrent());
+        }
+    }
+
+    if (m_updater.activated())
+    {
+        m_updater.wait();
     }
 
     for (TransportSet::iterator iter = m_Transports.begin(); iter != m_Transports.end(); ++iter)
@@ -278,6 +296,11 @@ void MapManager::UnloadAll()
     }
 
     TerrainManager::Instance().UnloadAll();
+
+    if (m_updater.activated())
+    {
+        m_updater.deactivate();
+    }
 }
 
 uint32 MapManager::GetNumInstances()

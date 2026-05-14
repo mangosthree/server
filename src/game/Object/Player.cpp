@@ -311,7 +311,7 @@ UpdateMask Player::updateVisualBits;
  *
  * @param session The owning world session.
  */
-Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this), m_glyphMgr(this), m_honorMgr(this)
+Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_petMgr(this), m_achievementMgr(this), m_reputationMgr(this), m_glyphMgr(this), m_honorMgr(this)
 {
     m_transport = 0;
 
@@ -446,8 +446,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_canTitanGrip = false;
     m_ammoDPS = 0.0f;
 
-    // Initialize temporary unsummoned pet number to 0
-    m_temporaryUnsummonedPetNumber = 0;
+    // m_temporaryUnsummonedPetNumber now owned by m_petMgr; initialized in its ctor.
 
     //////////////////// Rest System/////////////////////
     // Initialize time of entering inn to 0
@@ -480,8 +479,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
         m_forced_speed_changes[i] = 0;
     }
 
-    // Initialize stable slots to 0
-    m_stableSlots = 0;
+    // m_stableSlots now owned by m_petMgr; initialized in its ctor.
 
     /////////////////// Instance System /////////////////////
     // Initialize homebind timer to 0
@@ -20083,12 +20081,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     uint32 extraflags = fields[32].GetUInt32();
 
-    m_stableSlots = fields[33].GetUInt32();
-    if (m_stableSlots > MAX_PET_STABLES)
-    {
-        sLog.outError("Player can have not more %u stable slots, but have in DB %u", MAX_PET_STABLES, uint32(m_stableSlots));
-        m_stableSlots = MAX_PET_STABLES;
-    }
+    m_petMgr.LoadStableSlotsFromField(fields[33].GetUInt32());
 
     m_atLoginFlags = fields[34].GetUInt32();
 
@@ -21984,7 +21977,7 @@ void Player::SaveToDB()
 
     uberInsert.addUInt32(m_ExtraFlags);
 
-    uberInsert.addUInt32(uint32(m_stableSlots));            // to prevent save uint8 as char
+    uberInsert.addUInt32(uint32(m_petMgr.GetStableSlots()));   // to prevent save uint8 as char
 
     uberInsert.addUInt32(uint32(m_atLoginFlags));
 
@@ -23170,19 +23163,6 @@ void Player::UpdateDuelFlag(time_t currTime)
 }
 
 /**
- * @brief Unsummons the player's current pet using the requested save mode.
- *
- * @param mode The persistence mode to use when removing the pet.
- */
-void Player::RemovePet(PetSaveMode mode)
-{
-    if (Pet* pet = GetPet())
-    {
-        pet->Unsummon(mode, this);
-    }
-}
-
-/**
  * @brief Sends a say chat message from the player to nearby listeners.
  *
  * @param text The message text.
@@ -23515,16 +23495,6 @@ void Player::CharmSpellInitialize()
     data << uint8(0);                                       // cooldowns count
 
     GetSession()->SendPacket(&data);
-}
-
-/**
- * @brief Clears the pet action bar on the client.
- */
-void Player::RemovePetActionBar()
-{
-    WorldPacket data(SMSG_PET_SPELLS, 8);
-    data << ObjectGuid();
-    SendDirectMessage(&data);
 }
 
 /**
@@ -28838,66 +28808,6 @@ void Player::UpdateFallInformationIfNeed(MovementInfo const& minfo, uint16 opcod
     {
         SetFallInformation(minfo.GetFallTime(), minfo.GetPos()->z);
     }
-}
-
-/**
- * @brief Temporarily unsummons the current pet when the player's state requires it.
- */
-void Player::UnsummonPetTemporaryIfAny()
-{
-    Pet* pet = GetPet();
-    if (!pet)
-    {
-        return;
-    }
-
-    if (!m_temporaryUnsummonedPetNumber && pet->isControlled() && !pet->isTemporarySummoned())
-    {
-        m_temporaryUnsummonedPetNumber = pet->GetCharmInfo()->GetPetNumber();
-    }
-
-    pet->Unsummon(PET_SAVE_AS_CURRENT, this);
-}
-
-void Player::UnsummonPetIfAny()
-{
-    Pet* pet = GetPet();
-    if (!pet)
-    {
-        return;
-    }
-
-    pet->Unsummon(PET_SAVE_NOT_IN_SLOT, this);
-}
-
-/**
- * @brief Resummons a pet that was temporarily unsummoned earlier.
- */
-void Player::ResummonPetTemporaryUnSummonedIfAny()
-{
-    if (!m_temporaryUnsummonedPetNumber)
-    {
-        return;
-    }
-
-    // not resummon in not appropriate state
-    if (IsPetNeedBeTemporaryUnsummoned())
-    {
-        return;
-    }
-
-    if (GetPetGuid())
-    {
-        return;
-    }
-
-    Pet* NewPet = new Pet;
-    if (!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true))
-    {
-        delete NewPet;
-    }
-
-    m_temporaryUnsummonedPetNumber = 0;
 }
 
 /**

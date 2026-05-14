@@ -688,7 +688,7 @@ void WorldSession::SendStablePet(ObjectGuid guid)
     size_t wpos = data.wpos();
     data << uint8(0);                                       // place holder for slot show number
 
-    data << uint8(GetPlayer()->m_stableSlots);
+    data << uint8(GetPlayer()->GetStableSlots());
 
     uint8 num = 0;                                          // counter for place holder
 
@@ -832,7 +832,7 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
         delete result;
     }
 
-    if (free_slot > 0 && free_slot <= GetPlayer()->m_stableSlots)
+    if (free_slot > 0 && free_slot <= GetPlayer()->GetStableSlots())
     {
         pet->Unsummon(PetSaveMode(free_slot), _player);
         SendStableResult(STABLE_SUCCESS_STABLE);

@@ -66,6 +66,7 @@
 #include "Bag.h"
 #include "WorldSession.h"
 #include "Pet.h"
+#include "PetMgr.h"
 #include "MapReference.h"
 #include "Util.h"                                           // for Tokens typedef
 #include "AchievementMgr.h"
@@ -1394,7 +1395,7 @@ class Player : public Unit
         }
 
         // Remove the player's pet
-        void RemovePet(PetSaveMode mode);
+        void RemovePet(PetSaveMode mode) { m_petMgr.Remove(mode); }
 
         uint32 GetPhaseMaskForSpawn() const;                // used for proper set phase for DB at GM-mode creature/GO spawn
 
@@ -1780,7 +1781,7 @@ class Player : public Unit
         // Load the player's pet
         void LoadPet();
 
-        uint32 m_stableSlots; // Number of stable slots
+        // m_stableSlots now owned by m_petMgr; access via GetStableSlots() / SetStableSlots().
 
         uint32 GetEquipGearScore(bool withBags = true, bool withBank = false);
         void ResetCachedGearScore() { m_cachedGS = 0; }
@@ -2290,7 +2291,7 @@ class Player : public Unit
         void PossessSpellInitialize();
 
         // Remove the pet action bar
-        void RemovePetActionBar();
+        void RemovePetActionBar() { m_petMgr.RemoveActionBar(); }
 
         // Check if the player has a specific spell
         bool HasSpell(uint32 spell) const override;
@@ -3660,12 +3661,20 @@ class Player : public Unit
         // Remove an at-login flag for the player
         void RemoveAtLoginFlag(AtLoginFlags f, bool in_db_also = false);
 
-        // Temporarily removed pet cache
-        uint32 GetTemporaryUnsummonedPetNumber() const { return m_temporaryUnsummonedPetNumber; }
-        void SetTemporaryUnsummonedPetNumber(uint32 petnumber) { m_temporaryUnsummonedPetNumber = petnumber; }
-        void UnsummonPetTemporaryIfAny();
-        void UnsummonPetIfAny();
-        void ResummonPetTemporaryUnSummonedIfAny();
+        // Pet ownership API — thin delegating wrappers around m_petMgr.
+        // State (temporary-unsummon pet number, stable slot count) and
+        // lifecycle live on PetMgr; these forward unchanged signatures
+        // so external callers (SpellAuras.cpp, Spell.cpp, BattleGround.cpp,
+        // Vehicle.cpp, MovementHandler.cpp, CharacterHandler.cpp,
+        // MiscHandler.cpp, WorldSession.cpp, Pet.cpp, Unit.cpp) compile
+        // without changes.
+        uint32 GetTemporaryUnsummonedPetNumber() const { return m_petMgr.GetTemporaryUnsummonedPetNumber(); }
+        void SetTemporaryUnsummonedPetNumber(uint32 petnumber) { m_petMgr.SetTemporaryUnsummonedPetNumber(petnumber); }
+        void UnsummonPetTemporaryIfAny() { m_petMgr.UnsummonTemporaryIfAny(); }
+        void UnsummonPetIfAny() { m_petMgr.UnsummonIfAny(); }
+        void ResummonPetTemporaryUnSummonedIfAny() { m_petMgr.ResummonTemporaryUnsummonedIfAny(); }
+        uint32 GetStableSlots() const { return m_petMgr.GetStableSlots(); }
+        void SetStableSlots(uint32 slots) { m_petMgr.SetStableSlots(slots); }
         bool IsPetNeedBeTemporaryUnsummoned() const { return !IsInWorld() || !IsAlive() || IsMounted() /*+in flight*/; }
 
         // Send cinematic start to the client
@@ -4237,8 +4246,7 @@ class Player : public Unit
         // Detect invisibility timer
         uint32 m_DetectInvTimer;
 
-        // Temporary removed pet cache
-        uint32 m_temporaryUnsummonedPetNumber;
+        PetMgr m_petMgr;  // owns m_stableSlots + m_temporaryUnsummonedPetNumber + 5 pet-lifecycle helpers
 
         AchievementMgr m_achievementMgr;
         ReputationMgr  m_reputationMgr;

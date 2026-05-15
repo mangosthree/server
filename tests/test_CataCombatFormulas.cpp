@@ -24,122 +24,89 @@
 // (the Cataclysm pre-expansion patch) and must behave per the new rules in
 // any 4.3.4-build-15595 server.
 //
-// Canonical reference: https://www.wowhead.com/guide=4.0.1
-//
-// Tests in this file verify STRUCTURAL Cata-correctness only (i.e. "when can
-// outcome X happen"). Exact magnitudes (chance percentages, damage multipliers)
-// are intentionally not asserted yet — they need to be looked up on Wowhead
-// and cross-checked against TC-Preservation 4.3.4 before being pinned to a
-// specific value, per the project rule on Wowhead ID verification.
+// Canonical references:
+//   https://warcraft.wiki.gg/wiki/Crushing_blow  (2025-11-27)
+//   https://wowpedia.fandom.com/wiki/Crushing_blow
+//   https://www.wowhead.com/guide=4.0.1
 // ============================================================================
 
 namespace CataCombatTest
 {
 
 // ----------------------------------------------------------------------------
-// Crushing blow (post-Patch 4.0.1)
+// Crushing blow (post-Patch 3.0.2, retained through Cata 4.3.4)
 //
-// Rules retained from 3.0.2+: the attacker must be 4+ levels above the
-// defender to score a crushing blow. (Raid bosses were standardized to 3
-// levels above max-level players in 4.0.1, so bosses can no longer crush.)
+// Canonical Blizzard formula:
+//   chance% = max(skill_diff, 20) * 2% - 15%
+//   where  skill_diff = (attackerLevel - defenderLevel) * 5
 //
-// New in 4.0.1: properly-spec'd tanks in their tanking stance / presence /
-// form gain effective uncrushable status alongside uncrittable, regardless
-// of attacker level. This replaces the WotLK defense-cap mechanic.
+// Rules:
+// - Attacker must be 4+ levels above defender to crush
+//   (skill_diff >= 20 in the formula's floor).
+// - Raid bosses in 4.0+ are standardized to +3 levels above max-level
+//   players; they fail the floor and cannot crush. This is the entire
+//   reason tanks are "effectively uncrushable" in raids — it's emergent
+//   from the level rule, not a separate stance/aura mechanism.
 // ----------------------------------------------------------------------------
 
 // Returns crushing-blow chance as a percentage [0, 100].
-// `defenderIsProperTank` should be true when the defender is in their
-// tanking stance/presence/form (Defensive Stance, Bear Form, Blood Presence,
-// Righteous Fury active, etc.).
-//
-// Note: the non-zero return for the "can crush" branch is intentionally a
-// placeholder constant. The Cata-correct chance formula needs to be
-// confirmed against Wowhead 4.0.1 and TC-Preservation before being pinned.
-// Tests below only assert which branch is taken, not the magnitude.
-float CalculateCrushingChanceCata(int32_t attackerLevel,
-                                  int32_t defenderLevel,
-                                  bool defenderIsProperTank)
+float CalculateCrushingChanceCata(int32_t attackerLevel, int32_t defenderLevel)
 {
-    if (defenderIsProperTank)
+    const int32_t skillDiff = (attackerLevel - defenderLevel) * 5;
+    if (skillDiff < 20)
     {
         return 0.0f;
     }
-
-    const int32_t diff = attackerLevel - defenderLevel;
-    if (diff < 4)
-    {
-        return 0.0f;
-    }
-
-    // Placeholder positive chance — actual Cata value to be verified.
-    return 15.0f;
+    return float(skillDiff) * 2.0f - 15.0f;
 }
 
 } // namespace CataCombatTest
 
 // ============================================================================
-// Level-difference rule (post-3.0.2, retained in 4.0.1)
+// Below the 4-level floor: no crushing
 // ============================================================================
 
 TEST(CataCrushingBlow, EqualLevel_NoCrush)
 {
-    EXPECT_FLOAT_EQ(0.0f, CataCombatTest::CalculateCrushingChanceCata(85, 85, false));
+    EXPECT_FLOAT_EQ(0.0f, CataCombatTest::CalculateCrushingChanceCata(85, 85));
 }
 
 TEST(CataCrushingBlow, AttackerOneAbove_NoCrush)
 {
-    EXPECT_FLOAT_EQ(0.0f, CataCombatTest::CalculateCrushingChanceCata(86, 85, false));
+    EXPECT_FLOAT_EQ(0.0f, CataCombatTest::CalculateCrushingChanceCata(86, 85));
 }
 
 TEST(CataCrushingBlow, AttackerThreeAbove_BossDiff_NoCrush)
 {
-    // Raid bosses are 3 levels above max-level players in 4.0.1.
-    // They must not be able to crush.
-    EXPECT_FLOAT_EQ(0.0f, CataCombatTest::CalculateCrushingChanceCata(88, 85, false));
-}
-
-TEST(CataCrushingBlow, AttackerFourAbove_CanCrush)
-{
-    // Trash mobs 4+ levels above retain the ability to crush in Cata.
-    EXPECT_GT(CataCombatTest::CalculateCrushingChanceCata(85, 81, false), 0.0f);
-}
-
-TEST(CataCrushingBlow, AttackerTenAbove_CanCrush)
-{
-    EXPECT_GT(CataCombatTest::CalculateCrushingChanceCata(85, 75, false), 0.0f);
+    // Raid bosses are standardized to +3 levels above max-level players.
+    // skill_diff = 15, below the 20 floor.
+    EXPECT_FLOAT_EQ(0.0f, CataCombatTest::CalculateCrushingChanceCata(88, 85));
 }
 
 // ============================================================================
-// Tank-stance uncrushable (new in 4.0.1)
+// At and above the 4-level floor: verified Blizzard percentages
 // ============================================================================
 
-TEST(CataCrushingBlow, TankInStance_FourAbove_Uncrushable)
+TEST(CataCrushingBlow, AttackerFourAbove_25Percent)
 {
-    // A proper tank in stance must be uncrushable even when the attacker
-    // meets the level-diff threshold.
-    EXPECT_FLOAT_EQ(0.0f, CataCombatTest::CalculateCrushingChanceCata(85, 81, true));
+    // skill_diff = 20, at the floor. 20*2% - 15% = 25%.
+    EXPECT_FLOAT_EQ(25.0f, CataCombatTest::CalculateCrushingChanceCata(85, 81));
 }
 
-TEST(CataCrushingBlow, TankInStance_TenAbove_Uncrushable)
+TEST(CataCrushingBlow, AttackerFiveAbove_35Percent)
 {
-    EXPECT_FLOAT_EQ(0.0f, CataCombatTest::CalculateCrushingChanceCata(95, 85, true));
+    // skill_diff = 25. 25*2% - 15% = 35%.
+    EXPECT_FLOAT_EQ(35.0f, CataCombatTest::CalculateCrushingChanceCata(85, 80));
 }
 
-TEST(CataCrushingBlow, TankInStance_BossDiff_Uncrushable)
+TEST(CataCrushingBlow, AttackerSixAbove_45Percent)
 {
-    // Both rules apply: 3-level boss diff already blocks crushing, and
-    // tank-stance must also block. Belt and braces.
-    EXPECT_FLOAT_EQ(0.0f, CataCombatTest::CalculateCrushingChanceCata(88, 85, true));
+    // skill_diff = 30. 30*2% - 15% = 45%.
+    EXPECT_FLOAT_EQ(45.0f, CataCombatTest::CalculateCrushingChanceCata(85, 79));
 }
 
-// ============================================================================
-// Non-tank-player sanity (must still take crushes from 4+ above)
-// ============================================================================
-
-TEST(CataCrushingBlow, NonTankPlayer_HighDiff_CanCrush)
+TEST(CataCrushingBlow, AttackerTenAbove_85Percent)
 {
-    // A DPS/healer (no tanking stance) at level 85 attacked by a level-95
-    // elite must still be crushable.
-    EXPECT_GT(CataCombatTest::CalculateCrushingChanceCata(95, 85, false), 0.0f);
+    // skill_diff = 50. 50*2% - 15% = 85%.
+    EXPECT_FLOAT_EQ(85.0f, CataCombatTest::CalculateCrushingChanceCata(85, 75));
 }

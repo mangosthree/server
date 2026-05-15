@@ -113,6 +113,54 @@ float CalculateArmorDRCata(float armor, int32_t attackerLevel)
     return dr * 100.0f;
 }
 
+// ----------------------------------------------------------------------------
+// PvP Resilience damage reduction (Cata 4.0.1+)
+//
+// Patch 4.0.1 reworked resilience to be PvP-only damage reduction; it no
+// longer reduces critical-hit chance or critical-hit damage (those were the
+// WotLK-era functions). Patch 4.1.0 made the resilience-rating-to-percent
+// conversion linear.
+//
+// Application formula (the part testable as a pure function):
+//   damage_after = damage * (1 - reduction_pct / 100)
+//
+// where `reduction_pct` is computed from the victim's
+// CR_RESILIENCE_PLAYER_DAMAGE_TAKEN rating via gtCombatRatings.dbc
+// (data-driven, like mastery — not a hardcoded formula).
+//
+// Eligibility (NOT modeled below — separate predicate):
+//   - Damage source must be a player or player-controlled pet/minion
+//   - Victim must be a player or player-controlled pet/minion
+//   - Multi-passenger vehicles count if a player is mounted; pure NPC
+//     vehicles do not
+//
+// Reference: TC-Preservation Unit::ApplyResilience -> GetDamageReduction ->
+// GetCombatRatingDamageReduction. Numerical magnitudes intentionally NOT
+// asserted here — they live in DBC data and must be verified at runtime
+// against `gtCombatRatings.dbc` row CR_RESILIENCE_PLAYER_DAMAGE_TAKEN.
+// ----------------------------------------------------------------------------
+
+// Returns damage after resilience reduction. Reduction is given as a percent
+// in [0, 100]; values above 100 clamp to fully mitigated, negatives clamp to
+// no-op.
+uint32_t ApplyResilienceReduction(uint32_t damage, float reductionPct)
+{
+    if (reductionPct <= 0.0f)
+    {
+        return damage;
+    }
+    if (reductionPct >= 100.0f)
+    {
+        return 0;
+    }
+    const float reduction = float(damage) * reductionPct / 100.0f;
+    if (reduction >= float(damage))
+    {
+        return 0;
+    }
+    return damage - uint32_t(reduction);
+}
+
 } // namespace CataCombatTest
 
 // ============================================================================
@@ -227,4 +275,60 @@ TEST(CataArmorDR, Level85_ThreeXK_HitsCapExactly)
 {
     // armor/K = 3 -> DR = 3/(3+1) = 0.75 = cap.
     EXPECT_FLOAT_EQ(75.0f, CataCombatTest::CalculateArmorDRCata(52710.0f, 85));
+}
+
+// ============================================================================
+// Resilience: no-op / extreme reduction values
+// ============================================================================
+
+TEST(CataResilience, ZeroPercent_NoChange)
+{
+    EXPECT_EQ(1000u, CataCombatTest::ApplyResilienceReduction(1000u, 0.0f));
+}
+
+TEST(CataResilience, NegativePercent_NoChange)
+{
+    // Defensive: negative reduction is nonsensical; clamp to no-op.
+    EXPECT_EQ(1000u, CataCombatTest::ApplyResilienceReduction(1000u, -5.0f));
+}
+
+TEST(CataResilience, FullHundredPercent_ZeroDamage)
+{
+    EXPECT_EQ(0u, CataCombatTest::ApplyResilienceReduction(1000u, 100.0f));
+}
+
+TEST(CataResilience, OverHundredPercent_ClampsToZero)
+{
+    // Defensive: > 100% should not produce negative damage.
+    EXPECT_EQ(0u, CataCombatTest::ApplyResilienceReduction(1000u, 150.0f));
+}
+
+TEST(CataResilience, ZeroDamage_StaysZero)
+{
+    EXPECT_EQ(0u, CataCombatTest::ApplyResilienceReduction(0u, 25.0f));
+}
+
+// ============================================================================
+// Resilience: standard reduction math
+// ============================================================================
+
+TEST(CataResilience, HalfReduction_HalvesDamage)
+{
+    EXPECT_EQ(500u, CataCombatTest::ApplyResilienceReduction(1000u, 50.0f));
+}
+
+TEST(CataResilience, QuarterReduction_RemovesQuarter)
+{
+    EXPECT_EQ(750u, CataCombatTest::ApplyResilienceReduction(1000u, 25.0f));
+}
+
+TEST(CataResilience, TenPercentReduction_TenPercentOff)
+{
+    EXPECT_EQ(900u, CataCombatTest::ApplyResilienceReduction(1000u, 10.0f));
+}
+
+TEST(CataResilience, FractionalReduction_TruncatesIntegerMath)
+{
+    // 100 damage * 33.3% = 33.3 -> truncated to 33; 100 - 33 = 67.
+    EXPECT_EQ(67u, CataCombatTest::ApplyResilienceReduction(100u, 33.3f));
 }

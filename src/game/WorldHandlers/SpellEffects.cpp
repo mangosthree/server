@@ -5393,12 +5393,9 @@ void Spell::EffectPowerDrain(SpellEffectEntry const* effect)
     damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
     damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
 
-    // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
+    // Cata 4.0.1: TBC-era crit-resilience mana-drain reduction removed
+    // (resilience no longer has a separate crit-specific path).
     uint32 power = damage;
-    if (drain_power == POWER_MANA)
-    {
-        power -= unitTarget->GetCritDamageReduction(power);
-    }
 
     int32 new_damage;
     if (curPower < power)
@@ -5481,12 +5478,9 @@ void Spell::EffectPowerBurn(SpellEffectEntry const* effect)
 
     int32 curPower = int32(unitTarget->GetPower(powertype));
 
-    // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
+    // Cata 4.0.1: TBC-era crit-resilience mana-drain reduction removed
+    // (resilience no longer has a separate crit-specific path).
     int32 power = damage;
-    if (powertype == POWER_MANA)
-    {
-        power -= unitTarget->GetCritDamageReduction(power);
-    }
 
     int32 new_damage = (curPower < power) ? curPower : power;
 

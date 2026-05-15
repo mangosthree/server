@@ -8467,8 +8467,8 @@ void Aura::PeriodicTick()
             if (isCrit)
             {
                 cleanDamage.hitOutCome = MELEE_HIT_CRIT;
-                // Resilience - reduce crit damage
-                pdamage -= target->GetCritDamageReduction(pdamage);
+                // Cata 4.0.1: no separate crit-damage resilience reduction;
+                // the GetDamageReduction call below covers crit damage.
             }
 
             // only from players
@@ -8573,8 +8573,8 @@ void Aura::PeriodicTick()
             if (isCrit)
             {
                 cleanDamage.hitOutCome = MELEE_HIT_CRIT;
-                // Resilience - reduce crit damage
-                pdamage -= target->GetCritDamageReduction(pdamage);
+                // Cata 4.0.1: no separate crit-damage resilience reduction;
+                // the GetDamageReduction call below covers crit damage.
             }
 
             // only from players
@@ -8815,11 +8815,8 @@ void Aura::PeriodicTick()
 
             int32 drain_amount = target->GetPower(power) > pdamage ? pdamage : target->GetPower(power);
 
-            // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
-            if (power == POWER_MANA)
-            {
-                drain_amount -= target->GetCritDamageReduction(drain_amount);
-            }
+            // Cata 4.0.1: TBC-era crit-resilience mana-drain reduction removed
+            // (resilience no longer has a separate crit-specific path).
 
             target->ModifyPower(power, -drain_amount);
 
@@ -8987,11 +8984,8 @@ void Aura::PeriodicTick()
                 return;
             }
 
-            // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
-            if (powerType == POWER_MANA)
-            {
-                pdamage -= target->GetCritDamageReduction(pdamage);
-            }
+            // Cata 4.0.1: TBC-era crit-resilience mana-drain reduction removed
+            // (resilience no longer has a separate crit-specific path).
 
             uint32 gain = uint32(-target->ModifyPower(powerType, -pdamage));
 

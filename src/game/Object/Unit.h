@@ -2228,10 +2228,15 @@ class Unit : public WorldObject
          */
         void DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss);
 
-        // player or player's pet resilience (-1%)
+        // WotLK-era crit-specific resilience helper. Cata 4.0.1 collapsed
+        // crit-damage resilience into the single damage-reduction path; this
+        // method is retained for any legacy callers but should not be invoked
+        // from new code on a 4.3.4 server.
         uint32 GetCritDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_RESILIENCE_DAMAGE_TAKEN, 2.2f, 33.0f, damage); }
-        // player or player's pet resilience (-1%), cap 100%
-        uint32 GetDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_RESILIENCE_DAMAGE_TAKEN, 2.0f, 100.0f, damage); }
+        // Cata 4.0.1: linear rate of 1.0 against the DBC-driven rating bonus
+        // (gtCombatRatings.dbc, ~95.79 rating per 1% at L85). The WotLK-era
+        // 2.0f multiplier double-counted the conversion table.
+        uint32 GetDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_RESILIENCE_DAMAGE_TAKEN, 1.0f, 100.0f, damage); }
 
         float  MeleeSpellMissChance(Unit* pVictim, WeaponAttackType attType, int32 skillDiff, SpellEntry const* spell);
         /**

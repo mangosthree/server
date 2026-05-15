@@ -2043,9 +2043,8 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
             {
                 damageInfo->HitInfo |= SPELL_HIT_TYPE_CRIT;
                 damage = SpellCriticalDamageBonus(spellInfo, damage, pVictim);
-                // Resilience - reduce crit damage
-                uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damage, damageSchoolMask);
-                damage -= pVictim->GetCritDamageReduction(reduction_affected_damage);
+                // Cata 4.0.1: no separate crit-damage resilience reduction;
+                // the single GetDamageReduction call below covers crit damage.
             }
         }
         break;
@@ -2062,9 +2061,8 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
             {
                 damageInfo->HitInfo |= SPELL_HIT_TYPE_CRIT;
                 damage = SpellCriticalDamageBonus(spellInfo, damage, pVictim);
-                // Resilience - reduce crit damage
-                uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damage, damageSchoolMask);
-                damage -= pVictim->GetCritDamageReduction(reduction_affected_damage);
+                // Cata 4.0.1: no separate crit-damage resilience reduction;
+                // the single GetDamageReduction call below covers crit damage.
             }
         }
         break;
@@ -2274,12 +2272,9 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
                 damageInfo->damage = int32((damageInfo->damage) * float((100.0f + mod) / 100.0f));
             }
 
-            // Resilience - reduce crit damage
-            uint32 reduction_affected_damage = CalcNotIgnoreDamageReduction(damageInfo->damage, damageInfo->damageSchoolMask);
-            uint32 resilienceReduction = pVictim->GetCritDamageReduction(reduction_affected_damage);
-
-            damageInfo->damage      -= resilienceReduction;
-            damageInfo->cleanDamage += resilienceReduction;
+            // Cata 4.0.1: no separate crit-damage resilience reduction; the
+            // single GetDamageReduction pass at the "// only from players"
+            // block below handles crit damage too.
             break;
         }
         case MELEE_HIT_PARRY:

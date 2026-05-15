@@ -3661,22 +3661,38 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
         return MELEE_HIT_CRIT;
     }
 
-    // mobs can score crushing blows if they're 4 or more levels above victim
-    // having defense above your maximum (from items, talents etc.) has no effect
-    // mob's level * 5 - player's current defense skill - add 2% chance per lacking skill point, min. is 20%
-    if ((getLevel() - 4) >= pVictim->getLevel() && !IsNonMeleeSpellCasted(false) /* It should have been !spellCasted but wrath doesn't have that? */
-        && roll < (tmp = (((attackerMaxSkillValueForLevel - tmp) * 200) - 2000)))
+    // Crushing blow (post-3.0.2 rules, retained through Cata 4.3.4).
+    // Mobs can crush only if 4+ levels above the victim. Raid bosses are
+    // standardized to +3 levels, so they cannot crush max-level players.
+    //
+    // Canonical Blizzard formula:
+    //   chance% = max(skill_diff, 20) * 2% - 15%
+    //   where skill_diff = attackerLevel*5 - defenderLevel*5
+    //
+    // Verified against warcraft.wiki.gg/wiki/Crushing_blow (2025-11-27)
+    // and the Cataclysm-Preservation TrinityCore 4.3.4 reference impl.
+    if ((getLevel() - 4) >= pVictim->getLevel() && !IsNonMeleeSpellCasted(false) /* It should have been !spellCasted but wrath doesn't have that? */)
     {
-        uint32 typeId = GetTypeId();
-        /* It should have been !(((Creature*)this)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_CRUSH) but wrath doesn't have that? */
-        Unit* tempOwner = GetOwner();
-        Unit* tempCharmer = GetCharmer();
-        if ((typeId == TYPEID_UNIT && !(GetOwnerGuid() && tempOwner && tempOwner->GetTypeId() == TYPEID_PLAYER)
-            && !(static_cast<Creature const*>(this)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_CRUSH))
-            || (typeId == TYPEID_PLAYER && GetCharmerGuid() && tempCharmer && tempCharmer->GetTypeId() == TYPEID_UNIT))
+        // skill_diff = attacker_skill - victim_skill, both = level*5.
+        // 3.0.2 floor: minimum 20 skill points (= 4-level diff).
+        int32 crush_chance = attackerMaxSkillValueForLevel - victimMaxSkillValueForLevel;
+        if (crush_chance < 20)
+            crush_chance = 20;
+        crush_chance = crush_chance * 200 - 1500;  // basis points; 10000 = 100%
+
+        if (crush_chance > 0 && roll < (sum += crush_chance))
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: CRUSHING %d)", tmp);
-            return MELEE_HIT_CRUSHING;
+            uint32 typeId = GetTypeId();
+            /* It should have been !(((Creature*)this)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_CRUSH) but wrath doesn't have that? */
+            Unit* tempOwner = GetOwner();
+            Unit* tempCharmer = GetCharmer();
+            if ((typeId == TYPEID_UNIT && !(GetOwnerGuid() && tempOwner && tempOwner->GetTypeId() == TYPEID_PLAYER)
+                && !(static_cast<Creature const*>(this)->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_CRUSH))
+                || (typeId == TYPEID_PLAYER && GetCharmerGuid() && tempCharmer && tempCharmer->GetTypeId() == TYPEID_UNIT))
+            {
+                DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: CRUSHING <%d, %d)", sum - crush_chance, sum);
+                return MELEE_HIT_CRUSHING;
+            }
         }
     }
 

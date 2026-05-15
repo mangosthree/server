@@ -3204,7 +3204,14 @@ class Player : public Unit
 
         // Remove all stat bonuses
         void _RemoveAllStatBonuses();
-        float GetArmorPenetrationPct() const { return m_armorPenetrationPct; }
+        // Cata 4.0.1 removed Armor Penetration Rating from gear; the
+        // stat conversion no longer exists in retail 4.3.4. Stubbed to
+        // return 0 so the armor-mitigation path is a no-op even if a
+        // legacy DB item still grants CR_ARMOR_PENETRATION. The cached
+        // m_armorPenetrationPct continues to track the rating value for
+        // diagnostic visibility but is intentionally unused in damage
+        // calc.
+        float GetArmorPenetrationPct() const { return 0.0f; }
         int32 GetSpellPenetrationItemMod() const { return m_spellPenetrationItemMod; }
 
         // Apply weapon-dependent aura mods

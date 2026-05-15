@@ -36,6 +36,7 @@ set(TEST_SOURCES
     test_AuraSystem.cpp
     test_ThreatSystem.cpp
     test_CombatFormulas.cpp
+    test_CataCombatFormulas.cpp
     test_InventorySystem.cpp
     test_MovementSystem.cpp
     test_GridSystem.cpp
@@ -95,6 +96,7 @@ add_test(NAME SpellEffectsTests    COMMAND mangos_tests WORKING_DIRECTORY ${CMAK
 add_test(NAME AuraSystemTests      COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 add_test(NAME ThreatSystemTests    COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 add_test(NAME CombatFormulasTests  COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME CataCombatFormulasTests COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 add_test(NAME InventorySystemTests COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 add_test(NAME MovementSystemTests  COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 add_test(NAME GridSystemTests      COMMAND mangos_tests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

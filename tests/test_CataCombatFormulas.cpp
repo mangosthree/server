@@ -60,6 +60,59 @@ float CalculateCrushingChanceCata(int32_t attackerLevel, int32_t defenderLevel)
     return float(skillDiff) * 2.0f - 15.0f;
 }
 
+// ----------------------------------------------------------------------------
+// Armor damage reduction (Cata 4.3.4)
+//
+// Canonical wiki formula:
+//   DR% = armor / (armor + K), capped at 75%
+//
+// where K depends on the attacker's level L:
+//   K(L) = 400 + 85*L              for L < 60
+//   K(L) = 467.5*L - 22167.5       for L >= 60
+//
+// Equivalent expanded form used in production code:
+//   denom         = 8.5 * levelModifier + 40
+//   levelModifier = L                       for L < 60
+//   levelModifier = L + 4.5*(L - 59)        for L >= 60
+//   K             = 10 * denom
+//
+// Specific K values:
+//   60: 5882.5     70: 10557.5    80: 15232.5
+//   83 (raid boss vs L80): 16635  85 (max): 17570
+//
+// NOTE: TC-Preservation includes an additional `+20*(L-80)` term in the
+// level modifier for L > 80 (giving K=26070 at L=85), citing the client's
+// Paperdollframe.lua. That file is the tooltip-display calculation and may
+// not reflect the server-side damage math. The Wowpedia / Warcraft Wiki /
+// WoWWiki sources consistently document the no-kicker formula, and
+// mangosthree's `Unit::CalcArmorReducedDamage` already implements it
+// correctly. These tests lock that in as a regression guard.
+// ----------------------------------------------------------------------------
+
+float CalculateArmorDRCata(float armor, int32_t attackerLevel)
+{
+    if (armor < 0.0f)
+    {
+        return 0.0f;
+    }
+
+    float levelModifier = float(attackerLevel);
+    if (attackerLevel > 59)
+    {
+        levelModifier += 4.5f * (levelModifier - 59.0f);
+    }
+
+    const float denom = 8.5f * levelModifier + 40.0f;
+    const float temp = 0.1f * armor / denom;
+    float dr = temp / (1.0f + temp);
+
+    if (dr > 0.75f)
+    {
+        dr = 0.75f;
+    }
+    return dr * 100.0f;
+}
+
 } // namespace CataCombatTest
 
 // ============================================================================
@@ -109,4 +162,69 @@ TEST(CataCrushingBlow, AttackerTenAbove_85Percent)
 {
     // skill_diff = 50. 50*2% - 15% = 85%.
     EXPECT_FLOAT_EQ(85.0f, CataCombatTest::CalculateCrushingChanceCata(85, 75));
+}
+
+// ============================================================================
+// Armor DR: zero / negative / cap behaviour
+// ============================================================================
+
+TEST(CataArmorDR, ZeroArmor_NoReduction)
+{
+    EXPECT_FLOAT_EQ(0.0f, CataCombatTest::CalculateArmorDRCata(0.0f, 85));
+}
+
+TEST(CataArmorDR, NegativeArmor_ClampedToZero)
+{
+    EXPECT_FLOAT_EQ(0.0f, CataCombatTest::CalculateArmorDRCata(-100.0f, 85));
+}
+
+TEST(CataArmorDR, MassiveArmor_CappedAt75Percent)
+{
+    EXPECT_FLOAT_EQ(75.0f, CataCombatTest::CalculateArmorDRCata(1000000.0f, 85));
+}
+
+// ============================================================================
+// 50% reduction is reached at armor == K(level)
+// ============================================================================
+
+TEST(CataArmorDR, Level60_AtK_50Percent)
+{
+    // K = 467.5*60 - 22167.5 = 5882.5
+    EXPECT_FLOAT_EQ(50.0f, CataCombatTest::CalculateArmorDRCata(5882.5f, 60));
+}
+
+TEST(CataArmorDR, Level70_AtK_50Percent)
+{
+    // K = 467.5*70 - 22167.5 = 10557.5
+    EXPECT_FLOAT_EQ(50.0f, CataCombatTest::CalculateArmorDRCata(10557.5f, 70));
+}
+
+TEST(CataArmorDR, Level80_AtK_50Percent)
+{
+    // K = 467.5*80 - 22167.5 = 15232.5
+    EXPECT_FLOAT_EQ(50.0f, CataCombatTest::CalculateArmorDRCata(15232.5f, 80));
+}
+
+TEST(CataArmorDR, Level83_RaidBoss_AtK_50Percent)
+{
+    // K = 467.5*83 - 22167.5 = 16635.0. Raid bosses are +3 levels above
+    // max-level players; this is the value seen by an L80 tank in WotLK
+    // raids and an L82 tank vs Cata heroic-mode +1 trash.
+    EXPECT_FLOAT_EQ(50.0f, CataCombatTest::CalculateArmorDRCata(16635.0f, 83));
+}
+
+TEST(CataArmorDR, Level85_MaxLevel_AtK_50Percent)
+{
+    // K = 467.5*85 - 22167.5 = 17570
+    EXPECT_FLOAT_EQ(50.0f, CataCombatTest::CalculateArmorDRCata(17570.0f, 85));
+}
+
+// ============================================================================
+// 75% cap is reached exactly at armor == 3 * K
+// ============================================================================
+
+TEST(CataArmorDR, Level85_ThreeXK_HitsCapExactly)
+{
+    // armor/K = 3 -> DR = 3/(3+1) = 0.75 = cap.
+    EXPECT_FLOAT_EQ(75.0f, CataCombatTest::CalculateArmorDRCata(52710.0f, 85));
 }

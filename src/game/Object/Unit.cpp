@@ -12454,7 +12454,15 @@ bool Unit::SelectHostileTarget()
     {
         if (!hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED))
         {
-            SetInFront(target);
+            // PACIFIED creatures (training dummies, etc.) keep their spawn
+            // orientation. PACIFIED already gates attack initiation, so visual
+            // auto-facing here is purely cosmetic AND it falsifies the angle-of-
+            // attack rules in RollMeleeOutcomeAgainst (the from-behind gate for
+            // parry/block) for any player testing combat against the creature.
+            if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+            {
+                SetInFront(target);
+            }
             if (oldTarget != target)
             {
                 ((Creature*)this)->AI()->AttackStart(target);

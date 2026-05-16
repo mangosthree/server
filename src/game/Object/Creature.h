@@ -92,6 +92,7 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_WALK_IN_WATER = 0x00008000,          ///< creature is forced to walk in water even it can swim
     CREATURE_FLAG_EXTRA_HAVE_NO_SWIM_ANIMATION = 0x00010000, ///< we have to not set "swim" animation or creature will have "no animation"
     CREATURE_FLAG_EXTRA_NO_MELEE = 0x00020000,               ///< creature can't melee
+    CREATURE_FLAG_EXTRA_UNKILLABLE = 0x00040000,             ///< creature cannot be killed by external damage; damage that would kill is clamped to leave it at 1 HP (e.g. training dummies)
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
@@ -613,6 +614,7 @@ class Creature : public Unit
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool IsCivilian() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_CIVILIAN) != 0; }
         bool IsGuard() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_GUARD) != 0; }
+        bool IsUnkillable() const { return (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_UNKILLABLE) != 0; }
 
         bool CanWalk() const { return (GetCreatureInfo()->InhabitType & INHABIT_GROUND) != 0; }
         bool CanSwim() const override { return (GetCreatureInfo()->InhabitType & INHABIT_WATER) != 0; }

@@ -1174,6 +1174,20 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
     uint32 health = pVictim->GetHealth();
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "deal dmg:%d to health:%d ", damage, health);
 
+    // Clamp damage on unkillable creatures (training dummies, etc.) so the
+    // death cascade below never fires. Damage is clamped to (health - 1),
+    // matching the TC-Preservation pattern: the dummy stays at 1 HP after
+    // a would-be-lethal blow, and subsequent damage simply does nothing.
+    // Self-damage is NOT clamped — a creature suiciding on its own effect
+    // (Hellfire-style) should still resolve normally if the flag is ever
+    // set on such a unit.
+    if (damage >= health && pVictim != this &&
+        pVictim->GetTypeId() == TYPEID_UNIT &&
+        ((Creature*)pVictim)->IsUnkillable())
+    {
+        damage = health > 1 ? health - 1 : 0;
+    }
+
     // Rage from Damage made (only from direct weapon damage)
     if (cleanDamage && damagetype == DIRECT_DAMAGE && this != pVictim && GetTypeId() == TYPEID_PLAYER && (GetPowerType() == POWER_RAGE))
     {

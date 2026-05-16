@@ -528,11 +528,15 @@ void WorldSession::LogoutPlayer(bool Save)
         }
         else if (!_player->getAttackers().empty())
         {
-            _player->CombatStop();
-            _player->GetHostileRefManager().setOnlineOfflineState(false);
-            _player->RemoveAllAurasOnDeath();
-
-            // build set of player who attack _player or who have pet attacking of _player
+            // Build the set of player (or player-pet) attackers first; the
+            // kill-on-logout cascade below only runs when real players are
+            // involved (PvP-style honor death). PvE-only attackers — training
+            // dummies, neutral mobs that briefly grabbed aggro, anything whose
+            // owner isn't a player — get the cheap CombatStop and then continue
+            // into the normal save-and-logout path. Without this guard, just
+            // attacking a PACIFIED training dummy and typing /logout would
+            // KillPlayer, save the character to DB with 0 HP, and force a
+            // graveyard revive on the next login.
             std::set<Player*> aset;
             for (Unit::AttackerSet::const_iterator itr = _player->getAttackers().begin(); itr != _player->getAttackers().end(); ++itr)
             {
@@ -550,24 +554,30 @@ void WorldSession::LogoutPlayer(bool Save)
                 }
             }
 
-            _player->SetPvPDeath(!aset.empty());
-            _player->KillPlayer();
-            _player->BuildPlayerRepop();
-            _player->RepopAtGraveyard();
+            _player->CombatStop();
+            _player->GetHostileRefManager().setOnlineOfflineState(false);
 
-            // give honor to all attackers from set like group case
-            for (std::set<Player*>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
-            {
-                (*itr)->RewardHonor(_player, aset.size());
-            }
-
-            // give bg rewards and update counters like kill by first from attackers
-            // this can't be called for all attackers.
             if (!aset.empty())
+            {
+                _player->RemoveAllAurasOnDeath();
+                _player->SetPvPDeath(true);
+                _player->KillPlayer();
+                _player->BuildPlayerRepop();
+                _player->RepopAtGraveyard();
+
+                // give honor to all attackers from set like group case
+                for (std::set<Player*>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
+                {
+                    (*itr)->RewardHonor(_player, aset.size());
+                }
+
+                // give bg rewards and update counters like kill by first from attackers
+                // this can't be called for all attackers.
                 if (BattleGround* bg = _player->GetBattleGround())
                 {
                     bg->HandleKillPlayer(_player, *aset.begin());
                 }
+            }
         }
         else if (_player->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
         {

@@ -411,6 +411,19 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS] =
     &Unit::HandleNULLProc                                   //370 1 spells in 4.3.4 Fair Far Clip
 };
 
+/**
+ * @brief Checks whether a proc aura may trigger for the current spell event context.
+ *
+ * @param pVictim The proc victim.
+ * @param holder The aura holder being evaluated.
+ * @param procSpell The spell that caused the proc event.
+ * @param procFlag The proc flags for the event.
+ * @param procExtra Additional proc context flags.
+ * @param attType The triggering attack type.
+ * @param isVictim True if the current unit is the victim side of the event.
+ * @param spellProcEvent Receives the resolved proc event entry.
+ * @return true if the aura should trigger; otherwise false.
+ */
 bool Unit::IsTriggeredAtSpellProcEvent(Unit* pVictim, SpellAuraHolder* holder, SpellEntry const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, SpellProcEventEntry const*& spellProcEvent)
 {
     SpellEntry const* spellProto = holder->GetSpellProto();
@@ -520,6 +533,11 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* pVictim, SpellAuraHolder* holder, S
     return roll_chance_f(chance);
 }
 
+/**
+ * @brief Handles haste-style aura procs that trigger follow-up effects.
+ *
+ * @return SpellAuraProcResult The proc handling result.
+ */
 SpellAuraProcResult Unit::HandleHasteAuraProc(Unit* pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* /*procSpell*/, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 cooldown)
 {
     SpellEntry const* hasteSpell = triggeredByAura->GetSpellProto();
@@ -678,6 +696,11 @@ SpellAuraProcResult Unit::HandleSpellCritChanceAuraProc(Unit* pVictim, uint32 /*
     return SPELL_AURA_PROC_OK;
 }
 
+/**
+ * @brief Handles dummy aura procs with spell-family-specific custom logic.
+ *
+ * @return SpellAuraProcResult The proc handling result.
+ */
 SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown)
 {
     SpellEntry const *dummySpell = triggeredByAura->GetSpellProto();
@@ -3255,6 +3278,11 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
     return SPELL_AURA_PROC_OK;
 }
 
+/**
+ * @brief Handles proc-trigger-spell auras and resolves their triggered casts.
+ *
+ * @return SpellAuraProcResult The proc handling result.
+ */
 SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlags, uint32 procEx, uint32 cooldown)
 {
     // Get triggered aura spell info
@@ -4329,6 +4357,11 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
     return SPELL_AURA_PROC_OK;
 }
 
+/**
+ * @brief Handles damage-trigger proc auras that deal direct spell damage.
+ *
+ * @return SpellAuraProcResult The proc handling result.
+ */
 SpellAuraProcResult Unit::HandleProcTriggerDamageAuraProc(Unit* pVictim, uint32 /*damage*/, Aura* triggeredByAura, SpellEntry const* /*procSpell*/, uint32 /*procFlags*/, uint32 /*procEx*/, uint32 /*cooldown*/)
 {
     SpellEntry const* spellInfo = triggeredByAura->GetSpellProto();
@@ -4343,6 +4376,11 @@ SpellAuraProcResult Unit::HandleProcTriggerDamageAuraProc(Unit* pVictim, uint32 
     return SPELL_AURA_PROC_OK;
 }
 
+/**
+ * @brief Handles override-class-script aura procs with script-id-specific behavior.
+ *
+ * @return SpellAuraProcResult The proc handling result.
+ */
 SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(Unit* pVictim, uint32 /*damage*/, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/ , uint32 cooldown)
 {
     int32 scriptId = triggeredByAura->GetModifier()->m_miscvalue;
@@ -4540,18 +4578,33 @@ SpellAuraProcResult Unit::HandleMendingAuraProc(Unit* /*pVictim*/, uint32 /*dama
     return SPELL_AURA_PROC_OK;
 }
 
+/**
+ * @brief Handles casting-speed proc auras that require a non-instant trigger spell.
+ *
+ * @return SpellAuraProcResult The proc handling result.
+ */
 SpellAuraProcResult Unit::HandleModCastingSpeedNotStackAuraProc(Unit* /*pVictim*/, uint32 /*damage*/, Aura* /*triggeredByAura*/, SpellEntry const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
 {
     // Skip melee hits or instant cast spells
     return !(procSpell == NULL || GetSpellCastTime(procSpell) == 0) ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED;
 }
 
+/**
+ * @brief Handles school-reflect proc auras when the trigger spell matches the reflected school.
+ *
+ * @return SpellAuraProcResult The proc handling result.
+ */
 SpellAuraProcResult Unit::HandleReflectSpellsSchoolAuraProc(Unit* /*pVictim*/, uint32 /*damage*/, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
 {
     // Skip Melee hits and spells ws wrong school
     return !(procSpell == NULL || (triggeredByAura->GetModifier()->m_miscvalue & procSpell->SchoolMask) == 0) ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED;
 }
 
+/**
+ * @brief Handles power-cost proc auras when the trigger spell has matching school and cost.
+ *
+ * @return SpellAuraProcResult The proc handling result.
+ */
 SpellAuraProcResult Unit::HandleModPowerCostSchoolAuraProc(Unit* /*pVictim*/, uint32 /*damage*/, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
 {
     // Skip melee hits and spells ws wrong school or zero cost
@@ -4560,6 +4613,11 @@ SpellAuraProcResult Unit::HandleModPowerCostSchoolAuraProc(Unit* /*pVictim*/, ui
             (triggeredByAura->GetModifier()->m_miscvalue & procSpell->SchoolMask) == 0) ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED;  // School check
 }
 
+/**
+ * @brief Handles mechanic-immunity resistance procs for matching spell mechanics.
+ *
+ * @return SpellAuraProcResult The proc handling result.
+ */
 SpellAuraProcResult Unit::HandleMechanicImmuneResistanceAuraProc(Unit* /*pVictim*/, uint32 /*damage*/, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
 {
     // Compare mechanic
@@ -4782,6 +4840,11 @@ SpellAuraProcResult Unit::HandleManaShieldAuraProc(Unit* pVictim, uint32 /*damag
     return SPELL_AURA_PROC_OK;
 }
 
+/**
+ * @brief Handles resistance-related proc auras with spell-specific damage checks.
+ *
+ * @return SpellAuraProcResult The proc handling result.
+ */
 SpellAuraProcResult Unit::HandleModResistanceAuraProc(Unit* /*pVictim*/, uint32 damage, Aura* triggeredByAura, SpellEntry const* /*procSpell*/, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
 {
     SpellEntry const* spellInfo = triggeredByAura->GetSpellProto();
@@ -4799,6 +4862,11 @@ SpellAuraProcResult Unit::HandleModResistanceAuraProc(Unit* /*pVictim*/, uint32 
     return SPELL_AURA_PROC_OK;
 }
 
+/**
+ * @brief Handles procs that remove an aura based on incoming damage chance.
+ *
+ * @return SpellAuraProcResult The proc handling result.
+ */
 SpellAuraProcResult Unit::HandleRemoveByDamageChanceProc(Unit* /*pVictim*/, uint32 damage, Aura* triggeredByAura, SpellEntry const* /*procSpell*/, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 /*cooldown*/)
 {
     // The chance to dispel an aura depends on the damage taken with respect to the casters level.
@@ -4815,6 +4883,11 @@ SpellAuraProcResult Unit::HandleRemoveByDamageChanceProc(Unit* /*pVictim*/, uint
     return SPELL_AURA_PROC_FAILED;
 }
 
+/**
+ * @brief Handles invisibility-related procs that break invisibility auras.
+ *
+ * @return SpellAuraProcResult The proc handling result.
+ */
 SpellAuraProcResult Unit::HandleInvisibilityAuraProc(Unit* pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, uint32 procEx, uint32 cooldown)
 {
     if (triggeredByAura->GetSpellProto()->HasAttribute(SPELL_ATTR_PASSIVE) || triggeredByAura->GetSpellProto()->HasAttribute(SPELL_ATTR_NEGATIVE))

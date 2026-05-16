@@ -27,6 +27,9 @@
 
 #include "Common.h"
 
+/**
+ * Loads the random enchantment modifier table from the configured data source.
+ */
 void LoadRandomEnchantmentsTable();
 uint32 GetItemRandomPropertyMod(uint32 entry);
 uint32 GetItemRandomSuffixMod(uint32 entry);

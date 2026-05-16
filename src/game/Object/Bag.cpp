@@ -27,6 +27,9 @@
 #include "Database/DatabaseEnv.h"
 #include "UpdateData.h"
 
+/**
+ * @brief Creates an empty bag item instance.
+ */
 Bag::Bag(): Item()
 {
     m_objectType |= (TYPEMASK_ITEM | TYPEMASK_CONTAINER);
@@ -37,6 +40,9 @@ Bag::Bag(): Item()
     memset(m_bagslot, 0, sizeof(Item*) * MAX_BAG_SIZE);
 }
 
+/**
+ * @brief Destroys the bag and deletes any contained item pointers.
+ */
 Bag::~Bag()
 {
     for (int i = 0; i < MAX_BAG_SIZE; ++i)
@@ -45,6 +51,9 @@ Bag::~Bag()
     }
 }
 
+/**
+ * @brief Adds the bag and all contained items to the world.
+ */
 void Bag::AddToWorld()
 {
     Item::AddToWorld();
@@ -56,6 +65,9 @@ void Bag::AddToWorld()
         }
 }
 
+/**
+ * @brief Removes the bag and all contained items from the world.
+ */
 void Bag::RemoveFromWorld()
 {
     for (uint32 i = 0; i < GetBagSize(); ++i)
@@ -67,6 +79,16 @@ void Bag::RemoveFromWorld()
     Item::RemoveFromWorld();
 }
 
+/**
+ * @brief Creates bag data from an item template.
+ *
+ * Initializes ownership, durability, stack count, and all bag slots.
+ *
+ * @param guidlow The low part of the bag GUID.
+ * @param itemid The item entry used as the bag template.
+ * @param owner The owning player, if any.
+ * @return true if the bag was created successfully; otherwise, false.
+ */
 bool Bag::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 {
     ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(itemid);
@@ -101,11 +123,24 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player const* owner)
     return true;
 }
 
+/**
+ * @brief Saves the bag state to the database.
+ */
 void Bag::SaveToDB()
 {
     Item::SaveToDB();
 }
 
+/**
+ * @brief Loads the bag state from the database.
+ *
+ * Clears slot state so contained items can be rebuilt from character inventory data.
+ *
+ * @param guidLow The low part of the bag GUID.
+ * @param fields The database field array containing the bag data.
+ * @param ownerGuid The owner GUID for the bag.
+ * @return true if the bag loaded successfully; otherwise, false.
+ */
 bool Bag::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
 {
     if (!Item::LoadFromDB(guidLow, fields, ownerGuid))
@@ -125,6 +160,9 @@ bool Bag::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
     return true;
 }
 
+/**
+ * @brief Deletes the bag and its contained items from the database.
+ */
 void Bag::DeleteFromDB()
 {
     for (int i = 0; i < MAX_BAG_SIZE; ++i)
@@ -136,6 +174,11 @@ void Bag::DeleteFromDB()
     Item::DeleteFromDB();
 }
 
+/**
+ * @brief Counts the number of free slots in the bag.
+ *
+ * @return The number of currently empty bag slots.
+ */
 uint32 Bag::GetFreeSlots() const
 {
     uint32 slots = 0;
@@ -148,6 +191,11 @@ uint32 Bag::GetFreeSlots() const
     return slots;
 }
 
+/**
+ * @brief Removes an item from a bag slot.
+ *
+ * @param slot The slot index to clear.
+ */
 void Bag::RemoveItem(uint8 slot, bool /*update*/)
 {
     MANGOS_ASSERT(slot < MAX_BAG_SIZE);
@@ -161,6 +209,12 @@ void Bag::RemoveItem(uint8 slot, bool /*update*/)
     SetGuidValue(CONTAINER_FIELD_SLOT_1 + (slot * 2), ObjectGuid());
 }
 
+/**
+ * @brief Stores an item in a bag slot.
+ *
+ * @param slot The destination slot index.
+ * @param pItem The item to store.
+ */
 void Bag::StoreItem(uint8 slot, Item* pItem, bool /*update*/)
 {
     MANGOS_ASSERT(slot < MAX_BAG_SIZE);
@@ -176,6 +230,12 @@ void Bag::StoreItem(uint8 slot, Item* pItem, bool /*update*/)
     }
 }
 
+/**
+ * @brief Builds creation update data for the bag and its contents.
+ *
+ * @param data The update buffer to populate.
+ * @param target The player receiving the update.
+ */
 void Bag::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const
 {
     Item::BuildCreateUpdateBlockForPlayer(data, target);
@@ -187,7 +247,11 @@ void Bag::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) cons
         }
 }
 
-// If the bag is empty returns true
+/**
+ * @brief Checks whether the bag contains any items.
+ *
+ * @return true if every slot is empty; otherwise, false.
+ */
 bool Bag::IsEmpty() const
 {
     for (uint32 i = 0; i < GetBagSize(); ++i)
@@ -199,6 +263,12 @@ bool Bag::IsEmpty() const
     return true;
 }
 
+/**
+ * @brief Finds the first item in the bag matching an entry ID.
+ *
+ * @param item The item entry to search for.
+ * @return Pointer to the matching item, or NULL if not found.
+ */
 Item* Bag::GetItemByEntry(uint32 item) const
 {
     for (uint32 i = 0; i < GetBagSize(); ++i)
@@ -221,6 +291,13 @@ Item* Bag::GetItemByLimitedCategory(uint32 limitedCategory) const
     return NULL;
 }
 
+/**
+ * @brief Counts items in the bag matching an entry ID.
+ *
+ * @param item The item entry to count.
+ * @param eItem An optional item to exclude from the count.
+ * @return The total stack count for matching items.
+ */
 uint32 Bag::GetItemCount(uint32 item, Item* eItem) const
 {
     uint32 count = 0;
@@ -257,6 +334,12 @@ uint32 Bag::GetItemCountWithLimitCategory(uint32 limitCategory, Item* eItem) con
     return count;
 }
 
+/**
+ * @brief Finds the slot containing a specific item GUID.
+ *
+ * @param guid The GUID of the item to locate.
+ * @return The slot index, or NULL_SLOT if the item is not present.
+ */
 uint8 Bag::GetSlotByItemGUID(ObjectGuid guid) const
 {
     for (uint32 i = 0; i < GetBagSize(); ++i)
@@ -269,6 +352,12 @@ uint8 Bag::GetSlotByItemGUID(ObjectGuid guid) const
     return NULL_SLOT;
 }
 
+/**
+ * @brief Retrieves the item stored in a specific slot.
+ *
+ * @param slot The slot index to inspect.
+ * @return Pointer to the item in the slot, or NULL if the slot is invalid or empty.
+ */
 Item* Bag::GetItemByPos(uint8 slot) const
 {
     if (slot < GetBagSize())

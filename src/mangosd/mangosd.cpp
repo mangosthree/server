@@ -22,14 +22,31 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/// \addtogroup mangosd Mangos Daemon
-/// @{
-/// \file
+/**
+ * @file mangosd.cpp
+ * @brief World server daemon entry point
+ *
+ * This file implements the main entry point for the MaNGOS world server
+ * daemon (mangosd). It handles:
+ * - Command line argument parsing
+ * - Service/daemon mode initialization
+ * - Database connections (World, Character, Login)
+ * - Server subsystem initialization
+ * - Multiple thread management (World, CLI, Auto-freeze, SOAP)
+ * - Main event loop and shutdown
+ *
+ * The world server is responsible for running the game simulation,
+ * handling player connections, and managing game state.
+ *
+ * @addtogroup mangosd Mangos Daemon
+ * @{
+ */
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
 #  include <openssl/provider.h>
+#  include "Auth/OpenSSLProvider.h"
 #endif
 #include <ace/Version.h>
 #include <ace/Get_Opt.h>
@@ -71,16 +88,21 @@
  #include "PosixDaemon.h"
 #endif
 
-//*******************************************************************************************************//
 DatabaseType WorldDatabase;                                 ///< Accessor to the world database
 DatabaseType CharacterDatabase;                             ///< Accessor to the character database
 DatabaseType LoginDatabase;                                 ///< Accessor to the realm/login database
 
 uint32 realmID = 0;                                         ///< Id of the realm
-//*******************************************************************************************************//
 
-
-/// Clear 'online' status for all accounts with characters in this realm
+/**
+ * @brief Clear online status for realm accounts on startup
+ *
+ * Resets the 'online' status for all accounts that were marked as
+ * connected to this realm. This handles cases where the server
+ * crashed without properly logging out all players.
+ *
+ * Also resets character online status and battleground instance data.
+ */
 static void clear_online_accounts()
 {
     // Cleanup online status for characters hosted at current realm
@@ -94,7 +116,18 @@ static void clear_online_accounts()
 }
 
 
-/// Initialize connection to the databases
+/**
+ * @brief Initialize database connections
+ * @return true if all databases connected successfully, false otherwise
+ *
+ * Connects to three databases:
+ * - World Database: Contains game data (creatures, items, quests, etc.)
+ * - Character Database: Contains player character data
+ * - Login Database: References realm authentication data
+ *
+ * Validates database versions and connection counts from configuration.
+ * On failure, properly cleans up any connections that were established.
+ */
 static bool start_db()
 {
     ///- Get world database info from configuration file
@@ -419,25 +452,11 @@ int main(int argc, char** argv)
     DETAIL_LOG("Using SSL version: %s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
 
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-    OSSL_PROVIDER* legacy;
-    OSSL_PROVIDER* deflt;
+    // RAII provider management - automatically handles cleanup
+    OpenSSLProviderManager providerManager;
 
-    /* Load Multiple providers into the default (NULL) library context */
-    legacy = OSSL_PROVIDER_load(NULL, "legacy");
-    if (legacy == NULL) {
-        sLog.outError("Failed to load OpenSSL 3.x Legacy provider\n");
-#ifdef WIN32
-        sLog.outError("\nPlease check you have set the following Enviroment Varible:\n");
-        sLog.outError("OPENSSL_MODULES=C:\\OpenSSL-Win64\\bin\n");
-        sLog.outError("(where C:\\OpenSSL-Win64\\bin is the location you installed OpenSSL\n");
-#endif
-        Log::WaitBeforeContinueIfNeed();
-        return 0;
-    }
-    deflt = OSSL_PROVIDER_load(NULL, "default");
-    if (deflt == NULL) {
-        sLog.outError("Failed to load OpenSSL 3.x Default provider\n");
-        OSSL_PROVIDER_unload(legacy);
+    if (!providerManager.IsInitialized())
+    {
         Log::WaitBeforeContinueIfNeed();
         return 0;
     }

@@ -37,6 +37,14 @@
 #include "Chat.h"
 #include "Language.h"
 
+/**
+ * @brief Updates the repeat timer for an EventAI event.
+ *
+ * @param creature The creature using the event.
+ * @param repeatMin The minimum repeat interval.
+ * @param repeatMax The maximum repeat interval.
+ * @return true if a valid timer was set; otherwise, false.
+ */
 bool CreatureEventAIHolder::UpdateRepeatTimer(Creature* creature, uint32 repeatMin, uint32 repeatMax)
 {
     if (repeatMin == repeatMax)
@@ -57,6 +65,12 @@ bool CreatureEventAIHolder::UpdateRepeatTimer(Creature* creature, uint32 repeatM
     return true;
 }
 
+/**
+ * @brief Checks whether EventAI is the appropriate AI for a creature.
+ *
+ * @param creature The creature being evaluated.
+ * @return The EventAI permissibility score.
+ */
 int CreatureEventAI::Permissible(const Creature* creature)
 {
     if (creature->GetAIName() == "EventAI")
@@ -66,6 +80,11 @@ int CreatureEventAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
+/**
+ * @brief Prints current EventAI debug information for the creature.
+ *
+ * @param reader The chat handler receiving the output.
+ */
 void CreatureEventAI::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage(LANG_NPC_EVENTAI_PHASE, (uint32)m_Phase);
@@ -102,6 +121,11 @@ inline bool IsEventFlagsFitForNormalMap(uint8 eFlags)
            (eFlags & EFLAG_DIFFICULTY_0);
 }
 
+/**
+ * @brief Constructs EventAI state for a creature and loads its events.
+ *
+ * @param c The controlled creature.
+ */
 CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
     m_Phase(0),
     m_MeleeEnabled(true),
@@ -192,6 +216,12 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
     DEBUG_FILTER_LOG(LOG_FILTER_EVENT_AI_DEV, "CreatureEventAI: Event type %u (script %u) triggered for %s (invoked by %s)",    \
                      pHolder.Event.event_type, pHolder.Event.event_id, m_creature->GetGuidStr().c_str(), pActionInvoker ? pActionInvoker->GetGuidStr().c_str() : "<no invoker>")
 
+/**
+ * @brief Checks whether an EventAI event type is driven by timer-style scheduling.
+ *
+ * @param type The EventAI event type.
+ * @return true if the event type uses timer-based execution; otherwise false.
+ */
 inline bool IsTimerBasedEvent(EventAI_Type type)
 {
     switch (type)
@@ -216,6 +246,14 @@ inline bool IsTimerBasedEvent(EventAI_Type type)
     }
 }
 
+/**
+ * @brief Processes a single EventAI event and its actions.
+ *
+ * @param pHolder The event holder to evaluate.
+ * @param pActionInvoker The unit that triggered the event.
+ * @param pAIEventSender Optional AI event sender.
+ * @return true if the event was processed; otherwise, false.
+ */
 bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvoker, Creature* pAIEventSender /*=NULL*/)
 {
     if (!pHolder.Enabled || pHolder.Time)
@@ -631,6 +669,15 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
     return true;
 }
 
+/**
+ * @brief Executes a single EventAI action.
+ *
+ * @param action The action to execute.
+ * @param rnd The precomputed random value for the event.
+ * @param EventId The owning event id.
+ * @param pActionInvoker The unit that triggered the event.
+ * @param pAIEventSender Optional AI event sender.
+ */
 void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker, Creature* pAIEventSender)
 {
     if (action.type == ACTION_T_NONE)          //0
@@ -1299,6 +1346,9 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
     }
 }
 
+/**
+ * @brief Handles creature respawn and spawned-event initialization.
+ */
 void CreatureEventAI::JustRespawned()                       // NOTE that this is called from the AI's constructor as well
 {
     Reset();
@@ -1321,6 +1371,9 @@ void CreatureEventAI::JustRespawned()                       // NOTE that this is
     }
 }
 
+/**
+ * @brief Resets EventAI runtime state and out-of-combat timers.
+ */
 void CreatureEventAI::Reset()
 {
     m_EventUpdateTime = EVENT_UPDATE_TIME;
@@ -1351,6 +1404,9 @@ void CreatureEventAI::Reset()
     }
 }
 
+/**
+ * @brief Handles EventAI processing after the creature reaches home.
+ */
 void CreatureEventAI::JustReachedHome()
 {
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
@@ -1364,6 +1420,9 @@ void CreatureEventAI::JustReachedHome()
     Reset();
 }
 
+/**
+ * @brief Enters evade mode and processes evade events.
+ */
 void CreatureEventAI::EnterEvadeMode()
 {
     m_creature->RemoveAllAurasOnEvade();
@@ -1388,6 +1447,11 @@ void CreatureEventAI::EnterEvadeMode()
     }
 }
 
+/**
+ * @brief Handles EventAI death processing.
+ *
+ * @param killer The unit that killed the creature.
+ */
 void CreatureEventAI::JustDied(Unit* killer)
 {
     Reset();
@@ -1419,6 +1483,11 @@ void CreatureEventAI::JustDied(Unit* killer)
     m_Phase = 0;
 }
 
+/**
+ * @brief Handles EventAI kill events for slain player victims.
+ *
+ * @param victim The killed unit.
+ */
 void CreatureEventAI::KilledUnit(Unit* victim)
 {
     if (victim->GetTypeId() != TYPEID_PLAYER)
@@ -1435,6 +1504,11 @@ void CreatureEventAI::KilledUnit(Unit* victim)
     }
 }
 
+/**
+ * @brief Handles summoned creature creation events.
+ *
+ * @param pUnit The summoned creature.
+ */
 void CreatureEventAI::JustSummoned(Creature* pUnit)
 {
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
@@ -1446,6 +1520,11 @@ void CreatureEventAI::JustSummoned(Creature* pUnit)
     }
 }
 
+/**
+ * @brief Handles events when a summoned creature dies.
+ *
+ * @param pUnit The summoned creature.
+ */
 void CreatureEventAI::SummonedCreatureJustDied(Creature* pUnit)
 {
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
@@ -1457,6 +1536,11 @@ void CreatureEventAI::SummonedCreatureJustDied(Creature* pUnit)
     }
 }
 
+/**
+ * @brief Handles events when a summoned creature despawns.
+ *
+ * @param pUnit The summoned creature.
+ */
 void CreatureEventAI::SummonedCreatureDespawn(Creature* pUnit)
 {
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
@@ -1468,6 +1552,14 @@ void CreatureEventAI::SummonedCreatureDespawn(Creature* pUnit)
     }
 }
 
+/**
+ * @brief Receives and processes incoming AI events.
+ *
+ * @param eventType The AI event type.
+ * @param pSender The sending creature.
+ * @param pInvoker The invoking unit.
+ * @param miscValue Additional event data.
+ */
 void CreatureEventAI::ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*miscValue*/)
 {
     MANGOS_ASSERT(pSender);
@@ -1482,6 +1574,11 @@ void CreatureEventAI::ReceiveAIEvent(AIEventType eventType, Creature* pSender, U
     }
 }
 
+/**
+ * @brief Handles combat entry and initializes combat event timers.
+ *
+ * @param enemy The unit entering combat with the creature.
+ */
 void CreatureEventAI::EnterCombat(Unit* enemy)
 {
     // Check for on combat start events
@@ -1513,6 +1610,11 @@ void CreatureEventAI::EnterCombat(Unit* enemy)
     m_EventDiff = 0;
 }
 
+/**
+ * @brief Starts attacking a target using current EventAI combat settings.
+ *
+ * @param who The target to attack.
+ */
 void CreatureEventAI::AttackStart(Unit* who)
 {
     if (!who || !m_creature->CanAttackByItself())
@@ -1530,6 +1632,11 @@ void CreatureEventAI::AttackStart(Unit* who)
     }
 }
 
+/**
+ * @brief Reacts to units entering line of sight.
+ *
+ * @param who The unit in line of sight.
+ */
 void CreatureEventAI::MoveInLineOfSight(Unit* who)
 {
     if (!who)
@@ -1591,6 +1698,12 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
     }
 }
 
+/**
+ * @brief Handles spell-hit events for EventAI scripts.
+ *
+ * @param pUnit The casting unit.
+ * @param pSpell The spell that hit the creature.
+ */
 void CreatureEventAI::SpellHit(Unit* pUnit, const SpellEntry* pSpell)
 {
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
@@ -1609,6 +1722,11 @@ void CreatureEventAI::SpellHit(Unit* pUnit, const SpellEntry* pSpell)
     }
 }
 
+/**
+ * @brief Updates EventAI timers, spell lists, and melee behavior.
+ *
+ * @param diff The elapsed update time in milliseconds.
+ */
 void CreatureEventAI::UpdateAI(const uint32 diff)
 {
     // Check if we are in combat (also updates calls threat update code)
@@ -1691,12 +1809,27 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
     }
 }
 
+/**
+ * @brief Checks whether a unit is visible to this creature AI.
+ *
+ * @param pl The unit to test.
+ * @return true if visible; otherwise, false.
+ */
 bool CreatureEventAI::IsVisible(Unit* pl) const
 {
     return m_creature->IsWithinDist(pl, sWorld.getConfig(CONFIG_FLOAT_SIGHT_MONSTER))
            && pl->IsVisibleForOrDetect(m_creature, m_creature, true);
 }
 
+/**
+ * @brief Selects a random unsigned action parameter from three options.
+ *
+ * @param rnd The random seed value.
+ * @param param1 The first option.
+ * @param param2 The second option.
+ * @param param3 The third option.
+ * @return The selected parameter value.
+ */
 inline uint32 CreatureEventAI::GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3)
 {
     switch (rnd % 3)
@@ -1708,6 +1841,15 @@ inline uint32 CreatureEventAI::GetRandActionParam(uint32 rnd, uint32 param1, uin
     return 0;
 }
 
+/**
+ * @brief Selects a random signed action parameter from three options.
+ *
+ * @param rnd The random seed value.
+ * @param param1 The first option.
+ * @param param2 The second option.
+ * @param param3 The third option.
+ * @return The selected parameter value.
+ */
 inline int32 CreatureEventAI::GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3)
 {
     switch (rnd % 3)
@@ -1719,6 +1861,17 @@ inline int32 CreatureEventAI::GetRandActionParam(uint32 rnd, int32 param1, int32
     return 0;
 }
 
+/**
+ * @brief Resolves an action target based on EventAI target selection rules.
+ *
+ * @param Target The target selection type.
+ * @param pActionInvoker The invoking unit.
+ * @param pAIEventSender The sending creature for AI events.
+ * @param isError Receives whether target resolution failed.
+ * @param forSpellId Optional spell context.
+ * @param selectFlags Additional target selection flags.
+ * @return The resolved target, or null if none matched.
+ */
 inline Unit* CreatureEventAI::GetTargetByType(uint32 Target, Unit* pActionInvoker, Creature* pAIEventSender, bool& isError, uint32 forSpellId, uint32 selectFlags)
 {
     Unit* resTarget;
@@ -1800,6 +1953,13 @@ inline Unit* CreatureEventAI::GetTargetByType(uint32 Target, Unit* pActionInvoke
     };
 }
 
+/**
+ * @brief Selects the friendly unit missing the most health within range.
+ *
+ * @param range The search radius.
+ * @param MinHPDiff The minimum missing health requirement.
+ * @return The selected unit, or null if none matched.
+ */
 Unit* CreatureEventAI::DoSelectLowestHpFriendly(float range, uint32 MinHPDiff)
 {
     Unit* pUnit = NULL;
@@ -1815,6 +1975,12 @@ Unit* CreatureEventAI::DoSelectLowestHpFriendly(float range, uint32 MinHPDiff)
     return pUnit;
 }
 
+/**
+ * @brief Finds friendly crowd-controlled creatures in range.
+ *
+ * @param _list Receives matching creatures.
+ * @param range The search radius.
+ */
 void CreatureEventAI::DoFindFriendlyCC(std::list<Creature*>& _list, float range)
 {
     MaNGOS::FriendlyCCedInRangeCheck u_check(m_creature, range);
@@ -1822,6 +1988,13 @@ void CreatureEventAI::DoFindFriendlyCC(std::list<Creature*>& _list, float range)
     Cell::VisitGridObjects(m_creature, searcher, range);
 }
 
+/**
+ * @brief Finds friendly creatures missing a specific buff in range.
+ *
+ * @param _list Receives matching creatures.
+ * @param range The search radius.
+ * @param spellid The buff spell id.
+ */
 void CreatureEventAI::DoFindFriendlyMissingBuff(std::list<Creature*>& _list, float range, uint32 spellid)
 {
     MaNGOS::FriendlyMissingBuffInRangeCheck u_check(m_creature, range, spellid);
@@ -1832,6 +2005,12 @@ void CreatureEventAI::DoFindFriendlyMissingBuff(std::list<Creature*>& _list, flo
 //*********************************
 //*** Functions used globally ***
 
+/**
+ * @brief Handles text emote events directed at the creature.
+ *
+ * @param pPlayer The player sending the emote.
+ * @param text_emote The text emote id.
+ */
 void CreatureEventAI::ReceiveEmote(Player* pPlayer, uint32 text_emote)
 {
     for (CreatureEventAIList::iterator itr = m_CreatureEventAIList.begin(); itr != m_CreatureEventAIList.end(); ++itr)
@@ -1855,6 +2034,12 @@ void CreatureEventAI::ReceiveEmote(Player* pPlayer, uint32 text_emote)
 
 constexpr auto HEALTH_STEPS = 3;
 
+/**
+ * @brief Adjusts incoming damage for invincibility thresholds and health AI events.
+ *
+ * @param dealer The damaging unit.
+ * @param damage The incoming damage, updated in place.
+ */
 void CreatureEventAI::DamageTaken(Unit* dealer, uint32& damage)
 {
     if (m_InvinceabilityHpLevel > 0 && m_creature->GetHealth() < m_InvinceabilityHpLevel + damage)
@@ -1901,6 +2086,12 @@ void CreatureEventAI::DamageTaken(Unit* dealer, uint32& damage)
     }
 }
 
+/**
+ * @brief Processes heal-based AI events.
+ *
+ * @param healer The healing unit.
+ * @param healedAmount The healing amount.
+ */
 void CreatureEventAI::HealedBy(Unit* healer, uint32& healedAmount)
 {
     if (m_throwAIEventStep == 100)
@@ -1918,6 +2109,12 @@ void CreatureEventAI::HealedBy(Unit* healer, uint32& healedAmount)
     }
 }
 
+/**
+ * @brief Checks whether a spawned event should trigger for the current location.
+ *
+ * @param event The event definition.
+ * @return true if the spawned conditions are met; otherwise, false.
+ */
 bool CreatureEventAI::SpawnedEventConditionsCheck(CreatureEventAI_Event const& event)
 {
     if (event.event_type != EVENT_T_SPAWNED)

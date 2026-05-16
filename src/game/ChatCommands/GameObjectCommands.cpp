@@ -22,6 +22,17 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file GameObjectCommands.cpp
+ * @brief Implementation of game object manipulation chat commands.
+ *
+ * This file contains chat command handlers for game objects including:
+ * - Game object spawning and removal
+ * - Game object property modification
+ * - Game object state control
+ * - Game object database management
+ */
+
 #include "Chat.h"
 #include "Language.h"
 #include "G3D/Quat.h"
@@ -34,7 +45,7 @@
 
  /**********************************************************************
      CommandTable : gobjectCommandTable
-  **********************************************************************/
+  ***********************************************************************/
 
 void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, LocaleConstant loc, time_t const* date /*= NULL*/, Player* target /*= NULL */)
 {
@@ -100,7 +111,12 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
     SendSysMessage(ss.str().c_str());
 }
 
- // delete object by selection or guid
+/**
+ * @brief Handler for HandleGameObjectDeleteCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGameObjectDeleteCommand(char* args)
 {
     // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
@@ -152,7 +168,12 @@ bool ChatHandler::HandleGameObjectDeleteCommand(char* args)
     return true;
 }
 
-// turn selected object
+/**
+ * @brief Handler for HandleGameObjectTurnCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGameObjectTurnCommand(char* args)
 {
     // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
@@ -195,7 +216,12 @@ bool ChatHandler::HandleGameObjectTurnCommand(char* args)
     return true;
 }
 
-// move selected object
+/**
+ * @brief Handler for HandleGameObjectMoveCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGameObjectMoveCommand(char* args)
 {
     // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
@@ -279,7 +305,12 @@ bool ChatHandler::HandleGameObjectMoveCommand(char* args)
     return true;
 }
 
-// spawn go
+/**
+ * @brief Handler for HandleGameObjectAddCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGameObjectAddCommand(char* args)
 {
     // number or [name] Shift-click form |color|Hgameobject_entry:go_id|h[name]|h|r
@@ -365,6 +396,12 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleGameObjectNearCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGameObjectNearCommand(char* args)
 {
     float distance;
@@ -414,6 +451,12 @@ bool ChatHandler::HandleGameObjectNearCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleGameObjectTargetCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleGameObjectTargetCommand(char* args)
 {
     Player* pl = m_session->GetPlayer();
@@ -454,7 +497,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         {
             if (initString)
             {
-                eventFilter  <<  "OR event IN (" << *itr;
+                eventFilter << "OR event IN (" << *itr;
                 initString = false;
             }
             else
@@ -493,12 +536,12 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
     {
         Field* fields = result->Fetch();
         lowguid = fields[0].GetUInt32();
-        id =      fields[1].GetUInt32();
-        x =       fields[2].GetFloat();
-        y =       fields[3].GetFloat();
-        z =       fields[4].GetFloat();
-        o =       fields[5].GetFloat();
-        mapid =   fields[6].GetUInt16();
+        id = fields[1].GetUInt32();
+        x = fields[2].GetFloat();
+        y = fields[3].GetFloat();
+        z = fields[4].GetFloat();
+        o = fields[5].GetFloat();
+        mapid = fields[6].GetUInt16();
         pool_id = sPoolMgr.IsPartOfAPool<GameObject>(lowguid);
         if (!pool_id || pl->GetMap()->GetPersistentState()->IsSpawnedPoolObject<GameObject>(lowguid))
         {

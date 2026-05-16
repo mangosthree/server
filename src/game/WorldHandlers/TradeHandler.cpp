@@ -36,6 +36,11 @@
 #include "Language.h"
 #include "DBCStores.h"
 
+/**
+ * @brief Sends a trade status packet to the client.
+ *
+ * @param info The trade status payload to send.
+ */
 void WorldSession::SendTradeStatus(TradeStatus status)
 {
     WorldPacket data(SMSG_TRADE_STATUS, 4 + 8);
@@ -83,18 +88,33 @@ void WorldSession::SendTradeStatus(TradeStatus status)
     SendPacket(&data);
 }
 
+/**
+ * @brief Handles the client notification that a trade request was ignored.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleIgnoreTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     DEBUG_LOG("WORLD: Ignore Trade %u", _player->GetGUIDLow());
     // recvPacket.print_storage();
 }
 
+/**
+ * @brief Handles the client notification that the target is busy trading.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleBusyTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     DEBUG_LOG("WORLD: Busy Trade %u", _player->GetGUIDLow());
     // recvPacket.print_storage();
 }
 
+/**
+ * @brief Sends the current trade window contents to one side of the trade.
+ *
+ * @param trader_state True to send the trader's view, false for the player's own view.
+ */
 void WorldSession::SendUpdateTrade(bool trader_state /*= true*/)
 {
     TradeData* my_trade = _player->GetTradeData();
@@ -308,12 +328,24 @@ static void setAcceptTradeMode(TradeData* myTrade, TradeData* hisTrade, Item** m
     }
 }
 
+/**
+ * @brief Clears the accept-in-progress state on both trade objects.
+ *
+ * @param myTrade The initiating player's trade data.
+ * @param hisTrade The target player's trade data.
+ */
 static void clearAcceptTradeMode(TradeData* myTrade, TradeData* hisTrade)
 {
     myTrade->SetInAcceptProcess(false);
     hisTrade->SetInAcceptProcess(false);
 }
 
+/**
+ * @brief Clears the in-trade flag on cached traded items.
+ *
+ * @param myItems The initiating player's cached items.
+ * @param hisItems The target player's cached items.
+ */
 static void clearAcceptTradeMode(Item** myItems, Item** hisItems)
 {
     // clear 'in-trade' flag
@@ -330,6 +362,11 @@ static void clearAcceptTradeMode(Item** myItems, Item** hisItems)
     }
 }
 
+/**
+ * @brief Finalizes a trade when one side accepts the current offer.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 {
     recvPacket.read_skip<uint32>();                         // 7, amount traded slots ?
@@ -592,6 +629,11 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
     }
 }
 
+/**
+ * @brief Clears the local accepted state for the active trade.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     TradeData* my_trade = _player->m_trade;
@@ -603,6 +645,11 @@ void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& /*recvPacket*/)
     my_trade->SetAccepted(false, true);
 }
 
+/**
+ * @brief Opens the trade window for both participants.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleBeginTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     TradeData* my_trade = _player->m_trade;
@@ -621,6 +668,9 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& /*recvPacket*/)
     SendTradeStatus(TRADE_STATUS_OPEN_WINDOW);
 }
 
+/**
+ * @brief Sends a trade canceled status to the client.
+ */
 void WorldSession::SendCancelTrade()
 {
     if (m_playerRecentlyLogout)
@@ -631,6 +681,11 @@ void WorldSession::SendCancelTrade()
     SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
 }
 
+/**
+ * @brief Cancels the current trade session.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleCancelTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     // sent also after LOGOUT COMPLETE
@@ -640,6 +695,11 @@ void WorldSession::HandleCancelTradeOpcode(WorldPacket& /*recvPacket*/)
     }
 }
 
+/**
+ * @brief Starts a trade request with another player.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid otherGuid;
@@ -745,6 +805,11 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
     pOther->GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Updates the gold amount offered in the current trade.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
 {
     uint64 gold;
@@ -761,6 +826,11 @@ void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
     my_trade->SetMoney(gold);
 }
 
+/**
+ * @brief Assigns an inventory item to a trade slot.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 {
     // send update
@@ -804,6 +874,11 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
     my_trade->SetItem(TradeSlots(tradeSlot), item);
 }
 
+/**
+ * @brief Clears an item slot from the current trade offer.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleClearTradeItemOpcode(WorldPacket& recvPacket)
 {
     uint8 tradeSlot;

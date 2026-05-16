@@ -34,6 +34,11 @@
 
 INSTANTIATE_SINGLETON_1(GMTicketMgr);
 
+/**
+ * @brief Stores GM survey answers from a received packet.
+ *
+ * @param recvData The packet containing survey responses and optional comments.
+ */
 void GMTicket::SaveSurveyData(WorldPacket& recvData) const
 {
     uint32 surveyId;
@@ -77,6 +82,15 @@ void GMTicket::SaveSurveyData(WorldPacket& recvData) const
                                escapedComment.c_str());
 }
 
+/**
+ * @brief Initializes ticket data from loaded or newly created values.
+ *
+ * @param guid The player GUID owning the ticket.
+ * @param text The ticket text.
+ * @param responseText The GM response text.
+ * @param update The last update time.
+ * @param ticketId The ticket identifier.
+ */
 void GMTicket::Init(ObjectGuid guid, const std::string& text, const std::string& responseText, time_t update, uint32 ticketId)
 {
     m_guid = guid;
@@ -86,6 +100,11 @@ void GMTicket::Init(ObjectGuid guid, const std::string& text, const std::string&
     m_lastUpdate = update;
 }
 
+/**
+ * @brief Updates the ticket text and persists it to the database.
+ *
+ * @param text The new ticket text.
+ */
 void GMTicket::SetText(const char* text)
 {
     m_text = text ? text : "";
@@ -98,6 +117,11 @@ void GMTicket::SetText(const char* text)
                                escapedString.c_str(), m_guid.GetCounter(), m_ticketId);
 }
 
+/**
+ * @brief Updates the GM response text and persists it to the database.
+ *
+ * @param text The new response text.
+ */
 void GMTicket::SetResponseText(const char* text)
 {
     m_responseText = text ? text : "";
@@ -115,21 +139,35 @@ void GMTicket::SetResponseText(const char* text)
     }
 }
 
+/**
+ * @brief Closes the ticket and requests a survey from the client.
+ */
 void GMTicket::CloseWithSurvey() const
 {
     _Close(GM_TICKET_STATUS_SURVEY);
 }
 
+/**
+ * @brief Closes the ticket from the client side without further action.
+ */
 void GMTicket::CloseByClient() const
 {
     _Close(GM_TICKET_STATUS_DO_NOTHING);
 }
 
+/**
+ * @brief Closes the ticket with the standard close status.
+ */
 void GMTicket::Close() const
 {
     _Close(GM_TICKET_STATUS_CLOSE);
 }
 
+/**
+ * @brief Marks the ticket resolved and optionally notifies the player.
+ *
+ * @param statusCode The client status code to send on closure.
+ */
 void GMTicket::_Close(GMTicketStatus statusCode) const
 {
     Player* pPlayer = sObjectMgr.GetPlayer(m_guid);
@@ -145,6 +183,9 @@ void GMTicket::_Close(GMTicketStatus statusCode) const
     }
 }
 
+/**
+ * @brief Loads unresolved GM tickets from the database.
+ */
 void GMTicketMgr::LoadGMTickets()
 {
     m_GMTicketMap.clear();                                  // For reload case
@@ -192,6 +233,12 @@ void GMTicketMgr::LoadGMTickets()
     sLog.outString();
 }
 
+/**
+ * @brief Creates a new GM ticket for a player.
+ *
+ * @param guid The GUID of the player creating the ticket.
+ * @param text The ticket text.
+ */
 void GMTicketMgr::Create(ObjectGuid guid, const char* text)
 {
     std::string escapedText = text;
@@ -234,6 +281,9 @@ void GMTicketMgr::Create(ObjectGuid guid, const char* text)
     m_GMTicketIdMap[ticketId] = &ticket;
 }
 
+/**
+ * @brief Deletes all GM tickets and notifies affected online players.
+ */
 void GMTicketMgr::DeleteAll()
 {
     for (GMTicketMap::const_iterator itr = m_GMTicketMap.begin(); itr != m_GMTicketMap.end(); ++itr)

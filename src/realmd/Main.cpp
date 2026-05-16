@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@
 #include <openssl/crypto.h>
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
 #  include <openssl/provider.h>
+#  include "Auth/OpenSSLProvider.h"
 #endif
 
 #include <ace/Get_Opt.h>
@@ -231,27 +232,11 @@ extern int main(int argc, char** argv)
     DETAIL_LOG("Using SSL version: %s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
 
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-    OSSL_PROVIDER* legacy;
-    OSSL_PROVIDER* deflt;
+    // RAII provider management - automatically handles cleanup
+    OpenSSLProviderManager providerManager;
 
-    /* Load Multiple providers into the default (NULL) library context */
-    legacy = OSSL_PROVIDER_load(NULL, "legacy");
-    if (legacy == NULL)
+    if (!providerManager.IsInitialized())
     {
-        sLog.outError("Failed to load OpenSSL 3.x Legacy provider\n");
-#ifdef WIN32
-        sLog.outError("\nPlease check you have set the following Enviroment Varible:\n");
-        sLog.outError("OPENSSL_MODULES=C:\\OpenSSL-Win64\\bin\n");
-        sLog.outError("(where C:\\OpenSSL-Win64\\bin is the location you installed OpenSSL\n");
-#endif
-        Log::WaitBeforeContinueIfNeed();
-        return 0;
-    }
-    deflt = OSSL_PROVIDER_load(NULL, "default");
-    if (deflt == NULL)
-    {
-        sLog.outError("Failed to load OpenSSL 3.x Default provider\n");
-        OSSL_PROVIDER_unload(legacy);
         Log::WaitBeforeContinueIfNeed();
         return 0;
     }

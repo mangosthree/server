@@ -22,9 +22,33 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file ChannelHandler.cpp
+ * @brief Channel-related opcode handlers
+ *
+ * This file handles channel-related opcodes including:
+ * - CMSG_JOIN_CHANNEL: Join a channel
+ * - CMSG_LEAVE_CHANNEL: Leave a channel
+ * - CMSG_CHANNEL_LIST: List channels
+ * - CMSG_CHANNEL_PASSWORD: Set channel password
+ * - CMSG_CHANNEL_OWNER: Set channel owner
+ * - CMSG_CHANNEL_MODERATOR: Set channel moderator
+ * - CMSG_CHANNEL_MUTE: Mute channel member
+ * - CMSG_CHANNEL_UNMUTE: Unmute channel member
+ * - CMSG_CHANNEL_INVITE: Invite to channel
+ * - CMSG_CHANNEL_KICK: Kick from channel
+ * - CMSG_CHANNEL_BAN: Ban from channel
+ * - CMSG_CHANNEL_UNBAN: Unban from channel
+ */
+
 #include "ObjectMgr.h"                                      // for normalizePlayerName
 #include "ChannelMgr.h"
 
+/**
+ * @brief Handles a client's request to join a chat channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleJoinChannelOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -53,6 +77,11 @@ void WorldSession::HandleJoinChannelOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Handles a client's request to leave a chat channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleLeaveChannelOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -78,6 +107,11 @@ void WorldSession::HandleLeaveChannelOpcode(WorldPacket& recvPacket)
     }
 }
 
+/**
+ * @brief Sends the member list for a channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelListOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -91,6 +125,11 @@ void WorldSession::HandleChannelListOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Changes the password for a channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelPasswordOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -110,6 +149,11 @@ void WorldSession::HandleChannelPasswordOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Sets a new owner for a channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelSetOwnerOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -135,6 +179,11 @@ void WorldSession::HandleChannelSetOwnerOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Requests the current owner of a channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelOwnerOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -148,6 +197,11 @@ void WorldSession::HandleChannelOwnerOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Grants moderator privileges to a channel member.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelModeratorOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -172,6 +226,11 @@ void WorldSession::HandleChannelModeratorOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Removes moderator privileges from a channel member.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelUnmoderatorOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -196,6 +255,11 @@ void WorldSession::HandleChannelUnmoderatorOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Mutes a member in a channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelMuteOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -220,6 +284,11 @@ void WorldSession::HandleChannelMuteOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Unmutes a member in a channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelUnmuteOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -244,6 +313,11 @@ void WorldSession::HandleChannelUnmuteOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Invites another player to a channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelInviteOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -268,6 +342,11 @@ void WorldSession::HandleChannelInviteOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Kicks a member from a channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelKickOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -292,6 +371,11 @@ void WorldSession::HandleChannelKickOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Bans a member from a channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelBanOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -316,6 +400,11 @@ void WorldSession::HandleChannelBanOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Removes a ban for a member in a channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelUnbanOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -340,6 +429,11 @@ void WorldSession::HandleChannelUnbanOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Toggles channel join and leave announcements.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelAnnouncementsOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -352,6 +446,11 @@ void WorldSession::HandleChannelAnnouncementsOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Toggles moderated mode for a channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelModerateOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -365,6 +464,11 @@ void WorldSession::HandleChannelModerateOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Handles a channel display list query.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleChannelDisplayListQueryOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -377,6 +481,11 @@ void WorldSession::HandleChannelDisplayListQueryOpcode(WorldPacket& recvPacket)
         }
 }
 
+/**
+ * @brief Sends the current member count for a channel.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGetChannelMemberCountOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());
@@ -396,6 +505,11 @@ void WorldSession::HandleGetChannelMemberCountOpcode(WorldPacket& recvPacket)
     }
 }
 
+/**
+ * @brief Handles a channel watch request from the client.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleSetChannelWatchOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", recvPacket.GetOpcodeName(), recvPacket.GetOpcode(), recvPacket.GetOpcode());

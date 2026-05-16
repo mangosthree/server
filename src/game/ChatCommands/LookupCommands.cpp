@@ -22,6 +22,17 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file LookupCommands.cpp
+ * @brief Implementation of lookup and search chat commands.
+ *
+ * This file contains chat command handlers for searching game data including:
+ * - Item lookup by name or ID
+ * - NPC lookup
+ * - Quest lookup
+ * - Spell and ability lookup
+ */
+
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "Language.h"
@@ -31,11 +42,12 @@
 #include "SQLStorages.h"
 #include "Util.h"
 
- /**********************************************************************
-      CommandTable : lookupCommandTable
-  **********************************************************************/
-
-
+/**
+ * @brief Handler for LookupPlayerSearchCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::LookupPlayerSearchCommand(QueryResult* result, uint32* limit)
 {
     if (!result)
@@ -94,6 +106,13 @@ bool ChatHandler::LookupPlayerSearchCommand(QueryResult* result, uint32* limit)
     return true;
 }
 
+/**
+ * @brief Displays a localized quest summary line.
+ *
+ * @param questId The quest identifier to display.
+ * @param loc_idx The locale index used for localized strings.
+ * @param target Optional player used to show quest progress status.
+ */
 void ChatHandler::ShowQuestListHelper(uint32 questId, int32 loc_idx, Player* target /*= NULL*/)
 {
     Quest const* qinfo = sObjectMgr.GetQuestTemplate(questId);
@@ -138,6 +157,13 @@ void ChatHandler::ShowQuestListHelper(uint32 questId, int32 loc_idx, Player* tar
     }
 }
 
+/**
+ * @brief Displays a localized item summary line.
+ *
+ * @param itemId The item identifier to display.
+ * @param loc_idx The locale index used for localized strings.
+ * @param target Optional player used to evaluate item usability.
+ */
 void ChatHandler::ShowItemListHelper(uint32 itemId, int loc_idx, Player* target /*=NULL*/)
 {
     ItemPrototype const* itemProto = sItemStorage.LookupEntry<ItemPrototype >(itemId);
@@ -245,6 +271,12 @@ bool ChatHandler::HandleLookupAchievementCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleLookupAreaCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupAreaCommand(char* args)
 {
     if (!*args)
@@ -329,7 +361,12 @@ bool ChatHandler::HandleLookupAreaCommand(char* args)
     return true;
 }
 
-// Find tele in game_tele order by name
+/**
+ * @brief Handler for HandleLookupTeleCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupTeleCommand(char* args)
 {
     if (!*args)
@@ -384,6 +421,12 @@ bool ChatHandler::HandleLookupTeleCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleLookupFactionCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupFactionCommand(char* args)
 {
     if (!*args)
@@ -458,6 +501,12 @@ bool ChatHandler::HandleLookupFactionCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleLookupEventCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupEventCommand(char* args)
 {
     if (!*args)
@@ -520,6 +569,12 @@ bool ChatHandler::HandleLookupEventCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleLookupAccountEmailCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupAccountEmailCommand(char* args)
 {
     char* emailStr = ExtractQuotedOrLiteralArg(&args);
@@ -542,6 +597,12 @@ bool ChatHandler::HandleLookupAccountEmailCommand(char* args)
     return ShowAccountListHelper(result, &limit);
 }
 
+/**
+ * @brief Handler for HandleLookupAccountIpCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupAccountIpCommand(char* args)
 {
     char* ipStr = ExtractQuotedOrLiteralArg(&args);
@@ -565,6 +626,12 @@ bool ChatHandler::HandleLookupAccountIpCommand(char* args)
     return ShowAccountListHelper(result, &limit);
 }
 
+/**
+ * @brief Handler for HandleLookupAccountNameCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupAccountNameCommand(char* args)
 {
     char* accountStr = ExtractQuotedOrLiteralArg(&args);
@@ -592,6 +659,12 @@ bool ChatHandler::HandleLookupAccountNameCommand(char* args)
     return ShowAccountListHelper(result, &limit);
 }
 
+/**
+ * @brief Handler for ShowAccountListHelper command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::ShowAccountListHelper(QueryResult* result, uint32* limit, bool title, bool error)
 {
     if (!result)
@@ -650,6 +723,12 @@ bool ChatHandler::ShowAccountListHelper(QueryResult* result, uint32* limit, bool
     return true;
 }
 
+/**
+ * @brief Handler for HandleLookupPlayerIpCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupPlayerIpCommand(char* args)
 {
     char* ipStr = ExtractQuotedOrLiteralArg(&args);
@@ -672,6 +751,12 @@ bool ChatHandler::HandleLookupPlayerIpCommand(char* args)
     return LookupPlayerSearchCommand(result, &limit);
 }
 
+/**
+ * @brief Handler for HandleLookupPlayerAccountCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupPlayerAccountCommand(char* args)
 {
     char* accountStr = ExtractQuotedOrLiteralArg(&args);
@@ -699,6 +784,12 @@ bool ChatHandler::HandleLookupPlayerAccountCommand(char* args)
     return LookupPlayerSearchCommand(result, &limit);
 }
 
+/**
+ * @brief Handler for HandleLookupPlayerEmailCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupPlayerEmailCommand(char* args)
 {
     char* emailStr = ExtractQuotedOrLiteralArg(&args);
@@ -721,6 +812,12 @@ bool ChatHandler::HandleLookupPlayerEmailCommand(char* args)
     return LookupPlayerSearchCommand(result, &limit);
 }
 
+/**
+ * @brief Handler for HandleLookupPoolCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupPoolCommand(char* args)
 {
     if (!*args)
@@ -758,6 +855,12 @@ bool ChatHandler::HandleLookupPoolCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleLookupItemCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupItemCommand(char* args)
 {
     if (!*args)
@@ -810,6 +913,12 @@ bool ChatHandler::HandleLookupItemCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleLookupItemSetCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupItemSetCommand(char* args)
 {
     if (!*args)
@@ -888,6 +997,12 @@ bool ChatHandler::HandleLookupItemSetCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleLookupSkillCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupSkillCommand(char* args)
 {
     if (!*args)
@@ -985,6 +1100,12 @@ bool ChatHandler::HandleLookupSkillCommand(char* args)
 }
 
 
+/**
+ * @brief Handler for HandleLookupSpellCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupSpellCommand(char* args)
 {
     if (!*args)
@@ -1058,6 +1179,12 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleLookupQuestCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupQuestCommand(char* args)
 {
     if (!*args)
@@ -1108,6 +1235,12 @@ bool ChatHandler::HandleLookupQuestCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleLookupCreatureCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupCreatureCommand(char* args)
 {
     if (!*args)
@@ -1169,6 +1302,12 @@ bool ChatHandler::HandleLookupCreatureCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleLookupObjectCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupObjectCommand(char* args)
 {
     if (!*args)
@@ -1246,6 +1385,12 @@ bool ChatHandler::HandleLookupObjectCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleLookupTaxiNodeCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleLookupTaxiNodeCommand(char* args)
 {
     if (!*args)

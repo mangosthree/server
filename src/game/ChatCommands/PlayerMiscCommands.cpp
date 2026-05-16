@@ -22,6 +22,16 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file PlayerMiscCommands.cpp
+ * @brief Implementation of miscellaneous player manipulation chat commands.
+ *
+ * This file contains chat command handlers for player operations including:
+ * - Player item management
+ * - Player property modification
+ * - Player state control
+ */
+
 #include "Chat.h"
 #include "DBCStores.h"
 #include "Language.h"
@@ -30,10 +40,12 @@
 #include "World.h"
 #include "WorldSession.h"
 
- /**********************************************************************
-     CommandTable : commandTable
-  **********************************************************************/
-
+/**
+ * @brief Handler for HandleBankCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleBankCommand(char* /*args*/)
 {
     m_session->SendShowBank(m_session->GetPlayer()->GetObjectGuid());
@@ -41,6 +53,12 @@ bool ChatHandler::HandleBankCommand(char* /*args*/)
     return true;
 }
 
+/**
+ * @brief Handler for HandleStableCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleStableCommand(char* /*args*/)
 {
     m_session->SendStablePet(m_session->GetPlayer()->GetObjectGuid());
@@ -83,7 +101,6 @@ bool ChatHandler::HandleShowGearScoreCommand(char* args)
 /**********************************************************************
     CommandTable : resetCommandTable
  **********************************************************************/
-
 bool ChatHandler::HandleResetSpecsCommand(char* args)
 {
     Player* target;
@@ -168,6 +185,12 @@ static bool HandleResetStatsOrLevelHelper(Player* player)
     return true;
 }
 
+/**
+ * @brief Handler for HandleResetLevelCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleResetLevelCommand(char* args)
 {
     Player* target;
@@ -207,6 +230,12 @@ bool ChatHandler::HandleResetLevelCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleResetStatsCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleResetStatsCommand(char* args)
 {
     Player* target;
@@ -229,6 +258,12 @@ bool ChatHandler::HandleResetStatsCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleResetSpellsCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleResetSpellsCommand(char* args)
 {
     Player* target;
@@ -258,6 +293,12 @@ bool ChatHandler::HandleResetSpellsCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleResetTalentsCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleResetTalentsCommand(char* args)
 {
     Player* target;
@@ -312,6 +353,12 @@ bool ChatHandler::HandleResetTalentsCommand(char* args)
     return false;
 }
 
+/**
+ * @brief Handler for HandleResetAllCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleResetAllCommand(char* args)
 {
     if (!*args)
@@ -354,6 +401,5 @@ bool ChatHandler::HandleResetAllCommand(char* args)
     {
         plr->SetAtLoginFlag(atLogin);
     });
-
     return true;
 }

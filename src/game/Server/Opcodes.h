@@ -1456,6 +1456,9 @@ enum OpcodesList
 // Don't forget to change this value and add opcode name to Opcodes.cpp when you add new opcode!
 #define NUM_MSG_TYPES 0xFFFF
 
+/**
+ * Initializes opcode handler metadata tables.
+ */
 extern void InitializeOpcodes();
 
 /// Player state

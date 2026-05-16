@@ -22,6 +22,16 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file GMTicketCommands.cpp
+ * @brief Implementation of GM ticket management chat commands.
+ *
+ * This file contains chat command handlers for managing player support tickets including:
+ * - Ticket viewing and management
+ * - Ticket assignment and resolution
+ * - Ticket notification system
+ */
+
 #include "Chat.h"
 #include "Language.h"
 #include "ObjectMgr.h"
@@ -51,7 +61,12 @@ void ChatHandler::ShowTicket(GMTicket const* ticket)
     }
 }
 
-// ticket commands
+/**
+ * @brief Handler for HandleTicketAcceptCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTicketAcceptCommand(char* args)
 {
     char* px = ExtractLiteralArg(&args);
@@ -82,6 +97,12 @@ bool ChatHandler::HandleTicketAcceptCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleTicketCloseCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTicketCloseCommand(char* args)
 {
     GMTicket* ticket = NULL;
@@ -195,7 +216,12 @@ bool ChatHandler::HandleTicketCloseCommand(char* args)
     return true;
 }
 
-// del tickets
+/**
+ * @brief Handler for HandleTicketDeleteCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTicketDeleteCommand(char* args)
 {
     char* px = ExtractLiteralArg(&args);
@@ -274,6 +300,12 @@ bool ChatHandler::HandleTicketDeleteCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleTicketInfoCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTicketInfoCommand(char* args)
 {
     size_t count = sTicketMgr.GetTicketCount();
@@ -290,6 +322,12 @@ bool ChatHandler::HandleTicketInfoCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleTicketListCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTicketListCommand(char* args)
 {
     uint16 numToShow = std::min(uint16(sTicketMgr.GetTicketCount()), uint16(sWorld.getConfig(CONFIG_UINT32_GM_TICKET_LIST_SIZE)));
@@ -304,6 +342,12 @@ bool ChatHandler::HandleTicketListCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleTicketOnlineListCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTicketOnlineListCommand(char* args)
 {
     uint16 count = 0;
@@ -325,6 +369,12 @@ bool ChatHandler::HandleTicketOnlineListCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleTicketMeAcceptCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTicketMeAcceptCommand(char* args)
 {
     char* px = ExtractLiteralArg(&args);
@@ -361,6 +411,12 @@ bool ChatHandler::HandleTicketMeAcceptCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleTicketRespondCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTicketRespondCommand(char* args)
 {
     GMTicket* ticket = NULL;
@@ -496,6 +552,12 @@ bool ChatHandler::HandleTicketRespondCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleTicketShowCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTicketShowCommand(char* args)
 {
     // ticket #num
@@ -547,6 +609,12 @@ bool ChatHandler::HandleTicketShowCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleTickerSurveyClose command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleTickerSurveyClose(char* args)
 {
     GMTicket* ticket = NULL;

@@ -17,6 +17,25 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file DisableMgr.cpp
+ * @brief Content disabling system for server management
+ *
+ * This file implements the DisableMgr namespace which allows server
+ * administrators to disable specific game content through database
+ * configuration. Supports disabling:
+ * - Spells (cast or learned)
+ * - Quests (available or completable)
+ * - Maps/Instances (entry restriction)
+ * - Battlegrounds
+ * - Outdoor PvP areas
+ * - Vendors (specific items)
+ * - GameObjects (use interaction)
+ *
+ * Configuration is loaded from `disables` table with flags controlling
+ * the exact nature of the disable (e.g., disable casting vs learning).
+ */
+
 #include "DisableMgr.h"
 #include "ObjectMgr.h"
 #include "OutdoorPvPMgr.h"
@@ -30,20 +49,62 @@ namespace DisableMgr
 
 namespace
 {
+    /**
+     * @struct DisableData
+     * @brief Stores disable configuration for a single entry
+     *
+     * Contains flags controlling the disable behavior and optional
+     * parameter sets for conditional disables (e.g., spell disabled
+     * only in specific maps or areas).
+     */
     struct DisableData
     {
-        uint8 flags;
-        std::set<uint32> params[2];                             // data
+        uint8 flags;                                            ///< Disable behavior flags
+        std::set<uint32> params[2];                             ///< Optional data (map IDs, area IDs, etc.)
     };
 
-    // single disables here with optional data
+    /**
+     * @typedef DisableTypeMap
+     * @brief Map of entry IDs to disable data for a specific type
+     */
     typedef std::map<uint32, DisableData> DisableTypeMap;
-    // global disable map by source
+
+    /**
+     * @typedef DisableMap
+     * @brief Global disable storage by source type
+     *
+     * Top-level map organizing disables by category (spells, quests, maps, etc.)
+     */
     typedef std::map<DisableType, DisableTypeMap> DisableMap;
 
+    /**
+     * @var m_DisableMap
+     * @brief Global disable data storage
+     *
+     * Maps disable types to their respective entry maps. Loaded from
+     * `disables` database table during server startup.
+     */
     DisableMap m_DisableMap;
 }
 
+/**
+ * @def CONTINUE
+ * @brief Helper macro for early loop continuation
+ *
+ * Cleans up allocated DisableData if present, then continues to next iteration.
+ */
+#define CONTINUE if (newData) delete data; continue
+
+/**
+ * @brief Load all disable entries from database
+ *
+ * Reads the `disables` table and populates m_DisableMap with configured
+ * disable entries. Validates that referenced entries exist in DBC/data.
+ *
+ * Supports reload - clears existing data before loading.
+ *
+ * @note Called during server startup and on .reload disables command
+ */
 void LoadDisables()
 {
     // reload case
@@ -263,6 +324,9 @@ void LoadDisables()
     sLog.outString(">> Loaded %u disables", total_count);
 }
 
+/**
+ * @brief Validates quest disable entries against loaded quest templates.
+ */
 void CheckQuestDisables()
 {
     uint32 count = m_DisableMap[DISABLE_TYPE_QUEST].size();
@@ -290,6 +354,16 @@ void CheckQuestDisables()
     sLog.outString(">> Checked %u quest disables", count);
 }
 
+/**
+ * @brief Checks whether a feature entry is disabled for the given runtime context.
+ *
+ * @param type The disable category.
+ * @param entry The entry identifier to test.
+ * @param unit The contextual unit, when applicable.
+ * @param flags Additional disable flags to test.
+ * @param adData Additional lookup data such as spawn guid.
+ * @return true if the entry is disabled in the provided context; otherwise false.
+ */
 bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags)
 {
     MANGOS_ASSERT(type < MAX_DISABLE_TYPES);
@@ -406,11 +480,24 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
     return false;
 }
 
+/**
+ * @brief Checks whether VMAP processing is disabled for a specific entry and flag set.
+ *
+ * @param entry The map or model entry.
+ * @param flags The VMAP disable flags.
+ * @return true if VMAP is disabled; otherwise false.
+ */
 bool IsVMAPDisabledFor(uint32 entry, uint8 flags)
 {
     return IsDisabledFor(DISABLE_TYPE_VMAP, entry, NULL, flags);
 }
 
+/**
+ * @brief Checks whether mmap pathfinding is enabled for a map.
+ *
+ * @param mapId The map identifier.
+ * @return true if pathfinding is enabled; otherwise false.
+ */
 bool IsPathfindingEnabled(uint32 mapId)
 {
     return sWorld.getConfig(CONFIG_BOOL_MMAP_ENABLED)

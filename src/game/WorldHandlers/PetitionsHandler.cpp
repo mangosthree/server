@@ -22,6 +22,22 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file PetitionsHandler.cpp
+ * @brief Guild and arena charter opcode handlers
+ *
+ * This file handles petition-related opcodes for guild and arena charters:
+ * - CMSG_PETITION_BUY: Buy guild/arena charter
+ * - CMSG_PETITION_SHOW_SIGNATURES: Show charter signatures
+ * - CMSG_PETITION_SIGN: Sign charter
+ * - CMSG_PETITION_OFFER: Offer charter to player
+ * - CMSG_PETITION_TURN_IN: Turn in completed charter
+ * - CMSG_QUERY_PETITION: Query charter info
+ *
+ * Charters require a certain number of signatures before they can be
+ * turned in to create a guild or arena team.
+ */
+
 #include "Common.h"
 #include "Language.h"
 #include "WorldPacket.h"
@@ -46,6 +62,11 @@
 #define GUILD_CHARTER               5863
 #define CHARTER_DISPLAY_ID          16161
 
+/**
+ * @brief Handles charter purchase and petition creation.
+ *
+ * @param recv_data The incoming petition-buy packet.
+ */
 void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("Received opcode CMSG_PETITION_BUY");
@@ -172,6 +193,11 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
     CharacterDatabase.CommitTransaction();
 }
 
+/**
+ * @brief Sends the current signature list for a petition.
+ *
+ * @param recv_data The incoming show-signatures packet.
+ */
 void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recv_data)
 {
     // ok
@@ -229,6 +255,11 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recv_data)
     SendPacket(&data);
 }
 
+/**
+ * @brief Handles a petition query request.
+ *
+ * @param recv_data The incoming petition query packet.
+ */
 void WorldSession::HandlePetitionQueryOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("Received opcode CMSG_PETITION_QUERY");
@@ -243,6 +274,11 @@ void WorldSession::HandlePetitionQueryOpcode(WorldPacket& recv_data)
     SendPetitionQueryOpcode(petitionguid);
 }
 
+/**
+ * @brief Sends petition metadata for a specific petition item.
+ *
+ * @param petitionguid The petition guid.
+ */
 void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid)
 {
     uint32 petitionLowGuid = petitionguid.GetCounter();
@@ -298,6 +334,11 @@ void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid)
     SendPacket(&data);
 }
 
+/**
+ * @brief Handles petition renaming and updates persistent storage.
+ *
+ * @param recv_data The incoming petition rename packet.
+ */
 void WorldSession::HandlePetitionRenameOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("Received opcode MSG_PETITION_RENAME");   // ok
@@ -347,6 +388,11 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket& recv_data)
     SendPacket(&data);
 }
 
+/**
+ * @brief Handles signing a guild petition.
+ *
+ * @param recv_data The incoming petition sign packet.
+ */
 void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("Received opcode CMSG_PETITION_SIGN");    // ok
@@ -462,6 +508,11 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
     }
 }
 
+/**
+ * @brief Handles declining a petition offer and notifies the owner.
+ *
+ * @param recv_data The incoming petition decline packet.
+ */
 void WorldSession::HandlePetitionDeclineOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("Received opcode MSG_PETITION_DECLINE");  // ok
@@ -492,6 +543,11 @@ void WorldSession::HandlePetitionDeclineOpcode(WorldPacket& recv_data)
     }
 }
 
+/**
+ * @brief Offers a petition to another player for signature.
+ *
+ * @param recv_data The incoming offer-petition packet.
+ */
 void WorldSession::HandleOfferPetitionOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("Received opcode CMSG_OFFER_PETITION");   // ok
@@ -569,6 +625,11 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket& recv_data)
     player->GetSession()->SendPacket(&data);
 }
 
+/**
+ * @brief Handles turning in a completed petition to create a guild.
+ *
+ * @param recv_data The incoming turn-in-petition packet.
+ */
 void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("Received opcode CMSG_TURN_IN_PETITION"); // ok
@@ -681,6 +742,11 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
     _player->SendPetitionTurnInResult(PETITION_TURN_OK);
 }
 
+/**
+ * @brief Handles a request to show the petitioner vendor list.
+ *
+ * @param recv_data The incoming show-list packet.
+ */
 void WorldSession::HandlePetitionShowListOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("Received CMSG_PETITION_SHOWLIST");
@@ -692,6 +758,11 @@ void WorldSession::HandlePetitionShowListOpcode(WorldPacket& recv_data)
     SendPetitionShowList(guid);
 }
 
+/**
+ * @brief Sends the available petition list from a petitioner NPC.
+ *
+ * @param guid The petitioner NPC guid.
+ */
 void WorldSession::SendPetitionShowList(ObjectGuid guid)
 {
     Creature* pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_PETITIONER);

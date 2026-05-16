@@ -255,6 +255,12 @@ DBCStorage <WorldPvPAreaEntry>  sWorldPvPAreaStore(WorldPvPAreaEnrtyfmt);
 
 typedef std::list<std::string> StoreProblemList;
 
+/**
+ * @brief Checks whether a client build is supported by the server.
+ *
+ * @param build The client build number.
+ * @return true if the build is accepted; otherwise false.
+ */
 bool IsAcceptableClientBuild(uint32 build)
 {
     int accepted_versions[] = EXPECTED_MANGOSD_CLIENT_BUILD;
@@ -267,6 +273,11 @@ bool IsAcceptableClientBuild(uint32 build)
     return false;
 }
 
+/**
+ * @brief Builds a space-separated list of supported client builds.
+ *
+ * @return std::string The formatted build list.
+ */
 std::string AcceptableClientBuildsListStr()
 {
     std::ostringstream data;
@@ -364,6 +375,14 @@ static uint32 ReadDBCBuild(const std::string& dbc_path, LocaleNameStr const*&loc
     return build;
 }
 
+/**
+ * @brief Reports a DBC structure size mismatch before asserting.
+ *
+ * @param fsize The record size defined by the format string.
+ * @param rsize The size of the C++ structure.
+ * @param filename The DBC file being validated.
+ * @return false Always returns false so the assert condition fails.
+ */
 static bool LoadDBC_assert_print(uint32 fsize, uint32 rsize, const std::string& filename)
 {
     sLog.outError("Size of '%s' setted by format string (%u) not equal size of C++ structure (%u).", filename.c_str(), fsize, rsize);
@@ -386,6 +405,17 @@ struct LocalData
 };
 
 template<class T>
+/**
+ * @brief Loads a DBC file and its localized string tables.
+ *
+ * @tparam T The DBC record type.
+ * @param availableDbcLocales Bitmask of still-available locales.
+ * @param bar The startup progress indicator.
+ * @param errlist The list collecting missing or incompatible files.
+ * @param storage The storage receiving loaded records.
+ * @param dbc_path The base DBC directory.
+ * @param filename The DBC filename to load.
+ */
 inline void LoadDBC(LocalData& localeData, BarGoLink& bar, StoreProblemList& errlist, DBCStorage<T>& storage, const std::string& dbc_path, const std::string& filename)
 {
     // compatibility format and C++ structure sizes
@@ -451,6 +481,11 @@ inline void LoadDBC(LocalData& localeData, BarGoLink& bar, StoreProblemList& err
     }
 }
 
+/**
+ * @brief Loads all required DBC stores and initializes lookup helpers.
+ *
+ * @param dataPath The base data directory containing DBC files.
+ */
 void LoadDBCStores(const std::string& dataPath)
 {
     std::string dbcPath = dataPath + "dbc/";
@@ -988,6 +1023,12 @@ void LoadDBCStores(const std::string& dataPath)
     sLog.outString(">> Initialized %d data stores", DBCFilesCount);
 }
 
+/**
+ * @brief Gets the faction list associated with a faction team id.
+ *
+ * @param faction The faction team id.
+ * @return SimpleFactionsList const* The faction list, or null if none exists.
+ */
 SimpleFactionsList const* GetFactionTeamList(uint32 faction)
 {
     FactionTeamMap::const_iterator itr = sFactionTeamMap.find(faction);
@@ -998,6 +1039,13 @@ SimpleFactionsList const* GetFactionTeamList(uint32 faction)
     return &itr->second;
 }
 
+/**
+ * @brief Gets the localized pet family name.
+ *
+ * @param petfamily The creature family id.
+ * @param dbclang The locale index.
+ * @return char const* The localized pet name, or null if unavailable.
+ */
 char const* GetPetName(uint32 petfamily, uint32 dbclang)
 {
     if (!petfamily)
@@ -1012,6 +1060,12 @@ char const* GetPetName(uint32 petfamily, uint32 dbclang)
     return pet_family->Name[dbclang] ? pet_family->Name[dbclang] : NULL;
 }
 
+/**
+ * @brief Finds the talent position metadata for a spell id.
+ *
+ * @param spellId The talent spell id.
+ * @return TalentSpellPos const* The talent position, or null if not found.
+ */
 TalentSpellPos const* GetTalentSpellPos(uint32 spellId)
 {
     TalentSpellPosMap::const_iterator itr = sTalentSpellPosMap.find(spellId);
@@ -1034,6 +1088,12 @@ SpellEffectEntry const* GetSpellEffectEntry(uint32 spellId, SpellEffectIndex eff
     return itr->second.effects[effect];
 }
 
+/**
+ * @brief Computes the talent point cost from a talent position.
+ *
+ * @param pos The talent spell position.
+ * @return uint32 The talent point cost.
+ */
 uint32 GetTalentSpellCost(TalentSpellPos const* pos)
 {
     if (pos)
@@ -1044,11 +1104,23 @@ uint32 GetTalentSpellCost(TalentSpellPos const* pos)
     return 0;
 }
 
+/**
+ * @brief Computes the talent point cost for a spell id.
+ *
+ * @param spellId The talent spell id.
+ * @return uint32 The talent point cost.
+ */
 uint32 GetTalentSpellCost(uint32 spellId)
 {
     return GetTalentSpellCost(GetTalentSpellPos(spellId));
 }
 
+/**
+ * @brief Gets the explore flag for an area id.
+ *
+ * @param area_id The area id.
+ * @return int32 The explore flag, or -1 if the area is unknown.
+ */
 int32 GetAreaFlagByAreaID(uint32 area_id)
 {
     AreaFlagByAreaID::iterator i = sAreaFlagByAreaID.find(area_id);
@@ -1060,6 +1132,14 @@ int32 GetAreaFlagByAreaID(uint32 area_id)
     return i->second;
 }
 
+/**
+ * @brief Finds WMO area data by root, ADT, and group identifiers.
+ *
+ * @param rootid The WMO root id.
+ * @param adtid The ADT id.
+ * @param groupid The group id.
+ * @return WMOAreaTableEntry const* The matching area entry, or null if not found.
+ */
 WMOAreaTableEntry const* GetWMOAreaTableEntryByTripple(int32 rootid, int32 adtid, int32 groupid)
 {
     WMOAreaInfoByTripple::iterator i = sWMOAreaInfoByTripple.find(WMOAreaTableTripple(rootid, adtid, groupid));
@@ -1070,6 +1150,12 @@ WMOAreaTableEntry const* GetWMOAreaTableEntryByTripple(int32 rootid, int32 adtid
     return i->second;
 }
 
+/**
+ * @brief Gets an area table entry by area id.
+ *
+ * @param area_id The area id.
+ * @return AreaTableEntry const* The matching area entry, or null if not found.
+ */
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)
 {
     int32 areaflag = GetAreaFlagByAreaID(area_id);
@@ -1081,6 +1167,13 @@ AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)
     return sAreaStore.LookupEntry(areaflag);
 }
 
+/**
+ * @brief Finds an area entry by explore flag and map id.
+ *
+ * @param area_flag The explore flag.
+ * @param map_id The map id.
+ * @return AreaTableEntry const* The best matching area entry, or null if none exists.
+ */
 AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_id)
 {
     if (area_flag)
@@ -1096,6 +1189,12 @@ AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_
     return NULL;
 }
 
+/**
+ * @brief Gets the default area flag associated with a map id.
+ *
+ * @param mapid The map id.
+ * @return uint32 The area flag, or 0 if none is mapped.
+ */
 uint32 GetAreaFlagByMapId(uint32 mapid)
 {
     AreaFlagByMapID::iterator i = sAreaFlagByMapID.find(mapid);
@@ -1147,6 +1246,12 @@ ContentLevels GetContentLevelsForMap(uint32 mapid)
     }
 }
 
+/**
+ * @brief Finds a chat channel entry by channel id.
+ *
+ * @param channel_id The channel id.
+ * @return ChatChannelsEntry const* The matching channel entry, or null if not found.
+ */
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
 {
     // not sorted, numbering index from 0
@@ -1191,6 +1296,14 @@ bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredT
     return (itemEntry->categoryMask & reqEntry->categoryMask) == reqEntry->categoryMask;
 }
 
+/**
+ * @brief Converts zone map percentages into world map coordinates.
+ *
+ * @param x The X coordinate to convert.
+ * @param y The Y coordinate to convert.
+ * @param zone The world map area id.
+ * @return true if conversion succeeded; otherwise false.
+ */
 bool Zone2MapCoordinates(float& x, float& y, uint32 zone)
 {
     WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
@@ -1208,6 +1321,14 @@ bool Zone2MapCoordinates(float& x, float& y, uint32 zone)
     return true;
 }
 
+/**
+ * @brief Converts world map coordinates into zone map percentages.
+ *
+ * @param x The X coordinate to convert.
+ * @param y The Y coordinate to convert.
+ * @param zone The world map area id.
+ * @return true if conversion succeeded; otherwise false.
+ */
 bool Map2ZoneCoordinates(float& x, float& y, uint32 zone)
 {
     WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
@@ -1267,6 +1388,12 @@ ContentLevels GetContentLevelsForMapAndZone(uint32 mapId, uint32 zoneId)
     }
 }
 
+/**
+ * @brief Gets the inspect bit position for a talent within its tab.
+ *
+ * @param talentId The talent id.
+ * @return uint32 The bit position within inspect data.
+ */
 MapDifficultyEntry const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty)
 {
     MapDifficultyMap::const_iterator itr = sMapDifficultyMap.find(MAKE_PAIR32(mapId, difficulty));
@@ -1315,6 +1442,12 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattleGroundB
     return NULL;
 }
 
+/**
+ * @brief Gets the talent tab pages for a class.
+ *
+ * @param cls The class id.
+ * @return uint32 const* The three talent tab page ids for the class.
+ */
 uint32 const* GetTalentTabPages(uint32 cls)
 {
     return sTalentTabPages[cls];
@@ -1353,6 +1486,17 @@ uint32 GetTalentTreeRolesMask(uint32 talentTree)
     return itr->second;
 }
 
+/**
+ * @brief Checks whether a point lies inside an area trigger volume.
+ *
+ * @param atEntry The area trigger definition.
+ * @param mapid The current map id.
+ * @param x The X coordinate.
+ * @param y The Y coordinate.
+ * @param z The Z coordinate.
+ * @param delta Extra tolerance applied to the trigger bounds.
+ * @return true if the point is inside the trigger; otherwise false.
+ */
 bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, float x, float y, float z, float delta)
 {
     if (mapid != atEntry->mapid)
@@ -1402,6 +1546,12 @@ bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, flo
     return true;
 }
 
+/**
+ * @brief Gets the race id associated with a creature display model.
+ *
+ * @param model_id The creature model display id.
+ * @return uint32 The race id, or 0 if no race data is available.
+ */
 uint32 GetCreatureModelRace(uint32 model_id)
 {
     CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(model_id);

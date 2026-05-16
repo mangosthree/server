@@ -515,6 +515,9 @@ enum SkillRangeType
     SKILL_RANGE_NONE,                                       // 0..0 always
 };
 
+/**
+ * Determines the skill progression range type for the specified skill line.
+ */
 SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial);
 
 struct HotfixInfo
@@ -531,6 +534,9 @@ typedef std::vector<HotfixInfo> HotfixData;
 #define MAX_PET_NAME             12                         // max allowed by client name length
 #define MAX_CHARTER_NAME         24                         // max allowed by client name length
 
+/**
+ * Normalizes a player name to the server's canonical capitalization and format rules.
+ */
 bool normalizePlayerName(std::string& name);
 
 struct  LanguageDesc

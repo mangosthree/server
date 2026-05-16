@@ -31,92 +31,216 @@
 class Map;
 class WorldObject;
 
+/**
+ * @brief Cell area structure
+ */
 struct CellArea
 {
+    /**
+     * @brief Default constructor
+     */
     CellArea() {}
+
+    /**
+     * @brief Constructor with bounds
+     * @param low Low bound
+     * @param high High bound
+     */
     CellArea(CellPair low, CellPair high) : low_bound(low), high_bound(high) {}
 
+    /**
+     * @brief Check if empty
+     * @return True if empty
+     */
     bool operator!() const { return low_bound == high_bound; }
 
+    /**
+     * @brief Resize borders
+     * @param begin_cell Begin cell output
+     * @param end_cell End cell output
+     */
     void ResizeBorders(CellPair& begin_cell, CellPair& end_cell) const
     {
         begin_cell = low_bound;
         end_cell = high_bound;
     }
 
-    CellPair low_bound;
-    CellPair high_bound;
+    CellPair low_bound; ///< Low bound
+    CellPair high_bound; ///< High bound
 };
 
+/**
+ * @brief Cell structure
+ */
 struct Cell
 {
-        Cell() : data() { };
-        explicit Cell(CellPair const& p);
+    Cell() : data() { };
+    explicit Cell(CellPair const& p);
+    /**
+     * @brief Compute coordinates
+     * @param x X-coordinate output
+     * @param y Y-coordinate output
+     */
+    void Compute(uint32& x, uint32& y) const
+    {
+        x = data.Part.grid_x * MAX_NUMBER_OF_CELLS + data.Part.cell_x;
+        y = data.Part.grid_y * MAX_NUMBER_OF_CELLS + data.Part.cell_y;
+    }
 
-        void Compute(uint32& x, uint32& y) const
+    /**
+     * @brief Check if different cell
+     * @param cell Cell to compare
+     * @return True if different cell
+     */
+    bool DiffCell(const Cell& cell) const
+    {
+        return(data.Part.cell_x != cell.data.Part.cell_x ||
+               data.Part.cell_y != cell.data.Part.cell_y);
+    }
+
+    /**
+     * @brief Check if different grid
+     * @param cell Cell to compare
+     * @return True if different grid
+     */
+    bool DiffGrid(const Cell& cell) const
+    {
+        return(data.Part.grid_x != cell.data.Part.grid_x ||
+               data.Part.grid_y != cell.data.Part.grid_y);
+    }
+
+    /**
+     * @brief Get cell X coordinate
+     * @return Cell X
+     */
+    uint32 CellX() const
+    {
+        return data.Part.cell_x;
+    }
+
+    /**
+     * @brief Get cell Y coordinate
+     * @return Cell Y
+     */
+    uint32 CellY() const
+    {
+        return data.Part.cell_y;
+    }
+
+    /**
+     * @brief Get grid X coordinate
+     * @return Grid X
+     */
+    uint32 GridX() const
+    {
+        return data.Part.grid_x;
+    }
+
+    /**
+     * @brief Get grid Y coordinate
+     * @return Grid Y
+     */
+    uint32 GridY() const
+    {
+        return data.Part.grid_y;
+    }
+
+    /**
+     * @brief Check if no create flag is set
+     * @return True if no create
+     */
+    bool NoCreate() const
+    {
+        return data.Part.nocreate;
+    }
+
+    /**
+     * @brief Set no create flag
+     */
+    void SetNoCreate()
+    {
+        data.Part.nocreate = 1;
+    }
+
+    /**
+     * @brief Get grid pair
+     * @return Grid pair
+     */
+    GridPair gridPair() const
+    {
+        return GridPair(GridX(), GridY());
+    }
+
+    /**
+     * @brief Get cell pair
+     * @return Cell pair
+     */
+    CellPair cellPair() const
+    {
+        return CellPair(
+                   data.Part.grid_x * MAX_NUMBER_OF_CELLS + data.Part.cell_x,
+                   data.Part.grid_y * MAX_NUMBER_OF_CELLS + data.Part.cell_y);
+    }
+
+    /**
+     * @brief Assignment operator
+     * @param cell Source cell
+     * @return Reference to this cell
+     */
+    Cell& operator=(const Cell& cell)
+    {
+        data.All = cell.data.All;
+        return *this;
+    }
+
+    /**
+     * @brief Equality operator
+     * @param cell Cell to compare
+     * @return True if equal
+     */
+    bool operator==(const Cell& cell) const
+    {
+        return (data.All == cell.data.All);
+    }
+
+    /**
+     * @brief Inequality operator
+     * @param cell Cell to compare
+     * @return True if not equal
+     */
+    bool operator!=(const Cell& cell) const
+    {
+        return !operator==(cell);
+    }
+
+    union
+    {
+        struct
         {
-            x = data.Part.grid_x * MAX_NUMBER_OF_CELLS + data.Part.cell_x;
-            y = data.Part.grid_y * MAX_NUMBER_OF_CELLS + data.Part.cell_y;
-        }
+            uint8 grid_x : 8;
+            uint8 grid_y : 8;
+            uint8 cell_x : 8;
+            uint8 cell_y : 8;
+            uint8 nocreate : 8;
+        } Part;
+        uint64 All;
+    } data;
 
-        bool DiffCell(const Cell& cell) const
-        {
-            return(data.Part.cell_x != cell.data.Part.cell_x ||
-                   data.Part.cell_y != cell.data.Part.cell_y);
-        }
+    template<class T, class CONTAINER> void Visit(const CellPair& cellPair, TypeContainerVisitor<T, CONTAINER> &visitor, Map& m, float x, float y, float radius) const;
+    template<class T, class CONTAINER> void Visit(const CellPair& cellPair, TypeContainerVisitor<T, CONTAINER> &visitor, Map& m, const WorldObject& obj, float radius) const;
 
-        bool DiffGrid(const Cell& cell) const
-        {
-            return(data.Part.grid_x != cell.data.Part.grid_x ||
-                   data.Part.grid_y != cell.data.Part.grid_y);
-        }
+    static CellArea CalculateCellArea(float x, float y, float radius);
 
-        uint32 CellX() const { return data.Part.cell_x; }
-        uint32 CellY() const { return data.Part.cell_y; }
-        uint32 GridX() const { return data.Part.grid_x; }
-        uint32 GridY() const { return data.Part.grid_y; }
-        bool NoCreate() const { return data.Part.nocreate; }
-        void SetNoCreate() { data.Part.nocreate = 1; }
+    template<class T> static void VisitGridObjects(const WorldObject* obj, T& visitor, float radius, bool dont_load = true);
+    template<class T> static void VisitWorldObjects(const WorldObject* obj, T& visitor, float radius, bool dont_load = true);
+    template<class T> static void VisitAllObjects(const WorldObject* obj, T& visitor, float radius, bool dont_load = true);
 
-        GridPair gridPair() const { return GridPair(GridX(), GridY()); }
+    template<class T> static void VisitGridObjects(float x, float y, Map* map, T& visitor, float radius, bool dont_load = true);
+    template<class T> static void VisitWorldObjects(float x, float y, Map* map, T& visitor, float radius, bool dont_load = true);
+    template<class T> static void VisitAllObjects(float x, float y, Map* map, T& visitor, float radius, bool dont_load = true);
 
-        CellPair cellPair() const
-        {
-            return CellPair(
-                       data.Part.grid_x * MAX_NUMBER_OF_CELLS + data.Part.cell_x,
-                       data.Part.grid_y * MAX_NUMBER_OF_CELLS + data.Part.cell_y);
-        }
-
-        bool operator==(const Cell& cell) const { return (data.All == cell.data.All); }
-        bool operator!=(const Cell& cell) const { return !operator==(cell); }
-        union
-        {
-            struct
-            {
-                uint8 grid_x : 8;
-                uint8 grid_y : 8;
-                uint8 cell_x : 8;
-                uint8 cell_y : 8;
-                uint8 nocreate : 8;
-            } Part;
-            uint64 All;
-        } data;
-
-        template<class T, class CONTAINER> void Visit(const CellPair& cellPair, TypeContainerVisitor<T, CONTAINER> &visitor, Map& m, float x, float y, float radius) const;
-        template<class T, class CONTAINER> void Visit(const CellPair& cellPair, TypeContainerVisitor<T, CONTAINER> &visitor, Map& m, const WorldObject& obj, float radius) const;
-
-        static CellArea CalculateCellArea(float x, float y, float radius);
-
-        template<class T> static void VisitGridObjects(const WorldObject* obj, T& visitor, float radius, bool dont_load = true);
-        template<class T> static void VisitWorldObjects(const WorldObject* obj, T& visitor, float radius, bool dont_load = true);
-        template<class T> static void VisitAllObjects(const WorldObject* obj, T& visitor, float radius, bool dont_load = true);
-
-        template<class T> static void VisitGridObjects(float x, float y, Map* map, T& visitor, float radius, bool dont_load = true);
-        template<class T> static void VisitWorldObjects(float x, float y, Map* map, T& visitor, float radius, bool dont_load = true);
-        template<class T> static void VisitAllObjects(float x, float y, Map* map, T& visitor, float radius, bool dont_load = true);
-
-    private:
-        template<class T, class CONTAINER> void VisitCircle(TypeContainerVisitor<T, CONTAINER> &, Map&, const CellPair& , const CellPair&) const;
+private:
+    template<class T, class CONTAINER> void VisitCircle(TypeContainerVisitor<T, CONTAINER> &, Map&, const CellPair& , const CellPair&) const;
 };
 
 #endif

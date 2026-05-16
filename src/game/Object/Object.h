@@ -56,18 +56,23 @@
 
 #define MAX_STEALTH_DETECT_RANGE    45.0f
 
+/**
+ * @brief Temporary spawn type enumeration
+ *
+ * Defines when and how temporary spawns should despawn.
+ */
 enum TempSpawnType
 {
-    TEMPSPAWN_MANUAL_DESPAWN               = 0,             // despawns when UnSummon() is called
-    TEMPSPAWN_DEAD_DESPAWN                 = 1,             // despawns when the creature disappears
-    TEMPSPAWN_CORPSE_DESPAWN               = 2,             // despawns instantly after death
-    TEMPSPAWN_CORPSE_TIMED_DESPAWN         = 3,             // despawns after a specified time after death (or when the creature disappears)
-    TEMPSPAWN_TIMED_DESPAWN                = 4,             // despawns after a specified time
-    TEMPSPAWN_TIMED_OOC_DESPAWN            = 5,             // despawns after a specified time after the creature is out of combat
-    TEMPSPAWN_TIMED_OR_DEAD_DESPAWN        = 6,             // despawns after a specified time OR when the creature disappears
-    TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN      = 7,             // despawns after a specified time OR when the creature dies
-    TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN    = 8,             // despawns after a specified time (OOC) OR when the creature disappears
-    TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN  = 9,             // despawns after a specified time (OOC) OR when the creature dies
+    TEMPSPAWN_MANUAL_DESPAWN = 0,             ///< Despawns when UnSummon() is called
+    TEMPSPAWN_DEAD_DESPAWN = 1,               ///< Despawns when the creature disappears
+    TEMPSPAWN_CORPSE_DESPAWN = 2,             ///< Despawns instantly after death
+    TEMPSPAWN_CORPSE_TIMED_DESPAWN = 3,       ///< Despawns after a specified time after death (or when the creature disappears)
+    TEMPSPAWN_TIMED_DESPAWN = 4,              ///< Despawns after a specified time
+    TEMPSPAWN_TIMED_OOC_DESPAWN = 5,          ///< Despawns after a specified time after the creature is out of combat
+    TEMPSPAWN_TIMED_OR_DEAD_DESPAWN = 6,      ///< Despawns after a specified time OR when the creature disappears
+    TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN = 7,    ///< Despawns after a specified time OR when the creature dies
+    TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN = 8,  ///< Despawns after a specified time (OOC) OR when the creature disappears
+    TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN = 9 ///< Despawns after a specified time (OOC) OR when the creature dies
 };
 
 enum TempSummonLinkedAura
@@ -104,34 +109,76 @@ struct MangosStringLocale;
 
 typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 
+/**
+ * @brief Position structure
+ *
+ * Stores 3D position coordinates and orientation.
+ */
 struct Position
 {
+    /**
+     * @brief Default constructor
+     */
     Position() : x(0.0f), y(0.0f), z(0.0f), o(0.0f) {}
     Position(float _x, float _y, float _z, float _o) : x(_x), y(_y), z(_z), o(_o) {}
-    float x, y, z, o;
+
+    float x; ///< X-coordinate
+    float y; ///< Y-coordinate
+    float z; ///< Z-coordinate
+    float o; ///< Orientation (radians)
 };
 
+/**
+ * @brief World location structure
+ *
+ * Stores map ID and position coordinates.
+ */
 struct WorldLocation
 {
-    uint32 mapid;
-    float coord_x;
-    float coord_y;
-    float coord_z;
-    float orientation;
+    uint32 mapid; ///< Map ID
+    float coord_x; ///< X-coordinate
+    float coord_y; ///< Y-coordinate
+    float coord_z; ///< Z-coordinate
+    float orientation; ///< Orientation (radians)
+
+    /**
+     * @brief Constructor with parameters
+     * @param _mapid Map ID
+     * @param _x X-coordinate
+     * @param _y Y-coordinate
+     * @param _z Z-coordinate
+     * @param _o Orientation
+     */
     explicit WorldLocation(uint32 _mapid = 0, float _x = 0, float _y = 0, float _z = 0, float _o = 0)
         : mapid(_mapid), coord_x(_x), coord_y(_y), coord_z(_z), orientation(NormalizeOrientation(_o)) {}
+
+    /**
+     * @brief Copy constructor
+     * @param loc Source location
+     */
     WorldLocation(WorldLocation const& loc)
         : mapid(loc.mapid), coord_x(loc.coord_x), coord_y(loc.coord_y), coord_z(loc.coord_z), orientation(NormalizeOrientation(loc.orientation)) {}
 };
 
 
-// use this class to measure time between world update ticks
-// essential for units updating their spells after cells become active
+/**
+ * @brief World update counter
+ *
+ * Measures time between world update ticks.
+ * Essential for units updating their spells after cells become active.
+ */
 class WorldUpdateCounter
 {
     public:
+        /**
+         * @brief Constructor
+         */
         WorldUpdateCounter() : m_tmStart(0) {}
 
+        /**
+         * @brief Get elapsed time since start
+         * @return Elapsed time in milliseconds
+         */
         time_t timeElapsed()
         {
             if (!m_tmStart)
@@ -142,18 +189,55 @@ class WorldUpdateCounter
             return getMSTimeDiff(m_tmStart, GameTime::GetGameTimeMS());
         }
 
+        /**
+         * @brief Reset the counter
+         */
         void Reset() { m_tmStart = GameTime::GetGameTimeMS(); }
 
     private:
-        uint32 m_tmStart;
+        uint32 m_tmStart; ///< Start time in milliseconds
 };
 
+/**
+ * @brief Base class for all objects in the MaNGOS world
+ *
+ * The Object class is the fundamental base class for all entities that exist
+ * in the game world, including players, creatures, game objects, items, etc.
+ * It provides core functionality for GUID management, update fields, and world state.
+ *
+ * This class handles:
+ * - Object identification and GUID management
+ * - Update field system for client synchronization
+ * - World state management (in/out of world)
+ * - Type casting helpers for safe downcasting
+ * - Value accessors for different data types
+ *
+ * @note This is an abstract base class and should not be instantiated directly
+ * @note All derived classes must implement virtual methods appropriately
+ */
 class Object
 {
     public:
+        /**
+         * @brief Virtual destructor for proper cleanup of derived classes
+         */
         virtual ~Object();
 
+        /**
+         * @brief Check if object is currently in the game world
+         * @return true if object is in world, false otherwise
+         */
         const bool& IsInWorld() const { return m_inWorld; }
+
+        /**
+         * @brief Add object to the game world
+         *
+         * This method initializes the object's world state and prepares it for
+         * client updates. Should be called when object becomes active in world.
+         *
+         * @note If object is already in world, this method does nothing
+         * @note Clears update mask to prevent sending stale data
+         */
         virtual void AddToWorld()
         {
             if (m_inWorld)
@@ -166,6 +250,15 @@ class Object
             // synchronize values mirror with values array (changes will send in updatecreate opcode any way
             ClearUpdateMask(false);                         // false - we can't have update data in update queue before adding to world
         }
+
+        /**
+         * @brief Remove object from the game world
+         *
+         * This method cleans up the object's world state and prevents further
+         * client updates. Should be called when object becomes inactive.
+         *
+         * @note Clears update mask to prevent sending updates after removal
+         */
         virtual void RemoveFromWorld()
         {
             // if we remove from world then sending changes not required
@@ -173,12 +266,40 @@ class Object
             m_inWorld = false;
         }
 
+        /**
+         * @brief Get the object's unique GUID
+         * @return Reference to the object's GUID
+         */
         ObjectGuid const& GetObjectGuid() const { return GetGuidValue(OBJECT_FIELD_GUID); }
+
+        /**
+         * @brief Get the low part of the object's GUID
+         * @return Low 32 bits of the GUID counter
+         */
         uint32 GetGUIDLow() const { return GetObjectGuid().GetCounter(); }
+
+        /**
+         * @brief Get the packed GUID representation
+         * @return Reference to packed GUID for network transmission
+         */
         PackedGuid const& GetPackGUID() const { return m_PackGUID; }
+
+        /**
+         * @brief Get the GUID as a string
+         * @return String representation of the GUID
+         */
         std::string GetGuidStr() const { return GetObjectGuid().GetString(); }
 
+        /**
+         * @brief Get the object's entry ID from DBC
+         * @return Entry ID from appropriate DBC file
+         */
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
+
+        /**
+         * @brief Set the object's entry ID
+         * @param entry Entry ID from DBC file
+         */
         void SetEntry(uint32 entry) { SetUInt32Value(OBJECT_FIELD_ENTRY, entry); }
 
         float GetObjectScale() const

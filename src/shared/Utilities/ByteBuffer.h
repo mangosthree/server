@@ -51,19 +51,22 @@
 class ObjectGuid;
 
 /**
- * @brief
+ * @brief Exception thrown when ByteBuffer operations exceed buffer bounds
  *
+ * ByteBufferException is raised when attempting to read or write data beyond
+ * the current buffer capacity. Provides detailed position and size information
+ * for debugging buffer overflow conditions.
  */
 class ByteBufferException
 {
     public:
     /**
-     * @brief
+     * @brief Constructs a new ByteBufferException
      *
-     * @param _add
-     * @param _pos
-     * @param _esize
-     * @param _size
+     * @param _add True if exception occurred during append/write operation, false for read
+     * @param _pos Current position in buffer where overflow occurred
+     * @param _esize Size of element that was being added/read
+     * @param _size Total size of the buffer
      */
         ByteBufferException(bool _add, size_t _pos, size_t _esize, size_t _size)
             : add(_add), pos(_pos), esize(_esize), size(_size)
@@ -72,8 +75,9 @@ class ByteBufferException
         }
 
         /**
-         * @brief
+         * @brief Prints detailed error information about the buffer overflow
          *
+         * Outputs information about the position, operation type, and buffer bounds.
          */
         void PrintPosError() const
         {
@@ -93,10 +97,10 @@ class ByteBufferException
                 traceStr ? "\n" : "", traceStr ? traceStr : "");
         }
     private:
-        bool add; /**< TODO */
-        size_t pos; /**< TODO */
-        size_t esize; /**< TODO */
-        size_t size; /**< TODO */
+        bool add; /**< True if error occurred during write/append operation */
+        size_t pos; /**< Position in buffer where overflow occurred */
+        size_t esize; /**< Size of the element being read/written */
+        size_t size; /**< Total size of the buffer */
 };
 
 class BitStream
@@ -142,21 +146,36 @@ class BitStream
 
 template<class T>
 /**
- * @brief
+ * @brief Template for marking unused template parameters
  *
+ * Provides a clean way to suppress compiler warnings about unused template parameters
+ * in template specializations and other scenarios where a template parameter must be
+ * declared but is intentionally not used.
  */
 struct Unused
 {
 /**
- * @brief
- *
+ * @brief Constructs an Unused instance
  */
     Unused() {}
 };
 
 /**
- * @brief
+ * @brief Binary buffer for network packet serialization and deserialization
  *
+ * ByteBuffer provides a container for binary data with methods to read/write
+ * various data types in network byte order. It's essential for World of Warcraft
+ * protocol handling, allowing proper serialization of client-server packets.
+ *
+ * Features:
+ * - Automatic network byte order conversion (little-endian)
+ * - Read/write position tracking
+ * - Exception handling for buffer overflows
+ * - Support for all basic C++ types and strings
+ * - Packed GUID support for efficient network transmission
+ *
+ * @note This is the primary class used for all WoW protocol communication
+ * @note All write operations advance the write position, all reads advance read position
  */
 class ByteBuffer
 {
@@ -175,15 +194,24 @@ class ByteBuffer
             _storage.reserve(res);
         }
 
-        // copy constructor
+        /**
+         * @brief Copy constructor
+         *
+         * Creates a new ByteBuffer with the same content and positions as the source buffer.
+         * Both read and write positions are copied.
+         *
+         * @param buf Source ByteBuffer to copy from
+         */
         ByteBuffer(const ByteBuffer &buf) : _rpos(buf._rpos), _wpos(buf._wpos),
             _storage(buf._storage), _bitpos(buf._bitpos), _curbitval(buf._curbitval)
         {
         }
 
         /**
-         * @brief
+         * @brief Clear the buffer and reset positions
          *
+         * Removes all data from the buffer and resets both read and write
+         * positions to zero. Equivalent to creating a new empty buffer.
          */
         void clear()
         {
@@ -366,6 +394,15 @@ class ByteBuffer
         template<BITS_8>
             void WriteGuidBytes(ObjectGuid guid);
 
+        /**
+         * @brief Insert value at specific position in buffer
+         *
+         * Places a value at the specified position without affecting current
+         * read/write positions. Useful for modifying existing data.
+         *
+         * @param pos Position in buffer where to insert value
+         * @param value Value to insert (will be endian-converted)
+         */
         template <typename T> void put(size_t pos, T value)
         {
             EndianConvert(value);
@@ -373,10 +410,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Append uint8 value to buffer
          *
-         * @param value
-         * @return ByteBuffer &operator
+         * Stream operator for convenient appending of uint8 values.
+         * Advances write position by 1 byte.
+         *
+         * @param value Byte value to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(uint8 value)
         {
@@ -385,10 +425,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Append uint16 value to buffer
          *
-         * @param value
-         * @return ByteBuffer &operator
+         * Stream operator for convenient appending of uint16 values.
+         * Value is automatically endian-converted. Advances write position by 2 bytes.
+         *
+         * @param value 16-bit value to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(uint16 value)
         {
@@ -397,10 +440,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Append uint32 value to buffer
          *
-         * @param value
-         * @return ByteBuffer &operator
+         * Stream operator for convenient appending of uint32 values.
+         * Value is automatically endian-converted. Advances write position by 4 bytes.
+         *
+         * @param value 32-bit value to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(uint32 value)
         {
@@ -409,10 +455,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Append uint64 value to buffer
          *
-         * @param value
-         * @return ByteBuffer &operator
+         * Stream operator for convenient appending of uint64 values.
+         * Value is automatically endian-converted. Advances write position by 8 bytes.
+         *
+         * @param value 64-bit value to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(uint64 value)
         {
@@ -421,10 +470,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief signed as in 2e complement
+         * @brief Append signed int8 value to buffer
          *
-         * @param value
-         * @return ByteBuffer &operator
+         * Stream operator for appending signed 8-bit integers (2's complement).
+         * Advances write position by 1 byte.
+         *
+         * @param value Signed byte value to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(int8 value)
         {
@@ -433,10 +485,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Append signed int16 value to buffer
          *
-         * @param value
-         * @return ByteBuffer &operator
+         * Stream operator for appending signed 16-bit integers (2's complement).
+         * Value is automatically endian-converted. Advances write position by 2 bytes.
+         *
+         * @param value Signed 16-bit value to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(int16 value)
         {
@@ -445,10 +500,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Append signed int32 value to buffer
          *
-         * @param value
-         * @return ByteBuffer &operator
+         * Stream operator for appending signed 32-bit integers (2's complement).
+         * Value is automatically endian-converted. Advances write position by 4 bytes.
+         *
+         * @param value Signed 32-bit value to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(int32 value)
         {
@@ -457,10 +515,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Append signed int64 value to buffer
          *
-         * @param value
-         * @return ByteBuffer &operator
+         * Stream operator for appending signed 64-bit integers (2's complement).
+         * Value is automatically endian-converted. Advances write position by 8 bytes.
+         *
+         * @param value Signed 64-bit value to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(int64 value)
         {
@@ -469,10 +530,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief floating points
+         * @brief Append floating-point value to buffer
          *
-         * @param value
-         * @return ByteBuffer &operator
+         * Stream operator for appending floating-point values.
+         * Value is automatically endian-converted. Advances write position by 4 bytes.
+         *
+         * @param value Float value to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(float value)
         {
@@ -481,10 +545,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Append double-precision floating-point value to buffer
          *
-         * @param value
-         * @return ByteBuffer &operator
+         * Stream operator for appending double-precision values.
+         * Value is automatically endian-converted. Advances write position by 8 bytes.
+         *
+         * @param value Double value to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(double value)
         {
@@ -493,10 +560,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Append null-terminated string to buffer
          *
-         * @param value
-         * @return ByteBuffer &operator
+         * Appends the string content followed by a null terminator.
+         * Useful for transmitting string data over the network protocol.
+         *
+         * @param value String to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(const std::string& value)
         {
@@ -506,10 +576,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Append C-string to buffer
          *
-         * @param str
-         * @return ByteBuffer &operator
+         * Appends a C-string followed by a null terminator.
+         * Safely handles null pointers by writing nothing.
+         *
+         * @param str C-string to append
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator<<(const char* str)
         {
@@ -519,10 +592,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Extract boolean value from buffer
          *
-         * @param value
-         * @return ByteBuffer &operator >>
+         * Stream operator for reading and extracting a boolean value from the buffer.
+         * Non-zero values are interpreted as true. Advances read position by 1 byte.
+         *
+         * @param value Boolean reference to store extracted value
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator>>(bool& value)
         {
@@ -531,10 +607,13 @@ class ByteBuffer
         }
 
         /**
-         * @brief
+         * @brief Extract uint8 value from buffer
          *
-         * @param value
-         * @return ByteBuffer &operator >>
+         * Stream operator for reading and extracting an unsigned byte from the buffer.
+         * Advances read position by 1 byte.
+         *
+         * @param value Uint8 reference to store extracted value
+         * @return Reference to this ByteBuffer for chaining
          */
         ByteBuffer& operator>>(uint8& value)
         {

@@ -22,6 +22,17 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file InstanceCommands.cpp
+ * @brief Implementation of instance and dungeon management chat commands.
+ *
+ * This file contains chat command handlers for instance operations including:
+ * - Instance bindings management
+ * - Instance reset operations
+ * - Instance difficulty configuration
+ * - Instance data manipulation
+ */
+
 #include "Chat.h"
 #include "Language.h"
 #include "MapManager.h"
@@ -30,10 +41,12 @@
 #include "DBCStores.h"
 #include "MapPersistentStateMgr.h"
 
- /**********************************************************************
-     CommandTable : instanceCommandTable
-  **********************************************************************/
-
+/**
+ * @brief Handler for HandleInstanceListBindsCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleInstanceListBindsCommand(char* /*args*/)
 {
     Player* player = getSelectedPlayer();
@@ -56,7 +69,9 @@ bool ChatHandler::HandleInstanceListBindsCommand(char* /*args*/)
                                 state->GetDifficulty(), state->CanReset() ? "yes" : "no", timeleft.c_str());
             }
             else
+            {
                 PSendSysMessage("bound for a nonexistent map %u", itr->first);
+            }
             ++counter;
         }
     }
@@ -74,13 +89,15 @@ bool ChatHandler::HandleInstanceListBindsCommand(char* /*args*/)
                 std::string timeleft = secsToTimeString(state->GetResetTime() - time(NULL), TimeFormat::ShortText);
                 if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
                 {
-                    PSendSysMessage("map: %d (%s) inst: %d perm: %s diff: %d canReset: %s TTR: %s",
+                    PSendSysMessage("map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
                                     itr->first, entry->name[GetSessionDbcLocale()], state->GetInstanceId(), itr->second.perm ? "yes" : "no",
                                     state->GetDifficulty(), state->CanReset() ? "yes" : "no", timeleft.c_str());
                 }
                 else
+                {
                     PSendSysMessage("bound for a nonexistent map %u", itr->first);
-                ++counter;
+                }
+                counter++;
             }
         }
     }
@@ -89,6 +106,12 @@ bool ChatHandler::HandleInstanceListBindsCommand(char* /*args*/)
     return true;
 }
 
+/**
+ * @brief Handler for HandleInstanceUnbindCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleInstanceUnbindCommand(char* args)
 {
     if (!*args)
@@ -133,7 +156,7 @@ bool ChatHandler::HandleInstanceUnbindCommand(char* args)
 
                 if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
                 {
-                    PSendSysMessage("unbinding map: %d (%s) inst: %d perm: %s diff: %d canReset: %s TTR: %s",
+                    PSendSysMessage("unbinding map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
                                     itr->first, entry->name[GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no",
                                     save->GetDifficulty(), save->CanReset() ? "yes" : "no", timeleft.c_str());
                 }
@@ -155,6 +178,12 @@ bool ChatHandler::HandleInstanceUnbindCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleInstanceStatsCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleInstanceStatsCommand(char* /*args*/)
 {
     PSendSysMessage("instances loaded: %d", sMapMgr.GetNumInstances());
@@ -168,6 +197,12 @@ bool ChatHandler::HandleInstanceStatsCommand(char* /*args*/)
     return true;
 }
 
+/**
+ * @brief Handler for HandleInstanceSaveDataCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleInstanceSaveDataCommand(char* /*args*/)
 {
     Player* pl = m_session->GetPlayer();
@@ -185,4 +220,3 @@ bool ChatHandler::HandleInstanceSaveDataCommand(char* /*args*/)
     iData->SaveToDB();
     return true;
 }
-

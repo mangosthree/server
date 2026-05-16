@@ -22,6 +22,32 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file GuildHandler.cpp
+ * @brief Guild opcode handlers
+ *
+ * This file handles guild-related opcodes including:
+ * - CMSG_GUILD_QUERY: Query guild information
+ * - CMSG_GUILD_CREATE: Create new guild
+ * - CMSG_GUILD_INVITE: Invite player to guild
+ * - CMSG_GUILD_ACCEPT: Accept guild invitation
+ * - CMSG_GUILD_DECLINE: Decline guild invitation
+ * - CMSG_GUILD_INFO: Query guild roster
+ * - CMSG_GUILD_ROSTER: Request guild roster
+ * - CMSG_GUILD_LEAVE: Leave guild
+ * - CMSG_GUILD_DISBAND: Disband guild
+ * - CMSG_GUILD_LEADER: Transfer guild leadership
+ * - CMSG_GUILD_MOTD: Set guild message of the day
+ * - CMSG_GUILD_RANK: Modify guild ranks
+ * - CMSG_GUILD_ADD_RANK: Add guild rank
+ * - CMSG_GUILD_DELETE_RANK: Delete guild rank
+ * - CMSG_GUILD_DEMOTE: Demote guild member
+ * - CMSG_GUILD_PROMOTE: Promote guild member
+ * - CMSG_GUILD_REMOVE: Remove guild member
+ * - CMSG_GUILD_CHAT: Send guild chat message
+ * - CMSG_GUILD_BANK: Guild bank operations
+ */
+
 #include "Common.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -57,6 +83,11 @@ void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
     SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_PLAYER_NOT_IN_GUILD);
 }
 
+/**
+ * @brief Creates a new guild for the current player.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_CREATE");
@@ -79,6 +110,12 @@ void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
     sGuildMgr.AddGuild(guild);
 }
 
+/**
+ * @brief Sends a guild invitation packet to another player.
+ *
+ * @param player The invited player.
+ * @param alreadyInGuild Unused legacy flag for prior guild membership checks.
+ */
 void WorldSession::SendGuildInvite(Player* player, bool alreadyInGuild /*= false*/)
 {
     Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -95,6 +132,11 @@ void WorldSession::SendGuildInvite(Player* player, bool alreadyInGuild /*= false
     player->GetSession()->SendPacket(&data);                                  // unk
 }
 
+/**
+ * @brief Invites another player to the current guild.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_INVITE");
@@ -210,6 +252,11 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
     DEBUG_LOG("WORLD: Sent (SMSG_GUILD_INVITE)");
 }
 
+/**
+ * @brief Removes a member from the current guild.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_REMOVE");
@@ -278,6 +325,11 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
     guild->BroadcastEvent(GE_REMOVED, plName.c_str(), _player->GetName());
 }
 
+/**
+ * @brief Accepts a pending guild invitation.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildAcceptOpcode(WorldPacket& /*recvPacket*/)
 {
     Guild* guild;
@@ -307,6 +359,11 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& /*recvPacket*/)
     guild->BroadcastEvent(GE_JOINED, player->GetObjectGuid(), player->GetName());
 }
 
+/**
+ * @brief Declines a pending guild invitation.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode %s", LookupOpcodeName(recvPacket.GetOpcode()));
@@ -324,6 +381,11 @@ void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
     GetPlayer()->SetGuildLevel(0);
 }
 
+/**
+ * @brief Sends general information about the current guild.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildInfoOpcode(WorldPacket& /*recvPacket*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_INFO");
@@ -343,6 +405,11 @@ void WorldSession::HandleGuildInfoOpcode(WorldPacket& /*recvPacket*/)
     SendPacket(&data);
 }
 
+/**
+ * @brief Sends the guild roster to the current player.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)
 {
     ObjectGuid guid1, guid2;
@@ -380,6 +447,11 @@ void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)
     }
 }
 
+/**
+ * @brief Promotes a guild member to a higher rank.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_PROMOTE");
@@ -437,6 +509,11 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
     guild->BroadcastEvent(GE_PROMOTION, _player->GetName(), plName.c_str(), guild->GetRankName(newRankId).c_str());
 }
 
+/**
+ * @brief Demotes a guild member to a lower rank.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_DEMOTE");
@@ -623,6 +700,11 @@ void WorldSession::HandleGuildSwitchRankOpcode(WorldPacket& recvPacket)
     guild->Roster();                                        // broadcast for tab rights update
 }
 
+/**
+ * @brief Removes the current player from the guild.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildLeaveOpcode(WorldPacket& /*recvPacket*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_LEAVE");
@@ -671,6 +753,11 @@ void WorldSession::HandleGuildLeaveOpcode(WorldPacket& /*recvPacket*/)
     guild->BroadcastEvent(GE_LEFT, _player->GetObjectGuid(), _player->GetName());
 }
 
+/**
+ * @brief Disbands the current guild if the player is its leader.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildDisbandOpcode(WorldPacket& /*recvPacket*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_DISBAND");
@@ -701,6 +788,11 @@ void WorldSession::HandleGuildDisbandOpcode(WorldPacket& /*recvPacket*/)
     DEBUG_LOG("WORLD: Guild Successfully Disbanded");
 }
 
+/**
+ * @brief Transfers guild leadership to another member.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_LEADER");
@@ -754,6 +846,11 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
     guild->BroadcastEvent(GE_LEADER_CHANGED, oldLeader->GetName(), name.c_str());
 }
 
+/**
+ * @brief Updates the guild message of the day.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_MOTD");
@@ -777,6 +874,11 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
     guild->BroadcastEvent(GE_MOTD, MOTD.c_str());
 }
 
+/**
+ * @brief Updates a guild member's public note.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildSetNoteOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_SET_NOTE");
@@ -833,6 +935,11 @@ void WorldSession::HandleGuildSetNoteOpcode(WorldPacket& recvPacket)
     guild->Roster(this);
 }
 
+/**
+ * @brief Updates guild rank names and permissions.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
 {
     std::string rankname;
@@ -893,6 +1000,11 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     guild->Roster();                                        // broadcast for tab rights update
 }
 
+/**
+ * @brief Adds a new guild rank.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_ADD_RANK");
@@ -925,6 +1037,11 @@ void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
     guild->Roster();                                        // broadcast for tab rights update
 }
 
+/**
+ * @brief Deletes the lowest removable guild rank.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildDelRankOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_DEL_RANK");
@@ -959,6 +1076,13 @@ void WorldSession::HandleGuildDelRankOpcode(WorldPacket& recvPacket)
     guild->Roster();                                        // broadcast for tab rights update
 }
 
+/**
+ * @brief Sends the result of a guild command back to the client.
+ *
+ * @param typecmd The guild command type.
+ * @param str The related player or guild name.
+ * @param cmdresult The result code.
+ */
 void WorldSession::SendGuildCommandResult(uint32 typecmd, const std::string& str, uint32 cmdresult)
 {
     WorldPacket data(SMSG_GUILD_COMMAND_RESULT, 8 + str.size() + 1);
@@ -971,6 +1095,11 @@ void WorldSession::SendGuildCommandResult(uint32 typecmd, const std::string& str
     DEBUG_LOG("WORLD: Sent (SMSG_GUILD_COMMAND_RESULT)");
 }
 
+/**
+ * @brief Updates the guild information text.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildChangeInfoTextOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_GUILD_INFO_TEXT");
@@ -993,6 +1122,11 @@ void WorldSession::HandleGuildChangeInfoTextOpcode(WorldPacket& recvPacket)
     guild->SetGINFO(GINFO);
 }
 
+/**
+ * @brief Saves a new guild emblem design.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleSaveGuildEmblemOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode MSG_SAVE_GUILD_EMBLEM");
@@ -1043,6 +1177,11 @@ void WorldSession::HandleSaveGuildEmblemOpcode(WorldPacket& recvPacket)
     guild->Query(this);
 }
 
+/**
+ * @brief Sends the guild event log to the current player.
+ *
+ * @param recvPacket The received opcode packet.
+ */
 void WorldSession::HandleGuildEventLogQueryOpcode(WorldPacket& /* recvPacket */)
 {
     // empty
@@ -1591,6 +1730,11 @@ void WorldSession::HandleSetGuildBankTabText(WorldPacket& recv_data)
     pGuild->SetGuildBankTabText(TabId, Text);
 }
 
+/**
+ * @brief Sends the result of a guild emblem save request.
+ *
+ * @param msg The guild emblem result code.
+ */
 void WorldSession::SendSaveGuildEmblem(uint32 msg)
 {
     WorldPacket data(MSG_SAVE_GUILD_EMBLEM, 4);

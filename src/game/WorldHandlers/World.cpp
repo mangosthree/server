@@ -22,9 +22,25 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/** \file
-    \ingroup world
-*/
+/**
+ * @file World.cpp
+ * @brief Core world server implementation
+ *
+ * This file implements the World class, which is the central hub of the
+ * MaNGOS game server. It manages:
+ * - Server configuration and settings
+ * - Game time and world updates
+ * - Player sessions and limits
+ * - All game systems initialization (maps, spells, quests, etc.)
+ * - Server shutdown and restart procedures
+ * - In-game announcements and events
+ * - Various utility functions for the game world
+ *
+ * The World class is a singleton accessed via sWorld, and runs the main
+ * server loop that processes all game logic.
+ *
+ * @ingroup world
+ */
 
 #include "World.h"
 #include "Database/DatabaseEnv.h"
@@ -117,7 +133,22 @@ float World::m_VisibleObjectGreyDistance      = 0;
 float  World::m_relocation_lower_limit_sq     = 10.f * 10.f;
 uint32 World::m_relocation_ai_notify_delay    = 1000u;
 
-/// World constructor
+/**
+ * @brief World class constructor
+ *
+ * Initializes all world state variables to their default values:
+ * - Player limit set to 0 (unlimited)
+ * - Movement allowed
+ * - Shutdown mask and timer cleared
+ * - Game time set to current system time
+ * - Session counts zeroed
+ * - All config arrays cleared
+ * - DBC locale set to enUS
+ * - Broadcast system disabled
+ *
+ * This is called once when the server starts, before any configuration
+ * is loaded or systems initialized.
+ */
 World::World(): mail_timer(0), mail_timer_expires(0), m_NextMonthlyQuestReset(0)
 {
     m_playerLimit = 0;
@@ -257,6 +288,11 @@ bool World::RemoveSession(uint32 id)
     return true;
 }
 
+/**
+ * @brief Queues a new session for addition during the world update.
+ *
+ * @param s The session to add.
+ */
 void World::AddSession(WorldSession* s)
 {
     std::lock_guard<std::mutex> guard(m_sessionAddQueueLock);
@@ -362,6 +398,12 @@ World::AddSession_(WorldSession* s)
     }
 }
 
+/**
+ * @brief Returns the current queue position of a session.
+ *
+ * @param sess The session to locate.
+ * @return The 1-based queue position, or 0 if not queued.
+ */
 int32 World::GetQueuedSessionPos(WorldSession* sess)
 {
     uint32 position = 1;
@@ -375,6 +417,11 @@ int32 World::GetQueuedSessionPos(WorldSession* sess)
     return 0;
 }
 
+/**
+ * @brief Places a session into the login queue and notifies the client.
+ *
+ * @param sess The session being queued.
+ */
 void World::AddQueuedSession(WorldSession* sess)
 {
     sess->SetInQueue(true);
@@ -399,6 +446,12 @@ void World::AddQueuedSession(WorldSession* sess)
     sess->SendPacket(&packet);
 }
 
+/**
+ * @brief Removes a session from the login queue and updates later positions.
+ *
+ * @param sess The session to remove.
+ * @return true if the session was queued and removed; otherwise false.
+ */
 bool World::RemoveQueuedSession(WorldSession* sess)
 {
     // sessions count including queued to remove (if removed_session set)
@@ -1717,6 +1770,9 @@ void World::SetInitialWorldSettings()
     sLog.outString();
 }
 
+/**
+ * @brief Prints the startup footer and enabled module summary.
+ */
 void World::showFooter()
 {
     std::set<std::string> modules_;
@@ -1808,6 +1864,9 @@ void World::showFooter()
             thisClientVersion.c_str(), thisClientBuilds.c_str(), sModules.c_str());
 }
 
+/**
+ * @brief Detects the active DBC locale and available locale mask.
+ */
 void World::DetectDBCLang()
 {
     // get the DBC Locale
@@ -2424,6 +2483,11 @@ void World::ShutdownCancel()
 #endif /* ENABLE_ELUNA */
 }
 
+/**
+ * @brief Updates all active sessions and integrates newly queued ones.
+ *
+ * @param diff The elapsed world update time in milliseconds.
+ */
 void World::UpdateSessions(uint32 /*diff*/)
 {
     ///- Add new sessions
@@ -2478,10 +2542,16 @@ void World::ProcessCliCommands()
     }
 }
 
+/**
+ * @brief Initializes the asynchronous result queue state.
+ */
 void World::InitResultQueue()
 {
 }
 
+/**
+ * @brief Processes queued asynchronous database results.
+ */
 void World::UpdateResultQueue()
 {
     // process async result queues
@@ -2490,12 +2560,23 @@ void World::UpdateResultQueue()
     LoginDatabase.ProcessResultQueue();
 }
 
+/**
+ * @brief Requests an asynchronous character count refresh for an account.
+ *
+ * @param accountId The account id to refresh.
+ */
 void World::UpdateRealmCharCount(uint32 accountId)
 {
     CharacterDatabase.AsyncPQuery(this, &World::_UpdateRealmCharCount, accountId,
                                   "SELECT COUNT(`guid`) FROM `characters` WHERE `account` = '%u'", accountId);
 }
 
+/**
+ * @brief Stores the updated realm character count for an account.
+ *
+ * @param resultCharCount The asynchronous query result.
+ * @param accountId The account id being updated.
+ */
 void World::_UpdateRealmCharCount(QueryResult* resultCharCount, uint32 accountId)
 {
     if (resultCharCount)
@@ -2808,6 +2889,12 @@ void World::ResetCurrencyWeekCounts()
     CharacterDatabase.PExecute("UPDATE saved_variables SET `NextCurrenciesResetTime` = '" UI64FMTD "'", uint64(m_NextCurrencyReset));
 }
 
+/**
+ * @brief Sets the player access limit and updates the realm list if needed.
+ *
+ * @param limit The new player limit or security gate value.
+ * @param needUpdate Whether the database row should be considered for update.
+ */
 void World::SetPlayerLimit(int32 limit, bool needUpdate)
 {
     if (limit < -SEC_ADMINISTRATOR)
@@ -2825,12 +2912,18 @@ void World::SetPlayerLimit(int32 limit, bool needUpdate)
                                uint32(GetPlayerSecurityLimit()), realmID);
 }
 
+/**
+ * @brief Updates the recorded peak active and queued session counters.
+ */
 void World::UpdateMaxSessionCounters()
 {
     m_maxActiveSessionCount = std::max(m_maxActiveSessionCount, uint32(m_sessions.size() - m_QueuedSessions.size()));
     m_maxQueuedSessionCount = std::max(m_maxQueuedSessionCount, uint32(m_QueuedSessions.size()));
 }
 
+/**
+ * @brief Loads the current world database version string.
+ */
 void World::LoadDBVersion()
 {
     QueryResult* result = WorldDatabase.Query("SELECT `version`, `structure`, `content` FROM `db_version` ORDER BY `version` DESC, `structure` DESC, `content` DESC LIMIT 1");
@@ -2873,6 +2966,13 @@ void World::setConfig(eConfigInt64Values index, char const* fieldname, int64 def
     setConfig(index, sConfig.GetIntDefault(fieldname, defvalue));
 }
 
+/**
+ * @brief Loads an unsigned integer config value and clamps it against negativity.
+ *
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ */
 void World::setConfig(eConfigUInt32Values index, char const* fieldname, uint32 defvalue)
 {
     setConfig(index, sConfig.GetIntDefault(fieldname, defvalue));
@@ -2883,21 +2983,49 @@ void World::setConfig(eConfigUInt32Values index, char const* fieldname, uint32 d
     }
 }
 
+/**
+ * @brief Loads a signed integer config value.
+ *
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ */
 void World::setConfig(eConfigInt32Values index, char const* fieldname, int32 defvalue)
 {
     setConfig(index, sConfig.GetIntDefault(fieldname, defvalue));
 }
 
+/**
+ * @brief Loads a floating-point config value.
+ *
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ */
 void World::setConfig(eConfigFloatValues index, char const* fieldname, float defvalue)
 {
     setConfig(index, sConfig.GetFloatDefault(fieldname, defvalue));
 }
 
+/**
+ * @brief Loads a boolean config value.
+ *
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ */
 void World::setConfig(eConfigBoolValues index, char const* fieldname, bool defvalue)
 {
     setConfig(index, sConfig.GetBoolDefault(fieldname, defvalue));
 }
 
+/**
+ * @brief Loads a positive floating-point config value.
+ *
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ */
 void World::setConfigPos(eConfigFloatValues index, char const* fieldname, float defvalue)
 {
     setConfig(index, fieldname, defvalue);
@@ -2928,6 +3056,14 @@ void World::setConfigMin(eConfigInt64Values index, char const* fieldname, int64 
     }
 }
 
+/**
+ * @brief Loads an unsigned integer config value with a minimum bound.
+ *
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ * @param minvalue The minimum allowed value.
+ */
 void World::setConfigMin(eConfigUInt32Values index, char const* fieldname, uint32 defvalue, uint32 minvalue)
 {
     setConfig(index, fieldname, defvalue);
@@ -2938,6 +3074,14 @@ void World::setConfigMin(eConfigUInt32Values index, char const* fieldname, uint3
     }
 }
 
+/**
+ * @brief Loads a signed integer config value with a minimum bound.
+ *
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ * @param minvalue The minimum allowed value.
+ */
 void World::setConfigMin(eConfigInt32Values index, char const* fieldname, int32 defvalue, int32 minvalue)
 {
     setConfig(index, fieldname, defvalue);
@@ -2948,6 +3092,14 @@ void World::setConfigMin(eConfigInt32Values index, char const* fieldname, int32 
     }
 }
 
+/**
+ * @brief Loads a floating-point config value with a minimum bound.
+ *
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ * @param minvalue The minimum allowed value.
+ */
 void World::setConfigMin(eConfigFloatValues index, char const* fieldname, float defvalue, float minvalue)
 {
     setConfig(index, fieldname, defvalue);
@@ -2988,6 +3140,15 @@ void World::setConfigMinMax(eConfigInt64Values index, char const* fieldname, int
     }
 }
 
+/**
+ * @brief Loads an unsigned integer config value with minimum and maximum bounds.
+ *
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ * @param minvalue The minimum allowed value.
+ * @param maxvalue The maximum allowed value.
+ */
 void World::setConfigMinMax(eConfigUInt32Values index, char const* fieldname, uint32 defvalue, uint32 minvalue, uint32 maxvalue)
 {
     setConfig(index, fieldname, defvalue);
@@ -3003,6 +3164,15 @@ void World::setConfigMinMax(eConfigUInt32Values index, char const* fieldname, ui
     }
 }
 
+/**
+ * @brief Loads a signed integer config value with minimum and maximum bounds.
+ *
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ * @param minvalue The minimum allowed value.
+ * @param maxvalue The maximum allowed value.
+ */
 void World::setConfigMinMax(eConfigInt32Values index, char const* fieldname, int32 defvalue, int32 minvalue, int32 maxvalue)
 {
     setConfig(index, fieldname, defvalue);
@@ -3018,6 +3188,15 @@ void World::setConfigMinMax(eConfigInt32Values index, char const* fieldname, int
     }
 }
 
+/**
+ * @brief Loads a floating-point config value with minimum and maximum bounds.
+ *
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ * @param minvalue The minimum allowed value.
+ * @param maxvalue The maximum allowed value.
+ */
 void World::setConfigMinMax(eConfigFloatValues index, char const* fieldname, float defvalue, float minvalue, float maxvalue)
 {
     setConfig(index, fieldname, defvalue);
@@ -3033,6 +3212,15 @@ void World::setConfigMinMax(eConfigFloatValues index, char const* fieldname, flo
     }
 }
 
+/**
+ * @brief Rejects reloading a uint32 config value when live reload is not supported.
+ *
+ * @param reload Whether this is a config reload operation.
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ * @return true if normal loading may continue; otherwise false.
+ */
 bool World::configNoReload(bool reload, eConfigUInt32Values index, char const* fieldname, uint32 defvalue)
 {
     if (!reload)
@@ -3049,6 +3237,15 @@ bool World::configNoReload(bool reload, eConfigUInt32Values index, char const* f
     return false;
 }
 
+/**
+ * @brief Rejects reloading an int32 config value when live reload is not supported.
+ *
+ * @param reload Whether this is a config reload operation.
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ * @return true if normal loading may continue; otherwise false.
+ */
 bool World::configNoReload(bool reload, eConfigInt32Values index, char const* fieldname, int32 defvalue)
 {
     if (!reload)
@@ -3065,6 +3262,15 @@ bool World::configNoReload(bool reload, eConfigInt32Values index, char const* fi
     return false;
 }
 
+/**
+ * @brief Rejects reloading a float config value when live reload is not supported.
+ *
+ * @param reload Whether this is a config reload operation.
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ * @return true if normal loading may continue; otherwise false.
+ */
 bool World::configNoReload(bool reload, eConfigFloatValues index, char const* fieldname, float defvalue)
 {
     if (!reload)
@@ -3081,6 +3287,15 @@ bool World::configNoReload(bool reload, eConfigFloatValues index, char const* fi
     return false;
 }
 
+/**
+ * @brief Rejects reloading a bool config value when live reload is not supported.
+ *
+ * @param reload Whether this is a config reload operation.
+ * @param index The config slot.
+ * @param fieldname The configuration key.
+ * @param defvalue The default value.
+ * @return true if normal loading may continue; otherwise false.
+ */
 bool World::configNoReload(bool reload, eConfigBoolValues index, char const* fieldname, bool defvalue)
 {
     if (!reload)
@@ -3097,6 +3312,11 @@ bool World::configNoReload(bool reload, eConfigBoolValues index, char const* fie
     return false;
 }
 
+/**
+ * @brief Invalidates cached player data for all connected clients.
+ *
+ * @param guid The player guid to invalidate.
+ */
 void World::InvalidatePlayerDataToAllClient(ObjectGuid guid)
 {
     WorldPacket data(SMSG_INVALIDATE_PLAYER, 8);
@@ -3104,6 +3324,9 @@ void World::InvalidatePlayerDataToAllClient(ObjectGuid guid)
     SendGlobalMessage(&data);
 }
 
+/**
+ * @brief Loads automatic broadcast messages and their weights from the database.
+ */
 void World::LoadBroadcastStrings()
 {
     if (!m_broadcastEnable)
@@ -3159,6 +3382,9 @@ void World::LoadBroadcastStrings()
     }
 }
 
+/**
+ * @brief Sends a weighted random automatic broadcast message.
+ */
 void World::AutoBroadcast()
 {
     if (m_broadcastList.size() == 1)

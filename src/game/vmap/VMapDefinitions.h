@@ -27,7 +27,7 @@
 
 #include <cstring>
 
-#define LIQUID_TILE_SIZE (533.333f / 128.f)
+#define LIQUID_TILE_SIZE (533.333f / 128.f) ///< Liquid tile size
 
 namespace VMAP
 {

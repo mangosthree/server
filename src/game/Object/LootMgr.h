@@ -178,6 +178,8 @@ class LootStore
         bool HaveLootFor(uint32 loot_id) const { return m_LootTemplates.find(loot_id) != m_LootTemplates.end(); }
         bool HaveQuestLootFor(uint32 loot_id) const;
         bool HaveQuestLootForPlayer(uint32 loot_id, Player* player) const;
+        bool HaveConditionalLootFor(uint32 loot_id) const;
+        bool HaveConditionalLootForPlayer(uint32 loot_id, Player* player, WorldObject const* lootTarget) const;
 
         LootTemplate const* GetLootFor(uint32 loot_id) const;
 
@@ -209,6 +211,8 @@ class LootTemplate
         bool HasQuestDrop(LootTemplateMap const& store, uint8 GroupId = 0) const;
         // True if template includes at least 1 quest drop for an active quest of the player
         bool HasQuestDropForPlayer(LootTemplateMap const& store, Player const* player, uint8 GroupId = 0) const;
+        bool HasConditionalDrop(LootTemplateMap const& store, uint8 groupId = 0) const;
+        bool HasConditionalDropForPlayer(LootTemplateMap const& store, Player const* player, WorldObject const* lootTarget, uint8 groupId = 0) const;
 
         // Checks integrity of the template
         void Verify(LootStore const& store, uint32 Id) const;
@@ -247,7 +251,14 @@ class LootValidatorRefManager : public RefManager<Loot, LootValidatorRef>
 //=====================================================
 struct LootView;
 
+/**
+ * Serializes a loot item entry into a byte buffer.
+ */
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
+
+/**
+ * Serializes a loot view into a byte buffer.
+ */
 ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
 
 struct Loot
@@ -372,18 +383,57 @@ extern LootStore LootTemplates_Disenchant;
 extern LootStore LootTemplates_Prospecting;
 extern LootStore LootTemplates_Spell;
 
+/**
+ * Loads creature loot templates.
+ */
 void LoadLootTemplates_Creature();
+
+/**
+ * Loads fishing loot templates.
+ */
 void LoadLootTemplates_Fishing();
+
+/**
+ * Loads gameobject loot templates.
+ */
 void LoadLootTemplates_Gameobject();
+
+/**
+ * Loads item loot templates.
+ */
 void LoadLootTemplates_Item();
+
+/**
+ * Loads mail loot templates.
+ */
 void LoadLootTemplates_Mail();
+
+/**
+ * Loads milling loot templates.
+ */
 void LoadLootTemplates_Milling();
+
+/**
+ * Loads pickpocketing loot templates.
+ */
 void LoadLootTemplates_Pickpocketing();
+
+/**
+ * Loads skinning loot templates.
+ */
 void LoadLootTemplates_Skinning();
+
+/**
+ * Loads disenchant loot templates.
+ */
 void LoadLootTemplates_Disenchant();
 void LoadLootTemplates_Prospecting();
 
 void LoadLootTemplates_Spell();
+
+/**
+ * Loads reference loot templates used by other loot tables.
+ */
 void LoadLootTemplates_Reference();
 
 inline void LoadLootTables()

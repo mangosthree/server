@@ -22,6 +22,17 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file WaypointCommands.cpp
+ * @brief Implementation of waypoint path editing chat commands.
+ *
+ * This file contains chat command handlers for waypoint operations including:
+ * - Waypoint path creation and editing
+ * - Waypoint property modification
+ * - Path movement testing
+ * - NPC path assignment
+ */
+
 #include "Chat.h"
 #include "Language.h"
 #include "PointMovementGenerator.h"
@@ -61,6 +72,12 @@ inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin 
     return wpCreature;
 }
 
+/**
+ * @brief Despawns temporary visual waypoint creatures owned by a player.
+ *
+ * @param player The player used as the center of the search.
+ * @param ownerGuid The owner guid assigned to the visual waypoints.
+ */
 inline void UnsummonVisualWaypoints(Player const* player, ObjectGuid ownerGuid)
 {
     std::list<Creature*> waypoints;
@@ -120,7 +137,7 @@ bool ChatHandler::HandleWpAddCommand(char* args)
     WaypointPathOrigin wpDestination = PATH_NO_PATH;        ///< into which storage
     int32 wpPathId = 0;                                     ///< along which path
     uint32 wpPointId = 0;                                   ///< pointId if a waypoint was selected, in this case insert after
-    Creature* wpOwner = NULL;
+    Creature* wpOwner;
 
     if (targetCreature)
     {
@@ -329,7 +346,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
 
     // Did user provide a GUID or did the user select a creature?
     Creature* targetCreature = getSelectedCreature();       // Expect a visual waypoint to be selected
-    Creature* wpOwner = NULL;                               // Who moves along the waypoint
+    Creature* wpOwner;                               // Who moves along the waypoint
     uint32 wpId = 0;
     WaypointPathOrigin wpSource = PATH_NO_PATH;
     int32 wpPathId = 0;
@@ -609,7 +626,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         }
     }
 
-    Creature* wpOwner = NULL;                               ///< Npc that is moving
+    Creature* wpOwner;                               ///< Npc that is moving
     TemporarySummonWaypoint* wpTarget = NULL;               // Define here for wp-info command
 
     // Show info for the selected waypoint (Step one: get moving npc)
@@ -765,7 +782,12 @@ bool ChatHandler::HandleWpShowCommand(char* args)
     return false;
 }                                                           // HandleWpShowCommand
 
-/// [Guid if no selected unit] <filename> [pathId [wpOrigin] ]
+/**
+ * @brief Handler for HandleWpExportCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleWpExportCommand(char* args)
 {
     if (!*args)
@@ -773,7 +795,7 @@ bool ChatHandler::HandleWpExportCommand(char* args)
         return false;
     }
 
-    Creature* wpOwner = NULL;
+    Creature* wpOwner;
     WaypointPathOrigin wpOrigin = PATH_NO_PATH;
     int32 wpPathId = 0;
 

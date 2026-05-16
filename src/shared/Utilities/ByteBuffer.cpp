@@ -22,6 +22,14 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file ByteBuffer.cpp
+ * @brief ByteBuffer debugging and utility implementations
+ *
+ * This file provides debugging output functions for the ByteBuffer
+ * class, including hex dumps and formatted storage displays.
+ */
+
 #include "ByteBuffer.h"
 #include "Log/Log.h"
 

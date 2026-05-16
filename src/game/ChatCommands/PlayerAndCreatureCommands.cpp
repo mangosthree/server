@@ -22,6 +22,16 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+/**
+ * @file PlayerAndCreatureCommands.cpp
+ * @brief Implementation of player and creature interaction chat commands.
+ *
+ * This file contains chat command handlers for interactions including:
+ * - Player and creature following
+ * - Movement commands
+ * - Unit state management
+ */
+
 #include "Chat.h"
 #include "Language.h"
 #include "PathFinder.h"
@@ -34,11 +44,12 @@
 #include "Player.h"
 #include "DBCStores.h"
 
- /**********************************************************************
-      CommandTable : commandTable
-  **********************************************************************/
-
-// demorph player or unit
+/**
+ * @brief Handler for HandleDeMorphCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleDeMorphCommand(char* /*args*/)
 {
     Unit* target = getSelectedUnit();
@@ -58,7 +69,12 @@ bool ChatHandler::HandleDeMorphCommand(char* /*args*/)
     return true;
 }
 
-// morph creature or player
+/**
+ * @brief Handler for HandleModifyMorphCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleModifyMorphCommand(char* args)
 {
     if (!*args)
@@ -93,6 +109,12 @@ bool ChatHandler::HandleModifyMorphCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleDamageCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleDamageCommand(char* args)
 {
     if (!*args)
@@ -179,8 +201,6 @@ bool ChatHandler::HandleDamageCommand(char* args)
     }
 
     // non-melee damage
-
-    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
     uint32 spellid = ExtractSpellIdFromLink(&args);
     if (!spellid || !sSpellStore.LookupEntry(spellid))
     {
@@ -191,6 +211,12 @@ bool ChatHandler::HandleDamageCommand(char* args)
     return true;
 }
 
+/**
+ * @brief Handler for HandleDieCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleDieCommand(char* /*args*/)
 {
     Player* player = m_session->GetPlayer();
@@ -219,6 +245,12 @@ bool ChatHandler::HandleDieCommand(char* /*args*/)
     return true;
 }
 
+/**
+ * @brief Handler for HandleMovegensCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleMovegensCommand(char* /*args*/)
 {
     Unit* unit = getSelectedUnit();
@@ -245,7 +277,7 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
 
             case CHASE_MOTION_TYPE:
             {
-                Unit* target = NULL;
+                Unit* target;
                 if (unit->GetTypeId() == TYPEID_PLAYER)
                 {
                     target = static_cast<ChaseMovementGenerator<Player> const*>(*itr)->GetTarget();
@@ -271,7 +303,7 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
             }
             case FOLLOW_MOTION_TYPE:
             {
-                Unit* target = NULL;
+                Unit* target;
                 if (unit->GetTypeId() == TYPEID_PLAYER)
                 {
                     target = static_cast<FollowMovementGenerator<Player> const*>(*itr)->GetTarget();
@@ -322,6 +354,12 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
     return true;
 }
 
+/**
+ * @brief Handler for HandleSetViewCommand command.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
 bool ChatHandler::HandleSetViewCommand(char* /*args*/)
 {
     if (Unit* unit = getSelectedUnit())

@@ -4015,8 +4015,15 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
     {
         target->Unmount(true);
 
-        // remove speed aura
-        if (MountCapabilityEntry const* mountCapability = target->GetMountCapability(m_modifier.m_amount))
+        // Remove the per-capability speed-mod spell cast on apply. Look the
+        // capability up the same way the apply branch did — via the aura's
+        // EffectMiscValueB (mount type). Using a different field here meant
+        // the lookup returned null, RemoveAurasByCasterSpell was never called,
+        // SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED stayed on the player, and
+        // SetCanFly(false) never propagated to the client on dismount.
+        // Compare Spell.cpp:7924 and MovementHandler.cpp:259, which also
+        // feed GetMountCapability with EffectMiscValueB.
+        if (MountCapabilityEntry const* mountCapability = target->GetMountCapability(uint32(GetMiscBValue())))
         {
             target->RemoveAurasByCasterSpell(mountCapability->SpeedModSpell, target->GetObjectGuid());
         }

@@ -8040,8 +8040,25 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
         }
     }
 
-    // Set our target
-    SetTargetGuid(victim->GetObjectGuid());
+    // Set our target — but NOT for PACIFIED creatures (training dummies, etc.).
+    // The Cata 4.3.4 client auto-rotates a unit's model toward its UNIT_FIELD_TARGET
+    // (a client-rendering behavior dating back to Vanilla), so even though the
+    // server never sends an orientation packet for the dummy, the client locally
+    // tracks whatever GUID lives in that field. Setting the target here is what
+    // makes a hit-then-walked-around dummy spin to face the attacker: combat entry
+    // → AttackStart → Attack → SetTargetGuid → client sees the field update →
+    // client rotates the model. PACIFIED is supposed to mean "this unit doesn't
+    // fight back" — that includes not visually fixating on its attacker.
+    //
+    // The TYPEID_UNIT guard is required: a player with a PACIFY-bearing debuff
+    // (Sap, Polymorph, Repentance) must still get their UNIT_FIELD_TARGET set,
+    // because in retail Cata the player's selected target persists across the CC
+    // and queued attacks resume on break. Restricting the skip to creatures
+    // avoids any PvP regression.
+    if (!(GetTypeId() == TYPEID_UNIT && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)))
+    {
+        SetTargetGuid(victim->GetObjectGuid());
+    }
 
     if (meleeAttack)
     {

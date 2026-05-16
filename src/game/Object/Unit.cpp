@@ -2323,63 +2323,18 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
             damageInfo->HitInfo |= HITINFO_GLANCING;
             damageInfo->TargetState = VICTIMSTATE_NORMAL;
             damageInfo->procEx |= PROC_EX_NORMAL_HIT;
-            float reducePercent = 1.0f;                     // damage factor
-            // calculate base values and mods
-            float baseLowEnd = 1.3f;
-            float baseHighEnd = 1.2f;
-            switch (getClass())                             // lowering base values for casters
-            {
-                case CLASS_SHAMAN:
-                case CLASS_PRIEST:
-                case CLASS_MAGE:
-                case CLASS_WARLOCK:
-                case CLASS_DRUID:
-                    baseLowEnd  -= 0.7f;
-                    baseHighEnd -= 0.3f;
-                    break;
-            }
 
-            float maxLowEnd = 0.6f;
-            switch (getClass())                             // upper for melee classes
+            // Cata 4.0.1: flat 10%-per-level-diff reduction, capped at 3 levels (boss = -30%).
+            // Class- and weapon-skill-agnostic; the random damage window was removed in 4.0.1.
+            int32 leveldif = int32(damageInfo->target->getLevel()) - int32(getLevel());
+            if (leveldif > 3)
             {
-                case CLASS_WARRIOR:
-                case CLASS_ROGUE:
-                    maxLowEnd = 0.91f;                      // If the attacker is a melee class then instead the lower value of 0.91
+                leveldif = 3;
             }
+            float reducePercent = 1.0f - leveldif * 0.1f;
 
-            // calculate values
-            int32 diff = damageInfo->target->GetMaxSkillValueForLevel() - GetMaxSkillValueForLevel();
-            float lowEnd  = baseLowEnd - (0.05f * diff);
-            float highEnd = baseHighEnd - (0.03f * diff);
-
-            // apply max/min bounds
-            if (lowEnd < 0.01f)                             // the low end must not go bellow 0.01f
-            {
-                lowEnd = 0.01f;
-            }
-            else if (lowEnd > maxLowEnd)                    // the smaller value of this and 0.6 is kept as the low end
-            {
-                lowEnd = maxLowEnd;
-            }
-
-            if (highEnd < 0.2f)                             // high end limits
-            {
-                highEnd = 0.2f;
-            }
-            if (highEnd > 0.99f)
-            {
-                highEnd = 0.99f;
-            }
-
-            if (lowEnd > highEnd)                           // prevent negative range size
-            {
-                lowEnd = highEnd;
-            }
-
-            reducePercent = lowEnd + rand_norm_f() * (highEnd - lowEnd);
-
-            damageInfo->cleanDamage += damageInfo->damage - uint32(reducePercent *  damageInfo->damage);
-            damageInfo->damage   = uint32(reducePercent *  damageInfo->damage);
+            damageInfo->cleanDamage += damageInfo->damage - uint32(reducePercent * damageInfo->damage);
+            damageInfo->damage = uint32(reducePercent * damageInfo->damage);
             break;
         }
         case MELEE_HIT_CRUSHING:
@@ -3614,7 +3569,9 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
         }
     }
 
-    // Max 25% chance to score a glancing blow against mobs that are higher level (can do only players and pets and not with ranged weapon)
+    // Cata 4.0.1: glancing chance = 6% + 1.2% per skill point of (victim_max_skill - attacker_max_skill),
+    // capped at 40%. Yields 6%/12%/18%/24% at +0/+1/+2/+3 levels and 40% at the +6 NPC ceiling.
+    // Only white melee from a player/pet attacker against a higher-level mob can glance.
     if (attType != RANGED_ATTACK &&
         (GetTypeId() == TYPEID_PLAYER || ((Creature*)this)->IsPet()) &&
         pVictim->GetTypeId() != TYPEID_PLAYER && !((Creature*)pVictim)->IsPet() &&
@@ -3623,11 +3580,11 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
         // cap possible value (with bonuses > max skill)
         int32 skill = attackerMaxSkillValueForLevel;
 
-        tmp = (10 + (victimMaxSkillValueForLevel - skill)) * 100;
-        tmp = tmp > 2500 ? 2500 : tmp;
+        tmp = 600 + (victimMaxSkillValueForLevel - skill) * 120;
+        tmp = tmp > 4000 ? 4000 : tmp;
         if (roll < (sum += tmp))
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum - 2500, sum);
+            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum - tmp, sum);
             return MELEE_HIT_GLANCING;
         }
     }

@@ -199,7 +199,15 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
 
     if (owner.movespline->Finalized())
     {
-        if (i_angle == 0.f && !owner.HasInArc(0.01f, i_target.getTarget()))
+        // Once the chase movespline finalizes (creature has reached melee range or
+        // is already in it), every tick where the target leaves a tiny 0.01 rad
+        // arc snaps the chaser to face them. Suppress this for PACIFIED units —
+        // training dummies, etc. — that share the same Cata "don't fight back"
+        // semantics: they still get a chase generator queued by AttackStart,
+        // but rotating to track a player walking around them is just wrong.
+        // Matches the SelectHostileTarget guard in Unit::SelectHostileTarget.
+        if (i_angle == 0.f && !owner.HasInArc(0.01f, i_target.getTarget()) &&
+            !owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
         {
             owner.SetInFront(i_target.getTarget());
         }

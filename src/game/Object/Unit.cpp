@@ -14386,9 +14386,30 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                             continue;
                         }
                     }
-                    else if (!triggeredByAura->CanProcFrom(procSpell, procFlag, PROC_EX_NONE, procExtra, damage != 0, true))
+                    else
                     {
-                        continue;
+                        // Cata mastery proc auras: Blizzard left the DBC
+                        // EffectSpellClassMask deliberately narrow for these
+                        // (their server-side scripts owned the filter), so
+                        // CanProcFrom's generic mask check would silently drop
+                        // every mastery proc. Bypass the check for spells we
+                        // have a dedicated case for in HandleProcTriggerSpell-
+                        // AuraProc; the per-spell case is the dispatch
+                        // authority, mirroring Blizzard's design.
+                        // See MASTERY_SD3_ROADMAP.md for the planned SD3
+                        // AuraScript migration that supersedes this list.
+                        bool isCoreHandledMasteryProc = false;
+                        switch (triggeredByHolder->GetId())
+                        {
+                            case 76672: // Hand of Light (Retribution Paladin)
+                                isCoreHandledMasteryProc = true;
+                                break;
+                        }
+                        if (!isCoreHandledMasteryProc
+                            && !triggeredByAura->CanProcFrom(procSpell, procFlag, PROC_EX_NONE, procExtra, damage != 0, true))
+                        {
+                            continue;
+                        }
                     }
                 }
 

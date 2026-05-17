@@ -14371,6 +14371,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                                         // see the case comment for context. The SD3
                                         // mastery migration will move it back into
                                         // its semantically-correct location.)
+                            case 77222: // Elemental Overload (Elemental Shaman)
                                 isCoreHandledMasteryProc = true;
                                 break;
                         }

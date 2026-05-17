@@ -3005,6 +3005,77 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                 }
                 break;
             }
+            // Elemental Overload (Elemental Shaman mastery — spell 77222).
+            // procSpell-filtered: triggers an "overload" copy of Lightning
+            // Bolt (any rank), Chain Lightning (any rank), or Lava Burst.
+            // Chain Lightning's chance is reduced to 33% of the base mastery
+            // rate, matching TC-Preservation's spell_sha_elemental_overload
+            // at scripts/Spells/spell_shaman.cpp:1032 which applies
+            // CalculatePct(GetEffect(EFFECT_0)->GetAmount(), 33) for the
+            // Chain Lightning branch only.
+            //
+            // Lightning Bolt and Chain Lightning are matched by shaman
+            // SpellFamilyFlags (bit 0x1 and 0x2 respectively) rather than
+            // by procSpell ID so we transparently cover all ranks; Lava
+            // Burst is matched by ID 51505 directly (no rank progression).
+            //
+            // EFFECT_INDEX_0 gate handles any DBC placeholder on a later
+            // SPELL_AURA_DUMMY effect (Main Gauche pattern). CanProcFrom
+            // bypass entry is required because all three triggering spells
+            // pass procSpell != NULL. Self-chain via the triggered overload
+            // spells' CAST_END event (overload spells are themselves
+            // SPELL_DAMAGE_CLASS_MAGIC and would re-raise the matching proc
+            // flag) is caught by the framework-level CAST_END suppression
+            // added earlier in this series.
+            //
+            // The pre-existing WotLK "Lightning Overload" talent handler at
+            // SpellIconID==2018 below in this same SPELLFAMILY_SHAMAN block
+            // covers a different aura (the removed Cata-era WotLK talent
+            // with multiple ranks). This handler runs before the IconID
+            // fallback (Id-match takes priority) and returns early via
+            // break, so there is no double-dispatch risk.
+            if (dummySpell->Id == 77222)
+            {
+                if (effIndex != EFFECT_INDEX_0)
+                {
+                    return SPELL_AURA_PROC_FAILED;
+                }
+                if (!procSpell)
+                {
+                    return SPELL_AURA_PROC_FAILED;
+                }
+                int32 chance = triggerAmount;
+                uint32 overloadSpell = 0;
+                if (procClassOptions
+                    && (procClassOptions->SpellFamilyFlags & UI64LIT(0x0000000000000001)))
+                {
+                    // Lightning Bolt (Shaman family bit 0x1 — all ranks)
+                    overloadSpell = 45284;
+                }
+                else if (procClassOptions
+                    && (procClassOptions->SpellFamilyFlags & UI64LIT(0x0000000000000002)))
+                {
+                    // Chain Lightning (Shaman family bit 0x2 — all ranks)
+                    overloadSpell = 45297;
+                    chance = chance * 33 / 100;
+                }
+                else if (procSpell->Id == 51505)
+                {
+                    // Lava Burst (no rank progression)
+                    overloadSpell = 77451;
+                }
+                else
+                {
+                    return SPELL_AURA_PROC_FAILED;
+                }
+                if (!roll_chance_i(chance))
+                {
+                    return SPELL_AURA_PROC_FAILED;
+                }
+                triggered_spell_id = overloadSpell;
+                target = pVictim;
+                break;
+            }
             // Earth Shield
             if (dummyClassOptions && dummyClassOptions->SpellFamilyFlags & UI64LIT(0x0000040000000000))
             {

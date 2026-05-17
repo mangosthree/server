@@ -14487,6 +14487,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                                         // mastery migration will move it back into
                                         // its semantically-correct location.)
                             case 77222: // Elemental Overload (Elemental Shaman)
+                            case 76669: // Illuminated Healing (Holy Paladin)
                                 isCoreHandledMasteryProc = true;
                                 break;
                         }

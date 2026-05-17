@@ -14394,8 +14394,9 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                         // CanProcFrom's generic mask check would silently drop
                         // every mastery proc. Bypass the check for spells we
                         // have a dedicated case for in HandleProcTriggerSpell-
-                        // AuraProc; the per-spell case is the dispatch
-                        // authority, mirroring Blizzard's design.
+                        // AuraProc or HandleDummyAuraProc (depending on the
+                        // aura's effect type); the per-spell case is the
+                        // dispatch authority, mirroring Blizzard's design.
                         // See MASTERY_SD3_ROADMAP.md for the planned SD3
                         // AuraScript migration that supersedes this list.
                         bool isCoreHandledMasteryProc = false;
@@ -14408,6 +14409,34 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                         }
                         if (!isCoreHandledMasteryProc
                             && !triggeredByAura->CanProcFrom(procSpell, procFlag, PROC_EX_NONE, procExtra, damage != 0, true))
+                        {
+                            continue;
+                        }
+                        // CAST_END suppression for core-handled mastery
+                        // procs. Spell::cast() at Spell.cpp:4371/4375 fires
+                        // ProcDamageAndSpell unconditionally with procExtra=
+                        // PROC_EX_CAST_END and m_procAttacker matching the
+                        // hit's procFlag — so for every spell cast there
+                        // are TWO proc events on the caster: one at cast
+                        // end (procEx=CAST_END) and one at hit delivery
+                        // (procEx=NORMAL_HIT). Without filtering, a mastery
+                        // matching by procFlag alone rolls twice per cast,
+                        // doubling its effective rate and producing wasted
+                        // 0-damage triggered casts (because CAST_END is
+                        // called with damage=0). The standard procEx-
+                        // unspecified path in the if (spellProcEvent)
+                        // branch above filters this at Unit.cpp:14378
+                        // ("if procEx is unspecified and event is CAST_END
+                        // only, skip"); masteries that bypass CanProcFrom
+                        // miss that guard, so mirror it here. Verified via
+                        // [DIAG WQ] in world-server.log 2026-05-17 16:28:
+                        // every successful auto-shot produced two proc
+                        // events with procFlag=0x40 (RANGED_HIT) and
+                        // procEx alternating 0x80000 (CAST_END) / 0x1
+                        // (NORMAL_HIT), explaining the ~30% observed Wild
+                        // Quiver rate against ~16% Cata baseline.
+                        if (isCoreHandledMasteryProc
+                            && procExtra == PROC_EX_CAST_END)
                         {
                             continue;
                         }

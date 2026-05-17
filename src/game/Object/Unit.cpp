@@ -14365,6 +14365,12 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                         {
                             case 76672: // Hand of Light (Retribution Paladin)
                             case 76659: // Wild Quiver (Marksmanship Hunter)
+                            case 76838: // Strikes of Opportunity (Arms Warrior; cased
+                                        // under SPELLFAMILY_ROGUE in the dummy-aura
+                                        // handler due to a DBC family-name quirk —
+                                        // see the case comment for context. The SD3
+                                        // mastery migration will move it back into
+                                        // its semantically-correct location.)
                                 isCoreHandledMasteryProc = true;
                                 break;
                         }

@@ -3982,6 +3982,37 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 target = pVictim;
                 break;
             }
+            // Hand of Light (Retribution Paladin mastery — spell 76672).
+            // Procs on Templar's Verdict (85256), Crusader Strike (35395),
+            // and Divine Storm (53385). Triggered spell 96172 deals Holy
+            // damage as a % of the triggering hit; the % is the mastery-
+            // scaled aura amount written by Player::UpdateMasteryAuras on
+            // EFFECT_0, matching TC-Preservation's spell_pal_hand_of_light
+            // at scripts/Spells/spell_paladin.cpp:944 which hooks EFFECT_0
+            // only. EFFECT_INDEX_0 gate prevents double-firing if the DBC
+            // carries additional SPELL_AURA_PROC_TRIGGER_SPELL effects
+            // (defensive parity with the Main Gauche / Wild Quiver
+            // pattern; mangosthree's dispatcher iterates every aura
+            // effect and any placeholder on a later effect would silently
+            // double the proc).
+            else if (auraSpellInfo->Id == 76672)
+            {
+                if (triggeredByAura->GetEffIndex() != EFFECT_INDEX_0)
+                {
+                    return SPELL_AURA_PROC_FAILED;
+                }
+                if (!procSpell)
+                {
+                    return SPELL_AURA_PROC_FAILED;
+                }
+                if (procSpell->Id != 85256 && procSpell->Id != 35395 && procSpell->Id != 53385)
+                {
+                    return SPELL_AURA_PROC_FAILED;
+                }
+                trigger_spell_id = 96172;
+                basepoints[0] = int32(triggerAmount * damage / 100);
+                target = pVictim;
+            }
             break;
         }
         case SPELLFAMILY_SHAMAN:

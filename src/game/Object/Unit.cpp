@@ -14402,6 +14402,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                         switch (triggeredByHolder->GetId())
                         {
                             case 76672: // Hand of Light (Retribution Paladin)
+                            case 76659: // Wild Quiver (Marksmanship Hunter)
                                 isCoreHandledMasteryProc = true;
                                 break;
                         }

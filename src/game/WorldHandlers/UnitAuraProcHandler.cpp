@@ -2202,6 +2202,34 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                 target = this;
                 break;
             }
+            // Wild Quiver (Marksmanship Hunter mastery — spell 76659).
+            // Procs from auto-shot (PROC_FLAG_SUCCESSFUL_RANGED_HIT
+            // carried on the auto-repeat spell's DBC) and triggers
+            // 76663 for an extra ranged hit with its own weapon-damage
+            // formula. Proc chance is the mastery-scaled aura amount
+            // written by Player::UpdateMasteryAuras (StatSystem.cpp:899)
+            // on EFFECT_0, matching TC-Preservation's spell_hun_wild_-
+            // quiver at scripts/Spells/spell_hunter.cpp:893 which hooks
+            // EFFECT_0 only. EFFECT_INDEX_0 gate prevents double-firing
+            // if the DBC carries additional SPELL_AURA_DUMMY effects
+            // (Main Gauche pattern). A CanProcFrom bypass for 76659 is
+            // added in Unit::ProcDamageAndSpellFor because auto-shot
+            // passes procSpell=m_spellInfo (non-NULL), so the upstream
+            // mask check would otherwise drop the proc.
+            if (dummySpell->Id == 76659)
+            {
+                if (effIndex != EFFECT_INDEX_0)
+                {
+                    return SPELL_AURA_PROC_FAILED;
+                }
+                if (!roll_chance_i(triggerAmount))
+                {
+                    return SPELL_AURA_PROC_FAILED;
+                }
+                triggered_spell_id = 76663;
+                target = pVictim;
+                break;
+            }
             break;
         }
         case SPELLFAMILY_PALADIN:

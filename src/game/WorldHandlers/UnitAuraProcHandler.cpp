@@ -2680,6 +2680,61 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     }
                     break;
                 }
+                // Illuminated Healing (Holy Paladin mastery — spell 76669)
+                // On direct heals, apply an absorb shield (86273) on the
+                // heal target with amount = mastery% (triggerAmount) of
+                // the heal value. Stacks with existing 86273 aura from
+                // the same caster up to 33% of caster's max HP. Mirrors
+                // TC-Preservation's spell_pal_illuminated_healing at
+                // scripts/Spells/spell_paladin.cpp:907-941.
+                //
+                // EFFECT_INDEX_0 gate handles any DBC placeholder on a
+                // later SPELL_AURA_DUMMY effect (Main Gauche pattern).
+                // CanProcFrom bypass entry is needed because heal-cast
+                // procs pass procSpell != NULL (the heal spell), so the
+                // upstream class-mask check would otherwise drop them.
+                case 76669:
+                {
+                    if (effIndex != EFFECT_INDEX_0)
+                    {
+                        return SPELL_AURA_PROC_FAILED;
+                    }
+                    if (!pVictim)
+                    {
+                        return SPELL_AURA_PROC_FAILED;
+                    }
+                    if (damage == 0)
+                    {
+                        // damage param carries the heal amount on heal procs
+                        return SPELL_AURA_PROC_FAILED;
+                    }
+
+                    int32 shieldAmount = int32(uint64(damage) * uint32(triggerAmount) / 100);
+                    if (shieldAmount <= 0)
+                    {
+                        return SPELL_AURA_PROC_FAILED;
+                    }
+
+                    int32 cap = int32(GetMaxHealth() * 33 / 100);
+
+                    // Stack with existing 86273 aura from this caster on target
+                    if (SpellAuraHolder* existing = pVictim->GetSpellAuraHolder(86273, GetObjectGuid()))
+                    {
+                        if (Aura* eff = existing->GetAuraByEffectIndex(EFFECT_INDEX_0))
+                        {
+                            int32 newAmount = std::min(cap, eff->GetModifier()->m_amount + shieldAmount);
+                            eff->GetModifier()->m_amount = newAmount;
+                            existing->RefreshHolder();
+                        }
+                        return SPELL_AURA_PROC_OK;
+                    }
+
+                    // No existing aura — cast 86273 fresh with shield as basepoints
+                    basepoints[0] = std::min(cap, shieldAmount);
+                    triggered_spell_id = 86273;
+                    target = pVictim;
+                    break;
+                }
                 // Heartpierce, Item - Icecrown 25 Heroic Dagger Proc
                 case 71892:
                 {

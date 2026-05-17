@@ -9675,7 +9675,66 @@ bool Spell::IsNeedSendToClient() const
  */
 bool Spell::IsTriggeredSpellWithRedundentCastTime() const
 {
-    return m_IsTriggeredSpell && (m_spellInfo->GetManaCost() || m_spellInfo->GetManaCostPercentage());
+    if (m_IsTriggeredSpell && (m_spellInfo->GetManaCost() || m_spellInfo->GetManaCostPercentage()))
+    {
+        return true;
+    }
+
+    // Mastery / talent "overload" spells: zero-cost duplicates of caster
+    // spells triggered by Cata's Elemental Overload mastery (77222) and
+    // the WotLK Lightning Overload talent (SpellIconID 2018). Their DBC
+    // entries carry the source spell's cast time (so the spell preview /
+    // tooltip render correctly) but their mana cost is zero — the
+    // triggering spell already paid. The mana-cost heuristic above misses
+    // them, so the framework respects the source cast time and the
+    // triggered cast lands seconds after the proc rather than instantly,
+    // which contradicts Cata mastery design (verified in-game on
+    // 2026-05-17: source Lightning Bolt landed at 19:55:15.009 and the
+    // 45284 overload landed at 19:55:17.924 — a ~2.9s delay matching the
+    // source LB cast time, while the Lava Burst overload 77451 landed
+    // with only the expected ~0.4s projectile delay). Add an explicit
+    // allowlist of the affected spell IDs. This also fixes the latent
+    // WotLK Lightning Overload talent (preexisting issue that was never
+    // reported, presumably because the talent was rarely used at high
+    // gear levels where the delay would be most visible).
+    if (m_IsTriggeredSpell)
+    {
+        switch (m_spellInfo->Id)
+        {
+            // Lightning Bolt overload (ranks 1-14)
+            case 45284:
+            case 45286:
+            case 45287:
+            case 45288:
+            case 45289:
+            case 45290:
+            case 45291:
+            case 45292:
+            case 45293:
+            case 45294:
+            case 45295:
+            case 45296:
+            case 49239:
+            case 49240:
+            // Chain Lightning overload (ranks 1-8)
+            case 45297:
+            case 45298:
+            case 45299:
+            case 45300:
+            case 45301:
+            case 45302:
+            case 49268:
+            case 49269:
+            // Lava Burst overload (Cata; no rank progression). Listed
+            // defensively — currently lands instantly in-game, suggesting
+            // its DBC already has a non-zero mana cost or zero cast time,
+            // but the explicit entry documents the intent.
+            case 77451:
+                return true;
+        }
+    }
+
+    return false;
 }
 
 /**

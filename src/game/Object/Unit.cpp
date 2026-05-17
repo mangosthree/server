@@ -9017,6 +9017,35 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
         }
     }
 
+    // Mastery: Frostburn (Frost Mage 76613) — increases damage dealt to
+    // frozen targets by mastery%. Cata mechanic: the bonus only applies
+    // when the victim is in AURA_STATE_FROZEN (Frostbite / Freeze /
+    // Frost Nova / Deep Freeze / Ice Lance vs. frozen / etc.). The
+    // aura's m_miscvalue + family flags filter the affected spells
+    // (Frostbolt, Ice Lance, Frostfire Bolt — Mage family). Mirrors
+    // TC-Preservation at tc-preservation/src/server/game/Entities/Unit/
+    // Unit.cpp:6569-6573. Guard against the DBC placeholder (negative)
+    // bleeding through when SPELL_AURA_MASTERY isn't applied yet (e.g.
+    // mid-spec-swap, talent reset). UpdateMasteryAuras only overrides
+    // m_amount to the positive mastery-scaled value once the caster has
+    // the SPELL_AURA_MASTERY aura active; before that, the negative
+    // placeholder would apply as a damage REDUCTION on frozen targets.
+    if (pVictim)
+    {
+        if (SpellAuraHolder* frostburnHolder = GetSpellAuraHolder(76613))
+        {
+            if (Aura* frostburn = frostburnHolder->GetAuraByEffectIndex(EFFECT_INDEX_0))
+            {
+                if (frostburn->GetModifier()->m_amount > 0 &&
+                    pVictim->HasAuraState(AURA_STATE_FROZEN) &&
+                    frostburn->isAffectedOnSpell(spellProto))
+                {
+                    DoneTotalMod *= (100.0f + frostburn->GetModifier()->m_amount) / 100.0f;
+                }
+            }
+        }
+    }
+
     // done scripted mod (take it from owner)
     Unit* owner = GetOwner();
     if (!owner)

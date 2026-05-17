@@ -9017,6 +9017,27 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
         }
     }
 
+    // Mastery: Unshackled Fury (Fury Warrior 76856) — applies to non-
+    // melee-class warrior damage spells (rare; most warrior abilities
+    // go through MeleeDamageBonusDone instead). Same direct-aura-read
+    // pattern as the melee-path version. See MeleeDamageBonusDone for
+    // the canonical implementation comment.
+    if (GetPowerType() == POWER_RAGE)
+    {
+        if (SpellAuraHolder* ufHolder = GetSpellAuraHolder(76856))
+        {
+            if (Aura* uf = ufHolder->GetAuraByEffectIndex(EFFECT_INDEX_0))
+            {
+                if (uf->GetModifier()->m_amount > 0)
+                {
+                    uint32 maxPower = GetMaxPower(POWER_RAGE);
+                    float powerPct = maxPower ? std::min(float(GetPower(POWER_RAGE)) / maxPower, 1.0f) : 0.0f;
+                    DoneTotalMod *= (100.0f + uf->GetModifier()->m_amount * powerPct) / 100.0f;
+                }
+            }
+        }
+    }
+
     // Mastery: Frostburn (Frost Mage 76613) — increases damage dealt to
     // frozen targets by mastery%. Cata mechanic: the bonus only applies
     // when the victim is in AURA_STATE_FROZEN (Frostbite / Freeze /
@@ -10433,6 +10454,32 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
 
     // ..done pct (by creature type mask)
     DonePercent *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS, creatureTypeMask);
+
+    // Mastery: Unshackled Fury (Fury Warrior 76856) — applies to all
+    // damage dealt scaled by current rage%. Warrior abilities like
+    // Bloodthirst / Raging Blow are SPELL_DAMAGE_CLASS_MELEE and route
+    // through MeleeDamageBonusDone (not SpellDamageBonusDone). Read the
+    // 76856 aura holder directly instead of by aura type because
+    // mangosthree's DBC routes Unshackled Fury through a different aura
+    // type than Mana Adept's 356 (SPELL_AURA_MOD_DAMAGE_DONE_FROM_PCT_POWER);
+    // observed in-game with a temporary diagnostic on 2026-05-17.
+    // m_amount > 0 guard avoids the DBC placeholder bleeding through
+    // when SPELL_AURA_MASTERY isn't yet active on the caster.
+    if (GetPowerType() == POWER_RAGE)
+    {
+        if (SpellAuraHolder* ufHolder = GetSpellAuraHolder(76856))
+        {
+            if (Aura* uf = ufHolder->GetAuraByEffectIndex(EFFECT_INDEX_0))
+            {
+                if (uf->GetModifier()->m_amount > 0)
+                {
+                    uint32 maxPower = GetMaxPower(POWER_RAGE);
+                    float powerPct = maxPower ? std::min(float(GetPower(POWER_RAGE)) / maxPower, 1.0f) : 0.0f;
+                    DonePercent *= (100.0f + uf->GetModifier()->m_amount * powerPct) / 100.0f;
+                }
+            }
+        }
+    }
 
     // special dummys/class scripts and other effects
     // =============================================

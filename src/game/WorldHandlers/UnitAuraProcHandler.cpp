@@ -2079,6 +2079,67 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     target = pVictim;
                     break;
                 }
+                // Strikes of Opportunity (Arms Warrior mastery — spell 76838).
+                // Cased under SPELLFAMILY_ROGUE despite being a warrior
+                // mastery because mangosthree's DBC reports the spell with
+                // SpellFamilyName=8 (SPELLFAMILY_ROGUE). The outer
+                // switch(dummySpell->GetSpellFamilyName()) routes by that
+                // field, so the case must live wherever the dispatcher
+                // sends it — diagnosed in-game on 2026-05-17 with a
+                // temporary [DIAG HDA] log line that printed spellFamily=8
+                // for spell 76838 every time the handler was entered.
+                //
+                // The classification is plausibly Blizzard's choice
+                // (mechanic-by-family — the proc shape mirrors Main Gauche
+                // above) but may also be a DBC-extraction quirk. TC's
+                // canonical proc table lists 76838 with SpellFamilyName=4
+                // (WARRIOR), but that's a TC-maintained DB row and not a
+                // direct echo of the client DBC, so it's not conclusive.
+                // Either way, modifying SpellFamilyName via a runtime
+                // const_cast would risk corrupting any other spell that
+                // shares the same SpellClassOptions row, so we follow the
+                // data instead of patching it.
+                //
+                // **Future:** the SD3 mastery migration (see
+                // MASTERY_SD3_ROADMAP.md at workspace root) replaces this
+                // family-block dispatch with per-spell AuraScript hooks,
+                // identical to how TC structures the same handler. Once
+                // that lands the spell will live in spell_warrior.cpp
+                // where it semantically belongs, regardless of the DBC
+                // family-name value.
+                //
+                // Mechanics: procs on melee swings and melee abilities
+                // (PROC_FLAG_SUCCESSFUL_MELEE_HIT | _MELEE_SPELL_HIT) per
+                // the DBC procFlags=0x14. Triggered spell 76858
+                // ("Opportunity Strike") deals an extra melee weapon
+                // hit. Proc chance is the mastery-scaled aura amount
+                // written by Player::UpdateMasteryAuras on EFFECT_0,
+                // matching TC's spell_warr_strikes_of_opportunity at
+                // scripts/Spells/spell_warrior.cpp:828. EFFECT_INDEX_0
+                // gate handles the DBC's placeholder second SPELL_AURA_-
+                // DUMMY effect (Main Gauche pattern).
+                //
+                // CanProcFrom bypass entry IS needed in Unit::ProcDamage-
+                // AndSpellFor for 76838: melee ability casts (Mortal
+                // Strike, Slam, etc.) pass procSpell=m_spellInfo
+                // (non-NULL), so the upstream class-mask check would
+                // otherwise drop them. Self-chain via the triggered
+                // 76858's CAST_END event is caught by the framework-level
+                // CAST_END suppression added earlier in this series.
+                case 76838:
+                {
+                    if (effIndex != EFFECT_INDEX_0)
+                    {
+                        return SPELL_AURA_PROC_FAILED;
+                    }
+                    if (!roll_chance_i(triggerAmount))
+                    {
+                        return SPELL_AURA_PROC_FAILED;
+                    }
+                    triggered_spell_id = 76858;
+                    target = pVictim;
+                    break;
+                }
             }
             // Cut to the Chase
             if (dummySpell->SpellIconID == 2909)

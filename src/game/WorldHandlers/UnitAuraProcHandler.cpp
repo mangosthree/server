@@ -2038,6 +2038,47 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     CastSpell(this, 59628, true);           // Tricks of the Trade (caster timer)
                     break;
                 }
+                // Main Gauche (Combat Rogue mastery — spell 76806).
+                // Procs on main-hand auto-attack only; triggered spell
+                // 86392 is an off-hand weapon-percent damage hit. The
+                // proc chance is the mastery-scaled aura amount written
+                // by Player::UpdateMasteryAuras (StatSystem.cpp:899) on
+                // EFFECT_0, matching TC-Preservation's spell_rog_main_-
+                // gauche at scripts/Spells/spell_rogue.cpp:784 which
+                // hooks EFFECT_0 only. The DBC has a second SPELL_AURA_-
+                // DUMMY effect with a non-zero placeholder base value
+                // (200) that UpdateMasteryAuras skips per its
+                // CalculateSimpleValue guard; without this gate the
+                // handler would fire twice per hit and a 200%-clamped
+                // roll would proc 100% of the time. No CanProcFrom
+                // bypass needed in Unit::ProcDamageAndSpellFor because
+                // auto-attack procs pass procSpell=NULL and skip the
+                // bypass site entirely.
+                case 76806:
+                {
+                    if (effIndex != EFFECT_INDEX_0)
+                    {
+                        return SPELL_AURA_PROC_FAILED;
+                    }
+                    if (GetTypeId() != TYPEID_PLAYER)
+                    {
+                        return SPELL_AURA_PROC_FAILED;
+                    }
+                    // main-hand auto-attack only (exclude off-hand)
+                    if (!(procFlag & PROC_FLAG_SUCCESSFUL_MELEE_HIT)
+                        || (procFlag & PROC_FLAG_SUCCESSFUL_OFFHAND_HIT))
+                    {
+                        return SPELL_AURA_PROC_FAILED;
+                    }
+                    // Roll the mastery-scaled proc chance
+                    if (!roll_chance_i(triggerAmount))
+                    {
+                        return SPELL_AURA_PROC_FAILED;
+                    }
+                    triggered_spell_id = 86392;
+                    target = pVictim;
+                    break;
+                }
             }
             // Cut to the Chase
             if (dummySpell->SpellIconID == 2909)

@@ -101,7 +101,7 @@ class GameObjectModel
         /**
          * @brief
          *
-         * @param enabled
+         * @param ph_mask
          */
         void enable(uint32 ph_mask) { phasemask = ph_mask;}
 
@@ -111,6 +111,7 @@ class GameObjectModel
          * @param Ray
          * @param MaxDist
          * @param StopAtFirstHit
+         * @param phaseMask
          * @return bool
          */
         bool IntersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 phaseMask) const;

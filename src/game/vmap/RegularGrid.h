@@ -48,8 +48,8 @@ struct NodeCreator
     /**
      * @brief
      *
-     * @param int
-     * @param int
+     * @param x
+     * @param y
      * @return Node
      */
     static Node* makeNode(int /*x*/, int /*y*/) { return new Node();}

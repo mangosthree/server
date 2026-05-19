@@ -266,7 +266,6 @@ namespace VMAP
          *
          * @param basepath The base path to the model files.
          * @param filename The name of the model file.
-         * @param flags The flags for the model.
          * @return WorldModel* The acquired model instance.
          */
         WorldModel* acquireModelInstance(const std::string& basepath, const std::string& filename);

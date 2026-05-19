@@ -91,7 +91,12 @@ static char const* const areatriggerKeys[] =
 /**
  * @brief Handler for HandleGoHelper command.
  *
- * @param args Command arguments.
+ * @param player Player to teleport.
+ * @param mapid Destination map id.
+ * @param x Destination X coordinate.
+ * @param y Destination Y coordinate.
+ * @param zPtr Optional destination Z; if NULL the map height is sampled.
+ * @param ortPtr Optional destination orientation; if NULL the player's current orientation is reused.
  * @returns True if the command executed successfully, false otherwise.
  */
 bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y, float const* zPtr, float const* ortPtr)

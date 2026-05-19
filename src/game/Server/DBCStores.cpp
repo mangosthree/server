@@ -409,7 +409,7 @@ template<class T>
  * @brief Loads a DBC file and its localized string tables.
  *
  * @tparam T The DBC record type.
- * @param availableDbcLocales Bitmask of still-available locales.
+ * @param localeData Locale-availability tracker shared across the DBC load.
  * @param bar The startup progress indicator.
  * @param errlist The list collecting missing or incompatible files.
  * @param storage The storage receiving loaded records.
@@ -1389,10 +1389,11 @@ ContentLevels GetContentLevelsForMapAndZone(uint32 mapId, uint32 zoneId)
 }
 
 /**
- * @brief Gets the inspect bit position for a talent within its tab.
+ * @brief Looks up the per-difficulty data row for a given map.
  *
- * @param talentId The talent id.
- * @return uint32 The bit position within inspect data.
+ * @param mapId The map id.
+ * @param difficulty The map difficulty key.
+ * @return Pointer to the MapDifficultyEntry, or NULL when no row matches.
  */
 MapDifficultyEntry const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty)
 {

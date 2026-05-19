@@ -361,7 +361,6 @@ void CheckQuestDisables()
  * @param entry The entry identifier to test.
  * @param unit The contextual unit, when applicable.
  * @param flags Additional disable flags to test.
- * @param adData Additional lookup data such as spawn guid.
  * @return true if the entry is disabled in the provided context; otherwise false.
  */
 bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags)

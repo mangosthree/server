@@ -1636,7 +1636,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
  *
  * @param unit The unit that was hit.
  * @param effectMask The set of effects to process.
- * @param isReflected True if the spell hit is the result of reflection.
  */
 void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
 {
@@ -3776,9 +3775,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 /**
  * @brief Prepares the spell cast, validates conditions, and starts cast processing.
  *
- * @param targets The resolved spell cast targets.
  * @param triggeredByAura The triggering aura, if this spell was aura-triggered.
- * @param chance Optional roll chance required before proceeding.
  * @return The resulting cast status.
  */
 SpellCastResult Spell::PreCastCheck(Aura* triggeredByAura /*= NULL*/)
@@ -10011,8 +10008,6 @@ SpellCastResult Spell::CanOpenLock(SpellEffectIndex effIndex, uint32 lockId, Ski
  * Fill target list by units around (x,y) points at radius distance
 
  * @param targetUnitMap        Reference to target list that filled by function
- * @param x                    X coordinates of center point for target search
- * @param y                    Y coordinates of center point for target search
  * @param radius               Radius around (x,y) for target search
  * @param pushType             Additional rules for target area selection (in front, angle, etc)
  * @param spellTargets         Additional rules for target selection base at hostile/friendly state to original spell caster
@@ -10367,7 +10362,7 @@ void Spell::CancelGlobalCooldown()
 /**
  * @brief Resolves effective radius, chain target count, and target cap modifiers for an effect.
  *
- * @param effIndex The effect index being evaluated.
+ * @param spellEffect The spell effect entry being evaluated.
  * @param radius Receives the effective radius.
  * @param EffectChainTarget Receives the effective chain target count.
  * @param unMaxTargets Receives the effective maximum affected target count.

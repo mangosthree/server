@@ -3035,8 +3035,8 @@ char* ChatHandler::ExtractQuotedOrLiteralArg(char** args, bool asis /*= false*/)
 /**
  * Function extract on/off literals as boolean values
  *
- * @param args variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
- * @param val  return extracted value if function success, in fail case original value unmodified
+ * @param args  variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ * @param value return extracted value if function success, in fail case original value unmodified
  * @return     true at success
  */
 bool  ChatHandler::ExtractOnOff(char** args, bool& value)
@@ -3070,7 +3070,7 @@ bool  ChatHandler::ExtractOnOff(char** args, bool& value)
  *
  * @param linkTypes  optional NULL-terminated array of link types, shift-link must fit one from link type from array if provided or extraction fail
  *
- * @param found_idx  if not NULL then at return index in linkTypes that fit shift-link type, if extraction fail then non modified
+ * @param foundIdx   if not NULL then at return index in linkTypes that fit shift-link type, if extraction fail then non modified
  *
  * @param keyPair    if not NULL then pointer to 2-elements array for return start and end pointer for found key
  *                   if extraction fail then non modified
@@ -3343,7 +3343,7 @@ char* ChatHandler::ExtractOptNotLastArg(char** args)
  * Function extract data from shift-link "|color|LINKTYPE:RETURN:SOMETHING1|h[name]|h|r if linkType == LINKTYPE
  * It also extract literal/quote if not shift-link in args
  *
- * @param args       variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ * @param text       variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
  *                   if args have sift link with linkType != LINKTYPE then args still pointing to this arg (unmodified pointer)
  *
  * @param linkType   shift-link must fit by link type to this arg value or extraction fail
@@ -3368,7 +3368,7 @@ char* ChatHandler::ExtractKeyFromLink(char** text, char const* linkType, char** 
  * Function extract data from shift-link "|color|LINKTYPE:RETURN:SOMETHING1|h[name]|h|r if LINKTYPE in linkTypes array
  * It also extract literal/quote if not shift-link in args
  *
- * @param args       variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ * @param text       variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
  *                   if args have sift link with linkType != LINKTYPE then args still pointing to this arg (unmodified pointer)
  *
  * @param linkTypes  NULL-terminated array of link types, shift-link must fit one from link type from array or extraction fail
@@ -3425,7 +3425,7 @@ char* ChatHandler::ExtractKeyFromLink(char** text, char const* const* linkTypes,
  * Function extract uint32 key from shift-link "|color|LINKTYPE:RETURN|h[name]|h|r if linkType == LINKTYPE
  * It also extract direct number if not shift-link in args
  *
- * @param args       variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
+ * @param text       variable pointer to non parsed args string, updated at function call to new position (with skipped white spaces)
  *                   if args have sift link with linkType != LINKTYPE then args still pointing to this arg (unmodified pointer)
  *
  * @param linkType   shift-link must fit by link type to this arg value or extraction fail

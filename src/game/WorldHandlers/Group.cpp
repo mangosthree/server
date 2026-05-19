@@ -471,7 +471,6 @@ Player* Group::GetInvited(const std::string& name) const
  *
  * @param guid The member player GUID.
  * @param name The member player name.
- * @param joinMethod The join source indicator.
  * @return true if the member was added successfully; otherwise false.
  */
 bool Group::AddMember(ObjectGuid guid, const char* name)
@@ -2237,7 +2236,7 @@ void Group::UpdateLooterGuid(WorldObject* pSource, bool ifneed)
 /**
  * @brief Validates whether the full group can join a battleground queue together.
  *
- * @param bgTypeId The battleground type identifier.
+ * @param bgOrTemplate The battleground or its template.
  * @param bgQueueTypeId The battleground queue type identifier.
  * @param MinPlayerCount The minimum allowed group size.
  * @param MaxPlayerCount The maximum allowed group size.

@@ -39,7 +39,7 @@
 /**
  * @brief Sends a trade status packet to the client.
  *
- * @param info The trade status payload to send.
+ * @param status The trade status payload to send.
  */
 void WorldSession::SendTradeStatus(TradeStatus status)
 {

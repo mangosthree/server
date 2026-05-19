@@ -74,7 +74,7 @@ namespace MaNGOS
              *
              * @param other The other instance to copy from
              */
-            Singleton(const Singleton&);
+            Singleton(const Singleton& other);
 
             /**
              * @brief Prohibited assignment operator
@@ -82,7 +82,7 @@ namespace MaNGOS
              * @param other The other instance to assign from
              * @return Singleton& Reference to this instance
              */
-            Singleton& operator=(const Singleton&);
+            Singleton& operator=(const Singleton& other);
 
             /**
              * @brief Destroy the singleton instance

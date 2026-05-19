@@ -68,7 +68,7 @@ class QueryResultMysql : public QueryResult
         /**
          * @brief
          *
-         * @param type
+         * @param mysqlType
          * @return Field::SimpleDataTypes
          */
     private:

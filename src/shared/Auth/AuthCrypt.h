@@ -53,6 +53,7 @@ class AuthCrypt
 
         /**
          * @brief Initialize the encryption/decryption state
+         * @param K Session key used to seed the cipher state
          */
         void Init(BigNumber* K);
         /**
@@ -60,13 +61,13 @@ class AuthCrypt
          * @param data Pointer to data buffer to decrypt
          * @param len Length of data to decrypt
          */
-        void DecryptRecv(uint8*, size_t);
+        void DecryptRecv(uint8* data, size_t len);
         /**
          * @brief Encrypt data to send to client
          * @param data Pointer to data buffer to encrypt
          * @param len Length of data to encrypt
          */
-        void EncryptSend(uint8*, size_t);
+        void EncryptSend(uint8* data, size_t len);
 
         /**
          * @brief Check if the crypt object is initialized

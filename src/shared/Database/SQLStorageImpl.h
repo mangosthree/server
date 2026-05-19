@@ -34,7 +34,7 @@ template<class S, class D>
 /**
  * @brief S source-type, D destination-type
  *
- * @param uint32
+ * @param field_pos
  * @param src
  * @param dst
  */
@@ -56,7 +56,7 @@ template<class DerivedLoader, class StorageClass>
 /**
  * @brief
  *
- * @param uint32
+ * @param field_pos
  * @param src
  * @param dst
  */
@@ -80,8 +80,8 @@ template<class S>
 /**
  * @brief S source-type
  *
- * @param uint32
- * @param S
+ * @param field_pos
+ * @param src
  * @param dst
  */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_to_str(uint32 /*field_pos*/, S /*src*/, char*& dst)
@@ -95,8 +95,8 @@ template<class D>
 /**
  * @brief D destination-type
  *
- * @param uint32
- * @param
+ * @param field_pos
+ * @param src
  * @param dst
  */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_from_str(uint32 /*field_pos*/, char const* /*src*/, D& dst)
@@ -118,7 +118,7 @@ template<class S, class D>
 /**
  * @brief S source-type, D destination-type
  *
- * @param uint32
+ * @param field_pos
  * @param src
  * @param dst
  */
@@ -140,8 +140,8 @@ template<class DerivedLoader, class StorageClass>
 /**
  * @brief
  *
- * @param uint32
- * @param
+ * @param field_pos
+ * @param src
  * @param dst
  */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::default_fill_to_str(uint32 /*field_pos*/, char const* /*src*/, char*& dst)

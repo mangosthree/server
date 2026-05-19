@@ -262,7 +262,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
 /**
  * @brief Handles a no-op spell effect used only as a marker.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectEmpty(SpellEffectEntry const* /*effect*/)
 {
@@ -272,7 +272,7 @@ void Spell::EffectEmpty(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Handles a legacy null spell effect placeholder.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectNULL(SpellEffectEntry const* /*effect*/)
 {
@@ -282,7 +282,7 @@ void Spell::EffectNULL(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Handles an unused spell effect slot.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectUnused(SpellEffectEntry const* /*effect*/)
 {
@@ -292,7 +292,7 @@ void Spell::EffectUnused(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Sends a resurrection request to a dead player target.
  *
- * @param eff_idx The effect index providing resurrection values.
+ * @param effect The effect index providing resurrection values.
  */
 void Spell::EffectResurrectNew(SpellEffectEntry const* effect)
 {
@@ -327,7 +327,7 @@ void Spell::EffectResurrectNew(SpellEffectEntry const* effect)
 /**
  * @brief Instantly kills the unit target and handles spell-specific side effects.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectInstaKill(SpellEffectEntry const* /*effect*/)
 {
@@ -355,7 +355,7 @@ void Spell::EffectInstaKill(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Applies environmental damage to the caster.
  *
- * @param eff_idx The effect index used to calculate the base damage.
+ * @param effect The effect index used to calculate the base damage.
  */
 void Spell::EffectEnvironmentalDMG(SpellEffectEntry const* effect)
 {
@@ -379,7 +379,7 @@ void Spell::EffectEnvironmentalDMG(SpellEffectEntry const* effect)
 /**
  * @brief Computes school-damage special cases and accumulates resulting damage.
  *
- * @param effect_idx The damage effect index.
+ * @param effect The damage effect index.
  */
 void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
 {
@@ -920,7 +920,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
 /**
  * @brief Executes spell-specific dummy effect behavior.
  *
- * @param eff_idx The dummy effect index.
+ * @param effect The dummy effect index.
  */
 void Spell::EffectDummy(SpellEffectEntry const* effect)
 {
@@ -4869,7 +4869,7 @@ void Spell::EffectForceCast(SpellEffectEntry const* effect)
 /**
  * @brief Triggers another spell on the current unit target.
  *
- * @param eff_idx The effect index providing the triggered spell id.
+ * @param effect The effect index providing the triggered spell id.
  */
 void Spell::EffectTriggerSpell(SpellEffectEntry const* effect)
 {
@@ -5020,7 +5020,7 @@ void Spell::EffectTriggerSpell(SpellEffectEntry const* effect)
 /**
  * @brief Triggers a missile spell at the stored destination coordinates.
  *
- * @param effect_idx The effect index providing the triggered spell id.
+ * @param effect The effect index providing the triggered spell id.
  */
 void Spell::EffectTriggerMissileSpell(SpellEffectEntry const* effect)
 {
@@ -5363,7 +5363,7 @@ void Spell::EffectTeleportUnits(SpellEffectEntry const* effect)   // TODO - Use 
 /**
  * @brief Creates and attaches an aura effect to the current unit target.
  *
- * @param eff_idx The aura effect index.
+ * @param effect The aura effect index.
  */
 void Spell::EffectApplyAura(SpellEffectEntry const* effect)
 {
@@ -5419,7 +5419,7 @@ void Spell::EffectUnlearnSpecialization(SpellEffectEntry const* effect)
 /**
  * @brief Drains power from the unit target and optionally restores mana to the caster.
  *
- * @param eff_idx The effect index defining the drained power type.
+ * @param effect The effect index defining the drained power type.
  */
 void Spell::EffectPowerDrain(SpellEffectEntry const* effect)
 {
@@ -5492,7 +5492,7 @@ void Spell::EffectPowerDrain(SpellEffectEntry const* effect)
 /**
  * @brief Starts a scripted event defined by the spell effect.
  *
- * @param effectIndex The effect index providing the event identifier.
+ * @param effect The effect index providing the event identifier.
  */
 void Spell::EffectSendEvent(SpellEffectEntry const* effect)
 {
@@ -5507,7 +5507,7 @@ void Spell::EffectSendEvent(SpellEffectEntry const* effect)
 /**
  * @brief Burns target power and converts it into spell damage.
  *
- * @param eff_idx The effect index defining the burned power type.
+ * @param effect The effect index defining the burned power type.
  */
 void Spell::EffectPowerBurn(SpellEffectEntry const* effect)
 {
@@ -5569,7 +5569,7 @@ void Spell::EffectPowerBurn(SpellEffectEntry const* effect)
 /**
  * @brief Accumulates healing for the current unit target.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectHeal(SpellEffectEntry const* /*effect*/)
 {
@@ -5726,7 +5726,7 @@ void Spell::EffectHealPct(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Heals a mechanical target immediately.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectHealMechanical(SpellEffectEntry const* /*effect*/)
 {
@@ -5753,7 +5753,7 @@ void Spell::EffectHealMechanical(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Damages the target and heals the caster for a portion of the damage dealt.
  *
- * @param eff_idx The effect index providing the leech multiplier.
+ * @param effect The effect index providing the leech multiplier.
  */
 void Spell::EffectHealthLeech(SpellEffectEntry const* effect)
 {
@@ -5802,7 +5802,7 @@ void Spell::EffectHealthLeech(SpellEffectEntry const* effect)
 /**
  * @brief Creates an item and stores it in the player's inventory.
  *
- * @param eff_idx The effect index creating the item.
+ * @param effect The effect index creating the item.
  * @param itemtype The item entry to create.
  */
 void Spell::DoCreateItem(SpellEffectEntry const* effect, uint32 itemtype)
@@ -5919,7 +5919,7 @@ void Spell::DoCreateItem(SpellEffectEntry const* effect, uint32 itemtype)
 /**
  * @brief Handles item-creation effects and related special target cleanup.
  *
- * @param eff_idx The effect index creating the item.
+ * @param effect The effect index creating the item.
  */
 void Spell::EffectCreateItem(SpellEffectEntry const* effect)
 {
@@ -5977,7 +5977,7 @@ void Spell::EffectCreateRandomItem(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Creates a persistent area aura dynamic object.
  *
- * @param eff_idx The persistent area aura effect index.
+ * @param effect The persistent area aura effect index.
  */
 void Spell::EffectPersistentAA(SpellEffectEntry const* effect)
 {
@@ -6009,7 +6009,7 @@ void Spell::EffectPersistentAA(SpellEffectEntry const* effect)
 /**
  * @brief Restores power to the current unit target.
  *
- * @param eff_idx The effect index defining the power type.
+ * @param effect The effect index defining the power type.
  */
 void Spell::EffectEnergize(SpellEffectEntry const* effect)
 {
@@ -6215,7 +6215,7 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
 /**
  * @brief Opens a locked game object or item and awards related skill progress.
  *
- * @param eff_idx The open-lock effect index.
+ * @param effect The open-lock effect index.
  */
 void Spell::EffectOpenLock(SpellEffectEntry const* effect)
 {
@@ -6321,7 +6321,7 @@ void Spell::EffectOpenLock(SpellEffectEntry const* effect)
 /**
  * @brief Replaces the cast item with another item entry.
  *
- * @param eff_idx The effect index defining the replacement item.
+ * @param effect The effect index defining the replacement item.
  */
 void Spell::EffectSummonChangeItem(SpellEffectEntry const* effect)
 {
@@ -6361,7 +6361,7 @@ void Spell::EffectSummonChangeItem(SpellEffectEntry const* effect)
 /**
  * @brief Grants weapon or armor proficiency to a player target.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectProficiency(SpellEffectEntry const* /*effect*/)
 {
@@ -6393,7 +6393,7 @@ void Spell::EffectProficiency(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Creates and attaches an area aura for the current unit target.
  *
- * @param eff_idx The area aura effect index.
+ * @param effect The area aura effect index.
  */
 void Spell::EffectApplyAreaAura(SpellEffectEntry const* effect)
 {
@@ -7289,7 +7289,7 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
 /**
  * @brief Teaches a spell to the target player or pet.
  *
- * @param eff_idx The effect index containing the learned spell id.
+ * @param effect The effect index containing the learned spell id.
  */
 void Spell::EffectLearnSpell(SpellEffectEntry const* effect)
 {
@@ -7322,7 +7322,7 @@ void Spell::EffectLearnSpell(SpellEffectEntry const* effect)
 /**
  * @brief Dispels matching auras from the target and sends result logs.
  *
- * @param eff_idx The dispel effect index.
+ * @param effect The dispel effect index.
  */
 void Spell::EffectDispel(SpellEffectEntry const* effect)
 {
@@ -7483,7 +7483,7 @@ void Spell::EffectDispel(SpellEffectEntry const* effect)
 /**
  * @brief Enables dual wielding for a player target.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectDualWield(SpellEffectEntry const* /*effect*/)
 {
@@ -7496,7 +7496,7 @@ void Spell::EffectDualWield(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Placeholder for pull-style spell effects.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectPull(SpellEffectEntry const* /*effect*/)
 {
@@ -7507,7 +7507,7 @@ void Spell::EffectPull(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Turns and distracts a non-combat unit target.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectDistract(SpellEffectEntry const* /*effect*/)
 {
@@ -7535,7 +7535,7 @@ void Spell::EffectDistract(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Attempts to pickpocket a valid creature target.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectPickPocket(SpellEffectEntry const* /*effect*/)
 {
@@ -7573,7 +7573,7 @@ void Spell::EffectPickPocket(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Creates a farsight focus object and switches the player's camera to it.
  *
- * @param eff_idx The farsight effect index.
+ * @param effect The farsight effect index.
  */
 void Spell::EffectAddFarsight(SpellEffectEntry const* effect)
 {
@@ -7601,7 +7601,7 @@ void Spell::EffectAddFarsight(SpellEffectEntry const* effect)
 /**
  * @brief Teleports the target near the caster and turns it to face away from the caster.
  *
- * @param eff_idx The teleport effect index.
+ * @param effect The teleport effect index.
  */
 void Spell::EffectTeleUnitsFaceCaster(SpellEffectEntry const* effect)
 {
@@ -7632,7 +7632,7 @@ void Spell::EffectTeleUnitsFaceCaster(SpellEffectEntry const* effect)
 /**
  * @brief Teaches or updates a skill for a player target.
  *
- * @param eff_idx The effect index containing the skill identifier.
+ * @param effect The effect index containing the skill identifier.
  */
 void Spell::EffectLearnSkill(SpellEffectEntry const* effect)
 {
@@ -7670,7 +7670,7 @@ void Spell::EffectTradeSkill(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Applies a permanent enchantment to the target item.
  *
- * @param eff_idx The effect index providing the enchantment id.
+ * @param effect The effect index providing the enchantment id.
  */
 void Spell::EffectEnchantItemPerm(SpellEffectEntry const* effect)
 {
@@ -7743,7 +7743,7 @@ void Spell::EffectEnchantItemPerm(SpellEffectEntry const* effect)
 /**
  * @brief Applies a temporary enchantment to the target item.
  *
- * @param eff_idx The effect index providing the enchantment id.
+ * @param effect The effect index providing the enchantment id.
  */
 void Spell::EffectEnchantItemPrismatic(SpellEffectEntry const* effect)
 {
@@ -7958,7 +7958,7 @@ void Spell::EffectEnchantItemTmp(SpellEffectEntry const* effect)
 /**
  * @brief Converts the creature target into a hunter pet for the caster.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectTameCreature(SpellEffectEntry const* /*effect*/)
 {
@@ -8038,7 +8038,7 @@ void Spell::EffectTameCreature(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Summons, recalls, or replaces the caster's pet.
  *
- * @param eff_idx The summon effect index.
+ * @param effect The summon effect index.
  */
 void Spell::EffectSummonPet(SpellEffectEntry const* effect)
 {
@@ -8175,7 +8175,7 @@ void Spell::EffectSummonPet(SpellEffectEntry const* effect)
 /**
  * @brief Teaches a new spell to the caster's pet.
  *
- * @param eff_idx The effect index containing the learned spell id.
+ * @param effect The effect index containing the learned spell id.
  */
 void Spell::EffectLearnPetSpell(SpellEffectEntry const* effect)
 {
@@ -8216,7 +8216,7 @@ void Spell::EffectLearnPetSpell(SpellEffectEntry const* effect)
 /**
  * @brief Prepares taunt threat adjustments before the taunt aura is applied.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectTaunt(SpellEffectEntry const* /*effect*/)
 {
@@ -8246,7 +8246,7 @@ void Spell::EffectTaunt(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Computes weapon-based spell damage and accumulates it for application.
  *
- * @param eff_idx The weapon damage effect index.
+ * @param effect The weapon damage effect index.
  */
 void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
 {
@@ -8589,7 +8589,7 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
 /**
  * @brief Adds flat threat from the caster to the unit target.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectThreat(SpellEffectEntry const* /*effect*/)
 {
@@ -8609,7 +8609,7 @@ void Spell::EffectThreat(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Heals the target for an amount equal to the caster's maximum health.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectHealMaxHealth(SpellEffectEntry const* /*effect*/)
 {
@@ -8630,7 +8630,7 @@ void Spell::EffectHealMaxHealth(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Interrupts interruptible non-melee spells on the unit target.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectInterruptCast(SpellEffectEntry const* /*effect*/)
 {
@@ -8663,7 +8663,7 @@ void Spell::EffectInterruptCast(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Summons a wild game object at the destination or near the caster.
  *
- * @param eff_idx The summon object effect index.
+ * @param effect The summon object effect index.
  */
 void Spell::EffectSummonObjectWild(SpellEffectEntry const* effect)
 {
@@ -8748,7 +8748,7 @@ void Spell::EffectSummonObjectWild(SpellEffectEntry const* effect)
 /**
  * @brief Executes script-driven spell effect behavior for special cases.
  *
- * @param eff_idx The script effect index.
+ * @param effect The script effect index.
  */
 void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 {
@@ -12229,7 +12229,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 /**
  * @brief Clears combat and threat state for the target.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectSanctuary(SpellEffectEntry const* /*effect*/)
 {
@@ -12252,7 +12252,7 @@ void Spell::EffectSanctuary(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Adds combo points to the caster for the unit target.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectAddComboPoints(SpellEffectEntry const* effect /*effect*/)
 {
@@ -12277,7 +12277,7 @@ void Spell::EffectAddComboPoints(SpellEffectEntry const* effect /*effect*/)
 /**
  * @brief Creates a duel flag object and starts a duel request between two players.
  *
- * @param eff_idx The effect index containing the duel flag game object id.
+ * @param effect The effect index containing the duel flag game object id.
  */
 void Spell::EffectDuel(SpellEffectEntry const* effect)
 {
@@ -12373,7 +12373,7 @@ void Spell::EffectDuel(SpellEffectEntry const* effect)
 /**
  * @brief Teleports a player target to its homebind as an unstuck action.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectStuck(SpellEffectEntry const* effect /*effect*/)
 {
@@ -12413,7 +12413,7 @@ void Spell::EffectStuck(SpellEffectEntry const* effect /*effect*/)
 /**
  * @brief Sends a summon request to a player target.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectSummonPlayer(SpellEffectEntry const* /*effect*/)
 {
@@ -12459,7 +12459,7 @@ static ScriptInfo generateActivateCommand()
 /**
  * @brief Activates or manipulates the targeted game object based on the effect misc value.
  *
- * @param eff_idx The activation effect index.
+ * @param effect The activation effect index.
  */
 void Spell::EffectActivateObject(SpellEffectEntry const* effect)
 {
@@ -12676,7 +12676,7 @@ void Spell::EffectApplyGlyph(SpellEffectEntry const* effect)
 /**
  * @brief Applies a temporary enchantment to the main-hand item of the player target.
  *
- * @param eff_idx The enchant effect index.
+ * @param effect The enchant effect index.
  */
 void Spell::EffectEnchantHeldItem(SpellEffectEntry const* effect)
 {
@@ -12735,7 +12735,7 @@ void Spell::EffectEnchantHeldItem(SpellEffectEntry const* effect)
 /**
  * @brief Starts disenchanting loot generation for the target item.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectDisEnchant(SpellEffectEntry const* /*effect*/)
 {
@@ -12760,7 +12760,7 @@ void Spell::EffectDisEnchant(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Increases the drunk state of a player target.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectInebriate(SpellEffectEntry const* /*effect*/)
 {
@@ -12786,7 +12786,7 @@ void Spell::EffectInebriate(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Feeds the caster's pet and triggers the associated benefit spell.
  *
- * @param eff_idx The effect index containing the triggered spell id.
+ * @param effect The effect index containing the triggered spell id.
  */
 void Spell::EffectFeedPet(SpellEffectEntry const* effect)
 {
@@ -12831,7 +12831,7 @@ void Spell::EffectFeedPet(SpellEffectEntry const* effect)
 /**
  * @brief Dismisses the caster's living pet.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectDismissPet(SpellEffectEntry const* /*effect*/)
 {
@@ -12854,7 +12854,7 @@ void Spell::EffectDismissPet(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Summons a persistent object into one of the caster's object slots.
  *
- * @param eff_idx The summon object effect index.
+ * @param effect The summon object effect index.
  */
 void Spell::EffectSummonObject(SpellEffectEntry const* effect)
 {
@@ -12920,7 +12920,7 @@ void Spell::EffectSummonObject(SpellEffectEntry const* effect)
 /**
  * @brief Sends a resurrection request with percentage-based health and mana restoration.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectResurrect(SpellEffectEntry const* /*effect*/)
 {
@@ -12980,7 +12980,7 @@ void Spell::EffectResurrect(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Adds queued extra attacks to the target unit.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectAddExtraAttacks(SpellEffectEntry const* /*effect*/)
 {
@@ -13000,7 +13000,7 @@ void Spell::EffectAddExtraAttacks(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Grants the ability to parry to a player target.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectParry(SpellEffectEntry const* /*effect*/)
 {
@@ -13013,7 +13013,7 @@ void Spell::EffectParry(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Grants the ability to block to a player target.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectBlock(SpellEffectEntry const* /*effect*/)
 {
@@ -13026,7 +13026,7 @@ void Spell::EffectBlock(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Teleports the target forward while avoiding steep terrain, water edges, and obstacles.
  *
- * @param eff_idx The effect index providing the leap distance.
+ * @param effect The effect index providing the leap distance.
  */
 void Spell::EffectLeapForward(SpellEffectEntry const* effect)
 {
@@ -13208,7 +13208,7 @@ void Spell::EffectLeapBack(SpellEffectEntry const* effect)
 /**
  * @brief Modifies player reputation for the faction referenced by the effect.
  *
- * @param eff_idx The effect index containing faction and reputation values.
+ * @param effect The effect index containing faction and reputation values.
  */
 void Spell::EffectReputation(SpellEffectEntry const* effect)
 {
@@ -13237,7 +13237,7 @@ void Spell::EffectReputation(SpellEffectEntry const* effect)
 /**
  * @brief Marks the referenced quest objective as completed for the player target.
  *
- * @param eff_idx The effect index containing the quest id.
+ * @param effect The effect index containing the quest id.
  */
 void Spell::EffectQuestComplete(SpellEffectEntry const* effect)
 {
@@ -13274,7 +13274,7 @@ void Spell::EffectQuestComplete(SpellEffectEntry const* effect)
 /**
  * @brief Resurrects the target player with flat or percentage-based health and mana.
  *
- * @param eff_idx The effect index containing resurrection resource data.
+ * @param effect The effect index containing resurrection resource data.
  */
 void Spell::EffectSelfResurrect(SpellEffectEntry const* effect)
 {
@@ -13324,7 +13324,7 @@ void Spell::EffectSelfResurrect(SpellEffectEntry const* effect)
 /**
  * @brief Opens skinning loot for a creature and updates the player's gathering skill.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectSkinning(SpellEffectEntry const* /*effect*/)
 {
@@ -13356,7 +13356,7 @@ void Spell::EffectSkinning(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Moves the caster into melee contact with the target and starts attacking if appropriate.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectCharge(SpellEffectEntry const* /*effect*/)
 {
@@ -13419,7 +13419,7 @@ void Spell::EffectCharge2(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Applies a knockback to a player target.
  *
- * @param eff_idx The effect index containing horizontal speed data.
+ * @param effect The effect index containing horizontal speed data.
  */
 void Spell::EffectKnockBack(SpellEffectEntry const* effect)
 {
@@ -13434,7 +13434,7 @@ void Spell::EffectKnockBack(SpellEffectEntry const* effect)
 /**
  * @brief Starts the taxi path referenced by the spell effect for a player target.
  *
- * @param eff_idx The effect index containing the taxi path id.
+ * @param effect The effect index containing the taxi path id.
  */
 void Spell::EffectSendTaxi(SpellEffectEntry const* effect)
 {
@@ -13449,7 +13449,7 @@ void Spell::EffectSendTaxi(SpellEffectEntry const* effect)
 /**
  * @brief Pulls a player target toward the caster using reverse knockback.
  *
- * @param eff_idx The effect index containing vertical speed data.
+ * @param effect The effect index containing vertical speed data.
  */
 void Spell::EffectPlayerPull(SpellEffectEntry const* effect)
 {
@@ -13475,7 +13475,7 @@ void Spell::EffectPlayerPull(SpellEffectEntry const* effect)
 /**
  * @brief Removes auras from the target that match the specified mechanic.
  *
- * @param eff_idx The effect index containing the mechanic id.
+ * @param effect The effect index containing the mechanic id.
  */
 void Spell::EffectDispelMechanic(SpellEffectEntry const* effect)
 {
@@ -13510,7 +13510,7 @@ void Spell::EffectDispelMechanic(SpellEffectEntry const* effect)
 /**
  * @brief Restores the caster's dead pet and revives it with percentage-based health.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectSummonDeadPet(SpellEffectEntry const* /*effect*/)
 {
@@ -13570,7 +13570,7 @@ void Spell::EffectSummonAllTotems(SpellEffectEntry const* effect)
 /**
  * @brief Unsummons all totems currently owned by the caster.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectDestroyAllTotems(SpellEffectEntry const* /*effect*/)
 {
@@ -13613,7 +13613,7 @@ void Spell::EffectBreakPlayerTargeting (SpellEffectEntry const* /*effect*/)
 /**
  * @brief Removes a fixed number of durability points from one or more player items.
  *
- * @param eff_idx The effect index containing the inventory slot selector.
+ * @param effect The effect index containing the inventory slot selector.
  */
 void Spell::EffectDurabilityDamage(SpellEffectEntry const* effect)
 {
@@ -13647,7 +13647,7 @@ void Spell::EffectDurabilityDamage(SpellEffectEntry const* effect)
 /**
  * @brief Removes a percentage of durability from one or more player items.
  *
- * @param eff_idx The effect index containing the inventory slot selector.
+ * @param effect The effect index containing the inventory slot selector.
  */
 void Spell::EffectDurabilityDamagePCT(SpellEffectEntry const* effect)
 {
@@ -13686,7 +13686,7 @@ void Spell::EffectDurabilityDamagePCT(SpellEffectEntry const* effect)
 /**
  * @brief Modifies the caster's threat on the target by a percentage.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectModifyThreatPercent(SpellEffectEntry const* /*effect*/)
 {
@@ -13701,7 +13701,7 @@ void Spell::EffectModifyThreatPercent(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Summons a transmitted game object such as fishing nodes, rituals, or spell casters.
  *
- * @param eff_idx The effect index containing the game object entry.
+ * @param effect The effect index containing the game object entry.
  */
 void Spell::EffectTransmitted(SpellEffectEntry const* effect)
 {
@@ -13912,7 +13912,7 @@ void Spell::EffectSkill(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Fully resurrects a dead player target as part of a spirit heal effect.
  *
- * @param eff_idx Unused effect index.
+ * @param effect Unused effect index.
  */
 void Spell::EffectSpiritHeal(SpellEffectEntry const* /*effect*/)
 {
@@ -14261,7 +14261,7 @@ void Spell::EffectActivateSpec(SpellEffectEntry const* /*effect*/)
 /**
  * @brief Sets the player's homebind location to the current position.
  *
- * @param eff_idx The bind effect index.
+ * @param effect The bind effect index.
  */
 void Spell::EffectBind(SpellEffectEntry const* effect)
 {
@@ -14360,7 +14360,7 @@ void Spell::EffectRestoreItemCharges(SpellEffectEntry const* effect)
 /**
  * @brief Sends a battleground player target to its graveyard.
  *
- * @param eff_idx The teleport effect index.
+ * @param effect The teleport effect index.
  */
 void Spell::EffectRedirectThreat(SpellEffectEntry const* effect)
 {

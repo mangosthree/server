@@ -22,9 +22,24 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/// \addtogroup realmd Realm Daemon
-/// @{
-/// \file
+/**
+ * @file Main.cpp
+ * @brief Realm daemon entry point and main loop
+ *
+ * This file implements the realm daemon (realmd) which handles:
+ * - Client authentication and login
+ * - Realm list provision
+ * - Account verification
+ * - Connection to world servers
+ * - Database access for account data
+ *
+ * The realm daemon listens on a configured port for incoming client
+ * connections, authenticates users against the database, and provides
+ * the realm list for world server selection.
+ *
+ * @addtogroup realmd Realm Daemon
+ * @{
+ */
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
@@ -76,7 +91,13 @@ bool stopEvent = false;                                     ///< Setting it to t
 
 DatabaseType LoginDatabase;                                 ///< Accessor to the realm server database
 
-/// Print out the usage string for this program on the console.
+/**
+ * @brief Print command line usage information
+ * @param prog Program name (argv[0])
+ *
+ * Displays usage information including available command line options.
+ * Shows platform-specific options (Windows service vs POSIX daemon).
+ */
 void usage(const char* prog)
 {
     sLog.outString("Usage: \n %s [<options>]\n"
@@ -95,7 +116,24 @@ void usage(const char* prog)
                    , prog);
 }
 
-/// Launch the realm server
+/**
+ * @brief Realm daemon entry point
+ * @param argc Argument count
+ * @param argv Argument values
+ * @return Exit code (0 for success, non-zero for errors)
+ *
+ * Main entry point for the realm daemon. Performs:
+ * 1. Command line parsing
+ * 2. Service/daemon mode handling
+ * 3. Configuration loading
+ * 4. Database initialization
+ * 5. Network setup
+ * 6. Main event loop
+ * 7. Graceful shutdown
+ *
+ * The function runs until a shutdown signal is received or an
+ * unrecoverable error occurs.
+ */
 extern int main(int argc, char** argv)
 {
     ///- Command line parsing
@@ -248,7 +286,6 @@ extern int main(int argc, char** argv)
     }
 #endif
 
-
     DETAIL_LOG("Using ACE: %s", ACE_VERSION);
 
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
@@ -398,7 +435,10 @@ extern int main(int argc, char** argv)
         {
             stopEvent = true;
         }
-        while (m_ServiceStatus == 2) { Sleep(1000); }
+        while (m_ServiceStatus == 2)
+        {
+             Sleep(1000);
+        }
 #endif
     }
 

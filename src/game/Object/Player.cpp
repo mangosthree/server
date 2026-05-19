@@ -311,7 +311,7 @@ UpdateMask Player::updateVisualBits;
  *
  * @param session The owning world session.
  */
-Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this)
+Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this), m_glyphMgr(this)
 {
     m_transport = 0;
 
@@ -20822,52 +20822,7 @@ void Player::_LoadAuras(QueryResult* result, uint32 timediff)
     }
 }
 
-void Player::_LoadGlyphs(QueryResult* result)
-{
-    if (!result)
-    {
-        return;
-    }
-
-    //         0     1     2
-    // "SELECT spec, slot, glyph FROM character_glyphs WHERE guid='%u'"
-
-    do
-    {
-        Field* fields = result->Fetch();
-        uint8 spec = fields[0].GetUInt8();
-        uint8 slot = fields[1].GetUInt8();
-        uint32 glyph = fields[2].GetUInt32();
-
-        GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyph);
-        if (!gp)
-        {
-            sLog.outError("Player %s has not existing glyph entry %u on index %u, spec %u", m_name.c_str(), glyph, slot, spec);
-            CharacterDatabase.PExecute("DELETE FROM `character_glyphs` WHERE `glyph` = %u", glyph);
-            continue;
-        }
-
-        GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(GetGlyphSlot(slot));
-        if (!gs)
-        {
-            sLog.outError("Player %s has not existing glyph slot entry %u on index %u, spec %u", m_name.c_str(), GetGlyphSlot(slot), slot, spec);
-            CharacterDatabase.PExecute("DELETE FROM `character_glyphs` WHERE `slot` = %u AND `spec` = %u AND `guid` = %u", slot, spec, GetGUIDLow());
-            continue;
-        }
-
-        if (gp->TypeFlags != gs->TypeFlags)
-        {
-            sLog.outError("Player %s has glyph with typeflags %u in slot with typeflags %u, removing.", m_name.c_str(), gp->TypeFlags, gs->TypeFlags);
-            CharacterDatabase.PExecute("DELETE FROM `character_glyphs` WHERE `slot` = %u AND `spec` = %u AND `guid` = %u", slot, spec, GetGUIDLow());
-            continue;
-        }
-
-        m_glyphs[spec][slot].id = glyph;
-    }
-    while (result->NextRow());
-
-    delete result;
-}
+// Player::_LoadGlyphs moved to GlyphMgr::Load (2026-05-12); thin delegating wrapper lives inline in Player.h.
 
 /**
  * @brief Restores corpse state for a dead player or cleans it up for a living one.
@@ -22468,43 +22423,7 @@ void Player::_SaveAuras()
     }
 }
 
-void Player::_SaveGlyphs()
-{
-    static SqlStatementID insertGlyph ;
-    static SqlStatementID updateGlyph ;
-    static SqlStatementID deleteGlyph ;
-
-    for (uint8 spec = 0; spec < m_specsCount; ++spec)
-    {
-        for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
-        {
-            switch (m_glyphs[spec][slot].uState)
-            {
-                case GLYPH_NEW:
-                {
-                    SqlStatement stmt = CharacterDatabase.CreateStatement(insertGlyph, "INSERT INTO `character_glyphs` (`guid`, `spec`, `slot`, `glyph`) VALUES (?, ?, ?, ?)");
-                    stmt.PExecute(GetGUIDLow(), spec, slot, m_glyphs[spec][slot].GetId());
-                }
-                break;
-                case GLYPH_CHANGED:
-                {
-                    SqlStatement stmt = CharacterDatabase.CreateStatement(updateGlyph, "UPDATE `character_glyphs` SET `glyph` = ? WHERE `guid` = ? AND `spec` = ? AND `slot` = ?");
-                    stmt.PExecute(m_glyphs[spec][slot].GetId(), GetGUIDLow(), spec, slot);
-                }
-                break;
-                case GLYPH_DELETED:
-                {
-                    SqlStatement stmt = CharacterDatabase.CreateStatement(deleteGlyph, "DELETE FROM `character_glyphs` WHERE `guid` = ? AND `spec` = ? AND `slot` = ?");
-                    stmt.PExecute(GetGUIDLow(), spec, slot);
-                }
-                break;
-                case GLYPH_UNCHANGED:
-                    break;
-            }
-            m_glyphs[spec][slot].uState = GLYPH_UNCHANGED;
-        }
-    }
-}
+// Player::_SaveGlyphs moved to GlyphMgr::Save (2026-05-12); thin delegating wrapper lives inline in Player.h.
 
 /**
  * @brief Saves inventory state changes and queued item records to the database.
@@ -27855,62 +27774,8 @@ uint32 Player::GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 n
     return uint32(cost);
 }
 
-void Player::InitGlyphsForLevel()
-{
-    uint32 slot = 0;
-    for (uint32 i = 0; i < sGlyphSlotStore.GetNumRows() && slot < MAX_GLYPH_SLOT_INDEX; ++i)
-        if (GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(i))
-        {
-            SetGlyphSlot(slot++, gs->Id);
-        }
-
-    uint32 level = getLevel();
-    uint32 value = 0;
-
-    // 0x3F = 0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 for 80 level
-    if (level >= 25)
-    {
-        value |= 0x01 | 0x02 | 0x40;
-    }
-    if (level >= 50)
-    {
-        value |= 0x04 | 0x08 | 0x80;
-    }
-    if (level >= 75)
-    {
-        value |= 0x10 | 0x20 | 0x100;
-    }
-
-    SetUInt32Value(PLAYER_GLYPHS_ENABLED, value);
-}
-
-void Player::ApplyGlyph(uint8 slot, bool apply)
-{
-    if (uint32 glyph = GetGlyph(slot))
-    {
-        if (GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyph))
-        {
-            if (apply)
-            {
-                CastSpell(this, gp->SpellId, true);
-                SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, glyph);
-            }
-            else
-            {
-                RemoveAurasDueToSpell(gp->SpellId);
-                SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, 0);
-            }
-        }
-    }
-}
-
-void Player::ApplyGlyphs(bool apply)
-{
-    for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
-    {
-        ApplyGlyph(i, apply);
-    }
-}
+// Player::InitGlyphsForLevel, ApplyGlyph, ApplyGlyphs moved to GlyphMgr (2026-05-12);
+// thin delegating wrappers live inline in Player.h.
 
 /**
  * @brief Checks whether the player is immune to all spell schools.
@@ -29291,7 +29156,7 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket* data)
             // GlyphProperties.dbc
             for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
             {
-                *data << uint16(m_glyphs[specIdx][i].GetId());
+                *data << uint16(m_glyphMgr.GetGlyph(specIdx, i));
             }
         }
     }

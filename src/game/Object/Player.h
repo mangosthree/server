@@ -57,6 +57,7 @@
 #include "ItemPrototype.h"
 #include "Item.h"
 #include "GlyphMgr.h"   // GlyphMgr is held by value on Player; brings in Glyph struct + GlyphUpdateState enum
+#include "HonorMgr.h"   // HonorMgr is held by value on Player; owns daily-kill rollover + RewardHonor calculation
 
 #include "Database/DatabaseEnv.h"
 #include "NPCHandler.h"
@@ -3118,8 +3119,8 @@ class Player : public Unit
         /*********************************************************/
         /***                  PVP SYSTEM                       ***/
         /*********************************************************/
-        void UpdateHonorKills();
-        bool RewardHonor(Unit *pVictim, uint32 groupsize, float honor = -1);
+        void UpdateHonorKills() { m_honorMgr.UpdateKills(); }
+        bool RewardHonor(Unit *pVictim, uint32 groupsize, float honor = -1) { return m_honorMgr.Reward(pVictim, groupsize, honor); }
         void SendPvPRewards();
         void SendRatedBGStats();
 
@@ -4002,7 +4003,7 @@ class Player : public Unit
         uint32 m_speakCount; // Speak count
         Difficulty m_dungeonDifficulty; // Dungeon difficulty
         Difficulty m_raidDifficulty;
-        time_t m_lastHonorKillsUpdateTime;
+        HonorMgr m_honorMgr;   // daily / yesterday / lifetime kill rollover + Reward calculation (extracted 2026-05-12)
 
         uint32 m_atLoginFlags; // At-login flags
 

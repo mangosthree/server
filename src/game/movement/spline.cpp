@@ -157,7 +157,7 @@ namespace Movement
      * @param t Parameter for interpolation (not used).
      * @param result Output vector for the evaluated derivative.
      */
-    void SplineBase::EvaluateDerivativeLinear(index_type index, float, Vector3& result) const
+    void SplineBase::EvaluateDerivativeLinear(index_type index, float /*t*/, Vector3& result) const
     {
         MANGOS_ASSERT(index >= index_lo && index < index_hi);
         result = points[index + 1] - points[index];

@@ -347,7 +347,7 @@ class FlightPathMovementGenerator
          * @param o Orientation output
          * @return True if reset position obtained
          */
-        bool GetResetPosition(Player&, float& x, float& y, float& z, float& o) const;
+        bool GetResetPosition(Player& player, float& x, float& y, float& z, float& o) const;
 };
 
 #endif // MANGOS_WAYPOINTMOVEMENTGENERATOR_H

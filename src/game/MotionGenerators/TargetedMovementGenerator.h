@@ -114,7 +114,7 @@ class TargetedMovementGeneratorMedium
          * @param owner Reference to the unit.
          * @param updateDestination Whether to update the destination.
          */
-        void _setTargetLocation(T&, bool updateDestination);
+        void _setTargetLocation(T& owner, bool updateDestination);
 
         /**
          * @brief Checks if a new position is required.
@@ -329,7 +329,7 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<T, Follow
     private:
         /**
          * @brief Updates the unit's speed.
-         * @param owner Reference to the unit.
+         * @param u Reference to the unit.
          */
         void _updateSpeed(T& u);
 

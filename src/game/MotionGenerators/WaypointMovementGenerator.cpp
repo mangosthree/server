@@ -674,7 +674,7 @@ void FlightPathMovementGenerator::DoEventIfAny(Player& player, TaxiPathNodeEntry
  * @param o Reference to the orientation.
  * @return True if the reset position was successfully obtained, false otherwise.
  */
-bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, float& z, float& o) const
+bool FlightPathMovementGenerator::GetResetPosition(Player& /*player*/, float& x, float& y, float& z, float& o) const
 {
     const TaxiPathNodeEntry& node = (*i_path)[i_currentNode];
     x = node.x;

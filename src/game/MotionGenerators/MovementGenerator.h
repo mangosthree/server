@@ -59,7 +59,7 @@ class MovementGenerator
          *
          * @param owner Reference to the unit
          */
-        virtual void Initialize(Unit&) = 0;
+        virtual void Initialize(Unit& owner) = 0;
 
         /**
          * @brief Finalize the movement generator
@@ -68,7 +68,7 @@ class MovementGenerator
          *
          * @param owner Reference to the unit
          */
-        virtual void Finalize(Unit&) = 0;
+        virtual void Finalize(Unit& owner) = 0;
 
         /**
          * @brief Interrupt the movement generator
@@ -78,7 +78,7 @@ class MovementGenerator
          *
          * @param owner Reference to the unit
          */
-        virtual void Interrupt(Unit&) = 0;
+        virtual void Interrupt(Unit& owner) = 0;
 
         /**
          * @brief Reset the movement generator
@@ -88,7 +88,7 @@ class MovementGenerator
          *
          * @param owner Reference to the unit
          */
-        virtual void Reset(Unit&) = 0;
+        virtual void Reset(Unit& owner) = 0;
 
         /**
          * @brief Update the movement generator
@@ -96,7 +96,7 @@ class MovementGenerator
          * @param time_diff Time difference in milliseconds
          * @return True if update successful, false otherwise
          */
-        virtual bool Update(Unit&, const uint32& time_diff) = 0;
+        virtual bool Update(Unit& owner, const uint32& time_diff) = 0;
 
         /**
          * @brief Get the type of the movement generator
@@ -123,7 +123,7 @@ class MovementGenerator
          * @param o Orientation output
          * @return True if reset position obtained, false otherwise
          */
-        virtual bool GetResetPosition(Unit&, float& /*x*/, float& /*y*/, float& /*z*/, float& o) const { return false; }
+        virtual bool GetResetPosition(Unit& /*owner*/, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const { return false; }
 
         /**
          * @brief Check if destination is reachable

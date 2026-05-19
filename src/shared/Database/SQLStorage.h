@@ -574,7 +574,6 @@ class SQLMultiStorage : public SQLStorageBase
                 /**
                  * @brief
                  *
-                 * @param std::pair<RecordMultiMap::const_iterator
                  * @param pair
                  */
                 SQLMSIteratorBounds(std::pair<RecordMultiMap::const_iterator, RecordMultiMap::const_iterator> pair) : first(pair.first), second(pair.second) {}

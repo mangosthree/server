@@ -497,10 +497,14 @@ class SqlStatement
          */
         void addString(const char* var) { arg(var); }
         /**
+         * @brief Add a string parameter.
+         * @param var The string parameter to add.
+         */
+        void addString(const std::string& var) { arg(var.c_str()); }
+        /**
          * @brief Add a string parameter from an ostringstream.
          * @param ss The ostringstream containing the string parameter to add.
          */
-        void addString(const std::string& var) { arg(var.c_str()); }
         void addString(std::ostringstream& ss) { arg(ss.str().c_str()); ss.str(std::string()); }
 
     protected:

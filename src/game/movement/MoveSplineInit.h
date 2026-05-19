@@ -107,7 +107,6 @@ namespace Movement
              * @param destination The destination point.
              * @param generatePath Whether to generate a path.
              * @param forceDestination Whether to force the destination.
-             * @param maxPathRange The maximum path range.
              */
             void MoveTo(const Vector3& destination, bool generatePath = false, bool forceDestination = false);
 

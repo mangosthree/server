@@ -184,7 +184,7 @@ void AssistanceMovementGenerator::Finalize(Unit& unit)
  * @param diff Time difference.
  * @return True if the update was successful, false otherwise.
  */
-bool EffectMovementGenerator::Update(Unit& unit, const uint32&)
+bool EffectMovementGenerator::Update(Unit& unit, const uint32& /*diff*/)
 {
     return !unit.movespline->Finalized();
 }

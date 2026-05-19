@@ -498,7 +498,7 @@ void MotionMaster::MoveSeekAssistance(float x, float y, float z)
 
 /**
  * @brief Makes the unit seek assistance and then distract.
- * @param timer Time for the distraction.
+ * @param time Time for the distraction.
  */
 void MotionMaster::MoveSeekAssistanceDistract(uint32 time)
 {

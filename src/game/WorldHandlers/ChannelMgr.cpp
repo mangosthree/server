@@ -97,7 +97,7 @@ ChannelMgr::~ChannelMgr()
 /**
  * @brief Get or create a channel for joining
  * @param name Channel name (case-insensitive)
- * @param channelId
+ * @param channel_id
  * @return Channel instance (existing or newly created)
  *
  * Looks up a channel by name and creates it if it doesn't exist.

@@ -72,7 +72,7 @@
  * Invalid state is a placeholder/initial state that performs no actions.
  * Used as the default state before proper state assignment.
  */
-void InvalidState::Update(Map&, NGridType&, GridInfo&, const uint32& /*x*/, const uint32& /*y*/, const uint32&) const
+void InvalidState::Update(Map& /*m*/, NGridType& /*grid*/, GridInfo& /*info*/, const uint32& /*x*/, const uint32& /*y*/, const uint32& /*t_diff*/) const
 {
 }
 
@@ -126,7 +126,7 @@ void ActiveState::Update(Map& m, NGridType& grid, GridInfo& info, const uint32& 
  * but not yet unloaded. Resets the expiry timer and transitions to
  * REMOVAL_STATE for potential unloading.
  */
-void IdleState::Update(Map& m, NGridType& grid, GridInfo&, const uint32& x, const uint32& y, const uint32&) const
+void IdleState::Update(Map& m, NGridType& grid, GridInfo& /*info*/, const uint32& x, const uint32& y, const uint32& /*t_diff*/) const
 {
     m.ResetGridExpiry(grid);
     grid.SetGridState(GRID_STATE_REMOVAL);

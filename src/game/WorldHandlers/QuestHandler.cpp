@@ -698,11 +698,6 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
 }
 
 /**
- * @brief Relays a quest sharing result back to the original sharer.
- *
- * @param recvPacket The received opcode packet.
- */
-/**
  * What - if any - kind of exclamation mark or question-mark should a quest-giver display for a player
  * @param pPlayer - for whom
  * @param questgiver - from whom

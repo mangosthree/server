@@ -1123,7 +1123,7 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket& recv_data)
  * @param targetGuid The enchanted target guid.
  * @param casterGuid The caster guid.
  * @param itemId The item entry id.
- * @param spellId The enchantment spell id.
+ * @param enchantId The enchantment spell id.
  */
 void WorldSession::SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGuid, uint32 itemId, uint32 enchantId)
 {

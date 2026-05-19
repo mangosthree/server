@@ -519,8 +519,7 @@ public:
     /**
      * @brief Find the random dungeons not applicable for a player
      *
-     * @param level The level of said player
-     * @param expansion The player's expansion
+     * @param plr The player to test against
      */
     dungeonForbidden FindRandomDungeonsNotForPlayer(Player* plr);
 

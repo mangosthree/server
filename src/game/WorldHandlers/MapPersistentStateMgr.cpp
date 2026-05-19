@@ -472,7 +472,7 @@ uint32 DungeonResetScheduler::GetMaxResetTimeFor(MapDifficultyEntry const* mapDi
 /**
  * @brief Calculates the next global reset time for an instance template.
  *
- * @param temp The instance template.
+ * @param mapDiff The map difficulty entry.
  * @param prevResetTime The previous reset time.
  * @return The next reset timestamp.
  */

@@ -479,7 +479,7 @@ class AuctionHouseBot
         /**
          * @brief Sets the items amount.
          *
-         * @param (vals)[] The vals.
+         * @param vals The vals.
          */
         void SetItemsAmount(uint32(&vals) [MAX_AUCTION_QUALITY]);
         /**

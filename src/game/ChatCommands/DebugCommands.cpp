@@ -1084,7 +1084,10 @@ bool ChatHandler::HandleDebugSetAuraStateCommand(char* args)
 /**
  * @brief Handler for HandleSetValueHelper command.
  *
- * @param args Command arguments.
+ * @param target Object whose field should be set.
+ * @param field Field index within the object's data array.
+ * @param typeStr Field type token (int, hex, float).
+ * @param valStr New value parsed according to typeStr.
  * @returns True if the command executed successfully, false otherwise.
  */
 bool ChatHandler::HandleSetValueHelper(Object* target, uint32 field, char* typeStr, char* valStr)
@@ -1233,7 +1236,9 @@ bool ChatHandler::HandleDebugSetValueCommand(char* args)
 /**
  * @brief Handler for HandleGetValueHelper command.
  *
- * @param args Command arguments.
+ * @param target Object whose field should be read.
+ * @param field Field index within the object's data array.
+ * @param typeStr Field type token used to format the printed value.
  * @returns True if the command executed successfully, false otherwise.
  */
 bool ChatHandler::HandleGetValueHelper(Object* target, uint32 field, char* typeStr)
@@ -1381,7 +1386,10 @@ bool ChatHandler::HandleDebugGetValueCommand(char* args)
 /**
  * @brief Handler for HandlerDebugModValueHelper command.
  *
- * @param args Command arguments.
+ * @param target Object whose field should be modified.
+ * @param field Field index within the object's data array.
+ * @param typeStr Field type token (int, hex, float).
+ * @param valStr Modification value parsed according to typeStr.
  * @returns True if the command executed successfully, false otherwise.
  */
 bool ChatHandler::HandlerDebugModValueHelper(Object* target, uint32 field, char* typeStr, char* valStr)

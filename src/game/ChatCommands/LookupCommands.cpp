@@ -45,7 +45,8 @@
 /**
  * @brief Handler for LookupPlayerSearchCommand command.
  *
- * @param args Command arguments.
+ * @param result Query result set to walk; consumed and freed by this call.
+ * @param limit Optional pointer to a remaining-results counter; decremented as rows are printed.
  * @returns True if the command executed successfully, false otherwise.
  */
 bool ChatHandler::LookupPlayerSearchCommand(QueryResult* result, uint32* limit)
@@ -662,7 +663,10 @@ bool ChatHandler::HandleLookupAccountNameCommand(char* args)
 /**
  * @brief Handler for ShowAccountListHelper command.
  *
- * @param args Command arguments.
+ * @param result Query result set to walk; consumed and freed by this call.
+ * @param limit Optional pointer to a remaining-results counter; decremented as rows are printed.
+ * @param title Whether to print the column header row.
+ * @param error Whether to emit an "empty list" message when result is NULL.
  * @returns True if the command executed successfully, false otherwise.
  */
 bool ChatHandler::ShowAccountListHelper(QueryResult* result, uint32* limit, bool title, bool error)

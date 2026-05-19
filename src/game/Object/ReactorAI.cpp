@@ -50,9 +50,9 @@ int ReactorAI::Permissible(const Creature* creature)
 /**
  * @brief Ignores passive line-of-sight reactions for reactor AI.
  *
- * @param Unused line-of-sight unit.
+ * @param pWho The unit entering line-of-sight (unused).
  */
-void ReactorAI::MoveInLineOfSight(Unit*)
+void ReactorAI::MoveInLineOfSight(Unit* /*pWho*/)
 {
 }
 
@@ -84,10 +84,10 @@ void ReactorAI::AttackStart(Unit* p)
 /**
  * @brief Checks whether a unit is visible to this AI.
  *
- * @param Unused target unit.
+ * @param pWho The candidate unit (unused).
  * @return Always false for reactor AI visibility checks here.
  */
-bool ReactorAI::IsVisible(Unit*) const
+bool ReactorAI::IsVisible(Unit* /*pWho*/) const
 {
     return false;
 }

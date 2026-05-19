@@ -60,9 +60,9 @@ TotemAI::TotemAI(Creature* c) : CreatureAI(c)
 /**
  * @brief Ignores line-of-sight events for totems.
  *
- * @param The unit entering line of sight.
+ * @param pWho The unit entering line-of-sight.
  */
-void TotemAI::MoveInLineOfSight(Unit*)
+void TotemAI::MoveInLineOfSight(Unit* /*pWho*/)
 {
 }
 
@@ -141,10 +141,10 @@ void TotemAI::UpdateAI(const uint32 /*diff*/)
 /**
  * @brief Totems do not use generic visibility checks in this AI.
  *
- * @param The unit being tested.
+ * @param pWho The unit being tested.
  * @return false.
  */
-bool TotemAI::IsVisible(Unit*) const
+bool TotemAI::IsVisible(Unit* /*pWho*/) const
 {
     return false;
 }
@@ -152,9 +152,9 @@ bool TotemAI::IsVisible(Unit*) const
 /**
  * @brief Ignores direct attack start requests for totems.
  *
- * @param The target unit.
+ * @param pWho The target unit.
  */
-void TotemAI::AttackStart(Unit*)
+void TotemAI::AttackStart(Unit* /*pWho*/)
 {
 }
 

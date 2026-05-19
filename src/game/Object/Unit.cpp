@@ -3733,7 +3733,6 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
  * @param dodge_chance The dodge chance in hundredths of a percent.
  * @param parry_chance The parry chance in hundredths of a percent.
  * @param block_chance The block chance in hundredths of a percent.
- * @param SpellCasted True when evaluating a spell-based melee hit.
  * @return The resulting melee hit outcome.
  */
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 dodge_chance, int32 parry_chance, int32 block_chance) const
@@ -5038,8 +5037,6 @@ void Unit::FinishSpell(CurrentSpellTypes spellType, bool ok /*= true*/)
  * @param withDelayed True to treat delayed spells as active casts.
  * @param skipChanneled True to ignore channeled spells.
  * @param skipAutorepeat True to ignore auto-repeat spells.
- * @param forMovement Unused movement-specific flag.
- * @param forAutoIgnore Unused auto-ignore flag.
  * @return True if a matching non-melee spell is being cast; otherwise, false.
  */
 bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skipAutorepeat) const
@@ -13471,10 +13468,11 @@ void Unit::SetHealthPercent(float percent)
 }
 
 /**
- * @brief Sets a power value while clamping to its maximum.
+ * @brief Looks up the power-array index used by a given class for a power type.
  *
- * @param power The power type to set.
- * @param val The requested power value.
+ * @param powerId The power type to translate.
+ * @param classId The player or creature class id.
+ * @return The index within the unit's stored power array.
  */
 uint32 Unit::GetPowerIndexByClass(Powers powerId, uint32 classId)
 {

@@ -3821,7 +3821,8 @@ void ObjectMgr::LoadPlayerInfo()
  *
  * @param class_ The player class id.
  * @param level The player level.
- * @param info Receives the class level info.
+ * @param baseHP Receives the base health for this class/level combination.
+ * @param baseMana Receives the base mana for this class/level combination.
  */
 void ObjectMgr::GetPlayerClassLevelInfo(uint32 class_, uint32 level, uint32& baseHP, uint32& baseMana) const
 {

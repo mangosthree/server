@@ -225,10 +225,13 @@ bool BattleGroundQueue::SelectionPool::AddGroup(GroupQueueInfo* ginfo, uint32 de
  *
  * @param leader The group leader or solo player joining the queue.
  * @param grp The group joining (NULL for solo players).
- * @param bracketEntry
- * @param bracketId The level bracket for this group.
+ * @param BgTypeId The battleground type id.
+ * @param bracketEntry The PvP difficulty bracket entry; the local bracketId is derived from it.
  * @param arenaType The Arena Type for this group.
+ * @param isRated Whether the queue is rated.
  * @param isPremade Whether this is a premade group (rated, etc.).
+ * @param arenaRating Arena team rating for rated queues.
+ * @param arenateamid Arena team id (0 for non-arena).
  * @return GroupQueueInfo* Pointer to the created group queue info structure.
  */
 GroupQueueInfo* BattleGroundQueue::AddGroup(Player* leader, Group* grp, BattleGroundTypeId BgTypeId, PvPDifficultyEntry const*  bracketEntry, ArenaType arenaType, bool isRated, bool isPremade, uint32 arenaRating, uint32 arenateamid)
@@ -2319,7 +2322,7 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
  * New instances are created by copying this template.
  *
  * @param bgTypeId The battleground type.
- * @param isArena
+ * @param IsArena Whether the template is an arena.
  * @param MinPlayersPerTeam Minimum players required per team.
  * @param MaxPlayersPerTeam Maximum players allowed per team.
  * @param LevelMin Minimum level to queue for this battleground.
@@ -2334,7 +2337,6 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
  * @param Team2StartLocY Horde spawn location Y coordinate.
  * @param Team2StartLocZ Horde spawn location Z coordinate.
  * @param Team2StartLocO Horde spawn location orientation.
- * @param StartMaxDist Maximum distance from spawn location for initial positioning.
  * @return The instance ID of the created template battleground.
  */
 uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, bool IsArena, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char const* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO)

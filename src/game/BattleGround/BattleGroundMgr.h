@@ -158,9 +158,9 @@ class BattleGroundQueue
          * @brief Updates the battleground queue.
          * @param bgTypeId The battleground type id.
          * @param bracket_id The bracket id.
-         * @param ArenaType
-         * @param isRated
-         * @param minRating
+         * @param arenaType The arena type.
+         * @param isRated Whether the queue is rated.
+         * @param minRating Minimum rating filter.
          */
         void Update(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id, ArenaType arenaType = ARENA_TYPE_NONE, bool isRated = false, uint32 minRating = 0);
 
@@ -195,10 +195,12 @@ class BattleGroundQueue
          * @param leader The group leader.
          * @param group The group.
          * @param bgTypeId The battleground type id.
-         * @param bracketId The bracket id.
-         * @return arenaType
-         * @return isRated
+         * @param bracketEntry The PvP difficulty bracket entry.
+         * @param arenaType The arena type.
+         * @param isRated Whether the queue is rated.
          * @param isPremade True if the group is premade, false otherwise.
+         * @param ArenaRating Arena team rating for rated queues.
+         * @param ArenaTeamId Arena team id (0 for non-arena).
          * @return GroupQueueInfo* Pointer to the group queue info.
          */
         GroupQueueInfo* AddGroup(Player* leader, Group* group, BattleGroundTypeId bgTypeId, PvPDifficultyEntry const*  bracketEntry, ArenaType arenaType, bool isRated, bool isPremade, uint32 ArenaRating, uint32 ArenaTeamId = 0);
@@ -487,13 +489,12 @@ class BattleGroundMgr
          * @brief Builds a packet for battleground status.
          * @param data The packet data.
          * @param bg The battleground.
-         * @param player
+         * @param player The recipient player.
          * @param QueueSlot The queue slot.
          * @param StatusID The status ID.
          * @param Time1 The first time value.
          * @param Time2 The second time value.
-         * @param arenaType
-         * @param arenaTeam
+         * @param arenatype The arena type.
          */
         void BuildBattleGroundStatusPacket(WorldPacket* data, BattleGround* bg, Player* player, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, ArenaType arenatype);
         void BuildBattleGroundStatusFailedPacket(WorldPacket* data, BattleGround* bg, Player* player, uint8 QueueSlot, GroupJoinBattlegroundResult result);
@@ -533,9 +534,9 @@ class BattleGroundMgr
          * @brief Creates a new battleground instance.
          *
          * @param bgTypeId The battleground type id.
-         * @param bracket_id The bracket id.
-         * @param arenaType
-         * @param isRated
+         * @param bracketEntry The PvP difficulty bracket entry.
+         * @param arenaType The arena type.
+         * @param isRated Whether the instance is rated.
          * @return BattleGround* Pointer to the created battleground instance.
          */
         BattleGround* CreateNewBattleGround(BattleGroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry, ArenaType arenaType, bool isRated);

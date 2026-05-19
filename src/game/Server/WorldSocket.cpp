@@ -225,7 +225,7 @@ const std::string& WorldSocket::GetRemoteAddress(void) const
 /**
  * @brief Sends a packet immediately or queues it for later flush.
  *
- * @param pkt The packet to send.
+ * @param pct The packet to send.
  * @return int Zero on success; otherwise -1.
  */
 int WorldSocket::SendPacket(const WorldPacket& pct)

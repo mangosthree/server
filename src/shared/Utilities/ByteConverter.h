@@ -80,7 +80,7 @@ template<typename T> inline void EndianConvert(T& val) { ByteConverter::apply<T>
  * @brief Reverse byte order (no-op on big-endian host)
  * @param val Value to convert
  */
-template<typename T> inline void EndianConvertReverse(T&) { }
+template<typename T> inline void EndianConvertReverse(T& /*val*/) { }
 #else
 template<typename T> inline void EndianConvert(T&) { }
 template<typename T> inline void EndianConvertReverse(T& val) { ByteConverter::apply<T>(&val); }

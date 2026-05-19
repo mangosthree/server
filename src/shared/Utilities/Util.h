@@ -95,7 +95,7 @@ tm TimeBreakdown(time_t t);
  * @brief
  *
  * @param timeInSecs
- * @param shortText
+ * @param timeFormat
  * @param hoursOnly
  * @return std::string
  */

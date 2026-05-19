@@ -56,6 +56,7 @@
 #include "Common.h"
 #include "ItemPrototype.h"
 #include "Item.h"
+#include "GlyphMgr.h"   // GlyphMgr is held by value on Player; brings in Glyph struct + GlyphUpdateState enum
 
 #include "Database/DatabaseEnv.h"
 #include "NPCHandler.h"
@@ -281,53 +282,7 @@ enum ActionButtonIndex
 
 typedef std::map<uint8, ActionButton> ActionButtonList;
 
-enum GlyphUpdateState
-{
-    GLYPH_UNCHANGED             = 0,
-    GLYPH_CHANGED               = 1,
-    GLYPH_NEW                   = 2,
-    GLYPH_DELETED               = 3
-};
-
-struct Glyph
-{
-    uint32 id;
-    GlyphUpdateState uState;
-
-    Glyph() : id(0), uState(GLYPH_UNCHANGED) { }
-
-    uint32 GetId() { return id; }
-
-    void SetId(uint32 newId)
-    {
-        if (newId == id)
-        {
-            return;
-        }
-
-        if (id == 0 && uState == GLYPH_UNCHANGED)           // not exist yet in db and already saved
-        {
-            uState = GLYPH_NEW;
-        }
-        else if (newId == 0)
-        {
-            if (uState == GLYPH_NEW)                        // delete before add new -> no change
-            {
-                uState = GLYPH_UNCHANGED;
-            }
-            else                                            // delete existing data
-            {
-                uState = GLYPH_DELETED;
-            }
-        }
-        else if (uState != GLYPH_NEW)                       // if not new data, change current data
-        {
-            uState = GLYPH_CHANGED;
-        }
-
-        id = newId;
-    }
-};
+// GlyphUpdateState and Glyph struct moved to GlyphMgr.h (2026-05-12).
 
 struct PlayerCreateInfoItem
 {
@@ -2413,13 +2368,16 @@ class Player : public Unit
         void ActivateSpec(uint8 specNum);
         void UpdateSpecCount(uint8 count);
 
-        void InitGlyphsForLevel();
+        // Glyph API — thin delegating wrappers around m_glyphMgr (extracted 2026-05-12).
+        // SetGlyphSlot / GetGlyphSlot stay here because they touch entity update fields,
+        // not per-spec glyph state owned by GlyphMgr.
         void SetGlyphSlot(uint8 slot, uint32 slottype) { SetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + slot, slottype); }
         uint32 GetGlyphSlot(uint8 slot) const { return GetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + slot); }
-        void SetGlyph(uint8 slot, uint32 glyph) { m_glyphs[m_activeSpec][slot].SetId(glyph); }
-        uint32 GetGlyph(uint8 slot) { return m_glyphs[m_activeSpec][slot].GetId(); }
-        void ApplyGlyph(uint8 slot, bool apply);
-        void ApplyGlyphs(bool apply);
+        void InitGlyphsForLevel() { m_glyphMgr.InitGlyphsForLevel(); }
+        void SetGlyph(uint8 slot, uint32 glyph) { m_glyphMgr.SetGlyph(m_activeSpec, slot, glyph); }
+        uint32 GetGlyph(uint8 slot) { return m_glyphMgr.GetGlyph(m_activeSpec, slot); }
+        void ApplyGlyph(uint8 slot, bool apply) { m_glyphMgr.ApplyGlyph(slot, apply); }
+        void ApplyGlyphs(bool apply) { m_glyphMgr.ApplyAll(apply); }
 
         uint32 GetFreePrimaryProfessionPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS); }
         void SetFreePrimaryProfessions(uint16 profs) { SetUInt32Value(PLAYER_CHARACTER_POINTS, profs); }
@@ -3963,7 +3921,7 @@ class Player : public Unit
         void _LoadArenaTeamInfo(QueryResult* result);
         void _LoadEquipmentSets(QueryResult* result);
         void _LoadBGData(QueryResult* result);
-        void _LoadGlyphs(QueryResult* result);
+        void _LoadGlyphs(QueryResult* result) { m_glyphMgr.Load(result); }
         void _LoadIntoDataField(const char* data, uint32 startOffset, uint32 count);
 
         /*********************************************************/
@@ -3993,7 +3951,7 @@ class Player : public Unit
         void _SaveSpells();
         void _SaveEquipmentSets();
         void _SaveBGData();
-        void _SaveGlyphs();
+        void _SaveGlyphs() { m_glyphMgr.Save(); }
         void _SaveTalents();
         void _SaveStats();
 
@@ -4080,7 +4038,7 @@ class Player : public Unit
 
         ActionButtonList m_actionButtons[MAX_TALENT_SPEC_COUNT];
 
-        Glyph m_glyphs[MAX_TALENT_SPEC_COUNT][MAX_GLYPH_SLOT_INDEX];
+        GlyphMgr m_glyphMgr;   // per-spec glyph state + Load/Save/Apply lifecycle (extracted 2026-05-12)
 
         float m_auraBaseMod[BASEMOD_END][MOD_END];
         int16 m_baseRatingValue[MAX_COMBAT_RATING];

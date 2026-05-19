@@ -790,21 +790,7 @@ void AuctionHouseObject::BuildListOwnerItems(WorldPacket& data, Player* player, 
 }
 
 /**
- * @brief Builds the filtered public auction browse list.
- *
- * @param data The packet buffer to append to.
- * @param player The player requesting the list.
- * @param wsearchedname The search string in wide-character form.
- * @param listfrom The starting result offset.
- * @param levelmin The minimum required item level filter.
- * @param levelmax The maximum required item level filter.
- * @param usable Whether only usable items should be listed.
- * @param inventoryType The inventory type filter.
- * @param itemClass The item class filter.
- * @param itemSubClass The item subclass filter.
- * @param quality The minimum quality filter.
- * @param count Receives the number of appended entries.
- * @param totalcount Receives the total number of matching entries.
+ * @brief Comparator for sorted auction display.
  */
 int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Player* viewPlayer) const
 {
@@ -1016,6 +1002,23 @@ bool AuctionSorter::operator()(const AuctionEntry* auc1, const AuctionEntry* auc
     return false;                                           // "equal" by all sorts
 }
 
+/**
+ * @brief Builds the filtered public auction browse list.
+ *
+ * @param data The packet buffer to append to.
+ * @param player The player requesting the list.
+ * @param wsearchedname The search string in wide-character form.
+ * @param listfrom The starting result offset.
+ * @param levelmin The minimum required item level filter.
+ * @param levelmax The maximum required item level filter.
+ * @param usable Whether only usable items should be listed.
+ * @param inventoryType The inventory type filter.
+ * @param itemClass The item class filter.
+ * @param itemSubClass The item subclass filter.
+ * @param quality The minimum quality filter.
+ * @param count Receives the number of appended entries.
+ * @param totalcount Receives the total number of matching entries.
+ */
 void WorldSession::BuildListAuctionItems(std::vector<AuctionEntry*> const& auctions, WorldPacket& data, std::wstring const& wsearchedname, uint32 listfrom, uint32 levelmin,
         uint32 levelmax, uint32 usable, uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality, uint32& count, uint32& totalcount, bool isFull)
 {

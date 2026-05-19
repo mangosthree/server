@@ -149,8 +149,8 @@ VendorItem const* VendorItemData::FindItemCostPair(uint32 item_id, uint8 type, u
 /**
  * @brief Executes a delayed forced-despawn event.
  *
- * @param Unused execution time.
- * @param Unused update time.
+ * @param e_time Unused.
+ * @param p_time Unused.
  * @return Always true after despawning the owner.
  */
 bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
@@ -309,8 +309,6 @@ void Creature::RemoveFromWorld()
 
 /**
  * @brief Removes the creature corpse and schedules respawn handling.
- *
- * @param inPlace true to leave the corpse in place while removing loot state.
  */
 void Creature::RemoveCorpse()
 {
@@ -382,7 +380,6 @@ void Creature::RemoveCorpse()
  * @brief Initializes creature template-dependent data for the current entry.
  *
  * @param Entry The creature entry to apply.
- * @param team Optional team override.
  * @param data Optional static spawn data.
  * @param eventData Optional active event override data.
  * @return true if initialization succeeded; otherwise, false.
@@ -1751,7 +1748,8 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
 /**
  * @brief Selects the creature level and recalculates level-dependent stats.
  *
- * @param forcedLevel Optional forced level override.
+ * @param cinfo The creature template providing level bounds and base stats.
+ * @param percentHealth The starting health percentage to apply.
  */
 void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth /*= 100.0f*/)
 {

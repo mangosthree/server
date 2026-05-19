@@ -2605,13 +2605,6 @@ void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* ta
 }
 
 /**
- * @brief Send message to set
- * @param data Packet to send
- * @param bToSelf If true, send to self (unused)
- *
- * Broadcasts a packet to all players who can see this object.
- */
-/**
  * @brief Broadcasts a packet to all players in the object's visibility set.
  *
  * @param data The packet to send.
@@ -2626,15 +2619,6 @@ void WorldObject::SendMessageToSet(WorldPacket* data, bool /*bToSelf*/) const
     }
 }
 
-/**
- * @brief Send message to set in range
- * @param data Packet to send
- * @param dist Maximum distance
- * @param bToSelf If true, send to self (unused)
- *
- * Broadcasts a packet to all players within the specified distance
- * who can see this object.
- */
 /**
  * @brief Broadcasts a packet to players within a specified range.
  *
@@ -2651,14 +2635,6 @@ void WorldObject::SendMessageToSetInRange(WorldPacket* data, float dist, bool /*
     }
 }
 
-/**
- * @brief Send message to set except receiver
- * @param data Packet to send
- * @param skipped_receiver Player to skip
- *
- * Broadcasts a packet to all players who can see this object
- * except the specified player.
- */
 /**
  * @brief Broadcasts a packet to visible players except one receiver.
  *

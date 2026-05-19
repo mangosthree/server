@@ -43,7 +43,7 @@ public:
     * Called at World update tick, by default every 100ms
     * This setting is dependend on CONFIG_UINT32_INTERVAL_MAPUPDATE
     * Note: Use this function to handle Timers
-    * @param uiDiff Passed time since last call
+    * @param diff Passed time since last call
     */
     virtual void UpdateAI(const uint32 /*diff*/) {}
 

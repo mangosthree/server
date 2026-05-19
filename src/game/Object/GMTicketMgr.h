@@ -103,8 +103,9 @@ class GMTicket
          * Initializes this \ref GMTicket, much like the constructor would.
          * @param guid guid for the \ref Player that created the ticket
          * @param text the question text
-         * @param responsetext the response to the question if any
+         * @param responseText the response to the question if any
          * @param update the last time the ticket was updated by either \ref Player or GM
+         * @param ticketId unique identifier assigned to this ticket
          */
         void Init(ObjectGuid guid, const std::string& text, const std::string& responseText, time_t update, uint32 ticketId);
 

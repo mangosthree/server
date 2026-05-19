@@ -1323,7 +1323,7 @@ DrunkenState Player::GetDrunkenstateByValue(uint8 value)
 /**
  * @brief Sets the player's drunk value and updates related visibility effects.
  *
- * @param newDrunkenValue The new drunk value.
+ * @param newDrunkValue The new drunk value.
  * @param itemId Unused source item identifier.
  */
 void Player::SetDrunkValue(uint8 newDrunkValue, uint32 itemId /*= 0*/)
@@ -1755,7 +1755,8 @@ void Player::SetDeathState(DeathState s)
  * @brief Builds character-enumeration data for the character selection screen.
  *
  * @param result The database row for the character.
- * @param p_data The packet being populated.
+ * @param data The packet being populated.
+ * @param buffer Secondary byte buffer for trailing variable-length fields.
  * @return true if the enum data was built successfully; otherwise, false.
  */
 bool Player::BuildEnumData(QueryResult* result, ByteBuffer* data, ByteBuffer* buffer)
@@ -2034,7 +2035,7 @@ void Player::SendTeleportPacket(float oldX, float oldY, float oldZ, float oldO)
  * @param z The destination z coordinate.
  * @param orientation The destination orientation.
  * @param options Teleport option flags.
- * @param allowNoDelay true to bypass delayed-teleport deferral when possible.
+ * @param at Optional area trigger that initiated the teleport.
  * @return true if teleport setup succeeded; otherwise, false.
  */
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options /*=0*/, AreaTrigger const* at /*=NULL*/)
@@ -2775,7 +2776,7 @@ void Player::RegenerateHealth(uint32 diff)
  * @brief Gets an NPC the player can currently interact with.
  *
  * @param guid The target creature GUID.
- * @param npcflagmask Optional NPC flag mask that must be present on the creature.
+ * @param NpcFlagsmask Optional NPC flag mask that must be present on the creature.
  * @return The interactable creature, or null if interaction is not allowed.
  */
 Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 NpcFlagsmask)
@@ -3124,7 +3125,6 @@ void Player::UninviteFromGroup()
  *
  * @param group The group to remove the member from.
  * @param guid The GUID of the member to remove.
- * @param removeMethod The group removal method to apply.
  */
 void Player::RemoveFromGroup(Group* group, ObjectGuid guid)
 {
@@ -11101,12 +11101,12 @@ void Player::SetSheath(SheathState sheathed)
 }
 
 /**
- * @brief Finds an appropriate equipment slot for an item prototype.
+ * @brief Populates the candidate equipment slots for a given inventory type.
  *
- * @param proto The item prototype to equip.
- * @param slot The preferred slot, or NULL_SLOT to auto-select.
- * @param swap True to allow replacing an occupied slot.
- * @return The chosen slot, or NULL_SLOT if none fits.
+ * @param invType The item inventory type (see InventoryType enum).
+ * @param slots Receives up to four candidate equipment slots; unused entries are filled with NULL_SLOT.
+ * @param subClass The item subclass, used to disambiguate cases like ranged weapon variants.
+ * @return true if at least one valid slot is produced; otherwise, false.
  */
 bool Player::GetSlotsForInventoryType(uint8 invType, uint8* slots, uint32 subClass) const
 {
@@ -13578,7 +13578,6 @@ InventoryResult Player::CanUseItem(Item* pItem, bool direct_action) const
  * @brief Checks whether an item prototype is usable by the player.
  *
  * @param pProto The item prototype to validate.
- * @param direct_action True if the check is for an immediate player action.
  * @return The inventory result for the use check.
  */
 InventoryResult Player::CanUseItem(ItemPrototype const* pProto) const
@@ -14413,8 +14412,7 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
  * @param count The requested quantity to destroy.
  * @param update True to send inventory updates to the client.
  * @param unequip_check True to validate equipped items before destroying them.
- * @param delete_from_bank True to include bank storage in the search.
- * @param delete_from_buyback True to include vendor buyback slots in the search.
+ * @param inBankAlso True to include bank storage when searching for stacks to destroy.
  * @return The number of items removed.
  */
 void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequip_check, bool inBankAlso)
@@ -16224,7 +16222,6 @@ void Player::SendItemDurations()
  * @param received True if the item was received rather than looted.
  * @param created True if the item was created rather than simply received.
  * @param broadcast True to broadcast the message to the player's group.
- * @param showInChat True to show the gain in chat.
  */
 void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, bool broadcast)
 {
@@ -23791,7 +23788,7 @@ void Player::RemovePetActionBar()
 /**
  * @brief Applies or removes a spell modifier and notifies the client.
  *
- * @param mod The modifier to add or remove.
+ * @param aura The aura whose modifier should be added or removed.
  * @param apply True to apply the modifier; false to remove it.
  */
 void Player::AddSpellMod(Aura* aura, bool apply)
@@ -25407,8 +25404,6 @@ void Player::ToggleMetaGemsActive(uint8 exceptslot, bool apply)
 
 /**
  * @brief Stores the location used to return the player after leaving a battleground.
- *
- * @param leader The group leader to mirror entry positioning from, or NULL.
  */
 void Player::SetBattleGroundEntryPoint()
 {
@@ -26029,7 +26024,6 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
  * @brief Sends the appropriate transfer-aborted feedback for an area lock failure.
  *
  * @param mapEntry The destination map entry.
- * @param at The triggering area trigger, if any.
  * @param lockStatus The evaluated area lock status.
  * @param miscRequirement Extra requirement data used by some messages.
  */

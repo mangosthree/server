@@ -200,10 +200,7 @@ void GameObject::RemoveFromWorld()
  * @param y The y coordinate.
  * @param z The z coordinate.
  * @param ang The facing angle.
- * @param r0 Quaternion x component.
- * @param r1 Quaternion y component.
- * @param r2 Quaternion z component.
- * @param r3 Quaternion w component.
+ * @param rotation The packed quaternion describing the object's rotation.
  * @param animprogress The initial animation progress.
  * @param go_state The initial gameobject state.
  * @return true if creation succeeded; otherwise, false.

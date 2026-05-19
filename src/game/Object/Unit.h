@@ -2239,7 +2239,6 @@ class Unit : public WorldObject
          * the structure. Also calculates bonus damage with Unit::MeleeDamageBonusDone and the damage
          * with Unit::CalculateDamage
          * @param pVictim the victim that was hit with damage
-         * @param damage how much damage to try to do
          * @param damageInfo this is filled with data about what kind of damage that was done
          * @param attackType type of attack, base/off/ranged
          */
@@ -2424,7 +2423,6 @@ class Unit : public WorldObject
          * @param dodge_chance victims dodge chance
          * @param parry_chance victims parry chance
          * @param block_chance victims block chance
-         * @param SpellCasted whether or not this was because of a spell of autoattack (false => autoattack)
          * @return what the hit resulted in, miss/hit etc
          */
         MeleeHitOutcome RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 dodge_chance, int32 parry_chance, int32 block_chance) const;
@@ -2770,7 +2768,7 @@ class Unit : public WorldObject
          * @return true if the target can be attacked, false otherwise
          * \see UnitState
          */
-        bool IsTargetableForAttack(bool inversAlive = false) const;
+        bool IsTargetableForAttack(bool inverseAlive = false) const;
         /**
          * Simply checks if this \ref Unit has the flag (\ref Unit::HasFlag)
          * \ref UnitFlags::UNIT_FLAG_PASSIVE in \ref EUnitFields::UNIT_FIELD_FLAGS
@@ -2931,7 +2929,6 @@ class Unit : public WorldObject
          * @param triggeredByAura the \ref Aura that triggered this
          * @param originalCaster the original caster if any
          * @param triggeredBy the \ref SpellEntry that triggered this cast, if any
-         * @param calculateDamage Indicates whether the damage calculation must be performed (in some cases, the calculation has already been executed).
          * \todo What's the original caster?
          */
         void CastCustomSpell(Unit* Victim, SpellEntry const* spellInfo, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item* castItem = NULL, Aura* triggeredByAura = NULL, ObjectGuid originalCaster = ObjectGuid(), SpellEntry const* triggeredBy = NULL);

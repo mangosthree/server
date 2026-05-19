@@ -965,7 +965,6 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
  * @brief Initializes pet stats for a given level.
  *
  * @param petlevel The target pet level.
- * @param owner Optional owner override.
  * @return true if initialization succeeded; otherwise, false.
  */
 void Pet::InitStatsForLevel(uint32 petlevel)

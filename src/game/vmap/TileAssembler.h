@@ -145,7 +145,6 @@ namespace VMAP
          * @brief Reads the world model data from a file
          *
          * @param path The path to the file
-         * @param RAW_VMAP_MAGIC The validation string to verify the file header
          * @return bool True if successful, false otherwise
          */
         bool Read(const char* path);
@@ -218,7 +217,7 @@ namespace VMAP
             /**
              * @brief
              *
-             * @param )
+             * @param pFilterMethod
              */
             void setModelNameFilterMethod(bool (*pFilterMethod)(char* pName)) { iFilterMethod = pFilterMethod; }
             /**

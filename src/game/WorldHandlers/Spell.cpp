@@ -7179,6 +7179,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                     {
                         return SPELL_FAILED_AFFECTING_COMBAT;
                     }
+                    if (!m_caster->HasWorgenForm())
+                    {
+                        return SPELL_FAILED_SPELL_UNAVAILABLE;
+                    }
                 }
                 else if (m_spellInfo->SpellIconID == 156)   // Holy Shock
                 {

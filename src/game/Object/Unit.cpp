@@ -11222,11 +11222,11 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
                 InterruptSpell(CurrentSpellTypes(i), false);
             }
         }
+    }
 
-        if (getRace() == RACE_WORGEN && !IsInWorgenForm(true) && HasWorgenForm())
-        {
-            CastSpell(this, 97709, true);   // cast Altered Form
-        }
+    if (getRace() == RACE_WORGEN && !IsInWorgenForm(true) && HasWorgenForm())
+    {
+        CastSpell(this, 97709, true);   // cast Altered Form
     }
 
     if (creatureNotInCombat)

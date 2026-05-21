@@ -166,8 +166,16 @@ namespace VMAP
     WmoLiquid::WmoLiquid(uint32 width, uint32 height, const Vector3& corner, uint32 type) :
         iTilesX(width), iTilesY(height), iCorner(corner), iType(type)
     {
-        iHeight = new float[(width + 1) * (height + 1)];
-        iFlags = new uint8[width * height];
+        if (width && height)
+        {
+            iHeight = new float[(width + 1) * (height + 1)];
+            iFlags = new uint8[width * height];
+        }
+        else
+        {
+            iHeight = new float[1];
+            iFlags = nullptr;
+        }
     }
 
     /**
@@ -336,7 +344,7 @@ namespace VMAP
             result = false;
         }
         size = iTilesX * iTilesY;
-        if (result && fwrite(iFlags, sizeof(uint8), size, wf) != size)
+        if (result && size && fwrite(iFlags, sizeof(uint8), size, wf) != size)
         {
             result = false;
         }

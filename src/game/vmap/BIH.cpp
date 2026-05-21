@@ -379,7 +379,7 @@ bool BIH::ReadFromFile(FILE* rf)
     check += fread(&objects[0], sizeof(uint32), count, rf);
 
     // Return true if all reads were successful
-    return check == (3 + 3 + 2 + treeSize + count);
+    return uint64(check) == uint64(3 + 3 + 1 + 1 + uint64(treeSize) + uint64(count));
 }
 
 /**

@@ -45,6 +45,7 @@
 #include "VMapManager2.h"
 #include "VMapDefinitions.h"
 
+#include <cmath>
 #include <string>
 #include <sstream>
 #include <iomanip>
@@ -250,8 +251,7 @@ namespace VMAP
     {
         float maxDist = (pos2 - pos1).magnitude();
         // Return false if distance is over max float, in case of cheater teleporting to the end of the universe
-        if (maxDist == std::numeric_limits<float>::max() ||
-            maxDist == std::numeric_limits<float>::infinity())
+        if (maxDist == std::numeric_limits<float>::max() || !std::isfinite(maxDist))
         {
             return false;
         }

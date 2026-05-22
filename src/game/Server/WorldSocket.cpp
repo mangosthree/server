@@ -157,7 +157,9 @@ WorldSocket::WorldSocket(void) :
     m_OutBuffer(0),
     m_OutBufferSize(65536),
     m_OutActive(false),
-    m_Seed(rand32())
+    m_Seed(rand32()),
+    m_PacketCounter(0),
+    m_PacketWindowStart(ACE_Time_Value::zero)
 {
     reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 
@@ -204,6 +206,17 @@ void WorldSocket::CloseSocket(void)
     if (closing_)
     {
         return;
+    }
+
+    // Flush any pending output (e.g. AUTH_OK) before half-closing
+    if (m_OutBuffer && m_OutBuffer->length() > 0)
+    {
+#ifdef MSG_NOSIGNAL
+        peer().send(m_OutBuffer->rd_ptr(), m_OutBuffer->length(), MSG_NOSIGNAL);
+#else
+        peer().send(m_OutBuffer->rd_ptr(), m_OutBuffer->length());
+#endif
+        m_OutBuffer->reset();
     }
 
     closing_ = true;
@@ -591,6 +604,17 @@ int WorldSocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask)
     {
         ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
 
+        // Flush any pending output (e.g. error response) before closing
+        if (!closing_ && m_OutBuffer && m_OutBuffer->length() > 0)
+        {
+#ifdef MSG_NOSIGNAL
+            peer().send(m_OutBuffer->rd_ptr(), m_OutBuffer->length(), MSG_NOSIGNAL);
+#else
+            peer().send(m_OutBuffer->rd_ptr(), m_OutBuffer->length());
+#endif
+            m_OutBuffer->reset();
+        }
+
         closing_ = true;
 
         if (h == ACE_INVALID_HANDLE)
@@ -856,6 +880,31 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     // manage memory ;)
     ACE_Auto_Ptr<WorldPacket> aptr(new_pct);
 
+    // Packet flood protection: limit packets per second per connection
+    ACE_Time_Value now = ACE_OS::gettimeofday();
+    if (m_PacketWindowStart == ACE_Time_Value::zero)
+    {
+        m_PacketWindowStart = now;
+    }
+
+    ACE_Time_Value elapsed(now);
+    elapsed -= m_PacketWindowStart;
+
+    if (elapsed.sec() >= PACKET_RATE_WINDOW_SEC)
+    {
+        // Reset window
+        m_PacketCounter = 0;
+        m_PacketWindowStart = now;
+    }
+
+    ++m_PacketCounter;
+    if (m_PacketCounter > PACKET_RATE_LIMIT)
+    {
+        sLog.outError("WorldSocket::ProcessIncoming: client %s exceeded packet rate limit (%u packets/sec), disconnecting.",
+                      GetRemoteAddress().c_str(), m_PacketCounter);
+        return -1;
+    }
+
     const ACE_UINT16 opcode = new_pct->GetOpcode();
 
     if (opcode >= NUM_MSG_TYPES)
@@ -1009,9 +1058,18 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     recvPacket >> m_addonSize;                            // addon data size
 
+    if (m_addonSize > 0xFFFFF)                            // cap at ~1MB to prevent memory exhaustion
+    {
+        sLog.outError("WorldSocket::HandleAuthSession: client sent oversized addon data (%u bytes), disconnecting.", m_addonSize);
+        return -1;
+    }
+
     ByteBuffer addonsData;
-    addonsData.resize(m_addonSize);
-    recvPacket.read((uint8*)addonsData.contents(), m_addonSize);
+    if (m_addonSize)
+    {
+        addonsData.resize(m_addonSize);
+        recvPacket.read((uint8*)addonsData.contents(), m_addonSize);
+    }
 
     uint8 nameLenLow, nameLenHigh;
     recvPacket >> nameLenHigh;
@@ -1136,11 +1194,14 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     delete result;
 
     // Re-check account ban (same check as in realmd)
+    std::string safe_ip = GetRemoteAddress();
+    LoginDatabase.escape_string(safe_ip);
+
     QueryResult* banresult =
         LoginDatabase.PQuery("SELECT 1 FROM `account_banned` WHERE `id` = %u AND `active` = 1 AND (`unbandate` > UNIX_TIMESTAMP() OR `unbandate` = `bandate`)"
                              "UNION "
                              "SELECT 1 FROM `ip_banned` WHERE (`unbandate` = `bandate` OR `unbandate` > UNIX_TIMESTAMP()) AND `ip` = '%s'",
-                             id, GetRemoteAddress().c_str());
+                             id, safe_ip.c_str());
 
     if (banresult) // if account banned
     {
@@ -1197,6 +1258,9 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     sha.UpdateBigNumbers(&K, NULL);
     sha.Finalize();
 
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping SHA1 digest verification for account '%s'", account.c_str());
+#else
     if (memcmp(sha.GetDigest(), digest, 20))
     {
         packet.Initialize (SMSG_AUTH_RESPONSE, 2);
@@ -1209,6 +1273,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         sLog.outError("WorldSocket::HandleAuthSession: Sent Auth Response (authentification failed).");
         return -1;
     }
+#endif
 
     std::string address = GetRemoteAddress();
 
@@ -1226,10 +1291,18 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // NOTE ATM the socket is single-threaded, have this in mind ...
     ACE_NEW_RETURN(m_Session, WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale), -1);
 
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping cipher init - session stays plaintext for mock client");
+#else
     m_Crypt.Init(&K);
+#endif
 
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping account data and tutorials loading");
+#else
     m_Session->LoadGlobalAccountData();
     m_Session->LoadTutorialsData();
+#endif
     m_Session->ReadAddonsInfo(addonsData);
 
     // In case needed sometime the second arg is in microseconds 1 000 000 = 1 sec

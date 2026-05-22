@@ -276,7 +276,9 @@ bool World::RemoveSession(uint32 id)
 
     if (itr != m_sessions.end() && itr->second)
     {
-        if (itr->second->PlayerLoading())
+        // Block re-login only if the session is loading AND its socket is still open.
+        // If the socket is already closed (client disconnected mid-load), allow replacement.
+        if (itr->second->PlayerLoading() && !itr->second->IsSocketClosed())
         {
             return false;
         }
@@ -1132,6 +1134,9 @@ void World::SetInitialWorldSettings()
     }
 
     ///- Check the existence of the map files for all races start areas.
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping map/vmap file validation");
+#else
     if (!MapManager::ExistMapAndVMap(0, -6240.32f, 331.033f) ||                     // Dwarf/ Gnome
         !MapManager::ExistMapAndVMap(0, -8949.95f, -132.493f) ||                // Human
         !MapManager::ExistMapAndVMap(1, -618.518f, -4251.67f) ||                // Orc
@@ -1148,16 +1153,24 @@ void World::SetInitialWorldSettings()
         Log::WaitBeforeContinueIfNeed();
         exit(1);
     }
+#endif
 
     ///- Loading strings. Getting no records means core load has to be canceled because no error message can be output.
     sLog.outString();
     sLog.outString("Loading MaNGOS strings...");
     if (!sObjectMgr.LoadMangosStrings())
     {
+#ifdef MANGOS_TEST_MODE
+        sLog.outString("TEST MODE: Continuing without MaNGOS strings");
+#else
         Log::WaitBeforeContinueIfNeed();
         exit(1);                                            // Error message displayed in function already
+#endif
     }
 
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping realm update and corpse cleanup queries");
+#else
     ///- Update the realm entry in the database with the realm type from the config file
     // No SQL injection as values are treated as integers
 
@@ -1168,14 +1181,25 @@ void World::SetInitialWorldSettings()
 
     ///- Remove the bones (they should not exist in DB though) and old corpses after a restart
     CharacterDatabase.PExecute("DELETE FROM `corpse` WHERE `corpse_type` = '0' OR `time` < (UNIX_TIMESTAMP()-'%u')", 3 * DAY);
+#endif
 
     ///- Load the DBC files
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping DBC/DB2 data store loading");
+    m_defaultDbcLocale = LOCALE_enUS;
+    sObjectMgr.SetDBCLocaleIndex(GetDefaultDbcLocale());
+#else
     sLog.outString("Initialize DBC data stores...");
     LoadDBCStores(m_dataPath);
     DetectDBCLang();
     sObjectMgr.SetDBCLocaleIndex(GetDefaultDbcLocale());    // Get once for all the locale index of DBC language (console/broadcasts)
     LoadDB2Stores(m_dataPath);
+#endif
 
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping all game data loading (SpellTemplate, Scripts, Creatures, Items, Quests, etc.)");
+    sLog.outString("TEST MODE: Server will start with empty game world");
+#else
     sLog.outString("Loading SpellTemplate...");
     sObjectMgr.LoadSpellTemplate();
 
@@ -1597,6 +1621,7 @@ void World::SetInitialWorldSettings()
     sLog.outError("SD3 was not included in compilation, not using it.");
 #endif /* ENABLE_SD3 */
     sLog.outString();
+#endif /* !MANGOS_TEST_MODE - end of skipped data loading section */
 
     ///- Initialize game time and timers
     sLog.outString("Initialize game time and timers");
@@ -1611,8 +1636,10 @@ void World::SetInitialWorldSettings()
     sprintf(isoDate, "%04d-%02d-%02d %02d:%02d:%02d",
             local.tm_year + 1900, local.tm_mon + 1, local.tm_mday, local.tm_hour, local.tm_min, local.tm_sec);
 
+#ifndef MANGOS_TEST_MODE
     LoginDatabase.PExecute("INSERT INTO `uptime` (`realmid`, `starttime`, `startstring`, `uptime`) VALUES('%u', " UI64FMTD ", '%s', 0)",
                            realmID, uint64(m_startTime), isoDate);
+#endif
 
     m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE * IN_MILLISECONDS);
     m_timers[WUPDATE_UPTIME].SetInterval(getConfig(CONFIG_UINT32_UPTIME_UPDATE) * MINUTE * IN_MILLISECONDS);
@@ -1651,6 +1678,10 @@ void World::SetInitialWorldSettings()
     mail_timer_expires = uint32((DAY * IN_MILLISECONDS) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
     DEBUG_LOG("Mail timer set to: %u, mail return is called every %u minutes", mail_timer, mail_timer_expires);
 
+#ifdef MANGOS_TEST_MODE
+    sLog.outString("TEST MODE: Skipping Map/BattleGround/GameEvent initialization");
+    sLog.outString("TEST MODE: Server is ready - listening for connections on port %u", getConfig(CONFIG_UINT32_PORT_WORLD));
+#else
     ///- Initialize static helper structures
     AIRegistry::Initialize();
     Player::InitVisibleBits();
@@ -1710,6 +1741,7 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading grids for active creatures or transports...");
     sObjectMgr.LoadActiveEntities(NULL);
     sLog.outString();
+#endif
 
     // Delete all characters which have been deleted X days before
     Player::DeleteOldCharacters();
@@ -1942,11 +1974,13 @@ void World::Update(uint32 diff)
     ///-Update mass mailer tasks if any
     sMassMailMgr.Update();
 
+#ifndef MANGOS_TEST_MODE
     /// Handle daily quests and dungeon reset time
     if (m_gameTime > m_NextDailyQuestReset)
     {
         ResetDailyQuests();
     }
+#endif
 
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
@@ -1982,9 +2016,12 @@ void World::Update(uint32 diff)
         uint32 maxClientsNum = GetMaxActiveSessionCount();
 
         m_timers[WUPDATE_UPTIME].Reset();
+#ifndef MANGOS_TEST_MODE
         LoginDatabase.PExecute("UPDATE `uptime` SET `uptime` = %u, `maxplayers` = %u WHERE `realmid` = %u AND `starttime` = " UI64FMTD, tmpDiff, maxClientsNum, realmID, uint64(m_startTime));
+#endif
     }
 
+#ifndef MANGOS_TEST_MODE
     /// <li> Handle all other objects
     ///- Update objects (maps, transport, creatures,...)
     sMapMgr.Update(diff);
@@ -2033,12 +2070,15 @@ void World::Update(uint32 diff)
 
     // update the instance reset times
     sMapPersistentStateMgr.Update();
+#endif /* !MANGOS_TEST_MODE */
 
     // And last, but not least handle the issued cli commands
     ProcessCliCommands();
 
+#ifndef MANGOS_TEST_MODE
     // cleanup unused GridMap objects as well as VMaps
     sTerrainMgr.Update(diff);
+#endif
 }
 
 namespace MaNGOS

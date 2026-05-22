@@ -166,7 +166,7 @@ class CharacterHandler
             }
 
             WorldSession* session = sWorld.FindSession(((LoginQueryHolder*)holder)->GetAccountId());
-            if (!session)
+            if (!session || !session->PlayerLoading())
             {
                 delete holder;
                 return;
@@ -724,8 +724,16 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
 
     ObjectGuid playerGuid;
 
-    recv_data.ReadGuidMask<2, 3, 0, 6, 4, 5, 1, 7>(playerGuid);
-    recv_data.ReadGuidBytes<2, 7, 0, 3, 5, 6, 1, 4>(playerGuid);
+    try
+    {
+        recv_data.ReadGuidMask<2, 3, 0, 6, 4, 5, 1, 7>(playerGuid);
+        recv_data.ReadGuidBytes<2, 7, 0, 3, 5, 6, 1, 4>(playerGuid);
+    }
+    catch (ByteBufferException&)
+    {
+        m_playerLoading = false;
+        throw;
+    }
 
     DEBUG_LOG("WORLD: Received opcode Player Logon Message from %s", playerGuid.GetString().c_str());
 
@@ -1320,8 +1328,11 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(QueryResult* result, uin
 
     delete result;
 
+    std::string escaped_newname = newname;
+    CharacterDatabase.escape_string(escaped_newname);
+
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("UPDATE `characters` SET `name` = '%s', `at_login` = `at_login` & ~ %u WHERE `guid` ='%u'", newname.c_str(), uint32(AT_LOGIN_RENAME), guidLow);
+    CharacterDatabase.PExecute("UPDATE `characters` SET `name` = '%s', `at_login` = `at_login` & ~ %u WHERE `guid` ='%u'", escaped_newname.c_str(), uint32(AT_LOGIN_RENAME), guidLow);
     CharacterDatabase.PExecute("DELETE FROM `character_declinedname` WHERE `guid` ='%u'", guidLow);
     CharacterDatabase.CommitTransaction();
 

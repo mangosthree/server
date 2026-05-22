@@ -333,6 +333,8 @@ class WorldSession
             return m_playerLoading;
         }
 
+        bool IsSocketClosed() const;
+
         /**
          * @brief Check if player is logging out
          * @return True if logging out
@@ -350,7 +352,6 @@ class WorldSession
         {
             return m_playerLogout && m_playerSave;
         }
-
 
         void SizeError(WorldPacket const& packet, uint32 size) const;
 

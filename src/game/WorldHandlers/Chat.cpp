@@ -1178,9 +1178,10 @@ void ChatHandler::PSendSysMessage(int32 entry, ...)
 {
     const char* format = GetMangosString(entry);
     va_list ap;
-    char str [2048];
+    char str [4096];
     va_start(ap, entry);
-    vsnprintf(str, 2048, format, ap);
+    vsnprintf(str, sizeof(str), format, ap);
+    str[sizeof(str) - 1] = '\0';
     va_end(ap);
     SendSysMessage(str);
 }
@@ -1196,9 +1197,10 @@ void  ChatHandler::PSendSysMessageMultiline(int32 entry, ...)
 
     const char* format = GetMangosString(entry);
     va_list ap;
-    char str[2048];
+    char str[4096];
     va_start(ap, entry);
-    vsnprintf(str, 2048, format, ap);
+    vsnprintf(str, sizeof(str), format, ap);
+    str[sizeof(str) - 1] = '\0';
     va_end(ap);
 
     std::string mangosString(str);
@@ -1237,9 +1239,10 @@ void  ChatHandler::PSendSysMessageMultiline(int32 entry, ...)
 void ChatHandler::PSendSysMessage(const char* format, ...)
 {
     va_list ap;
-    char str [2048];
+    char str [4096];
     va_start(ap, format);
-    vsnprintf(str, 2048, format, ap);
+    vsnprintf(str, sizeof(str), format, ap);
+    str[sizeof(str) - 1] = '\0';
     va_end(ap);
     SendSysMessage(str);
 }

@@ -1269,7 +1269,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             if (shareTarget != pVictim && ((*itr)->GetMiscValue() & damageSchoolMask))
             {
                 SpellEntry const* shareSpell = (*itr)->GetSpellProto();
-                uint32 shareDamage = uint32(damage*(*itr)->GetModifier()->m_amount / 100.0f);
+                uint32 shareDamage = SafeUInt32FromFloat(damage*(*itr)->GetModifier()->m_amount / 100.0f);
                 DealDamageMods(shareTarget, shareDamage, NULL);
                 DealDamage(shareTarget, shareDamage, NULL, damagetype, GetSpellSchoolMask(shareSpell), shareSpell, false);
             }
@@ -3428,7 +3428,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                 continue;
             }
 
-            uint32 splitted = uint32(RemainingDamage * (*i)->GetModifier()->m_amount / 100.0f);
+            uint32 splitted = SafeUInt32FromFloat(RemainingDamage * (*i)->GetModifier()->m_amount / 100.0f);
 
             RemainingDamage -=  int32(splitted);
 
@@ -3505,7 +3505,7 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
 
     if (blocked)
     {
-        damageInfo->blocked = uint32(damageInfo->damage * GetShieldBlockDamageValue() / 100.0f);
+        damageInfo->blocked = SafeUInt32FromFloat(damageInfo->damage * GetShieldBlockDamageValue() / 100.0f);
         if (damageInfo->damage < damageInfo->blocked)
         {
             damageInfo->blocked = damageInfo->damage;
@@ -13463,7 +13463,7 @@ void Unit::SetMaxHealth(uint32 val)
  */
 void Unit::SetHealthPercent(float percent)
 {
-    uint32 newHealth = GetMaxHealth() * percent / 100.0f;
+    uint32 newHealth = SafeUInt32FromFloat(GetMaxHealth() * percent / 100.0f);
     SetHealth(newHealth);
 }
 
@@ -15650,7 +15650,7 @@ uint32 Unit::GetCombatRatingDamageReduction(CombatRating cr, float rate, float c
     {
         percent = cap;
     }
-    return uint32(percent * damage / 100.0f);
+    return SafeUInt32FromFloat(percent * damage / 100.0f);
 }
 
 void Unit::SendThreatUpdate()

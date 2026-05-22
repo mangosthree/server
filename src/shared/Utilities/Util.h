@@ -34,6 +34,23 @@
 #include <algorithm>
 #include <cctype>
 #include <functional>
+#include <limits>
+
+// Safely convert a float/double to uint32, clamping to [0, UINT32_MAX]
+// to avoid undefined behavior when the float exceeds the uint32 range.
+inline uint32 SafeUInt32FromFloat(float val)
+{
+    if (val < 0.0f) return 0;
+    if (val >= 4294967296.0f) return std::numeric_limits<uint32>::max();
+    return static_cast<uint32>(val);
+}
+
+inline uint32 SafeUInt32FromDouble(double val)
+{
+    if (val < 0.0) return 0;
+    if (val >= 4294967296.0) return std::numeric_limits<uint32>::max();
+    return static_cast<uint32>(val);
+}
 
 enum class TimeFormat : uint8
 {

@@ -7328,7 +7328,7 @@ void Aura::HandleModTotalPercentStat(bool apply, bool /*Real*/)
     // recalculate current HP/MP after applying aura modifications (only for spells with 0x10 flag)
     if ((miscValueB & (1 << STAT_STAMINA)) && maxHPValue > 0 && GetSpellProto()->HasAttribute(SPELL_ATTR_ABILITY))
     {
-        uint32 newHPValue = uint32(float(target->GetMaxHealth()) / maxHPValue * curHPValue);
+        uint32 newHPValue = SafeUInt32FromFloat(float(target->GetMaxHealth()) / maxHPValue * curHPValue);
         target->SetHealth(newHPValue);
     }
 }
@@ -9102,7 +9102,7 @@ void Aura::PeriodicTick()
             }
             else
             {
-                pdamage = uint32(target->GetMaxHealth() * amount / 100);
+                pdamage = SafeUInt32FromFloat(float(target->GetMaxHealth()) * amount / 100);
             }
 
             // SpellDamageBonus for magic spells
@@ -9353,7 +9353,7 @@ void Aura::PeriodicTick()
 
                 if (m_modifier.m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
                 {
-                    pdamage = uint32(target->GetMaxHealth() * amount / 100);
+                    pdamage = SafeUInt32FromFloat(float(target->GetMaxHealth()) * amount / 100);
                 }
                 else
                 {
@@ -9618,7 +9618,7 @@ void Aura::PeriodicTick()
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
-            uint32 pdamage = uint32(target->GetMaxPower(POWER_MANA) * amount / 100);
+            uint32 pdamage = SafeUInt32FromFloat(float(target->GetMaxPower(POWER_MANA)) * amount / 100);
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s energize %s for %u mana inflicted by %u",
                               GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
@@ -10529,7 +10529,7 @@ void Aura::PeriodicDummyTick()
             if (spell->IsFitToFamilyMask(UI64LIT(0x0000000020000000)))
             {
                 // damage not expected to be show in logs, not any damage spell related to damage apply
-                uint32 deal = m_modifier.m_amount * target->GetMaxHealth() / 100;
+                uint32 deal = SafeUInt32FromFloat(float(m_modifier.m_amount) * target->GetMaxHealth() / 100);
                 target->DealDamage(target, deal, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                 return;
             }

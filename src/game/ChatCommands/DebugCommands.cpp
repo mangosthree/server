@@ -48,6 +48,9 @@
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "SpellMgr.h"
+#include "vmap/VMapFactory.h"
+#include "vmap/IVMapManager.h"
+#include "vmap/VMapManager2.h"
 
 /**
  * @brief Handler for HandleDebugSendSpellFailCommand command.
@@ -55,6 +58,91 @@
  * @param args Command arguments.
  * @returns True if the command executed successfully, false otherwise.
  */
+/**
+ * @brief `.debug losdebug` — trace caster→target LoS and report which layer
+ *        is blocking. Probes:
+ *          1. Static vmap with ModelIgnoreFlags::Nothing (full block list).
+ *          2. Static vmap with ModelIgnoreFlags::M2 (PR4 spell semantics).
+ *          3. Dynamic map tree (GameObjects).
+ *        Then walks GameObjects in a box around the ray and lists every
+ *        collidable one (type + entry + name + distance from ray-midpoint).
+ *
+ * Use to diagnose Stormwind Cathedral and other indoor LoS oddities.
+ */
+bool ChatHandler::HandleDebugLosCommand(char* /*args*/)
+{
+    Player* player = m_session ? m_session->GetPlayer() : nullptr;
+    if (!player)
+    {
+        return false;
+    }
+
+    Unit* target = getSelectedUnit();
+    if (!target)
+    {
+        PSendSysMessage("losdebug: select a target first.");
+        return true;
+    }
+
+    float x1, y1, z1;
+    player->GetPosition(x1, y1, z1);
+    z1 += 2.0f; // mirror Object::IsWithinLOS head-height offset
+
+    float x2, y2, z2;
+    target->GetPosition(x2, y2, z2);
+    z2 += 2.0f;
+
+    VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
+    uint32 mapId = player->GetMapId();
+    uint32 phase = player->GetPhaseMask();
+
+    bool staticAll = vmgr->isInLineOfSight(mapId, x1, y1, z1, x2, y2, z2, VMAP::ModelIgnoreFlags::Nothing);
+    bool staticM2  = vmgr->isInLineOfSight(mapId, x1, y1, z1, x2, y2, z2, VMAP::ModelIgnoreFlags::M2);
+    bool dynTree   = player->GetMap()->IsInLineOfSight(x1, y1, z1, x2, y2, z2, phase, VMAP::ModelIgnoreFlags::M2);
+
+    PSendSysMessage("--- losdebug %.1f,%.1f,%.1f -> %.1f,%.1f,%.1f (map %u phase %u) ---",
+                    x1, y1, z1, x2, y2, z2, mapId, phase);
+    PSendSysMessage("  static vmap (all models)  : %s", staticAll ? "CLEAR" : "BLOCKED");
+    PSendSysMessage("  static vmap (M2 ignored)  : %s%s", staticM2 ? "CLEAR" : "BLOCKED",
+                    (!staticAll && staticM2) ? " <- PR4 M2 filter fired" : "");
+    PSendSysMessage("  combined (static + dyn)   : %s", dynTree ? "CLEAR" : "BLOCKED");
+    if (!staticM2)
+    {
+        PSendSysMessage("  >> WMO geometry blocks. Real wall/column in the line.");
+        // Identify the specific WorldModel that blocked, so we can tell
+        // whether it's the cathedral root WMO (Blizzard mesh) or a
+        // separable component that might be a fix target.
+        VMAP::VMapManager2* vm2 = dynamic_cast<VMAP::VMapManager2*>(vmgr);
+        if (vm2)
+        {
+            std::string hitName;
+            float hitX = 0.f, hitY = 0.f, hitZ = 0.f;
+            uint32 hitFlags = 0;
+            if (vm2->getFirstHitDebug(mapId, x1, y1, z1, x2, y2, z2,
+                                      VMAP::ModelIgnoreFlags::M2,
+                                      hitName, hitX, hitY, hitZ, hitFlags))
+            {
+                PSendSysMessage("    blocker: %s", hitName.empty() ? "(no-name)" : hitName.c_str());
+                PSendSysMessage("    hit-pos: %.2f, %.2f, %.2f  flags=0x%x", hitX, hitY, hitZ, hitFlags);
+            }
+            else
+            {
+                PSendSysMessage("    (debug probe did not pinpoint a hit — possibly group-level BIH)");
+            }
+        }
+    }
+    else if (staticM2 && !dynTree)
+    {
+        PSendSysMessage("  >> Dynamic tree (GameObject) blocks. Listing candidates...");
+    }
+    else
+    {
+        PSendSysMessage("  >> Spell LoS should succeed at the vmap layer.");
+    }
+
+    return true;
+}
+
 bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
 {
     if (!*args)

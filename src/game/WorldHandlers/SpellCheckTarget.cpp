@@ -241,7 +241,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
             // fall through
         case SPELL_EFFECT_RESURRECT_NEW:
             // player far away, maybe his corpse near?
-            if (target != m_caster && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !target->IsWithinLOSInMap(m_caster))
+            if (target != m_caster && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !target->IsWithinLOSInMap(m_caster, VMAP::ModelIgnoreFlags::M2))
             {
                 if (!m_targets.getCorpseTargetGuid())
                 {
@@ -259,7 +259,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
                     return false;
                 }
 
-                if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !corpse->IsWithinLOSInMap(m_caster))
+                if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !corpse->IsWithinLOSInMap(m_caster, VMAP::ModelIgnoreFlags::M2))
                 {
                     return false;
                 }
@@ -273,7 +273,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
             {
                 if (WorldObject* caster = GetCastingObject())
                 {
-                    if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !target->IsWithinLOSInMap(caster))
+                    if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !target->IsWithinLOSInMap(caster, VMAP::ModelIgnoreFlags::M2))
                     {
                         return false;
                     }

@@ -193,7 +193,15 @@ namespace VMAP
          * @param z2 The z-coordinate of the second point.
          * @return bool True if there is a line of sight, false otherwise.
          */
-        bool isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2) override;
+        bool isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags = ModelIgnoreFlags::Nothing) override;
+        /**
+         * @brief Debug helper: identify the first occluding model along a
+         *        ray. Wraps StaticMapTree::getFirstHitInstanceDebug for the
+         *        `.debug losdebug` chat command.
+         */
+        bool getFirstHitDebug(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2,
+                              ModelIgnoreFlags ignoreFlags, std::string& outName, float& outHitX, float& outHitY,
+                              float& outHitZ, uint32& outFlags);
         /**
          * @brief Gets the hit position of an object in the line of sight.
          *

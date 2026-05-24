@@ -242,7 +242,9 @@ bool GameObjectModel::IntersectRay(const G3D::Ray& ray, float& MaxDist, bool Sto
     Vector3 p = iInvRot * (ray.origin() - iPos) * iInvScale;
     Ray modRay(p, iInvRot * ray.direction());
     float distance = MaxDist * iInvScale;
-    bool hit = iModel->IntersectRay(modRay, distance, StopAtFirstHit);
+    // GameObject collision is WMO-style, not M2 doodads — pass Nothing
+    // so the WorldModel ignore-flag filter is a no-op here.
+    bool hit = iModel->IntersectRay(modRay, distance, StopAtFirstHit, VMAP::ModelIgnoreFlags::Nothing);
     if (hit)
     {
         distance *= iScale;

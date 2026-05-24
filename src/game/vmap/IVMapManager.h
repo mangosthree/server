@@ -28,6 +28,8 @@
 #include<string>
 #include <Platform/Define.h>
 
+#include "ModelIgnoreFlags.h"
+
 //===========================================================
 
 /**
@@ -119,7 +121,7 @@ namespace VMAP
              * @param z2
              * @return bool
              */
-            virtual bool isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2) = 0;
+            virtual bool isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags = ModelIgnoreFlags::Nothing) = 0;
             /**
              * @brief
              *

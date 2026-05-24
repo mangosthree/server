@@ -60,10 +60,50 @@ namespace VMAP
     /**
      * @brief Callback class for ray intersection with models.
      */
+    /**
+     * @brief Debug-only callback that records the first ModelInstance that
+     *        blocked the ray. Used by ChatHandler::HandleDebugLosCommand to
+     *        report which specific vmap model is occluding a spell.
+     */
+    class MapRayDebugCallback
+    {
+    public:
+        MapRayDebugCallback(ModelInstance* val, ModelIgnoreFlags ignoreFlags)
+            : prims(val), hit(false), flags(ignoreFlags), hitInstance(nullptr), hitDistance(0.f) {}
+
+        bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool pStopAtFirstHit = true)
+        {
+            float before = distance;
+            bool result = prims[entry].IntersectRay(ray, distance, pStopAtFirstHit, flags);
+            if (result)
+            {
+                if (!hit || distance < hitDistance)
+                {
+                    hitInstance = &prims[entry];
+                    hitDistance = distance;
+                }
+                hit = true;
+                (void)before;
+            }
+            return result;
+        }
+
+        bool didHit() const { return hit; }
+        const ModelInstance* getHit() const { return hitInstance; }
+        float getHitDistance() const { return hitDistance; }
+
+    private:
+        ModelInstance* prims;
+        bool hit;
+        ModelIgnoreFlags flags;
+        const ModelInstance* hitInstance;
+        float hitDistance;
+    };
+
     class MapRayCallback
     {
     public:
-        MapRayCallback(ModelInstance* val) : prims(val), hit(false) {}
+        MapRayCallback(ModelInstance* val, ModelIgnoreFlags ignoreFlags) : prims(val), hit(false), flags(ignoreFlags) {}
 
         /**
          * @brief Operator to handle ray intersection.
@@ -76,7 +116,7 @@ namespace VMAP
          */
         bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool pStopAtFirstHit = true)
         {
-            bool result = prims[entry].IntersectRay(ray, distance, pStopAtFirstHit);
+            bool result = prims[entry].IntersectRay(ray, distance, pStopAtFirstHit, flags);
             if (result)
             {
                 hit = true;
@@ -94,6 +134,7 @@ namespace VMAP
     protected:
         ModelInstance* prims; /**< Pointer to model instances. */
         bool hit; /**< Flag indicating if an intersection occurred. */
+        ModelIgnoreFlags flags; /**< Caller-supplied filter (e.g. ignore MOD_M2 for spell LoS). */
     };
 
     /**
@@ -232,10 +273,10 @@ namespace VMAP
      * @param pStopAtFirstHit Whether to stop at the first hit.
      * @return true if an intersection is found, false otherwise.
      */
-    bool StaticMapTree::getIntersectionTime(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit) const
+    bool StaticMapTree::getIntersectionTime(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags) const
     {
         float distance = pMaxDist;
-        MapRayCallback intersectionCallBack(iTreeValues);
+        MapRayCallback intersectionCallBack(iTreeValues, ignoreFlags);
         iTree.IntersectRay(pRay, intersectionCallBack, distance, pStopAtFirstHit);
         if (intersectionCallBack.didHit())
         {
@@ -251,7 +292,7 @@ namespace VMAP
      * @param pos2 The ending position.
      * @return true if there is a line of sight, false otherwise.
      */
-    bool StaticMapTree::isInLineOfSight(const Vector3& pos1, const Vector3& pos2) const
+    bool StaticMapTree::isInLineOfSight(const Vector3& pos1, const Vector3& pos2, ModelIgnoreFlags ignoreFlags) const
     {
         float maxDist = (pos2 - pos1).magnitude();
         // Return false if distance is over max float, in case of cheater teleporting to the end of the universe
@@ -270,7 +311,7 @@ namespace VMAP
 
         // Direction with length of 1
         G3D::Ray ray = G3D::Ray::fromOriginAndDirection(pos1, (pos2 - pos1) / maxDist);
-        if (getIntersectionTime(ray, maxDist, true))
+        if (getIntersectionTime(ray, maxDist, true, ignoreFlags))
         {
             return false;
         }
@@ -303,7 +344,7 @@ namespace VMAP
         Vector3 dir = (pPos2 - pPos1) / maxDist; // Direction with length of 1
         G3D::Ray ray(pPos1, dir);
         float dist = maxDist;
-        if (getIntersectionTime(ray, dist, false))
+        if (getIntersectionTime(ray, dist, false, ModelIgnoreFlags::Nothing))
         {
             pResultHitPos = pPos1 + dir * dist;
             if (pModifyDist < 0)
@@ -344,11 +385,41 @@ namespace VMAP
         Vector3 dir = Vector3(0, 0, -1);
         G3D::Ray ray(pPos, dir); // Direction with length of 1
         float maxDist = maxSearchDist;
-        if (getIntersectionTime(ray, maxDist, false))
+        if (getIntersectionTime(ray, maxDist, false, ModelIgnoreFlags::Nothing))
         {
             height = pPos.z - maxDist;
         }
         return height;
+    }
+
+    /**
+     * @brief Debug-only: return details of the first ModelInstance that
+     *        blocks the ray from pos1 to pos2 under the given ignoreFlags.
+     *        Used by ChatHandler::HandleDebugLosCommand to identify the
+     *        specific WorldModel file behind a "WMO blocked" verdict.
+     */
+    bool StaticMapTree::getFirstHitInstanceDebug(const Vector3& pos1, const Vector3& pos2, ModelIgnoreFlags ignoreFlags,
+                                                 std::string& outName, Vector3& outHitPos, uint32& outFlags,
+                                                 G3D::AABox& outBound) const
+    {
+        float maxDist = (pos2 - pos1).magnitude();
+        if (maxDist < 1e-10f || !std::isfinite(maxDist))
+        {
+            return false;
+        }
+        G3D::Ray ray = G3D::Ray::fromOriginAndDirection(pos1, (pos2 - pos1) / maxDist);
+        MapRayDebugCallback dbg(iTreeValues, ignoreFlags);
+        iTree.IntersectRay(ray, dbg, maxDist, true);
+        if (!dbg.didHit() || !dbg.getHit())
+        {
+            return false;
+        }
+        const ModelInstance* mi = dbg.getHit();
+        outName = mi->name;
+        outFlags = mi->flags;
+        outBound = mi->iBound;
+        outHitPos = ray.origin() + ray.direction() * dbg.getHitDistance();
+        return true;
     }
 
     /**

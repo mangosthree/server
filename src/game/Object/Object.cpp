@@ -1904,15 +1904,75 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
  * Checks if this object has line of sight to the target object
  * within the same map.
  */
-bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
+namespace
+{
+    // Shift `origin` toward `dest` by min(distance, reach). Mirrors TC's
+    // GetHitSpherePointFor at tc-preservation/src/server/game/Entities/
+    // Object/Object.cpp:1376-1402. Used to start the LoS ray at the
+    // edge of a unit's collision sphere instead of its center so the
+    // ray doesn't immediately self-collide with WMO geometry sitting
+    // right next to the unit (e.g. cathedral columns whose AABB grazes
+    // the unit's footprint). Players have small collision capsules and
+    // are NOT shifted; only non-player units shift by combat reach.
+    void ShiftBySphereRadius(float reach, float destX, float destY, float destZ,
+                             float& x, float& y, float& z)
+    {
+        float dx = destX - x;
+        float dy = destY - y;
+        float dz = destZ - z;
+        float dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+        if (dist < 1e-4f)
+        {
+            return;
+        }
+        float shift = std::min(dist, reach);
+        x += (dx / dist) * shift;
+        y += (dy / dist) * shift;
+        z += (dz / dist) * shift;
+    }
+}
+
+bool WorldObject::IsWithinLOSInMap(const WorldObject* obj, VMAP::ModelIgnoreFlags ignoreFlags) const
 {
     if (!IsInMap(obj))
     {
         return false;
     }
+
+    // Source: this object's position at head height.
+    float x, y, z;
+    GetPosition(x, y, z);
+    z += 2.0f;
+
+    // Destination: obj's position at head height.
     float ox, oy, oz;
     obj->GetPosition(ox, oy, oz);
-    return(IsWithinLOS(ox, oy, oz));
+    oz += 2.0f;
+
+    // TC's GetHitSpherePointFor pattern: shift non-player endpoints
+    // toward the opposite side by combat reach. Avoids the ray catching
+    // collision geometry sitting at the unit's feet (the Stormwind
+    // Cathedral column-AABB-grazes-player case verified via
+    // .debug losdebug, 2026-05-23).
+    if (GetTypeId() != TYPEID_PLAYER)
+    {
+        if (Unit const* thisUnit = ToUnit())
+        {
+            ShiftBySphereRadius(thisUnit->GetFloatValue(UNIT_FIELD_COMBATREACH),
+                                ox, oy, oz, x, y, z);
+        }
+    }
+    if (obj->GetTypeId() != TYPEID_PLAYER)
+    {
+        if (Unit const* objUnit = obj->ToUnit())
+        {
+            float origX = x, origY = y, origZ = z; // shifted source — fine
+            ShiftBySphereRadius(objUnit->GetFloatValue(UNIT_FIELD_COMBATREACH),
+                                origX, origY, origZ, ox, oy, oz);
+        }
+    }
+
+    return GetMap()->IsInLineOfSight(x, y, z, ox, oy, oz, GetPhaseMask(), ignoreFlags);
 }
 
 /**
@@ -1920,15 +1980,28 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
  * @param ox Target X coordinate
  * @param oy Target Y coordinate
  * @param oz Target Z coordinate
+ * @param ignoreFlags Caller-supplied filter — e.g. VMAP::ModelIgnoreFlags::M2
+ *                    skips MOD_M2 doodads for spell LoS checks.
  * @return True if within line of sight
  *
  * Checks if this object has line of sight to the specified point.
  */
-bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
+bool WorldObject::IsWithinLOS(float ox, float oy, float oz, VMAP::ModelIgnoreFlags ignoreFlags) const
 {
     float x, y, z;
     GetPosition(x, y, z);
-    return GetMap()->IsInLineOfSight(x, y, z + 2.0f, ox, oy, oz + 2.0f, GetPhaseMask());
+    z += 2.0f;
+    // Shift non-player source toward the destination point by combat
+    // reach. See ShiftBySphereRadius docs above.
+    if (GetTypeId() != TYPEID_PLAYER)
+    {
+        if (Unit const* thisUnit = ToUnit())
+        {
+            ShiftBySphereRadius(thisUnit->GetFloatValue(UNIT_FIELD_COMBATREACH),
+                                ox, oy, oz + 2.0f, x, y, z);
+        }
+    }
+    return GetMap()->IsInLineOfSight(x, y, z, ox, oy, oz + 2.0f, GetPhaseMask(), ignoreFlags);
 }
 
 /**

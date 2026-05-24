@@ -136,6 +136,14 @@ bool WMORoot::open()
                 f.read(DoodadData.Spawns.data(), size);
             }
         }
+        else if (!strcmp(fourcc, "MOGN")) // packed group-name blob
+        {
+            GroupNames.resize(size);
+            if (size)
+            {
+                f.read(GroupNames.data(), size);
+            }
+        }
         f.seek((int)nextpos);
     }
     f.close();
@@ -161,6 +169,29 @@ WMORoot::~WMORoot()
 WMOGroup::WMOGroup(std::string& filename) : filename(filename),
     MOPY(0), MOVI(0), MoviEx(0), MOVT(0), MOBA(0), MobaEx(0), hlq(0), LiquEx(0), LiquBytes(0)
 {
+}
+
+bool WMOGroup::ShouldSkip(WMORoot const* root) const
+{
+    // Unreachable groups (MOGP 0x80) are level-streaming hints, not walkable areas.
+    if (mogpFlags & 0x80)
+    {
+        return true;
+    }
+    // Antiportal groups (MOGP 0x4000000) are invisible renderer occluders;
+    // they must not contribute collision/LoS mesh. Mirrors TC vmap4_extractor.
+    if (mogpFlags & 0x4000000)
+    {
+        return true;
+    }
+    // Some WMOs flag antiportals by group name instead of the MOGP bit.
+    if (root && groupName >= 0 &&
+        static_cast<std::size_t>(groupName) < root->GroupNames.size() &&
+        !strcmp(&root->GroupNames[groupName], "antiportal"))
+    {
+        return true;
+    }
+    return false;
 }
 
 bool WMOGroup::open()

@@ -827,16 +827,37 @@ bool WorldSession::CheckStableMaster(ObjectGuid guid)
 }
 
 /**
- * @brief Moves the current hunter pet into the stable.
+ * @brief Moves a hunter pet between Call Pet 1..N slots (Cata payload).
  *
  * @param recv_data The received opcode packet.
+ *
+ * Cata 4.3.4 reuses the CMSG_STABLE_PET opcode value but ships a
+ * completely different payload: a pet number, a destination slot
+ * index, and a bit-packed stable-master guid. The drag-and-drop
+ * stable UI sends one of these per move. The legacy WotLK semantics
+ * (`stable my current pet into the first free stable slot`) are
+ * gone -- there is no "stable" vs "active" distinction in 4.3.4
+ * since every slot is callable from anywhere.
+ *
+ * Payload layout (matches TC-Preservation 4.3.4
+ * `Handlers/NPCHandler.cpp::HandleSetPetSlot`):
+ *   uint32  petId
+ *   uint8   new_slot
+ *   bits    stable-master guid mask  (3,2,0,7,5,6,1,4)
+ *   bytes   stable-master guid bytes (5,3,1,7,4,0,6,2)
  */
 void WorldSession::HandleStablePet(WorldPacket& recv_data)
 {
-    DEBUG_LOG("WORLD: Recv CMSG_STABLE_PET");
-    ObjectGuid npcGUID;
+    DEBUG_LOG("WORLD: Recv CMSG_STABLE_PET (Cata payload)");
 
-    recv_data >> npcGUID;
+    uint32 petId;
+    uint8 new_slot;
+    ObjectGuid guid;
+
+    recv_data >> petId >> new_slot;
+
+    recv_data.ReadGuidMask<3, 2, 0, 7, 5, 6, 1, 4>(guid);
+    recv_data.ReadGuidBytes<5, 3, 1, 7, 4, 0, 6, 2>(guid);
 
     if (!GetPlayer()->IsAlive())
     {
@@ -844,56 +865,114 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
         return;
     }
 
-    if (!CheckStableMaster(npcGUID))
+    if (!CheckStableMaster(guid))
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;
     }
 
+    if (new_slot > uint8(PET_SLOT_LAST_ACTIVE_SLOT))
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
+
+    // Look up the source pet by petId. Verify it belongs to this
+    // player so a forged packet can't reassign another character's
+    // pet. Capture the creature entry and the current slot for the
+    // tameable-exotic check and the swap logic below.
+    QueryResult* result = CharacterDatabase.PQuery(
+        "SELECT `entry`, `slot` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'",
+        _player->GetGUIDLow(), petId);
+    if (!result)
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
+
+    Field* fields = result->Fetch();
+    uint32 creatureEntry = fields[0].GetUInt32();
+    int32 old_slot = int32(fields[1].GetUInt32());
+    delete result;
+
+    CreatureInfo const* creatureInfo = ObjectMgr::GetCreatureTemplate(creatureEntry);
+    if (!creatureInfo || !creatureInfo->isTameable(true))
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
+    if (!creatureInfo->isTameable(_player->CanTameExoticPets()))
+    {
+        SendStableResult(STABLE_ERR_EXOTIC);
+        return;
+    }
+
+    // Currently summoned pet must be alive AND must be a hunter pet
+    // before any move is attempted: dragging a dead pet around the
+    // panel is a client-side mistake the server has to reject.
     Pet* pet = _player->GetPet();
-
-    // can't place in stable dead pet
-    if (!pet || !pet->IsAlive() || pet->getPetType() != HUNTER_PET)
+    if (pet && pet->GetCharmInfo()->GetPetNumber() == petId
+        && (!pet->IsAlive() || pet->getPetType() != HUNTER_PET))
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;
     }
 
-    uint32 free_slot = 1;
-
-    QueryResult* result = CharacterDatabase.PQuery("SELECT `owner`,`slot`,`id` FROM `character_pet` WHERE `owner` = '%u' AND `slot` >= '%u' AND `slot` <= '%u' ORDER BY `slot`",
-                          _player->GetGUIDLow(), PET_SAVE_FIRST_STABLE_SLOT, PET_SAVE_LAST_STABLE_SLOT);
-    if (result)
+    // No-op when the source pet is already at new_slot. Acknowledge
+    // success so the client UI settles.
+    if (old_slot == int32(new_slot))
     {
-        do
-        {
-            Field* fields = result->Fetch();
-
-            uint32 slot = fields[1].GetUInt32();
-
-            // slots ordered in query, and if not equal then free
-            if (slot != free_slot)
-            {
-                break;
-            }
-
-            // this slot not free, skip
-            ++free_slot;
-        }
-        while (result->NextRow());
-
-        delete result;
-    }
-
-    if (free_slot > 0 && free_slot <= GetPlayer()->GetStableSlots())
-    {
-        pet->Unsummon(PetSaveMode(free_slot), _player);
         SendStableResult(STABLE_SUCCESS_STABLE);
+        SendStablePet(guid);
+        return;
     }
-    else
+
+    // Find the pet (if any) currently occupying new_slot, so we can
+    // swap their slots atomically. character_pet has no unique key
+    // on (owner, slot) so we have to walk it explicitly.
+    QueryResult* swapResult = CharacterDatabase.PQuery(
+        "SELECT `id` FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '%u' AND `id` <> '%u'",
+        _player->GetGUIDLow(), uint32(new_slot), petId);
+    uint32 displacedPetId = 0;
+    if (swapResult)
     {
-        SendStableResult(STABLE_ERR_STABLE);
+        displacedPetId = swapResult->Fetch()[0].GetUInt32();
+        delete swapResult;
     }
+
+    CharacterDatabase.BeginTransaction();
+    if (displacedPetId)
+    {
+        CharacterDatabase.PExecute(
+            "UPDATE `character_pet` SET `slot` = '%u' WHERE `owner` = '%u' AND `id` = '%u'",
+            uint32(old_slot), _player->GetGUIDLow(), displacedPetId);
+    }
+    CharacterDatabase.PExecute(
+        "UPDATE `character_pet` SET `slot` = '%u' WHERE `owner` = '%u' AND `id` = '%u'",
+        uint32(new_slot), _player->GetGUIDLow(), petId);
+    CharacterDatabase.CommitTransaction();
+
+    // Keep the in-world Pet's m_petSlot in sync so any subsequent
+    // SavePetToDB(PET_SAVE_AS_CURRENT) writes the new slot back via
+    // the multi-pet intercept. Cover both the case where the moved
+    // pet is the active pet AND the case where the displaced pet
+    // was the active pet.
+    if (pet)
+    {
+        if (pet->GetCharmInfo()->GetPetNumber() == petId)
+        {
+            pet->SetSlot(int32(new_slot));
+        }
+        else if (displacedPetId && pet->GetCharmInfo()->GetPetNumber() == displacedPetId)
+        {
+            pet->SetSlot(old_slot);
+        }
+    }
+
+    SendStableResult(STABLE_SUCCESS_STABLE);
+    // Refresh the stable panel so the client sees the new layout
+    // without waiting for the next interaction.
+    SendStablePet(guid);
 }
 
 /**

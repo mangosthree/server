@@ -701,6 +701,7 @@ enum OpcodesList
     SMSG_STABLE_RESULT                                    = 0x2204, // 4.3.4 15595
     CMSG_STABLE_REVIVE_PET                                = 0x1275,
     CMSG_STABLE_SWAP_PET                                  = 0x1276,
+    CMSG_SET_PET_SLOT                                     = 0x3A04, // 4.3.4 15595 -- Cata stable drag-and-drop; supersedes CMSG_STABLE_PET/UNSTABLE_PET/SWAP_PET
     MSG_QUEST_PUSH_RESULT                                 = 0x4515, // 4.3.4 15595
     SMSG_PLAY_MUSIC                                       = 0x4B06, // 4.3.4 15595
     SMSG_PLAY_OBJECT_SOUND                                = 0x2635, // 4.3.4 15595

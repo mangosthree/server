@@ -7607,48 +7607,62 @@ SpellCastResult Spell::CheckCast(bool strict)
                 uint32 plClass = m_caster->getClass();
                 if (plClass == CLASS_HUNTER)
                 {
-                    if (Creature* pet = m_caster->GetPet())
+                    // Cata Call Pet 1..5 spells (883, 83242, 83243,
+                    // 83244, 83245) encode the target slot in
+                    // EffectBasePoints of effect index 0 -- Call Pet 1
+                    // resolves to slot 0, ... Call Pet 5 to slot 4.
+                    // Pre-Cata hunter pet-summon spells (legacy WotLK
+                    // content, scripted summons) leave EffectMiscValue
+                    // non-zero or BasePoints outside the active range
+                    // and fall back to slot 0 so existing single-pet
+                    // hunters keep working.
+                    int32 callSlot = 0;
+                    if (SpellEffectEntry const* eff = m_spellInfo->GetSpellEffect(EFFECT_INDEX_0))
                     {
-                        if (!pet->IsAlive() || pet->IsDead()) // this one will not play along; tried and retried countless times....
+                        if (eff->EffectMiscValue == 0
+                            && eff->EffectBasePoints >= 0
+                            && eff->EffectBasePoints <= PET_SLOT_LAST_ACTIVE_SLOT)
+                        {
+                            callSlot = eff->EffectBasePoints;
+                        }
+                    }
+
+                    // Cata multi-pet: Call Pet on the same slot as the
+                    // already-summoned pet is a no-op (the pet is
+                    // already out). Call Pet on a different slot
+                    // auto-dismisses the active pet so the new one can
+                    // load. Either way no SPELL_FAILED_ALREADY_HAVE_SUMMON
+                    // error -- that was the WotLK single-pet rule and
+                    // the wrong behaviour for the Cata Call Pet family,
+                    // which is expected to swap pets seamlessly.
+                    if (Pet* activePet = m_caster->GetPet())
+                    {
+                        if (!activePet->IsAlive() || activePet->IsDead())
                         {
                             return SPELL_FAILED_TARGETS_DEAD;
                         }
-                        else
+                        if (activePet->getPetType() == HUNTER_PET
+                            && activePet->GetSlot() == callSlot)
                         {
-                            return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+                            return SPELL_CAST_OK;
                         }
+                        // Different slot requested -- dismiss the active
+                        // pet so the LoadPetFromDB below can place the
+                        // new one. PET_SAVE_AS_CURRENT routes through the
+                        // multi-pet intercept and preserves the dismissed
+                        // pet at its own slot.
+                        activePet->Unsummon(PET_SAVE_AS_CURRENT, m_caster);
+                    }
+
+                    Pet* dbPet = new Pet;
+                    if (dbPet->LoadPetFromDB((Player*)m_caster, 0, 0, false, callSlot))
+                    {
+                        return SPELL_CAST_OK;
                     }
                     else
                     {
-                        // Cata Call Pet 1..5 spells (883, 83242, 83243,
-                        // 83244, 83245) encode the target slot in the
-                        // EffectBasePoints of effect index 0 -- Call Pet 1
-                        // resolves to slot 0, ... Call Pet 5 to slot 4.
-                        // Pre-Cata hunter pet-summon spells (legacy WotLK
-                        // content, scripted summons) leave EffectMiscValue
-                        // non-zero or BasePoints outside the active range,
-                        // and fall back to slot 0 so existing single-pet
-                        // hunters keep working.
-                        int32 callSlot = 0;
-                        if (SpellEffectEntry const* eff = m_spellInfo->GetSpellEffect(EFFECT_INDEX_0))
-                        {
-                            if (eff->EffectMiscValue == 0
-                                && eff->EffectBasePoints >= 0
-                                && eff->EffectBasePoints <= PET_SLOT_LAST_ACTIVE_SLOT)
-                            {
-                                callSlot = eff->EffectBasePoints;
-                            }
-                        }
-                        Pet* dbPet = new Pet;
-                        if (dbPet->LoadPetFromDB((Player*)m_caster, 0, 0, false, callSlot))
-                        {
-                            return SPELL_CAST_OK;           // still returns an error to the player, so this error must come from somewhere else...
-                        }
-                        else
-                        {
-                            delete dbPet;
-                            return SPELL_FAILED_NO_PET;
-                        }
+                        delete dbPet;
+                        return SPELL_FAILED_NO_PET;
                     }
                 }
                 else if (m_caster->GetPetGuid())

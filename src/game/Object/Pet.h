@@ -98,27 +98,8 @@ enum PetSaveMode
 /// slots). In Cata the two ranges map 1:1 onto each other -- storage slot
 /// 0 = Call Pet 1, storage slot 1 = Call Pet 2, ... -- but the slot model
 /// is named separately so the multi-pet code can grep for it without
-/// touching the legacy save-mode call sites.
-///
-/// Declared in this commit but not yet referenced by any caller. Subsequent
-/// commits (see MANGOS/PET_SAVE_CALLSITE_AUDIT.md) add the m_petSlot
-/// member, the LoadPetFromDB slot parameter, the PET_SAVE_NEW_PET save
-/// mode, and the EffectSummonPet routing that decode EffectBasePoints
-/// against this range.
-enum PetStableSlot
-{
-    PET_SLOT_FIRST             = 0,
-    PET_SLOT_LAST_ACTIVE_SLOT  = 4    ///< Inclusive. Slots 0..4 = Call Pet 1..5.
-};
-
-/// @brief Cata Call Pet slot model used in MSG_LIST_STABLED_PETS.
-///
-/// Cata 4.3.4 lets a hunter address up to five pets via the Call Pet 1-5
-/// spell family. The client identifies each pet in the stable payload by
-/// a slot index in this range. Distinct from PetSaveMode, which is the
-/// on-disk character_pet.slot value (PET_SAVE_AS_CURRENT for the live
-/// pet, 1..MAX_PET_STABLES for stabled pets). The mapping is direct:
-/// storage slot 0 = Call Pet 1, storage slot 1 = Call Pet 2, etc.
+/// touching the legacy save-mode call sites. Also consumed by the Cata
+/// CMSG_STABLE_PET handler and the MSG_LIST_STABLED_PETS packet shape.
 enum PetStableSlot
 {
     PET_SLOT_FIRST             = 0,
@@ -269,6 +250,14 @@ class Pet : public Creature
         /// value -1 means "no known slot," which is the right answer
         /// before any caller has supplied one.
         int32 GetSlot() const { return m_petSlot; }
+
+        /// Move this in-world Pet to a different character_pet.slot value.
+        /// Used by the CMSG_STABLE_PET Cata handler when the player drags
+        /// the currently summoned pet to a different Call Pet 1..N pane.
+        /// Does NOT persist the change on its own -- the caller is expected
+        /// to follow up with SavePetToDB(PET_SAVE_AS_CURRENT), which will
+        /// route through the m_petSlot intercept and write the new slot.
+        void SetSlot(int32 slot) { m_petSlot = slot; }
 
         static void DeleteFromDB(uint32 guidlow, bool separate_transaction = true);
 

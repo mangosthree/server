@@ -107,7 +107,7 @@ void Pet::RemoveFromWorld()
  * @param current true to load the current pet.
  * @return true if the pet was loaded successfully; otherwise, false.
  */
-bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool current)
+bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool current, int32 slot)
 {
     m_loading = true;
 
@@ -125,6 +125,16 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         result = CharacterDatabase.PQuery("SELECT `id`, `entry`, `owner`, `modelid`, `level`, `exp`, `Reactstate`, `slot`, `name`, `renamed`, `curhealth`, `curmana`, `abdata`, `savetime`, `resettalents_cost`, `resettalents_time`, `CreatedBySpell`, `PetType` "
                                           "FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '%u'",
                                           ownerid, PET_SAVE_AS_CURRENT);
+    else if (slot >= 0)
+        // Cata Call Pet 1..N: load the pet at this specific active slot
+        // (0..PET_SLOT_LAST_ACTIVE_SLOT). Caller is Spell::CheckCast for
+        // the hunter Call Pet spell family in a future commit on this
+        // branch; until then this branch is unreachable and the existing
+        // dispatch falls through as before.
+        //                                         0     1        2(?)     3          4        5      6             7       8       9          10           11         12        13          14                   15                   16                17
+        result = CharacterDatabase.PQuery("SELECT `id`, `entry`, `owner`, `modelid`, `level`, `exp`, `Reactstate`, `slot`, `name`, `renamed`, `curhealth`, `curmana`, `abdata`, `savetime`, `resettalents_cost`, `resettalents_time`, `CreatedBySpell`, `PetType` "
+                                          "FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '%u'",
+                                          ownerid, uint32(slot));
     else if (petentry)
         // known petentry entry (unique for summoned pet, but non unique for hunter pet (only from current or not stabled pets)
         //                                         0     1        2(?)     3          4        5      6             7       8       9          10           11         12        13          14                   15                   16                17
@@ -144,6 +154,17 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     }
 
     Field* fields = result->Fetch();
+
+    // Record the slot column on the Pet instance. Future commits on this
+    // branch (audit IDs C2 / D-row hunter re-saves) read m_petSlot to keep
+    // each tamed pet parked at its Call Pet 1..N slot across re-saves and
+    // dismisses. Capturing it here (after `result` is known non-null and
+    // the row exists, but before any early-out) means every successful
+    // load -- by petnumber, current-flag, explicit slot, petentry, or
+    // legacy fallback -- gets the same accurate value. Harmless for the
+    // early-out failure paths below: a Pet object that returns false
+    // gets discarded by the caller, m_petSlot included.
+    m_petSlot = int32(fields[7].GetUInt32());
 
     // update for case of current pet "slot = 0"
     petentry = fields[1].GetUInt32();

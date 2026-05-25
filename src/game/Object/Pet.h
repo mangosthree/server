@@ -215,7 +215,19 @@ class Pet : public Creature
 
         bool Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, uint32 pet_number);
         bool CreateBaseAtCreature(Creature* creature);
-        bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false);
+        /// Load a pet row from `character_pet` into this Pet instance.
+        ///
+        /// Resolution priority (first non-default selector wins):
+        ///   1. `petnumber > 0`    -> exact row by id
+        ///   2. `current == true`  -> the row at PET_SAVE_AS_CURRENT (legacy WotLK single-pet flow)
+        ///   3. `slot >= 0`        -> the row at character_pet.slot == slot (Cata Call Pet 1..N routing)
+        ///   4. `petentry > 0`     -> any row matching the creature entry (warlock summon)
+        ///   5. otherwise          -> the active or orphan pet (legacy fallback)
+        ///
+        /// `m_petSlot` is captured from the loaded row regardless of which
+        /// branch fired, so subsequent re-saves know which slot to write
+        /// back to.
+        bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, int32 slot = -1);
         void SavePetToDB(PetSaveMode mode);
         void Unsummon(PetSaveMode mode, Unit* owner = NULL);
 

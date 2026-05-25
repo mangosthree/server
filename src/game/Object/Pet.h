@@ -111,6 +111,34 @@ enum PetStableSlot
     PET_SLOT_LAST_ACTIVE_SLOT  = 4    ///< Inclusive. Slots 0..4 = Call Pet 1..5.
 };
 
+/// @brief Cata Call Pet slot model used in MSG_LIST_STABLED_PETS.
+///
+/// Cata 4.3.4 lets a hunter address up to five pets via the Call Pet 1-5
+/// spell family. The client identifies each pet in the stable payload by
+/// a slot index in this range. Distinct from PetSaveMode, which is the
+/// on-disk character_pet.slot value (PET_SAVE_AS_CURRENT for the live
+/// pet, 1..MAX_PET_STABLES for stabled pets). The mapping is direct:
+/// storage slot 0 = Call Pet 1, storage slot 1 = Call Pet 2, etc.
+enum PetStableSlot
+{
+    PET_SLOT_FIRST             = 0,
+    PET_SLOT_LAST_ACTIVE_SLOT  = 4    ///< Inclusive. Slots 0..4 = Call Pet 1..5.
+};
+
+/// @brief Flag bits for the per-pet status field in MSG_LIST_STABLED_PETS.
+///
+/// Sent for every pet in the stable list. PET_STABLE_ACTIVE marks the
+/// pet as part of the Call Pet roster (always set in 4.3.4 since every
+/// stored slot is callable). PET_STABLE_INACTIVE is reserved for
+/// stable-only slots beyond the active range and is not produced by
+/// the current data model; the bit is kept for forward parity with TC's
+/// Cata layout, which expects the field to be present and bit-coded.
+enum PetStableFlags
+{
+    PET_STABLE_ACTIVE   = 1,
+    PET_STABLE_INACTIVE = 2
+};
+
 // There might be a lot more
 /// @brief Pet mode flags enumeration.
 ///

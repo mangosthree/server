@@ -86,6 +86,30 @@ enum PetSaveMode
     PET_SAVE_REAGENTS          =  101                       // PET_SAVE_NOT_IN_SLOT with reagents return
 };
 
+/// @brief Cata Call Pet 1..5 slot model.
+///
+/// Cata 4.3.4 lets a hunter address up to five pets via the Call Pet 1-5
+/// spell family (883, 83242, 83243, 83244, 83245). Each spell encodes its
+/// target slot index in `SpellEffectEntry::EffectBasePoints` -- Call Pet 1
+/// -> 0, Call Pet 5 -> 4. These constants name the active-roster range
+/// independently of `PetSaveMode` (which is the on-disk
+/// `character_pet.slot` value: 0 = current pet, 1..MAX_PET_STABLES = stable
+/// slots). In Cata the two ranges map 1:1 onto each other -- storage slot
+/// 0 = Call Pet 1, storage slot 1 = Call Pet 2, ... -- but the slot model
+/// is named separately so the multi-pet code can grep for it without
+/// touching the legacy save-mode call sites.
+///
+/// Declared in this commit but not yet referenced by any caller. Subsequent
+/// commits (see MANGOS/PET_SAVE_CALLSITE_AUDIT.md) add the m_petSlot
+/// member, the LoadPetFromDB slot parameter, the PET_SAVE_NEW_PET save
+/// mode, and the EffectSummonPet routing that decode EffectBasePoints
+/// against this range.
+enum PetStableSlot
+{
+    PET_SLOT_FIRST             = 0,
+    PET_SLOT_LAST_ACTIVE_SLOT  = 4    ///< Inclusive. Slots 0..4 = Call Pet 1..5.
+};
+
 // There might be a lot more
 /// @brief Pet mode flags enumeration.
 ///

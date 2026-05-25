@@ -219,6 +219,43 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
     SetName(fields[8].GetString());
 
+    // Defensive name fallback. The starter pet rows created by
+    // WorldSession::HandleCharCreateOpcode (CharacterHandler.cpp) write
+    // `name = ' '` (single space) into character_pet for every race's
+    // hunter starter and the warlock imp. An empty / whitespace-only
+    // name renders client-side as "Unknown's Pet" in unit frames and
+    // produces blank-name rows in the stable list. Any future code path
+    // that persists a Pet row without setting a name lands here too --
+    // this fallback mirrors the family-name logic in CreateBaseAtCreature
+    // (PR #135) so the load path is consistent with the tame path.
+    {
+        bool nameIsBlank = true;
+        for (char const* p = m_name.c_str(); *p; ++p)
+        {
+            if (*p != ' ' && *p != '\t' && *p != '\r' && *p != '\n')
+            {
+                nameIsBlank = false;
+                break;
+            }
+        }
+        if (nameIsBlank)
+        {
+            std::string fallback;
+            if (CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(creatureInfo->Family))
+            {
+                fallback = cFamily->Name[sWorld.GetDefaultDbcLocale()];
+            }
+            if (fallback.empty() && creatureInfo->Name)
+            {
+                fallback = creatureInfo->Name;
+            }
+            if (!fallback.empty())
+            {
+                SetName(fallback);
+            }
+        }
+    }
+
     SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS);
     SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
 

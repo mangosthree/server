@@ -907,14 +907,17 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
         return;
     }
 
-    // Currently summoned pet must be alive AND must be a hunter pet
-    // before any move is attempted: dragging a dead pet around the
-    // panel is a client-side mistake the server has to reject.
+    // Retail Cata workflow: the currently summoned pet cannot have
+    // its slot changed -- the player must dismiss it first. Reject
+    // any drag operation whose source pet is the active in-world
+    // pet so the client surfaces the "That slot is locked" message
+    // via STABLE_INVALID_SLOT and the user knows to dismiss.
+    // The displaced-pet equivalent of this check fires below, after
+    // we know which pet (if any) sits at new_slot.
     Pet* pet = _player->GetPet();
-    if (pet && pet->GetCharmInfo()->GetPetNumber() == petId
-        && (!pet->IsAlive() || pet->getPetType() != HUNTER_PET))
+    if (pet && pet->GetCharmInfo()->GetPetNumber() == petId)
     {
-        SendStableResult(STABLE_ERR_STABLE);
+        SendStableResult(STABLE_INVALID_SLOT);
         return;
     }
 
@@ -938,6 +941,16 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
     {
         displacedPetId = swapResult->Fetch()[0].GetUInt32();
         delete swapResult;
+    }
+
+    // Symmetric to the active-pet check above: if the swap would
+    // shove the currently summoned pet into a different slot, refuse
+    // until the player dismisses it. The active pet's slot may not
+    // change while it is in world.
+    if (pet && displacedPetId && pet->GetCharmInfo()->GetPetNumber() == displacedPetId)
+    {
+        SendStableResult(STABLE_INVALID_SLOT);
+        return;
     }
 
     CharacterDatabase.BeginTransaction();

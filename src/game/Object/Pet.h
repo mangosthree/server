@@ -103,7 +103,9 @@ enum PetSaveMode
 enum PetStableSlot
 {
     PET_SLOT_FIRST             = 0,
-    PET_SLOT_LAST_ACTIVE_SLOT  = 4    ///< Inclusive. Slots 0..4 = Call Pet 1..5.
+    PET_SLOT_LAST_ACTIVE_SLOT  = 4,   ///< Inclusive. Slots 0..4 = Call Pet 1..5 (callable anywhere).
+    PET_SLOT_FIRST_STABLE_SLOT = 5,
+    PET_SLOT_LAST_STABLE_SLOT  = 20   ///< Inclusive. Slots 5..20 = stable-only (no Call Pet; require stable master interaction to move out). Mirrors TC-Preservation 4.3.4 PetDefines.h.
 };
 
 /// @brief Flag bits for the per-pet status field in MSG_LIST_STABLED_PETS.

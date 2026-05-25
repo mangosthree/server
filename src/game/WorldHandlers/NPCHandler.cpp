@@ -702,7 +702,11 @@ void WorldSession::SendStablePet(ObjectGuid guid)
 
     size_t wpos = data.wpos();
     data << uint8(0);                                       // place holder for pet count
-    data << uint8(PET_SLOT_LAST_ACTIVE_SLOT + 1);           // slots exposed to client = 5
+    // Tell the client how many stable-slot panes to draw. TC sends
+    // PET_SLOT_LAST_STABLE_SLOT (=20) literally; mirror that so the
+    // 4.3.4 client renders the full stable grid and the drag-and-drop
+    // targets in slots 5..20 are valid drop zones.
+    data << uint8(PET_SLOT_LAST_STABLE_SLOT);
 
     uint8 num = 0;                                          // counter for place holder
 
@@ -744,9 +748,16 @@ void WorldSession::SendStablePet(ObjectGuid guid)
     // matches every row because character_pet.id is never zero.
     uint32 activePetId = pet ? pet->GetCharmInfo()->GetPetNumber() : 0;
 
+    // Query the full Cata slot range 0..PET_SLOT_LAST_STABLE_SLOT
+    // (=20), not just the legacy PET_SAVE_LAST_STABLE_SLOT
+    // (=MAX_PET_STABLES). Slots 5..20 are stable-only positions the
+    // Cata stable UI displays and the player drags pets into via
+    // CMSG_SET_PET_SLOT. Restricting the query to 0..4 like the
+    // pre-Cata code would make any stable-only pet vanish from the
+    // panel the moment the player dragged it past slot 4.
     //                                                      0        1     2        3        4       5
     QueryResult* result = CharacterDatabase.PQuery("SELECT `owner`, `id`, `entry`, `level`, `name`, `slot` FROM `character_pet` WHERE `owner` = '%u' AND `slot` >= '%u' AND `slot` <= '%u' AND `id` <> '%u' ORDER BY `slot`",
-                          _player->GetGUIDLow(), PET_SAVE_AS_CURRENT, PET_SAVE_LAST_STABLE_SLOT, activePetId);
+                          _player->GetGUIDLow(), uint32(PET_SLOT_FIRST), uint32(PET_SLOT_LAST_STABLE_SLOT), activePetId);
 
     if (result)
     {
@@ -871,7 +882,16 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
         return;
     }
 
-    if (new_slot > uint8(PET_SLOT_LAST_ACTIVE_SLOT))
+    // Slot range goes up to PET_SLOT_LAST_STABLE_SLOT (=20), not just
+    // PET_SLOT_LAST_ACTIVE_SLOT (=4). The Cata client uses slots 0..4
+    // for the Call Pet 1..5 active roster and 5..20 for stable-only
+    // pets that need a stable master interaction to move out. Drag-
+    // and-drop in the stable UI sends new_slot values across the full
+    // 0..20 range -- a wire-capture of drag operations against
+    // mangosthree confirmed values up to 0x0F. Reject only the
+    // genuinely out-of-range case so the storage layer doesn't end
+    // up with nonsensical slot indices.
+    if (new_slot > uint8(PET_SLOT_LAST_STABLE_SLOT))
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;

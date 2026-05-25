@@ -451,12 +451,23 @@ void Pet::SavePetToDB(PetSaveMode mode)
         m_petSlot = freeSlot;
         mode = static_cast<PetSaveMode>(freeSlot);
     }
-    else if (getPetType() == HUNTER_PET && mode == PET_SAVE_AS_CURRENT && m_petSlot >= 0
+    else if (getPetType() == HUNTER_PET
+             && (mode == PET_SAVE_AS_CURRENT || mode == PET_SAVE_NOT_IN_SLOT)
+             && m_petSlot >= 0
              && m_petSlot <= int32(PET_SLOT_LAST_ACTIVE_SLOT))
     {
-        // Cata re-save path: preserve the pet's existing active slot rather
-        // than nuking it to 0. Legacy WotLK callers that have never set
-        // m_petSlot (m_petSlot == -1) still hit the original slot-0 path.
+        // Cata re-save path: every hunter pet stays parked in its Call Pet
+        // 1..N slot for the entire character lifetime, including across
+        // dismiss. Pre-Cata code used PET_SAVE_NOT_IN_SLOT to mean "this
+        // pet isn't out anymore, leave it in the orphan pool until next
+        // stable visit" -- which evicted the row from the active range
+        // and made the next Call Pet N fail with NO_PET because the row
+        // had moved. EffectDismissPet is the typical caller. The
+        // PET_SAVE_AS_CURRENT branch also routes through here so legacy
+        // callers that re-save the active pet (logout, level-up, feed)
+        // preserve its slot rather than nuking it to 0.
+        // Legacy WotLK paths that have never set m_petSlot
+        // (m_petSlot == -1) still hit the original mode-as-passed path.
         mode = static_cast<PetSaveMode>(m_petSlot);
     }
 

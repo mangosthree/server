@@ -471,6 +471,58 @@ void Pet::SavePetToDB(PetSaveMode mode)
         return;
     }
 
+    // Cata multi-pet allocator. Resolves PET_SAVE_NEW_PET (== 102) into
+    // a concrete active-roster slot 0..PET_SLOT_LAST_ACTIVE_SLOT by
+    // scanning character_pet for the first vacant slot in that range.
+    // Updates `mode` and `m_petSlot` in place so the rest of the
+    // function continues unchanged. If the roster is full, leaves
+    // m_petSlot at PET_SAVE_NOT_IN_SLOT and bails out without writing
+    // any row -- the caller (EffectTameCreature, future commit) checks
+    // GetSlot() after the call to detect failure and roll the tame back.
+    //
+    // No caller passes PET_SAVE_NEW_PET in this commit; the block
+    // becomes reachable in step 10 of the audit. Adding the allocator
+    // ahead of its caller keeps each diff small enough to review on
+    // its own.
+    if (mode == PET_SAVE_NEW_PET)
+    {
+        uint32 ownerLowForNewPet = GetOwnerGuid().GetCounter();
+        bool occupied[PET_SLOT_LAST_ACTIVE_SLOT + 1] = {};
+        if (QueryResult* used = CharacterDatabase.PQuery(
+                "SELECT `slot` FROM `character_pet` WHERE `owner` = '%u' AND `slot` <= '%u'",
+                ownerLowForNewPet, uint32(PET_SLOT_LAST_ACTIVE_SLOT)))
+        {
+            do
+            {
+                uint32 s = used->Fetch()[0].GetUInt32();
+                if (s <= uint32(PET_SLOT_LAST_ACTIVE_SLOT))
+                {
+                    occupied[s] = true;
+                }
+            }
+            while (used->NextRow());
+            delete used;
+        }
+        int32 freeSlot = -1;
+        for (int32 s = 0; s <= PET_SLOT_LAST_ACTIVE_SLOT; ++s)
+        {
+            if (!occupied[s])
+            {
+                freeSlot = s;
+                break;
+            }
+        }
+        if (freeSlot < 0)
+        {
+            // Roster full -- do not persist anything. m_petSlot value
+            // signals "no slot allocated" to the caller.
+            m_petSlot = int32(PET_SAVE_NOT_IN_SLOT);
+            return;
+        }
+        m_petSlot = freeSlot;
+        mode = static_cast<PetSaveMode>(freeSlot);
+    }
+
     // current/stable/not_in_slot
     if (mode >= PET_SAVE_AS_CURRENT)
     {

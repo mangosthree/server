@@ -83,7 +83,8 @@ enum PetSaveMode
     PET_SAVE_FIRST_STABLE_SLOT =  1,
     PET_SAVE_LAST_STABLE_SLOT  =  MAX_PET_STABLES,          // last in DB stable slot index (including), all higher have same meaning as PET_SAVE_NOT_IN_SLOT
     PET_SAVE_NOT_IN_SLOT       =  100,                      // for avoid conflict with stable size grow will use 100
-    PET_SAVE_REAGENTS          =  101                       // PET_SAVE_NOT_IN_SLOT with reagents return
+    PET_SAVE_REAGENTS          =  101,                      // PET_SAVE_NOT_IN_SLOT with reagents return
+    PET_SAVE_NEW_PET           =  102                       ///< Cata tame: ask SavePetToDB to allocate the next free active slot 0..PET_SLOT_LAST_ACTIVE_SLOT and rewrite this mode in place. Returns with m_petSlot == PET_SAVE_NOT_IN_SLOT and no row written when the active roster is full -- caller checks via GetSlot().
 };
 
 /// @brief Cata Call Pet 1..5 slot model.

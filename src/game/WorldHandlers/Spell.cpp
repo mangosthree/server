@@ -7596,8 +7596,27 @@ SpellCastResult Spell::CheckCast(bool strict)
                     }
                     else
                     {
+                        // Cata Call Pet 1..5 spells (883, 83242, 83243,
+                        // 83244, 83245) encode the target slot in the
+                        // EffectBasePoints of effect index 0 -- Call Pet 1
+                        // resolves to slot 0, ... Call Pet 5 to slot 4.
+                        // Pre-Cata hunter pet-summon spells (legacy WotLK
+                        // content, scripted summons) leave EffectMiscValue
+                        // non-zero or BasePoints outside the active range,
+                        // and fall back to slot 0 so existing single-pet
+                        // hunters keep working.
+                        int32 callSlot = 0;
+                        if (SpellEffectEntry const* eff = m_spellInfo->GetSpellEffect(EFFECT_INDEX_0))
+                        {
+                            if (eff->EffectMiscValue == 0
+                                && eff->EffectBasePoints >= 0
+                                && eff->EffectBasePoints <= PET_SLOT_LAST_ACTIVE_SLOT)
+                            {
+                                callSlot = eff->EffectBasePoints;
+                            }
+                        }
                         Pet* dbPet = new Pet;
-                        if (dbPet->LoadPetFromDB((Player*)m_caster, 0))
+                        if (dbPet->LoadPetFromDB((Player*)m_caster, 0, 0, false, callSlot))
                         {
                             return SPELL_CAST_OK;           // still returns an error to the player, so this error must come from somewhere else...
                         }

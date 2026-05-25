@@ -585,13 +585,36 @@ void Pet::SavePetToDB(PetSaveMode mode)
             stmt.PExecute(uint32(PET_SAVE_NOT_IN_SLOT), ownerLow, uint32(mode));
         }
 
-        // prevent existence another hunter pet in PET_SAVE_AS_CURRENT and PET_SAVE_NOT_IN_SLOT
+        // Cata multi-pet hunter cleanup: reap orphan rows
+        // (slot > PET_SAVE_LAST_STABLE_SLOT) only -- the
+        // slot 0..PET_SAVE_LAST_STABLE_SLOT range is the Call Pet 1..N
+        // roster and must be preserved across every save.
+        //
+        // The legacy WHERE clause was `slot = PET_SAVE_AS_CURRENT OR
+        // slot > PET_SAVE_LAST_STABLE_SLOT`, which destroyed every
+        // other tamed pet at slot 0 whenever the active pet was
+        // re-saved (dismiss, level-up, logout, taming a new one).
+        // That was the data-loss root surfaced when PR #137 was
+        // tested in-game and reverted -- the fix is here, in the
+        // WHERE clause, not in the per-mode intercepts.
+        //
+        // `id <> ?` excludes the pet we are about to INSERT below so
+        // that even if its previous row was bumped to NOT_IN_SLOT by
+        // the UPDATE above, we do not immediately delete the new row.
+        //
+        // No behaviour change for SUMMON_PET / GUARDIAN_PET (the
+        // outer `getPetType() == HUNTER_PET` guard already excluded
+        // them). No behaviour change for any current hunter that has
+        // a single pet at slot 0 -- there are no orphan rows to reap,
+        // so the DELETE is a no-op on a healthy single-pet DB. The
+        // cleanup re-engages only once multi-pet hunters exist
+        // (after step 10 of the audit ships).
         if (getPetType() == HUNTER_PET && (mode == PET_SAVE_AS_CURRENT || mode > PET_SAVE_LAST_STABLE_SLOT))
         {
             static SqlStatementID del ;
 
-            stmt = CharacterDatabase.CreateStatement(del, "DELETE FROM `character_pet` WHERE `owner` = ? AND (`slot` = ? OR `slot` > ?)");
-            stmt.PExecute(ownerLow, uint32(PET_SAVE_AS_CURRENT), uint32(PET_SAVE_LAST_STABLE_SLOT));
+            stmt = CharacterDatabase.CreateStatement(del, "DELETE FROM `character_pet` WHERE `owner` = ? AND `slot` > ? AND `id` <> ?");
+            stmt.PExecute(ownerLow, uint32(PET_SAVE_LAST_STABLE_SLOT), m_charmInfo->GetPetNumber());
         }
 
         // save pet

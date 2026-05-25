@@ -8032,7 +8032,18 @@ void Spell::EffectTameCreature(SpellEffectEntry const* /*effect*/)
 
     plr->PetSpellInitialize();
 
-    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+    // Cata Call Pet 1..5 storage: allocate the next free active slot instead
+    // of always overwriting slot 0. SavePetToDB(PET_SAVE_NEW_PET) leaves
+    // pet->GetSlot() at a value above PET_SLOT_LAST_ACTIVE_SLOT when the
+    // roster is full; in that case the tame is rolled back rather than
+    // letting an unowned pet linger in world.
+    pet->SavePetToDB(PET_SAVE_NEW_PET);
+    if (pet->GetSlot() > PET_SLOT_LAST_ACTIVE_SLOT)
+    {
+        plr->SendPetTameFailure(PETTAME_TOOMANY);
+        pet->Unsummon(PET_SAVE_AS_DELETED, plr);
+        return;
+    }
 }
 
 /**

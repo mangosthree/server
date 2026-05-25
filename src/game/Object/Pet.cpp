@@ -43,7 +43,7 @@ Pet::Pet(PetType type) :
     Creature(CREATURE_SUBTYPE_PET),
     m_resetTalentsCost(0), m_resetTalentsTime(0), m_usedTalentCount(0),
     m_removed(false),  m_petType(type), m_duration(0),
-    m_bonusdamage(0), m_auraUpdateMask(0), m_loading(false),
+    m_bonusdamage(0), m_petSlot(-1), m_auraUpdateMask(0), m_loading(false),
     m_declinedname(NULL), m_petModeFlags(PET_MODE_DEFAULT), m_retreating(false),
     m_stayPosSet(false), m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
     m_opener(0), m_openerMinRange(0), m_openerMaxRange(0)
@@ -107,7 +107,7 @@ void Pet::RemoveFromWorld()
  * @param current true to load the current pet.
  * @return true if the pet was loaded successfully; otherwise, false.
  */
-bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool current)
+bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool current, int32 slot)
 {
     m_loading = true;
 
@@ -125,6 +125,12 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         result = CharacterDatabase.PQuery("SELECT `id`, `entry`, `owner`, `modelid`, `level`, `exp`, `Reactstate`, `slot`, `name`, `renamed`, `curhealth`, `curmana`, `abdata`, `savetime`, `resettalents_cost`, `resettalents_time`, `CreatedBySpell`, `PetType` "
                                           "FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '%u'",
                                           ownerid, PET_SAVE_AS_CURRENT);
+    else if (slot >= 0)
+        // Cata Call Pet 1..5: load the pet at this specific active slot (0..PET_SLOT_LAST_ACTIVE_SLOT).
+        //                                         0     1        2(?)     3          4        5      6             7       8       9          10           11         12        13          14                   15                   16                17
+        result = CharacterDatabase.PQuery("SELECT `id`, `entry`, `owner`, `modelid`, `level`, `exp`, `Reactstate`, `slot`, `name`, `renamed`, `curhealth`, `curmana`, `abdata`, `savetime`, `resettalents_cost`, `resettalents_time`, `CreatedBySpell`, `PetType` "
+                                          "FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '%u'",
+                                          ownerid, uint32(slot));
     else if (petentry)
         // known petentry entry (unique for summoned pet, but non unique for hunter pet (only from current or not stabled pets)
         //                                         0     1        2(?)     3          4        5      6             7       8       9          10           11         12        13          14                   15                   16                17
@@ -257,7 +263,14 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     // 0=current
     // 1..MAX_PET_STABLES in stable slot
     // PET_SAVE_NOT_IN_SLOT(100) = not stable slot (summoning))
-    if (fields[7].GetUInt32() != 0)
+    //
+    // Cata Call Pet 1..5 loads a specific active slot 0..PET_SLOT_LAST_ACTIVE_SLOT
+    // and must preserve every pet's assigned slot. When the caller passed an
+    // explicit slot we record it on the Pet and skip the legacy WotLK auto-promote
+    // (which would shift this pet to slot 0 and bump the current pet to slot 100,
+    // destroying the rest of the multi-pet roster on the next destructive save).
+    m_petSlot = int32(fields[7].GetUInt32());
+    if (slot < 0 && fields[7].GetUInt32() != 0)
     {
         CharacterDatabase.BeginTransaction();
 
@@ -271,6 +284,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         stmt.PExecute(uint32(PET_SAVE_AS_CURRENT), ownerid, m_charmInfo->GetPetNumber());
 
         CharacterDatabase.CommitTransaction();
+        m_petSlot = int32(PET_SAVE_AS_CURRENT);
     }
 
     // load action bar, if data broken will fill later by default spells.
@@ -393,6 +407,59 @@ void Pet::SavePetToDB(PetSaveMode mode)
         return;
     }
 
+    // Cata multi-pet save modes -- must run BEFORE the "mode >= PET_SAVE_AS_CURRENT"
+    // gate below because PET_SAVE_NEW_PET (== 102) needs to be resolved into a real
+    // slot value (0..PET_SLOT_LAST_ACTIVE_SLOT) first.
+    uint32 ownerLowForSlot = GetOwnerGuid().GetCounter();
+    if (mode == PET_SAVE_NEW_PET)
+    {
+        // Tame path: find the next free active slot 0..PET_SLOT_LAST_ACTIVE_SLOT.
+        // If every active slot is taken the tame should be refused; we mark the
+        // pet's slot as not-in-slot so the caller can detect failure via GetSlot()
+        // and abort cleanly without leaking a half-saved row.
+        bool occupied[PET_SLOT_LAST_ACTIVE_SLOT + 1] = {};
+        if (QueryResult* used = CharacterDatabase.PQuery(
+                "SELECT `slot` FROM `character_pet` WHERE `owner` = '%u' AND `slot` <= '%u'",
+                ownerLowForSlot, uint32(PET_SLOT_LAST_ACTIVE_SLOT)))
+        {
+            do
+            {
+                uint32 s = used->Fetch()[0].GetUInt32();
+                if (s <= uint32(PET_SLOT_LAST_ACTIVE_SLOT))
+                {
+                    occupied[s] = true;
+                }
+            }
+            while (used->NextRow());
+            delete used;
+        }
+        int32 freeSlot = -1;
+        for (int32 s = 0; s <= PET_SLOT_LAST_ACTIVE_SLOT; ++s)
+        {
+            if (!occupied[s])
+            {
+                freeSlot = s;
+                break;
+            }
+        }
+        if (freeSlot < 0)
+        {
+            // No room in the active roster -- bail out, do not persist anything.
+            m_petSlot = int32(PET_SAVE_NOT_IN_SLOT);
+            return;
+        }
+        m_petSlot = freeSlot;
+        mode = static_cast<PetSaveMode>(freeSlot);
+    }
+    else if (getPetType() == HUNTER_PET && mode == PET_SAVE_AS_CURRENT && m_petSlot >= 0
+             && m_petSlot <= int32(PET_SLOT_LAST_ACTIVE_SLOT))
+    {
+        // Cata re-save path: preserve the pet's existing active slot rather
+        // than nuking it to 0. Legacy WotLK callers that have never set
+        // m_petSlot (m_petSlot == -1) still hit the original slot-0 path.
+        mode = static_cast<PetSaveMode>(m_petSlot);
+    }
+
     // current/stable/not_in_slot
     if (mode >= PET_SAVE_AS_CURRENT)
     {
@@ -455,13 +522,19 @@ void Pet::SavePetToDB(PetSaveMode mode)
             stmt.PExecute(uint32(PET_SAVE_NOT_IN_SLOT), ownerLow, uint32(mode));
         }
 
-        // prevent existence another hunter pet in PET_SAVE_AS_CURRENT and PET_SAVE_NOT_IN_SLOT
+        // Cata multi-pet: reap orphan rows (slot > PET_SAVE_LAST_STABLE_SLOT)
+        // only -- the slot 0..PET_SAVE_LAST_STABLE_SLOT range is the Call Pet
+        // 1..N roster and must be preserved across every save. The previous
+        // WotLK code also nuked `slot = PET_SAVE_AS_CURRENT`, which destroyed
+        // every other tamed pet whenever the active pet was re-saved (dismiss,
+        // level-up, logout, taming a new one). The exclude-self clause keeps
+        // the INSERT below idempotent when it adds the new row for this pet.
         if (getPetType() == HUNTER_PET && (mode == PET_SAVE_AS_CURRENT || mode > PET_SAVE_LAST_STABLE_SLOT))
         {
             static SqlStatementID del ;
 
-            stmt = CharacterDatabase.CreateStatement(del, "DELETE FROM `character_pet` WHERE `owner` = ? AND (`slot` = ? OR `slot` > ?)");
-            stmt.PExecute(ownerLow, uint32(PET_SAVE_AS_CURRENT), uint32(PET_SAVE_LAST_STABLE_SLOT));
+            stmt = CharacterDatabase.CreateStatement(del, "DELETE FROM `character_pet` WHERE `owner` = ? AND `slot` > ? AND `id` <> ?");
+            stmt.PExecute(ownerLow, uint32(PET_SAVE_LAST_STABLE_SLOT), m_charmInfo->GetPetNumber());
         }
 
         // save pet

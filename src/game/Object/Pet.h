@@ -83,7 +83,8 @@ enum PetSaveMode
     PET_SAVE_FIRST_STABLE_SLOT =  1,
     PET_SAVE_LAST_STABLE_SLOT  =  MAX_PET_STABLES,          // last in DB stable slot index (including), all higher have same meaning as PET_SAVE_NOT_IN_SLOT
     PET_SAVE_NOT_IN_SLOT       =  100,                      // for avoid conflict with stable size grow will use 100
-    PET_SAVE_REAGENTS          =  101                       // PET_SAVE_NOT_IN_SLOT with reagents return
+    PET_SAVE_REAGENTS          =  101,                      // PET_SAVE_NOT_IN_SLOT with reagents return
+    PET_SAVE_NEW_PET           =  102                       ///< Sentinel for Cata multi-pet tame: SavePetToDB allocates next free active slot 0..PET_SLOT_LAST_ACTIVE_SLOT and rewrites mode in place.
 };
 
 // There might be a lot more
@@ -191,7 +192,23 @@ class Pet : public Creature
 
         bool Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, uint32 pet_number);
         bool CreateBaseAtCreature(Creature* creature);
-        bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false);
+        /// Load a pet from the character_pet table.
+        ///
+        /// Resolution priority on the selector arguments:
+        ///   1. petnumber > 0   -> exact row by id
+        ///   2. current == true -> the row at PET_SAVE_AS_CURRENT (legacy WotLK single-pet flow)
+        ///   3. slot >= 0       -> the row at character_pet.slot == slot (Cata Call Pet 1..5)
+        ///   4. petentry > 0    -> any row matching the creature entry (warlock summon)
+        ///   5. otherwise       -> the active or orphan pet (legacy fallback)
+        ///
+        /// When the explicit `slot` path is taken the legacy auto-promote-to-slot-0
+        /// behaviour is skipped so each Cata Call Pet 1..5 slot keeps its assignment.
+        bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, int32 slot = -1);
+
+        /// Active-slot index this pet currently occupies in character_pet.slot,
+        /// or -1 when the pet has never been loaded or saved. Cata uses this for
+        /// the Call Pet 1..5 routing; WotLK callers can ignore it.
+        int32 GetSlot() const { return m_petSlot; }
         void SavePetToDB(PetSaveMode mode);
         void Unsummon(PetSaveMode mode, Unit* owner = NULL);
 
@@ -345,6 +362,7 @@ class Pet : public Creature
         PetType m_petType;
         int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         int32   m_bonusdamage;
+        int32   m_petSlot;                                  ///< character_pet.slot value: 0..4 for Cata Call Pet 1..5; -1 when unassigned.
         uint64  m_auraUpdateMask;
         bool    m_loading;
 

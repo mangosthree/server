@@ -709,7 +709,20 @@ void WorldSession::SendStablePet(ObjectGuid guid)
     // not let move dead pet in slot
     if (pet && pet->IsAlive() && pet->getPetType() == HUNTER_PET)
     {
-        data << int32(PET_SLOT_FIRST);                      // active pet always lives in slot 0 (Call Pet 1)
+        // Use the pet's actual stored slot, not a hardcoded slot 0.
+        // Under the Cata multi-pet model the currently summoned pet
+        // can live in any active slot 0..PET_SLOT_LAST_ACTIVE_SLOT --
+        // emitting the wrong slot here would render the active pet in
+        // the wrong stable pane. Falls back to PET_SLOT_FIRST when
+        // m_petSlot is -1 (pet object that has never round-tripped
+        // through LoadPetFromDB or SavePetToDB -- pre-Cata single-pet
+        // legacy path).
+        int32 activeSlot = pet->GetSlot();
+        if (activeSlot < int32(PET_SLOT_FIRST) || activeSlot > int32(PET_SLOT_LAST_ACTIVE_SLOT))
+        {
+            activeSlot = int32(PET_SLOT_FIRST);
+        }
+        data << int32(activeSlot);
         data << uint32(pet->GetCharmInfo()->GetPetNumber());
         data << uint32(pet->GetEntry());
         data << uint32(pet->getLevel());
@@ -718,9 +731,22 @@ void WorldSession::SendStablePet(ObjectGuid guid)
         ++num;
     }
 
+    // Query covers the entire active-roster range (slot 0..MAX) instead
+    // of starting at PET_SAVE_FIRST_STABLE_SLOT. Pre-Cata the slot-0
+    // branch was exclusively the currently summoned pet (one active pet
+    // per character) so the legacy query intentionally skipped it.
+    // Under Cata multi-pet a hunter can have multiple pets in
+    // 0..PET_SLOT_LAST_ACTIVE_SLOT and any of them can be dismissed --
+    // the dismissed ones still belong in the stable panel, just not as
+    // the active pet. Excluding the currently summoned pet's id
+    // prevents emitting it twice (once from the active branch above,
+    // once from this query). When no pet is summoned the WHERE id <> 0
+    // matches every row because character_pet.id is never zero.
+    uint32 activePetId = pet ? pet->GetCharmInfo()->GetPetNumber() : 0;
+
     //                                                      0        1     2        3        4       5
-    QueryResult* result = CharacterDatabase.PQuery("SELECT `owner`, `id`, `entry`, `level`, `name`, `slot` FROM `character_pet` WHERE `owner` = '%u' AND `slot` >= '%u' AND `slot` <= '%u' ORDER BY `slot`",
-                          _player->GetGUIDLow(), PET_SAVE_FIRST_STABLE_SLOT, PET_SAVE_LAST_STABLE_SLOT);
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `owner`, `id`, `entry`, `level`, `name`, `slot` FROM `character_pet` WHERE `owner` = '%u' AND `slot` >= '%u' AND `slot` <= '%u' AND `id` <> '%u' ORDER BY `slot`",
+                          _player->GetGUIDLow(), PET_SAVE_AS_CURRENT, PET_SAVE_LAST_STABLE_SLOT, activePetId);
 
     if (result)
     {

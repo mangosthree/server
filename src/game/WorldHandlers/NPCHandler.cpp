@@ -680,31 +680,46 @@ void WorldSession::SendStablePet(ObjectGuid guid)
 {
     DEBUG_LOG("WORLD: Recv MSG_LIST_STABLED_PETS Send.");
 
+    // Cata 4.3.4 MSG_LIST_STABLED_PETS payload layout (mirrors TC):
+    //   uint64  stablemaster guid
+    //   uint8   pet count (N)
+    //   uint8   slot count exposed to client (PET_SLOT_LAST_ACTIVE_SLOT + 1)
+    //   N times:
+    //     int32  petSlot              -- Call Pet 1..5 == slots 0..4
+    //     uint32 petNumber            -- character_pet.id
+    //     uint32 creatureEntry        -- character_pet.entry
+    //     uint32 petLevel             -- character_pet.level
+    //     string name                 -- character_pet.name
+    //     uint8  flags                -- PET_STABLE_ACTIVE [| PET_STABLE_INACTIVE]
+    //
+    // The pre-Cata layout (no slot field, magic status byte 1/2/3) is
+    // what the WotLK client expects; the Cata client misreads it field-
+    // for-field and renders the wrong pet name/level/entry in each pane.
     WorldPacket data(MSG_LIST_STABLED_PETS, 200);           // guess size
     data << guid;
 
     Pet* pet = _player->GetPet();
 
     size_t wpos = data.wpos();
-    data << uint8(0);                                       // place holder for slot show number
-
-    data << uint8(GetPlayer()->GetStableSlots());
+    data << uint8(0);                                       // place holder for pet count
+    data << uint8(PET_SLOT_LAST_ACTIVE_SLOT + 1);           // slots exposed to client = 5
 
     uint8 num = 0;                                          // counter for place holder
 
     // not let move dead pet in slot
     if (pet && pet->IsAlive() && pet->getPetType() == HUNTER_PET)
     {
+        data << int32(PET_SLOT_FIRST);                      // active pet always lives in slot 0 (Call Pet 1)
         data << uint32(pet->GetCharmInfo()->GetPetNumber());
         data << uint32(pet->GetEntry());
         data << uint32(pet->getLevel());
-        data << pet->GetName();                             // petname
-        data << uint8(1);                                   // 1 = current, 2/3 = in stable (any from 4,5,... create problems with proper show)
+        data << pet->GetName();
+        data << uint8(PET_STABLE_ACTIVE);
         ++num;
     }
 
-    //                                                      0        1     2        3        4
-    QueryResult* result = CharacterDatabase.PQuery("SELECT `owner`, `id`, `entry`, `level`, `name` FROM `character_pet` WHERE `owner` = '%u' AND `slot` >= '%u' AND `slot` <= '%u' ORDER BY `slot`",
+    //                                                      0        1     2        3        4       5
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `owner`, `id`, `entry`, `level`, `name`, `slot` FROM `character_pet` WHERE `owner` = '%u' AND `slot` >= '%u' AND `slot` <= '%u' ORDER BY `slot`",
                           _player->GetGUIDLow(), PET_SAVE_FIRST_STABLE_SLOT, PET_SAVE_LAST_STABLE_SLOT);
 
     if (result)
@@ -713,11 +728,23 @@ void WorldSession::SendStablePet(ObjectGuid guid)
         {
             Field* fields = result->Fetch();
 
+            // character_pet.slot 1..MAX_PET_STABLES maps directly onto
+            // Call Pet 2..N+1 in the Cata client. Pets stored beyond the
+            // Call Pet range get PET_STABLE_INACTIVE for forward parity,
+            // even though 4.3.4 has no such slots today.
+            uint32 petSlot = fields[5].GetUInt32();
+            uint8 flags = PET_STABLE_ACTIVE;
+            if (petSlot > uint32(PET_SLOT_LAST_ACTIVE_SLOT))
+            {
+                flags |= PET_STABLE_INACTIVE;
+            }
+
+            data << int32(petSlot);
             data << uint32(fields[1].GetUInt32());          // petnumber
             data << uint32(fields[2].GetUInt32());          // creature entry
             data << uint32(fields[3].GetUInt32());          // level
             data << fields[4].GetString();                  // name
-            data << uint8(2);                               // 1 = current, 2/3 = in stable (any from 4,5,... create problems with proper show)
+            data << uint8(flags);
 
             ++num;
         }

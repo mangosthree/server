@@ -10486,10 +10486,13 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
             {
                 // the player whose group may loot the corpse
                 Player* recipient = creature->GetLootRecipient();
-                if (!recipient)
+                Group* recipientGroup = creature->GetGroupLootRecipient();
+                // no recipient means the kill had no player participation (e.g. NPC-only kill).
+                // Deny loot rather than silently transferring ownership to the first clicker.
+                if (!recipient && !recipientGroup)
                 {
-                    creature->SetLootRecipient(this);
-                    recipient = this;
+                    SendLootRelease(guid);
+                    return;
                 }
 
                 if (creature->lootForPickPocketed)

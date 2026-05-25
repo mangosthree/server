@@ -1364,7 +1364,13 @@ void Creature::PrepareBodyLootState()
                 // ... or can have skinning after
                 (GetCreatureInfo()->SkinningLootId && sWorld.getConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW)))
         {
-            SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            // Only show the lootable glitter if a player participated in the kill.
+            // Without a recipient, no player is allowed to loot (see Player::SendLoot
+            // and Player::isAllowedToLoot), so hide the visual cue too.
+            if (HasLootRecipient())
+            {
+                SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+            }
             return;
         }
     }

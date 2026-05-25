@@ -8032,7 +8032,28 @@ void Spell::EffectTameCreature(SpellEffectEntry const* /*effect*/)
 
     plr->PetSpellInitialize();
 
-    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+    // Cata Call Pet 1..5 storage: allocate the next free active slot
+    // instead of always overwriting slot 0. SavePetToDB(PET_SAVE_NEW_PET)
+    // resolves into 0..PET_SLOT_LAST_ACTIVE_SLOT via the free-slot scan
+    // added in step 6 of MANGOS/PET_SAVE_CALLSITE_AUDIT.md, and leaves
+    // GetSlot() above PET_SLOT_LAST_ACTIVE_SLOT when the roster is full.
+    // Roll the tame back when that happens: keep the player from owning
+    // a phantom pet that has no character_pet row, and notify the client
+    // with PETTAME_TOOMANY so the UI clears the cast.
+    //
+    // Audit row T1. This is the keystone commit that makes Call Pet 1..5
+    // routing meaningful end-to-end: with this in place each tame writes
+    // to its own slot, step 9's CheckCast slot-decoding retrieves the
+    // right pet, step 5's auto-promote gate keeps it parked during temp
+    // unsummon, and step 8's intercept preserves the slot across
+    // dismiss / re-save / logout.
+    pet->SavePetToDB(PET_SAVE_NEW_PET);
+    if (pet->GetSlot() > PET_SLOT_LAST_ACTIVE_SLOT)
+    {
+        plr->SendPetTameFailure(PETTAME_TOOMANY);
+        pet->Unsummon(PET_SAVE_AS_DELETED, plr);
+        return;
+    }
 }
 
 /**

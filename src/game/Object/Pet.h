@@ -70,7 +70,7 @@ enum PetType
     MAX_PET_TYPE            = 5
 };
 
-#define MAX_PET_STABLES         4
+#define MAX_PET_STABLES         5   ///< Cata 4.0.1 unified hunter stable to 5 free slots; was 4 in WotLK.
 
 // Pet storage location
 /// @brief Pet save mode enumeration.

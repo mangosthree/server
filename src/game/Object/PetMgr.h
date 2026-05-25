@@ -58,19 +58,22 @@ class PetMgr
 {
     public:
         explicit PetMgr(Player* owner)
-            : m_owner(owner), m_stableSlots(0), m_temporaryUnsummonedPetNumber(0)
+            : m_owner(owner), m_stableSlots(MAX_PET_STABLES), m_temporaryUnsummonedPetNumber(0)
         {
         }
 
-        /// Number of paid stable slots the character has unlocked.
-        /// Persisted to `characters`.stable_slots; clamped to
-        /// MAX_PET_STABLES on load.
+        /// Number of stable slots the character can use. Cata 4.0.1 gave
+        /// every hunter MAX_PET_STABLES (5) for free and removed the
+        /// CMSG_BUY_STABLE_SLOT purchase flow, so this is effectively a
+        /// constant in this fork. Persisted to `characters`.stable_slots
+        /// for forward-compat; clamped UP to MAX_PET_STABLES on load.
         uint32 GetStableSlots() const { return m_stableSlots; }
         void SetStableSlots(uint32 slots) { m_stableSlots = slots; }
 
         /// Called from Player::LoadFromDB with the raw column value.
-        /// Clamps to MAX_PET_STABLES and logs a server error on
-        /// out-of-range data so an operator can detect a tampered row.
+        /// Clamps to MAX_PET_STABLES on either side so a character row
+        /// carried over from a pre-Cata default (stable_slots=0) still
+        /// gets the Cata 5 free slots without a DB migration.
         void LoadStableSlotsFromField(uint32 raw);
 
         /// Pet number that was active before a temporary unsummon (e.g.

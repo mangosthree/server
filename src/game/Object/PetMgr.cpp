@@ -31,12 +31,15 @@
 
 void PetMgr::LoadStableSlotsFromField(uint32 raw)
 {
-    m_stableSlots = raw;
-    if (m_stableSlots > MAX_PET_STABLES)
+    // Cata 4.0.1 gave every hunter MAX_PET_STABLES free slots and removed
+    // CMSG_BUY_STABLE_SLOT, so any row holding a lower value (typically
+    // the pre-Cata default of 0) is upgraded silently on load. A higher
+    // value indicates DB tampering and is clamped down with a log line.
+    if (raw > MAX_PET_STABLES)
     {
-        sLog.outError("Player can have not more %u stable slots, but have in DB %u", MAX_PET_STABLES, uint32(m_stableSlots));
-        m_stableSlots = MAX_PET_STABLES;
+        sLog.outError("Player can have not more %u stable slots, but have in DB %u", MAX_PET_STABLES, uint32(raw));
     }
+    m_stableSlots = MAX_PET_STABLES;
 }
 
 void PetMgr::Remove(PetSaveMode mode)

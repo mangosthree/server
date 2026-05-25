@@ -315,7 +315,27 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     // 0=current
     // 1..MAX_PET_STABLES in stable slot
     // PET_SAVE_NOT_IN_SLOT(100) = not stable slot (summoning))
-    if (fields[7].GetUInt32() != 0)
+    //
+    // The legacy auto-promote block below moves whichever pet we just
+    // loaded into PET_SAVE_AS_CURRENT (slot 0) and bumps any previous
+    // slot-0 pet to PET_SAVE_NOT_IN_SLOT (=100). That was correct under
+    // the WotLK 1-active-pet model where loading a stabled pet implied
+    // making it the active one and demoting the old current.
+    //
+    // For Cata HUNTER_PET the same code path is destructive: every pet
+    // permanently lives in its assigned Call Pet 1..N slot 0..4 and
+    // loading one must NOT shift it. Without this gate,
+    // ResummonTemporaryUnsummonedIfAny (mount, transport, vehicle exit)
+    // would force the resumed pet back to slot 0 and silently bump the
+    // pet that owns slot 0 out into orphan land, breaking the next
+    // Call Pet 1 cast. This was the bug audit row C2 in
+    // MANGOS/PET_SAVE_CALLSITE_AUDIT.md and the gap closed PR #137 left
+    // open when it was reverted.
+    //
+    // SUMMON_PET / GUARDIAN_PET / MINI_PET keep the legacy auto-promote
+    // -- they have no Call Pet 1..N concept and the warlock pet pool
+    // still expects loading from slot 100 to mean "becomes active."
+    if (getPetType() != HUNTER_PET && fields[7].GetUInt32() != 0)
     {
         CharacterDatabase.BeginTransaction();
 

@@ -974,14 +974,34 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(creature->getLevel()));
     SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
-    if (CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cInfo->Family))
+    // Cata 4.3.4 tame-name rules:
+    //  - Rare and rare-elite creatures (e.g. King Mosh, Loque'nahak)
+    //    keep their NPC name when tamed, instead of being replaced by
+    //    the family name. Players use Pet Rename (or a Certificate of
+    //    Ownership for second+ renames) if they want a custom name.
+    //  - Everything else inherits the pet-family name ("Wolf", "Cat",
+    //    "Devilsaur"), so identical-species pets share a default.
+    //  - Either path can hand back an empty string when the source DBC
+    //    row is missing the localized name (some Cata-added families
+    //    have empty Name[locale] entries on certain client builds);
+    //    when that happens the WoW client falls back to rendering the
+    //    pet as "Unknown's Pet" in unit frames. Fall through to the
+    //    creature name so the pet always carries a usable label.
+    std::string petName;
+    bool const isRare = cInfo->Rank == CREATURE_ELITE_RARE
+                     || cInfo->Rank == CREATURE_ELITE_RAREELITE;
+    if (!isRare)
     {
-        SetName(cFamily->Name[sWorld.GetDefaultDbcLocale()]);
+        if (CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cInfo->Family))
+        {
+            petName = cFamily->Name[sWorld.GetDefaultDbcLocale()];
+        }
     }
-    else
+    if (petName.empty())
     {
-        SetName(creature->GetNameForLocaleIdx(sObjectMgr.GetDBCLocaleIndex()));
+        petName = creature->GetNameForLocaleIdx(sObjectMgr.GetDBCLocaleIndex());
     }
+    SetName(petName);
 
     SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_WARRIOR);
     SetByteValue(UNIT_FIELD_BYTES_0, 2, GENDER_NONE);

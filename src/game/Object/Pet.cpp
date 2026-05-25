@@ -522,6 +522,41 @@ void Pet::SavePetToDB(PetSaveMode mode)
         m_petSlot = freeSlot;
         mode = static_cast<PetSaveMode>(freeSlot);
     }
+    else if (getPetType() == HUNTER_PET
+             && (mode == PET_SAVE_AS_CURRENT || mode == PET_SAVE_NOT_IN_SLOT)
+             && m_petSlot >= 0
+             && m_petSlot <= int32(PET_SLOT_LAST_ACTIVE_SLOT))
+    {
+        // Cata multi-pet re-save path. Every hunter pet stays parked in
+        // its Call Pet 1..N slot for the entire character lifetime,
+        // including across dismiss, logout, level-up, feed, range
+        // unsummon and visibility teardown. The pre-Cata code routed
+        // PET_SAVE_AS_CURRENT (=0) and PET_SAVE_NOT_IN_SLOT (=100)
+        // directly through to the INSERT, evicting the pet from its
+        // assigned slot and breaking the next Call Pet N cast with
+        // NO_PET.
+        //
+        // Rewrite mode in place so the rest of SavePetToDB writes
+        // back to the pet's known slot. Legacy WotLK paths that have
+        // never set m_petSlot (m_petSlot == -1, e.g. a fresh Pet*
+        // about to be saved for the first time -- though tame goes
+        // through PET_SAVE_NEW_PET in step 10) still fall through to
+        // the original mode-as-passed behaviour. SUMMON_PET /
+        // GUARDIAN_PET also fall through (gated on HUNTER_PET).
+        //
+        // Audit row IDs: D1 (EffectDismissPet), D2 (mount/transport
+        // temp-unsummon), D4 (out-of-range), D5 (talent reset),
+        // D6 (visibility teardown), D7 (GM .pet unsummon),
+        // S4 (Player::SaveToDB periodic).
+        //
+        // Until step 10 ships, no hunter has a pet with m_petSlot
+        // in 0..PET_SLOT_LAST_ACTIVE_SLOT (taming still goes through
+        // PET_SAVE_AS_CURRENT and m_petSlot stays at -1 because there
+        // is no load path to populate it). So this branch is dormant
+        // in practice today and engages once step 10's tame change
+        // starts populating m_petSlot.
+        mode = static_cast<PetSaveMode>(m_petSlot);
+    }
 
     // current/stable/not_in_slot
     if (mode >= PET_SAVE_AS_CURRENT)

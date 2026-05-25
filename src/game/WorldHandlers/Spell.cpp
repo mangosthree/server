@@ -7302,6 +7302,30 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_DONT_REPORT;
                 }
 
+                // Cata multi-pet roster guard: reject the cast up front
+                // if every Call Pet 1..N slot is already occupied. Without
+                // this check the 6-second Tame Beast channel completes
+                // before EffectTameCreature's SavePetToDB(PET_SAVE_NEW_PET)
+                // discovers the roster is full -- by which time the source
+                // creature has been ForcedDespawned and another hunter may
+                // already have it. The post-channel rollback in
+                // EffectTameCreature stays as a defensive safety net for
+                // any race between cast-start and effect-time (player
+                // gains a pet mid-cast somehow), but the user-visible
+                // failure now fires immediately.
+                if (QueryResult* roster = CharacterDatabase.PQuery(
+                        "SELECT COUNT(*) FROM `character_pet` WHERE `owner` = '%u' AND `slot` <= '%u'",
+                        plrCaster->GetGUIDLow(), uint32(PET_SLOT_LAST_ACTIVE_SLOT)))
+                {
+                    uint32 owned = roster->Fetch()[0].GetUInt32();
+                    delete roster;
+                    if (owned > uint32(PET_SLOT_LAST_ACTIVE_SLOT))
+                    {
+                        plrCaster->SendPetTameFailure(PETTAME_TOOMANY);
+                        return SPELL_FAILED_DONT_REPORT;
+                    }
+                }
+
                 break;
             }
             case SPELL_EFFECT_LEARN_SPELL:

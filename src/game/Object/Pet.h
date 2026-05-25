@@ -219,6 +219,16 @@ class Pet : public Creature
         void SavePetToDB(PetSaveMode mode);
         void Unsummon(PetSaveMode mode, Unit* owner = NULL);
 
+        /// Active-roster slot this pet currently occupies in
+        /// `character_pet.slot` (0..PET_SLOT_LAST_ACTIVE_SLOT for Cata
+        /// Call Pet 1..N), or -1 when the pet has never been loaded
+        /// from or saved to the database. Populated by future commits
+        /// in this branch -- see MANGOS/PET_SAVE_CALLSITE_AUDIT.md.
+        /// Reading it from existing code is harmless: the default
+        /// value -1 means "no known slot," which is the right answer
+        /// before any caller has supplied one.
+        int32 GetSlot() const { return m_petSlot; }
+
         static void DeleteFromDB(uint32 guidlow, bool separate_transaction = true);
 
         void SetDeathState(DeathState s) override;          // overwrite virtual Creature::SetDeathState and Unit::SetDeathState
@@ -369,6 +379,7 @@ class Pet : public Creature
         PetType m_petType;
         int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         int32   m_bonusdamage;
+        int32   m_petSlot;                                  ///< character_pet.slot value: 0..PET_SLOT_LAST_ACTIVE_SLOT for Cata Call Pet 1..N; -1 when unassigned. Read via GetSlot().
         uint64  m_auraUpdateMask;
         bool    m_loading;
 

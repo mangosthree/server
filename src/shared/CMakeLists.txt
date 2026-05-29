@@ -142,6 +142,8 @@ if(WIN32)
     set(SRC_GRP_SVC
       Win/ServiceWin32.cpp
       Win/ServiceWin32.h
+      Win/WheatyExceptionReport.cpp
+      Win/WheatyExceptionReport.h
     )
 else()
     set(SRC_GRP_SVC
@@ -242,4 +244,5 @@ target_link_libraries(shared
         MySQL::MySQL
         ${OPENSSL_LIBRARIES}
         OpenSSL::Crypto
+        $<$<BOOL:${WIN32}>:dbghelp>
 )

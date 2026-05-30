@@ -5258,12 +5258,6 @@ bool Player::CanSpeak() const
 /***              LOW LEVEL FUNCTIONS:Notifiers        ***/
 /*********************************************************/
 
-void Player::SendAttackSwingNotInRange()
-{
-    WorldPacket data(SMSG_ATTACKSWING_NOTINRANGE, 0);
-    GetSession()->SendPacket(&data);
-}
-
 /**
  * @brief Replaces a tokenized uint32 field value in a serialized array.
  *
@@ -5302,52 +5296,6 @@ void Player::Customize(ObjectGuid guid, uint8 gender, uint8 skin, uint8 face, ui
     CharacterDatabase.PExecute("UPDATE `characters` SET `gender` = '%u', `playerBytes` = '%u', `playerBytes2` = '%u' WHERE `guid` = '%u'", gender, skin | (face << 8) | (hairStyle << 16) | (hairColor << 24), player_bytes2, guid.GetCounter());
 
     delete result;
-}
-
-/**
- * @brief Sends the error packet for attempting to attack a dead target.
- */
-void Player::SendAttackSwingDeadTarget()
-{
-    WorldPacket data(SMSG_ATTACKSWING_DEADTARGET, 0);
-    GetSession()->SendPacket(&data);
-}
-
-/**
- * @brief Sends the error packet for a general inability to attack the target.
- */
-void Player::SendAttackSwingCantAttack()
-{
-    WorldPacket data(SMSG_ATTACKSWING_CANT_ATTACK, 0);
-    GetSession()->SendPacket(&data);
-}
-
-/**
- * @brief Sends the packet that cancels the player's current attack.
- */
-void Player::SendAttackSwingCancelAttack()
-{
-    WorldPacket data(SMSG_CANCEL_COMBAT, 0);
-    GetSession()->SendPacket(&data);
-}
-
-/**
- * @brief Sends the error packet for attempting to attack while facing the wrong direction.
- */
-void Player::SendAttackSwingBadFacingAttack()
-{
-    WorldPacket data(SMSG_ATTACKSWING_BADFACING, 0);
-    GetSession()->SendPacket(&data);
-}
-
-/**
- * @brief Sends the packet that cancels auto-repeat attacks for the client.
- */
-void Player::SendAutoRepeatCancel(Unit* target)
-{
-    WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, target->GetPackGUID().size());
-    data << target->GetPackGUID();
-    GetSession()->SendPacket(&data);
 }
 
 /**

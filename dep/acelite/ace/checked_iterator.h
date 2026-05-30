@@ -30,12 +30,13 @@
  * @author Ossama Othman
  */
 
-# if defined (_MSC_VER) && (_MSC_FULL_VER >= 140050000) && (!defined (_STLPORT_VERSION))
-// Checked iterators are currently only supported in MSVC++ 8 or better.
+# if defined (_MSC_VER) && (_MSC_FULL_VER >= 140050000) && (!defined (_STLPORT_VERSION)) && (_MSC_VER < 1950)
+// Checked iterators are currently only supported in MSVC++ 8 or better,
+// and were removed in MSVC 19.50 / Visual Studio 2026.
 #  include <iterator>
-# endif  /* _MSC_VER >= 1400 && !_STLPORT_VERSION */
+# endif  /* _MSC_VER >= 1400 && !_STLPORT_VERSION && _MSC_VER < 1950 */
 
-# if defined (_MSC_VER) && (_MSC_FULL_VER >= 140050000) && (!defined (_STLPORT_VERSION))
+# if defined (_MSC_VER) && (_MSC_FULL_VER >= 140050000) && (!defined (_STLPORT_VERSION)) && (_MSC_VER < 1950)
 template <typename PTR>
 stdext::checked_array_iterator<PTR>
 ACE_make_checked_array_iterator (PTR buf, size_t len)

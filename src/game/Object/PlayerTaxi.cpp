@@ -23,9 +23,25 @@
  */
 
 #include "PlayerTaxi.h"
-
+#include "Player.h"
+#include "Language.h"
+#include "Database/DatabaseEnv.h"
+#include "Log.h"
+#include "Opcodes.h"
+#include "SpellMgr.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
+#include "UpdateMask.h"
 #include "ObjectMgr.h"
+#include "ObjectAccessor.h"
+#include "Spell.h"
+#include "SpellAuras.h"
+#include "AchievementMgr.h"
+#include "DBCStores.h"
+#include "MapManager.h"
 
+#include <cmath>
 #include <limits>
 #include <sstream>
 
@@ -262,4 +278,295 @@ std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
 FactionTemplateEntry const* PlayerTaxi::GetFlightMasterFactionTemplate() const
 {
     return sFactionTemplateStore.LookupEntry(m_flightMasterFactionId);
+}
+
+/**
+ * @brief Starts a taxi flight across a sequence of taxi nodes.
+ *
+ * @param nodes The ordered taxi node path to travel.
+ * @param npc The taxi master providing the route, or NULL for spell/scripted travel.
+ * @param spellid The spell initiating the taxi flight, if any.
+ * @return True if the flight started successfully; otherwise, false.
+ */
+bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc /*= NULL*/, uint32 spellid /*= 0*/)
+{
+    if (nodes.size() < 2)
+    {
+        return false;
+    }
+
+    // not let cheating with start flight in time of logout process || if casting not finished || while in combat || if not use Spell's with EffectSendTaxi
+    if (GetSession()->isLogingOut() || IsInCombat())
+    {
+        GetSession()->SendActivateTaxiReply(ERR_TAXIPLAYERBUSY);
+        return false;
+    }
+
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+    {
+        return false;
+    }
+
+    // taximaster case
+    if (npc)
+    {
+        // not let cheating with start flight mounted
+        if (IsMounted())
+        {
+            GetSession()->SendActivateTaxiReply(ERR_TAXIPLAYERALREADYMOUNTED);
+            return false;
+        }
+
+        if (IsInDisallowedMountForm())
+        {
+            GetSession()->SendActivateTaxiReply(ERR_TAXIPLAYERSHAPESHIFTED);
+            return false;
+        }
+
+        // not let cheating with start flight in time of logout process || if casting not finished || while in combat || if not use Spell's with EffectSendTaxi
+        if (IsNonMeleeSpellCasted(false))
+        {
+            GetSession()->SendActivateTaxiReply(ERR_TAXIPLAYERBUSY);
+            return false;
+        }
+    }
+    // cast case or scripted call case
+    else
+    {
+        RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+
+        if (IsInDisallowedMountForm())
+        {
+            RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
+        }
+
+        if (Spell* spell = GetCurrentSpell(CURRENT_GENERIC_SPELL))
+            if (spell->m_spellInfo->Id != spellid)
+            {
+                InterruptSpell(CURRENT_GENERIC_SPELL, false);
+            }
+
+        InterruptSpell(CURRENT_AUTOREPEAT_SPELL, false);
+
+        if (Spell* spell = GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+            if (spell->m_spellInfo->Id != spellid)
+            {
+                InterruptSpell(CURRENT_CHANNELED_SPELL, true);
+            }
+    }
+
+    uint32 sourcenode = nodes[0];
+
+    // starting node too far away (cheat?)
+    TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(sourcenode);
+    if (!node)
+    {
+        GetSession()->SendActivateTaxiReply(ERR_TAXINOSUCHPATH);
+        return false;
+    }
+
+    // check node starting pos data set case if provided
+    if (node->x != 0.0f || node->y != 0.0f || node->z != 0.0f)
+    {
+        if (node->map_id != GetMapId() ||
+                (node->x - GetPositionX()) * (node->x - GetPositionX()) +
+                (node->y - GetPositionY()) * (node->y - GetPositionY()) +
+                (node->z - GetPositionZ()) * (node->z - GetPositionZ()) >
+                (2 * INTERACTION_DISTANCE) * (2 * INTERACTION_DISTANCE) * (2 * INTERACTION_DISTANCE))
+        {
+            GetSession()->SendActivateTaxiReply(ERR_TAXITOOFARAWAY);
+            return false;
+        }
+    }
+    // node must have pos if taxi master case (npc != NULL)
+    else if (npc)
+    {
+        GetSession()->SendActivateTaxiReply(ERR_TAXIUNSPECIFIEDSERVERERROR);
+        return false;
+    }
+
+    // Prepare to flight start now
+
+    // stop combat at start taxi flight if any
+    CombatStop();
+
+    // stop trade (client cancel trade at taxi map open but cheating tools can be used for reopen it)
+    TradeCancel(true);
+
+    // clean not finished taxi path if any
+    m_taxi.ClearTaxiDestinations();
+
+    // 0 element current node
+    m_taxi.AddTaxiDestination(sourcenode);
+
+    // fill destinations path tail
+    uint32 sourcepath = 0;
+    uint32 totalcost = 0;
+    uint32 firstcost = 0;
+
+    uint32 prevnode = sourcenode;
+    uint32 lastnode = 0;
+
+    for (uint32 i = 1; i < nodes.size(); ++i)
+    {
+        uint32 path, cost;
+
+        lastnode = nodes[i];
+        sObjectMgr.GetTaxiPath(prevnode, lastnode, path, cost);
+
+        if (!path)
+        {
+            m_taxi.ClearTaxiDestinations();
+            return false;
+        }
+
+        totalcost += cost;
+
+        if (i == 1)
+        {
+            firstcost = cost;
+        }
+
+        if (prevnode == sourcenode)
+        {
+            sourcepath = path;
+        }
+
+        m_taxi.AddTaxiDestination(lastnode);
+
+        prevnode = lastnode;
+    }
+
+    // get mount model (in case non taximaster (npc==NULL) allow more wide lookup)
+    uint32 mount_display_id = sObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == NULL);
+
+    // in spell case allow 0 model
+    if ((mount_display_id == 0 && spellid == 0) || sourcepath == 0)
+    {
+        GetSession()->SendActivateTaxiReply(ERR_TAXIUNSPECIFIEDSERVERERROR);
+
+        m_taxi.ClearTaxiDestinations();
+        return false;
+    }
+
+    uint64 money = GetMoney();
+
+    if (npc)
+    {
+        float discount = GetReputationPriceDiscount(npc);
+
+        totalcost = uint32(ceil(totalcost * discount));
+        firstcost = uint32(ceil(firstcost * discount));
+
+        m_taxi.SetFlightMasterFactionTemplateId(npc->getFaction());
+    }
+    else
+    {
+        m_taxi.SetFlightMasterFactionTemplateId(0);
+    }
+
+    if (money < totalcost)
+    {
+        GetSession()->SendActivateTaxiReply(ERR_TAXINOTENOUGHMONEY);
+
+        m_taxi.ClearTaxiDestinations();
+        return false;
+    }
+
+    // Checks and preparations done, DO FLIGHT
+    ModifyMoney(-(int64)totalcost);
+    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_TRAVELLING, totalcost);
+    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_FLIGHT_PATHS_TAKEN, 1);
+
+    // prevent stealth flight
+    RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
+    GetSession()->SendActivateTaxiReply(ERR_TAXIOK);
+    GetSession()->SendDoFlight(mount_display_id, sourcepath);
+
+    return true;
+}
+
+/**
+ * @brief Starts a taxi flight using a direct taxi path identifier.
+ *
+ * @param taxi_path_id The taxi path identifier to use.
+ * @param spellid The spell initiating the taxi flight, if any.
+ * @return True if the flight started successfully; otherwise, false.
+ */
+bool Player::ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid /*= 0*/)
+{
+    TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(taxi_path_id);
+    if (!entry)
+    {
+        return false;
+    }
+
+    std::vector<uint32> nodes;
+
+    nodes.resize(2);
+    nodes[0] = entry->from;
+    nodes[1] = entry->to;
+
+    return ActivateTaxiPathTo(nodes, NULL, spellid);
+}
+
+/**
+ * @brief Resumes an interrupted taxi flight from the nearest path node.
+ */
+void Player::ContinueTaxiFlight()
+{
+    uint32 sourceNode = m_taxi.GetTaxiSource();
+    if (!sourceNode)
+    {
+        return;
+    }
+
+    DEBUG_LOG("WORLD: Restart character %u taxi flight", GetGUIDLow());
+
+    uint32 mountDisplayId = sObjectMgr.GetTaxiMountDisplayId(sourceNode, GetTeam(), true);
+    uint32 path = m_taxi.GetCurrentTaxiPath();
+
+    // search appropriate start path node
+    uint32 startNode = 0;
+
+    TaxiPathNodeList const& nodeList = sTaxiPathNodesByPath[path];
+
+    float distPrev = MAP_SIZE * MAP_SIZE;
+    float distNext =
+        (nodeList[0].x - GetPositionX()) * (nodeList[0].x - GetPositionX()) +
+        (nodeList[0].y - GetPositionY()) * (nodeList[0].y - GetPositionY()) +
+        (nodeList[0].z - GetPositionZ()) * (nodeList[0].z - GetPositionZ());
+
+    for (uint32 i = 1; i < nodeList.size(); ++i)
+    {
+        TaxiPathNodeEntry const& node = nodeList[i];
+        TaxiPathNodeEntry const& prevNode = nodeList[i - 1];
+
+        // skip nodes at another map
+        if (node.mapid != GetMapId())
+        {
+            continue;
+        }
+
+        distPrev = distNext;
+
+        distNext =
+            (node.x - GetPositionX()) * (node.x - GetPositionX()) +
+            (node.y - GetPositionY()) * (node.y - GetPositionY()) +
+            (node.z - GetPositionZ()) * (node.z - GetPositionZ());
+
+        float distNodes =
+            (node.x - prevNode.x) * (node.x - prevNode.x) +
+            (node.y - prevNode.y) * (node.y - prevNode.y) +
+            (node.z - prevNode.z) * (node.z - prevNode.z);
+
+        if (distNext + distPrev < distNodes)
+        {
+            startNode = i;
+            break;
+        }
+    }
+
+    GetSession()->SendDoFlight(mountDisplayId, path, startNode);
 }

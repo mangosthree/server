@@ -6802,66 +6802,6 @@ void Player::SendAurasForTarget(Unit* target)
     GetSession()->SendPacket(&data);
 }
 
-void Player::SetDailyQuestStatus(uint32 quest_id)
-{
-    for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
-    {
-        if (!GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx))
-        {
-            SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx, quest_id);
-            m_DailyQuestChanged = true;
-            break;
-        }
-    }
-}
-
-void Player::SetWeeklyQuestStatus(uint32 quest_id)
-{
-    m_weeklyquests.insert(quest_id);
-    m_WeeklyQuestChanged = true;
-}
-
-void Player::SetMonthlyQuestStatus(uint32 quest_id)
-{
-    m_monthlyquests.insert(quest_id);
-    m_MonthlyQuestChanged = true;
-}
-
-void Player::ResetDailyQuestStatus()
-{
-    for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
-    {
-        SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx, 0);
-    }
-
-    // DB data deleted in caller
-    m_DailyQuestChanged = false;
-}
-
-void Player::ResetWeeklyQuestStatus()
-{
-    if (m_weeklyquests.empty())
-    {
-        return;
-    }
-
-    m_weeklyquests.clear();
-    // DB data deleted in caller
-    m_WeeklyQuestChanged = false;
-}
-
-void Player::ResetMonthlyQuestStatus()
-{
-    if (m_monthlyquests.empty())
-    {
-        return;
-    }
-
-    m_monthlyquests.clear();
-    // DB data deleted in caller
-    m_MonthlyQuestChanged = false;
-}
-
 /**
  * @brief Gets the battleground instance the player is currently associated with.
  *

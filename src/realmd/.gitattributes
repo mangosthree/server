@@ -1,0 +1,3 @@
+# Whitespace rules (mirror parent repo settings for submodule consistency)
+*.cpp        whitespace=trailing-space,space-before-tab,tab-in-indent,cr-at-eol
+*.h          whitespace=trailing-space,space-before-tab,tab-in-indent,cr-at-eol

@@ -34,6 +34,9 @@
 #include "Auth/Sha1.h"
 #include "ByteBuffer.h"
 #include "Utilities/Util.h"
+#ifdef _WIN32
+#include <atomic>
+#endif
 
 #include "SocketBuffer/BufferedSocket.h"
 
@@ -153,6 +156,14 @@ class AuthSocket: public BufferedSocket
          */
         void _SetVSFields(const std::string& rI);
 
+#ifdef _WIN32
+        /// Number of currently open auth TCP socket connections (observability).
+        static uint32 GetConnectionCount() { return s_connections.load(std::memory_order_relaxed); }
+
+        /// Number of clients currently authenticated and waiting for realm list (observability).
+        static uint32 GetAuthWaitingCount() { return s_authed.load(std::memory_order_relaxed); }
+#endif
+
     private:
         enum eStatus
         {
@@ -180,6 +191,14 @@ class AuthSocket: public BufferedSocket
         AccountTypes _accountSecurityLevel; /**< TODO */
 
         ACE_HANDLE patch_; /**< TODO */
+
+#ifdef _WIN32
+        /// Live count of constructed AuthSocket objects (open connections). Observability only.
+        static std::atomic<uint32> s_connections;
+
+        /// Live count of sockets currently in STATUS_AUTHED. Observability only.
+        static std::atomic<uint32> s_authed;
+#endif
 
         /**
          * @brief

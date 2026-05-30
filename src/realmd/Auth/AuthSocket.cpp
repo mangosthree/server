@@ -44,6 +44,11 @@
 
 extern DatabaseType LoginDatabase;
 
+#ifdef _WIN32
+std::atomic<uint32> AuthSocket::s_connections{0};
+std::atomic<uint32> AuthSocket::s_authed{0};
+#endif
+
 enum AccountFlags
 {
     ACCOUNT_FLAG_GM         = 0x00000001,
@@ -144,6 +149,9 @@ AuthSocket::AuthSocket() : _status(STATUS_CHALLENGE), _accountSecurityLevel(SEC_
 {
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
+#ifdef _WIN32
+    s_connections.fetch_add(1, std::memory_order_relaxed);
+#endif
 }
 
 /// Close patch file descriptor before leaving
@@ -153,6 +161,11 @@ AuthSocket::~AuthSocket()
     {
         ACE_OS::close(patch_);
     }
+#ifdef _WIN32
+    if (_status == STATUS_AUTHED)
+        s_authed.fetch_sub(1, std::memory_order_relaxed);
+    s_connections.fetch_sub(1, std::memory_order_relaxed);
+#endif
 }
 
 /// Accept the connection and set the s random value for SRP6
@@ -732,6 +745,9 @@ bool AuthSocket::_HandleLogonProof()
 
         ///- Set _status to authenticated
         _status = STATUS_AUTHED;
+#ifdef _WIN32
+        s_authed.fetch_add(1, std::memory_order_relaxed);
+#endif
     }
     else
     {
@@ -912,6 +928,9 @@ bool AuthSocket::_HandleReconnectProof()
 
         ///- Set _status to authenticated!
         _status = STATUS_AUTHED;
+#ifdef _WIN32
+        s_authed.fetch_add(1, std::memory_order_relaxed);
+#endif
 
         return true;
     }

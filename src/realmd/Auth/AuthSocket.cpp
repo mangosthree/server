@@ -77,7 +77,6 @@ typedef struct AUTH_LOGON_CHALLENGE_C
     uint8   I[1];
 } sAuthLogonChallenge_C;
 
-
 typedef struct AUTH_LOGON_PROOF_C
 {
     uint8   cmd;
@@ -139,7 +138,6 @@ typedef struct AuthHandler
 #else
 #pragma pack(pop)
 #endif
-
 
 /// Constructor - set the N and g values for SRP6
 AuthSocket::AuthSocket() : _status(STATUS_CHALLENGE), _accountSecurityLevel(SEC_PLAYER), _build(0), patch_(ACE_INVALID_HANDLE)
@@ -377,8 +375,8 @@ bool AuthSocket::_HandleLogonChallenge()
     std::string address = get_remote_address();
     LoginDatabase.escape_string(address);
     QueryResult* result = LoginDatabase.PQuery("SELECT `unbandate` FROM `ip_banned` WHERE "
-                          //    permanent                    still banned
-                          "(`unbandate` = `bandate` OR `unbandate` > UNIX_TIMESTAMP()) AND `ip` = '%s'", address.c_str());
+                            //               permanent                 still banned
+                            "(`unbandate` = `bandate` OR `unbandate` > UNIX_TIMESTAMP()) AND `ip` = '%s'", address.c_str());
     if (result)
     {
         pkt << (uint8)WOW_FAIL_BANNED;
@@ -448,7 +446,7 @@ bool AuthSocket::_HandleLogonChallenge()
                     std::string databaseV = (*result)[5].GetCppString();
                     std::string databaseS = (*result)[6].GetCppString();
 
-                    DEBUG_LOG("database authentication values: v='%s' s='%s'", databaseV.c_str(), databaseS.c_str());
+                    DEBUG_LOG("database authentication values present: v=%s s=%s", databaseV.size() == s_BYTE_SIZE * 2 ? "yes" : "no", databaseS.size() == s_BYTE_SIZE * 2 ? "yes" : "no");
 
                     // multiply with 2, bytes are stored as hexstring
                     if (databaseV.size() != s_BYTE_SIZE * 2 || databaseS.size() != s_BYTE_SIZE * 2)
@@ -692,10 +690,11 @@ bool AuthSocket::_HandleLogonProof()
         BASIC_LOG("User '%s' successfully authenticated", _login.c_str());
 
         ///- Update the sessionkey, last_ip, last login time and reset number of failed logins in the account table for this account
-        // No SQL injection (escaped user name) and IP address as received by socket
+        // No SQL injection (escaped user name and OS) and IP address as received by socket
         const char* K_hex = K.AsHexStr();
 
         // Use synchronous write to help ensure mangosd gets the correct key
+        LoginDatabase.escape_string(_os);
         LoginDatabase.Execute("START TRANSACTION");
         char updateQuery[512];
         snprintf(updateQuery, sizeof(updateQuery),

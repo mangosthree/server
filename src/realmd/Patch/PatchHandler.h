@@ -23,7 +23,7 @@
  */
 
 /** \file
-  \ingroup realmd
+    \ingroup realmd
   */
 
 #ifndef MANGOS_H_PATCHHANDLER
@@ -52,6 +52,7 @@ class PatchCache
          *
          */
         ~PatchCache();
+
         /**
          * @brief
          *
@@ -106,6 +107,7 @@ class PatchCache
          * @param
          */
         void LoadPatchMD5(const char*);
+
         /**
          * @brief
          *
@@ -145,6 +147,7 @@ class PatchHandler: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
          * @param patch
          */
         PatchHandler(ACE_HANDLE socket, ACE_HANDLE patch);
+
         /**
          * @brief
          *

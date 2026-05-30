@@ -103,7 +103,7 @@ enum AuthResult
     WOW_FAIL_GAME_ACCOUNT_LOCKED    = 0x18,                 ///< Access to your account has been temporarily disabled.
     WOW_FAIL_UNLOCKABLE_LOCK        = 0x19,                 ///< Your account has been locked but can be unlocked.
     WOW_FAIL_CONVERSION_REQUIRED    = 0x20,                 ///< This account needs to be converted to a Battle.net account. Please [Click Here] or go to: <site> to begin conversion.
-    WOW_FAIL_DISCONNECTED           = 0xFF
+    WOW_FAIL_DISCONNECTED           = 0xFF                  ///< Client disconnected from the authentication server
 };
 
 #endif

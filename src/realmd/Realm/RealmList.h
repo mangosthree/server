@@ -76,6 +76,7 @@ RealmBuildInfo const* FindBuildInfo(uint16 _build);
 typedef std::set<uint32> RealmBuilds;
 
 /// Storage object for a realm
+
 /**
  * @brief
  *
@@ -118,6 +119,7 @@ class RealmList
         ~RealmList() {};
 
         void Initialize(uint32 updateInterval);
+
         /**
          * Initializes a map holding a link from build number to a version.
          * \see RealmVersion
@@ -163,6 +165,7 @@ class RealmList
          * \see RealmVersion
          */
         void InitBuildToVersion();
+
         /**
          * Adds the given \ref Realm to a list sorted by version, ie: vanilla, tbc etc. This
          * in turn is used to only present the compatible realms to the clients connecting,
@@ -178,6 +181,7 @@ class RealmList
         void AddRealmToBuildList(const Realm& realm);
 
         void UpdateRealms(bool init);
+
         /**
          * @brief
          *

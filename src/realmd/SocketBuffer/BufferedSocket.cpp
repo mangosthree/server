@@ -23,7 +23,7 @@
  */
 
 /** \file
-  \ingroup realmd
+    \ingroup realmd
   */
 
 #include "Common.h"

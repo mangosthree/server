@@ -54,6 +54,7 @@ class AuthSocket: public BufferedSocket
          *
          */
         AuthSocket();
+
         /**
          * @brief
          *
@@ -65,17 +66,20 @@ class AuthSocket: public BufferedSocket
          *
          */
         void OnAccept() override;
+
         /**
          * @brief
          *
          */
         void OnRead() override;
+
         /**
          * @brief
          *
          * @param sha
          */
         void SendProof(Sha1Hash sha);
+
         /**
          * @brief
          *
@@ -92,24 +96,28 @@ class AuthSocket: public BufferedSocket
          * @return bool
          */
         bool _HandleLogonChallenge();
+
         /**
          * @brief
          *
          * @return bool
          */
         bool _HandleLogonProof();
+
         /**
          * @brief
          *
          * @return bool
          */
         bool _HandleReconnectChallenge();
+
         /**
          * @brief
          *
          * @return bool
          */
         bool _HandleReconnectProof();
+
         /**
          * @brief
          *
@@ -123,12 +131,14 @@ class AuthSocket: public BufferedSocket
          * @return bool
          */
         bool _HandleXferResume();
+
         /**
          * @brief
          *
          * @return bool
          */
         bool _HandleXferCancel();
+
         /**
          * @brief
          *

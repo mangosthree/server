@@ -22,66 +22,30 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "RuneMgr.h"
 #include "Player.h"
-#include "Language.h"
-#include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "Opcodes.h"
 #include "SpellMgr.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "UpdateMask.h"
-#include "SkillDiscovery.h"
-#include "QuestDef.h"
-#include "GossipDef.h"
-#include "UpdateData.h"
-#include "Channel.h"
-#include "ChannelMgr.h"
-#include "MapManager.h"
-#include "MapPersistentStateMgr.h"
-#include "InstanceData.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "CellImpl.h"
-#include "ObjectMgr.h"
-#include "ObjectAccessor.h"
-#include "CreatureAI.h"
-#include "Formulas.h"
-#include "Group.h"
-#include "Guild.h"
-#include "GuildMgr.h"
-#include "Pet.h"
-#include "Util.h"
-#include "Transports.h"
-#include "Weather.h"
-#include "BattleGround/BattleGround.h"
-#include "BattleGround/BattleGroundMgr.h"
-#include "BattleGround/BattleGroundAV.h"
-#include "OutdoorPvP/OutdoorPvP.h"
-#include "ArenaTeam.h"
-#include "Chat.h"
-#include "revision_data.h"
-#include "Database/DatabaseImpl.h"
-#include "Spell.h"
-#include "ScriptMgr.h"
-#include "SocialMgr.h"
-#include "AchievementMgr.h"
-#include "Mail.h"
 #include "SpellAuras.h"
-#include "DBCStores.h"
-#include "DB2Stores.h"
-#include "SQLStorages.h"
-#include "Vehicle.h"
-#include "Calendar.h"
-#include "DisableMgr.h"
-#ifdef ENABLE_ELUNA
-#include "LuaEngine.h"
-#endif /* ENABLE_ELUNA */
+#include "Unit.h"
 
 #include <cmath>
 
-void Player::UpdateRuneRegen(RuneType rune)
+static RuneType runeSlotTypes[MAX_RUNES] =
+{
+    /*0*/ RUNE_BLOOD,
+    /*1*/ RUNE_BLOOD,
+    /*2*/ RUNE_UNHOLY,
+    /*3*/ RUNE_UNHOLY,
+    /*4*/ RUNE_FROST,
+    /*5*/ RUNE_FROST
+};
+
+void RuneMgr::UpdateRuneRegen(RuneType rune)
 {
     if (rune >= RUNE_DEATH)
     {
@@ -118,7 +82,7 @@ void Player::UpdateRuneRegen(RuneType rune)
     }
 
     float auraMod = 1.0f;
-    Unit::AuraList const& regenAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+    Unit::AuraList const& regenAuras = m_owner->GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for (Unit::AuraList::const_iterator i = regenAuras.begin(); i != regenAuras.end(); ++i)
         if ((*i)->GetMiscValue() == POWER_RUNE && (*i)->GetSpellEffect()->EffectMiscValueB == rune)
         {
@@ -126,18 +90,18 @@ void Player::UpdateRuneRegen(RuneType rune)
         }
 
     // Unholy Presence
-    if (Aura* aura = GetAura(48265, EFFECT_INDEX_0))
+    if (Aura* aura = m_owner->GetAura(48265, EFFECT_INDEX_0))
     {
         auraMod *= (100.0f + aura->GetModifier()->m_amount) / 100.0f;
     }
 
     // Runic Corruption
-    if (Aura* aura = GetAura(51460, EFFECT_INDEX_0))
+    if (Aura* aura = m_owner->GetAura(51460, EFFECT_INDEX_0))
     {
         auraMod *= (100.0f + aura->GetModifier()->m_amount) / 100.0f;
     }
 
-    float hastePct = (100.0f - GetRatingBonusValue(CR_HASTE_MELEE)) / 100.0f;
+    float hastePct = (100.0f - m_owner->GetRatingBonusValue(CR_HASTE_MELEE)) / 100.0f;
     if (hastePct < 0)
     {
         hastePct = 1.0f;
@@ -146,10 +110,10 @@ void Player::UpdateRuneRegen(RuneType rune)
     cooldown *= hastePct / auraMod;
 
     float value = float(1 * IN_MILLISECONDS) / cooldown;
-    SetFloatValue(PLAYER_RUNE_REGEN_1 + uint8(actualRune), value);
+    m_owner->SetFloatValue(PLAYER_RUNE_REGEN_1 + uint8(actualRune), value);
 }
 
-void Player::UpdateRuneRegen()
+void RuneMgr::UpdateRuneRegen()
 {
     for (uint8 i = 0; i < NUM_RUNE_TYPES; ++i)
     {
@@ -157,7 +121,7 @@ void Player::UpdateRuneRegen()
     }
 }
 
-uint8 Player::GetRuneCooldownFraction(uint8 index) const
+uint8 RuneMgr::GetRuneCooldownFraction(uint8 index) const
 {
     uint16 baseCd = GetBaseRuneCooldown(index);
     if (!baseCd || !GetRuneCooldown(index))
@@ -172,22 +136,22 @@ uint8 Player::GetRuneCooldownFraction(uint8 index) const
     return uint8(float(baseCd - GetRuneCooldown(index)) / baseCd * 255);
 }
 
-void Player::AddRuneByAuraEffect(uint8 index, RuneType newType, Aura const* aura)
+void RuneMgr::AddRuneByAuraEffect(uint8 index, RuneType newType, Aura const* aura)
 {
     // Item - Death Knight T11 DPS 4P Bonus
-    if (newType == RUNE_DEATH && HasAura(90459))
+    if (newType == RUNE_DEATH && m_owner->HasAura(90459))
     {
-        CastSpell(this, 90507, true);   // Death Eater
+        m_owner->CastSpell(m_owner, 90507, true);   // Death Eater
     }
 
     SetRuneConvertAura(index, aura); ConvertRune(index, newType);
 }
 
-void Player::RemoveRunesByAuraEffect(Aura const* aura)
+void RuneMgr::RemoveRunesByAuraEffect(Aura const* aura)
 {
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {
-        if (m_runes->runes[i].ConvertAura == aura)
+        if (m_data.runes[i].ConvertAura == aura)
         {
             ConvertRune(i, GetBaseRune(i));
             SetRuneConvertAura(i, NULL);
@@ -195,9 +159,9 @@ void Player::RemoveRunesByAuraEffect(Aura const* aura)
     }
 }
 
-void Player::RestoreBaseRune(uint8 index)
+void RuneMgr::RestoreBaseRune(uint8 index)
 {
-    Aura const* aura = m_runes->runes[index].ConvertAura;
+    Aura const* aura = m_data.runes[index].ConvertAura;
     // If rune was converted by a non-pasive aura that still active we should keep it converted
     if (aura && !IsPassiveSpell(aura->GetSpellProto()))
     {
@@ -205,7 +169,7 @@ void Player::RestoreBaseRune(uint8 index)
     }
 
     // Blood of the North
-    if (aura->GetId() == 54637 && HasAura(54637))
+    if (aura->GetId() == 54637 && m_owner->HasAura(54637))
     {
         return;
     }
@@ -219,7 +183,7 @@ void Player::RestoreBaseRune(uint8 index)
     }
 
     for (uint8 i = 0; i < MAX_RUNES; ++i)
-        if (aura == m_runes->runes[i].ConvertAura)
+        if (aura == m_data.runes[i].ConvertAura)
         {
             return;
         }
@@ -230,17 +194,17 @@ void Player::RestoreBaseRune(uint8 index)
     }
 }
 
-void Player::ConvertRune(uint8 index, RuneType newType)
+void RuneMgr::ConvertRune(uint8 index, RuneType newType)
 {
     SetCurrentRune(index, newType);
 
     WorldPacket data(SMSG_CONVERT_RUNE, 2);
     data << uint8(index);
     data << uint8(newType);
-    GetSession()->SendPacket(&data);
+    m_owner->GetSession()->SendPacket(&data);
 }
 
-bool Player::ActivateRunes(RuneType type, uint32 count)
+bool RuneMgr::ActivateRunes(RuneType type, uint32 count)
 {
     bool modify = false;
     for (uint32 j = 0; count > 0 && j < MAX_RUNES; ++j)
@@ -256,7 +220,7 @@ bool Player::ActivateRunes(RuneType type, uint32 count)
     return modify;
 }
 
-void Player::ResyncRunes()
+void RuneMgr::ResyncRunes()
 {
     WorldPacket data(SMSG_RESYNC_RUNES, 4 + MAX_RUNES * 2);
     data << uint32(MAX_RUNES);
@@ -265,42 +229,40 @@ void Player::ResyncRunes()
         data << uint8(GetCurrentRune(i));                   // rune type
         data << uint8(GetRuneCooldownFraction(i));
     }
-    GetSession()->SendPacket(&data);
+    m_owner->GetSession()->SendPacket(&data);
 }
 
-void Player::AddRunePower(uint8 index)
+void RuneMgr::AddRunePower(uint8 index)
 {
     WorldPacket data(SMSG_ADD_RUNE_POWER, 4);
     data << uint32(1 << index);                             // mask (0x00-0x3F probably)
-    GetSession()->SendPacket(&data);
+    m_owner->GetSession()->SendPacket(&data);
 }
 
-void Player::InitRunes()
+void RuneMgr::Init()
 {
-    if (getClass() != CLASS_DEATH_KNIGHT)
+    if (m_owner->getClass() != CLASS_DEATH_KNIGHT)
     {
         return;
     }
 
-    m_runes = new Runes;
-
-    m_runes->runeState = 0;
+    m_data.runeState = 0;
 
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
         SetBaseRune(i, runeSlotTypes[i]);                   // init base types
         SetCurrentRune(i, runeSlotTypes[i]);                // init current types
         SetRuneCooldown(i, 0);                              // reset cooldowns
-        m_runes->SetRuneState(i);
+        m_data.SetRuneState(i);
     }
 
     for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
     {
-        SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f);
+        m_owner->SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f);
     }
 }
 
-bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
+bool RuneMgr::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
 {
     for (uint32 i = 0; i < MAX_RUNES; ++i)
         if (GetBaseRune(i) == runeType && GetRuneCooldown(i) == 0)

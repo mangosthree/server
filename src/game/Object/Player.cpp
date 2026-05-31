@@ -305,7 +305,7 @@ UpdateMask Player::updateVisualBits;
  *
  * @param session The owning world session.
  */
-Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_petMgr(this), m_achievementMgr(this), m_reputationMgr(this), m_glyphMgr(this), m_honorMgr(this), m_currencyMgr(this)
+Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_petMgr(this), m_achievementMgr(this), m_reputationMgr(this), m_glyphMgr(this), m_honorMgr(this), m_currencyMgr(this), m_runeMgr(this)
 {
     m_transport = 0;
 
@@ -530,7 +530,6 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
     // Initialize declined name to NULL
     m_declinedname = NULL;
-    m_runes = NULL;
 
     // Initialize last fall time to 0
     m_lastFallTime = 0;
@@ -597,7 +596,6 @@ Player::~Player()
         }
 
     delete m_declinedname;
-    delete m_runes;
 }
 
 /**

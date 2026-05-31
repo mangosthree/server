@@ -59,6 +59,7 @@
 #include "GlyphMgr.h"   // GlyphMgr is held by value on Player; brings in Glyph struct + GlyphUpdateState enum
 #include "HonorMgr.h"   // HonorMgr is held by value on Player; owns daily-kill rollover + RewardHonor calculation
 #include "CurrencyMgr.h" // CurrencyMgr is held by value on Player; brings in PlayerCurrency struct + PlayerCurrencyState/Flag enums + PlayerCurrenciesMap typedef
+#include "RuneMgr.h"    // RuneMgr is held by value on Player; brings in RuneType/RuneInfo/Runes + owns death-knight rune state
 
 #include "Database/DatabaseEnv.h"
 #include "NPCHandler.h"
@@ -359,60 +360,7 @@ struct Areas
     float y2;        // Y2 coordinate
 };
 
-#define MAX_RUNES               6
-
-enum RuneCooldowns
-{
-    RUNE_BASE_COOLDOWN          = 10000,
-    RUNE_MISS_COOLDOWN          = 1500     // cooldown applied on runes when the spell misses
-};
-
-enum RuneType
-{
-    RUNE_BLOOD                  = 0,
-    RUNE_UNHOLY                 = 1,
-    RUNE_FROST                  = 2,
-    RUNE_DEATH                  = 3,
-    NUM_RUNE_TYPES              = 4
-};
-
-static RuneType runeSlotTypes[MAX_RUNES] =
-{
-    /*0*/ RUNE_BLOOD,
-    /*1*/ RUNE_BLOOD,
-    /*2*/ RUNE_UNHOLY,
-    /*3*/ RUNE_UNHOLY,
-    /*4*/ RUNE_FROST,
-    /*5*/ RUNE_FROST
-};
-
-struct RuneInfo
-{
-    uint8  BaseRune;
-    uint8  CurrentRune;
-    uint16 BaseCooldown;
-    uint16 Cooldown;                                        // msec
-    Aura const* ConvertAura;
-};
-
-struct Runes
-{
-    RuneInfo runes[MAX_RUNES];
-    uint8 runeState;                                        // mask of available runes
-    uint32 lastUsedRuneMask;
-
-    void SetRuneState(uint8 index, bool set = true)
-    {
-        if (set)
-        {
-            runeState |= (1 << index);                      // usable
-        }
-        else
-        {
-            runeState &= ~(1 << index);                     // on cooldown
-        }
-    }
-};
+// Rune system types (MAX_RUNES / RuneType / RuneInfo / Runes) moved to RuneMgr.h
 
 struct EnchantDuration
 {
@@ -3775,32 +3723,32 @@ class Player : public Unit
 
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
 
-        // Rune functions, need check  getClass() == CLASS_DEATH_KNIGHT before access
-        uint8 GetRunesState() const { return m_runes->runeState; }
-        RuneType GetBaseRune(uint8 index) const { return RuneType(m_runes->runes[index].BaseRune); }
-        RuneType GetCurrentRune(uint8 index) const { return RuneType(m_runes->runes[index].CurrentRune); }
-        uint16 GetRuneCooldown(uint8 index) const { return m_runes->runes[index].Cooldown; }
-        uint16 GetBaseRuneCooldown(uint8 index) const { return m_runes->runes[index].BaseCooldown; }
-        uint8 GetRuneCooldownFraction(uint8 index) const;
-        void UpdateRuneRegen(RuneType rune);
-        void UpdateRuneRegen();
-        bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const;
-        void ClearLastUsedRuneMask() { m_runes->lastUsedRuneMask = 0; }
-        bool IsLastUsedRune(uint8 index) const { return (m_runes->lastUsedRuneMask & (1 << index)) != 0; }
-        void SetLastUsedRune(RuneType type) { m_runes->lastUsedRuneMask |= 1 << uint32(type); }
-        void SetBaseRune(uint8 index, RuneType baseRune) { m_runes->runes[index].BaseRune = baseRune; }
-        void SetCurrentRune(uint8 index, RuneType currentRune) { m_runes->runes[index].CurrentRune = currentRune; }
-        void SetRuneCooldown(uint8 index, uint16 cooldown) { m_runes->runes[index].Cooldown = cooldown; m_runes->SetRuneState(index, (cooldown == 0) ? true : false); }
-        void SetBaseRuneCooldown(uint8 index, uint16 cooldown) { m_runes->runes[index].BaseCooldown = cooldown; }
-        void SetRuneConvertAura(uint8 index, Aura const* aura) { m_runes->runes[index].ConvertAura = aura; }
-        void AddRuneByAuraEffect(uint8 index, RuneType newType, Aura const* aura);
-        void RemoveRunesByAuraEffect(Aura const* aura);
-        void RestoreBaseRune(uint8 index);
-        void ConvertRune(uint8 index, RuneType newType);
-        bool ActivateRunes(RuneType type, uint32 count);
-        void ResyncRunes();
-        void AddRunePower(uint8 index);
-        void InitRunes();
+        // Rune functions (delegated to m_runeMgr), need check getClass() == CLASS_DEATH_KNIGHT before access
+        uint8 GetRunesState() const { return m_runeMgr.GetRunesState(); }
+        RuneType GetBaseRune(uint8 index) const { return m_runeMgr.GetBaseRune(index); }
+        RuneType GetCurrentRune(uint8 index) const { return m_runeMgr.GetCurrentRune(index); }
+        uint16 GetRuneCooldown(uint8 index) const { return m_runeMgr.GetRuneCooldown(index); }
+        uint16 GetBaseRuneCooldown(uint8 index) const { return m_runeMgr.GetBaseRuneCooldown(index); }
+        uint8 GetRuneCooldownFraction(uint8 index) const { return m_runeMgr.GetRuneCooldownFraction(index); }
+        void UpdateRuneRegen(RuneType rune) { m_runeMgr.UpdateRuneRegen(rune); }
+        void UpdateRuneRegen() { m_runeMgr.UpdateRuneRegen(); }
+        bool IsBaseRuneSlotsOnCooldown(RuneType runeType) const { return m_runeMgr.IsBaseRuneSlotsOnCooldown(runeType); }
+        void ClearLastUsedRuneMask() { m_runeMgr.ClearLastUsedRuneMask(); }
+        bool IsLastUsedRune(uint8 index) const { return m_runeMgr.IsLastUsedRune(index); }
+        void SetLastUsedRune(RuneType type) { m_runeMgr.SetLastUsedRune(type); }
+        void SetBaseRune(uint8 index, RuneType baseRune) { m_runeMgr.SetBaseRune(index, baseRune); }
+        void SetCurrentRune(uint8 index, RuneType currentRune) { m_runeMgr.SetCurrentRune(index, currentRune); }
+        void SetRuneCooldown(uint8 index, uint16 cooldown) { m_runeMgr.SetRuneCooldown(index, cooldown); }
+        void SetBaseRuneCooldown(uint8 index, uint16 cooldown) { m_runeMgr.SetBaseRuneCooldown(index, cooldown); }
+        void SetRuneConvertAura(uint8 index, Aura const* aura) { m_runeMgr.SetRuneConvertAura(index, aura); }
+        void AddRuneByAuraEffect(uint8 index, RuneType newType, Aura const* aura) { m_runeMgr.AddRuneByAuraEffect(index, newType, aura); }
+        void RemoveRunesByAuraEffect(Aura const* aura) { m_runeMgr.RemoveRunesByAuraEffect(aura); }
+        void RestoreBaseRune(uint8 index) { m_runeMgr.RestoreBaseRune(index); }
+        void ConvertRune(uint8 index, RuneType newType) { m_runeMgr.ConvertRune(index, newType); }
+        bool ActivateRunes(RuneType type, uint32 count) { return m_runeMgr.ActivateRunes(type, count); }
+        void ResyncRunes() { m_runeMgr.ResyncRunes(); }
+        void AddRunePower(uint8 index) { m_runeMgr.AddRunePower(index); }
+        void InitRunes() { m_runeMgr.Init(); }
 
         AchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }
         AchievementMgr& GetAchievementMgr() { return m_achievementMgr; }
@@ -4114,7 +4062,7 @@ class Player : public Unit
         float m_summon_z; // Summon Z coordinate
 
         DeclinedName* m_declinedname;
-        Runes* m_runes;
+        RuneMgr m_runeMgr;
         EquipmentSets m_EquipmentSets;
         uint8 m_slot;
 

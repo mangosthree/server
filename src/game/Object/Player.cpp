@@ -4577,84 +4577,6 @@ void Player::SendExplorationExperience(uint32 Area, uint32 Experience)
     GetSession()->SendPacket(&data);
 }
 
-/*********************************************************/
-/***              Update timers                        ***/
-/*********************************************************/
-
-/// checks the 15 afk reports per 5 minutes limit
-void Player::UpdateAfkReport(time_t currTime)
-{
-    if (m_bgData.bgAfkReportedTimer <= currTime)
-    {
-        m_bgData.bgAfkReportedCount = 0;
-        m_bgData.bgAfkReportedTimer = currTime + 5 * MINUTE;
-    }
-}
-
-void Player::UpdateContestedPvP(uint32 diff)
-{
-    if (!m_contestedPvPTimer || IsInCombat())
-    {
-        return;
-    }
-    if (m_contestedPvPTimer <= diff)
-    {
-        ResetContestedPvP();
-    }
-    else
-    {
-        m_contestedPvPTimer -= diff;
-    }
-}
-
-/**
- * @brief Updates and clears the player's PvP flag when the timeout expires.
- *
- * @param currTime The current server time.
- */
-void Player::UpdatePvPFlag(time_t currTime)
-{
-    if (!IsPvP())
-    {
-        return;
-    }
-    if (pvpInfo.endTimer == 0 || currTime < (pvpInfo.endTimer + 300))
-    {
-        return;
-    }
-
-    UpdatePvP(false);
-}
-
-/**
- * @brief Starts an active duel once the duel countdown completes.
- *
- * @param currTime The current server time.
- */
-void Player::UpdateDuelFlag(time_t currTime)
-{
-    if (!duel || duel->startTimer == 0 || currTime < duel->startTimer + 3)
-    {
-        return;
-    }
-
-    // Used by Eluna
-#ifdef ENABLE_ELUNA
-    if (Eluna* e = GetEluna())
-    {
-        e->OnDuelStart(this, duel->opponent);
-    }
-#endif /* ENABLE_ELUNA */
-
-    SetUInt32Value(PLAYER_DUEL_TEAM, 1);
-    duel->opponent->SetUInt32Value(PLAYER_DUEL_TEAM, 2);
-
-    duel->startTimer = 0;
-    duel->startTime  = currTime;
-    duel->opponent->duel->startTimer = 0;
-    duel->opponent->duel->startTime  = currTime;
-}
-
 // send Proficiency
 void Player::SendProficiency(ItemClass itemClass, uint32 itemSubclassMask)
 {
@@ -4973,32 +4895,6 @@ void Player::UpdateHomebindTime(uint32 time)
         data << uint32(ERR_RAID_GROUP_NONE);                // error used only when timer = 0
         GetSession()->SendPacket(&data);
         DEBUG_LOG("PLAYER: Player '%s' (GUID: %u) will be teleported to homebind in 60 seconds", GetName(), GetGUIDLow());
-    }
-}
-
-/**
- * @brief Sets or clears the player's PvP state with timeout-aware handling.
- *
- * @param state True to enable PvP; false to disable it.
- * @param ovrride True to bypass the delayed PvP timeout behavior.
- */
-void Player::UpdatePvP(bool state, bool ovrride)
-{
-    if (!state || ovrride)
-    {
-        SetPvP(state);
-        pvpInfo.endTimer = 0;
-    }
-    else
-    {
-        if (pvpInfo.endTimer != 0)
-        {
-            pvpInfo.endTimer = time(NULL);
-        }
-        else
-        {
-            SetPvP(state);
-        }
     }
 }
 

@@ -1294,60 +1294,6 @@ void Aura::ReapplyAffectedPassiveAuras()
 /*********************************************************/
 /***               BASIC AURA FUNCTION                 ***/
 /*********************************************************/
-void Aura::HandleAddModifier(bool apply, bool Real)
-{
-    if (GetTarget()->GetTypeId() != TYPEID_PLAYER || !Real)
-    {
-        return;
-    }
-
-    if (m_modifier.m_miscvalue >= MAX_SPELLMOD)
-    {
-        return;
-    }
-
-    if (apply)
-    {
-        SpellEntry const* spellProto = GetSpellProto();
-
-        // Add custom charges for some mod aura
-        switch (spellProto->Id)
-        {
-            case 17941:                                     // Shadow Trance
-            case 22008:                                     // Netherwind Focus
-            case 31834:                                     // Light's Grace
-            case 34754:                                     // Clearcasting
-            case 34936:                                     // Backlash
-            case 44401:                                     // Missile Barrage
-            case 48108:                                     // Hot Streak
-            case 51124:                                     // Killing Machine
-            case 54741:                                     // Firestarter
-            case 57761:                                     // Fireball!
-            case 64823:                                     // Elune's Wrath (Balance druid t8 set
-                GetHolder()->SetAuraCharges(1);
-                break;
-        }
-
-        SpellClassOptionsEntry const * opt = spellProto->GetSpellClassOptions();
-        // Everlasting Affliction, overwrite wrong data, if will need more better restore support of spell_affect table
-        if (opt && spellProto->GetSpellFamilyName() == SPELLFAMILY_WARLOCK && spellProto->SpellIconID == 3169)
-        {
-            // Corruption and Unstable Affliction
-            const_cast<SpellClassOptionsEntry*>(opt)->SpellFamilyFlags = ClassFamilyMask(UI64LIT(0x0000010000000002));
-        }
-        // Improved Flametongue Weapon, overwrite wrong data, maybe time re-add table
-        else if (opt && spellProto->Id == 37212)
-        {
-            // Flametongue Weapon (Passive)
-            const_cast<SpellClassOptionsEntry*>(opt)->SpellFamilyFlags = ClassFamilyMask(UI64LIT(0x0000000000200000));
-        }
-    }
-
-    ((Player*)GetTarget())->AddSpellMod(this, apply);
-
-    ReapplyAffectedPassiveAuras();
-}
-
 /**
  * @brief Triggers the spell associated with the aura effect.
  */

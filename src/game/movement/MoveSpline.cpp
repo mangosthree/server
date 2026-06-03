@@ -90,6 +90,7 @@ namespace Movement
                 c.orientation = -c.orientation;
             }
         }
+        c.orientation = G3D::wrap(c.orientation, 0.f, (float)G3D::twoPi());
         return c;
     }
 

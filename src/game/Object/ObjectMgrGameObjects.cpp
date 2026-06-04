@@ -36,6 +36,7 @@
 #include "Log.h"
 #include "ProgressBar.h"
 #include "DBCStores.h"
+#include "SQLStorages.h"
 #include "MapManager.h"
 #include "GridDefines.h"
 #include "DisableMgr.h"

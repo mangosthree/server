@@ -2078,9 +2078,9 @@ void Spell::GetSpellRangeAndRadius(SpellEffectEntry const* spellEffect, float& r
                {
                     for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
                     {
-                        if (SpellEffectEntry const* spellEffect = currSpell->m_spellInfo->GetSpellEffect(SpellEffectIndex(i)))
+                        if (SpellEffectEntry const* currEffect = currSpell->m_spellInfo->GetSpellEffect(SpellEffectIndex(i)))
                         {
-                            if (spellEffect->EffectChainTarget > 0)
+                            if (currEffect->EffectChainTarget > 0)
                             {
                                 EffectChainTarget = 0;      // no chain targets
                             }

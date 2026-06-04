@@ -81,8 +81,6 @@
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
 
-extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
-
 class PrioritizeManaUnitWraper
 {
     public:
@@ -665,126 +663,6 @@ bool Spell::IsAliveUnitPresentInTargetList()
 
     // is all effects from m_needAliveTargetMask have alive targets
     return needAliveTargetMask == 0;
-}
-
-/**
- * @brief Dispatches one spell effect against the current resolved targets.
- *
- * @param pUnitTarget The unit target, if any.
- * @param pItemTarget The item target, if any.
- * @param pGOTarget The game object target, if any.
- * @param i The effect index to process.
- * @param DamageMultiplier The damage multiplier to apply for the effect.
- */
-void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOTarget, SpellEffectIndex i, float DamageMultiplier)
-{
-    unitTarget = pUnitTarget;
-    itemTarget = pItemTarget;
-    gameObjTarget = pGOTarget;
-
-    SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(SpellEffectIndex(i));
-
-    damage = int32(CalculateDamage(i, unitTarget) * DamageMultiplier);
-
-    if (spellEffect)
-    {
-        if (spellEffect->Effect < TOTAL_SPELL_EFFECTS)
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u Effect%d : %u Targets: %s, %s, %s",
-                m_spellInfo->Id, i, spellEffect->Effect,
-                unitTarget ? unitTarget->GetGuidStr().c_str() : "-",
-                itemTarget ? itemTarget->GetGuidStr().c_str() : "-",
-                gameObjTarget ? gameObjTarget->GetGuidStr().c_str() : "-");
-
-            (*this.*SpellEffects[spellEffect->Effect])(spellEffect);
-        }
-        else
-        {
-            sLog.outError("WORLD: Spell %u Effect%d : %u > TOTAL_SPELL_EFFECTS", m_spellInfo->Id, i, spellEffect->Effect);
-        }
-    }
-    else
-    {
-        sLog.outError("WORLD: Spell %u has no effect at index %u", m_spellInfo->Id, i);
-    }
-}
-
-/**
- * @brief Queues a spell to be triggered after successful completion.
- *
- * @param spellId The triggered spell identifier.
- */
-void Spell::AddTriggeredSpell(uint32 spellId)
-{
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
-
-    if (!spellInfo)
-    {
-        sLog.outError("Spell::AddTriggeredSpell: unknown spell id %u used as triggred spell for spell %u)", spellId, m_spellInfo->Id);
-        return;
-    }
-
-    m_TriggerSpells.push_back(spellInfo);
-}
-
-/**
- * @brief Queues a spell to be cast before applying effects to each target.
- *
- * @param spellId The precast spell identifier.
- */
-void Spell::AddPrecastSpell(uint32 spellId)
-{
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
-
-    if (!spellInfo)
-    {
-        sLog.outError("Spell::AddPrecastSpell: unknown spell id %u used as pre-cast spell for spell %u)", spellId, m_spellInfo->Id);
-        return;
-    }
-
-    m_preCastSpells.push_back(spellInfo);
-}
-
-/**
- * @brief Casts spells queued to trigger after the main spell completes successfully.
- */
-void Spell::CastTriggerSpells()
-{
-    for (SpellInfoList::const_iterator si = m_TriggerSpells.begin(); si != m_TriggerSpells.end(); ++si)
-    {
-        Spell* spell = new Spell(m_caster, (*si), true, m_originalCasterGUID);
-        spell->SpellStart(&m_targets);                         // use original spell original targets
-    }
-}
-
-/**
- * @brief Casts queued precast spells on the provided target.
- *
- * @param target The unit target for the precast spells.
- */
-void Spell::CastPreCastSpells(Unit* target)
-{
-    for (SpellInfoList::const_iterator si = m_preCastSpells.begin(); si != m_preCastSpells.end(); ++si)
-    {
-        m_caster->CastSpell(target, (*si), true, m_CastItem);
-    }
-}
-
-/**
- * @brief Gets the first queued unit target guid for an effect, falling back to the explicit target guid.
- *
- * @param effIndex The effect index to inspect.
- * @return The matching unit target guid, or the explicit unit target guid when none is queued.
- */
-Unit* Spell::GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const
-{
-    for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
-        if (itr->effectMask & (1 << effIndex))
-        {
-            return m_caster->GetMap()->GetUnit(itr->targetGUID);
-        }
-
-    return m_targets.getUnitTarget();
 }
 
 /**

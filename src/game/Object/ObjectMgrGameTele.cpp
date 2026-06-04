@@ -34,6 +34,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"
 #include "Log.h"
+#include "MapManager.h"
 #include "ProgressBar.h"
 #include "Util.h"
 

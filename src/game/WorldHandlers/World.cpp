@@ -1546,7 +1546,7 @@ void World::SetInitialWorldSettings()
         ///- Run eluna scripts.
         sLog.outString("Starting Eluna world state...");
         // use map id -1 for the global Eluna state
-        eluna = new Eluna(nullptr, sElunaConfig->IsElunaCompatibilityMode());
+        eluna = new Eluna(nullptr);
         sLog.outString();
     }
 #endif /*ENABLE_ELUNA*/

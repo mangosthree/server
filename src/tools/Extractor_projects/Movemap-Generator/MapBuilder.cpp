@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ namespace MMAP
         uint32 mapID, tileX, tileY, tileID, count = 0;
         char filter[12];
 
-        printf("Discovering maps... ");
+        printf(" Discovering maps...  ");
         getDirContents(files, "maps");
         for (uint32 i = 0; i < files.size(); ++i)
         {
@@ -193,10 +193,12 @@ namespace MMAP
 
             // add all tiles within bounds to tile list.
             for (uint32 i = minX; i <= maxX; ++i)
+            {
                 for (uint32 j = minY; j <= maxY; ++j)
                 {
                     tiles->insert(StaticMapTree::packTileID(i, j));
                 }
+            }
         }
 
         if (!tiles->size())
@@ -213,7 +215,7 @@ namespace MMAP
             return;
         }
 
-        // now start building mmtiles for each tile
+        // now start building/scheduling mmtiles for each tile
         printf("We have %u tiles.                          \n", (unsigned int)tiles->size());
         for (set<uint32>::iterator it = tiles->begin(); it != tiles->end(); ++it)
         {
@@ -245,7 +247,7 @@ namespace MMAP
         m_terrainBuilder->loadMap(mapID, tileX, tileY, meshData);
 
         // get model data
-        m_terrainBuilder->loadVMap(mapID, tileY, tileX, meshData);
+        m_terrainBuilder->loadVMap(mapID, tileX, tileY, meshData);
 
         // if there is no data, give up now
         if (!meshData.solidVerts.size() && !meshData.liquidVerts.size())
@@ -636,6 +638,7 @@ namespace MMAP
 
         delete [] tiles;
 
+#if defined (CATA)
         // remove padding for extraction
         for (int i = 0; i < iv.polyMesh->nverts; ++i)
         {
@@ -643,14 +646,16 @@ namespace MMAP
             v[0] -= (unsigned short)config.borderSize;
             v[2] -= (unsigned short)config.borderSize;
         }
-
+#endif
         // set polygons as walkable
         // TODO: special flags for DYNAMIC polygons, ie surfaces that can be turned on and off
         for (int i = 0; i < iv.polyMesh->npolys; ++i)
+        {
             if (iv.polyMesh->areas[i] & RC_WALKABLE_AREA)
             {
                 iv.polyMesh->flags[i] = iv.polyMesh->areas[i];
             }
+        }
 
         // setup mesh parameters
         dtNavMeshCreateParams params;
@@ -746,7 +751,7 @@ namespace MMAP
 
             // file output
             char fileName[255];
-            sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileY, tileX);
+            sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileX, tileY);
             FILE* file = fopen(fileName, "wb");
             if (!file)
             {
@@ -931,7 +936,7 @@ namespace MMAP
     bool MapBuilder::shouldSkipTile(uint32 mapID, uint32 tileX, uint32 tileY)
     {
         char fileName[255];
-        sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileY, tileX);
+        sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileX, tileY);
         FILE* file = fopen(fileName, "rb");
         if (!file)
         {

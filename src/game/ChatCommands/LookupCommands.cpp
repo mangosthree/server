@@ -1121,6 +1121,19 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
     Player* target = getSelectedPlayer();
 
     std::string namepart = args;
+
+    // Accept a shift-clicked spell link: search by its caption text,
+    // e.g. "|cff..|Hspell:133|h[Fireball]|h|r" -> "Fireball"
+    size_t linkStart = namepart.find('[');
+    if (linkStart != std::string::npos)
+    {
+        size_t linkEnd = namepart.find(']', linkStart);
+        if (linkEnd != std::string::npos)
+        {
+            namepart = namepart.substr(linkStart + 1, linkEnd - linkStart - 1);
+        }
+    }
+
     std::wstring wnamepart;
 
     if (!Utf8toWStr(namepart, wnamepart))
@@ -1140,7 +1153,8 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
         if (spellInfo)
         {
             int loc = GetSessionDbcLocale();
-            std::string name = spellInfo->SpellName[loc];
+            char const* nameStr = spellInfo->SpellName ? spellInfo->SpellName[loc] : NULL;
+            std::string name = nameStr ? nameStr : "";
             if (name.empty())
             {
                 continue;
@@ -1156,7 +1170,8 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
                         continue;
                     }
 
-                    name = spellInfo->SpellName[loc];
+                    nameStr = spellInfo->SpellName ? spellInfo->SpellName[loc] : NULL;
+                    name = nameStr ? nameStr : "";
                     if (name.empty())
                     {
                         continue;

@@ -179,11 +179,13 @@ void SpellCooldownMgr::UpdatePotionCooldown(Spell* spell)
         // spell/item pair let set proper cooldown (except nonexistent charged spell cooldown spellmods for potions)
         if (ItemPrototype const* proto = ObjectMgr::GetItemPrototype(m_owner->GetLastPotionId()))
             for (int idx = 0; idx < 5; ++idx)
+            {
                 if (proto->Spells[idx].SpellId && proto->Spells[idx].SpellTrigger == ITEM_SPELLTRIGGER_ON_USE)
                     if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(proto->Spells[idx].SpellId))
                     {
                         SendCooldownEvent(spellInfo, m_owner->GetLastPotionId());
                     }
+            }
     }
     // from spell cases (m_lastPotionId set in Spell::SendSpellCooldown)
     else

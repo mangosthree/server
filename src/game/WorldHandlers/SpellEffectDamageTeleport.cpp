@@ -204,10 +204,12 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     {
                         uint32 count = 0;
                         for(TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                        {
                             if (ihit->effectMask & (1<<effect->EffectIndex))
                             {
                                 ++count;
                             }
+                        }
 
                         damage /= count;                    // divide to all targets
                         break;
@@ -393,10 +395,12 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                     uint32 counter = 0;
                     Unit::AuraList const& dotAuras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
                     for (Unit::AuraList::const_iterator itr = dotAuras.begin(); itr != dotAuras.end(); ++itr)
+                    {
                         if ((*itr)->GetCasterGuid() == owner->GetObjectGuid())
                         {
                             ++counter;
                         }
+                    }
 
                     if (counter)
                     {

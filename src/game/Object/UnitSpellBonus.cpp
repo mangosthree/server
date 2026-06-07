@@ -673,10 +673,12 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
     if (!mOverrideSpellPowerAuras.empty())
     {
         for (Unit::AuraList::const_iterator itr = mOverrideSpellPowerAuras.begin(); itr != mOverrideSpellPowerAuras.end(); ++itr)
+        {
             if (schoolMask & (*itr)->GetModifier()->m_miscvalue)
             {
                 DoneAdvertisedBenefit += (*itr)->GetModifier()->m_amount;
             }
+        }
 
         return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + DoneAdvertisedBenefit) / 100.0f);
     }
@@ -1115,10 +1117,12 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
         uint32 maxHealth = pVictim->GetMaxHealth();
         float healthPct = maxHealth ? std::max(0.0f, 1.0f - float(pVictim->GetHealth()) / maxHealth) : 0.0f;
         for (AuraList::const_iterator i = mHealingFromHealthPct.begin();i != mHealingFromHealthPct.end(); ++i)
+        {
             if ((*i)->isAffectedOnSpell(spellProto))
             {
                 DoneTotalMod *= (100.0f + (*i)->GetModifier()->m_amount * healthPct) / 100.0f;
             }
+        }
     }
 
     // done scripted mod (take it from owner)
@@ -1172,9 +1176,11 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
 
                 Unit::AuraList const& RejorRegr = pVictim->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
                 for (Unit::AuraList::const_iterator itr = RejorRegr.begin(); itr != RejorRegr.end(); ++itr)
+                {
                     if ((*itr)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DRUID &&
                             (*itr)->GetCasterGuid() == GetObjectGuid())
                         ++ownHotCount;
+                }
 
                 if (ownHotCount)
                 {
@@ -1202,9 +1208,11 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
         int ownHotCount = 0;                        // counted HoT types amount, not stacks
         Unit::AuraList const& RejorRegr = pVictim->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
         for(Unit::AuraList::const_iterator i = RejorRegr.begin(); i != RejorRegr.end(); ++i)
+        {
             if ((*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_DRUID &&
                 (*i)->GetCasterGuid() == GetObjectGuid())
                 ++ownHotCount;
+        }
 
         if (ownHotCount)
         {
@@ -1290,10 +1298,12 @@ uint32 Unit::SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellProto,
 
     AuraList const& mHealingGet = GetAurasByType(SPELL_AURA_MOD_HEALING_RECEIVED);
     for (AuraList::const_iterator i = mHealingGet.begin(); i != mHealingGet.end(); ++i)
+    {
         if ((*i)->isAffectedOnSpell(spellProto))
         {
             TakenTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
         }
+    }
 
     // use float as more appropriate for negative values and percent applying
     float heal = (healamount + TakenTotal * int32(stack)) * TakenTotalMod;
@@ -1315,20 +1325,24 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
     if (!mOverrideSpellPowerAuras.empty())
     {
         for (Unit::AuraList::const_iterator itr = mOverrideSpellPowerAuras.begin(); itr != mOverrideSpellPowerAuras.end(); ++itr)
+        {
             if (schoolMask & (*itr)->GetModifier()->m_miscvalue)
             {
                 AdvertisedBenefit += (*itr)->GetModifier()->m_amount;
             }
+        }
 
         return int32(GetTotalAttackPowerValue(BASE_ATTACK) * (100.0f + AdvertisedBenefit) / 100.0f);
     }
 
     AuraList const& mHealingDone = GetAurasByType(SPELL_AURA_MOD_HEALING_DONE);
     for (AuraList::const_iterator i = mHealingDone.begin(); i != mHealingDone.end(); ++i)
+    {
         if (!(*i)->GetModifier()->m_miscvalue || ((*i)->GetModifier()->m_miscvalue & schoolMask) != 0)
         {
             AdvertisedBenefit += (*i)->GetModifier()->m_amount;
         }
+    }
 
     // Healing bonus of spirit, intellect and strength
     if (GetTypeId() == TYPEID_PLAYER)
@@ -1353,10 +1367,12 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
         // ... and attack power
         AuraList const& mHealingDonebyAP = GetAurasByType(SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER);
         for (AuraList::const_iterator i = mHealingDonebyAP.begin(); i != mHealingDonebyAP.end(); ++i)
+        {
             if ((*i)->GetModifier()->m_miscvalue & schoolMask)
             {
                 AdvertisedBenefit += int32(GetTotalAttackPowerValue(BASE_ATTACK) * (*i)->GetModifier()->m_amount / 100.0f);
             }
+        }
     }
 
     // pct spell power modifier
@@ -1383,10 +1399,12 @@ int32 Unit::SpellBaseHealingBonusTaken(SpellSchoolMask schoolMask)
     int32 AdvertisedBenefit = 0;
     AuraList const& mDamageTaken = GetAurasByType(SPELL_AURA_MOD_HEALING);
     for (AuraList::const_iterator i = mDamageTaken.begin(); i != mDamageTaken.end(); ++i)
+    {
         if ((*i)->GetModifier()->m_miscvalue & schoolMask)
         {
             AdvertisedBenefit += (*i)->GetModifier()->m_amount;
         }
+    }
 
     return AdvertisedBenefit;
 }
@@ -1402,18 +1420,22 @@ bool Unit::IsImmunedToDamage(SpellSchoolMask shoolMask)
     // If m_immuneToSchool type contain this school type, IMMUNE damage.
     SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
     for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
+    {
         if (itr->type & shoolMask)
         {
             return true;
         }
+    }
 
     // If m_immuneToDamage type contain magic, IMMUNE damage.
     SpellImmuneList const& damageList = m_spellImmune[IMMUNITY_DAMAGE];
     for (SpellImmuneList::const_iterator itr = damageList.begin(); itr != damageList.end(); ++itr)
+    {
         if (itr->type & shoolMask)
         {
             return true;
         }
+    }
 
     return false;
 }
@@ -1437,38 +1459,46 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf)
 
     SpellImmuneList const& dispelList = m_spellImmune[IMMUNITY_DISPEL];
     for (SpellImmuneList::const_iterator itr = dispelList.begin(); itr != dispelList.end(); ++itr)
+    {
         if (itr->type == spellInfo->GetDispel())
         {
             return true;
         }
+    }
 
     if (!spellInfo->HasAttribute(SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE) &&          // unaffected by school immunity
         !spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))           // can remove immune (by dispell or immune it)
     {
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
         for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
+        {
             if (!(IsPositiveSpell(itr->spellId) && IsPositiveSpell(spellInfo->Id)) &&
                 (itr->type & GetSpellSchoolMask(spellInfo)))
             {
                 return true;
             }
+        }
     }
 
     if (uint32 mechanic = spellInfo->GetMechanic())
     {
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
+        {
             if (itr->type == mechanic)
             {
                 return true;
             }
+        }
 
         AuraList const& immuneAuraApply = GetAurasByType(SPELL_AURA_MECHANIC_IMMUNITY_MASK);
         for (AuraList::const_iterator iter = immuneAuraApply.begin(); iter != immuneAuraApply.end(); ++iter)
+        {
             if ((*iter)->GetModifier()->m_miscvalue & (1 << (mechanic - 1)))
             {
                 return true;
             }
+        }
     }
 
     return false;
@@ -1494,36 +1524,44 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
     uint32 effect = spellEffect->Effect;
     SpellImmuneList const& effectList = m_spellImmune[IMMUNITY_EFFECT];
     for (SpellImmuneList::const_iterator itr = effectList.begin(); itr != effectList.end(); ++itr)
+    {
         if (itr->type == effect)
         {
             return true;
         }
+    }
 
     if (uint32 mechanic = spellEffect->EffectMechanic)
     {
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
+        {
             if (itr->type == mechanic)
             {
                 return true;
             }
+        }
 
         AuraList const& immuneAuraApply = GetAurasByType(SPELL_AURA_MECHANIC_IMMUNITY_MASK);
         for (AuraList::const_iterator iter = immuneAuraApply.begin(); iter != immuneAuraApply.end(); ++iter)
+        {
             if ((*iter)->GetModifier()->m_miscvalue & (1 << (mechanic - 1)))
             {
                 return true;
             }
+        }
     }
 
     if (uint32 aura = spellEffect->EffectApplyAuraName)
     {
         SpellImmuneList const& list = m_spellImmune[IMMUNITY_STATE];
         for (SpellImmuneList::const_iterator itr = list.begin(); itr != list.end(); ++itr)
+        {
             if (itr->type == aura)
             {
                 return true;
             }
+        }
 
         // Check for immune to application of harmful magical effects
         AuraList const& immuneAuraApply = GetAurasByType(SPELL_AURA_MOD_IMMUNE_AURA_APPLY_SCHOOL);
@@ -1534,10 +1572,12 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
             // Check school
             SpellSchoolMask schoolMask = GetSpellSchoolMask(spellInfo);
             for (AuraList::const_iterator iter = immuneAuraApply.begin(); iter != immuneAuraApply.end(); ++iter)
+            {
                 if ((*iter)->GetModifier()->m_miscvalue & schoolMask)
                 {
                     return true;
                 }
+            }
         }
     }
     return false;

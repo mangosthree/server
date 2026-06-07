@@ -1756,8 +1756,10 @@ void WorldSession::HandleReorderCharactersOpcode(WorldPacket& recv_data)
 
     CharacterDatabase.BeginTransaction();
     for (uint32 i = 0; i < charCount; ++i)
+    {
         CharacterDatabase.PExecute("UPDATE `characters` SET `slot` = '%u' WHERE `guid` = '%u' AND `account` = '%u'",
         slots[i], guids[i].GetCounter(), GetAccountId());
+    }
     CharacterDatabase.CommitTransaction();
 }
 

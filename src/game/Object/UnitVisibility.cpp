@@ -237,10 +237,12 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
             // Hunter mark functionality
             AuraList const& auras = GetAurasByType(SPELL_AURA_MOD_STALKED);
             for (AuraList::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
+            {
                 if ((*iter)->GetCasterGuid() == u->GetObjectGuid())
                 {
                     return true;
                 }
+            }
         }
 
         // none other cases for detect invisibility, so invisible
@@ -414,19 +416,23 @@ bool Unit::canDetectInvisibilityOf(Unit const* u) const
             int32 invLevel = 0;
             Unit::AuraList const& iAuras = u->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
             for (Unit::AuraList::const_iterator itr = iAuras.begin(); itr != iAuras.end(); ++itr)
+            {
                 if ((*itr)->GetModifier()->m_miscvalue == i && invLevel < (*itr)->GetModifier()->m_amount)
                 {
                     invLevel = (*itr)->GetModifier()->m_amount;
                 }
+            }
 
             // find invisibility detect level
             int32 detectLevel = 0;
             Unit::AuraList const& dAuras = GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
             for (Unit::AuraList::const_iterator itr = dAuras.begin(); itr != dAuras.end(); ++itr)
+            {
                 if ((*itr)->GetModifier()->m_miscvalue == i && detectLevel < (*itr)->GetModifier()->m_amount)
                 {
                     detectLevel = (*itr)->GetModifier()->m_amount;
                 }
+            }
 
             if (i == 6 && GetTypeId() == TYPEID_PLAYER)     // special drunk detection case
             {

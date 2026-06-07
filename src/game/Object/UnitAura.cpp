@@ -117,10 +117,12 @@ int32 Unit::GetMaxPositiveAuraModifier(AuraType auratype) const
 
     AuraList const& mTotalAuraList = GetAurasByType(auratype);
     for (AuraList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+    {
         if ((*i)->GetModifier()->m_amount > modifier)
         {
             modifier = (*i)->GetModifier()->m_amount;
         }
+    }
 
     return modifier;
 }
@@ -137,10 +139,12 @@ int32 Unit::GetMaxNegativeAuraModifier(AuraType auratype) const
 
     AuraList const& mTotalAuraList = GetAurasByType(auratype);
     for (AuraList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+    {
         if ((*i)->GetModifier()->m_amount < modifier)
         {
             modifier = (*i)->GetModifier()->m_amount;
         }
+    }
 
     return modifier;
 }
@@ -561,10 +565,12 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                         // find minimal effect-index that applies an aura
                         uint8 i = EFFECT_INDEX_0;
                         for (; i < MAX_EFFECT_INDEX; ++i)
+                        {
                             if (IsAuraApplyEffect(aurSpellInfo, SpellEffectIndex(i)))
                             {
                                 break;
                             }
+                        }
 
                         // Remove auras when first holder is applied
                         if ((1 << i) & holder->GetAuraFlags())
@@ -618,10 +624,12 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
     m_spellAuraHolders.insert(SpellAuraHolderMap::value_type(holder->GetId(), holder));
 
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         if (Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
         {
             AddAuraToModList(aur);
         }
+    }
 
     holder->ApplyAuraModifiers(true, true);                 // This is the place where auras are actually applied onto the target
     DEBUG_LOG("Holder of spell %u now is in use", holder->GetId());
@@ -1777,11 +1785,13 @@ Aura* Unit::GetAura(AuraType type, SpellFamily family, uint64 familyFlag, uint32
 {
     AuraList const& auras = GetAurasByType(type);
     for (AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
+    {
         if ((*i)->GetSpellProto()->IsFitToFamily(family, familyFlag, familyFlag2) &&
             (!casterGuid || (*i)->GetCasterGuid() == casterGuid))
         {
             return *i;
         }
+    }
 
     return NULL;
 }
@@ -1827,10 +1837,12 @@ bool Unit::HasAura(uint32 spellId, SpellEffectIndex effIndex) const
     //Find all auras with corresponding spellid, can be more than one
     SpellAuraHolderConstBounds spair = GetSpellAuraHolderBounds(spellId);
     for (SpellAuraHolderMap::const_iterator i_holder = spair.first; i_holder != spair.second; ++i_holder)
+    {
         if (i_holder->second->GetAuraByEffectIndex(effIndex))
         {
             return true;
         }
+    }
 
     return false;
 }

@@ -122,6 +122,7 @@ GameTele const* ObjectMgr::GetGameTele(const std::string& name) const
     // Alternative first GameTele what contains wnameLow as substring in case no GameTele location found
     const GameTele* alt = NULL;
     for (GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
+    {
         if (itr->second.wnameLow == wname)
         {
             return &itr->second;
@@ -130,6 +131,7 @@ GameTele const* ObjectMgr::GetGameTele(const std::string& name) const
         {
             alt = &itr->second;
         }
+    }
 
     return alt;
 }
@@ -145,10 +147,12 @@ bool ObjectMgr::AddGameTele(GameTele& tele)
     // find max id
     uint32 new_id = 0;
     for (GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
+    {
         if (itr->first > new_id)
         {
             new_id = itr->first;
         }
+    }
 
     // use next
     ++new_id;

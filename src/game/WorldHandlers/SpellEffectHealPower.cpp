@@ -314,10 +314,12 @@ void Spell::EffectHeal(SpellEffectEntry const* /*effect*/)
             int damageAmount = 0;
             Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
             for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+            {
                 if ((*i)->GetId() == 45062)
                 {
                     damageAmount += (*i)->GetModifier()->m_amount;
                 }
+            }
             if (damageAmount)
             {
                 m_caster->RemoveAurasDueToSpell(45062);

@@ -1464,10 +1464,12 @@ bool AuctionBotSeller::Initialize()
         // forced exclude filter
         bool isExcludeItem = false;
         for (size_t i = 0; (i < excludeItems.size() && (!isExcludeItem)); ++i)
+        {
             if (itemID == excludeItems[i])
             {
                 isExcludeItem = true;
             }
+        }
         if (isExcludeItem)
         {
             continue;
@@ -1476,10 +1478,12 @@ bool AuctionBotSeller::Initialize()
         // forced include filter
         bool isForcedIncludeItem = false;
         for (size_t i = 0; (i < includeItems.size() && (!isForcedIncludeItem)); ++i)
+        {
             if (itemID == includeItems[i])
             {
                 isForcedIncludeItem = true;
             }
+        }
 
         if (isForcedIncludeItem)
         {
@@ -1546,10 +1550,12 @@ bool AuctionBotSeller::Initialize()
         {
             bool IsVendorItem = false;
             for (size_t i = 0; (i < npcItems.size()) && (!IsVendorItem); ++i)
+            {
                 if (itemID == npcItems[i])
                 {
                     IsVendorItem = true;
                 }
+            }
 
             if (IsVendorItem)
             {
@@ -1562,10 +1568,12 @@ bool AuctionBotSeller::Initialize()
         {
             bool isLootItem = false;
             for (size_t i = 0; (i < lootItems.size()) && (!isLootItem); ++i)
+            {
                 if (itemID == lootItems[i])
                 {
                     isLootItem = true;
                 }
+            }
             if (isLootItem)
             {
                 continue;
@@ -1579,16 +1587,20 @@ bool AuctionBotSeller::Initialize()
             bool isLootItem = false;
 
             for (size_t i = 0; (i < npcItems.size()) && (!IsVendorItem); ++i)
+            {
                 if (itemID == npcItems[i])
                 {
                     IsVendorItem = true;
                 }
+            }
 
             for (size_t i = 0; (i < lootItems.size()) && (!isLootItem); ++i)
+            {
                 if (itemID == lootItems[i])
                 {
                     isLootItem = true;
                 }
+            }
 
             if ((!isLootItem) && (!IsVendorItem))
             {
@@ -1797,11 +1809,13 @@ bool AuctionBotSeller::Initialize()
 
     sLog.outString("Items loaded      \tGrey\tWhite\tGreen\tBlue\tPurple\tOrange\tYellow");
     for (uint32 i = 0; i < MAX_ITEM_CLASS; ++i)
+    {
         sLog.outString("%-18s\t%zu\t%zu\t%zu\t%zu\t%zu\t%zu\t%zu",
                        sAuctionBotConfig.GetItemClassName(ItemClass(i)),
                        m_ItemPool[0][i].size(), m_ItemPool[1][i].size(), m_ItemPool[2][i].size(),
                        m_ItemPool[3][i].size(), m_ItemPool[4][i].size(), m_ItemPool[5][i].size(),
                        m_ItemPool[6][i].size());
+    }
 
     sLog.outString();
     sLog.outString("AHBot seller configuration data loaded and initilized");
@@ -1816,10 +1830,12 @@ bool AuctionBotSeller::Initialize()
 void AuctionBotSeller::LoadConfig()
 {
     for (int i = 0; i < MAX_AUCTION_HOUSE_TYPE; ++i)
+    {
         if (sAuctionBotConfig.getConfigItemAmountRatio(AuctionHouseType(i)))
         {
             LoadSellerValues(m_HouseConfig[i]);
         }
+    }
 }
 
 /**

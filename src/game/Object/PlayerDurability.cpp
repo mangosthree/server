@@ -90,10 +90,12 @@
 void Player::DurabilityLossAll(double percent, bool inventory)
 {
     for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
+    {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
         {
             DurabilityLoss(pItem, percent);
         }
+    }
 
     if (inventory)
     {
@@ -101,18 +103,24 @@ void Player::DurabilityLossAll(double percent, bool inventory)
         // for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
 
         for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+        {
             if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             {
                 DurabilityLoss(pItem, percent);
             }
+        }
 
         for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+        {
             if (Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                 for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                {
                     if (Item* pItem = GetItemByPos(i, j))
                     {
                         DurabilityLoss(pItem, percent);
                     }
+                }
+        }
     }
 }
 
@@ -167,18 +175,24 @@ void Player::DurabilityPointsLossAll(int32 points, bool inventory)
         // for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
 
         for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+        {
             if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             {
                 DurabilityPointsLoss(pItem, points);
             }
+        }
 
         for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+        {
             if (Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                 for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                {
                     if (Item* pItem = GetItemByPos(i, j))
                     {
                         DurabilityPointsLoss(pItem, points);
                     }
+                }
+        }
     }
 }
 
@@ -256,10 +270,12 @@ uint32 Player::DurabilityRepairAll(bool cost, float discountMod, bool guildBank)
 
     // items in inventory bags
     for (int j = INVENTORY_SLOT_BAG_START; j < INVENTORY_SLOT_BAG_END; ++j)
+    {
         for (int i = 0; i < MAX_BAG_SIZE; ++i)
         {
             TotalCost += DurabilityRepair(((j << 8) | i), cost, discountMod, guildBank);
         }
+    }
     return TotalCost;
 }
 

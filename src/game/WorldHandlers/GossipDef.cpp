@@ -585,6 +585,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
         data << pQuest->RewChoiceItemCount[i];
     }
     for (uint32 i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
+    {
         if (ItemPrototype const* IProto = ObjectMgr::GetItemPrototype(pQuest->RewChoiceItemId[i]))
         {
             data << IProto->DisplayInfoID;
@@ -593,6 +594,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
         {
             data << uint32(0);
         }
+    }
 
     data << pQuest->GetRewItemsCount();
 
@@ -605,6 +607,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
         data << pQuest->RewItemCount[i];
     }
     for (uint32 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+    {
         if (ItemPrototype const* IProto = ObjectMgr::GetItemPrototype(pQuest->RewItemId[i]))
         {
             data << IProto->DisplayInfoID;
@@ -613,6 +616,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
         {
             data << uint32(0);
         }
+    }
 
     // send rewMoneyMaxLevel explicit for max player level, else send RewOrReqMoney
     if (GetMenuSession()->GetPlayer()->getLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
@@ -1020,6 +1024,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
         data << uint32(pQuest->RewChoiceItemCount[i]);
     }
     for (uint32 i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
+    {
         if (ItemPrototype const* pItem = ObjectMgr::GetItemPrototype(pQuest->RewChoiceItemId[i]))
         {
             data << uint32(pItem->DisplayInfoID);
@@ -1028,6 +1033,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
         {
             data << uint32(0);
         }
+    }
 
     // Add reward items to the packet
     data << uint32(pQuest->GetRewItemsCount());
@@ -1040,6 +1046,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
         data << uint32(pQuest->RewItemCount[i]);
     }
     for (uint32 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+    {
         if (ItemPrototype const* pItem = ObjectMgr::GetItemPrototype(pQuest->RewItemId[i]))
         {
             data << uint32(pItem->DisplayInfoID);
@@ -1048,6 +1055,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
         {
             data << uint32(0);
         }
+    }
 
     // send rewMoneyMaxLevel explicit for max player level, else send RewOrReqMoney
     if (GetMenuSession()->GetPlayer()->getLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))

@@ -396,10 +396,12 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     // check presence
                     for (int j = 0; j < 4; ++j)
+                    {
                         if (unitTarget->HasAura(spells[j], EFFECT_INDEX_0))
                         {
                             return;
                         }
+                    }
 
                     // cast
                     unitTarget->CastSpell(unitTarget, spells[urand(0, 3)], true);
@@ -3458,10 +3460,12 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     // don't overwrite an existing aura
                     for (uint8 i = 0; i < 5; ++i)
+                    {
                         if (unitTarget->HasAura(spellid + i, EFFECT_INDEX_0))
                         {
                             return;
                         }
+                    }
 
                     unitTarget->CastSpell(unitTarget, spellid + urand(0, 4), true);
                     break;

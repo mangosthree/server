@@ -621,10 +621,12 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
     // unlearn non talent higher ranks (recursive)
     SpellChainMapNext const& nextMap = sSpellMgr.GetSpellChainNext();
     for (SpellChainMapNext::const_iterator itr2 = nextMap.lower_bound(spell_id); itr2 != nextMap.upper_bound(spell_id); ++itr2)
+    {
         if (HasSpell(itr2->second) && !GetTalentSpellPos(itr2->second))
         {
             removeSpell(itr2->second, disabled, false);
         }
+    }
 
     // re-search, it can be corrupted in prev loop
     itr = m_spells.find(spell_id);
@@ -660,10 +662,12 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
 
     // remove pet auras
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         if (PetAura const* petSpell = sSpellMgr.GetPetAura(spell_id, SpellEffectIndex(i)))
         {
             RemovePetAura(petSpell);
         }
+    }
 
     TalentSpellPos const* talentPos = GetTalentSpellPos(spell_id);
     if (talentPos)
@@ -1002,10 +1006,12 @@ bool Player::resetTalents(bool no_cost, bool all_specs)
         }
 
         for (int j = 0; j < MAX_TALENT_RANK; ++j)
+        {
             if (talentInfo->RankID[j])
             {
                 removeSpell(talentInfo->RankID[j], !IsPassiveSpell(talentInfo->RankID[j]), false);
             }
+        }
 
         iter = m_talents[m_activeSpec].begin();
     }

@@ -936,12 +936,14 @@ void Aura::HandleAuraModSilence(bool apply, bool Real)
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED);
         // Stop cast only spells vs PreventionType == SPELL_PREVENTION_TYPE_SILENCE
         for (uint32 i = CURRENT_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
+        {
             if (Spell* spell = target->GetCurrentSpell(CurrentSpellTypes(i)))
                 if (spell->m_spellInfo->GetPreventionType() == SPELL_PREVENTION_TYPE_SILENCE)
                     // Stop spells on prepare or casting state
                 {
                     target->InterruptSpell(CurrentSpellTypes(i), false);
                 }
+        }
     }
     else
     {
@@ -999,10 +1001,12 @@ void Aura::HandleModThreat(bool apply, bool Real)
 
     if (target->GetTypeId() == TYPEID_PLAYER)
         for (int8 x = 0; x < MAX_SPELL_SCHOOL; ++x)
+        {
             if (m_modifier.m_miscvalue & int32(1 << x))
             {
                 ApplyPercentModFloatVar(target->m_threatModifier[x], float(m_modifier.m_amount), apply);
             }
+        }
 }
 
 /**

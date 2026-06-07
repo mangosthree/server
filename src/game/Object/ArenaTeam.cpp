@@ -652,10 +652,12 @@ uint32 ArenaTeam::GetPoints(uint32 MemberRating)
 bool ArenaTeam::HaveMember(ObjectGuid guid) const
 {
     for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    {
         if (itr->guid == guid)
         {
             return true;
         }
+    }
 
     return false;
 }

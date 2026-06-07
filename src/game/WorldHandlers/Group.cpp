@@ -339,10 +339,12 @@ void Group::ConvertToRaid()
 
     // update quest related GO states (quest activity dependent from raid membership)
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
+    {
         if (Player* player = sObjectMgr.GetPlayer(citr->guid))
         {
             player->UpdateForQuestWorldObjects();
         }
+    }
 }
 
 /**
@@ -440,10 +442,12 @@ void Group::RemoveAllInvites()
 Player* Group::GetInvited(ObjectGuid guid) const
 {
     for (InvitesList::const_iterator itr = m_invitees.begin(); itr != m_invitees.end(); ++itr)
+    {
         if ((*itr)->GetObjectGuid() == guid)
         {
             return (*itr);
         }
+    }
 
     return NULL;
 }
@@ -1010,10 +1014,12 @@ bool Group::CountRollVote(Player* player, ObjectGuid const& lootedTarget, uint32
 {
     Rolls::iterator rollI = RollId.begin();
     for (; rollI != RollId.end(); ++rollI)
+    {
         if ((*rollI)->isValid() && (*rollI)->lootedTargetGUID == lootedTarget && (*rollI)->itemSlot == itemSlot)
         {
             break;
         }
+    }
 
     if (rollI == RollId.end())
     {
@@ -1352,10 +1358,12 @@ void Group::SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid)
     // clean other icons
     if (targetGuid)
         for (int i = 0; i < TARGET_ICON_COUNT; ++i)
+        {
             if (m_targetIcons[i] == targetGuid)
             {
                 SetTargetIcon(i, ObjectGuid(), ObjectGuid());
             }
+        }
 
     m_targetIcons[id] = targetGuid;
 
@@ -1546,11 +1554,13 @@ void Group::UpdatePlayerOutOfRange(Player* pPlayer)
     pPlayer->GetSession()->BuildPartyMemberStatsChangedPacket(pPlayer, &data);
 
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
         if (Player* player = itr->getSource())
             if (player != pPlayer && !player->HaveAtClient(pPlayer))
             {
                 player->GetSession()->SendPacket(&data);
             }
+    }
 }
 
 /**

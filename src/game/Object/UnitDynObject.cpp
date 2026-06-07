@@ -195,10 +195,12 @@ DynamicObject* Unit::GetDynObject(uint32 spellId)
 GameObject* Unit::GetGameObject(uint32 spellId) const
 {
     for (GameObjectList::const_iterator i = m_gameObj.begin(); i != m_gameObj.end(); ++i)
+    {
         if ((*i)->GetSpellId() == spellId)
         {
             return *i;
         }
+    }
 
     WildGameObjectMap::const_iterator find = m_wildGameObjs.find(spellId);
     if (find != m_wildGameObjs.end())

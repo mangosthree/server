@@ -1607,10 +1607,12 @@ void Player::_LoadQuestStatus(QueryResult* result)
                     }
 
                     for (uint8 idx = 0; idx < QUEST_OBJECTIVES_COUNT; ++idx)
+                    {
                         if (questStatusData.m_creatureOrGOcount[idx])
                         {
                             SetQuestSlotCounter(slot, idx, questStatusData.m_creatureOrGOcount[idx]);
                         }
+                    }
 
                     ++slot;
                 }

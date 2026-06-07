@@ -550,10 +550,12 @@ void DungeonResetScheduler::LoadResetTimes()
 
         // schedule the reset times
         for (InstResetTimeMapDiffType::iterator itr = instResetTime.begin(); itr != instResetTime.end(); ++itr)
+        {
             if (itr->second.second > now)
             {
                 ScheduleReset(true, itr->second.second, DungeonResetEvent(RESET_EVENT_NORMAL_DUNGEON, PAIR32_LOPART(itr->second.first), Difficulty(PAIR32_HIPART(itr->second.first)), itr->first));
             }
+        }
     }
 
     // load the global respawn times for raid/heroic instances
@@ -640,10 +642,12 @@ void DungeonResetScheduler::LoadResetTimes()
         // schedule the global reset/warning
         ResetEventType type = RESET_EVENT_INFORM_1;
         for (; type < RESET_EVENT_INFORM_LAST; type = ResetEventType(type + 1))
+        {
             if (t > time_t(now + resetEventTypeDelay[type]))
             {
                 break;
             }
+        }
 
         ScheduleReset(true, t - resetEventTypeDelay[type], DungeonResetEvent(type, mapid, difficulty, 0));
     }
@@ -738,10 +742,12 @@ void DungeonResetScheduler::Update()
 
                 ResetEventType type = RESET_EVENT_INFORM_1;
                 for (; type < RESET_EVENT_INFORM_LAST; type = ResetEventType(type + 1))
+                {
                     if (next_reset > time_t(now + resetEventTypeDelay[type]))
                     {
                         break;
                     }
+                }
 
                 // add new scheduler event to the queue
                 event.type = type;
@@ -1183,10 +1189,12 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
         // note that we must build a list of states to unbind and then unbind them in two steps.  this is because the unbinding may
         // trigger the modification of the collection, which would invalidate the iterator and cause a crash.
         for (PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end(); ++itr)
+        {
             if (itr->second->GetMapId() == mapid && itr->second->GetDifficulty() == difficulty)
             {
                 unbindList.push_back((DungeonPersistentState *)itr->second);
             }
+        }
 
         for (auto i : unbindList)
         {
@@ -1261,11 +1269,13 @@ void MapPersistentStateManager::InitWorldMaps()
 {
     MapPersistentState* state = NULL;                       // need any from created for shared pool state
     for (uint32 mapid = 0; mapid < sMapStore.GetNumRows(); ++mapid)
+    {
         if (MapEntry const* entry = sMapStore.LookupEntry(mapid))
             if (!entry->Instanceable())
             {
                 state = AddPersistentState(entry, 0, REGULAR_DIFFICULTY, 0, false, true, false);
             }
+    }
 
     if (state)
     {

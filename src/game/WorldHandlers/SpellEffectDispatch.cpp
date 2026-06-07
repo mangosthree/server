@@ -195,10 +195,12 @@ void Spell::CastPreCastSpells(Unit* target)
 Unit* Spell::GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const
 {
     for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
+    {
         if (itr->effectMask & (1 << effIndex))
         {
             return m_caster->GetMap()->GetUnit(itr->targetGUID);
         }
+    }
 
     return m_targets.getUnitTarget();
 }

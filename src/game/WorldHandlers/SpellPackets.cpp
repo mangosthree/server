@@ -156,20 +156,24 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 ca
             {
                 SpellTotemsEntry const* totems = spellInfo->GetSpellTotems();
                 for(int i = 0; i < MAX_SPELL_TOTEMS; ++i)
+                {
                     if (totems && totems->Totem[i])
                     {
                         data << uint32(totems->Totem[i]);
                     }
+                }
             }
             break;
         case SPELL_FAILED_TOTEM_CATEGORY:
             {
                 SpellTotemsEntry const* totems = spellInfo->GetSpellTotems();
                 for(int i = 0; i < MAX_SPELL_TOTEM_CATEGORIES; ++i)
+                {
                     if (totems && totems->TotemCategory[i])
                     {
                         data << uint32(totems->TotemCategory[i]);
                     }
+                }
             }
             break;
         case SPELL_FAILED_EQUIPPED_ITEM_CLASS:

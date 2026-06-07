@@ -455,10 +455,12 @@ bool Player::canSeeSpellClickOn(Creature const* c) const
 
     SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(c->GetEntry());
     for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
+    {
         if (itr->second.IsFitToRequirements(this, c))
         {
             return true;
         }
+    }
 
     return false;
 }
@@ -832,10 +834,12 @@ void Player::ActivateSpec(uint8 specNum)
             TalentEntry const* talentInfo = talent.talentEntry;
 
             for (int r = 0; r < MAX_TALENT_RANK; ++r)
+            {
                 if (talentInfo->RankID[r])
                 {
                     removeSpell(talentInfo->RankID[r], !IsPassiveSpell(talentInfo->RankID[r]), false);
                 }
+            }
 
             specIter = m_talents[m_activeSpec].begin();
         }

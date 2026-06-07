@@ -412,10 +412,12 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
 bool AchievementCriteriaRequirementSet::Meets(Player const* source, Unit const* target, uint32 miscvalue /*= 0*/) const
 {
     for (Storage::const_iterator itr = storage.begin(); itr != storage.end(); ++itr)
+    {
         if (!itr->Meets(criteria_id, source, target, miscvalue))
         {
             return false;
         }
+    }
 
     return true;
 }
@@ -1121,10 +1123,12 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             {
                 uint32 counter = 0;
                 for (QuestStatusMap::const_iterator questItr = GetPlayer()->getQuestStatusMap().begin(); questItr != GetPlayer()->getQuestStatusMap().end(); ++questItr)
+                {
                     if (questItr->second.m_rewarded)
                     {
                         ++counter;
                     }
+                }
                 change = counter;
                 progressType = PROGRESS_HIGHEST;
                 break;
@@ -1888,10 +1892,12 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 {
                     SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellIter->first);
                     for (SkillLineAbilityMap::const_iterator skillIter = bounds.first; skillIter != bounds.second; ++skillIter)
+                    {
                         if (skillIter->second->skillId == achievementCriteria->learn_skill_line.skillLine)
                         {
                             ++spellCount;
                         }
+                    }
                 }
                 change = spellCount;
                 progressType = PROGRESS_HIGHEST;
@@ -2419,10 +2425,12 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
         if (AchievementEntryList const* achRefList = sAchievementMgr.GetAchievementByReferencedId(achievement->ID))
         {
             for (AchievementEntryList::const_iterator itr = achRefList->begin(); itr != achRefList->end(); ++itr)
+            {
                 if (IsCompletedAchievement(*itr))
                 {
                     CompletedAchievement(*itr);
                 }
+            }
         }
     }
     // update dependent achievements state at criteria incomplete
@@ -2443,11 +2451,13 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
 
         if (AchievementEntryList const* achRefList = sAchievementMgr.GetAchievementByReferencedId(achievement->ID))
             for (AchievementEntryList::const_iterator itr = achRefList->begin(); itr != achRefList->end(); ++itr)
+            {
                 if (HasAchievement((*itr)->ID))
                     if (!IsCompletedAchievement(*itr))
                     {
                         IncompletedAchievement(*itr);
                     }
+            }
     }
 }
 
@@ -2747,10 +2757,12 @@ AchievementReward const* AchievementGlobalMgr::GetAchievementReward(AchievementE
 {
     AchievementRewardsMapBounds bounds = m_achievementRewards.equal_range(achievement->ID);
     for (AchievementRewardsMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
+    {
         if (iter->second.gender == GENDER_NONE || uint8(iter->second.gender) == gender)
         {
             return &iter->second;
         }
+    }
 
     return NULL;
 }
@@ -2759,10 +2771,12 @@ AchievementRewardLocale const* AchievementGlobalMgr::GetAchievementRewardLocale(
 {
     AchievementRewardLocalesMapBounds bounds = m_achievementRewardLocales.equal_range(achievement->ID);
     for (AchievementRewardLocalesMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
+    {
         if (iter->second.gender == GENDER_NONE || uint8(iter->second.gender) == gender)
         {
             return &iter->second;
         }
+    }
 
     return NULL;
 }

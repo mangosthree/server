@@ -377,10 +377,12 @@ HASH_NAMESPACE_END
     {                                                \
         uint8 maskArr[] = { T2 };                    \
         for (uint8 i = 0; i < countof(maskArr); ++i) \
+        {                                            \
             if (guid[maskArr[i]] != 0)               \
             {                                        \
                 guid[maskArr[i]] ^= read<uint8>();   \
             }                                        \
+        }                                            \
     }
 
 #define DEFINE_WRITEGUIDBYTES(T1, T2) template <T1>     \
@@ -388,10 +390,12 @@ HASH_NAMESPACE_END
     {                                                   \
         uint8 maskArr[] = { T2 };                       \
         for (uint8 i = 0; i < countof(maskArr); ++i)    \
+        {                                               \
             if (guid[maskArr[i]] != 0)                  \
             {                                           \
                 (*this) << uint8(guid[maskArr[i]] ^ 1); \
             }                                           \
+        }                                               \
     }
 
 DEFINE_READGUIDMASK(BITS_1, BIT_VALS_1)

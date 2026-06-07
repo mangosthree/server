@@ -1030,10 +1030,12 @@ void Object::_SetUpdateBits(UpdateMask* updateMask, Player* target) const
     }
 
     for (uint16 index = 0; index < valuesCount; ++index )
+    {
         if (m_changedValues[index])
         {
             updateMask->SetBit(index);
         }
+    }
 }
 
 /**
@@ -1053,10 +1055,12 @@ void Object::_SetCreateBits(UpdateMask* updateMask, Player* target) const
     }
 
     for (uint16 index = 0; index < valuesCount; ++index)
+    {
         if (GetUInt32Value(index) != 0)
         {
             updateMask->SetBit(index);
         }
+    }
 }
 
 /**
@@ -2595,10 +2599,12 @@ void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* ta
             uint32 zoneid = GetZoneId();
             Map::PlayerList const& pList = GetMap()->GetPlayers();
             for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+            {
                 if (itr->getSource()->GetZoneId() == zoneid)
                 {
                     say_do(itr->getSource());
                 }
+            }
             break;
         }
     }

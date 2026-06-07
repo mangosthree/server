@@ -705,10 +705,12 @@ void GameEventMgr::Initialize(MapPersistentState* state)
     // At map persistent state creating need only apply pool spawn modifications
     // other data is global and will be auto-apply
     for (GameEventMgr::ActiveEvents::const_iterator event_itr = m_ActiveEvents.begin(); event_itr != m_ActiveEvents.end(); ++event_itr)
+    {
         for (IdList::iterator pool_itr = mGameEventSpawnPoolIds[*event_itr].begin(); pool_itr != mGameEventSpawnPoolIds[*event_itr].end(); ++pool_itr)
         {
             sPoolMgr.InitSpawnPool(*state, *pool_itr);
         }
+    }
 }
 
 // return the next event delay in ms
@@ -1016,10 +1018,12 @@ GameEventCreatureData const* GameEventMgr::GetCreatureUpdateDataForActiveEvent(u
     }
 
     for (GameEventCreatureDataList::const_iterator itr = mGameEventCreatureData[event_id].begin(); itr != mGameEventCreatureData[event_id].end(); ++itr)
+    {
         if (itr->first == lowguid)
         {
             return &itr->second;
         }
+    }
 
     return NULL;
 }
@@ -1156,11 +1160,15 @@ template <>
 int16 GameEventMgr::GetGameEventId<Creature>(uint32 guid_or_poolid)
 {
     for (uint16 i = 0; i < mGameEventCreatureGuids.size(); ++i) // 0 <= i <= 2*(S := mGameEvent.size()) - 2
+    {
         for (GuidList::const_iterator itr = mGameEventCreatureGuids[i].begin(); itr != mGameEventCreatureGuids[i].end(); ++itr)
+        {
             if (*itr == guid_or_poolid)
             {
                 return i + 1 - mGameEvent.size();        // -S *1 + 1 <= . <= 1*S - 1
             }
+        }
+    }
     return 0;
 }
 
@@ -1175,11 +1183,15 @@ template <>
 int16 GameEventMgr::GetGameEventId<GameObject>(uint32 guid_or_poolid)
 {
     for (uint16 i = 0; i < mGameEventGameobjectGuids.size(); ++i)
+    {
         for (GuidList::const_iterator itr = mGameEventGameobjectGuids[i].begin(); itr != mGameEventGameobjectGuids[i].end(); ++itr)
+        {
             if (*itr == guid_or_poolid)
             {
                 return i + 1 - mGameEvent.size();        // -S *1 + 1 <= . <= 1*S - 1
             }
+        }
+    }
     return 0;
 }
 
@@ -1194,11 +1206,15 @@ template <>
 int16 GameEventMgr::GetGameEventId<Pool>(uint32 guid_or_poolid)
 {
     for (uint16 i = 0; i < mGameEventSpawnPoolIds.size(); ++i)
+    {
         for (IdList::const_iterator itr = mGameEventSpawnPoolIds[i].begin(); itr != mGameEventSpawnPoolIds[i].end(); ++itr)
+        {
             if (*itr == guid_or_poolid)
             {
                 return i;
             }
+        }
+    }
     return 0;
 }
 
@@ -1221,10 +1237,12 @@ bool GameEventMgr::IsActiveHoliday(HolidayIds id)
     }
 
     for (GameEventMgr::ActiveEvents::const_iterator itr = m_ActiveEvents.begin(); itr != m_ActiveEvents.end(); ++itr)
+    {
         if (mGameEvent[*itr].holiday_id == id)
         {
             return true;
         }
+    }
 
     return false;
 }

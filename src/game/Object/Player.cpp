@@ -3204,20 +3204,19 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     // TC-Preservation and compare the player's level against the
     // effective required level instead.
     //
-    // The bare `prof ||` short-circuit-RED has been dropped: it forced
-    // profession spells to RED unconditionally, which never matched
-    // observed behaviour (the destructive bug was that the level check
-    // was a no-op, masking that line entirely for class spells where
-    // prof == false). mangostwo additionally gates the level check on a
-    // GM-trade-skill-bypass config; that is out of scope here.
-    bool prof = SpellMgr::IsProfessionSpell(trainer_spell->spell);
+    // The bare `prof ||` short-circuit-RED forced profession spells to RED
+    // unconditionally on both the level and skill checks (introduced by
+    // #192, which flattened mangostwo's two guarded checks into flat ORs).
+    // Both short-circuits are dropped so the actual requirements decide.
+    // mangostwo additionally gates these on a GM-trade-skill-bypass config;
+    // that is out of scope here.
     if (getLevel() < reqLevel)
     {
         return TRAINER_SPELL_RED;
     }
 
     // check skill requirement
-    if (prof || trainer_spell->reqSkill && GetBaseSkillValue(trainer_spell->reqSkill) < trainer_spell->reqSkillValue)
+    if (trainer_spell->reqSkill && GetBaseSkillValue(trainer_spell->reqSkill) < trainer_spell->reqSkillValue)
     {
         return TRAINER_SPELL_RED;
     }

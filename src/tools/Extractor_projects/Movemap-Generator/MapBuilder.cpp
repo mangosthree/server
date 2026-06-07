@@ -79,7 +79,8 @@ namespace MMAP
         getDirContents(files, "maps");
         for (uint32 i = 0; i < files.size(); ++i)
         {
-            mapID = uint32(atoi(files[i].substr(0, 3).c_str()));
+            // .map files use a 4-digit map id (vmaps still use 3)
+            mapID = uint32(atoi(files[i].substr(0, 4).c_str()));
             if (m_tiles.find(mapID) == m_tiles.end())
             {
                 m_tiles.insert(pair<uint32, set<uint32>*>(mapID, new set<uint32>));
@@ -117,13 +118,14 @@ namespace MMAP
                 count++;
             }
 
-            sprintf(filter, "%03u*", mapID);
+            // .map files use a 4-digit map id, so tile coords start one char later
+            sprintf(filter, "%04u*", mapID);
             files.clear();
             getDirContents(files, "maps", filter);
             for (uint32 i = 0; i < files.size(); ++i)
             {
-                tileY = uint32(atoi(files[i].substr(3, 2).c_str()));
-                tileX = uint32(atoi(files[i].substr(5, 2).c_str()));
+                tileY = uint32(atoi(files[i].substr(4, 2).c_str()));
+                tileX = uint32(atoi(files[i].substr(6, 2).c_str()));
                 tileID = StaticMapTree::packTileID(tileX, tileY);
 
                 if (tiles->insert(tileID).second)

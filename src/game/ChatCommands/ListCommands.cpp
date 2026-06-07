@@ -678,17 +678,24 @@ void ChatHandler::ShowSpellListHelper(Player* target, SpellEntry const* spellInf
 
     // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
     std::ostringstream ss;
+    char const* nameStr = (spellInfo->SpellName && spellInfo->SpellName[loc]) ? spellInfo->SpellName[loc] : "";
     if (m_session)
     {
-        ss << id << " - |cffffffff|Hspell:" << id << "|h[" << spellInfo->SpellName[loc];
+        ss << id << " - |cffffffff|Hspell:" << id << "|h[" << nameStr;
     }
     else
     {
-        ss << id << " - " << spellInfo->SpellName[loc];
+        ss << id << " - " << nameStr;
     }
 
-    // include rank in link name
-    if (rank)
+    // include the spell's subtext ("Rank N" / label) to distinguish same-named
+    // spells; fall back to the computed numeric rank when there is no subtext
+    char const* subText = spellInfo->Rank ? spellInfo->Rank[loc] : NULL;
+    if (subText && *subText)
+    {
+        ss << " " << subText;
+    }
+    else if (rank)
     {
         ss << GetMangosString(LANG_SPELL_RANK) << rank;
     }

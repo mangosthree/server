@@ -387,12 +387,14 @@ char* DBCFileLoader::AutoProduceStrings(const char* format, char* dataTable, Loc
                     break;
                 case DBC_FF_STRING:
                 {
-                    // fill only not filled entries
-                    char** slot = (char**)(&dataTable[offset]);
-                    if (!*slot || !** slot)
+                    // The dataTable field points to this record's MAX_LOCALE holder
+                    // array (set up by AutoProduceStringsArrayHolders). Fill the slot
+                    // for the locale being loaded; empty entries keep their "" default.
+                    char const** holder = *(char const***)(&dataTable[offset]);
+                    char const* st = getRecord(y).getString(x);
+                    if (st && *st)
                     {
-                        const char* st = getRecord(y).getString(x);
-                        *slot = stringPool + (st - (const char*)stringTable);
+                        holder[loc] = stringPool + (st - (const char*)stringTable);
                     }
                     offset += sizeof(char*);
                     break;

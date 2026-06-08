@@ -26,7 +26,6 @@ endif()
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/src/shared
-    #${CMAKE_SOURCE_DIR}/dep/libmpq
     ${CMAKE_SOURCE_DIR}/dep/StormLib/src
     ${CMAKE_SOURCE_DIR}/dep/loadlib
     ${CMAKE_SOURCE_DIR}/src/tools/Extractor_projects/shared

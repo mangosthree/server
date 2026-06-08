@@ -36,7 +36,6 @@ set(battleground_LIB_SRCS ${sources} ${headers})
 mangos_source_group(${battleground_LIB_SRCS})
 
 include_directories(
-    ${ACE_INCLUDE_DIRS}
     ${MYSQL_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/dep/include/g3dlite/
     ${CMAKE_SOURCE_DIR}/src/framework/
@@ -52,7 +51,7 @@ include_directories(
 #-----------------------------------------------------------------------------
 # Build the battleground library
 add_library(mangos-battleground STATIC ${battleground_LIB_SRCS})
-target_link_libraries(mangos-battleground mangos-shared mangos-framework g3dlite ${ACE_LIBRARIES} ${MYSQL_LIBRARIES})
+target_link_libraries(mangos-battleground mangos-shared mangos-framework g3dlite ace ${MYSQL_LIBRARIES})
 
 if(${CMAKE_BUILD_TYPE} MATCHES Debug)
     set(BUILD_PROPERTIES "-DMANGOS_DEBUG")

@@ -31,7 +31,6 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/dep/g3dlite
     ${CMAKE_SOURCE_DIR}/dep/g3dlite/G3D
     ${CMAKE_SOURCE_DIR}/src/framework
-    ${ACE_INCLUDE_DIR}
 )
 
 if(WIN32)

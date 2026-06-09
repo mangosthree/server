@@ -149,6 +149,14 @@ bool GridMap::loadData(char* filename)
             return false;
         }
 
+        // loadup holes data
+        if (header.holesOffset && !loadHolesData(in, header.holesOffset, header.holesSize))
+        {
+            sLog.outError("Error loading map holes data\n");
+            fclose(in);
+            return false;
+        }
+
         fclose(in);
         return true;
     }
@@ -368,6 +376,9 @@ float GridMap::getHeightFromFlat(float /*x*/, float /*y*/) const
  * @param col The height-map column.
  * @return true if the square is a hole; otherwise false.
  */
+// TODO(MoP): 4.3.4 only has the low-res 16-bit hole map. Client 5.3+ adds a
+// 64-bit high_res_holes map (MCNK flag 0x10000); supporting it needs a 64-bit
+// hole store here, a wider .map holes block, and a .map version bump.
 bool GridMap::isHole(int row, int col) const
 {
     int cellRow = row / 8;     // 8 squares per cell
@@ -378,6 +389,30 @@ bool GridMap::isHole(int row, int col) const
     uint16 hole = m_holes[cellRow][cellCol];
 
     return (hole & holetab_h[holeCol] & holetab_v[holeRow]) != 0;
+}
+
+/**
+ * @brief Resolves world (x, y) to a height-grid cell.
+ *
+ * @param x In: world x; out: fractional x within the cell.
+ * @param y In: world y; out: fractional y within the cell.
+ * @param xi Out: integer height-map row.
+ * @param yi Out: integer height-map column.
+ * @return false if the resolved cell is a terrain hole; otherwise true.
+ */
+bool GridMap::resolveCell(float& x, float& y, int& xi, int& yi) const
+{
+    x = MAP_RESOLUTION * (32 - x / SIZE_OF_GRIDS);
+    y = MAP_RESOLUTION * (32 - y / SIZE_OF_GRIDS);
+
+    xi = (int)x;
+    yi = (int)y;
+    x -= xi;
+    y -= yi;
+    xi &= (MAP_RESOLUTION - 1);
+    yi &= (MAP_RESOLUTION - 1);
+
+    return !isHole(xi, yi);
 }
 
 /**
@@ -394,17 +429,8 @@ float GridMap::getHeightFromFloat(float x, float y) const
         return INVALID_HEIGHT_VALUE;
     }
 
-    x = MAP_RESOLUTION * (32 - x / SIZE_OF_GRIDS);
-    y = MAP_RESOLUTION * (32 - y / SIZE_OF_GRIDS);
-
-    int x_int = (int)x;
-    int y_int = (int)y;
-    x -= x_int;
-    y -= y_int;
-    x_int &= (MAP_RESOLUTION - 1);
-    y_int &= (MAP_RESOLUTION - 1);
-
-    if (isHole(x_int, y_int))
+    int x_int, y_int;
+    if (!resolveCell(x, y, x_int, y_int))
     {
         return INVALID_HEIGHT_VALUE;
     }
@@ -490,15 +516,11 @@ float GridMap::getHeightFromUint8(float x, float y) const
         return m_gridHeight;
     }
 
-    x = MAP_RESOLUTION * (32 - x / SIZE_OF_GRIDS);
-    y = MAP_RESOLUTION * (32 - y / SIZE_OF_GRIDS);
-
-    int x_int = (int)x;
-    int y_int = (int)y;
-    x -= x_int;
-    y -= y_int;
-    x_int &= (MAP_RESOLUTION - 1);
-    y_int &= (MAP_RESOLUTION - 1);
+    int x_int, y_int;
+    if (!resolveCell(x, y, x_int, y_int))
+    {
+        return INVALID_HEIGHT_VALUE;
+    }
 
     int32 a, b, c;
     uint8* V9_h1_ptr = &m_uint8_V9[x_int * 128 + x_int + y_int];
@@ -567,15 +589,11 @@ float GridMap::getHeightFromUint16(float x, float y) const
         return m_gridHeight;
     }
 
-    x = MAP_RESOLUTION * (32 - x / SIZE_OF_GRIDS);
-    y = MAP_RESOLUTION * (32 - y / SIZE_OF_GRIDS);
-
-    int x_int = (int)x;
-    int y_int = (int)y;
-    x -= x_int;
-    y -= y_int;
-    x_int &= (MAP_RESOLUTION - 1);
-    y_int &= (MAP_RESOLUTION - 1);
+    int x_int, y_int;
+    if (!resolveCell(x, y, x_int, y_int))
+    {
+        return INVALID_HEIGHT_VALUE;
+    }
 
     int32 a, b, c;
     uint16* V9_h1_ptr = &m_uint16_V9[x_int * 128 + x_int + y_int];

@@ -107,6 +107,7 @@ namespace MMAP
         fwrite(mesh->bmax, sizeof(float), 3, file);
 
         for (int y = 0; y < mesh->height; ++y)
+        {
             for (int x = 0; x < mesh->width; ++x)
             {
                 rcSpan* span = mesh->spans[x + y * mesh->width];
@@ -130,6 +131,7 @@ namespace MMAP
                     span = span->next;
                 }
             }
+        }
     }
 
     void IntermediateValues::debugWrite(FILE* file, const rcCompactHeightfield* chf)
@@ -255,7 +257,7 @@ namespace MMAP
     void IntermediateValues::generateObjFile(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData)
     {
         char objFileName[255];
-        sprintf(objFileName, "meshes/map%04u%02u%02u.obj", mapID, tileY, tileX);
+        sprintf(objFileName, "meshes/map%04u%02u%02u.obj", mapID, tileX, tileY);
 
         FILE* objFile = fopen(objFileName, "wb");
         if (!objFile)
@@ -291,7 +293,6 @@ namespace MMAP
 
         fclose(objFile);
 
-
         char tileString[25];
         sprintf(tileString, "[%02u,%02u]: ", tileX, tileY);
         printf("%sWriting debug output...                       \r", tileString);
@@ -311,7 +312,7 @@ namespace MMAP
         fwrite(&b, sizeof(char), 1, objFile);
         fclose(objFile);
 
-        sprintf(objFileName, "meshes/%04u%02u%02u.mesh", mapID, tileY, tileX);
+        sprintf(objFileName, "meshes/%04u%02u%02u.mesh", mapID, tileX, tileY);
         objFile = fopen(objFileName, "wb");
         if (!objFile)
         {

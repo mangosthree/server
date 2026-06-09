@@ -282,12 +282,12 @@ bool FileLoader::loadFile(char* filename, bool log)
 
     SFileCloseFile(fileHandle);
 
-    // ToDo: Fix WDT errors...
     if (!prepareLoadedData())
     {
-        //printf("Error loading %s\n\n", filename);
-        //free();
-        return true;
+        if (log)
+            printf("Error loading %s\n", filename);
+        free();
+        return false;
     }
 
     return true;

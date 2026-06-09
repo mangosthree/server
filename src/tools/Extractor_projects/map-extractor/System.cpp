@@ -618,6 +618,11 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
         for (int j = 0; j < ADT_CELLS_PER_GRID; j++)
         {
             adt_MCNK* cell = adt.cells[i][j];
+            if (!cell)
+            {
+                area_flags[i][j] = 0xffff;
+                continue;
+            }
             uint32 areaid = cell->areaid;
             if (areaid && areaid <= maxAreaId)
             {

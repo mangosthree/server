@@ -43,6 +43,10 @@ extern HANDLE WorldMpq;
 WDTFile::WDTFile(char* file_name, char* file_name1): WDT(WorldMpq, file_name)
 {
     filename.append(file_name1, strlen(file_name1));
+    gWmoInstansName = NULL;
+    gnWMO = 0;
+    nMaps = 0;
+    nWmoNames = 0;
 }
 
 bool WDTFile::init(char* map_id, unsigned int mapID)
@@ -75,6 +79,13 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
 
         size_t nextpos = WDT.getPos() + size;
 
+        // A corrupt/truncated chunk header can declare a size past the end of
+        // the file; stop here rather than drive a wild new[]/read off it.
+        if (nextpos > WDT.getSize())
+        {
+            break;
+        }
+
         if (!strcmp(fourcc, "MAIN"))
         {
             // Do Nothing
@@ -97,6 +108,7 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
                     p = p + strlen(p) + 1;
                     gWmoInstansName[q++] = s;
                 }
+                nWmoNames = q;
                 delete[] buf;
             }
         }
@@ -113,8 +125,15 @@ bool WDTFile::init(char* map_id, unsigned int mapID)
                 gWMO_mapname = fake_mapname + std::string(map_id);
                 for (int i = 0; i < gnWMO; ++i)
                 {
-                    int id;
+                    uint32 id;
                     WDT.read(&id, 4);
+                    // Index is read straight from the file; a corrupt MODF could
+                    // point past the parsed MWMO names. Stop rather than read OOB.
+                    if (id >= (uint32)nWmoNames)
+                    {
+                        printf("Warning: WDT MODF entry %d references invalid WMO name index %u in %s.\n", i, id, filename.c_str());
+                        break;
+                    }
                     WMOInstance inst(WDT, gWmoInstansName[id].c_str(), mapID, 65, 65, dirfile);
                 }
                 delete[] gWmoInstansName;

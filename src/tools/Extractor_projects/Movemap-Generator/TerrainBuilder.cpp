@@ -775,17 +775,26 @@ namespace MMAP
                         uint8 type = NAV_EMPTY;
 
                         // convert liquid type to NavTerrain
+                        // vmap-extractor stores LiquidType.dbc ids (13/14/19/20 for WMO
+                        // water/ocean/magma/slime); basic ids 1-4 can pass through raw
                         switch (liquid->GetType())
                         {
-                            case 0:
-                            case 1:
+                            case 1:  // water
+                            case 2:  // ocean
+                            case 13: // WMO water
+                            case 14: // WMO ocean
                                 type = NAV_WATER;
                                 break;
-                            case 2:
+                            case 3:  // magma
+                            case 19: // WMO magma
                                 type = NAV_MAGMA;
                                 break;
-                            case 3:
+                            case 4:  // slime
+                            case 20: // WMO slime
+                            case 21: // Naxxramas slime
                                 type = NAV_SLIME;
+                                break;
+                            default: // unknown: keep NAV_EMPTY, span is dropped
                                 break;
                         }
 

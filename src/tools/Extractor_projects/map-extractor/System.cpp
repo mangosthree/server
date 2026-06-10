@@ -84,6 +84,7 @@ typedef struct
 map_id* map_ids;                    /**< TODO */
 uint16* areas;                      /**< TODO */
 uint16* LiqType;                    /**< TODO */
+uint32 LiqType_maxid = 0;           ///< Highest LiquidType.dbc id; bounds LiqType[].
 char output_path[128] = ".";        /**< TODO */
 char input_path[128] = ".";         /**< TODO */
 uint32 maxAreaId = 0;               /**< TODO */
@@ -173,7 +174,8 @@ void HandleArgs(int argc, char* arg[])
             case 'i':
                 if (c + 1 < argc)                           // all ok
                 {
-                    strcpy(input_path, arg[(c++) + 1]);
+                    strncpy(input_path, arg[(c++) + 1], sizeof(input_path) - 1);
+                    input_path[sizeof(input_path) - 1] = '\0';
                 }
                 else
                 {
@@ -183,7 +185,8 @@ void HandleArgs(int argc, char* arg[])
             case 'o':
                 if (c + 1 < argc)                           // all ok
                 {
-                    strcpy(output_path, arg[(c++) + 1]);
+                    strncpy(output_path, arg[(c++) + 1], sizeof(output_path) - 1);
+                    output_path[sizeof(output_path) - 1] = '\0';
                 }
                 else
                 {
@@ -448,7 +451,7 @@ void ReadLiquidTypeTableDBC(int const locale)
     }
 
     size_t LiqType_count = dbc.getRecordCount();
-    size_t LiqType_maxid = dbc.getMaxId();
+    LiqType_maxid = uint32(dbc.getMaxId());
     LiqType = new uint16[LiqType_maxid + 1];
     memset(LiqType, 0xff, (LiqType_maxid + 1) * sizeof(uint16));
 
@@ -983,7 +986,8 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
                 }
 
                 liquid_entry[i][j] = h->liquidType;
-                switch (LiqType[h->liquidType])
+                uint16 liqType = (h->liquidType <= LiqType_maxid) ? LiqType[h->liquidType] : 0xffff;
+                switch (liqType)
                 {
                     case LIQUID_TYPE_WATER: liquid_flags[i][j] |= MAP_LIQUID_TYPE_WATER; break;
                     case LIQUID_TYPE_OCEAN: liquid_flags[i][j] |= MAP_LIQUID_TYPE_OCEAN; break;
@@ -994,7 +998,7 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
                         break;
                 }
                 // Dark water detect
-                if (LiqType[h->liquidType] == LIQUID_TYPE_OCEAN)
+                if (liqType == LIQUID_TYPE_OCEAN)
                 {
                     uint8* lm = h2o->getLiquidLightMap(h);
                     if (!lm)

@@ -197,7 +197,7 @@ namespace Movement
      * @brief Enables walk mode. Disabled by default.
      * @param enable Whether to enable walk mode.
      */
-    inline void MoveSplineInit::SetWalk(bool enable) { args.flags.walkmode = enable;}
+    inline void MoveSplineInit::SetWalk(bool enable) { args.walk = enable;}
     inline void MoveSplineInit::SetSmooth() { args.flags.EnableCatmullRom();}
     /**
      * @brief Makes movement cyclic. Disabled by default.

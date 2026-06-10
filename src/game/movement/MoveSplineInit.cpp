@@ -107,7 +107,7 @@ namespace Movement
         args.initialOrientation = real_position.orientation;
 
         uint32 moveFlags = unit.m_movementInfo.GetMovementFlags();
-        if (args.flags.walkmode)
+        if (args.walk)
         {
             moveFlags |= MOVEFLAG_WALK_MODE;
         }
@@ -214,7 +214,8 @@ namespace Movement
     MoveSplineInit::MoveSplineInit(Unit& m) : unit(m)
     {
         // mix existing state into new
-        args.flags.walkmode = unit.m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE);
+        args.walk = unit.m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE);
+        args.flags.canSwim = unit.CanSwim(); ///< client refuses to swim a spline mover without this bit (TC 4.3.4)
         args.flags.flying = unit.m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_CAN_FLY | MOVEFLAG_FLYING | MOVEFLAG_LEVITATING));
     }
 

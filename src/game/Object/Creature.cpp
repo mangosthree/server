@@ -4040,9 +4040,22 @@ void Creature::SetSwim(bool enable)
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_SWIMMING);
     }
 
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_START_SWIM : SMSG_SPLINE_MOVE_STOP_SWIM);
-    data << GetPackGUID();
-    SendMessageToSet(&data, true);
+    if (IsInWorld())
+    {
+        WorldPacket data(enable ? SMSG_SPLINE_MOVE_START_SWIM : SMSG_SPLINE_MOVE_STOP_SWIM, 9);
+        if (enable)
+        {
+            data.WriteGuidMask<1, 6, 0, 7, 3, 5, 2, 4>(GetObjectGuid());
+            data.WriteGuidBytes<3, 7, 2, 5, 6, 4, 1, 0>(GetObjectGuid());
+        }
+        else
+        {
+            data.WriteGuidMask<4, 1, 5, 3, 0, 7, 2, 6>(GetObjectGuid());
+            data.WriteGuidBytes<6, 0, 7, 2, 3, 1, 5, 4>(GetObjectGuid());
+        }
+
+        SendMessageToSet(&data, true);
+    }
 }
 
 /**
@@ -4090,9 +4103,22 @@ void Creature::SetCanFly(bool enable)
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_CAN_FLY);
     }
 
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_FLYING : SMSG_SPLINE_MOVE_UNSET_FLYING, 9);
-    data << GetPackGUID();
-    SendMessageToSet(&data, true);
+    if (IsInWorld())
+    {
+        WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_FLYING : SMSG_SPLINE_MOVE_UNSET_FLYING, 9);
+        if (enable)
+        {
+            data.WriteGuidMask<0, 4, 1, 6, 7, 2, 3, 5>(GetObjectGuid());
+            data.WriteGuidBytes<7, 0, 5, 6, 4, 1, 3, 2>(GetObjectGuid());
+        }
+        else
+        {
+            data.WriteGuidMask<5, 0, 4, 7, 2, 3, 1, 6>(GetObjectGuid());
+            data.WriteGuidBytes<7, 2, 3, 4, 5, 1, 6, 0>(GetObjectGuid());
+        }
+
+        SendMessageToSet(&data, true);
+    }
 }
 
 /**
@@ -4111,9 +4137,22 @@ void Creature::SetFeatherFall(bool enable)
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_SAFE_FALL);
     }
 
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_FEATHER_FALL : SMSG_SPLINE_MOVE_NORMAL_FALL);
-    data << GetPackGUID();
-    SendMessageToSet(&data, true);
+    if (IsInWorld())
+    {
+        WorldPacket data(enable ? SMSG_SPLINE_MOVE_FEATHER_FALL : SMSG_SPLINE_MOVE_NORMAL_FALL, 9);
+        if (enable)
+        {
+            data.WriteGuidMask<3, 2, 7, 5, 4, 6, 1, 0>(GetObjectGuid());
+            data.WriteGuidBytes<1, 4, 7, 6, 2, 0, 5, 3>(GetObjectGuid());
+        }
+        else
+        {
+            data.WriteGuidMask<3, 5, 1, 0, 7, 6, 2, 4>(GetObjectGuid());
+            data.WriteGuidBytes<7, 6, 2, 0, 5, 4, 3, 1>(GetObjectGuid());
+        }
+
+        SendMessageToSet(&data, true);
+    }
 }
 
 /**
@@ -4132,9 +4171,22 @@ void Creature::SetHover(bool enable)
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_HOVER);
     }
 
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_HOVER : SMSG_SPLINE_MOVE_UNSET_HOVER, 9);
-    data << GetPackGUID();
-    SendMessageToSet(&data, false);
+    if (IsInWorld())
+    {
+        WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_HOVER : SMSG_SPLINE_MOVE_UNSET_HOVER, 9);
+        if (enable)
+        {
+            data.WriteGuidMask<3, 7, 0, 1, 4, 6, 2, 5>(GetObjectGuid());
+            data.WriteGuidBytes<2, 4, 3, 1, 7, 0, 5, 6>(GetObjectGuid());
+        }
+        else
+        {
+            data.WriteGuidMask<6, 7, 4, 0, 3, 1, 5, 2>(GetObjectGuid());
+            data.WriteGuidBytes<4, 5, 3, 0, 2, 7, 6, 1>(GetObjectGuid());
+        }
+
+        SendMessageToSet(&data, false);
+    }
 }
 
 /**

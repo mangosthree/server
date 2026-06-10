@@ -73,18 +73,13 @@ namespace MMAP
     {
         vector<string> files;
         uint32 mapID, tileX, tileY, tileID, count = 0;
-        // TODO(MoP): vmaps/mmaps here are still 3-digit. For map ids >= 1000:
-        // grow filter to [32]; vmtree parse substr(0,3)->substr(0,4); vmtile filter
-        // %03u->%04u and offsets +1 (substr 4->5, 7->8); and the mmap writers below
-        // (%03u->%04u). The .map parse is ALREADY 4-digit - leave it. Pairs with
-        // TileAssembler + VMapManager2 + MoveMap. See MOP_READINESS.md (A3/A4).
-        char filter[12];
+        char filter[32];
 
         printf(" Discovering maps...  ");
         getDirContents(files, "maps");
         for (uint32 i = 0; i < files.size(); ++i)
         {
-            // .map files use a 4-digit map id (vmaps still use 3)
+            // .map files always use a 4-digit map id
             mapID = uint32(atoi(files[i].substr(0, 4).c_str()));
             if (m_tiles.find(mapID) == m_tiles.end())
             {
@@ -97,7 +92,11 @@ namespace MMAP
         getDirContents(files, "vmaps", "*.vmtree");
         for (uint32 i = 0; i < files.size(); ++i)
         {
+#if defined(MISTS)
+            mapID = uint32(atoi(files[i].substr(0, 4).c_str()));
+#else
             mapID = uint32(atoi(files[i].substr(0, 3).c_str()));
+#endif
             m_tiles.insert(pair<uint32, set<uint32>*>(mapID, new set<uint32>));
             count++;
         }
@@ -110,13 +109,22 @@ namespace MMAP
             set<uint32>* tiles = (*itr).second;
             mapID = (*itr).first;
 
+#if defined(MISTS)
+            sprintf(filter, "%04u*.vmtile", mapID);
+#else
             sprintf(filter, "%03u*.vmtile", mapID);
+#endif
             files.clear();
             getDirContents(files, "vmaps", filter);
             for (uint32 i = 0; i < files.size(); ++i)
             {
+#if defined(MISTS)
+                tileX = uint32(atoi(files[i].substr(8, 2).c_str()));
+                tileY = uint32(atoi(files[i].substr(5, 2).c_str()));
+#else
                 tileX = uint32(atoi(files[i].substr(7, 2).c_str()));
                 tileY = uint32(atoi(files[i].substr(4, 2).c_str()));
+#endif
                 tileID = StaticMapTree::packTileID(tileY, tileX);
 
                 tiles->insert(tileID);
@@ -404,8 +412,11 @@ namespace MMAP
         }
 
         char fileName[25];
-        // TODO(MoP): %03u->%04u for map ids >= 1000 (pairs with MoveMap reader). MOP_READINESS.md (A4)
+#if defined(MISTS)
+        sprintf(fileName, "mmaps/%04u.mmap", mapID);
+#else
         sprintf(fileName, "mmaps/%03u.mmap", mapID);
+#endif
 
         FILE* file = fopen(fileName, "wb");
         if (!file)
@@ -759,8 +770,11 @@ namespace MMAP
 
             // file output
             char fileName[255];
-            // TODO(MoP): %03u->%04u for map ids >= 1000 (pairs with MoveMap reader). MOP_READINESS.md (A4)
+#if defined(MISTS)
+            sprintf(fileName, "mmaps/%04u%02i%02i.mmtile", mapID, tileX, tileY);
+#else
             sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileX, tileY);
+#endif
             FILE* file = fopen(fileName, "wb");
             if (!file)
             {
@@ -945,8 +959,11 @@ namespace MMAP
     bool MapBuilder::shouldSkipTile(uint32 mapID, uint32 tileX, uint32 tileY)
     {
         char fileName[255];
-        // TODO(MoP): %03u->%04u for map ids >= 1000 (pairs with MoveMap reader). MOP_READINESS.md (A4)
+#if defined(MISTS)
+        sprintf(fileName, "mmaps/%04u%02i%02i.mmtile", mapID, tileX, tileY);
+#else
         sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileX, tileY);
+#endif
         FILE* file = fopen(fileName, "rb");
         if (!file)
         {

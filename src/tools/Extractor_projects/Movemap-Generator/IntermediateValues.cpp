@@ -43,8 +43,6 @@ namespace MMAP
 
         printf("%sWriting debug output...                       \r", tileString);
 
-        // TODO(MoP): debug .obj/.mesh names use %03u; widen to %04u for map ids
-        // >= 1000 (debug output only, not gameplay). See MOP_READINESS.md (A5).
         string name("meshes/%03u%02i%02i.");
 
         // TODO: What the heck are these trailing \/ about in the following lines
@@ -298,8 +296,6 @@ namespace MMAP
         sprintf(tileString, "[%02u,%02u]: ", tileY, tileX);
         printf("%sWriting debug output...                       \r", tileString);
 
-        // TODO(MoP): debug name uses %03u; widen to %04u for map ids >= 1000
-        // (debug output only). See MOP_READINESS.md (A5).
         sprintf(objFileName, "meshes/%03u.map", mapID);
 
         objFile = fopen(objFileName, "wb");

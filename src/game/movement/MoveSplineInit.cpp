@@ -27,6 +27,7 @@
 #include "packet_builder.h"
 #include "Unit.h"
 #include "TransportSystem.h"
+#include <atomic>
 
 namespace Movement
 {
@@ -211,8 +212,12 @@ namespace Movement
      * @brief Constructor that initializes the MoveSplineInit with a reference to a Unit.
      * @param m Reference to the Unit to be moved.
      */
+    /// generates per-spline ids; the client uses them to tell successive splines apart
+    static std::atomic<uint32> splineIdGen(0);
+
     MoveSplineInit::MoveSplineInit(Unit& m) : unit(m)
     {
+        args.splineId = ++splineIdGen;
         // mix existing state into new
         args.walk = unit.m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE);
         args.flags.canSwim = unit.CanSwim(); ///< client refuses to swim a spline mover without this bit (TC 4.3.4)

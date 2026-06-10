@@ -30,6 +30,7 @@
 
 #include <string>
 #include <set>
+#include <map>
 #include <vector>
 #include <memory>
 #include "vec3d.h"
@@ -77,8 +78,12 @@ struct WMODoodadData
 {
     std::vector<WMODoodad::MODS> Sets;
     std::unique_ptr<char[]> Paths;       // MODN name block
+    uint32 PathsLen = 0;                 // size of the MODN block, for NameIndex bounds checks
     std::vector<WMODoodad::MODD> Spawns; // MODD
 };
+
+/// WMO basename (as stored under szWorkDirWmo) -> parsed interior doodad data.
+extern std::map<std::string, WMODoodadData> g_WmoDoodads;
 
 /**
  * @brief
@@ -240,6 +245,17 @@ class WMOInstance
          * @param pDirfile
          */
         WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile);
+
+        /**
+         * @brief Emits collision spawns for the instance's set-0 interior doodads.
+         *
+         * @param WmoInstName
+         * @param mapID
+         * @param tileX
+         * @param tileY
+         * @param pDirfile
+         */
+        void ExtractDoodadSet(const char* WmoInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile);
 
         /**
          * @brief

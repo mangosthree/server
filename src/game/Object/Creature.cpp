@@ -214,6 +214,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_groupLootTimer(0), m_groupLootId(0),
     m_lootMoney(0), m_lootGroupRecipientId(0),
     m_corpseDecayTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_ignoreCorpseDecayRatio(false), m_aggroDelay(0),
+    m_cannotReachTarget(false), m_cannotReachTimer(0),
     m_respawnradius(5.0f), m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
     m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false),
     m_AI_locked(false), m_IsDeadByDefault(false), m_temporaryFactionFlags(TEMPFACTION_NONE),
@@ -869,6 +870,21 @@ void Creature::Update(uint32 update_diff, uint32 diff)
             {
                 break;
             }
+
+            // victim kept unreachable (hard no-path) beyond the grace timer: give up and reset (TC parity)
+            if (m_cannotReachTarget && IsInCombat() && !IsInEvadeMode() && !GetMap()->IsRaid())
+            {
+                m_cannotReachTimer += update_diff;
+                if (m_cannotReachTimer >= CREATURE_NOPATH_EVADE_TIME)
+                {
+                    SetCannotReachTarget(false);
+                    if (AI())
+                    {
+                        AI()->EnterEvadeMode();
+                    }
+                }
+            }
+
             RegenerateAll(update_diff);
             break;
         }
@@ -2964,6 +2980,22 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     // Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and out of combat every update tick.
     return !pVictim->IsWithinDist3d(m_combatStartX, m_combatStartY, m_combatStartZ,
                                     ThreatRadius > AttackDist ? ThreatRadius : AttackDist);
+}
+
+/**
+ * @brief Arms or disarms the no-path evade grace timer (see Creature::Update).
+ *
+ * @param cannotReach true when the current victim has no valid path.
+ */
+void Creature::SetCannotReachTarget(bool cannotReach)
+{
+    if (cannotReach == m_cannotReachTarget)
+    {
+        return;
+    }
+
+    m_cannotReachTarget = cannotReach;
+    m_cannotReachTimer = 0;
 }
 
 /**

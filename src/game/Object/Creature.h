@@ -568,6 +568,9 @@ enum TemporaryFactionFlags                                  // Used at real fact
     TEMPFACTION_ALL,
 };
 
+// grace period a creature keeps trying before evading a target it has no path to (TC parity)
+#define CREATURE_NOPATH_EVADE_TIME (5 * IN_MILLISECONDS)
+
 class Creature : public Unit
 {
         CreatureAI* i_AI;
@@ -628,6 +631,9 @@ class Creature : public Unit
 
         bool IsOutOfThreatArea(Unit* pVictim) const;
         void FillGuidsListFromThreatList(GuidVector& guids, uint32 maxamount = 0);
+
+        void SetCannotReachTarget(bool cannotReach);        ///< Arms/disarms the no-path evade grace timer.
+        bool CanNotReachTarget() const { return m_cannotReachTarget; }
 
         bool IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf) override;
         bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const override;
@@ -917,6 +923,8 @@ class Creature : public Unit
         uint32 m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
         uint32 m_corpseDelay;                               // (secs) delay between death and corpse disappearance
         uint32 m_aggroDelay;                                // (msecs)delay between respawn and aggro due to movement
+        bool m_cannotReachTarget;                           // victim is unreachable (no path); armed by SelectHostileTarget
+        uint32 m_cannotReachTimer;                          // (msecs)time spent unable to reach the victim
         bool m_ignoreCorpseDecayRatio;
         float m_respawnradius;
 

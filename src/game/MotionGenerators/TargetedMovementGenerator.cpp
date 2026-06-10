@@ -239,7 +239,10 @@ template<class T, typename D>
  */
 bool TargetedMovementGeneratorMedium<T, D>::IsReachable() const
 {
-    return (i_path) ? (i_path->getPathType() & PATHFIND_NORMAL) : true;
+    // a partial (INCOMPLETE) path still brings us closer to the target and
+    // must keep the chase alive (TC parity); only a hard NOPATH means the
+    // target cannot be pursued at all
+    return (i_path) ? !(i_path->getPathType() & PATHFIND_NOPATH) : true;
 }
 
 /**

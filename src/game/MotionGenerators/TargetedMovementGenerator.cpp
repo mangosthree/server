@@ -269,7 +269,9 @@ template<class T, typename D>
 bool TargetedMovementGeneratorMedium<T, D>::RequiresNewPosition(T& owner, float x, float y, float z) const
 {
     // More distance let have better performance, less distance let have more sensitive reaction at target move.
-    if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly())
+    // swimmers move in the 3D water column, so their destination must track the target's depth too
+    if (owner.GetTypeId() == TYPEID_UNIT &&
+        (((Creature*)&owner)->CanFly() || ((Creature*)&owner)->IsSwimming()))
     {
         return !i_target->IsWithinDist3d(x, y, z, this->GetDynamicTargetDistance(owner, true));
     }

@@ -997,14 +997,10 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
                         printf("\nCan not find liquid type %u for map %s\nchunk %d,%d\n", h->liquidType, filename, i, j);
                         break;
                 }
-                // Dark water detect
-                if (liqType == LIQUID_TYPE_OCEAN)
+                // Dark water detect (Cata "deep" attribute, not a light-map heuristic)
+                if (liqType == LIQUID_TYPE_OCEAN && h2o->getLiquidDeepMap(i, j))
                 {
-                    uint8* lm = h2o->getLiquidLightMap(h);
-                    if (!lm)
-                    {
-                        liquid_flags[i][j] |= MAP_LIQUID_TYPE_DARK_WATER;
-                    }
+                    liquid_flags[i][j] |= MAP_LIQUID_TYPE_DARK_WATER;
                 }
 
                 if (!count && liquid_flags[i][j])
@@ -1026,7 +1022,8 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
                         }
                         else
                         {
-                            liquid_height[cy][cx] = h->heightLevel1;
+                            // LVF 2 carries no heightmap and its height is always 0.0.
+                            liquid_height[cy][cx] = (h->liquidVertexFormat == 2) ? 0.0f : h->heightLevel1;
                         }
                         pos++;
                     }

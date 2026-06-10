@@ -180,13 +180,15 @@ class adt_MCIN
         }
 };
 
-#define ADT_LIQUID_HEADER_FULL_LIGHT   0x01
-#define ADT_LIQUID_HEADER_NO_HIGHT     0x02
-
 struct adt_liquid_header
 {
     uint16 liquidType;             // Index from LiquidType.dbc
-    uint16 formatFlags;
+    // LiquidVertexFormat enum (4.3.4): 0=height+depth, 1=height+uv,
+    // 2=depth-only (height is 0.0), 3=height+uv+depth.
+    // TODO(MoP): 5.x adds a LiquidObject indirection - a value >= 42 is a
+    // LiquidObject.dbc id (resolve LiquidObject->LiquidType->LiquidMaterial->LVF,
+    // needs those DBC loaders) and width/height/offsets then default to 8,8,0,0.
+    uint16 liquidVertexFormat;
     float  heightLevel1;
     float  heightLevel2;
     uint8  xOffset;
@@ -228,36 +230,21 @@ class adt_MH2O
 
         float* getLiquidHeightMap(adt_liquid_header* h)
         {
-            if (h->formatFlags & ADT_LIQUID_HEADER_NO_HIGHT)
+            // LVF 2 is depth-only (height is 0.0); 0/1/3 begin with the float heightmap.
+            if (h->liquidVertexFormat == 2)
                 return 0;
             if (h->offsData2b)
                 return (float*)((uint8*)this + 8 + h->offsData2b);
             return 0;
         }
 
-        uint8* getLiquidLightMap(adt_liquid_header* h)
+        // Per-chunk Cata "deep" attribute (8x8 bitmask) -> fatigue / dark water.
+        // mh2o_chunk_attributes { uint64 fishable; uint64 deep; } at offset_attributes
+        // (liquid[x][y].offsData2); omitted (0) means all-0, i.e. not deep.
+        uint64 getLiquidDeepMap(int x, int y)
         {
-            if (h->formatFlags & ADT_LIQUID_HEADER_FULL_LIGHT)
-                return 0;
-            if (h->offsData2b)
-            {
-                if (h->formatFlags & ADT_LIQUID_HEADER_NO_HIGHT)
-                    return (uint8*)((uint8*)this + 8 + h->offsData2b);
-                return (uint8*)((uint8*)this + 8 + h->offsData2b + (h->width + 1) * (h->height + 1) * 4);
-            }
-            return 0;
-        }
-
-        uint32* getLiquidFullLightMap(adt_liquid_header* h)
-        {
-            if (!(h->formatFlags & ADT_LIQUID_HEADER_FULL_LIGHT))
-                return 0;
-            if (h->offsData2b)
-            {
-                if (h->formatFlags & ADT_LIQUID_HEADER_NO_HIGHT)
-                    return (uint32*)((uint8*)this + 8 + h->offsData2b);
-                return (uint32*)((uint8*)this + 8 + h->offsData2b + (h->width + 1) * (h->height + 1) * 4);
-            }
+            if (liquid[x][y].offsData2)
+                return *((uint64*)((uint8*)this + 8 + liquid[x][y].offsData2 + sizeof(uint64)));
             return 0;
         }
 

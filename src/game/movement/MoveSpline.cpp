@@ -82,7 +82,10 @@ namespace Movement
             {
                 Vector3 hermite;
                 spline.evaluate_derivative(point_Idx, u, hermite);
-                c.orientation = atan2(hermite.y, hermite.x);
+                if (hermite.x != 0.f || hermite.y != 0.f) ///< keep current facing on degenerate (vertical/zero) derivative
+                {
+                    c.orientation = atan2(hermite.y, hermite.x);
+                }
             }
 
             if (splineflags.orientationInversed)

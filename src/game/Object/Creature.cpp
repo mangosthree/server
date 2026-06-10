@@ -573,6 +573,12 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
         unitFlags |= UNIT_FLAG_IN_COMBAT;
     }
 
+    // the client needs this flag to play the swim animation in liquid
+    if (CanSwim() && !(GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_WALK_IN_WATER))
+    {
+        unitFlags |= UNIT_FLAG_CAN_SWIM;
+    }
+
     SetUInt32Value(UNIT_FIELD_FLAGS, unitFlags);
     SetUInt32Value(UNIT_FIELD_FLAGS_2, unitFlags2);
 

@@ -256,6 +256,14 @@ class PathFinder
         void BuildShortcut();
 
         /**
+         * @brief Build a straight 3D swim path through open water.
+         * @param startPos The start position.
+         * @param endPos The end position.
+         * @return True if the swim shortcut applies, false to use the navmesh.
+         */
+        bool BuildSwimShortcut(const Vector3& startPos, const Vector3& endPos);
+
+        /**
          * @brief Get the navigation terrain at the given position.
          * @param x The X-coordinate.
          * @param y The Y-coordinate.

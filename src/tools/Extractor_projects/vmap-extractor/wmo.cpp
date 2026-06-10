@@ -81,49 +81,31 @@ bool WMORoot::open()
             f.read(bbcorn1, 12);
             f.read(bbcorn2, 12);
             f.read(&liquidType, 4);
-            break;
         }
-        /*
-        else if (!strcmp(fourcc,"MOTX"))
+        else if (!strcmp(fourcc, "MODS")) // doodad sets
         {
+            DoodadData.Sets.resize(size / sizeof(WMODoodad::MODS));
+            if (size)
+            {
+                f.read(DoodadData.Sets.data(), size);
+            }
         }
-        else if (!strcmp(fourcc,"MOMT"))
+        else if (!strcmp(fourcc, "MODN")) // doodad name block
         {
+            if (size)
+            {
+                DoodadData.Paths.reset(new char[size]);
+                f.read(DoodadData.Paths.get(), size);
+            }
         }
-        else if (!strcmp(fourcc,"MOGN"))
+        else if (!strcmp(fourcc, "MODD")) // doodad definitions (40 bytes each)
         {
+            DoodadData.Spawns.resize(size / sizeof(WMODoodad::MODD));
+            if (size)
+            {
+                f.read(DoodadData.Spawns.data(), size);
+            }
         }
-        else if (!strcmp(fourcc,"MOGI"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOLT"))
-        {
-        }
-        else if (!strcmp(fourcc,"MODN"))
-        {
-        }
-        else if (!strcmp(fourcc,"MODS"))
-        {
-        }
-        else if (!strcmp(fourcc,"MODD"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOSB"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOPV"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOPT"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOPR"))
-        {
-        }
-        else if (!strcmp(fourcc,"MFOG"))
-        {
-        }
-        */
         f.seek((int)nextpos);
     }
     f.close();

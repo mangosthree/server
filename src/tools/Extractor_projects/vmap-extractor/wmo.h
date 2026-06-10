@@ -30,6 +30,8 @@
 
 #include <string>
 #include <set>
+#include <vector>
+#include <memory>
 #include "vec3d.h"
 #include "mpqfile.h"
 
@@ -49,6 +51,35 @@ class MPQFile;
 /* for whatever reason a certain company just can't stick to one coordinate system... */
 static inline Vec3D fixCoords(const Vec3D& v) { return Vec3D(v.z, v.x, v.y); }
 
+// WMO interior doodad sets (wowdev WMO MODS/MODN/MODD, 4.3.4).
+namespace WMODoodad
+{
+    struct MODS                          // doodad set, 32 bytes
+    {
+        char Name[20];
+        uint32 StartIndex;               // first MODD index in this set
+        uint32 Count;                    // number of doodads in this set
+        char _pad[4];
+    };
+
+    struct MODD                          // doodad instance, 40 bytes
+    {
+        uint32 NameIndex : 24;           // byte offset into the MODN name block
+        uint32 Flags : 8;
+        Vec3D Position;                  // WMO-local (Z-up)
+        float RotX, RotY, RotZ, RotW;    // orientation quaternion
+        float Scale;
+        uint32 Color;
+    };
+}
+
+struct WMODoodadData
+{
+    std::vector<WMODoodad::MODS> Sets;
+    std::unique_ptr<char[]> Paths;       // MODN name block
+    std::vector<WMODoodad::MODD> Spawns; // MODD
+};
+
 /**
  * @brief
  *
@@ -60,6 +91,7 @@ class WMORoot
         unsigned int col; /**< TODO */
         float bbcorn1[3]; /**< TODO */
         float bbcorn2[3]; /**< TODO */
+        WMODoodadData DoodadData; ///< Parsed MODS/MODN/MODD interior doodads.
 
         /**
          * @brief

@@ -205,11 +205,6 @@ namespace Movement
     inline void MoveSplineInit::SetCyclic() { args.flags.cyclic = true;}
 
     /**
-     * @brief Enables falling mode. Disabled by default.
-     */
-    inline void MoveSplineInit::SetFall() { args.flags.EnableFalling();}
-
-    /**
      * @brief Sets the velocity (in case you want to have custom movement velocity).
      * If not set, speed will be selected based on the unit's speeds and current movement mode.
      * Has no effect if falling mode is enabled.

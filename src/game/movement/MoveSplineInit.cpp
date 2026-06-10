@@ -225,6 +225,15 @@ namespace Movement
     }
 
     /**
+     * @brief Enables falling mode, carrying the unit's slow-fall state.
+     */
+    void MoveSplineInit::SetFall()
+    {
+        args.flags.EnableFalling();
+        args.flags.fallingSlow = unit.m_movementInfo.HasMovementFlag(MOVEFLAG_SAFE_FALL);
+    }
+
+    /**
      * @brief Sets unit's facing to a specified target after all path done.
      * @param target The target to face.
      */

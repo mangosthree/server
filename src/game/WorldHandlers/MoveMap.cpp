@@ -236,6 +236,9 @@ namespace MMAP
         }
 
         // load and init dtNavMesh - read parameters from file
+        // TODO(MoP): mmap/mmtile names use %03i here and in loadMap below; widen to
+        // %04u for map ids >= 1000. Must move with the Movemap-Generator writers.
+        // Filename-only. See MOP_READINESS.md (A6).
         uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%03i.mmap") + 1;
         char* fileName = new char[pathLen];
         snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/%03i.mmap").c_str(), mapId);

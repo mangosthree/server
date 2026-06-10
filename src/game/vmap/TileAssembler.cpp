@@ -170,6 +170,9 @@ namespace VMAP
             }
 
             // Write map tree file
+            // TODO(MoP): widen to setw(4) here and at the .vmtile name below for
+            // map ids >= 1000. Filename-only; pairs with VMapManager2::getMapFileName
+            // and MapBuilder::discoverTiles. See MOP_READINESS.md (A1).
             std::stringstream mapfilename;
             mapfilename << iDestDir << "/" << std::setfill('0') << std::setw(3) << map_iter->first << ".vmtree";
             FILE* mapfile = fopen(mapfilename.str().c_str(), "wb");
@@ -248,6 +251,7 @@ namespace VMAP
 
                 std::stringstream tilefilename;
                 tilefilename.fill('0');
+                // TODO(MoP): setw(4) for map ids >= 1000 (see A1 above). MOP_READINESS.md
                 tilefilename << iDestDir << "/" << std::setw(3) << map_iter->first << "_";
                 uint32 x, y;
                 StaticMapTree::unpackTileID(tileID, x, y);

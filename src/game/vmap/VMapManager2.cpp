@@ -107,6 +107,8 @@ namespace VMAP
     std::string VMapManager2::getMapFileName(unsigned int pMapId)
     {
         std::stringstream fname;
+        // TODO(MoP): width(4) for map ids >= 1000. Pairs with the TileAssembler
+        // vmtree/vmtile writer and MapBuilder::discoverTiles. See MOP_READINESS.md (A2).
         fname.width(3);
         fname << std::setfill('0') << pMapId << std::string(MAP_FILENAME_EXTENSION2);
         return fname.str();

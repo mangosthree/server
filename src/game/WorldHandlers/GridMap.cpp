@@ -378,7 +378,8 @@ float GridMap::getHeightFromFlat(float /*x*/, float /*y*/) const
  */
 // TODO(MoP): 4.3.4 only has the low-res 16-bit hole map. Client 5.3+ adds a
 // 64-bit high_res_holes map (MCNK flag 0x10000); supporting it needs a 64-bit
-// hole store here, a wider .map holes block, and a .map version bump.
+// hole store here, a wider .map holes block, and a .map version bump. Pairs with
+// the map-extractor writer + adt.h parse. See MOP_READINESS.md (B3).
 bool GridMap::isHole(int row, int col) const
 {
     int cellRow = row / 8;     // 8 squares per cell

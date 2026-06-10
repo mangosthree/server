@@ -73,6 +73,11 @@ namespace MMAP
     {
         vector<string> files;
         uint32 mapID, tileX, tileY, tileID, count = 0;
+        // TODO(MoP): vmaps/mmaps here are still 3-digit. For map ids >= 1000:
+        // grow filter to [32]; vmtree parse substr(0,3)->substr(0,4); vmtile filter
+        // %03u->%04u and offsets +1 (substr 4->5, 7->8); and the mmap writers below
+        // (%03u->%04u). The .map parse is ALREADY 4-digit - leave it. Pairs with
+        // TileAssembler + VMapManager2 + MoveMap. See MOP_READINESS.md (A3/A4).
         char filter[12];
 
         printf(" Discovering maps...  ");
@@ -399,6 +404,7 @@ namespace MMAP
         }
 
         char fileName[25];
+        // TODO(MoP): %03u->%04u for map ids >= 1000 (pairs with MoveMap reader). MOP_READINESS.md (A4)
         sprintf(fileName, "mmaps/%03u.mmap", mapID);
 
         FILE* file = fopen(fileName, "wb");
@@ -753,6 +759,7 @@ namespace MMAP
 
             // file output
             char fileName[255];
+            // TODO(MoP): %03u->%04u for map ids >= 1000 (pairs with MoveMap reader). MOP_READINESS.md (A4)
             sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileX, tileY);
             FILE* file = fopen(fileName, "wb");
             if (!file)
@@ -938,6 +945,7 @@ namespace MMAP
     bool MapBuilder::shouldSkipTile(uint32 mapID, uint32 tileX, uint32 tileY)
     {
         char fileName[255];
+        // TODO(MoP): %03u->%04u for map ids >= 1000 (pairs with MoveMap reader). MOP_READINESS.md (A4)
         sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileX, tileY);
         FILE* file = fopen(fileName, "rb");
         if (!file)

@@ -116,7 +116,10 @@ class adt_MCNK
         uint32 sizeMCSH;
         uint32 areaid;
         uint32 nMapObjRefs;
-        uint16 holes;           // locations where models pierce the heightmap
+        uint16 holes;           // low-res 16-bit hole map (holes_low_res)
+        // TODO(MoP): client 5.3+ adds a 64-bit high_res_holes map (MCNK flag
+        // 0x10000) that reuses the ofsHeight/ofsNormal bytes; parse it for MoP.
+        // See MOP_READINESS.md (B1).
         uint16 pad;
         uint16 s[2];
         uint32 data1;

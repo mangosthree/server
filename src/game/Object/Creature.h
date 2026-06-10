@@ -668,6 +668,7 @@ class Creature : public Unit
         void SetWalk(bool enable, bool asDefault = true);
         void SetLevitate(bool enable) override;
         void SetSwim(bool enable) override;
+        void UpdateSwimmingState(); ///< Sync MOVEFLAG_SWIMMING with the liquid at the current position.
         void SetCanFly(bool enable) override;
         void SetFeatherFall(bool enable) override;
         void SetHover(bool enable) override;

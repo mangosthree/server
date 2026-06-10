@@ -836,6 +836,14 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                 break;
             }
 
+            // keep the swim flag in sync while moving across liquid;
+            // cheap gate: position only changes mid-spline, and a set
+            // flag must clear when the water is left
+            if (!movespline->Finalized() || IsSwimming())
+            {
+                UpdateSwimmingState();
+            }
+
             if (!IsInEvadeMode())
             {
                 if (AI())
@@ -4017,6 +4025,11 @@ void Creature::SetLevitate(bool enable)
  */
 void Creature::SetSwim(bool enable)
 {
+    if (enable == m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING))
+    {
+        return;
+    }
+
     if (enable)
     {
         m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);
@@ -4029,6 +4042,35 @@ void Creature::SetSwim(bool enable)
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_START_SWIM : SMSG_SPLINE_MOVE_STOP_SWIM);
     data << GetPackGUID();
     SendMessageToSet(&data, true);
+}
+
+/**
+ * @brief Syncs MOVEFLAG_SWIMMING with the liquid at the current position.
+ *
+ * The spawn-time check in InitEntry only fires once; without this a shore
+ * spawned creature pathing through deep water keeps its land movement
+ * state (falling animation, run speed). Matches the swim half of TC's
+ * Creature::UpdateMovementCapabilities.
+ */
+void Creature::UpdateSwimmingState()
+{
+    // client-moved creatures (possess) own their movement flags
+    if (hasUnitState(UNIT_STAT_CONTROLLED))
+    {
+        return;
+    }
+
+    if (!CanSwim() || (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_WALK_IN_WATER))
+    {
+        return;
+    }
+
+    GridMapLiquidData liquidData;
+    bool swimmable = GetTerrain()->IsSwimmable(GetPositionX(), GetPositionY(), GetPositionZ(),
+                                               GetObjectBoundingRadius(), &liquidData) &&
+                     GetPositionZ() < liquidData.level + 2.0f; // not on a bridge/ledge above the water body
+
+    SetSwim(swimmable);
 }
 
 /**

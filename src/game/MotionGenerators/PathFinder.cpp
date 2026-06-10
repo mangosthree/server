@@ -312,18 +312,21 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
     // *** poly path generating logic ***
 
     // start and end are on same polygon
-    // just need to move in straight line
+    // handle this case as if they were 2 different polygons, building a line
+    // path split in a few points clamped to the navmesh (TC parity) - a free
+    // BuildShortcut() here let ground creatures walk straight up terrain the
+    // navmesh rejects (vertical canyon walls, >walkable-angle slopes)
     if (startPoly == endPoly)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: (startPoly == endPoly)\n");
-
-        BuildShortcut();
 
         m_pathPolyRefs[0] = startPoly;
         m_polyLength = 1;
 
         m_type = farFromPoly ? PATHFIND_INCOMPLETE : PATHFIND_NORMAL;
         DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: path type %d\n", m_type);
+
+        BuildPointPath(startPoint, endPoint);
         return;
     }
 
@@ -514,7 +517,14 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
                        m_pointPathLimit);    // maximum number of points
     }
 
-    if (pointCount < 2 || dtStatusFailed(dtResult))
+    // special case with start and end positions very close to each other
+    if (m_polyLength == 1 && pointCount == 1)
+    {
+        // first point is start position, append end position (TC parity)
+        dtVcopy(&pathPoints[1 * VERTEX_SIZE], endPoint);
+        pointCount++;
+    }
+    else if (pointCount < 2 || dtStatusFailed(dtResult))
     {
         // only happens if pass bad data to findStraightPath or navmesh is broken
         // single point paths can be generated here

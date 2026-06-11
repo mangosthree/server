@@ -62,6 +62,7 @@ class WDTFile
 
         std::string* gWmoInstansName; /**< TODO */
         int gnWMO, nMaps; /**< TODO */
+        int nWmoNames; ///< Count of names parsed from MWMO; bounds MODF indices.
 
         /**
          * @brief

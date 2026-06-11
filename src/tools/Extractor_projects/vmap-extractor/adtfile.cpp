@@ -142,6 +142,13 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
 
         size_t nextpos = ADT.getPos() + size;
 
+        // A corrupt/truncated chunk header can declare a size past the end of
+        // the file; stop here rather than drive a wild new[]/read off it.
+        if (nextpos > ADT.getSize())
+        {
+            break;
+        }
+
         if (!strcmp(fourcc, "MCIN"))
         {
         }

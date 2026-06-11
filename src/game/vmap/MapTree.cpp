@@ -549,18 +549,25 @@ namespace VMAP
                     }
 
                     // Update tree
+                    // TODO(format): align with TC's iSpawnIndices table (validated index stored
+                    // in the .vmtree) instead of reading referencedVal raw; needs a .vmtile/.vmtree format+version bump.
                     uint32 referencedVal;
 
-                    size_t fileRead = fread(&referencedVal, sizeof(uint32), 1, tf);
-                    if (!iLoadedSpawns.count(referencedVal) || fileRead <= 0)
+                    if (fread(&referencedVal, sizeof(uint32), 1, tf) != 1)
                     {
-#ifdef VMAP_DEBUG
-                        if (referencedVal > iNTreeValues)
-                        {
-                            DEBUG_LOG("invalid tree element! (%u/%u)", referencedVal, iNTreeValues);
-                            continue;
-                        }
-#endif
+                        result = false;
+                        break;
+                    }
+                    // referencedVal indexes iTreeValues and is read straight from the file: validate before use.
+                    if (referencedVal >= iNTreeValues)
+                    {
+                        ERROR_LOG("StaticMapTree::LoadMapTile(): invalid tree element (%u/%u) in tile [%u, %u]", referencedVal, iNTreeValues, tileX, tileY);
+                        result = false;
+                        break;
+                    }
+
+                    if (!iLoadedSpawns.count(referencedVal))
+                    {
                         iTreeValues[referencedVal] = ModelInstance(spawn, model);
                         iLoadedSpawns[referencedVal] = 1;
                     }

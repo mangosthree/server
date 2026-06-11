@@ -90,6 +90,14 @@ bool DBCFile::open()
         return false;
     }
 
+    // Reject a corrupt header whose declared sizes can't fit the file before
+    // attempting an absurd allocation (each field is bounded by the file size).
+    DWORD _fileSize = SFileGetFileSize(_file, NULL);
+    if (_recordSize > _fileSize || _recordCount > _fileSize || _stringSize > _fileSize)
+    {
+        return false;
+    }
+
     _data = new unsigned char[_recordSize * _recordCount + _stringSize];
     _stringTable = _data + _recordSize * _recordCount;
 

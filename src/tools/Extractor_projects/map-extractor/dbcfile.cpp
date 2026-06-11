@@ -98,6 +98,16 @@ bool DBCFile::open()
         return false;
     }
 
+    // Reject a corrupt header whose declared sizes can't fit the file before
+    // attempting an absurd allocation (each field is bounded by the file size).
+    DWORD fileSize = SFileGetFileSize(fileHandle, NULL);
+    if (recordSize > fileSize || recordCount > fileSize || stringSize > fileSize)
+    {
+        SFileCloseFile(fileHandle);
+        printf("DBCFile %s has invalid header sizes.\n", filename.c_str());
+        return false;
+    }
+
     data = new unsigned char[recordSize * recordCount + stringSize];
     stringTable = data + recordSize * recordCount;
 

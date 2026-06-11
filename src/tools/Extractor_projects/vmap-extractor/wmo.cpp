@@ -172,6 +172,14 @@ bool WMOGroup::open()
         }
         fourcc[4] = 0;
         size_t nextpos = f.getPos() + size;
+
+        // A corrupt/truncated chunk header can declare a size past the end of
+        // the file; stop here rather than drive a wild new[]/read off it.
+        if (nextpos > f.getSize())
+        {
+            break;
+        }
+
         LiquEx_size = 0;
         liquflags = 0;
 
@@ -228,11 +236,24 @@ bool WMOGroup::open()
             hlq = new WMOLiquidHeader;
             f.read(hlq, 0x1E);
             LiquEx_size = sizeof(WMOLiquidVert) * hlq->xverts * hlq->yverts;
-            LiquEx = new WMOLiquidVert[hlq->xverts * hlq->yverts];
-            f.read(LiquEx, LiquEx_size);
             int nLiquBytes = hlq->xtiles * hlq->ytiles;
-            LiquBytes = new char[nLiquBytes];
-            f.read(LiquBytes, nLiquBytes);
+            // Validate the declared liquid geometry against the chunk size before
+            // allocating, so a corrupt MLIQ header can't drive a wild allocation.
+            if (hlq->xverts < 0 || hlq->yverts < 0 || hlq->xtiles < 0 || hlq->ytiles < 0 ||
+                0x1E + LiquEx_size + size_t(nLiquBytes) > size)
+            {
+                printf("Warning: skipping malformed MLIQ chunk in WMO group.\n");
+                liquflags &= ~1;
+                delete hlq;
+                hlq = 0;
+            }
+            else
+            {
+                LiquEx = new WMOLiquidVert[hlq->xverts * hlq->yverts];
+                f.read(LiquEx, LiquEx_size);
+                LiquBytes = new char[nLiquBytes];
+                f.read(LiquBytes, nLiquBytes);
+            }
 
             /* std::ofstream llog("Buildings/liquid.log", ios_base::out | ios_base::app);
             llog << filename;

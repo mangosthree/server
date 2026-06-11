@@ -276,8 +276,8 @@ class adt_MHDR
         uint32 offsTex;            // MTEX
         uint32 offsModels;         // MMDX
         uint32 offsModelsIds;      // MMID
-        uint32 offsMapObejcts;     // MWMO
-        uint32 offsMapObejctsIds;  // MWID
+        uint32 offsMapObjects;     // MWMO
+        uint32 offsMapObjectsIds;  // MWID
         uint32 offsDoodsDef;       // MDDF
         uint32 offsObjectsDef;     // MODF
         uint32 offsMFBO;           // MFBO

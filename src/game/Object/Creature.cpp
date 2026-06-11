@@ -574,7 +574,8 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     }
 
     // the client needs this flag to play the swim animation in liquid
-    if (CanSwim() && !(GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_WALK_IN_WATER))
+    if ((GetCreatureInfo()->InhabitType & INHABIT_WATER) &&
+        !(GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_WALK_IN_WATER))
     {
         unitFlags |= UNIT_FLAG_CAN_SWIM;
     }
@@ -4065,6 +4066,45 @@ void Creature::SetSwim(bool enable)
 }
 
 /**
+ * @brief Whether this creature may swim instead of being clamped to the ground.
+ */
+bool Creature::CanSwim() const
+{
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CANT_SWIM))
+    {
+        return false;
+    }
+
+    if ((GetCreatureInfo()->InhabitType & INHABIT_WATER) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CAN_SWIM))
+    {
+        return true;
+    }
+
+    if (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_WALK_IN_WATER)
+    {
+        return false;
+    }
+
+    // a ground creature already in swim mode keeps it until the water is left
+    if (IsSwimming())
+    {
+        return true;
+    }
+
+    // not relocated yet during Create(); position is not valid to probe
+    if (!IsInWorld())
+    {
+        return false;
+    }
+
+    // the client default: a creature immersed in swim-deep liquid surface-swims
+    GridMapLiquidData liquidData;
+    return GetTerrain()->IsSwimmable(GetPositionX(), GetPositionY(), GetPositionZ(),
+                                     GetObjectBoundingRadius(), &liquidData) &&
+           GetPositionZ() < liquidData.level + 2.0f; // not on a bridge/ledge above the water body
+}
+
+/**
  * @brief Syncs MOVEFLAG_SWIMMING with the liquid at the current position.
  *
  * The spawn-time check in InitEntry only fires once; without this a shore
@@ -4080,13 +4120,15 @@ void Creature::UpdateSwimmingState()
         return;
     }
 
-    if (!CanSwim() || (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_WALK_IN_WATER))
+    // explicit bottom-walkers keep their spawn-time movement flags
+    if (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_WALK_IN_WATER)
     {
         return;
     }
 
     GridMapLiquidData liquidData;
-    bool swimmable = GetTerrain()->IsSwimmable(GetPositionX(), GetPositionY(), GetPositionZ(),
+    bool swimmable = !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CANT_SWIM) &&
+                     GetTerrain()->IsSwimmable(GetPositionX(), GetPositionY(), GetPositionZ(),
                                                GetObjectBoundingRadius(), &liquidData) &&
                      GetPositionZ() < liquidData.level + 2.0f; // not on a bridge/ledge above the water body
 

@@ -378,7 +378,10 @@ float GridMap::getHeightFromFlat(float /*x*/, float /*y*/) const
  */
 // TODO(MoP): 4.3.4 only has the low-res 16-bit hole map. Client 5.3+ adds a
 // 64-bit high_res_holes map (MCNK flag 0x10000); supporting it needs a 64-bit
-// hole store here, a wider .map holes block, and a .map version bump.
+// hole store here, a wider .map holes block, and a .map version bump. ENTANGLED:
+// the extractor side can't read those holes in isolation - they live at MCNK +0x14
+// where M3 reads the height offset (see dep/loadlib/sl/adt.h B1), so MoP holes are
+// part of the broader 5.3+ MCNK header rework, not a holes-only change. MOP_READINESS (B3).
 bool GridMap::isHole(int row, int col) const
 {
     int cellRow = row / 8;     // 8 squares per cell

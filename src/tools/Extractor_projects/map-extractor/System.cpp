@@ -1145,6 +1145,11 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
     }
 
     // map hole info
+    // TODO(MoP): only the low-res 16-bit holes_low_res is written here. Client 5.3+
+    // adds 64-bit high_res_holes (MCNK flag 0x10000); emitting it needs a wider .map
+    // holes block + a .map version-magic bump AND the GridMap reader. ENTANGLED with
+    // the 5.3+ MCNK header rework - the 64-bit holes sit at MCNK +0x14 where M3 reads
+    // the height offset (see adt.h B1); cannot be done holes-only. MOP_READINESS (B2).
     uint16 holes[ADT_CELLS_PER_GRID][ADT_CELLS_PER_GRID];
 
     if (map.liquidMapOffset)

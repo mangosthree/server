@@ -236,9 +236,15 @@ namespace MMAP
         }
 
         // load and init dtNavMesh - read parameters from file
+#if defined(MISTS)
+        uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%04u.mmap") + 1;
+        char* fileName = new char[pathLen];
+        snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/%04u.mmap").c_str(), mapId);
+#else
         uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%03i.mmap") + 1;
         char* fileName = new char[pathLen];
         snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/%03i.mmap").c_str(), mapId);
+#endif
 
         FILE* file = fopen(fileName, "rb");
         if (!file)
@@ -303,9 +309,15 @@ namespace MMAP
         }
 
         // load this tile :: mmaps/MMMXXYY.mmtile
+#if defined(MISTS)
+        uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%04u%02i%02i.mmtile") + 1;
+        char* fileName = new char[pathLen];
+        snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/%04u%02i%02i.mmtile").c_str(), mapId, x, y);
+#else
         uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%03i%02i%02i.mmtile") + 1;
         char* fileName = new char[pathLen];
         snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/%03i%02i%02i.mmtile").c_str(), mapId, x, y);
+#endif
 
         FILE* file = fopen(fileName, "rb");
         if (!file)

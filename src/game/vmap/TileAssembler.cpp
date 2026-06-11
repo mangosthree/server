@@ -171,7 +171,11 @@ namespace VMAP
 
             // Write map tree file
             std::stringstream mapfilename;
+#if defined(MISTS)
+            mapfilename << iDestDir << "/" << std::setfill('0') << std::setw(4) << map_iter->first << ".vmtree";
+#else
             mapfilename << iDestDir << "/" << std::setfill('0') << std::setw(3) << map_iter->first << ".vmtree";
+#endif
             FILE* mapfile = fopen(mapfilename.str().c_str(), "wb");
             if (!mapfile)
             {
@@ -248,7 +252,11 @@ namespace VMAP
 
                 std::stringstream tilefilename;
                 tilefilename.fill('0');
+#if defined(MISTS)
+                tilefilename << iDestDir << "/" << std::setw(4) << map_iter->first << "_";
+#else
                 tilefilename << iDestDir << "/" << std::setw(3) << map_iter->first << "_";
+#endif
                 uint32 x, y;
                 StaticMapTree::unpackTileID(tileID, x, y);
                 tilefilename << std::setw(2) << x << "_" << std::setw(2) << y << ".vmtile";

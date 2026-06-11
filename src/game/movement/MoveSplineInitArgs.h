@@ -78,7 +78,8 @@ namespace Movement
              * @param path_capacity The initial capacity of the path vector.
              */
             MoveSplineInitArgs(size_t path_capacity = 16) : path_Idx_offset(0),
-                velocity(0.f), parabolic_amplitude(0.f), time_perc(0.f), splineId(0), initialOrientation(0.f)
+                velocity(0.f), parabolic_amplitude(0.f), time_perc(0.f), splineId(0), initialOrientation(0.f),
+                walk(false)
             {
                 path.reserve(path_capacity);
             }
@@ -92,6 +93,7 @@ namespace Movement
             float time_perc;
             uint32 splineId; /**< The ID of the spline. */
             float initialOrientation;
+            bool walk; /**< Selects walk speed for the spline; never sent on the wire (4.3.4 has no walk spline bit). */
 
             /**
              * @brief Validates the MoveSplineInitArgs.

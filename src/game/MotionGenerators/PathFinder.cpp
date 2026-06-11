@@ -200,6 +200,14 @@ dtPolyRef PathFinder::getPolyByLocation(const float* point, float* distance) con
  */
 void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
 {
+    // water is an open volume the 2.5D navmesh cannot represent: a mesh
+    // path would pin a swimmer to the lake-bed polys, so swim straight
+    if (m_sourceUnit->GetTypeId() == TYPEID_UNIT && ((Creature*)m_sourceUnit)->CanSwim() &&
+        BuildSwimShortcut(startPos, endPos))
+    {
+        return;
+    }
+
     // *** getting start/end poly logic ***
 
     float distToStartPoly, distToEndPoly;
@@ -537,6 +545,39 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
     }
 
     DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::BuildPointPath path type %d size %d poly-size %d\n", m_type, pointCount, m_polyLength);
+}
+
+/**
+ * @brief Builds a straight 3D swim path when both ends float in the same water body.
+ * @param startPos The start position.
+ * @param endPos The end position.
+ * @return true if a swim shortcut was built; false to fall back to the navmesh.
+ */
+bool PathFinder::BuildSwimShortcut(const Vector3& startPos, const Vector3& endPos)
+{
+    TerrainInfo const* terrain = m_sourceUnit->GetTerrain();
+    float radius = m_sourceUnit->GetObjectBoundingRadius();
+
+    // both ends must be deep enough to actually swim in, not just wading
+    if (!terrain->IsSwimmable(startPos.x, startPos.y, startPos.z, radius) ||
+        !terrain->IsSwimmable(endPos.x, endPos.y, endPos.z, radius))
+    {
+        return false;
+    }
+
+    BuildShortcut();
+
+    // any sampled point outside liquid means a shore/dam between two pools
+    for (uint32 i = 0; i < m_pathPoints.size(); ++i)
+    {
+        if (!terrain->IsInWater(m_pathPoints[i].x, m_pathPoints[i].y, m_pathPoints[i].z))
+        {
+            return false;
+        }
+    }
+
+    m_type = PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH);
+    return true;
 }
 
 /**

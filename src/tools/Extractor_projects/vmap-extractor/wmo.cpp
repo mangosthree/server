@@ -374,9 +374,11 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
         memset(IndexRenum, 0xFF, nVertices * sizeof(int));
         for (int i = 0; i < nTriangles; ++i)
         {
-            // Skip no collision triangles
-            if (MOPY[2 * i]&WMO_MATERIAL_NO_COLLISION ||
-                !(MOPY[2 * i] & (WMO_MATERIAL_HINT | WMO_MATERIAL_COLLIDE_HIT)))
+            // Keep collidable triangles only: collision faces, or rendered
+            // non-detail faces (wowdev SMOPoly::isCollidable).
+            bool isRenderFace = (MOPY[2 * i] & WMO_MATERIAL_RENDER) && !(MOPY[2 * i] & WMO_MATERIAL_DETAIL);
+            bool isCollision = (MOPY[2 * i] & WMO_MATERIAL_COLLISION) || isRenderFace;
+            if (!isCollision)
             {
                 continue;
             }

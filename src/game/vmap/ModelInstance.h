@@ -31,6 +31,7 @@
 #include <G3D/Ray.h>
 
 #include "Platform/Define.h"
+#include "ModelIgnoreFlags.h"
 
 namespace VMAP
 {
@@ -129,7 +130,7 @@ namespace VMAP
              * @param pStopAtFirstHit
              * @return bool
              */
-            bool IntersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit) const;
+            bool IntersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags) const;
             /**
              * @brief
              *

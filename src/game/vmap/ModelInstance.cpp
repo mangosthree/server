@@ -62,7 +62,7 @@ namespace VMAP
         iInvScale = 1.f / iScale;
     }
 
-    bool ModelInstance::IntersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit) const
+    bool ModelInstance::IntersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags) const
     {
         if (!iModel)
         {
@@ -70,6 +70,20 @@ namespace VMAP
             DEBUG_LOG("<object not loaded>");
 #endif
             return false;
+        }
+        // Caller-requested filter: skip M2 doodads (banners, candles, pews,
+        // decorative WMO interior props extracted by PR2). MOD_M2 lives on
+        // the per-instance spawn record here, not on the WorldModel header
+        // (mangosthree's WorldModel::Flags is never persisted), so the
+        // filter must apply at the instance level. Mirrors TC's
+        // WorldModel::IntersectRay filter at
+        // tc-preservation/src/common/Collision/Models/WorldModel.cpp:474-482.
+        if ((ignoreFlags & ModelIgnoreFlags::M2) != ModelIgnoreFlags::Nothing)
+        {
+            if (flags & MOD_M2)
+            {
+                return false;
+            }
         }
         float time = pRay.intersectionTime(iBound);
         if (time == G3D::inf())
@@ -83,7 +97,7 @@ namespace VMAP
         Vector3 p = iInvRot * (pRay.origin() - iPos) * iInvScale;
         Ray modRay(p, iInvRot * pRay.direction());
         float distance = pMaxDist * iInvScale;
-        bool hit = iModel->IntersectRay(modRay, distance, pStopAtFirstHit);
+        bool hit = iModel->IntersectRay(modRay, distance, pStopAtFirstHit, ignoreFlags);
         if (hit)
         {
             distance *= iScale;

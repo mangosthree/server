@@ -772,9 +772,15 @@ namespace VMAP
      * @param stopAtFirstHit Whether to stop at the first hit.
      * @return bool True if the ray intersects, false otherwise.
      */
-    bool WorldModel::IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit) const
+    bool WorldModel::IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit, ModelIgnoreFlags /*ignoreFlags*/) const
     {
-        // M2 models are not taken into account for LoS calculation
+        // M2 models are not taken into account for LoS calculation.
+        // NOTE: mangosthree's extractor never persists WorldModel::Flags
+        // (writeFile/readFile only handle RootWMOID + group models), so
+        // this branch never fires at runtime. The real per-instance MOD_M2
+        // filter lives in ModelInstance::IntersectRay where the spawn-side
+        // flag is available. Branch kept for parity with TC and as a
+        // forward-compatible guard if Flags ever gets persisted.
         if (Flags & MOD_M2)
         {
             return false;

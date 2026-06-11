@@ -385,9 +385,9 @@ bool Unit::SelectHostileTarget()
 
                 if (m_ThreatManager.getThreatList().size() < 2)
                 {
-                    // only one target in list, we have to evade after timer
-                    // TODO: make timer - inside Creature class
-                    ((Creature*)this)->AI()->EnterEvadeMode();
+                    // only one target in list: keep trying and evade once the
+                    // no-path grace timer expires (see Creature::Update)
+                    ((Creature*)this)->SetCannotReachTarget(true);
                 }
                 else
                 {
@@ -398,9 +398,13 @@ bool Unit::SelectHostileTarget()
 
                     // remove target from current attacker, do not exit combat settings
                     AttackStop(true);
-                }
 
-                return false;
+                    return false;
+                }
+            }
+            else
+            {
+                ((Creature*)this)->SetCannotReachTarget(false);
             }
         }
         return true;

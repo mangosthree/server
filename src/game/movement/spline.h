@@ -67,6 +67,7 @@ namespace Movement
 
             uint8 m_mode; /**< Evaluation mode */
             bool cyclic; /**< Indicates if the spline is cyclic */
+            float initialOrientation; /**< Unit facing at launch, shapes the leading virtual point */
 
             /**
              * @brief Constants for segment length evaluation precision.
@@ -196,7 +197,7 @@ namespace Movement
             /**
              * @brief Constructor for SplineBase.
              */
-            explicit SplineBase() : index_lo(0), index_hi(0), m_mode(UninitializedMode), cyclic(false) {}
+            explicit SplineBase() : index_lo(0), index_hi(0), m_mode(UninitializedMode), cyclic(false), initialOrientation(0.f) {}
 
             /**
              * @brief Calculates the position for given segment Idx, and percent of segment length t.
@@ -263,16 +264,18 @@ namespace Movement
              * @param controls Array of control points.
              * @param count Number of control points.
              * @param m Evaluation mode.
+             * @param orientation Unit facing at launch, shapes the leading virtual point.
              */
-            void init_spline(const Vector3* controls, index_type count, EvaluationMode m);
+            void init_spline(const Vector3* controls, index_type count, EvaluationMode m, float orientation = 0.f);
             /**
              * @brief Initializes a cyclic spline.
              * @param controls Array of control points.
              * @param count Number of control points.
              * @param m Evaluation mode.
              * @param cyclic_point Index of the cyclic point.
+             * @param orientation Unit facing at launch, shapes the leading virtual point.
              */
-            void init_cyclic_spline(const Vector3* controls, index_type count, EvaluationMode m, index_type cyclic_point);
+            void init_cyclic_spline(const Vector3* controls, index_type count, EvaluationMode m, index_type cyclic_point, float orientation = 0.f);
 
             /**
              * @brief Initializes the spline with a custom initializer.
@@ -384,16 +387,18 @@ namespace Movement
              * @param controls Array of control points.
              * @param count Number of control points.
              * @param m Evaluation mode.
+             * @param orientation Unit facing at launch.
              */
-            void init_spline(const Vector3* controls, index_type count, EvaluationMode m) { SplineBase::init_spline(controls, count, m);}
+            void init_spline(const Vector3* controls, index_type count, EvaluationMode m, float orientation = 0.f) { SplineBase::init_spline(controls, count, m, orientation);}
             /**
              * @brief Initializes a cyclic spline.
              * @param controls Array of control points.
              * @param count Number of control points.
              * @param m Evaluation mode.
              * @param cyclic_point Index of the cyclic point.
+             * @param orientation Unit facing at launch.
              */
-            void init_cyclic_spline(const Vector3* controls, index_type count, EvaluationMode m, index_type cyclic_point) { SplineBase::init_cyclic_spline(controls, count, m, cyclic_point);}
+            void init_cyclic_spline(const Vector3* controls, index_type count, EvaluationMode m, index_type cyclic_point, float orientation = 0.f) { SplineBase::init_cyclic_spline(controls, count, m, cyclic_point, orientation);}
 
             /**
              * @brief Initializes lengths with SplineBase::SegLength method.

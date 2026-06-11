@@ -1314,6 +1314,13 @@ bool GameObject::IsCollisionEnabled() const
             return GetGoState() != GO_STATE_ACTIVE && GetGoState() != GO_STATE_ACTIVE_ALTERNATIVE;
         case GAMEOBJECT_TYPE_TRAP:
             return false;
+        // GAMEOBJECT_TYPE_CHAIR (7): benches, stools, decorative furniture
+        // (e.g. Stormwind Cathedral pews). Retail behaviour treats these as
+        // walk-over/shoot-over props; the mmap navmesh already ignores
+        // GameObjects, so keeping these out of the dynamic LoS tree keeps
+        // server-side checks consistent with both retail and the navmesh.
+        case GAMEOBJECT_TYPE_CHAIR:
+            return false;
         default:
             return true;
     }

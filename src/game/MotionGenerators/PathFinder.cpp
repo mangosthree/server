@@ -117,9 +117,12 @@ dtPolyRef PathFinder::getPathPolyByPosition(const dtPolyRef* polyPath, uint32 po
     }
 
     dtPolyRef nearestPoly = INVALID_POLYREF;
-    float minDist2d = FLT_MAX;
-    float minDist3d = 0.0f;
+    float minDist = FLT_MAX;
 
+    // full 3D distance for both selection and acceptance (TC parity) -
+    // a 2D test silently accepts stale path polys far above/below the
+    // point, e.g. ground polys directly beneath a target standing on
+    // top of something
     for (uint32 i = 0; i < polyPathSize; ++i)
     {
         float closestPoint[VERTEX_SIZE];
@@ -129,15 +132,14 @@ dtPolyRef PathFinder::getPathPolyByPosition(const dtPolyRef* polyPath, uint32 po
             continue;
         }
 
-        float d = dtVdist2DSqr(point, closestPoint);
-        if (d < minDist2d)
+        float d = dtVdistSqr(point, closestPoint);
+        if (d < minDist)
         {
-            minDist2d = d;
+            minDist = d;
             nearestPoly = polyPath[i];
-            minDist3d = dtVdistSqr(point, closestPoint);
         }
 
-        if (minDist2d < 1.0f) // shortcut out - close enough for us
+        if (minDist < 1.0f) // shortcut out - close enough for us
         {
             break;
         }
@@ -145,10 +147,10 @@ dtPolyRef PathFinder::getPathPolyByPosition(const dtPolyRef* polyPath, uint32 po
 
     if (distance)
     {
-        *distance = dtMathSqrtf(minDist3d);
+        *distance = dtMathSqrtf(minDist);
     }
 
-    return (minDist2d < 3.0f) ? nearestPoly : INVALID_POLYREF;
+    return (minDist < 3.0f) ? nearestPoly : INVALID_POLYREF;
 }
 
 /**
@@ -182,7 +184,9 @@ dtPolyRef PathFinder::getPolyByLocation(const float* point, float* distance) con
 
     // still nothing ..
     // try with bigger search box
-    extents[1] = 200.0f;
+    // the extent must not overlap more than 128 polygons in the navmesh
+    // (see dtNavMeshQuery::findNearestPoly), so keep it at TC's 50
+    extents[1] = 50.0f;
     dtResult = m_navMeshQuery->findNearestPoly(point, extents, &m_filter, &polyRef, closestPoint);
     if (dtStatusSucceed(dtResult) && polyRef != INVALID_POLYREF)
     {
@@ -216,6 +220,12 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
 
     dtPolyRef startPoly = getPolyByLocation(startPoint, &distToStartPoly);
     dtPolyRef endPoly = getPolyByLocation(endPoint, &distToEndPoly);
+
+    // reset the path type before rebuilding (TC parity): m_type persists
+    // across calculate() calls, so a stale PATHFIND_INCOMPLETE from one
+    // far-from-poly moment otherwise sticks to every later clean path,
+    // and IsReachable() consumers evade/drop a perfectly reachable target
+    m_type = PATHFIND_NORMAL;
 
     dtStatus dtResult;
 
@@ -302,18 +312,21 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
     // *** poly path generating logic ***
 
     // start and end are on same polygon
-    // just need to move in straight line
+    // handle this case as if they were 2 different polygons, building a line
+    // path split in a few points clamped to the navmesh (TC parity) - a free
+    // BuildShortcut() here let ground creatures walk straight up terrain the
+    // navmesh rejects (vertical canyon walls, >walkable-angle slopes)
     if (startPoly == endPoly)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: (startPoly == endPoly)\n");
-
-        BuildShortcut();
 
         m_pathPolyRefs[0] = startPoly;
         m_polyLength = 1;
 
         m_type = farFromPoly ? PATHFIND_INCOMPLETE : PATHFIND_NORMAL;
         DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: path type %d\n", m_type);
+
+        BuildPointPath(startPoint, endPoint);
         return;
     }
 
@@ -504,7 +517,14 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
                        m_pointPathLimit);    // maximum number of points
     }
 
-    if (pointCount < 2 || dtStatusFailed(dtResult))
+    // special case with start and end positions very close to each other
+    if (m_polyLength == 1 && pointCount == 1)
+    {
+        // first point is start position, append end position (TC parity)
+        dtVcopy(&pathPoints[1 * VERTEX_SIZE], endPoint);
+        pointCount++;
+    }
+    else if (pointCount < 2 || dtStatusFailed(dtResult))
     {
         // only happens if pass bad data to findStraightPath or navmesh is broken
         // single point paths can be generated here

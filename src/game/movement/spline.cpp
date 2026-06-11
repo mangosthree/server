@@ -23,6 +23,7 @@
  */
 
 #include "spline.h"
+#include <cmath>
 #include <sstream>
 #include <G3D/Matrix4.h>
 
@@ -258,10 +259,11 @@ namespace Movement
      * @param count Number of control points.
      * @param m Evaluation mode.
      */
-    void SplineBase::init_spline(const Vector3* controls, index_type count, EvaluationMode m)
+    void SplineBase::init_spline(const Vector3* controls, index_type count, EvaluationMode m, float orientation)
     {
         m_mode = m;
         cyclic = false;
+        initialOrientation = orientation;
 
         (this->*initializers[m_mode])(controls, count, cyclic, 0);
     }
@@ -272,11 +274,13 @@ namespace Movement
      * @param count Number of control points.
      * @param m Evaluation mode.
      * @param cyclic_point Index of the cyclic point.
+     * @param orientation Unit facing at launch.
      */
-    void SplineBase::init_cyclic_spline(const Vector3* controls, index_type count, EvaluationMode m, index_type cyclic_point)
+    void SplineBase::init_cyclic_spline(const Vector3* controls, index_type count, EvaluationMode m, index_type cyclic_point, float orientation)
     {
         m_mode = m;
         cyclic = true;
+        initialOrientation = orientation;
 
         (this->*initializers[m_mode])(controls, count, cyclic, cyclic_point);
     }
@@ -332,6 +336,8 @@ namespace Movement
 
         // first and last two indexes are space for special 'virtual points'
         // these points are required for proper C_Evaluate and C_Evaluate_Derivative method work
+        // the client builds the leading virtual point from the mover's current facing,
+        // one yard behind the first control point; mirror it to stay in sync
         if (cyclic)
         {
             if (cyclic_point == 0)
@@ -340,7 +346,7 @@ namespace Movement
             }
             else
             {
-                points[0] = controls[0].lerp(controls[1], -1);
+                points[0] = controls[0] - Vector3(std::cos(initialOrientation), std::sin(initialOrientation), 0.f);
             }
 
             points[high_index + 1] = controls[cyclic_point];
@@ -348,7 +354,7 @@ namespace Movement
         }
         else
         {
-            points[0] = controls[0].lerp(controls[1], -1);
+            points[0] = controls[0] - Vector3(std::cos(initialOrientation), std::sin(initialOrientation), 0.f);
             points[high_index + 1] = controls[count - 1];
         }
 

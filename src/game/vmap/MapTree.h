@@ -27,6 +27,7 @@
 
 #include "Platform/Define.h"
 #include "BIH.h"
+#include "ModelIgnoreFlags.h"
 
 #include <unordered_map>
 
@@ -89,7 +90,7 @@ namespace VMAP
          * @param pStopAtFirstHit Whether to stop at the first hit.
          * @return bool True if an intersection is found, false otherwise.
          */
-        bool getIntersectionTime(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit) const;
+        bool getIntersectionTime(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags) const;
         // bool containsLoadedMapTile(unsigned int pTileIdent) const { return(iLoadedMapTiles.containsKey(pTileIdent)); }
     public:
         /**
@@ -147,7 +148,14 @@ namespace VMAP
          * @param pos2 The ending position.
          * @return bool True if there is a line of sight, false otherwise.
          */
-        bool isInLineOfSight(const G3D::Vector3& pos1, const G3D::Vector3& pos2) const;
+        bool isInLineOfSight(const G3D::Vector3& pos1, const G3D::Vector3& pos2, ModelIgnoreFlags ignoreFlags) const;
+        /**
+         * @brief Debug helper: identify the first ModelInstance occluding
+         *        the ray. Out-params are populated only on success.
+         */
+        bool getFirstHitInstanceDebug(const G3D::Vector3& pos1, const G3D::Vector3& pos2, ModelIgnoreFlags ignoreFlags,
+                                      std::string& outName, G3D::Vector3& outHitPos, uint32& outFlags,
+                                      G3D::AABox& outBound) const;
         /**
          * @brief Checks if an object is hit when moving from pos1 to pos2.
          *

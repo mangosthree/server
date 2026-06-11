@@ -27,6 +27,7 @@
 #include "packet_builder.h"
 #include "Unit.h"
 #include "TransportSystem.h"
+#include <atomic>
 
 namespace Movement
 {
@@ -187,7 +188,7 @@ namespace Movement
         args.path[0] = real_position;
 
         args.flags = MoveSplineFlag::Done;
-        unit.m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_FORWARD | MOVEFLAG_CAN_FLY));
+        unit.m_movementInfo.RemoveMovementFlag(MOVEFLAG_FORWARD);
         move_spline.Initialize(args);
 
         WorldPacket data(SMSG_MONSTER_MOVE, 64);
@@ -211,12 +212,25 @@ namespace Movement
      * @brief Constructor that initializes the MoveSplineInit with a reference to a Unit.
      * @param m Reference to the Unit to be moved.
      */
+    /// generates per-spline ids; the client uses them to tell successive splines apart
+    static std::atomic<uint32> splineIdGen(0);
+
     MoveSplineInit::MoveSplineInit(Unit& m) : unit(m)
     {
+        args.splineId = ++splineIdGen;
         // mix existing state into new
         args.walk = unit.m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE);
         args.flags.canSwim = unit.CanSwim(); ///< client refuses to swim a spline mover without this bit (TC 4.3.4)
         args.flags.flying = unit.m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_CAN_FLY | MOVEFLAG_FLYING | MOVEFLAG_LEVITATING));
+    }
+
+    /**
+     * @brief Enables falling mode, carrying the unit's slow-fall state.
+     */
+    void MoveSplineInit::SetFall()
+    {
+        args.flags.EnableFalling();
+        args.flags.fallingSlow = unit.m_movementInfo.HasMovementFlag(MOVEFLAG_SAFE_FALL);
     }
 
     /**

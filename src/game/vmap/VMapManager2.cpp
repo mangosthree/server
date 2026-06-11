@@ -219,7 +219,7 @@ namespace VMAP
      * @param z2 The z-coordinate of the second point.
      * @return bool True if there is a line of sight, false otherwise.
      */
-    bool VMapManager2::isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2)
+    bool VMapManager2::isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags)
     {
         if (!isLineOfSightCalcEnabled() || IsVMAPDisabledForPtr(pMapId, VMAP_DISABLE_LOS))
         {
@@ -234,7 +234,7 @@ namespace VMAP
             Vector3 pos2 = convertPositionToInternalRep(x2, y2, z2);
             if (pos1 != pos2)
             {
-                result = instanceTree->second->isInLineOfSight(pos1, pos2);
+                result = instanceTree->second->isInLineOfSight(pos1, pos2, ignoreFlags);
             }
         }
         return result;
@@ -432,5 +432,32 @@ namespace VMAP
     bool VMapManager2::existsMap(const char* pBasePath, unsigned int pMapId, int x, int y)
     {
         return StaticMapTree::CanLoadMap(std::string(pBasePath), pMapId, x, y);
+    }
+
+    bool VMapManager2::getFirstHitDebug(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2,
+                                        ModelIgnoreFlags ignoreFlags, std::string& outName, float& outHitX, float& outHitY,
+                                        float& outHitZ, uint32& outFlags)
+    {
+        InstanceTreeMap::iterator instanceTree = iInstanceMapTrees.find(pMapId);
+        if (instanceTree == iInstanceMapTrees.end() || !instanceTree->second)
+        {
+            return false;
+        }
+        Vector3 pos1 = convertPositionToInternalRep(x1, y1, z1);
+        Vector3 pos2 = convertPositionToInternalRep(x2, y2, z2);
+        Vector3 hitPos;
+        G3D::AABox bound;
+        if (!instanceTree->second->getFirstHitInstanceDebug(pos1, pos2, ignoreFlags, outName, hitPos, outFlags, bound))
+        {
+            return false;
+        }
+        // Convert back from internal (vmap) rep to world rep. The forward
+        // transform is `mid - x` per convertPositionToInternalRep above; the
+        // inverse is the same expression, applied to x and y.
+        const float mid = 0.5f * 64.0f * 533.33333333f;
+        outHitX = mid - hitPos.x;
+        outHitY = mid - hitPos.y;
+        outHitZ = hitPos.z;
+        return true;
     }
 } // namespace VMAP

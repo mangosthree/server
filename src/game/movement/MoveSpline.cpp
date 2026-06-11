@@ -82,7 +82,10 @@ namespace Movement
             {
                 Vector3 hermite;
                 spline.evaluate_derivative(point_Idx, u, hermite);
-                c.orientation = atan2(hermite.y, hermite.x);
+                if (hermite.x != 0.f || hermite.y != 0.f) ///< keep current facing on degenerate (vertical/zero) derivative
+                {
+                    c.orientation = atan2(hermite.y, hermite.x);
+                }
             }
 
             if (splineflags.orientationInversed)
@@ -182,11 +185,11 @@ namespace Movement
             // MoveSplineFlag::Enter_Cycle support dropped
             // if (splineflags & SPLINEFLAG_ENTER_CYCLE)
             // cyclic_point = 1;   // shouldn't be modified, came from client
-            spline.init_cyclic_spline(&args.path[0], args.path.size(), modes[args.flags.isSmooth()], cyclic_point);
+            spline.init_cyclic_spline(&args.path[0], args.path.size(), modes[args.flags.isSmooth()], cyclic_point, args.initialOrientation);
         }
         else
         {
-            spline.init_spline(&args.path[0], args.path.size(), modes[args.flags.isSmooth()]);
+            spline.init_spline(&args.path[0], args.path.size(), modes[args.flags.isSmooth()], args.initialOrientation);
         }
 
         // init spline timestamps

@@ -32,6 +32,7 @@
 #include "BIH.h"
 
 #include "Platform/Define.h"
+#include "ModelIgnoreFlags.h"
 
 namespace VMAP
 {
@@ -330,7 +331,7 @@ namespace VMAP
          * @param stopAtFirstHit Whether to stop at the first hit.
          * @return bool True if the ray intersects, false otherwise.
          */
-        bool IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit) const;
+        bool IntersectRay(const G3D::Ray& ray, float& distance, bool stopAtFirstHit, ModelIgnoreFlags ignoreFlags) const;
         /**
          * @brief Gets area information at a specific position.
          *

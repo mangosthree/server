@@ -368,7 +368,7 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
 
             fz = liqData.level;
             // finally, check LoS
-            if (!m_caster->IsWithinLOS(fx, fy, fz))
+            if (!m_caster->IsWithinLOS(fx, fy, fz, VMAP::ModelIgnoreFlags::M2))
             {
                 SendCastResult(SPELL_FAILED_LINE_OF_SIGHT);
                 SendChannelUpdate(0);

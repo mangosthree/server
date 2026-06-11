@@ -42,7 +42,7 @@ add_executable(${EXECUTABLE_NAME} ${EXECUTABLE_SRCS}
     ${CMAKE_SOURCE_DIR}/src/tools/Extractor_projects/shared/ExtractorCommon.cpp
 )
 
-target_link_libraries(${EXECUTABLE_NAME} loadlib bzip2 zlib storm)
+target_link_libraries(${EXECUTABLE_NAME} loadlib bzip2 zlib storm g3dlite)
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION "${BIN_DIR}/${TOOLS_DIR}")
 

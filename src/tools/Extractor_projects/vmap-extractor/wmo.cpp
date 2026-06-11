@@ -27,6 +27,7 @@
 #include "vmapexport.h"
 #include "wmo.h"
 #include "vec3d.h"
+#include "adtfile.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
@@ -35,6 +36,9 @@
 #undef min
 #undef max
 #include "mpqfile.h"
+#include <G3D/Matrix3.h>
+#include <G3D/Quat.h>
+#include <G3D/Vector3.h>
 
 using namespace std;
 extern uint16* LiqType;
@@ -81,49 +85,57 @@ bool WMORoot::open()
             f.read(bbcorn1, 12);
             f.read(bbcorn2, 12);
             f.read(&liquidType, 4);
-            break;
         }
-        /*
-        else if (!strcmp(fourcc,"MOTX"))
+        else if (!strcmp(fourcc, "MODS")) // doodad sets
         {
+            DoodadData.Sets.resize(size / sizeof(WMODoodad::MODS));
+            if (size)
+            {
+                f.read(DoodadData.Sets.data(), size);
+            }
         }
-        else if (!strcmp(fourcc,"MOMT"))
+        else if (!strcmp(fourcc, "MODN")) // doodad name block
         {
+            if (size)
+            {
+                DoodadData.Paths.reset(new char[size]);
+                f.read(DoodadData.Paths.get(), size);
+                DoodadData.Paths[size - 1] = '\0'; // no-op for well-formed MODN, guards strlen on corrupt data
+                DoodadData.PathsLen = size;
+                // Extract every referenced model now, so doodad spawn emission
+                // can find its collision geometry under szWorkDirWmo later.
+                StringSet failedDoodadPaths;
+                char* ptr = DoodadData.Paths.get();
+                char* end = ptr + size;
+                while (ptr < end)
+                {
+                    size_t len = 0;
+                    while (ptr + len < end && ptr[len])
+                    {
+                        ++len;
+                    }
+                    std::string path(ptr, len);
+                    ptr += len + 1;
+                    if (path.length() < 4 || !GetExtension(GetPlainName(path.c_str())))
+                    {
+                        continue;
+                    }
+                    fixnamen(&path[0], path.length());
+                    char* s = GetPlainName(&path[0]);
+                    fixname2(s, strlen(s));
+                    std::string uName;
+                    ExtractSingleModel(path, uName, failedDoodadPaths);
+                }
+            }
         }
-        else if (!strcmp(fourcc,"MOGN"))
+        else if (!strcmp(fourcc, "MODD")) // doodad definitions (40 bytes each)
         {
+            DoodadData.Spawns.resize(size / sizeof(WMODoodad::MODD));
+            if (size)
+            {
+                f.read(DoodadData.Spawns.data(), size);
+            }
         }
-        else if (!strcmp(fourcc,"MOGI"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOLT"))
-        {
-        }
-        else if (!strcmp(fourcc,"MODN"))
-        {
-        }
-        else if (!strcmp(fourcc,"MODS"))
-        {
-        }
-        else if (!strcmp(fourcc,"MODD"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOSB"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOPV"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOPT"))
-        {
-        }
-        else if (!strcmp(fourcc,"MOPR"))
-        {
-        }
-        else if (!strcmp(fourcc,"MFOG"))
-        {
-        }
-        */
         f.seek((int)nextpos);
     }
     f.close();
@@ -610,4 +622,125 @@ WMOInstance::WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint
     fwrite(&nlen, sizeof(uint32), 1, pDirfile);
     fwrite(WmoInstName, sizeof(char), nlen, pDirfile);
 
+    ExtractDoodadSet(WmoInstName, mapID, tileX, tileY, pDirfile);
+}
+
+/// Stable per-(WMO instance, doodad index) spawn ids from the top half of the
+/// uint32 range, so they cannot collide with client MODF/MDDF unique ids.
+static uint32 GenerateDoodadUniqueId(uint32 wmoUniqueId, uint32 doodadIndex)
+{
+    static std::map<std::pair<uint32, uint32>, uint32> doodadIdMap;
+    static uint32 nextId = 0x80000000;
+
+    uint32& uid = doodadIdMap[std::make_pair(wmoUniqueId, doodadIndex)];
+    if (uid == 0)
+    {
+        uid = nextId++;
+    }
+    return uid;
+}
+
+void WMOInstance::ExtractDoodadSet(const char* WmoInstName, uint32 mapID, uint32 tileX, uint32 tileY, FILE* pDirfile)
+{
+    std::map<std::string, WMODoodadData>::const_iterator doodadItr = g_WmoDoodads.find(WmoInstName);
+    if (doodadItr == g_WmoDoodads.end())
+    {
+        return;
+    }
+
+    const WMODoodadData& doodadData = doodadItr->second;
+    if (doodadData.Sets.empty() || !doodadData.Paths)
+    {
+        return;
+    }
+
+    // Only the always-active doodad set 0 (Set_$DefaultGlobal) for now.
+    const WMODoodad::MODS& set = doodadData.Sets[0];
+
+    // pos is already fixCoords'd above; rot is the raw MODF Euler degrees.
+    G3D::Vector3 wmoPos(pos.x, pos.y, pos.z);
+    G3D::Matrix3 wmoRot = G3D::Matrix3::fromEulerAnglesZYX(G3D::toRadians(rot.y), G3D::toRadians(rot.x), G3D::toRadians(rot.z));
+
+    size_t spawnEnd = size_t(set.StartIndex) + set.Count;
+    if (spawnEnd > doodadData.Spawns.size())
+    {
+        spawnEnd = doodadData.Spawns.size();
+    }
+
+    for (size_t i = set.StartIndex; i < spawnEnd; ++i)
+    {
+        const WMODoodad::MODD& doodad = doodadData.Spawns[i];
+        if (doodad.NameIndex >= doodadData.PathsLen)
+        {
+            continue;
+        }
+
+        char ModelInstName[1024];
+        const char* plainName = GetPlainName(&doodadData.Paths[doodad.NameIndex]);
+        uint32 nlen = strlen(plainName);
+        if (nlen <= 3 || nlen >= sizeof(ModelInstName))
+        {
+            continue;
+        }
+        strcpy(ModelInstName, plainName);
+        fixnamen(ModelInstName, nlen);
+        fixname2(ModelInstName, nlen);
+        // Extracted models are stored as .m2
+        char* extension = &ModelInstName[nlen - 4];
+        if (!strcmp(extension, ".mdx") || !strcmp(extension, ".mdl"))
+        {
+            ModelInstName[nlen - 2] = '2';
+            ModelInstName[nlen - 1] = '\0';
+            --nlen;
+        }
+
+        // Skip doodads without extracted collision geometry.
+        char tempname[1036];
+        sprintf(tempname, "%s/%s", szWorkDirWmo, ModelInstName);
+        FILE* input = fopen(tempname, "r+b");
+        if (!input)
+        {
+            continue;
+        }
+        fseek(input, 8, SEEK_SET); // get the correct no of vertices
+        int nVertices = 0;
+        size_t count = fread(&nVertices, sizeof(int), 1, input);
+        fclose(input);
+        if (count != 1 || nVertices == 0)
+        {
+            continue;
+        }
+
+        G3D::Vector3 worldPos = wmoPos + wmoRot * G3D::Vector3(doodad.Position.x, doodad.Position.y, doodad.Position.z);
+        Vec3D position(worldPos.x, worldPos.y, worldPos.z);
+
+        Vec3D rotation;
+        (G3D::Quat(doodad.RotX, doodad.RotY, doodad.RotZ, doodad.RotW).toRotationMatrix() * wmoRot)
+            .toEulerAnglesXYZ(rotation.z, rotation.x, rotation.y);
+        rotation.x = G3D::toDegrees(rotation.x);
+        rotation.y = G3D::toDegrees(rotation.y);
+        rotation.z = G3D::toDegrees(rotation.z);
+
+        uint16 adtId = 0; // not used for models
+        uint32 uniqueId = GenerateDoodadUniqueId(id, uint32(i));
+        uint32 flags = MOD_M2;
+        if (tileX == 65 && tileY == 65)
+        {
+            flags |= MOD_WORLDSPAWN;
+        }
+        float scale = doodad.Scale; // MODD scale is a direct float, unlike MDDF
+
+        //write mapID, tileX, tileY, Flags, ID, Pos, Rot, Scale, name
+        fwrite(&mapID, sizeof(uint32), 1, pDirfile);
+        fwrite(&tileX, sizeof(uint32), 1, pDirfile);
+        fwrite(&tileY, sizeof(uint32), 1, pDirfile);
+        fwrite(&flags, sizeof(uint32), 1, pDirfile);
+        fwrite(&adtId, sizeof(uint16), 1, pDirfile);
+        fwrite(&uniqueId, sizeof(uint32), 1, pDirfile);
+        fwrite(&position, sizeof(float), 3, pDirfile);
+        fwrite(&rotation, sizeof(float), 3, pDirfile);
+        fwrite(&scale, sizeof(float), 1, pDirfile);
+        fwrite(&nlen, sizeof(uint32), 1, pDirfile);
+        fwrite(ModelInstName, sizeof(char), nlen, pDirfile);
+    }
 }

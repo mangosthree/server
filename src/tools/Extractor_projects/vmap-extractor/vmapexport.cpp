@@ -111,6 +111,9 @@ uint32 CONF_max_build = 0;
 const char* szWorkDirWmo = "./Buildings";
 const char* szRawVMAPMagic = "VMAPc06";
 
+/// WMO basename (as stored under szWorkDirWmo) -> parsed interior doodad data.
+std::map<std::string, WMODoodadData> g_WmoDoodads;
+
 // Local testing functions
 
 bool FileExists(const char* file)
@@ -616,6 +619,12 @@ bool ExtractSingleWmo(std::string& fname)
     if (!file_ok)
     {
         remove(szLocalFile);
+    }
+    else
+    {
+        // Key by the exact (fixnamen'd) basename WMOInstance later opens
+        // under szWorkDirWmo, so store and lookup provably match.
+        g_WmoDoodads[szLocalFile + strlen(szWorkDirWmo) + 1] = std::move(froot.DoodadData);
     }
     return true;
 }

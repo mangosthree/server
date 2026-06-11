@@ -217,23 +217,48 @@ namespace VMAP
             // <====
 
             // Write map tile files, similar to ADT files, only with extra BSP tree node info
+            // Walk unique tileIDs via equal_range instead of the old hand-rolled
+            // inner ++tile dance: when a tile holds a MOD_WORLDSPAWN spawn AND others
+            // (tile 65/65 once WMO interior doodads are extracted), the inner ++tile
+            // walked past end() -> UB. MOD_WORLDSPAWN spawns belong in the .vmtree
+            // global block, not in .vmtile files, so they are filtered out here.
             TileMap& tileEntries = map_iter->second->TileEntries;
-            TileMap::iterator tile;
-            for (tile = tileEntries.begin(); tile != tileEntries.end(); ++tile)
+            TileMap::iterator tile = tileEntries.begin();
+            while (tile != tileEntries.end())
             {
-                const ModelSpawn& spawn = map_iter->second->UniqueEntries[tile->second];
-                if (spawn.flags & MOD_WORLDSPAWN)           // WDT spawn, saved as tile 65/65 currently...
+                uint32 tileID = tile->first;
+                std::pair<TileMap::iterator, TileMap::iterator> range = tileEntries.equal_range(tileID);
+                // Advance the outer iterator past this tile up front.
+                tile = range.second;
+
+                std::vector<uint32> spawnIDs;
+                for (TileMap::iterator it = range.first; it != range.second; ++it)
+                {
+                    const ModelSpawn& spawn = map_iter->second->UniqueEntries[it->second];
+                    if (spawn.flags & MOD_WORLDSPAWN)       // WDT spawn, saved as tile 65/65
+                    {
+                        continue;
+                    }
+                    spawnIDs.push_back(it->second);
+                }
+                if (spawnIDs.empty())
                 {
                     continue;
                 }
-                uint32 nSpawns = tileEntries.count(tile->first);
+
                 std::stringstream tilefilename;
                 tilefilename.fill('0');
                 tilefilename << iDestDir << "/" << std::setw(3) << map_iter->first << "_";
                 uint32 x, y;
-                StaticMapTree::unpackTileID(tile->first, x, y);
+                StaticMapTree::unpackTileID(tileID, x, y);
                 tilefilename << std::setw(2) << x << "_" << std::setw(2) << y << ".vmtile";
                 FILE* tilefile = fopen(tilefilename.str().c_str(), "wb");
+                if (!tilefile)
+                {
+                    success = false;
+                    continue;
+                }
+                uint32 nSpawns = uint32(spawnIDs.size());
                 // File header
                 if (success && fwrite(VMAP_MAGIC, 1, 8, tilefile) != 8)
                 {
@@ -247,11 +272,7 @@ namespace VMAP
                 // Write tile spawns
                 for (uint32 s = 0; s < nSpawns; ++s)
                 {
-                    if (s && tile != tileEntries.end())
-                    {
-                        ++tile;
-                    }
-                    const ModelSpawn& spawn2 = map_iter->second->UniqueEntries[tile->second];
+                    const ModelSpawn& spawn2 = map_iter->second->UniqueEntries[spawnIDs[s]];
                     success = success && ModelSpawn::WriteToFile(tilefile, spawn2);
                     // MapTree nodes to update when loading tile:
                     std::map<uint32, uint32>::iterator nIdx = modelNodeIdx.find(spawn2.ID);

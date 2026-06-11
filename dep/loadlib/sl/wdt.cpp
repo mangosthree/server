@@ -55,8 +55,15 @@ bool WDT_file::prepareLoadedData()
     main = (wdt_MAIN*)((uint8*)mphd + mphd->size + 8);
     if (!main->prepareLoadedData())
         return false;
-    wmo = (wdt_MWMO*)((uint8*)main + main->size + 8);
-    if (!wmo->prepareLoadedData())
-        return false;
+
+    // Terrain WDTs may end right after MAIN (Cata-exported maps); MWMO+MODF only exist on WMO-only maps.
+    uint8* next = (uint8*)main + main->size + 8;
+    if (next + 8 <= GetData() + GetDataSize())
+    {
+        wmo = (wdt_MWMO*)next;
+        if (!wmo->prepareLoadedData())
+            return false;
+    }
+
     return true;
 }

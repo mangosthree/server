@@ -262,7 +262,7 @@ namespace MMAP
         m_terrainBuilder->loadMap(mapID, tileX, tileY, meshData);
 
         // get model data
-        m_terrainBuilder->loadVMap(mapID, tileX, tileY, meshData);
+        m_terrainBuilder->loadVMap(mapID, tileY, tileX, meshData);
 
         // if there is no data, give up now
         if (!meshData.solidVerts.size() && !meshData.liquidVerts.size())
@@ -771,9 +771,9 @@ namespace MMAP
             // file output
             char fileName[255];
 #if defined(MISTS)
-            sprintf(fileName, "mmaps/%04u%02i%02i.mmtile", mapID, tileX, tileY);
+            sprintf(fileName, "mmaps/%04u%02i%02i.mmtile", mapID, tileY, tileX);
 #else
-            sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileX, tileY);
+            sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileY, tileX);
 #endif
             FILE* file = fopen(fileName, "wb");
             if (!file)
@@ -960,9 +960,9 @@ namespace MMAP
     {
         char fileName[255];
 #if defined(MISTS)
-        sprintf(fileName, "mmaps/%04u%02i%02i.mmtile", mapID, tileX, tileY);
+        sprintf(fileName, "mmaps/%04u%02i%02i.mmtile", mapID, tileY, tileX);
 #else
-        sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileX, tileY);
+        sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileY, tileX);
 #endif
         FILE* file = fopen(fileName, "rb");
         if (!file)

@@ -98,6 +98,7 @@ class WMORoot
         float bbcorn1[3]; /**< TODO */
         float bbcorn2[3]; /**< TODO */
         WMODoodadData DoodadData; ///< Parsed MODS/MODN/MODD interior doodads.
+        std::vector<char> GroupNames; ///< MOGN packed name blob; WMOGroup::ShouldSkip resolves groupName in here.
 
         /**
          * @brief
@@ -160,6 +161,9 @@ struct WMOLiquidVert
 class WMOGroup
 {
     public:
+        /// Skip antiportal (MOGP 0x4000000 or name "antiportal") and unreachable (MOGP 0x80) groups.
+        bool ShouldSkip(WMORoot const* root) const;
+
         // MOGP
         int groupName, descGroupName, mogpFlags; /**< TODO */
         float bbcorn1[3]; /**< TODO */

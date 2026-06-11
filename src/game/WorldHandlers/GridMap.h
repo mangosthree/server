@@ -176,6 +176,7 @@ class GridMap
         float getHeightFromUint16(float x, float y) const;
         float getHeightFromUint8(float x, float y) const;
         float getHeightFromFlat(float x, float y) const;
+        bool resolveCell(float& x, float& y, int& xi, int& yi) const;
 
     public:
 

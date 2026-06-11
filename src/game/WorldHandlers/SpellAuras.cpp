@@ -1284,11 +1284,13 @@ void Aura::ReapplyAffectedPassiveAuras()
     // re-apply talents/passives/area auras applied to group members (it affected by player spellmods)
     if (Group* group = ((Player*)GetTarget())->GetGroup())
         for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+        {
             if (Player* member = itr->getSource())
                 if (member != GetTarget() && member->IsInMap(GetTarget()))
                 {
                     ReapplyAffectedPassiveAuras(member, false);
                 }
+        }
 }
 
 /*********************************************************/
@@ -1446,10 +1448,12 @@ void Aura::TriggerSpell()
                         Cell::VisitGridObjects(triggerTarget, searcher, 15.0f);
 
                         for (std::list<Creature*>::const_iterator itr = lList.begin(); itr != lList.end(); ++itr)
+                        {
                             if ((*itr)->IsAlive())
                             {
                                 (*itr)->AddThreat(triggerTarget, float(5000));
                             }
+                        }
 
                         return;
                     }
@@ -2784,11 +2788,13 @@ void Aura::PeriodicTick()
 
             if (!target->IsAlive() && pCaster->IsNonMeleeSpellCasted(false))
                 for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
+                {
                     if (Spell* spell = pCaster->GetCurrentSpell(CurrentSpellTypes(i)))
                         if (spell->m_spellInfo->Id == GetId())
                         {
                             spell->cancel();
                         }
+                }
 
             if (Player* modOwner = pCaster->GetSpellModOwner())
             {
@@ -4056,10 +4062,12 @@ bool Aura::IsCritFromAbilityAura(Unit* caster, uint32& damage)
 bool Aura::IsLastAuraOnHolder()
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         if (i != GetEffIndex() && GetHolder()->m_auras[i])
         {
             return false;
         }
+    }
     return true;
 }
 
@@ -4182,10 +4190,12 @@ void SpellAuraHolder::RemoveAura(SpellEffectIndex index)
 void SpellAuraHolder::ApplyAuraModifiers(bool apply, bool real)
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX && !IsDeleted(); ++i)
+    {
         if (Aura* aur = GetAuraByEffectIndex(SpellEffectIndex(i)))
         {
             aur->ApplyModifier(apply, real);
         }
+    }
 }
 
 /**
@@ -5041,10 +5051,12 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 // If target still has one of Warrior's bleeds, do nothing
                 Unit::AuraList const& PeriodicDamage = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
                 for(Unit::AuraList::const_iterator i = PeriodicDamage.begin(); i != PeriodicDamage.end(); ++i)
+                {
                     if ( (*i)->GetCasterGuid() == GetCasterGuid() &&
                         (*i)->GetSpellProto()->GetSpellFamilyName() == SPELLFAMILY_WARRIOR &&
                         (*i)->GetSpellProto()->GetMechanic() == MECHANIC_BLEED)
                         return;
+                }
 
                 spellId1 = 30069;                           // Blood Frenzy (Rank 1)
                 spellId2 = 30070;                           // Blood Frenzy (Rank 2)
@@ -5681,10 +5693,12 @@ SpellAuraHolder::~SpellAuraHolder()
 {
     // note: auras in delete list won't be affected since they clear themselves from holder when adding to deletedAuraslist
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         if (Aura* aur = m_auras[i])
         {
             delete aur;
         }
+    }
 }
 
 /**
@@ -5695,10 +5709,12 @@ SpellAuraHolder::~SpellAuraHolder()
 void SpellAuraHolder::Update(uint32 diff)
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         if (Aura* aura = m_auras[i])
         {
             aura->UpdateAura(diff);
         }
+    }
 
     if (m_duration > 0)
     {
@@ -5859,11 +5875,13 @@ bool SpellAuraHolder::HasMechanicMask(uint32 mechanicMask) const
 bool SpellAuraHolder::IsPersistent() const
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         if (Aura* aur = m_auras[i])
             if (aur->IsPersistent())
             {
                 return true;
             }
+    }
     return false;
 }
 
@@ -5875,11 +5893,13 @@ bool SpellAuraHolder::IsPersistent() const
 bool SpellAuraHolder::IsAreaAura() const
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         if (Aura* aur = m_auras[i])
             if (aur->IsAreaAura())
             {
                 return true;
             }
+    }
     return false;
 }
 
@@ -5891,11 +5911,13 @@ bool SpellAuraHolder::IsAreaAura() const
 bool SpellAuraHolder::IsPositive() const
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         if (Aura* aur = m_auras[i])
             if (!aur->IsPositive())
             {
                 return false;
             }
+    }
     return true;
 }
 
@@ -5907,10 +5929,12 @@ bool SpellAuraHolder::IsPositive() const
 bool SpellAuraHolder::IsEmptyHolder() const
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
         if (m_auras[i])
         {
             return false;
         }
+    }
     return true;
 }
 

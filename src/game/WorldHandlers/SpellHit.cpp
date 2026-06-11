@@ -606,10 +606,12 @@ void Spell::DoAllEffectOnTarget(ItemTargetInfo* target)
     }
 
     for (int effectNumber = 0; effectNumber < MAX_EFFECT_INDEX; ++effectNumber)
+    {
         if (effectMask & (1 << effectNumber))
         {
             HandleEffects(NULL, target->item, NULL, SpellEffectIndex(effectNumber));
         }
+    }
 }
 
 /**

@@ -2292,12 +2292,14 @@ bool Pet::removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
 void Pet::CleanupActionBar()
 {
     for (int i = 0; i < MAX_UNIT_ACTION_BAR_INDEX; ++i)
+    {
         if (UnitActionBarEntry const* ab = m_charmInfo->GetActionBarEntry(i))
             if (uint32 action = ab->GetAction())
                 if (ab->IsActionBarForSpell() && !HasSpell(action))
                 {
                     m_charmInfo->SetActionBar(i, 0, ACT_DISABLED);
                 }
+    }
 }
 
 /**
@@ -2380,10 +2382,12 @@ bool Pet::resetTalents(bool no_cost)
         }
 
         for (int j = 0; j < MAX_TALENT_RANK; ++j)
+        {
             if (talentInfo->RankID[j])
             {
                 removeSpell(talentInfo->RankID[j], !IsPassiveSpell(talentInfo->RankID[j]), false);
             }
+        }
     }
 
     UpdateFreeTalentPoints(false);

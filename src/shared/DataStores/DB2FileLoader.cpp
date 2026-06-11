@@ -247,10 +247,12 @@ uint32 DB2FileLoader::GetFormatStringsFields(const char * format)
 {
     uint32 stringfields = 0;
     for(uint32 x=0; format[x];++x)
+    {
         if (format[x] == DBC_FF_STRING)
         {
             ++stringfields;
         }
+    }
 
     return stringfields;
 }
@@ -387,6 +389,7 @@ char* DB2FileLoader::AutoProduceStringsArrayHolders(const char* format, char* da
         uint32 stringFieldNum = 0;
 
         for(uint32 x=0;x<fieldCount;x++)
+        {
             switch(format[x])
         {
             case DBC_FF_FLOAT:
@@ -413,6 +416,7 @@ char* DB2FileLoader::AutoProduceStringsArrayHolders(const char* format, char* da
                 break;
             default:
                 assert(false && "unknown format character");
+        }
         }
     }
 

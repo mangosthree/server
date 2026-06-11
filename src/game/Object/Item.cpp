@@ -76,10 +76,12 @@ void AddItemsSetItem(Player* player, Item* item)
 
         size_t x = 0;
         for (; x < player->ItemSetEff.size(); ++x)
+        {
             if (!player->ItemSetEff[x])
             {
                 break;
             }
+        }
 
         if (x < player->ItemSetEff.size())
         {
@@ -107,10 +109,12 @@ void AddItemsSetItem(Player* player, Item* item)
 
         uint32 z = 0;
         for (; z < 8; ++z)
+        {
             if (eff->spells[z] && eff->spells[z]->Id == set->spells[x])
             {
                 break;
             }
+        }
 
         if (z < 8)
         {
@@ -1387,10 +1391,12 @@ bool Item::IsTargetValidForItemUse(Unit* pUnitTarget)
     }
 
     for (ItemRequiredTargetMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+    {
         if (itr->second.IsFitToRequirements(pUnitTarget))
         {
             return true;
         }
+    }
 
     return false;
 }
@@ -1850,10 +1856,12 @@ bool Item::HasMaxCharges() const
     ItemPrototype const* itemProto = GetProto();
 
     for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+    {
         if (GetSpellCharges(i) != itemProto->Spells[i].SpellCharges)
         {
             return false;
         }
+    }
 
     return true;
 }
@@ -1990,10 +1998,12 @@ int32 Item::GetReforgableStat(ItemModType statType) const
 {
     ItemPrototype const* proto = GetProto();
     for (uint32 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
+    {
         if (proto->ItemStat[i].ItemStatType == statType)
         {
             return proto->ItemStat[i].ItemStatValue;
         }
+    }
 
     int32 randomPropId = GetItemRandomPropertyId();
     if (!randomPropId)

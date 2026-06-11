@@ -1046,6 +1046,7 @@ void Guild::SwitchRank(uint32 rankId, bool up)
         "VALUES ('%u', '%u', '%s', '%u', '%u')", m_Id, otherRankId, m_Ranks[otherRankId].Name.c_str(),m_Ranks[otherRankId].Rights,m_Ranks[otherRankId].BankMoneyPerDay);
 
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
+    {
         if (itr->second.RankId == rankId)
         {
             itr->second.ChangeRank(otherRankId);
@@ -1054,6 +1055,7 @@ void Guild::SwitchRank(uint32 rankId, bool up)
         {
             itr->second.ChangeRank(rankId);
         }
+    }
 
     CharacterDatabase.CommitTransaction();
 }
@@ -1527,18 +1529,22 @@ void Guild::DisplayGuildBankContent(WorldSession* session, uint8 TabId)
     data.WriteBit(0);
     uint32 itemCount = 0;
     for (int i = 0; i < GUILD_BANK_MAX_SLOTS; ++i)
+    {
         if (tab->Slots[i])
         {
             ++itemCount;
         }
+    }
 
     data.WriteBits(itemCount, 20);
     data.WriteBits(0, 22);                      // Tell client that there's no tab info in this packet
     for (int i = 0; i < GUILD_BANK_MAX_SLOTS; ++i)
+    {
         if (tab->Slots[i])
         {
             AppendDisplayGuildBankSlot(data, buffer, tab, i);
         }
+    }
 
     data << uint64(m_GuildBankMoney);
     if (!buffer.empty())
@@ -2056,11 +2062,13 @@ void Guild::SetBankRightsAndSlots(uint32 rankId, uint8 TabId, uint32 right, uint
     if (db)
     {
         for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
+        {
             if (itr->second.RankId == rankId)
                 for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
                 {
                     itr->second.BankResetTimeTab[i] = 0;
                 }
+        }
 
         CharacterDatabase.PExecute("DELETE FROM `guild_bank_right` WHERE `guildid`='%u' AND `TabId`='%u' AND `rid`='%u'", m_Id, uint32(TabId), rankId);
         CharacterDatabase.PExecute("INSERT INTO `guild_bank_right` (`guildid`,`TabId`,`rid`,`gbright`,`SlotPerDay`) VALUES "
@@ -3240,10 +3248,12 @@ void Guild::DeleteGuildBankItems(bool alsoInDB /*= false*/)
 bool GuildItemPosCount::isContainedIn(GuildItemPosCountVec const& vec) const
 {
     for (GuildItemPosCountVec::const_iterator itr = vec.begin(); itr != vec.end(); ++itr)
+    {
         if (itr->Slot == this->Slot)
         {
             return true;
         }
+    }
 
     return false;
 }

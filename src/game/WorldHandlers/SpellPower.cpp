@@ -169,6 +169,7 @@ void Spell::TakePower()
             ObjectGuid targetGuid = m_targets.getUnitTargetGuid();
             if (!targetGuid.IsEmpty())
                 for (TargetList::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                {
                     if (ihit->targetGUID == targetGuid)
                     {
                         if (ihit->missCondition != SPELL_MISS_NONE && ihit->missCondition != SPELL_MISS_MISS)
@@ -185,6 +186,7 @@ void Spell::TakePower()
                         }
                         break;
                     }
+                }
         }
     }
 
@@ -291,10 +293,12 @@ SpellCastResult Spell::CheckRunePower()
     }
 
     for (uint32 i = 0; i < RUNE_DEATH; ++i)
+    {
         if (runeCost[i] > 0)
         {
             runeCost[RUNE_DEATH] += runeCost[i];
         }
+    }
 
     if (runeCost[RUNE_DEATH] > MAX_RUNES)
     {

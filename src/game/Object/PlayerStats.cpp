@@ -422,10 +422,12 @@ void Player::UpdateRating(CombatRating cr)
     // stat used stored in miscValueB for this aura
     AuraList const& modRatingFromStat = GetAurasByType(SPELL_AURA_MOD_RATING_FROM_STAT);
     for (AuraList::const_iterator i = modRatingFromStat.begin(); i != modRatingFromStat.end(); ++i)
+    {
         if ((*i)->GetMiscValue() & (1 << cr))
         {
             amount += int32(GetStat(Stats((*i)->GetMiscBValue())) * (*i)->GetModifier()->m_amount / 100.0f);
         }
+    }
     if (amount < 0)
     {
         amount = 0;
@@ -973,11 +975,13 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
 
             // remove all spells that related to this skill
             for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+            {
                 if (SkillLineAbilityEntry const* pAbility = sSkillLineAbilityStore.LookupEntry(j))
                     if (pAbility->skillId == id)
                     {
                         removeSpell(sSpellMgr.GetFirstSpellInChain(pAbility->spellId));
                     }
+            }
         }
     }
     else if (currVal)                                       // add
@@ -1021,18 +1025,22 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
                 // temporary bonuses
                 AuraList const& mModSkill = GetAurasByType(SPELL_AURA_MOD_SKILL);
                 for (AuraList::const_iterator j = mModSkill.begin(); j != mModSkill.end(); ++j)
+                {
                     if ((*j)->GetModifier()->m_miscvalue == int32(id))
                     {
                         (*j)->ApplyModifier(true);
                     }
+                }
 
                 // permanent bonuses
                 AuraList const& mModSkillTalent = GetAurasByType(SPELL_AURA_MOD_SKILL_TALENT);
                 for (AuraList::const_iterator j = mModSkillTalent.begin(); j != mModSkillTalent.end(); ++j)
+                {
                     if ((*j)->GetModifier()->m_miscvalue == int32(id))
                     {
                         (*j)->ApplyModifier(true);
                     }
+                }
 
                 // Learn all spells for skill
                 learnSkillRewardedSpells(id, currVal);

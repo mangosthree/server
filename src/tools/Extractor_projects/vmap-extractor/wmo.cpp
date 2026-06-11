@@ -396,10 +396,12 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
         int check = 3 * nColVertices;
         fwrite(VERT, 4, 3, output);
         for (uint32 i = 0; i < nVertices; ++i)
+        {
             if (IndexRenum[i] >= 0)
             {
                 check -= fwrite(MOVT + 3 * i, sizeof(float), 3, output);
             }
+        }
 
         assert(check == 0);
 

@@ -218,10 +218,12 @@ void Spell::FillRaidOrPartyManaPriorityTargets(UnitList& targetUnitMap, Unit* me
 
     PrioritizeManaUnitQueue manaUsers;
     for (UnitList::const_iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr)
+    {
         if ((*itr)->GetPowerType() == POWER_MANA && !(*itr)->IsDead())
         {
             manaUsers.push(PrioritizeManaUnitWraper(*itr));
         }
+    }
 
     targetUnitMap.clear();
     while (!manaUsers.empty() && targetUnitMap.size() < count)
@@ -237,10 +239,12 @@ void Spell::FillRaidOrPartyHealthPriorityTargets(UnitList& targetUnitMap, Unit* 
 
     PrioritizeHealthUnitQueue healthQueue;
     for (UnitList::const_iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr)
+    {
         if (!(*itr)->IsDead())
         {
             healthQueue.push(PrioritizeHealthUnitWraper(*itr));
         }
+    }
 
     targetUnitMap.clear();
     while (!healthQueue.empty() && targetUnitMap.size() < count)

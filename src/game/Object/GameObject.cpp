@@ -2558,10 +2558,12 @@ Player* GameObject::GetLootRecipient() const
 
     // find any in group
     for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
         if (Player* newPlayer = itr->getSource())
         {
             return newPlayer;
         }
+    }
 
     return NULL;
 }

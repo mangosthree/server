@@ -125,17 +125,21 @@ void ObjectMgr::GetNpcTextLocaleStringsAll(uint32 entry, int32 loc_idx, ObjectMg
         {
             if (text0_Ptr)
                 for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
+                {
                     if (nl->Text_0[i].size() > (size_t)loc_idx && !nl->Text_0[i][loc_idx].empty())
                     {
                         (*text0_Ptr)[i] = nl->Text_0[i][loc_idx];
                     }
+                }
 
             if (text1_Ptr)
                 for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
+                {
                     if (nl->Text_1[i].size() > (size_t)loc_idx && !nl->Text_1[i][loc_idx].empty())
                     {
                         (*text1_Ptr)[i] = nl->Text_1[i][loc_idx];
                     }
+                }
         }
     }
 }

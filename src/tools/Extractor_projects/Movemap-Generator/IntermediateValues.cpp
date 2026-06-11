@@ -107,6 +107,7 @@ namespace MMAP
         fwrite(mesh->bmax, sizeof(float), 3, file);
 
         for (int y = 0; y < mesh->height; ++y)
+        {
             for (int x = 0; x < mesh->width; ++x)
             {
                 rcSpan* span = mesh->spans[x + y * mesh->width];
@@ -130,6 +131,7 @@ namespace MMAP
                     span = span->next;
                 }
             }
+        }
     }
 
     void IntermediateValues::debugWrite(FILE* file, const rcCompactHeightfield* chf)

@@ -297,10 +297,12 @@ ArenaTeam* ObjectMgr::GetArenaTeamById(uint32 arenateamid) const
 ArenaTeam* ObjectMgr::GetArenaTeamByName(const std::string& arenateamname) const
 {
     for (ArenaTeamMap::const_iterator itr = mArenaTeamMap.begin(); itr != mArenaTeamMap.end(); ++itr)
+    {
         if (itr->second->GetName() == arenateamname)
         {
             return itr->second;
         }
+    }
 
     return NULL;
 }
@@ -308,10 +310,12 @@ ArenaTeam* ObjectMgr::GetArenaTeamByName(const std::string& arenateamname) const
 ArenaTeam* ObjectMgr::GetArenaTeamByCaptain(ObjectGuid guid) const
 {
     for (ArenaTeamMap::const_iterator itr = mArenaTeamMap.begin(); itr != mArenaTeamMap.end(); ++itr)
+    {
         if (itr->second->GetCaptainGuid() == guid)
         {
             return itr->second;
         }
+    }
 
     return NULL;
 }
@@ -2715,10 +2719,12 @@ int ObjectMgr::GetIndexForLocale(LocaleConstant loc)
     }
 
     for (size_t i = 0; i < m_LocalForIndex.size(); ++i)
+    {
         if (m_LocalForIndex[i] == loc)
         {
             return i;
         }
+    }
 
     return -1;
 }
@@ -2753,10 +2759,12 @@ int ObjectMgr::GetOrNewIndexForLocale(LocaleConstant loc)
     }
 
     for (size_t i = 0; i < m_LocalForIndex.size(); ++i)
+    {
         if (m_LocalForIndex[i] == loc)
         {
             return i;
         }
+    }
 
     m_LocalForIndex.push_back(loc);
     return m_LocalForIndex.size() - 1;

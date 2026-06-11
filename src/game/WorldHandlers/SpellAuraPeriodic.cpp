@@ -781,10 +781,12 @@ void Aura::HandleModBaseResistance(bool apply, bool /*Real*/)
     else
     {
         for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
+        {
             if (m_modifier.m_miscvalue & (1 << i))
             {
                 GetTarget()->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + i), TOTAL_VALUE, float(m_modifier.m_amount), apply);
             }
+        }
     }
 }
 
@@ -1385,10 +1387,12 @@ void Aura::HandleAuraModCritPercent(bool apply, bool Real)
     if (Real)
     {
         for (int i = 0; i < MAX_ATTACK; ++i)
+        {
             if (Item* pItem = ((Player*)target)->GetWeaponForAttack(WeaponAttackType(i), true, false))
             {
                 ((Player*)target)->_ApplyWeaponDependentAuraCritMod(pItem, WeaponAttackType(i), this, apply);
             }
+        }
     }
 
     // mods must be applied base at equipped weapon class and subclass comparison
@@ -1491,10 +1495,12 @@ void Aura::HandleModSpellCritChanceShool(bool /*apply*/, bool Real)
     }
 
     for (int school = SPELL_SCHOOL_NORMAL; school < MAX_SPELL_SCHOOL; ++school)
+    {
         if (m_modifier.m_miscvalue & (1 << school))
         {
             ((Player*)GetTarget())->UpdateSpellCritChance(school);
         }
+    }
 }
 
 /********************************/
@@ -1652,10 +1658,12 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
     if (Real && target->GetTypeId() == TYPEID_PLAYER)
     {
         for (int i = 0; i < MAX_ATTACK; ++i)
+        {
             if (Item* pItem = ((Player*)target)->GetWeaponForAttack(WeaponAttackType(i), true, false))
             {
                 ((Player*)target)->_ApplyWeaponDependentAuraDamageMod(pItem, WeaponAttackType(i), this, apply);
             }
+        }
     }
 
     // m_modifier.m_miscvalue is bitmask of spell schools
@@ -1758,10 +1766,12 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
     if (Real && target->GetTypeId() == TYPEID_PLAYER)
     {
         for (int i = 0; i < MAX_ATTACK; ++i)
+        {
             if (Item* pItem = ((Player*)target)->GetWeaponForAttack(WeaponAttackType(i), true, false))
             {
                 ((Player*)target)->_ApplyWeaponDependentAuraDamageMod(pItem, WeaponAttackType(i), this, apply);
             }
+        }
     }
 
     // m_modifier.m_miscvalue is bitmask of spell schools
@@ -1852,10 +1862,12 @@ void Aura::HandleModPowerCostPCT(bool apply, bool Real)
 
     float amount = m_modifier.m_amount / 100.0f;
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
+    {
         if (m_modifier.m_miscvalue & (1 << i))
         {
             GetTarget()->ApplyModSignedFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER + i, amount, apply);
         }
+    }
 }
 
 /**
@@ -1873,10 +1885,12 @@ void Aura::HandleModPowerCost(bool apply, bool Real)
     }
 
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
+    {
         if (m_modifier.m_miscvalue & (1 << i))
         {
             GetTarget()->ApplyModInt32Value(UNIT_FIELD_POWER_COST_MODIFIER + i, m_modifier.m_amount, apply);
         }
+    }
 }
 
 void Aura::HandleNoReagentUseAura(bool /*Apply*/, bool Real)

@@ -205,6 +205,7 @@ namespace MMAP
             int j, indices[3], loopStart, loopEnd, loopInc;
             getLoopVars(portion, loopStart, loopEnd, loopInc);
             for (i = loopStart; i < loopEnd; i += loopInc)
+            {
                 for (j = TOP; j <= BOTTOM; j += 1)
                 {
                     getHeightTriangle(i, Spot(j), indices);
@@ -212,6 +213,7 @@ namespace MMAP
                     ttriangles.append(indices[1] + count);
                     ttriangles.append(indices[0] + count);
                 }
+            }
         }
 
         // liquid data
@@ -285,6 +287,7 @@ namespace MMAP
 
                 // generate triangles
                 for (int i = loopStart; i < loopEnd; i += loopInc)
+                {
                     for (int j = TOP; j <= BOTTOM; j += triInc)
                     {
                         getHeightTriangle(i, Spot(j), indices, true);
@@ -292,6 +295,7 @@ namespace MMAP
                         ltriangles.append(indices[1] + count);
                         ltriangles.append(indices[0] + count);
                     }
+                }
             }
         }
 
@@ -704,6 +708,7 @@ namespace MMAP
 
                         Vector3 vert;
                         for (uint32 x = 0; x < vertsX; ++x)
+                        {
                             for (uint32 y = 0; y < vertsY; ++y)
                             {
                                 vert = Vector3(corner.x + x * GRID_PART_SIZE, corner.y + y * GRID_PART_SIZE, data[y * vertsX + x]);
@@ -712,11 +717,14 @@ namespace MMAP
                                 vert.y *= -1.f;
                                 liqVerts.push_back(vert);
                             }
+                        }
 
                         int idx1, idx2, idx3, idx4;
                         uint32 square;
                         for (uint32 x = 0; x < tilesX; ++x)
+                        {
                             for (uint32 y = 0; y < tilesY; ++y)
+                            {
                                 if ((flags[x + y * tilesX] & 0x0f) != 0x0f)
                                 {
                                     square = x * tilesY + y;
@@ -734,6 +742,8 @@ namespace MMAP
                                     liqTris.push_back(idx3);
                                     liqTris.push_back(idx1);
                                 }
+                            }
+                        }
 
                         uint32 liqOffset = meshData.liquidVerts.size() / 3;
                         for (uint32 i = 0; i < liqVerts.size(); ++i)

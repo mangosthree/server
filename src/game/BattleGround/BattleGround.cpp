@@ -489,10 +489,12 @@ void BattleGround::Update(uint32 diff)
             data << uint32(countdownMaxForBGType);
 
             for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+            {
                 if (Player* player = sObjectMgr.GetPlayer(itr->first))
                 {
                     player->GetSession()->SendPacket(&data);
                 }
+            }
 
             m_CountdownTimer = 0;
         }
@@ -1563,10 +1565,12 @@ void BattleGround::StartBattleGround()
 void BattleGround::StartTimedAchievement(AchievementCriteriaTypes type, uint32 entry)
 {
     for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+    {
         if (Player* pPlayer = GetBgMap()->GetPlayer(itr->first))
         {
             pPlayer->GetAchievementMgr().StartTimedAchievementCriteria(type, entry);
         }
+    }
 }
 
 /// <summary>

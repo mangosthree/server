@@ -1875,10 +1875,12 @@ void Unit::PetOwnerKilledUnit(Unit* pVictim)
 void Unit::CastStop(uint32 except_spellid)
 {
     for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
+    {
         if (m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->Id != except_spellid)
         {
             InterruptSpell(CurrentSpellTypes(i), false);
         }
+    }
 }
 
 /**
@@ -2799,19 +2801,23 @@ uint32 Unit::CalcNotIgnoreAbsorbDamage(uint32 damage, SpellSchoolMask damageScho
     float absorb_affected_rate = 1.0f;
     Unit::AuraList const& ignoreAbsorbSchool = GetAurasByType(SPELL_AURA_MOD_IGNORE_ABSORB_SCHOOL);
     for (Unit::AuraList::const_iterator i = ignoreAbsorbSchool.begin(); i != ignoreAbsorbSchool.end(); ++i)
+    {
         if ((*i)->GetMiscValue() & damageSchoolMask)
         {
             absorb_affected_rate *= (100.0f - (*i)->GetModifier()->m_amount) / 100.0f;
         }
+    }
 
     if (spellInfo)
     {
         Unit::AuraList const& ignoreAbsorbForSpell = GetAurasByType(SPELL_AURA_MOD_IGNORE_ABSORB_FOR_SPELL);
         for (Unit::AuraList::const_iterator citr = ignoreAbsorbForSpell.begin(); citr != ignoreAbsorbForSpell.end(); ++citr)
+        {
             if ((*citr)->isAffectedOnSpell(spellInfo))
             {
                 absorb_affected_rate *= (100.0f - (*citr)->GetModifier()->m_amount) / 100.0f;
             }
+        }
     }
 
     return absorb_affected_rate <= 0.0f ? 0 : (absorb_affected_rate < 1.0f  ? uint32(damage * absorb_affected_rate) : damage);
@@ -2822,10 +2828,12 @@ uint32 Unit::CalcNotIgnoreDamageReduction(uint32 damage, SpellSchoolMask damageS
     float absorb_affected_rate = 1.0f;
     Unit::AuraList const& ignoreAbsorb = GetAurasByType(SPELL_AURA_MOD_IGNORE_DAMAGE_REDUCTION_SCHOOL);
     for (Unit::AuraList::const_iterator i = ignoreAbsorb.begin(); i != ignoreAbsorb.end(); ++i)
+    {
         if ((*i)->GetMiscValue() & damageSchoolMask)
         {
             absorb_affected_rate *= (100.0f - (*i)->GetModifier()->m_amount) / 100.0f;
         }
+    }
 
     return absorb_affected_rate <= 0.0f ? 0 : (absorb_affected_rate < 1.0f  ? uint32(damage * absorb_affected_rate) : damage);
 }
@@ -3172,10 +3180,12 @@ void Unit::InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id)
 Spell* Unit::FindCurrentSpellBySpellId(uint32 spell_id) const
 {
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
+    {
         if (m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->Id == spell_id)
         {
             return m_currentSpells[i];
         }
+    }
     return NULL;
 }
 
@@ -4275,11 +4285,13 @@ void Unit::RemoveGuardians()
 Pet* Unit::FindGuardianWithEntry(uint32 entry)
 {
     for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
+    {
         if (Pet* pet = GetMap()->GetPet(*itr))
             if (pet->GetEntry() == entry)
             {
                 return pet;
             }
+    }
 
     return NULL;
 }
@@ -4287,11 +4299,13 @@ Pet* Unit::FindGuardianWithEntry(uint32 entry)
 Pet* Unit::GetProtectorPet()
 {
     for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
+    {
         if (Pet* pet = GetMap()->GetPet(*itr))
             if (pet->getPetType() == PROTECTOR_PET)
             {
                 return pet;
             }
+    }
 
     return NULL;
 }
@@ -4332,10 +4346,12 @@ Totem* Unit::GetTotem(TotemSlot slot) const
 bool Unit::IsAllTotemSlotsUsed() const
 {
     for (int i = 0; i < MAX_TOTEM_SLOT; ++i)
+    {
         if (!m_TotemSlot[i])
         {
             return false;
         }
+    }
     return true;
 }
 
@@ -4373,10 +4389,12 @@ void Unit::_RemoveTotem(Totem* totem)
 void Unit::UnsummonAllTotems()
 {
     for (int i = 0; i < MAX_TOTEM_SLOT; ++i)
+    {
         if (Totem* totem = GetTotem(TotemSlot(i)))
         {
             totem->UnSummon();
         }
+    }
 }
 
 /**
@@ -5977,10 +5995,12 @@ void CharmInfo::ToggleCreatureAutocast(uint32 spellid, bool apply)
     }
 
     for (uint32 x = 0; x < CREATURE_MAX_SPELLS; ++x)
+    {
         if (spellid == m_charmspells[x].GetAction())
         {
             m_charmspells[x].SetType(apply ? ACT_ENABLED : ACT_DISABLED);
         }
+    }
 }
 
 /**
@@ -6995,10 +7015,12 @@ Aura* Unit::GetDummyAura(uint32 spell_id) const
 {
     Unit::AuraList const& mDummy = GetAurasByType(SPELL_AURA_DUMMY);
     for (Unit::AuraList::const_iterator itr = mDummy.begin(); itr != mDummy.end(); ++itr)
+    {
         if ((*itr)->GetId() == spell_id)
         {
             return *itr;
         }
+    }
 
     return NULL;
 }
@@ -7460,10 +7482,12 @@ SpellAuraHolder* Unit::GetSpellAuraHolder(uint32 spellid, ObjectGuid casterGuid)
 {
     SpellAuraHolderConstBounds bounds = GetSpellAuraHolderBounds(spellid);
     for (SpellAuraHolderMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
+    {
         if (iter->second->GetCasterGuid() == casterGuid)
         {
             return iter->second;
         }
+    }
 
     return NULL;
 }
@@ -7676,10 +7700,12 @@ bool Unit::IsInWorgenForm(bool inPermanent) const
 {
     AuraList const& vTransformAuras = GetAurasByType(SPELL_AURA_WORGEN_TRANSFORM);
     for (AuraList::const_iterator itr = vTransformAuras.begin(); itr != vTransformAuras.end(); ++itr)
+    {
         if (!inPermanent || (*itr)->GetHolder()->IsPermanent())
         {
             return true;
         }
+    }
 
     return false;
 }

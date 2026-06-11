@@ -290,10 +290,12 @@ void Player::Regenerate(Powers power, uint32 diff)
     {
         AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
         for (AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
+        {
             if ((*i)->GetModifier()->m_miscvalue == int32(power))
             {
                 addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0f;
             }
+        }
     }
 
     // addvalue computed on a 2sec basis. => update to diff time

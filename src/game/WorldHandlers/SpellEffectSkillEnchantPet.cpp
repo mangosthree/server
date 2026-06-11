@@ -1110,10 +1110,12 @@ void Spell::EffectWeaponDmg(SpellEffectEntry const* effect)
                 {
                     uint32 count = 0;
                     for(TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+                    {
                         if (ihit->effectMask & (1<<effect->EffectIndex))
                         {
                             ++count;
                         }
+                    }
 
                     totalDamagePercentMod /= float(count);  // divide to all targets
                     break;

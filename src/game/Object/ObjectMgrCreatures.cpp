@@ -1105,22 +1105,30 @@ void ObjectMgr::LoadCreatures()
     // build single time for check creature data
     std::set<uint32> difficultyCreatures[MAX_DIFFICULTY - 1];
     for (uint32 i = 0; i < sCreatureStorage.GetMaxEntry(); ++i)
+    {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
             for (uint32 diff = 0; diff < MAX_DIFFICULTY - 1; ++diff)
+            {
                 if (cInfo->DifficultyEntry[diff])
                 {
                     difficultyCreatures[diff].insert(cInfo->DifficultyEntry[diff]);
                 }
+            }
+    }
 
     // build single time for check spawnmask
     std::map<uint32, uint32> spawnMasks;
     for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+    {
         if (sMapStore.LookupEntry(i))
             for (int k = 0; k < MAX_DIFFICULTY; ++k)
+            {
                 if (GetMapDifficultyData(i, Difficulty(k)))
                 {
                     spawnMasks[i] |= (1 << k);
                 }
+            }
+    }
     // Map 0 was removed from dbc as of 4.x.x
     spawnMasks[0] = 1 << REGULAR_DIFFICULTY;
 

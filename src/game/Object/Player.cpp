@@ -155,10 +155,12 @@ Item* TradeData::GetItem(TradeSlots slot) const
 bool TradeData::HasItem(ObjectGuid item_guid) const
 {
     for (int i = 0; i < TRADE_SLOT_COUNT; ++i)
+    {
         if (m_items[i] == item_guid)
         {
             return true;
         }
+    }
     return false;
 }
 
@@ -592,10 +594,12 @@ Player::~Player()
 
     // clean up player-instance binds, may unload some instance saves
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+    {
         for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
         {
             itr->second.state->RemovePlayer(this);
         }
+    }
 
     delete m_declinedname;
 }
@@ -4868,22 +4872,26 @@ bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item cons
         case ITEM_CLASS_WEAPON:
         {
             for (int i = EQUIPMENT_SLOT_MAINHAND; i < EQUIPMENT_SLOT_TABARD; ++i)
+            {
                 if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                     if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo))
                     {
                         return true;
                     }
+            }
             break;
         }
         case ITEM_CLASS_ARMOR:
         {
             // tabard not have dependent spells
             for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_MAINHAND; ++i)
+            {
                 if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                     if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo))
                     {
                         return true;
                     }
+            }
 
             // shields can be equipped to offhand slot
             if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
@@ -4968,11 +4976,13 @@ void Player::RemoveItemDependentAurasAndCasts(Item* pItem)
 
     // currently casted spells can be dependent from item
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
+    {
         if (Spell* spell = GetCurrentSpell(CurrentSpellTypes(i)))
             if (spell->getState() != SPELL_STATE_DELAYED && !HasItemFitToSpellReqirements(spell->m_spellInfo, pItem))
             {
                 InterruptSpell(CurrentSpellTypes(i));
             }
+    }
 }
 
 /**
@@ -5315,10 +5325,12 @@ void Player::SetCanBlock(bool value)
 bool ItemPosCount::isContainedIn(ItemPosCountVec const& vec) const
 {
     for (ItemPosCountVec::const_iterator itr = vec.begin(); itr != vec.end(); ++itr)
+    {
         if (itr->pos == pos)
         {
             return true;
         }
+    }
 
     return false;
 }
@@ -6354,10 +6366,12 @@ bool Player::FitArmorSpecializationRules(SpellEntry const * spellProto) const
                     continue;
                 }
                 for (int j = 0; j < 4; ++j)
+                {
                     if (slots[j] != NULL_SLOT)
                     {
                         slotMask |= 1 << slots[j];
                     }
+                }
             }
         }
 

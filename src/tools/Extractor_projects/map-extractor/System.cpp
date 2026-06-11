@@ -780,17 +780,25 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
     if (CONF_allow_height_limit && minHeight < CONF_use_minHeight)
     {
         for (int y = 0; y < ADT_GRID_SIZE; y++)
+        {
             for (int x = 0; x < ADT_GRID_SIZE; x++)
+            {
                 if (V8[y][x] < CONF_use_minHeight)
                 {
                     V8[y][x] = CONF_use_minHeight;
                 }
+            }
+        }
         for (int y = 0; y <= ADT_GRID_SIZE; y++)
+        {
             for (int x = 0; x <= ADT_GRID_SIZE; x++)
+            {
                 if (V9[y][x] < CONF_use_minHeight)
                 {
                     V9[y][x] = CONF_use_minHeight;
                 }
+            }
+        }
         if (minHeight < CONF_use_minHeight)
         {
             minHeight = CONF_use_minHeight;
@@ -845,29 +853,37 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
         if (heightHeader.flags & MAP_HEIGHT_AS_INT8)
         {
             for (int y = 0; y < ADT_GRID_SIZE; y++)
+            {
                 for (int x = 0; x < ADT_GRID_SIZE; x++)
                 {
                     uint8_V8[y][x] = uint8((V8[y][x] - minHeight) * step + 0.5f);
                 }
+            }
             for (int y = 0; y <= ADT_GRID_SIZE; y++)
+            {
                 for (int x = 0; x <= ADT_GRID_SIZE; x++)
                 {
                     uint8_V9[y][x] = uint8((V9[y][x] - minHeight) * step + 0.5f);
                 }
+            }
             map.heightMapSize += sizeof(uint8_V9) + sizeof(uint8_V8);
         }
         else if (heightHeader.flags & MAP_HEIGHT_AS_INT16)
         {
             for (int y = 0; y < ADT_GRID_SIZE; y++)
+            {
                 for (int x = 0; x < ADT_GRID_SIZE; x++)
                 {
                     uint16_V8[y][x] = uint16((V8[y][x] - minHeight) * step + 0.5f);
                 }
+            }
             for (int y = 0; y <= ADT_GRID_SIZE; y++)
+            {
                 for (int x = 0; x <= ADT_GRID_SIZE; x++)
                 {
                     uint16_V9[y][x] = uint16((V9[y][x] - minHeight) * step + 0.5f);
                 }
+            }
             map.heightMapSize += sizeof(uint16_V9) + sizeof(uint16_V8);
         }
         else

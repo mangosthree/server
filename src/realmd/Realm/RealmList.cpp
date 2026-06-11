@@ -69,10 +69,12 @@ RealmBuildInfo const* FindBuildInfo(uint16 _build)
 
     // continue from 1 with explicit equal check
     for (int i = 1; ExpectedRealmdClientBuilds[i].build; ++i)
+    {
         if (_build == ExpectedRealmdClientBuilds[i].build)
         {
             return &ExpectedRealmdClientBuilds[i];
         }
+    }
 
     // none appropriate build
     return NULL;

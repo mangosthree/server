@@ -938,10 +938,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                     }
 
                     for (UnitList::iterator itr = targetsCombat.begin(); itr != targetsCombat.end(); ++itr)
+                    {
                         if ((*itr)->IsInCombat())
                         {
                             return SPELL_FAILED_TARGET_IN_COMBAT;
                         }
+                    }
                 }
                 break;
             }
@@ -2074,11 +2076,13 @@ SpellCastResult Spell::CheckCasterAuras() const
             bool is_stun_mechanic = true;
             Unit::AuraList const& stunAuras = m_caster->GetAurasByType(SPELL_AURA_MOD_STUN);
             for (Unit::AuraList::const_iterator itr = stunAuras.begin(); itr != stunAuras.end(); ++itr)
+            {
                 if (!(*itr)->HasMechanic(MECHANIC_STUN))
                 {
                     is_stun_mechanic = false;
                     break;
                 }
+            }
             if (!is_stun_mechanic)
             {
                 prevented_reason = SPELL_FAILED_STUNNED;
@@ -2250,10 +2254,12 @@ bool Spell::CanAutoCast(Unit* target)
         FillTargetMap();
         // check if among target units, our WANTED target is as well (->only self cast spells return false)
         for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+        {
             if (ihit->targetGUID == targetguid)
             {
                 return true;
             }
+        }
     }
     return false;                                           // target invalid
 }
@@ -2599,11 +2605,13 @@ SpellCastResult Spell::CheckItems()
         }
 
         for (int i = 0; i < 5; ++i)
+        {
             if (proto->Spells[i].SpellCharges)
                 if (m_CastItem->GetSpellCharges(i) == 0)
                 {
                     return SPELL_FAILED_NO_CHARGES_REMAIN;
                 }
+        }
 
         // consumable cast item checks
         if (proto->Class == ITEM_CLASS_CONSUMABLE && m_targets.getUnitTarget())

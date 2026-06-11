@@ -3229,10 +3229,12 @@ class Player : public Unit
         bool InBattleGroundQueue() const
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+            {
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId != BATTLEGROUND_QUEUE_NONE)
                 {
                     return true;
                 }
+            }
             return false;
         }
 
@@ -3241,10 +3243,12 @@ class Player : public Unit
         BattleGroundQueueTypeId GetBattleGroundQueueTypeIdByClientInstance(uint32 instanceId) const
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+            {
                 if (m_bgBattleGroundQueueID[i].invitedToInstance == instanceId)
                 {
                     return m_bgBattleGroundQueueID[i].bgQueueTypeId;
                 }
+            }
             return BATTLEGROUND_QUEUE_NONE;
         }
 
@@ -3252,10 +3256,12 @@ class Player : public Unit
         uint32 GetBattleGroundQueueIndex(BattleGroundQueueTypeId bgQueueTypeId) const
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+            {
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
                 {
                     return i;
                 }
+            }
             return PLAYER_MAX_BATTLEGROUND_QUEUES;
         }
 
@@ -3263,10 +3269,12 @@ class Player : public Unit
         bool IsInvitedForBattleGroundQueueType(BattleGroundQueueTypeId bgQueueTypeId) const
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+            {
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
                 {
                     return m_bgBattleGroundQueueID[i].invitedToInstance != 0;
                 }
+            }
             return false;
         }
 
@@ -3303,10 +3311,12 @@ class Player : public Unit
         bool HasFreeBattleGroundQueueId()
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+            {
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId == BATTLEGROUND_QUEUE_NONE)
                 {
                     return true;
                 }
+            }
             return false;
         }
 
@@ -3328,20 +3338,24 @@ class Player : public Unit
         void SetInviteForBattleGroundQueueType(BattleGroundQueueTypeId bgQueueTypeId, uint32 instanceId)
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+            {
                 if (m_bgBattleGroundQueueID[i].bgQueueTypeId == bgQueueTypeId)
                 {
                     m_bgBattleGroundQueueID[i].invitedToInstance = instanceId;
                 }
+            }
         }
 
         // Check if the player is invited for a specific battleground instance
         bool IsInvitedForBattleGroundInstance(uint32 instanceId) const
         {
             for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+            {
                 if (m_bgBattleGroundQueueID[i].invitedToInstance == instanceId)
                 {
                     return true;
                 }
+            }
             return false;
         }
 

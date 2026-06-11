@@ -84,10 +84,12 @@ void RuneMgr::UpdateRuneRegen(RuneType rune)
     float auraMod = 1.0f;
     Unit::AuraList const& regenAuras = m_owner->GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for (Unit::AuraList::const_iterator i = regenAuras.begin(); i != regenAuras.end(); ++i)
+    {
         if ((*i)->GetMiscValue() == POWER_RUNE && (*i)->GetSpellEffect()->EffectMiscValueB == rune)
         {
             auraMod *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
         }
+    }
 
     // Unholy Presence
     if (Aura* aura = m_owner->GetAura(48265, EFFECT_INDEX_0))
@@ -183,10 +185,12 @@ void RuneMgr::RestoreBaseRune(uint8 index)
     }
 
     for (uint8 i = 0; i < MAX_RUNES; ++i)
+    {
         if (aura == m_data.runes[i].ConvertAura)
         {
             return;
         }
+    }
 
     if (Unit* target = aura->GetTarget())
     {
@@ -265,10 +269,12 @@ void RuneMgr::Init()
 bool RuneMgr::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
 {
     for (uint32 i = 0; i < MAX_RUNES; ++i)
+    {
         if (GetBaseRune(i) == runeType && GetRuneCooldown(i) == 0)
         {
             return false;
         }
+    }
 
     return true;
 }

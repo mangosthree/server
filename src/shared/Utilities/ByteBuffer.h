@@ -287,10 +287,12 @@ class ByteBuffer
         {
             uint32 value = 0;
             for (int32 i = bits-1; i >= 0; --i)
+            {
                 if (ReadBit())
                 {
                     value |= (1 << i);
                 }
+            }
 
             return value;
         }
@@ -320,10 +322,12 @@ class ByteBuffer
             uint8* guidByte = ((uint8*)&guid);
 
             for (uint8 i = 0; i < byteCount; i++)
+            {
                 if (guidByte[byteOrder[i + bytePos]])
                 {
                     (*this) << uint8(guidByte[byteOrder[i + bytePos]] ^ 1);
                 }
+            }
         }
 
         template<BITS_1>

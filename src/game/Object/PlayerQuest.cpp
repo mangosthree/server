@@ -1970,10 +1970,12 @@ uint32 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry)
     }
 
     for (int j = 0; j < QUEST_OBJECTIVES_COUNT; ++j)
+    {
         if (qInfo->ReqCreatureOrGOId[j] == entry)
         {
             return mQuestStatus[quest_id].m_creatureOrGOcount[j];
         }
+    }
 
     return 0;
 }
@@ -2014,10 +2016,12 @@ void Player::AdjustQuestReqItemCount(Quest const* pQuest, QuestStatusData& quest
 uint16 Player::FindQuestSlot(uint32 quest_id) const
 {
     for (uint16 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
+    {
         if (GetQuestSlotQuestId(i) == quest_id)
         {
             return i;
         }
+    }
 
     return MAX_QUEST_LOG_SIZE;
 }
@@ -2351,10 +2355,12 @@ void Player::KilledMonster(CreatureInfo const* cInfo, ObjectGuid guid)
     }
 
     for (int i = 0; i < MAX_KILL_CREDIT; ++i)
+    {
         if (cInfo->KillCredit[i])
         {
             KilledMonsterCredit(cInfo->KillCredit[i], guid);
         }
+    }
 }
 
 /**

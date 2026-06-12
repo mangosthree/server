@@ -541,8 +541,20 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
         m_pathPoints[i] = Vector3(pathPoints[i * VERTEX_SIZE + 2], pathPoints[i * VERTEX_SIZE], pathPoints[i * VERTEX_SIZE + 1]);
     }
 
+    // clamp each point to the real surface: navmesh detail heights drift
+    // from terrain/vmap geometry on rough slopes, sinking units into hills
+    NormalizePath();
+
     // first point is always our current location - we need the next one
     setActualEndPosition(m_pathPoints[pointCount - 1]);
+
+    // the point path can stop short of the requested end (iteration cap or
+    // steering failure) even when the poly corridor reached the end poly -
+    // never report such a truncated path as complete
+    if ((m_type & PATHFIND_NORMAL) && !inRange(getActualEndPosition(), getEndPosition(), 3.0f, 7.5f))
+    {
+        m_type = PATHFIND_INCOMPLETE;
+    }
 
     // force the given destination, if needed
     if (m_forceDestination &&
@@ -875,16 +887,29 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
     uint32 npolys = polyPathSize;
 
     float iterPos[VERTEX_SIZE], targetPos[VERTEX_SIZE];
-    dtStatus dtResult = m_navMeshQuery->closestPointOnPolyBoundary(polys[0], startPos, iterPos);
-    if (dtStatusFailed(dtResult))
-    {
-        return DT_FAILURE;
-    }
+    dtStatus dtResult = DT_FAILURE;
 
-    dtResult = m_navMeshQuery->closestPointOnPolyBoundary(polys[npolys - 1], endPos, targetPos);
-    if (dtStatusFailed(dtResult))
+    if (polyPathSize > 1)
     {
-        return DT_FAILURE;
+        // pick the closest points on poly border
+        dtResult = m_navMeshQuery->closestPointOnPolyBoundary(polys[0], startPos, iterPos);
+        if (dtStatusFailed(dtResult))
+        {
+            return DT_FAILURE;
+        }
+
+        dtResult = m_navMeshQuery->closestPointOnPolyBoundary(polys[npolys - 1], endPos, targetPos);
+        if (dtStatusFailed(dtResult))
+        {
+            return DT_FAILURE;
+        }
+    }
+    else
+    {
+        // start and end are on the same poly: keep the exact positions,
+        // a boundary clamp would snap both onto the polygon edge
+        dtVcopy(iterPos, startPos);
+        dtVcopy(targetPos, endPos);
     }
 
     dtVcopy(&smoothPath[nsmoothPath * VERTEX_SIZE], iterPos);
@@ -930,7 +955,13 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
         dtPolyRef visited[MAX_VISIT_POLY];
 
         uint32 nvisited = 0;
-        m_navMeshQuery->moveAlongSurface(polys[0], iterPos, moveTgt, &m_filter, result, visited, (int*)&nvisited, MAX_VISIT_POLY);
+        dtResult = m_navMeshQuery->moveAlongSurface(polys[0], iterPos, moveTgt, &m_filter, result, visited, (int*)&nvisited, MAX_VISIT_POLY);
+        if (dtStatusFailed(dtResult))
+        {
+            // iterPos would desync from the corridor; abort instead of
+            // emitting garbage points
+            return DT_FAILURE;
+        }
         npolys = fixupCorridor(polys, npolys, MAX_PATH_LENGTH, visited, nvisited);
 
         m_navMeshQuery->getPolyHeight(polys[0], result, &result[1]);
@@ -1048,24 +1079,13 @@ float PathFinder::dist3DSqr(const Vector3& p1, const Vector3& p2) const
     return (p1 - p2).squaredLength();
 }
 
-void PathFinder::NormalizePath(uint32& size)
+/**
+ * @brief Clamps every path point to the allowed height at its location.
+ */
+void PathFinder::NormalizePath()
 {
     for (uint32 i = 0; i < m_pathPoints.size(); ++i)
     {
         m_sourceUnit->UpdateAllowedPositionZ(m_pathPoints[i].x, m_pathPoints[i].y, m_pathPoints[i].z);
     }
-
-    // check if the Z difference between each point is higher than SMOOTH_PATH_HEIGHT.
-    // add another point if that's the case and keep adding new midpoints till the Z difference is low enough
-    for (uint32 i = 1; i < m_pathPoints.size(); ++i)
-    {
-        if ((m_pathPoints[i - 1].z - m_pathPoints[i].z) > SMOOTH_PATH_HEIGHT)
-        {
-            auto midPoint = m_pathPoints[i - 1] + (m_pathPoints[i] - m_pathPoints[i - 1]) / 2.f;
-            m_sourceUnit->UpdateAllowedPositionZ(midPoint.x, midPoint.y, midPoint.z);
-            m_pathPoints.insert(m_pathPoints.begin() + i, midPoint);
-            --i;
-        }
-    }
-    size = m_pathPoints.size();
 }

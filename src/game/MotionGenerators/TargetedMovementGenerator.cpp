@@ -109,6 +109,13 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
     i_path->calculate(x, y, z, forceDest);
     if (i_path->getPathType() & PATHFIND_NOPATH)
     {
+        // no usable path: halt instead of running on along the stale spline,
+        // which may cut through terrain the new query just rejected
+        D::_clearUnitStateMove(owner);
+        if (!owner.IsStopped())
+        {
+            owner.StopMoving();
+        }
         return;
     }
 

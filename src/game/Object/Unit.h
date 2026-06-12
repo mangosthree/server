@@ -835,6 +835,14 @@ class MovementInfo
             t_time = 0;
             t_seat = -1;
         }
+        /// Drop stale fall state so object creates built after a teleport carry no fall block.
+        void ClearFallData()
+        {
+            fallTime = 0;
+            jump = JumpInfo();
+            si.hasFallData = false;
+            si.hasFallDirection = false;
+        }
         ObjectGuid const& GetGuid() const { return guid; }
         ObjectGuid const& GetGuid2() const { return guid2; }
         ObjectGuid const& GetTransportGuid() const { return t_guid; }

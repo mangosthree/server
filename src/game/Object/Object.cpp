@@ -523,9 +523,10 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
         {
             if (hasFallDirection)
             {
-                *data << float(unit->m_movementInfo.GetJumpInfo().cosAngle);
+                // 15595 client reads horizontal speed, then jump direction sin/cos
                 *data << float(unit->m_movementInfo.GetJumpInfo().xyspeed);
                 *data << float(unit->m_movementInfo.GetJumpInfo().sinAngle);
+                *data << float(unit->m_movementInfo.GetJumpInfo().cosAngle);
             }
 
             *data << uint32(unit->m_movementInfo.GetFallTime());

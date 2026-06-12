@@ -28,6 +28,9 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <mutex>
+#include <queue>
+#include <thread>
 
 #include <Recast.h>
 #include <DetourNavMesh.h>
@@ -106,7 +109,8 @@ namespace MMAP
                        bool skipBattlegrounds   = false,
                        bool debugOutput         = false,
                        bool bigBaseUnit         = false,
-                       const char* offMeshFilePath = NULL);
+                       const char* offMeshFilePath = NULL,
+                       unsigned int threads     = 0);  ///< 0 == hardware_concurrency, 1 == serial
 
             /**
              * @brief
@@ -224,6 +228,23 @@ namespace MMAP
              */
             bool shouldSkipTile(uint32 mapID, uint32 tileX, uint32 tileY);
 
+            /**
+             * @brief Per-thread worker body for parallel buildMap path. Pops
+             * TileTasks off the shared queue until empty, building each tile
+             * into a private navmesh cloned from the map navmesh's params.
+             */
+            void workerLoop(dtNavMesh* navMesh);
+
+            /**
+             * @brief A single tile-build unit handed to a worker.
+             */
+            struct TileTask
+            {
+                uint32 mapID;
+                uint32 tileX;
+                uint32 tileY;
+            };
+
             TerrainBuilder* m_terrainBuilder; /**< TODO */
             TileList m_tiles; /**< TODO */
 
@@ -237,7 +258,10 @@ namespace MMAP
             float m_maxWalkableAngle; /**< TODO */
             bool m_bigBaseUnit; /**< TODO */
 
-            rcContext* m_rcContext; /**< build performance - not really used for now */
+            unsigned int m_threads;        ///< worker count for parallel buildMap; 1 == serial
+            std::mutex m_queueMutex;       ///< guards m_taskQueue
+            std::queue<TileTask> m_taskQueue;
+            std::mutex m_debugOutputMutex; ///< serializes --debugOutput writes to the shared per-map marker file
     };
 }
 

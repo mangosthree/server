@@ -195,7 +195,7 @@ namespace MMAP
     /**************************************************************************/
     void MapBuilder::buildMap(uint32 mapID)
     {
-        printf("Building map %03u:\n", mapID);
+        printf("Building map %04u:\n", mapID);
 
         set<uint32>* tiles = getTileList(mapID);
 
@@ -254,7 +254,7 @@ namespace MMAP
     /**************************************************************************/
     void MapBuilder::buildTile(uint32 mapID, uint32 tileX, uint32 tileY, dtNavMesh* navMesh)
     {
-        printf("Building map %03u, tile [%02u,%02u]\n", mapID, tileX, tileY);
+        printf("Building map %04u, tile [%02u,%02u]\n", mapID, tileX, tileY);
 
         MeshData meshData;
 
@@ -412,11 +412,7 @@ namespace MMAP
         }
 
         char fileName[25];
-#if defined(MISTS)
         sprintf(fileName, "mmaps/%04u.mmap", mapID);
-#else
-        sprintf(fileName, "mmaps/%03u.mmap", mapID);
-#endif
 
         FILE* file = fopen(fileName, "wb");
         if (!file)
@@ -770,11 +766,7 @@ namespace MMAP
 
             // file output
             char fileName[255];
-#if defined(MISTS)
             sprintf(fileName, "mmaps/%04u%02i%02i.mmtile", mapID, tileY, tileX);
-#else
-            sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileY, tileX);
-#endif
             FILE* file = fopen(fileName, "wb");
             if (!file)
             {
@@ -959,11 +951,7 @@ namespace MMAP
     bool MapBuilder::shouldSkipTile(uint32 mapID, uint32 tileX, uint32 tileY)
     {
         char fileName[255];
-#if defined(MISTS)
         sprintf(fileName, "mmaps/%04u%02i%02i.mmtile", mapID, tileY, tileX);
-#else
-        sprintf(fileName, "mmaps/%03u%02i%02i.mmtile", mapID, tileY, tileX);
-#endif
         FILE* file = fopen(fileName, "rb");
         if (!file)
         {

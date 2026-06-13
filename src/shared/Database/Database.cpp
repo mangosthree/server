@@ -460,7 +460,7 @@ bool Database::DirectPExecute(const char* format, ...)
 
 bool Database::BeginTransaction()
 {
-    if (!m_pAsyncConn)
+    if (!m_pAsyncConn || !m_TransStorage)
     {
         return false;
     }

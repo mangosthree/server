@@ -476,6 +476,25 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
     else
     {
         m_type = PATHFIND_INCOMPLETE;
+
+        // The poly corridor stopped short of the target's polygon: the target
+        // sits on a navmesh island we cannot reach (e.g. a cliff-top plateau
+        // walled off from us by a steeper-than-walkable face). Clamp the path
+        // end to the closest point on the last reachable poly so the straight
+        // path stops at that reachable edge. Otherwise findStraightPath()
+        // appends the raw unreachable target and the spline drives the unit
+        // straight up through the terrain to reach it. Pets keep reaching an
+        // off-mesh master because BuildPointPath() re-forces getEndPosition()
+        // when m_forceDestination is set.
+        if (m_pathPolyRefs[m_polyLength - 1] != endPoly)
+        {
+            float closestPoint[VERTEX_SIZE];
+            if (dtStatusSucceed(m_navMeshQuery->closestPointOnPoly(m_pathPolyRefs[m_polyLength - 1], endPoint, closestPoint, NULL)))
+            {
+                dtVcopy(endPoint, closestPoint);
+                setActualEndPosition(Vector3(endPoint[2], endPoint[0], endPoint[1]));
+            }
+        }
     }
 
     // generate the point-path out of our up-to-date poly-path

@@ -44,7 +44,6 @@ class Unit;
 
 #define SMOOTH_PATH_STEP_SIZE   4.0f
 #define SMOOTH_PATH_SLOP        0.3f
-#define SMOOTH_PATH_HEIGHT      1.0f
 
 #define VERTEX_SIZE       3
 #define INVALID_POLYREF   0
@@ -120,7 +119,6 @@ class PathFinder
          * @return The actual end position of the path.
          */
         Vector3 getActualEndPosition() const { return m_actualEndPosition; }
-        void NormalizePath(uint32& size);
 
         /**
          * @brief Get the path points.
@@ -254,6 +252,11 @@ class PathFinder
          * @brief Build a shortcut path.
          */
         void BuildShortcut();
+
+        /**
+         * @brief Clamp every path point to the allowed height at its location.
+         */
+        void NormalizePath();
 
         /**
          * @brief Build a straight 3D swim path through open water.

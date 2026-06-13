@@ -556,12 +556,14 @@ namespace MMAP
         config.borderSize = config.walkableRadius + 3;
         config.maxEdgeLen = VERTEX_PER_TILE + 1;        //anything bigger than tileSize
         config.walkableHeight = m_bigBaseUnit ? 3 : 6;
-        config.walkableClimb = m_bigBaseUnit ? 2 : 4;   // keep less than walkableHeight
+        // a value >= 3|6 allows npcs to walk over some fences
+        // a value >= 4|8 allows npcs to walk over all fences
+        config.walkableClimb = m_bigBaseUnit ? 3 : 6;   // keep less than walkableHeight
         config.minRegionArea = rcSqr(60);
         config.mergeRegionArea = rcSqr(50);
-        config.maxSimplificationError = 2.0f;       // eliminates most jagged edges (tinny polygons)
-        config.detailSampleDist = config.cs * 64;
-        config.detailSampleMaxError = config.ch * 2;
+        config.maxSimplificationError = 1.8f;       // eliminates most jagged edges (tiny polygons)
+        config.detailSampleDist = config.cs * 16;
+        config.detailSampleMaxError = config.ch * 1;
 
         // this sets the dimensions of the heightfield - should maybe happen before border padding
         rcCalcGridSize(config.bmin, config.bmax, config.cs, &config.width, &config.height);
@@ -627,6 +629,12 @@ namespace MMAP
                 if (!rcErodeWalkableArea(&rcCtx, config.walkableRadius, *tile.chf))
                 {
                     printf("%s Failed eroding area!                    \n", tileString);
+                    continue;
+                }
+
+                if (!rcMedianFilterWalkableArea(&rcCtx, *tile.chf))
+                {
+                    printf("%s Failed filtering area!                  \n", tileString);
                     continue;
                 }
 
@@ -732,15 +740,12 @@ namespace MMAP
 
         delete [] tiles;
 
-#if defined (CATA)
-        // remove padding for extraction
-        for (int i = 0; i < iv.polyMesh->nverts; ++i)
-        {
-            unsigned short* v = &iv.polyMesh->verts[i * 3];
-            v[0] -= (unsigned short)config.borderSize;
-            v[2] -= (unsigned short)config.borderSize;
-        }
-#endif
+        // NOTE: do NOT subtract config.borderSize from the merged vertices here.
+        // rcBuildContours already removes the border offset (chf.borderSize > 0),
+        // so an extra subtraction shifts every polygon by borderSize cells and
+        // wraps tile-edge vertices below zero (unsigned short underflow), which
+        // breaks cross-tile stitching in Detour.
+
         // set polygons as walkable
         // TODO: special flags for DYNAMIC polygons, ie surfaces that can be turned on and off
         for (int i = 0; i < iv.polyMesh->npolys; ++i)

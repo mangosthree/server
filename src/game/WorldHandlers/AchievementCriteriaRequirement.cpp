@@ -34,6 +34,7 @@
 #include "AchievementMgr.h"
 #include "Log.h"
 #include "DBCStores.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "SpellMgr.h"
 #include "GameEventMgr.h"

@@ -23,6 +23,7 @@
  */
 
 #include "ObjectMgr.h"
+#include "LivingWorldAnchorPolicy.h"
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"
 

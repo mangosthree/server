@@ -225,6 +225,13 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_holyPowerRegenTimer = REGEN_TIME_HOLY_POWER;
     m_valuesCount = UNIT_END;
 
+    // Zero sentinel: lets waypoint evade tell "combat start never recorded"
+    // apart from a real recorded position (set in Unit::Attack), so it can
+    // resume from the departure point instead of the last reached waypoint.
+    m_combatStartX = 0.0f;
+    m_combatStartY = 0.0f;
+    m_combatStartZ = 0.0f;
+
     for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
     {
         m_spells[i] = 0;

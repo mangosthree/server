@@ -24,6 +24,7 @@
 
 #include "ObjectMgr.h"
 #include "LivingWorldAnchorPolicy.h"
+#include "MotionGenerators/MotionMaster.h"  // WAYPOINT_MOTION_TYPE
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"
 

@@ -1121,12 +1121,16 @@ void ObjectMgr::LoadCreatures()
     // build single time for check spawnmask
     std::map<uint32, uint32> spawnMasks;
     for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+    {
         if (sMapStore.LookupEntry(i))
             for (int k = 0; k < MAX_DIFFICULTY; ++k)
+            {
                 if (GetMapDifficultyData(i, Difficulty(k)))
                 {
                     spawnMasks[i] |= (1 << k);
                 }
+            }
+    }
     // Map 0 was removed from dbc as of 4.x.x
     spawnMasks[0] = 1 << REGULAR_DIFFICULTY;
 
@@ -1281,7 +1285,8 @@ void ObjectMgr::LoadCreatures()
             AddCreatureToGrid(guid, &data);
 
             const bool lwIsWaypoint = (data.movementType == WAYPOINT_MOTION_TYPE);
-            uint32 lwCats = GetLivingWorldAnchorCategories(cInfo, mapEntry) & lwAnchorMask;
+            uint32 lwCats = (GetLivingWorldAnchorCategories(cInfo, mapEntry)
+                          |  GetLivingWorldDefenderCategory(cInfo, mapEntry, lwIsWaypoint)) & lwAnchorMask;
             if ((cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_ACTIVE) || lwCats != 0)
             {
                 sLog.outString("Adding `creature` with Active Flag: Map: %u, Guid %u", data.mapid, guid);
@@ -1297,6 +1302,10 @@ void ObjectMgr::LoadCreatures()
                     if (lwCats & LW_ANCHOR_FLIGHT_MASTER)
                     {
                         ++lwFlightMasterCount;
+                    }
+                    if (lwCats & LW_ANCHOR_SETTLEMENT_DEFENDER)
+                    {
+                        ++lwSettlementDefenderCount;
                     }
                 }
             }

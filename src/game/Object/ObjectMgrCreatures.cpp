@@ -35,6 +35,8 @@
  */
 
 #include "ObjectMgr.h"
+#include "LivingWorldAnchorPolicy.h"
+#include "MotionGenerators/MotionMaster.h"  // WAYPOINT_MOTION_TYPE
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"
 
@@ -1105,12 +1107,16 @@ void ObjectMgr::LoadCreatures()
     // build single time for check creature data
     std::set<uint32> difficultyCreatures[MAX_DIFFICULTY - 1];
     for (uint32 i = 0; i < sCreatureStorage.GetMaxEntry(); ++i)
+    {
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
             for (uint32 diff = 0; diff < MAX_DIFFICULTY - 1; ++diff)
+            {
                 if (cInfo->DifficultyEntry[diff])
                 {
                     difficultyCreatures[diff].insert(cInfo->DifficultyEntry[diff]);
                 }
+            }
+    }
 
     // build single time for check spawnmask
     std::map<uint32, uint32> spawnMasks;
@@ -1125,6 +1131,12 @@ void ObjectMgr::LoadCreatures()
     spawnMasks[0] = 1 << REGULAR_DIFFICULTY;
 
     BarGoLink bar(result->GetRowCount());
+
+    const uint32 lwAnchorMask = sWorld.getConfig(CONFIG_UINT32_LIVINGWORLD_ANCHOR_MASK);
+    uint32 lwWorldBossLeaderCount = 0;
+    uint32 lwFlightMasterCount = 0;
+    uint32 lwSettlementDefenderCount = 0;
+    uint32 lwAnchorTotal = 0;
 
     do
     {
@@ -1268,10 +1280,25 @@ void ObjectMgr::LoadCreatures()
         {
             AddCreatureToGrid(guid, &data);
 
-            if (cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_ACTIVE)
+            const bool lwIsWaypoint = (data.movementType == WAYPOINT_MOTION_TYPE);
+            uint32 lwCats = GetLivingWorldAnchorCategories(cInfo, mapEntry) & lwAnchorMask;
+            if ((cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_ACTIVE) || lwCats != 0)
             {
                 sLog.outString("Adding `creature` with Active Flag: Map: %u, Guid %u", data.mapid, guid);
                 m_activeCreatures.insert(ActiveCreatureGuidsOnMap::value_type(data.mapid, guid));
+
+                if (lwCats != 0)
+                {
+                    ++lwAnchorTotal;
+                    if (lwCats & LW_ANCHOR_WORLD_BOSS_OR_LEADER)
+                    {
+                        ++lwWorldBossLeaderCount;
+                    }
+                    if (lwCats & LW_ANCHOR_FLIGHT_MASTER)
+                    {
+                        ++lwFlightMasterCount;
+                    }
+                }
             }
         }
 
@@ -1282,6 +1309,8 @@ void ObjectMgr::LoadCreatures()
     delete result;
 
     sLog.outString(">> Loaded %zu creatures", mCreatureDataMap.size());
+    sLog.outString("[LivingWorld] anchor policy mask=0x%X: world-boss/leaders=%u, flight-masters=%u, settlement-defenders=%u, total-anchors=%u (continent-only; instance spawns excluded)",
+        lwAnchorMask, lwWorldBossLeaderCount, lwFlightMasterCount, lwSettlementDefenderCount, lwAnchorTotal);
     sLog.outString();
 }
 

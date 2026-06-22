@@ -49,6 +49,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "CinematicFlyover.h"
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "ObjectAccessor.h"
@@ -906,20 +907,28 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     // Show cinematic at the first time that player login (TODO: activate world grids first, then cinematic)
     // move this code past the "SendInitialPacketsAfterAddToMap();" line?
-    if (!pCurrChar->getCinematic())
+    bool isFirstLogin = !pCurrChar->getCinematic();
+    uint32 cinematicSequenceId = 0;
+    if (isFirstLogin)
     {
         pCurrChar->setCinematic(1);
 
+        // Class cinematic (Death Knight) takes precedence; fall back to the race intro
         if (ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(pCurrChar->getClass()))
         {
             if (cEntry->CinematicSequence)
             {
-                pCurrChar->SendCinematicStart(cEntry->CinematicSequence);
+                cinematicSequenceId = cEntry->CinematicSequence;
             }
             else if (ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(pCurrChar->getRace()))
             {
-                pCurrChar->SendCinematicStart(rEntry->CinematicSequence);
+                cinematicSequenceId = rEntry->CinematicSequence;
             }
+        }
+
+        if (cinematicSequenceId)
+        {
+            pCurrChar->SendCinematicStart(cinematicSequenceId);
         }
     }
 
@@ -943,9 +952,24 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
     }
 
+    bool createCinematicFlyover = isFirstLogin && cinematicSequenceId &&
+        sWorld.getConfig(CONFIG_BOOL_CINEMATIC_FLYOVER_ENABLE);
+    bool createEarlyDkCinematicFlyover = createCinematicFlyover &&
+        cinematicSequenceId == 165 && pCurrChar->GetMapId() == 609;
+
+    // Death Knight sequence 165 needs the cinematic visibility radius before
+    // Map::Add performs the initial player-centered visibility pass. Other
+    // flyovers keep the existing post-add arming path.
+    if (lockStatus == AREA_LOCKSTATUS_OK && createEarlyDkCinematicFlyover)
+    {
+        pCurrChar->SetCinematicFlyover(
+            std::make_unique<CinematicFlyover>(pCurrChar, cinematicSequenceId));
+    }
+
     /* This code is run if we can not add the player to the map for some reason */
     if (lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->GetMap()->Add(pCurrChar))
     {
+        pCurrChar->SetCinematicFlyover(nullptr);
         /* Attempt to find an areatrigger to teleport the player for us */
         AreaTrigger const* at = sObjectMgr.GetGoBackTrigger(pCurrChar->GetMapId());
         if (at)
@@ -964,6 +988,17 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     // DEBUG_LOG("Player %s added to Map.",pCurrChar->GetName());
 
     pCurrChar->SendInitialPacketsAfterAddToMap();
+
+    /* If it's the player's first login, create the cinematic flyover if enabled */
+    /* Note: isFirstLogin was captured before setCinematic(1) mutated the flag */
+    /* Non-DK flyovers arm after the player is fully in-world; the DK flyover */
+    /* may already exist so its visibility lease affected Map::Add above. */
+    /* Begin still waits for the first CMSG_NEXT_CINEMATIC_CAMERA. */
+    if (createCinematicFlyover && !pCurrChar->GetCinematicFlyover())
+    {
+        pCurrChar->SetCinematicFlyover(
+            std::make_unique<CinematicFlyover>(pCurrChar, cinematicSequenceId));
+    }
 
     /* Mark player as online in the database */
     static SqlStatementID updChars;

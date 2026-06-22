@@ -470,7 +470,9 @@ class Map : public GridRefManager<NGridType>
         float m_VisibleDistance;
         std::multiset<float> m_cinematicViewerRadii;  ///< radii of active cinematic flyover viewers on this map
         float m_cinematicViewerRadius;                ///< cached largest of m_cinematicViewerRadii (0 when none)
+        /// Radii of active cinematic map-visibility leases.
         std::multiset<float> m_cinematicVisibilityRadii;
+        /// Cached largest cinematic visibility radius, or 0 when none.
         float m_cinematicVisibilityRadius;
         MapPersistentState* m_persistentState;
 

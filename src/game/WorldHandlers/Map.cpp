@@ -185,7 +185,9 @@ void Map::LoadMapAndVMap(int gx, int gy)
 Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
     : i_mapEntry(sMapStore.LookupEntry(id)), i_spawnMode(SpawnMode),
       i_id(id), i_InstanceId(InstanceId), m_unloadTimer(0),
-      m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE), m_persistentState(NULL),
+      m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE),
+      m_cinematicViewerRadius(0.0f), m_cinematicVisibilityRadius(0.0f),
+      m_persistentState(NULL),
       m_activeNonPlayersIter(m_activeNonPlayers.end()),
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
       i_data(NULL)
@@ -238,6 +240,56 @@ void Map::InitVisibilityDistance()
 {
     // init visibility for continents
     m_VisibleDistance = World::GetMaxVisibleDistanceOnContinents();
+}
+
+// Map::GetVisibilityDistance() is defined inline in Map.h (hot path).
+
+float Map::GetBroadcastRadius() const
+{
+    float visibilityDistance = GetVisibilityDistance();
+    return m_cinematicViewerRadius > visibilityDistance ?
+        m_cinematicViewerRadius : visibilityDistance;
+}
+
+void Map::AddCinematicViewer(float radius)
+{
+    m_cinematicViewerRadii.insert(radius);
+    m_cinematicViewerRadius = *m_cinematicViewerRadii.rbegin();
+}
+
+void Map::RemoveCinematicViewer(float radius)
+{
+    std::multiset<float>::iterator itr = m_cinematicViewerRadii.find(radius);
+    if (itr == m_cinematicViewerRadii.end())
+    {
+        sLog.outError("Map::RemoveCinematicViewer: no viewer registered with radius %.1f on map %u", radius, GetId());
+        return;
+    }
+
+    m_cinematicViewerRadii.erase(itr);
+    m_cinematicViewerRadius = m_cinematicViewerRadii.empty() ? 0.0f : *m_cinematicViewerRadii.rbegin();
+}
+
+void Map::AddCinematicVisibility(float radius)
+{
+    m_cinematicVisibilityRadii.insert(radius);
+    m_cinematicVisibilityRadius = *m_cinematicVisibilityRadii.rbegin();
+}
+
+void Map::RemoveCinematicVisibility(float radius)
+{
+    std::multiset<float>::iterator itr =
+        m_cinematicVisibilityRadii.find(radius);
+    if (itr == m_cinematicVisibilityRadii.end())
+    {
+        sLog.outError("Map::RemoveCinematicVisibility: no lease registered "
+                      "with radius %.1f on map %u", radius, GetId());
+        return;
+    }
+
+    m_cinematicVisibilityRadii.erase(itr);
+    m_cinematicVisibilityRadius = m_cinematicVisibilityRadii.empty() ?
+        0.0f : *m_cinematicVisibilityRadii.rbegin();
 }
 
 // Template specialization of utility methods
@@ -765,7 +817,7 @@ void Map::MessageBroadcast(Player const* player, WorldPacket* msg, bool to_self)
 
     MaNGOS::MessageDeliverer post_man(*player, msg, to_self);
     TypeContainerVisitor<MaNGOS::MessageDeliverer, WorldTypeMapContainer > message(post_man);
-    cell.Visit(p, message, *this, *player, GetVisibilityDistance());
+    cell.Visit(p, message, *this, *player, GetBroadcastRadius());
 }
 
 /**
@@ -796,7 +848,7 @@ void Map::MessageBroadcast(WorldObject const* obj, WorldPacket* msg)
     // we have alot of blinking mobs because monster move packet send is broken...
     MaNGOS::ObjectMessageDeliverer post_man(*obj, msg);
     TypeContainerVisitor<MaNGOS::ObjectMessageDeliverer, WorldTypeMapContainer > message(post_man);
-    cell.Visit(p, message, *this, *obj, GetVisibilityDistance());
+    cell.Visit(p, message, *this, *obj, GetBroadcastRadius());
 }
 
 /**

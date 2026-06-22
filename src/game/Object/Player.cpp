@@ -32,6 +32,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "UpdateMask.h"
+#include "CinematicFlyover.h"
 #include "SkillDiscovery.h"
 #include "QuestDef.h"
 #include "GossipDef.h"
@@ -605,6 +606,14 @@ Player::~Player()
  */
 void Player::CleanupsBeforeDelete()
 {
+    // Stop cinematic flyover if present (must happen before camera dtor).
+    // DK may hold an early visibility lease before the flyover is active.
+    if (m_cinematicFlyover)
+    {
+        m_cinematicFlyover->Stop();
+    }
+    m_cinematicFlyover.reset();
+
     // Perform cleanup only if the object is fully created
     if (m_uint32Values)
     {
@@ -1020,6 +1029,13 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         {
             m_visibilityObserverSweepTimer -= update_diff;
         }
+    }
+
+    // Update cinematic flyover while active, or while it owns pre-begin state
+    // such as the DK early visibility lease.
+    if (m_cinematicFlyover && m_cinematicFlyover->NeedsUpdate())
+    {
+        m_cinematicFlyover->Update(update_diff);
     }
 
     // Update player-only attacks
@@ -1661,6 +1677,13 @@ void Player::SendTeleportPacket(float oldX, float oldY, float oldZ, float oldO)
  */
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options /*=0*/, AreaTrigger const* at /*=NULL*/)
 {
+    // Stop cinematic flyover on teleport (body and any early visibility lease
+    // are map-bound).
+    if (m_cinematicFlyover)
+    {
+        m_cinematicFlyover->Stop();
+    }
+
     orientation = NormalizeOrientation(orientation);
 
     if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
@@ -3721,6 +3744,27 @@ void Player::SendMovieStart(uint32 MovieId)
     SendDirectMessage(&data);
 }
 #endif
+
+/**
+ * @brief True while a DK intro cinematic/flyover is in progress for this player.
+ */
+bool Player::IsCinematicIntroActive() const
+{
+    return m_cinematicFlyover && m_cinematicFlyover->IsIntroInProgress();
+}
+
+/**
+ * @brief Applies the DK intro PvP flag that was deferred during the cinematic.
+ */
+void Player::ApplyDeferredIntroPvP()
+{
+    // The intro cinematic deferred the hostile-area PvP flag (see UpdateZone) so
+    // its flag sound would not play mid-cinematic; apply it now, at the end.
+    if (pvpInfo.inHostileArea && !IsPvP())
+    {
+        UpdatePvP(true, true);
+    }
+}
 
 /**
  * @brief Gets the faction team associated with a race.

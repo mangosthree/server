@@ -287,7 +287,7 @@ void Spell::EffectDualWield(SpellEffectEntry const* /*effect*/)
 void Spell::EffectPull(SpellEffectEntry const* /*effect*/)
 {
     // TODO: create a proper pull towards distract spell center for distract
-    DEBUG_LOG("WORLD: Spell Effect DUMMY");
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: Spell Effect DUMMY");
 }
 
 /**

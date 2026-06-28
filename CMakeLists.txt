@@ -51,6 +51,7 @@ option(SOAP                 "Enable remote access via SOAP"                 OFF)
 option(PCH                  "Enable precompiled headers"                    ON)
 option(DEBUG                "Enable debug build (only on non IDEs)"         OFF)
 option(WITHOUT_GIT          "Disable Git revision detection"                OFF)
+option(BUILD_TESTS          "Build unit tests (doctest)"                    OFF)
 #==================================================================================
 message("")
 message(
@@ -61,6 +62,7 @@ message(
     BUILD_MANGOSD           Build the main server
     BUILD_REALMD            Build the login server
     BUILD_TOOLS             Build the map/vmap/mmap extractors
+    BUILD_TESTS             Build unit tests (doctest)
     USE_STORMLIB            Use StormLib for reading MPQs
     SOAP                    Enable remote access via SOAP
     PCH                     Enable use of precompiled headers
@@ -127,5 +129,10 @@ endif()
 
 add_subdirectory(dep)
 add_subdirectory(src)
+
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/StatusInfo.cmake)

@@ -26,6 +26,10 @@ set(SHARED_SRCS
     shared/ExtractorCommon.h
 )
 
+# Cata-specific ADT/WDT/MPQ reader (formerly dep/loadlib/sl); extractor-only,
+# kept here so dep/ can be the shared mangosDeps submodule.
+add_subdirectory(loadlib)
+
 #=======================================================#
 #map-extractor
 #=======================================================#
@@ -44,7 +48,7 @@ target_include_directories(map-extractor
 
 target_link_libraries(map-extractor
     PUBLIC
-    loadlib
+    loadlib_cata
 )
 
 install(
@@ -128,7 +132,7 @@ target_include_directories(vmap-extractor
 
 target_link_libraries(vmap-extractor
     PUBLIC
-        loadlib
+        loadlib_cata
         vmap2
 )
 
@@ -162,7 +166,7 @@ target_include_directories(vmap-assembler
 
 target_link_libraries(vmap-assembler
     PUBLIC
-        loadlib
+        loadlib_cata
         vmap2
 )
 
@@ -206,7 +210,7 @@ target_include_directories(mmap-extractor
 
 target_link_libraries(mmap-extractor
     PUBLIC
-        loadlib
+        loadlib_cata
         vmap2
         shared
         RecastNavigation::Recast

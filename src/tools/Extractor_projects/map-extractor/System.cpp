@@ -31,10 +31,10 @@
 
 #include "dbcfile.h"
 // The following is a temp fix until the extractor is merged with the unified extractor
-#include "../loadlib/sl/adt.h"
+#include "../loadlib/adt.h"
 //#include "sl/adt.h"
 // The following is a temp fix until the extractor is merged with the unified extractor
-#include "../loadlib/sl/wdt.h"
+#include "../loadlib/wdt.h"
 //#include "sl/wdt.h"
 #include "../shared/ExtractorCommon.h"
 #ifndef WIN32

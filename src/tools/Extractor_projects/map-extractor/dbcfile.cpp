@@ -24,7 +24,7 @@
 
 #include "dbcfile.h"
 // The following is a temp fix until the extractor is merged with the unified extractor
-#include "../loadlib/sl/loadlib.h"
+#include "../loadlib/loadlib.h"
 
 #include <cstdio>
 

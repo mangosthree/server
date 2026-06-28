@@ -357,13 +357,13 @@ float Player::GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const
  */
 float Player::OCTRegenMPPerSpirit()
 {
-    // Only healers have regen bonus from spirit. Others regenerate by combat regen.
-    uint32 rolesMask = GetTalentTreeRolesMask(m_talentsPrimaryTree[m_activeSpec]);
-    if ((rolesMask & TALENT_ROLE_HEALER) == 0)
-    {
-        return 0.0f;
-    }
-
+    // Cata 4.3.4: every mana-using spec regenerates from Spirit out of combat
+    // (the 15595 client shows "mana regen from spirit" for all mana specs, no
+    // role gate). The healer-only difference is the IN-COMBAT fraction, handled
+    // by Meditation (SPELL_AURA_MOD_MANA_REGEN_INTERRUPT) in UpdateManaRegen --
+    // a non-healer has modManaRegenInterrupt 0, so spirit regen is already
+    // zeroed while casting. Gating it here too (a MoP behaviour) wrongly removed
+    // non-healers' out-of-combat spirit regen.
     uint32 level = getLevel();
     uint32 pclass = getClass();
 

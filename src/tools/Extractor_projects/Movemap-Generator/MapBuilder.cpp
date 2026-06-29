@@ -850,7 +850,7 @@ namespace MMAP
 
             // file output
             char fileName[255];
-            sprintf(fileName, "mmaps/%04u%02i%02i.mmtile", mapID, tileY, tileX);
+            sprintf(fileName, "mmaps/%04u%02i%02i.mmtile", mapID, tileX, tileY);
             FILE* file = fopen(fileName, "wb");
             if (!file)
             {
@@ -1040,7 +1040,7 @@ namespace MMAP
     bool MapBuilder::shouldSkipTile(uint32 mapID, uint32 tileX, uint32 tileY)
     {
         char fileName[255];
-        sprintf(fileName, "mmaps/%04u%02i%02i.mmtile", mapID, tileY, tileX);
+        sprintf(fileName, "mmaps/%04u%02i%02i.mmtile", mapID, tileX, tileY);
         FILE* file = fopen(fileName, "rb");
         if (!file)
         {

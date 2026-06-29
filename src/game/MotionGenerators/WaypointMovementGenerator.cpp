@@ -366,7 +366,11 @@ void WaypointMovementGenerator<Creature>::BuildSmoothPath(Creature& creature, Wa
     ClearActiveSegment();
     pathPoints.clear();
 
-    if (!IsSmoothingEnabled())
+    // Skip the (up to WAYPOINT_SMOOTHING_MAX_LOOKAHEAD) smoothing navmesh queries when
+    // no player is on the map to see the result: leaving pathPoints empty makes StartMove
+    // fall back to plain per-waypoint MoveTo. Under LivingWorld this stops thousands of
+    // player-less creatures from saturating the single per-continent update thread.
+    if (!IsSmoothingEnabled() || !creature.GetMap()->HavePlayers())
     {
         return;
     }
@@ -534,7 +538,11 @@ void WaypointMovementGenerator<Creature>::StartMove(Creature& creature)
     }
     else
     {
-        init.MoveTo(nextNode.x, nextNode.y, nextNode.z, true);
+        // generatePath only when a player can observe path quality; on a player-less
+        // continent a straight 2-point segment between adjacent on-mesh waypoints avoids
+        // the last per-leg navmesh query (and isn't broadcast to anyone either - see
+        // Map::MessageBroadcast). Players present -> full navmesh-hugging movement.
+        init.MoveTo(nextNode.x, nextNode.y, nextNode.z, creature.GetMap()->HavePlayers());
     }
 
     if (finalNode->orientation != 100 && finalNode->delay != 0)

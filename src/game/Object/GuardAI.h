@@ -48,6 +48,7 @@ class GuardAI : public CreatureAI
         void EnterEvadeMode() override;
         void JustDied(Unit*) override;
         bool IsVisible(Unit*) const override;
+        bool CanIgnoreForRelocationNotify(Unit*) const override;
 
         void UpdateAI(const uint32) override;
         static int Permissible(const Creature*);

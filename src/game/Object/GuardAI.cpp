@@ -174,6 +174,20 @@ bool GuardAI::IsVisible(Unit* pl) const
 }
 
 /**
+ * @brief Relocation-notify fast-reject for guards.
+ *
+ * Mirrors the gates inside MoveInLineOfSight(): a guard acts only on a targetable unit that is
+ * hostile to players OR to the guard. The IsHostileToPlayers() term is mandatory -- dropping it
+ * would stop a guard reacting to enemy-faction units it is not yet personally hostile to. When the
+ * candidate cannot satisfy these, the worker can skip the expensive IsVisible()/detection sweep.
+ */
+bool GuardAI::CanIgnoreForRelocationNotify(Unit* pWho) const
+{
+    return !pWho->IsTargetableForAttack() ||
+           (!pWho->IsHostileToPlayers() && !m_creature->IsHostileTo(pWho));
+}
+
+/**
  * @brief Starts attacking a target unit.
  *
  * Adds threat, flags both units in combat, and begins movement toward the target.

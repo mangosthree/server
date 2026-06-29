@@ -188,6 +188,19 @@ bool AggressorAI::IsVisible(Unit* pl) const
 }
 
 /**
+ * @brief Relocation-notify fast-reject for aggressive creatures.
+ *
+ * Mirrors the gates inside MoveInLineOfSight(): it acts only on a hostile, targetable unit. When
+ * neither can hold, MoveInLineOfSight() would be a no-op, so the relocation worker can skip the
+ * expensive IsVisible()/detection sweep for this candidate. Z/range/LoS gate the action (not the
+ * interest) and are deliberately left out, so the reject is behaviour-neutral.
+ */
+bool AggressorAI::CanIgnoreForRelocationNotify(Unit* pWho) const
+{
+    return !pWho->IsTargetableForAttack() || !m_creature->IsHostileTo(pWho);
+}
+
+/**
  * @brief Starts attacking a target unit.
  *
  * Adds initial threat, flags both units in combat, and starts movement toward the target.

@@ -69,7 +69,9 @@ inline void PlayerCreatureRelocationWorker(Player* pl, Creature* c)
     // Creature AI reaction
     if (!c->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (c->AI() && c->AI()->IsVisible(pl) && !c->IsInEvadeMode())
+        // Cheap evade + fast-reject checks run BEFORE the expensive IsVisible()/detection call so
+        // non-aggroable candidates are skipped early.
+        if (c->AI() && !c->IsInEvadeMode() && !c->AI()->CanIgnoreForRelocationNotify(pl) && c->AI()->IsVisible(pl))
         {
             c->AI()->MoveInLineOfSight(pl);
         }
@@ -80,7 +82,7 @@ inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
 {
     if (!c1->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (c1->AI() && c1->AI()->IsVisible(c2) && !c1->IsInEvadeMode())
+        if (c1->AI() && !c1->IsInEvadeMode() && !c1->AI()->CanIgnoreForRelocationNotify(c2) && c1->AI()->IsVisible(c2))
         {
             c1->AI()->MoveInLineOfSight(c2);
         }
@@ -88,7 +90,7 @@ inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
 
     if (!c2->hasUnitState(UNIT_STAT_LOST_CONTROL))
     {
-        if (c2->AI() && c2->AI()->IsVisible(c1) && !c2->IsInEvadeMode())
+        if (c2->AI() && !c2->IsInEvadeMode() && !c2->AI()->CanIgnoreForRelocationNotify(c1) && c2->AI()->IsVisible(c1))
         {
             c2->AI()->MoveInLineOfSight(c1);
         }

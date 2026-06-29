@@ -47,6 +47,7 @@ class AggressorAI : public CreatureAI
         void AttackStart(Unit*) override;
         void EnterEvadeMode() override;
         bool IsVisible(Unit*) const override;
+        bool CanIgnoreForRelocationNotify(Unit*) const override;
 
         void UpdateAI(const uint32) override;
         static int Permissible(const Creature*);

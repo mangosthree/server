@@ -139,6 +139,15 @@ class CreatureAI
         virtual void MoveInLineOfSight(Unit* /*pWho*/) {}
 
         /**
+         * Relocation-notify fast-reject. Return true when this AI provably cannot act on pWho in
+         * MoveInLineOfSight, letting the relocation worker skip the expensive IsVisible()/detection
+         * call entirely. Default false = never skip (no behaviour change). Overridden only by core
+         * aggro AIs whose MoveInLineOfSight no-op conditions are known.
+         * @param pWho Unit* being considered as a relocation-notify candidate
+         */
+        virtual bool CanIgnoreForRelocationNotify(Unit* /*pWho*/) const { return false; }
+
+        /**
          * Called for reaction at enter to combat if not in combat yet
          * @param pEnemy Unit* of whom the Creature enters combat with, can be NULL
          */

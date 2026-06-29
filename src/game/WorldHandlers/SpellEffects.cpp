@@ -276,7 +276,7 @@ void Spell::EffectEmpty(SpellEffectEntry const* /*effect*/)
  */
 void Spell::EffectNULL(SpellEffectEntry const* /*effect*/)
 {
-    DEBUG_LOG("WORLD: Spell Effect DUMMY");
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: Spell Effect DUMMY");
 }
 
 /**

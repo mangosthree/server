@@ -1210,6 +1210,12 @@ Map::Remove(T* obj, bool remove)
             obj->SaveRespawnTime();
         }
 
+        // The object is being destroyed now. Purge any stale entry from the deferred-remove
+        // queue: a cascade delete reached from CleanupsBeforeDelete() above (e.g. an owner
+        // freeing an owned pet / DynamicObject that was independently queued) would otherwise
+        // leave a dangling pointer in i_objectsToRemove and crash RemoveAllObjectsInRemoveList
+        // during grid unload / shutdown. An object being deleted must never remain queued.
+        i_objectsToRemove.erase(obj);
         // Note: In case resurrectable corpse and pet its removed from global lists in own destructor
         delete obj;
     }

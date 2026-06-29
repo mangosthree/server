@@ -24,6 +24,8 @@
 
 #include "../recastnavigation/Detour/Include/DetourCommon.h"
 
+#include <cmath>
+
 #include "MoveMap.h"
 #include "GridMap.h"
 #include "Creature.h"
@@ -670,7 +672,17 @@ void PathFinder::BuildShortcut()
     // slopes when no navmesh is available.
     const float segmentLength = 5.0f;
     float dist = sqrt(dist3DSqr(start, end));
-    uint32 segments = std::max(1u, uint32(dist / segmentLength));
+    // Clamp the subdivision count. A degenerate destination (e.g. a failed
+    // navmesh poly search that leaves a far sentinel point in the end
+    // position) makes 'dist' astronomically large; an unbounded segment count
+    // then resizes m_pathPoints to billions of entries (multiple GB) and the
+    // fill loop below stalls the map-update thread. The rest of the path
+    // builder caps point paths at MAX_POINT_PATH_LENGTH - do the same here.
+    uint32 segments = 1u;
+    if (std::isfinite(dist) && dist > segmentLength)
+    {
+        segments = std::min<uint32>(uint32(dist / segmentLength), MAX_POINT_PATH_LENGTH);
+    }
     uint32 size = segments + 1;
 
     m_pathPoints.resize(size);

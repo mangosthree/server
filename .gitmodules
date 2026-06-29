@@ -4,3 +4,6 @@
 [submodule "src/modules/Eluna"]
 	path = src/modules/Eluna
 	url = https://github.com/MangosServer/Eluna
+[submodule "dep"]
+	path = dep
+	url = https://github.com/mangos/mangosDeps

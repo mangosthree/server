@@ -26,6 +26,10 @@ set(SHARED_SRCS
     shared/ExtractorCommon.h
 )
 
+# Cata-specific ADT/WDT/MPQ reader (formerly dep/loadlib/sl); extractor-only,
+# kept here so dep/ can be the shared mangosDeps submodule.
+add_subdirectory(loadlib)
+
 #=======================================================#
 #map-extractor
 #=======================================================#

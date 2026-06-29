@@ -22,14 +22,14 @@
 # client-format parsing and so lives with the extractors (not in the shared
 # mangosDeps dep submodule, whose generic loadlib does not read Cata).
 
-project(LOADLIB_CATA)
+project(LOADLIB)
 
-add_library(loadlib_cata STATIC
+add_library(loadlib STATIC
   loadlib.cpp
   adt.cpp
   wdt.cpp
   mpq.cpp)
 
-target_include_directories(loadlib_cata PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(loadlib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(loadlib_cata PUBLIC stormlib)
+target_link_libraries(loadlib PUBLIC stormlib)

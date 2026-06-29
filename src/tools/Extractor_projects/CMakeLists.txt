@@ -48,7 +48,7 @@ target_include_directories(map-extractor
 
 target_link_libraries(map-extractor
     PUBLIC
-    loadlib_cata
+    loadlib
 )
 
 install(
@@ -132,7 +132,7 @@ target_include_directories(vmap-extractor
 
 target_link_libraries(vmap-extractor
     PUBLIC
-        loadlib_cata
+        loadlib
         vmap2
 )
 
@@ -166,7 +166,7 @@ target_include_directories(vmap-assembler
 
 target_link_libraries(vmap-assembler
     PUBLIC
-        loadlib_cata
+        loadlib
         vmap2
 )
 
@@ -210,7 +210,7 @@ target_include_directories(mmap-extractor
 
 target_link_libraries(mmap-extractor
     PUBLIC
-        loadlib_cata
+        loadlib
         vmap2
         shared
         RecastNavigation::Recast

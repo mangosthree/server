@@ -267,6 +267,12 @@ template<class T>
  */
 void ObjectUpdater::Visit(GridRefManager<T>& m)
 {
+    // NOTE: this generic overload does NOT cache-next, so it is only safe for T whose
+    // Update() never synchronously relocates the iterated object out of its cell list.
+    // It is explicitly instantiated for GameObject/DynamicObject only (see bottom of this
+    // file); Creature uses the dedicated cache-next overload in GridNotifiersImpl.h because
+    // creature spline movement can relocate mid-iteration. Do not instantiate this for a
+    // type whose Update() can call Map::CreatureRelocation / RemoveFromGrid.
     for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
         WorldObject::UpdateHelper helper(iter->getSource());

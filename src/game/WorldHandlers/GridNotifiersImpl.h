@@ -47,9 +47,19 @@ inline void MaNGOS::VisibleNotifier::Visit(GridRefManager<T>& m)
 
 inline void MaNGOS::ObjectUpdater::Visit(CreatureMapType& m)
 {
-    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    // Advance the iterator BEFORE calling Update(). A creature's Update can relocate it
+    // across a cell boundary (UpdateSplineMovement -> Map::CreatureRelocation ->
+    // RemoveFromGrid/AddToGrid), which unlinks this node from the cell list being iterated
+    // and re-links it (head-insert) into the destination cell's list. With a post-increment
+    // loop, ++iter would then follow the moved node's NEW next pointer into the wrong list
+    // and never reach end() — re-visiting creatures forever (observed: 444M creature updates
+    // in one tick from a dense waypoint group shuttling between two adjacent cells, pegging
+    // the map-update thread at ~98%). Save-next mirrors the safe pattern in ObjectGridLoader.cpp.
+    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); )
     {
-        WorldObject::UpdateHelper helper(iter->getSource());
+        Creature* c = iter->getSource();
+        ++iter;                       // capture successor before Update may relocate c
+        WorldObject::UpdateHelper helper(c);
         helper.Update(i_timeDiff);
     }
 }

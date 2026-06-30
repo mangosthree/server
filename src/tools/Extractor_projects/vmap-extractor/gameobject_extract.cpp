@@ -5,6 +5,20 @@
 
 #include <algorithm>
 #include <stdio.h>
+#include <condition_variable>
+#include <mutex>
+#include <set>
+
+// Dedup model extraction across parallel tile workers. The old
+// FileExists()-then-write check is a TOCTOU race once tiles run concurrently.
+// One worker extracts a given model; the rest must WAIT until its file is on
+// disk, because the placement written straight after (ModelInstance) opens that
+// file and silently drops the spawn if it is missing. A plain "claimed" flag is
+// not enough -- the file has to exist before any referencing worker proceeds.
+static std::mutex s_modelExtractMutex;
+static std::condition_variable s_modelExtractCv;
+static std::set<std::string> s_modelsInProgress;
+static std::set<std::string> s_modelsDone;
 
 bool ExtractSingleModel(std::string& origPath, std::string& fixedName, StringSet& failedPaths)
 {
@@ -26,18 +40,39 @@ bool ExtractSingleModel(std::string& origPath, std::string& fixedName, StringSet
     output += "/";
     output += fixedName;
 
-    if (FileExists(output.c_str()))
     {
-        return true;
+        std::unique_lock<std::mutex> lock(s_modelExtractMutex);
+        if (s_modelsDone.count(fixedName))
+        {
+            return true;
+        }
+        if (s_modelsInProgress.count(fixedName))
+        {
+            // Another worker is extracting this model; block until its file is
+            // written so the placement that follows can read it.
+            s_modelExtractCv.wait(lock, [&] { return s_modelsDone.count(fixedName) != 0; });
+            return true;
+        }
+        if (FileExists(output.c_str()))
+        {
+            s_modelsDone.insert(fixedName);
+            return true;
+        }
+        // Claim it, then extract outside the lock so distinct models convert in
+        // parallel.
+        s_modelsInProgress.insert(fixedName);
     }
 
     Model mdl(origPath);                                    // Possible changed fname
-    if (!mdl.open(failedPaths))
-    {
-        return false;
-    }
+    bool ok = mdl.open(failedPaths) && mdl.ConvertToVMAPModel(output.c_str());
 
-    return mdl.ConvertToVMAPModel(output.c_str());
+    {
+        std::lock_guard<std::mutex> lock(s_modelExtractMutex);
+        s_modelsInProgress.erase(fixedName);
+        s_modelsDone.insert(fixedName);
+    }
+    s_modelExtractCv.notify_all();
+    return ok;
 }
 
 extern HANDLE LocaleMpq;

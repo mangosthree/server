@@ -33,6 +33,7 @@
 #include <cassert>
 #include <map>
 #include <fstream>
+#include <mutex>
 #undef min
 #undef max
 #include "mpqfile.h"
@@ -660,9 +661,15 @@ WMOInstance::WMOInstance(MPQFile& f, const char* WmoInstName, uint32 mapID, uint
 /// uint32 range, so they cannot collide with client MODF/MDDF unique ids.
 static uint32 GenerateDoodadUniqueId(uint32 wmoUniqueId, uint32 doodadIndex)
 {
+    static std::mutex s_doodadIdMutex;
     static std::map<std::pair<uint32, uint32>, uint32> doodadIdMap;
     static uint32 nextId = 0x80000000;
 
+    // Guards the shared map + counter against concurrent tile workers. The id a
+    // given (wmo, doodad) gets still depends on first-seen order, so threaded
+    // runs assign different (but equally valid, unique) ids than serial runs --
+    // the values are opaque spawn tags, so output stays functionally correct.
+    std::lock_guard<std::mutex> lock(s_doodadIdMutex);
     uint32& uid = doodadIdMap[std::make_pair(wmoUniqueId, doodadIndex)];
     if (uid == 0)
     {

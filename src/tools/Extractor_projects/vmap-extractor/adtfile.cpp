@@ -123,7 +123,13 @@ bool ADTFile::init(uint32 map_num, uint32 tileX, uint32 tileY, StringSet& failed
 
     string AdtMapNumber = xMap + ' ' + yMap + ' ' + GetPlainName((char*)AdtFilename.c_str());
 
-    std::string dirname = std::string(szWorkDirWmo) + "/dir_bin";
+    // Write this tile's placement records to a per-tile temp file rather than
+    // the shared dir_bin. A placement is several fwrites, so concurrent tiles
+    // sharing one handle would interleave (corrupt) records. ParsMapFiles
+    // concatenates these temps into dir_bin in tile order afterwards.
+    char tileSuffix[32];
+    sprintf(tileSuffix, "/dir_bin.%u_%u", tileX, tileY);
+    std::string dirname = std::string(szWorkDirWmo) + tileSuffix;
     FILE* dirfile;
     dirfile = fopen(dirname.c_str(), "ab");
     if (!dirfile)

@@ -18,7 +18,6 @@ namely the tools named:
 
 * `map-extractor`
 * `vmap-extractor`
-* `vmap-assembler`
 * `mmap-generator`
 
 Then copy `ExtractResources.sh`, `MoveMapGen.sh` and `offmesh.txt` into the client

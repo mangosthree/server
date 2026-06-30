@@ -24,39 +24,27 @@
 
 #include "TileAssembler.h"
 #include <string>
-#include <iostream>
 
-
-//=======================================================
-int main(int argc, char* argv[])
+/**
+* Assemble the raw, per-tile vmap data into the final .vmtree/.vmtile set.
+*
+* \arg \c src
+*   Directory holding the raw data produced by the extraction pass.
+* \arg \c dest
+*   Output directory for the assembled vmaps.
+* \return
+*   true on success; false if TileAssembler reported errors.
+*/
+bool AssembleVMAP(std::string src, std::string dest)
 {
-    if (argc != 3)
-    {
-        std::cout << "usage: " << argv[0] << " <raw data dir> <vmap dest dir>" << std::endl;
-        return 1;
-    }
-
-    std::string src = argv[1];
-    std::string dest = argv[2];
-
-    std::cout << "using " << src << " as source directory and writing output to " << dest << std::endl;
-
-    std::cout << "Create TileAssembler " << std::endl;
-
+    bool success = true;
     VMAP::TileAssembler* ta = new VMAP::TileAssembler(src, dest);
-
-    std::cout << "Convert to World2 " << std::endl;
 
     if (!ta->convertWorld2())
     {
-        std::cout << "exit with errors" << std::endl;
-        delete ta;
-        return 1;
+        success = false;
     }
 
-    std::cout << "THE END!!! " << std::endl;
-
     delete ta;
-    std::cout << "Ok, all done" << std::endl;
-    return 0;
+    return success;
 }

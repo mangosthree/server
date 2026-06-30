@@ -277,7 +277,11 @@ bool WMOGroup::open()
         else if (!strcmp(fourcc, "MLIQ"))
         {
             liquflags |= 1;
-            hlq = new WMOLiquidHeader;
+            // Value-initialize so the 2 padding bytes after `type` are zeroed:
+            // the read below fills only the 30 (0x1E) data bytes, but the whole
+            // struct (sizeof = 32) is later written out, so stale padding made
+            // the extracted .wmo bytes non-deterministic run-to-run.
+            hlq = new WMOLiquidHeader();
             f.read(hlq, 0x1E);
             LiquEx_size = sizeof(WMOLiquidVert) * hlq->xverts * hlq->yverts;
             int nLiquBytes = hlq->xtiles * hlq->ytiles;

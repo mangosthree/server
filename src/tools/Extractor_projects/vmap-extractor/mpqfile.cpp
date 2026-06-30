@@ -1,7 +1,15 @@
 #include "mpqfile.h"
 #include <deque>
 #include <cstdio>
+#include <mutex>
 #include "StormLib.h"
+
+// StormLib mutates a shared per-archive file position on every read with no
+// internal locking, so concurrent reads from one archive handle race (and
+// return wrong data on Linux). Every MPQ read in this tool flows through this
+// constructor, so one mutex here serialises all archive I/O; the parsing and
+// geometry conversion that follow run fully in parallel.
+std::mutex g_mpqReadMutex;
 
 MPQFile::MPQFile(HANDLE mpq, const char* filename):
     eof(false),
@@ -9,6 +17,7 @@ MPQFile::MPQFile(HANDLE mpq, const char* filename):
     pointer(0),
     size(0)
 {
+    std::lock_guard<std::mutex> mpqLock(g_mpqReadMutex);
     HANDLE file;
     if (!SFileOpenFileEx(mpq, filename, SFILE_OPEN_FROM_MPQ, &file))
     {

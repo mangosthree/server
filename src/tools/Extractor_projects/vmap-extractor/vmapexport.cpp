@@ -27,6 +27,11 @@
 #include <vector>
 #include <list>
 #include <errno.h>
+#include <atomic>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <utility>
 
 #if defined WIN32
 #include <Windows.h>
@@ -104,6 +109,7 @@ char output_path[128] = ".";
 char input_path[1024] = ".";
 bool preciseVectorData = true;
 uint32 CONF_max_build = 0;
+uint32 CONF_threads = 0;            ///< Worker threads for tile extraction; 0 = auto-detect cores, 1 = serial.
 
 // Constants
 
@@ -462,6 +468,7 @@ void Usage(char* prg)
     printf("   -l : large size, ~500MB more vmap data. (might contain more details)\n");
     printf("   -d <path>: Path to the vector data source folder.\n");
     printf("   -b : target build (default %u)", CONF_TargetBuild);
+    printf("   -t <#>: worker threads for tile extraction. 0 = auto-detect cores (default), 1 = serial.\n");
     printf("   -? : This message.\n");
 }
 
@@ -483,22 +490,102 @@ void ParsMapFiles()
         WDTFile WDT(fn, map_ids[i].name);
         if (WDT.init(id, map_ids[i].id))
         {
-            printf(" Processing Map %u (%s)\n[", map_ids[i].id, map_ids[i].name);
+            printf(" Processing Map %u (%s)\n", map_ids[i].id, map_ids[i].name);
+
+            // Queue every tile slot; GetMap()/init() fast-fail the absent ones.
+            std::queue<std::pair<int, int> > tileQueue;
             for (int x = 0; x < 64; ++x)
             {
                 for (int y = 0; y < 64; ++y)
                 {
+                    tileQueue.push(std::make_pair(x, y));
+                }
+            }
+
+            uint32 nThreads = CONF_threads ? CONF_threads : std::thread::hardware_concurrency();
+            if (nThreads < 1)
+            {
+                nThreads = 1;
+            }
+
+            uint32 mapId = map_ids[i].id;
+            std::mutex queueMutex;
+            std::mutex failedMutex;
+            auto worker = [&]()
+            {
+                StringSet localFailed;
+                while (true)
+                {
+                    int x, y;
+                    {
+                        std::lock_guard<std::mutex> lock(queueMutex);
+                        if (tileQueue.empty())
+                        {
+                            break;
+                        }
+                        x = tileQueue.front().first;
+                        y = tileQueue.front().second;
+                        tileQueue.pop();
+                    }
                     if (ADTFile* ADT = WDT.GetMap(x, y))
                     {
-                        //sprintf(id_filename,"%02u %02u %03u",x,y,map_ids[i].id);//!!!!!!!!!
-                        ADT->init(map_ids[i].id, x, y, failedPaths);
+                        ADT->init(mapId, x, y, localFailed);
                         delete ADT;
                     }
                 }
-                printf("#");
-                fflush(stdout);
+                std::lock_guard<std::mutex> lock(failedMutex);
+                failedPaths.insert(localFailed.begin(), localFailed.end());
+            };
+
+            if (nThreads <= 1)
+            {
+                // Serial path: one worker on this thread.
+                worker();
             }
-            printf("]\n");
+            else
+            {
+                std::vector<std::thread> workers;
+                workers.reserve(nThreads);
+                for (uint32 t = 0; t < nThreads; ++t)
+                {
+                    workers.emplace_back(worker);
+                }
+                for (std::thread& w : workers)
+                {
+                    w.join();
+                }
+            }
+
+            // Concatenate the per-tile temp files into dir_bin in tile order,
+            // so dir_bin is assembled in the same order no matter which worker
+            // wrote which tile, then remove the temps.
+            std::string dirBin = std::string(szWorkDirWmo) + "/dir_bin";
+            if (FILE* out = fopen(dirBin.c_str(), "ab"))
+            {
+                char copyBuf[8192];
+                for (int x = 0; x < 64; ++x)
+                {
+                    for (int y = 0; y < 64; ++y)
+                    {
+                        char tileSuffix[32];
+                        sprintf(tileSuffix, "/dir_bin.%u_%u", x, y);
+                        std::string tilePath = std::string(szWorkDirWmo) + tileSuffix;
+                        FILE* in = fopen(tilePath.c_str(), "rb");
+                        if (!in)
+                        {
+                            continue;
+                        }
+                        size_t n;
+                        while ((n = fread(copyBuf, 1, sizeof(copyBuf), in)) > 0)
+                        {
+                            fwrite(copyBuf, 1, n, out);
+                        }
+                        fclose(in);
+                        remove(tilePath.c_str());
+                    }
+                }
+                fclose(out);
+            }
         }
     }
 
@@ -730,6 +817,18 @@ bool processArgv(int argc, char** argv)
             if (i + 1 < argc)                            // all ok
             {
                 CONF_TargetBuild = atoi(argv[i++ + 1]);
+            }
+        }
+        else if (strcmp("-t", argv[i]) == 0)
+        {
+            if (i + 1 < argc)                            // all ok
+            {
+                CONF_threads = atoi(argv[i + 1]);
+                ++i;
+            }
+            else
+            {
+                result = false;
             }
         }
         else

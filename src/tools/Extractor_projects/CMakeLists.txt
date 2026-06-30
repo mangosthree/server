@@ -105,6 +105,7 @@ endif()
 add_executable(vmap-extractor
     vmap-extractor/adtfile.cpp
     vmap-extractor/adtfile.h
+    vmap-extractor/assembler.cpp
     vmap-extractor/dbcfile.cpp
     vmap-extractor/dbcfile.h
     vmap-extractor/gameobject_extract.cpp
@@ -144,40 +145,6 @@ install(
 if(WIN32 AND MSVC)
     install(
         FILES $<TARGET_PDB_FILE:vmap-extractor>
-        DESTINATION ${BIN_DIR}/${TOOLS_DIR}
-        OPTIONAL
-)
-endif()
-
-#=======================================================#
-#vmap-assembler
-#=======================================================#
-add_executable(vmap-assembler
-    vmap-assembler/vmap_assembler.cpp
-    ${SHARED_SRCS}
-    $<$<BOOL:${WIN32}>:vmap-assembler/vmap-assembler.rc>
-)
-
-target_include_directories(vmap-assembler
-    PUBLIC
-        shared
-        vmap-assembler
-)
-
-target_link_libraries(vmap-assembler
-    PUBLIC
-        loadlib
-        vmap2
-)
-
-install(
-    TARGETS vmap-assembler
-    DESTINATION ${BIN_DIR}/${TOOLS_DIR}
-)
-
-if(WIN32 AND MSVC)
-    install(
-        FILES $<TARGET_PDB_FILE:vmap-assembler>
         DESTINATION ${BIN_DIR}/${TOOLS_DIR}
         OPTIONAL
 )

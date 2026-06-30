@@ -887,7 +887,7 @@ bool GridMap::ExistVMap(uint32 mapid, int gx, int gy)
             if (!exists)
             {
                 std::string name = vmgr->getDirFileName(mapid, gx, gy);
-                sLog.outError("VMap file '%s' is missing or point to wrong version vmap file, redo vmaps with latest vmap_assembler.exe program", (sWorld.GetDataPath() + "vmaps/" + name).c_str());
+                sLog.outError("VMap file '%s' is missing or point to wrong version vmap file, redo vmaps with latest vmap-extractor program", (sWorld.GetDataPath() + "vmaps/" + name).c_str());
                 return false;
             }
         }

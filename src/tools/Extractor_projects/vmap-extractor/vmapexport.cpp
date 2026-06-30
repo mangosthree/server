@@ -114,6 +114,9 @@ const char* szRawVMAPMagic = "VMAPc06";
 /// WMO basename (as stored under szWorkDirWmo) -> parsed interior doodad data.
 std::map<std::string, WMODoodadData> g_WmoDoodads;
 
+/// Assemble the extracted raw tile data into the final vmaps (assembler.cpp).
+bool AssembleVMAP(std::string src, std::string dest);
+
 // Local testing functions
 
 bool FileExists(const char* file)
@@ -878,6 +881,17 @@ int main(int argc, char** argv)
     {
         printf("No errors.\n");
     }
+
+    // Assemble the raw tiles into the final vmaps in the same run (the former
+    // standalone vmap-assembler is now folded into vmap-extractor).
+    printf("Assembling vmaps from %s into %s ...\n", szWorkDirWmo, outDir.c_str());
+    if (!AssembleVMAP(std::string(szWorkDirWmo), outDir))
+    {
+        printf("ERROR: VMAP assembling for %s NOT completed.\n", szRawVMAPMagic);
+        delete [] LiqType;
+        return 1;
+    }
+    printf("VMAP assembling for %s complete.\n", szRawVMAPMagic);
 
     delete [] LiqType;
     return 0;

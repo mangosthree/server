@@ -28,6 +28,11 @@
 #include <deque>
 #include <map>
 #include <set>
+#include <atomic>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <vector>
 
 #include "dbcfile.h"
 // The following is a temp fix until the extractor is merged with the unified extractor
@@ -89,6 +94,13 @@ char output_path[128] = ".";        /**< TODO */
 char input_path[128] = ".";         /**< TODO */
 uint32 maxAreaId = 0;               /**< TODO */
 uint32 CONF_max_build = 0;
+uint32 CONF_threads = 0;            ///< Worker threads for tile conversion; 0 = auto-detect cores, 1 = serial.
+
+/// Serializes MPQ archive reads. StormLib mutates a shared per-archive file
+/// position with no internal locking, so concurrent reads from one handle
+/// race (unsafe on Linux). Held only around the archive read in ConvertADT;
+/// the parse/pack/write that follows runs fully parallel.
+std::mutex g_mpqReadMutex;
 /**
  * @brief Data types which can be extracted
  *
@@ -142,6 +154,8 @@ void Usage(char* prg)
     printf("                         size, but also accuracy\n");
     printf("   -e, --extract #       extract specified client data. 1 = maps, 2 = DBCs,\n");
     printf("                         3 = both. Defaults to extracting both.\n");
+    printf("   -t, --threads #       worker threads for map conversion. 0 = auto-detect\n");
+    printf("                         cores (default), 1 = serial.\n");
     printf("\n");
     printf(" Example:\n");
     printf(" - use input path and do not flatten maps:\n");
@@ -225,6 +239,16 @@ void HandleArgs(int argc, char* arg[])
                     {
                         Usage(arg[0]);
                     }
+                }
+                else
+                {
+                    Usage(arg[0]);
+                }
+                break;
+            case 't':
+                if (c + 1 < argc)                           // all ok
+                {
+                    CONF_threads = atoi(arg[(c++) + 1]);
                 }
                 else
                 {
@@ -573,19 +597,23 @@ float selectUInt16StepStore(float maxDiff)
     return 65535 / maxDiff;
 }
 
-uint16 area_flags[ADT_CELLS_PER_GRID][ADT_CELLS_PER_GRID];      /**< Temporary grid data store */
+// Per-tile working buffers. thread_local so each worker thread owns a private
+// copy: with one thread this is identical to the former plain globals, and it
+// lets ConvertADT run on several tiles concurrently without trampling shared
+// scratch. ConvertADT fully (re)writes/resets these per tile before reading.
+thread_local uint16 area_flags[ADT_CELLS_PER_GRID][ADT_CELLS_PER_GRID];      /**< Temporary grid data store */
 
-float V8[ADT_GRID_SIZE][ADT_GRID_SIZE];                         /**< TODO */
-float V9[ADT_GRID_SIZE + 1][ADT_GRID_SIZE + 1];                 /**< TODO */
-uint16 uint16_V8[ADT_GRID_SIZE][ADT_GRID_SIZE];                 /**< TODO */
-uint16 uint16_V9[ADT_GRID_SIZE + 1][ADT_GRID_SIZE + 1];         /**< TODO */
-uint8  uint8_V8[ADT_GRID_SIZE][ADT_GRID_SIZE];                  /**< TODO */
-uint8  uint8_V9[ADT_GRID_SIZE + 1][ADT_GRID_SIZE + 1];          /**< TODO */
+thread_local float V8[ADT_GRID_SIZE][ADT_GRID_SIZE];                         /**< TODO */
+thread_local float V9[ADT_GRID_SIZE + 1][ADT_GRID_SIZE + 1];                 /**< TODO */
+thread_local uint16 uint16_V8[ADT_GRID_SIZE][ADT_GRID_SIZE];                 /**< TODO */
+thread_local uint16 uint16_V9[ADT_GRID_SIZE + 1][ADT_GRID_SIZE + 1];         /**< TODO */
+thread_local uint8  uint8_V8[ADT_GRID_SIZE][ADT_GRID_SIZE];                  /**< TODO */
+thread_local uint8  uint8_V9[ADT_GRID_SIZE + 1][ADT_GRID_SIZE + 1];          /**< TODO */
 
-uint16 liquid_entry[ADT_CELLS_PER_GRID][ADT_CELLS_PER_GRID];    /**< TODO */
-uint8 liquid_flags[ADT_CELLS_PER_GRID][ADT_CELLS_PER_GRID];     /**< TODO */
-bool  liquid_show[ADT_GRID_SIZE][ADT_GRID_SIZE];                /**< TODO */
-float liquid_height[ADT_GRID_SIZE + 1][ADT_GRID_SIZE + 1];      /**< TODO */
+thread_local uint16 liquid_entry[ADT_CELLS_PER_GRID][ADT_CELLS_PER_GRID];    /**< TODO */
+thread_local uint8 liquid_flags[ADT_CELLS_PER_GRID][ADT_CELLS_PER_GRID];     /**< TODO */
+thread_local bool  liquid_show[ADT_GRID_SIZE][ADT_GRID_SIZE];                /**< TODO */
+thread_local float liquid_height[ADT_GRID_SIZE + 1][ADT_GRID_SIZE + 1];      /**< TODO */
 
 /**
  * @brief
@@ -600,15 +628,34 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
 {
     ADT_file adt;
 
-    if (!adt.loadFile(filename, true))
     {
-        printf("Error: Failed to load ADT file: %s\n", filename);
-        return false;
+        // loadFile reads the whole ADT into memory; everything after this is
+        // in-memory work, so the MPQ lock is held only for the read itself.
+        std::lock_guard<std::mutex> mpqLock(g_mpqReadMutex);
+        if (!adt.loadFile(filename, true))
+        {
+            printf("Error: Failed to load ADT file: %s\n", filename);
+            return false;
+        }
     }
 
+    // Zero every per-tile scratch buffer up front so a tile's output can never
+    // inherit residual data from a previously processed tile. Cells a tile does
+    // not fully overwrite (e.g. liquid height outside the liquid bounds) are
+    // dead to the server (gated by the liquid flags), but they still land in the
+    // .map file -- leaving them stale made the bytes depend on tile order, which
+    // is non-deterministic once tiles are processed across threads.
+    memset(area_flags, 0, sizeof(area_flags));
+    memset(V8, 0, sizeof(V8));
+    memset(V9, 0, sizeof(V9));
+    memset(uint16_V8, 0, sizeof(uint16_V8));
+    memset(uint16_V9, 0, sizeof(uint16_V9));
+    memset(uint8_V8, 0, sizeof(uint8_V8));
+    memset(uint8_V9, 0, sizeof(uint8_V9));
     memset(liquid_show, 0, sizeof(liquid_show));
     memset(liquid_flags, 0, sizeof(liquid_flags));
     memset(liquid_entry, 0, sizeof(liquid_entry));
+    memset(liquid_height, 0, sizeof(liquid_height));
 
     // Prepare map header
     map_fileheader map;
@@ -1246,8 +1293,6 @@ bool ConvertADT(char* filename, char* filename2, uint32 build)
  */
 void ExtractMapsFromMpq(uint32 build, const int locale)
 {
-    char mpq_filename[1024];
-    char output_filename[1024];
     char mpq_map_name[1024];
 
     printf("\n Extracting maps...\n");
@@ -1268,8 +1313,8 @@ void ExtractMapsFromMpq(uint32 build, const int locale)
         printf("Created output directory: %s\n", path.c_str());
     }
 
-    uint32 success_count = 0;
-    uint32 failed_count = 0;
+    std::atomic<uint32> success_count{0};
+    std::atomic<uint32> failed_count{0};
 
     printf("\n Converting map files\n");
     for (uint32 z = 0; z < map_count; ++z)
@@ -1307,19 +1352,51 @@ void ExtractMapsFromMpq(uint32 build, const int locale)
         }
         printf("  WDT indicates %u ADT files exist for this map\n", adt_exist_in_wdt);
 
+        // Collect the existing tiles, then convert them across CONF_threads
+        // workers (0 = auto-detect cores). Each tile writes its own independent
+        // .map file, so the output is identical regardless of thread count or
+        // completion order.
+        std::queue<std::pair<uint32, uint32> > tileQueue;   // (tileX, tileY)
         for (uint32 y = 0; y < WDT_MAP_SIZE; ++y)
         {
             for (uint32 x = 0; x < WDT_MAP_SIZE; ++x)
             {
                 // Check bit 0 only: this is the ADT existence flag
-                if (!(wdt.main->adt_list[y][x].exist & 0x1))
+                if (wdt.main->adt_list[y][x].exist & 0x1)
                 {
-                    continue;
+                    tileQueue.push(std::make_pair(x, y));
                 }
-                ++adt_count;
-                sprintf(mpq_filename, "World\\Maps\\%s\\%s_%u_%u.adt", map_ids[z].name, map_ids[z].name, x, y);
-                sprintf(output_filename, "%s/maps/%04u%02u%02u.map", output_path, map_ids[z].id, y, x);
-                if (ConvertADT(mpq_filename, output_filename, build))
+            }
+        }
+        adt_count = static_cast<uint32>(tileQueue.size());
+
+        uint32 nThreads = CONF_threads ? CONF_threads : std::thread::hardware_concurrency();
+        if (nThreads < 1)
+        {
+            nThreads = 1;
+        }
+
+        std::mutex queueMutex;
+        auto worker = [&]()
+        {
+            char tile_mpq[1024];
+            char tile_out[1024];
+            while (true)
+            {
+                uint32 tileX, tileY;
+                {
+                    std::lock_guard<std::mutex> lock(queueMutex);
+                    if (tileQueue.empty())
+                    {
+                        break;
+                    }
+                    tileX = tileQueue.front().first;
+                    tileY = tileQueue.front().second;
+                    tileQueue.pop();
+                }
+                sprintf(tile_mpq, "World\\Maps\\%s\\%s_%u_%u.adt", map_ids[z].name, map_ids[z].name, tileX, tileY);
+                sprintf(tile_out, "%s/maps/%04u%02u%02u.map", output_path, map_ids[z].id, tileY, tileX);
+                if (ConvertADT(tile_mpq, tile_out, build))
                 {
                     ++success_count;
                 }
@@ -1328,8 +1405,26 @@ void ExtractMapsFromMpq(uint32 build, const int locale)
                     ++failed_count;
                 }
             }
-            // draw progress bar
-            printf(" Processing........................%d%%\r", (100 * (y + 1)) / WDT_MAP_SIZE);
+        };
+
+        if (nThreads <= 1)
+        {
+            // Serial path: one worker on this thread, identical to the
+            // pre-threading behaviour.
+            worker();
+        }
+        else
+        {
+            std::vector<std::thread> workers;
+            workers.reserve(nThreads);
+            for (uint32 t = 0; t < nThreads; ++t)
+            {
+                workers.emplace_back(worker);
+            }
+            for (std::thread& w : workers)
+            {
+                w.join();
+            }
         }
 
         if (adt_count > 0)
@@ -1342,8 +1437,8 @@ void ExtractMapsFromMpq(uint32 build, const int locale)
         }
     }
     printf("\n\nMap extraction complete!\n");
-    printf("Successfully converted: %u tiles\n", success_count);
-    printf("Failed to convert: %u tiles\n", failed_count);
+    printf("Successfully converted: %u tiles\n", success_count.load());
+    printf("Failed to convert: %u tiles\n", failed_count.load());
     delete [] areas;
     delete [] map_ids;
 }

@@ -35,12 +35,12 @@
 * \return
 *   true on success; false if TileAssembler reported errors.
 */
-bool AssembleVMAP(std::string src, std::string dest)
+bool AssembleVMAP(std::string src, std::string dest, unsigned int nThreads)
 {
     bool success = true;
     VMAP::TileAssembler* ta = new VMAP::TileAssembler(src, dest);
 
-    if (!ta->convertWorld2())
+    if (!ta->convertWorld2(nThreads))
     {
         success = false;
     }

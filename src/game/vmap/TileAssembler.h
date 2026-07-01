@@ -29,6 +29,8 @@
 #include <G3D/Matrix3.h>
 #include <map>
 #include <set>
+#include <vector>
+#include <mutex>
 
 #include "ModelInstance.h"
 #include "WorldModel.h"
@@ -170,6 +172,11 @@ namespace VMAP
         MapData mapData; /**< Map data */
         std::set<std::string> spawnedModelFiles; /**< Set of spawned model files */
 
+        /// Per-model vertex cache for calculateTransformedBound: each unique
+        /// model is read+parsed once, then reused across all its spawns.
+        std::map<std::string, std::vector<G3D::Vector3> > iModelVertexCache;
+        std::mutex iModelCacheMutex; /**< Guards iModelVertexCache */
+
     public:
         /**
          * @brief Constructor to initialize the TileAssembler
@@ -186,9 +193,12 @@ namespace VMAP
             /**
              * @brief Converts the world data to a different format
              *
+             * \arg \c nThreads
+             *   Worker threads for the per-map and model passes; 0 = auto-detect
+             *   cores, 1 = serial.
              * @return bool True if successful, false otherwise
              */
-            bool convertWorld2();
+            bool convertWorld2(unsigned int nThreads = 0);
             /**
              * @brief Reads the map spawns from a file
              *

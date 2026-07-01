@@ -23,12 +23,12 @@ add_subdirectory(shared)
 add_subdirectory(genrev)
 
 # Needs to link against mangos_world.lib
-if(BUILD_MANGOSD)
+if (BUILD_MANGOSD)
     # Build the mangos game library
     add_subdirectory(game)
 endif()
 
-if(BUILD_MANGOSD)
+if (BUILD_MANGOSD)
     # Build the mangos world server
     add_subdirectory(mangosd)
 
@@ -37,17 +37,17 @@ if(BUILD_MANGOSD)
 endif()
 
 # Build the mangos realm authentication server
-if(BUILD_REALMD)
+if (BUILD_REALMD)
     add_subdirectory(realmd)
 endif()
 
 # If we want the tools for map/vmap/mmap extraction
-if(BUILD_TOOLS)
+if (BUILD_TOOLS)
     add_subdirectory(tools)
 endif()
 
 if (BUILD_MANGOSD OR BUILD_REALMD)
-    if(WIN32)
+    if (WIN32)
         get_filename_component(MYSQL_LIB_DIR ${MySQL_LIBRARIES} DIRECTORY)
         get_filename_component(MYSQL_LIB_DLL ${MySQL_LIBRARIES} NAME)
         STRING(REPLACE ".lib" ".dll" MYSQL_LIB_DLL ${MYSQL_LIB_DLL})

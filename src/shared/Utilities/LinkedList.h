@@ -64,33 +64,49 @@ class LinkedListElement
          * Initializes both next and previous pointers to NULL, indicating
          * the element is not yet part of any list.
          */
-        LinkedListElement()  { iNext = NULL; iPrev = NULL; }
+        LinkedListElement()
+        {
+            iNext = NULL;
+            iPrev = NULL;
+        }
         /**
          * @brief Destructs the element and automatically unlinks it from any list
          *
          * Calls delink() to ensure the element is properly removed from its list
          * before being destroyed.
          */
-        ~LinkedListElement() { delink(); }
+        ~LinkedListElement()
+        {
+            delink();
+        }
 
         /**
          * @brief Checks if this element has a next element in the list
          *
          * @return bool True if there is another element after this one, false otherwise
          */
-        bool hasNext() const  { return (iNext->iNext != NULL); }
+        bool hasNext() const
+        {
+            return (iNext->iNext != NULL);
+        }
         /**
          * @brief Checks if this element has a previous element in the list
          *
          * @return bool True if there is another element before this one, false otherwise
          */
-        bool hasPrev() const  { return (iPrev->iPrev != NULL); }
+        bool hasPrev() const
+        {
+            return (iPrev->iPrev != NULL);
+        }
         /**
          * @brief Checks if this element is currently part of a linked list
          *
          * @return bool True if element is in a list, false if unlinked
          */
-        bool isInList() const { return (iNext != NULL && iPrev != NULL); }
+        bool isInList() const
+        {
+            return (iNext != NULL && iPrev != NULL);
+        }
 
         /**
          * @brief Returns the next element in the list with bounds checking
@@ -100,13 +116,19 @@ class LinkedListElement
          *
          * @return LinkedListElement* Pointer to next element or NULL
          */
-        LinkedListElement*       next()       { return hasNext() ? iNext : NULL; }
+        LinkedListElement* next()
+        {
+            return hasNext() ? iNext : NULL;
+        }
         /**
          * @brief Returns the next element (const version)
          *
          * @return LinkedListElement const* Pointer to next element or NULL
          */
-        LinkedListElement const* next() const { return hasNext() ? iNext : NULL; }
+        LinkedListElement const* next() const
+        {
+            return hasNext() ? iNext : NULL;
+        }
         /**
          * @brief Returns the previous element in the list with bounds checking
          *
@@ -115,13 +137,19 @@ class LinkedListElement
          *
          * @return LinkedListElement* Pointer to previous element or NULL
          */
-        LinkedListElement*       prev()       { return hasPrev() ? iPrev : NULL; }
+        LinkedListElement* prev()
+        {
+            return hasPrev() ? iPrev : NULL;
+        }
         /**
          * @brief Returns the previous element (const version)
          *
          * @return LinkedListElement const* Pointer to previous element or NULL
          */
-        LinkedListElement const* prev() const { return hasPrev() ? iPrev : NULL; }
+        LinkedListElement const* prev() const
+        {
+            return hasPrev() ? iPrev : NULL;
+        }
 
         /**
          * @brief Returns the next element without bounds checking
@@ -131,13 +159,19 @@ class LinkedListElement
          *
          * @return LinkedListElement* Direct pointer to next element
          */
-        LinkedListElement*       nocheck_next()       { return iNext; }
+        LinkedListElement* nocheck_next()
+        {
+            return iNext;
+        }
         /**
          * @brief Returns the next element without bounds checking (const version)
          *
          * @return LinkedListElement const* Direct pointer to next element
          */
-        LinkedListElement const* nocheck_next() const { return iNext; }
+        LinkedListElement const* nocheck_next() const
+        {
+            return iNext;
+        }
         /**
          * @brief Returns the previous element without bounds checking
          *
@@ -146,13 +180,19 @@ class LinkedListElement
          *
          * @return LinkedListElement* Direct pointer to previous element
          */
-        LinkedListElement*       nocheck_prev()       { return iPrev; }
+        LinkedListElement* nocheck_prev()
+        {
+            return iPrev;
+        }
         /**
          * @brief Returns the previous element without bounds checking (const version)
          *
          * @return LinkedListElement const* Direct pointer to previous element
          */
-        LinkedListElement const* nocheck_prev() const { return iPrev; }
+        LinkedListElement const* nocheck_prev() const
+        {
+            return iPrev;
+        }
 
         /**
          * @brief Unlinks this element from its containing list
@@ -232,33 +272,48 @@ class LinkedListHead
          *
          * @return bool
          */
-        bool isEmpty() const { return (!iFirst.iNext->isInList()); }
+        bool isEmpty() const
+        {
+            return (!iFirst.iNext->isInList());
+        }
 
         /**
          * @brief
          *
          * @return LinkedListElement
          */
-        LinkedListElement*       getFirst()       { return (isEmpty() ? NULL : iFirst.iNext); }
+        LinkedListElement* getFirst()
+        {
+            return (isEmpty() ? NULL : iFirst.iNext);
+        }
         /**
          * @brief
          *
          * @return const LinkedListElement
          */
-        LinkedListElement const* getFirst() const { return (isEmpty() ? NULL : iFirst.iNext); }
+        LinkedListElement const* getFirst() const
+        {
+            return (isEmpty() ? NULL : iFirst.iNext);
+        }
 
         /**
          * @brief
          *
          * @return LinkedListElement
          */
-        LinkedListElement*       getLast()        { return (isEmpty() ? NULL : iLast.iPrev); }
+        LinkedListElement* getLast()
+        {
+            return (isEmpty() ? NULL : iLast.iPrev);
+        }
         /**
          * @brief
          *
          * @return const LinkedListElement
          */
-        LinkedListElement const* getLast() const  { return (isEmpty() ? NULL : iLast.iPrev); }
+        LinkedListElement const* getLast() const
+        {
+            return (isEmpty() ? NULL : iLast.iPrev);
+        }
 
         /**
          * @brief
@@ -310,12 +365,18 @@ class LinkedListHead
          * @brief
          *
          */
-        void incSize() { ++iSize; }
+        void incSize()
+        {
+            ++iSize;
+        }
         /**
          * @brief
          *
          */
-        void decSize() { --iSize; }
+        void decSize()
+        {
+            --iSize;
+        }
 
         template<class _Ty>
         /**

@@ -43,12 +43,18 @@ class GroupRefManager : public RefManager<Group, Player>
          * @brief Get first group reference
          * @return First group reference
          */
-        GroupReference* getFirst() { return ((GroupReference*) RefManager<Group, Player>::getFirst()); }
+        GroupReference* getFirst()
+        {
+            return ((GroupReference*) RefManager<Group, Player>::getFirst());
+        }
 
         /**
          * @brief Get first group reference (const)
          * @return First group reference (const)
          */
-        GroupReference const* getFirst() const { return ((GroupReference const*) RefManager<Group, Player>::getFirst()); }
+        GroupReference const* getFirst() const
+        {
+            return ((GroupReference const*) RefManager<Group, Player>::getFirst());
+        }
 };
 #endif

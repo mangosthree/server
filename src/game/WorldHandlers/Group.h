@@ -217,8 +217,12 @@ class Roll : public LootValidatorRef
         Roll(ObjectGuid _lootedTragetGuid, LootMethod method, LootItem const& li)
             : lootedTargetGUID(_lootedTragetGuid), itemid(li.itemid), itemRandomPropId(li.randomPropertyId), itemRandomSuffix(li.randomSuffix),
               itemCount(li.count), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), itemSlot(0),
-              m_method(method), m_commonVoteMask(ROLL_VOTE_MASK_ALL) {}
-        ~Roll() { }
+              m_method(method), m_commonVoteMask(ROLL_VOTE_MASK_ALL)
+        {
+        }
+        ~Roll()
+        {
+        }
         void setLoot(Loot* pLoot)
         {
             link(pLoot, this);
@@ -256,7 +260,10 @@ struct InstanceGroupBind
     bool perm;
     /* permanent InstanceGroupBinds exist iff the leader has a permanent
        PlayerInstanceBind for the same instance. */
-    InstanceGroupBind() : state(NULL), perm(false) {}
+    InstanceGroupBind()
+        : state(NULL), perm(false)
+    {
+    }
 };
 
 /** request member stats checken **/
@@ -324,12 +331,18 @@ class Group
         {
             return m_Id;
         }
-        ObjectGuid GetObjectGuid() const { return ObjectGuid(HIGHGUID_GROUP, GetId()); }
+        ObjectGuid GetObjectGuid() const
+        {
+            return ObjectGuid(HIGHGUID_GROUP, GetId());
+        }
         bool IsFull() const
         {
             return (m_groupType == GROUPTYPE_NORMAL) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE);
         }
-        GroupType GetGroupType() const { return m_groupType; }
+        GroupType GetGroupType() const
+        {
+            return m_groupType;
+        }
         bool isRaidGroup() const
         {
             return m_groupType == GROUPTYPE_RAID;
@@ -338,7 +351,10 @@ class Group
         {
             return m_bgGroup != NULL;
         }
-        bool isLFGGroup() const { return m_groupType & GROUPTYPE_LFD; }
+        bool isLFGGroup() const
+        {
+            return m_groupType & GROUPTYPE_LFD;
+        }
         bool IsCreated()   const
         {
             return GetMembersCount() > 0;
@@ -365,7 +381,10 @@ class Group
         }
 
         // member manipulation methods
-        void SetAsLfgGroup() { m_groupType = GroupType(m_groupType | GROUPTYPE_LFD); }
+        void SetAsLfgGroup()
+        {
+            m_groupType = GroupType(m_groupType | GROUPTYPE_LFD);
+        }
         bool IsMember(ObjectGuid guid) const
         {
             return _getMemberCSlot(guid) != m_memberSlots.end();
@@ -404,10 +423,22 @@ class Group
 
         bool SameSubGroup(Player const* member1, Player const* member2) const;
 
-        MemberSlotList const& GetMemberSlots() const { return m_memberSlots; }
-        GroupReference* GetFirstMember() { return m_memberMgr.getFirst(); }
-        GroupReference const* GetFirstMember() const { return m_memberMgr.getFirst(); }
-        uint32 GetMembersCount() const { return m_memberSlots.size(); }
+        MemberSlotList const& GetMemberSlots() const
+        {
+            return m_memberSlots;
+        }
+        GroupReference* GetFirstMember()
+        {
+            return m_memberMgr.getFirst();
+        }
+        GroupReference const* GetFirstMember() const
+        {
+            return m_memberMgr.getFirst();
+        }
+        uint32 GetMembersCount() const
+        {
+            return m_memberSlots.size();
+        }
         void GetDataForXPAtKill(Unit const* victim, uint32& count, uint32& sum_level, Player*& member_with_max_level, Player*& not_gray_member_with_max_level, Player* additional = NULL);
         uint8 GetMemberGroup(ObjectGuid guid) const
         {
@@ -479,9 +510,18 @@ class Group
 
         void SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid);
 
-        Difficulty GetDifficulty(bool isRaid) const { return isRaid ? m_raidDifficulty : m_dungeonDifficulty; }
-        Difficulty GetDungeonDifficulty() const { return m_dungeonDifficulty; }
-        Difficulty GetRaidDifficulty() const { return m_raidDifficulty; }
+        Difficulty GetDifficulty(bool isRaid) const
+        {
+            return isRaid ? m_raidDifficulty : m_dungeonDifficulty;
+        }
+        Difficulty GetDungeonDifficulty() const
+        {
+            return m_dungeonDifficulty;
+        }
+        Difficulty GetRaidDifficulty() const
+        {
+            return m_raidDifficulty;
+        }
         void SetDungeonDifficulty(Difficulty difficulty);
         void SetRaidDifficulty(Difficulty difficulty);
         uint16 InInstance();
@@ -519,13 +559,18 @@ class Group
         {
             m_memberMgr.insertFirst(pRef);
         }
-        void DelinkMember(GroupReference* /*pRef*/) { }
+        void DelinkMember(GroupReference* /*pRef*/)
+        {
+        }
 
         InstanceGroupBind* BindToInstance(DungeonPersistentState* save, bool permanent, bool load = false);
         void UnbindInstance(uint32 mapid, uint8 difficulty, bool unload = false);
         InstanceGroupBind* GetBoundInstance(uint32 mapId, Player* player);
         InstanceGroupBind* GetBoundInstance(Map* aMap, Difficulty difficulty);
-        BoundInstancesMap& GetBoundInstances(Difficulty difficulty) { return m_boundInstances[difficulty]; }
+        BoundInstancesMap& GetBoundInstances(Difficulty difficulty)
+        {
+            return m_boundInstances[difficulty];
+        }
 
     protected:
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant = false);

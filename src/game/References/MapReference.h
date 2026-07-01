@@ -74,35 +74,53 @@ class MapReference : public Reference<Map, Player>
         /**
          * @brief Constructor
          */
-        MapReference() : Reference<Map, Player>() {}
+        MapReference()
+            : Reference<Map, Player>()
+        {
+        }
 
         /**
          * @brief Destructor
          */
-        ~MapReference() { unlink(); }
+        ~MapReference()
+        {
+            unlink();
+        }
 
         /**
          * @brief Get next reference
          * @return Next map reference
          */
-        MapReference* next() { return (MapReference*)Reference<Map, Player>::next(); }
+        MapReference* next()
+        {
+            return (MapReference*)Reference<Map, Player>::next();
+        }
 
         /**
          * @brief Get next reference (const)
          * @return Next map reference (const)
          */
-        MapReference const* next() const { return (MapReference const*)Reference<Map, Player>::next(); }
+        MapReference const* next() const
+        {
+            return (MapReference const*)Reference<Map, Player>::next();
+        }
 
         /**
          * @brief Get previous reference (no check)
          * @return Previous map reference
          */
-        MapReference* nockeck_prev() { return (MapReference*)Reference<Map, Player>::nocheck_prev(); }
+        MapReference* nockeck_prev()
+        {
+            return (MapReference*)Reference<Map, Player>::nocheck_prev();
+        }
 
         /**
          * @brief Get previous reference (no check, const)
          * @return Previous map reference (const)
          */
-        MapReference const* nocheck_prev() const { return (MapReference const*)Reference<Map, Player>::nocheck_prev(); }
+        MapReference const* nocheck_prev() const
+        {
+            return (MapReference const*)Reference<Map, Player>::nocheck_prev();
+        }
 };
 #endif

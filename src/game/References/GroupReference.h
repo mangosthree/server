@@ -59,35 +59,53 @@ class GroupReference : public Reference<Group, Player>
         /**
          * @brief Constructor
          */
-        GroupReference() : Reference<Group, Player>(), iSubGroup(0) {}
+        GroupReference()
+            : Reference<Group, Player>(), iSubGroup(0)
+        {
+        }
 
         /**
          * @brief Destructor
          */
-        ~GroupReference() { unlink(); }
+        ~GroupReference()
+        {
+            unlink();
+        }
 
         /**
          * @brief Get next reference
          * @return Next group reference
          */
-        GroupReference* next() { return (GroupReference*)Reference<Group, Player>::next(); }
+        GroupReference* next()
+        {
+            return (GroupReference*)Reference<Group, Player>::next();
+        }
 
         /**
          * @brief Get next reference (const)
          * @return Next group reference (const)
          */
-        GroupReference const* next() const { return (GroupReference const*)Reference<Group, Player>::next(); }
+        GroupReference const* next() const
+        {
+            return (GroupReference const*)Reference<Group, Player>::next();
+        }
 
         /**
          * @brief Get sub-group ID
          * @return Sub-group ID
          */
-        uint8 getSubGroup() const { return iSubGroup; }
+        uint8 getSubGroup() const
+        {
+            return iSubGroup;
+        }
 
         /**
          * @brief Set sub-group ID
          * @param pSubGroup Sub-group ID to set
          */
-        void setSubGroup(uint8 pSubGroup) { iSubGroup = pSubGroup; }
+        void setSubGroup(uint8 pSubGroup)
+        {
+            iSubGroup = pSubGroup;
+        }
 };
 #endif

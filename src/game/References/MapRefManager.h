@@ -44,55 +44,82 @@ class MapRefManager : public RefManager<Map, Player>
          * @brief Get first map reference
          * @return First map reference
          */
-        MapReference* getFirst() { return (MapReference*)RefManager<Map, Player>::getFirst(); }
+        MapReference* getFirst()
+        {
+            return (MapReference*)RefManager<Map, Player>::getFirst();
+        }
 
         /**
          * @brief Get first map reference (const)
          * @return First map reference (const)
          */
-        MapReference const* getFirst() const { return (MapReference const*)RefManager<Map, Player>::getFirst(); }
+        MapReference const* getFirst() const
+        {
+            return (MapReference const*)RefManager<Map, Player>::getFirst();
+        }
 
         /**
          * @brief Get last map reference
          * @return Last map reference
          */
-        MapReference* getLast() { return (MapReference*)RefManager<Map, Player>::getLast(); }
+        MapReference* getLast()
+        {
+            return (MapReference*)RefManager<Map, Player>::getLast();
+        }
 
         /**
          * @brief Get last map reference (const)
          * @return Last map reference (const)
          */
-        MapReference const* getLast() const { return (MapReference const*)RefManager<Map, Player>::getLast(); }
+        MapReference const* getLast() const
+        {
+            return (MapReference const*)RefManager<Map, Player>::getLast();
+        }
 
         /**
          * @brief Get iterator to beginning
          * @return Iterator to beginning
          */
-        iterator begin() { return iterator(getFirst()); }
+        iterator begin()
+        {
+            return iterator(getFirst());
+        }
 
         /**
          * @brief Get iterator to end
          * @return Iterator to end
          */
-        iterator end() { return iterator(NULL); }
+        iterator end()
+        {
+            return iterator(NULL);
+        }
 
         /**
          * @brief Get reverse iterator to beginning
          * @return Reverse iterator to beginning
          */
-        iterator rbegin() { return iterator(getLast()); }
+        iterator rbegin()
+        {
+            return iterator(getLast());
+        }
 
         /**
          * @brief Get reverse iterator to end
          * @return Reverse iterator to end
          */
-        iterator rend() { return iterator(NULL); }
+        iterator rend()
+        {
+            return iterator(NULL);
+        }
 
         /**
          * @brief Get const iterator to beginning
          * @return Const iterator to beginning
          */
-        const_iterator begin() const { return const_iterator(getFirst()); }
+        const_iterator begin() const
+        {
+            return const_iterator(getFirst());
+        }
 
         /**
          * @brief Get const iterator to end

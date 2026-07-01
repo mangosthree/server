@@ -48,62 +48,91 @@ class RefManager : public LinkedListHead
          * @brief
          *
          */
-        RefManager() {}
+        RefManager()
+        {
+        }
         /**
          * @brief
          *
          */
-        virtual ~RefManager() { clearReferences(); }
+        virtual ~RefManager()
+        {
+            clearReferences();
+        }
 
         /**
          * @brief
          *
          * @return Reference<TO, FROM>
          */
-        Reference<TO, FROM>*       getFirst()       { return ((Reference<TO, FROM>*) LinkedListHead::getFirst()); }
+        Reference<TO, FROM>* getFirst()
+        {
+            return ((Reference<TO, FROM>*) LinkedListHead::getFirst());
+        }
         /**
          * @brief
          *
          * @return const Reference<TO, FROM>
          */
-        Reference<TO, FROM> const* getFirst() const { return ((Reference<TO, FROM> const*) LinkedListHead::getFirst()); }
+        Reference<TO, FROM> const* getFirst() const
+        {
+            return ((Reference<TO, FROM> const*) LinkedListHead::getFirst());
+        }
         /**
          * @brief
          *
          * @return Reference<TO, FROM>
          */
-        Reference<TO, FROM>*       getLast()       { return ((Reference<TO, FROM>*) LinkedListHead::getLast()); }
+        Reference<TO, FROM>* getLast()
+        {
+            return ((Reference<TO, FROM>*) LinkedListHead::getLast());
+        }
         /**
          * @brief
          *
          * @return const Reference<TO, FROM>
          */
-        Reference<TO, FROM> const* getLast() const { return ((Reference<TO, FROM> const*) LinkedListHead::getLast()); }
+        Reference<TO, FROM> const* getLast() const
+        {
+            return ((Reference<TO, FROM> const*) LinkedListHead::getLast());
+        }
 
         /**
          * @brief
          *
          * @return iterator
          */
-        iterator begin() { return iterator(getFirst()); }
+        iterator begin()
+        {
+            return iterator(getFirst());
+        }
         /**
          * @brief
          *
          * @return iterator
          */
-        iterator end() { return iterator(NULL); }
+        iterator end()
+        {
+            return iterator(NULL);
+        }
         /**
          * @brief
          *
          * @return iterator
          */
-        iterator rbegin() { return iterator(getLast()); }
+        iterator rbegin()
+        {
+            return iterator(getLast());
+        }
         /**
          * @brief
          *
          * @return iterator
          */
-        iterator rend() { return iterator(NULL); }
+        iterator rend()
+        {
+            return iterator(NULL);
+        }
 
         /**
          * @brief

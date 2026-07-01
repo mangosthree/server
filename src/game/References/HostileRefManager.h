@@ -59,7 +59,10 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
          * @brief Get owner unit
          * @return Owner unit
          */
-        Unit* getOwner() { return iOwner; }
+        Unit* getOwner()
+        {
+            return iOwner;
+        }
 
         /**
          * @brief Send threat to all haters for the victim
@@ -98,7 +101,10 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
          * @brief Get first hostile reference
          * @return First hostile reference
          */
-        HostileReference* getFirst() { return ((HostileReference*) RefManager<Unit, ThreatManager>::getFirst()); }
+        HostileReference* getFirst()
+        {
+            return ((HostileReference*) RefManager<Unit, ThreatManager>::getFirst());
+        }
 
         /**
          * @brief Update threat tables
@@ -137,7 +143,10 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
             m_redirectionMod = 0.0f;
         }
 
-        float GetThreatRedirectionMod() const { return m_redirectionMod; }
+        float GetThreatRedirectionMod() const
+        {
+            return m_redirectionMod;
+        }
         Unit*  GetThreatRedirectionTarget() const;
 
     private:

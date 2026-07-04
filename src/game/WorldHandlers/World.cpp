@@ -822,6 +822,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Calculate random battleground reset time...");
     InitRandomBGResetTime();
 
+    sLog.outString("Calculate next currency reset time...");
+    InitCurrencyResetTime();
+
     sLog.outString("Starting Game Event system...");
     uint32 nextGameEvent = sGameEventMgr.Initialize();
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    // depend on next event
@@ -1098,6 +1101,12 @@ void World::Update(uint32 diff)
     if (m_gameTime > m_NextMonthlyQuestReset)
     {
         ResetMonthlyQuests();
+    }
+
+    /// Handle weekly currency cap reset time
+    if (m_gameTime > m_NextCurrencyReset)
+    {
+        ResetCurrencyWeekCounts();
     }
 
     /// <ul><li> Handle auctions when the timer has passed

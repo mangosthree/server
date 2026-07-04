@@ -289,6 +289,18 @@ std::string AcceptableClientBuildsListStr()
     return data.str();
 }
 
+static uint32 sDBCLoadedBuild = 0;                          ///< Client build of the DBC files loaded at startup
+
+/**
+ * @brief Returns the client build of the DBC files loaded at startup.
+ *
+ * @return uint32 The loaded DBC build, or 0 before LoadDBCStores has run.
+ */
+uint32 GetDBCLoadedBuild()
+{
+    return sDBCLoadedBuild;
+}
+
 static bool ReadDBCBuildFileText(const std::string& dbc_path, char const* localeName, std::string& text)
 {
     std::string filename  = dbc_path + "component.wow-" + localeName + ".txt";
@@ -1018,6 +1030,10 @@ void LoadDBCStores(const std::string& dataPath)
         Log::WaitBeforeContinueIfNeed();
         exit(1);
     }
+
+    // Remember the validated build for consumers like the character
+    // database cleaner (see GetDBCLoadedBuild).
+    sDBCLoadedBuild = build;
 
     sLog.outString();
     sLog.outString(">> Initialized %d data stores", DBCFilesCount);

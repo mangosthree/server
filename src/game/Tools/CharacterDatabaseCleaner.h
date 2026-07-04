@@ -35,7 +35,8 @@ namespace CharacterDatabaseCleaner
         CLEANING_FLAG_ACHIEVEMENT_PROGRESS = 0x1,  ///< Clean Achievements
         CLEANING_FLAG_SKILLS = 0x2,                ///< Clean skills
         CLEANING_FLAG_SPELLS = 0x4,                ///< Clean spells
-        CLEANING_FLAG_TALENTS = 0x8                ///< Clean Talents
+        CLEANING_FLAG_TALENTS = 0x8,               ///< Clean Talents
+        CLEANING_FLAG_ALL = 0xF                    ///< All cleanup categories
     };
 
     /**

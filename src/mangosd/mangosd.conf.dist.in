@@ -208,6 +208,8 @@ BindIP                       = "0.0.0.0"
 #
 #    CleanCharacterDB
 #        Perform character db cleanups on start up
+#        Cleanups run when the loaded DBC client build changes or when
+#        cleaning_flags is set manually in the saved_variables table
 #        Default: 1 (Enable)
 #                 0 (Disabled)
 #

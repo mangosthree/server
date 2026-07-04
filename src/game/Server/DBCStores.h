@@ -42,6 +42,12 @@ bool IsAcceptableClientBuild(uint32 build);
 std::string AcceptableClientBuildsListStr();
 
 /**
+ * Returns the client build of the DBC files loaded at startup,
+ * or 0 before LoadDBCStores has run.
+ */
+uint32 GetDBCLoadedBuild();
+
+/**
  * This function checks to see if there is a valid locale file (component.wow-<locale>.txt)
  * and returns an index to the locale or -1 if not found
  * @PARAM dataPath full path to the data directory

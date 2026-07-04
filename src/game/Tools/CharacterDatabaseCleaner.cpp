@@ -36,7 +36,8 @@
  *
  * The cleaner uses flags stored in the `saved_variables` table to determine
  * which cleanup operations are needed. This allows incremental cleaning
- * across server restarts.
+ * across server restarts. A change of the loaded DBC client build against
+ * `saved_variables`.`last_cleaned_dbc_build` schedules a full cleanup.
  *
  * @see CharacterDatabaseCleaner for the cleaner interface
  * @see CLEANING_FLAG_* constants for available operations
@@ -55,8 +56,10 @@
  * Performs database cleaning based on configuration and stored flags:
  * 1. Checks if cleaning is enabled in config
  * 2. Reads cleaning flags from saved_variables table
- * 3. Executes appropriate cleanup routines
- * 4. Resets cleaning flags when complete
+ * 3. Schedules a full cleanup when the loaded DBC build differs from
+ *    saved_variables.last_cleaned_dbc_build (DBC data was swapped)
+ * 4. Executes appropriate cleanup routines
+ * 5. Resets cleaning flags and records the DBC build when complete
  *
  * @note Can be disabled via CONFIG_BOOL_CLEAN_CHARACTER_DB
  */
@@ -68,8 +71,6 @@ void CharacterDatabaseCleaner::CleanDatabase()
         return;
     }
 
-    sLog.outString("Cleaning character database...");
-
     // Check which cleanups are needed
     QueryResult* result = CharacterDatabase.PQuery("SELECT `cleaning_flags` FROM `saved_variables`");
     if (!result)
@@ -78,6 +79,35 @@ void CharacterDatabaseCleaner::CleanDatabase()
     }
     uint32 flags = (*result)[0].GetUInt32();
     delete result;
+
+    // Orphaned rows appear when the extracted DBC data is swapped for
+    // another client build, so a build change schedules a full cleanup.
+    bool hasBuildColumn = false;
+    uint32 const dbcBuild = GetDBCLoadedBuild();
+    result = CharacterDatabase.PQuery("SELECT `last_cleaned_dbc_build` FROM `saved_variables`");
+    if (result)
+    {
+        hasBuildColumn = true;
+        uint32 lastCleanedBuild = (*result)[0].GetUInt32();
+        delete result;
+
+        if (dbcBuild && lastCleanedBuild != dbcBuild)
+        {
+            sLog.outString("DBC build changed (%u -> %u), scheduling character database cleanup.", lastCleanedBuild, dbcBuild);
+            flags |= CLEANING_FLAG_ALL;
+        }
+    }
+    else
+    {
+        sLog.outErrorDb("saved_variables.last_cleaned_dbc_build is missing, DBC build-change cleanup disabled. Please apply the character database updates.");
+    }
+
+    if (!flags)
+    {
+        return;
+    }
+
+    sLog.outString("Cleaning character database...");
 
     // clean up
     if (flags & CLEANING_FLAG_ACHIEVEMENT_PROGRESS)
@@ -98,7 +128,17 @@ void CharacterDatabaseCleaner::CleanDatabase()
     {
         CleanCharacterTalent();
     }
-    CharacterDatabase.Execute("UPDATE `saved_variables` SET `cleaning_flags` = 0");
+
+    // Only reset the flags and record the build after a completed run so
+    // an interrupted cleanup is retried on the next startup.
+    if (hasBuildColumn)
+    {
+        CharacterDatabase.PExecute("UPDATE `saved_variables` SET `cleaning_flags` = 0, `last_cleaned_dbc_build` = %u", dbcBuild);
+    }
+    else
+    {
+        CharacterDatabase.Execute("UPDATE `saved_variables` SET `cleaning_flags` = 0");
+    }
 }
 
 /**

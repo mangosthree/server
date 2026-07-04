@@ -102,6 +102,12 @@ void WorldSession::HandleTaxiQueryAvailableNodes(WorldPacket& recv_data)
         return;
     }
 
+    // remove fake death
+    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
+
     // unknown taxi node case
     if (SendLearnNewTaxiNode(unit))
     {
@@ -148,6 +154,12 @@ void WorldSession::SendTaxiMenu(Creature* unit)
  */
 void WorldSession::SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathNode)
 {
+    // remove fake death
+    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
+
     while (GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
         GetPlayer()->GetMotionMaster()->MovementExpired(false);
 

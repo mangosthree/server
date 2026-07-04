@@ -960,6 +960,15 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
         }
     }
 
+    // take currency
+    for (uint32 i = 0; i < QUEST_REQUIRED_CURRENCY_COUNT; ++i)
+    {
+        if (pQuest->ReqCurrencyId[i])
+        {
+            ModifyCurrencyCount(pQuest->ReqCurrencyId[i], -int32(pQuest->ReqCurrencyCount[i] * GetCurrencyPrecision(pQuest->ReqCurrencyId[i])));
+        }
+    }
+
     RemoveTimedQuest(quest_id);
 
     if (BattleGround* bg = GetBattleGround())
@@ -1040,6 +1049,15 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     if (pQuest->GetRewOrReqMoney() < 0)
     {
         ModifyMoney(pQuest->GetRewOrReqMoney());
+    }
+
+    // reward currency
+    for (uint32 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
+    {
+        if (pQuest->RewCurrencyId[i])
+        {
+            ModifyCurrencyCount(pQuest->RewCurrencyId[i], int32(pQuest->RewCurrencyCount[i] * GetCurrencyPrecision(pQuest->RewCurrencyId[i])));
+        }
     }
 
     // honor reward

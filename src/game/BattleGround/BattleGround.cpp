@@ -245,6 +245,7 @@ void BattleGround::BroadcastWorker(Do& _do)
 BattleGround::BattleGround(): m_BuffChange(false), m_ArenaBuffSpawned(false), m_StartDelayTime(0), m_startMaxDist(0)
 {
     m_TypeID            = BattleGroundTypeId(0);
+    m_RandomTypeID      = BattleGroundTypeId(0);
     m_Status            = STATUS_NONE;
     m_ClientInstanceID  = 0;
     m_EndTime           = 0;

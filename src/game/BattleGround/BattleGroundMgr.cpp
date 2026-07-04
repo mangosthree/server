@@ -944,6 +944,7 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
     bg->SetStatus(STATUS_WAIT_JOIN);
     bg->SetArenaType(arenaType);
     bg->SetRated(isRated);
+    bg->SetRandomTypeID(bgTypeId);
 
     return bg;
 }

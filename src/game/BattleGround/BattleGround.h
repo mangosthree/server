@@ -574,6 +574,12 @@ class BattleGround
          * @param TypeID
          */
         void SetTypeID(BattleGroundTypeId TypeID) { m_TypeID = TypeID; }
+        /**
+         * @brief Sets the concrete battleground type a random battleground resolved to.
+         *
+         * @param TypeID
+         */
+        void SetRandomTypeID(BattleGroundTypeId TypeID) { m_RandomTypeID = TypeID; }
         // here we can count minlevel and maxlevel for players
         void SetBracket(PvPDifficultyEntry const* bracketEntry);
         /**

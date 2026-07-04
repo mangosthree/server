@@ -1087,6 +1087,18 @@ void World::Update(uint32 diff)
         ResetDailyQuests();
     }
 
+    /// Handle weekly quests reset time
+    if (m_gameTime > m_NextWeeklyQuestReset)
+    {
+        ResetWeeklyQuests();
+    }
+
+    /// Handle monthly quests reset time
+    if (m_gameTime > m_NextMonthlyQuestReset)
+    {
+        ResetMonthlyQuests();
+    }
+
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
     {

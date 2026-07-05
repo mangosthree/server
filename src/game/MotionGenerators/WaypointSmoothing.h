@@ -29,6 +29,16 @@ constexpr float WAYPOINT_SMOOTHING_MAX_XY_SPAN = 200.0f;
 constexpr float WAYPOINT_SMOOTHING_MAX_Z_SPAN = 100.0f;
 
 /**
+ * @brief Minimum length (in yards) of a segment in a smoothed multi-point spline.
+ *
+ * The 4.3.4 client cannot interpolate across a zero-length segment inside a
+ * multi-point spline; a mover carrying one becomes selectable from anywhere.
+ * Waypoint paths commonly duplicate their final node, so candidate points
+ * closer than this to the previous path point are dropped during the merge.
+ */
+constexpr float WAYPOINT_SMOOTHING_MIN_SEGMENT_LENGTH = 0.1f;
+
+/**
  * @brief Per-node properties that decide whether smoothing may pass through a waypoint.
  */
 struct WaypointSmoothingNode

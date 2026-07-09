@@ -106,6 +106,15 @@ void PlayerbotFactory::Prepare()
         bot->ResurrectPlayer(1.0f, false);
     }
 
+    // Clamp to the realm's level cap: on a Cata 4.3.4 realm a master can be above
+    // 85 (imported/MoP-level char), but gear only exists up to reqLevel 85, so an
+    // over-cap bot finds nothing to equip and ends up naked.
+    uint32 maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
+    if (level > maxLevel)
+    {
+        level = maxLevel;
+    }
+
     bot->CombatStop(true);
     bot->SetLevel(level);
     if (!sPlayerbotAIConfig.randomBotShowHelmet)

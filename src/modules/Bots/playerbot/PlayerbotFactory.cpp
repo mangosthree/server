@@ -1704,14 +1704,26 @@ ObjectGuid PlayerbotFactory::GetRandomBot()
  * @param questId The quest ID.
  * @param questIds The list of quest IDs.
  */
-void AddPrevQuests(uint32 questId, list<uint32>& questIds)
+void AddPrevQuests(uint32 questId, list<uint32>& questIds, std::set<uint32>& visited)
 {
+    // Guard against cyclic / self-referential quest prerequisite chains in the
+    // world DB, which would otherwise recurse forever and hang the world thread.
+    if (!visited.insert(questId).second)
+    {
+        return;
+    }
+
     Quest const *quest = sObjectMgr.GetQuestTemplate(questId);
+    if (!quest)
+    {
+        return;
+    }
+
     // Recursively add previous quests to the list
     for (Quest::PrevQuests::const_iterator iter = quest->prevQuests.begin(); iter != quest->prevQuests.end(); ++iter)
     {
         uint32 prevId = abs(*iter);
-        AddPrevQuests(prevId, questIds);
+        AddPrevQuests(prevId, questIds, visited);
         questIds.remove(prevId);
         questIds.push_back(prevId);
     }
@@ -1736,7 +1748,8 @@ void PlayerbotFactory::InitQuests()
                 continue;
             }
 
-            AddPrevQuests(questId, classQuestIds);
+            std::set<uint32> visitedQuests;
+            AddPrevQuests(questId, classQuestIds, visitedQuests);
             classQuestIds.remove(questId);
             classQuestIds.push_back(questId);
         }

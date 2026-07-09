@@ -681,22 +681,23 @@ bool RandomPlayerbotMgr::IsZoneSafeForBot(Player* bot, uint32 mapId, float x, fl
             return false;
     }
 
-    if (m_areaCreatureStatsMap.empty()) // calculate stats if not done yet
-    {
-        const_cast<RandomPlayerbotMgr*>(this)->CalculateAreaCreatureStats();
-    }
-
+    // Area creature-level stats are currently disabled (the creature scan in
+    // CalculateAreaCreatureStats is commented out), so m_areaCreatureStatsMap is
+    // always empty. Previously this recomputed the (empty) stats on every call and
+    // then rejected every zone, so the bot could never find a teleport target and
+    // spun the world thread forever. The caller's SQL already filters candidate
+    // locations by creature level, so accept the zone when no stats exist; only
+    // apply the level window when real stats are available.
     std::map<uint32, AreaCreatureStats>::const_iterator statsItr = m_areaCreatureStatsMap.find(area->ID);
-    AreaCreatureStats const* stats = (statsItr != m_areaCreatureStatsMap.end()) ? &statsItr->second : nullptr;
-    if (stats && stats->creatureCount > 0)
+    if (statsItr != m_areaCreatureStatsMap.end() && statsItr->second.creatureCount > 0)
     {
+        AreaCreatureStats const& stats = statsItr->second;
         uint8 botLevel = bot->getLevel();
         uint8 tolerance = sPlayerbotAIConfig.randomBotTeleLevel;
-        if (botLevel < stats->minLevel - tolerance || botLevel > stats->maxLevel + tolerance)
+        if (botLevel < stats.minLevel - tolerance || botLevel > stats.maxLevel + tolerance)
             return false;
-        return true;
     }
-    return false;
+    return true;
 }
 
 uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, string event)

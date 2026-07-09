@@ -67,8 +67,14 @@ AiPlayerbot.CommandPrefix = ~
 # Delay between two bot actions
 #AiPlayerbot.ReactDelay = 100
 
+# Inactivity delay
+#AiPlayerbot.PassiveDelay = 3000
+
+# Minimum delay between repeating actions (chat messages, emotes etc)
+#AiPlayerbot.RepeatDelay = 3000
+
 # Distances
-#AiPlayerbot.SightDistance = 50.0
+#AiPlayerbot.SightDistance = 75.0
 #AiPlayerbot.SpellDistance = 30.0
 #AiPlayerbot.ReactDistance = 150.0
 #AiPlayerbot.GrindDistance = 100.0
@@ -113,6 +119,25 @@ AiPlayerbot.CommandPrefix = ~
 
 # Delete all random bot accounts
 #AiPlayerbot.DeleteRandomBotAccounts = 0
+
+# Random bot guild count
+#AiPlayerbot.RandomBotGuildCount = 50
+
+# Guild Task system
+#AiPlayerbot.EnableGuildTasks = 1
+
+# How often tasks are changed
+#AiPlayerbot.MinGuildTaskChangeTime = 172800
+#AiPlayerbot.MaxGuildTaskChangeTime = 432000
+# Mail spam interval
+#AiPlayerbot.MinGuildTaskAdvertisementTime = 300
+#AiPlayerbot.MaxGuildTaskAdvertisementTime = 28800
+# Delay before reward is sent
+#AiPlayerbot.MinGuildTaskRewardTime = 300
+#AiPlayerbot.MaxGuildTaskRewardTime = 3600
+
+# Delete all random bot guilds
+#AiPlayerbot.DeleteRandomBotGuilds = 0
 
 # Maps to teleport random bots
 #AiPlayerbot.RandomBotMaps = 0,1,530,571
@@ -162,3 +187,6 @@ AiPlayerbot.RandomBotTeleLevel = 3
 
 # Command server port, 0 - disabled
 #AiPlayerbot.CommandServerPort = 8888
+
+# auto-login all player alts as bots on player login
+#AiPlayerbot.BotAutologin = 0

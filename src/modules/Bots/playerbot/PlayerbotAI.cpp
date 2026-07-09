@@ -207,11 +207,26 @@ void PlayerbotAI::HandleTeleportAck()
     bot->InterruptMoving(1);
     if (bot->IsBeingTeleportedNear())
     {
-        WorldPacket p = WorldPacket(CMSG_MOVE_TELEPORT_ACK, 8 + 4 + 4);
-        p << bot->GetObjectGuid();
-        p << (uint32)0; // supposed to be flags? not used currently
-        p << (uint32)time(0); // time - not currently used
+        // Cata 4.3.4 CMSG_MOVE_TELEPORT_ACK layout: counter, time, then bit-packed
+        // guid (order must match WorldSession::HandleMoveTeleportAckOpcode).
+        ObjectGuid guid = bot->GetObjectGuid();
+        WorldPacket p(CMSG_MOVE_TELEPORT_ACK);
+        p << uint32(0); // counter
+        p << uint32(0); // time
+        p.WriteGuidMask<5, 0, 1, 6, 3, 7, 2, 4>(guid);
+        p.WriteGuidBytes<4, 2, 7, 6, 5, 1, 3, 0>(guid);
         bot->GetSession()->HandleMoveTeleportAckOpcode(p);
+        // A same-map teleport doesn't refresh the view of nearby stationary
+        // players, so a summoned bot stays invisible until they move. Force the
+        // bot's own view and, explicitly, the master's client view of the bot.
+        bot->UpdateVisibilityAndView();
+        if (Player* master = GetMaster())
+        {
+            if (master != bot)
+            {
+                master->UpdateVisibilityOf(master, bot);
+            }
+        }
     }
     else if (bot->IsBeingTeleportedFar())
     {

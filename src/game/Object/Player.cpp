@@ -53,6 +53,10 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "Pet.h"
+#ifdef ENABLE_PLAYERBOTS
+#include "playerbot.h"
+#include "PlayerbotMgr.h"
+#endif
 #include "Util.h"
 #include "Transports.h"
 #include "Weather.h"
@@ -410,6 +414,10 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     m_drunkTimer = 0;
     m_restTime = 0;
     m_deathTimer = 0;
+#ifdef ENABLE_PLAYERBOTS
+    m_playerbotAI = NULL;
+    m_playerbotMgr = NULL;
+#endif
     // Initialize death expire time to 0
     m_deathExpireTime = 0;
 
@@ -1320,6 +1328,18 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     {
         TeleportTo(m_teleport_dest, m_teleport_options);
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    // Update player bot AI (drives obey/follow/combat for bots and the master's bot manager)
+    if (m_playerbotAI)
+    {
+        m_playerbotAI->UpdateAI(p_time);
+    }
+    if (m_playerbotMgr)
+    {
+        m_playerbotMgr->UpdateAI(p_time);
+    }
+#endif
 }
 
 /**

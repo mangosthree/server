@@ -105,6 +105,12 @@
 #include "ElunaLoader.h"
 #endif /* ENABLE_ELUNA */
 
+#ifdef ENABLE_PLAYERBOTS
+#include "playerbot.h"
+#include "PlayerbotAIConfig.h"
+#include "RandomPlayerbotMgr.h"
+#endif
+
 // WARDEN
 #include "WardenCheckMgr.h"
 
@@ -859,7 +865,7 @@ void World::SetInitialWorldSettings()
 #endif
 
 #ifdef ENABLE_PLAYERBOTS
-    //sPlayerbotAIConfig.Initialize();
+    sPlayerbotAIConfig.Initialize();
 #endif
 
     showFooter();
@@ -1132,6 +1138,11 @@ void World::Update(uint32 diff)
         sAuctionBot.Update();
         m_timers[WUPDATE_AHBOT].Reset();
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    sRandomPlayerbotMgr.UpdateAI(diff);
+    sRandomPlayerbotMgr.UpdateSessions(diff);
+#endif
 
     /// <li> Handle session updates
     UpdateSessions(diff);

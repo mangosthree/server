@@ -124,6 +124,12 @@ bool RandomPlayerbotFactory::CreateRandomBot(uint8 cls)
 
     uint8 gender = rand() % 2 ? GENDER_MALE : GENDER_FEMALE;
 
+    if (availableRaces[cls].empty())
+    {
+        sLog.outError("RandomPlayerbotFactory: no available races for class %u - skipping", cls);
+        return false;
+    }
+
     uint8 race = availableRaces[cls][urand(0, availableRaces[cls].size() - 1)];
     string name = CreateRandomBotName(gender);
     if (name.empty())

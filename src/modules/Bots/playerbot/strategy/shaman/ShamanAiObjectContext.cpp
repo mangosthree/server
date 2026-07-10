@@ -84,7 +84,6 @@ namespace ai
         public:
             TriggerFactoryInternal()
             {
-                creators["grace of air totem"] = &TriggerFactoryInternal::grace_of_air_totem;
                 creators["windfury totem"] = &TriggerFactoryInternal::windfury_totem;
                 creators["mana spring totem"] = &TriggerFactoryInternal::mana_spring_totem;
                 creators["flametongue totem"] = &TriggerFactoryInternal::flametongue_totem;
@@ -100,40 +99,28 @@ namespace ai
                 creators["water walking"] = &TriggerFactoryInternal::water_walking;
                 creators["water breathing on party"] = &TriggerFactoryInternal::water_breathing_on_party;
                 creators["water walking on party"] = &TriggerFactoryInternal::water_walking_on_party;
-                creators["cleanse spirit poison"] = &TriggerFactoryInternal::cleanse_poison;
+                // Cata 4.3.4: Cleanse Spirit removes curses only
                 creators["cleanse spirit curse"] = &TriggerFactoryInternal::cleanse_curse;
-                creators["cleanse spirit disease"] = &TriggerFactoryInternal::cleanse_disease;
-                creators["party member cleanse spirit poison"] = &TriggerFactoryInternal::party_member_cleanse_poison;
                 creators["party member cleanse spirit curse"] = &TriggerFactoryInternal::party_member_cleanse_curse;
-                creators["party member cleanse spirit disease"] = &TriggerFactoryInternal::party_member_cleanse_disease;
                 creators["shock"] = &TriggerFactoryInternal::shock;
                 creators["frost shock snare"] = &TriggerFactoryInternal::frost_shock_snare;
                 creators["heroism"] = &TriggerFactoryInternal::heroism;
                 creators["bloodlust"] = &TriggerFactoryInternal::bloodlust;
                 creators["maelstrom weapon"] = &TriggerFactoryInternal::maelstrom_weapon;
                 creators["wind shear on enemy healer"] = &TriggerFactoryInternal::wind_shear_on_enemy_healer;
-                creators["cure poison"] = &TriggerFactoryInternal::cure_poison;
-                creators["party member cure poison"] = &TriggerFactoryInternal::party_member_cure_poison;
-                creators["cure disease"] = &TriggerFactoryInternal::cure_disease;
-                creators["party member cure disease"] = &TriggerFactoryInternal::party_member_cure_disease;
             }
 
         private:
             static Trigger* maelstrom_weapon(PlayerbotAI* ai) { return new MaelstromWeaponTrigger(ai); }
             static Trigger* heroism(PlayerbotAI* ai) { return new HeroismTrigger(ai); }
             static Trigger* bloodlust(PlayerbotAI* ai) { return new BloodlustTrigger(ai); }
-            static Trigger* party_member_cleanse_disease(PlayerbotAI* ai) { return new PartyMemberCleanseSpiritDiseaseTrigger(ai); }
             static Trigger* party_member_cleanse_curse(PlayerbotAI* ai) { return new PartyMemberCleanseSpiritCurseTrigger(ai); }
-            static Trigger* party_member_cleanse_poison(PlayerbotAI* ai) { return new PartyMemberCleanseSpiritPoisonTrigger(ai); }
-            static Trigger* cleanse_disease(PlayerbotAI* ai) { return new CleanseSpiritDiseaseTrigger(ai); }
             static Trigger* cleanse_curse(PlayerbotAI* ai) { return new CleanseSpiritCurseTrigger(ai); }
-            static Trigger* cleanse_poison(PlayerbotAI* ai) { return new CleanseSpiritPoisonTrigger(ai); }
             static Trigger* water_breathing(PlayerbotAI* ai) { return new WaterBreathingTrigger(ai); }
             static Trigger* water_walking(PlayerbotAI* ai) { return new WaterWalkingTrigger(ai); }
             static Trigger* water_breathing_on_party(PlayerbotAI* ai) { return new WaterBreathingOnPartyTrigger(ai); }
             static Trigger* water_walking_on_party(PlayerbotAI* ai) { return new WaterWalkingOnPartyTrigger(ai); }
             static Trigger* windfury_totem(PlayerbotAI* ai) { return new WindfuryTotemTrigger(ai); }
-            static Trigger* grace_of_air_totem(PlayerbotAI* ai) { return new GraceOfAirTotemTrigger(ai); }
             static Trigger* mana_spring_totem(PlayerbotAI* ai) { return new ManaSpringTotemTrigger(ai); }
             static Trigger* flametongue_totem(PlayerbotAI* ai) { return new FlametongueTotemTrigger(ai); }
             static Trigger* strength_of_earth_totem(PlayerbotAI* ai) { return new StrengthOfEarthTotemTrigger(ai); }
@@ -147,10 +134,6 @@ namespace ai
             static Trigger* shock(PlayerbotAI* ai) { return new ShockTrigger(ai); }
             static Trigger* frost_shock_snare(PlayerbotAI* ai) { return new FrostShockSnareTrigger(ai); }
             static Trigger* wind_shear_on_enemy_healer(PlayerbotAI* ai) { return new WindShearInterruptEnemyHealerSpellTrigger(ai); }
-            static Trigger* cure_poison(PlayerbotAI* ai) { return new CurePoisonTrigger(ai); }
-            static Trigger* party_member_cure_poison(PlayerbotAI* ai) { return new PartyMemberCurePoisonTrigger(ai); }
-            static Trigger* cure_disease(PlayerbotAI* ai) { return new CureDiseaseTrigger(ai); }
-            static Trigger* party_member_cure_disease(PlayerbotAI* ai) { return new PartyMemberCureDiseaseTrigger(ai); }
         };
     };
 };
@@ -174,7 +157,6 @@ namespace ai
                 creators["searing totem"] = &AiObjectContextInternal::searing_totem;
                 creators["magma totem"] = &AiObjectContextInternal::magma_totem;
                 creators["windfury totem"] = &AiObjectContextInternal::windfury_totem;
-                creators["grace of air totem"] = &AiObjectContextInternal::grace_of_air_totem;
                 creators["mana spring totem"] = &AiObjectContextInternal::mana_spring_totem;
                 creators["mana tide totem"] = &AiObjectContextInternal::mana_tide_totem;
                 creators["healing stream totem"] = &AiObjectContextInternal::healing_stream_totem;
@@ -187,9 +169,9 @@ namespace ai
                 creators["earthliving weapon"] = &AiObjectContextInternal::earthliving_weapon;
                 creators["purge"] = &AiObjectContextInternal::purge;
                 creators["healing wave"] = &AiObjectContextInternal::healing_wave;
-                creators["lesser healing wave"] = &AiObjectContextInternal::lesser_healing_wave;
+                creators["healing surge"] = &AiObjectContextInternal::healing_surge;
                 creators["healing wave on party"] = &AiObjectContextInternal::healing_wave_on_party;
-                creators["lesser healing wave on party"] = &AiObjectContextInternal::lesser_healing_wave_on_party;
+                creators["healing surge on party"] = &AiObjectContextInternal::healing_surge_on_party;
                 creators["earth shield"] = &AiObjectContextInternal::earth_shield;
                 creators["earth shield on party"] = &AiObjectContextInternal::earth_shield_on_party;
                 creators["chain heal"] = &AiObjectContextInternal::chain_heal;
@@ -204,8 +186,6 @@ namespace ai
                 creators["water walking on party"] = &AiObjectContextInternal::water_walking_on_party;
                 creators["water breathing on party"] = &AiObjectContextInternal::water_breathing_on_party;
                 creators["cleanse spirit"] = &AiObjectContextInternal::cleanse_spirit;
-                creators["cleanse spirit poison on party"] = &AiObjectContextInternal::cleanse_spirit_poison_on_party;
-                creators["cleanse spirit disease on party"] = &AiObjectContextInternal::cleanse_spirit_disease_on_party;
                 creators["cleanse spirit curse on party"] = &AiObjectContextInternal::cleanse_spirit_curse_on_party;
                 creators["flame shock"] = &AiObjectContextInternal::flame_shock;
                 creators["earth shock"] = &AiObjectContextInternal::earth_shock;
@@ -215,10 +195,6 @@ namespace ai
                 creators["thunderstorm"] = &AiObjectContextInternal::thunderstorm;
                 creators["heroism"] = &AiObjectContextInternal::heroism;
                 creators["bloodlust"] = &AiObjectContextInternal::bloodlust;
-                creators["cure disease"] = &AiObjectContextInternal::cure_disease;
-                creators["cure disease on party"] = &AiObjectContextInternal::cure_disease_on_party;
-                creators["cure poison"] = &AiObjectContextInternal::cure_poison;
-                creators["cure poison on party"] = &AiObjectContextInternal::cure_poison_on_party;
             }
 
         private:
@@ -230,8 +206,6 @@ namespace ai
             static Action* frost_shock(PlayerbotAI* ai) { return new CastFrostShockAction(ai); }
             static Action* earth_shock(PlayerbotAI* ai) { return new CastEarthShockAction(ai); }
             static Action* flame_shock(PlayerbotAI* ai) { return new CastFlameShockAction(ai); }
-            static Action* cleanse_spirit_poison_on_party(PlayerbotAI* ai) { return new CastCleanseSpiritPoisonOnPartyAction(ai); }
-            static Action* cleanse_spirit_disease_on_party(PlayerbotAI* ai) { return new CastCleanseSpiritDiseaseOnPartyAction(ai); }
             static Action* cleanse_spirit_curse_on_party(PlayerbotAI* ai) { return new CastCleanseSpiritCurseOnPartyAction(ai); }
             static Action* cleanse_spirit(PlayerbotAI* ai) { return new CastCleanseSpiritAction(ai); }
             static Action* water_walking(PlayerbotAI* ai) { return new CastWaterWalkingAction(ai); }
@@ -246,7 +220,6 @@ namespace ai
             static Action* searing_totem(PlayerbotAI* ai) { return new CastSearingTotemAction(ai); }
             static Action* fire_nova(PlayerbotAI* ai) { return new CastFireNovaAction(ai); }
             static Action* windfury_totem(PlayerbotAI* ai) { return new CastWindfuryTotemAction(ai); }
-            static Action* grace_of_air_totem(PlayerbotAI* ai) { return new CastGraceOfAirTotemAction(ai); }
             static Action* mana_spring_totem(PlayerbotAI* ai) { return new CastManaSpringTotemAction(ai); }
             static Action* mana_tide_totem(PlayerbotAI* ai) { return new CastManaTideTotemAction(ai); }
             static Action* healing_stream_totem(PlayerbotAI* ai) { return new CastHealingStreamTotemAction(ai); }
@@ -258,9 +231,9 @@ namespace ai
             static Action* earthliving_weapon(PlayerbotAI* ai) { return new CastEarthlivingWeaponAction(ai); }
             static Action* purge(PlayerbotAI* ai) { return new CastPurgeAction(ai); }
             static Action* healing_wave(PlayerbotAI* ai) { return new CastHealingWaveAction(ai); }
-            static Action* lesser_healing_wave(PlayerbotAI* ai) { return new CastLesserHealingWaveAction(ai); }
+            static Action* healing_surge(PlayerbotAI* ai) { return new CastHealingSurgeAction(ai); }
             static Action* healing_wave_on_party(PlayerbotAI* ai) { return new CastHealingWaveOnPartyAction(ai); }
-            static Action* lesser_healing_wave_on_party(PlayerbotAI* ai) { return new CastLesserHealingWaveOnPartyAction(ai); }
+            static Action* healing_surge_on_party(PlayerbotAI* ai) { return new CastHealingSurgeOnPartyAction(ai); }
             static Action* earth_shield(PlayerbotAI* ai) { return new CastEarthShieldAction(ai); }
             static Action* earth_shield_on_party(PlayerbotAI* ai) { return new CastEarthShieldOnPartyAction(ai); }
             static Action* chain_heal(PlayerbotAI* ai) { return new CastChainHealAction(ai); }
@@ -270,10 +243,6 @@ namespace ai
             static Action* lava_lash(PlayerbotAI* ai) { return new CastLavaLashAction(ai); }
             static Action* ancestral_spirit(PlayerbotAI* ai) { return new CastAncestralSpiritAction(ai); }
             static Action* wind_shear_on_enemy_healer(PlayerbotAI* ai) { return new CastWindShearOnEnemyHealerAction(ai); }
-            static Action* cure_poison(PlayerbotAI* ai) { return new CastCurePoisonAction(ai); }
-            static Action* cure_poison_on_party(PlayerbotAI* ai) { return new CastCurePoisonOnPartyAction(ai); }
-            static Action* cure_disease(PlayerbotAI* ai) { return new CastCureDiseaseAction(ai); }
-            static Action* cure_disease_on_party(PlayerbotAI* ai) { return new CastCureDiseaseOnPartyAction(ai); }
         };
     };
 };

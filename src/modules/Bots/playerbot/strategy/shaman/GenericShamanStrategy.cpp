@@ -13,8 +13,8 @@ public:
         creators["flametongue weapon"] = &flametongue_weapon;
         creators["frostbrand weapon"] = &frostbrand_weapon;
         creators["windfury weapon"] = &windfury_weapon;
-        creators["lesser healing wave"] = &lesser_healing_wave;
-        creators["lesser healing wave on party"] = &lesser_healing_wave_on_party;
+        creators["healing surge"] = &healing_surge;
+        creators["healing surge on party"] = &healing_surge_on_party;
         creators["chain heal"] = &chain_heal;
         creators["riptide"] = &riptide;
         creators["chain heal on party"] = &chain_heal_on_party;
@@ -50,16 +50,16 @@ private:
             /*A*/ NextAction::array(0, new NextAction("rockbiter weapon"), NULL),
             /*C*/ NULL);
     }
-    static ActionNode* lesser_healing_wave(PlayerbotAI* ai)
+    static ActionNode* healing_surge(PlayerbotAI* ai)
     {
-        return new ActionNode ("lesser healing wave",
+        return new ActionNode ("healing surge",
             /*P*/ NULL,
             /*A*/ NextAction::array(0, new NextAction("healing wave"), NULL),
             /*C*/ NULL);
     }
-    static ActionNode* lesser_healing_wave_on_party(PlayerbotAI* ai)
+    static ActionNode* healing_surge_on_party(PlayerbotAI* ai)
     {
-        return new ActionNode ("lesser healing wave on party",
+        return new ActionNode ("healing surge on party",
             /*P*/ NULL,
             /*A*/ NextAction::array(0, new NextAction("healing wave on party"), NULL),
             /*C*/ NULL);
@@ -68,7 +68,7 @@ private:
     {
         return new ActionNode ("chain heal",
             /*P*/ NULL,
-            /*A*/ NextAction::array(0, new NextAction("lesser healing wave"), NULL),
+            /*A*/ NextAction::array(0, new NextAction("healing surge"), NULL),
             /*C*/ NULL);
     }
     static ActionNode* riptide(PlayerbotAI* ai)
@@ -82,7 +82,7 @@ private:
     {
         return new ActionNode ("chain heal on party",
             /*P*/ NULL,
-            /*A*/ NextAction::array(0, new NextAction("lesser healing wave on party"), NULL),
+            /*A*/ NextAction::array(0, new NextAction("healing surge on party"), NULL),
             /*C*/ NULL);
     }
     static ActionNode* riptide_on_party(PlayerbotAI* ai)
@@ -117,7 +117,7 @@ void GenericShamanStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "party member medium health",
-        NextAction::array(0, new NextAction("lesser healing wave on party", 25.0f), NULL)));
+        NextAction::array(0, new NextAction("healing surge on party", 25.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
@@ -129,7 +129,7 @@ void GenericShamanStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "medium health",
-        NextAction::array(0, new NextAction("lesser healing wave", 26.0f), NULL)));
+        NextAction::array(0, new NextAction("healing surge", 26.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low health",
@@ -160,40 +160,8 @@ void ShamanBuffManaStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
 void ShamanCureStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 {
-    triggers.push_back(new TriggerNode(
-        "cure poison",
-        NextAction::array(0, new NextAction("cure poison", 21.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member cure poison",
-        NextAction::array(0, new NextAction("cure poison on party", 21.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "cleanse spirit poison",
-        NextAction::array(0, new NextAction("cleanse spirit", 24.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member cleanse spirit poison",
-        NextAction::array(0, new NextAction("cleanse spirit poison on party", 23.0f), NULL)));
-
-
-    triggers.push_back(new TriggerNode(
-        "cure disease",
-        NextAction::array(0, new NextAction("cure disease", 31.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member cure disease",
-        NextAction::array(0, new NextAction("cure disease on party", 30.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "cleanse spirit disease",
-        NextAction::array(0, new NextAction("cleanse spirit", 24.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member cleanse spirit disease",
-        NextAction::array(0, new NextAction("cleanse spirit disease on party", 23.0f), NULL)));
-
-
+    // Cata 4.3.4: shaman poison/disease cures are gone (4.0.6 dispel rework);
+    // Cleanse Spirit removes curses only.
     triggers.push_back(new TriggerNode(
         "cleanse spirit curse",
         NextAction::array(0, new NextAction("cleanse spirit", 24.0f), NULL)));
@@ -201,5 +169,4 @@ void ShamanCureStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "party member cleanse spirit curse",
         NextAction::array(0, new NextAction("cleanse spirit curse on party", 23.0f), NULL)));
-
 }

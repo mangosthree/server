@@ -29,12 +29,6 @@ namespace ai
         WindfuryTotemTrigger(PlayerbotAI* ai) : TotemTrigger(ai, "windfury totem") {}
     };
 
-    class GraceOfAirTotemTrigger : public TotemTrigger
-    {
-    public:
-        GraceOfAirTotemTrigger(PlayerbotAI* ai) : TotemTrigger(ai, "grace of air totem") {}
-    };
-
     class ManaSpringTotemTrigger : public TotemTrigger {
     public:
         ManaSpringTotemTrigger(PlayerbotAI* ai) : TotemTrigger(ai, "mana spring totem") {}
@@ -130,18 +124,6 @@ namespace ai
         }
     };
 
-    class CleanseSpiritPoisonTrigger : public NeedCureTrigger
-    {
-    public:
-        CleanseSpiritPoisonTrigger(PlayerbotAI* ai) : NeedCureTrigger(ai, "cleanse spirit", DISPEL_POISON) {}
-    };
-
-    class PartyMemberCleanseSpiritPoisonTrigger : public PartyMemberNeedCureTrigger
-    {
-    public:
-        PartyMemberCleanseSpiritPoisonTrigger(PlayerbotAI* ai) : PartyMemberNeedCureTrigger(ai, "cleanse spirit", DISPEL_POISON) {}
-    };
-
     class CleanseSpiritCurseTrigger : public NeedCureTrigger
     {
     public:
@@ -154,17 +136,6 @@ namespace ai
         PartyMemberCleanseSpiritCurseTrigger(PlayerbotAI* ai) : PartyMemberNeedCureTrigger(ai, "cleanse spirit", DISPEL_CURSE) {}
     };
 
-    class CleanseSpiritDiseaseTrigger : public NeedCureTrigger
-    {
-    public:
-        CleanseSpiritDiseaseTrigger(PlayerbotAI* ai) : NeedCureTrigger(ai, "cleanse spirit", DISPEL_DISEASE) {}
-    };
-
-    class PartyMemberCleanseSpiritDiseaseTrigger : public PartyMemberNeedCureTrigger
-    {
-    public:
-        PartyMemberCleanseSpiritDiseaseTrigger(PlayerbotAI* ai) : PartyMemberNeedCureTrigger(ai, "cleanse spirit", DISPEL_DISEASE) {}
-    };
 
     class ShockTrigger : public DebuffTrigger {
     public:
@@ -201,27 +172,4 @@ namespace ai
         WindShearInterruptEnemyHealerSpellTrigger(PlayerbotAI* ai) : InterruptEnemyHealerTrigger(ai, "wind shear") {}
     };
 
-    class CurePoisonTrigger : public NeedCureTrigger
-    {
-    public:
-        CurePoisonTrigger(PlayerbotAI* ai) : NeedCureTrigger(ai, "cure poison", DISPEL_POISON) {}
-    };
-
-    class PartyMemberCurePoisonTrigger : public PartyMemberNeedCureTrigger
-    {
-    public:
-        PartyMemberCurePoisonTrigger(PlayerbotAI* ai) : PartyMemberNeedCureTrigger(ai, "cure poison", DISPEL_POISON) {}
-    };
-
-    class CureDiseaseTrigger : public NeedCureTrigger
-    {
-    public:
-        CureDiseaseTrigger(PlayerbotAI* ai) : NeedCureTrigger(ai, "cure disease", DISPEL_DISEASE) {}
-    };
-
-    class PartyMemberCureDiseaseTrigger : public PartyMemberNeedCureTrigger
-    {
-    public:
-        PartyMemberCureDiseaseTrigger(PlayerbotAI* ai) : PartyMemberNeedCureTrigger(ai, "cure disease", DISPEL_DISEASE) {}
-    };
 }

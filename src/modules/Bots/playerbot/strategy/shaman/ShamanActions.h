@@ -4,15 +4,16 @@
 
 namespace ai
 {
-    class CastLesserHealingWaveAction : public CastHealingSpellAction {
+    /// Cata 4.3.4: Lesser Healing Wave was renamed Healing Surge
+    class CastHealingSurgeAction : public CastHealingSpellAction {
     public:
-        CastLesserHealingWaveAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "lesser healing wave") {}
+        CastHealingSurgeAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "healing surge") {}
     };
 
-    class CastLesserHealingWaveOnPartyAction : public HealPartyMemberAction
+    class CastHealingSurgeOnPartyAction : public HealPartyMemberAction
     {
     public:
-        CastLesserHealingWaveOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "lesser healing wave") {}
+        CastHealingSurgeOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "healing surge") {}
     };
 
 
@@ -135,12 +136,6 @@ namespace ai
         CastHealingStreamTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "healing stream totem") {}
     };
 
-    class CastCleansingTotemAction : public CastTotemAction
-    {
-    public:
-        CastCleansingTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "cleansing totem") {}
-    };
-
     class CastFlametongueTotemAction : public CastTotemAction
     {
     public:
@@ -152,12 +147,6 @@ namespace ai
     {
     public:
         CastWindfuryTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "windfury totem") {}
-    };
-
-    class CastGraceOfAirTotemAction : public CastTotemAction
-    {
-    public:
-        CastGraceOfAirTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "grace of air totem") {}
     };
 
     class CastSearingTotemAction : public CastTotemAction
@@ -235,26 +224,12 @@ namespace ai
         CastCleanseSpiritAction(PlayerbotAI* ai) : CastCureSpellAction(ai, "cleanse spirit") {}
     };
 
-    class CastCleanseSpiritPoisonOnPartyAction : public CurePartyMemberAction
-    {
-    public:
-        CastCleanseSpiritPoisonOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cleanse spirit", DISPEL_POISON) {}
-
-        virtual string getName() { return "cleanse spirit poison on party"; }
-    };
     class CastCleanseSpiritCurseOnPartyAction : public CurePartyMemberAction
     {
     public:
         CastCleanseSpiritCurseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cleanse spirit", DISPEL_CURSE) {}
 
         virtual string getName() { return "cleanse spirit curse on party"; }
-    };
-    class CastCleanseSpiritDiseaseOnPartyAction : public CurePartyMemberAction
-    {
-    public:
-        CastCleanseSpiritDiseaseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cleanse spirit", DISPEL_DISEASE) {}
-
-        virtual string getName() { return "cleanse spirit disease on party"; }
     };
 
     class CastFlameShockAction : public CastDebuffSpellAction
@@ -311,27 +286,4 @@ namespace ai
         CastWindShearOnEnemyHealerAction(PlayerbotAI* ai) : CastSpellOnEnemyHealerAction(ai, "wind shear") {}
     };
 
-    class CastCurePoisonAction : public CastCureSpellAction
-    {
-    public:
-        CastCurePoisonAction(PlayerbotAI* ai) : CastCureSpellAction(ai, "cure poison") {}
-    };
-
-    class CastCurePoisonOnPartyAction : public CurePartyMemberAction
-    {
-    public:
-        CastCurePoisonOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cure poison", DISPEL_POISON) {}
-    };
-
-    class CastCureDiseaseAction : public CastCureSpellAction {
-    public:
-        CastCureDiseaseAction(PlayerbotAI* ai) : CastCureSpellAction(ai, "cure disease") {}
-    };
-
-    class CastCureDiseaseOnPartyAction : public CurePartyMemberAction
-    {
-    public:
-        CastCureDiseaseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cure disease", DISPEL_DISEASE) {}
-        virtual string getName() { return "cure disease on party"; }
-    };
 }

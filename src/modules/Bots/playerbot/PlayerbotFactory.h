@@ -159,11 +159,6 @@ private:
     void ClearInventory();
 
     /**
-     * @brief Initializes the ammo for the player bot.
-     */
-    void InitAmmo();
-
-    /**
      * @brief Initializes the mounts for the player bot.
      */
     void InitMounts();

@@ -51,7 +51,6 @@ void PlayerbotFactory::Refresh()
 {
     Prepare();
     InitEquipment(true);
-    InitAmmo();
     InitFood();
     InitPotions();
     InitPet();
@@ -181,9 +180,6 @@ void PlayerbotFactory::Randomize(bool incremental)
 
     sLog.outDetail("Initializing bags...");
     InitBags();
-
-    sLog.outDetail("Initializing ammo...");
-    InitAmmo();
 
     sLog.outDetail("Initializing food...");
     InitFood();
@@ -1793,68 +1789,6 @@ void PlayerbotFactory::ClearInventory()
 {
     DestroyItemsVisitor visitor(bot);
     IterateItems(&visitor);
-}
-
-/**
- * Initializes the ammo for the player bot.
- */
-void PlayerbotFactory::InitAmmo()
-{
-    // Check if the bot's class requires ammo
-    if (bot->getClass() != CLASS_HUNTER && bot->getClass() != CLASS_ROGUE && bot->getClass() != CLASS_WARRIOR)
-    {
-        return;
-    }
-
-    Item* const pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-    if (!pItem)
-    {
-        return;
-    }
-
-    uint32 subClass = 0;
-    // Determine the type of ammo required based on the ranged weapon
-    switch (pItem->GetProto()->SubClass)
-    {
-    case ITEM_SUBCLASS_WEAPON_GUN:
-        subClass = ITEM_SUBCLASS_BULLET;
-        break;
-    case ITEM_SUBCLASS_WEAPON_BOW:
-    case ITEM_SUBCLASS_WEAPON_CROSSBOW:
-        subClass = ITEM_SUBCLASS_ARROW;
-        break;
-    }
-
-    if (!subClass)
-    {
-        return;
-    }
-
-    // Query the database for the highest level ammo that the bot can use
-    QueryResult *results = WorldDatabase.PQuery("select max(`entry`), max(`RequiredLevel`) from `item_template` where `class` = '%u' and `subclass` = '%u' and `RequiredLevel` <= '%u'",
-            ITEM_CLASS_PROJECTILE, subClass, bot->getLevel());
-    if (!results)
-    {
-        return;
-    }
-
-    Field* fields = results->Fetch();
-    if (fields)
-    {
-        uint32 entry = fields[0].GetUInt32();
-        // Add the ammo to the bot's inventory
-        for (int i = 0; i < 10; i++)
-        {
-            Item* newItem = bot->StoreNewItemInInventorySlot(entry, 200);
-            if (newItem)
-            {
-                newItem->AddToUpdateQueueOf(bot);
-            }
-        }
-        bot->SetAmmo(entry);
-    }
-
-    delete results;
 }
 
 /**

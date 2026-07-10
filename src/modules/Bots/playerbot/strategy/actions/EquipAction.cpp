@@ -35,18 +35,11 @@ void EquipAction::EquipItem(Item& item)
 {
     uint8 bagIndex = item.GetBagSlot();
     uint8 slot = item.GetSlot();
-    uint32 itemId = item.GetProto()->ItemId;
 
-    if (item.GetProto()->InventoryType == INVTYPE_AMMO)
-    {
-        bot->SetAmmo(itemId);
-    }
-    else
-    {
-        WorldPacket* const packet = new WorldPacket(CMSG_AUTOEQUIP_ITEM, 2);
-            *packet << bagIndex << slot;
-        bot->GetSession()->QueuePacket(packet);
-    }
+    // Cata 4.3.4: ammo removed; INVTYPE_AMMO no longer special-cased.
+    WorldPacket* const packet = new WorldPacket(CMSG_AUTOEQUIP_ITEM, 2);
+    *packet << bagIndex << slot;
+    bot->GetSession()->QueuePacket(packet);
 
     ostringstream out; out << "equipping " << chat->formatItem(item.GetProto());
     ai->TellMaster(out);

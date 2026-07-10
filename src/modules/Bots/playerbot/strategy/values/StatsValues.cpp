@@ -85,6 +85,12 @@ uint8 ManaValue::Calculate()
     {
         return 100;
     }
+    // Cata: hunters/warriors/rogues/DKs have max mana 0 - avoid NaN and keep
+    // "low mana" style triggers quiet for mana-less classes.
+    if (!target->GetMaxPower(POWER_MANA))
+    {
+        return 100;
+    }
     return (static_cast<float> (target->GetPower(POWER_MANA)) / target->GetMaxPower(POWER_MANA)) * 100;
 }
 

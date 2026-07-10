@@ -1291,8 +1291,8 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target)
     Spell *spell = new Spell(bot, pSpellInfo, false);
     if (bot->isMoving() && spell->GetCastTime())
     {
-        delete spell;
         spell->cancel();
+        delete spell;
         return false;
     }
 
@@ -1349,7 +1349,11 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target)
         }
     }
 
-    if (!bot->IsInFront(faceTo, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT) && !bot->IsTaxiFlying())
+    // Never facing-check a self-cast: IsInFront(self) compares GetAngle(self)=0
+    // against the bot's orientation, so self-buffs would only ever succeed while
+    // the bot happened to face east (and a client-less bot cannot complete the
+    // SetFacingTo below to correct it).
+    if (faceTo != bot && !bot->IsInFront(faceTo, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT) && !bot->IsTaxiFlying())
     {
         bot->SetFacingTo(bot->GetAngle(faceTo));
         spell->cancel();

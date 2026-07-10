@@ -477,8 +477,18 @@ void WorldSession::HandleBotPackets()
     WorldPacket* packet;
     while (_recvQueue.next(packet))
     {
-        OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
-        (this->*opHandle.handler)(*packet);
+        try
+        {
+            OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+            (this->*opHandle.handler)(*packet);
+        }
+        catch (ByteBufferException&)
+        {
+            // A malformed bot-built packet must not kill the world thread;
+            // mirror the catch in WorldSession::Update.
+            sLog.outError("WorldSession::HandleBotPackets ByteBufferException occured while parsing a packet (opcode: %u) from bot %s, accountid=%i.",
+                          packet->GetOpcode(), GetPlayerName(), GetAccountId());
+        }
         delete packet;
     }
 }

@@ -100,14 +100,26 @@ bool UseItemAction::UseItem(Item* item, ObjectGuid goGuid, Item* itemTarget)
     }
     uint8 bagIndex = item->GetBagSlot();
     uint8 slot = item->GetSlot();
-    uint8 spell_count = 0;
     uint8 cast_count = 1;
-    uint64 item_guid = item->GetObjectGuid().GetRawValue();
-    //uint32 glyphIndex = 0;
-    //uint8 unk_flags = 0;
+    ObjectGuid item_guid = item->GetObjectGuid();
+    uint32 glyphIndex = 0;
+    uint8 cast_flags = 0;
 
-    WorldPacket* const packet = new WorldPacket(CMSG_USE_ITEM, 1 + 1 + 1 + 4 + 8 + 4 + 1 + 8 + 1);
-    *packet << bagIndex << slot << spell_count << cast_count << item_guid; //<< glyphIndex << unk_flags;
+    // Cata 4.3.4 CMSG_USE_ITEM header includes the spell id (see
+    // WorldSession::HandleUseItemOpcode); it is only used for error
+    // reporting, so the item's first spell is sufficient.
+    uint32 headerSpellId = 0;
+    for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+    {
+        if (item->GetProto()->Spells[i].SpellId)
+        {
+            headerSpellId = item->GetProto()->Spells[i].SpellId;
+            break;
+        }
+    }
+
+    WorldPacket* const packet = new WorldPacket(CMSG_USE_ITEM, 1 + 1 + 1 + 4 + 8 + 4 + 1 + 4 + 8);
+    *packet << bagIndex << slot << cast_count << headerSpellId << item_guid << glyphIndex << cast_flags;
 
     bool targetSelected = false;
     ostringstream out; out << "Using " << chat->formatItem(item->GetProto());

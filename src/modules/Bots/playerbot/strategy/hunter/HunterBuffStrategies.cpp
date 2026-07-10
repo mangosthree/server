@@ -29,7 +29,7 @@ void HunterBuffSpeedStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
 void HunterBuffManaStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 {
-    triggers.push_back(new TriggerNode(
-        "aspect of the viper",
-        NextAction::array(0, new NextAction("aspect of the viper", 10.0f), NULL)));
+    // Cata 4.3.4: hunters use focus; Aspect of the Viper is gone. Kept as an
+    // empty strategy because the generic non-combat engine requests "bmana"
+    // by name for every class (AiFactory).
 }

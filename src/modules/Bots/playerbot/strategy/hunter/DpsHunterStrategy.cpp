@@ -15,16 +15,8 @@ public:
         creators["chimera shot"] = &chimera_shot;
         creators["explosive shot"] = &explosive_shot;
         creators["concussive shot"] = &concussive_shot;
-        creators["viper sting"] = &viper_sting;
     }
 private:
-    static ActionNode* viper_sting(PlayerbotAI* ai)
-    {
-        return new ActionNode ("viper sting",
-            /*P*/ NULL,
-            /*A*/ NextAction::array(0, new NextAction("mana potion", 10.0f), NULL),
-            /*C*/ NULL);
-    }
     static ActionNode* aimed_shot(PlayerbotAI* ai)
     {
         return new ActionNode ("aimed shot",
@@ -73,10 +65,6 @@ void DpsHunterStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "black arrow",
         NextAction::array(0, new NextAction("black arrow", 51.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "low mana",
-        NextAction::array(0, new NextAction("viper sting", ACTION_EMERGENCY + 5), NULL)));
 
     triggers.push_back(new TriggerNode(
         "no pet",

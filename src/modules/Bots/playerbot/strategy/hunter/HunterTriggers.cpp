@@ -10,8 +10,7 @@ bool HunterNoStingsActiveTrigger::IsActive()
     Unit* target = AI_VALUE(Unit*, "current target");
     return target && AI_VALUE2(uint8, "health", "current target") > 40 &&
         !ai->HasAura("serpent sting", target) &&
-        !ai->HasAura("scorpid sting", target) &&
-        !ai->HasAura("viper sting", target);
+        !ai->HasAura("scorpid sting", target);
 }
 
 bool HuntersPetDeadTrigger::IsActive()
@@ -26,9 +25,5 @@ bool HuntersPetLowHealthTrigger::IsActive()
         !AI_VALUE2(bool, "dead", "pet target") && !AI_VALUE2(bool, "mounted", "self target");
 }
 
-bool HunterPetNotHappy::IsActive()
-{
-    return !AI_VALUE(bool, "pet happy") && !AI_VALUE2(bool, "mounted", "self target");
-}
 
 

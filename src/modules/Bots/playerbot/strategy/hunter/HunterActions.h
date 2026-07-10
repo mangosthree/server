@@ -45,10 +45,6 @@ namespace ai
     BEGIN_RANGED_SPELL_ACTION(CastWyvernStingAction, "wyvern sting")
     END_SPELL_ACTION()
 
-    BEGIN_RANGED_SPELL_ACTION(CastViperStingAction, "viper sting")
-    virtual bool isUseful();
-    END_SPELL_ACTION()
-
     BEGIN_RANGED_SPELL_ACTION(CastScorpidStingAction, "scorpid sting")
     END_SPELL_ACTION()
 
@@ -75,12 +71,6 @@ namespace ai
     {
     public:
         CastAspectOfThePackAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "aspect of the pack") {}
-    };
-
-    class CastAspectOfTheViperAction : public CastBuffSpellAction
-    {
-    public:
-        CastAspectOfTheViperAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "aspect of the viper") {}
     };
 
     class CastCallPetAction : public CastBuffSpellAction
@@ -159,10 +149,4 @@ namespace ai
         CastSerpentStingOnAttackerAction(PlayerbotAI* ai) : CastDebuffSpellOnAttackerAction(ai, "serpent sting") {}
     };
 
-    class FeedPetAction : public Action
-    {
-    public:
-        FeedPetAction(PlayerbotAI* ai) : Action(ai, "feed pet") {}
-        virtual bool Execute(Event event);
-    };
 }

@@ -23,16 +23,6 @@ namespace ai
         }
     };
 
-    class HunterAspectOfTheViperTrigger : public BuffTrigger
-    {
-    public:
-        HunterAspectOfTheViperTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "aspect of the viper") {}
-        virtual bool IsActive()
-        {
-            return SpellTrigger::IsActive() && !ai->HasAura(spell, GetTarget());
-        }
-    };
-
     class HunterAspectOfThePackTrigger : public BuffTrigger
     {
     public:
@@ -84,8 +74,6 @@ namespace ai
         SerpentStingOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "serpent sting") {}
     };
 
-    BEGIN_TRIGGER(HunterPetNotHappy, Trigger)
-    END_TRIGGER()
 
     class ConsussiveShotSnareTrigger : public SnareTargetTrigger
     {

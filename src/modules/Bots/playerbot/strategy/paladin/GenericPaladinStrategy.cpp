@@ -15,6 +15,13 @@ void GenericPaladinStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 {
     MeleeCombatStrategy::InitTriggers(triggers);
 
+    // Judgement requires an active seal (SPELL_FAILED_CASTER_AURASTATE without
+    // one); keep a baseline seal up for every spec. The b* buff strategies
+    // override this with their preferred seal at higher relevance (89-90).
+    triggers.push_back(new TriggerNode(
+        "seal",
+        NextAction::array(0, new NextAction("seal of righteousness", 87.0f), NULL)));
+
     triggers.push_back(new TriggerNode(
         "low health",
         NextAction::array(0, new NextAction("divine protection", ACTION_CRITICAL_HEAL + 2), new NextAction("holy light", ACTION_CRITICAL_HEAL + 2), NULL)));

@@ -10,16 +10,16 @@ class DpsPaladinStrategyActionNodeFactory : public NamedObjectFactory<ActionNode
 public:
     DpsPaladinStrategyActionNodeFactory()
     {
-        creators["seal of vengeance"] = &seal_of_vengeance;
+        creators["seal of truth"] = &seal_of_truth;
         creators["seal of command"] = &seal_of_command;
         creators["blessing of might"] = &blessing_of_might;
         creators["crusader strike"] = &crusader_strike;
     }
 
 private:
-    static ActionNode* seal_of_vengeance(PlayerbotAI* ai)
+    static ActionNode* seal_of_truth(PlayerbotAI* ai)
     {
-        return new ActionNode ("seal of vengeance",
+        return new ActionNode ("seal of truth",
             /*P*/ NULL,
             /*A*/ NextAction::array(0, new NextAction("seal of command"), NULL),
             /*C*/ NULL);
@@ -28,7 +28,7 @@ private:
     {
         return new ActionNode ("seal of command",
             /*P*/ NULL,
-            /*A*/ NextAction::array(0, new NextAction("seal of wisdom"), NULL),
+            /*A*/ NextAction::array(0, new NextAction("seal of insight"), NULL),
             /*C*/ NULL);
     }
     static ActionNode* blessing_of_might(PlayerbotAI* ai)
@@ -66,8 +66,8 @@ void DpsPaladinStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("divine shield", ACTION_CRITICAL_HEAL + 2), new NextAction("holy light", ACTION_CRITICAL_HEAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "judgement of wisdom",
-        NextAction::array(0, new NextAction("judgement of wisdom", ACTION_NORMAL + 2), NULL)));
+        "judgement",
+        NextAction::array(0, new NextAction("judgement", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium aoe",

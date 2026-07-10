@@ -22,8 +22,9 @@ namespace ai
         virtual bool IsActive();
     };
 
-    DEBUFF_TRIGGER(JudgementOfLightTrigger, "judgement of light", "judgement of light")
-    DEBUFF_TRIGGER(JudgementOfWisdomTrigger, "judgement of wisdom", "judgement of wisdom")
+    // Cata 4.3.4: single Judgement; no per-buff debuff remains, so this fires
+    // whenever the spell is ready (CanCastSpell handles the cooldown)
+    DEBUFF_TRIGGER(JudgementTrigger, "judgement", "judgement")
 
     class BlessingOnPartyTrigger : public BuffOnPartyTrigger
     {
@@ -34,7 +35,7 @@ namespace ai
     class BlessingTrigger : public BuffTrigger
     {
     public:
-        BlessingTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "blessing of sanctuary", 5) {}
+        BlessingTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "blessing of kings", 5) {}
     };
 
     class HammerOfJusticeInterruptSpellTrigger : public InterruptSpellTrigger
@@ -55,22 +56,10 @@ namespace ai
         ArtOfWarTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "the art of war") {}
     };
 
-    class ShadowResistanceAuraTrigger : public BuffTrigger
+    class ResistanceAuraTrigger : public BuffTrigger
     {
     public:
-        ShadowResistanceAuraTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "shadow resistance aura") {}
-    };
-
-    class FrostResistanceAuraTrigger : public BuffTrigger
-    {
-    public:
-        FrostResistanceAuraTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "frost resistance aura") {}
-    };
-
-    class FireResistanceAuraTrigger : public BuffTrigger
-    {
-    public:
-        FireResistanceAuraTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "fire resistance aura") {}
+        ResistanceAuraTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "resistance aura") {}
     };
 
     class DevotionAuraTrigger : public BuffTrigger

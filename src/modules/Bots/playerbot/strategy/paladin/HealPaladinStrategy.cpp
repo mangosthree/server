@@ -28,5 +28,5 @@ void HealPaladinStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "blessing",
-        NextAction::array(0, new NextAction("blessing of sanctuary", ACTION_HIGH + 9), NULL)));
+        NextAction::array(0, new NextAction("blessing of kings", ACTION_HIGH + 9), NULL)));
 }

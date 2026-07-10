@@ -3,22 +3,11 @@
 
 namespace ai
 {
-    class CastJudgementOfLightAction : public CastMeleeSpellAction
+    /// Cata 4.3.4: the per-buff judgements were merged into a single Judgement
+    class CastJudgementAction : public CastMeleeSpellAction
     {
     public:
-        CastJudgementOfLightAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "judgement of light") {}
-    };
-
-    class CastJudgementOfWisdomAction : public CastMeleeSpellAction
-    {
-    public:
-        CastJudgementOfWisdomAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "judgement of wisdom") {}
-    };
-
-    class CastJudgementOfJusticeAction : public CastMeleeSpellAction
-    {
-    public:
-        CastJudgementOfJusticeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "judgement of justice") {}
+        CastJudgementAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "judgement") {}
     };
 
     class CastRighteousFuryAction : public CastBuffSpellAction
@@ -57,22 +46,11 @@ namespace ai
         CastCrusaderStrikeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "crusader strike") {}
     };
 
-    class CastShadowResistanceAuraAction : public CastBuffSpellAction
+    /// Cata 4.3.4: fire/frost/shadow resistance auras were merged into one
+    class CastResistanceAuraAction : public CastBuffSpellAction
     {
     public:
-        CastShadowResistanceAuraAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "shadow resistance aura") {}
-    };
-
-    class CastFrostResistanceAuraAction : public CastBuffSpellAction
-    {
-    public:
-        CastFrostResistanceAuraAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "frost resistance aura") {}
-    };
-
-    class CastFireResistanceAuraAction : public CastBuffSpellAction
-    {
-    public:
-        CastFireResistanceAuraAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "fire resistance aura") {}
+        CastResistanceAuraAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "resistance aura") {}
     };
 
     class CastCrusaderAuraAction : public CastBuffSpellAction
@@ -94,16 +72,11 @@ namespace ai
     };
 
 
-    class CastSealOfLightAction : public CastBuffSpellAction
+    /// Cata 4.3.4: Seal of Light/Wisdom were merged into Seal of Insight
+    class CastSealOfInsightAction : public CastBuffSpellAction
     {
     public:
-        CastSealOfLightAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "seal of light") {}
-    };
-
-    class CastSealOfWisdomAction : public CastBuffSpellAction
-    {
-    public:
-        CastSealOfWisdomAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "seal of wisdom") {}
+        CastSealOfInsightAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "seal of insight") {}
     };
 
     class CastSealOfCommandAction : public CastBuffSpellAction
@@ -112,10 +85,11 @@ namespace ai
         CastSealOfCommandAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "seal of command") {}
     };
 
-    class CastSealOfVengeanceAction : public CastBuffSpellAction
+    /// Cata 4.3.4: Seal of Vengeance was renamed Seal of Truth
+    class CastSealOfTruthAction : public CastBuffSpellAction
     {
     public:
-        CastSealOfVengeanceAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "seal of vengeance") {}
+        CastSealOfTruthAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "seal of truth") {}
     };
 
 
@@ -132,19 +106,6 @@ namespace ai
         virtual string getName() { return "blessing of might on party";}
     };
 
-    class CastBlessingOfWisdomAction : public CastBuffSpellAction
-    {
-    public:
-        CastBlessingOfWisdomAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "blessing of wisdom") {}
-    };
-
-    class CastBlessingOfWisdomOnPartyAction : public BuffOnPartyAction
-    {
-    public:
-        CastBlessingOfWisdomOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "blessing of wisdom") {}
-        virtual string getName() { return "blessing of wisdom on party";}
-    };
-
     class CastBlessingOfKingsAction : public CastBuffSpellAction
     {
     public:
@@ -156,19 +117,6 @@ namespace ai
     public:
         CastBlessingOfKingsOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "blessing of kings") {}
         virtual string getName() { return "blessing of kings on party";}
-    };
-
-    class CastBlessingOfSanctuaryAction : public CastBuffSpellAction
-    {
-    public:
-        CastBlessingOfSanctuaryAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "blessing of sanctuary") {}
-    };
-
-    class CastBlessingOfSanctuaryOnPartyAction : public BuffOnPartyAction
-    {
-    public:
-        CastBlessingOfSanctuaryOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "blessing of sanctuary") {}
-        virtual string getName() { return "blessing of sanctuary on party";}
     };
 
     class CastHolyLightAction : public CastHealingSpellAction
@@ -261,34 +209,6 @@ namespace ai
     {
     public:
         CastHammerOfTheRighteousAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "hammer of the righteous") {}
-    };
-
-    class CastPurifyPoisonAction : public CastCureSpellAction
-    {
-    public:
-        CastPurifyPoisonAction(PlayerbotAI* ai) : CastCureSpellAction(ai, "purify") {}
-    };
-
-    class CastPurifyDiseaseAction : public CastCureSpellAction
-    {
-    public:
-        CastPurifyDiseaseAction(PlayerbotAI* ai) : CastCureSpellAction(ai, "purify") {}
-    };
-
-    class CastPurifyPoisonOnPartyAction : public CurePartyMemberAction
-    {
-    public:
-        CastPurifyPoisonOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "purify", DISPEL_POISON) {}
-
-        virtual string getName() { return "purify poison on party"; }
-    };
-
-    class CastPurifyDiseaseOnPartyAction : public CurePartyMemberAction
-    {
-    public:
-        CastPurifyDiseaseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "purify", DISPEL_DISEASE) {}
-
-        virtual string getName() { return "purify disease on party"; }
     };
 
     class CastHandOfReckoningAction : public CastSpellAction

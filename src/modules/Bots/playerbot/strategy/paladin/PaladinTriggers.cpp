@@ -10,10 +10,9 @@ bool SealTrigger::IsActive()
     Unit* target = GetTarget();
     return !ai->HasAura("seal of justice", target) &&
         !ai->HasAura("seal of command", target) &&
-        !ai->HasAura("seal of vengeance", target) &&
+        !ai->HasAura("seal of truth", target) &&
         !ai->HasAura("seal of righteousness", target) &&
-        !ai->HasAura("seal of light", target) &&
-        !ai->HasAura("seal of wisdom", target);
+        !ai->HasAura("seal of insight", target);
 }
 
 bool CrusaderAuraTrigger::IsActive()

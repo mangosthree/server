@@ -25,92 +25,35 @@ map<uint8, vector<uint8> > RandomPlayerbotFactory::availableRaces;
 
 /**
  * Constructor for RandomPlayerbotFactory.
- * Initializes the available races for each class.
+ * Initializes the available races for each class from the core's
+ * player-create data, so the matrix always matches this expansion's
+ * legal race/class combos (goblin, worgen, tauren paladin, ...).
  * @param accountId The account ID for the random bot.
  */
 RandomPlayerbotFactory::RandomPlayerbotFactory(uint32 accountId) : accountId(accountId)
 {
-    availableRaces[CLASS_WARRIOR].push_back(RACE_HUMAN);
-    availableRaces[CLASS_WARRIOR].push_back(RACE_NIGHTELF);
-    availableRaces[CLASS_WARRIOR].push_back(RACE_GNOME);
-    availableRaces[CLASS_WARRIOR].push_back(RACE_DWARF);
-    availableRaces[CLASS_WARRIOR].push_back(RACE_ORC);
-    availableRaces[CLASS_WARRIOR].push_back(RACE_UNDEAD);
-    availableRaces[CLASS_WARRIOR].push_back(RACE_TAUREN);
-    availableRaces[CLASS_WARRIOR].push_back(RACE_TROLL);
-#if !defined(CLASSIC)
-    availableRaces[CLASS_WARRIOR].push_back(RACE_DRAENEI);
-#endif
+    // availableRaces is static and the factory is constructed once per
+    // account - only build the matrix once.
+    if (!availableRaces.empty())
+    {
+        return;
+    }
 
-    availableRaces[CLASS_PALADIN].push_back(RACE_HUMAN);
-    availableRaces[CLASS_PALADIN].push_back(RACE_DWARF);
-#if !defined(CLASSIC)
-    availableRaces[CLASS_PALADIN].push_back(RACE_DRAENEI);
-    availableRaces[CLASS_PALADIN].push_back(RACE_BLOODELF);
-#endif
+    for (uint32 cls = CLASS_WARRIOR; cls < MAX_CLASSES; ++cls)
+    {
+        if (cls == CLASS_DEATH_KNIGHT)
+        {
+            continue; // no Death Knight bot AI yet
+        }
 
-    availableRaces[CLASS_ROGUE].push_back(RACE_HUMAN);
-    availableRaces[CLASS_ROGUE].push_back(RACE_DWARF);
-    availableRaces[CLASS_ROGUE].push_back(RACE_NIGHTELF);
-    availableRaces[CLASS_ROGUE].push_back(RACE_GNOME);
-    availableRaces[CLASS_ROGUE].push_back(RACE_ORC);
-    availableRaces[CLASS_ROGUE].push_back(RACE_TROLL);
-#if !defined(CLASSIC)
-    availableRaces[CLASS_ROGUE].push_back(RACE_BLOODELF);
-#endif
-    availableRaces[CLASS_PRIEST].push_back(RACE_HUMAN);
-    availableRaces[CLASS_PRIEST].push_back(RACE_DWARF);
-    availableRaces[CLASS_PRIEST].push_back(RACE_NIGHTELF);
-#if !defined(CLASSIC)
-    availableRaces[CLASS_PRIEST].push_back(RACE_DRAENEI);
-#endif
-    availableRaces[CLASS_PRIEST].push_back(RACE_TROLL);
-    availableRaces[CLASS_PRIEST].push_back(RACE_UNDEAD);
-#if !defined(CLASSIC)
-    availableRaces[CLASS_PRIEST].push_back(RACE_DRAENEI);
-    availableRaces[CLASS_PRIEST].push_back(RACE_BLOODELF);
-#endif
-    availableRaces[CLASS_MAGE].push_back(RACE_HUMAN);
-    availableRaces[CLASS_MAGE].push_back(RACE_GNOME);
-#if !defined(CLASSIC)
-    availableRaces[CLASS_MAGE].push_back(RACE_DRAENEI);
-#endif
-    availableRaces[CLASS_MAGE].push_back(RACE_UNDEAD);
-    availableRaces[CLASS_MAGE].push_back(RACE_TROLL);
-#if !defined(CLASSIC)
-    availableRaces[CLASS_MAGE].push_back(RACE_DRAENEI);
-    availableRaces[CLASS_MAGE].push_back(RACE_BLOODELF);
-#endif
-
-    availableRaces[CLASS_WARLOCK].push_back(RACE_HUMAN);
-    availableRaces[CLASS_WARLOCK].push_back(RACE_GNOME);
-    availableRaces[CLASS_WARLOCK].push_back(RACE_UNDEAD);
-    availableRaces[CLASS_WARLOCK].push_back(RACE_ORC);
-#if !defined(CLASSIC)
-    availableRaces[CLASS_WARLOCK].push_back(RACE_BLOODELF);
-#endif
-
-#if !defined(CLASSIC)
-    availableRaces[CLASS_SHAMAN].push_back(RACE_DRAENEI);
-#endif
-    availableRaces[CLASS_SHAMAN].push_back(RACE_ORC);
-    availableRaces[CLASS_SHAMAN].push_back(RACE_TAUREN);
-    availableRaces[CLASS_SHAMAN].push_back(RACE_TROLL);
-#if !defined(CLASSIC)
-    availableRaces[CLASS_SHAMAN].push_back(RACE_DRAENEI);
-#endif
-    availableRaces[CLASS_HUNTER].push_back(RACE_DWARF);
-    availableRaces[CLASS_HUNTER].push_back(RACE_NIGHTELF);
-    availableRaces[CLASS_HUNTER].push_back(RACE_ORC);
-    availableRaces[CLASS_HUNTER].push_back(RACE_TAUREN);
-    availableRaces[CLASS_HUNTER].push_back(RACE_TROLL);
-#if !defined(CLASSIC)
-    availableRaces[CLASS_HUNTER].push_back(RACE_DRAENEI);
-    availableRaces[CLASS_HUNTER].push_back(RACE_BLOODELF);
-#endif
-
-    availableRaces[CLASS_DRUID].push_back(RACE_NIGHTELF);
-    availableRaces[CLASS_DRUID].push_back(RACE_TAUREN);
+        for (uint32 race = RACE_HUMAN; race < MAX_RACES; ++race)
+        {
+            if (sObjectMgr.GetPlayerInfo(race, cls))
+            {
+                availableRaces[cls].push_back(race);
+            }
+        }
+    }
 }
 
 /**

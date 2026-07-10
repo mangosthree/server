@@ -55,13 +55,14 @@ void GenericMageNonCombatStrategy::InitTriggers(std::list<TriggerNode*> &trigger
         "arcane intellect on party",
         NextAction::array(0, new NextAction("arcane intellect on party", 20.0f), NULL)));
 
+    // Cata 4.3.4: one Conjure Refreshment covers food and drink
     triggers.push_back(new TriggerNode(
         "no drink",
-        NextAction::array(0, new NextAction("conjure water", 16.0f), NULL)));
+        NextAction::array(0, new NextAction("conjure refreshment", 16.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "no food",
-        NextAction::array(0, new NextAction("conjure food", 15.0f), NULL)));
+        NextAction::array(0, new NextAction("conjure refreshment", 15.0f), NULL)));
 }
 
 void MageBuffManaStrategy::InitTriggers(std::list<TriggerNode*> &triggers)

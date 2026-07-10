@@ -90,12 +90,6 @@ namespace ai
         CastRemoveCurseAction(PlayerbotAI* ai) : CastCureSpellAction(ai, "remove curse") {}
     };
 
-    class CastRemoveLesserCurseAction : public CastCureSpellAction
-    {
-    public:
-        CastRemoveLesserCurseAction(PlayerbotAI* ai) : CastCureSpellAction(ai, "remove lesser curse") {}
-    };
-
     class CastIcyVeinsAction : public CastBuffSpellAction
     {
     public:
@@ -117,22 +111,11 @@ namespace ai
         CastRemoveCurseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "remove curse", DISPEL_CURSE) {}
     };
 
-    class CastRemoveLesserCurseOnPartyAction : public CurePartyMemberAction
+    /// Cata 4.3.4: Conjure Water/Food were merged into Conjure Refreshment
+    class CastConjureRefreshmentAction : public CastBuffSpellAction
     {
     public:
-        CastRemoveLesserCurseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "remove lesser curse", DISPEL_CURSE) {}
-    };
-
-    class CastConjureFoodAction : public CastBuffSpellAction
-    {
-    public:
-        CastConjureFoodAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "conjure food") {}
-    };
-
-    class CastConjureWaterAction : public CastBuffSpellAction
-    {
-    public:
-        CastConjureWaterAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "conjure water") {}
+        CastConjureRefreshmentAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "conjure refreshment") {}
     };
 
     class CastIceBlockAction : public CastBuffSpellAction

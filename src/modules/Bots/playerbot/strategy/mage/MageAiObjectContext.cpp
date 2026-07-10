@@ -143,8 +143,7 @@ namespace ai
                 creators["frost nova"] = &AiObjectContextInternal::frost_nova;
                 creators["arcane intellect"] = &AiObjectContextInternal::arcane_intellect;
                 creators["arcane intellect on party"] = &AiObjectContextInternal::arcane_intellect_on_party;
-                creators["conjure water"] = &AiObjectContextInternal::conjure_water;
-                creators["conjure food"] = &AiObjectContextInternal::conjure_food;
+                creators["conjure refreshment"] = &AiObjectContextInternal::conjure_refreshment;
                 creators["molten armor"] = &AiObjectContextInternal::molten_armor;
                 creators["mage armor"] = &AiObjectContextInternal::mage_armor;
                 creators["ice armor"] = &AiObjectContextInternal::ice_armor;
@@ -157,8 +156,6 @@ namespace ai
                 creators["counterspell"] = &AiObjectContextInternal::counterspell;
                 creators["remove curse"] = &AiObjectContextInternal::remove_curse;
                 creators["remove curse on party"] = &AiObjectContextInternal::remove_curse_on_party;
-                creators["remove lesser curse"] = &AiObjectContextInternal::remove_lesser_curse;
-                creators["remove lesser curse on party"] = &AiObjectContextInternal::remove_lesser_curse_on_party;
                 creators["icy veins"] = &AiObjectContextInternal::icy_veins;
                 creators["combustion"] = &AiObjectContextInternal::combustion;
                 creators["ice block"] = &AiObjectContextInternal::ice_block;
@@ -184,8 +181,7 @@ namespace ai
             static Action* frost_nova(PlayerbotAI* ai) { return new CastFrostNovaAction(ai); }
             static Action* arcane_intellect(PlayerbotAI* ai) { return new CastArcaneIntellectAction(ai); }
             static Action* arcane_intellect_on_party(PlayerbotAI* ai) { return new CastArcaneIntellectOnPartyAction(ai); }
-            static Action* conjure_water(PlayerbotAI* ai) { return new CastConjureWaterAction(ai); }
-            static Action* conjure_food(PlayerbotAI* ai) { return new CastConjureFoodAction(ai); }
+            static Action* conjure_refreshment(PlayerbotAI* ai) { return new CastConjureRefreshmentAction(ai); }
             static Action* molten_armor(PlayerbotAI* ai) { return new CastMoltenArmorAction(ai); }
             static Action* mage_armor(PlayerbotAI* ai) { return new CastMageArmorAction(ai); }
             static Action* ice_armor(PlayerbotAI* ai) { return new CastIceArmorAction(ai); }
@@ -198,8 +194,6 @@ namespace ai
             static Action* counterspell(PlayerbotAI* ai) { return new CastCounterspellAction(ai); }
             static Action* remove_curse(PlayerbotAI* ai) { return new CastRemoveCurseAction(ai); }
             static Action* remove_curse_on_party(PlayerbotAI* ai) { return new CastRemoveCurseOnPartyAction(ai); }
-            static Action* remove_lesser_curse(PlayerbotAI* ai) { return new CastRemoveLesserCurseAction(ai); }
-            static Action* remove_lesser_curse_on_party(PlayerbotAI* ai) { return new CastRemoveLesserCurseOnPartyAction(ai); }
             static Action* icy_veins(PlayerbotAI* ai) { return new CastIcyVeinsAction(ai); }
             static Action* combustion(PlayerbotAI* ai) { return new CastCombustionAction(ai); }
             static Action* ice_block(PlayerbotAI* ai) { return new CastIceBlockAction(ai); }

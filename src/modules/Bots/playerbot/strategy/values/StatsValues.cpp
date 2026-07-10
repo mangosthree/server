@@ -104,6 +104,11 @@ bool HasManaValue::Calculate()
     return target->GetPower(POWER_MANA);
 }
 
+uint8 SoulShardsValue::Calculate()
+{
+    return bot->GetPower(POWER_SOUL_SHARDS);
+}
+
 
 uint8 ComboPointsValue::Calculate()
 {

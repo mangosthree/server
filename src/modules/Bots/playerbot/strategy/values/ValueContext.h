@@ -104,6 +104,7 @@ namespace ai
             creators["rage"] = &ValueContext::rage;
             creators["energy"] = &ValueContext::energy;
             creators["mana"] = &ValueContext::mana;
+            creators["soul shards"] = &ValueContext::soul_shards;
             creators["combo"] = &ValueContext::combo;
             creators["dead"] = &ValueContext::dead;
             creators["pet dead"] = &ValueContext::pet_dead;
@@ -216,6 +217,7 @@ namespace ai
         static UntypedValue* rage(PlayerbotAI* ai) { return new RageValue(ai); }
         static UntypedValue* energy(PlayerbotAI* ai) { return new EnergyValue(ai); }
         static UntypedValue* mana(PlayerbotAI* ai) { return new ManaValue(ai); }
+        static UntypedValue* soul_shards(PlayerbotAI* ai) { return new SoulShardsValue(ai); }
         static UntypedValue* combo(PlayerbotAI* ai) { return new ComboPointsValue(ai); }
         static UntypedValue* dead(PlayerbotAI* ai) { return new IsDeadValue(ai); }
         static UntypedValue* pet_happy(PlayerbotAI* ai) { return new PetIsHappyValue(ai); }

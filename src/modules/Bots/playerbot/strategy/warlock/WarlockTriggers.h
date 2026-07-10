@@ -51,7 +51,8 @@ namespace ai
     public:
         WarlockConjuredItemTrigger(PlayerbotAI* ai, string item) : ItemCountTrigger(ai, item, 1) {}
 
-        virtual bool IsActive() { return ItemCountTrigger::IsActive() && AI_VALUE2(uint8, "item count", "soul shard") > 0; }
+        // Cata: conjuring stones no longer consumes soul shard items
+        virtual bool IsActive() { return ItemCountTrigger::IsActive(); }
     };
 
     class HasSpellstoneTrigger : public WarlockConjuredItemTrigger

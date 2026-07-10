@@ -97,6 +97,14 @@ namespace ai
         virtual bool Calculate();
     };
 
+    /// Cata 4.3.4: soul shards are a power type, not items
+    class SoulShardsValue : public Uint8CalculatedValue
+    {
+    public:
+        SoulShardsValue(PlayerbotAI* ai) : Uint8CalculatedValue(ai) {}
+        virtual uint8 Calculate();
+    };
+
     class ComboPointsValue : public Uint8CalculatedValue, public Qualified
     {
     public:

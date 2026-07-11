@@ -292,6 +292,7 @@ class RandomPlayerbotMgr : public PlayerbotHolder
         uint32 m_processBotCursor; ///< GUID of the last bot examined; the next pass resumes after it so a budget/cap-limited pass eventually covers every bot.
         std::map<uint32, AreaCreatureStats> m_areaCreatureStatsMap;
         std::map<std::pair<uint32, uint32>, uint32> m_cellToAreaCache;
+        bool m_areaCreatureStatsComputed = false; ///< Guards the one-time area-stats scan so an empty result is not recomputed every call.
 };
 
 #define sRandomPlayerbotMgr RandomPlayerbotMgr::instance()

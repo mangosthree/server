@@ -760,13 +760,15 @@ bool RandomPlayerbotMgr::IsZoneSafeForBot(Player* bot, uint32 mapId, float x, fl
             return false;
     }
 
-    // Area creature-level stats are currently disabled (the creature scan in
-    // CalculateAreaCreatureStats is commented out), so m_areaCreatureStatsMap is
-    // always empty. Previously this recomputed the (empty) stats on every call and
-    // then rejected every zone, so the bot could never find a teleport target and
-    // spun the world thread forever. The caller's SQL already filters candidate
-    // locations by creature level, so accept the zone when no stats exist; only
-    // apply the level window when real stats are available.
+    // Reject zones whose creature level band does not fit the bot. Stats are scanned
+    // once (lazily) and cached; when a zone has no meaningful stats we accept it
+    // rather than reject-and-retry forever (the cycle guard that keeps the world
+    // thread from spinning if the scan ever yields nothing for a candidate area).
+    if (!m_areaCreatureStatsComputed)
+    {
+        CalculateAreaCreatureStats();
+    }
+
     std::map<uint32, AreaCreatureStats>::const_iterator statsItr = m_areaCreatureStatsMap.find(area->ID);
     if (statsItr != m_areaCreatureStatsMap.end() && statsItr->second.creatureCount > 0)
     {
@@ -830,51 +832,51 @@ void RandomPlayerbotMgr::CalculateAreaCreatureStats()
     uint32 getAreaIdCalls = 0;
     uint32 totalCreatures = 0;
 
-    //CreatureDataMap const* creatureDataMap = sObjectMgr.GetCreatureDataMap();
-    //for (CreatureDataMap::const_iterator itr = creatureDataMap->begin(); itr != creatureDataMap->end(); ++itr)
-    //{
-    //    CreatureData const& data = itr->second;
-    //    CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(data.id);
+    CreatureDataMap const* creatureDataMap = sObjectMgr.GetCreatureDataMap();
+    for (CreatureDataMap::const_iterator itr = creatureDataMap->begin(); itr != creatureDataMap->end(); ++itr)
+    {
+        CreatureData const& data = itr->second;
+        CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(data.id);
 
-    //    if (!cInfo || cInfo->NpcFlags != 0 || cInfo->UnitFlags & UNIT_FLAG_NON_ATTACKABLE)
-    //    {
-    //        continue;
-    //    }
+        if (!cInfo || cInfo->NpcFlags != 0 || cInfo->UnitFlags & UNIT_FLAG_NON_ATTACKABLE)
+        {
+            continue;
+        }
 
-    //    totalCreatures++;
+        totalCreatures++;
 
-    //    CellPair cell_pair = MaNGOS::ComputeCellPair(data.posX, data.posY);
-    //    uint32 cell_id = (cell_pair.y_coord * TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
-    //    std::pair<uint32, uint32> mapCell = std::make_pair(data.mapid, cell_id);
+        CellPair cell_pair = MaNGOS::ComputeCellPair(data.posX, data.posY);
+        uint32 cell_id = (cell_pair.y_coord * TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+        std::pair<uint32, uint32> mapCell = std::make_pair(data.mapid, cell_id);
 
-    //    uint32 areaId = 0;
+        uint32 areaId = 0;
 
-    //    std::map<std::pair<uint32, uint32>, uint32>::iterator cacheItr = cellToAreaCache.find(mapCell);
-    //    if (cacheItr != cellToAreaCache.end())
-    //    {
-    //        areaId = cacheItr->second;
-    //    }
-    //    else
-    //    {
-    //        Map* map = const_cast<Map*>(sMapMgr.FindMap(data.mapid));
-    //        if (!map || !map->GetTerrain())
-    //        {
-    //            continue;
-    //        }
+        std::map<std::pair<uint32, uint32>, uint32>::iterator cacheItr = cellToAreaCache.find(mapCell);
+        if (cacheItr != cellToAreaCache.end())
+        {
+            areaId = cacheItr->second;
+        }
+        else
+        {
+            Map* map = const_cast<Map*>(sMapMgr.FindMap(data.mapid));
+            if (!map || !map->GetTerrain())
+            {
+                continue;
+            }
 
-    //        areaId = map->GetTerrain()->GetAreaId(data.posX, data.posY, data.posZ);
-    //        cellToAreaCache[mapCell] = areaId; // Cache for future lookups
-    //        getAreaIdCalls++;
-    //    }
+            areaId = map->GetTerrain()->GetAreaId(data.posX, data.posY, data.posZ);
+            cellToAreaCache[mapCell] = areaId; // Cache for future lookups
+            getAreaIdCalls++;
+        }
 
-    //    if (areaId == 0)
-    //    {
-    //        continue;
-    //    }
+        if (areaId == 0)
+        {
+            continue;
+        }
 
-    //    uint8 avgLevel = (cInfo->MinLevel + cInfo->MaxLevel) / 2;
-    //    areaLevels[areaId].push_back(avgLevel);
-    //}
+        uint8 avgLevel = (cInfo->MinLevel + cInfo->MaxLevel) / 2;
+        areaLevels[areaId].push_back(avgLevel);
+    }
 
     uint32 statsCount = 0;
     for (std::map<uint32, std::vector<uint8>>::iterator itr = areaLevels.begin(); itr != areaLevels.end(); ++itr)
@@ -898,7 +900,9 @@ void RandomPlayerbotMgr::CalculateAreaCreatureStats()
         ++statsCount;
     }
 
-    sLog.outString(">> [Playerbots] Calculated spawn stats for %u areas", statsCount);
+    m_areaCreatureStatsComputed = true;
+    sLog.outString(">> [Playerbots] Calculated spawn stats for %u areas (%u creatures, %u area lookups)",
+        statsCount, totalCreatures, getAreaIdCalls);
 }
 
 bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, char const* args)

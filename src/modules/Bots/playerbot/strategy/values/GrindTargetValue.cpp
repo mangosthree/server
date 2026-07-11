@@ -56,7 +56,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
     for(list<ObjectGuid>::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
     {
         Unit* unit = ai->GetUnit(*tIter);
-        if (!unit)
+        if (!unit || !unit->IsAlive()) ///< cached list may hold units killed since the scan
         {
             continue;
         }

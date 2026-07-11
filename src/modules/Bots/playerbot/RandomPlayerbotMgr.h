@@ -283,7 +283,7 @@ class RandomPlayerbotMgr : public PlayerbotHolder
          * @return The level of the zone.
          */
         uint32 GetZoneLevel(uint16 mapId, float teleX, float teleY, float teleZ);
-        bool IsZoneSafeForBot(Player* bot, uint32 mapId, float x, float y, float z);
+        bool IsZoneSafeForBot(Player* bot, uint32 mapId, float x, float y, float z, uint32 useLevel = 0);
         void CalculateAreaCreatureStats();
 
     private:

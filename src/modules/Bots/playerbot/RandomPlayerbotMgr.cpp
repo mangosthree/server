@@ -507,6 +507,15 @@ void RandomPlayerbotMgr::IncreaseLevel(Player* bot)
         maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
     }
 
+    // A bot already at the level cap has nowhere to grow: re-roll it fresh
+    // (new level/zone/build via RandomizeFirst) instead of a no-op increment,
+    // so the population keeps cycling instead of stagnating at the cap.
+    if (bot->getLevel() >= maxLevel)
+    {
+        RandomizeFirst(bot);
+        return;
+    }
+
     uint32 level = min((uint32)(bot->getLevel() + 1), maxLevel);
     PlayerbotFactory factory(bot, level);
     if (bot->GetGuildId())
@@ -569,8 +578,10 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
         for (GameTeleMap::const_iterator itr = teleMap.begin(); itr != teleMap.end(); ++itr)
         {
             GameTele const* tele = &itr->second;
-            if (( tele->mapId == mapId) &&
-               (IsZoneSafeForBot(bot, tele->mapId, tele->position_x, tele->position_y, tele->position_z)))
+            // Collect all teleports on this map; zone safety is checked below
+            // against the bot's *target* level (computed from the zone), not the
+            // fresh bot's level 1, so a new bot is not confined to low-level zones.
+            if (tele->mapId == mapId)
             {
                 locs.push_back(tele);
             }
@@ -602,6 +613,13 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
         }
 
         if (level < sPlayerbotAIConfig.randomBotMinLevel)
+        {
+            continue;
+        }
+
+        // Now that the target level is known, reject the zone if its creature band
+        // (or opposing-faction guards) does not fit that level.
+        if (!IsZoneSafeForBot(bot, tele->mapId, tele->position_x, tele->position_y, tele->position_z, level))
         {
             continue;
         }
@@ -734,7 +752,7 @@ list<uint32> RandomPlayerbotMgr::GetBots()
     return bots;
 }
 
-bool RandomPlayerbotMgr::IsZoneSafeForBot(Player* bot, uint32 mapId, float x, float y, float z)
+bool RandomPlayerbotMgr::IsZoneSafeForBot(Player* bot, uint32 mapId, float x, float y, float z, uint32 useLevel)
 {
     Map* map = sMapMgr.FindMap(mapId);
     if (!map)
@@ -794,7 +812,7 @@ bool RandomPlayerbotMgr::IsZoneSafeForBot(Player* bot, uint32 mapId, float x, fl
     if (statsItr != m_areaCreatureStatsMap.end() && statsItr->second.creatureCount > 0)
     {
         AreaCreatureStats const& stats = statsItr->second;
-        uint8 botLevel = bot->getLevel();
+        uint8 botLevel = useLevel ? useLevel : bot->getLevel();
         uint8 tolerance = sPlayerbotAIConfig.randomBotTeleLevel;
         if (botLevel < stats.minLevel - tolerance || botLevel > stats.maxLevel + tolerance)
             return false;

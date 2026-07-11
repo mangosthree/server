@@ -32,7 +32,7 @@ DpsWarlockStrategy::DpsWarlockStrategy(PlayerbotAI* ai) : GenericWarlockStrategy
 
 NextAction** DpsWarlockStrategy::getDefaultActions()
 {
-    return NextAction::array(0, new NextAction("incinirate", 10.0f), new NextAction("shadow bolt", 10.0f), NULL);
+    return NextAction::array(0, new NextAction("incinerate", 10.0f), new NextAction("shadow bolt", 10.0f), NULL);
 }
 
 void DpsWarlockStrategy::InitTriggers(std::list<TriggerNode*> &triggers)

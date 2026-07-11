@@ -12,8 +12,3 @@ bool DemonArmorTrigger::IsActive()
         !ai->HasAura("demon armor", target) &&
         !ai->HasAura("fel armor", target);
 }
-
-bool SpellstoneTrigger::IsActive()
-{
-    return BuffTrigger::IsActive() && AI_VALUE2(uint8, "item count", getName()) > 0;
-}

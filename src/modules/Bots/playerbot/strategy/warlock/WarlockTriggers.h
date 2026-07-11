@@ -10,14 +10,7 @@ namespace ai
         virtual bool IsActive();
     };
 
-    class SpellstoneTrigger : public BuffTrigger
-    {
-    public:
-        SpellstoneTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "spellstone") {}
-        virtual bool IsActive();
-    };
-
-    DEBUFF_TRIGGER(CurseOfAgonyTrigger, "curse of agony", "curse of agony");
+    DEBUFF_TRIGGER(CurseOfAgonyTrigger, "bane of agony", "bane of agony"); ///< Cata: Bane of Agony
     DEBUFF_TRIGGER(CorruptionTrigger, "corruption", "corruption");
 
     class CorruptionOnAttackerTrigger : public DebuffOnAttackerTrigger
@@ -53,18 +46,6 @@ namespace ai
 
         // Cata: conjuring stones no longer consumes soul shard items
         virtual bool IsActive() { return ItemCountTrigger::IsActive(); }
-    };
-
-    class HasSpellstoneTrigger : public WarlockConjuredItemTrigger
-    {
-    public:
-        HasSpellstoneTrigger(PlayerbotAI* ai) : WarlockConjuredItemTrigger(ai, "spellstone") {}
-    };
-
-    class HasFirestoneTrigger : public WarlockConjuredItemTrigger
-    {
-    public:
-        HasFirestoneTrigger(PlayerbotAI* ai) : WarlockConjuredItemTrigger(ai, "firestone") {}
     };
 
     class HasHealthstoneTrigger : public WarlockConjuredItemTrigger

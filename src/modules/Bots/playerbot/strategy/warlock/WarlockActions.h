@@ -35,12 +35,6 @@ namespace ai
         }
     };
 
-    class CastDrainManaAction : public CastSpellAction
-    {
-    public:
-        CastDrainManaAction(PlayerbotAI* ai) : CastSpellAction(ai, "drain mana") {}
-    };
-
     class CastDrainLifeAction : public CastSpellAction
     {
     public:
@@ -50,7 +44,7 @@ namespace ai
     class CastCurseOfAgonyAction : public CastDebuffSpellAction
     {
     public:
-        CastCurseOfAgonyAction(PlayerbotAI* ai) : CastDebuffSpellAction(ai, "curse of agony") {}
+        CastCurseOfAgonyAction(PlayerbotAI* ai) : CastDebuffSpellAction(ai, "bane of agony") {} ///< Cata: Bane of Agony
     };
 
     class CastCurseOfWeaknessAction : public CastDebuffSpellAction
@@ -96,18 +90,6 @@ namespace ai
         CastCreateHealthstoneAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "create healthstone") {}
     };
 
-    class CastCreateFirestoneAction : public CastBuffSpellAction
-    {
-    public:
-        CastCreateFirestoneAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "create firestone") {}
-    };
-
-    class CastCreateSpellstoneAction : public CastBuffSpellAction
-    {
-    public:
-        CastCreateSpellstoneAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "create spellstone") {}
-    };
-
     class CastBanishAction : public CastBuffSpellAction
     {
     public:
@@ -146,10 +128,10 @@ namespace ai
         CastConflagrateAction(PlayerbotAI* ai) : CastSpellAction(ai, "conflagrate") {}
     };
 
-    class CastIncinirateAction : public CastSpellAction
+    class CastIncinerateAction : public CastSpellAction
     {
     public:
-        CastIncinirateAction(PlayerbotAI* ai) : CastSpellAction(ai, "incinirate") {}
+        CastIncinerateAction(PlayerbotAI* ai) : CastSpellAction(ai, "incinerate") {}
     };
 
     class CastFearAction : public CastDebuffSpellAction

@@ -6005,6 +6005,14 @@ InventoryResult Player::CanEquipUniqueItem(ItemPrototype const* itemProto, uint8
  */
 void Player::HandleFall(MovementInfo const& movementInfo)
 {
+    // Landing in water negates fall damage (retail behaviour). This also guards
+    // deep-water zones such as Vashj'ir, where a stale surface fall baseline
+    // would otherwise turn an underwater landing into lethal fall damage.
+    if (GetTerrain()->IsInWater(movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z))
+    {
+        return;
+    }
+
     // calculate total z distance of the fall
     float z_diff = m_lastFallZ - movementInfo.GetPos()->z;
     DEBUG_LOG("zDiff = %f", z_diff);

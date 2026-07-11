@@ -177,6 +177,14 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     SetWaterWalk(false);
     SetRoot(false);
 
+    // Reset the fall baseline to the resurrect position. Otherwise m_lastFallZ
+    // keeps its pre-death value, and resurrecting far below that baseline -- e.g.
+    // at a corpse deep underwater in Vashj'ir -- makes the next CMSG_MOVE_FALL_LAND
+    // compute a huge fall (baseline - currentZ) and deal lethal fall damage,
+    // instantly re-killing the player. RepopAtGraveyard already resets this via
+    // TeleportTo; the corpse/spell resurrect path did not.
+    SetFallInformation(0, GetPositionZ());
+
     // set health/powers (0- will be set in caller)
     if (restore_percent > 0.0f)
     {

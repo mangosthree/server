@@ -79,8 +79,6 @@ namespace ai
                 creators["party member cure disease"] = &TriggerFactoryInternal::party_member_cure_disease;
                 creators["power word: fortitude"] = &TriggerFactoryInternal::power_word_fortitude;
                 creators["power word: fortitude on party"] = &TriggerFactoryInternal::power_word_fortitude_on_party;
-                creators["divine spirit"] = &TriggerFactoryInternal::divine_spirit;
-                creators["divine spirit on party"] = &TriggerFactoryInternal::divine_spirit_on_party;
                 creators["inner fire"] = &TriggerFactoryInternal::inner_fire;
                 creators["vampiric touch"] = &TriggerFactoryInternal::vampiric_touch;
                 creators["shadowform"] = &TriggerFactoryInternal::shadowform;
@@ -101,8 +99,6 @@ namespace ai
             static Trigger* party_member_cure_disease(PlayerbotAI* ai) { return new PartyMemberCureDiseaseTrigger(ai); }
             static Trigger* power_word_fortitude(PlayerbotAI* ai) { return new PowerWordFortitudeTrigger(ai); }
             static Trigger* power_word_fortitude_on_party(PlayerbotAI* ai) { return new PowerWordFortitudeOnPartyTrigger(ai); }
-            static Trigger* divine_spirit(PlayerbotAI* ai) { return new DivineSpiritTrigger(ai); }
-            static Trigger* divine_spirit_on_party(PlayerbotAI* ai) { return new DivineSpiritOnPartyTrigger(ai); }
             static Trigger* inner_fire(PlayerbotAI* ai) { return new InnerFireTrigger(ai); }
         };
     };
@@ -133,8 +129,6 @@ namespace ai
                 creators["holy nova"] = &AiObjectContextInternal::holy_nova;
                 creators["power word: fortitude"] = &AiObjectContextInternal::power_word_fortitude;
                 creators["power word: fortitude on party"] = &AiObjectContextInternal::power_word_fortitude_on_party;
-                creators["divine spirit"] = &AiObjectContextInternal::divine_spirit;
-                creators["divine spirit on party"] = &AiObjectContextInternal::divine_spirit_on_party;
                 creators["power word: shield"] = &AiObjectContextInternal::power_word_shield;
                 creators["power word: shield on party"] = &AiObjectContextInternal::power_word_shield_on_party;
                 creators["renew"] = &AiObjectContextInternal::renew;
@@ -143,8 +137,6 @@ namespace ai
                 creators["greater heal on party"] = &AiObjectContextInternal::greater_heal_on_party;
                 creators["heal"] = &AiObjectContextInternal::heal;
                 creators["heal on party"] = &AiObjectContextInternal::heal_on_party;
-                creators["lesser heal"] = &AiObjectContextInternal::lesser_heal;
-                creators["lesser heal on party"] = &AiObjectContextInternal::lesser_heal_on_party;
                 creators["flash heal"] = &AiObjectContextInternal::flash_heal;
                 creators["flash heal on party"] = &AiObjectContextInternal::flash_heal_on_party;
                 creators["dispel magic"] = &AiObjectContextInternal::dispel_magic;
@@ -152,8 +144,6 @@ namespace ai
                 creators["dispel magic on target"] = &AiObjectContextInternal::dispel_magic_on_target;
                 creators["cure disease"] = &AiObjectContextInternal::cure_disease;
                 creators["cure disease on party"] = &AiObjectContextInternal::cure_disease_on_party;
-                creators["abolish disease"] = &AiObjectContextInternal::abolish_disease;
-                creators["abolish disease on party"] = &AiObjectContextInternal::abolish_disease_on_party;
                 creators["fade"] = &AiObjectContextInternal::fade;
                 creators["inner fire"] = &AiObjectContextInternal::inner_fire;
                 creators["resurrection"] = &AiObjectContextInternal::resurrection;
@@ -183,8 +173,6 @@ namespace ai
             static Action* holy_nova(PlayerbotAI* ai) { return new CastHolyNovaAction(ai); }
             static Action* power_word_fortitude(PlayerbotAI* ai) { return new CastPowerWordFortitudeAction(ai); }
             static Action* power_word_fortitude_on_party(PlayerbotAI* ai) { return new CastPowerWordFortitudeOnPartyAction(ai); }
-            static Action* divine_spirit(PlayerbotAI* ai) { return new CastDivineSpiritAction(ai); }
-            static Action* divine_spirit_on_party(PlayerbotAI* ai) { return new CastDivineSpiritOnPartyAction(ai); }
             static Action* power_word_shield(PlayerbotAI* ai) { return new CastPowerWordShieldAction(ai); }
             static Action* power_word_shield_on_party(PlayerbotAI* ai) { return new CastPowerWordShieldOnPartyAction(ai); }
             static Action* renew(PlayerbotAI* ai) { return new CastRenewAction(ai); }
@@ -193,8 +181,6 @@ namespace ai
             static Action* greater_heal_on_party(PlayerbotAI* ai) { return new CastGreaterHealOnPartyAction(ai); }
             static Action* heal(PlayerbotAI* ai) { return new CastHealAction(ai); }
             static Action* heal_on_party(PlayerbotAI* ai) { return new CastHealOnPartyAction(ai); }
-            static Action* lesser_heal(PlayerbotAI* ai) { return new CastLesserHealAction(ai); }
-            static Action* lesser_heal_on_party(PlayerbotAI* ai) { return new CastLesserHealOnPartyAction(ai); }
             static Action* flash_heal(PlayerbotAI* ai) { return new CastFlashHealAction(ai); }
             static Action* flash_heal_on_party(PlayerbotAI* ai) { return new CastFlashHealOnPartyAction(ai); }
             static Action* dispel_magic(PlayerbotAI* ai) { return new CastDispelMagicAction(ai); }
@@ -202,8 +188,6 @@ namespace ai
             static Action* dispel_magic_on_target(PlayerbotAI* ai) { return new CastDispelMagicOnTargetAction(ai); }
             static Action* cure_disease(PlayerbotAI* ai) { return new CastCureDiseaseAction(ai); }
             static Action* cure_disease_on_party(PlayerbotAI* ai) { return new CastCureDiseaseOnPartyAction(ai); }
-            static Action* abolish_disease(PlayerbotAI* ai) { return new CastAbolishDiseaseAction(ai); }
-            static Action* abolish_disease_on_party(PlayerbotAI* ai) { return new CastAbolishDiseaseOnPartyAction(ai); }
             static Action* fade(PlayerbotAI* ai) { return new CastFadeAction(ai); }
             static Action* inner_fire(PlayerbotAI* ai) { return new CastInnerFireAction(ai); }
         };

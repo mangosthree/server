@@ -14,15 +14,6 @@ namespace ai
         PowerWordFortitudeTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "power word: fortitude", 5) {}
     };
 
-    class DivineSpiritOnPartyTrigger : public BuffOnPartyTrigger {
-    public:
-        DivineSpiritOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "divine spirit", 7) {}
-    };
-
-    class DivineSpiritTrigger : public BuffTrigger {
-    public:
-        DivineSpiritTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "divine spirit", 5) {}
-    };
 
 
     BUFF_TRIGGER(InnerFireTrigger, "inner fire", "inner fire")

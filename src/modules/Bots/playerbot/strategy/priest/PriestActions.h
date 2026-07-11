@@ -17,18 +17,6 @@ namespace ai
         virtual string getName() { return "greater heal on party"; }
     };
 
-    class CastLesserHealAction : public CastHealingSpellAction {
-    public:
-        CastLesserHealAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "lesser heal") {}
-    };
-
-    class CastLesserHealOnPartyAction : public HealPartyMemberAction
-    {
-    public:
-        CastLesserHealOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "lesser heal") {}
-
-        virtual string getName() { return "lesser heal on party"; }
-    };
 
     class CastFlashHealAction : public CastHealingSpellAction {
     public:
@@ -113,10 +101,6 @@ namespace ai
         CastPowerWordFortitudeAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "power word: fortitude") {}
     };
 
-    class CastDivineSpiritAction : public CastBuffSpellAction {
-    public:
-        CastDivineSpiritAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "divine spirit") {}
-    };
 
     class CastInnerFireAction : public CastBuffSpellAction {
     public:
@@ -146,10 +130,6 @@ namespace ai
         CastPowerWordFortitudeOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "power word: fortitude") {}
     };
 
-    class CastDivineSpiritOnPartyAction : public BuffOnPartyAction {
-    public:
-        CastDivineSpiritOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "divine spirit") {}
-    };
 
     class CastPowerWordPainAction : public CastDebuffSpellAction
     {
@@ -187,19 +167,6 @@ namespace ai
         virtual string getName() { return "cure disease on party"; }
     };
 
-    class CastAbolishDiseaseAction : public CastCureSpellAction {
-    public:
-        CastAbolishDiseaseAction(PlayerbotAI* ai) : CastCureSpellAction(ai, "abolish disease") {}
-        virtual NextAction** getAlternatives();
-    };
-
-    class CastAbolishDiseaseOnPartyAction : public CurePartyMemberAction
-    {
-    public:
-        CastAbolishDiseaseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "abolish disease", DISPEL_DISEASE) {}
-        virtual string getName() { return "abolish disease on party"; }
-        virtual NextAction** getAlternatives();
-    };
 
     class CastDispelMagicAction : public CastCureSpellAction {
     public:

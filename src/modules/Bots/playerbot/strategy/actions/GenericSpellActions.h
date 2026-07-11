@@ -81,30 +81,21 @@ namespace ai
 
         virtual NextAction** getPrerequisites()
         {
-            // Already within the spell's range: no repositioning needed (only pull
-            // into melee contact if this is effectively a melee-range spell).
-            float currentDistance = AI_VALUE2(float, "distance", GetTargetName());
-            if (currentDistance <= range)
+            // Ranged spell: reach its DBC range (via the "reach spell distance" value)
+            // when out of range, otherwise cast in place. Melee-range spell: close in.
+            if (range > ATTACK_DISTANCE)
             {
-                if (range > ATTACK_DISTANCE)
+                float currentDistance = AI_VALUE2(float, "distance", GetTargetName());
+                if (currentDistance <= range)
                 {
                     return Action::getPrerequisites();
                 }
-                return NextAction::merge(NextAction::array(0, new NextAction("reach melee"), NULL), Action::getPrerequisites());
+
+                context->GetValue<float>("reach spell distance")->Set(range);
+                return NextAction::merge(NextAction::array(0, new NextAction("reach spell"), NULL), Action::getPrerequisites());
             }
 
-            if (range > sPlayerbotAIConfig.spellDistance)
-   {
-       return NULL;
-   }
-            else if (range > ATTACK_DISTANCE)
-   {
-       return NextAction::merge( NextAction::array(0, new NextAction("reach spell"), NULL), Action::getPrerequisites());
-   }
-            else
-   {
-       return NextAction::merge( NextAction::array(0, new NextAction("reach melee"), NULL), Action::getPrerequisites());
-   }
+            return NextAction::merge(NextAction::array(0, new NextAction("reach melee"), NULL), Action::getPrerequisites());
         }
 
     protected:

@@ -59,9 +59,36 @@ namespace ai
         }
     };
 
+    // Move away from the target until at least meleeDistance + contact away, so a
+    // caster/ranged bot with a mob in its face steps back into casting range.
+    class BackOffAction : public ReachTargetAction
+    {
+    public:
+        BackOffAction(PlayerbotAI* ai) : ReachTargetAction(ai, "back off", sPlayerbotAIConfig.meleeDistance) {}
+
+        virtual bool isUseful()
+        {
+            return AI_VALUE2(float, "distance", "current target") <
+                distance + sPlayerbotAIConfig.contactDistance + bot->GetObjectBoundingRadius();
+        }
+    };
+
     class ReachSpellAction : public ReachTargetAction
     {
     public:
-        ReachSpellAction(PlayerbotAI* ai, float distance = sPlayerbotAIConfig.spellDistance) : ReachTargetAction(ai, "reach spell", distance) {}
+        ReachSpellAction(PlayerbotAI* ai) : ReachTargetAction(ai, "reach spell", sPlayerbotAIConfig.spellDistance) {}
+
+        // The target distance is set per-spell via the "reach spell distance" value
+        // (by CastSpellAction::getPrerequisites) so the bot reaches that spell's range.
+        virtual bool Execute(Event event)
+        {
+            distance = AI_VALUE(float, "reach spell distance");
+            return ReachTargetAction::Execute(event);
+        }
+        virtual bool isUseful()
+        {
+            distance = AI_VALUE(float, "reach spell distance");
+            return ReachTargetAction::isUseful();
+        }
     };
 }

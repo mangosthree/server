@@ -159,6 +159,7 @@ namespace ai
             creators["snare target"] = &ValueContext::snare_target;
             creators["formation"] = &ValueContext::formation;
             creators["item usage"] = &ValueContext::item_usage;
+            creators["reach spell distance"] = &ValueContext::reach_spell_distance;
             creators["speed"] = &ValueContext::speed;
             creators["last said"] = &ValueContext::last_said;
             creators["last emote"] = &ValueContext::last_emote;
@@ -177,6 +178,7 @@ namespace ai
         static UntypedValue* already_seen_players(PlayerbotAI* ai) { return new AlreadySeenPlayersValue(ai); }
         static UntypedValue* new_player_nearby(PlayerbotAI* ai) { return new NewPlayerNearbyValue(ai); }
         static UntypedValue* item_usage(PlayerbotAI* ai) { return new ItemUsageValue(ai); }
+        static UntypedValue* reach_spell_distance(PlayerbotAI* ai) { return new ManualSetValue<float>(ai, sPlayerbotAIConfig.spellDistance, "reach spell distance"); }
         static UntypedValue* formation(PlayerbotAI* ai) { return new FormationValue(ai); }
         static UntypedValue* mana_save_level(PlayerbotAI* ai) { return new ManaSaveLevelValue(ai); }
         static UntypedValue* invalid_target(PlayerbotAI* ai) { return new InvalidTargetValue(ai); }

@@ -159,34 +159,19 @@ namespace ai
     class CastCurePoisonAction : public CastCureSpellAction
     {
     public:
-        CastCurePoisonAction(PlayerbotAI* ai) : CastCureSpellAction(ai, "cure poison") {}
+        CastCurePoisonAction(PlayerbotAI* ai) : CastCureSpellAction(ai, "remove corruption") {} ///< Cata: Remove Corruption
     };
 
     class CastCurePoisonOnPartyAction : public CurePartyMemberAction
     {
     public:
-        CastCurePoisonOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cure poison", DISPEL_POISON) {}
-    };
-
-    class CastAbolishPoisonAction : public CastCureSpellAction
-    {
-    public:
-        CastAbolishPoisonAction(PlayerbotAI* ai) : CastCureSpellAction(ai, "abolish poison") {}
-        virtual NextAction** getAlternatives();
-    };
-
-    class CastAbolishPoisonOnPartyAction : public CurePartyMemberAction
-    {
-    public:
-        CastAbolishPoisonOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "abolish poison", DISPEL_POISON) {}
-
-        virtual NextAction** getAlternatives();
+        CastCurePoisonOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "remove corruption", DISPEL_POISON) {}
     };
 
     class CastBarskinAction : public CastBuffSpellAction
     {
     public:
-        CastBarskinAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "barskin") {}
+        CastBarskinAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "barkskin") {}
     };
 
     class CastInnervateAction : public CastSpellAction

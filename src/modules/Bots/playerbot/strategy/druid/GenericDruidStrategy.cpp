@@ -14,8 +14,6 @@ public:
         creators["caster form"] = &caster_form;
         creators["cure poison"] = &cure_poison;
         creators["cure poison on party"] = &cure_poison_on_party;
-        creators["abolish poison"] = &abolish_poison;
-        creators["abolish poison on party"] = &abolish_poison_on_party;
         creators["rebirth"] = &rebirth;
         creators["entangling roots on cc"] = &entangling_roots_on_cc;
         creators["innervate"] = &innervate;
@@ -46,20 +44,6 @@ private:
     static ActionNode* cure_poison_on_party(PlayerbotAI* ai)
     {
         return new ActionNode ("cure poison on party",
-            /*P*/ NULL,
-            /*A*/ NULL,
-            /*C*/ NULL);
-    }
-    static ActionNode* abolish_poison(PlayerbotAI* ai)
-    {
-        return new ActionNode ("abolish poison",
-            /*P*/ NULL,
-            /*A*/ NULL,
-            /*C*/ NULL);
-    }
-    static ActionNode* abolish_poison_on_party(PlayerbotAI* ai)
-    {
-        return new ActionNode ("abolish poison on party",
             /*P*/ NULL,
             /*A*/ NULL,
             /*C*/ NULL);
@@ -127,9 +111,9 @@ void DruidCureStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
         "cure poison",
-        NextAction::array(0, new NextAction("abolish poison", ACTION_DISPEL + 2), NULL)));
+        NextAction::array(0, new NextAction("cure poison", ACTION_DISPEL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member cure poison",
-        NextAction::array(0, new NextAction("abolish poison on party", ACTION_DISPEL + 1), NULL)));
+        NextAction::array(0, new NextAction("cure poison on party", ACTION_DISPEL + 1), NULL)));
 }

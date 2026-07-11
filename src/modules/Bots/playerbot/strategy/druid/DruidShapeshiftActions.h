@@ -4,22 +4,12 @@ namespace ai {
     class CastBearFormAction : public CastBuffSpellAction {
     public:
         CastBearFormAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "bear form") {}
-
-        virtual bool isPossible() {
-            return CastBuffSpellAction::isPossible() && !ai->HasAura("dire bear form", GetTarget());
-        }
-        virtual bool isUseful() {
-            return CastBuffSpellAction::isUseful() && !ai->HasAura("dire bear form", GetTarget());
-        }
     };
 
+    /// Cata 4.3.4: Dire Bear Form was merged into Bear Form (key kept for wiring)
     class CastDireBearFormAction : public CastBuffSpellAction {
     public:
-        CastDireBearFormAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "dire bear form") {}
-
-        virtual NextAction** getAlternatives() {
-            return NextAction::merge(NextAction::array(0, new NextAction("bear form"), NULL), CastSpellAction::getAlternatives());
-        }
+        CastDireBearFormAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "bear form") {}
     };
 
     class CastCatFormAction : public CastBuffSpellAction {

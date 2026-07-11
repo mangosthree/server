@@ -167,8 +167,6 @@ namespace ai
                 creators["thorns"] = &AiObjectContextInternal::thorns;
                 creators["cure poison"] = &AiObjectContextInternal::cure_poison;
                 creators["cure poison on party"] = &AiObjectContextInternal::cure_poison_on_party;
-                creators["abolish poison"] = &AiObjectContextInternal::abolish_poison;
-                creators["abolish poison on party"] = &AiObjectContextInternal::abolish_poison_on_party;
                 creators["berserk"] = &AiObjectContextInternal::berserk;
                 creators["tiger's fury"] = &AiObjectContextInternal::tigers_fury;
                 creators["mark of the wild"] = &AiObjectContextInternal::mark_of_the_wild;
@@ -228,8 +226,6 @@ namespace ai
             static Action* thorns(PlayerbotAI* ai) { return new CastThornsAction(ai); }
             static Action* cure_poison(PlayerbotAI* ai) { return new CastCurePoisonAction(ai); }
             static Action* cure_poison_on_party(PlayerbotAI* ai) { return new CastCurePoisonOnPartyAction(ai); }
-            static Action* abolish_poison(PlayerbotAI* ai) { return new CastAbolishPoisonAction(ai); }
-            static Action* abolish_poison_on_party(PlayerbotAI* ai) { return new CastAbolishPoisonOnPartyAction(ai); }
             static Action* berserk(PlayerbotAI* ai) { return new CastBerserkAction(ai); }
             static Action* tigers_fury(PlayerbotAI* ai) { return new CastTigersFuryAction(ai); }
             static Action* mark_of_the_wild(PlayerbotAI* ai) { return new CastMarkOfTheWildAction(ai); }

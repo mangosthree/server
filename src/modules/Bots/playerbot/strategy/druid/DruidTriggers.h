@@ -77,13 +77,13 @@ namespace ai {
     class CurePoisonTrigger : public NeedCureTrigger
     {
     public:
-        CurePoisonTrigger(PlayerbotAI* ai) : NeedCureTrigger(ai, "cure poison", DISPEL_POISON) {}
+        CurePoisonTrigger(PlayerbotAI* ai) : NeedCureTrigger(ai, "remove corruption", DISPEL_POISON) {}
     };
 
     class PartyMemberCurePoisonTrigger : public PartyMemberNeedCureTrigger
     {
     public:
-        PartyMemberCurePoisonTrigger(PlayerbotAI* ai) : PartyMemberNeedCureTrigger(ai, "cure poison", DISPEL_POISON) {}
+        PartyMemberCurePoisonTrigger(PlayerbotAI* ai) : PartyMemberNeedCureTrigger(ai, "remove corruption", DISPEL_POISON) {}
     };
 
     class BearFormTrigger : public BuffTrigger

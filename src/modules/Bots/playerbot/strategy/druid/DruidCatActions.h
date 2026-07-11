@@ -4,7 +4,7 @@ namespace ai {
     class CastFeralChargeCatAction : public CastReachTargetSpellAction
     {
     public:
-        CastFeralChargeCatAction(PlayerbotAI* ai) : CastReachTargetSpellAction(ai, "feral charge - cat", 1.5f) {}
+        CastFeralChargeCatAction(PlayerbotAI* ai) : CastReachTargetSpellAction(ai, "feral charge", 1.5f) {}
     };
 
     class CastCowerAction : public CastBuffSpellAction
@@ -40,12 +40,12 @@ namespace ai {
 
     class CastMangleCatAction : public CastMeleeSpellAction {
     public:
-        CastMangleCatAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "mangle (cat)") {}
+        CastMangleCatAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "mangle") {}
     };
 
     class CastSwipeCatAction : public CastMeleeSpellAction {
     public:
-        CastSwipeCatAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "swipe (cat)") {}
+        CastSwipeCatAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "swipe") {}
     };
 
     class CastFerociousBiteAction : public CastMeleeSpellAction {

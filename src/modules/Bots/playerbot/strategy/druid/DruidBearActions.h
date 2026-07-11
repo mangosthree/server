@@ -4,7 +4,7 @@ namespace ai {
     class CastFeralChargeBearAction : public CastReachTargetSpellAction
     {
     public:
-        CastFeralChargeBearAction(PlayerbotAI* ai) : CastReachTargetSpellAction(ai, "feral charge - bear", 1.5f) {}
+        CastFeralChargeBearAction(PlayerbotAI* ai) : CastReachTargetSpellAction(ai, "feral charge", 1.5f) {}
     };
 
     class CastGrowlAction : public CastSpellAction
@@ -41,13 +41,13 @@ namespace ai {
     class CastMangleBearAction : public CastMeleeSpellAction
     {
     public:
-        CastMangleBearAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "mangle (bear)") {}
+        CastMangleBearAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "mangle") {}
     };
 
     class CastSwipeBearAction : public CastMeleeSpellAction
     {
     public:
-        CastSwipeBearAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "swipe (bear)") {}
+        CastSwipeBearAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "swipe") {}
     };
 
     class CastLacerateAction : public CastMeleeSpellAction

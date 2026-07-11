@@ -25,12 +25,6 @@ namespace ai
         CastMutilateAction(PlayerbotAI* ai) : CastComboAction(ai, "mutilate") {}
     };
 
-    class CastRiposteAction : public CastComboAction
-    {
-    public:
-        CastRiposteAction(PlayerbotAI* ai) : CastComboAction(ai, "riposte") {}
-    };
-
     class CastGougeAction : public CastComboAction
     {
     public:

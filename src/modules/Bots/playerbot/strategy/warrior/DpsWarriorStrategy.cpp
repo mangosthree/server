@@ -15,7 +15,6 @@ public:
         creators["charge"] = &charge;
         creators["bloodthirst"] = &bloodthirst;
         creators["rend"] = &rend;
-        creators["mocking blow"] = &mocking_blow;
         creators["death wish"] = &death_wish;
         creators["execute"] = &execute;
     }
@@ -53,13 +52,6 @@ private:
         return new ActionNode ("rend",
             /*P*/ NextAction::array(0, new NextAction("battle stance"), NULL),
             /*A*/ NULL,
-            /*C*/ NULL);
-    }
-    static ActionNode* mocking_blow(PlayerbotAI* ai)
-    {
-        return new ActionNode ("mocking blow",
-            /*P*/ NextAction::array(0, new NextAction("battle stance"), NULL),
-            /*A*/ NextAction::array(0, NULL),
             /*C*/ NULL);
     }
     static ActionNode* death_wish(PlayerbotAI* ai)

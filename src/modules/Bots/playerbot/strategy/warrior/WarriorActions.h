@@ -33,12 +33,6 @@ namespace ai
         CastCleaveAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "cleave") {}
     };
 
-    // battle, berserker
-    class CastMockingBlowAction : public CastMeleeSpellAction {
-    public:
-        CastMockingBlowAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "mocking blow") {}
-    };
-
     class CastBloodthirstAction : public CastMeleeSpellAction {
     public:
         CastBloodthirstAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "bloodthirst") {}
@@ -84,11 +78,6 @@ namespace ai
     class CastShieldWallAction : public CastDefensiveMeleeSpellAction {
     public:
         CastShieldWallAction(PlayerbotAI* ai) : CastDefensiveMeleeSpellAction(ai, "shield wall") {}
-    };
-
-    class CastBloodrageAction : public CastBuffSpellAction {
-    public:
-        CastBloodrageAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "bloodrage") {}
     };
 
     // defensive
@@ -140,8 +129,8 @@ namespace ai
     BEGIN_MELEE_SPELL_ACTION(CastChallengingShoutAction, "challenging shout")
     END_SPELL_ACTION()
 
-    // stuns
-    BEGIN_MELEE_SPELL_ACTION(CastShieldBashAction, "shield bash")
+    // interrupts
+    BEGIN_MELEE_SPELL_ACTION(CastPummelAction, "pummel")
     END_SPELL_ACTION()
 
     BEGIN_MELEE_SPELL_ACTION(CastIntimidatingShoutAction, "intimidating shout")
@@ -199,9 +188,9 @@ namespace ai
     BEGIN_MELEE_SPELL_ACTION(CastVictoryRushAction, "victory rush")
     END_SPELL_ACTION()
 
-    class CastShieldBashOnEnemyHealerAction : public CastSpellOnEnemyHealerAction
+    class CastPummelOnEnemyHealerAction : public CastSpellOnEnemyHealerAction
     {
     public:
-        CastShieldBashOnEnemyHealerAction(PlayerbotAI* ai) : CastSpellOnEnemyHealerAction(ai, "shield bash") {}
+        CastPummelOnEnemyHealerAction(PlayerbotAI* ai) : CastSpellOnEnemyHealerAction(ai, "pummel") {}
     };
 }

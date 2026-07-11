@@ -65,7 +65,7 @@ private:
     {
         return new ActionNode ("taunt",
             /*P*/ NULL,
-            /*A*/ NextAction::array(0, new NextAction("mocking blow"), NULL),
+            /*A*/ NULL,
             /*C*/ NULL);
     }
 };

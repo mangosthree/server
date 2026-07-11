@@ -10,7 +10,6 @@ class DpsRogueStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
 public:
     DpsRogueStrategyActionNodeFactory()
     {
-        creators["riposte"] = &riposte;
         creators["mutilate"] = &mutilate;
         creators["sinister strike"] = &sinister_strike;
         creators["kick"] = &kick;
@@ -19,13 +18,6 @@ public:
         creators["backstab"] = &backstab;
     }
 private:
-    static ActionNode* riposte(PlayerbotAI* ai)
-    {
-        return new ActionNode ("riposte",
-            /*P*/ NULL,
-            /*A*/ NextAction::array(0, new NextAction("mutilate"), NULL),
-            /*C*/ NULL);
-    }
     static ActionNode* mutilate(PlayerbotAI* ai)
     {
         return new ActionNode ("mutilate",
@@ -77,7 +69,7 @@ DpsRogueStrategy::DpsRogueStrategy(PlayerbotAI* ai) : MeleeCombatStrategy(ai)
 
 NextAction** DpsRogueStrategy::getDefaultActions()
 {
-    return NextAction::array(0, new NextAction("riposte", ACTION_NORMAL), NULL);
+    return NextAction::array(0, new NextAction("mutilate", ACTION_NORMAL), NULL);
 }
 
 void DpsRogueStrategy::InitTriggers(std::list<TriggerNode*> &triggers)

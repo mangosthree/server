@@ -21,22 +21,11 @@ namespace ai
         RevengeAvailableTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "revenge") {}
     };
 
-    class BloodrageDebuffTrigger : public DebuffTrigger
+    /// Cata 4.3.4: Shield Bash removed; Pummel interrupts in all stances
+    class PummelInterruptSpellTrigger : public InterruptSpellTrigger
     {
     public:
-        BloodrageDebuffTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "bloodrage") {}
-        virtual bool IsActive()
-        {
-            return DebuffTrigger::IsActive() &&
-                AI_VALUE2(uint8, "health", "self target") >= 75 &&
-                AI_VALUE2(uint8, "rage", "self target") < 20;
-        }
-    };
-
-    class ShieldBashInterruptSpellTrigger : public InterruptSpellTrigger
-    {
-    public:
-        ShieldBashInterruptSpellTrigger(PlayerbotAI* ai) : InterruptSpellTrigger(ai, "shield bash") {}
+        PummelInterruptSpellTrigger(PlayerbotAI* ai) : InterruptSpellTrigger(ai, "pummel") {}
     };
 
     class VictoryRushTrigger : public HasAuraTrigger
@@ -69,10 +58,10 @@ namespace ai
         DeathWishTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "death wish") {}
     };
 
-    class ShieldBashInterruptEnemyHealerSpellTrigger : public InterruptEnemyHealerTrigger
+    class PummelInterruptEnemyHealerSpellTrigger : public InterruptEnemyHealerTrigger
     {
     public:
-        ShieldBashInterruptEnemyHealerSpellTrigger(PlayerbotAI* ai) : InterruptEnemyHealerTrigger(ai, "shield bash") {}
+        PummelInterruptEnemyHealerSpellTrigger(PlayerbotAI* ai) : InterruptEnemyHealerTrigger(ai, "pummel") {}
     };
 
 }

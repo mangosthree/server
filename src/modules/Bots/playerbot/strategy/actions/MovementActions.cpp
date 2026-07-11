@@ -8,6 +8,7 @@
 #include "../../LootObjectStack.h"
 #include "../../PlayerbotAIConfig.h"
 #include "MotionGenerators/TargetedMovementGenerator.h"
+#include "Creature.h"
 
 using namespace ai;
 
@@ -45,7 +46,7 @@ bool MovementAction::MoveNear(WorldObject* target, float distance)
     return false;
 }
 
-bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z)
+bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool unsafe)
 {
     if (!bot->IsUnderWater())
     {
@@ -53,6 +54,13 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z)
     }
 
     if (!IsMovingAllowed(mapId, x, y, z))
+    {
+        return false;
+    }
+
+    // Cautious bots refuse a move whose destination sits inside a hostile
+    // creature's aggro zone, unless the caller marks the move as intentional.
+    if (!unsafe && ai->HasStrategy("cautious") && IsAggroPosition(x, y))
     {
         return false;
     }
@@ -122,7 +130,22 @@ bool MovementAction::MoveTo(Unit* target, float distance)
     float dx = cos(angle) * needToGo + bx;
     float dy = sin(angle) * needToGo + by;
 
-    return MoveTo(target->GetMapId(), dx, dy, tz);
+    // Cautious: stop short of a hostile creature's aggro zone along the path.
+    if (needToGo > 0)
+    {
+        float safeDist = CalculateAggroFreeDistance(bx, by, angle, needToGo);
+        if (safeDist < needToGo)
+        {
+            if (safeDist < sPlayerbotAIConfig.contactDistance)
+            {
+                return false;
+            }
+            dx = cos(angle) * safeDist + bx;
+            dy = sin(angle) * safeDist + by;
+        }
+    }
+
+    return MoveTo(target->GetMapId(), dx, dy, tz, true);
 }
 
 float MovementAction::GetFollowAngle()
@@ -267,8 +290,92 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
         if (currentTarget && currentTarget->GetObjectGuid() == target->GetObjectGuid()) return false;
     }
 
+    // Cautious: do not follow into a spot that would pull a hostile creature.
+    float followX = target->GetPositionX() + cos(angle) * distance;
+    float followY = target->GetPositionY() + sin(angle) * distance;
+    if (IsAggroPosition(followX, followY))
+    {
+        return false;
+    }
+
     mm.MoveFollow(target, distance, angle);
     return true;
+}
+
+/*
+ * Farthest distance along the beeline from (bx,by) at the given angle that does
+ * not enter any hostile creature's aggro zone. Returns maxDist if the path is
+ * clear, and is a no-op (returns maxDist) unless the "cautious" strategy is on.
+ */
+float MovementAction::CalculateAggroFreeDistance(float bx, float by, float angle, float maxDist)
+{
+    if (!ai->HasStrategy("cautious"))
+    {
+        return maxDist;
+    }
+
+    float cosA = cos(angle);
+    float sinA = sin(angle);
+    float safeDist = maxDist;
+
+    list<ObjectGuid> targets = AI_VALUE(list<ObjectGuid>, "possible targets");
+    for (list<ObjectGuid>::iterator i = targets.begin(); i != targets.end(); ++i)
+    {
+        Unit* unit = ai->GetUnit(*i);
+        if (!unit || !unit->IsAlive() || unit->IsInCombat() || !unit->IsHostileTo(bot) || unit == bot->getVictim())
+        {
+            continue;
+        }
+
+        Creature* creature = dynamic_cast<Creature*>(unit);
+        if (!creature || !creature->CanInitiateAttack())
+        {
+            continue;
+        }
+
+        // Solve for where the beeline crosses the creature's aggro circle.
+        float aggroRange = creature->GetAttackDistance(bot);
+        float ex = bx - creature->GetPositionX();
+        float ey = by - creature->GetPositionY();
+        float b = ex * cosA + ey * sinA;
+        float c = ex * ex + ey * ey - aggroRange * aggroRange;
+
+        float disc = b * b - c;
+        if (disc < 0)
+        {
+            continue;
+        }
+
+        float tEntry = -b - sqrt(disc);
+        if (tEntry < 0)
+        {
+            continue;
+        }
+
+        if (tEntry < safeDist)
+        {
+            safeDist = std::max(0.0f, tEntry - 2.0f);
+        }
+    }
+
+    return safeDist;
+}
+
+bool MovementAction::IsAggroPosition(float x, float y)
+{
+    float bx = bot->GetPositionX();
+    float by = bot->GetPositionY();
+
+    float dx = x - bx;
+    float dy = y - by;
+    float dist = sqrt(dx * dx + dy * dy);
+    if (dist < 0.1f)
+    {
+        return false;
+    }
+
+    float angle = atan2(dy, dx);
+    return CalculateAggroFreeDistance(bx, by, angle, dist) < dist;
 }
 
 void MovementAction::WaitForReach(float distance)

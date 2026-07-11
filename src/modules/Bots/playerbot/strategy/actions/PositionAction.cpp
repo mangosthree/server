@@ -108,6 +108,11 @@ bool MoveToPositionAction::Execute(Event event)
         return false;
     }
 
-    return MoveTo(bot->GetMapId(), pos.x, pos.y, pos.z);
+    // Explicit position command: move even into aggro range, but warn.
+    if (IsAggroPosition(pos.x, pos.y))
+    {
+        ai->TellMaster("Warning: that position is near hostile creatures.");
+    }
+    return MoveTo(bot->GetMapId(), pos.x, pos.y, pos.z, true);
 }
 

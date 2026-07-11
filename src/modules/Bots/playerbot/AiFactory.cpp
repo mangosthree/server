@@ -124,6 +124,11 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
 
     engine->addStrategies("racials", "chat", "default", "aoe", "potions", "cast time", "conserve mana", "duel", "pvp", NULL);
 
+    if (sPlayerbotAIConfig.cautiousDefault)
+    {
+        engine->addStrategy("cautious");
+    }
+
     switch (player->getClass())
     {
         case CLASS_PRIEST:
@@ -267,6 +272,11 @@ Engine* AiFactory::createCombatEngine(Player* player, PlayerbotAI* const facade,
 void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const facade, Engine* nonCombatEngine)
 {
     int tab = GetPlayerSpecTab(player);
+
+    if (sPlayerbotAIConfig.cautiousDefault)
+    {
+        nonCombatEngine->addStrategy("cautious");
+    }
 
     switch (player->getClass()){
         case CLASS_PRIEST:

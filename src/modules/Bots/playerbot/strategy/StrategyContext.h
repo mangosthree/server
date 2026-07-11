@@ -28,6 +28,7 @@
 #include "generic/TellTargetStrategy.h"
 #include "generic/AttackEnemyPlayersStrategy.h"
 #include "generic/MoveRandomStrategy.h"
+#include "generic/CautiousStrategy.h"
 
 namespace ai
 {
@@ -56,6 +57,7 @@ namespace ai
             creators["tell target"] = &StrategyContext::tell_target;
             creators["pvp"] = &StrategyContext::pvp;
             creators["move random"] = &StrategyContext::move_random;
+            creators["cautious"] = &StrategyContext::cautious;
             creators["lfg"] = &StrategyContext::lfg;
             creators["custom"] = &StrategyContext::custom;
             creators["reveal"] = &StrategyContext::reveal;
@@ -82,6 +84,7 @@ namespace ai
         static Strategy* ready_check(PlayerbotAI* ai) { return new ReadyCheckStrategy(ai); }
         static Strategy* pvp(PlayerbotAI* ai) { return new AttackEnemyPlayersStrategy(ai); }
         static Strategy* move_random(PlayerbotAI* ai) { return new MoveRandomStrategy(ai); }
+        static Strategy* cautious(PlayerbotAI* ai) { return new CautiousStrategy(ai); }
         static Strategy* lfg(PlayerbotAI* ai) { return new LfgStrategy(ai); }
         static Strategy* custom(PlayerbotAI* ai) { return new CustomStrategy(ai); }
         static Strategy* reveal(PlayerbotAI* ai) { return new RevealStrategy(ai); }

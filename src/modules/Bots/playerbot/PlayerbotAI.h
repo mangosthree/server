@@ -142,6 +142,7 @@ public:
     list<string> GetStrategies(BotState type) const;
     bool ContainsStrategy(StrategyType type);
     bool HasStrategy(string name, BotState type);
+    bool HasStrategy(string name) { return HasStrategy(name, currentState); }
     void ResetStrategies();
     void ReInitCurrentEngine();
     void Reset();

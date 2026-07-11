@@ -13,6 +13,27 @@ namespace ai
     BEGIN_RANGED_SPELL_ACTION(CastArcaneShotAction, "arcane shot")
     END_SPELL_ACTION()
 
+    // Cata focus generators
+    BEGIN_RANGED_SPELL_ACTION(CastSteadyShotAction, "steady shot")
+    END_SPELL_ACTION()
+
+    BEGIN_RANGED_SPELL_ACTION(CastCobraShotAction, "cobra shot")
+    END_SPELL_ACTION()
+
+    BEGIN_RANGED_SPELL_ACTION(CastKillShotAction, "kill shot")
+    END_SPELL_ACTION()
+
+    class CastKillCommandAction : public CastSpellAction
+    {
+    public:
+        CastKillCommandAction(PlayerbotAI* ai) : CastSpellAction(ai, "kill command") {}
+        virtual bool isPossible()
+        {
+            Pet* pet = bot->GetPet();
+            return CastSpellAction::isPossible() && pet && pet->IsAlive();
+        }
+    };
+
     BEGIN_RANGED_SPELL_ACTION(CastExplosiveShotAction, "explosive shot")
     END_SPELL_ACTION()
 
@@ -35,17 +56,11 @@ namespace ai
     BEGIN_RANGED_SPELL_ACTION(CastMultiShotAction, "multi-shot")
     END_SPELL_ACTION()
 
-    BEGIN_RANGED_SPELL_ACTION(CastVolleyAction, "volley")
-    END_SPELL_ACTION()
-
     BEGIN_RANGED_SPELL_ACTION(CastSerpentStingAction, "serpent sting")
     virtual bool isUseful();
     END_SPELL_ACTION()
 
     BEGIN_RANGED_SPELL_ACTION(CastWyvernStingAction, "wyvern sting")
-    END_SPELL_ACTION()
-
-    BEGIN_RANGED_SPELL_ACTION(CastScorpidStingAction, "scorpid sting")
     END_SPELL_ACTION()
 
     class CastAspectOfTheHawkAction : public CastBuffSpellAction

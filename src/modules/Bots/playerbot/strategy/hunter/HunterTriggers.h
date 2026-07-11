@@ -32,6 +32,14 @@ namespace ai
         };
     };
 
+    /// Cata: hunters run on focus; fires when there is enough for a spender
+    class HighFocusTrigger : public StatAvailable
+    {
+    public:
+        HighFocusTrigger(PlayerbotAI* ai) : StatAvailable(ai, 60, "high focus") {}
+        virtual bool IsActive();
+    };
+
     BEGIN_TRIGGER(HuntersPetDeadTrigger, Trigger)
     END_TRIGGER()
 

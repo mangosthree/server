@@ -103,6 +103,7 @@ namespace ai
             creators["health"] = &ValueContext::health;
             creators["rage"] = &ValueContext::rage;
             creators["energy"] = &ValueContext::energy;
+            creators["focus"] = &ValueContext::focus;
             creators["mana"] = &ValueContext::mana;
             creators["soul shards"] = &ValueContext::soul_shards;
             creators["combo"] = &ValueContext::combo;
@@ -216,6 +217,7 @@ namespace ai
         static UntypedValue* health(PlayerbotAI* ai) { return new HealthValue(ai); }
         static UntypedValue* rage(PlayerbotAI* ai) { return new RageValue(ai); }
         static UntypedValue* energy(PlayerbotAI* ai) { return new EnergyValue(ai); }
+        static UntypedValue* focus(PlayerbotAI* ai) { return new FocusValue(ai); }
         static UntypedValue* mana(PlayerbotAI* ai) { return new ManaValue(ai); }
         static UntypedValue* soul_shards(PlayerbotAI* ai) { return new SoulShardsValue(ai); }
         static UntypedValue* combo(PlayerbotAI* ai) { return new ComboPointsValue(ai); }

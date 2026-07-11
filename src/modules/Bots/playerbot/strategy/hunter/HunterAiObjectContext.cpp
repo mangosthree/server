@@ -75,6 +75,7 @@ namespace ai
                 creators["freezing trap"] = &TriggerFactoryInternal::freezing_trap;
                 creators["aspect of the pack"] = &TriggerFactoryInternal::aspect_of_the_pack;
                 creators["rapid fire"] = &TriggerFactoryInternal::rapid_fire;
+                creators["high focus"] = &TriggerFactoryInternal::high_focus;
                 creators["aspect of the hawk"] = &TriggerFactoryInternal::aspect_of_the_hawk;
                 creators["aspect of the wild"] = &TriggerFactoryInternal::aspect_of_the_wild;
                 creators["trueshot aura"] = &TriggerFactoryInternal::trueshot_aura;
@@ -94,6 +95,7 @@ namespace ai
             static Trigger* freezing_trap(PlayerbotAI* ai) { return new FreezingTrapTrigger(ai); }
             static Trigger* aspect_of_the_pack(PlayerbotAI* ai) { return new HunterAspectOfThePackTrigger(ai); }
             static Trigger* rapid_fire(PlayerbotAI* ai) { return new RapidFireTrigger(ai); }
+            static Trigger* high_focus(PlayerbotAI* ai) { return new HighFocusTrigger(ai); }
             static Trigger* aspect_of_the_hawk(PlayerbotAI* ai) { return new HunterAspectOfTheHawkTrigger(ai); }
             static Trigger* aspect_of_the_wild(PlayerbotAI* ai) { return new HunterAspectOfTheWildTrigger(ai); }
         };
@@ -118,14 +120,16 @@ namespace ai
                 creators["chimera shot"] = &AiObjectContextInternal::chimera_shot;
                 creators["explosive shot"] = &AiObjectContextInternal::explosive_shot;
                 creators["arcane shot"] = &AiObjectContextInternal::arcane_shot;
+                creators["steady shot"] = &AiObjectContextInternal::steady_shot;
+                creators["cobra shot"] = &AiObjectContextInternal::cobra_shot;
+                creators["kill shot"] = &AiObjectContextInternal::kill_shot;
+                creators["kill command"] = &AiObjectContextInternal::kill_command;
                 creators["concussive shot"] = &AiObjectContextInternal::concussive_shot;
                 creators["distracting shot"] = &AiObjectContextInternal::distracting_shot;
                 creators["multi-shot"] = &AiObjectContextInternal::multi_shot;
-                creators["volley"] = &AiObjectContextInternal::volley;
                 creators["serpent sting"] = &AiObjectContextInternal::serpent_sting;
                 creators["serpent sting on attacker"] = &AiObjectContextInternal::serpent_sting_on_attacker;
                 creators["wyvern sting"] = &AiObjectContextInternal::wyvern_sting;
-                creators["scorpid sting"] = &AiObjectContextInternal::scorpid_sting;
                 creators["hunter's mark"] = &AiObjectContextInternal::hunters_mark;
                 creators["mend pet"] = &AiObjectContextInternal::mend_pet;
                 creators["revive pet"] = &AiObjectContextInternal::revive_pet;
@@ -152,14 +156,16 @@ namespace ai
             static Action* chimera_shot(PlayerbotAI* ai) { return new CastChimeraShotAction(ai); }
             static Action* explosive_shot(PlayerbotAI* ai) { return new CastExplosiveShotAction(ai); }
             static Action* arcane_shot(PlayerbotAI* ai) { return new CastArcaneShotAction(ai); }
+            static Action* steady_shot(PlayerbotAI* ai) { return new CastSteadyShotAction(ai); }
+            static Action* cobra_shot(PlayerbotAI* ai) { return new CastCobraShotAction(ai); }
+            static Action* kill_shot(PlayerbotAI* ai) { return new CastKillShotAction(ai); }
+            static Action* kill_command(PlayerbotAI* ai) { return new CastKillCommandAction(ai); }
             static Action* concussive_shot(PlayerbotAI* ai) { return new CastConcussiveShotAction(ai); }
             static Action* distracting_shot(PlayerbotAI* ai) { return new CastDistractingShotAction(ai); }
             static Action* multi_shot(PlayerbotAI* ai) { return new CastMultiShotAction(ai); }
-            static Action* volley(PlayerbotAI* ai) { return new CastVolleyAction(ai); }
             static Action* serpent_sting(PlayerbotAI* ai) { return new CastSerpentStingAction(ai); }
             static Action* serpent_sting_on_attacker(PlayerbotAI* ai) { return new CastSerpentStingOnAttackerAction(ai); }
             static Action* wyvern_sting(PlayerbotAI* ai) { return new CastWyvernStingAction(ai); }
-            static Action* scorpid_sting(PlayerbotAI* ai) { return new CastScorpidStingAction(ai); }
             static Action* hunters_mark(PlayerbotAI* ai) { return new CastHuntersMarkAction(ai); }
             static Action* mend_pet(PlayerbotAI* ai) { return new CastMendPetAction(ai); }
             static Action* revive_pet(PlayerbotAI* ai) { return new CastRevivePetAction(ai); }

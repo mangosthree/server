@@ -78,6 +78,16 @@ uint8 EnergyValue::Calculate()
     return (static_cast<float> (target->GetPower(POWER_ENERGY)));
 }
 
+uint8 FocusValue::Calculate()
+{
+    Unit* target = GetTarget();
+    if (!target || !target->GetMaxPower(POWER_FOCUS))
+    {
+        return 0;
+    }
+    return (static_cast<float> (target->GetPower(POWER_FOCUS)) / target->GetMaxPower(POWER_FOCUS)) * 100;
+}
+
 uint8 ManaValue::Calculate()
 {
     Unit* target = GetTarget();

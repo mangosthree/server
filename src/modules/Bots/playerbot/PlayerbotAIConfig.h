@@ -86,6 +86,7 @@ public:
     bool logInGroupOnly, logValuesPerTick;
     bool fleeingEnabled; ///< Indicates if fleeing is enabled for bots.
     bool cautiousDefault; ///< If true, all bots get the "cautious" strategy (avoid pulling aggro while moving) by default.
+    bool spawnZoneStats;  ///< If true, scan all creatures once to level-band bot spawn zones. Expensive (multi-second world-thread scan); off by default.
     std::string combatStrategies, nonCombatStrategies;
     std::string randomBotCombatStrategies, randomBotNonCombatStrategies;
     uint32 randomBotMinLevel, randomBotMaxLevel;

@@ -158,11 +158,23 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed)
         SetNextCheckDelay(sPlayerbotAIConfig.randomBotCatchupInterval * 1000);
     }
 
-    ostringstream out; out << "Random bots are now scheduled to be processed in the background. Next re-schedule in " << sPlayerbotAIConfig.randomBotUpdateInterval << " seconds";
-    sLog.outString(out.str().c_str());
-    sWorld.SendWorldText(3, out.str().c_str());
+    // Internal scheduler status: keep it out of player chat (was broadcast via
+    // SendWorldText every pass = chat spam) and off the console at normal levels.
+    sLog.outDetail("Random bots processed; next pass in %u seconds",
+        overBudget ? sPlayerbotAIConfig.randomBotCatchupInterval : sPlayerbotAIConfig.randomBotUpdateInterval);
 
-    PrintStats();
+    // PrintStats walks every bot and logs a full breakdown; running it on every
+    // pass floods the log, so emit it roughly once a minute.
+    if (processTicks % 12 == 0)
+    {
+        PrintStats();
+    }
+
+    // Advance the pass counter. It was never incremented, so the "!processTicks"
+    // startup-burst branch above ran on *every* pass -- forcing a full-bot-list
+    // process each time instead of only at startup. Incrementing restores the
+    // intended one-time burst and steady per-interval throttling afterwards.
+    ++processTicks;
 }
 
 uint32 RandomPlayerbotMgr::AddRandomBots()
@@ -782,9 +794,12 @@ bool RandomPlayerbotMgr::IsZoneSafeForBot(Player* bot, uint32 mapId, float x, fl
         return true;
 
     // Area creature-level bands and contested-zone guard areas are scanned once
-    // (lazily) and cached; the computed-once flag stops an empty result from
-    // re-triggering the full scan every call (the world-thread spin guard).
-    if (!m_areaCreatureStatsComputed)
+    // (lazily) and cached. The scan walks every creature in the world (hundreds
+    // of thousands of terrain lookups = tens of seconds) on the world thread, so
+    // it is opt-in via AiPlayerbot.SpawnZoneStats; without it, only the cheap
+    // faction/team zone check applies. The computed-once flag stops an empty
+    // result from re-triggering the scan every call.
+    if (sPlayerbotAIConfig.spawnZoneStats && !m_areaCreatureStatsComputed)
     {
         CalculateAreaCreatureStats();
     }

@@ -51,6 +51,26 @@ namespace ai
             range(sPlayerbotAIConfig.spellDistance)
         {
             this->spell = spell;
+            // Clamp the action range to the spell's real max range from the DBC so
+            // the bot positions at the correct distance per spell instead of the
+            // one global spellDistance for everything.
+            uint32 spellId = AI_VALUE2(uint32, "spell id", spell);
+            if (spellId)
+            {
+                const SpellEntry* pSpellInfo = sSpellStore.LookupEntry(spellId);
+                if (pSpellInfo)
+                {
+                    SpellRangeEntry const* spellRange = sSpellRangeStore.LookupEntry(pSpellInfo->rangeIndex);
+                    if (spellRange)
+                    {
+                        float actualMaxRange = GetSpellMaxRange(spellRange);
+                        if (actualMaxRange > 0)
+                        {
+                            range = actualMaxRange;
+                        }
+                    }
+                }
+            }
         }
 
         virtual string GetTargetName() { return "current target"; };
@@ -61,6 +81,18 @@ namespace ai
 
         virtual NextAction** getPrerequisites()
         {
+            // Already within the spell's range: no repositioning needed (only pull
+            // into melee contact if this is effectively a melee-range spell).
+            float currentDistance = AI_VALUE2(float, "distance", GetTargetName());
+            if (currentDistance <= range)
+            {
+                if (range > ATTACK_DISTANCE)
+                {
+                    return Action::getPrerequisites();
+                }
+                return NextAction::merge(NextAction::array(0, new NextAction("reach melee"), NULL), Action::getPrerequisites());
+            }
+
             if (range > sPlayerbotAIConfig.spellDistance)
    {
        return NULL;

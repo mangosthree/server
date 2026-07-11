@@ -812,7 +812,17 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
             plMover->SendLootRelease(lootGUID);
         }
 
-        if (movementInfo.GetPos()->z < -500.0f)
+        // -500 assumed nothing legitimate sat that low, which held for old-world
+        // maps but not Cata's deep ocean zones: Vashj'ir's Abyssal Depths has
+        // live spirit-healer/graveyard content down to ~ -1800 (confirmed against
+        // creature/gameobject/areatrigger_teleport data), so it would void-kill
+        // swimmers there. getLiquidStatus() can't discriminate this either: the
+        // map-extractor clamps stored terrain height to CONF_use_minHeight
+        // (-500) for deep-ocean tiles, so GridMap::getLiquidStatus's internal
+        // "z < ground_level - 2" check misreads Vashj'ir's real liquid as
+        // LIQUID_MAP_NO_WATER. -3000 keeps a large margin below all known
+        // legitimate depth while still catching a genuine fall through the map.
+        if (movementInfo.GetPos()->z < -3000.0f)
         {
             if (plMover->GetBattleGround()
                 && plMover->GetBattleGround()->HandlePlayerUnderMap(_player))

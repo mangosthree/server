@@ -289,6 +289,7 @@ class RandomPlayerbotMgr : public PlayerbotHolder
     private:
         vector<Player*> players; ///< List of players.
         int processTicks; ///< Number of process ticks.
+        uint32 m_processBotCursor; ///< GUID of the last bot examined; the next pass resumes after it so a budget/cap-limited pass eventually covers every bot.
         std::map<uint32, AreaCreatureStats> m_areaCreatureStatsMap;
         std::map<std::pair<uint32, uint32>, uint32> m_cellToAreaCache;
 };

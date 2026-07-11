@@ -18,6 +18,7 @@
 #include "FleeManager.h"
 #include "GridDefines.h"
 #include "Map.h"
+#include "Timer.h"
 #include "MapManager.h"
 
 using namespace ai;
@@ -30,7 +31,7 @@ INSTANTIATE_SINGLETON_1(RandomPlayerbotMgr);
  * It handles the creation, updating, and processing of these bots, ensuring they
  * behave in a way that simulates real player activity.
  */
-RandomPlayerbotMgr::RandomPlayerbotMgr() : PlayerbotHolder(), processTicks(0)
+RandomPlayerbotMgr::RandomPlayerbotMgr() : PlayerbotHolder(), processTicks(0), m_processBotCursor(0)
 {
     sPlayerbotCommandServer.Start();
     //PrepareTeleportCache();
@@ -95,19 +96,66 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed)
         AddRandomBots();
     }
 
+    // Pace the pass against a wall-clock budget so a single update tick can not be
+    // monopolised by a burst of bot logins/randomizes/saves. Work that does not fit
+    // in the budget is carried over to the next (soon-rescheduled) pass.
+    uint32 passStart = getMSTime();
+    uint32 budgetMs = sPlayerbotAIConfig.randomBotProcessBudgetMs;
+    bool overBudget = false;
+
+    // Resume from the bot after the one last examined so a pass that stops early on
+    // its time budget or per-interval cap still works through every bot over
+    // successive passes instead of repeatedly re-processing the head of the list.
+    // A GUID cursor (not an index) is used because GetBots() is unordered and churns.
     int botProcessed = 0;
-    for (list<uint32>::iterator i = bots.begin(); i != bots.end(); ++i)
+    if (!bots.empty())
     {
-        uint32 bot = *i;
-        if (ProcessBot(bot))
+        list<uint32>::iterator i = bots.begin();
+        if (m_processBotCursor)
         {
-            botProcessed++;
+            list<uint32>::iterator cursor = std::find(bots.begin(), bots.end(), m_processBotCursor);
+            if (cursor != bots.end())
+            {
+                i = cursor;
+                if (++i == bots.end())
+                {
+                    i = bots.begin();
+                }
+            }
         }
 
-        if (botProcessed >= randomBotsPerInterval)
+        for (size_t examined = 0; examined < bots.size(); ++examined)
         {
-            break;
+            if (budgetMs && getMSTimeDiff(passStart, getMSTime()) >= budgetMs)
+            {
+                overBudget = true;
+                break;
+            }
+
+            uint32 bot = *i;
+            m_processBotCursor = bot;
+
+            if (ProcessBot(bot))
+            {
+                botProcessed++;
+            }
+
+            if (botProcessed >= randomBotsPerInterval)
+            {
+                break;
+            }
+
+            if (++i == bots.end())
+            {
+                i = bots.begin();
+            }
         }
+    }
+
+    // Still work left this pass - come back quickly instead of waiting a full interval.
+    if (overBudget && sPlayerbotAIConfig.randomBotCatchupInterval < sPlayerbotAIConfig.randomBotUpdateInterval)
+    {
+        SetNextCheckDelay(sPlayerbotAIConfig.randomBotCatchupInterval * 1000);
     }
 
     ostringstream out; out << "Random bots are now scheduled to be processed in the background. Next re-schedule in " << sPlayerbotAIConfig.randomBotUpdateInterval << " seconds";

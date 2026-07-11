@@ -29,6 +29,7 @@
 #include "MoveMap.h"
 #include "GridMap.h"
 #include "Creature.h"
+#include "Player.h"
 #include "PathFinder.h"
 #include "Log.h"
 
@@ -230,8 +231,17 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
 {
     // water is an open volume the 2.5D navmesh cannot represent: a mesh
     // path would pin a swimmer to the lake-bed polys, so swim straight
-    if (m_sourceUnit->GetTypeId() == TYPEID_UNIT && ((Creature*)m_sourceUnit)->CanSwim() &&
-        BuildSwimShortcut(startPos, endPos))
+    bool canSwim = m_sourceUnit->GetTypeId() == TYPEID_UNIT && ((Creature*)m_sourceUnit)->CanSwim();
+#ifdef ENABLE_PLAYERBOTS
+    // Bots are TYPEID_PLAYER, so the creature-only check above skipped them and
+    // the navmesh pinned them to the lake-bed -- the "walking underwater / jerky
+    // movement" report. Route bot players through the swim shortcut as well.
+    if (!canSwim && m_sourceUnit->GetTypeId() == TYPEID_PLAYER && ((Player*)m_sourceUnit)->GetPlayerbotAI())
+    {
+        canSwim = true;
+    }
+#endif
+    if (canSwim && BuildSwimShortcut(startPos, endPos))
     {
         return;
     }
@@ -693,7 +703,14 @@ void PathFinder::BuildShortcut()
     {
         float t = float(i) / float(segments);
         Vector3 point = start + (end - start) * t;
-        m_sourceUnit->UpdateAllowedPositionZ(point.x, point.y, point.z);
+        // Do not snap a waypoint that lies in water down to the ground: that pins
+        // the path to the lakebed and makes a swimming unit follow the uneven
+        // bottom (the "walking underwater / jerky movement" for bots). Keep the
+        // interpolated swim-level height so it glides across the surface instead.
+        if (!m_sourceUnit->GetMap()->GetTerrain()->IsInWater(point.x, point.y, point.z))
+        {
+            m_sourceUnit->UpdateAllowedPositionZ(point.x, point.y, point.z);
+        }
         m_pathPoints[i] = point;
     }
 

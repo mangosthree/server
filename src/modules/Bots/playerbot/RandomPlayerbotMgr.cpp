@@ -763,6 +763,14 @@ bool RandomPlayerbotMgr::IsZoneSafeForBot(Player* bot, uint32 mapId, float x, fl
     if (!area)
         return true;
 
+    // Area creature-level bands and contested-zone guard areas are scanned once
+    // (lazily) and cached; the computed-once flag stops an empty result from
+    // re-triggering the full scan every call (the world-thread spin guard).
+    if (!m_areaCreatureStatsComputed)
+    {
+        CalculateAreaCreatureStats();
+    }
+
     if (area->team != AREATEAM_NONE)
     {
         bool botIsAlliance = IsAlliance(bot->getRace());
@@ -771,16 +779,17 @@ bool RandomPlayerbotMgr::IsZoneSafeForBot(Player* bot, uint32 mapId, float x, fl
         if (!botIsAlliance && area->team != AREATEAM_HORDE)
             return false;
     }
-
-    // Reject zones whose creature level band does not fit the bot. Stats are scanned
-    // once (lazily) and cached; when a zone has no meaningful stats we accept it
-    // rather than reject-and-retry forever (the cycle guard that keeps the world
-    // thread from spinning if the scan ever yields nothing for a candidate area).
-    if (!m_areaCreatureStatsComputed)
+    else // contested area: keep bots out of zones guarded by the opposing faction
     {
-        CalculateAreaCreatureStats();
+        bool botIsAlliance = IsAlliance(bot->getRace());
+        if (botIsAlliance && m_hordeGuardAreas.find(area->ID) != m_hordeGuardAreas.end())
+            return false;
+        if (!botIsAlliance && m_allianceGuardAreas.find(area->ID) != m_allianceGuardAreas.end())
+            return false;
     }
 
+    // Reject zones whose creature level band does not fit the bot; when a zone has
+    // no meaningful stats we accept it rather than reject-and-retry forever.
     std::map<uint32, AreaCreatureStats>::const_iterator statsItr = m_areaCreatureStatsMap.find(area->ID);
     if (statsItr != m_areaCreatureStatsMap.end() && statsItr->second.creatureCount > 0)
     {
@@ -846,6 +855,9 @@ void RandomPlayerbotMgr::CalculateAreaCreatureStats()
     std::map<std::pair<uint32, uint32>, uint32> cellToAreaCache; // (mapId, cellId) -> areaId
     std::map<uint32, std::vector<uint8>> areaLevels;
 
+    m_allianceGuardAreas.clear();
+    m_hordeGuardAreas.clear();
+
     uint32 getAreaIdCalls = 0;
     uint32 totalCreatures = 0;
 
@@ -855,7 +867,7 @@ void RandomPlayerbotMgr::CalculateAreaCreatureStats()
         CreatureData const& data = itr->second;
         CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(data.id);
 
-        if (!cInfo || cInfo->NpcFlags != 0 || cInfo->UnitFlags & UNIT_FLAG_NON_ATTACKABLE)
+        if (!cInfo)
         {
             continue;
         }
@@ -887,6 +899,32 @@ void RandomPlayerbotMgr::CalculateAreaCreatureStats()
         }
 
         if (areaId == 0)
+        {
+            continue;
+        }
+
+        // Classify contested-zone guards by faction hostility so bots avoid
+        // areas patrolled by guards of the opposing faction.
+        if (cInfo->ExtraFlags & CREATURE_FLAG_EXTRA_GUARD)
+        {
+            FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->FactionAlliance);
+            if (factionTemplate && !factionTemplate->IsContestedGuardFaction() &&
+                !(factionTemplate->hostileMask & FACTION_MASK_PLAYER))
+            {
+                if (factionTemplate->hostileMask & FACTION_MASK_HORDE)
+                {
+                    m_allianceGuardAreas.insert(areaId);
+                }
+                if (factionTemplate->hostileMask & FACTION_MASK_ALLIANCE)
+                {
+                    m_hordeGuardAreas.insert(areaId);
+                }
+            }
+            continue;
+        }
+
+        // Skip questgivers, vendors, and non-attackable creatures for level stats.
+        if (cInfo->NpcFlags != 0 || cInfo->UnitFlags & UNIT_FLAG_NON_ATTACKABLE)
         {
             continue;
         }

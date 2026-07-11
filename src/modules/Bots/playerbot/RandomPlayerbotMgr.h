@@ -294,6 +294,8 @@ class RandomPlayerbotMgr : public PlayerbotHolder
         std::map<std::pair<uint32, uint32>, uint32> m_cellToAreaCache;
         bool m_areaCreatureStatsComputed = false; ///< Guards the one-time area-stats scan so an empty result is not recomputed every call.
         std::unordered_map<uint32, bool> m_randomBotCache; ///< Caches IsRandomBot("add") lookups to avoid a DB query per call; kept coherent in SetEventValue.
+        std::set<uint32> m_allianceGuardAreas; ///< Contested areas whose guards are hostile to Horde; Horde bots are kept out.
+        std::set<uint32> m_hordeGuardAreas;    ///< Contested areas whose guards are hostile to Alliance; Alliance bots are kept out.
 };
 
 #define sRandomPlayerbotMgr RandomPlayerbotMgr::instance()

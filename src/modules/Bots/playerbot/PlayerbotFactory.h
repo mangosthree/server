@@ -51,6 +51,11 @@ public:
      */
     void InitTalents();
 
+    /**
+     * @brief Initializes glyphs for the player bot.
+     */
+    void InitGlyphs();
+
 private:
     /**
      * @brief Randomizes the player bot with an option for incremental changes.

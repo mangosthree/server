@@ -161,6 +161,9 @@ void PlayerbotFactory::Randomize(bool incremental)
     sLog.outDetail("Initializing talents...");
     InitTalents();
 
+    sLog.outDetail("Initializing glyphs...");
+    InitGlyphs();
+
     sLog.outDetail("Initializing spells (step 2)...");
     InitAvailableSpells();
     InitSpecialSpells();
@@ -1668,6 +1671,89 @@ void PlayerbotFactory::InitTalents(uint32 specNo)
             }
         }
     }
+}
+
+/**
+ * Initializes glyphs for the player bot: fills every unlocked glyph slot with a
+ * random class-appropriate glyph of the matching type.
+ */
+void PlayerbotFactory::InitGlyphs()
+{
+    bot->InitGlyphsForLevel();
+
+    uint32 classMask = bot->getClassMask();
+
+    // Build glyph candidates per slot type (0/1/2) by scanning the class's
+    // glyph items and resolving each item's use-spell APPLY_GLYPH effect.
+    vector<uint32> candidates[3];
+    for (uint32 itemId = 0; itemId < sItemStorage.GetMaxEntry(); ++itemId)
+    {
+        ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+        if (!proto || proto->Class != ITEM_CLASS_GLYPH)
+        {
+            continue;
+        }
+
+        if (proto->AllowableClass && !(proto->AllowableClass & classMask))
+        {
+            continue;
+        }
+
+        // The glyph-apply spell is the one carried in the LEARN_SPELL_ID slot
+        // (spell_2); spell_1 is the generic SPELL_GENERIC_LEARN wrapper.
+        uint32 useSpell = 0;
+        for (int s = 0; s < MAX_ITEM_PROTO_SPELLS; ++s)
+        {
+            if (proto->Spells[s].SpellTrigger == ITEM_SPELLTRIGGER_LEARN_SPELL_ID && proto->Spells[s].SpellId)
+            {
+                useSpell = proto->Spells[s].SpellId;
+                break;
+            }
+        }
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(useSpell);
+        if (!spellInfo)
+        {
+            continue;
+        }
+
+        for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+        {
+            if (spellInfo->GetSpellEffectIdByIndex(SpellEffectIndex(j)) != SPELL_EFFECT_APPLY_GLYPH)
+            {
+                continue;
+            }
+
+            uint32 glyphId = spellInfo->GetEffectMiscValue(SpellEffectIndex(j));
+            GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyphId);
+            if (gp && gp->TypeFlags < 3)
+            {
+                candidates[gp->TypeFlags].push_back(glyphId);
+            }
+        }
+    }
+
+    for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
+    {
+        GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(bot->GetGlyphSlot(slot));
+        if (!gs || gs->TypeFlags >= 3)
+        {
+            continue;
+        }
+
+        vector<uint32>& pool = candidates[gs->TypeFlags];
+        if (pool.empty())
+        {
+            continue;
+        }
+
+        uint32 glyphId = pool[urand(0, pool.size() - 1)];
+        bot->ApplyGlyph(slot, false);
+        bot->SetGlyph(slot, glyphId);
+        bot->ApplyGlyph(slot, true);
+    }
+
+    bot->SendTalentsInfoData(false);
 }
 
 /**

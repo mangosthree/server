@@ -464,11 +464,35 @@ void RandomPlayerbotMgr::IncreaseLevel(Player* bot)
     if (bot->GetGuildId())
     {
         factory.Refresh();
-        // guilded bots skip the full randomize: respec here when the build is
-        // broken (no primary tree from the pre-Cata path) or points are unspent
+
+        // Guilded bots skip the full randomize (Refresh only re-rolls gear), so
+        // repair a broken build in place. Respec when the tree is unset (a
+        // pre-Cata build) or points are unspent.
+        bool changed = false;
         if (!bot->GetPrimaryTalentTree(bot->GetActiveSpec()) || bot->GetFreeTalentPoints())
         {
             factory.InitTalents();
+            changed = true;
+        }
+
+        // Fill glyphs for bots that have slots (level 25+) but none applied.
+        bool hasGlyph = false;
+        for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
+        {
+            if (bot->GetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot))
+            {
+                hasGlyph = true;
+                break;
+            }
+        }
+        if (bot->getLevel() >= 25 && !hasGlyph)
+        {
+            factory.InitGlyphs();
+            changed = true;
+        }
+
+        if (changed)
+        {
             bot->SaveToDB();
         }
     }

@@ -293,6 +293,7 @@ class RandomPlayerbotMgr : public PlayerbotHolder
         std::map<uint32, AreaCreatureStats> m_areaCreatureStatsMap;
         std::map<std::pair<uint32, uint32>, uint32> m_cellToAreaCache;
         bool m_areaCreatureStatsComputed = false; ///< Guards the one-time area-stats scan so an empty result is not recomputed every call.
+        std::unordered_map<uint32, bool> m_randomBotCache; ///< Caches IsRandomBot("add") lookups to avoid a DB query per call; kept coherent in SetEventValue.
 };
 
 #define sRandomPlayerbotMgr RandomPlayerbotMgr::instance()

@@ -144,7 +144,11 @@ float MovementAction::GetFollowAngle()
 
         if ( ref->getSource() == bot)
         {
-            return 2 * M_PI / (group->GetMembersCount() -1) * index;
+            // Fan followers across a rear arc behind the master (centred on
+            // straight-behind) instead of a full circle, so bots do not stand in
+            // front of / on top of the master.
+            int botCount = (int)group->GetMembersCount() - 1;
+            return M_PI / 2.0f + M_PI * (index - 1) / std::max(botCount - 1, 1);
         }
 
         index++;

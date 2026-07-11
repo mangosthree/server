@@ -47,6 +47,16 @@ namespace ai
     {
     public:
         ReachMeleeAction(PlayerbotAI* ai) : ReachTargetAction(ai, "reach melee", sPlayerbotAIConfig.meleeDistance) {}
+
+        // Account for the bot's body radius: "distance" is measured center-to-center,
+        // so without the bounding radius the bot keeps trying to close in while it is
+        // already in melee contact -- the dead-zone jitter of standing next to a mob
+        // without attacking.
+        virtual bool isUseful()
+        {
+            return AI_VALUE2(float, "distance", "current target") >
+                distance + sPlayerbotAIConfig.contactDistance + bot->GetObjectBoundingRadius();
+        }
     };
 
     class ReachSpellAction : public ReachTargetAction

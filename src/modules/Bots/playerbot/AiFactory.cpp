@@ -348,6 +348,17 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
     nonCombatEngine->addStrategies("nc", "food", "stay", "chat",
             "default", "quest", "loot", "gather", "duel", "emote", "conserve mana", NULL);
 
+    // A grouped bot should follow its master rather than stay put. The dead
+    // engine already forces "follow" for grouped bots (see AddDefaultDead-
+    // Strategies); mirror that here so an *alive* bot that joins a group also
+    // follows. Previously only the dead engine had "follow", so a bot invited
+    // while dead followed but a bot invited while alive just stayed.
+    if (player->GetGroup())
+    {
+        nonCombatEngine->addStrategy("follow");
+        nonCombatEngine->removeStrategy("stay");
+    }
+
     if (sRandomPlayerbotMgr.IsRandomBot(player))
     {
         if (!player->GetGroup())

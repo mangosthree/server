@@ -464,6 +464,13 @@ void RandomPlayerbotMgr::IncreaseLevel(Player* bot)
     if (bot->GetGuildId())
     {
         factory.Refresh();
+        // guilded bots skip the full randomize: respec here when the build is
+        // broken (no primary tree from the pre-Cata path) or points are unspent
+        if (!bot->GetPrimaryTalentTree(bot->GetActiveSpec()) || bot->GetFreeTalentPoints())
+        {
+            factory.InitTalents();
+            bot->SaveToDB();
+        }
     }
     else
     {

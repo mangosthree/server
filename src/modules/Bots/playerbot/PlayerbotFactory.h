@@ -46,6 +46,11 @@ public:
      */
     void Refresh();
 
+    /**
+     * @brief Initializes the talents for the player bot.
+     */
+    void InitTalents();
+
 private:
     /**
      * @brief Randomizes the player bot with an option for incremental changes.
@@ -131,11 +136,6 @@ private:
      * @brief Initializes spells not taught by trainers.
      */
     void InitQuestSpells();
-
-    /**
-     * @brief Initializes the talents for the player bot.
-     */
-    void InitTalents();
 
     /**
      * @brief Initializes the talents for the player bot based on a specific spec.

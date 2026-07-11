@@ -379,11 +379,22 @@ void PlayerbotFactory::InitTalents()
     uint32 p2 = p1 + sPlayerbotAIConfig.specProbability[cls][1];
 
     uint32 specNo = (point < p1 ? 0 : (point < p2 ? 1 : 2));
+
+    // start from a clean slate so the primary tree (and its mastery) is
+    // chosen by Player::LearnTalent, healing bots built by the old
+    // raw-learnSpell path that never set a tree
+    bot->resetTalents(true);
+
     InitTalents(specNo);
 
+    // Cata: off-tree rows unlock only after 31 points in the primary tree
     if (bot->GetFreeTalentPoints())
     {
-        InitTalents(2 - specNo);
+        InitTalents((specNo + 1) % 3);
+    }
+    if (bot->GetFreeTalentPoints())
+    {
+        InitTalents((specNo + 2) % 3);
     }
 }
 
@@ -1624,35 +1635,38 @@ void PlayerbotFactory::InitTalents(uint32 specNo)
         spells[talentInfo->Row].push_back(talentInfo);
     }
 
-    uint32 freePoints = bot->GetFreeTalentPoints();
-    for (map<uint32, vector<TalentEntry const*> >::iterator i = spells.begin(); i != spells.end(); ++i)
+    // Spend points row by row through Player::LearnTalent so every Cata rule
+    // applies (5-point row gates, 31-point primary tree, prerequisites) and
+    // the first learned talent sets the primary tree + mastery.
+    bool progress = true;
+    while (bot->GetFreeTalentPoints() && progress)
     {
-        vector<TalentEntry const*> &spells = i->second;
-        if (spells.empty())
+        progress = false;
+        for (map<uint32, vector<TalentEntry const*> >::iterator i = spells.begin(); i != spells.end() && bot->GetFreeTalentPoints(); ++i)
         {
-            sLog.outError("%s: No spells for talent row %d", bot->GetName(), i->first);
-            continue;
-        }
-
-        int attemptCount = 0;
-        while (!spells.empty() && (int)freePoints - (int)bot->GetFreeTalentPoints() < 5 && attemptCount++ < 3 && bot->GetFreeTalentPoints())
-        {
-            int index = urand(0, spells.size() - 1);
-            TalentEntry const *talentInfo = spells[index];
-            for (int rank = 0; rank < MAX_TALENT_RANK && bot->GetFreeTalentPoints(); ++rank)
+            vector<TalentEntry const*> &rowTalents = i->second;
+            vector<TalentEntry const*> shuffled = rowTalents;
+            for (size_t j = shuffled.size(); j > 1; --j)
             {
-                uint32 spellId = talentInfo->RankID[rank];
-                if (!spellId)
-                {
-                    continue;
-                }
-                bot->learnSpell(spellId, false);
-                bot->UpdateFreeTalentPoints(false);
+                std::swap(shuffled[j - 1], shuffled[urand(0, j - 1)]);
             }
-            spells.erase(spells.begin() + index);
-        }
 
-        freePoints = bot->GetFreeTalentPoints();
+            for (vector<TalentEntry const*>::iterator t = shuffled.begin(); t != shuffled.end() && bot->GetFreeTalentPoints(); ++t)
+            {
+                TalentEntry const* talentInfo = *t;
+                for (int rank = 0; rank < MAX_TALENT_RANK && bot->GetFreeTalentPoints(); ++rank)
+                {
+                    if (!talentInfo->RankID[rank])
+                    {
+                        continue;
+                    }
+                    if (bot->LearnTalent(talentInfo->TalentID, rank))
+                    {
+                        progress = true;
+                    }
+                }
+            }
+        }
     }
 }
 

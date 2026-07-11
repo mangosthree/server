@@ -13,12 +13,30 @@ public:
     {
         this->spell = spell;
         maxDistance = 0;
+        moonFound = false;
     }
 
 public:
     virtual void CheckAttacker(Unit* creature, ThreatManager* threatManager)
     {
+        if (moonFound)
+        {
+            return;
+        }
+
         Player* bot = ai->GetBot();
+
+        // A moon-marked (raid target icon 4) creature is the explicit CC pick and
+        // wins unconditionally -- before the health/castable filters, which would
+        // otherwise skip e.g. a low-health marked target.
+        Group* group = bot->GetGroup();
+        if (group && group->GetTargetIcon(4) == creature->GetObjectGuid())
+        {
+            result = creature;
+            moonFound = true;
+            return;
+        }
+
         if (*ai->GetAiObjectContext()->GetValue<Unit*>("current target") == creature)
         {
             return;
@@ -42,15 +60,8 @@ public:
         }
 
         float minDistance = sPlayerbotAIConfig.spellDistance;
-        Group* group = bot->GetGroup();
         if (!group)
         {
-            return;
-        }
-
-        if (group->GetTargetIcon(4) == creature->GetObjectGuid())
-        {
-            result = creature;
             return;
         }
 
@@ -102,6 +113,7 @@ public:
 private:
     string spell;
     float maxDistance;
+    bool moonFound;
 };
 
 Unit* CcTargetValue::Calculate()

@@ -36,7 +36,12 @@ bool RememberTaxiAction::Execute(Event event)
             {
                 p >> guid >> node_count;
 
-                LastMovement& movement = context->GetValue<LastMovement&>("last movement")->Get();
+                // Store into "last taxi" (not "last movement"): TaxiAction reads
+                // "last taxi", and "last movement" is overwritten by every normal
+                // move, which would wipe a remembered multi-hop taxi path before
+                // the bot follows it. The single-hop CMSG_ACTIVATETAXI case above
+                // already uses "last taxi"; keep the express path consistent.
+                LastMovement& movement = context->GetValue<LastMovement&>("last taxi")->Get();
                 movement.taxiNodes.clear();
                 for (uint32 i = 0; i < node_count; ++i)
                 {

@@ -6,12 +6,34 @@ namespace ai
 {
     class EnemyTooCloseForSpellTrigger : public Trigger {
     public:
-        EnemyTooCloseForSpellTrigger(PlayerbotAI* ai) : Trigger(ai, "enemy too close for spell", 2) {}
+        EnemyTooCloseForSpellTrigger(PlayerbotAI* ai) : Trigger(ai, "enemy too close for spell", 2), lastNoAggroFlee_(0) {}
         virtual bool IsActive()
         {
             Unit* target = AI_VALUE(Unit*, "current target");
-            return target && AI_VALUE2(float, "distance", "current target") <= sPlayerbotAIConfig.spellDistance / 2;
+            if (!target || AI_VALUE2(float, "distance", "current target") > sPlayerbotAIConfig.spellDistance / 2)
+            {
+                return false;
+            }
+
+            // With aggro, back off every time. Without aggro (mob is on someone
+            // else), throttle so the bot does not thrash away from a passing enemy.
+            if (AI_VALUE2(bool, "has aggro", "current target"))
+            {
+                lastNoAggroFlee_ = 0;
+                return true;
+            }
+
+            time_t now = time(nullptr);
+            if (lastNoAggroFlee_ == 0 || (now - lastNoAggroFlee_) >= NO_AGGRO_FLEE_COOLDOWN)
+            {
+                lastNoAggroFlee_ = now;
+                return true;
+            }
+            return false;
         }
+    private:
+        time_t lastNoAggroFlee_;
+        static const time_t NO_AGGRO_FLEE_COOLDOWN = 6;
     };
 
     class EnemyTooCloseForShootTrigger : public Trigger {

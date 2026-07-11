@@ -27,6 +27,7 @@ namespace ai
             creators["almost full health"] = &TriggerContext::AlmostFullHealth;
 
             creators["low mana"] = &TriggerContext::LowMana;
+            creators["low mana has aggro"] = &TriggerContext::LowManaHasAggro;
             creators["medium mana"] = &TriggerContext::MediumMana;
 
             creators["party member critical health"] = &TriggerContext::PartyMemberCriticalHealth;
@@ -126,6 +127,7 @@ namespace ai
         static Trigger* CriticalHealth(PlayerbotAI* ai) { return new CriticalHealthTrigger(ai); }
         static Trigger* TargetCriticalHealth(PlayerbotAI* ai) { return new TargetCriticalHealthTrigger(ai); }
         static Trigger* LowMana(PlayerbotAI* ai) { return new LowManaTrigger(ai); }
+        static Trigger* LowManaHasAggro(PlayerbotAI* ai) { return new LowManaHasAggroTrigger(ai); }
         static Trigger* MediumMana(PlayerbotAI* ai) { return new MediumManaTrigger(ai); }
         static Trigger* LightRageAvailable(PlayerbotAI* ai) { return new LightRageAvailableTrigger(ai); }
         static Trigger* MediumRageAvailable(PlayerbotAI* ai) { return new MediumRageAvailableTrigger(ai); }

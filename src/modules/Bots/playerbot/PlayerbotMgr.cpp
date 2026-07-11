@@ -140,7 +140,9 @@ void PlayerbotHolder::OnBotLogin(Player* const bot)
     if (group)
     {
         bool groupValid = false;
-        Group::MemberSlotList const& slots = group->GetMemberSlots();
+        // Copy by value: the loop can trigger group mutation (member removal on a
+        // stale/disbanding group), which would invalidate a reference to the live list.
+        Group::MemberSlotList slots = group->GetMemberSlots();
         for (Group::MemberSlotList::const_iterator i = slots.begin(); i != slots.end(); ++i)
         {
             ObjectGuid member = i->guid;

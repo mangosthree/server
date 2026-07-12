@@ -29,5 +29,34 @@ bool HuntersPetLowHealthTrigger::IsActive()
         !AI_VALUE2(bool, "dead", "pet target") && !AI_VALUE2(bool, "mounted", "self target");
 }
 
+bool FeignDeathTrigger::IsActive()
+{
+    if (!bot->hasUnitState(UNIT_STAT_DIED))
+    {
+        return false;
+    }
+
+    if (AI_VALUE(uint8, "attacker count") > 0)
+    {
+        return false;
+    }
+
+    Unit::AuraList const& auras = bot->GetAurasByType(SPELL_AURA_FEIGN_DEATH);
+    if (auras.empty())
+    {
+        return false;
+    }
+
+    Aura* aura = auras.front();
+    int32 maxDuration = aura->GetAuraMaxDuration();
+    int32 remaining = aura->GetAuraDuration();
+
+    if (maxDuration > 0)
+    {
+        return (maxDuration - remaining) >= 5000;
+    }
+
+    return true;
+}
 
 

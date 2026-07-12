@@ -119,6 +119,22 @@ namespace ai
         CastFeignDeathAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "feign death") {}
     };
 
+    /// Cancels Feign Death so the bot drops threat and stands back up
+    class RemoveFeignDeathAction : public Action
+    {
+    public:
+        RemoveFeignDeathAction(PlayerbotAI* ai) : Action(ai, "remove feign death") {}
+        virtual bool Execute(Event event)
+        {
+            bot->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+            return true;
+        }
+        virtual bool isUseful()
+        {
+            return bot->hasUnitState(UNIT_STAT_DIED);
+        }
+    };
+
     class CastRapidFireAction : public CastBuffSpellAction
     {
     public:

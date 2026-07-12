@@ -88,4 +88,12 @@ namespace ai
     public:
         ConsussiveShotSnareTrigger(PlayerbotAI* ai) : SnareTargetTrigger(ai, "concussive shot") {}
     };
+
+    /// Fires once a feigned bot has shed its attackers, so it can stand back up
+    class FeignDeathTrigger : public Trigger
+    {
+    public:
+        FeignDeathTrigger(PlayerbotAI* ai) : Trigger(ai, "has feign death", 1) {}
+        virtual bool IsActive();
+    };
 }

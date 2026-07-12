@@ -81,9 +81,11 @@ namespace ai
                 creators["trueshot aura"] = &TriggerFactoryInternal::trueshot_aura;
                 creators["serpent sting on attacker"] = &TriggerFactoryInternal::serpent_sting_on_attacker;
                 creators["concussive shot on snare target"] = &TriggerFactoryInternal::concussive_shot_on_snare_target;
+                creators["has feign death"] = &TriggerFactoryInternal::has_feign_death;
             }
 
         private:
+            static Trigger* has_feign_death(PlayerbotAI* ai) { return new FeignDeathTrigger(ai); }
             static Trigger* concussive_shot_on_snare_target(PlayerbotAI* ai) { return new ConsussiveShotSnareTrigger(ai); }
             static Trigger* serpent_sting_on_attacker(PlayerbotAI* ai) { return new SerpentStingOnAttackerTrigger(ai); }
             static Trigger* trueshot_aura(PlayerbotAI* ai) { return new TrueshotAuraTrigger(ai); }
@@ -145,11 +147,13 @@ namespace ai
                 creators["aspect of the cheetah"] = &AiObjectContextInternal::aspect_of_the_cheetah;
                 creators["trueshot aura"] = &AiObjectContextInternal::trueshot_aura;
                 creators["feign death"] = &AiObjectContextInternal::feign_death;
+                creators["remove feign death"] = &AiObjectContextInternal::remove_feign_death;
                 creators["wing clip"] = &AiObjectContextInternal::wing_clip;
             }
 
         private:
             static Action* feign_death(PlayerbotAI* ai) { return new CastFeignDeathAction(ai); }
+            static Action* remove_feign_death(PlayerbotAI* ai) { return new RemoveFeignDeathAction(ai); }
             static Action* trueshot_aura(PlayerbotAI* ai) { return new CastTrueshotAuraAction(ai); }
             static Action* auto_shot(PlayerbotAI* ai) { return new CastAutoShotAction(ai); }
             static Action* aimed_shot(PlayerbotAI* ai) { return new CastAimedShotAction(ai); }

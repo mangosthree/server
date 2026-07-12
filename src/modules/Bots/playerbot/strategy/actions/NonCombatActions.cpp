@@ -37,12 +37,23 @@ bool DrinkAction::Execute(Event event)
         }
         else
         {
-            result = UseItemAction::Execute(event);
+            // Use the level-sorted drink list directly -- UseItemAction::Execute
+            // misfires into the use-item-ON-item branch when 2+ drink stacks exist.
+            list<Item*> drinks = AI_VALUE2(list<Item*>, "inventory items", "drink");
+            if (!drinks.empty())
+            {
+                result = UseItemAuto(*drinks.begin());
+            }
+            else
+            {
+                result = false;
+            }
         }
     }
 
     if (result)
     {
+        bot->SetStandState(UNIT_STAND_STATE_SIT);
         ai->SetDrinking();
     }
     return result;
@@ -103,6 +114,7 @@ bool EatAction::Execute(Event event)
 
     if (result)
     {
+        bot->SetStandState(UNIT_STAND_STATE_SIT);
         ai->SetEating();
     }
     return result;

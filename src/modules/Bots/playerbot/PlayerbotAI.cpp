@@ -176,8 +176,13 @@ void PlayerbotAI::UpdateAI(uint32 elapsed)
 {
     if (m_eatingUntil || m_drinkingUntil)
     {
-        if (bot->IsInCombat() || !bot->IsSitState())
+        bool finished = !IsEating() && !IsDrinking();
+        if (bot->IsInCombat() || !bot->IsSitState() || finished)
         {
+            if (bot->IsSitState())
+            {
+                bot->SetStandState(UNIT_STAND_STATE_STAND);
+            }
             m_eatingUntil = 0;
             m_drinkingUntil = 0;
         }

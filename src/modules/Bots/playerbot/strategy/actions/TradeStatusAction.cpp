@@ -37,9 +37,13 @@ bool TradeStatusAction::Execute(Event event)
     }
 
     WorldPacket p(event.getPacket());
+    if (p.size() < 1)
+    {
+        return false;
+    }
     p.rpos(0);
-    uint32 status;
-    p >> status;
+    p.ReadBit();                     // matches core WriteBit(false)
+    uint32 status = p.ReadBits(5);   // matches core WriteBits(status, 5)
 
     if (status == TRADE_STATUS_TRADE_ACCEPT)
     {

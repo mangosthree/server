@@ -215,6 +215,7 @@ char const* WorldSession::GetPlayerName() const
 void WorldSession::SendPacket(WorldPacket const* packet)
 {
 #ifdef ENABLE_PLAYERBOTS
+    const_cast<WorldPacket*>(packet)->FlushBits();
     if (GetPlayer())
     {
         if (GetPlayer()->GetPlayerbotAI())

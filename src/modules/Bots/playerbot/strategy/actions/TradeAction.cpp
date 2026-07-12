@@ -12,8 +12,8 @@ bool TradeAction::Execute(Event event)
     uint32 copper = chat->parseMoney(text);
     if (copper > 0)
     {
-        WorldPacket* const packet = new WorldPacket(CMSG_SET_TRADE_GOLD, 4);
-        *packet << copper;
+        WorldPacket* const packet = new WorldPacket(CMSG_SET_TRADE_GOLD, 8);
+        *packet << uint64(copper);
         bot->GetSession()->QueuePacket(packet);
     }
 
@@ -88,9 +88,10 @@ bool TradeAction::TradeItem(const Item& item, int8 slot)
 
     if (tradeSlot == -1) return false;
 
+    // Cata 4.3.4 read order (HandleSetTradeItemOpcode): slot, tradeSlot, bag
     WorldPacket* const packet = new WorldPacket(CMSG_SET_TRADE_ITEM, 3);
-    *packet << (uint8) tradeSlot << (uint8) item.GetBagSlot()
-        << (uint8) item.GetSlot();
+    *packet << (uint8) item.GetSlot() << (uint8) tradeSlot
+        << (uint8) item.GetBagSlot();
     bot->GetSession()->QueuePacket(packet);
     return true;
 }

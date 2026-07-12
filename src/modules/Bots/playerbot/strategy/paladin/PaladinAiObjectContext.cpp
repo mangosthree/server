@@ -120,9 +120,13 @@ namespace ai
                 creators["holy shield"] = &TriggerFactoryInternal::holy_shield;
                 creators["hammer of justice on enemy healer"] = &TriggerFactoryInternal::hammer_of_justice_on_enemy_target;
                 creators["hammer of justice on snare target"] = &TriggerFactoryInternal::hammer_of_justice_on_snare_target;
+                creators["holy wrath"] = &TriggerFactoryInternal::holy_wrath;
+                creators["blessing of freedom"] = &TriggerFactoryInternal::blessing_of_freedom;
             }
 
         private:
+            static Trigger* holy_wrath(PlayerbotAI* ai) { return new HolyWrathTrigger(ai); }
+            static Trigger* blessing_of_freedom(PlayerbotAI* ai) { return new BlessingOfFreedomTrigger(ai); }
             static Trigger* holy_shield(PlayerbotAI* ai) { return new HolyShieldTrigger(ai); }
             static Trigger* righteous_fury(PlayerbotAI* ai) { return new RighteousFuryTrigger(ai); }
             static Trigger* judgement(PlayerbotAI* ai) { return new JudgementTrigger(ai); }
@@ -203,6 +207,7 @@ namespace ai
                 creators["righteous fury"] = &AiObjectContextInternal::righteous_fury;
                 creators["hammer of justice on enemy healer"] = &AiObjectContextInternal::hammer_of_justice_on_enemy_healer;
                 creators["hammer of justice on snare target"] = &AiObjectContextInternal::hammer_of_justice_on_snare_target;
+                creators["blessing of freedom"] = &AiObjectContextInternal::blessing_of_freedom;
             }
 
         private:
@@ -250,6 +255,7 @@ namespace ai
             static Action* resistance_aura(PlayerbotAI* ai) { return new CastResistanceAuraAction(ai); }
             static Action* hammer_of_justice_on_enemy_healer(PlayerbotAI* ai) { return new CastHammerOfJusticeOnEnemyHealerAction(ai); }
             static Action* hammer_of_justice_on_snare_target(PlayerbotAI* ai) { return new CastHammerOfJusticeSnareAction(ai); }
+            static Action* blessing_of_freedom(PlayerbotAI* ai) { return new CastBlessingOfFreedomAction(ai); }
         };
     };
 };

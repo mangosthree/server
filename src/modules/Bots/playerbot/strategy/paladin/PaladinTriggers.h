@@ -109,4 +109,20 @@ namespace ai
     public:
         HammerOfJusticeEnemyHealerTrigger(PlayerbotAI* ai) : InterruptEnemyHealerTrigger(ai, "hammer of justice") {}
     };
+
+    /// Cata 4.3.4: Holy Wrath hits all nearby enemies (only its stun is undead/demon-limited)
+    class HolyWrathTrigger : public Trigger
+    {
+    public:
+        HolyWrathTrigger(PlayerbotAI* ai) : Trigger(ai, "holy wrath") {}
+        virtual bool IsActive();
+    };
+
+    /// Fires when the bot itself is rooted or snared, to self-cast Blessing of Freedom
+    class BlessingOfFreedomTrigger : public Trigger
+    {
+    public:
+        BlessingOfFreedomTrigger(PlayerbotAI* ai) : Trigger(ai, "blessing of freedom") {}
+        virtual bool IsActive();
+    };
 }

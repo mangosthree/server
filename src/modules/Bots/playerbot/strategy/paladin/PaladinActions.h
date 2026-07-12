@@ -8,6 +8,19 @@ namespace ai
     {
     public:
         CastJudgementAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "judgement") {}
+        /// Judgement requires an active seal (SPELL_FAILED_CASTER_AURASTATE otherwise); mirrors SealTrigger::IsActive
+        virtual bool isPossible()
+        {
+            if (!ai->HasAura("seal of justice", bot) &&
+                !ai->HasAura("seal of command", bot) &&
+                !ai->HasAura("seal of truth", bot) &&
+                !ai->HasAura("seal of righteousness", bot) &&
+                !ai->HasAura("seal of insight", bot))
+            {
+                return false;
+            }
+            return CastMeleeSpellAction::isPossible();
+        }
     };
 
     class CastRighteousFuryAction : public CastBuffSpellAction
@@ -287,5 +300,11 @@ namespace ai
     {
     public:
         CastHammerOfJusticeSnareAction(PlayerbotAI* ai) : CastSnareSpellAction(ai, "hammer of justice") {}
+    };
+
+    class CastBlessingOfFreedomAction : public CastBuffSpellAction
+    {
+    public:
+        CastBlessingOfFreedomAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "blessing of freedom") {}
     };
 }

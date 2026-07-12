@@ -20,3 +20,13 @@ bool CrusaderAuraTrigger::IsActive()
     Unit* target = GetTarget();
     return AI_VALUE2(bool, "mounted", "self target") && !ai->HasAura("crusader aura", target);
 }
+
+bool HolyWrathTrigger::IsActive()
+{
+    return AI_VALUE(uint8, "attacker count") >= 2;
+}
+
+bool BlessingOfFreedomTrigger::IsActive()
+{
+    return bot->IsInRoots() || bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED);
+}

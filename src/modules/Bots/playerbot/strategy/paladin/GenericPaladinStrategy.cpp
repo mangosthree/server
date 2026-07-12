@@ -53,6 +53,14 @@ void GenericPaladinStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "target critical health",
         NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "holy wrath",
+        NextAction::array(0, new NextAction("holy wrath", ACTION_HIGH + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "blessing of freedom",
+        NextAction::array(0, new NextAction("blessing of freedom", ACTION_EMERGENCY), NULL)));
 }
 
 void PaladinCureStrategy::InitTriggers(std::list<TriggerNode*> &triggers)

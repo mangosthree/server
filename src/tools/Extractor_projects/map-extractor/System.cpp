@@ -113,7 +113,7 @@ enum Extract
 
 int   CONF_extract = EXTRACT_MAP | EXTRACT_DBC; /**< Select data for extract */
 bool  CONF_allow_height_limit       = true;     /**< Allows to limit minimum height */
-float CONF_use_minHeight            = -500.0f;  /**< Default minimum height */
+float CONF_use_minHeight            = -2000.0f; /**< Minimum stored terrain height. Cata's deep-ocean zones (Vashj'ir sea-bed ~ -960 to -1800) fall below the old vanilla -500 clamp, which flattened their floor to -500 and made getLiquidStatus report deep water as no-water (z < ground_level). -2000 matches TrinityCore's 4.3.4 value and keeps the real floor. */
 
 bool  CONF_allow_float_to_int      = false;      /**< Allows float to int conversion */
 float CONF_float_to_int8_limit     = 2.0f;      /**< Max accuracy = val/256 */

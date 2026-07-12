@@ -102,6 +102,7 @@ public:
     bool randomBotShowHelmet; ///< Indicates if random bots should show helmets.
     bool randomBotShowCloak; ///< Indicates if random bots should show cloaks.
     bool enableGreet; ///< Indicates if greeting is enabled for bots.
+    bool autoStockFood; ///< Indicates if bots with empty bags should be auto-stocked with food/drink on login.
 
     bool guildTaskEnabled; ///< Indicates if guild tasks are enabled.
     uint32 minGuildTaskChangeTime, maxGuildTaskChangeTime;

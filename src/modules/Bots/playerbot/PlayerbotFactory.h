@@ -56,6 +56,12 @@ public:
      */
     void InitGlyphs();
 
+    /**
+     * @brief Stocks level-appropriate food and drink for the player bot.
+     * Standalone-safe: only touches inventory, does not reset/re-randomize the bot.
+     */
+    void InitFood();
+
 private:
     /**
      * @brief Randomizes the player bot with an option for incremental changes.
@@ -172,11 +178,6 @@ private:
      * @brief Initializes the potions for the player bot.
      */
     void InitPotions();
-
-    /**
-     * @brief Initializes the food for the player bot.
-     */
-    void InitFood();
 
     /**
      * @brief Checks if the player bot can equip a given armor item.

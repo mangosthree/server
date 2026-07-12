@@ -726,6 +726,21 @@ void PlayerbotMgr::OnBotLoginInternal(Player * const bot)
     // Set the master for the bot and reset its strategies
     bot->GetPlayerbotAI()->SetMaster(master);
     bot->GetPlayerbotAI()->ResetStrategies();
+
+    // Owned alts added via .bot add keep their real bags and are never
+    // factory-stocked, so DrinkAction/EatAction find nothing to use. Stock
+    // them once on login if they currently carry no food and no drink.
+    if (sPlayerbotAIConfig.autoStockFood)
+    {
+        AiObjectContext* context = bot->GetPlayerbotAI()->GetAiObjectContext();
+        bool noFood = context->GetValue<list<Item*> >("inventory items", "food")->Get().empty();
+        bool noDrink = context->GetValue<list<Item*> >("inventory items", "drink")->Get().empty();
+        if (noFood && noDrink)
+        {
+            PlayerbotFactory factory(bot, bot->getLevel());
+            factory.InitFood();
+        }
+    }
 }
 
 /**

@@ -127,6 +127,7 @@ public:
     virtual ~PlayerbotAI();
 
 public:
+    virtual void UpdateAI(uint32 elapsed) override;
     virtual void UpdateAIInternal(uint32 elapsed);
     string HandleRemoteCommand(string command);
     void HandleCommand(uint32 type, const string& text, Player& fromPlayer);
@@ -193,6 +194,25 @@ public:
     static bool IsOpposing(uint8 race1, uint8 race2);
     PlayerbotSecurity* GetSecurity() { return &security; }
 
+    bool IsEating() const
+    {
+        return m_eatingUntil && time(0) <= m_eatingUntil &&
+               bot->GetHealth() < bot->GetMaxHealth();
+    }
+    bool IsDrinking() const
+    {
+        if (!m_drinkingUntil)
+        {
+            return false;
+        }
+
+        uint32 mana = bot->GetPower(POWER_MANA);
+        uint32 maxMana = bot->GetMaxPower(POWER_MANA);
+        return time(0) <= m_drinkingUntil && mana < maxMana;
+    }
+    void SetEating() { m_eatingUntil = time(0) + 30; }
+    void SetDrinking() { m_drinkingUntil = time(0) + 30; }
+
 protected:
     Player* bot;
     Player* master;
@@ -210,5 +230,7 @@ protected:
     PlayerbotSecurity security;
     map<string, time_t> whispers;
     pair<ChatMsg, time_t> currentChat;
+    time_t m_eatingUntil;
+    time_t m_drinkingUntil;
 };
 

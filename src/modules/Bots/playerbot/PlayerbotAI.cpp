@@ -83,7 +83,8 @@ void PacketHandlingHelper::AddPacket(const WorldPacket& packet)
  * Default constructor for PlayerbotAI.
  */
 PlayerbotAI::PlayerbotAI() : PlayerbotAIBase(), bot(NULL), aiObjectContext(NULL),
-    currentEngine(NULL), chatHelper(this), chatFilter(this), accountId(0), security(NULL), master(NULL), currentState(BOT_STATE_NON_COMBAT)
+    currentEngine(NULL), chatHelper(this), chatFilter(this), accountId(0), security(NULL), master(NULL), currentState(BOT_STATE_NON_COMBAT),
+    m_eatingUntil(0), m_drinkingUntil(0)
 {
     for (int i = 0 ; i < BOT_STATE_MAX; i++)
     {
@@ -96,7 +97,8 @@ PlayerbotAI::PlayerbotAI() : PlayerbotAIBase(), bot(NULL), aiObjectContext(NULL)
  * @param bot The player bot.
  */
 PlayerbotAI::PlayerbotAI(Player* bot) :
-    PlayerbotAIBase(), chatHelper(this), chatFilter(this), security(bot), master(NULL)
+    PlayerbotAIBase(), chatHelper(this), chatFilter(this), security(bot), master(NULL),
+    m_eatingUntil(0), m_drinkingUntil(0)
 {
     this->bot = bot;
 
@@ -163,6 +165,25 @@ PlayerbotAI::~PlayerbotAI()
     {
         delete aiObjectContext;
     }
+}
+
+/**
+ * Updates the AI, clearing the eat/drink state once the bot leaves the
+ * sit-and-eat posture (combat or standing back up).
+ * @param elapsed The time elapsed since the last update.
+ */
+void PlayerbotAI::UpdateAI(uint32 elapsed)
+{
+    if (m_eatingUntil || m_drinkingUntil)
+    {
+        if (bot->IsInCombat() || !bot->IsSitState())
+        {
+            m_eatingUntil = 0;
+            m_drinkingUntil = 0;
+        }
+    }
+
+    PlayerbotAIBase::UpdateAI(elapsed);
 }
 
 /**

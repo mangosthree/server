@@ -40,8 +40,10 @@ PlayerbotAIConfig::PlayerbotAIConfig()
       lowHealth(0),
       mediumHealth(0),
       almostFullHealth(0),
+      hungryHealth(0),
       lowMana(0),
       mediumMana(0),
+      thirstyMana(0),
       openGoSpell(0),
       randomBotAutologin(false),
       botAutologin(false), // Initialize botAutologin here
@@ -171,8 +173,10 @@ bool PlayerbotAIConfig::Initialize()
     lowHealth = config.GetIntDefault("AiPlayerbot.LowHealth", 50);
     mediumHealth = config.GetIntDefault("AiPlayerbot.MediumHealth", 70);
     almostFullHealth = config.GetIntDefault("AiPlayerbot.AlmostFullHealth", 85);
+    hungryHealth = config.GetIntDefault("AiPlayerbot.HungryHealth", 65);
     lowMana = config.GetIntDefault("AiPlayerbot.LowMana", 15);
     mediumMana = config.GetIntDefault("AiPlayerbot.MediumMana", 40);
+    thirstyMana = config.GetIntDefault("AiPlayerbot.ThirstyMana", 65);
 
     randomGearLoweringChance = config.GetFloatDefault("AiPlayerbot.RandomGearLoweringChance", 0.15);
     randomBotMaxLevelChance = config.GetFloatDefault("AiPlayerbot.RandomBotMaxLevelChance", 0.15);
@@ -345,9 +349,17 @@ string PlayerbotAIConfig::GetValue(string name) const
     {
         out << almostFullHealth;
     }
+    else if (name == "HungryHealth")
+    {
+        out << hungryHealth;
+    }
     else if (name == "LowMana")
     {
         out << lowMana;
+    }
+    else if (name == "ThirstyMana")
+    {
+        out << thirstyMana;
     }
 
     else if (name == "IterationsPerTick")
@@ -417,9 +429,17 @@ void PlayerbotAIConfig::SetValue(string &name, string value)
     {
         out >> almostFullHealth;
     }
+    else if (name == "HungryHealth")
+    {
+        out >> hungryHealth;
+    }
     else if (name == "LowMana")
     {
         out >> lowMana;
+    }
+    else if (name == "ThirstyMana")
+    {
+        out >> thirstyMana;
     }
 
     else if (name == "IterationsPerTick")

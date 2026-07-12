@@ -278,17 +278,6 @@ bool UseItemAction::UseItem(Item* item, ObjectGuid goGuid, Item* itemTarget)
         return false;
     }
 
-    ItemPrototype const* proto = item->GetProto();
-    if (proto->Class == ITEM_CLASS_CONSUMABLE && (proto->SubClass == ITEM_SUBCLASS_FOOD || proto->SubClass == ITEM_SUBCLASS_CONSUMABLE) &&
-        (proto->Spells[0].SpellCategory == 11 || proto->Spells[0].SpellCategory == 59))
-    {
-        if (bot->IsInCombat())
-        {
-            return false;
-        }
-
-        ai->SetNextCheckDelay(30000);
-    }
     ai->TellMaster(out);
     bot->GetSession()->QueuePacket(packet);
     return true;

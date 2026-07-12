@@ -12,8 +12,10 @@ namespace ai
         virtual bool Execute(Event event);
         virtual bool isPossible();
 
-    private:
+    protected:
         bool UseItemAuto(Item* item);
+
+    private:
         bool UseItemOnGameObject(Item* item, ObjectGuid go);
         bool UseItemOnItem(Item* item, Item* itemTarget);
         bool UseItem(Item* item, ObjectGuid go, Item* itemTarget);

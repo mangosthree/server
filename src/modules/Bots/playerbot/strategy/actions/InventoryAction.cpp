@@ -40,25 +40,6 @@ private:
     uint32 effectId;
 };
 
-class FindFoodVisitor : public FindUsableItemVisitor
-{
-public:
-    FindFoodVisitor(Player* bot, uint32 spellCategory) : FindUsableItemVisitor(bot)
-    {
-        this->spellCategory = spellCategory;
-    }
-
-    virtual bool Accept(const ItemPrototype* proto)
-    {
-        return proto->Class == ITEM_CLASS_CONSUMABLE &&
-            (proto->SubClass == ITEM_SUBCLASS_CONSUMABLE || proto->SubClass == ITEM_SUBCLASS_FOOD) &&
-            proto->Spells[0].SpellCategory == spellCategory;
-    }
-
-private:
-    uint32 spellCategory;
-};
-
 void InventoryAction::IterateItems(IterateItemsVisitor* visitor, IterateItemsMask mask)
 {
     if (mask & ITERATE_ITEMS_IN_BAGS)
@@ -240,14 +221,28 @@ list<Item*> InventoryAction::parseItems(string text)
 
     if (text == "food")
     {
-        FindFoodVisitor visitor(bot, 11);
+        FindFoodVisitor visitor(bot, SPELLCATEGORY_FOOD);
         IterateItems(&visitor, ITERATE_ITEMS_IN_BAGS);
         found.insert(visitor.GetResult().begin(), visitor.GetResult().end());
     }
 
     if (text == "drink" || text == "water")
     {
-        FindFoodVisitor visitor(bot, 59);
+        FindFoodVisitor visitor(bot, SPELLCATEGORY_DRINK);
+        IterateItems(&visitor, ITERATE_ITEMS_IN_BAGS);
+        found.insert(visitor.GetResult().begin(), visitor.GetResult().end());
+    }
+
+    if (text == "conjured food")
+    {
+        FindConjuredFoodVisitor visitor(bot, SPELLCATEGORY_FOOD);
+        IterateItems(&visitor, ITERATE_ITEMS_IN_BAGS);
+        found.insert(visitor.GetResult().begin(), visitor.GetResult().end());
+    }
+
+    if (text == "conjured drink")
+    {
+        FindConjuredFoodVisitor visitor(bot, SPELLCATEGORY_DRINK);
         IterateItems(&visitor, ITERATE_ITEMS_IN_BAGS);
         found.insert(visitor.GetResult().begin(), visitor.GetResult().end());
     }

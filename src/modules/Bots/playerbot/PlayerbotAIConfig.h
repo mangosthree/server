@@ -56,8 +56,8 @@ public:
     float sightDistance, spellDistance, reactDistance, grindDistance, lootDistance, shootDistance,
         fleeDistance, tooCloseDistance, meleeDistance, followDistance, whisperDistance, contactDistance,
         aoeRadius;
-    uint32 criticalHealth, lowHealth, mediumHealth, almostFullHealth;
-    uint32 lowMana, mediumMana;
+    uint32 criticalHealth, lowHealth, mediumHealth, almostFullHealth, hungryHealth;
+    uint32 lowMana, mediumMana, thirstyMana;
 
     uint32 openGoSpell; ///< The spell ID for opening game objects.
     bool randomBotAutologin; ///< Indicates if random bots should auto-login.

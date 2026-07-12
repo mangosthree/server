@@ -3,6 +3,7 @@
 #include "../Action.h"
 #include "UseItemAction.h"
 #include "../../PlayerbotAIConfig.h"
+#include "../ItemVisitors.h"
 
 namespace ai
 {
@@ -63,7 +64,17 @@ namespace ai
                 return true;
             }
 
-            bool result = UseItemAction::Execute(event);
+            bool result = false;
+            list<Item*> buffFoods = AI_VALUE2(list<Item*>, "inventory items", "buff food");
+            if (!buffFoods.empty() && !HasFoodBuff(bot, buffFoods))
+            {
+                result = UseItemAuto(*buffFoods.begin());
+            }
+            if (!result)
+            {
+                result = UseItemAction::Execute(event);
+            }
+
             if (result)
             {
                 ai->SetEating();

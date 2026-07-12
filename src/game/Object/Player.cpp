@@ -5221,6 +5221,27 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
 {
     GridMapLiquidData liquid_status;
     GridMapLiquidStatus res = m->GetTerrain()->getLiquidStatus(x, y, z, MAP_ALL_LIQUIDS, &liquid_status);
+
+#ifdef ENABLE_PLAYERBOTS
+    // Bots have no client to report their swim state (real players toggle
+    // MOVEFLAG_SWIMMING and the in-water cache via movement packets), so
+    // sync both server-side here, mirroring Creature::UpdateSwimmingState.
+    if (GetPlayerbotAI())
+    {
+        bool swimming = (res & (LIQUID_MAP_IN_WATER | LIQUID_MAP_UNDER_WATER)) &&
+                        liquid_status.level - liquid_status.depth_level > GetObjectBoundingRadius();
+        SetInWater(swimming);
+        if (swimming)
+        {
+            m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);
+        }
+        else
+        {
+            m_movementInfo.RemoveMovementFlag(MOVEFLAG_SWIMMING);
+        }
+    }
+#endif
+
     if (!res)
     {
         m_MirrorTimerFlags &= ~(UNDERWATER_INWATER | UNDERWATER_INLAVA | UNDERWATER_INSLIME | UNDERWATER_INDARKWATER);

@@ -68,7 +68,8 @@ namespace ai
         virtual bool IsActive()
         {
             return ai->IsEating() ||
-                   AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.hungryHealth;
+                   (AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.hungryHealth &&
+                    !AI_VALUE2(bool, "swimming", "self target"));
         }
     };
 

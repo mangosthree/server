@@ -5,9 +5,25 @@
 class Player;
 class PlayerbotMgr;
 class ChatHandler;
+class Item;
+struct ItemPrototype;
 
 using namespace std;
 using ai::InventoryAction;
+
+/**
+ * @brief One curated glyph recommendation row (ai_playerbot_glyph).
+ *
+ * `slotIdx` is positional within same-type glyph slots: e.g. type "major"
+ * slotIdx 1 means the second of the bot's unlocked major-glyph slots, in
+ * ascending physical-slot order (see PlayerbotFactory::ApplyCuratedGlyphs).
+ */
+struct CuratedGlyphRow
+{
+    string type;        ///< "prime", "major" or "minor" (informational; the glyph's own DBC TypeFlags is authoritative).
+    uint8 slotIdx;       ///< Position (0-2) among same-type glyph slots.
+    uint32 glyphSpell;   ///< The glyph's real apply spell (item's spellid_2 / LEARN_SPELL_ID).
+};
 
 /**
  * @brief Factory class for creating and managing player bots.
@@ -66,8 +82,10 @@ private:
     /**
      * @brief Equips the bot's curated (class/spec/tier) best-in-slot gear set,
      * when one exists in the ai_playerbot_gear cache and
-     * AiPlayerbot.UseCuratedGear is on. Phase A: gear only, no gems/enchants/
-     * glyphs. Lazily loads the static cache from ai_playerbot_gear on first use.
+     * AiPlayerbot.UseCuratedGear is on. Lazily loads the static cache from
+     * ai_playerbot_gear on first use. When AiPlayerbot.CuratedGearEnhancements
+     * is also on, applies curated enchants/gems (Phase B/C) to each
+     * curated-equipped item and curated glyphs (Phase D) for the bot's spec.
      * \return
      *   True if a curated set was found and applied to at least one slot
      *   (InitEquipment should skip its legacy gear-score loop); false if no
@@ -75,6 +93,36 @@ private:
      *   which case the caller must fall back to the legacy path unchanged.
      */
     bool InitCuratedGear();
+
+    /**
+     * @brief Lazily loads the curated enchant/gem/glyph caches (Phase
+     * B/C/D) from ai_playerbot_gear_enchant, ai_playerbot_gem and
+     * ai_playerbot_glyph. No-op after the first call.
+     */
+    static void LoadCuratedGearEnhancements();
+
+    /**
+     * @brief Applies the curated permanent enchant (if any) for
+     * (bot's class, specKey, gearSlotKey) to a just-equipped item.
+     * \arg \c gearSlotKey
+     *   The ai_playerbot_gear slot key ("finger1"/"finger2" are folded to
+     *   the dataset's single "finger" enchant key).
+     */
+    void ApplyCuratedEnchant(const std::string& specKey, const std::string& gearSlotKey, Item* item);
+
+    /**
+     * @brief Sockets curated, color-matched gems (falling back to
+     * "prismatic" for non-meta colors with no exact match) into every real
+     * socket on a just-equipped item.
+     */
+    void ApplyCuratedGems(const std::string& specKey, Item* item);
+
+    /**
+     * @brief Applies the curated glyph set for (bot's class, specKey),
+     * overriding InitGlyphs()'s random selection. No-op if no rows exist
+     * for the class/spec.
+     */
+    void ApplyCuratedGlyphs(const std::string& specKey);
 
     /**
      * @brief Resolves the dataset spec key (e.g. "arms", "feral_cat") for the
@@ -308,4 +356,20 @@ private:
     /// Curated gear cache: class -> spec -> tier -> slot -> itemId. Lazily
     /// loaded once from `ai_playerbot_gear` (see InitCuratedGear()).
     static map<uint8, map<string, map<string, map<string, uint32> > > > curatedGearSets;
+
+    /// Set once LoadCuratedGearEnhancements() has run (even if the tables
+    /// were empty), so it is only ever queried once.
+    static bool curatedEnhancementsLoaded;
+
+    /// Curated enchant cache: class -> spec -> slot -> SpellItemEnchantment id.
+    /// Lazily loaded from `ai_playerbot_gear_enchant`.
+    static map<uint8, map<string, map<string, uint32> > > curatedGearEnchants;
+
+    /// Curated gem cache: class -> spec -> color -> (gem_item, gem_enchant).
+    /// Lazily loaded from `ai_playerbot_gem`.
+    static map<uint8, map<string, map<string, pair<uint32, uint32> > > > curatedGearGems;
+
+    /// Curated glyph cache: class -> spec -> glyph rows. Lazily loaded from
+    /// `ai_playerbot_glyph`.
+    static map<uint8, map<string, vector<CuratedGlyphRow> > > curatedGearGlyphs;
 };

@@ -40,6 +40,12 @@ list<uint32> PlayerbotFactory::classQuestIds;
 // Curated gear cache: class -> spec -> tier -> slot -> itemId.
 map<uint8, map<string, map<string, map<string, uint32> > > > PlayerbotFactory::curatedGearSets;
 
+// Phase B/C/D: curated enchant/gem/glyph caches, mirroring curatedGearSets.
+bool PlayerbotFactory::curatedEnhancementsLoaded = false;
+map<uint8, map<string, map<string, uint32> > > PlayerbotFactory::curatedGearEnchants;
+map<uint8, map<string, map<string, pair<uint32, uint32> > > > PlayerbotFactory::curatedGearGems;
+map<uint8, map<string, vector<CuratedGlyphRow> > > PlayerbotFactory::curatedGearGlyphs;
+
 /**
  * Randomizes the player bot's attributes and equipment.
  */
@@ -880,6 +886,318 @@ string PlayerbotFactory::GetCuratedTier(Player* bot)
 }
 
 /**
+ * Lazily loads the curated enchant/gem/glyph caches (Phase B/C/D) from
+ * ai_playerbot_gear_enchant, ai_playerbot_gem and ai_playerbot_glyph.
+ * Mirrors the curatedGearSets loader in InitCuratedGear(). No-op after the
+ * first call (curatedEnhancementsLoaded), even if the tables are empty.
+ */
+void PlayerbotFactory::LoadCuratedGearEnhancements()
+{
+    if (curatedEnhancementsLoaded)
+    {
+        return;
+    }
+    curatedEnhancementsLoaded = true;
+
+    QueryResult* enchantResults = CharacterDatabase.Query(
+        "SELECT `class`, `spec`, `slot`, `enchant` FROM `ai_playerbot_gear_enchant`");
+    if (enchantResults)
+    {
+        do
+        {
+            Field* fields = enchantResults->Fetch();
+            uint8 cls = fields[0].GetUInt8();
+            string spec = fields[1].GetCppString();
+            string slot = fields[2].GetCppString();
+            uint32 enchant = fields[3].GetUInt32();
+            curatedGearEnchants[cls][spec][slot] = enchant;
+        }
+        while (enchantResults->NextRow());
+        delete enchantResults;
+    }
+
+    QueryResult* gemResults = CharacterDatabase.Query(
+        "SELECT `class`, `spec`, `color`, `gem_item`, `gem_enchant` FROM `ai_playerbot_gem`");
+    if (gemResults)
+    {
+        do
+        {
+            Field* fields = gemResults->Fetch();
+            uint8 cls = fields[0].GetUInt8();
+            string spec = fields[1].GetCppString();
+            string color = fields[2].GetCppString();
+            uint32 gemItem = fields[3].GetUInt32();
+            uint32 gemEnchant = fields[4].GetUInt32();
+            curatedGearGems[cls][spec][color] = make_pair(gemItem, gemEnchant);
+        }
+        while (gemResults->NextRow());
+        delete gemResults;
+    }
+
+    QueryResult* glyphResults = CharacterDatabase.Query(
+        "SELECT `class`, `spec`, `glyph_type`, `glyph_spell`, `slot_idx` FROM `ai_playerbot_glyph`");
+    if (glyphResults)
+    {
+        do
+        {
+            Field* fields = glyphResults->Fetch();
+            uint8 cls = fields[0].GetUInt8();
+            string spec = fields[1].GetCppString();
+
+            CuratedGlyphRow row;
+            row.type = fields[2].GetCppString();
+            row.glyphSpell = fields[3].GetUInt32();
+            row.slotIdx = fields[4].GetUInt8();
+
+            curatedGearGlyphs[cls][spec].push_back(row);
+        }
+        while (glyphResults->NextRow());
+        delete glyphResults;
+    }
+
+    sLog.outDetail("AI Playerbot: loaded curated gear enhancements (%u enchant classes, %u gem classes, %u glyph classes)",
+        (uint32)curatedGearEnchants.size(), (uint32)curatedGearGems.size(), (uint32)curatedGearGlyphs.size());
+}
+
+/**
+ * Applies the curated permanent enchant (if any) for (bot's class, specKey,
+ * gearSlotKey) to a just-equipped item.
+ * @param specKey The curated spec key (e.g. "arms").
+ * @param gearSlotKey The ai_playerbot_gear slot key; "finger1"/"finger2" are
+ * folded to the dataset's single "finger" enchant key.
+ * @param item The just-equipped item, or NULL (no-op).
+ */
+void PlayerbotFactory::ApplyCuratedEnchant(const string& specKey, const string& gearSlotKey, Item* item)
+{
+    if (!item)
+    {
+        return;
+    }
+
+    map<uint8, map<string, map<string, uint32> > >::const_iterator clsItr =
+        curatedGearEnchants.find((uint8)bot->getClass());
+    if (clsItr == curatedGearEnchants.end())
+    {
+        return;
+    }
+
+    map<string, map<string, uint32> >::const_iterator specItr = clsItr->second.find(specKey);
+    if (specItr == clsItr->second.end())
+    {
+        return;
+    }
+
+    string enchantSlotKey = (gearSlotKey == "finger1" || gearSlotKey == "finger2") ? "finger" : gearSlotKey;
+
+    map<string, uint32>::const_iterator slotItr = specItr->second.find(enchantSlotKey);
+    if (slotItr == specItr->second.end())
+    {
+        return;
+    }
+
+    uint32 enchantId = slotItr->second;
+    if (!enchantId || !sSpellItemEnchantmentStore.LookupEntry(enchantId))
+    {
+        sLog.outDebug("%s: curated enchant %u for slot %s not found in SpellItemEnchantment.dbc, skipping",
+            bot->GetName(), enchantId, enchantSlotKey.c_str());
+        return;
+    }
+
+    bot->ApplyEnchantment(item, PERM_ENCHANTMENT_SLOT, false);
+    item->SetEnchantment(PERM_ENCHANTMENT_SLOT, enchantId, 0, 0);
+    bot->ApplyEnchantment(item, PERM_ENCHANTMENT_SLOT, true);
+}
+
+/**
+ * Sockets curated, color-matched gems into every real socket on a
+ * just-equipped item. Meta sockets only ever take the spec's "meta" gem
+ * (never a prismatic fallback, matching the real socketing rules in
+ * WorldSession::HandleSocketOpcode); red/yellow/blue sockets fall back to
+ * "prismatic" when the spec has no gem of that exact color. Socket-bonus
+ * (BONUS_ENCHANTMENT_SLOT) activation is intentionally skipped.
+ * @param specKey The curated spec key (e.g. "arms").
+ * @param item The just-equipped item, or NULL (no-op).
+ */
+void PlayerbotFactory::ApplyCuratedGems(const string& specKey, Item* item)
+{
+    if (!item)
+    {
+        return;
+    }
+
+    map<uint8, map<string, map<string, pair<uint32, uint32> > > >::const_iterator clsItr =
+        curatedGearGems.find((uint8)bot->getClass());
+    if (clsItr == curatedGearGems.end())
+    {
+        return;
+    }
+
+    map<string, map<string, pair<uint32, uint32> > >::const_iterator specItr = clsItr->second.find(specKey);
+    if (specItr == clsItr->second.end())
+    {
+        return;
+    }
+
+    const map<string, pair<uint32, uint32> >& gemsByColor = specItr->second;
+
+    ItemPrototype const* proto = item->GetProto();
+    if (!proto)
+    {
+        return;
+    }
+
+    for (int i = 0; i < MAX_ITEM_PROTO_SOCKETS; ++i)
+    {
+        uint32 socketColor = proto->Socket[i].Color;
+        if (!socketColor)
+        {
+            continue; // no real socket here
+        }
+
+        string colorKey;
+        if (socketColor & SOCKET_COLOR_META)
+        {
+            colorKey = "meta";
+        }
+        else if (socketColor == SOCKET_COLOR_RED)
+        {
+            colorKey = "red";
+        }
+        else if (socketColor == SOCKET_COLOR_YELLOW)
+        {
+            colorKey = "yellow";
+        }
+        else if (socketColor == SOCKET_COLOR_BLUE)
+        {
+            colorKey = "blue";
+        }
+        else
+        {
+            colorKey = "prismatic";
+        }
+
+        map<string, pair<uint32, uint32> >::const_iterator gemItr = gemsByColor.find(colorKey);
+        if (gemItr == gemsByColor.end() && colorKey != "meta")
+        {
+            // No exact-color gem curated for this spec; a prismatic gem
+            // fits any non-meta socket (loses the socket bonus only).
+            gemItr = gemsByColor.find("prismatic");
+        }
+        if (gemItr == gemsByColor.end())
+        {
+            sLog.outDebug("%s: no curated %s gem for item %u socket %d, skipping",
+                bot->GetName(), colorKey.c_str(), proto->ItemId, i);
+            continue;
+        }
+
+        uint32 gemEnchant = gemItr->second.second;
+        if (!gemEnchant || !sSpellItemEnchantmentStore.LookupEntry(gemEnchant))
+        {
+            sLog.outDebug("%s: curated gem enchant %u not found in SpellItemEnchantment.dbc, skipping",
+                bot->GetName(), gemEnchant);
+            continue;
+        }
+
+        EnchantmentSlot sockSlot = EnchantmentSlot(SOCK_ENCHANTMENT_SLOT + i);
+        bot->ApplyEnchantment(item, sockSlot, false);
+        item->SetEnchantment(sockSlot, gemEnchant, 0, 0);
+        bot->ApplyEnchantment(item, sockSlot, true);
+    }
+}
+
+/**
+ * Applies the curated glyph set for (bot's class, specKey), overriding
+ * InitGlyphs()'s random selection. Resolves each row's glyph_spell to its
+ * GlyphProperties entry the same way InitGlyphs() builds its candidate
+ * pools, then places it positionally (slot_idx) among the bot's unlocked
+ * glyph slots that share that glyph's DBC TypeFlags. No-op if no rows exist
+ * for the class/spec.
+ * @param specKey The curated spec key (e.g. "arms").
+ */
+void PlayerbotFactory::ApplyCuratedGlyphs(const string& specKey)
+{
+    map<uint8, map<string, vector<CuratedGlyphRow> > >::const_iterator clsItr =
+        curatedGearGlyphs.find((uint8)bot->getClass());
+    if (clsItr == curatedGearGlyphs.end())
+    {
+        return;
+    }
+
+    map<string, vector<CuratedGlyphRow> >::const_iterator specItr = clsItr->second.find(specKey);
+    if (specItr == clsItr->second.end())
+    {
+        return;
+    }
+
+    // Group the bot's unlocked physical glyph slots (0..MAX_GLYPH_SLOT_INDEX-1)
+    // by their DBC TypeFlags (0/1/2), in ascending slot order, so a curated
+    // row's slot_idx can be resolved positionally within its own type.
+    map<uint32, vector<uint8> > slotsByType;
+    for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
+    {
+        GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(bot->GetGlyphSlot(slot));
+        if (!gs || gs->TypeFlags >= 3)
+        {
+            continue;
+        }
+
+        slotsByType[gs->TypeFlags].push_back(slot);
+    }
+
+    bool changed = false;
+    for (vector<CuratedGlyphRow>::const_iterator rowItr = specItr->second.begin();
+        rowItr != specItr->second.end(); ++rowItr)
+    {
+        const CuratedGlyphRow& row = *rowItr;
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(row.glyphSpell);
+        if (!spellInfo)
+        {
+            sLog.outDebug("%s: curated glyph spell %u not found, skipping", bot->GetName(), row.glyphSpell);
+            continue;
+        }
+
+        uint32 glyphId = 0;
+        for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+        {
+            if (spellInfo->GetSpellEffectIdByIndex(SpellEffectIndex(j)) == SPELL_EFFECT_APPLY_GLYPH)
+            {
+                glyphId = spellInfo->GetEffectMiscValue(SpellEffectIndex(j));
+                break;
+            }
+        }
+
+        GlyphPropertiesEntry const* gp = glyphId ? sGlyphPropertiesStore.LookupEntry(glyphId) : NULL;
+        if (!gp || gp->TypeFlags >= 3)
+        {
+            sLog.outDebug("%s: curated glyph spell %u (type %s) does not resolve to a usable glyph, skipping",
+                bot->GetName(), row.glyphSpell, row.type.c_str());
+            continue;
+        }
+
+        map<uint32, vector<uint8> >::const_iterator typeItr = slotsByType.find(gp->TypeFlags);
+        if (typeItr == slotsByType.end() || (size_t)row.slotIdx >= typeItr->second.size())
+        {
+            sLog.outDebug("%s: no unlocked %s glyph slot %u for curated glyph %u, skipping",
+                bot->GetName(), row.type.c_str(), (uint32)row.slotIdx, glyphId);
+            continue;
+        }
+
+        uint8 physicalSlot = typeItr->second[row.slotIdx];
+
+        bot->ApplyGlyph(physicalSlot, false);
+        bot->SetGlyph(physicalSlot, glyphId);
+        bot->ApplyGlyph(physicalSlot, true);
+        changed = true;
+    }
+
+    if (changed)
+    {
+        bot->SendTalentsInfoData(false);
+    }
+}
+
+/**
  * Equips the bot's curated (class/spec/tier) best-in-slot gear set.
  * @return True if at least one slot was equipped from a curated set (the
  * caller should skip the legacy gear-score loop); false to fall back.
@@ -932,6 +1250,15 @@ bool PlayerbotFactory::InitCuratedGear()
     if (specKey.empty())
     {
         return false;
+    }
+
+    // Phase B/C/D: curated glyphs are per (class, spec) only -- no tier
+    // dependency -- so apply them as soon as specKey resolves, independent
+    // of whether curated gear itself has data for this tier.
+    if (sPlayerbotAIConfig.useCuratedGearEnhancements)
+    {
+        LoadCuratedGearEnhancements();
+        ApplyCuratedGlyphs(specKey);
     }
 
     map<string, map<string, map<string, uint32> > >::const_iterator specItr = clsItr->second.find(specKey);
@@ -1007,6 +1334,13 @@ bool PlayerbotFactory::InitCuratedGear()
             newItem->AddToUpdateQueueOf(bot);
             bot->AutoUnequipOffhandIfNeed();
             ++equipped;
+
+            // Phase B/C: enchant + socket this curated-equipped item only.
+            if (sPlayerbotAIConfig.useCuratedGearEnhancements)
+            {
+                ApplyCuratedEnchant(specKey, slotMap[i].key, newItem);
+                ApplyCuratedGems(specKey, newItem);
+            }
         }
         else
         {

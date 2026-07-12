@@ -167,6 +167,11 @@ AiPlayerbot.CommandPrefix = ~
 # Leave empty for a balanced ~1/3-1/3-1/3 split keyed off each bot's GUID.
 #AiPlayerbot.GearTier =
 
+# Phase B/C/D: apply curated enchants, gems and glyphs on top of curated
+# gear (ai_playerbot_gear_enchant / ai_playerbot_gem / ai_playerbot_glyph).
+# Requires AiPlayerbot.UseCuratedGear = 1; has no effect otherwise.
+#AiPlayerbot.CuratedGearEnhancements = 1
+
 # Chance random bot has max level on first randomize
 #AiPlayerbot.RandomBotMaxLevelChance = 0.4
 

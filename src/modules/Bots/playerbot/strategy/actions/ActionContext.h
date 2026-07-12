@@ -71,6 +71,7 @@ namespace ai
             creators["guard"] = &ActionContext::guard;
             creators["move out of enemy contact"] = &ActionContext::move_out_of_enemy_contact;
             creators["set facing"] = &ActionContext::set_facing;
+            creators["swim to surface"] = &ActionContext::swim_to_surface;
             creators["attack duel opponent"] = &ActionContext::attack_duel_opponent;
             creators["drop target"] = &ActionContext::drop_target;
             creators["check mail"] = &ActionContext::check_mail;
@@ -127,6 +128,7 @@ namespace ai
         static Action* healthstone(PlayerbotAI* ai) { return new UseItemAction(ai, "healthstone"); }
         static Action* move_out_of_enemy_contact(PlayerbotAI* ai) { return new MoveOutOfEnemyContactAction(ai); }
         static Action* set_facing(PlayerbotAI* ai) { return new SetFacingTargetAction(ai); }
+        static Action* swim_to_surface(PlayerbotAI* ai) { return new SwimToSurfaceAction(ai); }
         static Action* say(PlayerbotAI* ai) { return new SayAction(ai); }
         static Action* reveal_gathering_item(PlayerbotAI* ai) { return new RevealGatheringItemAction(ai); }
         static Action* outfit(PlayerbotAI* ai) { return new OutfitAction(ai); }

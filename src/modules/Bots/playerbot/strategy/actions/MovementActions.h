@@ -93,4 +93,12 @@ namespace ai
         virtual bool isUseful();
     };
 
+    class SwimToSurfaceAction : public MovementAction
+    {
+    public:
+        SwimToSurfaceAction(PlayerbotAI* ai) : MovementAction(ai, "swim to surface") {}
+        virtual bool Execute(Event event);
+        virtual bool isUseful();
+    };
+
 }

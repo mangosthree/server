@@ -10,6 +10,7 @@
 #include "MotionGenerators/TargetedMovementGenerator.h"
 #include "Creature.h"
 #include "Map.h"
+#include "vmap/IVMapManager.h"
 #include "vmap/ModelIgnoreFlags.h"
 
 using namespace ai;
@@ -617,4 +618,25 @@ bool SetFacingTargetAction::Execute(Event event)
 bool SetFacingTargetAction::isUseful()
 {
     return !AI_VALUE2(bool, "facing", "current target");
+}
+
+bool SwimToSurfaceAction::isUseful()
+{
+    return bot->IsUnderWater();
+}
+
+bool SwimToSurfaceAction::Execute(Event event)
+{
+    float x = bot->GetPositionX();
+    float y = bot->GetPositionY();
+    float z = bot->GetPositionZ();
+
+    float waterLevel = bot->GetTerrain()->GetWaterLevel(x, y, z);
+    if (waterLevel <= VMAP_INVALID_HEIGHT)
+    {
+        return false;
+    }
+
+    ai->SetNextCheckDelay(sPlayerbotAIConfig.globalCoolDown);
+    return MoveTo(bot->GetMapId(), x, y, waterLevel - 0.5f);
 }

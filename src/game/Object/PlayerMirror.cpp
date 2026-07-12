@@ -231,6 +231,20 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
 }
 
 /**
+ * @brief Checks if the player is about to drown (breath timer almost expired).
+ *
+ * @return True if the player is submerged, has an active breath timer under
+ *         2 seconds remaining, has no water breathing aura, and is alive.
+ */
+bool Player::IsDrowning() const
+{
+    return (m_MirrorTimerFlags & UNDERWATER_INWATER) &&
+           m_MirrorTimer[BREATH_TIMER] != DISABLED_MIRROR_TIMER &&
+           !HasAuraType(SPELL_AURA_WATER_BREATHING) &&
+           m_MirrorTimer[BREATH_TIMER] < 2000 && IsAlive();
+}
+
+/**
  * @brief Marks mirror timers for refresh during the next drowning update.
  */
 void Player::UpdateMirrorTimers()

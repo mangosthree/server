@@ -1157,6 +1157,16 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         }
     }
 
+#ifdef ENABLE_PLAYERBOTS
+    // bots have no client heartbeats: refresh liquid state while stationary,
+    // mirroring Creature::Update's UpdateSwimmingState cadence
+    if (GetPlayerbotAI() && !m_positionStatusUpdateTimer && IsInWorld())
+    {
+        m_positionStatusUpdateTimer = 100;
+        UpdateUnderwaterState(GetMap(), GetPositionX(), GetPositionY(), GetPositionZ());
+    }
+#endif
+
     // Update weapon change timer
     if (m_weaponChangeTimer > 0)
     {

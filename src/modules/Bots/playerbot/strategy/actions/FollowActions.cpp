@@ -41,7 +41,15 @@ bool FollowAction::isUseful()
 
     if (!target.empty())
     {
-        distance = AI_VALUE2(float, "distance", target);
+        if (bot->IsInWater())
+        {
+            Unit* fTarget = AI_VALUE(Unit*, target);
+            distance = fTarget ? bot->GetDistance(fTarget) : AI_VALUE2(float, "distance", target);
+        }
+        else
+        {
+            distance = AI_VALUE2(float, "distance", target);
+        }
     }
     else
     {
@@ -51,7 +59,8 @@ bool FollowAction::isUseful()
             return false;
         }
 
-        distance = bot->GetDistance2d(loc.coord_x, loc.coord_y);
+        distance = bot->IsInWater() ? bot->GetDistance(loc.coord_x, loc.coord_y, loc.coord_z)
+                                     : bot->GetDistance2d(loc.coord_x, loc.coord_y);
     }
 
     return distance > formation->GetMaxDistance() &&

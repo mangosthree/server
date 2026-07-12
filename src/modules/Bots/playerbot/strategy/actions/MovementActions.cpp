@@ -50,7 +50,7 @@ bool MovementAction::MoveNear(WorldObject* target, float distance)
 
 bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool unsafe)
 {
-    if (!bot->IsUnderWater())
+    if (!bot->IsUnderWater() && !bot->GetTerrain()->IsInWater(x, y, z))
     {
         bot->UpdateGroundPositionZ(x, y, z);
     }

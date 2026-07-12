@@ -48,6 +48,16 @@ WorldLocation MoveAheadFormation::GetLocation()
             y = y1;
         }
     }
+
+    GridMapLiquidData liquid;
+    if (master->IsInWater() &&
+        master->GetTerrain()->IsSwimmable(x, y, z, master->GetObjectBoundingRadius(), &liquid))
+    {
+        float zDest = std::min(z, liquid.level - 0.5f);
+        zDest = std::max(zDest, liquid.depth_level + 0.5f);
+        return WorldLocation(master->GetMapId(), x, y, zDest);
+    }
+
     float ground = master->GetMap()->GetHeight(PHASEMASK_NORMAL, x, y, z + 0.5f);
     if (ground <= INVALID_HEIGHT)
     {
@@ -90,6 +100,16 @@ namespace ai
             float x = master->GetPositionX() + cos(angle) * range;
             float y = master->GetPositionY() + sin(angle) * range;
             float z = master->GetPositionZ();
+
+            GridMapLiquidData liquid;
+            if (master->IsInWater() &&
+                master->GetTerrain()->IsSwimmable(x, y, z, master->GetObjectBoundingRadius(), &liquid))
+            {
+                float zDest = std::min(z, liquid.level - 0.5f);
+                zDest = std::max(zDest, liquid.depth_level + 0.5f);
+                return WorldLocation(master->GetMapId(), x, y, zDest);
+            }
+
             float ground = master->GetMap()->GetHeight(PHASEMASK_NORMAL, x, y, z + 0.5f);
             if (ground <= INVALID_HEIGHT)
             {
@@ -192,14 +212,27 @@ namespace ai
             float x = target->GetPositionX();
             float y = target->GetPositionY();
             float z = target->GetPositionZ();
+
+            float angle = GetFollowAngle();
+            float destX = x + cos(angle) * range;
+            float destY = y + sin(angle) * range;
+
+            GridMapLiquidData liquid;
+            if (target->IsInWater() &&
+                target->GetTerrain()->IsSwimmable(destX, destY, z, target->GetObjectBoundingRadius(), &liquid))
+            {
+                float zDest = std::min(z, liquid.level - 0.5f);
+                zDest = std::max(zDest, liquid.depth_level + 0.5f);
+                return WorldLocation(bot->GetMapId(), destX, destY, zDest);
+            }
+
             float ground = target->GetMap()->GetHeight(PHASEMASK_NORMAL, x, y, z + 0.5f);
             if (ground <= INVALID_HEIGHT)
             {
                 return Formation::NullLocation;
             }
 
-            float angle = GetFollowAngle();
-            return WorldLocation(bot->GetMapId(), x + cos(angle) * range, y + sin(angle) * range, ground + 0.5f);
+            return WorldLocation(bot->GetMapId(), destX, destY, ground + 0.5f);
         }
     };
 
@@ -498,6 +531,16 @@ WorldLocation MoveFormation::MoveSingleLine(vector<Player*> line, float diff, fl
             float lx = x + cos(angle) * radius;
             float ly = y + sin(angle) * radius;
             float lz = cz;
+
+            GridMapLiquidData liquid;
+            if (bot->IsInWater() &&
+                bot->GetTerrain()->IsSwimmable(lx, ly, lz, bot->GetObjectBoundingRadius(), &liquid))
+            {
+                float zDest = std::min(lz, liquid.level - 0.5f);
+                zDest = std::max(zDest, liquid.depth_level + 0.5f);
+                return WorldLocation(bot->GetMapId(), lx, ly, zDest);
+            }
+
             float ground = bot->GetMap()->GetHeight(PHASEMASK_NORMAL, lx, ly, lz + 0.5f);
             if (ground <= INVALID_HEIGHT)
             {

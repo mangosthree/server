@@ -125,6 +125,21 @@ void PlayerbotHolder::OnBotLogin(Player* const bot)
     bot->SetPlayerbotAI(ai);
     OnBotLoginInternal(bot);
 
+    // Owned alts (.bot add) keep their real bags, and random bots may log in
+    // before Randomize stocks them, so ensure every bot carries food and drink
+    // to sit and recover with; stock if it is missing either.
+    if (sPlayerbotAIConfig.autoStockFood)
+    {
+        AiObjectContext* context = ai->GetAiObjectContext();
+        bool noFood = context->GetValue<list<Item*> >("inventory items", "food")->Get().empty();
+        bool noDrink = context->GetValue<list<Item*> >("inventory items", "drink")->Get().empty();
+        if (noFood || noDrink)
+        {
+            PlayerbotFactory factory(bot, bot->getLevel());
+            factory.InitFood();
+        }
+    }
+
     playerBots[bot->GetObjectGuid().GetRawValue()] = bot;
 
     Player* master = ai->GetMaster();
@@ -726,21 +741,6 @@ void PlayerbotMgr::OnBotLoginInternal(Player * const bot)
     // Set the master for the bot and reset its strategies
     bot->GetPlayerbotAI()->SetMaster(master);
     bot->GetPlayerbotAI()->ResetStrategies();
-
-    // Owned alts added via .bot add keep their real bags and are never
-    // factory-stocked, so DrinkAction/EatAction find nothing to use. Stock
-    // them once on login if they currently carry no food and no drink.
-    if (sPlayerbotAIConfig.autoStockFood)
-    {
-        AiObjectContext* context = bot->GetPlayerbotAI()->GetAiObjectContext();
-        bool noFood = context->GetValue<list<Item*> >("inventory items", "food")->Get().empty();
-        bool noDrink = context->GetValue<list<Item*> >("inventory items", "drink")->Get().empty();
-        if (noFood && noDrink)
-        {
-            PlayerbotFactory factory(bot, bot->getLevel());
-            factory.InitFood();
-        }
-    }
 }
 
 /**

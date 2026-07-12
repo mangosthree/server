@@ -104,6 +104,9 @@ public:
     bool enableGreet; ///< Indicates if greeting is enabled for bots.
     bool autoStockFood; ///< Indicates if bots with empty bags should be auto-stocked with food/drink on login.
 
+    bool useCuratedGear; ///< Phase A: equip class/spec/tier curated best-in-slot gear (ai_playerbot_gear) instead of gear-score guessing.
+    std::string gearTier; ///< Force a curated gear tier ("normal"/"heroic"/"raider"); empty = balanced split by bot GUID.
+
     bool guildTaskEnabled; ///< Indicates if guild tasks are enabled.
     uint32 minGuildTaskChangeTime, maxGuildTaskChangeTime;
     uint32 minGuildTaskAdvertisementTime, maxGuildTaskAdvertisementTime;

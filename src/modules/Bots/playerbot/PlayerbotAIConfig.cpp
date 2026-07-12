@@ -89,6 +89,7 @@ PlayerbotAIConfig::PlayerbotAIConfig()
       randomBotShowCloak(false),
       enableGreet(false),
       autoStockFood(true),
+      useCuratedGear(false),
       guildTaskEnabled(false),
       minGuildTaskChangeTime(0),
       maxGuildTaskChangeTime(0),
@@ -261,6 +262,9 @@ bool PlayerbotAIConfig::Initialize()
     guildTaskAdvertCleanupTime = config.GetIntDefault("AiPlayerbot.GuildTaskAdvertCleanupTime", 3600);
     enableGreet = config.GetBoolDefault("AiPlayerbot.EnableGreet", false);
     autoStockFood = config.GetBoolDefault("AiPlayerbot.AutoStockFood", true);
+
+    useCuratedGear = config.GetBoolDefault("AiPlayerbot.UseCuratedGear", true);
+    gearTier = config.GetStringDefault("AiPlayerbot.GearTier", "");
     // Cosmetic settings
     randomBotShowCloak = config.GetBoolDefault("AiPlayerbot.RandomBotShowCloak", false);
     randomBotShowHelmet = config.GetBoolDefault("AiPlayerbot.RandomBotShowHelmet", false);

@@ -9,6 +9,7 @@
 #include "SharedDefines.h"
 #include "ahbot/AhBot.h"
 #include "RandomPlayerbotFactory.h"
+#include "AiFactory.h"
 
 using namespace ai;
 using namespace std;
@@ -35,6 +36,9 @@ uint32 PlayerbotFactory::tradeSkills[] =
 
 // List of class-specific quest IDs
 list<uint32> PlayerbotFactory::classQuestIds;
+
+// Curated gear cache: class -> spec -> tier -> slot -> itemId.
+map<uint8, map<string, map<string, map<string, uint32> > > > PlayerbotFactory::curatedGearSets;
 
 /**
  * Randomizes the player bot's attributes and equipment.
@@ -752,6 +756,275 @@ bool PlayerbotFactory::CanEquipItem(ItemPrototype const* proto, uint32 desiredQu
 }
 
 /**
+ * Resolves the ai_playerbot_gear dataset spec key for the bot's class and
+ * primary talent tab.
+ * @param bot The player bot.
+ * @param tab The primary talent tab (0/1/2), or -1 if unresolved.
+ * @return The spec key, or an empty string if unmapped.
+ */
+string PlayerbotFactory::GetCuratedSpecKey(Player* bot, int tab)
+{
+    if (tab < 0 || tab > 2)
+    {
+        return "";
+    }
+
+    switch (bot->getClass())
+    {
+        case CLASS_WARRIOR:
+            switch (tab)
+            {
+                case 0: return "arms";
+                case 1: return "fury";
+                case 2: return "protection";
+            }
+            break;
+        case CLASS_PALADIN:
+            switch (tab)
+            {
+                case 0: return "holy";
+                case 1: return "protection";
+                case 2: return "retribution";
+            }
+            break;
+        case CLASS_HUNTER:
+            switch (tab)
+            {
+                case 0: return "beast_mastery";
+                case 1: return "marksmanship";
+                case 2: return "survival";
+            }
+            break;
+        case CLASS_ROGUE:
+            switch (tab)
+            {
+                case 0: return "assassination";
+                case 1: return "combat";
+                case 2: return "subtlety";
+            }
+            break;
+        case CLASS_PRIEST:
+            switch (tab)
+            {
+                case 0: return "discipline";
+                case 1: return "holy";
+                case 2: return "shadow";
+            }
+            break;
+        case CLASS_DEATH_KNIGHT:
+            switch (tab)
+            {
+                case 0: return "blood";
+                case 1: return "frost";
+                case 2: return "unholy";
+            }
+            break;
+        case CLASS_SHAMAN:
+            switch (tab)
+            {
+                case 0: return "elemental";
+                case 1: return "enhancement";
+                case 2: return "restoration";
+            }
+            break;
+        case CLASS_MAGE:
+            switch (tab)
+            {
+                case 0: return "arcane";
+                case 1: return "fire";
+                case 2: return "frost";
+            }
+            break;
+        case CLASS_WARLOCK:
+            switch (tab)
+            {
+                case 0: return "affliction";
+                case 1: return "demonology";
+                case 2: return "destruction";
+            }
+            break;
+        case CLASS_DRUID:
+            switch (tab)
+            {
+                case 0: return "balance";
+                // Feral (tab 1) covers both the cat-DPS and bear-tank builds
+                // in Cata's talent layout. Default to the DPS (cat) set --
+                // cheaply detecting a bear-tank build isn't worth the
+                // complexity for Phase A (gear only); revisit alongside role
+                // detection if/when that lands.
+                case 1: return "feral_cat";
+                case 2: return "restoration";
+            }
+            break;
+    }
+
+    return "";
+}
+
+/**
+ * Resolves the curated gear tier for the bot: honours the
+ * AiPlayerbot.GearTier override when set, otherwise a balanced
+ * normal/heroic/raider split keyed off the bot's GUID.
+ * @param bot The player bot.
+ * @return "normal", "heroic" or "raider".
+ */
+string PlayerbotFactory::GetCuratedTier(Player* bot)
+{
+    if (!sPlayerbotAIConfig.gearTier.empty())
+    {
+        return sPlayerbotAIConfig.gearTier;
+    }
+
+    static const char* tiers[3] = { "normal", "heroic", "raider" };
+    return tiers[bot->GetGUIDLow() % 3];
+}
+
+/**
+ * Equips the bot's curated (class/spec/tier) best-in-slot gear set.
+ * @return True if at least one slot was equipped from a curated set (the
+ * caller should skip the legacy gear-score loop); false to fall back.
+ */
+bool PlayerbotFactory::InitCuratedGear()
+{
+    if (!sPlayerbotAIConfig.useCuratedGear)
+    {
+        return false;
+    }
+
+    // Lazily load the curated gear cache once, mirroring the classQuestIds
+    // pattern used by InitQuests() below.
+    if (curatedGearSets.empty())
+    {
+        QueryResult* results = CharacterDatabase.Query(
+            "SELECT `class`, `spec`, `tier`, `slot`, `item` FROM `ai_playerbot_gear`");
+        if (results)
+        {
+            do
+            {
+                Field* fields = results->Fetch();
+                uint8 cls = fields[0].GetUInt8();
+                string spec = fields[1].GetCppString();
+                string tier = fields[2].GetCppString();
+                string slot = fields[3].GetCppString();
+                uint32 item = fields[4].GetUInt32();
+                curatedGearSets[cls][spec][tier][slot] = item;
+            }
+            while (results->NextRow());
+            delete results;
+        }
+
+        if (curatedGearSets.empty())
+        {
+            sLog.outDetail("AI Playerbot: ai_playerbot_gear is empty, curated gear unavailable");
+            return false;
+        }
+    }
+
+    map<uint8, map<string, map<string, map<string, uint32> > > >::const_iterator clsItr =
+        curatedGearSets.find((uint8)bot->getClass());
+    if (clsItr == curatedGearSets.end())
+    {
+        return false;
+    }
+
+    int tab = AiFactory::GetPlayerSpecTab(bot);
+    string specKey = GetCuratedSpecKey(bot, tab);
+    if (specKey.empty())
+    {
+        return false;
+    }
+
+    map<string, map<string, map<string, uint32> > >::const_iterator specItr = clsItr->second.find(specKey);
+    if (specItr == clsItr->second.end())
+    {
+        return false;
+    }
+
+    string tier = GetCuratedTier(bot);
+    map<string, map<string, uint32> >::const_iterator tierItr = specItr->second.find(tier);
+    if (tierItr == specItr->second.end())
+    {
+        return false;
+    }
+
+    static const struct { const char* key; uint8 slot; } slotMap[] =
+    {
+        { "head",     EQUIPMENT_SLOT_HEAD },
+        { "neck",     EQUIPMENT_SLOT_NECK },
+        { "shoulder", EQUIPMENT_SLOT_SHOULDERS },
+        { "back",     EQUIPMENT_SLOT_BACK },
+        { "chest",    EQUIPMENT_SLOT_CHEST },
+        { "wrist",    EQUIPMENT_SLOT_WRISTS },
+        { "hands",    EQUIPMENT_SLOT_HANDS },
+        { "waist",    EQUIPMENT_SLOT_WAIST },
+        { "legs",     EQUIPMENT_SLOT_LEGS },
+        { "feet",     EQUIPMENT_SLOT_FEET },
+        { "finger1",  EQUIPMENT_SLOT_FINGER1 },
+        { "finger2",  EQUIPMENT_SLOT_FINGER2 },
+        { "trinket1", EQUIPMENT_SLOT_TRINKET1 },
+        { "trinket2", EQUIPMENT_SLOT_TRINKET2 },
+        { "mainhand", EQUIPMENT_SLOT_MAINHAND },
+        { "offhand",  EQUIPMENT_SLOT_OFFHAND },
+        { "ranged",   EQUIPMENT_SLOT_RANGED },
+        // Cata: paladin/shaman/druid/death knight relics occupy the ranged
+        // slot. A spec's set carries either "ranged" or "relic", never both.
+        { "relic",    EQUIPMENT_SLOT_RANGED },
+    };
+
+    uint32 equipped = 0;
+    for (size_t i = 0; i < sizeof(slotMap) / sizeof(slotMap[0]); ++i)
+    {
+        map<string, uint32>::const_iterator slotItr = tierItr->second.find(slotMap[i].key);
+        if (slotItr == tierItr->second.end())
+        {
+            continue;
+        }
+
+        uint32 itemId = slotItr->second;
+        uint8 slot = slotMap[i].slot;
+
+        // Safety net: the dataset is class-correct, but still verify the
+        // bot can actually equip this item before touching its gear.
+        uint16 dest = 0;
+        if (!CanEquipUnseenItem(slot, dest, itemId))
+        {
+            sLog.outDebug("%s: curated gear item %u cannot be equipped in slot %u, skipping",
+                bot->GetName(), itemId, (uint32)slot);
+            continue;
+        }
+
+        Item* oldItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if (oldItem)
+        {
+            bot->RemoveItem(INVENTORY_SLOT_BAG_0, slot, true);
+            oldItem->DestroyForPlayer(bot);
+        }
+
+        Item* newItem = bot->EquipNewItem(dest, itemId, true);
+        if (newItem)
+        {
+            newItem->AddToWorld();
+            newItem->AddToUpdateQueueOf(bot);
+            bot->AutoUnequipOffhandIfNeed();
+            ++equipped;
+        }
+        else
+        {
+            sLog.outDebug("%s: failed to equip curated gear item %u in slot %u",
+                bot->GetName(), itemId, (uint32)slot);
+        }
+    }
+
+    if (equipped)
+    {
+        sLog.outDetail("%s: curated gear applied (class %u, spec %s, tier %s), %u slots equipped",
+            bot->GetName(), (uint32)bot->getClass(), specKey.c_str(), tier.c_str(), equipped);
+    }
+
+    return equipped > 0;
+}
+
+/**
  * Initializes the player bot's equipment.
  * @param incremental Whether to apply incremental changes.
  */
@@ -759,6 +1032,14 @@ void PlayerbotFactory::InitEquipment(bool incremental)
 {
     DestroyItemsVisitor visitor(bot);
     IterateItems(&visitor, ITERATE_ALL_ITEMS);
+
+    // Phase A: data-driven best-in-slot gear for the bot's class/spec/tier.
+    // Falls back to the legacy gear-score loop below when no curated set
+    // exists (or AiPlayerbot.UseCuratedGear is off).
+    if (InitCuratedGear())
+    {
+        return;
+    }
 
     map<uint8, vector<uint32> > items;
     for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)

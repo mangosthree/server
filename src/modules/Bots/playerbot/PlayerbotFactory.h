@@ -64,6 +64,37 @@ public:
 
 private:
     /**
+     * @brief Equips the bot's curated (class/spec/tier) best-in-slot gear set,
+     * when one exists in the ai_playerbot_gear cache and
+     * AiPlayerbot.UseCuratedGear is on. Phase A: gear only, no gems/enchants/
+     * glyphs. Lazily loads the static cache from ai_playerbot_gear on first use.
+     * \return
+     *   True if a curated set was found and applied to at least one slot
+     *   (InitEquipment should skip its legacy gear-score loop); false if no
+     *   set exists for (class, spec, tier) or the feature is disabled, in
+     *   which case the caller must fall back to the legacy path unchanged.
+     */
+    bool InitCuratedGear();
+
+    /**
+     * @brief Resolves the dataset spec key (e.g. "arms", "feral_cat") for the
+     * bot's class and primary talent tab (AiFactory::GetPlayerSpecTab).
+     * \arg \c tab
+     *   The primary talent tab index (0/1/2), or -1 if unresolved.
+     * \return
+     *   The spec key, or an empty string if the class/tab is not mapped.
+     */
+    static std::string GetCuratedSpecKey(Player* bot, int tab);
+
+    /**
+     * @brief Resolves the curated gear tier for the bot: honours the
+     * AiPlayerbot.GearTier override when set, otherwise a balanced
+     * normal/heroic/raider split keyed off the bot's GUID.
+     */
+    static std::string GetCuratedTier(Player* bot);
+
+
+    /**
      * @brief Randomizes the player bot with an option for incremental changes.
      * @param incremental If true, randomizes incrementally.
      */
@@ -273,4 +304,8 @@ private:
     uint32 itemQuality; ///< The quality of items to be equipped by the player bot.
     static uint32 tradeSkills[]; ///< Array of trade skills.
     static list<uint32> classQuestIds; ///< List of class quest IDs.
+
+    /// Curated gear cache: class -> spec -> tier -> slot -> itemId. Lazily
+    /// loaded once from `ai_playerbot_gear` (see InitCuratedGear()).
+    static map<uint8, map<string, map<string, map<string, uint32> > > > curatedGearSets;
 };

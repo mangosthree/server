@@ -9,6 +9,8 @@
 #include "../../PlayerbotAIConfig.h"
 #include "MotionGenerators/TargetedMovementGenerator.h"
 #include "Creature.h"
+#include "Map.h"
+#include "vmap/ModelIgnoreFlags.h"
 
 using namespace ai;
 
@@ -87,7 +89,11 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool unsafe
             ai->InterruptSpell();
         }
 
-        bool generatePath = !bot->IsFlying() && !bot->IsUnderWater();
+        // Underwater moves used to skip PathFinder entirely, building a raw
+        // straight spline with no vmap/WMO collision test -- one of the ways
+        // a bot could clip through a cove wall (e.g. Darkbrake Cove) into
+        // invalid space. Route underwater moves through PathFinder as well.
+        bool generatePath = !bot->IsFlying();
         MotionMaster &mm = *bot->GetMotionMaster();
         mm.MovePoint(mapId, x, y, z, generatePath);
 
@@ -261,18 +267,33 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
     if (bot->GetDistance2d(target->GetPositionX(), target->GetPositionY()) <= sPlayerbotAIConfig.sightDistance &&
             abs(bot->GetPositionZ() - target->GetPositionZ()) >= sPlayerbotAIConfig.spellDistance)
     {
-        mm.Clear();
         float x = bot->GetPositionX(), y = bot->GetPositionY(), z = target->GetPositionZ();
         if (target->GetMapId() && bot->GetMapId() != target->GetMapId())
         {
+            mm.Clear();
             bot->TeleportTo(target->GetMapId(), x, y, z, bot->GetOrientation());
+            AI_VALUE(LastMovement&, "last movement").Set(target);
+            return true;
         }
-        else
+
+        // Same-map vertical snap used to fire blind, which could drop the
+        // bot straight into a cove wall (e.g. Darkbrake Cove, Vashj'ir) and
+        // out under the map. Only snap when there is clear LOS to the
+        // destination column and the destination itself is valid (swimmable
+        // water or a real terrain height); otherwise fall through to the
+        // vmap-guarded MoveFollow path below.
+        bool hasLos = bot->GetMap()->IsInLineOfSight(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ() + 0.5f,
+                          x, y, z + 0.5f, bot->GetPhaseMask(), VMAP::ModelIgnoreFlags::M2);
+        float heightZ = z;
+        bool validDest = bot->GetTerrain()->IsSwimmable(x, y, z, bot->GetObjectBoundingRadius()) ||
+                          bot->GetMap()->GetHeightInRange(bot->GetPhaseMask(), x, y, heightZ);
+        if (hasLos && validDest)
         {
+            mm.Clear();
             bot->Relocate(x, y, z, bot->GetOrientation());
+            AI_VALUE(LastMovement&, "last movement").Set(target);
+            return true;
         }
-        AI_VALUE(LastMovement&, "last movement").Set(target);
-        return true;
     }
 
     if (!IsMovingAllowed(target))

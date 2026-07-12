@@ -650,6 +650,25 @@ bool PathFinder::BuildSwimShortcut(const Vector3& startPos, const Vector3& endPo
         return false;
     }
 
+#ifdef ENABLE_PLAYERBOTS
+    // Straight-line swim shortcuts have no vmap/WMO collision test, so a bot
+    // hugging a cove wall (e.g. Darkbrake Cove, Vashj'ir) can clip through
+    // the rock and end up under the map. Reject the shortcut when the
+    // straight start->end ray is blocked and fall back to the navmesh,
+    // which clamps to valid polys instead of tunnelling through geometry.
+    // ModelIgnoreFlags::M2 skips the dense kelp/coral doodads so they don't
+    // falsely block a clear swim lane.
+    if (m_sourceUnit->GetTypeId() == TYPEID_PLAYER && ((Player*)m_sourceUnit)->GetPlayerbotAI())
+    {
+        if (!m_sourceUnit->GetMap()->IsInLineOfSight(startPos.x, startPos.y, startPos.z + 0.5f,
+                endPos.x, endPos.y, endPos.z + 0.5f,
+                m_sourceUnit->GetPhaseMask(), VMAP::ModelIgnoreFlags::M2))
+        {
+            return false;
+        }
+    }
+#endif
+
     BuildShortcut();
 
     // any sampled point outside liquid means a shore/dam between two pools

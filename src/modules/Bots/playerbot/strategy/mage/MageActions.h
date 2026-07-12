@@ -116,6 +116,11 @@ namespace ai
     {
     public:
         CastConjureRefreshmentAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "conjure refreshment") {}
+
+        /// Don't re-conjure while already stocked -- Conjure Refreshment
+        /// creates an item, not an aura, so the base "already has aura"
+        /// check in CastAuraSpellAction::isUseful() never gates it.
+        virtual bool isUseful() { return CastBuffSpellAction::isUseful() && AI_VALUE2(list<Item*>, "inventory items", "conjured food").empty(); }
     };
 
     class CastIceBlockAction : public CastBuffSpellAction

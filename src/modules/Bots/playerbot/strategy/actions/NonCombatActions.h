@@ -12,39 +12,9 @@ namespace ai
     public:
         DrinkAction(PlayerbotAI* ai) : UseItemAction(ai, "drink") {}
 
-        virtual bool Execute(Event event)
-        {
-            if (bot->IsInCombat())
-            {
-                return false;
-            }
-
-            if (ai->IsDrinking())
-            {
-                return true;
-            }
-
-            bool result = UseItemAction::Execute(event);
-            if (result)
-            {
-                ai->SetDrinking();
-            }
-            return result;
-        }
-
-        virtual bool isPossible()
-        {
-            return ai->IsDrinking() || UseItemAction::isPossible();
-        }
-
-        virtual bool isUseful()
-        {
-            if (ai->IsDrinking())
-            {
-                return true;
-            }
-            return UseItemAction::isUseful() && AI_VALUE2(uint8, "mana", "self target") < sPlayerbotAIConfig.thirstyMana;
-        }
+        virtual bool Execute(Event event);
+        virtual bool isPossible();
+        virtual bool isUseful();
     };
 
     class EatAction : public UseItemAction
@@ -52,49 +22,9 @@ namespace ai
     public:
         EatAction(PlayerbotAI* ai) : UseItemAction(ai, "food") {}
 
-        virtual bool Execute(Event event)
-        {
-            if (bot->IsInCombat())
-            {
-                return false;
-            }
-
-            if (ai->IsEating())
-            {
-                return true;
-            }
-
-            bool result = false;
-            list<Item*> buffFoods = AI_VALUE2(list<Item*>, "inventory items", "buff food");
-            if (!buffFoods.empty() && !HasFoodBuff(bot, buffFoods))
-            {
-                result = UseItemAuto(*buffFoods.begin());
-            }
-            if (!result)
-            {
-                result = UseItemAction::Execute(event);
-            }
-
-            if (result)
-            {
-                ai->SetEating();
-            }
-            return result;
-        }
-
-        virtual bool isPossible()
-        {
-            return ai->IsEating() || UseItemAction::isPossible();
-        }
-
-        virtual bool isUseful()
-        {
-            if (ai->IsEating())
-            {
-                return true;
-            }
-            return UseItemAction::isUseful() && AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.hungryHealth;
-        }
+        virtual bool Execute(Event event);
+        virtual bool isPossible();
+        virtual bool isUseful();
     };
 
 }

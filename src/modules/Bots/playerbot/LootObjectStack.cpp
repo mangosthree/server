@@ -246,6 +246,18 @@ void LootObjectStack::Clear()
     availableLoot.clear();
 }
 
+void LootObjectStack::MarkProcessed(ObjectGuid guid)
+{
+    processedLoot.erase(LootTarget(guid));
+    processedLoot.insert(LootTarget(guid));
+}
+
+bool LootObjectStack::IsProcessed(ObjectGuid guid)
+{
+    processedLoot.shrink(time(0) - 120);
+    return processedLoot.find(LootTarget(guid)) != processedLoot.end();
+}
+
 bool LootObjectStack::CanLoot(float maxDistance)
 {
     vector<LootObject> ordered = OrderByDistance(maxDistance);
@@ -268,6 +280,11 @@ vector<LootObject> LootObjectStack::OrderByDistance(float maxDistance)
     {
         ObjectGuid guid = i->guid;
         LootObject lootObject(bot, guid);
+        if (lootObject.skillId == SKILL_NONE && IsProcessed(guid))
+        {
+            continue;
+        }
+
         if (!lootObject.IsLootPossible(bot))
         {
             continue;

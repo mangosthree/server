@@ -342,7 +342,9 @@ bool StoreLootAction::Execute(Event event)
         ai->TellMasterNoFacing(out.str());
     }
 
-    AI_VALUE(LootObjectStack*, "available loot")->Remove(guid);
+    LootObjectStack* lootObjectStack = AI_VALUE(LootObjectStack*, "available loot");
+    lootObjectStack->Remove(guid);
+    lootObjectStack->MarkProcessed(guid);
 
     // release loot
     bot->GetSession()->DoLootRelease(guid);

@@ -156,6 +156,21 @@ namespace ai
          */
         LootObject GetLoot(float maxDistance = 0);
 
+        /**
+         * @brief Marks a corpse/object as already processed for loot.
+         *
+         * @param guid The GUID of the loot object.
+         */
+        void MarkProcessed(ObjectGuid guid);
+
+        /**
+         * @brief Checks if a corpse/object was already processed for loot.
+         *
+         * @param guid The GUID of the loot object.
+         * @return true if the object was processed within the tracking window, false otherwise.
+         */
+        bool IsProcessed(ObjectGuid guid);
+
     private:
         /**
          * @brief Orders the loot objects by distance.
@@ -168,6 +183,7 @@ namespace ai
     private:
         Player* bot; ///< The player bot.
         LootTargetList availableLoot; ///< The list of available loot targets.
+        LootTargetList processedLoot; ///< The list of already-processed loot targets.
     };
 
 };

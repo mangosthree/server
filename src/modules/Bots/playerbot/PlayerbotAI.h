@@ -181,6 +181,7 @@ public:
 
 private:
     void _fillGearScoreData(Player *player, Item* item, std::vector<uint32>* gearScore, uint32& twoHandScore);
+    void ResyncObserversAfterTeleport();
 
 public:
     Player* GetBot() { return bot; }

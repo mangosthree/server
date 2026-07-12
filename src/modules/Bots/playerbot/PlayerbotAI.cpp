@@ -205,6 +205,7 @@ void PlayerbotAI::HandleTeleportAck()
 {
     bot->GetMotionMaster()->Clear(true);
     bot->InterruptMoving(1);
+    InterruptSpell();
     if (bot->IsBeingTeleportedNear())
     {
         // Cata 4.3.4 CMSG_MOVE_TELEPORT_ACK layout: counter, time, then bit-packed
@@ -216,17 +217,6 @@ void PlayerbotAI::HandleTeleportAck()
         p.WriteGuidMask<5, 0, 1, 6, 3, 7, 2, 4>(guid);
         p.WriteGuidBytes<4, 2, 7, 6, 5, 1, 3, 0>(guid);
         bot->GetSession()->HandleMoveTeleportAckOpcode(p);
-        // A same-map teleport doesn't refresh the view of nearby stationary
-        // players, so a summoned bot stays invisible until they move. Force the
-        // bot's own view and, explicitly, the master's client view of the bot.
-        bot->UpdateVisibilityAndView();
-        if (Player* master = GetMaster())
-        {
-            if (master != bot)
-            {
-                master->UpdateVisibilityOf(master, bot);
-            }
-        }
     }
     else if (bot->IsBeingTeleportedFar())
     {
@@ -234,12 +224,53 @@ void PlayerbotAI::HandleTeleportAck()
         SetNextCheckDelay(sPlayerbotAIConfig.globalCoolDown);
     }
 
+    // A client-less bot sends no post-teleport movement packets, so an
+    // observer whose client already tracks it keeps rendering the old
+    // position regardless of which ACK branch fired above. Force a
+    // destroy + re-create resync for every observer.
+    ResyncObserversAfterTeleport();
+
     LastMovement& movement = aiObjectContext->GetValue<LastMovement&>("last movement")->Get();
     if (movement.lastFollowState)
     {
         ChangeStrategy("+follow master,-stay", BOT_STATE_NON_COMBAT);
         movement.lastFollowState = false;
     }
+}
+
+/**
+ * Forces every observer on the bot's map to destroy and re-create it after a
+ * teleport. A client-less bot never sends its own post-teleport movement
+ * packets, so observers who already had it "at client" would otherwise keep
+ * rendering the stale position until they moved and triggered a grid update.
+ */
+void PlayerbotAI::ResyncObserversAfterTeleport()
+{
+    Map* map = bot->GetMap();
+    if (!map)
+    {
+        return;
+    }
+
+    Map::PlayerList const& players = map->GetPlayers();
+    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    {
+        Player* observer = itr->getSource();
+        if (!observer || observer == bot)
+        {
+            continue;
+        }
+
+        if (observer->HaveAtClient(bot))
+        {
+            bot->DestroyForPlayer(observer);
+            observer->m_clientGUIDs.erase(bot->GetObjectGuid());
+        }
+
+        observer->UpdateVisibilityOf(observer, bot);
+    }
+
+    bot->UpdateVisibilityAndView();
 }
 
 /**

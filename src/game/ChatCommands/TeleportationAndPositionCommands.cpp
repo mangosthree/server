@@ -41,11 +41,6 @@
 #include "CellImpl.h"
 #include "Player.h"
 #include "MapPersistentStateMgr.h"
-#ifdef ENABLE_PLAYERBOTS
-#include "playerbot.h"
-#include "PlayerbotMgr.h"
-#include "Database/DatabaseEnv.h"
-#endif
 
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"
@@ -180,27 +175,6 @@ bool ChatHandler::HandleSummonCommand(char* args)
         SetSentErrorMessage(true);
         return false;
     }
-
-#ifdef ENABLE_PLAYERBOTS
-    // A plain teleport leaves a summoned bot invisible to a stationary summoner
-    // until he moves. Instead log the bot out, move its saved position to the
-    // summoner, and re-login it via its manager so the client receives a fresh,
-    // visible object at the new position.
-    if (target && target->GetPlayerbotAI() && player->GetPlayerbotMgr())
-    {
-        ObjectGuid botGuid = target->GetObjectGuid();
-        uint32 botLow = botGuid.GetCounter();
-        uint32 masterAccount = player->GetSession()->GetAccountId();
-        PlayerbotMgr* mgr = player->GetPlayerbotMgr();
-
-        mgr->LogoutPlayerBot(botGuid.GetRawValue());   // note: 'target' dangles after this
-        CharacterDatabase.PExecute("UPDATE `characters` SET `map` = %u, `position_x` = %f, `position_y` = %f, `position_z` = %f, `orientation` = %f WHERE `guid` = %u",
-            player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), botLow);
-        mgr->AddPlayerBot(botGuid.GetRawValue(), masterAccount);
-        PSendSysMessage("Summoning bot %s to your position.", target_name.c_str());
-        return true;
-    }
-#endif
 
     if (target)
     {

@@ -54,6 +54,18 @@ AiObjectContext* AiFactory::createAiObjectContext(Player* player, PlayerbotAI* a
 
 int AiFactory::GetPlayerSpecTab(Player* bot)
 {
+    // Primary talent tree is authoritative when set; point-counting is stale-prone.
+    uint32 primaryTree = bot->GetPrimaryTalentTree(bot->GetActiveSpec());
+    if (primaryTree)
+    {
+        TalentTabEntry const* tabEntry = sTalentTabStore.LookupEntry(primaryTree);
+        if (tabEntry)
+        {
+            return (int)tabEntry->tabpage;
+        }
+    }
+
+    // Fallback: no primary tree set yet (unspecced / level-1 bots).
     map<uint32, int32> tabs = GetPlayerSpecTabs(bot);
 
     int tab = -1, max = 0;

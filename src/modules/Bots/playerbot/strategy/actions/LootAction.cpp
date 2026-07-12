@@ -269,6 +269,9 @@ bool StoreLootAction::Execute(Event event)
     {
         p >> gold;      // 4 money on corpse
         p >> items;     // 1 number of items on corpse
+
+        uint8 currencies = 0;
+        p >> currencies; // Cata 4.3.4: currency count byte follows item count (LootMgr.cpp)
     }
 
     if (gold > 0)
@@ -293,10 +296,10 @@ bool StoreLootAction::Execute(Event event)
         p.read_skip<uint32>();  // randomPropertyId
         p >> lootslot_type;     // 0 = can get, 1 = look only, 2 = master get
 
-        if (lootslot_type != LOOT_SLOT_NORMAL)
-  {
-      continue;
-  }
+        if (lootslot_type != LOOT_SLOT_NORMAL && lootslot_type != LOOT_SLOT_OWNER)
+        {
+            continue;
+        }
 
         if (loot_type != LOOT_SKINNING && !IsLootAllowed(itemid, ai))
         {

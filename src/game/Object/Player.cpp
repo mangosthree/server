@@ -5241,13 +5241,34 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
         bool swimming = (res & (LIQUID_MAP_IN_WATER | LIQUID_MAP_UNDER_WATER)) &&
                         liquid_status.level - liquid_status.depth_level > GetObjectBoundingRadius();
         SetInWater(swimming);
-        if (swimming)
+        if (swimming != m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING))
         {
-            m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);
-        }
-        else
-        {
-            m_movementInfo.RemoveMovementFlag(MOVEFLAG_SWIMMING);
+            if (swimming)
+            {
+                m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);
+            }
+            else
+            {
+                m_movementInfo.RemoveMovementFlag(MOVEFLAG_SWIMMING);
+            }
+
+            // broadcast the toggle or observers keep the land pose (mirrors Creature::SetSwim)
+            if (IsInWorld())
+            {
+                WorldPacket data(swimming ? SMSG_SPLINE_MOVE_START_SWIM : SMSG_SPLINE_MOVE_STOP_SWIM, 9);
+                if (swimming)
+                {
+                    data.WriteGuidMask<1, 6, 0, 7, 3, 5, 2, 4>(GetObjectGuid());
+                    data.WriteGuidBytes<3, 7, 2, 5, 6, 4, 1, 0>(GetObjectGuid());
+                }
+                else
+                {
+                    data.WriteGuidMask<4, 1, 5, 3, 0, 7, 2, 6>(GetObjectGuid());
+                    data.WriteGuidBytes<6, 0, 7, 2, 3, 1, 5, 4>(GetObjectGuid());
+                }
+
+                SendMessageToSet(&data, true);
+            }
         }
     }
 #endif

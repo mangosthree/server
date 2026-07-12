@@ -7246,7 +7246,7 @@ void Unit::DisableSpline()
 
 bool Unit::IsSplineEnabled() const
 {
-    return movespline->Initialized();
+    return movespline->Initialized() && !movespline->Finalized();
 }
 
 bool Unit::IsInWorgenForm(bool inPermanent) const

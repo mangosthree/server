@@ -217,11 +217,18 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed)
         chatCommands.pop();
     }
 
-    botOutgoingPacketHandlers.Handle(helper);
-    masterIncomingPacketHandlers.Handle(helper);
-    masterOutgoingPacketHandlers.Handle(helper);
+    try
+    {
+        botOutgoingPacketHandlers.Handle(helper);
+        masterIncomingPacketHandlers.Handle(helper);
+        masterOutgoingPacketHandlers.Handle(helper);
 
-    DoNextAction();
+        DoNextAction();
+    }
+    catch (ByteBufferException&)
+    {
+        sLog.outError("PlayerbotAI::UpdateAIInternal ByteBufferException for bot %s", bot->GetName());
+    }
 }
 
 /**

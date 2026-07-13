@@ -154,6 +154,21 @@ void PlayerbotFactory::Randomize(bool incremental)
 
     sLog.outDetail("Initializing quests...");
     InitQuests();
+
+    // A quest reward spell completed above can teleport the bot off its map, and a
+    // bot whose login never finished Map::Add is unmapped from the outset. Every
+    // remaining step (equip, enchant, gems, spell learning) resolves the bot and its
+    // items through the world/map and would crash on a mapless bot (GetOwner()==NULL,
+    // GetTerrain() on a NULL map, ...). Abort here rather than run that gauntlet:
+    // RandomizeFirst/IncreaseLevel re-anchor the bot via RandomTeleportForLevel right
+    // after, so it re-randomizes cleanly once it is mapped again.
+    if (!bot->GetMap())
+    {
+        sLog.outError("PlayerbotFactory::Randomize aborted for bot %u: unmapped after InitQuests",
+                      bot->GetGUIDLow());
+        return;
+    }
+
     // quest rewards boost bot level, so reduce back
     bot->SetLevel(level);
     ClearInventory();

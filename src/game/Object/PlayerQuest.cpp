@@ -3099,6 +3099,15 @@ void Player::UpdateForQuestWorldObjects()
         return;
     }
 
+    // Resolves each visible GUID through GetMap(); a player with no current map
+    // (e.g. a bot displaced off its map mid-randomize by a quest reward spell, or
+    // one whose login never completed Map::Add) would null-deref. With no map there
+    // are no visible world objects to refresh.
+    if (!GetMap())
+    {
+        return;
+    }
+
     UpdateData udata(GetMapId());
     WorldPacket packet;
     for (GuidSet::const_iterator itr = m_clientGUIDs.begin(); itr != m_clientGUIDs.end(); ++itr)

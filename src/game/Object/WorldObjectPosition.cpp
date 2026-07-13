@@ -201,6 +201,13 @@ void WorldObject::SetOrientation(float orientation)
  */
 uint32 WorldObject::GetZoneId() const
 {
+    // No current map -> no terrain to resolve against (a bot a quest reward spell
+    // teleported off its map mid-randomize, or one whose login never completed
+    // Map::Add). Report no zone rather than dereferencing a NULL map and crashing.
+    if (!GetMap())
+    {
+        return 0;
+    }
     return GetTerrain()->GetZoneId(m_position.x, m_position.y, m_position.z);
 }
 
@@ -212,6 +219,10 @@ uint32 WorldObject::GetZoneId() const
  */
 uint32 WorldObject::GetAreaId() const
 {
+    if (!GetMap())
+    {
+        return 0;
+    }
     return GetTerrain()->GetAreaId(m_position.x, m_position.y, m_position.z);
 }
 
@@ -224,6 +235,12 @@ uint32 WorldObject::GetAreaId() const
  */
 void WorldObject::GetZoneAndAreaId(uint32& zoneid, uint32& areaid) const
 {
+    if (!GetMap())
+    {
+        zoneid = 0;
+        areaid = 0;
+        return;
+    }
     GetTerrain()->GetZoneAndAreaId(zoneid, areaid, m_position.x, m_position.y, m_position.z);
 }
 

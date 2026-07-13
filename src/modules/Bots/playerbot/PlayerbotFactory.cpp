@@ -2454,6 +2454,17 @@ void AddPrevQuests(uint32 questId, list<uint32>& questIds, std::set<uint32>& vis
  */
 void PlayerbotFactory::InitQuests()
 {
+    // RewardQuest -> GetZoneAndAreaId -> GetTerrain dereferences m_currMap. A bot
+    // whose login never completed a Map::Add (bad saved position: an unloaded
+    // instance, Vashjir, a broken WMO) is still ticked by Player::Update but has no
+    // map, so this would null-deref and crash the world thread. Skip the quest pass
+    // for such a bot; every other randomize step (talents, spells, gear, glyphs) is
+    // map-independent, so the bot is still fully geared.
+    if (!bot->GetMap())
+    {
+        return;
+    }
+
     // Initialize the list of class-specific quest IDs if it is empty
     if (classQuestIds.empty())
     {
@@ -2489,6 +2500,14 @@ void PlayerbotFactory::InitQuests()
 
         bot->SetQuestStatus(questId, QUEST_STATUS_COMPLETE);
         bot->RewardQuest(quest, 0, bot, false);
+        // A quest reward spell can teleport the bot off its current map, leaving it
+        // unmapped. Stop force-completing quests once that happens: the remaining
+        // randomize steps (gear/talents/spells) are map-independent and the caller's
+        // RandomTeleportForLevel re-anchors the bot immediately afterwards.
+        if (!bot->GetMap())
+        {
+            break;
+        }
         if (!(count++ % 10))
         {
             ClearInventory();

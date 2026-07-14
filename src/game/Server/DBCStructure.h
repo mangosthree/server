@@ -555,9 +555,9 @@ struct AreaTableEntry
 
 struct AreaGroupEntry
 {
-    uint32  AreaGroupId;                                    // 0        m_ID
-    uint32  AreaId[6];                                      // 1-6      m_areaID
-    uint32  nextGroup;                                      // 7        m_nextAreaID
+    uint32  ID;                                             // 0        m_ID
+    uint32  AreaID[6];                                      // 1-6      m_areaID
+    uint32  NextAreaID;                                     // 7        m_nextAreaID
 };
 
 struct AreaTriggerEntry
@@ -727,9 +727,9 @@ struct ChrRacesEntry
 
 struct ChrPowerTypesEntry
 {
-   uint32 entry;                                               // 0
-   uint32 classId;                                             // 1
-   uint32 power;                                               // 2
+   uint32 ID;                                                  // 0
+   uint32 ClassID;                                             // 1
+   uint32 PowerType;                                           // 2
 };
 
 /*struct CinematicCameraEntry
@@ -755,7 +755,7 @@ struct CreatureDisplayInfoEntry
     uint32      Displayid;                                  // 0        m_ID
     uint32      ModelId;                                    // 1        m_modelID
                                                             // 2        m_soundID
-    uint32      ExtendedDisplayInfoID;                      // 3        m_extendedDisplayInfoID -> CreatureDisplayInfoExtraEntry::DisplayExtraId
+    uint32      ExtendedDisplayInfoID;                      // 3        m_extendedDisplayInfoID -> CreatureDisplayInfoExtraEntry::ID
     float       Scale;                                      // 4        m_creatureModelScale
                                                             // 5        m_creatureModelAlpha
                                                             // 6-8      m_textureVariation[3]
@@ -771,8 +771,8 @@ struct CreatureDisplayInfoEntry
 
 struct CreatureDisplayInfoExtraEntry
 {
-    uint32      DisplayExtraId;                             // 0        m_ID CreatureDisplayInfoEntry::m_extendedDisplayInfoID
-    uint32      Race;                                       // 1        m_DisplayRaceID
+    uint32      ID;                                         // 0        m_ID CreatureDisplayInfoEntry::m_extendedDisplayInfoID
+    uint32      DisplayRaceID;                              // 1        m_DisplayRaceID
     // uint32    Gender;                                    // 2        m_DisplaySexID
     // uint32    SkinColor;                                 // 3        m_SkinID
     // uint32    FaceType;                                  // 4        m_FaceID
@@ -865,27 +865,27 @@ struct CurrencyTypesEntry
 
 struct DestructibleModelDataEntry
 {
-    uint32 m_ID;                                            // 0        m_ID
-    uint32 intactDisplayId;                                 // 1
+    uint32 ID;                                              // 0        m_ID
+    uint32 State0WMO;                                       // 1
     // uint32 unk2;                                         // 2
     // uint32 unk3;                                         // 3
     // uint32 unk4;                                         // 4
-    uint32 damagedDisplayId;                                // 5
+    uint32 State1WMO;                                       // 5
     // uint32 unk6;                                         // 6
     // uint32 unk7;                                         // 7
     // uint32 unk8;                                         // 8
     // uint32 unk9;                                         // 9
-    uint32 destroyedDisplayId;                              // 10
+    uint32 State2WMO;                                       // 10
     // uint32 unk11;                                        // 11
     // uint32 unk12;                                        // 12
     // uint32 unk13;                                        // 13
     // uint32 unk14;                                        // 14
-    uint32 rebuildingDisplayId;                             // 15
+    uint32 State3WMO;                                       // 15
     // uint32 unk16;                                        // 16
     // uint32 unk17;                                        // 17
     // uint32 unk18;                                        // 18
     // uint32 unk19;                                        // 19
-    uint32 smokeDisplayId;                                  // 20
+    uint32 RepairGroundFx;                                  // 20
     // uint32 unk21;                                        // 21
     // uint32 unk22;                                        // 22
     // uint32 unk23;                                        // 23
@@ -1029,15 +1029,15 @@ struct FactionTemplateEntry
 
 struct GameObjectDisplayInfoEntry
 {
-    uint32 Displayid;                                       // 0 m_ID
-    char* filename;                                         // 1 m_modelName
+    uint32 ID;                                              // 0 m_ID
+    char* ModelName;                                        // 1 m_modelName
     // uint32 unknown2[10];                                 // 2-11 m_Sound
-    float geoBoxMinX;                                       // 12 m_geoBoxMinX (use first value as interact dist, mostly in hacks way)
-    float geoBoxMinY;                                       // 13 m_geoBoxMinY
-    float geoBoxMinZ;                                       // 14 m_geoBoxMinZ
-    float geoBoxMaxX;                                       // 15 m_geoBoxMaxX
-    float geoBoxMaxY;                                       // 16 m_geoBoxMaxY
-    float geoBoxMaxZ;                                       // 17 m_geoBoxMaxZ
+    float GeoBoxMin_0;                                      // 12 m_geoBoxMinX (use first value as interact dist, mostly in hacks way)
+    float GeoBoxMin_1;                                      // 13 m_geoBoxMinY
+    float GeoBoxMin_2;                                      // 14 m_geoBoxMinZ
+    float GeoBoxMax_0;                                      // 15 m_geoBoxMaxX
+    float GeoBoxMax_1;                                      // 16 m_geoBoxMaxY
+    float GeoBoxMax_2;                                      // 17 m_geoBoxMaxZ
     //uint32 transport;                                     // 18
     //uint32 unk;                                           // 19
     //uint32 unk1;                                          // 20
@@ -1046,10 +1046,10 @@ struct GameObjectDisplayInfoEntry
 struct GemPropertiesEntry
 {
     uint32      ID;                                         // 0        m_id
-    uint32      spellitemenchantement;                      // 1        m_enchant_id
+    uint32      Enchant_ID;                                 // 1        m_enchant_id
                                                             // 2        m_maxcount_inv
                                                             // 3        m_maxcount_item
-    uint32      color;                                      // 4        m_type
+    uint32      Type;                                       // 4        m_type
     //uint32                                                // 5
 };
 
@@ -1076,7 +1076,7 @@ struct GlyphSlotEntry
 struct GtBarberShopCostBaseEntry
 {
     //uint32 level;
-    float   cost;
+    float   Cost;
 };
 
 struct GtCombatRatingsEntry
@@ -1111,7 +1111,7 @@ struct GtChanceToSpellCritEntry
 
 struct GtOCTClassCombatRatingScalarEntry
 {
-    float    ratio;
+    float    Data;
 };
 
 struct GtOCTHpPerStaminaEntry
@@ -1243,8 +1243,8 @@ struct ItemLimitCategoryEntry
 {
     uint32      ID;                                         // 0 Id     m_ID
     //char*     name;                                       // 1        m_name_lang
-    uint32      maxCount;                                   // 2,       m_quantity max allowed equipped as item or in gem slot
-    uint32      mode;                                       // 3,       m_flags 0 = have, 1 = equip (enum ItemLimitCategoryMode)
+    uint32      Quantity;                                   // 2,       m_quantity max allowed equipped as item or in gem slot
+    uint32      Flags;                                      // 3,       m_flags 0 = have, 1 = equip (enum ItemLimitCategoryMode)
 };
 
 struct ItemRandomPropertiesEntry
@@ -1370,7 +1370,7 @@ struct MailTemplateEntry
 {
     uint32      ID;                                         // 0        m_ID
     //char*       subject;                                  // 1        m_subject_lang
-    DBCString content;                                      // 2        m_body_lang
+    DBCString Body_lang;                                    // 2        m_body_lang
 };
 
 struct MapEntry
@@ -1471,7 +1471,7 @@ struct MountTypeEntry
 struct NumTalentsAtLevelEntry
 {
     //uint32 Level;                                         // 0 index
-    float Talents;                                          // 1 talent count
+    float NumberOfTalents;                                  // 1 talent count
 };
 
 #define MAX_OVERRIDE_SPELLS     10
@@ -1528,16 +1528,16 @@ struct QuestSortEntry
 
 struct QuestXPLevel
 {
-    uint32      questLevel;                                 // 0        m_ID
-    uint32      xpIndex[10];                                // 1-10     m_difficulty[10]
+    uint32      ID;                                         // 0        m_ID
+    uint32      Difficulty[10];                             // 1-10     m_difficulty[10]
 };
 
 struct RandomPropertiesPointsEntry
 {
-    uint32    itemLevel;                                    // 0        m_ItemLevel
-    uint32    EpicPropertiesPoints[5];                      // 1-5      m_Epic
-    uint32    RarePropertiesPoints[5];                      // 6-10     m_Superior
-    uint32    UncommonPropertiesPoints[5];                  // 11-15    m_Good
+    uint32    ID;                                           // 0        m_ItemLevel
+    uint32    Epic[5];                                      // 1-5      m_Epic
+    uint32    Superior[5];                                  // 6-10     m_Superior
+    uint32    Good[5];                                      // 11-15    m_Good
 };
 
 struct ScalingStatDistributionEntry
@@ -2360,16 +2360,16 @@ struct TalentEntry
 
 struct TalentTabEntry
 {
-    uint32  TalentTabID;                                    // 0        m_ID
+    uint32  ID;                                             // 0        m_ID
     //char* name;                                           // 1        m_name_lang
     //unit32  spellicon;                                    // 2        m_spellIconID
     uint32  ClassMask;                                      // 3        m_classMask
-    uint32  petTalentMask;                                  // 4        m_petTalentMask
-    uint32  tabpage;                                        // 5        m_orderIndex
+    uint32  PetTalentMask;                                  // 4        m_petTalentMask
+    uint32  OrderIndex;                                     // 5        m_orderIndex
     //char* internalname;                                   // 6        m_backgroundFile
     //char* description;                                    // 7
-    uint32 rolesMask;                                       // 8        4.0.0
-    uint32 masterySpells[MAX_MASTERY_SPELLS];               // 9-10     passive mastery bonus spells
+    uint32 RoleMask;                                        // 8        4.0.0
+    uint32 MasterySpellID[MAX_MASTERY_SPELLS];              // 9-10     passive mastery bonus spells
 };
 
 struct TalentTreePrimarySpellsEntry
@@ -2421,8 +2421,8 @@ struct TotemCategoryEntry
 {
     uint32    ID;                                           // 0        m_ID
     //char*   name;                                         // 1        m_name_lang
-    uint32    categoryType;                                 // 2        m_totemCategoryType (one for specialization)
-    uint32    categoryMask;                                 // 3        m_totemCategoryMask (compatibility mask for same type: different for totems, compatible from high to low for rods)
+    uint32    TotemCategoryType;                            // 2        m_totemCategoryType (one for specialization)
+    uint32    TotemCategoryMask;                            // 3        m_totemCategoryMask (compatibility mask for same type: different for totems, compatible from high to low for rods)
 };
 
 struct TransportAnimationEntry
@@ -2581,7 +2581,7 @@ struct WorldMapOverlayEntry
 {
     uint32    ID;                                           // 0        m_ID
     //uint32    worldMapAreaId;                             // 1        m_mapAreaID (WorldMapArea.dbc)
-    uint32    areatableID[MAX_WORLD_MAP_OVERLAY_AREA_IDX];  // 2-5      m_areaID
+    uint32    AreaID[MAX_WORLD_MAP_OVERLAY_AREA_IDX];       // 2-5      m_areaID
     //char* internal_name                                   // 6        m_textureName
                                                             // 7        m_textureWidth
                                                             // 8        m_textureHeight

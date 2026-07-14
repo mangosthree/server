@@ -316,7 +316,7 @@ void Player::LearnPetTalent(ObjectGuid petGuid, uint32 talentId, uint32 talentRa
     }
 
     // prevent learn talent for different family (cheating)
-    if (!((1 << pet_family->petTalentType) & talentTabInfo->petTalentMask))
+    if (!((1 << pet_family->petTalentType) & talentTabInfo->PetTalentMask))
     {
         return;
     }
@@ -565,7 +565,7 @@ void Player::BuildPetTalentsInfoData(WorldPacket* data)
             continue;
         }
 
-        if (!((1 << pet_family->petTalentType) & talentTabInfo->petTalentMask))
+        if (!((1 << pet_family->petTalentType) & talentTabInfo->PetTalentMask))
         {
             continue;
         }

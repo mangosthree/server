@@ -5397,22 +5397,22 @@ uint32 Player::GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 n
 
     if (hairstyle != newhairstyle)
     {
-        cost += bsc->cost;                                  // full price
+        cost += bsc->Cost;                                  // full price
     }
 
     if (haircolor != newhaircolor && hairstyle == newhairstyle)
     {
-        cost += bsc->cost * 0.5f;                           // +1/2 of price
+        cost += bsc->Cost * 0.5f;                           // +1/2 of price
     }
 
     if (facialhair != newfacialhair)
     {
-        cost += bsc->cost * 0.75f;                          // +3/4 of price
+        cost += bsc->Cost * 0.75f;                          // +3/4 of price
     }
 
     if (skintone != newskintone && newskintone != -1)
     {
-        cost += bsc->cost * 0.5f;                           // +1/2 of price
+        cost += bsc->Cost * 0.5f;                           // +1/2 of price
     }
 
     return uint32(cost);
@@ -5625,7 +5625,7 @@ uint32 Player::CalculateTalentsPoints() const
         return 0;
     }
 
-    float baseForLevel = count->Talents;
+    float baseForLevel = count->NumberOfTalents;
 
     if (getClass() != CLASS_DEATH_KNIGHT)
     {
@@ -5645,7 +5645,7 @@ uint32 Player::CalculateTalentsPoints() const
         return 0;
     }
 
-    float talentPointsForLevel = count->Talents - dkBase->Talents;
+    float talentPointsForLevel = count->NumberOfTalents - dkBase->NumberOfTalents;
     talentPointsForLevel += float(m_questRewardTalentCount);
 
     if (talentPointsForLevel > baseForLevel)
@@ -5961,15 +5961,15 @@ InventoryResult Player::CanEquipUniqueItem(ItemPrototype const* itemProto, uint8
             return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
         }
 
-        // NOTE: limitEntry->mode not checked because if item have have-limit then it applied and to equip case
+        // NOTE: limitEntry->Flags not checked because if item have have-limit then it applied and to equip case
 
-        if (limit_count > limitEntry->maxCount)
+        if (limit_count > limitEntry->Quantity)
         {
             return EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_EQUIPPED_EXCEEDED_IS;
         }
 
         // there is an equip limit on this item
-        if (HasItemOrGemWithLimitCategoryEquipped(itemProto->ItemLimitCategory, limitEntry->maxCount - limit_count + 1, except_slot))
+        if (HasItemOrGemWithLimitCategoryEquipped(itemProto->ItemLimitCategory, limitEntry->Quantity - limit_count + 1, except_slot))
         {
             return EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_EQUIPPED_EXCEEDED_IS;
         }

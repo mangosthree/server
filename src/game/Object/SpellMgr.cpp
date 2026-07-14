@@ -3072,16 +3072,16 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spell
         while (groupEntry)
         {
             for (uint32 i = 0; i < 6; ++i)
-                if (groupEntry->AreaId[i] == zone_id || groupEntry->AreaId[i] == area_id)
+                if (groupEntry->AreaID[i] == zone_id || groupEntry->AreaID[i] == area_id)
                 {
                     found = true;
                 }
-            if (found || !groupEntry->nextGroup)
+            if (found || !groupEntry->NextAreaID)
             {
                 break;
             }
             // Try search in next group
-            groupEntry = sAreaGroupStore.LookupEntry(groupEntry->nextGroup);
+            groupEntry = sAreaGroupStore.LookupEntry(groupEntry->NextAreaID);
         }
 
         if (!found)

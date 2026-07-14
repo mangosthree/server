@@ -421,7 +421,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
             // Get destroyed DisplayId
             if ((!m_goInfo->destructibleBuilding.destroyedDisplayId || m_goInfo->destructibleBuilding.destroyedDisplayId == 1) && destructibleInfo)
             {
-                newDisplayId = destructibleInfo->destroyedDisplayId;
+                newDisplayId = destructibleInfo->State2WMO;
             }
             else
             {
@@ -432,7 +432,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
             {
                 if ((!m_goInfo->destructibleBuilding.damagedDisplayId || m_goInfo->destructibleBuilding.damagedDisplayId == 1) && destructibleInfo)
                 {
-                    newDisplayId = destructibleInfo->damagedDisplayId;
+                    newDisplayId = destructibleInfo->State1WMO;
                 }
                 else
                 {
@@ -458,7 +458,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
             // Get damaged DisplayId
             if ((!m_goInfo->destructibleBuilding.damagedDisplayId || m_goInfo->destructibleBuilding.damagedDisplayId == 1) && destructibleInfo)
             {
-                newDisplayId = destructibleInfo->damagedDisplayId;
+                newDisplayId = destructibleInfo->State1WMO;
             }
             else
             {

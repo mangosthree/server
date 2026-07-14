@@ -577,14 +577,14 @@ void LoadDBCStores(const std::string& dataPath)
             continue;
         }
 
-        MANGOS_ASSERT(entry->classId < MAX_CLASSES && "MAX_CLASSES not updated");
-        MANGOS_ASSERT(entry->power < MAX_POWERS && "MAX_POWERS not updated");
+        MANGOS_ASSERT(entry->ClassID < MAX_CLASSES && "MAX_CLASSES not updated");
+        MANGOS_ASSERT(entry->PowerType < MAX_POWERS && "MAX_POWERS not updated");
 
         uint32 index = 0;
 
         for (uint32 j = 0; j < MAX_POWERS; ++j)
         {
-            if (sChrClassXPowerTypesStore[entry->classId][j] != INVALID_POWER_INDEX)
+            if (sChrClassXPowerTypesStore[entry->ClassID][j] != INVALID_POWER_INDEX)
             {
                 ++index;
             }
@@ -592,8 +592,8 @@ void LoadDBCStores(const std::string& dataPath)
 
         MANGOS_ASSERT(index < MAX_STORED_POWERS && "MAX_STORED_POWERS not updated");
 
-        sChrClassXPowerTypesStore[entry->classId][entry->power] = index;
-        sChrClassXPowerIndexStore[entry->classId][index] = entry->power;
+        sChrClassXPowerTypesStore[entry->ClassID][entry->PowerType] = index;
+        sChrClassXPowerIndexStore[entry->ClassID][index] = entry->PowerType;
     }
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sChrRacesStore,            dbcPath,"ChrRaces.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sCinematicSequencesStore,  dbcPath,"CinematicSequences.dbc");
@@ -830,7 +830,7 @@ void LoadDBCStores(const std::string& dataPath)
             }
 
             for (uint32 i = 0; i < MAX_MASTERY_SPELLS; ++i)
-                if (uint32 spellid = talentTabInfo->masterySpells[i])
+                if (uint32 spellid = talentTabInfo->MasterySpellID[i])
                     if (sSpellStore.LookupEntry(spellid))
                     {
                         sTalentTreeMasterySpellsMap[talentTabId].push_back(spellid);
@@ -846,10 +846,10 @@ void LoadDBCStores(const std::string& dataPath)
             for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
                 if (talentTabInfo->ClassMask & (1 << (cls - 1)))
                 {
-                    sTalentTabPages[cls][talentTabInfo->tabpage] = talentTabId;
+                    sTalentTabPages[cls][talentTabInfo->OrderIndex] = talentTabId;
                 }
 
-            sTalentTreeRolesMap[talentTabId] = talentTabInfo->rolesMask;
+            sTalentTreeRolesMap[talentTabId] = talentTabInfo->RoleMask;
         }
     }
 
@@ -1304,12 +1304,12 @@ bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredT
         return false;
     }
 
-    if (itemEntry->categoryType != reqEntry->categoryType)
+    if (itemEntry->TotemCategoryType != reqEntry->TotemCategoryType)
     {
         return false;
     }
 
-    return (itemEntry->categoryMask & reqEntry->categoryMask) == reqEntry->categoryMask;
+    return (itemEntry->TotemCategoryMask & reqEntry->TotemCategoryMask) == reqEntry->TotemCategoryMask;
 }
 
 /**
@@ -1577,7 +1577,7 @@ uint32 GetCreatureModelRace(uint32 model_id)
         return 0;
     }
     CreatureDisplayInfoExtraEntry const* extraEntry = sCreatureDisplayInfoExtraStore.LookupEntry(displayEntry->ExtendedDisplayInfoID);
-    return extraEntry ? extraEntry->Race : 0;
+    return extraEntry ? extraEntry->DisplayRaceID : 0;
 }
 
 float GetCurrencyPrecision(uint32 currencyId)

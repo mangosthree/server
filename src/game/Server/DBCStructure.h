@@ -595,7 +595,7 @@ struct AuctionHouseEntry
 struct BankBagSlotPricesEntry
 {
     uint32  ID;                                             // 0        m_ID
-    uint32  price;                                          // 1        m_Cost
+    uint32  Cost;                                           // 1        m_Cost
 };
 
 struct BarberShopStyleEntry

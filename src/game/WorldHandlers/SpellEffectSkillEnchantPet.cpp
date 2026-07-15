@@ -121,7 +121,7 @@ void Spell::EffectDispel(SpellEffectEntry const* effect)
     std::list <std::pair<SpellAuraHolder* , uint32> > dispel_list;
 
     // Create dispel mask by dispel type
-    uint32 dispel_type = effect->EffectMiscValue;
+    uint32 dispel_type = effect->EffectMiscValue_0;
     uint32 dispelMask  = GetDispellMask( DispelType(dispel_type) );
     Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
     for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
@@ -432,7 +432,7 @@ void Spell::EffectLearnSkill(SpellEffectEntry const* effect)
         return;
     }
 
-    uint32 skillid =  effect->EffectMiscValue;
+    uint32 skillid =  effect->EffectMiscValue_0;
     uint16 skillval = ((Player*)unitTarget)->GetPureSkillValue(skillid);
     ((Player*)unitTarget)->SetSkill(skillid, skillval ? skillval : 1, damage * 75, damage);
 
@@ -469,7 +469,7 @@ void Spell::EffectEnchantItemPerm(SpellEffectEntry const* effect)
         return;
     }
 
-    uint32 enchant_id = effect->EffectMiscValue;
+    uint32 enchant_id = effect->EffectMiscValue_0;
     if (!enchant_id)
     {
         return;
@@ -544,7 +544,7 @@ void Spell::EffectEnchantItemPrismatic(SpellEffectEntry const* effect)
 
     Player* p_caster = (Player*)m_caster;
 
-    uint32 enchant_id = effect->EffectMiscValue;
+    uint32 enchant_id = effect->EffectMiscValue_0;
     if (!enchant_id)
     {
         return;
@@ -655,7 +655,7 @@ void Spell::EffectEnchantItemTmp(SpellEffectEntry const* effect)
         return;
     }
 
-    uint32 enchant_id = effect->EffectMiscValue;
+    uint32 enchant_id = effect->EffectMiscValue_0;
 
     if (!enchant_id)
     {
@@ -849,7 +849,7 @@ void Spell::EffectTameCreature(SpellEffectEntry const* /*effect*/)
  */
 void Spell::EffectSummonPet(SpellEffectEntry const* effect)
 {
-    uint32 petentry = effect->EffectMiscValue;
+    uint32 petentry = effect->EffectMiscValue_0;
 
     Pet* NewSummon = new Pet;
 
@@ -911,7 +911,7 @@ void Spell::EffectSummonPet(SpellEffectEntry const* effect)
     NewSummon->SetRespawnCoord(pos);
 
     // Level of pet summoned
-    uint32 level = std::max(m_caster->getLevel() + effect->EffectMultipleValue, 1.0f);
+    uint32 level = std::max(m_caster->getLevel() + effect->EffectAmplitude, 1.0f);
 
     NewSummon->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
     NewSummon->SetOwnerGuid(m_caster->GetObjectGuid());

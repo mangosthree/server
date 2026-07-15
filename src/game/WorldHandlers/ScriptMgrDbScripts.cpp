@@ -679,7 +679,7 @@ void ScriptMgr::LoadScripts(DBScriptType type)
                                     continue;
                                 }
 
-                                if (spellEffect->Effect == SPELL_EFFECT_SEND_TAXI && spellEffect->EffectMiscValue == tmp.sendTaxiPath.taxiPathId)
+                                if (spellEffect->Effect == SPELL_EFFECT_SEND_TAXI && spellEffect->EffectMiscValue_0 == tmp.sendTaxiPath.taxiPathId)
 #else
                                 if (spell->Effect[j] == SPELL_EFFECT_SEND_TAXI && spell->EffectMiscValue[j] == int32(tmp.sendTaxiPath.taxiPathId))
 #endif

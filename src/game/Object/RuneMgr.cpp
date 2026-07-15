@@ -84,7 +84,7 @@ void RuneMgr::UpdateRuneRegen(RuneType rune)
     float auraMod = 1.0f;
     Unit::AuraList const& regenAuras = m_owner->GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for (Unit::AuraList::const_iterator i = regenAuras.begin(); i != regenAuras.end(); ++i)
-        if ((*i)->GetMiscValue() == POWER_RUNE && (*i)->GetSpellEffect()->EffectMiscValueB == rune)
+        if ((*i)->GetMiscValue() == POWER_RUNE && (*i)->GetSpellEffect()->EffectMiscValue_1 == rune)
         {
             auraMod *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
         }

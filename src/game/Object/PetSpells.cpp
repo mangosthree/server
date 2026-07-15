@@ -350,7 +350,7 @@ void Pet::_SaveAuras()
                 continue;
             }
 
-            if (effectEntry->EffectApplyAuraName == SPELL_AURA_MOD_STEALTH ||
+            if (effectEntry->EffectAura == SPELL_AURA_MOD_STEALTH ||
                 effectEntry->Effect == SPELL_EFFECT_APPLY_AREA_AURA_OWNER ||
                 effectEntry->Effect == SPELL_EFFECT_APPLY_AREA_AURA_PET )
             {

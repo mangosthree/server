@@ -98,7 +98,7 @@ bool IsQuestTameSpell(uint32 spellId)
     SpellEffectEntry const* spellEffect0 = spellproto->GetSpellEffect(EFFECT_INDEX_0);
     SpellEffectEntry const* spellEffect1 = spellproto->GetSpellEffect(EFFECT_INDEX_1);
     return spellEffect0 && spellEffect0->Effect == SPELL_EFFECT_THREAT &&
-        spellEffect1 && spellEffect1->Effect == SPELL_EFFECT_APPLY_AURA && spellEffect1->EffectApplyAuraName == SPELL_AURA_DUMMY;
+        spellEffect1 && spellEffect1->Effect == SPELL_EFFECT_APPLY_AURA && spellEffect1->EffectAura == SPELL_AURA_DUMMY;
 }
 
 SpellCastTargets::SpellCastTargets()
@@ -555,7 +555,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
                 continue;
             }
 
-            if (!IsPositiveTarget(spellEffect->EffectImplicitTargetA, spellEffect->EffectImplicitTargetB))
+            if (!IsPositiveTarget(spellEffect->ImplicitTarget_0, spellEffect->ImplicitTarget_1))
             {
                 m_canReflect = true;
             }
@@ -1218,7 +1218,7 @@ void Spell::SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpel
                             continue;
                         }
 
-                        if (spellEffect->EffectApplyAuraName == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)
+                        if (spellEffect->EffectAura == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)
                         {
                             int32 mountSpeed = spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
 
@@ -1559,7 +1559,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectEntry const* spellEffect, float& r
                     {
                         if (SpellEffectEntry const* currEffect = currSpell->m_spellInfo->GetSpellEffect(SpellEffectIndex(i)))
                         {
-                            if (currEffect->EffectChainTarget > 0)
+                            if (currEffect->EffectChainTargets > 0)
                             {
                                 EffectChainTarget = 0;      // no chain targets
                             }

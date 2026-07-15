@@ -275,7 +275,7 @@ uint32 SpellEntry::GetAuraInterruptFlags() const
 uint32 SpellEntry::GetEffectImplicitTargetAByIndex(SpellEffectIndex index) const
 {
     SpellEffectEntry const* effect = GetSpellEffect(index);
-    return effect ? effect->EffectImplicitTargetA : TARGET_NONE;
+    return effect ? effect->ImplicitTarget_0 : TARGET_NONE;
 }
 
 int32 SpellEntry::GetAreaGroupId() const
@@ -311,7 +311,7 @@ uint32 SpellEntry::GetTargetCreatureType() const
 int32 SpellEntry::GetEffectMiscValue(SpellEffectIndex index) const
 {
     SpellEffectEntry const* effect = GetSpellEffect(index);
-    return effect ? effect->EffectMiscValue : 0;
+    return effect ? effect->EffectMiscValue_0 : 0;
 }
 
 uint32 SpellEntry::GetStances() const
@@ -359,5 +359,5 @@ uint32 SpellEntry::GetTargets() const
 uint32 SpellEntry::GetEffectApplyAuraNameByIndex(SpellEffectIndex index) const
 {
     SpellEffectEntry const* effect = GetSpellEffect(index);
-    return effect ? effect->EffectApplyAuraName : 0;
+    return effect ? effect->EffectAura : 0;
 }

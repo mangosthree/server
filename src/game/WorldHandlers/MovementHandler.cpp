@@ -256,7 +256,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
             Aura const* aura = *itr;
 
             // mount is no longer suitable
-            MountCapabilityEntry const* entry = _player->GetMountCapability(aura->GetSpellEffect()->EffectMiscValueB);
+            MountCapabilityEntry const* entry = _player->GetMountCapability(aura->GetSpellEffect()->EffectMiscValue_1);
             if (!entry)
             {
                 _player->RemoveAurasDueToSpell(aura->GetId());

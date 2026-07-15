@@ -735,18 +735,18 @@ void LoadDBCStores(const std::string& dataPath)
     {
         if (SpellEffectEntry const *spellEffect = sSpellEffectStore.LookupEntry(i))
         {
-            switch (spellEffect->EffectApplyAuraName)
+            switch (spellEffect->EffectAura)
             {
                 case SPELL_AURA_MOD_INCREASE_ENERGY:
                 case SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT:
                 case SPELL_AURA_PERIODIC_MANA_LEECH:
                 case SPELL_AURA_PERIODIC_ENERGIZE:
                 case SPELL_AURA_POWER_BURN_MANA:
-                    MANGOS_ASSERT(spellEffect->EffectMiscValue >= 0 && spellEffect->EffectMiscValue < MAX_POWERS);
+                    MANGOS_ASSERT(spellEffect->EffectMiscValue_0 >= 0 && spellEffect->EffectMiscValue_0 < MAX_POWERS);
                     break;
             }
 
-            sSpellEffectMap[spellEffect->EffectSpellId].effects[spellEffect->EffectIndex] = spellEffect;
+            sSpellEffectMap[spellEffect->SpellID].effects[spellEffect->EffectIndex] = spellEffect;
         }
     }
 
@@ -908,7 +908,7 @@ void LoadDBCStores(const std::string& dataPath)
                     if (SpellEffectEntry const* effect = sInfo->GetSpellEffect(SpellEffectIndex(j)))
                         if (effect->Effect==123 /*SPELL_EFFECT_SEND_TAXI*/)
                         {
-                            spellPaths.insert(effect->EffectMiscValue);
+                            spellPaths.insert(effect->EffectMiscValue_0);
                         }
 
         memset(sTaxiNodesMask, 0, sizeof(sTaxiNodesMask));

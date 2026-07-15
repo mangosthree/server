@@ -1516,7 +1516,7 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
             }
     }
 
-    if (uint32 aura = spellEffect->EffectApplyAuraName)
+    if (uint32 aura = spellEffect->EffectAura)
     {
         SpellImmuneList const& list = m_spellImmune[IMMUNITY_STATE];
         for (SpellImmuneList::const_iterator itr = list.begin(); itr != list.end(); ++itr)

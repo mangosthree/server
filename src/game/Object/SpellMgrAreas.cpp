@@ -193,7 +193,7 @@ void SpellMgr::LoadSpellAreas()
                 continue;
             }
 
-            switch (spellEffect->EffectApplyAuraName)
+            switch (spellEffect->EffectAura)
             {
                 case SPELL_AURA_DUMMY:
                 case SPELL_AURA_PHASE:

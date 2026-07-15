@@ -481,7 +481,7 @@ void ObjectMgr::LoadQuests()
                             continue;
                         }
 
-                        if ((spellEffect->Effect == SPELL_EFFECT_QUEST_COMPLETE && uint32(spellEffect->EffectMiscValue) == qinfo->QuestId) ||
+                        if ((spellEffect->Effect == SPELL_EFFECT_QUEST_COMPLETE && uint32(spellEffect->EffectMiscValue_0) == qinfo->QuestId) ||
                             spellEffect->Effect == SPELL_EFFECT_SEND_EVENT)
                         {
                             found = true;
@@ -921,7 +921,7 @@ void ObjectMgr::LoadQuests()
                 continue;
             }
 
-            uint32 quest_id = spellEffect->EffectMiscValue;
+            uint32 quest_id = spellEffect->EffectMiscValue_0;
 
             Quest const* quest = GetQuestTemplate(quest_id);
 

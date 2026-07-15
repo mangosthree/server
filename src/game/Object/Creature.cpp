@@ -2174,7 +2174,7 @@ bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectInd
         // Taunt aura apply check
         if (spellEffect->Effect == SPELL_EFFECT_APPLY_AURA)
         {
-            if (spellEffect->EffectApplyAuraName == SPELL_AURA_MOD_TAUNT)
+            if (spellEffect->EffectAura == SPELL_AURA_MOD_TAUNT)
             {
                 return true;
             }

@@ -104,7 +104,7 @@ void Spell::EffectApplyAura(SpellEffectEntry const* effect)
         }
     }
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell: Aura is: %u", effect->EffectApplyAuraName);
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell: Aura is: %u", effect->EffectAura);
 
     Aura* aur = CreateAura(m_spellInfo, SpellEffectIndex(effect->EffectIndex), &m_currentBasePoints[effect->EffectIndex], m_spellAuraHolder, unitTarget, caster, m_CastItem);
     m_spellAuraHolder->AddAura(aur, SpellEffectIndex(effect->EffectIndex));
@@ -135,12 +135,12 @@ void Spell::EffectUnlearnSpecialization(SpellEffectEntry const* effect)
  */
 void Spell::EffectPowerDrain(SpellEffectEntry const* effect)
 {
-    if (effect->EffectMiscValue < 0 || effect->EffectMiscValue >= MAX_POWERS)
+    if (effect->EffectMiscValue_0 < 0 || effect->EffectMiscValue_0 >= MAX_POWERS)
     {
         return;
     }
 
-    Powers drain_power = Powers(effect->EffectMiscValue);
+    Powers drain_power = Powers(effect->EffectMiscValue_0);
 
     if (!unitTarget)
     {
@@ -184,7 +184,7 @@ void Spell::EffectPowerDrain(SpellEffectEntry const* effect)
     // Don`t restore from self drain
     if (drain_power == POWER_MANA && m_caster != unitTarget)
     {
-        float manaMultiplier = effect->EffectMultipleValue;
+        float manaMultiplier = effect->EffectAmplitude;
         if (manaMultiplier==0)
         {
             manaMultiplier = 1;
@@ -212,8 +212,8 @@ void Spell::EffectSendEvent(SpellEffectEntry const* effect)
     we do not handle a flag dropping or clicking on flag in battleground by sendevent system
     TODO: Actually, why not...
     */
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart %u for spellid %u in EffectSendEvent ", effect->EffectMiscValue, m_spellInfo->ID);
-    StartEvents_Event(m_caster->GetMap(), effect->EffectMiscValue, m_caster, focusObject, true, m_caster);
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart %u for spellid %u in EffectSendEvent ", effect->EffectMiscValue_0, m_spellInfo->ID);
+    StartEvents_Event(m_caster->GetMap(), effect->EffectMiscValue_0, m_caster, focusObject, true, m_caster);
 }
 
 /**
@@ -223,12 +223,12 @@ void Spell::EffectSendEvent(SpellEffectEntry const* effect)
  */
 void Spell::EffectPowerBurn(SpellEffectEntry const* effect)
 {
-    if (effect->EffectMiscValue < 0 || effect->EffectMiscValue >= MAX_POWERS)
+    if (effect->EffectMiscValue_0 < 0 || effect->EffectMiscValue_0 >= MAX_POWERS)
     {
         return;
     }
 
-    Powers powertype = Powers(effect->EffectMiscValue);
+    Powers powertype = Powers(effect->EffectMiscValue_0);
 
     if (!unitTarget)
     {
@@ -267,7 +267,7 @@ void Spell::EffectPowerBurn(SpellEffectEntry const* effect)
     int32 new_damage = (curPower < power) ? curPower : power;
 
     unitTarget->ModifyPower(powertype, -new_damage);
-    float multiplier = effect->EffectMultipleValue;
+    float multiplier = effect->EffectAmplitude;
 
     if (Player* modOwner = m_caster->GetSpellModOwner())
     {
@@ -360,7 +360,7 @@ void Spell::EffectHeal(SpellEffectEntry const* /*effect*/)
             while(idx < 3)
             {
                 targetSpellEffect = targetAura->GetSpellProto()->GetSpellEffect(SpellEffectIndex(idx));
-                if (targetSpellEffect && targetSpellEffect->EffectApplyAuraName == SPELL_AURA_PERIODIC_HEAL)
+                if (targetSpellEffect && targetSpellEffect->EffectAura == SPELL_AURA_PERIODIC_HEAL)
                 {
                     break;
                 }
@@ -368,7 +368,7 @@ void Spell::EffectHeal(SpellEffectEntry const* /*effect*/)
             }
 
             int32 tickheal = targetAura->GetModifier()->m_amount;
-            int32 tickcount = GetSpellDuration(targetAura->GetSpellProto()) / (targetSpellEffect ? targetSpellEffect->EffectAmplitude : 1) - 1;
+            int32 tickcount = GetSpellDuration(targetAura->GetSpellProto()) / (targetSpellEffect ? targetSpellEffect->EffectAuraPeriod : 1) - 1;
 
             // Glyph of Swiftmend
             if (!caster->HasAura(54824))
@@ -492,7 +492,7 @@ void Spell::EffectHealthLeech(SpellEffectEntry const* effect)
         damage = curHealth;
     }
 
-    float multiplier = effect->EffectMultipleValue;
+    float multiplier = effect->EffectAmplitude;
 
     if (Player* modOwner = m_caster->GetSpellModOwner())
     {
@@ -734,12 +734,12 @@ void Spell::EffectEnergize(SpellEffectEntry const* effect)
         return;
     }
 
-    if (effect->EffectMiscValue < 0 || effect->EffectMiscValue >= MAX_POWERS)
+    if (effect->EffectMiscValue_0 < 0 || effect->EffectMiscValue_0 >= MAX_POWERS)
     {
         return;
     }
 
-    Powers power = Powers(effect->EffectMiscValue);
+    Powers power = Powers(effect->EffectMiscValue_0);
 
     // Some level depends spells
     int level_multiplier = 0;
@@ -858,12 +858,12 @@ void Spell::EffectEnergisePct(SpellEffectEntry const* effect)
         return;
     }
 
-    if (effect->EffectMiscValue < 0 || effect->EffectMiscValue >= MAX_POWERS)
+    if (effect->EffectMiscValue_0 < 0 || effect->EffectMiscValue_0 >= MAX_POWERS)
     {
         return;
     }
 
-    Powers power = Powers(effect->EffectMiscValue);
+    Powers power = Powers(effect->EffectMiscValue_0);
 
     uint32 maxPower = unitTarget->GetMaxPower(power);
     if (maxPower == 0)

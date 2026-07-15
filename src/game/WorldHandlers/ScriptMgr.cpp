@@ -186,9 +186,9 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
 
                 if (spellEffect->Effect == SPELL_EFFECT_SEND_EVENT)
                 {
-                    if (spellEffect->EffectMiscValue)
+                    if (spellEffect->EffectMiscValue_0)
                     {
-                        eventIds.insert(spellEffect->EffectMiscValue);
+                        eventIds.insert(spellEffect->EffectMiscValue_0);
                     }
                 }
 #else

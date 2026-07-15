@@ -370,7 +370,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 continue;
             }
 
-            if (spellEffect->EffectImplicitTargetA == TARGET_PET)
+            if (spellEffect->ImplicitTarget_0 == TARGET_PET)
             {
                 Pet* pet = m_caster->GetPet();
                 if (!pet)
@@ -421,7 +421,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     continue;
                 }
-                if (IsExplicitPositiveTarget(spellEffect->EffectImplicitTargetA))
+                if (IsExplicitPositiveTarget(spellEffect->ImplicitTarget_0))
                 {
                     if (!target_hostile_checked)
                     {
@@ -436,7 +436,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                     explicit_target_mode = true;
                 }
-                else if (IsExplicitNegativeTarget(spellEffect->EffectImplicitTargetA))
+                else if (IsExplicitNegativeTarget(spellEffect->ImplicitTarget_0))
                 {
                     if (!target_friendly_checked)
                     {
@@ -582,28 +582,28 @@ SpellCastResult Spell::CheckCast(bool strict)
                 continue;
             }
 
-            if (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT ||
-               spellEffect->EffectImplicitTargetB == TARGET_SCRIPT ||
-               spellEffect->EffectImplicitTargetA == TARGET_SCRIPT_COORDINATES ||
-               spellEffect->EffectImplicitTargetB == TARGET_SCRIPT_COORDINATES ||
-               spellEffect->EffectImplicitTargetA == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT ||
-               spellEffect->EffectImplicitTargetB == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT)
+            if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT ||
+               spellEffect->ImplicitTarget_1 == TARGET_SCRIPT ||
+               spellEffect->ImplicitTarget_0 == TARGET_SCRIPT_COORDINATES ||
+               spellEffect->ImplicitTarget_1 == TARGET_SCRIPT_COORDINATES ||
+               spellEffect->ImplicitTarget_0 == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT ||
+               spellEffect->ImplicitTarget_1 == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT)
             {
                 SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(m_spellInfo->ID);
 
                 if (bounds.first == bounds.second)
                 {
-                    if (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT || spellEffect->EffectImplicitTargetB == TARGET_SCRIPT)
+                    if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT || spellEffect->ImplicitTarget_1 == TARGET_SCRIPT)
                     {
                         sLog.outErrorDb("Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_SCRIPT, but creature are not defined in `spell_script_target`", m_spellInfo->ID, j);
                     }
 
-                    if (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT_COORDINATES || spellEffect->EffectImplicitTargetB == TARGET_SCRIPT_COORDINATES)
+                    if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT_COORDINATES || spellEffect->ImplicitTarget_1 == TARGET_SCRIPT_COORDINATES)
                     {
                         sLog.outErrorDb("Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_SCRIPT_COORDINATES, but gameobject or creature are not defined in `spell_script_target`", m_spellInfo->ID, j);
                     }
 
-                    if (spellEffect->EffectImplicitTargetA == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT || spellEffect->EffectImplicitTargetB == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT)
+                    if (spellEffect->ImplicitTarget_0 == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT || spellEffect->ImplicitTarget_1 == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT)
                     {
                         sLog.outErrorDb("Spell entry %u, effect %i has EffectImplicitTargetA/EffectImplicitTargetB = TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT, but gameobject are not defined in `spell_script_target`", m_spellInfo->ID, j);
                     }
@@ -726,12 +726,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (creatureScriptTarget)
                 {
                     // store coordinates for TARGET_SCRIPT_COORDINATES
-                    if (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT_COORDINATES ||
-                        spellEffect->EffectImplicitTargetB == TARGET_SCRIPT_COORDINATES)
+                    if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT_COORDINATES ||
+                        spellEffect->ImplicitTarget_1 == TARGET_SCRIPT_COORDINATES)
                     {
                         m_targets.setDestination(creatureScriptTarget->GetPositionX(), creatureScriptTarget->GetPositionY(), creatureScriptTarget->GetPositionZ());
 
-                        if (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT_COORDINATES && spellEffect->Effect != SPELL_EFFECT_PERSISTENT_AREA_AURA)
+                        if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT_COORDINATES && spellEffect->Effect != SPELL_EFFECT_PERSISTENT_AREA_AURA)
                         {
                             AddUnitTarget(creatureScriptTarget, SpellEffectIndex(j));
                         }
@@ -739,8 +739,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     // store explicit target for TARGET_SCRIPT
                     else
                     {
-                        if (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT ||
-                            spellEffect->EffectImplicitTargetB == TARGET_SCRIPT)
+                        if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT ||
+                            spellEffect->ImplicitTarget_1 == TARGET_SCRIPT)
                             {
                                 AddUnitTarget(creatureScriptTarget, SpellEffectIndex(j));
                             }
@@ -749,12 +749,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                 else if (goScriptTarget)
                 {
                     // store coordinates for TARGET_SCRIPT_COORDINATES
-                    if (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT_COORDINATES ||
-                        spellEffect->EffectImplicitTargetB == TARGET_SCRIPT_COORDINATES)
+                    if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT_COORDINATES ||
+                        spellEffect->ImplicitTarget_1 == TARGET_SCRIPT_COORDINATES)
                     {
                         m_targets.setDestination(goScriptTarget->GetPositionX(), goScriptTarget->GetPositionY(), goScriptTarget->GetPositionZ());
 
-                        if (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT_COORDINATES && spellEffect->Effect != SPELL_EFFECT_PERSISTENT_AREA_AURA)
+                        if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT_COORDINATES && spellEffect->Effect != SPELL_EFFECT_PERSISTENT_AREA_AURA)
                         {
                             AddGOTarget(goScriptTarget, SpellEffectIndex(j));
                         }
@@ -762,8 +762,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     // store explicit target for TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT
                     else
                     {
-                        if (spellEffect->EffectImplicitTargetA == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT ||
-                            spellEffect->EffectImplicitTargetB == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT)
+                        if (spellEffect->ImplicitTarget_0 == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT ||
+                            spellEffect->ImplicitTarget_1 == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT)
                             {
                                 AddGOTarget(goScriptTarget, SpellEffectIndex(j));
                             }
@@ -775,7 +775,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     /* For TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT makes DB targets optional not required for now
                      * TODO: Makes more research for this target type
                      */
-                    if (spellEffect->EffectImplicitTargetA != TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT)
+                    if (spellEffect->ImplicitTarget_0 != TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT)
                     {
                         // not report target not existence for triggered spells
                         if (m_triggeredByAuraSpell || m_IsTriggeredSpell)
@@ -1049,7 +1049,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_EFFECT_LEARN_SPELL:
             {
-                if (spellEffect->EffectImplicitTargetA != TARGET_PET)
+                if (spellEffect->ImplicitTarget_0 != TARGET_PET)
                 {
                     break;
                 }
@@ -1100,7 +1100,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_EFFECT_APPLY_GLYPH:
             {
-                uint32 glyphId = spellEffect->EffectMiscValue;
+                uint32 glyphId = spellEffect->EffectMiscValue_0;
                 if (GlyphPropertiesEntry const *gp = sGlyphPropertiesStore.LookupEntry(glyphId))
                     if (m_caster->HasAura(gp->SpellID))
                     {
@@ -1153,7 +1153,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     if (Unit* target = m_targets.getUnitTarget())
                     {
-                        if (target != m_caster && int32(target->GetPowerType()) != spellEffect->EffectMiscValue)
+                        if (target != m_caster && int32(target->GetPowerType()) != spellEffect->EffectMiscValue_0)
                         {
                             return SPELL_FAILED_BAD_TARGETS;
                         }
@@ -1208,7 +1208,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
 
                 // we need a go target in case of TARGET_GAMEOBJECT (for other targets acceptable GO and items)
-                if (spellEffect->EffectImplicitTargetA == TARGET_GAMEOBJECT)
+                if (spellEffect->ImplicitTarget_0 == TARGET_GAMEOBJECT)
                 {
                     if (!m_targets.getGOTarget())
                     {
@@ -1298,7 +1298,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             // This is generic summon effect
             case SPELL_EFFECT_SUMMON:
             {
-                if (SummonPropertiesEntry const *summon_prop = sSummonPropertiesStore.LookupEntry(spellEffect->EffectMiscValueB))
+                if (SummonPropertiesEntry const *summon_prop = sSummonPropertiesStore.LookupEntry(spellEffect->EffectMiscValue_1))
                 {
                     if (summon_prop->Control == SUMMON_PROP_GROUP_PETS)
                     {
@@ -1338,7 +1338,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     int32 callSlot = 0;
                     if (SpellEffectEntry const* eff = m_spellInfo->GetSpellEffect(EFFECT_INDEX_0))
                     {
-                        if (eff->EffectMiscValue == 0
+                        if (eff->EffectMiscValue_0 == 0
                             && eff->EffectBasePoints >= 0
                             && eff->EffectBasePoints <= PET_SLOT_LAST_ACTIVE_SLOT)
                         {
@@ -1553,7 +1553,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         // Possible Unit-target for the spell
         Unit* expectedTarget = GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex(i));
 
-        switch (spellEffect->EffectApplyAuraName)
+        switch (spellEffect->EffectAura)
         {
             case SPELL_AURA_DUMMY:
             {
@@ -1698,7 +1698,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_NO_MOUNTS_ALLOWED;
                 }
 
-                if (spellEffect->EffectMiscValueB && !m_caster->GetMountCapability(spellEffect->EffectMiscValueB))
+                if (spellEffect->EffectMiscValue_1 && !m_caster->GetMountCapability(spellEffect->EffectMiscValue_1))
                 {
                     return SPELL_FAILED_NOT_HERE;
                 }
@@ -1924,12 +1924,12 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
                 continue;
             }
 
-            if (spellEffect->EffectImplicitTargetA == TARGET_CHAIN_DAMAGE ||
-                spellEffect->EffectImplicitTargetA == TARGET_SINGLE_FRIEND ||
-                spellEffect->EffectImplicitTargetA == TARGET_SINGLE_FRIEND_2 ||
-                spellEffect->EffectImplicitTargetA == TARGET_DUELVSPLAYER ||
-                spellEffect->EffectImplicitTargetA == TARGET_SINGLE_PARTY ||
-                spellEffect->EffectImplicitTargetA == TARGET_CURRENT_ENEMY_COORDINATES)
+            if (spellEffect->ImplicitTarget_0 == TARGET_CHAIN_DAMAGE ||
+                spellEffect->ImplicitTarget_0 == TARGET_SINGLE_FRIEND ||
+                spellEffect->ImplicitTarget_0 == TARGET_SINGLE_FRIEND_2 ||
+                spellEffect->ImplicitTarget_0 == TARGET_DUELVSPLAYER ||
+                spellEffect->ImplicitTarget_0 == TARGET_SINGLE_PARTY ||
+                spellEffect->ImplicitTarget_0 == TARGET_CURRENT_ENEMY_COORDINATES)
             {
                 need = true;
                 if (!target)
@@ -1938,7 +1938,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
                 }
                 break;
             }
-            else if (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT_COORDINATES)
+            else if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT_COORDINATES)
             {
                 script = true;
                 continue;
@@ -2026,21 +2026,21 @@ SpellCastResult Spell::CheckCasterAuras() const
             {
                 continue;
             }
-            if (spellEffect->EffectApplyAuraName == SPELL_AURA_SCHOOL_IMMUNITY)
+            if (spellEffect->EffectAura == SPELL_AURA_SCHOOL_IMMUNITY)
             {
-                school_immune |= uint32(spellEffect->EffectMiscValue);
+                school_immune |= uint32(spellEffect->EffectMiscValue_0);
             }
-            else if (spellEffect->EffectApplyAuraName == SPELL_AURA_MECHANIC_IMMUNITY)
+            else if (spellEffect->EffectAura == SPELL_AURA_MECHANIC_IMMUNITY)
             {
-                mechanic_immune |= 1 << uint32(spellEffect->EffectMiscValue-1);
+                mechanic_immune |= 1 << uint32(spellEffect->EffectMiscValue_0-1);
             }
-            else if (spellEffect->EffectApplyAuraName == SPELL_AURA_MECHANIC_IMMUNITY_MASK)
+            else if (spellEffect->EffectAura == SPELL_AURA_MECHANIC_IMMUNITY_MASK)
             {
-                mechanic_immune |= uint32(spellEffect->EffectMiscValue);
+                mechanic_immune |= uint32(spellEffect->EffectMiscValue_0);
             }
-            else if (spellEffect->EffectApplyAuraName == SPELL_AURA_DISPEL_IMMUNITY)
+            else if (spellEffect->EffectAura == SPELL_AURA_DISPEL_IMMUNITY)
             {
-                dispel_immune |= GetDispellMask(DispelType(spellEffect->EffectMiscValue));
+                dispel_immune |= GetDispellMask(DispelType(spellEffect->EffectMiscValue_0));
             }
         }
 
@@ -2416,7 +2416,7 @@ uint32 Spell::CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spel
     for (Unit::AuraList::const_iterator itr = pwrCostAuras.begin(); itr != pwrCostAuras.end(); ++itr)
     {
         if (((*itr)->GetModifier()->m_miscvalue & schoolMask) &&
-            (!(*itr)->GetSpellEffect()->EffectMiscValueB || (*itr)->GetSpellEffect()->EffectMiscValueB & (1 << spellInfo->PowerType)))
+            (!(*itr)->GetSpellEffect()->EffectMiscValue_1 || (*itr)->GetSpellEffect()->EffectMiscValue_1 & (1 << spellInfo->PowerType)))
             powerCost += (*itr)->GetModifier()->m_amount;
     }
 
@@ -2444,7 +2444,7 @@ uint32 Spell::CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spel
     for (Unit::AuraList::const_iterator itr = pwrCostPctAuras.begin(); itr != pwrCostPctAuras.end(); ++itr)
     {
         if (((*itr)->GetModifier()->m_miscvalue & schoolMask) &&
-            (!(*itr)->GetSpellEffect()->EffectMiscValueB || (*itr)->GetSpellEffect()->EffectMiscValueB & (1 << spellInfo->PowerType)))
+            (!(*itr)->GetSpellEffect()->EffectMiscValue_1 || (*itr)->GetSpellEffect()->EffectMiscValue_1 & (1 << spellInfo->PowerType)))
             pctCostMultiplier += (*itr)->GetModifier()->m_amount / 100.0f;
     }
 
@@ -2618,7 +2618,7 @@ SpellCastResult Spell::CheckItems()
                     continue;
                 }
                 // skip check, pet not required like checks, and for TARGET_PET m_targets.getUnitTarget() is not the real target but the caster
-                if (spellEffect->EffectImplicitTargetA == TARGET_PET)
+                if (spellEffect->ImplicitTarget_0 == TARGET_PET)
                 {
                     continue;
                 }
@@ -2640,13 +2640,13 @@ SpellCastResult Spell::CheckItems()
                 // Mana Potion, Rage Potion, Thistle Tea(Rogue), ...
                 if (spellEffect->Effect == SPELL_EFFECT_ENERGIZE)
                 {
-                    if (spellEffect->EffectMiscValue < 0 || spellEffect->EffectMiscValue >= MAX_POWERS)
+                    if (spellEffect->EffectMiscValue_0 < 0 || spellEffect->EffectMiscValue_0 >= MAX_POWERS)
                     {
                         failReason = SPELL_FAILED_ALREADY_AT_FULL_POWER;
                         continue;
                     }
 
-                    Powers power = Powers(spellEffect->EffectMiscValue);
+                    Powers power = Powers(spellEffect->EffectMiscValue_0);
                     if (m_targets.getUnitTarget()->GetPower(power) == m_targets.getUnitTarget()->GetMaxPower(power))
                     {
                         failReason = SPELL_FAILED_ALREADY_AT_FULL_POWER;
@@ -2860,7 +2860,7 @@ SpellCastResult Spell::CheckItems()
                 // Not allow enchant in trade slot for some enchant type
                 if (targetItem->GetOwner() != m_caster)
                 {
-                    uint32 enchant_id = spellEffect->EffectMiscValue;
+                    uint32 enchant_id = spellEffect->EffectMiscValue_0;
                     SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
                     if (!pEnchant)
                     {
@@ -2888,7 +2888,7 @@ SpellCastResult Spell::CheckItems()
                 // Not allow enchant in trade slot for some enchant type
                 if (item->GetOwner() != m_caster)
                 {
-                    uint32 enchant_id = spellEffect->EffectMiscValue;
+                    uint32 enchant_id = spellEffect->EffectMiscValue_0;
                     SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
                     if (!pEnchant)
                     {

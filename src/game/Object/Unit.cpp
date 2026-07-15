@@ -1261,7 +1261,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 
         // if damage is done by another shared aura, then skip to avoid circular reference (aura 300 is only applied on effect_idx_0
         if (spellEffect && spellEffect->Effect == SPELL_EFFECT_APPLY_AURA &&
-            spellEffect->EffectApplyAuraName == SPELL_AURA_SHARE_DAMAGE_PCT)
+            spellEffect->EffectAura == SPELL_AURA_SHARE_DAMAGE_PCT)
             break;
 
         if (Unit* shareTarget = (*itr)->GetCaster())
@@ -4835,10 +4835,10 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
         return 0;
     }
 
-    switch (spellEffect->EffectApplyAuraName)
+    switch (spellEffect->EffectAura)
     {
         case SPELL_AURA_MOUNTED:
-            if (MountCapabilityEntry const* mountCapability = GetMountCapability(uint32(spellEffect->EffectMiscValueB)))
+            if (MountCapabilityEntry const* mountCapability = GetMountCapability(uint32(spellEffect->EffectMiscValue_1)))
             {
                 return int32(mountCapability->ID);
             }
@@ -4931,7 +4931,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
         basePoints = effBasePoints ? *effBasePoints - 1 : spellEffect->EffectBasePoints;
         basePoints += int32(level * basePointsPerLevel);
         int32 randomPoints = int32(spellEffect->EffectDieSides);
-        comboDamage = spellEffect->EffectPointsPerComboPoint;
+        comboDamage = spellEffect->EffectPointsPerResource;
 
         switch (randomPoints)
         {
@@ -4979,7 +4979,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
     if (!gtScalingEntry && spellProto->Attributes & SPELL_ATTR_LEVEL_DAMAGE_CALCULATION && spellLevel &&
             spellEffect->Effect != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
             spellEffect->Effect != SPELL_EFFECT_KNOCK_BACK &&
-            (spellEffect->Effect != SPELL_EFFECT_APPLY_AURA || spellEffect->EffectApplyAuraName != SPELL_AURA_MOD_DECREASE_SPEED))
+            (spellEffect->Effect != SPELL_EFFECT_APPLY_AURA || spellEffect->EffectAura != SPELL_AURA_MOD_DECREASE_SPEED))
     {
         value = int32(value * 0.25f * exp(level * (70 - spellLevel) / 1000.0f));
     }
@@ -5459,7 +5459,7 @@ void CharmInfo::InitCharmCreateSpells()
                 {
                     continue;
                 }
-                if (spellEffect->EffectImplicitTargetA != TARGET_SELF && spellEffect->EffectImplicitTargetA != 0)
+                if (spellEffect->ImplicitTarget_0 != TARGET_SELF && spellEffect->ImplicitTarget_0 != 0)
                 {
                     onlyselfcast = false;
                 }
@@ -5958,7 +5958,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                     }
                 }
 
-                SpellAuraProcResult procResult = (*this.*AuraProcHandler[spellEffect->EffectApplyAuraName])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
+                SpellAuraProcResult procResult = (*this.*AuraProcHandler[spellEffect->EffectAura])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
                 switch (procResult)
                 {
                     case SPELL_AURA_PROC_CANT_TRIGGER:
@@ -7416,7 +7416,7 @@ void Unit::SendCollisionHeightUpdate(float height)
 // This will create a new creature and set the current unit as the controller of that new creature
 Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry const* summonProp, SpellEffectEntry const* spellEffect, float x, float y, float z, float ang)
 {
-    int32 const& creatureEntry = spellEffect->EffectMiscValue;
+    int32 const& creatureEntry = spellEffect->EffectMiscValue_0;
     CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(creatureEntry);
     if (!cinfo)
     {

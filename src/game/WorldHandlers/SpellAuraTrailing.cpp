@@ -363,8 +363,8 @@ void Aura::HandleAuraConvertRune(bool apply, bool Real)
         return;
     }
 
-    RuneType runeFrom = RuneType(m_spellEffect->EffectMiscValue);
-    RuneType runeTo   = RuneType(m_spellEffect->EffectMiscValueB);
+    RuneType runeFrom = RuneType(m_spellEffect->EffectMiscValue_0);
+    RuneType runeTo   = RuneType(m_spellEffect->EffectMiscValue_1);
 
     if (apply)
     {

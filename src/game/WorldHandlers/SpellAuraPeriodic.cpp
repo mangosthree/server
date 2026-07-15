@@ -948,7 +948,7 @@ void Aura::HandleModTotalPercentStat(bool apply, bool /*Real*/)
     }
 
     Unit* target = GetTarget();
-    uint32 miscValueB = GetSpellEffect()->EffectMiscValueB;
+    uint32 miscValueB = GetSpellEffect()->EffectMiscValue_1;
 
     // save current and max HP before applying aura
     uint32 curHPValue = target->GetHealth();

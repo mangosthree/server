@@ -102,7 +102,7 @@ void Spell::EffectResurrectNew(SpellEffectEntry const* effect)
     }
 
     uint32 health = damage;
-    uint32 mana = effect->EffectMiscValue;
+    uint32 mana = effect->EffectMiscValue_0;
     pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest(pTarget);
 }
@@ -480,7 +480,7 @@ void Spell::EffectSchoolDMG(SpellEffectEntry const* effect)
                 {
                     // converts up to 30 points of energy into ($f1+$AP/410) additional damage
                     float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    float multiple = ap / 410 + effect->EffectDamageMultiplier;
+                    float multiple = ap / 410 + effect->EffectChainAmplitude;
                     damage += int32(((Player*)m_caster)->GetComboPoints() * ap * 7 / 100);
                     uint32 energy = m_caster->GetPower(POWER_ENERGY);
                     uint32 used_energy = energy > 30 ? 30 : energy;
@@ -742,7 +742,7 @@ void Spell::EffectClearQuest(SpellEffectEntry const* effect)
 
     Player* player = (Player*)m_caster;
 
-    uint32 quest_id = effect->EffectMiscValue;
+    uint32 quest_id = effect->EffectMiscValue_0;
 
     if (!sObjectMgr.GetQuestTemplate(quest_id))
     {
@@ -984,7 +984,7 @@ void Spell::EffectJump(SpellEffectEntry const* effect)
     {
         m_targets.getDestination(x, y, z);
 
-        if (effect->EffectImplicitTargetA == TARGET_BEHIND_VICTIM)
+        if (effect->ImplicitTarget_0 == TARGET_BEHIND_VICTIM)
         {
             // explicit cast data from client or server-side cast
             // some spell at client send caster
@@ -1066,10 +1066,10 @@ void Spell::EffectTeleportUnits(SpellEffectEntry const* effect)   // TODO - Use 
         }
 
     // Target dependend on TargetB, if there is none provided, decide dependend on A
-    uint32 targetType = effect->EffectImplicitTargetB;
+    uint32 targetType = effect->ImplicitTarget_1;
     if (!targetType)
     {
-        targetType = effect->EffectImplicitTargetA;
+        targetType = effect->ImplicitTarget_0;
     }
 
     switch (targetType)
@@ -1149,7 +1149,7 @@ void Spell::EffectTeleportUnits(SpellEffectEntry const* effect)   // TODO - Use 
             // If not exist data for dest location - return
             if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
             {
-                sLog.outError( "Spell::EffectTeleportUnits - unknown EffectImplicitTargetB[%u] = %u for spell ID %u", effect->EffectIndex, effect->EffectImplicitTargetB, m_spellInfo->ID );
+                sLog.outError( "Spell::EffectTeleportUnits - unknown EffectImplicitTargetB[%u] = %u for spell ID %u", effect->EffectIndex, effect->ImplicitTarget_1, m_spellInfo->ID );
                 return;
             }
             // Init dest coordinates

@@ -437,7 +437,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                         {
                             // m_auraname can be modified to SPELL_AURA_NONE for area auras, use original
                             SpellEffectEntry const* spellEffect = aurSpellInfo->GetSpellEffect(SpellEffectIndex(i));
-                            AuraType aurNameReal = AuraType(spellEffect ? spellEffect->EffectApplyAuraName : 0);
+                            AuraType aurNameReal = AuraType(spellEffect ? spellEffect->EffectAura : 0);
 
                             if (aurNameReal == SPELL_AURA_PERIODIC_DAMAGE && aur->GetAuraDuration() > 0)
                             {
@@ -474,7 +474,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
 
                 // m_auraname can be modified to SPELL_AURA_NONE for area auras, use original
                 SpellEffectEntry const* spellEffect = aurSpellInfo->GetSpellEffect(SpellEffectIndex(i));
-                AuraType aurNameReal = AuraType(spellEffect ? spellEffect->EffectApplyAuraName : SPELL_AURA_NONE);
+                AuraType aurNameReal = AuraType(spellEffect ? spellEffect->EffectAura : SPELL_AURA_NONE);
 
                 switch (aurNameReal)
                 {

@@ -495,7 +495,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
             if (m_applyMultiplierMask & (1 << effectNumber))
             {
                 // Get multiplier
-                float multiplier = spellEffect ? spellEffect->EffectDamageMultiplier : 1.0f;
+                float multiplier = spellEffect ? spellEffect->EffectChainAmplitude : 1.0f;
                 // Apply multiplier mods
                 if (realCaster)
                 {
@@ -657,7 +657,7 @@ void Spell::HandleDelayedSpellLaunch(TargetInfo* target)
                 if (m_applyMultiplierMask & (1 << effectNumber))
                 {
                     // Get multiplier
-                    float multiplier = spellEffect ? spellEffect->EffectDamageMultiplier : 1.0f;
+                    float multiplier = spellEffect ? spellEffect->EffectChainAmplitude : 1.0f;
                     // Apply multiplier mods
                     if (real_caster)
                     {
@@ -698,7 +698,7 @@ void Spell::InitializeDamageMultipliers()
             continue;
         }
 
-        uint32 EffectChainTarget = spellEffect->EffectChainTarget;
+        uint32 EffectChainTarget = spellEffect->EffectChainTargets;
         if (Unit* realCaster = GetAffectiveCaster())
             if (Player* modOwner = realCaster->GetSpellModOwner())
             {
@@ -706,7 +706,7 @@ void Spell::InitializeDamageMultipliers()
             }
 
         m_damageMultipliers[i] = 1.0f;
-        if ((spellEffect->EffectImplicitTargetA == TARGET_CHAIN_DAMAGE || spellEffect->EffectImplicitTargetA == TARGET_CHAIN_HEAL) &&
+        if ((spellEffect->ImplicitTarget_0 == TARGET_CHAIN_DAMAGE || spellEffect->ImplicitTarget_0 == TARGET_CHAIN_HEAL) &&
             (EffectChainTarget > 1))
         {
             m_applyMultiplierMask |= (1 << i);

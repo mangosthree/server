@@ -153,7 +153,7 @@ void Spell::EffectInterruptCast(SpellEffectEntry const* /*effect*/)
  */
 void Spell::EffectSummonObjectWild(SpellEffectEntry const* effect)
 {
-    uint32 gameobject_id = effect->EffectMiscValue;
+    uint32 gameobject_id = effect->EffectMiscValue_0;
 
     GameObject* pGameObj = new GameObject;
 
@@ -318,7 +318,7 @@ void Spell::EffectDuel(SpellEffectEntry const* effect)
     // CREATE DUEL FLAG OBJECT
     GameObject* pGameObj = new GameObject;
 
-    uint32 gameobject_id = effect->EffectMiscValue;
+    uint32 gameobject_id = effect->EffectMiscValue_0;
 
     Map* map = m_caster->GetMap();
     float x = (m_caster->GetPositionX() + unitTarget->GetPositionX()) * 0.5f;
@@ -473,7 +473,7 @@ void Spell::EffectActivateObject(SpellEffectEntry const* effect)
         return;
     }
 
-    uint32 misc_value = uint32(effect->EffectMiscValue);
+    uint32 misc_value = uint32(effect->EffectMiscValue_0);
 
     switch (misc_value)
     {
@@ -645,7 +645,7 @@ void Spell::EffectApplyGlyph(SpellEffectEntry const* effect)
     }
 
     // apply new one
-    if (uint32 glyph = effect->EffectMiscValue)
+    if (uint32 glyph = effect->EffectMiscValue_0)
     {
         if (GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyph))
         {
@@ -705,9 +705,9 @@ void Spell::EffectEnchantHeldItem(SpellEffectEntry const* effect)
         return;
     }
 
-    if (effect->EffectMiscValue)
+    if (effect->EffectMiscValue_0)
     {
-        uint32 enchant_id = effect->EffectMiscValue;
+        uint32 enchant_id = effect->EffectMiscValue_0;
         int32 duration = m_duration;                        // Try duration index first...
         if (!duration)
         {
@@ -863,8 +863,8 @@ void Spell::EffectDismissPet(SpellEffectEntry const* /*effect*/)
  */
 void Spell::EffectSummonObject(SpellEffectEntry const* effect)
 {
-    uint32 go_id = effect->EffectMiscValue;
-    uint8 slot = effect->EffectMiscValueB;
+    uint32 go_id = effect->EffectMiscValue_0;
+    uint8 slot = effect->EffectMiscValue_1;
     if (slot >= MAX_OBJECT_SLOT)
     {
         return;
@@ -1207,7 +1207,7 @@ void Spell::EffectLeapBack(SpellEffectEntry const* effect)
         return;
     }
 
-    m_caster->KnockBackFrom(unitTarget, float(effect->EffectMiscValue) / 10, float(damage) / 10);
+    m_caster->KnockBackFrom(unitTarget, float(effect->EffectMiscValue_0) / 10, float(damage) / 10);
 }
 
 /**
@@ -1225,7 +1225,7 @@ void Spell::EffectReputation(SpellEffectEntry const* effect)
     Player* _player = (Player*)unitTarget;
 
     int32  rep_change = m_currentBasePoints[effect->EffectIndex];
-    uint32 faction_id = effect->EffectMiscValue;
+    uint32 faction_id = effect->EffectMiscValue_0;
 
     FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction_id);
 
@@ -1272,7 +1272,7 @@ void Spell::EffectQuestComplete(SpellEffectEntry const* effect)
             break;
     }
 
-    uint32 quest_id = effect->EffectMiscValue;
+    uint32 quest_id = effect->EffectMiscValue_0;
     ((Player*)unitTarget)->AreaExploredOrEventHappens(quest_id);
 }
 
@@ -1303,7 +1303,7 @@ void Spell::EffectSelfResurrect(SpellEffectEntry const* effect)
     if (damage < 0)
     {
         health = uint32(-damage);
-        mana = effect->EffectMiscValue;
+        mana = effect->EffectMiscValue_0;
     }
     // percent case
     else
@@ -1433,7 +1433,7 @@ void Spell::EffectKnockBack(SpellEffectEntry const* effect)
         return;
     }
 
-    unitTarget->KnockBackFrom(m_caster, float(effect->EffectMiscValue) / 10, float(damage) / 10);
+    unitTarget->KnockBackFrom(m_caster, float(effect->EffectMiscValue_0) / 10, float(damage) / 10);
 }
 
 /**
@@ -1448,7 +1448,7 @@ void Spell::EffectSendTaxi(SpellEffectEntry const* effect)
         return;
     }
 
-    ((Player*)unitTarget)->ActivateTaxiPathTo(effect->EffectMiscValue, m_spellInfo->ID);
+    ((Player*)unitTarget)->ActivateTaxiPathTo(effect->EffectMiscValue_0, m_spellInfo->ID);
 }
 
 /**

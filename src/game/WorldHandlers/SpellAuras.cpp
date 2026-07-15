@@ -514,9 +514,9 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBas
     }
 
     damage *= holder->GetStackAmount();
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Aura: construct Spellid : %u, Aura : %u Target : %d Damage : %d", spellproto->ID, m_spellEffect->EffectApplyAuraName, m_spellEffect->EffectImplicitTargetA, damage);
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Aura: construct Spellid : %u, Aura : %u Target : %d Damage : %d", spellproto->ID, m_spellEffect->EffectAura, m_spellEffect->ImplicitTarget_0, damage);
 
-    SetModifier(AuraType(m_spellEffect->EffectApplyAuraName), damage, m_spellEffect->EffectAmplitude, m_spellEffect->EffectMiscValue);
+    SetModifier(AuraType(m_spellEffect->EffectAura), damage, m_spellEffect->EffectAuraPeriod, m_spellEffect->EffectMiscValue_0);
 
     Player* modOwner = caster ? caster->GetSpellModOwner() : NULL;
 
@@ -663,7 +663,7 @@ Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* curr
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
             SpellEffectEntry const* triggeredeffectEntry = triggeredSpellInfo->GetSpellEffect(SpellEffectIndex(i));
-            if (triggeredeffectEntry && triggeredeffectEntry->EffectImplicitTargetA == TARGET_SINGLE_ENEMY)
+            if (triggeredeffectEntry && triggeredeffectEntry->ImplicitTarget_0 == TARGET_SINGLE_ENEMY)
             {
                 return new SingleEnemyTargetAura(spellproto, eff, currentBasePoints, holder, target, caster, castItem);
             }
@@ -2766,7 +2766,7 @@ void Aura::PeriodicTick()
 
             pCaster->SendSpellNonMeleeDamageLog(target, GetId(), pdamage, GetSpellSchoolMask(spellProto), absorb, resist, false, 0, isCrit);
 
-            float multiplier = m_spellEffect->EffectMultipleValue > 0 ? m_spellEffect->EffectMultipleValue : 1;
+            float multiplier = m_spellEffect->EffectAmplitude > 0 ? m_spellEffect->EffectAmplitude : 1;
 
             // Set trigger flag
             uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC; // | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
@@ -2997,7 +2997,7 @@ void Aura::PeriodicTick()
 
             if (pCaster->GetMaxPower(power) > 0)
             {
-                gain_multiplier = m_spellEffect->EffectMultipleValue;
+                gain_multiplier = m_spellEffect->EffectAmplitude;
 
                 if (Player* modOwner = pCaster->GetSpellModOwner())
                 {
@@ -3162,7 +3162,7 @@ void Aura::PeriodicTick()
 
             uint32 gain = uint32(-target->ModifyPower(powerType, -pdamage));
 
-            gain = uint32(gain * m_spellEffect->EffectMultipleValue);
+            gain = uint32(gain * m_spellEffect->EffectAmplitude);
 
             // maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
             SpellNonMeleeDamage damageInfo(pCaster, target, spellProto->ID, SpellSchoolMask(spellProto->SchoolMask));
@@ -4548,7 +4548,7 @@ void SpellAuraHolder::CleanupTriggeredSpells()
             continue;
         }
 
-        if (!spellEffect->EffectApplyAuraName)
+        if (!spellEffect->EffectAura)
         {
             continue;
         }
@@ -4572,8 +4572,8 @@ void SpellAuraHolder::CleanupTriggeredSpells()
 
         // needed for spell 43680, maybe others
         // TODO: is there a spell flag, which can solve this in a more sophisticated way?
-        if (spellEffect->EffectApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL &&
-            GetSpellDuration(m_spellProto) == int32(spellEffect->EffectAmplitude))
+        if (spellEffect->EffectAura == SPELL_AURA_PERIODIC_TRIGGER_SPELL &&
+            GetSpellDuration(m_spellProto) == int32(spellEffect->EffectAuraPeriod))
             {
                 continue;
             }

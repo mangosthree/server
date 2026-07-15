@@ -1183,7 +1183,7 @@ void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
                 for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
                 {
                     SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i));
-                    if (effectEntry && effectEntry->EffectApplyAuraName == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)
+                    if (effectEntry && effectEntry->EffectAura == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)
                     {
                         int32 mountSpeed = spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
                         if (mountSpeed > m_modifier.m_amount)

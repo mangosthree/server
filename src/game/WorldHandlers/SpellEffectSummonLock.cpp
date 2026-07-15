@@ -203,7 +203,7 @@ void Spell::EffectOpenLock(SpellEffectEntry const* effect)
         itemTarget->SetFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_UNLOCKED);
     }
 
-    SendLoot(guid, LOOT_SKINNING, LockType(effect->EffectMiscValue));
+    SendLoot(guid, LOOT_SKINNING, LockType(effect->EffectMiscValue_0));
 
     // not allow use skill grow at item base open
     if (!m_CastItem && skillId != SKILL_NONE)
@@ -327,7 +327,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
         return;
     }
 
-    uint32 prop_id = effect->EffectMiscValueB;
+    uint32 prop_id = effect->EffectMiscValue_1;
     SummonPropertiesEntry const *summon_prop = sSummonPropertiesStore.LookupEntry(prop_id);
     if (!summon_prop)
     {
@@ -458,7 +458,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
                         else
                         {
                             // possible sort totems/guardians only by summon creature type
-                            CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(effect->EffectMiscValue);
+                            CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(effect->EffectMiscValue_0);
 
                             if (!cInfo)
                             {
@@ -616,7 +616,7 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
 {
     MANGOS_ASSERT(!list.empty() && prop);
 
-    uint32 creature_entry = effect->EffectMiscValue;
+    uint32 creature_entry = effect->EffectMiscValue_0;
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature_entry);
     if (!cInfo)
     {
@@ -665,7 +665,7 @@ bool Spell::DoSummonCritter(CreatureSummonPositions& list, SummonPropertiesEntry
     MANGOS_ASSERT(!list.empty() && prop);
 
     // ATM only first position is supported for summoning
-    uint32 pet_entry = effect->EffectMiscValue;
+    uint32 pet_entry = effect->EffectMiscValue_0;
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);
     if (!cInfo)
     {
@@ -751,7 +751,7 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
 {
     MANGOS_ASSERT(!list.empty() && prop);
 
-    uint32 pet_entry = effect->EffectMiscValue;
+    uint32 pet_entry = effect->EffectMiscValue_0;
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);
     if (!cInfo)
     {
@@ -884,10 +884,10 @@ bool Spell::DoSummonTotem(SpellEffectEntry const* effect, uint8 slot_dbc)
 
     CreatureCreatePos pos(m_caster, m_caster->GetOrientation(), 2.0f, angle);
 
-    CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(effect->EffectMiscValue);
+    CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(effect->EffectMiscValue_0);
     if (!cinfo)
     {
-        sLog.outErrorDb("Creature entry %u does not exist but used in spell %u totem summon.", m_spellInfo->ID, effect->EffectMiscValue);
+        sLog.outErrorDb("Creature entry %u does not exist but used in spell %u totem summon.", m_spellInfo->ID, effect->EffectMiscValue_0);
         return false;
     }
 
@@ -955,7 +955,7 @@ bool Spell::DoSummonPossessed(CreatureSummonPositions& list, SummonPropertiesEnt
 {
     MANGOS_ASSERT(!list.empty() && prop);
 
-    uint32 const& creatureEntry = effect->EffectMiscValue;
+    uint32 const& creatureEntry = effect->EffectMiscValue_0;
 
     Unit* newUnit = m_caster->TakePossessOf(m_spellInfo, prop, effect, list[0].x, list[0].y, list[0].z, m_caster->GetOrientation());
     if (!newUnit)
@@ -997,7 +997,7 @@ bool Spell::DoSummonPet(SpellEffectEntry const* effect)
         return false;
     }
 
-    uint32 pet_entry = effect->EffectMiscValue;
+    uint32 pet_entry = effect->EffectMiscValue_0;
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);
     if (!cInfo)
     {
@@ -1050,7 +1050,7 @@ bool Spell::DoSummonPet(SpellEffectEntry const* effect)
         return false;
     }
 
-    uint32 level = std::max(m_caster->getLevel() + effect->EffectMultipleValue, 1.0f);
+    uint32 level = std::max(m_caster->getLevel() + effect->EffectAmplitude, 1.0f);
 
     spawnCreature->SetRespawnCoord(pos);
 
@@ -1128,7 +1128,7 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
 {
     MANGOS_ASSERT(!list.empty() && prop);
 
-    uint32 creatureEntry = effect->EffectMiscValue;
+    uint32 creatureEntry = effect->EffectMiscValue_0;
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creatureEntry);
     if (!cInfo)
     {

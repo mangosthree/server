@@ -296,7 +296,7 @@ uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType d
         {
             continue;
         }
-        if (IsAreaEffectTarget(Targets(spellEffect->EffectImplicitTargetA)) || IsAreaEffectTarget(Targets(spellEffect->EffectImplicitTargetB)))
+        if (IsAreaEffectTarget(Targets(spellEffect->ImplicitTarget_0)) || IsAreaEffectTarget(Targets(spellEffect->ImplicitTarget_1)))
         {
             AreaEffect = true;
         }
@@ -320,7 +320,7 @@ uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType d
                 DirectDamage = true;
                 break;
             case SPELL_EFFECT_APPLY_AURA:
-                switch (spellEffect->EffectApplyAuraName)
+                switch (spellEffect->EffectAura)
                 {
                     case SPELL_AURA_PERIODIC_DAMAGE:
                     case SPELL_AURA_PERIODIC_HEAL:
@@ -397,7 +397,7 @@ uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType d
             continue;
         }
         if (spellEffect->Effect == SPELL_EFFECT_HEALTH_LEECH ||
-            spellEffect->Effect == SPELL_EFFECT_APPLY_AURA && spellEffect->EffectApplyAuraName == SPELL_AURA_PERIODIC_LEECH)
+            spellEffect->Effect == SPELL_EFFECT_APPLY_AURA && spellEffect->EffectAura == SPELL_AURA_PERIODIC_LEECH)
         {
             CastingTime /= 2;
             break;
@@ -441,13 +441,13 @@ uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo)
             continue;
         }
         if (spellEffect->Effect == SPELL_EFFECT_APPLY_AURA && (
-            spellEffect->EffectApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE ||
-            spellEffect->EffectApplyAuraName == SPELL_AURA_PERIODIC_HEAL ||
-            spellEffect->EffectApplyAuraName == SPELL_AURA_PERIODIC_LEECH) )
+            spellEffect->EffectAura == SPELL_AURA_PERIODIC_DAMAGE ||
+            spellEffect->EffectAura == SPELL_AURA_PERIODIC_HEAL ||
+            spellEffect->EffectAura == SPELL_AURA_PERIODIC_LEECH) )
         {
-            if (spellEffect->EffectAmplitude != 0)
+            if (spellEffect->EffectAuraPeriod != 0)
             {
-                return DotDuration / spellEffect->EffectAmplitude;
+                return DotDuration / spellEffect->EffectAuraPeriod;
             }
             break;
         }
@@ -605,11 +605,11 @@ bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2)
                 continue;
             }
             if (effect_1->Effect == effect_2->Effect
-                && effect_1->EffectApplyAuraName == effect_2->EffectApplyAuraName
-                && effect_1->EffectMiscValue == effect_2->EffectMiscValue
+                && effect_1->EffectAura == effect_2->EffectAura
+                && effect_1->EffectMiscValue_0 == effect_2->EffectMiscValue_0
                 && effect_1->EffectItemType == effect_2->EffectItemType
-                && (effect_1->Effect != 0 || effect_1->EffectApplyAuraName != 0 ||
-                    effect_1->EffectMiscValue != 0 || effect_1->EffectItemType != 0))
+                && (effect_1->Effect != 0 || effect_1->EffectAura != 0 ||
+                    effect_1->EffectMiscValue_0 != 0 || effect_1->EffectItemType != 0))
                 return true;
         }
     }
@@ -696,7 +696,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
                         continue;
                     }
 
-                    switch(spellEffect->EffectApplyAuraName)
+                    switch(spellEffect->EffectAura)
                     {
                             // Food
                         case SPELL_AURA_MOD_REGEN:
@@ -746,7 +746,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             }
 
             SpellEffectEntry const* mageSpellEffect = spellInfo->GetSpellEffect(EFFECT_INDEX_0);
-            if (classOpt && (classOpt->SpellClassMask & UI64LIT(0x1000000)) && mageSpellEffect && mageSpellEffect->EffectApplyAuraName == SPELL_AURA_MOD_CONFUSE)
+            if (classOpt && (classOpt->SpellClassMask & UI64LIT(0x1000000)) && mageSpellEffect && mageSpellEffect->EffectAura == SPELL_AURA_MOD_CONFUSE)
             {
                 return SPELL_MAGE_POLYMORPH;
             }
@@ -1101,7 +1101,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
         case SPELL_EFFECT_APPLY_AURA:
         case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
         {
-            switch(spellEffect->EffectApplyAuraName)
+            switch(spellEffect->EffectAura)
             {
                 case SPELL_AURA_DUMMY:
                 {
@@ -1184,7 +1184,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                                 // if non-positive trigger cast targeted to positive target this main cast is non-positive
                                 // this will place this spell auras as debuffs
                                 if (triggerSpellEffect->Effect &&
-                                    IsPositiveTarget(triggerSpellEffect->EffectImplicitTargetA,triggerSpellEffect->EffectImplicitTargetB) &&
+                                    IsPositiveTarget(triggerSpellEffect->ImplicitTarget_0,triggerSpellEffect->ImplicitTarget_1) &&
                                     !IsPositiveEffect(spellTriggeredProto, SpellEffectIndex(i)))
                                 {
                                         return false;
@@ -1227,8 +1227,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     return false;
                 case SPELL_AURA_PERIODIC_DAMAGE:            // used in positive spells also.
                     // part of negative spell if casted at self (prevent cancel)
-                    if (spellEffect->EffectImplicitTargetA == TARGET_SELF ||
-                        spellEffect->EffectImplicitTargetA == TARGET_SELF2)
+                    if (spellEffect->ImplicitTarget_0 == TARGET_SELF ||
+                        spellEffect->ImplicitTarget_0 == TARGET_SELF2)
                     {
                         return false;
                     }
@@ -1239,8 +1239,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                         return true;
                     }
                     // part of positive spell if casted at self
-                    if ((spellEffect->EffectImplicitTargetA == TARGET_SELF ||
-                        spellEffect->EffectImplicitTargetA == TARGET_SELF2) &&
+                    if ((spellEffect->ImplicitTarget_0 == TARGET_SELF ||
+                        spellEffect->ImplicitTarget_0 == TARGET_SELF2) &&
                         spellproto->GetSpellFamilyName() == SPELLFAMILY_GENERIC)
                         return false;
                     // but not this if this first effect (don't found better check)
@@ -1277,7 +1277,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case SPELL_AURA_MECHANIC_IMMUNITY:
                 {
                     // non-positive immunities
-                    switch(spellEffect->EffectMiscValue)
+                    switch(spellEffect->EffectMiscValue_0)
                     {
                         case MECHANIC_BANDAGE:
                         case MECHANIC_SHIELD:
@@ -1292,7 +1292,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                 case SPELL_AURA_ADD_PCT_MODIFIER:
                 {
                     // non-positive mods
-                    switch(spellEffect->EffectMiscValue)
+                    switch(spellEffect->EffectMiscValue_0)
                     {
                         case SPELLMOD_COST:                 // dependent from bas point sign (negative -> positive)
                             if (spellproto->CalculateSimpleValue(effIndex) > 0)
@@ -1353,7 +1353,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
     }
 
     // non-positive targets
-    if (spellEffect && !IsPositiveTarget(spellEffect->EffectImplicitTargetA,spellEffect->EffectImplicitTargetB))
+    if (spellEffect && !IsPositiveTarget(spellEffect->ImplicitTarget_0,spellEffect->ImplicitTarget_1))
     {
         return false;
     }
@@ -1703,7 +1703,7 @@ bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const
             case SPELLFAMILY_DRUID:
                 // Druid form Spell
                 if (spellEffect->Effect == SPELL_EFFECT_APPLY_AURA &&
-                    spellEffect->EffectApplyAuraName == SPELL_AURA_MOD_SHAPESHIFT)
+                    spellEffect->EffectAura == SPELL_AURA_MOD_SHAPESHIFT)
                 {
                     return false;
                 }
@@ -1711,7 +1711,7 @@ bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const
             case SPELLFAMILY_ROGUE:
                 // Rogue Stealth
                 if (spellEffect->Effect == SPELL_EFFECT_APPLY_AURA &&
-                    spellEffect->EffectApplyAuraName == SPELL_AURA_MOD_SHAPESHIFT)
+                    spellEffect->EffectAura == SPELL_AURA_MOD_SHAPESHIFT)
                 {
                     return false;
                 }
@@ -2633,10 +2633,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             {
                 continue;
             }
-            if (spellEffect1->EffectApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER ||
-                spellEffect1->EffectApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER  ||
-                spellEffect2->EffectApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER ||
-                spellEffect2->EffectApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER )
+            if (spellEffect1->EffectAura == SPELL_AURA_ADD_FLAT_MODIFIER ||
+                spellEffect1->EffectAura == SPELL_AURA_ADD_PCT_MODIFIER  ||
+                spellEffect2->EffectAura == SPELL_AURA_ADD_FLAT_MODIFIER ||
+                spellEffect2->EffectAura == SPELL_AURA_ADD_PCT_MODIFIER )
             {
                 isModifier = true;
             }
@@ -2681,12 +2681,12 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 
         if (spellEffect1->Effect != spellEffect2->Effect ||
             spellEffect1->EffectItemType != spellEffect2->EffectItemType ||
-            spellEffect1->EffectMiscValue != spellEffect2->EffectMiscValue ||
-            spellEffect1->EffectApplyAuraName != spellEffect2->EffectApplyAuraName)
+            spellEffect1->EffectMiscValue_0 != spellEffect2->EffectMiscValue_0 ||
+            spellEffect1->EffectAura != spellEffect2->EffectAura)
             return false;
 
         // ignore dummy only spells
-        if (spellEffect1->Effect && spellEffect1->Effect != SPELL_EFFECT_DUMMY && spellEffect1->EffectApplyAuraName != SPELL_AURA_DUMMY)
+        if (spellEffect1->Effect && spellEffect1->Effect != SPELL_EFFECT_DUMMY && spellEffect1->EffectAura != SPELL_AURA_DUMMY)
         {
             dummy_only = false;
         }
@@ -2893,8 +2893,8 @@ SpellEntry const* SpellMgr::SelectAuraRankForLevel(SpellEntry const* spellInfo, 
         }
         // for simple aura in check apply to any non caster based targets, in rank search mode to any explicit targets
         if (((spellEffect->Effect == SPELL_EFFECT_APPLY_AURA &&
-            (IsExplicitPositiveTarget(spellEffect->EffectImplicitTargetA) ||
-            IsAreaEffectPossitiveTarget(Targets(spellEffect->EffectImplicitTargetA)))) ||
+            (IsExplicitPositiveTarget(spellEffect->ImplicitTarget_0) ||
+            IsAreaEffectPossitiveTarget(Targets(spellEffect->ImplicitTarget_0)))) ||
             spellEffect->Effect == SPELL_EFFECT_APPLY_AREA_AURA_PARTY ||
             spellEffect->Effect == SPELL_EFFECT_APPLY_AREA_AURA_RAID) &&
             IsPositiveEffect(spellInfo, SpellEffectIndex(i)))
@@ -3391,7 +3391,7 @@ void SpellMgr::CheckUsedSpells(char const* table)
                     continue;
                 }
 
-                if (auraType >= 0 && spellEffect && spellEffect->EffectApplyAuraName != uint32(auraType))
+                if (auraType >= 0 && spellEffect && spellEffect->EffectAura != uint32(auraType))
                 {
                     sLog.outError("Spell %u '%s' aura%d <> %u but used in %s.", spell, name.c_str(), effectIdx + 1, auraType, code.c_str());
                     continue;
@@ -3474,7 +3474,7 @@ void SpellMgr::CheckUsedSpells(char const* table)
                         continue;
                     }
 
-                    if (auraType >=0 && spellEffect && spellEffect->EffectApplyAuraName != uint32(auraType))
+                    if (auraType >=0 && spellEffect && spellEffect->EffectAura != uint32(auraType))
                     {
                         continue;
                     }

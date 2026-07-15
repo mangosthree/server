@@ -96,7 +96,7 @@ void SpellMgr::LoadSpellPetAuras()
             SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(eff);
             if (!spellEffect || spellEffect->Effect != SPELL_EFFECT_DUMMY &&
                (spellEffect->Effect != SPELL_EFFECT_APPLY_AURA ||
-                spellEffect->EffectApplyAuraName != SPELL_AURA_DUMMY))
+                spellEffect->EffectAura != SPELL_AURA_DUMMY))
             {
                 sLog.outError("Spell %u listed in `spell_pet_auras` does not have dummy aura or dummy effect", spell);
                 continue;
@@ -109,7 +109,7 @@ void SpellMgr::LoadSpellPetAuras()
                 continue;
             }
 
-            PetAura pa(pet, aura, spellEffect->EffectImplicitTargetA == TARGET_PET, spellEffect->CalculateSimpleValue());
+            PetAura pa(pet, aura, spellEffect->ImplicitTarget_0 == TARGET_PET, spellEffect->CalculateSimpleValue());
             mSpellPetAuraMap[(spell << 8) + eff] = pa;
         }
 
@@ -288,7 +288,7 @@ void SpellMgr::LoadPetDefaultSpells()
 
             if (spellEffect->Effect==SPELL_EFFECT_SUMMON || spellEffect->Effect==SPELL_EFFECT_SUMMON_PET)
             {
-                uint32 creature_id = spellEffect->EffectMiscValue;
+                uint32 creature_id = spellEffect->EffectMiscValue_0;
                 CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(creature_id);
                 if (!cInfo)
                 {

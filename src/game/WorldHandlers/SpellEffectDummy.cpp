@@ -1429,7 +1429,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         {
                             m_caster->CastSpell(unitTarget, pSpell, true);
                             SpellEffectEntry const* killSpellEffect = pSpell->GetSpellEffect(EFFECT_INDEX_0);
-                            ((Player*)m_caster)->KilledMonsterCredit(killSpellEffect ? killSpellEffect->EffectMiscValue : 0);
+                            ((Player*)m_caster)->KilledMonsterCredit(killSpellEffect ? killSpellEffect->EffectMiscValue_0 : 0);
                         }
 
                         if (unitTarget->GetTypeId() == TYPEID_UNIT)
@@ -1588,7 +1588,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                             if (const SpellEntry *pSpellCredit = sSpellStore.LookupEntry(pSpellEffect->EffectTriggerSpell))
                                 if (SpellEffectEntry const* pSpellCreditEffect = pSpellCredit->GetSpellEffect(EFFECT_INDEX_0))
                                 {
-                                    ((Player*)m_caster)->KilledMonsterCredit(pSpellCreditEffect->EffectMiscValue);
+                                    ((Player*)m_caster)->KilledMonsterCredit(pSpellCreditEffect->EffectMiscValue_0);
                                 }
 
                         ((Creature*)unitTarget)->ForcedDespawn();
@@ -3066,7 +3066,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     rage_modified +=  aura->GetModifier()->m_amount * 10;
                 }
 
-                int32 basePoints0 = damage+int32(rage_modified * effect->EffectDamageMultiplier +
+                int32 basePoints0 = damage+int32(rage_modified * effect->EffectChainAmplitude +
                                                  m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.2f);
 
                 m_caster->CastCustomSpell(unitTarget, 20647, &basePoints0, NULL, NULL, true, 0);
@@ -3836,7 +3836,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 }
 
                 SpellEffectEntry const* dsSpellEffect = m_spellInfo->GetSpellEffect(EFFECT_INDEX_0);
-                int32 bp = int32(count * m_caster->GetMaxHealth() * (dsSpellEffect ? dsSpellEffect->EffectDamageMultiplier : 0.0f) / 100);
+                int32 bp = int32(count * m_caster->GetMaxHealth() * (dsSpellEffect ? dsSpellEffect->EffectChainAmplitude : 0.0f) / 100);
 
                 // Improved Death Strike (percent stored in nonexistent EFFECT_INDEX_2 effect base points)
                 Unit::AuraList const& auraMod = m_caster->GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);

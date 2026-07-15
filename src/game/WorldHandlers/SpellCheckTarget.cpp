@@ -159,7 +159,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
     }
 
     // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
-    if (spellEffect->EffectImplicitTargetA != TARGET_SELF )
+    if (spellEffect->ImplicitTarget_0 != TARGET_SELF )
     {
         if (!CheckTargetCreatureType(target))
         {
@@ -197,16 +197,16 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
             target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) &&
             (!target->GetTransportInfo() || (target->GetTransportInfo() &&
             !((Unit*)target->GetTransportInfo()->GetTransport())->IsVehicle())) &&
-            spellEffect->EffectImplicitTargetA != TARGET_SCRIPT &&
-            spellEffect->EffectImplicitTargetB != TARGET_SCRIPT &&
-            spellEffect->EffectImplicitTargetA != TARGET_AREAEFFECT_INSTANT &&
-            spellEffect->EffectImplicitTargetB != TARGET_AREAEFFECT_INSTANT &&
-            spellEffect->EffectImplicitTargetA != TARGET_AREAEFFECT_CUSTOM &&
-            spellEffect->EffectImplicitTargetB != TARGET_AREAEFFECT_CUSTOM &&
-            spellEffect->EffectImplicitTargetA != TARGET_NARROW_FRONTAL_CONE &&
-            spellEffect->EffectImplicitTargetB != TARGET_NARROW_FRONTAL_CONE &&
-            spellEffect->EffectImplicitTargetA != TARGET_NARROW_FRONTAL_CONE_2 &&
-            spellEffect->EffectImplicitTargetB != TARGET_NARROW_FRONTAL_CONE_2)
+            spellEffect->ImplicitTarget_0 != TARGET_SCRIPT &&
+            spellEffect->ImplicitTarget_1 != TARGET_SCRIPT &&
+            spellEffect->ImplicitTarget_0 != TARGET_AREAEFFECT_INSTANT &&
+            spellEffect->ImplicitTarget_1 != TARGET_AREAEFFECT_INSTANT &&
+            spellEffect->ImplicitTarget_0 != TARGET_AREAEFFECT_CUSTOM &&
+            spellEffect->ImplicitTarget_1 != TARGET_AREAEFFECT_CUSTOM &&
+            spellEffect->ImplicitTarget_0 != TARGET_NARROW_FRONTAL_CONE &&
+            spellEffect->ImplicitTarget_1 != TARGET_NARROW_FRONTAL_CONE &&
+            spellEffect->ImplicitTarget_0 != TARGET_NARROW_FRONTAL_CONE_2 &&
+            spellEffect->ImplicitTarget_1 != TARGET_NARROW_FRONTAL_CONE_2)
             {
                 return false;
             }
@@ -284,7 +284,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
     }
 
     if (target->GetTypeId() != TYPEID_PLAYER && m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER)
-        && spellEffect->EffectImplicitTargetA != TARGET_SCRIPT && spellEffect->EffectImplicitTargetA != TARGET_SELF)
+        && spellEffect->ImplicitTarget_0 != TARGET_SCRIPT && spellEffect->ImplicitTarget_0 != TARGET_SELF)
     {
         return false;
     }

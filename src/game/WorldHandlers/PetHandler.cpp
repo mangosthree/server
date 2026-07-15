@@ -264,9 +264,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     continue;
                 }
 
-                if (spellEffect->EffectImplicitTargetA == TARGET_ALL_ENEMY_IN_AREA
-                    || spellEffect->EffectImplicitTargetA == TARGET_ALL_ENEMY_IN_AREA_INSTANT
-                    || spellEffect->EffectImplicitTargetA == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
+                if (spellEffect->ImplicitTarget_0 == TARGET_ALL_ENEMY_IN_AREA
+                    || spellEffect->ImplicitTarget_0 == TARGET_ALL_ENEMY_IN_AREA_INSTANT
+                    || spellEffect->ImplicitTarget_0 == TARGET_ALL_ENEMY_IN_AREA_CHANNELED)
                     return;
             }
 

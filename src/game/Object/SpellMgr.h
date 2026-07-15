@@ -234,7 +234,7 @@ inline bool IsPeriodicRegenerateEffect(SpellEntry const* spellInfo, SpellEffectI
         return false;
     }
 
-    switch (AuraType(effectEntry->EffectApplyAuraName))
+    switch (AuraType(effectEntry->EffectAura))
     {
         case SPELL_AURA_PERIODIC_ENERGIZE:
         case SPELL_AURA_PERIODIC_HEAL:
@@ -252,7 +252,7 @@ inline bool IsSpellHaveAura(SpellEntry const* spellInfo, AuraType aura, uint32 e
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (effectMask & (1 << i))
             if (SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
-                if (AuraType(effectEntry->EffectApplyAuraName) == aura)
+                if (AuraType(effectEntry->EffectAura) == aura)
                 {
                     return true;
                 }
@@ -264,7 +264,7 @@ inline bool IsSpellLastAuraEffect(SpellEntry const* spellInfo, SpellEffectIndex 
     for (int i = effecIdx + 1; i < MAX_EFFECT_INDEX; ++i)
     {
         if (SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
-            if (effectEntry->EffectApplyAuraName)
+            if (effectEntry->EffectAura)
             {
                 return false;
             }
@@ -284,7 +284,7 @@ inline bool IsSealSpell(SpellEntry const* spellInfo)
     //Collection of all the seal family flags. No other paladin spell has any of those.
     return spellInfo->IsFitToFamily(SPELLFAMILY_PALADIN, UI64LIT(0x26000C000A000000)) &&
         // avoid counting target triggered effect as seal for avoid remove it or seal by it.
-        spellEffect && spellEffect->EffectImplicitTargetA == TARGET_SELF;
+        spellEffect && spellEffect->ImplicitTarget_0 == TARGET_SELF;
 }
 
 inline bool IsElementalShield(SpellEntry const* spellInfo)
@@ -361,8 +361,8 @@ inline bool IsSpellRemoveAllMovementAndControlLossEffects(SpellEntry const* spel
         return false;
     }
 
-    return spellEffect0->EffectApplyAuraName == SPELL_AURA_MECHANIC_IMMUNITY &&
-        spellEffect0->EffectMiscValue == 1 &&
+    return spellEffect0->EffectAura == SPELL_AURA_MECHANIC_IMMUNITY &&
+        spellEffect0->EffectMiscValue_0 == 1 &&
         spellProto->GetEffectApplyAuraNameByIndex(EFFECT_INDEX_1) == SPELL_AURA_NONE &&
         spellProto->GetEffectApplyAuraNameByIndex(EFFECT_INDEX_2) == SPELL_AURA_NONE &&
         spellProto->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)/* && -- all above selected spells have SPELL_ATTR_EX5_* mask
@@ -466,13 +466,13 @@ inline bool IsSpellWithCasterSourceTargetsOnly(SpellEntry const* spellInfo)
             continue;
         }
 
-        uint32 targetA = effectEntry->EffectImplicitTargetA;
+        uint32 targetA = effectEntry->ImplicitTarget_0;
         if (targetA && !IsCasterSourceTarget(targetA))
         {
             return false;
         }
 
-        uint32 targetB = effectEntry->EffectImplicitTargetB;
+        uint32 targetB = effectEntry->ImplicitTarget_1;
         if (targetB && !IsCasterSourceTarget(targetB))
         {
             return false;
@@ -561,17 +561,17 @@ inline bool IsAreaEffectTarget(Targets target)
 inline bool IsAreaOfEffectSpell(SpellEntry const* spellInfo)
 {
     SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(EFFECT_INDEX_0);
-    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetA)) || IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetB))))
+    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->ImplicitTarget_0)) || IsAreaEffectTarget(Targets(effectEntry->ImplicitTarget_1))))
     {
         return true;
     }
     effectEntry = spellInfo->GetSpellEffect(EFFECT_INDEX_1);
-    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetA)) || IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetB))))
+    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->ImplicitTarget_0)) || IsAreaEffectTarget(Targets(effectEntry->ImplicitTarget_1))))
     {
         return true;
     }
     effectEntry = spellInfo->GetSpellEffect(EFFECT_INDEX_2);
-    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetA)) || IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetB))))
+    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->ImplicitTarget_0)) || IsAreaEffectTarget(Targets(effectEntry->ImplicitTarget_1))))
     {
         return true;
     }
@@ -641,7 +641,7 @@ inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
             continue;
         }
 
-        switch (effectEntry->EffectImplicitTargetA)
+        switch (effectEntry->ImplicitTarget_0)
         {
             case TARGET_SELF:
             case TARGET_SELF2:
@@ -649,7 +649,7 @@ inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
             default:
                 return false;
         }
-        switch (effectEntry->EffectImplicitTargetB)
+        switch (effectEntry->ImplicitTarget_1)
         {
             case TARGET_SELF:
             case TARGET_SELF2:

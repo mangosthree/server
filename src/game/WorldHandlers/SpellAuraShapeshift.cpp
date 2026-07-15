@@ -914,7 +914,7 @@ void Aura::HandleAuraModSkill(bool apply, bool /*Real*/)
         return;
     }
 
-    uint32 prot = m_spellEffect->EffectMiscValue;
+    uint32 prot = m_spellEffect->EffectMiscValue_0;
     int32 points = GetModifier()->m_amount;
 
     // defense skill is removed in 4.x.x, spell tooltips updated,

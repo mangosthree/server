@@ -1003,10 +1003,10 @@ void ObjectMgr::LoadItemRequiredTarget()
                             continue;
                         }
 
-                        if (spellEffect->EffectImplicitTargetA == TARGET_CHAIN_DAMAGE ||
-                            spellEffect->EffectImplicitTargetB == TARGET_CHAIN_DAMAGE ||
-                            spellEffect->EffectImplicitTargetA == TARGET_DUELVSPLAYER ||
-                            spellEffect->EffectImplicitTargetB == TARGET_DUELVSPLAYER)
+                        if (spellEffect->ImplicitTarget_0 == TARGET_CHAIN_DAMAGE ||
+                            spellEffect->ImplicitTarget_1 == TARGET_CHAIN_DAMAGE ||
+                            spellEffect->ImplicitTarget_0 == TARGET_DUELVSPLAYER ||
+                            spellEffect->ImplicitTarget_1 == TARGET_DUELVSPLAYER)
                         {
                             bIsItemSpellValid = true;
                             break;

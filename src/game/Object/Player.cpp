@@ -3250,7 +3250,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
 
     // secondary prof. or not prof. spell
     SpellEffectEntry const* spellEffect = spell->GetSpellEffect(EFFECT_INDEX_1);
-    uint32 skill = spellEffect ? spellEffect->EffectMiscValue : 0;
+    uint32 skill = spellEffect ? spellEffect->EffectMiscValue_0 : 0;
 
     if (spellEffect && (spellEffect->Effect != SPELL_EFFECT_SKILL || !IsPrimaryProfessionSkill(skill)))
     {
@@ -6153,7 +6153,7 @@ bool Player::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
             default:
                 break;
         }
-        switch(spellEffect->EffectApplyAuraName)
+        switch(spellEffect->EffectAura)
         {
             case SPELL_AURA_MOD_TAUNT:
                 return true;

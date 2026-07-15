@@ -541,7 +541,7 @@ void SpellMgr::LoadSpellLearnSkills()
             if (spellEffect->Effect == SPELL_EFFECT_SKILL)
             {
                 SpellLearnSkillNode dbc_node;
-                dbc_node.skill    = spellEffect->EffectMiscValue;
+                dbc_node.skill    = spellEffect->EffectMiscValue_0;
                 dbc_node.step     = entry->CalculateSimpleValue(SpellEffectIndex(i));
                 if (dbc_node.skill != SKILL_RIDING)
                 {
@@ -658,7 +658,7 @@ void SpellMgr::LoadSpellLearnSpells()
                 // talent or passive spells or skill-step spells auto-casted and not need dependent learning,
                 // pet teaching spells don't must be dependent learning (casted)
                 // other required explicit dependent learning
-                dbc_node.autoLearned = spellEffect->EffectImplicitTargetA==TARGET_PET || GetTalentSpellCost(spell) > 0 || IsPassiveSpell(entry) || IsSpellHaveEffect(entry,SPELL_EFFECT_SKILL_STEP);
+                dbc_node.autoLearned = spellEffect->ImplicitTarget_0==TARGET_PET || GetTalentSpellCost(spell) > 0 || IsPassiveSpell(entry) || IsSpellHaveEffect(entry,SPELL_EFFECT_SKILL_STEP);
 
                 SpellLearnSpellMapBounds db_node_bounds = GetSpellLearnSpellMapBounds(spell);
 

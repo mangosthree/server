@@ -210,7 +210,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         return;
     }
 
-    uint32 EffectChainTarget = spellEffect ? spellEffect->EffectChainTarget : 0;
+    uint32 EffectChainTarget = spellEffect ? spellEffect->EffectChainTargets : 0;
     uint32 unMaxTargets = m_spellInfo->GetMaxAffectedTargets();
 
     float radius;
@@ -241,8 +241,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // This targetMode is often used as 'last' implicitTarget for positive spells, that just require coordinates
             // and no unitTarget (e.g. summon effects). As MaNGOS always needs a unitTarget we add just the caster here.
             // Logic: This is first target, and no second target => use m_caster -- This is second target: use m_caster if the spell is positive or a summon spell
-            if ((spellEffect->EffectImplicitTargetA == targetMode && spellEffect->EffectImplicitTargetB == TARGET_NONE) ||
-                    (spellEffect->EffectImplicitTargetB == targetMode && (IsPositiveSpell(m_spellInfo) || spellEffect->Effect == SPELL_EFFECT_SUMMON)))
+            if ((spellEffect->ImplicitTarget_0 == targetMode && spellEffect->ImplicitTarget_1 == TARGET_NONE) ||
+                    (spellEffect->ImplicitTarget_1 == targetMode && (IsPositiveSpell(m_spellInfo) || spellEffect->Effect == SPELL_EFFECT_SUMMON)))
                 targetUnitMap.push_back(m_caster);
             break;
         }
@@ -278,8 +278,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // This targetMode is often used as 'last' implicitTarget for positive spells, that just require coordinates
             // and no unitTarget (e.g. summon effects). As MaNGOS always needs a unitTarget we add just the caster here.
             // Logic: This is first target, and no second target => use m_caster -- This is second target: use m_caster if the spell is positive or a summon spell
-            if ((spellEffect->EffectImplicitTargetA == targetMode && spellEffect->EffectImplicitTargetB == TARGET_NONE) ||
-                    (spellEffect->EffectImplicitTargetB == targetMode && (IsPositiveSpell(m_spellInfo) || spellEffect->Effect == SPELL_EFFECT_SUMMON)))
+            if ((spellEffect->ImplicitTarget_0 == targetMode && spellEffect->ImplicitTarget_1 == TARGET_NONE) ||
+                    (spellEffect->ImplicitTarget_1 == targetMode && (IsPositiveSpell(m_spellInfo) || spellEffect->Effect == SPELL_EFFECT_SUMMON)))
                 targetUnitMap.push_back(m_caster);
 
             break;
@@ -1693,7 +1693,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     }
                     break;
                 case SPELL_EFFECT_APPLY_AURA:
-                    switch(spellEffect->EffectApplyAuraName)
+                    switch(spellEffect->EffectAura)
                     {
                         case SPELL_AURA_ADD_FLAT_MODIFIER:  // some spell mods auras have 0 target modes instead expected TARGET_SELF(1) (and present for other ranks for same spell for example)
                         case SPELL_AURA_ADD_PCT_MODIFIER:

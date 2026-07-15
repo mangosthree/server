@@ -77,25 +77,25 @@ void ChatHandler::ShowTriggerTargetListHelper(uint32 id, AreaTrigger const* at, 
  */
 void ChatHandler::ShowTriggerListHelper(AreaTriggerEntry const* atEntry)
 {
-    char const* tavern = sObjectMgr.IsTavernAreaTrigger(atEntry->id) ? GetMangosString(LANG_TRIGGER_TAVERN) : "";
-    char const* quest = sObjectMgr.GetQuestForAreaTrigger(atEntry->id) ? GetMangosString(LANG_TRIGGER_QUEST) : "";
+    char const* tavern = sObjectMgr.IsTavernAreaTrigger(atEntry->ID) ? GetMangosString(LANG_TRIGGER_TAVERN) : "";
+    char const* quest = sObjectMgr.GetQuestForAreaTrigger(atEntry->ID) ? GetMangosString(LANG_TRIGGER_QUEST) : "";
 
     if (m_session)
     {
-        float dist = m_session->GetPlayer()->GetDistance2d(atEntry->x, atEntry->y);
+        float dist = m_session->GetPlayer()->GetDistance2d(atEntry->PosX, atEntry->PosY);
         char dist_buf[50];
         snprintf(dist_buf, 50, GetMangosString(LANG_TRIGGER_DIST), dist);
 
         PSendSysMessage(LANG_TRIGGER_LIST_CHAT,
-                        atEntry->id, atEntry->id, atEntry->mapid, atEntry->x, atEntry->y, atEntry->z, dist_buf, tavern, quest);
+                        atEntry->ID, atEntry->ID, atEntry->MapId, atEntry->PosX, atEntry->PosY, atEntry->PosZ, dist_buf, tavern, quest);
     }
     else
         PSendSysMessage(LANG_TRIGGER_LIST_CONSOLE,
-                        atEntry->id, atEntry->mapid, atEntry->x, atEntry->y, atEntry->z, tavern, quest);
+                        atEntry->ID, atEntry->MapId, atEntry->PosX, atEntry->PosY, atEntry->PosZ, tavern, quest);
 
-    if (AreaTrigger const* at = sObjectMgr.GetAreaTrigger(atEntry->id))
+    if (AreaTrigger const* at = sObjectMgr.GetAreaTrigger(atEntry->ID))
     {
-        ShowTriggerTargetListHelper(atEntry->id, at, true);
+        ShowTriggerTargetListHelper(atEntry->ID, at, true);
     }
 }
 
@@ -155,13 +155,13 @@ bool ChatHandler::HandleTriggerCommand(char* args)
                 continue;
             }
 
-            if (atTestEntry->mapid != m_session->GetPlayer()->GetMapId())
+            if (atTestEntry->MapId != m_session->GetPlayer()->GetMapId())
             {
                 continue;
             }
 
-            float dx = atTestEntry->x - pl->GetPositionX();
-            float dy = atTestEntry->y - pl->GetPositionY();
+            float dx = atTestEntry->PosX - pl->GetPositionX();
+            float dy = atTestEntry->PosY - pl->GetPositionY();
 
             float test_dist2 = dx * dx + dy * dy;
 
@@ -186,13 +186,13 @@ bool ChatHandler::HandleTriggerCommand(char* args)
 
     int loc_idx = GetSessionDbLocaleIndex();
 
-    AreaTrigger const* at = sObjectMgr.GetAreaTrigger(atEntry->id);
+    AreaTrigger const* at = sObjectMgr.GetAreaTrigger(atEntry->ID);
     if (at)
     {
         PSendSysMessage(LANG_TRIGGER_REQ_LEVEL, at->requiredLevel);
     }
 
-    if (uint32 quest_id = sObjectMgr.GetQuestForAreaTrigger(atEntry->id))
+    if (uint32 quest_id = sObjectMgr.GetQuestForAreaTrigger(atEntry->ID))
     {
         SendSysMessage(LANG_TRIGGER_EXPLORE_QUEST);
         ShowQuestListHelper(quest_id, loc_idx, pl);
@@ -306,13 +306,13 @@ bool ChatHandler::HandleTriggerNearCommand(char* args)
             continue;
         }
 
-        if (atEntry->mapid != m_session->GetPlayer()->GetMapId())
+        if (atEntry->MapId != m_session->GetPlayer()->GetMapId())
         {
             continue;
         }
 
-        float dx = atEntry->x - pl->GetPositionX();
-        float dy = atEntry->y - pl->GetPositionY();
+        float dx = atEntry->PosX - pl->GetPositionX();
+        float dy = atEntry->PosY - pl->GetPositionY();
 
         if (dx * dx + dy * dy > dist2)
         {
@@ -333,7 +333,7 @@ bool ChatHandler::HandleTriggerNearCommand(char* args)
             continue;
         }
 
-        AreaTrigger const* at = sObjectMgr.GetAreaTrigger(atEntry->id);
+        AreaTrigger const* at = sObjectMgr.GetAreaTrigger(atEntry->ID);
         if (!at)
         {
             continue;
@@ -352,7 +352,7 @@ bool ChatHandler::HandleTriggerNearCommand(char* args)
             continue;
         }
 
-        ShowTriggerTargetListHelper(atEntry->id, at);
+        ShowTriggerTargetListHelper(atEntry->ID, at);
 
         ++counter;
     }

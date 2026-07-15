@@ -687,8 +687,8 @@ bool ChatHandler::HandleGPSCommand(char* args)
 
     PSendSysMessage(LANG_MAP_POSITION,
                     obj->GetMapId(), (mapEntry ? mapEntry->MapName_lang[GetSessionDbcLocale()] : "<unknown>"),
-                    zone_id, (zoneEntry ? zoneEntry->area_name[GetSessionDbcLocale()] : "<unknown>"),
-                    area_id, (areaEntry ? areaEntry->area_name[GetSessionDbcLocale()] : "<unknown>"),
+                    zone_id, (zoneEntry ? zoneEntry->AreaName_lang[GetSessionDbcLocale()] : "<unknown>"),
+                    area_id, (areaEntry ? areaEntry->AreaName_lang[GetSessionDbcLocale()] : "<unknown>"),
                     obj->GetPhaseMask(),
                     obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),
                     cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), obj->GetInstanceId(),
@@ -701,8 +701,8 @@ bool ChatHandler::HandleGPSCommand(char* args)
 
     DEBUG_LOG(GetMangosString(LANG_MAP_POSITION),
               obj->GetMapId(), (mapEntry ? mapEntry->MapName_lang[sWorld.GetDefaultDbcLocale()] : "<unknown>"),
-              zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDefaultDbcLocale()] : "<unknown>"),
-              area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDefaultDbcLocale()] : "<unknown>"),
+              zone_id, (zoneEntry ? zoneEntry->AreaName_lang[sWorld.GetDefaultDbcLocale()] : "<unknown>"),
+              area_id, (areaEntry ? areaEntry->AreaName_lang[sWorld.GetDefaultDbcLocale()] : "<unknown>"),
               obj->GetPhaseMask(),
               obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),
               cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), obj->GetInstanceId(),
@@ -899,14 +899,14 @@ bool ChatHandler::HandleGoTaxinodeCommand(char* args)
         return false;
     }
 
-    if (node->x == 0.0f && node->y == 0.0f && node->z == 0.0f)
+    if (node->Pos_0 == 0.0f && node->Pos_1 == 0.0f && node->Pos_2 == 0.0f)
     {
-        PSendSysMessage(LANG_INVALID_TARGET_COORD, node->x, node->y, node->map_id);
+        PSendSysMessage(LANG_INVALID_TARGET_COORD, node->Pos_0, node->Pos_1, node->ContinentID);
         SetSentErrorMessage(true);
         return false;
     }
 
-    return HandleGoHelper(_player, node->map_id, node->x, node->y, &node->z);
+    return HandleGoHelper(_player, node->ContinentID, node->Pos_0, node->Pos_1, &node->Pos_2);
 }
 
 /**
@@ -1067,13 +1067,13 @@ bool ChatHandler::HandleGoZoneXYCommand(char* args)
     }
 
     // update to parent zone if exist (client map show only zones without parents)
-    AreaTableEntry const* zoneEntry = areaEntry->zone ? GetAreaEntryByAreaID(areaEntry->zone) : areaEntry;
+    AreaTableEntry const* zoneEntry = areaEntry->ParentAreaID ? GetAreaEntryByAreaID(areaEntry->ParentAreaID) : areaEntry;
 
-    MapEntry const* mapEntry = sMapStore.LookupEntry(zoneEntry->mapid);
+    MapEntry const* mapEntry = sMapStore.LookupEntry(zoneEntry->ContinentID);
 
     if (mapEntry->Instanceable())
     {
-        PSendSysMessage(LANG_INVALID_ZONE_MAP, areaEntry->ID, areaEntry->area_name[GetSessionDbcLocale()],
+        PSendSysMessage(LANG_INVALID_ZONE_MAP, areaEntry->ID, areaEntry->AreaName_lang[GetSessionDbcLocale()],
                         mapEntry->ID, mapEntry->MapName_lang[GetSessionDbcLocale()]);
         SetSentErrorMessage(true);
         return false;
@@ -1081,7 +1081,7 @@ bool ChatHandler::HandleGoZoneXYCommand(char* args)
 
     if (!Zone2MapCoordinates(x, y, zoneEntry->ID))
     {
-        PSendSysMessage(LANG_INVALID_ZONE_MAP, areaEntry->ID, areaEntry->area_name[GetSessionDbcLocale()],
+        PSendSysMessage(LANG_INVALID_ZONE_MAP, areaEntry->ID, areaEntry->AreaName_lang[GetSessionDbcLocale()],
                         mapEntry->ID, mapEntry->MapName_lang[GetSessionDbcLocale()]);
         SetSentErrorMessage(true);
         return false;
@@ -1530,7 +1530,7 @@ bool ChatHandler::HandleGoTriggerCommand(char* args)
     }
     else
     {
-        return HandleGoHelper(_player, atEntry->mapid, atEntry->x, atEntry->y, &atEntry->z);
+        return HandleGoHelper(_player, atEntry->MapId, atEntry->PosX, atEntry->PosY, &atEntry->PosZ);
     }
 }
 

@@ -149,7 +149,7 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
         }
 
         CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
-        if (ci && target->IsVehicle() && ci->VehicleTemplateId == target->GetVehicleInfo()->GetVehicleEntry()->m_ID)
+        if (ci && target->IsVehicle() && ci->VehicleTemplateId == target->GetVehicleInfo()->GetVehicleEntry()->ID)
         {
             if (target->GetTypeId() == TYPEID_PLAYER)
             {

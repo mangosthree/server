@@ -499,12 +499,12 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
  */
 void ReputationMgr::SetVisible(FactionTemplateEntry const* factionTemplateEntry)
 {
-    if (!factionTemplateEntry->faction)
+    if (!factionTemplateEntry->Faction)
     {
         return;
     }
 
-    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction))
+    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->Faction))
     {
         SetVisible(factionEntry);
     }

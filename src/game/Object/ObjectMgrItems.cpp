@@ -204,9 +204,9 @@ void ObjectMgr::LoadItemPrototypes()
             }
             */
 
-            if (proto->Unk0 != dbcitem->Unk0)
+            if (proto->Unk0 != dbcitem->SoundOverrideSubclass)
             {
-                sLog.outErrorDb("Item (Entry: %u) not correct %i Unk0, must be %i (still using DB value).", i, proto->Unk0, dbcitem->Unk0);
+                sLog.outErrorDb("Item (Entry: %u) not correct %i Unk0, must be %i (still using DB value).", i, proto->Unk0, dbcitem->SoundOverrideSubclass);
                 // It safe let use Unk0 from DB
             }
 

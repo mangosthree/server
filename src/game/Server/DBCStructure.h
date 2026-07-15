@@ -911,7 +911,7 @@ struct DurabilityCostsEntry
 
 struct DurabilityQualityEntry
 {
-    uint32    Id;                                           // 0        m_ID
+    uint32    ID;                                           // 0        m_ID
     float     quality_mod;                                  // 1        m_data
 };
 
@@ -1055,10 +1055,10 @@ struct GemPropertiesEntry
 
 struct GlyphPropertiesEntry
 {
-    uint32  Id;                                             //          m_id
-    uint32  SpellId;                                        //          m_spellID
-    uint32  TypeFlags;                                      //          m_glyphSlotFlags
-    uint32  Unk1;                                           //          m_spellIconID
+    uint32  ID;                                             //          m_id
+    uint32  SpellID;                                        //          m_spellID
+    uint32  GlyphSlotFlags;                                      //          m_glyphSlotFlags
+    uint32  SpellIconID;                                           //          m_spellIconID
 };
 
 struct GlyphSlotEntry
@@ -1172,16 +1172,16 @@ struct HolidaysEntry
 
 struct ItemArmorQualityEntry
 {
-  uint32    Id;                                             // 0 item level
-  float     Value[7];                                       // 1-7 multiplier for item quality
-  uint32    Id2;                                            // 8 item level
+  uint32    ID;                                             // 0 item level
+  float     Qualitymod[7];                                       // 1-7 multiplier for item quality
+  uint32    ItemLevel;                                            // 8 item level
 };
 
 struct ItemArmorShieldEntry
 {
-  uint32    Id;                                             // 0 item level
-  uint32    Id2;                                            // 1 item level
-  float     Value[7];                                       // 2-8 multiplier for item quality
+  uint32    ID;                                             // 0 item level
+  uint32    ItemLevel;                                            // 1 item level
+  float     Quality[7];                                       // 2-8 multiplier for item quality
 };
 
 struct ItemArmorTotalEntry
@@ -1234,9 +1234,9 @@ struct ItemDisplayInfoEntry
 // ItemDamageWand.dbc
 struct ItemDamageEntry
 {
-  uint32    Id;                                             // 0 item level
-  float     Value[7];                                       // 1-7 multiplier for item quality
-  uint32    Id2;                                            // 8 item level
+  uint32    ID;                                             // 0 item level
+  float     Quality[7];                                       // 1-7 multiplier for item quality
+  uint32    ItemLevel;                                            // 8 item level
 };
 
 struct ItemLimitCategoryEntry
@@ -1266,9 +1266,9 @@ struct ItemRandomSuffixEntry
 
 struct ItemReforgeEntry
 {
-    uint32 Id;                                              // 0
-    uint32 SourceStat;                                      // 1
-    float SourceMultiplier;                                 // 2
+    uint32 ID;                                              // 0
+    uint32 Source_stat;                                      // 1
+    float Source_multiplier;                                 // 2
     uint32 FinalStat;                                       // 3
     float FinalMultiplier;                                  // 4
 };
@@ -1276,12 +1276,12 @@ struct ItemReforgeEntry
 struct ItemSetEntry
 {
     //uint32    id                                          // 0        m_ID
-    DBCString name;                                         // 1        m_name_lang
+    DBCString Name_lang;                                         // 1        m_name_lang
     //uint32    itemId[17];                                 // 2-18     m_itemID
-    uint32    spells[8];                                    // 19-26    m_setSpellID
-    uint32    items_to_triggerspell[8];                     // 27-34    m_setThreshold
-    uint32    required_skill_id;                            // 35       m_requiredSkill
-    uint32    required_skill_value;                         // 36       m_requiredSkillRank
+    uint32    SetSpellID[8];                                    // 19-26    m_setSpellID
+    uint32    SetThreshold[8];                     // 27-34    m_setThreshold
+    uint32    RequiredSkill;                            // 35       m_requiredSkill
+    uint32    RequiredSkillRank;                         // 36       m_requiredSkillRank
 };
 
 struct LfgDungeonsEntry
@@ -1542,11 +1542,11 @@ struct RandomPropertiesPointsEntry
 
 struct ScalingStatDistributionEntry
 {
-    uint32  Id;                                             // 0        m_ID
-    int32   StatMod[10];                                    // 1-10     m_statID
-    uint32  Modifier[10];                                   // 11-20    m_bonus
+    uint32  ID;                                             // 0        m_ID
+    int32   StatID[10];                                    // 1-10     m_statID
+    uint32  Bonus[10];                                   // 11-20    m_bonus
     //uint32 unk1;                                          // 21
-    uint32  MaxLevel;                                       // 22       m_maxlevel
+    uint32  Maxlevel;                                       // 22       m_maxlevel
 };
 
 struct ScalingStatValuesEntry
@@ -1711,11 +1711,11 @@ struct ScalingStatValuesEntry
 struct SkillRaceClassInfoEntry
 {
     //uint32    id;                                         // 0        m_ID
-    uint32    skillId;                                      // 1        m_skillID
-    uint32    raceMask;                                     // 2        m_raceMask
-    uint32    classMask;                                    // 3        m_classMask
-    uint32    flags;                                        // 4        m_flags
-    uint32    reqLevel;                                     // 5        m_minLevel
+    uint32    SkillID;                                      // 1        m_skillID
+    uint32    RaceMask;                                     // 2        m_raceMask
+    uint32    ClassMask;                                    // 3        m_classMask
+    uint32    Flags;                                        // 4        m_flags
+    uint32    Availability;                                     // 5        m_minLevel
     //uint32    skillTierId;                                // 6        m_skillTierID
     //uint32    skillCostID;                                // 7        m_skillCostIndex
     //uint32 Unk;                                           // 8

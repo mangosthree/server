@@ -554,7 +554,7 @@ bool ChatHandler::isValidChatMessage(const char* message)
                         return false;
                     }
 
-                    linkedSpell = sSpellStore.LookupEntry(glyph->SpellId);
+                    linkedSpell = sSpellStore.LookupEntry(glyph->SpellID);
 
                     if (!linkedSpell)
                     {

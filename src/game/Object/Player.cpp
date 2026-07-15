@@ -4751,24 +4751,24 @@ bool Player::IsSpellFitByClassAndRace(uint32 spell_id, uint32* pReqlevel /*= NUL
         for (SkillRaceClassInfoMap::const_iterator itr = raceBounds.first; itr != raceBounds.second; ++itr)
         {
             SkillRaceClassInfoEntry const* skillRCEntry = itr->second;
-            if ((skillRCEntry->raceMask & racemask) && (skillRCEntry->classMask & classmask))
+            if ((skillRCEntry->RaceMask & racemask) && (skillRCEntry->ClassMask & classmask))
             {
-                if (skillRCEntry->flags & ABILITY_SKILL_NONTRAINABLE)
+                if (skillRCEntry->Flags & ABILITY_SKILL_NONTRAINABLE)
                 {
                     return false;
                 }
 
                 if (pReqlevel)                              // show trainers list case
                 {
-                    if (skillRCEntry->reqLevel)
+                    if (skillRCEntry->Availability)
                     {
-                        *pReqlevel = skillRCEntry->reqLevel;
+                        *pReqlevel = skillRCEntry->Availability;
                         return true;
                     }
                 }
                 else                                        // check availble case at train
                 {
-                    if (skillRCEntry->reqLevel && getLevel() < skillRCEntry->reqLevel)
+                    if (skillRCEntry->Availability && getLevel() < skillRCEntry->Availability)
                     {
                         return false;
                     }

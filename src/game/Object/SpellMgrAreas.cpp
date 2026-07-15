@@ -320,12 +320,12 @@ void SpellMgr::LoadSkillRaceClassInfoMap()
         }
 
         // not all skills really listed in ability skills list
-        if (!sSkillLineStore.LookupEntry(skillRCInfo->skillId))
+        if (!sSkillLineStore.LookupEntry(skillRCInfo->SkillID))
         {
             continue;
         }
 
-        mSkillRaceClassInfoMap.insert(SkillRaceClassInfoMap::value_type(skillRCInfo->skillId, skillRCInfo));
+        mSkillRaceClassInfoMap.insert(SkillRaceClassInfoMap::value_type(skillRCInfo->SkillID, skillRCInfo));
 
         ++count;
     }

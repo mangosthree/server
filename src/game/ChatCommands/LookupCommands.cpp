@@ -950,7 +950,7 @@ bool ChatHandler::HandleLookupItemSetCommand(char* args)
         if (set)
         {
             int loc = GetSessionDbcLocale();
-            std::string name = set->name[loc];
+            std::string name = set->Name_lang[loc];
             if (name.empty())
             {
                 continue;
@@ -966,7 +966,7 @@ bool ChatHandler::HandleLookupItemSetCommand(char* args)
                         continue;
                     }
 
-                    name = set->name[loc];
+                    name = set->Name_lang[loc];
                     if (name.empty())
                     {
                         continue;

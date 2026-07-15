@@ -151,9 +151,9 @@ void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool appl
 
     // req. check at equip, but allow use for extended range if range limit max level, set proper level
     uint32 ssd_level = getLevel();
-    if (ssd && ssd_level > ssd->MaxLevel)
+    if (ssd && ssd_level > ssd->Maxlevel)
     {
-        ssd_level = ssd->MaxLevel;
+        ssd_level = ssd->Maxlevel;
     }
 
     ScalingStatValuesEntry const* ssv = proto->StatScalingFactor ? sScalingStatValuesStore.LookupEntry(ssd_level) : NULL;
@@ -169,12 +169,12 @@ void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool appl
         // If set ScalingStatDistribution need get stats and values from it
         if (ssd && ssv)
         {
-            if (ssd->StatMod[i] < 0)
+            if (ssd->StatID[i] < 0)
             {
                 continue;
             }
-            statType = ssd->StatMod[i];
-            val = (ssv->getssdMultiplier(proto->StatScalingFactor) * ssd->Modifier[i]) / 10000;
+            statType = ssd->StatID[i];
+            val = (ssv->getssdMultiplier(proto->StatScalingFactor) * ssd->Bonus[i]) / 10000;
         }
         else
         {

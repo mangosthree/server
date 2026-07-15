@@ -52,7 +52,7 @@ void AddItemsSetItem(Player* player, Item* item)
         return;
     }
 
-    if (set->required_skill_id && player->GetSkillValue(set->required_skill_id) < set->required_skill_value)
+    if (set->RequiredSkill && player->GetSkillValue(set->RequiredSkill) < set->RequiredSkillRank)
     {
         return;
     }
@@ -95,19 +95,19 @@ void AddItemsSetItem(Player* player, Item* item)
 
     for (uint32 x = 0; x < 8; ++x)
     {
-        if (!set->spells[x])
+        if (!set->SetSpellID[x])
         {
             continue;
         }
         // not enough for  spell
-        if (set->items_to_triggerspell[x] > eff->item_count)
+        if (set->SetThreshold[x] > eff->item_count)
         {
             continue;
         }
 
         uint32 z = 0;
         for (; z < 8; ++z)
-            if (eff->spells[z] && eff->spells[z]->Id == set->spells[x])
+            if (eff->spells[z] && eff->spells[z]->Id == set->SetSpellID[x])
             {
                 break;
             }
@@ -122,10 +122,10 @@ void AddItemsSetItem(Player* player, Item* item)
         {
             if (!eff->spells[y])                            // free slot
             {
-                SpellEntry const* spellInfo = sSpellStore.LookupEntry(set->spells[x]);
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(set->SetSpellID[x]);
                 if (!spellInfo)
                 {
-                    sLog.outError("WORLD: unknown spell id %u in items set %u effects", set->spells[x], setid);
+                    sLog.outError("WORLD: unknown spell id %u in items set %u effects", set->SetSpellID[x], setid);
                     break;
                 }
 
@@ -177,20 +177,20 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
 
     for (uint32 x = 0; x < 8; ++x)
     {
-        if (!set->spells[x])
+        if (!set->SetSpellID[x])
         {
             continue;
         }
 
         // enough for spell
-        if (set->items_to_triggerspell[x] <= eff->item_count)
+        if (set->SetThreshold[x] <= eff->item_count)
         {
             continue;
         }
 
         for (uint32 z = 0; z < 8; ++z)
         {
-            if (eff->spells[z] && eff->spells[z]->Id == set->spells[x])
+            if (eff->spells[z] && eff->spells[z]->Id == set->SetSpellID[x])
             {
                 // spell can be not active if not fit form requirement
                 player->ApplyEquipSpell(eff->spells[z], NULL, false);
@@ -319,7 +319,7 @@ uint32 ItemPrototype::GetArmor() const
     {
         if (ItemArmorShieldEntry const* ias = sItemArmorShieldStore.LookupEntry(ItemLevel))
         {
-            return uint32(floor(ias->Value[Quality] + 0.5f));
+            return uint32(floor(ias->Quality[Quality] + 0.5f));
         }
         return 0;
     }
@@ -378,7 +378,7 @@ uint32 ItemPrototype::GetArmor() const
             return 0;
     }
 
-    return uint32(floor(iaq->Value[Quality] * iatMult * alMult + 0.5f));
+    return uint32(floor(iaq->Qualitymod[Quality] * iatMult * alMult + 0.5f));
 }
 
 float ItemPrototype::getDPS() const
@@ -450,7 +450,7 @@ float ItemPrototype::getDPS() const
             return damage;
         }
 
-        return id->Value[Quality];
+        return id->Quality[Quality];
     }
 
     return damage;

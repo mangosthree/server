@@ -1102,7 +1102,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 uint32 glyphId = spellEffect->EffectMiscValue;
                 if (GlyphPropertiesEntry const *gp = sGlyphPropertiesStore.LookupEntry(glyphId))
-                    if (m_caster->HasAura(gp->SpellId))
+                    if (m_caster->HasAura(gp->SpellID))
                     {
                         return SPELL_FAILED_UNIQUE_GLYPH;
                     }

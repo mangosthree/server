@@ -998,7 +998,7 @@ uint32 ChatHandler::ExtractSpellIdFromLink(char** text)
             }
 
             GlyphPropertiesEntry const* glyphPropEntry = sGlyphPropertiesStore.LookupEntry(glyph_prop_id);
-            return glyphPropEntry ? glyphPropEntry->SpellId : 0;
+            return glyphPropEntry ? glyphPropEntry->SpellID : 0;
         }
     }
 

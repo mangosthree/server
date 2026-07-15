@@ -603,11 +603,11 @@ void Player::ApplyReforgeEnchantment(Item* item, bool apply)
         return;
     }
 
-    float removeValue = item->GetReforgableStat(ItemModType(reforge->SourceStat)) * reforge->SourceMultiplier;
+    float removeValue = item->GetReforgableStat(ItemModType(reforge->Source_stat)) * reforge->Source_multiplier;
 
     float addValue = removeValue * reforge->FinalMultiplier;
 
-    switch (reforge->SourceStat)
+    switch (reforge->Source_stat)
     {
         case ITEM_MOD_HEALTH:
             HandleStatModifier(UNIT_MOD_HEALTH, BASE_VALUE, -removeValue, apply);

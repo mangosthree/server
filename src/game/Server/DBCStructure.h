@@ -1551,13 +1551,13 @@ struct ScalingStatDistributionEntry
 
 struct ScalingStatValuesEntry
 {
-    uint32  Id;                                             // 0        m_ID
-    uint32  Level;                                          // 1        m_charlevel
+    uint32  ID;                                             // 0        m_ID
+    uint32  Charlevel;                                          // 1        m_charlevel
     uint32  dpsMod[6];                                      // 2-7 DPS mod for level
-    uint32  spellBonus;                                     // 8 spell power for level
-    uint32  ssdMultiplier[5];                               // 9-13 Multiplier for ScalingStatDistribution
-    uint32  armorMod[4];                                    // 14-17 Armor for level
-    uint32  armorMod2[4];                                   // 18-21 Armor for level
+    uint32  SpellPower;                                     // 8 spell power for level
+    uint32  StatMultiplier[5];                               // 9-13 Multiplier for ScalingStatDistribution
+    uint32  ArmorShoulder[4];                                    // 14-17 Armor for level
+    uint32  ArmorChest[4];                                   // 18-21 Armor for level
     //uint32 trash[24];                                     // 22-45
     //uint32 unk2;                                          // 46 unk, probably also Armor for level (flag 0x80000?)
 
@@ -1594,27 +1594,27 @@ struct ScalingStatValuesEntry
         {
             if (mask & 0x00000001)
             {
-                return ssdMultiplier[1];
+                return StatMultiplier[1];
             }
             if (mask & 0x00000002)
             {
-                return ssdMultiplier[2]; // 0 and 1 were duplicated
+                return StatMultiplier[2]; // 0 and 1 were duplicated
             }
             if (mask & 0x00000004)
             {
-                return ssdMultiplier[3];
+                return StatMultiplier[3];
             }
             if (mask & 0x00000008)
             {
-                return ssdMultiplier[0];
+                return StatMultiplier[0];
             }
             if (mask & 0x00000010)
             {
-                return ssdMultiplier[4];
+                return StatMultiplier[4];
             }
             if (mask & 0x00040000)
             {
-                return ssdMultiplier[2]; // 4.0.0
+                return StatMultiplier[2]; // 4.0.0
             }
         }
         return 0;
@@ -1626,35 +1626,35 @@ struct ScalingStatValuesEntry
         {
             if (mask & 0x00000020)
             {
-                return armorMod[0];
+                return ArmorShoulder[0];
             }
             if (mask & 0x00000040)
             {
-                return armorMod[1];
+                return ArmorShoulder[1];
             }
             if (mask & 0x00000080)
             {
-                return armorMod[2];
+                return ArmorShoulder[2];
             }
             if (mask & 0x00000100)
             {
-                return armorMod[3];
+                return ArmorShoulder[3];
             }
             if (mask & 0x00100000)
             {
-                return armorMod2[0];     // cloth
+                return ArmorChest[0];     // cloth
             }
             if (mask & 0x00200000)
             {
-                return armorMod2[1];     // leather
+                return ArmorChest[1];     // leather
             }
             if (mask & 0x00400000)
             {
-                return armorMod2[2];     // mail
+                return ArmorChest[2];     // mail
             }
             if (mask & 0x00800000)
             {
-                return armorMod2[3];     // plate
+                return ArmorChest[3];     // plate
             }
         }
         return 0;
@@ -1696,7 +1696,7 @@ struct ScalingStatValuesEntry
     {
         if (mask & 0x00008000)
         {
-            return spellBonus;
+            return SpellPower;
         }
         return 0;
     }

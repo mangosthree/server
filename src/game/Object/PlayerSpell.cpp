@@ -270,7 +270,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                 for (int i = 0; i < MAX_TALENT_RANK; ++i)
                 {
                     // skip learning spell and no rank spell case
-                    uint32 rankSpellId = talentInfo->RankID[i];
+                    uint32 rankSpellId = talentInfo->SpellRank[i];
                     if (!rankSpellId || rankSpellId == spell_id)
                     {
                         continue;
@@ -455,7 +455,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         // not ranked skills
         for (SkillLineAbilityMap::const_iterator _spell_idx = skill_bounds.first; _spell_idx != skill_bounds.second; ++_spell_idx)
         {
-            SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(_spell_idx->second->skillId);
+            SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(_spell_idx->second->SkillLine);
             if (!pSkill)
             {
                 continue;
@@ -466,11 +466,11 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                 continue;
             }
 
-            if (_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL ||
+            if (_spell_idx->second->AcquireMethod == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL ||
                     // lockpicking/runeforging special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
-                    (pSkill->id == SKILL_RUNEFORGING && _spell_idx->second->max_value == 0))
+                    (pSkill->id == SKILL_RUNEFORGING && _spell_idx->second->TrivialSkillLineRankHigh == 0))
             {
-                switch (GetSkillRangeType(pSkill, _spell_idx->second->racemask != 0))
+                switch (GetSkillRangeType(pSkill, _spell_idx->second->RaceMask != 0))
                 {
                     case SKILL_RANGE_LANGUAGE:
                         SetSkill(pSkill->id, 300, 300, GetSkillStep(pSkill->id));
@@ -512,8 +512,8 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         // not ranked skills
         for (SkillLineAbilityMap::const_iterator _spell_idx = skill_bounds.first; _spell_idx != skill_bounds.second; ++_spell_idx)
         {
-            GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LEARN_SKILL_LINE, _spell_idx->second->skillId);
-            GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LEARN_SKILLLINE_SPELLS, _spell_idx->second->skillId);
+            GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LEARN_SKILL_LINE, _spell_idx->second->SkillLine);
+            GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LEARN_SKILLLINE_SPELLS, _spell_idx->second->SkillLine);
         }
 
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LEARN_SPELL, spell_id);
@@ -763,20 +763,20 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank, bo
         for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
         {
             SkillLineAbilityEntry const* skillAbility = _spell_idx->second;
-            SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skillAbility->skillId);
+            SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skillAbility->SkillLine);
             if (!pSkill)
             {
                 continue;
             }
 
-            if ((skillAbility->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL &&
+            if ((skillAbility->AcquireMethod == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL &&
                     pSkill->categoryId != SKILL_CATEGORY_CLASS) ||// not unlearn class skills (spellbook/talent pages)
                     // lockpicking/runeforging special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
-                    (pSkill->id == SKILL_RUNEFORGING && skillAbility->max_value == 0))
+                    (pSkill->id == SKILL_RUNEFORGING && skillAbility->TrivialSkillLineRankHigh == 0))
             {
                 // not reset skills for professions and racial abilities
                 if ((pSkill->categoryId == SKILL_CATEGORY_SECONDARY || pSkill->categoryId == SKILL_CATEGORY_PROFESSION) &&
-                        (IsProfessionSkill(pSkill->id) || skillAbility->racemask != 0))
+                        (IsProfessionSkill(pSkill->id) || skillAbility->RaceMask != 0))
                 {
                     continue;
                 }
@@ -984,7 +984,7 @@ bool Player::resetTalents(bool no_cost, bool all_specs)
             continue;
         }
 
-        TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
+        TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TabID);
 
         if (!talentTabInfo)
         {
@@ -1002,9 +1002,9 @@ bool Player::resetTalents(bool no_cost, bool all_specs)
         }
 
         for (int j = 0; j < MAX_TALENT_RANK; ++j)
-            if (talentInfo->RankID[j])
+            if (talentInfo->SpellRank[j])
             {
-                removeSpell(talentInfo->RankID[j], !IsPassiveSpell(talentInfo->RankID[j]), false);
+                removeSpell(talentInfo->SpellRank[j], !IsPassiveSpell(talentInfo->SpellRank[j]), false);
             }
 
         iter = m_talents[m_activeSpec].begin();

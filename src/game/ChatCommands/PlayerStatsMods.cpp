@@ -1150,15 +1150,15 @@ bool ChatHandler::HandleModifyRepCommand(char* args)
         return false;
     }
 
-    if (factionEntry->reputationListID < 0)
+    if (factionEntry->ReputationIndex < 0)
     {
-        PSendSysMessage(LANG_COMMAND_FACTION_NOREP_ERROR, factionEntry->name[GetSessionDbcLocale()], factionId);
+        PSendSysMessage(LANG_COMMAND_FACTION_NOREP_ERROR, factionEntry->Name_lang[GetSessionDbcLocale()], factionId);
         SetSentErrorMessage(true);
         return false;
     }
 
     target->GetReputationMgr().SetReputation(factionEntry, amount);
-    PSendSysMessage(LANG_COMMAND_MODIFY_REP, factionEntry->name[GetSessionDbcLocale()], factionId,
+    PSendSysMessage(LANG_COMMAND_MODIFY_REP, factionEntry->Name_lang[GetSessionDbcLocale()], factionId,
                     GetNameLink(target).c_str(), target->GetReputationMgr().GetReputation(factionEntry));
     return true;
 }
@@ -1383,7 +1383,7 @@ bool ChatHandler::HandleLookupCurrencyCommand(char* args)
         if (currency)
         {
             int loc = GetSessionDbcLocale();
-            std::string name = currency->name[loc];
+            std::string name = currency->Name_lang[loc];
             if (name.empty())
             {
                 continue;
@@ -1399,7 +1399,7 @@ bool ChatHandler::HandleLookupCurrencyCommand(char* args)
                         continue;
                     }
 
-                    name = currency->name[loc];
+                    name = currency->Name_lang[loc];
                     if (name.empty())
                     {
                         continue;

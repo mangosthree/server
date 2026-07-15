@@ -578,12 +578,12 @@ bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTar
 
         if (!player->isGameMaster())
         {
-            if (currency->Category == CURRENCY_CATEGORY_META)
+            if (currency->CategoryID == CURRENCY_CATEGORY_META)
             {
                 return false;
             }
 
-            if (currency->Category == CURRENCY_CATEGORY_ARCHAEOLOGY && !player->HasSkill(SKILL_ARCHAEOLOGY))
+            if (currency->CategoryID == CURRENCY_CATEGORY_ARCHAEOLOGY && !player->HasSkill(SKILL_ARCHAEOLOGY))
             {
                 return false;
             }

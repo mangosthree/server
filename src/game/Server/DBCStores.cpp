@@ -614,9 +614,9 @@ void LoadDBCStores(const std::string& dataPath)
     for (uint32 i = 0; i < sFactionStore.GetNumRows(); ++i)
     {
         FactionEntry const* faction = sFactionStore.LookupEntry(i);
-        if (faction && faction->team)
+        if (faction && faction->ParentFactionID)
         {
-            SimpleFactionsList& flist = sFactionTeamMap[faction->team];
+            SimpleFactionsList& flist = sFactionTeamMap[faction->ParentFactionID];
             flist.push_back(i);
         }
     }
@@ -691,7 +691,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sPvPDifficultyStore,       dbcPath, "PvpDifficulty.dbc");
     for (uint32 i = 0; i < sPvPDifficultyStore.GetNumRows(); ++i)
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
-            if (entry->bracketId > MAX_BATTLEGROUND_BRACKETS)
+            if (entry->RangeIndex > MAX_BATTLEGROUND_BRACKETS)
             {
                 MANGOS_ASSERT(false && "Need update MAX_BATTLEGROUND_BRACKETS by DBC data");
             }
@@ -769,7 +769,7 @@ void LoadDBCStores(const std::string& dataPath)
             continue;
         }
 
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->Spell);
         if (spellInfo && (spellInfo->Attributes & (SPELL_ATTR_ABILITY | SPELL_ATTR_PASSIVE | SPELL_ATTR_UNK7 | SPELL_ATTR_UNK8)) == (SPELL_ATTR_ABILITY | SPELL_ATTR_PASSIVE | SPELL_ATTR_UNK7 | SPELL_ATTR_UNK8))
         {
             for (unsigned int i = 1; i < sCreatureFamilyStore.GetNumRows(); ++i)
@@ -780,7 +780,7 @@ void LoadDBCStores(const std::string& dataPath)
                     continue;
                 }
 
-                if (skillLine->skillId != cFamily->skillLine[0] && skillLine->skillId != cFamily->skillLine[1])
+                if (skillLine->SkillLine != cFamily->SkillLine[0] && skillLine->SkillLine != cFamily->SkillLine[1])
                 {
                     continue;
                 }
@@ -810,9 +810,9 @@ void LoadDBCStores(const std::string& dataPath)
         TalentEntry const* talentInfo = sTalentStore.LookupEntry(i);
         if (!talentInfo) continue;
         for (int j = 0; j < MAX_TALENT_RANK; j++)
-            if (talentInfo->RankID[j])
+            if (talentInfo->SpellRank[j])
             {
-                sTalentSpellPosMap[talentInfo->RankID[j]] = TalentSpellPos(i, j);
+                sTalentSpellPosMap[talentInfo->SpellRank[j]] = TalentSpellPos(i, j);
             }
     }
 
@@ -856,9 +856,9 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bar,bad_dbc_files, sTalentTreePrimarySpellsStore, dbcPath, "TalentTreePrimarySpells.dbc");
     for (uint32 i = 0; i < sTalentTreePrimarySpellsStore.GetNumRows(); ++i)
         if (TalentTreePrimarySpellsEntry const* talentSpell = sTalentTreePrimarySpellsStore.LookupEntry(i))
-            if (sSpellStore.LookupEntry(talentSpell->SpellId))
+            if (sSpellStore.LookupEntry(talentSpell->SpellID))
             {
-                sTalentTreePrimarySpellsMap[talentSpell->TalentTree].push_back(talentSpell->SpellId);
+                sTalentTreePrimarySpellsMap[talentSpell->TalentTabID].push_back(talentSpell->SpellID);
             }
     sTalentTreePrimarySpellsStore.Clear();
 
@@ -1073,7 +1073,7 @@ char const* GetPetName(uint32 petfamily, uint32 dbclang)
     {
         return NULL;
     }
-    return pet_family->Name[dbclang] ? pet_family->Name[dbclang] : NULL;
+    return pet_family->Name_lang[dbclang] ? pet_family->Name_lang[dbclang] : NULL;
 }
 
 /**
@@ -1274,7 +1274,7 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
     for (uint32 i = 0; i < sChatChannelsStore.GetNumRows(); ++i)
     {
         ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(i);
-        if (ch && ch->ChannelID == channel_id)
+        if (ch && ch->ID == channel_id)
         {
             return ch;
         }
@@ -1425,19 +1425,19 @@ PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 lev
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
         {
             // skip unrelated and too-high brackets
-            if (entry->mapId != mapid || entry->minLevel > level)
+            if (entry->MapID != mapid || entry->MinLevel > level)
             {
                 continue;
             }
 
             // exactly fit
-            if (entry->maxLevel >= level)
+            if (entry->MaxLevel >= level)
             {
                 return entry;
             }
 
             // remember for possible out-of-range case (search higher from existed)
-            if (!maxEntry || maxEntry->maxLevel < entry->maxLevel)
+            if (!maxEntry || maxEntry->MaxLevel < entry->MaxLevel)
             {
                 maxEntry = entry;
             }
@@ -1451,7 +1451,7 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattleGroundB
 {
     for (uint32 i = 0; i < sPvPDifficultyStore.GetNumRows(); ++i)
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
-            if (entry->mapId == mapid && entry->GetBracketId() == id)
+            if (entry->MapID == mapid && entry->GetBracketId() == id)
             {
                 return entry;
             }

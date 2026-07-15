@@ -97,15 +97,15 @@ void Player::FillBGWeekendWorldStates(WorldPacket& data, uint32& count)
     for (uint32 i = 1; i < sBattlemasterListStore.GetNumRows(); ++i)
     {
         BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(i);
-        if (bl && bl->HolidayWorldStateId)
+        if (bl && bl->HolidayWorldState)
         {
-            if (BattleGroundMgr::IsBGWeekend(BattleGroundTypeId(bl->id)))
+            if (BattleGroundMgr::IsBGWeekend(BattleGroundTypeId(bl->ID)))
             {
-                FillInitialWorldState(data, count, bl->HolidayWorldStateId, 1);
+                FillInitialWorldState(data, count, bl->HolidayWorldState, 1);
             }
             else
             {
-                FillInitialWorldState(data, count, bl->HolidayWorldStateId, 0);
+                FillInitialWorldState(data, count, bl->HolidayWorldState, 0);
             }
         }
     }

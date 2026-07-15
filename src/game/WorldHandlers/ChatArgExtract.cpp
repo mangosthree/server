@@ -986,7 +986,7 @@ uint32 ChatHandler::ExtractSpellIdFromLink(char** text)
                 rank = 0;
             }
 
-            return rank < MAX_TALENT_RANK ? talentEntry->RankID[rank] : 0;
+            return rank < MAX_TALENT_RANK ? talentEntry->SpellRank[rank] : 0;
         }
         case SPELL_LINK_GLYPH:
         {

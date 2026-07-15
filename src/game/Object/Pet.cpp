@@ -510,7 +510,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     {
         if (CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cInfo->Family))
         {
-            petName = cFamily->Name[sWorld.GetDefaultDbcLocale()];
+            petName = cFamily->Name_lang[sWorld.GetDefaultDbcLocale()];
         }
     }
     if (petName.empty())
@@ -587,20 +587,20 @@ void Pet::InitStatsForLevel(uint32 petlevel)
         {
             CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cInfo->Family);
 
-            if (cFamily && cFamily->minScale > 0.0f)
+            if (cFamily && cFamily->MinScale > 0.0f)
             {
                 float scale;
-                if (getLevel() >= cFamily->maxScaleLevel)
+                if (getLevel() >= cFamily->MaxScaleLevel)
                 {
-                    scale = cFamily->maxScale;
+                    scale = cFamily->MaxScale;
                 }
-                else if (getLevel() <= cFamily->minScaleLevel)
+                else if (getLevel() <= cFamily->MinScaleLevel)
                 {
-                    scale = cFamily->minScale;
+                    scale = cFamily->MinScale;
                 }
                 else
                 {
-                    scale = cFamily->minScale + float(getLevel() - cFamily->minScaleLevel) / cFamily->maxScaleLevel * (cFamily->maxScale - cFamily->minScale);
+                    scale = cFamily->MinScale + float(getLevel() - cFamily->MinScaleLevel) / cFamily->MaxScaleLevel * (cFamily->MaxScale - cFamily->MinScale);
                 }
 
                 SetObjectScale(scale);
@@ -892,7 +892,7 @@ bool Pet::HaveInDiet(ItemPrototype const* item) const
         return false;
     }
 
-    uint32 diet = cFamily->petFoodMask;
+    uint32 diet = cFamily->PetFoodMask;
     uint32 FoodMask = 1 << (item->FoodType - 1);
     return diet & FoodMask;
 }

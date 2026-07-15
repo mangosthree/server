@@ -1312,7 +1312,7 @@ uint32 Item::GetSpecialPrice(ItemPrototype const* proto, uint32 minimumPrice /*=
                 ItemClassEntry const* classEntry = sItemClassStore.LookupEntry(proto->Class);
                 if (classEntry)
                 {
-                    cost *= classEntry->PriceFactor;
+                    cost *= classEntry->PriceModifier;
                 }
                 else
                 {

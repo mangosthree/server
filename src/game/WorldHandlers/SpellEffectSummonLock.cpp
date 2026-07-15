@@ -336,7 +336,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
     }
 
     // Pet's are atm handled differently
-    if (summon_prop->Group == SUMMON_PROP_GROUP_PETS && prop_id != 1562)
+    if (summon_prop->Control == SUMMON_PROP_GROUP_PETS && prop_id != 1562)
     {
         DoSummonPet(effect);
     }
@@ -345,7 +345,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
     uint32 amount = damage > 0 ? damage : 1;
 
     // basepoints of SUMMON_PROP_GROUP_VEHICLE is often a spellId, set amount to 1
-    if ((summon_prop->Group == SUMMON_PROP_GROUP_VEHICLE || (prop_id == 1961)) || summon_prop->Group == SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE || summon_prop->Group == SUMMON_PROP_GROUP_CONTROLLABLE)
+    if ((summon_prop->Control == SUMMON_PROP_GROUP_VEHICLE || (prop_id == 1961)) || summon_prop->Control == SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE || summon_prop->Control == SUMMON_PROP_GROUP_CONTROLLABLE)
     {
         amount = 1;
     }
@@ -418,7 +418,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
     }
 
     bool summonResult = false;
-    switch (summon_prop->Group)
+    switch (summon_prop->Control)
     {
             // faction handled later on, or loaded from template
         case SUMMON_PROP_GROUP_WILD:
@@ -544,7 +544,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
             break;
         }
         default:
-            sLog.outError("EffectSummonType: Unhandled summon group type %u", summon_prop->Group);
+            sLog.outError("EffectSummonType: Unhandled summon group type %u", summon_prop->Control);
             break;
     }
 
@@ -562,9 +562,9 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
             continue;
         }
 
-        if (summon_prop->FactionId)
+        if (summon_prop->Faction)
         {
-            itr->creature->setFaction(summon_prop->FactionId);
+            itr->creature->setFaction(summon_prop->Faction);
         }
         // Else set faction to summoner's faction for pet-like summoned
         else if ((summon_prop->Flags & SUMMON_PROP_FLAG_INHERIT_FACTION) || !itr->creature->IsTemporarySummon())

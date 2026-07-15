@@ -4736,18 +4736,18 @@ bool Player::IsSpellFitByClassAndRace(uint32 spell_id, uint32* pReqlevel /*= NUL
     {
         SkillLineAbilityEntry const* abilityEntry = _spell_idx->second;
         // skip wrong race skills
-        if (abilityEntry->racemask && (abilityEntry->racemask & racemask) == 0)
+        if (abilityEntry->RaceMask && (abilityEntry->RaceMask & racemask) == 0)
         {
             continue;
         }
 
         // skip wrong class skills
-        if (abilityEntry->classmask && (abilityEntry->classmask & classmask) == 0)
+        if (abilityEntry->ClassMask && (abilityEntry->ClassMask & classmask) == 0)
         {
             continue;
         }
 
-        SkillRaceClassInfoMapBounds raceBounds = sSpellMgr.GetSkillRaceClassInfoMapBounds(abilityEntry->skillId);
+        SkillRaceClassInfoMapBounds raceBounds = sSpellMgr.GetSkillRaceClassInfoMapBounds(abilityEntry->SkillLine);
         for (SkillRaceClassInfoMap::const_iterator itr = raceBounds.first; itr != raceBounds.second; ++itr)
         {
             SkillRaceClassInfoEntry const* skillRCEntry = itr->second;
@@ -5456,8 +5456,8 @@ bool Player::HasTitle(uint32 bitIndex) const
 
 void Player::SetTitle(CharTitlesEntry const* title, bool lost)
 {
-    uint32 fieldIndexOffset = title->bit_index / 32;
-    uint32 flag = 1 << (title->bit_index % 32);
+    uint32 fieldIndexOffset = title->Mask_ID / 32;
+    uint32 flag = 1 << (title->Mask_ID % 32);
 
     if (lost)
     {
@@ -5479,7 +5479,7 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
     }
 
     WorldPacket data(SMSG_TITLE_EARNED, 4 + 4);
-    data << uint32(title->bit_index);
+    data << uint32(title->Mask_ID);
     data << uint32(lost ? 0 : 1);                           // 1 - earned, 0 - lost
     GetSession()->SendPacket(&data);
 }
@@ -6064,7 +6064,7 @@ SpellEntry const* Player::GetKnownTalentRankById(int32 talentId) const
 {
     if (PlayerTalent const* talent = GetKnownTalentById(talentId))
     {
-        return sSpellStore.LookupEntry(talent->talentEntry->RankID[talent->currentRank]);
+        return sSpellStore.LookupEntry(talent->talentEntry->SpellRank[talent->currentRank]);
     }
     else
     {
@@ -6444,7 +6444,7 @@ float Player::GetCollisionHeight(bool mounted) const
             return GetCollisionHeight(false);
         }
 
-        CreatureModelDataEntry const* mountModelData = sCreatureModelDataStore.LookupEntry(mountDisplayInfo->ModelId);
+        CreatureModelDataEntry const* mountModelData = sCreatureModelDataStore.LookupEntry(mountDisplayInfo->ModelID);
         if (!mountModelData)
         {
             return GetCollisionHeight(false);
@@ -6457,10 +6457,10 @@ float Player::GetCollisionHeight(bool mounted) const
             return 0;
         }
 
-        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelID);
         if (!modelData)
         {
-            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
+            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelID);
             return 0;
         }
 
@@ -6478,10 +6478,10 @@ float Player::GetCollisionHeight(bool mounted) const
             return 0;
         }
 
-        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelID);
         if (!modelData)
         {
-            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
+            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelID);
             return 0;
         }
 

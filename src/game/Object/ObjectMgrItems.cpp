@@ -259,7 +259,7 @@ void ObjectMgr::LoadItemPrototypes()
         if (proto->Flags2 & ITEM_FLAG2_HORDE_ONLY)
         {
             if (FactionEntry const* faction = sFactionStore.LookupEntry(HORDE))
-                if ((proto->AllowableRace & faction->BaseRepRaceMask[0]) == 0)
+                if ((proto->AllowableRace & faction->ReputationRaceMask[0]) == 0)
                     sLog.outErrorDb("Item (Entry: %u) have in `AllowableRace` races (%u) only not compatible with ITEM_FLAG2_HORDE_ONLY (%u) in Flags field, item any way will can't be equipped or use by this races.",
                                     i, proto->AllowableRace, ITEM_FLAG2_HORDE_ONLY);
 
@@ -270,7 +270,7 @@ void ObjectMgr::LoadItemPrototypes()
         else if (proto->Flags2 & ITEM_FLAG2_ALLIANCE_ONLY)
         {
             if (FactionEntry const* faction = sFactionStore.LookupEntry(ALLIANCE))
-                if ((proto->AllowableRace & faction->BaseRepRaceMask[0]) == 0)
+                if ((proto->AllowableRace & faction->ReputationRaceMask[0]) == 0)
                     sLog.outErrorDb("Item (Entry: %u) have in `AllowableRace` races (%u) only not compatible with ITEM_FLAG2_ALLIANCE_ONLY (%u) in Flags field, item any way will can't be equipped or use by this races.",
                                     i, proto->AllowableRace, ITEM_FLAG2_ALLIANCE_ONLY);
         }

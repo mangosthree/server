@@ -325,7 +325,7 @@ void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement)
         guild->BroadcastWorker(say_do, GetPlayer());
     }
 
-    if (achievement->flags & (ACHIEVEMENT_FLAG_REALM_FIRST_KILL | ACHIEVEMENT_FLAG_REALM_FIRST_REACH))
+    if (achievement->Flags & (ACHIEVEMENT_FLAG_REALM_FIRST_KILL | ACHIEVEMENT_FLAG_REALM_FIRST_REACH))
     {
         // broadcast realm first reached
         WorldPacket data(SMSG_SERVER_FIRST_ACHIEVEMENT, strlen(GetPlayer()->GetName()) + 1 + 8 + 4 + 4);
@@ -430,8 +430,8 @@ void AchievementMgr::StartTimedAchievementCriteria(AchievementCriteriaTypes type
         AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
         // Checked in LoadAchievementCriteriaList
 
-        if ((achievement->factionFlag == ACHIEVEMENT_FACTION_FLAG_HORDE    && GetPlayer()->GetTeam() != HORDE) ||
-                (achievement->factionFlag == ACHIEVEMENT_FACTION_FLAG_ALLIANCE && GetPlayer()->GetTeam() != ALLIANCE))
+        if ((achievement->Faction == ACHIEVEMENT_FACTION_FLAG_HORDE    && GetPlayer()->GetTeam() != HORDE) ||
+                (achievement->Faction == ACHIEVEMENT_FACTION_FLAG_ALLIANCE && GetPlayer()->GetTeam() != ALLIANCE))
             continue;
 
         // don't update already completed criteria
@@ -544,8 +544,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
         AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
         // Checked in LoadAchievementCriteriaList
 
-        if ((achievement->factionFlag == ACHIEVEMENT_FACTION_FLAG_HORDE    && GetPlayer()->GetTeam() != HORDE) ||
-                (achievement->factionFlag == ACHIEVEMENT_FACTION_FLAG_ALLIANCE && GetPlayer()->GetTeam() != ALLIANCE))
+        if ((achievement->Faction == ACHIEVEMENT_FACTION_FLAG_HORDE    && GetPlayer()->GetTeam() != HORDE) ||
+                (achievement->Faction == ACHIEVEMENT_FACTION_FLAG_ALLIANCE && GetPlayer()->GetTeam() != ALLIANCE))
             continue;
 
         // don't update already completed criteria
@@ -1468,7 +1468,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellIter->first);
                     for (SkillLineAbilityMap::const_iterator skillIter = bounds.first; skillIter != bounds.second; ++skillIter)
                     {
-                        if (skillIter->second->skillId == achievementCriteria->learn_skillline_spell.skillLine)
+                        if (skillIter->second->SkillLine == achievementCriteria->learn_skillline_spell.skillLine)
                         {
                             ++spellCount;
                         }
@@ -1544,7 +1544,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 {
                     SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellIter->first);
                     for (SkillLineAbilityMap::const_iterator skillIter = bounds.first; skillIter != bounds.second; ++skillIter)
-                        if (skillIter->second->skillId == achievementCriteria->learn_skill_line.skillLine)
+                        if (skillIter->second->SkillLine == achievementCriteria->learn_skill_line.skillLine)
                         {
                             ++spellCount;
                         }
@@ -1837,7 +1837,7 @@ uint32 AchievementMgr::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry co
             break;
     }
 
-    if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER)
+    if (achievement->Flags & ACHIEVEMENT_FLAG_COUNTER)
     {
         resultValue = std::numeric_limits<uint32>::max();
     }
@@ -1848,12 +1848,12 @@ uint32 AchievementMgr::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry co
 bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achievementCriteria, AchievementEntry const* achievement) const
 {
     // counter can never complete
-    if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER)
+    if (achievement->Flags & ACHIEVEMENT_FLAG_COUNTER)
     {
         return false;
     }
 
-    if (achievement->flags & (ACHIEVEMENT_FLAG_REALM_FIRST_REACH | ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
+    if (achievement->Flags & (ACHIEVEMENT_FLAG_REALM_FIRST_REACH | ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
     {
         // someone on this realm has already completed that achievement
         if (sAchievementMgr.IsRealmCompleted(achievement))
@@ -1872,13 +1872,13 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
 
     uint32 maxcounter = GetCriteriaProgressMaxCounter(achievementCriteria, achievement);
 
-    return progress->counter >= maxcounter || (achievement->flags & ACHIEVEMENT_FLAG_REQ_COUNT && progress->counter);
+    return progress->counter >= maxcounter || (achievement->Flags & ACHIEVEMENT_FLAG_REQ_COUNT && progress->counter);
 }
 
 void AchievementMgr::CompletedCriteriaFor(AchievementEntry const* achievement)
 {
     // counter can never complete
-    if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER)
+    if (achievement->Flags & ACHIEVEMENT_FLAG_COUNTER)
     {
         return;
     }
@@ -1898,14 +1898,14 @@ void AchievementMgr::CompletedCriteriaFor(AchievementEntry const* achievement)
 bool AchievementMgr::IsCompletedAchievement(AchievementEntry const* entry)
 {
     // counter can never complete
-    if (entry->flags & ACHIEVEMENT_FLAG_COUNTER)
+    if (entry->Flags & ACHIEVEMENT_FLAG_COUNTER)
     {
         return false;
     }
 
     // for achievement with referenced achievement criterias get from referenced and counter from self
-    uint32 achievementForTestId = entry->refAchievement ? entry->refAchievement : entry->ID;
-    uint32 achievementForTestCount = entry->count;
+    uint32 achievementForTestId = entry->Shares_criteria ? entry->Shares_criteria : entry->ID;
+    uint32 achievementForTestCount = entry->Minimum_criteria;
 
     AchievementCriteriaEntryList const* cList = sAchievementMgr.GetAchievementCriteriaByAchievement(achievementForTestId);
     if (!cList)
@@ -1916,7 +1916,7 @@ bool AchievementMgr::IsCompletedAchievement(AchievementEntry const* entry)
 
     // For SUMM achievements, we have to count the progress of each criteria of the achievement.
     // Oddly, the target count is NOT countained in the achievement, but in each individual criteria
-    if (entry->flags & ACHIEVEMENT_FLAG_SUMM)
+    if (entry->Flags & ACHIEVEMENT_FLAG_SUMM)
     {
         for (AchievementCriteriaEntryList::const_iterator itr = cList->begin(); itr != cList->end(); ++itr)
         {
@@ -2064,7 +2064,7 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
 
         // check again the completeness for SUMM and REQ COUNT achievements,
         // as they don't depend on the completed criteria but on the sum of the progress of each individual criteria
-        if (achievement->flags & ACHIEVEMENT_FLAG_SUMM)
+        if (achievement->Flags & ACHIEVEMENT_FLAG_SUMM)
         {
             if (IsCompletedAchievement(achievement))
             {
@@ -2110,7 +2110,7 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
 void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
 {
     DETAIL_LOG("AchievementMgr::CompletedAchievement(%u)", achievement->ID);
-    if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER || m_completedAchievements.find(achievement->ID) != m_completedAchievements.end())
+    if (achievement->Flags & ACHIEVEMENT_FLAG_COUNTER || m_completedAchievements.find(achievement->ID) != m_completedAchievements.end())
     {
         return;
     }
@@ -2122,7 +2122,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
 
     // don't insert for ACHIEVEMENT_FLAG_REALM_FIRST_KILL since otherwise only the first group member would reach that achievement
     // TODO: where do set this instead?
-    if (!(achievement->flags & ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
+    if (!(achievement->Flags & ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
     {
         sAchievementMgr.SetRealmCompleted(achievement);
     }
@@ -2190,7 +2190,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
 void AchievementMgr::IncompletedAchievement(AchievementEntry const* achievement)
 {
     DETAIL_LOG("AchievementMgr::IncompletedAchievement(%u)", achievement->ID);
-    if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER)
+    if (achievement->Flags & ACHIEVEMENT_FLAG_COUNTER)
     {
         return;
     }

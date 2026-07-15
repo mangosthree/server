@@ -436,7 +436,7 @@ bool ChatHandler::isValidChatMessage(const char* message)
                         return false;
                     }
 
-                    linkedSpell = sSpellStore.LookupEntry(talentInfo->RankID[0]);
+                    linkedSpell = sSpellStore.LookupEntry(talentInfo->SpellRank[0]);
                     if (!linkedSpell)
                     {
                         return false;
@@ -586,7 +586,7 @@ bool ChatHandler::isValidChatMessage(const char* message)
                     // verify the link name
                     if (linkedCurrency)
                     {
-                        if (linkedCurrency->Category == CURRENCY_CATEGORY_META)
+                        if (linkedCurrency->CategoryID == CURRENCY_CATEGORY_META)
                         {
                             return false;
                         }
@@ -594,7 +594,7 @@ bool ChatHandler::isValidChatMessage(const char* message)
                         bool foundName = false;
                         for (uint8 i = 0; i < MAX_LOCALE; ++i)
                         {
-                            if (*linkedCurrency->name[i] && strcmp(linkedCurrency->name[i], buffer) == 0)
+                            if (*linkedCurrency->Name_lang[i] && strcmp(linkedCurrency->Name_lang[i], buffer) == 0)
                             {
                                 foundName = true;
                                 break;
@@ -624,7 +624,7 @@ bool ChatHandler::isValidChatMessage(const char* message)
                                 return false;
                             }
 
-                            SkillLineEntry const* skillLine = sSkillLineStore.LookupEntry(skillInfo->skillId);
+                            SkillLineEntry const* skillLine = sSkillLineStore.LookupEntry(skillInfo->SkillLine);
                             if (!skillLine)
                             {
                                 return false;
@@ -735,7 +735,7 @@ bool ChatHandler::isValidChatMessage(const char* message)
                         bool foundName = false;
                         for (uint8 i = 0; i < MAX_LOCALE; ++i)
                         {
-                            if (*linkedAchievement->name[i] && strcmp(linkedAchievement->name[i], buffer) == 0)
+                            if (*linkedAchievement->Title_lang[i] && strcmp(linkedAchievement->Title_lang[i], buffer) == 0)
                             {
                                 foundName = true;
                                 break;

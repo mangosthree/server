@@ -205,7 +205,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             std::string fallback;
             if (CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(creatureInfo->Family))
             {
-                fallback = cFamily->Name[sWorld.GetDefaultDbcLocale()];
+                fallback = cFamily->Name_lang[sWorld.GetDefaultDbcLocale()];
             }
             if (fallback.empty() && creatureInfo->Name)
             {

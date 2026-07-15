@@ -438,7 +438,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
                     continue;
                 }
 
-                if (pCurrency->Category == CURRENCY_CATEGORY_META)
+                if (pCurrency->CategoryID == CURRENCY_CATEGORY_META)
                 {
                     continue;
                 }

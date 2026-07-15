@@ -2125,25 +2125,25 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
                 }
 
                 // doesn't have skill
-                if (!player->HasSkill(skillInfo->skillId))
+                if (!player->HasSkill(skillInfo->SkillLine))
                 {
                     return false;
                 }
 
                 // doesn't match class
-                if (skillInfo->classmask && (skillInfo->classmask & player->getClassMask()) == 0)
+                if (skillInfo->ClassMask && (skillInfo->ClassMask & player->getClassMask()) == 0)
                 {
                     return false;
                 }
 
                 // doesn't match race
-                if (skillInfo->racemask && (skillInfo->racemask & player->getRaceMask()) == 0)
+                if (skillInfo->RaceMask && (skillInfo->RaceMask & player->getRaceMask()) == 0)
                 {
                     return false;
                 }
 
                 // skill level too low
-                if (skillInfo->min_value > player->GetSkillValue(skillInfo->skillId))
+                if (skillInfo->TrivialSkillLineRankLow > player->GetSkillValue(skillInfo->SkillLine))
                 {
                     return false;
                 }
@@ -3383,7 +3383,7 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
         }
         else
         {
-            if (currencyEntry->Category == CURRENCY_CATEGORY_META)
+            if (currencyEntry->CategoryID == CURRENCY_CATEGORY_META)
             {
                 if (pl)
                 {

@@ -635,34 +635,34 @@ bool Player::UpdateCraftSkill(uint32 spellid)
     for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
     {
         SkillLineAbilityEntry const* skill = _spell_idx->second;
-        if (skill->skillId)
+        if (skill->SkillLine)
         {
-            uint32 SkillValue = GetPureSkillValue(skill->skillId);
+            uint32 SkillValue = GetPureSkillValue(skill->SkillLine);
 
             // Alchemy Discoveries here
             SpellEntry const* spellEntry = sSpellStore.LookupEntry(spellid);
             if (spellEntry && spellEntry->GetMechanic() == MECHANIC_DISCOVERY)
             {
-                if (uint32 discoveredSpell = GetSkillDiscoverySpell(skill->skillId, spellid, this))
+                if (uint32 discoveredSpell = GetSkillDiscoverySpell(skill->SkillLine, spellid, this))
                 {
                     learnSpell(discoveredSpell, false);
                 }
             }
 
             uint32 craft_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_CRAFTING);
-            if (!_spell_idx->second->characterPoints)
+            if (!_spell_idx->second->NumSkillUps)
             {
                 sLog.outError("Player::UpdateCraftSkill spell %u has characterPoints == 0!", spellid);
             }
             else
             {
-                craft_skill_gain += skill->characterPoints - 1;
+                craft_skill_gain += skill->NumSkillUps - 1;
             }
 
-            return UpdateSkillPro(skill->skillId, SkillGainChance(SkillValue,
-                                  skill->max_value,
-                                  (skill->max_value + skill->min_value) / 2,
-                                  skill->min_value),
+            return UpdateSkillPro(skill->SkillLine, SkillGainChance(SkillValue,
+                                  skill->TrivialSkillLineRankHigh,
+                                  (skill->TrivialSkillLineRankHigh + skill->TrivialSkillLineRankLow) / 2,
+                                  skill->TrivialSkillLineRankLow),
                                   craft_skill_gain);
         }
     }
@@ -974,9 +974,9 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
             // remove all spells that related to this skill
             for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
                 if (SkillLineAbilityEntry const* pAbility = sSkillLineAbilityStore.LookupEntry(j))
-                    if (pAbility->skillId == id)
+                    if (pAbility->SkillLine == id)
                     {
-                        removeSpell(sSpellMgr.GetFirstSpellInChain(pAbility->spellId));
+                        removeSpell(sSpellMgr.GetFirstSpellInChain(pAbility->Spell));
                     }
         }
     }

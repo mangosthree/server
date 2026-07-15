@@ -1549,18 +1549,18 @@ InventoryResult Player::CanUseItem(Item* pItem, bool direct_action) const
                             continue;
                         }
 
-                        if (skillInfo->skillId != item_use_skill)
+                        if (skillInfo->SkillLine != item_use_skill)
                         {
                             continue;
                         }
 
                         // can't learn
-                        if (skillInfo->classmask && (skillInfo->classmask & getClassMask()) == 0)
+                        if (skillInfo->ClassMask && (skillInfo->ClassMask & getClassMask()) == 0)
                         {
                             continue;
                         }
 
-                        if (skillInfo->racemask && (skillInfo->racemask & getRaceMask()) == 0)
+                        if (skillInfo->RaceMask && (skillInfo->RaceMask & getRaceMask()) == 0)
                         {
                             continue;
                         }

@@ -504,7 +504,7 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
             for (int i = 0; i < MAX_TALENT_RANK; ++i)
             {
                 // skip learning spell and no rank spell case
-                uint32 rankSpellId = talentInfo->RankID[i];
+                uint32 rankSpellId = talentInfo->SpellRank[i];
                 if (!rankSpellId || rankSpellId == spell_id)
                 {
                     continue;
@@ -811,7 +811,7 @@ bool Pet::resetTalents(bool no_cost)
     }
     // Check pet talent type
     CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->Family);
-    if (!pet_family || pet_family->petTalentType < 0)
+    if (!pet_family || pet_family->PetTalentType < 0)
     {
         return false;
     }
@@ -843,7 +843,7 @@ bool Pet::resetTalents(bool no_cost)
 
         if (!talentInfo) continue;
 
-        TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
+        TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TabID);
 
         if (!talentTabInfo)
         {
@@ -851,15 +851,15 @@ bool Pet::resetTalents(bool no_cost)
         }
 
         // unlearn only talents for pets family talent type
-        if (!((1 << pet_family->petTalentType) & talentTabInfo->PetTalentMask))
+        if (!((1 << pet_family->PetTalentType) & talentTabInfo->PetTalentMask))
         {
             continue;
         }
 
         for (int j = 0; j < MAX_TALENT_RANK; ++j)
-            if (talentInfo->RankID[j])
+            if (talentInfo->SpellRank[j])
             {
-                removeSpell(talentInfo->RankID[j], !IsPassiveSpell(talentInfo->RankID[j]), false);
+                removeSpell(talentInfo->SpellRank[j], !IsPassiveSpell(talentInfo->SpellRank[j]), false);
             }
     }
 

@@ -745,11 +745,11 @@ void ChatHandler::ShowCurrencyListHelper(Player* target, CurrencyTypesEntry cons
     std::ostringstream ss;
     if (m_session)
     {
-        ss << id << " - |cff00aa00|Hcurrency:" << id << "|h[" << currency->name[loc];
+        ss << id << " - |cff00aa00|Hcurrency:" << id << "|h[" << currency->Name_lang[loc];
     }
     else
     {
-        ss << id << " - " << currency->name[loc];
+        ss << id << " - " << currency->Name_lang[loc];
     }
 
     if (m_session)
@@ -839,7 +839,7 @@ bool ChatHandler::ShowPlayerListHelper(QueryResult* result, uint32* limit, bool 
 
 void ChatHandler::ShowFactionListHelper(FactionEntry const* factionEntry, LocaleConstant loc, FactionState const* repState /*= NULL*/, Player* target /*= NULL */)
 {
-    std::string name = factionEntry->name[loc];
+    std::string name = factionEntry->Name_lang[loc];
 
     // send faction in "id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
     // or              "id - [faction] [no reputation]" format

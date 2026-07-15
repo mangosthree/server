@@ -385,7 +385,7 @@ bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot,
         return false;
     }
 
-    if (pCurrency->Category == CURRENCY_CATEGORY_META)
+    if (pCurrency->CategoryID == CURRENCY_CATEGORY_META)
     {
         return false;
     }

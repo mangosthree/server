@@ -413,7 +413,7 @@ void ObjectMgr::LoadCreatureTemplates()
         {
             if (displayScaleEntry)
             {
-                const_cast<CreatureInfo*>(cInfo)->Scale = displayScaleEntry->Scale;
+                const_cast<CreatureInfo*>(cInfo)->Scale = displayScaleEntry->CreatureModelScale;
             }
             else
             {

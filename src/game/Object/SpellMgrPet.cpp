@@ -165,7 +165,7 @@ void SpellMgr::LoadPetLevelupSpellMap()
                 ++family_count;
             }
 
-            spellSet.insert(PetLevelupSpellSet::value_type(spell->GetSpellLevel(),spell->Id));
+            spellSet.insert(PetLevelupSpellSet::value_type(spell->GetSpellLevel(),spell->ID));
             count++;
         }
     }
@@ -259,7 +259,7 @@ void SpellMgr::LoadPetDefaultSpells()
         PetDefaultSpellsEntry petDefSpells;
         for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
         {
-            petDefSpells.spellid[j] = spellDataEntry->spellId[j];
+            petDefSpells.spellid[j] = spellDataEntry->Spells[j];
         }
 
         if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))

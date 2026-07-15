@@ -107,7 +107,7 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
         if (spellEffect->Effect < TOTAL_SPELL_EFFECTS)
         {
             DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u Effect%d : %u Targets: %s, %s, %s",
-                m_spellInfo->Id, i, spellEffect->Effect,
+                m_spellInfo->ID, i, spellEffect->Effect,
                 unitTarget ? unitTarget->GetGuidStr().c_str() : "-",
                 itemTarget ? itemTarget->GetGuidStr().c_str() : "-",
                 gameObjTarget ? gameObjTarget->GetGuidStr().c_str() : "-");
@@ -116,12 +116,12 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
         }
         else
         {
-            sLog.outError("WORLD: Spell %u Effect%d : %u > TOTAL_SPELL_EFFECTS", m_spellInfo->Id, i, spellEffect->Effect);
+            sLog.outError("WORLD: Spell %u Effect%d : %u > TOTAL_SPELL_EFFECTS", m_spellInfo->ID, i, spellEffect->Effect);
         }
     }
     else
     {
-        sLog.outError("WORLD: Spell %u has no effect at index %u", m_spellInfo->Id, i);
+        sLog.outError("WORLD: Spell %u has no effect at index %u", m_spellInfo->ID, i);
     }
 }
 
@@ -136,7 +136,7 @@ void Spell::AddTriggeredSpell(uint32 spellId)
 
     if (!spellInfo)
     {
-        sLog.outError("Spell::AddTriggeredSpell: unknown spell id %u used as triggred spell for spell %u)", spellId, m_spellInfo->Id);
+        sLog.outError("Spell::AddTriggeredSpell: unknown spell id %u used as triggred spell for spell %u)", spellId, m_spellInfo->ID);
         return;
     }
 
@@ -154,7 +154,7 @@ void Spell::AddPrecastSpell(uint32 spellId)
 
     if (!spellInfo)
     {
-        sLog.outError("Spell::AddPrecastSpell: unknown spell id %u used as pre-cast spell for spell %u)", spellId, m_spellInfo->Id);
+        sLog.outError("Spell::AddPrecastSpell: unknown spell id %u used as pre-cast spell for spell %u)", spellId, m_spellInfo->ID);
         return;
     }
 

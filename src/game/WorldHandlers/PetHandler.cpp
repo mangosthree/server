@@ -284,12 +284,12 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
             SpellCastResult result = spell->CheckPetCast(unit_target);
 
-            const SpellRangeEntry* sRange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
+            const SpellRangeEntry* sRange = sSpellRangeStore.LookupEntry(spellInfo->RangeIndex);
 
-            if (unit_target && !(pet->IsWithinDistInMap(unit_target, sRange->maxRange) && pet->IsWithinLOSInMap(unit_target, VMAP::ModelIgnoreFlags::M2))
+            if (unit_target && !(pet->IsWithinDistInMap(unit_target, sRange->RangeMax_0) && pet->IsWithinLOSInMap(unit_target, VMAP::ModelIgnoreFlags::M2))
                 && !(GetPlayer()->IsFriendlyTo(unit_target) || pet->HasAuraType(SPELL_AURA_MOD_POSSESS)))
             {
-                ((Pet*)pet)->SetSpellOpener(spellid, sRange->minRange, sRange->maxRange);
+                ((Pet*)pet)->SetSpellOpener(spellid, sRange->RangeMin_0, sRange->RangeMax_0);
                 spell->finish(false);
                 delete spell;
 

@@ -107,7 +107,7 @@ void AddItemsSetItem(Player* player, Item* item)
 
         uint32 z = 0;
         for (; z < 8; ++z)
-            if (eff->spells[z] && eff->spells[z]->Id == set->SetSpellID[x])
+            if (eff->spells[z] && eff->spells[z]->ID == set->SetSpellID[x])
             {
                 break;
             }
@@ -190,7 +190,7 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
 
         for (uint32 z = 0; z < 8; ++z)
         {
-            if (eff->spells[z] && eff->spells[z]->Id == set->SetSpellID[x])
+            if (eff->spells[z] && eff->spells[z]->ID == set->SetSpellID[x])
             {
                 // spell can be not active if not fit form requirement
                 player->ApplyEquipSpell(eff->spells[z], NULL, false);
@@ -848,7 +848,7 @@ bool Item::IsBoundByEnchant() const
             continue;
         }
 
-        if (enchantEntry->slot & ENCHANTMENT_CAN_SOULBOUND)
+        if (enchantEntry->Flags & ENCHANTMENT_CAN_SOULBOUND)
         {
             return true;
         }
@@ -897,9 +897,9 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
             return false;                                    //  wrong item class
         }
 
-        if (equippedItems->EquippedItemSubClassMask != 0)   // 0 == any subclass
+        if (equippedItems->EquippedItemSubclass != 0)   // 0 == any subclass
         {
-            if ((equippedItems->EquippedItemSubClassMask & (1 << proto->SubClass)) == 0)
+            if ((equippedItems->EquippedItemSubclass & (1 << proto->SubClass)) == 0)
             {
                 return false;                                // subclass not present in mask
             }
@@ -909,9 +909,9 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
     // Only check for item enchantments (TARGET_FLAG_ITEM), all other spells are either NPC spells
     // or spells where slot requirements are already handled with AttributesEx3 fields
     // and special code (Titan's Grip, Windfury Attack). Check clearly not applicable for Lava Lash.
-    if (equippedItems->EquippedItemInventoryTypeMask != 0 && (spellInfo->GetTargets() & TARGET_FLAG_ITEM))    // 0 == any inventory type
+    if (equippedItems->EquippedItemInvTypes != 0 && (spellInfo->GetTargets() & TARGET_FLAG_ITEM))    // 0 == any inventory type
     {
-        if ((equippedItems->EquippedItemInventoryTypeMask  & (1 << proto->InventoryType)) == 0)
+        if ((equippedItems->EquippedItemInvTypes  & (1 << proto->InventoryType)) == 0)
         {
             return false;                                    // inventory type not present in mask
         }
@@ -1367,7 +1367,7 @@ int32 Item::GetReforgableStat(ItemModType statType) const
             {
                 for (uint32 f = 0; f < 3; ++f)
                 {
-                    if (enchant->type[f] == ITEM_ENCHANTMENT_TYPE_STAT && enchant->spellid[f] == statType)
+                    if (enchant->Effect[f] == ITEM_ENCHANTMENT_TYPE_STAT && enchant->EffectArg[f] == statType)
                     {
                         for (int k = 0; k < 5; ++k)
                         {
@@ -1395,13 +1395,13 @@ int32 Item::GetReforgableStat(ItemModType statType) const
             {
                 for (uint32 f = 0; f < 3; ++f)
                 {
-                    if (enchant->type[f] == ITEM_ENCHANTMENT_TYPE_STAT && enchant->spellid[f] == statType)
+                    if (enchant->Effect[f] == ITEM_ENCHANTMENT_TYPE_STAT && enchant->EffectArg[f] == statType)
                     {
                         for (int k = 0; k < 3; ++k)
                         {
                             if (randomProp->Enchantment[k] == enchant->ID)
                             {
-                                return int32(enchant->amount[k]);
+                                return int32(enchant->EffectPointsMin[k]);
                             }
                         }
                     }

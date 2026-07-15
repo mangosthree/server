@@ -785,7 +785,7 @@ void LoadDBCStores(const std::string& dataPath)
                     continue;
                 }
 
-                sPetFamilySpellsStore[i].insert(spellInfo->Id);
+                sPetFamilySpellsStore[i].insert(spellInfo->ID);
             }
         }
     }

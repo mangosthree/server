@@ -1520,7 +1520,7 @@ bool Player::BuildEnumData(QueryResult* result, ByteBuffer* data, ByteBuffer* bu
 
         *buffer << uint8(proto->InventoryType);
         *buffer << uint32(proto->DisplayInfoID);
-        *buffer << uint32(enchant ? enchant->aura_id : 0);
+        *buffer << uint32(enchant ? enchant->ItemVisual : 0);
     }
 
     for (int32 i = 0; i < 4; i++)
@@ -3258,7 +3258,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     }
 
     // check primary prof. limit
-    if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(spell->Id) && GetFreePrimaryProfessionPoints() == 0)
+    if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(spell->ID) && GetFreePrimaryProfessionPoints() == 0)
     {
         return TRAINER_SPELL_GREEN_DISABLED;
     }
@@ -4409,10 +4409,10 @@ void Player::InitDataForForm(bool reapplyMods)
     ShapeshiftForm form = GetShapeshiftForm();
 
     SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(form);
-    if (ssEntry && ssEntry->attackSpeed)
+    if (ssEntry && ssEntry->CombatRoundTime)
     {
-        SetAttackTime(BASE_ATTACK, ssEntry->attackSpeed);
-        SetAttackTime(OFF_ATTACK, ssEntry->attackSpeed);
+        SetAttackTime(BASE_ATTACK, ssEntry->CombatRoundTime);
+        SetAttackTime(OFF_ATTACK, ssEntry->CombatRoundTime);
         SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
     }
     else
@@ -5034,7 +5034,7 @@ uint32 Player::GetResurrectionSpellId()
     for (AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
     {
         // Soulstone Resurrection                           // prio: 3 (max, non death persistent)
-        if (prio < 2 && (*itr)->GetSpellProto()->SpellVisual[0] == 99 && (*itr)->GetSpellProto()->SpellIconID == 92)
+        if (prio < 2 && (*itr)->GetSpellProto()->SpellVisualID[0] == 99 && (*itr)->GetSpellProto()->SpellIconID == 92)
         {
             switch ((*itr)->GetId())
             {
@@ -5914,7 +5914,7 @@ InventoryResult Player::CanEquipUniqueItem(Item* pItem, uint8 eslot, uint32 limi
             continue;
         }
 
-        ItemPrototype const* pGem = ObjectMgr::GetItemPrototype(enchantEntry->GemID);
+        ItemPrototype const* pGem = ObjectMgr::GetItemPrototype(enchantEntry->Src_itemID);
         if (!pGem)
         {
             continue;
@@ -6328,15 +6328,15 @@ void Player::UpdateArmorSpecializations()
         // remove if base passive is unlearned
         if (!HasSpell(specPassive))
         {
-            RemoveAurasDueToSpell(spellProto->Id);
+            RemoveAurasDueToSpell(spellProto->ID);
             continue;
         }
 
-        SpellAuraHolder* holder = GetSpellAuraHolder(spellProto->Id);
+        SpellAuraHolder* holder = GetSpellAuraHolder(spellProto->ID);
         if (!holder)
         {
             // cast absent spells that may be missing due to shapeshift form dependency
-            CastSpell(this, spellProto->Id, true);
+            CastSpell(this, spellProto->ID, true);
             continue;
         }
 
@@ -6363,7 +6363,7 @@ bool Player::FitArmorSpecializationRules(SpellEntry const * spellProto) const
     int i = 0;
     for (; i < MAX_ARMOR_SPECIALIZATION_SPELLS; ++i)
     {
-        if (spellProto->Id == armorSpecToTab[i].spellId)
+        if (spellProto->ID == armorSpecToTab[i].spellId)
         {
             if (!armorSpecToTab[i].tab && m_talentsPrimaryTree[m_activeSpec] == 0 ||
                 armorSpecToTab[i].tab && armorSpecToTab[i].tab != m_talentsPrimaryTree[m_activeSpec])
@@ -6386,7 +6386,7 @@ bool Player::FitArmorSpecializationRules(SpellEntry const * spellProto) const
     if (SpellEquippedItemsEntry const * itemsEntry = spellProto->GetSpellEquippedItems())
     {
         // there spells check items with inventory types which are in EquippedItemInventoryTypeMask
-        uint32 inventoryTypeMask = itemsEntry->EquippedItemInventoryTypeMask;
+        uint32 inventoryTypeMask = itemsEntry->EquippedItemInvTypes;
         // get slots that should be check for item presence and SpellEquippedItemsEntry match
         uint32 slotMask = 0;
         uint8 slots[4];
@@ -6422,7 +6422,7 @@ bool Player::FitArmorSpecializationRules(SpellEntry const * spellProto) const
                     return false;
                 }
 
-                if (((1 << item->GetProto()->SubClass) & itemsEntry->EquippedItemSubClassMask) == 0)
+                if (((1 << item->GetProto()->SubClass) & itemsEntry->EquippedItemSubclass) == 0)
                 {
                     return false;
                 }

@@ -131,7 +131,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         procVictim   = PROC_FLAG_NONE;
     }
 
-    float speed = m_spellInfo->speed == 0.0f && m_triggeredBySpellInfo ? m_triggeredBySpellInfo->speed : m_spellInfo->speed;
+    float speed = m_spellInfo->Speed == 0.0f && m_triggeredBySpellInfo ? m_triggeredBySpellInfo->Speed : m_spellInfo->Speed;
     if (speed > 0.0f)
     {
         // mark effects that were already handled in Spell::HandleDelayedSpellLaunch on spell launch as processed
@@ -164,7 +164,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         if (real_caster && real_caster != unit)
         {
             // can cause back attack (if detected)
-            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !IsPositiveSpell(m_spellInfo->Id) &&
+            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !IsPositiveSpell(m_spellInfo->ID) &&
                     m_caster->IsVisibleForOrDetect(unit, unit, false))
             {
                 if (!unit->IsInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
@@ -216,7 +216,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     else if (m_damage)
     {
         // Fill base damage struct (unitTarget - is real spell target)
-        SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->Id, m_spellSchoolMask);
+        SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->ID, m_spellSchoolMask);
 
         if (speed > 0.0f)
         {
@@ -255,10 +255,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // Haunt (NOTE: for avoid use additional field damage stored in dummy value (replace unused 100%)
         // apply before deal damage because aura can be removed at target kill
         SpellClassOptionsEntry const *classOpt = m_spellInfo->GetSpellClassOptions();
-        if (classOpt && classOpt->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellIconID == 3172 &&
-            (classOpt->SpellFamilyFlags & UI64LIT(0x0004000000000000)))
+        if (classOpt && classOpt->SpellClassSet == SPELLFAMILY_WARLOCK && m_spellInfo->SpellIconID == 3172 &&
+            (classOpt->SpellClassMask & UI64LIT(0x0004000000000000)))
         {
-            if (Aura* dummy = unitTarget->GetDummyAura(m_spellInfo->Id))
+            if (Aura* dummy = unitTarget->GetDummyAura(m_spellInfo->ID))
             {
                 dummy->GetModifier()->m_amount = damageInfo.damage;
             }
@@ -267,7 +267,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         caster->DealSpellDamage(&damageInfo, true);
 
         // Scourge Strike, here because needs to use final damage in second part of the spell
-        if (classOpt && classOpt->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && classOpt->SpellFamilyFlags & UI64LIT(0x0800000000000000))
+        if (classOpt && classOpt->SpellClassSet == SPELLFAMILY_DEATHKNIGHT && classOpt->SpellClassMask & UI64LIT(0x0800000000000000))
         {
             uint32 count = 0;
             Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
@@ -292,7 +292,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     else if (procAttacker || procVictim)
     {
         // Fill base damage struct (unitTarget - is real spell target)
-        SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->Id, m_spellSchoolMask);
+        SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->ID, m_spellSchoolMask);
         procEx = createProcExtendMask(&damageInfo, missInfo);
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
@@ -310,7 +310,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         {
             if (Player* p = real_caster->GetCharmerOrOwnerPlayerOrPlayerItself())
             {
-                p->RewardPlayerAndGroupAtCast(unit, m_spellInfo->Id);
+                p->RewardPlayerAndGroupAtCast(unit, m_spellInfo->ID);
             }
         }
 
@@ -352,14 +352,14 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
     Unit* realCaster = GetAffectiveCaster();
 
     // Recheck immune (only for delayed spells)
-    float speed = m_spellInfo->speed == 0.0f && m_triggeredBySpellInfo ? m_triggeredBySpellInfo->speed : m_spellInfo->speed;
+    float speed = m_spellInfo->Speed == 0.0f && m_triggeredBySpellInfo ? m_triggeredBySpellInfo->Speed : m_spellInfo->Speed;
     if (speed && (
                 unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo)) ||
                 unit->IsImmuneToSpell(m_spellInfo, unit == realCaster)))
     {
         if (realCaster)
         {
-            realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
+            realCaster->SendSpellMiss(unit, m_spellInfo->ID, SPELL_MISS_IMMUNE);
         }
 
         ResetEffectDamageAndHeal();
@@ -368,13 +368,13 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
 
     if (unit->GetTypeId() == TYPEID_PLAYER)
     {
-        ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, m_spellInfo->Id);
-        ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, m_spellInfo->Id);
+        ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, m_spellInfo->ID);
+        ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, m_spellInfo->ID);
     }
 
     if (realCaster && realCaster->GetTypeId() == TYPEID_PLAYER)
     {
-        ((Player*)realCaster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL2, m_spellInfo->Id, 0, unit);
+        ((Player*)realCaster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL2, m_spellInfo->ID, 0, unit);
     }
 
     if (realCaster && realCaster != unit)
@@ -384,7 +384,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
                 unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) &&
                 unit->GetCharmerOrOwnerGuid() != m_caster->GetObjectGuid())
         {
-            realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
+            realCaster->SendSpellMiss(unit, m_spellInfo->ID, SPELL_MISS_EVADE);
             ResetEffectDamageAndHeal();
             return;
         }
@@ -395,7 +395,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
             if (speed > 0.0f && unit == m_targets.getUnitTarget() &&
                     !unit->IsVisibleForOrDetect(m_caster, m_caster, false))
             {
-                realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
+                realCaster->SendSpellMiss(unit, m_spellInfo->ID, SPELL_MISS_EVADE);
                 ResetEffectDamageAndHeal();
                 return;
             }
@@ -407,7 +407,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
             }
 
             // can cause back attack (if detected), stealth removed at Spell::cast if spell break it
-            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !IsPositiveSpell(m_spellInfo->Id) &&
+            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !IsPositiveSpell(m_spellInfo->ID) &&
                     m_caster->IsVisibleForOrDetect(unit, unit, false))
             {
                 // use speedup check to avoid re-remove after above lines
@@ -442,9 +442,9 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
         else
         {
             // for delayed spells ignore negative spells (after duel end) for friendly targets
-            if (speed > 0.0f && !IsPositiveSpell(m_spellInfo->Id))
+            if (speed > 0.0f && !IsPositiveSpell(m_spellInfo->ID))
             {
-                realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
+                realCaster->SendSpellMiss(unit, m_spellInfo->ID, SPELL_MISS_EVADE);
                 ResetEffectDamageAndHeal();
                 return;
             }
@@ -501,7 +501,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
                 {
                     if (Player* modOwner = realCaster->GetSpellModOwner())
                     {
-                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_EFFECT_PAST_FIRST, multiplier, this);
+                        modOwner->ApplySpellMod(m_spellInfo->ID, SPELLMOD_EFFECT_PAST_FIRST, multiplier, this);
                     }
                 }
                 m_damageMultipliers[effectNumber] *= multiplier;
@@ -587,7 +587,7 @@ void Spell::DoAllEffectOnTarget(GOTargetInfo* target)
     {
         if (Player* p = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself())
         {
-            p->RewardPlayerAndGroupAtCast(go, m_spellInfo->Id);
+            p->RewardPlayerAndGroupAtCast(go, m_spellInfo->ID);
         }
     }
 }
@@ -643,7 +643,7 @@ void Spell::HandleDelayedSpellLaunch(TargetInfo* target)
     m_healing = 0; // healing maybe not needed at this point
 
     // Fill base damage struct (unitTarget - is real spell target)
-    SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->Id, m_spellSchoolMask);
+    SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->ID, m_spellSchoolMask);
 
     // keep damage amount for reflected spells
     if (missInfo == SPELL_MISS_NONE || (missInfo == SPELL_MISS_REFLECT && target->reflectResult == SPELL_MISS_NONE))
@@ -663,7 +663,7 @@ void Spell::HandleDelayedSpellLaunch(TargetInfo* target)
                     {
                         if (Player* modOwner = real_caster->GetSpellModOwner())
                         {
-                            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_EFFECT_PAST_FIRST, multiplier, this);
+                            modOwner->ApplySpellMod(m_spellInfo->ID, SPELLMOD_EFFECT_PAST_FIRST, multiplier, this);
                         }
                     }
                     m_damageMultipliers[effectNumber] *= multiplier;
@@ -702,7 +702,7 @@ void Spell::InitializeDamageMultipliers()
         if (Unit* realCaster = GetAffectiveCaster())
             if (Player* modOwner = realCaster->GetSpellModOwner())
             {
-                modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, EffectChainTarget, this);
+                modOwner->ApplySpellMod(m_spellInfo->ID, SPELLMOD_JUMP_TARGETS, EffectChainTarget, this);
             }
 
         m_damageMultipliers[i] = 1.0f;

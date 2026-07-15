@@ -94,7 +94,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         SpellEntry const* spellProto = GetSpellProto();
 
         // Add custom charges for some mod aura
-        switch (spellProto->Id)
+        switch (spellProto->ID)
         {
             case 17941:                                     // Shadow Trance
             case 22008:                                     // Netherwind Focus
@@ -116,13 +116,13 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         if (opt && spellProto->GetSpellFamilyName() == SPELLFAMILY_WARLOCK && spellProto->SpellIconID == 3169)
         {
             // Corruption and Unstable Affliction
-            const_cast<SpellClassOptionsEntry*>(opt)->SpellFamilyFlags = ClassFamilyMask(UI64LIT(0x0000010000000002));
+            const_cast<SpellClassOptionsEntry*>(opt)->SpellClassMask = ClassFamilyMask(UI64LIT(0x0000010000000002));
         }
         // Improved Flametongue Weapon, overwrite wrong data, maybe time re-add table
-        else if (opt && spellProto->Id == 37212)
+        else if (opt && spellProto->ID == 37212)
         {
             // Flametongue Weapon (Passive)
-            const_cast<SpellClassOptionsEntry*>(opt)->SpellFamilyFlags = ClassFamilyMask(UI64LIT(0x0000000000200000));
+            const_cast<SpellClassOptionsEntry*>(opt)->SpellClassMask = ClassFamilyMask(UI64LIT(0x0000000000200000));
         }
     }
 

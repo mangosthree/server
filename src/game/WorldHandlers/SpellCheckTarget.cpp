@@ -104,7 +104,7 @@ bool Spell::CheckTargetCreatureType(Unit* target) const
     }
 
     // Dismiss Pet, Taming Lesson and Control Robot skipped
-    if (m_spellInfo->Id == 2641 || m_spellInfo->Id == 23356 || m_spellInfo->Id == 30009)
+    if (m_spellInfo->ID == 2641 || m_spellInfo->ID == 23356 || m_spellInfo->ID == 30009)
     {
         spellCreatureTargetMask =  0;
     }
@@ -171,11 +171,11 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
     SpellAuraRestrictionsEntry const* auraRestrictions = m_spellInfo->GetSpellAuraRestrictions();
     if (auraRestrictions)
     {
-        if (auraRestrictions->targetAuraSpell && !target->HasAura(auraRestrictions->targetAuraSpell))
+        if (auraRestrictions->TargetAuraSpell && !target->HasAura(auraRestrictions->TargetAuraSpell))
         {
             return false;
         }
-        if (auraRestrictions->excludeTargetAuraSpell && target->HasAura(auraRestrictions->excludeTargetAuraSpell))
+        if (auraRestrictions->ExcludeTargetAuraSpell && target->HasAura(auraRestrictions->ExcludeTargetAuraSpell))
         {
             return false;
         }
@@ -220,21 +220,21 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
             return false;
         }
 
-        if (((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
+        if (((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo->ID))
         {
             return false;
         }
     }
 
     // Check targets for LOS visibility (except spells without range limitations )
-    if (!DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_ATTR_EX2_IGNORE_LOS))
+    if (!DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->ID, NULL, SPELL_ATTR_EX2_IGNORE_LOS))
     {
         switch(spellEffect->Effect)
         {
         case SPELL_EFFECT_SUMMON_PLAYER:                    // from anywhere
             break;
         case SPELL_EFFECT_DUMMY:
-            if (m_spellInfo->Id != 20577)                   // Cannibalize
+            if (m_spellInfo->ID != 20577)                   // Cannibalize
             {
                 break;
             }
@@ -289,7 +289,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
         return false;
     }
 
-    switch (m_spellInfo->Id)
+    switch (m_spellInfo->ID)
     {
         case 37433:                                         // Spout (The Lurker Below), only players affected if its not in water
             if (target->GetTypeId() != TYPEID_PLAYER || target->IsInWater())

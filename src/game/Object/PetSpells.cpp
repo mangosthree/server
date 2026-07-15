@@ -647,12 +647,12 @@ void Pet::InitLevelupSpellsForLevel()
             // will called first if level down
             if (spellEntry->GetSpellLevel() > level)
             {
-                unlearnSpell(spellEntry->Id, true);
+                unlearnSpell(spellEntry->ID, true);
             }
             // will called if level up
             else
             {
-                learnSpell(spellEntry->Id);
+                learnSpell(spellEntry->ID);
             }
         }
     }

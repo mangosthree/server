@@ -1073,7 +1073,7 @@ void Pet::CastOwnerTalentAuras()
 
             if (seTalent)
             {
-                switch (seTalent->Id)
+                switch (seTalent->ID)
                 {
                     case 34455: // Ferocious Inspiration Rank 1
                         CastSpell(this, 75593, true); // Ferocious Inspiration 1%

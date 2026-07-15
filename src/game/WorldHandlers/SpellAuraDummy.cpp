@@ -476,7 +476,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
 
                 // Overpower
-                if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000004))
+                if (classOptions && classOptions->SpellClassMask & UI64LIT(0x0000000000000004))
                 {
                     // Must be casting target
                     if (!target->IsNonMeleeSpellCasted(false))
@@ -496,7 +496,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         // Unrelenting Assault
                         if ((*itr)->GetSpellProto()->GetSpellFamilyName()==SPELLFAMILY_WARRIOR && (*itr)->GetSpellProto()->SpellIconID == 2775)
                         {
-                            switch ((*itr)->GetSpellProto()->Id)
+                            switch ((*itr)->GetSpellProto()->ID)
                             {
                                 case 46859:                 // Unrelenting Assault, rank 1
                                     target->CastSpell(target, 64849, true, NULL, (*itr));
@@ -536,7 +536,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
 
                 // Earth Shield
-                if (classOptions && (classOptions->SpellFamilyFlags & UI64LIT(0x40000000000)))
+                if (classOptions && (classOptions->SpellClassMask & UI64LIT(0x40000000000)))
                 {
                     // prevent double apply bonuses
                     if (target->GetTypeId() != TYPEID_PLAYER || !((Player*)target)->GetSession()->PlayerLoading())
@@ -919,7 +919,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         }
 
         // Living Bomb
-        if (classOptions && classOptions->SpellFamilyName == SPELLFAMILY_MAGE && (classOptions->SpellFamilyFlags & UI64LIT(0x2000000000000)))
+        if (classOptions && classOptions->SpellClassSet == SPELLFAMILY_MAGE && (classOptions->SpellClassMask & UI64LIT(0x2000000000000)))
         {
             if (m_removeMode == AURA_REMOVE_BY_EXPIRE || m_removeMode == AURA_REMOVE_BY_DISPEL)
             {
@@ -1214,7 +1214,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         case SPELLFAMILY_WARLOCK:
         {
             // Haunt
-            if (classOptions && GetSpellProto()->SpellIconID == 3172 && (classOptions->SpellFamilyFlags & UI64LIT(0x0004000000000000)))
+            if (classOptions && GetSpellProto()->SpellIconID == 3172 && (classOptions->SpellClassMask & UI64LIT(0x0004000000000000)))
             {
                 // NOTE: for avoid use additional field damage stored in dummy value (replace unused 100%
                 if (apply)
@@ -1275,7 +1275,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
 
             // Lifebloom
-            if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x1000000000))
+            if (classOptions && classOptions->SpellClassMask & UI64LIT(0x1000000000))
             {
                 if (apply)
                 {

@@ -73,7 +73,7 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
         bool talent = GetTalentSpellCost(itr->second->GetId()) > 0;
 
         SpellAuraHolder* holder = itr->second;
-        char const* name = holder->GetSpellProto()->SpellName[GetSessionDbcLocale()];
+        char const* name = holder->GetSpellProto()->Name_lang[GetSessionDbcLocale()];
 
         for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
@@ -116,7 +116,7 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
         {
             bool talent = GetTalentSpellCost((*itr)->GetId()) > 0;
 
-            char const* name = (*itr)->GetSpellProto()->SpellName[GetSessionDbcLocale()];
+            char const* name = (*itr)->GetSpellProto()->Name_lang[GetSessionDbcLocale()];
 
             if (m_session)
             {
@@ -660,7 +660,7 @@ bool ChatHandler::HandleListCreatureCommand(char* args)
 
 void ChatHandler::ShowSpellListHelper(Player* target, SpellEntry const* spellInfo, LocaleConstant loc)
 {
-    uint32 id = spellInfo->Id;
+    uint32 id = spellInfo->ID;
 
     bool known = target && target->HasSpell(id);
     SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(EFFECT_INDEX_0);
@@ -678,7 +678,7 @@ void ChatHandler::ShowSpellListHelper(Player* target, SpellEntry const* spellInf
 
     // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
     std::ostringstream ss;
-    char const* nameStr = (spellInfo->SpellName && spellInfo->SpellName[loc]) ? spellInfo->SpellName[loc] : "";
+    char const* nameStr = (spellInfo->Name_lang && spellInfo->Name_lang[loc]) ? spellInfo->Name_lang[loc] : "";
     if (m_session)
     {
         ss << id << " - |cffffffff|Hspell:" << id << "|h[" << nameStr;
@@ -690,7 +690,7 @@ void ChatHandler::ShowSpellListHelper(Player* target, SpellEntry const* spellInf
 
     // include the spell's subtext ("Rank N" / label) to distinguish same-named
     // spells; fall back to the computed numeric rank when there is no subtext
-    char const* subText = spellInfo->Rank ? spellInfo->Rank[loc] : NULL;
+    char const* subText = spellInfo->NameSubtext_lang ? spellInfo->NameSubtext_lang[loc] : NULL;
     if (subText && *subText)
     {
         ss << " " << subText;

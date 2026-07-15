@@ -465,7 +465,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             if (SpellEntry const* newInfo = sSpellStore.LookupEntry((*itr)->GetModifier()->m_amount))
             {
                 spellInfo = newInfo;
-                spellId = newInfo->Id;
+                spellId = newInfo->ID;
             }
             break;
         }
@@ -585,7 +585,7 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     if (IsChanneledSpell(spellInfo))
     {
         if (Spell* curSpell = _player->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-            if (curSpell->m_spellInfo->Id == spellId)
+            if (curSpell->m_spellInfo->ID == spellId)
             {
                 _player->InterruptSpell(CURRENT_CHANNELED_SPELL);
             }

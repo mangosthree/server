@@ -580,7 +580,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
         // Wyvern Sting
         SpellClassOptionsEntry const* classOptions = GetSpellProto()->GetSpellClassOptions();
-        if (classOptions && classOptions->SpellFamilyName == SPELLFAMILY_HUNTER && classOptions->SpellFamilyFlags & UI64LIT(0x0000100000000000))
+        if (classOptions && classOptions->SpellClassSet == SPELLFAMILY_HUNTER && classOptions->SpellClassMask & UI64LIT(0x0000100000000000))
         {
             Unit* caster = GetCaster();
             if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
@@ -664,7 +664,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
                         target->CastCustomSpell(target, 31665, &bp, NULL, NULL, true);
                     }
                     // Overkill
-                    else if ((*i)->GetId() == 58426 && classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000400000))
+                    else if ((*i)->GetId() == 58426 && classOptions && classOptions->SpellClassMask & UI64LIT(0x0000000000400000))
                     {
                         target->CastSpell(target, 58427, true);
                     }
@@ -709,7 +709,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
                     target->CastSpell(target, 31666, true);
                 }
                 // Overkill
-                else if ((*i)->GetId() == 58426 && classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000400000))
+                else if ((*i)->GetId() == 58426 && classOptions && classOptions->SpellClassMask & UI64LIT(0x0000000000400000))
                 {
                     if (SpellAuraHolder* holder = target->GetSpellAuraHolder(58427))
                     {
@@ -1172,7 +1172,7 @@ void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
     }
 
     // Swift Flight Form check for higher speed flying mounts
-    if (apply && target->GetTypeId() == TYPEID_PLAYER && GetSpellProto()->Id == 40121)
+    if (apply && target->GetTypeId() == TYPEID_PLAYER && GetSpellProto()->ID == 40121)
     {
         for (PlayerSpellMap::const_iterator iter = ((Player*)target)->GetSpellMap().begin(); iter != ((Player*)target)->GetSpellMap().end(); ++iter)
         {
@@ -1333,7 +1333,7 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
         }
     }
     // Heroic Fury (Intercept cooldown remove)
-    else if (apply && GetSpellProto()->Id == 60970 && target->GetTypeId() == TYPEID_PLAYER)
+    else if (apply && GetSpellProto()->ID == 60970 && target->GetTypeId() == TYPEID_PLAYER)
     {
         ((Player*)target)->RemoveSpellCooldown(20252, true);
     }
@@ -1373,7 +1373,7 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
         }
         else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
         {
-            outdoorPvP->HandleDropFlag(player, GetSpellProto()->Id);
+            outdoorPvP->HandleDropFlag(player, GetSpellProto()->ID);
         }
     }
 
@@ -1440,9 +1440,9 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
             if ((GetSpellSchoolMask(spell) & school_mask)   // Check for school mask
                     && !spell->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)   // Spells unaffected by invulnerability
                     && !iter->second->IsPositive()          // Don't remove positive spells
-                    && spell->Id != GetId())                // Don't remove self
+                    && spell->ID != GetId())                // Don't remove self
             {
-                target->RemoveAurasDueToSpell(spell->Id);
+                target->RemoveAurasDueToSpell(spell->ID);
                 if (Auras.empty())
                 {
                     break;

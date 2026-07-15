@@ -164,7 +164,7 @@ void Spell::TakePower()
     bool hit = true;
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if (m_spellInfo->powerType == POWER_RAGE || m_spellInfo->powerType == POWER_ENERGY || m_spellInfo->powerType == POWER_HOLY_POWER)
+        if (m_spellInfo->PowerType == POWER_RAGE || m_spellInfo->PowerType == POWER_ENERGY || m_spellInfo->PowerType == POWER_HOLY_POWER)
         {
             ObjectGuid targetGuid = m_targets.getUnitTargetGuid();
             if (!targetGuid.IsEmpty())
@@ -180,7 +180,7 @@ void Spell::TakePower()
                             // lower spell cost on fail (by talent aura)
                             if (Player* modOwner = ((Player*)m_caster)->GetSpellModOwner())
                             {
-                                modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_SPELL_COST_REFUND_ON_FAIL, m_powerCost);
+                                modOwner->ApplySpellMod(m_spellInfo->ID, SPELLMOD_SPELL_COST_REFUND_ON_FAIL, m_powerCost);
                             }
                         }
                         break;
@@ -189,20 +189,20 @@ void Spell::TakePower()
     }
 
     // health as power used
-    if (m_spellInfo->powerType == POWER_HEALTH)
+    if (m_spellInfo->PowerType == POWER_HEALTH)
     {
         m_caster->ModifyHealth(-(int32)m_powerCost);
-        m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, m_powerCost, GetSpellSchoolMask(m_spellInfo), 0, 0, false, 0, false);
+        m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->ID, m_powerCost, GetSpellSchoolMask(m_spellInfo), 0, 0, false, 0, false);
         return;
     }
 
-    if (m_spellInfo->powerType >= MAX_POWERS)
+    if (m_spellInfo->PowerType >= MAX_POWERS)
     {
-        sLog.outError("Spell::TakePower: Unknown power type '%d'", m_spellInfo->powerType);
+        sLog.outError("Spell::TakePower: Unknown power type '%d'", m_spellInfo->PowerType);
         return;
     }
 
-    Powers powerType = Powers(m_spellInfo->powerType);
+    Powers powerType = Powers(m_spellInfo->PowerType);
 
     if (powerType == POWER_HOLY_POWER)
     {
@@ -224,7 +224,7 @@ void Spell::TakePower()
         }
 
         // Zealotry - does not take power
-        if (m_spellInfo->Id == 85696)
+        if (m_spellInfo->ID == 85696)
         {
             return;
         }
@@ -256,7 +256,7 @@ SpellCastResult Spell::CheckRunePower()
         return SPELL_CAST_OK;
     }
 
-    SpellRuneCostEntry const* src = sSpellRuneCostStore.LookupEntry(m_spellInfo->runeCostID);
+    SpellRuneCostEntry const* src = sSpellRuneCostStore.LookupEntry(m_spellInfo->RuneCostID);
 
     if (!src)
     {
@@ -275,7 +275,7 @@ SpellCastResult Spell::CheckRunePower()
         runeCost[i] = src->RuneCost[i];
         if (Player* modOwner = m_caster->GetSpellModOwner())
         {
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i]);
+            modOwner->ApplySpellMod(m_spellInfo->ID, SPELLMOD_COST, runeCost[i]);
         }
     }
 
@@ -318,7 +318,7 @@ void Spell::TakeRunePower(bool hit)
         return;
     }
 
-    SpellRuneCostEntry const* src = sSpellRuneCostStore.LookupEntry(m_spellInfo->runeCostID);
+    SpellRuneCostEntry const* src = sSpellRuneCostStore.LookupEntry(m_spellInfo->RuneCostID);
 
     if (!src)
     {
@@ -339,7 +339,7 @@ void Spell::TakeRunePower(bool hit)
         runeCost[i] = src->RuneCost[i];
         if (Player* modOwner = m_caster->GetSpellModOwner())
         {
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i]);
+            modOwner->ApplySpellMod(m_spellInfo->ID, SPELLMOD_COST, runeCost[i]);
         }
     }
 
@@ -397,7 +397,7 @@ void Spell::TakeRunePower(bool hit)
         {
             if (Player* modOwner = m_caster->GetSpellModOwner())
             {
-                modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, rp);
+                modOwner->ApplySpellMod(m_spellInfo->ID, SPELLMOD_COST, rp);
             }
 
             rp = int32(sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RUNICPOWER_INCOME) * rp);
@@ -488,7 +488,7 @@ void Spell::HandleThreatSpells()
         return;
     }
 
-    SpellThreatEntry const* threatEntry = sSpellMgr.GetSpellThreatEntry(m_spellInfo->Id);
+    SpellThreatEntry const* threatEntry = sSpellMgr.GetSpellThreatEntry(m_spellInfo->ID);
 
     if (!threatEntry || (!threatEntry->threat && threatEntry->ap_bonus == 0.0f))
     {
@@ -520,7 +520,7 @@ void Spell::HandleThreatSpells()
         // so abort when only some effects are negative.
         if ((m_negativeEffectMask & effectMask) != effectMask)
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u, rank %u, is not clearly positive or negative, ignoring bonus threat", m_spellInfo->Id, sSpellMgr.GetSpellRank(m_spellInfo->Id));
+            DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u, rank %u, is not clearly positive or negative, ignoring bonus threat", m_spellInfo->ID, sSpellMgr.GetSpellRank(m_spellInfo->ID));
             return;
         }
         positive = false;
@@ -559,5 +559,5 @@ void Spell::HandleThreatSpells()
         }
     }
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u added an additional %f threat for %s %zu target(s)", m_spellInfo->Id, threat, positive ? "assisting" : "harming", m_UniqueTargetInfo.size());
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u added an additional %f threat for %s %zu target(s)", m_spellInfo->ID, threat, positive ? "assisting" : "harming", m_UniqueTargetInfo.size());
 }

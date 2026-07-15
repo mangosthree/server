@@ -1188,9 +1188,9 @@ bool TerrainInfo::IsOutdoors(float x, float y, float z) const
     WMOAreaTableEntry const* wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId);
     if (wmoEntry)
     {
-        DEBUG_LOG("Got WMOAreaTableEntry! flag %u, areaid %u", wmoEntry->Flags, wmoEntry->areaId);
+        DEBUG_LOG("Got WMOAreaTableEntry! flag %u, areaid %u", wmoEntry->Flags, wmoEntry->AreaTableID);
 
-        atEntry = GetAreaEntryByAreaID(wmoEntry->areaId);
+        atEntry = GetAreaEntryByAreaID(wmoEntry->AreaTableID);
     }
 
     return IsOutdoorWMO(mogpFlags, adtId, rootId, groupId, wmoEntry, atEntry);
@@ -1252,7 +1252,7 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
         wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId);
         if (wmoEntry)
         {
-            atEntry = GetAreaEntryByAreaID(wmoEntry->areaId);
+            atEntry = GetAreaEntryByAreaID(wmoEntry->AreaTableID);
         }
     }
 
@@ -1610,7 +1610,7 @@ GridMap* TerrainInfo::LoadMapAndVMap(const uint32 x, const uint32 y)
 
             // load VMAPs for current map/grid...
             const MapEntry* i_mapEntry = sMapStore.LookupEntry(m_mapId);
-            const char* mapName = i_mapEntry ? i_mapEntry->name[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
+            const char* mapName = i_mapEntry ? i_mapEntry->MapName_lang[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
 
             int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld.GetDataPath() + "vmaps").c_str(),  m_mapId, x, y);
             switch (vmapLoadResult)

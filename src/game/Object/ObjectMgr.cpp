@@ -580,7 +580,7 @@ void ObjectMgr::LoadInstanceTemplate()
             if (parentEntry->IsContinent())
             {
                 sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: parent point to continent map id %u for instance template %d template, ignored, need be set only for non-continent parents!",
-                                parentEntry->MapID, temp->map);
+                                parentEntry->ID, temp->map);
                 const_cast<InstanceTemplate*>(temp)->parent = 0;
                 continue;
             }
@@ -2191,7 +2191,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             DungeonEncounterEntry const* dbcEntry1 = sDungeonEncounterStore.LookupEntry(m_value1);
             DungeonEncounterEntry const* dbcEntry2 = sDungeonEncounterStore.LookupEntry(m_value2);
             // Check that on proper map
-            if (dbcEntry1->mapId != map->GetId())
+            if (dbcEntry1->MapID != map->GetId())
             {
                 sLog.outErrorDb("CONDITION_COMPLETED_ENCOUNTER (entry %u, DungeonEncounterEntry %u) is used on wrong map (used on Map %u) by %s", m_entry, m_value1, player->GetMapId(), player->GetGuidStr().c_str());
                 return false;
@@ -2206,7 +2206,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
                 dbcEntry2 = NULL;
             }
 
-            return completedEncounterMask & ((dbcEntry1 ? 1 << dbcEntry1->encounterIndex : 0) | (dbcEntry2 ? 1 << dbcEntry2->encounterIndex : 0));
+            return completedEncounterMask & ((dbcEntry1 ? 1 << dbcEntry1->Bit : 0) | (dbcEntry2 ? 1 << dbcEntry2->Bit : 0));
         }
         case CONDITION_SOURCE_AURA:
         {
@@ -2724,7 +2724,7 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
                 sLog.outErrorDb("Completed Encounter condition (entry %u, type %u) has an unknown DungeonEncounter entry %u defined (in value2), skipping.", entry, condition, value2);
                 return false;
             }
-            if (dbcEntry2 && dbcEntry1->mapId != dbcEntry2->mapId)
+            if (dbcEntry2 && dbcEntry1->MapID != dbcEntry2->MapID)
             {
                 sLog.outErrorDb("Completed Encounter condition (entry %u, type %u) has different mapIds for both encounters, skipping.", entry, condition);
                 return false;

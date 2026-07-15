@@ -228,14 +228,14 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     if (mInstance)
     {
         Difficulty diff = GetPlayer()->GetDifficulty(mEntry->IsRaid());
-        if (MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mEntry->MapID, diff))
+        if (MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mEntry->ID, diff))
         {
-            if (mapDiff->resetTime)
+            if (mapDiff->RaidDuration)
             {
-                if (time_t timeReset = sMapPersistentStateMgr.GetScheduler().GetResetTimeFor(mEntry->MapID, diff))
+                if (time_t timeReset = sMapPersistentStateMgr.GetScheduler().GetResetTimeFor(mEntry->ID, diff))
                 {
                     uint32 timeleft = uint32(timeReset - time(NULL));
-                    GetPlayer()->SendInstanceResetWarning(mEntry->MapID, diff, timeleft);
+                    GetPlayer()->SendInstanceResetWarning(mEntry->ID, diff, timeleft);
                 }
             }
         }
@@ -265,7 +265,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
             }
 
             // mount capability changed
-            if (entry->Id != aura->GetModifier()->m_amount)
+            if (entry->ID != aura->GetModifier()->m_amount)
             {
                 if (MountCapabilityEntry const* oldEntry = sMountCapabilityStore.LookupEntry(aura->GetModifier()->m_amount))
                 {
@@ -274,7 +274,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
                 _player->CastSpell(_player, entry->SpeedModSpell, true);
 
-                const_cast<Aura*>(aura)->ChangeAmount(entry->Id);
+                const_cast<Aura*>(aura)->ChangeAmount(entry->ID);
             }
 
             ++itr;

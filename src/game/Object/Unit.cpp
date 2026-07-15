@@ -2360,7 +2360,7 @@ void Unit::HandleEmote(uint32 emote_id)
     }
     else if (EmotesEntry const* emoteEntry = sEmotesStore.LookupEntry(emote_id))
     {
-        if (emoteEntry->EmoteType)                          // 1,2 states, 0 command
+        if (emoteEntry->EmoteSpecProc)                          // 1,2 states, 0 command
         {
             HandleEmoteState(emote_id);
         }
@@ -4421,7 +4421,7 @@ MountCapabilityEntry const* Unit::GetMountCapability(uint32 mountType) const
 
     for (uint32 i = MAX_MOUNT_CAPABILITIES; i > 0; --i)
     {
-        MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(mountTypeEntry->MountCapability[i - 1]);
+        MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(mountTypeEntry->Capability[i - 1]);
         if (!mountCapability)
         {
             continue;
@@ -4840,7 +4840,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
         case SPELL_AURA_MOUNTED:
             if (MountCapabilityEntry const* mountCapability = GetMountCapability(uint32(spellEffect->EffectMiscValueB)))
             {
-                return int32(mountCapability->Id);
+                return int32(mountCapability->ID);
             }
             break;
         default:

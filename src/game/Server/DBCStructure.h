@@ -600,14 +600,14 @@ struct BankBagSlotPricesEntry
 
 struct BarberShopStyleEntry
 {
-    uint32  Id;                                             // 0        m_ID
-    uint32  type;                                           // 1        m_type
+    uint32  ID;                                             // 0        m_ID
+    uint32  Type;                                           // 1        m_type
     //char*   name;                                         // 2        m_DisplayName_lang
     //uint32  unk_name;                                     // 3        m_Description_lang
     //float   CostMultiplier;                               // 4        m_Cost_Modifier
-    uint32  race;                                           // 5        m_race
-    uint32  gender;                                         // 6        m_sex
-    uint32  hair_id;                                        // 7        m_data (real ID to hair/facial hair)
+    uint32  Race;                                           // 5        m_race
+    uint32  Sex;                                         // 6        m_sex
+    uint32  Data;                                        // 7        m_data (real ID to hair/facial hair)
 };
 
 struct BattlemasterListEntry
@@ -745,7 +745,7 @@ struct ChrPowerTypesEntry
 
 struct CinematicSequencesEntry
 {
-    uint32      Id;                                         // 0        m_ID
+    uint32      ID;                                         // 0        m_ID
     // uint32      unk1;                                    // 1        m_soundID
     // uint32      cinematicCamera;                         // 2        m_camera[8]
 };
@@ -801,7 +801,7 @@ struct CreatureFamilyEntry
 
 struct CreatureModelDataEntry
 {
-    uint32 Id;                                              // 0
+    uint32 ID;                                              // 0
     //uint32 Flags;                                         // 1
     //char* ModelPath                                       // 2
     //uint32 InhabitType;                                   // 3 model inhabit type
@@ -893,12 +893,12 @@ struct DestructibleModelDataEntry
 
 struct DungeonEncounterEntry
 {
-    uint32 Id;                                              // 0        m_ID
-    uint32 mapId;                                           // 1        m_mapID
+    uint32 ID;                                              // 0        m_ID
+    uint32 MapID;                                           // 1        m_mapID
     uint32 Difficulty;                                      // 2        m_difficulty
-    uint32 encounterData;                                   // 3        m_orderIndex
-    uint32 encounterIndex;                                  // 4        m_Bit
-    DBCString encounterName;                                // 5 - encounter name
+    uint32 OrderIndex;                                   // 3        m_orderIndex
+    uint32 Bit;                                  // 4        m_Bit
+    DBCString Name_lang;                                // 5 - encounter name
     //uint32 nameLangFlags;                                 // 6        m_name_lang_flags
     //uint32 spellIconID;                                   // 7        m_spellIconID
 };
@@ -917,21 +917,21 @@ struct DurabilityQualityEntry
 
 struct EmotesEntry
 {
-    uint32  Id;                                             // 0        m_ID
+    uint32  ID;                                             // 0        m_ID
     //char*   Name;                                         // 1        m_EmoteSlashCommand
     //uint32  AnimationId;                                  // 2        m_AnimID
-    uint32  Flags;                                          // 3        m_EmoteFlags
-    uint32  EmoteType;                                      // 4        m_EmoteSpecProc (determine how emote are shown)
-    uint32  UnitStandState;                                 // 5        m_EmoteSpecProcParam
+    uint32  EmoteFlags;                                          // 3        m_EmoteFlags
+    uint32  EmoteSpecProc;                                      // 4        m_EmoteSpecProc (determine how emote are shown)
+    uint32  EmoteSpecProcParam;                                 // 5        m_EmoteSpecProcParam
     //uint32  SoundId;                                      // 6        m_EventSoundID
     //uint32 unk;                                           // 7 - 4.2.0
 };
 
 struct EmotesTextEntry
 {
-    uint32  Id;                                             //          m_ID
+    uint32  ID;                                             //          m_ID
                                                             //          m_name
-    uint32  textid;                                         //          m_emoteID
+    uint32  EmoteID;                                         //          m_emoteID
                                                             //          m_emoteText
 };
 
@@ -1375,74 +1375,74 @@ struct MailTemplateEntry
 
 struct MapEntry
 {
-    uint32  MapID;                                          // 0        m_ID
-    DBCString   internalname;                                   // 1        m_Directory
-    uint32  map_type;                                       // 2        m_InstanceType
-    uint32      mapFlags;                                       // 3        m_Flags (0x100 - CAN_CHANGE_PLAYER_DIFFICULTY)
-    uint32      unk4;                                           // 4 4.0.1
-    uint32      isPvP;                                          // 5        m_PVP 0 or 1 for battlegrounds (not arenas)
-    DBCString   name;                                           // 6        m_MapName_lang
-    uint32      linked_zone;                                    // 7        m_areaTableID
-    DBCString   hordeIntro;                                     // 8        m_MapDescription0_lang
-    DBCString   allianceIntro;                                  // 9        m_MapDescription1_lang
-    uint32      multimap_id;                                    // 10       m_LoadingScreenID (LoadingScreens.dbc)
-    float       BattlefieldMapIconScale;                        // 11       m_minimapIconScale
-    int32       ghost_entrance_map;                             // 12       m_corpseMapID map_id of entrance map in ghost mode (continent always and in most cases = normal entrance)
-    float       ghost_entrance_x;                               // 13       m_corpseX entrance x coordinate in ghost mode  (in most cases = normal entrance)
-    float       ghost_entrance_y;                               // 14       m_corpseY entrance y coordinate in ghost mode  (in most cases = normal entrance)
-    uint32      timeOfDayOverride;                              // 15       m_timeOfDayOverride
-    uint32      addon;                                          // 16       m_expansionID
-    uint32      unkTime;                                        // 17       m_raidOffset
-    uint32      maxPlayers;                                     // 18       m_maxPlayers
-    int32       rootPhaseMap;                                   // 19       map with base phasing
+    uint32  ID;                                          // 0        m_ID
+    DBCString   Directory;                                   // 1        m_Directory
+    uint32  InstanceType;                                       // 2        m_InstanceType
+    uint32      Flags;                                       // 3        m_Flags (0x100 - CAN_CHANGE_PLAYER_DIFFICULTY)
+    uint32      MapType;                                           // 4 4.0.1
+    uint32      PVP;                                          // 5        m_PVP 0 or 1 for battlegrounds (not arenas)
+    DBCString   MapName_lang;                                           // 6        m_MapName_lang
+    uint32      AreaTableID;                                    // 7        m_areaTableID
+    DBCString   MapDescription0_lang;                                     // 8        m_MapDescription0_lang
+    DBCString   MapDescription1_lang;                                  // 9        m_MapDescription1_lang
+    uint32      LoadingScreenID;                                    // 10       m_LoadingScreenID (LoadingScreens.dbc)
+    float       MinimapIconScale;                        // 11       m_minimapIconScale
+    int32       CorpseMapID;                             // 12       m_corpseMapID map_id of entrance map in ghost mode (continent always and in most cases = normal entrance)
+    float       Corpse_0;                               // 13       m_corpseX entrance x coordinate in ghost mode  (in most cases = normal entrance)
+    float       Corpse_1;                               // 14       m_corpseY entrance y coordinate in ghost mode  (in most cases = normal entrance)
+    uint32      TimeOfDayOverride;                              // 15       m_timeOfDayOverride
+    uint32      ExpansionID;                                          // 16       m_expansionID
+    uint32      RaidOffset;                                        // 17       m_raidOffset
+    uint32      MaxPlayers;                                     // 18       m_maxPlayers
+    int32       ParentMapID;                                   // 19       map with base phasing
 
     // Helpers
-    uint32 Expansion() const { return addon; }
+    uint32 Expansion() const { return ExpansionID; }
 
-    bool IsDungeon() const { return map_type == MAP_INSTANCE || map_type == MAP_RAID; }
-    bool IsNonRaidDungeon() const { return map_type == MAP_INSTANCE; }
-    bool Instanceable() const { return map_type == MAP_INSTANCE || map_type == MAP_RAID || map_type == MAP_BATTLEGROUND || map_type == MAP_ARENA; }
-    bool IsRaid() const { return map_type == MAP_RAID; }
-    bool IsBattleGround() const { return map_type == MAP_BATTLEGROUND; }
-    bool IsBattleArena() const { return map_type == MAP_ARENA; }
-    bool IsBattleGroundOrArena() const { return map_type == MAP_BATTLEGROUND || map_type == MAP_ARENA; }
+    bool IsDungeon() const { return InstanceType == MAP_INSTANCE || InstanceType == MAP_RAID; }
+    bool IsNonRaidDungeon() const { return InstanceType == MAP_INSTANCE; }
+    bool Instanceable() const { return InstanceType == MAP_INSTANCE || InstanceType == MAP_RAID || InstanceType == MAP_BATTLEGROUND || InstanceType == MAP_ARENA; }
+    bool IsRaid() const { return InstanceType == MAP_RAID; }
+    bool IsBattleGround() const { return InstanceType == MAP_BATTLEGROUND; }
+    bool IsBattleArena() const { return InstanceType == MAP_ARENA; }
+    bool IsBattleGroundOrArena() const { return InstanceType == MAP_BATTLEGROUND || InstanceType == MAP_ARENA; }
 
     bool IsMountAllowed() const
     {
         return !IsDungeon() ||
-               MapID == 209 || MapID == 269 || MapID == 309 || // TanarisInstance, CavernsOfTime, Zul'gurub
-               MapID == 509 || MapID == 534 || MapID == 560 || // AhnQiraj, HyjalPast, HillsbradPast
-               MapID == 568 || MapID == 580 || MapID == 595 || // ZulAman, Sunwell Plateau, Culling of Stratholme
-               MapID == 603 || MapID == 615 || MapID == 616 || // Ulduar, The Obsidian Sanctum, The Eye Of Eternity
-               MapID == 631 ||                                 // Icecrown Citadel,
-               MapID == 654 || MapID == 655 || MapID == 656 || // Gilneas, Gilneas Phase 1, Gilneas Phase 2
-               MapID == 658 || MapID == 720 || MapID == 724 || // Pit of Saron, Firelands, Ruby Sanctum
-               MapID == 644 || MapID == 721 || MapID == 734 || // Halls of Origination, Firelands, ?????????
-               MapID == 754 || MapID == 755 || MapID == 859 || // Throne of Four Winds, Lost City of Tol'Vir, Zul'Gurub
-               MapID == 861 || MapID == 938 || MapID == 939 || // Firelands Dailies, End Time, Well of Eternity
-               MapID == 940 || MapID == 962 || MapID == 967;   // Hour of Twilight, Gate of Setting Sun, Dragon Soul
+               ID == 209 || ID == 269 || ID == 309 || // TanarisInstance, CavernsOfTime, Zul'gurub
+               ID == 509 || ID == 534 || ID == 560 || // AhnQiraj, HyjalPast, HillsbradPast
+               ID == 568 || ID == 580 || ID == 595 || // ZulAman, Sunwell Plateau, Culling of Stratholme
+               ID == 603 || ID == 615 || ID == 616 || // Ulduar, The Obsidian Sanctum, The Eye Of Eternity
+               ID == 631 ||                                 // Icecrown Citadel,
+               ID == 654 || ID == 655 || ID == 656 || // Gilneas, Gilneas Phase 1, Gilneas Phase 2
+               ID == 658 || ID == 720 || ID == 724 || // Pit of Saron, Firelands, Ruby Sanctum
+               ID == 644 || ID == 721 || ID == 734 || // Halls of Origination, Firelands, ?????????
+               ID == 754 || ID == 755 || ID == 859 || // Throne of Four Winds, Lost City of Tol'Vir, Zul'Gurub
+               ID == 861 || ID == 938 || ID == 939 || // Firelands Dailies, End Time, Well of Eternity
+               ID == 940 || ID == 962 || ID == 967;   // Hour of Twilight, Gate of Setting Sun, Dragon Soul
     }
 
     bool IsContinent() const
     {
-        return MapID == 0 || MapID == 1 || MapID == 530 || MapID == 571;
+        return ID == 0 || ID == 1 || ID == 530 || ID == 571;
     }
 };
 
 struct MapDifficultyEntry
 {
-    uint32      Id;                                         // 0        m_ID
-    uint32      MapId;                                      // 1        m_mapID
+    uint32      ID;                                         // 0        m_ID
+    uint32      MapID;                                      // 1        m_mapID
     uint32      Difficulty;                                 // 2        m_difficulty (for arenas: arena slot)
-    DBCString   areaTriggerText;                            // 3        m_message_lang (text showed when transfer to map failed)
-    uint32      resetTime;                                  // 4,       m_raidDuration in secs, 0 if no fixed reset time
-    uint32      maxPlayers;                                 // 5,       m_maxPlayers some heroic versions have 0 when expected same amount as in normal version
-    DBCString   difficultyString;                           // 6        m_difficultystring
+    DBCString   Message_lang;                            // 3        m_message_lang (text showed when transfer to map failed)
+    uint32      RaidDuration;                                  // 4,       m_raidDuration in secs, 0 if no fixed reset time
+    uint32      MaxPlayers;                                 // 5,       m_maxPlayers some heroic versions have 0 when expected same amount as in normal version
+    DBCString   Difficultystring;                           // 6        m_difficultystring
 };
 
 struct MovieEntry
 {
-    uint32      Id;                                         // 0        m_ID
+    uint32      ID;                                         // 0        m_ID
     //char*       filename;                                 // 1        m_filename
     //uint32      unk1;                                     // 2        m_volume
     //uint32      unk2;                                     // 3 4.0.0
@@ -1450,7 +1450,7 @@ struct MovieEntry
 
 struct MountCapabilityEntry
 {
-    uint32 Id;
+    uint32 ID;
     uint32 Flags;
     uint32 RequiredRidingSkill;
     uint32 RequiredArea;
@@ -1464,8 +1464,8 @@ struct MountCapabilityEntry
 
 struct MountTypeEntry
 {
-    uint32 Id;
-    uint32 MountCapability[MAX_MOUNT_CAPABILITIES];
+    uint32 ID;
+    uint32 Capability[MAX_MOUNT_CAPABILITIES];
 };
 
 struct NumTalentsAtLevelEntry
@@ -2428,8 +2428,8 @@ struct TotemCategoryEntry
 struct TransportAnimationEntry
 {
     //uint32    id;                                         // 0
-    uint32    transportEntry;                               // 1
-    uint32    timeFrame;                                    // 2
+    uint32    TransportID;                               // 1
+    uint32    TimeIndex;                                    // 2
     //float     xOffs;                                      // 3
     //float     yOffs;                                      // 4
     //float     zOffs;                                      // 5
@@ -2540,17 +2540,17 @@ struct VehicleSeatEntry
 
 struct WMOAreaTableEntry
 {
-    uint32 Id;                                              // 0        m_ID index
-    int32 rootId;                                           // 1        m_WMOID used in root WMO
-    int32 adtId;                                            // 2        m_NameSetID used in adt file
-    int32 groupId;                                          // 3        m_WMOGroupID used in group WMO
+    uint32 ID;                                              // 0        m_ID index
+    int32 WMOID;                                           // 1        m_WMOID used in root WMO
+    int32 NameSetID;                                            // 2        m_NameSetID used in adt file
+    int32 WMOGroupID;                                          // 3        m_WMOGroupID used in group WMO
     //uint32 field4;                                        // 4        m_SoundProviderPref
     //uint32 field5;                                        // 5        m_SoundProviderPrefUnderwater
     //uint32 field6;                                        // 6        m_AmbienceID
     //uint32 field7;                                        // 7        m_ZoneMusic
     //uint32 field8;                                        // 8        m_IntroSound
     uint32 Flags;                                           // 9        m_flags (used for indoor/outdoor determination)
-    uint32 areaId;                                          // 10       m_AreaTableID (AreaTable.dbc)
+    uint32 AreaTableID;                                          // 10       m_AreaTableID (AreaTable.dbc)
     //char *Name;                                           // 11       m_AreaName_lang
     //uint32 field12;                                       // 12
     //uint32 field13;                                       // 13
@@ -2560,14 +2560,14 @@ struct WMOAreaTableEntry
 struct WorldMapAreaEntry
 {
     //uint32  ID;                                           // 0        m_ID
-    uint32  map_id;                                         // 1        m_mapID
-    uint32  area_id;                                        // 2        m_areaID index (continent 0 areas ignored)
+    uint32  MapID;                                         // 1        m_mapID
+    uint32  AreaID;                                        // 2        m_areaID index (continent 0 areas ignored)
     //char* internal_name                                   // 3        m_areaName
-    float   y1;                                             // 4        m_locLeft
-    float   y2;                                             // 5        m_locRight
-    float   x1;                                             // 6        m_locTop
-    float   x2;                                             // 7        m_locBottom
-    int32   virtual_map_id;                                 // 8        m_displayMapID -1 (map_id have correct map) other: virtual map where zone show (map_id - where zone in fact internally)
+    float   LocLeft;                                             // 4        m_locLeft
+    float   LocRight;                                             // 5        m_locRight
+    float   LocTop;                                             // 6        m_locTop
+    float   LocBottom;                                             // 7        m_locBottom
+    int32   DisplayMapID;                                 // 8        m_displayMapID -1 (map_id have correct map) other: virtual map where zone show (map_id - where zone in fact internally)
     // int32   dungeonMap_id;                               // 9        m_defaultDungeonFloor (DungeonMap.dbc)
     // uint32  someMapID;                                   // 10       m_parentWorldMapID
     //uint32   unk1;                                        // 11 4.0.0
@@ -2596,10 +2596,10 @@ struct WorldMapOverlayEntry
 struct WorldSafeLocsEntry
 {
     uint32    ID;                                           // 0        m_ID
-    uint32    map_id;                                       // 1        m_continent
-    float     x;                                            // 2        m_locX
-    float     y;                                            // 3        m_locY
-    float     z;                                            // 4        m_locZ
+    uint32    Continent;                                       // 1        m_continent
+    float     Loc_0;                                            // 2        m_locX
+    float     Loc_1;                                            // 3        m_locY
+    float     Loc_2;                                            // 4        m_locZ
     //char*   name;                                         // 5        m_AreaName_lang
 };
 

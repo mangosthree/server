@@ -675,7 +675,7 @@ void LoadDBCStores(const std::string& dataPath)
     for (uint32 i = 1; i < sMapDifficultyStore.GetNumRows(); ++i)
         if (MapDifficultyEntry const* entry = sMapDifficultyStore.LookupEntry(i))
         {
-            sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = entry;
+            sMapDifficultyMap[MAKE_PAIR32(entry->MapID, entry->Difficulty)] = entry;
         }
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sMovieStore,               dbcPath, "Movie.dbc");
@@ -982,7 +982,7 @@ void LoadDBCStores(const std::string& dataPath)
     for (uint32 i = 0; i < sTransportAnimationStore.GetNumRows(); ++i)
         if (TransportAnimationEntry const* entry = sTransportAnimationStore.LookupEntry(i))
         {
-            sTransportAnimationsByEntry[entry->transportEntry][entry->timeFrame] = entry;
+            sTransportAnimationsByEntry[entry->TransportID][entry->TimeIndex] = entry;
         }
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sVehicleStore,             dbcPath, "Vehicle.dbc");
@@ -993,7 +993,7 @@ void LoadDBCStores(const std::string& dataPath)
     {
         if (WMOAreaTableEntry const* entry = sWMOAreaTableStore.LookupEntry(i))
         {
-            sWMOAreaInfoByTripple.insert(WMOAreaInfoByTripple::value_type(WMOAreaTableTripple(entry->rootId, entry->adtId, entry->groupId), entry));
+            sWMOAreaInfoByTripple.insert(WMOAreaInfoByTripple::value_type(WMOAreaTableTripple(entry->WMOID, entry->NameSetID, entry->WMOGroupID), entry));
         }
     }
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sWorldMapOverlayStore,     dbcPath, "WorldMapOverlay.dbc");
@@ -1199,7 +1199,7 @@ AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_
 
     if (MapEntry const* mapEntry = sMapStore.LookupEntry(map_id))
     {
-        return GetAreaEntryByAreaID(mapEntry->linked_zone);
+        return GetAreaEntryByAreaID(mapEntry->AreaTableID);
     }
 
     return NULL;
@@ -1233,7 +1233,7 @@ uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId)
 
     if (WorldMapAreaEntry const* wma = sWorldMapAreaStore.LookupEntry(zoneId))
     {
-        return wma->virtual_map_id >= 0 ? wma->virtual_map_id : wma->map_id;
+        return wma->DisplayMapID >= 0 ? wma->DisplayMapID : wma->MapID;
     }
 
     return mapid;
@@ -1325,14 +1325,14 @@ bool Zone2MapCoordinates(float& x, float& y, uint32 zone)
     WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
 
     // if not listed then map coordinates (instance)
-    if (!maEntry || maEntry->x2 == maEntry->x1 || maEntry->y2 == maEntry->y1)
+    if (!maEntry || maEntry->LocBottom == maEntry->LocTop || maEntry->LocRight == maEntry->LocLeft)
     {
         return false;
     }
 
     std::swap(x, y);                                        // at client map coords swapped
-    x = x * ((maEntry->x2 - maEntry->x1) / 100) + maEntry->x1;
-    y = y * ((maEntry->y2 - maEntry->y1) / 100) + maEntry->y1; // client y coord from top to down
+    x = x * ((maEntry->LocBottom - maEntry->LocTop) / 100) + maEntry->LocTop;
+    y = y * ((maEntry->LocRight - maEntry->LocLeft) / 100) + maEntry->LocLeft; // client y coord from top to down
 
     return true;
 }
@@ -1350,13 +1350,13 @@ bool Map2ZoneCoordinates(float& x, float& y, uint32 zone)
     WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
 
     // if not listed then map coordinates (instance)
-    if (!maEntry || maEntry->x2 == maEntry->x1 || maEntry->y2 == maEntry->y1)
+    if (!maEntry || maEntry->LocBottom == maEntry->LocTop || maEntry->LocRight == maEntry->LocLeft)
     {
         return false;
     }
 
-    x = (x - maEntry->x1) / ((maEntry->x2 - maEntry->x1) / 100);
-    y = (y - maEntry->y1) / ((maEntry->y2 - maEntry->y1) / 100); // client y coord from top to down
+    x = (x - maEntry->LocTop) / ((maEntry->LocBottom - maEntry->LocTop) / 100);
+    y = (y - maEntry->LocLeft) / ((maEntry->LocRight - maEntry->LocLeft) / 100); // client y coord from top to down
     std::swap(x, y);                                        // client have map coords swapped
 
     return true;
@@ -1370,9 +1370,9 @@ ContentLevels GetContentLevelsForMapAndZone(uint32 mapId, uint32 zoneId)
         return CONTENT_1_60;
     }
 
-    if (mapEntry->rootPhaseMap != -1)
+    if (mapEntry->ParentMapID != -1)
     {
-        mapId = mapEntry->rootPhaseMap;
+        mapId = mapEntry->ParentMapID;
     }
 
     switch (mapId)

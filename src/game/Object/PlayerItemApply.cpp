@@ -151,9 +151,9 @@ void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool appl
 
     // req. check at equip, but allow use for extended range if range limit max level, set proper level
     uint32 ssd_level = getLevel();
-    if (ssd && ssd_level > ssd->MaxLevel)
+    if (ssd && ssd_level > ssd->Maxlevel)
     {
-        ssd_level = ssd->MaxLevel;
+        ssd_level = ssd->Maxlevel;
     }
 
     ScalingStatValuesEntry const* ssv = proto->StatScalingFactor ? sScalingStatValuesStore.LookupEntry(ssd_level) : NULL;
@@ -169,12 +169,12 @@ void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool appl
         // If set ScalingStatDistribution need get stats and values from it
         if (ssd && ssv)
         {
-            if (ssd->StatMod[i] < 0)
+            if (ssd->StatID[i] < 0)
             {
                 continue;
             }
-            statType = ssd->StatMod[i];
-            val = (ssv->getssdMultiplier(proto->StatScalingFactor) * ssd->Modifier[i]) / 10000;
+            statType = ssd->StatID[i];
+            val = (ssv->getssdMultiplier(proto->StatScalingFactor) * ssd->Bonus[i]) / 10000;
         }
         else
         {
@@ -584,7 +584,7 @@ void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply
 
         if (form_change)                                    // check aura active state from other form
         {
-            SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellInfo->Id);
+            SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellInfo->ID);
             for (SpellAuraHolderMap::const_iterator iter = spair.first; iter != spair.second; ++iter)
             {
                 if (!item || iter->second->GetCastItemGuid() == item->GetObjectGuid())
@@ -594,7 +594,7 @@ void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply
             }
         }
 
-        DEBUG_LOG("WORLD: cast %s Equip spellId - %i", (item ? "item" : "itemset"), spellInfo->Id);
+        DEBUG_LOG("WORLD: cast %s Equip spellId - %i", (item ? "item" : "itemset"), spellInfo->ID);
 
         CastSpell(this, spellInfo, true, item);
     }
@@ -611,11 +611,11 @@ void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply
 
         if (item)
         {
-            RemoveAurasDueToItemSpell(item, spellInfo->Id); // un-apply all spells , not only at-equipped
+            RemoveAurasDueToItemSpell(item, spellInfo->ID); // un-apply all spells , not only at-equipped
         }
         else
         {
-            RemoveAurasDueToSpell(spellInfo->Id); // un-apply spell (item set case)
+            RemoveAurasDueToSpell(spellInfo->ID); // un-apply spell (item set case)
         }
     }
 }
@@ -751,7 +751,7 @@ void Player::DestroyItemWithOnStoreSpell(Item* item, uint32 spellId)
 void Player::_HandleDeadlyPoison(Unit* Target, WeaponAttackType attType, SpellEntry const* spellInfo)
 {
     SpellAuraHolder const* dPoison = NULL;
-    SpellAuraHolderConstBounds holders = Target->GetSpellAuraHolderBounds(spellInfo->Id);
+    SpellAuraHolderConstBounds holders = Target->GetSpellAuraHolderBounds(spellInfo->ID);
     for (SpellAuraHolderMap::const_iterator iter = holders.first; iter != holders.second; ++iter)
     {
         if (iter->second->GetCaster() == this)
@@ -783,12 +783,12 @@ void Player::_HandleDeadlyPoison(Unit* Target, WeaponAttackType attType, SpellEn
 
         for (int s = 0; s < 3; ++s)
         {
-            if (pSecondEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+            if (pSecondEnchant->Effect[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
             {
                 continue;
             }
 
-            SpellEntry const* combatEntry = sSpellStore.LookupEntry(pSecondEnchant->spellid[s]);
+            SpellEntry const* combatEntry = sSpellStore.LookupEntry(pSecondEnchant->EffectArg[s]);
             if (combatEntry && combatEntry->GetDispel() == DISPEL_POISON)
             {
                 CastSpell(Target, combatEntry, true, otherWeapon);
@@ -865,7 +865,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
 
         if (roll_chance_f(chance))
         {
-            CastSpell(Target, spellInfo->Id, true, item);
+            CastSpell(Target, spellInfo->ID, true, item);
         }
     }
 
@@ -885,12 +885,12 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
         }
         for (int s = 0; s < 3; ++s)
         {
-            if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+            if (pEnchant->Effect[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
             {
                 continue;
             }
 
-            uint32 proc_spell_id = pEnchant->spellid[s];
+            uint32 proc_spell_id = pEnchant->EffectArg[s];
             SpellEntry const* spellInfo = sSpellStore.LookupEntry(proc_spell_id);
             if (!spellInfo)
             {
@@ -899,20 +899,20 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
             }
 
             // Use first rank to access spell item enchant procs
-            float ppmRate = sSpellMgr.GetItemEnchantProcChance(spellInfo->Id);
+            float ppmRate = sSpellMgr.GetItemEnchantProcChance(spellInfo->ID);
 
             float chance = ppmRate
                            ? GetPPMProcChance(proto->Delay, ppmRate)
-                           : pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
+                           : pEnchant->EffectPointsMin[s] != 0 ? float(pEnchant->EffectPointsMin[s]) : GetWeaponProcChance();
 
-            ApplySpellMod(spellInfo->Id, SPELLMOD_CHANCE_OF_SUCCESS, chance);
-            ApplySpellMod(spellInfo->Id, SPELLMOD_FREQUENCY_OF_SUCCESS, chance);
+            ApplySpellMod(spellInfo->ID, SPELLMOD_CHANCE_OF_SUCCESS, chance);
+            ApplySpellMod(spellInfo->ID, SPELLMOD_FREQUENCY_OF_SUCCESS, chance);
 
             if (roll_chance_f(chance))
             {
-                if (IsPositiveSpell(spellInfo->Id))
+                if (IsPositiveSpell(spellInfo->ID))
                 {
-                    CastSpell(this, spellInfo->Id, true, item);
+                    CastSpell(this, spellInfo->ID, true, item);
                 }
                 else
                 {
@@ -922,7 +922,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
                         _HandleDeadlyPoison(Target, attType, spellInfo);
                     }
 
-                    CastSpell(Target, spellInfo->Id, true, item);
+                    CastSpell(Target, spellInfo->ID, true, item);
                 }
             }
         }
@@ -1013,15 +1013,15 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
 
         for (int s = 0; s < 3; ++s)
         {
-            if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_USE_SPELL)
+            if (pEnchant->Effect[s] != ITEM_ENCHANTMENT_TYPE_USE_SPELL)
             {
                 continue;
             }
 
-            SpellEntry const* spellInfo = sSpellStore.LookupEntry(pEnchant->spellid[s]);
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(pEnchant->EffectArg[s]);
             if (!spellInfo)
             {
-                sLog.outError("Player::CastItemUseSpell Enchant %i, cast unknown spell %i", pEnchant->ID, pEnchant->spellid[s]);
+                sLog.outError("Player::CastItemUseSpell Enchant %i, cast unknown spell %i", pEnchant->ID, pEnchant->EffectArg[s]);
                 continue;
             }
 

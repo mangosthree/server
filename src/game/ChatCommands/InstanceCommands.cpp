@@ -65,7 +65,7 @@ bool ChatHandler::HandleInstanceListBindsCommand(char* /*args*/)
             if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
             {
                 PSendSysMessage("map: %d (%s) inst: %d perm: %s diff: %d canReset: %s TTR: %s",
-                                itr->first, entry->name[GetSessionDbcLocale()], state->GetInstanceId(), itr->second.perm ? "yes" : "no",
+                                itr->first, entry->MapName_lang[GetSessionDbcLocale()], state->GetInstanceId(), itr->second.perm ? "yes" : "no",
                                 state->GetDifficulty(), state->CanReset() ? "yes" : "no", timeleft.c_str());
             }
             else
@@ -90,7 +90,7 @@ bool ChatHandler::HandleInstanceListBindsCommand(char* /*args*/)
                 if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
                 {
                     PSendSysMessage("map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
-                                    itr->first, entry->name[GetSessionDbcLocale()], state->GetInstanceId(), itr->second.perm ? "yes" : "no",
+                                    itr->first, entry->MapName_lang[GetSessionDbcLocale()], state->GetInstanceId(), itr->second.perm ? "yes" : "no",
                                     state->GetDifficulty(), state->CanReset() ? "yes" : "no", timeleft.c_str());
                 }
                 else
@@ -157,7 +157,7 @@ bool ChatHandler::HandleInstanceUnbindCommand(char* args)
                 if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
                 {
                     PSendSysMessage("unbinding map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
-                                    itr->first, entry->name[GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no",
+                                    itr->first, entry->MapName_lang[GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no",
                                     save->GetDifficulty(), save->CanReset() ? "yes" : "no", timeleft.c_str());
                 }
                 else

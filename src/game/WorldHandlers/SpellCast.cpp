@@ -141,7 +141,7 @@ void Spell::SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura)
         return;
     }
 
-    if (DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, m_caster))
+    if (DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->ID, m_caster))
     {
         SendCastResult(SPELL_FAILED_SPELL_UNAVAILABLE);
         finish(false);
@@ -249,7 +249,7 @@ void Spell::cancel()
                     Unit* unit = m_caster->GetObjectGuid() == (*ihit).targetGUID ? m_caster : sObjectAccessor.GetUnit(*m_caster, ihit->targetGUID);
                     if (unit && unit->IsAlive())
                     {
-                        unit->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid());
+                        unit->RemoveAurasByCasterSpell(m_spellInfo->ID, m_caster->GetObjectGuid());
                     }
 
                     // prevent other effects applying if spell is already interrupted
@@ -274,8 +274,8 @@ void Spell::cancel()
     }
 
     finish(false);
-    m_caster->RemoveDynObject(m_spellInfo->Id);
-    m_caster->RemoveGameObject(m_spellInfo->Id, true);
+    m_caster->RemoveDynObject(m_spellInfo->ID);
+    m_caster->RemoveGameObject(m_spellInfo->ID, true);
 }
 
 /**
@@ -291,11 +291,11 @@ void Spell::cast(bool skipCheck)
     {
         if (m_triggeredByAuraSpell)
         {
-            sLog.outError("Spell %u triggered by aura spell %u too deep in cast chain for cast. Cast not allowed for prevent overflow stack crash.", m_spellInfo->Id, m_triggeredByAuraSpell->Id);
+            sLog.outError("Spell %u triggered by aura spell %u too deep in cast chain for cast. Cast not allowed for prevent overflow stack crash.", m_spellInfo->ID, m_triggeredByAuraSpell->ID);
         }
         else
         {
-            sLog.outError("Spell %u too deep in cast chain for cast. Cast not allowed for prevent overflow stack crash.", m_spellInfo->Id);
+            sLog.outError("Spell %u too deep in cast chain for cast. Cast not allowed for prevent overflow stack crash.", m_spellInfo->ID);
         }
 
         SendCastResult(SPELL_FAILED_ERROR);
@@ -358,9 +358,9 @@ void Spell::cast(bool skipCheck)
                 AddPrecastSpell(11196);                     // Recently Bandaged
             }
             // Stoneskin
-            else if (m_spellInfo->Id == 20594)
+            else if (m_spellInfo->ID == 20594)
                 AddTriggeredSpell(65116);                   // Stoneskin - armor 10% for 8 sec
-            else if (m_spellInfo->Id == 68992)              // Darkflight
+            else if (m_spellInfo->ID == 68992)              // Darkflight
             {
                 AddPrecastSpell(96223);                     // Run Speed Marker
                 if (m_caster->HasWorgenForm())
@@ -368,7 +368,7 @@ void Spell::cast(bool skipCheck)
                     AddPrecastSpell(97709);                 // Altered Form
                 }
             }
-            else if (m_spellInfo->Id == 68996)              // Two Forms
+            else if (m_spellInfo->ID == 68996)              // Two Forms
             {
                 if (m_caster->IsInWorgenForm())
                 {
@@ -380,12 +380,12 @@ void Spell::cast(bool skipCheck)
                 }
             }
             // Chaos Bane strength buff
-            else if (m_spellInfo->Id == 71904)
+            else if (m_spellInfo->ID == 71904)
             {
                 AddTriggeredSpell(73422);
             }
             // Weak Alcohol
-            else if (m_spellInfo->SpellIconID == 1306 && m_spellInfo->SpellVisual[0] == 11359)
+            else if (m_spellInfo->SpellIconID == 1306 && m_spellInfo->SpellVisualID[0] == 11359)
             {
                 AddTriggeredSpell(51655);                   // BOTM - Create Empty Brew Bottle
             }
@@ -394,12 +394,12 @@ void Spell::cast(bool skipCheck)
         case SPELLFAMILY_MAGE:
         {
             // Ice Block
-            if (classOpt && classOpt->SpellFamilyFlags & UI64LIT(0x0000008000000000))
+            if (classOpt && classOpt->SpellClassMask & UI64LIT(0x0000008000000000))
             {
                 AddPrecastSpell(41425);                     // Hypothermia
             }
             // Icy Veins
-            else if (m_spellInfo->Id == 12472)
+            else if (m_spellInfo->ID == 12472)
             {
                 if (m_caster->HasAura(56374))               // Glyph of Icy Veins
                 {
@@ -409,7 +409,7 @@ void Spell::cast(bool skipCheck)
                 }
             }
             // Fingers of Frost
-            else if (m_spellInfo->Id == 44544)
+            else if (m_spellInfo->ID == 44544)
             {
                 AddPrecastSpell(74396);                     // Fingers of Frost
             }
@@ -418,7 +418,7 @@ void Spell::cast(bool skipCheck)
         case SPELLFAMILY_WARRIOR:
         {
             // Shield Slam
-            if (classOpt && (classOpt->SpellFamilyFlags & UI64LIT(0x0000020000000000)) && m_spellInfo->GetCategory()==1209)
+            if (classOpt && (classOpt->SpellClassMask & UI64LIT(0x0000020000000000)) && m_spellInfo->GetCategory()==1209)
             {
                 if (m_caster->HasAura(58375))               // Glyph of Blocking
                 {
@@ -426,7 +426,7 @@ void Spell::cast(bool skipCheck)
                 }
             }
             // Bloodrage
-            if (classOpt && (classOpt->SpellFamilyFlags & UI64LIT(0x0000000000000100)))
+            if (classOpt && (classOpt->SpellClassMask & UI64LIT(0x0000000000000100)))
             {
                 if (m_caster->HasAura(70844))               // Item - Warrior T10 Protection 4P Bonus
                 {
@@ -434,7 +434,7 @@ void Spell::cast(bool skipCheck)
                 }
             }
             // Bloodsurge (triggered), Sudden Death (triggered)
-            else if (m_spellInfo->Id == 46916 || m_spellInfo->Id == 52437)
+            else if (m_spellInfo->ID == 46916 || m_spellInfo->ID == 52437)
                 // Item - Warrior T10 Melee 4P Bonus
                 if (Aura* aur = m_caster->GetAura(70847, EFFECT_INDEX_0))
                     if (roll_chance_i(aur->GetModifier()->m_amount))
@@ -447,15 +447,15 @@ void Spell::cast(bool skipCheck)
         {
             // Power Word: Shield
             if (m_spellInfo->GetMechanic() == MECHANIC_SHIELD &&
-                (classOpt && classOpt->SpellFamilyFlags & UI64LIT(0x0000000000000001)))
+                (classOpt && classOpt->SpellClassMask & UI64LIT(0x0000000000000001)))
                 AddPrecastSpell(6788);                      // Weakened Soul
             // Prayer of Mending (jump animation), we need formal caster instead original for correct animation
-            else if (classOpt && classOpt->SpellFamilyFlags & UI64LIT(0x0000002000000000))
+            else if (classOpt && classOpt->SpellClassMask & UI64LIT(0x0000002000000000))
             {
                 AddTriggeredSpell(41637);
             }
 
-            switch (m_spellInfo->Id)
+            switch (m_spellInfo->ID)
             {
                 case 15237: AddTriggeredSpell(23455); break;// Holy Nova, rank 1
                 case 15430: AddTriggeredSpell(23458); break;// Holy Nova, rank 2
@@ -473,12 +473,12 @@ void Spell::cast(bool skipCheck)
         case SPELLFAMILY_DRUID:
         {
             // Faerie Fire (Feral)
-            if (m_spellInfo->Id == 16857 && m_caster->GetShapeshiftForm() != FORM_CAT)
+            if (m_spellInfo->ID == 16857 && m_caster->GetShapeshiftForm() != FORM_CAT)
             {
                 AddTriggeredSpell(60089);
             }
             // Clearcasting
-            else if (m_spellInfo->Id == 16870)
+            else if (m_spellInfo->ID == 16870)
             {
                 if (m_caster->HasAura(70718))               // Item - Druid T10 Balance 2P Bonus
                 {
@@ -486,7 +486,7 @@ void Spell::cast(bool skipCheck)
                 }
             }
             // Berserk (Bear Mangle part)
-            else if (m_spellInfo->Id == 50334)
+            else if (m_spellInfo->ID == 50334)
             {
                 AddTriggeredSpell(58923);
             }
@@ -494,7 +494,7 @@ void Spell::cast(bool skipCheck)
         }
         case SPELLFAMILY_ROGUE:
             // Fan of Knives (main hand)
-            if (m_spellInfo->Id == 51723 && m_caster->GetTypeId() == TYPEID_PLAYER &&
+            if (m_spellInfo->ID == 51723 && m_caster->GetTypeId() == TYPEID_PLAYER &&
                     ((Player*)m_caster)->haveOffhandWeapon())
             {
                 AddTriggeredSpell(52874);                   // Fan of Knives (offhand)
@@ -503,12 +503,12 @@ void Spell::cast(bool skipCheck)
         case SPELLFAMILY_HUNTER:
         {
             // Deterrence
-            if (m_spellInfo->Id == 19263)
+            if (m_spellInfo->ID == 19263)
             {
                 AddPrecastSpell(67801);
             }
             // Kill Command
-            else if (m_spellInfo->Id == 34026)
+            else if (m_spellInfo->ID == 34026)
             {
                 if (m_caster->HasAura(37483))               // Improved Kill Command - Item set bonus
                 {
@@ -516,7 +516,7 @@ void Spell::cast(bool skipCheck)
                 }
             }
             // Lock and Load
-            else if (m_spellInfo->Id == 56453)
+            else if (m_spellInfo->ID == 56453)
             {
                 AddPrecastSpell(67544);                     // Lock and Load Marker
             }
@@ -525,7 +525,7 @@ void Spell::cast(bool skipCheck)
         case SPELLFAMILY_PALADIN:
         {
             // Divine Illumination
-            if (m_spellInfo->Id == 31842)
+            if (m_spellInfo->ID == 31842)
             {
                 if (m_caster->HasAura(70755))               // Item - Paladin T10 Holy 2P Bonus
                 {
@@ -533,7 +533,7 @@ void Spell::cast(bool skipCheck)
                 }
             }
             // Hand of Reckoning
-            else if (m_spellInfo->Id == 62124)
+            else if (m_spellInfo->ID == 62124)
             {
                 if (!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetTargetGuid() != m_caster->GetObjectGuid())
                 {
@@ -541,13 +541,13 @@ void Spell::cast(bool skipCheck)
                 }
             }
             // Divine Shield, Divine Protection or Hand of Protection
-            else if (classOpt && classOpt->SpellFamilyFlags & UI64LIT(0x0000000000400080))
+            else if (classOpt && classOpt->SpellClassMask & UI64LIT(0x0000000000400080))
             {
                 AddPrecastSpell(25771);                     // Forbearance
                 AddPrecastSpell(61987);                     // Avenging Wrath Marker
             }
             // Lay on Hands
-            else if (classOpt && classOpt->SpellFamilyFlags & UI64LIT(0x0000000000008000))
+            else if (classOpt && classOpt->SpellClassMask & UI64LIT(0x0000000000008000))
             {
                 // only for self cast
                 if (m_caster == m_targets.getUnitTarget())
@@ -556,7 +556,7 @@ void Spell::cast(bool skipCheck)
                 }
             }
             // Avenging Wrath
-            else if (classOpt && classOpt->SpellFamilyFlags & UI64LIT(0x0000200000000000))
+            else if (classOpt && classOpt->SpellClassMask & UI64LIT(0x0000200000000000))
             {
                 AddPrecastSpell(61987);                     // Avenging Wrath Marker
             }
@@ -566,22 +566,22 @@ void Spell::cast(bool skipCheck)
         {
             SpellEffectEntry const* spellEffect = m_spellInfo->GetSpellEffect(EFFECT_INDEX_0);
             // Bloodlust
-            if (m_spellInfo->Id == 2825)
+            if (m_spellInfo->ID == 2825)
             {
                 AddPrecastSpell(57724);                     // Sated
             }
             // Heroism
-            else if (m_spellInfo->Id == 32182)
+            else if (m_spellInfo->ID == 32182)
             {
                 AddPrecastSpell(57723);                     // Exhaustion
             }
             // Spirit Walk
-            else if (m_spellInfo->Id == 58875)
+            else if (m_spellInfo->ID == 58875)
             {
                 AddPrecastSpell(58876);
             }
             // Totem of Wrath
-            else if (spellEffect && spellEffect->Effect==SPELL_EFFECT_APPLY_AREA_AURA_RAID && classOpt && classOpt->SpellFamilyFlags & UI64LIT(0x0000000004000000))
+            else if (spellEffect && spellEffect->Effect==SPELL_EFFECT_APPLY_AREA_AURA_RAID && classOpt && classOpt->SpellClassMask & UI64LIT(0x0000000004000000))
                 // only for main totem spell cast
                 AddTriggeredSpell(30708);                   // Totem of Wrath
             break;
@@ -589,7 +589,7 @@ void Spell::cast(bool skipCheck)
         case SPELLFAMILY_DEATHKNIGHT:
         {
             // Chains of Ice
-            if (m_spellInfo->Id == 45524)
+            if (m_spellInfo->ID == 45524)
             {
                 AddTriggeredSpell(55095);                   // Frost Fever
             }
@@ -610,7 +610,7 @@ void Spell::cast(bool skipCheck)
             ((Player*)m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM, m_CastItem->GetEntry());
         }
 
-        ((Player*)m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
+        ((Player*)m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->ID);
     }
 
     // Used by Eluna
@@ -652,7 +652,7 @@ void Spell::cast(bool skipCheck)
     }
 
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
-    float speed = m_spellInfo->speed == 0.0f && m_triggeredBySpellInfo ? m_triggeredBySpellInfo->speed : m_spellInfo->speed;
+    float speed = m_spellInfo->Speed == 0.0f && m_triggeredBySpellInfo ? m_triggeredBySpellInfo->Speed : m_spellInfo->Speed;
     if (speed > 0.0f)
     {
         // Remove used for cast item if need (it can be already NULL after TakeReagents call
@@ -872,7 +872,7 @@ void Spell::_handle_immediate_phase()
         // persistent area auras target only the ground
         if (spellEffect->Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA ||
                 //summon a gameobject at the spell's destination xyz
-                (spellEffect->Effect == SPELL_EFFECT_TRANS_DOOR && spellEffect->EffectImplicitTargetA == TARGET_AREAEFFECT_GO_AROUND_DEST))
+                (spellEffect->Effect == SPELL_EFFECT_TRANS_DOOR && spellEffect->ImplicitTarget_0 == TARGET_AREAEFFECT_GO_AROUND_DEST))
             HandleEffects(NULL, NULL, NULL, SpellEffectIndex(j));
     }
 }
@@ -1006,7 +1006,7 @@ void Spell::update(uint32 difftime)
                     }
 
                     // check if player has turned if flag is set
-                    if ( spellInterrupts && (spellInterrupts->ChannelInterruptFlags & CHANNEL_FLAG_TURNING) && m_castOrientation != m_caster->GetOrientation() )
+                    if ( spellInterrupts && (spellInterrupts->ChannelInterruptFlags_0 & CHANNEL_FLAG_TURNING) && m_castOrientation != m_caster->GetOrientation() )
                     {
                         cancel();
                     }
@@ -1054,7 +1054,7 @@ void Spell::update(uint32 difftime)
                                 continue;
                             }
 
-                            p->RewardPlayerAndGroupAtCast(unit, m_spellInfo->Id);
+                            p->RewardPlayerAndGroupAtCast(unit, m_spellInfo->ID);
                         }
 
                         for (GOTargetList::const_iterator ihit = m_UniqueGOTargetInfo.begin(); ihit != m_UniqueGOTargetInfo.end(); ++ihit)
@@ -1067,7 +1067,7 @@ void Spell::update(uint32 difftime)
                                 continue;
                             }
 
-                            p->RewardPlayerAndGroupAtCast(go, m_spellInfo->Id);
+                            p->RewardPlayerAndGroupAtCast(go, m_spellInfo->ID);
                         }
                     }
                 }
@@ -1162,7 +1162,7 @@ void Spell::finish(bool ok)
     {
         // Not drop combopoints if negative spell and if any miss on enemy exist
         bool needDrop = true;
-        if (!IsPositiveSpell(m_spellInfo->Id))
+        if (!IsPositiveSpell(m_spellInfo->ID))
         {
             for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
             {
@@ -1206,7 +1206,7 @@ void Spell::finish(bool ok)
         Map* map = m_caster->GetMap();
         if (map->IsDungeon())
         {
-            ((DungeonMap*)map)->GetPersistanceState()->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, m_spellInfo->Id);
+            ((DungeonMap*)map)->GetPersistanceState()->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, m_spellInfo->ID);
         }
     }
 }

@@ -169,7 +169,7 @@ void SpellMgr::LoadSpellTargetPositions()
             {
                 continue;
             }
-            if (spellEffect->EffectImplicitTargetA==TARGET_TABLE_X_Y_Z_COORDINATES || spellEffect->EffectImplicitTargetB==TARGET_TABLE_X_Y_Z_COORDINATES)
+            if (spellEffect->ImplicitTarget_0==TARGET_TABLE_X_Y_Z_COORDINATES || spellEffect->ImplicitTarget_1==TARGET_TABLE_X_Y_Z_COORDINATES)
             {
                 found = true;
                 break;
@@ -266,7 +266,7 @@ void SpellMgr::LoadSpellBonuses()
             }
 
             // DoTs/HoTs
-            switch(spellEffect->EffectApplyAuraName)
+            switch(spellEffect->EffectAura)
             {
                 case SPELL_AURA_PERIODIC_DAMAGE:
                 case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
@@ -305,7 +305,7 @@ void SpellMgr::LoadSpellBonuses()
                 }
                 // Heals (Also count Mana Shield and Absorb effects as heals)
                 if (spellEffect->Effect == SPELL_EFFECT_HEAL || spellEffect->Effect == SPELL_EFFECT_HEAL_MAX_HEALTH ||
-                    (spellEffect->Effect == SPELL_EFFECT_APPLY_AURA && (spellEffect->EffectApplyAuraName == SPELL_AURA_SCHOOL_ABSORB || spellEffect->EffectApplyAuraName == SPELL_AURA_PERIODIC_HEAL)) )
+                    (spellEffect->Effect == SPELL_EFFECT_APPLY_AURA && (spellEffect->EffectAura == SPELL_AURA_SCHOOL_ABSORB || spellEffect->EffectAura == SPELL_AURA_PERIODIC_HEAL)) )
                 {
                     isHeal = true;
                     break;
@@ -329,7 +329,7 @@ void SpellMgr::LoadSpellBonuses()
                     continue;
                 }
                 // Periodic Heals
-                if (spellEffect->Effect == SPELL_EFFECT_APPLY_AURA && spellEffect->EffectApplyAuraName == SPELL_AURA_PERIODIC_HEAL)
+                if (spellEffect->Effect == SPELL_EFFECT_APPLY_AURA && spellEffect->EffectAura == SPELL_AURA_PERIODIC_HEAL)
                 {
                     isHeal = true;
                     break;
@@ -476,7 +476,7 @@ struct DoSpellThreat
     }
     void AddEntry(SpellThreatEntry const& ste, SpellEntry const* spell)
     {
-        threatMap[spell->Id] = ste;
+        threatMap[spell->ID] = ste;
 
         // flat threat bonus and attack power bonus currently only work properly when all
         // effects have same targets, otherwise, we'd need to seperate it by effect index
@@ -485,9 +485,9 @@ struct DoSpellThreat
             SpellEffectEntry const* spellEffect0 = spell->GetSpellEffect(EFFECT_INDEX_0);
             SpellEffectEntry const* spellEffect1 = spell->GetSpellEffect(EFFECT_INDEX_1);
             SpellEffectEntry const* spellEffect2 = spell->GetSpellEffect(EFFECT_INDEX_2);
-            if ((spellEffect1 && spellEffect1->EffectImplicitTargetA && (!spellEffect0 || spellEffect1->EffectImplicitTargetA != spellEffect0->EffectImplicitTargetA)) ||
-                (spellEffect2 && spellEffect2->EffectImplicitTargetA && (!spellEffect0 || spellEffect2->EffectImplicitTargetA != spellEffect0->EffectImplicitTargetA)))
-                sLog.outErrorDb("Spell %u listed in `spell_threat` has effects with different targets, threat may be assigned incorrectly", spell->Id);
+            if ((spellEffect1 && spellEffect1->ImplicitTarget_0 && (!spellEffect0 || spellEffect1->ImplicitTarget_0 != spellEffect0->ImplicitTarget_0)) ||
+                (spellEffect2 && spellEffect2->ImplicitTarget_0 && (!spellEffect0 || spellEffect2->ImplicitTarget_0 != spellEffect0->ImplicitTarget_0)))
+                sLog.outErrorDb("Spell %u listed in `spell_threat` has effects with different targets, threat may be assigned incorrectly", spell->ID);
         }
         ++count;
     }
@@ -573,24 +573,24 @@ void SpellMgr::LoadSpellScriptTarget()
                 continue;
             }
 
-            if ( spellEffect->EffectImplicitTargetA == TARGET_SCRIPT ||
-                spellEffect->EffectImplicitTargetB == TARGET_SCRIPT ||
-                spellEffect->EffectImplicitTargetA == TARGET_SCRIPT_COORDINATES ||
-                spellEffect->EffectImplicitTargetB == TARGET_SCRIPT_COORDINATES ||
-                spellEffect->EffectImplicitTargetA == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT ||
-                spellEffect->EffectImplicitTargetB == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT ||
-                spellEffect->EffectImplicitTargetA == TARGET_AREAEFFECT_INSTANT ||
-                spellEffect->EffectImplicitTargetB == TARGET_AREAEFFECT_INSTANT ||
-                spellEffect->EffectImplicitTargetA == TARGET_AREAEFFECT_CUSTOM ||
-                spellEffect->EffectImplicitTargetB == TARGET_AREAEFFECT_CUSTOM ||
-                spellEffect->EffectImplicitTargetA == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
-                spellEffect->EffectImplicitTargetB == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
-                spellEffect->EffectImplicitTargetA == TARGET_AREAEFFECT_GO_AROUND_DEST ||
-                spellEffect->EffectImplicitTargetB == TARGET_AREAEFFECT_GO_AROUND_DEST ||
-                spellEffect->EffectImplicitTargetA == TARGET_NARROW_FRONTAL_CONE ||
-                spellEffect->EffectImplicitTargetB == TARGET_NARROW_FRONTAL_CONE ||
-                spellEffect->EffectImplicitTargetA == TARGET_NARROW_FRONTAL_CONE_2 ||
-                spellEffect->EffectImplicitTargetB == TARGET_NARROW_FRONTAL_CONE_2)
+            if ( spellEffect->ImplicitTarget_0 == TARGET_SCRIPT ||
+                spellEffect->ImplicitTarget_1 == TARGET_SCRIPT ||
+                spellEffect->ImplicitTarget_0 == TARGET_SCRIPT_COORDINATES ||
+                spellEffect->ImplicitTarget_1 == TARGET_SCRIPT_COORDINATES ||
+                spellEffect->ImplicitTarget_0 == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT ||
+                spellEffect->ImplicitTarget_1 == TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT ||
+                spellEffect->ImplicitTarget_0 == TARGET_AREAEFFECT_INSTANT ||
+                spellEffect->ImplicitTarget_1 == TARGET_AREAEFFECT_INSTANT ||
+                spellEffect->ImplicitTarget_0 == TARGET_AREAEFFECT_CUSTOM ||
+                spellEffect->ImplicitTarget_1 == TARGET_AREAEFFECT_CUSTOM ||
+                spellEffect->ImplicitTarget_0 == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
+                spellEffect->ImplicitTarget_1 == TARGET_AREAEFFECT_GO_AROUND_SOURCE ||
+                spellEffect->ImplicitTarget_0 == TARGET_AREAEFFECT_GO_AROUND_DEST ||
+                spellEffect->ImplicitTarget_1 == TARGET_AREAEFFECT_GO_AROUND_DEST ||
+                spellEffect->ImplicitTarget_0 == TARGET_NARROW_FRONTAL_CONE ||
+                spellEffect->ImplicitTarget_1 == TARGET_NARROW_FRONTAL_CONE ||
+                spellEffect->ImplicitTarget_0 == TARGET_NARROW_FRONTAL_CONE_2 ||
+                spellEffect->ImplicitTarget_1 == TARGET_NARROW_FRONTAL_CONE_2)
             {
                 targetfound = true;
                 break;
@@ -673,13 +673,13 @@ void SpellMgr::LoadSpellScriptTarget()
                     continue;
                 }
 
-                if (spellEffect->EffectImplicitTargetA == TARGET_SCRIPT ||
-                    spellEffect->EffectImplicitTargetA != TARGET_SELF && spellEffect->EffectImplicitTargetB == TARGET_SCRIPT)
+                if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT ||
+                    spellEffect->ImplicitTarget_0 != TARGET_SELF && spellEffect->ImplicitTarget_1 == TARGET_SCRIPT)
                 {
                     SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(i);
                     if (bounds.first == bounds.second)
                     {
-                        sLog.outErrorDb("Spell (ID: %u) has effect EffectImplicitTargetA/EffectImplicitTargetB = %u (TARGET_SCRIPT), but does not have record in `spell_script_target`", spellInfo->Id, TARGET_SCRIPT);
+                        sLog.outErrorDb("Spell (ID: %u) has effect EffectImplicitTargetA/EffectImplicitTargetB = %u (TARGET_SCRIPT), but does not have record in `spell_script_target`", spellInfo->ID, TARGET_SCRIPT);
                         break;                              // effects of spell
                     }
                 }

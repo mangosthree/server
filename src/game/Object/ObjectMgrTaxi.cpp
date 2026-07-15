@@ -55,7 +55,7 @@ uint32 ObjectMgr::GetNearestTaxiNode(float x, float y, float z, uint32 mapid, Te
     for (uint32 i = 1; i < sTaxiNodesStore.GetNumRows(); ++i)
     {
         TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(i);
-        if (!node || node->map_id != mapid || !node->MountCreatureID[team == ALLIANCE ? 1 : 0])
+        if (!node || node->ContinentID != mapid || !node->MountCreatureID[team == ALLIANCE ? 1 : 0])
         {
             continue;
         }
@@ -69,7 +69,7 @@ uint32 ObjectMgr::GetNearestTaxiNode(float x, float y, float z, uint32 mapid, Te
             continue;
         }
 
-        float dist2 = (node->x - x) * (node->x - x) + (node->y - y) * (node->y - y) + (node->z - z) * (node->z - z);
+        float dist2 = (node->Pos_0 - x) * (node->Pos_0 - x) + (node->Pos_1 - y) * (node->Pos_1 - y) + (node->Pos_2 - z) * (node->Pos_2 - z);
         if (found)
         {
             if (dist2 < dist)

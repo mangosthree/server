@@ -139,7 +139,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
                 return false;
             }
             SpellEffectEntry const* spellEffect = spellEntry->GetSpellEffect(SpellEffectIndex(aura.effect_idx));
-            if (!spellEffect || !spellEffect->EffectApplyAuraName)
+            if (!spellEffect || !spellEffect->EffectAura)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement %s (%u) have non-aura spell effect (ID: %u Effect: %u), ignore.",
                                 criteria->ID, criteria->requiredType, (requirementType == ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA ? "ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA" : "ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA"), requirementType, aura.spell_id, aura.effect_idx);
@@ -367,7 +367,7 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
         {
             if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(known_title.title_id))
             {
-                return source && source->HasTitle(titleInfo->bit_index);
+                return source && source->HasTitle(titleInfo->Mask_ID);
             }
 
             return false;

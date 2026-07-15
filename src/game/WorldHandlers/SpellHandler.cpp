@@ -196,8 +196,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         {
             SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(EFFECT_INDEX_0);
             // for implicit area/coord target spells
-            if (spellEffect && (IsPointEffectTarget(Targets(spellEffect->EffectImplicitTargetA)) ||
-                IsAreaEffectTarget(Targets(spellEffect->EffectImplicitTargetA))))
+            if (spellEffect && (IsPointEffectTarget(Targets(spellEffect->ImplicitTarget_0)) ||
+                IsAreaEffectTarget(Targets(spellEffect->ImplicitTarget_0))))
                 Spell::SendCastResult(_player,spellInfo,cast_count,SPELL_FAILED_NO_VALID_TARGETS);
             // for explicit target spells
             else
@@ -465,7 +465,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             if (SpellEntry const* newInfo = sSpellStore.LookupEntry((*itr)->GetModifier()->m_amount))
             {
                 spellInfo = newInfo;
-                spellId = newInfo->Id;
+                spellId = newInfo->ID;
             }
             break;
         }
@@ -561,8 +561,8 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
             for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
             {
                 SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(SpellEffectIndex(k));
-                if (spellEffect && (spellEffect->EffectApplyAuraName == SPELL_AURA_MOD_POSSESS ||
-                    spellEffect->EffectApplyAuraName == SPELL_AURA_MOD_POSSESS_PET))
+                if (spellEffect && (spellEffect->EffectAura == SPELL_AURA_MOD_POSSESS ||
+                    spellEffect->EffectAura == SPELL_AURA_MOD_POSSESS_PET))
                 {
                     allow = true;
                     break;
@@ -585,7 +585,7 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     if (IsChanneledSpell(spellInfo))
     {
         if (Spell* curSpell = _player->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-            if (curSpell->m_spellInfo->Id == spellId)
+            if (curSpell->m_spellInfo->ID == spellId)
             {
                 _player->InterruptSpell(CURRENT_CHANNELED_SPELL);
             }

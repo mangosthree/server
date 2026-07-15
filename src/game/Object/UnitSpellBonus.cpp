@@ -91,7 +91,7 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
         coeff = 1.0f;
     }
     // Check for table values
-    else if (SpellBonusEntry const* bonus = sSpellMgr.GetSpellBonusData(spellProto->Id))
+    else if (SpellBonusEntry const* bonus = sSpellMgr.GetSpellBonusData(spellProto->ID))
     {
         coeff = damagetype == DOT ? bonus->dot_damage : bonus->direct_damage;
 
@@ -126,7 +126,7 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
         if (Player* modOwner = GetSpellModOwner())
         {
             coeff *= 100.0f;
-            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_SPELL_BONUS_DAMAGE, coeff);
+            modOwner->ApplySpellMod(spellProto->ID, SPELLMOD_SPELL_BONUS_DAMAGE, coeff);
             coeff /= 100.0f;
         }
 
@@ -173,7 +173,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
         if (((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
             (!spellEquip || spellEquip->EquippedItemClass == -1 &&
             // -1 == any item class (not wand then)
-            spellEquip->EquippedItemInventoryTypeMask == 0))
+            spellEquip->EquippedItemInvTypes == 0))
             // 0 == any inventory type (not wand then)
         {
             DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
@@ -301,7 +301,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
                 {
                     SpellEntry const* m_spell = itr->second->GetSpellProto();
                     SpellClassOptionsEntry const* itrClassOptions = m_spell->GetSpellClassOptions();
-                    if (itrClassOptions && (itrClassOptions->SpellFamilyName != SPELLFAMILY_WARLOCK || !(itrClassOptions->SpellFamilyFlags & UI64LIT(0x0004071B8044C402))))
+                    if (itrClassOptions && (itrClassOptions->SpellClassSet != SPELLFAMILY_WARLOCK || !(itrClassOptions->SpellClassMask & UI64LIT(0x0004071B8044C402))))
                     {
                         continue;
                     }
@@ -425,7 +425,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
                 }
             }
             // Torment the weak affected (Arcane Barrage, Arcane Blast, Frostfire Bolt, Arcane Missiles, Fireball)
-            if (classOptions && (classOptions->SpellFamilyFlags & UI64LIT(0x0000900020200021)) &&
+            if (classOptions && (classOptions->SpellClassMask & UI64LIT(0x0000900020200021)) &&
                 (pVictim->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) || pVictim->HasAuraType(SPELL_AURA_HASTE_ALL)))
             {
                 // Search for Torment the weak dummy aura
@@ -444,7 +444,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
         case SPELLFAMILY_WARLOCK:
         {
             // Drain Soul
-            if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000004000))
+            if (classOptions && classOptions->SpellClassMask & UI64LIT(0x0000000000004000))
             {
                 if (pVictim->GetMaxHealth() && pVictim->GetHealth() * 100 / pVictim->GetMaxHealth() <= 25)
                 {
@@ -485,7 +485,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
         case SPELLFAMILY_DRUID:
         {
             // Improved Insect Swarm (Wrath part)
-            if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000000000001))
+            if (classOptions && classOptions->SpellClassMask & UI64LIT(0x0000000000000001))
             {
                 // if Insect Swarm on target
                 if (pVictim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, UI64LIT(0x000000000200000), 0, GetObjectGuid()))
@@ -506,7 +506,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
         case SPELLFAMILY_DEATHKNIGHT:
         {
             // Icy Touch and Howling Blast
-            if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000200000002))
+            if (classOptions && classOptions->SpellClassMask & UI64LIT(0x0000000200000002))
             {
                 // search disease
                 bool found = false;
@@ -536,7 +536,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
                 }
             }
             // Death Coil (bonus from Item - Death Knight T8 DPS Relic)
-            else if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x00002000))
+            else if (classOptions && classOptions->SpellClassMask & UI64LIT(0x00002000))
             {
                 if (Aura* sigil = GetDummyAura(64962))
                 {
@@ -566,7 +566,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
     // apply spellmod to Done damage (flat and pct)
     if (Player* modOwner = GetSpellModOwner())
     {
-        modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, tmpDamage);
+        modOwner->ApplySpellMod(spellProto->ID, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, tmpDamage);
     }
 
     return tmpDamage > 0 ? uint32(tmpDamage) : 0;
@@ -688,7 +688,7 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
         SpellEquippedItemsEntry const* spellEquip = (*i)->GetSpellProto()->GetSpellEquippedItems();
         if (((*i)->GetModifier()->m_miscvalue & schoolMask) != 0 &&
             (!spellEquip || spellEquip->EquippedItemClass == -1 &&      // -1 == any item class (not wand then)
-            spellEquip->EquippedItemInventoryTypeMask == 0))            //  0 == any inventory type (not wand then)
+            spellEquip->EquippedItemInvTypes == 0))            //  0 == any inventory type (not wand then)
                 DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount;
     }
 
@@ -811,7 +811,7 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
             // taken
             if (pVictim)
             {
-                if (!IsPositiveSpell(spellProto->Id))
+                if (!IsPositiveSpell(spellProto->ID))
                 {
                     // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE
                     crit_chance += pVictim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE, schoolMask);
@@ -926,7 +926,7 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
                         break;
                     case SPELLFAMILY_PALADIN:
                         // Sacred Shield
-                        if (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x0000000040000000))
+                        if (classOptions && classOptions->SpellClassMask & UI64LIT(0x0000000040000000))
                         {
                             Aura* aura = pVictim->GetDummyAura(58597);
                             if (aura && aura->GetCasterGuid() == GetObjectGuid())
@@ -976,7 +976,7 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
     // only players use intelligence for critical chance computations
     if (Player* modOwner = GetSpellModOwner())
     {
-        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
+        modOwner->ApplySpellMod(spellProto->ID, SPELLMOD_CRITICAL_CHANCE, crit_chance);
     }
 
     crit_chance = crit_chance > 0.0f ? crit_chance : 0.0f;
@@ -1017,7 +1017,7 @@ uint32 Unit::SpellCriticalDamageBonus(SpellEntry const* spellProto, uint32 damag
     // adds additional damage to crit_bonus (from talents)
     if (Player* modOwner = GetSpellModOwner())
     {
-        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
+        modOwner->ApplySpellMod(spellProto->ID, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
     }
 
     if (!pVictim)
@@ -1197,7 +1197,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
 
     // Nourish 20% of heal increase if target is affected by Druids HOTs
     SpellClassOptionsEntry const* classOptions = spellProto->GetSpellClassOptions();
-    if (classOptions && classOptions->SpellFamilyName == SPELLFAMILY_DRUID && (classOptions->SpellFamilyFlags & UI64LIT(0x0200000000000000)))
+    if (classOptions && classOptions->SpellClassSet == SPELLFAMILY_DRUID && (classOptions->SpellClassMask & UI64LIT(0x0200000000000000)))
     {
         int ownHotCount = 0;                        // counted HoT types amount, not stacks
         Unit::AuraList const& RejorRegr = pVictim->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
@@ -1243,7 +1243,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
     // apply spellmod to Done amount
     if (Player* modOwner = GetSpellModOwner())
     {
-        modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, heal);
+        modOwner->ApplySpellMod(spellProto->ID, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, heal);
     }
 
     return heal < 0 ? 0 : uint32(heal);
@@ -1447,7 +1447,7 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf)
     {
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
         for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
-            if (!(IsPositiveSpell(itr->spellId) && IsPositiveSpell(spellInfo->Id)) &&
+            if (!(IsPositiveSpell(itr->spellId) && IsPositiveSpell(spellInfo->ID)) &&
                 (itr->type & GetSpellSchoolMask(spellInfo)))
             {
                 return true;
@@ -1516,7 +1516,7 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
             }
     }
 
-    if (uint32 aura = spellEffect->EffectApplyAuraName)
+    if (uint32 aura = spellEffect->EffectAura)
     {
         SpellImmuneList const& list = m_spellImmune[IMMUNITY_STATE];
         for (SpellImmuneList::const_iterator itr = list.begin(); itr != list.end(); ++itr)
@@ -1851,7 +1851,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
     {
         if (Player* modOwner = GetSpellModOwner())
         {
-            modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, tmpDamage);
+            modOwner->ApplySpellMod(spellProto->ID, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, tmpDamage);
         }
     }
 
@@ -1882,7 +1882,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackTy
 
     // Shred also have bonus as MECHANIC_BLEED damages
     SpellClassOptionsEntry const* classOptions = spellProto ? spellProto->GetSpellClassOptions() : NULL;
-    if (classOptions && classOptions->SpellFamilyName==SPELLFAMILY_DRUID && classOptions->SpellFamilyFlags & UI64LIT(0x00008000))
+    if (classOptions && classOptions->SpellClassSet==SPELLFAMILY_DRUID && classOptions->SpellClassMask & UI64LIT(0x00008000))
     {
         mechanicMask |= (1 << (MECHANIC_BLEED - 1));
     }

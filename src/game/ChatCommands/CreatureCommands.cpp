@@ -292,7 +292,7 @@ bool ChatHandler::HandleNpcAddVendorCurrencyCommand(char* args)
 
     sObjectMgr.AddVendorItem(vendor_entry, currencyId, VENDOR_ITEM_TYPE_CURRENCY, maxcount, 0, extendedcost);
 
-    std::string name = sCurrencyTypesStore.LookupEntry(currencyId)->name[0];
+    std::string name = sCurrencyTypesStore.LookupEntry(currencyId)->Name_lang[0];
 
     PSendSysMessage(LANG_ITEM_ADDED_TO_LIST, currencyId, name.c_str(), maxcount, 0, extendedcost);
     return true;
@@ -381,7 +381,7 @@ bool ChatHandler::HandleNpcDelVendorCurrencyCommand(char* args)
         return false;
     }
 
-    std::string name = sCurrencyTypesStore.LookupEntry(itemId)->name[0];
+    std::string name = sCurrencyTypesStore.LookupEntry(itemId)->Name_lang[0];
 
     PSendSysMessage(LANG_ITEM_DELETED_FROM_LIST, itemId, name.c_str());
     return true;

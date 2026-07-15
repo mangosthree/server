@@ -108,7 +108,7 @@ inline float GetSpellMinRange(SpellRangeEntry const* range, bool friendly = fals
     {
         return 0;
     }
-    return (friendly ? range->minRangeFriendly : range->minRange);
+    return (friendly ? range->RangeMin_1 : range->RangeMin_0);
 }
 
 inline float GetSpellMaxRange(SpellRangeEntry const* range, bool friendly = false)
@@ -117,7 +117,7 @@ inline float GetSpellMaxRange(SpellRangeEntry const* range, bool friendly = fals
     {
         return 0;
     }
-    return (friendly ? range->maxRangeFriendly : range->maxRange);
+    return (friendly ? range->RangeMax_1 : range->RangeMax_0);
 }
 
 inline uint32 GetSpellRecoveryTime(SpellEntry const *spellInfo)
@@ -234,7 +234,7 @@ inline bool IsPeriodicRegenerateEffect(SpellEntry const* spellInfo, SpellEffectI
         return false;
     }
 
-    switch (AuraType(effectEntry->EffectApplyAuraName))
+    switch (AuraType(effectEntry->EffectAura))
     {
         case SPELL_AURA_PERIODIC_ENERGIZE:
         case SPELL_AURA_PERIODIC_HEAL:
@@ -252,7 +252,7 @@ inline bool IsSpellHaveAura(SpellEntry const* spellInfo, AuraType aura, uint32 e
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (effectMask & (1 << i))
             if (SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
-                if (AuraType(effectEntry->EffectApplyAuraName) == aura)
+                if (AuraType(effectEntry->EffectAura) == aura)
                 {
                     return true;
                 }
@@ -264,7 +264,7 @@ inline bool IsSpellLastAuraEffect(SpellEntry const* spellInfo, SpellEffectIndex 
     for (int i = effecIdx + 1; i < MAX_EFFECT_INDEX; ++i)
     {
         if (SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(SpellEffectIndex(i)))
-            if (effectEntry->EffectApplyAuraName)
+            if (effectEntry->EffectAura)
             {
                 return false;
             }
@@ -284,14 +284,14 @@ inline bool IsSealSpell(SpellEntry const* spellInfo)
     //Collection of all the seal family flags. No other paladin spell has any of those.
     return spellInfo->IsFitToFamily(SPELLFAMILY_PALADIN, UI64LIT(0x26000C000A000000)) &&
         // avoid counting target triggered effect as seal for avoid remove it or seal by it.
-        spellEffect && spellEffect->EffectImplicitTargetA == TARGET_SELF;
+        spellEffect && spellEffect->ImplicitTarget_0 == TARGET_SELF;
 }
 
 inline bool IsElementalShield(SpellEntry const* spellInfo)
 {
     SpellClassOptionsEntry const* classOptions = spellInfo->GetSpellClassOptions();
     // family flags 10 (Lightning), 42 (Earth), 37 (Water), proc shield from T2 8 pieces bonus
-    return (classOptions && classOptions->SpellFamilyFlags & UI64LIT(0x42000000400)) || spellInfo->Id == 23552;
+    return (classOptions && classOptions->SpellClassMask & UI64LIT(0x42000000400)) || spellInfo->ID == 23552;
 }
 
 inline bool IsExplicitDiscoverySpell(SpellEntry const* spellInfo)
@@ -301,7 +301,7 @@ inline bool IsExplicitDiscoverySpell(SpellEntry const* spellInfo)
     return ((spellEffect0 && (spellEffect0->Effect == SPELL_EFFECT_CREATE_RANDOM_ITEM ||
         spellEffect0->Effect == SPELL_EFFECT_CREATE_ITEM_2) &&
         (spellEffect1 && spellEffect1->Effect == SPELL_EFFECT_SCRIPT_EFFECT)) ||
-        spellInfo->Id == 64323);                         // Book of Glyph Mastery (Effect0==SPELL_EFFECT_SCRIPT_EFFECT without any other data)
+        spellInfo->ID == 64323);                         // Book of Glyph Mastery (Effect0==SPELL_EFFECT_SCRIPT_EFFECT without any other data)
 }
 
 inline bool IsLootCraftingSpell(SpellEntry const* spellInfo)
@@ -316,8 +316,8 @@ inline bool IsLootCraftingSpell(SpellEntry const* spellInfo)
 
     return ((spellEffect0->Effect == SPELL_EFFECT_CREATE_RANDOM_ITEM) ||
         // different random cards from Inscription (121==Virtuoso Inking Set category) or without explicit item or explicit spells
-        ((spellEffect0->Effect == SPELL_EFFECT_CREATE_ITEM_2) && ((totems && totems->TotemCategory[0] != 0) || (spellEffect0->EffectItemType == 0))) ||
-        (spellInfo->Id == 62941));
+        ((spellEffect0->Effect == SPELL_EFFECT_CREATE_ITEM_2) && ((totems && totems->RequiredTotemCategoryID[0] != 0) || (spellEffect0->EffectItemType == 0))) ||
+        (spellInfo->ID == 62941));
 }
 
 /**
@@ -361,8 +361,8 @@ inline bool IsSpellRemoveAllMovementAndControlLossEffects(SpellEntry const* spel
         return false;
     }
 
-    return spellEffect0->EffectApplyAuraName == SPELL_AURA_MECHANIC_IMMUNITY &&
-        spellEffect0->EffectMiscValue == 1 &&
+    return spellEffect0->EffectAura == SPELL_AURA_MECHANIC_IMMUNITY &&
+        spellEffect0->EffectMiscValue_0 == 1 &&
         spellProto->GetEffectApplyAuraNameByIndex(EFFECT_INDEX_1) == SPELL_AURA_NONE &&
         spellProto->GetEffectApplyAuraNameByIndex(EFFECT_INDEX_2) == SPELL_AURA_NONE &&
         spellProto->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)/* && -- all above selected spells have SPELL_ATTR_EX5_* mask
@@ -373,7 +373,7 @@ inline bool IsSpellRemoveAllMovementAndControlLossEffects(SpellEntry const* spel
 
 inline bool IsDeathOnlySpell(SpellEntry const* spellInfo)
 {
-    return spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD) || spellInfo->Id == 2584;
+    return spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD) || spellInfo->ID == 2584;
 }
 
 inline bool IsDeathPersistentSpell(SpellEntry const* spellInfo)
@@ -466,13 +466,13 @@ inline bool IsSpellWithCasterSourceTargetsOnly(SpellEntry const* spellInfo)
             continue;
         }
 
-        uint32 targetA = effectEntry->EffectImplicitTargetA;
+        uint32 targetA = effectEntry->ImplicitTarget_0;
         if (targetA && !IsCasterSourceTarget(targetA))
         {
             return false;
         }
 
-        uint32 targetB = effectEntry->EffectImplicitTargetB;
+        uint32 targetB = effectEntry->ImplicitTarget_1;
         if (targetB && !IsCasterSourceTarget(targetB))
         {
             return false;
@@ -561,17 +561,17 @@ inline bool IsAreaEffectTarget(Targets target)
 inline bool IsAreaOfEffectSpell(SpellEntry const* spellInfo)
 {
     SpellEffectEntry const* effectEntry = spellInfo->GetSpellEffect(EFFECT_INDEX_0);
-    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetA)) || IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetB))))
+    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->ImplicitTarget_0)) || IsAreaEffectTarget(Targets(effectEntry->ImplicitTarget_1))))
     {
         return true;
     }
     effectEntry = spellInfo->GetSpellEffect(EFFECT_INDEX_1);
-    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetA)) || IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetB))))
+    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->ImplicitTarget_0)) || IsAreaEffectTarget(Targets(effectEntry->ImplicitTarget_1))))
     {
         return true;
     }
     effectEntry = spellInfo->GetSpellEffect(EFFECT_INDEX_2);
-    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetA)) || IsAreaEffectTarget(Targets(effectEntry->EffectImplicitTargetB))))
+    if (effectEntry && (IsAreaEffectTarget(Targets(effectEntry->ImplicitTarget_0)) || IsAreaEffectTarget(Targets(effectEntry->ImplicitTarget_1))))
     {
         return true;
     }
@@ -641,7 +641,7 @@ inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
             continue;
         }
 
-        switch (effectEntry->EffectImplicitTargetA)
+        switch (effectEntry->ImplicitTarget_0)
         {
             case TARGET_SELF:
             case TARGET_SELF2:
@@ -649,7 +649,7 @@ inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
             default:
                 return false;
         }
-        switch (effectEntry->EffectImplicitTargetB)
+        switch (effectEntry->ImplicitTarget_1)
         {
             case TARGET_SELF:
             case TARGET_SELF2:
@@ -706,7 +706,7 @@ inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftFo
     }
 
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
-    return (shapeShift->Stances & (1<<(form-1)) && !(spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT));
+    return (shapeShift->ShapeshiftMask_0 & (1<<(form-1)) && !(spellInfo->AttributesExB & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT));
 }
 
 inline bool IsNeedCastSpellAtOutdoor(SpellEntry const* spellInfo)
@@ -1234,7 +1234,7 @@ class SpellMgr
                 return 1.0f;
             }
 
-            if (SpellThreatEntry const* entry = GetSpellThreatEntry(spellInfo->Id))
+            if (SpellThreatEntry const* entry = GetSpellThreatEntry(spellInfo->ID))
             {
                 return entry->multiplier;
             }
@@ -1375,7 +1375,7 @@ class SpellMgr
         bool canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const;
         bool IsRankedSpellNonStackableInSpellBook(SpellEntry const* spellInfo) const
         {
-            return !canStackSpellRanksInSpellBook(spellInfo) && GetSpellRank(spellInfo->Id) != 0;
+            return !canStackSpellRanksInSpellBook(spellInfo) && GetSpellRank(spellInfo->ID) != 0;
         }
 
         // return true if spell1 can affect spell2

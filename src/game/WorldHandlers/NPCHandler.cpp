@@ -607,7 +607,7 @@ void WorldSession::SendSpiritResurrect()
 
         if (corpseGrave != ghostGrave)
         {
-            _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
+            _player->TeleportTo(corpseGrave->Continent, corpseGrave->Loc_0, corpseGrave->Loc_1, corpseGrave->Loc_2, _player->GetOrientation());
         }
         // or update at original position
         else
@@ -639,7 +639,7 @@ void WorldSession::HandleReturnToGraveyardOpcode(WorldPacket& recv_data)
         return;
     }
 
-    _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
+    _player->TeleportTo(corpseGrave->Continent, corpseGrave->Loc_0, corpseGrave->Loc_1, corpseGrave->Loc_2, _player->GetOrientation());
 }
 
 /**

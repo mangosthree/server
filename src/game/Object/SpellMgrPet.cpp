@@ -96,7 +96,7 @@ void SpellMgr::LoadSpellPetAuras()
             SpellEffectEntry const* spellEffect = spellInfo->GetSpellEffect(eff);
             if (!spellEffect || spellEffect->Effect != SPELL_EFFECT_DUMMY &&
                (spellEffect->Effect != SPELL_EFFECT_APPLY_AURA ||
-                spellEffect->EffectApplyAuraName != SPELL_AURA_DUMMY))
+                spellEffect->EffectAura != SPELL_AURA_DUMMY))
             {
                 sLog.outError("Spell %u listed in `spell_pet_auras` does not have dummy aura or dummy effect", spell);
                 continue;
@@ -109,7 +109,7 @@ void SpellMgr::LoadSpellPetAuras()
                 continue;
             }
 
-            PetAura pa(pet, aura, spellEffect->EffectImplicitTargetA == TARGET_PET, spellEffect->CalculateSimpleValue());
+            PetAura pa(pet, aura, spellEffect->ImplicitTarget_0 == TARGET_PET, spellEffect->CalculateSimpleValue());
             mSpellPetAuraMap[(spell << 8) + eff] = pa;
         }
 
@@ -144,16 +144,16 @@ void SpellMgr::LoadPetLevelupSpellMap()
                 continue;
             }
 
-            if (skillLine->skillId != creatureFamily->skillLine[0] &&
-                    (!creatureFamily->skillLine[1] || skillLine->skillId != creatureFamily->skillLine[1]))
+            if (skillLine->SkillLine != creatureFamily->SkillLine[0] &&
+                    (!creatureFamily->SkillLine[1] || skillLine->SkillLine != creatureFamily->SkillLine[1]))
                 continue;
 
-            if (skillLine->learnOnGetSkill != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
+            if (skillLine->AcquireMethod != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
             {
                 continue;
             }
 
-            SpellEntry const* spell = sSpellStore.LookupEntry(skillLine->spellId);
+            SpellEntry const* spell = sSpellStore.LookupEntry(skillLine->Spell);
             if (!spell)                                     // not exist
             {
                 continue;
@@ -165,7 +165,7 @@ void SpellMgr::LoadPetLevelupSpellMap()
                 ++family_count;
             }
 
-            spellSet.insert(PetLevelupSpellSet::value_type(spell->GetSpellLevel(),spell->Id));
+            spellSet.insert(PetLevelupSpellSet::value_type(spell->GetSpellLevel(),spell->ID));
             count++;
         }
     }
@@ -259,7 +259,7 @@ void SpellMgr::LoadPetDefaultSpells()
         PetDefaultSpellsEntry petDefSpells;
         for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
         {
-            petDefSpells.spellid[j] = spellDataEntry->spellId[j];
+            petDefSpells.spellid[j] = spellDataEntry->Spells[j];
         }
 
         if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
@@ -288,7 +288,7 @@ void SpellMgr::LoadPetDefaultSpells()
 
             if (spellEffect->Effect==SPELL_EFFECT_SUMMON || spellEffect->Effect==SPELL_EFFECT_SUMMON_PET)
             {
-                uint32 creature_id = spellEffect->EffectMiscValue;
+                uint32 creature_id = spellEffect->EffectMiscValue_0;
                 CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(creature_id);
                 if (!cInfo)
                 {

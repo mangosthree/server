@@ -986,7 +986,7 @@ uint32 ChatHandler::ExtractSpellIdFromLink(char** text)
                 rank = 0;
             }
 
-            return rank < MAX_TALENT_RANK ? talentEntry->RankID[rank] : 0;
+            return rank < MAX_TALENT_RANK ? talentEntry->SpellRank[rank] : 0;
         }
         case SPELL_LINK_GLYPH:
         {
@@ -998,7 +998,7 @@ uint32 ChatHandler::ExtractSpellIdFromLink(char** text)
             }
 
             GlyphPropertiesEntry const* glyphPropEntry = sGlyphPropertiesStore.LookupEntry(glyph_prop_id);
-            return glyphPropEntry ? glyphPropEntry->SpellId : 0;
+            return glyphPropEntry ? glyphPropEntry->SpellID : 0;
         }
     }
 
@@ -1245,10 +1245,10 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
             {
                 return false;
             }
-            mapid = node->map_id;
-            x = node->x;
-            y = node->y;
-            z = node->z;
+            mapid = node->ContinentID;
+            x = node->Pos_0;
+            y = node->Pos_1;
+            z = node->Pos_2;
             return true;
         }
         case LOCATION_LINK_CREATURE:
@@ -1373,10 +1373,10 @@ bool ChatHandler::ExtractLocationFromLink(char** text, uint32& mapid, float& x, 
                 return false;
             }
 
-            mapid = atEntry->mapid;
-            x = atEntry->x;
-            y = atEntry->y;
-            z = atEntry->z;
+            mapid = atEntry->MapId;
+            x = atEntry->PosX;
+            y = atEntry->PosY;
+            z = atEntry->PosZ;
             return true;
         }
         case LOCATION_LINK_AREATRIGGER_TARGET:

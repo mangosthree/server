@@ -93,7 +93,7 @@ void WorldSession::HandleLearnPreviewTalents(WorldPacket& recvPacket)
     {
         if (TalentTabEntry const* talentTabEntry = sTalentTabStore.LookupEntry(_player->GetPrimaryTalentTree(_player->GetActiveSpec())))
         {
-            if (talentTabEntry->tabpage != tabPage)
+            if (talentTabEntry->OrderIndex != tabPage)
             {
                 recvPacket.rfinish();
                 sLog.outError("WorldSession::HandleLearnPreviewTalents: tabPage != talent tabPage for %s (account %u)", GetPlayerName(), GetAccountId());

@@ -204,9 +204,9 @@ void ObjectMgr::LoadItemPrototypes()
             }
             */
 
-            if (proto->Unk0 != dbcitem->Unk0)
+            if (proto->Unk0 != dbcitem->SoundOverrideSubclass)
             {
-                sLog.outErrorDb("Item (Entry: %u) not correct %i Unk0, must be %i (still using DB value).", i, proto->Unk0, dbcitem->Unk0);
+                sLog.outErrorDb("Item (Entry: %u) not correct %i Unk0, must be %i (still using DB value).", i, proto->Unk0, dbcitem->SoundOverrideSubclass);
                 // It safe let use Unk0 from DB
             }
 
@@ -259,7 +259,7 @@ void ObjectMgr::LoadItemPrototypes()
         if (proto->Flags2 & ITEM_FLAG2_HORDE_ONLY)
         {
             if (FactionEntry const* faction = sFactionStore.LookupEntry(HORDE))
-                if ((proto->AllowableRace & faction->BaseRepRaceMask[0]) == 0)
+                if ((proto->AllowableRace & faction->ReputationRaceMask[0]) == 0)
                     sLog.outErrorDb("Item (Entry: %u) have in `AllowableRace` races (%u) only not compatible with ITEM_FLAG2_HORDE_ONLY (%u) in Flags field, item any way will can't be equipped or use by this races.",
                                     i, proto->AllowableRace, ITEM_FLAG2_HORDE_ONLY);
 
@@ -270,7 +270,7 @@ void ObjectMgr::LoadItemPrototypes()
         else if (proto->Flags2 & ITEM_FLAG2_ALLIANCE_ONLY)
         {
             if (FactionEntry const* faction = sFactionStore.LookupEntry(ALLIANCE))
-                if ((proto->AllowableRace & faction->BaseRepRaceMask[0]) == 0)
+                if ((proto->AllowableRace & faction->ReputationRaceMask[0]) == 0)
                     sLog.outErrorDb("Item (Entry: %u) have in `AllowableRace` races (%u) only not compatible with ITEM_FLAG2_ALLIANCE_ONLY (%u) in Flags field, item any way will can't be equipped or use by this races.",
                                     i, proto->AllowableRace, ITEM_FLAG2_ALLIANCE_ONLY);
         }
@@ -989,7 +989,7 @@ void ObjectMgr::LoadItemRequiredTarget()
             {
                 if (pItemProto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_USE)
                 {
-                    SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(pSpellInfo->Id);
+                    SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(pSpellInfo->ID);
                     if (bounds.first != bounds.second)
                     {
                         break;
@@ -1003,10 +1003,10 @@ void ObjectMgr::LoadItemRequiredTarget()
                             continue;
                         }
 
-                        if (spellEffect->EffectImplicitTargetA == TARGET_CHAIN_DAMAGE ||
-                            spellEffect->EffectImplicitTargetB == TARGET_CHAIN_DAMAGE ||
-                            spellEffect->EffectImplicitTargetA == TARGET_DUELVSPLAYER ||
-                            spellEffect->EffectImplicitTargetB == TARGET_DUELVSPLAYER)
+                        if (spellEffect->ImplicitTarget_0 == TARGET_CHAIN_DAMAGE ||
+                            spellEffect->ImplicitTarget_1 == TARGET_CHAIN_DAMAGE ||
+                            spellEffect->ImplicitTarget_0 == TARGET_DUELVSPLAYER ||
+                            spellEffect->ImplicitTarget_1 == TARGET_DUELVSPLAYER)
                         {
                             bIsItemSpellValid = true;
                             break;

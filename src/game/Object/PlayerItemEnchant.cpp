@@ -285,7 +285,7 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
         return;
     }
 
-    if (!ignore_condition && pEnchant->EnchantmentCondition && !EnchantmentFitsRequirements(pEnchant->EnchantmentCondition, -1))
+    if (!ignore_condition && pEnchant->Condition_ID && !EnchantmentFitsRequirements(pEnchant->Condition_ID, -1))
     {
         return;
     }
@@ -294,9 +294,9 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
     {
         for (int s = 0; s < 3; ++s)
         {
-            uint32 enchant_display_type = pEnchant->type[s];
-            uint32 enchant_amount = pEnchant->amount[s];
-            uint32 enchant_spell_id = pEnchant->spellid[s];
+            uint32 enchant_display_type = pEnchant->Effect[s];
+            uint32 enchant_amount = pEnchant->EffectPointsMin[s];
+            uint32 enchant_spell_id = pEnchant->EffectArg[s];
 
             switch (enchant_display_type)
             {
@@ -335,9 +335,9 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                                     // Search enchant_amount
                                     for (int k = 0; k < 3; ++k)
                                     {
-                                        if (item_rand->enchant_id[k] == enchant_id)
+                                        if (item_rand->Enchantment[k] == enchant_id)
                                         {
-                                            basepoints = int32((item_rand->prefix[k] * item->GetItemSuffixFactor()) / 10000);
+                                            basepoints = int32((item_rand->AllocationPct[k] * item->GetItemSuffixFactor()) / 10000);
                                             break;
                                         }
                                     }
@@ -368,9 +368,9 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                         {
                             for (int k = 0; k < 3; ++k)
                             {
-                                if (item_rand->enchant_id[k] == enchant_id)
+                                if (item_rand->Enchantment[k] == enchant_id)
                                 {
-                                    enchant_amount = uint32((item_rand->prefix[k] * item->GetItemSuffixFactor()) / 10000);
+                                    enchant_amount = uint32((item_rand->AllocationPct[k] * item->GetItemSuffixFactor()) / 10000);
                                     break;
                                 }
                             }
@@ -388,9 +388,9 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                         {
                             for (int k = 0; k < 3; ++k)
                             {
-                                if (item_rand_suffix->enchant_id[k] == enchant_id)
+                                if (item_rand_suffix->Enchantment[k] == enchant_id)
                                 {
-                                    enchant_amount = uint32((item_rand_suffix->prefix[k] * item->GetItemSuffixFactor()) / 10000);
+                                    enchant_amount = uint32((item_rand_suffix->AllocationPct[k] * item->GetItemSuffixFactor()) / 10000);
                                     break;
                                 }
                             }
@@ -603,11 +603,11 @@ void Player::ApplyReforgeEnchantment(Item* item, bool apply)
         return;
     }
 
-    float removeValue = item->GetReforgableStat(ItemModType(reforge->SourceStat)) * reforge->SourceMultiplier;
+    float removeValue = item->GetReforgableStat(ItemModType(reforge->Source_stat)) * reforge->Source_multiplier;
 
     float addValue = removeValue * reforge->FinalMultiplier;
 
-    switch (reforge->SourceStat)
+    switch (reforge->Source_stat)
     {
         case ITEM_MOD_HEALTH:
             HandleStatModifier(UNIT_MOD_HEALTH, BASE_VALUE, -removeValue, apply);

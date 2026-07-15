@@ -345,7 +345,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
         index_mod = UNIT_FIELD_RANGED_ATTACK_POWER_MOD_POS;
         index_mult = UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER;
 
-        float rapPerAgi = std::max(GetStat(STAT_AGILITY) - 10.0f, 0.0f) * chrEntry->rapPerAgi;
+        float rapPerAgi = std::max(GetStat(STAT_AGILITY) - 10.0f, 0.0f) * chrEntry->RangedAttackPowerPerAgility;
 
         switch (getClass())
         {
@@ -357,8 +357,8 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
     }
     else
     {
-        float apPerAgi = std::max(GetStat(STAT_AGILITY) - 10.0f, 0.0f) * chrEntry->apPerAgi;
-        float apPerStr = std::max(GetStat(STAT_STRENGTH) - 10.0f, 0.0f) * chrEntry->apPerStr;
+        float apPerAgi = std::max(GetStat(STAT_AGILITY) - 10.0f, 0.0f) * chrEntry->AttackPowerPerAgility;
+        float apPerStr = std::max(GetStat(STAT_STRENGTH) - 10.0f, 0.0f) * chrEntry->AttackPowerPerStrength;
         float levelmod;
         switch (getClass())
         {
@@ -379,9 +379,9 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
         if (getClass() == CLASS_DRUID && GetShapeshiftForm())
         {
             if (SpellShapeshiftFormEntry const * entry = sSpellShapeshiftFormStore.LookupEntry(uint32(GetShapeshiftForm())))
-                if (entry->flags1 & 0x20)
+                if (entry->Flags & 0x20)
                 {
-                    val2 += std::max(GetStat(STAT_AGILITY) - 10.0f, 0.0f) * chrEntry->apPerStr;
+                    val2 += std::max(GetStat(STAT_AGILITY) - 10.0f, 0.0f) * chrEntry->AttackPowerPerStrength;
                 }
         }
     }

@@ -693,7 +693,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     SetMap(sMapMgr.CreateMap(info->mapId, this));
 
     // Set player's power type based on class
-    uint8 powertype = cEntry->powerType;
+    uint8 powertype = cEntry->DisplayPower;
 
     // Set player's faction based on race
     setFactionForRace(race);
@@ -1520,7 +1520,7 @@ bool Player::BuildEnumData(QueryResult* result, ByteBuffer* data, ByteBuffer* bu
 
         *buffer << uint8(proto->InventoryType);
         *buffer << uint32(proto->DisplayInfoID);
-        *buffer << uint32(enchant ? enchant->aura_id : 0);
+        *buffer << uint32(enchant ? enchant->ItemVisual : 0);
     }
 
     for (int32 i = 0; i < 4; i++)
@@ -3250,7 +3250,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
 
     // secondary prof. or not prof. spell
     SpellEffectEntry const* spellEffect = spell->GetSpellEffect(EFFECT_INDEX_1);
-    uint32 skill = spellEffect ? spellEffect->EffectMiscValue : 0;
+    uint32 skill = spellEffect ? spellEffect->EffectMiscValue_0 : 0;
 
     if (spellEffect && (spellEffect->Effect != SPELL_EFFECT_SKILL || !IsPrimaryProfessionSkill(skill)))
     {
@@ -3258,7 +3258,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     }
 
     // check primary prof. limit
-    if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(spell->Id) && GetFreePrimaryProfessionPoints() == 0)
+    if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(spell->ID) && GetFreePrimaryProfessionPoints() == 0)
     {
         return TRAINER_SPELL_GREEN_DISABLED;
     }
@@ -3781,13 +3781,13 @@ Team Player::TeamForRace(uint8 race)
         return ALLIANCE;
     }
 
-    switch (rEntry->TeamID)
+    switch (rEntry->BaseLanguage)
     {
         case 7: return ALLIANCE;
         case 1: return HORDE;
     }
 
-    sLog.outError("Race %u have wrong teamid %u in DBC: wrong DBC files?", uint32(race), rEntry->TeamID);
+    sLog.outError("Race %u have wrong teamid %u in DBC: wrong DBC files?", uint32(race), rEntry->BaseLanguage);
     return TEAM_NONE;
 }
 
@@ -4409,10 +4409,10 @@ void Player::InitDataForForm(bool reapplyMods)
     ShapeshiftForm form = GetShapeshiftForm();
 
     SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(form);
-    if (ssEntry && ssEntry->attackSpeed)
+    if (ssEntry && ssEntry->CombatRoundTime)
     {
-        SetAttackTime(BASE_ATTACK, ssEntry->attackSpeed);
-        SetAttackTime(OFF_ATTACK, ssEntry->attackSpeed);
+        SetAttackTime(BASE_ATTACK, ssEntry->CombatRoundTime);
+        SetAttackTime(OFF_ATTACK, ssEntry->CombatRoundTime);
         SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
     }
     else
@@ -4441,9 +4441,9 @@ void Player::InitDataForForm(bool reapplyMods)
         default:                                            // 0, for example
         {
             ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(getClass());
-            if (cEntry && cEntry->powerType < MAX_POWERS && uint32(GetPowerType()) != cEntry->powerType)
+            if (cEntry && cEntry->DisplayPower < MAX_POWERS && uint32(GetPowerType()) != cEntry->DisplayPower)
             {
-                SetPowerType(Powers(cEntry->powerType));
+                SetPowerType(Powers(cEntry->DisplayPower));
             }
             break;
         }
@@ -4698,12 +4698,12 @@ float Player::GetReputationPriceDiscount(Creature const* pCreature) const
 
 float Player::GetReputationPriceDiscount(FactionTemplateEntry const* factionTemplate) const
 {
-    if (!factionTemplate || !factionTemplate->faction)
+    if (!factionTemplate || !factionTemplate->Faction)
     {
         return 1.0f;
     }
 
-    ReputationRank rank = GetReputationRank(factionTemplate->faction);
+    ReputationRank rank = GetReputationRank(factionTemplate->Faction);
     if (rank <= REP_NEUTRAL)
     {
         return 1.0f;
@@ -4736,39 +4736,39 @@ bool Player::IsSpellFitByClassAndRace(uint32 spell_id, uint32* pReqlevel /*= NUL
     {
         SkillLineAbilityEntry const* abilityEntry = _spell_idx->second;
         // skip wrong race skills
-        if (abilityEntry->racemask && (abilityEntry->racemask & racemask) == 0)
+        if (abilityEntry->RaceMask && (abilityEntry->RaceMask & racemask) == 0)
         {
             continue;
         }
 
         // skip wrong class skills
-        if (abilityEntry->classmask && (abilityEntry->classmask & classmask) == 0)
+        if (abilityEntry->ClassMask && (abilityEntry->ClassMask & classmask) == 0)
         {
             continue;
         }
 
-        SkillRaceClassInfoMapBounds raceBounds = sSpellMgr.GetSkillRaceClassInfoMapBounds(abilityEntry->skillId);
+        SkillRaceClassInfoMapBounds raceBounds = sSpellMgr.GetSkillRaceClassInfoMapBounds(abilityEntry->SkillLine);
         for (SkillRaceClassInfoMap::const_iterator itr = raceBounds.first; itr != raceBounds.second; ++itr)
         {
             SkillRaceClassInfoEntry const* skillRCEntry = itr->second;
-            if ((skillRCEntry->raceMask & racemask) && (skillRCEntry->classMask & classmask))
+            if ((skillRCEntry->RaceMask & racemask) && (skillRCEntry->ClassMask & classmask))
             {
-                if (skillRCEntry->flags & ABILITY_SKILL_NONTRAINABLE)
+                if (skillRCEntry->Flags & ABILITY_SKILL_NONTRAINABLE)
                 {
                     return false;
                 }
 
                 if (pReqlevel)                              // show trainers list case
                 {
-                    if (skillRCEntry->reqLevel)
+                    if (skillRCEntry->Availability)
                     {
-                        *pReqlevel = skillRCEntry->reqLevel;
+                        *pReqlevel = skillRCEntry->Availability;
                         return true;
                     }
                 }
                 else                                        // check availble case at train
                 {
-                    if (skillRCEntry->reqLevel && getLevel() < skillRCEntry->reqLevel)
+                    if (skillRCEntry->Availability && getLevel() < skillRCEntry->Availability)
                     {
                         return false;
                     }
@@ -5034,7 +5034,7 @@ uint32 Player::GetResurrectionSpellId()
     for (AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
     {
         // Soulstone Resurrection                           // prio: 3 (max, non death persistent)
-        if (prio < 2 && (*itr)->GetSpellProto()->SpellVisual[0] == 99 && (*itr)->GetSpellProto()->SpellIconID == 92)
+        if (prio < 2 && (*itr)->GetSpellProto()->SpellVisualID[0] == 99 && (*itr)->GetSpellProto()->SpellIconID == 92)
         {
             switch ((*itr)->GetId())
             {
@@ -5204,9 +5204,9 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     if (!res)
     {
         m_MirrorTimerFlags &= ~(UNDERWATER_INWATER | UNDERWATER_INLAVA | UNDERWATER_INSLIME | UNDERWATER_INDARKWATER);
-        if (m_lastLiquid && m_lastLiquid->SpellId)
+        if (m_lastLiquid && m_lastLiquid->SpellID)
         {
-            RemoveAurasDueToSpell(m_lastLiquid->SpellId == 37025 ? 37284 : m_lastLiquid->SpellId);
+            RemoveAurasDueToSpell(m_lastLiquid->SpellID == 37025 ? 37284 : m_lastLiquid->SpellID);
         }
         m_lastLiquid = NULL;
         return;
@@ -5215,22 +5215,22 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     if (uint32 liqEntry = liquid_status.entry)
     {
         LiquidTypeEntry const* liquid = sLiquidTypeStore.LookupEntry(liqEntry);
-        if (m_lastLiquid && m_lastLiquid->SpellId && m_lastLiquid->Id != liqEntry)
+        if (m_lastLiquid && m_lastLiquid->SpellID && m_lastLiquid->ID != liqEntry)
         {
-            RemoveAurasDueToSpell(m_lastLiquid->SpellId);
+            RemoveAurasDueToSpell(m_lastLiquid->SpellID);
         }
 
-        if (liquid && liquid->SpellId)
+        if (liquid && liquid->SpellID)
         {
             // Exception for SSC water
-            uint32 liquidSpellId = liquid->SpellId == 37025 ? 37284 : liquid->SpellId;
+            uint32 liquidSpellId = liquid->SpellID == 37025 ? 37284 : liquid->SpellID;
 
             if (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER))
             {
                 if (!HasAura(liquidSpellId))
                 {
                     // Handle exception for SSC water
-                    if (liquid->SpellId == 37025)
+                    if (liquid->SpellID == 37025)
                     {
                         if (InstanceData* pInst = GetInstanceData())
                         {
@@ -5263,9 +5263,9 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
 
         m_lastLiquid = liquid;
     }
-    else if (m_lastLiquid && m_lastLiquid->SpellId)
+    else if (m_lastLiquid && m_lastLiquid->SpellID)
     {
-        RemoveAurasDueToSpell(m_lastLiquid->SpellId == 37025 ? 37284 : m_lastLiquid->SpellId);
+        RemoveAurasDueToSpell(m_lastLiquid->SpellID == 37025 ? 37284 : m_lastLiquid->SpellID);
         m_lastLiquid = NULL;
     }
 
@@ -5397,22 +5397,22 @@ uint32 Player::GetBarberShopCost(uint8 newhairstyle, uint8 newhaircolor, uint8 n
 
     if (hairstyle != newhairstyle)
     {
-        cost += bsc->cost;                                  // full price
+        cost += bsc->Cost;                                  // full price
     }
 
     if (haircolor != newhaircolor && hairstyle == newhairstyle)
     {
-        cost += bsc->cost * 0.5f;                           // +1/2 of price
+        cost += bsc->Cost * 0.5f;                           // +1/2 of price
     }
 
     if (facialhair != newfacialhair)
     {
-        cost += bsc->cost * 0.75f;                          // +3/4 of price
+        cost += bsc->Cost * 0.75f;                          // +3/4 of price
     }
 
     if (skintone != newskintone && newskintone != -1)
     {
-        cost += bsc->cost * 0.5f;                           // +1/2 of price
+        cost += bsc->Cost * 0.5f;                           // +1/2 of price
     }
 
     return uint32(cost);
@@ -5456,8 +5456,8 @@ bool Player::HasTitle(uint32 bitIndex) const
 
 void Player::SetTitle(CharTitlesEntry const* title, bool lost)
 {
-    uint32 fieldIndexOffset = title->bit_index / 32;
-    uint32 flag = 1 << (title->bit_index % 32);
+    uint32 fieldIndexOffset = title->Mask_ID / 32;
+    uint32 flag = 1 << (title->Mask_ID % 32);
 
     if (lost)
     {
@@ -5479,7 +5479,7 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
     }
 
     WorldPacket data(SMSG_TITLE_EARNED, 4 + 4);
-    data << uint32(title->bit_index);
+    data << uint32(title->Mask_ID);
     data << uint32(lost ? 0 : 1);                           // 1 - earned, 0 - lost
     GetSession()->SendPacket(&data);
 }
@@ -5625,7 +5625,7 @@ uint32 Player::CalculateTalentsPoints() const
         return 0;
     }
 
-    float baseForLevel = count->Talents;
+    float baseForLevel = count->NumberOfTalents;
 
     if (getClass() != CLASS_DEATH_KNIGHT)
     {
@@ -5645,7 +5645,7 @@ uint32 Player::CalculateTalentsPoints() const
         return 0;
     }
 
-    float talentPointsForLevel = count->Talents - dkBase->Talents;
+    float talentPointsForLevel = count->NumberOfTalents - dkBase->NumberOfTalents;
     talentPointsForLevel += float(m_questRewardTalentCount);
 
     if (talentPointsForLevel > baseForLevel)
@@ -5759,12 +5759,12 @@ void Player::_LoadSkills(QueryResult* result)
             SetUInt16Value(PLAYER_SKILL_LINEID_0 + field, offset, skill);
             uint16 step = 0;
 
-            if (pSkill->categoryId == SKILL_CATEGORY_SECONDARY)
+            if (pSkill->CategoryID == SKILL_CATEGORY_SECONDARY)
             {
                 step = max / 75;
             }
 
-            if (pSkill->categoryId == SKILL_CATEGORY_PROFESSION)
+            if (pSkill->CategoryID == SKILL_CATEGORY_PROFESSION)
             {
                 step = max / 75;
 
@@ -5914,7 +5914,7 @@ InventoryResult Player::CanEquipUniqueItem(Item* pItem, uint8 eslot, uint32 limi
             continue;
         }
 
-        ItemPrototype const* pGem = ObjectMgr::GetItemPrototype(enchantEntry->GemID);
+        ItemPrototype const* pGem = ObjectMgr::GetItemPrototype(enchantEntry->Src_itemID);
         if (!pGem)
         {
             continue;
@@ -5961,15 +5961,15 @@ InventoryResult Player::CanEquipUniqueItem(ItemPrototype const* itemProto, uint8
             return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
         }
 
-        // NOTE: limitEntry->mode not checked because if item have have-limit then it applied and to equip case
+        // NOTE: limitEntry->Flags not checked because if item have have-limit then it applied and to equip case
 
-        if (limit_count > limitEntry->maxCount)
+        if (limit_count > limitEntry->Quantity)
         {
             return EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_EQUIPPED_EXCEEDED_IS;
         }
 
         // there is an equip limit on this item
-        if (HasItemOrGemWithLimitCategoryEquipped(itemProto->ItemLimitCategory, limitEntry->maxCount - limit_count + 1, except_slot))
+        if (HasItemOrGemWithLimitCategoryEquipped(itemProto->ItemLimitCategory, limitEntry->Quantity - limit_count + 1, except_slot))
         {
             return EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_EQUIPPED_EXCEEDED_IS;
         }
@@ -6064,7 +6064,7 @@ SpellEntry const* Player::GetKnownTalentRankById(int32 talentId) const
 {
     if (PlayerTalent const* talent = GetKnownTalentById(talentId))
     {
-        return sSpellStore.LookupEntry(talent->talentEntry->RankID[talent->currentRank]);
+        return sSpellStore.LookupEntry(talent->talentEntry->SpellRank[talent->currentRank]);
     }
     else
     {
@@ -6153,7 +6153,7 @@ bool Player::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
             default:
                 break;
         }
-        switch(spellEffect->EffectApplyAuraName)
+        switch(spellEffect->EffectAura)
         {
             case SPELL_AURA_MOD_TAUNT:
                 return true;
@@ -6328,15 +6328,15 @@ void Player::UpdateArmorSpecializations()
         // remove if base passive is unlearned
         if (!HasSpell(specPassive))
         {
-            RemoveAurasDueToSpell(spellProto->Id);
+            RemoveAurasDueToSpell(spellProto->ID);
             continue;
         }
 
-        SpellAuraHolder* holder = GetSpellAuraHolder(spellProto->Id);
+        SpellAuraHolder* holder = GetSpellAuraHolder(spellProto->ID);
         if (!holder)
         {
             // cast absent spells that may be missing due to shapeshift form dependency
-            CastSpell(this, spellProto->Id, true);
+            CastSpell(this, spellProto->ID, true);
             continue;
         }
 
@@ -6363,7 +6363,7 @@ bool Player::FitArmorSpecializationRules(SpellEntry const * spellProto) const
     int i = 0;
     for (; i < MAX_ARMOR_SPECIALIZATION_SPELLS; ++i)
     {
-        if (spellProto->Id == armorSpecToTab[i].spellId)
+        if (spellProto->ID == armorSpecToTab[i].spellId)
         {
             if (!armorSpecToTab[i].tab && m_talentsPrimaryTree[m_activeSpec] == 0 ||
                 armorSpecToTab[i].tab && armorSpecToTab[i].tab != m_talentsPrimaryTree[m_activeSpec])
@@ -6386,7 +6386,7 @@ bool Player::FitArmorSpecializationRules(SpellEntry const * spellProto) const
     if (SpellEquippedItemsEntry const * itemsEntry = spellProto->GetSpellEquippedItems())
     {
         // there spells check items with inventory types which are in EquippedItemInventoryTypeMask
-        uint32 inventoryTypeMask = itemsEntry->EquippedItemInventoryTypeMask;
+        uint32 inventoryTypeMask = itemsEntry->EquippedItemInvTypes;
         // get slots that should be check for item presence and SpellEquippedItemsEntry match
         uint32 slotMask = 0;
         uint8 slots[4];
@@ -6422,7 +6422,7 @@ bool Player::FitArmorSpecializationRules(SpellEntry const * spellProto) const
                     return false;
                 }
 
-                if (((1 << item->GetProto()->SubClass) & itemsEntry->EquippedItemSubClassMask) == 0)
+                if (((1 << item->GetProto()->SubClass) & itemsEntry->EquippedItemSubclass) == 0)
                 {
                     return false;
                 }
@@ -6444,7 +6444,7 @@ float Player::GetCollisionHeight(bool mounted) const
             return GetCollisionHeight(false);
         }
 
-        CreatureModelDataEntry const* mountModelData = sCreatureModelDataStore.LookupEntry(mountDisplayInfo->ModelId);
+        CreatureModelDataEntry const* mountModelData = sCreatureModelDataStore.LookupEntry(mountDisplayInfo->ModelID);
         if (!mountModelData)
         {
             return GetCollisionHeight(false);
@@ -6457,10 +6457,10 @@ float Player::GetCollisionHeight(bool mounted) const
             return 0;
         }
 
-        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelID);
         if (!modelData)
         {
-            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
+            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelID);
             return 0;
         }
 
@@ -6478,10 +6478,10 @@ float Player::GetCollisionHeight(bool mounted) const
             return 0;
         }
 
-        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelID);
         if (!modelData)
         {
-            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
+            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelID);
             return 0;
         }
 

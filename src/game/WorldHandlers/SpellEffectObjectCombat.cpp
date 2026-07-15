@@ -153,7 +153,7 @@ void Spell::EffectInterruptCast(SpellEffectEntry const* /*effect*/)
  */
 void Spell::EffectSummonObjectWild(SpellEffectEntry const* effect)
 {
-    uint32 gameobject_id = effect->EffectMiscValue;
+    uint32 gameobject_id = effect->EffectMiscValue_0;
 
     GameObject* pGameObj = new GameObject;
 
@@ -183,7 +183,7 @@ void Spell::EffectSummonObjectWild(SpellEffectEntry const* effect)
     }
 
     pGameObj->SetRespawnTime(m_duration > 0 ? m_duration / IN_MILLISECONDS : 0);
-    pGameObj->SetSpellId(m_spellInfo->Id);
+    pGameObj->SetSpellId(m_spellInfo->ID);
 
     // Wild object not have owner and check clickable by players
     map->Add(pGameObj);
@@ -302,14 +302,14 @@ void Spell::EffectDuel(SpellEffectEntry const* effect)
 
     // Players can only fight a duel with each other outside (=not inside dungeons and not in capital cities)
     AreaTableEntry const* casterAreaEntry = GetAreaEntryByAreaID(caster->GetAreaId());
-    if (casterAreaEntry && !(casterAreaEntry->flags & AREA_FLAG_DUEL))
+    if (casterAreaEntry && !(casterAreaEntry->Flags & AREA_FLAG_DUEL))
     {
         SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
         return;
     }
 
     AreaTableEntry const* targetAreaEntry = GetAreaEntryByAreaID(target->GetAreaId());
-    if (targetAreaEntry && !(targetAreaEntry->flags & AREA_FLAG_DUEL))
+    if (targetAreaEntry && !(targetAreaEntry->Flags & AREA_FLAG_DUEL))
     {
         SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
         return;
@@ -318,7 +318,7 @@ void Spell::EffectDuel(SpellEffectEntry const* effect)
     // CREATE DUEL FLAG OBJECT
     GameObject* pGameObj = new GameObject;
 
-    uint32 gameobject_id = effect->EffectMiscValue;
+    uint32 gameobject_id = effect->EffectMiscValue_0;
 
     Map* map = m_caster->GetMap();
     float x = (m_caster->GetPositionX() + unitTarget->GetPositionX()) * 0.5f;
@@ -335,7 +335,7 @@ void Spell::EffectDuel(SpellEffectEntry const* effect)
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() + 1);
 
     pGameObj->SetRespawnTime(m_duration > 0 ? m_duration / IN_MILLISECONDS : 0);
-    pGameObj->SetSpellId(m_spellInfo->Id);
+    pGameObj->SetSpellId(m_spellInfo->ID);
 
     m_caster->AddGameObject(pGameObj);
     map->Add(pGameObj);
@@ -473,7 +473,7 @@ void Spell::EffectActivateObject(SpellEffectEntry const* effect)
         return;
     }
 
-    uint32 misc_value = uint32(effect->EffectMiscValue);
+    uint32 misc_value = uint32(effect->EffectMiscValue_0);
 
     switch (misc_value)
     {
@@ -508,7 +508,7 @@ void Spell::EffectActivateObject(SpellEffectEntry const* effect)
             break;
         case 16:                    // GO custom use - found mostly in Wind Stones spells, Simon Game spells and other GO target summoning spells
         {
-            switch (m_spellInfo->Id)
+            switch (m_spellInfo->ID)
             {
                 case 24734:         // Summon Templar Random
                 case 24744:         // Summon Templar (fire)
@@ -531,7 +531,7 @@ void Spell::EffectActivateObject(SpellEffectEntry const* effect)
                     uint32 dukes[] = {15206, 15207, 15208, 15220};
                     uint32 royals[] = {15203, 15204, 15205, 15305};
 
-                    switch (m_spellInfo->Id)
+                    switch (m_spellInfo->ID)
                     {
                         case 24734: npcEntry = templars[urand(0, 3)]; break;
                         case 24763: npcEntry = dukes[urand(0, 3)];    break;
@@ -609,7 +609,7 @@ void Spell::EffectActivateObject(SpellEffectEntry const* effect)
             gameObjTarget->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             break;
         default:
-            sLog.outError("Spell::EffectActivateObject called with unknown misc value. Spell Id %u", m_spellInfo->Id);
+            sLog.outError("Spell::EffectActivateObject called with unknown misc value. Spell Id %u", m_spellInfo->ID);
             break;
     }
 }
@@ -645,13 +645,13 @@ void Spell::EffectApplyGlyph(SpellEffectEntry const* effect)
     }
 
     // apply new one
-    if (uint32 glyph = effect->EffectMiscValue)
+    if (uint32 glyph = effect->EffectMiscValue_0)
     {
         if (GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyph))
         {
             if (GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(player->GetGlyphSlot(m_glyphIndex)))
             {
-                if (gp->TypeFlags != gs->TypeFlags)
+                if (gp->GlyphSlotFlags != gs->Type)
                 {
                     SendCastResult(SPELL_FAILED_INVALID_GLYPH);
                     return;                                 // glyph slot mismatch
@@ -705,9 +705,9 @@ void Spell::EffectEnchantHeldItem(SpellEffectEntry const* effect)
         return;
     }
 
-    if (effect->EffectMiscValue)
+    if (effect->EffectMiscValue_0)
     {
-        uint32 enchant_id = effect->EffectMiscValue;
+        uint32 enchant_id = effect->EffectMiscValue_0;
         int32 duration = m_duration;                        // Try duration index first...
         if (!duration)
         {
@@ -755,7 +755,7 @@ void Spell::EffectDisEnchant(SpellEffectEntry const* /*effect*/)
         return;
     }
 
-    p_caster->UpdateCraftSkill(m_spellInfo->Id);
+    p_caster->UpdateCraftSkill(m_spellInfo->ID);
 
     ((Player*)m_caster)->SendLoot(itemTarget->GetObjectGuid(), LOOT_DISENCHANTING);
 
@@ -863,8 +863,8 @@ void Spell::EffectDismissPet(SpellEffectEntry const* /*effect*/)
  */
 void Spell::EffectSummonObject(SpellEffectEntry const* effect)
 {
-    uint32 go_id = effect->EffectMiscValue;
-    uint8 slot = effect->EffectMiscValueB;
+    uint32 go_id = effect->EffectMiscValue_0;
+    uint8 slot = effect->EffectMiscValue_1;
     if (slot >= MAX_OBJECT_SLOT)
     {
         return;
@@ -903,7 +903,7 @@ void Spell::EffectSummonObject(SpellEffectEntry const* effect)
 
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel());
     pGameObj->SetRespawnTime(m_duration > 0 ? m_duration / IN_MILLISECONDS : 0);
-    pGameObj->SetSpellId(m_spellInfo->Id);
+    pGameObj->SetSpellId(m_spellInfo->ID);
     m_caster->AddGameObject(pGameObj);
 
     map->Add(pGameObj);
@@ -939,7 +939,7 @@ void Spell::EffectResurrect(SpellEffectEntry const* /*effect*/)
         return;
     }
 
-    switch (m_spellInfo->Id)
+    switch (m_spellInfo->ID)
     {
         case 8342:                                          // Defibrillate (Goblin Jumper Cables) has 33% chance on success
         case 22999:                                         // Defibrillate (Goblin Jumper Cables XL) has 50% chance on success
@@ -947,7 +947,7 @@ void Spell::EffectResurrect(SpellEffectEntry const* /*effect*/)
         {
             uint32 failChance = 0;
             uint32 failSpellId = 0;
-            switch (m_spellInfo->Id)
+            switch (m_spellInfo->ID)
             {
                 case 8342:  failChance = 67; failSpellId = 8338;  break;
                 case 22999: failChance = 50; failSpellId = 23055; break;
@@ -1207,7 +1207,7 @@ void Spell::EffectLeapBack(SpellEffectEntry const* effect)
         return;
     }
 
-    m_caster->KnockBackFrom(unitTarget, float(effect->EffectMiscValue) / 10, float(damage) / 10);
+    m_caster->KnockBackFrom(unitTarget, float(effect->EffectMiscValue_0) / 10, float(damage) / 10);
 }
 
 /**
@@ -1225,7 +1225,7 @@ void Spell::EffectReputation(SpellEffectEntry const* effect)
     Player* _player = (Player*)unitTarget;
 
     int32  rep_change = m_currentBasePoints[effect->EffectIndex];
-    uint32 faction_id = effect->EffectMiscValue;
+    uint32 faction_id = effect->EffectMiscValue_0;
 
     FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction_id);
 
@@ -1252,7 +1252,7 @@ void Spell::EffectQuestComplete(SpellEffectEntry const* effect)
     }
 
     // A few spells has additional value from basepoints, check condition here.
-    switch (m_spellInfo->Id)
+    switch (m_spellInfo->ID)
     {
         case 43458:                                         // Secrets of Nifflevar
         {
@@ -1272,7 +1272,7 @@ void Spell::EffectQuestComplete(SpellEffectEntry const* effect)
             break;
     }
 
-    uint32 quest_id = effect->EffectMiscValue;
+    uint32 quest_id = effect->EffectMiscValue_0;
     ((Player*)unitTarget)->AreaExploredOrEventHappens(quest_id);
 }
 
@@ -1303,7 +1303,7 @@ void Spell::EffectSelfResurrect(SpellEffectEntry const* effect)
     if (damage < 0)
     {
         health = uint32(-damage);
-        mana = effect->EffectMiscValue;
+        mana = effect->EffectMiscValue_0;
     }
     // percent case
     else
@@ -1384,7 +1384,7 @@ void Spell::EffectCharge(SpellEffectEntry const* /*effect*/)
     m_caster->MonsterMoveWithSpeed(x, y, z, 24.f, true, true);
 
     // not all charge effects used in negative spells
-    if (unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->Id))
+    if (unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->ID))
     {
         m_caster->Attack(unitTarget, true);
     }
@@ -1415,7 +1415,7 @@ void Spell::EffectCharge2(SpellEffectEntry const* /*effect*/)
     m_caster->MonsterMoveWithSpeed(x, y, z, 24.f, true, true);
 
     // not all charge effects used in negative spells
-    if (unitTarget && unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->Id))
+    if (unitTarget && unitTarget != m_caster && !IsPositiveSpell(m_spellInfo->ID))
     {
         m_caster->Attack(unitTarget, true);
     }
@@ -1433,7 +1433,7 @@ void Spell::EffectKnockBack(SpellEffectEntry const* effect)
         return;
     }
 
-    unitTarget->KnockBackFrom(m_caster, float(effect->EffectMiscValue) / 10, float(damage) / 10);
+    unitTarget->KnockBackFrom(m_caster, float(effect->EffectMiscValue_0) / 10, float(damage) / 10);
 }
 
 /**
@@ -1448,7 +1448,7 @@ void Spell::EffectSendTaxi(SpellEffectEntry const* effect)
         return;
     }
 
-    ((Player*)unitTarget)->ActivateTaxiPathTo(effect->EffectMiscValue, m_spellInfo->Id);
+    ((Player*)unitTarget)->ActivateTaxiPathTo(effect->EffectMiscValue_0, m_spellInfo->ID);
 }
 
 /**
@@ -1473,6 +1473,6 @@ void Spell::EffectPlayerPull(SpellEffectEntry const* effect)
     // Try to normalize Z coord because GetContactPoint do nothing with Z axis
     unitTarget->UpdateAllowedPositionZ(x, y, z);
 
-    float speed = m_spellInfo->speed ? m_spellInfo->speed : 27.0f;
+    float speed = m_spellInfo->Speed ? m_spellInfo->Speed : 27.0f;
     unitTarget->GetMotionMaster()->MoveJump(x, y, z, speed, 2.5f);
 }

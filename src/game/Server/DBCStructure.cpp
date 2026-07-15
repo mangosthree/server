@@ -29,7 +29,7 @@
 
 int32 SpellEntry::CalculateSimpleValue(SpellEffectIndex eff) const
 {
-    if (SpellEffectEntry const* effectEntry = GetSpellEffectEntry(Id, eff))
+    if (SpellEffectEntry const* effectEntry = GetSpellEffectEntry(ID, eff))
     {
         return effectEntry->CalculateSimpleValue();
     }
@@ -38,7 +38,7 @@ int32 SpellEntry::CalculateSimpleValue(SpellEffectIndex eff) const
 
 ClassFamilyMask const& SpellEntry::GetEffectSpellClassMask(SpellEffectIndex eff) const
 {
-    if (SpellEffectEntry const* effectEntry = GetSpellEffectEntry(Id, eff))
+    if (SpellEffectEntry const* effectEntry = GetSpellEffectEntry(ID, eff))
     {
         return effectEntry->EffectSpellClassMask;
     }
@@ -50,88 +50,88 @@ ClassFamilyMask const& SpellEntry::GetEffectSpellClassMask(SpellEffectIndex eff)
 
 SpellAuraOptionsEntry const* SpellEntry::GetSpellAuraOptions() const
 {
-    return SpellAuraOptionsId ? sSpellAuraOptionsStore.LookupEntry(SpellAuraOptionsId) : NULL;
+    return AuraOptionsID ? sSpellAuraOptionsStore.LookupEntry(AuraOptionsID) : NULL;
 }
 
 SpellAuraRestrictionsEntry const* SpellEntry::GetSpellAuraRestrictions() const
 {
-    return SpellAuraRestrictionsId ? sSpellAuraRestrictionsStore.LookupEntry(SpellAuraRestrictionsId) : NULL;
+    return AuraRestrictionsID ? sSpellAuraRestrictionsStore.LookupEntry(AuraRestrictionsID) : NULL;
 }
 
 SpellCastingRequirementsEntry const* SpellEntry::GetSpellCastingRequirements() const
 {
-    return SpellCastingRequirementsId ? sSpellCastingRequirementsStore.LookupEntry(SpellCastingRequirementsId) : NULL;
+    return CastingRequirementsID ? sSpellCastingRequirementsStore.LookupEntry(CastingRequirementsID) : NULL;
 }
 
 SpellCategoriesEntry const* SpellEntry::GetSpellCategories() const
 {
-    return SpellCategoriesId ? sSpellCategoriesStore.LookupEntry(SpellCategoriesId) : NULL;
+    return CategoriesID ? sSpellCategoriesStore.LookupEntry(CategoriesID) : NULL;
 }
 
 SpellClassOptionsEntry const* SpellEntry::GetSpellClassOptions() const
 {
-    return SpellClassOptionsId ? sSpellClassOptionsStore.LookupEntry(SpellClassOptionsId) : NULL;
+    return ClassOptionsID ? sSpellClassOptionsStore.LookupEntry(ClassOptionsID) : NULL;
 }
 
 SpellCooldownsEntry const* SpellEntry::GetSpellCooldowns() const
 {
-    return SpellCooldownsId ? sSpellCooldownsStore.LookupEntry(SpellCooldownsId) : NULL;
+    return CooldownsID ? sSpellCooldownsStore.LookupEntry(CooldownsID) : NULL;
 }
 
 SpellEffectEntry const* SpellEntry::GetSpellEffect(SpellEffectIndex eff) const
 {
-    return GetSpellEffectEntry(Id, eff);
+    return GetSpellEffectEntry(ID, eff);
 }
 
 SpellEquippedItemsEntry const* SpellEntry::GetSpellEquippedItems() const
 {
-    return SpellEquippedItemsId ? sSpellEquippedItemsStore.LookupEntry(SpellEquippedItemsId) : NULL;
+    return EquippedItemsID ? sSpellEquippedItemsStore.LookupEntry(EquippedItemsID) : NULL;
 }
 
 SpellInterruptsEntry const* SpellEntry::GetSpellInterrupts() const
 {
-    return SpellInterruptsId ? sSpellInterruptsStore.LookupEntry(SpellInterruptsId) : NULL;
+    return InterruptsID ? sSpellInterruptsStore.LookupEntry(InterruptsID) : NULL;
 }
 
 SpellLevelsEntry const* SpellEntry::GetSpellLevels() const
 {
-    return SpellLevelsId ? sSpellLevelsStore.LookupEntry(SpellLevelsId) : NULL;
+    return LevelsID ? sSpellLevelsStore.LookupEntry(LevelsID) : NULL;
 }
 
 SpellPowerEntry const* SpellEntry::GetSpellPower() const
 {
-    return SpellPowerId ? sSpellPowerStore.LookupEntry(SpellPowerId) : NULL;
+    return PowerDisplayID ? sSpellPowerStore.LookupEntry(PowerDisplayID) : NULL;
 }
 
 SpellReagentsEntry const* SpellEntry::GetSpellReagents() const
 {
-    return SpellReagentsId ? sSpellReagentsStore.LookupEntry(SpellReagentsId) : NULL;
+    return ReagentsID ? sSpellReagentsStore.LookupEntry(ReagentsID) : NULL;
 }
 
 SpellScalingEntry const* SpellEntry::GetSpellScaling() const
 {
-    return SpellScalingId ? sSpellScalingStore.LookupEntry(SpellScalingId) : NULL;
+    return ScalingID ? sSpellScalingStore.LookupEntry(ScalingID) : NULL;
 }
 
 SpellShapeshiftEntry const* SpellEntry::GetSpellShapeshift() const
 {
-    return SpellShapeshiftId ? sSpellShapeshiftStore.LookupEntry(SpellShapeshiftId) : NULL;
+    return ShapeshiftID ? sSpellShapeshiftStore.LookupEntry(ShapeshiftID) : NULL;
 }
 
 SpellTargetRestrictionsEntry const* SpellEntry::GetSpellTargetRestrictions() const
 {
-    return SpellTargetRestrictionsId ? sSpellTargetRestrictionsStore.LookupEntry(SpellTargetRestrictionsId) : NULL;
+    return TargetRestrictionsID ? sSpellTargetRestrictionsStore.LookupEntry(TargetRestrictionsID) : NULL;
 }
 
 SpellTotemsEntry const* SpellEntry::GetSpellTotems() const
 {
-    return SpellTotemsId ? sSpellTotemsStore.LookupEntry(SpellTotemsId) : NULL;
+    return TotemsID ? sSpellTotemsStore.LookupEntry(TotemsID) : NULL;
 }
 
 uint32 SpellEntry::GetManaCost() const
 {
     SpellPowerEntry const* power = GetSpellPower();
-    return power ? power->manaCost : 0;
+    return power ? power->ManaCost : 0;
 }
 
 uint32 SpellEntry::GetPreventionType() const
@@ -179,7 +179,7 @@ uint32 SpellEntry::GetStartRecoveryCategory() const
 uint32 SpellEntry::GetSpellLevel() const
 {
     SpellLevelsEntry const* levels = GetSpellLevels();
-    return levels ? levels->spellLevel : 0;
+    return levels ? levels->SpellLevel : 0;
 }
 
 int32 SpellEntry::GetEquippedItemClass() const
@@ -191,19 +191,19 @@ int32 SpellEntry::GetEquippedItemClass() const
 SpellFamily SpellEntry::GetSpellFamilyName() const
 {
     SpellClassOptionsEntry const* classOpt = GetSpellClassOptions();
-    return classOpt ? SpellFamily(classOpt->SpellFamilyName) : SPELLFAMILY_GENERIC;
+    return classOpt ? SpellFamily(classOpt->SpellClassSet) : SPELLFAMILY_GENERIC;
 }
 
 uint32 SpellEntry::GetDmgClass() const
 {
     SpellCategoriesEntry const* cat = GetSpellCategories();
-    return cat ? cat->DmgClass : 0;
+    return cat ? cat->DefenseType : 0;
 }
 
 uint32 SpellEntry::GetDispel() const
 {
     SpellCategoriesEntry const* cat = GetSpellCategories();
-    return cat ? cat->Dispel : 0;
+    return cat ? cat->DispelType : 0;
 }
 
 uint32 SpellEntry::GetMaxAffectedTargets() const
@@ -215,31 +215,31 @@ uint32 SpellEntry::GetMaxAffectedTargets() const
 uint32 SpellEntry::GetStackAmount() const
 {
     SpellAuraOptionsEntry const* aura = GetSpellAuraOptions();
-    return aura ? aura->StackAmount : 0;
+    return aura ? aura->CumulativeAura : 0;
 }
 
 uint32 SpellEntry::GetManaCostPercentage() const
 {
     SpellPowerEntry const* power = GetSpellPower();
-    return power ? power->ManaCostPercentage : 0;
+    return power ? power->PowerCost : 0;
 }
 
 uint32 SpellEntry::GetProcCharges() const
 {
     SpellAuraOptionsEntry const* aura = GetSpellAuraOptions();
-    return aura ? aura->procCharges : 0;
+    return aura ? aura->ProcCharges : 0;
 }
 
 uint32 SpellEntry::GetProcChance() const
 {
     SpellAuraOptionsEntry const* aura = GetSpellAuraOptions();
-    return aura ? aura->procChance : 0;
+    return aura ? aura->ProcChance : 0;
 }
 
 uint32 SpellEntry::GetMaxLevel() const
 {
     SpellLevelsEntry const* levels = GetSpellLevels();
-    return levels ? levels->maxLevel : 0;
+    return levels ? levels->MaxLevel : 0;
 }
 
 uint32 SpellEntry::GetTargetAuraState() const
@@ -251,7 +251,7 @@ uint32 SpellEntry::GetTargetAuraState() const
 uint32 SpellEntry::GetManaPerSecond() const
 {
     SpellPowerEntry const* power = GetSpellPower();
-    return power ? power->manaPerSecond : 0;
+    return power ? power->ManaPerSecond : 0;
 }
 
 uint32 SpellEntry::GetRequiresSpellFocus() const
@@ -269,19 +269,19 @@ uint32 SpellEntry::GetSpellEffectIdByIndex(SpellEffectIndex index) const
 uint32 SpellEntry::GetAuraInterruptFlags() const
 {
     SpellInterruptsEntry const* interrupt = GetSpellInterrupts();
-    return interrupt ? interrupt->AuraInterruptFlags : 0;
+    return interrupt ? interrupt->AuraInterruptFlags_0 : 0;
 }
 
 uint32 SpellEntry::GetEffectImplicitTargetAByIndex(SpellEffectIndex index) const
 {
     SpellEffectEntry const* effect = GetSpellEffect(index);
-    return effect ? effect->EffectImplicitTargetA : TARGET_NONE;
+    return effect ? effect->ImplicitTarget_0 : TARGET_NONE;
 }
 
 int32 SpellEntry::GetAreaGroupId() const
 {
     SpellCastingRequirementsEntry const* castReq = GetSpellCastingRequirements();
-    return castReq ? castReq->AreaGroupId : 0;
+    return castReq ? castReq->RequiredAreasID : 0;
 }
 
 uint32 SpellEntry::GetFacingCasterFlags() const
@@ -293,7 +293,7 @@ uint32 SpellEntry::GetFacingCasterFlags() const
 uint32 SpellEntry::GetBaseLevel() const
 {
     SpellLevelsEntry const* levels = GetSpellLevels();
-    return levels ? levels->baseLevel : 0;
+    return levels ? levels->BaseLevel : 0;
 }
 
 uint32 SpellEntry::GetInterruptFlags() const
@@ -311,37 +311,37 @@ uint32 SpellEntry::GetTargetCreatureType() const
 int32 SpellEntry::GetEffectMiscValue(SpellEffectIndex index) const
 {
     SpellEffectEntry const* effect = GetSpellEffect(index);
-    return effect ? effect->EffectMiscValue : 0;
+    return effect ? effect->EffectMiscValue_0 : 0;
 }
 
 uint32 SpellEntry::GetStances() const
 {
     SpellShapeshiftEntry const* ss = GetSpellShapeshift();
-    return ss ? ss->Stances : 0;
+    return ss ? ss->ShapeshiftMask_0 : 0;
 }
 
 uint32 SpellEntry::GetStancesNot() const
 {
     SpellShapeshiftEntry const* ss = GetSpellShapeshift();
-    return ss ? ss->StancesNot : 0;
+    return ss ? ss->ShapeshiftExclude_0 : 0;
 }
 
 uint32 SpellEntry::GetProcFlags() const
 {
     SpellAuraOptionsEntry const* aura = GetSpellAuraOptions();
-    return aura ? aura->procFlags : 0;
+    return aura ? aura->ProcTypeMask : 0;
 }
 
 uint32 SpellEntry::GetChannelInterruptFlags() const
 {
     SpellInterruptsEntry const* interrupt = GetSpellInterrupts();
-    return interrupt ? interrupt->ChannelInterruptFlags : 0;
+    return interrupt ? interrupt->ChannelInterruptFlags_0 : 0;
 }
 
 uint32 SpellEntry::GetManaCostPerLevel() const
 {
     SpellPowerEntry const* power = GetSpellPower();
-    return power ? power->manaCostPerlevel : 0;
+    return power ? power->ManaCostPerLevel : 0;
 }
 
 uint32 SpellEntry::GetCasterAuraState() const
@@ -359,5 +359,5 @@ uint32 SpellEntry::GetTargets() const
 uint32 SpellEntry::GetEffectApplyAuraNameByIndex(SpellEffectIndex index) const
 {
     SpellEffectEntry const* effect = GetSpellEffect(index);
-    return effect ? effect->EffectApplyAuraName : 0;
+    return effect ? effect->EffectAura : 0;
 }

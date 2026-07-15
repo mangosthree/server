@@ -119,7 +119,7 @@ void ObjectMgr::LoadGraveyardZones()
             continue;
         }
 
-        if (areaEntry->zone != 0)
+        if (areaEntry->ParentAreaID != 0)
         {
             sLog.outErrorDb("Table `game_graveyard_zone` has record subzone id (%u) instead of zone, skipped.", zoneId);
             continue;
@@ -205,13 +205,13 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(float x, float y, float
         }
 
         // find now nearest graveyard at other (continent) map
-        if (MapId != entry->map_id)
+        if (MapId != entry->Continent)
         {
             // if find graveyard at different map from where entrance placed (or no entrance data), use any first
             if (!mapEntry ||
-                    mapEntry->ghost_entrance_map < 0 ||
-                    uint32(mapEntry->ghost_entrance_map) != entry->map_id ||
-                    (mapEntry->ghost_entrance_x == 0 && mapEntry->ghost_entrance_y == 0))
+                    mapEntry->CorpseMapID < 0 ||
+                    uint32(mapEntry->CorpseMapID) != entry->Continent ||
+                    (mapEntry->Corpse_0 == 0 && mapEntry->Corpse_1 == 0))
             {
                 // not have any coordinates for check distance anyway
                 entryFar = entry;
@@ -219,8 +219,8 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(float x, float y, float
             }
 
             // at entrance map calculate distance (2D);
-            float dist2 = (entry->x - mapEntry->ghost_entrance_x) * (entry->x - mapEntry->ghost_entrance_x)
-                          + (entry->y - mapEntry->ghost_entrance_y) * (entry->y - mapEntry->ghost_entrance_y);
+            float dist2 = (entry->Loc_0 - mapEntry->Corpse_0) * (entry->Loc_0 - mapEntry->Corpse_0)
+                          + (entry->Loc_1 - mapEntry->Corpse_1) * (entry->Loc_1 - mapEntry->Corpse_1);
             if (foundEntr)
             {
                 if (dist2 < distEntr)
@@ -239,7 +239,7 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(float x, float y, float
         // find now nearest graveyard at same map
         else
         {
-            float dist2 = (entry->x - x) * (entry->x - x) + (entry->y - y) * (entry->y - y) + (entry->z - z) * (entry->z - z);
+            float dist2 = (entry->Loc_0 - x) * (entry->Loc_0 - x) + (entry->Loc_1 - y) * (entry->Loc_1 - y) + (entry->Loc_2 - z) * (entry->Loc_2 - z);
             if (foundNear)
             {
                 if (dist2 < distNear)

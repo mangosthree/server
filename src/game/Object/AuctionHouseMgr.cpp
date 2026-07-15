@@ -103,7 +103,7 @@ uint64 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32
 {
     double deposit = float(pItem->GetProto()->SellPrice * pItem->GetCount() * (time / MIN_AUCTION_TIME));
 
-    deposit = deposit * entry->depositPercent * 3.0f / 100.0f;
+    deposit = deposit * entry->DepositRate * 3.0f / 100.0f;
 
     float min_deposit = float(sWorld.getConfig(CONFIG_UINT32_AUCTION_DEPOSIT_MIN));
 
@@ -596,7 +596,7 @@ uint32 AuctionHouseMgr::GetAuctionHouseTeam(AuctionHouseEntry const* house)
     // auction houses have faction field pointing to PLAYER,* factions,
     // but player factions not have filled team field, and hard go from faction value to faction_template value,
     // so more easy just sort by auction house ids
-    switch (house->houseId)
+    switch (house->ID)
     {
         case 1: case 2: case 3:
             return ALLIANCE;
@@ -647,11 +647,11 @@ AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntry(Unit* unit)
                     {
                         houseid = 7;                         // goblin auction house
                     }
-                    else if (u_entry->ourMask & FACTION_MASK_ALLIANCE)
+                    else if (u_entry->FactionGroup & FACTION_MASK_ALLIANCE)
                     {
                         houseid = 1;                         // human auction house
                     }
-                    else if (u_entry->ourMask & FACTION_MASK_HORDE)
+                    else if (u_entry->FactionGroup & FACTION_MASK_HORDE)
                     {
                         houseid = 6;                         // orc auction house
                     }
@@ -1248,7 +1248,7 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket& data) const
  */
 uint64 AuctionEntry::GetAuctionCut() const
 {
-    return uint64(auctionHouseEntry->cutPercent * bid * sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_CUT) / 100.0f);
+    return uint64(auctionHouseEntry->ConsignmentRate * bid * sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_CUT) / 100.0f);
 }
 
 /// the sum of outbid is (1% from current bid)*5, if bid is very small, it is 1c
@@ -1279,7 +1279,7 @@ void AuctionEntry::SaveToDB() const
     // No SQL injection (no strings)
     CharacterDatabase.PExecute("INSERT INTO `auction` (`id`,`houseid`,`itemguid`,`item_template`,`item_count`,`item_randompropertyid`,`itemowner`,`buyoutprice`,`time`,`moneyTime`,`buyguid`,`lastbid`,`startbid`,`deposit`) "
                                "VALUES ('%u', '%u', '%u', '%u', '%u', '%i', '%u', '" UI64FMTD "', '" UI64FMTD "', '" UI64FMTD "', '%u', '" UI64FMTD "', '" UI64FMTD "', '" UI64FMTD "')",
-                               Id, auctionHouseEntry->houseId, itemGuidLow, itemTemplate, itemCount, itemRandomPropertyId, owner, buyout, (uint64)expireTime, (uint64)moneyDeliveryTime, bidder, bid, startbid, deposit);
+                               Id, auctionHouseEntry->ID, itemGuidLow, itemTemplate, itemCount, itemRandomPropertyId, owner, buyout, (uint64)expireTime, (uint64)moneyDeliveryTime, bidder, bid, startbid, deposit);
 }
 
 /**

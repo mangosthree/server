@@ -52,7 +52,7 @@ void AddItemsSetItem(Player* player, Item* item)
         return;
     }
 
-    if (set->required_skill_id && player->GetSkillValue(set->required_skill_id) < set->required_skill_value)
+    if (set->RequiredSkill && player->GetSkillValue(set->RequiredSkill) < set->RequiredSkillRank)
     {
         return;
     }
@@ -95,19 +95,19 @@ void AddItemsSetItem(Player* player, Item* item)
 
     for (uint32 x = 0; x < 8; ++x)
     {
-        if (!set->spells[x])
+        if (!set->SetSpellID[x])
         {
             continue;
         }
         // not enough for  spell
-        if (set->items_to_triggerspell[x] > eff->item_count)
+        if (set->SetThreshold[x] > eff->item_count)
         {
             continue;
         }
 
         uint32 z = 0;
         for (; z < 8; ++z)
-            if (eff->spells[z] && eff->spells[z]->Id == set->spells[x])
+            if (eff->spells[z] && eff->spells[z]->ID == set->SetSpellID[x])
             {
                 break;
             }
@@ -122,10 +122,10 @@ void AddItemsSetItem(Player* player, Item* item)
         {
             if (!eff->spells[y])                            // free slot
             {
-                SpellEntry const* spellInfo = sSpellStore.LookupEntry(set->spells[x]);
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(set->SetSpellID[x]);
                 if (!spellInfo)
                 {
-                    sLog.outError("WORLD: unknown spell id %u in items set %u effects", set->spells[x], setid);
+                    sLog.outError("WORLD: unknown spell id %u in items set %u effects", set->SetSpellID[x], setid);
                     break;
                 }
 
@@ -177,20 +177,20 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
 
     for (uint32 x = 0; x < 8; ++x)
     {
-        if (!set->spells[x])
+        if (!set->SetSpellID[x])
         {
             continue;
         }
 
         // enough for spell
-        if (set->items_to_triggerspell[x] <= eff->item_count)
+        if (set->SetThreshold[x] <= eff->item_count)
         {
             continue;
         }
 
         for (uint32 z = 0; z < 8; ++z)
         {
-            if (eff->spells[z] && eff->spells[z]->Id == set->spells[x])
+            if (eff->spells[z] && eff->spells[z]->ID == set->SetSpellID[x])
             {
                 // spell can be not active if not fit form requirement
                 player->ApplyEquipSpell(eff->spells[z], NULL, false);
@@ -319,7 +319,7 @@ uint32 ItemPrototype::GetArmor() const
     {
         if (ItemArmorShieldEntry const* ias = sItemArmorShieldStore.LookupEntry(ItemLevel))
         {
-            return uint32(floor(ias->Value[Quality] + 0.5f));
+            return uint32(floor(ias->Quality[Quality] + 0.5f));
         }
         return 0;
     }
@@ -378,7 +378,7 @@ uint32 ItemPrototype::GetArmor() const
             return 0;
     }
 
-    return uint32(floor(iaq->Value[Quality] * iatMult * alMult + 0.5f));
+    return uint32(floor(iaq->Qualitymod[Quality] * iatMult * alMult + 0.5f));
 }
 
 float ItemPrototype::getDPS() const
@@ -450,7 +450,7 @@ float ItemPrototype::getDPS() const
             return damage;
         }
 
-        return id->Value[Quality];
+        return id->Quality[Quality];
     }
 
     return damage;
@@ -600,7 +600,7 @@ void Item::SetItemRandomProperties(int32 randomPropId)
             }
             for (uint32 i = PROP_ENCHANTMENT_SLOT_1; i < PROP_ENCHANTMENT_SLOT_4; ++i)
             {
-                SetEnchantment(EnchantmentSlot(i), item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_1], 0, 0);
+                SetEnchantment(EnchantmentSlot(i), item_rand->Enchantment[i - PROP_ENCHANTMENT_SLOT_1], 0, 0);
             }
         }
     }
@@ -619,7 +619,7 @@ void Item::SetItemRandomProperties(int32 randomPropId)
 
             for (uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_4; ++i)
             {
-                SetEnchantment(EnchantmentSlot(i), item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_0], 0, 0);
+                SetEnchantment(EnchantmentSlot(i), item_rand->Enchantment[i - PROP_ENCHANTMENT_SLOT_0], 0, 0);
             }
         }
     }
@@ -848,7 +848,7 @@ bool Item::IsBoundByEnchant() const
             continue;
         }
 
-        if (enchantEntry->slot & ENCHANTMENT_CAN_SOULBOUND)
+        if (enchantEntry->Flags & ENCHANTMENT_CAN_SOULBOUND)
         {
             return true;
         }
@@ -897,9 +897,9 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
             return false;                                    //  wrong item class
         }
 
-        if (equippedItems->EquippedItemSubClassMask != 0)   // 0 == any subclass
+        if (equippedItems->EquippedItemSubclass != 0)   // 0 == any subclass
         {
-            if ((equippedItems->EquippedItemSubClassMask & (1 << proto->SubClass)) == 0)
+            if ((equippedItems->EquippedItemSubclass & (1 << proto->SubClass)) == 0)
             {
                 return false;                                // subclass not present in mask
             }
@@ -909,9 +909,9 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
     // Only check for item enchantments (TARGET_FLAG_ITEM), all other spells are either NPC spells
     // or spells where slot requirements are already handled with AttributesEx3 fields
     // and special code (Titan's Grip, Windfury Attack). Check clearly not applicable for Lava Lash.
-    if (equippedItems->EquippedItemInventoryTypeMask != 0 && (spellInfo->GetTargets() & TARGET_FLAG_ITEM))    // 0 == any inventory type
+    if (equippedItems->EquippedItemInvTypes != 0 && (spellInfo->GetTargets() & TARGET_FLAG_ITEM))    // 0 == any inventory type
     {
-        if ((equippedItems->EquippedItemInventoryTypeMask  & (1 << proto->InventoryType)) == 0)
+        if ((equippedItems->EquippedItemInvTypes  & (1 << proto->InventoryType)) == 0)
         {
             return false;                                    // inventory type not present in mask
         }
@@ -1312,7 +1312,7 @@ uint32 Item::GetSpecialPrice(ItemPrototype const* proto, uint32 minimumPrice /*=
                 ItemClassEntry const* classEntry = sItemClassStore.LookupEntry(proto->Class);
                 if (classEntry)
                 {
-                    cost *= classEntry->PriceFactor;
+                    cost *= classEntry->PriceModifier;
                 }
                 else
                 {
@@ -1367,13 +1367,13 @@ int32 Item::GetReforgableStat(ItemModType statType) const
             {
                 for (uint32 f = 0; f < 3; ++f)
                 {
-                    if (enchant->type[f] == ITEM_ENCHANTMENT_TYPE_STAT && enchant->spellid[f] == statType)
+                    if (enchant->Effect[f] == ITEM_ENCHANTMENT_TYPE_STAT && enchant->EffectArg[f] == statType)
                     {
                         for (int k = 0; k < 5; ++k)
                         {
-                            if (randomSuffix->enchant_id[k] == enchant->ID)
+                            if (randomSuffix->Enchantment[k] == enchant->ID)
                             {
-                                return int32((randomSuffix->prefix[k] * GetItemSuffixFactor()) / 10000);
+                                return int32((randomSuffix->AllocationPct[k] * GetItemSuffixFactor()) / 10000);
                             }
                         }
                     }
@@ -1395,13 +1395,13 @@ int32 Item::GetReforgableStat(ItemModType statType) const
             {
                 for (uint32 f = 0; f < 3; ++f)
                 {
-                    if (enchant->type[f] == ITEM_ENCHANTMENT_TYPE_STAT && enchant->spellid[f] == statType)
+                    if (enchant->Effect[f] == ITEM_ENCHANTMENT_TYPE_STAT && enchant->EffectArg[f] == statType)
                     {
                         for (int k = 0; k < 3; ++k)
                         {
-                            if (randomProp->enchant_id[k] == enchant->ID)
+                            if (randomProp->Enchantment[k] == enchant->ID)
                             {
-                                return int32(enchant->amount[k]);
+                                return int32(enchant->EffectPointsMin[k]);
                             }
                         }
                     }

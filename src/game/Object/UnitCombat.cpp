@@ -614,7 +614,7 @@ float Unit::MeleeSpellMissChance(Unit* pVictim, WeaponAttackType attType, int32 
     // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
     if (Player* modOwner = GetSpellModOwner())
     {
-        modOwner->ApplySpellMod(spell->Id, SPELLMOD_RESIST_MISS_CHANCE, hitChance);
+        modOwner->ApplySpellMod(spell->ID, SPELLMOD_RESIST_MISS_CHANCE, hitChance);
     }
 
     // Miss = 100 - hit
@@ -848,7 +848,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
     // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
     if (Player* modOwner = GetSpellModOwner())
     {
-        modOwner->ApplySpellMod(spell->Id, SPELLMOD_RESIST_MISS_CHANCE, modHitChance);
+        modOwner->ApplySpellMod(spell->ID, SPELLMOD_RESIST_MISS_CHANCE, modHitChance);
     }
     // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
     modHitChance += pVictim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, schoolMask);
@@ -943,7 +943,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
 
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
-    if (IsPositiveSpell(spell->Id))
+    if (IsPositiveSpell(spell->ID))
     {
         return SPELL_MISS_NONE;
     }

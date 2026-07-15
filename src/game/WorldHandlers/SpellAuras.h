@@ -118,7 +118,7 @@ class  SpellAuraHolder
         Aura* GetAuraByEffectIndex(SpellEffectIndex index) const { return m_auras[index]; }
         SpellEntry const* GetTriggeredBy() const { return m_triggeredBy; }
 
-        uint32 GetId() const { return m_spellProto->Id; }
+        uint32 GetId() const { return m_spellProto->ID; }
         SpellEntry const* GetSpellProto() const { return m_spellProto; }
         SpellAuraHolderState GetState() const { return m_spellAuraHolderState; }
         void SetState(SpellAuraHolderState state) { m_spellAuraHolderState = state; }
@@ -452,12 +452,12 @@ class  Aura
         void SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue);
         Modifier*       GetModifier()       { return &m_modifier; }
         Modifier const* GetModifier() const { return &m_modifier; }
-        int32 GetMiscValue() const { return m_spellEffect ? m_spellEffect->EffectMiscValue : 0; }
-        int32 GetMiscBValue() const { return m_spellEffect ? m_spellEffect->EffectMiscValueB : 0; }
+        int32 GetMiscValue() const { return m_spellEffect ? m_spellEffect->EffectMiscValue_0 : 0; }
+        int32 GetMiscBValue() const { return m_spellEffect ? m_spellEffect->EffectMiscValue_1 : 0; }
 
         SpellEntry const* GetSpellProto() const { return GetHolder()->GetSpellProto(); }
         SpellEffectEntry const* GetSpellEffect() const { return m_spellEffect; }
-        uint32 GetId() const{ return GetHolder()->GetSpellProto()->Id; }
+        uint32 GetId() const{ return GetHolder()->GetSpellProto()->ID; }
         ObjectGuid const& GetCastItemGuid() const { return GetHolder()->GetCastItemGuid(); }
         ObjectGuid const& GetCasterGuid() const { return GetHolder()->GetCasterGuid(); }
         Unit* GetCaster() const { return GetHolder()->GetCaster(); }

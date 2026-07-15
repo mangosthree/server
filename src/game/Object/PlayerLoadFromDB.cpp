@@ -620,8 +620,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         else                                                // have start node, to it
         {
             sLog.outError("Character %u have too short taxi destination list, teleport to original node.", GetGUIDLow());
-            SetLocationMapId(nodeEntry->map_id);
-            Relocate(nodeEntry->x, nodeEntry->y, nodeEntry->z, 0.0f);
+            SetLocationMapId(nodeEntry->ContinentID);
+            Relocate(nodeEntry->Pos_0, nodeEntry->Pos_1, nodeEntry->Pos_2, 0.0f);
         }
 
         // we can be relocated from taxi and still have an outdated Map pointer!
@@ -637,10 +637,10 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         // save source node as recall coord to prevent recall and fall from sky
         TaxiNodesEntry const* nodeEntry = sTaxiNodesStore.LookupEntry(node_id);
         MANGOS_ASSERT(nodeEntry);                           // checked in m_taxi.LoadTaxiDestinationsFromString
-        m_recallMap = nodeEntry->map_id;
-        m_recallX = nodeEntry->x;
-        m_recallY = nodeEntry->y;
-        m_recallZ = nodeEntry->z;
+        m_recallMap = nodeEntry->ContinentID;
+        m_recallX = nodeEntry->Pos_0;
+        m_recallY = nodeEntry->Pos_1;
+        m_recallZ = nodeEntry->Pos_2;
 
         // flight will started later
     }

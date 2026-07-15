@@ -104,10 +104,10 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
                     gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
                     return;
                 }
-                sLog.outError("Spell::SendLoot unhandled locktype %u for GameObject trap (entry %u) for spell %u.", lockType, gameObjTarget->GetEntry(), m_spellInfo->Id);
+                sLog.outError("Spell::SendLoot unhandled locktype %u for GameObject trap (entry %u) for spell %u.", lockType, gameObjTarget->GetEntry(), m_spellInfo->ID);
                 return;
             default:
-                sLog.outError("Spell::SendLoot unhandled GameObject type %u (entry %u) for spell %u.", gameObjTarget->GetGoType(), gameObjTarget->GetEntry(), m_spellInfo->Id);
+                sLog.outError("Spell::SendLoot unhandled GameObject type %u (entry %u) for spell %u.", gameObjTarget->GetGoType(), gameObjTarget->GetEntry(), m_spellInfo->ID);
                 return;
         }
     }
@@ -203,7 +203,7 @@ void Spell::EffectOpenLock(SpellEffectEntry const* effect)
         itemTarget->SetFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_UNLOCKED);
     }
 
-    SendLoot(guid, LOOT_SKINNING, LockType(effect->EffectMiscValue));
+    SendLoot(guid, LOOT_SKINNING, LockType(effect->EffectMiscValue_0));
 
     // not allow use skill grow at item base open
     if (!m_CastItem && skillId != SKILL_NONE)
@@ -287,14 +287,14 @@ void Spell::EffectProficiency(SpellEffectEntry const* /*effect*/)
         return;
     }
 
-    if (eqItems->EquippedItemClass == ITEM_CLASS_WEAPON && !(p_target->GetWeaponProficiency() & eqItems->EquippedItemSubClassMask))
+    if (eqItems->EquippedItemClass == ITEM_CLASS_WEAPON && !(p_target->GetWeaponProficiency() & eqItems->EquippedItemSubclass))
     {
-        p_target->AddWeaponProficiency(eqItems->EquippedItemSubClassMask);
+        p_target->AddWeaponProficiency(eqItems->EquippedItemSubclass);
         p_target->SendProficiency(ITEM_CLASS_WEAPON, p_target->GetWeaponProficiency());
     }
-    if (eqItems->EquippedItemClass == ITEM_CLASS_ARMOR && !(p_target->GetArmorProficiency() & eqItems->EquippedItemSubClassMask))
+    if (eqItems->EquippedItemClass == ITEM_CLASS_ARMOR && !(p_target->GetArmorProficiency() & eqItems->EquippedItemSubclass))
     {
-        p_target->AddArmorProficiency(eqItems->EquippedItemSubClassMask);
+        p_target->AddArmorProficiency(eqItems->EquippedItemSubclass);
         p_target->SendProficiency(ITEM_CLASS_ARMOR, p_target->GetArmorProficiency());
     }
 }
@@ -322,12 +322,12 @@ void Spell::EffectApplyAreaAura(SpellEffectEntry const* effect)
 void Spell::EffectSummonType(SpellEffectEntry const* effect)
 {
     // if this spell already have an aura applied cancel the summon
-    if (m_caster->HasAura(m_spellInfo->Id))
+    if (m_caster->HasAura(m_spellInfo->ID))
     {
         return;
     }
 
-    uint32 prop_id = effect->EffectMiscValueB;
+    uint32 prop_id = effect->EffectMiscValue_1;
     SummonPropertiesEntry const *summon_prop = sSummonPropertiesStore.LookupEntry(prop_id);
     if (!summon_prop)
     {
@@ -336,7 +336,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
     }
 
     // Pet's are atm handled differently
-    if (summon_prop->Group == SUMMON_PROP_GROUP_PETS && prop_id != 1562)
+    if (summon_prop->Control == SUMMON_PROP_GROUP_PETS && prop_id != 1562)
     {
         DoSummonPet(effect);
     }
@@ -345,7 +345,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
     uint32 amount = damage > 0 ? damage : 1;
 
     // basepoints of SUMMON_PROP_GROUP_VEHICLE is often a spellId, set amount to 1
-    if ((summon_prop->Group == SUMMON_PROP_GROUP_VEHICLE || (prop_id == 1961)) || summon_prop->Group == SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE || summon_prop->Group == SUMMON_PROP_GROUP_CONTROLLABLE)
+    if ((summon_prop->Control == SUMMON_PROP_GROUP_VEHICLE || (prop_id == 1961)) || summon_prop->Control == SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE || summon_prop->Control == SUMMON_PROP_GROUP_CONTROLLABLE)
     {
         amount = 1;
     }
@@ -354,7 +354,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
     WorldObject* realCaster = GetCastingObject();
     if (!realCaster)
     {
-        sLog.outError("EffectSummonType: No Casting Object found for spell %u, (caster = %s)", m_spellInfo->Id, m_caster->GetGuidStr().c_str());
+        sLog.outError("EffectSummonType: No Casting Object found for spell %u, (caster = %s)", m_spellInfo->ID, m_caster->GetGuidStr().c_str());
         return;
     }
 
@@ -391,7 +391,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
         realCaster->GetPosition(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z);
 
         // TODO - Is this really an error?
-        sLog.outDebug("Spell Effect EFFECT_SUMMON (%u) - summon without destination (spell id %u, effIndex %u)", effect->Effect, m_spellInfo->Id, SpellEffectIndex(effect->EffectIndex));
+        sLog.outDebug("Spell Effect EFFECT_SUMMON (%u) - summon without destination (spell id %u, effIndex %u)", effect->Effect, m_spellInfo->ID, SpellEffectIndex(effect->EffectIndex));
     }
 
     // Set summon positions
@@ -418,7 +418,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
     }
 
     bool summonResult = false;
-    switch (summon_prop->Group)
+    switch (summon_prop->Control)
     {
             // faction handled later on, or loaded from template
         case SUMMON_PROP_GROUP_WILD:
@@ -458,7 +458,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
                         else
                         {
                             // possible sort totems/guardians only by summon creature type
-                            CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(effect->EffectMiscValue);
+                            CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(effect->EffectMiscValue_0);
 
                             if (!cInfo)
                             {
@@ -544,7 +544,7 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
             break;
         }
         default:
-            sLog.outError("EffectSummonType: Unhandled summon group type %u", summon_prop->Group);
+            sLog.outError("EffectSummonType: Unhandled summon group type %u", summon_prop->Control);
             break;
     }
 
@@ -558,13 +558,13 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
         MANGOS_ASSERT(itr->creature || itr != summonPositions.begin());
         if (!itr->creature)
         {
-            sLog.outError("EffectSummonType: Expected to have %u NPCs summoned, but some failed (Spell id %u)", amount, m_spellInfo->Id);
+            sLog.outError("EffectSummonType: Expected to have %u NPCs summoned, but some failed (Spell id %u)", amount, m_spellInfo->ID);
             continue;
         }
 
-        if (summon_prop->FactionId)
+        if (summon_prop->Faction)
         {
-            itr->creature->setFaction(summon_prop->FactionId);
+            itr->creature->setFaction(summon_prop->Faction);
         }
         // Else set faction to summoner's faction for pet-like summoned
         else if ((summon_prop->Flags & SUMMON_PROP_FLAG_INHERIT_FACTION) || !itr->creature->IsTemporarySummon())
@@ -616,11 +616,11 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
 {
     MANGOS_ASSERT(!list.empty() && prop);
 
-    uint32 creature_entry = effect->EffectMiscValue;
+    uint32 creature_entry = effect->EffectMiscValue_0;
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature_entry);
     if (!cInfo)
     {
-        sLog.outErrorDb("Spell::DoSummonWild: creature entry %u not found for spell %u.", creature_entry, m_spellInfo->Id);
+        sLog.outErrorDb("Spell::DoSummonWild: creature entry %u not found for spell %u.", creature_entry, m_spellInfo->ID);
         return false;
     }
 
@@ -631,7 +631,7 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
         {
             itr->creature = summon;
 
-            summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+            summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->ID);
 
             // UNIT_FIELD_CREATEDBY are not set for these kind of spells.
             // Does exceptions exist? If so, what are they?
@@ -665,11 +665,11 @@ bool Spell::DoSummonCritter(CreatureSummonPositions& list, SummonPropertiesEntry
     MANGOS_ASSERT(!list.empty() && prop);
 
     // ATM only first position is supported for summoning
-    uint32 pet_entry = effect->EffectMiscValue;
+    uint32 pet_entry = effect->EffectMiscValue_0;
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);
     if (!cInfo)
     {
-        sLog.outErrorDb("Spell::DoSummonCritter: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->Id);
+        sLog.outErrorDb("Spell::DoSummonCritter: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->ID);
         return false;
     }
 
@@ -697,7 +697,7 @@ bool Spell::DoSummonCritter(CreatureSummonPositions& list, SummonPropertiesEntry
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
     if (!critter->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, pet_number))
     {
-        sLog.outError("Spell::EffectSummonCritter, spellid %u: no such creature entry %u", m_spellInfo->Id, pet_entry);
+        sLog.outError("Spell::EffectSummonCritter, spellid %u: no such creature entry %u", m_spellInfo->ID, pet_entry);
         delete critter;
         return false;
     }
@@ -711,7 +711,7 @@ bool Spell::DoSummonCritter(CreatureSummonPositions& list, SummonPropertiesEntry
     critter->SetOwnerGuid(m_caster->GetObjectGuid());
     critter->SetCreatorGuid(m_caster->GetObjectGuid());
 
-    critter->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+    critter->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->ID);
 
     critter->InitPetCreateSpells();                         // e.g. disgusting oozeling has a create spell as critter...
     // critter->InitLevelupSpellsForLevel();                // none?
@@ -751,11 +751,11 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
 {
     MANGOS_ASSERT(!list.empty() && prop);
 
-    uint32 pet_entry = effect->EffectMiscValue;
+    uint32 pet_entry = effect->EffectMiscValue_0;
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);
     if (!cInfo)
     {
-        sLog.outErrorDb("Spell::DoSummonGuardian: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->Id);
+        sLog.outErrorDb("Spell::DoSummonGuardian: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->ID);
         return false;
     }
 
@@ -795,7 +795,7 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
         uint32 pet_number = sObjectMgr.GeneratePetNumber();
         if (!spawnCreature->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, pet_number))
         {
-            sLog.outError("Spell::DoSummonGuardian: can't create creature entry %u for spell %u.", pet_entry, m_spellInfo->Id);
+            sLog.outError("Spell::DoSummonGuardian: can't create creature entry %u for spell %u.", pet_entry, m_spellInfo->ID);
             delete spawnCreature;
             return false;
         }
@@ -818,7 +818,7 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
         spawnCreature->setFaction(m_caster->getFaction());
         spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
         spawnCreature->SetCreatorGuid(m_caster->GetObjectGuid());
-        spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+        spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->ID);
 
         spawnCreature->InitStatsForLevel(level);
 
@@ -884,10 +884,10 @@ bool Spell::DoSummonTotem(SpellEffectEntry const* effect, uint8 slot_dbc)
 
     CreatureCreatePos pos(m_caster, m_caster->GetOrientation(), 2.0f, angle);
 
-    CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(effect->EffectMiscValue);
+    CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(effect->EffectMiscValue_0);
     if (!cinfo)
     {
-        sLog.outErrorDb("Creature entry %u does not exist but used in spell %u totem summon.", m_spellInfo->Id, effect->EffectMiscValue);
+        sLog.outErrorDb("Creature entry %u does not exist but used in spell %u totem summon.", m_spellInfo->ID, effect->EffectMiscValue_0);
         return false;
     }
 
@@ -918,7 +918,7 @@ bool Spell::DoSummonTotem(SpellEffectEntry const* effect, uint8 slot_dbc)
         pTotem->SetHealth(damage);
     }
 
-    pTotem->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+    pTotem->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->ID);
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -942,7 +942,7 @@ bool Spell::DoSummonTotem(SpellEffectEntry const* effect, uint8 slot_dbc)
         data << uint8(slot);
         data << pTotem->GetObjectGuid();
         data << uint32(m_duration);
-        data << uint32(m_spellInfo->Id);
+        data << uint32(m_spellInfo->ID);
         ((Player*)m_caster)->SendDirectMessage(&data);
     }
 
@@ -955,12 +955,12 @@ bool Spell::DoSummonPossessed(CreatureSummonPositions& list, SummonPropertiesEnt
 {
     MANGOS_ASSERT(!list.empty() && prop);
 
-    uint32 const& creatureEntry = effect->EffectMiscValue;
+    uint32 const& creatureEntry = effect->EffectMiscValue_0;
 
     Unit* newUnit = m_caster->TakePossessOf(m_spellInfo, prop, effect, list[0].x, list[0].y, list[0].z, m_caster->GetOrientation());
     if (!newUnit)
     {
-        sLog.outError("Spell::DoSummonPossessed: creature entry %d for spell %u could not be summoned.", creatureEntry, m_spellInfo->Id);
+        sLog.outError("Spell::DoSummonPossessed: creature entry %d for spell %u could not be summoned.", creatureEntry, m_spellInfo->ID);
         return false;
     }
 
@@ -997,11 +997,11 @@ bool Spell::DoSummonPet(SpellEffectEntry const* effect)
         return false;
     }
 
-    uint32 pet_entry = effect->EffectMiscValue;
+    uint32 pet_entry = effect->EffectMiscValue_0;
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);
     if (!cInfo)
     {
-        sLog.outErrorDb("Spell::DoSummonPet: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->Id);
+        sLog.outErrorDb("Spell::DoSummonPet: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->ID);
         return false;
     }
 
@@ -1045,12 +1045,12 @@ bool Spell::DoSummonPet(SpellEffectEntry const* effect)
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
     if (!spawnCreature->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, pet_number))
     {
-        sLog.outErrorDb("Spell::EffectSummon: can't create creature with entry %u for spell %u", cInfo->Entry, m_spellInfo->Id);
+        sLog.outErrorDb("Spell::EffectSummon: can't create creature with entry %u for spell %u", cInfo->Entry, m_spellInfo->ID);
         delete spawnCreature;
         return false;
     }
 
-    uint32 level = std::max(m_caster->getLevel() + effect->EffectMultipleValue, 1.0f);
+    uint32 level = std::max(m_caster->getLevel() + effect->EffectAmplitude, 1.0f);
 
     spawnCreature->SetRespawnCoord(pos);
 
@@ -1058,7 +1058,7 @@ bool Spell::DoSummonPet(SpellEffectEntry const* effect)
     spawnCreature->setFaction(m_caster->getFaction());
     spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
     spawnCreature->SetCreatorGuid(m_caster->GetObjectGuid());
-    spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+    spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->ID);
 
     spawnCreature->InitStatsForLevel(level);
 
@@ -1128,11 +1128,11 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
 {
     MANGOS_ASSERT(!list.empty() && prop);
 
-    uint32 creatureEntry = effect->EffectMiscValue;
+    uint32 creatureEntry = effect->EffectMiscValue_0;
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creatureEntry);
     if (!cInfo)
     {
-        sLog.outErrorDb("Spell::DoSummonVehicle: creature entry %u not found for spell %u.", creatureEntry, m_spellInfo->Id);
+        sLog.outErrorDb("Spell::DoSummonVehicle: creature entry %u not found for spell %u.", creatureEntry, m_spellInfo->ID);
         return false;
     }
 
@@ -1141,7 +1141,7 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
 
     if (!spawnCreature)
     {
-        sLog.outError("Spell::DoSummonVehicle: creature entry %u for spell %u could not be summoned.", creatureEntry, m_spellInfo->Id);
+        sLog.outError("Spell::DoSummonVehicle: creature entry %u for spell %u could not be summoned.", creatureEntry, m_spellInfo->ID);
         return false;
     }
 
@@ -1149,7 +1149,7 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
 
     // Changes to be sent
     spawnCreature->SetCreatorGuid(m_caster->GetObjectGuid());
-    spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+    spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->ID);
     //spawnCreature->SetLevel(level); // Do we need to set level for vehicles?
 
     // Board the caster right after summoning

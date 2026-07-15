@@ -87,15 +87,15 @@ void Player::TakeExtendedCost(uint32 extendedCostId)
 
     for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
     {
-        if (extendedCost->reqitem[i])
+        if (extendedCost->ItemID[i])
         {
-            DestroyItemCount(extendedCost->reqitem[i], extendedCost->reqitemcount[i], true);
+            DestroyItemCount(extendedCost->ItemID[i], extendedCost->ItemCount[i], true);
         }
     }
 
     for (int i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
     {
-        if (extendedCost->reqcur[i] == CURRENCY_NONE)
+        if (extendedCost->CurrencyID[i] == CURRENCY_NONE)
         {
             continue;
         }
@@ -105,13 +105,13 @@ void Player::TakeExtendedCost(uint32 extendedCostId)
             continue;
         }
 
-        CurrencyTypesEntry const * entry = sCurrencyTypesStore.LookupEntry(extendedCost->reqcur[i]);
+        CurrencyTypesEntry const * entry = sCurrencyTypesStore.LookupEntry(extendedCost->CurrencyID[i]);
         if (!entry)
         {
             continue;
         }
 
-        int32 cost = int32(extendedCost->reqcurrcount[i]);
+        int32 cost = int32(extendedCost->CurrencyCount[i]);
         ModifyCurrencyCount(entry->ID, -cost);
     }
 }
@@ -228,7 +228,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         // item base price
         for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
         {
-            if (iece->reqitem[i] && !HasItemCount(iece->reqitem[i], iece->reqitemcount[i]))
+            if (iece->ItemID[i] && !HasItemCount(iece->ItemID[i], iece->ItemCount[i]))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
                 return false;
@@ -238,21 +238,21 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         // currency price
         for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
         {
-            if (iece->reqcur[i] == CURRENCY_NONE)
+            if (iece->CurrencyID[i] == CURRENCY_NONE)
             {
                 continue;
             }
 
-            CurrencyTypesEntry const * costCurrency = sCurrencyTypesStore.LookupEntry(iece->reqcur[i]);
+            CurrencyTypesEntry const * costCurrency = sCurrencyTypesStore.LookupEntry(iece->CurrencyID[i]);
             if (!costCurrency)
             {
-                sLog.outError("Item %u has ExtendedCost %u with unexistent currency id %u", pProto->ItemId, extendedCostId, iece->reqcur[i]);
+                sLog.outError("Item %u has ExtendedCost %u with unexistent currency id %u", pProto->ItemId, extendedCostId, iece->CurrencyID[i]);
                 continue;
             }
 
-            int32 cost = int32(iece->reqcurrcount[i]);
+            int32 cost = int32(iece->CurrencyCount[i]);
 
-            bool hasCount = iece->IsSeasonCurrencyRequirement(i) ? HasCurrencySeasonCount(iece->reqcur[i], cost) : HasCurrencyCount(iece->reqcur[i], cost);
+            bool hasCount = iece->IsSeasonCurrencyRequirement(i) ? HasCurrencySeasonCount(iece->CurrencyID[i], cost) : HasCurrencyCount(iece->CurrencyID[i], cost);
             if (!hasCount)
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL);
@@ -261,7 +261,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         }
 
         // check for personal arena rating requirement
-        if (GetMaxPersonalArenaRatingRequirement(iece->reqarenaslot) < iece->reqpersonalarenarating)
+        if (GetMaxPersonalArenaRatingRequirement(iece->ArenaBracket) < iece->RequiredPersonalArenaRating)
         {
             // probably not the proper equip err
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
@@ -385,7 +385,7 @@ bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot,
         return false;
     }
 
-    if (pCurrency->Category == CURRENCY_CATEGORY_META)
+    if (pCurrency->CategoryID == CURRENCY_CATEGORY_META)
     {
         return false;
     }
@@ -448,7 +448,7 @@ bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot,
         // item base price
         for (uint8 i = 0; i < MAX_EXTENDED_COST_ITEMS; ++i)
         {
-            if (iece->reqitem[i] && !HasItemCount(iece->reqitem[i], iece->reqitemcount[i]))
+            if (iece->ItemID[i] && !HasItemCount(iece->ItemID[i], iece->ItemCount[i]))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
                 return false;
@@ -458,20 +458,20 @@ bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot,
         // currency price
         for (uint8 i = 0; i < MAX_EXTENDED_COST_CURRENCIES; ++i)
         {
-            if (iece->reqcur[i] == CURRENCY_NONE)
+            if (iece->CurrencyID[i] == CURRENCY_NONE)
             {
                 continue;
             }
 
-            CurrencyTypesEntry const * costCurrency = sCurrencyTypesStore.LookupEntry(iece->reqcur[i]);
+            CurrencyTypesEntry const * costCurrency = sCurrencyTypesStore.LookupEntry(iece->CurrencyID[i]);
             if (!costCurrency)
             {
-                sLog.outError("Currency %u has ExtendedCost %u with unexistent currency id %u", currencyId, extendedCostId, iece->reqcur[i]);
+                sLog.outError("Currency %u has ExtendedCost %u with unexistent currency id %u", currencyId, extendedCostId, iece->CurrencyID[i]);
                 continue;
             }
 
-            int32 cost = int32(iece->reqcurrcount[i]);
-            bool hasCount = iece->IsSeasonCurrencyRequirement(i) ? HasCurrencySeasonCount(iece->reqcur[i], cost) : HasCurrencyCount(iece->reqcur[i], cost);
+            int32 cost = int32(iece->CurrencyCount[i]);
+            bool hasCount = iece->IsSeasonCurrencyRequirement(i) ? HasCurrencySeasonCount(iece->CurrencyID[i], cost) : HasCurrencyCount(iece->CurrencyID[i], cost);
             if (!hasCount)
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL);
@@ -480,7 +480,7 @@ bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot,
         }
 
         // check for personal arena rating requirement
-        if (GetMaxPersonalArenaRatingRequirement(iece->reqarenaslot) < iece->reqpersonalarenarating)
+        if (GetMaxPersonalArenaRatingRequirement(iece->ArenaBracket) < iece->RequiredPersonalArenaRating)
         {
             // probably not the proper equip err
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);

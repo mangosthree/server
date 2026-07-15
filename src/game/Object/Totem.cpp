@@ -316,7 +316,7 @@ bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex 
             default:
                 break;
         }
-        switch(spellEffect->EffectApplyAuraName)
+        switch(spellEffect->EffectAura)
         {
             case SPELL_AURA_PERIODIC_DAMAGE:
             case SPELL_AURA_PERIODIC_LEECH:

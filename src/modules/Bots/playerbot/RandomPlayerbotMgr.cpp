@@ -20,6 +20,8 @@
 #include "Map.h"
 #include "Timer.h"
 #include "MapManager.h"
+#include "MoveMap.h"
+#include "PathFinder.h"
 
 using namespace ai;
 using namespace MaNGOS;
@@ -266,6 +268,51 @@ bool RandomPlayerbotMgr::ProcessBot(uint32 bot)
         return true;
     }
 
+    // Offline-dead / sentinel-wedged bots: the dead->revive branch normally
+    // lives in ProcessBot(Player*), which only runs for bots that are online
+    // and ticking their own AI trigger. A bot that logs out while dead - or
+    // whose "dead" row is wedged behind a runaway validIn (e.g. the historic
+    // 2000000000-second sentinel) - would then never get revived. Drain it
+    // here instead, independent of online status, every scheduler pass.
+    uint32 deadFlag = GetEventValue(bot, "dead");
+    if (deadFlag)
+    {
+        QueryResult* deadRow = CharacterDatabase.PQuery(
+            "SELECT `validIn` FROM `ai_playerbot_random_bots` "
+            "WHERE `owner` = 0 AND `bot` = '%u' AND `event` = 'dead'", bot);
+        if (deadRow)
+        {
+            uint32 deadValidIn = deadRow->Fetch()[0].GetUInt32();
+            delete deadRow;
+
+            uint32 const sentinelValidIn = sPlayerbotAIConfig.maxRandomBotReviveTime * 10;
+            if (deadValidIn >= sentinelValidIn)
+            {
+                sLog.outDetail("Bot %d dead row wedged (validIn=%u), self-healing", bot, deadValidIn);
+                SetEventValue(bot, "dead", 0, 0);
+                SetEventValue(bot, "revive", 0, 0);
+                deadFlag = 0;
+            }
+        }
+    }
+
+    if (deadFlag && !GetEventValue(bot, "revive"))
+    {
+        Player* player = GetPlayerBot(bot);
+        if (!player)
+        {
+            sLog.outDetail("Bot %d logged in for offline revive", bot);
+            AddPlayerBot(bot, 0);
+            player = GetPlayerBot(bot);
+        }
+
+        if (player)
+        {
+            Revive(player);
+        }
+        return true;
+    }
+
     if (!GetPlayerBot(bot))
     {
         sLog.outDetail("Bot %d logged in", bot);
@@ -323,6 +370,20 @@ bool RandomPlayerbotMgr::ProcessBot(Player* player)
         }
 
         return false;
+    }
+
+    // Vashj'ir survival: keep the Sea Legs water-breathing buff on random bots in-zone.
+    static uint32 const SPELL_SEA_LEGS = 73701;
+    if (player->IsInVashjir())
+    {
+        if (!player->HasAura(SPELL_SEA_LEGS))
+        {
+            player->CastSpell(player, SPELL_SEA_LEGS, true);
+        }
+    }
+    else if (player->HasAura(SPELL_SEA_LEGS))
+    {
+        player->RemoveAurasDueToSpell(SPELL_SEA_LEGS);
     }
 
     if (player->GetGuildId())
@@ -397,11 +458,120 @@ void RandomPlayerbotMgr::Revive(Player* player)
     sLog.outDetail("Reviving dead bot %d", bot);
     SetEventValue(bot, "dead", 0, 0);
     SetEventValue(bot, "revive", 0, 0);
+    Refresh(player);
     RandomTeleportForLevel(player);
 }
 
+/// Rejects void/off-mesh/deep-water destinations; snaps z to ground on success
+bool RandomPlayerbotMgr::IsSafeTeleportPosition(uint32 mapId, float x, float y, float& z)
+{
+    static float const MAX_SAFE_WATER_DEPTH = 4.0f;
+    static float const NAVMESH_SEARCH_EXTENTS[VERTEX_SIZE] = { 3.0f, 5.0f, 3.0f };
+
+    Map* map = sMapMgr.FindMap(mapId);
+    if (!map)
+    {
+        return false;
+    }
+
+    TerrainInfo const* terrain = map->GetTerrain();
+    if (!terrain)
+    {
+        return false;
+    }
+
+    // Ground snap + void check: reject destinations with no map data underneath.
+    float groundZ = terrain->GetHeightStatic(x, y, z, true, MAX_HEIGHT);
+    if (groundZ <= INVALID_HEIGHT)
+    {
+        return false;
+    }
+
+    // Vashj'ir is an underwater zone by design: bots are kept alive there via the
+    // Sea Legs buff + fatigue/breath exemption, and they swim rather than path on
+    // the navmesh. Exempt it from the deep-water and off-mesh rejections below,
+    // but leave every other deep-ocean destination rejected as before.
+    uint32 zoneId = terrain->GetZoneId(x, y, groundZ);
+    bool inVashjir = Player::IsVashjirZone(zoneId);
+
+    // Deep-water reject by depth, not a bare in/under-water boolean, so shallow
+    // fords and beaches stay teleportable while Vashj'ir-style deep ocean does not.
+    if (!inVashjir)
+    {
+        GridMapLiquidData liquidData;
+        GridMapLiquidStatus liquidStatus = terrain->getLiquidStatus(x, y, groundZ, MAP_ALL_LIQUIDS, &liquidData);
+        if (liquidStatus != LIQUID_MAP_NO_WATER && liquidData.level - liquidData.depth_level > MAX_SAFE_WATER_DEPTH)
+        {
+            return false;
+        }
+    }
+
+    // Navmesh reachability kills cliff/fall/inside-geometry destinations. If the
+    // mmap isn't loaded for this map, skip the check rather than hard-failing so
+    // non-mmap maps stay teleportable. Vashj'ir dark-water quads carry no poly,
+    // so the check would reject every point there; swimming bots reach the spot
+    // via PathFinder::BuildSwimShortcut regardless.
+    if (!inVashjir)
+    {
+        MMAP::MMapManager* mmapManager = MMAP::MMapFactory::createOrGetMMapManager();
+        dtNavMesh const* navMesh = mmapManager->GetNavMesh(mapId);
+        dtNavMeshQuery const* navMeshQuery = mmapManager->GetNavMeshQuery(mapId, 0);
+        if (navMesh && navMeshQuery)
+        {
+            float const center[VERTEX_SIZE] = { y, groundZ, x };
+            float closestPoint[VERTEX_SIZE];
+            dtQueryFilter filter;
+            dtPolyRef polyRef = INVALID_POLYREF;
+            navMeshQuery->findNearestPoly(center, NAVMESH_SEARCH_EXTENTS, &filter, &polyRef, closestPoint);
+            if (polyRef == INVALID_POLYREF)
+            {
+                return false;
+            }
+
+            groundZ = closestPoint[1];
+        }
+    }
+
+    // Small lift off the ground plane to avoid landing embedded in geometry,
+    // matching the epsilon the prior teleport code used.
+    z = groundZ + 0.05f;
+    return true;
+}
+
+/**
+ * @brief One-shot expiry for post-teleport spawn protection on a random bot.
+ * Clears UNIT_FLAG_NON_ATTACKABLE whether the timer runs to completion or
+ * the event is aborted early (bot despawned/removed first), so the flag
+ * can never get stuck on.
+ */
+class RandomBotSpawnProtectionEvent : public BasicEvent
+{
+    public:
+        explicit RandomBotSpawnProtectionEvent(Unit& owner) : BasicEvent(), m_owner(owner) {}
+
+        bool Execute(uint64 /*e_time*/, uint32 /*p_time*/)
+        {
+            m_owner.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            return true;
+        }
+
+        void Abort(uint64 /*e_time*/)
+        {
+            m_owner.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+    private:
+        Unit& m_owner;
+};
+
 void RandomPlayerbotMgr::RandomTeleport(Player* bot, vector<WorldLocation> &locs)
 {
+    // Brief, self-expiring window so a bot survives initial contact on a
+    // dense spawn (e.g. Vashj'ir/L'ghorek) and its AI can orient/react
+    // before being focus-fired; not a permanent invulnerability. Tune this
+    // if bots still die on arrival, or if it trivialises normal combat.
+    static uint32 const SPAWN_PROTECTION_DURATION_MS = 10000;
+
     if (bot->IsBeingTeleported())
     {
         return;
@@ -421,21 +591,22 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, vector<WorldLocation> &locs
         float y = loc.coord_y + urand(0, sPlayerbotAIConfig.grindDistance) - sPlayerbotAIConfig.grindDistance / 2;
         float z = loc.coord_z;
 
-        Map* map = sMapMgr.FindMap(loc.mapid);
-        if (!map)
+        if (!IsSafeTeleportPosition(loc.mapid, x, y, z))
         {
             continue;
         }
 
-        const TerrainInfo * terrain = map->GetTerrain();
-        if (!terrain->IsOutdoors(x, y, z) ||
-            +terrain->IsUnderWater(x, y, z) ||
-            +terrain->IsInWater(x, y, z))
-            continue;
-
         sLog.outDetail("Random teleporting bot %s to %u %f,%f,%f", bot->GetName(), loc.mapid, x, y, z);
-        z = 0.05f + map->GetTerrain()->GetHeightStatic(x, y, 0.05f + z, true, MAX_HEIGHT);
         bot->TeleportTo(loc.mapid, x, y, z, 0);
+
+        // Applied to all random teleports, not just Vashj'ir - landing
+        // inside a dense mob pack is a general risk for any destination.
+        if (!bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+        {
+            bot->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            bot->m_Events.AddEvent(new RandomBotSpawnProtectionEvent(*bot),
+                bot->m_Events.CalculateTime(SPAWN_PROTECTION_DURATION_MS));
+        }
         return;
     }
 
@@ -444,14 +615,18 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, vector<WorldLocation> &locs
 
 void RandomPlayerbotMgr::RandomTeleportForLevel(Player* bot)
 {
+    // Bounded to avoid sorting/scanning every matching spawn on maps with a
+    // huge creature count; tune against live query performance if needed.
+    static uint32 const RANDOM_TELEPORT_CANDIDATE_LIMIT = 300;
+
     vector<WorldLocation> locs;
-    QueryResult* results = WorldDatabase.PQuery("SELECT `map`, `position_x`, `position_y`, `position_z` FROM ("
-        "SELECT MIN(`c`.`map`) `map`, MIN(`c`.`position_x`) `position_x`, MIN(`c`.`position_y`) `position_y`, "
-    "MIN(`c`.`position_z`) `position_z`, AVG(`t`.`maxlevel`), AVG(`t`.`minlevel`), "
-        "%u - (AVG(`t`.`maxlevel`) + AVG(`t`.`minlevel`)) / 2 `delta` FROM `creature` `c` "
-    "INNER JOIN `creature_template` `t` ON `c`.`id` = `t`.`entry` GROUP BY `t`.`entry`) `q` "
-        "WHERE `delta` >= 0 AND `delta` <= %u AND `map` IN (%s)",
-        bot->getLevel(), sPlayerbotAIConfig.randomBotTeleLevel, sPlayerbotAIConfig.randomBotMapsAsString.c_str());
+    QueryResult* results = WorldDatabase.PQuery(
+        "SELECT `c`.`map`, `c`.`position_x`, `c`.`position_y`, `c`.`position_z` FROM `creature` `c` "
+        "INNER JOIN `creature_template` `t` ON `c`.`id` = `t`.`entry` "
+        "WHERE (%u - (`t`.`maxlevel` + `t`.`minlevel`) / 2) BETWEEN 0 AND %u AND `c`.`map` IN (%s) "
+        "ORDER BY RAND() LIMIT %u",
+        bot->getLevel(), sPlayerbotAIConfig.randomBotTeleLevel, sPlayerbotAIConfig.randomBotMapsAsString.c_str(),
+        RANDOM_TELEPORT_CANDIDATE_LIMIT);
 
     if (results)
     {

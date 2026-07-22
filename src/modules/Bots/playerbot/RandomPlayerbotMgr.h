@@ -286,6 +286,9 @@ class RandomPlayerbotMgr : public PlayerbotHolder
         bool IsZoneSafeForBot(Player* bot, uint32 mapId, float x, float y, float z, uint32 useLevel = 0);
         void CalculateAreaCreatureStats();
 
+        /// Rejects void/off-mesh/deep-water destinations; snaps z to ground on success
+        bool IsSafeTeleportPosition(uint32 mapId, float x, float y, float& z);
+
     private:
         vector<Player*> players; ///< List of players.
         int processTicks; ///< Number of process ticks.

@@ -199,12 +199,16 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
                 engine->addStrategies("dps", "melee aoe", "bdps", "threat", NULL);
             }
 
-            engine->addStrategies("dps assist", "cure", NULL);
+            engine->addStrategies("dps assist", "cure", "totems", NULL);
             break;
         case CLASS_PALADIN:
             if (tab == 1)
             {
                 engine->addStrategies("tank", "tank aoe", "bthreat", "cure", NULL);
+            }
+            else if (tab == 0)
+            {
+                engine->addStrategies("heal", "bmana", "flee", "cure", NULL);
             }
             else
             {
@@ -240,14 +244,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
             engine->addStrategies("dps", "threat", "dps assist", NULL);
             break;
         case CLASS_WARLOCK:
-            if (tab == 1)
-            {
-                engine->addStrategies("tank", "threat", NULL);
-            }
-            else
-            {
-                engine->addStrategies("dps", "threat", NULL);
-            }
+            engine->addStrategies("dps", "threat", NULL);
 
             if (player->getLevel() > 19)
             {
@@ -298,6 +295,10 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
             if (tab == 1)
             {
                 nonCombatEngine->addStrategies("bthreat", "tank aoe", NULL);
+            }
+            else if (tab == 0)
+            {
+                nonCombatEngine->addStrategies("bmana", "dps assist", NULL);
             }
             else
             {

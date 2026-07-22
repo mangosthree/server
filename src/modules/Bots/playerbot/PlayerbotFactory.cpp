@@ -1214,10 +1214,11 @@ void PlayerbotFactory::ApplyCuratedGlyphs(const string& specKey)
 
 /**
  * Equips the bot's curated (class/spec/tier) best-in-slot gear set.
+ * @param filledSlots Out-param, receives every slot equipped from curated data.
  * @return True if at least one slot was equipped from a curated set (the
  * caller should skip the legacy gear-score loop); false to fall back.
  */
-bool PlayerbotFactory::InitCuratedGear()
+bool PlayerbotFactory::InitCuratedGear(set<uint8>& filledSlots)
 {
     if (!sPlayerbotAIConfig.useCuratedGear)
     {
@@ -1311,6 +1312,8 @@ bool PlayerbotFactory::InitCuratedGear()
         // Cata: paladin/shaman/druid/death knight relics occupy the ranged
         // slot. A spec's set carries either "ranged" or "relic", never both.
         { "relic",    EQUIPMENT_SLOT_RANGED },
+        // Priest wands (INVTYPE_RANGEDRIGHT) also occupy the ranged slot.
+        { "wand",     EQUIPMENT_SLOT_RANGED },
     };
 
     uint32 equipped = 0;
@@ -1349,6 +1352,7 @@ bool PlayerbotFactory::InitCuratedGear()
             newItem->AddToUpdateQueueOf(bot);
             bot->AutoUnequipOffhandIfNeed();
             ++equipped;
+            filledSlots.insert(slot);
 
             // Phase B/C: enchant + socket this curated-equipped item only.
             if (sPlayerbotAIConfig.useCuratedGearEnhancements)
@@ -1383,20 +1387,54 @@ void PlayerbotFactory::InitEquipment(bool incremental)
     IterateItems(&visitor, ITERATE_ALL_ITEMS);
 
     // Phase A: data-driven best-in-slot gear for the bot's class/spec/tier.
-    // Falls back to the legacy gear-score loop below when no curated set
+    // On success, the legacy loop below still runs, but restricted to
+    // weapon slots the curated set left empty (e.g. hunter melee
+    // main-hand when the curated set only carries a ranged weapon).
+    // Falls back to the full legacy gear-score loop when no curated set
     // exists (or AiPlayerbot.UseCuratedGear is off).
-    if (InitCuratedGear())
+    set<uint8> filledSlots;
+    bool curatedApplied = InitCuratedGear(filledSlots);
+
+    static const uint8 weaponSlots[] =
     {
-        return;
+        EQUIPMENT_SLOT_MAINHAND, EQUIPMENT_SLOT_OFFHAND, EQUIPMENT_SLOT_RANGED
+    };
+
+    vector<uint8> slotsToFill;
+    if (curatedApplied)
+    {
+        for (size_t i = 0; i < sizeof(weaponSlots) / sizeof(weaponSlots[0]); ++i)
+        {
+            uint8 slot = weaponSlots[i];
+            if (filledSlots.find(slot) == filledSlots.end() &&
+                !bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+            {
+                slotsToFill.push_back(slot);
+            }
+        }
+
+        if (slotsToFill.empty())
+        {
+            return;
+        }
+    }
+    else
+    {
+        for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
+        {
+            if (slot == EQUIPMENT_SLOT_TABARD || slot == EQUIPMENT_SLOT_BODY)
+            {
+                continue;
+            }
+
+            slotsToFill.push_back(slot);
+        }
     }
 
     map<uint8, vector<uint32> > items;
-    for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
+    for (size_t slotIdx = 0; slotIdx < slotsToFill.size(); ++slotIdx)
     {
-        if (slot == EQUIPMENT_SLOT_TABARD || slot == EQUIPMENT_SLOT_BODY)
-        {
-            continue;
-        }
+        uint8 slot = slotsToFill[slotIdx];
 
         uint32 desiredQuality = itemQuality;
         if (urand(0, 100) < 100 * sPlayerbotAIConfig.randomGearLoweringChance && desiredQuality > ITEM_QUALITY_NORMAL)
@@ -1461,12 +1499,9 @@ void PlayerbotFactory::InitEquipment(bool incremental)
         } while (items[slot].empty() && desiredQuality-- > ITEM_QUALITY_NORMAL);
     }
 
-    for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
+    for (size_t slotIdx = 0; slotIdx < slotsToFill.size(); ++slotIdx)
     {
-        if (slot == EQUIPMENT_SLOT_TABARD || slot == EQUIPMENT_SLOT_BODY)
-        {
-            continue;
-        }
+        uint8 slot = slotsToFill[slotIdx];
 
         vector<uint32>& ids = items[slot];
         if (ids.empty())

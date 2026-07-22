@@ -86,13 +86,18 @@ private:
      * ai_playerbot_gear on first use. When AiPlayerbot.CuratedGearEnhancements
      * is also on, applies curated enchants/gems (Phase B/C) to each
      * curated-equipped item and curated glyphs (Phase D) for the bot's spec.
+     * \arg \c filledSlots
+     *   Out-param: every EQUIPMENT_SLOT_* successfully equipped from the
+     *   curated set is inserted here, so InitEquipment can restrict its
+     *   legacy weapon-slot fallback to slots the curated set left empty.
      * \return
      *   True if a curated set was found and applied to at least one slot
-     *   (InitEquipment should skip its legacy gear-score loop); false if no
-     *   set exists for (class, spec, tier) or the feature is disabled, in
-     *   which case the caller must fall back to the legacy path unchanged.
+     *   (InitEquipment should skip its legacy full-slot gear-score loop,
+     *   only topping up empty weapon slots); false if no set exists for
+     *   (class, spec, tier) or the feature is disabled, in which case the
+     *   caller must fall back to the legacy path unchanged.
      */
-    bool InitCuratedGear();
+    bool InitCuratedGear(std::set<uint8>& filledSlots);
 
     /**
      * @brief Lazily loads the curated enchant/gem/glyph caches (Phase

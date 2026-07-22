@@ -887,7 +887,8 @@ bool GuildTaskMgr::CheckItemTask(uint32 itemId, uint32 obtained, Player* ownerPl
         sLog.outDebug("%s / %s: item %u is not guild task item (%u)",
                 guild->GetName().c_str(), ownerPlayer->GetName(),
                 itemId, itemTask);
-        SendCompletionMessage(ownerPlayer, "made a mistake with");
+        // not an error: any looted/traded/mailed item is checked here, and
+        // most have no active guild task on this owner - silent no-op
         return false;
     }
 

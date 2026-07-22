@@ -263,6 +263,11 @@ bool ChatHandler::HandleSummonCommand(char* args)
         // before GM
         float x, y, z;
         player->GetClosePoint(x, y, z, target->GetObjectBoundingRadius());
+        // seed z from the summoner (known-valid surface) and snap with a
+        // bounded, WMO-aware search; avoids falling through stairs/WMO floors
+        // to the ADT terrain far below (unbounded GetHeight via GetClosePoint)
+        z = player->GetPositionZ();
+        player->GetMap()->GetHeightInRange(player->GetPhaseMask(), x, y, z, 4.0f);
         target->TeleportTo(player->GetMapId(), x, y, z, target->GetOrientation());
     }
     else

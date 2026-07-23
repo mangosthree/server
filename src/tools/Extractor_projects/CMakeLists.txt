@@ -183,10 +183,7 @@ target_link_libraries(mmap-extractor
         RecastNavigation::Recast
         Threads::Threads
         DL::DL
-        ${OPENSSL_LIBRARIES}
-#if (defined(OPENSSL_VERSION_MAJOR) && OPENSSL_VERSION_MAJOR >= 3)
-        OpenSSL::Crypto
-#endif()
+        mangos_openssl
 )
 
 install(

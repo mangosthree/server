@@ -67,17 +67,16 @@ target_include_directories(realmd
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}/VersionInfo.h
-        ${OPENSSL_INCLUDE_DIR}
 )
 
 target_link_libraries(realmd
     PUBLIC
         shared
         Threads::Threads
-        ${OPENSSL_LIBRARIES}
-#if (defined(OPENSSL_VERSION_MAJOR) && OPENSSL_VERSION_MAJOR >= 3)
-        OpenSSL::Crypto
-#endif()
+        # realmd's own sockets/AuthSocket/PatchHandler are Stage 2 territory
+        # (they still call the deprecated MD5_*/ACE APIs) -- do not link
+        # mangos_openssl_strict here yet or the Stage 1 build breaks.
+        mangos_openssl
 )
 
 install(

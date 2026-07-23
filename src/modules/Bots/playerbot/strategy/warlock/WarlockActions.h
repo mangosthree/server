@@ -28,11 +28,7 @@ namespace ai
     {
     public:
         CastDrainSoulAction(PlayerbotAI* ai) : CastSpellAction(ai, "drain soul") {}
-        virtual bool isUseful()
-        {
-            // Cata: shards are a power (max 3), not items
-            return AI_VALUE(uint8, "soul shards") < 3;
-        }
+        ///< Execute range is gated by the "target critical health" trigger; no shard-count gate here.
     };
 
     class CastDrainLifeAction : public CastSpellAction
@@ -154,6 +150,55 @@ namespace ai
         CastLifeTapAction(PlayerbotAI* ai) : CastSpellAction(ai, "life tap") {}
         virtual string GetTargetName() { return "self target"; }
         virtual bool isUseful() { return AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.lowHealth; }
+    };
+
+    /// Affliction: maintained DoT, runtime-verify exact 4.3.4 spell name.
+    class CastUnstableAfflictionAction : public CastDebuffSpellAction
+    {
+    public:
+        CastUnstableAfflictionAction(PlayerbotAI* ai) : CastDebuffSpellAction(ai, "unstable affliction") {}
+    };
+
+    /// Affliction: DoT-amp debuff, recast whenever it falls off (also cooldown-gated).
+    class CastHauntAction : public CastDebuffSpellAction
+    {
+    public:
+        CastHauntAction(PlayerbotAI* ai) : CastDebuffSpellAction(ai, "haunt") {}
+    };
+
+    /// Demonology: big DPS cooldown, self buff.
+    class CastMetamorphosisAction : public CastBuffSpellAction
+    {
+    public:
+        CastMetamorphosisAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "metamorphosis") {}
+    };
+
+    /// Demonology: on-cooldown nuke, runtime-verify apostrophe/spacing.
+    class CastHandOfGuldanAction : public CastSpellAction
+    {
+    public:
+        CastHandOfGuldanAction(PlayerbotAI* ai) : CastSpellAction(ai, "hand of gul'dan") {}
+    };
+
+    /// Demonology: short self buff only usable in Metamorphosis form, runtime-verify.
+    class CastImmolationAuraAction : public CastBuffSpellAction
+    {
+    public:
+        CastImmolationAuraAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "immolation aura") {}
+    };
+
+    /// Destruction: on-cooldown nuke.
+    class CastChaosBoltAction : public CastSpellAction
+    {
+    public:
+        CastChaosBoltAction(PlayerbotAI* ai) : CastSpellAction(ai, "chaos bolt") {}
+    };
+
+    /// Destruction: execute, gated by "target critical health" trigger.
+    class CastShadowburnAction : public CastSpellAction
+    {
+    public:
+        CastShadowburnAction(PlayerbotAI* ai) : CastSpellAction(ai, "shadowburn") {}
     };
 
 }

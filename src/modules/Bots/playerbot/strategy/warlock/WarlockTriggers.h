@@ -20,6 +20,40 @@ namespace ai
     };
 
     DEBUFF_TRIGGER(ImmolateTrigger, "immolate", "immolate");
+    DEBUFF_TRIGGER(UnstableAfflictionTrigger, "unstable affliction", "unstable affliction");
+    DEBUFF_TRIGGER(HauntTrigger, "haunt", "haunt");
+
+    class MetamorphosisTrigger : public BoostTrigger
+    {
+    public:
+        MetamorphosisTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "metamorphosis") {}
+    };
+
+    class HandOfGuldanTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        HandOfGuldanTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "hand of gul'dan") {}
+    };
+
+    class ImmolationAuraTrigger : public BuffTrigger
+    {
+    public:
+        ImmolationAuraTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "immolation aura") {}
+    };
+
+    class ChaosBoltTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        ChaosBoltTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "chaos bolt") {}
+    };
+
+    /// Own cooldown gate for conflagrate; only active while immolate is on the target.
+    class ConflagrateTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        ConflagrateTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "conflagrate") {}
+        virtual bool IsActive();
+    };
 
     class ShadowTranceTrigger : public HasAuraTrigger
     {

@@ -73,7 +73,13 @@ namespace ai
                 creators["backlash"] = &TriggerFactoryInternal::backlash;
                 creators["fear"] = &TriggerFactoryInternal::fear;
                 creators["immolate"] = &TriggerFactoryInternal::immolate;
-
+                creators["unstable affliction"] = &TriggerFactoryInternal::unstable_affliction;
+                creators["haunt"] = &TriggerFactoryInternal::haunt;
+                creators["metamorphosis"] = &TriggerFactoryInternal::metamorphosis;
+                creators["hand of gul'dan"] = &TriggerFactoryInternal::hand_of_guldan;
+                creators["immolation aura"] = &TriggerFactoryInternal::immolation_aura;
+                creators["chaos bolt"] = &TriggerFactoryInternal::chaos_bolt;
+                creators["conflagrate"] = &TriggerFactoryInternal::conflagrate;
 
             }
 
@@ -88,6 +94,13 @@ namespace ai
             static Trigger* backlash(PlayerbotAI* ai) { return new BacklashTrigger(ai); }
             static Trigger* fear(PlayerbotAI* ai) { return new FearTrigger(ai); }
             static Trigger* immolate(PlayerbotAI* ai) { return new ImmolateTrigger(ai); }
+            static Trigger* unstable_affliction(PlayerbotAI* ai) { return new UnstableAfflictionTrigger(ai); }
+            static Trigger* haunt(PlayerbotAI* ai) { return new HauntTrigger(ai); }
+            static Trigger* metamorphosis(PlayerbotAI* ai) { return new MetamorphosisTrigger(ai); }
+            static Trigger* hand_of_guldan(PlayerbotAI* ai) { return new HandOfGuldanTrigger(ai); }
+            static Trigger* immolation_aura(PlayerbotAI* ai) { return new ImmolationAuraTrigger(ai); }
+            static Trigger* chaos_bolt(PlayerbotAI* ai) { return new ChaosBoltTrigger(ai); }
+            static Trigger* conflagrate(PlayerbotAI* ai) { return new ConflagrateTrigger(ai); }
 
         };
     };
@@ -127,9 +140,23 @@ namespace ai
                 creators["fear on cc"] = &AiObjectContextInternal::fear_on_cc;
                 creators["incinerate"] = &AiObjectContextInternal::incinerate;
                 creators["conflagrate"] = &AiObjectContextInternal::conflagrate;
+                creators["unstable affliction"] = &AiObjectContextInternal::unstable_affliction;
+                creators["haunt"] = &AiObjectContextInternal::haunt;
+                creators["metamorphosis"] = &AiObjectContextInternal::metamorphosis;
+                creators["hand of gul'dan"] = &AiObjectContextInternal::hand_of_guldan;
+                creators["immolation aura"] = &AiObjectContextInternal::immolation_aura;
+                creators["chaos bolt"] = &AiObjectContextInternal::chaos_bolt;
+                creators["shadowburn"] = &AiObjectContextInternal::shadowburn;
             }
 
         private:
+            static Action* unstable_affliction(PlayerbotAI* ai) { return new CastUnstableAfflictionAction(ai); }
+            static Action* haunt(PlayerbotAI* ai) { return new CastHauntAction(ai); }
+            static Action* metamorphosis(PlayerbotAI* ai) { return new CastMetamorphosisAction(ai); }
+            static Action* hand_of_guldan(PlayerbotAI* ai) { return new CastHandOfGuldanAction(ai); }
+            static Action* immolation_aura(PlayerbotAI* ai) { return new CastImmolationAuraAction(ai); }
+            static Action* chaos_bolt(PlayerbotAI* ai) { return new CastChaosBoltAction(ai); }
+            static Action* shadowburn(PlayerbotAI* ai) { return new CastShadowburnAction(ai); }
             static Action* conflagrate(PlayerbotAI* ai) { return new CastConflagrateAction(ai); }
             static Action* incinerate(PlayerbotAI* ai) { return new CastIncinerateAction(ai); }
             static Action* fear_on_cc(PlayerbotAI* ai) { return new CastFearOnCcAction(ai); }

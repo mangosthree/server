@@ -47,7 +47,9 @@ void GenericWarlockNonCombatStrategy::InitTriggers(std::list<TriggerNode*> &trig
         "no healthstone",
         NextAction::array(0, new NextAction("create healthstone", 15.0f), NULL)));
 
+    // Demonology bots know "summon felguard" and take it (higher relevance);
+    // isPossible() no-ops it for everyone else, so the queue falls through to imp.
     triggers.push_back(new TriggerNode(
         "no pet",
-        NextAction::array(0, new NextAction("summon imp", 10.0f), NULL)));
+        NextAction::array(0, new NextAction("summon felguard", 11.0f), new NextAction("summon imp", 10.0f), NULL)));
 }

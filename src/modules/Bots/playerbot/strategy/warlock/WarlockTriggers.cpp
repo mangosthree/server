@@ -12,3 +12,9 @@ bool DemonArmorTrigger::IsActive()
         !ai->HasAura("demon armor", target) &&
         !ai->HasAura("fel armor", target);
 }
+
+bool ConflagrateTrigger::IsActive()
+{
+    Unit* target = GetTarget();
+    return SpellCanBeCastTrigger::IsActive() && target && ai->HasAura("immolate", target);
+}

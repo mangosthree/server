@@ -38,6 +38,30 @@ namespace ai
         CastBloodthirstAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "bloodthirst") {}
     };
 
+    // battle
+    class CastMortalStrikeAction : public CastBattleMeleeSpellAction {
+    public:
+        CastMortalStrikeAction(PlayerbotAI* ai) : CastBattleMeleeSpellAction(ai, "mortal strike") {}
+    };
+
+    // battle
+    class CastColossusSmashAction : public CastMeleeSpellAction {
+    public:
+        CastColossusSmashAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "colossus smash") {}
+    };
+
+    // berserker
+    class CastRagingBlowAction : public CastMeleeSpellAction {
+    public:
+        CastRagingBlowAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "raging blow") {}
+    };
+
+    // berserker
+    class CastRecklessnessAction : public CastBuffSpellAction {
+    public:
+        CastRecklessnessAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "recklessness") {}
+    };
+
     // battle, berserker
     class CastExecuteAction : public CastMeleeSpellAction {
     public:

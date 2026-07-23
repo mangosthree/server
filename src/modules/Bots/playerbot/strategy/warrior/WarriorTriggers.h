@@ -28,10 +28,42 @@ namespace ai
         PummelInterruptSpellTrigger(PlayerbotAI* ai) : InterruptSpellTrigger(ai, "pummel") {}
     };
 
+    // Cata 4.3.4: Victory Rush is enabled by the "Victorious" proc buff (32216), not an aura named "victory rush"
     class VictoryRushTrigger : public HasAuraTrigger
     {
     public:
-        VictoryRushTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "victory rush") {}
+        VictoryRushTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "victorious") {}
+    };
+
+    class MortalStrikeAvailableTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        MortalStrikeAvailableTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "mortal strike") {}
+    };
+
+    class ColossusSmashAvailableTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        ColossusSmashAvailableTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "colossus smash") {}
+    };
+
+    // runtime-verify: Arms Overpower is enabled by the "Taste for Blood" proc
+    class TasteForBloodTrigger : public HasAuraTrigger
+    {
+    public:
+        TasteForBloodTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "taste for blood") {}
+    };
+
+    class RagingBlowAvailableTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        RagingBlowAvailableTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "raging blow") {}
+    };
+
+    class RecklessnessTrigger : public BoostTrigger
+    {
+    public:
+        RecklessnessTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "recklessness") {}
     };
 
     class SwordAndBoardTrigger : public HasAuraTrigger

@@ -103,6 +103,29 @@ void DpsWarriorStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "death wish",
         NextAction::array(0, new NextAction("death wish", ACTION_HIGH + 2), NULL)));
+
+    // Arms: real rotation instead of degrading to Heroic Strike spam; no-op for Fury (spell unknown)
+    triggers.push_back(new TriggerNode(
+        "mortal strike",
+        NextAction::array(0, new NextAction("mortal strike", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "taste for blood",
+        NextAction::array(0, new NextAction("overpower", ACTION_HIGH), NULL)));
+
+    // Arms/Fury CD-weave, shared: no-op for whichever spec doesn't know it
+    triggers.push_back(new TriggerNode(
+        "colossus smash",
+        NextAction::array(0, new NextAction("colossus smash", ACTION_HIGH + 1), NULL)));
+
+    // Fury: no-op for Arms (spell unknown)
+    triggers.push_back(new TriggerNode(
+        "raging blow",
+        NextAction::array(0, new NextAction("raging blow", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "recklessness",
+        NextAction::array(0, new NextAction("recklessness", ACTION_HIGH + 2), NULL)));
 }
 
 

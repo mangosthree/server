@@ -47,7 +47,7 @@
  * stdout/stderr via Log::SetColor / Log::ResetColor and fwrite, so it is
  * safe to run alongside (and shut down after) the rest of logging.
  */
-class ConsoleLogWriter : public ACE_Based::Runnable
+class ConsoleLogWriter : public MaNGOS::Runnable
 {
     public:
         /**

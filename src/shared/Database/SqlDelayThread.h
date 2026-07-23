@@ -37,7 +37,7 @@ class SqlConnection;
  * @brief
  *
  */
-class SqlDelayThread : public ACE_Based::Runnable
+class SqlDelayThread : public MaNGOS::Runnable
 {
         /**
          * @brief

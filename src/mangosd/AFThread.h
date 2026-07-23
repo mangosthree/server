@@ -25,22 +25,43 @@
 #ifndef ANTIFREEZE_THREAD
 #define ANTIFREEZE_THREAD
 
-#include "ace/Task.h"
 #include "Common.h"
+#include "Threading/Threading.h"
 
-class AntiFreezeThread : public ACE_Task_Base
+/**
+ * @brief Watchdog thread that bang-crashes the process if the world loop hangs.
+ */
+class AntiFreezeThread
 {
     public:
         explicit AntiFreezeThread(uint32 delay);
-        int open(void*) override;
-        int svc() override;
+        ~AntiFreezeThread();
+
+        /// Starts the watchdog thread.
+        void Activate();
 
     private:
-        uint32 m_loops;
-        uint32 m_lastchange;
-        uint32 w_loops;
-        uint32 w_lastchange;
-        uint32 delaytime_;
+        /// Runnable body driving the watchdog loop.
+        class Body : public MaNGOS::Runnable
+        {
+            public:
+                explicit Body(uint32 delay)
+                    : m_loops(0), m_lastchange(0), w_loops(0), w_lastchange(0), m_delayTime(delay)
+                {
+                }
+
+                void run() override;
+
+            private:
+                uint32 m_loops;
+                uint32 m_lastchange;
+                uint32 w_loops;
+                uint32 w_lastchange;
+                uint32 m_delayTime;
+        };
+
+        uint32          m_delayTime;
+        MaNGOS::Thread* m_thread;
 };
 
 #endif

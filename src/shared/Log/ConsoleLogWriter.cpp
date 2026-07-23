@@ -57,7 +57,7 @@ void ConsoleLogWriter::run()
     {
         if (!DrainOnce())
         {
-            ACE_Based::Thread::Sleep(5);
+            MaNGOS::Thread::Sleep(5);
         }
     }
     // Authoritative final drain: runs on the writer thread while wait()

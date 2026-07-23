@@ -52,7 +52,8 @@
 #include <iostream>
 #include <utility>
 
-#include <ace/OS_NS_unistd.h>
+#include <chrono>
+#include <thread>
 
 INSTANTIATE_SINGLETON_1(Log);
 
@@ -478,7 +479,7 @@ void Log::StartConsoleThread()
         return;                                             // idempotent (realmd double-init)
     }
     m_consoleBody = new ConsoleLogWriter();
-    m_consoleThread = new ACE_Based::Thread(m_consoleBody); // ctor auto-starts run()
+    m_consoleThread = new MaNGOS::Thread(m_consoleBody); // ctor auto-starts run()
     m_consoleAsync = true;
 }
 
@@ -1309,7 +1310,7 @@ void Log::WaitBeforeContinueIfNeed()
         for (int i = 0; i < mode; ++i)
         {
             bar.step();
-            ACE_OS::sleep(1);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
 }

@@ -214,8 +214,8 @@ void Database::InitDelayThread()
 
     // New delay thread for delay execute
     m_threadBody = CreateDelayThread();              // will deleted at m_delayThread delete
-    m_TransStorage = new ACE_TSS<Database::TransHelper>();
-    m_delayThread = new ACE_Based::Thread(m_threadBody);
+    m_TransStorage = new MaNGOS::ThreadLocalStore<Database::TransHelper>();
+    m_delayThread = new MaNGOS::Thread(m_threadBody);
 }
 
 void Database::HaltDelayThread()

@@ -548,7 +548,7 @@ int main(int argc, char** argv)
     uint16 port = sWorld.getConfig(CONFIG_UINT32_PORT_WORLD);
 
     WorldThread* worldThread = new WorldThread(port, host.c_str());
-    worldThread->open(0);
+    worldThread->Open();
 
     //************************************************************************************************************************
     // 2. Start the remote access listener thread
@@ -587,7 +587,7 @@ int main(int argc, char** argv)
     // 4. Start the freeze catcher thread
     //************************************************************************************************************************
     AntiFreezeThread* freezeThread = new AntiFreezeThread(1000 * sConfig.GetIntDefault("MaxCoreStuckTime", 0));
-    freezeThread->open(NULL);
+    freezeThread->Activate();
 
     //************************************************************************************************************************
     // 5. Start the console thread
@@ -601,21 +601,24 @@ int main(int argc, char** argv)
     {
         ///- Launch CliRunnable thread
         cliThread = new CliThread(sConfig.GetBoolDefault("BeepAtStart", true));
-        cliThread->activate();
+        cliThread->Activate();
     }
 
-    worldThread->wait();
-    sLog.outString("[shutdown] worldThread->wait() returned (world thread joined)");
+    worldThread->Wait();
+    sLog.outString("[shutdown] worldThread->Wait() returned (world thread joined)");
 
     if (cliThread)
     {
-        cliThread->cli_shutdown();
+        cliThread->Shutdown();
         delete cliThread;
     }
 
-    sLog.outString("[shutdown] joining all ACE task threads (ACE_Thread_Manager::wait)...");
+    // WorldThread/CliThread/AntiFreezeThread are std::thread-based now and
+    // joined by their own destructors below; RAThread (Stage 2 territory)
+    // is still an ACE_Task_Base and remains registered here.
+    sLog.outString("[shutdown] joining remaining ACE task threads (ACE_Thread_Manager::wait)...");
     ACE_Thread_Manager::instance()->wait();
-    sLog.outString("[shutdown] all ACE task threads joined");
+    sLog.outString("[shutdown] remaining ACE task threads joined");
     sLog.outString("Halting process...");
 
     ///- Stop freeze protection before shutdown tasks

@@ -26,10 +26,10 @@
 #define DATABASE_H
 
 #include "Threading/Threading.h"
+#include "Threading/ThreadLocalStore.h"
 #include "Database/SqlDelayThread.h"
 #include <ace/Recursive_Thread_Mutex.h>
 #include "Policies/ThreadingModel.h"
-#include <ace/TSS_T.h>
 #include <ace/Atomic_Op.h>
 #include "SqlPreparedStatement.h"
 
@@ -754,7 +754,7 @@ class Database
          * @brief per-thread based storage for SqlTransaction object initialization - no locking is required
          *
          */
-        typedef ACE_TSS<Database::TransHelper> DBTransHelperTSS;
+        typedef MaNGOS::ThreadLocalStore<Database::TransHelper> DBTransHelperTSS;
         Database::DBTransHelperTSS *m_TransStorage; /**< TODO */
 
         ///< DB connections
@@ -806,7 +806,7 @@ class Database
 
         SqlResultQueue*     m_pResultQueue;                 /**< Transaction queues from diff. threads */
         SqlDelayThread*     m_threadBody;                   /**< Pointer to delay sql executer (owned by m_delayThread) */
-        ACE_Based::Thread*  m_delayThread;                  /**< Pointer to executer thread */
+        MaNGOS::Thread*     m_delayThread;                  /**< Pointer to executer thread */
 
         bool m_bAllowAsyncTransactions;                     /**< flag which specifies if async transactions are enabled */
 
@@ -838,5 +838,46 @@ class Database
         bool m_logSQL; /**< TODO */
         std::string m_logsDir; /**< TODO */
         uint32 m_pingIntervallms; /**< TODO */
+};
+
+/**
+ * @brief RAII pairing of ThreadStart() and ThreadEnd() for a worker thread.
+ *
+ * The MySQL client library keeps per-thread state, and every thread that
+ * issues a query on a connection it did not create itself must register
+ * with it first and release that state on the way out. Database declares
+ * ThreadStart()/ThreadEnd() as that contract and DatabaseMysql implements
+ * them; a thread that skips them corrupts or leaks the library's
+ * thread-local data, which surfaces far from the cause and only under load.
+ *
+ * Use this rather than calling the pair by hand: it survives early returns
+ * and exceptions, and it keeps the backend-specific call behind the
+ * interface. A null database is tolerated, so the guard can sit in a
+ * thread body that may run without one.
+ */
+class DbThreadGuard
+{
+    public:
+        explicit DbThreadGuard(Database* db) : m_db(db)
+        {
+            if (m_db)
+            {
+                m_db->ThreadStart();
+            }
+        }
+
+        ~DbThreadGuard()
+        {
+            if (m_db)
+            {
+                m_db->ThreadEnd();
+            }
+        }
+
+        DbThreadGuard(const DbThreadGuard&) = delete;
+        DbThreadGuard& operator=(const DbThreadGuard&) = delete;
+
+    private:
+        Database* m_db;
 };
 #endif

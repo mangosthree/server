@@ -30,3 +30,8 @@ bool BlessingOfFreedomTrigger::IsActive()
 {
     return bot->IsInRoots() || bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED);
 }
+
+bool HolyPowerAvailableTrigger::IsActive()
+{
+    return AI_VALUE2(uint8, "holy power", "self target") >= amount;
+}

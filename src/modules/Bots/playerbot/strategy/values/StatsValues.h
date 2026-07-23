@@ -118,6 +118,21 @@ namespace ai
         virtual uint8 Calculate();
     };
 
+    /// Cata 4.3.4: paladin resource, spent by Templar's Verdict / Shield of the
+    /// Righteous / Word of Glory / Inquisition
+    class HolyPowerValue : public Uint8CalculatedValue, public Qualified
+    {
+    public:
+        HolyPowerValue(PlayerbotAI* ai) : Uint8CalculatedValue(ai) {}
+
+        Unit* GetTarget()
+        {
+            AiObjectContext* ctx = AiObject::context;
+            return ctx->GetValue<Unit*>(qualifier)->Get();
+        }
+        virtual uint8 Calculate();
+    };
+
     class ComboPointsValue : public Uint8CalculatedValue, public Qualified
     {
     public:

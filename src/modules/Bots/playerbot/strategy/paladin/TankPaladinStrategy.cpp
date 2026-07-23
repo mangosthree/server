@@ -11,7 +11,7 @@ TankPaladinStrategy::TankPaladinStrategy(PlayerbotAI* ai) : GenericPaladinStrate
 
 NextAction** TankPaladinStrategy::getDefaultActions()
 {
-    return NextAction::array(0, new NextAction("melee", ACTION_NORMAL), NULL);
+    return NextAction::array(0, new NextAction("crusader strike", ACTION_NORMAL + 1), new NextAction("melee", ACTION_NORMAL), NULL);
 }
 
 void TankPaladinStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
@@ -45,4 +45,14 @@ void TankPaladinStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "blessing",
         NextAction::array(0, new NextAction("blessing of kings", ACTION_HIGH + 9), NULL)));
+
+    // Word of Glory outranks Shield of the Righteous but its isUseful() health
+    // gate (CastHealingSpellAction) keeps it out of the basket when not hurt
+    triggers.push_back(new TriggerNode(
+        "holy power available",
+        NextAction::array(0, new NextAction("word of glory", ACTION_HIGH + 2), new NextAction("shield of the righteous", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("guardian of ancient kings", ACTION_EMERGENCY + 2), new NextAction("ardent defender", ACTION_EMERGENCY + 1), NULL)));
 }

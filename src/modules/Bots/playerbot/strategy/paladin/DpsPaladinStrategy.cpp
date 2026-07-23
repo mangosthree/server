@@ -76,4 +76,18 @@ void DpsPaladinStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "art of war",
         NextAction::array(0, new NextAction("exorcism", ACTION_HIGH + 2), NULL)));
+
+    // Inquisition is ranked above the finisher; CastAuraSpellAction::isUseful
+    // already no-ops it once the buff is up, so Templar's Verdict takes over
+    triggers.push_back(new TriggerNode(
+        "holy power available",
+        NextAction::array(0, new NextAction("inquisition", ACTION_HIGH + 2), new NextAction("templar's verdict", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "avenging wrath",
+        NextAction::array(0, new NextAction("avenging wrath", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "rebuke interrupt",
+        NextAction::array(0, new NextAction("rebuke", ACTION_INTERRUPT), NULL)));
 }

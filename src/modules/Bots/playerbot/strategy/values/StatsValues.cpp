@@ -120,6 +120,16 @@ uint8 SoulShardsValue::Calculate()
 }
 
 
+uint8 HolyPowerValue::Calculate()
+{
+    Unit* target = GetTarget();
+    if (!target)
+    {
+        return 0;
+    }
+    return (static_cast<float> (target->GetPower(POWER_HOLY_POWER)));
+}
+
 uint8 ComboPointsValue::Calculate()
 {
     Unit *target = GetTarget();

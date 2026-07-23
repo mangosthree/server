@@ -122,11 +122,19 @@ namespace ai
                 creators["hammer of justice on snare target"] = &TriggerFactoryInternal::hammer_of_justice_on_snare_target;
                 creators["holy wrath"] = &TriggerFactoryInternal::holy_wrath;
                 creators["blessing of freedom"] = &TriggerFactoryInternal::blessing_of_freedom;
+                creators["holy power available"] = &TriggerFactoryInternal::holy_power_available;
+                creators["beacon of light on tank"] = &TriggerFactoryInternal::beacon_of_light_on_tank;
+                creators["avenging wrath"] = &TriggerFactoryInternal::avenging_wrath;
+                creators["rebuke interrupt"] = &TriggerFactoryInternal::rebuke_interrupt;
             }
 
         private:
             static Trigger* holy_wrath(PlayerbotAI* ai) { return new HolyWrathTrigger(ai); }
             static Trigger* blessing_of_freedom(PlayerbotAI* ai) { return new BlessingOfFreedomTrigger(ai); }
+            static Trigger* holy_power_available(PlayerbotAI* ai) { return new HolyPowerAvailableTrigger(ai); }
+            static Trigger* beacon_of_light_on_tank(PlayerbotAI* ai) { return new BeaconOfLightOnTankTrigger(ai); }
+            static Trigger* avenging_wrath(PlayerbotAI* ai) { return new AvengingWrathTrigger(ai); }
+            static Trigger* rebuke_interrupt(PlayerbotAI* ai) { return new RebukeInterruptSpellTrigger(ai); }
             static Trigger* holy_shield(PlayerbotAI* ai) { return new HolyShieldTrigger(ai); }
             static Trigger* righteous_fury(PlayerbotAI* ai) { return new RighteousFuryTrigger(ai); }
             static Trigger* judgement(PlayerbotAI* ai) { return new JudgementTrigger(ai); }
@@ -208,6 +216,19 @@ namespace ai
                 creators["hammer of justice on enemy healer"] = &AiObjectContextInternal::hammer_of_justice_on_enemy_healer;
                 creators["hammer of justice on snare target"] = &AiObjectContextInternal::hammer_of_justice_on_snare_target;
                 creators["blessing of freedom"] = &AiObjectContextInternal::blessing_of_freedom;
+                creators["holy shock"] = &AiObjectContextInternal::holy_shock;
+                creators["holy shock on party"] = &AiObjectContextInternal::holy_shock_on_party;
+                creators["divine light"] = &AiObjectContextInternal::divine_light;
+                creators["divine light on party"] = &AiObjectContextInternal::divine_light_on_party;
+                creators["beacon of light on tank"] = &AiObjectContextInternal::beacon_of_light_on_tank;
+                creators["templar's verdict"] = &AiObjectContextInternal::templars_verdict;
+                creators["inquisition"] = &AiObjectContextInternal::inquisition;
+                creators["avenging wrath"] = &AiObjectContextInternal::avenging_wrath;
+                creators["rebuke"] = &AiObjectContextInternal::rebuke;
+                creators["shield of the righteous"] = &AiObjectContextInternal::shield_of_the_righteous;
+                creators["word of glory"] = &AiObjectContextInternal::word_of_glory;
+                creators["guardian of ancient kings"] = &AiObjectContextInternal::guardian_of_ancient_kings;
+                creators["ardent defender"] = &AiObjectContextInternal::ardent_defender;
             }
 
         private:
@@ -256,6 +277,19 @@ namespace ai
             static Action* hammer_of_justice_on_enemy_healer(PlayerbotAI* ai) { return new CastHammerOfJusticeOnEnemyHealerAction(ai); }
             static Action* hammer_of_justice_on_snare_target(PlayerbotAI* ai) { return new CastHammerOfJusticeSnareAction(ai); }
             static Action* blessing_of_freedom(PlayerbotAI* ai) { return new CastBlessingOfFreedomAction(ai); }
+            static Action* holy_shock(PlayerbotAI* ai) { return new CastHolyShockAction(ai); }
+            static Action* holy_shock_on_party(PlayerbotAI* ai) { return new CastHolyShockOnPartyAction(ai); }
+            static Action* divine_light(PlayerbotAI* ai) { return new CastDivineLightAction(ai); }
+            static Action* divine_light_on_party(PlayerbotAI* ai) { return new CastDivineLightOnPartyAction(ai); }
+            static Action* beacon_of_light_on_tank(PlayerbotAI* ai) { return new CastBeaconOfLightOnTankAction(ai); }
+            static Action* templars_verdict(PlayerbotAI* ai) { return new CastTemplarsVerdictAction(ai); }
+            static Action* inquisition(PlayerbotAI* ai) { return new CastInquisitionAction(ai); }
+            static Action* avenging_wrath(PlayerbotAI* ai) { return new CastAvengingWrathAction(ai); }
+            static Action* rebuke(PlayerbotAI* ai) { return new CastRebukeAction(ai); }
+            static Action* shield_of_the_righteous(PlayerbotAI* ai) { return new CastShieldOfTheRighteousAction(ai); }
+            static Action* word_of_glory(PlayerbotAI* ai) { return new CastWordOfGloryAction(ai); }
+            static Action* guardian_of_ancient_kings(PlayerbotAI* ai) { return new CastGuardianOfAncientKingsAction(ai); }
+            static Action* ardent_defender(PlayerbotAI* ai) { return new CastArdentDefenderAction(ai); }
         };
     };
 };

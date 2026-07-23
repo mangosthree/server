@@ -44,6 +44,36 @@ namespace ai
         HammerOfJusticeInterruptSpellTrigger(PlayerbotAI* ai) : InterruptSpellTrigger(ai, "hammer of justice") {}
     };
 
+    class RebukeInterruptSpellTrigger : public InterruptSpellTrigger
+    {
+    public:
+        RebukeInterruptSpellTrigger(PlayerbotAI* ai) : InterruptSpellTrigger(ai, "rebuke") {}
+    };
+
+    /// Cata 4.3.4 paladin resource; modeled on ComboPointsAvailableTrigger but the
+    /// stat lives on the bot itself, not on the current target
+    class HolyPowerAvailableTrigger : public StatAvailable
+    {
+    public:
+        HolyPowerAvailableTrigger(PlayerbotAI* ai, int amount = 3) : StatAvailable(ai, amount, "holy power available") {}
+        virtual bool IsActive();
+    };
+
+    /// Maintains Beacon of Light on the tank instead of rotating party members
+    class BeaconOfLightOnTankTrigger : public BuffTrigger
+    {
+    public:
+        BeaconOfLightOnTankTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "beacon of light") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("tank target"); }
+        virtual string getName() { return "beacon of light on tank"; }
+    };
+
+    class AvengingWrathTrigger : public BoostTrigger
+    {
+    public:
+        AvengingWrathTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "avenging wrath") {}
+    };
+
     class HammerOfJusticeSnareTrigger : public SnareTargetTrigger
     {
     public:

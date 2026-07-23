@@ -160,6 +160,43 @@ namespace ai
         virtual string getName() { return "flash of light on party"; }
     };
 
+    class CastHolyShockAction : public CastHealingSpellAction
+    {
+    public:
+        CastHolyShockAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "holy shock") {}
+    };
+
+    class CastHolyShockOnPartyAction : public HealPartyMemberAction
+    {
+    public:
+        CastHolyShockOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "holy shock") {}
+
+        virtual string getName() { return "holy shock on party"; }
+    };
+
+    class CastDivineLightAction : public CastHealingSpellAction
+    {
+    public:
+        CastDivineLightAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "divine light") {}
+    };
+
+    class CastDivineLightOnPartyAction : public HealPartyMemberAction
+    {
+    public:
+        CastDivineLightOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "divine light") {}
+
+        virtual string getName() { return "divine light on party"; }
+    };
+
+    /// Maintains Beacon of Light on the main tank rather than a rotating party member
+    class CastBeaconOfLightOnTankAction : public CastBuffSpellAction
+    {
+    public:
+        CastBeaconOfLightOnTankAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "beacon of light") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("tank target"); }
+        virtual string getName() { return "beacon of light on tank"; }
+    };
+
     class CastLayOnHandsAction : public CastHealingSpellAction
     {
     public:
@@ -306,5 +343,90 @@ namespace ai
     {
     public:
         CastBlessingOfFreedomAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "blessing of freedom") {}
+    };
+
+    /// Ret finisher; requires 3 Holy Power. Mirrors CastJudgementAction's isPossible gate style
+    class CastTemplarsVerdictAction : public CastMeleeSpellAction
+    {
+    public:
+        CastTemplarsVerdictAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "templar's verdict") {}
+        virtual bool isPossible()
+        {
+            if (AI_VALUE2(uint8, "holy power", "self target") < 3)
+            {
+                return false;
+            }
+            return CastMeleeSpellAction::isPossible();
+        }
+    };
+
+    /// Spends 3 Holy Power to refresh the crit buff; self-gates on the aura via
+    /// CastAuraSpellAction::isUseful so it only fires while the buff is down
+    class CastInquisitionAction : public CastBuffSpellAction
+    {
+    public:
+        CastInquisitionAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "inquisition") {}
+        virtual bool isPossible()
+        {
+            if (AI_VALUE2(uint8, "holy power", "self target") < 3)
+            {
+                return false;
+            }
+            return CastBuffSpellAction::isPossible();
+        }
+    };
+
+    class CastAvengingWrathAction : public CastBuffSpellAction
+    {
+    public:
+        CastAvengingWrathAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "avenging wrath") {}
+    };
+
+    class CastRebukeAction : public CastSpellAction
+    {
+    public:
+        CastRebukeAction(PlayerbotAI* ai) : CastSpellAction(ai, "rebuke") {}
+    };
+
+    /// Prot Holy Power spender: threat + mitigation
+    class CastShieldOfTheRighteousAction : public CastMeleeSpellAction
+    {
+    public:
+        CastShieldOfTheRighteousAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "shield of the righteous") {}
+        virtual bool isPossible()
+        {
+            if (AI_VALUE2(uint8, "holy power", "self target") < 3)
+            {
+                return false;
+            }
+            return CastMeleeSpellAction::isPossible();
+        }
+    };
+
+    /// Prot Holy Power self-heal; competes with Shield of the Righteous via relevance
+    class CastWordOfGloryAction : public CastHealingSpellAction
+    {
+    public:
+        CastWordOfGloryAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "word of glory") {}
+        virtual bool isPossible()
+        {
+            if (AI_VALUE2(uint8, "holy power", "self target") < 3)
+            {
+                return false;
+            }
+            return CastHealingSpellAction::isPossible();
+        }
+    };
+
+    class CastGuardianOfAncientKingsAction : public CastBuffSpellAction
+    {
+    public:
+        CastGuardianOfAncientKingsAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "guardian of ancient kings") {}
+    };
+
+    class CastArdentDefenderAction : public CastBuffSpellAction
+    {
+    public:
+        CastArdentDefenderAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "ardent defender") {}
     };
 }

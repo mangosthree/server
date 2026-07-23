@@ -131,11 +131,7 @@ set(SRC_GRP_PLATFORM
 source_group("Platform" FILES ${SRC_GRP_PLATFORM})
 
 set(SRC_GRP_POLICIES
-  Policies/CreationPolicy.h
-  Policies/ObjectLifeTime.cpp
-  Policies/ObjectLifeTime.h
   Policies/Singleton.h
-  Policies/ThreadingModel.h
 )
 source_group("Policies" FILES ${SRC_GRP_POLICIES})
 

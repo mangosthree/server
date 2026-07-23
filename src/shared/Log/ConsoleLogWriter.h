@@ -27,8 +27,6 @@
 
 #include <atomic>
 
-#include <ace/Thread_Mutex.h>
-#include <ace/Atomic_Op.h>
 #include "LockedQueue/LockedQueue.h"
 #include "Threading/Threading.h"
 #include "Log.h"
@@ -90,10 +88,10 @@ class ConsoleLogWriter : public MaNGOS::Runnable
          */
         void Emit(const ConsoleLogRecord& rec);
 
-        typedef ACE_Based::LockedQueue<ConsoleLogRecord, ACE_Thread_Mutex> Queue;
+        typedef MaNGOS::LockedQueue<ConsoleLogRecord> Queue;
         Queue m_queue; /**< Unbounded backing queue (capacity enforced via m_depth) */
-        ACE_Atomic_Op<ACE_Thread_Mutex, long> m_depth; /**< Approximate pending count */
-        ACE_Atomic_Op<ACE_Thread_Mutex, long> m_dropped; /**< Records dropped on overflow */
+        std::atomic<long> m_depth; /**< Approximate pending count */
+        std::atomic<long> m_dropped; /**< Records dropped on overflow */
         std::atomic<bool> m_running; /**< Cooperative stop flag (cross-thread: set by Stop(), read by run()) */
         static const long MAX_CONSOLE_QUEUE = 16384; /**< Overflow threshold */
 };

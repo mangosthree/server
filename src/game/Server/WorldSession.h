@@ -1125,7 +1125,7 @@ class WorldSession
         uint32 m_Tutorials[8];
         TutorialDataState m_tutorialState;
         AddonsList m_addonsList;
-        ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
+        MaNGOS::LockedQueue<WorldPacket*> _recvQueue;
 };
 #endif
 /// @}

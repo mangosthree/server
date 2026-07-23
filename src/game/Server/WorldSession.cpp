@@ -1355,7 +1355,7 @@ void WorldSession::SendAddonsInfo()
 
 void WorldSession::SendRedirectClient(std::string& ip, uint16 port)
 {
-    uint32 ip2 = ACE_OS::inet_addr(ip.c_str());
+    uint32 ip2 = inet_addr(ip.c_str());
     WorldPacket pkt(SMSG_CONNECT_TO, 4 + 2 + 4 + 20);
 
     pkt << uint32(ip2);                                     // inet_addr(ipstr)

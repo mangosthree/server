@@ -67,10 +67,10 @@ void AntiFreezeThread::Body::run()
         uint32 curtime = getMSTime();
 
         // normal work
-        if (w_loops != World::m_worldLoopCounter.value())
+        if (w_loops != World::m_worldLoopCounter.load())
         {
             w_lastchange = curtime;
-            w_loops = World::m_worldLoopCounter.value();
+            w_loops = World::m_worldLoopCounter.load();
         }
         // possible freeze
         else if (getMSTimeDiff(w_lastchange, curtime) > m_delayTime)

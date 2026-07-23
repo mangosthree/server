@@ -28,10 +28,10 @@
 #include "Threading/Threading.h"
 #include "Threading/ThreadLocalStore.h"
 #include "Database/SqlDelayThread.h"
-#include <ace/Recursive_Thread_Mutex.h>
-#include "Policies/ThreadingModel.h"
-#include <ace/Atomic_Op.h>
 #include "SqlPreparedStatement.h"
+
+#include <atomic>
+#include <mutex>
 
 class SqlTransaction;
 class SqlResultQueue;
@@ -160,12 +160,12 @@ class SqlConnection
                  *
                  * @param conn
                  */
-                Lock(SqlConnection* conn) : m_pConn(conn) { m_pConn->m_mutex.acquire(); }
+                Lock(SqlConnection* conn) : m_pConn(conn) { m_pConn->m_mutex.lock(); }
                 /**
                  * @brief
                  *
                  */
-                ~Lock() { m_pConn->m_mutex.release(); }
+                ~Lock() { m_pConn->m_mutex.unlock(); }
 
                 /**
                  * @brief
@@ -221,7 +221,12 @@ class SqlConnection
          * @brief
          *
          */
-        typedef ACE_Recursive_Thread_Mutex LOCK_TYPE;
+        // Recursive, as the previous connection mutex was, and for the reason
+        // the design requires: SqlTransaction::Execute holds this across the
+        // whole BEGIN..COMMIT so nothing interleaves, then runs each queued
+        // SqlOperation, and every one of those takes it again because each
+        // must also work standalone from the delay queue.
+        typedef std::recursive_mutex LOCK_TYPE;
         LOCK_TYPE m_mutex; /**< TODO */
 
         /**
@@ -792,7 +797,7 @@ class Database
 
         // connection helper counters
         int m_nQueryConnPoolSize;                               /**< current size of query connection pool */
-        ACE_Atomic_Op<ACE_Thread_Mutex, long> m_nQueryCounter;  /**< counter for connection selection */
+        std::atomic<long> m_nQueryCounter;  /**< counter for connection selection */
 
         /**
          * @brief lets use pool of connections for sync queries
@@ -815,12 +820,12 @@ class Database
          * @brief
          *
          */
-        typedef ACE_Thread_Mutex LOCK_TYPE;
+        typedef std::mutex LOCK_TYPE;
         /**
          * @brief
          *
          */
-        typedef ACE_Guard<LOCK_TYPE> LOCK_GUARD;
+        typedef std::lock_guard<LOCK_TYPE> LOCK_GUARD;
 
         mutable LOCK_TYPE m_stmtGuard; /**< TODO */
 

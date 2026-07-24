@@ -10,6 +10,20 @@ message("+-- operating system  : ${CMAKE_HOST_SYSTEM}")
 message("+-- cmake version     : ${CMAKE_VERSION}")
 message("")
 
+# Which network backend the configure step actually resolved. Printed because
+# WITH_IO_URING can be asked for and silently not granted (liburing missing), and
+# the difference is invisible at runtime until something misbehaves under load.
+if(WIN32)
+    message("Network backend       : IOCP")
+elseif(MANGOS_USE_IO_URING)
+    message("Network backend       : io_uring")
+elseif(APPLE OR CMAKE_SYSTEM_NAME MATCHES "BSD")
+    message("Network backend       : kqueue reactor")
+else()
+    message("Network backend       : epoll reactor")
+endif()
+message("")
+
 if(BUILD_MANGOSD)
     message("Build main server     : Yes (default)")
     if(SCRIPT_LIB_ELUNA)

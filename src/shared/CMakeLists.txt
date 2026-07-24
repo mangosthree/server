@@ -135,6 +135,37 @@ set(SRC_GRP_POLICIES
 )
 source_group("Policies" FILES ${SRC_GRP_POLICIES})
 
+# Shared networking engine. The backends self-collapse on the platforms they do not
+# serve (IocpServer is #ifdef _WIN32, the reactor is #ifndef _WIN32), so they can all
+# be listed unconditionally. io_uring is the exception: it needs liburing, so it is
+# only compiled when the option above resolved.
+set(SRC_GRP_NET
+  net/BindAddress.cpp
+  net/BindAddress.hpp
+  net/FlowControl.hpp
+  net/ISession.hpp
+  net/SendQueue.hpp
+  net/Server.hpp
+  net/iocp/IocpServer.cpp
+  net/iocp/IocpServer.hpp
+  net/reactor/Connection.hpp
+  net/reactor/EpollPoller.cpp
+  net/reactor/EpollPoller.hpp
+  net/reactor/KqueuePoller.cpp
+  net/reactor/KqueuePoller.hpp
+  net/reactor/Poller.hpp
+  net/reactor/PollerFactory.cpp
+  net/reactor/ReactorServer.cpp
+  net/reactor/ReactorServer.hpp
+)
+if(MANGOS_USE_IO_URING)
+  list(APPEND SRC_GRP_NET
+    net/uring/UringServer.cpp
+    net/uring/UringServer.hpp
+  )
+endif()
+source_group("net" FILES ${SRC_GRP_NET})
+
 if(WIN32)
     set(SRC_GRP_SVC
       Win/ServiceWin32.cpp
@@ -209,6 +240,7 @@ add_library(shared STATIC
     ${SRC_GRP_GAMESYSTEM}
     ${SRC_GRP_LOCKQ}
     ${SRC_GRP_LOG}
+    ${SRC_GRP_NET}
     ${SRC_GRP_THREAD}
     ${SRC_GRP_PLATFORM}
     ${SRC_GRP_POLICIES}
@@ -241,6 +273,14 @@ target_link_libraries(shared
         MySQL::MySQL
         mangos_openssl
         $<$<BOOL:${WIN32}>:dbghelp>
+        # Winsock + the AcceptEx/GetAcceptExSockaddrs extensions used by IocpServer.
+        $<$<BOOL:${WIN32}>:ws2_32>
+        $<$<BOOL:${WIN32}>:mswsock>
+        $<$<BOOL:${MANGOS_USE_IO_URING}>:${URING_LIBRARY}>
     PRIVATE
         mangos_openssl_strict
 )
+
+if(MANGOS_USE_IO_URING)
+    target_include_directories(shared PUBLIC ${URING_INCLUDE_DIR})
+endif()

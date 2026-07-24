@@ -27,7 +27,6 @@
 
 #include "Common.h"
 #include "ByteBuffer.h"
-#include "Opcodes.h"
 
 // Note: m_opcode and size stored in platfom dependent format
 // ignore endianess until send, and converted at receive
@@ -41,8 +40,11 @@ class WorldPacket : public ByteBuffer
         /**
          * @brief just container for later use
          *
+         * 0x1001 is MSG_NULL_ACTION (src/game/Server/Opcodes.h) -- named here
+         * as a literal, not an #include, so this header does not couple to
+         * the opcode enum (see the constructor below).
          */
-        WorldPacket() : ByteBuffer(0), m_opcode(MSG_NULL_ACTION)
+        WorldPacket() : ByteBuffer(0), m_opcode(0x1001)
         {
         }
         /**
@@ -51,7 +53,7 @@ class WorldPacket : public ByteBuffer
          * @param opcode
          * @param res
          */
-        explicit WorldPacket(OpcodesList opcode, size_t res = 200) : ByteBuffer(res), m_opcode(opcode) { }
+        explicit WorldPacket(uint16 opcode, size_t res = 200) : ByteBuffer(res), m_opcode(opcode) { }
         /**
          * @brief copy constructor
          *
@@ -67,7 +69,7 @@ class WorldPacket : public ByteBuffer
          * @param opcode
          * @param newres
          */
-        void Initialize(OpcodesList opcode, size_t newres = 200)
+        void Initialize(uint16 opcode, size_t newres = 200)
         {
             clear();
             _storage.reserve(newres);
@@ -79,21 +81,19 @@ class WorldPacket : public ByteBuffer
          *
          * @return uint16
          */
-        OpcodesList GetOpcode() const { return m_opcode; }
+        uint16 GetOpcode() const { return m_opcode; }
         /**
          * @brief
          *
          * @param opcode
          */
-        void SetOpcode(OpcodesList opcode) { m_opcode = opcode; }
-        /**
-         * @brief
-         *
-         * @return const char
-         */
-        inline const char* GetOpcodeName() const { return LookupOpcodeName(m_opcode); }
+        void SetOpcode(uint16 opcode) { m_opcode = opcode; }
+        // Deliberately no GetOpcodeName() here. The opcode-name table belongs
+        // to the protocol/game layer, and having this convenience accessor in
+        // a shared header made shared depend on game just to format a log
+        // line. Callers use LookupOpcodeName(pkt.GetOpcode()) instead.
 
     protected:
-        OpcodesList m_opcode;
+        uint16 m_opcode;
 };
 #endif

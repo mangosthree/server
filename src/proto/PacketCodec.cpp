@@ -125,7 +125,7 @@ namespace proto
             }
 
             // ---- Phase 3: emit and reset for the next packet ------------------
-            WorldPacket packet(OpcodesList(m_opcode), m_payload.size());
+            WorldPacket packet(m_opcode, m_payload.size());
             if (!m_payload.empty())
             {
                 packet.append(m_payload.data(), m_payload.size());

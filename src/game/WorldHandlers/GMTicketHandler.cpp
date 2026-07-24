@@ -42,6 +42,7 @@
 #include "Common.h"
 #include "Language.h"
 #include "WorldPacket.h"
+#include "Opcodes.h"                                        // for LookupOpcodeName
 #include "Log.h"
 #include "GMTicketMgr.h"
 #include "ObjectAccessor.h"
@@ -307,7 +308,7 @@ void WorldSession::HandleGMTicketSurveySubmitOpcode(WorldPacket& recv_data)
 void WorldSession::HandleGMResponseResolveOpcode(WorldPacket& recv_data)
 {
     // empty opcode
-    DEBUG_LOG("WORLD: %s", recv_data.GetOpcodeName());
+    DEBUG_LOG("WORLD: %s", LookupOpcodeName(recv_data.GetOpcode()));
 
     sTicketMgr.Delete(GetPlayer()->GetObjectGuid());
 

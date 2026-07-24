@@ -29,8 +29,6 @@
 #include <mutex>
 #include "ClientConnection.h"
 
-#include "Opcodes.h"
-
 #include "Auth/BigNumber.h"
 #include "Auth/Sha1.h"
 #include "Log/Log.h"
@@ -44,6 +42,26 @@ namespace proto
     {
         /// Number of bytes in the client's SHA-1 login proof.
         const size_t AUTH_DIGEST_SIZE = 20;
+
+        // The handful of transport opcodes this file speaks. Re-derived from
+        // (grepped out of, never copied by memory from) this fork's own
+        // src/game/Server/Opcodes.h -- proto does not link game, so these are
+        // proto-local constants rather than references into that table. Every
+        // value carries the exact line it was read from, on 2026-07-24:
+        //   MSG_WOW_CONNECTION   Opcodes.h:55   (0x4F57)
+        //   SMSG_AUTH_CHALLENGE  Opcodes.h:56   (0x4542)
+        //   CMSG_AUTH_SESSION    Opcodes.h:57   (0x0449)
+        //   SMSG_AUTH_RESPONSE   Opcodes.h:58   (0x5DB6)
+        //   CMSG_PING            Opcodes.h:555  (0x444D)
+        //   SMSG_PONG            Opcodes.h:556  (0x4D42)
+        //   CMSG_KEEP_ALIVE      Opcodes.h:1119 (0x0015)
+        const uint16 MSG_WOW_CONNECTION  = 0x4F57;
+        const uint16 SMSG_AUTH_CHALLENGE = 0x4542;
+        const uint16 CMSG_AUTH_SESSION   = 0x0449;
+        const uint16 SMSG_AUTH_RESPONSE  = 0x5DB6;
+        const uint16 CMSG_PING           = 0x444D;
+        const uint16 SMSG_PONG           = 0x4D42;
+        const uint16 CMSG_KEEP_ALIVE     = 0x0015;
 
         /**
          * @brief Draw the server authentication nonce from the cryptographic RNG.

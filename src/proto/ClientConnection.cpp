@@ -197,17 +197,24 @@ namespace proto
                                   m_address.c_str());
                     return false;
                 }
+                // Scripting veto, ahead of any parsing -- matches
+                // WorldSocket.cpp:896-904's ordering exactly. A veto is not a
+                // protocol error: the peer stays connected, the packet is
+                // simply dropped (mirrors the old code's `return 0`).
+                if (!m_gateway.OnAuthPacketReceived(packet))
+                {
+                    return true;
+                }
                 return HandleAuthSession(packet);
 
             case CMSG_PING:
                 return HandlePing(packet);
 
             case CMSG_KEEP_ALIVE:
-                // WorldSocket.cpp:906-915 swallows this with a debug log only;
-                // mirrored here. The Eluna OnPacketReceive hook for this opcode
-                // is world-side scaffolding and moves to the gateway in the CP3
-                // checkpoint that wires proto into game.
+                // WorldSocket.cpp:906-915 swallows this with a debug log and a
+                // fire-and-forget Eluna notification; both mirrored here.
                 DEBUG_LOG("proto: CMSG_KEEP_ALIVE from %s", m_address.c_str());
+                m_gateway.OnKeepAlivePacketReceived(packet, m_session);
                 return true;
 
             default:

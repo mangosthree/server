@@ -29,10 +29,10 @@
 #ifndef MANGOS_H_WORLDTHREAD
 #define MANGOS_H_WORLDTHREAD
 
-#include <ace/INET_Addr.h>
-
 #include "Common.h"
 #include "Threading/Threading.h"
+
+#include <string>
 
 /**
  * @brief Heartbeat thread for the World
@@ -58,7 +58,8 @@ class WorldThread
                 void run() override;
         };
 
-        ACE_INET_Addr   m_listenAddr;
+        uint16      m_port;
+        std::string m_host;
         MaNGOS::Thread* m_thread;
 };
 #endif

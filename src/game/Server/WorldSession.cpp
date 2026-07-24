@@ -41,11 +41,11 @@
  * - World::UpdateSessions() context: Process all packets
  *
  * @see WorldSession for the session class
- * @see WorldSocket for the network socket
+ * @see proto::ClientConnection for the network connection
  * @see Opcodes.cpp for opcode registration
  */
 
-#include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
+#include "IClientLink.h"
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
@@ -77,6 +77,7 @@
 #include "WardenWin.h"
 #include "WardenMac.h"
 #include <mutex>
+#include <utility>
 #include <cstdarg>
 
 #ifndef _WIN32
@@ -155,16 +156,18 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 }
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :
-    m_muteTime(mute_time), _player(NULL), m_Socket(sock), _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
+WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
+                           AccountTypes sec, uint8 expansion, time_t mute_time,
+                           LocaleConstant locale, const BigNumber& sessionKeySalt) :
+    m_muteTime(mute_time), _player(NULL), m_Socket(std::move(link)), m_sessionKeySalt(sessionKeySalt),
+    _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
     m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED)
 {
-    if (sock)
+    if (m_Socket)
     {
-        m_Address = sock->GetRemoteAddress();
-        sock->AddReference();
+        m_Address = m_Socket->GetRemoteAddress();
     }
 }
 
@@ -177,12 +180,13 @@ WorldSession::~WorldSession()
         LogoutPlayer(true);
     }
 
-    /// - If have unclosed socket, close it
+    /// - If the connection is still up, close it. Dropping the shared_ptr is
+    /// all the bookkeeping there is now: the transport owns the socket, and
+    /// the link stays safe to call even after the peer is gone.
     if (m_Socket)
     {
-        m_Socket->CloseSocket();
-        m_Socket->RemoveReference();
-        m_Socket = NULL;
+        m_Socket->Close();
+        m_Socket.reset();
     }
 
     // CAUSES CRASH ON PLAYER EXITING TO LOGIN SCREEN
@@ -281,10 +285,9 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 
 #endif                                                  // !MANGOS_DEBUG
 
-    if (m_Socket->SendPacket(*packet) == -1)
-    {
-        m_Socket->CloseSocket();
-    }
+    // SendPacket is void and safe to call on a dead link -- unlike the old
+    // WorldSocket::SendPacket, there is no failure to react to here.
+    m_Socket->SendPacket(*packet);
 }
 
 /// Add an incoming packet to the queue
@@ -444,8 +447,7 @@ bool WorldSession::Update(PacketFilter& updater)
     ///- Cleanup socket pointer if need
     if (m_Socket && m_Socket->IsClosed())
     {
-        m_Socket->RemoveReference();
-        m_Socket = NULL;
+        m_Socket.reset();
     }
 
  // WARDEN ISSUE - commented out to stop crash
@@ -754,7 +756,7 @@ void WorldSession::KickPlayer()
 {
     if (m_Socket)
     {
-        m_Socket->CloseSocket();
+        m_Socket->Close();
     }
 }
 
@@ -949,7 +951,7 @@ void WorldSession::Handle_NULL(WorldPacket& recvPacket)
  */
 void WorldSession::Handle_EarlyProccess(WorldPacket& recvPacket)
 {
-    sLog.outError("SESSION: received opcode %s (0x%.4X) that must be processed in WorldSocket::OnRead",
+    sLog.outError("SESSION: received opcode %s (0x%.4X) that must be processed by proto::ClientConnection",
                   LookupOpcodeName(recvPacket.GetOpcode()),
                   recvPacket.GetOpcode());
 }
@@ -1368,7 +1370,7 @@ void WorldSession::SendRedirectClient(std::string& ip, uint16 port)
 
     pkt << uint32(0);                                       // unknown
 
-    HMACSHA1 sha1(40, m_Socket->GetSessionKey().AsByteArray());
+    HMACSHA1 sha1(40, GetSessionKey().AsByteArray());
     sha1.UpdateData((uint8*)&ip2, 4);
     sha1.UpdateData((uint8*)&port, 2);
     sha1.Finalize();

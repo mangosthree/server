@@ -27,8 +27,7 @@
  */
 
 #include "Common.h"
-#include "WorldSocket.h"
-#include "WorldSocketMgr.h"
+#include "WorldNetwork.h"
 #include "World.h"
 #include "WorldThread.h"
 #include "Timer.h"
@@ -53,7 +52,7 @@ extern int m_ServiceStatus;
 /**
  * Initializes the world thread listener with the configured host and port.
  */
-WorldThread::WorldThread(uint16 port, const char* host) : m_listenAddr(port, host), m_thread(nullptr)
+WorldThread::WorldThread(uint16 port, const char* host) : m_port(port), m_host(host), m_thread(nullptr)
 {
 }
 
@@ -70,7 +69,7 @@ WorldThread::~WorldThread()
  */
 bool WorldThread::Open()
 {
-    if (sWorldSocketMgr->StartNetwork(m_listenAddr) == -1)
+    if (!sWorldNetwork.Start(m_port, m_host))
     {
         sLog.outError("Failed to start network");
         Log::WaitBeforeContinueIfNeed();
@@ -138,7 +137,7 @@ void WorldThread::Body::run()
     sWorld.UpdateSessions(1);                               // real players unload required UpdateSessions call
     sLog.outString("[shutdown] final UpdateSessions done");
     sLog.outString("[shutdown] StopNetwork: ending reactor + joining network threads...");
-    sWorldSocketMgr->StopNetwork();
+    sWorldNetwork.Stop();
     sLog.outString("[shutdown] StopNetwork done");
     sLog.outString("[shutdown] UnloadAll: unloading maps + MapUpdater teardown...");
     sMapMgr.UnloadAll();                                    // unload all grids (including locked in memory)

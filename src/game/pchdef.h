@@ -26,7 +26,6 @@
 #ifndef GAME_PCH_H
 #define GAME_PCH_H
 
-#include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
 #include "Common.h"
 
 #include "MapManager.h"

@@ -212,6 +212,42 @@ namespace proto
              * state, which is what net::ISession::reapable() exists to express.
              */
             virtual void Detach(SessionId session) = 0;
+
+            /**
+             * @brief Scripting hook: a CMSG_AUTH_SESSION packet arrived, still
+             *        raw and unparsed.
+             *
+             * Mirrors WorldSocket.cpp's pre-auth Eluna::OnPacketReceive call
+             * (WorldSocket.cpp:896-904), which ran before that same function's
+             * own byte-level parsing -- a script could inspect, rewrite, or
+             * veto the packet before a single field was read out of it. The
+             * protocol layer cannot call into Eluna itself (game-only), so this
+             * is the seam's way of keeping that capability alive: called before
+             * proto reads anything from @p packet, and again before
+             * LookupAccount(). No session exists yet, which is why this is not
+             * expressed as a SessionId -- there is nothing to key it by.
+             *
+             * Default: a no-op that never vetoes, for implementations (fakes in
+             * tests) that have no scripting layer to consult.
+             *
+             * @param packet The raw CMSG_AUTH_SESSION packet. May be rewritten.
+             * @return false to drop the packet silently (matches the old code's
+             *         `return 0` -- a veto is not a protocol error).
+             */
+            virtual bool OnAuthPacketReceived(WorldPacket& /*packet*/) { return true; }
+
+            /**
+             * @brief Scripting hook: a CMSG_KEEP_ALIVE packet arrived.
+             *
+             * Mirrors WorldSocket.cpp:906-915's fire-and-forget Eluna
+             * notification -- fire-and-forget here too, no veto.
+             *
+             * @param packet  The (empty-payload) keep-alive packet.
+             * @param session The session, or INVALID_SESSION_ID if the peer
+             *                has not authenticated yet.
+             */
+            virtual void OnKeepAlivePacketReceived(WorldPacket& /*packet*/,
+                                                    SessionId /*session*/) {}
     };
 }
 

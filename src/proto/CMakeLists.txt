@@ -35,6 +35,12 @@
 # =============================================================================
 
 set(SRC_GRP_PROTO
+    ClientConnection.cpp
+    ClientConnection.h
+    IClientLink.h
+    IWorldGateway.h
+    Listener.cpp
+    Listener.h
     Opcodes.h
     PacketCodec.cpp
     PacketCodec.h

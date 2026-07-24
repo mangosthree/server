@@ -29,25 +29,31 @@
 #ifndef MANGOS_H_AUTHSOCKET
 #define MANGOS_H_AUTHSOCKET
 
+#include <utility>
 #include "Common.h"
 #include "Auth/BigNumber.h"
 #include "Auth/Sha1.h"
 #include "ByteBuffer.h"
 #include "Utilities/Util.h"
-#ifdef _WIN32
+
+#include "net/ISession.hpp"
+
 #include <atomic>
-#endif
+#include <memory>
+#include <string>
+#include <vector>
 
-#include "SocketBuffer/BufferedSocket.h"
-
-class ACE_INET_Addr;
 struct Realm;
+struct RealmAddress;
 
 /**
- * @brief Handle login commands
+ * @brief Handle login commands.
  *
+ * A request/response session: the SRP6 login handshake and realm-list handler
+ * run inline on the network thread, on the shared net::ISession transport,
+ * which owns the socket and hands the session a thread-safe Sender/Closer.
  */
-class AuthSocket: public BufferedSocket
+class AuthSocket: public net::ISession
 {
     public:
         const static int s_BYTE_SIZE = 32; /**< TODO */
@@ -64,17 +70,15 @@ class AuthSocket: public BufferedSocket
          */
         ~AuthSocket();
 
-        /**
-         * @brief
-         *
-         */
-        void OnAccept() override;
-
-        /**
-         * @brief
-         *
-         */
-        void OnRead() override;
+        // --- net::ISession -------------------------------------------------
+        void setPeerAddress(const std::string& addr) override { remote_address_ = addr; }
+        void setSender(net::Sender sender) override { m_sender = std::move(sender); }
+        void setCloser(net::Closer closer) override { m_closer = std::move(closer); }
+        void setFlowControl(std::shared_ptr<net::FlowControl> fc) override { m_flowControl = std::move(fc); }
+        std::vector<uint8_t> onConnect() override;
+        std::vector<uint8_t> onData(const uint8_t* data, size_t len) override;
+        void onClose() override { m_closed.store(true); }
+        bool closed() const override { return m_closed.load(); }
 
         /**
          * @brief
@@ -91,7 +95,7 @@ class AuthSocket: public BufferedSocket
          */
         void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
 
-        static ACE_INET_Addr const& GetAddressForClient(Realm const& realm, ACE_INET_Addr const& clientAddr);
+        static RealmAddress GetAddressForClient(Realm const& realm, uint32 clientIp);
 
         /**
          * @brief
@@ -129,25 +133,22 @@ class AuthSocket: public BufferedSocket
         bool _HandleRealmList();
 
         /**
-         * @brief data transfer handle for patch
-         *
+         * @brief Client accepted the offered patch transfer (from the start).
+         * @return bool
+         */
+        bool _HandleXferAccept();
+
+        /**
+         * @brief Client wants to resume the patch transfer from an offset.
          * @return bool
          */
         bool _HandleXferResume();
 
         /**
-         * @brief
-         *
+         * @brief Client cancelled the patch transfer.
          * @return bool
          */
         bool _HandleXferCancel();
-
-        /**
-         * @brief
-         *
-         * @return bool
-         */
-        bool _HandleXferAccept();
 
         /**
          * @brief
@@ -170,10 +171,37 @@ class AuthSocket: public BufferedSocket
             STATUS_CHALLENGE,
             STATUS_LOGON_PROOF,
             STATUS_RECON_PROOF,
-            STATUS_PATCH,
+            STATUS_PATCH,       ///< awaiting the client's XFER accept/resume/cancel
             STATUS_AUTHED,
             STATUS_CLOSED
         };
+
+        /// Kick off the background patch stream for the offered archive, honouring
+        /// an XFER_RESUME start offset. Closes the connection on failure.
+        bool BeginPatchStream(uint64 startOffset);
+
+        // --- Buffered-stream emulation (formerly provided by BufferedSocket) ----
+        // net::ISession delivers raw bytes via onData(); these mirror the old
+        // recv_soft/recv/recv_skip/recv_len/send API so the SRP6 handlers below
+        // are unchanged. Bytes consumed during one onData() pass are dropped from
+        // the pending buffer afterwards, exactly like the old crunch() behaviour.
+        size_t recv_len() const { return m_readBuf.size() - m_readPos; }
+        bool recv_soft(char* buf, size_t len);
+        bool recv(char* buf, size_t len);
+        void recv_skip(size_t len);
+        bool send(const char* buf, size_t len);
+        const std::string& get_remote_address() const { return remote_address_; }
+        void close_connection();
+
+        std::vector<uint8_t> m_readBuf;      ///< pending unconsumed inbound bytes
+        size_t               m_readPos = 0;  ///< consume cursor within m_readBuf
+
+        net::Sender          m_sender;       ///< thread-safe outbound channel
+        net::Closer          m_closer;       ///< request-teardown channel
+        std::shared_ptr<net::FlowControl> m_flowControl; ///< outbound backpressure (patch stream)
+        std::atomic<bool>    m_closed{false};
+
+        std::string remote_address_ = "<unknown>";
 
         BigNumber N, s, g, v; /**< TODO */
         BigNumber b, B; /**< TODO */
@@ -187,10 +215,9 @@ class AuthSocket: public BufferedSocket
 
         std::string _localizationName; /**< Since GetLocaleByName() is _NOT_ bijective, we have to store the locale as a string. Otherwise we can't differ between enUS and enGB, which is important for the patch system */
         std::string _os;
+        std::string _patchPath; /**< resolved ./patches archive offered to an unsupported build, empty if none */
         uint16 _build; /**< TODO */
         AccountTypes _accountSecurityLevel; /**< TODO */
-
-        ACE_HANDLE patch_; /**< TODO */
 
 #ifdef _WIN32
         /// Live count of constructed AuthSocket objects (open connections). Observability only.
@@ -199,12 +226,6 @@ class AuthSocket: public BufferedSocket
         /// Live count of sockets currently in STATUS_AUTHED. Observability only.
         static std::atomic<uint32> s_authed;
 #endif
-
-        /**
-         * @brief
-         *
-         */
-        void InitPatch();
 };
 #endif
 /// @}

@@ -27,8 +27,6 @@
 
 #include "utf8.h"
 #include "RNGen.h"
-#include <ace/TSS_T.h>
-#include <ace/INET_Addr.h>
 #include "Log/Log.h"
 
 #include <iomanip>
@@ -503,21 +501,18 @@ bool IsIPAddress(char const* ipaddress)
     return inet_addr(ipaddress) != INADDR_NONE;
 }
 
-std::string GetAddressString(ACE_INET_Addr const& addr)
+std::string GetAddressString(uint32 ip, uint16 port)
 {
-    char buf[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 16];
-    addr.addr_to_string(buf, ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 16);
+    char buf[32];
+    snprintf(buf, sizeof(buf), "%u.%u.%u.%u:%u",
+             (ip >> 24) & 0xFF, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF,
+             unsigned(port));
     return buf;
 }
 
-bool IsIPAddrInNetwork(ACE_INET_Addr const& net, ACE_INET_Addr const& addr, ACE_INET_Addr const& subnetMask)
+bool IsIPAddrInNetwork(uint32 net, uint32 addr, uint32 subnetMask)
 {
-    uint32 mask = subnetMask.get_ip_address();
-    if ((net.get_ip_address() & mask) == (addr.get_ip_address() & mask))
-    {
-        return true;
-    }
-    return false;
+    return (net & subnetMask) == (addr & subnetMask);
 }
 
 /// create PID file

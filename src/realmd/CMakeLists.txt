@@ -34,11 +34,6 @@ source_group("Patch" FILES ${SRC_GRP_PATCH})
 file(GLOB_RECURSE SRC_GRP_REALM Realm/*.cpp Realm/*.h)
 source_group("Realmlist" FILES ${SRC_GRP_REALM})
 
-#Socket Buffer Files
-file(GLOB_RECURSE SRC_GRP_SOCKB SocketBuffer/*.cpp SocketBuffer/*.h)
-source_group("Socket Buffer" FILES ${SRC_GRP_SOCKB})
-
-
 configure_file(realmd.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/realmd.conf.dist)
 
 if(WIN32)
@@ -52,7 +47,6 @@ add_executable(realmd
     ${SRC_GRP_AUTH}
     ${SRC_GRP_PATCH}
     ${SRC_GRP_REALM}
-    ${SRC_GRP_SOCKB}
     Main.cpp
     $<$<BOOL:${WIN32}>:
         ${CMAKE_CURRENT_BINARY_DIR}/VersionInfo.h
@@ -73,10 +67,13 @@ target_link_libraries(realmd
     PUBLIC
         shared
         Threads::Threads
-        # realmd's own sockets/AuthSocket/PatchHandler are Stage 2 territory
-        # (they still call the deprecated MD5_*/ACE APIs) -- do not link
-        # mangos_openssl_strict here yet or the Stage 1 build breaks.
         mangos_openssl
+    PRIVATE
+        # AuthSocket/PatchHandler moved off ACE and the deprecated MD5_*/
+        # SSLeay_* API (PatchHandler now hashes via EVP_Digest*) in the Stage 2
+        # realmd rewrite, so realmd can finally hold the same OpenSSL 3.x API
+        # level as shared/game/mangosd.
+        mangos_openssl_strict
 )
 
 install(

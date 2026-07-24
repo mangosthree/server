@@ -23,213 +23,178 @@
  */
 
 /** \file
-    \ingroup realmd
-  */
+ \ingroup realmd
+ */
 
-#include "Common.h"
+#include <cstdint>
+#include <string>
+#include <memory>
+#include <mutex>
 #include "PatchHandler.h"
 #include "Auth/AuthCodes.h"
 #include "Log.h"
 
-#include <ace/OS_NS_sys_socket.h>
-#include <ace/OS_NS_dirent.h>
-#include <ace/OS_NS_errno.h>
-#include <ace/OS_NS_unistd.h>
+#include <openssl/evp.h>
 
-#include <ace/os_include/netinet/os_tcp.h>
+#include <chrono>
+#include <cstring>
+#include <fstream>
+#include <thread>
+#include <utility>
+#include <vector>
 
-#ifndef MSG_NOSIGNAL
-#define MSG_NOSIGNAL 0
-#endif
-
-#if defined( __GNUC__ )
-#pragma pack(1)
-#else
-#pragma pack(push,1)
-#endif
-
-struct Chunk
+namespace
 {
-    ACE_UINT8 cmd;
-    ACE_UINT16 data_size;
-    ACE_UINT8 data[4096]; // 4096 - page size on most arch
-};
+    /// Bytes carried per CMD_XFER_DATA packet. 4 KiB matches the historical page
+    /// size the ACE-era PatchHandler used (Chunk::data[4096]).
+    constexpr size_t kChunkSize = 4096;
 
-#if defined( __GNUC__ )
-#pragma pack()
-#else
-#pragma pack(pop)
-#endif
-
-PatchHandler::PatchHandler(ACE_HANDLE socket, ACE_HANDLE patch)
-{
-    reactor(NULL);
-    set_handle(socket);
-    patch_fd_ = patch;
-}
-
-PatchHandler::~PatchHandler()
-{
-    if (patch_fd_ != ACE_INVALID_HANDLE)
-    {
-        ACE_OS::close(patch_fd_);
-    }
-}
-
-int PatchHandler::open(void*)
-{
-    if (get_handle() == ACE_INVALID_HANDLE || patch_fd_ == ACE_INVALID_HANDLE)
-    {
-        return -1;
-    }
-
-    int nodelay = 0;
-    if (-1 == peer().set_option(ACE_IPPROTO_TCP,
-                                TCP_NODELAY,
-                                &nodelay,
-                                sizeof(nodelay)))
-    {
-        return -1;
-    }
-
-#if defined(TCP_CORK)
-    int cork = 1;
-    if (-1 == peer().set_option(ACE_IPPROTO_TCP,
-                                TCP_CORK,
-                                &cork,
-                                sizeof(cork)))
-    {
-        return -1;
-    }
-#endif // TCP_CORK
-
-    (void) peer().disable(ACE_NONBLOCK);
-
-    return activate(THR_NEW_LWP | THR_DETACHED | THR_INHERIT_SCHED);
-}
-
-int PatchHandler::svc(void)
-{
-    // Do 1 second sleep, similar to the one in game/WorldSocket.cpp
-    // Seems client have problems with too fast sends.
-    ACE_OS::sleep(1);
-
-    int flags = MSG_NOSIGNAL;
-
-    Chunk data;
-    data.cmd = CMD_XFER_DATA;
-
-    ssize_t r;
-
-    while ((r = ACE_OS::read(patch_fd_, data.data, sizeof(data.data))) > 0)
-    {
-        data.data_size = (ACE_UINT16)r;
-
-        if (peer().send((const char*)&data,
-                        ((size_t) r) + sizeof(data) - sizeof(data.data),
-                        flags) == -1)
-        {
-            return -1;
-        }
-    }
-
-    if (r == -1)
-    {
-        return -1;
-    }
-
-    return 0;
-}
-
-PatchCache::~PatchCache()
-{
-    for (Patches::iterator i = patches_.begin(); i != patches_.end(); ++i)
-    {
-        delete i->second;
-    }
-}
-
-PatchCache::PatchCache()
-{
-    LoadPatchesInfo();
+    /// Backpressure ceiling: the streaming thread will not get further than this many
+    /// bytes ahead of what the transport has actually written to the socket, so queued
+    /// memory stays bounded regardless of archive size or client speed. Stated in
+    /// bytes because the transport coalesces queued packets into one contiguous
+    /// stream, which makes a count of outstanding buffers meaningless.
+    constexpr uint64_t kMaxOutstandingBytes = 256 * 1024;
 }
 
 PatchCache* PatchCache::instance()
 {
-    return ACE_Singleton<PatchCache, ACE_Thread_Mutex>::instance();
+    static PatchCache s_instance;
+    return &s_instance;
 }
 
-void PatchCache::LoadPatchMD5(const char* szFileName)
+bool PatchCache::ComputeMD5(const std::string& fullPath, uint8_t outMd5[MD5_DIGEST_LENGTH])
 {
-    // Try to open the patch file
-    std::string path = "./patches/";
-    path += szFileName;
-    FILE* pPatch = fopen(path.c_str(), "rb");
-    sLog.outDebug("Loading patch info from %s", path.c_str());
-
-    if (!pPatch)
+    std::ifstream in(fullPath, std::ios::binary);
+    if (!in)
     {
-        return;
+        return false;
     }
 
-    // Calculate the MD5 hash
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-
-    const size_t check_chunk_size = 4 * 1024;
-
-    ACE_UINT8 buf[check_chunk_size];
-
-    while (!feof(pPatch))
+    // Streamed, so a large patch is never held in memory: the one-shot EVP_Digest()
+    // cannot express that, hence the explicit context.
+    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
+    if (!ctx)
     {
-        size_t read = fread(buf, 1, check_chunk_size, pPatch);
-        MD5_Update(&ctx, buf, read);
+        return false;
     }
 
-    fclose(pPatch);
-
-    // Store the result in the internal patch hash map
-    patches_[path] = new PATCH_INFO;
-    MD5_Final((ACE_UINT8*) & patches_[path]->md5, &ctx);
-}
-
-bool PatchCache::GetHash(const char* pat, ACE_UINT8 mymd5[MD5_DIGEST_LENGTH])
-{
-    for (Patches::iterator i = patches_.begin(); i != patches_.end(); ++i)
-        if (!stricmp(pat, i->first.c_str()))
-        {
-            memcpy(mymd5, i->second->md5, MD5_DIGEST_LENGTH);
-            return true;
-        }
-
-    return false;
-}
-
-void PatchCache::LoadPatchesInfo()
-{
-    ACE_DIR* dirp = ACE_OS::opendir(ACE_TEXT("./patches/"));
-
-    if (!dirp)
+    if (EVP_DigestInit_ex(ctx, EVP_md5(), NULL) != 1)
     {
-        return;
+        EVP_MD_CTX_free(ctx);
+        return false;
     }
 
-    ACE_DIRENT* dp;
-
-    while ((dp = ACE_OS::readdir(dirp)) != NULL)
+    char buf[kChunkSize];
+    while (in)
     {
-        int l = strlen(dp->d_name);
-        if (l < 8)
+        in.read(buf, sizeof(buf));
+        std::streamsize got = in.gcount();
+        if (got > 0 && EVP_DigestUpdate(ctx, buf, static_cast<size_t>(got)) != 1)
         {
-            continue;
-        }
-
-        if (!memcmp(&dp->d_name[l - 4], ".mpq", 4))
-        {
-            LoadPatchMD5(dp->d_name);
+            EVP_MD_CTX_free(ctx);
+            return false;
         }
     }
 
-    ACE_OS::closedir(dirp);
+    // A read error (as opposed to a clean EOF) leaves a partial hash -- reject it.
+    if (in.bad())
+    {
+        EVP_MD_CTX_free(ctx);
+        return false;
+    }
+
+    unsigned int len = 0;
+    const bool ok = EVP_DigestFinal_ex(ctx, outMd5, &len) == 1;
+    EVP_MD_CTX_free(ctx);
+    return ok;
 }
 
+bool PatchCache::GetMD5(const std::string& fullPath, uint8_t outMd5[MD5_DIGEST_LENGTH])
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    auto it = m_cache.find(fullPath);
+    if (it != m_cache.end())
+    {
+        memcpy(outMd5, it->second.data(), MD5_DIGEST_LENGTH);
+        return true;
+    }
+
+    std::array<uint8_t, MD5_DIGEST_LENGTH> digest{};
+    if (!ComputeMD5(fullPath, digest.data()))
+    {
+        return false;
+    }
+
+    m_cache[fullPath] = digest;
+    memcpy(outMd5, digest.data(), MD5_DIGEST_LENGTH);
+    return true;
+}
+
+bool StartPatchTransfer(net::Sender sender, net::Closer closer,
+                        std::shared_ptr<net::FlowControl> flow,
+                        const std::string& path, uint64_t startOffset)
+{
+    // Open (and position) up front so a failure is reported synchronously to the
+    // caller instead of on the background thread.
+    auto in = std::make_shared<std::ifstream>(path, std::ios::binary);
+    if (!in->is_open())
+    {
+        return false;
+    }
+    if (startOffset != 0)
+    {
+        in->seekg(static_cast<std::streamoff>(startOffset), std::ios::beg);
+        if (!in->good())
+        {
+            return false;
+        }
+    }
+
+    std::thread([in, sender = std::move(sender), closer = std::move(closer),
+                 flow = std::move(flow)]() mutable
+    {
+        // Do 1 second sleep, similar to the one in game/WorldSocket.cpp.
+        // Seems client have problems with too fast sends.
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        // One framing buffer for the whole transfer: the header is rewritten in place
+        // each pass and the payload read straight in behind it, so streaming a 100 MB
+        // archive allocates exactly once rather than once per 4 KiB chunk.
+        std::vector<uint8_t> pkt(3 + kChunkSize);
+
+        for (;;)
+        {
+            // Block until the transport has drained the outbound backlog below the
+            // ceiling (real backpressure), or bail out if the connection is gone.
+            if (flow && !flow->awaitWritable(kMaxOutstandingBytes))
+            {
+                return;
+            }
+
+            in->read(reinterpret_cast<char*>(pkt.data() + 3), kChunkSize);
+            std::streamsize got = in->gcount();
+            if (got <= 0)
+            {
+                break;
+            }
+
+            // Frame: CMD_XFER_DATA, uint16 size (little-endian), payload.
+            pkt[0] = uint8_t(CMD_XFER_DATA);
+            pkt[1] = uint8_t(got & 0xFF);
+            pkt[2] = uint8_t((got >> 8) & 0xFF);
+            sender(pkt.data(), 3 + static_cast<size_t>(got));
+        }
+
+        if (in->bad())
+        {
+            sLog.outError("PatchTransfer: read error streaming patch, closing connection");
+            closer();
+        }
+        // On success the socket is left open; the client tears it down once it has
+        // the whole archive and reconnects with the patched build.
+    }).detach();
+
+    return true;
+}

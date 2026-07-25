@@ -28,6 +28,7 @@
 #include "Common/Common.h"
 #include "Policies/Singleton.h"
 
+#include <cstdarg>
 #include <mutex>
 
 class Config;

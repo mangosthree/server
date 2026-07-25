@@ -27,6 +27,7 @@
 #include "Database/SqlOperations.h"
 #include "GitRevision.h"
 
+#include <cstdarg>
 #include <ctime>
 #include <iostream>
 #include <fstream>

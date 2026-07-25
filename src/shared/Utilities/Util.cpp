@@ -31,7 +31,12 @@
 
 #include <iomanip>
 #include <cctype>
+#include <cstdarg>
 #include <cstring>
+
+#ifndef _WIN32
+#  include <arpa/inet.h>                                    ///< inet_addr
+#endif
 
 //static ACE_Time_Value g_SystemTickTime = ACE_OS::gettimeofday();
 

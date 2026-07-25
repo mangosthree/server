@@ -31,6 +31,7 @@
 #include <vector>
 #include <algorithm>
 #include <cctype>
+#include <cstdarg>
 #include <functional>
 
 enum class TimeFormat : uint8

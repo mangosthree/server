@@ -60,6 +60,7 @@
 #include "CellImpl.h"
 #include "DisableMgr.h"
 
+#include <cstdarg>
 #include <limits>
 #include <set>
 

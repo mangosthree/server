@@ -31,6 +31,9 @@
 #include "MapTree.h"
 #include "ModelInstance.h"
 
+#include <cfloat>
+#include <climits>
+
 using namespace VMAP;
 
 namespace MMAP

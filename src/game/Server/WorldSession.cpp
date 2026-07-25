@@ -77,6 +77,11 @@
 #include "WardenWin.h"
 #include "WardenMac.h"
 #include <mutex>
+#include <cstdarg>
+
+#ifndef _WIN32
+#  include <arpa/inet.h>                                    ///< inet_addr
+#endif
 
 /**
  * @brief Helper for Map session filtering

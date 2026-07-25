@@ -98,6 +98,7 @@
 #include "GitRevision.h"
 #include "UpdateTime.h"
 #include "GameTime.h"
+#include <cstdarg>
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"

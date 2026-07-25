@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,45 +22,53 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/// \addtogroup mangosd
-/// @{
-/// \file
+#ifndef MANGOS_H_SOAPSERVICE
+#define MANGOS_H_SOAPSERVICE
 
-#ifndef MANGOS_H_WORLDTHREAD
-#define MANGOS_H_WORLDTHREAD
+#include "SoapThread.h"
 
-#include "Common.h"
-#include "Threading/Threading.h"
+#include "../Service.h"
+
+#include "Platform/Define.h"
 
 #include <string>
+#include <thread>
 
 /**
- * @brief Heartbeat thread for the World
+ * @brief The gSOAP listener, as an IService.
  *
+ * SoapThread() already polls World::IsStopped() in its own loop (it was never
+ * ACE, just a bare std::thread mangosd.cpp spun up and joined by hand), so
+ * there is nothing to signal here: the world stopping is the stop request,
+ * and Join() only has to wait for the thread to notice.
  */
-class WorldThread
+class SoapService : public IService
 {
     public:
-        explicit WorldThread(uint16 port, const char* host);
-        ~WorldThread();
 
-        /// Starts the world socket network listener and spawns the update loop.
-        bool Open();
+        SoapService(const std::string& host, uint16 port)
+            : m_host(host), m_port(port) {}
 
-        /// Blocks until the update loop has stopped.
-        void Wait();
+        const char* Name() const override { return "SOAP"; }
+
+        void Start() override
+        {
+            m_thread = std::thread(SoapThread, m_host, m_port);
+        }
+
+        void Join() override
+        {
+            if (m_thread.joinable())
+            {
+                m_thread.join();
+            }
+        }
 
     private:
-        /// Runnable body driving the world update loop.
-        class Body : public MaNGOS::Runnable
-        {
-            public:
-                void run() override;
-        };
 
-        uint16      m_port;
         std::string m_host;
-        MaNGOS::Thread* m_thread;
+        uint16      m_port;
+        std::thread m_thread;
 };
+
 #endif
-/// @}

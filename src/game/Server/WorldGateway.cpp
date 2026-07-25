@@ -311,6 +311,16 @@ void WorldGateway::Deliver(proto::SessionId session, WorldPacket&& packet)
         return;
     }
 
+    // Dump incoming packet (opt-in via PacketLoggingEnabled; off by default).
+    // WorldSocket.cpp:875-879 did this with the ACE socket fd as the "SOCKET:"
+    // field; the proto SessionId is the modern equivalent -- a slot assigned
+    // once at Attach() and released at Detach(), same lifetime shape as a fd.
+    if (sLog.IsPacketLoggingEnabled())
+    {
+        sLog.outWorldPacketDump(session, packet.GetOpcode(),
+                                LookupOpcodeName(packet.GetOpcode()), &packet, true);
+    }
+
     std::lock_guard<std::mutex> lock(m_lock);
 
     if (WorldSession* target = Find(session))

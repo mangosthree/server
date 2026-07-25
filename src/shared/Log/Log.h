@@ -293,7 +293,8 @@ class Log : public MaNGOS::Singleton<Log>
         /**
          * @brief any log level
          *
-         * Currently unreferenced -- see IsPacketLoggingEnabled()'s comment below.
+         * Called from WorldGateway::Deliver (incoming) and WorldSession::SendPacket
+         * (outgoing) -- see IsPacketLoggingEnabled()'s comment below.
          *
          * @param socket
          * @param opcode
@@ -452,16 +453,13 @@ class Log : public MaNGOS::Singleton<Log>
          *        only opened when the flag is set, so this is the single source
          *        of truth and is off by default even on legacy configs.
          *
-         *        Currently unreferenced: WorldSocket.cpp (the ACE-removal
-         *        campaign's Stage 2 CP3) was the only caller of this and of
-         *        outWorldPacketDump() below, and it is gone. The config flag
-         *        still parses and this API still compiles, but nothing invokes
-         *        it, so setting PacketLoggingEnabled=1 today produces no dump
-         *        file. Re-homing it into proto::ClientConnection::onData()/
-         *        SendPacket() (the new choke points for every inbound/outbound
-         *        WorldPacket) is a deliberate follow-up, not folded into this
-         *        change so a logging re-home does not ride along with an
-         *        unrelated commit.
+         *        WorldSocket.cpp (the ACE-removal campaign's Stage 2 CP3) was
+         *        the original caller of this and of outWorldPacketDump()
+         *        below; deleting it orphaned both for one checkpoint. Re-homed
+         *        game-side (not into proto, which must stay game-agnostic and
+         *        no longer resolves opcode names) at Stage 2 CP5+1:
+         *        WorldGateway::Deliver for incoming, WorldSession::SendPacket
+         *        for outgoing.
          * @return bool
          */
         bool IsPacketLoggingEnabled() const { return worldLogfile != NULL; }

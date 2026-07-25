@@ -268,7 +268,11 @@ target_compile_definitions(shared
 
 target_link_libraries(shared
     PUBLIC
-        ace
+        # PUBLIC, and required: shared uses std::thread directly (the console
+        # writer, Threading, the net workers). ACE used to drag pthread in as a
+        # side effect on Linux, so nothing here ever declared the dependency --
+        # which only becomes visible now that acelite is disarmed.
+        Threads::Threads
         utf8
         MySQL::MySQL
         mangos_openssl

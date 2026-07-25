@@ -186,7 +186,7 @@ if(PCH)
     include(${CMAKE_SOURCE_DIR}/cmake/PCHSupport.cmake)
 endif()
 
-add_subdirectory(dep)
+include(${CMAKE_SOURCE_DIR}/cmake/Dependencies.cmake)
 add_subdirectory(src)
 
 include(${CMAKE_SOURCE_DIR}/cmake/StatusInfo.cmake)

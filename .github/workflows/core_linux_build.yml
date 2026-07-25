@@ -48,7 +48,7 @@ jobs:
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
             git cmake make build-essential \
             libssl-dev libbz2-dev default-libmysqlclient-dev \
-            libace-dev libreadline-dev \
+            libreadline-dev \
             ${{ matrix.pkg }}
 
       - name: Configure project

@@ -159,9 +159,12 @@ if(UNIX)
 endif()
 
 add_dependencies(${LIBRARY_NAME} revision.h)
-if(NOT ACE_USE_EXTERNAL)
-  add_dependencies(${LIBRARY_NAME} ace)
-endif()
+# ace dependency removed with the rest of ACE (Stage 2 ACE-removal campaign).
+# NOTE for the playerbots spike branch (spike/playerbots-m1-to-m3): its own
+# AhbotThread/PlayerbotCommandServer sources are not present on this branch
+# (drop-ins only, conf templates committed here) and still use ACE_Thread on
+# that branch; they need their own MaNGOS::Thread/net:: conversion when that
+# branch rebases onto this ACE-free master.
 
 # Install config files
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/playerbot/aiplayerbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/aiplayerbot.conf.dist)

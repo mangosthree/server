@@ -98,6 +98,7 @@
 #include "GitRevision.h"
 #include "UpdateTime.h"
 #include "GameTime.h"
+#include <cstdarg>
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -120,7 +121,7 @@ extern void LoadGameObjectModelList();
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
 
-ACE_Atomic_Op<ACE_Thread_Mutex, uint32> World::m_worldLoopCounter = 0;
+std::atomic<uint32> World::m_worldLoopCounter{0};
 
 float World::m_MaxVisibleDistanceOnContinents = DEFAULT_VISIBILITY_DISTANCE;
 float World::m_MaxVisibleDistanceInInstances  = DEFAULT_VISIBILITY_INSTANCE;

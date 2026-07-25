@@ -24,6 +24,7 @@
 
 #include "../recastnavigation/Detour/Include/DetourCommon.h"
 
+#include <cfloat>
 #include <cmath>
 
 #include "MoveMap.h"

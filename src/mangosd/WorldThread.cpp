@@ -53,29 +53,48 @@ extern int m_ServiceStatus;
 /**
  * Initializes the world thread listener with the configured host and port.
  */
-WorldThread::WorldThread(uint16 port, const char* host) : listen_addr(port, host)
+WorldThread::WorldThread(uint16 port, const char* host) : m_listenAddr(port, host), m_thread(nullptr)
 {
 }
 
 /**
- * Starts the world socket network listener and activates the world thread.
+ * Joins the update loop (if still running) and releases the thread.
  */
-int WorldThread::open(void* unused)
+WorldThread::~WorldThread()
 {
-    if (sWorldSocketMgr->StartNetwork(listen_addr) == -1)
+    delete m_thread;
+}
+
+/**
+ * Starts the world socket network listener and spawns the update loop.
+ */
+bool WorldThread::Open()
+{
+    if (sWorldSocketMgr->StartNetwork(m_listenAddr) == -1)
     {
         sLog.outError("Failed to start network");
         Log::WaitBeforeContinueIfNeed();
         World::StopNow(ERROR_EXIT_CODE);
-        return -1;
+        return false;
     }
 
-    activate();
-    return 0;
+    m_thread = new MaNGOS::Thread(new Body());
+    return true;
+}
+
+/**
+ * Blocks until the update loop has stopped.
+ */
+void WorldThread::Wait()
+{
+    if (m_thread)
+    {
+        m_thread->wait();
+    }
 }
 
 /// Heartbeat for the World
-int WorldThread::svc()
+void WorldThread::Body::run()
 {
     uint32 realCurrTime = 0;
     uint32 realPrevTime = getMSTime();
@@ -126,5 +145,4 @@ int WorldThread::svc()
     sLog.outString("[shutdown] UnloadAll returned; world thread exiting");
 
     sLog.outString("World Updater Thread stopped");
-    return 0;
 }

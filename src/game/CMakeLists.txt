@@ -288,6 +288,11 @@ target_link_libraries(game
         g3dlite
         $<$<BOOL:${SCRIPT_LIB_SD3}>:mangosscript>
         $<$<BOOL:${SCRIPT_LIB_ELUNA}>:lualib>
+    PRIVATE
+        # Holds game to the same OpenSSL 3.x API level as shared and mangosd.
+        # It was the one target left out, which is why Warden could keep
+        # calling the low-level MD5_* functions OpenSSL 3.0 deprecated.
+        mangos_openssl_strict
 )
 
 # Generate precompiled header

@@ -59,9 +59,6 @@
 #include "DBCEnums.h"
 #include "BattleGround.h"
 
-// Ace metux not defined, this header is required
-#include "ace/Recursive_Thread_Mutex.h"
-
 #include <mutex>
 
 /**
@@ -245,7 +242,10 @@ class BattleGroundQueue
         uint32 GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattleGroundBracketId bracket_id);
 
     private:
-        ACE_Recursive_Thread_Mutex  m_Lock; /**< Mutex that should not allow changing private data, nor allowing to update Queue during private data change. */
+        // A recursive-mutex m_Lock member lived here; every call site that
+        // would have acquired it was already commented out, so it never
+        // actually served as a lock. Removed rather than ported -- see the
+        // [Cleanup] std sync primitives commit body.
 
         /**
          * @brief Map for storing queued players.
@@ -768,7 +768,10 @@ class BattleGroundMgr
          */
         static bool IsBGWeekend(BattleGroundTypeId bgTypeId);
     private:
-        ACE_Thread_Mutex    SchedulerLock; /**< Mutex to protect the scheduler from concurrent access. */
+        // A SchedulerLock member lived here (a plain thread mutex); every
+        // call site that would have acquired it was already commented out,
+        // so it never actually served as a lock. Removed rather than
+        // ported -- see the [Cleanup] std sync primitives commit body.
         BattleMastersMap    mBattleMastersMap; /**< Map storing battle master entries. */
         CreatureBattleEventIndexesMap m_CreatureBattleEventIndexMap; /**< Map storing creature battle event indexes. */
         GameObjectBattleEventIndexesMap m_GameObjectBattleEventIndexMap; /**< Map storing game object battle event indexes. */

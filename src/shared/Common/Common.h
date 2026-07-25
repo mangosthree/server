@@ -99,6 +99,8 @@
 #include <algorithm>
 #include <thread>
 #include <atomic>
+#include <cinttypes>
+#include <cstdint>
 
 #include <unordered_map>
 #include <unordered_set>
@@ -107,11 +109,12 @@
 #include "LockedQueue/LockedQueue.h"
 #include "Threading/Threading.h"
 
-#include <ace/Basic_Types.h>
-#include <ace/Guard_T.h>
-#include <ace/RW_Thread_Mutex.h>
+// ACE_Thread_Mutex survives here (rather than moving to the two callers
+// that still need it) because those callers -- WorldSocketMgr.h,
+// realmd/Patch/PatchHandler.cpp -- are socket-layer files Stage 1 does not
+// touch; they reach ACE_Thread_Mutex transitively through this header
+// today, and Stage 2's engine swap is what gives them their own includes.
 #include <ace/Thread_Mutex.h>
-#include <ace/OS_NS_arpa_inet.h>
 
 // Old ACE versions (pre-ACE-5.5.4) not have this type (add for allow use at Unix side external old ACE versions)
 #if PLATFORM != PLATFORM_WINDOWS
@@ -155,28 +158,22 @@ typedef off_t ACE_OFF_T;
 #  define strnicmp strncasecmp
 
 #  define I32FMT "%08X"
-#  if ACE_SIZEOF_LONG == 8
-#    define I64FMT "%016lX"
-#  else
-#    define I64FMT "%016llX"
-#  endif /* ACE_SIZEOF_LONG == 8 */
+#  define I64FMT "%016" PRIX64
 
 #endif
 
-#if defined(__APPLE__)
-#  ifdef I64FMT
-#    undef I64FMT
-#  endif
-#  define I64FMT "%016llX"
-#  define UI64FMTD "%llu"
-#else
-#  define UI64FMTD ACE_UINT64_FORMAT_SPECIFIER
-#endif
+// These used to expand to ACE_UINT64_FORMAT_SPECIFIER and friends (with a
+// hand-rolled ACE_SIZEOF_LONG-conditional and an __APPLE__ special case for
+// I64FMT), which is why printing a uint64 anywhere in the server pulled in
+// ACE. <cinttypes> is the standard answer to the same problem and is correct
+// on every platform by definition, so the macros survive (there are ~470
+// uses) but their contents no longer come from a third-party portability
+// layer.
+#define UI64FMTD "%" PRIu64
+#define UI64LIT(N) UINT64_C(N)
 
-#define UI64LIT(N) ACE_UINT64_LITERAL(N)
-
-#define SI64FMTD ACE_INT64_FORMAT_SPECIFIER
-#define SI64LIT(N) ACE_INT64_LITERAL(N)
+#define SI64FMTD "%" PRId64
+#define SI64LIT(N) INT64_C(N)
 
 /**
  * @brief

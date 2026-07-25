@@ -28,10 +28,12 @@
 #include "Common/Common.h"
 #include "Policies/Singleton.h"
 
+#include <mutex>
+
 class Config;
 class ByteBuffer;
 class ConsoleLogWriter;
-namespace ACE_Based { class Thread; }
+namespace MaNGOS { class Thread; }
 
 /**
  * @brief Logging severity levels for message filtering
@@ -161,9 +163,9 @@ struct ConsoleLogRecord
  * - Console color support for improved readability
  * - Formatted output with timestamps
  */
-class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Thread_Mutex> >
+class Log : public MaNGOS::Singleton<Log>
 {
-        friend class MaNGOS::OperatorNew<Log>;
+        friend class MaNGOS::Singleton<Log>;
         /**
          * @brief Constructs the Log singleton instance
          *
@@ -541,11 +543,11 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Th
         FILE* scriptErrLogFile; /**< TODO */
         FILE* worldLogfile; /**< TODO */
         FILE* wardenLogfile; /**< TODO */
-        ACE_Thread_Mutex m_worldLogMtx; /**< Serializes packet-dump writes to worldLogfile */
-        ACE_Thread_Mutex m_fileMtx; /**< Serializes writes to the main logfile so concurrent map-update worker threads cannot tear lines */
+        std::mutex m_worldLogMtx; /**< Serializes packet-dump writes to worldLogfile */
+        std::mutex m_fileMtx; /**< Serializes writes to the main logfile so concurrent map-update worker threads cannot tear lines */
 
         ConsoleLogWriter* m_consoleBody; /**< Off-thread console writer Runnable (owned via thread refcount) */
-        ACE_Based::Thread* m_consoleThread; /**< Thread driving m_consoleBody; deleting it drops the Runnable refcount */
+        MaNGOS::Thread* m_consoleThread; /**< Thread driving m_consoleBody; deleting it drops the Runnable refcount */
         bool m_consoleAsync; /**< When true, console emits route to the writer thread; otherwise synchronous fallback */
 
         LogLevel m_logLevel; /**< log/console control */

@@ -25,9 +25,9 @@
 #ifndef MANGOS_H_MMAP_COMMON
 #define MANGOS_H_MMAP_COMMON
 
-// stop warning spam from ACE includes
 #ifdef WIN32
 #  pragma warning( disable : 4996 )
+#  include <windows.h>
 #endif
 
 #include <string>

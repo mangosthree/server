@@ -181,9 +181,9 @@ void ScriptMgr::LoadScriptBinding()
 bool ScriptMgr::ReloadScriptBinding()
 {
 #ifdef _DEBUG
-    m_bindMutex.acquire_write();
+    m_bindMutex.lock();
     LoadScriptBinding();
-    m_bindMutex.release();
+    m_bindMutex.unlock();
     return true;
 #else
     return false;
@@ -261,7 +261,7 @@ uint32 ScriptMgr::GetScriptId(const char* name) const
 uint32 ScriptMgr::GetBoundScriptId(ScriptedObjectType entity, int32 entry)
 {
 #ifdef _DEBUG
-    m_bindMutex.acquire_read();
+    m_bindMutex.lock_shared();
 #endif /* _DEBUG */
     uint32 id = 0;
     if (entity < SCRIPTED_MAX_TYPE)
@@ -275,7 +275,7 @@ uint32 ScriptMgr::GetBoundScriptId(ScriptedObjectType entity, int32 entry)
     else
         sLog.outErrorScriptLib("asking a script for non-existing entity type %u!", entity);
 #ifdef _DEBUG
-    m_bindMutex.release();
+    m_bindMutex.unlock_shared();
 #endif /* _DEBUG */
     return id;
 }

@@ -27,8 +27,7 @@
  * @brief INI configuration file parser and storage
  *
  * This file implements the Config singleton for reading and accessing
- * server configuration from INI format files using the ACE configuration
- * framework.
+ * server configuration from INI format files.
  *
  * Features:
  * - INI file format parsing
@@ -40,57 +39,56 @@
  * Supported value types:
  * - String: Raw string values
  * - Bool: true/false, yes/no, 1/0 (case-insensitive)
- * - Int: 32-bit signed integers
+ * - Int: 32-bit (and 64-bit) signed integers
  * - Float: Floating point values
  *
  * @see Config for the main configuration interface
  */
 
 #include "Config.h"
-#include <ace/Configuration_Import_Export.h>
-#include <mutex>
-
-#include <unordered_map>
-#include <string>
-#include <fstream>
-
 #include "Policies/Singleton.h"
+
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
 
 INSTANTIATE_SINGLETON_1(Config);
 
-/**
- * @brief Search all sections for a configuration value
- * @param mConf Configuration heap to search
- * @param name Key name to find
- * @param result Output string for value
- * @return true if found, false otherwise
- *
- * Searches through all sections in the INI file to find the specified
- * key. Returns the first match found (sections are enumerated in order).
- */
-static bool GetValueHelper(ACE_Configuration_Heap* mConf, const char* name, ACE_TString& result)
+namespace
 {
-    if (!mConf)
+    /// Strip leading and trailing spaces/tabs/CR.
+    std::string Trim(const std::string& s)
     {
-        return false;
-    }
+        const char* WS = " \t\r\n";
 
-    ACE_TString section_name;
-    ACE_Configuration_Section_Key section_key;
-    ACE_Configuration_Section_Key root_key = mConf->root_section();
-
-    int i = 0;
-    while (mConf->enumerate_sections(root_key, i, section_name) == 0)
-    {
-        mConf->open_section(root_key, section_name.c_str(), 0, section_key);
-        if (mConf->get_string_value(section_key, name, result) == 0)
+        const std::string::size_type first = s.find_first_not_of(WS);
+        if (first == std::string::npos)
         {
-            return true;
+            return std::string();
         }
-        ++i;
+
+        const std::string::size_type last = s.find_last_not_of(WS);
+        return s.substr(first, last - first + 1);
     }
 
-    return false;
+    /**
+     * @brief Remove one layer of surrounding double quotes, if present.
+     *
+     * The config files quote any value that may contain separators -- most
+     * importantly the database connection strings, which are
+     * semicolon-delimited ("127.0.0.1;3306;root;mangos;realmd"). That is
+     * also why nothing here treats ';' as a comment introducer: it would
+     * cut those values in half.
+     */
+    std::string Unquote(const std::string& s)
+    {
+        if (s.size() >= 2 && s.front() == '"' && s.back() == '"')
+        {
+            return s.substr(1, s.size() - 2);
+        }
+
+        return s;
+    }
 }
 
 /**
@@ -99,18 +97,38 @@ static bool GetValueHelper(ACE_Configuration_Heap* mConf, const char* name, ACE_
  * Initializes with no loaded configuration. Use SetSource() to load a file.
  */
 Config::Config()
-    : mConf(NULL)
+    : mLoaded(false)
 {
 }
 
 /**
  * @brief Destroy Config singleton
- *
- * Cleans up the ACE configuration heap.
  */
 Config::~Config()
 {
-    delete mConf;
+}
+
+/**
+ * @brief Look a key up across every section; the first section holding it wins.
+ */
+bool Config::GetValue(const char* name, std::string& result) const
+{
+    if (!mLoaded)
+    {
+        return false;
+    }
+
+    for (Sections::const_iterator section = mSections.begin(); section != mSections.end(); ++section)
+    {
+        SectionEntries::const_iterator entry = section->second.find(name);
+        if (entry != section->second.end())
+        {
+            result = entry->second;
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -139,21 +157,60 @@ bool Config::SetSource(const char* file)
  */
 bool Config::Reload()
 {
-    delete mConf;
-    mConf = new ACE_Configuration_Heap;
+    mSections.clear();
+    mLoaded = false;
 
-    if (mConf->open() == 0)
+    std::ifstream in(mFilename.c_str());
+    if (!in.is_open())
     {
-        ACE_Ini_ImpExp config_importer(*mConf);
-        if (config_importer.import_config(mFilename.c_str()) == 0)
-        {
-            return true;
-        }
+        return false;
     }
 
-    delete mConf;
-    mConf = NULL;
-    return false;
+    // Keys that appear before any [section] header land in an unnamed
+    // leading section, which keeps them reachable from GetValue() rather
+    // than silently dropped.
+    mSections.push_back(std::make_pair(std::string(), SectionEntries()));
+
+    std::string line;
+    while (std::getline(in, line))
+    {
+        const std::string text = Trim(line);
+
+        if (text.empty() || text[0] == '#' || text[0] == ';')
+        {
+            continue;
+        }
+
+        if (text[0] == '[')
+        {
+            const std::string::size_type close = text.find(']');
+            if (close != std::string::npos)
+            {
+                mSections.push_back(std::make_pair(Trim(text.substr(1, close - 1)), SectionEntries()));
+            }
+            continue;
+        }
+
+        const std::string::size_type eq = text.find('=');
+        if (eq == std::string::npos)
+        {
+            continue;   // not a key/value line; ignore it
+        }
+
+        const std::string key = Trim(text.substr(0, eq));
+        if (key.empty())
+        {
+            continue;
+        }
+
+        // Everything after the '=' is the value: no inline-comment handling,
+        // because a quoted value may legitimately contain '#' or ';'. The
+        // last assignment of a key within a section wins.
+        mSections.back().second[key] = Unquote(Trim(text.substr(eq + 1)));
+    }
+
+    mLoaded = true;
+    return true;
 }
 
 /**
@@ -167,8 +224,8 @@ bool Config::Reload()
  */
 std::string Config::GetStringDefault(const char* name, const char* def)
 {
-    ACE_TString val;
-    return GetValueHelper(mConf, name, val) ? val.c_str() : def;
+    std::string val;
+    return GetValue(name, val) ? val : std::string(def);
 }
 
 /**
@@ -183,8 +240,8 @@ std::string Config::GetStringDefault(const char* name, const char* def)
  */
 bool Config::GetBoolDefault(const char* name, bool def)
 {
-    ACE_TString val;
-    if (!GetValueHelper(mConf, name, val))
+    std::string val;
+    if (!GetValue(name, val))
     {
         return def;
     }
@@ -212,14 +269,23 @@ bool Config::GetBoolDefault(const char* name, bool def)
  */
 int32 Config::GetIntDefault(const char* name, int32 def)
 {
-    ACE_TString val;
-    return GetValueHelper(mConf, name, val) ? atoi(val.c_str()) : def;
+    std::string val;
+    return GetValue(name, val) ? atoi(val.c_str()) : def;
 }
 
+/**
+ * @brief Get 64-bit integer configuration value
+ * @param name Key name to look up
+ * @param def Default value if key not found or invalid
+ * @return Configuration value or default
+ *
+ * Parses value using atoi(), matching the pre-existing (32-bit-truncating)
+ * behavior byte-for-byte -- fixing that is not part of the ACE removal.
+ */
 int64 Config::GetInt64Default(const char* name, int64 def)
 {
-    ACE_TString val;
-    return GetValueHelper(mConf, name, val) ? atoi(val.c_str()) : def;
+    std::string val;
+    return GetValue(name, val) ? atoi(val.c_str()) : def;
 }
 
 /**
@@ -232,6 +298,6 @@ int64 Config::GetInt64Default(const char* name, int64 def)
  */
 float Config::GetFloatDefault(const char* name, float def)
 {
-    ACE_TString val;
-    return GetValueHelper(mConf, name, val) ? (float)atof(val.c_str()) : def;
+    std::string val;
+    return GetValue(name, val) ? (float)atof(val.c_str()) : def;
 }

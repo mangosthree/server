@@ -25,6 +25,7 @@
 #include "Auth/BigNumber.h"
 #include <openssl/bn.h>
 #include <algorithm>
+#include <vector>
 
 BigNumber::BigNumber()
 {
@@ -68,12 +69,25 @@ void BigNumber::SetQword(uint64 val)
 
 void BigNumber::SetBinary(const uint8* bytes, int len)
 {
-    uint8 t[1000];
+    // Input is little-endian; BN_bin2bn wants big-endian, hence the reversal.
+    //
+    // The buffer used to be a fixed uint8 t[1000] on the stack with no check
+    // on len, so any caller passing more than a kilobyte wrote past it.
+    if (len <= 0)
+    {
+        BN_zero(_bn);
+        return;
+    }
+
+    // Braces, not parentheses: vector<uint8> reversed(size_t(len)) is a
+    // function declaration, not a vector -- the most vexing parse.
+    std::vector<uint8> reversed(static_cast<size_t>(len), 0);
     for (int i = 0; i < len; ++i)
     {
-        t[i] = bytes[len - 1 - i];
+        reversed[size_t(i)] = bytes[len - 1 - i];
     }
-    BN_bin2bn(t, len, _bn);
+
+    BN_bin2bn(reversed.data(), len, _bn);
 }
 
 void BigNumber::SetHexStr(const char* str)
@@ -178,42 +192,25 @@ bool BigNumber::isZero() const
 
 uint8* BigNumber::AsByteArray(int minSize)
 {
-    int length = (minSize >= GetNumBytes()) ? minSize : GetNumBytes();
-
-    delete[] _array;
-    _array = new uint8[length];
-
-    // If we need more bytes than length of BigNumber set the rest to 0
-    if (length > GetNumBytes())
-    {
-        memset((void*)_array, 0, length);
-    }
-
-    BN_bn2bin(_bn, (unsigned char*)_array);
-
-    std::reverse(_array, _array + length);
-
-    return _array;
+    return AsByteArray(minSize, true);
 }
 
 uint8 *BigNumber::AsByteArray(int minSize, bool reverse)
 {
-    int length = (minSize >= GetNumBytes()) ? minSize : GetNumBytes();
+    const int length = (minSize >= GetNumBytes()) ? minSize : GetNumBytes();
 
-    if (_array)
-    {
-        delete[] _array;
-        _array = NULL;
-    }
+    delete[] _array;
     _array = new uint8[length];
 
-    // If we need more bytes than length of BigNumber set the rest to 0
-    if (length > GetNumBytes())
-    {
-        memset((void*)_array, 0, length);
-    }
-
-    BN_bn2bin(_bn, (unsigned char *)_array);
+    // BN_bn2binpad left-pads to exactly `length` bytes. The previous code
+    // used BN_bn2bin, which emits the minimal big-endian encoding at offset 0
+    // and leaves the zero padding at the *end* -- so the reverse below moved
+    // that padding to the front of the little-endian result and shifted the
+    // value by however many bytes were short (about 1 login in 256, since it
+    // only bites when the value serialises with a leading zero byte). Using
+    // the padding-aware call makes the mistake unwritable rather than merely
+    // fixed.
+    BN_bn2binpad(_bn, _array, length);
 
     if (reverse)
     {

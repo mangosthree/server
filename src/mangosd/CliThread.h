@@ -29,22 +29,43 @@
 #ifndef MANGOS_H_CLITHREAD
 #define MANGOS_H_CLITHREAD
 
-#include "ace/Task.h"
+#include "Threading/Threading.h"
 
 /**
  * @brief Command Line Interface handling thread
  *
  */
-class CliThread : public ACE_Task_Base
+class CliThread
 {
-    enum { BUFFSIZE = 256 };
     public:
-        CliThread(bool);
-        int svc() override;
-        void cli_shutdown();
+        explicit CliThread(bool beep);
+        ~CliThread();
+
+        /// Starts the CLI thread.
+        void Activate();
+
+        /// Unblocks the CLI thread during server shutdown and joins it.
+        void Shutdown();
+
     private:
-        char buffer_[BUFFSIZE];
-        bool beep_;
+        /// Runnable body driving the console read/dispatch loop.
+        class Body : public MaNGOS::Runnable
+        {
+            public:
+                enum { BUFFSIZE = 256 };
+
+                explicit Body(bool beep) : m_beep(beep) {}
+
+                void run() override;
+
+            private:
+                char m_buffer[BUFFSIZE];
+                bool m_beep;
+        };
+
+        Body*           m_body;
+        MaNGOS::Thread* m_thread;
+        bool            m_beep;
 };
 #endif
 /// @}

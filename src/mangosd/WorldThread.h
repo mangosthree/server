@@ -30,22 +30,36 @@
 #define MANGOS_H_WORLDTHREAD
 
 #include <ace/INET_Addr.h>
-#include <ace/Task.h>
 
 #include "Common.h"
+#include "Threading/Threading.h"
 
 /**
  * @brief Heartbeat thread for the World
  *
  */
-class WorldThread : public ACE_Task_Base
+class WorldThread
 {
     public:
         explicit WorldThread(uint16 port, const char* host);
-        int open(void*) override;
-        int svc() override;
+        ~WorldThread();
+
+        /// Starts the world socket network listener and spawns the update loop.
+        bool Open();
+
+        /// Blocks until the update loop has stopped.
+        void Wait();
+
     private:
-        ACE_INET_Addr listen_addr;
+        /// Runnable body driving the world update loop.
+        class Body : public MaNGOS::Runnable
+        {
+            public:
+                void run() override;
+        };
+
+        ACE_INET_Addr   m_listenAddr;
+        MaNGOS::Thread* m_thread;
 };
 #endif
 /// @}

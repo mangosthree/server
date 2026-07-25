@@ -37,6 +37,7 @@
 #include "Opcodes.h"
 #include "World.h"
 #include "Player.h"
+#include <cstdarg>
 
 /**
  * @brief Sends a system message to the current session, splitting multiline text.

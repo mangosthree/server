@@ -28,10 +28,11 @@
 #include "Common.h"
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
-#include "ace/Recursive_Thread_Mutex.h"
 #include "Map.h"
 #include "GridStates.h"
 #include "MapUpdater.h"
+
+#include <mutex>
 
 class Transport;
 class BattleGround;
@@ -57,13 +58,9 @@ struct MapID
     uint32 nInstanceId;
 };
 
-class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockable<MapManager, ACE_Recursive_Thread_Mutex> >
+class MapManager : public MaNGOS::Singleton<MapManager>
 {
-        friend class MaNGOS::OperatorNew<MapManager>;
-
-        typedef ACE_Recursive_Thread_Mutex LOCK_TYPE;
-        typedef ACE_Guard<LOCK_TYPE> LOCK_TYPE_GUARD;
-        typedef MaNGOS::ClassLevelLockable<MapManager, ACE_Recursive_Thread_Mutex>::Lock Guard;
+        friend class MaNGOS::Singleton<MapManager>;
 
     public:
         typedef std::map<MapID, Map* > MapMapType;
@@ -71,6 +68,8 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         Map* CreateMap(uint32, const WorldObject* obj);
         Map* CreateBgMap(uint32 mapid, BattleGround* bg);
         Map* FindMap(uint32 mapid, uint32 instanceId = 0) const;
+        /// FindMap's body for callers already holding m_lock.
+        Map* FindMapLocked(uint32 mapid, uint32 instanceId) const;
 
         void UpdateGridState(grid_state_t state, Map& map, NGridType& ngrid, GridInfo& ginfo, const uint32& x, const uint32& y, const uint32& t_diff);
 
@@ -185,6 +184,11 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         MapMapType i_maps;
         IntervalTimer i_timer;
         MapUpdater m_updater;
+
+        // Plain, not recursive. Every path that used to reenter now goes
+        // through a FindMapLocked-style helper instead; see MapManager.cpp.
+        typedef std::mutex LOCK_TYPE;
+        mutable LOCK_TYPE m_lock;
 };
 
 template<typename Do>

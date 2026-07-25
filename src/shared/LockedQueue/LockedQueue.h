@@ -25,65 +25,40 @@
 #ifndef LOCKEDQUEUE_H
 #define LOCKEDQUEUE_H
 
-#include <ace/Guard_T.h>
-#include <ace/Thread_Mutex.h>
 #include <deque>
-#include <assert.h>
-#include "Utilities/Errors.h"
+#include <mutex>
 
-namespace ACE_Based
+namespace MaNGOS
 {
-    template < class T, class LockType, typename StorageType = std::deque<T> >
     /**
-     * @brief
+     * @brief A simple thread-safe FIFO queue.
      *
+     * The former lock template parameter is gone: the queue owns a
+     * std::mutex and serialises itself, so call sites name only the
+     * element (and optionally the backing container) type.
+     *
+     * @tparam T           Element type.
+     * @tparam StorageType Underlying container (deque by default).
      */
+    template <class T, typename StorageType = std::deque<T> >
     class LockedQueue
     {
-            LockType _lock; /**< Lock access to the queue. */
-            StorageType _queue; /**< Storage backing the queue. */
-
-            /*volatile*/ bool _canceled; /**< Cancellation flag. */
-
         public:
 
-            /**
-             * @brief Create a LockedQueue.
-             *
-             */
-            LockedQueue()
-                : _canceled(false)
-            {
-            }
+            LockedQueue() = default;
+            virtual ~LockedQueue() = default;
 
-            /**
-             * @brief Destroy a LockedQueue.
-             *
-             */
-            virtual ~LockedQueue()
-            {
-            }
-
-            /**
-             * @brief Adds an item to the queue.
-             *
-             * @param item
-             */
+            /// Append an item to the back of the queue.
             void add(const T& item)
             {
-                ACE_Guard<LockType> g(this->_lock);
+                std::lock_guard<std::mutex> guard(_lock);
                 _queue.push_back(item);
             }
 
-            /**
-             * @brief Gets the next result in the queue, if any.
-             *
-             * @param result
-             * @return bool
-             */
+            /// Pop the front item into @p result. Returns false if the queue is empty.
             bool next(T& result)
             {
-                ACE_GUARD_RETURN(LockType, g, this->_lock, false);
+                std::lock_guard<std::mutex> guard(_lock);
 
                 if (_queue.empty())
                 {
@@ -96,7 +71,6 @@ namespace ACE_Based
                 return true;
             }
 
-            template<class Checker>
             /**
              * @brief Pops the first queued item the checker accepts.
              *
@@ -117,9 +91,10 @@ namespace ACE_Based
              *         false if the queue is empty or no item satisfied the
              *         checker.
              */
+            template<class Checker>
             bool next(T& result, Checker& check)
             {
-                ACE_GUARD_RETURN(LockType, g, this->_lock, false);
+                std::lock_guard<std::mutex> guard(_lock);
 
                 for (typename StorageType::iterator it = _queue.begin(); it != _queue.end(); ++it)
                 {
@@ -134,69 +109,24 @@ namespace ACE_Based
                 return false;
             }
 
-            /**
-             * @brief Peeks at the top of the queue. Remember to unlock after use.
-             *
-             * @return T
-             */
-            T& peek()
-            {
-                lock();
-
-                T& result = _queue.front();
-
-                return result;
-            }
-
-            /**
-             * @brief Cancels the queue.
-             *
-             */
-            void cancel()
-            {
-                ACE_Guard<LockType> g(this->_lock);
-                _canceled = true;
-            }
-
-            /**
-             * @brief Checks if the queue is cancelled.
-             *
-             * @return bool
-             */
-            bool cancelled()
-            {
-                ACE_Guard<LockType> g(this->_lock);
-                return _canceled;
-            }
-
-            /**
-             * @brief Locks the queue for access.
-             *
-             */
-            void lock()
-            {
-                this->_lock.acquire();
-            }
-
-            /**
-             * @brief Unlocks the queue.
-             *
-             */
-            void unlock()
-            {
-                this->_lock.release();
-            }
-
-            /**
-             * @brief Checks if we're empty or not with locks held
-             *
-             * @return bool
-             */
+            /// True when the queue holds no elements (lock held).
             bool empty()
             {
-                ACE_Guard<LockType> g(this->_lock);
+                std::lock_guard<std::mutex> guard(_lock);
                 return _queue.empty();
             }
+
+            /// Number of elements currently queued (lock held).
+            size_t size()
+            {
+                std::lock_guard<std::mutex> guard(_lock);
+                return _queue.size();
+            }
+
+        private:
+
+            std::mutex  _lock;   ///< Serialises access to the queue
+            StorageType _queue;  ///< Storage backing the queue
     };
 }
 #endif

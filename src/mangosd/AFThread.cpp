@@ -22,7 +22,6 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "ace/OS.h"
 #include "AFThread.h"
 #include "World.h"
 #include "Log.h"
@@ -30,48 +29,51 @@
 /**
  * Initializes the anti-freeze watchdog thread with the configured delay interval.
  */
-AntiFreezeThread::AntiFreezeThread(uint32 delay) : delaytime_(delay)
+AntiFreezeThread::AntiFreezeThread(uint32 delay) : m_delayTime(delay), m_thread(nullptr)
 {
-    m_loops = 0;
-    w_loops = 0;
-    m_lastchange = 0;
-    w_lastchange = 0;
 }
 
 /**
- * Activates the anti-freeze watchdog thread.
+ * Joins the watchdog thread (if still running) and releases it.
  */
-int AntiFreezeThread::open(void* unused)
+AntiFreezeThread::~AntiFreezeThread()
 {
-    activate();
-    return 0;
+    delete m_thread;
+}
+
+/**
+ * Starts the watchdog thread.
+ */
+void AntiFreezeThread::Activate()
+{
+    m_thread = new MaNGOS::Thread(new Body(m_delayTime));
 }
 
 /**
  * Monitors the main and world loops and terminates the server if they become stuck.
  */
-int AntiFreezeThread::svc(void)
+void AntiFreezeThread::Body::run()
 {
-    if (!delaytime_)
+    if (!m_delayTime)
     {
-        return 0;
+        return;
     }
 
-    sLog.outString("AntiFreeze Thread started (%u seconds max stuck time)", delaytime_ / 1000);
+    sLog.outString("AntiFreeze Thread started (%u seconds max stuck time)", m_delayTime / 1000);
     while (!World::IsStopped())
     {
-        ACE_OS::sleep(1);
+        MaNGOS::Thread::Sleep(1000);
 
         uint32 curtime = getMSTime();
 
         // normal work
-        if (w_loops != World::m_worldLoopCounter.value())
+        if (w_loops != World::m_worldLoopCounter.load())
         {
             w_lastchange = curtime;
-            w_loops = World::m_worldLoopCounter.value();
+            w_loops = World::m_worldLoopCounter.load();
         }
         // possible freeze
-        else if (getMSTimeDiff(w_lastchange, curtime) > delaytime_)
+        else if (getMSTimeDiff(w_lastchange, curtime) > m_delayTime)
         {
             sLog.outError("World Thread hangs, kicking out server!");
             *((uint32 volatile*)NULL) = 0;          // bang crash
@@ -79,6 +81,4 @@ int AntiFreezeThread::svc(void)
     }
 
     sLog.outString("AntiFreeze Thread stopped.");
-    return 0;
 }
-

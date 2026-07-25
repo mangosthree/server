@@ -44,6 +44,7 @@
 #include "Map.h"
 #include "Log.h"
 #include "WorldPacket.h"
+#include "Opcodes.h"                                        ///< SMSG_INSTANCE_ENCOUNTER
 
 /**
  * @brief Save instance state to database

@@ -42,6 +42,8 @@
 #include "DatabaseEnv.h"
 #include "DatabaseImpl.h"
 
+#include <cstdarg>
+
 /**
  * @def LOCK_DB_CONN
  * @brief RAII lock macro for database connections

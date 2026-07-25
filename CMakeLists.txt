@@ -49,6 +49,7 @@ option(SCRIPT_LIB_SD3       "Compile with support for ScriptDev3 scripts"   ON)
 option(PLAYERBOTS           "Enable Player Bots"                            OFF)
 option(SOAP                 "Enable remote access via SOAP"                 OFF)
 option(PCH                  "Enable precompiled headers"                    ON)
+option(WITH_IO_URING        "Use the io_uring network backend (Linux, needs liburing)" OFF)
 option(DEBUG                "Enable debug build (only on non IDEs)"         OFF)
 option(WITHOUT_GIT          "Disable Git revision detection"                OFF)
 #==================================================================================
@@ -64,6 +65,8 @@ message(
     USE_STORMLIB            Use StormLib for reading MPQs
     SOAP                    Enable remote access via SOAP
     PCH                     Enable use of precompiled headers
+    WITH_IO_URING           Use the io_uring network backend instead of epoll (Linux only,
+                            requires liburing headers; falls back to epoll if absent)
     DEBUG                   Debug build, only for systems without IDE (Linux, *BSD)
    Scripting engines:
     SCRIPT_LIB_ELUNA        Compile with support for Eluna scripts
@@ -149,6 +152,30 @@ target_compile_definitions(mangos_openssl_strict
         OPENSSL_NO_DEPRECATED
 )
 
+# =============================================================================
+# Network backend selection
+#
+# Detection lives here, next to the option, rather than in src/shared: the result
+# is needed by the build summary at the end of this file, and a set() inside a
+# subdirectory would not be visible up here.
+#
+# Off by default -- the epoll reactor is the supported Linux backend and liburing
+# is absent on plenty of distributions. Asking for it without the headers present
+# is not fatal; it warns and falls back, which is why the summary prints the
+# backend that was actually chosen rather than the one that was requested.
+# =============================================================================
+set(MANGOS_USE_IO_URING OFF)
+if(WITH_IO_URING AND UNIX AND NOT APPLE)
+    find_library(URING_LIBRARY NAMES uring)
+    find_path(URING_INCLUDE_DIR NAMES liburing.h)
+    if(URING_LIBRARY AND URING_INCLUDE_DIR)
+        set(MANGOS_USE_IO_URING ON)
+    else()
+        message(WARNING "WITH_IO_URING was requested but liburing was not found; "
+                        "falling back to the epoll reactor.")
+    endif()
+endif()
+
 include(${CMAKE_SOURCE_DIR}/cmake/GenRevision.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/EnsureVersion.cmake)
 
@@ -159,7 +186,7 @@ if(PCH)
     include(${CMAKE_SOURCE_DIR}/cmake/PCHSupport.cmake)
 endif()
 
-add_subdirectory(dep)
+include(${CMAKE_SOURCE_DIR}/cmake/Dependencies.cmake)
 add_subdirectory(src)
 
 include(${CMAKE_SOURCE_DIR}/cmake/StatusInfo.cmake)

@@ -26,13 +26,12 @@
 #define MANGOS_H_UTIL
 
 #include "Common/Common.h"
-#include <ace/Null_Mutex.h>
-#include <ace/INET_Addr.h>
 
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <cctype>
+#include <cstdarg>
 #include <functional>
 
 enum class TimeFormat : uint8
@@ -868,11 +867,11 @@ std::string vutf8format(const char* str, va_list* ap);
  */
 bool IsIPAddress(char const* ipaddress);
 
-/// Checks if address belongs to the a network with specified submask
-bool IsIPAddrInNetwork(ACE_INET_Addr const& net, ACE_INET_Addr const& addr, ACE_INET_Addr const& subnetMask);
+/// Checks if a host-order IPv4 address belongs to a network with the given subnet mask
+bool IsIPAddrInNetwork(uint32 net, uint32 addr, uint32 subnetMask);
 
-/// Transforms ACE_INET_Addr address into string format "dotted_ip:port"
-std::string GetAddressString(ACE_INET_Addr const& addr);
+/// Transforms a host-order IPv4 address into "dotted_ip:port"
+std::string GetAddressString(uint32 ip, uint16 port);
 
 /**
  * @brief

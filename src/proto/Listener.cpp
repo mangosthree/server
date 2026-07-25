@@ -22,50 +22,54 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/// \addtogroup mangosd
-/// @{
-/// \file
+#include <cstdint>
+#include <string>
+#include "Listener.h"
 
-#ifndef MANGOS_H_CLITHREAD
-#define MANGOS_H_CLITHREAD
+#include "ClientConnection.h"
 
-#include "Threading/Threading.h"
+#include <memory>
 
-/**
- * @brief Command Line Interface handling thread
- *
- */
-class CliThread
+namespace proto
 {
-    public:
-        explicit CliThread(bool beep);
-        ~CliThread();
+    Listener::Listener(IWorldGateway& gateway)
+        : m_gateway(gateway),
+          m_running(false)
+    {
+    }
 
-        /// Starts the CLI thread.
-        void Activate();
+    Listener::~Listener()
+    {
+        Stop();
+    }
 
-        /// Unblocks the CLI thread during server shutdown and joins it.
-        void Shutdown();
-
-    private:
-        /// Runnable body driving the console read/dispatch loop.
-        class Body : public MaNGOS::Runnable
+    bool Listener::Start(uint16_t port, const std::string& bindIp)
+    {
+        if (m_running)
         {
-            public:
-                enum { BUFFSIZE = 256 };
+            return true;
+        }
 
-                explicit Body(bool beep) : m_beep(beep) {}
+        IWorldGateway* gateway = &m_gateway;
 
-                void run() override;
+        m_running = m_server.start(port,
+            [gateway]() -> std::shared_ptr<net::ISession>
+            {
+                return std::make_shared<ClientConnection>(*gateway);
+            },
+            bindIp);
 
-            private:
-                char m_buffer[BUFFSIZE];
-                bool m_beep;
-        };
+        return m_running;
+    }
 
-        Body*           m_body;
-        MaNGOS::Thread* m_thread;
-        bool            m_beep;
-};
-#endif
-/// @}
+    void Listener::Stop()
+    {
+        if (!m_running)
+        {
+            return;
+        }
+
+        m_server.stop();
+        m_running = false;
+    }
+}

@@ -283,6 +283,10 @@ target_compile_definitions(game
 target_link_libraries(game
     PUBLIC
         shared
+        # The world protocol. The dependency runs one way only: game links proto,
+        # proto never links game. That is what keeps the seam from silently
+        # closing back up the first time someone needs sWorld from a socket.
+        proto
         RecastNavigation::Detour
         ZLIB::ZLIB
         g3dlite

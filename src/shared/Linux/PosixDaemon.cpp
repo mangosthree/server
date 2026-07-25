@@ -28,6 +28,14 @@
 #include <iostream>
 #include <fstream>
 
+// POSIX syscalls used below (umask/fork/setsid/getpid/kill/signal/exit); these
+// were previously reached transitively through ACE headers, now gone.
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <csignal>
+#include <cstdlib>
+
 pid_t parent_pid = 0, sid = 0;
 
 /**

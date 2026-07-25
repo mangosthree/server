@@ -41,11 +41,11 @@
  * - World::UpdateSessions() context: Process all packets
  *
  * @see WorldSession for the session class
- * @see WorldSocket for the network socket
+ * @see proto::ClientConnection for the network connection
  * @see Opcodes.cpp for opcode registration
  */
 
-#include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
+#include "IClientLink.h"
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
@@ -77,6 +77,7 @@
 #include "WardenWin.h"
 #include "WardenMac.h"
 #include <mutex>
+#include <utility>
 #include <cstdarg>
 
 #ifndef _WIN32
@@ -155,16 +156,18 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 }
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :
-    m_muteTime(mute_time), _player(NULL), m_Socket(sock), _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
+WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
+                           AccountTypes sec, uint8 expansion, time_t mute_time,
+                           LocaleConstant locale, const BigNumber& sessionKeySalt) :
+    m_muteTime(mute_time), _player(NULL), m_Socket(std::move(link)), m_sessionKeySalt(sessionKeySalt),
+    _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
     m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED)
 {
-    if (sock)
+    if (m_Socket)
     {
-        m_Address = sock->GetRemoteAddress();
-        sock->AddReference();
+        m_Address = m_Socket->GetRemoteAddress();
     }
 }
 
@@ -177,12 +180,13 @@ WorldSession::~WorldSession()
         LogoutPlayer(true);
     }
 
-    /// - If have unclosed socket, close it
+    /// - If the connection is still up, close it. Dropping the shared_ptr is
+    /// all the bookkeeping there is now: the transport owns the socket, and
+    /// the link stays safe to call even after the peer is gone.
     if (m_Socket)
     {
-        m_Socket->CloseSocket();
-        m_Socket->RemoveReference();
-        m_Socket = NULL;
+        m_Socket->Close();
+        m_Socket.reset();
     }
 
     // CAUSES CRASH ON PLAYER EXITING TO LOGIN SCREEN
@@ -207,7 +211,7 @@ WorldSession::~WorldSession()
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
 {
     sLog.outError("Client (account %u) send packet %s (%u) with size %zu but expected %u (attempt crash server?), skipped",
-                  GetAccountId(), packet.GetOpcodeName(), packet.GetOpcode(), packet.size(), size);
+                  GetAccountId(), LookupOpcodeName(packet.GetOpcode()), packet.GetOpcode(), packet.size(), size);
 }
 
 /// Get the player name
@@ -281,10 +285,22 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 
 #endif                                                  // !MANGOS_DEBUG
 
-    if (m_Socket->SendPacket(*packet) == -1)
+    // Dump outgoing packet (opt-in via PacketLoggingEnabled; off by default).
+    // WorldSocket.cpp:240-244 did this with the ACE socket fd as the "SOCKET:"
+    // field; WorldSession has no proto::SessionId of its own to mirror that
+    // with (the gateway keys sessions the other way, WorldSession -> nothing),
+    // so the account id fills the same "stable per-connection identifier"
+    // role here -- it does not change across a reconnect the way a freshly
+    // assigned slot id would.
+    if (sLog.IsPacketLoggingEnabled())
     {
-        m_Socket->CloseSocket();
+        sLog.outWorldPacketDump(GetAccountId(), packet->GetOpcode(),
+                                LookupOpcodeName(packet->GetOpcode()), packet, false);
     }
+
+    // SendPacket is void and safe to call on a dead link -- unlike the old
+    // WorldSocket::SendPacket, there is no failure to react to here.
+    m_Socket->SendPacket(*packet);
 }
 
 /// Add an incoming packet to the queue
@@ -297,7 +313,7 @@ void WorldSession::QueuePacket(WorldPacket* new_packet)
 void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* reason)
 {
     sLog.outError("SESSION: received unexpected opcode %s (0x%.4X) %s",
-                  packet->GetOpcodeName(),
+                  LookupOpcodeName(packet->GetOpcode()),
                   packet->GetOpcode(),
                   reason);
 }
@@ -306,7 +322,7 @@ void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* reason)
 void WorldSession::LogUnprocessedTail(WorldPacket* packet)
 {
     sLog.outError("SESSION: opcode %s (0x%.4X) have unprocessed tail data (read stop at %zu from %zu)",
-                  packet->GetOpcodeName(),
+                  LookupOpcodeName(packet->GetOpcode()),
                   packet->GetOpcode(),
                   packet->rpos(), packet->wpos());
 }
@@ -321,7 +337,7 @@ bool WorldSession::Update(PacketFilter& updater)
     {
         /*#if 1
         sLog.outError( "MOEP: %s (0x%.4X)",
-                        packet->GetOpcodeName(),
+                        LookupOpcodeName(packet->GetOpcode()),
                         packet->GetOpcode());
         #endif*/
 
@@ -397,7 +413,7 @@ bool WorldSession::Update(PacketFilter& updater)
                     break;
                 case STATUS_NEVER:
                     sLog.outError("SESSION: received not allowed opcode %s (0x%.4X)",
-                                  packet->GetOpcodeName(),
+                                  LookupOpcodeName(packet->GetOpcode()),
                                   packet->GetOpcode());
                     break;
                 case STATUS_UNHANDLED:
@@ -407,7 +423,7 @@ bool WorldSession::Update(PacketFilter& updater)
                     break;
                 default:
                     sLog.outError("SESSION: received wrong-status-req opcode %s (0x%.4X)",
-                                  packet->GetOpcodeName(),
+                                  LookupOpcodeName(packet->GetOpcode()),
                                   packet->GetOpcode());
                     break;
             }
@@ -444,8 +460,7 @@ bool WorldSession::Update(PacketFilter& updater)
     ///- Cleanup socket pointer if need
     if (m_Socket && m_Socket->IsClosed())
     {
-        m_Socket->RemoveReference();
-        m_Socket = NULL;
+        m_Socket.reset();
     }
 
  // WARDEN ISSUE - commented out to stop crash
@@ -754,7 +769,7 @@ void WorldSession::KickPlayer()
 {
     if (m_Socket)
     {
-        m_Socket->CloseSocket();
+        m_Socket->Close();
     }
 }
 
@@ -938,7 +953,7 @@ const char* WorldSession::GetMangosString(int32 entry) const
 void WorldSession::Handle_NULL(WorldPacket& recvPacket)
 {
     DEBUG_LOG("SESSION: received unimplemented opcode %s (0x%.4X)",
-              recvPacket.GetOpcodeName(),
+              LookupOpcodeName(recvPacket.GetOpcode()),
               recvPacket.GetOpcode());
 }
 
@@ -949,8 +964,8 @@ void WorldSession::Handle_NULL(WorldPacket& recvPacket)
  */
 void WorldSession::Handle_EarlyProccess(WorldPacket& recvPacket)
 {
-    sLog.outError("SESSION: received opcode %s (0x%.4X) that must be processed in WorldSocket::OnRead",
-                  recvPacket.GetOpcodeName(),
+    sLog.outError("SESSION: received opcode %s (0x%.4X) that must be processed by proto::ClientConnection",
+                  LookupOpcodeName(recvPacket.GetOpcode()),
                   recvPacket.GetOpcode());
 }
 
@@ -962,7 +977,7 @@ void WorldSession::Handle_EarlyProccess(WorldPacket& recvPacket)
 void WorldSession::Handle_ServerSide(WorldPacket& recvPacket)
 {
     sLog.outError("SESSION: received server-side opcode %s (0x%.4X)",
-                  recvPacket.GetOpcodeName(),
+                  LookupOpcodeName(recvPacket.GetOpcode()),
                   recvPacket.GetOpcode());
 }
 
@@ -974,7 +989,7 @@ void WorldSession::Handle_ServerSide(WorldPacket& recvPacket)
 void WorldSession::Handle_Deprecated(WorldPacket& recvPacket)
 {
     sLog.outError("SESSION: received deprecated opcode %s (0x%.4X)",
-                  recvPacket.GetOpcodeName(),
+                  LookupOpcodeName(recvPacket.GetOpcode()),
                   recvPacket.GetOpcode());
 }
 
@@ -1368,7 +1383,7 @@ void WorldSession::SendRedirectClient(std::string& ip, uint16 port)
 
     pkt << uint32(0);                                       // unknown
 
-    HMACSHA1 sha1(40, m_Socket->GetSessionKey().AsByteArray());
+    HMACSHA1 sha1(40, GetSessionKey().AsByteArray());
     sha1.UpdateData((uint8*)&ip2, 4);
     sha1.UpdateData((uint8*)&port, 2);
     sha1.Finalize();

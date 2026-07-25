@@ -37,6 +37,7 @@
 #include "Item.h"
 #include "LFGMgr.h"
 
+#include <memory>
 #include <mutex>
 
 struct ItemPrototype;
@@ -52,13 +53,14 @@ class Player;
 class Unit;
 class Warden;
 class WorldPacket;
-class WorldSocket;
 class QueryResult;
 class LoginQueryHolder;
 class CharacterHandler;
 class GMTicket;
 class MovementInfo;
 class WorldSession;
+
+namespace proto { class IClientLink; }
 
 struct OpcodeHandler;
 
@@ -312,12 +314,18 @@ class WorldSession
         /**
          * @brief Constructor
          * @param id Session ID
-         * @param sock World socket
+         * @param link How to talk back to this client (proto::IClientLink; the
+         *             transport underneath is opaque to WorldSession)
          * @param sec Account security level
          * @param mute_time Mute time
          * @param locale Locale
+         * @param sessionKeySalt The account's `s` (SRP6 salt) column, carried in
+         *             rather than re-read: SendRedirectClient() uses it as an
+         *             HMAC seed, exactly as WorldSocket::GetSessionKey() did.
          */
-        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale);
+        WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
+                     AccountTypes sec, uint8 expansion, time_t mute_time,
+                     LocaleConstant locale, const BigNumber& sessionKeySalt);
 
         /**
          * @brief Destructor
@@ -379,6 +387,11 @@ class WorldSession
         void SendSetPhaseShift(uint32 phaseMask, uint16 mapId = 0);
         void SendQueryTimeResponse();
         void SendRedirectClient(std::string& ip, uint16 port);
+
+        /// The account's `s` (SRP6 salt) column -- see m_sessionKeySalt's doc
+        /// comment. Name preserved from WorldSocket::GetSessionKey(), which
+        /// this replaces.
+        BigNumber& GetSessionKey() { return m_sessionKeySalt; }
 
         AccountTypes GetSecurity() const
         {
@@ -572,7 +585,7 @@ class WorldSession
 
         // opcodes handlers
         void Handle_NULL(WorldPacket& recvPacket);          // not used
-        void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
+        void Handle_EarlyProccess(WorldPacket& recvPacket); // STATUS_NEVER stub; these opcodes are fully owned by proto::ClientConnection and must never reach here
         void Handle_ServerSide(WorldPacket& recvPacket);    // sever side only, can't be accepted from client
         void Handle_Deprecated(WorldPacket& recvPacket);    // never used anymore by client
 
@@ -1100,8 +1113,13 @@ class WorldSession
 
         uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
         Player* _player;
-        WorldSocket* m_Socket;
+        std::shared_ptr<proto::IClientLink> m_Socket;
         std::string m_Address;
+
+        /// `s` (SRP6 salt), not the session key `K` -- see the constructor's
+        /// doc comment. Named GetSessionKey() for source compatibility with
+        /// the one caller (SendRedirectClient), which predates this move.
+        BigNumber m_sessionKeySalt;
 
         AccountTypes _security;
         uint32 _accountId;

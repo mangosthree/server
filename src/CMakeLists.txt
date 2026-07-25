@@ -20,6 +20,11 @@
 # Build the mangos shared library
 add_subdirectory(shared)
 
+# The 4.3.4 world protocol. Sits between shared and game: it links shared, and
+# nothing links it yet -- this checkpoint only proves it compiles standalone.
+# See src/proto/CMakeLists.txt for the link-boundary rule.
+add_subdirectory(proto)
+
 add_subdirectory(genrev)
 
 # Needs to link against mangos_world.lib

@@ -109,29 +109,10 @@
 #include "LockedQueue/LockedQueue.h"
 #include "Threading/Threading.h"
 
-// ACE_Thread_Mutex survives here (rather than moving to the two callers
-// that still need it) because those callers -- WorldSocketMgr.h,
-// realmd/Patch/PatchHandler.cpp -- are socket-layer files Stage 1 does not
-// touch; they reach ACE_Thread_Mutex transitively through this header
-// today, and Stage 2's engine swap is what gives them their own includes.
-#include <ace/Thread_Mutex.h>
-
-// Old ACE versions (pre-ACE-5.5.4) not have this type (add for allow use at Unix side external old ACE versions)
-#if PLATFORM != PLATFORM_WINDOWS
-#  ifndef ACE_OFF_T
-/**
- * @brief
- *
- */
-typedef off_t ACE_OFF_T;
-#  endif
-#endif
-
 #if PLATFORM == PLATFORM_WINDOWS
 #  if !defined (FD_SETSIZE)
 #    define FD_SETSIZE 4096
 #  endif
-#  include <ace/config-all.h>
 #  include <ws2tcpip.h>
 #else
 #  include <sys/types.h>
@@ -183,6 +164,12 @@ typedef off_t ACE_OFF_T;
  */
 inline float finiteAlways(float f) { return finite(f) ? f : 0.0f; }
 
+// This used to need <ace/OS_NS_stdlib.h> included ahead of it: that header
+// declares its own atol(), and the #define below is a textual replacement,
+// so any translation unit that saw an ACE header declaring atol() after this
+// macro got a mangled declaration instead of a redefinition warning. With
+// ACE gone from src/ entirely, nothing declares atol() again downstream of
+// this file, so there is nothing left to collide with.
 #define atol(a) strtoul( a, NULL, 10)
 
 #define STRINGIZE(a) #a

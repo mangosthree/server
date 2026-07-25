@@ -268,31 +268,31 @@
           case ${VER} in
             "sarah")
               # Linux Mint 18 - Ubuntu Xenial based
-              su -c "aptitude -y install build-essential cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev" root
+              su -c "aptitude -y install build-essential cmake libbz2-dev libssl-dev libmysqlclient-dev" root
               ;;
             "rosa")
               # Linux Mint 17.3 - Ubuntu Trusty based
-              su -c "aptitude -y install build-essential cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev" root
+              su -c "aptitude -y install build-essential cmake libbz2-dev libssl-dev libmysqlclient-dev" root
               ;;
             "rafaela")
               # Linux Mint 17.2 - Ubuntu Trusty based
-              su -c "aptitude -y install build-essential cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev" root
+              su -c "aptitude -y install build-essential cmake libbz2-dev libssl-dev libmysqlclient-dev" root
               ;;
             "rebecca")
               # Linux Mint 17.1 - Ubuntu Trusty based
-              su -c "aptitude -y install build-essential cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev" root
+              su -c "aptitude -y install build-essential cmake libbz2-dev libssl-dev libmysqlclient-dev" root
               ;;
             "qiana")
               # Linux Mint 17 - Ubuntu Trusty based
-              su -c "aptitude -y install build-essential cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev" root
+              su -c "aptitude -y install build-essential cmake libbz2-dev libssl-dev libmysqlclient-dev" root
               ;;
             "maya")
               # Linux Mint 13 - Ubuntu Precise based
-              su -c "aptitude -y install build-essential cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev" root
+              su -c "aptitude -y install build-essential cmake libbz2-dev libssl-dev libmysqlclient-dev" root
               ;;
             "betsy")
               # LMDE 2 - Debian Jessie based
-              su -c "aptitude -y install build-essential linux-headers-$(uname -r) autoconf automake cmake libbz2-dev libace-dev libace-6.2.8 libssl-dev libmysqlclient-dev libtool zliblg-dev" root
+              su -c "aptitude -y install build-essential linux-headers-$(uname -r) autoconf automake cmake libbz2-dev libace-6.2.8 libssl-dev libmysqlclient-dev libtool zliblg-dev" root
               ;;
             *)
               OS_VER=0
@@ -303,39 +303,39 @@
           case ${VER} in
             "precise")
               # Ubuntu 12.04 LTS
-              su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev libtool" root
+              su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libssl-dev libmysqlclient-dev libtool" root
               ;;
             "trusty")
               # Ubuntu 14.04 LTS
-              su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev libtool" root
+              su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libssl-dev libmysqlclient-dev libtool" root
               ;;
             "xenial")
               # Ubuntu 16.04 LTS
-              su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev libtool" root
+              su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libssl-dev libmysqlclient-dev libtool" root
               ;;
             "yakkety")
               # Ubuntu 16.10
-              su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev libtool" root
+              su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libssl-dev libmysqlclient-dev libtool" root
               ;;
         "zesty")
           # Ubuntu 17.04
-          su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev libtool" root
+          su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libssl-dev libmysqlclient-dev libtool" root
           ;;
         "artful")
           # Ubuntu 17.10
-          su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev libtool" root
+          su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libssl-dev libmysqlclient-dev libtool" root
           ;;
         "bionic")
           # Ubuntu 18.04 LTS
-          su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev libtool" root
+          su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libssl-dev libmysqlclient-dev libtool" root
           ;;
         "disco")
           # Ubuntu 19.04
-          su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev libtool" root
+          su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libssl-dev libmysqlclient-dev libtool" root
           ;;
         "focal")
           # Ubuntu 20.04
-          su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libace-dev libssl-dev libmysqlclient-dev libtool" root
+          su -c "apt-get -y install build-essential curl autoconf automake cmake libbz2-dev libssl-dev libmysqlclient-dev libtool" root
           ;;
             *)
               OS_VER=0
@@ -346,11 +346,11 @@
           case ${VER} in
             "jessie")
               # Debian 8.0 "current"
-              su -c "aptitude -y install curl build-essential autoconf automake cmake libbz2-dev libace-dev libssl-dev default-libmysqlclient-dev libtool" root
+              su -c "aptitude -y install curl build-essential autoconf automake cmake libbz2-dev libssl-dev default-libmysqlclient-dev libtool" root
               ;;
             "stretch")
               # Debian Next
-              su -c "aptitude -y install curl build-essential autoconf automake cmake libbz2-dev libace-dev libssl-dev default-libmysqlclient-dev libtool" root
+              su -c "aptitude -y install curl build-essential autoconf automake cmake libbz2-dev libssl-dev default-libmysqlclient-dev libtool" root
               ;;
             *)
               OS_VER=0
@@ -361,11 +361,11 @@
           case ${VER} in
             "santiago")
               # Red Hat 6.x
-              su -c "yum -y install curl build-essential linux-headers-$(uname -r) autoconf automake cmake libbz2-dev libace-dev ace-6.3.3 libssl-dev libmysqlclient-dev libtool zliblg-dev" root
+              su -c "yum -y install curl build-essential linux-headers-$(uname -r) autoconf automake cmake libbz2-dev ace-6.3.3 libssl-dev libmysqlclient-dev libtool zliblg-dev" root
               ;;
             "maipo")
               # Red Hat 7.x
-              su -c "yum -y install curl build-essential linux-headers-$(uname -r) autoconf automake cmake libbz2-dev libace-dev ace-6.3.3 libssl-dev libmysqlclient-dev libtool zliblg-dev" root
+              su -c "yum -y install curl build-essential linux-headers-$(uname -r) autoconf automake cmake libbz2-dev ace-6.3.3 libssl-dev libmysqlclient-dev libtool zliblg-dev" root
               ;;
             *)
               OS_VER=0

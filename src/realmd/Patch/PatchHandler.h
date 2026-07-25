@@ -29,139 +29,63 @@
 #ifndef MANGOS_H_PATCHHANDLER
 #define MANGOS_H_PATCHHANDLER
 
-#include <ace/Basic_Types.h>
-#include <ace/Synch_Traits.h>
-#include <ace/Svc_Handler.h>
-#include <ace/SOCK_Stream.h>
-#include <ace/Message_Block.h>
-#include <ace/Auto_Ptr.h>
-#include <map>
+#include <memory>
+#include "net/ISession.hpp"
 
-#include <openssl/bn.h>
+#include <array>
+#include <cstdint>
+#include <map>
+#include <mutex>
+#include <string>
+
 #include <openssl/md5.h>
 
 /**
- * @brief Caches MD5 hash of client patches present on the server
+ * @brief Caches the MD5 of client patch archives under ./patches.
  *
+ * A build that the server does not support can be lifted to a supported one by
+ * dropping a "<build><locale>.mpq" archive in ./patches; realmd streams it to
+ * the client (the classic background-downloader flow). The XFER_INITIATE packet
+ * carries the archive's MD5 so the client can verify the download, and this
+ * cache avoids re-hashing the (potentially large) file on every logon attempt.
+ * Thread-safe: the SRP6 handlers run on the network thread and the streaming
+ * runs on its own thread.
  */
 class PatchCache
 {
     public:
-        /**
-         * @brief
-         *
-         */
-        ~PatchCache();
-
-        /**
-         * @brief
-         *
-         */
-        PatchCache();
-
-        /**
-         * @brief
-         *
-         * @return PatchCache
-         */
         static PatchCache* instance();
 
-        /**
-         * @brief
-         *
-         */
-        struct PATCH_INFO
-        {
-            ACE_UINT8 md5[MD5_DIGEST_LENGTH]; /**< TODO */
-        };
-
-        /**
-         * @brief
-         *
-         */
-        typedef std::map<std::string, PATCH_INFO*> Patches;
-
-        /**
-         * @brief
-         *
-         * @return Patches::const_iterator
-         */
-        Patches::const_iterator begin() const
-        {
-            return patches_.begin();
-        }
-
-        /**
-         * @brief
-         *
-         * @return Patches::const_iterator
-         */
-        Patches::const_iterator end() const
-        {
-            return patches_.end();
-        }
-
-        /**
-         * @brief
-         *
-         * @param
-         */
-        void LoadPatchMD5(const char*);
-
-        /**
-         * @brief
-         *
-         * @param pat
-         * @param mymd5[]
-         * @return bool
-         */
-        bool GetHash(const char* pat, ACE_UINT8 mymd5[MD5_DIGEST_LENGTH]);
+        /// Look up (computing and caching on first use) the MD5 of the patch at
+        /// `fullPath`. Returns false if the file cannot be read.
+        bool GetMD5(const std::string& fullPath, uint8_t outMd5[MD5_DIGEST_LENGTH]);
 
     private:
-        /**
-         * @brief
-         *
-         */
-        void LoadPatchesInfo();
-        Patches patches_; /**< TODO */
+        PatchCache() = default;
+
+        bool ComputeMD5(const std::string& fullPath, uint8_t outMd5[MD5_DIGEST_LENGTH]);
+
+        std::mutex                                                    m_mutex;
+        std::map<std::string, std::array<uint8_t, MD5_DIGEST_LENGTH>> m_cache;
 };
 
 /**
- * @brief
+ * @brief Stream a patch archive to a client on a detached background thread.
  *
+ * Frames the file (from `startOffset`, so XFER_RESUME works) as CMD_XFER_DATA
+ * chunks pushed through the session's thread-safe Sender, so the network thread
+ * is never blocked on disk or a slow client. `flow` applies real backpressure:
+ * before each chunk the thread blocks until the transport's outbound backlog has
+ * drained, so queued memory stays bounded (a few chunks) no matter how large the
+ * archive or how slow the client. `closer` is invoked only if the file cannot be
+ * fully read (to tear the connection down); on success the socket is left open
+ * for the client to close once it has the whole archive.
+ *
+ * @return false if the file cannot be opened at `startOffset` (nothing spawned).
  */
-class PatchHandler: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
-{
-    protected:
-        /**
-         * @brief
-         *
-         */
-        typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> Base;
+bool StartPatchTransfer(net::Sender sender, net::Closer closer,
+                        std::shared_ptr<net::FlowControl> flow,
+                        const std::string& path, uint64_t startOffset);
 
-    public:
-        /**
-         * @brief
-         *
-         * @param socket
-         * @param patch
-         */
-        PatchHandler(ACE_HANDLE socket, ACE_HANDLE patch);
-
-        /**
-         * @brief
-         *
-         */
-        virtual ~PatchHandler();
-
-        int open(void* = 0) override;
-
-    protected:
-        int svc(void) override;
-
-    private:
-        ACE_HANDLE patch_fd_; /**< TODO */
-};
-
-#endif /* _BK_PATCHHANDLER_H__ */
-
+#endif
+/// @}

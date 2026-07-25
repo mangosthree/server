@@ -29,10 +29,21 @@
 #ifndef MANGOS_H_REALMLIST
 #define MANGOS_H_REALMLIST
 
-#include <ace/Singleton.h>
-#include <ace/Null_Mutex.h>
-#include <ace/INET_Addr.h>
 #include "Common.h"
+
+/**
+ * @brief Resolved IPv4 endpoint for a realm.
+ *
+ * A plain, pre-resolved IPv4 address in host byte order plus a port. @c loopback
+ * is precomputed (127.0.0.0/8) so the address-selection logic never needs to
+ * re-inspect the octets.
+ */
+struct RealmAddress
+{
+    uint32 ip = 0;          ///< IPv4 address in host byte order
+    uint16 port = 0;        ///< TCP port (unused for subnet masks)
+    bool   loopback = false;///< true when @c ip is in 127.0.0.0/8
+};
 
 /**
  * @brief
@@ -84,9 +95,9 @@ typedef std::set<uint32> RealmBuilds;
 struct Realm
 {
     std::string name;
-    ACE_INET_Addr ExternalAddress;
-    ACE_INET_Addr LocalAddress;
-    ACE_INET_Addr LocalSubnetMask;
+    RealmAddress ExternalAddress;
+    RealmAddress LocalAddress;
+    RealmAddress LocalSubnetMask;
     uint8 icon;
     RealmFlags realmflags;                                  // realmflags
     uint8 timezone;
@@ -196,7 +207,7 @@ class RealmList
          * @param popu
          * @param builds
          */
-        void UpdateRealm(uint32 ID, const std::string& name, ACE_INET_Addr const& address, ACE_INET_Addr const& localAddress, ACE_INET_Addr const& localSubnetmask, uint32 port, uint8 icon, RealmFlags realmflags, uint8 timezone, AccountTypes allowedSecurityLevel, float popu, const std::string& builds);
+        void UpdateRealm(uint32 ID, const std::string& name, RealmAddress const& address, RealmAddress const& localAddress, RealmAddress const& localSubnetmask, uint32 port, uint8 icon, RealmFlags realmflags, uint8 timezone, AccountTypes allowedSecurityLevel, float popu, const std::string& builds);
     private:
         RealmMap m_realms;                                    ///< Internal map of realms
         RealmStlList m_realmsByVersion[REALM_VERSION_COUNT]; ///< This sorts the realms by their supported build

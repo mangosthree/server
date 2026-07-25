@@ -51,7 +51,6 @@ class Player;
 class Weather;
 class SqlResultQueue;
 class QueryResult;
-class WorldSocket;
 
 // ServerMessages.dbc
 enum ServerMessageType

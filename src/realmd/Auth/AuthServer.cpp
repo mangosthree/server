@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,39 +22,48 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/// \addtogroup mangosd
-/// @{
-/// \file
+/** \file
+ \ingroup realmd
+ */
 
-#ifndef MANGOS_H_RATHREAD
-#define MANGOS_H_RATHREAD
+#include <cstdint>
+#include <string>
+#include "AuthServer.h"
+#include "AuthSocket.h"
 
-#include <ace/SOCK_Acceptor.h>
-#include <ace/Acceptor.h>
-#include <ace/Task.h>
-#include <ace/INET_Addr.h>
+#include "net/Server.hpp"
 
-#include "Common.h"
+#include <memory>
 
-class RASocket;
-class ACE_Reactor;
-
-typedef ACE_Acceptor < RASocket, ACE_SOCK_ACCEPTOR > RAAcceptor;
-
-class RAThread : public ACE_Task_Base
+/// Holds the value-type networking engine, kept in the .cpp so its platform
+/// headers stay out of AuthServer.h (and therefore out of Main.cpp).
+struct AuthServer::Impl
 {
-    private:
-        ACE_Reactor    *m_Reactor;
-        RAAcceptor     *m_Acceptor;
-        ACE_INET_Addr  listen_addr;
-
-    public:
-        explicit RAThread(uint16 port, const char* host);
-        virtual ~RAThread();
-
-        int open(void* unused) override;
-        int svc() override;
+    net::Server server;
 };
 
-#endif
+AuthServer::AuthServer()
+    : m_impl(new Impl())
+{
+}
 
+AuthServer::~AuthServer()
+{
+    Stop();
+}
+
+bool AuthServer::Start(uint16_t port, const std::string& bindIp)
+{
+    return m_impl->server.start(port, []() -> std::shared_ptr<net::ISession>
+    {
+        return std::make_shared<AuthSocket>();
+    }, bindIp);
+}
+
+void AuthServer::Stop()
+{
+    if (m_impl)
+    {
+        m_impl->server.stop();
+    }
+}

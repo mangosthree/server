@@ -51,7 +51,7 @@ include_directories(
 #-----------------------------------------------------------------------------
 # Build the battleground library
 add_library(mangos-battleground STATIC ${battleground_LIB_SRCS})
-target_link_libraries(mangos-battleground mangos-shared mangos-framework g3dlite ace ${MYSQL_LIBRARIES})
+target_link_libraries(mangos-battleground mangos-shared mangos-framework g3dlite ${MYSQL_LIBRARIES})
 
 if(${CMAKE_BUILD_TYPE} MATCHES Debug)
     set(BUILD_PROPERTIES "-DMANGOS_DEBUG")

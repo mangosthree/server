@@ -28,6 +28,7 @@
 #include "Common/Common.h"
 #include "Policies/Singleton.h"
 
+#include <cstdarg>
 #include <mutex>
 
 class Config;
@@ -293,6 +294,9 @@ class Log : public MaNGOS::Singleton<Log>
         /**
          * @brief any log level
          *
+         * Called from WorldGateway::Deliver (incoming) and WorldSession::SendPacket
+         * (outgoing) -- see IsPacketLoggingEnabled()'s comment below.
+         *
          * @param socket
          * @param opcode
          * @param opcodeName
@@ -449,6 +453,14 @@ class Log : public MaNGOS::Singleton<Log>
          *        PacketLoggingEnabled config flag at startup: worldLogfile is
          *        only opened when the flag is set, so this is the single source
          *        of truth and is off by default even on legacy configs.
+         *
+         *        WorldSocket.cpp (the ACE-removal campaign's Stage 2 CP3) was
+         *        the original caller of this and of outWorldPacketDump()
+         *        below; deleting it orphaned both for one checkpoint. Re-homed
+         *        game-side (not into proto, which must stay game-agnostic and
+         *        no longer resolves opcode names) at Stage 2 CP5+1:
+         *        WorldGateway::Deliver for incoming, WorldSession::SendPacket
+         *        for outgoing.
          * @return bool
          */
         bool IsPacketLoggingEnabled() const { return worldLogfile != NULL; }

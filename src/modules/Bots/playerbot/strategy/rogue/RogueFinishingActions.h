@@ -48,4 +48,18 @@ namespace ai
         CastKidneyShotAction(PlayerbotAI* ai) : CastFinishingMoveAction(ai, "kidney shot") {}
     };
 
+    // Assassination combo dump. Envenom consumes Deadly Poison stacks, so it is
+    // only possible when the target carries Deadly Poison; otherwise the node
+    // falls back to Eviscerate.
+    class CastEnvenomAction : public CastFinishingMoveAction
+    {
+    public:
+        CastEnvenomAction(PlayerbotAI* ai) : CastFinishingMoveAction(ai, "envenom") {}
+
+        virtual bool isPossible()
+        {
+            return CastFinishingMoveAction::isPossible() && ai->HasAura("deadly poison", GetTarget());
+        }
+    };
+
 }

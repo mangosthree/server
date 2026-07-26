@@ -16,6 +16,7 @@ public:
         creators["kidney shot"] = &kidney_shot;
         creators["rupture"] = &rupture;
         creators["backstab"] = &backstab;
+        creators["envenom"] = &envenom;
     }
 private:
     static ActionNode* mutilate(PlayerbotAI* ai)
@@ -60,6 +61,13 @@ private:
             /*A*/ NextAction::array(0, new NextAction("mutilate"), NULL),
             /*C*/ NULL);
     }
+    static ActionNode* envenom(PlayerbotAI* ai)
+    {
+        return new ActionNode ("envenom",
+            /*P*/ NULL,
+            /*A*/ NextAction::array(0, new NextAction("eviscerate"), NULL),
+            /*C*/ NULL);
+    }
 };
 
 DpsRogueStrategy::DpsRogueStrategy(PlayerbotAI* ai) : MeleeCombatStrategy(ai)
@@ -78,11 +86,11 @@ void DpsRogueStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "slice and dice",
-        NextAction::array(0, new NextAction("slice and dice", ACTION_HIGH + 3), NULL)));
+        NextAction::array(0, new NextAction("slice and dice", ACTION_HIGH + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
         "combo points for target available",
-        NextAction::array(0, new NextAction("rupture", ACTION_HIGH + 2), NULL)));
+        NextAction::array(0, new NextAction("envenom", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "rupture",
@@ -94,7 +102,7 @@ void DpsRogueStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "revealing strike",
-        NextAction::array(0, new NextAction("revealing strike", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("revealing strike", 22.5f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "adrenaline rush",
@@ -103,6 +111,34 @@ void DpsRogueStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "killing spree",
         NextAction::array(0, new NextAction("killing spree", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "vendetta",
+        NextAction::array(0, new NextAction("vendetta", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "cold blood",
+        NextAction::array(0, new NextAction("cold blood", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "shadow dance",
+        NextAction::array(0, new NextAction("shadow dance", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "shadow dance active",
+        NextAction::array(0, new NextAction("ambush", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "high aoe",
+        NextAction::array(0, new NextAction("fan of knives", 24.5f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "tricks of the trade on party",
+        NextAction::array(0, new NextAction("tricks of the trade on party", ACTION_NORMAL + 8), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "hemorrhage",
+        NextAction::array(0, new NextAction("hemorrhage", ACTION_IDLE + 11), NULL)));
 
     triggers.push_back(new TriggerNode(
         "blade flurry",

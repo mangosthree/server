@@ -21,9 +21,12 @@ namespace ai
     public:
         RuptureTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "rupture") {}
 
+        // Assassination/Subtlety only. Combat (probed via Revealing Strike,
+        // 84617) treats Rupture as a DPS loss, so opt it out.
         virtual bool IsActive()
         {
-            return DebuffTrigger::IsActive() && AI_VALUE2(uint8, "combo", "current target") >= 5;
+            return DebuffTrigger::IsActive() && AI_VALUE2(uint8, "combo", "current target") >= 5
+                && !bot->HasSpell(84617);
         }
     };
 
@@ -37,6 +40,12 @@ namespace ai
     {
     public:
         RevealingStrikeTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "revealing strike") {}
+
+        // Apply Revealing Strike at exactly 4 combo points; at 5 the dump wins.
+        virtual bool IsActive()
+        {
+            return DebuffTrigger::IsActive() && AI_VALUE2(uint8, "combo", "current target") == 4;
+        }
     };
 
     class BladeFlurryTrigger : public BoostTrigger
@@ -55,6 +64,42 @@ namespace ai
     {
     public:
         KillingSpreeTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "killing spree") {}
+
+        // Best used as an Energy dump when very low on Energy.
+        virtual bool IsActive()
+        {
+            return BoostTrigger::IsActive() && AI_VALUE2(uint8, "energy", "self target") < 30;
+        }
+    };
+
+    class VendettaTrigger : public BoostTrigger
+    {
+    public:
+        VendettaTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "vendetta") {}
+    };
+
+    class ColdBloodTrigger : public BoostTrigger
+    {
+    public:
+        ColdBloodTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "cold blood") {}
+    };
+
+    class ShadowDanceTrigger : public BoostTrigger
+    {
+    public:
+        ShadowDanceTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "shadow dance") {}
+    };
+
+    class ShadowDanceActiveTrigger : public HasAuraIdTrigger
+    {
+    public:
+        ShadowDanceActiveTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "shadow dance active", 51713) {}
+    };
+
+    class HemorrhageTrigger : public DebuffTrigger
+    {
+    public:
+        HemorrhageTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "hemorrhage") {}
     };
 
     class KickInterruptEnemyHealerSpellTrigger : public InterruptEnemyHealerTrigger

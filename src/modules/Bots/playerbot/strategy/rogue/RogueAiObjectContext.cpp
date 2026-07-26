@@ -62,6 +62,12 @@ namespace ai
                 creators["blade flurry"] = &TriggerFactoryInternal::blade_flurry;
                 creators["adrenaline rush"] = &TriggerFactoryInternal::adrenaline_rush;
                 creators["killing spree"] = &TriggerFactoryInternal::killing_spree;
+                creators["vendetta"] = &TriggerFactoryInternal::vendetta;
+                creators["cold blood"] = &TriggerFactoryInternal::cold_blood;
+                creators["shadow dance"] = &TriggerFactoryInternal::shadow_dance;
+                creators["shadow dance active"] = &TriggerFactoryInternal::shadow_dance_active;
+                creators["hemorrhage"] = &TriggerFactoryInternal::hemorrhage;
+                creators["tricks of the trade on party"] = &TriggerFactoryInternal::tricks_of_the_trade_on_party;
 
             }
 
@@ -78,6 +84,12 @@ namespace ai
             static Trigger* blade_flurry(PlayerbotAI* ai) { return new BladeFlurryTrigger(ai); }
             static Trigger* adrenaline_rush(PlayerbotAI* ai) { return new AdrenalineRushTrigger(ai); }
             static Trigger* killing_spree(PlayerbotAI* ai) { return new KillingSpreeTrigger(ai); }
+            static Trigger* vendetta(PlayerbotAI* ai) { return new VendettaTrigger(ai); }
+            static Trigger* cold_blood(PlayerbotAI* ai) { return new ColdBloodTrigger(ai); }
+            static Trigger* shadow_dance(PlayerbotAI* ai) { return new ShadowDanceTrigger(ai); }
+            static Trigger* shadow_dance_active(PlayerbotAI* ai) { return new ShadowDanceActiveTrigger(ai); }
+            static Trigger* hemorrhage(PlayerbotAI* ai) { return new HemorrhageTrigger(ai); }
+            static Trigger* tricks_of_the_trade_on_party(PlayerbotAI* ai) { return new BuffOnPartyTrigger(ai, "tricks of the trade"); }
         };
     };
 };
@@ -119,6 +131,14 @@ namespace ai
                 creators["blade flurry"] = &AiObjectContextInternal::blade_flurry;
                 creators["adrenaline rush"] = &AiObjectContextInternal::adrenaline_rush;
                 creators["killing spree"] = &AiObjectContextInternal::killing_spree;
+                creators["envenom"] = &AiObjectContextInternal::envenom;
+                creators["vendetta"] = &AiObjectContextInternal::vendetta;
+                creators["cold blood"] = &AiObjectContextInternal::cold_blood;
+                creators["shadow dance"] = &AiObjectContextInternal::shadow_dance;
+                creators["ambush"] = &AiObjectContextInternal::ambush;
+                creators["hemorrhage"] = &AiObjectContextInternal::hemorrhage;
+                creators["fan of knives"] = &AiObjectContextInternal::fan_of_knives;
+                creators["tricks of the trade on party"] = &AiObjectContextInternal::tricks_of_the_trade_on_party;
             }
 
         private:
@@ -147,6 +167,14 @@ namespace ai
             static Action* blade_flurry(PlayerbotAI* ai) { return new CastBladeFlurryAction(ai); }
             static Action* adrenaline_rush(PlayerbotAI* ai) { return new CastAdrenalineRushAction(ai); }
             static Action* killing_spree(PlayerbotAI* ai) { return new CastKillingSpreeAction(ai); }
+            static Action* envenom(PlayerbotAI* ai) { return new CastEnvenomAction(ai); }
+            static Action* vendetta(PlayerbotAI* ai) { return new CastVendettaAction(ai); }
+            static Action* cold_blood(PlayerbotAI* ai) { return new CastColdBloodAction(ai); }
+            static Action* shadow_dance(PlayerbotAI* ai) { return new CastShadowDanceAction(ai); }
+            static Action* ambush(PlayerbotAI* ai) { return new CastAmbushAction(ai); }
+            static Action* hemorrhage(PlayerbotAI* ai) { return new CastHemorrhageAction(ai); }
+            static Action* fan_of_knives(PlayerbotAI* ai) { return new CastFanOfKnivesAction(ai); }
+            static Action* tricks_of_the_trade_on_party(PlayerbotAI* ai) { return new CastTricksOfTheTradeAction(ai); }
         };
     };
 };

@@ -36,4 +36,25 @@ namespace ai
     public:
         CastBackstabAction(PlayerbotAI* ai) : CastComboAction(ai, "backstab") {}
     };
+
+    // Subtlety opener/builder. Usable while stealthed or during Shadow Dance
+    // (51713), and only from behind the target.
+    class CastAmbushAction : public CastComboAction
+    {
+    public:
+        CastAmbushAction(PlayerbotAI* ai) : CastComboAction(ai, "ambush") {}
+
+        virtual bool isUseful()
+        {
+            return CastComboAction::isUseful()
+                && (ai->HasAura("stealth", bot) || ai->HasAura(51713u, bot))
+                && AI_VALUE2(bool, "behind", "current target");
+        }
+    };
+
+    class CastHemorrhageAction : public CastComboAction
+    {
+    public:
+        CastHemorrhageAction(PlayerbotAI* ai) : CastComboAction(ai, "hemorrhage") {}
+    };
 }

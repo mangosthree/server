@@ -86,6 +86,45 @@ namespace ai
         CastKickOnEnemyHealerAction(PlayerbotAI* ai) : CastSpellOnEnemyHealerAction(ai, "kick") {}
     };
 
+    class CastVendettaAction : public CastDebuffSpellAction
+    {
+    public:
+        CastVendettaAction(PlayerbotAI* ai) : CastDebuffSpellAction(ai, "vendetta") {}
+    };
+
+    class CastColdBloodAction : public CastBuffSpellAction
+    {
+    public:
+        CastColdBloodAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "cold blood") {}
+    };
+
+    class CastShadowDanceAction : public CastBuffSpellAction
+    {
+    public:
+        CastShadowDanceAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "shadow dance") {}
+    };
+
+    // AoE finisher. Requires a thrown weapon equipped in the ranged slot;
+    // without one the cast fails, so gate on the equipped subclass.
+    class CastFanOfKnivesAction : public CastMeleeSpellAction
+    {
+    public:
+        CastFanOfKnivesAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "fan of knives") {}
+
+        virtual bool isUseful()
+        {
+            Item* ranged = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+            return ranged && ranged->GetProto() &&
+                ranged->GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_THROWN;
+        }
+    };
+
+    class CastTricksOfTheTradeAction : public BuffOnPartyAction
+    {
+    public:
+        CastTricksOfTheTradeAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "tricks of the trade") {}
+    };
+
     class CastStealthAction : public CastBuffSpellAction
     {
     public:

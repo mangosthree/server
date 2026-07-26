@@ -86,9 +86,23 @@ namespace ai
                 creators["bestial wrath"] = &TriggerFactoryInternal::bestial_wrath;
                 creators["misdirection on tank"] = &TriggerFactoryInternal::misdirection_on_tank;
                 creators["silencing shot"] = &TriggerFactoryInternal::silencing_shot;
+                creators["kill command available"] = &TriggerFactoryInternal::kill_command_available;
+                creators["lock and load"] = &TriggerFactoryInternal::lock_and_load;
+                creators["fire proc"] = &TriggerFactoryInternal::fire_proc;
+                creators["improved steady shot missing"] = &TriggerFactoryInternal::improved_steady_shot_missing;
+                creators["pet frenzy"] = &TriggerFactoryInternal::pet_frenzy;
+                creators["low focus"] = &TriggerFactoryInternal::low_focus;
+                creators["marksman filler"] = &TriggerFactoryInternal::marksman_filler;
             }
 
         private:
+            static Trigger* kill_command_available(PlayerbotAI* ai) { return new KillCommandAvailableTrigger(ai); }
+            static Trigger* lock_and_load(PlayerbotAI* ai) { return new LockAndLoadTrigger(ai); }
+            static Trigger* fire_proc(PlayerbotAI* ai) { return new FireProcTrigger(ai); }
+            static Trigger* improved_steady_shot_missing(PlayerbotAI* ai) { return new ImprovedSteadyShotMissingTrigger(ai); }
+            static Trigger* pet_frenzy(PlayerbotAI* ai) { return new PetFrenzyTrigger(ai); }
+            static Trigger* low_focus(PlayerbotAI* ai) { return new LowFocusTrigger(ai); }
+            static Trigger* marksman_filler(PlayerbotAI* ai) { return new MarksmanFillerTrigger(ai); }
             static Trigger* chimera_shot(PlayerbotAI* ai) { return new ChimeraShotAvailableTrigger(ai); }
             static Trigger* bestial_wrath(PlayerbotAI* ai) { return new BestialWrathTrigger(ai); }
             static Trigger* misdirection_on_tank(PlayerbotAI* ai) { return new MisdirectionOnTankTrigger(ai); }
@@ -160,9 +174,13 @@ namespace ai
                 creators["silencing shot"] = &AiObjectContextInternal::silencing_shot;
                 creators["bestial wrath"] = &AiObjectContextInternal::bestial_wrath;
                 creators["misdirection on tank"] = &AiObjectContextInternal::misdirection_on_tank;
+                creators["focus fire"] = &AiObjectContextInternal::focus_fire;
+                creators["fervor"] = &AiObjectContextInternal::fervor;
             }
 
         private:
+            static Action* focus_fire(PlayerbotAI* ai) { return new CastBuffSpellAction(ai, "focus fire"); }
+            static Action* fervor(PlayerbotAI* ai) { return new CastBuffSpellAction(ai, "fervor"); }
             static Action* silencing_shot(PlayerbotAI* ai) { return new CastSilencingShotAction(ai); }
             static Action* bestial_wrath(PlayerbotAI* ai) { return new CastBestialWrathAction(ai); }
             static Action* misdirection_on_tank(PlayerbotAI* ai) { return new CastMisdirectionAction(ai); }

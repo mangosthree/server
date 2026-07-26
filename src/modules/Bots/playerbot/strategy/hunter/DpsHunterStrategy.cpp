@@ -88,7 +88,7 @@ void DpsHunterStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "black arrow",
-        NextAction::array(0, new NextAction("black arrow", 51.0f), NULL)));
+        NextAction::array(0, new NextAction("black arrow", 16.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "no pet",
@@ -111,16 +111,44 @@ void DpsHunterStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("concussive shot", 83.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "high focus",
-        NextAction::array(0, new NextAction("kill command", 15.0f), NULL)));
+        "low focus",
+        NextAction::array(0, new NextAction("fervor", 24.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "target critical health",
-        NextAction::array(0, new NextAction("kill shot", 25.0f), NULL)));
+        "kill command available",
+        NextAction::array(0, new NextAction("kill command", 23.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "improved steady shot missing",
+        NextAction::array(0, new NextAction("steady shot", 22.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "chimera shot",
         NextAction::array(0, new NextAction("chimera shot", 21.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "fire proc",
+        NextAction::array(0, new NextAction("aimed shot", 19.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "lock and load",
+        NextAction::array(0, new NextAction("explosive shot", 18.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "target critical health",
+        NextAction::array(0, new NextAction("kill shot", 17.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "pet frenzy",
+        NextAction::array(0, new NextAction("focus fire", 16.5f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "high focus",
+        NextAction::array(0, new NextAction("arcane shot", 15.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "marksman filler",
+        NextAction::array(0, new NextAction("steady shot", 10.8f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "bestial wrath",
@@ -132,10 +160,6 @@ void DpsAoeHunterStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "medium aoe",
         NextAction::array(0, new NextAction("multi-shot", 20.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "serpent sting on attacker",
-        NextAction::array(0, new NextAction("serpent sting on attacker", 49.0f), NULL)));
 }
 
 void DpsHunterDebuffStrategy::InitTriggers(std::list<TriggerNode*> &triggers)

@@ -248,7 +248,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
             }
             break;
         case CLASS_HUNTER:
-            engine->addStrategies("dps", "bdps", "threat", "dps assist", NULL);
+            engine->addStrategies("dps", "aoe", "bdps", "threat", "dps assist", NULL);
             if (player->getLevel() > 19)
             {
                 engine->addStrategy("dps debuff");

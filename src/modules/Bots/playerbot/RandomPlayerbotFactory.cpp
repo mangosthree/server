@@ -88,7 +88,9 @@ bool RandomPlayerbotFactory::CreateRandomBot(uint8 cls)
     uint8 outfitId = 0;
 
 #if !defined(CLASSIC)
-    WorldSession* session = new WorldSession(accountId, NULL, SEC_PLAYER, MAX_EXPANSION, 0, LOCALE_enUS);
+    // Headless bot session: no client link (nullptr), empty session-key salt.
+    // The core guards every m_Socket use, so a dead link is safe.
+    WorldSession* session = new WorldSession(accountId, nullptr, SEC_PLAYER, MAX_EXPANSION, 0, LOCALE_enUS, BigNumber());
 #else
     WorldSession* session = new WorldSession(accountId, NULL, SEC_PLAYER, 0, LOCALE_enUS);
 #endif

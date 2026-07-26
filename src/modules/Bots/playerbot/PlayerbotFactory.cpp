@@ -1786,7 +1786,10 @@ void PlayerbotFactory::EnchantItem(Item* item)
             }
 
             SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-            if (!enchant || enchant->slot != PERM_ENCHANTMENT_SLOT)
+            // The realigned SpellItemEnchantmentEntry has no perm/temp slot
+            // field; curated enchants are all permanent, so a valid entry is
+            // sufficient here.
+            if (!enchant)
             {
                 continue;
             }

@@ -72,6 +72,7 @@ PlayerbotAIConfig::PlayerbotAIConfig()
       randomBotJoinLfg(false),
       randomBotLoginAtStartup(false),
       randomBotTeleLevel(0),
+      feralBearTankChance(0),
       logInGroupOnly(false),
       logValuesPerTick(false),
       fleeingEnabled(false),
@@ -267,6 +268,7 @@ bool PlayerbotAIConfig::Initialize()
     useCuratedGear = config.GetBoolDefault("AiPlayerbot.UseCuratedGear", true);
     gearTier = config.GetStringDefault("AiPlayerbot.GearTier", "");
     useCuratedGearEnhancements = config.GetBoolDefault("AiPlayerbot.CuratedGearEnhancements", true);
+    feralBearTankChance = config.GetIntDefault("AiPlayerbot.FeralBearTankChance", 30);
     // Cosmetic settings
     randomBotShowCloak = config.GetBoolDefault("AiPlayerbot.RandomBotShowCloak", false);
     randomBotShowHelmet = config.GetBoolDefault("AiPlayerbot.RandomBotShowHelmet", false);

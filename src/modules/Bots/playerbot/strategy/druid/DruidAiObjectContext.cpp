@@ -92,6 +92,10 @@ namespace ai
                 creators["eclipse (solar)"] = &TriggerFactoryInternal::eclipse_solar;
                 creators["eclipse (lunar)"] = &TriggerFactoryInternal::eclipse_lunar;
                 creators["bash on enemy healer"] = &TriggerFactoryInternal::bash_on_enemy_healer;
+                creators["savage roar"] = &TriggerFactoryInternal::savage_roar;
+                creators["berserk"] = &TriggerFactoryInternal::berserk;
+                creators["skull bash"] = &TriggerFactoryInternal::skull_bash;
+                creators["lifebloom on tank"] = &TriggerFactoryInternal::lifebloom_on_tank;
             }
 
         private:
@@ -115,6 +119,10 @@ namespace ai
             static Trigger* cat_form(PlayerbotAI* ai) { return new CatFormTrigger(ai); }
             static Trigger* tree_form(PlayerbotAI* ai) { return new TreeFormTrigger(ai); }
             static Trigger* bash_on_enemy_healer(PlayerbotAI* ai) { return new BashInterruptEnemyHealerSpellTrigger(ai); }
+            static Trigger* savage_roar(PlayerbotAI* ai) { return new SavageRoarTrigger(ai); }
+            static Trigger* berserk(PlayerbotAI* ai) { return new BerserkTrigger(ai); }
+            static Trigger* skull_bash(PlayerbotAI* ai) { return new SkullBashInterruptSpellTrigger(ai); }
+            static Trigger* lifebloom_on_tank(PlayerbotAI* ai) { return new LifebloomOnTankTrigger(ai); }
         };
     };
 };
@@ -156,7 +164,6 @@ namespace ai
                 creators["moonfire"] = &AiObjectContextInternal::moonfire;
                 creators["starfire"] = &AiObjectContextInternal::starfire;
                 creators["nature's grasp"] = &AiObjectContextInternal::natures_grasp;
-                creators["claw"] = &AiObjectContextInternal::claw;
                 creators["mangle (cat)"] = &AiObjectContextInternal::mangle_cat;
                 creators["swipe (cat)"] = &AiObjectContextInternal::swipe_cat;
                 creators["rake"] = &AiObjectContextInternal::rake;
@@ -185,6 +192,13 @@ namespace ai
                 creators["innervate"] = &AiObjectContextInternal::innervate;
                 creators["tranquility"] = &AiObjectContextInternal::tranquility;
                 creators["bash on enemy healer"] = &AiObjectContextInternal::bash_on_enemy_healer;
+                creators["shred"] = &AiObjectContextInternal::shred;
+                creators["savage roar"] = &AiObjectContextInternal::savage_roar;
+                creators["thrash"] = &AiObjectContextInternal::thrash;
+                creators["frenzied regeneration"] = &AiObjectContextInternal::frenzied_regeneration;
+                creators["skull bash"] = &AiObjectContextInternal::skull_bash;
+                creators["wild growth"] = &AiObjectContextInternal::wild_growth;
+                creators["lifebloom on tank"] = &AiObjectContextInternal::lifebloom_on_tank;
             }
 
         private:
@@ -215,7 +229,7 @@ namespace ai
             static Action* moonfire(PlayerbotAI* ai) { return new CastMoonfireAction(ai); }
             static Action* starfire(PlayerbotAI* ai) { return new CastStarfireAction(ai); }
             static Action* natures_grasp(PlayerbotAI* ai) { return new CastNaturesGraspAction(ai); }
-            static Action* claw(PlayerbotAI* ai) { return new CastClawAction(ai); }
+            static Action* shred(PlayerbotAI* ai) { return new CastShredAction(ai); }
             static Action* mangle_cat(PlayerbotAI* ai) { return new CastMangleCatAction(ai); }
             static Action* swipe_cat(PlayerbotAI* ai) { return new CastSwipeCatAction(ai); }
             static Action* rake(PlayerbotAI* ai) { return new CastRakeAction(ai); }
@@ -227,6 +241,7 @@ namespace ai
             static Action* cure_poison(PlayerbotAI* ai) { return new CastCurePoisonAction(ai); }
             static Action* cure_poison_on_party(PlayerbotAI* ai) { return new CastCurePoisonOnPartyAction(ai); }
             static Action* berserk(PlayerbotAI* ai) { return new CastBerserkAction(ai); }
+            static Action* savage_roar(PlayerbotAI* ai) { return new CastSavageRoarAction(ai); }
             static Action* tigers_fury(PlayerbotAI* ai) { return new CastTigersFuryAction(ai); }
             static Action* mark_of_the_wild(PlayerbotAI* ai) { return new CastMarkOfTheWildAction(ai); }
             static Action* mark_of_the_wild_on_party(PlayerbotAI* ai) { return new CastMarkOfTheWildOnPartyAction(ai); }
@@ -243,6 +258,11 @@ namespace ai
             static Action* hurricane(PlayerbotAI* ai) { return new CastHurricaneAction(ai); }
             static Action* innervate(PlayerbotAI* ai) { return new CastInnervateAction(ai); }
             static Action* bash_on_enemy_healer(PlayerbotAI* ai) { return new CastBashOnEnemyHealerAction(ai); }
+            static Action* thrash(PlayerbotAI* ai) { return new CastThrashAction(ai); }
+            static Action* frenzied_regeneration(PlayerbotAI* ai) { return new CastFrenziedRegenerationAction(ai); }
+            static Action* skull_bash(PlayerbotAI* ai) { return new CastSkullBashAction(ai); }
+            static Action* wild_growth(PlayerbotAI* ai) { return new CastWildGrowthAction(ai); }
+            static Action* lifebloom_on_tank(PlayerbotAI* ai) { return new CastLifebloomOnTankAction(ai); }
         };
     };
 };

@@ -33,9 +33,10 @@ namespace ai {
     };
 
 
-    class CastClawAction : public CastMeleeSpellAction {
+    // Claw was removed in 4.0.1; Shred is the live cat-form combo builder.
+    class CastShredAction : public CastMeleeSpellAction {
     public:
-        CastClawAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "claw") {}
+        CastShredAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "shred") {}
     };
 
     class CastMangleCatAction : public CastMeleeSpellAction {
@@ -53,12 +54,16 @@ namespace ai {
         CastFerociousBiteAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "ferocious bite") {}
     };
 
-
-    class CastRipAction : public CastMeleeSpellAction {
+    // Aura-gated (CastDebuffSpellAction/CastAuraSpellAction::isUseful skips
+    // the cast while the bleed is still up) so Rip is maintained rather than
+    // reapplied every combo-point dump.
+    class CastRipAction : public CastDebuffSpellAction {
     public:
-        CastRipAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "rip") {}
+        CastRipAction(PlayerbotAI* ai) : CastDebuffSpellAction(ai, "rip") {}
     };
 
-
-
+    class CastSavageRoarAction : public CastBuffSpellAction {
+    public:
+        CastSavageRoarAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "savage roar") {}
+    };
 }

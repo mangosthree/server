@@ -22,6 +22,9 @@ public:
         creators["swipe"] = &swipe;
         creators["lacerate"] = &lacerate;
         creators["demoralizing roar"] = &demoralizing_roar;
+        creators["thrash"] = &thrash;
+        creators["frenzied regeneration"] = &frenzied_regeneration;
+        creators["skull bash"] = &skull_bash;
     }
 private:
     static ActionNode* melee(PlayerbotAI* ai)
@@ -115,6 +118,27 @@ private:
             /*A*/ NULL,
             /*C*/ NULL);
     }
+    static ActionNode* thrash(PlayerbotAI* ai)
+    {
+        return new ActionNode ("thrash",
+            /*P*/ NULL,
+            /*A*/ NULL,
+            /*C*/ NULL);
+    }
+    static ActionNode* frenzied_regeneration(PlayerbotAI* ai)
+    {
+        return new ActionNode ("frenzied regeneration",
+            /*P*/ NULL,
+            /*A*/ NULL,
+            /*C*/ NULL);
+    }
+    static ActionNode* skull_bash(PlayerbotAI* ai)
+    {
+        return new ActionNode ("skull bash",
+            /*P*/ NULL,
+            /*A*/ NextAction::array(0, new NextAction("bash"), NULL),
+            /*C*/ NULL);
+    }
 };
 
 BearTankDruidStrategy::BearTankDruidStrategy(PlayerbotAI* ai) : FeralDruidStrategy(ai)
@@ -137,9 +161,12 @@ void BearTankDruidStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 {
     FeralDruidStrategy::InitTriggers(triggers);
 
-    triggers.push_back(new TriggerNode(
-        "thorns",
-        NextAction::array(0, new NextAction("thorns", ACTION_HIGH + 9), NULL)));
+    // Thorns is a non-combat raid buff cast from caster form; it must NOT be
+    // wired here. ThornsTrigger has no combat-state check, so wiring it at
+    // combat relevance made the bot leave Bear Form (dumping rage/armor) to
+    // recast Thorns every time the aura lapsed, then shift back -- a
+    // form-dance bug. Thorns stays unwired in combat; cast it pre-pull if
+    // ever needed via the non-combat strategy instead.
 
     triggers.push_back(new TriggerNode(
         "bear form",
@@ -155,11 +182,19 @@ void BearTankDruidStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "medium aoe",
-        NextAction::array(0, new NextAction("demoralizing roar", ACTION_HIGH + 6), new NextAction("swipe (bear)", ACTION_HIGH + 6), NULL)));
+        NextAction::array(0, new NextAction("thrash", ACTION_HIGH + 6), new NextAction("demoralizing roar", ACTION_HIGH + 6), new NextAction("swipe (bear)", ACTION_HIGH + 6), NULL)));
 
     triggers.push_back(new TriggerNode(
         "light aoe",
-        NextAction::array(0, new NextAction("swipe (bear)", ACTION_HIGH + 5), NULL)));
+        NextAction::array(0, new NextAction("thrash", ACTION_HIGH + 5), new NextAction("swipe (bear)", ACTION_HIGH + 5), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "low health",
+        NextAction::array(0, new NextAction("frenzied regeneration", ACTION_EMERGENCY), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "skull bash",
+        NextAction::array(0, new NextAction("skull bash", ACTION_INTERRUPT + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "bash",

@@ -14,11 +14,12 @@ public:
         creators["melee"] = &melee;
         creators["feral charge - cat"] = &feral_charge_cat;
         creators["cat form"] = &cat_form;
-        creators["claw"] = &claw;
+        creators["shred"] = &shred;
         creators["mangle (cat)"] = &mangle_cat;
         creators["rake"] = &rake;
         creators["ferocious bite"] = &ferocious_bite;
         creators["rip"] = &rip;
+        creators["savage roar"] = &savage_roar;
     }
 private:
     static ActionNode* faerie_fire_feral(PlayerbotAI* ai)
@@ -49,9 +50,9 @@ private:
             /*A*/ NULL,
             /*C*/ NULL);
     }
-    static ActionNode* claw(PlayerbotAI* ai)
+    static ActionNode* shred(PlayerbotAI* ai)
     {
-        return new ActionNode ("claw",
+        return new ActionNode ("shred",
             /*P*/ NULL,
             /*A*/ NextAction::array(0, new NextAction("melee"), NULL),
             /*C*/ NULL);
@@ -60,7 +61,7 @@ private:
     {
         return new ActionNode ("mangle (cat)",
             /*P*/ NULL,
-            /*A*/ NextAction::array(0, new NextAction("claw"), NULL),
+            /*A*/ NextAction::array(0, new NextAction("shred"), NULL),
             /*C*/ NULL);
     }
     static ActionNode* rake(PlayerbotAI* ai)
@@ -74,12 +75,22 @@ private:
     {
         return new ActionNode ("ferocious bite",
             /*P*/ NULL,
-            /*A*/ NextAction::array(0, new NextAction("rip"), NULL),
+            /*A*/ NULL,
             /*C*/ NULL);
     }
+    // Finisher to maintain: alternative falls through to ferocious bite
+    // (via CastAuraSpellAction::isUseful) once the bleed is already up, so
+    // 5 CP dumps into Ferocious Bite instead of refreshing Rip early.
     static ActionNode* rip(PlayerbotAI* ai)
     {
         return new ActionNode ("rip",
+            /*P*/ NULL,
+            /*A*/ NextAction::array(0, new NextAction("ferocious bite"), NULL),
+            /*C*/ NULL);
+    }
+    static ActionNode* savage_roar(PlayerbotAI* ai)
+    {
+        return new ActionNode ("savage roar",
             /*P*/ NULL,
             /*A*/ NULL,
             /*C*/ NULL);
@@ -109,8 +120,15 @@ void CatDpsDruidStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("rake", ACTION_NORMAL + 5), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "savage roar",
+        NextAction::array(0, new NextAction("savage roar", ACTION_NORMAL + 7), NULL)));
+
+    // Rip is the finisher to maintain; its alternative (ferocious bite)
+    // only fires once Rip's isUseful() aura-check says the bleed is
+    // already up, so 5 CP dumps into Ferocious Bite instead of clipping Rip.
+    triggers.push_back(new TriggerNode(
         "combo points available",
-        NextAction::array(0, new NextAction("ferocious bite", ACTION_NORMAL + 9), NULL)));
+        NextAction::array(0, new NextAction("rip", ACTION_NORMAL + 9), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium threat",
@@ -123,6 +141,10 @@ void CatDpsDruidStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "tiger's fury",
         NextAction::array(0, new NextAction("tiger's fury", ACTION_EMERGENCY + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "berserk",
+        NextAction::array(0, new NextAction("berserk", ACTION_EMERGENCY + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "entangling roots",

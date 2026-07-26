@@ -18,4 +18,11 @@ public:
 public:
     static int GetPlayerSpecTab(Player* player);
     static map<uint32, int32> GetPlayerSpecTabs(Player* player);
+
+    /// Deterministic bear-vs-cat split for the Feral tree (talent point
+    /// spending doesn't distinguish the two builds -- see InitTalents).
+    /// Stable per bot (keyed off GUID) so a given bot is always the same
+    /// role across restarts. Shared by AiFactory (strategy routing) and
+    /// PlayerbotFactory::GetCuratedSpecKey (gear routing) so both agree.
+    static bool IsFeralBearTank(Player* bot);
 };

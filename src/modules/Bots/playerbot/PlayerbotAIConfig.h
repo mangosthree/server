@@ -107,6 +107,7 @@ public:
     bool useCuratedGear; ///< Phase A: equip class/spec/tier curated best-in-slot gear (ai_playerbot_gear) instead of gear-score guessing.
     std::string gearTier; ///< Force a curated gear tier ("normal"/"heroic"/"raider"); empty = balanced split by bot GUID.
     bool useCuratedGearEnhancements; ///< Phase B/C/D: apply curated enchants/gems/glyphs on top of curated gear (ai_playerbot_gear_enchant/_gem/_glyph). Requires useCuratedGear.
+    uint32 feralBearTankChance; ///< Percent (0-100) of Feral druid bots routed to the bear tank build (AiFactory::IsFeralBearTank); the rest are cat DPS.
 
     bool guildTaskEnabled; ///< Indicates if guild tasks are enabled.
     uint32 minGuildTaskChangeTime, maxGuildTaskChangeTime;

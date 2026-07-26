@@ -187,4 +187,19 @@ namespace ai
     public:
         CastTranquilityAction(PlayerbotAI* ai) : CastAoeHealSpellAction(ai, "tranquility") {}
     };
+
+    class CastWildGrowthAction : public CastAoeHealSpellAction
+    {
+    public:
+        CastWildGrowthAction(PlayerbotAI* ai) : CastAoeHealSpellAction(ai, "wild growth") {}
+    };
+
+    /// Maintains Lifebloom on the main tank rather than a rotating party member.
+    class CastLifebloomOnTankAction : public CastBuffSpellAction
+    {
+    public:
+        CastLifebloomOnTankAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "lifebloom") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("tank target"); }
+        virtual string getName() { return "lifebloom on tank"; }
+    };
 }

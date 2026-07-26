@@ -31,6 +31,12 @@ void HealDruidStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         "tree form",
         NextAction::array(0, new NextAction("tree form", ACTION_HIGH + 1), NULL)));
 
+    // Cata resto's HoT anchor: keep Lifebloom stacked on the tank rather
+    // than rotating it like the other party HoTs.
+    triggers.push_back(new TriggerNode(
+        "lifebloom on tank",
+        NextAction::array(0, new NextAction("lifebloom on tank", ACTION_HIGH + 8), NULL)));
+
     triggers.push_back(new TriggerNode(
         "medium health",
         NextAction::array(0, new NextAction("regrowth", ACTION_MEDIUM_HEAL + 2), NULL)));
@@ -50,6 +56,12 @@ void HealDruidStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "medium aoe heal",
         NextAction::array(0, new NextAction("tranquility", ACTION_MEDIUM_HEAL + 3), NULL)));
+
+    // Wild Growth is the cheaper, non-channeled AoE heal; try it on the
+    // lighter aoe-heal tier before committing to Tranquility's channel.
+    triggers.push_back(new TriggerNode(
+        "low aoe heal",
+        NextAction::array(0, new NextAction("wild growth", ACTION_MEDIUM_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "entangling roots",

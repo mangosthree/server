@@ -869,11 +869,9 @@ string PlayerbotFactory::GetCuratedSpecKey(Player* bot, int tab)
             {
                 case 0: return "balance";
                 // Feral (tab 1) covers both the cat-DPS and bear-tank builds
-                // in Cata's talent layout. Default to the DPS (cat) set --
-                // cheaply detecting a bear-tank build isn't worth the
-                // complexity for Phase A (gear only); revisit alongside role
-                // detection if/when that lands.
-                case 1: return "feral_cat";
+                // in Cata's talent layout. Same deterministic per-bot split
+                // as AiFactory::IsFeralBearTank, so gear and strategy agree.
+                case 1: return AiFactory::IsFeralBearTank(bot) ? "feral_bear" : "feral_cat";
                 case 2: return "restoration";
             }
             break;

@@ -56,10 +56,28 @@ namespace ai {
         BashInterruptSpellTrigger(PlayerbotAI* ai) : InterruptSpellTrigger(ai, "bash") {}
     };
 
+    class SkullBashInterruptSpellTrigger : public InterruptSpellTrigger
+    {
+    public:
+        SkullBashInterruptSpellTrigger(PlayerbotAI* ai) : InterruptSpellTrigger(ai, "skull bash") {}
+    };
+
     class TigersFuryTrigger : public BoostTrigger
     {
     public:
         TigersFuryTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "tiger's fury") {}
+    };
+
+    class BerserkTrigger : public BoostTrigger
+    {
+    public:
+        BerserkTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "berserk") {}
+    };
+
+    class SavageRoarTrigger : public BuffTrigger
+    {
+    public:
+        SavageRoarTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "savage roar") {}
     };
 
     class NaturesGraspTrigger : public BoostTrigger
@@ -123,5 +141,14 @@ namespace ai {
     {
     public:
         BashInterruptEnemyHealerSpellTrigger(PlayerbotAI* ai) : InterruptEnemyHealerTrigger(ai, "bash") {}
+    };
+
+    /// Maintains Lifebloom on the main tank rather than a rotating party member.
+    class LifebloomOnTankTrigger : public BuffTrigger
+    {
+    public:
+        LifebloomOnTankTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "lifebloom") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("tank target"); }
+        virtual string getName() { return "lifebloom on tank"; }
     };
 }

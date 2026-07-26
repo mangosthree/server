@@ -130,6 +130,16 @@ map<uint32, int32> AiFactory::GetPlayerSpecTabs(Player* bot)
     return tabs;
 }
 
+bool AiFactory::IsFeralBearTank(Player* bot)
+{
+    // Cata's Feral tree (tab 1) covers both cat-DPS and bear-tank builds and
+    // talent point spending (PlayerbotFactory::InitTalents) is a random walk
+    // across the tree's rows -- it doesn't distinguish the two roles. Route
+    // deterministically off the bot's GUID instead, so a given bot is always
+    // bear or always cat, stable across restarts.
+    return (bot->GetGUIDLow() % 100) < sPlayerbotAIConfig.feralBearTankChance;
+}
+
 void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const facade, Engine* engine)
 {
     int tab = GetPlayerSpecTab(player);
@@ -228,9 +238,13 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
             {
                 engine->addStrategies("heal", "cure", "flee", "dps assist", NULL);
             }
+            else if (IsFeralBearTank(player))
+            {
+                engine->addStrategies("bear", "tank aoe", "threat", "flee", NULL);
+            }
             else
             {
-                engine->addStrategies("bear", "tank aoe", "flee", NULL);
+                engine->addStrategies("cat", "cat aoe", "dps assist", "flee", NULL);
             }
             break;
         case CLASS_HUNTER:
@@ -335,7 +349,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
             nonCombatEngine->addStrategies("dps assist", "cure", NULL);
             break;
         case CLASS_DRUID:
-            if (tab == 1)
+            if (tab == 1 && IsFeralBearTank(player))
             {
                 nonCombatEngine->addStrategy("tank aoe");
             }

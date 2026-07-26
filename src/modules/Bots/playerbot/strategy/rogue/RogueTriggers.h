@@ -20,12 +20,41 @@ namespace ai
     {
     public:
         RuptureTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "rupture") {}
+
+        virtual bool IsActive()
+        {
+            return DebuffTrigger::IsActive() && AI_VALUE2(uint8, "combo", "current target") >= 5;
+        }
     };
 
     class ExposeArmorTrigger : public DebuffTrigger
     {
     public:
         ExposeArmorTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "expose armor") {}
+    };
+
+    class RevealingStrikeTrigger : public DebuffTrigger
+    {
+    public:
+        RevealingStrikeTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "revealing strike") {}
+    };
+
+    class BladeFlurryTrigger : public BoostTrigger
+    {
+    public:
+        BladeFlurryTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "blade flurry") {}
+    };
+
+    class AdrenalineRushTrigger : public BoostTrigger
+    {
+    public:
+        AdrenalineRushTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "adrenaline rush") {}
+    };
+
+    class KillingSpreeTrigger : public BoostTrigger
+    {
+    public:
+        KillingSpreeTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "killing spree") {}
     };
 
     class KickInterruptEnemyHealerSpellTrigger : public InterruptEnemyHealerTrigger

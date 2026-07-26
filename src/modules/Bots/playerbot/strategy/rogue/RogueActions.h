@@ -74,6 +74,12 @@ namespace ai
         CastKillingSpreeAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "killing spree") {}
     };
 
+    class CastRevealingStrikeAction : public CastDebuffSpellAction
+    {
+    public:
+        CastRevealingStrikeAction(PlayerbotAI* ai) : CastDebuffSpellAction(ai, "revealing strike") {}
+    };
+
     class CastKickOnEnemyHealerAction : public CastSpellOnEnemyHealerAction
     {
     public:

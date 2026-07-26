@@ -85,8 +85,28 @@ void DpsRogueStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("rupture", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "rupture",
+        NextAction::array(0, new NextAction("rupture", ACTION_HIGH + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "expose armor",
         NextAction::array(0, new NextAction("expose armor", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "revealing strike",
+        NextAction::array(0, new NextAction("revealing strike", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "adrenaline rush",
+        NextAction::array(0, new NextAction("adrenaline rush", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "killing spree",
+        NextAction::array(0, new NextAction("killing spree", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "blade flurry",
+        NextAction::array(0, new NextAction("blade flurry", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium threat",

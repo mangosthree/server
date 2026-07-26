@@ -35,6 +35,11 @@ namespace ai
     {
     public:
         CastRuptureAction(PlayerbotAI* ai) : CastFinishingMoveAction(ai, "rupture") {}
+
+        virtual bool isPossible()
+        {
+            return CastFinishingMoveAction::isPossible() && !ai->HasAura("rupture", GetTarget());
+        }
     };
 
     class CastKidneyShotAction : public CastFinishingMoveAction

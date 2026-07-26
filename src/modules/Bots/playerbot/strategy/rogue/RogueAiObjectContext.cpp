@@ -58,6 +58,10 @@ namespace ai
                 creators["combo points for target available"] = &TriggerFactoryInternal::combo_points_for_target_available;
                 creators["stealth"] = &TriggerFactoryInternal::stealth;
                 creators["sap"] = &TriggerFactoryInternal::sap;
+                creators["revealing strike"] = &TriggerFactoryInternal::revealing_strike;
+                creators["blade flurry"] = &TriggerFactoryInternal::blade_flurry;
+                creators["adrenaline rush"] = &TriggerFactoryInternal::adrenaline_rush;
+                creators["killing spree"] = &TriggerFactoryInternal::killing_spree;
 
             }
 
@@ -70,6 +74,10 @@ namespace ai
             static Trigger* combo_points_for_target_available(PlayerbotAI* ai) { return new ComboPointsForTargetAvailableTrigger(ai); }
             static Trigger* stealth(PlayerbotAI* ai) { return new StealthTrigger(ai); }
             static Trigger* sap(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "sap"); }
+            static Trigger* revealing_strike(PlayerbotAI* ai) { return new RevealingStrikeTrigger(ai); }
+            static Trigger* blade_flurry(PlayerbotAI* ai) { return new BladeFlurryTrigger(ai); }
+            static Trigger* adrenaline_rush(PlayerbotAI* ai) { return new AdrenalineRushTrigger(ai); }
+            static Trigger* killing_spree(PlayerbotAI* ai) { return new KillingSpreeTrigger(ai); }
         };
     };
 };
@@ -107,6 +115,10 @@ namespace ai
                 creators["stealth"] = &AiObjectContextInternal::stealth;
                 creators["begin ambush"] = &AiObjectContextInternal::begin_ambush;
                 creators["end ambush"] = &AiObjectContextInternal::end_ambush;
+                creators["revealing strike"] = &AiObjectContextInternal::revealing_strike;
+                creators["blade flurry"] = &AiObjectContextInternal::blade_flurry;
+                creators["adrenaline rush"] = &AiObjectContextInternal::adrenaline_rush;
+                creators["killing spree"] = &AiObjectContextInternal::killing_spree;
             }
 
         private:
@@ -131,6 +143,10 @@ namespace ai
             static Action* stealth(PlayerbotAI* ai) { return new CastStealthAction(ai); }
             static Action* begin_ambush(PlayerbotAI* ai) { return new BeginAmbushAction(ai); }
             static Action* end_ambush(PlayerbotAI* ai) { return new RogueEndAmbushAction(ai); }
+            static Action* revealing_strike(PlayerbotAI* ai) { return new CastRevealingStrikeAction(ai); }
+            static Action* blade_flurry(PlayerbotAI* ai) { return new CastBladeFlurryAction(ai); }
+            static Action* adrenaline_rush(PlayerbotAI* ai) { return new CastAdrenalineRushAction(ai); }
+            static Action* killing_spree(PlayerbotAI* ai) { return new CastKillingSpreeAction(ai); }
         };
     };
 };

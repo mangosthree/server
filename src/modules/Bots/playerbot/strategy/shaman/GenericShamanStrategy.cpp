@@ -24,9 +24,11 @@ public:
 private:
     static ActionNode* earth_shock(PlayerbotAI* ai)
     {
+        // Instant filler/nuke; Flame Shock DoT upkeep is a separate trigger
+        // ("shock"), so no fallback chain here.
         return new ActionNode ("earth shock",
             /*P*/ NULL,
-            /*A*/ NextAction::array(0, new NextAction("flame shock"), NULL),
+            /*A*/ NULL,
             /*C*/ NULL);
     }
     static ActionNode* flametongue_weapon(PlayerbotAI* ai)
@@ -115,13 +117,17 @@ void GenericShamanStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         "purge",
         NextAction::array(0, new NextAction("purge", 10.0f), NULL)));
 
+    // Riptide is a cheap instant HoT: keep it rolling on moderately hurt
+    // targets, falling back to Healing Wave once it is already up/on cooldown.
     triggers.push_back(new TriggerNode(
         "party member medium health",
-        NextAction::array(0, new NextAction("healing surge on party", 25.0f), NULL)));
+        NextAction::array(0, new NextAction("riptide on party", ACTION_MEDIUM_HEAL + 3), new NextAction("healing wave on party", ACTION_MEDIUM_HEAL + 2), NULL)));
 
+    // Healing Surge is the fast, expensive heal reserved for the more
+    // dangerous "low health" band.
     triggers.push_back(new TriggerNode(
         "party member low health",
-        NextAction::array(0, new NextAction("riptide on party", 25.0f), NULL)));
+        NextAction::array(0, new NextAction("healing surge on party", ACTION_CRITICAL_HEAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium aoe heal",
@@ -129,11 +135,11 @@ void GenericShamanStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "medium health",
-        NextAction::array(0, new NextAction("healing surge", 26.0f), NULL)));
+        NextAction::array(0, new NextAction("riptide", ACTION_MEDIUM_HEAL + 3), new NextAction("healing wave", ACTION_MEDIUM_HEAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("riptide", 26.0f), NULL)));
+        NextAction::array(0, new NextAction("healing surge", ACTION_CRITICAL_HEAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "heroism",

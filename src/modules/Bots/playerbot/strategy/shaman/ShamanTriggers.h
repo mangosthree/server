@@ -137,9 +137,33 @@ namespace ai
     };
 
 
+    /// Flame Shock DoT upkeep: fires while the target lacks the debuff.
     class ShockTrigger : public DebuffTrigger {
     public:
         ShockTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "earth shock") {}
+        virtual bool IsActive();
+    };
+
+    /// Earth Shock instant filler/nuke: independent of Flame Shock upkeep.
+    class EarthShockReadyTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        EarthShockReadyTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "earth shock") {}
+    };
+
+    /// Guaranteed crit vs a target already carrying Flame Shock.
+    class LavaBurstTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        LavaBurstTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "lava burst") {}
+        virtual bool IsActive();
+    };
+
+    /// Fire Nova detonates Flame Shock; only useful once the DoT is up.
+    class FireNovaTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        FireNovaTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "fire nova") {}
         virtual bool IsActive();
     };
 
@@ -160,16 +184,40 @@ namespace ai
         BloodlustTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "bloodlust") {}
     };
 
+    /// Fires only at 5 stacks, when the next cast is fully instant.
     class MaelstromWeaponTrigger : public HasAuraTrigger
     {
     public:
         MaelstromWeaponTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "maelstrom weapon") {}
+        virtual bool IsActive();
     };
 
     class WindShearInterruptEnemyHealerSpellTrigger : public InterruptEnemyHealerTrigger
     {
     public:
         WindShearInterruptEnemyHealerSpellTrigger(PlayerbotAI* ai) : InterruptEnemyHealerTrigger(ai, "wind shear") {}
+    };
+
+    class UnleashElementsTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        UnleashElementsTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "unleash elements") {}
+        virtual string GetTargetName() { return "self target"; }
+    };
+
+    class FeralSpiritTrigger : public BoostTrigger
+    {
+    public:
+        FeralSpiritTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "feral spirit") {}
+    };
+
+    /// Maintains Earth Shield on the main tank rather than a rotating party member.
+    class EarthShieldOnTankTrigger : public BuffTrigger
+    {
+    public:
+        EarthShieldOnTankTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "earth shield") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("tank target"); }
+        virtual string getName() { return "earth shield on tank"; }
     };
 
 }

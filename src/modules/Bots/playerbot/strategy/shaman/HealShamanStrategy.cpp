@@ -55,4 +55,12 @@ void HealShamanStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "medium aoe",
         NextAction::array(0, new NextAction("healing stream totem", ACTION_LIGHT_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "earth shield on tank",
+        NextAction::array(0, new NextAction("earth shield on tank", ACTION_HIGH + 8), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "low aoe heal",
+        NextAction::array(0, new NextAction("healing rain", 28.0f), NULL)));
 }

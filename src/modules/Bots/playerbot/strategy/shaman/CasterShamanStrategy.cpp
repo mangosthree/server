@@ -50,7 +50,15 @@ void CasterShamanStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "shock",
-        NextAction::array(0, new NextAction("earth shock", 20.0f), NULL)));
+        NextAction::array(0, new NextAction("flame shock", 20.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "earth shock ready",
+        NextAction::array(0, new NextAction("earth shock", 21.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "lava burst",
+        NextAction::array(0, new NextAction("lava burst", 24.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "frost shock snare",

@@ -62,7 +62,23 @@ void MeleeShamanStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "shock",
-        NextAction::array(0, new NextAction("earth shock", 20.0f), NULL)));
+        NextAction::array(0, new NextAction("flame shock", 20.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "earth shock ready",
+        NextAction::array(0, new NextAction("earth shock", 21.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "maelstrom weapon",
+        NextAction::array(0, new NextAction("lightning bolt", 24.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "unleash elements",
+        NextAction::array(0, new NextAction("unleash elements", 23.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "feral spirit",
+        NextAction::array(0, new NextAction("feral spirit", 27.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "not facing target",
@@ -88,6 +104,6 @@ void MeleeAoeShamanStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("magma totem", 26.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "medium aoe",
+        "fire nova",
         NextAction::array(0, new NextAction("fire nova", 25.0f), NULL)));
 }

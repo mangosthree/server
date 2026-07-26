@@ -56,6 +56,20 @@ namespace ai
         CastEarthShieldOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "earth shield") {}
     };
 
+    /// Maintains Earth Shield on the main tank rather than a rotating party member.
+    class CastEarthShieldOnTankAction : public CastBuffSpellAction
+    {
+    public:
+        CastEarthShieldOnTankAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "earth shield") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("tank target"); }
+        virtual string getName() { return "earth shield on tank"; }
+    };
+
+    class CastHealingRainAction : public CastAoeHealSpellAction {
+    public:
+        CastHealingRainAction(PlayerbotAI* ai) : CastAoeHealSpellAction(ai, "healing rain") {}
+    };
+
     class CastWaterShieldAction : public CastBuffSpellAction {
     public:
         CastWaterShieldAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "water shield") {}
@@ -262,6 +276,12 @@ namespace ai
         CastLightningBoltAction(PlayerbotAI* ai) : CastSpellAction(ai, "lightning bolt") {}
     };
 
+    class CastLavaBurstAction : public CastSpellAction
+    {
+    public:
+        CastLavaBurstAction(PlayerbotAI* ai) : CastSpellAction(ai, "lava burst") {}
+    };
+
     class CastThunderstormAction : public CastMeleeSpellAction
     {
     public:
@@ -284,6 +304,18 @@ namespace ai
     {
     public:
         CastWindShearOnEnemyHealerAction(PlayerbotAI* ai) : CastSpellOnEnemyHealerAction(ai, "wind shear") {}
+    };
+
+    class CastUnleashElementsAction : public CastBuffSpellAction
+    {
+    public:
+        CastUnleashElementsAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "unleash elements") {}
+    };
+
+    class CastFeralSpiritAction : public CastBuffSpellAction
+    {
+    public:
+        CastFeralSpiritAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "feral spirit") {}
     };
 
 }

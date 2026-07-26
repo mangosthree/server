@@ -108,9 +108,21 @@ namespace ai
                 creators["bloodlust"] = &TriggerFactoryInternal::bloodlust;
                 creators["maelstrom weapon"] = &TriggerFactoryInternal::maelstrom_weapon;
                 creators["wind shear on enemy healer"] = &TriggerFactoryInternal::wind_shear_on_enemy_healer;
+                creators["earth shock ready"] = &TriggerFactoryInternal::earth_shock_ready;
+                creators["lava burst"] = &TriggerFactoryInternal::lava_burst;
+                creators["fire nova"] = &TriggerFactoryInternal::fire_nova;
+                creators["unleash elements"] = &TriggerFactoryInternal::unleash_elements;
+                creators["feral spirit"] = &TriggerFactoryInternal::feral_spirit;
+                creators["earth shield on tank"] = &TriggerFactoryInternal::earth_shield_on_tank;
             }
 
         private:
+            static Trigger* earth_shock_ready(PlayerbotAI* ai) { return new EarthShockReadyTrigger(ai); }
+            static Trigger* lava_burst(PlayerbotAI* ai) { return new LavaBurstTrigger(ai); }
+            static Trigger* fire_nova(PlayerbotAI* ai) { return new FireNovaTrigger(ai); }
+            static Trigger* unleash_elements(PlayerbotAI* ai) { return new UnleashElementsTrigger(ai); }
+            static Trigger* feral_spirit(PlayerbotAI* ai) { return new FeralSpiritTrigger(ai); }
+            static Trigger* earth_shield_on_tank(PlayerbotAI* ai) { return new EarthShieldOnTankTrigger(ai); }
             static Trigger* maelstrom_weapon(PlayerbotAI* ai) { return new MaelstromWeaponTrigger(ai); }
             static Trigger* heroism(PlayerbotAI* ai) { return new HeroismTrigger(ai); }
             static Trigger* bloodlust(PlayerbotAI* ai) { return new BloodlustTrigger(ai); }
@@ -174,6 +186,8 @@ namespace ai
                 creators["healing surge on party"] = &AiObjectContextInternal::healing_surge_on_party;
                 creators["earth shield"] = &AiObjectContextInternal::earth_shield;
                 creators["earth shield on party"] = &AiObjectContextInternal::earth_shield_on_party;
+                creators["earth shield on tank"] = &AiObjectContextInternal::earth_shield_on_tank;
+                creators["healing rain"] = &AiObjectContextInternal::healing_rain;
                 creators["chain heal"] = &AiObjectContextInternal::chain_heal;
                 creators["riptide"] = &AiObjectContextInternal::riptide;
                 creators["riptide on party"] = &AiObjectContextInternal::riptide_on_party;
@@ -192,9 +206,12 @@ namespace ai
                 creators["frost shock"] = &AiObjectContextInternal::frost_shock;
                 creators["chain lightning"] = &AiObjectContextInternal::chain_lightning;
                 creators["lightning bolt"] = &AiObjectContextInternal::lightning_bolt;
+                creators["lava burst"] = &AiObjectContextInternal::lava_burst;
                 creators["thunderstorm"] = &AiObjectContextInternal::thunderstorm;
                 creators["heroism"] = &AiObjectContextInternal::heroism;
                 creators["bloodlust"] = &AiObjectContextInternal::bloodlust;
+                creators["unleash elements"] = &AiObjectContextInternal::unleash_elements;
+                creators["feral spirit"] = &AiObjectContextInternal::feral_spirit;
             }
 
         private:
@@ -202,6 +219,9 @@ namespace ai
             static Action* bloodlust(PlayerbotAI* ai) { return new CastBloodlustAction(ai); }
             static Action* thunderstorm(PlayerbotAI* ai) { return new CastThunderstormAction(ai); }
             static Action* lightning_bolt(PlayerbotAI* ai) { return new CastLightningBoltAction(ai); }
+            static Action* lava_burst(PlayerbotAI* ai) { return new CastLavaBurstAction(ai); }
+            static Action* unleash_elements(PlayerbotAI* ai) { return new CastUnleashElementsAction(ai); }
+            static Action* feral_spirit(PlayerbotAI* ai) { return new CastFeralSpiritAction(ai); }
             static Action* chain_lightning(PlayerbotAI* ai) { return new CastChainLightningAction(ai); }
             static Action* frost_shock(PlayerbotAI* ai) { return new CastFrostShockAction(ai); }
             static Action* earth_shock(PlayerbotAI* ai) { return new CastEarthShockAction(ai); }
@@ -236,6 +256,8 @@ namespace ai
             static Action* healing_surge_on_party(PlayerbotAI* ai) { return new CastHealingSurgeOnPartyAction(ai); }
             static Action* earth_shield(PlayerbotAI* ai) { return new CastEarthShieldAction(ai); }
             static Action* earth_shield_on_party(PlayerbotAI* ai) { return new CastEarthShieldOnPartyAction(ai); }
+            static Action* earth_shield_on_tank(PlayerbotAI* ai) { return new CastEarthShieldOnTankAction(ai); }
+            static Action* healing_rain(PlayerbotAI* ai) { return new CastHealingRainAction(ai); }
             static Action* chain_heal(PlayerbotAI* ai) { return new CastChainHealAction(ai); }
             static Action* riptide(PlayerbotAI* ai) { return new CastRiptideAction(ai); }
             static Action* riptide_on_party(PlayerbotAI* ai) { return new CastRiptideOnPartyAction(ai); }

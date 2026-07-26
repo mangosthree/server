@@ -37,6 +37,45 @@ bool ShamanWeaponTrigger::IsActive()
 
 bool ShockTrigger::IsActive()
 {
-    return SpellTrigger::IsActive()
-            && !ai->HasAnyAuraOf(GetTarget(), "frost shock", "earth shock", "flame shock", NULL);
+    return SpellTrigger::IsActive() && !ai->HasAura("flame shock", GetTarget());
+}
+
+bool LavaBurstTrigger::IsActive()
+{
+    Unit* target = GetTarget();
+    return SpellCanBeCastTrigger::IsActive() && target && ai->HasAura("flame shock", target);
+}
+
+bool FireNovaTrigger::IsActive()
+{
+    Unit* target = GetTarget();
+    return AI_VALUE(uint8, "attacker count") >= 3 &&
+            SpellCanBeCastTrigger::IsActive() &&
+            target && ai->HasAura("flame shock", target);
+}
+
+bool MaelstromWeaponTrigger::IsActive()
+{
+    Unit* target = GetTarget();
+    if (!target)
+    {
+        return false;
+    }
+
+    uint32 spellId = AI_VALUE2(uint32, "spell id", "maelstrom weapon");
+    if (!spellId)
+    {
+        return false;
+    }
+
+    for (uint32 effect = EFFECT_INDEX_0; effect <= EFFECT_INDEX_2; effect++)
+    {
+        Aura* aura = target->GetAura(spellId, (SpellEffectIndex)effect);
+        if (aura && aura->GetStackAmount() >= 5)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }

@@ -41,6 +41,14 @@ bool AttackMyTargetAction::Execute(Event event)
 
 bool AttackAction::Attack(Unit* target)
 {
+    // Already auto-attacking this exact target: nothing changed, report FAILED
+    // so the engine falls through to lower-relevance actions instead of
+    // ending the tick on a no-op (this starved e.g. Arms rotation fillers).
+    if (target && bot->getVictim() == target)
+    {
+        return false;
+    }
+
     MotionMaster &mm = *bot->GetMotionMaster();
     if (mm.GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE || bot->IsTaxiFlying())
     {

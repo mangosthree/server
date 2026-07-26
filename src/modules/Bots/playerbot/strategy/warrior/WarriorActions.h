@@ -33,6 +33,24 @@ namespace ai
         CastCleaveAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "cleave") {}
     };
 
+    // battle, berserker
+    class CastSweepingStrikesAction : public CastBuffSpellAction {
+    public:
+        CastSweepingStrikesAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "sweeping strikes") {}
+    };
+
+    // battle
+    class CastBladestormAction : public CastBuffSpellAction {
+    public:
+        CastBladestormAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "bladestorm") {}
+    };
+
+    // berserker
+    class CastWhirlwindAction : public CastMeleeSpellAction {
+    public:
+        CastWhirlwindAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "whirlwind") {}
+    };
+
     class CastBloodthirstAction : public CastMeleeSpellAction {
     public:
         CastBloodthirstAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "bloodthirst") {}
@@ -60,6 +78,18 @@ namespace ai
     class CastRecklessnessAction : public CastBuffSpellAction {
     public:
         CastRecklessnessAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "recklessness") {}
+    };
+
+    // battle, berserker
+    class CastDeadlyCalmAction : public CastBuffSpellAction {
+    public:
+        CastDeadlyCalmAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "deadly calm") {}
+    };
+
+    // berserker
+    class CastBerserkerStanceAction : public CastBuffSpellAction {
+    public:
+        CastBerserkerStanceAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "berserker stance") {}
     };
 
     // battle, berserker

@@ -21,6 +21,91 @@ namespace ai
         RevengeAvailableTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "revenge") {}
     };
 
+    class ShieldSlamAvailableTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        ShieldSlamAvailableTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "shield slam") {}
+    };
+
+    class ShieldBlockAvailableTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        ShieldBlockAvailableTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "shield block") {}
+    };
+
+    class BloodthirstAvailableTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        BloodthirstAvailableTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "bloodthirst") {}
+    };
+
+    DEBUFF_TRIGGER(ThunderClapDebuffTrigger, "thunder clap", "thunder clap")
+    DEBUFF_TRIGGER(DemoralizingShoutDebuffTrigger, "demoralizing shout", "demoralizing shout")
+
+    // ID-based proc trigger: several Arms/Fury/Prot procs share the exact
+    // display name of their enabling talent (a permanent passive aura), so a
+    // name-based HasAuraTrigger fires every tick. Check the proc's spell id
+    // on the bot directly instead.
+    class HasAuraIdTrigger : public Trigger
+    {
+    public:
+        HasAuraIdTrigger(PlayerbotAI* ai, string name, uint32 spellId) : Trigger(ai, name)
+        {
+            this->spellId = spellId;
+        }
+        virtual bool IsActive()
+        {
+            return ai->HasAura(spellId, ai->GetBot());
+        }
+
+    protected:
+        uint32 spellId;
+    };
+
+    // runtime-verify: Sword and Board proc id 50227 (free Shield Slam)
+    class SwordAndBoardProcTrigger : public HasAuraIdTrigger
+    {
+    public:
+        SwordAndBoardProcTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "sword and board", 50227) {}
+    };
+
+    // runtime-verify: Battle Trance proc id 85742 (free Heroic Strike)
+    class BattleTranceProcTrigger : public HasAuraIdTrigger
+    {
+    public:
+        BattleTranceProcTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "battle trance", 85742) {}
+    };
+
+    // runtime-verify: Bloodsurge proc id 46916 (instant Slam, Fury)
+    class BloodsurgeProcTrigger : public HasAuraIdTrigger
+    {
+    public:
+        BloodsurgeProcTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "bloodsurge", 46916) {}
+    };
+
+    // Fury gate: bot knows Bloodthirst (spec check) and is not yet in Berserker Stance
+    class BerserkerStanceTrigger : public BuffTrigger
+    {
+    public:
+        BerserkerStanceTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "berserker stance") {}
+        virtual bool IsActive()
+        {
+            return BuffTrigger::IsActive() && AI_VALUE2(uint32, "spell id", "bloodthirst") != 0;
+        }
+    };
+
+    // Fury enrage-weave gate: not already enraged/boosted
+    class NotEnragedTrigger : public Trigger
+    {
+    public:
+        NotEnragedTrigger(PlayerbotAI* ai) : Trigger(ai, "not enraged") {}
+        virtual bool IsActive()
+        {
+            return AI_VALUE2(uint32, "spell id", "bloodthirst") != 0 &&
+                !ai->HasAnyAuraOf(ai->GetBot(), "enrage", "death wish", "berserker rage", NULL);
+        }
+    };
+
     /// Cata 4.3.4: Shield Bash removed; Pummel interrupts in all stances
     class PummelInterruptSpellTrigger : public InterruptSpellTrigger
     {
@@ -47,11 +132,13 @@ namespace ai
         ColossusSmashAvailableTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "colossus smash") {}
     };
 
-    // runtime-verify: Arms Overpower is enabled by the "Taste for Blood" proc
-    class TasteForBloodTrigger : public HasAuraTrigger
+    // runtime-verify: Arms Overpower proc id 60503 ("Taste for Blood"); the
+    // display name collides with the permanent enabling talent, so this must
+    // be id-based, not HasAuraTrigger(name).
+    class TasteForBloodTrigger : public HasAuraIdTrigger
     {
     public:
-        TasteForBloodTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "taste for blood") {}
+        TasteForBloodTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "taste for blood", 60503) {}
     };
 
     class RagingBlowAvailableTrigger : public SpellCanBeCastTrigger
@@ -66,10 +153,10 @@ namespace ai
         RecklessnessTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "recklessness") {}
     };
 
-    class SwordAndBoardTrigger : public HasAuraTrigger
+    class DeadlyCalmTrigger : public BoostTrigger
     {
     public:
-        SwordAndBoardTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "sword and board") {}
+        DeadlyCalmTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "deadly calm") {}
     };
 
     class ConcussionBlowTrigger : public SnareTargetTrigger

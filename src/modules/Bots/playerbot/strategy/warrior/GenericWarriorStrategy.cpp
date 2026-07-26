@@ -51,10 +51,7 @@ void GenericWarriorStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         "battle shout",
         NextAction::array(0, new NextAction("battle shout", ACTION_HIGH + 1), NULL)));
 
-    triggers.push_back(new TriggerNode(
-        "rend",
-        NextAction::array(0, new NextAction("rend", ACTION_NORMAL + 1), NULL)));
-
+    // rend priority is spec-specific (Arms vs Prot); wired in each subclass
     triggers.push_back(new TriggerNode(
         "pummel",
         NextAction::array(0, new NextAction("pummel", ACTION_INTERRUPT + 4), NULL)));

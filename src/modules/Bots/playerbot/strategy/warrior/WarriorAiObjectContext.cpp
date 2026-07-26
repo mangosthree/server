@@ -77,6 +77,17 @@ namespace ai
                 creators["taste for blood"] = &TriggerFactoryInternal::taste_for_blood;
                 creators["raging blow"] = &TriggerFactoryInternal::raging_blow;
                 creators["recklessness"] = &TriggerFactoryInternal::recklessness;
+                creators["revenge"] = &TriggerFactoryInternal::revenge;
+                creators["shield slam"] = &TriggerFactoryInternal::shield_slam;
+                creators["shield block"] = &TriggerFactoryInternal::shield_block;
+                creators["bloodthirst"] = &TriggerFactoryInternal::bloodthirst;
+                creators["thunder clap"] = &TriggerFactoryInternal::thunder_clap;
+                creators["demoralizing shout"] = &TriggerFactoryInternal::demoralizing_shout;
+                creators["berserker stance"] = &TriggerFactoryInternal::berserker_stance;
+                creators["not enraged"] = &TriggerFactoryInternal::not_enraged;
+                creators["battle trance"] = &TriggerFactoryInternal::battle_trance;
+                creators["bloodsurge"] = &TriggerFactoryInternal::bloodsurge;
+                creators["deadly calm"] = &TriggerFactoryInternal::deadly_calm;
 
             }
 
@@ -90,13 +101,24 @@ namespace ai
             static Trigger* pummel(PlayerbotAI* ai) { return new PummelInterruptSpellTrigger(ai); }
             static Trigger* disarm(PlayerbotAI* ai) { return new DisarmDebuffTrigger(ai); }
             static Trigger* concussion_blow(PlayerbotAI* ai) { return new ConcussionBlowTrigger(ai); }
-            static Trigger* SwordAndBoard(PlayerbotAI* ai) { return new SwordAndBoardTrigger(ai); }
+            static Trigger* SwordAndBoard(PlayerbotAI* ai) { return new SwordAndBoardProcTrigger(ai); }
             static Trigger* pummel_on_enemy_healer(PlayerbotAI* ai) { return new PummelInterruptEnemyHealerSpellTrigger(ai); }
             static Trigger* mortal_strike(PlayerbotAI* ai) { return new MortalStrikeAvailableTrigger(ai); }
             static Trigger* colossus_smash(PlayerbotAI* ai) { return new ColossusSmashAvailableTrigger(ai); }
             static Trigger* taste_for_blood(PlayerbotAI* ai) { return new TasteForBloodTrigger(ai); }
             static Trigger* raging_blow(PlayerbotAI* ai) { return new RagingBlowAvailableTrigger(ai); }
             static Trigger* recklessness(PlayerbotAI* ai) { return new RecklessnessTrigger(ai); }
+            static Trigger* revenge(PlayerbotAI* ai) { return new RevengeAvailableTrigger(ai); }
+            static Trigger* shield_slam(PlayerbotAI* ai) { return new ShieldSlamAvailableTrigger(ai); }
+            static Trigger* shield_block(PlayerbotAI* ai) { return new ShieldBlockAvailableTrigger(ai); }
+            static Trigger* bloodthirst(PlayerbotAI* ai) { return new BloodthirstAvailableTrigger(ai); }
+            static Trigger* thunder_clap(PlayerbotAI* ai) { return new ThunderClapDebuffTrigger(ai); }
+            static Trigger* demoralizing_shout(PlayerbotAI* ai) { return new DemoralizingShoutDebuffTrigger(ai); }
+            static Trigger* berserker_stance(PlayerbotAI* ai) { return new BerserkerStanceTrigger(ai); }
+            static Trigger* not_enraged(PlayerbotAI* ai) { return new NotEnragedTrigger(ai); }
+            static Trigger* battle_trance(PlayerbotAI* ai) { return new BattleTranceProcTrigger(ai); }
+            static Trigger* bloodsurge(PlayerbotAI* ai) { return new BloodsurgeProcTrigger(ai); }
+            static Trigger* deadly_calm(PlayerbotAI* ai) { return new DeadlyCalmTrigger(ai); }
         };
     };
 };
@@ -150,6 +172,11 @@ namespace ai
                 creators["colossus smash"] = &AiObjectContextInternal::colossus_smash;
                 creators["raging blow"] = &AiObjectContextInternal::raging_blow;
                 creators["recklessness"] = &AiObjectContextInternal::recklessness;
+                creators["deadly calm"] = &AiObjectContextInternal::deadly_calm;
+                creators["berserker stance"] = &AiObjectContextInternal::berserker_stance;
+                creators["sweeping strikes"] = &AiObjectContextInternal::sweeping_strikes;
+                creators["bladestorm"] = &AiObjectContextInternal::bladestorm;
+                creators["whirlwind"] = &AiObjectContextInternal::whirlwind;
             }
 
         private:
@@ -190,6 +217,11 @@ namespace ai
             static Action* colossus_smash(PlayerbotAI* ai) { return new CastColossusSmashAction(ai); }
             static Action* raging_blow(PlayerbotAI* ai) { return new CastRagingBlowAction(ai); }
             static Action* recklessness(PlayerbotAI* ai) { return new CastRecklessnessAction(ai); }
+            static Action* deadly_calm(PlayerbotAI* ai) { return new CastDeadlyCalmAction(ai); }
+            static Action* berserker_stance(PlayerbotAI* ai) { return new CastBerserkerStanceAction(ai); }
+            static Action* sweeping_strikes(PlayerbotAI* ai) { return new CastSweepingStrikesAction(ai); }
+            static Action* bladestorm(PlayerbotAI* ai) { return new CastBladestormAction(ai); }
+            static Action* whirlwind(PlayerbotAI* ai) { return new CastWhirlwindAction(ai); }
 
         };
     };

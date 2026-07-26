@@ -84,9 +84,35 @@ void TankWarriorStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 {
     GenericWarriorStrategy::InitTriggers(triggers);
 
+    // Shield Slam is on-cooldown priority, not rage-gated; Sword and Board still free-casts it
     triggers.push_back(new TriggerNode(
-        "medium rage available",
-        NextAction::array(0, new NextAction("shield slam", ACTION_NORMAL + 2), new NextAction("heroic strike", ACTION_NORMAL + 2), NULL)));
+        "shield slam",
+        NextAction::array(0, new NextAction("shield slam", ACTION_NORMAL + 6), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "revenge",
+        NextAction::array(0, new NextAction("revenge", ACTION_NORMAL + 5), NULL)));
+
+    // Prot rend, moved off the Generic default priority
+    triggers.push_back(new TriggerNode(
+        "rend",
+        NextAction::array(0, new NextAction("rend", ACTION_NORMAL + 4), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "high rage available",
+        NextAction::array(0, new NextAction("heroic strike", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "shield block",
+        NextAction::array(0, new NextAction("shield block", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "thunder clap",
+        NextAction::array(0, new NextAction("thunder clap", ACTION_NORMAL + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "demoralizing shout",
+        NextAction::array(0, new NextAction("demoralizing shout", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "disarm",

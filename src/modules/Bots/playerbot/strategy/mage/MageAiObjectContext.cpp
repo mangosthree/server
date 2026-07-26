@@ -98,9 +98,12 @@ namespace ai
                 creators["spellsteal"] = &TriggerFactoryInternal::spellsteal;
                 creators["hot streak"] = &TriggerFactoryInternal::hot_streak;
                 creators["living bomb"] = &TriggerFactoryInternal::living_bomb;
-                creators["missile barrage"] = &TriggerFactoryInternal::missile_barrage;
+                creators["arcane missiles proc"] = &TriggerFactoryInternal::arcane_missiles_proc;
                 creators["arcane blast"] = &TriggerFactoryInternal::arcane_blast;
+                creators["arcane blast capped"] = &TriggerFactoryInternal::arcane_blast_capped;
                 creators["counterspell on enemy healer"] = &TriggerFactoryInternal::counterspell_enemy_healer;
+                creators["fingers of frost"] = &TriggerFactoryInternal::fingers_of_frost;
+                creators["brain freeze"] = &TriggerFactoryInternal::brain_freeze;
 
             }
 
@@ -119,9 +122,12 @@ namespace ai
             static Trigger* polymorph(PlayerbotAI* ai) { return new PolymorphTrigger(ai); }
             static Trigger* spellsteal(PlayerbotAI* ai) { return new SpellstealTrigger(ai); }
             static Trigger* living_bomb(PlayerbotAI* ai) { return new LivingBombTrigger(ai); }
-            static Trigger* missile_barrage(PlayerbotAI* ai) { return new MissileBarrageTrigger(ai); }
+            static Trigger* arcane_missiles_proc(PlayerbotAI* ai) { return new ArcaneMissilesProcTrigger(ai); }
             static Trigger* arcane_blast(PlayerbotAI* ai) { return new ArcaneBlastTrigger(ai); }
+            static Trigger* arcane_blast_capped(PlayerbotAI* ai) { return new ArcaneBlastCappedTrigger(ai); }
             static Trigger* counterspell_enemy_healer(PlayerbotAI* ai) { return new CounterspellEnemyHealerTrigger(ai); }
+            static Trigger* fingers_of_frost(PlayerbotAI* ai) { return new FingersOfFrostTrigger(ai); }
+            static Trigger* brain_freeze(PlayerbotAI* ai) { return new BrainFreezeTrigger(ai); }
         };
     };
 };
@@ -141,6 +147,10 @@ namespace ai
                 creators["frostbolt"] = &AiObjectContextInternal::frostbolt;
                 creators["blizzard"] = &AiObjectContextInternal::blizzard;
                 creators["frost nova"] = &AiObjectContextInternal::frost_nova;
+                creators["ice lance"] = &AiObjectContextInternal::ice_lance;
+                creators["frostfire bolt"] = &AiObjectContextInternal::frostfire_bolt;
+                creators["deep freeze"] = &AiObjectContextInternal::deep_freeze;
+                creators["summon water elemental"] = &AiObjectContextInternal::summon_water_elemental;
                 creators["arcane intellect"] = &AiObjectContextInternal::arcane_intellect;
                 creators["arcane intellect on party"] = &AiObjectContextInternal::arcane_intellect_on_party;
                 creators["conjure refreshment"] = &AiObjectContextInternal::conjure_refreshment;
@@ -179,6 +189,10 @@ namespace ai
             static Action* frostbolt(PlayerbotAI* ai) { return new CastFrostboltAction(ai); }
             static Action* blizzard(PlayerbotAI* ai) { return new CastBlizzardAction(ai); }
             static Action* frost_nova(PlayerbotAI* ai) { return new CastFrostNovaAction(ai); }
+            static Action* ice_lance(PlayerbotAI* ai) { return new CastIceLanceAction(ai); }
+            static Action* frostfire_bolt(PlayerbotAI* ai) { return new CastFrostfireBoltAction(ai); }
+            static Action* deep_freeze(PlayerbotAI* ai) { return new CastDeepFreezeAction(ai); }
+            static Action* summon_water_elemental(PlayerbotAI* ai) { return new CastSummonWaterElementalAction(ai); }
             static Action* arcane_intellect(PlayerbotAI* ai) { return new CastArcaneIntellectAction(ai); }
             static Action* arcane_intellect_on_party(PlayerbotAI* ai) { return new CastArcaneIntellectOnPartyAction(ai); }
             static Action* conjure_refreshment(PlayerbotAI* ai) { return new CastConjureRefreshmentAction(ai); }

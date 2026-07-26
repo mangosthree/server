@@ -72,6 +72,33 @@ namespace ai
         CastBlizzardAction(PlayerbotAI* ai) : CastSpellAction(ai, "blizzard") {}
     };
 
+    class CastIceLanceAction : public CastSpellAction
+    {
+    public:
+        CastIceLanceAction(PlayerbotAI* ai) : CastSpellAction(ai, "ice lance") {}
+    };
+
+    class CastFrostfireBoltAction : public CastSpellAction
+    {
+    public:
+        CastFrostfireBoltAction(PlayerbotAI* ai) : CastSpellAction(ai, "frostfire bolt") {}
+    };
+
+    /// Talent-gated finisher; requires the target already frozen (Fingers of
+    /// Frost/Frost Nova). isPossible() no-ops for non-Frost via HasSpell.
+    class CastDeepFreezeAction : public CastSpellAction
+    {
+    public:
+        CastDeepFreezeAction(PlayerbotAI* ai) : CastSpellAction(ai, "deep freeze") {}
+    };
+
+    /// Frost-only pet; isPossible() no-ops for Fire/Arcane via HasSpell.
+    class CastSummonWaterElementalAction : public CastBuffSpellAction
+    {
+    public:
+        CastSummonWaterElementalAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "summon water elemental") {}
+    };
+
     class CastArcaneIntellectAction : public CastBuffSpellAction
     {
     public:

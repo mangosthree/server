@@ -39,14 +39,26 @@ namespace ai
         HotStreakTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "hot streak") {}
     };
 
-    class MissileBarrageTrigger : public HasAuraTrigger {
+    /// Cata proc aura (the WotLK "missile barrage" name is gone); fires the free
+    /// instant Arcane Missiles cast.
+    class ArcaneMissilesProcTrigger : public HasAuraTrigger {
     public:
-        MissileBarrageTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "missile barrage") {}
+        ArcaneMissilesProcTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "arcane missiles!") {}
     };
 
+    /// Active while the self "arcane blast" buff is below its 4-stack cap, so the
+    /// bot keeps stacking instead of alternating AB/Barrage every cycle.
     class ArcaneBlastTrigger : public BuffTrigger {
     public:
         ArcaneBlastTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "arcane blast") {}
+        virtual bool IsActive();
+    };
+
+    /// Active once "arcane blast" is at its 4-stack cap; dumps via Barrage.
+    class ArcaneBlastCappedTrigger : public BuffTrigger {
+    public:
+        ArcaneBlastCappedTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "arcane blast") {}
+        virtual bool IsActive();
     };
 
     class CounterspellInterruptSpellTrigger : public InterruptSpellTrigger
@@ -65,6 +77,22 @@ namespace ai
     {
     public:
         IcyVeinsTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "icy veins") {}
+    };
+
+    /// core-proc-dependent, runtime-verify: fires ice lance / deep freeze; the
+    /// core must actually proc the "fingers of frost" self-buff.
+    class FingersOfFrostTrigger : public HasAuraTrigger
+    {
+    public:
+        FingersOfFrostTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "fingers of frost") {}
+    };
+
+    /// core-proc-dependent, runtime-verify: fires frostfire bolt; the core must
+    /// actually proc the "brain freeze" self-buff.
+    class BrainFreezeTrigger : public HasAuraTrigger
+    {
+    public:
+        BrainFreezeTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "brain freeze") {}
     };
 
     class PolymorphTrigger : public HasCcTargetTrigger

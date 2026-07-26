@@ -52,13 +52,21 @@ void ArcaneMageStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 {
     GenericMageStrategy::InitTriggers(triggers);
 
+    // Stacks Arcane Blast to its 4-stack cap; ArcaneBlastTrigger goes inactive
+    // once capped so this and the "capped" dump below never fire together.
     triggers.push_back(new TriggerNode(
         "arcane blast",
         NextAction::array(0, new NextAction("arcane blast", 15.0f), NULL)));
 
+    // Capped at 4 stacks with no proc up: dump via Barrage instead of re-stacking.
     triggers.push_back(new TriggerNode(
-        "missile barrage",
-        NextAction::array(0, new NextAction("arcane missiles", 15.0f), NULL)));
+        "arcane blast capped",
+        NextAction::array(0, new NextAction("arcane barrage", 18.0f), NULL)));
 
+    // Cata proc ("Arcane Missiles!"), replaces the dead WotLK "missile barrage"
+    // trigger; free instant cast, so it outranks everything else in the rotation.
+    triggers.push_back(new TriggerNode(
+        "arcane missiles proc",
+        NextAction::array(0, new NextAction("arcane missiles", 26.0f), NULL)));
 }
 

@@ -63,6 +63,12 @@ void GenericMageNonCombatStrategy::InitTriggers(std::list<TriggerNode*> &trigger
     triggers.push_back(new TriggerNode(
         "no food",
         NextAction::array(0, new NextAction("conjure refreshment", 15.0f), NULL)));
+
+    // Frost-only pet; isPossible() no-ops for Fire/Arcane bots via HasSpell,
+    // mirroring the warlock "no pet" -> summon felguard/imp pattern.
+    triggers.push_back(new TriggerNode(
+        "no pet",
+        NextAction::array(0, new NextAction("summon water elemental", 17.0f), NULL)));
 }
 
 void MageBuffManaStrategy::InitTriggers(std::list<TriggerNode*> &triggers)

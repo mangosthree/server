@@ -7,7 +7,9 @@ using namespace ai;
 
 NextAction** FireMageStrategy::getDefaultActions()
 {
-    return NextAction::array(0, new NextAction("scorch", 7.0f), new NextAction("fireball", 6.0f), new NextAction("fire blast", 5.0f), NULL);
+    // Fireball is the primary single-target filler; Scorch is the movement/
+    // instant-cast fallback; Fire Blast is the lowest-priority instant filler.
+    return NextAction::array(0, new NextAction("fireball", 7.0f), new NextAction("scorch", 6.0f), new NextAction("fire blast", 5.0f), NULL);
 }
 
 void FireMageStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
@@ -29,6 +31,11 @@ void FireMageStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "enemy too close for spell",
         NextAction::array(0, new NextAction("dragon's breath", 70.0f), NULL)));
+
+    // Maintain Living Bomb as a single-target DoT too, not only in "fire aoe".
+    triggers.push_back(new TriggerNode(
+        "living bomb",
+        NextAction::array(0, new NextAction("living bomb", 22.0f), NULL)));
 }
 
 void FireMageAoeStrategy::InitTriggers(std::list<TriggerNode*> &triggers)

@@ -216,7 +216,7 @@ namespace ai
     {
     public:
         EarthShieldOnTankTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "earth shield") {}
-        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("tank target"); }
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("party tank"); }
         virtual string getName() { return "earth shield on tank"; }
     };
 

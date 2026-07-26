@@ -148,7 +148,7 @@ namespace ai {
     {
     public:
         LifebloomOnTankTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "lifebloom") {}
-        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("tank target"); }
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("party tank"); }
         virtual string getName() { return "lifebloom on tank"; }
     };
 }

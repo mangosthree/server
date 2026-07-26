@@ -193,7 +193,7 @@ namespace ai
     {
     public:
         CastBeaconOfLightOnTankAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "beacon of light") {}
-        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("tank target"); }
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("party tank"); }
         virtual string getName() { return "beacon of light on tank"; }
     };
 

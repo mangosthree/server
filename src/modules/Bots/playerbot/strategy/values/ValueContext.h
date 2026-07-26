@@ -14,6 +14,7 @@
 #include "MasterTargetValue.h"
 #include "LineTargetValue.h"
 #include "TankTargetValue.h"
+#include "PartyTankValue.h"
 #include "DpsTargetValue.h"
 #include "CcTargetValue.h"
 #include "CurrentCcTargetValue.h"
@@ -89,6 +90,7 @@ namespace ai
             creators["master target"] = &ValueContext::master;
             creators["line target"] = &ValueContext::line_target;
             creators["tank target"] = &ValueContext::tank_target;
+            creators["party tank"] = &ValueContext::party_tank;
             creators["dps target"] = &ValueContext::dps_target;
             creators["least hp target"] = &ValueContext::least_hp_target;
             creators["enemy player target"] = &ValueContext::enemy_player_target;
@@ -247,6 +249,7 @@ namespace ai
         static UntypedValue* master(PlayerbotAI* ai) { return new MasterTargetValue(ai); }
         static UntypedValue* line_target(PlayerbotAI* ai) { return new LineTargetValue(ai); }
         static UntypedValue* tank_target(PlayerbotAI* ai) { return new TankTargetValue(ai); }
+        static UntypedValue* party_tank(PlayerbotAI* ai) { return new PartyTankValue(ai); }
         static UntypedValue* dps_target(PlayerbotAI* ai) { return new DpsTargetValue(ai); }
         static UntypedValue* least_hp_target(PlayerbotAI* ai) { return new LeastHpTargetValue(ai); }
         static UntypedValue* enemy_player_target(PlayerbotAI* ai) { return new EnemyPlayerValue(ai); }

@@ -72,7 +72,7 @@ namespace ai
     {
     public:
         CastMisdirectionAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "misdirection") {}
-        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("tank target"); }
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("party tank"); }
         virtual string getName() { return "misdirection on tank"; }
     };
 

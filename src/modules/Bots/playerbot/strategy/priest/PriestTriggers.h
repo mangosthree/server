@@ -77,4 +77,20 @@ namespace ai
 
         virtual string GetTargetName() { return "party tank"; }
     };
+
+    /// Fires when the tank lacks Weakened Soul, i.e. PW:S can be reapplied
+    class TankWeakenedSoulAbsentTrigger : public BuffTrigger
+    {
+    public:
+        TankWeakenedSoulAbsentTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "weakened soul") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("party tank"); }
+        virtual string getName() { return "power word: shield on tank"; }
+    };
+
+    /// Holy: fires when the Chakra: Serenity state aura is absent (cast id 81208)
+    class ChakraSerenityTrigger : public BuffTrigger
+    {
+    public:
+        ChakraSerenityTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "chakra: serenity") {}
+    };
 }

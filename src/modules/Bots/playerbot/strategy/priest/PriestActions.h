@@ -86,12 +86,16 @@ namespace ai
     class CastPowerWordShieldAction : public CastBuffSpellAction {
     public:
         CastPowerWordShieldAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "power word: shield") {}
+        /// PW:S applies Weakened Soul (blocks re-shield 15s); don't waste it
+        virtual bool isUseful() { return !ai->HasAura("weakened soul", GetTarget()) && CastBuffSpellAction::isUseful(); }
     };
 
     class CastPowerWordShieldOnPartyAction : public HealPartyMemberAction
     {
     public:
         CastPowerWordShieldOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "power word: shield") {}
+        /// PW:S applies Weakened Soul (blocks re-shield 15s); don't waste it
+        virtual bool isUseful() { return !ai->HasAura("weakened soul", GetTarget()) && HealPartyMemberAction::isUseful(); }
 
         virtual string getName() { return "power word: shield on party"; }
     };
@@ -267,6 +271,22 @@ namespace ai
         CastGuardianSpiritOnTankAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "guardian spirit") {}
         virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("party tank"); }
         virtual string getName() { return "guardian spirit on tank"; }
+    };
+
+    /// Discipline: keep Power Word: Shield up on the tank on cooldown
+    class CastPowerWordShieldOnTankAction : public CastBuffSpellAction
+    {
+    public:
+        CastPowerWordShieldOnTankAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "power word: shield") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("party tank"); }
+        virtual string getName() { return "power word: shield on tank"; }
+    };
+
+    /// Holy: Chakra: Serenity stance for single-target healing (state aura, cast id 81208)
+    class CastChakraSerenityAction : public CastBuffSpellAction
+    {
+    public:
+        CastChakraSerenityAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "chakra: serenity") {}
     };
 
 }

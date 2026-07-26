@@ -52,8 +52,9 @@ void ShadowPriestAoeStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         "shadow word: pain on attacker",
         NextAction::array(0, new NextAction("shadow word: pain on attacker", 31.0f), NULL)));
 
+    // Mind Sear is worth its channel at 5+ targets (guide); gate on high aoe
     triggers.push_back(new TriggerNode(
-        "medium aoe",
+        "high aoe",
         NextAction::array(0, new NextAction("mind sear", 30.0f), NULL)));
 }
 

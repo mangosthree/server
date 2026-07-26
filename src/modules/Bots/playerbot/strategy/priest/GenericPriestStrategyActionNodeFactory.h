@@ -23,8 +23,24 @@ namespace ai
             creators["flash heal on party"] = &flash_heal_on_party;
             creators["psychic scream"] = &psychic_scream;
             creators["fade"] = &fade;
+            creators["penance"] = &penance;
+            creators["penance on party"] = &penance_on_party;
         }
     private:
+        static ActionNode* penance(PlayerbotAI* ai)
+        {
+            return new ActionNode ("penance",
+                /*P*/ NextAction::array(0, new NextAction("remove shadowform"), NULL),
+                /*A*/ NextAction::array(0, new NextAction("flash heal"), NULL),
+                /*C*/ NULL);
+        }
+        static ActionNode* penance_on_party(PlayerbotAI* ai)
+        {
+            return new ActionNode ("penance on party",
+                /*P*/ NextAction::array(0, new NextAction("remove shadowform"), NULL),
+                /*A*/ NextAction::array(0, new NextAction("flash heal on party"), NULL),
+                /*C*/ NULL);
+        }
         static ActionNode* inner_fire(PlayerbotAI* ai)
         {
             return new ActionNode ("inner fire",

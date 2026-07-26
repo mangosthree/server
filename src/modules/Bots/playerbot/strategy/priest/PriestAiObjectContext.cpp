@@ -85,6 +85,8 @@ namespace ai
                 creators["vampiric embrace"] = &TriggerFactoryInternal::vampiric_embrace;
                 creators["prayer of mending on tank"] = &TriggerFactoryInternal::prayer_of_mending_on_tank;
                 creators["tank critical health"] = &TriggerFactoryInternal::tank_critical_health;
+                creators["power word: shield on tank"] = &TriggerFactoryInternal::power_word_shield_on_tank;
+                creators["chakra: serenity"] = &TriggerFactoryInternal::chakra_serenity;
 
             }
 
@@ -93,6 +95,8 @@ namespace ai
             static Trigger* shadowform(PlayerbotAI* ai) { return new ShadowformTrigger(ai); }
             static Trigger* prayer_of_mending_on_tank(PlayerbotAI* ai) { return new PrayerOfMendingOnTankTrigger(ai); }
             static Trigger* tank_critical_health(PlayerbotAI* ai) { return new TankCriticalHealthTrigger(ai); }
+            static Trigger* power_word_shield_on_tank(PlayerbotAI* ai) { return new TankWeakenedSoulAbsentTrigger(ai); }
+            static Trigger* chakra_serenity(PlayerbotAI* ai) { return new ChakraSerenityTrigger(ai); }
             static Trigger* vampiric_touch(PlayerbotAI* ai) { return new VampiricTouchTrigger(ai); }
             static Trigger* devouring_plague(PlayerbotAI* ai) { return new DevouringPlagueTrigger(ai); }
             static Trigger* shadow_word_pain(PlayerbotAI* ai) { return new PowerWordPainTrigger(ai); }
@@ -165,6 +169,8 @@ namespace ai
                 creators["pain suppression on tank"] = &AiObjectContextInternal::pain_suppression_on_tank;
                 creators["prayer of healing"] = &AiObjectContextInternal::prayer_of_healing;
                 creators["guardian spirit on tank"] = &AiObjectContextInternal::guardian_spirit_on_tank;
+                creators["power word: shield on tank"] = &AiObjectContextInternal::power_word_shield_on_tank;
+                creators["chakra: serenity"] = &AiObjectContextInternal::chakra_serenity;
             }
 
         private:
@@ -212,6 +218,8 @@ namespace ai
             static Action* pain_suppression_on_tank(PlayerbotAI* ai) { return new CastPainSuppressionOnTankAction(ai); }
             static Action* prayer_of_healing(PlayerbotAI* ai) { return new CastPrayerOfHealingAction(ai); }
             static Action* guardian_spirit_on_tank(PlayerbotAI* ai) { return new CastGuardianSpiritOnTankAction(ai); }
+            static Action* power_word_shield_on_tank(PlayerbotAI* ai) { return new CastPowerWordShieldOnTankAction(ai); }
+            static Action* chakra_serenity(PlayerbotAI* ai) { return new CastChakraSerenityAction(ai); }
         };
     };
 };

@@ -22,6 +22,30 @@ void HealPriestStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         "medium aoe heal",
         NextAction::array(0, new NextAction("circle of healing", 27.0f), NULL)));
 
+    // Disc: use Penance on cooldown (efficient); falls to flash heal when on CD
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("penance", 26.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("penance on party", 21.0f), NULL)));
+
+    // Disc: keep PW:S on the tank on cooldown (fires when Weakened Soul absent)
+    triggers.push_back(new TriggerNode(
+        "power word: shield on tank",
+        NextAction::array(0, new NextAction("power word: shield on tank", 27.0f), NULL)));
+
+    // Healers: pop Shadowfiend to recover mana when low
+    triggers.push_back(new TriggerNode(
+        "low mana",
+        NextAction::array(0, new NextAction("shadowfiend", ACTION_EMERGENCY), NULL)));
+
+    // Holy: maintain Chakra: Serenity single-target healing stance (no-op if unknown)
+    triggers.push_back(new TriggerNode(
+        "chakra: serenity",
+        NextAction::array(0, new NextAction("chakra: serenity", 33.0f), NULL)));
+
     triggers.push_back(new TriggerNode(
         "almost full health",
         NextAction::array(0, new NextAction("renew", 15.0f), NULL)));

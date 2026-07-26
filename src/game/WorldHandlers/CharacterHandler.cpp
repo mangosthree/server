@@ -45,6 +45,12 @@
 #include "SharedDefines.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
+#ifdef ENABLE_PLAYERBOTS
+#include "playerbot.h"
+#include "PlayerbotMgr.h"
+#include "PlayerbotAIConfig.h"
+#include "RandomPlayerbotMgr.h"
+#endif
 #include "Log.h"
 #include "World.h"
 #include "ObjectMgr.h"
@@ -87,6 +93,22 @@ class LoginQueryHolder : public SqlQueryHolder
         uint32 GetAccountId() const { return m_accountId; }
         bool Initialize();
 };
+
+#ifdef ENABLE_PLAYERBOTS
+class PlayerbotLoginQueryHolder : public LoginQueryHolder
+{
+    private:
+        uint32 masterAccountId;
+        PlayerbotHolder* playerbotHolder;
+
+    public:
+        PlayerbotLoginQueryHolder(PlayerbotHolder* playerbotHolder, uint32 masterAccount, uint32 accountId, ObjectGuid guid)
+            : LoginQueryHolder(accountId, guid), masterAccountId(masterAccount), playerbotHolder(playerbotHolder) { }
+
+        uint32 GetMasterAccountId() const { return masterAccountId; }
+        PlayerbotHolder* GetPlayerbotHolder() { return playerbotHolder; }
+};
+#endif
 
 /**
  * @brief Builds the set of delayed login queries required for a character load.
@@ -172,9 +194,103 @@ class CharacterHandler
                 delete holder;
                 return;
             }
+#ifdef ENABLE_PLAYERBOTS
+            ObjectGuid guid = ((LoginQueryHolder*)holder)->GetGuid();
+#endif
             session->HandlePlayerLogin((LoginQueryHolder*)holder);
+#ifdef ENABLE_PLAYERBOTS
+            Player* player = sObjectMgr.GetPlayer(guid, true);
+            if (player && !player->GetPlayerbotAI())
+            {
+                player->SetPlayerbotMgr(new PlayerbotMgr(player));
+                sRandomPlayerbotMgr.OnPlayerLogin(player);
+            }
+#endif
         }
+#ifdef ENABLE_PLAYERBOTS
+        void HandlePlayerBotLoginCallback(QueryResult* /*dummy*/, SqlQueryHolder* holder)
+        {
+            if (!holder)
+            {
+                return;
+            }
+
+            PlayerbotLoginQueryHolder* lqh = (PlayerbotLoginQueryHolder*)holder;
+            if (sObjectMgr.GetPlayer(lqh->GetGuid()))
+            {
+                delete holder;
+                return;
+            }
+
+            PlayerbotHolder* playerbotHolder = lqh->GetPlayerbotHolder();
+            uint32 masterAccount = lqh->GetMasterAccountId();
+            WorldSession* masterSession = masterAccount ? sWorld.FindSession(masterAccount) : NULL;
+
+            // The bot's WorldSession is owned by the bot's Player object
+            // and is deleted by PlayerbotMgr::LogoutPlayerBot
+            uint32 botAccountId = lqh->GetAccountId();
+            WorldSession* botSession = new WorldSession(botAccountId, NULL, SEC_PLAYER, 1, 0, LOCALE_enUS);
+            botSession->HandlePlayerLogin(lqh); // will delete lqh
+            Player* bot = botSession->GetPlayer();
+            if (!bot)
+            {
+                return;
+            }
+
+            bool allowed = false;
+            if (botAccountId == masterAccount)
+            {
+                allowed = true;
+            }
+            else if (masterSession && sPlayerbotAIConfig.allowGuildBots && bot->GetGuildId() == masterSession->GetPlayer()->GetGuildId())
+            {
+                allowed = true;
+            }
+            else if (sPlayerbotAIConfig.IsInRandomAccountList(botAccountId))
+            {
+                allowed = true;
+            }
+
+            if (allowed)
+            {
+                playerbotHolder->OnBotLogin(bot);
+            }
+            else if (masterSession)
+            {
+                ChatHandler ch(masterSession);
+                ch.PSendSysMessage("You are not allowed to control bot %s...", bot->GetName());
+                playerbotHolder->LogoutPlayerBot(bot->GetObjectGuid().GetRawValue());
+            }
+        }
+#endif
 } chrHandler;
+
+#ifdef ENABLE_PLAYERBOTS
+/**
+ * @brief Queues asynchronous login loading for a playerbot character.
+ */
+void PlayerbotHolder::AddPlayerBot(uint64 playerGuid, uint32 masterAccountId)
+{
+    if (sObjectMgr.GetPlayer(ObjectGuid(playerGuid)))
+    {
+        return;
+    }
+
+    uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(ObjectGuid(playerGuid));
+    if (accountId == 0)
+    {
+        return;
+    }
+
+    PlayerbotLoginQueryHolder* holder = new PlayerbotLoginQueryHolder(this, masterAccountId, accountId, ObjectGuid(playerGuid));
+    if (!holder->Initialize())
+    {
+        delete holder;
+        return;
+    }
+    CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerBotLoginCallback, holder);
+}
+#endif
 
 /**
  * @brief Builds and sends the character enumeration list for the session account.

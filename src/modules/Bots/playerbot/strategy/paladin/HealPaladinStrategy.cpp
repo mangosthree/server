@@ -1,0 +1,44 @@
+#include "botpch.h"
+#include "../../playerbot.h"
+#include "PaladinMultipliers.h"
+#include "HealPaladinStrategy.h"
+
+using namespace ai;
+
+HealPaladinStrategy::HealPaladinStrategy(PlayerbotAI* ai) : GenericPaladinStrategy(ai)
+{
+}
+
+NextAction** HealPaladinStrategy::getDefaultActions()
+{
+    return NextAction::array(0, new NextAction("melee", ACTION_NORMAL), NULL);
+}
+
+void HealPaladinStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
+{
+    GenericPaladinStrategy::InitTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("holy shock", ACTION_MEDIUM_HEAL + 3), new NextAction("flash of light", ACTION_MEDIUM_HEAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("holy shock on party", ACTION_MEDIUM_HEAL + 2), new NextAction("flash of light on party", ACTION_MEDIUM_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "low health",
+        NextAction::array(0, new NextAction("divine light", ACTION_CRITICAL_HEAL + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member low health",
+        NextAction::array(0, new NextAction("divine light on party", ACTION_CRITICAL_HEAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "beacon of light on tank",
+        NextAction::array(0, new NextAction("beacon of light on tank", ACTION_HIGH + 8), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "blessing",
+        NextAction::array(0, new NextAction("blessing of kings", ACTION_HIGH + 9), NULL)));
+}

@@ -70,7 +70,7 @@
 #include "LuaEngine.h"
 #endif /*ENABLE_ELUNA*/
 #ifdef ENABLE_PLAYERBOTS
-//#include "playerbot.h"
+#include "playerbot.h"
 #endif
 
 // Warden
@@ -224,16 +224,18 @@ char const* WorldSession::GetPlayerName() const
 void WorldSession::SendPacket(WorldPacket const* packet)
 {
 #ifdef ENABLE_PLAYERBOTS
-    //if (GetPlayer()) {
-    //    if (GetPlayer()->GetPlayerbotAI())
-    //    {
-    //        GetPlayer()->GetPlayerbotAI()->HandleBotOutgoingPacket(*packet);
-    //    }
-    //    else if (GetPlayer()->GetPlayerbotMgr())
-    //    {
-    //        GetPlayer()->GetPlayerbotMgr()->HandleMasterOutgoingPacket(*packet);
-    //    }
-    //}
+    const_cast<WorldPacket*>(packet)->FlushBits();
+    if (GetPlayer())
+    {
+        if (GetPlayer()->GetPlayerbotAI())
+        {
+            GetPlayer()->GetPlayerbotAI()->HandleBotOutgoingPacket(*packet);
+        }
+        else if (GetPlayer()->GetPlayerbotMgr())
+        {
+            GetPlayer()->GetPlayerbotMgr()->HandleMasterOutgoingPacket(*packet);
+        }
+    }
 #endif
 
     if (!m_Socket)
@@ -363,10 +365,10 @@ bool WorldSession::Update(PacketFilter& updater)
                     // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
 
 #ifdef ENABLE_PLAYERBOTS
-              /*      if (_player && _player->GetPlayerbotMgr())
+                    if (_player && _player->GetPlayerbotMgr())
                     {
                         _player->GetPlayerbotMgr()->HandleMasterIncomingPacket(*packet);
-                    }*/
+                    }
 #endif
                     break;
                 case STATUS_LOGGEDIN_OR_RECENTLY_LOGGEDOUT:
@@ -451,10 +453,10 @@ bool WorldSession::Update(PacketFilter& updater)
     }
 
 #ifdef ENABLE_PLAYERBOTS
-    //if (GetPlayer() && GetPlayer()->GetPlayerbotMgr())
-    //{
-    //    GetPlayer()->GetPlayerbotMgr()->UpdateSessions(0);
-    //}
+    if (GetPlayer() && GetPlayer()->GetPlayerbotMgr())
+    {
+        GetPlayer()->GetPlayerbotMgr()->UpdateSessions(0);
+    }
 #endif
 
     ///- Cleanup socket pointer if need
@@ -496,8 +498,18 @@ void WorldSession::HandleBotPackets()
     WorldPacket* packet;
     while (_recvQueue.next(packet))
     {
-        OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
-        (this->*opHandle.handler)(*packet);
+        try
+        {
+            OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+            (this->*opHandle.handler)(*packet);
+        }
+        catch (ByteBufferException&)
+        {
+            // A malformed bot-built packet must not kill the world thread;
+            // mirror the catch in WorldSession::Update.
+            sLog.outError("WorldSession::HandleBotPackets ByteBufferException occured while parsing a packet (opcode: %u) from bot %s, accountid=%i.",
+                          packet->GetOpcode(), GetPlayerName(), GetAccountId());
+        }
         delete packet;
     }
 }
@@ -518,10 +530,10 @@ void WorldSession::LogoutPlayer(bool Save)
     if (_player)
     {
 #ifdef ENABLE_PLAYERBOTS
-  /*      if (GetPlayer()->GetPlayerbotMgr())
+        if (GetPlayer()->GetPlayerbotMgr())
         {
             GetPlayer()->GetPlayerbotMgr()->LogoutAllBots();
-        }*/
+        }
 #endif
 
         // Stop cinematic flyover if present; DK may hold an early
@@ -539,11 +551,11 @@ void WorldSession::LogoutPlayer(bool Save)
         }
 
 #ifdef ENABLE_PLAYERBOTS
-        //if (_player->GetPlayerbotMgr())
-        //{
-        //    _player->GetPlayerbotMgr()->LogoutAllBots();
-        //}
-        //sRandomPlayerbotMgr.OnPlayerLogout(_player);
+        if (_player->GetPlayerbotMgr())
+        {
+            _player->GetPlayerbotMgr()->LogoutAllBots();
+        }
+        sRandomPlayerbotMgr.OnPlayerLogout(_player);
 #endif
 
         ///- If the player just died before logging out, make him appear as a ghost
@@ -650,16 +662,16 @@ void WorldSession::LogoutPlayer(bool Save)
         // no point resetting online in character table here as Player::SaveToDB() will set it to 1 since player has not been removed from world at this stage
         // No SQL injection as AccountID is uint32
 #ifdef ENABLE_PLAYERBOTS
-        //if (!GetPlayer()->GetPlayerbotAI())
-        //{
-        //    static SqlStatementID id;
-        //    // playerbot mod
-        //    if (!_player->GetPlayerbotAI())
-        //    {
-        //        SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
-        //        stmt.PExecute(uint32(0), GetAccountId());
-        //    }
-        //}
+        if (!GetPlayer()->GetPlayerbotAI())
+        {
+            static SqlStatementID id;
+            // playerbot mod
+            if (!_player->GetPlayerbotAI())
+            {
+                SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
+                stmt.PExecute(uint32(0), GetAccountId());
+            }
+        }
 #else
         static SqlStatementID id;
 

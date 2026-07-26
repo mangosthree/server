@@ -812,7 +812,16 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
             plMover->SendLootRelease(lootGUID);
         }
 
-        if (movementInfo.GetPos()->z < -500.0f)
+        // The old -500 cutoff assumed nothing legitimate sat that low; that held
+        // for old-world maps but not Cata's deep-ocean zones. Vashj'ir's Abyssal
+        // Depths has live spirit-healer/graveyard content down to ~ -1800
+        // (confirmed against creature/gameobject/areatrigger_teleport data), and a
+        // swimmer sits around -950, so a -500 cutoff void-kills legitimate players
+        // there. This is a plain Z threshold independent of the map/liquid data,
+        // so it must sit below all real content regardless of the terrain-height
+        // fix: -3000 keeps a large margin below the deepest legitimate depth while
+        // still catching a genuine fall through the map (which keeps accelerating).
+        if (movementInfo.GetPos()->z < -3000.0f)
         {
             if (plMover->GetBattleGround()
                 && plMover->GetBattleGround()->HandlePlayerUnderMap(_player))

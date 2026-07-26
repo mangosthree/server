@@ -1030,6 +1030,8 @@ class ObjectMgr
                 }
         }
 
+        CreatureDataMap const* GetCreatureDataMap() const { return &mCreatureDataMap; }
+
         ActiveCreatureGuidsOnMap const* GetActiveCreatureGuids() const
         {
             return &m_activeCreatures;

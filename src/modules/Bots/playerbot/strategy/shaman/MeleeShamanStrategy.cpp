@@ -62,11 +62,15 @@ void MeleeShamanStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "shock",
-        NextAction::array(0, new NextAction("flame shock", 20.0f), NULL)));
+        NextAction::array(0, new NextAction("flame shock", 21.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "earth shock ready",
-        NextAction::array(0, new NextAction("earth shock", 21.0f), NULL)));
+        NextAction::array(0, new NextAction("earth shock", 12.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "lava lash ready",
+        NextAction::array(0, new NextAction("lava lash", 11.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "maelstrom weapon",

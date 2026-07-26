@@ -54,28 +54,29 @@ bool FireNovaTrigger::IsActive()
             target && ai->HasAura("flame shock", target);
 }
 
-bool MaelstromWeaponTrigger::IsActive()
+bool FulminationTrigger::IsActive()
 {
-    Unit* target = GetTarget();
-    if (!target)
+    if (!SpellCanBeCastTrigger::IsActive())
     {
         return false;
     }
 
-    uint32 spellId = AI_VALUE2(uint32, "spell id", "maelstrom weapon");
-    if (!spellId)
+    Player* bot = ai->GetBot();
+    // No Fulmination passive on this core: behave as plain Earth-Shock-ready.
+    if (!ai->HasAura(88766u, bot))
     {
-        return false;
+        return true;
     }
 
-    for (uint32 effect = EFFECT_INDEX_0; effect <= EFFECT_INDEX_2; effect++)
+    // With Fulmination, only dump at >= 7 Lightning Shield (324) charges.
+    for (uint32 effect = EFFECT_INDEX_0; effect <= EFFECT_INDEX_2; ++effect)
     {
-        Aura* aura = target->GetAura(spellId, (SpellEffectIndex)effect);
-        if (aura && aura->GetStackAmount() >= 5)
+        Aura* aura = bot->GetAura(324u, (SpellEffectIndex)effect);
+        if (aura && aura->GetStackAmount() >= 7)
         {
             return true;
         }
     }
-
     return false;
 }
+

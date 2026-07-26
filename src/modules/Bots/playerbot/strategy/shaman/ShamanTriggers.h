@@ -159,6 +159,23 @@ namespace ai
         virtual bool IsActive();
     };
 
+    /// Fulmination-aware Earth Shock (Elemental). This core has no Rolling Thunder
+    /// and does not implement Fulmination (passive 88766), so the fall-through path
+    /// (plain Earth-Shock-ready) is always taken and Earth Shock stays a filler.
+    class FulminationTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        FulminationTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "earth shock") {}
+        virtual bool IsActive();
+    };
+
+    /// Enhancement: keeps Lava Lash cast whenever Stormstrike is on cooldown.
+    class LavaLashReadyTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        LavaLashReadyTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "lava lash") {}
+    };
+
     /// Fire Nova detonates Flame Shock; only useful once the DoT is up.
     class FireNovaTrigger : public SpellCanBeCastTrigger
     {
@@ -184,12 +201,13 @@ namespace ai
         BloodlustTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "bloodlust") {}
     };
 
-    /// Fires only at 5 stacks, when the next cast is fully instant.
-    class MaelstromWeaponTrigger : public HasAuraTrigger
+    /// Fires only at 5 stacks of the Maelstrom Weapon proc buff (53817), when the
+    /// next cast is fully instant. The passive talent shares the display name and
+    /// is skipped by the name resolver, so match the proc buff by id.
+    class MaelstromWeaponTrigger : public HasAuraStacksTrigger
     {
     public:
-        MaelstromWeaponTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "maelstrom weapon") {}
-        virtual bool IsActive();
+        MaelstromWeaponTrigger(PlayerbotAI* ai) : HasAuraStacksTrigger(ai, "maelstrom weapon", 53817, 5) {}
     };
 
     class WindShearInterruptEnemyHealerSpellTrigger : public InterruptEnemyHealerTrigger
@@ -209,6 +227,13 @@ namespace ai
     {
     public:
         FeralSpiritTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "feral spirit") {}
+    };
+
+    /// Elemental cooldown: summon Fire Elemental on boss-length fights.
+    class FireElementalTotemTrigger : public BoostTrigger
+    {
+    public:
+        FireElementalTotemTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "fire elemental totem") {}
     };
 
     /// Maintains Earth Shield on the main tank rather than a rotating party member.

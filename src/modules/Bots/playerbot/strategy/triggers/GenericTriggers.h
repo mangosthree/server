@@ -431,6 +431,40 @@ namespace ai
         uint32 spellId;
     };
 
+    // Like HasAuraIdTrigger but also requires a minimum stack count on the bot's
+    // own aura (e.g. Maelstrom Weapon at 5). Reads the proc's spell id directly.
+    class HasAuraStacksTrigger : public Trigger
+    {
+    public:
+        HasAuraStacksTrigger(PlayerbotAI* ai, string name, uint32 spellId, uint32 minStacks) : Trigger(ai, name)
+        {
+            this->spellId = spellId;
+            this->minStacks = minStacks;
+        }
+        virtual bool IsActive()
+        {
+            Player* bot = ai->GetBot();
+            if (!bot)
+            {
+                return false;
+            }
+
+            for (uint32 effect = EFFECT_INDEX_0; effect <= EFFECT_INDEX_2; ++effect)
+            {
+                Aura* aura = bot->GetAura(spellId, (SpellEffectIndex)effect);
+                if (aura && aura->GetStackAmount() >= minStacks)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+    protected:
+        uint32 spellId;
+        uint32 minStacks;
+    };
+
     class TimerTrigger : public Trigger
     {
     public:

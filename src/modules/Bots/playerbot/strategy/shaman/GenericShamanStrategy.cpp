@@ -15,6 +15,8 @@ public:
         creators["windfury weapon"] = &windfury_weapon;
         creators["healing surge"] = &healing_surge;
         creators["healing surge on party"] = &healing_surge_on_party;
+        creators["greater healing wave"] = &greater_healing_wave;
+        creators["greater healing wave on party"] = &greater_healing_wave_on_party;
         creators["chain heal"] = &chain_heal;
         creators["riptide"] = &riptide;
         creators["chain heal on party"] = &chain_heal_on_party;
@@ -62,6 +64,20 @@ private:
     static ActionNode* healing_surge_on_party(PlayerbotAI* ai)
     {
         return new ActionNode ("healing surge on party",
+            /*P*/ NULL,
+            /*A*/ NextAction::array(0, new NextAction("healing wave on party"), NULL),
+            /*C*/ NULL);
+    }
+    static ActionNode* greater_healing_wave(PlayerbotAI* ai)
+    {
+        return new ActionNode ("greater healing wave",
+            /*P*/ NULL,
+            /*A*/ NextAction::array(0, new NextAction("healing wave"), NULL),
+            /*C*/ NULL);
+    }
+    static ActionNode* greater_healing_wave_on_party(PlayerbotAI* ai)
+    {
+        return new ActionNode ("greater healing wave on party",
             /*P*/ NULL,
             /*A*/ NextAction::array(0, new NextAction("healing wave on party"), NULL),
             /*C*/ NULL);
@@ -123,11 +139,16 @@ void GenericShamanStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         "party member medium health",
         NextAction::array(0, new NextAction("riptide on party", ACTION_MEDIUM_HEAL + 3), new NextAction("healing wave on party", ACTION_MEDIUM_HEAL + 2), NULL)));
 
-    // Healing Surge is the fast, expensive heal reserved for the more
-    // dangerous "low health" band.
+    // Greater Healing Wave is the big single-target heal for the "low health"
+    // band; Healing Surge is held back for the true emergency below.
     triggers.push_back(new TriggerNode(
         "party member low health",
-        NextAction::array(0, new NextAction("healing surge on party", ACTION_CRITICAL_HEAL + 2), NULL)));
+        NextAction::array(0, new NextAction("greater healing wave on party", ACTION_CRITICAL_HEAL + 2), NULL)));
+
+    // Healing Surge is the fast, expensive emergency heal.
+    triggers.push_back(new TriggerNode(
+        "party member critical health",
+        NextAction::array(0, new NextAction("healing surge on party", ACTION_CRITICAL_HEAL + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium aoe heal",
@@ -139,7 +160,11 @@ void GenericShamanStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("healing surge", ACTION_CRITICAL_HEAL + 2), NULL)));
+        NextAction::array(0, new NextAction("greater healing wave", ACTION_CRITICAL_HEAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("healing surge", ACTION_CRITICAL_HEAL + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
         "heroism",

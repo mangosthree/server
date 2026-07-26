@@ -28,6 +28,18 @@ namespace ai
         CastHealingWaveOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "healing wave") {}
     };
 
+    /// Cata 4.3.4: big, slow single-target heal (77472); pairs with Tidal Waves.
+    class CastGreaterHealingWaveAction : public CastHealingSpellAction {
+    public:
+        CastGreaterHealingWaveAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "greater healing wave") {}
+    };
+
+    class CastGreaterHealingWaveOnPartyAction : public HealPartyMemberAction
+    {
+    public:
+        CastGreaterHealingWaveOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "greater healing wave") {}
+    };
+
     class CastChainHealAction : public CastAoeHealSpellAction {
     public:
         CastChainHealAction(PlayerbotAI* ai) : CastAoeHealSpellAction(ai, "chain heal") {}
@@ -316,6 +328,13 @@ namespace ai
     {
     public:
         CastFeralSpiritAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "feral spirit") {}
+    };
+
+    /// Elemental cooldown pet totem (2894).
+    class CastFireElementalTotemAction : public CastTotemAction
+    {
+    public:
+        CastFireElementalTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "fire elemental totem") {}
     };
 
 }

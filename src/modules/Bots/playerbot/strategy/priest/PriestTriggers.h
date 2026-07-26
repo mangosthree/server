@@ -58,4 +58,23 @@ namespace ai
         ShadowformTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "shadowform") {}
         virtual bool IsActive() { return !ai->HasAura("shadowform", bot); }
     };
+
+    /// Maintains Prayer of Mending on the tank instead of rotating party members
+    class PrayerOfMendingOnTankTrigger : public BuffTrigger
+    {
+    public:
+        PrayerOfMendingOnTankTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "prayer of mending") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("party tank"); }
+        virtual string getName() { return "prayer of mending on tank"; }
+    };
+
+    /// Fires Pain Suppression / Guardian Spirit when the tank is critically low
+    class TankCriticalHealthTrigger : public HealthInRangeTrigger
+    {
+    public:
+        TankCriticalHealthTrigger(PlayerbotAI* ai) :
+            HealthInRangeTrigger(ai, "tank critical health", sPlayerbotAIConfig.criticalHealth, 0) {}
+
+        virtual string GetTargetName() { return "party tank"; }
+    };
 }

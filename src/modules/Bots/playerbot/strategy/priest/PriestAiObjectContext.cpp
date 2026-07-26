@@ -83,12 +83,16 @@ namespace ai
                 creators["vampiric touch"] = &TriggerFactoryInternal::vampiric_touch;
                 creators["shadowform"] = &TriggerFactoryInternal::shadowform;
                 creators["vampiric embrace"] = &TriggerFactoryInternal::vampiric_embrace;
+                creators["prayer of mending on tank"] = &TriggerFactoryInternal::prayer_of_mending_on_tank;
+                creators["tank critical health"] = &TriggerFactoryInternal::tank_critical_health;
 
             }
 
         private:
             static Trigger* vampiric_embrace(PlayerbotAI* ai) { return new VampiricEmbraceTrigger(ai); }
             static Trigger* shadowform(PlayerbotAI* ai) { return new ShadowformTrigger(ai); }
+            static Trigger* prayer_of_mending_on_tank(PlayerbotAI* ai) { return new PrayerOfMendingOnTankTrigger(ai); }
+            static Trigger* tank_critical_health(PlayerbotAI* ai) { return new TankCriticalHealthTrigger(ai); }
             static Trigger* vampiric_touch(PlayerbotAI* ai) { return new VampiricTouchTrigger(ai); }
             static Trigger* devouring_plague(PlayerbotAI* ai) { return new DevouringPlagueTrigger(ai); }
             static Trigger* shadow_word_pain(PlayerbotAI* ai) { return new PowerWordPainTrigger(ai); }
@@ -152,6 +156,15 @@ namespace ai
                 creators["vampiric touch"] = &AiObjectContextInternal::vampiric_touch;
                 creators["vampiric embrace"] = &AiObjectContextInternal::vampiric_embrace;
                 creators["dispersion"] = &AiObjectContextInternal::dispersion;
+                creators["shadow word: death"] = &AiObjectContextInternal::shadow_word_death;
+                creators["mind sear"] = &AiObjectContextInternal::mind_sear;
+                creators["shadowfiend"] = &AiObjectContextInternal::shadowfiend;
+                creators["penance"] = &AiObjectContextInternal::penance;
+                creators["penance on party"] = &AiObjectContextInternal::penance_on_party;
+                creators["prayer of mending on tank"] = &AiObjectContextInternal::prayer_of_mending_on_tank;
+                creators["pain suppression on tank"] = &AiObjectContextInternal::pain_suppression_on_tank;
+                creators["prayer of healing"] = &AiObjectContextInternal::prayer_of_healing;
+                creators["guardian spirit on tank"] = &AiObjectContextInternal::guardian_spirit_on_tank;
             }
 
         private:
@@ -190,6 +203,15 @@ namespace ai
             static Action* cure_disease_on_party(PlayerbotAI* ai) { return new CastCureDiseaseOnPartyAction(ai); }
             static Action* fade(PlayerbotAI* ai) { return new CastFadeAction(ai); }
             static Action* inner_fire(PlayerbotAI* ai) { return new CastInnerFireAction(ai); }
+            static Action* shadow_word_death(PlayerbotAI* ai) { return new CastShadowWordDeathAction(ai); }
+            static Action* mind_sear(PlayerbotAI* ai) { return new CastMindSearAction(ai); }
+            static Action* shadowfiend(PlayerbotAI* ai) { return new CastShadowfiendAction(ai); }
+            static Action* penance(PlayerbotAI* ai) { return new CastPenanceAction(ai); }
+            static Action* penance_on_party(PlayerbotAI* ai) { return new CastPenanceOnPartyAction(ai); }
+            static Action* prayer_of_mending_on_tank(PlayerbotAI* ai) { return new CastPrayerOfMendingOnTankAction(ai); }
+            static Action* pain_suppression_on_tank(PlayerbotAI* ai) { return new CastPainSuppressionOnTankAction(ai); }
+            static Action* prayer_of_healing(PlayerbotAI* ai) { return new CastPrayerOfHealingAction(ai); }
+            static Action* guardian_spirit_on_tank(PlayerbotAI* ai) { return new CastGuardianSpiritOnTankAction(ai); }
         };
     };
 };

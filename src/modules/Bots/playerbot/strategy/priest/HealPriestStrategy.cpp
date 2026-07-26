@@ -33,4 +33,28 @@ void HealPriestStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "enemy too close for spell",
         NextAction::array(0, new NextAction("fade", 50.0f), new NextAction("flee", 49.0f), NULL)));
+
+    // Discipline: fast efficient heal, availability-gated (talent-locked spell)
+    triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("penance", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member critical health",
+        NextAction::array(0, new NextAction("penance on party", ACTION_CRITICAL_HEAL), NULL)));
+
+    // Disc/Holy: proactive raid-wide AoE heal, availability-gated
+    triggers.push_back(new TriggerNode(
+        "low aoe heal",
+        NextAction::array(0, new NextAction("prayer of healing", 28.0f), NULL)));
+
+    // Disc/Holy: maintain Prayer of Mending on the tank rather than a rotating target
+    triggers.push_back(new TriggerNode(
+        "prayer of mending on tank",
+        NextAction::array(0, new NextAction("prayer of mending on tank", ACTION_HIGH + 8), NULL)));
+
+    // Discipline: external mitigation; Holy: external emergency heal, both on the tank
+    triggers.push_back(new TriggerNode(
+        "tank critical health",
+        NextAction::array(0, new NextAction("guardian spirit on tank", ACTION_EMERGENCY + 5), new NextAction("pain suppression on tank", ACTION_EMERGENCY), NULL)));
 }

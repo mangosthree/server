@@ -34,11 +34,16 @@ void ShadowPriestStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "low mana",
-        NextAction::array(0, new NextAction("dispersion", ACTION_EMERGENCY + 5), NULL)));
+        NextAction::array(0, new NextAction("shadowfiend", ACTION_EMERGENCY), new NextAction("dispersion", ACTION_EMERGENCY + 5), NULL)));
 
     triggers.push_back(new TriggerNode(
         "vampiric embrace",
         NextAction::array(0, new NextAction("vampiric embrace", 36.0f), NULL)));
+
+    // Execute finisher, gated by the generic "target critical health" trigger
+    triggers.push_back(new TriggerNode(
+        "target critical health",
+        NextAction::array(0, new NextAction("shadow word: death", 34.0f), NULL)));
 }
 
 void ShadowPriestAoeStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
@@ -46,6 +51,10 @@ void ShadowPriestAoeStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "shadow word: pain on attacker",
         NextAction::array(0, new NextAction("shadow word: pain on attacker", 31.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium aoe",
+        NextAction::array(0, new NextAction("mind sear", 30.0f), NULL)));
 }
 
 void ShadowPriestDebuffStrategy::InitTriggers(std::list<TriggerNode*> &triggers)

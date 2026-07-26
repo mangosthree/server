@@ -210,4 +210,63 @@ namespace ai
         virtual string GetTargetName() { return "self target"; }
     };
 
+    /// Execute; gated by the "target critical health" trigger
+    BEGIN_RANGED_SPELL_ACTION(CastShadowWordDeathAction, "shadow word: death")
+    END_SPELL_ACTION()
+
+    /// AoE channel; gated by an attacker-count trigger like other AoE nukes
+    BEGIN_RANGED_SPELL_ACTION(CastMindSearAction, "mind sear")
+        virtual ActionThreatType getThreatType() { return ACTION_THREAT_AOE; }
+    END_SPELL_ACTION()
+
+    /// Mana cooldown pet; gated by "low mana"
+    BEGIN_RANGED_SPELL_ACTION(CastShadowfiendAction, "shadowfiend")
+    END_SPELL_ACTION()
+
+    class CastPenanceAction : public CastHealingSpellAction {
+    public:
+        CastPenanceAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "penance") {}
+    };
+
+    class CastPenanceOnPartyAction : public HealPartyMemberAction
+    {
+    public:
+        CastPenanceOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "penance") {}
+
+        virtual string getName() { return "penance on party"; }
+    };
+
+    /// Maintains Prayer of Mending on the tank instead of a rotating party member
+    class CastPrayerOfMendingOnTankAction : public CastBuffSpellAction
+    {
+    public:
+        CastPrayerOfMendingOnTankAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "prayer of mending") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("party tank"); }
+        virtual string getName() { return "prayer of mending on tank"; }
+    };
+
+    /// Discipline external defensive; cast on the tank, not self/current target
+    class CastPainSuppressionOnTankAction : public CastBuffSpellAction
+    {
+    public:
+        CastPainSuppressionOnTankAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "pain suppression") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("party tank"); }
+        virtual string getName() { return "pain suppression on tank"; }
+    };
+
+    class CastPrayerOfHealingAction : public CastAoeHealSpellAction
+    {
+    public:
+        CastPrayerOfHealingAction(PlayerbotAI* ai) : CastAoeHealSpellAction(ai, "prayer of healing") {}
+    };
+
+    /// Holy external emergency cooldown; cast on the tank
+    class CastGuardianSpiritOnTankAction : public CastBuffSpellAction
+    {
+    public:
+        CastGuardianSpiritOnTankAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "guardian spirit") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("party tank"); }
+        virtual string getName() { return "guardian spirit on tank"; }
+    };
+
 }

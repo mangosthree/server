@@ -53,6 +53,29 @@ namespace ai
     BEGIN_RANGED_SPELL_ACTION(CastDistractingShotAction, "distracting shot")
     END_SPELL_ACTION()
 
+    BEGIN_RANGED_SPELL_ACTION(CastSilencingShotAction, "silencing shot")
+    END_SPELL_ACTION()
+
+    class CastBestialWrathAction : public CastBuffSpellAction
+    {
+    public:
+        CastBestialWrathAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "bestial wrath") {}
+        virtual bool isPossible()
+        {
+            Pet* pet = bot->GetPet();
+            return CastBuffSpellAction::isPossible() && pet && pet->IsAlive();
+        }
+    };
+
+    /// Redirects the bot's threat onto the tank
+    class CastMisdirectionAction : public CastBuffSpellAction
+    {
+    public:
+        CastMisdirectionAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "misdirection") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("tank target"); }
+        virtual string getName() { return "misdirection on tank"; }
+    };
+
     BEGIN_RANGED_SPELL_ACTION(CastMultiShotAction, "multi-shot")
     END_SPELL_ACTION()
 
@@ -91,7 +114,8 @@ namespace ai
     class CastCallPetAction : public CastBuffSpellAction
     {
     public:
-        CastCallPetAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "call pet") {}
+        /// Cata's summon is "Call Pet 1"..5 (per-slot spells); "call pet" never resolves
+        CastCallPetAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "call pet 1") {}
     };
 
     class CastMendPetAction : public CastAuraSpellAction

@@ -70,6 +70,33 @@ namespace ai
         RapidFireTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "rapid fire") {}
     };
 
+    class BestialWrathTrigger : public BoostTrigger
+    {
+    public:
+        BestialWrathTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "bestial wrath") {}
+    };
+
+    class ChimeraShotAvailableTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        ChimeraShotAvailableTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "chimera shot") {}
+    };
+
+    class SilencingShotInterruptSpellTrigger : public InterruptSpellTrigger
+    {
+    public:
+        SilencingShotInterruptSpellTrigger(PlayerbotAI* ai) : InterruptSpellTrigger(ai, "silencing shot") {}
+    };
+
+    /// Maintains Misdirection on the tank rather than a rotating party member
+    class MisdirectionOnTankTrigger : public BuffTrigger
+    {
+    public:
+        MisdirectionOnTankTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "misdirection") {}
+        virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("tank target"); }
+        virtual string getName() { return "misdirection on tank"; }
+    };
+
     class TrueshotAuraTrigger : public BuffTrigger
     {
     public:

@@ -40,6 +40,8 @@ void GenericHunterNonCombatStrategy::InitTriggers(std::list<TriggerNode*> &trigg
 {
     NonCombatStrategy::InitTriggers(triggers);
 
+    // BuffTrigger only fires while the aura is missing, so this maintains the
+    // toggle rather than recasting it every tick
     triggers.push_back(new TriggerNode(
         "trueshot aura",
         NextAction::array(0, new NextAction("trueshot aura", 2.0f), NULL)));

@@ -82,9 +82,17 @@ namespace ai
                 creators["serpent sting on attacker"] = &TriggerFactoryInternal::serpent_sting_on_attacker;
                 creators["concussive shot on snare target"] = &TriggerFactoryInternal::concussive_shot_on_snare_target;
                 creators["has feign death"] = &TriggerFactoryInternal::has_feign_death;
+                creators["chimera shot"] = &TriggerFactoryInternal::chimera_shot;
+                creators["bestial wrath"] = &TriggerFactoryInternal::bestial_wrath;
+                creators["misdirection on tank"] = &TriggerFactoryInternal::misdirection_on_tank;
+                creators["silencing shot"] = &TriggerFactoryInternal::silencing_shot;
             }
 
         private:
+            static Trigger* chimera_shot(PlayerbotAI* ai) { return new ChimeraShotAvailableTrigger(ai); }
+            static Trigger* bestial_wrath(PlayerbotAI* ai) { return new BestialWrathTrigger(ai); }
+            static Trigger* misdirection_on_tank(PlayerbotAI* ai) { return new MisdirectionOnTankTrigger(ai); }
+            static Trigger* silencing_shot(PlayerbotAI* ai) { return new SilencingShotInterruptSpellTrigger(ai); }
             static Trigger* has_feign_death(PlayerbotAI* ai) { return new FeignDeathTrigger(ai); }
             static Trigger* concussive_shot_on_snare_target(PlayerbotAI* ai) { return new ConsussiveShotSnareTrigger(ai); }
             static Trigger* serpent_sting_on_attacker(PlayerbotAI* ai) { return new SerpentStingOnAttackerTrigger(ai); }
@@ -149,9 +157,15 @@ namespace ai
                 creators["feign death"] = &AiObjectContextInternal::feign_death;
                 creators["remove feign death"] = &AiObjectContextInternal::remove_feign_death;
                 creators["wing clip"] = &AiObjectContextInternal::wing_clip;
+                creators["silencing shot"] = &AiObjectContextInternal::silencing_shot;
+                creators["bestial wrath"] = &AiObjectContextInternal::bestial_wrath;
+                creators["misdirection on tank"] = &AiObjectContextInternal::misdirection_on_tank;
             }
 
         private:
+            static Action* silencing_shot(PlayerbotAI* ai) { return new CastSilencingShotAction(ai); }
+            static Action* bestial_wrath(PlayerbotAI* ai) { return new CastBestialWrathAction(ai); }
+            static Action* misdirection_on_tank(PlayerbotAI* ai) { return new CastMisdirectionAction(ai); }
             static Action* feign_death(PlayerbotAI* ai) { return new CastFeignDeathAction(ai); }
             static Action* remove_feign_death(PlayerbotAI* ai) { return new RemoveFeignDeathAction(ai); }
             static Action* trueshot_aura(PlayerbotAI* ai) { return new CastTrueshotAuraAction(ai); }

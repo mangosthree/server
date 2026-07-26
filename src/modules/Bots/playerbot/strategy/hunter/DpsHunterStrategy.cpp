@@ -117,6 +117,14 @@ void DpsHunterStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "target critical health",
         NextAction::array(0, new NextAction("kill shot", 25.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "chimera shot",
+        NextAction::array(0, new NextAction("chimera shot", 21.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "bestial wrath",
+        NextAction::array(0, new NextAction("bestial wrath", 56.0f), NULL)));
 }
 
 void DpsAoeHunterStrategy::InitTriggers(std::list<TriggerNode*> &triggers)

@@ -71,4 +71,12 @@ void GenericHunterStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "rapid fire",
         NextAction::array(0, new NextAction("rapid fire", 55.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "misdirection on tank",
+        NextAction::array(0, new NextAction("misdirection on tank", 54.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "silencing shot",
+        NextAction::array(0, new NextAction("silencing shot", ACTION_INTERRUPT), NULL)));
 }

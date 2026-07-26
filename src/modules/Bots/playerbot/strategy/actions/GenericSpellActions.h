@@ -60,7 +60,7 @@ namespace ai
                 const SpellEntry* pSpellInfo = sSpellStore.LookupEntry(spellId);
                 if (pSpellInfo)
                 {
-                    SpellRangeEntry const* spellRange = sSpellRangeStore.LookupEntry(pSpellInfo->rangeIndex);
+                    SpellRangeEntry const* spellRange = sSpellRangeStore.LookupEntry(pSpellInfo->RangeIndex);
                     if (spellRange)
                     {
                         float actualMaxRange = GetSpellMaxRange(spellRange);

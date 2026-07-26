@@ -979,12 +979,12 @@ bool RandomPlayerbotMgr::IsZoneSafeForBot(Player* bot, uint32 mapId, float x, fl
         CalculateAreaCreatureStats();
     }
 
-    if (area->team != AREATEAM_NONE)
+    if (area->FactionGroupMask != AREATEAM_NONE)
     {
         bool botIsAlliance = IsAlliance(bot->getRace());
-        if (botIsAlliance && area->team != AREATEAM_ALLY)
+        if (botIsAlliance && area->FactionGroupMask != AREATEAM_ALLY)
             return false;
-        if (!botIsAlliance && area->team != AREATEAM_HORDE)
+        if (!botIsAlliance && area->FactionGroupMask != AREATEAM_HORDE)
             return false;
     }
     else // contested area: keep bots out of zones guarded by the opposing faction
@@ -1117,13 +1117,13 @@ void RandomPlayerbotMgr::CalculateAreaCreatureStats()
         {
             FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->FactionAlliance);
             if (factionTemplate && !factionTemplate->IsContestedGuardFaction() &&
-                !(factionTemplate->hostileMask & FACTION_MASK_PLAYER))
+                !(factionTemplate->EnemyGroup & FACTION_MASK_PLAYER))
             {
-                if (factionTemplate->hostileMask & FACTION_MASK_HORDE)
+                if (factionTemplate->EnemyGroup & FACTION_MASK_HORDE)
                 {
                     m_allianceGuardAreas.insert(areaId);
                 }
-                if (factionTemplate->hostileMask & FACTION_MASK_ALLIANCE)
+                if (factionTemplate->EnemyGroup & FACTION_MASK_ALLIANCE)
                 {
                     m_hordeGuardAreas.insert(areaId);
                 }

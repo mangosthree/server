@@ -1,5 +1,6 @@
 //add here most rarely modified headers to speed up debug build compilation
-#include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
+// (WorldSocket.h was included here only to satisfy ACE include ordering;
+//  ACE was removed from the core, and no bot code uses WorldSocket.)
 #include "Common.h"
 
 #include "MapManager.h"

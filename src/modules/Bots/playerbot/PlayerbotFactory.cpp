@@ -1151,12 +1151,12 @@ void PlayerbotFactory::ApplyCuratedGlyphs(const string& specKey)
     for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
     {
         GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(bot->GetGlyphSlot(slot));
-        if (!gs || gs->TypeFlags >= 3)
+        if (!gs || gs->Type >= 3)
         {
             continue;
         }
 
-        slotsByType[gs->TypeFlags].push_back(slot);
+        slotsByType[gs->Type].push_back(slot);
     }
 
     bool changed = false;
@@ -1183,14 +1183,14 @@ void PlayerbotFactory::ApplyCuratedGlyphs(const string& specKey)
         }
 
         GlyphPropertiesEntry const* gp = glyphId ? sGlyphPropertiesStore.LookupEntry(glyphId) : NULL;
-        if (!gp || gp->TypeFlags >= 3)
+        if (!gp || gp->GlyphSlotFlags >= 3)
         {
             sLog.outDebug("%s: curated glyph spell %u (type %s) does not resolve to a usable glyph, skipping",
                 bot->GetName(), row.glyphSpell, row.type.c_str());
             continue;
         }
 
-        map<uint32, vector<uint8> >::const_iterator typeItr = slotsByType.find(gp->TypeFlags);
+        map<uint32, vector<uint8> >::const_iterator typeItr = slotsByType.find(gp->GlyphSlotFlags);
         if (typeItr == slotsByType.end() || (size_t)row.slotIdx >= typeItr->second.size())
         {
             sLog.outDebug("%s: no unlocked %s glyph slot %u for curated glyph %u, skipping",
@@ -1791,7 +1791,7 @@ void PlayerbotFactory::EnchantItem(Item* item)
                 continue;
             }
 
-            const SpellEntry *enchantSpell = sSpellStore.LookupEntry(enchant->spellid[0]);
+            const SpellEntry *enchantSpell = sSpellStore.LookupEntry(enchant->EffectArg[0]);
             if (!enchantSpell || (enchantSpell->GetSpellLevel() && enchantSpell->GetSpellLevel() > level))
             {
                 continue;
@@ -1800,12 +1800,12 @@ void PlayerbotFactory::EnchantItem(Item* item)
             uint8 sp = 0, ap = 0, tank = 0;
             for (int i = 0; i < 3; ++i)
             {
-                if (enchant->type[i] != ITEM_ENCHANTMENT_TYPE_STAT)
+                if (enchant->Effect[i] != ITEM_ENCHANTMENT_TYPE_STAT)
                 {
                     continue;
                 }
 
-                AddItemStats(enchant->spellid[i], sp, ap, tank);
+                AddItemStats(enchant->EffectArg[i], sp, ap, tank);
             }
 
             if (!CheckItemStats(sp, ap, tank))
@@ -2289,8 +2289,8 @@ void PlayerbotFactory::InitTalents(uint32 specNo)
             continue;
         }
 
-        TalentTabEntry const *talentTabInfo = sTalentTabStore.LookupEntry( talentInfo->TalentTab );
-        if (!talentTabInfo || talentTabInfo->tabpage != specNo)
+        TalentTabEntry const *talentTabInfo = sTalentTabStore.LookupEntry( talentInfo->TabID );
+        if (!talentTabInfo || talentTabInfo->OrderIndex != specNo)
         {
             continue;
         }
@@ -2300,7 +2300,7 @@ void PlayerbotFactory::InitTalents(uint32 specNo)
             continue;
         }
 
-        spells[talentInfo->Row].push_back(talentInfo);
+        spells[talentInfo->TierID].push_back(talentInfo);
     }
 
     // Spend points row by row through Player::LearnTalent so every Cata rule
@@ -2324,11 +2324,11 @@ void PlayerbotFactory::InitTalents(uint32 specNo)
                 TalentEntry const* talentInfo = *t;
                 for (int rank = 0; rank < MAX_TALENT_RANK && bot->GetFreeTalentPoints(); ++rank)
                 {
-                    if (!talentInfo->RankID[rank])
+                    if (!talentInfo->SpellRank[rank])
                     {
                         continue;
                     }
-                    if (bot->LearnTalent(talentInfo->TalentID, rank))
+                    if (bot->LearnTalent(talentInfo->ID, rank))
                     {
                         progress = true;
                     }
@@ -2391,9 +2391,9 @@ void PlayerbotFactory::InitGlyphs()
 
             uint32 glyphId = spellInfo->GetEffectMiscValue(SpellEffectIndex(j));
             GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyphId);
-            if (gp && gp->TypeFlags < 3)
+            if (gp && gp->GlyphSlotFlags < 3)
             {
-                candidates[gp->TypeFlags].push_back(glyphId);
+                candidates[gp->GlyphSlotFlags].push_back(glyphId);
             }
         }
     }
@@ -2401,12 +2401,12 @@ void PlayerbotFactory::InitGlyphs()
     for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
     {
         GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(bot->GetGlyphSlot(slot));
-        if (!gs || gs->TypeFlags >= 3)
+        if (!gs || gs->Type >= 3)
         {
             continue;
         }
 
-        vector<uint32>& pool = candidates[gs->TypeFlags];
+        vector<uint32>& pool = candidates[gs->Type];
         if (pool.empty())
         {
             continue;

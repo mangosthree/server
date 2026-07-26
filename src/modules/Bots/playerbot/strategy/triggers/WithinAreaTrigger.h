@@ -36,16 +36,16 @@ namespace ai
     private:
         bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, float x, float y, float z, float delta)
         {
-            if (mapid != atEntry->mapid)
+            if (mapid != atEntry->MapId)
             {
                 return false;
             }
 
-            if (atEntry->radius > 0)
+            if (atEntry->Radius > 0)
             {
                 // if we have radius check it
-                float dist2 = (x - atEntry->x) * (x - atEntry->x) + (y - atEntry->y) * (y - atEntry->y) + (z - atEntry->z) * (z - atEntry->z);
-                if (dist2 > (atEntry->radius + delta) * (atEntry->radius + delta))
+                float dist2 = (x - atEntry->PosX) * (x - atEntry->PosX) + (y - atEntry->PosY) * (y - atEntry->PosY) + (z - atEntry->PosZ) * (z - atEntry->PosZ);
+                if (dist2 > (atEntry->Radius + delta) * (atEntry->Radius + delta))
                 {
                     return false;
                 }
@@ -58,23 +58,23 @@ namespace ai
                 // is-in-cube check and we have to calculate only one point instead of 4
 
                 // 2PI = 360, keep in mind that ingame orientation is counter-clockwise
-                double rotation = 2 * M_PI - atEntry->box_orientation;
+                double rotation = 2 * M_PI - atEntry->Box_yaw;
                 double sinVal = sin(rotation);
                 double cosVal = cos(rotation);
 
-                float playerBoxDistX = x - atEntry->x;
-                float playerBoxDistY = y - atEntry->y;
+                float playerBoxDistX = x - atEntry->PosX;
+                float playerBoxDistY = y - atEntry->PosY;
 
-                float rotPlayerX = float(atEntry->x + playerBoxDistX * cosVal - playerBoxDistY * sinVal);
-                float rotPlayerY = float(atEntry->y + playerBoxDistY * cosVal + playerBoxDistX * sinVal);
+                float rotPlayerX = float(atEntry->PosX + playerBoxDistX * cosVal - playerBoxDistY * sinVal);
+                float rotPlayerY = float(atEntry->PosY + playerBoxDistY * cosVal + playerBoxDistX * sinVal);
 
                 // box edges are parallel to coordiante axis, so we can treat every dimension independently :D
-                float dz = z - atEntry->z;
-                float dx = rotPlayerX - atEntry->x;
-                float dy = rotPlayerY - atEntry->y;
-                if ((fabs(dx) > atEntry->box_x / 2 + delta) ||
-                        (fabs(dy) > atEntry->box_y / 2 + delta) ||
-                        (fabs(dz) > atEntry->box_z / 2 + delta))
+                float dz = z - atEntry->PosZ;
+                float dx = rotPlayerX - atEntry->PosX;
+                float dy = rotPlayerY - atEntry->PosY;
+                if ((fabs(dx) > atEntry->Box_length / 2 + delta) ||
+                        (fabs(dy) > atEntry->Box_width / 2 + delta) ||
+                        (fabs(dz) > atEntry->Box_height / 2 + delta))
                 {
                     return false;
                 }

@@ -369,7 +369,7 @@ namespace ai
                 continue;
             }
 
-            if (bot->HasAura(sp->Id))
+            if (bot->HasAura(sp->ID))
             {
                 return true;
             }

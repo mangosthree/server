@@ -412,6 +412,25 @@ namespace ai
 
     };
 
+    // ID-based aura check on the bot itself. Several talent-enabled procs share
+    // the exact display name of their permanent enabling passive, so a name-based
+    // HasAuraTrigger fires every tick; check the proc's spell id directly instead.
+    class HasAuraIdTrigger : public Trigger
+    {
+    public:
+        HasAuraIdTrigger(PlayerbotAI* ai, string name, uint32 spellId) : Trigger(ai, name)
+        {
+            this->spellId = spellId;
+        }
+        virtual bool IsActive()
+        {
+            return ai->HasAura(spellId, ai->GetBot());
+        }
+
+    protected:
+        uint32 spellId;
+    };
+
     class TimerTrigger : public Trigger
     {
     public:

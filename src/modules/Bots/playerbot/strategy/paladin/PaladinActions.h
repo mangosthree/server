@@ -47,16 +47,23 @@ namespace ai
         CastConcentrationAuraAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "concentration aura") {}
     };
 
-    class CastDivineStormAction : public CastBuffSpellAction
+    /// Cata 4.3.4: Divine Storm is a melee-range instant attack, not a self-buff
+    class CastDivineStormAction : public CastMeleeSpellAction
     {
     public:
-        CastDivineStormAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "divine storm") {}
+        CastDivineStormAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "divine storm") {}
     };
 
     class CastCrusaderStrikeAction : public CastMeleeSpellAction
     {
     public:
         CastCrusaderStrikeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "crusader strike") {}
+        /// Only a Holy Power builder; stop once the resource is capped
+        virtual bool isUseful()
+        {
+            return AI_VALUE2(uint8, "holy power", "self target") < 3 &&
+                CastMeleeSpellAction::isUseful();
+        }
     };
 
     /// Cata 4.3.4: fire/frost/shadow resistance auras were merged into one
@@ -352,7 +359,9 @@ namespace ai
         CastTemplarsVerdictAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "templar's verdict") {}
         virtual bool isPossible()
         {
-            if (AI_VALUE2(uint8, "holy power", "self target") < 3)
+            // runtime-verify: Divine Purpose proc 90174 makes the finisher free,
+            // bypassing the normal 3 Holy Power requirement
+            if (AI_VALUE2(uint8, "holy power", "self target") < 3 && !ai->HasAura(90174u, bot))
             {
                 return false;
             }
@@ -428,5 +437,47 @@ namespace ai
     {
     public:
         CastArdentDefenderAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "ardent defender") {}
+    };
+
+    /// Ret burst cooldown (85696); only worth popping alongside Avenging Wrath
+    class CastZealotryAction : public CastBuffSpellAction
+    {
+    public:
+        CastZealotryAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "zealotry") {}
+        virtual bool isUseful()
+        {
+            return ai->HasAura("avenging wrath", bot) && CastBuffSpellAction::isUseful();
+        }
+    };
+
+    /// Mana return cooldown (54428); self-buff
+    class CastDivinePleaAction : public CastBuffSpellAction
+    {
+    public:
+        CastDivinePleaAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "divine plea") {}
+    };
+
+    /// Holy Power self-heal aimed at a party member; 3 Holy Power gate mirrors
+    /// CastWordOfGloryAction
+    class CastWordOfGloryOnPartyAction : public HealPartyMemberAction
+    {
+    public:
+        CastWordOfGloryOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "word of glory") {}
+        virtual bool isPossible()
+        {
+            if (AI_VALUE2(uint8, "holy power", "self target") < 3)
+            {
+                return false;
+            }
+            return HealPartyMemberAction::isPossible();
+        }
+        virtual string getName() { return "word of glory on party"; }
+    };
+
+    /// Holy throughput cooldown (31842); self-buff
+    class CastDivineFavorAction : public CastBuffSpellAction
+    {
+    public:
+        CastDivineFavorAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "divine favor") {}
     };
 }

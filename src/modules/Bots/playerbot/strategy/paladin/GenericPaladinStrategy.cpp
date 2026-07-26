@@ -54,9 +54,10 @@ void GenericPaladinStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         "target critical health",
         NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH + 1), NULL)));
 
+    // Holy Wrath is low-priority AoE filler; the >=2-attacker gate stays on the trigger
     triggers.push_back(new TriggerNode(
         "holy wrath",
-        NextAction::array(0, new NextAction("holy wrath", ACTION_HIGH + 3), NULL)));
+        NextAction::array(0, new NextAction("holy wrath", 17.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "blessing of freedom",

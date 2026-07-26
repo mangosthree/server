@@ -66,26 +66,45 @@ void DpsPaladinStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("divine shield", ACTION_CRITICAL_HEAL + 2), new NextAction("holy light", ACTION_CRITICAL_HEAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "judgement",
-        NextAction::array(0, new NextAction("judgement", ACTION_NORMAL + 2), NULL)));
+        "avenging wrath",
+        NextAction::array(0, new NextAction("avenging wrath", 29.0f), NULL)));
+
+    // Zealotry and Guardian of Ancient Kings are AW-paired; queued only while the
+    // wings aura is up (the boost trigger deactivates once AW is active)
+    triggers.push_back(new TriggerNode(
+        "avenging wrath active",
+        NextAction::array(0, new NextAction("zealotry", 28.0f), new NextAction("guardian of ancient kings", 27.0f), NULL)));
+
+    // Inquisition refreshes above the finisher; CastAuraSpellAction::isUseful
+    // no-ops it once the buff is up, so Templar's Verdict takes over
+    triggers.push_back(new TriggerNode(
+        "holy power available",
+        NextAction::array(0, new NextAction("inquisition", 26.0f), new NextAction("templar's verdict", 20.0f), NULL)));
+
+    // Divine Purpose proc: free finisher (bypasses the 3 Holy Power gate)
+    triggers.push_back(new TriggerNode(
+        "divine purpose",
+        NextAction::array(0, new NextAction("inquisition", 26.0f), new NextAction("templar's verdict", 23.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium aoe",
-        NextAction::array(0, new NextAction("divine storm", ACTION_HIGH + 1), new NextAction("consecration", ACTION_HIGH + 1), NULL)));
+        NextAction::array(0, new NextAction("divine storm", 25.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "crusader strike available",
+        NextAction::array(0, new NextAction("crusader strike", 24.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "art of war",
-        NextAction::array(0, new NextAction("exorcism", ACTION_HIGH + 2), NULL)));
-
-    // Inquisition is ranked above the finisher; CastAuraSpellAction::isUseful
-    // already no-ops it once the buff is up, so Templar's Verdict takes over
-    triggers.push_back(new TriggerNode(
-        "holy power available",
-        NextAction::array(0, new NextAction("inquisition", ACTION_HIGH + 2), new NextAction("templar's verdict", ACTION_HIGH + 1), NULL)));
+        NextAction::array(0, new NextAction("exorcism", 22.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "avenging wrath",
-        NextAction::array(0, new NextAction("avenging wrath", ACTION_HIGH + 2), NULL)));
+        "judgement",
+        NextAction::array(0, new NextAction("judgement", 19.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "high aoe",
+        NextAction::array(0, new NextAction("consecration", 18.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "rebuke interrupt",

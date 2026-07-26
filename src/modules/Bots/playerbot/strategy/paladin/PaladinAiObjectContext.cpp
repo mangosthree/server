@@ -126,9 +126,19 @@ namespace ai
                 creators["beacon of light on tank"] = &TriggerFactoryInternal::beacon_of_light_on_tank;
                 creators["avenging wrath"] = &TriggerFactoryInternal::avenging_wrath;
                 creators["rebuke interrupt"] = &TriggerFactoryInternal::rebuke_interrupt;
+                creators["divine purpose"] = &TriggerFactoryInternal::divine_purpose;
+                creators["avenging wrath active"] = &TriggerFactoryInternal::avenging_wrath_active;
+                creators["crusader strike available"] = &TriggerFactoryInternal::crusader_strike_available;
+                creators["avenger's shield available"] = &TriggerFactoryInternal::avengers_shield_available;
+                creators["daybreak"] = &TriggerFactoryInternal::daybreak;
             }
 
         private:
+            static Trigger* divine_purpose(PlayerbotAI* ai) { return new DivinePurposeTrigger(ai); }
+            static Trigger* avenging_wrath_active(PlayerbotAI* ai) { return new AvengingWrathActiveTrigger(ai); }
+            static Trigger* crusader_strike_available(PlayerbotAI* ai) { return new CrusaderStrikeAvailableTrigger(ai); }
+            static Trigger* avengers_shield_available(PlayerbotAI* ai) { return new AvengersShieldAvailableTrigger(ai); }
+            static Trigger* daybreak(PlayerbotAI* ai) { return new DaybreakTrigger(ai); }
             static Trigger* holy_wrath(PlayerbotAI* ai) { return new HolyWrathTrigger(ai); }
             static Trigger* blessing_of_freedom(PlayerbotAI* ai) { return new BlessingOfFreedomTrigger(ai); }
             static Trigger* holy_power_available(PlayerbotAI* ai) { return new HolyPowerAvailableTrigger(ai); }
@@ -229,6 +239,10 @@ namespace ai
                 creators["word of glory"] = &AiObjectContextInternal::word_of_glory;
                 creators["guardian of ancient kings"] = &AiObjectContextInternal::guardian_of_ancient_kings;
                 creators["ardent defender"] = &AiObjectContextInternal::ardent_defender;
+                creators["zealotry"] = &AiObjectContextInternal::zealotry;
+                creators["divine plea"] = &AiObjectContextInternal::divine_plea;
+                creators["word of glory on party"] = &AiObjectContextInternal::word_of_glory_on_party;
+                creators["divine favor"] = &AiObjectContextInternal::divine_favor;
             }
 
         private:
@@ -290,6 +304,10 @@ namespace ai
             static Action* word_of_glory(PlayerbotAI* ai) { return new CastWordOfGloryAction(ai); }
             static Action* guardian_of_ancient_kings(PlayerbotAI* ai) { return new CastGuardianOfAncientKingsAction(ai); }
             static Action* ardent_defender(PlayerbotAI* ai) { return new CastArdentDefenderAction(ai); }
+            static Action* zealotry(PlayerbotAI* ai) { return new CastZealotryAction(ai); }
+            static Action* divine_plea(PlayerbotAI* ai) { return new CastDivinePleaAction(ai); }
+            static Action* word_of_glory_on_party(PlayerbotAI* ai) { return new CastWordOfGloryOnPartyAction(ai); }
+            static Action* divine_favor(PlayerbotAI* ai) { return new CastDivineFavorAction(ai); }
         };
     };
 };

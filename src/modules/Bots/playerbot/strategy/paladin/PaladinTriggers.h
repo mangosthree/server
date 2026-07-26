@@ -80,10 +80,50 @@ namespace ai
         HammerOfJusticeSnareTrigger(PlayerbotAI* ai) : SnareTargetTrigger(ai, "hammer of justice") {}
     };
 
-    class ArtOfWarTrigger : public HasAuraTrigger
+    // runtime-verify: Art of War proc id 59578 (free instant Exorcism). The Ret
+    // talent that enables it is a passive sharing this display name, so a
+    // name-based HasAuraTrigger would fire every tick (Exorcism spam / stall).
+    class ArtOfWarTrigger : public HasAuraIdTrigger
     {
     public:
-        ArtOfWarTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "the art of war") {}
+        ArtOfWarTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "art of war", 59578) {}
+    };
+
+    // runtime-verify: Divine Purpose proc id 90174 (free Holy Power finisher)
+    class DivinePurposeTrigger : public HasAuraIdTrigger
+    {
+    public:
+        DivinePurposeTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "divine purpose", 90174) {}
+    };
+
+    // runtime-verify: Avenging Wrath aura id 31884. Fires the AW-paired burst
+    // cooldowns while the wings are up; the boost trigger deactivates once AW is
+    // active, so a separate active-aura trigger is needed to queue them.
+    class AvengingWrathActiveTrigger : public HasAuraIdTrigger
+    {
+    public:
+        AvengingWrathActiveTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "avenging wrath active", 31884) {}
+    };
+
+    class CrusaderStrikeAvailableTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        CrusaderStrikeAvailableTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "crusader strike") {}
+    };
+
+    // Covers Grand Crusader too: the proc resets Avenger's Shield's cooldown
+    // server-side, so "can it be cast" already captures the free-cast window.
+    class AvengersShieldAvailableTrigger : public SpellCanBeCastTrigger
+    {
+    public:
+        AvengersShieldAvailableTrigger(PlayerbotAI* ai) : SpellCanBeCastTrigger(ai, "avenger's shield") {}
+    };
+
+    // runtime-verify: Daybreak proc id 88819 (free/instant Holy Shock follow-up)
+    class DaybreakTrigger : public HasAuraIdTrigger
+    {
+    public:
+        DaybreakTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "daybreak", 88819) {}
     };
 
     class ResistanceAuraTrigger : public BuffTrigger

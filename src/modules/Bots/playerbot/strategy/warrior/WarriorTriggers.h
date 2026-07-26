@@ -42,25 +42,8 @@ namespace ai
     DEBUFF_TRIGGER(ThunderClapDebuffTrigger, "thunder clap", "thunder clap")
     DEBUFF_TRIGGER(DemoralizingShoutDebuffTrigger, "demoralizing shout", "demoralizing shout")
 
-    // ID-based proc trigger: several Arms/Fury/Prot procs share the exact
-    // display name of their enabling talent (a permanent passive aura), so a
-    // name-based HasAuraTrigger fires every tick. Check the proc's spell id
-    // on the bot directly instead.
-    class HasAuraIdTrigger : public Trigger
-    {
-    public:
-        HasAuraIdTrigger(PlayerbotAI* ai, string name, uint32 spellId) : Trigger(ai, name)
-        {
-            this->spellId = spellId;
-        }
-        virtual bool IsActive()
-        {
-            return ai->HasAura(spellId, ai->GetBot());
-        }
-
-    protected:
-        uint32 spellId;
-    };
+    // HasAuraIdTrigger now lives in the shared triggers/GenericTriggers.h so any
+    // class can reuse the id-based proc check.
 
     // runtime-verify: Sword and Board proc id 50227 (free Shield Slam)
     class SwordAndBoardProcTrigger : public HasAuraIdTrigger

@@ -41,11 +41,6 @@ RandomPlayerbotFactory::RandomPlayerbotFactory(uint32 accountId) : accountId(acc
 
     for (uint32 cls = CLASS_WARRIOR; cls < MAX_CLASSES; ++cls)
     {
-        if (cls == CLASS_DEATH_KNIGHT)
-        {
-            continue; // no Death Knight bot AI yet
-        }
-
         for (uint32 race = RACE_HUMAN; race < MAX_RACES; ++race)
         {
             if (sObjectMgr.GetPlayerInfo(race, cls))

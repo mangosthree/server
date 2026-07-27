@@ -135,6 +135,11 @@ source_group("Player Bot\\Strategies\\Values" FILES ${Playerbot_Values})
 LIST(APPEND SRC_GRP_BOTS ${Playerbot_Values})
 
 ## Class files
+#Death Knight AI
+file(GLOB Playerbot_Deathknight ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/strategy/deathknight/*.cpp ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/strategy/deathknight/*.h)
+source_group("Player Bot\\Strategies\\Deathknight" FILES ${Playerbot_Deathknight})
+LIST(APPEND SRC_GRP_BOTS ${Playerbot_Deathknight})
+
 #Druid AI
 file(GLOB Playerbot_Druid ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/strategy/druid/*.cpp ${CMAKE_SOURCE_DIR}/src/modules/Bots/playerbot/strategy/druid/*.h)
 source_group("Player Bot\\Strategies\\Druid" FILES ${Playerbot_Druid})

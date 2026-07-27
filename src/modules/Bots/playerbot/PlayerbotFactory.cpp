@@ -2267,6 +2267,17 @@ void PlayerbotFactory::InitQuestSpells()
             break;
         case CLASS_MAGE:
             break;
+        case CLASS_DEATH_KNIGHT:
+            // Baseline class kit; harmless to re-learn if a trainer already
+            // granted these.
+            if (!bot->HasSpell(48263)) bot->learnSpell(48263, false); // Blood Presence
+            if (!bot->HasSpell(48265)) bot->learnSpell(48265, false); // Unholy Presence
+            if (!bot->HasSpell(48266)) bot->learnSpell(48266, false); // Frost Presence
+            if (!bot->HasSpell(46584)) bot->learnSpell(46584, false); // Raise Dead
+            if (!bot->HasSpell(49576)) bot->learnSpell(49576, false); // Death Grip
+            if (!bot->HasSpell(50977)) bot->learnSpell(50977, false); // Death Gate
+            if (!bot->HasSpell(53428)) bot->learnSpell(53428, false); // Runeforging
+            break;
         default:
             break;
     }

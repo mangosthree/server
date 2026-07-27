@@ -110,6 +110,8 @@ namespace ai
             creators["soul shards"] = &ValueContext::soul_shards;
             creators["combo"] = &ValueContext::combo;
             creators["holy power"] = &ValueContext::holy_power;
+            creators["runic power"] = &ValueContext::runic_power;
+            creators["rune count"] = &ValueContext::rune_count;
             creators["dead"] = &ValueContext::dead;
             creators["pet dead"] = &ValueContext::pet_dead;
             creators["pet happy"] = &ValueContext::pet_happy;
@@ -227,6 +229,8 @@ namespace ai
         static UntypedValue* soul_shards(PlayerbotAI* ai) { return new SoulShardsValue(ai); }
         static UntypedValue* combo(PlayerbotAI* ai) { return new ComboPointsValue(ai); }
         static UntypedValue* holy_power(PlayerbotAI* ai) { return new HolyPowerValue(ai); }
+        static UntypedValue* runic_power(PlayerbotAI* ai) { return new RunicPowerValue(ai); }
+        static UntypedValue* rune_count(PlayerbotAI* ai) { return new AvailableRunesValue(ai); }
         static UntypedValue* dead(PlayerbotAI* ai) { return new IsDeadValue(ai); }
         static UntypedValue* pet_happy(PlayerbotAI* ai) { return new PetIsHappyValue(ai); }
         static UntypedValue* pet_dead(PlayerbotAI* ai) { return new PetIsDeadValue(ai); }

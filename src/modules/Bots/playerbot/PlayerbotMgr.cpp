@@ -109,18 +109,6 @@ Player* PlayerbotHolder::GetPlayerBot(uint64 playerGuid) const
  */
 void PlayerbotHolder::OnBotLogin(Player* const bot)
 {
-    // Safety net for paths that skip ProcessBotCommand (e.g. .summon re-add):
-    // there is no Death Knight bot AI yet, so log the bot straight back out
-    // (inline: the bot is not in playerBots yet, LogoutPlayerBot would no-op).
-    if (bot->getClass() == CLASS_DEATH_KNIGHT)
-    {
-        sLog.outString("Bot %s is a Death Knight - not supported yet, logging out", bot->GetName());
-        WorldSession* botSession = bot->GetSession();
-        botSession->LogoutPlayer(true);
-        delete botSession;
-        return;
-    }
-
     PlayerbotAI* ai = new PlayerbotAI(bot);
     bot->SetPlayerbotAI(ai);
     OnBotLoginInternal(bot);
@@ -233,18 +221,6 @@ string PlayerbotHolder::ProcessBotCommand(string cmd, ObjectGuid guid, bool admi
         if (sObjectMgr.GetPlayer(guid))
         {
             return "player already logged in";
-        }
-
-        // No Death Knight bot AI exists yet (Cata); refuse with a clear message.
-        QueryResult* classResult = CharacterDatabase.PQuery("SELECT `class` FROM `characters` WHERE `guid` = '%u'", guid.GetCounter());
-        if (classResult)
-        {
-            uint8 botClass = classResult->Fetch()[0].GetUInt8();
-            delete classResult;
-            if (botClass == CLASS_DEATH_KNIGHT)
-            {
-                return "Death Knight bots are not supported yet";
-            }
         }
 
         AddPlayerBot(guid.GetRawValue(), masterAccountId);

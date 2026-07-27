@@ -130,6 +130,56 @@ uint8 HolyPowerValue::Calculate()
     return (static_cast<float> (target->GetPower(POWER_HOLY_POWER)));
 }
 
+uint8 RunicPowerValue::Calculate()
+{
+    Unit* target = GetTarget();
+    if (!target)
+    {
+        return 0;
+    }
+    return (static_cast<float> (target->GetPower(POWER_RUNIC_POWER))) / 10;
+}
+
+uint8 AvailableRunesValue::Calculate()
+{
+    if (bot->getClass() != CLASS_DEATH_KNIGHT)
+    {
+        return 0;
+    }
+
+    RuneType type;
+    if (qualifier == "blood")
+    {
+        type = RUNE_BLOOD;
+    }
+    else if (qualifier == "frost")
+    {
+        type = RUNE_FROST;
+    }
+    else if (qualifier == "unholy")
+    {
+        type = RUNE_UNHOLY;
+    }
+    else if (qualifier == "death")
+    {
+        type = RUNE_DEATH;
+    }
+    else
+    {
+        return 0;
+    }
+
+    uint8 count = 0;
+    for (uint8 i = 0; i < MAX_RUNES; ++i)
+    {
+        if (!bot->GetRuneCooldown(i) && bot->GetCurrentRune(i) == type)
+        {
+            ++count;
+        }
+    }
+    return count;
+}
+
 uint8 ComboPointsValue::Calculate()
 {
     Unit *target = GetTarget();

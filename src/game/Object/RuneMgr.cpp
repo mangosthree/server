@@ -252,7 +252,11 @@ void RuneMgr::Init()
     {
         SetBaseRune(i, runeSlotTypes[i]);                   // init base types
         SetCurrentRune(i, runeSlotTypes[i]);                // init current types
+        SetBaseRuneCooldown(i, 0);                          // reset base cooldowns
         SetRuneCooldown(i, 0);                              // reset cooldowns
+        SetRuneConvertAura(i, NULL);                        // clear convert-aura ptr:
+                                                            // uninitialised it is garbage
+                                                            // and RestoreBaseRune derefs it
         m_data.SetRuneState(i);
     }
 

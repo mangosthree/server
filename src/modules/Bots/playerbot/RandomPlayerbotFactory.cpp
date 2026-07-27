@@ -60,7 +60,7 @@ bool RandomPlayerbotFactory::CreateRandomBot(uint8 cls)
 {
     sLog.outDetail("Creating new random bot for class %d", cls);
 
-    uint8 gender = rand() % 2 ? GENDER_MALE : GENDER_FEMALE;
+    uint8 gender = urand(0, 1) ? GENDER_MALE : GENDER_FEMALE;
 
     if (availableRaces[cls].empty())
     {

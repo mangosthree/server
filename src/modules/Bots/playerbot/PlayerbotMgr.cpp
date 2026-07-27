@@ -355,28 +355,30 @@ list<string> PlayerbotHolder::HandlePlayerbotCommand(char const* args, Player* m
         return messages;
     }
 
-    char* cmd = strtok((char*)args, " ");
-    char* charname = strtok(NULL, " ");
-    if (!cmd)
+    // Portable, thread-safe tokenising (no strtok): first token = command,
+    // second = player name(s).
+    vector<string> tokens = split((string)args, ' ');
+    if (tokens.empty() || tokens[0].empty())
     {
         messages.push_back("usage: list or add/init/remove PLAYERNAME");
         return messages;
     }
 
-    if (!strcmp(cmd, "list"))
+    std::string cmdStr = tokens[0];
+
+    if (cmdStr == "list")
     {
         messages.push_back(ListBots(master));
         return messages;
     }
 
-    if (!charname)
+    if (tokens.size() < 2 || tokens[1].empty())
     {
         messages.push_back("usage: list or add/init/remove PLAYERNAME");
         return messages;
     }
 
-    std::string cmdStr = cmd;
-    std::string charnameStr = charname;
+    std::string charnameStr = tokens[1];
 
     set<string> bots;
     if (charnameStr == "*" && master)

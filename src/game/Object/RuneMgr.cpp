@@ -169,7 +169,7 @@ void RuneMgr::RestoreBaseRune(uint8 index)
     }
 
     // Blood of the North
-    if (aura->GetId() == 54637 && m_owner->HasAura(54637))
+    if (aura && aura->GetId() == 54637 && m_owner->HasAura(54637))
     {
         return;
     }

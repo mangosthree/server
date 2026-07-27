@@ -54,7 +54,7 @@ private:
     {
         return new ActionNode ("shred",
             /*P*/ NULL,
-            /*A*/ NextAction::array(0, new NextAction("melee"), NULL),
+            /*A*/ NextAction::array(0, new NextAction("mangle (cat)"), NULL),
             /*C*/ NULL);
     }
     static ActionNode* mangle_cat(PlayerbotAI* ai)
@@ -104,7 +104,9 @@ CatDpsDruidStrategy::CatDpsDruidStrategy(PlayerbotAI* ai) : FeralDruidStrategy(a
 
 NextAction** CatDpsDruidStrategy::getDefaultActions()
 {
-    return NextAction::array(0, new NextAction("mangle (cat)", ACTION_NORMAL + 1), NULL);
+    // Shred is the default combo-point builder; Mangle is reserved for its
+    // bleed-debuff upkeep (see the "mangle (cat)" trigger below).
+    return NextAction::array(0, new NextAction("shred", ACTION_NORMAL + 1), NULL);
 }
 
 void CatDpsDruidStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
@@ -114,6 +116,13 @@ void CatDpsDruidStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "cat form",
         NextAction::array(0, new NextAction("cat form", ACTION_MOVE + 2), NULL)));
+
+    // Mangle is cast only for its bleed-debuff upkeep; Shred (default action)
+    // falls back to it when out of position, so this also catches the
+    // can't-be-behind-target Shred failure case.
+    triggers.push_back(new TriggerNode(
+        "mangle (cat)",
+        NextAction::array(0, new NextAction("mangle (cat)", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "rake",
@@ -149,6 +158,11 @@ void CatDpsDruidStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "entangling roots",
         NextAction::array(0, new NextAction("entangling roots on cc", ACTION_HIGH + 1), NULL)));
+
+    // Runtime-verify: Predator's Swiftness up -> free instant Regrowth.
+    triggers.push_back(new TriggerNode(
+        "predator's swiftness",
+        NextAction::array(0, new NextAction("regrowth", ACTION_LIGHT_HEAL + 3), NULL)));
 
 }
 

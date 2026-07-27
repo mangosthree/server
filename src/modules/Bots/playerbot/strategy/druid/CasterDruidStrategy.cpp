@@ -17,6 +17,7 @@ public:
         creators["entangling roots on cc"] = &entangling_roots_on_cc;
         creators["wrath"] = &wrath;
         creators["starfall"] = &starfall;
+        creators["starsurge"] = &starsurge;
         creators["insect swarm"] = &insect_swarm;
         creators["moonfire"] = &moonfire;
         creators["starfire"] = &starfire;
@@ -54,6 +55,13 @@ private:
     static ActionNode* wrath(PlayerbotAI* ai)
     {
         return new ActionNode ("wrath",
+            /*P*/ NextAction::array(0, new NextAction("moonkin form"), NULL),
+            /*A*/ NULL,
+            /*C*/ NULL);
+    }
+    static ActionNode* starsurge(PlayerbotAI* ai)
+    {
+        return new ActionNode ("starsurge",
             /*P*/ NextAction::array(0, new NextAction("moonkin form"), NULL),
             /*A*/ NULL,
             /*C*/ NULL);
@@ -103,7 +111,9 @@ CasterDruidStrategy::CasterDruidStrategy(PlayerbotAI* ai) : GenericDruidStrategy
 
 NextAction** CasterDruidStrategy::getDefaultActions()
 {
-    return NextAction::array(0, new NextAction("starfire", ACTION_NORMAL + 2), new NextAction("wrath", ACTION_NORMAL + 1), NULL);
+    // Eclipse-less fallback (POWER_ECLIPSE unimplemented in this core): Starsurge
+    // on cooldown ahead of the Wrath/Starfire filler.
+    return NextAction::array(0, new NextAction("starsurge", ACTION_NORMAL + 3), new NextAction("starfire", ACTION_NORMAL + 2), new NextAction("wrath", ACTION_NORMAL + 1), NULL);
 }
 
 void CasterDruidStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
@@ -146,12 +156,6 @@ void CasterDruidStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "eclipse (lunar)",
         NextAction::array(0, new NextAction("starfire", ACTION_NORMAL + 6), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "moonfire",
-        NextAction::array(0, new NextAction("moonfire", ACTION_NORMAL + 4), NULL)));
-
-
 
     triggers.push_back(new TriggerNode(
         "nature's grasp",

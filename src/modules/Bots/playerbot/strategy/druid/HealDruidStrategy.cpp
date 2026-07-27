@@ -37,13 +37,22 @@ void HealDruidStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         "lifebloom on tank",
         NextAction::array(0, new NextAction("lifebloom on tank", ACTION_HIGH + 8), NULL)));
 
+    // Swiftmend consumes an existing Rejuvenation/Regrowth HoT for a burst
+    // heal; try it ahead of Regrowth.
     triggers.push_back(new TriggerNode(
         "medium health",
-        NextAction::array(0, new NextAction("regrowth", ACTION_MEDIUM_HEAL + 2), NULL)));
+        NextAction::array(0, new NextAction("swiftmend", ACTION_MEDIUM_HEAL + 4), new NextAction("regrowth", ACTION_MEDIUM_HEAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member medium health",
-        NextAction::array(0, new NextAction("regrowth on party", ACTION_MEDIUM_HEAL + 1), NULL)));
+        NextAction::array(0, new NextAction("swiftmend on party", ACTION_MEDIUM_HEAL + 3), new NextAction("regrowth on party", ACTION_MEDIUM_HEAL + 1), NULL)));
+
+    // Nature's Swiftness: instant-cast the next heal for a party member in
+    // a critical-health emergency, ahead of GenericDruidStrategy's
+    // healing-touch-on-party fallback.
+    triggers.push_back(new TriggerNode(
+        "party member critical health",
+        NextAction::array(0, new NextAction("nature's swiftness", ACTION_CRITICAL_HEAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "almost full health",

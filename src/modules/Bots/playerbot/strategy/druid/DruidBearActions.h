@@ -17,7 +17,9 @@ namespace ai {
     {
     public:
         CastMaulAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "maul") {}
-        virtual bool isUseful() { return CastMeleeSpellAction::isUseful() && AI_VALUE2(uint8, "rage", "self target") >= 45; }
+        // Preserve the rage-cap-avoidance gate for the normal case, but a
+        // Clearcasting (16870) proc makes Maul free -- let it through then too.
+        virtual bool isUseful() { return CastMeleeSpellAction::isUseful() && (AI_VALUE2(uint8, "rage", "self target") >= 45 || ai->HasAura(16870u, bot)); }
     };
 
     class CastBashAction : public CastMeleeSpellAction

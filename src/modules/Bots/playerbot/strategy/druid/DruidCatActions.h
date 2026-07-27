@@ -24,6 +24,7 @@ namespace ai {
     {
     public:
         CastTigersFuryAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "tiger's fury") {}
+        virtual bool isUseful() { return CastBuffSpellAction::isUseful() && AI_VALUE2(uint8, "energy", "self target") < 40; }
     };
 
     class CastRakeAction : public CastDebuffSpellAction

@@ -48,6 +48,26 @@ namespace ai
         CastRegrowthOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "regrowth") {}
     };
 
+    /// Consumes an existing Rejuvenation/Regrowth HoT for a burst heal; casts
+    /// harmlessly fail with no HoT up (core-supported, no extra gating here).
+    class CastSwiftmendAction : public CastHealingSpellAction
+    {
+    public:
+        CastSwiftmendAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "swiftmend") {}
+    };
+
+    class CastSwiftmendOnPartyAction : public HealPartyMemberAction
+    {
+    public:
+        CastSwiftmendOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "swiftmend") {}
+    };
+
+    class CastNaturesSwiftnessAction : public CastBuffSpellAction
+    {
+    public:
+        CastNaturesSwiftnessAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "nature's swiftness") {}
+    };
+
     class CastHealingTouchOnPartyAction : public HealPartyMemberAction
     {
     public:
@@ -128,6 +148,14 @@ namespace ai
     {
     public:
         CastStarfireAction(PlayerbotAI* ai) : CastSpellAction(ai, "starfire") {}
+    };
+
+    /// Plain nuke on this core: Eclipse is unimplemented (see EclipseSolarTrigger),
+    /// so its energize-the-bar side effect is a no-op here.
+    class CastStarsurgeAction : public CastSpellAction
+    {
+    public:
+        CastStarsurgeAction(PlayerbotAI* ai) : CastSpellAction(ai, "starsurge") {}
     };
 
     class CastEntanglingRootsAction : public CastSpellAction

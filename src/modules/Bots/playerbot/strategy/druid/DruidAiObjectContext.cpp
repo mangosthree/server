@@ -96,6 +96,10 @@ namespace ai
                 creators["berserk"] = &TriggerFactoryInternal::berserk;
                 creators["skull bash"] = &TriggerFactoryInternal::skull_bash;
                 creators["lifebloom on tank"] = &TriggerFactoryInternal::lifebloom_on_tank;
+                creators["mangle (cat)"] = &TriggerFactoryInternal::mangle_cat;
+                creators["demoralizing roar"] = &TriggerFactoryInternal::demoralizing_roar;
+                creators["clearcasting"] = &TriggerFactoryInternal::clearcasting;
+                creators["predator's swiftness"] = &TriggerFactoryInternal::predators_swiftness;
             }
 
         private:
@@ -123,6 +127,10 @@ namespace ai
             static Trigger* berserk(PlayerbotAI* ai) { return new BerserkTrigger(ai); }
             static Trigger* skull_bash(PlayerbotAI* ai) { return new SkullBashInterruptSpellTrigger(ai); }
             static Trigger* lifebloom_on_tank(PlayerbotAI* ai) { return new LifebloomOnTankTrigger(ai); }
+            static Trigger* mangle_cat(PlayerbotAI* ai) { return new MangleTrigger(ai); }
+            static Trigger* demoralizing_roar(PlayerbotAI* ai) { return new DemoralizingRoarTrigger(ai); }
+            static Trigger* clearcasting(PlayerbotAI* ai) { return new ClearcastingTrigger(ai); }
+            static Trigger* predators_swiftness(PlayerbotAI* ai) { return new PredatorsSwiftnessTrigger(ai); }
         };
     };
 };
@@ -160,6 +168,7 @@ namespace ai
                 creators["entangling roots on cc"] = &AiObjectContextInternal::entangling_roots_on_cc;
                 creators["wrath"] = &AiObjectContextInternal::wrath;
                 creators["starfall"] = &AiObjectContextInternal::starfall;
+                creators["starsurge"] = &AiObjectContextInternal::starsurge;
                 creators["insect swarm"] = &AiObjectContextInternal::insect_swarm;
                 creators["moonfire"] = &AiObjectContextInternal::moonfire;
                 creators["starfire"] = &AiObjectContextInternal::starfire;
@@ -199,6 +208,9 @@ namespace ai
                 creators["skull bash"] = &AiObjectContextInternal::skull_bash;
                 creators["wild growth"] = &AiObjectContextInternal::wild_growth;
                 creators["lifebloom on tank"] = &AiObjectContextInternal::lifebloom_on_tank;
+                creators["swiftmend"] = &AiObjectContextInternal::swiftmend;
+                creators["swiftmend on party"] = &AiObjectContextInternal::swiftmend_on_party;
+                creators["nature's swiftness"] = &AiObjectContextInternal::natures_swiftness;
             }
 
         private:
@@ -225,6 +237,7 @@ namespace ai
             static Action* entangling_roots_on_cc(PlayerbotAI* ai) { return new CastEntanglingRootsCcAction(ai); }
             static Action* wrath(PlayerbotAI* ai) { return new CastWrathAction(ai); }
             static Action* starfall(PlayerbotAI* ai) { return new CastStarfallAction(ai); }
+            static Action* starsurge(PlayerbotAI* ai) { return new CastStarsurgeAction(ai); }
             static Action* insect_swarm(PlayerbotAI* ai) { return new CastInsectSwarmAction(ai); }
             static Action* moonfire(PlayerbotAI* ai) { return new CastMoonfireAction(ai); }
             static Action* starfire(PlayerbotAI* ai) { return new CastStarfireAction(ai); }
@@ -263,6 +276,9 @@ namespace ai
             static Action* skull_bash(PlayerbotAI* ai) { return new CastSkullBashAction(ai); }
             static Action* wild_growth(PlayerbotAI* ai) { return new CastWildGrowthAction(ai); }
             static Action* lifebloom_on_tank(PlayerbotAI* ai) { return new CastLifebloomOnTankAction(ai); }
+            static Action* swiftmend(PlayerbotAI* ai) { return new CastSwiftmendAction(ai); }
+            static Action* swiftmend_on_party(PlayerbotAI* ai) { return new CastSwiftmendOnPartyAction(ai); }
+            static Action* natures_swiftness(PlayerbotAI* ai) { return new CastNaturesSwiftnessAction(ai); }
         };
     };
 };

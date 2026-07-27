@@ -125,16 +125,21 @@ namespace ai {
         virtual bool IsActive() { return !ai->HasAura("cat form", bot); }
     };
 
-    class EclipseSolarTrigger : public HasAuraTrigger
+    /// ID-based: Eclipse (Solar) buff (48517). POWER_ECLIPSE is unimplemented in
+    /// this core (UnitPower.cpp max power TODO) and the driver aura is
+    /// HandleNULL, so this never fires today; left wired for self-upgrade if
+    /// the core ever implements the Eclipse bar.
+    class EclipseSolarTrigger : public HasAuraIdTrigger
     {
     public:
-        EclipseSolarTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "eclipse (solar)") {}
+        EclipseSolarTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "eclipse (solar)", 48517) {}
     };
 
-    class EclipseLunarTrigger : public HasAuraTrigger
+    /// ID-based: Eclipse (Lunar) buff (48518). See EclipseSolarTrigger.
+    class EclipseLunarTrigger : public HasAuraIdTrigger
     {
     public:
-        EclipseLunarTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "eclipse (lunar)") {}
+        EclipseLunarTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "eclipse (lunar)", 48518) {}
     };
 
     class BashInterruptEnemyHealerSpellTrigger : public InterruptEnemyHealerTrigger
@@ -144,11 +149,50 @@ namespace ai {
     };
 
     /// Maintains Lifebloom on the main tank rather than a rotating party member.
+    /// NOTE: 1-stack upkeep only -- BuffTrigger::IsActive() fires solely on
+    /// total aura absence, so once a stack is up this never re-casts to build
+    /// toward Cata's 3-stack bloom. A stack-aware version would need a custom
+    /// IsActive() re-deriving BuffTrigger's mana check plus a per-effect stack
+    /// scan against the party-tank Unit* (HasAuraStacksTrigger can't be reused
+    /// as-is -- it hardcodes ai->GetBot() as the target). Deferred as
+    /// over-engineering for this pass; accepted as a known limitation.
     class LifebloomOnTankTrigger : public BuffTrigger
     {
     public:
         LifebloomOnTankTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "lifebloom") {}
         virtual Value<Unit*>* GetTargetValue() { return context->GetValue<Unit*>("party tank"); }
         virtual string getName() { return "lifebloom on tank"; }
+    };
+
+    /// Feral: bleed-debuff upkeep for Mangle in Cat Form (shares the "mangle"
+    /// spell name with the Bear Form version; form determines the effect).
+    class MangleTrigger : public DebuffTrigger
+    {
+    public:
+        MangleTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "mangle") {}
+    };
+
+    class DemoralizingRoarTrigger : public DebuffTrigger
+    {
+    public:
+        DemoralizingRoarTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "demoralizing roar") {}
+    };
+
+    /// ID-based: Clearcasting proc (16870) makes the next Maul free of its
+    /// rage cost/gate.
+    class ClearcastingTrigger : public HasAuraIdTrigger
+    {
+    public:
+        ClearcastingTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "clearcasting", 16870) {}
+    };
+
+    /// ID-based: Predator's Swiftness (69369) -- next Regrowth/Healing Touch
+    /// is instant. Runtime-verify: wired to the existing "regrowth" action,
+    /// whose ActionNode caster-form prerequisite (when present) may still
+    /// force a shapeshift, partly defeating the talent's no-shift benefit.
+    class PredatorsSwiftnessTrigger : public HasAuraIdTrigger
+    {
+    public:
+        PredatorsSwiftnessTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "predator's swiftness", 69369) {}
     };
 }

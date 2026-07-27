@@ -15,10 +15,14 @@ bool MageArmorTrigger::IsActive()
         !ai->HasAura("mage armor", target);
 }
 
-/// Reads the "arcane blast" self-buff stack count (mirrors
-/// shaman::MaelstromWeaponTrigger's Aura::GetStackAmount() approach) instead of
-/// the base BuffTrigger !HasAura check, which only ever fires once (stack 1)
-/// and caused AB/Barrage to alternate instead of AB stacking to its 4-stack cap.
+/// Reads the "arcane blast" self-buff stack count by id (36032, mirrors
+/// shaman::MaelstromWeaponTrigger's Aura::GetStackAmount() approach and
+/// ArcaneBlastCappedTrigger's HasAuraStacksTrigger below) instead of the base
+/// BuffTrigger !HasAura check, which only ever fires once (stack 1) and caused
+/// AB/Barrage to alternate instead of AB stacking to its 4-stack cap.
+/// runtime-verify: 36032 is the stacking buff aura, distinct from the 30451
+/// cast spell that the old "spell id" lookup indirectly (and incorrectly)
+/// resolved through.
 bool ArcaneBlastTrigger::IsActive()
 {
     Unit* target = GetTarget();
@@ -32,11 +36,7 @@ bool ArcaneBlastTrigger::IsActive()
         return false;
     }
 
-    uint32 spellId = AI_VALUE2(uint32, "spell id", "arcane blast");
-    if (!spellId)
-    {
-        return true; // spell id unresolved -- fall through, CastSpellAction::isPossible() no-ops safely
-    }
+    const uint32 spellId = 36032;
 
     for (uint32 effect = EFFECT_INDEX_0; effect <= EFFECT_INDEX_2; effect++)
     {
@@ -50,28 +50,7 @@ bool ArcaneBlastTrigger::IsActive()
     return true; // no stacks yet -- start building
 }
 
-bool ArcaneBlastCappedTrigger::IsActive()
+bool ArcaneBurnEvocationTrigger::IsActive()
 {
-    Unit* target = GetTarget();
-    if (!target)
-    {
-        return false;
-    }
-
-    uint32 spellId = AI_VALUE2(uint32, "spell id", "arcane blast");
-    if (!spellId)
-    {
-        return false;
-    }
-
-    for (uint32 effect = EFFECT_INDEX_0; effect <= EFFECT_INDEX_2; effect++)
-    {
-        Aura* aura = target->GetAura(spellId, (SpellEffectIndex)effect);
-        if (aura && aura->GetStackAmount() >= 4)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return AI_VALUE2(bool, "has mana", "self target") && AI_VALUE2(uint8, "mana", "self target") <= 30;
 }

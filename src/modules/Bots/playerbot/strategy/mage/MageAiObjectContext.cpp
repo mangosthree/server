@@ -104,6 +104,9 @@ namespace ai
                 creators["counterspell on enemy healer"] = &TriggerFactoryInternal::counterspell_enemy_healer;
                 creators["fingers of frost"] = &TriggerFactoryInternal::fingers_of_frost;
                 creators["brain freeze"] = &TriggerFactoryInternal::brain_freeze;
+                creators["arcane burn evocation"] = &TriggerFactoryInternal::arcane_burn_evocation;
+                creators["arcane power"] = &TriggerFactoryInternal::arcane_power;
+                creators["flame orb ready"] = &TriggerFactoryInternal::flame_orb_ready;
 
             }
 
@@ -128,6 +131,9 @@ namespace ai
             static Trigger* counterspell_enemy_healer(PlayerbotAI* ai) { return new CounterspellEnemyHealerTrigger(ai); }
             static Trigger* fingers_of_frost(PlayerbotAI* ai) { return new FingersOfFrostTrigger(ai); }
             static Trigger* brain_freeze(PlayerbotAI* ai) { return new BrainFreezeTrigger(ai); }
+            static Trigger* arcane_burn_evocation(PlayerbotAI* ai) { return new ArcaneBurnEvocationTrigger(ai); }
+            static Trigger* arcane_power(PlayerbotAI* ai) { return new ArcanePowerTrigger(ai); }
+            static Trigger* flame_orb_ready(PlayerbotAI* ai) { return new FlameOrbReadyTrigger(ai); }
         };
     };
 };
@@ -180,6 +186,8 @@ namespace ai
                 creators["arcane barrage"] = &AiObjectContextInternal::arcane_barrage;
                 creators["arcane missiles"] = &AiObjectContextInternal::arcane_missiles;
                 creators["counterspell on enemy healer"] = &AiObjectContextInternal::counterspell_on_enemy_healer;
+                creators["arcane power"] = &AiObjectContextInternal::arcane_power;
+                creators["flame orb"] = &AiObjectContextInternal::flame_orb;
             }
 
         private:
@@ -219,6 +227,8 @@ namespace ai
             static Action* invisibility(PlayerbotAI* ai) { return new CastInvisibilityAction(ai); }
             static Action* evocation(PlayerbotAI* ai) { return new CastEvocationAction(ai); }
             static Action* counterspell_on_enemy_healer(PlayerbotAI* ai) { return new CastCounterspellOnEnemyHealerAction(ai); }
+            static Action* arcane_power(PlayerbotAI* ai) { return new CastArcanePowerAction(ai); }
+            static Action* flame_orb(PlayerbotAI* ai) { return new CastFlameOrbAction(ai); }
         };
     };
 };

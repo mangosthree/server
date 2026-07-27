@@ -147,6 +147,13 @@ void GenericMageStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         "low mana",
         NextAction::array(0, new NextAction("mana potion", ACTION_EMERGENCY + 6),
             new NextAction("evocation", ACTION_EMERGENCY + 5), NULL)));
+
+    // Shared Fire/Frost/Arcane cooldown filler (Flame Orb, 82731); wired here
+    // once so all three specs pick it up via GenericMageStrategy::InitTriggers.
+    // runtime-verify "flame orb" resolves.
+    triggers.push_back(new TriggerNode(
+        "flame orb ready",
+        NextAction::array(0, new NextAction("flame orb", 24.0f), NULL)));
 }
 
 void MageCureStrategy::InitTriggers(std::list<TriggerNode*> &triggers)

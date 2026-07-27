@@ -229,4 +229,19 @@ namespace ai
     public:
         CastCounterspellOnEnemyHealerAction(PlayerbotAI* ai) : CastSpellOnEnemyHealerAction(ai, "counterspell") {}
     };
+
+    /// Burn-opener cooldown; self buff. runtime-verify "arcane power" resolves.
+    class CastArcanePowerAction : public CastBuffSpellAction
+    {
+    public:
+        CastArcanePowerAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "arcane power") {}
+    };
+
+    /// Shared Fire/Frost/Arcane cooldown filler (82731); tauri ranks it #2 in
+    /// Fire ST. runtime-verify "flame orb" resolves.
+    class CastFlameOrbAction : public CastSpellAction
+    {
+    public:
+        CastFlameOrbAction(PlayerbotAI* ai) : CastSpellAction(ai, "flame orb") {}
+    };
 }

@@ -80,6 +80,13 @@ namespace ai
                 creators["immolation aura"] = &TriggerFactoryInternal::immolation_aura;
                 creators["chaos bolt"] = &TriggerFactoryInternal::chaos_bolt;
                 creators["conflagrate"] = &TriggerFactoryInternal::conflagrate;
+                creators["bane of doom"] = &TriggerFactoryInternal::bane_of_doom;
+                creators["curse of the elements"] = &TriggerFactoryInternal::curse_of_the_elements;
+                creators["demon soul"] = &TriggerFactoryInternal::demon_soul;
+                creators["molten core"] = &TriggerFactoryInternal::molten_core;
+                creators["decimation"] = &TriggerFactoryInternal::decimation;
+                creators["empowered imp"] = &TriggerFactoryInternal::empowered_imp;
+                creators["improved soul fire"] = &TriggerFactoryInternal::improved_soul_fire;
 
             }
 
@@ -101,6 +108,13 @@ namespace ai
             static Trigger* immolation_aura(PlayerbotAI* ai) { return new ImmolationAuraTrigger(ai); }
             static Trigger* chaos_bolt(PlayerbotAI* ai) { return new ChaosBoltTrigger(ai); }
             static Trigger* conflagrate(PlayerbotAI* ai) { return new ConflagrateTrigger(ai); }
+            static Trigger* bane_of_doom(PlayerbotAI* ai) { return new BaneOfDoomTrigger(ai); }
+            static Trigger* curse_of_the_elements(PlayerbotAI* ai) { return new CurseOfTheElementsTrigger(ai); }
+            static Trigger* demon_soul(PlayerbotAI* ai) { return new DemonSoulTrigger(ai); }
+            static Trigger* molten_core(PlayerbotAI* ai) { return new MoltenCoreTrigger(ai); }
+            static Trigger* decimation(PlayerbotAI* ai) { return new DecimationTrigger(ai); }
+            static Trigger* empowered_imp(PlayerbotAI* ai) { return new EmpoweredImpTrigger(ai); }
+            static Trigger* improved_soul_fire(PlayerbotAI* ai) { return new ImprovedSoulFireTrigger(ai); }
 
         };
     };
@@ -147,6 +161,11 @@ namespace ai
                 creators["immolation aura"] = &AiObjectContextInternal::immolation_aura;
                 creators["chaos bolt"] = &AiObjectContextInternal::chaos_bolt;
                 creators["shadowburn"] = &AiObjectContextInternal::shadowburn;
+                creators["soul fire"] = &AiObjectContextInternal::soul_fire;
+                creators["bane of doom"] = &AiObjectContextInternal::bane_of_doom;
+                creators["curse of the elements"] = &AiObjectContextInternal::curse_of_the_elements;
+                creators["demon soul"] = &AiObjectContextInternal::demon_soul;
+                creators["summon felhunter"] = &AiObjectContextInternal::summon_felhunter;
             }
 
         private:
@@ -180,6 +199,11 @@ namespace ai
             static Action* rain_of_fire(PlayerbotAI* ai) { return new CastRainOfFireAction(ai); }
             static Action* shadowfury(PlayerbotAI* ai) { return new CastShadowfuryAction(ai); }
             static Action* life_tap(PlayerbotAI* ai) { return new CastLifeTapAction(ai); }
+            static Action* soul_fire(PlayerbotAI* ai) { return new CastSoulFireAction(ai); }
+            static Action* bane_of_doom(PlayerbotAI* ai) { return new CastBaneOfDoomAction(ai); }
+            static Action* curse_of_the_elements(PlayerbotAI* ai) { return new CastCurseOfTheElementsAction(ai); }
+            static Action* demon_soul(PlayerbotAI* ai) { return new CastDemonSoulAction(ai); }
+            static Action* summon_felhunter(PlayerbotAI* ai) { return new CastSummonFelhunterAction(ai); }
 
         };
     };

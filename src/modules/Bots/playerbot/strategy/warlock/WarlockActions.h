@@ -201,4 +201,41 @@ namespace ai
         CastShadowburnAction(PlayerbotAI* ai) : CastSpellAction(ai, "shadowburn") {}
     };
 
+    /// Demonology: filler/execute nuke, also the Decimation/Improved Soul Fire payoff.
+    class CastSoulFireAction : public CastSpellAction
+    {
+    public:
+        CastSoulFireAction(PlayerbotAI* ai) : CastSpellAction(ai, "soul fire") {}
+    };
+
+    /// Demonology: maintained curse, low-level-lock fallback for Bane of Agony.
+    class CastBaneOfDoomAction : public CastDebuffSpellAction
+    {
+    public:
+        CastBaneOfDoomAction(PlayerbotAI* ai) : CastDebuffSpellAction(ai, "bane of doom") {}
+    };
+
+    /// Raid utility curse, maintained on the current target.
+    class CastCurseOfTheElementsAction : public CastDebuffSpellAction
+    {
+    public:
+        CastCurseOfTheElementsAction(PlayerbotAI* ai) : CastDebuffSpellAction(ai, "curse of the elements") {}
+    };
+
+    /// Demonology: self buff cooldown consuming a Demon Soul.
+    class CastDemonSoulAction : public CastBuffSpellAction
+    {
+    public:
+        CastDemonSoulAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "demon soul") {}
+    };
+
+    /// Affliction pet. Conflagrate (17962) is Destro-only in Cata; gate it out
+    /// for Destro bots so the "no pet" chain falls through to Imp.
+    class CastSummonFelhunterAction : public CastBuffSpellAction
+    {
+    public:
+        CastSummonFelhunterAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "summon felhunter") {}
+        virtual bool isUseful() { return CastBuffSpellAction::isUseful() && !bot->HasSpell(17962); }
+    };
+
 }

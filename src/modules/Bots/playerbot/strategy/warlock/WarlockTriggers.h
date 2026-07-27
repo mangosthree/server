@@ -10,7 +10,15 @@ namespace ai
         virtual bool IsActive();
     };
 
-    DEBUFF_TRIGGER(CurseOfAgonyTrigger, "bane of agony", "bane of agony"); ///< Cata: Bane of Agony
+    /// Cata: Bane of Agony. Banes share a single debuff slot; back off once the
+    /// bot also knows Bane of Doom so the two curses stop fighting over it.
+    class CurseOfAgonyTrigger : public DebuffTrigger
+    {
+    public:
+        CurseOfAgonyTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "bane of agony") {}
+        virtual bool IsActive() { return DebuffTrigger::IsActive() && !bot->HasSpell(603); }
+    };
+
     DEBUFF_TRIGGER(CorruptionTrigger, "corruption", "corruption");
 
     class CorruptionOnAttackerTrigger : public DebuffOnAttackerTrigger
@@ -55,16 +63,19 @@ namespace ai
         virtual bool IsActive();
     };
 
-    class ShadowTranceTrigger : public HasAuraTrigger
+    class ShadowTranceTrigger : public HasAuraIdTrigger
     {
     public:
-        ShadowTranceTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "shadow trance") {}
+        ShadowTranceTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "shadow trance", 17941) {}
     };
 
-    class BacklashTrigger : public HasAuraTrigger
+    /// ID-based: talent auras 34935/34938/34939 share the "backlash" display
+    /// name with the proc itself, so a name-based check fired every tick and
+    /// pinned Shadow Bolt at relevance 20 over Incinerate for every Destro bot.
+    class BacklashTrigger : public HasAuraIdTrigger
     {
     public:
-        BacklashTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "backlash") {}
+        BacklashTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "backlash", 34936) {}
     };
 
     class BanishTrigger : public HasCcTargetTrigger
@@ -92,6 +103,59 @@ namespace ai
     {
     public:
         FearTrigger(PlayerbotAI* ai) : HasCcTargetTrigger(ai, "fear") {}
+    };
+
+    DEBUFF_TRIGGER(BaneOfDoomTrigger, "bane of doom", "bane of doom");
+
+    class CurseOfTheElementsTrigger : public DebuffTrigger
+    {
+    public:
+        CurseOfTheElementsTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "curse of the elements") {}
+    };
+
+    class DemonSoulTrigger : public BoostTrigger
+    {
+    public:
+        DemonSoulTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "demon soul") {}
+    };
+
+    /// Demo: Molten Core (Immolate/Corruption/Incinerate crit) procs 71165/71164/71162.
+    /// ID-based on self; the talent (47245/47246/47247) shares the display name.
+    /// runtime-verify: unconfirmed whether m3 core ever applies these aura ids —
+    /// wired as a safe no-op either way.
+    class MoltenCoreTrigger : public Trigger
+    {
+    public:
+        MoltenCoreTrigger(PlayerbotAI* ai) : Trigger(ai, "molten core") {}
+        virtual bool IsActive();
+    };
+
+    /// Demo: Decimation (63167 talented / 63165 base) — free/cheap Soul Fire
+    /// below 35% target health. Core-supported: UnitAuraProcHandler.cpp ~3956-3971.
+    class DecimationTrigger : public Trigger
+    {
+    public:
+        DecimationTrigger(PlayerbotAI* ai) : Trigger(ai, "decimation") {}
+        virtual bool IsActive();
+    };
+
+    /// Destro: Empowered Imp instant-cast-Soul-Fire proc.
+    /// runtime-verify: aura 47283 confirmed DEAD in m3 core (never applied) —
+    /// wired as a safe no-op, future-proof.
+    class EmpoweredImpTrigger : public HasAuraIdTrigger
+    {
+    public:
+        EmpoweredImpTrigger(PlayerbotAI* ai) : HasAuraIdTrigger(ai, "empowered imp", 47283) {}
+    };
+
+    /// Destro: talent-passive gate (18119/18120) with buff-missing check (85383).
+    /// runtime-verify: core aura 85383 confirmed never applied in m3 — wired as a
+    /// safe no-op. Throttled: unthrottled would spam-hardcast Soul Fire every tick.
+    class ImprovedSoulFireTrigger : public Trigger
+    {
+    public:
+        ImprovedSoulFireTrigger(PlayerbotAI* ai) : Trigger(ai, "improved soul fire", 20) {}
+        virtual bool IsActive();
     };
 
 }

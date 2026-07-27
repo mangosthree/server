@@ -46,6 +46,19 @@ void DpsWarlockStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "backlash",
         NextAction::array(0, new NextAction("shadow bolt", 20.0f), NULL)));
+
+    // Destro: Empowered Imp proc.
+    // runtime-verify: aura 47283 confirmed DEAD in m3 core — safe no-op.
+    triggers.push_back(new TriggerNode(
+        "empowered imp",
+        NextAction::array(0, new NextAction("soul fire", 20.8f), NULL)));
+
+    // Destro: Improved Soul Fire talent-passive gate.
+    // runtime-verify: core aura 85383 confirmed never applied in m3 — safe no-op;
+    // trigger's own 20s throttle caps worst case at ~1 Soul Fire/20s (tauri cadence).
+    triggers.push_back(new TriggerNode(
+        "improved soul fire",
+        NextAction::array(0, new NextAction("soul fire", 19.2f), NULL)));
 }
 
 void DpsAoeWarlockStrategy::InitTriggers(std::list<TriggerNode*> &triggers)

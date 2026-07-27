@@ -104,4 +104,27 @@ void GenericWarlockStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "immolation aura",
         NextAction::array(0, new NextAction("immolation aura", 17.0f), NULL))); ///< runtime-verify spell name
+
+    triggers.push_back(new TriggerNode(
+        "demon soul",
+        NextAction::array(0, new NextAction("demon soul", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "bane of doom",
+        NextAction::array(0, new NextAction("bane of doom", 12.5f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "curse of the elements",
+        NextAction::array(0, new NextAction("curse of the elements", 10.5f), NULL)));
+
+    // Demo: Molten Core procs a free/cheap-cast Incinerate.
+    // runtime-verify: safe no-op if the m3 core never applies the proc aura.
+    triggers.push_back(new TriggerNode(
+        "molten core",
+        NextAction::array(0, new NextAction("incinerate", 20.5f), NULL)));
+
+    // Demo: Decimation drops Soul Fire's cast time/cost below 35% target health.
+    triggers.push_back(new TriggerNode(
+        "decimation",
+        NextAction::array(0, new NextAction("soul fire", 20.2f), NULL)));
 }

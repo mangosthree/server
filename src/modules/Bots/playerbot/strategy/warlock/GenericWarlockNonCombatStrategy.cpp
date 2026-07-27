@@ -47,9 +47,11 @@ void GenericWarlockNonCombatStrategy::InitTriggers(std::list<TriggerNode*> &trig
         "no healthstone",
         NextAction::array(0, new NextAction("create healthstone", 15.0f), NULL)));
 
-    // Demonology bots know "summon felguard" and take it (higher relevance);
-    // isPossible() no-ops it for everyone else, so the queue falls through to imp.
+    // Demo bots know "summon felguard" and take it (highest relevance);
+    // Affliction falls to "summon felhunter"; Destro's isUseful() gate on
+    // felhunter (Conflagrate-only check) drops it through to "summon imp".
+    // isPossible()/isUseful() no-op each option for everyone it doesn't apply to.
     triggers.push_back(new TriggerNode(
         "no pet",
-        NextAction::array(0, new NextAction("summon felguard", 11.0f), new NextAction("summon imp", 10.0f), NULL)));
+        NextAction::array(0, new NextAction("summon felguard", 11.0f), new NextAction("summon felhunter", 10.5f), new NextAction("summon imp", 10.0f), NULL)));
 }

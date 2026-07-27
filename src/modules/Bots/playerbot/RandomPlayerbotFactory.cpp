@@ -109,6 +109,27 @@ bool RandomPlayerbotFactory::CreateRandomBot(uint8 cls)
 
     player->setCinematic(2);
     player->SetAtLoginFlag(AT_LOGIN_NONE);
+
+    // A fresh Death Knight is created at level 55 on the instanced Ebon Hold start
+    // map (609); every other class starts at level 1 on a normal starting map. The
+    // random-bot pipeline relies on that shape: Randomize() runs the full gear-up
+    // (RandomizeFirst) only at level 1 - a level-55 bot takes the +1 IncreaseLevel
+    // crawl instead - and a bot must idle on a normal map to fire the randomize
+    // trigger. Normalize a new DK to the same shape (level 1 at a safe faction
+    // capital) so it randomizes and gears exactly like any other class.
+    if (cls == CLASS_DEATH_KNIGHT)
+    {
+        player->SetLevel(1);
+        if (IsAlliance(player->getRace()))
+        {
+            player->TeleportTo(0, -8833.38f, 628.62f, 94.0f, 3.9f);   // Stormwind
+        }
+        else
+        {
+            player->TeleportTo(1, 1629.36f, -4373.63f, 31.24f, 0.0f); // Orgrimmar
+        }
+    }
+
     player->SaveToDB();
 
     sLog.outDetail("Random bot created for account %d - name: \"%s\"; race: %u; class: %u; gender: %u; skin: %u; face: %u; hairStyle: %u; hairColor: %u; facialHair: %u; outfitId: %u",
@@ -233,7 +254,8 @@ void RandomPlayerbotFactory::CreateRandomBots()
         RandomPlayerbotFactory factory(accountId);
         for (uint8 cls = CLASS_WARRIOR; cls < MAX_CLASSES; ++cls)
         {
-            if (cls != 10 && cls != 6)
+            // class 10 (Monk) does not exist in 4.3.4; Death Knight (6) is supported
+            if (cls != 10)
             {
                 factory.CreateRandomBot(cls);
             }

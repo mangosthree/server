@@ -1393,17 +1393,20 @@ void PlayerbotFactory::InitEquipment(bool incremental)
     set<uint8> filledSlots;
     bool curatedApplied = InitCuratedGear(filledSlots);
 
-    static const uint8 weaponSlots[] =
-    {
-        EQUIPMENT_SLOT_MAINHAND, EQUIPMENT_SLOT_OFFHAND, EQUIPMENT_SLOT_RANGED
-    };
-
     vector<uint8> slotsToFill;
     if (curatedApplied)
     {
-        for (size_t i = 0; i < sizeof(weaponSlots) / sizeof(weaponSlots[0]); ++i)
+        // Back-fill every equipment slot the curated pass left empty - whether a
+        // curated item failed CanEquip/EquipNewItem or the set carried no entry
+        // for that slot - with legacy best-available gear, so no slot is left
+        // bare. (Previously only weapon slots were topped up, so an intermittent
+        // equip failure in an armor/finger/back slot stayed permanently empty.)
+        for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
         {
-            uint8 slot = weaponSlots[i];
+            if (slot == EQUIPMENT_SLOT_TABARD || slot == EQUIPMENT_SLOT_BODY)
+            {
+                continue;
+            }
             if (filledSlots.find(slot) == filledSlots.end() &&
                 !bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
             {

@@ -58,6 +58,7 @@ namespace ai
             creators["ready check"] = &WorldPacketActionContext::ready_check;
             creators["ready check finished"] = &WorldPacketActionContext::ready_check_finished;
             creators["uninvite"] = &WorldPacketActionContext::uninvite;
+            creators["disband"] = &WorldPacketActionContext::disband;
             creators["security check"] = &WorldPacketActionContext::security_check;
             creators["guild accept"] = &WorldPacketActionContext::guild_accept;
             creators["inventory change failure"] = &WorldPacketActionContext::inventory_change_failure;
@@ -68,6 +69,7 @@ namespace ai
         static Action* guild_accept(PlayerbotAI* ai) { return new GuildAcceptAction(ai); }
         static Action* security_check(PlayerbotAI* ai) { return new SecurityCheckAction(ai); }
         static Action* uninvite(PlayerbotAI* ai) { return new UninviteAction(ai); }
+        static Action* disband(PlayerbotAI* ai) { return new DisbandAction(ai); }
         static Action* ready_check_finished(PlayerbotAI* ai) { return new FinishReadyCheckAction(ai); }
         static Action* ready_check(PlayerbotAI* ai) { return new ReadyCheckAction(ai); }
         static Action* accept_duel(PlayerbotAI* ai) { return new AcceptDuelAction(ai); }

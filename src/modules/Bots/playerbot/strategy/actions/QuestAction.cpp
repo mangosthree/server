@@ -33,7 +33,25 @@ bool QuestAction::ProcessQuests(ObjectGuid questGiver)
     GameObject *gameObject = ai->GetGameObject(questGiver);
     if (gameObject && gameObject->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
     {
-        return ProcessQuests(gameObject);
+        if (!ProcessQuests(gameObject))
+        {
+            // Some questgivers show quests only after a gossip option is
+            // selected (e.g. quest chests/clickies gated behind gossip text).
+            gameObject->Use(bot);
+            GossipMenu& gossipMenu = bot->PlayerTalkClass->GetGossipMenu();
+            for (uint32 i = 0; i < gossipMenu.MenuItemCount(); ++i)
+            {
+                GossipMenuItem const& item = gossipMenu.GetItem(i);
+                if (item.m_gOptionId == GOSSIP_OPTION_GOSSIP ||
+                    item.m_gOptionId == GOSSIP_OPTION_QUESTGIVER)
+                {
+                    bot->OnGossipSelect(gameObject, i, gossipMenu.GetMenuId());
+                    return ProcessQuests(gameObject);
+                }
+            }
+            return false;
+        }
+        return true;
     }
 
     Creature* creature = ai->GetCreature(questGiver);
@@ -80,7 +98,7 @@ bool QuestAction::ProcessQuests(WorldObject* questGiver)
         ProcessQuest(quest, questGiver);
     }
 
-    return true;
+    return (questMenu.MenuItemCount() > 0);
 }
 
 bool QuestAction::AcceptQuest(Quest const* quest, uint64 questGiver)

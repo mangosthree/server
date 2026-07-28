@@ -52,7 +52,13 @@ bool CheckMountStateAction::Mount()
     }
 
     const SpellEntry* masterSpell = auras.front()->GetSpellProto();
-    int32 masterSpeed = max(masterSpell->CalculateSimpleValue(SpellEffectIndex(1)), masterSpell->CalculateSimpleValue(SpellEffectIndex(2)));
+
+    // A dual-purpose mount's aura carries both a ground (index 1) and a flight
+    // (index 2) speed bonus; compare only the one the master is actually
+    // using, or a grounded bot's ground-speed mount always loses to the much
+    // larger flight bonus and the bot never mounts while the master flies.
+    SpellEffectIndex speedIndex = master->IsFlying() ? SpellEffectIndex(2) : SpellEffectIndex(1);
+    int32 masterSpeed = masterSpell->CalculateSimpleValue(speedIndex);
 
     map<int32, vector<uint32> > spells;
     for (PlayerSpellMap::iterator itr = bot->GetSpellMap().begin(); itr != bot->GetSpellMap().end(); ++itr)
@@ -69,7 +75,7 @@ bool CheckMountStateAction::Mount()
       continue;
   }
 
-        int32 effect = max(spellInfo->CalculateSimpleValue(SpellEffectIndex(1)), spellInfo->CalculateSimpleValue(SpellEffectIndex(2)));
+        int32 effect = spellInfo->CalculateSimpleValue(speedIndex);
         if (effect < masterSpeed)
   {
       continue;

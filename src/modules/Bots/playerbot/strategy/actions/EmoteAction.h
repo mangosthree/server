@@ -10,6 +10,10 @@ namespace ai
         EmoteAction(PlayerbotAI* ai) : Action(ai, "emote"), Qualified() {}
         virtual bool Execute(Event event);
         bool isUseful();
+        virtual bool isPossible()
+        {
+            return !bot->IsNonMeleeSpellCasted(true);
+        }
 
     private:
         void InitEmotes();

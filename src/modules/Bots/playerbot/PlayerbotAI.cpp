@@ -193,6 +193,26 @@ void PlayerbotAI::UpdateAI(uint32 elapsed)
         }
     }
 
+    // Don't let a gather/loot wait stall a fight: clamp to maxWaitForMove while
+    // the bot is in combat, and also while the master is fighting and the bot
+    // is not (so it breaks off and rejoins rather than finishing the gather).
+    if (nextAICheckDelay > sPlayerbotAIConfig.maxWaitForMove && !bot->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+    {
+        if (bot->IsInCombat())
+        {
+            nextAICheckDelay = sPlayerbotAIConfig.maxWaitForMove;
+        }
+        else
+        {
+            Player* master = GetMaster();
+            if (master && master->IsInCombat())
+            {
+                InterruptSpell();
+                nextAICheckDelay = sPlayerbotAIConfig.maxWaitForMove;
+            }
+        }
+    }
+
     PlayerbotAIBase::UpdateAI(elapsed);
 }
 

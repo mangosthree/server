@@ -13,6 +13,15 @@ SpellIdValue::SpellIdValue(PlayerbotAI* ai) :
 uint32 SpellIdValue::Calculate()
 {
     string namepart = qualifier;
+
+    // Strip surrounding quotes passed through from whisper text (eg. cast "flash heal")
+    if (namepart.size() >= 2 &&
+        (namepart.front() == '"' || namepart.front() == '\'') &&
+        namepart.back() == namepart.front())
+    {
+        namepart = namepart.substr(1, namepart.size() - 2);
+    }
+
     ItemIds itemIds = ChatHelper::parseItems(namepart);
 
     PlayerbotChatHandler handler(bot);

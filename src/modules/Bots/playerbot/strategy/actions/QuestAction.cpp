@@ -39,6 +39,10 @@ bool QuestAction::ProcessQuests(ObjectGuid questGiver)
     Creature* creature = ai->GetCreature(questGiver);
     if (creature)
     {
+        if (!creature->IsQuestGiver())
+        {
+            return false;
+        }
         return ProcessQuests(creature);
     }
 

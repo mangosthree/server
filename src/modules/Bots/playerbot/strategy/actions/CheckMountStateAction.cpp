@@ -38,6 +38,11 @@ bool CheckMountStateAction::Execute(Event event)
 
 bool CheckMountStateAction::Mount()
 {
+    if (bot->IsNonMeleeSpellCasted(true))
+    {
+        return false;
+    }
+
     Player* master = GetMaster();
     ai->RemoveShapeshift();
     Unit::AuraList const& auras = master->GetAurasByType(SPELL_AURA_MOUNTED);
@@ -83,6 +88,7 @@ bool CheckMountStateAction::Mount()
   }
 
         ai->CastSpell(ids[index], bot);
+        ai->SetNextCheckDelay(4000);
         return true;
     }
 

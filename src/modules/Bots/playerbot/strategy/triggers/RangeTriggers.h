@@ -44,6 +44,21 @@ namespace ai
         static const time_t NO_AGGRO_FLEE_COOLDOWN = 11;
     };
 
+    class EnemyTooCloseForSpellNoAggroTrigger : public Trigger {
+    public:
+        EnemyTooCloseForSpellNoAggroTrigger(PlayerbotAI* ai) : Trigger(ai, "enemy too close for spell no aggro") {}
+        virtual bool IsActive()
+        {
+            Unit* target = AI_VALUE(Unit*, "current target");
+            if (!target || AI_VALUE2(float, "distance", "current target") > sPlayerbotAIConfig.tooCloseDistance)
+            {
+                return false;
+            }
+
+            return AI_VALUE(uint8, "my attacker count") == 0;
+        }
+    };
+
     class EnemyTooCloseForShootTrigger : public Trigger {
     public:
         EnemyTooCloseForShootTrigger(PlayerbotAI* ai) : Trigger(ai, "enemy too close for shoot", 2) {}

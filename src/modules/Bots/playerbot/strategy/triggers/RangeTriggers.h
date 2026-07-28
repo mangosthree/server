@@ -29,11 +29,19 @@ namespace ai
                 lastNoAggroFlee_ = now;
                 return true;
             }
+
+            // Stay active for a short window after triggering so the bot keeps
+            // moving out instead of taking one step every cooldown period.
+            if (now - lastNoAggroFlee_ < NO_AGGRO_FLEE_ACTIVE)
+            {
+                return true;
+            }
             return false;
         }
     private:
         time_t lastNoAggroFlee_;
-        static const time_t NO_AGGRO_FLEE_COOLDOWN = 6;
+        static const time_t NO_AGGRO_FLEE_ACTIVE = 5;
+        static const time_t NO_AGGRO_FLEE_COOLDOWN = 11;
     };
 
     class EnemyTooCloseForShootTrigger : public Trigger {

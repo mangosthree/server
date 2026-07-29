@@ -30,6 +30,7 @@
  * picks this file up automatically; Creature.h is unchanged.
  */
 
+#include <algorithm>
 #include "Creature.h"
 #include "World.h"
 #include "ObjectMgr.h"

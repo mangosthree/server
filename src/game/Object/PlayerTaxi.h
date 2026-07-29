@@ -25,7 +25,11 @@
 #ifndef PLAYERTAXI_H
 #define PLAYERTAXI_H
 
-#include "Common.h"
+#include <deque>
+#include "Platform/Define.h"
+#include <string>
+#include <sstream>
+#include <cstring>
 #include "DBCEnums.h"
 #include "DBCStructure.h"
 #include "SharedDefines.h"

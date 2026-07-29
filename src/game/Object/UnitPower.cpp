@@ -30,6 +30,7 @@
  * declarations remain in Unit.h. No behaviour change.
  */
 
+#include "Utilities/Errors.h"
 #include "Unit.h"
 #include "Player.h"
 #include "Creature.h"

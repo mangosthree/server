@@ -41,6 +41,9 @@
  * @see Channel for channel chat
  */
 
+#include "Common/Locales.h"
+#include "Utilities/Errors.h"
+#include <string>
 #include "Chat.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -60,6 +63,7 @@
 #include "GameEventMgr.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
 #include "CommandMgr.h"
+#include "ObjectLookup.h"
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -1575,7 +1579,7 @@ Unit* ChatHandler::getSelectedUnit()
     }
 
     // can be selected player at another map
-    return sObjectAccessor.GetUnit(*m_session->GetPlayer(), guid);
+    return ObjectLookup::GetUnit(*m_session->GetPlayer(), guid);
 }
 
 /**
@@ -1844,7 +1848,7 @@ void ChatHandler::LogCommand(char const* fullcmd)
         Player* p = m_session->GetPlayer();
         ObjectGuid sel_guid = p->GetSelectionGuid();
         sLog.outCommand(GetAccountId(), "Command: %s [Player: %s (Account: %u) X: %f Y: %f Z: %f Map: %u Selected: %s]",
-                        fullcmd, p->GetName(), GetAccountId(), p->GetPositionX(), p->GetPositionY(), p->GetPositionZ(), p->GetMapId(),
+                        fullcmd, p->GetName(), GetAccountId(), p->Where().X(), p->Where().Y(), p->Where().Z(), p->GetMapId(),
                         sel_guid.GetString().c_str());
     }
     else                                        // 0 account -> console

@@ -22,10 +22,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include <zlib.h>
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include <string>
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
-#include "Database/DatabaseImpl.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
 #include "Log.h"
@@ -42,7 +44,7 @@
 #include "Chat.h"
 #include "ScriptMgr.h"
 #include "zlib.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "Object.h"
 #include "BattleGround/BattleGround.h"
 #include "OutdoorPvP/OutdoorPvP.h"
@@ -99,7 +101,11 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: %s asked to add friend : '%s'",
               GetPlayer()->GetName(), friendName.c_str());
 
-    CharacterDatabase.AsyncPQuery(&WorldSession::HandleAddFriendOpcodeCallBack, GetAccountId(), friendNote, "SELECT `guid`, `race` FROM `characters` WHERE `name` = '%s'", friendName.c_str());
+    uint32 accountId = GetAccountId();
+    CharacterDatabase.AsyncPQuery([accountId, friendNote](QueryResult* result)
+                                  {
+                                      WorldSession::HandleAddFriendOpcodeCallBack(result, accountId, friendNote);
+                                  }, "SELECT `guid`, `race` FROM `characters` WHERE `name` = '%s'", friendName.c_str());
 }
 
 /**
@@ -144,7 +150,7 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult* result, uint32 acc
         }
         else
         {
-            Player* pFriend = sObjectAccessor.FindPlayer(friendGuid);
+            Player* pFriend = sPlayerRegistry.Find(friendGuid);
             if (pFriend && pFriend->IsInWorld() && pFriend->IsVisibleGloballyFor(session->GetPlayer()))
             {
                 friendResult = FRIEND_ADDED_ONLINE;
@@ -212,7 +218,11 @@ void WorldSession::HandleAddIgnoreOpcode(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: %s asked to Ignore: '%s'",
               GetPlayer()->GetName(), IgnoreName.c_str());
 
-    CharacterDatabase.AsyncPQuery(&WorldSession::HandleAddIgnoreOpcodeCallBack, GetAccountId(), "SELECT `guid` FROM `characters` WHERE `name` = '%s'", IgnoreName.c_str());
+    uint32 accountId = GetAccountId();
+    CharacterDatabase.AsyncPQuery([accountId](QueryResult* result)
+                                  {
+                                      WorldSession::HandleAddIgnoreOpcodeCallBack(result, accountId);
+                                  }, "SELECT `guid` FROM `characters` WHERE `name` = '%s'", IgnoreName.c_str());
 }
 
 /**

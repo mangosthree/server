@@ -39,13 +39,15 @@
  * @see GMTicket for ticket data structure
  */
 
-#include "Common.h"
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include <string>
 #include "Language.h"
 #include "WorldPacket.h"
-#include "Opcodes.h"                                        // for LookupOpcodeName
+#include "OpcodeTable.h"                                        // for LookupOpcodeName
 #include "Log.h"
 #include "GMTicketMgr.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "Player.h"
 #include "Chat.h"
 
@@ -146,7 +148,7 @@ void WorldSession::HandleGMTicketUpdateTextOpcode(WorldPacket& recv_data)
     GMTicket * ticket = sTicketMgr.GetGMTicket(GetPlayer()->GetObjectGuid());
 
     // Notify all GM that the ticket has been changed
-    sObjectAccessor.DoForAllPlayers([ticket, this](Player* player)
+    sPlayerRegistry.ForEach([ticket, this](Player* player)
         {
             if (player->GetSession()->GetSecurity() >= SEC_GAMEMASTER && player->isAcceptTickets())
             {
@@ -249,7 +251,7 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recv_data)
 
     GMTicket * ticket = sTicketMgr.GetGMTicket(_player->GetObjectGuid());
 
-    sObjectAccessor.DoForAllPlayers([ticket, this](Player* player)
+    sPlayerRegistry.ForEach([ticket, this](Player* player)
         {
             if (player->GetSession()->GetSecurity() >= SEC_GAMEMASTER && player->isAcceptTickets())
             {

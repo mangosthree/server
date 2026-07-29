@@ -31,6 +31,9 @@
  *        Player.h is unchanged.
  */
 
+#include "Utilities/Errors.h"
+#include <algorithm>
+#include <string>
 #include "Player.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -54,7 +57,6 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"
@@ -71,7 +73,6 @@
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "revision_data.h"
-#include "Database/DatabaseImpl.h"
 #include "Spell.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
@@ -848,7 +849,7 @@ void Player::AddQuest(Quest const* pQuest, Object* questGiver)
 
     // Some spells applied at quest activation
     uint32 zone, area;
-    GetZoneAndAreaId(zone, area);
+    GetTerrain()->GetZoneAndAreaId(zone, area, Where().X(), Where().Y(), Where().Z());
     SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(zone);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
     {
@@ -1161,7 +1162,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     // remove auras from spells with quest reward state limitations
     // Some spells applied at quest reward
     uint32 zone, area;
-    GetZoneAndAreaId(zone, area);
+    GetTerrain()->GetZoneAndAreaId(zone, area, Where().X(), Where().Y(), Where().Z());
     SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(zone);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
     {

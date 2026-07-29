@@ -33,9 +33,9 @@ namespace MaNGOS
     /**
      * @brief A simple thread-safe FIFO queue.
      *
-     * The former lock template parameter is gone: the queue owns a
-     * std::mutex and serialises itself, so call sites name only the
-     * element (and optionally the backing container) type.
+     * The former lock template parameter is gone: the queue owns a std::mutex
+     * and serialises itself, so call sites name only the element (and optionally the
+     * backing container) type.
      *
      * @tparam T           Element type.
      * @tparam StorageType Underlying container (deque by default).
@@ -72,41 +72,29 @@ namespace MaNGOS
             }
 
             /**
-             * @brief Pops the first queued item the checker accepts.
+             * @brief Pop the front item only if @p check accepts it.
              *
-             * Walks from the front of the queue and returns the first item
-             * for which @c check.Process(item) returns true. Items the
-             * checker rejects are left in place at their original positions;
-             * this preserves FIFO order within each accepted class while
-             * allowing a caller that owns one classification to make
-             * progress without being blocked by a head-of-queue item that
-             * belongs to another classification (e.g. a Map worker draining
-             * thread-safe packets while a thread-unsafe packet sits at the
-             * head of the same queue, awaiting the World thread).
-             *
-             * @param result Out parameter; receives the popped item on success.
-             * @param check Functor with bool Process(const T&). Invoked under
-             *              the queue lock.
-             * @return true if an accepted item was popped into @c result;
-             *         false if the queue is empty or no item satisfied the
-             *         checker.
+             * Returns false — leaving the item queued — if the queue is empty or the
+             * checker rejects it.
              */
             template<class Checker>
             bool next(T& result, Checker& check)
             {
                 std::lock_guard<std::mutex> guard(_lock);
 
-                for (typename StorageType::iterator it = _queue.begin(); it != _queue.end(); ++it)
+                if (_queue.empty())
                 {
-                    if (check.Process(*it))
-                    {
-                        result = *it;
-                        _queue.erase(it);
-                        return true;
-                    }
+                    return false;
                 }
 
-                return false;
+                result = _queue.front();
+                if (!check.Process(result))
+                {
+                    return false;
+                }
+
+                _queue.pop_front();
+                return true;
             }
 
             /// True when the queue holds no elements (lock held).

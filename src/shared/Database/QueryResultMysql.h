@@ -27,7 +27,8 @@
 #if !defined(QUERYRESULTMYSQL_H)
 #define QUERYRESULTMYSQL_H
 
-#include "Common/Common.h"
+#include "QueryResult.h"
+#include "Platform/Define.h"
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -68,11 +69,12 @@ class QueryResultMysql : public QueryResult
         /**
          * @brief
          *
-         * @param mysqlType
+         * @param type
          * @return Field::SimpleDataTypes
          */
+        static Field::SimpleDataTypes GetSimpleType(enum_field_types type);
+
     private:
-        enum Field::DataTypes ConvertNativeType(enum_field_types mysqlType) const;
         /**
          * @brief
          *

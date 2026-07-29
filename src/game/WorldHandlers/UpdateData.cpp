@@ -46,7 +46,9 @@
  * @see Object::BuildValuesUpdateBlockForPlayer for value updates
  */
 
-#include "Common.h"
+#include <zlib.h>
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
 #include "UpdateData.h"
 #include "ByteBuffer.h"
 #include "WorldPacket.h"

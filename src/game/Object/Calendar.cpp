@@ -22,13 +22,16 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <algorithm>
+#include <sstream>
+#include <string>
 #include "Calendar.h"
 #include "Guild.h"
 #include "Mail.h"
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
 
-INSTANTIATE_SINGLETON_1(CalendarMgr);
 
 //////////////////////////////////////////////////////////////////////////
 // CalendarEvent Class to store single event informations

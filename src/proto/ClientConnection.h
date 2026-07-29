@@ -118,7 +118,6 @@ namespace proto
             bool HandlePacket(WorldPacket&& packet);
 
             bool HandleAuthSession(WorldPacket& packet);
-            bool HandlePing(WorldPacket& packet);
 
             /// Send a bare, bit-packed SMSG_AUTH_RESPONSE carrying only a status
             /// byte. Cata's failure response is `WriteBit(false); WriteBit(false);
@@ -149,14 +148,6 @@ namespace proto
             net::Sender m_sender;
             net::Closer m_closer;
 
-            /// When the previous CMSG_PING arrived; valid once m_hadPing is set.
-            std::chrono::steady_clock::time_point m_lastPing;
-            bool m_hadPing;
-
-            /// Consecutive pings that arrived faster than a real client sends
-            /// them. Reset the moment the cadence returns to normal, so ordinary
-            /// network jitter cannot accumulate into a kick.
-            uint32 m_fastPingRun;
     };
 }
 

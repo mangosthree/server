@@ -30,7 +30,9 @@
  * picks this file up automatically; AchievementMgr.h is unchanged.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <ctime>
 #include "AchievementMgr.h"
 #include "Log.h"
 #include "DBCStores.h"
@@ -280,7 +282,7 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
         case ACHIEVEMENT_CRITERIA_REQUIRE_S_AREA:
         {
             uint32 zone_id, area_id;
-            source->GetZoneAndAreaId(zone_id, area_id);
+            source->GetTerrain()->GetZoneAndAreaId(zone_id, area_id, source->Where().X(), source->Where().Y(), source->Where().Z());
             return area.id == zone_id || area.id == area_id;
         }
         case ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA:

@@ -31,6 +31,7 @@
  *        SpellMgr.h is unchanged.
  */
 
+#include "Utilities/Errors.h"
 #include "SpellMgr.h"
 #include "SpellAuraDefines.h"
 #include "ObjectMgr.h"

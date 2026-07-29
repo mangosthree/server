@@ -22,6 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <string>
+#include <vector>
 #include "PlayerTaxi.h"
 #include "Player.h"
 #include "Language.h"
@@ -34,7 +37,6 @@
 #include "WorldSession.h"
 #include "UpdateMask.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
 #include "Spell.h"
 #include "SpellAuras.h"
 #include "AchievementMgr.h"
@@ -369,9 +371,9 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     if (node->Pos_0 != 0.0f || node->Pos_1 != 0.0f || node->Pos_2 != 0.0f)
     {
         if (node->ContinentID != GetMapId() ||
-                (node->Pos_0 - GetPositionX()) * (node->Pos_0 - GetPositionX()) +
-                (node->Pos_1 - GetPositionY()) * (node->Pos_1 - GetPositionY()) +
-                (node->Pos_2 - GetPositionZ()) * (node->Pos_2 - GetPositionZ()) >
+                (node->Pos_0 - Where().X()) * (node->Pos_0 - Where().X()) +
+                (node->Pos_1 - Where().Y()) * (node->Pos_1 - Where().Y()) +
+                (node->Pos_2 - Where().Z()) * (node->Pos_2 - Where().Z()) >
                 (2 * INTERACTION_DISTANCE) * (2 * INTERACTION_DISTANCE) * (2 * INTERACTION_DISTANCE))
         {
             GetSession()->SendActivateTaxiReply(ERR_TAXITOOFARAWAY);
@@ -534,9 +536,9 @@ void Player::ContinueTaxiFlight()
 
     float distPrev = MAP_SIZE * MAP_SIZE;
     float distNext =
-        (nodeList[0].Loc_0 - GetPositionX()) * (nodeList[0].Loc_0 - GetPositionX()) +
-        (nodeList[0].Loc_1 - GetPositionY()) * (nodeList[0].Loc_1 - GetPositionY()) +
-        (nodeList[0].Loc_2 - GetPositionZ()) * (nodeList[0].Loc_2 - GetPositionZ());
+        (nodeList[0].Loc_0 - Where().X()) * (nodeList[0].Loc_0 - Where().X()) +
+        (nodeList[0].Loc_1 - Where().Y()) * (nodeList[0].Loc_1 - Where().Y()) +
+        (nodeList[0].Loc_2 - Where().Z()) * (nodeList[0].Loc_2 - Where().Z());
 
     for (uint32 i = 1; i < nodeList.size(); ++i)
     {
@@ -552,9 +554,9 @@ void Player::ContinueTaxiFlight()
         distPrev = distNext;
 
         distNext =
-            (node.Loc_0 - GetPositionX()) * (node.Loc_0 - GetPositionX()) +
-            (node.Loc_1 - GetPositionY()) * (node.Loc_1 - GetPositionY()) +
-            (node.Loc_2 - GetPositionZ()) * (node.Loc_2 - GetPositionZ());
+            (node.Loc_0 - Where().X()) * (node.Loc_0 - Where().X()) +
+            (node.Loc_1 - Where().Y()) * (node.Loc_1 - Where().Y()) +
+            (node.Loc_2 - Where().Z()) * (node.Loc_2 - Where().Z());
 
         float distNodes =
             (node.Loc_0 - prevNode.Loc_0) * (node.Loc_0 - prevNode.Loc_0) +

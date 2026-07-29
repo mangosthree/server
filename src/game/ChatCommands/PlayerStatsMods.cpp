@@ -22,6 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Common/Locales.h"
+#include <sstream>
+#include <string>
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "Language.h"
@@ -33,6 +36,27 @@
  * @file PlayerStatsMods.cpp
  * @brief Cohesion split of PlayerCommands.cpp -- player stat/property modify GM commands: HP/mana/energy/rage/runic/holy-power, speed/swim/fly/scale, mount, money, drunk, reputation, gender and currency. Same ChatHandler class; no behaviour change. CMake file(GLOB) picks this file up automatically; Chat.h is unchanged.
  */
+
+// Gold/silver/copper is a game concept, so it stays out of shared; this file is
+// the only consumer.
+static std::string MoneyToString(uint64 money)
+{
+    uint32 gold = money / 10000;
+    uint32 silv = (money % 10000) / 100;
+    uint32 copp = (money % 10000) % 100;
+    std::stringstream ss;
+    if (gold)
+    {
+        ss << gold << "g";
+    }
+    if (silv || gold)
+    {
+        ss << silv << "s";
+    }
+    ss << copp << "c";
+
+    return ss.str();
+}
 
 static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
 {

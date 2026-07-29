@@ -71,16 +71,19 @@ void BigNumber::SetBinary(const uint8* bytes, int len)
 {
     // Input is little-endian; BN_bin2bn wants big-endian, hence the reversal.
     //
-    // The buffer used to be a fixed uint8 t[1000] on the stack with no check
-    // on len, so any caller passing more than a kilobyte wrote past it.
+    // The buffer used to be a fixed uint8 t[1000] on the stack with no check on
+    // len, so any caller passing more than a kilobyte wrote past it. Nothing in
+    // the tree does today -- the largest is a 40-byte session key -- but the
+    // bound was neither enforced nor documented, and the argument comes from
+    // callers that read lengths off the wire.
     if (len <= 0)
     {
         BN_zero(_bn);
         return;
     }
 
-    // Braces, not parentheses: vector<uint8> reversed(size_t(len)) is a
-    // function declaration, not a vector -- the most vexing parse.
+    // Braces, not parentheses: vector<uint8> reversed(size_t(len)) is a function
+    // declaration, not a vector -- the most vexing parse.
     std::vector<uint8> reversed(static_cast<size_t>(len), 0);
     for (int i = 0; i < len; ++i)
     {
@@ -195,21 +198,25 @@ uint8* BigNumber::AsByteArray(int minSize)
     return AsByteArray(minSize, true);
 }
 
-uint8 *BigNumber::AsByteArray(int minSize, bool reverse)
+uint8* BigNumber::AsByteArray(int minSize, bool reverse)
 {
     const int length = (minSize >= GetNumBytes()) ? minSize : GetNumBytes();
 
     delete[] _array;
     _array = new uint8[length];
 
-    // BN_bn2binpad left-pads to exactly `length` bytes. The previous code
-    // used BN_bn2bin, which emits the minimal big-endian encoding at offset 0
-    // and leaves the zero padding at the *end* -- so the reverse below moved
-    // that padding to the front of the little-endian result and shifted the
-    // value by however many bytes were short (about 1 login in 256, since it
-    // only bites when the value serialises with a leading zero byte). Using
-    // the padding-aware call makes the mistake unwritable rather than merely
-    // fixed.
+    // BN_bn2binpad left-pads to exactly `length` bytes. The previous code used
+    // BN_bn2bin, which emits the minimal big-endian encoding at offset 0 and
+    // leaves the zero padding at the *end* -- so std::reverse below moved that
+    // padding to the front of the little-endian result and shifted the value by
+    // however many bytes were short.
+    //
+    // The number has to serialise shorter than requested for this to bite, which
+    // for a uniformly distributed quantity (every SRP6 value here) is a leading
+    // zero byte: about 1 login in 256. That is why it survived so long -- it
+    // looks exactly like a flaky network, and it is invisible 255 times out of
+    // 256. Using the padding-aware call makes the mistake unwritable rather than
+    // merely fixed.
     BN_bn2binpad(_bn, _array, length);
 
     if (reverse)

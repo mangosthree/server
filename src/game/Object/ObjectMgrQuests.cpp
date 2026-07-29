@@ -34,6 +34,9 @@
  * instead of scattered through a 12K-line god file.
  */
 
+#include "Common/Locales.h"
+#include <string>
+#include <map>
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"

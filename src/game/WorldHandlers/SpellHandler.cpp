@@ -38,7 +38,7 @@
  * and manage spell cancellation.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "DBCStores.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -338,7 +338,7 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!obj->IsWithinDistInMap(_player, obj->GetInteractionDistance()))
+    if (!InReach(*obj, *_player, obj->GetInteractionDistance()))
     {
         return;
     }
@@ -386,7 +386,7 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
         return;
     }
 
-    if (!go->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
+    if (!InReach(*go, *_player, INTERACTION_DISTANCE))
     {
         return;
     }

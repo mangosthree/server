@@ -53,7 +53,13 @@
 #ifndef MANGOS_H_BATTLEGROUNDMGR
 #define MANGOS_H_BATTLEGROUNDMGR
 
-#include "Common.h"
+#include <unordered_map>
+#include "Platform/Define.h"
+#include <ctime>
+#include <vector>
+#include <map>
+#include <set>
+#include <list>
 #include "Utilities/EventProcessor.h"
 #include "SharedDefines.h"
 #include "DBCEnums.h"

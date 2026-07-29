@@ -22,6 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <algorithm>
+#include <string>
 #include "SpellMgr.h"
 #include "ObjectMgr.h"
 #include "SpellAuraDefines.h"

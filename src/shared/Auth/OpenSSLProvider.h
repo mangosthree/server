@@ -34,7 +34,7 @@
 #ifndef _AUTH_OPENSSL_PROVIDER_H
 #define _AUTH_OPENSSL_PROVIDER_H
 
-#include "Common/Common.h"
+#include <string>
 #include <openssl/evp.h>
 
 /**
@@ -118,6 +118,12 @@ public:
     bool IsLoaded() const { return m_provider != nullptr; }
 
     /**
+     * @brief Get the version reported by the loaded provider
+     * @return Provider version, or an empty string if unavailable
+     */
+    std::string Version() const;
+
+    /**
      * @brief Get the underlying provider handle
      * @return OSSL_PROVIDER pointer or nullptr if not loaded
      */
@@ -161,6 +167,14 @@ public:
      * @brief Destructor - automatically unloads providers
      */
     ~OpenSSLProviderManager();
+
+    /**
+     * @brief The one manager for the process
+     *
+     * Providers are global to the library, so loading them per object costs an
+     * OpenSSL-wide lock on every construction and buys nothing.
+     */
+    static OpenSSLProviderManager& Instance();
 
     /**
      * @brief Check if providers are successfully loaded

@@ -25,7 +25,8 @@
 #ifndef MANGOS_DBCSTRUCTURE_H
 #define MANGOS_DBCSTRUCTURE_H
 
-#include "Common.h"
+#include <unordered_map>
+#include "Common/Locales.h"
 #include "DBCEnums.h"
 #include "Path.h"
 #include "Platform/Define.h"

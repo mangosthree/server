@@ -34,9 +34,9 @@ namespace MaNGOS
     /**
      * @brief Base class for a task that runs on its own thread.
      *
-     * Reference-counted, so the Runnable can be handed to a Thread and
-     * forgotten: the creator holds one reference, the running thread holds
-     * another for the duration of run(), and whichever drops last deletes it.
+     * Reference-counted, so the Runnable can be handed to a Thread and forgotten:
+     * the creator holds one reference, the running thread holds another for the
+     * duration of run(), and whichever drops last deletes it.
      */
     class Runnable
     {
@@ -65,12 +65,11 @@ namespace MaNGOS
     /**
      * @brief A joinable OS thread running a Runnable.
      *
-     * Constructing with a Runnable starts it immediately. Deleting the
-     * Thread joins it and then drops the Thread's reference to the task --
-     * so `delete someThread` is a "stop and reclaim", and by the time it
-     * returns the task is gone. Callers are expected to have already told
-     * the Runnable to finish (its run() must return), otherwise the join
-     * blocks forever.
+     * Constructing with a Runnable starts it immediately. Deleting the Thread joins
+     * it and then drops the Thread's reference to the task — so `delete someThread`
+     * is a "stop and reclaim", and by the time it returns the task is gone. Callers
+     * are expected to have already told the Runnable to finish (its run() must
+     * return), otherwise the join blocks forever.
      */
     class Thread
     {
@@ -83,10 +82,10 @@ namespace MaNGOS
             Thread(const Thread&) = delete;
             Thread& operator=(const Thread&) = delete;
 
-            /// Spawn the thread. False if already running or has no task.
+            /// Spawn the thread. Returns false if it is already running or has no task.
             bool start();
 
-            /// Join the thread. False if it was not running.
+            /// Join the thread. Returns false if it was not running.
             bool wait();
 
             static void Sleep(unsigned long msecs)
@@ -97,7 +96,8 @@ namespace MaNGOS
         private:
 
             std::thread m_thread; ///< The OS thread; joinable while running
-            Runnable*   m_task;   ///< Task run by m_thread (we hold one ref)
+            Runnable*   m_task;   ///< Task executed by m_thread (we hold one reference)
     };
 }
+
 #endif

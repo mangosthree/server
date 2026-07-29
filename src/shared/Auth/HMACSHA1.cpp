@@ -25,9 +25,11 @@
 #include "Auth/HMACSHA1.h"
 #include "BigNumber.h"
 #include "Log/Log.h"
+#include "Utilities/Errors.h"
 
 #include <openssl/core_names.h>
 #include <openssl/params.h>
+#include <string>
 
 HMACSHA1::HMACSHA1(uint32 len, uint8 *seed) : m_ctx(nullptr), m_digest()
 {

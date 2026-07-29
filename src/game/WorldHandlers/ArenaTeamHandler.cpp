@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <string>
 #include "WorldSession.h"
 #include "WorldPacket.h"
 #include "Log.h"
@@ -30,6 +31,7 @@
 #include "ArenaTeam.h"
 #include "World.h"
 #include "SocialMgr.h"
+#include "PlayerRegistry.h"
 
 void WorldSession::HandleInspectArenaTeamsOpcode(WorldPacket& recv_data)
 {
@@ -45,7 +47,7 @@ void WorldSession::HandleInspectArenaTeamsOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+    if (!InReach(*_player, *player, INSPECT_DISTANCE, false))
     {
         return;
     }
@@ -166,7 +168,7 @@ void WorldSession::HandleArenaTeamInviteOpcode(WorldPacket& recv_data)
             return;
         }
 
-        player = sObjectAccessor.FindPlayerByName(Invitedname.c_str());
+        player = sPlayerRegistry.FindByName(Invitedname.c_str());
     }
 
     if (!player)

@@ -25,6 +25,8 @@
 #ifndef DB2STORE_H
 #define DB2STORE_H
 
+#include "Common/Locales.h"
+#include <list>
 #include "DB2FileLoader.h"
 
 template<class T>

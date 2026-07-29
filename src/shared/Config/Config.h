@@ -25,14 +25,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "Common/Common.h"
 #include <Policies/Singleton.h>
 #include "Platform/Define.h"
 
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
-#include <map>
 
 /**
  * @brief Manages configuration file loading and value retrieval
@@ -50,9 +49,7 @@ class Config
          * Initializes the configuration manager with no configuration loaded.
          */
         Config();
-        /**
-         * @brief Destructs the Config instance
-         */
+
         ~Config();
 
         /**
@@ -108,6 +105,13 @@ class Config
          * @return int32 The configuration value or default value
          */
         int32 GetIntDefault(const char* name, const int32 def);
+        /**
+         * @brief Retrieves a 64-bit integer configuration value with default fallback
+         *
+         * @param name Key name to look up
+         * @param def Default value if the key is absent or unparsable
+         * @return int64 The configuration value or default value
+         */
         int64 GetInt64Default(const char* name, const int64 def);
         /**
          * @brief Retrieves a floating-point configuration value with default fallback
@@ -130,10 +134,9 @@ class Config
 
     private:
 
-        /// One [section] and its key/value pairs. Within a section the last
-        /// assignment of a key wins; across sections the first section
-        /// holding the key wins (see GetValue). Sections are kept in file
-        /// order so that resolution is stable.
+        /// One [section] and its key/value pairs. Within a section the last assignment
+        /// of a key wins; across sections the first section holding the key wins (see
+        /// GetValue). Sections are kept in file order so that resolution is stable.
         typedef std::map<std::string, std::string> SectionEntries;
         typedef std::vector<std::pair<std::string, SectionEntries> > Sections;
 

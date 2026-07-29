@@ -51,7 +51,12 @@
 #ifndef MANGOSSERVER_GAMEOBJECT_H
 #define MANGOSSERVER_GAMEOBJECT_H
 
-#include "Common.h"
+#include <cmath>
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <ctime>
+#include <string>
+#include <vector>
 #include "SharedDefines.h"
 #include "Object.h"
 #include "LootMgr.h"
@@ -691,6 +696,8 @@ enum CapturePointSliderValue
 
 class Unit;
 class GameObjectModel;
+#include "Geometry/Quat.h"
+
 struct GameObjectDisplayInfoEntry;
 
 // 5 sec for bobber catch
@@ -729,6 +736,18 @@ class GameObject : public WorldObject
         void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot);
         void SetWorldRotation(float qx, float qy, float qz, float qw);
         void SetTransportPathRotation(const QuaternionData& rotation);      // transforms(rotates) transport's path
+
+        /// The pose the collision body is built from. Cataclysm keeps the rotation in
+        /// m_worldRotation rather than in the object fields the earlier expansions use,
+        /// so this is the one accessor GameObjectModel asks -- it must not have to know
+        /// which expansion it is compiled for.
+        void GetQuaternion(Geometry::Quat& q) const
+        {
+            q.x = m_worldRotation.x;
+            q.y = m_worldRotation.y;
+            q.z = m_worldRotation.z;
+            q.w = m_worldRotation.w;
+        }
         int64 GetPackedWorldRotation() const { return m_packedRotation; }
 
         void SetOwnerGuid(ObjectGuid ownerGuid)
@@ -794,7 +813,7 @@ class GameObject : public WorldObject
         void SetDisplayId(uint32 modelId);
         void SetPhaseMask(uint32 newPhaseMask, bool update) override;
 
-        float GetObjectBoundingRadius() const override;     // overwrite WorldObject version
+        float ComputeBoundingRadius() const override;     // overwrite WorldObject version
 
         void Use(Unit* user);
 

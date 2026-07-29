@@ -22,7 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "Opcodes.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -32,7 +32,6 @@
 #include "ObjectGuid.h"
 #include "Group.h"
 #include "Formulas.h"
-#include "ObjectAccessor.h"
 #include "BattleGround/BattleGround.h"
 #include "MapManager.h"
 #include "MapPersistentStateMgr.h"

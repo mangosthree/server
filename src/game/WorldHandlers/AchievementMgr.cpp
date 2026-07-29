@@ -22,7 +22,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Common/ServerDefines.h"
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include <cstring>
+#include <ctime>
+#include <string>
 #include "AchievementMgr.h"
 #include "DBCStores.h"
 #include "Player.h"
@@ -51,7 +56,6 @@
 
 #include "Policies/Singleton.h"
 
-INSTANTIATE_SINGLETON_1(AchievementGlobalMgr);
 
 namespace MaNGOS
 {

@@ -40,7 +40,10 @@
  * Pet actions are validated and synchronized with the owner.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <cstring>
+#include <string>
+#include <ctime>
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "ObjectMgr.h"
@@ -286,7 +289,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
             const SpellRangeEntry* sRange = sSpellRangeStore.LookupEntry(spellInfo->RangeIndex);
 
-            if (unit_target && !(pet->IsWithinDistInMap(unit_target, sRange->RangeMax_0) && pet->IsWithinLOSInMap(unit_target, VMAP::ModelIgnoreFlags::M2))
+            if (unit_target && !(InReach(*pet, *unit_target, sRange->RangeMax_0) && HasLineOfSight(*pet, *unit_target))
                 && !(GetPlayer()->IsFriendlyTo(unit_target) || pet->HasAuraType(SPELL_AURA_MOD_POSSESS)))
             {
                 ((Pet*)pet)->SetSpellOpener(spellid, sRange->RangeMin_0, sRange->RangeMax_0);

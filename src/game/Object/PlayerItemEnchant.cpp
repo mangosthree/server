@@ -30,6 +30,7 @@
  *        Player.h is unchanged.
  */
 
+#include "Utilities/Errors.h"
 #include "Player.h"
 #include "Log.h"
 #include "Opcodes.h"

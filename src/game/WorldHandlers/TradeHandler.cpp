@@ -22,11 +22,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "World.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "Log.h"
 #include "Opcodes.h"
 #include "Player.h"
@@ -395,7 +396,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
     // set before checks to properly undo at problems (it already set in to client)
     my_trade->SetAccepted(true);
 
-    if (!_player->IsWithinDistInMap(trader, TRADE_DISTANCE, false))
+    if (!InReach(*_player, *trader, TRADE_DISTANCE, false))
     {
         SendTradeStatus(TRADE_STATUS_TARGET_TO_FAR);
         my_trade->SetAccepted(false);
@@ -735,7 +736,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    Player* pOther = sObjectAccessor.FindPlayer(otherGuid);
+    Player* pOther = sPlayerRegistry.Find(otherGuid);
 
     if (!pOther)
     {
@@ -785,7 +786,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!pOther->IsWithinDistInMap(_player, 10.0f, false))
+    if (!InReach(*pOther, *_player, 10.0f, false))
     {
         SendTradeStatus(TRADE_STATUS_TARGET_TO_FAR);
         return;

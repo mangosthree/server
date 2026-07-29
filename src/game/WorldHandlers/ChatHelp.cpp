@@ -30,6 +30,7 @@
  *        Chat.h is unchanged.
  */
 
+#include <string>
 #include "Chat.h"
 #include "Language.h"
 #include "WorldSession.h"

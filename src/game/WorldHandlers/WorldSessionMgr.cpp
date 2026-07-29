@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <mutex>
 #include "World.h"
 #include "WorldSession.h"
 #include "WorldPacket.h"
@@ -51,7 +53,7 @@ Player* World::FindPlayerInZone(uint32 zone)
         {
             continue;
         }
-        if (player->IsInWorld() && player->GetZoneId() == zone)
+        if (player->IsInWorld() && player->GetTerrain()->GetZoneId(player->Where().X(), player->Where().Y(), player->Where().Z()) == zone)
         {
             // Used by the weather system. We return the player to broadcast the change weather message to him and all players in the zone.
             return player;

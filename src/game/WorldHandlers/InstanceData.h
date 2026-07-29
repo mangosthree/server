@@ -25,7 +25,7 @@
 #ifndef MANGOS_INSTANCE_DATA_H
 #define MANGOS_INSTANCE_DATA_H
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "ObjectGuid.h"
 #include "WorldPacket.h"
 #include "LootMgr.h"                                        ///< LootType
@@ -72,7 +72,7 @@ enum EncounterFrameTypes                                    // only raid UI spec
     ENCOUNTER_FRAME_ADD_COMBAT_RES_LIMIT    = 10
 };
 
-class MANGOS_DLL_SPEC InstanceData
+class InstanceData
 {
     public:
 

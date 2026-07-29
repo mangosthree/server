@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <string>
+#include <set>
 #include "DBCEnums.h"
 #include "DBCStores.h"
 #include "DBCStructure.h"
@@ -30,7 +32,6 @@
 #include "LFGMgr.h"
 #include "Object.h"
 #include "Player.h"
-#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "SharedDefines.h"
 #include "WorldSession.h"

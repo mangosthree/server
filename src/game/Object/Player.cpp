@@ -22,6 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <algorithm>
+#include <string>
+#include <list>
 #include "Player.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -46,7 +50,8 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
+#include "CorpseManager.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"
@@ -55,6 +60,7 @@
 #include "Pet.h"
 #include "Util.h"
 #include "Transports.h"
+#include "TransportMap.h"
 #include "Weather.h"
 #include "BattleGround/BattleGround.h"
 #include "BattleGround/BattleGroundMgr.h"
@@ -63,7 +69,6 @@
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "revision_data.h"
-#include "Database/DatabaseImpl.h"
 #include "Spell.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
@@ -579,12 +584,6 @@ Player::~Player()
     // Delete the player's talk class
     delete PlayerTalkClass;
 
-    // Remove the player from any transport they are on
-    if (m_transport)
-    {
-        m_transport->RemovePassenger(this);
-    }
-
     // Delete all item set effects
     for (size_t x = 0; x < ItemSetEff.size(); ++x)
     {
@@ -687,7 +686,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
 
     // Set player's initial location
     SetLocationMapId(info->mapId);
-    Relocate(info->positionX, info->positionY, info->positionZ, info->orientation);
+    Place().MoveTo(info->positionX, info->positionY, info->positionZ, info->orientation);
 
     // Set the player's map
     SetMap(sMapMgr.CreateMap(info->mapId, this));
@@ -1168,7 +1167,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         if (update_diff >= m_zoneUpdateTimer)
         {
             uint32 newzone, newarea;
-            GetZoneAndAreaId(newzone, newarea);
+            GetZoneAndAreaAboardOrHere(newzone, newarea);
 
             if (m_zoneUpdateId != newzone)
             {
@@ -1310,7 +1309,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
 
     // Handle pet unsummoning if out of range
     Pet* pet = GetPet();
-    if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && (GetCharmGuid() && (pet->GetObjectGuid() != GetCharmGuid())))
+    if (pet && !InReach(*pet, *this, GetMap()->GetVisibilityDistance()) && (GetCharmGuid() && (pet->GetObjectGuid() != GetCharmGuid())))
     {
         pet->Unsummon(PET_SAVE_REAGENTS, this);
     }
@@ -1651,15 +1650,15 @@ void Player::SendTeleportPacket(float oldX, float oldY, float oldZ, float oldO)
 
     data << uint32(0);  // counter
     data.WriteGuidBytes<1, 2, 3, 5>(guid);
-    data << float(GetPositionX());
+    data << float(Where().X());
     data.WriteGuidBytes<4>(guid);
-    data << float(GetOrientation());
+    data << float(Where().Facing());
     data.WriteGuidBytes<7>(guid);
-    data << float(GetPositionZ());
+    data << float(Where().Z());
     data.WriteGuidBytes<0, 6>(guid);
-    data << float(GetPositionY());
+    data << float(Where().Y());
 
-    Relocate(oldX, oldY, oldZ, oldO);
+    Place().MoveTo(oldX, oldY, oldZ, oldO);
     SendDirectMessage(&data);
 }
 
@@ -1684,7 +1683,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         m_cinematicFlyover->Stop();
     }
 
-    orientation = NormalizeOrientation(orientation);
+    orientation = Geometry::Placement::NormalizeOrientation(orientation);
 
     if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
     {
@@ -1748,7 +1747,17 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // if we were on a transport, leave
     if (!(options & TELE_TO_NOT_LEAVE_TRANSPORT) && m_transport)
     {
-        m_transport->RemovePassenger(this);
+        // OFF THE DECK MAP FIRST. Everything below -- the near/far decision, the duel
+        // check, the world port -- reasons about the map he is standing on, and while he
+        // is standing on a deck that map is the hull. Put him down on the map the ship
+        // sails, at the ship's own pose; it is a staging point that lives for the rest of
+        // this function, because the teleport is about to move him to its destination.
+        if (TransportMap* hull = m_transport->AsMap())
+        {
+            hull->Disembark(this, m_transport->Where().X(), m_transport->Where().Y(),
+                            m_transport->Where().Z(), m_transport->Where().Facing());
+        }
+
         m_transport = NULL;
         m_movementInfo.ClearTransportData();
     }
@@ -1786,7 +1795,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if (!(options & TELE_TO_NOT_UNSUMMON_PET))
         {
             // same map, only remove pet if out of range for new position
-            if (pet && !pet->IsWithinDist3d(x, y, z, GetMap()->GetVisibilityDistance()))
+            if (pet && !pet->Where().WithinDist(Geometry::Vector3(x, y, z), GetMap()->GetVisibilityDistance()))
             {
                 UnsummonPetTemporaryIfAny();
             }
@@ -1808,9 +1817,11 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if (!GetSession()->PlayerLogout())
         {
             float oldX, oldY, oldZ;
-            float oldO = GetOrientation();
-            GetPosition(oldX, oldY, oldZ);;
-            Relocate(x, y, z, orientation);
+            float oldO = Where().Facing();
+            oldX = Where().X();
+            oldY = Where().Y();
+            oldZ = Where().Z();
+            Place().MoveTo(x, y, z, orientation);
             SendTeleportPacket(oldX, oldY, oldZ, oldO);
         }
     }
@@ -1948,7 +1959,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 else
                 {
                     data << float(final_x);
-                    data << float(NormalizeOrientation(final_o));
+                    data << float(Geometry::Placement::NormalizeOrientation(final_o));
                     data << float(final_y);
                 }
 
@@ -2160,7 +2171,7 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 NpcFlagsmask)
     }
 
     // not too far
-    if (!unit->IsWithinDistInMap(this, INTERACTION_DISTANCE))
+    if (!InReach(*unit, *this, INTERACTION_DISTANCE))
     {
         return NULL;
     }
@@ -2197,13 +2208,13 @@ GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameo
         if (uint32(go->GetGoType()) == gameobject_type || gameobject_type == MAX_GAMEOBJECT_TYPE)
         {
             float maxdist = go->GetInteractionDistance();
-            if (go->IsWithinDistInMap(this, maxdist) && go->isSpawned())
+            if (InReach(*go, *this, maxdist) && go->isSpawned())
             {
                 return go;
             }
 
             sLog.outError("GetGameObjectIfCanInteractWith: GameObject '%s' [GUID: %u] is too far away from player %s [GUID: %u] to be used by him (distance=%f, maximal %f is allowed)",
-                          go->GetGOInfo()->name,  go->GetGUIDLow(), GetName(), GetGUIDLow(), go->GetDistance(this), maxdist);
+                          go->GetGOInfo()->name,  go->GetGUIDLow(), GetName(), GetGUIDLow(), go->Where().DistanceTo(this->Where()), maxdist);
         }
     }
     return NULL;
@@ -2216,7 +2227,7 @@ GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameo
  */
 bool Player::IsUnderWater() const
 {
-    return GetTerrain()->IsUnderWater(GetPositionX(), GetPositionY(), GetPositionZ() + 2);
+    return GetTerrain()->IsUnderWater(Where().X(), Where().Y(), Where().Z() + 2);
 }
 
 /**
@@ -3304,7 +3315,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
 
     // convert corpse to bones if exist (to prevent exiting Corpse in World without DB entry)
     // bones will be deleted by corpse/bones deleting thread shortly
-    sObjectAccessor.ConvertCorpseForPlayer(playerguid);
+    sCorpseManager.ConvertCorpseForPlayer(playerguid);
 
     // remove from guild
     if (uint32 guildId = GetGuildIdFromDB(playerguid))
@@ -3459,7 +3470,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
                 do
                 {
                     Field* fieldsFriend = resultFriend->Fetch();
-                    if (Player* sFriend = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, fieldsFriend[0].GetUInt32())))
+                    if (Player* sFriend = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, fieldsFriend[0].GetUInt32())))
                     {
                         if (sFriend->IsInWorld())
                         {
@@ -3586,10 +3597,10 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
 
     Map* m = GetMap();
 
-    const float old_x = GetPositionX();
-    const float old_y = GetPositionY();
-    const float old_z = GetPositionZ();
-    const float old_r = GetOrientation();
+    const float old_x = Where().X();
+    const float old_y = Where().Y();
+    const float old_z = Where().Z();
+    const float old_r = Where().Facing();
 
     if (teleport || old_x != x || old_y != y || old_z != z || old_r != orientation)
     {
@@ -3609,9 +3620,9 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
 
         // reread after Map::Relocation
         m = GetMap();
-        x = GetPositionX();
-        y = GetPositionY();
-        z = GetPositionZ();
+        x = Where().X();
+        y = Where().Y();
+        z = Where().Z();
 
         // group update
         if (GetGroup() && (old_x != x || old_y != y))
@@ -3641,10 +3652,10 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
 void Player::SaveRecallPosition()
 {
     m_recallMap = GetMapId();
-    m_recallX = GetPositionX();
-    m_recallY = GetPositionY();
-    m_recallZ = GetPositionZ();
-    m_recallO = GetOrientation();
+    m_recallX = Where().X();
+    m_recallY = Where().Y();
+    m_recallZ = Where().Z();
+    m_recallO = Where().Facing();
 }
 
 /**
@@ -4339,7 +4350,7 @@ void Player::HandleStealthedUnitsDetection()
                 (*i)->SendCreateUpdateToPlayer(this);
                 m_clientGUIDs.insert(i_guid);
 
-                DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is detected in stealth by player %u. Distance = %f", i_guid.GetString().c_str(), GetGUIDLow(), GetDistance(*i));
+                DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is detected in stealth by player %u. Distance = %f", i_guid.GetString().c_str(), GetGUIDLow(), Where().DistanceTo((*i)->Where()));
 
                 // target aura duration for caster show only if target exist at caster client
                 // send data at target visibility change (adding to client)
@@ -4550,7 +4561,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
         SendCorpseReclaimDelay(true);
     }
 
-    SendInitWorldStates(GetZoneId(), GetAreaId());
+    SendInitWorldStates(GetTerrain()->GetZoneId(Where().X(), Where().Y(), Where().Z()), GetTerrain()->GetAreaId(Where().X(), Where().Y(), Where().Z()));
 
     SendEquipmentSetList();
 
@@ -4580,11 +4591,84 @@ void Player::SendInitialPacketsBeforeAddToMap()
 /**
  * @brief Sends map-dependent initialization packets after the player is added to the world.
  */
+/**
+ * @brief Where this player is, for the questions the WORLD answers: a graveyard, an area
+ *        trigger, anything looked up against terrain the client shipped.
+ *
+ * Aboard a vessel that is the VESSEL's map and pose. A deck map carries no area table --
+ * the client never shipped one for a hull -- so asking it yields zone 0 and finds nothing,
+ * and there are no graveyards on a ship in any case.
+ */
+void Player::GetWorldAnchor(uint32& mapId, float& x, float& y, float& z) const
+{
+    if (Transport* vessel = Transport::VesselOf(*this))
+    {
+        if (Map* sailing = vessel->GetMap())
+        {
+            mapId = sailing->GetId();
+            x = vessel->Where().X();
+            y = vessel->Where().Y();
+            z = vessel->Where().Z();
+            return;
+        }
+    }
+
+    mapId = GetMapId();
+    x = Where().X();
+    y = Where().Y();
+    z = Where().Z();
+}
+
+Map* Player::BoardingMap() const
+{
+    TransportMap* hull = m_transport ? m_transport->AsMap() : NULL;
+
+    // Uncommissioned -- the baker left her no hull -- and she carries nobody: he stays on the
+    // water, which is at least a place that exists.
+    return (hull && hull->IsCommissioned()) ? hull : GetMap();
+}
+
+/**
+ * @brief The terrain that answers WORLD questions for this player: exploration, area
+ *        flags, indoor/outdoor, area triggers.
+ *
+ * Aboard a vessel that is the terrain of the map the ship sails, not the deck's. A deck
+ * map is a hull with no area table -- the client never shipped one -- so asking it yields
+ * area flag 0 and "discovered unknown area" for every step taken on deck.
+ */
+TerrainInfo const* Player::AnchorTerrain() const
+{
+    if (Transport* vessel = Transport::VesselOf(*this))
+    {
+        if (Map* sailing = vessel->GetMap())
+        {
+            return sailing->GetTerrain();
+        }
+    }
+
+    return GetTerrain();
+}
+
+void Player::GetZoneAndAreaAboardOrHere(uint32& zone, uint32& area) const
+{
+    if (Transport* vessel = Transport::VesselOf(*this))
+    {
+        if (Map* sailing = vessel->GetMap())
+        {
+            sailing->GetTerrain()->GetZoneAndAreaId(zone, area, vessel->Where().X(),
+                                                    vessel->Where().Y(), vessel->Where().Z());
+            return;
+        }
+    }
+
+    GetTerrain()->GetZoneAndAreaId(zone, area, Where().X(), Where().Y(), Where().Z());
+}
+
 void Player::SendInitialPacketsAfterAddToMap()
 {
     // update zone
     uint32 newzone, newarea;
-    GetZoneAndAreaId(newzone, newarea);
+    GetTerrain()->GetZoneAndAreaId(newzone, newarea, Where().X(), Where().Y(), Where().Z());
     UpdateZone(newzone, newarea);                           // also call SendInitWorldStates();
 
     ResetTimeSync();
@@ -4819,7 +4903,7 @@ void Player::SummonIfPossible(bool agree)
 
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ACCEPTED_SUMMONINGS, 1);
 
-    TeleportTo(m_summon_mapid, m_summon_x, m_summon_y, m_summon_z, GetOrientation());
+    TeleportTo(m_summon_mapid, m_summon_x, m_summon_y, m_summon_z, Where().Facing());
 }
 
 /**
@@ -5078,7 +5162,7 @@ void Player::ResurectUsingRequestData()
     /// Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
     if (m_resurrectGuid.IsPlayer())
     {
-        TeleportTo(m_resurrectMap, m_resurrectX, m_resurrectY, m_resurrectZ, GetOrientation());
+        TeleportTo(m_resurrectMap, m_resurrectX, m_resurrectY, m_resurrectZ, Where().Facing());
     }
 
     // we cannot resurrect player when we triggered far teleport
@@ -5270,7 +5354,7 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     }
 
     // All liquids type - check under water position
-    if (liquid_status.CreatureTypeFlags & (MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_OCEAN | MAP_LIQUID_TYPE_MAGMA | MAP_LIQUID_TYPE_SLIME))
+    if (liquid_status.type_flags & (MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_OCEAN | MAP_LIQUID_TYPE_MAGMA | MAP_LIQUID_TYPE_SLIME))
     {
         if (res & LIQUID_MAP_UNDER_WATER)
         {
@@ -5283,7 +5367,7 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     }
 
     // Allow travel in dark water on taxi or transport
-    if ((liquid_status.CreatureTypeFlags & MAP_LIQUID_TYPE_DARK_WATER) && !IsTaxiFlying() && !GetTransport())
+    if ((liquid_status.type_flags & MAP_LIQUID_TYPE_DARK_WATER) && !IsTaxiFlying() && !GetTransport())
     {
         m_MirrorTimerFlags |= UNDERWATER_INDARKWATER;
     }
@@ -5293,7 +5377,7 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     }
 
     // in lava check, anywhere in lava level
-    if (liquid_status.CreatureTypeFlags & MAP_LIQUID_TYPE_MAGMA)
+    if (liquid_status.type_flags & MAP_LIQUID_TYPE_MAGMA)
     {
         if (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER | LIQUID_MAP_WATER_WALK))
         {
@@ -5305,7 +5389,7 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
         }
     }
     // in slime check, anywhere in slime level
-    if (liquid_status.CreatureTypeFlags & MAP_LIQUID_TYPE_SLIME)
+    if (liquid_status.type_flags & MAP_LIQUID_TYPE_SLIME)
     {
         if (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER | LIQUID_MAP_WATER_WALK))
         {
@@ -6005,7 +6089,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
             uint32 damage = (uint32)(damageperc * GetMaxHealth() * sWorld.getConfig(CONFIG_FLOAT_RATE_DAMAGE_FALL));
 
             float height = movementInfo.GetPos()->z;
-            UpdateAllowedPositionZ(movementInfo.GetPos()->x, movementInfo.GetPos()->y, height);
+            ClampToAllowedZ(*this, movementInfo.GetPos()->x, movementInfo.GetPos()->y, height);
 
             if (damage > 0)
             {
@@ -6032,7 +6116,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
             }
 
             // Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
-            DEBUG_LOG("FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d" , movementInfo.GetPos()->z, height, GetPositionZ(), movementInfo.GetFallTime(), height, damage, safe_fall);
+            DEBUG_LOG("FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d" , movementInfo.GetPos()->z, height, Where().Z(), movementInfo.GetFallTime(), height, damage, safe_fall);
         }
     }
 }
@@ -6208,7 +6292,7 @@ Object* Player::GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask)
             }
             if ((typemask & TYPEMASK_PLAYER) && IsInWorld())
             {
-                return sObjectAccessor.FindPlayer(guid);
+                return sPlayerRegistry.Find(guid);
             }
             break;
         case HIGHGUID_GAMEOBJECT:
@@ -6494,7 +6578,9 @@ void Player::setResurrectRequestData(Unit* caster, uint32 health, uint32 mana)
 {
     m_resurrectGuid = caster->GetObjectGuid();
     m_resurrectMap = caster->GetMapId();
-    caster->GetPosition(m_resurrectX, m_resurrectY, m_resurrectZ);
+    m_resurrectX = caster->Where().X();
+    m_resurrectY = caster->Where().Y();
+    m_resurrectZ = caster->Where().Z();
     m_resurrectHealth = health;
     m_resurrectMana = mana;
     m_resurrectToGhoul = false;

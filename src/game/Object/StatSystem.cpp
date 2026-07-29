@@ -22,6 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include "Utilities/Errors.h"
+#include <algorithm>
+#include <vector>
 #include "DBCStores.h"
 #include "Unit.h"
 #include "Player.h"

@@ -22,7 +22,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include <cmath>
+#include <utility>
+#include "Platform/Define.h"
+#include <cstring>
+#include <set>
+#include <algorithm>
 #include "Database/DatabaseEnv.h"
 #include "SQLStorages.h"
 #include "CreatureEventAI.h"
@@ -35,7 +40,6 @@
 #include "SpellMgr.h"
 #include "World.h"
 
-INSTANTIATE_SINGLETON_1(CreatureEventAIMgr);
 
 // -------------------
 /**
@@ -584,6 +588,12 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     {
                         sLog.outErrorEventAI("Creature %u are using repeatable event(%u) with param4 < param3 (RepeatMax < RepeatMin). Event will never repeat.", temp.creature_id, i);
                     }
+                    break;
+                }
+                case EVENT_T_REACHED_WAYPOINT:
+                {
+                    // Nothing to check: every field is a signed coordinate and
+                    // the whole range is legal.
                     break;
                 }
                 case EVENT_T_RECEIVE_AI_EVENT:

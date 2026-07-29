@@ -22,7 +22,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include "Utilities/PackedValues.h"
+#include <ctime>
+#include <string>
+#include <set>
 #include "Log.h"
 #include "Player.h"
 #include "WorldPacket.h"
@@ -36,6 +41,16 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "ArenaTeam.h"
+#include "PlayerRegistry.h"
+
+static time_t LocalTimeToUTCTime(time_t time)
+{
+    #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
+        return time + _timezone;
+    #else
+        return time + timezone;
+    #endif
+}
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
 {
@@ -483,7 +498,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
 
     recv_data >> eventId >> inviteId >> name >> isPreInvite >> isGuildEvent;
 
-    if (Player* player = sObjectAccessor.FindPlayerByName(name.c_str()))
+    if (Player* player = sPlayerRegistry.FindByName(name.c_str()))
     {
         // Invitee is online
         inviteeGuid = player->GetObjectGuid();

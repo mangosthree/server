@@ -30,7 +30,10 @@
  * picks this file up automatically; AchievementMgr.h is unchanged.
  */
 
-#include "Common.h"
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include "Common/Locales.h"
+#include <string>
 #include "AchievementMgr.h"
 #include "Log.h"
 #include "DBCStores.h"

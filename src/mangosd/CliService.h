@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,9 +35,7 @@
  *
  * The commands themselves are never executed here: they go onto the world's
  * command queue and run on the world thread, which is the only thread allowed
- * to touch game state. This service is purely a reader -- the same job
- * CliThread did, on std::thread instead of MaNGOS::Thread/Runnable so it fits
- * the IService shape every background activity now shares.
+ * to touch game state. This service is purely a reader.
  */
 class CliService : public IService
 {
@@ -56,6 +54,12 @@ class CliService : public IService
     private:
 
         void Run();
+
+        /// Reader loop for the full-screen console, which owns the keyboard.
+        void RunManaged();
+
+        /// Reader loop for a plain line-oriented terminal (or redirected stdin).
+        void RunLineBased();
 
         const bool        m_beep;
         std::thread       m_thread;

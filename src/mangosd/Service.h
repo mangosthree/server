@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,17 +25,17 @@
 #ifndef MANGOS_H_SERVICE
 #define MANGOS_H_SERVICE
 
+#include <thread>
 #include <string>
 
 /**
  * @brief A background activity that runs alongside the world loop.
  *
- * The console reader, remote administration, SOAP and the freeze watchdog used
- * to be four separate classes with four different shapes -- one ACE_Task_Base,
- * one ACE reactor handler with its own acceptor, one raw std::thread, and one
- * MaNGOS::Runnable -- each started and stopped by hand from main(), in an order
- * that had to be remembered rather than expressed. This is the one shape they
- * all share now.
+ * The console reader, remote administration, SOAP and the freeze watchdog were
+ * four separate classes with four different shapes -- one ACE_Task_Base, one
+ * reactor handler, one raw std::thread, and one more ACE task -- each started
+ * and stopped by hand from main(), in an order that had to be remembered rather
+ * than expressed. This is the one shape they all share.
  *
  * The contract is deliberately three calls, because shutdown needs all three
  * separated: RequestStop() must be able to run for every service before any of

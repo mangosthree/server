@@ -25,7 +25,7 @@
 #ifndef MANGOS_DB2STRUCTURE_H
 #define MANGOS_DB2STRUCTURE_H
 
-#include "Common.h"
+#include "Utilities/Errors.h"
 #include "DBCEnums.h"
 #include "Path.h"
 #include "Platform/Define.h"

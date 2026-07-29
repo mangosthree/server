@@ -32,6 +32,7 @@
  *        ObjectMgr.h is unchanged.
  */
 
+#include <string>
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"

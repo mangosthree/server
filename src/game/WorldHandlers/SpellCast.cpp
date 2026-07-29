@@ -62,12 +62,11 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 #include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
 #include "LootMgr.h"
-#include "VMapFactory.h"
 #include "BattleGround/BattleGround.h"
 #include "Util.h"
 #include "Chat.h"
@@ -119,10 +118,10 @@ void Spell::SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura)
         m_CastItemGuid = m_CastItem->GetObjectGuid();
     }
 
-    m_castPositionX = m_caster->GetPositionX();
-    m_castPositionY = m_caster->GetPositionY();
-    m_castPositionZ = m_caster->GetPositionZ();
-    m_castOrientation = m_caster->GetOrientation();
+    m_castPositionX = m_caster->Where().X();
+    m_castPositionY = m_caster->Where().Y();
+    m_castPositionZ = m_caster->Where().Z();
+    m_castOrientation = m_caster->Where().Facing();
 
     if (triggeredByAura)
     {
@@ -246,7 +245,7 @@ void Spell::cancel()
             {
                 if (ihit->missCondition == SPELL_MISS_NONE)
                 {
-                    Unit* unit = m_caster->GetObjectGuid() == (*ihit).targetGUID ? m_caster : sObjectAccessor.GetUnit(*m_caster, ihit->targetGUID);
+                    Unit* unit = m_caster->GetObjectGuid() == (*ihit).targetGUID ? m_caster : ObjectLookup::GetUnit(*m_caster, ihit->targetGUID);
                     if (unit && unit->IsAlive())
                     {
                         unit->RemoveAurasByCasterSpell(m_spellInfo->ID, m_caster->GetObjectGuid());
@@ -945,7 +944,7 @@ void Spell::update(uint32 difftime)
 
     // check if the player or unit caster has moved before the spell finished (exclude casting on vehicles)
     if (((m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->GetTypeId() == TYPEID_UNIT) && m_timer != 0) &&
-        (m_castPositionX != m_caster->GetPositionX() || m_castPositionY != m_caster->GetPositionY() || m_castPositionZ != m_caster->GetPositionZ()) &&
+        (m_castPositionX != m_caster->Where().X() || m_castPositionY != m_caster->Where().Y() || m_castPositionZ != m_caster->Where().Z()) &&
         ((spellEffect && spellEffect->Effect != SPELL_EFFECT_STUCK) || !((Player*)m_caster)->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)) &&
         !m_caster->HasAffectedAura(SPELL_AURA_ALLOW_CAST_WHILE_MOVING, m_spellInfo))
     {
@@ -1006,7 +1005,7 @@ void Spell::update(uint32 difftime)
                     }
 
                     // check if player has turned if flag is set
-                    if ( spellInterrupts && (spellInterrupts->ChannelInterruptFlags_0 & CHANNEL_FLAG_TURNING) && m_castOrientation != m_caster->GetOrientation() )
+                    if ( spellInterrupts && (spellInterrupts->ChannelInterruptFlags_0 & CHANNEL_FLAG_TURNING) && m_castOrientation != m_caster->Where().Facing() )
                     {
                         cancel();
                     }
@@ -1048,7 +1047,7 @@ void Spell::update(uint32 difftime)
                                 continue;
                             }
 
-                            Unit* unit = m_caster->GetObjectGuid() == target.targetGUID ? m_caster : sObjectAccessor.GetUnit(*m_caster, target.targetGUID);
+                            Unit* unit = m_caster->GetObjectGuid() == target.targetGUID ? m_caster : ObjectLookup::GetUnit(*m_caster, target.targetGUID);
                             if (unit == NULL)
                             {
                                 continue;
@@ -1119,7 +1118,7 @@ void Spell::finish(bool ok)
             if (ihit->missCondition == SPELL_MISS_NONE)
             {
                 // check m_caster->GetGUID() let load auras at login and speedup most often case
-                Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : sObjectAccessor.GetUnit(*m_caster, ihit->targetGUID);
+                Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : ObjectLookup::GetUnit(*m_caster, ihit->targetGUID);
                 if (unit && unit->IsAlive())
                 {
                     SpellEntry const* auraSpellInfo = (*i)->GetSpellProto();

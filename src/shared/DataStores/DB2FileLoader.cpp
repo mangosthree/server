@@ -22,12 +22,20 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Common/Locales.h"
+#include <cassert>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "DBCFileLoader.h"
 #include "DB2FileLoader.h"
+
+
+// Ceilings for the two sizes AutoProduceData takes from file content -- far above any
+// real .db2, and there so a corrupt file fails the load instead of sizing an allocation.
+static const uint64 MAX_DB2_INDEX       = 16u * 1024u * 1024u;
+static const uint64 MAX_DB2_TABLE_BYTES = 512u * 1024u * 1024u;
 
 DB2FileLoader::DB2FileLoader()
 {
@@ -291,10 +299,18 @@ char* DB2FileLoader::AutoProduceData(const char* format, uint32& records, char**
             }
         }
 
+        // maxi comes from record CONTENT. Refuse a wrapped or absurd count rather than
+        // allocating from it: ++maxi on 0xFFFFFFFF is 0, which allocates nothing and is
+        // then written through by every row.
+        if (maxi == 0xFFFFFFFFu || uint64(maxi) + 1 > MAX_DB2_INDEX)
+        {
+            return NULL;
+        }
+
         ++maxi;
         records = maxi;
         indexTable = new ptr[maxi];
-        memset(indexTable, 0, maxi * sizeof(ptr));
+        memset(indexTable, 0, size_t(maxi) * sizeof(ptr));
     }
     else
     {
@@ -302,7 +318,16 @@ char* DB2FileLoader::AutoProduceData(const char* format, uint32& records, char**
         indexTable = new ptr[recordCount];
     }
 
-    char* dataTable = new char[recordCount * recordsize];
+    // In 64 bits, so a large record count times a wide format cannot wrap.
+    const uint64 tableBytes = uint64(recordCount) * recordsize;
+    if (tableBytes > MAX_DB2_TABLE_BYTES)
+    {
+        delete[] indexTable;
+        indexTable = NULL;
+        return NULL;
+    }
+
+    char* dataTable = new char[size_t(tableBytes)];
 
     uint32 offset = 0;
 

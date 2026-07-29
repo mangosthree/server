@@ -25,6 +25,9 @@
 #ifndef MANGOS_LOOTMGR_H
 #define MANGOS_LOOTMGR_H
 
+#include <unordered_map>
+#include <cmath>
+#include <set>
 #include "ItemEnchantmentMgr.h"
 #include "ByteBuffer.h"
 #include "ObjectGuid.h"

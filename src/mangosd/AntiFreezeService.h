@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,15 +39,17 @@
  *
  * World::m_worldLoopCounter is incremented once per world tick. If it does not
  * change for the configured interval, the world thread is wedged: no player is
- * being served, nothing will recover on its own, and the process is only
- * holding its port and its database connections. The watchdog aborts so that
- * whatever supervises the server (systemd, a container runtime, a restart
- * script) can put it back.
+ * being served, nothing will recover on its own, and the process is only holding
+ * its port and its database connections. The watchdog aborts so that whatever
+ * supervises the server (systemd, a container runtime, a restart script) can put
+ * it back.
  *
- * The old AntiFreezeThread already terminated on a hang (a raw null-pointer
- * write); this version keeps that behaviour but does it through std::abort()
- * instead -- portable, and it produces a proper crash report/core dump rather
- * than relying on undefined behaviour to fault.
+ * That termination is the part the predecessor never implemented. It logged
+ * "World Thread hangs, kicking out server!" and then carried on looping, while
+ * mangosd.conf described the option as "force crash after the specified amount of
+ * seconds". Both the message and the documentation promised an action nothing
+ * performed, which is worse than not having the feature: an operator who
+ * configured MaxCoreStuckTime believed they had a recovery mechanism.
  *
  * Off by default (MaxCoreStuckTime = 0), so terminating only ever happens
  * because an operator explicitly asked for it.

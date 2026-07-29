@@ -32,110 +32,21 @@
  * to overload its types as a visit method is called.
  */
 
-#include "Platform/Define.h"
+#include <utility>
 #include "TypeContainer.h"
 
-// forward declaration
-template<class T, class Y> class TypeContainerVisitor;
-
-template<class VISITOR, class TYPE_CONTAINER>
-/**
- * @brief visitor helper
- *
- * @param v
- * @param c
- */
-void VisitorHelper(VISITOR& v, TYPE_CONTAINER& c)
-{
-    v.Visit(c);
-}
-
-template<class VISITOR>
-/**
- * @brief terminate condition container map list
- *
- * @param
- * @param
- */
-void VisitorHelper(VISITOR& /*v*/, ContainerMapList<TypeNull>& /*c*/)
-{
-}
-
-template<class VISITOR, class T>
-/**
- * @brief
- *
- * @param v
- * @param c
- */
-void VisitorHelper(VISITOR& v, ContainerMapList<T>& c)
-{
-    v.Visit(c._element);
-}
-
-template<class VISITOR, class H, class T>
-/**
- * @brief recursion container map list
- *
- * @param v
- * @param ContainerMapList<TypeList<H
- * @param c
- */
-void VisitorHelper(VISITOR& v, ContainerMapList<TypeList<H, T> >& c)
-{
-    VisitorHelper(v, c._elements);
-    VisitorHelper(v, c._TailElements);
-}
-
-template<class VISITOR, class OBJECT_TYPES>
-/**
- * @brief for TypeMapContainer
- *
- * @param v
- * @param c
- */
-void VisitorHelper(VISITOR& v, TypeMapContainer<OBJECT_TYPES>& c)
-{
-    VisitorHelper(v, c.GetElements());
-}
-
-template<class VISITOR, class TYPE_CONTAINER>
-/**
- * @brief
- *
- */
+template<class VISITOR, class CONTAINER>
 class TypeContainerVisitor
 {
     public:
-
-        /**
-         * @brief
-         *
-         * @param v
-         */
-        TypeContainerVisitor(VISITOR& v)
-            : i_visitor(v)
+        TypeContainerVisitor(VISITOR& v) : i_visitor(v){}
+        void Visit(CONTAINER& c)
         {
+            c.accept(i_visitor);
         }
-
-        /**
-         * @brief
-         *
-         * @param c
-         */
-        void Visit(TYPE_CONTAINER& c)
+        void Visit(const CONTAINER& c) const
         {
-            VisitorHelper(i_visitor, c);
-        }
-
-        /**
-         * @brief
-         *
-         * @param c
-         */
-        void Visit(const TYPE_CONTAINER& c) const
-        {
-            VisitorHelper(i_visitor, c);
+            c.accept(i_visitor);
         }
     private:
         VISITOR& i_visitor;

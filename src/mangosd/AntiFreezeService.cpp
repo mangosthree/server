@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <mutex>
+#include <thread>
 #include "AntiFreezeService.h"
 
 #include "Log.h"
@@ -50,7 +52,8 @@ void AntiFreezeService::Start()
         return;     // disabled; never spawn the thread at all
     }
 
-    sLog.outString("AntiFreeze Thread started (%u seconds max stuck time)", m_maxStuckMs / 1000);
+    sLog.outString("Anti-freeze watchdog armed (%u seconds max stuck time)",
+                   m_maxStuckMs / 1000);
 
     m_thread = std::thread([this] { Run(); });
 }
@@ -75,7 +78,7 @@ void AntiFreezeService::Join()
 void AntiFreezeService::Run()
 {
     // Snapshot of the counter and when it last moved.
-    uint32 lastLoops  = World::m_worldLoopCounter.load();
+    uint32 lastLoops  = World::m_worldLoopCounter.load(std::memory_order_relaxed);
     uint32 lastChange = getMSTime();
 
     for (;;)
@@ -94,7 +97,7 @@ void AntiFreezeService::Run()
         }
 
         const uint32 now   = getMSTime();
-        const uint32 loops = World::m_worldLoopCounter.load();
+        const uint32 loops = World::m_worldLoopCounter.load(std::memory_order_relaxed);
 
         if (loops != lastLoops)
         {
@@ -108,11 +111,13 @@ void AntiFreezeService::Run()
             // Deliberately abort rather than return. The world thread is wedged,
             // so an orderly shutdown would itself hang waiting on it; the only
             // thing left that works is to die and let the supervisor restart us.
-            sLog.outError("World Thread hangs, kicking out server!");
+            sLog.outError("World thread has not advanced for %u seconds -- "
+                          "terminating so the server can be restarted.",
+                          m_maxStuckMs / 1000);
             Log::WaitBeforeContinueIfNeed();
             std::abort();
         }
     }
 
-    sLog.outString("AntiFreeze Thread stopped.");
+    sLog.outString("Anti-freeze watchdog stopped.");
 }

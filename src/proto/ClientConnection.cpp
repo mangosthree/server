@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <string>
 #include <cstdint>
 #include <utility>
 #include <vector>
@@ -84,9 +85,7 @@ namespace proto
           m_codec(),
           m_seed(MakeAuthSeed()),
           m_session(INVALID_SESSION_ID),
-          m_closed(false),
-          m_hadPing(false),
-          m_fastPingRun(0)
+          m_closed(false)
     {
     }
 
@@ -206,16 +205,6 @@ namespace proto
                     return true;
                 }
                 return HandleAuthSession(packet);
-
-            case CMSG_PING:
-                return HandlePing(packet);
-
-            case CMSG_KEEP_ALIVE:
-                // WorldSocket.cpp:906-915 swallows this with a debug log and a
-                // fire-and-forget Eluna notification; both mirrored here.
-                DEBUG_LOG("proto: CMSG_KEEP_ALIVE from %s", m_address.c_str());
-                m_gateway.OnKeepAlivePacketReceived(packet, m_session);
-                return true;
 
             default:
                 break;
@@ -365,57 +354,6 @@ namespace proto
 
         DEBUG_LOG("proto: account '%s' authenticated from %s",
                   request.account.c_str(), m_address.c_str());
-        return true;
-    }
-
-    bool ClientConnection::HandlePing(WorldPacket& packet)
-    {
-        uint32 ping    = 0;
-        uint32 latency = 0;
-
-        try
-        {
-            packet >> ping;
-            packet >> latency;
-        }
-        catch (ByteBufferException&)
-        {
-            sLog.outError("proto: truncated CMSG_PING from %s", m_address.c_str());
-            return false;
-        }
-
-        // WorldSocket.cpp:1281 -- the client pings roughly every 30 seconds.
-        // Anything materially faster is either a broken client or someone
-        // probing, so count the run; a single early ping is jitter and must
-        // not be treated as either.
-        static const std::chrono::seconds MIN_PING_INTERVAL(27);
-
-        const std::chrono::steady_clock::time_point now =
-            std::chrono::steady_clock::now();
-
-        if (m_hadPing)
-        {
-            if (now - m_lastPing < MIN_PING_INTERVAL)
-            {
-                ++m_fastPingRun;
-            }
-            else
-            {
-                m_fastPingRun = 0;
-            }
-        }
-        m_lastPing = now;
-        m_hadPing  = true;
-
-        if (!m_gateway.OnPing(m_session, latency, m_fastPingRun))
-        {
-            return false;
-        }
-
-        // SMSG_PONG: 4-byte echo of the ping counter (WorldSocket.cpp:1324-1326).
-        WorldPacket pong(SMSG_PONG, 4);
-        pong << ping;
-        SendPacket(pong);
         return true;
     }
 

@@ -25,7 +25,7 @@
 #ifndef MANGOS_H_CURRENCYMGR
 #define MANGOS_H_CURRENCYMGR
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include <unordered_map>
 
 class Player;

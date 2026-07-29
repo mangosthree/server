@@ -22,8 +22,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include "Utilities/Errors.h"
+#include <sstream>
+#include "Utilities/MathDefines.h"
 #include "GameObject.h"
-#include "G3D/Quat.h"
+#include "Geometry/Quat.h"
 #include "QuestDef.h"
 #include "ObjectMgr.h"
 #include "PoolManager.h"
@@ -46,11 +50,13 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "Util.h"
 #include "ScriptMgr.h"
-#include "vmap/GameObjectModel.h"
+#include "GameObjectModel.h"
 #include "CreatureAISelector.h"
 #include "SQLStorages.h"
 #include "GameObjectAI.h"
 #include <memory>
+#include "PlayerRegistry.h"
+#include "ObjectLookup.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
@@ -160,7 +166,7 @@ void GameObject::RemoveFromWorld()
 #endif /* ENABLE_ELUNA */
 
         // Notify the outdoor pvp script
-        if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
+        if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetTerrain()->GetZoneId(Where().X(), Where().Y(), Where().Z())))
         {
             outdoorPvP->HandleGameObjectRemove(this);
         }
@@ -168,7 +174,7 @@ void GameObject::RemoveFromWorld()
         // Remove GO from owner
         if (ObjectGuid owner_guid = GetOwnerGuid())
         {
-            if (Unit* owner = sObjectAccessor.GetUnit(*this, owner_guid))
+            if (Unit* owner = ObjectLookup::GetUnit(*this, owner_guid))
             {
                 owner->RemoveGameObject(this, false);
             }
@@ -210,11 +216,11 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
                         const QuaternionData& rotation, uint8 animprogress, GOState go_state)
 {
     MANGOS_ASSERT(map);
-    Relocate(x, y, z, ang);
+    Place().MoveTo(x, y, z, ang);
     SetMap(map);
     SetPhaseMask(phaseMask, false);
 
-    if (!IsPositionValid())
+    if (!IsPlaceable(*this))
     {
         sLog.outError("Gameobject (GUID: %u Entry: %u ) not created. Suggested coordinates are invalid (X: %f Y: %f)", guidlow, name_id, x, y);
         return false;
@@ -316,7 +322,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     {
         ((BattleGroundMap*)map)->GetBG()->HandleGameObjectCreate(this);
     }
-    else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
+    else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetTerrain()->GetZoneId(Where().X(), Where().Y(), Where().Z())))
     {
         outdoorPvP->HandleGameObjectCreate(this);
     }
@@ -425,10 +431,10 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     data.id = GetEntry();
     data.mapid = mapid;
     data.phaseMask = phaseMask;
-    data.posX = GetPositionX();
-    data.posY = GetPositionY();
-    data.posZ = GetPositionZ();
-    data.orientation = GetOrientation();
+    data.posX = Where().X();
+    data.posY = Where().Y();
+    data.posZ = Where().Z();
+    data.orientation = Where().Facing();
     data.rotation.x = m_worldRotation.x;
     data.rotation.y = m_worldRotation.y;
     data.rotation.z = m_worldRotation.z;
@@ -446,10 +452,10 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
        << mapid << ", "
        << uint32(spawnMask) << ","                         // cast to prevent save as symbol
        << uint32(GetPhaseMask()) << ","                    // prevent out of range error
-       << GetPositionX() << ", "
-       << GetPositionY() << ", "
-       << GetPositionZ() << ", "
-       << GetOrientation() << ", "
+       << Where().X() << ", "
+       << Where().Y() << ", "
+       << Where().Z() << ", "
+       << Where().Facing() << ", "
        << m_worldRotation.x << ", "
        << m_worldRotation.y << ", "
        << m_worldRotation.z << ", "
@@ -635,7 +641,7 @@ bool GameObject::IsTransport() const
  */
 Unit* GameObject::GetOwner() const
 {
-    return sObjectAccessor.GetUnit(*this, GetOwnerGuid());
+    return ObjectLookup::GetUnit(*this, GetOwnerGuid());
 }
 
 /**
@@ -672,7 +678,7 @@ bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoi
     }
 
     // Transport always visible at this step implementation
-    if (IsTransport() && IsInMap(u))
+    if (IsTransport() && Where().ShareFrame(u->Where()))
     {
         return true;
     }
@@ -726,7 +732,7 @@ bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoi
             // only rogue have skill for traps detection
             if (Aura* aura = ((Player*)u)->GetAura(2836, EFFECT_INDEX_0))
             {
-                if (roll_chance_i(aura->GetModifier()->m_amount) && u->IsInFront(this, 15.0f))
+                if (roll_chance_i(aura->GetModifier()->m_amount) && InFrontPhased(*u, *this, 15.0f, M_PI_F))
                 {
                     return true;
                 }
@@ -740,7 +746,7 @@ bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoi
     }
 
     // check distance
-    return IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() +
+    return InReach(*this, *viewPoint, GetMap()->GetVisibilityDistance() +
                              (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
 }
 
@@ -875,7 +881,7 @@ void GameObject::SummonLinkedTrapIfAny()
 
     GameObject* linkedGO = new GameObject;
     if (!linkedGO->Create(GetMap()->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, GetMap(),
-                          GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation()))
+                          GetPhaseMask(), Where().X(), Where().Y(), Where().Z(), Where().Facing()))
     {
         delete linkedGO;
         return;
@@ -1084,7 +1090,7 @@ const char* GameObject::GetNameForLocaleIdx(int32 loc_idx) const
     return GetName();
 }
 
-using G3D::Quat;
+using Geometry::Quat;
 struct QuaternionCompressed
 {
     QuaternionCompressed() : m_raw(0) {}
@@ -1127,7 +1133,7 @@ void GameObject::SetWorldRotation(float qx, float qy, float qz, float qw)
     // Temporary solution for gameobjects that has no rotation data in DB:
     if (qz == 0.f && qw == 0.f)
     {
-        rotation = Quat::fromAxisAngleRotation(G3D::Vector3::unitZ(), GetOrientation());
+        rotation = Geometry::FromAxisAngle(Geometry::Vector3::unitZ(), Where().Facing());
     }
 
     rotation.unitize();
@@ -1148,7 +1154,7 @@ void GameObject::SetTransportPathRotation(const QuaternionData& rotation)
 
 void GameObject::SetWorldRotationAngles(float z_rot, float y_rot, float x_rot)
 {
-    Quat quat(G3D::Matrix3::fromEulerAnglesZYX(z_rot, y_rot, x_rot));
+    const Quat quat = Geometry::FromEulerAnglesZYX(z_rot, y_rot, x_rot);
     SetWorldRotation(quat.x, quat.y, quat.z, quat.w);
 }
 
@@ -1340,7 +1346,8 @@ void GameObject::UpdateCollisionState() const
         return;
     }
 
-    m_model->enable(IsCollisionEnabled() ? GetPhaseMask() : 0);
+    m_model->SetCollidable(IsCollisionEnabled());
+    m_model->SetPhaseMask(IsCollisionEnabled() ? GetPhaseMask() : 0);
 }
 
 /**
@@ -1399,7 +1406,7 @@ void GameObject::StopGroupLoot()
  */
 Player* GameObject::GetOriginalLootRecipient() const
 {
-    return m_lootRecipientGuid ? sObjectAccessor.FindPlayer(m_lootRecipientGuid) : NULL;
+    return m_lootRecipientGuid ? sPlayerRegistry.Find(m_lootRecipientGuid) : NULL;
 }
 
 /**
@@ -1492,7 +1499,7 @@ void GameObject::SetLootRecipient(Unit* pUnit)
  *
  * @return The default game object radius.
  */
-float GameObject::GetObjectBoundingRadius() const
+float GameObject::ComputeBoundingRadius() const
 {
     // FIXME:
     // 1. This is clearly hack way because we usually need this to check range, but a box just is no ball

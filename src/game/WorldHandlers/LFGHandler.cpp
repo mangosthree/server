@@ -39,6 +39,9 @@
  * @see LFGQueue for matching algorithm
  */
 
+#include <string>
+#include <vector>
+#include <set>
 #include "WorldSession.h"
 #include "LFGMgr.h"
 #include "Log.h"
@@ -46,6 +49,7 @@
 #include "WorldPacket.h"
 #include "ObjectMgr.h"
 #include "World.h"
+#include "PlayerRegistry.h"
 
 void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
 {
@@ -174,7 +178,7 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
 
     uint32 playerCount = 0;
 
-    sObjectAccessor.DoForAllPlayers([this, &playerCount, &data](Player* plr)->void
+    sPlayerRegistry.ForEach([this, &playerCount, &data](Player* plr)->void
     {
         ++playerCount;
         if (plr && (plr->GetTeam() == _player->GetTeam()) && plr->IsInWorld())
@@ -239,7 +243,7 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
 
             if (flags & 0x20)
             {
-                data << uint32(plr->GetZoneId());               // areaid
+                data << uint32(plr->GetTerrain()->GetZoneId(plr->Where().X(), plr->Where().Y(), plr->Where().Z()));               // areaid
             }
 
             if (flags & 0x40)
@@ -447,7 +451,7 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
     {
         ObjectGuid leaderGuid = ObjectGuid(roleCheck.leaderGuidRaw);
         uint8 leaderRoles = roleCheck.currentRoles.find(leaderGuid)->second;
-        Player* pLeader = sObjectAccessor.FindPlayer(leaderGuid);
+        Player* pLeader = sPlayerRegistry.Find(leaderGuid);
 
         data << uint64(leaderGuid.GetRawValue());
         data << uint8(leaderRoles > 0);
@@ -463,7 +467,7 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
 
             ObjectGuid plrGuid = rItr->first;
 
-            Player* pPlayer = sObjectAccessor.FindPlayer(plrGuid);
+            Player* pPlayer = sPlayerRegistry.Find(plrGuid);
 
             data << uint64(plrGuid.GetRawValue());
             data << uint8(rItr->second > 0);

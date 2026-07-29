@@ -34,7 +34,7 @@
  * - Join/Leave battleground operations
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "SharedDefines.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -355,16 +355,16 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket & /*recv_
     if (flagCarrierA)
     {
         data.WriteGuidBytes<2, 1>(flagCarrierA->GetObjectGuid());
-        data << float(flagCarrierA->GetPositionY());
+        data << float(flagCarrierA->Where().Y());
         data.WriteGuidBytes<5, 4, 7, 0, 6, 3>(flagCarrierA->GetObjectGuid());
-        data << float(flagCarrierA->GetPositionX());
+        data << float(flagCarrierA->Where().X());
     }
     if (flagCarrierH)
     {
         data.WriteGuidBytes<2, 1>(flagCarrierH->GetObjectGuid());
-        data << float(flagCarrierH->GetPositionY());
+        data << float(flagCarrierH->Where().Y());
         data.WriteGuidBytes<5, 4, 7, 0, 6, 3>(flagCarrierH->GetObjectGuid());
-        data << float(flagCarrierH->GetPositionX());
+        data << float(flagCarrierH->Where().X());
     }
 
     SendPacket(&data);

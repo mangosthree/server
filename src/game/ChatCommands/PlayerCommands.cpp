@@ -33,6 +33,10 @@
  * - Character customization
  */
 
+#include "Common/Locales.h"
+#include <sstream>
+#include <string>
+#include <list>
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "Language.h"

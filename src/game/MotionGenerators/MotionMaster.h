@@ -25,7 +25,10 @@
 #ifndef MANGOS_MOTIONMASTER_H
 #define MANGOS_MOTIONMASTER_H
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <sstream>
+
+struct Position;
 #include <stack>
 #include <vector>
 
@@ -250,7 +253,12 @@ class MotionMaster : private std::stack<MovementGenerator*>
          */
         void MoveDistract(uint32 timeLimit);
         void MoveJump(float x, float y, float z, float horizontalSpeed, float max_height, uint32 id = 0);
-        void MoveDestination(float x, float y, float z, float o, float horizontalSpeed, float max_height, Unit* target = NULL);
+        void MoveJump(Position& pos, float horizontalSpeed, float max_height, uint32 id = 0);
+
+        /// A jump that ends facing a target, or a given orientation. Cataclysm's
+        /// EffectJump uses it where mangos_two still teleports.
+        void MoveDestination(float x, float y, float z, float o, float horizontalSpeed,
+                             float max_height, Unit* target = NULL);
 
         /**
          * @brief Makes the unit fall.

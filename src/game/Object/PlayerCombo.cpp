@@ -45,7 +45,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"
@@ -62,7 +62,6 @@
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "revision_data.h"
-#include "Database/DatabaseImpl.h"
 #include "Spell.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
@@ -85,7 +84,7 @@
  */
 void Player::SendComboPoints()
 {
-    Unit* combotarget = sObjectAccessor.GetUnit(*this, m_comboTargetGuid);
+    Unit* combotarget = ObjectLookup::GetUnit(*this, m_comboTargetGuid);
     if (combotarget)
     {
         WorldPacket data(SMSG_UPDATE_COMBO_POINTS, combotarget->GetPackGUID().size() + 1);
@@ -125,7 +124,7 @@ void Player::AddComboPoints(Unit* target, int8 count)
     else
     {
         if (m_comboTargetGuid)
-            if (Unit* target2 = sObjectAccessor.GetUnit(*this, m_comboTargetGuid))
+            if (Unit* target2 = ObjectLookup::GetUnit(*this, m_comboTargetGuid))
             {
                 target2->RemoveComboPointHolder(GetGUIDLow());
             }
@@ -165,7 +164,7 @@ void Player::ClearComboPoints()
 
     SendComboPoints();
 
-    if (Unit* target = sObjectAccessor.GetUnit(*this, m_comboTargetGuid))
+    if (Unit* target = ObjectLookup::GetUnit(*this, m_comboTargetGuid))
     {
         target->RemoveComboPointHolder(GetGUIDLow());
     }

@@ -25,9 +25,11 @@
 #ifndef _AUTH_SHA1_H
 #define _AUTH_SHA1_H
 
-#include "Common/Common.h"
+#include "Platform/Define.h"
+#include "Utilities/Errors.h"
 #include <openssl/evp.h>
-#include <openssl/sha.h>
+#include <openssl/sha.h>       // SHA_DIGEST_LENGTH
+#include <string>
 
 class BigNumber;
 

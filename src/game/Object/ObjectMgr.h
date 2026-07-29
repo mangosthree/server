@@ -25,7 +25,16 @@
 #ifndef MANGOS_H_OBJECTMGR
 #define MANGOS_H_OBJECTMGR
 
-#include "Common.h"
+#include <unordered_map>
+#include <utility>
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include "Common/Locales.h"
+#include "Utilities/PackedValues.h"
+#include <vector>
+#include <set>
+#include <list>
+#include <ctime>
 #include "Log.h"
 #include "Object.h"
 #include "Bag.h"
@@ -39,7 +48,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Map.h"
 #include "MapPersistentStateMgr.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "ObjectGuid.h"
 #include "Policies/Singleton.h"
 
@@ -781,8 +790,8 @@ class ObjectMgr
 
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
-        static Player* GetPlayer(const char* name);                                 ///< Wrapper for sObjectAccessor.FindPlayerByName
-        static Player* GetPlayer(ObjectGuid guid, bool inWorld = true);             ///< Wrapper for sObjectAccessor.FindPlayer
+        static Player* GetPlayer(const char* name);                                 ///< Wrapper for sPlayerRegistry.FindByName
+        static Player* GetPlayer(ObjectGuid guid, bool inWorld = true);             ///< Wrapper for sPlayerRegistry.Find
         static CreatureInfo const* GetCreatureTemplate(uint32 id);                  ///< Wrapper for sCreatureStorage.LookupEntry
         static CreatureModelInfo const* GetCreatureModelInfo(uint32 modelid);       ///< Wrapper for sCreatureModelStorage.LookupEntry
         static EquipmentInfo const* GetEquipmentInfo(uint32 entry);                 ///< Wrapper for sEquipmentStorage.LookupEntry

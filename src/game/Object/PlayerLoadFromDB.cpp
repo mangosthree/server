@@ -22,6 +22,11 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <algorithm>
+#include <string>
+#include "Database/SqlOperations.h"
+#include <cstdlib>
 #include "Player.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -45,7 +50,6 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"
@@ -62,7 +66,6 @@
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "revision_data.h"
-#include "Database/DatabaseImpl.h"
 #include "Spell.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
@@ -75,6 +78,7 @@
 #include "Vehicle.h"
 #include "Calendar.h"
 #include "DisableMgr.h"
+#include <cmath>
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
@@ -220,7 +224,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     // init saved position, and fix it later if problematic
     uint32 transGUID = fields[31].GetUInt32();
-    Relocate(fields[12].GetFloat(), fields[13].GetFloat(), fields[14].GetFloat(), fields[16].GetFloat());
+    Place().MoveTo(fields[12].GetFloat(), fields[13].GetFloat(), fields[14].GetFloat(), fields[16].GetFloat());
     SetLocationMapId(fields[15].GetUInt32());
 
     uint32 difficulty = fields[39].GetUInt32();
@@ -262,10 +266,10 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     _LoadBoundInstances(holder->GetResult(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES));
 
-    if (!IsPositionValid())
+    if (!IsPlaceable(*this))
     {
         sLog.outError("%s have invalid coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",
-                      guid.GetString().c_str(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+                      guid.GetString().c_str(), Where().X(), Where().Y(), Where().Z(), Where().Facing());
         RelocateToHomebind();
 
         transGUID = 0;
@@ -305,7 +309,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             // move to bg enter point
             const WorldLocation& _loc = GetBattleGroundEntryPoint();
             SetLocationMapId(_loc.mapid);
-            Relocate(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
+            Place().MoveTo(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
 
             // We are not in BG anymore
             SetBattleGroundId(0, BATTLEGROUND_TYPE_NONE);
@@ -322,7 +326,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         {
             const WorldLocation& _loc = GetBattleGroundEntryPoint();
             SetLocationMapId(_loc.mapid);
-            Relocate(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
+            Place().MoveTo(_loc.coord_x, _loc.coord_y, _loc.coord_z, _loc.orientation);
 
             // We are not in BG anymore
             SetBattleGroundId(0, BATTLEGROUND_TYPE_NONE);
@@ -336,14 +340,18 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         m_movementInfo.SetTransportData(ObjectGuid(HIGHGUID_MO_TRANSPORT, transGUID), fields[27].GetFloat(), fields[28].GetFloat(), fields[29].GetFloat(), fields[30].GetFloat(), 0, -1);
 
         if (!MaNGOS::IsValidMapCoord(
-                    GetPositionX() + m_movementInfo.GetTransportPos()->x, GetPositionY() + m_movementInfo.GetTransportPos()->y,
-                    GetPositionZ() + m_movementInfo.GetTransportPos()->z, GetOrientation() + m_movementInfo.GetTransportPos()->o) ||
-                // transport size limited
-                m_movementInfo.GetTransportPos()->x > 50 || m_movementInfo.GetTransportPos()->y > 50 || m_movementInfo.GetTransportPos()->z > 50)
+                    Where().X() + m_movementInfo.GetTransportPos()->x, Where().Y() + m_movementInfo.GetTransportPos()->y,
+                    Where().Z() + m_movementInfo.GetTransportPos()->z, Where().Facing() + m_movementInfo.GetTransportPos()->o) ||
+                // The saved place on the deck map, bounded the same way and symmetrically:
+                // the old test read the positive side only, so a character who logged out
+                // forward of the mast was sent to his homebind.
+                std::fabs(m_movementInfo.GetTransportPos()->x) > MAX_DECK_EXTENT ||
+                std::fabs(m_movementInfo.GetTransportPos()->y) > MAX_DECK_EXTENT ||
+                std::fabs(m_movementInfo.GetTransportPos()->z) > MAX_DECK_EXTENT)
         {
             sLog.outError("%s have invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",
-                          guid.GetString().c_str(), GetPositionX() + m_movementInfo.GetTransportPos()->x, GetPositionY() + m_movementInfo.GetTransportPos()->y,
-                          GetPositionZ() + m_movementInfo.GetTransportPos()->z, GetOrientation() + m_movementInfo.GetTransportPos()->o);
+                          guid.GetString().c_str(), Where().X() + m_movementInfo.GetTransportPos()->x, Where().Y() + m_movementInfo.GetTransportPos()->y,
+                          Where().Z() + m_movementInfo.GetTransportPos()->z, Where().Facing() + m_movementInfo.GetTransportPos()->o);
 
             RelocateToHomebind();
 
@@ -368,8 +376,17 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
                 }
 
                 m_transport = *iter;
-                m_transport->AddPassenger(this);
+
+                // He logs in on the map the ship SAILS, at her waypoint estimate, because
+                // that is the only thing the client can be told: it has no terrain for her
+                // own map and dies looking for the WDT. This world position is coarse and
+                // temporary -- it names the right grid, nothing more. He is moved aboard
+                // once he is in the world and holds the vessel, in
+                // SendInitialPacketsAfterAddToMap.
                 SetLocationMapId(m_transport->GetMapId());
+                Place().MoveTo(m_transport->Where().X(), m_transport->Where().Y(),
+                               m_transport->Where().Z(), m_transport->Where().Facing());
+
                 break;
             }
         }
@@ -409,7 +426,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(GetMapId());
         if (at)
         {
-            Relocate(at->target_X, at->target_Y, at->target_Z, at->target_Orientation);
+            Place().MoveTo(at->target_X, at->target_Y, at->target_Z, at->target_Orientation);
         }
         else
         {
@@ -510,7 +527,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             break;
         }
 
-        uint32 talentTree = atol(talentTrees[i].c_str());
+        uint32 talentTree = std::strtoul(talentTrees[i].c_str(), NULL, 10);
         if (!talentTree || sTalentTabStore.LookupEntry(talentTree))
         {
             m_talentsPrimaryTree[i] = talentTree;
@@ -621,7 +638,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         {
             sLog.outError("Character %u have too short taxi destination list, teleport to original node.", GetGUIDLow());
             SetLocationMapId(nodeEntry->ContinentID);
-            Relocate(nodeEntry->Pos_0, nodeEntry->Pos_1, nodeEntry->Pos_2, 0.0f);
+            Place().MoveTo(nodeEntry->Pos_0, nodeEntry->Pos_1, nodeEntry->Pos_2, 0.0f);
         }
 
         // we can be relocated from taxi and still have an outdated Map pointer!
@@ -646,7 +663,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     }
 
     // has to be called after last Relocate() in Player::LoadFromDB
-    SetFallInformation(0, GetPositionZ());
+    SetFallInformation(0, Where().Z());
 
     _LoadSpellCooldowns(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS));
 

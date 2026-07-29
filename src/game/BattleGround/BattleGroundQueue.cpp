@@ -22,7 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <algorithm>
 #include "SharedDefines.h"
 #include "Player.h"
 #include "BattleGroundMgr.h"

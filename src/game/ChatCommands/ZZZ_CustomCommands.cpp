@@ -32,7 +32,6 @@
  * - Specialized functionality
  */
 
-#include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldSession.h"
 #include "World.h"
@@ -46,7 +45,6 @@
 #include "Log.h"
 #include "Guild.h"
 #include "GuildMgr.h"
-#include "ObjectAccessor.h"
 #include "MapManager.h"
 #include "MassMailMgr.h"
 #include "ScriptMgr.h"

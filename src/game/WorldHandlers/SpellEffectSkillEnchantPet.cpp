@@ -22,7 +22,15 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include <iterator>
+#include <utility>
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <string>
+#include <list>
+#include <algorithm>
+#include <ctime>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -40,7 +48,6 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "SharedDefines.h"
 #include "Pet.h"
 #include "GameObject.h"
@@ -54,7 +61,6 @@
 #include "BattleGround/BattleGroundWS.h"
 #include "Language.h"
 #include "SocialMgr.h"
-#include "VMapFactory.h"
 #include "Util.h"
 #include "TemporarySummon.h"
 #include "ScriptMgr.h"
@@ -64,7 +70,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Vehicle.h"
-#include "G3D/Vector3.h"
+#include "Geometry/Vector3.h"
 #include "LootMgr.h"
 #include <random>
 
@@ -309,7 +315,7 @@ void Spell::EffectDistract(SpellEffectEntry const* /*effect*/)
         return;
     }
 
-    unitTarget->SetFacingTo(unitTarget->GetAngle(m_targets.m_destX, m_targets.m_destY));
+    unitTarget->SetFacingTo(unitTarget->Where().BearingTo(Geometry::Vector2(m_targets.m_destX, m_targets.m_destY)));
     unitTarget->clearUnitState(UNIT_STAT_MOVING);
 
     if (unitTarget->GetTypeId() == TYPEID_UNIT)
@@ -409,10 +415,10 @@ void Spell::EffectTeleUnitsFaceCaster(SpellEffectEntry const* effect)
     else
     {
         float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->GetRadiusIndex()));
-        m_caster->GetClosePoint(fx, fy, fz, unitTarget->GetObjectBoundingRadius(), dis);
+        ClosePointNear(*m_caster, fx, fy, fz, unitTarget->Where().Extent(), dis);
     }
 
-    unitTarget->NearTeleportTo(fx, fy, fz, -m_caster->GetOrientation(), unitTarget == m_caster);
+    unitTarget->NearTeleportTo(fx, fy, fz, -m_caster->Where().Facing(), unitTarget == m_caster);
 }
 
 /**
@@ -898,7 +904,7 @@ void Spell::EffectSummonPet(SpellEffectEntry const* effect)
         return;
     }
 
-    CreatureCreatePos pos(m_caster, m_caster->GetOrientation());
+    CreatureCreatePos pos(m_caster, m_caster->Where().Facing());
 
     Map* map = m_caster->GetMap();
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
@@ -908,7 +914,7 @@ void Spell::EffectSummonPet(SpellEffectEntry const* effect)
         return;
     }
 
-    NewSummon->SetRespawnCoord(pos);
+    NewSummon->SetSpawn(pos);
 
     // Level of pet summoned
     uint32 level = std::max(m_caster->getLevel() + effect->EffectAmplitude, 1.0f);

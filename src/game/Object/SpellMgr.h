@@ -28,7 +28,11 @@
 // For static or at-server-startup loaded spell data
 // For more high level function for sSpellStore data
 
-#include "Common.h"
+#include <unordered_map>
+#include <utility>
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include <cstring>
 #include "SharedDefines.h"
 #include "SpellAuraDefines.h"
 #include "DBCStructure.h"

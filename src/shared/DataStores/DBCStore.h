@@ -25,7 +25,9 @@
 #ifndef DBCSTORE_H
 #define DBCSTORE_H
 
+#include "Common/Locales.h"
 #include "DBCFileLoader.h"
+#include <list>
 
 template<class T>
 /**

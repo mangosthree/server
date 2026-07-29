@@ -25,7 +25,10 @@
 #ifndef MANGOS_WAYPOINTMANAGER_H
 #define MANGOS_WAYPOINTMANAGER_H
 
-#include "Common.h"
+#include <unordered_map>
+#include "Platform/Define.h"
+#include <map>
+#include <set>
 #include <vector>
 #include <string>
 #include "Policies/Singleton.h"

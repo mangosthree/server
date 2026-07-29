@@ -22,6 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <sstream>
+#include <string>
+#include <vector>
+#include <map>
 #include "AuctionHouseBot.h"
 #include "ProgressBar.h"
 #include "Log.h"
@@ -433,8 +437,6 @@ class AuctionBotSeller : public AuctionBotAgent
         void        LoadItemsQuantity(AHB_Seller_Config& config);
 };
 
-INSTANTIATE_SINGLETON_1(AuctionHouseBot);
-INSTANTIATE_SINGLETON_1(AuctionBotConfig);
 
 //== AuctionBotConfig functions ============================
 

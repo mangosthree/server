@@ -93,7 +93,7 @@ void BattleGroundEY::Update(uint32 diff)
                 if (m_towerOwner[NODE_FEL_REAVER_RUINS] == flagCarrier->GetTeam())
                 {
                     // coords and range taken from DBC of areatrigger (4514)
-                    if (flagCarrier->GetDistance(2044.0f, 1729.729f, 1190.03f) <= 3.0f)
+                    if (flagCarrier->Where().DistanceTo(Geometry::Vector3(2044.0f, 1729.729f, 1190.03f)) <= 3.0f)
                     {
                         EventPlayerCapturedFlag(flagCarrier, NODE_FEL_REAVER_RUINS);
                     }
@@ -484,7 +484,7 @@ void BattleGroundEY::EventPlayerDroppedFlag(Player* source)
 
 void BattleGroundEY::EventPlayerClickedOnFlag(Player* source, GameObject* target_obj)
 {
-    if (GetStatus() != STATUS_IN_PROGRESS || IsFlagPickedUp() || !source->IsWithinDistInMap(target_obj, 10))
+    if (GetStatus() != STATUS_IN_PROGRESS || IsFlagPickedUp() || !InReach(*source, *target_obj, 10))
     {
         return;
     }
@@ -647,9 +647,9 @@ WorldSafeLocsEntry const* BattleGroundEY::GetClosestGraveYard(Player* player)
         return NULL;
     }
 
-    float plr_x = player->GetPositionX();
-    float plr_y = player->GetPositionY();
-    float plr_z = player->GetPositionZ();
+    float plr_x = player->Where().X();
+    float plr_y = player->Where().Y();
+    float plr_z = player->Where().Z();
 
 
     distance = (entry->Loc_0 - plr_x) * (entry->Loc_0 - plr_x) + (entry->Loc_1 - plr_y) * (entry->Loc_1 - plr_y) + (entry->Loc_2 - plr_z) * (entry->Loc_2 - plr_z);

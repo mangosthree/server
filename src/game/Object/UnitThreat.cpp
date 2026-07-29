@@ -31,6 +31,7 @@
  * declarations remain in Unit.h. No behaviour change.
  */
 
+#include "Utilities/Errors.h"
 #include "Unit.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -47,7 +48,6 @@
 #include "Group.h"
 #include "SpellAuras.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "TemporarySummon.h"
 #include "Formulas.h"
@@ -61,7 +61,6 @@
 #include "MapPersistentStateMgr.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
-#include "VMapFactory.h"
 #include "MovementGenerator.h"
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
@@ -342,7 +341,7 @@ bool Unit::SelectHostileTarget()
         // Auras are pushed_back, last caster will be on the end
         for (AuraList::const_reverse_iterator aura = tauntAuras.rbegin(); aura != tauntAuras.rend(); ++aura)
         {
-            if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
+            if ((caster = (*aura)->GetCaster()) && caster->Where().ShareFrame(this->Where()) &&
                 caster->IsTargetableForAttack() && caster->isInAccessablePlaceFor((Creature*)this) &&
                 !IsSecondChoiceTarget(caster, true))
             {
@@ -424,7 +423,7 @@ bool Unit::SelectHostileTarget()
     {
         for (AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
         {
-            if ((*itr)->IsInMap(this) && (*itr)->IsTargetableForAttack() && (*itr)->isInAccessablePlaceFor((Creature*)this))
+            if ((*itr)->Where().ShareFrame(this->Where()) && (*itr)->IsTargetableForAttack() && (*itr)->isInAccessablePlaceFor((Creature*)this))
             {
                 return false;
             }

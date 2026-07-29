@@ -31,6 +31,8 @@
  *        SpellMgr.h is unchanged.
  */
 
+#include <unordered_map>
+#include "Utilities/Errors.h"
 #include "SpellMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"

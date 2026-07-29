@@ -22,7 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "DBCStructure.h"
 #include "DBCStores.h"
 #include "SharedDefines.h"

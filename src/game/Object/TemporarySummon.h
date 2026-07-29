@@ -25,8 +25,9 @@
 #ifndef MANGOSSERVER_TEMPSUMMON_H
 #define MANGOSSERVER_TEMPSUMMON_H
 
+#include "Utilities/Errors.h"
 #include "Creature.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 
 class TemporarySummon : public Creature
 {
@@ -40,7 +41,7 @@ class TemporarySummon : public Creature
         void UnSummon();
         void SaveToDB();
         ObjectGuid const& GetSummonerGuid() const { return m_summoner ; }
-        Unit* GetSummoner() const { return sObjectAccessor.GetUnit(*this, m_summoner); }
+        Unit* GetSummoner() const { return ObjectLookup::GetUnit(*this, m_summoner); }
         void SetLinkedToOwnerAura(uint32 flags) { m_linkedToOwnerAura |= flags; };
     private:
         void RemoveAuraFromOwner();

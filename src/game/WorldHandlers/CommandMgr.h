@@ -21,6 +21,9 @@
 #define COMMANDMGR_H
 
 
+#include <unordered_map>
+#include <string>
+#include <vector>
 struct CommandHelpLocale
 {
     std::vector<std::string> HelpText;

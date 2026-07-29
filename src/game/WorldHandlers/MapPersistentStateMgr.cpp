@@ -43,6 +43,14 @@
  * @see MapPersistentState for individual instance state
  */
 
+#include "Utilities/Errors.h"
+#include <algorithm>
+#include <sstream>
+#include <string>
+#include <map>
+#include <set>
+#include <list>
+#include "Utilities/PackedValues.h"
 #include "MapPersistentStateMgr.h"
 
 #include "SQLStorages.h"
@@ -64,7 +72,6 @@
 #include "ProgressBar.h"
 #include <cstdarg>
 
-INSTANTIATE_SINGLETON_1(MapPersistentStateManager);
 
 static uint32 resetEventTypeDelay[MAX_RESET_EVENT_TYPE] = { 0,                      // not used
                                                             3600, 900, 300, 60,     // (seconds) normal and official timer delay to inform player about instance reset

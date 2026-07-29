@@ -25,7 +25,12 @@
 #ifndef MANGOS_H_SCRIPTMGR
 #define MANGOS_H_SCRIPTMGR
 
-#include "Common.h"
+#include <unordered_map>
+#include "Platform/Define.h"
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
 #include "Policies/Singleton.h"
 #include "ObjectGuid.h"
 #include "DBCEnums.h"

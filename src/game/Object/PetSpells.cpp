@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <sstream>
 #include "Pet.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"

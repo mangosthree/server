@@ -22,13 +22,14 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <vector>
+#include "Utilities/MathDefines.h"
 #include "PetAI.h"
 #include "Errors.h"
 #include "Pet.h"
 #include "Player.h"
 #include "DBCStores.h"
 #include "Spell.h"
-#include "ObjectAccessor.h"
 #include "SpellMgr.h"
 #include "Creature.h"
 #include "World.h"
@@ -84,9 +85,9 @@ void PetAI::MoveInLineOfSight(Unit* pWho)
             && !(m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
             && pWho && pWho->IsTargetableForAttack() && pWho->isInAccessablePlaceFor(m_creature)
             && (m_creature->IsHostileTo(pWho) || pWho->IsHostileTo(m_creature->GetCharmerOrOwner()))
-            && m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho))
-            && m_creature->GetDistanceZ(pWho) <= CREATURE_Z_ATTACK_RANGE
-            && m_creature->IsWithinLOSInMap(pWho))
+            && InReach(*m_creature, *pWho, m_creature->GetAttackDistance(pWho))
+            && m_creature->Where().HeightGapTo(pWho->Where()) <= CREATURE_Z_ATTACK_RANGE
+            && HasLineOfSight(*m_creature, *pWho))
         {
             AttackStart(pWho);
 
@@ -234,7 +235,7 @@ void PetAI::UpdateAI(const uint32 diff)
             return;
         }
 
-        if (!owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
+        if (!InReach(*owner, *m_creature, (PET_FOLLOW_DIST * 2)))
         {
             if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
             {
@@ -253,10 +254,10 @@ void PetAI::UpdateAI(const uint32 diff)
         uint32 minRange = ((Pet*)m_creature)->GetSpellOpenerMinRange();
 
         if (!(victim = m_creature->getVictim())
-            || (minRange != 0 && m_creature->IsWithinDistInMap(victim, minRange)))
+            || (minRange != 0 && InReach(*m_creature, *victim, minRange)))
             ((Pet*)m_creature)->SetSpellOpener();
-        else if (m_creature->IsWithinDistInMap(victim, ((Pet*)m_creature)->GetSpellOpenerMaxRange())
-                && m_creature->IsWithinLOSInMap(victim))
+        else if (InReach(*m_creature, *victim, ((Pet*)m_creature)->GetSpellOpenerMaxRange())
+                && HasLineOfSight(*m_creature, *victim))
         {
             // stop moving
             m_creature->clearUnitState(UNIT_STAT_MOVING);
@@ -407,7 +408,7 @@ void PetAI::UpdateAI(const uint32 diff)
             SpellCastTargets targets;
             targets.setUnitTarget(target);
 
-            if (!m_creature->HasInArc(M_PI_F, target))
+            if (!m_creature->Where().HasInArc(target->Where(), M_PI_F))
             {
                 m_creature->SetInFront(target);
                 if (target->GetTypeId() == TYPEID_PLAYER)
@@ -464,9 +465,9 @@ void PetAI::UpdateAI(const uint32 diff)
 
         // if pet misses its target, it will also be the first in threat list
         if (!(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_NO_MELEE)
-            && m_creature->CanReachWithMeleeAttack(victim))
+            && InMeleeReach(*m_creature, *victim))
         {
-            if (!m_creature->HasInArc(2 * M_PI_F / 3, victim))
+            if (!m_creature->Where().HasInArc(victim->Where(), 2 * M_PI_F / 3))
             {
                 m_creature->SetInFront(victim);
                 if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -512,9 +513,9 @@ void PetAI::UpdateAI(const uint32 diff)
                     float stayPosY = pet->GetStayPosY();
                     float stayPosZ = pet->GetStayPosZ();
 
-                    if (m_creature->GetPositionX() == stayPosX
-                        && m_creature->GetPositionY() == stayPosY
-                        && m_creature->GetPositionZ() == stayPosZ)
+                    if (m_creature->Where().X() == stayPosX
+                        && m_creature->Where().Y() == stayPosY
+                        && m_creature->Where().Z() == stayPosZ)
                     {
                         float StayPosO = pet->GetStayPosO();
 
@@ -523,9 +524,9 @@ void PetAI::UpdateAI(const uint32 diff)
                             m_creature->GetMotionMaster()->Clear(false);
                             m_creature->GetMotionMaster()->MoveIdle();
                         }
-                        else if (m_creature->GetOrientation() != StayPosO)
+                        else if (m_creature->Where().Facing() != StayPosO)
                         {
-                            m_creature->SetOrientation(StayPosO);
+                            m_creature->Place().Face(StayPosO);
                         }
                     }
                     else
@@ -536,14 +537,14 @@ void PetAI::UpdateAI(const uint32 diff)
             }
             else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW))
             {
-                if (owner->IsWithinDistInMap(m_creature, PET_FOLLOW_DIST))
+                if (InReach(*owner, *m_creature, PET_FOLLOW_DIST))
                 {
                     m_creature->GetMotionMaster()->Clear(false);
                     m_creature->GetMotionMaster()->MoveIdle();
                 }
             }
             else if (charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW)
-                && !owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
+                && !InReach(*owner, *m_creature, (PET_FOLLOW_DIST * 2)))
                 m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
         }
     }
@@ -557,7 +558,7 @@ void PetAI::UpdateAI(const uint32 diff)
  */
 bool PetAI::_isVisible(Unit* u) const
 {
-    return m_creature->IsWithinDist(u, sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER))
+    return m_creature->Where().WithinDist(u->Where(), sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER))
            && u->IsVisibleForOrDetect(m_creature, m_creature, true);
 }
 

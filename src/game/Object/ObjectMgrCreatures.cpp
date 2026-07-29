@@ -34,6 +34,13 @@
  * instead of scattered through a 12K-line god file.
  */
 
+#include <algorithm>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+#include "Utilities/PackedValues.h"
 #include "ObjectMgr.h"
 #include "LivingWorldAnchorPolicy.h"
 #include "MotionGenerators/MotionMaster.h"  // WAYPOINT_MOTION_TYPE

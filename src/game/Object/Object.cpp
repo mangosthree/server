@@ -39,6 +39,7 @@
  * players who can see the object.
  */
 
+#include "Utilities/Errors.h"
 #include "Object.h"
 #include "SharedDefines.h"
 #include "WorldPacket.h"
@@ -58,7 +59,6 @@
 #include "Transports.h"
 #include "TargetedMovementGenerator.h"
 #include "WaypointMovementGenerator.h"
-#include "VMapFactory.h"
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
@@ -185,6 +185,7 @@ void Object::_Create(uint32 guidlow, uint32 entry, HighGuid guidhigh)
 void Object::SetObjectScale(float newScale)
 {
     SetFloatValue(OBJECT_FIELD_SCALE_X, newScale);
+    OnScaleChanged();
 }
 
 

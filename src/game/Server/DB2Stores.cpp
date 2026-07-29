@@ -22,6 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Common/Locales.h"
+#include "Utilities/Errors.h"
+#include <string>
+#include <list>
 #include "DB2Stores.h"
 #include "DBCStores.h"
 #include "Policies/Singleton.h"

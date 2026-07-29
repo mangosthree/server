@@ -38,9 +38,9 @@ set(SRC_GRP_MAIN
 source_group("Main" FILES ${SRC_GRP_MAIN})
 
 set(SRC_GRP_SOAP
-  SOAP/SoapService.h
   SOAP/SoapThread.cpp
   SOAP/SoapThread.h
+  SOAP/SoapService.h
 )
 source_group("SOAP" FILES ${SRC_GRP_SOAP})
 
@@ -62,24 +62,23 @@ add_executable(mangosd
 )
 
 target_include_directories(mangosd
-    PUBLIC
+    PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 target_compile_definitions(mangosd
-    PUBLIC
+    PRIVATE
         $<$<BOOL:${SCRIPT_LIB_ELUNA}>:ENABLE_ELUNA ELUNA_EXPANSION=3 ELUNA_MANGOS>
 )
 
 target_link_libraries(mangosd
-    PUBLIC
+    PRIVATE
         game
+        proto
         $<$<BOOL:${SOAP}>:gsoap>
         Threads::Threads
-        DL::DL
         mangos_openssl
-    PRIVATE
         mangos_openssl_strict
 )
 

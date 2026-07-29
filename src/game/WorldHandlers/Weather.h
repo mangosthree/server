@@ -29,7 +29,8 @@
 #ifndef __WEATHER_H
 #define __WEATHER_H
 
-#include "Common.h"
+#include <unordered_map>
+#include "Platform/Define.h"
 #include "SharedDefines.h"
 #include "Timer.h"
 #include "Util.h"

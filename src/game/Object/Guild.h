@@ -28,9 +28,15 @@
 #define WITHDRAW_MONEY_UNLIMITED    UI64LIT(0xFFFFFFFFFFFFFFFF)
 #define WITHDRAW_SLOT_UNLIMITED     0xFFFFFFFF
 
-#include "Common.h"
+#include <unordered_map>
+#include "Platform/Define.h"
+#include <cstring>
+#include <ctime>
+#include <string>
+#include <vector>
+#include <list>
 #include "Item.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "SharedDefines.h"
 
 class Item;
@@ -399,7 +405,7 @@ class Guild
         void BroadcastWorker(Do& _do, Player* except = NULL)
         {
             for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
-                if (Player* player = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first)))
+                if (Player* player = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, itr->first)))
                     if (player != except)
                     {
                         _do(player);

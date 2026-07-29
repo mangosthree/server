@@ -38,8 +38,26 @@
  * It supports both formatted output and raw string logging.
  */
 
-#include "Common/Common.h"
+#include "Threading/Threading.h"
+#include "Platform/Define.h"
+
+// The console colour path below uses FOREGROUND_*, HANDLE and GetStdHandle.
+// Those arrived transitively through the ACE headers that Common.h pulled in on
+// Windows; with Common.h gone they have to be asked for by name.
+#ifdef _WIN32
+#  define WIN32_LEAN_AND_MEAN
+#  include <windows.h>
+#endif
+
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
+#include <string>
+#include <sstream>
 #include "Log.h"
+#include <chrono>
+#include <thread>
+#include <mutex>
 #include "ConsoleLogWriter.h"
 #include "Policies/Singleton.h"
 #include "Config/Config.h"
@@ -52,10 +70,7 @@
 #include <iostream>
 #include <utility>
 
-#include <chrono>
-#include <thread>
 
-INSTANTIATE_SINGLETON_1(Log);
 
 LogFilterData logFilterData[LOG_FILTER_COUNT] =
 {
@@ -83,16 +98,6 @@ LogFilterData logFilterData[LOG_FILTER_COUNT] =
     { "grid_add",            "LogFilter_GridAdd",            true  },
     { "db_scripts",          "LogFilter_DbScripts",          true  },
 };
-
-enum LogType
-{
-    LogNormal = 0,
-    LogDetails,
-    LogDebug,
-    LogError
-};
-
-const int LogType_count = int(LogError) + 1;
 
 /**
  * @brief Construct the Log singleton
@@ -370,15 +375,16 @@ std::string Log::ConsoleTimePrefix() const
     }
 
     time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    std::tm aTm;
-    localtime_r(&tt, &aTm);
+    std::tm aTm = safe_localtime(tt);
     char buf[16];
     snprintf(buf, sizeof(buf), "%02d:%02d:%02d ", aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
     return std::string(buf);
 }
 
-void Log::ConsoleEmit(bool toStdout, Color color, bool applyColor, const char* fmt, va_list* ap)
+void Log::ConsoleEmit(bool toStdout, LogType type, bool applyColor, const char* fmt, va_list* ap)
 {
+    const Color color = m_colors[type];
+
     // Record text carries NO trailing newline: the newline is emitted after
     // ResetColor (here and in ConsoleLogWriter::Emit) so the line terminator
     // stays OUTSIDE the color span, byte-matching the legacy ordering
@@ -393,6 +399,7 @@ void Log::ConsoleEmit(bool toStdout, Color color, bool applyColor, const char* f
         ConsoleLogRecord rec;
         rec.text = std::move(body);
         rec.color = color;
+        rec.type = type;
         rec.applyColor = applyColor;
         rec.toStdout = toStdout;
         m_consoleBody->Enqueue(rec);
@@ -590,11 +597,13 @@ void Log::Initialize()
 
     m_logFilter = 0;
     for (int i = 0; i < LOG_FILTER_COUNT; ++i)
+    {
         if (*logFilterData[i].name)
             if (sConfig.GetBoolDefault(logFilterData[i].configName, logFilterData[i].defaultState))
             {
                 m_logFilter |= (1 << i);
             }
+    }
 
     // Char log settings
     m_charLog_Dump = sConfig.GetBoolDefault("CharLogDump", false);
@@ -649,9 +658,8 @@ FILE* Log::openGmlogPerAccount(uint32 account)
 void Log::outTimestamp(FILE* file)
 {
     time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::tm aTm = safe_localtime(tt);
 
-    std::tm aTm;
-    localtime_r(&tt, &aTm);
     //       YYYY   year
     //       MM     month (2 digits 01-12)
     //       DD     day (2 digits 01-31)
@@ -665,8 +673,8 @@ void Log::outTime()
 {
     time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
-    std::tm aTm;
-    localtime_r(&tt, &aTm);
+    std::tm aTm = safe_localtime(tt);
+
     //       YYYY   year
     //       MM     month (2 digits 01-12)
     //       DD     day (2 digits 01-31)
@@ -680,8 +688,7 @@ std::string Log::GetTimestampStr()
 {
     time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
-    std::tm aTm;
-    localtime_r(&tt, &aTm);
+    std::tm aTm = safe_localtime(tt);
     //       YYYY   year
     //       MM     month (2 digits 01-12)
     //       DD     day (2 digits 01-31)
@@ -714,7 +721,7 @@ void Log::outString(const char* str, ...)
     va_list ap;
 
     va_start(ap, str);
-    ConsoleEmit(true, m_colors[LogNormal], m_colored, str, &ap);
+    ConsoleEmit(true, LogNormal, m_colored, str, &ap);
     va_end(ap);
 
     if (logfile)
@@ -739,7 +746,7 @@ void Log::outError(const char* err, ...)
     va_list ap;
 
     va_start(ap, err);
-    ConsoleEmit(false, m_colors[LogError], m_colored, err, &ap);
+    ConsoleEmit(false, LogError, m_colored, err, &ap);
     va_end(ap);
 
     if (logfile)
@@ -785,7 +792,7 @@ void Log::outErrorDb(const char* err, ...)
     va_list ap;
 
     va_start(ap, err);
-    ConsoleEmit(false, m_colors[LogError], m_colored, err, &ap);
+    ConsoleEmit(false, LogError, m_colored, err, &ap);
     va_end(ap);
 
     if (logfile)
@@ -850,7 +857,7 @@ void Log::outErrorEluna(const char* err, ...)
     va_list ap;
 
     va_start(ap, err);
-    ConsoleEmit(false, m_colors[LogError], m_colored, err, &ap);
+    ConsoleEmit(false, LogError, m_colored, err, &ap);
     va_end(ap);
 
     if (logfile)
@@ -913,7 +920,7 @@ void Log::outErrorEventAI(const char* err, ...)
     va_list ap;
 
     va_start(ap, err);
-    ConsoleEmit(false, m_colors[LogError], m_colored, err, &ap);
+    ConsoleEmit(false, LogError, m_colored, err, &ap);
     va_end(ap);
 
     if (logfile)
@@ -954,7 +961,7 @@ void Log::outBasic(const char* str, ...)
     {
         va_list ap;
         va_start(ap, str);
-        ConsoleEmit(true, m_colors[LogDetails], m_colored, str, &ap);
+        ConsoleEmit(true, LogDetails, m_colored, str, &ap);
         va_end(ap);
     }
 
@@ -981,7 +988,7 @@ void Log::outDetail(const char* str, ...)
     {
         va_list ap;
         va_start(ap, str);
-        ConsoleEmit(true, m_colors[LogDetails], m_colored, str, &ap);
+        ConsoleEmit(true, LogDetails, m_colored, str, &ap);
         va_end(ap);
     }
 
@@ -1010,7 +1017,7 @@ void Log::outDebug(const char* str, ...)
     {
         va_list ap;
         va_start(ap, str);
-        ConsoleEmit(true, m_colors[LogDebug], m_colored, str, &ap);
+        ConsoleEmit(true, LogDebug, m_colored, str, &ap);
         va_end(ap);
     }
 
@@ -1039,7 +1046,7 @@ void Log::outCommand(uint32 account, const char* str, ...)
     {
         va_list ap;
         va_start(ap, str);
-        ConsoleEmit(true, m_colors[LogDetails], m_colored, str, &ap);
+        ConsoleEmit(true, LogDetails, m_colored, str, &ap);
         va_end(ap);
     }
 
@@ -1100,14 +1107,11 @@ void Log::outWarden(const char* str, ...)
     {
         return;
     }
-    if (m_logLevel >= LOG_LVL_DETAIL)
-    {
-        va_list ap;
 
-        va_start(ap, str);
-        ConsoleEmit(true, m_colors[LogNormal], m_colored, str, &ap);
-        va_end(ap);
-    }
+    // FILE ONLY. Warden narrates six lines per check per player, every thirty seconds --
+    // at LogLevel 3 that is a console nobody can read anything else in. It has a logfile of
+    // its own, which is the whole point of having one; a real detection is reported through
+    // outError and reaches the console that way.
 
     if (wardenLogfile && m_logFileLevel >= LOG_LVL_DETAIL)
     {
@@ -1182,7 +1186,7 @@ void Log::outErrorScriptLib(const char* err, ...)
     va_list ap;
 
     va_start(ap, err);
-    ConsoleEmit(false, m_colors[LogError], m_colored, err, &ap);
+    ConsoleEmit(false, LogError, m_colored, err, &ap);
     va_end(ap);
 
     if (logfile)

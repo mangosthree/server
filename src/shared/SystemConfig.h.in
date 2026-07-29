@@ -28,24 +28,25 @@
 #include "Platform/Define.h"
 
 #ifndef MANGOS_PACKAGENAME
-#define MANGOS_PACKAGENAME "MaNGOS Three"
+#define MANGOS_PACKAGENAME "@MANGOS_PKG@"
 #endif
 
 #ifndef MANGOS_VERSION
-#if PLATFORM == PLATFORM_WINDOWS
-# define MANGOS_VERSION(REVD,REVT,REVN,REVH) "0.22.0" " (" REVD " " REVT " Revision " REVN " - " REVH ")"
-#else
-# define MANGOS_VERSION(REVD,REVT,REVN,REVH) "@VERSION@" " (" REVD " " REVT " Revision " REVN " - " REVH ")"
-#endif
+# define MANGOS_VERSION(REVD,REVT,REVN,REVH) "@PROJECT_VERSION@" " (" REVD " " REVT " Revision " REVN " - " REVH ")"
 #endif
 
 // Format is YYYYMMDDRR where RR is the change in the conf file
 // for that day.
 #ifndef MANGOSD_CONFIG_VERSION
-# define MANGOSD_CONFIG_VERSION 2026062800
+# define MANGOSD_CONFIG_VERSION @MANGOS_WORLD_VER@
 #endif
+
 #ifndef REALMD_CONFIG_VERSION
-# define REALMD_CONFIG_VERSION 2010062001
+# define REALMD_CONFIG_VERSION @MANGOS_REALM_VER@
+#endif
+
+#ifndef AHBOT_CONFIG_VERSION
+# define AHBOT_CONFIG_VERSION @MANGOS_AHBOT_VER@
 #endif
 
 #if MANGOS_ENDIAN == MANGOS_BIGENDIAN

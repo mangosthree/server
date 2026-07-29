@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <string>
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"

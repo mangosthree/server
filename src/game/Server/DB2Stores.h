@@ -25,7 +25,7 @@
 #ifndef MANGOS_DB2STORES_H
 #define MANGOS_DB2STORES_H
 
-#include "Common.h"
+#include <string>
 #include "DataStores/DB2Store.h"
 #include "DB2Structure.h"
 

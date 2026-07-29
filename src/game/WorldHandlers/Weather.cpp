@@ -109,7 +109,7 @@ bool Weather::ReGenerate()
     // season source http://aa.usno.navy.mil/data/docs/EarthSeasons.html
     time_t gtime = sWorld.GetGameTime();
     struct tm ltime;
-    localtime_r(&gtime, &ltime);
+    ltime = safe_localtime(gtime);
     uint32 season = ((ltime.tm_yday - 78 + 365) / 91) % 4;
 
     static char const* seasonName[WEATHER_SEASONS] = { "spring", "summer", "fall", "winter" };

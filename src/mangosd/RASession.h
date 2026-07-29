@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,9 +47,8 @@
 
 /**
  * One remote-access (telnet) connection: a line-oriented login shell (username,
- * password, then commands) whose commands are queued to the world thread exactly
- * as the local CLI's are. Runs on the shared networking engine instead of its own
- * ACE reactor/acceptor.
+ * password, then commands) whose commands are queued to the world thread exactly as
+ * the local CLI's are. Runs on the shared networking engine.
  */
 class RASession : public net::ISession
 {
@@ -95,7 +94,7 @@ class RASession : public net::ISession
         net::Sender  m_sender;
         net::Closer  m_closer;
 
-        std::atomic<bool> m_closed{false};
+        std::atomic<bool> m_closed;
 
         std::string m_input;   ///< partial line carried between reads
 
@@ -112,7 +111,7 @@ class RASession : public net::ISession
         // peer disconnecting mid-command cannot free the session under the callback.
         std::mutex                 m_commandLock;
         std::shared_ptr<RASession> m_keepAlive;
-        int                        m_commandsPending = 0;
+        int                        m_commandsPending;
 };
 
 /**
@@ -135,11 +134,11 @@ class RaServer
 };
 
 /**
- * @brief The remote-administration listener, as an IService.
+ * @brief The remote-administration listener, as a Master service.
  *
  * Nothing but lifetime: the listener itself is RaServer, and each accepted
  * connection becomes an RASession on the shared networking engine -- the same
- * engine the world port uses, rather than the separate ACE reactor/acceptor
+ * engine the world port uses, rather than the separate hand-rolled acceptor
  * this replaced.
  */
 class RaService : public IService

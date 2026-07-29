@@ -25,7 +25,10 @@
 #ifndef MANGOS_GRIDDEFINES_H
 #define MANGOS_GRIDDEFINES_H
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <algorithm>
+#include "Utilities/MathDefines.h"
 #include "GameSystem/NGrid.h"
 #include <cmath>
 
@@ -61,11 +64,12 @@ class Camera;
 #define MAP_SIZE                (SIZE_OF_GRIDS*MAX_NUMBER_OF_GRIDS)
 #define MAP_HALFSIZE            (MAP_SIZE/2)
 
+template <typename...Ts> struct TypeList;
+
 // Creature used instead pet to simplify *::Visit templates (not required duplicate code for Creature->Pet case)
 // Cameras in world list just because linked with Player objects
-typedef TYPELIST_4(Player, Creature/*pets*/, Corpse/*resurrectable*/, Camera)           AllWorldObjectTypes;
-typedef TYPELIST_4(GameObject, Creature/*except pets*/, DynamicObject, Corpse/*Bones*/) AllGridObjectTypes;
-typedef TYPELIST_4(Creature, Pet, GameObject, DynamicObject)                            AllMapStoredObjectTypes;
+using GridTypeMapContainer  = TypeMapContainer<TypeList<GameObject, Creature/*except pets*/, DynamicObject, Corpse/*bones*/>>;
+using WorldTypeMapContainer = TypeMapContainer<TypeList<Player, Creature/*pets*/, Corpse/*resurrectable*/, Camera>>;
 
 typedef GridRefManager<Camera>          CameraMapType;
 typedef GridRefManager<Corpse>          CorpseMapType;
@@ -74,11 +78,9 @@ typedef GridRefManager<DynamicObject>   DynamicObjectMapType;
 typedef GridRefManager<GameObject>      GameObjectMapType;
 typedef GridRefManager<Player>          PlayerMapType;
 
-typedef Grid<Player, AllWorldObjectTypes, AllGridObjectTypes> GridType;
-typedef NGrid<MAX_NUMBER_OF_CELLS, Player, AllWorldObjectTypes, AllGridObjectTypes> NGridType;
+typedef Grid<Player, WorldTypeMapContainer, GridTypeMapContainer> GridType;
+typedef NGrid<MAX_NUMBER_OF_CELLS, Player, WorldTypeMapContainer, GridTypeMapContainer> NGridType;
 
-typedef TypeMapContainer<AllGridObjectTypes> GridTypeMapContainer;
-typedef TypeMapContainer<AllWorldObjectTypes> WorldTypeMapContainer;
 
 template<const unsigned int LIMIT>
 struct CoordPair
@@ -234,7 +236,7 @@ namespace MaNGOS
      */
     inline bool IsValidMapCoord(float c)
     {
-        return finite(c) && (std::fabs(c) <= MAP_HALFSIZE - 0.5);
+        return std::isfinite(c) && (std::fabs(c) <= MAP_HALFSIZE - 0.5);
     }
 
     /**
@@ -261,7 +263,7 @@ namespace MaNGOS
      */
     inline bool IsValidMapCoord(float x, float y, float z)
     {
-        return IsValidMapCoord(x, y) && finite(z);
+        return IsValidMapCoord(x, y) && std::isfinite(z);
     }
 
     /**
@@ -276,7 +278,7 @@ namespace MaNGOS
      */
     inline bool IsValidMapCoord(float x, float y, float z, float o)
     {
-        return IsValidMapCoord(x, y, z) && finite(o);
+        return IsValidMapCoord(x, y, z) && std::isfinite(o);
     }
 }
 #endif

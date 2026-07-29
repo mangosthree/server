@@ -22,7 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include <cmath>
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <algorithm>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -40,7 +43,6 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "SharedDefines.h"
 #include "Pet.h"
 #include "GameObject.h"
@@ -54,7 +56,6 @@
 #include "BattleGround/BattleGroundWS.h"
 #include "Language.h"
 #include "SocialMgr.h"
-#include "VMapFactory.h"
 #include "Util.h"
 #include "TemporarySummon.h"
 #include "ScriptMgr.h"
@@ -64,7 +65,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Vehicle.h"
-#include "G3D/Vector3.h"
+#include "Geometry/Vector3.h"
 #include "LootMgr.h"
 #include <random>
 
@@ -103,7 +104,7 @@ void Spell::EffectResurrectNew(SpellEffectEntry const* effect)
 
     uint32 health = damage;
     uint32 mana = effect->EffectMiscValue_0;
-    pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z(), health, mana);
     SendResurrectRequest(pTarget);
 }
 
@@ -1002,22 +1003,22 @@ void Spell::EffectJump(SpellEffectEntry const* effect)
                 pTarget = m_caster->GetMap()->GetUnit(((Player*)m_caster)->GetSelectionGuid());
             }
 
-            o = pTarget ? pTarget->GetOrientation() : m_caster->GetOrientation();
+            o = pTarget ? pTarget->Where().Facing() : m_caster->Where().Facing();
         }
         else
         {
-            o = m_caster->GetOrientation();
+            o = m_caster->Where().Facing();
         }
     }
     else if (unitTarget)
     {
-        unitTarget->GetContactPoint(m_caster, x, y, z, CONTACT_DISTANCE);
-        o = m_caster->GetOrientation();
+        ContactPointNear(*unitTarget, m_caster, x, y, z, CONTACT_DISTANCE);
+        o = m_caster->Where().Facing();
     }
     else if (gameObjTarget)
     {
-        gameObjTarget->GetContactPoint(m_caster, x, y, z, CONTACT_DISTANCE);
-        o = m_caster->GetOrientation();
+        ContactPointNear(*gameObjTarget, m_caster, x, y, z, CONTACT_DISTANCE);
+        o = m_caster->Where().Facing();
     }
     else
     {
@@ -1026,7 +1027,7 @@ void Spell::EffectJump(SpellEffectEntry const* effect)
     }
 
     // Try to normalize Z coord because GetContactPoint do nothing with Z axis
-    m_caster->UpdateAllowedPositionZ(x, y, z);
+    ClampToAllowedZ(*m_caster, x, y, z);
 
     float speed = m_spellInfo->Speed ? m_spellInfo->Speed : 27.0f;
     m_caster->GetMotionMaster()->MoveDestination(x, y, z, o, speed, 2.5f);
@@ -1109,10 +1110,10 @@ void Spell::EffectTeleportUnits(SpellEffectEntry const* effect)   // TODO - Use 
         {
             // m_destN filled, but sometimes for wrong dest and does not have TARGET_FLAG_DEST_LOCATION
 
-            float x = unitTarget->GetPositionX();
-            float y = unitTarget->GetPositionY();
-            float z = unitTarget->GetPositionZ();
-            float orientation = m_caster->GetOrientation();
+            float x = unitTarget->Where().X();
+            float y = unitTarget->Where().Y();
+            float z = unitTarget->Where().Z();
+            float orientation = m_caster->Where().Facing();
 
             m_caster->NearTeleportTo(x, y, z, orientation, unitTarget == m_caster);
             return;
@@ -1140,7 +1141,7 @@ void Spell::EffectTeleportUnits(SpellEffectEntry const* effect)   // TODO - Use 
             float x = m_targets.m_destX;
             float y = m_targets.m_destY;
             float z = m_targets.m_destZ;
-            float orientation = pTarget ? pTarget->GetOrientation() : unitTarget->GetOrientation();
+            float orientation = pTarget ? pTarget->Where().Facing() : unitTarget->Where().Facing();
             unitTarget->NearTeleportTo(x, y, z, orientation, unitTarget == m_caster);
             return;
         }
@@ -1156,7 +1157,7 @@ void Spell::EffectTeleportUnits(SpellEffectEntry const* effect)   // TODO - Use 
             float x = m_targets.m_destX;
             float y = m_targets.m_destY;
             float z = m_targets.m_destZ;
-            float orientation = unitTarget->GetOrientation();
+            float orientation = unitTarget->Where().Facing();
             // Teleport
             unitTarget->NearTeleportTo(x, y, z, orientation, unitTarget == m_caster);
             return;

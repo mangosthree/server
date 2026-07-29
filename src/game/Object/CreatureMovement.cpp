@@ -195,9 +195,9 @@ bool Creature::CanSwim() const
 
     // the client default: a creature immersed in swim-deep liquid surface-swims
     GridMapLiquidData liquidData;
-    return GetTerrain()->IsSwimmable(GetPositionX(), GetPositionY(), GetPositionZ(),
-                                     GetObjectBoundingRadius(), &liquidData) &&
-           GetPositionZ() < liquidData.level + 2.0f; // not on a bridge/ledge above the water body
+    return GetTerrain()->IsSwimmable(Where().X(), Where().Y(), Where().Z(),
+                                     Where().Extent(), &liquidData) &&
+           Where().Z() < liquidData.level + 2.0f; // not on a bridge/ledge above the water body
 }
 
 /**
@@ -224,9 +224,9 @@ void Creature::UpdateSwimmingState()
 
     GridMapLiquidData liquidData;
     bool swimmable = !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CANT_SWIM) &&
-                     GetTerrain()->IsSwimmable(GetPositionX(), GetPositionY(), GetPositionZ(),
-                                               GetObjectBoundingRadius(), &liquidData) &&
-                     GetPositionZ() < liquidData.level + 2.0f; // not on a bridge/ledge above the water body
+                     GetTerrain()->IsSwimmable(Where().X(), Where().Y(), Where().Z(),
+                                               Where().Extent(), &liquidData) &&
+                     Where().Z() < liquidData.level + 2.0f; // not on a bridge/ledge above the water body
 
     SetSwim(swimmable);
 }

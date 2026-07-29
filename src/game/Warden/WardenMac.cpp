@@ -40,7 +40,10 @@
  */
 
 #include "WardenKeyGeneration.h"
-#include "Common.h"
+#include "Auth/Md5.h"
+#include "Platform/Define.h"
+#include <cstring>
+#include <string>
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Log.h"
@@ -129,12 +132,10 @@ ClientWardenModule* WardenMac::GetModuleForClient()
     memcpy(mod->Key, Module_0DBBF209A27B1E279A9FEC5C168A15F7_Key, 16);
 
     // md5 hash
-    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
-    EVP_DigestInit_ex(ctx, EVP_md5(), nullptr);
-    EVP_DigestUpdate(ctx, mod->CompressedData, len);
-    unsigned int mdLen = 0;
-    EVP_DigestFinal_ex(ctx, (uint8*)&mod->Id, &mdLen);
-    EVP_MD_CTX_free(ctx);
+    Md5Hash md5;
+    md5.UpdateData(mod->CompressedData, len);
+    md5.Finalize();
+    memcpy(&mod->Id, md5.GetDigest(), Md5Hash::DigestLength);
 
     return mod;
 }
@@ -302,13 +303,11 @@ void WardenMac::HandleData(ByteBuffer &buff)
         found = true;
     }
 
-    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
-    EVP_DigestInit_ex(ctx, EVP_md5(), nullptr);
-    EVP_DigestUpdate(ctx, str.c_str(), str.size());
+    Md5Hash md5;
+    md5.UpdateData(str);
+    md5.Finalize();
     uint8 ourMD5Hash[16];
-    unsigned int mdLen = 0;
-    EVP_DigestFinal_ex(ctx, ourMD5Hash, &mdLen);
-    EVP_MD_CTX_free(ctx);
+    memcpy(ourMD5Hash, md5.GetDigest(), sizeof(ourMD5Hash));
 
     uint8 theirsMD5Hash[16];
     buff.read(theirsMD5Hash, 16);

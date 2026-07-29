@@ -41,7 +41,9 @@
  * Group operations require proper permission checks and state validation.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <string>
+#include <cstring>
 #include "Database/DatabaseEnv.h"
 #include "Opcodes.h"
 #include "Log.h"
@@ -57,7 +59,8 @@
 #include "DB2Structure.h"
 #include "DB2Stores.h"
 #include "Vehicle.h"
-#include "TransportSystem.h"
+#include "Vehicle.h"
+#include "PlayerRegistry.h"
 
 /* differeces from off:
     -you can uninvite yourself - is is useful
@@ -981,7 +984,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
 
     if (mask & GROUP_UPDATE_FLAG_ZONE)
     {
-        *data << uint16(player->GetZoneId());
+        *data << uint16(player->GetTerrain()->GetZoneId(player->Where().X(), player->Where().Y(), player->Where().Z()));
     }
 
     if (mask & GROUP_UPDATE_FLAG_UNK)
@@ -991,7 +994,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
 
     if (mask & GROUP_UPDATE_FLAG_POSITION)
     {
-        *data << uint16(player->GetPositionX()) << uint16(player->GetPositionY()) << uint16(player->GetPositionZ());
+        *data << uint16(player->Where().X()) << uint16(player->Where().Y()) << uint16(player->Where().Z());
     }
 
     if (mask & GROUP_UPDATE_FLAG_AURAS)
@@ -1203,7 +1206,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     ObjectGuid guid;
     recv_data >> guid;
 
-    Player* player = sObjectAccessor.FindPlayer(guid, false);
+    Player* player = sPlayerRegistry.Find(guid, false);
     if (!player)
     {
         WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3 + 4 + 2);
@@ -1250,10 +1253,10 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
 
     if (player->IsInWorld())
     {
-        iZoneId = player->GetZoneId();
-        iCoordX = player->GetPositionX();
-        iCoordY = player->GetPositionY();
-        iCoordZ = player->GetPositionZ();
+        iZoneId = player->GetTerrain()->GetZoneId(player->Where().X(), player->Where().Y(), player->Where().Z());
+        iCoordX = player->Where().X();
+        iCoordY = player->Where().Y();
+        iCoordZ = player->Where().Z();
     }
     else if (player->IsBeingTeleported())               // Player is in teleportation
     {

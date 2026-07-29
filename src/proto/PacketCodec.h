@@ -27,7 +27,7 @@
 
 #include <utility>
 #include "Platform/Define.h"
-#include "Utilities/WorldPacket.h"
+#include "WorldPacket.h"
 
 #include <cstddef>
 #include <functional>

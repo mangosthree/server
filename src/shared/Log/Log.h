@@ -25,15 +25,16 @@
 #ifndef MANGOSSERVER_LOG_H
 #define MANGOSSERVER_LOG_H
 
-#include "Common/Common.h"
+#include "Threading/Threading.h"
+#include "Platform/Define.h"
+#include <string>
 #include "Policies/Singleton.h"
-
-#include <cstdarg>
-#include <mutex>
 
 class Config;
 class ByteBuffer;
 class ConsoleLogWriter;
+#include <mutex>
+
 namespace MaNGOS { class Thread; }
 
 /**
@@ -132,6 +133,19 @@ enum Color
 const int Color_count = int(WHITE) + 1; /**< Total number of available colors **/
 
 /**
+ * @brief Severity of a line, and the index into the configured colour table
+ */
+enum LogType
+{
+    LogNormal = 0,
+    LogDetails,
+    LogDebug,
+    LogError
+};
+
+const int LogType_count = int(LogError) + 1; /**< Size of the colour table */
+
+/**
  * @brief One formatted console line handed to the off-thread writer
  *
  * Producers format text (time prefix + body, WITHOUT the trailing newline) and
@@ -142,11 +156,12 @@ struct ConsoleLogRecord
 {
     std::string text; /**< Formatted line WITHOUT the trailing newline; the writer appends '\n' after ResetColor */
     Color color; /**< Color to apply when applyColor is set */
+    LogType type; /**< Severity, kept alongside the colour so the full-screen console can theme independently of the configured palette */
     bool applyColor; /**< Whether to wrap the write in SetColor/ResetColor */
     bool toStdout; /**< true => stdout, false => stderr */
     bool isRaw; /**< Raw passthrough: write text verbatim with NO color and NO appended newline (used for progress-bar redraws, which carry their own '\r'/'\n' and must not be reformatted) */
 
-    ConsoleLogRecord() : color(WHITE), applyColor(false), toStdout(true), isRaw(false) {}
+    ConsoleLogRecord() : color(WHITE), type(LogNormal), applyColor(false), toStdout(true), isRaw(false) {}
 };
 
 /**
@@ -454,13 +469,9 @@ class Log : public MaNGOS::Singleton<Log>
          *        only opened when the flag is set, so this is the single source
          *        of truth and is off by default even on legacy configs.
          *
-         *        WorldSocket.cpp (the ACE-removal campaign's Stage 2 CP3) was
-         *        the original caller of this and of outWorldPacketDump()
-         *        below; deleting it orphaned both for one checkpoint. Re-homed
-         *        game-side (not into proto, which must stay game-agnostic and
-         *        no longer resolves opcode names) at Stage 2 CP5+1:
-         *        WorldGateway::Deliver for incoming, WorldSession::SendPacket
-         *        for outgoing.
+         *        Hooked into WorldGateway::Deliver (incoming) and
+         *        WorldSession::SendPacket (outgoing) -- not into proto, which
+         *        must stay game-agnostic and does not resolve opcode names.
          * @return bool
          */
         bool IsPacketLoggingEnabled() const { return worldLogfile != NULL; }
@@ -524,12 +535,12 @@ class Log : public MaNGOS::Singleton<Log>
          *        color and whether color applies.
          *
          * @param toStdout true => stdout, false => stderr
-         * @param color
+         * @param type severity; selects the colour from m_colors
          * @param applyColor
          * @param fmt
          * @param ap
          */
-        void ConsoleEmit(bool toStdout, Color color, bool applyColor, const char* fmt, va_list* ap);
+        void ConsoleEmit(bool toStdout, LogType type, bool applyColor, const char* fmt, va_list* ap);
 
         /// Emit a blank console line (time prefix + newline) via the writer / fallback.
         void ConsoleEmitBlank(bool toStdout);

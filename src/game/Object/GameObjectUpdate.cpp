@@ -23,7 +23,7 @@
  */
 
 #include "GameObject.h"
-#include "G3D/Quat.h"
+#include "Geometry/Quat.h"
 #include "QuestDef.h"
 #include "ObjectMgr.h"
 #include "PoolManager.h"
@@ -46,7 +46,7 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "Util.h"
 #include "ScriptMgr.h"
-#include "vmap/GameObjectModel.h"
+#include "GameObjectModel.h"
 #include "CreatureAISelector.h"
 #include "SQLStorages.h"
 #include "GameObjectAI.h"

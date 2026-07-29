@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,12 +35,12 @@
 #include <thread>
 
 /**
- * @brief The gSOAP listener, as an IService.
+ * @brief The gSOAP listener, as a Master service.
  *
- * SoapThread() already polls World::IsStopped() in its own loop (it was never
- * ACE, just a bare std::thread mangosd.cpp spun up and joined by hand), so
- * there is nothing to signal here: the world stopping is the stop request,
- * and Join() only has to wait for the thread to notice.
+ * SoapThread() polls with a one-second accept timeout and re-checks
+ * World::IsStopped() between polls, so there is nothing to signal here: the
+ * world stopping is the stop request, and Join() only has to wait out at most
+ * one poll interval.
  */
 class SoapService : public IService
 {

@@ -22,6 +22,11 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <sstream>
+#include <string>
+#include <vector>
+#include <map>
 #include "AuctionHouseMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "SQLStorages.h"
@@ -47,7 +52,6 @@
  * \file
  */
 
-INSTANTIATE_SINGLETON_1(AuctionHouseMgr);
 
 /**
  * @brief Initializes the auction house manager.

@@ -34,6 +34,7 @@
  * This is essential for network protocol handling in World of Warcraft.
  */
 
+#include <utility>
 #include "Platform/Define.h"
 #include <algorithm>
 
@@ -80,7 +81,7 @@ template<typename T> inline void EndianConvert(T& val) { ByteConverter::apply<T>
  * @brief Reverse byte order (no-op on big-endian host)
  * @param val Value to convert
  */
-template<typename T> inline void EndianConvertReverse(T& /*val*/) { }
+template<typename T> inline void EndianConvertReverse(T&) { }
 #else
 template<typename T> inline void EndianConvert(T&) { }
 template<typename T> inline void EndianConvertReverse(T& val) { ByteConverter::apply<T>(&val); }

@@ -33,6 +33,7 @@
  * - Ban management utilities
  */
 
+#include <string>
 #include "Chat.h"
 #include "Language.h"
 #include "World.h"
@@ -106,7 +107,7 @@ bool ChatHandler::HandleBanListHelper(QueryResult* result)
                 {
                     time_t timeBan = fields2[0].GetUInt64();
                     tm tmBan;
-                    localtime_r(&timeBan, &tmBan);
+                    tmBan = safe_localtime(timeBan);
 
                     if (fields2[0].GetUInt64() == fields2[1].GetUInt64())
                     {
@@ -118,7 +119,7 @@ bool ChatHandler::HandleBanListHelper(QueryResult* result)
                     {
                         time_t timeUnban = fields2[1].GetUInt64();
                         tm tmUnban;
-                        localtime_r(&timeUnban, &tmUnban);
+                        tmUnban = safe_localtime(timeUnban);
 
                         PSendSysMessage("|%-15.15s|%02d-%02d-%02d %02d:%02d|%02d-%02d-%02d %02d:%02d|%-15.15s|%-15.15s|",
                                         account_name.c_str(), tmBan.tm_year % 100, tmBan.tm_mon + 1, tmBan.tm_mday, tmBan.tm_hour, tmBan.tm_min,

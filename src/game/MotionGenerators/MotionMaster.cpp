@@ -22,6 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Log/Log.h"
+#include <cmath>
+#include <sstream>
+#include "Utilities/Errors.h"
 #include "MotionMaster.h"
 #include "ConfusedMovementGenerator.h"
 #include "FleeingMovementGenerator.h"
@@ -71,7 +75,7 @@ void MotionMaster::Initialize()
         top()->Initialize(*m_owner);
         if (top()->GetMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
         {
-            (static_cast<WaypointMovementGenerator<Creature>*>(top()))->InitializeWaypointPath(*((Creature*)(m_owner)), 0, PATH_NO_PATH, 0, 0);
+            (static_cast<WaypointMovementGenerator*>(top()))->InitializeWaypointPath(*((Creature*)(m_owner)), 0, PATH_NO_PATH, 0, 0);
         }
     }
     else
@@ -331,7 +335,7 @@ void MotionMaster::MoveRandomAroundPoint(float x, float y, float z, float radius
     else
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s move random.", m_owner->GetGuidStr().c_str());
-        Mutate(new RandomMovementGenerator<Creature>(x, y, z, radius, verticalZ));
+        Mutate(new RandomMovementGenerator(x, y, z, radius, verticalZ));
     }
 }
 
@@ -357,7 +361,7 @@ void MotionMaster::MoveTargetedHome()
         else
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted home", m_owner->GetGuidStr().c_str());
-            Mutate(new HomeMovementGenerator<Creature>());
+            Mutate(new HomeMovementGenerator());
         }
     }
     else if (m_owner->GetTypeId() == TYPEID_UNIT && ((Creature*)m_owner)->GetCharmerOrOwnerGuid())
@@ -365,7 +369,7 @@ void MotionMaster::MoveTargetedHome()
         if (Unit* target = ((Creature*)m_owner)->GetCharmerOrOwner())
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s follow to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
-            Mutate(new FollowMovementGenerator<Creature>(*target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE));
+            Mutate(new FollowMovementGenerator(*target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE));
         }
         else
         {
@@ -385,14 +389,7 @@ void MotionMaster::MoveConfused()
 {
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s move confused", m_owner->GetGuidStr().c_str());
 
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-    {
-        Mutate(new ConfusedMovementGenerator<Player>());
-    }
-    else
-    {
-        Mutate(new ConfusedMovementGenerator<Creature>());
-    }
+    Mutate(new ConfusedMovementGenerator());
 }
 
 /**
@@ -411,14 +408,7 @@ void MotionMaster::MoveChase(Unit* target, float dist, float angle)
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s chase to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
 
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-    {
-        Mutate(new ChaseMovementGenerator<Player>(*target, dist, angle));
-    }
-    else
-    {
-        Mutate(new ChaseMovementGenerator<Creature>(*target, dist, angle));
-    }
+    Mutate(new ChaseMovementGenerator(*target, dist, angle));
 }
 
 /**
@@ -444,14 +434,7 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle)
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s follow to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
 
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-    {
-        Mutate(new FollowMovementGenerator<Player>(*target, dist, angle));
-    }
-    else
-    {
-        Mutate(new FollowMovementGenerator<Creature>(*target, dist, angle));
-    }
+    Mutate(new FollowMovementGenerator(*target, dist, angle));
 }
 
 /**
@@ -466,14 +449,7 @@ void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generate
 {
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted point (Id: %u X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), id, x, y, z);
 
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-    {
-        Mutate(new PointMovementGenerator<Player>(id, x, y, z, generatePath));
-    }
-    else
-    {
-        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, generatePath));
-    }
+    Mutate(new PointMovementGenerator(id, x, y, z, generatePath));
 }
 
 /**
@@ -498,7 +474,7 @@ void MotionMaster::MoveSeekAssistance(float x, float y, float z)
 
 /**
  * @brief Makes the unit seek assistance and then distract.
- * @param time Time for the distraction.
+ * @param timer Time for the distraction.
  */
 void MotionMaster::MoveSeekAssistanceDistract(uint32 time)
 {
@@ -528,20 +504,13 @@ void MotionMaster::MoveFleeing(Unit* enemy, uint32 time)
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s flee from %s", m_owner->GetGuidStr().c_str(), enemy->GetGuidStr().c_str());
 
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
+    if (m_owner->GetTypeId() != TYPEID_PLAYER && time)
     {
-        Mutate(new FleeingMovementGenerator<Player>(enemy->GetObjectGuid()));
+        Mutate(new TimedFleeingMovementGenerator(enemy->GetObjectGuid(), time));
     }
     else
     {
-        if (time)
-        {
-            Mutate(new TimedFleeingMovementGenerator(enemy->GetObjectGuid(), time));
-        }
-        else
-        {
-            Mutate(new FleeingMovementGenerator<Creature>(enemy->GetObjectGuid()));
-        }
+        Mutate(new FleeingMovementGenerator(enemy->GetObjectGuid()));
     }
 }
 
@@ -558,14 +527,14 @@ void MotionMaster::MoveWaypoint(int32 id /*=0*/, uint32 source /*=0==PATH_NO_PAT
     {
         if (GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
         {
-            sLog.outError("%s attempt to MoveWaypoint() but is already using waypoint", m_owner->GetGuidStr().c_str());
+            sLog.outError("Creature %s (Entry %u) attempt to MoveWaypoint() but creature is already using waypoint", m_owner->GetGuidStr().c_str(), m_owner->GetEntry());
             return;
         }
 
         Creature* creature = (Creature*)m_owner;
 
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s start MoveWaypoint()", m_owner->GetGuidStr().c_str());
-        WaypointMovementGenerator<Creature>* newWPMMgen = new WaypointMovementGenerator<Creature>(*creature);
+        WaypointMovementGenerator* newWPMMgen = new WaypointMovementGenerator(*creature);
         Mutate(newWPMMgen);
         newWPMMgen->InitializeWaypointPath(*creature, id, (WaypointPathOrigin)source, initialDelay, overwriteEntry);
     }
@@ -686,7 +655,7 @@ bool MotionMaster::SetNextWaypoint(uint32 pointId)
     {
         if ((*rItr)->GetMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
         {
-            return (static_cast<WaypointMovementGenerator<Creature>*>(*rItr))->SetNextWaypoint(pointId);
+            return (static_cast<WaypointMovementGenerator*>(*rItr))->SetNextWaypoint(pointId);
         }
     }
     return false;
@@ -702,7 +671,7 @@ uint32 MotionMaster::getLastReachedWaypoint() const
     {
         if ((*rItr)->GetMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
         {
-            return (static_cast<WaypointMovementGenerator<Creature>*>(*rItr))->getLastReachedWaypoint();
+            return (static_cast<WaypointMovementGenerator*>(*rItr))->getLastReachedWaypoint();
         }
     }
     return 0;
@@ -732,7 +701,7 @@ void MotionMaster::GetWaypointPathInformation(std::ostringstream& oss) const
     {
         if ((*rItr)->GetMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
         {
-            static_cast<WaypointMovementGenerator<Creature>*>(*rItr)->GetPathInformation(oss);
+            static_cast<WaypointMovementGenerator*>(*rItr)->GetPathInformation(oss);
             return;
         }
     }
@@ -752,7 +721,7 @@ bool MotionMaster::GetDestination(float& x, float& y, float& z)
         return false;
     }
 
-    const G3D::Vector3& dest = m_owner->movespline->FinalDestination();
+    const Geometry::Vector3& dest = m_owner->movespline->FinalDestination();
     x = dest.x;
     y = dest.y;
     z = dest.z;
@@ -769,7 +738,21 @@ void MotionMaster::MoveJump(float x, float y, float z, float horizontalSpeed, fl
     Mutate(new EffectMovementGenerator(id));
 }
 
-void MotionMaster::MoveDestination(float x, float y, float z, float o, float horizontalSpeed, float max_height, Unit* target)
+void MotionMaster::MoveJump(Position& pos, float horizontalSpeed, float max_height, uint32 id)
+{
+    MoveJump(pos.x, pos.y, pos.z, horizontalSpeed, max_height, id);
+}
+
+/**
+ * @brief A jump that ends FACING something -- a target, or a given orientation.
+ *
+ * Kept where mangos_two teleports instead (its EffectJump ends in NearTeleportTo
+ * with a TODO). A spline the client can see is the better answer, so this is the
+ * implementation that wins; it lays no generator because the jump IS the whole
+ * movement and there is nothing left to drive afterwards.
+ */
+void MotionMaster::MoveDestination(float x, float y, float z, float o, float horizontalSpeed,
+                                   float max_height, Unit* target)
 {
     Movement::MoveSplineInit init(*m_owner);
     init.MoveTo(x, y, z);
@@ -786,22 +769,23 @@ void MotionMaster::MoveDestination(float x, float y, float z, float o, float hor
 void MotionMaster::MoveFall()
 {
     // Use larger distance for vmap height search than in most other cases
-    float tz = m_owner->GetMap()->GetHeight(m_owner->GetPhaseMask(), m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ());
-    if (tz <= INVALID_HEIGHT)
+    const auto floor = m_owner->GetMap()->Floor(m_owner->GetPhaseMask(), m_owner->Where().X(), m_owner->Where().Y(), m_owner->Where().Z());
+    if (!floor)
     {
         DEBUG_LOG("MotionMaster::MoveFall: unable retrive a proper height at map %u (x: %f, y: %f, z: %f).",
-                  m_owner->GetMap()->GetId(), m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ());
+                  m_owner->GetMap()->GetId(), m_owner->Where().X(), m_owner->Where().Y(), m_owner->Where().Z());
         return;
     }
 
     // Abort too if the ground is very near
-    if (fabs(m_owner->GetPositionZ() - tz) < 0.1f)
+    const float tz = *floor;
+    if (fabs(m_owner->Where().Z() - tz) < 0.1f)
     {
         return;
     }
 
     Movement::MoveSplineInit init(*m_owner);
-    init.MoveTo(m_owner->GetPositionX(), m_owner->GetPositionY(), tz);
+    init.MoveTo(m_owner->Where().X(), m_owner->Where().Y(), tz);
     init.SetFall();
     init.Launch();
     Mutate(new EffectMovementGenerator(0));

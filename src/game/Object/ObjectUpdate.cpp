@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <vector>
 #include "Object.h"
 #include "SharedDefines.h"
 #include "WorldPacket.h"
@@ -39,9 +41,9 @@
 #include "MapManager.h"
 #include "Log.h"
 #include "Transports.h"
+#include "TransportMap.h"
 #include "TargetedMovementGenerator.h"
 #include "WaypointMovementGenerator.h"
-#include "VMapFactory.h"
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
@@ -241,9 +243,33 @@ void Object::DestroyForPlayer(Player* target, bool anim) const
  * Includes position, orientation, movement flags, and speeds
  * for living objects, or just position for static objects.
  */
+namespace
+{
+    /// The vessel whose deck this object stands on, or NULL. DERIVED AT THE INSTANT OF
+    /// WRITING, from the map -- the one thing about being aboard that cannot fall out of
+    /// step, unlike anything we could have stamped on the object earlier.
+    Transport* DeckVesselOf(Object const* obj)
+    {
+        if (!obj->isType(TYPEMASK_WORLDOBJECT))
+        {
+            return NULL;
+        }
+
+        Map* on = static_cast<WorldObject const*>(obj)->GetMap();
+        TransportMap* hull = on ? on->AsTransport() : NULL;
+        return hull ? hull->Vessel() : NULL;
+    }
+}
+
 void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
 {
     ObjectGuid Guid = GetObjectGuid();
+
+    // ABOARD, THERE IS NO WORLD POSITION TO SEND. Our coordinates are the vessel's map's,
+    // and the client has never heard of that map -- no WDT, no terrain, no id it would
+    // accept. It gets the vessel's guid and those same coordinates as an offset, which is
+    // the only thing it can compose a position from.
+    Transport* const vessel = DeckVesselOf(this);
 
     data->WriteBit(false);
     data->WriteBit(false);
@@ -275,6 +301,17 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     if (isType(TYPEMASK_UNIT))
     {
         Unit const* unit = (Unit const*)this;
+
+        if (vessel)
+        {
+            // Written into the copy the wire is built from, not stored: a crew member is
+            // not "registered" as a passenger anywhere, it is simply on her map.
+            MovementInfo& aboard = const_cast<Unit*>(unit)->m_movementInfo;
+            aboard.SetTransportData(vessel->GetObjectGuid(), unit->Where().X(),
+                                    unit->Where().Y(), unit->Where().Z(),
+                                    unit->Where().Facing(), 0, -1);
+        }
+
         hasTransport = !unit->m_movementInfo.GetTransportGuid().IsEmpty();
         isSplineEnabled = unit->IsSplineEnabled();
 
@@ -421,7 +458,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
             Movement::PacketBuilder::WriteCreateBytes(*unit->movespline, *data);
         }
 
-        *data << float(unit->GetPositionZ());
+        *data << float(vessel ? 0.0f : unit->Where().Z());
         data->WriteGuidBytes<5>(Guid);
 
         if (hasTransport)
@@ -430,7 +467,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
 
             data->WriteGuidBytes<5, 7>(tGuid);
             *data << uint32(unit->m_movementInfo.GetTransportTime());
-            *data << float(NormalizeOrientation(unit->m_movementInfo.GetTransportPos()->o));
+            *data << float(Geometry::Placement::NormalizeOrientation(unit->m_movementInfo.GetTransportPos()->o));
 
             if (hasTransportTime2)
             {
@@ -452,11 +489,11 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
             data->WriteGuidBytes<1, 6, 2, 4>(tGuid);
         }
 
-        *data << float(unit->GetPositionX());
+        *data << float(vessel ? 0.0f : unit->Where().X());
         *data << float(unit->GetSpeed(MOVE_PITCH_RATE));
         data->WriteGuidBytes<3, 0>(Guid);
         *data << float(unit->GetSpeed(MOVE_SWIM));
-        *data << float(unit->GetPositionY());
+        *data << float(vessel ? 0.0f : unit->Where().Y());
         data->WriteGuidBytes<7, 1, 2>(Guid);
         *data << float(unit->GetSpeed(MOVE_WALK));
 
@@ -468,7 +505,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
 
         if (hasOrientation)
         {
-            *data << float(NormalizeOrientation(unit->GetOrientation()));
+            *data << float(Geometry::Placement::NormalizeOrientation(unit->Where().Facing()));
         }
 
         *data << float(unit->GetSpeed(MOVE_RUN));
@@ -483,7 +520,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
 
     if (updateFlags & UPDATEFLAG_VEHICLE)
     {
-        *data << float(NormalizeOrientation(((WorldObject*)this)->GetOrientation()));
+        *data << float(Geometry::Placement::NormalizeOrientation(((WorldObject*)this)->Where().Facing()));
         *data << uint32(((Unit*)this)->GetVehicleInfo()->GetVehicleEntry()->ID); // vehicle id
     }
 
@@ -542,10 +579,10 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
 
     if (updateFlags & UPDATEFLAG_HAS_POSITION)
     {
-        *data << float(NormalizeOrientation(((WorldObject*)this)->GetOrientation()));
-        *data << float(((WorldObject*)this)->GetPositionX());
-        *data << float(((WorldObject*)this)->GetPositionY());
-        *data << float(((WorldObject*)this)->GetPositionZ());
+        *data << float(Geometry::Placement::NormalizeOrientation(((WorldObject*)this)->Where().Facing()));
+        *data << float(vessel ? 0.0f : ((WorldObject*)this)->Where().X());
+        *data << float(vessel ? 0.0f : ((WorldObject*)this)->Where().Y());
+        *data << float(vessel ? 0.0f : ((WorldObject*)this)->Where().Z());
     }
 
     if (updateFlags & UPDATEFLAG_HAS_ATTACKING_TARGET)
@@ -561,7 +598,19 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
 
     if (updateFlags & UPDATEFLAG_TRANSPORT)
     {
-        *data << uint32(GameTime::GetGameTimeMS());           // ms time
+        // THE PHASE, not the clock. The client does not take the modulo itself: it wants
+        // how far along the route she is, and that is ours to compute. Hand it a raw wall
+        // clock and the hull stops animating altogether -- a dead ship, with everyone
+        // standing on her frozen too.
+        if (isType(TYPEMASK_GAMEOBJECT)
+            && ((GameObject*)this)->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT)
+        {
+            *data << uint32(((Transport*)this)->GetPathProgress());
+        }
+        else
+        {
+            *data << uint32(GameTime::GetGameTimeMS());       // ms time
+        }
     }
 }
 

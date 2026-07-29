@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <algorithm>
 #include "Unit.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -38,7 +39,6 @@
 #include "Group.h"
 #include "SpellAuras.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "TemporarySummon.h"
 #include "Formulas.h"
@@ -52,7 +52,6 @@
 #include "MapPersistentStateMgr.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
-#include "VMapFactory.h"
 #include "MovementGenerator.h"
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"

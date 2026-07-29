@@ -29,13 +29,21 @@
 #ifndef MANGOS_H_WORLDSESSION
 #define MANGOS_H_WORLDSESSION
 
-#include "Common.h"
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include "Common/Locales.h"
+#include <ctime>
+#include <string>
+#include <vector>
+#include <list>
 #include "Auth/BigNumber.h"
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
 #include "AuctionHouseMgr.h"
 #include "Item.h"
 #include "LFGMgr.h"
+#include "SessionMailbox.h"
+#include "SessionProtocolPolicy.h"
 
 #include <memory>
 #include <mutex>
@@ -324,6 +332,7 @@ class WorldSession
          *             HMAC seed, exactly as WorldSocket::GetSessionKey() did.
          */
         WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
+                     std::shared_ptr<SessionMailbox> mailbox,
                      AccountTypes sec, uint8 expansion, time_t mute_time,
                      LocaleConstant locale, const BigNumber& sessionKeySalt);
 
@@ -632,6 +641,7 @@ class WorldSession
         void HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data);
 
         void HandlePingOpcode(WorldPacket& recvPacket);
+        void HandleKeepAliveOpcode(WorldPacket& recvPacket);
         void HandleAuthSessionOpcode(WorldPacket& recvPacket);
         void HandleRepopRequestOpcode(WorldPacket& recvPacket);
         void HandleAutostoreLootItemOpcode(WorldPacket& recvPacket);
@@ -1114,6 +1124,7 @@ class WorldSession
         uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
         Player* _player;
         std::shared_ptr<proto::IClientLink> m_Socket;
+        std::shared_ptr<SessionMailbox> m_mailbox;
         std::string m_Address;
 
         /// `s` (SRP6 salt), not the session key `K` -- see the constructor's
@@ -1139,11 +1150,11 @@ class WorldSession
         int m_sessionDbLocaleIndex;
         uint32 m_latency;
         uint32 m_clientTimeDelay;
+        SessionPingTracker m_pingTracker;
         AccountData m_accountData[NUM_ACCOUNT_DATA_TYPES];
         uint32 m_Tutorials[8];
         TutorialDataState m_tutorialState;
         AddonsList m_addonsList;
-        MaNGOS::LockedQueue<WorldPacket*> _recvQueue;
 };
 #endif
 /// @}

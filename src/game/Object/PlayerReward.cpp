@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
 #include "Player.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -45,7 +46,6 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"
@@ -62,7 +62,6 @@
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "revision_data.h"
-#include "Database/DatabaseImpl.h"
 #include "Spell.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
@@ -224,7 +223,7 @@ void Player::RewardPlayerAndGroupAtCast(WorldObject* pRewardSource, uint32 spell
  */
 bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
 {
-    if (pRewardSource->IsWithinDistInMap(this, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE)))
+    if (InReach(*pRewardSource, *this, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE)))
     {
         return true;
     }
@@ -240,5 +239,5 @@ bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
         return false;
     }
 
-    return pRewardSource->IsWithinDistInMap(corpse, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE));
+    return InReach(*pRewardSource, *corpse, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE));
 }

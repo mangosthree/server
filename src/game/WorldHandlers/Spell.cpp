@@ -43,6 +43,7 @@
  * @see SpellMgr for spell management
  */
 
+#include "Utilities/Errors.h"
 #include "Spell.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -62,12 +63,11 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 #include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
 #include "LootMgr.h"
-#include "VMapFactory.h"
 #include "BattleGround/BattleGround.h"
 #include "Util.h"
 #include "Chat.h"
@@ -110,6 +110,8 @@ SpellCastTargets::SpellCastTargets()
     m_itemTargetEntry  = 0;
 
     m_srcX = m_srcY = m_srcZ = m_destX = m_destY = m_destZ = 0.0f;
+    m_srcTransOffsetX = m_srcTransOffsetY = m_srcTransOffsetZ = 0.0f;
+    m_destTransOffsetX = m_destTransOffsetY = m_destTransOffsetZ = 0.0f;
     m_strTarget.clear();
     m_targetMask = 0;
 
@@ -133,9 +135,9 @@ void SpellCastTargets::setUnitTarget(Unit* target)
         return;
     }
 
-    m_destX = target->GetPositionX();
-    m_destY = target->GetPositionY();
-    m_destZ = target->GetPositionZ();
+    m_destX = target->Where().X();
+    m_destY = target->Where().Y();
+    m_destZ = target->Where().Z();
     m_unitTarget = target;
     m_unitTargetGUID = target->GetObjectGuid();
     m_targetMask |= TARGET_FLAG_UNIT;
@@ -235,7 +237,7 @@ void SpellCastTargets::Update(Unit* caster)
 {
     m_GOTarget   = m_GOTargetGUID ? caster->GetMap()->GetGameObject(m_GOTargetGUID) : NULL;
     m_unitTarget = m_unitTargetGUID ?
-                   (m_unitTargetGUID == caster->GetObjectGuid() ? caster : sObjectAccessor.GetUnit(*caster, m_unitTargetGUID)) :
+                   (m_unitTargetGUID == caster->GetObjectGuid() ? caster : ObjectLookup::GetUnit(*caster, m_unitTargetGUID)) :
                        NULL;
 
     m_itemTarget = NULL;
@@ -275,9 +277,9 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
 
     if (m_targetMask == TARGET_FLAG_SELF)
     {
-        m_destX = caster->GetPositionX();
-        m_destY = caster->GetPositionY();
-        m_destZ = caster->GetPositionZ();
+        m_destX = caster->Where().X();
+        m_destY = caster->Where().Y();
+        m_destZ = caster->Where().Z();
         m_unitTarget = caster;
         m_unitTargetGUID = caster->GetObjectGuid();
         return;
@@ -308,6 +310,9 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
     {
         data >> m_srcTransportGUID.ReadAsPacked();
         data >> m_srcX >> m_srcY >> m_srcZ;
+        m_srcTransOffsetX = m_srcX;
+        m_srcTransOffsetY = m_srcY;
+        m_srcTransOffsetZ = m_srcZ;
         if (!MaNGOS::IsValidMapCoord(m_srcX, m_srcY, m_srcZ))
         {
             throw ByteBufferException(false, data.rpos(), 0, data.size());
@@ -318,6 +323,9 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
     {
         data >> m_destTransportGUID.ReadAsPacked();
         data >> m_destX >> m_destY >> m_destZ;
+        m_destTransOffsetX = m_destX;
+        m_destTransOffsetY = m_destY;
+        m_destTransOffsetZ = m_destZ;
         if (!MaNGOS::IsValidMapCoord(m_destX, m_destY, m_destZ))
         {
             throw ByteBufferException(false, data.rpos(), 0, data.size());
@@ -601,7 +609,7 @@ bool Spell::IsAliveUnitPresentInTargetList()
     {
         if (ihit->missCondition == SPELL_MISS_NONE && (needAliveTargetMask & ihit->effectMask))
         {
-            Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : sObjectAccessor.GetUnit(*m_caster, ihit->targetGUID);
+            Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : ObjectLookup::GetUnit(*m_caster, ihit->targetGUID);
 
             // either unit is alive and normal spell, or unit dead and deathonly-spell
             if (unit && (unit->IsAlive() != IsDeathOnlySpell(m_spellInfo)))
@@ -715,7 +723,7 @@ void Spell::DelayedChannel()
     {
         if ((*ihit).missCondition == SPELL_MISS_NONE)
         {
-            if (Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : sObjectAccessor.GetUnit(*m_caster, ihit->targetGUID))
+            if (Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : ObjectLookup::GetUnit(*m_caster, ihit->targetGUID))
             {
                 unit->DelaySpellAuraHolder(m_spellInfo->ID, delaytime, unit->GetObjectGuid());
             }
@@ -750,7 +758,7 @@ void Spell::UpdateOriginalCasterPointer()
     }
     else
     {
-        Unit* unit = sObjectAccessor.GetUnit(*m_caster, m_originalCasterGUID);
+        Unit* unit = ObjectLookup::GetUnit(*m_caster, m_originalCasterGUID);
         m_originalCaster = unit && unit->IsInWorld() ? unit : NULL;
     }
 }
@@ -1196,7 +1204,7 @@ void Spell::SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpel
 
         // zone check
         uint32 zone, area;
-        target->GetZoneAndAreaId(zone, area);
+        target->GetTerrain()->GetZoneAndAreaId(zone, area, target->Where().X(), target->Where().Y(), target->Where().Z());
 
         SpellCastResult locRes = sSpellMgr.GetSpellAllowedInLocationError(pSpell, target->GetMapId(), zone, area, target->GetCharmerOrOwnerPlayerOrPlayerItself());
         if (locRes != SPELL_CAST_OK || !((Player*)target)->CanStartFlyInArea(target->GetMapId(), zone, area))

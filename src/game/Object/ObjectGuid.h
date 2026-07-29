@@ -25,7 +25,12 @@
 #ifndef MANGOS_OBJECT_GUID_H
 #define MANGOS_OBJECT_GUID_H
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <string>
+#include <vector>
+#include <set>
+#include <list>
+#include "Utilities/Errors.h"
 #include "ByteBuffer.h"
 
 #include <functional>
@@ -333,7 +338,8 @@ inline PackedGuid ObjectGuid::WriteAsPacked() const { return PackedGuid(*this); 
 #if defined(__FreeBSD__) && defined(__clang__)
 namespace std{
 # else
-HASH_NAMESPACE_START
+namespace std
+{
 #endif
 template<>
 class hash<ObjectGuid>
@@ -348,7 +354,7 @@ class hash<ObjectGuid>
 #if defined(__FreeBSD__) && defined(__clang__)
 }
 # else
-HASH_NAMESPACE_END
+}
 #endif
 
 

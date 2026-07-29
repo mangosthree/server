@@ -33,6 +33,8 @@
  * - NPC path assignment
  */
 
+#include <string>
+#include <list>
 #include "Chat.h"
 #include "Language.h"
 #include "PointMovementGenerator.h"
@@ -64,7 +66,7 @@ inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin 
     }
 
     wpCreature->SetVisibility(VISIBILITY_OFF);
-    wpCreature->SetRespawnCoord(pos);
+    wpCreature->SetSpawn(pos);
 
     wpCreature->SetActiveObjectState(true);
 
@@ -225,7 +227,7 @@ bool ChatHandler::HandleWpAddCommand(char* args)
         {
             if (wpOwner->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
             {
-                if (WaypointMovementGenerator<Creature> const* wpMMGen = dynamic_cast<WaypointMovementGenerator<Creature> const*>(wpOwner->GetMotionMaster()->GetCurrent()))
+                if (WaypointMovementGenerator const* wpMMGen = dynamic_cast<WaypointMovementGenerator const*>(wpOwner->GetMotionMaster()->GetCurrent()))
                 {
                     wpMMGen->GetPathInformation(wpPathId, wpDestination);
                 }
@@ -251,7 +253,9 @@ bool ChatHandler::HandleWpAddCommand(char* args)
     // wpOwner will get a new waypoint inserted into wpPath = GetPathFromOrigin(wpOwner, wpDestination, wpPathId) at wpPointId
 
     float x, y, z;
-    m_session->GetPlayer()->GetPosition(x, y, z);
+    x = m_session->GetPlayer()->Where().X();
+    y = m_session->GetPlayer()->Where().Y();
+    z = m_session->GetPlayer()->Where().Z();
     if (!sWaypointMgr.AddNode(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPointId, wpDestination, x, y, z))
     {
         PSendSysMessage(LANG_WAYPOINT_NOTCREATED, wpPointId, wpOwner->GetGuidStr().c_str(), wpPathId, WaypointManager::GetOriginString(wpDestination).c_str());
@@ -422,7 +426,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
     {
         if (wpOwner->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
         {
-            if (WaypointMovementGenerator<Creature> const* wpMMGen = dynamic_cast<WaypointMovementGenerator<Creature> const*>(wpOwner->GetMotionMaster()->GetCurrent()))
+            if (WaypointMovementGenerator const* wpMMGen = dynamic_cast<WaypointMovementGenerator const*>(wpOwner->GetMotionMaster()->GetCurrent()))
             {
                 wpMMGen->GetPathInformation(wpPathId, wpSource);
             }
@@ -488,10 +492,12 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
     else if (subCmd == "move")                              // Move to player position, no additional command required
     {
         float x, y, z;
-        m_session->GetPlayer()->GetPosition(x, y, z);
+        x = m_session->GetPlayer()->Where().X();
+        y = m_session->GetPlayer()->Where().Y();
+        z = m_session->GetPlayer()->Where().Z();
 
         // Move visual waypoint
-        targetCreature->NearTeleportTo(x, y, z, targetCreature->GetOrientation());
+        targetCreature->NearTeleportTo(x, y, z, targetCreature->Where().Facing());
 
         sWaypointMgr.SetNodePosition(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpId, wpPathId, wpSource, x, y, z);
 
@@ -675,7 +681,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
     {
         if (wpOwner->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
         {
-            if (WaypointMovementGenerator<Creature> const* wpMMGen = dynamic_cast<WaypointMovementGenerator<Creature> const*>(wpOwner->GetMotionMaster()->GetCurrent()))
+            if (WaypointMovementGenerator const* wpMMGen = dynamic_cast<WaypointMovementGenerator const*>(wpOwner->GetMotionMaster()->GetCurrent()))
             {
                 wpMMGen->GetPathInformation(wpPathId, wpOrigin);
                 wpPath = sWaypointMgr.GetPathFromOrigin(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPathId, wpOrigin);
@@ -892,7 +898,7 @@ bool ChatHandler::HandleWpExportCommand(char* args)
         if (wpOrigin == PATH_NO_PATH)
         {
             if (wpOwner->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
-                if (WaypointMovementGenerator<Creature> const* wpMMGen = dynamic_cast<WaypointMovementGenerator<Creature> const*>(wpOwner->GetMotionMaster()->GetCurrent()))
+                if (WaypointMovementGenerator const* wpMMGen = dynamic_cast<WaypointMovementGenerator const*>(wpOwner->GetMotionMaster()->GetCurrent()))
                 {
                     wpMMGen->GetPathInformation(wpPathId, wpOrigin);
                 }

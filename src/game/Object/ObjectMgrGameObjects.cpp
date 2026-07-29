@@ -30,6 +30,8 @@
  *        automatically; ObjectMgr.h is unchanged.
  */
 
+#include <map>
+#include "Utilities/PackedValues.h"
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"

@@ -25,7 +25,10 @@
 #ifndef __InstanceSaveMgr_H
 #define __InstanceSaveMgr_H
 
-#include "Common.h"
+#include <unordered_map>
+#include "Utilities/PackedValues.h"
+#include <ctime>
+#include <set>
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
 #include <list>

@@ -31,6 +31,8 @@
  * ScriptMgr.h is unchanged.
  */
 
+#include <algorithm>
+#include <set>
 #include "ScriptMgr.h"
 #include "Log.h"
 #include "ProgressBar.h"

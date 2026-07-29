@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/MathDefines.h"
 #include "Unit.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -38,7 +39,6 @@
 #include "Group.h"
 #include "SpellAuras.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "TemporarySummon.h"
 #include "Formulas.h"
@@ -52,7 +52,6 @@
 #include "MapPersistentStateMgr.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
-#include "VMapFactory.h"
 #include "MovementGenerator.h"
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
@@ -248,7 +247,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
         return MELEE_HIT_CRIT;
     }
 
-    bool from_behind = !pVictim->HasInArc(M_PI_F, this);
+    bool from_behind = !pVictim->Where().HasInArc(this->Where(), M_PI_F);
 
     if (from_behind)
     {
@@ -527,7 +526,7 @@ void Unit::SendMeleeAttackStop(Unit* victim)
  */
 bool Unit::IsSpellBlocked(Unit* pCaster, SpellEntry const* spellEntry, WeaponAttackType attackType)
 {
-    if (!HasInArc(M_PI_F, pCaster))
+    if (!Where().HasInArc(pCaster->Where(), M_PI_F))
     {
         return false;
     }
@@ -698,7 +697,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
         return SPELL_MISS_NONE;
     }
 
-    bool from_behind = !pVictim->HasInArc(M_PI_F, this);
+    bool from_behind = !pVictim->Where().HasInArc(this->Where(), M_PI_F);
 
     // Ranged attack cannot be parry/dodge only deflect
     if (attType == RANGED_ATTACK)
@@ -899,7 +898,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
         return SPELL_MISS_MISS;
     }
 
-    bool from_behind = !pVictim->HasInArc(M_PI_F, this);
+    bool from_behind = !pVictim->Where().HasInArc(this->Where(), M_PI_F);
 
     // cast by caster in front of victim or behind with special ability
     if (!from_behind || pVictim->HasAuraType(SPELL_AURA_MOD_PARRY_FROM_BEHIND_PERCENT))

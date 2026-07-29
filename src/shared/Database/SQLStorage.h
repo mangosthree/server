@@ -25,7 +25,10 @@
 #ifndef SQLSTORAGE_H
 #define SQLSTORAGE_H
 
-#include "Common/Common.h"
+#include <unordered_map>
+#include <utility>
+#include "Platform/Define.h"
+#include <map>
 #include "Database/DatabaseEnv.h"
 #include "DataStores/DBCFileLoader.h"
 
@@ -574,6 +577,7 @@ class SQLMultiStorage : public SQLStorageBase
                 /**
                  * @brief
                  *
+                 * @param std::pair<RecordMultiMap::const_iterator
                  * @param pair
                  */
                 SQLMSIteratorBounds(std::pair<RecordMultiMap::const_iterator, RecordMultiMap::const_iterator> pair) : first(pair.first), second(pair.second) {}

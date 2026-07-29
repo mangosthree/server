@@ -33,7 +33,9 @@
  * - Guild bank management
  */
 
+#include <string>
 #include "Chat.h"
+#include "Player.h"
 #include "Language.h"
 #include "GuildMgr.h"
 #include "Guild.h"

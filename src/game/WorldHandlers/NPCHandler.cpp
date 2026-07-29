@@ -47,7 +47,10 @@
  * - CMSG_BUY_STABLE_SLOT: Buy stable slot
  */
 
-#include "Common.h"
+#include <cmath>
+#include "Platform/Define.h"
+#include <string>
+#include <algorithm>
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -594,7 +597,7 @@ void WorldSession::SendSpiritResurrect()
     Corpse* corpse = _player->GetCorpse();
     if (corpse)
         corpseGrave = sObjectMgr.GetClosestGraveYard(
-                          corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetMapId(), _player->GetTeam());
+                          corpse->Where().X(), corpse->Where().Y(), corpse->Where().Z(), corpse->GetMapId(), _player->GetTeam());
 
     // now can spawn bones
     _player->SpawnCorpseBones();
@@ -603,11 +606,11 @@ void WorldSession::SendSpiritResurrect()
     if (corpseGrave)
     {
         WorldSafeLocsEntry const* ghostGrave = sObjectMgr.GetClosestGraveYard(
-                _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetMapId(), _player->GetTeam());
+                _player->Where().X(), _player->Where().Y(), _player->Where().Z(), _player->GetMapId(), _player->GetTeam());
 
         if (corpseGrave != ghostGrave)
         {
-            _player->TeleportTo(corpseGrave->Continent, corpseGrave->Loc_0, corpseGrave->Loc_1, corpseGrave->Loc_2, _player->GetOrientation());
+            _player->TeleportTo(corpseGrave->Continent, corpseGrave->Loc_0, corpseGrave->Loc_1, corpseGrave->Loc_2, _player->Where().Facing());
         }
         // or update at original position
         else
@@ -632,14 +635,14 @@ void WorldSession::HandleReturnToGraveyardOpcode(WorldPacket& recv_data)
         return;
     }
 
-    WorldSafeLocsEntry const* corpseGrave = sObjectMgr.GetClosestGraveYard(corpse->GetPositionX(), corpse->GetPositionY(),
-            corpse->GetPositionZ(), corpse->GetMapId(), _player->GetTeam());
+    WorldSafeLocsEntry const* corpseGrave = sObjectMgr.GetClosestGraveYard(corpse->Where().X(), corpse->Where().Y(),
+            corpse->Where().Z(), corpse->GetMapId(), _player->GetTeam());
     if (!corpseGrave)
     {
         return;
     }
 
-    _player->TeleportTo(corpseGrave->Continent, corpseGrave->Loc_0, corpseGrave->Loc_1, corpseGrave->Loc_2, _player->GetOrientation());
+    _player->TeleportTo(corpseGrave->Continent, corpseGrave->Loc_0, corpseGrave->Loc_1, corpseGrave->Loc_2, _player->Where().Facing());
 }
 
 /**

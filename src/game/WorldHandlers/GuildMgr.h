@@ -25,7 +25,9 @@
 #ifndef _GUILDMGR_H
 #define _GUILDMGR_H
 
-#include "Common.h"
+#include <unordered_map>
+#include "Platform/Define.h"
+#include <string>
 #include "Policies/Singleton.h"
 
 #include <mutex>

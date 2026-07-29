@@ -26,11 +26,11 @@
 #ifndef GAME_PCH_H
 #define GAME_PCH_H
 
-#include "Common.h"
+#include <map>
+#include <vector>
 
 #include "MapManager.h"
 #include "Log.h"
-#include "ObjectAccessor.h"
 #include "ObjectGuid.h"
 #include "SQLStorages.h"
 #include "Opcodes.h"

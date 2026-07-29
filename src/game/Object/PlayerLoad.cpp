@@ -31,6 +31,10 @@
  *        picks this file up automatically; Player.h is unchanged.
  */
 
+#include "Utilities/Errors.h"
+#include <string>
+#include <map>
+#include <list>
 #include "Player.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -54,7 +58,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
+#include "CorpseManager.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"
@@ -71,7 +75,6 @@
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "revision_data.h"
-#include "Database/DatabaseImpl.h"
 #include "Spell.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
@@ -463,7 +466,7 @@ void Player::LoadCorpse()
 {
     if (IsAlive())
     {
-        sObjectAccessor.ConvertCorpseForPlayer(GetObjectGuid());
+        sCorpseManager.ConvertCorpseForPlayer(GetObjectGuid());
     }
     else
     {
@@ -494,7 +497,7 @@ void Player::_LoadInventory(QueryResult* result, uint32 timediff)
     // NOTE2: the "order by `slot`" is needed because mainhand weapons are (wrongly?)
     // expected to be equipped before offhand items (TODO: fixme)
 
-    uint32 zone = GetZoneId();
+    uint32 zone = GetTerrain()->GetZoneId(Where().X(), Where().Y(), Where().Z());
 
     if (result)
     {

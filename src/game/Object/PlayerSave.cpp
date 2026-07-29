@@ -22,6 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <sstream>
+#include <vector>
 #include "Player.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -45,7 +48,6 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"
@@ -62,7 +64,6 @@
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "revision_data.h"
-#include "Database/DatabaseImpl.h"
 #include "Spell.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
@@ -161,10 +162,10 @@ void Player::SaveToDB()
     {
         uberInsert.addUInt32(GetMapId());
         uberInsert.addUInt32(uint32(GetDungeonDifficulty()));
-        uberInsert.addFloat(finiteAlways(GetPositionX()));
-        uberInsert.addFloat(finiteAlways(GetPositionY()));
-        uberInsert.addFloat(finiteAlways(GetPositionZ()));
-        uberInsert.addFloat(finiteAlways(GetOrientation()));
+        uberInsert.addFloat(finiteAlways(Where().X()));
+        uberInsert.addFloat(finiteAlways(Where().Y()));
+        uberInsert.addFloat(finiteAlways(Where().Z()));
+        uberInsert.addFloat(finiteAlways(Where().Facing()));
     }
     else
     {
@@ -220,7 +221,7 @@ void Player::SaveToDB()
 
     uberInsert.addUInt32(uint32(m_atLoginFlags));
 
-    uberInsert.addUInt32(IsInWorld() ? GetZoneId() : GetCachedZoneId());
+    uberInsert.addUInt32(IsInWorld() ? GetTerrain()->GetZoneId(Where().X(), Where().Y(), Where().Z()) : GetCachedZoneId());
 
     uberInsert.addUInt64(uint64(m_deathExpireTime));
 

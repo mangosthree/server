@@ -32,9 +32,11 @@
  * improving server responsiveness.
  */
 
+#include "Threading/Threading.h"
 #include "Database/SqlDelayThread.h"
 #include "Database/SqlOperations.h"
 #include "DatabaseEnv.h"
+#include "Timer.h"
 
 /**
  * @brief Constructor for SqlDelayThread
@@ -74,14 +76,15 @@ SqlDelayThread::~SqlDelayThread()
  * database's configured ping interval.
  *
  * @note This method is called when the thread starts. It should not
- * be called directly - use MaNGOS::Thread::start() instead.
+ * be called directly - use MaNGOS::Thread::Start() instead.
  */
 void SqlDelayThread::run()
 {
-#ifndef DO_POSTGRESQL
-    // Initialize MySQL thread-local data for this thread
-    mysql_thread_init();
-#endif
+    // Register this thread with the client library for as long as it runs. RAII, not a
+    // matching pair of calls: the end hook must run even if the loop leaves by an
+    // unexpected path, because a thread that skips it corrupts MySQL's per-thread state
+    // instead of failing cleanly.
+    DbThreadGuard dbThread(m_dbEngine);
 
     const uint32 loopSleepms = 10; /**< Sleep interval between processing cycles in milliseconds */
 
@@ -96,7 +99,15 @@ void SqlDelayThread::run()
         // empty the queue before exiting
         MaNGOS::Thread::Sleep(loopSleepms);
 
+        // A delay thread that stalls looks exactly like a server that has stopped
+        // saving, with nothing in the log to say so. Time it and say when it does.
+        const uint32 start = getMSTime();
         ProcessRequests();
+        const uint32 elapsed = getMSTimeDiff(start, getMSTime());
+        if (elapsed > 5000)
+        {
+            sLog.outError("SqlDelayThread: ProcessRequests took %u ms", elapsed);
+        }
 
         // Send periodic ping to keep connection alive
         if ((loopCounter++) >= pingEveryLoop)
@@ -105,12 +116,6 @@ void SqlDelayThread::run()
             m_dbEngine->Ping();
         }
     }
-
-#ifndef DO_POSTGRESQL
-    // Clean up MySQL thread-local data
-    mysql_thread_end();
-#endif
-
 }
 
 /**

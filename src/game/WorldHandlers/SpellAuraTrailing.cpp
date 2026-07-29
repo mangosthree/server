@@ -42,7 +42,7 @@
  * @see Spell for spell casting
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -58,7 +58,6 @@
 #include "DynamicObject.h"
 #include "Group.h"
 #include "UpdateData.h"
-#include "ObjectAccessor.h"
 #include "Policies/Singleton.h"
 #include "Totem.h"
 #include "Creature.h"
@@ -422,7 +421,7 @@ void Aura::HandlePhase(bool apply, bool Real)
         if (saBounds.first != saBounds.second)
         {
             uint32 zone, area;
-            target->GetZoneAndAreaId(zone, area);
+            target->GetTerrain()->GetZoneAndAreaId(zone, area, target->Where().X(), target->Where().Y(), target->Where().Z());
 
             for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
             {

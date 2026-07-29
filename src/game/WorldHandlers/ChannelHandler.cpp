@@ -41,9 +41,10 @@
  * - CMSG_CHANNEL_UNBAN: Unban from channel
  */
 
+#include <string>
 #include "ObjectMgr.h"                                      // for normalizePlayerName
 #include "ChannelMgr.h"
-#include "Opcodes.h"                                        // for LookupOpcodeName
+#include "OpcodeTable.h"                                        // for LookupOpcodeName
 
 /**
  * @brief Handles a client's request to join a chat channel.

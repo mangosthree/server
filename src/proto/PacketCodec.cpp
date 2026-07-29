@@ -90,9 +90,13 @@ namespace proto
 
                 // `size` counts the four opcode bytes, so anything below that is
                 // impossible and would underflow the payload length below.
-                // WorldSocket.cpp:654 checks size alone (no upper bound on cmd);
-                // matched here verbatim rather than adding a check M3 never had.
-                if (size < 4 || size > MAX_CLIENT_PACKET_SIZE)
+                // The opcode is bounded too, which WorldSocket.cpp never did. An
+                // opcode past the dispatch table can only ever be rejected further
+                // in, and Rule three is that rejection must be the WORST outcome for
+                // anything off a socket -- so it is rejected here, where the peer
+                // controls neither an allocation nor an index.
+                if (size < 4 || size > MAX_CLIENT_PACKET_SIZE
+                    || cmd > MAX_CLIENT_PACKET_SIZE)
                 {
                     return DecodeStatus::Malformed;
                 }

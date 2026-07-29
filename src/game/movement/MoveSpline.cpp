@@ -22,6 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include "Utilities/Errors.h"
+#include <algorithm>
+#include <string>
 #include "MoveSpline.h"
 #include <sstream>
 #include "Log.h"
@@ -93,7 +97,7 @@ namespace Movement
                 c.orientation = -c.orientation;
             }
         }
-        c.orientation = G3D::wrap(c.orientation, 0.f, (float)G3D::twoPi());
+        c.orientation = Geometry::wrap(c.orientation, 0.f, (float)Geometry::twoPi());
         return c;
     }
 

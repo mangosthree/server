@@ -22,7 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <vector>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -40,7 +41,6 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "SharedDefines.h"
 #include "Pet.h"
 #include "GameObject.h"
@@ -54,7 +54,6 @@
 #include "BattleGround/BattleGroundWS.h"
 #include "Language.h"
 #include "SocialMgr.h"
-#include "VMapFactory.h"
 #include "Util.h"
 #include "TemporarySummon.h"
 #include "ScriptMgr.h"
@@ -64,13 +63,15 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Vehicle.h"
-#include "G3D/Vector3.h"
+#include "Geometry/Vector3.h"
 #include "LootMgr.h"
 #include <random>
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
+#include "Transports.h"
+#include "TransportMap.h"
 
 /**
  * @brief Creates and attaches an aura effect to the current unit target.
@@ -712,6 +713,26 @@ void Spell::EffectPersistentAA(SpellEffectEntry const* effect)
     {
         delete dynObj;
         return;
+    }
+
+    // A deck-anchored area effect belongs to the deck spot, not to the sea underneath.
+    // Two ways to be on a deck: the point was ground-targeted on one (the dest carries its
+    // guid), or the caster is simply standing on one (a self-centred aura).
+    if (ObjectGuid destVessel = m_targets.getDestTransportGuid())
+    {
+        float lx, ly, lz;
+        m_targets.getDestTransportOffset(lx, ly, lz);
+        dynObj->BindToTransport(destVessel, lx, ly, lz);
+    }
+    else if (TransportMap* vessel = pCaster->GetMap()->AsTransport())
+    {
+        // A self-centred aura on a caster aboard: its anchor is simply the caster's own
+        // position on the ship -- exact, and asking for nothing the server has to estimate.
+        if (const auto local = vessel->PositionOf(*pCaster))
+        {
+            dynObj->BindToTransport(vessel->Vessel()->GetObjectGuid(),
+                                    local->X(), local->Y(), local->Z());
+        }
     }
 
     pCaster->AddDynObject(dynObj);

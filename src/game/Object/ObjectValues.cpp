@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
 #include "Object.h"
 #include "UpdateData.h"
 #include "UpdateMask.h"

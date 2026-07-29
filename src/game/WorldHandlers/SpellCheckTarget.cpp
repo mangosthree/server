@@ -62,12 +62,10 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
 #include "LootMgr.h"
-#include "VMapFactory.h"
 #include "BattleGround/BattleGround.h"
 #include "Util.h"
 #include "Chat.h"
@@ -241,7 +239,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
             // fall through
         case SPELL_EFFECT_RESURRECT_NEW:
             // player far away, maybe his corpse near?
-            if (target != m_caster && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !target->IsWithinLOSInMap(m_caster, VMAP::ModelIgnoreFlags::M2))
+            if (target != m_caster && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !HasLineOfSight(*target, *m_caster))
             {
                 if (!m_targets.getCorpseTargetGuid())
                 {
@@ -259,7 +257,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
                     return false;
                 }
 
-                if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !corpse->IsWithinLOSInMap(m_caster, VMAP::ModelIgnoreFlags::M2))
+                if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !HasLineOfSight(*corpse, *m_caster))
                 {
                     return false;
                 }
@@ -273,7 +271,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
             {
                 if (WorldObject* caster = GetCastingObject())
                 {
-                    if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !target->IsWithinLOSInMap(caster, VMAP::ModelIgnoreFlags::M2))
+                    if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS) && !HasLineOfSight(*target, *caster))
                     {
                         return false;
                     }
@@ -299,7 +297,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
             break;
         case 68921:                                         // Soulstorm (FoS), only targets farer than 10 away
         case 69049:                                         // Soulstorm            - = -
-            if (m_caster->IsWithinDist(target, 10.0f, false))
+            if (m_caster->Where().WithinDist(target->Where(), 10.0f, false))
             {
                 return false;
             }

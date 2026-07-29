@@ -32,6 +32,7 @@
 #include <unordered_map>
 
 class WorldSession;
+class SessionMailbox;
 
 /**
  * @brief The world's side of the protocol seam.
@@ -63,20 +64,11 @@ class WorldGateway : public proto::IWorldGateway
 
         void Deliver(proto::SessionId session, WorldPacket&& packet) override;
 
-        bool OnPing(proto::SessionId session, uint32 latency,
-                    uint32 fastPingRun) override;
-
         void Detach(proto::SessionId session) override;
 
         bool OnAuthPacketReceived(WorldPacket& packet) override;
 
-        void OnKeepAlivePacketReceived(WorldPacket& packet,
-                                       proto::SessionId session) override;
-
     private:
-
-        /// Resolve a handle to a live session, or NULL. Caller must hold m_lock.
-        WorldSession* Find(proto::SessionId session) const;
 
         mutable std::mutex m_lock;
 
@@ -85,7 +77,11 @@ class WorldGateway : public proto::IWorldGateway
         /// session of a player who has since logged back in.
         proto::SessionId m_nextId;
 
-        std::unordered_map<proto::SessionId, WorldSession*> m_sessions;
+        /// A route owns a mailbox, not a session. The session is owned by the
+        /// world and may be reaped on any tick; the mailbox outlives it because
+        /// both sides hold a share, so a packet arriving mid-teardown is dropped
+        /// on a closed mailbox instead of written through a dangling pointer.
+        std::unordered_map<proto::SessionId, std::shared_ptr<SessionMailbox>> m_routes;
 };
 
 #endif

@@ -48,18 +48,22 @@
  * - CMSG_GUILD_BANK: Guild bank operations
  */
 
-#include "Common.h"
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include <string>
+#include <cstring>
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Log.h"
-#include "Opcodes.h"
+#include "OpcodeTable.h"
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "GossipDef.h"
 #include "SocialMgr.h"
 #include "Calendar.h"
+#include "PlayerRegistry.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
@@ -148,7 +152,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     if (normalizePlayerName(Invitedname))
     {
-        player = sObjectAccessor.FindPlayerByName(Invitedname.c_str());
+        player = sPlayerRegistry.FindByName(Invitedname.c_str());
     }
 
     if (!player)

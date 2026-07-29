@@ -43,6 +43,8 @@
  * @see SpellMgr for spell management
  */
 
+#include <vector>
+#include <queue>
 #include "Spell.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -62,12 +64,10 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
 #include "LootMgr.h"
-#include "VMapFactory.h"
 #include "BattleGround/BattleGround.h"
 #include "Util.h"
 #include "Chat.h"
@@ -173,7 +173,7 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
             if (Target && (raid || subgroup == Target->GetSubGroup())
                 && !m_caster->IsHostileTo(Target))
             {
-                if ((Target == center || center->IsWithinDistInMap(Target, radius)) &&
+                if ((Target == center || InReach(*center, *Target, radius)) &&
                         (withcaster || Target != m_caster))
                 {
                     targetUnitMap.push_back(Target);
@@ -181,7 +181,7 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
 
                 if (withPets)
                     if (Pet* pet = Target->GetPet())
-                        if ((pet == center || center->IsWithinDistInMap(pet, radius)) &&
+                        if ((pet == center || InReach(*center, *pet, radius)) &&
                                 (withcaster || pet != m_caster))
                         {
                             targetUnitMap.push_back(pet);
@@ -192,7 +192,7 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
     else
     {
         Unit* ownerOrSelf = pMember ? pMember : member->GetCharmerOrOwnerOrSelf();
-        if ((ownerOrSelf == center || center->IsWithinDistInMap(ownerOrSelf, radius)) &&
+        if ((ownerOrSelf == center || InReach(*center, *ownerOrSelf, radius)) &&
                 (withcaster || ownerOrSelf != m_caster))
         {
             targetUnitMap.push_back(ownerOrSelf);
@@ -202,7 +202,7 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
         {
             if (Pet* pet = ownerOrSelf->GetPet())
             {
-                if ((pet == center || center->IsWithinDistInMap(pet, radius)) &&
+                if ((pet == center || InReach(*center, *pet, radius)) &&
                         (withcaster || pet != m_caster))
                 {
                     targetUnitMap.push_back(pet);

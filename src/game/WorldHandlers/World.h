@@ -29,7 +29,17 @@
 #ifndef MANGOS_H_WORLD
 #define MANGOS_H_WORLD
 
-#include "Common.h"
+#include <unordered_map>
+#include <deque>
+#include "LockedQueue/LockedQueue.h"
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include "Common/Locales.h"
+#include <cstring>
+#include <ctime>
+#include <string>
+#include <vector>
+#include "Utilities/Util.h"
 #include "Timer.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"

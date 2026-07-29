@@ -25,7 +25,10 @@
 #ifndef MANGOS_MAPMANAGER_H
 #define MANGOS_MAPMANAGER_H
 
-#include "Common.h"
+#include <functional>
+#include "Utilities/MathDefines.h"
+#include <map>
+#include <set>
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
 #include "Map.h"
@@ -134,8 +137,8 @@ class MapManager : public MaNGOS::Singleton<MapManager>
         typedef std::set<Transport*> TransportSet;
         TransportSet m_Transports;
 
-        typedef std::map<uint32, TransportSet> TransportMap;
-        TransportMap m_TransportsByMap;
+        typedef std::map<uint32, TransportSet> TransportsByMapType;
+        TransportsByMapType m_TransportsByMap;
 
         void InitializeVisibilityDistanceInfo();
 

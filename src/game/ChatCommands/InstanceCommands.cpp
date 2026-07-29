@@ -33,6 +33,7 @@
  * - Instance data manipulation
  */
 
+#include <string>
 #include "Chat.h"
 #include "Language.h"
 #include "MapManager.h"

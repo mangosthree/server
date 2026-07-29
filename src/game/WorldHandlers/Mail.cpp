@@ -43,6 +43,8 @@
  * @see MailHandler for network opcode handling
  */
 
+#include "Utilities/Errors.h"
+#include <string>
 #include "Mail.h"
 #include "Log.h"
 #include "ObjectGuid.h"

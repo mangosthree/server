@@ -42,7 +42,9 @@
  * @see Spell for spell casting
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <ctime>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -58,7 +60,6 @@
 #include "DynamicObject.h"
 #include "Group.h"
 #include "UpdateData.h"
-#include "ObjectAccessor.h"
 #include "Policies/Singleton.h"
 #include "Totem.h"
 #include "Creature.h"
@@ -517,7 +518,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         {
             GameObject* pObj = new GameObject;
             if (pObj->Create(target->GetMap()->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), 185584, target->GetMap(), target->GetPhaseMask(),
-                             target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation()))
+                             target->Where().X(), target->Where().Y(), target->Where().Z(), target->Where().Facing()))
             {
                 pObj->SetRespawnTime(GetAuraDuration() / IN_MILLISECONDS);
                 pObj->SetSpellId(GetId());

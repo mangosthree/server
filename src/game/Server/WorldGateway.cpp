@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Common/Locales.h"
+#include <cmath>
 #include <utility>
 #include <memory>
 #include <mutex>
@@ -31,7 +33,7 @@
 #include "DBCStores.h"
 #include "Database/DatabaseEnv.h"
 #include "Log/Log.h"
-#include "Opcodes.h"
+#include "OpcodeTable.h"
 #include "SharedDefines.h"
 #include "World.h"
 #include "WorldSession.h"
@@ -256,9 +258,12 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
         updAccount, "UPDATE `account` SET `last_ip` = ? WHERE `username` = ?");
     stmt.PExecute(request.peerAddress.c_str(), request.account.c_str());
 
-    WorldSession* session = new WorldSession(row->id, link, row->security,
-                                             row->expansion, row->muteTime,
-                                             row->locale, row->sessionSalt);
+    std::shared_ptr<SessionMailbox> mailbox =
+        std::make_shared<SessionMailbox>();
+    std::unique_ptr<WorldSession> session =
+        std::make_unique<WorldSession>(
+            row->id, link, mailbox, row->security, row->expansion,
+            row->muteTime, row->locale, row->sessionSalt);
 
     session->LoadGlobalAccountData();
     session->LoadTutorialsData();
@@ -285,15 +290,35 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
     proto::SessionId id;
     {
         std::lock_guard<std::mutex> lock(m_lock);
-        id = m_nextId++;
-        m_sessions[id] = session;
+        do
+        {
+            id = m_nextId++;
+            if (id == proto::INVALID_SESSION_ID)
+            {
+                id = m_nextId++;
+            }
+        }
+        while (m_routes.find(id) != m_routes.end());
+        m_routes.emplace(id, mailbox);
     }
 
     // AddSession answers the client itself, with either AUTH_OK or a queue
     // position (WorldSession::SendAuthWaitQue). The cipher was armed by proto
     // before we were called (ClientConnection::HandleAuthSession), so that
     // reply goes out encrypted -- the one ordering constraint across this seam.
-    sWorld.AddSession(session);
+    // Ownership only leaves this function once AddSession has taken it; if it
+    // throws, the route is torn down and the session freed rather than leaked.
+    WorldSession* published = session.release();
+    try
+    {
+        sWorld.AddSession(published);
+    }
+    catch (...)
+    {
+        session.reset(published);
+        Detach(id);
+        throw;
+    }
 
     return id;
 }
@@ -321,83 +346,44 @@ void WorldGateway::Deliver(proto::SessionId session, WorldPacket&& packet)
                                 LookupOpcodeName(packet.GetOpcode()), &packet, true);
     }
 
-    std::lock_guard<std::mutex> lock(m_lock);
-
-    if (WorldSession* target = Find(session))
+    std::shared_ptr<SessionMailbox> mailbox;
     {
-        // QueuePacket takes ownership; the world thread drains and frees it.
-        target->QueuePacket(new WorldPacket(std::move(packet)));
-    }
-}
-
-bool WorldGateway::OnPing(proto::SessionId session, uint32 latency,
-                          uint32 fastPingRun)
-{
-    std::lock_guard<std::mutex> lock(m_lock);
-
-    WorldSession* target = Find(session);
-
-    // A ping before authenticating is not something a real client does.
-    // WorldSocket.cpp:1314-1321.
-    if (target == NULL)
-    {
-        return false;
+        std::lock_guard<std::mutex> lock(m_lock);
+        auto route = m_routes.find(session);
+        if (route == m_routes.end())
+        {
+            return;
+        }
+        mailbox = route->second;
     }
 
-    target->SetLatency(latency);
-    target->ResetClientTimeDelay();
-
-    // Overspeed policy. A configured maximum of zero disables the check
-    // entirely, which is the historical meaning of the option.
-    // WorldSocket.cpp:1285-1298.
-    const uint32 maxCount = sWorld.getConfig(CONFIG_UINT32_MAX_OVERSPEED_PINGS);
-    if (maxCount == 0 || fastPingRun <= maxCount)
-    {
-        return true;
-    }
-
-    // Staff accounts are exempt: the check exists to catch clients hammering the
-    // server, and a GM tool legitimately does.
-    if (target->GetSecurity() != SEC_PLAYER)
-    {
-        return true;
-    }
-
-    sLog.outError("WorldGateway: kicking account %u for overspeed pings (%u in a row)",
-                  target->GetAccountId(), fastPingRun);
-    return false;
+    // The lock is already released: the mailbox holds its own, and a post to a
+    // closed one is refused rather than fatal.
+    mailbox->Enqueue(std::unique_ptr<WorldPacket>(new WorldPacket(std::move(packet))));
 }
 
 void WorldGateway::Detach(proto::SessionId session)
 {
-    WorldSession* target = NULL;
+    std::shared_ptr<SessionMailbox> mailbox;
     {
         std::lock_guard<std::mutex> lock(m_lock);
 
-        auto it = m_sessions.find(session);
-        if (it == m_sessions.end())
+        auto route = m_routes.find(session);
+        if (route == m_routes.end())
         {
             return;
         }
-        target = it->second;
-        m_sessions.erase(it);
+        mailbox = route->second;
+        m_routes.erase(route);
     }
 
-    // The session is not deleted here. It still holds a player that has to be
-    // saved and taken off the map, which only the world thread may do; the
-    // world reaps it on a later tick. The link it holds is already disarmed,
-    // so any packet it tries to send on the way out is discarded rather than
-    // crashing.
-    if (target != NULL)
-    {
-        target->KickPlayer();
-    }
-}
+    mailbox->Close();
 
-WorldSession* WorldGateway::Find(proto::SessionId session) const
-{
-    auto it = m_sessions.find(session);
-    return it == m_sessions.end() ? NULL : it->second;
+    // The session is not deleted here, and it is not kicked from this thread
+    // either. The transport marked the link closed before calling us;
+    // WorldSession::Update observes that on the world thread, logs the player
+    // out and returns false, and World::UpdateSessions reaps the session. That
+    // is the only thread allowed to save a player and take them off the map.
 }
 
 bool WorldGateway::OnAuthPacketReceived(WorldPacket& packet)
@@ -415,21 +401,4 @@ bool WorldGateway::OnAuthPacketReceived(WorldPacket& packet)
     }
 #endif
     return true;
-}
-
-void WorldGateway::OnKeepAlivePacketReceived(WorldPacket& packet,
-                                             proto::SessionId session)
-{
-    // WorldSocket.cpp:909-913: fire-and-forget, no veto.
-#ifdef ENABLE_ELUNA
-    if (Eluna* e = sWorld.GetEluna())
-    {
-        WorldSession* target = NULL;
-        {
-            std::lock_guard<std::mutex> lock(m_lock);
-            target = Find(session);
-        }
-        e->OnPacketReceive(target, packet);
-    }
-#endif
 }

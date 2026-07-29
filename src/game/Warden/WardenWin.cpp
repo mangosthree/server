@@ -41,8 +41,12 @@
  */
 
 #include "HMACSHA1.h"
+#include "Auth/Md5.h"
 #include "WardenKeyGeneration.h"
-#include "Common.h"
+#include "Platform/Define.h"
+#include <cstring>
+#include <list>
+#include <sstream>
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Log.h"
@@ -125,12 +129,10 @@ ClientWardenModule* WardenWin::GetModuleForClient()
     memcpy(mod->Key, Module.ModuleKey, 16);
 
     // md5 hash
-    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
-    EVP_DigestInit_ex(ctx, EVP_md5(), nullptr);
-    EVP_DigestUpdate(ctx, mod->CompressedData, length);
-    unsigned int mdLen = 0;
-    EVP_DigestFinal_ex(ctx, (uint8*)&mod->Id, &mdLen);
-    EVP_MD_CTX_free(ctx);
+    Md5Hash md5;
+    md5.UpdateData(mod->CompressedData, length);
+    md5.Finalize();
+    memcpy(&mod->Id, md5.GetDigest(), Md5Hash::DigestLength);
 
     return mod;
 }

@@ -28,19 +28,19 @@ set(SRC_GRP_AUTH
   Auth/BigNumber.h
   Auth/HMACSHA1.cpp
   Auth/HMACSHA1.h
+  Auth/Md5.h
   Auth/OpenSSLProvider.cpp
   Auth/OpenSSLProvider.h
   Auth/Sha1.cpp
   Auth/Sha1.h
   Auth/WardenKeyGeneration.h
-  Auth/md5.c
-  Auth/md5.h
 )
 source_group("Auth" FILES ${SRC_GRP_AUTH})
 
 set(SRC_GRP_COMMON
-  Common/Common.cpp
-  Common/Common.h
+  Common/Locales.cpp
+  Common/Locales.h
+  Common/TimeConstants.h
   Common/ServerDefines.h
   Common/GitRevision.cpp
   Common/GitRevision.h
@@ -67,7 +67,6 @@ set(SRC_GRP_DATABASE
   Database/Database.cpp
   Database/Database.h
   Database/DatabaseEnv.h
-  Database/DatabaseImpl.h
   Database/DatabaseMysql.cpp
   Database/DatabaseMysql.h
   Database/Field.cpp
@@ -95,7 +94,6 @@ source_group("Dynamic" FILES ${SRC_GRP_DYNAMIC})
 
 set(SRC_GRP_GAMESYSTEM
   GameSystem/Grid.h
-  GameSystem/GridLoader.h
   GameSystem/GridRefManager.h
   GameSystem/GridReference.h
   GameSystem/NGrid.h
@@ -108,6 +106,14 @@ set(SRC_GRP_LOCKQ
   LockedQueue/LockedQueue.h
 )
 source_group("LockedQueue" FILES ${SRC_GRP_LOCKQ})
+
+set(SRC_GRP_CONSOLE
+  Console/ConsoleUI.cpp
+  Console/ConsoleUI.h
+  Console/Terminal.cpp
+  Console/Terminal.h
+)
+source_group("Console" FILES ${SRC_GRP_CONSOLE})
 
 set(SRC_GRP_LOG
   Log/Log.cpp
@@ -186,13 +192,17 @@ set(SRC_GRP_UTILITIES
   Utilities/ByteBuffer.h
   Utilities/Errors.h
   Utilities/ProgressBar.cpp
+  Utilities/IdList.h
+  Utilities/MathDefines.h
+  Utilities/PackedValues.h
   Utilities/ProgressBar.h
   Utilities/ProgressBarRender.h
   Utilities/RNGen.h
+  Utilities/ScheduledExit.cpp
+  Utilities/ScheduledExit.h
   Utilities/Timer.h
   Utilities/Util.cpp
   Utilities/Util.h
-  Utilities/WorldPacket.h
   Utilities/ByteConverter.h
   Utilities/Callback.h
   Utilities/EventProcessor.cpp
@@ -201,7 +211,6 @@ set(SRC_GRP_UTILITIES
   Utilities/LinkedReference/RefManager.h
   Utilities/LinkedReference/Reference.h
   Utilities/TypeList.h
-  Utilities/UnorderedMapSet.h
   Utilities/Optional.h
 )
 source_group("Utilities" FILES ${SRC_GRP_UTILITIES})
@@ -210,6 +219,7 @@ set(TGT_INCL
   Auth
   Common
   Config
+  Console
   DataStores
   Database
   Linux
@@ -239,6 +249,7 @@ add_library(shared STATIC
     ${SRC_GRP_DYNAMIC}
     ${SRC_GRP_GAMESYSTEM}
     ${SRC_GRP_LOCKQ}
+    ${SRC_GRP_CONSOLE}
     ${SRC_GRP_LOG}
     ${SRC_GRP_NET}
     ${SRC_GRP_THREAD}

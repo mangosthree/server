@@ -42,7 +42,8 @@
  * @see Spell for spell casting
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -58,7 +59,6 @@
 #include "DynamicObject.h"
 #include "Group.h"
 #include "UpdateData.h"
-#include "ObjectAccessor.h"
 #include "Policies/Singleton.h"
 #include "Totem.h"
 #include "Creature.h"

@@ -33,14 +33,17 @@
  * - Game object database management
  */
 
+#include "Common/Locales.h"
+#include <sstream>
+#include <string>
 #include "Chat.h"
 #include "Language.h"
-#include "G3D/Quat.h"
+#include "Geometry/Quat.h"
 #include "MapManager.h"
 #include "GameEventMgr.h"
 #include "Player.h"
 #include "GameObject.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 #include "ObjectMgr.h"
 
  /**********************************************************************
@@ -148,7 +151,7 @@ bool ChatHandler::HandleGameObjectDeleteCommand(char* args)
 
     if (ObjectGuid ownerGuid = obj->GetOwnerGuid())
     {
-        Unit* owner = sObjectAccessor.GetUnit(*m_session->GetPlayer(), ownerGuid);
+        Unit* owner = ObjectLookup::GetUnit(*m_session->GetPlayer(), ownerGuid);
         if (!owner || !ownerGuid.IsPlayer())
         {
             PSendSysMessage(LANG_COMMAND_DELOBJREFERCREATURE, obj->GetGUIDLow(), ownerGuid.GetString().c_str());
@@ -258,7 +261,7 @@ bool ChatHandler::HandleGameObjectMoveCommand(char* args)
         Map* map = obj->GetMap();
         map->Remove(obj, false);
 
-        obj->Relocate(chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), obj->GetOrientation());
+        obj->Place().MoveTo(chr->Where().X(), chr->Where().Y(), chr->Where().Z(), obj->Where().Facing());
 
         map->Add(obj);
     }
@@ -292,7 +295,7 @@ bool ChatHandler::HandleGameObjectMoveCommand(char* args)
         Map* map = obj->GetMap();
         map->Remove(obj, false);
 
-        obj->Relocate(x, y, z, obj->GetOrientation());
+        obj->Place().MoveTo(x, y, z, obj->Where().Facing());
 
         map->Add(obj);
     }
@@ -349,10 +352,10 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
     }
 
     Player* plr = m_session->GetPlayer();
-    float x = float(plr->GetPositionX());
-    float y = float(plr->GetPositionY());
-    float z = float(plr->GetPositionZ());
-    float o = float(plr->GetOrientation());
+    float x = float(plr->Where().X());
+    float y = float(plr->Where().Y());
+    float z = float(plr->Where().Z());
+    float o = float(plr->Where().Facing());
     Map* map = plr->GetMap();
 
     // used guids from specially reserved range (can be 0 if no free values)
@@ -416,8 +419,8 @@ bool ChatHandler::HandleGameObjectNearCommand(char* args)
     QueryResult* result = WorldDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `map`, "
                           "(POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) AS order_ "
                           "FROM `gameobject` WHERE `map`='%u' AND (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) <= '%f' ORDER BY order_",
-                          pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(),
-                          pl->GetMapId(), pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), distance * distance);
+                          pl->Where().X(), pl->Where().Y(), pl->Where().Z(),
+                          pl->GetMapId(), pl->Where().X(), pl->Where().Y(), pl->Where().Z(), distance * distance);
 
     if (result)
     {
@@ -475,7 +478,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         if (ExtractUInt32(&cId, id))
         {
             result = WorldDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) AS order_ FROM `gameobject` WHERE `map` = '%i' AND `id` = '%u' ORDER BY order_ ASC LIMIT 1",
-                                          pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), pl->GetMapId(), id);
+                                          pl->Where().X(), pl->Where().Y(), pl->Where().Z(), pl->GetMapId(), id);
         }
         else
         {
@@ -484,7 +487,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
             result = WorldDatabase.PQuery(
                          "SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) AS order_ "
                          "FROM `gameobject`,`gameobject_template` WHERE `gameobject_template`.`entry` = `gameobject`.`id` AND `map` = %i AND `name` " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'")" ORDER BY order_ ASC LIMIT 1",
-                         pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), pl->GetMapId(), name.c_str());
+                         pl->Where().X(), pl->Where().Y(), pl->Where().Z(), pl->GetMapId(), name.c_str());
         }
     }
     else
@@ -518,7 +521,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         result = WorldDatabase.PQuery("SELECT `gameobject`.`guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, "
                                       "(POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) AS order_ FROM `gameobject` "
                                       "LEFT OUTER JOIN `game_event_gameobject` on `gameobject`.`guid`=`game_event_gameobject`.`guid` WHERE `map` = '%i' %s ORDER BY order_ ASC LIMIT 10",
-                                      pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), pl->GetMapId(), eventFilter.str().c_str());
+                                      pl->Where().X(), pl->Where().Y(), pl->Where().Z(), pl->GetMapId(), eventFilter.str().c_str());
     }
 
     if (!result)

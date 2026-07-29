@@ -38,10 +38,12 @@
  * for the requested object type.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <string>
+#include <vector>
+#include <ctime>
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
-#include "Database/DatabaseImpl.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
@@ -100,7 +102,11 @@ void WorldSession::SendNameQueryOpcode(Player* p)
  */
 void WorldSession::SendNameQueryOpcodeFromDB(ObjectGuid guid)
 {
-    CharacterDatabase.AsyncPQuery(&WorldSession::SendNameQueryOpcodeFromDBCallBack, GetAccountId(),
+    uint32 accountId = GetAccountId();
+    CharacterDatabase.AsyncPQuery([accountId](QueryResult* result)
+                                  {
+                                      WorldSession::SendNameQueryOpcodeFromDBCallBack(result, accountId);
+                                  },
                                   !sWorld.getConfig(CONFIG_BOOL_DECLINED_NAMES_USED) ?
                                   //   ------- Query Without Declined Names --------
                                   //       0       1       2       3         4
@@ -363,9 +369,9 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
     }
 
     uint32 corpsemapid = corpse->GetMapId();
-    float x = corpse->GetPositionX();
-    float y = corpse->GetPositionY();
-    float z = corpse->GetPositionZ();
+    float x = corpse->Where().X();
+    float y = corpse->Where().Y();
+    float z = corpse->Where().Z();
     int32 mapid = corpsemapid;
 
     // if corpse at different map
@@ -382,7 +388,8 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
                     mapid = corpseMapEntry->CorpseMapID;
                     x = corpseMapEntry->Corpse_0;
                     y = corpseMapEntry->Corpse_1;
-                    z = entranceMap->GetHeightStatic(x, y, MAX_HEIGHT);
+                    const auto entranceFloor = entranceMap->StaticFloor(x, y, MAX_HEIGHT);
+                    z = entranceFloor ? *entranceFloor : INVALID_HEIGHT;
                 }
             }
         }

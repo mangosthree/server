@@ -42,7 +42,8 @@
  * @see Spell for spell casting
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -58,7 +59,6 @@
 #include "DynamicObject.h"
 #include "Group.h"
 #include "UpdateData.h"
-#include "ObjectAccessor.h"
 #include "Policies/Singleton.h"
 #include "Totem.h"
 #include "Creature.h"
@@ -733,13 +733,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 42517:                                     // Beam to Zelfrax
             {
                 // expecting target to be a dummy creature
-                Creature* pSummon = target->SummonCreature(23864, 0.0f, 0.0f, 0.0f, target->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
+                Creature* pSummon = target->SummonCreature(23864, 0.0f, 0.0f, 0.0f, target->Where().Facing(), TEMPSPAWN_DEAD_DESPAWN, 0);
 
                 Unit* pCaster = GetCaster();
 
                 if (pSummon && pCaster)
                 {
-                    pSummon->GetMotionMaster()->MovePoint(0, pCaster->GetPositionX(), pCaster->GetPositionY(), pCaster->GetPositionZ());
+                    pSummon->GetMotionMaster()->MovePoint(0, pCaster->Where().X(), pCaster->Where().Y(), pCaster->Where().Z());
                 }
 
                 return;
@@ -889,7 +889,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             case 58600:                                     // Restricted Flight Area
             {
-                //AreaTableEntry const* area = GetAreaEntryByAreaID(target->GetAreaId());
+                //AreaTableEntry const* area = GetAreaEntryByAreaID(target->GetTerrain()->GetAreaId(target->Where().X(), target->Where().Y(), target->Where().Z()));
 
                 //// Dalaran restricstruct boss_freyted flight zone (recheck before apply unmount)
                 //if (area && target->GetTypeId() == TYPEID_PLAYER && (area->flags & AREA_FLAG_CANNOT_FLY) &&
@@ -1464,7 +1464,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         if (saBounds.first != saBounds.second)
         {
             uint32 zone, area;
-            target->GetZoneAndAreaId(zone, area);
+            target->GetTerrain()->GetZoneAndAreaId(zone, area, target->Where().X(), target->Where().Y(), target->Where().Z());
 
             for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
             {

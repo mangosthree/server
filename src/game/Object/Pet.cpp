@@ -22,6 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <algorithm>
+#include <string>
 #include "Pet.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
@@ -161,7 +164,7 @@ void Pet::Update(uint32 update_diff, uint32 diff)
             // unsummon pet that lost owner
             Unit* owner = GetOwner();
             if (!owner ||
-                (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && (owner->GetCharmGuid() && (owner->GetCharmGuid() != GetObjectGuid()))) ||
+                (!InReach(*this, *owner, GetMap()->GetVisibilityDistance()) && (owner->GetCharmGuid() && (owner->GetCharmGuid() != GetObjectGuid()))) ||
                 (isControlled() && !owner->GetPetGuid()))
             {
                 Unsummon(PET_SAVE_REAGENTS);
@@ -464,7 +467,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
         return false;
     }
 
-    CreatureCreatePos pos(creature, creature->GetOrientation());
+    CreatureCreatePos pos(creature, creature->Where().Facing());
 
     uint32 guid = creature->GetMap()->GenerateLocalLowGuid(HIGHGUID_PET);
 
@@ -953,7 +956,7 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* ci
 
     cPos.SelectFinalPoint(this);
 
-    if (!cPos.Relocate(this))
+    if (!cPos.PlaceOn(this))
     {
         return false;
     }
@@ -1182,10 +1185,10 @@ void Pet::SetStayPosition(bool stay)
 {
     if (stay)
     {
-        m_stayPosX = GetPositionX();
-        m_stayPosY = GetPositionY();
-        m_stayPosZ = GetPositionZ();
-        m_stayPosO = GetOrientation();
+        m_stayPosX = Where().X();
+        m_stayPosY = Where().Y();
+        m_stayPosZ = Where().Z();
+        m_stayPosO = Where().Facing();
     }
     else
     {

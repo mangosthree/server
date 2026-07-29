@@ -27,7 +27,7 @@
 #define _AUTH_SARC4_H
 
 #include <openssl/evp.h>
-#include "Common/Common.h"
+#include "Platform/Define.h"
 #include "OpenSSLProvider.h"
 
 /**
@@ -66,9 +66,6 @@ class ARC4
          */
         void UpdateData(int len, uint8 *data);
     private:
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-        OpenSSLProviderManager m_providerManager;  /**< RAII provider management */
-#endif
         OpenSSLCipherContext m_cipherContext;        /**< RAII cipher context */
 };
 

@@ -25,6 +25,7 @@
 #ifndef MANGOS_FACTORY_HOLDER
 #define MANGOS_FACTORY_HOLDER
 
+#include <string>
 #include "Platform/Define.h"
 #include "Utilities/TypeList.h"
 #include "ObjectRegistry.h"
@@ -76,7 +77,10 @@ class FactoryHolder
          * @brief
          *
          */
-        void DeregisterSelf(void) { FactoryHolderRepository::Instance().RemoveItem(this, false); }
+        /// `i_key`, not `this`: RemoveItem takes the KEY. Passing the pointer never
+        /// failed to build only because a template member is not instantiated until it
+        /// is called, and nothing called this one.
+        void DeregisterSelf() { FactoryHolderRepository::Instance().RemoveItem(i_key, false); }
 
         /**
          * @brief Abstract Factory create method

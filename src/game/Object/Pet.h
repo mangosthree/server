@@ -52,8 +52,15 @@
 #ifndef MANGOSSERVER_PET_H
 #define MANGOSSERVER_PET_H
 
-#include "Common.h"
+#include <unordered_map>
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include "Utilities/MathDefines.h"
+#include <ctime>
+#include <vector>
 #include "ObjectGuid.h"
+
+struct ItemPrototype;
 #include "Creature.h"
 #include "Unit.h"
 

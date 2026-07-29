@@ -47,7 +47,14 @@
 #ifndef MANGOS_H_SPELL
 #define MANGOS_H_SPELL
 
-#include "Common.h"
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include "Utilities/MathDefines.h"
+#include <ctime>
+#include <string>
+#include <vector>
+#include <map>
+#include <list>
 #include "GridDefines.h"
 #include "SharedDefines.h"
 #include "DBCEnums.h"
@@ -203,6 +210,14 @@ class SpellCastTargets
             m_destY = target.m_destY;
             m_destZ = target.m_destZ;
 
+            m_srcTransOffsetX = target.m_srcTransOffsetX;
+            m_srcTransOffsetY = target.m_srcTransOffsetY;
+            m_srcTransOffsetZ = target.m_srcTransOffsetZ;
+
+            m_destTransOffsetX = target.m_destTransOffsetX;
+            m_destTransOffsetY = target.m_destTransOffsetY;
+            m_destTransOffsetZ = target.m_destTransOffsetZ;
+
             m_strTarget = target.m_strTarget;
 
             m_targetMask = target.m_targetMask;
@@ -221,6 +236,13 @@ class SpellCastTargets
         void setSource(float x, float y, float z);
         void getDestination(float& x, float& y, float& z) const { x = m_destX; y = m_destY; z = m_destZ; }
         void getSource(float& x, float& y, float& z) const { x = m_srcX; y = m_srcY, z = m_srcZ; }
+
+        /// The vessel a deck-local destination/source was cast against, or an empty guid.
+        /// Persistent effects (a DynamicObject) need this to stay parented to the deck.
+        ObjectGuid getDestTransportGuid() const { return m_destTransportGUID; }
+        ObjectGuid getSrcTransportGuid() const { return m_srcTransportGUID; }
+        void getDestTransportOffset(float& x, float& y, float& z) const { x = m_destTransOffsetX; y = m_destTransOffsetY; z = m_destTransOffsetZ; }
+        void getSrcTransportOffset(float& x, float& y, float& z) const { x = m_srcTransOffsetX; y = m_srcTransOffsetY; z = m_srcTransOffsetZ; }
 
         void setGOTarget(GameObject* target);
         ObjectGuid getGOTargetGuid() const { return m_GOTargetGUID; }
@@ -251,6 +273,12 @@ class SpellCastTargets
 
         float m_srcX, m_srcY, m_srcZ;
         float m_destX, m_destY, m_destZ;
+
+        // The deck offsets as the client sent them, valid only when the matching transport
+        // guid is set. Nothing composes them into a world position: aboard, the offset IS
+        // the position, and the vessel's own pose is an estimate no effect may be built on.
+        float m_srcTransOffsetX, m_srcTransOffsetY, m_srcTransOffsetZ;
+        float m_destTransOffsetX, m_destTransOffsetY, m_destTransOffsetZ;
         std::string m_strTarget;
 
         float GetElevation() const { return m_elevation; }
@@ -826,7 +854,7 @@ namespace MaNGOS
                     continue;
                 }
 
-                if (pPlayer->IsWithinDist3d(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ, i_radius))
+                if (pPlayer->Where().WithinDist(Geometry::Vector3(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ), i_radius))
                 {
                     i_data.push_back(pPlayer);
                 }
@@ -873,8 +901,8 @@ namespace MaNGOS
                 case PUSH_SELF_CENTER:
                     if (i_castingObject)
                     {
-                        i_centerX = i_castingObject->GetPositionX();
-                        i_centerY = i_castingObject->GetPositionY();
+                        i_centerX = i_castingObject->Where().X();
+                        i_centerY = i_castingObject->Where().Y();
                     }
                     break;
                 case PUSH_DEST_CENTER:
@@ -890,8 +918,8 @@ namespace MaNGOS
                 case PUSH_TARGET_CENTER:
                     if (Unit* target = i_spell.m_targets.getUnitTarget())
                     {
-                        i_centerX = target->GetPositionX();
-                        i_centerY = target->GetPositionY();
+                        i_centerX = target->Where().X();
+                        i_centerY = target->Where().Y();
                     }
                     break;
                 default:
@@ -914,7 +942,7 @@ namespace MaNGOS
                 // they are no AOE and don't have such a nice SPELL_ATTR flag
                 if ((i_TargetType != SPELL_TARGETS_ALL && !itr->getSource()->IsTargetableForAttack(i_spell.m_spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD)))
                     // mostly phase check
-                    || !itr->getSource()->IsInMap(i_originalCaster))
+                    || !itr->getSource()->Where().ShareFrame(i_originalCaster->Where()))
                     {
                         continue;
                     }
@@ -977,49 +1005,49 @@ namespace MaNGOS
                 switch (i_push_type)
                 {
                     case PUSH_IN_FRONT:
-                        if (i_castingObject->IsInFront((Unit*)(itr->getSource()), i_radius, 2 * M_PI_F / 3))
+                        if (InFrontPhased(*i_castingObject, *((Unit*)(itr->getSource())), i_radius, 2 * M_PI_F / 3))
                         {
                             i_data->push_back(itr->getSource());
                         }
                         break;
                     case PUSH_IN_FRONT_90:
-                        if (i_castingObject->IsInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 2))
+                        if (InFrontPhased(*i_castingObject, *((Unit*)(itr->getSource())), i_radius, M_PI_F / 2))
                         {
                             i_data->push_back(itr->getSource());
                         }
                         break;
                     case PUSH_IN_FRONT_30:
-                        if (i_castingObject->IsInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 6))
+                        if (InFrontPhased(*i_castingObject, *((Unit*)(itr->getSource())), i_radius, M_PI_F / 6))
                         {
                             i_data->push_back(itr->getSource());
                         }
                         break;
                     case PUSH_IN_FRONT_15:
-                        if (i_castingObject->IsInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 12))
+                        if (InFrontPhased(*i_castingObject, *((Unit*)(itr->getSource())), i_radius, M_PI_F / 12))
                         {
                             i_data->push_back(itr->getSource());
                         }
                         break;
                     case PUSH_IN_BACK:
-                        if (i_castingObject->IsInBack((Unit*)(itr->getSource()), i_radius, 2 * M_PI_F / 3))
+                        if (InBackPhased(*i_castingObject, *((Unit*)(itr->getSource())), i_radius, 2 * M_PI_F / 3))
                         {
                             i_data->push_back(itr->getSource());
                         }
                         break;
                     case PUSH_SELF_CENTER:
-                        if (i_castingObject->IsWithinDist((Unit*)(itr->getSource()), i_radius))
+                        if (i_castingObject->Where().WithinDist(((Unit*)(itr->getSource()))->Where(), i_radius))
                         {
                             i_data->push_back(itr->getSource());
                         }
                         break;
                     case PUSH_DEST_CENTER:
-                        if (itr->getSource()->IsWithinDist3d(i_centerX, i_centerY, i_centerZ, i_radius))
+                        if (itr->getSource()->Where().WithinDist(Geometry::Vector3(i_centerX, i_centerY, i_centerZ), i_radius))
                         {
                             i_data->push_back(itr->getSource());
                         }
                         break;
                     case PUSH_TARGET_CENTER:
-                        if (i_spell.m_targets.getUnitTarget() && i_spell.m_targets.getUnitTarget()->IsWithinDist((Unit*)(itr->getSource()), i_radius))
+                        if (i_spell.m_targets.getUnitTarget() && i_spell.m_targets.getUnitTarget()->Where().WithinDist(((Unit*)(itr->getSource()))->Where(), i_radius))
                         {
                             i_data->push_back(itr->getSource());
                         }

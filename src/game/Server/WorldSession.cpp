@@ -45,11 +45,20 @@
  * @see Opcodes.cpp for opcode registration
  */
 
+#include <zlib.h>
 #include "IClientLink.h"
-#include "Common.h"
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include "Common/Locales.h"
+#include <cstdio>
+#include <cstring>
+#include <ctime>
+#include <string>
+#include <set>
+#include <memory>
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
-#include "Opcodes.h"
+#include "OpcodeTable.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Player.h"
@@ -59,7 +68,6 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "World.h"
-#include "ObjectAccessor.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "MapManager.h"
 #include "SocialMgr.h"
@@ -157,9 +165,12 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
+                           std::shared_ptr<SessionMailbox> mailbox,
                            AccountTypes sec, uint8 expansion, time_t mute_time,
                            LocaleConstant locale, const BigNumber& sessionKeySalt) :
-    m_muteTime(mute_time), _player(NULL), m_Socket(std::move(link)), m_sessionKeySalt(sessionKeySalt),
+    m_muteTime(mute_time), _player(NULL), m_Socket(std::move(link)),
+    m_mailbox(mailbox ? std::move(mailbox) : std::make_shared<SessionMailbox>()),
+    m_sessionKeySalt(sessionKeySalt),
     _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
@@ -195,11 +206,7 @@ WorldSession::~WorldSession()
 //        delete _warden;
 
     ///- empty incoming packet queue
-    WorldPacket* packet = NULL;
-    while (_recvQueue.next(packet))
-    {
-        delete packet;
-    }
+    m_mailbox->Close();
 }
 
 /**
@@ -306,7 +313,7 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 /// Add an incoming packet to the queue
 void WorldSession::QueuePacket(WorldPacket* new_packet)
 {
-    _recvQueue.add(new_packet);
+    m_mailbox->Enqueue(std::unique_ptr<WorldPacket>(new_packet));
 }
 
 /// Logging helper for unexpected opcodes
@@ -333,7 +340,7 @@ bool WorldSession::Update(PacketFilter& updater)
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not process packets if socket already closed
     WorldPacket* packet = NULL;
-    while (m_Socket && !m_Socket->IsClosed() && _recvQueue.next(packet, updater))
+    while (m_Socket && !m_Socket->IsClosed() && m_mailbox->Next(packet, updater))
     {
         /*#if 1
         sLog.outError( "MOEP: %s (0x%.4X)",
@@ -395,16 +402,22 @@ bool WorldSession::Update(PacketFilter& updater)
                     }
                     break;
                 case STATUS_AUTHED:
-                    // prevent cheating with skip queue wait
-                    if (m_inQueue)
+                    // Prevent skipping the queue -- but a queued client's own heartbeats
+                    // are STATUS_AUTHED too, and dropping them times it out.
+                    if (m_inQueue &&
+                        packet->GetOpcode() != CMSG_PING &&
+                        packet->GetOpcode() != CMSG_KEEP_ALIVE)
                     {
                         LogUnexpectedOpcode(packet, "the player not pass queue yet");
                         break;
                     }
 
-                    // single from authed time opcodes send in to after logout time
-                    // and before other STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT opcodes.
-                    if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL)
+                    // A heartbeat is not activity, so it must not close the
+                    // recently-logged-out window. Same opcodes as the gate above by
+                    // coincidence, not by rule.
+                    if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL &&
+                        packet->GetOpcode() != CMSG_PING &&
+                        packet->GetOpcode() != CMSG_KEEP_ALIVE)
                     {
                         m_playerRecentlyLogout = false;
                     }
@@ -494,7 +507,7 @@ bool WorldSession::Update(PacketFilter& updater)
 void WorldSession::HandleBotPackets()
 {
     WorldPacket* packet;
-    while (_recvQueue.next(packet))
+    while (m_mailbox->Next(packet))
     {
         OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
         (this->*opHandle.handler)(*packet);
@@ -771,6 +784,44 @@ void WorldSession::KickPlayer()
     {
         m_Socket->Close();
     }
+}
+
+/// Ping and keep-alive are ordinary opcodes handled on the world thread. They
+/// used to be answered inside the protocol layer, which meant the transport had
+/// to know about latency, the overspeed policy and the security level of an
+/// account -- all game knowledge on the wrong side of the seam.
+void WorldSession::HandlePingOpcode(WorldPacket& recvPacket)
+{
+    uint32 ping = 0;
+    uint32 latency = 0;
+    recvPacket >> ping;
+    recvPacket >> latency;
+
+    uint32 fastPingRun =
+        m_pingTracker.Record(SessionPingTracker::Clock::now());
+    uint32 maximum =
+        sWorld.getConfig(CONFIG_UINT32_MAX_OVERSPEED_PINGS);
+    if (m_pingTracker.ShouldKick(maximum, GetSecurity() == SEC_PLAYER))
+    {
+        sLog.outError(
+            "WorldSession::HandlePingOpcode: account %u kicked for "
+            "overspeeded pings (%u in a row), address = %s",
+            GetAccountId(), fastPingRun, GetRemoteAddress().c_str());
+        KickPlayer();
+        return;
+    }
+
+    SetLatency(latency);
+    ResetClientTimeDelay();
+
+    WorldPacket response(SMSG_PONG, 4);
+    response << ping;
+    SendPacket(&response);
+}
+
+void WorldSession::HandleKeepAliveOpcode(WorldPacket& recvPacket)
+{
+    DEBUG_LOG("CMSG_KEEP_ALIVE ,size: %zu ", recvPacket.size());
 }
 
 /// Cancel channeling handler

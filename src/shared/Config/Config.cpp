@@ -28,6 +28,7 @@
  *
  * This file implements the Config singleton for reading and accessing
  * server configuration from INI format files.
+
  *
  * Features:
  * - INI file format parsing
@@ -51,8 +52,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
-
-INSTANTIATE_SINGLETON_1(Config);
+#include <string>
+#include <utility>
 
 namespace
 {
@@ -74,11 +75,10 @@ namespace
     /**
      * @brief Remove one layer of surrounding double quotes, if present.
      *
-     * The config files quote any value that may contain separators -- most
-     * importantly the database connection strings, which are
-     * semicolon-delimited ("127.0.0.1;3306;root;mangos;realmd"). That is
-     * also why nothing here treats ';' as a comment introducer: it would
-     * cut those values in half.
+     * The config files quote any value that may contain separators — most importantly
+     * the database connection strings, which are semicolon-delimited
+     * ("127.0.0.1;3306;root;mangos;realmd"). That is also why nothing here treats ';'
+     * as a comment introducer: it would cut those values in half.
      */
     std::string Unquote(const std::string& s)
     {
@@ -91,25 +91,20 @@ namespace
     }
 }
 
-/**
- * @brief Construct Config singleton
- *
- * Initializes with no loaded configuration. Use SetSource() to load a file.
- */
 Config::Config()
     : mLoaded(false)
 {
 }
 
-/**
- * @brief Destroy Config singleton
- */
 Config::~Config()
 {
 }
 
 /**
  * @brief Look a key up across every section; the first section holding it wins.
+ *
+ * Look across sections in file order and
+ * returned the first one that had the key.
  */
 bool Config::GetValue(const char* name, std::string& result) const
 {
@@ -166,9 +161,8 @@ bool Config::Reload()
         return false;
     }
 
-    // Keys that appear before any [section] header land in an unnamed
-    // leading section, which keeps them reachable from GetValue() rather
-    // than silently dropped.
+    // Keys that appear before any [section] header land in an unnamed leading section,
+    // which keeps them reachable from GetValue() rather than silently dropped.
     mSections.push_back(std::make_pair(std::string(), SectionEntries()));
 
     std::string line;
@@ -203,9 +197,9 @@ bool Config::Reload()
             continue;
         }
 
-        // Everything after the '=' is the value: no inline-comment handling,
-        // because a quoted value may legitimately contain '#' or ';'. The
-        // last assignment of a key within a section wins.
+        // Everything after the '=' is the value: no inline-comment handling, because a
+        // quoted value may legitimately contain '#' or ';'. The last assignment of a key
+        // within a section wins.
         mSections.back().second[key] = Unquote(Trim(text.substr(eq + 1)));
     }
 
@@ -279,13 +273,13 @@ int32 Config::GetIntDefault(const char* name, int32 def)
  * @param def Default value if key not found or invalid
  * @return Configuration value or default
  *
- * Parses value using atoi(), matching the pre-existing (32-bit-truncating)
- * behavior byte-for-byte -- fixing that is not part of the ACE removal.
+ * strtoll, not atoi: the value is 64 bits precisely because it does not fit in
+ * an int, and atoi would truncate every one that matters.
  */
 int64 Config::GetInt64Default(const char* name, int64 def)
 {
     std::string val;
-    return GetValue(name, val) ? atoi(val.c_str()) : def;
+    return GetValue(name, val) ? int64(std::strtoll(val.c_str(), NULL, 10)) : def;
 }
 
 /**

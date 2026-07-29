@@ -28,12 +28,6 @@
 # LoginDatabase from in here, the build fails rather than quietly re-tangling the
 # two layers. That is the whole point of the library existing -- a naming
 # convention would not have survived contact.
-#
-# No Opcodes.h here: WorldPacket (shared) no longer couples its opcode field
-# to any enum type (see the WorldPacket decoupling commit), so proto's own
-# handful of transport opcodes are plain uint16 constants local to
-# ClientConnection.cpp -- no header needed to share them with `game`, because
-# nothing outside this library uses them.
 # =============================================================================
 
 set(SRC_GRP_PROTO
@@ -43,6 +37,8 @@ set(SRC_GRP_PROTO
     IWorldGateway.h
     Listener.cpp
     Listener.h
+    Opcodes.h
+    WorldPacket.h
     PacketCodec.cpp
     PacketCodec.h
 )

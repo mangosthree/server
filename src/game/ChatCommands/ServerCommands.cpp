@@ -33,6 +33,7 @@
  * - Shutdown and restart operations
  */
 
+#include <string>
 #include "Chat.h"
 #include "Language.h"
 #include "World.h"
@@ -42,7 +43,7 @@
 #include "BattleGroundMgr.h"
 #include "UpdateTime.h"
 #include "MapPersistentStateMgr.h"
-#include "ObjectAccessor.h"
+#include "CorpseManager.h"
 #include "revision_data.h"
 
 /**
@@ -343,7 +344,7 @@ bool ChatHandler::HandleServerLogLevelCommand(char* args)
  */
 bool ChatHandler::HandleServerCorpsesCommand(char* /*args*/)
 {
-    sObjectAccessor.RemoveOldCorpses();
+    sCorpseManager.RemoveOldCorpses();
     return true;
 }
 

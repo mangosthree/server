@@ -1903,7 +1903,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 if (m_transport)
                 {
                     data.WriteBit(1);   // has transport
-                    data << uint32(GetMapId());
+                    // The map he is LEAVING, and that is the one the ship sails. Never her
+                    // own: the client has no terrain for it and dies in CMap::LoadWdt().
+                    data << uint32(m_transport->GetMapId());
                     data << uint32(m_transport->GetEntry());
                 }
                 else

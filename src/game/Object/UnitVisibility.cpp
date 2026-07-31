@@ -79,7 +79,7 @@
  */
 bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList, bool is3dDistance) const
 {
-    if (!u || !Where().ShareFrame(u->Where()))
+    if (!u || !CanBeSeen(*this, *u))
     {
         return false;
     }
@@ -139,7 +139,7 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     if (u->IsTaxiFlying())                                  // what see player in flight
     {
         // use object grey distance for all (only see objects any way)
-        if (!InReach(*this, *viewPoint, World::GetMaxVisibleDistanceInFlight() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), is3dDistance))
+        if (!SeenWithin(*this, *viewPoint, World::GetMaxVisibleDistanceInFlight() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), is3dDistance))
         {
             return false;
         }
@@ -155,7 +155,7 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         }
 
         // Any units far than max visible distance for viewer or not in our map are not visible too
-        if (!InReach(*this, *viewPoint, visibilityDistance + (inVisibleList ? World::GetVisibleUnitGreyDistance() : 0.0f), is3dDistance))
+        if (!SeenWithin(*this, *viewPoint, visibilityDistance + (inVisibleList ? World::GetVisibleUnitGreyDistance() : 0.0f), is3dDistance))
         {
             return false;
         }

@@ -678,7 +678,7 @@ bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoi
     }
 
     // Transport always visible at this step implementation
-    if (IsTransport() && Where().ShareFrame(u->Where()))
+    if (IsTransport() && CanBeSeen(*this, *u))
     {
         return true;
     }
@@ -746,7 +746,7 @@ bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoi
     }
 
     // check distance
-    return InReach(*this, *viewPoint, GetMap()->GetVisibilityDistance() +
+    return SeenWithin(*this, *viewPoint, GetMap()->GetVisibilityDistance() +
                              (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
 }
 

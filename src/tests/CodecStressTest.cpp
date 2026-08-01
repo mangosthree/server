@@ -274,15 +274,23 @@ TEST(CodecStress_oversized_size_field_is_rejected)
     }
 }
 
-TEST(CodecStress_absurd_opcode_is_rejected)
+TEST(CodecStress_absurd_opcode_is_truncated_not_rejected)
 {
+    // The framing layer must NOT range-check the opcode. The client's opening
+    // greeting is a raw string that puts the ASCII "WORL" (0x4C524F57) in the
+    // cmd field, and only the uint16 truncation recovers MSG_WOW_CONNECTION --
+    // so a codec that rejects large cmd values rejects every login. An opcode
+    // that survives truncation but names no handler is the game layer's problem:
+    // WorldGateway::Deliver() drops anything >= NUM_MSG_TYPES before it can be
+    // used as a table index, which is the only place that knowledge exists.
     proto::PacketCodec codec;
     std::vector<WorldPacket> out;
 
     const std::vector<uint8> header = RawHeader(8, 0xFFFFFFFFu);
 
     CHECK(codec.Feed(header.data(), header.size(), out)
-          == proto::DecodeStatus::Malformed);
+          == proto::DecodeStatus::Ok);
+    CHECK_EQ(int(out.size()), 0);           // 4-byte payload still outstanding
 }
 
 TEST(CodecStress_truncated_stream_emits_nothing)

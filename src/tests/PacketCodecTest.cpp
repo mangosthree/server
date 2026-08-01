@@ -157,6 +157,116 @@ TEST(PacketCodec_rejects_an_oversized_packet)
     CHECK(codec.Feed(wire, sizeof(wire), out) == proto::DecodeStatus::Malformed);
 }
 
+TEST(PacketCodec_accepts_opcodes_above_the_packet_size_limit)
+{
+    // The opcode space and the packet-size limit are unrelated quantities. Most
+    // of the 4.3.4 opcode set sits above MAX_CLIENT_PACKET_SIZE (0x2800) --
+    // CMSG_PING alone is 0x444D -- so bounding the opcode by the size limit
+    // drops the connection on the client's first keepalive.
+    proto::PacketCodec codec;
+    std::vector<WorldPacket> out;
+
+    const std::vector<uint8> wire = Frame(0x444D, { 0x01, 0x02, 0x03, 0x04 });
+
+    CHECK(codec.Feed(wire.data(), wire.size(), out) == proto::DecodeStatus::Ok);
+    REQUIRE(out.size() == 1);
+    CHECK_EQ(int(out[0].GetOpcode()), 0x444D);
+}
+
+TEST(PacketCodec_decodes_the_client_opening_greeting)
+{
+    // Captured off the wire from a 4.3.4.15595 client, byte for byte. This is
+    // the FIRST thing any client says, and it is not a packet: it is a uint16
+    // big-endian size followed by the raw ASCII string
+    // "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER".
+    //
+    // Read through the 6-byte client header, "WORL" lands in the 32-bit cmd
+    // field (0x4C524F57) and only the uint16 truncation recovers the real
+    // opcode, MSG_WOW_CONNECTION = 0x4F57. Bounding cmd by anything at all --
+    // the packet size limit, 0xFFFF, or the opcode table size -- rejects this
+    // and nobody can log in. Live symptom:
+    //   "malformed packet framing ... header 00 30 57 4F 52 4C -> size=48
+    //    cmd=0x4C524F57 ... 50 byte(s) read, 0 packet(s) decoded before it"
+    proto::PacketCodec codec;
+    std::vector<WorldPacket> out;
+
+    const char greeting[] = "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER";
+
+    std::vector<uint8> wire;
+    wire.push_back(0x00);                       // size, big-endian: 48
+    wire.push_back(0x30);
+    // 47 characters plus the terminator the client sends with them.
+    wire.insert(wire.end(), greeting, greeting + sizeof(greeting));
+
+    REQUIRE(wire.size() == 50);
+
+    CHECK(codec.Feed(wire.data(), wire.size(), out) == proto::DecodeStatus::Ok);
+    REQUIRE(out.size() == 1);
+    CHECK_EQ(int(out[0].GetOpcode()), 0x4F57);  // MSG_WOW_CONNECTION
+    CHECK_EQ(int(out[0].size()), 44);           // 48 - the 4 cmd bytes
+}
+
+TEST(PacketCodec_arms_the_decryptor_between_coalesced_packets)
+{
+    // The login sequence in miniature. Two packets arrive in ONE read: the
+    // first is plaintext and, when HANDLED, arms the header cipher; the second
+    // is already enciphered by the client. WorldSocket.cpp ran ProcessIncoming()
+    // inside its read loop (:743-801), so the cipher was always armed before the
+    // next header was decrypted. A codec that decodes the whole buffer before
+    // anything is handled reads header two as plaintext, sees garbage, and drops
+    // the connection -- taking the unprocessed CMSG_AUTH_SESSION with it.
+    proto::PacketCodec codec;
+
+    // "Encryption" that is exactly invertible and obviously not identity.
+    const uint8 key = 0x5A;
+
+    std::vector<uint8> wire = Frame(0x0111, { 0xAA });
+    std::vector<uint8> second = Frame(0x0222, { 0xBB });
+    for (size_t i = 0; i < proto::CLIENT_HEADER_SIZE; ++i)
+    {
+        second[i] = uint8(second[i] ^ key);
+    }
+    wire.insert(wire.end(), second.begin(), second.end());
+
+    std::vector<uint16> handled;
+
+    const proto::DecodeStatus status = codec.Feed(wire.data(), wire.size(),
+        [&](WorldPacket&& packet) -> bool
+        {
+            handled.push_back(uint16(packet.GetOpcode()));
+
+            // Handling packet one is what installs the cipher, exactly as
+            // HandleAuthSession() does.
+            if (handled.size() == 1)
+            {
+                codec.SetHeaderDecryptor(
+                    [key](uint8* header, size_t len)
+                    {
+                        for (size_t i = 0; i < len; ++i)
+                        {
+                            header[i] = uint8(header[i] ^ key);
+                        }
+                    });
+            }
+            return true;
+        });
+
+    CHECK(status == proto::DecodeStatus::Ok);
+    REQUIRE(handled.size() == 2);
+    CHECK_EQ(int(handled[0]), 0x0111);
+    CHECK_EQ(int(handled[1]), 0x0222);
+
+    // The control, and the regression this test exists for: decoding the same
+    // buffer to completion BEFORE handling any of it cannot arm the cipher in
+    // time, so header two is read as plaintext and the whole read is condemned
+    // -- including the still-unhandled packet one.
+    proto::PacketCodec batched;
+    std::vector<WorldPacket> out;
+    CHECK(batched.Feed(wire.data(), wire.size(), out)
+          == proto::DecodeStatus::Malformed);
+    CHECK_EQ(int(out.size()), 1);
+}
+
 TEST(PacketCodec_header_decryptor_runs_once_per_header)
 {
     // The header cipher is a stream cipher: decrypting a header in two pieces as

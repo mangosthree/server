@@ -44,6 +44,12 @@ namespace proto
     /// included. Source: WorldSocket.cpp:654 (`header.size > 10240`).
     static const uint32 MAX_CLIENT_PACKET_SIZE = 10240;
 
+    /// There is deliberately no MAX_CLIENT_OPCODE. The 32-bit cmd field is
+    /// truncated to uint16 and NOT range-checked, because the client's opening
+    /// greeting is a raw string whose bytes land in that field ("WORL" ->
+    /// 0x4C524F57) and only the truncation recovers MSG_WOW_CONNECTION. See the
+    /// header check in PacketCodec.cpp; bounding cmd breaks every login.
+
     /**
      * @brief Result of handing a run of received bytes to the codec.
      */
@@ -84,8 +90,40 @@ namespace proto
              */
             explicit PacketCodec(HeaderDecryptor decryptor = HeaderDecryptor());
 
+            /// Receives one completed packet. Returning false stops decoding the
+            /// rest of the buffer, for a peer that must not be listened to any
+            /// further. Called as each packet completes, NOT after the whole
+            /// buffer is decoded -- see the Feed() overload below for why.
+            typedef std::function<bool(WorldPacket&&)> PacketSink;
+
+            /**
+             * @brief Feed received bytes; hand over each packet as it completes.
+             *
+             * @p sink runs BEFORE the next header in the same buffer is read, so
+             * a handler may install the header decryptor (or change any other
+             * decode state) and have it apply to the very next packet. That
+             * ordering is load-bearing: the client enciphers every header after
+             * CMSG_AUTH_SESSION, and TCP will happily deliver that packet and its
+             * successors in a single read. Decoding a whole buffer up front would
+             * read those successors as plaintext. WorldSocket.cpp got this right
+             * by construction, calling ProcessIncoming() inside its read loop.
+             *
+             * @param data Received bytes. Need only stay valid for the call.
+             * @param len  Number of bytes at @p data.
+             * @param sink Invoked once per completed packet, in arrival order.
+             * @return DecodeStatus::Malformed if the peer violated the framing,
+             *         in which case the connection must be closed.
+             */
+            DecodeStatus Feed(const uint8* data, size_t len,
+                              const PacketSink& sink);
+
             /**
              * @brief Feed received bytes; append every packet completed by them.
+             *
+             * Convenience form for tests and callers with no decode state to
+             * change mid-buffer. Everything is decoded before anything is
+             * returned, so it must NOT be used on a connection whose cipher is
+             * armed by one of the packets it might decode.
              *
              * @param data Received bytes. Need only stay valid for the call.
              * @param len  Number of bytes at @p data.
@@ -119,9 +157,33 @@ namespace proto
                 m_decryptor = std::move(decryptor);
             }
 
+            /**
+             * @brief What the header looked like when Feed() last said Malformed.
+             *
+             * A bare "malformed framing" line cannot distinguish a desynchronised
+             * stream cipher from a peer that is genuinely not speaking the
+             * protocol, which is the single most expensive ambiguity there is to
+             * chase from a production log. The codec records rather than logs it,
+             * so it still owns no I/O.
+             */
+            struct Failure
+            {
+                uint8  header[CLIENT_HEADER_SIZE]; ///< the raw header, post-decrypt
+                uint32 size;                       ///< size field as decoded
+                uint32 cmd;                        ///< opcode field as decoded
+                bool   decrypted;                  ///< was a decryptor installed?
+            };
+
+            /// Valid only immediately after Feed() returned Malformed.
+            const Failure& LastFailure() const
+            {
+                return m_failure;
+            }
+
         private:
 
             HeaderDecryptor m_decryptor;
+            Failure         m_failure;
 
             uint8  m_header[CLIENT_HEADER_SIZE]; ///< partially received header
             size_t m_headerFill;                 ///< bytes of m_header filled so far

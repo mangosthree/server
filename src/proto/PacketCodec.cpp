@@ -40,10 +40,22 @@ namespace proto
           m_payloadNeeded(0)
     {
         std::memset(m_header, 0, sizeof(m_header));
+        std::memset(&m_failure, 0, sizeof(m_failure));
     }
 
     DecodeStatus PacketCodec::Feed(const uint8* data, size_t len,
                                    std::vector<WorldPacket>& out)
+    {
+        return Feed(data, len,
+            [&out](WorldPacket&& packet) -> bool
+            {
+                out.push_back(std::move(packet));
+                return true;
+            });
+    }
+
+    DecodeStatus PacketCodec::Feed(const uint8* data, size_t len,
+                                   const PacketSink& sink)
     {
         if (data == NULL || len == 0)
         {
@@ -91,14 +103,30 @@ namespace proto
 
                 // `size` counts the four opcode bytes, so anything below that is
                 // impossible and would underflow the payload length below.
-                // The opcode is bounded too, which WorldSocket.cpp never did. An
-                // opcode past the dispatch table can only ever be rejected further
-                // in, and Rule three is that rejection must be the WORST outcome for
-                // anything off a socket -- so it is rejected here, where the peer
-                // controls neither an allocation nor an index.
-                if (size < 4 || size > MAX_CLIENT_PACKET_SIZE
-                    || cmd > MAX_CLIENT_PACKET_SIZE)
+                //
+                // The opcode is deliberately NOT bounded here, which is the one
+                // thing WorldSocket.cpp appeared to forget and in fact relied on.
+                // The 15595 client opens the world socket with a greeting that is
+                // not a packet at all -- a uint16 size followed by the raw string
+                // "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER". Read through
+                // the 6-byte header that framing puts the ASCII "WORL" in the cmd
+                // field, so cmd arrives as 0x4C524F57 and only the uint16
+                // truncation below turns it back into MSG_WOW_CONNECTION (0x4F57).
+                // Captured live: header 00 30 57 4F 52 4C, size 48, 50 bytes on
+                // the wire, payload 48-4 = 44. ANY upper bound on cmd -- 0x2800,
+                // 0xFFFF, or the opcode table's own size -- rejects the first
+                // thing every client says and no one can log in.
+                //
+                // Rejecting an opcode that is merely absent from the dispatch
+                // table needs NUM_MSG_TYPES, which is game knowledge proto must
+                // not link; that check lives in WorldGateway::Deliver(), on the
+                // one path proto cannot bypass, safely after the truncation.
+                if (size < 4 || size > MAX_CLIENT_PACKET_SIZE)
                 {
+                    std::memcpy(m_failure.header, m_header, CLIENT_HEADER_SIZE);
+                    m_failure.size      = size;
+                    m_failure.cmd       = cmd;
+                    m_failure.decrypted = bool(m_decryptor);
                     return DecodeStatus::Malformed;
                 }
 
@@ -135,11 +163,18 @@ namespace proto
             {
                 packet.append(m_payload.data(), m_payload.size());
             }
-            out.push_back(std::move(packet));
 
+            // Reset BEFORE handing the packet over. The sink installs the header
+            // decryptor from inside this call, so the codec must already be
+            // sitting cleanly on the next header boundary when it does.
             m_haveHeader = false;
             m_headerFill = 0;
             m_payload.clear();
+
+            if (!sink(std::move(packet)))
+            {
+                return DecodeStatus::Ok;
+            }
         }
 
         return DecodeStatus::Ok;

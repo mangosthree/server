@@ -4606,7 +4606,7 @@ void Player::GetWorldAnchor(uint32& mapId, float& x, float& y, float& z) const
 {
     if (Transport* vessel = Transport::VesselOf(*this))
     {
-        if (Map* sailing = vessel->GetMap())
+        if (Map* sailing = vessel->FindMap())
         {
             mapId = sailing->GetId();
             x = vessel->Where().X();
@@ -4643,7 +4643,7 @@ TerrainInfo const* Player::AnchorTerrain() const
 {
     if (Transport* vessel = Transport::VesselOf(*this))
     {
-        if (Map* sailing = vessel->GetMap())
+        if (Map* sailing = vessel->FindMap())
         {
             return sailing->GetTerrain();
         }
@@ -4656,7 +4656,7 @@ void Player::GetZoneAndAreaAboardOrHere(uint32& zone, uint32& area) const
 {
     if (Transport* vessel = Transport::VesselOf(*this))
     {
-        if (Map* sailing = vessel->GetMap())
+        if (Map* sailing = vessel->FindMap())
         {
             sailing->GetTerrain()->GetZoneAndAreaId(zone, area, vessel->Where().X(),
                                                     vessel->Where().Y(), vessel->Where().Z());

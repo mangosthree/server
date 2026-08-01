@@ -191,7 +191,7 @@ void CinematicFlyover::Begin()
     // which already covers the dense citadel before Map::Add.
     if (!(m_route->sequenceId == 165 && m_route->mapId == 609))
     {
-        if (Map* map = m_player->GetMap())
+        if (Map* map = m_player->FindMap())
         {
             for (uint32 i = 0; i < m_route->keyframeCount; ++i)
             {
@@ -313,7 +313,7 @@ void CinematicFlyover::Update(uint32 updateDiff)
 
     // Relocate body using Map::CreatureRelocation to trigger OnRelocated
     // and visibility updates
-    if (body->GetMap())
+    if (body->FindMap())
     {
         body->GetMap()->CreatureRelocation(body, x, y, z, o);
 
@@ -447,7 +447,7 @@ Creature* CinematicFlyover::ResolveBody() const
     }
 
     // Resolve body from map by GUID (safe against async removal)
-    if (!m_player || !m_player->GetMap())
+    if (!m_player || !m_player->FindMap())
     {
         return nullptr;
     }

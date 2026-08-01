@@ -342,7 +342,7 @@ void WorldObject::SendMessageToSet(WorldPacket* data, bool /*bToSelf*/) const
     for (Transport* vessel : vessels->second)
     {
         TransportMap* hull = vessel->AsMap();
-        if (!hull || vessel->GetMap() != GetMap())
+        if (!hull || vessel->FindMap() != FindMap())
         {
             continue;
         }

@@ -956,7 +956,7 @@ void Unit::WriteMovementInfo(ByteBuffer& out, uint16 opcode) const
     // map's, and the client has never heard of it -- no WDT, no terrain, no id it would
     // accept -- so it gets no world position at all. It gets the vessel's guid and those
     // same coordinates as an offset, which is the only thing it can compose a position from.
-    Map* on = GetMap();
+    Map* on = FindMap();
     TransportMap* hull = on ? on->AsTransport() : NULL;
     Transport* vessel = hull ? hull->Vessel() : NULL;
 
@@ -3737,7 +3737,7 @@ Pet* Unit::GetPet() const
         if (TransportMap* hull = on->AsTransport())
         {
             Transport* vessel = hull->Vessel();
-            if (Map* sailed = vessel ? vessel->GetMap() : NULL)
+            if (Map* sailed = vessel ? vessel->FindMap() : NULL)
             {
                 if (Pet* pet = sailed->GetPet(pet_guid))
                 {

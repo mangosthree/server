@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -26,8 +27,32 @@
 #include "MoveSpline.h"
 #include "packet_builder.h"
 #include "Unit.h"
-#include "TransportSystem.h"
+#include "Transports.h"
+#include "Vehicle.h"
+#include "TransportMap.h"
+#include "Map.h"
 #include <atomic>
+
+namespace
+{
+    /// The vessel whose deck this unit is standing on, or an empty guid. Derived from the
+    /// map, so a spline goes out as SMSG_MONSTER_MOVE_TRANSPORT for anything on a deck --
+    /// crew, pet or totem alike -- without anyone having registered it as anything.
+    ObjectGuid DeckVesselGuidOf(Unit const& unit)
+    {
+        if (Map* on = unit.GetMap())
+        {
+            if (TransportMap* hull = on->AsTransport())
+            {
+                if (Transport* vessel = hull->Vessel())
+                {
+                    return vessel->GetObjectGuid();
+                }
+            }
+        }
+        return ObjectGuid();
+    }
+}
 
 namespace Movement
 {
@@ -80,14 +105,26 @@ namespace Movement
     int32 MoveSplineInit::Launch()
     {
         MoveSpline& move_spline = *unit.movespline;
+        // A VEHICLE seat is a real transform the server owns, so a rider's pose has to be
+        // fetched from it. A DECK is not: the unit's map is the vessel and its position is
+        // already deck-local, so Where() is the answer and nothing is composed.
         TransportInfo* transportInfo = unit.GetTransportInfo();
+        if (transportInfo && !transportInfo->IsOnVehicle())
+        {
+            transportInfo = NULL;
+        }
 
-        Location real_position(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ(), unit.GetOrientation());
+        const ObjectGuid vesselGuid = DeckVesselGuidOf(unit);
 
-        // If boarded use current local position
+        Location real_position(unit.Where().X(), unit.Where().Y(), unit.Where().Z(), unit.Where().Facing());
+
         if (transportInfo)
         {
-            transportInfo->GetLocalPosition(real_position.x, real_position.y, real_position.z, real_position.orientation);
+            Geometry::Placement const& deck = transportInfo->Seat();
+            real_position.x = deck.X();
+            real_position.y = deck.Y();
+            real_position.z = deck.Z();
+            real_position.orientation = deck.Facing();
         }
 
         // there is a big chance that current position is unknown if current state is not finalized, need compute it
@@ -141,6 +178,17 @@ namespace Movement
             data << transportInfo->GetTransportGuid().WriteAsPacked();
             data << int8(transportInfo->GetTransportSeat());
         }
+        else if (!vesselGuid.IsEmpty())
+        {
+            // NO SEAT. A seat is a vehicle's, and a vehicle is a unit: it has a seat map,
+            // a transform per seat and a passenger bound to one. A ship has none of that --
+            // she is a map, and what is on her is simply on her. -1 is how the client is
+            // told there is no seat, and it is what both reference cores send for a
+            // MO_TRANSPORT.
+            data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
+            data << vesselGuid.WriteAsPacked();
+            data << int8(-1);
+        }
 
         PacketBuilder::WriteMonsterMove(move_spline, data);
         unit.SendMessageToSet(&data, true);
@@ -161,14 +209,26 @@ namespace Movement
             return;
         }
 
+        // A VEHICLE seat is a real transform the server owns, so a rider's pose has to be
+        // fetched from it. A DECK is not: the unit's map is the vessel and its position is
+        // already deck-local, so Where() is the answer and nothing is composed.
         TransportInfo* transportInfo = unit.GetTransportInfo();
+        if (transportInfo && !transportInfo->IsOnVehicle())
+        {
+            transportInfo = NULL;
+        }
 
-        Location real_position(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ(), unit.GetOrientation());
+        const ObjectGuid vesselGuid = DeckVesselGuidOf(unit);
 
-        // If boarded use current local position
+        Location real_position(unit.Where().X(), unit.Where().Y(), unit.Where().Z(), unit.Where().Facing());
+
         if (transportInfo)
         {
-            transportInfo->GetLocalPosition(real_position.x, real_position.y, real_position.z, real_position.orientation);
+            Geometry::Placement const& deck = transportInfo->Seat();
+            real_position.x = deck.X();
+            real_position.y = deck.Y();
+            real_position.z = deck.Z();
+            real_position.orientation = deck.Facing();
         }
 
         // there is a big chance that current position is unknown if current state is not finalized, need compute it
@@ -199,6 +259,17 @@ namespace Movement
             data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
             data << transportInfo->GetTransportGuid().WriteAsPacked();
             data << int8(transportInfo->GetTransportSeat());
+        }
+        else if (!vesselGuid.IsEmpty())
+        {
+            // NO SEAT. A seat is a vehicle's, and a vehicle is a unit: it has a seat map,
+            // a transform per seat and a passenger bound to one. A ship has none of that --
+            // she is a map, and what is on her is simply on her. -1 is how the client is
+            // told there is no seat, and it is what both reference cores send for a
+            // MO_TRANSPORT.
+            data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
+            data << vesselGuid.WriteAsPacked();
+            data << int8(-1);
         }
 
         data << uint8(0);
@@ -251,7 +322,7 @@ namespace Movement
      */
     void MoveSplineInit::SetFacing(float angle)
     {
-        args.facing.angle = G3D::wrap(angle, 0.f, (float)G3D::twoPi());
+        args.facing.angle = Geometry::wrap(angle, 0.f, (float)Geometry::twoPi());
         args.flags.EnableFacingAngle();
     }
 }

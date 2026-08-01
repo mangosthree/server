@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,13 +17,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <string>
+#include <vector>
 #include "PlayerTaxi.h"
 #include "Player.h"
 #include "Language.h"
@@ -34,7 +38,6 @@
 #include "WorldSession.h"
 #include "UpdateMask.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
 #include "Spell.h"
 #include "SpellAuras.h"
 #include "AchievementMgr.h"
@@ -369,9 +372,9 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     if (node->Pos_0 != 0.0f || node->Pos_1 != 0.0f || node->Pos_2 != 0.0f)
     {
         if (node->ContinentID != GetMapId() ||
-                (node->Pos_0 - GetPositionX()) * (node->Pos_0 - GetPositionX()) +
-                (node->Pos_1 - GetPositionY()) * (node->Pos_1 - GetPositionY()) +
-                (node->Pos_2 - GetPositionZ()) * (node->Pos_2 - GetPositionZ()) >
+                (node->Pos_0 - Where().X()) * (node->Pos_0 - Where().X()) +
+                (node->Pos_1 - Where().Y()) * (node->Pos_1 - Where().Y()) +
+                (node->Pos_2 - Where().Z()) * (node->Pos_2 - Where().Z()) >
                 (2 * INTERACTION_DISTANCE) * (2 * INTERACTION_DISTANCE) * (2 * INTERACTION_DISTANCE))
         {
             GetSession()->SendActivateTaxiReply(ERR_TAXITOOFARAWAY);
@@ -534,9 +537,9 @@ void Player::ContinueTaxiFlight()
 
     float distPrev = MAP_SIZE * MAP_SIZE;
     float distNext =
-        (nodeList[0].Loc_0 - GetPositionX()) * (nodeList[0].Loc_0 - GetPositionX()) +
-        (nodeList[0].Loc_1 - GetPositionY()) * (nodeList[0].Loc_1 - GetPositionY()) +
-        (nodeList[0].Loc_2 - GetPositionZ()) * (nodeList[0].Loc_2 - GetPositionZ());
+        (nodeList[0].Loc_0 - Where().X()) * (nodeList[0].Loc_0 - Where().X()) +
+        (nodeList[0].Loc_1 - Where().Y()) * (nodeList[0].Loc_1 - Where().Y()) +
+        (nodeList[0].Loc_2 - Where().Z()) * (nodeList[0].Loc_2 - Where().Z());
 
     for (uint32 i = 1; i < nodeList.size(); ++i)
     {
@@ -552,9 +555,9 @@ void Player::ContinueTaxiFlight()
         distPrev = distNext;
 
         distNext =
-            (node.Loc_0 - GetPositionX()) * (node.Loc_0 - GetPositionX()) +
-            (node.Loc_1 - GetPositionY()) * (node.Loc_1 - GetPositionY()) +
-            (node.Loc_2 - GetPositionZ()) * (node.Loc_2 - GetPositionZ());
+            (node.Loc_0 - Where().X()) * (node.Loc_0 - Where().X()) +
+            (node.Loc_1 - Where().Y()) * (node.Loc_1 - Where().Y()) +
+            (node.Loc_2 - Where().Z()) * (node.Loc_2 - Where().Z());
 
         float distNodes =
             (node.Loc_0 - prevNode.Loc_0) * (node.Loc_0 - prevNode.Loc_0) +

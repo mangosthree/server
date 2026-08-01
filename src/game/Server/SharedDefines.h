@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -2865,6 +2866,24 @@ enum CreatureTypeFlags
     CREATURE_TYPEFLAGS_UNK31            = 0x40000000,
     CREATURE_TYPEFLAGS_QUEST_BOSS       = 0x80000000,       // Lua_UnitIsQuestBoss
 };
+
+/**
+ * @brief A CREATURE CARRYING BOTH OF THESE MAY NOT SAIL.
+ *
+ * Set together, they kill every client that can see the creature the moment the transport it
+ * stands on gets under way -- in the client's own render path, reading a wild pointer.
+ * Stationary nothing happens: a transport's attachments are only walked while it moves.
+ *
+ * BOTH are required. Either bit alone was put on a deck and sailed with no complaint; the two
+ * together were fatal every time. They reach the client in SMSG_CREATURE_QUERY_RESPONSE and
+ * are cached there per ENTRY, so this cannot be masked per creature on the wire -- the
+ * creature simply does not go aboard. See TransportMap::EnlistCrew.
+ *
+ * In the whole world database exactly one template carries the pair, and it is not content:
+ * the `.wp add` waypoint marker, which is why laying a path on a deck used to kill everyone
+ * in the harbour.
+ */
+#define CREATURE_TYPEFLAGS_TRANSPORT_FORBIDDEN     (CREATURE_TYPEFLAGS_UNK21 | CREATURE_TYPEFLAGS_UNK23)
 
 enum CreatureEliteType
 {

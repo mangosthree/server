@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -25,7 +26,10 @@
 #ifndef MANGOS_CREATURE_EAI_H
 #define MANGOS_CREATURE_EAI_H
 
-#include "Common.h"
+#include <unordered_map>
+#include "Platform/Define.h"
+#include <vector>
+#include <list>
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "Unit.h"
@@ -70,7 +74,8 @@ enum EventAI_Type
     EVENT_T_TARGET_MISSING_AURA     = 28,                   // Param1 = SpellID, Param2 = Number of time stacked expected, Param3/4 Repeat Min/Max
     EVENT_T_TIMER_GENERIC           = 29,                   // InitialMin, InitialMax, RepeatMin, RepeatMax
     EVENT_T_RECEIVE_AI_EVENT        = 30,                   // AIEventType, Sender-Entry, unused, unused
-    EVENT_T_ENERGY                  = 31,                   // EnergyMax%, EnergyMin%, RepeatMin, RepeatMax
+    EVENT_T_REACHED_WAYPOINT        = 31,                   // positionX, positionY, positionZ, distance (distance from the waypoint)
+    EVENT_T_ENERGY                  = 32,                   // EnergyMax%, EnergyMin%, RepeatMin, RepeatMax
 
     EVENT_T_END,
 };
@@ -485,7 +490,7 @@ struct CreatureEventAI_Event
         // EVENT_T_MANA                                     = 3
         // EVENT_T_TARGET_HP                                = 12
         // EVENT_T_TARGET_MANA                              = 18
-        // EVENT_T_ENERGY                                   = 31
+        // EVENT_T_ENERGY                                   = 32
         struct
         {
             uint32 percentMax;
@@ -601,6 +606,14 @@ struct CreatureEventAI_Event
             uint32 unused1;
             uint32 unused2;
         } receiveAIEvent;
+        // EVENT_T_REACHED_WAYPOINT                         = 31
+        struct
+        {
+            int positionX;
+            int positionY;
+            int positionZ;
+            int distance;                                   // Distance from the waypoint
+        } reached_waypoint;
         // RAW
         struct
         {

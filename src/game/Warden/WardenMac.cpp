@@ -1,13 +1,15 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -16,8 +18,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -40,7 +41,10 @@
  */
 
 #include "WardenKeyGeneration.h"
-#include "Common.h"
+#include "Auth/Md5.h"
+#include "Platform/Define.h"
+#include <cstring>
+#include <string>
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Log.h"
@@ -129,12 +133,10 @@ ClientWardenModule* WardenMac::GetModuleForClient()
     memcpy(mod->Key, Module_0DBBF209A27B1E279A9FEC5C168A15F7_Key, 16);
 
     // md5 hash
-    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
-    EVP_DigestInit_ex(ctx, EVP_md5(), nullptr);
-    EVP_DigestUpdate(ctx, mod->CompressedData, len);
-    unsigned int mdLen = 0;
-    EVP_DigestFinal_ex(ctx, (uint8*)&mod->Id, &mdLen);
-    EVP_MD_CTX_free(ctx);
+    Md5Hash md5;
+    md5.UpdateData(mod->CompressedData, len);
+    md5.Finalize();
+    memcpy(&mod->Id, md5.GetDigest(), Md5Hash::DigestLength);
 
     return mod;
 }
@@ -302,13 +304,11 @@ void WardenMac::HandleData(ByteBuffer &buff)
         found = true;
     }
 
-    EVP_MD_CTX* ctx = EVP_MD_CTX_new();
-    EVP_DigestInit_ex(ctx, EVP_md5(), nullptr);
-    EVP_DigestUpdate(ctx, str.c_str(), str.size());
+    Md5Hash md5;
+    md5.UpdateData(str);
+    md5.Finalize();
     uint8 ourMD5Hash[16];
-    unsigned int mdLen = 0;
-    EVP_DigestFinal_ex(ctx, ourMD5Hash, &mdLen);
-    EVP_MD_CTX_free(ctx);
+    memcpy(ourMD5Hash, md5.GetDigest(), sizeof(ourMD5Hash));
 
     uint8 theirsMD5Hash[16];
     buff.read(theirsMD5Hash, 16);

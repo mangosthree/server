@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -25,7 +26,10 @@
 #ifndef FIELD_H
 #define FIELD_H
 
-#include "Common/Common.h"
+#include "Platform/Define.h"
+#include <cstdlib>
+#include <cstdio>
+#include <string>
 #include <mysql.h>
 
 /**
@@ -42,7 +46,7 @@ class Field
         /**
          * @brief Simple data type enumeration for field classification
          */
-        enum DataTypes
+        enum SimpleDataTypes
         {
             DB_TYPE_UNKNOWN = 0x00,
             DB_TYPE_STRING  = 0x01,
@@ -54,13 +58,13 @@ class Field
         /**
          * @brief Default constructor - creates NULL field
          */
-        Field() : mValue(NULL), mType(DB_TYPE_UNKNOWN) {}
+        Field() : mValue(NULL), mType(MYSQL_TYPE_NULL) {}
         /**
          * @brief Constructor with value and type
          * @param value Pointer to string value
          * @param type MySQL field type
          */
-        Field(const char* value, enum DataTypes type) : mValue(value), mType(type) {}
+        Field(const char* value, enum_field_types type) : mValue(value), mType(type) {}
 
         /**
          * @brief Destructor
@@ -71,8 +75,7 @@ class Field
          * @brief Get the MySQL field type
          * @return MySQL field type enumeration
          */
-        enum DataTypes GetType() const { return mType; }
-
+        enum enum_field_types GetType() const { return mType; }
         /**
          * @brief Check if field value is NULL
          * @return True if NULL, false otherwise
@@ -103,40 +106,42 @@ class Field
          */
         bool GetBool() const { return mValue ? atoi(mValue) > 0 : false; }
         /**
-        * @brief Get double value
-        * @return Double value (0.0 if NULL)
-        */
+         * @brief Get double value
+         * @return Double value (0.0 if NULL)
+         */
         double GetDouble() const { return mValue ? static_cast<double>(atof(mValue)) : 0.0f; }
         /**
-        * @brief Get 8-bit signed integer value
-        * @return 8-bit signed integer (0 if NULL)
-        */
-        int8 GetInt8() const { return mValue ? static_cast<int8>(atol(mValue)) : int8(0); }
+         * @brief Get 8-bit signed integer value
+         * @return 8-bit signed integer (0 if NULL)
+         */
+        // strtol/strtoul, not atol: MSVC's long is 32 bits even on x64, so a DB
+        // value above 2^31 overflows atol -- undefined, LONG_MAX in practice.
+        int8 GetInt8() const { return mValue ? static_cast<int8>(std::strtol(mValue, NULL, 10)) : int8(0); }
         /**
          * @brief Get 32-bit signed integer value
          * @return 32-bit signed integer (0 if NULL)
          */
-        int32 GetInt32() const { return mValue ? static_cast<int32>(atol(mValue)) : int32(0); }
+        int32 GetInt32() const { return mValue ? static_cast<int32>(std::strtol(mValue, NULL, 10)) : int32(0); }
         /**
          * @brief Get 8-bit unsigned integer value
          * @return 8-bit unsigned integer (0 if NULL)
          */
-        uint8 GetUInt8() const { return mValue ? static_cast<uint8>(atol(mValue)) : uint8(0); }
+        uint8 GetUInt8() const { return mValue ? static_cast<uint8>(std::strtoul(mValue, NULL, 10)) : uint8(0); }
         /**
          * @brief Get 16-bit unsigned integer value
          * @return 16-bit unsigned integer (0 if NULL)
          */
-        uint16 GetUInt16() const { return mValue ? static_cast<uint16>(atol(mValue)) : uint16(0); }
+        uint16 GetUInt16() const { return mValue ? static_cast<uint16>(std::strtoul(mValue, NULL, 10)) : uint16(0); }
         /**
          * @brief Get 16-bit signed integer value
          * @return 16-bit signed integer (0 if NULL)
          */
-        int16 GetInt16() const { return mValue ? static_cast<int16>(atol(mValue)) : int16(0); }
+        int16 GetInt16() const { return mValue ? static_cast<int16>(std::strtol(mValue, NULL, 10)) : int16(0); }
         /**
          * @brief Get 32-bit unsigned integer value
          * @return 32-bit unsigned integer (0 if NULL)
          */
-        uint32 GetUInt32() const { return mValue ? static_cast<uint32>(atol(mValue)) : uint32(0); }
+        uint32 GetUInt32() const { return mValue ? static_cast<uint32>(std::strtoul(mValue, NULL, 10)) : uint32(0); }
         /**
          * @brief Get 64-bit unsigned integer value
          * @return 64-bit unsigned integer (0 if NULL)
@@ -152,9 +157,9 @@ class Field
             return value;
         }
         /**
-        * @brief Get 64-bit signed integer value
-        * @return 64-bit signed integer (0 if NULL)
-        */
+         * @brief Get 64-bit signed integer value
+         * @return 64-bit signed integer (0 if NULL)
+         */
         // TODO: should this be int64 not uint64
         uint64 GetInt64() const
         {
@@ -171,7 +176,7 @@ class Field
          * @brief Set the MySQL field type
          * @param type MySQL field type
          */
-        void SetType(enum DataTypes type) { mType = type; }
+        void SetType(enum enum_field_types type) { mType = type; }
 
         /**
          * @brief Set the field value (no memory allocation, pointer only)
@@ -194,6 +199,6 @@ class Field
         Field& operator=(Field const&);
 
         const char* mValue; /**< Pointer to field value string */
-        enum DataTypes mType; /**< MySQL field type */
+        enum_field_types mType; /**< MySQL field type */
 };
 #endif

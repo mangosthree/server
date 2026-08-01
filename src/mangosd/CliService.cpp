@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
  * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -25,6 +26,7 @@
 #include "CliService.h"
 
 #include "Common/ServerDefines.h"
+#include "Console/ConsoleUI.h"
 #include "Log.h"
 #include "Util.h"
 #include "World.h"
@@ -47,13 +49,17 @@ namespace
      * @brief Draw the prompt.
      *
      * Routed through the console writer rather than printf: stdout has a single
-     * owner (src/shared/Log/ConsoleLogWriter), so the prompt cannot overtake
-     * queued log lines or tear against a progress-bar redraw -- which is exactly
-     * what happens when a command like .reload finishes and its output is still
-     * draining.
+     * owner, so the prompt cannot overtake queued log lines or tear against a
+     * progress-bar redraw -- which is exactly what happens when a command like
+     * .reload finishes and its output is still draining.
      */
     void Prompt(void* /*callbackArg*/ = nullptr, bool /*success*/ = true)
     {
+        if (MaNGOS::Console::ConsoleUI::Instance().Active())
+        {
+            return;                             // the console draws its own input row
+        }
+
         sLog.ConsoleEmitRaw("mangos>");
     }
 
@@ -127,22 +133,53 @@ void CliService::Run()
     // Let start-up finish printing before the prompt lands in the middle of it.
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    if (m_beep)
+    if (m_beep && !MaNGOS::Console::ConsoleUI::Instance().Active())
     {
-        sLog.ConsoleEmitRaw("\a");     // \a = Alert (through the writer, single-owner stdout)
+        sLog.ConsoleEmitRaw("\a");
     }
 
     Prompt();
 
+    if (MaNGOS::Console::ConsoleUI::Instance().Active())
+    {
+        RunManaged();
+    }
+    else
+    {
+        RunLineBased();
+    }
+}
+
+void CliService::RunManaged()
+{
+    std::string line;
+
+    while (!m_stop.load(std::memory_order_acquire) && !World::IsStopped())
+    {
+        // Already UTF-8: the console decodes keystrokes to code points itself, so
+        // the consoleToUtf8() step of the line-based path would double-convert.
+        if (!MaNGOS::Console::ConsoleUI::Instance().PollInput(line))
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(15));
+            continue;
+        }
+
+        sWorld.QueueCliCommand(
+            new CliCommandHolder(0, SEC_CONSOLE, nullptr, line.c_str(),
+                                 &utf8print, &Prompt));
+    }
+}
+
+void CliService::RunLineBased()
+{
     char buffer[256];
 
-    ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it
     while (!m_stop.load(std::memory_order_acquire) && !World::IsStopped())
     {
 #ifndef _WIN32
         // Poll rather than block, so shutdown does not have to wait for the
         // operator to press Return. The sleep also caps the console at roughly
-        // ten commands a second, same as the old CliThread::Body::run().
+        // ten commands a second.
         while (!LinePending())
         {
             if (m_stop.load(std::memory_order_acquire) || World::IsStopped())
@@ -181,13 +218,15 @@ void CliService::Run()
         }
 
         std::string command;
-        if (!consoleToUtf8(line, command))       // convert from console encoding to utf8
+        if (!consoleToUtf8(line, command))
         {
             Prompt();
             continue;
         }
 
         // Queued, never executed here: game state belongs to the world thread.
-        sWorld.QueueCliCommand(new CliCommandHolder(0, SEC_CONSOLE, NULL, command.c_str(), &utf8print, &Prompt));
+        sWorld.QueueCliCommand(
+            new CliCommandHolder(0, SEC_CONSOLE, nullptr, command.c_str(),
+                                 &utf8print, &Prompt));
     }
 }

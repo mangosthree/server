@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -47,7 +48,13 @@
 #ifndef MANGOSSERVER_CREATURE_H
 #define MANGOSSERVER_CREATURE_H
 
-#include "Common.h"
+#include <unordered_map>
+#include "Platform/Define.h"
+#include <ctime>
+#include <string>
+#include <vector>
+#include <map>
+#include "Common/TimeConstants.h"
 #include "GameTime.h"
 #include "Unit.h"
 #include "SharedDefines.h"
@@ -525,16 +532,16 @@ struct CreatureCreatePos
     public:
         // exactly coordinates used
         CreatureCreatePos(Map* map, float x, float y, float z, float o, uint32 phaseMask)
-            : m_map(map), m_phaseMask(phaseMask), m_closeObject(NULL), m_angle(0.0f), m_dist(0.0f) { m_pos.x = x; m_pos.y = y; m_pos.z = z; m_pos.o = NormalizeOrientation(o); }
+            : m_map(map), m_phaseMask(phaseMask), m_closeObject(NULL), m_angle(0.0f), m_dist(0.0f) { m_pos.x = x; m_pos.y = y; m_pos.z = z; m_pos.o = o; }
         // if dist == 0.0f -> exactly object coordinates used, in other case close point to object (CONTACT_DIST can be used as minimal distances)
         CreatureCreatePos(WorldObject* closeObject, float ori, float dist = 0.0f, float angle = 0.0f)
             : m_map(closeObject->GetMap()), m_phaseMask(closeObject->GetPhaseMask()),
-              m_closeObject(closeObject), m_angle(angle), m_dist(dist) { m_pos.o = NormalizeOrientation(ori); }
+              m_closeObject(closeObject), m_angle(angle), m_dist(dist) { m_pos.o = ori; }
     public:
         Map* GetMap() const { return m_map; }
         uint32 GetPhaseMask() const { return m_phaseMask; }
         void SelectFinalPoint(Creature* cr);
-        bool Relocate(Creature* cr) const;
+        bool PlaceOn(Creature* cr) const;
 
         // read only after SelectFinalPoint
         Position m_pos;
@@ -877,13 +884,17 @@ class Creature : public Unit
             }
         }
 
-        void SetCombatStartPosition(float x, float y, float z) { m_combatStartX = x; m_combatStartY = y; m_combatStartZ = z; }
-        void GetCombatStartPosition(float& x, float& y, float& z) { x = m_combatStartX; y = m_combatStartY; z = m_combatStartZ; }
+        /// Where combat began, in the frame it began in. The leash point, and nothing
+        /// composes it -- a creature pulled on a deck leashes to a deck spot.
+        Geometry::Vector3 const& CombatAnchor() const { return m_combatStart; }
+        void SetCombatAnchor(Geometry::Vector3 const& at) { m_combatStart = at; }
 
-        void SetRespawnCoord(CreatureCreatePos const& pos) { m_respawnPos = pos.m_pos; }
-        void SetRespawnCoord(float x, float y, float z, float ori) { m_respawnPos.x = x; m_respawnPos.y = y; m_respawnPos.z = z; m_respawnPos.o = ori; }
-        void GetRespawnCoord(float& x, float& y, float& z, float* ori = NULL, float* dist = NULL) const;
-        void ResetRespawnCoord();
+        /// Where this creature belongs: its spawn pose, in the frame it spawned in.
+        /// Home movement, wander and leashing all read it, and nothing composes it.
+        Geometry::Placement const& Spawn() const { return m_spawn; }
+        void SetSpawn(CreatureCreatePos const& pos);
+        void SetSpawn(Geometry::Vector3 const& at, float facing);
+        void ResetSpawn();
 
         void SetDeadByDefault(bool death_state) { m_IsDeadByDefault = death_state; }
 
@@ -945,17 +956,19 @@ class Creature : public Unit
         SpellSchoolMask m_meleeDamageSchoolMask;
         uint32 m_originalEntry;
 
-        float m_combatStartX;
-        float m_combatStartY;
-        float m_combatStartZ;
+        Geometry::Vector3 m_combatStart;
 
-        Position m_respawnPos;
+        Geometry::Placement m_spawn;
 
         bool DisableReputationGain;
 
     private:
         GridReference<Creature> m_gridRef;
         CreatureInfo const* m_creatureInfo;                 // in difficulty mode > 0 can different from ObjMgr::GetCreatureTemplate(GetEntry())
+
+#ifdef MANGOS_SCRIPT_COMPAT
+#include "Object/ScriptApiCompatCreature.inl"
+#endif
 };
 
 class ForcedDespawnDelayEvent : public BasicEvent

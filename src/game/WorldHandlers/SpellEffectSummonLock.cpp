@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,14 +17,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include "Utilities/MathDefines.h"
+#include <algorithm>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -40,7 +44,6 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "SharedDefines.h"
 #include "Pet.h"
 #include "GameObject.h"
@@ -54,7 +57,6 @@
 #include "BattleGround/BattleGroundWS.h"
 #include "Language.h"
 #include "SocialMgr.h"
-#include "VMapFactory.h"
 #include "Util.h"
 #include "TemporarySummon.h"
 #include "ScriptMgr.h"
@@ -64,7 +66,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Vehicle.h"
-#include "G3D/Vector3.h"
+#include "Geometry/Vector3.h"
 #include "LootMgr.h"
 #include <random>
 
@@ -388,7 +390,9 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
     }
     else
     {
-        realCaster->GetPosition(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z);
+        summonPositions[0].x = realCaster->Where().X();
+        summonPositions[0].y = realCaster->Where().Y();
+        summonPositions[0].z = realCaster->Where().Z();
 
         // TODO - Is this really an error?
         sLog.outDebug("Spell Effect EFFECT_SUMMON (%u) - summon without destination (spell id %u, effIndex %u)", effect->Effect, m_spellInfo->ID, SpellEffectIndex(effect->EffectIndex));
@@ -401,18 +405,24 @@ void Spell::EffectSummonType(SpellEffectEntry const* effect)
     {
         if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION || radius > 1.0f)
         {
-            realCaster->GetRandomPoint(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, radius, itr->x, itr->y, itr->z);
+            const Geometry::Vector3 spot = RandomGroundPointNear(*realCaster, Geometry::Vector3(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z), radius);
+            itr->x = spot.x;
+            itr->y = spot.y;
+            itr->z = spot.z;
             if (realCaster->GetMap()->GetHitPosition(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, itr->x, itr->y, itr->z, m_caster->GetPhaseMask(), -0.5f))
             {
-                realCaster->UpdateAllowedPositionZ(itr->x, itr->y, itr->z);
+                ClampToAllowedZ(*realCaster, itr->x, itr->y, itr->z);
             }
         }
         else                                                // Get a point near the caster
         {
-            realCaster->GetRandomPoint(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, radius, itr->x, itr->y, itr->z);
+            const Geometry::Vector3 spot = RandomGroundPointNear(*realCaster, Geometry::Vector3(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z), radius);
+            itr->x = spot.x;
+            itr->y = spot.y;
+            itr->z = spot.z;
             if (realCaster->GetMap()->GetHitPosition(summonPositions[0].x, summonPositions[0].y, summonPositions[0].z, itr->x, itr->y, itr->z, m_caster->GetPhaseMask(), -0.5f))
             {
-                realCaster->UpdateAllowedPositionZ(itr->x, itr->y, itr->z);
+                ClampToAllowedZ(*realCaster, itr->x, itr->y, itr->z);
             }
         }
     }
@@ -627,7 +637,7 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
     TempSpawnType summonType = (m_duration == 0) ? TEMPSPAWN_DEAD_DESPAWN : TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN;
 
     for (CreatureSummonPositions::iterator itr = list.begin(); itr != list.end(); ++itr)
-        if (Creature* summon = m_caster->SummonCreature(creature_entry, itr->x, itr->y, itr->z, m_caster->GetOrientation(), summonType, m_duration))
+        if (Creature* summon = m_caster->SummonCreature(creature_entry, itr->x, itr->y, itr->z, m_caster->Where().Facing(), summonType, m_duration))
         {
             itr->creature = summon;
 
@@ -689,7 +699,7 @@ bool Spell::DoSummonCritter(CreatureSummonPositions& list, SummonPropertiesEntry
     }
 
     // for (CreatureSummonPositions::iterator itr = list.begin(); itr != list.end(); ++itr)
-    CreatureCreatePos pos(m_caster->GetMap(), list[0].x, list[0].y, list[0].z, m_caster->GetOrientation(), m_caster->GetPhaseMask());
+    CreatureCreatePos pos(m_caster->GetMap(), list[0].x, list[0].y, list[0].z, m_caster->Where().Facing(), m_caster->GetPhaseMask());
 
     // summon new pet
     Pet* critter = new Pet(MINI_PET);
@@ -705,7 +715,7 @@ bool Spell::DoSummonCritter(CreatureSummonPositions& list, SummonPropertiesEntry
     // itr!
     list[0].creature = critter;
 
-    critter->SetRespawnCoord(pos);
+    critter->SetSpawn(pos);
 
     // critter->SetName("");                                // generated by client
     critter->SetOwnerGuid(m_caster->GetObjectGuid());
@@ -790,7 +800,7 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
     {
         Pet* spawnCreature = new Pet(petType);
 
-        CreatureCreatePos pos(m_caster->GetMap(), itr->x, itr->y, itr->z, -m_caster->GetOrientation(), m_caster->GetPhaseMask());
+        CreatureCreatePos pos(m_caster->GetMap(), itr->x, itr->y, itr->z, -m_caster->Where().Facing(), m_caster->GetPhaseMask());
 
         uint32 pet_number = sObjectMgr.GeneratePetNumber();
         if (!spawnCreature->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, pet_number))
@@ -802,7 +812,7 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
 
         itr->creature = spawnCreature;
 
-        spawnCreature->SetRespawnCoord(pos);
+        spawnCreature->SetSpawn(pos);
 
         if (m_duration > 0)
         {
@@ -882,7 +892,7 @@ bool Spell::DoSummonTotem(SpellEffectEntry const* effect, uint8 slot_dbc)
     // if totem have creature_template_addon.auras with persistent point for example or script call
     float angle = slot < MAX_TOTEM_SLOT ? M_PI_F / MAX_TOTEM_SLOT - (slot * 2 * M_PI_F / MAX_TOTEM_SLOT) : 0;
 
-    CreatureCreatePos pos(m_caster, m_caster->GetOrientation(), 2.0f, angle);
+    CreatureCreatePos pos(m_caster, m_caster->Where().Facing(), 2.0f, angle);
 
     CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(effect->EffectMiscValue_0);
     if (!cinfo)
@@ -899,7 +909,7 @@ bool Spell::DoSummonTotem(SpellEffectEntry const* effect, uint8 slot_dbc)
         return false;
     }
 
-    pTotem->SetRespawnCoord(pos);
+    pTotem->SetSpawn(pos);
 
     if (slot < MAX_TOTEM_SLOT)
     {
@@ -957,7 +967,7 @@ bool Spell::DoSummonPossessed(CreatureSummonPositions& list, SummonPropertiesEnt
 
     uint32 const& creatureEntry = effect->EffectMiscValue_0;
 
-    Unit* newUnit = m_caster->TakePossessOf(m_spellInfo, prop, effect, list[0].x, list[0].y, list[0].z, m_caster->GetOrientation());
+    Unit* newUnit = m_caster->TakePossessOf(m_spellInfo, prop, effect, list[0].x, list[0].y, list[0].z, m_caster->Where().Facing());
     if (!newUnit)
     {
         sLog.outError("Spell::DoSummonPossessed: creature entry %d for spell %u could not be summoned.", creatureEntry, m_spellInfo->ID);
@@ -1020,7 +1030,7 @@ bool Spell::DoSummonPet(SpellEffectEntry const* effect)
             // Summon in dest location
             if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
             {
-                spawnCreature->Relocate(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, -m_caster->GetOrientation());
+                spawnCreature->Place().MoveTo(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, -m_caster->Where().Facing());
             }
 
             return true;
@@ -1034,11 +1044,11 @@ bool Spell::DoSummonPet(SpellEffectEntry const* effect)
     }
 
     // Summon in dest location
-    CreatureCreatePos pos(m_caster->GetMap(), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, -m_caster->GetOrientation(), m_caster->GetPhaseMask());
+    CreatureCreatePos pos(m_caster->GetMap(), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, -m_caster->Where().Facing(), m_caster->GetPhaseMask());
 
     if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
     {
-        pos = CreatureCreatePos(m_caster, -m_caster->GetOrientation());
+        pos = CreatureCreatePos(m_caster, -m_caster->Where().Facing());
     }
 
     Map* map = m_caster->GetMap();
@@ -1052,7 +1062,7 @@ bool Spell::DoSummonPet(SpellEffectEntry const* effect)
 
     uint32 level = std::max(m_caster->getLevel() + effect->EffectAmplitude, 1.0f);
 
-    spawnCreature->SetRespawnCoord(pos);
+    spawnCreature->SetSpawn(pos);
 
     spawnCreature->SetOwnerGuid(m_caster->GetObjectGuid());
     spawnCreature->setFaction(m_caster->getFaction());
@@ -1136,7 +1146,7 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
         return false;
     }
 
-    Creature* spawnCreature = m_caster->SummonCreature(creatureEntry, list[0].x, list[0].y, list[0].z, m_caster->GetOrientation(),
+    Creature* spawnCreature = m_caster->SummonCreature(creatureEntry, list[0].x, list[0].y, list[0].z, m_caster->Where().Facing(),
                               (m_duration == 0) ? TEMPSPAWN_CORPSE_DESPAWN : TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, m_duration);
 
     if (!spawnCreature)

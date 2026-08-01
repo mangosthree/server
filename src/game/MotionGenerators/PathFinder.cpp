@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,13 +17,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <algorithm>
 #include "../recastnavigation/Detour/Include/DetourCommon.h"
 
 #include <cfloat>
@@ -41,13 +44,17 @@
  * @param owner The unit that owns this PathFinder.
  */
 PathFinder::PathFinder(const Unit* owner) :
+    PathFinder(owner, owner->GetMapId())
+{
+}
+
+PathFinder::PathFinder(const Unit* owner, uint32 mapId) :
     m_polyLength(0), m_type(PATHFIND_BLANK),
     m_useStraightPath(false), m_forceDestination(false), m_pointPathLimit(MAX_POINT_PATH_LENGTH),
     m_sourceUnit(owner), m_navMesh(NULL), m_navMeshQuery(NULL)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::PathInfo for %u \n", m_sourceUnit->GetGUIDLow());
 
-    uint32 mapId = m_sourceUnit->GetMapId();
     if (MMAP::MMapFactory::IsPathfindingEnabled(mapId, owner))
     {
         MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
@@ -77,7 +84,9 @@ PathFinder::~PathFinder()
 bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest)
 {
     float x, y, z;
-    m_sourceUnit->GetPosition(x, y, z);
+    x = m_sourceUnit->Where().X();
+    y = m_sourceUnit->Where().Y();
+    z = m_sourceUnit->Where().Z();
 
     return calculate(x, y, z, destX, destY, destZ, forceDest);
 }
@@ -642,7 +651,7 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
 bool PathFinder::BuildSwimShortcut(const Vector3& startPos, const Vector3& endPos)
 {
     TerrainInfo const* terrain = m_sourceUnit->GetTerrain();
-    float radius = m_sourceUnit->GetObjectBoundingRadius();
+    float radius = m_sourceUnit->Where().Extent();
 
     // both ends must be deep enough to actually swim in, not just wading
     if (!terrain->IsSwimmable(startPos.x, startPos.y, startPos.z, radius) ||
@@ -652,18 +661,19 @@ bool PathFinder::BuildSwimShortcut(const Vector3& startPos, const Vector3& endPo
     }
 
 #ifdef ENABLE_PLAYERBOTS
-    // Straight-line swim shortcuts have no vmap/WMO collision test, so a bot
+    // Straight-line swim shortcuts have no WMO collision test, so a bot
     // hugging a cove wall (e.g. Darkbrake Cove, Vashj'ir) can clip through
     // the rock and end up under the map. Reject the shortcut when the
     // straight start->end ray is blocked and fall back to the navmesh,
     // which clamps to valid polys instead of tunnelling through geometry.
-    // ModelIgnoreFlags::M2 skips the dense kelp/coral doodads so they don't
-    // falsely block a clear swim lane.
+    // (The united-cores terrain engine has no per-model ignore filter; if
+    // dense kelp/doodads prove to block clear swim lanes, this is the spot
+    // that needs a finer-grained query.)
     if (m_sourceUnit->GetTypeId() == TYPEID_PLAYER && ((Player*)m_sourceUnit)->GetPlayerbotAI())
     {
         if (!m_sourceUnit->GetMap()->IsInLineOfSight(startPos.x, startPos.y, startPos.z + 0.5f,
                 endPos.x, endPos.y, endPos.z + 0.5f,
-                m_sourceUnit->GetPhaseMask(), VMAP::ModelIgnoreFlags::M2))
+                m_sourceUnit->GetPhaseMask()))
         {
             return false;
         }
@@ -723,14 +733,7 @@ void PathFinder::BuildShortcut()
     {
         float t = float(i) / float(segments);
         Vector3 point = start + (end - start) * t;
-        // Do not snap a waypoint that lies in water down to the ground: that pins
-        // the path to the lakebed and makes a swimming unit follow the uneven
-        // bottom (the "walking underwater / jerky movement" for bots). Keep the
-        // interpolated swim-level height so it glides across the surface instead.
-        if (!m_sourceUnit->GetMap()->GetTerrain()->IsInWater(point.x, point.y, point.z))
-        {
-            m_sourceUnit->UpdateAllowedPositionZ(point.x, point.y, point.z);
-        }
+        ClampToAllowedZ(*m_sourceUnit, point.x, point.y, point.z);
         m_pathPoints[i] = point;
     }
 
@@ -781,9 +784,9 @@ void PathFinder::updateFilter()
     if (m_sourceUnit->IsInWater() || m_sourceUnit->IsUnderWater())
     {
         uint16 includedFlags = m_filter.getIncludeFlags();
-        includedFlags |= getNavTerrain(m_sourceUnit->GetPositionX(),
-                                       m_sourceUnit->GetPositionY(),
-                                       m_sourceUnit->GetPositionZ());
+        includedFlags |= getNavTerrain(m_sourceUnit->Where().X(),
+                                       m_sourceUnit->Where().Y(),
+                                       m_sourceUnit->Where().Z());
 
         m_filter.setIncludeFlags(includedFlags);
     }
@@ -801,7 +804,7 @@ NavTerrain PathFinder::getNavTerrain(float x, float y, float z)
     GridMapLiquidData data;
     m_sourceUnit->GetTerrain()->getLiquidStatus(x, y, z, MAP_ALL_LIQUIDS, &data);
 
-    switch (data.CreatureTypeFlags)
+    switch (data.type_flags)
     {
         case MAP_LIQUID_TYPE_WATER:
         case MAP_LIQUID_TYPE_OCEAN:
@@ -1176,6 +1179,6 @@ void PathFinder::NormalizePath()
 {
     for (uint32 i = 0; i < m_pathPoints.size(); ++i)
     {
-        m_sourceUnit->UpdateAllowedPositionZ(m_pathPoints[i].x, m_pathPoints[i].y, m_pathPoints[i].z);
+        ClampToAllowedZ(*m_sourceUnit, m_pathPoints[i].x, m_pathPoints[i].y, m_pathPoints[i].z);
     }
 }

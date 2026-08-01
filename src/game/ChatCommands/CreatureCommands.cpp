@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -33,6 +34,7 @@
  * - Creature database management
  */
 
+#include <string>
 #include "Chat.h"
 #include "Language.h"
 #include "World.h"
@@ -44,9 +46,9 @@
 #include "PathFinder.h"                                     // for mmap commands
 #include "Totem.h"
 #include "ObjectMgr.h"
+#include "ObjectLookup.h"
 
 #ifdef _DEBUG_VMAPS
-#include "VMapFactory.h"
 #endif
 
  /**********************************************************************
@@ -75,7 +77,7 @@ bool ChatHandler::HandleComeToMeCommand(char* /*args*/)
 
     Player* pl = m_session->GetPlayer();
 
-    caster->GetMotionMaster()->MovePoint(0, pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ());
+    caster->GetMotionMaster()->MovePoint(0, pl->Where().X(), pl->Where().Y(), pl->Where().Z());
     return true;
 }
 
@@ -219,7 +221,7 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
     }
 
     Player* chr = m_session->GetPlayer();
-    CreatureCreatePos pos(chr, chr->GetOrientation());
+    CreatureCreatePos pos(chr, chr->Where().Facing());
     Map* map = chr->GetMap();
 
     Creature* pCreature = new Creature;
@@ -665,10 +667,10 @@ bool ChatHandler::HandleNpcMoveCommand(char* args)
         lowguid = pCreature->GetGUIDLow();
     }
 
-    float x = player->GetPositionX();
-    float y = player->GetPositionY();
-    float z = player->GetPositionZ();
-    float o = player->GetOrientation();
+    float x = player->Where().X();
+    float y = player->Where().Y();
+    float z = player->Where().Z();
+    float o = player->Where().Facing();
 
     if (pCreature)
     {
@@ -1029,7 +1031,7 @@ bool ChatHandler::HandleNpcUnFollowCommand(char* /*args*/)
         return false;
     }
 
-    FollowMovementGenerator<Creature> const* mgen = static_cast<FollowMovementGenerator<Creature> const*>(creatureMotion->top());
+    FollowMovementGenerator const* mgen = static_cast<FollowMovementGenerator const*>(creatureMotion->top());
 
     if (mgen->GetTarget() != player)
     {
@@ -1187,7 +1189,7 @@ bool ChatHandler::HandleNpcNameCommand(char* /*args*/)
         return true;
     }
 
-    Creature* pCreature = sObjectAccessor.GetCreature(*m_session->GetPlayer(), guid);
+    Creature* pCreature = ObjectLookup::GetCreature(*m_session->GetPlayer(), guid);
 
     if (!pCreature)
     {
@@ -1242,7 +1244,7 @@ bool ChatHandler::HandleNpcSubNameCommand(char* /*args*/)
         return true;
     }
 
-    Creature* pCreature = sObjectAccessor.GetCreature(*m_session->GetPlayer(), guid);
+    Creature* pCreature = ObjectLookup::GetCreature(*m_session->GetPlayer(), guid);
 
     if (!pCreature)
     {
@@ -1328,10 +1330,10 @@ namespace
     void PrintNpcWatchUnitDetails(ChatHandler& handler, char const* label,
                                   Creature const* watched, Unit const* unit)
     {
-        float x = unit->GetPositionX();
-        float y = unit->GetPositionY();
-        float z = unit->GetPositionZ();
-        float o = unit->GetOrientation();
+        float x = unit->Where().X();
+        float y = unit->Where().Y();
+        float z = unit->Where().Z();
+        float o = unit->Where().Facing();
 
         GridPair gridPair = MaNGOS::ComputeGridPair(x, y);
         CellPair cellPair = MaNGOS::ComputeCellPair(x, y);
@@ -1361,10 +1363,10 @@ namespace
                                 cellLoaded ? "yes" : "no",
                                 inWorld ? "" : " (not in world)");
 
-        if (watched->IsInMap(unit))
+        if (CanBeSeen(*unit, *watched))
         {
             handler.PSendSysMessage("    distance=%.3f",
-                                    watched->GetDistance(unit));
+                                    watched->Where().DistanceTo(unit->Where()));
         }
         else
         {
@@ -1387,10 +1389,10 @@ namespace
 
     void PrintNpcWatchCreatureDetails(ChatHandler& handler, Creature* target)
     {
-        float x = target->GetPositionX();
-        float y = target->GetPositionY();
-        float z = target->GetPositionZ();
-        float o = target->GetOrientation();
+        float x = target->Where().X();
+        float y = target->Where().Y();
+        float z = target->Where().Z();
+        float o = target->Where().Facing();
 
         GridPair gridPair = MaNGOS::ComputeGridPair(x, y);
         CellPair cellPair = MaNGOS::ComputeCellPair(x, y);
@@ -1470,10 +1472,10 @@ bool ChatHandler::HandleNpcWatchCommand(char* /*args*/)
         return false;
     }
 
-    float x = target->GetPositionX();
-    float y = target->GetPositionY();
-    float z = target->GetPositionZ();
-    float o = target->GetOrientation();
+    float x = target->Where().X();
+    float y = target->Where().Y();
+    float z = target->Where().Z();
+    float o = target->Where().Facing();
 
     GridPair gridPair = MaNGOS::ComputeGridPair(x, y);
     CellPair cellPair = MaNGOS::ComputeCellPair(x, y);
@@ -1576,7 +1578,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     PSendSysMessage(LANG_COMMAND_RAWPAWNTIMES, defRespawnDelayStr.c_str(), curRespawnDelayStr.c_str());
     PSendSysMessage(LANG_NPCINFO_LOOT, cInfo->LootId, cInfo->PickpocketLootId, cInfo->SkinningLootId);
     PSendSysMessage(LANG_NPCINFO_DUNGEON_ID, target->GetInstanceId());
-    PSendSysMessage(LANG_NPCINFO_POSITION, float(target->GetPositionX()), float(target->GetPositionY()), float(target->GetPositionZ()));
+    PSendSysMessage(LANG_NPCINFO_POSITION, float(target->Where().X()), float(target->Where().Y()), float(target->Where().Z()));
 
     if ((npcflags & UNIT_NPC_FLAG_VENDOR))
     {
@@ -1634,7 +1636,7 @@ bool ChatHandler::HandleNpcAddWeaponCommand(char* /*args*/)
         return true;
     }
 
-    Creature *pCreature = sObjectAccessor.GetCreature(*m_session->GetPlayer(), guid);
+    Creature *pCreature = ObjectLookup::GetCreature(*m_session->GetPlayer(), guid);
 
     if (!pCreature)
     {

@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -31,9 +32,30 @@
  * transform) off the world and map-update threads.
  */
 
+#include "Threading/Threading.h"
 #include "ConsoleLogWriter.h"
+#include "Console/ConsoleUI.h"
 
 #include <cstdio>
+
+namespace
+{
+    /// Severity -> full-screen theme. Deliberately not m_colors: the configured
+    /// palette targets a 16-colour console and would clash with the UI's own.
+    MaNGOS::Console::Style StyleFor(LogType type)
+    {
+        switch (type)
+        {
+        case LogDetails: return MaNGOS::Console::STYLE_DETAIL;
+        case LogDebug:   return MaNGOS::Console::STYLE_DEBUG;
+        case LogError:   return MaNGOS::Console::STYLE_ERROR;
+        case LogNormal:
+        default:         return MaNGOS::Console::STYLE_NORMAL;
+        }
+    }
+
+    const int IDLE_RENDER_TICKS = 6;                     // ~30ms between idle repaints
+}
 
 ConsoleLogWriter::ConsoleLogWriter()
     : m_depth(0), m_dropped(0), m_running(true)
@@ -42,7 +64,7 @@ ConsoleLogWriter::ConsoleLogWriter()
 
 void ConsoleLogWriter::Enqueue(ConsoleLogRecord& rec)
 {
-    if (m_depth.load() >= MAX_CONSOLE_QUEUE)
+    if (m_depth.load(std::memory_order_relaxed) >= MAX_CONSOLE_QUEUE)
     {
         ++m_dropped;
         return;
@@ -53,9 +75,22 @@ void ConsoleLogWriter::Enqueue(ConsoleLogRecord& rec)
 
 void ConsoleLogWriter::run()
 {
+    int idleTicks = 0;
+
     while (m_running)
     {
-        if (!DrainOnce())
+        const bool didWork = DrainOnce();
+
+        // Sole renderer of the full-screen console: repaint after every drain so
+        // new lines appear at once, and on a slow idle tick so the clock, status
+        // and progress bar keep moving when nothing is being logged.
+        if (didWork || ++idleTicks >= IDLE_RENDER_TICKS)
+        {
+            idleTicks = 0;
+            MaNGOS::Console::ConsoleUI::Instance().Render();
+        }
+
+        if (!didWork)
         {
             MaNGOS::Thread::Sleep(5);
         }
@@ -63,13 +98,14 @@ void ConsoleLogWriter::run()
     // Authoritative final drain: runs on the writer thread while wait()
     // blocks the caller, so any straggler enqueued before Stop() is rendered.
     DrainOnce();
+    MaNGOS::Console::ConsoleUI::Instance().Render();
 }
 
 bool ConsoleLogWriter::DrainOnce()
 {
     bool didWork = false;
 
-    long dropped = m_dropped.load();
+    long dropped = m_dropped.load(std::memory_order_relaxed);
     if (dropped > 0)
     {
         m_dropped -= dropped;
@@ -85,9 +121,16 @@ bool ConsoleLogWriter::DrainOnce()
         }
         if (n > 0)
         {
-            Log::SetColor(true, RED);
-            fwrite(note, 1, (size_t)n, stdout);
-            Log::ResetColor(true);
+            if (MaNGOS::Console::ConsoleUI::Instance().Active())
+            {
+                MaNGOS::Console::ConsoleUI::Instance().PushLog(note, MaNGOS::Console::STYLE_ERROR);
+            }
+            else
+            {
+                Log::SetColor(true, RED);
+                fwrite(note, 1, (size_t)n, stdout);
+                Log::ResetColor(true);
+            }
         }
         didWork = true;
     }
@@ -104,7 +147,7 @@ bool ConsoleLogWriter::DrainOnce()
     // piped stdout is fully buffered, and flushing here (off the world/map
     // threads) makes output prompt without any producer paying for it. A real
     // console is effectively unbuffered, so this is a cheap no-op there.
-    if (didWork)
+    if (didWork && !MaNGOS::Console::ConsoleUI::Instance().Active())
     {
         fflush(stdout);
     }
@@ -114,6 +157,22 @@ bool ConsoleLogWriter::DrainOnce()
 
 void ConsoleLogWriter::Emit(const ConsoleLogRecord& rec)
 {
+    if (MaNGOS::Console::ConsoleUI::Instance().Active())
+    {
+        // Raw records still reaching here are text (CLI command output, loglevel
+        // notices): the bar is intercepted upstream by the progress sink and the
+        // prompt is suppressed, since the console draws both regions itself.
+        if (rec.isRaw)
+        {
+            MaNGOS::Console::ConsoleUI::Instance().PushRaw(rec.text, MaNGOS::Console::STYLE_NORMAL);
+        }
+        else
+        {
+            MaNGOS::Console::ConsoleUI::Instance().PushLog(rec.text, StyleFor(rec.type));
+        }
+        return;
+    }
+
     FILE* out = rec.toStdout ? stdout : stderr;
     if (rec.isRaw)
     {

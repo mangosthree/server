@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -27,17 +28,18 @@
 
 #include <sys/types.h>
 
+#include <cinttypes>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 
 #include "Platform/CompilerDefs.h"
 
 #define MANGOS_LITTLEENDIAN 0
 #define MANGOS_BIGENDIAN    1
 
-// Normally supplied by CMake (TEST_BIG_ENDIAN -> MANGOS_ENDIAN). The fallback
-// keeps this header self-contained for tooling that compiles it outside the
-// build.
+// Normally supplied by CMake (TEST_BIG_ENDIAN -> MANGOS_ENDIAN). The fallback keeps
+// this header self-contained for tooling that compiles it outside the build.
 #if !defined(MANGOS_ENDIAN)
 #  if defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && \
       (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
@@ -46,8 +48,6 @@
 #    define MANGOS_ENDIAN MANGOS_LITTLEENDIAN
 #  endif
 #endif // MANGOS_ENDIAN
-
-#define MANGOS_SCRIPT_NAME "mangosscript"
 
 #if PLATFORM == PLATFORM_WINDOWS
 #  define MANGOS_PATH_MAX 260                               // ::MAX_PATH, without dragging in windows.h
@@ -58,41 +58,12 @@
 #endif
 
 #if PLATFORM == PLATFORM_WINDOWS
-#  define MANGOS_EXPORT __declspec(dllexport)
-#  define MANGOS_IMPORT __cdecl
-#else // PLATFORM != PLATFORM_WINDOWS
-#  define MANGOS_EXPORT export
-#  if defined(__APPLE_CC__) && defined(BIG_ENDIAN)
-#    if (defined(__ppc__) || defined(__powerpc__))
-#      define MANGOS_IMPORT __attribute__ ((longcall))
-#    else
-#      define MANGOS_IMPORT
-#    endif
-#  elif defined(__x86_64__)
-#    define MANGOS_IMPORT
-#  else
-#    define MANGOS_IMPORT __attribute__ ((cdecl))
-#  endif //__APPLE_CC__ && BIG_ENDIAN
-#endif // PLATFORM
-
-#if PLATFORM == PLATFORM_WINDOWS
-#  define MANGOS_DLL_SPEC __declspec(dllexport)
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
 #  endif // DECLSPEC_NORETURN
 #else // PLATFORM != PLATFORM_WINDOWS
-#  define MANGOS_DLL_SPEC
 #  define DECLSPEC_NORETURN
 #endif // PLATFORM
-
-#if !defined(DEBUG)
-#  define MANGOS_INLINE inline
-#else // DEBUG
-#  if !defined(MANGOS_DEBUG)
-#    define MANGOS_DEBUG
-#  endif // MANGOS_DEBUG
-#  define MANGOS_INLINE
-#endif //!DEBUG
 
 #if COMPILER == COMPILER_GNU || COMPILER == COMPILER_CLANG
 #  define ATTR_NORETURN __attribute__((noreturn))
@@ -104,54 +75,22 @@
 #  define ATTR_DEPRECATED
 #endif //COMPILER == COMPILER_GNU
 
-#if COMPILER_HAS_CPP11_SUPPORT
-#  define OVERRIDE override
-#  define FINAL final
-#else
-#  define OVERRIDE
-#  define FINAL
-#endif //COMPILER_HAS_CPP11_SUPPORT
-
-/**
- * @brief A signed integer of 64 bits
- *
- */
-typedef std::int64_t int64;
-/**
- * @brief A signed integer of 32 bits
- *
- */
-typedef std::int32_t int32;
-/**
- * @brief A signed integer of 16 bits
- *
- */
-typedef std::int16_t int16;
-/**
- * @brief A signed integer of 8 bits
- *
- */
-typedef std::int8_t int8;
-/**
- * @brief An unsigned integer of 64 bits
- *
- */
+/// A signed integer of 64 bits
+typedef std::int64_t  int64;
+/// A signed integer of 32 bits
+typedef std::int32_t  int32;
+/// A signed integer of 16 bits
+typedef std::int16_t  int16;
+/// A signed integer of 8 bits
+typedef std::int8_t   int8;
+/// An unsigned integer of 64 bits
 typedef std::uint64_t uint64;
-/**
- * @brief An unsigned integer of 32 bits
- *
- */
+/// An unsigned integer of 32 bits
 typedef std::uint32_t uint32;
-/**
- * @brief An unsigned integer of 16 bits
- *
- */
+/// An unsigned integer of 16 bits
 typedef std::uint16_t uint16;
-/**
- * @brief An unsigned integer of 8 bits
- *
- */
-typedef std::uint8_t uint8;
+/// An unsigned integer of 8 bits
+typedef std::uint8_t  uint8;
 
 #if COMPILER != COMPILER_MICROSOFT
 /**
@@ -166,32 +105,38 @@ typedef uint16      WORD;
 typedef uint32      DWORD;
 #endif // COMPILER
 
-#define CONCAT(x, y) CONCAT1(x, y)
-#define CONCAT1(x, y) x##y
-#define STATIC_ASSERT_WORKAROUND(expr, msg) typedef char CONCAT(static_assert_failed_at_line_, __LINE__) [(expr) ? 1 : -1]
+// ---------------------------------------------------------------------------
+// 64-bit printf formatting and literals.
+//
+// These used to expand to ACE_UINT64_FORMAT_SPECIFIER and friends, which is why
+// printing a uint64 anywhere in the server pulled in ACE. <cinttypes> is the
+// standard answer to the same problem and is correct on every platform by
+// definition, so the macros survive but their contents no longer come from a
+// third-party portability layer.
+// ---------------------------------------------------------------------------
+#define UI64FMTD "%" PRIu64
+#define SI64FMTD "%" PRId64
+#define I64FMT   "%016" PRIX64
+#define I32FMT   "%08" PRIX32
 
-#ifndef COMPILER_HAS_CPP11_SUPPORT
-#if COMPILER == COMPILER_GNU
-#  if !defined(__GXX_EXPERIMENTAL_CXX0X__) || (__GNUC__ < 4) || (__GNUC__ == 4) && (__GNUC_MINOR__ < 7)
-#    define override
-#    define static_assert(a, b) STATIC_ASSERT_WORKAROUND(a, b)
-#  endif
-#elif COMPILER == COMPILER_CLANG
-#  ifndef __cxx_static_assert
-#    define override
-#    define static_assert(a, b) STATIC_ASSERT_WORKAROUND(a, b)
-#  endif
-#elif COMPILER == COMPILER_MICROSOFT
-#  if _MSC_VER < 1600
-#    define static_assert(a, b) STATIC_ASSERT_WORKAROUND(a, b)
-#  endif
-#endif
-#endif
+#define UI64LIT(N) UINT64_C(N)
+#define SI64LIT(N) INT64_C(N)
 
-/**
- * @brief
- *
- */
-typedef uint64 OBJECT_HANDLE;
+/// Number of elements in a C array. Rejects pointers at compile time, which the
+/// old sizeof/sizeof macro silently accepted.
+template<typename T, std::size_t N>
+constexpr std::size_t countof(T const (&)[N]) noexcept
+{
+    return N;
+}
+
+#define STRINGIZE(a) #a
+
+// MSVC spells the case-insensitive compares with a leading underscore.
+#if COMPILER == COMPILER_MICROSOFT
+#  define strnicmp _strnicmp
+#else
+#  define strnicmp strncasecmp
+#endif
 
 #endif // MANGOS_DEFINE_H

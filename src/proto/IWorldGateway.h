@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -29,7 +30,7 @@
 
 #include "Auth/BigNumber.h"
 #include "Platform/Define.h"
-#include "Utilities/WorldPacket.h"
+#include "WorldPacket.h"
 
 #include <memory>
 #include <string>
@@ -188,24 +189,6 @@ namespace proto
             virtual void Deliver(SessionId session, WorldPacket&& packet) = 0;
 
             /**
-             * @brief A client ping arrived.
-             *
-             * The protocol layer counts how many pings in a row arrived faster than
-             * a real client sends them, because that is a property of the stream.
-             * The world decides what the run is worth: the threshold is
-             * configuration, and staff accounts are exempt, which is session state.
-             *
-             * @param session      The session, or INVALID_SESSION_ID if the peer
-             *                     pinged before authenticating.
-             * @param latency      Round-trip time the client reported.
-             * @param fastPingRun  Number of consecutive suspiciously fast pings;
-             *                     zero once the client returns to a normal cadence.
-             * @return false to drop the connection.
-             */
-            virtual bool OnPing(SessionId session, uint32 latency,
-                                uint32 fastPingRun) = 0;
-
-            /**
              * @brief The connection is gone; release the session.
              *
              * The world may keep the session alive past this call to unwind game
@@ -235,19 +218,6 @@ namespace proto
              *         `return 0` -- a veto is not a protocol error).
              */
             virtual bool OnAuthPacketReceived(WorldPacket& /*packet*/) { return true; }
-
-            /**
-             * @brief Scripting hook: a CMSG_KEEP_ALIVE packet arrived.
-             *
-             * Mirrors WorldSocket.cpp:906-915's fire-and-forget Eluna
-             * notification -- fire-and-forget here too, no veto.
-             *
-             * @param packet  The (empty-payload) keep-alive packet.
-             * @param session The session, or INVALID_SESSION_ID if the peer
-             *                has not authenticated yet.
-             */
-            virtual void OnKeepAlivePacketReceived(WorldPacket& /*packet*/,
-                                                    SessionId /*session*/) {}
     };
 }
 

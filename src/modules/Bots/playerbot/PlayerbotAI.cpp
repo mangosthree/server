@@ -304,7 +304,7 @@ void PlayerbotAI::HandleTeleportAck()
  */
 void PlayerbotAI::ResyncObserversAfterTeleport()
 {
-    Map* map = bot->GetMap();
+    Map* map = bot->FindMap();
     if (!map)
     {
         return;
@@ -938,7 +938,7 @@ Unit* PlayerbotAI::GetUnit(ObjectGuid guid)
         return NULL;
     }
 
-    Map* map = bot->GetMap();
+    Map* map = bot->FindMap();
     if (!map)
     {
         return NULL;
@@ -959,7 +959,7 @@ Creature* PlayerbotAI::GetCreature(ObjectGuid guid)
         return NULL;
     }
 
-    Map* map = bot->GetMap();
+    Map* map = bot->FindMap();
     if (!map)
     {
         return NULL;
@@ -980,7 +980,7 @@ GameObject* PlayerbotAI::GetGameObject(ObjectGuid guid)
         return NULL;
     }
 
-    Map* map = bot->GetMap();
+    Map* map = bot->FindMap();
     if (!map)
     {
         return NULL;

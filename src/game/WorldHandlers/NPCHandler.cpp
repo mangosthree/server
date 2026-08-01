@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -47,7 +48,10 @@
  * - CMSG_BUY_STABLE_SLOT: Buy stable slot
  */
 
-#include "Common.h"
+#include <cmath>
+#include "Platform/Define.h"
+#include <string>
+#include <algorithm>
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -594,7 +598,7 @@ void WorldSession::SendSpiritResurrect()
     Corpse* corpse = _player->GetCorpse();
     if (corpse)
         corpseGrave = sObjectMgr.GetClosestGraveYard(
-                          corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetMapId(), _player->GetTeam());
+                          corpse->Where().X(), corpse->Where().Y(), corpse->Where().Z(), corpse->GetMapId(), _player->GetTeam());
 
     // now can spawn bones
     _player->SpawnCorpseBones();
@@ -603,11 +607,11 @@ void WorldSession::SendSpiritResurrect()
     if (corpseGrave)
     {
         WorldSafeLocsEntry const* ghostGrave = sObjectMgr.GetClosestGraveYard(
-                _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetMapId(), _player->GetTeam());
+                _player->Where().X(), _player->Where().Y(), _player->Where().Z(), _player->GetMapId(), _player->GetTeam());
 
         if (corpseGrave != ghostGrave)
         {
-            _player->TeleportTo(corpseGrave->Continent, corpseGrave->Loc_0, corpseGrave->Loc_1, corpseGrave->Loc_2, _player->GetOrientation());
+            _player->TeleportTo(corpseGrave->Continent, corpseGrave->Loc_0, corpseGrave->Loc_1, corpseGrave->Loc_2, _player->Where().Facing());
         }
         // or update at original position
         else
@@ -632,14 +636,14 @@ void WorldSession::HandleReturnToGraveyardOpcode(WorldPacket& recv_data)
         return;
     }
 
-    WorldSafeLocsEntry const* corpseGrave = sObjectMgr.GetClosestGraveYard(corpse->GetPositionX(), corpse->GetPositionY(),
-            corpse->GetPositionZ(), corpse->GetMapId(), _player->GetTeam());
+    WorldSafeLocsEntry const* corpseGrave = sObjectMgr.GetClosestGraveYard(corpse->Where().X(), corpse->Where().Y(),
+            corpse->Where().Z(), corpse->GetMapId(), _player->GetTeam());
     if (!corpseGrave)
     {
         return;
     }
 
-    _player->TeleportTo(corpseGrave->Continent, corpseGrave->Loc_0, corpseGrave->Loc_1, corpseGrave->Loc_2, _player->GetOrientation());
+    _player->TeleportTo(corpseGrave->Continent, corpseGrave->Loc_0, corpseGrave->Loc_1, corpseGrave->Loc_2, _player->Where().Facing());
 }
 
 /**

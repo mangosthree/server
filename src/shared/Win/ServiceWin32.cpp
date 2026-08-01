@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -24,16 +25,10 @@
 
 #ifdef WIN32
 
-#include "Common/Common.h"
 #include "Log/Log.h"
 #include <cstring>
 #include <windows.h>
 #include <winsvc.h>
-
-// stupid ACE define
-#ifdef main
-#undef main
-#endif
 
 #if !defined(WINADVAPI)
 #if !defined(_ADVAPI32_)
@@ -72,15 +67,22 @@ bool WinServiceInstall()
         return false;
     }
 
-    char path[_MAX_PATH + 10];
-    if (!GetModuleFileName(0, path, sizeof(path) / sizeof(path[0])))
+    // The suffix is appended in place, so the path must be read into a buffer that
+    // still has room for it: GetModuleFileName will happily fill the whole array and,
+    // on truncation, returns exactly the size it was given. Reading into the full
+    // array and then strcat-ing eight more bytes overflows for any install path near
+    // the limit -- which long-path support makes reachable.
+    static const char RUN_SUFFIX[] = " -s run";
+    char path[_MAX_PATH + sizeof(RUN_SUFFIX)];
+    const DWORD pathLen = GetModuleFileName(0, path, _MAX_PATH);
+    if (pathLen == 0 || pathLen >= _MAX_PATH)
     {
         CloseServiceHandle(serviceControlManager);
         sLog.outError("SERVICE: Can't get service binary filename.");
         return false;
     }
 
-    std::strcat(path, " -s run");
+    std::strcat(path, RUN_SUFFIX);
 
     SC_HANDLE service = CreateService(serviceControlManager,
                                       serviceName,          // name of service

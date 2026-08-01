@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -32,10 +33,12 @@
  * - General purpose administrative utilities
  */
 
+#include <string>
+#include <list>
 #include "Chat.h"
 #include "DBCStores.h"
 #include "Language.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "Player.h"
 #include "SpellMgr.h"
 #include "Util.h"
@@ -151,11 +154,11 @@ bool ChatHandler::HandlePInfoCommand(char* args)
 //    if (target)
 //    {
 //        uint32 mapId = target->GetMapId();
-//        uint32 zoneId = target->GetZoneId();
-//        float posX = target->GetPositionX();
-//        float posY = target->GetPositionY();
-//        float posZ = target->GetPositionZ();
-//        float orientation = target->GetOrientation();
+//        uint32 zoneId = target->GetTerrain()->GetZoneId(target->Where().X(), target->Where().Y(), target->Where().Z());
+//        float posX = target->Where().X();
+//        float posY = target->Where().Y();
+//        float posZ = target->Where().Z();
+//        float orientation = target->Where().Facing();
 //
 //        MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
 //        AreaTableEntry const* zoneEntry = GetAreaEntryByAreaID(zoneId);
@@ -247,11 +250,6 @@ bool ChatHandler::HandleGMCommand(char* args)
     {
         m_session->GetPlayer()->SetGameMaster(true);
         m_session->SendNotification(LANG_GM_ON);
-#ifdef _DEBUG_VMAPS
-        VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
-        vMapManager->processCommand("stoplog");
-#endif
-
         return true;
     }
 
@@ -259,11 +257,6 @@ bool ChatHandler::HandleGMCommand(char* args)
     {
         m_session->GetPlayer()->SetGameMaster(false);
         m_session->SendNotification(LANG_GM_OFF);
-#ifdef _DEBUG_VMAPS
-        VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
-        vMapManager->processCommand("startlog");
-#endif
-
         return true;
     }
 
@@ -362,7 +355,7 @@ bool ChatHandler::HandleGMFlyCommand(char* args)
 bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
 {
     std::list< std::pair<std::string, bool> > names;
-    sObjectAccessor.DoForAllPlayers([&names, this](Player *player)
+    sPlayerRegistry.ForEach([&names, this](Player *player)
     {
         AccountTypes security = player->GetSession()->GetSecurity();
         if ((player->isGameMaster() || (security > SEC_PLAYER && security <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
@@ -491,7 +484,7 @@ bool ChatHandler::HandleChangeWeatherCommand(char* args)
     }
 
     Player* player = m_session->GetPlayer();
-    uint32 zoneId = player->GetZoneId();
+    uint32 zoneId = player->GetTerrain()->GetZoneId(player->Where().X(), player->Where().Y(), player->Where().Z());
     if (!sWeatherMgr.GetWeatherChances(zoneId))
     {
         SendSysMessage(LANG_NO_WEATHER);

@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -33,11 +34,16 @@
  * - AI and path debugging
  */
 
-#include "Common.h"
+#include <cstdlib>
+#include "Platform/Define.h"
+#include <cstring>
+#include <string>
+#include <vector>
+#include <sstream>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "Player.h"
-#include "Opcodes.h"
+#include "OpcodeTable.h"
 #include "Chat.h"
 #include "Log.h"
 #include "Unit.h"
@@ -48,9 +54,11 @@
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "SpellMgr.h"
-#include "vmap/VMapFactory.h"
-#include "vmap/IVMapManager.h"
-#include "vmap/VMapManager2.h"
+#include "Pet.h"
+#include "Map.h"
+#include "MapManager.h"
+#include "TransportMap.h"
+#include "Transports.h"
 
 /**
  * @brief Handler for HandleDebugSendSpellFailCommand command.
@@ -59,15 +67,12 @@
  * @returns True if the command executed successfully, false otherwise.
  */
 /**
- * @brief `.debug losdebug` — trace caster→target LoS and report which layer
- *        is blocking. Probes:
- *          1. Static vmap with ModelIgnoreFlags::Nothing (full block list).
- *          2. Static vmap with ModelIgnoreFlags::M2 (PR4 spell semantics).
- *          3. Dynamic map tree (GameObjects).
- *        Then walks GameObjects in a box around the ray and lists every
- *        collidable one (type + entry + name + distance from ray-midpoint).
+ * @brief `.debug losdebug` -- trace caster->target line of sight and say which layer
+ *        blocks it: the baked static geometry, or a game object standing in the way.
  *
- * Use to diagnose Stormwind Cathedral and other indoor LoS oddities.
+ * The two are asked separately and over the same segment, which is the whole point: a
+ * combined answer of BLOCKED says nothing about whether a wall or a crate is at fault,
+ * and only one of those is a data bug worth chasing.
  */
 bool ChatHandler::HandleDebugLosCommand(char* /*args*/)
 {
@@ -84,60 +89,39 @@ bool ChatHandler::HandleDebugLosCommand(char* /*args*/)
         return true;
     }
 
-    float x1, y1, z1;
-    player->GetPosition(x1, y1, z1);
-    z1 += 2.0f; // mirror Object::IsWithinLOS head-height offset
+    // Head height, mirroring HasLineOfSight: a sight line is cast between heads.
+    const float x1 = player->Where().X(), y1 = player->Where().Y(),
+                z1 = player->Where().Z() + 2.0f;
+    const float x2 = target->Where().X(), y2 = target->Where().Y(),
+                z2 = target->Where().Z() + 2.0f;
 
-    float x2, y2, z2;
-    target->GetPosition(x2, y2, z2);
-    z2 += 2.0f;
+    const uint32 mapId = player->GetMapId();
+    const uint32 phase = player->GetPhaseMask();
 
-    VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
-    uint32 mapId = player->GetMapId();
-    uint32 phase = player->GetPhaseMask();
-
-    bool staticAll = vmgr->isInLineOfSight(mapId, x1, y1, z1, x2, y2, z2, VMAP::ModelIgnoreFlags::Nothing);
-    bool staticM2  = vmgr->isInLineOfSight(mapId, x1, y1, z1, x2, y2, z2, VMAP::ModelIgnoreFlags::M2);
-    bool dynTree   = player->GetMap()->IsInLineOfSight(x1, y1, z1, x2, y2, z2, phase, VMAP::ModelIgnoreFlags::M2);
+    const bool staticClear = player->GetTerrain()->IsInLineOfSight(x1, y1, z1, x2, y2, z2);
+    const bool combined = player->GetMap()->IsInLineOfSight(x1, y1, z1, x2, y2, z2, phase);
 
     PSendSysMessage("--- losdebug %.1f,%.1f,%.1f -> %.1f,%.1f,%.1f (map %u phase %u) ---",
                     x1, y1, z1, x2, y2, z2, mapId, phase);
-    PSendSysMessage("  static vmap (all models)  : %s", staticAll ? "CLEAR" : "BLOCKED");
-    PSendSysMessage("  static vmap (M2 ignored)  : %s%s", staticM2 ? "CLEAR" : "BLOCKED",
-                    (!staticAll && staticM2) ? " <- PR4 M2 filter fired" : "");
-    PSendSysMessage("  combined (static + dyn)   : %s", dynTree ? "CLEAR" : "BLOCKED");
-    if (!staticM2)
+    PSendSysMessage("  baked geometry (terrain + WMO + M2) : %s",
+                    staticClear ? "CLEAR" : "BLOCKED");
+    PSendSysMessage("  plus live game objects              : %s",
+                    combined ? "CLEAR" : "BLOCKED");
+
+    if (!staticClear)
     {
-        PSendSysMessage("  >> WMO geometry blocks. Real wall/column in the line.");
-        // Identify the specific WorldModel that blocked, so we can tell
-        // whether it's the cathedral root WMO (Blizzard mesh) or a
-        // separable component that might be a fix target.
-        VMAP::VMapManager2* vm2 = dynamic_cast<VMAP::VMapManager2*>(vmgr);
-        if (vm2)
-        {
-            std::string hitName;
-            float hitX = 0.f, hitY = 0.f, hitZ = 0.f;
-            uint32 hitFlags = 0;
-            if (vm2->getFirstHitDebug(mapId, x1, y1, z1, x2, y2, z2,
-                                      VMAP::ModelIgnoreFlags::M2,
-                                      hitName, hitX, hitY, hitZ, hitFlags))
-            {
-                PSendSysMessage("    blocker: %s", hitName.empty() ? "(no-name)" : hitName.c_str());
-                PSendSysMessage("    hit-pos: %.2f, %.2f, %.2f  flags=0x%x", hitX, hitY, hitZ, hitFlags);
-            }
-            else
-            {
-                PSendSysMessage("    (debug probe did not pinpoint a hit — possibly group-level BIH)");
-            }
-        }
+        const float frac = player->GetTerrain()->NearestHitFraction(x1, y1, z1, x2, y2, z2);
+        const float dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
+        PSendSysMessage("  >> world geometry blocks at %.0f%% of the ray: %.2f, %.2f, %.2f",
+                        frac * 100.0f, x1 + dx * frac, y1 + dy * frac, z1 + dz * frac);
     }
-    else if (staticM2 && !dynTree)
+    else if (!combined)
     {
-        PSendSysMessage("  >> Dynamic tree (GameObject) blocks. Listing candidates...");
+        PSendSysMessage("  >> a game object blocks; the world itself is clear");
     }
     else
     {
-        PSendSysMessage("  >> Spell LoS should succeed at the vmap layer.");
+        PSendSysMessage("  >> line of sight is clear");
     }
 
     return true;
@@ -215,7 +199,7 @@ bool ChatHandler::HandleDebugSendPoiCommand(char* args)
     }
 
     DETAIL_LOG("Command : POI, NPC = %u, icon = %u flags = %u", target->GetGUIDLow(), icon, flags);
-    pPlayer->PlayerTalkClass->SendPointOfInterest(target->GetPositionX(), target->GetPositionY(), Poi_Icon(icon), flags, 30, "Test POI");
+    pPlayer->PlayerTalkClass->SendPointOfInterest(target->Where().X(), target->Where().Y(), Poi_Icon(icon), flags, 30, "Test POI");
     return true;
 }
 
@@ -729,7 +713,7 @@ bool ChatHandler::HandleDebugGetLootRecipientCommand(char* /*args*/)
  */
 bool ChatHandler::HandleDebugSendQuestInvalidMsgCommand(char* args)
 {
-    uint32 msg = atol(args);
+    uint32 msg = std::strtoul(args, NULL, 10);
     m_session->GetPlayer()->SendCanTakeQuestResponse(msg);
     return true;
 }
@@ -1810,4 +1794,102 @@ bool ChatHandler::HandleDebugPhaseCommand(char* args)
 
     m_session->GetPlayer()->HandleEmoteCommand(emote_id);
     return true;
+}
+/**
+ * @brief `.debug minion` -- where a player's minions actually are, deck boundary and all.
+ *
+ * The steady state is what needs reading, not the transition: a pet left on a deck looks
+ * exactly like a pet that followed and stopped, and the difference is a map id. So this
+ * reports three things that must agree and usually do not: what the master OWNS, what stands
+ * on the master's own map, and what stands on every deck sailing that map.
+ */
+bool ChatHandler::HandleDebugMinionCommand(char* /*args*/)
+{
+    Player* master = getSelectedPlayer();
+    if (!master)
+    {
+        master = m_session ? m_session->GetPlayer() : NULL;
+    }
+
+    if (!master)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    PSendSysMessage("master   %s", DescribeSpatially(master).c_str());
+    PSendSysMessage("petguid  %s  transport=%s",
+                    master->GetPetGuid().GetString().c_str(),
+                    master->GetTransport() ? "yes" : "no");
+
+    int owned = 0;
+    master->CallForAllControlledUnits(
+        [this, &owned](Unit* minion)
+        {
+            ++owned;
+            PSendSysMessage("owned    %s", DescribeSpatially(minion).c_str());
+        },
+        CONTROLLED_PET | CONTROLLED_MINIPET | CONTROLLED_GUARDIANS | CONTROLLED_TOTEMS |
+        CONTROLLED_CHARM);
+
+    if (!owned)
+    {
+        SendSysMessage("owned    NONE -- the master controls nothing the sweep can find");
+    }
+
+    Map* on = master->FindMap();
+    if (!on)
+    {
+        return true;
+    }
+
+    DumpPetsOn(on, "onmap");
+
+    // The decks are the other half of the answer: a pet the master no longer owns is still
+    // standing somewhere, and it is almost always on the hull he walked off.
+    if (TransportMap* deck = on->AsTransport())
+    {
+        if (Transport* vessel = deck->Vessel())
+        {
+            if (Map* sailed = vessel->GetMap())
+            {
+                DumpPetsOn(sailed, "ashore");
+            }
+        }
+    }
+    else
+    {
+        MapManager::TransportsByMapType::const_iterator vessels =
+            sMapMgr.m_TransportsByMap.find(on->GetId());
+        if (vessels != sMapMgr.m_TransportsByMap.end())
+        {
+            for (Transport* vessel : vessels->second)
+            {
+                if (TransportMap* hull = vessel->AsMap())
+                {
+                    DumpPetsOn(hull, "ondeck");
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+/// Every pet standing on one map, whoever owns it. `label` says which map it was.
+void ChatHandler::DumpPetsOn(Map* on, char const* label)
+{
+    for (auto const& entry : on->GetObjectsStore().GetElements<Pet>())
+    {
+        Pet* pet = entry.second;
+        if (!pet)
+        {
+            continue;
+        }
+
+        Unit* owner = pet->GetOwner();
+        PSendSysMessage("%-8s %s owner=%s", label, DescribeSpatially(pet).c_str(),
+                        owner ? owner->GetGuidStr().c_str() : "(none)");
+    }
 }

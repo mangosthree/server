@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -33,14 +34,17 @@
  * - Game object database management
  */
 
+#include "Common/Locales.h"
+#include <sstream>
+#include <string>
 #include "Chat.h"
 #include "Language.h"
-#include "G3D/Quat.h"
+#include "Geometry/Quat.h"
 #include "MapManager.h"
 #include "GameEventMgr.h"
 #include "Player.h"
 #include "GameObject.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 #include "ObjectMgr.h"
 
  /**********************************************************************
@@ -148,7 +152,7 @@ bool ChatHandler::HandleGameObjectDeleteCommand(char* args)
 
     if (ObjectGuid ownerGuid = obj->GetOwnerGuid())
     {
-        Unit* owner = sObjectAccessor.GetUnit(*m_session->GetPlayer(), ownerGuid);
+        Unit* owner = ObjectLookup::GetUnit(*m_session->GetPlayer(), ownerGuid);
         if (!owner || !ownerGuid.IsPlayer())
         {
             PSendSysMessage(LANG_COMMAND_DELOBJREFERCREATURE, obj->GetGUIDLow(), ownerGuid.GetString().c_str());
@@ -258,7 +262,7 @@ bool ChatHandler::HandleGameObjectMoveCommand(char* args)
         Map* map = obj->GetMap();
         map->Remove(obj, false);
 
-        obj->Relocate(chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), obj->GetOrientation());
+        obj->Place().MoveTo(chr->Where().X(), chr->Where().Y(), chr->Where().Z(), obj->Where().Facing());
 
         map->Add(obj);
     }
@@ -292,7 +296,7 @@ bool ChatHandler::HandleGameObjectMoveCommand(char* args)
         Map* map = obj->GetMap();
         map->Remove(obj, false);
 
-        obj->Relocate(x, y, z, obj->GetOrientation());
+        obj->Place().MoveTo(x, y, z, obj->Where().Facing());
 
         map->Add(obj);
     }
@@ -349,10 +353,10 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
     }
 
     Player* plr = m_session->GetPlayer();
-    float x = float(plr->GetPositionX());
-    float y = float(plr->GetPositionY());
-    float z = float(plr->GetPositionZ());
-    float o = float(plr->GetOrientation());
+    float x = float(plr->Where().X());
+    float y = float(plr->Where().Y());
+    float z = float(plr->Where().Z());
+    float o = float(plr->Where().Facing());
     Map* map = plr->GetMap();
 
     // used guids from specially reserved range (can be 0 if no free values)
@@ -416,8 +420,8 @@ bool ChatHandler::HandleGameObjectNearCommand(char* args)
     QueryResult* result = WorldDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `map`, "
                           "(POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) AS order_ "
                           "FROM `gameobject` WHERE `map`='%u' AND (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) <= '%f' ORDER BY order_",
-                          pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(),
-                          pl->GetMapId(), pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), distance * distance);
+                          pl->Where().X(), pl->Where().Y(), pl->Where().Z(),
+                          pl->GetMapId(), pl->Where().X(), pl->Where().Y(), pl->Where().Z(), distance * distance);
 
     if (result)
     {
@@ -475,7 +479,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         if (ExtractUInt32(&cId, id))
         {
             result = WorldDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) AS order_ FROM `gameobject` WHERE `map` = '%i' AND `id` = '%u' ORDER BY order_ ASC LIMIT 1",
-                                          pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), pl->GetMapId(), id);
+                                          pl->Where().X(), pl->Where().Y(), pl->Where().Z(), pl->GetMapId(), id);
         }
         else
         {
@@ -484,7 +488,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
             result = WorldDatabase.PQuery(
                          "SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) AS order_ "
                          "FROM `gameobject`,`gameobject_template` WHERE `gameobject_template`.`entry` = `gameobject`.`id` AND `map` = %i AND `name` " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'")" ORDER BY order_ ASC LIMIT 1",
-                         pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), pl->GetMapId(), name.c_str());
+                         pl->Where().X(), pl->Where().Y(), pl->Where().Z(), pl->GetMapId(), name.c_str());
         }
     }
     else
@@ -518,7 +522,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         result = WorldDatabase.PQuery("SELECT `gameobject`.`guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, "
                                       "(POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) AS order_ FROM `gameobject` "
                                       "LEFT OUTER JOIN `game_event_gameobject` on `gameobject`.`guid`=`game_event_gameobject`.`guid` WHERE `map` = '%i' %s ORDER BY order_ ASC LIMIT 10",
-                                      pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), pl->GetMapId(), eventFilter.str().c_str());
+                                      pl->Where().X(), pl->Where().Y(), pl->Where().Z(), pl->GetMapId(), eventFilter.str().c_str());
     }
 
     if (!result)

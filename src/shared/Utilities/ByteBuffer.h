@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -25,8 +26,12 @@
 #ifndef MANGOS_H_BYTEBUFFER
 #define MANGOS_H_BYTEBUFFER
 
-#include "Common/Common.h"
-#include "Log/Log.h"
+#include "Platform/Define.h"
+#include <cstring>
+#include <string>
+#include <vector>
+#include <map>
+#include <list>
 #include "Utilities/ByteConverter.h"
 #include "Utilities/Errors.h"
 
@@ -79,59 +84,12 @@ class ByteBufferException
          *
          * Outputs information about the position, operation type, and buffer bounds.
          */
-        void PrintPosError() const
-        {
-            sLog.outError(
-                "Attempted to %s in ByteBuffer (pos: %zu size: %zu) "
-                "value with size: %zu",
-                (add ? "put" : "get"), pos, size, esize);
-        }
+        void PrintPosError() const;
     private:
         bool add; /**< True if error occurred during write/append operation */
         size_t pos; /**< Position in buffer where overflow occurred */
         size_t esize; /**< Size of the element being read/written */
         size_t size; /**< Total size of the buffer */
-};
-
-class BitStream
-{
-    public:
-        BitStream(): _rpos(0), _wpos(0) {}
-
-        BitStream(uint32 val, size_t len): _rpos(0), _wpos(0)
-        {
-            WriteBits(val, len);
-        }
-
-        BitStream(BitStream const& bs) : _rpos(bs._rpos), _wpos(bs._wpos), _data(bs._data) {}
-
-        void Clear();
-        uint8 GetBit(uint32 bit);
-        uint8 ReadBit();
-        void WriteBit(uint32 bit);
-        template <typename T> void WriteBits(T value, size_t bits);
-        bool Empty();
-        void Reverse();
-        void Print();
-
-        size_t GetLength() { return _data.size(); }
-        uint32 GetReadPosition() { return _rpos; }
-        uint32 GetWritePosition() { return _wpos; }
-        void SetReadPos(uint32 pos) { _rpos = pos; }
-
-        uint8 const& operator[](uint32 const pos) const
-        {
-            return _data[pos];
-        }
-
-        uint8& operator[] (uint32 const pos)
-        {
-            return _data[pos];
-        }
-
-    private:
-        std::vector<uint8> _data;
-        uint32 _rpos, _wpos;
 };
 
 template<class T>
@@ -283,16 +241,6 @@ class ByteBuffer
                 }
 
             return value;
-        }
-
-        BitStream ReadBitStream(uint32 len)
-        {
-            BitStream b;
-            for (uint32 i = 0; i < len; ++i)
-            {
-                b.WriteBit(ReadBit());
-            }
-            return b;
         }
 
         void WriteGuidMask(uint64 guid, uint8* maskOrder, uint8 maskCount, uint8 maskPos = 0)
@@ -1010,7 +958,18 @@ class ByteBuffer
          *
          * @return const uint8
          */
-        const uint8* contents() const { return &_storage[0]; }
+        /**
+         * @brief Pointer to the buffer's bytes.
+         *
+         * Returns nullptr when the buffer is empty. The old form was
+         * `&_storage[0]`, which indexes element zero of a possibly empty vector --
+         * undefined behaviour, and in a debug STL an outright assertion. Plenty of
+         * packets are pure opcodes with no payload at all, so this was reachable,
+         * not theoretical. data() is defined for empty vectors.
+         *
+         * @return const uint8* Buffer bytes, or nullptr if empty.
+         */
+        const uint8* contents() const { return _storage.data(); }
 
         /**
          * @brief
@@ -1183,77 +1142,11 @@ class ByteBuffer
          * @brief
          *
          */
-        void print_storage() const
-        {
-            sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
-            for (uint32 i = 0; i < size(); ++i)
-            {
-                sLog.outDebug("%u - ", read<uint8>(i) );
-            }
-            sLog.outDebug(" ");
-        }
+        void print_storage() const;
 
-        void textlike() const
-        {
-            sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
-            for (uint32 i = 0; i < size(); ++i)
-            {
-                sLog.outDebug("%c", read<uint8>(i) );
-            }
-            sLog.outDebug(" ");
-        }
+        void textlike() const;
 
-        void hexlike() const
-        {
-            uint32 j = 1, k = 1;
-            sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
-
-            for (uint32 i = 0; i < size(); ++i)
-            {
-                if ((i == (j * 8)) && ((i != (k * 16))))
-                {
-                    if (read<uint8>(i) < 0x10)
-                    {
-                        sLog.outDebug("| 0%X ", read<uint8>(i) );
-                    }
-                    else
-                    {
-                        sLog.outDebug("| %X ", read<uint8>(i) );
-                    }
-                    ++j;
-                }
-                else if (i == (k * 16))
-                {
-                    if (read<uint8>(i) < 0x10)
-                    {
-                        sLog.outDebug("\n");
-
-                        sLog.outDebug("0%X ", read<uint8>(i) );
-                    }
-                    else
-                    {
-                        sLog.outDebug("\n");
-
-                        sLog.outDebug("%X ", read<uint8>(i) );
-                    }
-
-                    ++k;
-                    ++j;
-                }
-                else
-                {
-                    if (read<uint8>(i) < 0x10)
-                    {
-                        sLog.outDebug("0%X ", read<uint8>(i) );
-                    }
-                    else
-                    {
-                        sLog.outDebug("%X ", read<uint8>(i) );
-                    }
-                }
-            }
-            sLog.outDebug("\n");
-        }
+        void hexlike() const;
 
     protected:
         size_t _rpos, _wpos, _bitpos;

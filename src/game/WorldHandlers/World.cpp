@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -42,6 +43,13 @@
  * @ingroup world
  */
 
+#include "Common/Locales.h"
+#include "Utilities/Errors.h"
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <set>
+#include <atomic>
 #include "World.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"
@@ -75,11 +83,11 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "TemporarySummon.h"
-#include "VMapFactory.h"
+#include "terrain/FusedTerrain.hpp"
+#include "terrain/GoModelStore.hpp"
 #include "MoveMap.h"
 #include "GameEventMgr.h"
 #include "PoolManager.h"
-#include "Database/DatabaseImpl.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "MapPersistentStateMgr.h"
@@ -119,10 +127,10 @@
 #include <sstream>
 
 #include <mutex>
+#include "PlayerRegistry.h"
+#include "CorpseManager.h"
 
-INSTANTIATE_SINGLETON_1(World);
 
-extern void LoadGameObjectModelList();
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -226,7 +234,6 @@ World::~World()
         delete session;
     }
 
-    VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
 }
 
@@ -254,12 +261,11 @@ void World::SetInitialWorldSettings()
     ///- Initialize config settings
     LoadConfigSettings();
 
-    ///- Initialize VMapManager function pointers (to untangle game/collision circular deps)
-    if (VMAP::VMapManager2* vmmgr2 = dynamic_cast<VMAP::VMapManager2*>(VMAP::VMapFactory::createOrGetVMapManager()))
-    {
-        //vmmgr2->GetLiquidFlagsPtr = &GetLiquidFlags;
-        vmmgr2->IsVMAPDisabledForPtr = &DisableMgr::IsVMAPDisabledFor;
-    }
+    ///- Point the terrain engine at the baked tiles. Nothing else tells it where they
+    ///  are, and without this every height, liquid and sight query answers "no data"
+    ///  while the server otherwise starts perfectly.
+    world::terrain::FusedTerrain::SetTileDir(m_dataPath + "tiles");
+    world::terrain::GoModelStore::Instance().SetDirectory(m_dataPath + "gomodels");
 
     ///- Check the existence of the map files for all races start areas.
     if (!MapManager::ExistMapAndVMap(0, -6240.32f, 331.033f) ||                     // Dwarf/ Gnome
@@ -274,7 +280,7 @@ void World::SetInitialWorldSettings()
             (m_configUint32Values[CONFIG_UINT32_EXPANSION] >= EXPANSION_WOTLK &&
               !MapManager::ExistMapAndVMap(609, 2355.84f, -5664.77f)))              // Death Knight
     {
-        sLog.outError("Correct *.map files not found in path '%smaps' or *.vmtree/*.vmtile files in '%svmaps'. Please place *.map and vmap files in appropriate directories or correct the DataDir value in the mangosd.conf file.", m_dataPath.c_str(), m_dataPath.c_str());
+        sLog.outError("Baked tiles not found in '%stiles'. Run mangos-extractor against a 4.3.4 client, or correct DataDir in mangosd.conf.", m_dataPath.c_str());
         Log::WaitBeforeContinueIfNeed();
         exit(1);
     }
@@ -359,7 +365,6 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadGameobjectInfo();
 
     sLog.outString("Loading GameObject models...");
-    LoadGameObjectModelList();
     sLog.outString();
 
     sLog.outString("Loading Spell Chain Data...");
@@ -709,7 +714,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Initializing Scripts...");
 #ifdef ENABLE_SD3
-    switch (sScriptMgr.LoadScriptLibrary(MANGOS_SCRIPT_NAME))
+    switch (sScriptMgr.LoadScriptLibrary("mangosscript"))
     {
         case SCRIPT_LOAD_OK:
             sLog.outString("Scripting library loaded.");
@@ -777,7 +782,8 @@ void World::SetInitialWorldSettings()
     // to set mailtimer to return mails every day between 4 and 5 am
     // mailtimer is increased when updating auctions
     // one second is 1000 -(tested on win system)
-    mail_timer = uint32((((localtime(&m_gameTime)->tm_hour + 20) % 24) * HOUR * IN_MILLISECONDS) / m_timers[WUPDATE_AUCTIONS].GetInterval());
+    std::tm ltm = safe_localtime(m_gameTime);
+    mail_timer = uint32((((ltm.tm_hour + 20) % 24) * HOUR * IN_MILLISECONDS) / m_timers[WUPDATE_AUCTIONS].GetInterval());
     // 1440
     mail_timer_expires = uint32((DAY * IN_MILLISECONDS) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
     DEBUG_LOG("Mail timer set to: %u, mail return is called every %u minutes", mail_timer, mail_timer_expires);
@@ -1188,7 +1194,7 @@ void World::Update(uint32 diff)
     {
         m_timers[WUPDATE_CORPSES].Reset();
 
-        sObjectAccessor.RemoveOldCorpses();
+        sCorpseManager.RemoveOldCorpses();
     }
 
     ///- Process Game events when necessary
@@ -1539,7 +1545,7 @@ void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode)
     {
         if (!(options & SHUTDOWN_MASK_IDLE) || GetActiveAndQueuedSessionCount() == 0)
         {
-                sObjectAccessor.SaveAllPlayers();        // save all players.
+                sPlayerRegistry.SaveAll();        // save all players.
                 m_stopEvent = true;                                // exist code already set
         }
         else
@@ -1700,7 +1706,10 @@ void World::UpdateResultQueue()
  */
 void World::UpdateRealmCharCount(uint32 accountId)
 {
-    CharacterDatabase.AsyncPQuery(this, &World::_UpdateRealmCharCount, accountId,
+    CharacterDatabase.AsyncPQuery([this, accountId](QueryResult* result)
+                                  {
+                                      _UpdateRealmCharCount(result, accountId);
+                                  },
                                   "SELECT COUNT(`guid`) FROM `characters` WHERE `account` = '%u'", accountId);
 }
 
@@ -1740,7 +1749,7 @@ void World::InitWeeklyQuestResetTime()
     // generate time by config
     time_t curTime = time(NULL);
     tm localTm;
-    localtime_r(&curTime, &localTm);
+    localTm = safe_localtime(curTime);
 
     int week_day_offset = localTm.tm_wday - int(getConfig(CONFIG_UINT32_QUEST_WEEKLY_RESET_WEEK_DAY));
 
@@ -1785,7 +1794,7 @@ void World::InitDailyQuestResetTime()
     // generate time by config
     time_t curTime = time(NULL);
     tm localTm;
-    localtime_r(&curTime, &localTm);
+    localTm = safe_localtime(curTime);
 
     localTm.tm_hour = getConfig(CONFIG_UINT32_QUEST_DAILY_RESET_HOUR);
     localTm.tm_min  = 0;
@@ -1834,7 +1843,7 @@ void World::SetMonthlyQuestResetTime(bool initialize)
     // generate time
     time_t currentTime = time(NULL);
     tm localTm;
-    localtime_r(&currentTime, &localTm);
+    localTm = safe_localtime(currentTime);
 
     int month = localTm.tm_mon;
     int year = localTm.tm_year;
@@ -1882,7 +1891,7 @@ void World::InitCurrencyResetTime()
         // generate time by config
         time_t curTime = time(NULL);
         tm localTm;
-        localtime_r(&curTime, &localTm);
+        localTm = safe_localtime(curTime);
 
         int week_day_offset = localTm.tm_wday - int(getConfig(CONFIG_UINT32_CURRENCY_RESET_TIME_WEEK_DAY));
 
@@ -1928,7 +1937,7 @@ void World::InitRandomBGResetTime()
     // generate time by config
     time_t curTime = time(NULL);
     tm localTm;
-    localtime_r(&curTime, &localTm);
+    localTm = safe_localtime(curTime);
 
     localTm.tm_hour = getConfig(CONFIG_UINT32_RANDOM_BG_RESET_HOUR);
     localTm.tm_min = 0;

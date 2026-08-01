@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 ################################################################################
 # World server configuration                                                   #
 ################################################################################
@@ -153,13 +154,6 @@ BindIP                       = "0.0.0.0"
 #        Default: 1 (only save on logout)
 #                 0 (save on every player save)
 #
-#    vmap.enableLOS
-#    vmap.enableHeight
-#        Enable/Disable VMaps support for line of sight and height calculation
-#        You need to extract the VMaps in order to enable those options
-#        Default: 1 (enable)
-#                 0 (disable)
-#
 #    vmap.ignoreSpellIds
 #        These spells are ignored for LoS calculation
 #        List of ids with delimiter ','
@@ -234,8 +228,6 @@ ChangeWeatherInterval             = 600000
 PlayerSave.Interval               = 900000
 PlayerSave.Stats.MinLevel         = 0
 PlayerSave.Stats.SaveOnlyOnLogout = 1
-vmap.enableLOS                    = 1
-vmap.enableHeight                 = 1
 vmap.ignoreSpellIds               = "7720"
 vmap.enableIndoorCheck            = 1
 DetectPosCollision                = 1
@@ -301,6 +293,7 @@ MaxWhoListReturns                 = 49
 #    LogFilter_EventAiDev
 #    LogFilter_Calendar
 #    LogFilter_CellEnvelope
+#    LogFilter_DeckMinions
 #        Log filters (active by default - meaning: the filter is active, hence the log is not displayed)
 #        Default: 1 - not include with any log level
 #                 0 - include in log if log level permit
@@ -414,6 +407,7 @@ LogFilter_EventAiDev         = 1
 LogFilter_CellEnvelope       = 1
 LogFilter_GridAdd            = 1
 LogFilter_DbScripts          = 1
+LogFilter_DeckMinions        = 1
 LogFilter_PeriodicAffects    = 1
 LogFilter_PlayerMoves        = 1
 LogFilter_SQLText            = 1

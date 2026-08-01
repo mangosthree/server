@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,14 +17,19 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include <utility>
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include "Utilities/MathDefines.h"
+#include <vector>
+#include <list>
+#include <ctime>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -40,7 +47,6 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "SharedDefines.h"
 #include "Pet.h"
 #include "GameObject.h"
@@ -54,7 +60,6 @@
 #include "BattleGround/BattleGroundWS.h"
 #include "Language.h"
 #include "SocialMgr.h"
-#include "VMapFactory.h"
 #include "Util.h"
 #include "TemporarySummon.h"
 #include "ScriptMgr.h"
@@ -64,7 +69,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Vehicle.h"
-#include "G3D/Vector3.h"
+#include "Geometry/Vector3.h"
 #include "LootMgr.h"
 #include <random>
 
@@ -129,11 +134,11 @@ void Spell::EffectSummonDeadPet(SpellEffectEntry const* /*effect*/)
         return;
     }
 
-    if (_player->GetDistance(pet) >= 2.0f)
+    if (_player->Where().DistanceTo(pet->Where()) >= 2.0f)
     {
         float px, py, pz;
-        m_caster->GetClosePoint(px, py, pz, pet->GetObjectBoundingRadius());
-        ((Unit*)pet)->NearTeleportTo(px, py, pz, -m_caster->GetOrientation());
+        ClosePointNear(*m_caster, px, py, pz, pet->Where().Extent());
+        ((Unit*)pet)->NearTeleportTo(px, py, pz, -m_caster->Where().Facing());
     }
 
     pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
@@ -341,7 +346,7 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
     else if (effect->GetRadiusIndex() && m_spellInfo->Speed == 0)
     {
         float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->GetRadiusIndex()));
-        m_caster->GetClosePoint(fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
+        ClosePointNear(*m_caster, fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
     }
     else
     {
@@ -354,12 +359,14 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
         if (goinfo->type == GAMEOBJECT_TYPE_FISHINGNODE)
         {
             // calculate angle variation for roughly equal dimensions of target area
-            float max_angle = (max_dis - min_dis) / (max_dis + m_caster->GetObjectBoundingRadius());
+            float max_angle = (max_dis - min_dis) / (max_dis + m_caster->Where().Extent());
             float angle_offset = max_angle * (rand_norm_f() - 0.5f);
-            m_caster->GetNearPoint2D(fx, fy, dis + m_caster->GetObjectBoundingRadius(), m_caster->GetOrientation() + angle_offset);
+            const Geometry::Vector3 near_ = PointNear(*m_caster, dis + m_caster->Where().Extent(), m_caster->Where().Facing() + angle_offset);
+            fx = near_.x;
+            fy = near_.y;
 
             GridMapLiquidData liqData;
-            if (!m_caster->GetTerrain()->IsInWater(fx, fy, m_caster->GetPositionZ() + 1.f, &liqData))
+            if (!m_caster->GetTerrain()->IsInWater(fx, fy, m_caster->Where().Z() + 1.f, &liqData))
             {
                 SendCastResult(SPELL_FAILED_NOT_FISHABLE);
                 SendChannelUpdate(0);
@@ -368,7 +375,7 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
 
             fz = liqData.level;
             // finally, check LoS
-            if (!m_caster->IsWithinLOS(fx, fy, fz, VMAP::ModelIgnoreFlags::M2))
+            if (!HasLineOfSight(*m_caster, Geometry::Vector3(fx, fy, fz)))
             {
                 SendCastResult(SPELL_FAILED_LINE_OF_SIGHT);
                 SendChannelUpdate(0);
@@ -377,7 +384,7 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
         }
         else
         {
-            m_caster->GetClosePoint(fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
+            ClosePointNear(*m_caster, fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
         }
     }
 
@@ -386,13 +393,15 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
     // if gameobject is summoning object, it should be spawned right on caster's position
     if (goinfo->type == GAMEOBJECT_TYPE_SUMMONING_RITUAL)
     {
-        m_caster->GetPosition(fx, fy, fz);
+        fx = m_caster->Where().X();
+        fy = m_caster->Where().Y();
+        fz = m_caster->Where().Z();
     }
 
     GameObject* pGameObj = new GameObject;
 
     if (!pGameObj->Create(cMap->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), name_id, cMap,
-                          m_caster->GetPhaseMask(), fx, fy, fz, m_caster->GetOrientation()))
+                          m_caster->GetPhaseMask(), fx, fy, fz, m_caster->Where().Facing()))
     {
         delete pGameObj;
         return;
@@ -896,10 +905,10 @@ void Spell::EffectBind(SpellEffectEntry const* effect)
     }
     else
     {
-        player->GetPosition(loc);
+        loc = WorldLocation(player->GetMapId(), player->Where().X(), player->Where().Y(), player->Where().Z(), player->Where().Facing());
         if (!area_id)
         {
-            area_id = player->GetAreaId();
+            area_id = player->GetTerrain()->GetAreaId(player->Where().X(), player->Where().Y(), player->Where().Z());
         }
     }
 
@@ -1055,10 +1064,12 @@ void Spell::EffectKnockBackFromPosition(SpellEffectEntry const* effect)
     }
     else
     {
-        m_caster->GetPosition(x, y, z);
+        x = m_caster->Where().X();
+        y = m_caster->Where().Y();
+        z = m_caster->Where().Z();
     }
 
-    float angle = unitTarget->GetAngle(x, y) + M_PI_F;
+    float angle = unitTarget->Where().BearingTo(Geometry::Vector2(x, y)) + M_PI_F;
     float horizontalSpeed = effect->EffectMiscValue_0 * 0.1f;
     float verticalSpeed = damage * 0.1f;
     unitTarget->KnockBackWithAngle(angle, horizontalSpeed, verticalSpeed);
@@ -1078,11 +1089,13 @@ void Spell::EffectGravityPull(SpellEffectEntry const* effect)
     }
     else
     {
-        m_caster->GetPosition(x, y, z);
+        x = m_caster->Where().X();
+        y = m_caster->Where().Y();
+        z = m_caster->Where().Z();
     }
 
     float speed = float(effect->EffectMiscValue_0) * 0.15f;
-    float height = float(unitTarget->GetDistance(x, y, z) * 0.2f);
+    float height = float(unitTarget->Where().DistanceTo(Geometry::Vector3(x, y, z)) * 0.2f);
 
     unitTarget->GetMotionMaster()->MoveJump(x, y, z, speed, height);
 }
@@ -1104,7 +1117,7 @@ void Spell::EffectCreateTamedPet(SpellEffectEntry const* effect)
     }
 
     Pet* newTamedPet = new Pet(HUNTER_PET);
-    CreatureCreatePos pos(unitTarget, unitTarget->GetOrientation());
+    CreatureCreatePos pos(unitTarget, unitTarget->Where().Facing());
 
     Map* map = unitTarget->GetMap();
     uint32 petNumber = sObjectMgr.GeneratePetNumber();
@@ -1114,7 +1127,7 @@ void Spell::EffectCreateTamedPet(SpellEffectEntry const* effect)
         return;
     }
 
-    newTamedPet->SetRespawnCoord(pos);
+    newTamedPet->SetSpawn(pos);
 
     newTamedPet->SetOwnerGuid(unitTarget->GetObjectGuid());
     newTamedPet->SetCreatorGuid(unitTarget->GetObjectGuid());
@@ -1146,8 +1159,8 @@ void Spell::EffectCreateTamedPet(SpellEffectEntry const* effect)
     newTamedPet->AIM_Initialize();
 
     float x, y, z;
-    unitTarget->GetClosePoint(x, y, z, newTamedPet->GetObjectBoundingRadius());
-    newTamedPet->Relocate(x, y, z, unitTarget->GetOrientation());
+    ClosePointNear(*unitTarget, x, y, z, newTamedPet->Where().Extent());
+    newTamedPet->Place().MoveTo(x, y, z, unitTarget->Where().Facing());
 
     map->Add((Creature*)newTamedPet);
     m_caster->SetPet(newTamedPet);

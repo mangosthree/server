@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -54,7 +55,7 @@ void ChatHandler::ShowTriggerTargetListHelper(uint32 id, AreaTrigger const* at, 
         char dist_buf[50];
         if (!subpart)
         {
-            float dist = m_session->GetPlayer()->GetDistance2d(at->target_X, at->target_Y);
+            float dist = m_session->GetPlayer()->Where().DistanceTo(Geometry::Vector2(at->target_X, at->target_Y));
             snprintf(dist_buf, 50, GetMangosString(LANG_TRIGGER_DIST), dist);
         }
         else
@@ -82,7 +83,7 @@ void ChatHandler::ShowTriggerListHelper(AreaTriggerEntry const* atEntry)
 
     if (m_session)
     {
-        float dist = m_session->GetPlayer()->GetDistance2d(atEntry->PosX, atEntry->PosY);
+        float dist = m_session->GetPlayer()->Where().DistanceTo(Geometry::Vector2(atEntry->PosX, atEntry->PosY));
         char dist_buf[50];
         snprintf(dist_buf, 50, GetMangosString(LANG_TRIGGER_DIST), dist);
 
@@ -160,8 +161,8 @@ bool ChatHandler::HandleTriggerCommand(char* args)
                 continue;
             }
 
-            float dx = atTestEntry->PosX - pl->GetPositionX();
-            float dy = atTestEntry->PosY - pl->GetPositionY();
+            float dx = atTestEntry->PosX - pl->Where().X();
+            float dy = atTestEntry->PosY - pl->Where().Y();
 
             float test_dist2 = dx * dx + dy * dy;
 
@@ -265,7 +266,7 @@ bool ChatHandler::HandleTriggerActiveCommand(char* /*args*/)
             continue;
         }
 
-        if (!IsPointInAreaTriggerZone(atEntry, pl->GetMapId(), pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ()))
+        if (!IsPointInAreaTriggerZone(atEntry, pl->GetMapId(), pl->Where().X(), pl->Where().Y(), pl->Where().Z()))
         {
             continue;
         }
@@ -311,8 +312,8 @@ bool ChatHandler::HandleTriggerNearCommand(char* args)
             continue;
         }
 
-        float dx = atEntry->PosX - pl->GetPositionX();
-        float dy = atEntry->PosY - pl->GetPositionY();
+        float dx = atEntry->PosX - pl->Where().X();
+        float dy = atEntry->PosY - pl->Where().Y();
 
         if (dx * dx + dy * dy > dist2)
         {
@@ -344,8 +345,8 @@ bool ChatHandler::HandleTriggerNearCommand(char* args)
             continue;
         }
 
-        float dx = at->target_X - pl->GetPositionX();
-        float dy = at->target_Y - pl->GetPositionY();
+        float dx = at->target_X - pl->Where().X();
+        float dy = at->target_Y - pl->Where().Y();
 
         if (dx * dx + dy * dy > dist2)
         {

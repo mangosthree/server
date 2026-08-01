@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -46,14 +47,11 @@
 
 #define COMPILER_MICROSOFT  0
 #define COMPILER_GNU        1
-#define COMPILER_BORLAND    2
 #define COMPILER_INTEL      3
 #define COMPILER_CLANG      4
 
 #ifdef _MSC_VER
 #  define COMPILER COMPILER_MICROSOFT
-#elif defined( __BORLANDC__ )
-#  define COMPILER COMPILER_BORLAND
 #elif defined( __INTEL_COMPILER )
 #  define COMPILER COMPILER_INTEL
 #elif defined(__clang__)
@@ -62,12 +60,6 @@
 #  define COMPILER COMPILER_GNU
 #else
 #  pragma error "FATAL ERROR: Unknown compiler."
-#endif
-
-#if defined(__cplusplus) && __cplusplus == 201103L
-#  define COMPILER_HAS_CPP11_SUPPORT 1
-#else
-#  define COMPILER_HAS_CPP11_SUPPORT 0
 #endif
 
 #endif

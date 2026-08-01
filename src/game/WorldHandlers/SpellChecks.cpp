@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -43,6 +44,7 @@
  * @see SpellMgr for spell management
  */
 
+#include "Utilities/MathDefines.h"
 #include "Spell.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -62,12 +64,12 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
 #include "LootMgr.h"
-#include "VMapFactory.h"
+#include "LineOfSightExemptions.h"
 #include "BattleGround/BattleGround.h"
 #include "Util.h"
 #include "Chat.h"
@@ -124,17 +126,16 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER && !((Player*)m_caster)->isGameMaster() &&
-        sWorld.getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK) &&
-        VMAP::VMapFactory::createOrGetVMapManager()->isLineOfSightCalcEnabled())
+        sWorld.getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK))
     {
         if (m_spellInfo->HasAttribute(SPELL_ATTR_OUTDOORS_ONLY) &&
-            !m_caster->GetTerrain()->IsOutdoors(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ()))
+            !m_caster->GetTerrain()->IsOutdoors(m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z()))
             {
                 return SPELL_FAILED_ONLY_OUTDOORS;
             }
 
         if (m_spellInfo->HasAttribute(SPELL_ATTR_INDOORS_ONLY) &&
-            m_caster->GetTerrain()->IsOutdoors(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ()))
+            m_caster->GetTerrain()->IsOutdoors(m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z()))
             {
                 return SPELL_FAILED_ONLY_INDOORS;
             }
@@ -291,7 +292,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
             }
 
-            if (!m_IsTriggeredSpell && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->ID, NULL, SPELL_ATTR_EX2_IGNORE_LOS) && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->ID) && !m_caster->IsWithinLOSInMap(target, VMAP::ModelIgnoreFlags::M2))
+            if (!m_IsTriggeredSpell && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->ID, NULL, SPELL_ATTR_EX2_IGNORE_LOS) && !LineOfSightExemptions::Has(m_spellInfo->ID) && !HasLineOfSight(*m_caster, *target))
             {
                 return SPELL_FAILED_LINE_OF_SIGHT;
             }
@@ -493,7 +494,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
 
         // Must be behind the target.
-        if (m_spellInfo->AttributesExB == SPELL_ATTR_EX2_FACING_TARGETS_BACK && m_spellInfo->HasAttribute(SPELL_ATTR_EX_FACING_TARGET) && target->HasInArc(M_PI_F, m_caster))
+        if (m_spellInfo->AttributesExB == SPELL_ATTR_EX2_FACING_TARGETS_BACK && m_spellInfo->HasAttribute(SPELL_ATTR_EX_FACING_TARGET) && target->Where().HasInArc(m_caster->Where(), M_PI_F))
         {
             // Exclusion for Pounce: Facing Limitation was removed in 2.0.1, but it still uses the same, old Ex-Flags
             // Exclusion for Mutilate:Facing Limitation was removed in 2.0.1 and 3.0.3, but they still use the same, old Ex-Flags
@@ -508,7 +509,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
 
         // Target must be facing you.
-        if ((m_spellInfo->Attributes == (SPELL_ATTR_ABILITY | SPELL_ATTR_NOT_SHAPESHIFT | SPELL_ATTR_DONT_AFFECT_SHEATH_STATE | SPELL_ATTR_STOP_ATTACK_TARGET)) && !target->HasInArc(M_PI_F, m_caster))
+        if ((m_spellInfo->Attributes == (SPELL_ATTR_ABILITY | SPELL_ATTR_NOT_SHAPESHIFT | SPELL_ATTR_DONT_AFFECT_SHEATH_STATE | SPELL_ATTR_STOP_ATTACK_TARGET)) && !target->Where().HasInArc(m_caster->Where(), M_PI_F))
         {
             SendInterrupted(2);
             return SPELL_FAILED_NOT_INFRONT;
@@ -522,7 +523,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
     // zone check
     uint32 zone, area;
-    m_caster->GetZoneAndAreaId(zone, area);
+    m_caster->GetTerrain()->GetZoneAndAreaId(zone, area, m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z());
 
     SpellCastResult locRes = sSpellMgr.GetSpellAllowedInLocationError(m_spellInfo, m_caster->GetMapId(), zone, area,
                              m_caster->GetCharmerOrOwnerPlayerOrPlayerItself());
@@ -651,7 +652,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                             }
                             else if (focusObject)           // Focus Object
                             {
-                                float frange = m_caster->GetDistance(focusObject);
+                                float frange = m_caster->Where().DistanceTo(focusObject->Where());
                                 if (range >= frange)
                                 {
                                     creatureScriptTarget = NULL;
@@ -675,7 +676,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                                     if (i_spellST->type == SPELL_TARGET_TYPE_DEAD && ((Creature*)pTarget)->IsCorpse())
                                     {
                                         // always use spellMaxRange, in case GetLastRange returned different in a previous pass
-                                        if (pTarget->IsWithinDistInMap(m_caster, GetSpellMaxRange(srange)))
+                                        if (InReach(*pTarget, *m_caster, GetSpellMaxRange(srange)))
                                         {
                                             targetExplicit = (Creature*)pTarget;
                                         }
@@ -683,7 +684,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                                     else if (i_spellST->type == SPELL_TARGET_TYPE_CREATURE && pTarget->IsAlive())
                                     {
                                         // always use spellMaxRange, in case GetLastRange returned different in a previous pass
-                                        if (pTarget->IsWithinDistInMap(m_caster, GetSpellMaxRange(srange)))
+                                        if (InReach(*pTarget, *m_caster, GetSpellMaxRange(srange)))
                                         {
                                             targetExplicit = (Creature*)pTarget;
                                         }
@@ -729,7 +730,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT_COORDINATES ||
                         spellEffect->ImplicitTarget_1 == TARGET_SCRIPT_COORDINATES)
                     {
-                        m_targets.setDestination(creatureScriptTarget->GetPositionX(), creatureScriptTarget->GetPositionY(), creatureScriptTarget->GetPositionZ());
+                        m_targets.setDestination(creatureScriptTarget->Where().X(), creatureScriptTarget->Where().Y(), creatureScriptTarget->Where().Z());
 
                         if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT_COORDINATES && spellEffect->Effect != SPELL_EFFECT_PERSISTENT_AREA_AURA)
                         {
@@ -752,7 +753,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT_COORDINATES ||
                         spellEffect->ImplicitTarget_1 == TARGET_SCRIPT_COORDINATES)
                     {
-                        m_targets.setDestination(goScriptTarget->GetPositionX(), goScriptTarget->GetPositionY(), goScriptTarget->GetPositionZ());
+                        m_targets.setDestination(goScriptTarget->Where().X(), goScriptTarget->Where().Y(), goScriptTarget->Where().Z());
 
                         if (spellEffect->ImplicitTarget_0 == TARGET_SCRIPT_COORDINATES && spellEffect->Effect != SPELL_EFFECT_PERSISTENT_AREA_AURA)
                         {
@@ -860,7 +861,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     }
 
                     float dist = GetSpellRadius(sSpellRadiusStore.LookupEntry(spellEffect->GetRadiusIndex()));
-                    if (!target->IsWithinDistInMap(m_caster,dist))
+                    if (!InReach(*target, *m_caster, dist))
                     {
                         return SPELL_FAILED_OUT_OF_RANGE;
                     }
@@ -907,7 +908,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     // spell different for friends and enemies
                     // hart version required facing
-                    if (m_targets.getUnitTarget() && !m_caster->IsFriendlyTo(m_targets.getUnitTarget()) && !m_caster->HasInArc(M_PI_F, m_targets.getUnitTarget()))
+                    if (m_targets.getUnitTarget() && !m_caster->IsFriendlyTo(m_targets.getUnitTarget()) && !m_caster->Where().HasInArc(m_targets.getUnitTarget()->Where(), M_PI_F))
                     {
                         return SPELL_FAILED_UNIT_NOT_INFRONT;
                     }
@@ -1445,7 +1446,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     if (Corpse* corpse = m_caster->GetMap()->GetCorpse(m_targets.getCorpseTargetGuid()))
                     {
-                        if (Player* owner = sObjectAccessor.FindPlayer(corpse->GetOwnerGuid()))
+                        if (Player* owner = sPlayerRegistry.Find(corpse->GetOwnerGuid()))
                         {
                             if (owner->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
                             {
@@ -2294,7 +2295,7 @@ SpellCastResult Spell::CheckRange(bool strict)
                 }
 
                 // with additional 5 dist for non stricted case (some melee spells have delay in apply
-                return m_caster->CanReachWithMeleeAttack(target, range_mod) ? SPELL_CAST_OK : SPELL_FAILED_OUT_OF_RANGE;
+                return InMeleeReach(*m_caster, *target, range_mod) ? SPELL_CAST_OK : SPELL_FAILED_OUT_OF_RANGE;
             }
             break;                                          // let continue in generic way for no target
         }
@@ -2316,7 +2317,7 @@ SpellCastResult Spell::CheckRange(bool strict)
     if (target && target != m_caster)
     {
         // distance from target in checks
-        float dist = m_caster->GetCombatDistance(target, m_spellInfo->RangeIndex == SPELL_RANGE_IDX_COMBAT);
+        float dist = CombatDistanceBetween(*m_caster, *target, m_spellInfo->RangeIndex == SPELL_RANGE_IDX_COMBAT);
 
         if (dist > max_range)
         {
@@ -2327,18 +2328,18 @@ SpellCastResult Spell::CheckRange(bool strict)
             return SPELL_FAILED_TOO_CLOSE;
         }
         if ( m_caster->GetTypeId() == TYPEID_PLAYER &&
-            (m_spellInfo->GetFacingCasterFlags() & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc( M_PI_F, target ) )
+            (m_spellInfo->GetFacingCasterFlags() & SPELL_FACING_FLAG_INFRONT) && !m_caster->Where().HasInArc(target->Where(), M_PI_F) )
             return SPELL_FAILED_UNIT_NOT_INFRONT;
     }
 
     // TODO verify that such spells really use bounding radius
     if (m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destZ != 0)
     {
-        if (!m_caster->IsWithinDist3d(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, max_range))
+        if (!m_caster->Where().WithinDist(Geometry::Vector3(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ), max_range))
         {
             return SPELL_FAILED_OUT_OF_RANGE;
         }
-        if (min_range && m_caster->IsWithinDist3d(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, min_range))
+        if (min_range && m_caster->Where().WithinDist(Geometry::Vector3(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ), min_range))
         {
             return SPELL_FAILED_TOO_CLOSE;
         }

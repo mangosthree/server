@@ -481,11 +481,12 @@ bool RandomPlayerbotMgr::IsSafeTeleportPosition(uint32 mapId, float x, float y, 
     }
 
     // Ground snap + void check: reject destinations with no map data underneath.
-    float groundZ = terrain->GetHeightStatic(x, y, z, true, MAX_HEIGHT);
-    if (groundZ <= INVALID_HEIGHT)
+    const auto floorZ = terrain->StaticFloor(x, y, z);
+    if (!floorZ)
     {
         return false;
     }
+    float groundZ = *floorZ;
 
     // Vashj'ir is an underwater zone by design: bots are kept alive there via the
     // Sea Legs buff + fatigue/breath exemption, and they swim rather than path on

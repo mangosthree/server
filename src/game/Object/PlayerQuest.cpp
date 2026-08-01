@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -31,6 +32,9 @@
  *        Player.h is unchanged.
  */
 
+#include "Utilities/Errors.h"
+#include <algorithm>
+#include <string>
 #include "Player.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -54,7 +58,6 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"
@@ -71,7 +74,6 @@
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "revision_data.h"
-#include "Database/DatabaseImpl.h"
 #include "Spell.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
@@ -848,7 +850,7 @@ void Player::AddQuest(Quest const* pQuest, Object* questGiver)
 
     // Some spells applied at quest activation
     uint32 zone, area;
-    GetZoneAndAreaId(zone, area);
+    GetTerrain()->GetZoneAndAreaId(zone, area, Where().X(), Where().Y(), Where().Z());
     SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(zone);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
     {
@@ -1161,13 +1163,13 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     // remove auras from spells with quest reward state limitations
     // Some spells applied at quest reward.
     // A reward spell cast above (GetRewSpell) can teleport the player off their
-    // current map, leaving m_currMap NULL; GetZoneAndAreaId -> GetTerrain would then
-    // dereference it and crash. Without a map there is no zone, hence no zone-limited
+    // current map, leaving m_currMap NULL; GetTerrain() would then dereference it
+    // and crash. Without a map there is no zone, hence no zone-limited
     // auras to reconcile, so skip this block when the player is no longer mapped.
-    if (GetMap())
+    if (FindMap())
     {
         uint32 zone, area;
-        GetZoneAndAreaId(zone, area);
+        GetTerrain()->GetZoneAndAreaId(zone, area, Where().X(), Where().Y(), Where().Z());
         SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(zone);
         for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
         {
@@ -2965,7 +2967,7 @@ void Player::SendQuestGiverStatusMultiple()
     // Walks m_clientGUIDs through GetMap(); a player with no current map (e.g. one a
     // quest reward spell just teleported off it, mid-RewardQuest) would null-deref.
     // No map means no nearby questgivers to report, so nothing to send.
-    if (!GetMap())
+    if (!FindMap())
     {
         return;
     }
@@ -3103,7 +3105,7 @@ void Player::UpdateForQuestWorldObjects()
     // (e.g. a bot displaced off its map mid-randomize by a quest reward spell, or
     // one whose login never completed Map::Add) would null-deref. With no map there
     // are no visible world objects to refresh.
-    if (!GetMap())
+    if (!FindMap())
     {
         return;
     }

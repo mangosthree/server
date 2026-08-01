@@ -1,11 +1,13 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
 # MaNGOS is a full featured server for World of Warcraft, supporting
 # the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
 #
-# Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+# Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
 #
-# This program is free software; you can redistribute it and/or modify
+# This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -14,8 +16,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 include(TestBigEndian)
 
@@ -28,19 +29,19 @@ set(SRC_GRP_AUTH
   Auth/BigNumber.h
   Auth/HMACSHA1.cpp
   Auth/HMACSHA1.h
+  Auth/Md5.h
   Auth/OpenSSLProvider.cpp
   Auth/OpenSSLProvider.h
   Auth/Sha1.cpp
   Auth/Sha1.h
   Auth/WardenKeyGeneration.h
-  Auth/md5.c
-  Auth/md5.h
 )
 source_group("Auth" FILES ${SRC_GRP_AUTH})
 
 set(SRC_GRP_COMMON
-  Common/Common.cpp
-  Common/Common.h
+  Common/Locales.cpp
+  Common/Locales.h
+  Common/TimeConstants.h
   Common/ServerDefines.h
   Common/GitRevision.cpp
   Common/GitRevision.h
@@ -67,7 +68,6 @@ set(SRC_GRP_DATABASE
   Database/Database.cpp
   Database/Database.h
   Database/DatabaseEnv.h
-  Database/DatabaseImpl.h
   Database/DatabaseMysql.cpp
   Database/DatabaseMysql.h
   Database/Field.cpp
@@ -95,7 +95,6 @@ source_group("Dynamic" FILES ${SRC_GRP_DYNAMIC})
 
 set(SRC_GRP_GAMESYSTEM
   GameSystem/Grid.h
-  GameSystem/GridLoader.h
   GameSystem/GridRefManager.h
   GameSystem/GridReference.h
   GameSystem/NGrid.h
@@ -108,6 +107,14 @@ set(SRC_GRP_LOCKQ
   LockedQueue/LockedQueue.h
 )
 source_group("LockedQueue" FILES ${SRC_GRP_LOCKQ})
+
+set(SRC_GRP_CONSOLE
+  Console/ConsoleUI.cpp
+  Console/ConsoleUI.h
+  Console/Terminal.cpp
+  Console/Terminal.h
+)
+source_group("Console" FILES ${SRC_GRP_CONSOLE})
 
 set(SRC_GRP_LOG
   Log/Log.cpp
@@ -186,13 +193,17 @@ set(SRC_GRP_UTILITIES
   Utilities/ByteBuffer.h
   Utilities/Errors.h
   Utilities/ProgressBar.cpp
+  Utilities/IdList.h
+  Utilities/MathDefines.h
+  Utilities/PackedValues.h
   Utilities/ProgressBar.h
   Utilities/ProgressBarRender.h
   Utilities/RNGen.h
+  Utilities/ScheduledExit.cpp
+  Utilities/ScheduledExit.h
   Utilities/Timer.h
   Utilities/Util.cpp
   Utilities/Util.h
-  Utilities/WorldPacket.h
   Utilities/ByteConverter.h
   Utilities/Callback.h
   Utilities/EventProcessor.cpp
@@ -201,7 +212,6 @@ set(SRC_GRP_UTILITIES
   Utilities/LinkedReference/RefManager.h
   Utilities/LinkedReference/Reference.h
   Utilities/TypeList.h
-  Utilities/UnorderedMapSet.h
   Utilities/Optional.h
 )
 source_group("Utilities" FILES ${SRC_GRP_UTILITIES})
@@ -210,6 +220,7 @@ set(TGT_INCL
   Auth
   Common
   Config
+  Console
   DataStores
   Database
   Linux
@@ -239,6 +250,7 @@ add_library(shared STATIC
     ${SRC_GRP_DYNAMIC}
     ${SRC_GRP_GAMESYSTEM}
     ${SRC_GRP_LOCKQ}
+    ${SRC_GRP_CONSOLE}
     ${SRC_GRP_LOG}
     ${SRC_GRP_NET}
     ${SRC_GRP_THREAD}

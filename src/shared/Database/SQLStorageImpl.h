@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -25,6 +26,8 @@
 #ifndef SQLSTORAGE_IMPL_H
 #define SQLSTORAGE_IMPL_H
 
+#include <cstring>
+#include <cassert>
 #include "Utilities/ProgressBar.h"
 #include "Log/Log.h"
 #include "DataStores/DBCFileLoader.h"
@@ -34,14 +37,15 @@ template<class S, class D>
 /**
  * @brief S source-type, D destination-type
  *
- * @param field_pos
+ * @param uint32
  * @param src
  * @param dst
  */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert(uint32 /*field_pos*/, S src, D& dst)
 {
 #if defined(__arm__)
-    if (((unsigned) &dst) % sizeof(D)) {
+    if (((unsigned) &dst) % sizeof(D))
+    {
         //The address is not aligned. Use memcpy to avoid ARM unaligned trap
        D converted(src);
        memcpy((void*) &dst, (void*) &converted, sizeof(D));
@@ -56,7 +60,7 @@ template<class DerivedLoader, class StorageClass>
 /**
  * @brief
  *
- * @param field_pos
+ * @param uint32
  * @param src
  * @param dst
  */
@@ -80,8 +84,8 @@ template<class S>
 /**
  * @brief S source-type
  *
- * @param field_pos
- * @param src
+ * @param uint32
+ * @param S
  * @param dst
  */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_to_str(uint32 /*field_pos*/, S /*src*/, char*& dst)
@@ -95,14 +99,15 @@ template<class D>
 /**
  * @brief D destination-type
  *
- * @param field_pos
- * @param src
+ * @param uint32
+ * @param
  * @param dst
  */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_from_str(uint32 /*field_pos*/, char const* /*src*/, D& dst)
 {
 #if defined(__arm__)
-    if (((unsigned) &dst) % sizeof(D)) {
+    if (((unsigned) &dst) % sizeof(D))
+    {
        //The address is not aligned. Use memcpy to avoid ARM unaligned trap
        D converted(0);
        memcpy((void*) &dst, (void*) &converted, sizeof(D));
@@ -118,14 +123,15 @@ template<class S, class D>
 /**
  * @brief S source-type, D destination-type
  *
- * @param field_pos
+ * @param uint32
  * @param src
  * @param dst
  */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::default_fill(uint32 /*field_pos*/, S src, D& dst)
 {
 #if defined(__arm__)
-    if (((unsigned) &dst) % sizeof(D)) {
+    if (((unsigned) &dst) % sizeof(D))
+    {
        //The address is not aligned. Use memcpy to avoid ARM unaligned trap
        D converted(src);
        memcpy((void*) &dst, (void*) &converted, sizeof(D));
@@ -140,8 +146,8 @@ template<class DerivedLoader, class StorageClass>
 /**
  * @brief
  *
- * @param field_pos
- * @param src
+ * @param uint32
+ * @param
  * @param dst
  */
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::default_fill_to_str(uint32 /*field_pos*/, char const* /*src*/, char*& dst)

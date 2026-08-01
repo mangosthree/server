@@ -1,13 +1,15 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -16,8 +18,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -43,7 +44,11 @@
  * @see WardenMac for macOS-specific implementation
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <cstring>
+#include <string>
+#include <sstream>
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Log.h"
@@ -488,9 +493,9 @@ void Warden::LogPositiveToDB(WardenCheck* check)
     {
         stmt.addUInt64(pl->GetObjectGuid().GetRawValue());
         stmt.addUInt32(pl->GetMapId());
-        stmt.addFloat(pl->GetPositionX());
-        stmt.addFloat(pl->GetPositionY());
-        stmt.addFloat(pl->GetPositionZ());
+        stmt.addFloat(pl->Where().X());
+        stmt.addFloat(pl->Where().Y());
+        stmt.addFloat(pl->Where().Z());
     }
     else
     {

@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -33,6 +34,9 @@
  * - Quest and achievement lists
  */
 
+#include "Common/Locales.h"
+#include <sstream>
+#include <string>
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "Language.h"
@@ -40,6 +44,7 @@
 #include "SpellMgr.h"
 #include "Unit.h"
 #include "Player.h"
+#include "PlayerRegistry.h"
 
 static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
 {
@@ -462,7 +467,7 @@ bool ChatHandler::HandleListItemCommand(char* args)
 //    PSendSysMessage("Online Players (Limit %u):", limit);
 //    PSendSysMessage("===========================================");
 //
-//    sObjectAccessor.DoForAllPlayers([&](Player* player)
+//    sPlayerRegistry.ForEach([&](Player* player)
 //    {
 //        if (count >= limit)
 //        {
@@ -470,7 +475,7 @@ bool ChatHandler::HandleListItemCommand(char* args)
 //        }
 //
 //        uint32 mapId = player->GetMapId();
-//        uint32 zoneId = player->GetZoneId();
+//        uint32 zoneId = player->GetTerrain()->GetZoneId(player->Where().X(), player->Where().Y(), player->Where().Z());
 //
 //        MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
 //        AreaTableEntry const* zoneEntry = GetAreaEntryByAreaID(zoneId);
@@ -538,7 +543,7 @@ bool ChatHandler::HandleListObjectCommand(char* args)
     {
         Player* pl = m_session->GetPlayer();
         result = WorldDatabase.PQuery("SELECT `guid`, `position_x`, `position_y`, `position_z`, `map`, (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) AS order_ FROM `gameobject` WHERE `id` = '%u' ORDER BY `order_` ASC LIMIT %u",
-                                      pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), go_id, uint32(count));
+                                      pl->Where().X(), pl->Where().Y(), pl->Where().Z(), go_id, uint32(count));
     }
     else
         result = WorldDatabase.PQuery("SELECT `guid`, `position_x`, `position_y`, `position_z`, `map` FROM `gameobject` WHERE `id` = '%u' LIMIT %u",
@@ -623,7 +628,7 @@ bool ChatHandler::HandleListCreatureCommand(char* args)
     {
         Player* pl = m_session->GetPlayer();
         result = WorldDatabase.PQuery("SELECT `guid`, `position_x`, `position_y`, `position_z`, `map`, (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) AS order_ FROM `creature` WHERE `id` = '%u' ORDER BY `order_` ASC LIMIT %u",
-                                      pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), cr_id, uint32(count));
+                                      pl->Where().X(), pl->Where().Y(), pl->Where().Z(), cr_id, uint32(count));
     }
     else
         result = WorldDatabase.PQuery("SELECT `guid`, `position_x`, `position_y`, `position_z`, `map` FROM `creature` WHERE `id` = '%u' LIMIT %u",

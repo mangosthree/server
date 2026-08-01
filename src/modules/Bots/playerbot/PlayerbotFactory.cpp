@@ -162,7 +162,7 @@ void PlayerbotFactory::Randomize(bool incremental)
     // GetTerrain() on a NULL map, ...). Abort here rather than run that gauntlet:
     // RandomizeFirst/IncreaseLevel re-anchor the bot via RandomTeleportForLevel right
     // after, so it re-randomizes cleanly once it is mapped again.
-    if (!bot->GetMap())
+    if (!bot->FindMap())
     {
         sLog.outError("PlayerbotFactory::Randomize aborted for bot %u: unmapped after InitQuests",
                       bot->GetGUIDLow());
@@ -247,7 +247,7 @@ void PlayerbotFactory::InitPet()
             return;
         }
 
-        Map* map = bot->GetMap();
+        Map* map = bot->FindMap();
         if (!map)
         {
             return;
@@ -2525,7 +2525,7 @@ void PlayerbotFactory::InitQuests()
     // map, so this would null-deref and crash the world thread. Skip the quest pass
     // for such a bot; every other randomize step (talents, spells, gear, glyphs) is
     // map-independent, so the bot is still fully geared.
-    if (!bot->GetMap())
+    if (!bot->FindMap())
     {
         return;
     }
@@ -2569,7 +2569,7 @@ void PlayerbotFactory::InitQuests()
         // unmapped. Stop force-completing quests once that happens: the remaining
         // randomize steps (gear/talents/spells) are map-independent and the caller's
         // RandomTeleportForLevel re-anchors the bot immediately afterwards.
-        if (!bot->GetMap())
+        if (!bot->FindMap())
         {
             break;
         }

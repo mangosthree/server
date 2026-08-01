@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,14 +17,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <sstream>
+#include <vector>
 #include "Player.h"
+#include "TransportMap.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
@@ -45,7 +50,6 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"
@@ -62,7 +66,6 @@
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "revision_data.h"
-#include "Database/DatabaseImpl.h"
 #include "Spell.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
@@ -159,12 +162,45 @@ void Player::SaveToDB()
 
     if (!IsBeingTeleported())
     {
-        uberInsert.addUInt32(GetMapId());
+        // What goes in this row is what the client will be handed at the next login, so it
+        // is the map the ship SAILS and a point on it -- never the deck map, which the
+        // client cannot load. Where he actually stands is the deck position saved in the
+        // transport columns below, and that is the one that survives the voyage intact.
+        //
+        // The vessel is taken from the boarding relationship when it is intact, and from
+        // the map otherwise: a GM `.tele` onto a hull puts him there with no transport at
+        // all. Written once, a deck map in this column is unloadable for ever.
+        uint32 savedMap = GetMapId();
+        float savedX = Where().X(), savedY = Where().Y();
+        float savedZ = Where().Z(), savedO = Where().Facing();
+
+        Transport* vessel = m_transport;
+        if (!vessel)
+        {
+            if (Map* on = FindMap())
+            {
+                if (TransportMap* hull = on->AsTransport())
+                {
+                    vessel = hull->Vessel();
+                }
+            }
+        }
+
+        if (vessel)
+        {
+            savedMap = vessel->GetMapId();
+            savedX = vessel->Where().X();
+            savedY = vessel->Where().Y();
+            savedZ = vessel->Where().Z();
+            savedO = vessel->Where().Facing();
+        }
+
+        uberInsert.addUInt32(savedMap);
         uberInsert.addUInt32(uint32(GetDungeonDifficulty()));
-        uberInsert.addFloat(finiteAlways(GetPositionX()));
-        uberInsert.addFloat(finiteAlways(GetPositionY()));
-        uberInsert.addFloat(finiteAlways(GetPositionZ()));
-        uberInsert.addFloat(finiteAlways(GetOrientation()));
+        uberInsert.addFloat(finiteAlways(savedX));
+        uberInsert.addFloat(finiteAlways(savedY));
+        uberInsert.addFloat(finiteAlways(savedZ));
+        uberInsert.addFloat(finiteAlways(savedO));
     }
     else
     {
@@ -220,7 +256,7 @@ void Player::SaveToDB()
 
     uberInsert.addUInt32(uint32(m_atLoginFlags));
 
-    uberInsert.addUInt32(IsInWorld() ? GetZoneId() : GetCachedZoneId());
+    uberInsert.addUInt32(IsInWorld() ? GetTerrain()->GetZoneId(Where().X(), Where().Y(), Where().Z()) : GetCachedZoneId());
 
     uberInsert.addUInt64(uint64(m_deathExpireTime));
 

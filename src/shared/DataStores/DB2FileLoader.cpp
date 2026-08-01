@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,19 +17,26 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Common/Locales.h"
+#include <cassert>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "DBCFileLoader.h"
 #include "DB2FileLoader.h"
+
+
+// Ceilings for the two sizes AutoProduceData takes from file content -- far above any
+// real .db2, and there so a corrupt file fails the load instead of sizing an allocation.
+static const uint64 MAX_DB2_INDEX       = 16u * 1024u * 1024u;
+static const uint64 MAX_DB2_TABLE_BYTES = 512u * 1024u * 1024u;
 
 DB2FileLoader::DB2FileLoader()
 {
@@ -291,10 +300,18 @@ char* DB2FileLoader::AutoProduceData(const char* format, uint32& records, char**
             }
         }
 
+        // maxi comes from record CONTENT. Refuse a wrapped or absurd count rather than
+        // allocating from it: ++maxi on 0xFFFFFFFF is 0, which allocates nothing and is
+        // then written through by every row.
+        if (maxi == 0xFFFFFFFFu || uint64(maxi) + 1 > MAX_DB2_INDEX)
+        {
+            return NULL;
+        }
+
         ++maxi;
         records = maxi;
         indexTable = new ptr[maxi];
-        memset(indexTable, 0, maxi * sizeof(ptr));
+        memset(indexTable, 0, size_t(maxi) * sizeof(ptr));
     }
     else
     {
@@ -302,7 +319,16 @@ char* DB2FileLoader::AutoProduceData(const char* format, uint32& records, char**
         indexTable = new ptr[recordCount];
     }
 
-    char* dataTable = new char[recordCount * recordsize];
+    // In 64 bits, so a large record count times a wide format cannot wrap.
+    const uint64 tableBytes = uint64(recordCount) * recordsize;
+    if (tableBytes > MAX_DB2_TABLE_BYTES)
+    {
+        delete[] indexTable;
+        indexTable = NULL;
+        return NULL;
+    }
+
+    char* dataTable = new char[size_t(tableBytes)];
 
     uint32 offset = 0;
 

@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
  * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,13 +17,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <memory>
 #include "Master.h"
 
 #include "AntiFreezeService.h"
@@ -29,17 +31,18 @@
 #include "RASession.h"
 
 #include "Config/Config.h"
+#include "Console/ConsoleUI.h"
 #include "DBCStores.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "MapManager.h"
-#include "MassMailMgr.h"
 #include "Server/WorldNetwork.h"
 #include "Timer.h"
 #include "World.h"
 
 #ifdef ENABLE_SOAP
 #include "SOAP/SoapService.h"
+#include <thread>
 #endif
 
 #ifdef _WIN32
@@ -61,6 +64,41 @@ extern int m_ServiceStatus;
 
 extern uint32 realmID;
 
+namespace
+{
+    /**
+     * @brief Open one database and verify its schema version.
+     *
+     * @param db          The database to open.
+     * @param label       Name used in log messages.
+     * @param infoKey     Config key holding the connection string.
+     * @param countKey    Config key holding the extra connection count.
+     * @param versionKind Which schema this database is expected to carry.
+     * @return false if the database could not be opened or is the wrong version.
+     */
+    bool OpenDatabase(Database& db, const char* label, const char* infoKey,
+                      const char* countKey, DatabaseTypes versionKind)
+    {
+        const std::string info = sConfig.GetStringDefault(infoKey, "");
+        if (info.empty())
+        {
+            sLog.outError("%s database not specified in the configuration file", label);
+            return false;
+        }
+
+        const int connections = sConfig.GetIntDefault(countKey, 1);
+        sLog.outString("%s database total connections: %i", label, connections + 1);
+
+        if (!db.Initialize(info.c_str(), connections))
+        {
+            sLog.outError("Cannot connect to the %s database", label);
+            return false;
+        }
+
+        return db.CheckDatabaseVersion(versionKind);
+    }
+}
+
 Master::Master()
 {
 }
@@ -71,126 +109,70 @@ Master::~Master()
 
 bool Master::StartDatabases()
 {
-    ///- Get world database info from configuration file
-    std::string dbstring = sConfig.GetStringDefault("WorldDatabaseInfo", "");
-    int nConnections = sConfig.GetIntDefault("WorldDatabaseConnections", 1);
-    if (dbstring.empty())
-    {
-        sLog.outError("Database not specified in configuration file");
-        return false;
-    }
-    sLog.outString("World Database total connections: %i", nConnections + 1);
-
-    ///- Initialise the world database
-    if (!WorldDatabase.Initialize(dbstring.c_str(), nConnections))
-    {
-        sLog.outError("Can not connect to world database %s", dbstring.c_str());
-        return false;
-    }
-
-    ///- Check the World database version
-    if (!WorldDatabase.CheckDatabaseVersion(DATABASE_WORLD))
+    // Opened in order, and unwound in reverse on failure. The predecessor
+    // repeated the whole unwind at each of eight failure points, which is how a
+    // missed HaltDelayThread() hides: every new early return has to remember the
+    // full list of everything opened so far.
+    if (!OpenDatabase(WorldDatabase, "World", "WorldDatabaseInfo",
+                      "WorldDatabaseConnections", DATABASE_WORLD))
     {
         WorldDatabase.HaltDelayThread();
         return false;
     }
 
-    dbstring = sConfig.GetStringDefault("CharacterDatabaseInfo", "");
-    nConnections = sConfig.GetIntDefault("CharacterDatabaseConnections", 1);
-    if (dbstring.empty())
+    if (!OpenDatabase(CharacterDatabase, "Character", "CharacterDatabaseInfo",
+                      "CharacterDatabaseConnections", DATABASE_CHARACTER))
     {
-        sLog.outError("Character Database not specified in configuration file");
-        WorldDatabase.HaltDelayThread();
-        return false;
-    }
-    sLog.outString("Character Database total connections: %i", nConnections + 1);
-
-    ///- Initialise the Character database
-    if (!CharacterDatabase.Initialize(dbstring.c_str(), nConnections))
-    {
-        sLog.outError("Can not connect to Character database %s", dbstring.c_str());
-        WorldDatabase.HaltDelayThread();
-        return false;
-    }
-
-    ///- Check the Character database version
-    if (!CharacterDatabase.CheckDatabaseVersion(DATABASE_CHARACTER))
-    {
-        WorldDatabase.HaltDelayThread();
         CharacterDatabase.HaltDelayThread();
+        WorldDatabase.HaltDelayThread();
         return false;
     }
 
-    ///- Get login database info from configuration file
-    dbstring = sConfig.GetStringDefault("LoginDatabaseInfo", "");
-    nConnections = sConfig.GetIntDefault("LoginDatabaseConnections", 1);
-    if (dbstring.empty())
+    if (!OpenDatabase(LoginDatabase, "Login", "LoginDatabaseInfo",
+                      "LoginDatabaseConnections", DATABASE_REALMD))
     {
-        sLog.outError("Login database not specified in configuration file");
-        WorldDatabase.HaltDelayThread();
-        CharacterDatabase.HaltDelayThread();
-        return false;
-    }
-
-    ///- Initialise the login database
-    sLog.outString("Login Database total connections: %i", nConnections + 1);
-    if (!LoginDatabase.Initialize(dbstring.c_str(), nConnections))
-    {
-        sLog.outError("Can not connect to login database %s", dbstring.c_str());
-        WorldDatabase.HaltDelayThread();
-        CharacterDatabase.HaltDelayThread();
-        return false;
-    }
-
-    ///- Check the Realm database version
-    if (!LoginDatabase.CheckDatabaseVersion(DATABASE_REALMD))
-    {
-        WorldDatabase.HaltDelayThread();
-        CharacterDatabase.HaltDelayThread();
         LoginDatabase.HaltDelayThread();
+        CharacterDatabase.HaltDelayThread();
+        WorldDatabase.HaltDelayThread();
         return false;
     }
 
-    sLog.outString();
-
-    ///- Get the realm Id from the configuration file
     realmID = sConfig.GetIntDefault("RealmID", 0);
     if (!realmID)
     {
-        sLog.outError("Realm ID not defined in configuration file");
-        WorldDatabase.HaltDelayThread();
-        CharacterDatabase.HaltDelayThread();
-        LoginDatabase.HaltDelayThread();
+        sLog.outError("Realm ID not defined in the configuration file");
+        StopDatabases();
         return false;
     }
 
-    sLog.outString("Realm running as realm ID %d", realmID);
-    sLog.outString();
-
-    sWorld.LoadDBVersion();
-
-    sLog.outString("Using World DB: %s", sWorld.GetDBVersion());
-    sLog.outString();
+    sLog.outString("Realm running as realm ID %u", realmID);
     return true;
 }
 
 void Master::StopDatabases()
 {
+    LoginDatabase.HaltDelayThread();
     CharacterDatabase.HaltDelayThread();
     WorldDatabase.HaltDelayThread();
-    LoginDatabase.HaltDelayThread();
 }
 
 void Master::ClearOnlineAccounts()
 {
-    // Cleanup online status for characters hosted at current realm
-    /// \todo Only accounts with characters logged on *this* realm should have online status reset. Move the online column from 'account' to 'realmcharacters'?
-    LoginDatabase.PExecute("UPDATE `account` SET `active_realm_id` = 0, `os` = ''  WHERE `active_realm_id` = '%u'", realmID);
+    // Reset the online flags for this realm only: another realm sharing the same
+    // login database may be up, and its sessions are none of our business.
+    LoginDatabase.PExecute(
+        "UPDATE `account` SET `active_realm_id` = 0 WHERE `active_realm_id` = '%u'",
+        realmID);
 
-    CharacterDatabase.Execute("UPDATE `characters` SET `online` = 0 WHERE `online`<>0");
+    CharacterDatabase.Execute("UPDATE `characters` SET `online` = 0 WHERE `online` <> 0");
 
-    // Battleground instance ids reset at server restart
-    CharacterDatabase.Execute("UPDATE `character_battleground_data` SET `instance_id` = 0");
+    CharacterDatabase.Execute("DELETE FROM `character_battleground_data`");
+
+    CharacterDatabase.Execute(
+        "UPDATE `groups` SET `leaderGuid` = (SELECT `memberGuid` FROM `group_member` "
+        "WHERE `group_member`.`groupId` = `groups`.`groupId` ORDER BY `assistant` DESC LIMIT 1) "
+        "WHERE `leaderGuid` NOT IN (SELECT `memberGuid` FROM `group_member` "
+        "WHERE `group_member`.`groupId` = `groups`.`groupId`)");
 }
 
 void Master::StartServices()
@@ -213,7 +195,7 @@ void Master::StartServices()
 #else
     if (sConfig.GetBoolDefault("SOAP.Enabled", false))
     {
-        sLog.outError("SOAP is enabled but wasn't included during compilation, not activating it.");
+        sLog.outError("SOAP is enabled in the configuration but was not compiled in; ignoring.");
     }
 #endif
 
@@ -231,7 +213,7 @@ void Master::StartServices()
     if (consoleWanted)
     {
         m_services.push_back(std::unique_ptr<IService>(
-            new CliService(sConfig.GetBoolDefault("BeepAtStart", true))));
+            new CliService(sConfig.GetBoolDefault("Console.BeepAtStart", true))));
     }
 
     for (auto& service : m_services)
@@ -259,43 +241,78 @@ void Master::StopServices()
     m_services.clear();
 }
 
+void Master::PublishConsoleStatus(uint32 diff)
+{
+    MaNGOS::Console::ConsoleUI& ui = MaNGOS::Console::ConsoleUI::Instance();
+    if (!ui.Active())
+    {
+        return;
+    }
+
+    const uint32 uptime = sWorld.GetUptime();
+    char buf[64];
+
+    snprintf(buf, sizeof(buf), "%u / %u", sWorld.GetActiveSessionCount(),
+             sWorld.GetPlayerAmountLimit());
+    ui.SetStatus(0, "Players", buf);
+
+    ui.SetStatus(1, "Queue", std::to_string(sWorld.GetQueuedSessionCount()),
+                 sWorld.GetQueuedSessionCount() ? MaNGOS::Console::STYLE_WARN
+                                                : MaNGOS::Console::STYLE_NORMAL);
+
+    snprintf(buf, sizeof(buf), "%u ms", diff);
+    ui.SetStatus(2, "Diff", buf, diff > WORLD_SLEEP_CONST ? MaNGOS::Console::STYLE_WARN
+                                                          : MaNGOS::Console::STYLE_SUCCESS);
+
+    snprintf(buf, sizeof(buf), "%ud %02u:%02u:%02u", uptime / 86400,
+             (uptime / 3600) % 24, (uptime / 60) % 60, uptime % 60);
+    ui.SetStatus(3, "Uptime", buf);
+}
+
 void Master::WorldLoop()
 {
-    sLog.outString("World Updater Thread started (%dms min update interval)", WORLD_SLEEP_CONST);
+    sLog.outString("World updater started (%dms minimum update interval)",
+                   WORLD_SLEEP_CONST);
 
-    uint32 realPrevTime = getMSTime();
+    uint32 previous = getMSTime();
+    uint32 lastStatus = 0;
 
     while (!World::IsStopped())
     {
+        // Read by the freeze watchdog to tell a busy server from a wedged one.
         ++World::m_worldLoopCounter;
 
-        const uint32 realCurrTime = getMSTime();
-        const uint32 diff = getMSTimeDiff(realPrevTime, realCurrTime);
+        const uint32 current = getMSTime();
+        sWorld.Update(getMSTimeDiff(previous, current));
+        previous = current;
 
-        sWorld.Update(diff);
-        realPrevTime = realCurrTime;
+        const uint32 spent = getMSTimeDiff(current, getMSTime());
 
-        const uint32 executionTimeDiff = getMSTimeDiff(realCurrTime, getMSTime());
-
-        if (executionTimeDiff < WORLD_SLEEP_CONST)
+        if (getMSTimeDiff(lastStatus, current) >= 1000)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(WORLD_SLEEP_CONST - executionTimeDiff));
+            lastStatus = current;
+            PublishConsoleStatus(spent);
+        }
+
+        if (spent < WORLD_SLEEP_CONST)
+        {
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds(WORLD_SLEEP_CONST - spent));
         }
 
 #ifdef _WIN32
-        if (m_ServiceStatus == 0) // service stopped
+        if (m_ServiceStatus == 0)               // service stopped
         {
             World::StopNow(SHUTDOWN_EXIT_CODE);
         }
-
-        while (m_ServiceStatus == 2) // service paused
+        while (m_ServiceStatus == 2)            // service paused
         {
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
 #endif
     }
 
-    sLog.outString("World Updater Thread stopped");
+    sLog.outString("World updater stopped.");
 }
 
 void Master::ShutdownWorld()
@@ -303,23 +320,17 @@ void Master::ShutdownWorld()
     // Strict order, and it matters: players must be saved before their sessions
     // are drained, sessions must be drained before the listener goes away, and
     // the listener must be gone before the maps they live on are unloaded.
-    sLog.outString("[shutdown] world loop stopped; entering world-thread shutdown tail");
-
-    sLog.outString("[shutdown] KickAll: saving + kicking players...");
+    sLog.outString("[shutdown] saving and kicking all players");
     sWorld.KickAll();
-    sLog.outString("[shutdown] KickAll done");
 
-    sLog.outString("[shutdown] final UpdateSessions...");
+    sLog.outString("[shutdown] draining remaining sessions");
     sWorld.UpdateSessions(1);
-    sLog.outString("[shutdown] final UpdateSessions done");
 
-    sLog.outString("[shutdown] StopNetwork: ending the world listener...");
+    sLog.outString("[shutdown] stopping the world listener");
     sWorldNetwork.Stop();
-    sLog.outString("[shutdown] StopNetwork done");
 
-    sLog.outString("[shutdown] UnloadAll: unloading maps + MapUpdater teardown...");
+    sLog.outString("[shutdown] unloading maps");
     sMapMgr.UnloadAll();
-    sLog.outString("[shutdown] UnloadAll returned; world thread exiting");
 }
 
 int Master::Run()
@@ -374,15 +385,10 @@ int Master::Run()
     StopServices();
 
     ClearOnlineAccounts();
-
-    // send all still queued mass mails (before DB connections shutdown)
-    sMassMailMgr.Update(true);
-
-    sLog.outString("[shutdown] halting DB delay threads (Character/World/Login)...");
     StopDatabases();
-    sLog.outString("[shutdown] DB delay threads halted");
 
     WorldDatabase.ThreadEnd();
 
+    sLog.outString("Halting process...");
     return World::GetExitCode();
 }

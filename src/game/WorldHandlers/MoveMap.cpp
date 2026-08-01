@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,13 +17,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <string>
+#include <set>
 #include "GridMap.h"
 #include "Log.h"
 #include "World.h"
@@ -50,6 +54,25 @@
  * @see MMapFactory for creation utilities
  * @see DetourNavMesh for underlying navigation mesh
  */
+
+namespace
+{
+    /// Named from the expansion, never from the format string: a deck map's id is seven
+    /// digits and the old sizing silently cut the extension off.
+    std::string MMapFileName(uint32 mapId)
+    {
+        char leaf[64];
+        snprintf(leaf, sizeof(leaf), "mmaps/%04u.mmap", mapId);
+        return sWorld.GetDataPath() + leaf;
+    }
+
+    std::string MMapTileFileName(uint32 mapId, int32 x, int32 y)
+    {
+        char leaf[64];
+        snprintf(leaf, sizeof(leaf), "mmaps/%04u%02i%02i.mmtile", mapId, x, y);
+        return sWorld.GetDataPath() + leaf;
+    }
+}
 
 namespace MMAP
 {
@@ -235,19 +258,19 @@ namespace MMAP
             return true;
         }
 
-        // load and init dtNavMesh - read parameters from file
-        uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%04u.mmap") + 1;
-        char* fileName = new char[pathLen];
-        snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/%04u.mmap").c_str(), mapId);
+        // The buffer is sized for the WIDEST EXPANSION, not for the format string: a map id
+        // wider than the %04u pad -- a vessel's deck, minted above a million -- expanded
+        // past a buffer measured from "mmaps/%04u.mmap" and the name was truncated to
+        // "...1181646.m", which fails to open and reads like missing data.
+        const std::string fileName = MMapFileName(mapId);
 
-        FILE* file = fopen(fileName, "rb");
+        FILE* file = fopen(fileName.c_str(), "rb");
         if (!file)
         {
             if (MMapFactory::IsPathfindingEnabled(mapId))
             {
-                sLog.outError("MMAP:loadMapData: Error: Could not open mmap file '%s'", fileName);
+                sLog.outError("MMAP:loadMapData: Error: Could not open mmap file '%s'", fileName.c_str());
             }
-            delete[] fileName;
             return false;
         }
 
@@ -260,12 +283,10 @@ namespace MMAP
         if (DT_SUCCESS != mesh->init(&params))
         {
             dtFreeNavMesh(mesh);
-            sLog.outError("MMAP:loadMapData: Failed to initialize dtNavMesh for mmap %04u from file %s", mapId, fileName);
-            delete[] fileName;
+            sLog.outError("MMAP:loadMapData: Failed to initialize dtNavMesh for mmap %04u from file %s", mapId, fileName.c_str());
             return false;
         }
 
-        delete[] fileName;
 
         DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MMAP:loadMapData: Loaded %04u.mmap", mapId);
 
@@ -303,18 +324,14 @@ namespace MMAP
         }
 
         // load this tile :: mmaps/MMMMXXYY.mmtile
-        uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%04u%02i%02i.mmtile") + 1;
-        char* fileName = new char[pathLen];
-        snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/%04u%02i%02i.mmtile").c_str(), mapId, x, y);
+        const std::string fileName = MMapTileFileName(mapId, x, y);
 
-        FILE* file = fopen(fileName, "rb");
+        FILE* file = fopen(fileName.c_str(), "rb");
         if (!file)
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "ERROR: MMAP:loadMap: Could not open mmtile file '%s'", fileName);
-            delete[] fileName;
+            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "ERROR: MMAP:loadMap: Could not open mmtile file '%s'", fileName.c_str());
             return false;
         }
-        delete[] fileName;
 
         // read header
         MmapTileHeader fileHeader;

@@ -1,12 +1,14 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
 #/**
 # * MaNGOS is a full featured server for World of Warcraft, supporting
 # * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
 # *
-# * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+# * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
 # *
-# * This program is free software; you can redistribute it and/or modify
+# * This program is free software: you can redistribute it and/or modify
 # * it under the terms of the GNU General Public License as published by
-# * the Free Software Foundation; either version 2 of the License, or
+# * the Free Software Foundation, either version 3 of the License, or
 # * (at your option) any later version.
 # *
 # * This program is distributed in the hope that it will be useful,
@@ -38,9 +40,9 @@ set(SRC_GRP_MAIN
 source_group("Main" FILES ${SRC_GRP_MAIN})
 
 set(SRC_GRP_SOAP
-  SOAP/SoapService.h
   SOAP/SoapThread.cpp
   SOAP/SoapThread.h
+  SOAP/SoapService.h
 )
 source_group("SOAP" FILES ${SRC_GRP_SOAP})
 
@@ -62,24 +64,23 @@ add_executable(mangosd
 )
 
 target_include_directories(mangosd
-    PUBLIC
+    PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 target_compile_definitions(mangosd
-    PUBLIC
+    PRIVATE
         $<$<BOOL:${SCRIPT_LIB_ELUNA}>:ENABLE_ELUNA ELUNA_EXPANSION=3 ELUNA_MANGOS>
 )
 
 target_link_libraries(mangosd
-    PUBLIC
+    PRIVATE
         game
+        proto
         $<$<BOOL:${SOAP}>:gsoap>
         Threads::Threads
-        DL::DL
         mangos_openssl
-    PRIVATE
         mangos_openssl_strict
 )
 

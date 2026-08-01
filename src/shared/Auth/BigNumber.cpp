@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -71,16 +72,19 @@ void BigNumber::SetBinary(const uint8* bytes, int len)
 {
     // Input is little-endian; BN_bin2bn wants big-endian, hence the reversal.
     //
-    // The buffer used to be a fixed uint8 t[1000] on the stack with no check
-    // on len, so any caller passing more than a kilobyte wrote past it.
+    // The buffer used to be a fixed uint8 t[1000] on the stack with no check on
+    // len, so any caller passing more than a kilobyte wrote past it. Nothing in
+    // the tree does today -- the largest is a 40-byte session key -- but the
+    // bound was neither enforced nor documented, and the argument comes from
+    // callers that read lengths off the wire.
     if (len <= 0)
     {
         BN_zero(_bn);
         return;
     }
 
-    // Braces, not parentheses: vector<uint8> reversed(size_t(len)) is a
-    // function declaration, not a vector -- the most vexing parse.
+    // Braces, not parentheses: vector<uint8> reversed(size_t(len)) is a function
+    // declaration, not a vector -- the most vexing parse.
     std::vector<uint8> reversed(static_cast<size_t>(len), 0);
     for (int i = 0; i < len; ++i)
     {
@@ -195,21 +199,25 @@ uint8* BigNumber::AsByteArray(int minSize)
     return AsByteArray(minSize, true);
 }
 
-uint8 *BigNumber::AsByteArray(int minSize, bool reverse)
+uint8* BigNumber::AsByteArray(int minSize, bool reverse)
 {
     const int length = (minSize >= GetNumBytes()) ? minSize : GetNumBytes();
 
     delete[] _array;
     _array = new uint8[length];
 
-    // BN_bn2binpad left-pads to exactly `length` bytes. The previous code
-    // used BN_bn2bin, which emits the minimal big-endian encoding at offset 0
-    // and leaves the zero padding at the *end* -- so the reverse below moved
-    // that padding to the front of the little-endian result and shifted the
-    // value by however many bytes were short (about 1 login in 256, since it
-    // only bites when the value serialises with a leading zero byte). Using
-    // the padding-aware call makes the mistake unwritable rather than merely
-    // fixed.
+    // BN_bn2binpad left-pads to exactly `length` bytes. The previous code used
+    // BN_bn2bin, which emits the minimal big-endian encoding at offset 0 and
+    // leaves the zero padding at the *end* -- so std::reverse below moved that
+    // padding to the front of the little-endian result and shifted the value by
+    // however many bytes were short.
+    //
+    // The number has to serialise shorter than requested for this to bite, which
+    // for a uniformly distributed quantity (every SRP6 value here) is a leading
+    // zero byte: about 1 login in 256. That is why it survived so long -- it
+    // looks exactly like a flaky network, and it is invisible 255 times out of
+    // 256. Using the padding-aware call makes the mistake unwritable rather than
+    // merely fixed.
     BN_bn2binpad(_bn, _array, length);
 
     if (reverse)

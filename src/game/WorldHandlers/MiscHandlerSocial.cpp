@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,17 +17,18 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include <zlib.h>
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include <string>
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
-#include "Database/DatabaseImpl.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
 #include "Log.h"
@@ -42,7 +45,7 @@
 #include "Chat.h"
 #include "ScriptMgr.h"
 #include "zlib.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "Object.h"
 #include "BattleGround/BattleGround.h"
 #include "OutdoorPvP/OutdoorPvP.h"
@@ -99,7 +102,11 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: %s asked to add friend : '%s'",
               GetPlayer()->GetName(), friendName.c_str());
 
-    CharacterDatabase.AsyncPQuery(&WorldSession::HandleAddFriendOpcodeCallBack, GetAccountId(), friendNote, "SELECT `guid`, `race` FROM `characters` WHERE `name` = '%s'", friendName.c_str());
+    uint32 accountId = GetAccountId();
+    CharacterDatabase.AsyncPQuery([accountId, friendNote](QueryResult* result)
+                                  {
+                                      WorldSession::HandleAddFriendOpcodeCallBack(result, accountId, friendNote);
+                                  }, "SELECT `guid`, `race` FROM `characters` WHERE `name` = '%s'", friendName.c_str());
 }
 
 /**
@@ -144,7 +151,7 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult* result, uint32 acc
         }
         else
         {
-            Player* pFriend = sObjectAccessor.FindPlayer(friendGuid);
+            Player* pFriend = sPlayerRegistry.Find(friendGuid);
             if (pFriend && pFriend->IsInWorld() && pFriend->IsVisibleGloballyFor(session->GetPlayer()))
             {
                 friendResult = FRIEND_ADDED_ONLINE;
@@ -212,7 +219,11 @@ void WorldSession::HandleAddIgnoreOpcode(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: %s asked to Ignore: '%s'",
               GetPlayer()->GetName(), IgnoreName.c_str());
 
-    CharacterDatabase.AsyncPQuery(&WorldSession::HandleAddIgnoreOpcodeCallBack, GetAccountId(), "SELECT `guid` FROM `characters` WHERE `name` = '%s'", IgnoreName.c_str());
+    uint32 accountId = GetAccountId();
+    CharacterDatabase.AsyncPQuery([accountId](QueryResult* result)
+                                  {
+                                      WorldSession::HandleAddIgnoreOpcodeCallBack(result, accountId);
+                                  }, "SELECT `guid` FROM `characters` WHERE `name` = '%s'", IgnoreName.c_str());
 }
 
 /**

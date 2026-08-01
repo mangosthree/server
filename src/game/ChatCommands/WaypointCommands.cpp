@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -33,6 +34,8 @@
  * - NPC path assignment
  */
 
+#include <string>
+#include <list>
 #include "Chat.h"
 #include "Language.h"
 #include "PointMovementGenerator.h"
@@ -64,7 +67,7 @@ inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin 
     }
 
     wpCreature->SetVisibility(VISIBILITY_OFF);
-    wpCreature->SetRespawnCoord(pos);
+    wpCreature->SetSpawn(pos);
 
     wpCreature->SetActiveObjectState(true);
 
@@ -225,7 +228,7 @@ bool ChatHandler::HandleWpAddCommand(char* args)
         {
             if (wpOwner->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
             {
-                if (WaypointMovementGenerator<Creature> const* wpMMGen = dynamic_cast<WaypointMovementGenerator<Creature> const*>(wpOwner->GetMotionMaster()->GetCurrent()))
+                if (WaypointMovementGenerator const* wpMMGen = dynamic_cast<WaypointMovementGenerator const*>(wpOwner->GetMotionMaster()->GetCurrent()))
                 {
                     wpMMGen->GetPathInformation(wpPathId, wpDestination);
                 }
@@ -251,7 +254,9 @@ bool ChatHandler::HandleWpAddCommand(char* args)
     // wpOwner will get a new waypoint inserted into wpPath = GetPathFromOrigin(wpOwner, wpDestination, wpPathId) at wpPointId
 
     float x, y, z;
-    m_session->GetPlayer()->GetPosition(x, y, z);
+    x = m_session->GetPlayer()->Where().X();
+    y = m_session->GetPlayer()->Where().Y();
+    z = m_session->GetPlayer()->Where().Z();
     if (!sWaypointMgr.AddNode(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPointId, wpDestination, x, y, z))
     {
         PSendSysMessage(LANG_WAYPOINT_NOTCREATED, wpPointId, wpOwner->GetGuidStr().c_str(), wpPathId, WaypointManager::GetOriginString(wpDestination).c_str());
@@ -422,7 +427,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
     {
         if (wpOwner->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
         {
-            if (WaypointMovementGenerator<Creature> const* wpMMGen = dynamic_cast<WaypointMovementGenerator<Creature> const*>(wpOwner->GetMotionMaster()->GetCurrent()))
+            if (WaypointMovementGenerator const* wpMMGen = dynamic_cast<WaypointMovementGenerator const*>(wpOwner->GetMotionMaster()->GetCurrent()))
             {
                 wpMMGen->GetPathInformation(wpPathId, wpSource);
             }
@@ -488,10 +493,12 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
     else if (subCmd == "move")                              // Move to player position, no additional command required
     {
         float x, y, z;
-        m_session->GetPlayer()->GetPosition(x, y, z);
+        x = m_session->GetPlayer()->Where().X();
+        y = m_session->GetPlayer()->Where().Y();
+        z = m_session->GetPlayer()->Where().Z();
 
         // Move visual waypoint
-        targetCreature->NearTeleportTo(x, y, z, targetCreature->GetOrientation());
+        targetCreature->NearTeleportTo(x, y, z, targetCreature->Where().Facing());
 
         sWaypointMgr.SetNodePosition(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpId, wpPathId, wpSource, x, y, z);
 
@@ -675,7 +682,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
     {
         if (wpOwner->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
         {
-            if (WaypointMovementGenerator<Creature> const* wpMMGen = dynamic_cast<WaypointMovementGenerator<Creature> const*>(wpOwner->GetMotionMaster()->GetCurrent()))
+            if (WaypointMovementGenerator const* wpMMGen = dynamic_cast<WaypointMovementGenerator const*>(wpOwner->GetMotionMaster()->GetCurrent()))
             {
                 wpMMGen->GetPathInformation(wpPathId, wpOrigin);
                 wpPath = sWaypointMgr.GetPathFromOrigin(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPathId, wpOrigin);
@@ -892,7 +899,7 @@ bool ChatHandler::HandleWpExportCommand(char* args)
         if (wpOrigin == PATH_NO_PATH)
         {
             if (wpOwner->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
-                if (WaypointMovementGenerator<Creature> const* wpMMGen = dynamic_cast<WaypointMovementGenerator<Creature> const*>(wpOwner->GetMotionMaster()->GetCurrent()))
+                if (WaypointMovementGenerator const* wpMMGen = dynamic_cast<WaypointMovementGenerator const*>(wpOwner->GetMotionMaster()->GetCurrent()))
                 {
                     wpMMGen->GetPathInformation(wpPathId, wpOrigin);
                 }

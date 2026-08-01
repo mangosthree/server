@@ -1,0 +1,43 @@
+# mangos-extractor vessel list: <mapId> <displayId>   # name (entry N)
+#
+# Each line gives one vessel map the id of the hull model to bake into it. Map ids
+# below 1000000 are the client's own Transport<entry> rows; the rest are minted by
+# the server for hulls Blizzard shipped no map for (VESSEL_MAP_BASE + entry).
+# Generated from three_world.transports and a 4.3.4 Map.dbc; regenerate if either
+# changes.
+
+593      3015   # Ship (The Maiden's Fancy) (entry 20808)
+591      3031   # Zeppelin (The Thundercaller) (entry 164871)
+589      3031   # Zeppelin (The Iron Eagle) (entry 175080)
+584      3015   # Ship (The Lady Mehley) (entry 176231)
+588      3015   # Ship (The Bravery) (entry 176310)
+590      3031   # Zeppelin (The Purple Princess) (entry 176495)
+1181646  7087   # Ship, Night Elf (Elune's Blessing) (entry 181646)
+1181688  7446   # Ship, Icebreaker (Northspear) (entry 181688)
+1181689  7546   # Zeppelin, Horde (Cloudkisser) (entry 181689)
+592      7546   # Zeppelin, Horde (The Mighty Wind) (entry 186238)
+1186371  3031   # Zeppelin (entry 186371)
+594      7570   # Sister Mercy (entry 187038)
+1187568  7636   # Turtle (Walker of Waves) (entry 187568)
+1188511  7636   # Turtle (Green Island) (entry 188511)
+1190536  7446   # Ship, Icebreaker (Stormwind's Pride) (entry 190536)
+1190549  3031   # The Zephyr (entry 190549)
+622      8253   # Orgrim's Hammer (entry 192241)
+623      8254   # The Skybreaker (entry 192242)
+1195121  9002   # Alliance Gunship (entry 195121)
+1195276  9001   # Horde Gunship (entry 195276)
+662      9534   # Ship to Vashj'ir (entry 197195)
+1201598  9002   # The Skybreaker (entry 201598)
+1201599  8253   # Orgrim's Hammer (entry 201599)
+1201811  9150   # The Skybreaker (entry 201811)
+1201812  9151   # Orgrim's Hammer (entry 201812)
+1203428  8253   # Orc Gunship (entry 203428)
+1203466  9534   # Ship to Vashj'ir (entry 203466)
+1203620  9582   # Alliance Submarine to Leviathan Cave (entry 203620)
+1203621  9583   # Horde Submarine to Leviathan Cave (entry 203621)
+1203626  7546   # The Spear of Durotar (entry 203626)
+743      10308  # Horde Submarine circling Abyssal Maw (entry 203730)
+1204018  8254   # Alliance Gunship (entry 204018)
+1206328  3031   # Krazzworks to Dragonmaw Port (entry 206328)
+1206329  3031   # Dragonmaw Port to Krazzworks (entry 206329)
+1207227  3031   # Krazzworks Attack Zeppelin (entry 207227)

@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,13 +17,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <string>
 #include "SocialMgr.h"
 #include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
@@ -31,8 +33,8 @@
 #include "ObjectMgr.h"
 #include "World.h"
 #include "Util.h"
+#include "PlayerRegistry.h"
 
-INSTANTIATE_SINGLETON_1(SocialMgr);
 
 /**
  * @brief Creates an empty social list for a player.
@@ -268,7 +270,7 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friend_lowguid, FriendInfo&
         return;
     }
 
-    Player* pFriend = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, friend_lowguid));
+    Player* pFriend = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, friend_lowguid));
 
     Team team = player->GetTeam();
     AccountTypes security = player->GetSession()->GetSecurity();
@@ -297,7 +299,7 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friend_lowguid, FriendInfo&
         {
             friendInfo.Status = FRIEND_STATUS_DND;
         }
-        friendInfo.Area = pFriend->GetZoneId();
+        friendInfo.Area = pFriend->GetTerrain()->GetZoneId(pFriend->Where().X(), pFriend->Where().Y(), pFriend->Where().Z());
         friendInfo.Level = pFriend->getLevel();
         friendInfo.Class = pFriend->getClass();
     }
@@ -398,7 +400,7 @@ void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket* packet)
         PlayerSocialMap::const_iterator itr2 = itr->second.m_playerSocialMap.find(guid);
         if (itr2 != itr->second.m_playerSocialMap.end() && (itr2->second.Flags & SOCIAL_FLAG_FRIEND))
         {
-            Player* pFriend = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+            Player* pFriend = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, itr->first));
 
             // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
             // MODERATOR, GAME MASTER, ADMINISTRATOR can see all

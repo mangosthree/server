@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -52,10 +53,12 @@
  * authoritative position to prevent cheating.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <ctime>
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Opcodes.h"
+#include "OpcodeTable.h"
 #include "Log.h"
 #include "Corpse.h"
 #include "Player.h"
@@ -63,10 +66,13 @@
 #include "SpellAuras.h"
 #include "MapManager.h"
 #include "Transports.h"
+#include "TransportMap.h"
+#include <cmath>
 #include "BattleGround/BattleGround.h"
 #include "WaypointMovementGenerator.h"
 #include "MapPersistentStateMgr.h"
 #include "ObjectMgr.h"
+#include "ObjectLookup.h"
 
 #define MOVEMENT_PACKET_TIME_DELAY 0
 
@@ -93,8 +99,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     }
 
     // get start teleport coordinates (will used later in fail case)
-    WorldLocation old_loc;
-    GetPlayer()->GetPosition(old_loc);
+    WorldLocation old_loc(GetPlayer()->GetMapId(),
+                          GetPlayer()->Where().X(), GetPlayer()->Where().Y(),
+                          GetPlayer()->Where().Z(), GetPlayer()->Where().Facing());
 
     // get the teleport destination
     WorldLocation& loc = GetPlayer()->GetTeleportDest();
@@ -161,12 +168,22 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     }
 
     GetPlayer()->SetMap(map);
-    GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
+    GetPlayer()->Place().MoveTo(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
+
+    // The client threw away every object it had when it left the old map, so the set of
+    // "things he already has" is now a lie in the one direction that hurts: anything still
+    // listed here will be skipped by UpdateVisibilityOf and never sent again. That
+    // includes the vessel he is standing on, which exists on both sides of the seam and so
+    // keeps its guid across it.
+    GetPlayer()->m_clientGUIDs.clear();
 
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
     // the CanEnter checks are done in TeleporTo but conditions may change
     // while the player is in transit, for example the map may get full
-    if (!GetPlayer()->GetMap()->Add(GetPlayer()))
+    // Aboard, this is HER map, not the one just named in SMSG_NEW_WORLD -- see
+    // Player::BoardingMap. The client is loading the world map she sails and never learns
+    // the other one exists.
+    if (!GetPlayer()->BoardingMap()->Add(GetPlayer()))
     {
         // if player wasn't added to map, reset his map pointer!
         GetPlayer()->ResetMap();
@@ -281,7 +298,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         }
 
         uint32 zone, area;
-        _player->GetZoneAndAreaId(zone, area);
+        _player->GetTerrain()->GetZoneAndAreaId(zone, area, _player->Where().X(), _player->Where().Y(), _player->Where().Z());
         // recheck fly auras
         Unit::AuraList const& mFlyAuras = _player->GetAurasByType(SPELL_AURA_FLY);
         for (Unit::AuraList::const_iterator itr = mFlyAuras.begin(); itr != mFlyAuras.end(); )
@@ -351,14 +368,14 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 
     plMover->SetSemaphoreTeleportNear(false);
 
-    uint32 old_zone = plMover->GetZoneId();
+    uint32 old_zone = plMover->GetTerrain()->GetZoneId(plMover->Where().X(), plMover->Where().Y(), plMover->Where().Z());
 
     WorldLocation const& dest = plMover->GetTeleportDest();
 
     plMover->SetPosition(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation, true);
 
     uint32 newzone, newarea;
-    plMover->GetZoneAndAreaId(newzone, newarea);
+    plMover->GetTerrain()->GetZoneAndAreaId(newzone, newarea, plMover->Where().X(), plMover->Where().Y(), plMover->Where().Z());
     plMover->UpdateZone(newzone, newarea);
 
     // new zone
@@ -539,7 +556,7 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket& recv_data)
     }
     else
     {
-        if (Unit* mover = sObjectAccessor.GetUnit(*GetPlayer(), guid))
+        if (Unit* mover = ObjectLookup::GetUnit(*GetPlayer(), guid))
         {
             _player->SetMover(mover);
         }
@@ -739,9 +756,32 @@ bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo) const
 
     if (movementInfo.GetTransportGuid())
     {
-        // transports size limited
-        // (also received at zeppelin/lift leave by some reason with t_* as absolute in continent coordinates, can be safely skipped)
-        if (movementInfo.GetTransportPos()->x > 50 || movementInfo.GetTransportPos()->y > 50 || movementInfo.GetTransportPos()->z > 100)
+        // WHERE HE STANDS ON THE DECK MAP. The wire spells this field t_x/t_y/t_z and the
+        // protocol calls it an offset, but the moment it is ours it is a position on the
+        // vessel's own map -- nothing is composed with it, ever.
+        //
+        // So the test is whether it names a place on that map, and a map's bounds are the
+        // hull's. The old one compared 50 yards against the POSITIVE side alone and threw
+        // the whole packet away otherwise, which froze the stored position at the last one
+        // accepted: even a common transport ship reaches x[-59, +45], so anyone forward of
+        // the mast stopped moving at 50.
+        //
+        // The guard it replaces is still needed: a leaving zeppelin sometimes reports these
+        // as absolute continent coordinates, and those are thousands.
+        const Position* onDeck = movementInfo.GetTransportPos();
+
+        float extent = MAX_DECK_EXTENT;
+        if (Transport* vessel = _player
+                                    ? Transport::GetTransport(_player->GetMap(),
+                                                              movementInfo.GetTransportGuid())
+                                    : NULL)
+        {
+            extent = vessel->AsMap() ? vessel->AsMap()->HullRadius() + DECK_EDGE_MARGIN
+                                     : MAX_DECK_EXTENT;
+        }
+
+        if (std::fabs(onDeck->x) > extent || std::fabs(onDeck->y) > extent ||
+            std::fabs(onDeck->z) > extent)
         {
             return false;
         }
@@ -774,6 +814,14 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
 
     if (Player* plMover = mover->GetTypeId() == TYPEID_PLAYER ? (Player*)mover : NULL)
     {
+        // BEFORE the transport branch, and the ordering is the whole of it.
+        // TransportMap::Add reads the passenger's OWN m_movementInfo for his deck offset; the
+        // assignment used to sit below this branch, so on the first ONTRANSPORT packet Add read
+        // the PREVIOUS one -- which carries no transport data -- and stood him on the hull
+        // origin. His minions were then drawn beside (0, 0, 0): a yard off the keel and six
+        // metres under the deck, which is what "the pet comes up through the walls" was.
+        plMover->m_movementInfo = movementInfo;
+
         if (movementInfo.GetTransportGuid())
         {
             if (!plMover->m_transport)
@@ -784,7 +832,14 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
                     if ((*iter)->GetObjectGuid() == movementInfo.GetTransportGuid())
                     {
                         plMover->m_transport = (*iter);
-                        (*iter)->AddPassenger(plMover);
+
+                        // He walked aboard, so his client already has the vessel and is
+                        // rendering the map she sails; moving him onto her own map is safe
+                        // at once. Nothing tells the client -- it never learns that id.
+                        if (TransportMap* hull = (*iter)->AsMap())
+                        {
+                            hull->Embark(plMover);
+                        }
                         break;
                     }
                 }
@@ -792,7 +847,41 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
         }
         else if (plMover->m_transport)               // if we were on a transport, leave
         {
-            plMover->m_transport->RemovePassenger(plMover);
+            // He walked ashore, and his own client just told us where: that world point is
+            // better than anything we could derive from a hull whose pose we only estimate.
+            //
+            // BUT ONLY IF IT IS NEXT TO THE SHIP. Nobody steps off a vessel onto another
+            // continent, and the number in this field is not always his: while he is aboard
+            // we tell him his world position is (0, 0, 0), and he echoes it straight back.
+            // Drop the flag for one packet -- the client does, on arrival, before it has
+            // resolved the hull -- and that zero is read as a destination. (0, 0, 0) on map
+            // 0 is the middle of Lordamere Lake, which is exactly where people landed.
+            if (TransportMap* hull = plMover->m_transport->AsMap())
+            {
+                Transport* vessel = plMover->m_transport;
+
+                const float reach = hull->HullRadius() + vessel->NodeSlack() +
+                                    DECK_EDGE_MARGIN;
+
+                const bool ashore = vessel->Where().WithinDist(
+                    Geometry::Vector3(movementInfo.GetPos()->x,
+                                      movementInfo.GetPos()->y,
+                                      movementInfo.GetPos()->z), reach);
+
+                if (ashore)
+                {
+                    hull->Disembark(plMover, movementInfo.GetPos()->x,
+                                    movementInfo.GetPos()->y, movementInfo.GetPos()->z,
+                                    movementInfo.GetPos()->o);
+                }
+                else
+                {
+                    // Not a step ashore at all. Put him down on the ship's own coarse pose:
+                    // wrong by a hull's length at worst, instead of by a continent.
+                    hull->Disembark(plMover, vessel->Where().X(), vessel->Where().Y(),
+                                    vessel->Where().Z(), vessel->Where().Facing());
+                }
+            }
             plMover->m_transport = NULL;
             movementInfo.ClearTransportData();
         }
@@ -803,7 +892,18 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
             plMover->SetInWater(!plMover->IsInWater() || plMover->GetTerrain()->IsUnderWater(movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z));
         }
 
-        plMover->SetPosition(movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z, movementInfo.GetPos()->o);
+        // Aboard, the deck offset IS his position: it is what the client computed against
+        // the hull it is drawing, and the world pair in the same packet describes a place
+        // on a map he is no longer filed under. Ashore, the two are the same packet field.
+        if (plMover->m_transport && plMover->GetMap()->AsTransport())
+        {
+            const Position* offset = movementInfo.GetTransportPos();
+            plMover->SetPosition(offset->x, offset->y, offset->z, offset->o);
+        }
+        else
+        {
+            plMover->SetPosition(movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z, movementInfo.GetPos()->o);
+        }
         plMover->m_movementInfo = movementInfo;
 
         /* Movement should cancel looting */

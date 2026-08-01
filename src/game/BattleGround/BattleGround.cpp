@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -36,6 +37,7 @@
  * - Creature and game object spawning
  */
 
+#include <string>
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"
@@ -53,6 +55,7 @@
 #include "GridNotifiersImpl.h"
 #include "Chat.h"
 #include <cstdarg>
+#include "PlayerRegistry.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif /* ENABLE_ELUNA */
@@ -236,7 +239,7 @@ void BattleGround::BroadcastWorker(Do& _do)
 {
     for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
-        if (Player* plr = sObjectAccessor.FindPlayer(itr->first))
+        if (Player* plr = sPlayerRegistry.Find(itr->first))
         {
             _do(plr);
         }
@@ -465,7 +468,7 @@ void BattleGround::Update(uint32 diff)
                     {
                         float x, y, z, o;
                         GetTeamStartLoc(player->GetTeam(), x, y, z, o);
-                        if (!player->IsWithinDist3d(x, y, z, maxDist))
+                        if (!player->Where().WithinDist(Geometry::Vector3(x, y, z), maxDist))
                         {
                             player->TeleportTo(GetMapId(), x, y, z, o);
                         }
@@ -1577,7 +1580,7 @@ void BattleGround::SetBgRaid(Team team, Group* bg_raid)
 /// <returns></returns>
 WorldSafeLocsEntry const* BattleGround::GetClosestGraveYard(Player* player)
 {
-    return sObjectMgr.GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam());
+    return sObjectMgr.GetClosestGraveYard(player->Where().X(), player->Where().Y(), player->Where().Z(), player->GetMapId(), player->GetTeam());
 }
 
 bool BattleGround::IsTeamScoreInRange(Team team, uint32 minScore, uint32 maxScore) const

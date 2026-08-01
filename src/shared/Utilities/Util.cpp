@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,13 +17,19 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/MathDefines.h"
+#include <algorithm>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <iterator>
+#include "Common/TimeConstants.h"
 #include "Util.h"
 #include "Timer.h"
 
@@ -29,54 +37,29 @@
 #include "RNGen.h"
 #include "Log/Log.h"
 
-#include <iomanip>
-#include <cctype>
-#include <cstdarg>
-#include <cstring>
-
-#ifndef _WIN32
-#  include <arpa/inet.h>                                    ///< inet_addr
+// Socket headers for inet_pton/INET_ADDRSTRLEN. These used to arrive by accident,
+// dragged in transitively by the ACE includes buried in Common.h; naming them here
+// is what lets this file compile without it.
+#ifdef _WIN32
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
+#else
+#  include <arpa/inet.h>
+#  include <netinet/in.h>
+#  include <sys/socket.h>
+#  include <unistd.h>          // getpid
 #endif
 
-//static ACE_Time_Value g_SystemTickTime = ACE_OS::gettimeofday();
+#include <cstdarg>   // va_start/va_copy/va_end
+#include <iomanip>
+#include <sstream>
+#include <cctype>
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include <charconv>   // for std::to_chars
 
-//uint32 WorldTimer::m_iTime = 0;
-//uint32 WorldTimer::m_iPrevTime = 0;
-//
-//uint32 WorldTimer::tickTime() { return m_iTime; }
-//uint32 WorldTimer::tickPrevTime() { return m_iPrevTime; }
-//
-//uint32 WorldTimer::tick()
-//{
-//    // save previous world tick time
-//    m_iPrevTime = m_iTime;
-//
-//    // get the new one and don't forget to persist current system time in m_SystemTickTime
-//    m_iTime = WorldTimer::getMSTime_internal();
-//
-//    // return tick diff
-//    return getMSTimeDiff(m_iPrevTime, m_iTime);
-//}
-//
-//uint32 WorldTimer::getMSTime()
-//{
-//    return getMSTime_internal();
-//}
-//
-//uint32 WorldTimer::getMSTime_internal()
-//{
-//    // get current time
-//    const ACE_Time_Value currTime = ACE_OS::gettimeofday();
-//    // calculate time diff between two world ticks
-//    // special case: curr_time < old_time - we suppose that our time has not ticked at all
-//    // this should be constant value otherwise it is possible that our time can start ticking backwards until next world tick!!!
-//    uint64 diff = 0;
-//    (currTime - g_SystemTickTime).msec(diff);
-//
-//    // lets calculate current world time
-//    uint32 iRes = uint32(diff % UI64LIT(0x00000000FFFFFFFF));
-//    return iRes;
-//}
+#include <array>
 
 //////////////////////////////////////////////////////////////////////////
 int32 irand(int32 min, int32 max)
@@ -94,7 +77,7 @@ float frand(float min, float max)
     return RNG::instance()->rand_f(min, max);
 }
 
-int32 rand32()
+uint32 rand32()
 {
     return RNG::instance()->rand();
 }
@@ -164,21 +147,6 @@ float GetFloatValueFromArray(Tokens const& data, uint16 index)
     return result;
 }
 
-// modulos a radian orientation to the range of 0..2PI
-float NormalizeOrientation(float o)
-{
-    // fmod only supports positive numbers. Thus we have
-    // to emulate negative numbers
-    if (o < 0)
-    {
-        float mod = o * -1;
-        mod = fmod(mod, 2.0f * M_PI_F);
-        mod = -mod + 2.0f * M_PI_F;
-        return mod;
-    }
-    return fmod(o, 2.0f * M_PI_F);
-}
-
 void stripLineInvisibleChars(std::string& str)
 {
     static std::string invChars = " \t\7\n";
@@ -217,52 +185,6 @@ void stripLineInvisibleChars(std::string& str)
 }
 
 /**
- * It's a wrapper for the localtime_r function that works on Windows
- *
- * @param time The time to convert.
- * @param result A pointer to a tm structure to receive the broken-down time.
- *
- * @return A pointer to the result.
- */
-#if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
-struct tm* localtime_r(time_t const* time, struct tm *result)
-{
-    localtime_s(result, time);
-    return result;
-}
-#endif
-
-/**
- * It takes a time_t value and returns a tm structure with the same time, but in local time
- *
- * @param time The time to break down.
- *
- * @return A struct tm
- */
-tm TimeBreakdown(time_t time)
-{
-    tm timeLocal;
-    localtime_r(&time, &timeLocal);
-    return timeLocal;
-}
-
-/**
- * Convert local time to UTC time.
- *
- * @param time The time to convert.
- *
- * @return The time in UTC.
- */
-time_t LocalTimeToUTCTime(time_t time)
-{
-    #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
-        return time + _timezone;
-    #else
-        return time + timezone;
-    #endif
-}
-
-/**
  * "Get the timestamp of the next time the given hour occurs in the local timezone."
  *
  * The function takes a timestamp, an hour, and a boolean. The timestamp is the time you want to find
@@ -279,7 +201,7 @@ time_t LocalTimeToUTCTime(time_t time)
  */
 time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime)
 {
-    tm timeLocal = TimeBreakdown(time);
+    std::tm timeLocal = safe_localtime(time);
     timeLocal.tm_hour = 0;
     timeLocal.tm_min  = 0;
     timeLocal.tm_sec  = 0;
@@ -295,122 +217,85 @@ time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime)
     return hourLocal;
 }
 
+
 std::string secsToTimeString(time_t timeInSecs, TimeFormat timeFormat, bool hoursOnly)
 {
-    time_t secs    = timeInSecs % MINUTE;
-    time_t minutes = timeInSecs % HOUR / MINUTE;
-    time_t hours   = timeInSecs % DAY  / HOUR;
-    time_t days    = timeInSecs / DAY;
+    const time_t secs = timeInSecs % MINUTE;
+    const time_t minutes = (timeInSecs % HOUR) / MINUTE;
+    const time_t hours = (timeInSecs % DAY) / HOUR;
+    const time_t days = timeInSecs / DAY;
 
-    std::ostringstream ss;
+    std::string out;
+    out.reserve(64); // to avoid reallocations
+
+    auto append_number = [&](time_t value, bool pad2 = false)
+        {
+            std::array<char, 16> buf{};
+            auto [ptr, ec] = std::to_chars(buf.data(), buf.data() + buf.size(), value);
+            if (pad2 && (ptr - buf.data()) == 1)  // pad single-digit numbers
+                out.push_back('0');
+            out.append(buf.data(), ptr);
+        };
+
+    // --- Days ---
     if (days)
     {
-        ss << days;
+        append_number(days);
         if (timeFormat == TimeFormat::Numeric)
-        {
-            ss << ":";
-        }
+            out += ':';
         else if (timeFormat == TimeFormat::ShortText)
-        {
-            ss << "d";
-        }
-        else // if (timeFormat == TimeFormat::FullText)
-        {
-            if (days == 1)
-            {
-                ss << " Day ";
-            }
-            else
-            {
-                ss << " Days ";
-            }
-        }
+            out += 'd';
+        else
+            out += (days == 1 ? " Day " : " Days ");
     }
 
+    // --- Hours ---
     if (hours || hoursOnly)
     {
-        ss << hours;
+        append_number(hours);
         if (timeFormat == TimeFormat::Numeric)
-        {
-            ss << ":";
-        }
+            out += ':';
         else if (timeFormat == TimeFormat::ShortText)
-        {
-            ss << "h";
-        }
-        else // if (timeFormat == TimeFormat::FullText)
-        {
-            if (hours <= 1)
-            {
-                ss << " Hour ";
-            }
-            else
-            {
-                ss << " Hours ";
-            }
-        }
+            out += 'h';
+        else
+            out += (hours == 1 ? " Hour " : " Hours ");
     }
 
+    // --- Minutes ---
     if (!hoursOnly)
     {
-        ss << minutes;
+        append_number(minutes);
         if (timeFormat == TimeFormat::Numeric)
-        {
-            ss << ":";
-        }
+            out += ':';
         else if (timeFormat == TimeFormat::ShortText)
-        {
-            ss << "m";
-        }
-        else // if (timeFormat == TimeFormat::FullText)
-        {
-            if (minutes == 1)
-            {
-                ss << " Minute ";
-            }
-            else
-            {
-                ss << " Minutes ";
-            }
-        }
+            out += 'm';
+        else
+            out += (minutes == 1 ? " Minute " : " Minutes ");
     }
-    else
+    else if (timeFormat == TimeFormat::Numeric)
     {
-        if (timeFormat == TimeFormat::Numeric)
-        {
-            ss << "0:";
-        }
+        // add �0:� when hoursOnly requested
+        out += "0:";
     }
 
+    // --- Seconds ---
     if (secs || (!days && !hours && !minutes))
     {
-        ss << std::setw(2) << std::setfill('0') << secs;
+        // Always pad seconds to 2 digits in numeric format
+        append_number(secs, timeFormat == TimeFormat::Numeric);
         if (timeFormat == TimeFormat::ShortText)
-        {
-            ss << "s";
-        }
+            out += 's';
         else if (timeFormat == TimeFormat::FullText)
-        {
-            if (secs <= 1)
-            {
-                ss << " Second.";
-            }
-            else
-            {
-                ss << " Seconds.";
-            }
-        }
+            out += (secs == 1 ? " Second." : " Seconds.");
     }
-    else
+    else if (timeFormat == TimeFormat::Numeric)
     {
-        if (timeFormat == TimeFormat::Numeric)
-        {
-            ss << "00";
-        }
+        out += "00";
     }
 
-    return ss.str();
+    return out;
 }
+
 
 uint32 TimeStringToSecs(const std::string& timestring)
 {
@@ -446,17 +331,41 @@ uint32 TimeStringToSecs(const std::string& timestring)
 
 std::string TimeToTimestampStr(time_t t)
 {
-    tm aTm;
-    localtime_r(&t, &aTm);
     //       YYYY   year
     //       MM     month (2 digits 01-12)
     //       DD     day (2 digits 01-31)
     //       HH     hour (2 digits 00-23)
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
-    char buf[20];
-    snprintf(buf, 20, "%04d-%02d-%02d_%02d-%02d-%02d", aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
-    return std::string(buf);
+
+    std::tm aTm = safe_localtime(t);
+    std::array<char, 20> buf; // "YYYY-MM-DD_HH-MM-SS" = 19 chars + '\0'
+    char* p = buf.data();
+
+    auto append_2d = [&](int v) {
+        *p++ = char('0' + v / 10);
+        *p++ = char('0' + v % 10);
+        };
+    auto append_4d = [&](int v) {
+        *p++ = char('0' + (v / 1000) % 10);
+        *p++ = char('0' + (v / 100) % 10);
+        *p++ = char('0' + (v / 10) % 10);
+        *p++ = char('0' + v % 10);
+        };
+
+    append_4d(aTm.tm_year + 1900);
+    *p++ = '-';
+    append_2d(aTm.tm_mon + 1);
+    *p++ = '-';
+    append_2d(aTm.tm_mday);
+    *p++ = '_';
+    append_2d(aTm.tm_hour);
+    *p++ = '-';
+    append_2d(aTm.tm_min);
+    *p++ = '-';
+    append_2d(aTm.tm_sec);
+
+    return std::string(buf.data(), p);
 }
 
 time_t timeBitFieldsToSecs(uint32 packedDate)
@@ -470,27 +379,11 @@ time_t timeBitFieldsToSecs(uint32 packedDate)
     lt.tm_mday = ((packedDate >> 14) & 0x3F) + 1;
     lt.tm_mon = (packedDate >> 20) & 0xF;
     lt.tm_year = ((packedDate >> 24) & 0x1F) + 100;
+    // -1 lets mktime resolve DST for this date; memset had forced 0 (standard
+    // time), which shifted summer dates forward by the DST offset.
+    lt.tm_isdst = -1;
 
     return time_t(mktime(&lt));
-}
-
-std::string MoneyToString(uint64 money)
-{
-    uint32 gold = money / 10000;
-    uint32 silv = (money % 10000) / 100;
-    uint32 copp = (money % 10000) % 100;
-    std::stringstream ss;
-    if (gold)
-    {
-        ss << gold << "g";
-    }
-    if (silv || gold)
-    {
-        ss << silv << "s";
-    }
-    ss << copp << "c";
-
-    return ss.str();
 }
 
 /// Check if the string is a valid ip address representation
@@ -503,15 +396,20 @@ bool IsIPAddress(char const* ipaddress)
 
     // Let the big boys do it.
     // Drawback: all valid ip address formats are recognized e.g.: 12.23,121234,0xABCD)
-    return inet_addr(ipaddress) != INADDR_NONE;
+    // inet_addr's INADDR_NONE sentinel also matches the legitimate broadcast
+    // address 255.255.255.255; inet_pton has no such ambiguity.
+    struct in_addr dummy;
+    return inet_pton(AF_INET, ipaddress, &dummy) == 1;
 }
 
 std::string GetAddressString(uint32 ip, uint16 port)
 {
-    char buf[32];
+    char buf[INET_ADDRSTRLEN + 8];
+
     snprintf(buf, sizeof(buf), "%u.%u.%u.%u:%u",
              (ip >> 24) & 0xFF, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF,
              unsigned(port));
+
     return buf;
 }
 
@@ -547,7 +445,7 @@ size_t utf8length(std::string& utf8str)
     {
         return utf8::distance(utf8str.c_str(), utf8str.c_str() + utf8str.size());
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         utf8str = "";
         return 0;
@@ -571,7 +469,7 @@ void utf8truncate(std::string& utf8str, size_t len)
         char* oend = utf8::utf16to8(wstr.c_str(), wstr.c_str() + wstr.size(), &utf8str[0]);
         utf8str.resize(oend - (&utf8str[0]));               // remove unused tail
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         utf8str = "";
     }
@@ -588,6 +486,35 @@ bool Utf8ToUpperOnlyLatin(std::string& utf8String)
     std::transform(wstr.begin(), wstr.end(), wstr.begin(), wcharToUpperOnlyLatin);
 
     return WStrToUtf8(wstr, utf8String);
+}
+
+size_t utf8limit(std::string& utf8str, size_t bytes)
+{
+    if (utf8str.size() > bytes)
+    {
+        try
+        {
+            auto end = (utf8str.cbegin() + bytes);
+            auto itr = utf8::find_invalid(utf8str.cbegin(), end);
+
+            // Fix UTF8 if it was corrupted by bytes truncated
+            if (itr != end)
+            {
+                bytes = std::distance(utf8str.cbegin(), itr);
+            }
+
+            utf8str.resize(bytes);
+            utf8str.shrink_to_fit();
+
+            return bytes;
+        }
+        catch (const std::exception&)
+        {
+            utf8str = "";
+        }
+    }
+
+    return 0;
 }
 
 bool Utf8toWStr(char const* utf8str, size_t csize, wchar_t* wstr, size_t& wsize)
@@ -609,7 +536,7 @@ bool Utf8toWStr(char const* utf8str, size_t csize, wchar_t* wstr, size_t& wsize)
         utf8::utf8to16(utf8str, utf8str + csize, wstr);
         wstr[len] = L'\0';
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         if (wsize > 0)
         {
@@ -634,7 +561,7 @@ bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr)
             utf8::utf8to16(utf8str.c_str(), utf8str.c_str() + utf8str.size(), &wstr[0]);
         }
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         wstr = L"";
         return false;
@@ -654,7 +581,7 @@ bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str)
         utf8str2.resize(oend - (&utf8str2[0]));             // remove unused tail
         utf8str = utf8str2;
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         utf8str = "";
         return false;
@@ -674,7 +601,7 @@ bool WStrToUtf8(std::wstring wstr, std::string& utf8str)
         utf8str2.resize(oend - (&utf8str2[0]));             // remove unused tail
         utf8str = utf8str2;
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         utf8str = "";
         return false;

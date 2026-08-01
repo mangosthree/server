@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -41,7 +42,9 @@
  * Group operations require proper permission checks and state validation.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <string>
+#include <cstring>
 #include "Database/DatabaseEnv.h"
 #include "Opcodes.h"
 #include "Log.h"
@@ -57,7 +60,8 @@
 #include "DB2Structure.h"
 #include "DB2Stores.h"
 #include "Vehicle.h"
-#include "TransportSystem.h"
+#include "Vehicle.h"
+#include "PlayerRegistry.h"
 
 /* differeces from off:
     -you can uninvite yourself - is is useful
@@ -981,7 +985,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
 
     if (mask & GROUP_UPDATE_FLAG_ZONE)
     {
-        *data << uint16(player->GetZoneId());
+        *data << uint16(player->GetTerrain()->GetZoneId(player->Where().X(), player->Where().Y(), player->Where().Z()));
     }
 
     if (mask & GROUP_UPDATE_FLAG_UNK)
@@ -991,7 +995,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
 
     if (mask & GROUP_UPDATE_FLAG_POSITION)
     {
-        *data << uint16(player->GetPositionX()) << uint16(player->GetPositionY()) << uint16(player->GetPositionZ());
+        *data << uint16(player->Where().X()) << uint16(player->Where().Y()) << uint16(player->Where().Z());
     }
 
     if (mask & GROUP_UPDATE_FLAG_AURAS)
@@ -1203,7 +1207,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     ObjectGuid guid;
     recv_data >> guid;
 
-    Player* player = sObjectAccessor.FindPlayer(guid, false);
+    Player* player = sPlayerRegistry.Find(guid, false);
     if (!player)
     {
         WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3 + 4 + 2);
@@ -1250,10 +1254,10 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
 
     if (player->IsInWorld())
     {
-        iZoneId = player->GetZoneId();
-        iCoordX = player->GetPositionX();
-        iCoordY = player->GetPositionY();
-        iCoordZ = player->GetPositionZ();
+        iZoneId = player->GetTerrain()->GetZoneId(player->Where().X(), player->Where().Y(), player->Where().Z());
+        iCoordX = player->Where().X();
+        iCoordY = player->Where().Y();
+        iCoordZ = player->Where().Z();
     }
     else if (player->IsBeingTeleported())               // Player is in teleportation
     {

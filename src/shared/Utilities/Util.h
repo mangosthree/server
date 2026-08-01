@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -25,14 +26,36 @@
 #ifndef MANGOS_H_UTIL
 #define MANGOS_H_UTIL
 
-#include "Common/Common.h"
+#include <cstdio>
+#include <cstdarg>
+#include "Common/TimeConstants.h"
+#include "Platform/Define.h"
 
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <cctype>
-#include <cstdarg>
+#include <cstring>
+#include <ctime>
 #include <functional>
+
+/**
+ * @brief strdup() built on operator new[].
+ *
+ * The result MUST be released with delete[], never free(). That asymmetry is the
+ * whole reason this exists rather than plain strdup: the buffers it returns are
+ * owned by code that frees with delete[].
+ *
+ * @param source NUL-terminated string to copy. Must not be null.
+ * @return A new[]-allocated copy.
+ */
+inline char* mangos_strdup(const char* source)
+{
+    const size_t len = std::strlen(source) + 1;
+    char* dest = new char[len];
+    std::memcpy(dest, source, len);
+    return dest;
+}
 
 enum class TimeFormat : uint8
 {
@@ -72,7 +95,6 @@ uint32 GetUInt32ValueFromArray(Tokens const& data, uint16 index);
  */
 float GetFloatValueFromArray(Tokens const& data, uint16 index);
 
-float NormalizeOrientation(float o);
 /**
  * @brief
  *
@@ -80,21 +102,34 @@ float NormalizeOrientation(float o);
  */
 void stripLineInvisibleChars(std::string& src);
 
-struct tm* localtime_r(const time_t* time, struct tm* result);
+/**
+ * @brief Thread safe, portable localtime_s/localtime_r replacement
+ *
+ * @param time - local time
+ */
 
-time_t LocalTimeToUTCTime(time_t time);
+inline std::tm safe_localtime(const time_t time)
+{
+    std::tm _ltm{};
+#if PLATFORM == PLATFORM_WINDOWS
+    localtime_s(&_ltm, &time);
+#else
+    localtime_r(&time, &_ltm);
+#endif
+    return _ltm;
+}
 
 /**
  * Returns the timestamp for the specified local hour, optionally requiring it to be after the input time.
  */
 time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime = true);
-tm TimeBreakdown(time_t t);
+
 
 /**
  * @brief
  *
  * @param timeInSecs
- * @param timeFormat
+ * @param shortText
  * @param hoursOnly
  * @return std::string
  */
@@ -113,9 +148,11 @@ uint32 TimeStringToSecs(const std::string& timestring);
  * @return std::string
  */
 std::string TimeToTimestampStr(time_t t);
+
+
 time_t timeBitFieldsToSecs(uint32 packedDate);
 
-std::string MoneyToString(uint64 money);
+
 /**
  * @brief
  *
@@ -124,8 +161,9 @@ std::string MoneyToString(uint64 money);
  */
 inline uint32 secsToTimeBitFields(time_t secs)
 {
-    tm* lt = localtime(&secs);
-    return (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 | (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 | lt->tm_hour << 6 | lt->tm_min;
+    std::tm lt = safe_localtime(secs);
+    return (lt.tm_year - 100) << 24 | lt.tm_mon  << 20
+         | (lt.tm_mday - 1) << 14 | lt.tm_wday << 11 | lt.tm_hour << 6 | lt.tm_min;
 }
 
 
@@ -187,7 +225,7 @@ inline std::string& trim(std::string& s)
  *
  * @return int32
  */
- int32 rand32();
+uint32 rand32();
 
 /**
  * @brief Return a random double from 0.0 to 1.0 (exclusive).
@@ -376,6 +414,14 @@ void utf8truncate(std::string& utf8str, size_t len);
 /**
  * @brief
  *
+ * @param utf8str
+ * @param bytes
+ */
+size_t utf8limit(std::string& utf8str, size_t bytes);
+
+/**
+ * @brief
+ *
  * @param wchar
  * @return bool
  */
@@ -550,10 +596,12 @@ inline bool isNumericOrSpace(wchar_t wchar)
 inline bool isNumeric(char const* str)
 {
     for (char const* c = str; *c; ++c)
+    {
         if (!isNumeric(*c))
         {
             return false;
         }
+    }
 
     return true;
 }
@@ -567,10 +615,12 @@ inline bool isNumeric(char const* str)
 inline bool isNumeric(std::string const& str)
 {
     for (std::string::const_iterator itr = str.begin(); itr != str.end(); ++itr)
+    {
         if (!isNumeric(*itr))
         {
             return false;
         }
+    }
 
     return true;
 }
@@ -584,10 +634,12 @@ inline bool isNumeric(std::string const& str)
 inline bool isNumeric(std::wstring const& str)
 {
     for (std::wstring::const_iterator itr = str.begin(); itr != str.end(); ++itr)
+    {
         if (!isNumeric(*itr))
         {
             return false;
         }
+    }
 
     return true;
 }
@@ -602,10 +654,12 @@ inline bool isNumeric(std::wstring const& str)
 inline bool isBasicLatinString(const std::wstring &wstr, bool numericOrSpace)
 {
     for (size_t i = 0; i < wstr.size(); ++i)
+    {
         if (!isBasicLatinCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
         {
             return false;
         }
+    }
     return true;
 }
 
@@ -619,10 +673,12 @@ inline bool isBasicLatinString(const std::wstring &wstr, bool numericOrSpace)
 inline bool isExtendedLatinString(const std::wstring &wstr, bool numericOrSpace)
 {
     for (size_t i = 0; i < wstr.size(); ++i)
+    {
         if (!isExtendedLatinCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
         {
             return false;
         }
+    }
     return true;
 }
 
@@ -636,10 +692,12 @@ inline bool isExtendedLatinString(const std::wstring &wstr, bool numericOrSpace)
 inline bool isCyrillicString(const std::wstring &wstr, bool numericOrSpace)
 {
     for (size_t i = 0; i < wstr.size(); ++i)
+    {
         if (!isCyrillicCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
         {
             return false;
         }
+    }
     return true;
 }
 
@@ -653,10 +711,12 @@ inline bool isCyrillicString(const std::wstring &wstr, bool numericOrSpace)
 inline bool isEastAsianString(const std::wstring &wstr, bool numericOrSpace)
 {
     for (size_t i = 0; i < wstr.size(); ++i)
+    {
         if (!isEastAsianCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
         {
             return false;
         }
+    }
     return true;
 }
 
@@ -784,7 +844,7 @@ inline wchar_t wcharToLower(wchar_t wchar)
  */
 inline void wstrToUpper(std::wstring& str)
 {
-    std::transform(str.begin(), str.end(), str.begin(), wcharToUpper);
+    std::transform(str.begin(), str.end(), str.begin(), [](wchar_t w) {return wcharToUpper(w); });
 }
 
 /**
@@ -794,12 +854,10 @@ inline void wstrToUpper(std::wstring& str)
  */
 inline void wstrToLower(std::wstring& str)
 {
-    std::transform(str.begin(), str.end(), str.begin(), wcharToLower);
+    std::transform(str.begin(), str.end(), str.begin(), [](wchar_t w) {return wcharToLower(w); });
 }
 
-
 std::wstring GetMainPartOfName(std::wstring wname, uint32 declension);
-
 
 /**
  * @brief
@@ -867,7 +925,7 @@ std::string vutf8format(const char* str, va_list* ap);
  */
 bool IsIPAddress(char const* ipaddress);
 
-/// Checks if a host-order IPv4 address belongs to a network with the given subnet mask
+/// Checks if address belongs to the a network with specified submask
 bool IsIPAddrInNetwork(uint32 net, uint32 addr, uint32 subnetMask);
 
 /// Transforms a host-order IPv4 address into "dotted_ip:port"

@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -38,10 +39,12 @@
  * for the requested object type.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <string>
+#include <vector>
+#include <ctime>
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
-#include "Database/DatabaseImpl.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
@@ -100,7 +103,11 @@ void WorldSession::SendNameQueryOpcode(Player* p)
  */
 void WorldSession::SendNameQueryOpcodeFromDB(ObjectGuid guid)
 {
-    CharacterDatabase.AsyncPQuery(&WorldSession::SendNameQueryOpcodeFromDBCallBack, GetAccountId(),
+    uint32 accountId = GetAccountId();
+    CharacterDatabase.AsyncPQuery([accountId](QueryResult* result)
+                                  {
+                                      WorldSession::SendNameQueryOpcodeFromDBCallBack(result, accountId);
+                                  },
                                   !sWorld.getConfig(CONFIG_BOOL_DECLINED_NAMES_USED) ?
                                   //   ------- Query Without Declined Names --------
                                   //       0       1       2       3         4
@@ -363,9 +370,9 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
     }
 
     uint32 corpsemapid = corpse->GetMapId();
-    float x = corpse->GetPositionX();
-    float y = corpse->GetPositionY();
-    float z = corpse->GetPositionZ();
+    float x = corpse->Where().X();
+    float y = corpse->Where().Y();
+    float z = corpse->Where().Z();
     int32 mapid = corpsemapid;
 
     // if corpse at different map
@@ -382,7 +389,8 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
                     mapid = corpseMapEntry->CorpseMapID;
                     x = corpseMapEntry->Corpse_0;
                     y = corpseMapEntry->Corpse_1;
-                    z = entranceMap->GetHeightStatic(x, y, MAX_HEIGHT);
+                    const auto entranceFloor = entranceMap->StaticFloor(x, y, MAX_HEIGHT);
+                    z = entranceFloor ? *entranceFloor : INVALID_HEIGHT;
                 }
             }
         }

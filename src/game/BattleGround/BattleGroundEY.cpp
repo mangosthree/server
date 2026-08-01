@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -93,7 +94,7 @@ void BattleGroundEY::Update(uint32 diff)
                 if (m_towerOwner[NODE_FEL_REAVER_RUINS] == flagCarrier->GetTeam())
                 {
                     // coords and range taken from DBC of areatrigger (4514)
-                    if (flagCarrier->GetDistance(2044.0f, 1729.729f, 1190.03f) <= 3.0f)
+                    if (flagCarrier->Where().DistanceTo(Geometry::Vector3(2044.0f, 1729.729f, 1190.03f)) <= 3.0f)
                     {
                         EventPlayerCapturedFlag(flagCarrier, NODE_FEL_REAVER_RUINS);
                     }
@@ -484,7 +485,7 @@ void BattleGroundEY::EventPlayerDroppedFlag(Player* source)
 
 void BattleGroundEY::EventPlayerClickedOnFlag(Player* source, GameObject* target_obj)
 {
-    if (GetStatus() != STATUS_IN_PROGRESS || IsFlagPickedUp() || !source->IsWithinDistInMap(target_obj, 10))
+    if (GetStatus() != STATUS_IN_PROGRESS || IsFlagPickedUp() || !InReach(*source, *target_obj, 10))
     {
         return;
     }
@@ -647,9 +648,9 @@ WorldSafeLocsEntry const* BattleGroundEY::GetClosestGraveYard(Player* player)
         return NULL;
     }
 
-    float plr_x = player->GetPositionX();
-    float plr_y = player->GetPositionY();
-    float plr_z = player->GetPositionZ();
+    float plr_x = player->Where().X();
+    float plr_y = player->Where().Y();
+    float plr_z = player->Where().Z();
 
 
     distance = (entry->Loc_0 - plr_x) * (entry->Loc_0 - plr_x) + (entry->Loc_1 - plr_y) * (entry->Loc_1 - plr_y) + (entry->Loc_2 - plr_z) * (entry->Loc_2 - plr_z);

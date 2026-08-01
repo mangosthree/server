@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,14 +17,21 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include <iterator>
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include "Utilities/MathDefines.h"
+#include <cstdlib>
+#include <vector>
+#include <list>
+#include <algorithm>
+#include <ctime>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -40,7 +49,6 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "SharedDefines.h"
 #include "Pet.h"
 #include "GameObject.h"
@@ -54,7 +62,6 @@
 #include "BattleGround/BattleGroundWS.h"
 #include "Language.h"
 #include "SocialMgr.h"
-#include "VMapFactory.h"
 #include "Util.h"
 #include "TemporarySummon.h"
 #include "ScriptMgr.h"
@@ -64,7 +71,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Vehicle.h"
-#include "G3D/Vector3.h"
+#include "Geometry/Vector3.h"
 #include "LootMgr.h"
 #include <random>
 
@@ -413,8 +420,8 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), 177704,
                                           map, m_caster->GetPhaseMask(),
-                                          unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(),
-                                          unitTarget->GetOrientation()))
+                                          unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(),
+                                          unitTarget->Where().Facing()))
                     {
                         delete pGameObj;
                         return;
@@ -498,8 +505,8 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     // create before death for get proper coordinates
                     if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), 179644, map, m_caster->GetPhaseMask(),
-                                          creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(),
-                                          creatureTarget->GetOrientation()))
+                                          creatureTarget->Where().X(), creatureTarget->Where().Y(), creatureTarget->Where().Z(),
+                                          creatureTarget->Where().Facing()))
                     {
                         delete pGameObj;
                         return;
@@ -894,7 +901,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                 case 35745:                                 // Socrethar's Stone
                 {
                     uint32 spell_id;
-                    switch (m_caster->GetAreaId())
+                    switch (m_caster->GetTerrain()->GetAreaId(m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z()))
                     {
                         case 3900: spell_id = 35743; break; // Socrethar Portal
                         case 3742: spell_id = 35744; break; // Socrethar Portal
@@ -1022,7 +1029,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         return;
                     }
 
-                    m_caster->SummonCreature(23416, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), 0, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 30000);
+                    m_caster->SummonCreature(23416, unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), 0, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 30000);
                     return;
                 }
                 case 41333:                                 // Empyreal Equivalency
@@ -1363,7 +1370,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     float fMaxDist = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->RangeIndex));
 
-                    MaNGOS::NearestGameObjectEntryInPosRangeCheck go_check_big(*unitTarget, 187675, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), fMaxDist);
+                    MaNGOS::NearestGameObjectEntryInPosRangeCheck go_check_big(*unitTarget, 187675, unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), fMaxDist);
                     MaNGOS::GameObjectSearcher<MaNGOS::NearestGameObjectEntryInPosRangeCheck> checker1(pGo, go_check_big);
 
                     Cell::VisitGridObjects(unitTarget, checker1, fMaxDist);
@@ -1377,7 +1384,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     // small fire
                     std::list<GameObject*> lList;
 
-                    MaNGOS::GameObjectEntryInPosRangeCheck go_check_small(*unitTarget, 187676, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), fMaxDist);
+                    MaNGOS::GameObjectEntryInPosRangeCheck go_check_small(*unitTarget, 187676, unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), fMaxDist);
                     MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectEntryInPosRangeCheck> checker2(lList, go_check_small);
 
                     Cell::VisitGridObjects(unitTarget, checker2, fMaxDist);
@@ -1526,7 +1533,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     float fMaxDist = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->RangeIndex));
 
-                    MaNGOS::NearestGameObjectEntryInPosRangeCheck go_check(*unitTarget, 187675, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), fMaxDist);
+                    MaNGOS::NearestGameObjectEntryInPosRangeCheck go_check(*unitTarget, 187675, unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), fMaxDist);
                     MaNGOS::GameObjectSearcher<MaNGOS::NearestGameObjectEntryInPosRangeCheck> checker(pGo, go_check);
 
                     Cell::VisitGridObjects(unitTarget, checker, fMaxDist);
@@ -1639,7 +1646,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     // Spell 47117,47149,47316,47405,50439 exist, are these used to check area/meet requirement
                     // and to cast correct spell in correct area?
 
-                    switch (m_caster->GetAreaId())
+                    switch (m_caster->GetTerrain()->GetAreaId(m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z()))
                     {
                         case 4255: spellId = 47381; break;  // Reagent Check (Frozen Mojo)
                         case 4209: spellId = 47386; break;  // Reagent Check (Zim'Bo's Mojo)
@@ -2085,7 +2092,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                             unitTarget->GetMotionMaster()->MovementExpired();
                         }
 
-                        unitTarget->MonsterMoveWithSpeed(pTargetDummy->GetPositionX(), pTargetDummy->GetPositionY(), pTargetDummy->GetPositionZ(), 24.f);
+                        unitTarget->MonsterMoveWithSpeed(pTargetDummy->Where().X(), pTargetDummy->Where().Y(), pTargetDummy->Where().Z(), 24.f);
 
                         // Add state to temporarily prevent follow
                         unitTarget->addUnitState(UNIT_STAT_ROOT);
@@ -2180,7 +2187,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     float fMaxDist = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->RangeIndex));
 
-                    MaNGOS::GameObjectEntryInPosRangeCheck go_check(*unitTarget, 182071, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), fMaxDist);
+                    MaNGOS::GameObjectEntryInPosRangeCheck go_check(*unitTarget, 182071, unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), fMaxDist);
                     MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectEntryInPosRangeCheck> checker(lList, go_check);
 
                     Cell::VisitGridObjects(unitTarget, checker, fMaxDist);
@@ -2868,7 +2875,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                         return;
                     }
 
-                    m_caster->CastSpell(unitTarget, m_caster->CanReachWithMeleeAttack(unitTarget) ? 71623 : 72264, true);
+                    m_caster->CastSpell(unitTarget, InMeleeReach(*m_caster, *unitTarget) ? 71623 : 72264, true);
                     return;
                 }
                 case 72285:                                 // Vile Gas Trigger
@@ -3902,8 +3909,10 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                 uint32 spellId = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
                 float dest_x, dest_y;
-                m_caster->GetNearPoint2D(dest_x, dest_y, m_caster->GetObjectBoundingRadius() + unitTarget->GetObjectBoundingRadius(), m_caster->GetOrientation());
-                unitTarget->CastSpell(dest_x, dest_y, m_caster->GetPositionZ() + 0.5f, spellId, true, NULL, NULL, m_caster->GetObjectGuid(), m_spellInfo);
+                const Geometry::Vector3 near_ = PointNear(*m_caster, m_caster->Where().Extent() + unitTarget->Where().Extent(), m_caster->Where().Facing());
+                dest_x = near_.x;
+                dest_y = near_.y;
+                unitTarget->CastSpell(dest_x, dest_y, m_caster->Where().Z() + 0.5f, spellId, true, NULL, NULL, m_caster->GetObjectGuid(), m_spellInfo);
                 return;
             }
             // Obliterate

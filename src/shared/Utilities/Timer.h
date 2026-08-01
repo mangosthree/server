@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -25,9 +26,10 @@
 #ifndef MANGOS_TIMER_H
 #define MANGOS_TIMER_H
 
-#include "Common/Common.h"
+#include "Platform/Define.h"
 #include "Duration.h"
 #include <ctime>
+#include <chrono>
 
 // New Method
 inline std::chrono::steady_clock::time_point GetApplicationStartTime()
@@ -102,46 +104,48 @@ struct IntervalTimer
                 _current = 0;
             }
         }
+
         /**
          * @brief
          *
          * @return bool
          */
-    bool Passed()
-    {
-        return _current >= _interval;
-    }
+        bool Passed()
+        {
+            return _current >= _interval;
+        }
+
         /**
          * @brief
          *
          */
-    void Reset()
-    {
-        if (_current >= _interval)
+        void Reset()
         {
-            _current %= _interval;
+            if (_current >= _interval)
+            {
+                _current %= _interval;
+            }
         }
-    }
 
-    void SetCurrent(time_t current)
-    {
-        _current = current;
-    }
+        void SetCurrent(time_t current)
+        {
+            _current = current;
+        }
 
-    void SetInterval(time_t interval)
-    {
-        _interval = interval;
-    }
+        void SetInterval(time_t interval)
+        {
+            _interval = interval;
+        }
 
-    time_t GetInterval() const
-    {
-        return _interval;
-    }
+        time_t GetInterval() const
+        {
+            return _interval;
+        }
 
-    time_t GetCurrent() const
-    {
-        return _current;
-    }
+        time_t GetCurrent() const
+        {
+            return _current;
+        }
 
     private:
         time_t _interval; /**< TODO */
@@ -154,75 +158,75 @@ struct IntervalTimer
  */
 struct TimeTracker
 {
-public:
-    TimeTracker(int32 expiry = 0) : _expiryTime(expiry) { }
-    TimeTracker(Milliseconds expiry) : _expiryTime(expiry) { }
+    public:
+        TimeTracker(int32 expiry = 0) : _expiryTime(expiry) {}
+        TimeTracker(Milliseconds expiry) : _expiryTime(expiry) {}
 
-    void Update(int32 diff)
-    {
-        Update(Milliseconds(diff));
-    }
+        void Update(int32 diff)
+        {
+            Update(Milliseconds(diff));
+        }
 
-    void Update(Milliseconds diff)
-    {
-        _expiryTime -= diff;
-    }
+        void Update(Milliseconds diff)
+        {
+            _expiryTime -= diff;
+        }
 
-    bool Passed() const
-    {
-        return _expiryTime <= Seconds(0);
-    }
+        bool Passed() const
+        {
+            return _expiryTime <= Seconds(0);
+        }
 
-    void Reset(int32 expiry)
-    {
-        Reset(Milliseconds(expiry));
-    }
+        void Reset(int32 expiry)
+        {
+            Reset(Milliseconds(expiry));
+        }
 
-    void Reset(Milliseconds expiry)
-    {
-        _expiryTime = expiry;
-    }
+        void Reset(Milliseconds expiry)
+        {
+            _expiryTime = expiry;
+        }
 
-    Milliseconds GetExpiry() const
-    {
-        return _expiryTime;
-    }
+        Milliseconds GetExpiry() const
+        {
+            return _expiryTime;
+        }
 
-private:
-    Milliseconds _expiryTime;
+    private:
+        Milliseconds _expiryTime;
 };
 
 struct PeriodicTimer
 {
-public:
-    PeriodicTimer(int32 period, int32 start_time) :
-        i_period(period), i_expireTime(start_time) { }
+    public:
+        PeriodicTimer(int32 period, int32 start_time)
+            : i_period(period), i_expireTime(start_time) {}
 
-    bool Update(const uint32 diff)
-    {
-        if ((i_expireTime -= diff) > 0)
+        bool Update(const uint32 diff)
         {
-            return false;
+            if ((i_expireTime -= diff) > 0)
+            {
+                return false;
+            }
+
+            i_expireTime += i_period > int32(diff) ? i_period : diff;
+            return true;
         }
 
-        i_expireTime += i_period > int32(diff) ? i_period : diff;
-        return true;
-    }
+        void SetPeriodic(int32 period, int32 start_time)
+        {
+            i_expireTime = start_time;
+            i_period = period;
+        }
 
-    void SetPeriodic(int32 period, int32 start_time)
-    {
-        i_expireTime = start_time;
-        i_period = period;
-    }
+        // Tracker interface
+        void TUpdate(int32 diff) { i_expireTime -= diff; }
+        bool TPassed() const { return i_expireTime <= 0; }
+        void TReset(int32 diff, int32 period) { i_expireTime += period > diff ? period : diff; }
 
-    // Tracker interface
-    void TUpdate(int32 diff) { i_expireTime -= diff; }
-    bool TPassed() const { return i_expireTime <= 0; }
-    void TReset(int32 diff, int32 period) { i_expireTime += period > diff ? period : diff; }
-
-private:
-    int32 i_period;
-    int32 i_expireTime;
+    private:
+        int32 i_period;
+        int32 i_expireTime;
 };
 
 #endif

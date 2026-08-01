@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -47,10 +48,14 @@
  * - CMSG_SET_PLAYER_DECLARED_NAME: Set player name
  */
 
-#include "Common.h"
+#include <zlib.h>
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include <string>
+#include <vector>
+#include <ctime>
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
-#include "Database/DatabaseImpl.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
 #include "Log.h"
@@ -67,7 +72,8 @@
 #include "Chat.h"
 #include "ScriptMgr.h"
 #include "zlib.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
+#include "ObjectLookup.h"
 #include "Object.h"
 #include "BattleGround/BattleGround.h"
 #include "OutdoorPvP/OutdoorPvP.h"
@@ -214,7 +220,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     data << uint32(clientcount);                            // clientcount place holder, online count
 
     uint32 count = 0;
-    sObjectAccessor.DoForAllPlayers([&](Player* pl)->void
+    sPlayerRegistry.ForEach([&](Player* pl)->void
     {
         ++count;
 
@@ -271,7 +277,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
             return;
         }
 
-        uint32 pzoneid = pl->GetZoneId();
+        uint32 pzoneid = pl->GetTerrain()->GetZoneId(pl->Where().X(), pl->Where().Y(), pl->Where().Z());
         uint8 gender = pl->getGender();
 
         bool z_show = true;
@@ -418,8 +424,8 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket & /*recv_data*/)
     // not set flags if player can't free move to prevent lost state at logout cancel
     if (GetPlayer()->CanFreeMove())
     {
-        float height = GetPlayer()->GetMap()->GetHeight(GetPlayer()->GetPhaseMask(), GetPlayer()->GetPositionX(), GetPlayer()->GetPositionY(), GetPlayer()->GetPositionZ());
-        if ((GetPlayer()->GetPositionZ() < height + 0.1f) && !(GetPlayer()->IsInWater()))
+        float height = GetPlayer()->GetMap()->GetHeight(GetPlayer()->GetPhaseMask(), GetPlayer()->Where().X(), GetPlayer()->Where().Y(), GetPlayer()->Where().Z());
+        if ((GetPlayer()->Where().Z() < height + 0.1f) && !(GetPlayer()->IsInWater()))
         {
             GetPlayer()->SetStandState(UNIT_STAND_STATE_SIT);
         }
@@ -522,7 +528,7 @@ void WorldSession::HandleZoneUpdateOpcode(WorldPacket& recv_data)
 
     // use server side data
     uint32 newzone, newarea;
-    GetPlayer()->GetZoneAndAreaId(newzone, newarea);
+    GetPlayer()->GetTerrain()->GetZoneAndAreaId(newzone, newarea, GetPlayer()->Where().X(), GetPlayer()->Where().Y(), GetPlayer()->Where().Z());
     GetPlayer()->UpdateZone(newzone, newarea);
 }
 
@@ -540,7 +546,7 @@ void WorldSession::HandleSetTargetOpcode(WorldPacket& recv_data)
     _player->SetTargetGuid(guid);
 
     // update reputation list if need
-    Unit* unit = sObjectAccessor.GetUnit(*_player, guid);   // can select group members at diff maps
+    Unit* unit = ObjectLookup::GetUnit(*_player, guid);   // can select group members at diff maps
     if (!unit)
     {
         return;
@@ -565,7 +571,7 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket& recv_data)
     _player->SetSelectionGuid(guid);
 
     // update reputation list if need
-    Unit* unit = sObjectAccessor.GetUnit(*_player, guid);   // can select group members at diff maps
+    Unit* unit = ObjectLookup::GetUnit(*_player, guid);   // can select group members at diff maps
     if (!unit)
     {
         return;
@@ -664,7 +670,7 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!corpse->IsWithinDistInMap(GetPlayer(), CORPSE_RECLAIM_RADIUS, true))
+    if (!InReach(*corpse, *(GetPlayer()), CORPSE_RECLAIM_RADIUS, true))
     {
         return;
     }
@@ -726,7 +732,7 @@ void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
     }
     else
     {
-        ClosestGrave = sObjectMgr.GetClosestGraveYard(pPlayer->GetCorpse()->GetPositionX(), pPlayer->GetCorpse()->GetPositionY(), pPlayer->GetCorpse()->GetPositionZ(), pPlayer->GetCorpse()->GetMapId(), pPlayer->GetTeam());
+        ClosestGrave = sObjectMgr.GetClosestGraveYard(pPlayer->GetCorpse()->Where().X(), pPlayer->GetCorpse()->Where().Y(), pPlayer->GetCorpse()->Where().Z(), pPlayer->GetCorpse()->GetMapId(), pPlayer->GetTeam());
     }
 
     // if no grave found, stay at the current location
@@ -734,7 +740,7 @@ void WorldSession::HandleReturnToGraveyard(WorldPacket& /*recvPacket*/)
     if (ClosestGrave)
     {
         bool updateVisibility = pPlayer->IsInWorld() && pPlayer->GetCorpse()->GetMapId() == ClosestGrave->Continent;
-        pPlayer->TeleportTo(ClosestGrave->Continent, ClosestGrave->Loc_0, ClosestGrave->Loc_1, ClosestGrave->Loc_2, pPlayer->GetOrientation());
+        pPlayer->TeleportTo(ClosestGrave->Continent, ClosestGrave->Loc_0, ClosestGrave->Loc_1, ClosestGrave->Loc_2, pPlayer->Where().Facing());
         if (pPlayer->IsDead())                                       // not send if alive, because it used in TeleportTo()
         {
             WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);// show spirit healer position on minimap
@@ -784,7 +790,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
     const float delta = 5.0f;
 
     // check if player in the range of areatrigger
-    if (!IsPointInAreaTriggerZone(atEntry, player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), delta))
+    if (!IsPointInAreaTriggerZone(atEntry, player->GetMapId(), player->Where().X(), player->Where().Y(), player->Where().Z(), delta))
     {
         DEBUG_LOG("Player '%s' (GUID: %u) too far, ignore Area Trigger ID: %u", player->GetName(), player->GetGUIDLow(), Trigger_ID);
         return;
@@ -1240,7 +1246,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!_player->IsWithinDistInMap(plr, INSPECT_DISTANCE, false))
+    if (!InReach(*_player, *plr, INSPECT_DISTANCE, false))
     {
         return;
     }
@@ -1294,7 +1300,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+    if (!InReach(*_player, *player, INSPECT_DISTANCE, false))
     {
         return;
     }
@@ -1649,7 +1655,7 @@ void WorldSession::HandleQueryInspectAchievementsOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+    if (!InReach(*_player, *player, INSPECT_DISTANCE, false))
     {
         return;
     }
@@ -1684,7 +1690,7 @@ void WorldSession::HandleHearthandResurrect(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_HEARTH_AND_RESURRECT");
 
-    AreaTableEntry const* atEntry = sAreaStore.LookupEntry(_player->GetAreaId());
+    AreaTableEntry const* atEntry = sAreaStore.LookupEntry(_player->GetTerrain()->GetAreaId(_player->Where().X(), _player->Where().Y(), _player->Where().Z()));
     if (!atEntry || !(atEntry->Flags & AREA_FLAG_CAN_HEARTH_AND_RES))
     {
         return;

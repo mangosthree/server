@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,13 +17,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include <string>
 #include "World.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"
@@ -55,11 +58,11 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "TemporarySummon.h"
-#include "VMapFactory.h"
+#include "LineOfSightExemptions.h"
+#include "Utilities/IdList.h"
 #include "MoveMap.h"
 #include "GameEventMgr.h"
 #include "PoolManager.h"
-#include "Database/DatabaseImpl.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "MapPersistentStateMgr.h"
@@ -240,11 +243,10 @@ void World::LoadConfigSettings(bool reload)
     std::string forceLoadGridOnMaps = sConfig.GetStringDefault("LoadAllGridsOnMaps", "");
     if (!forceLoadGridOnMaps.empty())
     {
-        unsigned int pos = 0;
-        unsigned int id;
-        VMAP::VMapFactory::chompAndTrim(forceLoadGridOnMaps);
-        while (VMAP::VMapFactory::getNextId(forceLoadGridOnMaps, pos, id))
+        for (uint32 id : ParseIdList(forceLoadGridOnMaps))
+        {
             m_configForceLoadMapIds.insert(id);
+        }
     }
 
     setConfig(CONFIG_UINT32_INTERVAL_SAVE, "PlayerSave.Interval", 15 * MINUTE * IN_MILLISECONDS);
@@ -674,21 +676,13 @@ void World::LoadConfigSettings(bool reload)
     }
 
     setConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK, "vmap.enableIndoorCheck", true);
-    bool enableLOS = sConfig.GetBoolDefault("vmap.enableLOS", false);
-    bool enableHeight = sConfig.GetBoolDefault("vmap.enableHeight", false);
-    std::string ignoreSpellIds = sConfig.GetStringDefault("vmap.ignoreSpellIds", "");
+    // vmap.enableLOS and vmap.enableHeight are gone rather than ignored. A fused tile
+    // carries terrain and collision in one file, so there is nothing left that could be
+    // switched off independently -- and a config key that silently does nothing is worse
+    // than one that is absent.
+    LineOfSightExemptions::Load(sConfig.GetStringDefault("vmap.ignoreSpellIds", ""));
 
-    if (!enableHeight)
-    {
-        sLog.outError("VMAP height use disabled! Creatures movements and other things will be in broken state.");
-    }
-
-    VMAP::VMapFactory::createOrGetVMapManager()->setEnableLineOfSightCalc(enableLOS);
-    VMAP::VMapFactory::createOrGetVMapManager()->setEnableHeightCalc(enableHeight);
-    VMAP::VMapFactory::preventSpellsFromBeingTestedForLoS(ignoreSpellIds.c_str());
-    sLog.outString("WORLD: VMap support included. LineOfSight:%i, getHeight:%i, indoorCheck:%i",
-                   enableLOS, enableHeight, getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK) ? 1 : 0);
-    sLog.outString("WORLD: VMap data directory is: %svmaps", m_dataPath.c_str());
+    sLog.outString("WORLD: Terrain tiles directory is: %stiles", m_dataPath.c_str());
 
     setConfig(CONFIG_BOOL_MMAP_ENABLED, "mmap.enabled", true);
     std::string ignoreMapIds = sConfig.GetStringDefault("mmap.ignoreMapIds", "");

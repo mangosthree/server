@@ -43,7 +43,7 @@ bool UseMeetingStoneAction::Execute(Event event)
         return false;
     }
 
-    Map* map = master->GetMap();
+    Map* map = master->FindMap();
     if (!map)
     {
         return NULL;

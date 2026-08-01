@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -42,14 +43,14 @@
 
 #ifndef DO_POSTGRESQL
 
+#include <string>
+#include "Utilities/Errors.h"
 #include "Utilities/Util.h"
 #include "Policies/Singleton.h"
 #include "Platform/Define.h"
 #include "Threading/Threading.h"
 #include "DatabaseEnv.h"
 #include "Utilities/Timer.h"
-
-#include <cstdlib>
 
 /**
  * @var DatabaseMysql::db_count
@@ -219,7 +220,15 @@ bool MySQLConnection::Initialize(const char* infoString)
     }
 
     mysql_options(mysqlInit, MYSQL_SET_CHARSET_NAME, "utf8");
+
+    // Auto-reconnect is deprecated from client 8.0.34 on, and asking for it makes the library
+    // print a warning of its own to stderr at every connect -- past our logging, so it cannot
+    // be filtered or levelled like anything else we emit. We do not need it either: a dropped
+    // connection silently reconnecting mid-transaction is how a transaction ends up half
+    // applied. Only ask for it where it is neither deprecated nor noisy.
+#if !defined(MYSQL_VERSION_ID) || MYSQL_VERSION_ID < 80034
     mysql_options(mysqlInit, MYSQL_OPT_RECONNECT, "1");
+#endif
 #ifdef WIN32
     if (host == ".")                                        // named pipe use option (Windows)
     {
@@ -261,8 +270,12 @@ bool MySQLConnection::Initialize(const char* infoString)
     }
 
     DETAIL_LOG("Connected to MySQL database %s@%s:%s/%s", user.c_str(), host.c_str(), port_or_socket.c_str(), database.c_str());
-    sLog.outString("MySQL client library: %s", mysql_get_client_info());
-    sLog.outString("MySQL server ver: %s ", mysql_get_server_info(mMysql));
+
+    // Detail, not console furniture: it is printed once per connection -- three times at
+    // start-up for one fact that does not change -- and it says nothing an operator needs
+    // before the first line of real output.
+    DETAIL_LOG("MySQL client library: %s, server: %s", mysql_get_client_info(),
+               mysql_get_server_info(mMysql));
 
     /*----------SET AUTOCOMMIT ON---------*/
     // It seems mysql 5.0.x have enabled this feature
@@ -532,6 +545,7 @@ unsigned long MySQLConnection::escape_string(char* to, const char* from, unsigne
     return(mysql_real_escape_string(mMysql, to, from, length));
 }
 
+//////////////////////////////////////////////////////////////////////////
 /**
  * @brief Create a prepared statement
  * @param fmt SQL statement format string with ? placeholders
@@ -545,6 +559,7 @@ SqlPreparedStatement* MySQLConnection::CreateStatement(const std::string& fmt)
     return new MySqlPreparedStatement(fmt, *this, mMysql);
 }
 
+//////////////////////////////////////////////////////////////////////////
 /**
  * @brief Construct MySQL prepared statement
  * @param fmt SQL format string with ? placeholders

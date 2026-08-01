@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,19 +17,22 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <vector>
+#include <set>
 #include "Camera.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Log.h"
 #include "Errors.h"
 #include "Player.h"
+#include "TransportMap.h"
 
 /**
  * @brief Creates a camera bound to a player.
@@ -96,7 +101,7 @@ void Camera::SetView(WorldObject* obj, bool update_far_sight_field /*= true*/)
         return;
     }
 
-    if (!m_owner.IsInMap(obj))
+    if (!CanBeSeen(*obj, m_owner))
     {
         sLog.outError("Camera::SetView, viewpoint is not in map with camera's owner");
         return;
@@ -234,6 +239,19 @@ void Camera::UpdateVisibilityForOwner()
 
     MaNGOS::VisibleNotifier notifier(*this);
     Cell::VisitAllObjects(m_source, notifier, visibilityDistance, false);
+
+    // The other side of a vessel's boundary. A deck and the shore it sails past are two
+    // maps, and no cell visit of one reaches the other -- so the same notifier is run over
+    // the far side as well. ONE elimination follows, over both, which is the whole point:
+    // an object that drops out of reach across the boundary is destroyed by the ordinary
+    // sweep instead of by a ledger somebody has to remember to keep.
+    std::vector<RelaySource> relayed;
+    TransportMap::CollectRelaySources(m_source, visibilityDistance, relayed);
+    for (RelaySource const& src : relayed)
+    {
+        Cell::VisitAllObjects(src.x, src.y, src.map, notifier, src.radius, false);
+    }
+
     notifier.Notify();
 }
 

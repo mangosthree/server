@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -39,6 +40,9 @@
  * @see LFGQueue for matching algorithm
  */
 
+#include <string>
+#include <vector>
+#include <set>
 #include "WorldSession.h"
 #include "LFGMgr.h"
 #include "Log.h"
@@ -46,6 +50,7 @@
 #include "WorldPacket.h"
 #include "ObjectMgr.h"
 #include "World.h"
+#include "PlayerRegistry.h"
 
 void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
 {
@@ -174,7 +179,7 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
 
     uint32 playerCount = 0;
 
-    sObjectAccessor.DoForAllPlayers([this, &playerCount, &data](Player* plr)->void
+    sPlayerRegistry.ForEach([this, &playerCount, &data](Player* plr)->void
     {
         ++playerCount;
         if (plr && (plr->GetTeam() == _player->GetTeam()) && plr->IsInWorld())
@@ -239,7 +244,7 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
 
             if (flags & 0x20)
             {
-                data << uint32(plr->GetZoneId());               // areaid
+                data << uint32(plr->GetTerrain()->GetZoneId(plr->Where().X(), plr->Where().Y(), plr->Where().Z()));               // areaid
             }
 
             if (flags & 0x40)
@@ -447,7 +452,7 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
     {
         ObjectGuid leaderGuid = ObjectGuid(roleCheck.leaderGuidRaw);
         uint8 leaderRoles = roleCheck.currentRoles.find(leaderGuid)->second;
-        Player* pLeader = sObjectAccessor.FindPlayer(leaderGuid);
+        Player* pLeader = sPlayerRegistry.Find(leaderGuid);
 
         data << uint64(leaderGuid.GetRawValue());
         data << uint8(leaderRoles > 0);
@@ -463,7 +468,7 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
 
             ObjectGuid plrGuid = rItr->first;
 
-            Player* pPlayer = sObjectAccessor.FindPlayer(plrGuid);
+            Player* pPlayer = sPlayerRegistry.Find(plrGuid);
 
             data << uint64(plrGuid.GetRawValue());
             data << uint8(rItr->second > 0);

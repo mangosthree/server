@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2015-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2015-2026 MaNGOS <https://www.getmangos.eu>
  * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2008 MaNGOS <http://getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
+ * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
+ * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -36,6 +36,9 @@
  * the exact nature of the disable (e.g., disable casting vs learning).
  */
 
+#include "Utilities/Errors.h"
+#include <map>
+#include <set>
 #include "DisableMgr.h"
 #include "ObjectMgr.h"
 #include "OutdoorPvPMgr.h"
@@ -251,28 +254,28 @@ void LoadDisables()
                 switch (mapEntry->InstanceType)
                 {
                     case MAP_COMMON:
-                        if (flags & VMAP::VMAP_DISABLE_AREAFLAG)
+                        if (flags & COLLISION_DISABLE_AREAFLAG)
                             sLog.outDebug("Areaflag disabled for world map %u.", entry);
-                        if (flags & VMAP::VMAP_DISABLE_LIQUIDSTATUS)
+                        if (flags & COLLISION_DISABLE_LIQUIDSTATUS)
                             sLog.outDebug("Liquid status disabled for world map %u.", entry);
                         break;
                     case MAP_INSTANCE:
                     case MAP_RAID:
-                        if (flags & VMAP::VMAP_DISABLE_HEIGHT)
+                        if (flags & COLLISION_DISABLE_HEIGHT)
                             sLog.outDebug("Height disabled for instance map %u.", entry);
-                        if (flags & VMAP::VMAP_DISABLE_LOS)
+                        if (flags & COLLISION_DISABLE_LOS)
                             sLog.outDebug("LoS disabled for instance map %u.", entry);
                         break;
                     case MAP_BATTLEGROUND:
-                        if (flags & VMAP::VMAP_DISABLE_HEIGHT)
+                        if (flags & COLLISION_DISABLE_HEIGHT)
                             sLog.outDebug("Height disabled for battleground map %u.", entry);
-                        if (flags & VMAP::VMAP_DISABLE_LOS)
+                        if (flags & COLLISION_DISABLE_LOS)
                             sLog.outDebug("LoS disabled for battleground map %u.", entry);
                         break;
                     //case MAP_ARENA: [-ZERO]
-                    //    if (flags & VMAP::VMAP_DISABLE_HEIGHT)
+                    //    if (flags & COLLISION_DISABLE_HEIGHT)
                     //        TC_LOG_INFO("misc", "Height disabled for arena map %u.", entry);
-                    //    if (flags & VMAP::VMAP_DISABLE_LOS)
+                    //    if (flags & COLLISION_DISABLE_LOS)
                     //        TC_LOG_INFO("misc", "LoS disabled for arena map %u.", entry);
                     //    break;
                     default:
@@ -406,7 +409,7 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
                     if (spellFlags & SPELL_DISABLE_AREA)
                     {
                         std::set<uint32> const& areaIds = itr->second.params[1];
-                        if (areaIds.find(unit->GetAreaId()) != areaIds.end())
+                        if (areaIds.find(unit->GetTerrain()->GetAreaId(unit->Where().X(), unit->Where().Y(), unit->Where().Z())) != areaIds.end())
                         {
                             return true;                                        // Spell is disabled in this area
                         }

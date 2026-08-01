@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,35 +17,42 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cstdlib>
+#include <cstdint>
+#include <string>
 #include "Config/Config.h"
 #include "PosixDaemon.h"
 #include <cstdio>
 #include <iostream>
 #include <fstream>
 
-// POSIX syscalls used below (umask/fork/setsid/getpid/kill/signal/exit); these
-// were previously reached transitively through ACE headers, now gone.
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+// POSIX process control: fork/setsid/chdir/umask/getpid/alarm/pause and the
+// signal constants. These used to arrive by accident through the ACE headers
+// buried in Common.h; naming them is what lets this file build without it.
 #include <csignal>
-#include <cstdlib>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-pid_t parent_pid = 0, sid = 0;
+// volatile sig_atomic_t, not pid_t: these are read from a signal handler, and that
+// is the only type a handler is allowed to touch.
+static volatile sig_atomic_t parent_pid = 0;
+static volatile sig_atomic_t sid = 0;
 
 /**
  * Handles daemon lifecycle signals during process startup and shutdown.
  */
 void daemonSignal(int s)
 {
-
+    // _exit(), never exit(): this runs from a signal handler, and exit() would run
+    // atexit handlers and flush stdio. Arriving inside malloc or a FILE lock, that
+    // deadlocks. getpid(), kill() and _exit() are all async-signal-safe.
     if (getpid() != parent_pid)
     {
         return;
@@ -51,15 +60,15 @@ void daemonSignal(int s)
 
     if (s == SIGUSR1)
     {
-        exit(EXIT_SUCCESS);
+        _exit(EXIT_SUCCESS);
     }
 
     if (sid)
     {
-        kill(sid, s);
+        kill(static_cast<pid_t>(sid), s);
     }
 
-    exit(EXIT_FAILURE);
+    _exit(EXIT_FAILURE);
 }
 
 /**
@@ -84,9 +93,11 @@ void startDaemon(uint32_t timeout)
 
     if (pid > 0)
     {
+        // The forked parent leaves through _exit() as well: exit() would flush stdio
+        // buffers the child inherited at the fork, writing whatever was pending twice.
         alarm(timeout);
         pause();
-        exit(EXIT_FAILURE);
+        _exit(EXIT_FAILURE);
     }
 
     umask(0);

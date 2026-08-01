@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -39,7 +40,11 @@
  * appearance customization, and starting location setup.
  */
 
-#include "Common.h"
+#include "Database/SqlOperations.h"
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include <string>
+#include <memory>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "SharedDefines.h"
@@ -58,9 +63,8 @@
 #include "CinematicFlyover.h"
 #include "Guild.h"
 #include "GuildMgr.h"
-#include "ObjectAccessor.h"
+#include "CorpseManager.h"
 #include "Group.h"
-#include "Database/DatabaseImpl.h"
 #include "PlayerDump.h"
 #include "SocialMgr.h"
 #include "Util.h"
@@ -71,6 +75,7 @@
 #include "Timer.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
+#include "PlayerRegistry.h"
 #endif /* ENABLE_ELUNA */
 
 // config option SkipCinematics supported values
@@ -336,7 +341,11 @@ void WorldSession::HandleCharEnum(QueryResult* result)
 void WorldSession::HandleCharEnumOpcode(WorldPacket & /*recv_data*/)
 {
     /// get all the data necessary for loading all characters (along with their pets) on the account
-    CharacterDatabase.AsyncPQuery(&chrHandler, &CharacterHandler::HandleCharEnumCallback, GetAccountId(),
+    uint32 accountId = GetAccountId();
+    CharacterDatabase.AsyncPQuery([accountId](QueryResult* result)
+                                  {
+                                      chrHandler.HandleCharEnumCallback(result, accountId);
+                                  },
                                   !sWorld.getConfig(CONFIG_BOOL_DECLINED_NAMES_USED) ?
                                   //   ------- Query Without Declined Names --------
                                   //           0               1                2                3                 4                  5                       6                        7
@@ -854,7 +863,10 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
         return;
     }
 
-    CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerLoginCallback, holder);
+    CharacterDatabase.DelayQueryHolder([](QueryResult* result, SqlQueryHolder* h)
+                                       {
+                                           chrHandler.HandlePlayerLoginCallback(result, h);
+                                       }, holder);
 }
 
 /**
@@ -895,10 +907,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
     data << pCurrChar->GetMapId();
-    data << pCurrChar->GetPositionX();
-    data << pCurrChar->GetPositionY();
-    data << pCurrChar->GetPositionZ();
-    data << pCurrChar->GetOrientation();
+    data << pCurrChar->Where().X();
+    data << pCurrChar->Where().Y();
+    data << pCurrChar->Where().Z();
+    data << pCurrChar->Where().Facing();
     SendPacket(&data);
 
     // load player specific part before send times
@@ -1083,7 +1095,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     }
 
     /* This code is run if we can not add the player to the map for some reason */
-    if (lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->GetMap()->Add(pCurrChar))
+    if (lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->BoardingMap()->Add(pCurrChar))
     {
         pCurrChar->SetCinematicFlyover(nullptr);
         /* Attempt to find an areatrigger to teleport the player for us */
@@ -1094,13 +1106,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
 
         /* We couldn't find an areatrigger to teleport, so just move the player back to their home bind */
-        if (!at || lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, pCurrChar->GetOrientation()))
+        if (!at || lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, pCurrChar->Where().Facing()))
         {
             pCurrChar->TeleportToHomebind();
         }
     }
 
-    sObjectAccessor.AddObject(pCurrChar);
+    sPlayerRegistry.Add(pCurrChar);
     // DEBUG_LOG("Player %s added to Map.",pCurrChar->GetName());
 
     pCurrChar->SendInitialPacketsAfterAddToMap();

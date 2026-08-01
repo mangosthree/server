@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
  * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -24,12 +25,21 @@
 
 #pragma once
 
-// One connection's outbound byte stream, shared by every backend. Producers append
-// bytes from any thread into m_pending; the transport drains m_inflight to the socket
-// and swaps the two once drained, coalescing everything queued between writes into the
-// next single write. m_inflight's storage stays put for the duration of a write, so a
-// proactor may hand the kernel a raw pointer into it; m_off resumes a partial write
-// from where the kernel stopped.
+// One connection's outbound byte stream, shared by every backend. Producers append into
+// m_pending from any thread while the transport drains m_inflight to the socket; the two
+// are swapped once drained.
+//
+// That swap buys both properties this needs. COALESCING: everything queued during one
+// write leaves in the next single write, and both vectors keep their capacity across
+// clear(), so after warm-up the send path allocates nothing -- a world tick emits a great
+// many small packets and a queue-of-buffers would cost an allocation and a syscall each.
+// STABLE STORAGE: a proactor hands the kernel a pointer and collects a completion later,
+// and producers never touch m_inflight, so that memory cannot move under it. m_off then
+// makes a partial write safe by resuming where the kernel stopped rather than dropping
+// the remainder.
+//
+// It lives in the per-connection SendChannel, a shared_ptr the session captures, so the
+// buffers outlive the socket and a parked producer cannot wake into freed memory.
 
 #include "net/FlowControl.hpp"
 

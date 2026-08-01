@@ -10,8 +10,6 @@
 #include "MotionGenerators/TargetedMovementGenerator.h"
 #include "Creature.h"
 #include "Map.h"
-#include "vmap/IVMapManager.h"
-#include "vmap/ModelIgnoreFlags.h"
 
 using namespace ai;
 
@@ -284,7 +282,7 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
         // water or a real terrain height); otherwise fall through to the
         // vmap-guarded MoveFollow path below.
         bool hasLos = bot->GetMap()->IsInLineOfSight(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ() + 0.5f,
-                          x, y, z + 0.5f, bot->GetPhaseMask(), VMAP::ModelIgnoreFlags::M2);
+                          x, y, z + 0.5f, bot->GetPhaseMask());
         float heightZ = z;
         bool validDest = bot->GetTerrain()->IsSwimmable(x, y, z, bot->GetObjectBoundingRadius()) ||
                           bot->GetMap()->GetHeightInRange(bot->GetPhaseMask(), x, y, heightZ);
@@ -631,12 +629,12 @@ bool SwimToSurfaceAction::Execute(Event event)
     float y = bot->GetPositionY();
     float z = bot->GetPositionZ();
 
-    float waterLevel = bot->GetTerrain()->GetWaterLevel(x, y, z);
-    if (waterLevel <= VMAP_INVALID_HEIGHT)
+    const auto waterLevel = bot->GetTerrain()->GetWaterLevel(x, y, z);
+    if (!waterLevel)
     {
         return false;
     }
 
     ai->SetNextCheckDelay(sPlayerbotAIConfig.globalCoolDown);
-    return MoveTo(bot->GetMapId(), x, y, waterLevel - 0.5f);
+    return MoveTo(bot->GetMapId(), x, y, *waterLevel - 0.5f);
 }

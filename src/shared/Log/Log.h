@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -25,15 +26,16 @@
 #ifndef MANGOSSERVER_LOG_H
 #define MANGOSSERVER_LOG_H
 
-#include "Common/Common.h"
+#include "Threading/Threading.h"
+#include "Platform/Define.h"
+#include <string>
 #include "Policies/Singleton.h"
-
-#include <cstdarg>
-#include <mutex>
 
 class Config;
 class ByteBuffer;
 class ConsoleLogWriter;
+#include <mutex>
+
 namespace MaNGOS { class Thread; }
 
 /**
@@ -84,9 +86,10 @@ enum LogFilters
     LOG_FILTER_CELL_ENVELOPE      = 0x100000,               // 20 LivingWorld B-Cell envelope load/accrete trace
     LOG_FILTER_GRID_ADD           = 0x200000,               // 21 object added to a grid cell ("X enters grid[x,y]") - high-volume, mostly creatures
     LOG_FILTER_DB_SCRIPTS         = 0x400000,               // 22 db_scripts command processing trace (execution, not errors)
+    LOG_FILTER_DECK_MINIONS       = 0x800000,               // 23 minions drawn across a deck boundary: board, step ashore, reconcile
 };
 
-#define LOG_FILTER_COUNT            23
+#define LOG_FILTER_COUNT            24
 
 /**
  * @brief Configuration data for individual log filters
@@ -132,6 +135,19 @@ enum Color
 const int Color_count = int(WHITE) + 1; /**< Total number of available colors **/
 
 /**
+ * @brief Severity of a line, and the index into the configured colour table
+ */
+enum LogType
+{
+    LogNormal = 0,
+    LogDetails,
+    LogDebug,
+    LogError
+};
+
+const int LogType_count = int(LogError) + 1; /**< Size of the colour table */
+
+/**
  * @brief One formatted console line handed to the off-thread writer
  *
  * Producers format text (time prefix + body, WITHOUT the trailing newline) and
@@ -142,11 +158,12 @@ struct ConsoleLogRecord
 {
     std::string text; /**< Formatted line WITHOUT the trailing newline; the writer appends '\n' after ResetColor */
     Color color; /**< Color to apply when applyColor is set */
+    LogType type; /**< Severity, kept alongside the colour so the full-screen console can theme independently of the configured palette */
     bool applyColor; /**< Whether to wrap the write in SetColor/ResetColor */
     bool toStdout; /**< true => stdout, false => stderr */
     bool isRaw; /**< Raw passthrough: write text verbatim with NO color and NO appended newline (used for progress-bar redraws, which carry their own '\r'/'\n' and must not be reformatted) */
 
-    ConsoleLogRecord() : color(WHITE), applyColor(false), toStdout(true), isRaw(false) {}
+    ConsoleLogRecord() : color(WHITE), type(LogNormal), applyColor(false), toStdout(true), isRaw(false) {}
 };
 
 /**
@@ -454,13 +471,9 @@ class Log : public MaNGOS::Singleton<Log>
          *        only opened when the flag is set, so this is the single source
          *        of truth and is off by default even on legacy configs.
          *
-         *        WorldSocket.cpp (the ACE-removal campaign's Stage 2 CP3) was
-         *        the original caller of this and of outWorldPacketDump()
-         *        below; deleting it orphaned both for one checkpoint. Re-homed
-         *        game-side (not into proto, which must stay game-agnostic and
-         *        no longer resolves opcode names) at Stage 2 CP5+1:
-         *        WorldGateway::Deliver for incoming, WorldSession::SendPacket
-         *        for outgoing.
+         *        Hooked into WorldGateway::Deliver (incoming) and
+         *        WorldSession::SendPacket (outgoing) -- not into proto, which
+         *        must stay game-agnostic and does not resolve opcode names.
          * @return bool
          */
         bool IsPacketLoggingEnabled() const { return worldLogfile != NULL; }
@@ -524,12 +537,12 @@ class Log : public MaNGOS::Singleton<Log>
          *        color and whether color applies.
          *
          * @param toStdout true => stdout, false => stderr
-         * @param color
+         * @param type severity; selects the colour from m_colors
          * @param applyColor
          * @param fmt
          * @param ap
          */
-        void ConsoleEmit(bool toStdout, Color color, bool applyColor, const char* fmt, va_list* ap);
+        void ConsoleEmit(bool toStdout, LogType type, bool applyColor, const char* fmt, va_list* ap);
 
         /// Emit a blank console line (time prefix + newline) via the writer / fallback.
         void ConsoleEmitBlank(bool toStdout);

@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,14 +17,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <set>
 #include "Opcodes.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -32,7 +34,7 @@
 #include "ObjectGuid.h"
 #include "Group.h"
 #include "Formulas.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "BattleGround/BattleGround.h"
 #include "MapManager.h"
 #include "MapPersistentStateMgr.h"
@@ -95,8 +97,8 @@ void Group::UpdateLooterGuid(WorldObject* pSource, bool ifneed)
         if (ifneed)
         {
             // not update if only update if need and ok
-            Player* looter = sObjectAccessor.FindPlayer(guid_itr->guid);
-            if (looter && looter->IsWithinDist(pSource, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
+            Player* looter = sPlayerRegistry.Find(guid_itr->guid);
+            if (looter && looter->Where().WithinDist(pSource->Where(), sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
             {
                 return;
             }
@@ -109,9 +111,9 @@ void Group::UpdateLooterGuid(WorldObject* pSource, bool ifneed)
     {
         for (member_citerator itr = guid_itr; itr != m_memberSlots.end(); ++itr)
         {
-            if (Player* pl = sObjectAccessor.FindPlayer(itr->guid))
+            if (Player* pl = sPlayerRegistry.Find(itr->guid))
             {
-                if (pl->IsWithinDist(pSource, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
+                if (pl->Where().WithinDist(pSource->Where(), sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
                 {
                     bool refresh = pl->GetLootGuid() == pSource->GetObjectGuid();
 
@@ -132,9 +134,9 @@ void Group::UpdateLooterGuid(WorldObject* pSource, bool ifneed)
     // search from start
     for (member_citerator itr = m_memberSlots.begin(); itr != guid_itr; ++itr)
     {
-        if (Player* pl = sObjectAccessor.FindPlayer(itr->guid))
+        if (Player* pl = sPlayerRegistry.Find(itr->guid))
         {
-            if (pl->IsWithinDist(pSource, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
+            if (pl->Where().WithinDist(pSource->Where(), sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
             {
                 bool refresh = pl->GetLootGuid() == pSource->GetObjectGuid();
 
@@ -344,7 +346,7 @@ void Group::ResetInstances(InstanceResetMethod method, bool isRaid, Player* Send
         // Store maps in which are offline members for instance reset check.
         for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
         {
-            if (!sObjectAccessor.FindPlayer(itr->guid))
+            if (!sPlayerRegistry.Find(itr->guid))
             {
                 mapsWithOfflinePlayer.insert(itr->lastMap); // add last map from offline player
             }

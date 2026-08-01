@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -31,63 +32,63 @@
 
 class RNGen
 {
-public:
-    RNGen()
-    {
-        std::random_device rd;
-        gen_.seed(rd());
-    }
+    public:
+        RNGen()
+        {
+            std::random_device rd;
+            gen_.seed(rd());
+        }
 
-    int32 rand_i(int32 min, int32 max)
-    {
-        std::uniform_int_distribution<int32> dist{min, max};
-        return dist(gen_);
-    }
+        int32 rand_i(int32 min, int32 max)
+        {
+            std::uniform_int_distribution<int32> dist{min, max};
+            return dist(gen_);
+        }
 
-    uint32 rand_u(uint32 min, uint32 max)
-    {
-        std::uniform_int_distribution<uint32> dist{min, max};
-        return dist(gen_);
-    }
+        uint32 rand_u(uint32 min, uint32 max)
+        {
+            std::uniform_int_distribution<uint32> dist{min, max};
+            return dist(gen_);
+        }
 
-    uint32 rand()
-    {
-        std::uniform_int_distribution<uint32> dist;
-        return dist(gen_);
-    }
+        uint32 rand()
+        {
+            std::uniform_int_distribution<uint32> dist;
+            return dist(gen_);
+        }
 
-    float rand_f(float min, float max)
-    {
-        std::uniform_real_distribution<float> dist{min, max};
-        return dist(gen_);
-    }
+        float rand_f(float min, float max)
+        {
+            std::uniform_real_distribution<float> dist{min, max};
+            return dist(gen_);
+        }
 
-    double rand_d(double min, double max)
-    {
-        std::uniform_real_distribution<double> dist{min, max};
-        return dist(gen_);
-    }
+        double rand_d(double min, double max)
+        {
+            std::uniform_real_distribution<double> dist{min, max};
+            return dist(gen_);
+        }
 
-private:
-    std::mt19937 gen_;
+    private:
+        std::mt19937 gen_;
 };
 
 /**
  * @brief Per-thread access to an RNGen.
  *
- * std::mt19937 is not thread-safe, so every thread gets its own generator
- * (each seeded independently from std::random_device). A genuine
- * thread_local needs no mutex on the access path -- and these are called
- * from the world and map-update threads on every roll.
+ * std::mt19937 is not thread-safe, so every thread gets its own generator (each
+ * seeded independently from std::random_device). A genuine thread_local needs no
+ * mutex on the access path — and these are called from the world and map-update
+ * threads on every roll.
  */
 class RNG
 {
-public:
-    static RNGen* instance()
-    {
-        thread_local RNGen generator;
-        return &generator;
-    }
+    public:
+        static RNGen* instance()
+        {
+            thread_local RNGen generator;
+            return &generator;
+        }
 };
 
 #endif

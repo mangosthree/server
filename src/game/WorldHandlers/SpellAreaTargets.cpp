@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -43,6 +44,8 @@
  * @see SpellMgr for spell management
  */
 
+#include <vector>
+#include <queue>
 #include "Spell.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -62,12 +65,10 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
 #include "LootMgr.h"
-#include "VMapFactory.h"
 #include "BattleGround/BattleGround.h"
 #include "Util.h"
 #include "Chat.h"
@@ -173,7 +174,7 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
             if (Target && (raid || subgroup == Target->GetSubGroup())
                 && !m_caster->IsHostileTo(Target))
             {
-                if ((Target == center || center->IsWithinDistInMap(Target, radius)) &&
+                if ((Target == center || InReach(*center, *Target, radius)) &&
                         (withcaster || Target != m_caster))
                 {
                     targetUnitMap.push_back(Target);
@@ -181,7 +182,7 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
 
                 if (withPets)
                     if (Pet* pet = Target->GetPet())
-                        if ((pet == center || center->IsWithinDistInMap(pet, radius)) &&
+                        if ((pet == center || InReach(*center, *pet, radius)) &&
                                 (withcaster || pet != m_caster))
                         {
                             targetUnitMap.push_back(pet);
@@ -192,7 +193,7 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
     else
     {
         Unit* ownerOrSelf = pMember ? pMember : member->GetCharmerOrOwnerOrSelf();
-        if ((ownerOrSelf == center || center->IsWithinDistInMap(ownerOrSelf, radius)) &&
+        if ((ownerOrSelf == center || InReach(*center, *ownerOrSelf, radius)) &&
                 (withcaster || ownerOrSelf != m_caster))
         {
             targetUnitMap.push_back(ownerOrSelf);
@@ -202,7 +203,7 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
         {
             if (Pet* pet = ownerOrSelf->GetPet())
             {
-                if ((pet == center || center->IsWithinDistInMap(pet, radius)) &&
+                if ((pet == center || InReach(*center, *pet, radius)) &&
                         (withcaster || pet != m_caster))
                 {
                     targetUnitMap.push_back(pet);

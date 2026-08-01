@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,16 +17,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <sstream>
 #include "Corpse.h"
 #include "Player.h"
-#include "ObjectAccessor.h"
+#include "CorpseManager.h"
 #include "ObjectGuid.h"
 #include "Database/DatabaseEnv.h"
 #include "World.h"
@@ -67,7 +70,7 @@ void Corpse::AddToWorld()
     ///- Register the corpse for guid lookup
     if (!IsInWorld())
     {
-        sObjectAccessor.AddObject(this);
+        sCorpseManager.AddObject(this);
     }
 
     Object::AddToWorld();
@@ -81,7 +84,7 @@ void Corpse::RemoveFromWorld()
     ///- Remove the corpse from the accessor
     if (IsInWorld())
     {
-        sObjectAccessor.RemoveObject(this);
+        sCorpseManager.RemoveObject(this);
     }
 
     Object::RemoveFromWorld();
@@ -111,23 +114,23 @@ bool Corpse::Create(uint32 guidlow, Player* owner)
     MANGOS_ASSERT(owner);
 
     WorldObject::_Create(guidlow, HIGHGUID_CORPSE, owner->GetPhaseMask());
-    Relocate(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ(), owner->GetOrientation());
+    Place().MoveTo(owner->Where().X(), owner->Where().Y(), owner->Where().Z(), owner->Where().Facing());
 
     // we need to assign owner's map for corpse
     // in other way we will get a crash in Corpse::SaveToDB()
     SetMap(owner->GetMap());
 
-    if (!IsPositionValid())
+    if (!IsPlaceable(*this))
     {
         sLog.outError("Corpse (guidlow %d, owner %s) not created. Suggested coordinates isn't valid (X: %f Y: %f)",
-                      guidlow, owner->GetName(), owner->GetPositionX(), owner->GetPositionY());
+                      guidlow, owner->GetName(), owner->Where().X(), owner->Where().Y());
         return false;
     }
 
     SetObjectScale(DEFAULT_OBJECT_SCALE);
     SetGuidValue(CORPSE_FIELD_OWNER, owner->GetObjectGuid());
 
-    m_grid = MaNGOS::ComputeGridPair(GetPositionX(), GetPositionY());
+    m_grid = MaNGOS::ComputeGridPair(Where().X(), Where().Y());
 
     return true;
 }
@@ -148,10 +151,10 @@ void Corpse::SaveToDB()
     ss  << "INSERT INTO `corpse` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`map`,`time`,`corpse_type`,`instance`,`phaseMask`) VALUES ("
         << GetGUIDLow() << ", "
         << GetOwnerGuid().GetCounter() << ", "
-        << GetPositionX() << ", "
-        << GetPositionY() << ", "
-        << GetPositionZ() << ", "
-        << GetOrientation() << ", "
+        << Where().X() << ", "
+        << Where().Y() << ", "
+        << Where().Z() << ", "
+        << Where().Facing() << ", "
         << GetMapId() << ", "
         << uint64(m_time) << ", "
         << uint32(GetType()) << ", "
@@ -294,16 +297,16 @@ bool Corpse::LoadFromDB(uint32 lowguid, Field* fields)
     SetLocationInstanceId(instanceid);
     SetLocationMapId(mapid);
     SetPhaseMask(phaseMask, false);
-    Relocate(positionX, positionY, positionZ, orientation);
+    Place().MoveTo(positionX, positionY, positionZ, orientation);
 
-    if (!IsPositionValid())
+    if (!IsPlaceable(*this))
     {
         sLog.outError("%s Owner %s not created. Suggested coordinates isn't valid (X: %f Y: %f)",
-                      GetGuidStr().c_str(), GetOwnerGuid().GetString().c_str(), GetPositionX(), GetPositionY());
+                      GetGuidStr().c_str(), GetOwnerGuid().GetString().c_str(), Where().X(), Where().Y());
         return false;
     }
 
-    m_grid = MaNGOS::ComputeGridPair(GetPositionX(), GetPositionY());
+    m_grid = MaNGOS::ComputeGridPair(Where().X(), Where().Y());
 
     return true;
 }
@@ -318,7 +321,7 @@ bool Corpse::LoadFromDB(uint32 lowguid, Field* fields)
  */
 bool Corpse::IsVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
 {
-    return IsInWorld() && u->IsInWorld() && IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
+    return IsInWorld() && u->IsInWorld() && SeenWithin(*this, *viewPoint, GetMap()->GetVisibilityDistance() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
 }
 
 /**

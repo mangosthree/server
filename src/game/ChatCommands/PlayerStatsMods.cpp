@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,13 +17,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Common/Locales.h"
+#include <sstream>
+#include <string>
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "Language.h"
@@ -33,6 +37,27 @@
  * @file PlayerStatsMods.cpp
  * @brief Cohesion split of PlayerCommands.cpp -- player stat/property modify GM commands: HP/mana/energy/rage/runic/holy-power, speed/swim/fly/scale, mount, money, drunk, reputation, gender and currency. Same ChatHandler class; no behaviour change. CMake file(GLOB) picks this file up automatically; Chat.h is unchanged.
  */
+
+// Gold/silver/copper is a game concept, so it stays out of shared; this file is
+// the only consumer.
+static std::string MoneyToString(uint64 money)
+{
+    uint32 gold = money / 10000;
+    uint32 silv = (money % 10000) / 100;
+    uint32 copp = (money % 10000) % 100;
+    std::stringstream ss;
+    if (gold)
+    {
+        ss << gold << "g";
+    }
+    if (silv || gold)
+    {
+        ss << silv << "s";
+    }
+    ss << copp << "c";
+
+    return ss.str();
+}
 
 static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
 {

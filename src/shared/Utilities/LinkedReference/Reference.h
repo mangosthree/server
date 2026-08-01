@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -25,21 +26,18 @@
 #ifndef MANGOS_H_REFERENCE
 #define MANGOS_H_REFERENCE
 
+#include <cassert>
 #include "Utilities/LinkedList.h"
 
 //=====================================================
 
 template<class TO, class FROM>
-/**
- * @brief
- *
- */
 class Reference : public LinkedListElement
 {
     private:
 
-        TO* iRefTo; /**< TODO */
-        FROM* iRefFrom; /**< TODO */
+        TO* iRefTo;
+        FROM* iRefFrom;
 
     protected:
 
@@ -63,19 +61,11 @@ class Reference : public LinkedListElement
 
     public:
 
-        /**
-         * @brief
-         *
-         */
         Reference()
             : iRefTo(NULL), iRefFrom(NULL)
         {
         }
 
-        /**
-         * @brief
-         *
-         */
         virtual ~Reference() {}
 
         /**
@@ -129,84 +119,24 @@ class Reference : public LinkedListElement
             iRefTo = NULL;
         }
 
-        /**
-         * @brief
-         *
-         * @return bool
-         */
         bool isValid() const                                // Only check the iRefTo
         {
             return iRefTo != NULL;
         }
 
-        /**
-         * @brief
-         *
-         * @return Reference<TO, FROM>
-         */
         Reference<TO, FROM>*       next()       { return((Reference<TO, FROM>*) LinkedListElement::next()); }
-        /**
-         * @brief
-         *
-         * @return const Reference<TO, FROM>
-         */
         Reference<TO, FROM> const* next() const { return((Reference<TO, FROM> const*) LinkedListElement::next()); }
-        /**
-         * @brief
-         *
-         * @return Reference<TO, FROM>
-         */
         Reference<TO, FROM>*       prev()       { return((Reference<TO, FROM>*) LinkedListElement::prev()); }
-        /**
-         * @brief
-         *
-         * @return const Reference<TO, FROM>
-         */
         Reference<TO, FROM> const* prev() const { return((Reference<TO, FROM> const*) LinkedListElement::prev()); }
 
-        /**
-         * @brief
-         *
-         * @return Reference<TO, FROM>
-         */
         Reference<TO, FROM>*       nocheck_next()       { return((Reference<TO, FROM>*) LinkedListElement::nocheck_next()); }
-        /**
-         * @brief
-         *
-         * @return const Reference<TO, FROM>
-         */
         Reference<TO, FROM> const* nocheck_next() const { return((Reference<TO, FROM> const*) LinkedListElement::nocheck_next()); }
-        /**
-         * @brief
-         *
-         * @return Reference<TO, FROM>
-         */
         Reference<TO, FROM>*       nocheck_prev()       { return((Reference<TO, FROM>*) LinkedListElement::nocheck_prev()); }
-        /**
-         * @brief
-         *
-         * @return const Reference<TO, FROM>
-         */
         Reference<TO, FROM> const* nocheck_prev() const { return((Reference<TO, FROM> const*) LinkedListElement::nocheck_prev()); }
 
-        /**
-         * @brief
-         *
-         * @return TO *operator ->
-         */
         TO* operator->() const { return iRefTo; }
-        /**
-         * @brief
-         *
-         * @return TO
-         */
         TO* getTarget() const { return iRefTo; }
 
-        /**
-         * @brief
-         *
-         * @return FROM
-         */
         FROM* getSource() const { return iRefFrom; }
 };
 

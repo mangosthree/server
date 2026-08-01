@@ -1,11 +1,13 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
 # MaNGOS is a full featured server for World of Warcraft, supporting
 # the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
 #
-# Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+# Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
 #
-# This program is free software; you can redistribute it and/or modify
+# This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -14,8 +16,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #AH Bot group
 file(GLOB SRC_GRP_AHBOT AuctionHouseBot/*.cpp AuctionHouseBot/*.h)
@@ -65,10 +66,6 @@ source_group("Time" FILES ${SRC_GRP_TIME})
 file(GLOB SRC_GRP_TOOL Tools/*.cpp Tools/*.h)
 source_group("Tool" FILES ${SRC_GRP_TOOL})
 
-#VMap group
-file(GLOB SRC_GRP_VMAPS vmap/*.cpp vmap/*.h)
-source_group("vmaps" FILES ${SRC_GRP_VMAPS})
-
 #Warden group
 file(GLOB SRC_GRP_WARDEN Warden/*.cpp Warden/*.h)
 source_group("Warden" FILES ${SRC_GRP_WARDEN})
@@ -94,6 +91,17 @@ if(SCRIPT_LIB_ELUNA)
         ${CMAKE_SOURCE_DIR}/src/modules/Eluna/methods/Mangos/*.h
     )
     source_group("Eluna" FILES ${SRC_GRP_ELUNA})
+
+    # Eluna is an untouched submodule; see cmake/SubmoduleCompat.cmake.
+    #
+    # Two different scopes, deliberately. The forced include goes to Eluna's own
+    # sources only, so the shim is never injected ahead of the core sources. The
+    # include DIRECTORY has to be visible to all of `game`, because core files
+    # include Eluna headers and those headers open with #include "Common.h" -- the
+    # include has to resolve wherever it is pulled in. It is passive: nothing in the
+    # core names Common.h, so nothing gets it.
+    mangos_submodule_compat_sources("${SRC_GRP_ELUNA}"
+        "${CMAKE_SOURCE_DIR}/src/shared/Compat/eluna")
 endif()
 
 if(PLAYERBOTS)
@@ -191,41 +199,6 @@ endif()
 
 configure_file(AuctionHouseBot/ahbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/AuctionHouseBot/ahbot.conf.dist)
 
-if(BUILD_TOOLS)
-add_library(vmap2 STATIC
-    vmap/BIH.cpp
-    vmap/VMapManager2.cpp
-    vmap/MapTree.cpp
-    vmap/TileAssembler.cpp
-    vmap/WorldModel.cpp
-    vmap/ModelInstance.cpp
-    vmap/BIH.h
-    vmap/VMapManager2.h
-    vmap/MapTree.h
-    vmap/TileAssembler.h
-    vmap/WorldModel.h
-    vmap/ModelInstance.h
-)
-
-target_include_directories(vmap2
-    PUBLIC
-        vmap
-        WorldHandlers
-)
-
-target_compile_definitions(vmap2
-    PUBLIC
-        MMAP_GENERATOR
-        NO_CORE_FUNCS
-)
-target_link_libraries(vmap2
-    PUBLIC
-        shared
-        g3dlite
-        RecastNavigation::Detour
-)
-endif()
-
 add_library(game STATIC
     ${SRC_GRP_AHBOT}
     ${SRC_GRP_BATTLEGROUND}
@@ -239,13 +212,19 @@ add_library(game STATIC
     ${SRC_GRP_SERVER}
     ${SRC_GRP_TIME}
     ${SRC_GRP_TOOL}
-    ${SRC_GRP_VMAPS}
     ${SRC_GRP_WARDEN}
     ${SRC_GRP_WARDEN_MODULES}
     ${SRC_GRP_WORLD_HANDLERS}
     $<$<BOOL:${SCRIPT_LIB_ELUNA}>:${SRC_GRP_ELUNA}>
     $<$<BOOL:${PLAYERBOTS}>:${SRC_GRP_BOTS}>
 )
+
+# Eluna headers are included by core files and open with #include "Common.h";
+# see the note above. Passive -- nothing in the core names that header.
+if(SCRIPT_LIB_ELUNA)
+    target_include_directories(game
+        PRIVATE "${CMAKE_SOURCE_DIR}/src/shared/Compat/eluna")
+endif()
 
 target_include_directories(game
     PUBLIC
@@ -261,7 +240,6 @@ target_include_directories(game
         Server
         Time
         Tools
-        vmap
         Warden
         Warden/Modules
         WorldHandlers
@@ -280,6 +258,9 @@ target_include_directories(game
 target_compile_definitions(game
     PUBLIC
         $<$<BOOL:${SOAP}>:ENABLE_SOAP>
+        # The old coordinate-owning spatial API. SD3 no longer needs it -- it calls
+        # Where()/Place() -- so this is Eluna's alone. See Object/ScriptApiCompat.inl.
+        $<$<OR:$<BOOL:${SCRIPT_LIB_ELUNA}>,$<BOOL:${PLAYERBOTS}>>:MANGOS_SCRIPT_COMPAT>
         $<$<BOOL:${SCRIPT_LIB_SD3}>:ENABLE_SD3>
         $<$<BOOL:${PLAYERBOTS}>:ENABLE_PLAYERBOTS>
         $<$<BOOL:${SCRIPT_LIB_ELUNA}>:ENABLE_ELUNA ELUNA_EXPANSION=3 ELUNA_MANGOS>
@@ -287,6 +268,10 @@ target_compile_definitions(game
 
 target_link_libraries(game
     PUBLIC
+        # The terrain engine: geometry and baked tiles, and no knowledge of the
+        # world, the database or any DBC.
+        terrain
+        geometry
         shared
         # The world protocol. The dependency runs one way only: game links proto,
         # proto never links game. That is what keeps the seam from silently
@@ -294,7 +279,6 @@ target_link_libraries(game
         proto
         RecastNavigation::Detour
         ZLIB::ZLIB
-        g3dlite
         $<$<BOOL:${SCRIPT_LIB_SD3}>:mangosscript>
         $<$<BOOL:${SCRIPT_LIB_ELUNA}>:lualib>
     PRIVATE

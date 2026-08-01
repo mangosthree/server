@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,13 +17,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <set>
 #include "DBCEnums.h"
 #include "DBCStores.h"
 #include "DBCStructure.h"
@@ -30,12 +32,11 @@
 #include "LFGMgr.h"
 #include "Object.h"
 #include "Player.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "ObjectMgr.h"
 #include "SharedDefines.h"
 #include "WorldSession.h"
 
-INSTANTIATE_SINGLETON_1(LFGMgr);
 
 LFGMgr::LFGMgr()
 {
@@ -631,8 +632,8 @@ bool LFGMgr::MatchesAreOfSameTeam(LFGPlayers* groupOne, LFGPlayers* groupTwo)
     roleMap::iterator it2 = groupTwo->currentRoles.begin();
 
     // now we find the players from the maps
-    Player* pPlayer1 = sObjectAccessor.FindPlayer(it1->first);
-    Player* pPlayer2 = sObjectAccessor.FindPlayer(it2->first);
+    Player* pPlayer1 = sPlayerRegistry.Find(it1->first);
+    Player* pPlayer2 = sPlayerRegistry.Find(it2->first);
 
     if (!pPlayer1 || !pPlayer2)
     {
@@ -699,7 +700,7 @@ void LFGMgr::SendQueueStatus()
         {
             for (roleMap::iterator rItr = queueInfo->currentRoles.begin(); rItr != queueInfo->currentRoles.end(); ++rItr)
             {
-                if (Player* pPlayer = sObjectAccessor.FindPlayer(rItr->first))
+                if (Player* pPlayer = sPlayerRegistry.Find(rItr->first))
                 {
                     uint32 dungeonId = *queueInfo->dungeonList.begin();
 

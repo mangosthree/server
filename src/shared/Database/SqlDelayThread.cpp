@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -32,9 +33,11 @@
  * improving server responsiveness.
  */
 
+#include "Threading/Threading.h"
 #include "Database/SqlDelayThread.h"
 #include "Database/SqlOperations.h"
 #include "DatabaseEnv.h"
+#include "Timer.h"
 
 /**
  * @brief Constructor for SqlDelayThread
@@ -74,14 +77,15 @@ SqlDelayThread::~SqlDelayThread()
  * database's configured ping interval.
  *
  * @note This method is called when the thread starts. It should not
- * be called directly - use MaNGOS::Thread::start() instead.
+ * be called directly - use MaNGOS::Thread::Start() instead.
  */
 void SqlDelayThread::run()
 {
-#ifndef DO_POSTGRESQL
-    // Initialize MySQL thread-local data for this thread
-    mysql_thread_init();
-#endif
+    // Register this thread with the client library for as long as it runs. RAII, not a
+    // matching pair of calls: the end hook must run even if the loop leaves by an
+    // unexpected path, because a thread that skips it corrupts MySQL's per-thread state
+    // instead of failing cleanly.
+    DbThreadGuard dbThread(m_dbEngine);
 
     const uint32 loopSleepms = 10; /**< Sleep interval between processing cycles in milliseconds */
 
@@ -96,7 +100,15 @@ void SqlDelayThread::run()
         // empty the queue before exiting
         MaNGOS::Thread::Sleep(loopSleepms);
 
+        // A delay thread that stalls looks exactly like a server that has stopped
+        // saving, with nothing in the log to say so. Time it and say when it does.
+        const uint32 start = getMSTime();
         ProcessRequests();
+        const uint32 elapsed = getMSTimeDiff(start, getMSTime());
+        if (elapsed > 5000)
+        {
+            sLog.outError("SqlDelayThread: ProcessRequests took %u ms", elapsed);
+        }
 
         // Send periodic ping to keep connection alive
         if ((loopCounter++) >= pingEveryLoop)
@@ -105,12 +117,6 @@ void SqlDelayThread::run()
             m_dbEngine->Ping();
         }
     }
-
-#ifndef DO_POSTGRESQL
-    // Clean up MySQL thread-local data
-    mysql_thread_end();
-#endif
-
 }
 
 /**

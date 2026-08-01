@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,14 +17,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/Errors.h"
+#include <algorithm>
+#include <string>
 #include "Pet.h"
+#include "TransportMap.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "WorldPacket.h"
@@ -160,8 +165,17 @@ void Pet::Update(uint32 update_diff, uint32 diff)
         {
             // unsummon pet that lost owner
             Unit* owner = GetOwner();
+            // A minion whose master is on ANOTHER MAP is mid-crossing, not off its leash.
+            // Stepping on or off a deck leaves them in different frames for the one tick
+            // before TransportMap's reconciler draws it across, and InReach fails closed on
+            // a cross-frame question. Unsummoning on that answer is how a pet vanished the
+            // instant its master went ashore.
+            const bool crossingDeck = owner && !Where().ShareFrame(owner->Where()) &&
+                                      ((FindMap() && FindMap()->AsTransport()) ||
+                                       (owner->FindMap() && owner->FindMap()->AsTransport()));
+
             if (!owner ||
-                (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && (owner->GetCharmGuid() && (owner->GetCharmGuid() != GetObjectGuid()))) ||
+                (!crossingDeck && !InReach(*this, *owner, GetMap()->GetVisibilityDistance()) && (owner->GetCharmGuid() && (owner->GetCharmGuid() != GetObjectGuid()))) ||
                 (isControlled() && !owner->GetPetGuid()))
             {
                 Unsummon(PET_SAVE_REAGENTS);
@@ -464,7 +478,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
         return false;
     }
 
-    CreatureCreatePos pos(creature, creature->GetOrientation());
+    CreatureCreatePos pos(creature, creature->Where().Facing());
 
     uint32 guid = creature->GetMap()->GenerateLocalLowGuid(HIGHGUID_PET);
 
@@ -953,7 +967,7 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* ci
 
     cPos.SelectFinalPoint(this);
 
-    if (!cPos.Relocate(this))
+    if (!cPos.PlaceOn(this))
     {
         return false;
     }
@@ -1182,10 +1196,10 @@ void Pet::SetStayPosition(bool stay)
 {
     if (stay)
     {
-        m_stayPosX = GetPositionX();
-        m_stayPosY = GetPositionY();
-        m_stayPosZ = GetPositionZ();
-        m_stayPosO = GetOrientation();
+        m_stayPosX = Where().X();
+        m_stayPosY = Where().Y();
+        m_stayPosZ = Where().Z();
+        m_stayPosO = Where().Facing();
     }
     else
     {

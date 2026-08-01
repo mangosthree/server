@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -111,8 +112,13 @@ struct SendChannel {
     ConnCtx*   ctx = nullptr;
     SendQueue  out;                        // coalescing buffer + byte backpressure
 
+    // A close asked for by the session, honoured only once its bytes are out. The
+    // flag lives on the CHANNEL rather than the ctx because the channel is what a
+    // world thread holds, and it outlives the ctx by design.
+    bool closeRequested = false;
+
     void post(const uint8_t* data, size_t len);  // append + kick a write while armed
-    void requestClose();                   // close the socket -> triggers teardown
+    void requestClose();                   // drain, then close
     void disarm();                         // detach from the ctx, forever
 };
 
@@ -131,6 +137,19 @@ struct ConnCtx {
     // teardown idempotent across the recv/send/close paths that can all race to it.
     std::atomic<long> refs{1};
     std::atomic<bool> dead{false};
+
+    // Set once the FIN has been sent, so the half-close is not repeated.
+    bool sendShutdown = false;
+
+    // True while a worker is inside this connection's session callbacks.
+    //
+    // A session closes by setting closed() and calling the closer FROM INSIDE onData,
+    // before it has returned the bytes that explain the disconnect. Acting on the
+    // request there would find an empty queue and shut the send side down a moment
+    // before those bytes are queued -- which is precisely the data loss this is meant
+    // to prevent. So the request is only recorded while dispatching; the dispatcher
+    // honours it once the response is in the queue.
+    std::atomic<bool> dispatching{false};
 
     // Serialises this connection's session callbacks. IOCP places no ordering on the
     // completions for one handle, so without this a recv-data completion (onData) and
@@ -155,6 +174,15 @@ struct ConnCtx {
     IocpServer* owner{nullptr};
 
     explicit ConnCtx(const SessionFactory& factory) : session(factory()) {}
+
+    // True once the session's outbound bytes have all reached the socket, so a
+    // requested close can be honoured. Checked wherever a send or recv completes.
+    bool drained() const;
+
+    // Closes if a close was asked for and nothing is left to send. Returns true when
+    // it closed. The half-close is a shutdown(SD_SEND), not a closesocket: the peer
+    // gets a FIN and reads the tail, instead of losing it to a reset.
+    bool closeIfDrained();
 
     void addRef()  { refs.fetch_add(1, std::memory_order_relaxed); }
     // Out of line: the last release routes through owner->removeAndDelete(), which needs

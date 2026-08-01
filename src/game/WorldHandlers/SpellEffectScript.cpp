@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,14 +17,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include <iterator>
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include "Utilities/MathDefines.h"
+#include <cstdlib>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -40,7 +45,6 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "SharedDefines.h"
 #include "Pet.h"
 #include "GameObject.h"
@@ -54,7 +58,6 @@
 #include "BattleGround/BattleGroundWS.h"
 #include "Language.h"
 #include "SocialMgr.h"
-#include "VMapFactory.h"
 #include "Util.h"
 #include "TemporarySummon.h"
 #include "ScriptMgr.h"
@@ -64,7 +67,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Vehicle.h"
-#include "G3D/Vector3.h"
+#include "Geometry/Vector3.h"
 #include "LootMgr.h"
 #include <random>
 
@@ -419,7 +422,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
                     // Two separate mounts depending on area id (allows use both in and out of specific instance)
-                    if (unitTarget->GetAreaId() == 3428)
+                    if (unitTarget->GetTerrain()->GetAreaId(unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z()) == 3428)
                     {
                         unitTarget->CastSpell(unitTarget, 25863, false);
                     }
@@ -440,10 +443,10 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     // Spells 27690, 27691, 27692, 27693 are missing from DBC
                     // So we need to summon creature 16119 manually
                     float x, y, z;
-                    float angle = unitTarget->GetOrientation();
+                    float angle = unitTarget->Where().Facing();
                     for (uint8 i = 0; i < 4; ++i)
                     {
-                        unitTarget->GetNearPoint(unitTarget, x, y, z, unitTarget->GetObjectBoundingRadius(), INTERACTION_DISTANCE, angle + i * M_PI_F / 2);
+                        FindFreeSpotNear(*unitTarget, unitTarget, x, y, z, unitTarget->Where().Extent(), INTERACTION_DISTANCE, angle + i * M_PI_F / 2);
                         unitTarget->SummonCreature(16119, x, y, z, angle, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 10 * MINUTE * IN_MILLISECONDS);
                     }
                     return;
@@ -496,7 +499,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                         return;
                     }
 
-                    m_caster->SummonCreature(16474, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), 0.0f, TEMPSPAWN_TIMED_DESPAWN, 30000);
+                    m_caster->SummonCreature(16474, unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), 0.0f, TEMPSPAWN_TIMED_DESPAWN, 30000);
                     return;
                 }
                 case 28859:                                 // Cleansing Flames
@@ -736,7 +739,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     float x, y, z;
                     for (uint8 i = 0; i < 4; ++i)
                     {
-                        m_caster->GetNearPoint(m_caster, x, y, z, 0.0f, INTERACTION_DISTANCE, M_PI_F * .5f * i + M_PI_F * .25f);
+                        FindFreeSpotNear(*m_caster, m_caster, x, y, z, 0.0f, INTERACTION_DISTANCE, M_PI_F * .5f * i + M_PI_F * .25f);
                         m_caster->SummonCreature(21002, x, y, z, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                     }
                     return;
@@ -938,7 +941,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
 
                     unitTarget->CastSpell(m_caster, effect->CalculateSimpleValue(), true);
                     // despawn delay depends on the distance between caster and target
-                    ((Creature*)unitTarget)->ForcedDespawn(100 * unitTarget->GetDistance2d(m_caster));
+                    ((Creature*)unitTarget)->ForcedDespawn(100 * unitTarget->Where().DistanceTo(m_caster->Where(), false));
                     return;
                 }
                 case 44364:                                 // Rock Falcon Primer
@@ -980,7 +983,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                                 // trigger cast of quest complete script (see code for this spell below)
                                 pTarget->CastSpell(pTarget, 44462, true);
 
-                                pTarget->GetMotionMaster()->MovePoint(0, m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
+                                pTarget->GetMotionMaster()->MovePoint(0, m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z());
                             }
 
                             return;
@@ -1155,7 +1158,10 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                         return;
                     }
 
-                    ((Creature*)unitTarget)->SetRespawnCoord(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), unitTarget->GetOrientation());
+                    ((Creature*)unitTarget)->SetSpawn(
+                        Geometry::Vector3(unitTarget->Where().X(), unitTarget->Where().Y(),
+                                          unitTarget->Where().Z()),
+                        unitTarget->Where().Facing());
                     return;
                 }
                 case 45625:                                 // Arcane Chains: Character Force Cast
@@ -1259,7 +1265,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     // We can assume 45705-45712 are transform auras, used instead of hard coded models in the below code.
 
                     // not in map yet OR no npc flags yet (restored after LoadCreatureAddon for respawn cases)
-                    if (!m_caster->IsInMap(m_caster) || m_caster->GetUInt32Value(UNIT_NPC_FLAGS) == UNIT_NPC_FLAG_NONE)
+                    if (!m_caster->Where().ShareFrame(m_caster->Where()) || m_caster->GetUInt32Value(UNIT_NPC_FLAGS) == UNIT_NPC_FLAG_NONE)
                     {
                         display_id = Creature::ChooseDisplayId(cTemplate);
                         ((Creature*)m_caster)->LoadEquipment(((Creature*)m_caster)->GetEquipmentId());
@@ -1419,11 +1425,11 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                         return;
                     }
 
-                    if (unitTarget->GetAreaId() == 4157)
+                    if (unitTarget->GetTerrain()->GetAreaId(unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z()) == 4157)
                     {
                         unitTarget->CastSpell(unitTarget, 47324, true);
                     }
-                    else if (unitTarget->GetAreaId() == 4156)
+                    else if (unitTarget->GetTerrain()->GetAreaId(unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z()) == 4156)
                     {
                         unitTarget->CastSpell(unitTarget, 47325, true);
                     }
@@ -1921,7 +1927,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     Unit::SpellAuraHolderConstBounds bounds = m_caster->GetSpellAuraHolderBounds(52500);
                     uint32 summonedGhouls = std::distance(bounds.first, bounds.second);
 
-                    m_caster->CastSpell(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), urand(0, 2) || summonedGhouls >= 5 ? 52505 : 52490, true);
+                    m_caster->CastSpell(unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), urand(0, 2) || summonedGhouls >= 5 ? 52505 : 52490, true);
                     return;
                 }
                 case 52555:                                 // Dispel Scarlet Ghoul Credit Counter
@@ -1966,7 +1972,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                 {
                     uint32 spellId = 0;
 
-                    switch (m_caster->GetAreaId())
+                    switch (m_caster->GetTerrain()->GetAreaId(m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z()))
                     {
                         case 4385: spellId = 52954; break;  // Bittertide Lake
                         case 4290: spellId = 52958; break;  // River's Heart
@@ -2138,7 +2144,7 @@ void Spell::EffectScriptEffect(SpellEffectEntry const* effect)
                     }
 
                     // return from top
-                    if (((Player*)unitTarget)->GetAreaId() == 4637)
+                    if (static_cast<Player*>(unitTarget)->GetTerrain()->GetAreaId(static_cast<Player*>(unitTarget)->Where().X(), static_cast<Player*>(unitTarget)->Where().Y(), static_cast<Player*>(unitTarget)->Where().Z()) == 4637)
                     {
                         unitTarget->CastSpell(unitTarget, 59316, true);
                     }

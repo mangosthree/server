@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,8 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
@@ -51,7 +52,12 @@
 #ifndef MANGOSSERVER_GAMEOBJECT_H
 #define MANGOSSERVER_GAMEOBJECT_H
 
-#include "Common.h"
+#include <cmath>
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <ctime>
+#include <string>
+#include <vector>
 #include "SharedDefines.h"
 #include "Object.h"
 #include "LootMgr.h"
@@ -691,6 +697,8 @@ enum CapturePointSliderValue
 
 class Unit;
 class GameObjectModel;
+#include "Geometry/Quat.h"
+
 struct GameObjectDisplayInfoEntry;
 
 // 5 sec for bobber catch
@@ -729,6 +737,18 @@ class GameObject : public WorldObject
         void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot);
         void SetWorldRotation(float qx, float qy, float qz, float qw);
         void SetTransportPathRotation(const QuaternionData& rotation);      // transforms(rotates) transport's path
+
+        /// The pose the collision body is built from. Cataclysm keeps the rotation in
+        /// m_worldRotation rather than in the object fields the earlier expansions use,
+        /// so this is the one accessor GameObjectModel asks -- it must not have to know
+        /// which expansion it is compiled for.
+        void GetQuaternion(Geometry::Quat& q) const
+        {
+            q.x = m_worldRotation.x;
+            q.y = m_worldRotation.y;
+            q.z = m_worldRotation.z;
+            q.w = m_worldRotation.w;
+        }
         int64 GetPackedWorldRotation() const { return m_packedRotation; }
 
         void SetOwnerGuid(ObjectGuid ownerGuid)
@@ -794,7 +814,7 @@ class GameObject : public WorldObject
         void SetDisplayId(uint32 modelId);
         void SetPhaseMask(uint32 newPhaseMask, bool update) override;
 
-        float GetObjectBoundingRadius() const override;     // overwrite WorldObject version
+        float ComputeBoundingRadius() const override;     // overwrite WorldObject version
 
         void Use(Unit* user);
 

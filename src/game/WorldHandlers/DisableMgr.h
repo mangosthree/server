@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2015-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2015-2026 MaNGOS <https://www.getmangos.eu>
  * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2008 MaNGOS <http://getmangos.com/>
  *
- * This program is free software; you can redistribute it and/or modify it
+ * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
+ * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,7 +20,6 @@
 #ifndef TRINITY_DISABLEMGR_H
 #define TRINITY_DISABLEMGR_H
 
-#include "VMapManager2.h"
 #include "ProgressBar.h"
 
 class Unit;
@@ -65,6 +64,17 @@ namespace DisableMgr
     void LoadDisables();
     bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit = NULL, uint8 flags = 0);
     void CheckQuestDisables();
+    // Per-map collision disables from the `disables` table. The bits used to be
+    // declared inside the vmap library and reached from here only because it happened
+    // to be linked; they are a server rule, so they are declared with the rule.
+    enum CollisionDisableFlags
+    {
+        COLLISION_DISABLE_AREAFLAG      = 0x1,
+        COLLISION_DISABLE_HEIGHT        = 0x2,
+        COLLISION_DISABLE_LOS           = 0x4,
+        COLLISION_DISABLE_LIQUIDSTATUS  = 0x8
+    };
+
     bool IsVMAPDisabledFor(uint32 entry, uint8 flags);
     bool IsPathfindingEnabled(uint32 mapId);
 }

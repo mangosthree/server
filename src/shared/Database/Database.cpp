@@ -1,12 +1,14 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,19 +17,25 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * World of Warcraft, and all World of Warcraft or Warcraft art, images,
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <functional>
+#include <mutex>
+#include <cassert>
+#include <string>
+#include "Common/TimeConstants.h"
+#include <algorithm>
+#include "Threading/Threading.h"
+#include "Utilities/Errors.h"
 #include "DatabaseEnv.h"
 #include "Config/Config.h"
 #include "Database/SqlOperations.h"
 #include "GitRevision.h"
-
-#include <cstdarg>
+#include "Utilities/Util.h"
 #include <ctime>
 #include <iostream>
 #include <fstream>
@@ -215,7 +223,7 @@ void Database::InitDelayThread()
 
     // New delay thread for delay execute
     m_threadBody = CreateDelayThread();              // will deleted at m_delayThread delete
-    m_TransStorage = new MaNGOS::ThreadLocalStore<Database::TransHelper>();
+    m_TransStorage = new DBTransHelperTSS();
     m_delayThread = new MaNGOS::Thread(m_threadBody);
 }
 
@@ -258,11 +266,14 @@ void Database::escape_string(std::string& str)
         return;
     }
 
-    char* buf = new char[str.size() * 2 + 1];
-    // we don't care what connection to use - escape string will be the same
-    m_pQueryConnections[0]->escape_string(buf, str.c_str(), str.size());
-    str = buf;
-    delete[] buf;
+    // It DOES matter which connection, and it matters that the lock is held:
+    // mysql_real_escape_string reads the connection's character set, and connection
+    // zero may be running a query on another thread at the same moment. The old
+    // comment said the choice was free -- the sharing was the problem, not the choice.
+    std::unique_ptr<char[]> buf(new char[str.size() * 2 + 1]);
+    SqlConnection::Lock guard(m_pQueryConnections[0]);
+    guard->escape_string(buf.get(), str.c_str(), str.size());
+    str = buf.get();
 }
 
 SqlConnection* Database::getQueryConnection()
@@ -319,11 +330,11 @@ bool Database::PExecuteLog(const char* format, ...)
     if (m_logSQL)
     {
         time_t curr;
-        tm local;
         time(&curr);                                        // get current time_t value
-        local = *(localtime(&curr));                        // dereference and assign
+        const std::tm local = safe_localtime(curr);
         char fName[128];
-        sprintf(fName, "%04d-%02d-%02d_logSQL.sql", local.tm_year + 1900, local.tm_mon + 1, local.tm_mday);
+        snprintf(fName, sizeof(fName), "%04d-%02d-%02d_logSQL.sql",
+                 local.tm_year + 1900, local.tm_mon + 1, local.tm_mday);
 
         FILE* log_file;
         std::string logsDir_fname = m_logsDir + fName;
@@ -459,6 +470,48 @@ bool Database::DirectPExecute(const char* format, ...)
     return DirectExecute(szQuery);
 }
 
+bool Database::AsyncQuery(std::function<void(QueryResult*)> callback, const char* sql)
+{
+    if (!sql || !m_pResultQueue)
+    {
+        return false;
+    }
+
+    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback(std::move(callback)), m_pResultQueue));
+}
+
+bool Database::AsyncPQuery(std::function<void(QueryResult*)> callback, const char* format, ...)
+{
+    if (!format)
+    {
+        return false;
+    }
+
+    va_list ap;
+    char szQuery[MAX_QUERY_LEN];
+    va_start(ap, format);
+    int res = vsnprintf(szQuery, MAX_QUERY_LEN, format, ap);
+    va_end(ap);
+
+    if (res == -1)
+    {
+        sLog.outError("SQL Query truncated (and not executed) for format: %s", format);
+        return false;
+    }
+
+    return AsyncQuery(std::move(callback), szQuery);
+}
+
+bool Database::DelayQueryHolder(std::function<void(QueryResult*, SqlQueryHolder*)> callback, SqlQueryHolder* holder)
+{
+    if (!holder || !m_pResultQueue)
+    {
+        return false;
+    }
+
+    return holder->Execute(new MaNGOS::QueryHolderCallback(std::move(callback), holder), m_threadBody, m_pResultQueue);
+}
+
 bool Database::BeginTransaction()
 {
     if (!m_pAsyncConn || !m_TransStorage)
@@ -515,6 +568,52 @@ bool Database::CommitTransactionDirect()
     delete pTrans;
 
     return true;
+}
+
+bool Database::CommitTransactionChecked()
+{
+    if (!m_pAsyncConn)
+    {
+        return false;
+    }
+
+    if (!(*m_TransStorage)->get())
+    {
+        return false;
+    }
+
+    // Async not available (startup, or -t): run it here and return the REAL result.
+    // Not CommitTransactionDirect(), which discards that bool. detach() clears the TSS
+    // slot so the next BeginTransaction() does not trip the assert in TransHelper::init().
+    if (!m_bAllowAsyncTransactions)
+    {
+        SqlTransaction* pTrans = (*m_TransStorage)->detach();
+        bool res = pTrans->Execute(m_pAsyncConn);
+        delete pTrans;
+        return res;
+    }
+
+    // If the delay thread has stopped, enqueuing a blocking transaction onto it would
+    // block this caller forever: nothing will drain the queue or fulfil the promise.
+    // Checked BEFORE the promise is built -- abandoning a stack-frame promise while a
+    // queued op still holds its address is a use-after-free, so a timeout is not an
+    // option. The residual race is closed by shutdown ordering: the world thread is torn
+    // down before the delay thread, so no world caller is here while it stops.
+    if (!m_threadBody->IsRunning())
+    {
+        SqlTransaction* t = (*m_TransStorage)->detach();
+        bool r = t->Execute(m_pAsyncConn);
+        delete t;
+        return r;
+    }
+
+    // Queued like every other write, so ordering holds, then blocked on the result. The
+    // promise and future live on THIS parked frame, which is why they outlive the op.
+    std::promise<bool> prom;
+    std::future<bool> fut = prom.get_future();
+    SqlTransaction* pTrans = (*m_TransStorage)->detach();
+    m_threadBody->Delay(new SqlTransactionResultSignal(pTrans, &prom));
+    return fut.get();
 }
 
 bool Database::RollbackTransaction()
@@ -715,9 +814,8 @@ SqlStatement Database::CreateStatement(SqlStatementID& index, const char* fmt)
         // count input parameters
         int nParams = std::count(szFmt.begin(), szFmt.end(), '?');
         // find existing or add a new record in registry
-        // std::lock_guard is unconditionally holding the mutex once
-        // constructed, so the old locked() assertion the previous guard
-        // type needed has nothing left to check.
+        // std::lock_guard is unconditionally holding the mutex once constructed,
+        // so the old ACE_Guard::locked() assertion has nothing left to check.
         LOCK_GUARD _guard(m_stmtGuard);
         PreparedStmtRegistry::const_iterator iter = m_stmtRegistry.find(szFmt);
         if (iter == m_stmtRegistry.end())

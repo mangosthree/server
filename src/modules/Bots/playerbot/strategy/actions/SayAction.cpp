@@ -97,7 +97,7 @@ bool SayAction::Execute(Event event)
 
     replaceAll(text, "<randomfaction>", IsAlliance(bot->getRace()) ? "Alliance" : "Horde");
 
-    if (bot->GetMap())
+    if (bot->FindMap())
     {
         const TerrainInfo * terrain = bot->GetMap()->GetTerrain();
         if (terrain)

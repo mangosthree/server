@@ -1318,5 +1318,3 @@ void AhBot::PurgeMailedItems()
     CharacterDatabase.PExecute(
         "DELETE FROM mail WHERE receiver = '%u'", guid);
 }
-
-INSTANTIATE_SINGLETON_1( ahbot::AhBot );

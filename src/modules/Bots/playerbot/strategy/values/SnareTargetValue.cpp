@@ -31,14 +31,7 @@ Unit* SnareTargetValue::Calculate()
         case FLEEING_MOTION_TYPE:
             return unit;
         case CHASE_MOTION_TYPE:
-            if (unit->GetTypeId() == TYPEID_PLAYER)
-            {
-                chaseTarget = static_cast<ChaseMovementGenerator<Player> const*>(unit->GetMotionMaster()->GetCurrent())->GetTarget();
-            }
-            else
-            {
-                chaseTarget = static_cast<ChaseMovementGenerator<Creature> const*>(unit->GetMotionMaster()->GetCurrent())->GetTarget();
-            }
+            chaseTarget = static_cast<TargetedMovementGenerator const*>(unit->GetMotionMaster()->GetCurrent())->GetTarget();
 
             if (!chaseTarget)
             {

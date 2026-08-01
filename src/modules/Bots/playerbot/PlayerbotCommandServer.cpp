@@ -3,8 +3,6 @@
 #include "PlayerbotAIConfig.h"
 #include "PlayerbotCommandServer.h"
 
-INSTANTIATE_SINGLETON_1(PlayerbotCommandServer);
-
 using namespace std;
 
 void PlayerbotCommandServer::Start()

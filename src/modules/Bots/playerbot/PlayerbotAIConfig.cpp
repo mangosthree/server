@@ -7,8 +7,6 @@
 
 using namespace std;
 
-INSTANTIATE_SINGLETON_1(PlayerbotAIConfig);
-
 /**
  * @brief Constructor for PlayerbotAIConfig.
  * Initializes all configuration parameters with default values.

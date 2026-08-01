@@ -661,14 +661,16 @@ bool PathFinder::BuildSwimShortcut(const Vector3& startPos, const Vector3& endPo
     }
 
 #ifdef ENABLE_PLAYERBOTS
-    // Straight-line swim shortcuts have no WMO collision test, so a bot
-    // hugging a cove wall (e.g. Darkbrake Cove, Vashj'ir) can clip through
-    // the rock and end up under the map. Reject the shortcut when the
-    // straight start->end ray is blocked and fall back to the navmesh,
+    // A straight-line swim shortcut has no collision test of its own, so a
+    // bot hugging a cove wall (e.g. Darkbrake Cove, Vashj'ir) can clip
+    // through the rock and end up under the map. Reject the shortcut when
+    // the straight start->end ray is blocked and fall back to the navmesh,
     // which clamps to valid polys instead of tunnelling through geometry.
-    // (The united-cores terrain engine has no per-model ignore filter; if
-    // dense kelp/doodads prove to block clear swim lanes, this is the spot
-    // that needs a finer-grained query.)
+    // The terrain ray tests terrain + WMO + M2 hulls with no per-model
+    // filter (the old VMAP::ModelIgnoreFlags::M2 did not survive the
+    // united-cores engine); if collidable kelp/doodads prove to block
+    // clear swim lanes, a ModelKind::Mesh skip in the terrain LoS query
+    // is the fix, not a change here.
     if (m_sourceUnit->GetTypeId() == TYPEID_PLAYER && ((Player*)m_sourceUnit)->GetPlayerbotAI())
     {
         if (!m_sourceUnit->GetMap()->IsInLineOfSight(startPos.x, startPos.y, startPos.z + 0.5f,

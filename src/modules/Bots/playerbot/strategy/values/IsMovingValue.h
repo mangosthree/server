@@ -24,14 +24,7 @@ namespace ai
             case FLEEING_MOTION_TYPE:
                 return true;
             case CHASE_MOTION_TYPE:
-                if (target->GetTypeId() == TYPEID_PLAYER)
-                {
-                    chaseTarget = static_cast<ChaseMovementGenerator<Player> const*>(target->GetMotionMaster()->GetCurrent())->GetTarget();
-                }
-                else
-                {
-                    chaseTarget = static_cast<ChaseMovementGenerator<Creature> const*>(target->GetMotionMaster()->GetCurrent())->GetTarget();
-                }
+                chaseTarget = static_cast<TargetedMovementGenerator const*>(target->GetMotionMaster()->GetCurrent())->GetTarget();
 
                 if (!chaseTarget)
                 {

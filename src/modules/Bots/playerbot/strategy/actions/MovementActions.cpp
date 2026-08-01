@@ -280,7 +280,9 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
         // out under the map. Only snap when there is clear LOS to the
         // destination column and the destination itself is valid (swimmable
         // water or a real terrain height); otherwise fall through to the
-        // vmap-guarded MoveFollow path below.
+        // pathfinder-guarded MoveFollow path below. Note the terrain ray
+        // tests terrain + WMO + M2 hulls; a collidable doodad on the ray
+        // only costs the snap, never a wrong move.
         bool hasLos = bot->GetMap()->IsInLineOfSight(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ() + 0.5f,
                           x, y, z + 0.5f, bot->GetPhaseMask());
         float heightZ = z;
@@ -325,7 +327,7 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
 
     if (bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
     {
-        Unit *currentTarget = static_cast<ChaseMovementGenerator<Player> const*>(bot->GetMotionMaster()->GetCurrent())->GetTarget();
+        Unit *currentTarget = static_cast<TargetedMovementGenerator const*>(bot->GetMotionMaster()->GetCurrent())->GetTarget();
         if (currentTarget && currentTarget->GetObjectGuid() == target->GetObjectGuid()) return false;
     }
 
@@ -495,8 +497,7 @@ bool MoveRandomAction::Execute(Event event)
         WorldObject* target = ai->GetUnit(*i);
         if (target && bot->GetDistance(target) > sPlayerbotAIConfig.tooCloseDistance)
         {
-            WorldLocation loc;
-            target->GetPosition(loc);
+            WorldLocation loc(target->GetMapId(), target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
             locs.push_back(loc);
         }
     }
@@ -507,8 +508,7 @@ bool MoveRandomAction::Execute(Event event)
         WorldObject* target = ai->GetUnit(*i);
         if (target && bot->GetDistance(target) > sPlayerbotAIConfig.tooCloseDistance)
         {
-            WorldLocation loc;
-            target->GetPosition(loc);
+            WorldLocation loc(target->GetMapId(), target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
             locs.push_back(loc);
         }
     }
@@ -520,8 +520,7 @@ bool MoveRandomAction::Execute(Event event)
 
         if (target && bot->GetDistance(target) > sPlayerbotAIConfig.tooCloseDistance)
         {
-            WorldLocation loc;
-            target->GetPosition(loc);
+            WorldLocation loc(target->GetMapId(), target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
             locs.push_back(loc);
         }
     }

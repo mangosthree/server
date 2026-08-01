@@ -234,7 +234,9 @@ class CharacterHandler
             // The bot's WorldSession is owned by the bot's Player object
             // and is deleted by PlayerbotMgr::LogoutPlayerBot
             uint32 botAccountId = lqh->GetAccountId();
-            WorldSession* botSession = new WorldSession(botAccountId, nullptr, SEC_PLAYER, 1, 0, LOCALE_enUS, BigNumber());
+            // nullptr mailbox is safe: the ctor substitutes a fresh SessionMailbox,
+            // which this headless bot session drains via HandleBotPackets().
+            WorldSession* botSession = new WorldSession(botAccountId, nullptr, nullptr, SEC_PLAYER, 1, 0, LOCALE_enUS, BigNumber());
             botSession->HandlePlayerLogin(lqh); // will delete lqh
             Player* bot = botSession->GetPlayer();
             if (!bot)
@@ -293,7 +295,10 @@ void PlayerbotHolder::AddPlayerBot(uint64 playerGuid, uint32 masterAccountId)
         delete holder;
         return;
     }
-    CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerBotLoginCallback, holder);
+    CharacterDatabase.DelayQueryHolder([](QueryResult* result, SqlQueryHolder* h)
+                                       {
+                                           chrHandler.HandlePlayerBotLoginCallback(result, h);
+                                       }, holder);
 }
 #endif
 

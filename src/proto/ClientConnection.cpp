@@ -133,34 +133,64 @@ namespace proto
 
     std::vector<uint8_t> ClientConnection::onData(const uint8_t* data, size_t len)
     {
-        std::vector<WorldPacket> packets;
-
-        if (m_codec.Feed(data, len, packets) == DecodeStatus::Malformed)
-        {
-            sLog.outError("proto: malformed packet framing from %s, dropping",
-                          m_address.c_str());
-            Close();
-            return std::vector<uint8_t>();
-        }
+        // Each packet is handled as it completes, before the next header in this
+        // same buffer is decoded. HandleAuthSession() arms the header cipher, and
+        // the client enciphers everything after CMSG_AUTH_SESSION -- which TCP
+        // routinely delivers in one read with the packets that follow it.
+        size_t decoded = 0;
+        bool   fatal   = false;
 
         // A short read anywhere below unwinds onto a network worker thread, where
         // nothing else would catch it and the process would abort. Dropping the
         // peer has to be the worst a malformed packet can do.
+        DecodeStatus status = DecodeStatus::Ok;
         try
         {
-            for (size_t i = 0; i < packets.size(); ++i)
-            {
-                if (!HandlePacket(std::move(packets[i])))
+            status = m_codec.Feed(data, len,
+                [&](WorldPacket&& packet) -> bool
                 {
-                    Close();
-                    break;
-                }
-            }
+                    ++decoded;
+                    if (!HandlePacket(std::move(packet)))
+                    {
+                        fatal = true;
+                        return false;
+                    }
+                    return true;
+                });
         }
         catch (ByteBufferException&)
         {
             sLog.outError("proto: short read handling packet from %s, dropping",
                           m_address.c_str());
+            Close();
+            return std::vector<uint8_t>();
+        }
+
+        if (status == DecodeStatus::Malformed)
+        {
+            // Print the header that failed, not just the fact that one did: a
+            // desynchronised header cipher and a peer talking a different
+            // protocol produce the same symptom and need opposite fixes.
+            const PacketCodec::Failure& bad = m_codec.LastFailure();
+
+            sLog.outError("proto: malformed packet framing from %s, dropping "
+                          "(header %.2X %.2X %.2X %.2X %.2X %.2X -> size=%u "
+                          "cmd=0x%.4X, header cipher %s, %u byte(s) read, "
+                          "%u packet(s) decoded before it)",
+                          m_address.c_str(),
+                          bad.header[0], bad.header[1], bad.header[2],
+                          bad.header[3], bad.header[4], bad.header[5],
+                          bad.size, bad.cmd,
+                          bad.decrypted ? "armed" : "not armed",
+                          uint32(len), uint32(decoded));
+            Close();
+            return std::vector<uint8_t>();
+        }
+
+        // A handler that refused the packet has already said why; it only
+        // remains to drop the peer.
+        if (fatal)
+        {
             Close();
         }
 

@@ -28,6 +28,11 @@ namespace world::terrain
         constexpr uint8_t MCLQ_NO_LIQUID = 0x0F;
         constexpr uint8_t MCLQ_DARK = 0x80;
 
+        // MH2O instance field 2 is a vertex format below this value and a
+        // LiquidObject.dbc id from it upward (Cataclysm+).
+        constexpr uint16_t MH2O_FIRST_LIQUID_OBJECT = 42;
+        constexpr uint16_t LIQUID_TYPE_OCEAN_ID = 2;
+
         void EnsureLiquid(AdtData& out)
         {
             if (!out.liquidHeight.empty())
@@ -208,7 +213,16 @@ namespace world::terrain
                         }
 
                         // Vertex format 2 is depth-only and carries no heights.
-                        const bool hasHeights = (lvf != 2);
+                        // A field of 42+ is a LiquidObject.dbc id instead of a
+                        // format: ocean instances are depth-only there (uint8
+                        // depths -- read as floats they bake ~1e11 surfaces),
+                        // while every other 4.3.4 liquid resolves through
+                        // LiquidType->LiquidMaterial to a height-first format.
+                        const bool depthOnly =
+                            (lvf >= MH2O_FIRST_LIQUID_OBJECT)
+                                ? (entry == LIQUID_TYPE_OCEAN_ID)
+                                : (lvf == 2);
+                        const bool hasHeights = !depthOnly;
                         const uint32_t corners = uint32_t(w + 1) * uint32_t(hgt + 1);
                         const uint8_t* heights = nullptr;
                         if (hasHeights && offsVerts &&

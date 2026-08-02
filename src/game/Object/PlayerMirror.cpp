@@ -195,6 +195,14 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
     switch (timer)
     {
         case FATIGUE_TIMER:
+#ifdef ENABLE_PLAYERBOTS
+            // Random bots placed in Vashj'ir survive the deep ocean; fatigue
+            // would otherwise drown them regardless of water breathing.
+            if (GetPlayerbotAI() && IsInVashjir())
+            {
+                return DISABLED_MIRROR_TIMER;
+            }
+#endif
             if (GetSession()->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_TIMERBAR_FATIGUE_GMLEVEL))
             {
                 return DISABLED_MIRROR_TIMER;
@@ -203,6 +211,9 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
         case BREATH_TIMER:
         {
             if (!IsAlive() || HasAuraType(SPELL_AURA_WATER_BREATHING) ||
+#ifdef ENABLE_PLAYERBOTS
+                (GetPlayerbotAI() && IsInVashjir()) ||
+#endif
                 GetSession()->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_TIMERBAR_BREATH_GMLEVEL))
             {
                 return DISABLED_MIRROR_TIMER;
@@ -227,6 +238,32 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
             return 0;
     }
     return 0;
+}
+
+bool Player::IsVashjirZone(uint32 zoneId)
+{
+    // Kelp'thar Forest / Shimmering Expanse / Abyssal Depths / parent Vashj'ir.
+    // Zone IDs runtime-verified via .gps (see human's in-game check).
+    return zoneId == 4815 || zoneId == 5144 || zoneId == 5145 || zoneId == 5146;
+}
+
+bool Player::IsInVashjir() const
+{
+    return IsVashjirZone(GetZoneId());
+}
+
+/**
+ * @brief Checks if the player is about to drown (breath timer almost expired).
+ *
+ * @return True if the player is submerged, has an active breath timer under
+ *         2 seconds remaining, has no water breathing aura, and is alive.
+ */
+bool Player::IsDrowning() const
+{
+    return (m_MirrorTimerFlags & UNDERWATER_INWATER) &&
+           m_MirrorTimer[BREATH_TIMER] != DISABLED_MIRROR_TIMER &&
+           !HasAuraType(SPELL_AURA_WATER_BREATHING) &&
+           m_MirrorTimer[BREATH_TIMER] < 2000 && IsAlive();
 }
 
 /**

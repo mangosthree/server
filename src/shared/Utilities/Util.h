@@ -727,7 +727,7 @@ inline bool isEastAsianString(const std::wstring &wstr, bool numericOrSpace)
  */
 inline void strToUpper(std::string& str)
 {
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return toupper(c); });
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return static_cast<char>(::toupper(c)); });
 }
 
 /**
@@ -737,7 +737,7 @@ inline void strToUpper(std::string& str)
  */
 inline void strToLower(std::string& str)
 {
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return tolower(c); });
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return static_cast<char>(::tolower(c)); });
 }
 
 /**

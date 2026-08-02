@@ -110,6 +110,10 @@ class PlayerSocial;
 class DungeonPersistentState;
 class Spell;
 class Item;
+#ifdef ENABLE_PLAYERBOTS
+class PlayerbotAI;
+class PlayerbotMgr;
+#endif
 
 struct AreaTrigger;
 
@@ -1111,6 +1115,13 @@ class Player : public Unit
             return m_isInWater;
         }
         bool IsUnderWater() const override; // Check if the player is underwater
+        bool IsDrowning() const; // Check if the player is drowning (breath timer expired)
+
+        /// True if zoneId is one of the Vashj'ir sub-zones.
+        static bool IsVashjirZone(uint32 zoneId);
+        /// True if this player is currently in a Vashj'ir sub-zone.
+        bool IsInVashjir() const;
+
         bool IsFalling() // Check if the player is falling
         {
             return Where().Z() < m_lastFallZ;
@@ -3091,6 +3102,17 @@ class Player : public Unit
         // Get the player's death timer
         uint32 GetDeathTimer() const { return m_deathTimer; }
 
+#ifdef ENABLE_PLAYERBOTS
+        void SetPlayerbotAI(PlayerbotAI* ai) { MANGOS_ASSERT(!m_playerbotAI && !m_playerbotMgr); m_playerbotAI = ai; }
+        PlayerbotAI* GetPlayerbotAI() { return m_playerbotAI; }
+        void SetPlayerbotMgr(PlayerbotMgr* mgr) { MANGOS_ASSERT(!m_playerbotAI && !m_playerbotMgr); m_playerbotMgr = mgr; }
+        PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr; }
+        void RemovePlayerbotMgr() { m_playerbotMgr = NULL; }
+        void RemovePlayerbotAI() { m_playerbotAI = NULL; }
+        void SetBotDeathTimer() { m_deathTimer = 0; }
+        bool MinimalLoadFromDB(QueryResult* result, uint32 guid);
+#endif
+
         // Get the corpse reclaim delay
         uint32 GetCorpseReclaimDelay(bool pvp) const;
 
@@ -4041,6 +4063,10 @@ class Player : public Unit
         uint32 m_positionStatusUpdateTimer; // Position status update timer
 
         uint32 m_deathTimer; // Death timer
+#ifdef ENABLE_PLAYERBOTS
+        PlayerbotAI* m_playerbotAI;
+        PlayerbotMgr* m_playerbotMgr;
+#endif
         time_t m_deathExpireTime; // Death expire time
 
         uint32 m_restTime; // Rest time

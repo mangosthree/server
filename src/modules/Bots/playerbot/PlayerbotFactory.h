@@ -1,0 +1,380 @@
+#pragma once
+
+#include "strategy/actions/InventoryAction.h"
+
+class Player;
+class PlayerbotMgr;
+class ChatHandler;
+class Item;
+struct ItemPrototype;
+
+using namespace std;
+using ai::InventoryAction;
+
+/**
+ * @brief One curated glyph recommendation row (ai_playerbot_glyph).
+ *
+ * `slotIdx` is positional within same-type glyph slots: e.g. type "major"
+ * slotIdx 1 means the second of the bot's unlocked major-glyph slots, in
+ * ascending physical-slot order (see PlayerbotFactory::ApplyCuratedGlyphs).
+ */
+struct CuratedGlyphRow
+{
+    string type;        ///< "prime", "major" or "minor" (informational; the glyph's own DBC TypeFlags is authoritative).
+    uint8 slotIdx;       ///< Position (0-2) among same-type glyph slots.
+    uint32 glyphSpell;   ///< The glyph's real apply spell (item's spellid_2 / LEARN_SPELL_ID).
+};
+
+/**
+ * @brief Factory class for creating and managing player bots.
+ * This class provides methods to initialize and randomize player bots, including their equipment, skills, spells, and inventory.
+ */
+class PlayerbotFactory : public InventoryAction
+{
+public:
+    /**
+     * @brief Constructor for PlayerbotFactory.
+     * @param bot Pointer to the player bot.
+     * @param level The level of the player bot.
+     * @param itemQuality The quality of items to be equipped by the player bot.
+     */
+    PlayerbotFactory(Player* bot, uint32 level, uint32 itemQuality = 0) :
+        bot(bot), level(level), itemQuality(itemQuality), InventoryAction(bot->GetPlayerbotAI(), "factory") {}
+
+    /**
+     * @brief Gets a random bot's GUID.
+     * @return The GUID of a random bot.
+     */
+    static ObjectGuid GetRandomBot();
+
+    /**
+     * @brief Cleans and randomizes the player bot.
+     */
+    void CleanRandomize();
+
+    /**
+     * @brief Randomizes the player bot.
+     */
+    void Randomize();
+
+    /**
+     * @brief Refreshes the player bot.
+     */
+    void Refresh();
+
+    /**
+     * @brief Initializes the talents for the player bot.
+     */
+    void InitTalents();
+
+    /**
+     * @brief Initializes glyphs for the player bot.
+     */
+    void InitGlyphs();
+
+    /**
+     * @brief Stocks level-appropriate food and drink for the player bot.
+     * Standalone-safe: only touches inventory, does not reset/re-randomize the bot.
+     */
+    void InitFood();
+
+private:
+    /**
+     * @brief Equips the bot's curated (class/spec/tier) best-in-slot gear set,
+     * when one exists in the ai_playerbot_gear cache and
+     * AiPlayerbot.UseCuratedGear is on. Lazily loads the static cache from
+     * ai_playerbot_gear on first use. When AiPlayerbot.CuratedGearEnhancements
+     * is also on, applies curated enchants/gems (Phase B/C) to each
+     * curated-equipped item and curated glyphs (Phase D) for the bot's spec.
+     * \arg \c filledSlots
+     *   Out-param: every EQUIPMENT_SLOT_* successfully equipped from the
+     *   curated set is inserted here, so InitEquipment can restrict its
+     *   legacy weapon-slot fallback to slots the curated set left empty.
+     * \return
+     *   True if a curated set was found and applied to at least one slot
+     *   (InitEquipment should skip its legacy full-slot gear-score loop,
+     *   only topping up empty weapon slots); false if no set exists for
+     *   (class, spec, tier) or the feature is disabled, in which case the
+     *   caller must fall back to the legacy path unchanged.
+     */
+    bool InitCuratedGear(std::set<uint8>& filledSlots);
+
+    /**
+     * @brief Lazily loads the curated enchant/gem/glyph caches (Phase
+     * B/C/D) from ai_playerbot_gear_enchant, ai_playerbot_gem and
+     * ai_playerbot_glyph. No-op after the first call.
+     */
+    static void LoadCuratedGearEnhancements();
+
+    /**
+     * @brief Applies the curated permanent enchant (if any) for
+     * (bot's class, specKey, gearSlotKey) to a just-equipped item.
+     * \arg \c gearSlotKey
+     *   The ai_playerbot_gear slot key ("finger1"/"finger2" are folded to
+     *   the dataset's single "finger" enchant key).
+     */
+    void ApplyCuratedEnchant(const std::string& specKey, const std::string& gearSlotKey, Item* item);
+
+    /**
+     * @brief Sockets curated, color-matched gems (falling back to
+     * "prismatic" for non-meta colors with no exact match) into every real
+     * socket on a just-equipped item.
+     */
+    void ApplyCuratedGems(const std::string& specKey, Item* item);
+
+    /**
+     * @brief Applies the curated glyph set for (bot's class, specKey),
+     * overriding InitGlyphs()'s random selection. No-op if no rows exist
+     * for the class/spec.
+     */
+    void ApplyCuratedGlyphs(const std::string& specKey);
+
+    /**
+     * @brief Resolves the dataset spec key (e.g. "arms", "feral_cat") for the
+     * bot's class and primary talent tab (AiFactory::GetPlayerSpecTab).
+     * \arg \c tab
+     *   The primary talent tab index (0/1/2), or -1 if unresolved.
+     * \return
+     *   The spec key, or an empty string if the class/tab is not mapped.
+     */
+    static std::string GetCuratedSpecKey(Player* bot, int tab);
+
+    /**
+     * @brief Resolves the curated gear tier for the bot: honours the
+     * AiPlayerbot.GearTier override when set, otherwise a balanced
+     * normal/heroic/raider split keyed off the bot's GUID.
+     */
+    static std::string GetCuratedTier(Player* bot);
+
+
+    /**
+     * @brief Randomizes the player bot with an option for incremental changes.
+     * @param incremental If true, randomizes incrementally.
+     */
+    void Randomize(bool incremental);
+
+    /**
+     * @brief Prepares the player bot for randomization.
+     */
+    void Prepare();
+
+    /**
+     * @brief Initializes the second equipment set for the player bot.
+     */
+    void InitSecondEquipmentSet();
+
+    /**
+     * @brief Initializes the equipment for the player bot.
+     * @param incremental If true, initializes incrementally.
+     */
+    void InitEquipment(bool incremental);
+
+    /**
+     * @brief Checks if the player bot can equip a given item.
+     * @param proto Pointer to the item prototype.
+     * @param desiredQuality The desired quality of the item.
+     * @return True if the item can be equipped, false otherwise.
+     */
+    bool CanEquipItem(ItemPrototype const* proto, uint32 desiredQuality);
+
+    /**
+     * @brief Checks if the player bot can equip an unseen item.
+     * @param slot The slot to equip the item in.
+     * @param dest The destination slot.
+     * @param item The item ID.
+     * @return True if the item can be equipped, false otherwise.
+     */
+    bool CanEquipUnseenItem(uint8 slot, uint16 &dest, uint32 item);
+
+    /**
+     * @brief Initializes the skills for the player bot.
+     */
+    void InitSkills();
+
+    /**
+     * @brief Initializes the trade skills for the player bot.
+     */
+    void InitTradeSkills();
+
+    /**
+     * @brief Updates the trade skills for the player bot.
+     */
+    void UpdateTradeSkills();
+
+    /**
+     * @brief Sets a random skill for the player bot.
+     * @param id The skill ID.
+     */
+    void SetRandomSkill(uint16 id);
+
+    /**
+     * @brief Initializes the spells for the player bot.
+     */
+    void InitSpells();
+
+    /**
+     * @brief Clears the spells for the player bot.
+     */
+    void ClearSpells();
+
+    /**
+     * @brief Initializes the available spells for the player bot.
+     */
+    void InitAvailableSpells();
+
+    /**
+     * @brief Initializes the special spells for the player bot.
+     */
+    void InitSpecialSpells();
+
+    /**
+     * @brief Initializes spells not taught by trainers.
+     */
+    void InitQuestSpells();
+
+    /**
+     * @brief Initializes the talents for the player bot based on a specific spec.
+     * @param specNo The spec number.
+     */
+    void InitTalents(uint32 specNo);
+
+    /**
+     * @brief Initializes the quests for the player bot.
+     */
+    void InitQuests();
+
+    /**
+     * @brief Initializes the pet for the player bot.
+     */
+    void InitPet();
+
+    /**
+     * @brief Clears the inventory of the player bot.
+     */
+    void ClearInventory();
+
+    /**
+     * @brief Initializes the mounts for the player bot.
+     */
+    void InitMounts();
+
+    /**
+     * @brief Initializes the potions for the player bot.
+     */
+    void InitPotions();
+
+    /**
+     * @brief Checks if the player bot can equip a given armor item.
+     * @param proto Pointer to the item prototype.
+     * @return True if the armor can be equipped, false otherwise.
+     */
+    bool CanEquipArmor(ItemPrototype const* proto);
+
+    /**
+     * @brief Checks if the player bot can equip a given weapon item.
+     * @param proto Pointer to the item prototype.
+     * @return True if the weapon can be equipped, false otherwise.
+     */
+    bool CanEquipWeapon(ItemPrototype const* proto);
+
+    /**
+     * @brief Enchants a given item for the player bot.
+     * @param item Pointer to the item.
+     */
+    void EnchantItem(Item* item);
+
+    /**
+     * @brief Adds item stats to the player bot.
+     * @param mod The stat modifier.
+     * @param sp The spell power stat.
+     * @param ap The attack power stat.
+     * @param tank The tank stat.
+     */
+    void AddItemStats(uint32 mod, uint8 &sp, uint8 &ap, uint8 &tank);
+
+    /**
+     * @brief Checks if the item stats are within desired ranges.
+     * @param sp The spell power stat.
+     * @param ap The attack power stat.
+     * @param tank The tank stat.
+     * @return True if the item stats are within desired ranges, false otherwise.
+     */
+    bool CheckItemStats(uint8 sp, uint8 ap, uint8 tank);
+
+    /**
+     * @brief Cancels all auras on the player bot.
+     */
+    void CancelAuras();
+
+    /**
+     * @brief Checks if a given item is a desired replacement for the player bot.
+     * @param item Pointer to the item.
+     * @return True if the item is a desired replacement, false otherwise.
+     */
+    bool IsDesiredReplacement(Item* item);
+
+    /**
+     * @brief Initializes the bags for the player bot.
+     */
+    void InitBags();
+
+    /**
+     * @brief Initializes the inventory for the player bot.
+     */
+    void InitInventory();
+
+    /**
+     * @brief Initializes the trade inventory for the player bot.
+     */
+    void InitInventoryTrade();
+
+    /**
+     * @brief Initializes the equipped inventory for the player bot.
+     */
+    void InitInventoryEquip();
+
+    /**
+     * @brief Initializes the skill inventory for the player bot.
+     */
+    void InitInventorySkill();
+
+    /**
+     * @brief Stores an item in the player bot's inventory.
+     * @param itemId The item ID.
+     * @param count The item count.
+     * @return Pointer to the stored item.
+     */
+    Item* StoreItem(uint32 itemId, uint32 count);
+
+    /**
+     * @brief Initializes the guild for the player bot.
+     */
+    void InitGuild();
+
+private:
+    Player* bot; ///< Pointer to the player bot.
+    uint32 level; ///< The level of the player bot.
+    uint32 itemQuality; ///< The quality of items to be equipped by the player bot.
+    static uint32 tradeSkills[]; ///< Array of trade skills.
+    static list<uint32> classQuestIds; ///< List of class quest IDs.
+
+    /// Curated gear cache: class -> spec -> tier -> slot -> itemId. Lazily
+    /// loaded once from `ai_playerbot_gear` (see InitCuratedGear()).
+    static map<uint8, map<string, map<string, map<string, uint32> > > > curatedGearSets;
+
+    /// Set once LoadCuratedGearEnhancements() has run (even if the tables
+    /// were empty), so it is only ever queried once.
+    static bool curatedEnhancementsLoaded;
+
+    /// Curated enchant cache: class -> spec -> slot -> SpellItemEnchantment id.
+    /// Lazily loaded from `ai_playerbot_gear_enchant`.
+    static map<uint8, map<string, map<string, uint32> > > curatedGearEnchants;
+
+    /// Curated gem cache: class -> spec -> color -> (gem_item, gem_enchant).
+    /// Lazily loaded from `ai_playerbot_gem`.
+    static map<uint8, map<string, map<string, pair<uint32, uint32> > > > curatedGearGems;
+
+    /// Curated glyph cache: class -> spec -> glyph rows. Lazily loaded from
+    /// `ai_playerbot_glyph`.
+    static map<uint8, map<string, vector<CuratedGlyphRow> > > curatedGearGlyphs;
+};

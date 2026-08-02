@@ -86,7 +86,11 @@ bool TargetedMovementGenerator::RequiresNewPosition(Unit& owner,
     float distSq = dx * dx + dy * dy;
 
     // A flier cares about height too; anything on the ground does not.
-    if (owner.GetTypeId() == TYPEID_UNIT && static_cast<Creature&>(owner).CanFly())
+    // Swimmers likewise move in the 3D water column, so their destination must
+    // track the target's depth; MOVEFLAG_SWIMMING covers creatures (IsSwimming)
+    // and swimming players (client-set for real ones, server-synced for bots).
+    if ((owner.GetTypeId() == TYPEID_UNIT && static_cast<Creature&>(owner).CanFly()) ||
+        owner.m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING))
     {
         const float dz = spot.z - target.z;
         distSq += dz * dz;

@@ -33,6 +33,7 @@
 #include "MoveMap.h"
 #include "GridMap.h"
 #include "Creature.h"
+#include "Player.h"
 #include "PathFinder.h"
 #include "Log.h"
 
@@ -240,8 +241,17 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
 {
     // water is an open volume the 2.5D navmesh cannot represent: a mesh
     // path would pin a swimmer to the lake-bed polys, so swim straight
-    if (m_sourceUnit->GetTypeId() == TYPEID_UNIT && ((Creature*)m_sourceUnit)->CanSwim() &&
-        BuildSwimShortcut(startPos, endPos))
+    bool canSwim = m_sourceUnit->GetTypeId() == TYPEID_UNIT && ((Creature*)m_sourceUnit)->CanSwim();
+#ifdef ENABLE_PLAYERBOTS
+    // Bots are TYPEID_PLAYER, so the creature-only check above skipped them and
+    // the navmesh pinned them to the lake-bed -- the "walking underwater / jerky
+    // movement" report. Route bot players through the swim shortcut as well.
+    if (!canSwim && m_sourceUnit->GetTypeId() == TYPEID_PLAYER && ((Player*)m_sourceUnit)->GetPlayerbotAI())
+    {
+        canSwim = true;
+    }
+#endif
+    if (canSwim && BuildSwimShortcut(startPos, endPos))
     {
         return;
     }
@@ -649,6 +659,28 @@ bool PathFinder::BuildSwimShortcut(const Vector3& startPos, const Vector3& endPo
     {
         return false;
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    // A straight-line swim shortcut has no collision test of its own, so a
+    // bot hugging a cove wall (e.g. Darkbrake Cove, Vashj'ir) can clip
+    // through the rock and end up under the map. Reject the shortcut when
+    // the straight start->end ray is blocked and fall back to the navmesh,
+    // which clamps to valid polys instead of tunnelling through geometry.
+    // The terrain ray tests terrain + WMO + M2 hulls with no per-model
+    // filter (the old VMAP::ModelIgnoreFlags::M2 did not survive the
+    // united-cores engine); if collidable kelp/doodads prove to block
+    // clear swim lanes, a ModelKind::Mesh skip in the terrain LoS query
+    // is the fix, not a change here.
+    if (m_sourceUnit->GetTypeId() == TYPEID_PLAYER && ((Player*)m_sourceUnit)->GetPlayerbotAI())
+    {
+        if (!m_sourceUnit->GetMap()->IsInLineOfSight(startPos.x, startPos.y, startPos.z + 0.5f,
+                endPos.x, endPos.y, endPos.z + 0.5f,
+                m_sourceUnit->GetPhaseMask()))
+        {
+            return false;
+        }
+    }
+#endif
 
     BuildShortcut();
 

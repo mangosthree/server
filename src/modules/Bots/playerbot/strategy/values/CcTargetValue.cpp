@@ -1,0 +1,123 @@
+#include "botpch.h"
+#include "../../playerbot.h"
+#include "CcTargetValue.h"
+#include "../../PlayerbotAIConfig.h"
+#include "../Action.h"
+
+using namespace ai;
+
+class FindTargetForCcStrategy : public FindTargetStrategy
+{
+public:
+    FindTargetForCcStrategy(PlayerbotAI* ai, string spell) : FindTargetStrategy(ai)
+    {
+        this->spell = spell;
+        maxDistance = 0;
+        moonFound = false;
+    }
+
+public:
+    virtual void CheckAttacker(Unit* creature, ThreatManager* threatManager)
+    {
+        if (moonFound)
+        {
+            return;
+        }
+
+        Player* bot = ai->GetBot();
+
+        // A moon-marked (raid target icon 4) creature is the explicit CC pick and
+        // wins unconditionally -- before the health/castable filters, which would
+        // otherwise skip e.g. a low-health marked target.
+        Group* group = bot->GetGroup();
+        if (group && group->GetTargetIcon(4) == creature->GetObjectGuid())
+        {
+            result = creature;
+            moonFound = true;
+            return;
+        }
+
+        if (*ai->GetAiObjectContext()->GetValue<Unit*>("current target") == creature)
+        {
+            return;
+        }
+
+        uint8 health = creature->GetHealthPercent();
+        if (health < sPlayerbotAIConfig.mediumHealth)
+        {
+            return;
+        }
+
+        if (!ai->CanCastSpell(spell, creature))
+        {
+            return;
+        }
+
+        if (*ai->GetAiObjectContext()->GetValue<Unit*>("rti target") == creature)
+        {
+            result = creature;
+            return;
+        }
+
+        float minDistance = sPlayerbotAIConfig.spellDistance;
+        if (!group)
+        {
+            return;
+        }
+
+        if (*ai->GetAiObjectContext()->GetValue<uint8>("aoe count") > 2)
+        {
+            WorldLocation aoe = *ai->GetAiObjectContext()->GetValue<WorldLocation>("aoe position");
+            if (creature->GetDistance2d(aoe.coord_x, aoe.coord_y) <= sPlayerbotAIConfig.aoeRadius)
+            {
+                return;
+            }
+        }
+
+        int tankCount, dpsCount;
+        GetPlayerCount(creature, &tankCount, &dpsCount);
+        if (!tankCount || !dpsCount)
+        {
+            result = creature;
+            return;
+        }
+
+        Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player *member = sObjectMgr.GetPlayer(itr->guid);
+            if ( !member || !member->IsAlive() || member == bot)
+            {
+                continue;
+            }
+
+            if (!ai->IsTank(member))
+            {
+                continue;
+            }
+
+            float distance = member->GetDistance(creature);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+            }
+        }
+
+        if (!result || minDistance > maxDistance)
+        {
+            result = creature;
+            maxDistance = minDistance;
+        }
+    }
+
+private:
+    string spell;
+    float maxDistance;
+    bool moonFound;
+};
+
+Unit* CcTargetValue::Calculate()
+{
+    FindTargetForCcStrategy strategy(ai, qualifier);
+    return FindTarget(&strategy);
+}

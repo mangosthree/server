@@ -1,0 +1,65 @@
+#pragma once
+
+namespace ai
+{
+    class CastFinishingMoveAction : public CastMeleeSpellAction
+    {
+    public:
+        CastFinishingMoveAction(PlayerbotAI* ai, string name) : CastMeleeSpellAction(ai, name) {}
+
+        virtual bool isUseful()
+        {
+            return CastMeleeSpellAction::isUseful() && AI_VALUE2(uint8, "combo", "current target") >= 1;
+        }
+    };
+
+    class CastEviscerateAction : public CastFinishingMoveAction
+    {
+    public:
+        CastEviscerateAction(PlayerbotAI* ai) : CastFinishingMoveAction(ai, "eviscerate") {}
+    };
+
+    class CastSliceAndDiceAction : public CastFinishingMoveAction
+    {
+    public:
+        CastSliceAndDiceAction(PlayerbotAI* ai) : CastFinishingMoveAction(ai, "slice and dice") {}
+    };
+
+    class CastExposeArmorAction : public CastFinishingMoveAction
+    {
+    public:
+        CastExposeArmorAction(PlayerbotAI* ai) : CastFinishingMoveAction(ai, "expose armor") {}
+    };
+
+    class CastRuptureAction : public CastFinishingMoveAction
+    {
+    public:
+        CastRuptureAction(PlayerbotAI* ai) : CastFinishingMoveAction(ai, "rupture") {}
+
+        virtual bool isPossible()
+        {
+            return CastFinishingMoveAction::isPossible() && !ai->HasAura("rupture", GetTarget());
+        }
+    };
+
+    class CastKidneyShotAction : public CastFinishingMoveAction
+    {
+    public:
+        CastKidneyShotAction(PlayerbotAI* ai) : CastFinishingMoveAction(ai, "kidney shot") {}
+    };
+
+    // Assassination combo dump. Envenom consumes Deadly Poison stacks, so it is
+    // only possible when the target carries Deadly Poison; otherwise the node
+    // falls back to Eviscerate.
+    class CastEnvenomAction : public CastFinishingMoveAction
+    {
+    public:
+        CastEnvenomAction(PlayerbotAI* ai) : CastFinishingMoveAction(ai, "envenom") {}
+
+        virtual bool isPossible()
+        {
+            return CastFinishingMoveAction::isPossible() && ai->HasAura("deadly poison", GetTarget());
+        }
+    };
+
+}

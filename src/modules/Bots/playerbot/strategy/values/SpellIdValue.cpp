@@ -1,0 +1,147 @@
+#include "botpch.h"
+#include "../../playerbot.h"
+#include "SpellIdValue.h"
+#include "../../PlayerbotAIConfig.h"
+
+using namespace ai;
+
+SpellIdValue::SpellIdValue(PlayerbotAI* ai) :
+        CalculatedValue<uint32>(ai, "spell id")
+{
+}
+
+uint32 SpellIdValue::Calculate()
+{
+    string namepart = qualifier;
+
+    // Strip surrounding quotes passed through from whisper text (eg. cast "flash heal")
+    if (namepart.size() >= 2 &&
+        (namepart.front() == '"' || namepart.front() == '\'') &&
+        namepart.back() == namepart.front())
+    {
+        namepart = namepart.substr(1, namepart.size() - 2);
+    }
+
+    ItemIds itemIds = ChatHelper::parseItems(namepart);
+
+    PlayerbotChatHandler handler(bot);
+    uint32 extractedSpellId = handler.extractSpellId(namepart);
+    if (extractedSpellId)
+    {
+        const SpellEntry* pSpellInfo = sSpellStore.LookupEntry(extractedSpellId);
+        if (pSpellInfo) namepart = pSpellInfo->Name_lang[0];
+    }
+
+    wstring wnamepart;
+
+    if (!Utf8toWStr(namepart, wnamepart))
+    {
+        return 0;
+    }
+
+    wstrToLower(wnamepart);
+    char firstSymbol = tolower(namepart[0]);
+    int spellLength = wnamepart.length();
+
+    int loc = bot->GetSession()->GetSessionDbcLocale();
+
+    uint32 foundSpellId = 0;
+    bool foundMatchUsesNoReagents = false;
+
+    for (PlayerSpellMap::iterator itr = bot->GetSpellMap().begin(); itr != bot->GetSpellMap().end(); ++itr)
+    {
+        uint32 spellId = itr->first;
+
+        if (itr->second.state == PLAYERSPELL_REMOVED || itr->second.disabled || IsPassiveSpell(spellId))
+        {
+            continue;
+        }
+
+        const SpellEntry* pSpellInfo = sSpellStore.LookupEntry(spellId);
+        if (!pSpellInfo)
+        {
+            continue;
+        }
+
+        if (pSpellInfo->GetSpellEffectIdByIndex(SpellEffectIndex(0)) == SPELL_EFFECT_LEARN_SPELL)
+        {
+            continue;
+        }
+
+        bool useByItem = false;
+        for (int i = 0; i < 3; ++i)
+        {
+            if (pSpellInfo->GetSpellEffectIdByIndex(SpellEffectIndex(i)) == SPELL_EFFECT_CREATE_ITEM && itemIds.find(pSpellInfo->GetSpellEffect(SpellEffectIndex(i))->EffectItemType) != itemIds.end())
+            {
+                useByItem = true;
+                break;
+            }
+        }
+
+        char const* spellName = pSpellInfo->Name_lang[loc];
+        if (!useByItem && (tolower(spellName[0]) != firstSymbol || strlen(spellName) != spellLength || !Utf8FitTo(spellName, wnamepart)))
+        {
+            continue;
+        }
+
+        SpellReagentsEntry const* reagents = pSpellInfo->GetSpellReagents();
+        bool usesNoReagents = (!reagents || reagents->Reagent[0] <= 0);
+
+        // if we already found a spell
+        bool useThisSpell = true;
+        if (foundSpellId > 0) {
+        if (usesNoReagents && !foundMatchUsesNoReagents)
+        {
+
+        }
+        else if (spellId > foundSpellId)
+        {
+
+        }
+            else
+            {
+                useThisSpell = false;
+            }
+        }
+        if (useThisSpell) {
+        {
+            foundSpellId = spellId;
+        }
+            foundMatchUsesNoReagents = usesNoReagents;
+        }
+    }
+
+    Pet* pet = bot->GetPet();
+    if (!foundSpellId && pet)
+    {
+        for (PetSpellMap::const_iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
+        {
+            if (itr->second.state == PETSPELL_REMOVED)
+            {
+                continue;
+            }
+
+            uint32 spellId = itr->first;
+            const SpellEntry* pSpellInfo = sSpellStore.LookupEntry(spellId);
+            if (!pSpellInfo)
+            {
+                continue;
+            }
+
+            if (pSpellInfo->GetSpellEffectIdByIndex(SpellEffectIndex(0)) == SPELL_EFFECT_LEARN_SPELL)
+            {
+                continue;
+            }
+
+            char const* spellName = pSpellInfo->Name_lang[loc];
+            if (tolower(spellName[0]) != firstSymbol || strlen(spellName) != spellLength || !Utf8FitTo(spellName, wnamepart))
+            {
+                continue;
+            }
+
+            foundSpellId = spellId;
+        }
+    }
+
+    return foundSpellId;
+}

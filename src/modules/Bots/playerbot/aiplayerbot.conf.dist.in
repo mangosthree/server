@@ -3,7 +3,7 @@
 ##########################################
 
 [AiPlayerbotConf]
-ConfVersion=2010102201
+ConfVersion=2026061600
 
 # Enable or disable AI Playerbot
 AiPlayerbot.Enabled = 1
@@ -67,8 +67,14 @@ AiPlayerbot.CommandPrefix = ~
 # Delay between two bot actions
 #AiPlayerbot.ReactDelay = 100
 
+# Inactivity delay
+#AiPlayerbot.PassiveDelay = 3000
+
+# Minimum delay between repeating actions (chat messages, emotes etc)
+#AiPlayerbot.RepeatDelay = 3000
+
 # Distances
-#AiPlayerbot.SightDistance = 50.0
+#AiPlayerbot.SightDistance = 75.0
 #AiPlayerbot.SpellDistance = 30.0
 #AiPlayerbot.ReactDistance = 150.0
 #AiPlayerbot.GrindDistance = 100.0
@@ -83,13 +89,25 @@ AiPlayerbot.CommandPrefix = ~
 # Bot can flee for enemy
 #AiPlayerbot.FleeingEnabled = 1
 
+# Bot avoids pulling aggro during movement by default
+#AiPlayerbot.Cautious = 0
+
+# Restrict random-bot spawns to zones whose creature level band fits the bot.
+# WARNING: this scans every creature in the world once (tens of seconds of
+# world-thread work on a full DB) the first time a bot picks a spawn, which
+# freezes the world during that scan. Off by default; only the cheap
+# faction/zone check applies when disabled.
+#AiPlayerbot.SpawnZoneStats = 0
+
 # Health/Mana levels
 #AiPlayerbot.CriticalHealth = 25
 #AiPlayerbot.LowHealth = 45
 #AiPlayerbot.MediumHealth = 65
 #AiPlayerbot.AlmostFullHealth = 85
+#AiPlayerbot.HungryHealth = 65
 #AiPlayerbot.LowMana = 15
 #AiPlayerbot.MediumMana = 40
+#AiPlayerbot.ThirstyMana = 65
 
 # Enable random bot system
 #AiPlayerbot.RandomBotAutologin = 1
@@ -114,11 +132,45 @@ AiPlayerbot.CommandPrefix = ~
 # Delete all random bot accounts
 #AiPlayerbot.DeleteRandomBotAccounts = 0
 
+# Random bot guild count
+#AiPlayerbot.RandomBotGuildCount = 50
+
+# Guild Task system
+#AiPlayerbot.EnableGuildTasks = 1
+
+# How often tasks are changed
+#AiPlayerbot.MinGuildTaskChangeTime = 172800
+#AiPlayerbot.MaxGuildTaskChangeTime = 432000
+# Mail spam interval
+#AiPlayerbot.MinGuildTaskAdvertisementTime = 300
+#AiPlayerbot.MaxGuildTaskAdvertisementTime = 28800
+# Delay before reward is sent
+#AiPlayerbot.MinGuildTaskRewardTime = 300
+#AiPlayerbot.MaxGuildTaskRewardTime = 3600
+
+# Delete all random bot guilds
+#AiPlayerbot.DeleteRandomBotGuilds = 0
+
 # Maps to teleport random bots
 #AiPlayerbot.RandomBotMaps = 0,1,530,571
 
 # Change random bot has lower gear
 #AiPlayerbot.RandomGearLoweringChance = 0.15
+
+# Phase A: equip class/spec/tier curated best-in-slot gear from the
+# ai_playerbot_gear table instead of the gear-score guessing loop.
+# Falls back to gear-score guessing when no curated set exists for a
+# bot's (class, spec, tier).
+#AiPlayerbot.UseCuratedGear = 1
+
+# Force a curated gear tier for every bot: "normal", "heroic" or "raider".
+# Leave empty for a balanced ~1/3-1/3-1/3 split keyed off each bot's GUID.
+#AiPlayerbot.GearTier =
+
+# Phase B/C/D: apply curated enchants, gems and glyphs on top of curated
+# gear (ai_playerbot_gear_enchant / ai_playerbot_gem / ai_playerbot_glyph).
+# Requires AiPlayerbot.UseCuratedGear = 1; has no effect otherwise.
+#AiPlayerbot.CuratedGearEnhancements = 1
 
 # Chance random bot has max level on first randomize
 #AiPlayerbot.RandomBotMaxLevelChance = 0.4
@@ -145,6 +197,16 @@ AiPlayerbot.RandomBotTeleLevel = 3
 #AiPlayerbot.MaxRandomRandomizeTime = 1209600
 #AiPlayerbot.MinRandomBotsPerInterval = 50
 #AiPlayerbot.MaxRandomBotsPerInterval = 100
+
+# Wall-clock budget (milliseconds) for a single random-bot processing pass. When a
+# pass exceeds this, it stops and resumes on the next (catch-up) pass instead of
+# blocking the world tick. Set to 0 to disable pacing (legacy burst behaviour).
+#AiPlayerbot.RandomBotProcessBudgetMs = 50
+
+# Seconds until the next pass when a pass stopped early on its time budget. Only used
+# while there is pending work; ignored once a pass finishes within budget.
+#AiPlayerbot.RandomBotCatchupInterval = 1
+
 #AiPlayerbot.MinRandomBotsPriceChangeInterval = 7200
 #AiPlayerbot.MaxRandomBotsPriceChangeInterval = 172800
 
@@ -162,3 +224,6 @@ AiPlayerbot.RandomBotTeleLevel = 3
 
 # Command server port, 0 - disabled
 #AiPlayerbot.CommandServerPort = 8888
+
+# auto-login all player alts as bots on player login
+#AiPlayerbot.BotAutologin = 0

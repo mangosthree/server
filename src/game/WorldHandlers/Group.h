@@ -310,6 +310,10 @@ class Group
         bool   AddMember(ObjectGuid guid, const char* name);
         uint32 RemoveMember(ObjectGuid guid, uint8 method); // method: 0=just remove, 1=kick
         void   ChangeLeader(ObjectGuid guid);
+#ifdef ENABLE_PLAYERBOTS
+        ObjectGuid GetTargetIcon(uint8 id) const { return id < TARGET_ICON_COUNT ? m_targetIcons[id] : ObjectGuid(); }
+        Rolls& GetRolls() { return RollId; }
+#endif
         void   SetLootMethod(LootMethod method)
         {
             m_lootMethod = method;

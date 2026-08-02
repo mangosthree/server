@@ -1,0 +1,236 @@
+#include "botpch.h"
+#include "../../playerbot.h"
+#include "WarriorActions.h"
+#include "WarriorAiObjectContext.h"
+#include "GenericWarriorNonCombatStrategy.h"
+#include "TankWarriorStrategy.h"
+#include "DpsWarriorStrategy.h"
+#include "../generic/PullStrategy.h"
+#include "WarriorTriggers.h"
+#include "../NamedObjectContext.h"
+
+using namespace ai;
+
+
+namespace ai
+{
+    namespace warrior
+    {
+        using namespace ai;
+
+        class StrategyFactoryInternal : public NamedObjectContext<Strategy>
+        {
+        public:
+            StrategyFactoryInternal()
+            {
+                creators["nc"] = &warrior::StrategyFactoryInternal::nc;
+                creators["pull"] = &warrior::StrategyFactoryInternal::pull;
+                creators["aoe"] = &warrior::StrategyFactoryInternal::aoe;
+            }
+
+        private:
+            static Strategy* nc(PlayerbotAI* ai) { return new GenericWarriorNonCombatStrategy(ai); }
+            static Strategy* aoe(PlayerbotAI* ai) { return new DpsWarrirorAoeStrategy(ai); }
+            static Strategy* pull(PlayerbotAI* ai) { return new PullStrategy(ai, "shoot"); }
+        };
+
+        class CombatStrategyFactoryInternal : public NamedObjectContext<Strategy>
+        {
+        public:
+            CombatStrategyFactoryInternal() : NamedObjectContext<Strategy>(false, true)
+            {
+                creators["tank"] = &warrior::CombatStrategyFactoryInternal::tank;
+                creators["dps"] = &warrior::CombatStrategyFactoryInternal::dps;
+            }
+
+        private:
+            static Strategy* tank(PlayerbotAI* ai) { return new TankWarriorStrategy(ai); }
+            static Strategy* dps(PlayerbotAI* ai) { return new DpsWarriorStrategy(ai); }
+        };
+    };
+};
+
+namespace ai
+{
+    namespace warrior
+    {
+        using namespace ai;
+
+        class TriggerFactoryInternal : public NamedObjectContext<Trigger>
+        {
+        public:
+            TriggerFactoryInternal()
+            {
+                creators["hamstring"] = &TriggerFactoryInternal::hamstring;
+                creators["victory rush"] = &TriggerFactoryInternal::victory_rush;
+                creators["death wish"] = &TriggerFactoryInternal::death_wish;
+                creators["battle shout"] = &TriggerFactoryInternal::battle_shout;
+                creators["rend"] = &TriggerFactoryInternal::rend;
+                creators["rend on attacker"] = &TriggerFactoryInternal::rend_on_attacker;
+                creators["pummel"] = &TriggerFactoryInternal::pummel;
+                creators["disarm"] = &TriggerFactoryInternal::disarm;
+                creators["concussion blow"] = &TriggerFactoryInternal::concussion_blow;
+                creators["sword and board"] = &TriggerFactoryInternal::SwordAndBoard;
+                creators["pummel on enemy healer"] = &TriggerFactoryInternal::pummel_on_enemy_healer;
+                creators["mortal strike"] = &TriggerFactoryInternal::mortal_strike;
+                creators["colossus smash"] = &TriggerFactoryInternal::colossus_smash;
+                creators["taste for blood"] = &TriggerFactoryInternal::taste_for_blood;
+                creators["raging blow"] = &TriggerFactoryInternal::raging_blow;
+                creators["recklessness"] = &TriggerFactoryInternal::recklessness;
+                creators["revenge"] = &TriggerFactoryInternal::revenge;
+                creators["shield slam"] = &TriggerFactoryInternal::shield_slam;
+                creators["shield block"] = &TriggerFactoryInternal::shield_block;
+                creators["bloodthirst"] = &TriggerFactoryInternal::bloodthirst;
+                creators["thunder clap"] = &TriggerFactoryInternal::thunder_clap;
+                creators["demoralizing shout"] = &TriggerFactoryInternal::demoralizing_shout;
+                creators["berserker stance"] = &TriggerFactoryInternal::berserker_stance;
+                creators["not enraged"] = &TriggerFactoryInternal::not_enraged;
+                creators["battle trance"] = &TriggerFactoryInternal::battle_trance;
+                creators["bloodsurge"] = &TriggerFactoryInternal::bloodsurge;
+                creators["deadly calm"] = &TriggerFactoryInternal::deadly_calm;
+
+            }
+
+        private:
+            static Trigger* hamstring(PlayerbotAI* ai) { return new HamstringTrigger(ai); }
+            static Trigger* victory_rush(PlayerbotAI* ai) { return new VictoryRushTrigger(ai); }
+            static Trigger* death_wish(PlayerbotAI* ai) { return new DeathWishTrigger(ai); }
+            static Trigger* battle_shout(PlayerbotAI* ai) { return new BattleShoutTrigger(ai); }
+            static Trigger* rend(PlayerbotAI* ai) { return new RendDebuffTrigger(ai); }
+            static Trigger* rend_on_attacker(PlayerbotAI* ai) { return new RendDebuffOnAttackerTrigger(ai); }
+            static Trigger* pummel(PlayerbotAI* ai) { return new PummelInterruptSpellTrigger(ai); }
+            static Trigger* disarm(PlayerbotAI* ai) { return new DisarmDebuffTrigger(ai); }
+            static Trigger* concussion_blow(PlayerbotAI* ai) { return new ConcussionBlowTrigger(ai); }
+            static Trigger* SwordAndBoard(PlayerbotAI* ai) { return new SwordAndBoardProcTrigger(ai); }
+            static Trigger* pummel_on_enemy_healer(PlayerbotAI* ai) { return new PummelInterruptEnemyHealerSpellTrigger(ai); }
+            static Trigger* mortal_strike(PlayerbotAI* ai) { return new MortalStrikeAvailableTrigger(ai); }
+            static Trigger* colossus_smash(PlayerbotAI* ai) { return new ColossusSmashAvailableTrigger(ai); }
+            static Trigger* taste_for_blood(PlayerbotAI* ai) { return new TasteForBloodTrigger(ai); }
+            static Trigger* raging_blow(PlayerbotAI* ai) { return new RagingBlowAvailableTrigger(ai); }
+            static Trigger* recklessness(PlayerbotAI* ai) { return new RecklessnessTrigger(ai); }
+            static Trigger* revenge(PlayerbotAI* ai) { return new RevengeAvailableTrigger(ai); }
+            static Trigger* shield_slam(PlayerbotAI* ai) { return new ShieldSlamAvailableTrigger(ai); }
+            static Trigger* shield_block(PlayerbotAI* ai) { return new ShieldBlockAvailableTrigger(ai); }
+            static Trigger* bloodthirst(PlayerbotAI* ai) { return new BloodthirstAvailableTrigger(ai); }
+            static Trigger* thunder_clap(PlayerbotAI* ai) { return new ThunderClapDebuffTrigger(ai); }
+            static Trigger* demoralizing_shout(PlayerbotAI* ai) { return new DemoralizingShoutDebuffTrigger(ai); }
+            static Trigger* berserker_stance(PlayerbotAI* ai) { return new BerserkerStanceTrigger(ai); }
+            static Trigger* not_enraged(PlayerbotAI* ai) { return new NotEnragedTrigger(ai); }
+            static Trigger* battle_trance(PlayerbotAI* ai) { return new BattleTranceProcTrigger(ai); }
+            static Trigger* bloodsurge(PlayerbotAI* ai) { return new BloodsurgeProcTrigger(ai); }
+            static Trigger* deadly_calm(PlayerbotAI* ai) { return new DeadlyCalmTrigger(ai); }
+        };
+    };
+};
+
+
+namespace ai
+{
+    namespace warrior
+    {
+        using namespace ai;
+
+        class AiObjectContextInternal : public NamedObjectContext<Action>
+        {
+        public:
+            AiObjectContextInternal()
+            {
+                creators["devastate"] = &AiObjectContextInternal::devastate;
+                creators["overpower"] = &AiObjectContextInternal::overpower;
+                creators["charge"] = &AiObjectContextInternal::charge;
+                creators["bloodthirst"] = &AiObjectContextInternal::bloodthirst;
+                creators["rend"] = &AiObjectContextInternal::rend;
+                creators["rend on attacker"] = &AiObjectContextInternal::rend_on_attacker;
+                creators["death wish"] = &AiObjectContextInternal::death_wish;
+                creators["berserker rage"] = &AiObjectContextInternal::berserker_rage;
+                creators["victory rush"] = &AiObjectContextInternal::victory_rush;
+                creators["execute"] = &AiObjectContextInternal::execute;
+                creators["defensive stance"] = &AiObjectContextInternal::defensive_stance;
+                creators["hamstring"] = &AiObjectContextInternal::hamstring;
+                creators["pummel"] = &AiObjectContextInternal::pummel;
+                creators["shield block"] = &AiObjectContextInternal::shield_block;
+                creators["battle stance"] = &AiObjectContextInternal::battle_stance;
+                creators["heroic strike"] = &AiObjectContextInternal::heroic_strike;
+                creators["intimidating shout"] = &AiObjectContextInternal::intimidating_shout;
+                creators["demoralizing shout"] = &AiObjectContextInternal::demoralizing_shout;
+                creators["challenging shout"] = &AiObjectContextInternal::challenging_shout;
+                creators["shield wall"] = &AiObjectContextInternal::shield_wall;
+                creators["battle shout"] = &AiObjectContextInternal::battle_shout;
+                creators["thunder clap"] = &AiObjectContextInternal::thunder_clap;
+                creators["taunt"] = &AiObjectContextInternal::taunt;
+                creators["revenge"] = &AiObjectContextInternal::revenge;
+                creators["slam"] = &AiObjectContextInternal::slam;
+                creators["shield slam"] = &AiObjectContextInternal::shield_slam;
+                creators["disarm"] = &AiObjectContextInternal::disarm;
+                creators["sunder armor"] = &AiObjectContextInternal::sunder_armor;
+                creators["last stand"] = &AiObjectContextInternal::last_stand;
+                creators["shockwave"] = &AiObjectContextInternal::shockwave;
+                creators["cleave"] = &AiObjectContextInternal::cleave;
+                creators["concussion blow"] = &AiObjectContextInternal::concussion_blow;
+                creators["pummel on enemy healer"] = &AiObjectContextInternal::pummel_on_enemy_healer;
+                creators["mortal strike"] = &AiObjectContextInternal::mortal_strike;
+                creators["colossus smash"] = &AiObjectContextInternal::colossus_smash;
+                creators["raging blow"] = &AiObjectContextInternal::raging_blow;
+                creators["recklessness"] = &AiObjectContextInternal::recklessness;
+                creators["deadly calm"] = &AiObjectContextInternal::deadly_calm;
+                creators["berserker stance"] = &AiObjectContextInternal::berserker_stance;
+                creators["sweeping strikes"] = &AiObjectContextInternal::sweeping_strikes;
+                creators["bladestorm"] = &AiObjectContextInternal::bladestorm;
+                creators["whirlwind"] = &AiObjectContextInternal::whirlwind;
+            }
+
+        private:
+            static Action* devastate(PlayerbotAI* ai) { return new CastDevastateAction(ai); }
+            static Action* last_stand(PlayerbotAI* ai) { return new CastLastStandAction(ai); }
+            static Action* shockwave(PlayerbotAI* ai) { return new CastShockwaveAction(ai); }
+            static Action* cleave(PlayerbotAI* ai) { return new CastCleaveAction(ai); }
+            static Action* concussion_blow(PlayerbotAI* ai) { return new CastConcussionBlowAction(ai); }
+            static Action* taunt(PlayerbotAI* ai) { return new CastTauntAction(ai); }
+            static Action* revenge(PlayerbotAI* ai) { return new CastRevengeAction(ai); }
+            static Action* slam(PlayerbotAI* ai) { return new CastSlamAction(ai); }
+            static Action* shield_slam(PlayerbotAI* ai) { return new CastShieldSlamAction(ai); }
+            static Action* disarm(PlayerbotAI* ai) { return new CastDisarmAction(ai); }
+            static Action* sunder_armor(PlayerbotAI* ai) { return new CastSunderArmorAction(ai); }
+            static Action* overpower(PlayerbotAI* ai) { return new CastOverpowerAction(ai); }
+            static Action* charge(PlayerbotAI* ai) { return new CastChargeAction(ai); }
+            static Action* bloodthirst(PlayerbotAI* ai) { return new CastBloodthirstAction(ai); }
+            static Action* rend(PlayerbotAI* ai) { return new CastRendAction(ai); }
+            static Action* rend_on_attacker(PlayerbotAI* ai) { return new CastRendOnAttackerAction(ai); }
+            static Action* death_wish(PlayerbotAI* ai) { return new CastDeathWishAction(ai); }
+            static Action* berserker_rage(PlayerbotAI* ai) { return new CastBerserkerRageAction(ai); }
+            static Action* victory_rush(PlayerbotAI* ai) { return new CastVictoryRushAction(ai); }
+            static Action* execute(PlayerbotAI* ai) { return new CastExecuteAction(ai); }
+            static Action* defensive_stance(PlayerbotAI* ai) { return new CastDefensiveStanceAction(ai); }
+            static Action* hamstring(PlayerbotAI* ai) { return new CastHamstringAction(ai); }
+            static Action* pummel(PlayerbotAI* ai) { return new CastPummelAction(ai); }
+            static Action* shield_block(PlayerbotAI* ai) { return new CastShieldBlockAction(ai); }
+            static Action* battle_stance(PlayerbotAI* ai) { return new CastBattleStanceAction(ai); }
+            static Action* heroic_strike(PlayerbotAI* ai) { return new CastHeroicStrikeAction(ai); }
+            static Action* intimidating_shout(PlayerbotAI* ai) { return new CastIntimidatingShoutAction(ai); }
+            static Action* demoralizing_shout(PlayerbotAI* ai) { return new CastDemoralizingShoutAction(ai); }
+            static Action* challenging_shout(PlayerbotAI* ai) { return new CastChallengingShoutAction(ai); }
+            static Action* shield_wall(PlayerbotAI* ai) { return new CastShieldWallAction(ai); }
+            static Action* battle_shout(PlayerbotAI* ai) { return new CastBattleShoutAction(ai); }
+            static Action* thunder_clap(PlayerbotAI* ai) { return new CastThunderClapAction(ai); }
+            static Action* pummel_on_enemy_healer(PlayerbotAI* ai) { return new CastPummelOnEnemyHealerAction(ai); }
+            static Action* mortal_strike(PlayerbotAI* ai) { return new CastMortalStrikeAction(ai); }
+            static Action* colossus_smash(PlayerbotAI* ai) { return new CastColossusSmashAction(ai); }
+            static Action* raging_blow(PlayerbotAI* ai) { return new CastRagingBlowAction(ai); }
+            static Action* recklessness(PlayerbotAI* ai) { return new CastRecklessnessAction(ai); }
+            static Action* deadly_calm(PlayerbotAI* ai) { return new CastDeadlyCalmAction(ai); }
+            static Action* berserker_stance(PlayerbotAI* ai) { return new CastBerserkerStanceAction(ai); }
+            static Action* sweeping_strikes(PlayerbotAI* ai) { return new CastSweepingStrikesAction(ai); }
+            static Action* bladestorm(PlayerbotAI* ai) { return new CastBladestormAction(ai); }
+            static Action* whirlwind(PlayerbotAI* ai) { return new CastWhirlwindAction(ai); }
+
+        };
+    };
+};
+
+WarriorAiObjectContext::WarriorAiObjectContext(PlayerbotAI* ai) : AiObjectContext(ai)
+{
+    strategyContexts.Add(new ai::warrior::StrategyFactoryInternal());
+    strategyContexts.Add(new ai::warrior::CombatStrategyFactoryInternal());
+    actionContexts.Add(new ai::warrior::AiObjectContextInternal());
+    triggerContexts.Add(new ai::warrior::TriggerFactoryInternal());
+}

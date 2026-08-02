@@ -234,16 +234,33 @@ void WorldObject::GetRandomPoint(float x, float y, float z, float distance,
 
 uint32 WorldObject::GetZoneId() const
 {
+    // No current map -> no terrain to resolve against (a bot a quest reward spell
+    // teleported off its map mid-randomize, or one whose login never completed
+    // Map::Add). Report no zone rather than dereferencing a NULL map and crashing.
+    if (!FindMap())
+    {
+        return 0;
+    }
     return GetTerrain()->GetZoneId(Where().X(), Where().Y(), Where().Z());
 }
 
 uint32 WorldObject::GetAreaId() const
 {
+    if (!FindMap())
+    {
+        return 0;
+    }
     return GetTerrain()->GetAreaId(Where().X(), Where().Y(), Where().Z());
 }
 
 void WorldObject::GetZoneAndAreaId(uint32& zoneid, uint32& areaid) const
 {
+    if (!FindMap())
+    {
+        zoneid = 0;
+        areaid = 0;
+        return;
+    }
     GetTerrain()->GetZoneAndAreaId(zoneid, areaid, Where().X(), Where().Y(), Where().Z());
 }
 

@@ -161,6 +161,14 @@ class ChatHandler
             ObjectGuid const& targetGuid = ObjectGuid(), char const* targetName = NULL,
             char const* channelName = NULL, uint32 achievementId = 0, const char* addonPrefix = NULL);
 
+#ifdef ENABLE_PLAYERBOTS
+        WorldSession* GetSession() { return m_session; }
+        bool HandlePlayerbotCommand(char* args);
+        bool HandleRandomPlayerbotCommand(char* args);
+        bool HandleAhBotCommand(char* args);
+        bool HandleGuildTaskCommand(char* args);
+#endif
+
     protected:
         explicit ChatHandler() : m_session(NULL), sentErrorMessage(false) {}      // for CLI subclass
 

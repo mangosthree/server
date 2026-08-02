@@ -355,7 +355,7 @@ void Spell::cast(bool skipCheck)
             // Bandages
             if (m_spellInfo->GetMechanic() == MECHANIC_BANDAGE)
             {
-                AddPrecastSpell(11196);                     // Recently Bandaged
+                AddPrecastSpell(SPELL_ID_RECENTLY_BANDAGED); // Recently Bandaged
             }
             // Stoneskin
             else if (m_spellInfo->ID == 20594)

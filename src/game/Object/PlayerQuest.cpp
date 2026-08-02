@@ -1161,26 +1161,33 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST, pQuest->GetQuestId());
 
     // remove auras from spells with quest reward state limitations
-    // Some spells applied at quest reward
-    uint32 zone, area;
-    GetTerrain()->GetZoneAndAreaId(zone, area, Where().X(), Where().Y(), Where().Z());
-    SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(zone);
-    for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+    // Some spells applied at quest reward.
+    // A reward spell cast above (GetRewSpell) can teleport the player off their
+    // current map, leaving m_currMap NULL; GetTerrain() would then dereference it
+    // and crash. Without a map there is no zone, hence no zone-limited
+    // auras to reconcile, so skip this block when the player is no longer mapped.
+    if (FindMap())
     {
-        itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
-    }
-    if (area != zone)
-    {
-        saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(area);
+        uint32 zone, area;
+        GetTerrain()->GetZoneAndAreaId(zone, area, Where().X(), Where().Y(), Where().Z());
+        SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(zone);
         for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
         {
             itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
         }
-    }
-    saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(0);
-    for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-    {
-        itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
+        if (area != zone)
+        {
+            saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(area);
+            for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+            {
+                itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
+            }
+        }
+        saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(0);
+        for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+        {
+            itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
+        }
     }
 
     // resend quests status directly
@@ -2957,6 +2964,14 @@ void Player::SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, ObjectGuid guid
 
 void Player::SendQuestGiverStatusMultiple()
 {
+    // Walks m_clientGUIDs through GetMap(); a player with no current map (e.g. one a
+    // quest reward spell just teleported off it, mid-RewardQuest) would null-deref.
+    // No map means no nearby questgivers to report, so nothing to send.
+    if (!FindMap())
+    {
+        return;
+    }
+
     uint32 count = 0;
     uint32 dialogStatus = DIALOG_STATUS_NONE;
 
@@ -3082,6 +3097,15 @@ bool Player::HasQuestForGO(int32 GOId) const
 void Player::UpdateForQuestWorldObjects()
 {
     if (m_clientGUIDs.empty())
+    {
+        return;
+    }
+
+    // Resolves each visible GUID through GetMap(); a player with no current map
+    // (e.g. a bot displaced off its map mid-randomize by a quest reward spell, or
+    // one whose login never completed Map::Add) would null-deref. With no map there
+    // are no visible world objects to refresh.
+    if (!FindMap())
     {
         return;
     }

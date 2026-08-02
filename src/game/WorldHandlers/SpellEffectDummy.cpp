@@ -3573,6 +3573,34 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
             switch (m_spellInfo->ID)
             {
+                case 19740:                                 // Blessing of Might
+                case 20217:                                 // Blessing of Kings
+                {
+                    if (!unitTarget)
+                    {
+                        return;
+                    }
+
+                    // Cata 4.3.4: dummy carries the buff spell id; id + 1 is the raid-wide variant
+                    uint32 buffId = m_currentBasePoints[effect->EffectIndex];
+                    if (!sSpellStore.LookupEntry(buffId))
+                    {
+                        return;
+                    }
+
+                    Player* casterPlayer = m_caster->GetTypeId() == TYPEID_PLAYER ? (Player*)m_caster : NULL;
+                    Player* targetPlayer = unitTarget->GetCharmerOrOwnerPlayerOrPlayerItself();
+                    if (casterPlayer && targetPlayer && casterPlayer != targetPlayer &&
+                        casterPlayer->IsInSameRaidWith(targetPlayer) && sSpellStore.LookupEntry(buffId + 1))
+                    {
+                        m_caster->CastSpell(m_caster, buffId + 1, true);
+                    }
+                    else
+                    {
+                        m_caster->CastSpell(unitTarget, buffId, true);
+                    }
+                    return;
+                }
                 case 31789:                                 // Righteous Defense (step 1)
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)

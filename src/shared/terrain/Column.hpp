@@ -29,6 +29,7 @@ namespace world::terrain
         LiquidKind liquid = LiquidKind::None;
         uint16_t liquidEntry = 0;
         bool deep = false;
+        bool fromAdt = false;  ///< tile (ADT) liquid, not carried by a model
 
         bool Solid() const { return kind != SurfaceKind::Liquid; }
 
@@ -54,7 +55,7 @@ namespace world::terrain
                 m_surfaces.push_back(s);
             }
 
-            void AddLiquid(const LiquidInfo& info)
+            void AddLiquid(const LiquidInfo& info, bool fromAdt = false)
             {
                 Surface s;
                 s.z = info.level;
@@ -62,6 +63,7 @@ namespace world::terrain
                 s.liquid = info.kind;
                 s.liquidEntry = info.entry;
                 s.deep = info.deep;
+                s.fromAdt = fromAdt;
                 m_surfaces.push_back(s);
             }
 
@@ -118,17 +120,32 @@ namespace world::terrain
                 return LowestSolidAbove(z + tolerance);
             }
 
-            std::optional<Surface> HighestLiquid() const
+            std::optional<Surface> HighestLiquid(bool includeAdt = true) const
             {
                 std::optional<Surface> best;
                 for (const Surface& s : m_surfaces)
                 {
-                    if (s.kind == SurfaceKind::Liquid && (!best || s.z > best->z))
+                    if (s.kind == SurfaceKind::Liquid &&
+                        (includeAdt || !s.fromAdt) && (!best || s.z > best->z))
                     {
                         best = s;
                     }
                 }
                 return best;
+            }
+
+            /// Whether any baked model surface lies in the sweep -- the cheap
+            /// pre-test for "could this point be inside a WMO at all".
+            bool HasStatic() const
+            {
+                for (const Surface& s : m_surfaces)
+                {
+                    if (s.kind == SurfaceKind::Static)
+                    {
+                        return true;
+                    }
+                }
+                return false;
             }
 
         private:

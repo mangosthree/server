@@ -82,6 +82,11 @@ namespace
     const uint32 LIQUID_OUTLAND_OCEAN_ROW = 15;
     const uint32 LIQUID_FIRST_OVERRIDABLE_ROW = 21;
 
+    // MOGP group flag: the group is an interior. Outside (ADT) liquid must not
+    // reach a point inside one -- Vashj'ir's L'ghorek air pocket, a dry hold
+    // under the sea -- only liquid the WMO itself carries counts there.
+    const uint32 MOGP_FLAG_INTERIOR = 0x2000;
+
     // LiquidType.dbc SoundBank is the family the client uses (0 water .. 3 slime), and
     // MAP_LIQUID_TYPE_* is one bit per family in that order. The DBC is the authority:
     // the tile carries the row id, never a pre-chewed category.
@@ -352,10 +357,27 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z,
     const world::terrain::Column column =
         ColumnAt(x, y, z + FLOOR_BURIED_LIFT, z - FLOOR_SEARCH_DOWN);
 
-    const auto liquid = column.HighestLiquid();
+    auto liquid = column.HighestLiquid();
     if (!liquid || !liquid->liquidEntry)
     {
         return LIQUID_MAP_NO_WATER;
+    }
+
+    // Tile liquid is the OUTSIDE water. When the point sits inside a WMO
+    // interior group, drop it and keep only what the model itself carries.
+    if (liquid->fromAdt && column.HasStatic())
+    {
+        uint32 mogpFlags = 0;
+        int32 adtId = 0, rootId = 0, groupId = 0;
+        if (GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId) &&
+            (mogpFlags & MOGP_FLAG_INTERIOR))
+        {
+            liquid = column.HighestLiquid(false);
+            if (!liquid || !liquid->liquidEntry)
+            {
+                return LIQUID_MAP_NO_WATER;
+            }
+        }
     }
     const LiquidInfo info = liquid->AsLiquid();
 

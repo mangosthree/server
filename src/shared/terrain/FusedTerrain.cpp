@@ -345,7 +345,7 @@ namespace world::terrain
         {
             if (auto adt = tile->LiquidAt(x, y))
             {
-                column.AddLiquid(*adt);
+                column.AddLiquid(*adt, true);
             }
         }
 

@@ -138,6 +138,8 @@ namespace
         uint64_t existsBits = ~uint64_t(0);
         bool withHeights = false;
         float heightBias = 0.f;
+        bool withDepths = false;      ///< uint8 depth array at offsVerts (LVF 2 / ocean object)
+        uint8_t depthFill = 0xBC;     ///< 0xBCBCBCBC == -0.023f if misread as float32
         bool withAttributes = false;
         uint64_t fishableBits = 0;
         uint64_t deepBits = 0;
@@ -179,7 +181,7 @@ namespace
             existsOfs = cursor;
             cursor += 8;
         }
-        if (l.withHeights)
+        if (l.withHeights || l.withDepths)
         {
             vertsOfs = cursor;
         }
@@ -212,6 +214,23 @@ namespace
                 {
                     tail.F32(l.heightBias + float(y * (l.w + 1) + x));
                 }
+            }
+        }
+        if (l.withDepths)
+        {
+            const int corners = (l.w + 1) * (l.h + 1);
+            for (int i = 0; i < corners; ++i)
+            {
+                tail.U8(l.depthFill);
+            }
+            // Real MH2O bodies carry far more data after a depth array (the
+            // other 255 chunks' instances); the pre-fix bug's float32 read
+            // guard (AdtParser.cpp:214-215) sizes against 4 bytes/corner, so
+            // pad with the same fill byte to reproduce that guard passing
+            // here too, uniformly, without changing the reinterpreted bits.
+            for (int i = corners; i < corners * 4; ++i)
+            {
+                tail.U8(l.depthFill);
             }
         }
 
@@ -496,6 +515,60 @@ TEST(AdtMh2oDepthOnlyLayerUsesMinHeight)
     AdtData d;
     REQUIRE(ParseAdt(adt.b, d));
     CHECK_EQ(d.liquidHeight[0], -7.25f);
+}
+
+TEST(AdtMh2oOceanLiquidObjectIsDepthOnly)
+{
+    float mcvt[145];
+    FillRamp(mcvt, 0.f);
+
+    // Retail coastal ocean: LiquidType 2 through LiquidObject 42, vertex data
+    // is uint8 depths. Misread as float32 the fill byte bakes -0.023f (real
+    // tiles bake anything up to +-1e36).
+    Mh2oLayer l;
+    l.entry = 2;
+    l.lvf = 42;
+    l.minHeight = 0.f;
+    l.withDepths = true;
+
+    Blob adt;
+    PutChunk(adt, "MCNK", MakeMcnk(0, 0, 0.f, 0, 0, mcvt));
+    PutChunk(adt, "MH2O", MakeMh2o(0, 0, l));
+
+    AdtData d;
+    REQUIRE(ParseAdt(adt.b, d));
+    REQUIRE(d.hasLiquid);
+    for (int y = 0; y <= 8; ++y)
+    {
+        for (int x = 0; x <= 8; ++x)
+        {
+            CHECK_EQ(d.liquidHeight[size_t(y) * ADT_V9 + x], 0.f);
+        }
+    }
+}
+
+TEST(AdtMh2oNonOceanLiquidObjectKeepsHeights)
+{
+    float mcvt[145];
+    FillRamp(mcvt, 0.f);
+
+    // A river authored as a LiquidObject: LiquidType 5 resolves to a
+    // height-first vertex format, so the float height map must be honoured.
+    Mh2oLayer l;
+    l.entry = 5;
+    l.lvf = 3001;
+    l.w = 2;
+    l.h = 2;
+    l.withHeights = true;
+    l.heightBias = 55.f;
+
+    Blob adt;
+    PutChunk(adt, "MCNK", MakeMcnk(0, 0, 0.f, 0, 0, mcvt));
+    PutChunk(adt, "MH2O", MakeMh2o(0, 0, l));
+
+    AdtData d;
+    REQUIRE(ParseAdt(adt.b, d));
+    CHECK_EQ(d.liquidHeight[size_t(1) * ADT_V9 + 2], 55.f + float(1 * 3 + 2));
 }
 
 TEST(AdtMh2oRejectsOutOfRangeInstance)

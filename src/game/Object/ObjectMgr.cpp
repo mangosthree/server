@@ -2380,7 +2380,7 @@ bool PlayerCondition::CheckParamRequirements(Player const* pPlayer, Map const* m
                     // Case 2 (Instance map only)
                     if (!map && (pPlayer || source))
                     {
-                        map = source ? source->GetMap() : pPlayer->GetMap();
+                        map = source ? source->FindMap() : pPlayer->FindMap();
                     }
                     if (!map || !map->Instanceable())
                     {

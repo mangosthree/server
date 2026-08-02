@@ -100,7 +100,7 @@ void WorldSession::HandleSetDungeonDifficultyOpcode(WorldPacket& recv_data)
     }
 
     // cannot reset while in an instance
-    Map* map = _player->GetMap();
+    Map* map = _player->FindMap();
     if (map && map->IsDungeon())
     {
         sLog.outError("WorldSession::HandleSetDungeonDifficultyOpcode: player %d tried to reset the instance while inside!", _player->GetGUIDLow());
@@ -149,7 +149,7 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recv_data)
     }
 
     // cannot reset while in an instance
-    Map* map = _player->GetMap();
+    Map* map = _player->FindMap();
     if (map && map->IsDungeon())
     {
         sLog.outError("WorldSession::HandleSetRaidDifficultyOpcode: player %d tried to reset the instance while inside!", _player->GetGUIDLow());

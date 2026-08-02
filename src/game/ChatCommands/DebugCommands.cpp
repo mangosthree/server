@@ -1852,7 +1852,7 @@ bool ChatHandler::HandleDebugMinionCommand(char* /*args*/)
     {
         if (Transport* vessel = deck->Vessel())
         {
-            if (Map* sailed = vessel->GetMap())
+            if (Map* sailed = vessel->FindMap())
             {
                 DumpPetsOn(sailed, "ashore");
             }

@@ -234,7 +234,7 @@ GameObject* WorldObject::SummonGameObject(uint32 id, float x, float y, float z, 
 {
     GameObject* pGameObj = new GameObject;
 
-    Map *map = GetMap();
+    Map *map = FindMap();
 
     if (!map)
     {

@@ -448,7 +448,7 @@ Transport* Transport::VesselOf(WorldObject const& obj)
     //
     // A lift passenger and a vehicle rider are NOT here: their map is the world's, and the
     // seat transform is the vehicle system's business, not this one's.
-    Map* map = obj.GetMap();
+    Map* map = obj.FindMap();
     TransportMap* hull = map ? map->AsTransport() : NULL;
     return hull ? hull->Vessel() : NULL;
 }
@@ -472,7 +472,7 @@ void Transport::WithdrawFromWorld()
         m_map->ReleaseCrew();
     }
 
-    if (Map* sailed = GetMap())
+    if (Map* sailed = FindMap())
     {
         sailed->RemoveFromActive(this);
     }
@@ -792,7 +792,7 @@ void Transport::MoveToNextWayPoint()
  */
 void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
 {
-    Map* oldMap = GetMap();
+    Map* oldMap = FindMap();
 
     // The route decided WHEN; what crossing means for anyone standing on her is not this
     // object's business and never was. Her own map is told and owns every consequence.
@@ -832,7 +832,7 @@ void Transport::CompleteCrossing()
     const uint32 newMapid = m_crossingTo;
     m_crossingTo = 0;
 
-    Map* oldMap = GetMap();
+    Map* oldMap = FindMap();
     Map* newMap = sMapMgr.CreateMap(newMapid, this);
     if (!oldMap || !newMap || oldMap == newMap)
     {

@@ -443,7 +443,7 @@ bool TransportMap::Add(Player* passenger)
     //
     // Never while she is between two maps: she would name the one she is leaving, and he
     // would be handed a continent's worth of ships that are not on the water he can see.
-    if (Map* sailed = m_vessel->IsCrossing() ? NULL : m_vessel->GetMap())
+    if (Map* sailed = m_vessel->IsCrossing() ? NULL : m_vessel->FindMap())
     {
         MapManager::TransportsByMapType::const_iterator vessels =
             sMapMgr.m_TransportsByMap.find(sailed->GetId());
@@ -496,7 +496,7 @@ void TransportMap::Disembark(Player* passenger, float x, float y, float z, float
         return;
     }
 
-    Map* sailed = m_vessel ? m_vessel->GetMap() : NULL;
+    Map* sailed = m_vessel ? m_vessel->FindMap() : NULL;
     if (!sailed)
     {
         return;
@@ -707,7 +707,7 @@ void TransportMap::AppendCrewDestroyBlocks(UpdateData& data)
 
 void TransportMap::SendCrewMemberCreate(Creature* crew)
 {
-    if (!crew || !crew->IsInWorld() || !m_vessel || !m_vessel->GetMap())
+    if (!crew || !crew->IsInWorld() || !m_vessel || !m_vessel->FindMap())
     {
         return;
     }
@@ -779,7 +779,7 @@ void TransportMap::RetractVessel(Transport* vessel, Player* observer)
 void TransportMap::CollectRelaySources(WorldObject const* viewer, float visibility,
                                        std::vector<RelaySource>& out)
 {
-    if (!viewer || !viewer->GetMap())
+    if (!viewer || !viewer->FindMap())
     {
         return;
     }
@@ -789,7 +789,7 @@ void TransportMap::CollectRelaySources(WorldObject const* viewer, float visibili
     if (TransportMap const* hull = viewer->GetMap()->AsTransport())
     {
         Transport* vessel = hull->Vessel();
-        if (Map* sailed = vessel ? vessel->GetMap() : NULL)
+        if (Map* sailed = vessel ? vessel->FindMap() : NULL)
         {
             out.push_back({sailed, vessel->Where().X(), vessel->Where().Y(),
                            visibility + hull->HullRadius() + vessel->NodeSlack()});
@@ -807,7 +807,7 @@ void TransportMap::CollectRelaySources(WorldObject const* viewer, float visibili
     for (Transport* vessel : vessels->second)
     {
         TransportMap* hull = vessel->AsMap();
-        if (!hull || vessel->GetMap() != viewer->GetMap())
+        if (!hull || vessel->FindMap() != viewer->GetMap())
         {
             continue;
         }
@@ -826,7 +826,7 @@ void TransportMap::CollectRelaySources(WorldObject const* viewer, float visibili
 
 void TransportMap::GatherObservers()
 {
-    Map* world = m_vessel ? m_vessel->GetMap() : NULL;
+    Map* world = m_vessel ? m_vessel->FindMap() : NULL;
     if (!world)
     {
         return;

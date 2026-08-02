@@ -40,7 +40,7 @@ namespace
     /// crew, pet or totem alike -- without anyone having registered it as anything.
     ObjectGuid DeckVesselGuidOf(Unit const& unit)
     {
-        if (Map* on = unit.GetMap())
+        if (Map* on = unit.FindMap())
         {
             if (TransportMap* hull = on->AsTransport())
             {

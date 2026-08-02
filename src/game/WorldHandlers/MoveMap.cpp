@@ -323,8 +323,13 @@ namespace MMAP
             return false;
         }
 
+        /// Recast X is world Y, so the baker names a tile with the axes swapped
+        /// relative to the grid position. See NavMeshBuilder.hpp.
+        const int32 filenameTileX = y;
+        const int32 filenameTileY = x;
+
         // load this tile :: mmaps/MMMMXXYY.mmtile
-        const std::string fileName = MMapTileFileName(mapId, x, y);
+        const std::string fileName = MMapTileFileName(mapId, filenameTileX, filenameTileY);
 
         FILE* file = fopen(fileName.c_str(), "rb");
         if (!file)
@@ -339,7 +344,7 @@ namespace MMAP
 
         if (fileHeader.mmapMagic != MMAP_MAGIC)
         {
-            sLog.outError("MMAP:loadMap: Bad header in mmap %04u%02i%02i.mmtile", mapId, x, y);
+            sLog.outError("MMAP:loadMap: Bad header in mmap %04u%02i%02i.mmtile", mapId, filenameTileX, filenameTileY);
             fclose(file);
             return false;
         }
@@ -347,7 +352,7 @@ namespace MMAP
         if (fileHeader.mmapVersion != MMAP_VERSION)
         {
             sLog.outError("MMAP:loadMap: %04u%02i%02i.mmtile was built with generator v%i, expected v%i",
-                          mapId, x, y, fileHeader.mmapVersion, MMAP_VERSION);
+                          mapId, filenameTileX, filenameTileY, fileHeader.mmapVersion, MMAP_VERSION);
             fclose(file);
             return false;
         }
@@ -358,7 +363,7 @@ namespace MMAP
         size_t result = fread(data, fileHeader.size, 1, file);
         if (!result)
         {
-            sLog.outError("MMAP:loadMap: Bad header or data in mmap %04u%02i%02i.mmtile", mapId, x, y);
+            sLog.outError("MMAP:loadMap: Bad header or data in mmap %04u%02i%02i.mmtile", mapId, filenameTileX, filenameTileY);
             fclose(file);
             return false;
         }
@@ -371,7 +376,7 @@ namespace MMAP
         // memory allocated for data is now managed by detour, and will be deallocated when the tile is removed
         if (mmap->navMesh->addTile(data, fileHeader.size, DT_TILE_FREE_DATA, 0, &tileRef) != DT_SUCCESS)
         {
-            sLog.outError("MMAP:loadMap: Could not load %04u%02i%02i.mmtile into navmesh", mapId, x, y);
+            sLog.outError("MMAP:loadMap: Could not load %04u%02i%02i.mmtile into navmesh", mapId, filenameTileX, filenameTileY);
             dtFree(data);
             return false;
         }

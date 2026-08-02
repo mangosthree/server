@@ -138,6 +138,12 @@ namespace
         uint64_t existsBits = ~uint64_t(0);
         bool withHeights = false;
         float heightBias = 0.f;
+        bool withAttributes = false;
+        uint64_t fishableBits = 0;
+        uint64_t deepBits = 0;
+        /// Non-zero overrides the attributes offset written to the table, for
+        /// exercising the parser's bounds guard against a malformed chunk.
+        uint32_t forceAttributesOfs = 0;
     };
 
     // One MH2O chunk carrying a single layer on chunk (iy,ix).
@@ -161,7 +167,13 @@ namespace
         const uint32_t afterInstance = instOfs + 24;
         uint32_t existsOfs = 0;
         uint32_t vertsOfs = 0;
+        uint32_t attrOfs = 0;
         uint32_t cursor = afterInstance;
+        if (l.withAttributes)
+        {
+            attrOfs = cursor;
+            cursor += 16;
+        }
         if (l.withExists)
         {
             existsOfs = cursor;
@@ -174,6 +186,17 @@ namespace
         tail.U32(existsOfs);
         tail.U32(vertsOfs);
 
+        if (l.withAttributes)
+        {
+            for (int i = 0; i < 8; ++i)
+            {
+                tail.U8(uint8_t((l.fishableBits >> (i * 8)) & 0xFF));
+            }
+            for (int i = 0; i < 8; ++i)
+            {
+                tail.U8(uint8_t((l.deepBits >> (i * 8)) & 0xFF));
+            }
+        }
         if (l.withExists)
         {
             for (int i = 0; i < 8; ++i)
@@ -195,6 +218,8 @@ namespace
         body.Append(tail);
         body.PatchU32(size_t(iy * 16 + ix) * 12 + 0, instOfs);
         body.PatchU32(size_t(iy * 16 + ix) * 12 + 4, 1);
+        body.PatchU32(size_t(iy * 16 + ix) * 12 + 8,
+                      l.forceAttributesOfs ? l.forceAttributesOfs : attrOfs);
         return body;
     }
 
@@ -312,6 +337,92 @@ TEST(AdtMh2oFlatLayerFillsWholeChunk)
     }
     CHECK_EQ(d.liquidHeight[size_t(8) * ADT_V9 + 8], 42.5f);
     CHECK_EQ(d.liquidShow[0], uint8_t(0));
+}
+
+// Retail Vashj'ir ships MH2O with no attributes at all, and must not fatigue.
+// Absent is the common case, so it has to read as "not deep", never as a
+// default of set bits.
+TEST(AdtMh2oAbsentAttributesAreNotDeep)
+{
+    float mcvt[145];
+    FillRamp(mcvt, 0.f);
+
+    Mh2oLayer l;
+
+    Blob adt;
+    PutChunk(adt, "MCNK", MakeMcnk(1, 1, 0.f, 0, 0, mcvt));
+    PutChunk(adt, "MH2O", MakeMh2o(1, 1, l));
+
+    AdtData d;
+    REQUIRE(ParseAdt(adt.b, d));
+    CHECK_EQ(d.liquidDeepAttr[size_t(8) * ADT_GRID + 8], uint8_t(0));
+}
+
+TEST(AdtMh2oDeepAttributeMarksChunkDeep)
+{
+    float mcvt[145];
+    FillRamp(mcvt, 0.f);
+
+    Mh2oLayer l;
+    l.withAttributes = true;
+    l.deepBits = ~uint64_t(0);
+
+    Blob adt;
+    PutChunk(adt, "MCNK", MakeMcnk(1, 1, 0.f, 0, 0, mcvt));
+    PutChunk(adt, "MH2O", MakeMh2o(1, 1, l));
+
+    AdtData d;
+    REQUIRE(ParseAdt(adt.b, d));
+    for (int y = 0; y < 8; ++y)
+    {
+        for (int x = 0; x < 8; ++x)
+        {
+            CHECK_EQ(d.liquidDeepAttr[size_t(8 + y) * ADT_GRID + (8 + x)], uint8_t(1));
+        }
+    }
+    CHECK_EQ(d.liquidDeepAttr[0], uint8_t(0));
+}
+
+// The fishable bitmap sits ahead of the deep one; reading the wrong half would
+// flag shallow fishing water as fatiguing ocean.
+TEST(AdtMh2oFishableAttributeIsNotDeep)
+{
+    float mcvt[145];
+    FillRamp(mcvt, 0.f);
+
+    Mh2oLayer l;
+    l.withAttributes = true;
+    l.fishableBits = ~uint64_t(0);
+    l.deepBits = 0;
+
+    Blob adt;
+    PutChunk(adt, "MCNK", MakeMcnk(1, 1, 0.f, 0, 0, mcvt));
+    PutChunk(adt, "MH2O", MakeMh2o(1, 1, l));
+
+    AdtData d;
+    REQUIRE(ParseAdt(adt.b, d));
+    CHECK_EQ(d.liquidDeepAttr[size_t(8) * ADT_GRID + 8], uint8_t(0));
+}
+
+// A truncated or malformed chunk must fall back to "not deep" rather than
+// reading past the body.
+TEST(AdtMh2oOutOfRangeAttributesOffsetIsNotDeep)
+{
+    float mcvt[145];
+    FillRamp(mcvt, 0.f);
+
+    Mh2oLayer l;
+    l.withAttributes = true;
+    l.deepBits = ~uint64_t(0);
+    l.forceAttributesOfs = 0x00FFFFFF;
+
+    Blob adt;
+    PutChunk(adt, "MCNK", MakeMcnk(1, 1, 0.f, 0, 0, mcvt));
+    PutChunk(adt, "MH2O", MakeMh2o(1, 1, l));
+
+    AdtData d;
+    REQUIRE(ParseAdt(adt.b, d));
+    CHECK_EQ(d.liquidDeepAttr[size_t(8) * ADT_GRID + 8], uint8_t(0));
 }
 
 TEST(AdtMh2oHonoursSubRectAndExistsBitmap)

@@ -36,7 +36,7 @@ namespace world::terrain
         std::vector<uint8_t> liquidShow;
         std::vector<uint16_t> liquidEntry;
         std::vector<uint8_t> liquidDark;     ///< MCLQ per-cell dark-water bit
-        std::vector<uint8_t> liquidNoLight;  ///< MH2O layer shipped no light map
+        std::vector<uint8_t> liquidDeepAttr; ///< MH2O chunk deep attribute, cell-broadcast
 
         std::vector<std::string> wmoNames;
         std::vector<std::string> m2Names;

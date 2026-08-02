@@ -246,11 +246,13 @@ namespace world::terrain
                 const LiquidKind kind =
                     world::ClassifyLiquid(tile->liquidEntry[i], m_liquidTypes);
                 tile->liquidKind[i] = uint8_t(kind);
-                // Dark water is the MCLQ per-cell bit, or an ocean layer that shipped no
-                // light map -- the rule the reference extractor has always used.
+                // Dark water is the MCLQ per-cell bit (pre-WotLK tiles), or an
+                // ocean cell whose MH2O chunk carries the "deep" attribute --
+                // the rule the pre-rewrite extractor used. The former
+                // ocean-without-light-map guess misflagged all of Vashj'ir.
                 tile->liquidDeep[i] =
                     (adt.liquidDark[i] ||
-                     (kind == LiquidKind::Ocean && adt.liquidNoLight[i]))
+                     (kind == LiquidKind::Ocean && adt.liquidDeepAttr[i]))
                         ? 1
                         : 0;
             }

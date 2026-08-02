@@ -385,27 +385,6 @@ TEST(AdtMh2oDepthOnlyLayerUsesMinHeight)
     AdtData d;
     REQUIRE(ParseAdt(adt.b, d));
     CHECK_EQ(d.liquidHeight[0], -7.25f);
-    CHECK_EQ(d.liquidNoLight[0], uint8_t(0));
-}
-
-TEST(AdtMh2oMarksTextureCoordLayersAsUnlit)
-{
-    float mcvt[145];
-    FillRamp(mcvt, 0.f);
-
-    Mh2oLayer l;
-    l.lvf = 1;
-    l.w = 1;
-    l.h = 1;
-    l.withHeights = true;
-
-    Blob adt;
-    PutChunk(adt, "MCNK", MakeMcnk(0, 0, 0.f, 0, 0, mcvt));
-    PutChunk(adt, "MH2O", MakeMh2o(0, 0, l));
-
-    AdtData d;
-    REQUIRE(ParseAdt(adt.b, d));
-    CHECK_EQ(d.liquidNoLight[0], uint8_t(1));
 }
 
 TEST(AdtMh2oRejectsOutOfRangeInstance)

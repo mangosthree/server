@@ -38,7 +38,7 @@ namespace world::terrain
             out.liquidShow.assign(size_t(ADT_GRID) * ADT_GRID, 0);
             out.liquidEntry.assign(size_t(ADT_GRID) * ADT_GRID, 0);
             out.liquidDark.assign(size_t(ADT_GRID) * ADT_GRID, 0);
-            out.liquidNoLight.assign(size_t(ADT_GRID) * ADT_GRID, 0);
+            out.liquidDeepAttr.assign(size_t(ADT_GRID) * ADT_GRID, 0);
         }
 
         void ReadMcnk(const uint8_t* mcnk, uint32_t mcnkSize, AdtData& out)
@@ -177,6 +177,18 @@ namespace world::terrain
                         continue;
                     }
 
+                    // The 12-byte header's third field points at the Cataclysm
+                    // attributes pair { uint64 fishable; uint64 deep; }. Absent
+                    // means NOT deep: retail Vashj'ir ships no attributes and
+                    // must not fatigue, while real deep ocean carries set bits.
+                    const uint32_t offsAttributes = RdU32(ch + 8);
+                    uint64_t deepBits = 0;
+                    if (offsAttributes &&
+                        uint64_t(offsAttributes) + 16 <= bodySize)
+                    {
+                        deepBits = RdU64(body + offsAttributes + 8);
+                    }
+
                     for (uint32_t l = 0; l < layers; ++l)
                     {
                         const uint8_t* inst = body + offsInstances + l * INSTANCE;
@@ -195,11 +207,8 @@ namespace world::terrain
                             continue;
                         }
 
-                        // Vertex format 2 is depth-only and carries no heights; 1 and 3
-                        // replace the depth map with texture coordinates, which is the
-                        // "no light map" the reference reads dark water from.
+                        // Vertex format 2 is depth-only and carries no heights.
                         const bool hasHeights = (lvf != 2);
-                        const bool noLight = (lvf == 1 || lvf == 3 || !offsVerts);
                         const uint32_t corners = uint32_t(w + 1) * uint32_t(hgt + 1);
                         const uint8_t* heights = nullptr;
                         if (hasHeights && offsVerts &&
@@ -234,7 +243,7 @@ namespace world::terrain
                                 out.liquidShow[idx] = 1;
                                 out.liquidEntry[idx] = entry;
                                 out.liquidDark[idx] = 0;
-                                out.liquidNoLight[idx] = noLight ? 1 : 0;
+                                out.liquidDeepAttr[idx] = (deepBits != 0) ? 1 : 0;
                             }
                         }
 

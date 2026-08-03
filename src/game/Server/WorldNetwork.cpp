@@ -26,6 +26,7 @@
 #include <string>
 #include "WorldNetwork.h"
 
+#include "ClientConnection.h"
 #include "Log/Log.h"
 #include "OpcodeTable.h"
 
@@ -68,4 +69,9 @@ bool WorldNetwork::Start(uint16 port, const std::string& bindIp)
 void WorldNetwork::Stop()
 {
     m_listener.Stop();
+}
+
+uint32 WorldNetwork::GetOpenConnectionCount() const
+{
+    return proto::ClientConnection::GetOpenConnectionCount();
 }

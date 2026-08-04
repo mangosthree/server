@@ -11,6 +11,7 @@ class Player;
 class Unit;
 class Object;
 class Item;
+class QueryResult;
 
 using namespace std;
 /**
@@ -197,6 +198,13 @@ class RandomPlayerbotMgr : public PlayerbotHolder
          */
         void RandomTeleportForLevel(Player* bot);
 
+        /// Queues every bot in a persisted group for login (used when AiPlayerbot.RandomBotKeepGroups is set).
+        void EnsureGroupedBotsOnline();
+        /// Refreshes m_groupedBots from the character DB.
+        void LoadGroupedBots();
+        /// Underlying query shared by EnsureGroupedBotsOnline/LoadGroupedBots.
+        QueryResult* QueryGroupedBots();
+
         /**
          * @brief Teleports the given player bot to a random location.
          * @param bot Pointer to the player bot.
@@ -309,6 +317,7 @@ class RandomPlayerbotMgr : public PlayerbotHolder
         bool m_areaCreatureStatsComputed = false; ///< Guards the one-time area-stats scan so an empty result is not recomputed every call.
         std::unordered_map<uint32, bool> m_randomBotCache; ///< Caches IsRandomBot("add") lookups to avoid a DB query per call; kept coherent in SetEventValue.
         std::unordered_map<uint32, uint32> m_playerZoneCounts; ///< zone_id -> real player count, for O(1) bot tick gating.
+        std::set<uint32> m_groupedBots; ///< Cached set of bot GUIDs currently in a group, refreshed each update cycle.
 
         /// Cached mirror of one `ai_playerbot_random_bots` row.
         struct EventValueEntry

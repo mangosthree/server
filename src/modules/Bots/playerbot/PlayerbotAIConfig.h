@@ -56,6 +56,7 @@ public:
     float sightDistance, spellDistance, reactDistance, grindDistance, lootDistance, shootDistance,
         fleeDistance, tooCloseDistance, meleeDistance, followDistance, whisperDistance, contactDistance,
         aoeRadius;
+    bool whisperToZoneOnly; ///< Restricts suggestion whispers to players in the bot's zone.
     uint32 criticalHealth, lowHealth, mediumHealth, almostFullHealth, hungryHealth;
     uint32 lowMana, mediumMana, thirstyMana;
 

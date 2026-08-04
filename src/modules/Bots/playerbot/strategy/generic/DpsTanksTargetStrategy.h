@@ -3,14 +3,13 @@
 
 namespace ai
 {
-    class DpsAssistStrategy : public NonCombatStrategy
+    class DpsTanksTargetStrategy : public NonCombatStrategy
     {
     public:
-        DpsAssistStrategy(PlayerbotAI* ai) : NonCombatStrategy(ai) {}
-        virtual string getName() { return "dps assist"; }
+        DpsTanksTargetStrategy(PlayerbotAI* ai) : NonCombatStrategy(ai) {}
+        virtual string getName() { return "dps tanks"; }
         virtual int GetType() { return STRATEGY_TYPE_DPS; }
-
-    public:
         virtual void InitTriggers(std::list<TriggerNode*> &triggers);
     };
+
 }

@@ -34,6 +34,7 @@ PlayerbotAIConfig::PlayerbotAIConfig()
       whisperDistance(0.0f),
       contactDistance(0.0f),
       aoeRadius(0.0f),
+      whisperToZoneOnly(false),
       criticalHealth(0),
       lowHealth(0),
       mediumHealth(0),
@@ -69,12 +70,13 @@ PlayerbotAIConfig::PlayerbotAIConfig()
       maxRandomBotsPriceChangeInterval(0),
       randomBotJoinLfg(false),
       randomBotLoginAtStartup(false),
+      randomBotKeepGroups(false),
+      randomBotActiveZoneOnly(false),
       randomBotTeleLevel(0),
       feralBearTankChance(0),
       logInGroupOnly(false),
       logValuesPerTick(false),
       fleeingEnabled(false),
-      cautiousDefault(false),
       spawnZoneStats(false),
       randomBotMinLevel(0),
       randomBotMaxLevel(0),
@@ -98,7 +100,9 @@ PlayerbotAIConfig::PlayerbotAIConfig()
       minGuildTaskRewardTime(0),
       maxGuildTaskRewardTime(0),
       guildTaskAdvertCleanupTime(0),
-      iterationsPerTick(0)
+      iterationsPerTick(0),
+      tankDelaySeconds(0),
+      tankThreatPct(0.0f)
 {
 }
 
@@ -170,6 +174,7 @@ bool PlayerbotAIConfig::Initialize()
     whisperDistance = config.GetFloatDefault("AiPlayerbot.WhisperDistance", 6000.0f);
     contactDistance = config.GetFloatDefault("AiPlayerbot.ContactDistance", 0.5f);
     aoeRadius = config.GetFloatDefault("AiPlayerbot.AoeRadius", 10.0f);
+    whisperToZoneOnly = config.GetBoolDefault("AiPlayerbot.WhisperToZoneOnly", false);
 
     criticalHealth = config.GetIntDefault("AiPlayerbot.CriticalHealth", 20);
     lowHealth = config.GetIntDefault("AiPlayerbot.LowHealth", 50);
@@ -184,6 +189,8 @@ bool PlayerbotAIConfig::Initialize()
     randomBotMaxLevelChance = config.GetFloatDefault("AiPlayerbot.RandomBotMaxLevelChance", 0.15);
 
     iterationsPerTick = config.GetIntDefault("AiPlayerbot.IterationsPerTick", 100);
+    tankDelaySeconds = config.GetIntDefault("AiPlayerbot.TankDelaySeconds", 3);
+    tankThreatPct = config.GetFloatDefault("AiPlayerbot.TankThreatPct", 2.0f);
 
     allowGuildBots = config.GetBoolDefault("AiPlayerbot.AllowGuildBots", true);
 
@@ -217,11 +224,12 @@ bool PlayerbotAIConfig::Initialize()
     logInGroupOnly = config.GetBoolDefault("AiPlayerbot.LogInGroupOnly", true);
     logValuesPerTick = config.GetBoolDefault("AiPlayerbot.LogValuesPerTick", false);
     fleeingEnabled = config.GetBoolDefault("AiPlayerbot.FleeingEnabled", true);
-    cautiousDefault = config.GetBoolDefault("AiPlayerbot.Cautious", false);
     spawnZoneStats = config.GetBoolDefault("AiPlayerbot.SpawnZoneStats", false);
     randomBotMinLevel = config.GetIntDefault("AiPlayerbot.RandomBotMinLevel", 1);
     randomBotMaxLevel = config.GetIntDefault("AiPlayerbot.RandomBotMaxLevel", 255);
     randomBotLoginAtStartup = config.GetBoolDefault("AiPlayerbot.RandomBotLoginAtStartup", true);
+    randomBotKeepGroups = config.GetBoolDefault("AiPlayerbot.RandomBotKeepGroups", false);
+    randomBotActiveZoneOnly = config.GetBoolDefault("AiPlayerbot.RandomBotActiveZoneOnly", false);
     randomBotTeleLevel = config.GetIntDefault("AiPlayerbot.RandomBotTeleLevel", 3);
     openGoSpell = config.GetIntDefault("AiPlayerbot.OpenGoSpell", 6477);
 
@@ -231,8 +239,18 @@ bool PlayerbotAIConfig::Initialize()
     randomBotNonCombatStrategies = config.GetStringDefault("AiPlayerbot.RandomBotNonCombatStrategies", "+grind,+move random,+loot");
     combatStrategies = config.GetStringDefault("AiPlayerbot.CombatStrategies", "+custom::say");
     nonCombatStrategies = config.GetStringDefault("AiPlayerbot.NonCombatStrategies", "+custom::say");
+    botTankStrategies = config.GetStringDefault("AiPlayerbot.BotTankStrategies", "+tank aoe");
+    botDpsStrategies = config.GetStringDefault("AiPlayerbot.BotDpsStrategies", "+dps assist");
+    botHealStrategies = config.GetStringDefault("AiPlayerbot.BotHealStrategies", "");
+    // m3 registers the follow strategy as "follow" (m0: "follow master") -- align the default.
+    botGroupNonCombatStrategies = config.GetStringDefault("AiPlayerbot.BotGroupNonCombatStrategies", "+follow,+loot");
 
     commandPrefix = config.GetStringDefault("AiPlayerbot.CommandPrefix", "");
+
+    {
+        std::string name = "RandomMovementTargets";
+        SetValue(name, config.GetStringDefault("AiPlayerbot.RandomMovementTargets", "anynpcs,anyitems,random"));
+    }
 
     commandServerPort = config.GetIntDefault("AiPlayerbot.CommandServerPort", 0);
 
@@ -375,6 +393,11 @@ string PlayerbotAIConfig::GetValue(string name) const
         out << iterationsPerTick;
     }
 
+    else if (name == "RandomMovementTargets")
+    {
+        out << randomMovementTargetsAsString;
+    }
+
     return out.str();
 }
 
@@ -453,5 +476,33 @@ void PlayerbotAIConfig::SetValue(string &name, string value)
     else if (name == "IterationsPerTick")
     {
         out >> iterationsPerTick;
+    }
+
+    else if (name == "RandomMovementTargets")
+    {
+        randomMovementTargetsAsString = value;
+        randomMovementTargets.clear();
+        std::vector<std::string> tokens = split(value, ',');
+        std::set<std::string> validTargets = { "usefulnpcs", "anynpcs", "players", "tradeskillitems", "interactableitems", "anyitems", "random" };
+        for (std::vector<std::string>::iterator i = tokens.begin(); i != tokens.end(); ++i)
+        {
+            std::string token = *i;
+            size_t start = token.find_first_not_of(" \t");
+            size_t end = token.find_last_not_of(" \t");
+            if (start == std::string::npos)
+            {
+                continue;
+            }
+            token = token.substr(start, end - start + 1);
+            std::string lowerToken = token;
+            for (size_t j = 0; j < lowerToken.size(); ++j)
+            {
+                lowerToken[j] = static_cast<char>(tolower(static_cast<unsigned char>(lowerToken[j])));
+            }
+            if (validTargets.find(lowerToken) != validTargets.end())
+            {
+                randomMovementTargets.push_back(lowerToken);
+            }
+        }
     }
 }

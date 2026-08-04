@@ -29,6 +29,7 @@
 #include "generic/AttackEnemyPlayersStrategy.h"
 #include "generic/MoveRandomStrategy.h"
 #include "generic/CautiousStrategy.h"
+#include "generic/DpsTanksTargetStrategy.h"
 
 namespace ai
 {
@@ -116,6 +117,7 @@ namespace ai
         AssistStrategyContext() : NamedObjectContext<Strategy>(false, true)
         {
             creators["dps assist"] = &AssistStrategyContext::dps_assist;
+            creators["dps tanks"] = &AssistStrategyContext::dps_tanks_target;
             creators["tank aoe"] = &AssistStrategyContext::tank_aoe;
             creators["grind"] = &AssistStrategyContext::grind;
         }
@@ -124,6 +126,7 @@ namespace ai
         static Strategy* dps_assist(PlayerbotAI* ai) { return new DpsAssistStrategy(ai); }
         static Strategy* tank_aoe(PlayerbotAI* ai) { return new TankAoeStrategy(ai); }
         static Strategy* grind(PlayerbotAI* ai) { return new GrindingStrategy(ai); }
+        static Strategy* dps_tanks_target(PlayerbotAI* ai) { return new DpsTanksTargetStrategy(ai); }
     };
 
     class QuestStrategyContext : public NamedObjectContext<Strategy>

@@ -553,6 +553,15 @@ namespace ai
         virtual bool IsActive();
     };
 
+    class NoTanksTargetActiveTrigger : public Trigger
+    {
+    public:
+        NoTanksTargetActiveTrigger(PlayerbotAI* ai) : Trigger(ai, "no tanks target active") {}
+
+    public:
+        virtual bool IsActive();
+    };
+
     class EnemyPlayerIsAttacking : public Trigger
     {
     public:

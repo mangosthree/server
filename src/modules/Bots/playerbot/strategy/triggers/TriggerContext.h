@@ -50,6 +50,7 @@ namespace ai
             creators["no target"] = &TriggerContext::NoTarget;
             creators["target in sight"] = &TriggerContext::TargetInSight;
             creators["not dps target active"] = &TriggerContext::not_dps_target_active;
+            creators["no tanks target active"] = &TriggerContext::no_tanks_target_active;
             creators["has nearest adds"] = &TriggerContext::has_nearest_adds;
             creators["enemy player is attacking"] = &TriggerContext::enemy_player_is_attacking;
 
@@ -149,6 +150,7 @@ namespace ai
         static Trigger* NoTarget(PlayerbotAI* ai) { return new NoTargetTrigger(ai); }
         static Trigger* TargetInSight(PlayerbotAI* ai) { return new TargetInSightTrigger(ai); }
         static Trigger* not_dps_target_active(PlayerbotAI* ai) { return new NotDpsTargetActiveTrigger(ai); }
+        static Trigger* no_tanks_target_active(PlayerbotAI* ai) { return new NoTanksTargetActiveTrigger(ai); }
         static Trigger* has_nearest_adds(PlayerbotAI* ai) { return new HasNearestAddsTrigger(ai); }
         static Trigger* enemy_player_is_attacking(PlayerbotAI* ai) { return new EnemyPlayerIsAttacking(ai); }
         static Trigger* Random(PlayerbotAI* ai) { return new RandomTrigger(ai, "random", 15); }

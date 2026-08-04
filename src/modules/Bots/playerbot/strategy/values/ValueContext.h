@@ -16,6 +16,7 @@
 #include "TankTargetValue.h"
 #include "PartyTankValue.h"
 #include "DpsTargetValue.h"
+#include "DpsTanksTargetValue.h"
 #include "CcTargetValue.h"
 #include "CurrentCcTargetValue.h"
 #include "PetTargetValue.h"
@@ -60,6 +61,7 @@
 #include "LastSaidValue.h"
 #include "NearestFriendlyPlayersValue.h"
 #include "NearestNonBotPlayersValue.h"
+#include "NearestPlayersValue.h"
 #include "NewPlayerNearbyValue.h"
 #include "OutfitListValue.h"
 #include "RandomBotUpdateValue.h"
@@ -77,6 +79,7 @@ namespace ai
             creators["nearest game objects"] = &ValueContext::nearest_game_objects;
             creators["nearest npcs"] = &ValueContext::nearest_npcs;
             creators["nearest friendly players"] = &ValueContext::nearest_friendly_players;
+            creators["nearest players"] = &ValueContext::nearest_players;
             creators["possible targets"] = &ValueContext::possible_targets;
             creators["nearest adds"] = &ValueContext::nearest_adds;
             creators["nearest corpses"] = &ValueContext::nearest_corpses;
@@ -93,6 +96,7 @@ namespace ai
             creators["party tank"] = &ValueContext::party_tank;
             creators["dps target"] = &ValueContext::dps_target;
             creators["least hp target"] = &ValueContext::least_hp_target;
+            creators["dps tanks target"] = &ValueContext::dps_tanks_target;
             creators["enemy player target"] = &ValueContext::enemy_player_target;
             creators["cc target"] = &ValueContext::cc_target;
             creators["current cc target"] = &ValueContext::current_cc_target;
@@ -239,6 +243,7 @@ namespace ai
         static UntypedValue* log_level(PlayerbotAI* ai) { return new LogLevelValue(ai); }
         static UntypedValue* nearest_npcs(PlayerbotAI* ai) { return new NearestNpcsValue(ai); }
         static UntypedValue* nearest_friendly_players(PlayerbotAI* ai) { return new NearestFriendlyPlayersValue(ai); }
+        static UntypedValue* nearest_players(PlayerbotAI* ai) { return new NearestPlayersValue(ai); }
         static UntypedValue* nearest_corpses(PlayerbotAI* ai) { return new NearestCorpsesValue(ai); }
         static UntypedValue* possible_targets(PlayerbotAI* ai) { return new PossibleTargetsValue(ai); }
         static UntypedValue* nearest_adds(PlayerbotAI* ai) { return new NearestAdsValue(ai); }
@@ -256,6 +261,7 @@ namespace ai
         static UntypedValue* party_tank(PlayerbotAI* ai) { return new PartyTankValue(ai); }
         static UntypedValue* dps_target(PlayerbotAI* ai) { return new DpsTargetValue(ai); }
         static UntypedValue* least_hp_target(PlayerbotAI* ai) { return new LeastHpTargetValue(ai); }
+        static UntypedValue* dps_tanks_target(PlayerbotAI* ai) { return new DpsTanksTargetValue(ai); }
         static UntypedValue* enemy_player_target(PlayerbotAI* ai) { return new EnemyPlayerValue(ai); }
         static UntypedValue* cc_target(PlayerbotAI* ai) { return new CcTargetValue(ai); }
         static UntypedValue* current_cc_target(PlayerbotAI* ai) { return new CurrentCcTargetValue(ai); }

@@ -31,7 +31,7 @@ namespace ai
         }
         virtual bool isUseful() {
             /// No real-player proximity gate (m0 behavior): random bots grind on their own
-            return (GetTarget() &&
+            return AttackAction::isUseful() && (GetTarget() &&
                     AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.mediumHealth &&
                     (!AI_VALUE2(uint8, "mana", "self target") || AI_VALUE2(uint8, "mana", "self target") > sPlayerbotAIConfig.mediumMana)
                 ) || AI_VALUE2(bool, "combat", "self target")
@@ -48,6 +48,22 @@ namespace ai
     public:
         AttackLeastHpTargetAction(PlayerbotAI* ai) : AttackAction(ai, "attack least hp target") {}
         virtual string GetTargetName() { return "least hp target"; }
+    };
+
+    class AttackTanksTargetAction : public AttackAction
+    {
+    public:
+        AttackTanksTargetAction(PlayerbotAI* ai) : AttackAction(ai, "attack tanks target") {}
+
+        virtual string GetTargetName()
+        {
+            Player* tank = ai->GetGroupTank(bot);
+            if (!tank || !tank->IsAlive())
+            {
+                return "least hp target";
+            }
+            return "dps tanks target";
+        }
     };
 
     class AttackEnemyPlayerAction : public AttackAction

@@ -10,6 +10,7 @@ public:
     ChatCommandActionNodeFactoryInternal()
     {
         creators["tank attack chat shortcut"] = &tank_attack_chat_shortcut;
+        creators["goto"] = &goto_action;
     }
 
 private:
@@ -19,6 +20,16 @@ private:
             /*P*/ NULL,
             /*A*/ NULL,
             /*C*/ NextAction::array(0, new NextAction("attack my target", 100.0f), NULL));
+    }
+    static ActionNode* goto_action(PlayerbotAI* ai)
+    {
+        // m0 chains ->persist(3600000) here; that method is introduced by
+        // #350 (Phase 8, out of scope for this tranche) and does not exist
+        // in this tree yet, so the node is created without it.
+        return new ActionNode ("goto",
+            /*P*/ NULL,
+            /*A*/ NULL,
+            /*C*/ NULL);
     }
 };
 
@@ -135,6 +146,10 @@ void ChatCommandHandlerStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "ready",
         NextAction::array(0, new NextAction("ready check", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "goto",
+        NextAction::array(0, new NextAction("goto", 1000.0f), NULL)));
 }
 
 
@@ -176,6 +191,7 @@ ChatCommandHandlerStrategy::ChatCommandHandlerStrategy(PlayerbotAI* ai) : PassTr
     supported.push_back("spell");
     supported.push_back("rti");
     supported.push_back("position");
+    supported.push_back("goto");
     supported.push_back("summon");
     supported.push_back("who");
     supported.push_back("save mana");

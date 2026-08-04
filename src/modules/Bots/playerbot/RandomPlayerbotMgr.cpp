@@ -55,6 +55,15 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed)
         return;
     }
 
+    if (sPlayerbotAIConfig.randomBotKeepGroups)
+    {
+        if (!processTicks)
+        {
+            EnsureGroupedBotsOnline();
+        }
+        LoadGroupedBots();
+    }
+
     sLog.outBasic("Processing random bots...");
 
     uint32 cachedMin = GetEventValue(0, "config_min");
@@ -260,8 +269,15 @@ bool RandomPlayerbotMgr::ProcessBot(uint32 bot)
         Player* player = GetPlayerBot(bot);
         if (!player || !player->GetGroup())
         {
-            sLog.outString("Bot %d expired", bot);
-            SetEventValue(bot, "add", 0, 0);
+            if (sPlayerbotAIConfig.randomBotKeepGroups && m_groupedBots.count(bot))
+            {
+                SetEventValue(bot, "add", 1, sPlayerbotAIConfig.maxRandomBotInWorldTime);
+            }
+            else
+            {
+                sLog.outString("Bot %d expired", bot);
+                SetEventValue(bot, "add", 0, 0);
+            }
         }
         return true;
     }
@@ -1009,9 +1025,90 @@ bool RandomPlayerbotMgr::IsZoneSafeForBot(Player* bot, uint32 mapId, float x, fl
     return true;
 }
 
+QueryResult* RandomPlayerbotMgr::QueryGroupedBots()
+{
+    if (sPlayerbotAIConfig.randomBotAccounts.empty())
+    {
+        return nullptr;
+    }
+
+    ostringstream os;
+    bool first = true;
+    for (list<uint32>::iterator i = sPlayerbotAIConfig.randomBotAccounts.begin(); i != sPlayerbotAIConfig.randomBotAccounts.end(); ++i)
+    {
+        if (!first)
+        {
+            os << ",";
+        }
+        os << *i;
+        first = false;
+    }
+
+    return CharacterDatabase.PQuery(
+        "SELECT gm.`memberGuid` FROM `group_member` gm "
+        "INNER JOIN `characters` c ON gm.`memberGuid` = c.`guid` "
+        "INNER JOIN `groups` g ON gm.`groupId` = g.`groupId` "
+        "WHERE c.`account` IN (%s)",
+        os.str().c_str());
+}
+
+void RandomPlayerbotMgr::LoadGroupedBots()
+{
+    m_groupedBots.clear();
+    QueryResult* result = QueryGroupedBots();
+    if (!result)
+    {
+        return;
+    }
+
+    do
+    {
+        Field* fields = result->Fetch();
+        m_groupedBots.insert(fields[0].GetUInt32());
+    } while (result->NextRow());
+    delete result;
+}
+
+void RandomPlayerbotMgr::EnsureGroupedBotsOnline()
+{
+    QueryResult* result = QueryGroupedBots();
+    if (!result)
+    {
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+        uint32 botGuid = fields[0].GetUInt32();
+        if (!GetEventValue(botGuid, "add"))
+        {
+            SetEventValue(botGuid, "add", 1, sPlayerbotAIConfig.maxRandomBotInWorldTime);
+            count++;
+        }
+    } while (result->NextRow());
+    delete result;
+
+    if (count > 0)
+    {
+        sLog.outString("Queued %u grouped bot(s) for login at startup", count);
+    }
+}
+
 uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, string event)
 {
     uint32 value = 0;
+
+    std::pair<uint32, std::string> key(bot, event);
+    std::map<std::pair<uint32, std::string>, EventValueEntry>::iterator cacheIt = m_eventValueCache.find(key);
+    if (cacheIt != m_eventValueCache.end())
+    {
+        if (((uint32)time(0) - cacheIt->second.lastChangeTime) < cacheIt->second.validIn)
+        {
+            return cacheIt->second.value;
+        }
+    }
 
     // Query the database to get the event value for the specified bot
     QueryResult* results = CharacterDatabase.PQuery(
@@ -1028,6 +1125,7 @@ uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, string event)
         {
             value = 0;
         }
+        m_eventValueCache[key] = { value, lastChangeTime, validIn };
         delete results;
     }
 
@@ -1051,6 +1149,8 @@ uint32 RandomPlayerbotMgr::SetEventValue(uint32 bot, string event, uint32 value,
     {
         m_randomBotCache[bot] = (value != 0);
     }
+
+    m_eventValueCache[std::make_pair(bot, event)] = { value, (uint32)time(0), validIn };
 
     return value;
 }
@@ -1312,6 +1412,20 @@ void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
         {
             players.erase(i);
         }
+
+        uint32 zone = player->GetZoneId();
+        std::unordered_map<uint32, uint32>::iterator zi = m_playerZoneCounts.find(zone);
+        if (zi != m_playerZoneCounts.end())
+        {
+            if (zi->second <= 1)
+            {
+                m_playerZoneCounts.erase(zi);
+            }
+            else
+            {
+                zi->second--;
+            }
+        }
     }
 }
 
@@ -1351,6 +1465,43 @@ void RandomPlayerbotMgr::OnPlayerLogin(Player* player)
         players.push_back(player);
         sLog.outDebug("Including non-random bot player %s into random bot update", player->GetName());
     }
+}
+
+void RandomPlayerbotMgr::OnPlayerZoneChange(Player* player, uint32 newZone)
+{
+    // PlayerbotAI is not set yet when this is called on bot login, so also
+    // check IsRandomBot directly -- a null-socket bot session never matches
+    // a "bot" remote address the way m0's guard assumed.
+    if (player->GetPlayerbotAI() || sRandomPlayerbotMgr.IsRandomBot(player))
+    {
+        return;
+    }
+
+    uint32 oldZone = player->GetCachedZoneId();
+    if (oldZone == newZone)
+    {
+        return;
+    }
+
+    std::unordered_map<uint32, uint32>::iterator zi = m_playerZoneCounts.find(oldZone);
+    if (zi != m_playerZoneCounts.end())
+    {
+        if (zi->second <= 1)
+        {
+            m_playerZoneCounts.erase(zi);
+        }
+        else
+        {
+            zi->second--;
+        }
+    }
+    m_playerZoneCounts[newZone]++;
+}
+
+bool RandomPlayerbotMgr::HasRealPlayerInZone(uint32 zoneId) const
+{
+    std::unordered_map<uint32, uint32>::const_iterator zi = m_playerZoneCounts.find(zoneId);
+    return zi != m_playerZoneCounts.end() && zi->second > 0;
 }
 
 Player* RandomPlayerbotMgr::GetRandomPlayer()

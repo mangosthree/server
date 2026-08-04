@@ -4,12 +4,14 @@
 #include "Common.h"
 #include "PlayerbotAIBase.h"
 #include "PlayerbotMgr.h"
+#include <unordered_map>
 
 class WorldPacket;
 class Player;
 class Unit;
 class Object;
 class Item;
+class QueryResult;
 
 using namespace std;
 /**
@@ -129,6 +131,16 @@ class RandomPlayerbotMgr : public PlayerbotHolder
         void OnPlayerLogin(Player* player);
 
         /**
+         * @brief Updates zone-population bookkeeping when a player changes zone.
+         * @param player Pointer to the player.
+         * @param newZone The zone the player is entering.
+         */
+        void OnPlayerZoneChange(Player* player, uint32 newZone);
+
+        /// True if at least one real (non-bot) player is currently in the given zone.
+        bool HasRealPlayerInZone(uint32 zoneId) const;
+
+        /**
          * @brief Gets a random player.
          * @return Pointer to the random player.
          */
@@ -185,6 +197,13 @@ class RandomPlayerbotMgr : public PlayerbotHolder
          * @param bot Pointer to the player bot.
          */
         void RandomTeleportForLevel(Player* bot);
+
+        /// Queues every bot in a persisted group for login (used when AiPlayerbot.RandomBotKeepGroups is set).
+        void EnsureGroupedBotsOnline();
+        /// Refreshes m_groupedBots from the character DB.
+        void LoadGroupedBots();
+        /// Underlying query shared by EnsureGroupedBotsOnline/LoadGroupedBots.
+        QueryResult* QueryGroupedBots();
 
         /**
          * @brief Teleports the given player bot to a random location.
@@ -297,6 +316,17 @@ class RandomPlayerbotMgr : public PlayerbotHolder
         std::map<std::pair<uint32, uint32>, uint32> m_cellToAreaCache;
         bool m_areaCreatureStatsComputed = false; ///< Guards the one-time area-stats scan so an empty result is not recomputed every call.
         std::unordered_map<uint32, bool> m_randomBotCache; ///< Caches IsRandomBot("add") lookups to avoid a DB query per call; kept coherent in SetEventValue.
+        std::unordered_map<uint32, uint32> m_playerZoneCounts; ///< zone_id -> real player count, for O(1) bot tick gating.
+        std::set<uint32> m_groupedBots; ///< Cached set of bot GUIDs currently in a group, refreshed each update cycle.
+
+        /// Cached mirror of one `ai_playerbot_random_bots` row.
+        struct EventValueEntry
+        {
+            uint32 value;
+            uint32 lastChangeTime;
+            uint32 validIn;
+        };
+        std::map<std::pair<uint32, std::string>, EventValueEntry> m_eventValueCache; ///< (bot, event) -> cached value, avoids a DB query per GetEventValue call.
         std::set<uint32> m_allianceGuardAreas; ///< Contested areas whose guards are hostile to Horde; Horde bots are kept out.
         std::set<uint32> m_hordeGuardAreas;    ///< Contested areas whose guards are hostile to Alliance; Alliance bots are kept out.
 };

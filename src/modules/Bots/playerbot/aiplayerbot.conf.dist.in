@@ -84,13 +84,25 @@ AiPlayerbot.CommandPrefix = ~
 #AiPlayerbot.MeleeDistance = 1.0
 #AiPlayerbot.FollowDistance = 1.5
 #AiPlayerbot.WhisperDistance = 6000.0
+# If enabled, bot suggestion whispers will only target players in the same zone
+#AiPlayerbot.WhisperToZoneOnly = false
 #AiPlayerbot.ContactDistance = 0.5
+
+# Random movement target priority (comma-separated, earlier = higher weight)
+# Valid types: usefulnpcs, anynpcs, players, tradeskillitems, interactableitems, anyitems, random
+#   usefulnpcs       = NPCs with service flags (bankers, vendors, quest givers, trainers, ...)
+#   anynpcs          = any friendly NPC including non-interactable critters
+#   players          = other player characters (including bots)
+#   tradeskillitems  = game objects matching bot's tradeskills (mining, herbalism, etc.)
+#   interactableitems= chests, quest items, usable objects (type-based filter)
+#   anyitems         = any game object including decorative
+#   random           = random position in the area
+# Omitting a type from the list excludes it as a possible target entirely
+# Example: AiPlayerbot.RandomMovementTargets = anynpcs,anyitems,random
+#AiPlayerbot.RandomMovementTargets = anynpcs,anyitems,random
 
 # Bot can flee for enemy
 #AiPlayerbot.FleeingEnabled = 1
-
-# Bot avoids pulling aggro during movement by default
-#AiPlayerbot.Cautious = 0
 
 # Restrict random-bot spawns to zones whose creature level band fits the bot.
 # WARNING: this scans every creature in the world once (tens of seconds of
@@ -115,6 +127,12 @@ AiPlayerbot.CommandPrefix = ~
 # Random bot default strategies (applied after defaults)
 #AiPlayerbot.RandomBotCombatStrategies = +dps,+attack weak
 #AiPlayerbot.RandomBotNonCombatStrategies = +grind,+move random,+loot
+
+# Group strategies (applied by role to all bots when in a group, replacing solo strategies)
+#AiPlayerbot.BotTankStrategies = +tank aoe
+#AiPlayerbot.BotDpsStrategies = +dps assist
+#AiPlayerbot.BotHealStrategies =
+#AiPlayerbot.BotGroupNonCombatStrategies = +follow,+loot
 
 # Create random bot characters automatically
 #AiPlayerbot.RandomBotAutoCreate = 1
@@ -183,6 +201,23 @@ AiPlayerbot.CommandPrefix = ~
 
 # Enable LFG for random bots
 #AiPlayerbot.RandomBotJoinLfg = 1
+
+# Preserve bot group assignments across server restarts
+#AiPlayerbot.RandomBotKeepGroups = 0
+
+# Only tick ungrouped random bots when a real player is in their zone.
+# Reduces CPU load on empty zones at the cost of bots being frozen there.
+#AiPlayerbot.RandomBotActiveZoneOnly = 0
+
+# DPS bots in a group with a tank will wait before engaging.
+# Only applies when the "cautious" strategy is active on the bot.
+# TankDelaySeconds: wait N seconds after tank first hits the target
+# (0 = disabled)
+# TankThreatPct: wait until tank has threat >= N% of target max HP
+# (0 = disabled)
+# Both conditions must be met if both are nonzero.
+#AiPlayerbot.TankDelaySeconds = 3
+#AiPlayerbot.TankThreatPct = 2.0
 
 # Level diff between random bots and nearby creatures for random teleports
 AiPlayerbot.RandomBotTeleLevel = 3

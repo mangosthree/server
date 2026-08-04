@@ -56,6 +56,7 @@ public:
     float sightDistance, spellDistance, reactDistance, grindDistance, lootDistance, shootDistance,
         fleeDistance, tooCloseDistance, meleeDistance, followDistance, whisperDistance, contactDistance,
         aoeRadius;
+    bool whisperToZoneOnly; ///< Restricts suggestion whispers to players in the bot's zone.
     uint32 criticalHealth, lowHealth, mediumHealth, almostFullHealth, hungryHealth;
     uint32 lowMana, mediumMana, thirstyMana;
 
@@ -82,12 +83,14 @@ public:
     uint32 minRandomBotsPriceChangeInterval, maxRandomBotsPriceChangeInterval;
     bool randomBotJoinLfg; ///< Indicates if random bots should join Looking For Group.
     bool randomBotLoginAtStartup; ///< Indicates if random bots should login at startup.
+    bool randomBotKeepGroups; ///< Indicates if random bots should preserve groups across restarts.
+    bool randomBotActiveZoneOnly; ///< If true, ungrouped random bots only tick when a real player is in their zone.
     uint32 randomBotTeleLevel; ///< The teleport level for random bots.
     bool logInGroupOnly, logValuesPerTick;
     bool fleeingEnabled; ///< Indicates if fleeing is enabled for bots.
-    bool cautiousDefault; ///< If true, all bots get the "cautious" strategy (avoid pulling aggro while moving) by default.
     bool spawnZoneStats;  ///< If true, scan all creatures once to level-band bot spawn zones. Expensive (multi-second world-thread scan); off by default.
     std::string combatStrategies, nonCombatStrategies;
+    std::string botTankStrategies, botDpsStrategies, botHealStrategies, botGroupNonCombatStrategies; ///< Role-based strategy strings applied to grouped bots.
     std::string randomBotCombatStrategies, randomBotNonCombatStrategies;
     uint32 randomBotMinLevel, randomBotMaxLevel;
     float randomChangeMultiplier;
@@ -117,7 +120,13 @@ public:
 
     uint32 iterationsPerTick; ///< Number of iterations per tick.
 
+    std::string randomMovementTargetsAsString; ///< Comma-separated string of random movement targets.
+    std::vector<std::string> randomMovementTargets; ///< List of validated random movement targets, priority order.
+
     int commandServerPort; ///< Port for the command server.
+
+    uint32 tankDelaySeconds; ///< Grouped cautious DPS wait this long after the tank engages before attacking (0 = disabled).
+    float tankThreatPct; ///< Grouped cautious DPS wait until the tank has this % of target max HP in threat (0 = disabled).
 
     /**
      * @brief Gets the value of a configuration parameter by name.

@@ -22,6 +22,7 @@
 #include "ReadyCheckAction.h"
 #include "LfgActions.h"
 #include "SecurityCheckAction.h"
+#include "PetitionSignAction.h"
 #include "GuildAcceptAction.h"
 #include "ReleaseSpiritWithMasterAction.h"
 #include "SpiritHealerWithMasterAction.h"
@@ -62,6 +63,7 @@ namespace ai
             creators["uninvite"] = &WorldPacketActionContext::uninvite;
             creators["disband"] = &WorldPacketActionContext::disband;
             creators["security check"] = &WorldPacketActionContext::security_check;
+            creators["petition sign"] = &WorldPacketActionContext::petition_sign;
             creators["guild accept"] = &WorldPacketActionContext::guild_accept;
             creators["inventory change failure"] = &WorldPacketActionContext::inventory_change_failure;
             creators["release spirit with master"] = &WorldPacketActionContext::release_spirit_with_master;
@@ -70,6 +72,7 @@ namespace ai
 
     private:
         static Action* inventory_change_failure(PlayerbotAI* ai) { return new InventoryChangeFailureAction(ai); }
+        static Action* petition_sign(PlayerbotAI* ai) { return new PetitionSignAction(ai); }
         static Action* guild_accept(PlayerbotAI* ai) { return new GuildAcceptAction(ai); }
         static Action* release_spirit_with_master(PlayerbotAI* ai) { return new ReleaseSpiritWithMasterAction(ai); }
         static Action* spirit_healer_with_master(PlayerbotAI* ai) { return new SpiritHealerWithMasterAction(ai); }

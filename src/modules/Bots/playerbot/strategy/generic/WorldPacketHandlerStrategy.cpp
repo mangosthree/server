@@ -76,6 +76,10 @@ void WorldPacketHandlerStrategy::InitTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("security check", relevance), new NextAction("check mail", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "petition sign",
+        NextAction::array(0, new NextAction("petition sign", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "guild invite",
         NextAction::array(0, new NextAction("guild accept", relevance), NULL)));
 

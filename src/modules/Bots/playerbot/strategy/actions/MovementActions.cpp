@@ -488,43 +488,163 @@ bool RunAwayAction::Execute(Event event)
     return Flee(AI_VALUE(Unit*, "master target"));
 }
 
+template<typename F>
+static std::vector<WorldObject*> CollectValidUnits(PlayerbotAI* ai, Player* bot, const std::list<ObjectGuid>& guids, F filter)
+{
+    std::vector<WorldObject*> results;
+    for (std::list<ObjectGuid>::const_iterator i = guids.begin(); i != guids.end(); ++i)
+    {
+        Unit* unit = ai->GetUnit(*i);
+        if (unit && filter(unit) && bot->GetDistance(unit) > sPlayerbotAIConfig.tooCloseDistance)
+        {
+            results.push_back(unit);
+        }
+    }
+    return results;
+}
+
+template<typename F>
+static std::vector<WorldObject*> CollectValidGameObjects(PlayerbotAI* ai, Player* bot, const std::list<ObjectGuid>& guids, F filter)
+{
+    std::vector<WorldObject*> results;
+    for (std::list<ObjectGuid>::const_iterator i = guids.begin(); i != guids.end(); ++i)
+    {
+        GameObject* go = ai->GetGameObject(*i);
+        if (go && filter(go) && bot->GetDistance(go) > sPlayerbotAIConfig.tooCloseDistance)
+        {
+            results.push_back(go);
+        }
+    }
+    return results;
+}
+
 bool MoveRandomAction::Execute(Event event)
 {
+    if (m_hasFaceTarget)
+    {
+        if (bot->IsStopped())
+        {
+            m_hasFaceTarget = false;
+            bot->SetFacingTo(bot->GetAngle(m_faceX, m_faceY));
+        }
+        return true;
+    }
+
+    WorldObject* target = NULL;
+
+    // If no configured targets, fall through to the random-position fallback.
+    if (!sPlayerbotAIConfig.randomMovementTargets.empty())
+    {
+        // Cache all value queries ONCE per Execute()
+        std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
+        std::list<ObjectGuid> players = AI_VALUE(std::list<ObjectGuid>, "nearest players");
+        std::list<ObjectGuid> gos = AI_VALUE(std::list<ObjectGuid>, "nearest game objects");
+
+        struct CategoryPick { WorldObject* target; int weight; };
+        std::vector<CategoryPick> picks;
+        size_t configSize = sPlayerbotAIConfig.randomMovementTargets.size();
+
+        for (size_t idx = 0; idx < configSize; ++idx)
+        {
+            const std::string& type = sPlayerbotAIConfig.randomMovementTargets[idx];
+            int weight = 1 << (int)(configSize - 1 - idx);
+
+            if (type == "random")
+            {
+                picks.push_back({nullptr, weight});
+                continue;
+            }
+
+            std::vector<WorldObject*> matches;
+
+            if (type == "anynpcs")
+            {
+                matches = CollectValidUnits(ai, bot, npcs, [](Unit*) { return true; });
+            }
+            else if (type == "usefulnpcs")
+            {
+                matches = CollectValidUnits(ai, bot, npcs, [](Unit* u)
+                {
+                    Creature* c = dynamic_cast<Creature*>(u);
+                    return c && c->GetUInt32Value(UNIT_NPC_FLAGS) != UNIT_NPC_FLAG_NONE;
+                });
+            }
+            else if (type == "players")
+            {
+                matches = CollectValidUnits(ai, bot, players, [](Unit*) { return true; });
+            }
+            else if (type == "tradeskillitems")
+            {
+                for (std::list<ObjectGuid>::const_iterator gi = gos.begin(); gi != gos.end(); ++gi)
+                {
+                    LootObject loot(bot, *gi);
+                    if (loot.skillId != SKILL_NONE && bot->HasSkill(loot.skillId))
+                    {
+                        GameObject* go = ai->GetGameObject(*gi);
+                        if (go && bot->GetDistance(go) > sPlayerbotAIConfig.tooCloseDistance)
+                        {
+                            matches.push_back(go);
+                        }
+                    }
+                }
+            }
+            else if (type == "interactableitems")
+            {
+                matches = CollectValidGameObjects(ai, bot, gos, [](GameObject* go)
+                {
+                    uint32 t = go->GetGOInfo()->type;
+                    return t == GAMEOBJECT_TYPE_CHEST || t == GAMEOBJECT_TYPE_QUESTGIVER ||
+                           t == GAMEOBJECT_TYPE_SPELL_FOCUS || t == GAMEOBJECT_TYPE_GOOBER;
+                });
+            }
+            else if (type == "anyitems")
+            {
+                matches = CollectValidGameObjects(ai, bot, gos, [](GameObject*) { return true; });
+            }
+
+            if (!matches.empty())
+            {
+                picks.push_back({matches[urand(0, matches.size() - 1)], weight});
+            }
+        }
+
+        if (!picks.empty())
+        {
+            int totalWeight = 0;
+            for (vector<CategoryPick>::const_iterator i = picks.begin(); i != picks.end(); ++i)
+            {
+                totalWeight += i->weight;
+            }
+
+            int roll = urand(0, totalWeight - 1);
+            for (vector<CategoryPick>::const_iterator i = picks.begin(); i != picks.end(); ++i)
+            {
+                if (roll < i->weight)
+                {
+                    target = i->target;
+                    break;
+                }
+                roll -= i->weight;
+            }
+        }
+    }
+
+    if (target)
+    {
+        bool moved = MoveNear(target);
+        if (moved)
+        {
+            m_faceX = target->GetPositionX();
+            m_faceY = target->GetPositionY();
+            m_hasFaceTarget = true;
+        }
+        return moved;
+    }
+
+    // No specific target (empty config, or the "random" category won the
+    // weighted roll): fall back to a random ground position near the bot,
+    // rejecting underwater/off-mesh points.
     vector<WorldLocation> locs;
-    list<ObjectGuid> npcs = AI_VALUE(list<ObjectGuid>, "nearest npcs");
-    for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
-    {
-        WorldObject* target = ai->GetUnit(*i);
-        if (target && bot->GetDistance(target) > sPlayerbotAIConfig.tooCloseDistance)
-        {
-            WorldLocation loc(target->GetMapId(), target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
-            locs.push_back(loc);
-        }
-    }
-
-    list<ObjectGuid> players = AI_VALUE(list<ObjectGuid>, "nearest friendly players");
-    for (list<ObjectGuid>::iterator i = players.begin(); i != players.end(); i++)
-    {
-        WorldObject* target = ai->GetUnit(*i);
-        if (target && bot->GetDistance(target) > sPlayerbotAIConfig.tooCloseDistance)
-        {
-            WorldLocation loc(target->GetMapId(), target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
-            locs.push_back(loc);
-        }
-    }
-
-    list<ObjectGuid> gos = AI_VALUE(list<ObjectGuid>, "nearest game objects");
-    for (list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
-    {
-        WorldObject* target = ai->GetGameObject(*i);
-
-        if (target && bot->GetDistance(target) > sPlayerbotAIConfig.tooCloseDistance)
-        {
-            WorldLocation loc(target->GetMapId(), target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
-            locs.push_back(loc);
-        }
-    }
-
     float distance = sPlayerbotAIConfig.grindDistance;
     Map* map = bot->GetMap();
     for (int i = 0; i < 10; ++i)
@@ -562,8 +682,8 @@ bool MoveRandomAction::Execute(Event event)
         return false;
     }
 
-    WorldLocation target = locs[urand(0, locs.size() - 1)];
-    return MoveNear(target.mapid, target.coord_x, target.coord_y, target.coord_z);
+    WorldLocation randomLoc = locs[urand(0, locs.size() - 1)];
+    return MoveNear(randomLoc.mapid, randomLoc.coord_x, randomLoc.coord_y, randomLoc.coord_z);
 }
 
 bool MoveToLootAction::Execute(Event event)

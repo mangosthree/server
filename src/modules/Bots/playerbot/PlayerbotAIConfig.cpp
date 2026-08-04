@@ -243,6 +243,11 @@ bool PlayerbotAIConfig::Initialize()
 
     commandPrefix = config.GetStringDefault("AiPlayerbot.CommandPrefix", "");
 
+    {
+        std::string name = "RandomMovementTargets";
+        SetValue(name, config.GetStringDefault("AiPlayerbot.RandomMovementTargets", "anynpcs,anyitems,random"));
+    }
+
     commandServerPort = config.GetIntDefault("AiPlayerbot.CommandServerPort", 0);
 
     // Load class spec probabilities from the configuration file
@@ -384,6 +389,11 @@ string PlayerbotAIConfig::GetValue(string name) const
         out << iterationsPerTick;
     }
 
+    else if (name == "RandomMovementTargets")
+    {
+        out << randomMovementTargetsAsString;
+    }
+
     return out.str();
 }
 
@@ -462,5 +472,33 @@ void PlayerbotAIConfig::SetValue(string &name, string value)
     else if (name == "IterationsPerTick")
     {
         out >> iterationsPerTick;
+    }
+
+    else if (name == "RandomMovementTargets")
+    {
+        randomMovementTargetsAsString = value;
+        randomMovementTargets.clear();
+        std::vector<std::string> tokens = split(value, ',');
+        std::set<std::string> validTargets = { "usefulnpcs", "anynpcs", "players", "tradeskillitems", "interactableitems", "anyitems", "random" };
+        for (std::vector<std::string>::iterator i = tokens.begin(); i != tokens.end(); ++i)
+        {
+            std::string token = *i;
+            size_t start = token.find_first_not_of(" \t");
+            size_t end = token.find_last_not_of(" \t");
+            if (start == std::string::npos)
+            {
+                continue;
+            }
+            token = token.substr(start, end - start + 1);
+            std::string lowerToken = token;
+            for (size_t j = 0; j < lowerToken.size(); ++j)
+            {
+                lowerToken[j] = static_cast<char>(tolower(static_cast<unsigned char>(lowerToken[j])));
+            }
+            if (validTargets.find(lowerToken) != validTargets.end())
+            {
+                randomMovementTargets.push_back(lowerToken);
+            }
+        }
     }
 }

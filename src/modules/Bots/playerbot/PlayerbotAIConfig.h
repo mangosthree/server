@@ -120,6 +120,9 @@ public:
 
     uint32 iterationsPerTick; ///< Number of iterations per tick.
 
+    std::string randomMovementTargetsAsString; ///< Comma-separated string of random movement targets.
+    std::vector<std::string> randomMovementTargets; ///< List of validated random movement targets, priority order.
+
     int commandServerPort; ///< Port for the command server.
 
     /**

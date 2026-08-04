@@ -1507,6 +1507,12 @@ void PlayerbotAI::WaitForSpellCast(Spell *spell)
  */
 void PlayerbotAI::InterruptSpell()
 {
+    Spell* autoRepeat = bot->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL);
+    if (autoRepeat)
+    {
+        bot->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+    }
+
     for (int type = CURRENT_MELEE_SPELL; type < CURRENT_CHANNELED_SPELL; type++)
     {
         Spell* spell = bot->GetCurrentSpell((CurrentSpellTypes)type);

@@ -91,9 +91,6 @@ AiPlayerbot.CommandPrefix = ~
 # Bot can flee for enemy
 #AiPlayerbot.FleeingEnabled = 1
 
-# Bot avoids pulling aggro during movement by default
-#AiPlayerbot.Cautious = 0
-
 # Restrict random-bot spawns to zones whose creature level band fits the bot.
 # WARNING: this scans every creature in the world once (tens of seconds of
 # world-thread work on a full DB) the first time a bot picks a spawn, which
@@ -117,6 +114,12 @@ AiPlayerbot.CommandPrefix = ~
 # Random bot default strategies (applied after defaults)
 #AiPlayerbot.RandomBotCombatStrategies = +dps,+attack weak
 #AiPlayerbot.RandomBotNonCombatStrategies = +grind,+move random,+loot
+
+# Group strategies (applied by role to all bots when in a group, replacing solo strategies)
+#AiPlayerbot.BotTankStrategies = +tank aoe
+#AiPlayerbot.BotDpsStrategies = +dps assist
+#AiPlayerbot.BotHealStrategies =
+#AiPlayerbot.BotGroupNonCombatStrategies = +follow,+loot
 
 # Create random bot characters automatically
 #AiPlayerbot.RandomBotAutoCreate = 1

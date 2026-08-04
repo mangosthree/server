@@ -150,11 +150,6 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
 
     engine->addStrategies("racials", "chat", "default", "aoe", "potions", "cast time", "conserve mana", "duel", "pvp", NULL);
 
-    if (sPlayerbotAIConfig.cautiousDefault)
-    {
-        engine->addStrategy("cautious");
-    }
-
     switch (player->getClass())
     {
         case CLASS_PRIEST:
@@ -287,15 +282,27 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
             break;
     }
 
-    if (sRandomPlayerbotMgr.IsRandomBot(player))
+    if (player->GetGroup())
     {
-        if (!player->GetGroup())
+        if (engine->ContainsStrategy(STRATEGY_TYPE_TANK))
         {
-            engine->ChangeStrategy(sPlayerbotAIConfig.randomBotCombatStrategies);
-            if (player->getClass() == CLASS_DRUID && player->getLevel() < 20)
-            {
-                engine->addStrategies("bear", NULL);
-            }
+            engine->ChangeStrategy(sPlayerbotAIConfig.botTankStrategies);
+        }
+        else if (engine->ContainsStrategy(STRATEGY_TYPE_HEAL))
+        {
+            engine->ChangeStrategy(sPlayerbotAIConfig.botHealStrategies);
+        }
+        else
+        {
+            engine->ChangeStrategy(sPlayerbotAIConfig.botDpsStrategies);
+        }
+    }
+    else if (sRandomPlayerbotMgr.IsRandomBot(player))
+    {
+        engine->ChangeStrategy(sPlayerbotAIConfig.randomBotCombatStrategies);
+        if (player->getClass() == CLASS_DRUID && player->getLevel() < 20)
+        {
+            engine->addStrategies("bear", NULL);
         }
     }
     else
@@ -313,11 +320,6 @@ Engine* AiFactory::createCombatEngine(Player* player, PlayerbotAI* const facade,
 void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const facade, Engine* nonCombatEngine)
 {
     int tab = GetPlayerSpecTab(player);
-
-    if (sPlayerbotAIConfig.cautiousDefault)
-    {
-        nonCombatEngine->addStrategy("cautious");
-    }
 
     switch (player->getClass()){
         case CLASS_PRIEST:
@@ -414,12 +416,13 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
         nonCombatEngine->removeStrategy("stay");
     }
 
-    if (sRandomPlayerbotMgr.IsRandomBot(player))
+    if (player->GetGroup())
     {
-        if (!player->GetGroup())
-        {
-            nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.randomBotNonCombatStrategies);
-        }
+        nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.botGroupNonCombatStrategies);
+    }
+    else if (sRandomPlayerbotMgr.IsRandomBot(player))
+    {
+        nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.randomBotNonCombatStrategies);
     }
     else
     {

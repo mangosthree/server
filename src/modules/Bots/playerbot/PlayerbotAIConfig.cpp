@@ -77,7 +77,6 @@ PlayerbotAIConfig::PlayerbotAIConfig()
       logInGroupOnly(false),
       logValuesPerTick(false),
       fleeingEnabled(false),
-      cautiousDefault(false),
       spawnZoneStats(false),
       randomBotMinLevel(0),
       randomBotMaxLevel(0),
@@ -221,7 +220,6 @@ bool PlayerbotAIConfig::Initialize()
     logInGroupOnly = config.GetBoolDefault("AiPlayerbot.LogInGroupOnly", true);
     logValuesPerTick = config.GetBoolDefault("AiPlayerbot.LogValuesPerTick", false);
     fleeingEnabled = config.GetBoolDefault("AiPlayerbot.FleeingEnabled", true);
-    cautiousDefault = config.GetBoolDefault("AiPlayerbot.Cautious", false);
     spawnZoneStats = config.GetBoolDefault("AiPlayerbot.SpawnZoneStats", false);
     randomBotMinLevel = config.GetIntDefault("AiPlayerbot.RandomBotMinLevel", 1);
     randomBotMaxLevel = config.GetIntDefault("AiPlayerbot.RandomBotMaxLevel", 255);
@@ -237,6 +235,11 @@ bool PlayerbotAIConfig::Initialize()
     randomBotNonCombatStrategies = config.GetStringDefault("AiPlayerbot.RandomBotNonCombatStrategies", "+grind,+move random,+loot");
     combatStrategies = config.GetStringDefault("AiPlayerbot.CombatStrategies", "+custom::say");
     nonCombatStrategies = config.GetStringDefault("AiPlayerbot.NonCombatStrategies", "+custom::say");
+    botTankStrategies = config.GetStringDefault("AiPlayerbot.BotTankStrategies", "+tank aoe");
+    botDpsStrategies = config.GetStringDefault("AiPlayerbot.BotDpsStrategies", "+dps assist");
+    botHealStrategies = config.GetStringDefault("AiPlayerbot.BotHealStrategies", "");
+    // m3 registers the follow strategy as "follow" (m0: "follow master") -- align the default.
+    botGroupNonCombatStrategies = config.GetStringDefault("AiPlayerbot.BotGroupNonCombatStrategies", "+follow,+loot");
 
     commandPrefix = config.GetStringDefault("AiPlayerbot.CommandPrefix", "");
 

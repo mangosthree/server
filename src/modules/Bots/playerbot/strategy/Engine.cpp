@@ -608,6 +608,8 @@ void Engine::ChangeStrategy(string &names)
     vector<string> splitted = split(names, ',');
     for (vector<string>::iterator i = splitted.begin(); i != splitted.end(); i++)
     {
+        i->erase(0, i->find_first_not_of(" \t"));
+        i->erase(i->find_last_not_of(" \t") + 1);
         const char* name = i->c_str();
         switch (name[0])
         {

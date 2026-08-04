@@ -54,6 +54,10 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "Pet.h"
+#ifdef ENABLE_PLAYERBOTS
+#include "playerbot.h"
+#include "PlayerbotMgr.h"
+#endif
 #include "Util.h"
 #include "Transports.h"
 #include "Weather.h"
@@ -179,6 +183,13 @@ void Player::SetGroup(Group* group, int8 subgroup)
         m_group.link(group, this);
         m_group.setSubGroup((uint8)subgroup);
     }
+
+#ifdef ENABLE_PLAYERBOTS
+    if (GetPlayerbotAI())
+    {
+        GetPlayerbotAI()->ResetStrategies();
+    }
+#endif
 }
 
 /**

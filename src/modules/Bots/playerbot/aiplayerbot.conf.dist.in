@@ -209,6 +209,16 @@ AiPlayerbot.CommandPrefix = ~
 # Reduces CPU load on empty zones at the cost of bots being frozen there.
 #AiPlayerbot.RandomBotActiveZoneOnly = 0
 
+# DPS bots in a group with a tank will wait before engaging.
+# Only applies when the "cautious" strategy is active on the bot.
+# TankDelaySeconds: wait N seconds after tank first hits the target
+# (0 = disabled)
+# TankThreatPct: wait until tank has threat >= N% of target max HP
+# (0 = disabled)
+# Both conditions must be met if both are nonzero.
+#AiPlayerbot.TankDelaySeconds = 3
+#AiPlayerbot.TankThreatPct = 2.0
+
 # Level diff between random bots and nearby creatures for random teleports
 AiPlayerbot.RandomBotTeleLevel = 3
 

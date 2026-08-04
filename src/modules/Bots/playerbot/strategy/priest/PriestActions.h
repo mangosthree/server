@@ -112,9 +112,7 @@ namespace ai
     };
 
     BEGIN_SPELL_ACTION(CastHolyNovaAction, "holy nova")
-    virtual bool isUseful() {
-        return !ai->HasAura("shadowform", AI_VALUE(Unit*, "self target"));
-    }
+    virtual bool isUseful();
     END_SPELL_ACTION()
 
     BEGIN_RANGED_SPELL_ACTION(CastHolyFireAction, "holy fire")
@@ -205,6 +203,10 @@ namespace ai
     {
     public:
         CastPsychicScreamAction(PlayerbotAI* ai) : CastSpellAction(ai, "psychic scream") {}
+        virtual bool isUseful()
+        {
+            return CastSpellAction::isUseful() && (!ai->HasStrategy("cautious") || !ai->GetGroupTank(bot));
+        }
     };
 
     class CastDispersionAction : public CastSpellAction

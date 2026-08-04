@@ -125,6 +125,9 @@ public:
 
     int commandServerPort; ///< Port for the command server.
 
+    uint32 tankDelaySeconds; ///< Grouped cautious DPS wait this long after the tank engages before attacking (0 = disabled).
+    float tankThreatPct; ///< Grouped cautious DPS wait until the tank has this % of target max HP in threat (0 = disabled).
+
     /**
      * @brief Gets the value of a configuration parameter by name.
      * @param name The name of the configuration parameter.

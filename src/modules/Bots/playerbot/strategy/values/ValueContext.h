@@ -16,6 +16,7 @@
 #include "TankTargetValue.h"
 #include "PartyTankValue.h"
 #include "DpsTargetValue.h"
+#include "DpsTanksTargetValue.h"
 #include "CcTargetValue.h"
 #include "CurrentCcTargetValue.h"
 #include "PetTargetValue.h"
@@ -95,6 +96,7 @@ namespace ai
             creators["party tank"] = &ValueContext::party_tank;
             creators["dps target"] = &ValueContext::dps_target;
             creators["least hp target"] = &ValueContext::least_hp_target;
+            creators["dps tanks target"] = &ValueContext::dps_tanks_target;
             creators["enemy player target"] = &ValueContext::enemy_player_target;
             creators["cc target"] = &ValueContext::cc_target;
             creators["current cc target"] = &ValueContext::current_cc_target;
@@ -259,6 +261,7 @@ namespace ai
         static UntypedValue* party_tank(PlayerbotAI* ai) { return new PartyTankValue(ai); }
         static UntypedValue* dps_target(PlayerbotAI* ai) { return new DpsTargetValue(ai); }
         static UntypedValue* least_hp_target(PlayerbotAI* ai) { return new LeastHpTargetValue(ai); }
+        static UntypedValue* dps_tanks_target(PlayerbotAI* ai) { return new DpsTanksTargetValue(ai); }
         static UntypedValue* enemy_player_target(PlayerbotAI* ai) { return new EnemyPlayerValue(ai); }
         static UntypedValue* cc_target(PlayerbotAI* ai) { return new CcTargetValue(ai); }
         static UntypedValue* current_cc_target(PlayerbotAI* ai) { return new CurrentCcTargetValue(ai); }

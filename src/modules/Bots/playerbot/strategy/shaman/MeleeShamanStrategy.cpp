@@ -34,7 +34,8 @@ private:
         return new ActionNode ("magma totem",
             /*P*/ NULL,
             /*A*/ NULL,
-            /*C*/ NextAction::array(0, new NextAction("fire nova"), NULL));
+            /*C*/ NextAction::array(0,
+                new NextAction("fire nova", ACTION_NORMAL), NULL));
     }
 };
 

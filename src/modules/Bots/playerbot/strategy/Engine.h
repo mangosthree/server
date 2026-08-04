@@ -90,7 +90,7 @@ namespace ai
         void addStrategy(string name);
         void addStrategies(string first, ...);
         bool removeStrategy(string name);
-        bool HasStrategy(string name);
+        bool HasStrategy(const string& name);
         void removeAllStrategies();
         void toggleStrategy(string name);
         std::string ListStrategies();

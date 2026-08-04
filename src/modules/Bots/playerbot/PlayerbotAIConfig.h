@@ -83,6 +83,7 @@ public:
     uint32 minRandomBotsPriceChangeInterval, maxRandomBotsPriceChangeInterval;
     bool randomBotJoinLfg; ///< Indicates if random bots should join Looking For Group.
     bool randomBotLoginAtStartup; ///< Indicates if random bots should login at startup.
+    bool randomBotActiveZoneOnly; ///< If true, ungrouped random bots only tick when a real player is in their zone.
     uint32 randomBotTeleLevel; ///< The teleport level for random bots.
     bool logInGroupOnly, logValuesPerTick;
     bool fleeingEnabled; ///< Indicates if fleeing is enabled for bots.

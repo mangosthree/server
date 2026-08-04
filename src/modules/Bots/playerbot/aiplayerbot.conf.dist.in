@@ -186,6 +186,10 @@ AiPlayerbot.CommandPrefix = ~
 # Enable LFG for random bots
 #AiPlayerbot.RandomBotJoinLfg = 1
 
+# Only tick ungrouped random bots when a real player is in their zone.
+# Reduces CPU load on empty zones at the cost of bots being frozen there.
+#AiPlayerbot.RandomBotActiveZoneOnly = 0
+
 # Level diff between random bots and nearby creatures for random teleports
 AiPlayerbot.RandomBotTeleLevel = 3
 

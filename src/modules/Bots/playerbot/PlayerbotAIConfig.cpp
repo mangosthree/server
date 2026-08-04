@@ -70,6 +70,7 @@ PlayerbotAIConfig::PlayerbotAIConfig()
       maxRandomBotsPriceChangeInterval(0),
       randomBotJoinLfg(false),
       randomBotLoginAtStartup(false),
+      randomBotActiveZoneOnly(false),
       randomBotTeleLevel(0),
       feralBearTankChance(0),
       logInGroupOnly(false),
@@ -224,6 +225,7 @@ bool PlayerbotAIConfig::Initialize()
     randomBotMinLevel = config.GetIntDefault("AiPlayerbot.RandomBotMinLevel", 1);
     randomBotMaxLevel = config.GetIntDefault("AiPlayerbot.RandomBotMaxLevel", 255);
     randomBotLoginAtStartup = config.GetBoolDefault("AiPlayerbot.RandomBotLoginAtStartup", true);
+    randomBotActiveZoneOnly = config.GetBoolDefault("AiPlayerbot.RandomBotActiveZoneOnly", false);
     randomBotTeleLevel = config.GetIntDefault("AiPlayerbot.RandomBotTeleLevel", 3);
     openGoSpell = config.GetIntDefault("AiPlayerbot.OpenGoSpell", 6477);
 

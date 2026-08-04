@@ -1013,6 +1013,16 @@ uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, string event)
 {
     uint32 value = 0;
 
+    std::pair<uint32, std::string> key(bot, event);
+    std::map<std::pair<uint32, std::string>, EventValueEntry>::iterator cacheIt = m_eventValueCache.find(key);
+    if (cacheIt != m_eventValueCache.end())
+    {
+        if (((uint32)time(0) - cacheIt->second.lastChangeTime) < cacheIt->second.validIn)
+        {
+            return cacheIt->second.value;
+        }
+    }
+
     // Query the database to get the event value for the specified bot
     QueryResult* results = CharacterDatabase.PQuery(
             "SELECT `value`, `time`, `validIn` FROM `ai_playerbot_random_bots` WHERE `owner` = 0 AND `bot` = '%u' AND `event` = '%s'",
@@ -1028,6 +1038,7 @@ uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, string event)
         {
             value = 0;
         }
+        m_eventValueCache[key] = { value, lastChangeTime, validIn };
         delete results;
     }
 
@@ -1051,6 +1062,8 @@ uint32 RandomPlayerbotMgr::SetEventValue(uint32 bot, string event, uint32 value,
     {
         m_randomBotCache[bot] = (value != 0);
     }
+
+    m_eventValueCache[std::make_pair(bot, event)] = { value, (uint32)time(0), validIn };
 
     return value;
 }
@@ -1312,6 +1325,20 @@ void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
         {
             players.erase(i);
         }
+
+        uint32 zone = player->GetZoneId();
+        std::unordered_map<uint32, uint32>::iterator zi = m_playerZoneCounts.find(zone);
+        if (zi != m_playerZoneCounts.end())
+        {
+            if (zi->second <= 1)
+            {
+                m_playerZoneCounts.erase(zi);
+            }
+            else
+            {
+                zi->second--;
+            }
+        }
     }
 }
 
@@ -1351,6 +1378,43 @@ void RandomPlayerbotMgr::OnPlayerLogin(Player* player)
         players.push_back(player);
         sLog.outDebug("Including non-random bot player %s into random bot update", player->GetName());
     }
+}
+
+void RandomPlayerbotMgr::OnPlayerZoneChange(Player* player, uint32 newZone)
+{
+    // PlayerbotAI is not set yet when this is called on bot login, so also
+    // check IsRandomBot directly -- a null-socket bot session never matches
+    // a "bot" remote address the way m0's guard assumed.
+    if (player->GetPlayerbotAI() || sRandomPlayerbotMgr.IsRandomBot(player))
+    {
+        return;
+    }
+
+    uint32 oldZone = player->GetCachedZoneId();
+    if (oldZone == newZone)
+    {
+        return;
+    }
+
+    std::unordered_map<uint32, uint32>::iterator zi = m_playerZoneCounts.find(oldZone);
+    if (zi != m_playerZoneCounts.end())
+    {
+        if (zi->second <= 1)
+        {
+            m_playerZoneCounts.erase(zi);
+        }
+        else
+        {
+            zi->second--;
+        }
+    }
+    m_playerZoneCounts[newZone]++;
+}
+
+bool RandomPlayerbotMgr::HasRealPlayerInZone(uint32 zoneId) const
+{
+    std::unordered_map<uint32, uint32>::const_iterator zi = m_playerZoneCounts.find(zoneId);
+    return zi != m_playerZoneCounts.end() && zi->second > 0;
 }
 
 Player* RandomPlayerbotMgr::GetRandomPlayer()

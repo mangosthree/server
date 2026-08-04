@@ -85,6 +85,10 @@ public:
     void AddHandler(uint16 opcode, string handler);
     void Handle(ExternalEventHelper &helper);
     void AddPacket(const WorldPacket& packet);
+    bool IsEmpty()
+    {
+        return queue.size() == 0;
+    }
 
 private:
     map<uint16, string> handlers;

@@ -179,6 +179,15 @@ PlayerbotAI::~PlayerbotAI()
  */
 void PlayerbotAI::UpdateAI(uint32 elapsed)
 {
+    if (sPlayerbotAIConfig.randomBotActiveZoneOnly &&
+        !bot->GetGroup() && sRandomPlayerbotMgr.IsRandomBot(bot) &&
+        botOutgoingPacketHandlers.IsEmpty() &&
+        !sRandomPlayerbotMgr.HasRealPlayerInZone(bot->GetZoneId()))
+    {
+        SetNextCheckDelay(5000);
+        return;
+    }
+
     if (m_eatingUntil || m_drinkingUntil)
     {
         bool finished = !IsEating() && !IsDrinking();

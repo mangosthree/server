@@ -730,6 +730,10 @@ void WorldSession::LogoutPlayer(bool Save)
         ///- Send update to group
         if (_player->GetGroup())
         {
+            // a world marker belongs to the raid, not to whoever placed it, so
+            // hand its dynamic object to someone still online rather than
+            // letting it die with this player
+            _player->GetGroup()->ReanchorMarkersFrom(_player->GetObjectGuid());
             _player->GetGroup()->SendUpdate();
         }
 

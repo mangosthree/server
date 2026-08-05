@@ -646,6 +646,8 @@ void InitializeOpcodes()
     OPCODE(SMSG_ROLE_POLL_BEGIN,                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_ROLE_CHANGED_INFORM,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_SET_EVERYONE_IS_ASSISTANT,               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSetEveryoneIsAssistantOpcode);
+    OPCODE(SMSG_RAID_MARKERS_CHANGED,                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(CMSG_CLEAR_RAID_MARKER,                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleClearRaidMarkerOpcode     );
     OPCODE(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE,               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_CHANGEPLAYER_DIFFICULTY_RESULT,          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(CMSG_GM_TEACH,                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );

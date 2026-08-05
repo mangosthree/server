@@ -62,6 +62,9 @@
 #include "MapPersistentStateMgr.h"
 #include "Util.h"
 #include "LootMgr.h"
+#include "DynamicObject.h"                                  // raid markers are dynamic objects
+#include "SpellMgr.h"                                       // GetSpellDuration / GetSpellRadius
+#include "DBCStores.h"
 #include <atomic>
 
 #ifdef ENABLE_ELUNA
@@ -348,6 +351,166 @@ void Group::ConvertToRaid()
         {
             player->UpdateForQuestWorldObjects();
         }
+}
+
+/**
+ * @brief Tells every member which raid world markers are currently placed.
+ */
+void Group::SendRaidMarkerUpdate()
+{
+    WorldPacket data(SMSG_RAID_MARKERS_CHANGED, 4);
+    data << uint32(m_markerMask);
+
+    BroadcastPacket(&data, true);
+}
+
+/**
+ * Re-creates the beacon for one slot on another group member.
+ *
+ * @return the new owner, or an empty guid when nobody can host it.
+ */
+ObjectGuid Group::_resummonMarker(uint8 slot, ObjectGuid skip)
+{
+    RaidMarkerSlot const& marker = m_markers[slot];
+
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(marker.spellId);
+    if (!spellInfo)
+    {
+        return ObjectGuid();
+    }
+
+    SpellEffectEntry const* effect = spellInfo->GetSpellEffect(EFFECT_INDEX_0);
+    if (!effect)
+    {
+        return ObjectGuid();
+    }
+
+    for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
+    {
+        if (citr->guid == skip)
+        {
+            continue;
+        }
+
+        Player* host = sObjectMgr.GetPlayer(citr->guid);
+        if (!host || !host->IsInWorld() || host->GetMapId() != marker.mapId)
+        {
+            continue;
+        }
+
+        DynamicObject* dynObj = new DynamicObject;
+        if (!dynObj->Create(host->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), host,
+                            marker.spellId, EFFECT_INDEX_0, marker.x, marker.y, marker.z,
+                            GetSpellDuration(spellInfo),
+                            GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->GetRadiusIndex())),
+                            DYNAMIC_OBJECT_RAID_MARKER))
+        {
+            delete dynObj;
+            continue;
+        }
+
+        host->AddDynObject(dynObj);
+        host->GetMap()->Add(dynObj);
+        return host->GetObjectGuid();
+    }
+
+    return ObjectGuid();
+}
+
+/**
+ * @brief Records a placed world marker so it can be kept alive and taken down later.
+ *
+ * @param slot Marker slot, from the spell effect's base points.
+ * @param caster Player currently hosting the dynamic object.
+ * @param spellId Spell used, needed to find that object again.
+ * @param x Beacon position.
+ * @param y Beacon position.
+ * @param z Beacon position.
+ * @param mapId Map the beacon stands on; the client is never told.
+ */
+void Group::SetRaidMarker(uint8 slot, ObjectGuid caster, uint32 spellId, float x, float y, float z, uint32 mapId)
+{
+    if (slot >= MAX_RAID_MARKERS)
+    {
+        return;
+    }
+
+    m_markers[slot].owner   = caster;
+    m_markers[slot].spellId = spellId;
+    m_markers[slot].mapId   = mapId;
+    m_markers[slot].x       = x;
+    m_markers[slot].y       = y;
+    m_markers[slot].z       = z;
+    m_markerMask |= (1 << slot);
+}
+
+/**
+ * @brief Takes down one world marker, or all of them.
+ *
+ * @param slot Marker slot; anything >= MAX_RAID_MARKERS clears every marker.
+ */
+void Group::ClearRaidMarker(uint8 slot)
+{
+    uint8 first = (slot >= MAX_RAID_MARKERS) ? 0 : slot;
+    uint8 last  = (slot >= MAX_RAID_MARKERS) ? MAX_RAID_MARKERS - 1 : slot;
+
+    for (uint8 i = first; i <= last; ++i)
+    {
+        if (m_markers[i].spellId)
+        {
+            Player* owner = sObjectMgr.GetPlayer(m_markers[i].owner);
+            if (owner)
+            {
+                owner->RemoveDynObject(m_markers[i].spellId);
+            }
+        }
+
+        m_markers[i] = RaidMarkerSlot();
+        m_markerMask &= ~(1 << i);
+    }
+
+    SendRaidMarkerUpdate();
+}
+
+/**
+ * @brief Keeps world markers standing when the player hosting them leaves.
+ *
+ * A marker belongs to the raid, not to whoever placed it -- nothing on the wire
+ * ties the two together. But in 4.3.4 the only thing the client can draw is the
+ * dynamic object, and that dies with its caster, so the beacon is re-summoned on
+ * another member. If nobody can host it the slot is dropped as well, because a
+ * ticked checkbox with no beacon would leave that slot unusable.
+ *
+ * @param leaver Player who is going away.
+ */
+void Group::ReanchorMarkersFrom(ObjectGuid leaver)
+{
+    bool changed = false;
+
+    for (uint8 i = 0; i < MAX_RAID_MARKERS; ++i)
+    {
+        if (!m_markers[i].spellId || m_markers[i].owner != leaver)
+        {
+            continue;
+        }
+
+        ObjectGuid host = _resummonMarker(i, leaver);
+        if (host)
+        {
+            m_markers[i].owner = host;
+            continue;
+        }
+
+        // nothing can render it any more -- drop both channels together
+        m_markers[i] = RaidMarkerSlot();
+        m_markerMask &= ~(1 << i);
+        changed = true;
+    }
+
+    if (changed)
+    {
+        SendRaidMarkerUpdate();
+    }
 }
 
 /**
@@ -740,6 +903,9 @@ void Group::ChangeLeader(ObjectGuid guid)
 void Group::Disband(bool hideDestroy)
 {
     Player* player;
+
+    // markers outlive the group otherwise -- they carry a 4h duration
+    ClearRaidMarker(MAX_RAID_MARKERS);
 
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {

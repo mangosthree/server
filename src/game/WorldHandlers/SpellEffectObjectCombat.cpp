@@ -859,6 +859,60 @@ void Spell::EffectDismissPet(SpellEffectEntry const* /*effect*/)
 }
 
 /**
+ * @brief Drops a raid world marker at the targeted point.
+ *
+ * The client places these by casting one spell per colour at a destination; the
+ * slot the marker occupies is the effect's base points. Every member is told
+ * which slots are filled so the dropdown can tick them.
+ *
+ * @param effect The raid marker effect index.
+ */
+void Spell::EffectSummonRaidMarker(SpellEffectEntry const* effect)
+{
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+    {
+        return;
+    }
+
+    Player* player = (Player*)m_caster;
+    Group* group = player->GetGroup();
+    if (!group)
+    {
+        return;
+    }
+
+    if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
+    {
+        return;
+    }
+
+    // re-placing the same colour moves it, so drop the previous one first
+    player->RemoveDynObject(m_spellInfo->ID);
+
+    float x, y, z;
+    m_targets.getDestination(x, y, z);
+
+    int32 duration = GetSpellDuration(m_spellInfo);
+    float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->GetRadiusIndex()));
+
+    DynamicObject* dynObj = new DynamicObject;
+    if (!dynObj->Create(player->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), player,
+                        m_spellInfo->ID, SpellEffectIndex(effect->EffectIndex),
+                        x, y, z, duration, radius, DYNAMIC_OBJECT_RAID_MARKER))
+    {
+        delete dynObj;
+        return;
+    }
+
+    player->AddDynObject(dynObj);
+    player->GetMap()->Add(dynObj);
+
+    group->SetRaidMarker(uint8(effect->EffectBasePoints), player->GetObjectGuid(), m_spellInfo->ID,
+                         x, y, z, player->GetMapId());
+    group->SendRaidMarkerUpdate();
+}
+
+/**
  * @brief Summons a persistent object into one of the caster's object slots.
  *
  * @param effect The summon object effect index.

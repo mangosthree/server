@@ -866,6 +866,35 @@ void WorldSession::HandleSetEveryoneIsAssistantOpcode(WorldPacket& recv_data)
 }
 
 /**
+ * @brief Takes down a raid world marker; the client sends an out-of-range slot
+ *        to mean "remove them all".
+ *
+ * @param recv_data The received opcode packet.
+ */
+void WorldSession::HandleClearRaidMarkerOpcode(WorldPacket& recv_data)
+{
+    uint8 marker;
+    recv_data >> marker;
+
+    Group* group = GetPlayer()->GetGroup();
+    if (!group)
+    {
+        return;
+    }
+
+    // same gate as placing: restricted to leader/assistants in a raid, open to
+    // any member of a party
+    if (group->isRaidGroup() &&
+        !group->IsLeader(GetPlayer()->GetObjectGuid()) &&
+        !group->IsAssistant(GetPlayer()->GetObjectGuid()))
+    {
+        return;
+    }
+
+    group->ClearRaidMarker(marker);
+}
+
+/**
  * @brief Moves a raid member into another subgroup.
  *
  * @param recv_data The received opcode packet.

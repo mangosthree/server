@@ -178,7 +178,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectReputation,                               //103 SPELL_EFFECT_REPUTATION
     &Spell::EffectSummonObject,                             //104 SPELL_EFFECT_SUMMON_OBJECT_SLOT
     &Spell::EffectNULL,                                     //105 SPELL_EFFECT_SURVEY
-    &Spell::EffectNULL,                                     //106 SPELL_EFFECT_SUMMON_RAID_MARKER
+    &Spell::EffectSummonRaidMarker,                         //106 SPELL_EFFECT_SUMMON_RAID_MARKER
     &Spell::EffectNULL,                                     //107 SPELL_EFFECT_LOOT_CORPSE
     &Spell::EffectDispelMechanic,                           //108 SPELL_EFFECT_DISPEL_MECHANIC
     &Spell::EffectSummonDeadPet,                            //109 SPELL_EFFECT_SUMMON_DEAD_PET

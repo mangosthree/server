@@ -706,6 +706,7 @@ class WorldSession
         void HandleSetRoleOpcode(WorldPacket& recv_data);
         void HandleRolePollBeginOpcode(WorldPacket& recv_data);
         void HandleSetEveryoneIsAssistantOpcode(WorldPacket& recv_data);
+        void HandleClearRaidMarkerOpcode(WorldPacket& recv_data);
         void HandleSetActionButtonOpcode(WorldPacket& recvPacket);
 
         void HandleGameObjectUseOpcode(WorldPacket& recPacket);

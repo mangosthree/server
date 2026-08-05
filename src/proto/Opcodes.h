@@ -614,6 +614,8 @@ enum OpcodesList
     SMSG_ROLE_POLL_BEGIN                                  = 0x70B0, // 4.3.4 15595
     SMSG_ROLE_CHANGED_INFORM                              = 0x39A6, // 4.3.4 15595
     CMSG_SET_EVERYONE_IS_ASSISTANT                        = 0x2530, // 4.3.4 15595
+    SMSG_RAID_MARKERS_CHANGED                             = 0x10A1, // 4.3.4 15595
+    CMSG_CLEAR_RAID_MARKER                                = 0x7300, // 4.3.4 15595
     SMSG_CLEAR_FAR_SIGHT_IMMEDIATE                        = 0x2A04, // 4.3.4 15595
     SMSG_CHANGEPLAYER_DIFFICULTY_RESULT                   = 0x2217, // 4.3.4 15595
     CMSG_GM_TEACH                                         = 0x1210,

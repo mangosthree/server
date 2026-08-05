@@ -55,6 +55,7 @@
 #include "Player.h"
 #include "SpellAuras.h"
 #include "Group.h"
+#include "LFGMgr.h"                                         // LFGRoles: PLAYER_ROLE_*
 #include "SocialMgr.h"
 #include "Util.h"
 #include "DB2Structure.h"
@@ -732,6 +733,136 @@ void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket& recv_data)
     {
         group->ConvertToParty();
     }
+}
+
+/**
+ * Builds SMSG_ROLE_CHANGED_INFORM.
+ *
+ * Bit and byte order are transcribed from the client's own reader; the two GUIDs
+ * interleave, so this cannot use the single-GUID WriteGuidMask helpers.
+ */
+static void BuildRoleChangedInform(WorldPacket& data, ObjectGuid from, ObjectGuid changed,
+                                   uint32 oldRole, uint32 newRole)
+{
+    uint64 rawFrom = from.GetRawValue();
+    uint64 rawChanged = changed.GetRawValue();
+    uint8 const* f = (uint8 const*)&rawFrom;
+    uint8 const* c = (uint8 const*)&rawChanged;
+
+    data.WriteBit(f[1]); data.WriteBit(c[0]); data.WriteBit(c[2]); data.WriteBit(c[4]);
+    data.WriteBit(c[7]); data.WriteBit(c[3]); data.WriteBit(f[7]); data.WriteBit(c[5]);
+    data.WriteBit(f[5]); data.WriteBit(f[4]); data.WriteBit(f[3]); data.WriteBit(c[6]);
+    data.WriteBit(f[2]); data.WriteBit(f[6]); data.WriteBit(c[1]); data.WriteBit(f[0]);
+
+    data.FlushBits();
+
+    #define ROLE_SEQ(b) if (b) { data << uint8((b) ^ 1); }
+    ROLE_SEQ(f[7]); ROLE_SEQ(c[3]); ROLE_SEQ(f[6]); ROLE_SEQ(c[4]); ROLE_SEQ(c[0]);
+    data << uint32(newRole);
+    ROLE_SEQ(c[6]); ROLE_SEQ(c[2]); ROLE_SEQ(f[0]); ROLE_SEQ(f[4]); ROLE_SEQ(c[1]);
+    ROLE_SEQ(f[3]); ROLE_SEQ(f[5]); ROLE_SEQ(f[2]); ROLE_SEQ(c[5]); ROLE_SEQ(c[7]);
+    ROLE_SEQ(f[1]);
+    data << uint32(oldRole);
+    #undef ROLE_SEQ
+}
+
+/**
+ * @brief Records the role a player picked in the role-poll popup.
+ *
+ * @param recv_data The received opcode packet; uint32 role then a packed GUID.
+ */
+void WorldSession::HandleSetRoleOpcode(WorldPacket& recv_data)
+{
+    uint32 role;
+    recv_data >> role;
+
+    ObjectGuid changedUnit;
+    recv_data.ReadGuidMask<2, 6, 3, 7, 5, 1, 0, 4>(changedUnit);
+    recv_data.ReadGuidBytes<6, 4, 1, 3, 0, 5, 2, 7>(changedUnit);
+
+    // never trust the client with the spare bits
+    role &= (PLAYER_ROLE_LEADER | PLAYER_ROLE_TANK | PLAYER_ROLE_HEALER | PLAYER_ROLE_DAMAGE);
+
+    Group* group = GetPlayer()->GetGroup();
+    if (!group)
+    {
+        return;
+    }
+
+    // only the leader/assistants may re-role someone else
+    if (changedUnit != GetPlayer()->GetObjectGuid() &&
+        !group->IsLeader(GetPlayer()->GetObjectGuid()) &&
+        !group->IsAssistant(GetPlayer()->GetObjectGuid()))
+    {
+        return;
+    }
+
+    uint8 oldRole = group->GetLfgRoles(changedUnit);
+    if (oldRole == uint8(role))
+    {
+        return;
+    }
+
+    WorldPacket data(SMSG_ROLE_CHANGED_INFORM, 8 + 8 + 4 + 4);
+    BuildRoleChangedInform(data, GetPlayer()->GetObjectGuid(), changedUnit, oldRole, role);
+    group->BroadcastPacket(&data, false);
+
+    // roles also ride back to every client inside SMSG_GROUP_LIST
+    group->SetLfgRoles(changedUnit, uint8(role));
+}
+
+/**
+ * @brief Starts a role check; asks every member to re-pick their role.
+ *
+ * @param recv_data The received opcode packet; an empty body starts the poll.
+ */
+void WorldSession::HandleRolePollBeginOpcode(WorldPacket& recv_data)
+{
+    Group* group = GetPlayer()->GetGroup();
+    if (!group)
+    {
+        return;
+    }
+
+    if (!recv_data.empty())
+    {
+        return;
+    }
+
+    ObjectGuid guid = GetPlayer()->GetObjectGuid();
+    if (!group->IsLeader(guid) && !group->IsAssistant(guid))
+    {
+        return;
+    }
+
+    WorldPacket data(SMSG_ROLE_POLL_BEGIN, 8);
+    data.WriteGuidMask<1, 5, 7, 3, 2, 4, 0, 6>(guid);
+    data.WriteGuidBytes<4, 7, 0, 5, 1, 6, 2, 3>(guid);
+
+    group->BroadcastPacket(&data, true);
+}
+
+/**
+ * @brief Toggles the raid's "everyone is assistant" flag.
+ *
+ * @param recv_data The received opcode packet.
+ */
+void WorldSession::HandleSetEveryoneIsAssistantOpcode(WorldPacket& recv_data)
+{
+    bool apply = recv_data.ReadBit();
+
+    Group* group = GetPlayer()->GetGroup();
+    if (!group)
+    {
+        return;
+    }
+
+    if (!group->IsLeader(GetPlayer()->GetObjectGuid()))
+    {
+        return;
+    }
+
+    group->SetEveryoneIsAssistant(apply);
 }
 
 /**

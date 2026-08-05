@@ -909,6 +909,171 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
 }
 
 /**
+ * @brief Sends the character's raid-frame (CompactUnitFrame) profiles.
+ *
+ * The 4.3.4 client will not fire COMPACT_UNIT_FRAME_PROFILES_LOADED until this
+ * arrives, and Blizzard_CompactUnitFrameProfiles.lua activates no profile until
+ * it does -- which leaves CompactRaidFrameManager's container disabled and the
+ * raid frames hidden. An empty list is valid: the client then builds its own
+ * default profile.
+ */
+void WorldSession::SendLoadCUFProfiles()
+{
+    Player* player = GetPlayer();
+    if (!player)
+    {
+        return;
+    }
+
+    std::vector<CUFProfile const*> profiles;
+    for (uint8 i = 0; i < MAX_CUF_PROFILES; ++i)
+    {
+        if (CUFProfile const* profile = player->GetCUFProfile(i))
+        {
+            profiles.push_back(profile);
+        }
+    }
+
+    WorldPacket data(SMSG_LOAD_CUF_PROFILES, 3 + profiles.size() * 32);
+
+    data.WriteBits(profiles.size(), 20);
+
+    // bit order below is the client's, not a sensible one -- do not "tidy" it
+    for (CUFProfile const* profile : profiles)
+    {
+        data.WriteBit(profile->BoolOptions[CUF_UNK_157]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_10_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_5_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_25_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_HEAL_PREDICTION]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_PVE]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_HORIZONTAL_GROUPS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_40_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_3_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_AGGRO_HIGHLIGHT]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_BORDER]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_2_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_NON_BOSS_DEBUFFS]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_MAIN_TANK_AND_ASSIST]);
+        data.WriteBit(profile->BoolOptions[CUF_UNK_156]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_SPEC_2]);
+        data.WriteBit(profile->BoolOptions[CUF_USE_CLASS_COLORS]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_POWER_BAR]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_SPEC_1]);
+        data.WriteBits(profile->ProfileName.size(), 8);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS]);
+        data.WriteBit(profile->BoolOptions[CUF_KEEP_GROUPS_TOGETHER]);
+        data.WriteBit(profile->BoolOptions[CUF_UNK_145]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_15_PLAYERS]);
+        data.WriteBit(profile->BoolOptions[CUF_DISPLAY_PETS]);
+        data.WriteBit(profile->BoolOptions[CUF_AUTO_ACTIVATE_PVP]);
+    }
+
+    data.FlushBits();
+
+    for (CUFProfile const* profile : profiles)
+    {
+        data << uint16(profile->LeftOffset);
+        data << uint16(profile->FrameHeight);
+        data << uint16(profile->BottomOffset);
+        data << uint8(profile->BottomPoint);
+        data << uint16(profile->TopOffset);
+        data << uint8(profile->TopPoint);
+        data << uint8(profile->HealthText);
+        data << uint8(profile->SortBy);
+        data << uint16(profile->FrameWidth);
+        data << uint8(profile->LeftPoint);
+        data.append(profile->ProfileName.c_str(), profile->ProfileName.size());
+    }
+
+    SendPacket(&data);
+}
+
+/**
+ * @brief Stores raid-frame profiles the client edited.
+ *
+ * @param recv_data The received opcode packet.
+ */
+void WorldSession::HandleSaveCUFProfiles(WorldPacket& recv_data)
+{
+    DEBUG_LOG("WORLD: Received opcode CMSG_SAVE_CUF_PROFILES");
+
+    Player* player = GetPlayer();
+    if (!player)
+    {
+        recv_data.rfinish();
+        return;
+    }
+
+    uint8 count = uint8(recv_data.ReadBits(20));
+    if (count > MAX_CUF_PROFILES)
+    {
+        sLog.outError("HandleSaveCUFProfiles: %s sent %u profiles, max is %u",
+                      player->GetName(), count, MAX_CUF_PROFILES);
+        recv_data.rfinish();
+        return;
+    }
+
+    std::unique_ptr<CUFProfile> profiles[MAX_CUF_PROFILES];
+    uint8 nameLengths[MAX_CUF_PROFILES];
+
+    // the read order differs from the write order -- both are the client's
+    for (uint8 i = 0; i < count; ++i)
+    {
+        profiles[i].reset(new CUFProfile());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_2, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_10_PLAYERS, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_UNK_157, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_HEAL_PREDICTION, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_SPEC_1, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVP, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_POWER_BAR, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_15_PLAYERS, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_40_PLAYERS, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_PETS, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_5_PLAYERS, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_ONLY_DISPELLABLE_DEBUFFS, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_2_PLAYERS, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_UNK_156, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_NON_BOSS_DEBUFFS, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_MAIN_TANK_AND_ASSIST, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_AGGRO_HIGHLIGHT, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_3_PLAYERS, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_BORDER, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_USE_CLASS_COLORS, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_UNK_145, recv_data.ReadBit());
+        nameLengths[i] = uint8(recv_data.ReadBits(8));
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_PVE, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_DISPLAY_HORIZONTAL_GROUPS, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_AUTO_ACTIVATE_25_PLAYERS, recv_data.ReadBit());
+        profiles[i]->BoolOptions.set(CUF_KEEP_GROUPS_TOGETHER, recv_data.ReadBit());
+    }
+
+    for (uint8 i = 0; i < count; ++i)
+    {
+        recv_data >> profiles[i]->TopPoint;
+        profiles[i]->ProfileName = recv_data.ReadString(nameLengths[i]);
+        recv_data >> profiles[i]->BottomOffset;
+        recv_data >> profiles[i]->FrameHeight;
+        recv_data >> profiles[i]->FrameWidth;
+        recv_data >> profiles[i]->TopOffset;
+        recv_data >> profiles[i]->HealthText;
+        recv_data >> profiles[i]->BottomPoint;
+        recv_data >> profiles[i]->SortBy;
+        recv_data >> profiles[i]->LeftOffset;
+        recv_data >> profiles[i]->LeftPoint;
+
+        player->SaveCUFProfile(i, std::move(profiles[i]));
+    }
+
+    // slots the client no longer uses
+    for (uint8 i = count; i < MAX_CUF_PROFILES; ++i)
+    {
+        player->SaveCUFProfile(i, std::unique_ptr<CUFProfile>());
+    }
+}
+
+/**
  * @brief Consumes an account-data update packet.
  *
  * @param recv_data The received opcode packet.

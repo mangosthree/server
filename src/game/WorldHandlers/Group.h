@@ -154,6 +154,8 @@ enum GroupType
     // 0x04?
     GROUPTYPE_LFD    = 0x08,
     // 0x10, leave/change group?, I saw this flag when leaving group and after leaving BG while in group
+    GROUPTYPE_ONE_PERSON_PARTY   = 0x20,                   ///< client: Lua_IsOnePersonParty
+    GROUPTYPE_EVERYONE_ASSISTANT = 0x40,                   ///< client: Lua_IsEveryoneAssistant
 };
 
 enum GroupFlagMask
@@ -284,6 +286,8 @@ class Group
             uint8       group;
             /* Indicates whether the player is assistant. */
             bool        assistant;
+            /* Role mask the player picked (tank/healer/damage). */
+            uint8       roles = 0;
             uint32      lastMap;
         };
         typedef std::list<MemberSlot> MemberSlotList;
@@ -302,7 +306,7 @@ class Group
         // group manipulation methods
         bool   Create(ObjectGuid guid, const char* name);
         bool   LoadGroupFromDB(Field* fields);
-        bool   LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant);
+        bool   LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant, uint8 roles = 0);
         bool   AddInvite(Player* player);
         uint32 RemoveInvite(Player* player);
         void   RemoveAllInvites();
@@ -435,6 +439,16 @@ class Group
         // some additional raid methods
         void ConvertToRaid();
         void ConvertToParty();                              ///< raid -> party, collapses every member into subgroup 0
+
+        void SetEveryoneIsAssistant(bool apply);            ///< PartyFlags bit 0x40; Lua_IsEveryoneAssistant
+        bool IsEveryoneAssistant() const { return (m_groupType & GROUPTYPE_EVERYONE_ASSISTANT) != 0; }
+
+        void SetLfgRoles(ObjectGuid guid, uint8 roles);     ///< role the client picked; echoed back in SMSG_GROUP_LIST
+        uint8 GetLfgRoles(ObjectGuid guid) const
+        {
+            member_citerator slot = _getMemberCSlot(guid);
+            return slot == m_memberSlots.end() ? 0 : slot->roles;
+        }
 
         void SetBattlegroundGroup(BattleGround* bg)
         {

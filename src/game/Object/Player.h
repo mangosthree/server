@@ -72,6 +72,8 @@
 #include "ItemPrototype.h"
 #include "Item.h"
 #include "GlyphMgr.h"   // GlyphMgr is held by value on Player; brings in Glyph struct + GlyphUpdateState enum
+#include "CUFProfile.h" // raid-frame profiles are held by value on Player
+#include <memory>
 #include "HonorMgr.h"   // HonorMgr is held by value on Player; owns daily-kill rollover + RewardHonor calculation
 #include "CurrencyMgr.h" // CurrencyMgr is held by value on Player; brings in PlayerCurrency struct + PlayerCurrencyState/Flag enums + PlayerCurrenciesMap typedef
 #include "RuneMgr.h"    // RuneMgr is held by value on Player; brings in RuneType/RuneInfo/Runes + owns death-knight rune state
@@ -854,6 +856,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADWEEKLYQUESTSTATUS,
     PLAYER_LOGIN_QUERY_LOADMONTHLYQUESTSTATUS,
     PLAYER_LOGIN_QUERY_LOADCURRENCIES,
+    PLAYER_LOGIN_QUERY_LOADCUFPROFILES,
 
     MAX_PLAYER_LOGIN_QUERY
 };
@@ -1130,6 +1133,19 @@ class Player : public Unit
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
         void SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time);
+
+        /// Raid-frame (CompactUnitFrame) profiles; \c NULL slots are unused.
+        CUFProfile* GetCUFProfile(uint8 id) const
+        {
+            MANGOS_ASSERT(id < MAX_CUF_PROFILES);
+            return m_cufProfiles[id].get();
+        }
+        void SaveCUFProfile(uint8 id, std::unique_ptr<CUFProfile> profile)
+        {
+            MANGOS_ASSERT(id < MAX_CUF_PROFILES);
+            m_cufProfiles[id] = std::move(profile);
+            m_cufProfilesChanged = true;
+        }
 
         Creature* GetNPCIfCanInteractWith(ObjectGuid guid, uint32 NpcFlagsmask);
         GameObject* GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameobject_type = MAX_GAMEOBJECT_TYPE);
@@ -3902,6 +3918,7 @@ class Player : public Unit
         void _LoadEquipmentSets(QueryResult* result);
         void _LoadBGData(QueryResult* result);
         void _LoadGlyphs(QueryResult* result) { m_glyphMgr.Load(result); }
+        void _LoadCUFProfiles(QueryResult* result);
         void _LoadIntoDataField(const char* data, uint32 startOffset, uint32 count);
 
         /*********************************************************/
@@ -3932,6 +3949,7 @@ class Player : public Unit
         void _SaveEquipmentSets();
         void _SaveBGData();
         void _SaveGlyphs() { m_glyphMgr.Save(); }
+        void _SaveCUFProfiles();
         void _SaveTalents();
         void _SaveStats();
 
@@ -4019,6 +4037,9 @@ class Player : public Unit
         ActionButtonList m_actionButtons[MAX_TALENT_SPEC_COUNT];
 
         GlyphMgr m_glyphMgr;   // per-spec glyph state + Load/Save/Apply lifecycle (extracted 2026-05-12)
+
+        std::unique_ptr<CUFProfile> m_cufProfiles[MAX_CUF_PROFILES]; // raid-frame layouts, echoed back on login
+        bool m_cufProfilesChanged = false;                           // only rewrite the table when the client edited them
 
         float m_auraBaseMod[BASEMOD_END][MOD_END];
         int16 m_baseRatingValue[MAX_COMBAT_RATING];

@@ -62,6 +62,7 @@
 #include "MapPersistentStateMgr.h"
 #include "Util.h"
 #include "LootMgr.h"
+#include <atomic>
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -305,7 +306,7 @@ bool Group::LoadGroupFromDB(Field* fields)
  * @param assistant True if the member is an assistant.
  * @return true if the member was loaded successfully; otherwise false.
  */
-bool Group::LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant)
+bool Group::LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant, uint8 roles)
 {
     MemberSlot member;
     member.guid      = ObjectGuid(HIGHGUID_PLAYER, guidLow);
@@ -318,6 +319,7 @@ bool Group::LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant)
 
     member.group     = subgroup;
     member.assistant = assistant;
+    member.roles     = roles;
     m_memberSlots.push_back(member);
 
     SubGroupCounterIncrease(subgroup);
@@ -346,6 +348,60 @@ void Group::ConvertToRaid()
         {
             player->UpdateForQuestWorldObjects();
         }
+}
+
+/**
+ * @brief Flags every member as assistant (PartyFlags bit 0x40).
+ *
+ * @param apply true to set, false to clear.
+ */
+void Group::SetEveryoneIsAssistant(bool apply)
+{
+    if (apply)
+    {
+        m_groupType = GroupType(m_groupType | GROUPTYPE_EVERYONE_ASSISTANT);
+    }
+    else
+    {
+        m_groupType = GroupType(m_groupType & ~GROUPTYPE_EVERYONE_ASSISTANT);
+    }
+
+    if (!isBGGroup())
+    {
+        CharacterDatabase.PExecute("UPDATE `groups` SET `groupType` = %u WHERE `groupId`='%u'", uint8(m_groupType), m_Id);
+    }
+
+    SendUpdate();
+}
+
+/**
+ * @brief Records the role a member picked and republishes the roster.
+ *
+ * @param guid Member to update.
+ * @param roles Role mask from the client.
+ */
+void Group::SetLfgRoles(ObjectGuid guid, uint8 roles)
+{
+    member_witerator slot = _getMemberWSlot(guid);
+    if (slot == m_memberSlots.end())
+    {
+        return;
+    }
+
+    if (slot->roles == roles)
+    {
+        return;
+    }
+
+    slot->roles = roles;
+
+    if (!isBGGroup())
+    {
+        CharacterDatabase.PExecute("UPDATE `group_member` SET `roles` = '%u' WHERE `memberGuid`='%u'",
+                                   roles, guid.GetCounter());
+    }
+
+    SendUpdate();
 }
 
 /**
@@ -1516,10 +1572,33 @@ void Group::SendTargetIconList(WorldSession* session)
 }
 
 /**
+ * Roster version stamped into SMSG_GROUP_LIST.
+ *
+ * The client drops a roster it has already seen: for a matching party GUID less
+ * than 60s old it compares stored >= incoming and discards the packet. That makes
+ * a per-group counter unsafe, because group ids are reused and a fresh group
+ * starting at 1 would be rejected against the previous occupant's higher value. A
+ * server-wide counter can never regress. Zero disables the check, so it is skipped.
+ */
+static std::atomic<uint32> s_groupListSequence(0);
+
+static uint32 NextGroupListSequence()
+{
+    uint32 seq = ++s_groupListSequence;
+    if (seq == 0)                                           // wrapped
+    {
+        seq = ++s_groupListSequence;
+    }
+    return seq;
+}
+
+/**
  * @brief Sends a full group list update to every connected member.
  */
 void Group::SendUpdate()
 {
+    uint32 const sequence = NextGroupListSequence();
+
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
         Player* player = sObjectMgr.GetPlayer(citr->guid);
@@ -1532,7 +1611,7 @@ void Group::SendUpdate()
         data << uint8(m_groupType);                         // group type (flags in 3.3)
         data << uint8(citr->group);                         // groupid
         data << uint8(GetFlags(*citr));                     // group flags
-        data << uint8(isBGGroup() ? 1 : 0);                 // 2.0.x, isBattleGroundGroup?
+        data << uint8(citr->roles);                         // your own assigned role
         if (m_groupType & GROUPTYPE_LFD)
         {
             data << uint8(0);
@@ -1540,7 +1619,7 @@ void Group::SendUpdate()
             data << uint8(0);
         }
         data << GetObjectGuid();                            // group guid
-        data << uint32(0);                                  // 3.3, this value increments every time SMSG_GROUP_LIST is sent
+        data << uint32(sequence);                           // roster version; client drops anything it has already seen
         data << uint32(GetMembersCount() - 1);
         for (member_citerator citr2 = m_memberSlots.begin(); citr2 != m_memberSlots.end(); ++citr2)
         {
@@ -1557,7 +1636,7 @@ void Group::SendUpdate()
             data << uint8(onlineState);                     // online-state
             data << uint8(citr2->group);                    // groupid
             data << uint8(GetFlags(*citr2));                // group flags
-            data << uint8(0);                               // roles mask
+            data << uint8(citr2->roles);                    // assigned role
         }
 
         data << m_leaderGuid;                               // leader guid

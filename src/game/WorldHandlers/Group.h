@@ -337,12 +337,14 @@ class Group
         ObjectGuid GetObjectGuid() const { return ObjectGuid(HIGHGUID_GROUP, GetId()); }
         bool IsFull() const
         {
-            return (m_groupType == GROUPTYPE_NORMAL) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE);
+            return isRaidGroup() ? (m_memberSlots.size() >= MAX_RAID_SIZE) : (m_memberSlots.size() >= MAX_GROUP_SIZE);
         }
         GroupType GetGroupType() const { return m_groupType; }
+        /// m_groupType is a flag set, so test the bit; an equality check misses
+        /// GROUPTYPE_BGRAID and any future flag OR-ed alongside it.
         bool isRaidGroup() const
         {
-            return m_groupType == GROUPTYPE_RAID;
+            return (m_groupType & GROUPTYPE_RAID) != 0;
         }
         bool isBGGroup()   const
         {
@@ -432,6 +434,7 @@ class Group
 
         // some additional raid methods
         void ConvertToRaid();
+        void ConvertToParty();                              ///< raid -> party, collapses every member into subgroup 0
 
         void SetBattlegroundGroup(BattleGround* bg)
         {

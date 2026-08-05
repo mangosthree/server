@@ -686,12 +686,16 @@ void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recv_data)
 }
 
 /**
- * @brief Converts the current party into a raid group.
+ * @brief Converts the current group between party and raid mode.
  *
- * @param recv_data The received opcode packet.
+ * @param recv_data The received opcode packet; carries the target mode.
  */
-void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket& /*recv_data*/)
+void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket& recv_data)
 {
+    // Lua ConvertToRaid() sends 1, ConvertToParty() sends 0 on the same opcode
+    uint8 toRaid;
+    recv_data >> toRaid;
+
     Group* group = GetPlayer()->GetGroup();
     if (!group)
     {
@@ -708,11 +712,26 @@ void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket& /*recv_data*/)
     {
         return;
     }
+
+    // a party cannot hold more than MAX_GROUP_SIZE players
+    if (!toRaid && group->GetMembersCount() > MAX_GROUP_SIZE)
+    {
+        SendPartyResult(PARTY_OP_INVITE, "", ERR_GROUP_FULL);
+        return;
+    }
     /********************/
 
     // everything is fine, do it (is it 0 (PARTY_OP_INVITE) correct code)
     SendPartyResult(PARTY_OP_INVITE, "", ERR_PARTY_RESULT_OK);
-    group->ConvertToRaid();
+
+    if (toRaid)
+    {
+        group->ConvertToRaid();
+    }
+    else
+    {
+        group->ConvertToParty();
+    }
 }
 
 /**

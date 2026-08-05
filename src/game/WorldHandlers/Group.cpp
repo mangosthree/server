@@ -349,6 +349,52 @@ void Group::ConvertToRaid()
 }
 
 /**
+ * @brief Converts the group back to party mode; a party has one subgroup and no raid roles.
+ */
+void Group::ConvertToParty()
+{
+    m_groupType = GroupType(m_groupType & ~GROUPTYPE_RAID);
+
+    // main tank / main assistant only exist in a raid
+    m_mainTankGuid.Clear();
+    m_mainAssistantGuid.Clear();
+
+    // a party is a single subgroup, so everyone collapses into subgroup 0
+    for (member_witerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
+    {
+        citr->group     = 0;
+        citr->assistant = false;
+
+        Player* player = sObjectMgr.GetPlayer(citr->guid);
+        if (player && player->GetGroup() == this)
+        {
+            player->GetGroupRef().setSubGroup(0);
+        }
+    }
+
+    _initRaidSubGroupsCounter();
+
+    if (!isBGGroup())
+    {
+        CharacterDatabase.PExecute("UPDATE `groups` SET `groupType` = %u, `mainTank` = '0', `mainAssistant` = '0' WHERE `groupId`='%u'",
+                                   uint8(m_groupType), m_Id);
+        CharacterDatabase.PExecute("UPDATE `group_member` SET `subgroup` = '0', `assistant` = '0' WHERE `groupId`='%u'", m_Id);
+    }
+
+    SendUpdate();
+
+    // update quest related GO states (quest activity dependent from raid membership)
+    for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
+    {
+        Player* player = sObjectMgr.GetPlayer(citr->guid);
+        if (player)
+        {
+            player->UpdateForQuestWorldObjects();
+        }
+    }
+}
+
+/**
  * @brief Adds a pending invitation for a player.
  *
  * @param player The invited player.

@@ -17,6 +17,7 @@
 #include "PlayerbotSecurity.h"
 #include "Util.h"
 #include "Group.h"
+#include "LFGMgr.h"                                         // LFGRoles: PLAYER_ROLE_TANK/HEALER/DAMAGE
 #include "Pet.h"
 #include "SpellAuras.h"
 #include "../ahbot/AhBot.h"
@@ -493,6 +494,26 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         uint32 spellId;
         p >> spellId;
         SpellInterrupted(spellId);
+        return;
+    }
+    case SMSG_ROLE_POLL_BEGIN:
+    {
+        // a bot has no role-poll popup, so answer it straight from the strategy
+        // it is already running -- same source IsTank()/IsHeal() read.
+        if (Group* group = bot->GetGroup())
+        {
+            uint8 role = PLAYER_ROLE_DAMAGE;
+            if (ContainsStrategy(STRATEGY_TYPE_TANK))
+            {
+                role = PLAYER_ROLE_TANK;
+            }
+            else if (ContainsStrategy(STRATEGY_TYPE_HEAL))
+            {
+                role = PLAYER_ROLE_HEALER;
+            }
+
+            group->SetLfgRoles(bot->GetObjectGuid(), role);
+        }
         return;
     }
     case SMSG_SPELL_DELAYED:

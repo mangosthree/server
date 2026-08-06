@@ -88,6 +88,7 @@ namespace proto
           m_codec(),
           m_seed(MakeAuthSeed()),
           m_session(INVALID_SESSION_ID),
+          m_traceSession(INVALID_SESSION_ID),
           m_closed(false)
     {
         s_openConnections.fetch_add(1, std::memory_order_relaxed);
@@ -112,6 +113,7 @@ namespace proto
         WorldPacket connection(MSG_WOW_CONNECTION, 46);
         connection << std::string("RLD OF WARCRAFT CONNECTION - SERVER TO CLIENT");
 
+        m_gateway.TracePacket(INVALID_SESSION_ID, connection, false);
         const std::vector<uint8> connectionWire =
             PacketCodec::Encode(connection, PacketCodec::HeaderEncryptor());
         wire.insert(wire.end(), connectionWire.begin(), connectionWire.end());
@@ -128,6 +130,7 @@ namespace proto
 
         // Neither packet is encrypted: the crypt is not armed yet, and the
         // client cannot key its own cipher until it has the challenge.
+        m_gateway.TracePacket(INVALID_SESSION_ID, challenge, false);
         const std::vector<uint8> challengeWire =
             PacketCodec::Encode(challenge, PacketCodec::HeaderEncryptor());
         wire.insert(wire.end(), challengeWire.begin(), challengeWire.end());
@@ -154,6 +157,9 @@ namespace proto
                 [&](WorldPacket&& packet) -> bool
                 {
                     ++decoded;
+                    // Before the move, which empties it.
+                    m_gateway.TracePacket(m_traceSession.load(std::memory_order_relaxed),
+                                          packet, true);
                     if (!HandlePacket(std::move(packet)))
                     {
                         fatal = true;
@@ -386,6 +392,7 @@ namespace proto
         }
 
         m_session = session;
+        m_traceSession.store(session, std::memory_order_relaxed);
 
         DEBUG_LOG("proto: account '%s' authenticated from %s",
                   request.account.c_str(), m_address.c_str());
@@ -411,6 +418,8 @@ namespace proto
         {
             return;
         }
+
+        m_gateway.TracePacket(m_traceSession.load(std::memory_order_relaxed), packet, false);
 
         std::vector<uint8_t> wire;
         {
@@ -448,5 +457,6 @@ namespace proto
             m_gateway.Detach(m_session);
             m_session = INVALID_SESSION_ID;
         }
+        m_traceSession.store(INVALID_SESSION_ID, std::memory_order_relaxed);
     }
 }

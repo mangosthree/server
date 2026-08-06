@@ -295,18 +295,10 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 
 #endif                                                  // !MANGOS_DEBUG
 
-    // Dump outgoing packet (opt-in via PacketLoggingEnabled; off by default).
-    // WorldSocket.cpp:240-244 did this with the ACE socket fd as the "SOCKET:"
-    // field; WorldSession has no proto::SessionId of its own to mirror that
-    // with (the gateway keys sessions the other way, WorldSession -> nothing),
-    // so the account id fills the same "stable per-connection identifier"
-    // role here -- it does not change across a reconnect the way a freshly
-    // assigned slot id would.
-    if (sLog.IsPacketLoggingEnabled())
-    {
-        sLog.outWorldPacketDump(GetAccountId(), packet->GetOpcode(),
-                                LookupOpcodeName(packet->GetOpcode()), packet, false);
-    }
+    // The dump is NOT taken here any more. The account id this used to key it on was a
+    // different numbering scheme from the SessionId the incoming side used, so the two
+    // halves of one log could not be told apart. ClientConnection traces both directions
+    // now, which also catches what never reaches this function: the auth handshake.
 
     // SendPacket is void and safe to call on a dead link -- unlike the old
     // WorldSocket::SendPacket, there is no failure to react to here.

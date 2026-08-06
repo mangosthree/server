@@ -564,6 +564,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     UpdateNextMailTimeAndUnreads();
 
     _LoadGlyphs(holder->GetResult(PLAYER_LOGIN_QUERY_LOADGLYPHS));
+    _LoadCUFProfiles(holder->GetResult(PLAYER_LOGIN_QUERY_LOADCUFPROFILES));
 
     _LoadAuras(holder->GetResult(PLAYER_LOGIN_QUERY_LOADAURAS), time_diff);
     ApplyGlyphs(true);

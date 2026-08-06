@@ -461,6 +461,55 @@ void Player::_LoadAuras(QueryResult* result, uint32 timediff)
 // Player::_LoadGlyphs moved to GlyphMgr::Load (2026-05-12); thin delegating wrapper lives inline in Player.h.
 
 /**
+ * @brief Restores the character's raid-frame profiles.
+ *
+ * \arg \c result
+ *   Rows from `character_cuf_profiles`; may be NULL when none are stored.
+ */
+void Player::_LoadCUFProfiles(QueryResult* result)
+{
+    if (!result)
+    {
+        return;
+    }
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint8 id = fields[0].GetUInt8();
+        if (id >= MAX_CUF_PROFILES)
+        {
+            sLog.outError("Player::_LoadCUFProfiles: %s has a profile with invalid id %u, max is %u",
+                          GetGuidStr().c_str(), id, MAX_CUF_PROFILES);
+            continue;
+        }
+
+        std::unique_ptr<CUFProfile> profile(new CUFProfile());
+        profile->ProfileName  = fields[1].GetCppString();
+        profile->FrameHeight  = fields[2].GetUInt16();
+        profile->FrameWidth   = fields[3].GetUInt16();
+        profile->SortBy       = fields[4].GetUInt8();
+        profile->HealthText   = fields[5].GetUInt8();
+        profile->BoolOptions  = std::bitset<CUF_BOOL_OPTIONS_COUNT>(fields[6].GetUInt32());
+        profile->TopPoint     = fields[7].GetUInt8();
+        profile->BottomPoint  = fields[8].GetUInt8();
+        profile->LeftPoint    = fields[9].GetUInt8();
+        profile->TopOffset    = fields[10].GetUInt16();
+        profile->BottomOffset = fields[11].GetUInt16();
+        profile->LeftOffset   = fields[12].GetUInt16();
+
+        m_cufProfiles[id] = std::move(profile);
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    // straight from the DB, so nothing to write back yet
+    m_cufProfilesChanged = false;
+}
+
+/**
  * @brief Restores corpse state for a dead player or cleans it up for a living one.
  */
 void Player::LoadCorpse()

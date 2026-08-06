@@ -334,6 +334,7 @@ void Player::SaveToDB()
     _SaveEquipmentSets();
     GetSession()->SaveTutorialsData();                      // changed only while character in game
     _SaveGlyphs();
+    _SaveCUFProfiles();
     _SaveTalents();
 
     CharacterDatabase.CommitTransaction();
@@ -515,6 +516,55 @@ void Player::_SaveAuras()
 }
 
 // Player::_SaveGlyphs moved to GlyphMgr::Save (2026-05-12); thin delegating wrapper lives inline in Player.h.
+
+/**
+ * @brief Writes the character's raid-frame profiles, but only if the client changed them.
+ */
+void Player::_SaveCUFProfiles()
+{
+    if (!m_cufProfilesChanged)
+    {
+        return;
+    }
+
+    static SqlStatementID delProfiles;
+    static SqlStatementID insProfile;
+
+    SqlStatement stmt = CharacterDatabase.CreateStatement(delProfiles,
+                        "DELETE FROM `character_cuf_profiles` WHERE `guid` = ?");
+    stmt.PExecute(GetGUIDLow());
+
+    for (uint8 i = 0; i < MAX_CUF_PROFILES; ++i)
+    {
+        CUFProfile const* profile = m_cufProfiles[i].get();
+        if (!profile)
+        {
+            continue;
+        }
+
+        stmt = CharacterDatabase.CreateStatement(insProfile,
+               "INSERT INTO `character_cuf_profiles` (`guid`,`id`,`name`,`frameHeight`,`frameWidth`,`sortBy`,"
+               "`healthText`,`boolOptions`,`topPoint`,`bottomPoint`,`leftPoint`,`topOffset`,`bottomOffset`,`leftOffset`) "
+               "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        stmt.addUInt32(GetGUIDLow());
+        stmt.addUInt8(i);
+        stmt.addString(profile->ProfileName);
+        stmt.addUInt16(profile->FrameHeight);
+        stmt.addUInt16(profile->FrameWidth);
+        stmt.addUInt8(profile->SortBy);
+        stmt.addUInt8(profile->HealthText);
+        stmt.addUInt32(uint32(profile->BoolOptions.to_ulong()));
+        stmt.addUInt8(profile->TopPoint);
+        stmt.addUInt8(profile->BottomPoint);
+        stmt.addUInt8(profile->LeftPoint);
+        stmt.addUInt16(profile->TopOffset);
+        stmt.addUInt16(profile->BottomOffset);
+        stmt.addUInt16(profile->LeftOffset);
+        stmt.Execute();
+    }
+
+    m_cufProfilesChanged = false;
+}
 
 /**
  * @brief Saves inventory state changes and queued item records to the database.

@@ -165,8 +165,8 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
     if (!isBGGroup())
     {
         // insert into group table
-        CharacterDatabase.PExecute("INSERT INTO `group_member` (`groupId`,`memberGuid`,`assistant`,`subgroup`) VALUES ('%u','%u','%u','%u')",
-                                   m_Id, member.guid.GetCounter(), ((member.assistant == 1) ? 1 : 0), member.group);
+        CharacterDatabase.PExecute("INSERT INTO `group_member` (`groupId`,`memberGuid`,`assistant`,`subgroup`,`roles`) VALUES ('%u','%u','%u','%u','%u')",
+                                   m_Id, member.guid.GetCounter(), ((member.assistant == 1) ? 1 : 0), member.group, member.roles);
     }
 
     return true;

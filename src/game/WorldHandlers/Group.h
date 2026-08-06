@@ -81,6 +81,7 @@ class Unit;
 
 #define MAX_GROUP_SIZE 5
 #define MAX_RAID_SIZE 40
+#define MAX_RAID_MARKERS 5                                  ///< NUM_WORLD_RAID_MARKERS in FrameXML
 #define MAX_RAID_SUBGROUPS (MAX_RAID_SIZE / MAX_GROUP_SIZE)
 #define TARGET_ICON_COUNT 8
 
@@ -154,6 +155,8 @@ enum GroupType
     // 0x04?
     GROUPTYPE_LFD    = 0x08,
     // 0x10, leave/change group?, I saw this flag when leaving group and after leaving BG while in group
+    GROUPTYPE_ONE_PERSON_PARTY   = 0x20,                   ///< client: Lua_IsOnePersonParty
+    GROUPTYPE_EVERYONE_ASSISTANT = 0x40,                   ///< client: Lua_IsEveryoneAssistant
 };
 
 enum GroupFlagMask
@@ -284,6 +287,8 @@ class Group
             uint8       group;
             /* Indicates whether the player is assistant. */
             bool        assistant;
+            /* Role mask the player picked (tank/healer/damage). */
+            uint8       roles = 0;
             uint32      lastMap;
         };
         typedef std::list<MemberSlot> MemberSlotList;
@@ -302,7 +307,7 @@ class Group
         // group manipulation methods
         bool   Create(ObjectGuid guid, const char* name);
         bool   LoadGroupFromDB(Field* fields);
-        bool   LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant);
+        bool   LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant, uint8 roles = 0);
         bool   AddInvite(Player* player);
         uint32 RemoveInvite(Player* player);
         void   RemoveAllInvites();
@@ -337,12 +342,14 @@ class Group
         ObjectGuid GetObjectGuid() const { return ObjectGuid(HIGHGUID_GROUP, GetId()); }
         bool IsFull() const
         {
-            return (m_groupType == GROUPTYPE_NORMAL) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE);
+            return isRaidGroup() ? (m_memberSlots.size() >= MAX_RAID_SIZE) : (m_memberSlots.size() >= MAX_GROUP_SIZE);
         }
         GroupType GetGroupType() const { return m_groupType; }
+        /// m_groupType is a flag set, so test the bit; an equality check misses
+        /// GROUPTYPE_BGRAID and any future flag OR-ed alongside it.
         bool isRaidGroup() const
         {
-            return m_groupType == GROUPTYPE_RAID;
+            return (m_groupType & GROUPTYPE_RAID) != 0;
         }
         bool isBGGroup()   const
         {
@@ -432,6 +439,23 @@ class Group
 
         // some additional raid methods
         void ConvertToRaid();
+        void ConvertToParty();                              ///< raid -> party, collapses every member into subgroup 0
+
+        void SetEveryoneIsAssistant(bool apply);            ///< PartyFlags bit 0x40; Lua_IsEveryoneAssistant
+        bool IsEveryoneAssistant() const { return (m_groupType & GROUPTYPE_EVERYONE_ASSISTANT) != 0; }
+
+        void SendRaidMarkerUpdate();                        ///< which world markers are currently placed
+        uint32 GetGroupMarkerMask() const { return m_markerMask; }
+        void SetRaidMarker(uint8 slot, ObjectGuid caster, uint32 spellId, float x, float y, float z, uint32 mapId);
+        void ClearRaidMarker(uint8 slot);                   ///< slot >= MAX_RAID_MARKERS clears every marker
+        void ReanchorMarkersFrom(ObjectGuid leaver);        ///< keep markers alive when their summoner leaves
+
+        void SetLfgRoles(ObjectGuid guid, uint8 roles);     ///< role the client picked; echoed back in SMSG_GROUP_LIST
+        uint8 GetLfgRoles(ObjectGuid guid) const
+        {
+            member_citerator slot = _getMemberCSlot(guid);
+            return slot == m_memberSlots.end() ? 0 : slot->roles;
+        }
 
         void SetBattlegroundGroup(BattleGround* bg)
         {
@@ -652,5 +676,22 @@ class Group
         Rolls               RollId;
         BoundInstancesMap   m_boundInstances[MAX_DIFFICULTY];
         uint8*              m_subGroupsCounts;
+        uint32              m_markerMask = 0;               ///< bitmask of placed raid world markers
+
+        /// A placed world marker. The 4.3.4 client is told only the mask, never a
+        /// position, so the visible beacon is purely the dynamic object -- the
+        /// group has to remember where it is in order to keep it alive.
+        struct RaidMarkerSlot
+        {
+            ObjectGuid owner;                               ///< whoever currently hosts the dynamic object
+            uint32     spellId = 0;                         ///< 0 when the slot is empty
+            uint32     mapId   = 0;
+            float      x = 0.0f, y = 0.0f, z = 0.0f;
+        };
+        RaidMarkerSlot      m_markers[MAX_RAID_MARKERS];
+
+        /// Rebuilds one marker's beacon on any member other than \a skip.
+        /// \return the new host, or an empty guid when nobody can carry it.
+        ObjectGuid _resummonMarker(uint8 slot, ObjectGuid skip);
 };
 #endif

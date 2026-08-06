@@ -62,6 +62,10 @@
 #include "MapPersistentStateMgr.h"
 #include "Util.h"
 #include "LootMgr.h"
+#include "DynamicObject.h"                                  // raid markers are dynamic objects
+#include "SpellMgr.h"                                       // GetSpellDuration / GetSpellRadius
+#include "DBCStores.h"
+#include <atomic>
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -305,7 +309,7 @@ bool Group::LoadGroupFromDB(Field* fields)
  * @param assistant True if the member is an assistant.
  * @return true if the member was loaded successfully; otherwise false.
  */
-bool Group::LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant)
+bool Group::LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant, uint8 roles)
 {
     MemberSlot member;
     member.guid      = ObjectGuid(HIGHGUID_PLAYER, guidLow);
@@ -318,6 +322,7 @@ bool Group::LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant)
 
     member.group     = subgroup;
     member.assistant = assistant;
+    member.roles     = roles;
     m_memberSlots.push_back(member);
 
     SubGroupCounterIncrease(subgroup);
@@ -346,6 +351,266 @@ void Group::ConvertToRaid()
         {
             player->UpdateForQuestWorldObjects();
         }
+}
+
+/**
+ * @brief Tells every member which raid world markers are currently placed.
+ */
+void Group::SendRaidMarkerUpdate()
+{
+    WorldPacket data(SMSG_RAID_MARKERS_CHANGED, 4);
+    data << uint32(m_markerMask);
+
+    BroadcastPacket(&data, true);
+}
+
+/**
+ * Re-creates the beacon for one slot on another group member.
+ *
+ * @return the new owner, or an empty guid when nobody can host it.
+ */
+ObjectGuid Group::_resummonMarker(uint8 slot, ObjectGuid skip)
+{
+    RaidMarkerSlot const& marker = m_markers[slot];
+
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(marker.spellId);
+    if (!spellInfo)
+    {
+        return ObjectGuid();
+    }
+
+    SpellEffectEntry const* effect = spellInfo->GetSpellEffect(EFFECT_INDEX_0);
+    if (!effect)
+    {
+        return ObjectGuid();
+    }
+
+    for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
+    {
+        if (citr->guid == skip)
+        {
+            continue;
+        }
+
+        Player* host = sObjectMgr.GetPlayer(citr->guid);
+        if (!host || !host->IsInWorld() || host->GetMapId() != marker.mapId)
+        {
+            continue;
+        }
+
+        DynamicObject* dynObj = new DynamicObject;
+        if (!dynObj->Create(host->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), host,
+                            marker.spellId, EFFECT_INDEX_0, marker.x, marker.y, marker.z,
+                            GetSpellDuration(spellInfo),
+                            GetSpellRadius(sSpellRadiusStore.LookupEntry(effect->GetRadiusIndex())),
+                            DYNAMIC_OBJECT_RAID_MARKER))
+        {
+            delete dynObj;
+            continue;
+        }
+
+        host->AddDynObject(dynObj);
+        host->GetMap()->Add(dynObj);
+        return host->GetObjectGuid();
+    }
+
+    return ObjectGuid();
+}
+
+/**
+ * @brief Records a placed world marker so it can be kept alive and taken down later.
+ *
+ * @param slot Marker slot, from the spell effect's base points.
+ * @param caster Player currently hosting the dynamic object.
+ * @param spellId Spell used, needed to find that object again.
+ * @param x Beacon position.
+ * @param y Beacon position.
+ * @param z Beacon position.
+ * @param mapId Map the beacon stands on; the client is never told.
+ */
+void Group::SetRaidMarker(uint8 slot, ObjectGuid caster, uint32 spellId, float x, float y, float z, uint32 mapId)
+{
+    if (slot >= MAX_RAID_MARKERS)
+    {
+        return;
+    }
+
+    m_markers[slot].owner   = caster;
+    m_markers[slot].spellId = spellId;
+    m_markers[slot].mapId   = mapId;
+    m_markers[slot].x       = x;
+    m_markers[slot].y       = y;
+    m_markers[slot].z       = z;
+    m_markerMask |= (1 << slot);
+}
+
+/**
+ * @brief Takes down one world marker, or all of them.
+ *
+ * @param slot Marker slot; anything >= MAX_RAID_MARKERS clears every marker.
+ */
+void Group::ClearRaidMarker(uint8 slot)
+{
+    uint8 first = (slot >= MAX_RAID_MARKERS) ? 0 : slot;
+    uint8 last  = (slot >= MAX_RAID_MARKERS) ? MAX_RAID_MARKERS - 1 : slot;
+
+    for (uint8 i = first; i <= last; ++i)
+    {
+        if (m_markers[i].spellId)
+        {
+            Player* owner = sObjectMgr.GetPlayer(m_markers[i].owner);
+            if (owner)
+            {
+                owner->RemoveDynObject(m_markers[i].spellId);
+            }
+        }
+
+        m_markers[i] = RaidMarkerSlot();
+        m_markerMask &= ~(1 << i);
+    }
+
+    SendRaidMarkerUpdate();
+}
+
+/**
+ * @brief Keeps world markers standing when the player hosting them leaves.
+ *
+ * A marker belongs to the raid, not to whoever placed it -- nothing on the wire
+ * ties the two together. But in 4.3.4 the only thing the client can draw is the
+ * dynamic object, and that dies with its caster, so the beacon is re-summoned on
+ * another member. If nobody can host it the slot is dropped as well, because a
+ * ticked checkbox with no beacon would leave that slot unusable.
+ *
+ * @param leaver Player who is going away.
+ */
+void Group::ReanchorMarkersFrom(ObjectGuid leaver)
+{
+    bool changed = false;
+
+    for (uint8 i = 0; i < MAX_RAID_MARKERS; ++i)
+    {
+        if (!m_markers[i].spellId || m_markers[i].owner != leaver)
+        {
+            continue;
+        }
+
+        ObjectGuid host = _resummonMarker(i, leaver);
+        if (host)
+        {
+            m_markers[i].owner = host;
+            continue;
+        }
+
+        // nothing can render it any more -- drop both channels together
+        m_markers[i] = RaidMarkerSlot();
+        m_markerMask &= ~(1 << i);
+        changed = true;
+    }
+
+    if (changed)
+    {
+        SendRaidMarkerUpdate();
+    }
+}
+
+/**
+ * @brief Flags every member as assistant (PartyFlags bit 0x40).
+ *
+ * @param apply true to set, false to clear.
+ */
+void Group::SetEveryoneIsAssistant(bool apply)
+{
+    if (apply)
+    {
+        m_groupType = GroupType(m_groupType | GROUPTYPE_EVERYONE_ASSISTANT);
+    }
+    else
+    {
+        m_groupType = GroupType(m_groupType & ~GROUPTYPE_EVERYONE_ASSISTANT);
+    }
+
+    if (!isBGGroup())
+    {
+        CharacterDatabase.PExecute("UPDATE `groups` SET `groupType` = %u WHERE `groupId`='%u'", uint8(m_groupType), m_Id);
+    }
+
+    SendUpdate();
+}
+
+/**
+ * @brief Records the role a member picked and republishes the roster.
+ *
+ * @param guid Member to update.
+ * @param roles Role mask from the client.
+ */
+void Group::SetLfgRoles(ObjectGuid guid, uint8 roles)
+{
+    member_witerator slot = _getMemberWSlot(guid);
+    if (slot == m_memberSlots.end())
+    {
+        return;
+    }
+
+    if (slot->roles == roles)
+    {
+        return;
+    }
+
+    slot->roles = roles;
+
+    if (!isBGGroup())
+    {
+        CharacterDatabase.PExecute("UPDATE `group_member` SET `roles` = '%u' WHERE `memberGuid`='%u'",
+                                   roles, guid.GetCounter());
+    }
+
+    SendUpdate();
+}
+
+/**
+ * @brief Converts the group back to party mode; a party has one subgroup and no raid roles.
+ */
+void Group::ConvertToParty()
+{
+    m_groupType = GroupType(m_groupType & ~GROUPTYPE_RAID);
+
+    // main tank / main assistant only exist in a raid
+    m_mainTankGuid.Clear();
+    m_mainAssistantGuid.Clear();
+
+    // a party is a single subgroup, so everyone collapses into subgroup 0
+    for (member_witerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
+    {
+        citr->group     = 0;
+        citr->assistant = false;
+
+        Player* player = sObjectMgr.GetPlayer(citr->guid);
+        if (player && player->GetGroup() == this)
+        {
+            player->GetGroupRef().setSubGroup(0);
+        }
+    }
+
+    _initRaidSubGroupsCounter();
+
+    if (!isBGGroup())
+    {
+        CharacterDatabase.PExecute("UPDATE `groups` SET `groupType` = %u, `mainTank` = '0', `mainAssistant` = '0' WHERE `groupId`='%u'",
+                                   uint8(m_groupType), m_Id);
+        CharacterDatabase.PExecute("UPDATE `group_member` SET `subgroup` = '0', `assistant` = '0' WHERE `groupId`='%u'", m_Id);
+    }
+
+    SendUpdate();
+
+    // update quest related GO states (quest activity dependent from raid membership)
+    for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
+    {
+        Player* player = sObjectMgr.GetPlayer(citr->guid);
+        if (player)
+        {
+            player->UpdateForQuestWorldObjects();
+        }
+    }
 }
 
 /**
@@ -638,6 +903,9 @@ void Group::ChangeLeader(ObjectGuid guid)
 void Group::Disband(bool hideDestroy)
 {
     Player* player;
+
+    // markers outlive the group otherwise -- they carry a 4h duration
+    ClearRaidMarker(MAX_RAID_MARKERS);
 
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
@@ -1470,10 +1738,33 @@ void Group::SendTargetIconList(WorldSession* session)
 }
 
 /**
+ * Roster version stamped into SMSG_GROUP_LIST.
+ *
+ * The client drops a roster it has already seen: for a matching party GUID less
+ * than 60s old it compares stored >= incoming and discards the packet. That makes
+ * a per-group counter unsafe, because group ids are reused and a fresh group
+ * starting at 1 would be rejected against the previous occupant's higher value. A
+ * server-wide counter can never regress. Zero disables the check, so it is skipped.
+ */
+static std::atomic<uint32> s_groupListSequence(0);
+
+static uint32 NextGroupListSequence()
+{
+    uint32 seq = ++s_groupListSequence;
+    if (seq == 0)                                           // wrapped
+    {
+        seq = ++s_groupListSequence;
+    }
+    return seq;
+}
+
+/**
  * @brief Sends a full group list update to every connected member.
  */
 void Group::SendUpdate()
 {
+    uint32 const sequence = NextGroupListSequence();
+
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
         Player* player = sObjectMgr.GetPlayer(citr->guid);
@@ -1486,7 +1777,7 @@ void Group::SendUpdate()
         data << uint8(m_groupType);                         // group type (flags in 3.3)
         data << uint8(citr->group);                         // groupid
         data << uint8(GetFlags(*citr));                     // group flags
-        data << uint8(isBGGroup() ? 1 : 0);                 // 2.0.x, isBattleGroundGroup?
+        data << uint8(citr->roles);                         // your own assigned role
         if (m_groupType & GROUPTYPE_LFD)
         {
             data << uint8(0);
@@ -1494,7 +1785,7 @@ void Group::SendUpdate()
             data << uint8(0);
         }
         data << GetObjectGuid();                            // group guid
-        data << uint32(0);                                  // 3.3, this value increments every time SMSG_GROUP_LIST is sent
+        data << uint32(sequence);                           // roster version; client drops anything it has already seen
         data << uint32(GetMembersCount() - 1);
         for (member_citerator citr2 = m_memberSlots.begin(); citr2 != m_memberSlots.end(); ++citr2)
         {
@@ -1511,7 +1802,7 @@ void Group::SendUpdate()
             data << uint8(onlineState);                     // online-state
             data << uint8(citr2->group);                    // groupid
             data << uint8(GetFlags(*citr2));                // group flags
-            data << uint8(0);                               // roles mask
+            data << uint8(citr2->roles);                    // assigned role
         }
 
         data << m_leaderGuid;                               // leader guid

@@ -4707,6 +4707,9 @@ void Player::SendInitialPacketsAfterAddToMap()
     ResetTimeSync();
     SendTimeSync();
 
+    // client gates its whole raid UI on this arriving
+    GetSession()->SendLoadCUFProfiles();
+
     CastSpell(this, 836, true);                             // LOGINEFFECT
 
     // set some aura effects that send packet to player client after add player to map

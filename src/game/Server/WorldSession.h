@@ -504,6 +504,7 @@ class WorldSession
         AccountData* GetAccountData(AccountDataType type) { return &m_accountData[type]; }
         void SetAccountData(AccountDataType type, time_t time_, const std::string& data);
         void SendAccountDataTimes(uint32 mask);
+        void SendLoadCUFProfiles();                         ///< raid-frame profiles; client blocks its raid UI until this arrives
         void LoadGlobalAccountData();
         void LoadAccountData(QueryResult* result, uint32 mask);
         void LoadTutorialsData();
@@ -701,6 +702,11 @@ class WorldSession
 
         void HandleUpdateAccountData(WorldPacket& recvPacket);
         void HandleRequestAccountData(WorldPacket& recvPacket);
+        void HandleSaveCUFProfiles(WorldPacket& recvPacket);
+        void HandleSetRoleOpcode(WorldPacket& recv_data);
+        void HandleRolePollBeginOpcode(WorldPacket& recv_data);
+        void HandleSetEveryoneIsAssistantOpcode(WorldPacket& recv_data);
+        void HandleClearRaidMarkerOpcode(WorldPacket& recv_data);
         void HandleSetActionButtonOpcode(WorldPacket& recvPacket);
 
         void HandleGameObjectUseOpcode(WorldPacket& recPacket);

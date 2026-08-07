@@ -156,6 +156,8 @@ DBCStorage <ItemRandomSuffixEntry>        sItemRandomSuffixStore(ItemRandomSuffi
 DBCStorage <ItemReforgeEntry>             sItemReforgeStore(ItemReforgefmt);
 DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
 DBCStorage <LfgDungeonsEntry> sLfgDungeonsStore(LfgDungeonsEntryfmt);
+LfgDungeonsByMapDifficultyMap sLfgDungeonsByMapDifficultyMap;
+LfgDungeonsByRandomIdMap sLfgDungeonsByRandomIdMap;
 DBCStorage <LiquidTypeEntry> sLiquidTypeStore(LiquidTypefmt);
 DBCStorage <LockEntry> sLockStore(LockEntryfmt);
 
@@ -676,6 +678,25 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemRandomSuffixStore,    dbcPath, "ItemRandomSuffix.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemSetStore,             dbcPath, "ItemSet.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLfgDungeonsStore,         dbcPath, "LFGDungeons.dbc");
+    // fill (mapId, difficulty) -> entry and Random_ID -> entry indices. 49
+    // rows carry mapID == -1 (LFD_CATA_ANALYSIS.md section 4.2) and are
+    // skipped for the first index; Random_ID == 0 means "not part of a
+    // random bucket" and is skipped for the second.
+    for (uint32 i = 0; i < sLfgDungeonsStore.GetNumRows(); ++i)
+        if (LfgDungeonsEntry const* entry = sLfgDungeonsStore.LookupEntry(i))
+        {
+            if (entry->mapID >= 0)
+            {
+                uint32 key = MAKE_PAIR32((uint32)entry->mapID, entry->difficulty);
+                sLfgDungeonsByMapDifficultyMap[key] = entry;
+            }
+
+            if (entry->Random_ID != 0)
+            {
+                sLfgDungeonsByRandomIdMap.insert(
+                    LfgDungeonsByRandomIdMap::value_type(entry->Random_ID, entry));
+            }
+        }
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLiquidTypeStore,          dbcPath, "LiquidType.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLockStore,                dbcPath, "Lock.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sMailTemplateStore,        dbcPath, "MailTemplate.dbc");
@@ -1432,6 +1453,34 @@ MapDifficultyEntry const* GetMapDifficultyData(uint32 mapId, Difficulty difficul
 {
     MapDifficultyMap::const_iterator itr = sMapDifficultyMap.find(MAKE_PAIR32(mapId, difficulty));
     return itr != sMapDifficultyMap.end() ? itr->second : NULL;
+}
+
+/**
+ * @brief Reverse-looks-up the LFGDungeons.dbc row for a given map/difficulty
+ *        pair. LFD_CATA_ANALYSIS.md section 4.2: 49 rows carry mapID == -1
+ *        and are never indexed here.
+ *
+ * @param mapId The map id.
+ * @param difficulty The dungeon difficulty (LfgDungeonsEntry::difficulty).
+ * @return Pointer to the LfgDungeonsEntry, or NULL when no row matches.
+ */
+LfgDungeonsEntry const* GetLfgDungeonByMapDifficulty(uint32 mapId, uint32 difficulty)
+{
+    LfgDungeonsByMapDifficultyMap::const_iterator itr = sLfgDungeonsByMapDifficultyMap.find(MAKE_PAIR32(mapId, difficulty));
+    return itr != sLfgDungeonsByMapDifficultyMap.end() ? itr->second : NULL;
+}
+
+/**
+ * @brief Returns every LFGDungeons.dbc row sharing a Random_ID -- the
+ *        dungeons a random-dungeon bucket (e.g. "Random Cataclysm Heroic")
+ *        can select from.
+ *
+ * @param randomId The bucket's Random_ID.
+ * @return Iterator bounds into sLfgDungeonsByRandomIdMap; empty when no rows match.
+ */
+LfgDungeonsByRandomIdBounds GetLfgDungeonsByRandomId(uint32 randomId)
+{
+    return sLfgDungeonsByRandomIdMap.equal_range(randomId);
 }
 
 PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 level)

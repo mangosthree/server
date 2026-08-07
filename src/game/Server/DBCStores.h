@@ -29,6 +29,7 @@
 #include "Platform/Define.h"
 #include <string>
 #include <map>
+#include <utility>
 #include <vector>
 #include "DataStores/DBCStore.h"
 #include "DBCStructure.h"
@@ -148,6 +149,24 @@ bool Map2ZoneCoordinates(float& x, float& y, uint32 zone);
 typedef std::map<uint32/*pair32(map,diff)*/, MapDifficultyEntry const*> MapDifficultyMap;
 MapDifficultyEntry const* GetMapDifficultyData(uint32 mapId, Difficulty difficulty);
 
+/**
+ * Reverse index (mapId, difficulty) -> LfgDungeonsEntry, built once at DBC
+ * load. LFGDungeons.dbc carries 49 rows with mapID == -1
+ * (LFD_CATA_ANALYSIS.md section 4.2); those rows are never inserted here.
+ */
+typedef std::map<uint32/*pair32(map,diff)*/, LfgDungeonsEntry const*> LfgDungeonsByMapDifficultyMap;
+LfgDungeonsEntry const* GetLfgDungeonByMapDifficulty(uint32 mapId, uint32 difficulty);
+
+/**
+ * Reverse index Random_ID -> every LfgDungeonsEntry sharing it (the member
+ * dungeons of one "Random <Expansion> [Heroic]" bucket, e.g. Random_ID 12
+ * for id=301 "Random Cataclysm Heroic"). Rows with Random_ID == 0 (not part
+ * of any bucket) are never inserted.
+ */
+typedef std::multimap<uint32/*Random_ID*/, LfgDungeonsEntry const*> LfgDungeonsByRandomIdMap;
+typedef std::pair<LfgDungeonsByRandomIdMap::const_iterator, LfgDungeonsByRandomIdMap::const_iterator> LfgDungeonsByRandomIdBounds;
+LfgDungeonsByRandomIdBounds GetLfgDungeonsByRandomId(uint32 randomId);
+
 // natural order for difficulties up-down iteration
 // difficulties for dungeons/battleground ordered in normal way
 // and if more high version not exist must be used lesser version
@@ -260,6 +279,8 @@ extern DBCStorage <ItemRandomSuffixEntry>        sItemRandomSuffixStore;
 extern DBCStorage <ItemReforgeEntry>             sItemReforgeStore;
 extern DBCStorage <ItemSetEntry>                 sItemSetStore;
 extern DBCStorage <LfgDungeonsEntry>             sLfgDungeonsStore;
+extern LfgDungeonsByMapDifficultyMap             sLfgDungeonsByMapDifficultyMap;
+extern LfgDungeonsByRandomIdMap                  sLfgDungeonsByRandomIdMap;
 extern DBCStorage <LiquidTypeEntry>              sLiquidTypeStore;
 extern DBCStorage <LockEntry>                    sLockStore;
 extern DBCStorage <MailTemplateEntry>            sMailTemplateStore;

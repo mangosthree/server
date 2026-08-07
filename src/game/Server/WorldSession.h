@@ -389,6 +389,8 @@ class WorldSession
         void SendLfgTeleportError(uint8 error);
         void SendLfgRewards(LFGRewards const& rewards);
         void SendLfgBootUpdate(LFGBoot const& boot);
+        void SendLfgPlayerLockInfo();
+        void SendLfgPartyLockInfo();
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
         void SendGuildInvite(Player* player, bool alreadyInGuild = false);
@@ -1011,6 +1013,7 @@ class WorldSession
         void HandleSearchLfgJoinOpcode(WorldPacket& recv_data);
         void HandleSearchLfgLeaveOpcode(WorldPacket& recv_data);
         void HandleSetLfgCommentOpcode(WorldPacket& recv_data);
+        void HandleLfgLockInfoRequestOpcode(WorldPacket& recv_data);
         void HandleSetTitleOpcode(WorldPacket& recv_data);
         void HandleRealmSplitOpcode(WorldPacket& recv_data);
         void HandleTimeSyncResp(WorldPacket& recv_data);

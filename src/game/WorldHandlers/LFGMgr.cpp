@@ -29,6 +29,7 @@
 #include "DBCStructure.h"
 #include "GameEventMgr.h"
 #include "Group.h"
+#include "LFGLockReason.h"
 #include "LFGMgr.h"
 #include "Object.h"
 #include "Player.h"
@@ -311,77 +312,93 @@ dungeonEntries LFGMgr::FindRandomDungeonsForPlayer(uint32 level, uint8 expansion
 
 dungeonForbidden LFGMgr::FindRandomDungeonsNotForPlayer(Player* plr)
 {
+    dungeonForbidden randomDungeons;
+
+    for (LFGLockedDungeon const& locked : GetPlayerLockList(plr))
+    {
+        randomDungeons[locked.slot] = locked.reason;
+    }
+
+    return randomDungeons;
+}
+
+std::vector<LFGLockedDungeon> LFGMgr::GetPlayerLockList(Player* plr)
+{
+    std::vector<LFGLockedDungeon> lockList;
+
     uint32 level = plr->getLevel();
     uint8 expansion = plr->GetSession()->Expansion();
-
-    dungeonForbidden randomDungeons;
+    bool isAlliance = plr->GetTeam() == ALLIANCE;
+    uint32 currentItemLevel = plr->GetEquipGearScore(false, false);
 
     for (uint32 id = 0; id < sLfgDungeonsStore.GetNumRows(); ++id)
     {
         LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(id);
-        if (dungeon)
+        if (!dungeon)
         {
-            uint32 forbiddenReason = 0;
+            continue;
+        }
 
-            if ((uint8)dungeon->expansionLevel > expansion)
-            {
-                forbiddenReason = (uint32)LFG_FORBIDDEN_EXPANSION;
-            }
-            else if (dungeon->typeID == LFG_TYPE_RAID)
-            {
-                forbiddenReason = (uint32)LFG_FORBIDDEN_RAID;
-            }
-            else if (dungeon->minLevel > level)
-            {
-                forbiddenReason = (uint32)LFG_FORBIDDEN_LOW_LEVEL;
-            }
-            else if (dungeon->maxLevel < level)
-            {
-                forbiddenReason = (uint32)LFG_FORBIDDEN_HIGH_LEVEL;
-            }
-            else if (IsSeasonal(dungeon->flags) && !IsSeasonActive(dungeon->ID)) // check pointers/function args
-            {
-                forbiddenReason = (uint32)LFG_FORBIDDEN_NOT_IN_SEASON;
-            }
-            else if (DungeonFinderRequirements const* req = sObjectMgr.GetDungeonFinderRequirements((uint32)dungeon->mapID, dungeon->difficulty))
-            {
-                if (req->minItemLevel && (plr->GetEquipGearScore(false,false) < req->minItemLevel))
-                {
-                    forbiddenReason = (uint32)LFG_FORBIDDEN_LOW_GEAR_SCORE;
-                }
-                else if (req->achievement && !plr->GetAchievementMgr().HasAchievement(req->achievement))
-                {
-                    forbiddenReason = (uint32)LFG_FORBIDDEN_MISSING_ACHIEVEMENT;
-                }
-                else if (plr->GetTeam() == ALLIANCE && req->allianceQuestId && !plr->GetQuestRewardStatus(req->allianceQuestId))
-                {
-                    forbiddenReason = (uint32)LFG_FORBIDDEN_QUEST_INCOMPLETE;
-                }
-                else if (plr->GetTeam() == HORDE && req->hordeQuestId && !plr->GetQuestRewardStatus(req->hordeQuestId))
-                {
-                    forbiddenReason = (uint32)LFG_FORBIDDEN_QUEST_INCOMPLETE;
-                }
-                else
-                    if (req->item)
-                    {
-                        if (!plr->HasItemCount(req->item, 1) && (!req->item2 || !plr->HasItemCount(req->item2, 1)))
-                        {
-                            forbiddenReason = LFG_FORBIDDEN_MISSING_ITEM;
-                        }
-                    }
-                    else if (req->item2 && !plr->HasItemCount(req->item2, 1))
-                    {
-                        forbiddenReason = LFG_FORBIDDEN_MISSING_ITEM;
-                    }
-            }
+        LFGLockReason::CheckInput in;
+        in.playerLevel = level;
+        in.playerExpansion = expansion;
+        in.isAlliance = isAlliance;
+        in.dungeonExpansionLevel = dungeon->expansionLevel;
+        in.dungeonTypeID = dungeon->typeID;
+        in.dungeonMinLevel = dungeon->minLevel;
+        in.dungeonMaxLevel = dungeon->maxLevel;
+        in.isSeasonal = IsSeasonal(dungeon->flags);
+        in.seasonActive = in.isSeasonal && IsSeasonActive(dungeon->ID);
 
-            if (forbiddenReason)
-            {
-                randomDungeons[dungeon->Entry()] = forbiddenReason;
-            }
+        // LFGDungeons.dbc carries 49 rows with mapID == -1
+        // (LFD_CATA_ANALYSIS.md section 4.2 / Phase 5's trap). Guard here
+        // rather than casting -1 to uint32 and handing 0xFFFFFFFF to
+        // GetDungeonFinderRequirements.
+        DungeonFinderRequirements const* req = (dungeon->mapID >= 0)
+            ? sObjectMgr.GetDungeonFinderRequirements(
+                  (uint32)dungeon->mapID, dungeon->difficulty)
+            : NULL;
+
+        if (req)
+        {
+            in.hasRequirements = true;
+            in.requiredItemLevel = req->minItemLevel;
+            in.currentItemLevel = currentItemLevel;
+
+            in.requiresAchievement = req->achievement != 0;
+            in.hasAchievement = !in.requiresAchievement
+                || plr->GetAchievementMgr().HasAchievement(req->achievement);
+
+            in.requiresAllianceQuest = req->allianceQuestId != 0;
+            in.hasCompletedAllianceQuest = !in.requiresAllianceQuest
+                || plr->GetQuestRewardStatus(req->allianceQuestId);
+
+            in.requiresHordeQuest = req->hordeQuestId != 0;
+            in.hasCompletedHordeQuest = !in.requiresHordeQuest
+                || plr->GetQuestRewardStatus(req->hordeQuestId);
+
+            in.requiresItem1 = req->item != 0;
+            in.hasItem1 = !in.requiresItem1
+                || plr->HasItemCount(req->item, 1);
+
+            in.requiresItem2 = req->item2 != 0;
+            in.hasItem2 = !in.requiresItem2
+                || plr->HasItemCount(req->item2, 1);
+        }
+
+        LFGLockReason::Result result = LFGLockReason::Compute(in);
+        if (result.reason != LFGLockReason::REASON_NONE)
+        {
+            LFGLockedDungeon locked;
+            locked.slot = dungeon->Entry();
+            locked.reason = result.reason;
+            locked.subReason1 = result.subReason1;
+            locked.subReason2 = result.subReason2;
+            lockList.push_back(locked);
         }
     }
-    return randomDungeons;
+
+    return lockList;
 }
 
 void LFGMgr::UpdateNeededRoles(ObjectGuid guid, LFGPlayers* information)

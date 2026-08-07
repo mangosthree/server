@@ -44,7 +44,9 @@
 #include <vector>
 #include <set>
 #include "WorldSession.h"
+#include "Group.h"
 #include "LFGMgr.h"
+#include "LFGPackets.h"
 #include "Log.h"
 #include "Player.h"
 #include "WorldPacket.h"
@@ -120,6 +122,26 @@ void WorldSession::HandleSetLfgCommentOpcode(WorldPacket& recv_data)
     std::string comment;
     recv_data >> comment;
     DEBUG_LOG("LFG comment \"%s\"", comment.c_str());
+}
+
+/// Fires on Dungeon Finder panel open (LFDFrame.xml's OnShow calls both
+/// RequestLFDPlayerLockInfo and RequestLFDPartyLockInfo, each a separate
+/// CMSG_LFG_LOCK_INFO_REQUEST distinguished by this one bit -- section 3.22).
+void WorldSession::HandleLfgLockInfoRequestOpcode(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_LOCK_INFO_REQUEST");
+
+    LFGPackets::LockInfoRequest request;
+    LFGPackets::ReadLockInfoRequest(recv_data, request);
+
+    if (request.player)
+    {
+        SendLfgPlayerLockInfo();
+    }
+    else
+    {
+        SendLfgPartyLockInfo();
+    }
 }
 
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
@@ -611,5 +633,60 @@ void WorldSession::SendLfgBootUpdate(LFGBoot const& boot)
     SendPacket(&data);
 }
 
+/// Builds and sends SMSG_LFG_PLAYER_INFO for the requesting player. Drives
+/// the padlocks in the Dungeon Finder's own list (LFG_LOCK_INFO_RECEIVED).
+/// randomDungeons is intentionally left empty: the reward fields it carries
+/// (Completion/Purse/shortage-tier quantities) are Phase 9's job, and the
+/// client tolerates an empty array here -- it just leaves the "Type:"
+/// dropdown in specific-dungeon mode (section 1.3) until that phase lands.
+void WorldSession::SendLfgPlayerLockInfo()
+{
+    Player* player = GetPlayer();
+
+    LFGPackets::PlayerInfo info;
+    info.lockedDungeons = sLFGMgr.GetPlayerLockList(player);
+
+    WorldPacket data(SMSG_LFG_PLAYER_INFO, 5 + info.lockedDungeons.size() * 16);
+    if (LFGPackets::BuildPlayerInfo(data, info))
+    {
+        SendPacket(&data);
+    }
+}
+
+/// Builds and sends SMSG_LFG_PARTY_INFO for the requesting player's group.
+/// Self is skipped (section 3.11); with no group this sends a valid,
+/// empty member list.
+void WorldSession::SendLfgPartyLockInfo()
+{
+    Player* player = GetPlayer();
+
+    LFGPackets::PartyInfo info;
+
+    if (Group* group = player->GetGroup())
+    {
+        ObjectGuid selfGuid = player->GetObjectGuid();
+
+        for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+        {
+            Player* member = itr->getSource();
+            if (!member || member->GetObjectGuid() == selfGuid)
+            {
+                continue;
+            }
+
+            LFGPackets::LFGPartyInfoMember memberInfo;
+            memberInfo.guid = member->GetObjectGuid().GetRawValue();
+            memberInfo.lockedDungeons = sLFGMgr.GetPlayerLockList(member);
+
+            info.members.push_back(memberInfo);
+        }
+    }
+
+    WorldPacket data(SMSG_LFG_PARTY_INFO, 1 + info.members.size() * 12);
+    if (LFGPackets::BuildPartyInfo(data, info))
+    {
+        SendPacket(&data);
+    }
+}
 
 

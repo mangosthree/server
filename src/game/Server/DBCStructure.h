@@ -1289,26 +1289,22 @@ struct ItemSetEntry
 struct LfgDungeonsEntry
 {
     uint32    ID;
-    DBCString    Name;
+    DBCString Name;
     uint32    minLevel;
     uint32    maxLevel;
     uint32    target_level;
     uint32    target_level_min;
     uint32    target_level_max;
-    float    mapID;
+    int32     mapID;
     uint32    difficulty;
     uint32    flags;
     uint32    typeID;
-    float    faction;
-    DBCString    textureFilename;
     uint32    expansionLevel;
-    DBCString    order_index;
     uint32    group_id;
-    DBCString    description_lang;
-    uint32    col17;
-    uint32    col18;
-    uint32    col19;
-    uint32    col20;
+    uint32    Random_ID;
+    uint32    Count_tank;
+    uint32    Count_healer;
+    uint32    Count_damage;
 
     uint32 Entry() const { return ID + ((uint8)typeID << 24); }
 };

@@ -243,6 +243,27 @@ class ByteBuffer
             return value;
         }
 
+        /// Reads one packed-GUID wire byte in place; a clear mask bit (b == 0)
+        /// means the client never wrote a byte for it, so nothing is consumed.
+        void ReadByteSeq(uint8& b)
+        {
+            if (b != 0)
+            {
+                b ^= read<uint8>();
+            }
+        }
+
+        /// Writes one packed-GUID wire byte; mirrors WriteGuidBytes's
+        /// skip-and-XOR (b == 0 emits nothing, matching the mask bit that was
+        /// already sent as 0).
+        void WriteByteSeq(uint8 b)
+        {
+            if (b != 0)
+            {
+                append<uint8>(b ^ 1);
+            }
+        }
+
         void WriteGuidMask(uint64 guid, uint8* maskOrder, uint8 maskCount, uint8 maskPos = 0)
         {
             uint8* guidByte = ((uint8*)&guid);

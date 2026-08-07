@@ -120,3 +120,62 @@ TEST(ByteBuffer_clear_resets_to_empty)
     CHECK_EQ(int(buf.rpos()), 0);
     CHECK_EQ(int(buf.wpos()), 0);
 }
+
+/*
+ * WriteByteSeq / ReadByteSeq -- the packed-GUID skip-and-XOR path.
+ *
+ * These are new for the LFG packet layer (Phase 3a): m3 previously only had
+ * the array-driven WriteGuidBytes. A zero mask bit means the client never
+ * wrote a byte for that GUID byte at all, so a zero input must round-trip to
+ * zero without consuming or emitting a byte -- getting this wrong shifts
+ * every field after it by one byte, silently.
+ */
+
+TEST(ByteBuffer_WriteByteSeq_emits_nothing_for_a_zero_byte)
+{
+    ByteBuffer buf;
+    buf.WriteByteSeq(uint8(0));
+
+    CHECK_EQ(int(buf.size()), 0);
+}
+
+TEST(ByteBuffer_WriteByteSeq_emits_the_byte_XORed_with_one)
+{
+    ByteBuffer buf;
+    buf.WriteByteSeq(uint8(0x42));
+
+    REQUIRE(int(buf.size()) == 1);
+    CHECK_EQ(int(buf.contents()[0]), 0x42 ^ 1);
+}
+
+TEST(ByteBuffer_ReadByteSeq_round_trips_through_WriteByteSeq)
+{
+    // Mirrors ObjectGuid.h's DEFINE_READGUIDBYTES: ReadGuidMask leaves the
+    // byte slot holding exactly the mask bit (0 or 1), not the final value.
+    // ReadByteSeq then XORs that 1 with the wire byte (original ^ 1),
+    // recovering the original: 1 ^ (original ^ 1) == original.
+    ByteBuffer buf;
+    buf.WriteByteSeq(uint8(0x99));
+
+    uint8 b = 1;                    // mask bit was set
+    buf.ReadByteSeq(b);
+
+    CHECK_EQ(int(buf.rpos()), 1);
+    CHECK_EQ(int(b), 0x99);
+}
+
+TEST(ByteBuffer_ReadByteSeq_leaves_a_zero_byte_untouched_and_reads_nothing)
+{
+    ByteBuffer buf;
+    buf << uint8(0xAA);             // sentinel: proves nothing was consumed
+
+    uint8 b = 0;                    // mask bit was clear
+    buf.ReadByteSeq(b);
+
+    CHECK_EQ(int(b), 0);
+    CHECK_EQ(int(buf.rpos()), 0);
+
+    uint8 sentinel = 0;
+    buf >> sentinel;
+    CHECK_EQ(int(sentinel), 0xAA);
+}

@@ -38,6 +38,7 @@ set(SRC_GRP_TESTS
     BigNumberTest.cpp
     Utf8Test.cpp
     ByteBufferTest.cpp
+    LFGPacketsTest.cpp
     SessionMailboxTest.cpp
     SessionProtocolPolicyTest.cpp
     DatabaseConcurrencyTest.cpp

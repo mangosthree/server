@@ -87,9 +87,10 @@ enum LogFilters
     LOG_FILTER_GRID_ADD           = 0x200000,               // 21 object added to a grid cell ("X enters grid[x,y]") - high-volume, mostly creatures
     LOG_FILTER_DB_SCRIPTS         = 0x400000,               // 22 db_scripts command processing trace (execution, not errors)
     LOG_FILTER_DECK_MINIONS       = 0x800000,               // 23 minions drawn across a deck boundary: board, step ashore, reconcile
+    LOG_FILTER_LFG                = 0x1000000,              // 24 Dungeon Finder / Raid Finder queue and proposal trace
 };
 
-#define LOG_FILTER_COUNT            24
+#define LOG_FILTER_COUNT            25
 
 /**
  * @brief Configuration data for individual log filters

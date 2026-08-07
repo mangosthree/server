@@ -1108,10 +1108,8 @@ void LFGMgr::SendLfgJoinResult(ObjectGuid plrGuid, LfgJoinResult result, LFGStat
 
 void LFGMgr::RemoveOldRoleChecks()
 {
-    for (roleCheckMap::iterator roleItr = m_roleCheckMap.begin(); roleItr != m_roleCheckMap.end(); ++roleItr)
+    for (roleCheckMap::iterator roleItr = m_roleCheckMap.begin(); roleItr != m_roleCheckMap.end();)
     {
-        ObjectGuid groupGuid = roleItr->first;
-
         LFGRoleCheck roleCheck = roleItr->second;
         if ((roleCheck.waitForRoleTime - time(NULL)) <= 0) // no time left
         {
@@ -1127,7 +1125,11 @@ void LFGMgr::RemoveOldRoleChecks()
                 SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), true);  // not in lfg system anymore
             }
 
-            m_roleCheckMap.erase(groupGuid);
+            roleItr = m_roleCheckMap.erase(roleItr);
+        }
+        else
+        {
+            ++roleItr;
         }
     }
 }

@@ -432,6 +432,9 @@ enum eConfigBoolValues
     // Cinematic flyover
     CONFIG_BOOL_CINEMATIC_FLYOVER_ENABLE,
     CONFIG_BOOL_CINEMATIC_FLYOVER_DEBUG,
+
+    // LFG (Dungeon Finder)
+    CONFIG_BOOL_LFG_ENABLE,
     CONFIG_BOOL_VALUE_COUNT
 };
 

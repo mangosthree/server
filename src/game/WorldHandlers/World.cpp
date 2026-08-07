@@ -1146,6 +1146,15 @@ void World::Update(uint32 diff)
         m_timers[WUPDATE_AHBOT].Reset();
     }
 
+    /// <li> Handle LFG (Dungeon Finder) queue and role-check processing
+    if (getConfig(CONFIG_BOOL_LFG_ENABLE) && m_timers[WUPDATE_LFGMGR].Passed())
+    {
+        sLFGMgr.Update();
+        m_timers[WUPDATE_LFGMGR].Reset();
+
+        DEBUG_FILTER_LOG(LOG_FILTER_LFG, "WORLD: LFGMgr::Update tick");
+    }
+
 #ifdef ENABLE_PLAYERBOTS
     sRandomPlayerbotMgr.UpdateAI(diff);
     sRandomPlayerbotMgr.UpdateSessions(diff);
@@ -1976,6 +1985,11 @@ void World::ResetDailyQuests()
 
     m_NextDailyQuestReset = time_t(m_NextDailyQuestReset + DAY);
     CharacterDatabase.PExecute("UPDATE `saved_variables` SET `NextDailyQuestResetTime` = '" UI64FMTD "'", uint64(m_NextDailyQuestReset));
+
+    if (getConfig(CONFIG_BOOL_LFG_ENABLE))
+    {
+        sLFGMgr.ResetDailyRecords();
+    }
 }
 
 void World::ResetWeeklyQuests()

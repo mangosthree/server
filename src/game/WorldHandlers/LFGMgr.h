@@ -31,6 +31,7 @@
 #include "Common/TimeConstants.h"
 #include <ctime>
 #include <string>
+#include "LFGPackets.h"
 #include "Policies/Singleton.h"
 #include "Group.h"
 #include <set>
@@ -111,7 +112,14 @@ enum LfgType
     LFG_TYPE_RANDOM_DUNGEON       = 6
 };
 
-/// Reasons a player cannot enter a dungeon
+/**
+ * Reasons a player cannot enter a dungeon -- the client's
+ * LFG_INSTANCE_INVALID_CODES index (LFD_CATA_ANALYSIS.md section 1.9).
+ * Values are the wire contract with client build 15595, not free to
+ * renumber. LFGLockReason.h (used by GetPlayerLockList) declares the same
+ * numeric values independently, kept in sync by hand since that header must
+ * not include this one -- see its own top comment for why.
+ */
 enum LFGForbiddenTypes
 {
     LFG_FORBIDDEN_EXPANSION             = 1,
@@ -120,12 +128,16 @@ enum LFGForbiddenTypes
     LFG_FORBIDDEN_LOW_GEAR_SCORE        = 4,
     LFG_FORBIDDEN_HIGH_GEAR_SCORE       = 5,
     LFG_FORBIDDEN_RAID                  = 6,
+    LFG_FORBIDDEN_AREA_NOT_EXPLORED     = 9,       ///< no data source yet; declared for future use
     LFG_FORBIDDEN_ATTUNEMENT_LOW_LEVEL  = 1001,
     LFG_FORBIDDEN_ATTUNEMENT_HIGH_LEVEL = 1002,
     LFG_FORBIDDEN_QUEST_INCOMPLETE      = 1022,
     LFG_FORBIDDEN_MISSING_ITEM          = 1025,
+    LFG_FORBIDDEN_TOO_SOON_REALM        = 1029,    ///< both 1029/1030 render as TOO_SOON client-side
+    LFG_FORBIDDEN_TOO_SOON_CHARACTER    = 1030,
     LFG_FORBIDDEN_NOT_IN_SEASON         = 1031,
-    LFG_FORBIDDEN_MISSING_ACHIEVEMENT   = 1034
+    LFG_FORBIDDEN_MISSING_ACHIEVEMENT   = 1034,
+    LFG_FORBIDDEN_TEMPORARILY_DISABLED  = 10000    ///< no data source yet; declared for future use
 };
 
 /// Spells that affect the mechanisms of the dungeon finder
@@ -527,6 +539,18 @@ public:
      * @param plr The player to test against
      */
     dungeonForbidden FindRandomDungeonsNotForPlayer(Player* plr);
+
+    /**
+     * @brief Compute the full wire-shaped lock list for one player -- every
+     *        LFGDungeons.dbc row the player is currently locked out of, with
+     *        slot/reason/sub-reasons ready for SMSG_LFG_PLAYER_INFO /
+     *        SMSG_LFG_PARTY_INFO (LFGPackets::LFGLockedDungeon). Backs
+     *        FindRandomDungeonsNotForPlayer as well, so there is one
+     *        decision per dungeon, not two.
+     *
+     * @param plr The player to test against
+     */
+    std::vector<LFGLockedDungeon> GetPlayerLockList(Player* plr);
 
     /// Given the ID of a dungeon, spit out its entry
     uint32 GetDungeonEntry(uint32 ID);

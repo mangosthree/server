@@ -426,6 +426,33 @@ void LFGMgr::CountAssignedRoles(roleMap const& roles, uint8& tanks,
     dps = seated.dps;
 }
 
+void LFGMgr::AssignRoles(roleMap const& selected, roleMap& assigned)
+{
+    std::vector<ObjectGuid> guids;
+    std::vector<uint8> masks;
+    guids.reserve(selected.size());
+    masks.reserve(selected.size());
+
+    for (roleMap::const_iterator it = selected.begin(); it != selected.end(); ++it)
+    {
+        guids.push_back(it->first);
+        masks.push_back(it->second);
+    }
+
+    std::vector<uint8> seats;
+    LFGRoleAssignment::Assign(masks, NORMAL_TANK_OR_HEALER_COUNT,
+                              NORMAL_TANK_OR_HEALER_COUNT, NORMAL_DAMAGE_COUNT,
+                              &seats);
+
+    assigned.clear();
+    for (size_t i = 0; i < guids.size(); ++i)
+    {
+        // Carry the leader bit through -- the client reads it for the crown.
+        uint8 leaderBit = masks[i] & PLAYER_ROLE_LEADER;
+        assigned[guids[i]] = uint8(seats[i] | leaderBit);
+    }
+}
+
 void LFGMgr::UpdateNeededRoles(ObjectGuid guid, LFGPlayers* information)
 {
     if (information->dungeonList.empty())

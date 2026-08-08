@@ -211,6 +211,61 @@ TEST(LFGRoleAssignment_flexible_paladin_with_full_group_takes_damage)
     CHECK(c.seated == 5);
 }
 
+TEST(LFGRoleAssignment_reports_the_seat_each_player_took)
+{
+    // The proposal packet sends one icon per role bit, so it needs the seat
+    // rather than the selection -- otherwise a tank+healer shows as a second
+    // tank next to the real one.
+    std::vector<uint8> masks;
+    masks.push_back(ROLE_TANK);
+    masks.push_back(uint8(ROLE_TANK | ROLE_HEALER | ROLE_DAMAGE));
+    masks.push_back(ROLE_DAMAGE);
+
+    std::vector<uint8> seats;
+    Counts c = Assign(masks, TANKS_5MAN, HEALS_5MAN, DPS_5MAN, &seats);
+
+    REQUIRE(seats.size() == 3);
+    CHECK(seats[0] == ROLE_TANK);
+    CHECK(seats[1] == ROLE_HEALER);   // tank was taken, healer was the gap
+    CHECK(seats[2] == ROLE_DAMAGE);
+    CHECK(c.seated == 3);
+}
+
+TEST(LFGRoleAssignment_unseated_player_reports_no_role)
+{
+    std::vector<uint8> masks;
+    masks.push_back(ROLE_TANK);
+    masks.push_back(ROLE_TANK);
+
+    std::vector<uint8> seats;
+    Counts c = Assign(masks, TANKS_5MAN, HEALS_5MAN, DPS_5MAN, &seats);
+
+    REQUIRE(seats.size() == 2);
+    CHECK(seats[0] == ROLE_TANK);
+    CHECK(seats[1] == ROLE_NONE);
+    CHECK(c.seated == 1);
+}
+
+TEST(LFGRoleAssignment_seat_is_always_a_single_bit)
+{
+    std::vector<uint8> masks;
+    for (int i = 0; i < 5; ++i)
+    {
+        masks.push_back(uint8(ROLE_TANK | ROLE_HEALER | ROLE_DAMAGE));
+    }
+
+    std::vector<uint8> seats;
+    Assign(masks, TANKS_5MAN, HEALS_5MAN, DPS_5MAN, &seats);
+
+    REQUIRE(seats.size() == 5);
+    for (size_t i = 0; i < seats.size(); ++i)
+    {
+        // exactly one bit set
+        CHECK(seats[i] != ROLE_NONE);
+        CHECK((seats[i] & (seats[i] - 1)) == 0);
+    }
+}
+
 TEST(LFGRoleAssignment_all_flexible_fills_every_slot)
 {
     std::vector<uint8> masks;

@@ -371,6 +371,7 @@ struct LFGProposal
     uint64 groupLeaderGuid = 0;           ///< its leader; 0 until 7b
     bool isNew = true;                    ///< false only for offer-continue (7b)
     roleMap currentRoles;                 ///< participants and their role masks
+    roleMap assignedRoles;                ///< the one role each will actually fill
     proposalAnswerMap answers;            ///< per-player answer
     playerGroupMap groups;                ///< player -> original party guid (empty guid = solo)
     time_t joinedQueue = 0;               ///< queue join time, feeds wait stats
@@ -612,6 +613,9 @@ public:
     /// Seats each player into one of their selected roles, scarce roles first.
     static void CountAssignedRoles(roleMap const& roles, uint8& tanks,
                                    uint8& healers, uint8& dps);
+
+    /// Same seating, but reports the single role each player ended up filling.
+    static void AssignRoles(roleMap const& selected, roleMap& assigned);
 
     /// True when the class can perform every non-leader role in the mask.
     static bool CanPerformSelectedRoles(uint8 playerClass, uint8 roles);

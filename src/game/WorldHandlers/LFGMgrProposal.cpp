@@ -237,6 +237,11 @@ void LFGMgr::SendDungeonProposal(ObjectGuid queueGuid, LFGPlayers* lfgGroup)
     proposal.queueEntryGuid = queueGuid;
     proposal.currentRoles = lfgGroup->currentRoles;
 
+    // Pin each player to the single role they will fill. The selected masks
+    // stay in currentRoles so a declined proposal re-queues them just as
+    // flexible as they were; the packet and 7b's group both want the seat.
+    AssignRoles(proposal.currentRoles, proposal.assignedRoles);
+
     for (roleMap::const_iterator itr = proposal.currentRoles.begin();
          itr != proposal.currentRoles.end(); ++itr)
     {
@@ -318,8 +323,16 @@ void LFGMgr::SendProposalUpdateToPlayer(ObjectGuid plrGuid, LFGProposal const& p
         LFGProposalAnswer answer = (ansItr != proposal.answers.end())
             ? ansItr->second : LFG_ANSWER_PENDING;
 
+        // The seat, not the selection: sending the raw mask draws an icon per
+        // bit, so a player who offered to tank and heal shows up as a second
+        // tank beside the real one. Fall back to the mask if unseated.
+        roleMap::const_iterator seatItr = proposal.assignedRoles.find(memberGuid);
+        uint8 seat = (seatItr != proposal.assignedRoles.end() &&
+                      (seatItr->second & ~uint8(PLAYER_ROLE_LEADER)) != PLAYER_ROLE_NONE)
+            ? seatItr->second : itr->second;
+
         LFGPackets::ProposalUpdatePlayer member;
-        member.roles = itr->second;             // leader bit kept (client isLeader)
+        member.roles = seat;                    // leader bit kept (client isLeader)
         member.me = memberGuid == plrGuid;
         member.sameParty = !memberGroup.IsEmpty() && memberGroup == myGroup;
         // Wire bit 2 gates the client's "someone in your party did not

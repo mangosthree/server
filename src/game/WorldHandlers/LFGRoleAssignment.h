@@ -84,20 +84,30 @@ namespace LFGRoleAssignment
     *   One entry per queued player; the leader bit is ignored.
     * \arg \c maxTanks \c maxHealers \c maxDps
     *   Slot capacity for the content being queued for (1/1/3 for 5-man).
+    * \arg \c assigned
+    *   Optional; when given, receives one entry per input holding the single
+    *   role that player ended up filling, or ROLE_NONE if they got no seat.
     * \return
     *   The seated counts. \c seated below \c masks.size() means at least one
     *   player selected no role, or only roles that were already full.
     */
     inline Counts Assign(std::vector<uint8> const& masks, uint8 maxTanks,
-                         uint8 maxHealers, uint8 maxDps)
+                         uint8 maxHealers, uint8 maxDps,
+                         std::vector<uint8>* assigned = nullptr)
     {
         Counts out;
-        std::vector<uint8> flexible;
 
-        for (std::vector<uint8>::const_iterator it = masks.begin();
-             it != masks.end(); ++it)
+        if (assigned)
         {
-            uint8 mask = *it & ~uint8(ROLE_LEADER);
+            assigned->assign(masks.size(), uint8(ROLE_NONE));
+        }
+
+        // Index of each player who did not pin themselves to one role.
+        std::vector<size_t> flexible;
+
+        for (size_t i = 0; i < masks.size(); ++i)
+        {
+            uint8 mask = masks[i] & ~uint8(ROLE_LEADER);
             switch (mask)
             {
                 case ROLE_TANK:
@@ -105,6 +115,10 @@ namespace LFGRoleAssignment
                     {
                         ++out.tanks;
                         ++out.seated;
+                        if (assigned)
+                        {
+                            (*assigned)[i] = ROLE_TANK;
+                        }
                     }
                     break;
                 case ROLE_HEALER:
@@ -112,6 +126,10 @@ namespace LFGRoleAssignment
                     {
                         ++out.healers;
                         ++out.seated;
+                        if (assigned)
+                        {
+                            (*assigned)[i] = ROLE_HEALER;
+                        }
                     }
                     break;
                 case ROLE_DAMAGE:
@@ -119,34 +137,50 @@ namespace LFGRoleAssignment
                     {
                         ++out.dps;
                         ++out.seated;
+                        if (assigned)
+                        {
+                            (*assigned)[i] = ROLE_DAMAGE;
+                        }
                     }
                     break;
                 default:
                     if (mask != ROLE_NONE)
                     {
-                        flexible.push_back(mask);
+                        flexible.push_back(i);
                     }
                     break;
             }
         }
 
-        for (std::vector<uint8>::const_iterator it = flexible.begin();
+        for (std::vector<size_t>::const_iterator it = flexible.begin();
              it != flexible.end(); ++it)
         {
-            if ((*it & ROLE_TANK) && out.tanks < maxTanks)
+            uint8 mask = masks[*it] & ~uint8(ROLE_LEADER);
+            uint8 seat = ROLE_NONE;
+
+            if ((mask & ROLE_TANK) && out.tanks < maxTanks)
             {
                 ++out.tanks;
-                ++out.seated;
+                seat = ROLE_TANK;
             }
-            else if ((*it & ROLE_HEALER) && out.healers < maxHealers)
+            else if ((mask & ROLE_HEALER) && out.healers < maxHealers)
             {
                 ++out.healers;
-                ++out.seated;
+                seat = ROLE_HEALER;
             }
-            else if ((*it & ROLE_DAMAGE) && out.dps < maxDps)
+            else if ((mask & ROLE_DAMAGE) && out.dps < maxDps)
             {
                 ++out.dps;
+                seat = ROLE_DAMAGE;
+            }
+
+            if (seat != ROLE_NONE)
+            {
                 ++out.seated;
+                if (assigned)
+                {
+                    (*assigned)[*it] = seat;
+                }
             }
         }
 

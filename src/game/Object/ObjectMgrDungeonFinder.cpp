@@ -269,3 +269,52 @@ void ObjectMgr::LoadDungeonFinderItems()
     sLog.outString();
     sLog.outString(">> Loaded %u Dungeon Finder Items", count);
 }
+
+void ObjectMgr::LoadLfgDungeonEntrances()
+{
+    uint32 count = 0;
+    mLfgDungeonEntranceMap.clear();    // in case of a reload
+
+    //                                                 0            1             2             3             4
+    QueryResult* result = WorldDatabase.Query("SELECT `dungeonId`, `position_x`, `position_y`, `position_z`, `orientation` FROM `lfg_dungeon_entrances`");
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outString();
+        sLog.outString(">> Loaded 0 LFG dungeon entrance overrides. DB table `lfg_dungeon_entrances` is empty.");
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field* fields = result->Fetch();
+        bar.step();
+
+        uint32 dungeonId = fields[0].GetUInt32();
+        if (!sLfgDungeonsStore.LookupEntry(dungeonId))
+        {
+            sLog.outString();
+            sLog.outErrorDb("Table `lfg_dungeon_entrances` has a row for nonexistent dungeon %u, skipped.", dungeonId);
+            continue;
+        }
+
+        LfgDungeonEntrance entrance;
+        entrance.x = fields[1].GetFloat();
+        entrance.y = fields[2].GetFloat();
+        entrance.z = fields[3].GetFloat();
+        entrance.o = fields[4].GetFloat();
+        mLfgDungeonEntranceMap[dungeonId] = entrance;
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString(">> Loaded %u LFG dungeon entrance overrides", count);
+}

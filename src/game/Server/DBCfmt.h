@@ -94,6 +94,7 @@ const char ItemRandomSuffixfmt[]="nsxiiiiiiiiii";
 const char ItemReforgefmt[]="nifif";
 const char ItemSetEntryfmt[]="dsxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
 const char LfgDungeonsEntryfmt[] = "nsiiiiiiiiixxixixiiii";
+const char LfgDungeonsGroupingMapEntryfmt[] = "niii";
 const char LiquidTypefmt[] = "nxxixixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char LockEntryfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiixxxxxxxx";
 const char MailTemplateEntryfmt[]="nxs";

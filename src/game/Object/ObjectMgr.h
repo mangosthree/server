@@ -789,6 +789,23 @@ class ObjectMgr
         DungeonFinderRewardsMap const& GetDungeonFinderRewardsMap() const { return mDungeonFinderRewardsMap; }
         DungeonFinderItemsMap const& GetDungeonFinderItemsMap() const { return mDungeonFinderItemsMap; }
 
+        struct LfgDungeonEntrance
+        {
+            float x;
+            float y;
+            float z;
+            float o;
+        };
+        typedef std::unordered_map<uint32 /*dungeonId*/, LfgDungeonEntrance> LfgDungeonEntranceMap;
+
+        /// Entrance override for one LFGDungeons.dbc id; NULL = fall back to
+        /// GetMapEntranceTrigger (multi-wing maps only carry overrides).
+        LfgDungeonEntrance const* GetLfgDungeonEntrance(uint32 dungeonId) const
+        {
+            LfgDungeonEntranceMap::const_iterator itr = mLfgDungeonEntranceMap.find(dungeonId);
+            return itr != mLfgDungeonEntranceMap.end() ? &itr->second : NULL;
+        }
+
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
         static Player* GetPlayer(const char* name);                                 ///< Wrapper for sPlayerRegistry.FindByName
@@ -877,6 +894,7 @@ class ObjectMgr
         void LoadDungeonFinderRequirements();
         void LoadDungeonFinderRewards();
         void LoadDungeonFinderItems();
+        void LoadLfgDungeonEntrances();
 
         void LoadNPCSpellClickSpells();
         void LoadSpellTemplate();
@@ -1501,6 +1519,7 @@ class ObjectMgr
         DungeonFinderRequirementsMap mDungeonFinderRequirementsMap;
         DungeonFinderRewardsMap mDungeonFinderRewardsMap;
         DungeonFinderItemsMap mDungeonFinderItemsMap;
+        LfgDungeonEntranceMap mLfgDungeonEntranceMap;
 
         // character reserved names
         typedef std::set<std::wstring> ReservedNamesMap;

@@ -65,6 +65,7 @@
 #include "Player.h"
 #include "ObjectMgr.h"
 #include "Group.h"
+#include "LFGMgr.h"
 #include "CinematicFlyover.h"
 #include "Guild.h"
 #include "GuildMgr.h"
@@ -710,11 +711,14 @@ void WorldSession::LogoutPlayer(bool Save)
         _player->CleanupChannels();
 #ifndef ENABLE_PLAYERBOTS
         ///- If the player is in a group (or invited), remove him. If the group if then only 1 person, disband the group.
+        bool const retainLfgGroup = sLFGMgr.OnPlayerLogout(_player);
         _player->UninviteFromGroup();
 
         // remove player from the group if he is:
         // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
-        if (_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && m_Socket)
+        // LFD groups keep their offline members (retail behavior).
+        if (!retainLfgGroup && _player->GetGroup() &&
+            !_player->GetGroup()->isRaidGroup() && m_Socket)
         {
             _player->RemoveFromGroup();
         }

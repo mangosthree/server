@@ -158,6 +158,7 @@ DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
 DBCStorage <LfgDungeonsEntry> sLfgDungeonsStore(LfgDungeonsEntryfmt);
 LfgDungeonsByMapDifficultyMap sLfgDungeonsByMapDifficultyMap;
 LfgDungeonsByRandomIdMap sLfgDungeonsByRandomIdMap;
+DBCStorage <LfgDungeonsGroupingMapEntry> sLfgDungeonsGroupingMapStore(LfgDungeonsGroupingMapEntryfmt);
 DBCStorage <LiquidTypeEntry> sLiquidTypeStore(LiquidTypefmt);
 DBCStorage <LockEntry> sLockStore(LockEntryfmt);
 
@@ -531,7 +532,7 @@ void LoadDBCStores(const std::string& dataPath)
         exit(1);
     }
 
-    const uint32 DBCFilesCount = 129;
+    const uint32 DBCFilesCount = 130;
 
     BarGoLink bar(DBCFilesCount);
 
@@ -697,6 +698,7 @@ void LoadDBCStores(const std::string& dataPath)
                     LfgDungeonsByRandomIdMap::value_type(entry->Random_ID, entry));
             }
         }
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLfgDungeonsGroupingMapStore, dbcPath, "LFGDungeonsGroupingmap.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLiquidTypeStore,          dbcPath, "LiquidType.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLockStore,                dbcPath, "Lock.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sMailTemplateStore,        dbcPath, "MailTemplate.dbc");

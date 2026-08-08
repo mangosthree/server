@@ -1309,6 +1309,17 @@ struct LfgDungeonsEntry
     uint32 Entry() const { return ID + ((uint8)typeID << 24); }
 };
 
+/// LFGDungeonsGroupingmap.dbc (build 15595): maps a random-dungeon bucket to
+/// member dungeons LFGDungeons.group_id cannot express (Random Hour of
+/// Twilight 434 -> 435/437/439). 6 records.
+struct LfgDungeonsGroupingMapEntry
+{
+    uint32    ID;                                           // 0
+    uint32    dungeonID;                                    // 1 LFGDungeons.dbc member row
+    uint32    randomID;                                     // 2 LFGDungeons.dbc random row (typeID 6)
+    uint32    groupID;                                      // 3 LFGDungeonGroup.dbc id
+};
+
 /*struct LfgDungeonGroupEntry
 {
     m_ID

@@ -65,6 +65,7 @@
 #include "DynamicObject.h"                                  // raid markers are dynamic objects
 #include "SpellMgr.h"                                       // GetSpellDuration / GetSpellRadius
 #include "DBCStores.h"
+#include "LFGMgr.h"
 #include <atomic>
 
 #ifdef ENABLE_ELUNA
@@ -748,6 +749,8 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
         return false;
     }
 
+    sLFGMgr.OnGroupMemberAdded(GetObjectGuid(), guid);
+
     SendUpdate();
 
     if (Player* player = sObjectMgr.GetPlayer(guid))
@@ -807,6 +810,12 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 removeMethod)
     if (GetMembersCount() > uint32(isBGGroup() ? 1 : 2))    // in BG group case allow 1 members group
     {
         bool leaderChanged = _removeMember(guid);
+
+        sLFGMgr.OnGroupMemberRemoved(GetObjectGuid(), guid);
+        if (leaderChanged)
+        {
+            sLFGMgr.OnGroupLeaderChanged(GetObjectGuid(), m_memberSlots.front().guid);
+        }
 
         if (Player* player = sObjectMgr.GetPlayer(guid))
         {
@@ -889,6 +898,8 @@ void Group::ChangeLeader(ObjectGuid guid)
 
     _setLeader(guid);
 
+    sLFGMgr.OnGroupLeaderChanged(GetObjectGuid(), guid);
+
     WorldPacket data(SMSG_GROUP_SET_LEADER, slot->name.size() + 1);
     data << slot->name;
     BroadcastPacket(&data, true);
@@ -902,6 +913,8 @@ void Group::ChangeLeader(ObjectGuid guid)
  */
 void Group::Disband(bool hideDestroy)
 {
+    sLFGMgr.OnGroupDisband(GetObjectGuid());
+
     Player* player;
 
     // markers outlive the group otherwise -- they carry a 4h duration
@@ -1774,15 +1787,20 @@ void Group::SendUpdate()
         }
         // guess size
         WorldPacket data(SMSG_GROUP_LIST, (1 + 1 + 1 + 1 + 8 + 4 + GetMembersCount() * 20));
+        LFGGroupUpdateData lfgData;
+        if (m_groupType & GROUPTYPE_LFD)
+        {
+            sLFGMgr.GetGroupUpdateData(GetObjectGuid(), citr->guid, lfgData);
+        }
         data << uint8(m_groupType);                         // group type (flags in 3.3)
         data << uint8(citr->group);                         // groupid
         data << uint8(GetFlags(*citr));                     // group flags
         data << uint8(citr->roles);                         // your own assigned role
         if (m_groupType & GROUPTYPE_LFD)
         {
-            data << uint8(0);
-            data << uint32(0);
-            data << uint8(0);
+            data << uint8(lfgData.state);                   // MyLfgFlags; 2 = finished
+            data << uint32(lfgData.dungeonEntry);           // LfgSlot; concrete Entry()
+            data << uint8(0);                               // LfgAborted -- Phase 8
         }
         data << GetObjectGuid();                            // group guid
         data << uint32(sequence);                           // roster version; client drops anything it has already seen

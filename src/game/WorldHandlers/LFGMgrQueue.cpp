@@ -343,6 +343,13 @@ void LFGMgr::LeaveLFG(Player* plr, bool isGroup)
 
         ObjectGuid grpGuid = pGroup->GetObjectGuid();
 
+        // Leaving while the dungeon-ready popup is up counts as a decline
+        // (tc-preservation LFGMgr.cpp:709-729).
+        if (FailProposalForLeaver(plr->GetObjectGuid()))
+        {
+            return;
+        }
+
         if (m_roleCheckMap.count(grpGuid))
         {
             PerformRoleCheck(NULL, pGroup, 0);   // aborts the check and notifies everyone
@@ -376,6 +383,11 @@ void LFGMgr::LeaveLFG(Player* plr, bool isGroup)
     else
     {
         ObjectGuid plrGuid = plr->GetObjectGuid();
+
+        if (FailProposalForLeaver(plrGuid))
+        {
+            return;
+        }
 
         LFGPlayerStatus plrStatus = GetPlayerStatus(plrGuid);
         if (plrStatus.state == LFG_STATE_QUEUED || plrStatus.state == LFG_STATE_PROPOSAL)

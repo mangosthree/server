@@ -363,17 +363,19 @@ struct LFGGroupStatus //todo: check for this in joinlfg function, not lfgplayers
 /// For SMSG_LFG_PROPOSAL_UPDATE
 struct LFGProposal
 {
-    uint32 id;                 // proposal id
-    uint32 dungeonID;          // dungeon id
-    LFGProposalState state;    // proposal state
-    uint32 encounters;         // encounters done
-    uint64 groupRawGuid;       // group raw guid value
-    uint64 groupLeaderGuid;    // group leader's guid
-    bool isNew;                // is new or old group
-    roleMap currentRoles;      // group player's roles
-    proposalAnswerMap answers; // answers to a proposal
-    playerGroupMap groups;     // data on which groups players belong/belonged to
-    time_t joinedQueue;        // time from when the players joined the queue
+    uint32 id = 0;                        ///< proposal id
+    uint32 dungeonID = 0;                 ///< dungeon ID (not entry)
+    LFGProposalState state = LFG_PROPOSAL_INITIATING;
+    uint32 encounters = 0;                ///< completed-encounter mask; 0 until 7b
+    uint64 groupRawGuid = 0;              ///< pre-existing LFG group guid; 0 until 7b
+    uint64 groupLeaderGuid = 0;           ///< its leader; 0 until 7b
+    bool isNew = true;                    ///< false only for offer-continue (7b)
+    roleMap currentRoles;                 ///< participants and their role masks
+    proposalAnswerMap answers;            ///< per-player answer
+    playerGroupMap groups;                ///< player -> original party guid (empty guid = solo)
+    time_t joinedQueue = 0;               ///< queue join time, feeds wait stats
+    time_t cancelTime = 0;                ///< expiry timestamp, seconds
+    ObjectGuid queueEntryGuid;            ///< m_playerData key this proposal was built from
 };
 
 // For SMSG_LFG_PLAYER_REWARD
@@ -654,8 +656,17 @@ protected:
     /// Are the players in a proposal already grouped up?
     bool IsProposalSameGroup(LFGProposal const& proposal);
 
-    /// Update a proposal after a player refused to join
-    void ProposalDeclined(ObjectGuid guid, LFGProposal* proposal);
+    /// Fail a proposal: notify everyone, drop decliners, re-queue the rest.
+    proposalMap::iterator RemoveProposal(proposalMap::iterator itProposal, LfgUpdateType type);
+
+    /// Treat a mid-proposal leaver as a decliner; true when a proposal was hit.
+    bool FailProposalForLeaver(ObjectGuid plrGuid);
+
+    /// Expire proposals older than LFG_TIME_PROPOSAL.
+    void RemoveOldProposals();
+
+    /// Build and send one member's view of a proposal.
+    void SendProposalUpdateToPlayer(ObjectGuid plrGuid, LFGProposal const& proposal);
 
     /// Updates a wait map with the amount of time it took the last player to join
     void UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime);
@@ -676,7 +687,7 @@ protected:
     void MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo, std::set<uint32> compatibleDungeons);
 
     /// Send a proposal to each member of a group
-    void SendDungeonProposal(LFGPlayers* lfgGroup);
+    void SendDungeonProposal(ObjectGuid queueGuid, LFGPlayers* lfgGroup);
 
     /// Send SMSG_LFG_QUEUE_STATUS to every member of one queue entry.
     void SendQueueStatusFor(ObjectGuid guid);

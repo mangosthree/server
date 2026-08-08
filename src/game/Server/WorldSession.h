@@ -387,7 +387,7 @@ class WorldSession
         void SendLfgQueueStatus(LFGPackets::QueueStatus const& status);
         void SendLfgRoleCheckUpdate(LFGPackets::RoleCheckUpdate const& roleCheck);
         void SendLfgRoleChosen(uint64 rawGuid, uint32 roles);
-        void SendLfgProposalUpdate(LFGProposal const& proposal);
+        void SendLfgProposalUpdate(LFGPackets::ProposalUpdate const& proposal);
         void SendLfgTeleportError(uint8 error);
         void SendLfgRewards(LFGRewards const& rewards);
         void SendLfgBootUpdate(LFGBoot const& boot);
@@ -1018,6 +1018,7 @@ class WorldSession
         void HandleLfgLockInfoRequestOpcode(WorldPacket& recv_data);
         void HandleLfgSetRolesOpcode(WorldPacket& recv_data);
         void HandleLfgGetStatusOpcode(WorldPacket& recv_data);
+        void HandleLfgProposalResultOpcode(WorldPacket& recv_data);
         void HandleSetTitleOpcode(WorldPacket& recv_data);
         void HandleRealmSplitOpcode(WorldPacket& recv_data);
         void HandleTimeSyncResp(WorldPacket& recv_data);

@@ -74,10 +74,13 @@ LFGMgr::~LFGMgr()
 
 void LFGMgr::Update()
 {
-    //todo: remove old queues, proposals & boot votes
+    //todo: remove old queues & boot votes
 
     // remove old role checks
     RemoveOldRoleChecks();
+
+    // remove expired dungeon proposals (45 s -- LFG_TIME_PROPOSAL)
+    RemoveOldProposals();
 
     // go through a waitTimeMap::iterator for each wait map and update times based on player count
     for (waitTimeMap::iterator tankItr = m_tankWaitTime.begin(); tankItr != m_tankWaitTime.end(); ++tankItr)
@@ -472,6 +475,14 @@ void LFGMgr::AddToQueue(ObjectGuid guid)
     {
         m_queueSet.insert(guid);
     }
+
+    // A complete party (1/1/3 seated) skips matching entirely -- this is
+    // how a full premade proposes the moment its role check passes.
+    if ((information->neededTanks == 0) && (information->neededHealers == 0) &&
+        (information->neededDps == 0))
+    {
+        SendDungeonProposal(guid, information);
+    }
 }
 
 void LFGMgr::RemoveFromQueue(ObjectGuid guid)
@@ -687,10 +698,7 @@ void LFGMgr::MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo, std::set<uint32
     if ((mainGroup->neededTanks == 0) && (mainGroup->neededHealers == 0) &&
         (mainGroup->neededDps == 0))
     {
-        // Proposal packets are Phase 7; announcing a match with the legacy
-        // WotLK-shaped SMSG_LFG_PROPOSAL_UPDATE would desync 4.3.4 clients.
-        DEBUG_FILTER_LOG(LOG_FILTER_LFG,
-            "LFGMgr: full match found, proposal deferred to Phase 7");
+        SendDungeonProposal(guidOne, mainGroup);
     }
 
     // guidTwo's players now live in guidOne's entry, so retire its queue slot

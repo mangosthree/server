@@ -1001,8 +1001,8 @@ void InitializeOpcodes()
     //OPCODE(CMSG_LFG_SEARCH_JOIN,                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSearchLfgJoinOpcode       );
     //OPCODE(CMSG_LFG_SEARCH_LEAVE,                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSearchLfgLeaveOpcode      );
     //OPCODE(SMSG_LFG_SEARCH_RESULTS,                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(SMSG_LFG_PROPOSAL_UPDATE,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(CMSG_LFG_PROPOSAL_RESULT,                     STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
+    OPCODE(SMSG_LFG_PROPOSAL_UPDATE,                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(CMSG_LFG_PROPOSAL_RESULT,                     STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgProposalResultOpcode   );
     OPCODE(SMSG_LFG_ROLE_CHECK_UPDATE,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_LFG_JOIN_RESULT,                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_LFG_QUEUE_STATUS,                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );

@@ -657,7 +657,7 @@ protected:
     bool IsProposalSameGroup(LFGProposal const& proposal);
 
     /// Fail a proposal: notify everyone, drop decliners, re-queue the rest.
-    proposalMap::iterator RemoveProposal(proposalMap::iterator itProposal, LfgUpdateType type);
+    void RemoveProposal(uint32 proposalId, LfgUpdateType type);
 
     /// Treat a mid-proposal leaver as a decliner; true when a proposal was hit.
     bool FailProposalForLeaver(ObjectGuid plrGuid);

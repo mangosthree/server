@@ -394,7 +394,7 @@ void LFGMgr::ProposalUpdate(uint32 proposalID, ObjectGuid plrGuid, bool accepted
 
     if (!accepted)
     {
-        RemoveProposal(itProposal, LFG_UPDATE_PROPOSAL_DECLINED);
+        RemoveProposal(proposalID, LFG_UPDATE_PROPOSAL_DECLINED);
         return;
     }
 
@@ -761,9 +761,21 @@ LFGGroupStatus* LFGMgr::GetGroupStatus(ObjectGuid guid)
     }
 }
 
-proposalMap::iterator LFGMgr::RemoveProposal(proposalMap::iterator itProposal, LfgUpdateType type)
+void LFGMgr::RemoveProposal(uint32 proposalId, LfgUpdateType type)
 {
-    LFGProposal& proposal = itProposal->second;
+    proposalMap::iterator itProposal = m_proposalMap.find(proposalId);
+    if (itProposal == m_proposalMap.end())
+    {
+        return;
+    }
+
+    // Work on a copy and retire the map entry up front. Re-queueing a survivor
+    // set below can reach SendDungeonProposal, and its insert into
+    // m_proposalMap may rehash and invalidate every iterator into the map.
+    // Taking the id rather than an iterator keeps that off every caller too.
+    LFGProposal proposal = itProposal->second;
+    m_proposalMap.erase(itProposal);
+
     proposal.state = LFG_PROPOSAL_FAILED;
 
     DEBUG_FILTER_LOG(LOG_FILTER_LFG, "LFGMgr: proposal %u failed, update type %u",
@@ -879,7 +891,6 @@ proposalMap::iterator LFGMgr::RemoveProposal(proposalMap::iterator itProposal, L
         SendQueueStatusFor(newKey);
     }
 
-    return m_proposalMap.erase(itProposal);
 }
 
 bool LFGMgr::FailProposalForLeaver(ObjectGuid plrGuid)
@@ -893,7 +904,7 @@ bool LFGMgr::FailProposalForLeaver(ObjectGuid plrGuid)
         }
 
         itAnswer->second = LFG_ANSWER_DENY;
-        RemoveProposal(itr, LFG_UPDATE_PROPOSAL_DECLINED);
+        RemoveProposal(itr->first, LFG_UPDATE_PROPOSAL_DECLINED);
         return true;
     }
 
@@ -1292,15 +1303,22 @@ void LFGMgr::RemoveOldRoleChecks()
 void LFGMgr::RemoveOldProposals()
 {
     time_t now = time(NULL);
-    for (proposalMap::iterator itr = m_proposalMap.begin(); itr != m_proposalMap.end();)
+
+    // Collect first: removing a proposal re-queues its survivors, which can
+    // insert a fresh proposal and rehash the map out from under a live walk.
+    std::vector<uint32> expired;
+    for (proposalMap::const_iterator itr = m_proposalMap.begin();
+         itr != m_proposalMap.end(); ++itr)
     {
         if (itr->second.cancelTime <= now)
         {
-            itr = RemoveProposal(itr, LFG_UPDATE_PROPOSAL_FAILED);
+            expired.push_back(itr->first);
         }
-        else
-        {
-            ++itr;
-        }
+    }
+
+    for (std::vector<uint32>::const_iterator itr = expired.begin();
+         itr != expired.end(); ++itr)
+    {
+        RemoveProposal(*itr, LFG_UPDATE_PROPOSAL_FAILED);
     }
 }

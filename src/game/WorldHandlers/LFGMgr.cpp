@@ -31,6 +31,7 @@
 #include "Group.h"
 #include "LFGLockReason.h"
 #include "LFGMgr.h"
+#include "LFGRoleAssignment.h"
 #include "Log.h"
 #include "Object.h"
 #include "Player.h"
@@ -403,6 +404,25 @@ std::vector<LFGLockedDungeon> LFGMgr::GetPlayerLockList(Player* plr)
     return lockList;
 }
 
+void LFGMgr::CountAssignedRoles(roleMap const& roles, uint8& tanks,
+                                uint8& healers, uint8& dps)
+{
+    std::vector<uint8> masks;
+    masks.reserve(roles.size());
+    for (roleMap::const_iterator it = roles.begin(); it != roles.end(); ++it)
+    {
+        masks.push_back(it->second);
+    }
+
+    LFGRoleAssignment::Counts const seated = LFGRoleAssignment::Assign(
+        masks, NORMAL_TANK_OR_HEALER_COUNT, NORMAL_TANK_OR_HEALER_COUNT,
+        NORMAL_DAMAGE_COUNT);
+
+    tanks = seated.tanks;
+    healers = seated.healers;
+    dps = seated.dps;
+}
+
 void LFGMgr::UpdateNeededRoles(ObjectGuid guid, LFGPlayers* information)
 {
     if (information->dungeonList.empty())
@@ -411,24 +431,7 @@ void LFGMgr::UpdateNeededRoles(ObjectGuid guid, LFGPlayers* information)
     }
 
     uint8 tankCount = 0, dpsCount = 0, healCount = 0;
-    for (roleMap::iterator it = information->currentRoles.begin(); it != information->currentRoles.end(); ++it)
-    {
-        uint8 withoutLeader = it->second;
-        withoutLeader &= ~PLAYER_ROLE_LEADER;
-
-        switch (withoutLeader)
-        {
-            case PLAYER_ROLE_TANK:
-                ++tankCount;
-                break;
-            case PLAYER_ROLE_HEALER:
-                ++healCount;
-                break;
-            case PLAYER_ROLE_DAMAGE:
-                ++dpsCount;
-                break;
-        }
-    }
+    CountAssignedRoles(information->currentRoles, tankCount, healCount, dpsCount);
 
     std::set<uint32>::iterator itr = information->dungeonList.begin();
 
@@ -478,67 +481,44 @@ void LFGMgr::RemoveFromQueue(ObjectGuid guid)
     //todo - might need to implement a removefromwaitmap function
 }
 
+/// Counts one more player waiting for each of the given dungeons.
+static void AddWaiterTo(waitTimeMap& target, std::set<uint32> const& dungeons)
+{
+    for (std::set<uint32>::const_iterator itr = dungeons.begin();
+         itr != dungeons.end(); ++itr)
+    {
+        waitTimeMap::iterator it = target.find(*itr);
+        if (it != target.end())
+        {
+            // Increment current player count by one
+            ++it->second.playerCount;
+        }
+        else
+        {
+            LFGWait waitInfo(QUEUE_DEFAULT_TIME, -1, 1, false);
+            target[*itr] = waitInfo;
+        }
+    }
+}
+
 void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
 {
-    // use withoutLeader for switch operator
     uint8 withoutLeader = role;
     withoutLeader &= ~PLAYER_ROLE_LEADER;
 
-    switch (withoutLeader)
+    // Someone queued for several roles is waiting in each of those queues, so
+    // test the bits instead of matching the mask exactly.
+    if (withoutLeader & PLAYER_ROLE_TANK)
     {
-        case PLAYER_ROLE_TANK:
-        {
-            for (std::set<uint32>::iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
-            {
-                waitTimeMap::iterator it = m_tankWaitTime.find(*itr);
-                if (it != m_tankWaitTime.end())
-                {
-                    // Increment current player count by one
-                    ++it->second.playerCount;
-                }
-                else
-                {
-                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, -1, 1, false);
-                    m_tankWaitTime[*itr] = waitInfo;
-                }
-            }
-        } break;
-        case PLAYER_ROLE_HEALER:
-        {
-            for (std::set<uint32>::iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
-            {
-                waitTimeMap::iterator it = m_healerWaitTime.find(*itr);
-                if (it != m_healerWaitTime.end())
-                {
-                    // Increment current player count by one
-                    ++it->second.playerCount;
-                }
-                else
-                {
-                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, -1, 1, false);
-                    m_healerWaitTime[*itr] = waitInfo;
-                }
-            }
-        } break;
-        case PLAYER_ROLE_DAMAGE:
-        {
-            for (std::set<uint32>::iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
-            {
-                waitTimeMap::iterator it = m_dpsWaitTime.find(*itr);
-                if (it != m_dpsWaitTime.end())
-                {
-                    // Increment current player count by one
-                    ++it->second.playerCount;
-                }
-                else
-                {
-                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, -1, 1, false);
-                    m_dpsWaitTime[*itr] = waitInfo;
-                }
-            }
-        } break;
-        default:
-            break;
+        AddWaiterTo(m_tankWaitTime, dungeons);
+    }
+    if (withoutLeader & PLAYER_ROLE_HEALER)
+    {
+        AddWaiterTo(m_healerWaitTime, dungeons);
+    }
+    if (withoutLeader & PLAYER_ROLE_DAMAGE)
+    {
+        AddWaiterTo(m_dpsWaitTime, dungeons);
     }
 
     // insert the average time regardless of role
@@ -559,8 +539,11 @@ void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
 
 void LFGMgr::FindQueueMatches()
 {
-    // Fetch information on all the queued players/groups
-    for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
+    // Fetch information on all the queued players/groups. Iterate a snapshot:
+    // a merge retires the absorbed entry from m_queueSet, which would
+    // invalidate a live iterator here.
+    queueSet const snapshot = m_queueSet;
+    for (queueSet::const_iterator itr = snapshot.begin(); itr != snapshot.end(); ++itr)
     {
         FindSpecificQueueMatches(*itr);
     }
@@ -575,7 +558,10 @@ void LFGMgr::FindSpecificQueueMatches(ObjectGuid guid)
         // compare to everyone else in queue for compatibility
         // after a match is found call UpdateNeededRoles
         // Use the roleMap to store player guid/role information; merge into queueInfo struct & delete other struct/map entry
-        for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
+        // Snapshot for the same reason as FindQueueMatches: MergeGroups
+        // retires the absorbed guid from m_queueSet.
+        queueSet const candidates = m_queueSet;
+        for (queueSet::const_iterator itr = candidates.begin(); itr != candidates.end(); ++itr)
         {
             if (*itr == guid)
             {
@@ -709,7 +695,11 @@ void LFGMgr::MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo, std::set<uint32
             "LFGMgr: full match found, proposal deferred to Phase 7");
     }
 
+    // guidTwo's players now live in guidOne's entry, so retire its queue slot
+    // as well -- leaving it behind makes every later tick look it up, find no
+    // data and skip it.
     m_playerData.erase(guidTwo);
+    m_queueSet.erase(guidTwo);
 }
 
 void LFGMgr::SendQueueStatus()

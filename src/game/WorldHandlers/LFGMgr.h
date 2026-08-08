@@ -607,6 +607,10 @@ public:
     /// Make sure role selections are okay
     bool ValidateGroupRoles(roleMap groupMap);
 
+    /// Seats each player into one of their selected roles, scarce roles first.
+    static void CountAssignedRoles(roleMap const& roles, uint8& tanks,
+                                   uint8& healers, uint8& dps);
+
     /// True when the class can perform every non-leader role in the mask.
     static bool CanPerformSelectedRoles(uint8 playerClass, uint8 roles);
 

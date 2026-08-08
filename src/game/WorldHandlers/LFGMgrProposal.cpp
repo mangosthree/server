@@ -210,26 +210,10 @@ bool LFGMgr::ValidateGroupRoles(roleMap groupMap)
     }
 
     uint8 tankCount = 0, dpsCount = 0, healCount = 0;
+    CountAssignedRoles(groupMap, tankCount, healCount, dpsCount);
 
-    for (roleMap::iterator it = groupMap.begin(); it != groupMap.end(); ++it)
-    {
-        uint8 withoutLeader = it->second;
-        withoutLeader &= ~PLAYER_ROLE_LEADER;
-
-        switch (withoutLeader)
-        {
-            case PLAYER_ROLE_TANK:
-                ++tankCount;
-                break;
-            case PLAYER_ROLE_HEALER:
-                ++healCount;
-                break;
-            case PLAYER_ROLE_DAMAGE:
-                ++dpsCount;
-                break;
-        }
-    }
-
+    // Everyone must have been seated; anyone left over selected no role, or
+    // only roles the group has already filled.
     return (tankCount + dpsCount + healCount == groupMap.size()) ? true : false;
 }
 

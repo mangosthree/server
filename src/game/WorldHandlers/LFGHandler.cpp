@@ -371,7 +371,9 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
         break;
     }
 
-    WorldPacket data(isGroup ? SMSG_LFG_UPDATE_PARTY : SMSG_LFG_UPDATE_PLAYER);
+    // SMSG_LFG_UPDATE_PLAYER/SMSG_LFG_UPDATE_PARTY collapsed into one 4.3.4
+    // opcode carrying an IsParty bit; body still needs the Phase 3 rewrite.
+    WorldPacket data(SMSG_LFG_UPDATE_STATUS);
     data << uint8(status.updateType);
 
     data << uint8(dungeonSize > 0);
@@ -594,7 +596,7 @@ void WorldSession::SendLfgBootUpdate(LFGBoot const& boot)
 
     uint32 timeLeft = uint8(((boot.startTime + LFG_TIME_BOOT) - time(NULL)) / 1000);
 
-    WorldPacket data(SMSG_LFG_BOOT_PLAYER, 27 + boot.reason.length());
+    WorldPacket data(SMSG_LFG_BOOT_PROPOSAL_UPDATE, 27 + boot.reason.length());
 
     data << uint8(boot.inProgress);                   // Is boot still ongoing?
     data << uint8(plrAnswer != LFG_ANSWER_PENDING);   // Did this player vote yet?

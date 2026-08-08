@@ -31,6 +31,7 @@
 #include "Group.h"
 #include "LFGLockReason.h"
 #include "LFGMgr.h"
+#include "Log.h"
 #include "Object.h"
 #include "Player.h"
 #include "PlayerRegistry.h"
@@ -42,6 +43,7 @@
 LFGMgr::LFGMgr()
 {
     m_proposalId = 0;
+    m_ticketId = 0;
 }
 
 LFGMgr::~LFGMgr()
@@ -403,6 +405,11 @@ std::vector<LFGLockedDungeon> LFGMgr::GetPlayerLockList(Player* plr)
 
 void LFGMgr::UpdateNeededRoles(ObjectGuid guid, LFGPlayers* information)
 {
+    if (information->dungeonList.empty())
+    {
+        return;
+    }
+
     uint8 tankCount = 0, dpsCount = 0, healCount = 0;
     for (roleMap::iterator it = information->currentRoles.begin(); it != information->currentRoles.end(); ++it)
     {
@@ -429,13 +436,11 @@ void LFGMgr::UpdateNeededRoles(ObjectGuid guid, LFGPlayers* information)
     LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(*itr);
     if (dungeon)
     {
-        // atm we're just handling DUNGEON_DIFFICULTY_NORMAL
-        if (dungeon->difficulty == DUNGEON_DIFFICULTY_NORMAL)
-        {
-            information->neededTanks = NORMAL_TANK_OR_HEALER_COUNT - tankCount;
-            information->neededHealers = NORMAL_TANK_OR_HEALER_COUNT - healCount;
-            information->neededDps = NORMAL_DAMAGE_COUNT - dpsCount;
-        }
+        // All 5-man content (normal and heroic alike) wants 1/1/3; raids are
+        // Phase 10 and never reach the queue in this phase.
+        information->neededTanks = NORMAL_TANK_OR_HEALER_COUNT - tankCount;
+        information->neededHealers = NORMAL_TANK_OR_HEALER_COUNT - healCount;
+        information->neededDps = NORMAL_DAMAGE_COUNT - dpsCount;
     }
 
     m_playerData[guid] = *information;
@@ -695,9 +700,13 @@ void LFGMgr::MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo, std::set<uint32
     //mainGroup = GetPlayerOrPartyData(rawGuidOne);
 
     // Then do the following:
-    if ((mainGroup->neededTanks == 0) && (mainGroup->neededHealers == 0) && (mainGroup->neededDps == 0))
+    if ((mainGroup->neededTanks == 0) && (mainGroup->neededHealers == 0) &&
+        (mainGroup->neededDps == 0))
     {
-        SendDungeonProposal(mainGroup);
+        // Proposal packets are Phase 7; announcing a match with the legacy
+        // WotLK-shaped SMSG_LFG_PROPOSAL_UPDATE would desync 4.3.4 clients.
+        DEBUG_FILTER_LOG(LOG_FILTER_LFG,
+            "LFGMgr: full match found, proposal deferred to Phase 7");
     }
 
     m_playerData.erase(guidTwo);
@@ -705,62 +714,65 @@ void LFGMgr::MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo, std::set<uint32
 
 void LFGMgr::SendQueueStatus()
 {
-    // First we should get the current time
-    time_t timeNow = time(0);
-
-    // Check who is listed as being in the queue
     for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
     {
-        // make sure it's not a false entry
-        LFGPlayers* queueInfo = GetPlayerOrPartyData(*itr);
-        if (queueInfo && queueInfo->currentState == LFG_STATE_QUEUED)
+        SendQueueStatusFor(*itr);
+    }
+}
+
+void LFGMgr::SendQueueStatusFor(ObjectGuid guid)
+{
+    LFGPlayers* queueInfo = GetPlayerOrPartyData(guid);
+    if (!queueInfo || queueInfo->currentState != LFG_STATE_QUEUED ||
+        queueInfo->dungeonList.empty())
+    {
+        return;
+    }
+
+    time_t timeNow = time(NULL);
+    uint32 dungeonId = *queueInfo->dungeonList.begin();
+
+    for (roleMap::iterator rItr = queueInfo->currentRoles.begin();
+         rItr != queueInfo->currentRoles.end(); ++rItr)
+    {
+        Player* pPlayer = sPlayerRegistry.Find(rItr->first);
+        if (!pPlayer)
         {
-            for (roleMap::iterator rItr = queueInfo->currentRoles.begin(); rItr != queueInfo->currentRoles.end(); ++rItr)
-            {
-                if (Player* pPlayer = sPlayerRegistry.Find(rItr->first))
-                {
-                    uint32 dungeonId = *queueInfo->dungeonList.begin();
-
-                    LFGQueueStatus status;
-                    status.dungeonID        = dungeonId;
-                    status.neededTanks      = queueInfo->neededTanks;
-                    status.neededHeals      = queueInfo->neededHealers;
-                    status.neededDps        = queueInfo->neededDps;
-                    status.timeSpentInQueue = uint32(timeNow - queueInfo->joinedTime);
-
-                    int32 playerWaitTime;
-
-                    // strip leader flag from role
-                    uint8 withoutLeader = rItr->second;
-                    withoutLeader &= ~PLAYER_ROLE_LEADER;
-
-                    switch (withoutLeader)
-                    {
-                        case PLAYER_ROLE_TANK:
-                            playerWaitTime = m_tankWaitTime[dungeonId].time;
-                            break;
-                        case PLAYER_ROLE_HEALER:
-                            playerWaitTime = m_healerWaitTime[dungeonId].time;
-                            break;
-                        case PLAYER_ROLE_DAMAGE:
-                            playerWaitTime = m_dpsWaitTime[dungeonId].time;
-                            break;
-                        default:
-                            playerWaitTime = m_avgWaitTime[dungeonId].time;
-                            break;
-                    }
-
-                    status.playerAvgWaitTime = playerWaitTime;
-                    status.dpsAvgWaitTime    = m_dpsWaitTime[dungeonId].time;
-                    status.healerAvgWaitTime = m_healerWaitTime[dungeonId].time;
-                    status.tankAvgWaitTime   = m_tankWaitTime[dungeonId].time;
-                    status.avgWaitTime       = m_avgWaitTime[dungeonId].time;
-
-                    // Send packet to client
-                    pPlayer->GetSession()->SendLfgQueueStatus(status);
-                }
-            }
+            continue;
         }
+
+        LFGPackets::QueueStatus status;
+        status.ticket = GetPlayerStatus(rItr->first).ticket;
+        status.slot = GetDungeonEntry(dungeonId);
+        status.queuedTime = uint32(timeNow - queueInfo->joinedTime);
+        status.lastNeeded[0] = queueInfo->neededTanks;
+        status.lastNeeded[1] = queueInfo->neededHealers;
+        status.lastNeeded[2] = queueInfo->neededDps;
+        status.avgWaitTimeByRole[0] = m_tankWaitTime[dungeonId].time;
+        status.avgWaitTimeByRole[1] = m_healerWaitTime[dungeonId].time;
+        status.avgWaitTimeByRole[2] = m_dpsWaitTime[dungeonId].time;
+        status.avgWaitTime = m_avgWaitTime[dungeonId].time;
+
+        // strip leader flag from role
+        uint8 withoutLeader = rItr->second;
+        withoutLeader &= ~PLAYER_ROLE_LEADER;
+        switch (withoutLeader)
+        {
+            case PLAYER_ROLE_TANK:
+                status.avgWaitTimeMe = status.avgWaitTimeByRole[0];
+                break;
+            case PLAYER_ROLE_HEALER:
+                status.avgWaitTimeMe = status.avgWaitTimeByRole[1];
+                break;
+            case PLAYER_ROLE_DAMAGE:
+                status.avgWaitTimeMe = status.avgWaitTimeByRole[2];
+                break;
+            default:
+                status.avgWaitTimeMe = status.avgWaitTime;
+                break;
+        }
+
+        pPlayer->GetSession()->SendLfgQueueStatus(status);
     }
 }
 
@@ -775,5 +787,51 @@ uint32 LFGMgr::GetDungeonEntry(uint32 ID)
     {
         return 0;
     }
+}
+
+void LFGMgr::SendStatusUpdate(Player* plr)
+{
+    ObjectGuid guid = plr->GetObjectGuid();
+    LFGPlayerStatus status = GetPlayerStatus(guid);
+
+    if (status.state == LFG_STATE_NONE)
+    {
+        return;                          // not using LFG
+    }
+
+    status.updateType = LFG_UPDATE_STATUS;
+
+    LFGPlayerStatus cleared = status;
+    cleared.dungeonList.clear();
+
+    if (plr->GetGroup())
+    {
+        SendLfgUpdate(guid, status, true);
+        SendLfgUpdate(guid, cleared, false);
+    }
+    else
+    {
+        SendLfgUpdate(guid, status, false);
+        SendLfgUpdate(guid, cleared, true);
+    }
+}
+
+bool LFGMgr::CanPerformSelectedRoles(uint8 playerClass, uint8 roles)
+{
+    if ((roles & PLAYER_ROLE_TANK) &&
+        playerClass != CLASS_WARRIOR && playerClass != CLASS_PALADIN &&
+        playerClass != CLASS_DEATH_KNIGHT && playerClass != CLASS_DRUID)
+    {
+        return false;
+    }
+
+    if ((roles & PLAYER_ROLE_HEALER) &&
+        playerClass != CLASS_PALADIN && playerClass != CLASS_PRIEST &&
+        playerClass != CLASS_SHAMAN && playerClass != CLASS_DRUID)
+    {
+        return false;
+    }
+
+    return true;
 }
 

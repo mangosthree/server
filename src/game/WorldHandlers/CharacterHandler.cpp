@@ -71,6 +71,7 @@
 #include "Language.h"
 #include "SpellMgr.h"
 #include "Calendar.h"
+#include "LFGPackets.h"
 #include "GameTime.h"
 #include "Timer.h"
 #ifdef ENABLE_ELUNA
@@ -940,6 +941,16 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     data << uint32(10);
     data << uint32(60);
     SendPacket(&data);
+
+    // Dungeon Finder: tell the client up front when the feature is off, so
+    // the Dungeon Finder panel shows the disabled state instead of an empty
+    // list
+    if (!sWorld.getConfig(CONFIG_BOOL_LFG_ENABLE))
+    {
+        data.Initialize(SMSG_LFG_DISABLED, 0);
+        LFGPackets::BuildDisabled(data);
+        SendPacket(&data);
+    }
 
     // Send MOTD
     {

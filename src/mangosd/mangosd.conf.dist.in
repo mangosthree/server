@@ -294,6 +294,7 @@ MaxWhoListReturns                 = 49
 #    LogFilter_Calendar
 #    LogFilter_CellEnvelope
 #    LogFilter_DeckMinions
+#    LogFilter_Lfg
 #        Log filters (active by default - meaning: the filter is active, hence the log is not displayed)
 #        Default: 1 - not include with any log level
 #                 0 - include in log if log level permit
@@ -417,6 +418,7 @@ LogFilter_Damage             = 1
 LogFilter_Combat             = 1
 LogFilter_SpellCast          = 1
 LogFilter_Calendar           = 1
+LogFilter_Lfg                = 1
 LogWhispers                  = 1
 WorldLogFile                 = "world-packets.log"
 PacketLoggingEnabled         = 0
@@ -1395,6 +1397,20 @@ CinematicFlyover.TimeoutSec         = 120
 CinematicFlyover.Debug              = 0
 CinematicFlyover.BodyEntry          = 12999
 CinematicFlyover.VisibilityDistance = 250
+
+################################################################################
+# LFG (DUNGEON FINDER)
+#
+#    LFG.Enable
+#        Enable the Dungeon Finder (Looking For Group) system.
+#        While disabled, clients are sent SMSG_LFG_DISABLED on login and the
+#        Dungeon Finder panel shows the feature-disabled state.
+#        Default: 0 (disabled)
+#                 1 (enabled)
+#
+################################################################################
+
+LFG.Enable = 0
 
 ################################################################################
 # SERVER RATES

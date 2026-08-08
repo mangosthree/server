@@ -444,6 +444,9 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_RESTRICTED_LFG_CHANNEL,      "Channel.RestrictedLfg", true);
     setConfig(CONFIG_BOOL_SILENTLY_GM_JOIN_TO_CHANNEL, "Channel.SilentlyGMJoin", false);
 
+    ///- Load the LFG (Dungeon Finder) related config options
+    setConfig(CONFIG_BOOL_LFG_ENABLE, "LFG.Enable", false);
+
     setConfig(CONFIG_BOOL_TALENTS_INSPECTING,           "TalentsInspecting", true);
     setConfig(CONFIG_BOOL_CHAT_FAKE_MESSAGE_PREVENTING, "ChatFakeMessagePreventing", false);
 

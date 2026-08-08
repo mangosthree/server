@@ -380,11 +380,13 @@ class WorldSession
         void SendNotification(int32 string_id, ...);
         void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName* declinedName);
         void SendLfgSearchResults(LfgType type, uint32 entry);
-        void SendLfgJoinResult(LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons);
-        void SendLfgUpdate(bool isGroup, LFGPlayerStatus status);
-        void SendLfgQueueStatus(LFGQueueStatus const& status);
-        void SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck);
-        void SendLfgRoleChosen(uint64 rawGuid, uint8 roles);
+        void SendLfgJoinResult(LfgJoinResult result, uint8 resultDetail,
+                               RideTicket const& ticket,
+                               std::vector<LFGPackets::JoinResultBlacklist> const& blacklist);
+        void SendLfgUpdateStatus(LFGPackets::UpdateStatus const& status);
+        void SendLfgQueueStatus(LFGPackets::QueueStatus const& status);
+        void SendLfgRoleCheckUpdate(LFGPackets::RoleCheckUpdate const& roleCheck);
+        void SendLfgRoleChosen(uint64 rawGuid, uint32 roles);
         void SendLfgProposalUpdate(LFGProposal const& proposal);
         void SendLfgTeleportError(uint8 error);
         void SendLfgRewards(LFGRewards const& rewards);
@@ -1014,6 +1016,8 @@ class WorldSession
         void HandleSearchLfgLeaveOpcode(WorldPacket& recv_data);
         void HandleSetLfgCommentOpcode(WorldPacket& recv_data);
         void HandleLfgLockInfoRequestOpcode(WorldPacket& recv_data);
+        void HandleLfgSetRolesOpcode(WorldPacket& recv_data);
+        void HandleLfgGetStatusOpcode(WorldPacket& recv_data);
         void HandleSetTitleOpcode(WorldPacket& recv_data);
         void HandleRealmSplitOpcode(WorldPacket& recv_data);
         void HandleTimeSyncResp(WorldPacket& recv_data);

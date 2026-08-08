@@ -60,45 +60,52 @@ enum LFGFlags
     LFG_FLAG_UNK3        = 0x8
 };
 
-/// Possible statuses to send after a request to join the dungeon finder
+/// 4.3.4 wire values for SMSG_LFG_JOIN_RESULT's Result byte
+/// (tc-preservation LFGMgr.h:111-133; per-code client messages noted there).
 enum LfgJoinResult
 {
     ERR_LFG_OK                                  = 0x00,
-    ERR_LFG_ROLE_CHECK_FAILED                   = 0x01,
-    ERR_LFG_GROUP_FULL                          = 0x02,
-    ERR_LFG_NO_LFG_OBJECT                       = 0x04,
-    ERR_LFG_NO_SLOTS_PLAYER                     = 0x05,
-    ERR_LFG_NO_SLOTS_PARTY                      = 0x06,
-    ERR_LFG_MISMATCHED_SLOTS                    = 0x07,
-    ERR_LFG_PARTY_PLAYERS_FROM_DIFFERENT_REALMS = 0x08,
-    ERR_LFG_MEMBERS_NOT_PRESENT                 = 0x09,
-    ERR_LFG_GET_INFO_TIMEOUT                    = 0x0A,
-    ERR_LFG_INVALID_SLOT                        = 0x0B,
-    ERR_LFG_DESERTER_PLAYER                     = 0x0C,
-    ERR_LFG_DESERTER_PARTY                      = 0x0D,
-    ERR_LFG_RANDOM_COOLDOWN_PLAYER              = 0x0E,
-    ERR_LFG_RANDOM_COOLDOWN_PARTY               = 0x0F,
-    ERR_LFG_TOO_MANY_MEMBERS                    = 0x10,
-    ERR_LFG_CANT_USE_DUNGEONS                   = 0x11,
-    ERR_LFG_ROLE_CHECK_FAILED2                  = 0x12,
+    ERR_LFG_ROLE_CHECK_FAILED                   = 0x1B,   ///< detail 3/4 selects the specific text
+    ERR_LFG_GROUP_FULL                          = 0x1C,
+    ERR_LFG_INTERNAL_ERROR                      = 0x1E,
+    ERR_LFG_NO_SLOTS_PLAYER                     = 0x1F,   ///< does not meet requirements
+    ERR_LFG_MISMATCHED_SLOTS                    = 0x20,   ///< mixed dungeon/raid/random
+    ERR_LFG_PARTY_PLAYERS_FROM_DIFFERENT_REALMS = 0x21,
+    ERR_LFG_MEMBERS_NOT_PRESENT                 = 0x22,
+    ERR_LFG_GET_INFO_TIMEOUT                    = 0x23,
+    ERR_LFG_INVALID_SLOT                        = 0x24,
+    ERR_LFG_DESERTER_PLAYER                     = 0x25,
+    ERR_LFG_DESERTER_PARTY                      = 0x26,
+    ERR_LFG_RANDOM_COOLDOWN_PLAYER              = 0x27,
+    ERR_LFG_RANDOM_COOLDOWN_PARTY               = 0x28,
+    ERR_LFG_TOO_MANY_MEMBERS                    = 0x29,
+    ERR_LFG_CANT_USE_DUNGEONS                   = 0x2A,   ///< using BG/arena system
+    ERR_LFG_ROLE_CHECK_FAILED2                  = 0x2B,   ///< generic text only; no detail dispatch
 };
 
+/// 4.3.4 wire values for SMSG_LFG_UPDATE_STATUS's Reason byte. The client
+/// switches on these numerically (sub_140703ED0); the WotLK numbering the
+/// old code carried renders wrong or missing client messages.
 enum LfgUpdateType
 {
-    LFG_UPDATE_DEFAULT              = 0,
-    LFG_UPDATE_LEADER_LEAVE         = 1,
-    LFG_UPDATE_ROLECHECK_ABORTED    = 4,
-    LFG_UPDATE_JOIN                 = 5,
-    LFG_UPDATE_ROLECHECK_FAILED     = 6,
-    LFG_UPDATE_LEAVE                = 7,
-    LFG_UPDATE_PROPOSAL_FAILED      = 8,
-    LFG_UPDATE_PROPOSAL_DECLINED    = 9,
-    LFG_UPDATE_GROUP_FOUND          = 10,
-    LFG_UPDATE_ADDED_TO_QUEUE       = 12,
-    LFG_UPDATE_PROPOSAL_BEGIN       = 13,
-    LFG_UPDATE_STATUS               = 14,
-    LFG_UPDATE_GROUP_MEMBER_OFFLINE = 15,
-    LFG_UPDATE_GROUP_DISBAND        = 16,
+    LFG_UPDATE_DEFAULT                  = 0,
+    LFG_UPDATE_LEADER_LEAVE             = 1,
+    LFG_UPDATE_ROLECHECK_ABORTED        = 4,
+    LFG_UPDATE_JOIN                     = 6,
+    LFG_UPDATE_ROLECHECK_FAILED         = 7,
+    LFG_UPDATE_REMOVED_FROM_QUEUE       = 8,
+    LFG_UPDATE_PROPOSAL_FAILED          = 9,
+    LFG_UPDATE_PROPOSAL_DECLINED        = 10,
+    LFG_UPDATE_GROUP_FOUND              = 11,
+    LFG_UPDATE_ADDED_TO_QUEUE           = 13,
+    LFG_UPDATE_PROPOSAL_BEGIN           = 14,
+    LFG_UPDATE_STATUS                   = 15,
+    LFG_UPDATE_GROUP_MEMBER_OFFLINE     = 16,
+    LFG_UPDATE_GROUP_DISBAND            = 17,
+    LFG_UPDATE_JOIN_INITIAL             = 24,
+    LFG_UPDATE_DUNGEON_FINISHED         = 25,
+    LFG_UPDATE_PARTY_ROLE_NOT_AVAILABLE = 43,
+    LFG_UPDATE_JOIN_LFG_OBJECT_FAILED   = 45,
 };
 
 enum LfgType
@@ -149,7 +156,7 @@ enum LFGSpells
 
 enum LFGTimes
 {
-    LFG_TIME_ROLECHECK                           = 45*IN_MILLISECONDS,
+    LFG_TIME_ROLECHECK                           = 45,     ///< seconds
     LFG_TIME_BOOT                                = 120,
     LFG_TIME_PROPOSAL                            = 45,
 };
@@ -296,7 +303,8 @@ struct LFGPlayers //TODO: rename to LFGQueueData
     uint8 neededHealers;
     uint8 neededDps;
 
-    LFGPlayers() : currentState(LFG_STATE_NONE), currentRoles(0), isGroup(false) {}
+    LFGPlayers() : currentState(LFG_STATE_NONE), isGroup(false), joinedTime(0),
+        neededTanks(0), neededHealers(0), neededDps(0) {}
     LFGPlayers(LFGState state, std::set<uint32> dungeonSelection, roleMap CurrentRoles, std::string comment, bool IsGroup, time_t JoinedTime,
         uint8 NeededTanks, uint8 NeededHealers, uint8 NeededDps) : currentState(state), dungeonList(dungeonSelection),
         currentRoles(CurrentRoles), comments(comment), isGroup(IsGroup), joinedTime(JoinedTime), neededTanks(NeededTanks),
@@ -305,12 +313,12 @@ struct LFGPlayers //TODO: rename to LFGQueueData
 
 struct LFGRoleCheck
 {
-    LFGRoleCheckState state;      // current status of the role check
-    roleMap currentRoles;         // map of players to roles
-    std::set<uint32> dungeonList; // The dungeons this player or group are queued for
-    uint32 randomDungeonID;       // The random dungeon ID
-    uint64 leaderGuidRaw;         // ObjectGuid(raw) of leader
-    time_t waitForRoleTime;       // How long we'll wait for the players to confirm their roles
+    LFGRoleCheckState state = LFG_ROLECHECK_DEFAULT;  // current status of the role check
+    roleMap currentRoles;          // map of players to roles
+    std::set<uint32> dungeonList;  // The dungeons this player or group are queued for
+    uint32 randomDungeonID = 0;    // The random dungeon ID
+    uint64 leaderGuidRaw = 0;      // ObjectGuid(raw) of leader
+    time_t waitForRoleTime = 0;    // How long we'll wait for the players to confirm their roles
 };
 
 struct LFGWait
@@ -325,21 +333,6 @@ struct LFGWait
         : time(currentTime), previousTime(lastTime), playerCount(currentPlayerCount), doAverage(shouldRecalculate) {}
 };
 
-/// For SMSG_LFG_QUEUE_STATUS
-struct LFGQueueStatus
-{
-    uint32 dungeonID;             // queue info for x dungeon
-    int32  playerAvgWaitTime;     // average wait time for the current player
-    int32  avgWaitTime;           // average wait time for the dungeon
-    int32  tankAvgWaitTime;       // average wait time for the tank(s)
-    int32  healerAvgWaitTime;     // average wait time for the healer(s)
-    int32  dpsAvgWaitTime;        // average wait time for the dps'
-    uint8  neededTanks;           // amount of tanks needed
-    uint8  neededHeals;           // amount of healers needed
-    uint8  neededDps;             // amount of dps needed
-    uint32 timeSpentInQueue;      // time already spent in the queue
-};
-
 /// For CMSG_LFG_GET_STATUS, SMSG_LFG_UPDATE_PARTY, and SMSG_LFG_UPDATE_PLAYER
 struct LFGPlayerStatus
 {
@@ -347,8 +340,9 @@ struct LFGPlayerStatus
     LfgUpdateType updateType;
     std::set<uint32> dungeonList;
     std::string comment;
+    RideTicket ticket;
 
-    LFGPlayerStatus() { }
+    LFGPlayerStatus() : state(LFG_STATE_NONE), updateType(LFG_UPDATE_DEFAULT) { }
     LFGPlayerStatus(LFGState State, LfgUpdateType UpdateType, std::set<uint32> DungeonList, std::string Comment)
         : state(State), updateType(UpdateType), dungeonList(DungeonList), comment(Comment) { }
 };
@@ -596,6 +590,9 @@ public:
     /// Send a periodic status update for queued players
     void SendQueueStatus();
 
+    /// CMSG_LFG_GET_STATUS reply: two SMSG_LFG_UPDATE_STATUS per TC's order.
+    void SendStatusUpdate(Player* plr);
+
     /// Role-Related Functions
 
     /**
@@ -609,6 +606,13 @@ public:
 
     /// Make sure role selections are okay
     bool ValidateGroupRoles(roleMap groupMap);
+
+    /// Seats each player into one of their selected roles, scarce roles first.
+    static void CountAssignedRoles(roleMap const& roles, uint8& tanks,
+                                   uint8& healers, uint8& dps);
+
+    /// True when the class can perform every non-leader role in the mask.
+    static bool CanPerformSelectedRoles(uint8 playerClass, uint8 roles);
 
     /// Proposal-Related Functions
 
@@ -674,17 +678,26 @@ protected:
     /// Send a proposal to each member of a group
     void SendDungeonProposal(LFGPlayers* lfgGroup);
 
+    /// Send SMSG_LFG_QUEUE_STATUS to every member of one queue entry.
+    void SendQueueStatusFor(ObjectGuid guid);
+
     /// Tell a group member that someone else just confirmed their role
     void SendRoleChosen(ObjectGuid plrGuid, ObjectGuid confirmedGuid, uint8 roles);
 
+    /// Build the shared SMSG_LFG_ROLE_CHECK_UPDATE payload for one role
+    /// check, so PerformRoleCheck and RemoveOldRoleChecks cannot drift.
+    void BuildRoleCheckPacket(LFGRoleCheck const& roleCheck, LFGPackets::RoleCheckUpdate& out);
+
     /// Send SMSG_LFG_ROLE_CHECK_UPDATE to a specific player
-    void SendRoleCheckUpdate(ObjectGuid plrGuid, LFGRoleCheck const& roleCheck);
+    void SendRoleCheckUpdate(ObjectGuid plrGuid, LFGPackets::RoleCheckUpdate const& update);
 
     /// Send SMSG_LFG_UPDATE_PARTY or SMSG_LFG_UPDATE_PLAYER
     void SendLfgUpdate(ObjectGuid plrGuid, LFGPlayerStatus status, bool isGroup);
 
     /// Send SMSG_LFG_JOIN_RESULT
-    void SendLfgJoinResult(ObjectGuid plrGuid, LfgJoinResult result, LFGState state, partyForbidden const& lockedDungeons);
+    void SendLfgJoinResult(ObjectGuid plrGuid, LfgJoinResult result, uint8 resultDetail,
+                           RideTicket const& ticket,
+                           std::vector<LFGPackets::JoinResultBlacklist> const& blacklist);
 
     /// Get rid of expired role checks
     void RemoveOldRoleChecks();
@@ -721,6 +734,9 @@ private:
     /// Proposal information
     uint32 m_proposalId;
     proposalMap m_proposalMap;
+
+    /// Monotonically increasing RideTicket::id
+    uint32 m_ticketId;
 };
 
 #define sLFGMgr MaNGOS::Singleton<LFGMgr>::Instance()

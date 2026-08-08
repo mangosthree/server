@@ -609,27 +609,25 @@ bool LFGMgr::RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo)
     {
         return false;
     }
-    else
+
+    // Seat the two selections together rather than adding up what each side
+    // separately decided it needed. Someone who picked several roles is only
+    // pinned to one of them once the rest of the group is known, so comparing
+    // the pre-computed counts would let a flexible player squat the tank slot
+    // and lock out a dedicated tank who could still have joined.
+    roleMap combined = groupOne->currentRoles;
+    for (roleMap::const_iterator it = groupTwo->currentRoles.begin();
+         it != groupTwo->currentRoles.end(); ++it)
     {
-        // make sure we don't have too many players of a certain role here
-        if (((NORMAL_DAMAGE_COUNT - groupOne->neededDps) + (NORMAL_DAMAGE_COUNT - groupTwo->neededDps)) > NORMAL_DAMAGE_COUNT)
-        {
-            return false;
-        }
-        else if (((NORMAL_TANK_OR_HEALER_COUNT - groupOne->neededHealers) + (NORMAL_TANK_OR_HEALER_COUNT - groupTwo->neededHealers)) > NORMAL_TANK_OR_HEALER_COUNT)
-        {
-            return false;
-        }
-        else if (((NORMAL_TANK_OR_HEALER_COUNT - groupOne->neededTanks) + (NORMAL_TANK_OR_HEALER_COUNT - groupTwo->neededTanks)) > NORMAL_TANK_OR_HEALER_COUNT)
-        {
-            return false;
-        }
-        else
-        {
-            return true; // the player/role counts line up!
-        }
+        combined[it->first] = it->second;
     }
-    return false;
+
+    uint8 tanks = 0, healers = 0, dps = 0;
+    CountAssignedRoles(combined, tanks, healers, dps);
+
+    // Compatible only when everyone still gets a seat; anyone left over means
+    // the two sides are carrying roles the group cannot use.
+    return (uint32(tanks) + uint32(healers) + uint32(dps)) == combined.size();
 }
 
 bool LFGMgr::MatchesAreOfSameTeam(LFGPlayers* groupOne, LFGPlayers* groupTwo)

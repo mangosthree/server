@@ -179,6 +179,38 @@ TEST(LFGRoleAssignment_dps_capacity_is_respected)
     CHECK(c.seated == 3);
 }
 
+TEST(LFGRoleAssignment_flexible_yields_tank_slot_to_a_dedicated_tank)
+{
+    // The case that stranded a queue: a player who ticked all three roles
+    // must not squat the tank slot when a dedicated tank is also present.
+    std::vector<uint8> masks;
+    masks.push_back(ROLE_HEALER);
+    masks.push_back(uint8(ROLE_TANK | ROLE_HEALER | ROLE_DAMAGE));
+    masks.push_back(ROLE_TANK);
+
+    Counts c = Assign5Man(masks);
+    CHECK(c.tanks == 1);
+    CHECK(c.healers == 1);
+    CHECK(c.dps == 1);
+    CHECK(c.seated == 3);
+}
+
+TEST(LFGRoleAssignment_flexible_paladin_with_full_group_takes_damage)
+{
+    std::vector<uint8> masks;
+    masks.push_back(ROLE_TANK);
+    masks.push_back(ROLE_HEALER);
+    masks.push_back(ROLE_DAMAGE);
+    masks.push_back(ROLE_DAMAGE);
+    masks.push_back(uint8(ROLE_TANK | ROLE_HEALER | ROLE_DAMAGE));
+
+    Counts c = Assign5Man(masks);
+    CHECK(c.tanks == 1);
+    CHECK(c.healers == 1);
+    CHECK(c.dps == 3);
+    CHECK(c.seated == 5);
+}
+
 TEST(LFGRoleAssignment_all_flexible_fills_every_slot)
 {
     std::vector<uint8> masks;

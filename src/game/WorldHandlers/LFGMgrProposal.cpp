@@ -170,7 +170,7 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
             default:
                 if (roleCheck.leaderGuidRaw == guidBuff.GetRawValue())
                 {
-                    SendLfgJoinResult(guidBuff, ERR_LFG_ROLE_CHECK_FAILED2, uint8(roleCheck.state),
+                    SendLfgJoinResult(guidBuff, ERR_LFG_ROLE_CHECK_FAILED, uint8(roleCheck.state),
                                       GetPlayerStatus(guidBuff).ticket, {});
                 }
                 SetPlayerState(guidBuff, LFG_STATE_NONE);
@@ -1199,7 +1199,7 @@ void LFGMgr::RemoveOldRoleChecks()
 
                 if (plrGuid.GetRawValue() == roleCheck.leaderGuidRaw)
                 {
-                    SendLfgJoinResult(plrGuid, ERR_LFG_ROLE_CHECK_FAILED2, uint8(LFG_ROLECHECK_MISSING_ROLE),
+                    SendLfgJoinResult(plrGuid, ERR_LFG_ROLE_CHECK_FAILED, uint8(LFG_ROLECHECK_MISSING_ROLE),
                                       GetPlayerStatus(plrGuid).ticket, {});
                 }
 

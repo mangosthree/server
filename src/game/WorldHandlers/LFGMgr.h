@@ -65,7 +65,7 @@ enum LFGFlags
 enum LfgJoinResult
 {
     ERR_LFG_OK                                  = 0x00,
-    ERR_LFG_ROLE_CHECK_FAILED                   = 0x1B,   ///< "RoleCheck failed"
+    ERR_LFG_ROLE_CHECK_FAILED                   = 0x1B,   ///< detail 3/4 selects the specific text
     ERR_LFG_GROUP_FULL                          = 0x1C,
     ERR_LFG_INTERNAL_ERROR                      = 0x1E,
     ERR_LFG_NO_SLOTS_PLAYER                     = 0x1F,   ///< does not meet requirements
@@ -80,7 +80,7 @@ enum LfgJoinResult
     ERR_LFG_RANDOM_COOLDOWN_PARTY               = 0x28,
     ERR_LFG_TOO_MANY_MEMBERS                    = 0x29,
     ERR_LFG_CANT_USE_DUNGEONS                   = 0x2A,   ///< using BG/arena system
-    ERR_LFG_ROLE_CHECK_FAILED2                  = 0x2B,   ///< role check failed, detail = LFGRoleCheckState
+    ERR_LFG_ROLE_CHECK_FAILED2                  = 0x2B,   ///< generic text only; no detail dispatch
 };
 
 /// 4.3.4 wire values for SMSG_LFG_UPDATE_STATUS's Reason byte. The client

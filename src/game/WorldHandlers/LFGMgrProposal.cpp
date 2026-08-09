@@ -47,7 +47,8 @@
  * @brief Cohesion split of LFGMgr.cpp -- role check, dungeon proposal and in-dungeon flow: PerformRoleCheck, proposal send/update/decline, dungeon group create, teleport, boss-kill, kick/vote and LFG packet senders. Same LFGMgr class; no behaviour change. CMake file(GLOB) picks this file up automatically; LFGMgr.h is unchanged.
  */
 
-void LFGMgr::BuildRoleCheckPacket(LFGRoleCheck const& roleCheck, LFGPackets::RoleCheckUpdate& out)
+void LFGMgr::BuildRoleCheckPacket(LFGRoleCheck const& roleCheck, bool isBeginning,
+                                  LFGPackets::RoleCheckUpdate& out)
 {
     std::set<uint32> dungeonBuff;
     if (roleCheck.randomDungeonID)
@@ -60,7 +61,7 @@ void LFGMgr::BuildRoleCheckPacket(LFGRoleCheck const& roleCheck, LFGPackets::Rol
     }
 
     out.status = uint32(roleCheck.state);
-    out.isBeginning = roleCheck.state == LFG_ROLECHECK_INITIALITING;
+    out.isBeginning = isBeginning;
 
     for (uint32 id : dungeonBuff)
     {
@@ -115,7 +116,6 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
 
     LFGRoleCheck& roleCheck = it->second;   // reference: mutations must stick (C3)
     ObjectGuid plrGuid = pPlayer ? pPlayer->GetObjectGuid() : ObjectGuid();
-    bool roleChosen = roleCheck.state != LFG_ROLECHECK_DEFAULT && !plrGuid.IsEmpty();
 
     if (!plrGuid)
     {
@@ -145,9 +145,20 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
         }
     }
 
+    // The client treats a set flag as "the check just started": it prints
+    // ERR_LFG_ROLE_CHECK_INITIATED, plays 17318 and replays ROLE_CHOSEN for
+    // every member who already answered. Exactly one packet may carry it.
+    bool const isBeginning = !roleCheck.beginningSent &&
+                             roleCheck.state == LFG_ROLECHECK_INITIALITING;
+    roleCheck.beginningSent = true;
+
+    // The isBeginning packet already replays ROLE_CHOSEN for everyone who has
+    // answered, so sending it here too prints the leader's line twice.
+    bool const roleChosen = !isBeginning && !plrGuid.IsEmpty();
+
     // Build ONE role-check packet for everyone in this check.
     LFGPackets::RoleCheckUpdate update;
-    BuildRoleCheckPacket(roleCheck, update);
+    BuildRoleCheckPacket(roleCheck, isBeginning, update);
 
     for (roleMap::iterator itr = roleCheck.currentRoles.begin(); itr != roleCheck.currentRoles.end(); ++itr)
     {
@@ -1388,7 +1399,7 @@ void LFGMgr::RemoveOldRoleChecks()
             roleCheck.state = LFG_ROLECHECK_MISSING_ROLE;   // TC parity (LFGMgr.cpp:310)
 
             LFGPackets::RoleCheckUpdate update;
-            BuildRoleCheckPacket(roleCheck, update);
+            BuildRoleCheckPacket(roleCheck, false, update);
 
             for (roleMap::iterator roleMapItr = roleCheck.currentRoles.begin(); roleMapItr != roleCheck.currentRoles.end(); ++roleMapItr)
             {

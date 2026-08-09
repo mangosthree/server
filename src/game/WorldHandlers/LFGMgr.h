@@ -319,6 +319,7 @@ struct LFGRoleCheck
     uint32 randomDungeonID = 0;    // The random dungeon ID
     uint64 leaderGuidRaw = 0;      // ObjectGuid(raw) of leader
     time_t waitForRoleTime = 0;    // How long we'll wait for the players to confirm their roles
+    bool beginningSent = false;      ///< the initiating update has gone out
 };
 
 struct LFGWait
@@ -727,7 +728,9 @@ protected:
 
     /// Build the shared SMSG_LFG_ROLE_CHECK_UPDATE payload for one role
     /// check, so PerformRoleCheck and RemoveOldRoleChecks cannot drift.
-    void BuildRoleCheckPacket(LFGRoleCheck const& roleCheck, LFGPackets::RoleCheckUpdate& out);
+    /// \a isBeginning must be true on the first packet of a check only.
+    void BuildRoleCheckPacket(LFGRoleCheck const& roleCheck, bool isBeginning,
+                              LFGPackets::RoleCheckUpdate& out);
 
     /// Send SMSG_LFG_ROLE_CHECK_UPDATE to a specific player
     void SendRoleCheckUpdate(ObjectGuid plrGuid, LFGPackets::RoleCheckUpdate const& update);

@@ -621,6 +621,15 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     m_groupSet.insert(groupGuid);
     m_groupStatusMap[groupGuid] = groupStatus;
 
+    // Roster broadcast carrying the filled LFG block (state / concrete dungeon
+    // entry / aborted) -- and preceding GROUP_FOUND. This has to go out BEFORE
+    // the teleport: a far teleport is deferred behind the world-port ack, so a
+    // group list sent afterwards reaches the client mid-loading-screen and the
+    // last roster it actually applied stays the pre-SetAsLfgGroup one from
+    // AddMember -- leader crown instead of the guide, and raid conversion still
+    // offered.
+    pGroup->SendUpdate();
+
     for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
     {
         if (Player* pGroupPlr = itr->getSource())
@@ -629,9 +638,6 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
         }
     }
 
-    // Final roster broadcast now carries the filled LFG block (state /
-    // concrete dungeon entry / aborted) -- and precedes GROUP_FOUND.
-    pGroup->SendUpdate();
     return true;
 }
 

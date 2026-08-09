@@ -61,6 +61,7 @@
 #include "OpcodeTable.h"
 #include "Log.h"
 #include "Corpse.h"
+#include "Group.h"
 #include "Player.h"
 #include "Vehicle.h"
 #include "SpellAuras.h"
@@ -328,9 +329,18 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->ProcessDelayedOperations();
 
     // notify group after successful teleport
-    if (_player->GetGroup())
+    if (Group* group = _player->GetGroup())
     {
         _player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
+
+        // GROUP_UPDATE_FULL only refreshes member stats. An LFG group also
+        // carries roster flags the client reads once, out of SMSG_GROUP_LIST,
+        // and it drops that packet if it arrives during a loading screen --
+        // so re-send the roster now that this member has actually landed.
+        if (group->isLFGGroup())
+        {
+            group->SendUpdate();
+        }
     }
 }
 

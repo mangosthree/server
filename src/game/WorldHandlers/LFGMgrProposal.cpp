@@ -281,7 +281,12 @@ void LFGMgr::SendDungeonProposal(ObjectGuid queueGuid, LFGPlayers* lfgGroup)
          itr != stored.currentRoles.end(); ++itr)
     {
         ObjectGuid plrGuid = itr->first;
-        bool isParty = !stored.groups.find(plrGuid)->second.IsEmpty();
+
+        // The client silently drops SMSG_LFG_UPDATE_STATUS when IsParty
+        // disagrees with its own current group state (spec 7c, section 1.5b)
+        // -- derive it from live membership, not from the proposal snapshot.
+        Player* pPlayer = sPlayerRegistry.Find(plrGuid);
+        bool const isParty = pPlayer && pPlayer->GetGroup();
 
         SetPlayerState(plrGuid, LFG_STATE_PROPOSAL);
         SetPlayerUpdateType(plrGuid, LFG_UPDATE_PROPOSAL_BEGIN);
@@ -493,7 +498,11 @@ void LFGMgr::ProposalUpdate(uint32 proposalID, ObjectGuid plrGuid, bool accepted
         UpdateWaitMap(LFGRoles(role), waitKey,
                       time_t(now - proposal.joinedQueue));
 
-        bool isParty = !proposal.groups.find(memberGuid)->second.IsEmpty();
+        // CreateDungeonGroup has already run: every proposal player, premade
+        // and former solo queuer alike, is now in the formed group -- the
+        // pre-formation proposal.groups snapshot no longer reflects that.
+        Player* pMember = sPlayerRegistry.Find(memberGuid);
+        bool const isParty = pMember && pMember->GetGroup();
         status.updateType = LFG_UPDATE_GROUP_FOUND;
         SendLfgUpdate(memberGuid, status, isParty);
     }

@@ -49,18 +49,20 @@
 
 namespace LFGBootLogic
 {
-    /// Votes needed to resolve a boot, by group kind. INFERRED from
-    /// TrinityCore; not proven against a 4.3.4 sniff.
+    /// Votes needed to resolve a boot, by group kind. The client cannot
+    /// settle this: it parses the votes-needed field and never reads it
+    /// back, so the number is server policy. A five-man kick is a majority
+    /// of the group, which is three -- not the four TrinityCore uses.
     enum BootVotesNeeded
     {
-        LFD_BOOT_VOTES_NEEDED = 4,
+        LFD_BOOT_VOTES_NEEDED = 3,
         LFR_BOOT_VOTES_NEEDED = 15
     };
 
     /// Boot votes a single group may win before the budget is spent.
     enum BootBudget
     {
-        BOOT_MAX_KICKS = 3
+        BOOT_MAX_KICKS = 2
     };
 
     /// How a boot vote ended.

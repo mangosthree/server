@@ -38,7 +38,8 @@ using namespace LFGBootLogic;
 
 TEST(LFGBootLogic_RequiredVotes_lfd)
 {
-    CHECK(RequiredVotes(false) == 4u);
+    // A majority of the five-man group, so one dissenter is not a veto.
+    CHECK(RequiredVotes(false) == 3u);
 }
 
 TEST(LFGBootLogic_RequiredVotes_lfr)
@@ -148,12 +149,24 @@ TEST(LFGBootLogic_five_man_unanimity_all_three_agree_passes)
     CHECK(Resolve(tally, RequiredVotes(false)) == BOOT_PASSED);
 }
 
-TEST(LFGBootLogic_five_man_unanimity_one_abstention_deadlocks)
+TEST(LFGBootLogic_five_man_majority_passes_despite_one_dissenter)
 {
-    // Same group, but one survivor never votes: neither side reaches 4.
+    // Three of the five agree, so the kick carries. A single dissenter --
+    // or an abstention -- is not a veto, which is what a threshold of four
+    // would have made it.
     BootTally tally;
     tally.agree = 1 + 2;   // kicker + two survivors
     tally.deny = 1;        // victim
+    tally.total = tally.agree + tally.deny;
+
+    CHECK(Resolve(tally, RequiredVotes(false)) == BOOT_PASSED);
+}
+
+TEST(LFGBootLogic_five_man_two_agreeing_is_not_yet_a_majority)
+{
+    BootTally tally;
+    tally.agree = 2;
+    tally.deny = 1;
     tally.total = tally.agree + tally.deny;
 
     CHECK(Resolve(tally, RequiredVotes(false)) == BOOT_PENDING);
@@ -161,5 +174,5 @@ TEST(LFGBootLogic_five_man_unanimity_one_abstention_deadlocks)
 
 TEST(LFGBootLogic_budget_constant)
 {
-    CHECK(int(BOOT_MAX_KICKS) == 3);
+    CHECK(int(BOOT_MAX_KICKS) == 2);
 }

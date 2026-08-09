@@ -393,7 +393,9 @@ class WorldSession
         void SendLfgBootProposalUpdate(LFGBoot const& boot, uint32 votesNeeded);
         void SendLfgPlayerLockInfo();
         void SendLfgPartyLockInfo();
-        void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
+        void SendPartyResult(PartyOperation operation, const std::string& member,
+                             PartyResult res, uint32 val = 0,
+                             ObjectGuid guid = ObjectGuid());
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
         void SendGuildInvite(Player* player, bool alreadyInGuild = false);
         void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2, 3);

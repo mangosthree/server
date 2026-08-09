@@ -53,6 +53,8 @@
 #include "Group.h"
 #include "Guild.h"
 #include "GuildMgr.h"
+#include "LFGBootLogic.h"
+#include "LFGMgr.h"
 #include "Pet.h"
 #ifdef ENABLE_PLAYERBOTS
 #include "playerbot.h"
@@ -145,16 +147,25 @@ void Player::UninviteFromGroup()
 }
 
 /**
- * @brief Removes a member from a group and disposes of the group if it becomes empty.
+ * @brief Removes a member from a group, or starts a vote kick in an LFD group.
  *
  * @param group The group to remove the member from.
  * @param guid The GUID of the member to remove.
+ * @param kicker The GUID of the player requesting the removal; equal to \c guid
+ *   for a voluntary leave.
+ * @param reason The vote-kick reason; empty for a voluntary leave.
  */
-void Player::RemoveFromGroup(Group* group, ObjectGuid guid)
+void Player::RemoveFromGroup(Group* group, ObjectGuid guid, ObjectGuid kicker,
+                             std::string reason)
 {
     if (group)
     {
-        if (group->RemoveMember(guid, 0) <= 1)
+        if (group->isLFGGroup() && LFGBootLogic::ShouldVoteKick(
+            guid.GetRawValue(), kicker.GetRawValue()))
+        {
+            sLFGMgr.AttemptToKickPlayer(group, guid, kicker, reason);
+        }
+        else if (group->RemoveMember(guid, 0) <= 1)
         {
             // group->Disband(); already disbanded in RemoveMember
             sObjectMgr.RemoveGroup(group);
@@ -255,9 +266,14 @@ Player* Player::GetNextRandomRaidMember(float radius)
 /**
  * @brief Checks whether the player is allowed to uninvite someone from the group.
  *
+ * @param guidMember The member being targeted; not read by either branch
+ *   today (the LFG gate is group-wide, and the non-LFG gate never grew
+ *   TrinityCore's "can't kick the leader" check -- see the spec's cut line).
+ *   Kept in the signature for interface/TC parity and so a future check can
+ *   use it without another signature change.
  * @return The party result code describing whether uninvite is allowed.
  */
-PartyResult Player::CanUninviteFromGroup() const
+PartyResult Player::CanUninviteFromGroup(ObjectGuid guidMember) const
 {
     const Group* grp = GetGroup();
     if (!grp)
@@ -265,14 +281,54 @@ PartyResult Player::CanUninviteFromGroup() const
         return ERR_NOT_IN_GROUP;
     }
 
-    if (!grp->IsLeader(GetObjectGuid()) && !grp->IsAssistant(GetObjectGuid()))
+    if (grp->isLFGGroup())
     {
-        return ERR_NOT_LEADER;
-    }
+        ObjectGuid const groupGuid = grp->GetObjectGuid();
 
-    if (InBattleGround())
+        if (sLFGMgr.GetKicksLeft(groupGuid) == 0)
+        {
+            return ERR_PARTY_LFG_BOOT_LIMIT;
+        }
+
+        if (sLFGMgr.IsBootVoteActive(groupGuid))
+        {
+            return ERR_PARTY_LFG_BOOT_IN_PROGRESS;
+        }
+
+        if (grp->GetMembersCount() <= LFGBootLogic::RequiredVotes(grp->isLFRGroup()))
+        {
+            return ERR_PARTY_LFG_BOOT_TOO_FEW_PLAYERS;
+        }
+
+        if (sLFGMgr.GetGroupLfgState(groupGuid) == LFG_STATE_FINISHED_DUNGEON)
+        {
+            return ERR_PARTY_LFG_BOOT_DUNGEON_COMPLETE;
+        }
+
+        // ERR_PARTY_LFG_BOOT_LOOT_ROLLS (29): no cheap isRollLootActive()
+        // equivalent exists in this tree yet (OQ-8.5) -- gate point named,
+        // not filled.
+
+        for (GroupReference const* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
+        {
+            Player* pMember = itr->getSource();
+            if (pMember && pMember->IsInMap(this) && pMember->IsInCombat())
+            {
+                return ERR_PARTY_LFG_BOOT_IN_COMBAT;
+            }
+        }
+    }
+    else
     {
-        return ERR_INVITE_RESTRICTED;
+        if (!grp->IsLeader(GetObjectGuid()) && !grp->IsAssistant(GetObjectGuid()))
+        {
+            return ERR_NOT_LEADER;
+        }
+
+        if (InBattleGround())
+        {
+            return ERR_INVITE_RESTRICTED;
+        }
     }
 
     return ERR_PARTY_RESULT_OK;

@@ -356,6 +356,8 @@ class Group
             return m_bgGroup != NULL;
         }
         bool isLFGGroup() const { return m_groupType & GROUPTYPE_LFD; }
+        /// True for a Raid Finder group: an LFD group that is also a raid.
+        bool isLFRGroup() const { return isLFGGroup() && isRaidGroup(); }
         bool IsCreated()   const
         {
             return GetMembersCount() > 0;

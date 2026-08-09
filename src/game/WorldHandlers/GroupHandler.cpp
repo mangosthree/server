@@ -81,15 +81,18 @@
  * @param operation The party operation being reported.
  * @param member The related member name.
  * @param res The result code to send.
+ * @param val LFD cooldown seconds (ERR_PARTY_LFG_BOOT_COOLDOWN_S / _NOT_ELIGIBLE_S); 0 otherwise.
+ * @param guid Victim guid for ERR_VOTE_KICK_REASON_NEEDED; empty otherwise.
  */
-void WorldSession::SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res)
+void WorldSession::SendPartyResult(PartyOperation operation, const std::string& member,
+                                   PartyResult res, uint32 val, ObjectGuid guid)
 {
     WorldPacket data(SMSG_PARTY_COMMAND_RESULT, 4 + member.size() + 1 + 4 + 4 + 8);
     data << uint32(operation);
     data << member;                                         // max len 48
     data << uint32(res);
-    data << uint32(0);                                      // LFD cooldown related (used with ERR_PARTY_LFG_BOOT_COOLDOWN_S and ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S)
-    data << ObjectGuid();                                   // if result == 27 (ERR_VOTE_KICK_REASON_NEEDED), then it's guid of player being kicked (member's guid)
+    data << uint32(val);                                    // LFD cooldown related (used with ERR_PARTY_LFG_BOOT_COOLDOWN_S and ERR_PARTY_LFG_BOOT_NOT_ELIGIBLE_S)
+    data << guid;                                            // if result == 27 (ERR_VOTE_KICK_REASON_NEEDED), then it's guid of player being kicked (member's guid)
 
     SendPacket(&data);
 }
@@ -353,15 +356,17 @@ void WorldSession::HandleGroupInviteResponseOpcode(WorldPacket& recv_data)
 }
 
 /**
- * @brief Uninvites a group member or invitee by guid.
+ * @brief Uninvites a group member or invitee by guid, or starts a vote kick
+ *        when the target's group is an LFD group.
  *
  * @param recv_data The received opcode packet.
  */
 void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recv_data)
 {
     ObjectGuid guid;
+    std::string reason;
     recv_data >> guid;
-    recv_data.read_skip<std::string>();                     // reason
+    recv_data >> reason;
 
     // can't uninvite yourself
     if (guid == GetPlayer()->GetObjectGuid())
@@ -370,14 +375,39 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recv_data)
         return;
     }
 
-    PartyResult res = GetPlayer()->CanUninviteFromGroup();
-    if (res != ERR_PARTY_RESULT_OK)
+    // The client caps the reason at 64 bytes on copy (spec section 1.1); a
+    // modified client must not be able to push a longer string into the
+    // group broadcast.
+    trim(reason);
+    if (reason.size() > 64)
     {
-        SendPartyResult(PARTY_OP_LEAVE, "", res);
-        return;
+        reason.resize(64);
     }
 
     Group* grp = GetPlayer()->GetGroup();
+
+    // Resolved from member slots (not sObjectMgr.GetPlayer) so it works for
+    // an offline member -- needed below regardless of eligibility outcome.
+    std::string targetName;
+    if (grp)
+    {
+        for (Group::MemberSlot const& slot : grp->GetMemberSlots())
+        {
+            if (slot.guid == guid)
+            {
+                targetName = slot.name;
+                break;
+            }
+        }
+    }
+
+    PartyResult res = GetPlayer()->CanUninviteFromGroup(guid);
+    if (res != ERR_PARTY_RESULT_OK)
+    {
+        SendPartyResult(PARTY_OP_LEAVE, targetName, res);
+        return;
+    }
+
     if (!grp)
     {
         return;
@@ -385,7 +415,16 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recv_data)
 
     if (grp->IsMember(guid))
     {
-        Player::RemoveFromGroup(grp, guid);
+        if (grp->isLFGGroup() && reason.empty())
+        {
+            // Opens the client's "Please enter the reason to vote kick"
+            // box (VOTE_KICK_REASON_NEEDED, spec section 1.1).
+            SendPartyResult(PARTY_OP_LEAVE, targetName,
+                            ERR_VOTE_KICK_REASON_NEEDED, 0, guid);
+            return;
+        }
+
+        Player::RemoveFromGroup(grp, guid, GetPlayer()->GetObjectGuid(), reason);
         return;
     }
 
@@ -395,7 +434,7 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recv_data)
         return;
     }
 
-    SendPartyResult(PARTY_OP_LEAVE, "", ERR_TARGET_NOT_IN_GROUP_S);
+    SendPartyResult(PARTY_OP_LEAVE, targetName, ERR_TARGET_NOT_IN_GROUP_S);
 }
 
 /**
@@ -436,7 +475,7 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket& recv_data)
 
     if (ObjectGuid guid = grp->GetMemberGuid(membername))
     {
-        Player::RemoveFromGroup(grp, guid);
+        Player::RemoveFromGroup(grp, guid, GetPlayer()->GetObjectGuid(), "");
         return;
     }
 

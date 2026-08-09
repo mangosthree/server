@@ -1800,7 +1800,7 @@ void Group::SendUpdate()
         {
             data << uint8(lfgData.state);                   // MyLfgFlags; 2 = finished
             data << uint32(lfgData.dungeonEntry);           // LfgSlot; concrete Entry()
-            data << uint8(0);                               // LfgAborted -- Phase 8
+            data << uint8(0);                               // LfgAborted; non-zero disables CanPartyLFGBackfill (sub_1406FB440)
         }
         data << GetObjectGuid();                            // group guid
         data << uint32(sequence);                           // roster version; client drops anything it has already seen

@@ -74,13 +74,16 @@ LFGMgr::~LFGMgr()
 
 void LFGMgr::Update()
 {
-    //todo: remove old queues & boot votes
+    //todo: remove old queues
 
     // remove old role checks
     RemoveOldRoleChecks();
 
     // remove expired dungeon proposals (45 s -- LFG_TIME_PROPOSAL)
     RemoveOldProposals();
+
+    // fail expired boot votes (120 s -- LFG_TIME_BOOT)
+    RemoveOldBoots();
 
     // go through a waitTimeMap::iterator for each wait map and update times based on player count
     for (waitTimeMap::iterator tankItr = m_tankWaitTime.begin(); tankItr != m_tankWaitTime.end(); ++tankItr)

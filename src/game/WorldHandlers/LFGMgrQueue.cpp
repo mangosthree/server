@@ -494,6 +494,13 @@ void LFGMgr::OnGroupMemberRemoved(ObjectGuid groupGuid, ObjectGuid playerGuid)
 
     CancelQueueEntry(groupGuid, LFG_UPDATE_REMOVED_FROM_QUEUE);
 
+    // Without this, a boot whose group changed mid-vote leaks in
+    // m_bootStatusMap until RemoveOldBoots reaps it (section 1.7 item 3).
+    // Must run after the proposal-move early-return above and before the
+    // m_groupStatusMap teardown below, which destroys the state
+    // CancelBootVote needs.
+    CancelBootVote(groupGuid);
+
     // In-dungeon LFD group bookkeeping.
     groupStatusMap::iterator itStatus = m_groupStatusMap.find(groupGuid);
     if (itStatus != m_groupStatusMap.end())
@@ -534,6 +541,10 @@ void LFGMgr::OnGroupDisband(ObjectGuid groupGuid)
     }
 
     CancelQueueEntry(groupGuid, LFG_UPDATE_GROUP_DISBAND);
+
+    // Same reasoning as OnGroupMemberRemoved: cancel before the
+    // m_groupStatusMap teardown below removes the state CancelBootVote needs.
+    CancelBootVote(groupGuid);
 
     groupStatusMap::iterator itStatus = m_groupStatusMap.find(groupGuid);
     if (itStatus != m_groupStatusMap.end())

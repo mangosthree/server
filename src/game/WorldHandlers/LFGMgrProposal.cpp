@@ -31,6 +31,7 @@
 #include "GameEventMgr.h"
 #include "Group.h"
 #include "LFGMgr.h"
+#include "LFGBootLogic.h"
 #include "LFGProposalLogic.h"
 #include "LFGDungeonResolution.h"
 #include "Log.h"
@@ -1239,50 +1240,65 @@ void LFGMgr::HandleBossKilled(Player* pPlayer)
 
 void LFGMgr::AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kicker, std::string reason)
 {
-    ObjectGuid groupGuid = pGroup->GetObjectGuid();
-    LFGGroupStatus* status = GetGroupStatus(groupGuid);
-
-    bootStatusMap::iterator bIt = m_bootStatusMap.find(groupGuid);
-    if (!status)
+    if (!pGroup || !LFGBootLogic::ShouldVoteKick(guid.GetRawValue(), kicker.GetRawValue()) ||
+        !pGroup->IsMember(guid) || !pGroup->IsMember(kicker))
     {
         return;
     }
 
-    status->state = LFG_STATE_BOOT;
-    m_groupStatusMap[groupGuid] = *status;
-
-    // This function is only called when a group is set/in a dungeon so we can go straight to the boot packets
-    time_t now = time(NULL);
-    proposalAnswerMap votes;
-
-    // safe to say the person attempting to kick them will vote yes, the kick-ee will vote no
-    votes[guid] = LFG_ANSWER_DENY;
-    votes[kicker] = LFG_ANSWER_AGREE;
-
-    // set group state to boot vote, same for player states until it's over
-    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next()) //todo: check if we will need to use mail or not
+    ObjectGuid groupGuid = pGroup->GetObjectGuid();
+    LFGGroupStatus* status = GetGroupStatus(groupGuid);
+    if (!status || status->state != LFG_STATE_IN_DUNGEON)
     {
-        if (Player* pGroupPlr = itr->getSource())
-        {
-            ObjectGuid pGroupPlrGuid = pGroupPlr->GetObjectGuid();
-
-            SetPlayerState(pGroupPlrGuid, LFG_STATE_BOOT);
-
-            if ( (pGroupPlrGuid != guid) && (pGroupPlrGuid != kicker) )
-            {
-                votes[pGroupPlrGuid] = LFG_ANSWER_PENDING;
-            }
-        }
+        return;
     }
 
-    LFGBoot boot(true, guid, reason, votes, now);
+    if (m_bootStatusMap.find(groupGuid) != m_bootStatusMap.end())
+    {
+        return;                     // a boot is already running for this group
+    }
+
+    LFGState const previousState = status->state;
+    status->state = LFG_STATE_BOOT;   // mutate through the pointer -- no write-back copy
+
+    uint32 const votesNeeded = LFGBootLogic::RequiredVotes(pGroup->isLFRGroup());
+
+    // Seed votes from playerRoles (not GetFirstMember()) so offline members
+    // stay in the tally: victim DENY, kicker AGREE, everyone else PENDING.
+    proposalAnswerMap votes;
+    for (roleMap::const_iterator itr = status->playerRoles.begin();
+         itr != status->playerRoles.end(); ++itr)
+    {
+        ObjectGuid const memberGuid = itr->first;
+
+        if (memberGuid == guid)
+        {
+            votes[memberGuid] = LFG_ANSWER_DENY;
+        }
+        else if (memberGuid == kicker)
+        {
+            votes[memberGuid] = LFG_ANSWER_AGREE;
+        }
+        else
+        {
+            votes[memberGuid] = LFG_ANSWER_PENDING;
+        }
+
+        SetPlayerState(memberGuid, LFG_STATE_BOOT);
+    }
+
+    LFGBoot boot(true, false, previousState, guid, reason, votes, time(NULL));
     m_bootStatusMap[groupGuid] = boot;
 
-    for (GroupReference* it = pGroup->GetFirstMember(); it != NULL; it = it->next())
+    // Include the victim: their myVoteCompleted suppresses the popup
+    // (section 1.1), but voteInProgress must be set so the terminating
+    // packet can clear it later.
+    for (proposalAnswerMap::const_iterator itr = boot.answers.begin();
+         itr != boot.answers.end(); ++itr)
     {
-        if (Player* groupPlr = it->getSource())
+        if (Player* pMember = sPlayerRegistry.Find(itr->first))
         {
-            groupPlr->GetSession()->SendLfgBootProposalUpdate(boot, REQUIRED_VOTES_FOR_BOOT);
+            pMember->GetSession()->SendLfgBootProposalUpdate(boot, votesNeeded);
         }
     }
 }
@@ -1295,10 +1311,13 @@ void LFGMgr::CastVote(Player* pPlayer, bool vote)
     }
 
     Group* pGroup = pPlayer->GetGroup();
+    if (!pGroup)
+    {
+        return;
+    }
+
     ObjectGuid groupGuid = pGroup->GetObjectGuid();
-
     LFGGroupStatus* status = GetGroupStatus(groupGuid);
-
     if (!status || status->state != LFG_STATE_BOOT)
     {
         return;
@@ -1310,61 +1329,209 @@ void LFGMgr::CastVote(Player* pPlayer, bool vote)
         return;
     }
 
-    LFGBoot boot = it->second;
-    boot.answers[pPlayer->GetObjectGuid()] = LFGProposalAnswer(vote);
+    LFGBoot& boot = it->second;   // a reference: mutations must stick
 
-    int32 yay = 0, nay = 0; // keep a count of votes
-    for (proposalAnswerMap::iterator pIt = boot.answers.begin(); pIt != boot.answers.end(); ++pIt)
+    proposalAnswerMap::iterator ansItr = boot.answers.find(pPlayer->GetObjectGuid());
+    if (ansItr == boot.answers.end() || ansItr->second != LFG_ANSWER_PENDING)
     {
-        LFGProposalAnswer answer = pIt->second;
-        if (answer == LFG_ANSWER_AGREE)
+        return;                     // not a voter, or already voted
+    }
+
+    ansItr->second = LFGProposalAnswer(vote);
+
+    uint32 const votesNeeded = LFGBootLogic::RequiredVotes(pGroup->isLFRGroup());
+
+    LFGBootLogic::BootTally tally;
+    for (proposalAnswerMap::const_iterator pIt = boot.answers.begin(); pIt != boot.answers.end(); ++pIt)
+    {
+        if (pIt->second == LFG_ANSWER_AGREE)
         {
-            ++yay;
+            ++tally.agree;
+            ++tally.total;
         }
-        else if (answer == LFG_ANSWER_DENY)
+        else if (pIt->second == LFG_ANSWER_DENY)
         {
-            ++nay;
+            ++tally.deny;
+            ++tally.total;
         }
     }
 
-    if (yay < REQUIRED_VOTES_FOR_BOOT && nay < REQUIRED_VOTES_FOR_BOOT)
+    LFGBootLogic::BootResolution const resolution = LFGBootLogic::Resolve(tally, votesNeeded);
+    if (resolution == LFGBootLogic::BOOT_PASSED)
     {
-        m_bootStatusMap[groupGuid] = boot;
+        FinishBootVote(groupGuid, true);
         return;
     }
 
-    // if we dont have enough votes to kick or keep plr, don't send packet update
-    // if else, set boot.inProgress to false, set plr + group states back to lfg-state-dungeon,
-    // send packet update to group, kick plr if we had the votes, and then erase entry from boot map
+    if (resolution == LFGBootLogic::BOOT_FAILED)
+    {
+        FinishBootVote(groupGuid, false);
+        return;
+    }
+
+    // Still pending: re-broadcast. Safe on the voter's own client too --
+    // noCancelOnReuse means a fresh update never fires a spurious OnCancel.
+    for (proposalAnswerMap::const_iterator pIt = boot.answers.begin(); pIt != boot.answers.end(); ++pIt)
+    {
+        if (Player* pMember = sPlayerRegistry.Find(pIt->first))
+        {
+            pMember->GetSession()->SendLfgBootProposalUpdate(boot, votesNeeded);
+        }
+    }
+}
+
+/// Resolves one boot vote, notifies the group and applies the outcome.
+void LFGMgr::FinishBootVote(ObjectGuid groupGuid, bool succeeded)
+{
+    bootStatusMap::iterator it = m_bootStatusMap.find(groupGuid);
+    if (it == m_bootStatusMap.end())
+    {
+        return;
+    }
+
+    // Copy-then-erase-then-act: RemoveMember below re-enters through
+    // OnGroupMemberRemoved -> CancelBootVote, and the entry must already be
+    // gone for that recursive call to be a no-op (section 1.7 item 4).
+    LFGBoot boot = it->second;
+    m_bootStatusMap.erase(it);
 
     boot.inProgress = false;
-    status->state = LFG_STATE_IN_DUNGEON;
+    boot.votePassed = succeeded;
 
-    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+    LFGGroupStatus* status = GetGroupStatus(groupGuid);
+    if (status)
     {
-        if (Player* pGroupPlr = itr->getSource())
+        status->state = boot.previousState;
+        for (proposalAnswerMap::const_iterator ansItr = boot.answers.begin();
+             ansItr != boot.answers.end(); ++ansItr)
         {
-            ObjectGuid plrGuid = pGroupPlr->GetObjectGuid();
-
-            if (plrGuid != boot.playerVotedOn)
-            {
-                SetPlayerState(plrGuid, LFG_STATE_IN_DUNGEON);
-                pGroupPlr->GetSession()->SendLfgBootProposalUpdate(boot, REQUIRED_VOTES_FOR_BOOT);
-            }
+            SetPlayerState(ansItr->first, boot.previousState);
         }
     }
 
-    if (yay == REQUIRED_VOTES_FOR_BOOT)
+    Group* pGroup = sObjectMgr.GetGroupById(groupGuid.GetCounter());
+    uint32 const votesNeeded = LFGBootLogic::RequiredVotes(pGroup && pGroup->isLFRGroup());
+
+    // Broadcast BEFORE touching the group: this is what closes the popup on
+    // every client (the only thing that does) and what prints the pass/fail
+    // line while the victim's guid still resolves. The victim is included --
+    // see OQ-8.1 in the PR body for the TrinityCore divergence and why.
+    for (proposalAnswerMap::const_iterator ansItr = boot.answers.begin();
+         ansItr != boot.answers.end(); ++ansItr)
     {
-        // kick player from group
+        if (Player* pMember = sPlayerRegistry.Find(ansItr->first))
+        {
+            pMember->GetSession()->SendLfgBootProposalUpdate(boot, votesNeeded);
+        }
+    }
+
+    if (!succeeded)
+    {
+        if (pGroup)
+        {
+            pGroup->SendUpdate();
+        }
+        return;
+    }
+
+    if (status)
+    {
+        status->kicksLeft = (status->kicksLeft > 0) ? status->kicksLeft - 1 : 0;
+    }
+
+    if (pGroup && pGroup->IsMember(boot.playerVotedOn))
+    {
         if (pGroup->RemoveMember(boot.playerVotedOn, 1) <= 1)
         {
             // group->Disband(); already disbanded in RemoveMember
             sObjectMgr.RemoveGroup(pGroup);
             delete pGroup;
-            // removemember sets the player's group pointer to NULL
+            // RemoveMember sets the player's group pointer to NULL
         }
     }
+}
+
+/// Fails boot votes that have run past LFG_TIME_BOOT.
+void LFGMgr::RemoveOldBoots()
+{
+    time_t const now = time(NULL);
+
+    // Collect first: FinishBootVote erases from the map being walked, so a
+    // single-phase loop is UB (mirrors RemoveOldProposals above).
+    std::vector<ObjectGuid> expired;
+    for (bootStatusMap::const_iterator itr = m_bootStatusMap.begin();
+         itr != m_bootStatusMap.end(); ++itr)
+    {
+        if (itr->second.startTime + LFG_TIME_BOOT <= now)
+        {
+            expired.push_back(itr->first);
+        }
+    }
+
+    for (std::vector<ObjectGuid>::const_iterator itr = expired.begin();
+         itr != expired.end(); ++itr)
+    {
+        FinishBootVote(*itr, false);
+    }
+}
+
+/// Cancel any in-flight boot for this group without penalty -- called from
+/// the group lifecycle seam (OnGroupMemberRemoved / OnGroupDisband) when a
+/// member is already leaving. Must not route through FinishBootVote's
+/// removal path.
+void LFGMgr::CancelBootVote(ObjectGuid groupGuid)
+{
+    bootStatusMap::iterator it = m_bootStatusMap.find(groupGuid);
+    if (it == m_bootStatusMap.end())
+    {
+        return;
+    }
+
+    LFGBoot boot = it->second;
+    m_bootStatusMap.erase(it);
+
+    boot.inProgress = false;
+    boot.votePassed = false;
+
+    LFGGroupStatus* status = GetGroupStatus(groupGuid);
+    if (status)
+    {
+        status->state = boot.previousState;
+        for (proposalAnswerMap::const_iterator ansItr = boot.answers.begin();
+             ansItr != boot.answers.end(); ++ansItr)
+        {
+            SetPlayerState(ansItr->first, boot.previousState);
+        }
+    }
+
+    Group* pGroup = sObjectMgr.GetGroupById(groupGuid.GetCounter());
+    uint32 const votesNeeded = LFGBootLogic::RequiredVotes(pGroup && pGroup->isLFRGroup());
+
+    for (proposalAnswerMap::const_iterator ansItr = boot.answers.begin();
+         ansItr != boot.answers.end(); ++ansItr)
+    {
+        if (Player* pMember = sPlayerRegistry.Find(ansItr->first))
+        {
+            pMember->GetSession()->SendLfgBootProposalUpdate(boot, votesNeeded);
+        }
+    }
+}
+
+bool LFGMgr::IsBootVoteActive(ObjectGuid groupGuid) const
+{
+    return m_bootStatusMap.find(groupGuid) != m_bootStatusMap.end();
+}
+
+uint8 LFGMgr::GetKicksLeft(ObjectGuid groupGuid) const
+{
+    groupStatusMap::const_iterator it = m_groupStatusMap.find(groupGuid);
+    return (it != m_groupStatusMap.end()) ? it->second.kicksLeft : 0;
+}
+
+LFGState LFGMgr::GetGroupLfgState(ObjectGuid groupGuid) const
+{
+    groupStatusMap::const_iterator it = m_groupStatusMap.find(groupGuid);
+    return (it != m_groupStatusMap.end()) ? it->second.state : LFG_STATE_NONE;
 }
 
 void LFGMgr::SendRoleChosen(ObjectGuid plrGuid, ObjectGuid confirmedGuid, uint8 roles)

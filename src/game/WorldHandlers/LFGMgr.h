@@ -31,6 +31,7 @@
 #include "Common/TimeConstants.h"
 #include <ctime>
 #include <string>
+#include "LFGEmpowerment.h"
 #include "LFGPackets.h"
 #include "Policies/Singleton.h"
 #include "Group.h"
@@ -460,6 +461,12 @@ public:
      * @param plr The pointer to the player
      */
     LfgJoinResult GetJoinResult(Player* plr);
+
+    /// Build the empowerment state for \a plr from its current group.
+    static LFGEmpowerment::State BuildEmpowermentState(Player* plr);
+
+    /// True when \a plr may queue or dequeue for its group (client parity).
+    static bool IsEmpowered(Player* plr);
 
     /**
      * @brief Fetch the playerstatus struct of a player on request, if existant

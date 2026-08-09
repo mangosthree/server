@@ -152,9 +152,9 @@ TEST(LFGPackets_BootProposalUpdate_exact_fixture)
 {
     LFGPackets::BootProposalUpdate data;
     data.voteInProgress = true;
-    data.myVoteCompleted = true;
-    data.myVote = false;
-    data.voteEcho = true;
+    data.votePassed = true;
+    data.myVoteCompleted = false;
+    data.myVote = true;
     data.target = 0x0011223344556677ULL;   // leading zero byte, raw GUID
     data.totalVotes = 5;
     data.bootVotes = 3;
@@ -177,6 +177,24 @@ TEST(LFGPackets_BootProposalUpdate_exact_fixture)
         0x03,0x00,0x00,0x00,
         0x41,0x46,0x4B,0x00
     });
+}
+
+TEST(LFGPackets_BootProposalUpdate_four_byte_prefix)
+{
+    // C-5 regression guard: the legacy sender wrote three leading bytes
+    // where the client reads four. Pin all four flag bytes with a
+    // distinguishable 1/0/1/0 pattern so a dropped byte fails this test.
+    LFGPackets::BootProposalUpdate data;
+    data.voteInProgress = true;
+    data.votePassed = false;
+    data.myVoteCompleted = true;
+    data.myVote = false;
+
+    WorldPacket packet(SMSG_LFG_BOOT_PROPOSAL_UPDATE, 64);
+    REQUIRE(LFGPackets::BuildBootProposalUpdate(packet, data));
+
+    CHECK(packet.size() >= 4);
+    CHECK_BYTES(packet.contents(), 4, { 0x01, 0x00, 0x01, 0x00 });
 }
 
 TEST(LFGPackets_BootProposalUpdate_empty_reason_is_just_the_terminator)

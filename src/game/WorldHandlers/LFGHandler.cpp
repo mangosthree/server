@@ -217,6 +217,17 @@ void WorldSession::HandleLfgLockInfoRequestOpcode(WorldPacket& recv_data)
     }
 }
 
+/// CMSG_LFG_SET_BOOT_VOTE: records this player's answer to a boot vote.
+void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_SET_BOOT_VOTE");
+
+    LFGPackets::SetBootVoteRequest request;
+    LFGPackets::ReadSetBootVote(recv_data, request);
+
+    sLFGMgr.CastVote(GetPlayer(), request.vote);
+}
+
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
 {
     WorldPacket data(SMSG_LFG_SEARCH_RESULTS);

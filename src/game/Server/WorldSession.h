@@ -1022,6 +1022,7 @@ class WorldSession
         void HandleLfgGetStatusOpcode(WorldPacket& recv_data);
         void HandleLfgProposalResultOpcode(WorldPacket& recv_data);
         void HandleLfgTeleportOpcode(WorldPacket& recv_data);
+        void HandleLfgSetBootVoteOpcode(WorldPacket& recv_data);
         void HandleSetTitleOpcode(WorldPacket& recv_data);
         void HandleRealmSplitOpcode(WorldPacket& recv_data);
         void HandleTimeSyncResp(WorldPacket& recv_data);

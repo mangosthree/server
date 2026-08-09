@@ -152,7 +152,7 @@ enum GroupType
     GROUPTYPE_BG     = 0x01,
     GROUPTYPE_RAID   = 0x02,
     GROUPTYPE_BGRAID = GROUPTYPE_BG | GROUPTYPE_RAID,       // mask
-    // 0x04?
+    GROUPTYPE_LFD_RESTRICTED = 0x04,                       ///< client: Lua_HasLFGRestrictions
     GROUPTYPE_LFD    = 0x08,
     // 0x10, leave/change group?, I saw this flag when leaving group and after leaving BG while in group
     GROUPTYPE_ONE_PERSON_PARTY   = 0x20,                   ///< client: Lua_IsOnePersonParty
@@ -382,7 +382,8 @@ class Group
         }
 
         // member manipulation methods
-        void SetAsLfgGroup() { m_groupType = GroupType(m_groupType | GROUPTYPE_LFD); }
+        /// Sets both bits: 0x08 carries the LFG block, 0x04 drives HasLFGRestrictions.
+        void SetAsLfgGroup() { m_groupType = GroupType(m_groupType | GROUPTYPE_LFD | GROUPTYPE_LFD_RESTRICTED); }
         bool IsMember(ObjectGuid guid) const
         {
             return _getMemberCSlot(guid) != m_memberSlots.end();

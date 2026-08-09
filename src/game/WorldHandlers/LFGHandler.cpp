@@ -504,8 +504,7 @@ void WorldSession::SendLfgBootProposalUpdate(LFGBoot const& boot, uint32 votesNe
 
     LFGPackets::BootProposalUpdate data;
     data.voteInProgress = boot.inProgress;
-    data.votePassed = false;   // LFGBoot gains a real votePassed field in a
-                                // later commit of this series; wired there.
+    data.votePassed = boot.votePassed;
     data.myVoteCompleted = plrAnswer != LFG_ANSWER_PENDING;
     data.myVote = plrAnswer == LFG_ANSWER_AGREE;
     data.target = boot.playerVotedOn.GetRawValue();
@@ -525,6 +524,16 @@ void WorldSession::SendLfgBootProposalUpdate(LFGBoot const& boot, uint32 votesNe
         sLog.outError("WorldSession::SendLfgBootProposalUpdate: reason too long (%u bytes), packet not sent",
                       uint32(boot.reason.length()));
     }
+}
+
+/// SMSG_LFG_OFFER_CONTINUE: offers the group a backfill for its dungeon.
+void WorldSession::SendLfgOfferContinue(uint32 dungeonEntry)
+{
+    DEBUG_LOG("SMSG_LFG_OFFER_CONTINUE %u", dungeonEntry);
+
+    WorldPacket data(SMSG_LFG_OFFER_CONTINUE, 4);
+    LFGPackets::BuildOfferContinue(data, dungeonEntry);
+    SendPacket(&data);
 }
 
 /// Builds and sends SMSG_LFG_PLAYER_INFO for the requesting player. Drives

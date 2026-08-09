@@ -391,6 +391,7 @@ class WorldSession
         void SendLfgTeleportError(uint8 error);
         void SendLfgRewards(LFGRewards const& rewards);
         void SendLfgBootProposalUpdate(LFGBoot const& boot, uint32 votesNeeded);
+        void SendLfgOfferContinue(uint32 dungeonEntry);
         void SendLfgPlayerLockInfo();
         void SendLfgPartyLockInfo();
         void SendPartyResult(PartyOperation operation, const std::string& member,

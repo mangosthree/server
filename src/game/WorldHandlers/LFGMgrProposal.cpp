@@ -1441,12 +1441,37 @@ void LFGMgr::FinishBootVote(ObjectGuid groupGuid, bool succeeded)
 
     if (pGroup && pGroup->IsMember(boot.playerVotedOn))
     {
-        if (pGroup->RemoveMember(boot.playerVotedOn, 1) <= 1)
+        if (Player* pVictim = sPlayerRegistry.Find(boot.playerVotedOn))
+        {
+            // A booted player keeps no deserter debuff and gets the random
+            // dungeon cooldown back. RemoveAurasDueToSpell is a no-op today
+            // -- 71328 is never applied in this tree -- written now so the
+            // branch is correct once a later phase starts applying it.
+            pVictim->RemoveAurasDueToSpell(LFG_COOLDOWN_SPELL);
+
+            if (pVictim->GetMap() && pVictim->GetMap()->IsDungeon())
+            {
+                TeleportPlayer(pVictim, true, true);
+            }
+        }
+
+        bool const groupSurvived = pGroup->RemoveMember(boot.playerVotedOn, 1) > 1;
+        if (!groupSurvived)
         {
             // group->Disband(); already disbanded in RemoveMember
             sObjectMgr.RemoveGroup(pGroup);
             delete pGroup;
             // RemoveMember sets the player's group pointer to NULL
+        }
+
+        // Guarded against the group having just been deleted above.
+        if (groupSurvived && status && status->state != LFG_STATE_FINISHED_DUNGEON)
+        {
+            if (Player* pLeader = sPlayerRegistry.Find(pGroup->GetLeaderGuid()))
+            {
+                pLeader->GetSession()->SendLfgOfferContinue(
+                    GetDungeonEntry(status->dungeonID));
+            }
         }
     }
 }

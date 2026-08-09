@@ -517,6 +517,43 @@ bool LFGMgr::HasLeaderFlag(roleMap const& roles)
     return false;
 }
 
+void LFGMgr::DetachFromGroup(Group* pGroup, ObjectGuid plrGuid)
+{
+    if (!pGroup)
+    {
+        return;
+    }
+
+    // RemoveMember disbands itself when the pre-removal count is <= 2, so the
+    // caller must decide ownership before the call, never after it. Disband
+    // never unregisters from ObjectMgr or deletes itself (Group.cpp:914-1009),
+    // so this is the only teardown -- not a double-free of a self-disbanded
+    // group.
+    bool const willDisband = pGroup->GetMembersCount() <= 2;
+
+    pGroup->RemoveMember(plrGuid, 0);
+
+    if (willDisband)
+    {
+        sObjectMgr.RemoveGroup(pGroup);
+        delete pGroup;
+    }
+}
+
+ObjectGuid LFGMgr::PickHostGroup(LFGProposal const& proposal)
+{
+    std::vector<LFGProposalLogic::PlayerGroupPair> playerToGroup;
+    playerToGroup.reserve(proposal.groups.size());
+    for (playerGroupMap::const_iterator itr = proposal.groups.begin();
+         itr != proposal.groups.end(); ++itr)
+    {
+        playerToGroup.push_back(LFGProposalLogic::PlayerGroupPair(
+            itr->first.GetRawValue(), itr->second.GetRawValue()));
+    }
+
+    return ObjectGuid(LFGProposalLogic::PickHostGroup(playerToGroup));
+}
+
 //todo(7c): offer-continue formation (proposal->groupRawGuid != 0)
 bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
 {
@@ -545,72 +582,73 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
         }
     }
 
-    // Leader: the seat that carries the leader bit; lowest guid otherwise.
-    ObjectGuid leaderGuid;
-    for (roleMap::const_iterator itr = proposal->assignedRoles.begin();
-         itr != proposal->assignedRoles.end(); ++itr)
+    // Prefer the pre-existing party contributing the most members: keep its
+    // Group object and leader instead of tearing the premade down and
+    // rebuilding it.
+    Group* pGroup = NULL;
+    ObjectGuid const hostGuid = PickHostGroup(*proposal);
+    if (!hostGuid.IsEmpty())
     {
-        if (itr->second & PLAYER_ROLE_LEADER)
+        pGroup = sObjectMgr.GetGroupById(hostGuid.GetCounter());
+    }
+
+    if (!pGroup)
+    {
+        // No premade in this proposal: build from scratch, as before.
+        // Leader: the seat that carries the leader bit; lowest guid otherwise.
+        ObjectGuid leaderGuid;
+        for (roleMap::const_iterator itr = proposal->assignedRoles.begin();
+             itr != proposal->assignedRoles.end(); ++itr)
         {
-            leaderGuid = itr->first;
-            break;
+            if (itr->second & PLAYER_ROLE_LEADER)
+            {
+                leaderGuid = itr->first;
+                break;
+            }
+
+            if (leaderGuid.IsEmpty() || itr->first < leaderGuid)
+            {
+                leaderGuid = itr->first;
+            }
         }
 
-        if (leaderGuid.IsEmpty() || itr->first < leaderGuid)
+        Player* pLeader = sPlayerRegistry.Find(leaderGuid);
+        if (!pLeader)
         {
-            leaderGuid = itr->first;
+            return false;
         }
-    }
 
-    Player* pLeader = sPlayerRegistry.Find(leaderGuid);
-    if (!pLeader)
-    {
-        return false;
-    }
-
-    // From here on, lifecycle hooks fired by the removes/adds below must
-    // not react -- IsSuccessfulProposalMove covers this proposal's guids.
-    if (Group* pOldGroup = pLeader->GetGroup())
-    {
-        if (pOldGroup->RemoveMember(leaderGuid, 0) <= 1)
+        pGroup = new Group();
+        if (!pGroup->Create(leaderGuid, pLeader->GetName()))
         {
-            sObjectMgr.RemoveGroup(pOldGroup);
-            delete pOldGroup;
+            delete pGroup;
+            return false;
         }
+        sObjectMgr.AddGroup(pGroup);
     }
 
-    Group* pGroup = new Group();
-    if (!pGroup->Create(leaderGuid, pLeader->GetName()))
-    {
-        delete pGroup;
-        return false;
-    }
-    sObjectMgr.AddGroup(pGroup);
-
+    // From here on, lifecycle hooks fired by the removes/adds below must not
+    // react -- IsSuccessfulProposalMove covers this proposal's guids. The
+    // host party keeps its own leader; only outsiders move.
     for (roleMap::const_iterator itr = proposal->currentRoles.begin();
          itr != proposal->currentRoles.end(); ++itr)
     {
-        ObjectGuid memberGuid = itr->first;
-        if (memberGuid == leaderGuid || pGroup->IsMember(memberGuid))
+        ObjectGuid const memberGuid = itr->first;
+        if (pGroup->IsMember(memberGuid))
         {
             continue;
         }
 
         Player* pMember = sPlayerRegistry.Find(memberGuid);
-        if (Group* pOldGroup = pMember->GetGroup())
+        if (!pMember)
         {
-            if (pOldGroup->RemoveMember(memberGuid, 0) <= 1)
-            {
-                sObjectMgr.RemoveGroup(pOldGroup);
-                delete pOldGroup;
-            }
+            return false;
         }
+
+        DetachFromGroup(pMember->GetGroup(), memberGuid);
 
         if (!pGroup->AddMember(memberGuid, pMember->GetName()))
         {
-            pGroup->Disband(true);
-            sObjectMgr.RemoveGroup(pGroup);
-            delete pGroup;
             return false;
         }
     }
@@ -838,6 +876,10 @@ bool LFGMgr::IsSuccessfulProposalMove(ObjectGuid guid) const
             return true;
         }
 
+        // The VALUE arm is what covers a preserved host group: AddMember on
+        // a kept premade fires OnGroupMemberAdded(hostGroupGuid, ...), and
+        // the host's guid appears as a value here for each of its own
+        // members -- do not "simplify" this to the KEY arm alone.
         for (playerGroupMap::const_iterator grpItr = proposal.groups.begin();
              grpItr != proposal.groups.end(); ++grpItr)
         {

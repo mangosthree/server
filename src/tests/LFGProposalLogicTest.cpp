@@ -227,3 +227,56 @@ TEST(LFGProposalLogic_requeue_key_zero_when_none_survive)
     uint64 key = PickRequeueKey(members, dispositions, 1);
     CHECK(key == 0);
 }
+
+// -------------------------------------------------------------------------
+// PickHostGroup -- which pre-existing party a formed proposal preserves
+// -------------------------------------------------------------------------
+
+TEST(LFGProposalLogic_PickHostGroup_most_members_wins)
+{
+    // Party 100 contributes 3 players, party 200 contributes 2.
+    std::vector<PlayerGroupPair> playerToGroup;
+    playerToGroup.push_back(PlayerGroupPair(1, 100));
+    playerToGroup.push_back(PlayerGroupPair(2, 100));
+    playerToGroup.push_back(PlayerGroupPair(3, 100));
+    playerToGroup.push_back(PlayerGroupPair(4, 200));
+    playerToGroup.push_back(PlayerGroupPair(5, 200));
+
+    CHECK(PickHostGroup(playerToGroup) == 100);
+}
+
+TEST(LFGProposalLogic_PickHostGroup_tie_breaks_on_lowest_guid)
+{
+    // Two 2-member parties tie; the lower party guid wins deterministically.
+    std::vector<PlayerGroupPair> playerToGroup;
+    playerToGroup.push_back(PlayerGroupPair(1, 300));
+    playerToGroup.push_back(PlayerGroupPair(2, 300));
+    playerToGroup.push_back(PlayerGroupPair(3, 150));
+    playerToGroup.push_back(PlayerGroupPair(4, 150));
+    playerToGroup.push_back(PlayerGroupPair(5, 0));
+
+    CHECK(PickHostGroup(playerToGroup) == 150);
+}
+
+TEST(LFGProposalLogic_PickHostGroup_all_solo_returns_zero)
+{
+    std::vector<PlayerGroupPair> playerToGroup;
+    playerToGroup.push_back(PlayerGroupPair(1, 0));
+    playerToGroup.push_back(PlayerGroupPair(2, 0));
+    playerToGroup.push_back(PlayerGroupPair(3, 0));
+
+    CHECK(PickHostGroup(playerToGroup) == 0);
+}
+
+TEST(LFGProposalLogic_PickHostGroup_single_premade_returns_it)
+{
+    // 3 + 2 solo: the only party in the proposal is the host.
+    std::vector<PlayerGroupPair> playerToGroup;
+    playerToGroup.push_back(PlayerGroupPair(1, 42));
+    playerToGroup.push_back(PlayerGroupPair(2, 42));
+    playerToGroup.push_back(PlayerGroupPair(3, 42));
+    playerToGroup.push_back(PlayerGroupPair(4, 0));
+    playerToGroup.push_back(PlayerGroupPair(5, 0));
+
+    CHECK(PickHostGroup(playerToGroup) == 42);
+}

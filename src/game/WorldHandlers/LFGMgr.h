@@ -715,6 +715,12 @@ protected:
     /// Forms the LFD group for a succeeded proposal; false = caller unwinds.
     bool CreateDungeonGroup(LFGProposal* proposal);
 
+    /// Detach \a plrGuid from \a pGroup, destroying the group only if we own it.
+    static void DetachFromGroup(Group* pGroup, ObjectGuid plrGuid);
+
+    /// The pre-existing party contributing most members to \a proposal.
+    static ObjectGuid PickHostGroup(LFGProposal const& proposal);
+
     /**
      * @brief Merges two players/groups/etc into one for dungeon assignment.
      *

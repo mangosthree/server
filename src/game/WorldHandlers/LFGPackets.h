@@ -209,11 +209,14 @@ namespace LFGPackets
     // predates this branch and is left as-is.
     // ---------------------------------------------------------------------
 
-    /// Builds SMSG_ROLE_CHOSEN. Fixed shape, always succeeds.
+    /// TANK | HEALER | DAMAGE. The LEADER bit alone is not a role.
+    uint32 const ROLE_MASK_ANY = 0x0E;
+
+    /// Accepted is false unless a real role bit is set; the client asserts.
     inline void BuildRoleChosen(WorldPacket& out, uint64 guid, uint32 roleMask)
     {
         out << uint64(guid);
-        out << uint8(roleMask > 0);
+        out << uint8((roleMask & ROLE_MASK_ANY) != 0);
         out << roleMask;
     }
 

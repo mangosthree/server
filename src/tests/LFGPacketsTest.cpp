@@ -117,6 +117,21 @@ TEST(LFGPackets_RoleChosen_no_roles_is_not_accepted)
     });
 }
 
+TEST(LFGPackets_RoleChosen_leader_bit_alone_is_not_accepted)
+{
+    // PLAYER_ROLE_LEADER (0x01) with no TANK/HEALER/DAMAGE bit: the client
+    // builds a roleList from roles & (2|4|8) and asserts it is non-nil
+    // (LFGFrame.lua:166). Accepted = 1 here would crash the default UI.
+    WorldPacket packet(SMSG_ROLE_CHOSEN, 16);
+    LFGPackets::BuildRoleChosen(packet, 0x1122334455667788ULL, 0x01);
+
+    CHECK_BYTES(packet.contents(), packet.size(), {
+        0x88,0x77,0x66,0x55,0x44,0x33,0x22,0x11,
+        0x00,
+        0x01,0x00,0x00,0x00
+    });
+}
+
 // ---------------------------------------------------------------------
 // SMSG_LFG_TELEPORT_DENIED (0x0E14)
 // ---------------------------------------------------------------------

@@ -390,7 +390,7 @@ class WorldSession
         void SendLfgProposalUpdate(LFGPackets::ProposalUpdate const& proposal);
         void SendLfgTeleportError(uint8 error);
         void SendLfgRewards(LFGRewards const& rewards);
-        void SendLfgBootUpdate(LFGBoot const& boot);
+        void SendLfgBootProposalUpdate(LFGBoot const& boot, uint32 votesNeeded);
         void SendLfgPlayerLockInfo();
         void SendLfgPartyLockInfo();
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);

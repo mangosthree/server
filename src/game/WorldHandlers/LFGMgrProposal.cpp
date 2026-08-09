@@ -1282,7 +1282,7 @@ void LFGMgr::AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kick
     {
         if (Player* groupPlr = it->getSource())
         {
-            groupPlr->GetSession()->SendLfgBootUpdate(boot);
+            groupPlr->GetSession()->SendLfgBootProposalUpdate(boot, REQUIRED_VOTES_FOR_BOOT);
         }
     }
 }
@@ -1349,7 +1349,7 @@ void LFGMgr::CastVote(Player* pPlayer, bool vote)
             if (plrGuid != boot.playerVotedOn)
             {
                 SetPlayerState(plrGuid, LFG_STATE_IN_DUNGEON);
-                pGroupPlr->GetSession()->SendLfgBootUpdate(boot);
+                pGroupPlr->GetSession()->SendLfgBootProposalUpdate(boot, REQUIRED_VOTES_FOR_BOOT);
             }
         }
     }

@@ -528,6 +528,12 @@ void WorldSession::HandleLootMethodOpcode(WorldPacket& recv_data)
     {
         return;
     }
+
+    // A dungeon-finder group keeps the loot rules it was formed with.
+    if (group->isLFGGroup())
+    {
+        return;
+    }
     /********************/
 
     // everything is fine, do it
@@ -703,7 +709,9 @@ void WorldSession::HandleGroupRaidConvertOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (_player->InBattleGround())
+    // A dungeon-finder group cannot be converted; the client hides the option
+    // behind HasLFGRestrictions, but that is presentation, not enforcement.
+    if (_player->InBattleGround() || group->isLFGGroup())
     {
         return;
     }

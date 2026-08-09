@@ -1154,3 +1154,75 @@ TEST(LFGPackets_ReadLockInfoRequest_true)
     LFGPackets::ReadLockInfoRequest(packet, out);
     CHECK(out.player);
 }
+
+// ---------------------------------------------------------------------
+// DeriveUpdateFlags -- the Joined/Queued/LfgJoined derivation table
+// (tc-preservation LFGHandler.cpp:336-386; client consumes Joined as the
+// payload gate and LfgJoined as the eye-clear signal).
+// ---------------------------------------------------------------------
+
+TEST(LFGPackets_DeriveUpdateFlags_join_initial)
+{
+    LFGPackets::UpdateFlags f = LFGPackets::DeriveUpdateFlags(24, 0);
+    CHECK(f.joined);
+    CHECK(!f.queued);
+    CHECK(f.lfgJoined);
+}
+
+TEST(LFGPackets_DeriveUpdateFlags_join_queue)
+{
+    LFGPackets::UpdateFlags f = LFGPackets::DeriveUpdateFlags(6, 0);
+    CHECK(f.joined);
+    CHECK(f.queued);
+    CHECK(f.lfgJoined);
+}
+
+TEST(LFGPackets_DeriveUpdateFlags_added_to_queue)
+{
+    LFGPackets::UpdateFlags f = LFGPackets::DeriveUpdateFlags(13, 0);
+    CHECK(f.joined);
+    CHECK(f.queued);
+    CHECK(f.lfgJoined);
+}
+
+TEST(LFGPackets_DeriveUpdateFlags_proposal_begin)
+{
+    LFGPackets::UpdateFlags f = LFGPackets::DeriveUpdateFlags(14, 0);
+    CHECK(f.joined);
+    CHECK(!f.queued);
+    CHECK(f.lfgJoined);
+}
+
+TEST(LFGPackets_DeriveUpdateFlags_removed_from_queue)
+{
+    LFGPackets::UpdateFlags f = LFGPackets::DeriveUpdateFlags(8, 0);
+    CHECK(!f.joined);
+    CHECK(!f.queued);
+    CHECK(!f.lfgJoined);
+}
+
+TEST(LFGPackets_DeriveUpdateFlags_rolecheck_failed)
+{
+    LFGPackets::UpdateFlags f = LFGPackets::DeriveUpdateFlags(7, 0);
+    CHECK(!f.joined);
+    CHECK(!f.queued);
+    CHECK(f.lfgJoined);
+}
+
+TEST(LFGPackets_DeriveUpdateFlags_update_status_states)
+{
+    // reason 15: joined = state not in {0,1,5,6}; queued = state in {2,7}
+    struct Row { uint8 state; bool joined; bool queued; };
+    const Row rows[] = {
+        {0, false, false}, {1, false, false}, {2, true, true},
+        {3, true, false},  {4, true, false},  {5, false, false},
+        {6, false, false}, {7, true, true},
+    };
+    for (Row const& row : rows)
+    {
+        LFGPackets::UpdateFlags f = LFGPackets::DeriveUpdateFlags(15, row.state);
+        CHECK(f.joined == row.joined);
+        CHECK(f.queued == row.queued);
+        CHECK(f.lfgJoined);
+    }
+}

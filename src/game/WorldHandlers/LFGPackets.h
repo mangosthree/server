@@ -705,6 +705,49 @@ namespace LFGPackets
     }
 
     // ---------------------------------------------------------------------
+    // SMSG_LFG_UPDATE_STATUS flag derivation
+    // ---------------------------------------------------------------------
+
+    /// Joined/Queued/LfgJoined wire bits for SMSG_LFG_UPDATE_STATUS, derived
+    /// from the update reason and player state exactly as tc-preservation's
+    /// 4.3.4 LFGHandler.cpp:336-386 does. Numeric constants mirror LFGMgr.h's
+    /// LfgUpdateType / LFGState, kept in sync by hand (precedent:
+    /// LFGLockReason.h) because this header must stay game-lib-free.
+    struct UpdateFlags
+    {
+        bool joined = false;
+        bool queued = false;
+        bool lfgJoined = false;
+    };
+
+    inline UpdateFlags DeriveUpdateFlags(uint8 reason, uint8 state)
+    {
+        UpdateFlags flags;
+        switch (reason)
+        {
+            case 24:                              // JOIN_INITIAL
+            case 3:                               // JOIN_RAIDBROWSER
+            case 14:                              // PROPOSAL_BEGIN
+                flags.joined = true;
+                break;
+            case 6:                               // JOIN (rolecheck begins)
+            case 13:                              // ADDED_TO_QUEUE
+                flags.joined = true;
+                flags.queued = true;
+                break;
+            case 15:                              // UPDATE_STATUS
+                flags.joined = state != 1 && state != 0 && state != 5 && state != 6;
+                flags.queued = state == 2 || state == 7;
+                break;
+            default:
+                break;
+        }
+
+        flags.lfgJoined = reason != 8;            // REMOVED_FROM_QUEUE
+        return flags;
+    }
+
+    // ---------------------------------------------------------------------
     // SMSG_LFG_JOIN_RESULT (0x38B6) -- sub_1403C11F0 / read sub_1403BFF40
     // ---------------------------------------------------------------------
 

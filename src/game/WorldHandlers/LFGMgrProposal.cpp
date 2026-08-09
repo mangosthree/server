@@ -31,6 +31,8 @@
 #include "GameEventMgr.h"
 #include "Group.h"
 #include "LFGMgr.h"
+#include "LFGProposalLogic.h"
+#include "Log.h"
 #include "Object.h"
 #include "Player.h"
 #include "PlayerRegistry.h"
@@ -217,101 +219,131 @@ bool LFGMgr::ValidateGroupRoles(roleMap groupMap)
     return (tankCount + dpsCount + healCount == groupMap.size()) ? true : false;
 }
 
-//todo: remove from queue, update queue average settings
-void LFGMgr::SendDungeonProposal(LFGPlayers* lfgGroup)
+//todo(7b): offer-continue proposals (isNew = false, encounters, groupRawGuid)
+void LFGMgr::SendDungeonProposal(ObjectGuid queueGuid, LFGPlayers* lfgGroup)
 {
-    ++m_proposalId; // increment number to make a new proposal id
-
-    std::set<uint32>::iterator dItr = lfgGroup->dungeonList.begin();
-
-    // note: group create function's parameters are leader guid & leader name
-    LFGProposal newProposal;
-    newProposal.id = m_proposalId;
-    newProposal.state = LFG_PROPOSAL_INITIATING;
-    newProposal.encounters = 0; // todo: check if group has already started a dungeon and are looking for another plr
-    newProposal.currentRoles = lfgGroup->currentRoles;
-    newProposal.dungeonID = *dItr;
-    newProposal.isNew = true;
-    newProposal.joinedQueue = lfgGroup->joinedTime;
-
-    bool premadeGroup = IsProposalSameGroup(newProposal);
-
-    // iterate through role map just so get everyone's guid
-    for (roleMap::iterator it = lfgGroup->currentRoles.begin(); it != lfgGroup->currentRoles.end(); ++it)
+    if (!lfgGroup || lfgGroup->dungeonList.empty() || lfgGroup->currentRoles.empty())
     {
-        ObjectGuid plrGuid = it->first;
-        SetPlayerState(plrGuid, LFG_STATE_PROPOSAL);
+        return;
+    }
+
+    ++m_proposalId;
+
+    LFGProposal proposal;
+    proposal.id = m_proposalId;
+    proposal.dungeonID = *lfgGroup->dungeonList.begin();
+    proposal.joinedQueue = lfgGroup->joinedTime;
+    proposal.cancelTime = time(NULL) + LFG_TIME_PROPOSAL;
+    proposal.queueEntryGuid = queueGuid;
+    proposal.currentRoles = lfgGroup->currentRoles;
+
+    // Pin each player to the single role they will fill. The selected masks
+    // stay in currentRoles so a declined proposal re-queues them just as
+    // flexible as they were; the packet and 7b's group both want the seat.
+    AssignRoles(proposal.currentRoles, proposal.assignedRoles);
+
+    for (roleMap::const_iterator itr = proposal.currentRoles.begin();
+         itr != proposal.currentRoles.end(); ++itr)
+    {
+        ObjectGuid plrGuid = itr->first;
+        proposal.answers[plrGuid] = LFG_ANSWER_PENDING;
 
         Player* pPlayer = sPlayerRegistry.Find(plrGuid);
-        if (!pPlayer)
-        {
-            continue;
-        }
-
-        if (Group* pGroup = pPlayer->GetGroup())
-        {
-            ObjectGuid grpGuid = pGroup->GetObjectGuid();
-
-            SetPlayerUpdateType(plrGuid, LFG_UPDATE_PROPOSAL_BEGIN);
-
-            if (premadeGroup && pGroup->IsLeader(plrGuid))
-            {
-                newProposal.groupLeaderGuid = plrGuid.GetRawValue();
-            }
-
-            if (premadeGroup && !newProposal.groupRawGuid)
-            {
-                newProposal.groupRawGuid = grpGuid.GetRawValue();
-            }
-
-            newProposal.groups[plrGuid] = grpGuid;
-
-            SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), true);
-        }
-        else
-        {
-            newProposal.groups[plrGuid] = ObjectGuid();
-
-            //SetPlayerUpdateType(plrGuid, LFG_UPDATE_GROUP_FOUND);
-            //SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), false);
-
-            SetPlayerUpdateType(plrGuid, LFG_UPDATE_PROPOSAL_BEGIN);
-            SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), false);
-        }
-
-        newProposal.answers[plrGuid] = LFG_ANSWER_PENDING;
-
-        // then send SMSG_LFG_PROPOSAL_UPDATE
-        pPlayer->GetSession()->SendLfgProposalUpdate(newProposal);
+        Group* pGroup = pPlayer ? pPlayer->GetGroup() : NULL;
+        proposal.groups[plrGuid] = pGroup ? pGroup->GetObjectGuid() : ObjectGuid();
     }
 
-    // then if group guid is set, call Group::SetAsLfgGroup()
-    if (premadeGroup)
+    // Freeze the queue entry: no more matching, no more queue status.
+    lfgGroup->currentState = LFG_STATE_PROPOSAL;
+    m_queueSet.erase(queueGuid);
+
+    m_proposalMap[proposal.id] = proposal;
+    LFGProposal const& stored = m_proposalMap[proposal.id];
+
+    for (roleMap::const_iterator itr = stored.currentRoles.begin();
+         itr != stored.currentRoles.end(); ++itr)
     {
-        Player* pGroupLeader = sPlayerRegistry.Find(ObjectGuid(newProposal.groupLeaderGuid));
+        ObjectGuid plrGuid = itr->first;
+        bool isParty = !stored.groups.find(plrGuid)->second.IsEmpty();
 
-        if (pGroupLeader)
-        {
-            Group* pGroup = pGroupLeader->GetGroup();
-            if (pGroup)
-            {
-                pGroup->SetAsLfgGroup();
-            }
-            else
-            {
-                // Log an error: group not found for group leader
-                // In the future, we should determine the right actions for this scenario.
-            }
-        }
-        else
-        {
-            // Log an error: group leader not found
-            // In the future, we should determine the right actions for this scenario.
-        }
+        SetPlayerState(plrGuid, LFG_STATE_PROPOSAL);
+        SetPlayerUpdateType(plrGuid, LFG_UPDATE_PROPOSAL_BEGIN);
+        SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), isParty);
+        SendProposalUpdateToPlayer(plrGuid, stored);
     }
 
-    // also save the proposal
-    m_proposalMap[newProposal.id] = newProposal;
+    DEBUG_FILTER_LOG(LOG_FILTER_LFG,
+        "LFGMgr: proposal %u sent for dungeon %u to %u players",
+        stored.id, stored.dungeonID, uint32(stored.currentRoles.size()));
+}
+
+void LFGMgr::SendProposalUpdateToPlayer(ObjectGuid plrGuid, LFGProposal const& proposal)
+{
+    Player* pPlayer = sPlayerRegistry.Find(plrGuid);
+    if (!pPlayer)
+    {
+        return;
+    }
+
+    LFGPlayerStatus status = GetPlayerStatus(plrGuid);
+
+    // Show the recipient the dungeon they actually picked (their random
+    // entry) when the concrete dungeon is not in their selection
+    // (tc-preservation LFGHandler.cpp:594-599).
+    uint32 dungeonId = proposal.dungeonID;
+    if (!status.dungeonList.empty() &&
+        status.dungeonList.find(dungeonId) == status.dungeonList.end())
+    {
+        dungeonId = *status.dungeonList.begin();
+    }
+
+    playerGroupMap::const_iterator selfItr = proposal.groups.find(plrGuid);
+    ObjectGuid myGroup = (selfItr != proposal.groups.end())
+        ? selfItr->second : ObjectGuid();
+
+    LFGPackets::ProposalUpdate data;
+    data.ticket = status.ticket;
+    data.instanceId = 0;                        // TC parity; echoed back, unused
+    data.proposalId = proposal.id;
+    data.slot = GetDungeonEntry(dungeonId);
+    data.state = int8(proposal.state);
+    data.completedMask = proposal.encounters;
+    data.proposalSilent = false;                // every 7a proposal is new (C4)
+
+    for (roleMap::const_iterator itr = proposal.currentRoles.begin();
+         itr != proposal.currentRoles.end(); ++itr)
+    {
+        ObjectGuid memberGuid = itr->first;
+
+        playerGroupMap::const_iterator grpItr = proposal.groups.find(memberGuid);
+        ObjectGuid memberGroup = (grpItr != proposal.groups.end())
+            ? grpItr->second : ObjectGuid();
+
+        proposalAnswerMap::const_iterator ansItr = proposal.answers.find(memberGuid);
+        LFGProposalAnswer answer = (ansItr != proposal.answers.end())
+            ? ansItr->second : LFG_ANSWER_PENDING;
+
+        // The seat, not the selection: sending the raw mask draws an icon per
+        // bit, so a player who offered to tank and heal shows up as a second
+        // tank beside the real one. Fall back to the mask if unseated.
+        roleMap::const_iterator seatItr = proposal.assignedRoles.find(memberGuid);
+        uint8 seat = (seatItr != proposal.assignedRoles.end() &&
+                      (seatItr->second & ~uint8(PLAYER_ROLE_LEADER)) != PLAYER_ROLE_NONE)
+            ? seatItr->second : itr->second;
+
+        LFGPackets::ProposalUpdatePlayer member;
+        member.roles = seat;                    // leader bit kept (client isLeader)
+        member.me = memberGuid == plrGuid;
+        member.sameParty = !memberGroup.IsEmpty() && memberGroup == myGroup;
+        // Wire bit 2 gates the client's "someone in your party did not
+        // accept" message (spec C5); TC's proposal-group fill starves it.
+        member.myParty = member.sameParty;
+        member.responded = answer != LFG_ANSWER_PENDING;
+        member.accepted = answer == LFG_ANSWER_AGREE;
+        data.players.push_back(member);
+    }
+
+    pPlayer->GetSession()->SendLfgProposalUpdate(data);
 }
 
 bool LFGMgr::IsProposalSameGroup(LFGProposal const& proposal)
@@ -351,106 +383,96 @@ bool LFGMgr::IsProposalSameGroup(LFGProposal const& proposal)
     return isSameGroup;
 }
 
-// From a CMSG_LFG_PROPOSAL_RESPONSE call
+// From CMSG_LFG_PROPOSAL_RESULT
 void LFGMgr::ProposalUpdate(uint32 proposalID, ObjectGuid plrGuid, bool accepted)
 {
-    //note: create a group here if it doesn't exist and everyone accepted proposal
-    LFGProposal* proposal = GetProposalData(proposalID);
-
-    if (!proposal)
+    proposalMap::iterator itProposal = m_proposalMap.find(proposalID);
+    if (itProposal == m_proposalMap.end())
     {
         return;
     }
 
-    bool allOkay = true; // true if everyone answered LFG_ANSWER_AGREE
+    LFGProposal& proposal = itProposal->second;
 
-    // Update answer map to given value
-    LFGProposalAnswer plrAnswer = (LFGProposalAnswer)accepted;
-    proposal->answers[plrGuid] = plrAnswer;
-
-    // If the player declined, the proposal is over
-    if (plrAnswer == LFG_ANSWER_DENY)
+    proposalAnswerMap::iterator itAnswer = proposal.answers.find(plrGuid);
+    if (itAnswer == proposal.answers.end())
     {
-        ProposalDeclined(plrGuid, proposal);
+        return;                     // not a member of this proposal
     }
 
-    for (proposalAnswerMap::iterator it = proposal->answers.begin(); it != proposal->answers.end(); ++it)
+    itAnswer->second = accepted ? LFG_ANSWER_AGREE : LFG_ANSWER_DENY;
+
+    DEBUG_FILTER_LOG(LOG_FILTER_LFG, "LFGMgr: proposal %u answer %u from %s",
+        proposalID, uint32(accepted), plrGuid.GetString().c_str());
+
+    if (!accepted)
     {
-        if (it->second != LFG_ANSWER_AGREE)
+        RemoveProposal(proposalID, LFG_UPDATE_PROPOSAL_DECLINED);
+        return;
+    }
+
+    bool allAgreed = true;
+    for (proposalAnswerMap::const_iterator itr = proposal.answers.begin();
+         itr != proposal.answers.end(); ++itr)
+    {
+        if (itr->second != LFG_ANSWER_AGREE)
         {
-            allOkay = false;
+            allAgreed = false;
+            break;
         }
     }
 
-    // if !allOkay, send proposal updates to all
-    if (!allOkay)
+    if (!allAgreed)
     {
-        for (proposalAnswerMap::iterator itr = proposal->answers.begin(); itr != proposal->answers.end(); ++itr)
+        // Everyone's popup shows the new answer.
+        for (roleMap::const_iterator itr = proposal.currentRoles.begin();
+             itr != proposal.currentRoles.end(); ++itr)
         {
-            ObjectGuid proposalPlrGuid  = itr->first;
-            Player* pProposalPlayer = sPlayerRegistry.Find(proposalPlrGuid);
-            if (pProposalPlayer)
-            {
-                pProposalPlayer->GetSession()->SendLfgProposalUpdate(*proposal);
-            }
+            SendProposalUpdateToPlayer(itr->first, proposal);
         }
 
         return;
     }
 
-    // at this point everyone's good to join the dungeon!
+    // Success: state 2, TC packet sequence, then wipe -- 7b replaces the
+    // wipe with group formation + teleport (CreateDungeonGroup).
+    bool sendUpdate = proposal.state != LFG_PROPOSAL_SUCCESS;
+    proposal.state = LFG_PROPOSAL_SUCCESS;
+    time_t now = time(NULL);
 
-    time_t joinedTime = time(NULL);
-    bool sendProposalUpdate = proposal->state != LFG_PROPOSAL_SUCCESS;
-
-    // now update the proposal's state to successful and inform the players
-    proposal->state = LFG_PROPOSAL_SUCCESS;
-    for (roleMap::iterator rItr = proposal->currentRoles.begin(); rItr != proposal->currentRoles.end(); ++rItr)
+    for (roleMap::const_iterator itr = proposal.currentRoles.begin();
+         itr != proposal.currentRoles.end(); ++itr)
     {
-        // get the player's role
-        uint8 proposalPlrRole   = rItr->second;
-        proposalPlrRole &= ~PLAYER_ROLE_LEADER;
+        ObjectGuid memberGuid = itr->first;
+        uint8 role = itr->second;
+        role &= ~PLAYER_ROLE_LEADER;
 
-        ObjectGuid proposalPlrGuid  = rItr->first;
-        Player* pProposalPlayer = sPlayerRegistry.Find(proposalPlrGuid);
-        if (!pProposalPlayer)
+        if (sendUpdate)
         {
-            continue;
+            SendProposalUpdateToPlayer(memberGuid, proposal);
         }
 
-        if (sendProposalUpdate)
-        {
-            pProposalPlayer->GetSession()->SendLfgProposalUpdate(*proposal);
-        }
+        UpdateWaitMap(LFGRoles(role), proposal.dungeonID,
+                      time_t(now - proposal.joinedQueue));
 
-        // amount of time spent in queue
-        int32 timeWaited = joinedTime - proposal->joinedQueue;
-
-        // tell the lfg system to update the average wait times on the next tick
-        UpdateWaitMap(LFGRoles(proposalPlrRole), proposal->dungeonID, timeWaited);
-
-        // send some updates to the player, depending on group status
-        LFGPlayerStatus proposalPlrStatus = GetPlayerStatus(proposalPlrGuid);
-        proposalPlrStatus.updateType = LFG_UPDATE_GROUP_FOUND;
-
-        if (pProposalPlayer->GetGroup())
-        {
-            SendLfgUpdate(proposalPlrGuid, proposalPlrStatus, true);
-            RemoveFromQueue(pProposalPlayer->GetGroup()->GetObjectGuid()); // not the best way to handle this
-        }
-        else
-        {
-            SendLfgUpdate(proposalPlrGuid, proposalPlrStatus, false);
-            RemoveFromQueue(proposalPlrGuid);
-        }
-
-        proposalPlrStatus.updateType = LFG_UPDATE_REMOVED_FROM_QUEUE;
-        SendLfgUpdate(proposalPlrGuid, proposalPlrStatus, false);
-        SendLfgUpdate(proposalPlrGuid, proposalPlrStatus, true);
+        bool isParty = !proposal.groups.find(memberGuid)->second.IsEmpty();
+        LFGPlayerStatus status = GetPlayerStatus(memberGuid);
+        status.updateType = LFG_UPDATE_GROUP_FOUND;
+        SendLfgUpdate(memberGuid, status, isParty);
     }
 
-    CreateDungeonGroup(proposal);
-    m_proposalMap.erase(proposal->id);
+    sLog.outString("LFGMgr: proposal %u succeeded for dungeon %u -- "
+                   "group formation lands in Phase 7b", proposal.id,
+                   proposal.dungeonID);
+
+    for (roleMap::const_iterator itr = proposal.currentRoles.begin();
+         itr != proposal.currentRoles.end(); ++itr)
+    {
+        m_playerStatusMap.erase(itr->first);
+    }
+
+    m_playerData.erase(proposal.queueEntryGuid);
+    m_proposalMap.erase(itProposal);
 }
 
 bool LFGMgr::HasLeaderFlag(roleMap const& roles)
@@ -752,67 +774,154 @@ LFGGroupStatus* LFGMgr::GetGroupStatus(ObjectGuid guid)
     }
 }
 
-void LFGMgr::ProposalDeclined(ObjectGuid guid, LFGProposal* proposal)
+void LFGMgr::RemoveProposal(uint32 proposalId, LfgUpdateType type)
 {
-    Player* pPlayer = sPlayerRegistry.Find(guid);
-
-    if (!pPlayer)
+    proposalMap::iterator itProposal = m_proposalMap.find(proposalId);
+    if (itProposal == m_proposalMap.end())
     {
         return;
     }
 
-    bool leaveGroupLFG = false;
+    // Work on a copy and retire the map entry up front. Re-queueing a survivor
+    // set below can reach SendDungeonProposal, and its insert into
+    // m_proposalMap may rehash and invalidate every iterator into the map.
+    // Taking the id rather than an iterator keeps that off every caller too.
+    LFGProposal proposal = itProposal->second;
+    m_proposalMap.erase(itProposal);
 
-    for (roleMap::iterator it = proposal->currentRoles.begin(); it != proposal->currentRoles.end(); ++it)
+    proposal.state = LFG_PROPOSAL_FAILED;
+
+    DEBUG_FILTER_LOG(LOG_FILTER_LFG, "LFGMgr: proposal %u failed, update type %u",
+        proposal.id, uint32(type));
+
+    // 1. Classify: decliners' whole units leave, everyone else re-queues.
+    std::vector<LFGProposalLogic::Member> members;
+    std::vector<ObjectGuid> memberGuids;
+    members.reserve(proposal.currentRoles.size());
+    memberGuids.reserve(proposal.currentRoles.size());
+
+    for (roleMap::const_iterator itr = proposal.currentRoles.begin();
+         itr != proposal.currentRoles.end(); ++itr)
     {
-        ObjectGuid groupPlrGuid = it->first;
+        ObjectGuid memberGuid = itr->first;
+        ObjectGuid unitGuid = proposal.groups.find(memberGuid)->second;
 
-        // update each player with a LFG_UPDATE_PROPOSAL_DECLINED
-        SetPlayerUpdateType(groupPlrGuid, LFG_UPDATE_PROPOSAL_DECLINED);
+        LFGProposalLogic::Member member;
+        member.guid = memberGuid.GetRawValue();
+        member.unitGuid = unitGuid.IsEmpty() ? member.guid : unitGuid.GetRawValue();
+        member.answer = int(proposal.answers.find(memberGuid)->second);
+        members.push_back(member);
+        memberGuids.push_back(memberGuid);
+    }
 
-        Player* pGroupPlayer = sPlayerRegistry.Find(groupPlrGuid);
-        if (!pGroupPlayer)
+    std::vector<LFGProposalLogic::Disposition> dispositions;
+    LFGProposalLogic::ResolveFailure(members, type == LFG_UPDATE_PROPOSAL_FAILED,
+                                     dispositions);
+
+    // Timeout flipped PENDING to DENY; reflect that in the packet's
+    // responded/accepted bits.
+    for (size_t i = 0; i < members.size(); ++i)
+    {
+        proposal.answers[memberGuids[i]] = LFGProposalAnswer(members[i].answer);
+    }
+
+    // 2. Notify. Proposal packet first, then the removed members' status
+    //    (tc-preservation LFGMgr.cpp:1224-1258; survivors follow in step 3).
+    for (size_t i = 0; i < members.size(); ++i)
+    {
+        ObjectGuid memberGuid = memberGuids[i];
+        bool isParty = !proposal.groups.find(memberGuid)->second.IsEmpty();
+
+        SendProposalUpdateToPlayer(memberGuid, proposal);
+
+        if (dispositions[i] != LFGProposalLogic::DISPOSITION_REMOVE)
         {
             continue;
         }
-        Group* pGroup = pGroupPlayer->GetGroup();
 
-        // if player was in a premade group and declined, remove the group.
-        if (groupPlrGuid == guid)
-        {
-            //LeaveLFG(pGroupPlayer, true);
-            if (pGroup && (pGroup->GetObjectGuid().GetRawValue() == proposal->groupRawGuid))
-            {
-                leaveGroupLFG = true;
-            }
+        LFGPlayerStatus status = GetPlayerStatus(memberGuid);
+        status.updateType = (members[i].answer == LFGProposalLogic::ANSWER_DENY)
+            ? type : LFG_UPDATE_REMOVED_FROM_QUEUE;
+        status.state = LFG_STATE_NONE;
+        status.dungeonList.clear();
+        SendLfgUpdate(memberGuid, status, isParty);
 
-            SendLfgUpdate(groupPlrGuid, GetPlayerStatus(groupPlrGuid), false);
-        }
-        else
-        {
-            if (proposal->groupRawGuid)
-            {
-                SendLfgUpdate(groupPlrGuid, GetPlayerStatus(groupPlrGuid), true);
-            }
-            else
-            {
-                SendLfgUpdate(groupPlrGuid, GetPlayerStatus(groupPlrGuid), false);
-            }
-        }
+        m_playerStatusMap.erase(memberGuid);
     }
 
-    if (!leaveGroupLFG)
+    // 3. Re-queue every survivor as one entry (m3 merged the originals
+    //    away -- spec C11).
+    uint64 newKeyRaw = LFGProposalLogic::PickRequeueKey(
+        members, dispositions, proposal.queueEntryGuid.GetRawValue());
+
+    playerData::iterator itEntry = m_playerData.find(proposal.queueEntryGuid);
+    if (newKeyRaw == 0)
     {
-        proposal->currentRoles.erase(guid);
-        proposal->answers.erase(guid);
-        proposal->groups.erase(guid);
+        if (itEntry != m_playerData.end())
+        {
+            m_playerData.erase(itEntry);
+        }
     }
     else
     {
-        m_proposalMap.erase(proposal->id);
+        LFGPlayers entry;
+        if (itEntry != m_playerData.end())
+        {
+            entry = itEntry->second;
+            m_playerData.erase(itEntry);
+        }
+
+        entry.currentState = LFG_STATE_QUEUED;
+        entry.currentRoles.clear();
+        for (size_t i = 0; i < members.size(); ++i)
+        {
+            if (dispositions[i] == LFGProposalLogic::DISPOSITION_REQUEUE)
+            {
+                entry.currentRoles[memberGuids[i]] =
+                    proposal.currentRoles.find(memberGuids[i])->second;
+            }
+        }
+
+        ObjectGuid newKey = ObjectGuid(newKeyRaw);
+        m_playerData[newKey] = entry;
+
+        for (size_t i = 0; i < members.size(); ++i)
+        {
+            if (dispositions[i] != LFGProposalLogic::DISPOSITION_REQUEUE)
+            {
+                continue;
+            }
+
+            ObjectGuid memberGuid = memberGuids[i];
+            bool isParty = !proposal.groups.find(memberGuid)->second.IsEmpty();
+
+            SetPlayerState(memberGuid, LFG_STATE_QUEUED);
+            SetPlayerUpdateType(memberGuid, LFG_UPDATE_ADDED_TO_QUEUE);
+            SendLfgUpdate(memberGuid, GetPlayerStatus(memberGuid), isParty);
+        }
+
+        AddToQueue(newKey);
+        SendQueueStatusFor(newKey);
     }
 
-    LeaveLFG(pPlayer, leaveGroupLFG);
+}
+
+bool LFGMgr::FailProposalForLeaver(ObjectGuid plrGuid)
+{
+    for (proposalMap::iterator itr = m_proposalMap.begin(); itr != m_proposalMap.end(); ++itr)
+    {
+        proposalAnswerMap::iterator itAnswer = itr->second.answers.find(plrGuid);
+        if (itAnswer == itr->second.answers.end())
+        {
+            continue;
+        }
+
+        itAnswer->second = LFG_ANSWER_DENY;
+        RemoveProposal(itr->first, LFG_UPDATE_PROPOSAL_DECLINED);
+        return true;
+    }
+
+    return false;
 }
 
 void LFGMgr::UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime)
@@ -1201,5 +1310,28 @@ void LFGMgr::RemoveOldRoleChecks()
         {
             ++roleItr;
         }
+    }
+}
+
+void LFGMgr::RemoveOldProposals()
+{
+    time_t now = time(NULL);
+
+    // Collect first: removing a proposal re-queues its survivors, which can
+    // insert a fresh proposal and rehash the map out from under a live walk.
+    std::vector<uint32> expired;
+    for (proposalMap::const_iterator itr = m_proposalMap.begin();
+         itr != m_proposalMap.end(); ++itr)
+    {
+        if (itr->second.cancelTime <= now)
+        {
+            expired.push_back(itr->first);
+        }
+    }
+
+    for (std::vector<uint32>::const_iterator itr = expired.begin();
+         itr != expired.end(); ++itr)
+    {
+        RemoveProposal(*itr, LFG_UPDATE_PROPOSAL_FAILED);
     }
 }

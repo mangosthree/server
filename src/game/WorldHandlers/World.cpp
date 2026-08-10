@@ -672,6 +672,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Dungeon Finder Items...");
     sObjectMgr.LoadDungeonFinderItems();
 
+    sLog.outString("Loading LFG Dungeon Entrances...");
+    sObjectMgr.LoadLfgDungeonEntrances();
+
     ///- Handle outdated emails (delete/return)
     sLog.outString("Returning old mails...");
     sObjectMgr.ReturnOrDeleteOldMails(false);

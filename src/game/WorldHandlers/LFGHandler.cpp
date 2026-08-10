@@ -150,6 +150,19 @@ void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recv_data)
                            request.accepted);
 }
 
+void WorldSession::HandleLfgTeleportOpcode(WorldPacket& recv_data)
+{
+    LFGPackets::TeleportRequest request;
+    LFGPackets::ReadTeleport(recv_data, request);
+
+    DEBUG_FILTER_LOG(LOG_FILTER_LFG, "CMSG_LFG_TELEPORT out %u",
+        uint32(request.teleportOut));
+
+    // No LFG.Enable gate: without LFG no group status exists and the
+    // manager denies with INVALID_LOCATION on its own.
+    sLFGMgr.TeleportPlayer(GetPlayer(), request.teleportOut, false);
+}
+
 void WorldSession::HandleSearchLfgJoinOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_LFG_SEARCH_JOIN");
@@ -405,9 +418,8 @@ void WorldSession::SendLfgProposalUpdate(LFGPackets::ProposalUpdate const& propo
 
 void WorldSession::SendLfgTeleportError(uint8 error)
 {
-    DEBUG_LOG("SMSG_LFG_TELEPORT_DENIED");
     WorldPacket data(SMSG_LFG_TELEPORT_DENIED, 4);
-    data << uint32(error);
+    LFGPackets::BuildTeleportDenied(data, uint32(error));
     SendPacket(&data);
 }
 

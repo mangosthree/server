@@ -490,10 +490,14 @@ void LFGMgr::AddToQueue(ObjectGuid guid)
     // This will be necessary for finding matches in the queue
     UpdateNeededRoles(guid, information);
 
-    // put info into wait time maps for starters
+    // put info into wait time maps for starters, keyed by what each member
+    // SELECTED (the random entry for random queuers) -- wait stats answer
+    // "how long for Random Cataclysm Heroic", not per concrete dungeon.
     for (roleMap::iterator it = information->currentRoles.begin(); it != information->currentRoles.end(); ++it)
     {
-        AddToWaitMap(it->second, information->dungeonList);
+        LFGPlayerStatus const memberStatus = GetPlayerStatus(it->first);
+        AddToWaitMap(it->second, memberStatus.dungeonList.empty()
+                     ? information->dungeonList : memberStatus.dungeonList);
     }
 
     // just in case someone's already been in the queue.
@@ -753,7 +757,6 @@ void LFGMgr::SendQueueStatusFor(ObjectGuid guid)
     }
 
     time_t timeNow = time(NULL);
-    uint32 dungeonId = *queueInfo->dungeonList.begin();
 
     for (roleMap::iterator rItr = queueInfo->currentRoles.begin();
          rItr != queueInfo->currentRoles.end(); ++rItr)
@@ -764,8 +767,12 @@ void LFGMgr::SendQueueStatusFor(ObjectGuid guid)
             continue;
         }
 
+        LFGPlayerStatus const memberStatus = GetPlayerStatus(rItr->first);
+        uint32 dungeonId = memberStatus.dungeonList.empty()
+            ? *queueInfo->dungeonList.begin() : *memberStatus.dungeonList.begin();
+
         LFGPackets::QueueStatus status;
-        status.ticket = GetPlayerStatus(rItr->first).ticket;
+        status.ticket = memberStatus.ticket;
         status.slot = GetDungeonEntry(dungeonId);
         status.queuedTime = uint32(timeNow - queueInfo->joinedTime);
         status.lastNeeded[0] = queueInfo->neededTanks;
@@ -799,7 +806,7 @@ void LFGMgr::SendQueueStatusFor(ObjectGuid guid)
     }
 }
 
-uint32 LFGMgr::GetDungeonEntry(uint32 ID)
+uint32 LFGMgr::GetDungeonEntry(uint32 ID) const
 {
     LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(ID);
     if (dungeon)

@@ -32,12 +32,14 @@
 #include "Group.h"
 #include "LFGMgr.h"
 #include "LFGProposalLogic.h"
+#include "LFGDungeonResolution.h"
 #include "Log.h"
 #include "Object.h"
 #include "Player.h"
 #include "PlayerRegistry.h"
 #include "ObjectMgr.h"
 #include "SharedDefines.h"
+#include "Util.h"
 #include "WorldSession.h"
 
 /**
@@ -231,7 +233,11 @@ void LFGMgr::SendDungeonProposal(ObjectGuid queueGuid, LFGPlayers* lfgGroup)
 
     LFGProposal proposal;
     proposal.id = m_proposalId;
-    proposal.dungeonID = *lfgGroup->dungeonList.begin();
+    // The entry's dungeonList is already the pruned concrete candidate set
+    // (JoinLFG expanded randoms at join; merges intersected) -- every member
+    // can enter whichever one we draw. Uniform pick, TC parity.
+    proposal.dungeonID = LFGDungeonResolution::Pick(lfgGroup->dungeonList,
+        urand(0, uint32(lfgGroup->dungeonList.size() - 1)));
     proposal.joinedQueue = lfgGroup->joinedTime;
     proposal.cancelTime = time(NULL) + LFG_TIME_PROPOSAL;
     proposal.queueEntryGuid = queueGuid;
@@ -434,8 +440,9 @@ void LFGMgr::ProposalUpdate(uint32 proposalID, ObjectGuid plrGuid, bool accepted
         return;
     }
 
-    // Success: state 2, TC packet sequence, then wipe -- 7b replaces the
-    // wipe with group formation + teleport (CreateDungeonGroup).
+    // Success: state 2, rebroadcast, then FORM THE GROUP before any
+    // UPDATE_STATUS -- the client only hides the ready popup on
+    // GROUP_FOUND when it is already in a party (spec C6 / 7a C2).
     bool sendUpdate = proposal.state != LFG_PROPOSAL_SUCCESS;
     proposal.state = LFG_PROPOSAL_SUCCESS;
     time_t now = time(NULL);
@@ -443,33 +450,45 @@ void LFGMgr::ProposalUpdate(uint32 proposalID, ObjectGuid plrGuid, bool accepted
     for (roleMap::const_iterator itr = proposal.currentRoles.begin();
          itr != proposal.currentRoles.end(); ++itr)
     {
-        ObjectGuid memberGuid = itr->first;
-        uint8 role = itr->second;
-        role &= ~PLAYER_ROLE_LEADER;
-
         if (sendUpdate)
         {
-            SendProposalUpdateToPlayer(memberGuid, proposal);
+            SendProposalUpdateToPlayer(itr->first, proposal);
         }
-
-        UpdateWaitMap(LFGRoles(role), proposal.dungeonID,
-                      time_t(now - proposal.joinedQueue));
-
-        bool isParty = !proposal.groups.find(memberGuid)->second.IsEmpty();
-        LFGPlayerStatus status = GetPlayerStatus(memberGuid);
-        status.updateType = LFG_UPDATE_GROUP_FOUND;
-        SendLfgUpdate(memberGuid, status, isParty);
     }
 
-    sLog.outString("LFGMgr: proposal %u succeeded for dungeon %u -- "
-                   "group formation lands in Phase 7b", proposal.id,
-                   proposal.dungeonID);
+    if (!CreateDungeonGroup(&proposal))
+    {
+        // Formation failed (someone vanished / group calls failed):
+        // everyone agreed, so RemoveProposal re-queues all of them.
+        sLog.outString("LFGMgr: proposal %u group formation FAILED, re-queueing",
+                       proposal.id);
+        RemoveProposal(proposalID, LFG_UPDATE_PROPOSAL_FAILED);
+        return;
+    }
 
     for (roleMap::const_iterator itr = proposal.currentRoles.begin();
          itr != proposal.currentRoles.end(); ++itr)
     {
-        m_playerStatusMap.erase(itr->first);
+        ObjectGuid memberGuid = itr->first;
+
+        roleMap::const_iterator seatItr = proposal.assignedRoles.find(memberGuid);
+        uint8 role = (seatItr != proposal.assignedRoles.end())
+            ? seatItr->second : itr->second;
+        role &= ~PLAYER_ROLE_LEADER;
+
+        LFGPlayerStatus status = GetPlayerStatus(memberGuid);
+        uint32 waitKey = status.dungeonList.empty()
+            ? proposal.dungeonID : *status.dungeonList.begin();
+        UpdateWaitMap(LFGRoles(role), waitKey,
+                      time_t(now - proposal.joinedQueue));
+
+        bool isParty = !proposal.groups.find(memberGuid)->second.IsEmpty();
+        status.updateType = LFG_UPDATE_GROUP_FOUND;
+        SendLfgUpdate(memberGuid, status, isParty);
     }
+
+    sLog.outString("LFGMgr: proposal %u formed an LFD group for dungeon %u",
+                   proposal.id, proposal.dungeonID);
 
     m_playerData.erase(proposal.queueEntryGuid);
     m_proposalMap.erase(itProposal);
@@ -487,184 +506,286 @@ bool LFGMgr::HasLeaderFlag(roleMap const& roles)
     return false;
 }
 
-void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
+//todo(7c): offer-continue formation (proposal->groupRawGuid != 0)
+bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
 {
-    if (!proposal)
+    if (!proposal || proposal->currentRoles.empty() ||
+        proposal->currentRoles.size() > NORMAL_TOTAL_ROLE_COUNT)
     {
-        return;
+        return false;
     }
 
-    Group* pGroup = nullptr;
-
-    if (!proposal->groupRawGuid)
-    {
-        bool leaderIsSet = false;
-        bool leaderRoleIsSet = HasLeaderFlag(proposal->currentRoles);
-        ObjectGuid leaderGuid;
-
-        pGroup = new Group();
-
-        for (playerGroupMap::iterator it = proposal->groups.begin(); it != proposal->groups.end(); ++it)
-        {
-            // remove plr from group w/ guid it->second
-            // set leader on first loop, then set leaderisset to true
-            ObjectGuid pGroupPlrGuid = it->first;
-            Player* pGroupPlr = sPlayerRegistry.Find(pGroupPlrGuid);
-
-            if (pGroupPlr && it->second)
-            {
-                Group* existingGroup = pGroupPlr->GetGroup();
-                if (existingGroup)
-                {
-                    existingGroup->RemoveMember(pGroupPlrGuid, 0);
-                }
-            }
-
-            if (pGroupPlr && !leaderIsSet)
-            {
-                bool currentPlrIsLeader = false;
-                if (leaderRoleIsSet)
-                {
-                    for (roleMap::iterator itr = proposal->currentRoles.begin(); itr != proposal->currentRoles.end(); ++itr)
-                    {
-                        if (itr->second & PLAYER_ROLE_LEADER)
-                        {
-                            leaderGuid = itr->first;
-                            Player* leaderRef = sPlayerRegistry.Find(leaderGuid);
-
-                            if (leaderRef)
-                            {
-                                pGroup->Create(leaderRef->GetObjectGuid(), leaderRef->GetName());
-                                currentPlrIsLeader = (pGroupPlrGuid == leaderGuid);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    pGroup->Create(pGroupPlrGuid, pGroupPlr->GetName());
-                }
-
-                if (!currentPlrIsLeader)
-                {
-                    pGroup->AddMember(pGroupPlrGuid, pGroupPlr->GetName());
-                }
-
-                leaderIsSet = true;
-            }
-            else if (leaderIsSet && pGroupPlr && pGroupPlrGuid != leaderGuid)
-            {
-                pGroup->AddMember(pGroupPlrGuid, pGroupPlr->GetName());
-            }
-        }
-        pGroup->SetAsLfgGroup();
-    }
-    else
-    {
-        Player* pGroupLeader = sPlayerRegistry.Find(ObjectGuid(proposal->groupLeaderGuid));
-
-        // Check if the group leader was found before accessing their group
-        if (pGroupLeader)
-        {
-            pGroup = pGroupLeader->GetGroup();
-        }
-        else
-        {
-            // Log that the group leader is missing and fall back to creating a new group
-            // In the future, we should determine the right actions for this scenario.
-            // LOG_ERROR("LFGMgr::CreateDungeonGroup", "Group leader with GUID %u not found. Creating new group.", proposal->groupLeaderGuid);
-
-            // Attempt to create a new group using the first available player in the proposal group
-            if (!proposal->groups.empty())
-            {
-                ObjectGuid fallbackLeaderGuid = proposal->groups.begin()->first;
-                Player* fallbackLeader = sPlayerRegistry.Find(fallbackLeaderGuid);
-
-                if (fallbackLeader)
-                {
-                    pGroup = new Group();
-                    pGroup->Create(fallbackLeader->GetObjectGuid(), fallbackLeader->GetName());
-                    pGroup->SetAsLfgGroup();
-
-                    // Add remaining members to the new group
-                    for (playerGroupMap::iterator it = proposal->groups.begin(); it != proposal->groups.end(); ++it)
-                    {
-                        ObjectGuid pGroupPlrGuid = it->first;
-                        if (pGroupPlrGuid != fallbackLeaderGuid)
-                        {
-                            Player* pGroupPlr = sPlayerRegistry.Find(pGroupPlrGuid);
-                            if (pGroupPlr)
-                            {
-                                pGroup->AddMember(pGroupPlrGuid, pGroupPlr->GetName());
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    // If no valid players are found, we return without proceeding
-                    // In the future, we should determine the right actions for this scenario.
-                    // LOG_ERROR("LFGMgr::CreateDungeonGroup", "No valid players found to create a fallback group.");
-                    return;
-                }
-            }
-            else
-            {
-                // Log if there are no players in the proposal groups map
-                // In the future, we should determine the right actions for this scenario.
-                // LOG_ERROR("LFGMgr::CreateDungeonGroup", "Proposal groups map is empty, cannot create fallback group.");
-                return;
-            }
-        }
-    }
-
-    // Set dungeon difficulty for group
     LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(proposal->dungeonID);
-    if (!dungeon || !pGroup)
+    MapEntry const* map = (dungeon && dungeon->mapID > 0)
+        ? sMapStore.LookupEntry(uint32(dungeon->mapID)) : NULL;
+    if (!dungeon || !map || !map->IsNonRaidDungeon() ||
+        (dungeon->typeID != LFG_TYPE_DUNGEON && dungeon->typeID != LFG_TYPE_HEROIC_DUNGEON))
     {
-        return;
+        return false;
     }
 
+    // Everyone must still be online; an offline member is the timeout's job.
+    for (roleMap::const_iterator itr = proposal->currentRoles.begin();
+         itr != proposal->currentRoles.end(); ++itr)
+    {
+        if (!sPlayerRegistry.Find(itr->first))
+        {
+            return false;
+        }
+    }
+
+    // Leader: the seat that carries the leader bit; lowest guid otherwise.
+    ObjectGuid leaderGuid;
+    for (roleMap::const_iterator itr = proposal->assignedRoles.begin();
+         itr != proposal->assignedRoles.end(); ++itr)
+    {
+        if (itr->second & PLAYER_ROLE_LEADER)
+        {
+            leaderGuid = itr->first;
+            break;
+        }
+
+        if (leaderGuid.IsEmpty() || itr->first < leaderGuid)
+        {
+            leaderGuid = itr->first;
+        }
+    }
+
+    Player* pLeader = sPlayerRegistry.Find(leaderGuid);
+    if (!pLeader)
+    {
+        return false;
+    }
+
+    // From here on, lifecycle hooks fired by the removes/adds below must
+    // not react -- IsSuccessfulProposalMove covers this proposal's guids.
+    if (Group* pOldGroup = pLeader->GetGroup())
+    {
+        if (pOldGroup->RemoveMember(leaderGuid, 0) <= 1)
+        {
+            sObjectMgr.RemoveGroup(pOldGroup);
+            delete pOldGroup;
+        }
+    }
+
+    Group* pGroup = new Group();
+    if (!pGroup->Create(leaderGuid, pLeader->GetName()))
+    {
+        delete pGroup;
+        return false;
+    }
+    sObjectMgr.AddGroup(pGroup);
+
+    for (roleMap::const_iterator itr = proposal->currentRoles.begin();
+         itr != proposal->currentRoles.end(); ++itr)
+    {
+        ObjectGuid memberGuid = itr->first;
+        if (memberGuid == leaderGuid || pGroup->IsMember(memberGuid))
+        {
+            continue;
+        }
+
+        Player* pMember = sPlayerRegistry.Find(memberGuid);
+        if (Group* pOldGroup = pMember->GetGroup())
+        {
+            if (pOldGroup->RemoveMember(memberGuid, 0) <= 1)
+            {
+                sObjectMgr.RemoveGroup(pOldGroup);
+                delete pOldGroup;
+            }
+        }
+
+        if (!pGroup->AddMember(memberGuid, pMember->GetName()))
+        {
+            pGroup->Disband(true);
+            sObjectMgr.RemoveGroup(pGroup);
+            delete pGroup;
+            return false;
+        }
+    }
+
+    // Seat everyone (leader bit kept -- the client draws the crown/roles
+    // from these bytes in SMSG_GROUP_LIST), then flag and configure.
+    for (roleMap::const_iterator itr = proposal->assignedRoles.begin();
+         itr != proposal->assignedRoles.end(); ++itr)
+    {
+        pGroup->SetLfgRoles(itr->first, itr->second);
+    }
+
+    pGroup->SetAsLfgGroup();
     pGroup->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
 
-    // Add group to our group set and group map, then teleport to the dungeon
     ObjectGuid groupGuid = pGroup->GetObjectGuid();
-    LFGGroupStatus groupStatus(LFG_STATE_IN_DUNGEON, dungeon->ID, proposal->currentRoles, pGroup->GetLeaderGuid());
-
+    LFGGroupStatus groupStatus(LFG_STATE_IN_DUNGEON, dungeon->ID,
+                               proposal->assignedRoles, pGroup->GetLeaderGuid());
     m_groupSet.insert(groupGuid);
     m_groupStatusMap[groupGuid] = groupStatus;
-    TeleportToDungeon(dungeon->ID, pGroup);
 
+    // Roster broadcast carrying the filled LFG block (state / concrete dungeon
+    // entry / aborted) -- and preceding GROUP_FOUND. This has to go out BEFORE
+    // the teleport: a far teleport is deferred behind the world-port ack, so a
+    // group list sent afterwards reaches the client mid-loading-screen and the
+    // last roster it actually applied stays the pre-SetAsLfgGroup one from
+    // AddMember -- leader crown instead of the guide, and raid conversion still
+    // offered.
     pGroup->SendUpdate();
+
+    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        if (Player* pGroupPlr = itr->getSource())
+        {
+            TeleportPlayer(pGroupPlr, false, true);
+        }
+    }
+
+    return true;
 }
 
-void LFGMgr::TeleportToDungeon(uint32 dungeonID, Group* pGroup)
+bool LFGMgr::TeleportPlayer(Player* pPlayer, bool out, bool automatic)
 {
-    // if the group's leader is already in the dungeon, teleport anyone not in dungeon to them
-    // if nobody is in the dungeon, teleport all to beginning of dungeon (sObjectMgr.GetMapEntranceTrigger(mapid [not dungeonid]))
-    LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(dungeonID);
-    if (!dungeon || !pGroup)
+    if (!pPlayer)
     {
-        return;
+        return false;
     }
 
-    uint32 mapID = (uint32)dungeon->mapID;
-    float x, y, z, o;
+    Group* pGroup = pPlayer->GetGroup();
+    LFGGroupStatus* status = pGroup ? GetGroupStatus(pGroup->GetObjectGuid()) : NULL;
+    LfgDungeonsEntry const* dungeon = status
+        ? sLfgDungeonsStore.LookupEntry(status->dungeonID) : NULL;
+    if (!dungeon || dungeon->mapID <= 0)
+    {
+        pPlayer->GetSession()->SendLfgTeleportError(uint8(LFG_TELEPORTERROR_INVALID_LOCATION));
+        return false;
+    }
+
+    uint32 mapID = uint32(dungeon->mapID);
+
+    if (out)
+    {
+        if (pPlayer->GetMapId() != mapID)
+        {
+            pPlayer->GetSession()->SendLfgTeleportError(uint8(LFG_TELEPORTERROR_INVALID_LOCATION));
+            return false;
+        }
+
+        // A never-stored entry point is the zero location -- teleporting
+        // there would drop the player into the map-0 ocean (spec C10).
+        WorldLocation const& entryPoint = pPlayer->GetBattleGroundEntryPoint();
+        if (entryPoint.mapid == 0 && entryPoint.coord_x == 0.0f &&
+            entryPoint.coord_y == 0.0f && entryPoint.coord_z == 0.0f)
+        {
+            pPlayer->GetSession()->SendLfgTeleportError(uint8(LFG_TELEPORTERROR_INVALID_LOCATION));
+            return false;
+        }
+
+        if (!pPlayer->TeleportToBGEntryPoint())
+        {
+            pPlayer->GetSession()->SendLfgTeleportError(uint8(LFG_TELEPORTERROR_INVALID_LOCATION));
+            return false;
+        }
+
+        return true;
+    }
+
+    if (pPlayer->GetMapId() == mapID)
+    {
+        return true;                     // already inside
+    }
+
     LFGTeleportError err = LFG_TELEPORTERROR_OK;
-
-    Player* pGroupLeader = sPlayerRegistry.Find(pGroup->GetLeaderGuid());
-
-    if (pGroupLeader && pGroupLeader->GetMapId() == mapID) // Already in the dungeon
+    if (pPlayer->IsDead())
     {
-        // set teleport location to that of the group leader
-        x = pGroupLeader->Where().X();
-        y = pGroupLeader->Where().Y();
-        z = pGroupLeader->Where().Z();
-        o = pGroupLeader->Where().Facing();
+        err = LFG_TELEPORTERROR_PLAYER_DEAD;
     }
-    else
+    else if (pPlayer->IsFalling())
     {
-        if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(mapID))
+        err = LFG_TELEPORTERROR_FALLING;
+    }
+    else if (pPlayer->GetVehicleInfo())
+    {
+        err = LFG_TELEPORTERROR_IN_VEHICLE;
+    }
+    else if (!pPlayer->GetCharmerGuid().IsEmpty())
+    {
+        err = LFG_TELEPORTERROR_CHARMING;
+    }
+    else if (pPlayer->IsInCombat() || pPlayer->IsTaxiFlying())
+    {
+        err = LFG_TELEPORTERROR_INVALID_LOCATION;
+    }
+
+    if (err == LFG_TELEPORTERROR_OK)
+    {
+        dungeonForbidden const lockedDungeons = FindRandomDungeonsNotForPlayer(pPlayer);
+        if (lockedDungeons.find(dungeon->Entry()) != lockedDungeons.end())
+        {
+            err = LFG_TELEPORTERROR_INVALID_LOCATION;
+        }
+    }
+
+    if (err == LFG_TELEPORTERROR_OK)
+    {
+        Map* pCurrentMap = pPlayer->GetMap();
+        if (!pCurrentMap || pCurrentMap->IsDungeon() || pCurrentMap->IsRaid() ||
+            pPlayer->InBattleGround())
+        {
+            err = LFG_TELEPORTERROR_INVALID_LOCATION;
+        }
+    }
+
+    if (err != LFG_TELEPORTERROR_OK)
+    {
+        pPlayer->GetSession()->SendLfgTeleportError(uint8(err));
+        return false;
+    }
+
+    float x = 0.0f;
+    float y = 0.0f;
+    float z = 0.0f;
+    float o = 0.0f;
+    bool destinationFound = false;
+
+    // Formation-time: land beside a member who is already inside.
+    if (automatic)
+    {
+        Player* pInside = sPlayerRegistry.Find(pGroup->GetLeaderGuid());
+        if (!pInside || pInside == pPlayer || pInside->GetMapId() != mapID)
+        {
+            pInside = NULL;
+            for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                Player* pMember = itr->getSource();
+                if (pMember && pMember != pPlayer && pMember->GetMapId() == mapID)
+                {
+                    pInside = pMember;
+                    break;
+                }
+            }
+        }
+
+        if (pInside)
+        {
+            x = pInside->Where().X();
+            y = pInside->Where().Y();
+            z = pInside->Where().Z();
+            o = pInside->Where().Facing();
+            destinationFound = true;
+        }
+    }
+
+    if (!destinationFound)
+    {
+        // Multi-wing override first (lfg_dungeon_entrances), then the
+        // generic map entrance areatrigger.
+        if (ObjectMgr::LfgDungeonEntrance const* entrance =
+            sObjectMgr.GetLfgDungeonEntrance(status->dungeonID))
+        {
+            x = entrance->x;
+            y = entrance->y;
+            z = entrance->z;
+            o = entrance->o;
+        }
+        else if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(mapID))
         {
             x = at->target_X;
             y = at->target_Y;
@@ -673,92 +794,50 @@ void LFGMgr::TeleportToDungeon(uint32 dungeonID, Group* pGroup)
         }
         else
         {
-            err = LFG_TELEPORTERROR_INVALID_LOCATION;
+            pPlayer->GetSession()->SendLfgTeleportError(uint8(LFG_TELEPORTERROR_INVALID_LOCATION));
+            return false;
         }
     }
 
-    dungeonForbidden lockedDungeons;
-    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+    pPlayer->SetBattleGroundEntryPoint();    // current map is validated outdoor
+
+    if (!pPlayer->TeleportTo(mapID, x, y, z, o))
     {
-        if (Player* pGroupPlr = itr->getSource())
-        {
-            // further checks: player is dead, in vehicle, in battleground, on taxi, etc
-            LFGTeleportError plrErr = LFG_TELEPORTERROR_OK;
-
-            if (pGroupPlr->IsDead())
-            {
-                plrErr = LFG_TELEPORTERROR_PLAYER_DEAD;
-            }
-            if (pGroupPlr->IsFalling())
-            {
-                plrErr = LFG_TELEPORTERROR_FALLING;
-            }
-            if (pGroupPlr->GetVehicleInfo())
-            {
-                plrErr = LFG_TELEPORTERROR_IN_VEHICLE;
-            }
-
-            lockedDungeons = FindRandomDungeonsNotForPlayer(pGroupPlr);
-            if (lockedDungeons.find(dungeon->Entry()) != lockedDungeons.end())
-            {
-                plrErr = LFG_TELEPORTERROR_INVALID_LOCATION;
-            }
-
-            if (err == LFG_TELEPORTERROR_OK && plrErr == LFG_TELEPORTERROR_OK && pGroupPlr->GetMapId() != mapID)
-            {
-                if (pGroupPlr->GetMap() && !pGroupPlr->GetMap()->IsDungeon() && !pGroupPlr->GetMap()->IsRaid() && !pGroupPlr->InBattleGround())
-                {
-                    pGroupPlr->SetBattleGroundEntryPoint(); // store current position and such
-                }
-
-                if (!pGroupPlr->TeleportTo(mapID, x, y, z, o))
-                {
-                    plrErr = LFG_TELEPORTERROR_INVALID_LOCATION;
-                }
-            }
-
-            if (err != LFG_TELEPORTERROR_OK)
-            {
-                pGroupPlr->GetSession()->SendLfgTeleportError(err);
-            }
-            else if (plrErr != LFG_TELEPORTERROR_OK)
-            {
-                pGroupPlr->GetSession()->SendLfgTeleportError(plrErr);
-            }
-            else
-            {
-                SetPlayerState(pGroupPlr->GetObjectGuid(), LFG_STATE_IN_DUNGEON);
-            }
-        }
+        pPlayer->GetSession()->SendLfgTeleportError(uint8(LFG_TELEPORTERROR_INVALID_LOCATION));
+        return false;
     }
+
+    SetPlayerState(pPlayer->GetObjectGuid(), LFG_STATE_IN_DUNGEON);
+    return true;
 }
 
-void LFGMgr::TeleportPlayer(Player* pPlayer, bool out)
+bool LFGMgr::IsSuccessfulProposalMove(ObjectGuid guid) const
 {
-    // Fetch necessary data first
-    Group* pGroup = pPlayer->GetGroup();
-    if (!pGroup)
+    for (proposalMap::const_iterator itr = m_proposalMap.begin();
+         itr != m_proposalMap.end(); ++itr)
     {
-        pPlayer->GetSession()->SendLfgTeleportError((uint8)LFG_TELEPORTERROR_INVALID_LOCATION);
-        return;
-    }
-
-    LFGGroupStatus* status = GetGroupStatus(pGroup->GetObjectGuid());
-    if (!status)
-    {
-        pPlayer->GetSession()->SendLfgTeleportError((uint8)LFG_TELEPORTERROR_INVALID_LOCATION);
-        return;
-    }
-
-    // Get dungeon info and then teleport the player out if applicable
-    if (out)
-    {
-        LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(status->dungeonID);
-        if (dungeon && pPlayer->GetMapId() == dungeon->mapID)
+        LFGProposal const& proposal = itr->second;
+        if (proposal.state != LFG_PROPOSAL_SUCCESS)
         {
-            pPlayer->TeleportToBGEntryPoint();
+            continue;
+        }
+
+        if (proposal.queueEntryGuid == guid)
+        {
+            return true;
+        }
+
+        for (playerGroupMap::const_iterator grpItr = proposal.groups.begin();
+             grpItr != proposal.groups.end(); ++grpItr)
+        {
+            if (grpItr->first == guid || grpItr->second == guid)
+            {
+                return true;
+            }
         }
     }
+
+    return false;
 }
 
 LFGGroupStatus* LFGMgr::GetGroupStatus(ObjectGuid guid)
@@ -772,6 +851,26 @@ LFGGroupStatus* LFGMgr::GetGroupStatus(ObjectGuid guid)
     {
         return NULL;
     }
+}
+
+bool LFGMgr::GetGroupUpdateData(ObjectGuid groupGuid, ObjectGuid playerGuid,
+                                LFGGroupUpdateData& data) const
+{
+    groupStatusMap::const_iterator itr = m_groupStatusMap.find(groupGuid);
+    if (itr == m_groupStatusMap.end())
+    {
+        return false;                    // caller keeps the value-initialized zeros
+    }
+
+    LFGGroupStatus const& status = itr->second;
+
+    roleMap::const_iterator roleItr = status.playerRoles.find(playerGuid);
+    data.role = (roleItr != status.playerRoles.end()) ? roleItr->second : uint8(PLAYER_ROLE_NONE);
+    // MyLfgFlags: 2 = dungeon finished (kills the client's backfill offer);
+    // the concrete dungeon's Entry() drives IsPartyLFG/IsInLFGDungeon (C7).
+    data.state = uint8((status.state == LFG_STATE_FINISHED_DUNGEON) ? 2 : 0);
+    data.dungeonEntry = GetDungeonEntry(status.dungeonID);
+    return true;
 }
 
 void LFGMgr::RemoveProposal(uint32 proposalId, LfgUpdateType type)
@@ -914,6 +1013,11 @@ bool LFGMgr::FailProposalForLeaver(ObjectGuid plrGuid)
         if (itAnswer == itr->second.answers.end())
         {
             continue;
+        }
+
+        if (itr->second.state != LFG_PROPOSAL_INITIATING)
+        {
+            return false;                // success is being formed; boots come later
         }
 
         itAnswer->second = LFG_ANSWER_DENY;

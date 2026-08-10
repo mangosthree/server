@@ -281,6 +281,7 @@ extern DBCStorage <ItemSetEntry>                 sItemSetStore;
 extern DBCStorage <LfgDungeonsEntry>             sLfgDungeonsStore;
 extern LfgDungeonsByMapDifficultyMap             sLfgDungeonsByMapDifficultyMap;
 extern LfgDungeonsByRandomIdMap                  sLfgDungeonsByRandomIdMap;
+extern DBCStorage <LfgDungeonsGroupingMapEntry>  sLfgDungeonsGroupingMapStore;
 extern DBCStorage <LiquidTypeEntry>              sLiquidTypeStore;
 extern DBCStorage <LockEntry>                    sLockStore;
 extern DBCStorage <MailTemplateEntry>            sMailTemplateStore;

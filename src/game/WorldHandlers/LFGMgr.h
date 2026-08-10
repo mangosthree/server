@@ -360,6 +360,16 @@ struct LFGGroupStatus //todo: check for this in joinlfg function, not lfgplayers
         : state(State), dungeonID(DungeonID), playerRoles(PlayerRoles), leaderGuid(LeaderGuid) { }
 };
 
+/// The client-facing LFD fields appended to SMSG_GROUP_LIST for one member.
+struct LFGGroupUpdateData
+{
+    uint8 role;
+    uint8 state;
+    uint32 dungeonEntry;
+
+    LFGGroupUpdateData() : role(PLAYER_ROLE_NONE), state(0), dungeonEntry(0) { }
+};
+
 /// For SMSG_LFG_PROPOSAL_UPDATE
 struct LFGProposal
 {
@@ -550,10 +560,10 @@ public:
     std::vector<LFGLockedDungeon> GetPlayerLockList(Player* plr);
 
     /// Given the ID of a dungeon, spit out its entry
-    uint32 GetDungeonEntry(uint32 ID);
+    uint32 GetDungeonEntry(uint32 ID) const;
 
-    /// Teleports a player out of a dungeon (called by CMSG_LFG_TELEPORT)
-    void TeleportPlayer(Player* pPlayer, bool out);
+    /// Enter or leave the group's validated LFD dungeon.
+    bool TeleportPlayer(Player* pPlayer, bool out, bool automatic);
 
     /// Queue Functions Below
 
@@ -633,6 +643,18 @@ public:
     // Called when a player votes yes or no on a boot vote
     void CastVote(Player* pPlayer, bool vote);
 
+    /// Fetch the client-facing LFD fields appended to SMSG_GROUP_LIST.
+    bool GetGroupUpdateData(ObjectGuid groupGuid, ObjectGuid playerGuid,
+                            LFGGroupUpdateData& data) const;
+
+    /// Group lifecycle hooks used by the core group implementation.
+    void OnGroupMemberAdded(ObjectGuid groupGuid, ObjectGuid playerGuid);
+    void OnGroupMemberRemoved(ObjectGuid groupGuid, ObjectGuid playerGuid);
+    void OnGroupDisband(ObjectGuid groupGuid);
+    void OnGroupLeaderChanged(ObjectGuid groupGuid, ObjectGuid newLeaderGuid);
+    /// Returns true when logout must retain active LFD group membership.
+    bool OnPlayerLogout(Player* player);
+
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }
 
@@ -669,17 +691,21 @@ protected:
     /// Expire proposals older than LFG_TIME_PROPOSAL.
     void RemoveOldProposals();
 
+    /// True while a succeeded proposal is still moving this guid's players
+    /// between groups -- lifecycle hooks must not react to those moves.
+    bool IsSuccessfulProposalMove(ObjectGuid guid) const;
+
+    /// Drop one queue entry: notify its members, wipe their statuses.
+    void CancelQueueEntry(ObjectGuid unitGuid, LfgUpdateType reason);
+
     /// Build and send one member's view of a proposal.
     void SendProposalUpdateToPlayer(ObjectGuid plrGuid, LFGProposal const& proposal);
 
     /// Updates a wait map with the amount of time it took the last player to join
     void UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime);
 
-    /// Creates a group so they can enter a dungeon together
-    void CreateDungeonGroup(LFGProposal* proposal);
-
-    /// Sends a group to the dungeon assigned to them
-    void TeleportToDungeon(uint32 dungeonID, Group* pGroup);
+    /// Forms the LFD group for a succeeded proposal; false = caller unwinds.
+    bool CreateDungeonGroup(LFGProposal* proposal);
 
     /**
      * @brief Merges two players/groups/etc into one for dungeon assignment.

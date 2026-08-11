@@ -1726,6 +1726,54 @@ bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const
 }
 
 /**
+ * @brief Checks whether two spells apply an aura of the same type.
+ *
+ * Only effects that apply an aura have an aura type. The function skips all
+ * other effects.
+ *
+ * @param spellInfo_1 The first spell.
+ * @param spellInfo_2 The second spell.
+ * @return true if the spells share an aura type; otherwise, false.
+ */
+static bool SpellsShareAuraType(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2)
+{
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (!IsAuraApplyEffect(spellInfo_1, SpellEffectIndex(i)))
+        {
+            continue;
+        }
+
+        SpellEffectEntry const* spellEffect1 = spellInfo_1->GetSpellEffect(SpellEffectIndex(i));
+        if (!spellEffect1 || !spellEffect1->EffectAura)
+        {
+            continue;
+        }
+
+        for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+        {
+            if (!IsAuraApplyEffect(spellInfo_2, SpellEffectIndex(j)))
+            {
+                continue;
+            }
+
+            SpellEffectEntry const* spellEffect2 = spellInfo_2->GetSpellEffect(SpellEffectIndex(j));
+            if (!spellEffect2)
+            {
+                continue;
+            }
+
+            if (spellEffect1->EffectAura == spellEffect2->EffectAura)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/**
  * @brief Checks whether two spells should not stack.
  *
  * @param spellId_1 The first spell identifier.
@@ -2625,8 +2673,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     }
 
     // more generic checks
+    // a shared icon only implies the same spell when the auras match too
     if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID &&
-        spellInfo_1->SpellIconID != 0 && spellInfo_2->SpellIconID != 0)
+        spellInfo_1->SpellIconID != 0 && spellInfo_2->SpellIconID != 0 &&
+        SpellsShareAuraType(spellInfo_1, spellInfo_2))
     {
         bool isModifier = false;
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)

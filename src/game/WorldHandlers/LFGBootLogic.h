@@ -39,10 +39,10 @@
  * game-free. No Player, no Group, no ObjectGuid -- raw std::uint64_t for
  * guids, matching m2's LFGLogic::ShouldVoteKick.
  *
- * The vote threshold (4 LFD / 15 LFR) is TrinityCore's number, adopted
- * because nothing above it in this campaign's authority order speaks -- see
- * LFD_PHASE8_SPEC.md section 1.4. It is isolated here, in one place, so it
- * can be revisited without touching the tally/resolution machinery.
+ * The vote thresholds are server policy -- the client parses the
+ * votes-needed field and never reads it back -- so they are isolated here,
+ * in one place, and can be revisited without touching the tally or
+ * resolution machinery.
  */
 
 #include <cstdint>

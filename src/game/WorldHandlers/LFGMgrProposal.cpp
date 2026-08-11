@@ -700,7 +700,7 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     return true;
 }
 
-bool LFGMgr::TeleportPlayer(Player* pPlayer, bool out, bool automatic)
+bool LFGMgr::TeleportPlayer(Player* pPlayer, bool out, bool automatic, uint32 dungeonID)
 {
     if (!pPlayer)
     {
@@ -708,9 +708,19 @@ bool LFGMgr::TeleportPlayer(Player* pPlayer, bool out, bool automatic)
     }
 
     Group* pGroup = pPlayer->GetGroup();
-    LFGGroupStatus* status = pGroup ? GetGroupStatus(pGroup->GetObjectGuid()) : NULL;
-    LfgDungeonsEntry const* dungeon = status
-        ? sLfgDungeonsStore.LookupEntry(status->dungeonID) : NULL;
+
+    // An explicit dungeon is for callers that have already detached the
+    // player from the group -- a boot -- and so cannot look one up.
+    if (!dungeonID)
+    {
+        if (LFGGroupStatus* status = pGroup ? GetGroupStatus(pGroup->GetObjectGuid()) : NULL)
+        {
+            dungeonID = status->dungeonID;
+        }
+    }
+
+    LfgDungeonsEntry const* dungeon = dungeonID
+        ? sLfgDungeonsStore.LookupEntry(dungeonID) : NULL;
     if (!dungeon || dungeon->mapID <= 0)
     {
         pPlayer->GetSession()->SendLfgTeleportError(uint8(LFG_TELEPORTERROR_INVALID_LOCATION));
@@ -837,7 +847,7 @@ bool LFGMgr::TeleportPlayer(Player* pPlayer, bool out, bool automatic)
         // Multi-wing override first (lfg_dungeon_entrances), then the
         // generic map entrance areatrigger.
         if (ObjectMgr::LfgDungeonEntrance const* entrance =
-            sObjectMgr.GetLfgDungeonEntrance(status->dungeonID))
+            sObjectMgr.GetLfgDungeonEntrance(dungeonID))
         {
             x = entrance->x;
             y = entrance->y;
@@ -1441,21 +1451,36 @@ void LFGMgr::FinishBootVote(ObjectGuid groupGuid, bool succeeded)
 
     if (pGroup && pGroup->IsMember(boot.playerVotedOn))
     {
-        if (Player* pVictim = sPlayerRegistry.Find(boot.playerVotedOn))
+        Player* pVictim = sPlayerRegistry.Find(boot.playerVotedOn);
+        if (pVictim)
         {
             // A booted player keeps no deserter debuff and gets the random
             // dungeon cooldown back. RemoveAurasDueToSpell is a no-op today
             // -- 71328 is never applied in this tree -- written now so the
             // branch is correct once a later phase starts applying it.
             pVictim->RemoveAurasDueToSpell(LFG_COOLDOWN_SPELL);
-
-            if (pVictim->GetMap() && pVictim->GetMap()->IsDungeon())
-            {
-                TeleportPlayer(pVictim, true, true);
-            }
         }
 
+        // Read the dungeon before the removal takes the group away, so the
+        // teleport below still knows where the victim is being pulled out of.
+        uint32 const bootedFrom = status ? status->dungeonID : 0;
+        bool const victimInDungeon =
+            pVictim && pVictim->GetMap() && pVictim->GetMap()->IsDungeon();
+
+        // Remove BEFORE teleporting. RemoveMember is what tells the victim
+        // they are out -- SMSG_GROUP_UNINVITE plus an empty SMSG_GROUP_LIST
+        // -- and a far teleport puts them behind a loading screen that
+        // discards both, leaving them staring at a group they already left
+        // while everyone else sees them gone. The world-port ack cannot
+        // repair it either: its roster re-send only fires for a player who
+        // still has a group.
         bool const groupSurvived = pGroup->RemoveMember(boot.playerVotedOn, 1) > 1;
+
+        if (victimInDungeon)
+        {
+            TeleportPlayer(pVictim, true, true, bootedFrom);
+        }
+
         if (!groupSurvived)
         {
             // group->Disband(); already disbanded in RemoveMember

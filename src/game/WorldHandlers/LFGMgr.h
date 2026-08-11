@@ -580,8 +580,16 @@ public:
     /// Given the ID of a dungeon, spit out its entry
     uint32 GetDungeonEntry(uint32 ID) const;
 
-    /// Enter or leave the group's validated LFD dungeon.
-    bool TeleportPlayer(Player* pPlayer, bool out, bool automatic);
+    /**
+     * Enter or leave the group's validated LFD dungeon.
+     *
+     * \arg \c dungeonID
+     *   Dungeon to teleport out of, for a caller that has already removed
+     *   the player from the group and so has no group to look one up on.
+     *   0 derives it from the player's current group, as every entering
+     *   caller does.
+     */
+    bool TeleportPlayer(Player* pPlayer, bool out, bool automatic, uint32 dungeonID = 0);
 
     /// Queue Functions Below
 

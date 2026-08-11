@@ -3374,7 +3374,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
         delete resultGroup;
         if (Group* group = sObjectMgr.GetGroupById(groupId))
         {
-            RemoveFromGroup(group, playerguid);
+            RemoveFromGroup(group, playerguid, playerguid, "");
         }
     }
 

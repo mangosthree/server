@@ -217,6 +217,17 @@ void WorldSession::HandleLfgLockInfoRequestOpcode(WorldPacket& recv_data)
     }
 }
 
+/// CMSG_LFG_SET_BOOT_VOTE: records this player's answer to a boot vote.
+void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_SET_BOOT_VOTE");
+
+    LFGPackets::SetBootVoteRequest request;
+    LFGPackets::ReadSetBootVote(recv_data, request);
+
+    sLFGMgr.CastVote(GetPlayer(), request.vote);
+}
+
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
 {
     WorldPacket data(SMSG_LFG_SEARCH_RESULTS);
@@ -458,40 +469,70 @@ void WorldSession::SendLfgRewards(LFGRewards const& rewards)
     SendPacket(&data);
 }
 
-void WorldSession::SendLfgBootUpdate(LFGBoot const& boot)
+/// Sends SMSG_LFG_BOOT_PROPOSAL_UPDATE for one recipient.
+///
+/// timeLeft is computed inline here rather than through
+/// LFGBootLogic::RemainingSeconds (LFGBootLogic.h, added in a later commit
+/// of this same series) so this commit stays independently buildable; the
+/// clamp formula is identical -- no `/1000`, no `uint8` truncation, floored
+/// at 0 (C-8).
+void WorldSession::SendLfgBootProposalUpdate(LFGBoot const& boot, uint32 votesNeeded)
 {
-    DEBUG_LOG("SMSG_LFG_BOOT_PLAYER");
+    DEBUG_LOG("SMSG_LFG_BOOT_PROPOSAL_UPDATE");
 
     ObjectGuid plrGuid = GetPlayer()->GetObjectGuid();
-    LFGProposalAnswer plrAnswer = boot.answers.find(plrGuid)->second;
 
-    uint32 voteCount = 0, yayCount = 0;
+    proposalAnswerMap::const_iterator ansItr = boot.answers.find(plrGuid);
+    LFGProposalAnswer plrAnswer = (ansItr != boot.answers.end()) ? ansItr->second : LFG_ANSWER_PENDING;
+
+    uint32 totalVotes = 0, bootVotes = 0;
     for (proposalAnswerMap::const_iterator it = boot.answers.begin(); it != boot.answers.end(); ++it)
     {
         if (it->second != LFG_ANSWER_PENDING)
         {
-            ++voteCount;
+            ++totalVotes;
             if (it->second == LFG_ANSWER_AGREE)
             {
-                ++yayCount;
+                ++bootVotes;
             }
         }
     }
 
-    uint32 timeLeft = uint8(((boot.startTime + LFG_TIME_BOOT) - time(NULL)) / 1000);
+    time_t const now = time(NULL);
+    time_t const deadline = boot.startTime + LFG_TIME_BOOT;
+    uint32 const timeLeft = (deadline > now) ? uint32(deadline - now) : 0;
 
-    WorldPacket data(SMSG_LFG_BOOT_PROPOSAL_UPDATE, 27 + boot.reason.length());
+    LFGPackets::BootProposalUpdate data;
+    data.voteInProgress = boot.inProgress;
+    data.votePassed = boot.votePassed;
+    data.myVoteCompleted = plrAnswer != LFG_ANSWER_PENDING;
+    data.myVote = plrAnswer == LFG_ANSWER_AGREE;
+    data.target = boot.playerVotedOn.GetRawValue();
+    data.totalVotes = totalVotes;
+    data.bootVotes = bootVotes;
+    data.timeLeft = timeLeft;
+    data.votesNeeded = votesNeeded;
+    data.reason = boot.reason;
 
-    data << uint8(boot.inProgress);                   // Is boot still ongoing?
-    data << uint8(plrAnswer != LFG_ANSWER_PENDING);   // Did this player vote yet?
-    data << uint8(plrAnswer == LFG_ANSWER_AGREE);     // Did this player agree to boot them?
-    data << uint64(boot.playerVotedOn.GetRawValue()); // Potentially booted player's objectguid value
-    data << uint32(voteCount);                        // Number of players who've voted so far
-    data << uint32(yayCount);                         // Number of players who've voted against the plr so far
-    data << uint32(timeLeft);                         // Time left in seconds
-    data << uint32(REQUIRED_VOTES_FOR_BOOT);          // Number of votes needed to win
-    data << boot.reason.c_str();                      // Reason given for booting
+    WorldPacket packet(SMSG_LFG_BOOT_PROPOSAL_UPDATE, 28 + boot.reason.length() + 1);
+    if (LFGPackets::BuildBootProposalUpdate(packet, data))
+    {
+        SendPacket(&packet);
+    }
+    else
+    {
+        sLog.outError("WorldSession::SendLfgBootProposalUpdate: reason too long (%u bytes), packet not sent",
+                      uint32(boot.reason.length()));
+    }
+}
 
+/// SMSG_LFG_OFFER_CONTINUE: offers the group a backfill for its dungeon.
+void WorldSession::SendLfgOfferContinue(uint32 dungeonEntry)
+{
+    DEBUG_LOG("SMSG_LFG_OFFER_CONTINUE %u", dungeonEntry);
+
+    WorldPacket data(SMSG_LFG_OFFER_CONTINUE, 4);
+    LFGPackets::BuildOfferContinue(data, dungeonEntry);
     SendPacket(&data);
 }
 

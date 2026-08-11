@@ -390,10 +390,13 @@ class WorldSession
         void SendLfgProposalUpdate(LFGPackets::ProposalUpdate const& proposal);
         void SendLfgTeleportError(uint8 error);
         void SendLfgRewards(LFGRewards const& rewards);
-        void SendLfgBootUpdate(LFGBoot const& boot);
+        void SendLfgBootProposalUpdate(LFGBoot const& boot, uint32 votesNeeded);
+        void SendLfgOfferContinue(uint32 dungeonEntry);
         void SendLfgPlayerLockInfo();
         void SendLfgPartyLockInfo();
-        void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
+        void SendPartyResult(PartyOperation operation, const std::string& member,
+                             PartyResult res, uint32 val = 0,
+                             ObjectGuid guid = ObjectGuid());
         void SendGroupInvite(Player* player, bool alreadyInGroup = false);
         void SendGuildInvite(Player* player, bool alreadyInGuild = false);
         void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2, 3);
@@ -1020,6 +1023,7 @@ class WorldSession
         void HandleLfgGetStatusOpcode(WorldPacket& recv_data);
         void HandleLfgProposalResultOpcode(WorldPacket& recv_data);
         void HandleLfgTeleportOpcode(WorldPacket& recv_data);
+        void HandleLfgSetBootVoteOpcode(WorldPacket& recv_data);
         void HandleSetTitleOpcode(WorldPacket& recv_data);
         void HandleRealmSplitOpcode(WorldPacket& recv_data);
         void HandleTimeSyncResp(WorldPacket& recv_data);

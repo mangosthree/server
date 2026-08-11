@@ -234,20 +234,25 @@ namespace LFGPackets
 
     // ---------------------------------------------------------------------
     // SMSG_LFG_BOOT_PROPOSAL_UPDATE (0x0F05) -- sub_1406FA6F0
+    // Flag names from the client's own log string at 0x1409F89E0 ("In
+    // Progress / I Voted / My Vote", slots 1/3/4) and from slot 2 selecting
+    // ERR_PARTY_LFG_BOOT_VOTE_SUCCEEDED (680) vs _FAILED (681) at
+    // 0x1406FA86E. votesNeeded is parsed but never pushed to Lua.
     // ---------------------------------------------------------------------
 
     struct BootProposalUpdate
     {
         bool voteInProgress = false;
+        bool votePassed = false;    ///< selects the client's "vote passed" vs
+                                     ///< "vote failed" line; only read when
+                                     ///< voteInProgress is false
         bool myVoteCompleted = false;
         bool myVote = false;
-        bool voteEcho = false;      ///< fourth wire flag; not read back by
-                                     ///< this handler, name is inferred
         uint64 target = 0;          ///< victim guid, raw
         uint32 totalVotes = 0;
         uint32 bootVotes = 0;
         uint32 timeLeft = 0;        ///< seconds
-        uint32 votesNeeded = 0;
+        uint32 votesNeeded = 0;     ///< wire-only; never reaches Lua
         std::string reason;         ///< NUL-terminated on the wire, max 256
                                      ///< bytes including the terminator
     };
@@ -263,9 +268,9 @@ namespace LFGPackets
         }
 
         out << uint8(data.voteInProgress);
+        out << uint8(data.votePassed);
         out << uint8(data.myVoteCompleted);
         out << uint8(data.myVote);
-        out << uint8(data.voteEcho);
         out << uint64(data.target);
         out << data.totalVotes;
         out << data.bootVotes;

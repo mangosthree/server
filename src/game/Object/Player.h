@@ -2560,8 +2560,9 @@ class Player : public Unit
 
         // Uninvite the player from the group
         void UninviteFromGroup();
-        static void RemoveFromGroup(Group* group, ObjectGuid guid);
-        void RemoveFromGroup() { RemoveFromGroup(GetGroup(), GetObjectGuid()); }
+        static void RemoveFromGroup(Group* group, ObjectGuid guid,
+                                    ObjectGuid kicker, std::string reason);
+        void RemoveFromGroup() { RemoveFromGroup(GetGroup(), GetObjectGuid(), GetObjectGuid(), ""); }
         void SendUpdateToOutOfRangeGroupMembers();
         void SetAllowLowLevelRaid(bool allow) { ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_ENABLE_LOW_LEVEL_RAID, allow); }
         bool GetAllowLowLevelRaid() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_ENABLE_LOW_LEVEL_RAID); }
@@ -3755,7 +3756,7 @@ class Player : public Unit
         Player* GetNextRandomRaidMember(float radius);
 
         // Check if the player can be uninvited from the group
-        PartyResult CanUninviteFromGroup() const;
+        PartyResult CanUninviteFromGroup(ObjectGuid guidMember = ObjectGuid()) const;
         void UpdateGroupLeaderFlag(const bool remove = false);
         // BattleGround Group System
 

@@ -31,6 +31,7 @@
 #include "Common/TimeConstants.h"
 #include <ctime>
 #include <string>
+#include "LFGBootLogic.h"
 #include "LFGEmpowerment.h"
 #include "LFGPackets.h"
 #include "Policies/Singleton.h"
@@ -255,9 +256,6 @@ const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
 /// Default average queue time (in case we don't have data to base calculations on)
 const int32 QUEUE_DEFAULT_TIME = 15*MINUTE;                              // 15 minutes [system is measured in seconds]
 
-/// Amount of votes needed to kick a player out of a group
-const int32 REQUIRED_VOTES_FOR_BOOT = 3;
-
 typedef std::set<uint32> dailyEntries;                                   // for players who did one of X type instance per day
 typedef std::set<ObjectGuid> queueSet;                                   // List of players / groups in the queue
 typedef std::set<ObjectGuid> groupSet;                                   // List of groups doing a dungeon via the finder
@@ -356,10 +354,14 @@ struct LFGGroupStatus //todo: check for this in joinlfg function, not lfgplayers
     uint32 dungeonID;      // ID of the dungeon the group should be in
     roleMap playerRoles;   // Container holding each player's objectguid and their roles
     ObjectGuid leaderGuid; // The group leader's object guid
+    uint8 kicksLeft;       // Boot votes this group may still win before ERR_PARTY_LFG_BOOT_LIMIT
 
-    LFGGroupStatus() { }
+    LFGGroupStatus()
+        : state(LFG_STATE_NONE), dungeonID(0),
+          kicksLeft(uint8(LFGBootLogic::BOOT_MAX_KICKS)) { }
     LFGGroupStatus(LFGState State, uint32 DungeonID, roleMap PlayerRoles, ObjectGuid LeaderGuid)
-        : state(State), dungeonID(DungeonID), playerRoles(PlayerRoles), leaderGuid(LeaderGuid) { }
+        : state(State), dungeonID(DungeonID), playerRoles(PlayerRoles), leaderGuid(LeaderGuid),
+          kicksLeft(uint8(LFGBootLogic::BOOT_MAX_KICKS)) { }
 };
 
 /// The client-facing LFD fields appended to SMSG_GROUP_LIST for one member.
@@ -414,14 +416,22 @@ struct LFGRewards
 struct LFGBoot
 {
     bool inProgress;           // Is the boot vote still occurring?
+    bool votePassed;           // Resolved outcome once inProgress goes false
+    LFGState previousState;    // Group state to restore when the vote resolves
     ObjectGuid playerVotedOn;  // ObjectGuid of the player being voted on
     std::string reason;        // Reason stated for the vote
     proposalAnswerMap answers; // Player's votes
     time_t startTime;          // When the vote started
 
-    LFGBoot() { }
-    LFGBoot(bool InProgress, ObjectGuid PlayerVotedOn, std::string Reason, proposalAnswerMap Answers, time_t StartTime)
-        : inProgress(InProgress), playerVotedOn(PlayerVotedOn), reason(Reason), answers(Answers), startTime(StartTime) { }
+    LFGBoot()
+        : inProgress(false), votePassed(false),
+          previousState(LFG_STATE_NONE), startTime(0) { }
+    LFGBoot(bool InProgress, bool VotePassed, LFGState PreviousState,
+            ObjectGuid PlayerVotedOn, std::string const& Reason,
+            proposalAnswerMap const& Answers, time_t StartTime)
+        : inProgress(InProgress), votePassed(VotePassed), previousState(PreviousState),
+          playerVotedOn(PlayerVotedOn), reason(Reason), answers(Answers),
+          startTime(StartTime) { }
 };
 
 // End Section: Structures
@@ -570,8 +580,16 @@ public:
     /// Given the ID of a dungeon, spit out its entry
     uint32 GetDungeonEntry(uint32 ID) const;
 
-    /// Enter or leave the group's validated LFD dungeon.
-    bool TeleportPlayer(Player* pPlayer, bool out, bool automatic);
+    /**
+     * Enter or leave the group's validated LFD dungeon.
+     *
+     * \arg \c dungeonID
+     *   Dungeon to teleport out of, for a caller that has already removed
+     *   the player from the group and so has no group to look one up on.
+     *   0 derives it from the player's current group, as every entering
+     *   caller does.
+     */
+    bool TeleportPlayer(Player* pPlayer, bool out, bool automatic, uint32 dungeonID = 0);
 
     /// Queue Functions Below
 
@@ -651,6 +669,19 @@ public:
     // Called when a player votes yes or no on a boot vote
     void CastVote(Player* pPlayer, bool vote);
 
+    /// Cancel any in-flight boot for this group without penalty.
+    void CancelBootVote(ObjectGuid groupGuid);
+
+    /// True while \a groupGuid has an unresolved boot vote.
+    bool IsBootVoteActive(ObjectGuid groupGuid) const;
+
+    /// Kicks remaining before ERR_PARTY_LFG_BOOT_LIMIT; 0 when the group is
+    /// not tracked as an in-dungeon LFD group.
+    uint8 GetKicksLeft(ObjectGuid groupGuid) const;
+
+    /// The group's dungeon-finder state; LFG_STATE_NONE when untracked.
+    LFGState GetGroupLfgState(ObjectGuid groupGuid) const;
+
     /// Fetch the client-facing LFD fields appended to SMSG_GROUP_LIST.
     bool GetGroupUpdateData(ObjectGuid groupGuid, ObjectGuid playerGuid,
                             LFGGroupUpdateData& data) const;
@@ -698,6 +729,12 @@ protected:
 
     /// Expire proposals older than LFG_TIME_PROPOSAL.
     void RemoveOldProposals();
+
+    /// Resolve one boot vote and restore the group's previous state.
+    void FinishBootVote(ObjectGuid groupGuid, bool succeeded);
+
+    /// Fail boot votes older than LFG_TIME_BOOT.
+    void RemoveOldBoots();
 
     /// True while a succeeded proposal is still moving this guid's players
     /// between groups -- lifecycle hooks must not react to those moves.

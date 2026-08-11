@@ -788,7 +788,7 @@ void InitializeOpcodes()
     OPCODE(CMSG_BUYBACK_ITEM,                            STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBuybackItem               );
     OPCODE(SMSG_SERVER_MESSAGE,                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_SET_SAVED_INSTANCE_EXTEND,               STATUS_UNHANDLED, PROCESS_INPLACE,     &WorldSession::Handle_NULL                     );
-    //OPCODE(SMSG_LFG_OFFER_CONTINUE,                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(SMSG_LFG_OFFER_CONTINUE,                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(CMSG_TEST_DROP_RATE,                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
     //OPCODE(SMSG_TEST_DROP_RATE_RESULT,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_LFG_GET_STATUS,                          STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgGetStatusOpcode        );
@@ -1012,8 +1012,8 @@ void InitializeOpcodes()
     //OPCODE(SMSG_LFG_SLOT_INVALID,                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_LFG_SET_ROLES,                           STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgSetRolesOpcode         );
     OPCODE(CMSG_LFG_LOCK_INFO_REQUEST,                   STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgLockInfoRequestOpcode  );
-    //OPCODE(CMSG_LFG_SET_BOOT_VOTE,                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
-    //OPCODE(SMSG_LFG_BOOT_PROPOSAL_UPDATE,                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
+    OPCODE(CMSG_LFG_SET_BOOT_VOTE,                       STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgSetBootVoteOpcode      );
+    OPCODE(SMSG_LFG_BOOT_PROPOSAL_UPDATE,                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(SMSG_LFG_PLAYER_INFO,                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_LFG_TELEPORT,                            STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLfgTeleportOpcode         );
     OPCODE(SMSG_LFG_PARTY_INFO,                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );

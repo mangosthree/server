@@ -47,7 +47,8 @@
  * @brief Cohesion split of LFGMgr.cpp -- role check, dungeon proposal and in-dungeon flow: PerformRoleCheck, proposal send/update/decline, dungeon group create, teleport, boss-kill, kick/vote and LFG packet senders. Same LFGMgr class; no behaviour change. CMake file(GLOB) picks this file up automatically; LFGMgr.h is unchanged.
  */
 
-void LFGMgr::BuildRoleCheckPacket(LFGRoleCheck const& roleCheck, LFGPackets::RoleCheckUpdate& out)
+void LFGMgr::BuildRoleCheckPacket(LFGRoleCheck const& roleCheck, bool isBeginning,
+                                  LFGPackets::RoleCheckUpdate& out)
 {
     std::set<uint32> dungeonBuff;
     if (roleCheck.randomDungeonID)
@@ -60,7 +61,7 @@ void LFGMgr::BuildRoleCheckPacket(LFGRoleCheck const& roleCheck, LFGPackets::Rol
     }
 
     out.status = uint32(roleCheck.state);
-    out.isBeginning = roleCheck.state == LFG_ROLECHECK_INITIALITING;
+    out.isBeginning = isBeginning;
 
     for (uint32 id : dungeonBuff)
     {
@@ -115,7 +116,6 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
 
     LFGRoleCheck& roleCheck = it->second;   // reference: mutations must stick (C3)
     ObjectGuid plrGuid = pPlayer ? pPlayer->GetObjectGuid() : ObjectGuid();
-    bool roleChosen = roleCheck.state != LFG_ROLECHECK_DEFAULT && !plrGuid.IsEmpty();
 
     if (!plrGuid)
     {
@@ -145,9 +145,20 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
         }
     }
 
+    // The client treats a set flag as "the check just started": it prints
+    // ERR_LFG_ROLE_CHECK_INITIATED, plays 17318 and replays ROLE_CHOSEN for
+    // every member who already answered. Exactly one packet may carry it.
+    bool const isBeginning = !roleCheck.beginningSent &&
+                             roleCheck.state == LFG_ROLECHECK_INITIALITING;
+    roleCheck.beginningSent = true;
+
+    // The isBeginning packet already replays ROLE_CHOSEN for everyone who has
+    // answered, so sending it here too prints the leader's line twice.
+    bool const roleChosen = !isBeginning && !plrGuid.IsEmpty();
+
     // Build ONE role-check packet for everyone in this check.
     LFGPackets::RoleCheckUpdate update;
-    BuildRoleCheckPacket(roleCheck, update);
+    BuildRoleCheckPacket(roleCheck, isBeginning, update);
 
     for (roleMap::iterator itr = roleCheck.currentRoles.begin(); itr != roleCheck.currentRoles.end(); ++itr)
     {
@@ -270,7 +281,12 @@ void LFGMgr::SendDungeonProposal(ObjectGuid queueGuid, LFGPlayers* lfgGroup)
          itr != stored.currentRoles.end(); ++itr)
     {
         ObjectGuid plrGuid = itr->first;
-        bool isParty = !stored.groups.find(plrGuid)->second.IsEmpty();
+
+        // The client silently drops SMSG_LFG_UPDATE_STATUS when IsParty
+        // disagrees with its own current group state (spec 7c, section 1.5b)
+        // -- derive it from live membership, not from the proposal snapshot.
+        Player* pPlayer = sPlayerRegistry.Find(plrGuid);
+        bool const isParty = pPlayer && pPlayer->GetGroup();
 
         SetPlayerState(plrGuid, LFG_STATE_PROPOSAL);
         SetPlayerUpdateType(plrGuid, LFG_UPDATE_PROPOSAL_BEGIN);
@@ -482,7 +498,11 @@ void LFGMgr::ProposalUpdate(uint32 proposalID, ObjectGuid plrGuid, bool accepted
         UpdateWaitMap(LFGRoles(role), waitKey,
                       time_t(now - proposal.joinedQueue));
 
-        bool isParty = !proposal.groups.find(memberGuid)->second.IsEmpty();
+        // CreateDungeonGroup has already run: every proposal player, premade
+        // and former solo queuer alike, is now in the formed group -- the
+        // pre-formation proposal.groups snapshot no longer reflects that.
+        Player* pMember = sPlayerRegistry.Find(memberGuid);
+        bool const isParty = pMember && pMember->GetGroup();
         status.updateType = LFG_UPDATE_GROUP_FOUND;
         SendLfgUpdate(memberGuid, status, isParty);
     }
@@ -504,6 +524,43 @@ bool LFGMgr::HasLeaderFlag(roleMap const& roles)
         }
     }
     return false;
+}
+
+void LFGMgr::DetachFromGroup(Group* pGroup, ObjectGuid plrGuid)
+{
+    if (!pGroup)
+    {
+        return;
+    }
+
+    // RemoveMember disbands itself when the pre-removal count is <= 2, so the
+    // caller must decide ownership before the call, never after it. Disband
+    // never unregisters from ObjectMgr or deletes itself (Group.cpp:914-1009),
+    // so this is the only teardown -- not a double-free of a self-disbanded
+    // group.
+    bool const willDisband = pGroup->GetMembersCount() <= 2;
+
+    pGroup->RemoveMember(plrGuid, 0);
+
+    if (willDisband)
+    {
+        sObjectMgr.RemoveGroup(pGroup);
+        delete pGroup;
+    }
+}
+
+ObjectGuid LFGMgr::PickHostGroup(LFGProposal const& proposal)
+{
+    std::vector<LFGProposalLogic::PlayerGroupPair> playerToGroup;
+    playerToGroup.reserve(proposal.groups.size());
+    for (playerGroupMap::const_iterator itr = proposal.groups.begin();
+         itr != proposal.groups.end(); ++itr)
+    {
+        playerToGroup.push_back(LFGProposalLogic::PlayerGroupPair(
+            itr->first.GetRawValue(), itr->second.GetRawValue()));
+    }
+
+    return ObjectGuid(LFGProposalLogic::PickHostGroup(playerToGroup));
 }
 
 //todo(7c): offer-continue formation (proposal->groupRawGuid != 0)
@@ -534,72 +591,73 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
         }
     }
 
-    // Leader: the seat that carries the leader bit; lowest guid otherwise.
-    ObjectGuid leaderGuid;
-    for (roleMap::const_iterator itr = proposal->assignedRoles.begin();
-         itr != proposal->assignedRoles.end(); ++itr)
+    // Prefer the pre-existing party contributing the most members: keep its
+    // Group object and leader instead of tearing the premade down and
+    // rebuilding it.
+    Group* pGroup = NULL;
+    ObjectGuid const hostGuid = PickHostGroup(*proposal);
+    if (!hostGuid.IsEmpty())
     {
-        if (itr->second & PLAYER_ROLE_LEADER)
+        pGroup = sObjectMgr.GetGroupById(hostGuid.GetCounter());
+    }
+
+    if (!pGroup)
+    {
+        // No premade in this proposal: build from scratch, as before.
+        // Leader: the seat that carries the leader bit; lowest guid otherwise.
+        ObjectGuid leaderGuid;
+        for (roleMap::const_iterator itr = proposal->assignedRoles.begin();
+             itr != proposal->assignedRoles.end(); ++itr)
         {
-            leaderGuid = itr->first;
-            break;
+            if (itr->second & PLAYER_ROLE_LEADER)
+            {
+                leaderGuid = itr->first;
+                break;
+            }
+
+            if (leaderGuid.IsEmpty() || itr->first < leaderGuid)
+            {
+                leaderGuid = itr->first;
+            }
         }
 
-        if (leaderGuid.IsEmpty() || itr->first < leaderGuid)
+        Player* pLeader = sPlayerRegistry.Find(leaderGuid);
+        if (!pLeader)
         {
-            leaderGuid = itr->first;
+            return false;
         }
-    }
 
-    Player* pLeader = sPlayerRegistry.Find(leaderGuid);
-    if (!pLeader)
-    {
-        return false;
-    }
-
-    // From here on, lifecycle hooks fired by the removes/adds below must
-    // not react -- IsSuccessfulProposalMove covers this proposal's guids.
-    if (Group* pOldGroup = pLeader->GetGroup())
-    {
-        if (pOldGroup->RemoveMember(leaderGuid, 0) <= 1)
+        pGroup = new Group();
+        if (!pGroup->Create(leaderGuid, pLeader->GetName()))
         {
-            sObjectMgr.RemoveGroup(pOldGroup);
-            delete pOldGroup;
+            delete pGroup;
+            return false;
         }
+        sObjectMgr.AddGroup(pGroup);
     }
 
-    Group* pGroup = new Group();
-    if (!pGroup->Create(leaderGuid, pLeader->GetName()))
-    {
-        delete pGroup;
-        return false;
-    }
-    sObjectMgr.AddGroup(pGroup);
-
+    // From here on, lifecycle hooks fired by the removes/adds below must not
+    // react -- IsSuccessfulProposalMove covers this proposal's guids. The
+    // host party keeps its own leader; only outsiders move.
     for (roleMap::const_iterator itr = proposal->currentRoles.begin();
          itr != proposal->currentRoles.end(); ++itr)
     {
-        ObjectGuid memberGuid = itr->first;
-        if (memberGuid == leaderGuid || pGroup->IsMember(memberGuid))
+        ObjectGuid const memberGuid = itr->first;
+        if (pGroup->IsMember(memberGuid))
         {
             continue;
         }
 
         Player* pMember = sPlayerRegistry.Find(memberGuid);
-        if (Group* pOldGroup = pMember->GetGroup())
+        if (!pMember)
         {
-            if (pOldGroup->RemoveMember(memberGuid, 0) <= 1)
-            {
-                sObjectMgr.RemoveGroup(pOldGroup);
-                delete pOldGroup;
-            }
+            return false;
         }
+
+        DetachFromGroup(pMember->GetGroup(), memberGuid);
 
         if (!pGroup->AddMember(memberGuid, pMember->GetName()))
         {
-            pGroup->Disband(true);
-            sObjectMgr.RemoveGroup(pGroup);
-            delete pGroup;
             return false;
         }
     }
@@ -827,6 +885,10 @@ bool LFGMgr::IsSuccessfulProposalMove(ObjectGuid guid) const
             return true;
         }
 
+        // The VALUE arm is what covers a preserved host group: AddMember on
+        // a kept premade fires OnGroupMemberAdded(hostGroupGuid, ...), and
+        // the host's guid appears as a value here for each of its own
+        // members -- do not "simplify" this to the KEY arm alone.
         for (playerGroupMap::const_iterator grpItr = proposal.groups.begin();
              grpItr != proposal.groups.end(); ++grpItr)
         {
@@ -1388,7 +1450,7 @@ void LFGMgr::RemoveOldRoleChecks()
             roleCheck.state = LFG_ROLECHECK_MISSING_ROLE;   // TC parity (LFGMgr.cpp:310)
 
             LFGPackets::RoleCheckUpdate update;
-            BuildRoleCheckPacket(roleCheck, update);
+            BuildRoleCheckPacket(roleCheck, false, update);
 
             for (roleMap::iterator roleMapItr = roleCheck.currentRoles.begin(); roleMapItr != roleCheck.currentRoles.end(); ++roleMapItr)
             {

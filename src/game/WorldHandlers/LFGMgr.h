@@ -31,6 +31,7 @@
 #include "Common/TimeConstants.h"
 #include <ctime>
 #include <string>
+#include "LFGEmpowerment.h"
 #include "LFGPackets.h"
 #include "Policies/Singleton.h"
 #include "Group.h"
@@ -319,6 +320,7 @@ struct LFGRoleCheck
     uint32 randomDungeonID = 0;    // The random dungeon ID
     uint64 leaderGuidRaw = 0;      // ObjectGuid(raw) of leader
     time_t waitForRoleTime = 0;    // How long we'll wait for the players to confirm their roles
+    bool beginningSent = false;      ///< the initiating update has gone out
 };
 
 struct LFGWait
@@ -459,6 +461,12 @@ public:
      * @param plr The pointer to the player
      */
     LfgJoinResult GetJoinResult(Player* plr);
+
+    /// Build the empowerment state for \a plr from its current group.
+    static LFGEmpowerment::State BuildEmpowermentState(Player* plr);
+
+    /// True when \a plr may queue or dequeue for its group (client parity).
+    static bool IsEmpowered(Player* plr);
 
     /**
      * @brief Fetch the playerstatus struct of a player on request, if existant
@@ -707,6 +715,12 @@ protected:
     /// Forms the LFD group for a succeeded proposal; false = caller unwinds.
     bool CreateDungeonGroup(LFGProposal* proposal);
 
+    /// Detach \a plrGuid from \a pGroup, destroying the group only if we own it.
+    static void DetachFromGroup(Group* pGroup, ObjectGuid plrGuid);
+
+    /// The pre-existing party contributing most members to \a proposal.
+    static ObjectGuid PickHostGroup(LFGProposal const& proposal);
+
     /**
      * @brief Merges two players/groups/etc into one for dungeon assignment.
      *
@@ -727,7 +741,9 @@ protected:
 
     /// Build the shared SMSG_LFG_ROLE_CHECK_UPDATE payload for one role
     /// check, so PerformRoleCheck and RemoveOldRoleChecks cannot drift.
-    void BuildRoleCheckPacket(LFGRoleCheck const& roleCheck, LFGPackets::RoleCheckUpdate& out);
+    /// \a isBeginning must be true on the first packet of a check only.
+    void BuildRoleCheckPacket(LFGRoleCheck const& roleCheck, bool isBeginning,
+                              LFGPackets::RoleCheckUpdate& out);
 
     /// Send SMSG_LFG_ROLE_CHECK_UPDATE to a specific player
     void SendRoleCheckUpdate(ObjectGuid plrGuid, LFGPackets::RoleCheckUpdate const& update);

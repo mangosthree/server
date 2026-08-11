@@ -45,6 +45,8 @@
 
 #include "Platform/Define.h"
 
+#include <map>
+#include <utility>
 #include <vector>
 
 namespace LFGProposalLogic
@@ -141,6 +143,43 @@ namespace LFGProposalLogic
             if (best == 0 || members[i].unitGuid < best)
             {
                 best = members[i].unitGuid;
+            }
+        }
+
+        return best;
+    }
+
+    /// One proposal player's own party, flattened: (player guid, party guid).
+    /// A solo player's party guid is 0.
+    typedef std::pair<uint64, uint64> PlayerGroupPair;
+
+    /// The pre-existing party contributing the most members to a proposal --
+    /// so CreateDungeonGroup can keep that Group object and its leader
+    /// instead of tearing the premade down and rebuilding it (spec 7c,
+    /// section 3.3). Ties break on the lowest guid; 0 when nobody in
+    /// \a playerToGroup has a party (every player's second is 0).
+    inline uint64 PickHostGroup(std::vector<PlayerGroupPair> const& playerToGroup)
+    {
+        std::map<uint64, uint32> counts;
+        for (PlayerGroupPair const& entry : playerToGroup)
+        {
+            if (entry.second != 0)
+            {
+                ++counts[entry.second];
+            }
+        }
+
+        uint64 best = 0;
+        uint32 bestCount = 0;
+        for (std::map<uint64, uint32>::const_iterator itr = counts.begin();
+             itr != counts.end(); ++itr)
+        {
+            // Most members wins; lowest guid breaks the tie deterministically.
+            if (itr->second > bestCount ||
+                (itr->second == bestCount && best != 0 && itr->first < best))
+            {
+                best = itr->first;
+                bestCount = itr->second;
             }
         }
 

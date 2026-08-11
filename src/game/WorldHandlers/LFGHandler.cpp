@@ -57,12 +57,12 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
     }
 
     Player* player = GetPlayer();
-    if (Group* group = player->GetGroup())
+
+    // The client only greys the button; refuse silently, exactly as retail
+    // does -- there is no "leader only" message in GlobalStrings.
+    if (!LFGMgr::IsEmpowered(player))
     {
-        if (group->GetLeaderGuid() != player->GetObjectGuid())
-        {
-            return;                     // only the leader may queue a group
-        }
+        return;
     }
 
     std::set<uint32> dungeons;
@@ -93,12 +93,16 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recv_data)
     Player* player = GetPlayer();
     Group* group = player->GetGroup();
 
-    // Only the leader may dequeue a group; the ticket guid the client echoes
-    // is deliberately ignored in favour of the session's own identity.
-    if (!group || group->GetLeaderGuid() == player->GetObjectGuid())
+    // The client only greys the button; refuse silently, exactly as retail
+    // does -- there is no "leader only" message in GlobalStrings. The ticket
+    // guid the client echoes is deliberately ignored in favour of the
+    // session's own identity.
+    if (!LFGMgr::IsEmpowered(player))
     {
-        sLFGMgr.LeaveLFG(player, group != nullptr);
+        return;
     }
+
+    sLFGMgr.LeaveLFG(player, group != nullptr);
 }
 
 void WorldSession::HandleLfgSetRolesOpcode(WorldPacket& recv_data)

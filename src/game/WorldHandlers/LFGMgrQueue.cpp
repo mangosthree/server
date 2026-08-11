@@ -603,6 +603,38 @@ bool LFGMgr::OnPlayerLogout(Player* player)
     return false;
 }
 
+LFGEmpowerment::State LFGMgr::BuildEmpowermentState(Player* plr)
+{
+    LFGEmpowerment::State state;
+    if (!plr)
+    {
+        return state;
+    }
+
+    Group* pGroup = plr->GetGroup();
+    if (!pGroup)
+    {
+        return state;
+    }
+
+    ObjectGuid const plrGuid = plr->GetObjectGuid();
+    bool const isRaid = pGroup->isRaidGroup();
+
+    state.inParty = !isRaid;
+    state.inRaid = isRaid;
+    state.isPartyLeader = !isRaid && pGroup->IsLeader(plrGuid);
+    state.isRaidLeader = isRaid && pGroup->IsLeader(plrGuid);
+    state.isRaidAssistant = isRaid && pGroup->IsAssistant(plrGuid);
+    state.hasLfgRestrictions = pGroup->isLFGGroup();
+
+    return state;
+}
+
+bool LFGMgr::IsEmpowered(Player* plr)
+{
+    return LFGEmpowerment::IsEmpowered(BuildEmpowermentState(plr));
+}
+
 LFGPlayers* LFGMgr::GetPlayerOrPartyData(ObjectGuid guid)
 {
     playerData::iterator it = m_playerData.find(guid);

@@ -305,6 +305,43 @@ TEST(LFGPackets_PlayerReward_exact_fixture)
     });
 }
 
+TEST(LFGPackets_PlayerReward_currency_quantity_is_hundredths)
+{
+    // A level-85 random heroic: 150 Valor and 12g 40s 25c, plus a plain
+    // item so both item shapes ride in one image. The client divides a
+    // currency flagged 0x08 by 100 before display, so 150 Valor crosses
+    // the wire as 15000 -- the 0x3A98 below is that contract. Sending 150
+    // would render as 1, silently.
+    LFGPackets::PlayerReward data;
+    data.queuedSlot = 301 + (6 << 24);      // Random Cataclysm Heroic
+    data.actualSlot = 68 + (5 << 24);       // some heroic dungeon
+    data.rewardMoney = 124025;
+    data.addedXp = 0;
+    data.items = {
+        { 69903, 12345, 1, false },
+        { 396, 0, 15000, true }
+    };
+
+    WorldPacket packet(SMSG_LFG_PLAYER_REWARD, 64);
+    REQUIRE(LFGPackets::BuildPlayerReward(packet, data));
+
+    CHECK_BYTES(packet.contents(), packet.size(), {
+        0x2D,0x01,0x00,0x06,
+        0x44,0x00,0x00,0x05,
+        0x79,0xE4,0x01,0x00,
+        0x00,0x00,0x00,0x00,
+        0x02,
+        0x0F,0x11,0x01,0x00,
+        0x39,0x30,0x00,0x00,
+        0x01,0x00,0x00,0x00,
+        0x00,
+        0x8C,0x01,0x00,0x00,
+        0x00,0x00,0x00,0x00,
+        0x98,0x3A,0x00,0x00,
+        0x01
+    });
+}
+
 TEST(LFGPackets_PlayerReward_rejects_too_many_items)
 {
     LFGPackets::PlayerReward data;
@@ -430,6 +467,68 @@ TEST(LFGPackets_PlayerInfo_exact_fixture)
         0x01,0x00,0x00,0x00,
         0x02,0x00,0x00,0x00,
         0x03,0x00,0x00,0x00
+    });
+}
+
+TEST(LFGPackets_PlayerInfo_valor_cap_block)
+{
+    // The reward preview a fresh level-85 sees for Random Cataclysm
+    // Heroic: 150 Valor a run, seven runs' worth of allowance against a
+    // 1000-Valor weekly purse -- every quantity in hundredths, the same
+    // unit the reward packet and CurrencyMgr use. The client divides
+    // (limit - quantity) by the per-run quantity itself, which is how it
+    // arrives at "7 more times this week".
+    LFGPackets::LFGRandomDungeonEntry entry;
+    entry.slot = 301 + (6 << 24);
+    entry.firstReward = true;
+    entry.completionQuantity = 15000;
+    entry.completionLimit = 105000;
+    entry.completionCurrencyId = 396;
+    entry.specificQuantity = 0;
+    entry.specificLimit = 105000;
+    entry.overallQuantity = 0;
+    entry.overallLimit = 105000;
+    entry.purseWeeklyQuantity = 0;
+    entry.purseWeeklyLimit = 100000;
+    entry.quantity = 15000;
+    entry.rewardMoney = 124025;
+    entry.items = { { 396, 0, 15000, true } };
+
+    LFGPackets::PlayerInfo data;
+    data.randomDungeons = { entry };
+
+    WorldPacket packet(SMSG_LFG_PLAYER_INFO, 128);
+    REQUIRE(LFGPackets::BuildPlayerInfo(packet, data));
+
+    CHECK_BYTES(packet.contents(), packet.size(), {
+        0x01,
+        0x2D,0x01,0x00,0x06,
+        0x01,
+        0x98,0x3A,0x00,0x00,
+        0x28,0x9A,0x01,0x00,
+        0x8C,0x01,0x00,0x00,
+        0x00,0x00,0x00,0x00,
+        0x28,0x9A,0x01,0x00,
+        0x00,0x00,0x00,0x00,
+        0x28,0x9A,0x01,0x00,
+        0x00,0x00,0x00,0x00,
+        0xA0,0x86,0x01,0x00,
+        0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,
+        0x98,0x3A,0x00,0x00,
+        0x00,0x00,0x00,0x00,
+        0x00,
+        0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,
+        0x79,0xE4,0x01,0x00,
+        0x00,0x00,0x00,0x00,
+        0x01,
+        0x8C,0x01,0x00,0x00,
+        0x00,0x00,0x00,0x00,
+        0x98,0x3A,0x00,0x00,
+        0x01,
+        0x00,0x00,0x00,0x00
     });
 }
 

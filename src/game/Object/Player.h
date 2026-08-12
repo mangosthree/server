@@ -3071,6 +3071,8 @@ class Player : public Unit
         uint32 GetCurrencyCount(uint32 id) const { return m_currencyMgr.GetCount(id); }
         uint32 GetCurrencySeasonCount(uint32 id) const { return m_currencyMgr.GetSeasonCount(id); }
         uint32 GetCurrencyWeekCount(uint32 id) const { return m_currencyMgr.GetWeekCount(id); }
+        uint32 GetCurrencyWeekCap(CurrencyTypesEntry const * currency) const { return m_currencyMgr.GetWeekCap(currency); }
+        uint32 GetCurrencyTotalCap(CurrencyTypesEntry const * currency) const { return m_currencyMgr.GetTotalCap(currency); }
         void SendCurrencies() const { m_currencyMgr.SendAll(); }
         void ModifyCurrencyCount(uint32 id, int32 count, bool modifyWeek = true, bool modifySeason = true, bool ignoreMultipliers = false) { m_currencyMgr.ModifyCount(id, count, modifyWeek, modifySeason, ignoreMultipliers); }
         bool HasCurrencyCount(uint32 id, uint32 count) const { return GetCurrencyCount(id) >= count; }
@@ -3983,8 +3985,6 @@ class Player : public Unit
         /***                CURRENCY SYSTEM                    ***/
         /*********************************************************/
         CurrencyMgr m_currencyMgr;   // owns m_currencies map + 14 Get/Set/Modify/Send/Load/Save methods (extracted 2026-05-12)
-        uint32 GetCurrencyWeekCap(CurrencyTypesEntry const * currency) const { return m_currencyMgr.GetWeekCap(currency); }
-        uint32 GetCurrencyTotalCap(CurrencyTypesEntry const * currency) const { return m_currencyMgr.GetTotalCap(currency); }
         void _LoadCurrencies(QueryResult* result) { m_currencyMgr.Load(result); }
         void _SaveCurrencies() { m_currencyMgr.Save(); }
 

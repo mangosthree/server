@@ -538,6 +538,19 @@ public:
     dungeonEntries FindRandomDungeonsForPlayer(uint32 level, uint8 expansion);
 
     /**
+    * Builds the reward preview the Dungeon Finder panel draws for every
+    * random slot this player can queue: what one completion pays, and how
+    * many completions are left in the period.
+    *
+    * \arg \c pPlayer
+    *   The requesting player.
+    * \arg \c out
+    *   Receives one entry per available random dungeon, appended.
+    */
+    void BuildRandomDungeonRewards(Player* pPlayer,
+                                   std::vector<LFGPackets::LFGRandomDungeonEntry>& out);
+
+    /**
      * @brief Find the random dungeons not applicable for a player
      *
      * @param plr The player to test against

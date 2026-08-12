@@ -304,6 +304,133 @@ dungeonEntries LFGMgr::FindRandomDungeonsForPlayer(uint32 level, uint8 expansion
     return randomDungeons;
 }
 
+void LFGMgr::BuildRandomDungeonRewards(Player* pPlayer,
+                                       std::vector<LFGPackets::LFGRandomDungeonEntry>& out)
+{
+    if (!pPlayer)
+    {
+        return;
+    }
+
+    uint32 const level = pPlayer->getLevel();
+    bool const atMaxLevel = (level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
+
+    DungeonFinderRewards const* rewards = sObjectMgr.GetDungeonFinderRewards(level);
+
+    dungeonEntries const randomDungeons =
+        FindRandomDungeonsForPlayer(level, pPlayer->GetSession()->Expansion());
+
+    for (dungeonEntries::const_iterator itr = randomDungeons.begin();
+         itr != randomDungeons.end(); ++itr)
+    {
+        DungeonTypes const type = GetDungeonType(itr->first);
+
+        LFGPackets::LFGRandomDungeonEntry entry;
+        entry.slot = itr->second;
+
+        // Random slots carry no map of their own, so there is no bound
+        // instance to report encounters from.
+        entry.completedMask = 0;
+
+        if (type == DUNGEON_CATACLYSM_HEROIC)
+        {
+            // Valor, capped weekly by the currency itself. The panel works
+            // the "N more times this week" line out of these numbers.
+            CurrencyTypesEntry const* valor =
+                sCurrencyTypesStore.LookupEntry(LFGRewardLogic::LFG_CURRENCY_VALOR);
+
+            uint32 const weekCount =
+                pPlayer->GetCurrencyWeekCount(LFGRewardLogic::LFG_CURRENCY_VALOR);
+            uint32 const weekCap = valor ? pPlayer->GetCurrencyWeekCap(valor) : 0;
+
+            entry.firstReward = (weekCount == 0);
+            entry.completionCurrencyId = LFGRewardLogic::LFG_CURRENCY_VALOR;
+            entry.completionQuantity = LFGRewardLogic::CATA_HEROIC_VALOR;
+            entry.completionLimit =
+                LFGRewardLogic::CATA_HEROIC_VALOR *
+                LFGRewardLogic::CATA_NORMAL_JUSTICE_RUNS_PER_WEEK;
+            entry.specificQuantity = weekCount;
+            entry.specificLimit = entry.completionLimit;
+            entry.overallQuantity = weekCount;
+            entry.overallLimit = entry.completionLimit;
+            entry.purseWeeklyQuantity = weekCount;
+            entry.purseWeeklyLimit = weekCap;
+            entry.purseQuantity =
+                pPlayer->GetCurrencyCount(LFGRewardLogic::LFG_CURRENCY_VALOR);
+            entry.purseLimit = valor ? pPlayer->GetCurrencyTotalCap(valor) : 0;
+            entry.quantity = entry.completionQuantity;
+
+            LFGRewardItem item;
+            item.id = LFGRewardLogic::LFG_CURRENCY_VALOR;
+            item.quantity = LFGRewardLogic::CATA_HEROIC_VALOR;
+            item.isCurrency = true;
+            entry.items.push_back(item);
+        }
+        else if (type == DUNGEON_CATACLYSM &&
+                 level >= LFGRewardLogic::CATA_NORMAL_JUSTICE_MIN_LEVEL)
+        {
+            // Justice has no weekly cap of its own, so the allowance is
+            // ours to report. The purse fields stay zero: the client skips
+            // a zero purse limit when it works out what is left.
+            std::unordered_map<uint32, uint8>::const_iterator weekItr =
+                m_weeklyCataNormal.find(pPlayer->GetGUIDLow());
+            uint32 const runsThisWeek =
+                (weekItr != m_weeklyCataNormal.end()) ? weekItr->second : 0;
+
+            entry.firstReward = !HasPlayerDoneDaily(pPlayer->GetGUIDLow(), type);
+            entry.completionCurrencyId = LFGRewardLogic::LFG_CURRENCY_JUSTICE;
+            entry.completionQuantity = LFGRewardLogic::CATA_NORMAL_JUSTICE;
+            entry.completionLimit =
+                LFGRewardLogic::CATA_NORMAL_JUSTICE *
+                LFGRewardLogic::CATA_NORMAL_JUSTICE_RUNS_PER_WEEK;
+            entry.specificQuantity = runsThisWeek * LFGRewardLogic::CATA_NORMAL_JUSTICE;
+            entry.specificLimit = entry.completionLimit;
+            entry.overallQuantity = entry.specificQuantity;
+            entry.overallLimit = entry.completionLimit;
+            entry.quantity = entry.completionQuantity;
+
+            LFGRewardItem item;
+            item.id = LFGRewardLogic::LFG_CURRENCY_JUSTICE;
+            item.quantity = LFGRewardLogic::CATA_NORMAL_JUSTICE;
+            item.isCurrency = true;
+            entry.items.push_back(item);
+        }
+        else
+        {
+            // No currency: the panel drops to its flat "You will receive
+            // this reward:" text, which is what a levelling random pays.
+            entry.firstReward = !HasPlayerDoneDaily(pPlayer->GetGUIDLow(), type);
+
+            ItemRewards const itemRewards = GetDungeonItemRewards(itr->first, type);
+            if (entry.firstReward && itemRewards.itemId && itemRewards.itemAmount)
+            {
+                if (ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemRewards.itemId))
+                {
+                    LFGRewardItem item;
+                    item.id = itemRewards.itemId;
+                    item.displayId = pProto->DisplayInfoID;
+                    item.quantity = itemRewards.itemAmount;
+                    entry.items.push_back(item);
+                }
+            }
+        }
+
+        // The preview is always the full first-completion value: the panel
+        // has its own "already done" wording for the reduced run.
+        if (rewards)
+        {
+            uint32 const multiplier =
+                (type == DUNGEON_CATACLYSM_HEROIC)
+                    ? 1u : LFGRewardLogic::FirstRewardMultiplier(false);
+
+            entry.rewardMoney = uint32(rewards->baseMonetaryReward) * multiplier;
+            entry.rewardXp = atMaxLevel ? 0 : (rewards->baseXPReward * multiplier);
+        }
+
+        out.push_back(entry);
+    }
+}
+
 dungeonForbidden LFGMgr::FindRandomDungeonsNotForPlayer(Player* plr)
 {
     dungeonForbidden randomDungeons;

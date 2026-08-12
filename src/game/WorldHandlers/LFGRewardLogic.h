@@ -69,6 +69,35 @@ namespace LFGRewardLogic
         DIFFICULTY_VALUE_HEROIC = 1
     };
 
+    /// Currencies the finder pays out.
+    enum RewardCurrency
+    {
+        LFG_CURRENCY_JUSTICE = 395,
+        LFG_CURRENCY_VALOR   = 396
+    };
+
+    /// Cataclysm random-dungeon currency, in the hundredths CurrencyMgr
+    /// stores and SMSG_LFG_PLAYER_REWARD carries -- the client divides a
+    /// currency carrying CurrencyTypes flag 0x08 by 100 before display, and
+    /// both of ours do. These are era constants of the expansion, not
+    /// operator data, so they live beside the code rather than in the DB.
+    enum RewardAmount
+    {
+        /// 150 Valor per level-85 random heroic. The era "first seven per
+        /// week" needs no counter: the DBC's own 1000-per-week purse cap
+        /// clamps the seventh run and zeroes the rest.
+        CATA_HEROIC_VALOR = 15000,
+        /// 70 Justice instead, once the Valor week is spent.
+        CATA_HEROIC_JUSTICE_FALLBACK = 7000,
+        /// 140 Justice per random Cataclysm normal, seven per week.
+        CATA_NORMAL_JUSTICE = 14000,
+        CATA_NORMAL_JUSTICE_RUNS_PER_WEEK = 7,
+        /// Random Cataclysm Dungeon spans levels 80-85, but its Justice
+        /// starts with the 83+ reward quests -- below that the slot is
+        /// served by the older Lich King pair, gold and experience only.
+        CATA_NORMAL_JUSTICE_MIN_LEVEL = 83
+    };
+
     /// What a removal from an LFD group costs the player who left it.
     enum class RemovalPenalty
     {

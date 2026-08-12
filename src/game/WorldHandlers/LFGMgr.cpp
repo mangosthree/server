@@ -261,6 +261,11 @@ void LFGMgr::ResetDailyRecords()
     m_dailyCataNormal.clear();
 }
 
+void LFGMgr::ResetWeeklyRecords()
+{
+    m_weeklyCataNormal.clear();
+}
+
 bool LFGMgr::IsSeasonActive(uint32 dungeonId)
 {
     switch (dungeonId)

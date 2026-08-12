@@ -2007,6 +2007,11 @@ void World::ResetWeeklyQuests()
 
     m_NextWeeklyQuestReset = time_t(m_NextWeeklyQuestReset + WEEK);
     CharacterDatabase.PExecute("UPDATE `saved_variables` SET `NextWeeklyQuestResetTime` = '" UI64FMTD "'", uint64(m_NextWeeklyQuestReset));
+
+    if (getConfig(CONFIG_BOOL_LFG_ENABLE))
+    {
+        sLFGMgr.ResetWeeklyRecords();
+    }
 }
 
 void World::ResetMonthlyQuests()

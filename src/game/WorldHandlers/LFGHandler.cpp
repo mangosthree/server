@@ -438,34 +438,19 @@ void WorldSession::SendLfgTeleportError(uint8 error)
     SendPacket(&data);
 }
 
-void WorldSession::SendLfgRewards(LFGRewards const& rewards)
+void WorldSession::SendLfgPlayerReward(LFGPackets::PlayerReward const& reward)
 {
     DEBUG_LOG("SMSG_LFG_PLAYER_REWARD");
 
     WorldPacket data(SMSG_LFG_PLAYER_REWARD, 42);
-    data << uint32(rewards.randomDungeonEntry);
-    data << uint32(rewards.groupDungeonEntry);
-    data << uint8(rewards.hasDoneDaily);
-    data << uint32(1);
-    data << uint32(rewards.moneyReward);
-    data << uint32(rewards.expReward);
-    data << uint32(0);
-    data << uint32(0);
-    if (rewards.itemID != 0)
+    if (!LFGPackets::BuildPlayerReward(data, reward))
     {
-        ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(rewards.itemID);
-        if (pProto)
-        {
-            data << uint8(1);
-            data << uint32(rewards.itemID);
-            data << uint32(pProto->DisplayInfoID);
-            data << uint32(rewards.itemAmount);
-        }
+        sLog.outError("SMSG_LFG_PLAYER_REWARD: %s has %u reward items, wire holds a uint8",
+                      _player ? _player->GetGuidStr().c_str() : "<no player>",
+                      uint32(reward.items.size()));
+        return;
     }
-    else
-    {
-        data << uint8(0);
-    }
+
     SendPacket(&data);
 }
 

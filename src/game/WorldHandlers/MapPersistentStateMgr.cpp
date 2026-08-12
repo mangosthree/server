@@ -70,6 +70,7 @@
 #include "World.h"
 #include "Group.h"
 #include "InstanceData.h"
+#include "LFGMgr.h"
 #include "ProgressBar.h"
 #include <cstdarg>
 
@@ -448,10 +449,14 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
             CharacterDatabase.PExecute("UPDATE `instance` SET `encountersMask` = '%u' WHERE `id` = '%u'", m_completedEncountersMask, GetInstanceId());
 
             DEBUG_LOG("DungeonPersistentState: Dungeon %s (Id %u) completed encounter %s", GetMap()->GetMapName(), GetInstanceId(), dbcEntry->Name_lang[sWorld.GetDefaultDbcLocale()]);
-            if (/*uint32 dungeonId =*/ iter->second->lastEncounterDungeon)
+            if (iter->second->lastEncounterDungeon)
             {
                 DEBUG_LOG("DungeonPersistentState:: Dungeon %s (Instance-Id %u) completed last encounter %s", GetMap()->GetMapName(), GetInstanceId(), dbcEntry->Name_lang[sWorld.GetDefaultDbcLocale()]);
-                // Place LFG reward here
+
+                if (sWorld.getConfig(CONFIG_BOOL_LFG_ENABLE))
+                {
+                    sLFGMgr.OnDungeonEncounterComplete(GetMap());
+                }
             }
             return;
         }

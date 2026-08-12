@@ -389,7 +389,7 @@ class WorldSession
         void SendLfgRoleChosen(uint64 rawGuid, uint32 roles);
         void SendLfgProposalUpdate(LFGPackets::ProposalUpdate const& proposal);
         void SendLfgTeleportError(uint8 error);
-        void SendLfgRewards(LFGRewards const& rewards);
+        void SendLfgPlayerReward(LFGPackets::PlayerReward const& reward);
         void SendLfgBootProposalUpdate(LFGBoot const& boot, uint32 votesNeeded);
         void SendLfgOfferContinue(uint32 dungeonEntry);
         void SendLfgPlayerLockInfo();

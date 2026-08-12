@@ -885,6 +885,36 @@ void World::SetInitialWorldSettings()
     sLog.outString();
 }
 
+uint32 World::GetBotCount() const
+{
+#ifdef ENABLE_PLAYERBOTS
+    // Two homes to count: random bots belong to the one manager, while a bot
+    // a player summoned belongs to that player's own. Bots hold no entry in
+    // m_sessions, which is why the session counts never include them.
+    uint32 count = uint32(std::distance(sRandomPlayerbotMgr.GetPlayerBotsBegin(),
+                                        sRandomPlayerbotMgr.GetPlayerBotsEnd()));
+
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    {
+        Player* player = itr->second ? itr->second->GetPlayer() : NULL;
+        if (!player)
+        {
+            continue;
+        }
+
+        if (PlayerbotMgr* mgr = player->GetPlayerbotMgr())
+        {
+            count += uint32(std::distance(mgr->GetPlayerBotsBegin(),
+                                          mgr->GetPlayerBotsEnd()));
+        }
+    }
+
+    return count;
+#else
+    return 0;
+#endif
+}
+
 /**
  * @brief Prints the startup footer and enabled module summary.
  */

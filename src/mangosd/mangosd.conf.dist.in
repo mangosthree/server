@@ -1408,9 +1408,29 @@ CinematicFlyover.VisibilityDistance = 250
 #        Default: 0 (disabled)
 #                 1 (enabled)
 #
+#    LFG.Deserter.MinRemaining
+#        Members that must remain in the group for a player who leaves an
+#        unfinished Dungeon Finder run to receive the 30 minute Dungeon
+#        Deserter debuff. No Blizzard material states an application rule
+#        for Cataclysm, so this is server policy rather than a restored
+#        constant: 0 deserters any voluntary leave, 4 reproduces the
+#        threshold TrinityCore uses (which era evidence does not support).
+#        Leaving after the last boss never deserters, at any setting.
+#        Default: 0 (no threshold)
+#
+#    LFG.Deserter.OnVoteKick
+#        Whether a vote-kicked player is treated as having left. Wrath
+#        exempted kicked players by design; whether 4.3.4 still did is
+#        unsettled, so it is the admin's call. A kicked player always
+#        loses their Dungeon Cooldown either way.
+#        Default: 0 (kicked players are exempt)
+#                 1 (a kick counts as leaving)
+#
 ################################################################################
 
 LFG.Enable = 0
+LFG.Deserter.MinRemaining = 0
+LFG.Deserter.OnVoteKick = 0
 
 ################################################################################
 # SERVER RATES

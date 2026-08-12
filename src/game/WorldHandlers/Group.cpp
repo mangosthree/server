@@ -811,7 +811,9 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 removeMethod)
     {
         bool leaderChanged = _removeMember(guid);
 
-        sLFGMgr.OnGroupMemberRemoved(GetObjectGuid(), guid);
+        // removeMethod: 0 the player left, 1 they were kicked. The LFG hook
+        // needs the difference -- only one of the two earns Deserter.
+        sLFGMgr.OnGroupMemberRemoved(GetObjectGuid(), guid, removeMethod);
         if (leaderChanged)
         {
             sLFGMgr.OnGroupLeaderChanged(GetObjectGuid(), m_memberSlots.front().guid);

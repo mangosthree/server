@@ -706,6 +706,16 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     {
         if (Player* pGroupPlr = itr->getSource())
         {
+            // Being placed in a random group starts the 15 minute cooldown
+            // on queueing for another random. Picking a dungeon by name
+            // starts nothing, and completing this one lifts it early.
+            queuedSlotMap::const_iterator slotItr =
+                groupStatus.queuedSlots.find(pGroupPlr->GetObjectGuid());
+            if (slotItr != groupStatus.queuedSlots.end() && slotItr->second != 0)
+            {
+                pGroupPlr->CastSpell(pGroupPlr, LFG_COOLDOWN_SPELL, true);
+            }
+
             TeleportPlayer(pGroupPlr, false, true);
         }
     }
@@ -1700,10 +1710,12 @@ void LFGMgr::FinishBootVote(ObjectGuid groupGuid, bool succeeded)
         Player* pVictim = sPlayerRegistry.Find(boot.playerVotedOn);
         if (pVictim)
         {
-            // A booted player keeps no deserter debuff and gets the random
-            // dungeon cooldown back. RemoveAurasDueToSpell is a no-op today
-            // -- 71328 is never applied in this tree -- written now so the
-            // branch is correct once a later phase starts applying it.
+            // A booted player gets their random dungeon cooldown back.
+            // RemoveMember's hook does this too, but only while the group
+            // survives -- a boot that takes it below three disbands
+            // instead, and this is the only clearing on that path.
+            // Whether the victim also earns Deserter is the hook's call,
+            // under LFG.Deserter.OnVoteKick (exempt by default).
             pVictim->RemoveAurasDueToSpell(LFG_COOLDOWN_SPELL);
         }
 

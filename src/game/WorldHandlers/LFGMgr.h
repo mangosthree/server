@@ -689,7 +689,8 @@ public:
 
     /// Group lifecycle hooks used by the core group implementation.
     void OnGroupMemberAdded(ObjectGuid groupGuid, ObjectGuid playerGuid);
-    void OnGroupMemberRemoved(ObjectGuid groupGuid, ObjectGuid playerGuid);
+    void OnGroupMemberRemoved(ObjectGuid groupGuid, ObjectGuid playerGuid,
+                              uint8 removeMethod);
     void OnGroupDisband(ObjectGuid groupGuid);
     void OnGroupLeaderChanged(ObjectGuid groupGuid, ObjectGuid newLeaderGuid);
     /// Returns true when logout must retain active LFD group membership.
@@ -801,6 +802,12 @@ private:
     /// The random dungeon this player queued for, 0 when they picked a
     /// specific one. Read from their own selection, which the queue keeps.
     uint32 GetQueuedRandomID(ObjectGuid plrGuid);
+
+    /// Casts or clears the leave/kick auras a removal from an LFD group
+    /// earns, per LFGRewardLogic::PenaltyForRemoval under the two
+    /// LFG.Deserter config options.
+    void ApplyRemovalPenalty(ObjectGuid playerGuid, uint8 removeMethod,
+                             bool dungeonInProgress, size_t remainingMembers);
 
     /// Pays one member for a completed run and tells them what they got.
     void RewardDungeonCompletion(Player* pPlayer, LFGGroupStatus const& status,

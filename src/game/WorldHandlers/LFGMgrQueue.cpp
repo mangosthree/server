@@ -474,7 +474,8 @@ void LFGMgr::OnGroupMemberAdded(ObjectGuid groupGuid, ObjectGuid playerGuid)
     CancelQueueEntry(playerGuid, LFG_UPDATE_REMOVED_FROM_QUEUE);
 }
 
-void LFGMgr::OnGroupMemberRemoved(ObjectGuid groupGuid, ObjectGuid playerGuid)
+void LFGMgr::OnGroupMemberRemoved(ObjectGuid groupGuid, ObjectGuid playerGuid,
+                                  uint8 removeMethod)
 {
     if (IsSuccessfulProposalMove(groupGuid) || IsSuccessfulProposalMove(playerGuid))
     {
@@ -505,14 +506,60 @@ void LFGMgr::OnGroupMemberRemoved(ObjectGuid groupGuid, ObjectGuid playerGuid)
     groupStatusMap::iterator itStatus = m_groupStatusMap.find(groupGuid);
     if (itStatus != m_groupStatusMap.end())
     {
+        // CancelBootVote above has already restored the pre-vote state, and
+        // FinishBootVote restores it before it removes the victim, so state
+        // reads IN_DUNGEON for a kick as well. The discriminator has to be
+        // removeMethod -- testing the state would deserter the victim.
+        bool const inProgress = (itStatus->second.state == LFG_STATE_IN_DUNGEON);
+
         itStatus->second.playerRoles.erase(playerGuid);
+        itStatus->second.queuedSlots.erase(playerGuid);
         m_playerStatusMap.erase(playerGuid);
+
+        ApplyRemovalPenalty(playerGuid, removeMethod, inProgress,
+                            itStatus->second.playerRoles.size());
 
         if (itStatus->second.playerRoles.empty())
         {
             m_groupStatusMap.erase(itStatus);
             m_groupSet.erase(groupGuid);
         }
+    }
+}
+
+void LFGMgr::ApplyRemovalPenalty(ObjectGuid playerGuid, uint8 removeMethod,
+                                 bool dungeonInProgress, size_t remainingMembers)
+{
+    LFGRewardLogic::RemovalPenalty const penalty = LFGRewardLogic::PenaltyForRemoval(
+        removeMethod, dungeonInProgress, remainingMembers,
+        sWorld.getConfig(CONFIG_UINT32_LFG_DESERTER_MIN_REMAINING),
+        sWorld.getConfig(CONFIG_BOOL_LFG_DESERTER_ON_VOTE_KICK));
+
+    if (penalty == LFGRewardLogic::RemovalPenalty::NONE)
+    {
+        return;
+    }
+
+    // An offline leaver simply gets nothing -- the auras only exist on a
+    // live player, and the run they walked out of is over for them either
+    // way.
+    Player* pPlayer = sObjectMgr.GetPlayer(playerGuid);
+    if (!pPlayer)
+    {
+        return;
+    }
+
+    if (penalty == LFGRewardLogic::RemovalPenalty::CLEAR_COOLDOWN ||
+        penalty == LFGRewardLogic::RemovalPenalty::DESERTER_AND_CLEAR_COOLDOWN)
+    {
+        pPlayer->RemoveAurasDueToSpell(LFG_COOLDOWN_SPELL);
+    }
+
+    if (penalty == LFGRewardLogic::RemovalPenalty::DESERTER ||
+        penalty == LFGRewardLogic::RemovalPenalty::DESERTER_AND_CLEAR_COOLDOWN)
+    {
+        // Duration comes from Spell.dbc; nothing here hardcodes 30 minutes.
+        pPlayer->CastSpell(pPlayer, LFG_DESERTER_SPELL, true);
     }
 }
 

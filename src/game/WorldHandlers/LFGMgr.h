@@ -443,8 +443,10 @@ public:
      *        the LFG queue
      *
      * @param plr The pointer to the player
+     * @param dungeons The dungeons being queued for. The random cooldown only
+     *        blocks a selection that contains a random or seasonal slot.
      */
-    LfgJoinResult GetJoinResult(Player* plr);
+    LfgJoinResult GetJoinResult(Player* plr, std::set<uint32> const& dungeons);
 
     /// Build the empowerment state for \a plr from its current group.
     static LFGEmpowerment::State BuildEmpowermentState(Player* plr);

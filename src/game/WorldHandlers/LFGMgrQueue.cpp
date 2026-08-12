@@ -91,7 +91,7 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     // used for upcoming checks
     bool isRandom  = false;
 
-    LfgJoinResult result = GetJoinResult(plr);
+    LfgJoinResult result = GetJoinResult(plr, dungeons);
     if (result == ERR_LFG_OK)
     {
         bool isRaid    = false;
@@ -672,14 +672,14 @@ LFGProposal* LFGMgr::GetProposalData(uint32 proposalID)
     }
 }
 
-LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
+LfgJoinResult LFGMgr::GetJoinResult(Player* plr, std::set<uint32> const& dungeons)
 {
     LfgJoinResult result = ERR_LFG_OK;
     Group* pGroup = plr->GetGroup();
 
     /* Reasons for not entering:
      *   Deserter spell
-     *   Dungeon finder cooldown
+     *   Dungeon finder cooldown (random selections only)
      *   In a battleground
      *   In an arena
      *   Queued for battleground
@@ -689,6 +689,24 @@ LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
      *   Any group member cannot enter for x reason any other player can't
      */
 
+    // Dungeon Cooldown gates the random queue, nothing else: with it up a
+    // player could still pick a dungeon by name. The client agrees -- its
+    // cover frame only covers the random tab for a cooldown, where Deserter
+    // covers the whole panel.
+    // TODO: exempt a queue that continues the group's current dungeon, once
+    // there is an offer-continue path to exempt.
+    bool selectionIsRandom = false;
+    for (std::set<uint32>::const_iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
+    {
+        LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(*itr);
+        if (dungeon && (dungeon->typeID == LFG_TYPE_RANDOM_DUNGEON ||
+                        (IsSeasonal(dungeon->flags) && IsSeasonActive(dungeon->ID))))
+        {
+            selectionIsRandom = true;
+            break;
+        }
+    }
+
     if (plr->HasAura(LFG_DESERTER_SPELL))
     {
         result = ERR_LFG_DESERTER_PLAYER;
@@ -697,7 +715,7 @@ LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
     {
         result = ERR_LFG_CANT_USE_DUNGEONS;
     }
-    else if (plr->HasAura(LFG_COOLDOWN_SPELL))
+    else if (selectionIsRandom && plr->HasAura(LFG_COOLDOWN_SPELL))
     {
         result = ERR_LFG_RANDOM_COOLDOWN_PLAYER;
     }
@@ -728,7 +746,7 @@ LfgJoinResult LFGMgr::GetJoinResult(Player* plr)
                     {
                         result = ERR_LFG_CANT_USE_DUNGEONS;
                     }
-                    else if (pGroupPlr->HasAura(LFG_COOLDOWN_SPELL))
+                    else if (selectionIsRandom && pGroupPlr->HasAura(LFG_COOLDOWN_SPELL))
                     {
                         result = ERR_LFG_RANDOM_COOLDOWN_PARTY;
                     }

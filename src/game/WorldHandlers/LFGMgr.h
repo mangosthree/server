@@ -33,6 +33,7 @@
 #include <string>
 #include "LFGBootLogic.h"
 #include "LFGEmpowerment.h"
+#include "LFGRewardLogic.h"
 #include "LFGPackets.h"
 #include "Policies/Singleton.h"
 #include "Group.h"
@@ -235,15 +236,7 @@ enum LFGTeleportError
     LFG_TELEPORTERROR_CHARMING                   = 8
 };
 
-enum DungeonTypes
-{
-    DUNGEON_CLASSIC      = 0,
-    DUNGEON_TBC          = 1,
-    DUNGEON_TBC_HEROIC   = 2,
-    DUNGEON_WOTLK        = 3,
-    DUNGEON_WOTLK_HEROIC = 4,
-    DUNGEON_UNKNOWN
-};
+// DungeonTypes lives in LFGRewardLogic.h -- ClassifyDungeon returns it.
 
 // End Section: Enumerations
 
@@ -802,6 +795,7 @@ private:
     dailyEntries m_dailyTBCHeroic;
     dailyEntries m_dailyLKNormal;
     dailyEntries m_dailyLKHeroic;
+    dailyEntries m_dailyCataNormal;
 
     /// General info related to joining / leaving the dungeon finder
     playerData m_playerData;

@@ -179,15 +179,14 @@ ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
         for (DungeonFinderItemsMap::const_iterator it = itemBuffer.begin(); it != itemBuffer.end(); ++it)
         {
             DungeonFinderItems itemCache = it->second;
-            if (itemCache.dungeonType == type)
+
+            // should only be one row matching this band and tier
+            if (LFGRewardLogic::ItemRewardMatches(itemCache.minLevel, itemCache.maxLevel,
+                                                  itemCache.dungeonType, avgLevel, type))
             {
-                // should only be one of this inequality in the map
-                if ((avgLevel >= itemCache.minLevel) && (avgLevel <= itemCache.maxLevel))
-                {
-                    rewards.itemId = itemCache.itemReward;
-                    rewards.itemAmount = itemCache.itemAmount;
-                    return rewards;
-                }
+                rewards.itemId = itemCache.itemReward;
+                rewards.itemAmount = itemCache.itemAmount;
+                return rewards;
             }
         }
     }
@@ -197,39 +196,12 @@ ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
 DungeonTypes LFGMgr::GetDungeonType(uint32 dungeonId)
 {
     LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(dungeonId);
-    if (dungeon)
+    if (!dungeon)
     {
-        switch (dungeon->expansionLevel)
-        {
-            case 0:
-                return DUNGEON_CLASSIC;
-            case 1:
-            {
-                if (dungeon->difficulty == DUNGEON_DIFFICULTY_NORMAL)
-                {
-                    return DUNGEON_TBC;
-                }
-                else if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
-                {
-                    return DUNGEON_TBC_HEROIC;
-                }
-            }
-            case 2:
-            {
-                if (dungeon->difficulty == DUNGEON_DIFFICULTY_NORMAL)
-                {
-                    return DUNGEON_WOTLK;
-                }
-                else if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
-                {
-                    return DUNGEON_WOTLK_HEROIC;
-                }
-            }
-            default:
-                return DUNGEON_UNKNOWN;
-        }
+        return DUNGEON_UNKNOWN;
     }
-    return DUNGEON_UNKNOWN;
+
+    return LFGRewardLogic::ClassifyDungeon(dungeon->expansionLevel, dungeon->difficulty);
 }
 
 void LFGMgr::RegisterPlayerDaily(uint32 guidLow, DungeonTypes dungeon)
@@ -249,6 +221,11 @@ void LFGMgr::RegisterPlayerDaily(uint32 guidLow, DungeonTypes dungeon)
         case DUNGEON_WOTLK_HEROIC:
             m_dailyLKHeroic.insert(guidLow);
             break;
+        case DUNGEON_CATACLYSM:
+            m_dailyCataNormal.insert(guidLow);
+            break;
+        // DUNGEON_CATACLYSM_HEROIC has no daily set: its cadence is the
+        // weekly currency cap, not a first-of-day bonus.
         default:
             break;
     }
@@ -267,6 +244,8 @@ bool LFGMgr::HasPlayerDoneDaily(uint32 guidLow, DungeonTypes dungeon)
             return (m_dailyLKNormal.find(guidLow) != m_dailyLKNormal.end()) ? true : false;
         case DUNGEON_WOTLK_HEROIC:
             return (m_dailyLKHeroic.find(guidLow) != m_dailyLKHeroic.end()) ? true : false;
+        case DUNGEON_CATACLYSM:
+            return (m_dailyCataNormal.find(guidLow) != m_dailyCataNormal.end()) ? true : false;
         default:
             return false;
     }
@@ -279,6 +258,7 @@ void LFGMgr::ResetDailyRecords()
     m_dailyTBCHeroic.clear();
     m_dailyLKNormal.clear();
     m_dailyLKHeroic.clear();
+    m_dailyCataNormal.clear();
 }
 
 bool LFGMgr::IsSeasonActive(uint32 dungeonId)

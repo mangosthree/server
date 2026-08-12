@@ -811,7 +811,9 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 removeMethod)
     {
         bool leaderChanged = _removeMember(guid);
 
-        sLFGMgr.OnGroupMemberRemoved(GetObjectGuid(), guid);
+        // removeMethod: 0 the player left, 1 they were kicked. The LFG hook
+        // needs the difference -- only one of the two earns Deserter.
+        sLFGMgr.OnGroupMemberRemoved(GetObjectGuid(), guid, removeMethod);
         if (leaderChanged)
         {
             sLFGMgr.OnGroupLeaderChanged(GetObjectGuid(), m_memberSlots.front().guid);
@@ -861,6 +863,13 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 removeMethod)
     // if group before remove <= 2 disband it
     else
     {
+        // Disband tears the whole group down and only fires OnGroupDisband,
+        // so the per-member hook above never sees this removal. Run it
+        // first: the player walking out of a two-man remnant left an
+        // unfinished dungeon just as surely as the first one did. It is a
+        // no-op for a group the finder does not know.
+        sLFGMgr.OnGroupMemberRemoved(GetObjectGuid(), guid, removeMethod);
+
         Disband(true);
     }
 

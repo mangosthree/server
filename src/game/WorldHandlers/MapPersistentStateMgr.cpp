@@ -70,6 +70,7 @@
 #include "World.h"
 #include "Group.h"
 #include "InstanceData.h"
+#include "LFGMgr.h"
 #include "ProgressBar.h"
 #include <cstdarg>
 
@@ -433,17 +434,29 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
     {
         DungeonEncounterEntry const* dbcEntry = iter->second->dbcEntry;
 
-        if (iter->second->creditType == type && Difficulty(dbcEntry->Difficulty) == GetDifficulty() && dbcEntry->MapID == GetMapId())
+        // Difficulty -1 covers every difficulty of the map. 155 of the 617
+        // rows are stored that way, among them every encounter of End Time,
+        // Well of Eternity and Hour of Twilight -- comparing the raw field
+        // never matched those, so their bits never reached encountersMask.
+        bool const difficultyMatches = (dbcEntry->Difficulty == uint32(-1)) ||
+            (Difficulty(dbcEntry->Difficulty) == GetDifficulty());
+
+        if (iter->second->creditType == type && difficultyMatches &&
+            dbcEntry->MapID == GetMapId())
         {
             m_completedEncountersMask |= 1 << dbcEntry->Bit;
 
             CharacterDatabase.PExecute("UPDATE `instance` SET `encountersMask` = '%u' WHERE `id` = '%u'", m_completedEncountersMask, GetInstanceId());
 
             DEBUG_LOG("DungeonPersistentState: Dungeon %s (Id %u) completed encounter %s", GetMap()->GetMapName(), GetInstanceId(), dbcEntry->Name_lang[sWorld.GetDefaultDbcLocale()]);
-            if (/*uint32 dungeonId =*/ iter->second->lastEncounterDungeon)
+            if (iter->second->lastEncounterDungeon)
             {
                 DEBUG_LOG("DungeonPersistentState:: Dungeon %s (Instance-Id %u) completed last encounter %s", GetMap()->GetMapName(), GetInstanceId(), dbcEntry->Name_lang[sWorld.GetDefaultDbcLocale()]);
-                // Place LFG reward here
+
+                if (sWorld.getConfig(CONFIG_BOOL_LFG_ENABLE))
+                {
+                    sLFGMgr.OnDungeonEncounterComplete(GetMap());
+                }
             }
             return;
         }

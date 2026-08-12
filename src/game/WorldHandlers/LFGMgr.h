@@ -33,6 +33,7 @@
 #include <string>
 #include "LFGBootLogic.h"
 #include "LFGEmpowerment.h"
+#include "LFGRewardLogic.h"
 #include "LFGPackets.h"
 #include "Policies/Singleton.h"
 #include "Group.h"
@@ -235,23 +236,11 @@ enum LFGTeleportError
     LFG_TELEPORTERROR_CHARMING                   = 8
 };
 
-enum DungeonTypes
-{
-    DUNGEON_CLASSIC      = 0,
-    DUNGEON_TBC          = 1,
-    DUNGEON_TBC_HEROIC   = 2,
-    DUNGEON_WOTLK        = 3,
-    DUNGEON_WOTLK_HEROIC = 4,
-    DUNGEON_UNKNOWN
-};
+// DungeonTypes lives in LFGRewardLogic.h -- ClassifyDungeon returns it.
 
 // End Section: Enumerations
 
 // Begin Section: Constants & Definitions
-
-/// Heroic dungeon rewards in WoTLK after already doing a dungeon
-const uint32 WOTLK_SPECIAL_HEROIC_ITEM = 47241;
-const uint32 WOTLK_SPECIAL_HEROIC_AMNT = 2;
 
 /// Default average queue time (in case we don't have data to base calculations on)
 const int32 QUEUE_DEFAULT_TIME = 15*MINUTE;                              // 15 minutes [system is measured in seconds]
@@ -266,6 +255,7 @@ typedef std::unordered_map<uint32, LFGProposal> proposalMap;                  //
 typedef std::unordered_map<uint32, LFGWait> waitTimeMap;                      // DungeonID, wait info
 typedef std::unordered_map<ObjectGuid, dungeonForbidden> partyForbidden;      // ObjectGuid of player, map of locked dungeons
 typedef std::unordered_map<ObjectGuid, uint8> roleMap;                        // ObjectGuid of player, role(s) selected
+typedef std::unordered_map<ObjectGuid, uint32> queuedSlotMap;                 // ObjectGuid of player, the random dungeon ID they queued for (0 = specific)
 typedef std::unordered_map<ObjectGuid, LFGRoleCheck> roleCheckMap;            // ObjectGuid of group, role information
 typedef std::unordered_map<ObjectGuid, LFGPlayerStatus> playerStatusMap;      // ObjectGuid of player, info on specific players only
 typedef std::unordered_map<ObjectGuid, LFGPlayers> playerData;                // ObjectGuid of plr/group, info on specific player or group. TODO: rename to queueData
@@ -350,11 +340,14 @@ struct LFGPlayerStatus
 /// Information on a group currently in a dungeon
 struct LFGGroupStatus //todo: check for this in joinlfg function, not lfgplayers struct
 {
-    LFGState state;        // State of the group
-    uint32 dungeonID;      // ID of the dungeon the group should be in
-    roleMap playerRoles;   // Container holding each player's objectguid and their roles
-    ObjectGuid leaderGuid; // The group leader's object guid
-    uint8 kicksLeft;       // Boot votes this group may still win before ERR_PARTY_LFG_BOOT_LIMIT
+    LFGState state;          // State of the group
+    uint32 dungeonID;        // ID of the dungeon the group should be in
+    roleMap playerRoles;     // Container holding each player's objectguid and their roles
+    ObjectGuid leaderGuid;   // The group leader's object guid
+    uint8 kicksLeft;         // Boot votes this group may still win before ERR_PARTY_LFG_BOOT_LIMIT
+    queuedSlotMap queuedSlots; // Per member: the random dungeon they queued for, captured
+                               // at formation. The completed dungeon is always a specific
+                               // one, so it cannot be derived back at reward time.
 
     LFGGroupStatus()
         : state(LFG_STATE_NONE), dungeonID(0),
@@ -391,25 +384,6 @@ struct LFGProposal
     time_t joinedQueue = 0;               ///< queue join time, feeds wait stats
     time_t cancelTime = 0;                ///< expiry timestamp, seconds
     ObjectGuid queueEntryGuid;            ///< m_playerData key this proposal was built from
-};
-
-// For SMSG_LFG_PLAYER_REWARD
-struct LFGRewards
-{
-    uint32 randomDungeonEntry;  // Entry of the random dungeon done (0 if not random)
-    uint32 groupDungeonEntry;   // Entry of the dungeon done by your group
-    bool hasDoneDaily;          // First dungeon of the day?
-    uint32 moneyReward;         // Amount of money rewarded
-    uint32 expReward;           // Amount of experience rewarded
-    uint32 itemID;              // ID of item reward
-    uint32 itemAmount;          // How many of x item is rewarded
-
-    LFGRewards() { }
-    LFGRewards(uint32 RandomDungeonEntry, uint32 GroupDungeonEntry, bool HasDoneDaily,
-        uint32 MoneyReward, uint32 ExpReward, uint32 ItemID, uint32 ItemAmount) :
-        randomDungeonEntry(RandomDungeonEntry), groupDungeonEntry(GroupDungeonEntry),
-        hasDoneDaily(HasDoneDaily), moneyReward(MoneyReward), expReward(ExpReward),
-        itemID(ItemID), itemAmount(ItemAmount) { }
 };
 
 // For SMSG_LFG_BOOT_PLAYER
@@ -469,8 +443,10 @@ public:
      *        the LFG queue
      *
      * @param plr The pointer to the player
+     * @param dungeons The dungeons being queued for. The random cooldown only
+     *        blocks a selection that contains a random or seasonal slot.
      */
-    LfgJoinResult GetJoinResult(Player* plr);
+    LfgJoinResult GetJoinResult(Player* plr, std::set<uint32> const& dungeons);
 
     /// Build the empowerment state for \a plr from its current group.
     static LFGEmpowerment::State BuildEmpowermentState(Player* plr);
@@ -543,6 +519,11 @@ public:
     /// Reset accounts of players completing a/any dungeon for the day for new rewards
     void ResetDailyRecords();
 
+    /// Reset the weekly reward counters LFG keeps itself. Justice has no
+    /// DBC week cap, so the seven-per-week Cataclysm normal allowance
+    /// cannot ride on CurrencyMgr the way Valor does.
+    void ResetWeeklyRecords();
+
     /**
      * @brief Find out whether or not a special dungeon is available for that season
      *
@@ -557,6 +538,19 @@ public:
      * @param expansion The player's expansion
      */
     dungeonEntries FindRandomDungeonsForPlayer(uint32 level, uint8 expansion);
+
+    /**
+    * Builds the reward preview the Dungeon Finder panel draws for every
+    * random slot this player can queue: what one completion pays, and how
+    * many completions are left in the period.
+    *
+    * \arg \c pPlayer
+    *   The requesting player.
+    * \arg \c out
+    *   Receives one entry per available random dungeon, appended.
+    */
+    void BuildRandomDungeonRewards(Player* pPlayer,
+                                   std::vector<LFGPackets::LFGRandomDungeonEntry>& out);
 
     /**
      * @brief Find the random dungeons not applicable for a player
@@ -660,8 +654,15 @@ public:
 
     void ProposalUpdate(uint32 proposalID, ObjectGuid plrGuid, bool accepted);
 
-    /// Handles reward hooks -- called by achievement manager
-    void HandleBossKilled(Player* pPlayer);
+    /**
+    * Pays out an LFD run. Called from DungeonPersistentState when the
+    * encounter flagged as the dungeon's last one completes.
+    *
+    * \arg \c pMap
+    *   The instance the encounter completed on. Every LFD group on it
+    *   whose queued dungeon matches is rewarded once.
+    */
+    void OnDungeonEncounterComplete(Map* pMap);
 
     /// Group kick hook
     void AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kicker, std::string reason);
@@ -688,7 +689,8 @@ public:
 
     /// Group lifecycle hooks used by the core group implementation.
     void OnGroupMemberAdded(ObjectGuid groupGuid, ObjectGuid playerGuid);
-    void OnGroupMemberRemoved(ObjectGuid groupGuid, ObjectGuid playerGuid);
+    void OnGroupMemberRemoved(ObjectGuid groupGuid, ObjectGuid playerGuid,
+                              uint8 removeMethod);
     void OnGroupDisband(ObjectGuid groupGuid);
     void OnGroupLeaderChanged(ObjectGuid groupGuid, ObjectGuid newLeaderGuid);
     /// Returns true when logout must retain active LFD group membership.
@@ -797,11 +799,30 @@ protected:
     void RemoveOldRoleChecks();
 
 private:
+    /// The random dungeon this player queued for, 0 when they picked a
+    /// specific one. Read from their own selection, which the queue keeps.
+    uint32 GetQueuedRandomID(ObjectGuid plrGuid);
+
+    /// Casts or clears the leave/kick auras a removal from an LFD group
+    /// earns, per LFGRewardLogic::PenaltyForRemoval under the two
+    /// LFG.Deserter config options.
+    void ApplyRemovalPenalty(ObjectGuid playerGuid, uint8 removeMethod,
+                             bool dungeonInProgress, size_t remainingMembers);
+
+    /// Pays one member for a completed run and tells them what they got.
+    void RewardDungeonCompletion(Player* pPlayer, LFGGroupStatus const& status,
+                                 DungeonTypes type);
+
     /// Daily occurences of a player doing X type dungeon
     dailyEntries m_dailyAny;
     dailyEntries m_dailyTBCHeroic;
     dailyEntries m_dailyLKNormal;
     dailyEntries m_dailyLKHeroic;
+    dailyEntries m_dailyCataNormal;
+
+    /// Random Cataclysm normals completed this week, per player. Justice
+    /// carries no DBC week cap, so this allowance has nowhere else to live.
+    std::unordered_map<uint32, uint8> m_weeklyCataNormal;
 
     /// General info related to joining / leaving the dungeon finder
     playerData m_playerData;

@@ -30,7 +30,9 @@
 #include "DBCStructure.h"
 #include "GameEventMgr.h"
 #include "Group.h"
+#include "Item.h"
 #include "LFGMgr.h"
+#include "Mail.h"
 #include "LFGBootLogic.h"
 #include "LFGProposalLogic.h"
 #include "LFGDungeonResolution.h"
@@ -674,9 +676,30 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     pGroup->SetAsLfgGroup();
     pGroup->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
 
+    // Strangers thrown together do not get to trust each other: a finder
+    // group loots need before greed, so anything above the threshold is
+    // rolled for by the members who can actually use it instead of going
+    // to whoever reaches the corpse first. A premade that queued together
+    // is switched over too -- the rule belongs to the run, not the party
+    // that started it. HandleLootMethodOpcode already refuses to change it
+    // back while the group is an LFD one.
+    pGroup->SetLootMethod(NEED_BEFORE_GREED);
+    pGroup->SetLootThreshold(ITEM_QUALITY_UNCOMMON);
+
     ObjectGuid groupGuid = pGroup->GetObjectGuid();
     LFGGroupStatus groupStatus(LFG_STATE_IN_DUNGEON, dungeon->ID,
                                proposal->assignedRoles, pGroup->GetLeaderGuid());
+
+    // Capture what each member queued for while their selection is still
+    // around. By completion time the group holds a concrete dungeon and the
+    // random slot they clicked is unrecoverable -- and members of one group
+    // can have arrived from different random slots.
+    for (roleMap::const_iterator itr = proposal->assignedRoles.begin();
+         itr != proposal->assignedRoles.end(); ++itr)
+    {
+        groupStatus.queuedSlots[itr->first] = GetQueuedRandomID(itr->first);
+    }
+
     m_groupSet.insert(groupGuid);
     m_groupStatusMap[groupGuid] = groupStatus;
 
@@ -693,6 +716,16 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     {
         if (Player* pGroupPlr = itr->getSource())
         {
+            // Being placed in a random group starts the 15 minute cooldown
+            // on queueing for another random. Picking a dungeon by name
+            // starts nothing, and completing this one lifts it early.
+            queuedSlotMap::const_iterator slotItr =
+                groupStatus.queuedSlots.find(pGroupPlr->GetObjectGuid());
+            if (slotItr != groupStatus.queuedSlots.end() && slotItr->second != 0)
+            {
+                pGroupPlr->CastSpell(pGroupPlr, LFG_COOLDOWN_SPELL, true);
+            }
+
             TeleportPlayer(pGroupPlr, false, true);
         }
     }
@@ -1174,78 +1207,311 @@ void LFGMgr::UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime)
 
 }
 
-void LFGMgr::HandleBossKilled(Player* pPlayer)
+namespace
 {
-    Group* pGroup = pPlayer->GetGroup();
-    if (!pGroup)
+    /// Grants a currency and reports what actually landed. CurrencyMgr
+    /// clamps against the weekly and total caps, so the request and the
+    /// grant are different numbers on the run that fills the week.
+    uint32 GrantLfgCurrency(Player* pPlayer, uint32 currencyId, uint32 amount)
     {
-        return;
+        uint32 const before = pPlayer->GetCurrencyCount(currencyId);
+        pPlayer->ModifyCurrencyCount(currencyId, int32(amount));
+        uint32 const after = pPlayer->GetCurrencyCount(currencyId);
+
+        return (after > before) ? (after - before) : 0;
     }
 
-    ObjectGuid groupGuid = pGroup->GetObjectGuid();
-    LFGGroupStatus* status = GetGroupStatus(groupGuid);
-    if (!status)
+    /// Adds a granted currency to the reward packet. Quantities stay in the
+    /// hundredths CurrencyMgr stores: the client divides a currency flagged
+    /// 0x08 by 100 before display, so 15000 shows as 150.
+    void AppendCurrencyReward(LFGPackets::PlayerReward& reward, uint32 currencyId,
+                              uint32 quantity)
     {
-        return;
+        LFGRewardItem item;
+        item.id = currencyId;
+        item.displayId = 0;
+        item.quantity = quantity;
+        item.isCurrency = true;
+        reward.items.push_back(item);
     }
 
-    // set each player's lfgstate to LFG_STATE_FINISHED_DUNGEON
-    // fetch reward info, and if it's the first dungeon of the day (per player),
-    //    give them 2x the xp (or 1x if it's not the first), and the reward item
-    //    (special case for 2nd wotlk heroic and +). If no room in inventory, send
-    //    via ingame mail.
-    status->state = LFG_STATE_FINISHED_DUNGEON;
-
-    DungeonTypes type = GetDungeonType(status->dungeonID);
-    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next()) //todo: check if we will need to use mail or not
+    /// Puts the reward item in the player's bags, mailing it if they are
+    /// full so a full inventory never eats the reward.
+    void GiveRewardItem(Player* pPlayer, uint32 itemId, uint32 amount)
     {
-        if (Player* pGroupPlr = itr->getSource())
+        ItemPosCountVec dest;
+        if (pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, amount) == EQUIP_ERR_OK)
         {
-            SetPlayerState(pGroupPlr->GetObjectGuid(), LFG_STATE_FINISHED_DUNGEON);
+            Item* pItem = pPlayer->StoreNewItem(dest, itemId, true,
+                                                Item::GenerateItemRandomPropertyId(itemId));
+            pPlayer->SendNewItem(pItem, amount, true, false);
+            return;
+        }
 
-            // check if player did a random dungeon
-            uint32 randomDungeonId = 0;
-            LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(status->dungeonID);
-            if (dungeon->typeID == LFG_TYPE_RANDOM_DUNGEON || IsSeasonal(dungeon->flags))
-            {
-                randomDungeonId = dungeon->ID;
-            }
+        Item* pItem = Item::CreateItem(itemId, amount, pPlayer);
+        if (!pItem)
+        {
+            return;
+        }
 
-            // get rewards
-            uint32 groupPlrLevel = pGroupPlr->getLevel();
-            const DungeonFinderRewards* rewards = sObjectMgr.GetDungeonFinderRewards(groupPlrLevel); // Fetch base xp/money reward
-            ItemRewards itemRewards = GetDungeonItemRewards(status->dungeonID, type);                // fetch item reward
+        // Save before sending, so a failed send does not lose the item.
+        pItem->SaveToDB();
 
-            int32 multiplier;                                                                        // base reward modifier
-            bool hasDoneDaily = HasPlayerDoneDaily(pGroupPlr->GetGUIDLow(), type);                                 // first dungeon of the day?
-            (hasDoneDaily) ? multiplier = 1 : multiplier = 2;
+        ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemId);
 
-            uint32 xpReward = multiplier*rewards->baseXPReward;                                      // player's xp reward
-            uint32 moneyReward = uint32(multiplier*rewards->baseMonetaryReward);                              // player's money reward
+        // Subject is the item's own name, as the auction house does it --
+        // no new mangos_string row for one fallback path.
+        MailDraft draft(pProto ? pProto->Name1 : "", "");
+        draft.AddItem(pItem);
+        draft.SendMailTo(pPlayer, MailSender(MAIL_NORMAL, pPlayer->GetGUIDLow(),
+                                             MAIL_STATIONERY_GM));
+    }
+}
 
-            uint32 itemReward = 0;                                                                   // reward item
-            uint32 itemAmount = 0;                                                                   // amount of item
-            if (hasDoneDaily && (type == DUNGEON_WOTLK_HEROIC))
-            {
-                itemReward = WOTLK_SPECIAL_HEROIC_ITEM;
-                itemAmount = WOTLK_SPECIAL_HEROIC_AMNT;
-            }
-            else if (!hasDoneDaily)
-            {
-                itemReward = itemRewards.itemId;
-                itemAmount = itemRewards.itemAmount;
-            }
-
-            // and then fill a structure corresponding to SMSG_LFG_PLAYER_REWARD and
-            // send one of these to each player
-            LFGRewards reward(randomDungeonId, status->dungeonID, hasDoneDaily, moneyReward, xpReward, itemReward, itemAmount);
-            pGroupPlr->GetSession()->SendLfgRewards(reward);
+uint32 LFGMgr::GetQueuedRandomID(ObjectGuid plrGuid)
+{
+    // The queue keeps the player's own selection: a random join carries the
+    // one random row they clicked, never the concrete set it expanded to.
+    LFGPlayerStatus const status = GetPlayerStatus(plrGuid);
+    for (std::set<uint32>::const_iterator itr = status.dungeonList.begin();
+         itr != status.dungeonList.end(); ++itr)
+    {
+        LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(*itr);
+        if (dungeon && (dungeon->typeID == LFG_TYPE_RANDOM_DUNGEON ||
+                        IsSeasonal(dungeon->flags)))
+        {
+            return dungeon->ID;
         }
     }
 
-    // now we can remove the group from our maps
-    m_groupStatusMap.erase(groupGuid);
-    m_groupSet.erase(groupGuid);
+    return 0;
+}
+
+void LFGMgr::RewardDungeonCompletion(Player* pPlayer, LFGGroupStatus const& status,
+                                     DungeonTypes type)
+{
+    ObjectGuid const plrGuid = pPlayer->GetObjectGuid();
+
+    queuedSlotMap::const_iterator slotItr = status.queuedSlots.find(plrGuid);
+    uint32 const queuedID = (slotItr != status.queuedSlots.end()) ? slotItr->second : 0;
+
+    LFGPackets::PlayerReward reward;
+    reward.actualSlot = GetDungeonEntry(status.dungeonID);
+    reward.queuedSlot = queuedID ? GetDungeonEntry(queuedID) : reward.actualSlot;
+
+    // Only a random (or seasonal) queue pays. Picking a dungeon by name and
+    // clearing it is its own reward -- the era reward quests are all
+    // "Random ..." quests, and the client's own preview only ever names a
+    // random slot.
+    if (!queuedID)
+    {
+        return;
+    }
+
+    DungeonTypes const randomType = GetDungeonType(queuedID);
+    uint32 const level = pPlayer->getLevel();
+    bool const atMaxLevel =
+        (level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
+
+    // Max-level heroic randoms are paid in currency on a weekly cadence;
+    // everything else pays gold and experience, doubled on the first run of
+    // the day for that tier.
+    bool const currencyRegime = (randomType == DUNGEON_CATACLYSM_HEROIC);
+
+    DungeonFinderRewards const* rewards = sObjectMgr.GetDungeonFinderRewards(level);
+    uint32 money = 0;
+    uint32 xp = 0;
+    bool hasDoneDaily = true;
+
+    if (rewards)
+    {
+        if (currencyRegime)
+        {
+            // Repeatable, so the stored (subsequent-run) value stands as is.
+            money = uint32(rewards->baseMonetaryReward);
+        }
+        else
+        {
+            hasDoneDaily = HasPlayerDoneDaily(pPlayer->GetGUIDLow(), randomType);
+
+            uint32 const multiplier = LFGRewardLogic::FirstRewardMultiplier(hasDoneDaily);
+            money = uint32(rewards->baseMonetaryReward) * multiplier;
+            xp = rewards->baseXPReward * multiplier;
+
+            RegisterPlayerDaily(pPlayer->GetGUIDLow(), randomType);
+        }
+    }
+    else
+    {
+        // No row for this level: pay nothing rather than dereference one.
+        sLog.outErrorDb("LFGMgr: no dungeonfinder_rewards row for level %u, "
+                        "player %s completed dungeon %u unpaid",
+                        level, plrGuid.GetString().c_str(), status.dungeonID);
+    }
+
+    if (atMaxLevel)
+    {
+        xp = 0;
+    }
+
+    // Currency. The granted amount is measured, never assumed: CurrencyMgr
+    // clamps against the weekly and total caps, and the packet has to carry
+    // what the player actually received.
+    if (currencyRegime)
+    {
+        uint32 granted = GrantLfgCurrency(pPlayer, LFGRewardLogic::LFG_CURRENCY_VALOR,
+                                          LFGRewardLogic::CATA_HEROIC_VALOR);
+        if (granted > 0)
+        {
+            AppendCurrencyReward(reward, LFGRewardLogic::LFG_CURRENCY_VALOR, granted);
+        }
+        else
+        {
+            // Valor week spent -- the run still pays, in Justice.
+            granted = GrantLfgCurrency(pPlayer, LFGRewardLogic::LFG_CURRENCY_JUSTICE,
+                                       LFGRewardLogic::CATA_HEROIC_JUSTICE_FALLBACK);
+            if (granted > 0)
+            {
+                AppendCurrencyReward(reward, LFGRewardLogic::LFG_CURRENCY_JUSTICE, granted);
+            }
+        }
+    }
+    else if (randomType == DUNGEON_CATACLYSM &&
+             level >= LFGRewardLogic::CATA_NORMAL_JUSTICE_MIN_LEVEL)
+    {
+        // Slot 300 spans levels 80-85, but its Justice only starts with the
+        // 83+ reward quests; below that it is a gold and experience run.
+        uint8& runsThisWeek = m_weeklyCataNormal[pPlayer->GetGUIDLow()];
+        if (runsThisWeek < LFGRewardLogic::CATA_NORMAL_JUSTICE_RUNS_PER_WEEK)
+        {
+            uint32 const granted = GrantLfgCurrency(pPlayer,
+                                                    LFGRewardLogic::LFG_CURRENCY_JUSTICE,
+                                                    LFGRewardLogic::CATA_NORMAL_JUSTICE);
+            if (granted > 0)
+            {
+                ++runsThisWeek;
+                AppendCurrencyReward(reward, LFGRewardLogic::LFG_CURRENCY_JUSTICE, granted);
+            }
+        }
+    }
+
+    // Item, first run of the day only.
+    if (!currencyRegime && !hasDoneDaily)
+    {
+        ItemRewards const itemRewards = GetDungeonItemRewards(status.dungeonID, type);
+        if (itemRewards.itemId && itemRewards.itemAmount)
+        {
+            GiveRewardItem(pPlayer, itemRewards.itemId, itemRewards.itemAmount);
+
+            if (ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemRewards.itemId))
+            {
+                LFGRewardItem item;
+                item.id = itemRewards.itemId;
+                item.displayId = pProto->DisplayInfoID;
+                item.quantity = itemRewards.itemAmount;
+                item.isCurrency = false;
+                reward.items.push_back(item);
+            }
+        }
+    }
+
+    if (money > 0)
+    {
+        pPlayer->ModifyMoney(int64(money));
+    }
+
+    if (xp > 0)
+    {
+        pPlayer->GiveXP(xp, NULL);
+    }
+
+    reward.rewardMoney = money;
+    reward.addedXp = xp;
+
+    pPlayer->GetSession()->SendLfgPlayerReward(reward);
+}
+
+void LFGMgr::OnDungeonEncounterComplete(Map* pMap)
+{
+    if (!pMap)
+    {
+        return;
+    }
+
+    // The groups standing on this instance. A player may be grouped without
+    // that group being an LFD one -- the status lookup below filters those.
+    std::set<ObjectGuid> groupGuids;
+    Map::PlayerList const& players = pMap->GetPlayers();
+    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    {
+        Player* pPlayer = itr->getSource();
+        if (!pPlayer)
+        {
+            continue;
+        }
+
+        if (Group* pGroup = pPlayer->GetGroup())
+        {
+            groupGuids.insert(pGroup->GetObjectGuid());
+        }
+    }
+
+    for (std::set<ObjectGuid>::const_iterator itr = groupGuids.begin();
+         itr != groupGuids.end(); ++itr)
+    {
+        LFGGroupStatus* status = GetGroupStatus(*itr);
+        if (!status || status->state != LFG_STATE_IN_DUNGEON)
+        {
+            continue;
+        }
+
+        // The dungeon the group queued for is the authority on what was just
+        // completed; instance_encounters only says "this was a last boss".
+        LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(status->dungeonID);
+        if (!dungeon || dungeon->mapID != int32(pMap->GetId()) ||
+            Difficulty(dungeon->difficulty) != pMap->GetDifficulty())
+        {
+            continue;
+        }
+
+        Group* pGroup = sObjectMgr.GetGroupById(itr->GetCounter());
+        if (!pGroup)
+        {
+            continue;
+        }
+
+        // Flip state before paying anyone: a second last-boss credit finds
+        // the group finished and skips it.
+        status->state = LFG_STATE_FINISHED_DUNGEON;
+
+        DungeonTypes const type = GetDungeonType(status->dungeonID);
+
+        for (GroupReference* ref = pGroup->GetFirstMember(); ref != NULL; ref = ref->next())
+        {
+            Player* pGroupPlr = ref->getSource();
+
+            // Only members who were there for the kill. Nobody is paid for
+            // walking in afterwards.
+            if (!pGroupPlr || pGroupPlr->GetMapId() != pMap->GetId())
+            {
+                continue;
+            }
+
+            RewardDungeonCompletion(pGroupPlr, *status, type);
+
+            // Finishing lifts the random cooldown early.
+            pGroupPlr->RemoveAurasDueToSpell(LFG_COOLDOWN_SPELL);
+
+            ObjectGuid const plrGuid = pGroupPlr->GetObjectGuid();
+            SetPlayerState(plrGuid, LFG_STATE_FINISHED_DUNGEON);
+            SetPlayerUpdateType(plrGuid, LFG_UPDATE_DUNGEON_FINISHED);
+            SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), true);
+        }
+    }
+
+    // The group status stays, now FINISHED: it is what suppresses the
+    // client's backfill offer and what tells a later leave that the run was
+    // already over. OnGroupDisband clears it when the group dissolves.
 }
 
 void LFGMgr::AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kicker, std::string reason)
@@ -1454,10 +1720,12 @@ void LFGMgr::FinishBootVote(ObjectGuid groupGuid, bool succeeded)
         Player* pVictim = sPlayerRegistry.Find(boot.playerVotedOn);
         if (pVictim)
         {
-            // A booted player keeps no deserter debuff and gets the random
-            // dungeon cooldown back. RemoveAurasDueToSpell is a no-op today
-            // -- 71328 is never applied in this tree -- written now so the
-            // branch is correct once a later phase starts applying it.
+            // A booted player gets their random dungeon cooldown back.
+            // RemoveMember's hook does this too, but only while the group
+            // survives -- a boot that takes it below three disbands
+            // instead, and this is the only clearing on that path.
+            // Whether the victim also earns Deserter is the hook's call,
+            // under LFG.Deserter.OnVoteKick (exempt by default).
             pVictim->RemoveAurasDueToSpell(LFG_COOLDOWN_SPELL);
         }
 

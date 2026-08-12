@@ -446,6 +446,8 @@ void World::LoadConfigSettings(bool reload)
 
     ///- Load the LFG (Dungeon Finder) related config options
     setConfig(CONFIG_BOOL_LFG_ENABLE, "LFG.Enable", false);
+    setConfig(CONFIG_UINT32_LFG_DESERTER_MIN_REMAINING, "LFG.Deserter.MinRemaining", 0);
+    setConfig(CONFIG_BOOL_LFG_DESERTER_ON_VOTE_KICK, "LFG.Deserter.OnVoteKick", false);
 
     setConfig(CONFIG_BOOL_TALENTS_INSPECTING,           "TalentsInspecting", true);
     setConfig(CONFIG_BOOL_CHAT_FAKE_MESSAGE_PREVENTING, "ChatFakeMessagePreventing", false);

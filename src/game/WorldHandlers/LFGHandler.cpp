@@ -438,34 +438,19 @@ void WorldSession::SendLfgTeleportError(uint8 error)
     SendPacket(&data);
 }
 
-void WorldSession::SendLfgRewards(LFGRewards const& rewards)
+void WorldSession::SendLfgPlayerReward(LFGPackets::PlayerReward const& reward)
 {
     DEBUG_LOG("SMSG_LFG_PLAYER_REWARD");
 
     WorldPacket data(SMSG_LFG_PLAYER_REWARD, 42);
-    data << uint32(rewards.randomDungeonEntry);
-    data << uint32(rewards.groupDungeonEntry);
-    data << uint8(rewards.hasDoneDaily);
-    data << uint32(1);
-    data << uint32(rewards.moneyReward);
-    data << uint32(rewards.expReward);
-    data << uint32(0);
-    data << uint32(0);
-    if (rewards.itemID != 0)
+    if (!LFGPackets::BuildPlayerReward(data, reward))
     {
-        ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(rewards.itemID);
-        if (pProto)
-        {
-            data << uint8(1);
-            data << uint32(rewards.itemID);
-            data << uint32(pProto->DisplayInfoID);
-            data << uint32(rewards.itemAmount);
-        }
+        sLog.outError("SMSG_LFG_PLAYER_REWARD: %s has %u reward items, wire holds a uint8",
+                      _player ? _player->GetGuidStr().c_str() : "<no player>",
+                      uint32(reward.items.size()));
+        return;
     }
-    else
-    {
-        data << uint8(0);
-    }
+
     SendPacket(&data);
 }
 
@@ -537,19 +522,20 @@ void WorldSession::SendLfgOfferContinue(uint32 dungeonEntry)
 }
 
 /// Builds and sends SMSG_LFG_PLAYER_INFO for the requesting player. Drives
-/// the padlocks in the Dungeon Finder's own list (LFG_LOCK_INFO_RECEIVED).
-/// randomDungeons is intentionally left empty: the reward fields it carries
-/// (Completion/Purse/shortage-tier quantities) are Phase 9's job, and the
-/// client tolerates an empty array here -- it just leaves the "Type:"
-/// dropdown in specific-dungeon mode (section 1.3) until that phase lands.
+/// the padlocks in the Dungeon Finder's own list (LFG_LOCK_INFO_RECEIVED)
+/// and the reward panel: randomDungeons is what puts "Random Dungeon" in
+/// the "Type:" dropdown at all, and carries the money, experience,
+/// currency and remaining-completions the panel draws beside it.
 void WorldSession::SendLfgPlayerLockInfo()
 {
     Player* player = GetPlayer();
 
     LFGPackets::PlayerInfo info;
+    sLFGMgr.BuildRandomDungeonRewards(player, info.randomDungeons);
     info.lockedDungeons = sLFGMgr.GetPlayerLockList(player);
 
-    WorldPacket data(SMSG_LFG_PLAYER_INFO, 5 + info.lockedDungeons.size() * 16);
+    WorldPacket data(SMSG_LFG_PLAYER_INFO,
+                     5 + info.randomDungeons.size() * 80 + info.lockedDungeons.size() * 16);
     if (LFGPackets::BuildPlayerInfo(data, info))
     {
         SendPacket(&data);

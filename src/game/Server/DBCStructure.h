@@ -897,7 +897,7 @@ struct DungeonEncounterEntry
 {
     uint32 ID;                                              // 0        m_ID
     uint32 MapID;                                           // 1        m_mapID
-    uint32 Difficulty;                                      // 2        m_difficulty
+    uint32 Difficulty;                                      // 2        m_difficulty, -1 = every difficulty
     uint32 OrderIndex;                                   // 3        m_orderIndex
     uint32 Bit;                                  // 4        m_Bit
     DBCString Name_lang;                                // 5 - encounter name

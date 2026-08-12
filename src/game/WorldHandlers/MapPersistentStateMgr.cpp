@@ -433,7 +433,15 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
     {
         DungeonEncounterEntry const* dbcEntry = iter->second->dbcEntry;
 
-        if (iter->second->creditType == type && Difficulty(dbcEntry->Difficulty) == GetDifficulty() && dbcEntry->MapID == GetMapId())
+        // Difficulty -1 covers every difficulty of the map. 155 of the 617
+        // rows are stored that way, among them every encounter of End Time,
+        // Well of Eternity and Hour of Twilight -- comparing the raw field
+        // never matched those, so their bits never reached encountersMask.
+        bool const difficultyMatches = (dbcEntry->Difficulty == uint32(-1)) ||
+            (Difficulty(dbcEntry->Difficulty) == GetDifficulty());
+
+        if (iter->second->creditType == type && difficultyMatches &&
+            dbcEntry->MapID == GetMapId())
         {
             m_completedEncountersMask |= 1 << dbcEntry->Bit;
 

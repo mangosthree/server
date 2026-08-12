@@ -37,7 +37,10 @@
 
 // Server side limitation. Base at used code requirements.
 // also see MAX_LEVEL and GT_MAX_LEVEL define
-#define STRONG_MAX_LEVEL 255
+// Everything above level 200 crashes the client: its tooltip path indexes
+// gtSpellScaling by level and reads past the end of the table, so the first
+// spell tooltip on such a character takes the client down.
+#define STRONG_MAX_LEVEL 200
 enum MountFlags
 {
     MOUNT_FLAG_CAN_PITCH                = 0x4,

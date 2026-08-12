@@ -155,6 +155,10 @@ enum LFGSpells
 {
     LFG_DESERTER_SPELL = 71041,
     LFG_COOLDOWN_SPELL = 71328,
+    /// Luck of the Draw: 5% damage, healing and health per stack, for a
+    /// group put together out of strangers. Duration, stack cap and the
+    /// map-exit removal all come from the DBC.
+    LFG_LUCK_OF_THE_DRAW_SPELL = 72221,
 };
 
 enum LFGTimes
@@ -331,6 +335,9 @@ struct LFGPlayerStatus
     std::set<uint32> dungeonList;
     std::string comment;
     RideTicket ticket;
+    /// Queued alone rather than as part of a party. These are the "random
+    /// players" Luck of the Draw counts.
+    bool queuedSolo = false;
 
     LFGPlayerStatus() : state(LFG_STATE_NONE), updateType(LFG_UPDATE_DEFAULT) { }
     LFGPlayerStatus(LFGState State, LfgUpdateType UpdateType, std::set<uint32> DungeonList, std::string Comment)
@@ -664,6 +671,18 @@ public:
     */
     void OnDungeonEncounterComplete(Map* pMap);
 
+    /**
+    * Applies Luck of the Draw to a player arriving on their finder
+    * dungeon's map -- on the formation teleport, a corpse run back in, or
+    * a login inside it.
+    *
+    * \arg \c pPlayer
+    *   The arriving player.
+    * \arg \c pMap
+    *   The map being entered.
+    */
+    void OnPlayerEnterMap(Player* pPlayer, Map* pMap);
+
     /// Group kick hook
     void AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kicker, std::string reason);
 
@@ -802,6 +821,11 @@ private:
     /// The random dungeon this player queued for, 0 when they picked a
     /// specific one. Read from their own selection, which the queue keeps.
     uint32 GetQueuedRandomID(ObjectGuid plrGuid);
+
+    /// Members of this group who queued alone. A member with no queue
+    /// status -- someone invited by hand after formation -- counts as a
+    /// friend rather than a stranger.
+    uint32 CountSoloJoinedMembers(LFGGroupStatus const& status);
 
     /// Casts or clears the leave/kick auras a removal from an LFD group
     /// earns, per LFGRewardLogic::PenaltyForRemoval under the two

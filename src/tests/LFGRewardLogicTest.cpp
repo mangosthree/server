@@ -124,6 +124,18 @@ TEST(LFGRewardLogic_FirstRewardMultiplier)
     CHECK(FirstRewardMultiplier(false) == 2u);
 }
 
+TEST(LFGRewardLogic_LuckOfTheDrawStacks)
+{
+    // One stack per stranger, capped at the spell's own maximum of three.
+    // A group that queued together as five has no strangers and no buff.
+    CHECK(LuckOfTheDrawStacks(0) == 0u);
+    CHECK(LuckOfTheDrawStacks(1) == 1u);
+    CHECK(LuckOfTheDrawStacks(2) == 2u);
+    CHECK(LuckOfTheDrawStacks(3) == 3u);
+    CHECK(LuckOfTheDrawStacks(4) == 3u);
+    CHECK(LuckOfTheDrawStacks(5) == 3u);
+}
+
 TEST(LFGRewardLogic_ItemRewardMatches_band)
 {
     CHECK(ItemRewardMatches(70, 80, 4, 75, 4) == true);

@@ -64,6 +64,7 @@
 #include "CorpseManager.h"
 #include "ObjectMgr.h"
 #include "World.h"
+#include "LFGMgr.h"
 #include "ScriptMgr.h"
 #include "Group.h"
 #include "MapRefManager.h"
@@ -750,6 +751,14 @@ bool Map::Add(Player* player)
     if (i_data)
     {
         i_data->OnPlayerEnter(player);
+    }
+
+    // Every way into a map arrives here -- the formation teleport, a corpse
+    // run back in, and a login inside one -- which is what Luck of the Draw
+    // needs: it is applied on entry and taken away on exit by the spell.
+    if (sWorld.getConfig(CONFIG_BOOL_LFG_ENABLE))
+    {
+        sLFGMgr.OnPlayerEnterMap(player, this);
     }
 
     return true;

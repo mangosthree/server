@@ -332,6 +332,9 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
         // set up a status struct for client requests/updates
         LFGPlayerStatus plrStatus(LFG_STATE_NONE, LFG_UPDATE_JOIN_INITIAL, displayDungeons, comments);
         plrStatus.ticket = ticket;
+        // Queued alone: this player is a stranger to whoever they are matched
+        // with, which is what Luck of the Draw counts.
+        plrStatus.queuedSolo = true;
         m_playerStatusMap[guid] = plrStatus;
         SendLfgUpdate(guid, plrStatus, false);
 

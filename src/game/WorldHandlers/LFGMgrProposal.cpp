@@ -41,6 +41,7 @@
 #include "Player.h"
 #include "PlayerRegistry.h"
 #include "ObjectMgr.h"
+#include "SpellAuras.h"
 #include "SharedDefines.h"
 #include "Util.h"
 #include "WorldSession.h"
@@ -1429,6 +1430,79 @@ void LFGMgr::RewardDungeonCompletion(Player* pPlayer, LFGGroupStatus const& stat
     reward.addedXp = xp;
 
     pPlayer->GetSession()->SendLfgPlayerReward(reward);
+}
+
+uint32 LFGMgr::CountSoloJoinedMembers(LFGGroupStatus const& status)
+{
+    uint32 solo = 0;
+    for (roleMap::const_iterator itr = status.playerRoles.begin();
+         itr != status.playerRoles.end(); ++itr)
+    {
+        playerStatusMap::const_iterator statusItr = m_playerStatusMap.find(itr->first);
+        if (statusItr != m_playerStatusMap.end() && statusItr->second.queuedSolo)
+        {
+            ++solo;
+        }
+    }
+
+    return solo;
+}
+
+void LFGMgr::OnPlayerEnterMap(Player* pPlayer, Map* pMap)
+{
+    if (!pPlayer || !pMap)
+    {
+        return;
+    }
+
+    Group* pGroup = pPlayer->GetGroup();
+    if (!pGroup)
+    {
+        return;
+    }
+
+    LFGGroupStatus* status = GetGroupStatus(pGroup->GetObjectGuid());
+    if (!status)
+    {
+        return;
+    }
+
+    // The run counts as under way from the teleport until the group breaks
+    // up, so a corpse run back in after the last boss is still buffed.
+    if (status->state != LFG_STATE_IN_DUNGEON &&
+        status->state != LFG_STATE_FINISHED_DUNGEON)
+    {
+        return;
+    }
+
+    LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(status->dungeonID);
+    if (!dungeon || dungeon->mapID != int32(pMap->GetId()) ||
+        Difficulty(dungeon->difficulty) != pMap->GetDifficulty())
+    {
+        return;
+    }
+
+    // Strangers, not party size: a group that queued together as five gets
+    // nothing, and the count is the group's rather than each viewer's.
+    uint32 const stacks =
+        LFGRewardLogic::LuckOfTheDrawStacks(CountSoloJoinedMembers(*status));
+    if (stacks == 0)
+    {
+        return;
+    }
+
+    pPlayer->CastSpell(pPlayer, LFG_LUCK_OF_THE_DRAW_SPELL, true);
+
+    if (stacks > 1)
+    {
+        // The cast can be refused -- an immunity, a script -- and there is
+        // then nothing to stack.
+        if (SpellAuraHolder* holder =
+                pPlayer->GetSpellAuraHolder(LFG_LUCK_OF_THE_DRAW_SPELL))
+        {
+            holder->SetStackAmount(stacks);
+        }
+    }
 }
 
 void LFGMgr::OnDungeonEncounterComplete(Map* pMap)

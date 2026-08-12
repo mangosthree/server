@@ -676,6 +676,16 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     pGroup->SetAsLfgGroup();
     pGroup->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
 
+    // Strangers thrown together do not get to trust each other: a finder
+    // group loots need before greed, so anything above the threshold is
+    // rolled for by the members who can actually use it instead of going
+    // to whoever reaches the corpse first. A premade that queued together
+    // is switched over too -- the rule belongs to the run, not the party
+    // that started it. HandleLootMethodOpcode already refuses to change it
+    // back while the group is an LFD one.
+    pGroup->SetLootMethod(NEED_BEFORE_GREED);
+    pGroup->SetLootThreshold(ITEM_QUALITY_UNCOMMON);
+
     ObjectGuid groupGuid = pGroup->GetObjectGuid();
     LFGGroupStatus groupStatus(LFG_STATE_IN_DUNGEON, dungeon->ID,
                                proposal->assignedRoles, pGroup->GetLeaderGuid());

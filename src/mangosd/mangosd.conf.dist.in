@@ -1426,11 +1426,30 @@ CinematicFlyover.VisibilityDistance = 250
 #        Default: 0 (kicked players are exempt)
 #                 1 (a kick counts as leaving)
 #
+#    LFG.CallToArms.Enable
+#        Offer a Satchel of Exotic Mysteries to players who queue alone for a
+#        role the level 85 random heroic queue is short of. Retail ran this
+#        from 4.1 onwards with no switch; while disabled, the shortage block
+#        of SMSG_LFG_PLAYER_INFO stays zeroed and nothing is ever granted.
+#        Default: 1 (enabled)
+#                 0 (disabled)
+#
+#    LFG.CallToArms.MinQueued
+#        Players that must be queued for a random heroic slot before a
+#        shortage is declared there. Retail gated on queue wait time being
+#        "longer than a few minutes" and never published a threshold, so
+#        this is server policy rather than a restored constant. Raise it on
+#        a populated realm to stop a single queued player flagging the two
+#        roles they did not pick. 0 switches the call off for every slot.
+#        Default: 1
+#
 ################################################################################
 
 LFG.Enable = 0
 LFG.Deserter.MinRemaining = 0
 LFG.Deserter.OnVoteKick = 0
+LFG.CallToArms.Enable = 1
+LFG.CallToArms.MinQueued = 1
 
 ################################################################################
 # SERVER RATES

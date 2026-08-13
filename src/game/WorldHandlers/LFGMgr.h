@@ -560,6 +560,18 @@ public:
                                    std::vector<LFGPackets::LFGRandomDungeonEntry>& out);
 
     /**
+    * Roles the Dungeon Finder is currently calling for in a random slot.
+    *
+    * \arg \c dungeonId
+    *   The random slot's LFGDungeons.dbc ID.
+    * \return
+    *   PLAYER_ROLE_* bits, or 0 when the slot calls for nobody -- which is
+    *   also the answer for a slot that can never call, and for every slot
+    *   while Call to Arms is switched off.
+    */
+    uint32 GetShortageRoleMask(uint32 dungeonId) const;
+
+    /**
      * @brief Find the random dungeons not applicable for a player
      *
      * @param plr The player to test against
@@ -837,6 +849,10 @@ private:
     void RewardDungeonCompletion(Player* pPlayer, LFGGroupStatus const& status,
                                  DungeonTypes type);
 
+    /// Recomputes m_shortageMasks from the live queue. Called once per LFG
+    /// world tick; leaves the map empty while Call to Arms is switched off.
+    void UpdateShortageMasks();
+
     /// Daily occurences of a player doing X type dungeon
     dailyEntries m_dailyAny;
     dailyEntries m_dailyTBCHeroic;
@@ -847,6 +863,11 @@ private:
     /// Random Cataclysm normals completed this week, per player. Justice
     /// carries no DBC week cap, so this allowance has nowhere else to live.
     std::unordered_map<uint32, uint8> m_weeklyCataNormal;
+
+    /// Roles called for per random slot, keyed by LFGDungeons.dbc ID.
+    /// Written only by UpdateShortageMasks; read through
+    /// GetShortageRoleMask, which must not insert a default.
+    std::unordered_map<uint32, uint32> m_shortageMasks;
 
     /// General info related to joining / leaving the dungeon finder
     playerData m_playerData;

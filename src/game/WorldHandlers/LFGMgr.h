@@ -355,6 +355,9 @@ struct LFGGroupStatus //todo: check for this in joinlfg function, not lfgplayers
     queuedSlotMap queuedSlots; // Per member: the random dungeon they queued for, captured
                                // at formation. The completed dungeon is always a specific
                                // one, so it cannot be derived back at reward time.
+    std::set<ObjectGuid> shortageEligible; // Members owed a Call to Arms satchel, captured at
+                                           // formation because the shortage moves with the
+                                           // queue, and paid on completion.
 
     LFGGroupStatus()
         : state(LFG_STATE_NONE), dungeonID(0),

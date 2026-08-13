@@ -34,6 +34,7 @@
 #include "LFGMgr.h"
 #include "Mail.h"
 #include "LFGBootLogic.h"
+#include "LFGCallToArmsLogic.h"
 #include "LFGProposalLogic.h"
 #include "LFGDungeonResolution.h"
 #include "Log.h"
@@ -698,7 +699,28 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     for (roleMap::const_iterator itr = proposal->assignedRoles.begin();
          itr != proposal->assignedRoles.end(); ++itr)
     {
-        groupStatus.queuedSlots[itr->first] = GetQueuedRandomID(itr->first);
+        uint32 const queuedSlot = GetQueuedRandomID(itr->first);
+        groupStatus.queuedSlots[itr->first] = queuedSlot;
+
+        // And who answered a Call to Arms doing it. Snapshotted here for the
+        // same reason: the shortage belongs to the queue, and the queue this
+        // group just came out of is a different one a minute from now.
+        LfgDungeonsEntry const* queued = sLfgDungeonsStore.LookupEntry(queuedSlot);
+        if (!queued || !LFGCallToArmsLogic::IsCallToArmsSlot(queued->typeID,
+                                                             GetDungeonType(queued->ID)))
+        {
+            continue;
+        }
+
+        playerStatusMap::const_iterator statusItr = m_playerStatusMap.find(itr->first);
+        bool const queuedSolo = (statusItr != m_playerStatusMap.end() &&
+                                 statusItr->second.queuedSolo);
+
+        if (LFGCallToArmsLogic::ShortageEligibleAtFormation(
+                queuedSolo, itr->second, GetShortageRoleMask(queuedSlot)))
+        {
+            groupStatus.shortageEligible.insert(itr->first);
+        }
     }
 
     m_groupSet.insert(groupGuid);
@@ -1413,6 +1435,32 @@ void LFGMgr::RewardDungeonCompletion(Player* pPlayer, LFGGroupStatus const& stat
                 item.isCurrency = false;
                 reward.items.push_back(item);
             }
+        }
+    }
+
+    // Call to Arms: the satchel, for a member who answered the call this
+    // group formed on. No daily gate -- the 15 minute random cooldown is
+    // the only throttle the era had.
+    if (status.shortageEligible.count(plrGuid) != 0)
+    {
+        ItemPrototype const* pSatchel =
+            ObjectMgr::GetItemPrototype(LFGRewardLogic::CALL_TO_ARMS_SATCHEL_ITEM);
+        if (pSatchel)
+        {
+            GiveRewardItem(pPlayer, LFGRewardLogic::CALL_TO_ARMS_SATCHEL_ITEM, 1);
+
+            LFGRewardItem item;
+            item.id = LFGRewardLogic::CALL_TO_ARMS_SATCHEL_ITEM;
+            item.displayId = pSatchel->DisplayInfoID;
+            item.quantity = 1;
+            item.isCurrency = false;
+            reward.items.push_back(item);
+        }
+        else
+        {
+            sLog.outErrorDb("LFG: Call to Arms reward item %u is not in "
+                            "`item_template`; nothing was granted.",
+                            uint32(LFGRewardLogic::CALL_TO_ARMS_SATCHEL_ITEM));
         }
     }
 

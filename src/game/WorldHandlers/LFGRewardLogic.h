@@ -98,6 +98,13 @@ namespace LFGRewardLogic
         CATA_NORMAL_JUSTICE_MIN_LEVEL = 83
     };
 
+    /// Satchel of Exotic Mysteries -- the whole of the Call to Arms reward.
+    /// Its contents are the world DB's; the finder only hands it over.
+    enum RewardItem
+    {
+        CALL_TO_ARMS_SATCHEL_ITEM = 69903
+    };
+
     /// What a removal from an LFD group costs the player who left it.
     enum class RemovalPenalty
     {

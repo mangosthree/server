@@ -558,6 +558,10 @@ class World
         uint32 GetActiveAndQueuedSessionCount() const { return m_sessions.size(); }
         uint32 GetActiveSessionCount() const { return m_sessions.size() - m_QueuedSessions.size(); }
         uint32 GetQueuedSessionCount() const { return m_QueuedSessions.size(); }
+
+        /// Player bots currently logged in. Always 0 when the module is not
+        /// built -- bots hold no session, so the counts above never see them.
+        uint32 GetBotCount() const;
         /// Get the maximum number of parallel sessions on the server since last reboot
         uint32 GetMaxQueuedSessionCount() const { return m_maxQueuedSessionCount; }
         uint32 GetMaxActiveSessionCount() const { return m_maxActiveSessionCount; }

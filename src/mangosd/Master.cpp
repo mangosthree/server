@@ -294,17 +294,25 @@ void Master::PublishConsoleStatus(uint32 diff)
              sWorld.GetPlayerAmountLimit());
     ui.SetStatus(0, "Players", buf);
 
-    ui.SetStatus(1, "Queue", std::to_string(sWorld.GetQueuedSessionCount()),
+#ifdef ENABLE_PLAYERBOTS
+    // Only on a build that has bots -- a permanent "Bots 0" would be noise
+    // everywhere else. Bots hold no session, so this is a count of its own
+    // rather than a share of the player count beside it. An unset slot is
+    // skipped when the row is composed, so the gap left here closes up.
+    ui.SetStatus(1, "Bots", std::to_string(sWorld.GetBotCount()));
+#endif
+
+    ui.SetStatus(2, "Queue", std::to_string(sWorld.GetQueuedSessionCount()),
                  sWorld.GetQueuedSessionCount() ? MaNGOS::Console::STYLE_WARN
                                                 : MaNGOS::Console::STYLE_NORMAL);
 
     snprintf(buf, sizeof(buf), "%u ms", diff);
-    ui.SetStatus(2, "Diff", buf, diff > WORLD_SLEEP_CONST ? MaNGOS::Console::STYLE_WARN
+    ui.SetStatus(3, "Diff", buf, diff > WORLD_SLEEP_CONST ? MaNGOS::Console::STYLE_WARN
                                                           : MaNGOS::Console::STYLE_SUCCESS);
 
     snprintf(buf, sizeof(buf), "%ud %02u:%02u:%02u", uptime / 86400,
              (uptime / 3600) % 24, (uptime / 60) % 60, uptime % 60);
-    ui.SetStatus(3, "Uptime", buf);
+    ui.SetStatus(4, "Uptime", buf);
 }
 
 void Master::WorldLoop()

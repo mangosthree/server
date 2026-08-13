@@ -194,6 +194,15 @@ namespace LFGRewardLogic
             ? RemovalPenalty::DESERTER : RemovalPenalty::NONE;
     }
 
+    /// Luck of the Draw stacks for a group holding this many solo-queued
+    /// members. One stack each, capped at three -- the cap is the spell's
+    /// own, from SpellAuraOptions, not a number chosen here.
+    inline std::uint32_t LuckOfTheDrawStacks(std::uint32_t soloJoinedMembers)
+    {
+        std::uint32_t const maxStacks = 3;
+        return (soloJoinedMembers < maxStacks) ? soloJoinedMembers : maxStacks;
+    }
+
     /// Multiplier on the stored reward row. dungeonfinder_rewards holds the
     /// subsequent-run value, so the first run of the day pays double.
     inline std::uint32_t FirstRewardMultiplier(bool hasDoneDaily)

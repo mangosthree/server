@@ -856,6 +856,12 @@ private:
     /// world tick; leaves the map empty while Call to Arms is switched off.
     void UpdateShortageMasks();
 
+    /// Whether the panel should show this player the Call to Arms reward for
+    /// a random slot: anyone not yet in a group can still answer the call,
+    /// and a member of a run that captured them keeps seeing it until it
+    /// pays out.
+    bool IsShortageEligible(Player* pPlayer, uint32 dungeonId);
+
     /// Daily occurences of a player doing X type dungeon
     dailyEntries m_dailyAny;
     dailyEntries m_dailyTBCHeroic;

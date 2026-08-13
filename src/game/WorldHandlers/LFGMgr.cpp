@@ -290,6 +290,40 @@ uint32 LFGMgr::GetShortageRoleMask(uint32 dungeonId) const
     return (itr != m_shortageMasks.end()) ? itr->second : 0;
 }
 
+bool LFGMgr::IsShortageEligible(Player* pPlayer, uint32 dungeonId)
+{
+    if (!pPlayer)
+    {
+        return false;
+    }
+
+    Group* pGroup = pPlayer->GetGroup();
+    if (!pGroup)
+    {
+        // No seat taken yet, so the call is still theirs to answer.
+        return true;
+    }
+
+    LFGGroupStatus const* status = GetGroupStatus(pGroup->GetObjectGuid());
+    if (!status)
+    {
+        // In a party that is not an LFD run: they would join the queue
+        // together, which is not what the satchel pays for.
+        return false;
+    }
+
+    ObjectGuid const plrGuid = pPlayer->GetObjectGuid();
+    if (status->shortageEligible.count(plrGuid) == 0)
+    {
+        return false;
+    }
+
+    // Keep showing it only for the slot the claim was made against.
+    queuedSlotMap::const_iterator slotItr = status->queuedSlots.find(plrGuid);
+
+    return slotItr != status->queuedSlots.end() && slotItr->second == dungeonId;
+}
+
 
 ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
 {
@@ -491,6 +525,34 @@ void LFGMgr::BuildRandomDungeonRewards(Player* pPlayer,
             item.quantity = LFGRewardLogic::CATA_HEROIC_VALOR;
             item.isCurrency = true;
             entry.items.push_back(item);
+
+            // Call to Arms. Tier 0 is the RARE severity, the one the era
+            // interface polled and the only one retail is documented using;
+            // the other two stay zero-masked and are skipped on the wire.
+            // The panel draws the coin icon from a tier that carries an
+            // item, and the tooltip from the item itself.
+            uint32 const shortageMask = GetShortageRoleMask(itr->first);
+            if (shortageMask != 0)
+            {
+                entry.shortageEligible = IsShortageEligible(pPlayer, itr->first);
+
+                LFGPackets::LFGShortageReward& tier = entry.shortageTiers[0];
+                tier.roleMask = shortageMask;
+
+                // Missing from the world DB: the tier ships mask-only, which
+                // draws nothing. A silent self-disable beats a promise the
+                // completion path cannot keep.
+                if (ItemPrototype const* pSatchel = ObjectMgr::GetItemPrototype(
+                        LFGRewardLogic::CALL_TO_ARMS_SATCHEL_ITEM))
+                {
+                    LFGRewardItem satchel;
+                    satchel.id = LFGRewardLogic::CALL_TO_ARMS_SATCHEL_ITEM;
+                    satchel.displayId = pSatchel->DisplayInfoID;
+                    satchel.quantity = 1;
+                    satchel.isCurrency = false;
+                    tier.items.push_back(satchel);
+                }
+            }
         }
         else if (type == DUNGEON_CATACLYSM &&
                  level >= LFGRewardLogic::CATA_NORMAL_JUSTICE_MIN_LEVEL)

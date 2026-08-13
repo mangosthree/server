@@ -433,7 +433,7 @@ namespace LFGPackets
         uint32 quantity = 0;
         uint32 completedMask = 0;
         bool shortageEligible = false;
-        std::array<LFGShortageReward, 3> shortageTiers;   ///< tank, healer, dps
+        std::array<LFGShortageReward, 3> shortageTiers;   ///< severity: rare, uncommon, plentiful
         uint32 rewardMoney = 0;
         uint32 rewardXp = 0;
         std::vector<LFGRewardItem> items;

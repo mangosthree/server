@@ -29,6 +29,7 @@
 #include "DBCStructure.h"
 #include "GameEventMgr.h"
 #include "Group.h"
+#include "LFGCallToArmsLogic.h"
 #include "LFGLockReason.h"
 #include "LFGMgr.h"
 #include "LFGRoleAssignment.h"
@@ -159,9 +160,168 @@ void LFGMgr::Update()
         }
     }
 
+    // Which roles the queue is calling for, before it is matched down
+    UpdateShortageMasks();
+
     // Queue System
     FindQueueMatches();
     SendQueueStatus();
+}
+
+/// Supply offered for one random slot, before the group needs weight it.
+struct LFGShortageSupply
+{
+    LFGShortageSupply() : tanks(0), healers(0), dps(0) {}
+
+    uint32 tanks;
+    uint32 healers;
+    uint32 dps;
+};
+
+void LFGMgr::UpdateShortageMasks()
+{
+    m_shortageMasks.clear();
+
+    if (!sWorld.getConfig(CONFIG_BOOL_LFG_CALL_TO_ARMS))
+    {
+        return;
+    }
+
+    // The slots a call can be made for at all -- the level-85 random
+    // heroics, two rows out of the whole table.
+    std::set<uint32> callableSlots;
+    for (uint32 i = 0; i < sLfgDungeonsStore.GetNumRows(); ++i)
+    {
+        LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(i);
+        if (dungeon && LFGCallToArmsLogic::IsCallToArmsSlot(dungeon->typeID,
+                                                            GetDungeonType(dungeon->ID)))
+        {
+            callableSlots.insert(dungeon->ID);
+        }
+    }
+
+    if (callableSlots.empty())
+    {
+        return;
+    }
+
+    // Count what is on offer. Iterate a snapshot for the reason
+    // FindQueueMatches does: a merge retires the absorbed entry.
+    std::unordered_map<uint32, LFGShortageSupply> supply;
+    queueSet const snapshot = m_queueSet;
+
+    for (queueSet::const_iterator itr = snapshot.begin(); itr != snapshot.end(); ++itr)
+    {
+        LFGPlayers* queueInfo = GetPlayerOrPartyData(*itr);
+        if (!queueInfo)
+        {
+            continue;
+        }
+
+        for (roleMap::const_iterator roleItr = queueInfo->currentRoles.begin();
+             roleItr != queueInfo->currentRoles.end(); ++roleItr)
+        {
+            uint8 const roles = roleItr->second & ~uint8(PLAYER_ROLE_LEADER);
+            if (roles == 0)
+            {
+                continue;
+            }
+
+            // The member's own selection, not the queue entry's expanded
+            // dungeon list: only a player who picked the random slot is
+            // queued for it.
+            playerStatusMap::const_iterator statusItr =
+                m_playerStatusMap.find(roleItr->first);
+            if (statusItr == m_playerStatusMap.end())
+            {
+                continue;
+            }
+
+            std::set<uint32> const& selection = statusItr->second.dungeonList;
+            for (std::set<uint32>::const_iterator dItr = selection.begin();
+                 dItr != selection.end(); ++dItr)
+            {
+                if (callableSlots.find(*dItr) == callableSlots.end())
+                {
+                    continue;
+                }
+
+                LFGShortageSupply& counts = supply[*dItr];
+                if (roles & PLAYER_ROLE_TANK)
+                {
+                    ++counts.tanks;
+                }
+                if (roles & PLAYER_ROLE_HEALER)
+                {
+                    ++counts.healers;
+                }
+                if (roles & PLAYER_ROLE_DAMAGE)
+                {
+                    ++counts.dps;
+                }
+            }
+        }
+    }
+
+    uint32 const minQueued =
+        sWorld.getConfig(CONFIG_UINT32_LFG_CALL_TO_ARMS_MIN_QUEUED);
+
+    // Slots nobody queued for are absent from `supply` and stay absent from
+    // the mask map: an empty queue calls for nobody.
+    for (std::unordered_map<uint32, LFGShortageSupply>::const_iterator itr = supply.begin();
+         itr != supply.end(); ++itr)
+    {
+        uint32 const mask =
+            LFGCallToArmsLogic::ComputeShortageMask(itr->second.tanks,
+                                                    itr->second.healers,
+                                                    itr->second.dps, minQueued);
+        if (mask != 0)
+        {
+            m_shortageMasks[itr->first] = mask;
+        }
+    }
+}
+
+uint32 LFGMgr::GetShortageRoleMask(uint32 dungeonId) const
+{
+    std::unordered_map<uint32, uint32>::const_iterator itr =
+        m_shortageMasks.find(dungeonId);
+
+    return (itr != m_shortageMasks.end()) ? itr->second : 0;
+}
+
+bool LFGMgr::IsShortageEligible(Player* pPlayer, uint32 dungeonId)
+{
+    if (!pPlayer)
+    {
+        return false;
+    }
+
+    Group* pGroup = pPlayer->GetGroup();
+    if (!pGroup)
+    {
+        // No seat taken yet, so the call is still theirs to answer.
+        return true;
+    }
+
+    LFGGroupStatus const* status = GetGroupStatus(pGroup->GetObjectGuid());
+    if (!status)
+    {
+        // In a party that is not an LFD run: they would join the queue
+        // together, which is not what the satchel pays for.
+        return false;
+    }
+
+    ObjectGuid const plrGuid = pPlayer->GetObjectGuid();
+    if (status->shortageEligible.count(plrGuid) == 0)
+    {
+        return false;
+    }
+
+    // Keep showing it only for the slot the claim was made against.
+    queuedSlotMap::const_iterator slotItr = status->queuedSlots.find(plrGuid);
+
+    return slotItr != status->queuedSlots.end() && slotItr->second == dungeonId;
 }
 
 
@@ -365,6 +525,34 @@ void LFGMgr::BuildRandomDungeonRewards(Player* pPlayer,
             item.quantity = LFGRewardLogic::CATA_HEROIC_VALOR;
             item.isCurrency = true;
             entry.items.push_back(item);
+
+            // Call to Arms. Tier 0 is the RARE severity, the one the era
+            // interface polled and the only one retail is documented using;
+            // the other two stay zero-masked and are skipped on the wire.
+            // The panel draws the coin icon from a tier that carries an
+            // item, and the tooltip from the item itself.
+            uint32 const shortageMask = GetShortageRoleMask(itr->first);
+            if (shortageMask != 0)
+            {
+                entry.shortageEligible = IsShortageEligible(pPlayer, itr->first);
+
+                LFGPackets::LFGShortageReward& tier = entry.shortageTiers[0];
+                tier.roleMask = shortageMask;
+
+                // Missing from the world DB: the tier ships mask-only, which
+                // draws nothing. A silent self-disable beats a promise the
+                // completion path cannot keep.
+                if (ItemPrototype const* pSatchel = ObjectMgr::GetItemPrototype(
+                        LFGRewardLogic::CALL_TO_ARMS_SATCHEL_ITEM))
+                {
+                    LFGRewardItem satchel;
+                    satchel.id = LFGRewardLogic::CALL_TO_ARMS_SATCHEL_ITEM;
+                    satchel.displayId = pSatchel->DisplayInfoID;
+                    satchel.quantity = 1;
+                    satchel.isCurrency = false;
+                    tier.items.push_back(satchel);
+                }
+            }
         }
         else if (type == DUNGEON_CATACLYSM &&
                  level >= LFGRewardLogic::CATA_NORMAL_JUSTICE_MIN_LEVEL)

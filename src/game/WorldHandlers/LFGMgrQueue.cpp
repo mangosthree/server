@@ -473,6 +473,19 @@ void LFGMgr::OnGroupMemberAdded(ObjectGuid groupGuid, ObjectGuid playerGuid)
         }
     }
 
+    // Bringing in a hand-picked replacement voids the group's Call to Arms:
+    // the satchel answers the queue's call, and this run is no longer the
+    // group the queue made. There is no backfill path, so a mid-run add is
+    // always a manual invite. The adds that build the group at formation do
+    // not reach this -- CreateDungeonGroup registers the status only once
+    // the group is assembled -- which is why that order matters.
+    groupStatusMap::iterator itAdded = m_groupStatusMap.find(groupGuid);
+    if (itAdded != m_groupStatusMap.end() &&
+        itAdded->second.state == LFG_STATE_IN_DUNGEON)
+    {
+        itAdded->second.shortageEligible.clear();
+    }
+
     CancelQueueEntry(groupGuid, LFG_UPDATE_REMOVED_FROM_QUEUE);
     CancelQueueEntry(playerGuid, LFG_UPDATE_REMOVED_FROM_QUEUE);
 }
@@ -517,6 +530,8 @@ void LFGMgr::OnGroupMemberRemoved(ObjectGuid groupGuid, ObjectGuid playerGuid,
 
         itStatus->second.playerRoles.erase(playerGuid);
         itStatus->second.queuedSlots.erase(playerGuid);
+        // Only the leaver's own claim goes; the members who stay keep theirs.
+        itStatus->second.shortageEligible.erase(playerGuid);
         m_playerStatusMap.erase(playerGuid);
 
         ApplyRemovalPenalty(playerGuid, removeMethod, inProgress,

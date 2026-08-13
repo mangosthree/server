@@ -46,6 +46,7 @@ set(SRC_GRP_TESTS
     LFGBootLogicTest.cpp
     LFGDungeonResolutionTest.cpp
     LFGRewardLogicTest.cpp
+    LFGCallToArmsLogicTest.cpp
     SessionMailboxTest.cpp
     SessionProtocolPolicyTest.cpp
     DatabaseConcurrencyTest.cpp

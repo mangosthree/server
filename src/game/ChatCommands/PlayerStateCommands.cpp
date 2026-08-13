@@ -436,6 +436,59 @@ bool ChatHandler::HandleExploreCheatCommand(char* args)
 }
 
 /**
+ * @brief Handler for HandleLevelCommand command. Sets the level outright,
+ *        where .levelup adds to it.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
+bool ChatHandler::HandleLevelCommand(char* args)
+{
+    if (!*args)
+    {
+        return false;
+    }
+
+    char* nameStr = ExtractOptNotLastArg(&args);
+
+    int32 newlevel;
+    if (!ExtractInt32(&args, newlevel))
+    {
+        return false;
+    }
+
+    Player* target;
+    ObjectGuid target_guid;
+    std::string target_name;
+    if (!ExtractPlayerTarget(&nameStr, &target, &target_guid, &target_name))
+    {
+        return false;
+    }
+
+    if (newlevel < 1)
+    {
+        newlevel = 1;
+    }
+
+    if (newlevel > STRONG_MAX_LEVEL)                        // hardcoded maximum level
+    {
+        newlevel = STRONG_MAX_LEVEL;
+    }
+
+    int32 oldlevel = target ? target->getLevel() : Player::GetLevelFromDB(target_guid);
+
+    HandleCharacterLevel(target, target_guid, oldlevel, newlevel);
+
+    if (!m_session || m_session->GetPlayer() != target)     // including chr==NULL
+    {
+        std::string nameLink = playerLink(target_name);
+        PSendSysMessage(LANG_YOU_CHANGE_LVL, nameLink.c_str(), newlevel);
+    }
+
+    return true;
+}
+
+/**
  * @brief Handler for HandleLevelUpCommand command.
  *
  * @param args Command arguments.

@@ -62,7 +62,6 @@ namespace
         uint8          expansion = 0;
         time_t         muteTime  = 0;
         LocaleConstant locale    = LOCALE_enUS;
-        std::string    os;
         BigNumber      sessionKey; ///< `sessionkey` column (K) -- arms proto's cipher and its SHA-1 proof.
 
         /// `s` column (SRP6 salt) -- WorldSocket kept this in a field it called
@@ -175,7 +174,7 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
     const uint8 rawLocale = fields[8].GetUInt8();
     row->locale = rawLocale >= MAX_LOCALE ? LOCALE_enUS : LocaleConstant(rawLocale);
 
-    row->os = fields[9].GetString();
+    const std::string clientOs = fields[9].GetString();
 
     delete queryResult;
 
@@ -220,15 +219,13 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
         return result;
     }
 
-    // ---- Warden's client OS rule ----------------------------------------------
-    // WorldSocket.cpp:1181-1191.
-    const bool wardenActive = sWorld.getConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED)
-                           || sWorld.getConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED);
-
-    if (wardenActive && row->os != "Win" && row->os != "OSX")
+    // ---- Client platform -------------------------------------------------------
+    // Preserve WorldSocket.cpp:1181-1191 as an authentication rule independent
+    // of the retired Warden runtime.
+    if (clientOs != "Win" && clientOs != "OSX")
     {
         BASIC_LOG("WorldGateway: client %s attempted to log in using invalid "
-                  "client OS (%s)", request.peerAddress.c_str(), row->os.c_str());
+                  "client OS (%s)", request.peerAddress.c_str(), clientOs.c_str());
         result.status = proto::AuthStatus::Reject;
         return result;
     }
@@ -279,14 +276,6 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
         addonBuffer.append(request.addonData.data(), request.addonData.size());
     }
     session->ReadAddonsInfo(addonBuffer);
-
-    // WorldSocket.cpp:1244-1248.
-    const bool wardenActive = sWorld.getConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED)
-                           || sWorld.getConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED);
-    if (wardenActive)
-    {
-        session->InitWarden(uint16(request.build), &row->sessionKey, row->os);
-    }
 
     proto::SessionId id;
     {

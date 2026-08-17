@@ -66,14 +66,6 @@ source_group("Time" FILES ${SRC_GRP_TIME})
 file(GLOB SRC_GRP_TOOL Tools/*.cpp Tools/*.h)
 source_group("Tool" FILES ${SRC_GRP_TOOL})
 
-#Warden group
-file(GLOB SRC_GRP_WARDEN Warden/*.cpp Warden/*.h)
-source_group("Warden" FILES ${SRC_GRP_WARDEN})
-
-#Warden Modules group
-file(GLOB SRC_GRP_WARDEN_MODULES Warden/Modules/*.cpp Warden/Modules/*.h)
-source_group("Warden\\Modules" FILES ${SRC_GRP_WARDEN_MODULES})
-
 #World and Handlers group
 file(GLOB SRC_GRP_WORLD_HANDLERS WorldHandlers/*.cpp WorldHandlers/*.h)
 source_group("World\\Handlers" FILES ${SRC_GRP_WORLD_HANDLERS})
@@ -212,8 +204,6 @@ add_library(game STATIC
     ${SRC_GRP_SERVER}
     ${SRC_GRP_TIME}
     ${SRC_GRP_TOOL}
-    ${SRC_GRP_WARDEN}
-    ${SRC_GRP_WARDEN_MODULES}
     ${SRC_GRP_WORLD_HANDLERS}
     $<$<BOOL:${SCRIPT_LIB_ELUNA}>:${SRC_GRP_ELUNA}>
     $<$<BOOL:${PLAYERBOTS}>:${SRC_GRP_BOTS}>
@@ -240,8 +230,6 @@ target_include_directories(game
         Server
         Time
         Tools
-        Warden
-        Warden/Modules
         WorldHandlers
         $<$<BOOL:${SCRIPT_LIB_ELUNA}>:
             ${CMAKE_SOURCE_DIR}/src/modules/Eluna
@@ -283,8 +271,6 @@ target_link_libraries(game
         $<$<BOOL:${SCRIPT_LIB_ELUNA}>:lualib>
     PRIVATE
         # Holds game to the same OpenSSL 3.x API level as shared and mangosd.
-        # It was the one target left out, which is why Warden could keep
-        # calling the low-level MD5_* functions OpenSSL 3.0 deprecated.
         mangos_openssl_strict
 )
 

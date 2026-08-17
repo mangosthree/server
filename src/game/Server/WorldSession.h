@@ -602,6 +602,7 @@ class WorldSession
         void Handle_EarlyProccess(WorldPacket& recvPacket); // STATUS_NEVER stub; these opcodes are fully owned by proto::ClientConnection and must never reach here
         void Handle_ServerSide(WorldPacket& recvPacket);    // sever side only, can't be accepted from client
         void Handle_Deprecated(WorldPacket& recvPacket);    // never used anymore by client
+        void HandleWardenDataOpcode(WorldPacket& recv_data); // authenticated drain; legacy Warden is intentionally absent
 
         void HandleCharEnumOpcode(WorldPacket& recvPacket);
         void HandleCharDeleteOpcode(WorldPacket& recvPacket);

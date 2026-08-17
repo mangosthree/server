@@ -876,8 +876,8 @@ void InitializeOpcodes()
     OPCODE(CMSG_AREA_SPIRIT_HEALER_QUEUE,                STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleAreaSpiritHealerQueueOpcode);
     OPCODE(SMSG_AREA_SPIRIT_HEALER_TIME,                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     //OPCODE(CMSG_GM_UNTEACH,                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     );
-    //OPCODE(SMSG_WARDEN_DATA,                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
-    //OPCODE(CMSG_WARDEN_DATA,                             STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleWardenDataOpcode          );
+    // Warden is intentionally absent. CMSG_WARDEN_DATA keeps the table's
+    // STATUS_UNHANDLED default and is discarded without parsing.
     OPCODE(CMSG_BATTLEGROUND_PLAYER_POSITIONS,           STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleBattleGroundPlayerPositionsOpcode);
     OPCODE(SMSG_BATTLEGROUND_PLAYER_POSITIONS,           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               );
     OPCODE(CMSG_PET_STOP_ATTACK,                         STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandlePetStopAttack             );

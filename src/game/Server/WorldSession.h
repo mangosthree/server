@@ -60,7 +60,6 @@ class Item;
 class Object;
 class Player;
 class Unit;
-class Warden;
 class WorldPacket;
 class QueryResult;
 class LoginQueryHolder;
@@ -436,9 +435,6 @@ class WorldSession
             _player = plr;
         }
         uint8 Expansion() const { return m_expansion; }
-
-        // Warden
-        void InitWarden(uint16 build, BigNumber* k, std::string const& os);
 
         /// Session in auth.queue currently
         void SetInQueue(bool state)
@@ -1005,7 +1001,6 @@ class WorldSession
         void HandleRequestRatedBGStatsOpcode(WorldPacket& recv_data);
         void HandleRequestRatedBgInfo(WorldPacket & recvData);
 
-        void HandleWardenDataOpcode(WorldPacket& recv_data);
         void HandleWorldTeleportOpcode(WorldPacket& recv_data);
         void HandleMinimapPingOpcode(WorldPacket& recv_data);
         void HandleRandomRollOpcode(WorldPacket& recv_data);
@@ -1156,8 +1151,6 @@ class WorldSession
         uint32 _accountId;
         uint8 m_expansion;
 
-        // Warden
-        Warden* _warden;                                    // Remains NULL if Warden system is not enabled by config
         uint16 _build;                                      // connected client build
 
         time_t _logoutTime;

@@ -120,9 +120,6 @@
 #include "RandomPlayerbotMgr.h"
 #endif
 
-// WARDEN
-#include "WardenCheckMgr.h"
-
 #include <iostream>
 #include <sstream>
 
@@ -813,15 +810,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Transports...");
     sMapMgr.LoadTransports();
 
-    // Initialize Warden
-    sLog.outString("Loading Warden Checks...");
-    sWardenCheckMgr->LoadWardenChecks();
-    sLog.outString();
-
-    sLog.outString("Loading Warden Action Overrides...");
-    sWardenCheckMgr->LoadWardenOverrides();
-    sLog.outString();
-
     sLog.outString("Deleting expired bans...");
     LoginDatabase.Execute("DELETE FROM `ip_banned` WHERE `unbandate`<=UNIX_TIMESTAMP() AND `unbandate`<>`bandate`");
     sLog.outString();
@@ -968,17 +956,6 @@ void World::showFooter()
         modules_.insert("                  SOAP : Disabled");
     }
 #endif
-
-    // Warden is always included, set active or disabled via mangos.conf
-    bool wardenActive = (sWorld.getConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED) || sWorld.getConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED));
-    if (wardenActive)
-    {
-        modules_.insert("                Warden : Enabled");
-    }
-    else
-    {
-        modules_.insert("                Warden : Disabled");
-    }
 
     std::string thisClientVersion (EXPECTED_MANGOSD_CLIENT_VERSION);
     std::string thisClientBuilds = AcceptableClientBuildsListStr();

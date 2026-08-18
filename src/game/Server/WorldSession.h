@@ -60,7 +60,6 @@ class Item;
 class Object;
 class Player;
 class Unit;
-class Warden;
 class WorldPacket;
 class QueryResult;
 class LoginQueryHolder;
@@ -437,9 +436,6 @@ class WorldSession
         }
         uint8 Expansion() const { return m_expansion; }
 
-        // Warden
-        void InitWarden(uint16 build, BigNumber* k, std::string const& os);
-
         /// Session in auth.queue currently
         void SetInQueue(bool state)
         {
@@ -606,6 +602,7 @@ class WorldSession
         void Handle_EarlyProccess(WorldPacket& recvPacket); // STATUS_NEVER stub; these opcodes are fully owned by proto::ClientConnection and must never reach here
         void Handle_ServerSide(WorldPacket& recvPacket);    // sever side only, can't be accepted from client
         void Handle_Deprecated(WorldPacket& recvPacket);    // never used anymore by client
+        void HandleWardenDataOpcode(WorldPacket& recv_data); // authenticated drain; legacy Warden is intentionally absent
 
         void HandleCharEnumOpcode(WorldPacket& recvPacket);
         void HandleCharDeleteOpcode(WorldPacket& recvPacket);
@@ -1005,7 +1002,6 @@ class WorldSession
         void HandleRequestRatedBGStatsOpcode(WorldPacket& recv_data);
         void HandleRequestRatedBgInfo(WorldPacket & recvData);
 
-        void HandleWardenDataOpcode(WorldPacket& recv_data);
         void HandleWorldTeleportOpcode(WorldPacket& recv_data);
         void HandleMinimapPingOpcode(WorldPacket& recv_data);
         void HandleRandomRollOpcode(WorldPacket& recv_data);
@@ -1065,9 +1061,6 @@ class WorldSession
 #ifdef ENABLE_PLAYERBOTS
         void HandleBotPackets();
 #endif
-
-        // for Warden
-        uint16 GetClientBuild() const { return _build; }
 
         // Guild Bank
         void HandleGuildPermissions(WorldPacket& recv_data);
@@ -1155,10 +1148,6 @@ class WorldSession
         AccountTypes _security;
         uint32 _accountId;
         uint8 m_expansion;
-
-        // Warden
-        Warden* _warden;                                    // Remains NULL if Warden system is not enabled by config
-        uint16 _build;                                      // connected client build
 
         time_t _logoutTime;
         bool m_inQueue;                                     // session wait in auth.queue

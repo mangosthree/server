@@ -1082,6 +1082,17 @@ SpellCastResult Spell::CanOpenLock(SpellEffectIndex effIndex, uint32 lockId, Ski
                 break;
                 // check key skill (only single first fit case can be)
             }
+                // check key spell: the lock names the spell that opens it, and
+                // the client casts exactly that spell when the object is used
+            case LOCK_KEY_SPELL:
+            {
+                if (m_spellInfo->ID == lockInfo->Index[j])
+                {
+                    return SPELL_CAST_OK;
+                }
+                reqKey = true;
+                break;
+            }
             case LOCK_KEY_SKILL:
             {
                 reqKey = true;

@@ -845,6 +845,31 @@ void Spell::EffectPlayMusic(SpellEffectEntry const* effect)
     m_caster->PlayMusic(soundId, (Player*)unitTarget);
 }
 
+/**
+* Starts a pre-rendered cinematic on the target's client.
+*
+* \arg \c effect
+*   The spell effect; its EffectMiscValue_0 names the Movie.dbc entry.
+*/
+void Spell::EffectPlayMovie(SpellEffectEntry const* effect)
+{
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+    {
+        return;
+    }
+
+    const uint32 movieId = effect->EffectMiscValue_0;
+
+    if (!sMovieStore.LookupEntry(movieId))
+    {
+        sLog.outError("EffectPlayMovie: Movie (Id: %u) in spell %u does not exist.",
+            movieId, m_spellInfo->ID);
+        return;
+    }
+
+    ((Player*)unitTarget)->SendMovieStart(movieId);
+}
+
 void Spell::EffectSpecCount(SpellEffectEntry const* /*effect*/)
 {
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)

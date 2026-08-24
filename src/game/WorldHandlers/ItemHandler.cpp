@@ -520,7 +520,9 @@ void WorldSession::SendItemDb2Reply(uint32 entry)
     ItemPrototype const* proto = sObjectMgr.GetItemPrototype(entry);
     if (!proto)
     {
-        data << uint32(-1);         // entry
+        // A miss must echo the requested id negated: the client recovers it
+        // with abs() to match its pending query, and -1 matches nothing
+        data << uint32(-int32(entry)); // entry
         data << uint32(DB2_REPLY_ITEM);
         data << uint32(time(NULL)); // hotfix date
         data << uint32(0);          // size of next block
@@ -554,7 +556,9 @@ void WorldSession::SendItemSparseDb2Reply(uint32 entry)
     ItemPrototype const* proto = sObjectMgr.GetItemPrototype(entry);
     if (!proto)
     {
-        data << uint32(-1);         // entry
+        // A miss must echo the requested id negated: the client recovers it
+        // with abs() to match its pending query, and -1 matches nothing
+        data << uint32(-int32(entry)); // entry
         data << uint32(DB2_REPLY_SPARSE);
         data << uint32(time(NULL)); // hotfix date
         data << uint32(0);          // size of next block

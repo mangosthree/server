@@ -533,7 +533,7 @@ class Group
         void BroadcastReadyCheck(WorldPacket* packet);
         void OfflineReadyCheck();
 
-        void RewardGroupAtKill(Unit* pVictim, Player* player_tap);
+        void RewardGroupAtKill(Unit* pVictim, Player* player_tap, bool bNoExperience = false);
 
         bool SetPlayerMap(ObjectGuid guid, uint32 mapid);
 

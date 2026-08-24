@@ -632,7 +632,7 @@ static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
  *
  * Rewards received by group members and player_tap
  */
-void Group::RewardGroupAtKill(Unit* pVictim, Player* player_tap)
+void Group::RewardGroupAtKill(Unit* pVictim, Player* player_tap, bool bNoExperience /*= false*/)
 {
     bool PvP = pVictim->isCharmedOwnedByPlayerOrPlayer();
 
@@ -649,7 +649,7 @@ void Group::RewardGroupAtKill(Unit* pVictim, Player* player_tap)
     if (member_with_max_level)
     {
         /// not get Xp in PvP or no not gray players in group
-        xp = (PvP || !not_gray_member_with_max_level) ? 0 : MaNGOS::XP::Gain(not_gray_member_with_max_level, pVictim);
+        xp = (PvP || bNoExperience || !not_gray_member_with_max_level) ? 0 : MaNGOS::XP::Gain(not_gray_member_with_max_level, pVictim);
 
         /// skip in check PvP case (for speed, not used)
         bool is_raid = PvP ? false : sMapStore.LookupEntry(pVictim->GetMapId())->IsRaid() && isRaidGroup();

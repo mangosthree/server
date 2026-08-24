@@ -316,7 +316,29 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recv_data)
 
     if (!CanInteractWithQuestGiver(guid, "CMSG_QUESTGIVER_CHOOSE_REWARD"))
     {
-        return;
+        // A reward window the SERVER pushed must survive the state it was
+        // pushed into. The Duskhaven wake-up (14375) holds the player STUNNED
+        // through the whole scene and retail completes the quest straight
+        // through it - the stun only lifts as the reward's own cast lands.
+        // The control-state gate above is right for opening gossip, wrong for
+        // finishing an offer the server itself sent, so a living player still
+        // in reach of the involved questgiver with the quest complete passes.
+        bool allowed = false;
+
+        if (_player->IsAlive() && guid.IsCreatureOrVehicle())
+        {
+            if (Creature* pGiver = _player->GetMap()->GetAnyTypeCreature(guid))
+            {
+                allowed = pGiver->IsAlive() && pGiver->HasInvolvedQuest(quest) &&
+                    InReach(*pGiver, *_player, INTERACTION_DISTANCE) &&
+                    _player->GetQuestStatus(quest) == QUEST_STATUS_COMPLETE;
+            }
+        }
+
+        if (!allowed)
+        {
+            return;
+        }
     }
 
     DEBUG_LOG("WORLD: Received opcode CMSG_QUESTGIVER_CHOOSE_REWARD - for %s to %s, quest = %u, reward = %u", _player->GetGuidStr().c_str(), guid.GetString().c_str(), quest, reward);
@@ -339,8 +361,15 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recv_data)
         {
             _player->RewardQuest(pQuest, reward, pObject, false);
 
-            // Send next quest
-            if (Quest const* nextquest = _player->GetNextQuest(guid, pQuest))
+            // Send next quest, but only if it can actually be taken - a chain
+            // that converges offers it once the first sibling is turned in
+            Quest const* nextquest = _player->GetNextQuest(guid, pQuest);
+            if (nextquest && !_player->CanTakeQuest(nextquest, false))
+            {
+                nextquest = NULL;
+            }
+
+            if (nextquest)
             {
                 _player->PlayerTalkClass->SendQuestGiverQuestDetails(nextquest, guid, true);
             }

@@ -916,12 +916,6 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
         }
         plMover->m_movementInfo = movementInfo;
 
-        /* Movement should cancel looting */
-        if (ObjectGuid lootGUID = plMover->GetLootGuid())
-        {
-            plMover->SendLootRelease(lootGUID);
-        }
-
         // The old -500 cutoff assumed nothing legitimate sat that low; that held
         // for old-world maps but not Cata's deep-ocean zones. Vashj'ir's Abyssal
         // Depths has live spirit-healer/graveyard content down to ~ -1800

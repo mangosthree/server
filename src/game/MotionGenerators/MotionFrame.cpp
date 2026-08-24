@@ -49,6 +49,27 @@ namespace Motion
             float(MAX_POINT_PATH_LENGTH) * SMOOTH_PATH_STEP_SIZE;
 
         /// The world frame's router: the Detour navmesh, behind IPathQuery.
+        /// A PARTIAL corridor still counts as reachable while walking it makes
+        /// real progress toward the goal: the verdict is re-derived from the
+        /// new spot on the next route, and the no-path grace timer catches
+        /// corridors that stall. Without this, every INCOMPLETE flicker in a
+        /// crowded fight read as "unreachable" and fed the threat-shedding
+        /// hair-trigger in SelectHostileTarget.
+        bool PartialPathProgresses(PathFinder const& path)
+        {
+            if ((path.getPathType() & PATHFIND_INCOMPLETE) == 0)
+            {
+                return false;
+            }
+
+            const float remaining =
+                (path.getActualEndPosition() - path.getEndPosition()).magnitude();
+            const float whole =
+                (path.getStartPosition() - path.getEndPosition()).magnitude();
+
+            return remaining < 7.5f || remaining + 4.0f < whole;
+        }
+
         class WorldPathQuery final : public IPathQuery
         {
             public:
@@ -100,7 +121,8 @@ namespace Motion
 
                 bool Reachable() const override
                 {
-                    return (m_path.getPathType() & PATHFIND_NORMAL) != 0;
+                    return (m_path.getPathType() & PATHFIND_NORMAL) != 0 ||
+                           PartialPathProgresses(m_path);
                 }
 
             private:
@@ -320,7 +342,8 @@ namespace Motion
 
                 bool Reachable() const override
                 {
-                    return (m_path.getPathType() & PATHFIND_NORMAL) != 0;
+                    return (m_path.getPathType() & PATHFIND_NORMAL) != 0 ||
+                           PartialPathProgresses(m_path);
                 }
 
             private:

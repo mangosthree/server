@@ -592,7 +592,8 @@ class Creature : public Unit
 
         bool Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, Team team = TEAM_NONE, const CreatureData* data = NULL, GameEventCreatureData const* eventData = NULL);
         bool LoadCreatureAddon(bool reload);
-        void SelectLevel(const CreatureInfo* cinfo, float percentHealth = 100.0f);
+        void SelectLevel(const CreatureInfo* cinfo, float percentHealth = 100.0f,
+                         uint32 forcedLevel = USE_DEFAULT_DATABASE_LEVEL);
         void SelectLevel(uint32 forcedLevel = USE_DEFAULT_DATABASE_LEVEL);
         void LoadEquipment(uint32 equip_entry, bool force = false);
 
@@ -641,6 +642,7 @@ class Creature : public Unit
 
         void SetCannotReachTarget(bool cannotReach);        ///< Arms/disarms the no-path evade grace timer.
         bool CanNotReachTarget() const { return m_cannotReachTarget; }
+        uint32 GetCannotReachTimer() const { return m_cannotReachTimer; } ///< ms spent unreachable since armed.
 
         bool IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf) override;
         bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const override;

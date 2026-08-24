@@ -136,6 +136,11 @@ class ChaseMovementGenerator final : public TargetedMovementGenerator
         void AddMoveState(Unit& owner) const override { owner.addUnitState(UNIT_STAT_CHASE_MOVE); }
         void ClearMoveState(Unit& owner) const override { owner.clearUnitState(UNIT_STAT_CHASE_MOVE); }
 
+        /// A brawl re-derives its spot on a human beat, not ten times a
+        /// second: with the 0.75-reach hysteresis, 100ms rechecks made
+        /// shuffling melee crowds re-vector sub-second (bot twitch).
+        uint32 RecheckIntervalMs() const override { return 400; }
+
         float TargetDistance(Unit& owner, bool forRangeCheck) const override;
         bool LostTarget(Unit& owner) const override;
         void ReachTarget(Unit& owner) override;

@@ -380,19 +380,28 @@ bool Unit::SelectHostileTarget()
             // NOTE: path alrteady generated from AttackStart()
             if (!GetMotionMaster()->GetCurrent()->IsReachable())
             {
-                // remove all taunts
-                RemoveSpellsCausingAura(SPELL_AURA_MOD_TAUNT);
-
-                if (m_ThreatManager.getThreatList().size() < 2)
+                if (InMeleeReach(*this, *target))
                 {
-                    // only one target in list: keep trying and evade once the
-                    // no-path grace timer expires (see Creature::Update)
+                    // Already at arm's length: the route verdict is noise.
+                    ((Creature*)this)->SetCannotReachTarget(false);
+                }
+                else if (!((Creature*)this)->CanNotReachTarget())
+                {
+                    // First unreachable verdict: arm the grace timer. Transient
+                    // verdicts (mid-crowd congestion, partial corridors still
+                    // being walked) resolve themselves inside the window; the
+                    // old instant threat-delete churned world-wide.
                     ((Creature*)this)->SetCannotReachTarget(true);
                 }
-                else
+                else if (((Creature*)this)->GetCannotReachTimer() >= CREATURE_NOPATH_EVADE_TIME &&
+                         m_ThreatManager.getThreatList().size() >= 2)
                 {
-                    // remove unreachable target from our threat list
-                    // next iteration we will select next possible target
+                    // Grace spent with other attackers listed: shed THIS victim
+                    // and rotate to the next. The single-attacker case keeps
+                    // the evade fallback in Creature::Update.
+                    RemoveSpellsCausingAura(SPELL_AURA_MOD_TAUNT);
+                    ((Creature*)this)->SetCannotReachTarget(false);
+
                     m_HostileRefManager.deleteReference(target);
                     m_ThreatManager.modifyThreatPercent(target, -101);
 

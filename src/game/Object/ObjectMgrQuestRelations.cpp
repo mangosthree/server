@@ -243,6 +243,15 @@ void ObjectMgr::LoadGameObjectForQuests()
                 }
                 break;
             }
+            case GAMEOBJECT_TYPE_DOOR:
+            {
+                if (itr->raw.data[8])                       // quest-sparkle doors (see ActivateToQuest)
+                {
+                    mGameObjectForQuestSet.insert(itr->id);
+                    ++count;
+                }
+                break;
+            }
             case GAMEOBJECT_TYPE_GOOBER:
             {
                 if (itr->goober.questId)                    // quests objects

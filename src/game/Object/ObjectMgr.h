@@ -968,6 +968,7 @@ class ObjectMgr
         LivingWorldStartupStats LoadActiveEntities(Map* _map);
 
         void LoadVehicleAccessory();
+        void LoadCreatureSparring();
 
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint32 level) const;

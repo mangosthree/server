@@ -431,6 +431,9 @@ bool World::SetInitialWorldSettings()
     sLog.outString("Loading Vehicle Accessory...");         // must be after creature templates
     sObjectMgr.LoadVehicleAccessory();
 
+    sLog.outString("Loading Creature Sparring Templates...");
+    sObjectMgr.LoadCreatureSparring();
+
     sLog.outString("Loading ItemRequiredTarget...");
     sObjectMgr.LoadItemRequiredTarget();
 

@@ -359,7 +359,7 @@ enum HitInfo
     HITINFO_CRUSHING            = 0x00020000,
     HITINFO_NOACTION            = 0x00040000,               // guessed
     // 0x00080000
-    // 0x00100000
+    HITINFO_FAKE_DAMAGE         = 0x00100000,               // swing lands, health bar does not move (sparring)
     HITINFO_SWINGNOHITSOUND     = 0x00200000,               // guessed
     // 0x00400000
     HITINFO_UNK22               = 0x00800000
@@ -2774,6 +2774,7 @@ class Unit : public WorldObject
          */
         bool IsTargetableForAttack(bool inverseAlive = false) const;
         bool IsImmuneToAttacker(Unit const* pAttacker) const;
+        bool IsSparringWith(Unit const* pAttacker, float* pFloorPct = NULL) const;
         /**
          * Simply checks if this \ref Unit has the flag (\ref Unit::HasFlag)
          * \ref UnitFlags::UNIT_FLAG_PASSIVE in \ref EUnitFields::UNIT_FIELD_FLAGS

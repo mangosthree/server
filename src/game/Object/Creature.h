@@ -300,6 +300,27 @@ enum SplineFlags
 };
 
 // from `creature_addon` and `creature_template_addon`tables
+/**
+* Sparring health floor for a creature that is fought only for show.
+*
+* Retail runs the street battles of an invaded city as theatre: defenders and
+* attackers trade blows indefinitely and the defenders never fall. A capture of
+* Gilneas City shows the losing side of such a pair settling on a fixed
+* fraction of its health and staying there for the rest of the fight.
+*
+* \arg \c CreatureID
+*   The VICTIM's `creature_template` entry - the creature being protected.
+* \arg \c HealthLimitPct
+*   NPC attackers deal no damage once the victim is at or below this
+*   percentage of its health, and can never land a killing blow on it.
+*   Players and their pets are unaffected.
+*/
+struct CreatureSparring
+{
+    uint32 CreatureID;
+    float  HealthLimitPct;
+};
+
 struct CreatureDataAddon
 {
     uint32 guidOrEntry;

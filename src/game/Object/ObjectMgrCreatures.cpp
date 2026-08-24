@@ -707,6 +707,38 @@ CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, u
 }
 
 /**
+* Loads `creature_sparring_template`.
+*
+* One row per protected VICTIM. See `CreatureSparring` for what the floor
+* means and why retail needs one.
+*/
+void ObjectMgr::LoadCreatureSparring()
+{
+    sCreatureSparringStorage.Load();
+
+    sLog.outString(">> Loaded %u creature sparring templates", sCreatureSparringStorage.GetRecordCount());
+    sLog.outString();
+
+    for (SQLStorage::SQLSIterator<CreatureSparring> itr = sCreatureSparringStorage.getDataBegin<CreatureSparring>();
+         itr < sCreatureSparringStorage.getDataEnd<CreatureSparring>(); ++itr)
+    {
+        if (!sCreatureStorage.LookupEntry<CreatureInfo>(itr->CreatureID))
+        {
+            sLog.outErrorDb("Table `creature_sparring_template` has entry %u which is not in `creature_template`, skipped.", itr->CreatureID);
+            sCreatureSparringStorage.EraseEntry(itr->CreatureID);
+            continue;
+        }
+
+        if (itr->HealthLimitPct <= 0.0f || itr->HealthLimitPct > 100.0f)
+        {
+            sLog.outErrorDb("Table `creature_sparring_template` has entry %u with HealthLimitPct %f out of range (0, 100], skipped.", itr->CreatureID, itr->HealthLimitPct);
+            sCreatureSparringStorage.EraseEntry(itr->CreatureID);
+            continue;
+        }
+    }
+}
+
+/**
  * @brief Loads creature equipment templates in current and deprecated formats.
  */
 void ObjectMgr::LoadEquipmentTemplates()

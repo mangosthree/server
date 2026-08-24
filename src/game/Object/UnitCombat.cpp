@@ -127,6 +127,19 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     CalculateMeleeDamage(pVictim, &damageInfo, attType);
     // Send log damage message to client
     DealDamageMods(pVictim, damageInfo.damage, &damageInfo.absorb);
+
+    // A sparring partner already at its floor still gets hit - it just stops
+    // losing health. Without this the client draws damage numbers over a bar
+    // that never moves.
+    float fFloorPct = 0.0f;
+
+    if (pVictim->IsSparringWith(this, &fFloorPct)
+        && pVictim->GetHealthPercent() <= fFloorPct)
+    {
+        damageInfo.damage = 0;
+        damageInfo.HitInfo |= HITINFO_FAKE_DAMAGE;
+    }
+
     SendAttackStateUpdate(&damageInfo);
     ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.damage, damageInfo.attackType);
     DealMeleeDamage(&damageInfo, true);

@@ -133,9 +133,17 @@ class VehicleInfo
         VehicleEntry const* GetVehicleEntry() const { return m_vehicleEntry; }
         VehicleSeatEntry const* GetSeatEntry(uint8 seat) const;
 
+        /// How long a summoned vehicle lingers once its controller steps off.
+        /// Retail varies this per vehicle (Greymane's horse 2.6 s, Crowley's 6 s
+        /// in the 18019 Gilneas captures); scripts set it, the default is the
+        /// old one-second guess.
+        void SetDespawnDelay(uint32 ms) { m_despawnDelay = ms; }
+        uint32 GetDespawnDelay() const { return m_despawnDelay; }
+
         void Board(Unit* passenger, uint8 seat);            // Board a passenger to a vehicle
         void SwitchSeat(Unit* passenger, uint8 seat);       // Used to switch seats of a passenger
         void UnBoard(Unit* passenger, bool changeVehicle);  // Used to Unboard a passenger from a vehicle
+        void UnBoardAll();                                  // Eject every passenger (before the vehicle is destroyed)
 
         bool CanBoard(Unit* passenger) const;               // Used to check if a Unit can board a vehicle
         Unit* GetPassenger(uint8 seat) const;
@@ -163,6 +171,8 @@ class VehicleInfo
         bool IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) const;
         bool IsUsableSeatForCreature(uint32 /*seatFlags*/) const { return true; } // special flag?, !IsUsableSeatForPlayer(seatFlags)?
 
+        bool IsExitSpotTaken(Unit const* passenger, float x, float y) const;
+
         // Apply/ Remove Controlling of the vehicle
         void ApplySeatMods(Unit* passenger, uint32 seatFlags);
         void RemoveSeatMods(Unit* passenger, uint32 seatFlags);
@@ -181,6 +191,7 @@ class VehicleInfo
 
         Geometry::Placement m_lastPose;                     ///< Pose the last global update ran at
         uint32 m_updatePositionsTimer;                      ///< Triggers the global position updates
+        uint32 m_despawnDelay;                              ///< ms a summoned vehicle stays after its controller leaves
 };
 
 #endif

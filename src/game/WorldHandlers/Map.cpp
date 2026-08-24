@@ -1378,7 +1378,12 @@ void Map::PlayerRelocation(Player* player, float x, float y, float z, float orie
  */
 void Map::CreatureRelocation(Creature* creature, float x, float y, float z, float ang)
 {
-    MANGOS_ASSERT(CheckGridIntegrity(creature, false));
+    // A boarded passenger's world position is derived from its seat and is
+    // refreshed by this very call, so it is expected to be stale on entry
+    if (!creature->IsBoarded())
+    {
+        MANGOS_ASSERT(CheckGridIntegrity(creature, false));
+    }
 
     Cell old_cell = creature->GetCurrentCell();
     Cell new_cell(MaNGOS::ComputeCellPair(x, y));

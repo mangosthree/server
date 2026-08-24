@@ -1027,10 +1027,11 @@ bool Spell::DoSummonPet(SpellEffectEntry const* effect)
     {
         if (spawnCreature->LoadPetFromDB((Player*)m_caster, pet_entry))
         {
-            // Summon in dest location
+            // Summon in dest location; LoadPetFromDB already added the pet to
+            // the map, so a raw position write would desync its grid cell
             if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
             {
-                spawnCreature->Place().MoveTo(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, -m_caster->Where().Facing());
+                spawnCreature->NearTeleportTo(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, -m_caster->Where().Facing());
             }
 
             return true;

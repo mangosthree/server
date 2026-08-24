@@ -61,8 +61,49 @@ class Group;
 class ArenaTeam;
 class Item;
 class SQLStorage;
-struct PhaseDefinition;
 struct SpellPhaseInfo;
+
+/// @brief Flags on a `phase_definitions` row, controlling how it combines with
+/// the definitions evaluated before it for the same zone.
+enum PhaseDefinitionFlags
+{
+    PHASE_FLAG_OVERWRITE_EXISTING = 0x1,  ///< Discard what earlier rows contributed
+    PHASE_FLAG_NO_MORE_PHASES     = 0x2,  ///< Stop evaluating further rows for this zone
+    PHASE_FLAG_NEGATE_PHASE       = 0x4,  ///< Remove this phasemask instead of adding it
+};
+
+/// @brief One conditional phase override for a zone, loaded from `phase_definitions`.
+///
+/// Rows are evaluated in `entry` order for the player's current zone. A row
+/// applies when its `conditionId` passes (or is 0), and contributes its
+/// phasemask, its Phase.dbc id, and optionally a terrain-swap map -- the last
+/// being what replaces the zone's world geometry client-side, e.g. Gilneas
+/// swapping in map 638 (the intact city) over the ruined base map 654.
+struct PhaseDefinition
+{
+    uint32 zoneId;          ///< Zone this definition applies in
+    uint32 entry;           ///< Evaluation order within the zone
+    uint32 phasemask;       ///< Server-side visibility mask contribution
+    uint32 phaseId;         ///< Phase.dbc id sent to the client, 0 for none
+    uint32 terrainswapmap;  ///< Map.dbc id swapped in for this zone, 0 for none
+    uint32 flags;           ///< @ref PhaseDefinitionFlags
+    uint32 conditionId;     ///< `conditions` row gating this row, 0 = always true
+
+    bool IsOverwritingExistingPhases() const
+    {
+        return (flags & PHASE_FLAG_OVERWRITE_EXISTING) != 0;
+    }
+
+    bool IsLastDefinition() const
+    {
+        return (flags & PHASE_FLAG_NO_MORE_PHASES) != 0;
+    }
+
+    bool IsNegatingPhasemask() const
+    {
+        return (flags & PHASE_FLAG_NEGATE_PHASE) != 0;
+    }
+};
 
 typedef std::list<PhaseDefinition*> PhaseDefinitionContainer;
 typedef std::unordered_map<uint32 /*zoneId*/, PhaseDefinitionContainer> PhaseDefinitionStore;

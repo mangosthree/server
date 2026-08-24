@@ -1188,6 +1188,13 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
         {
             itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
         }
+
+        // A phase definition can hinge on quest state - Gilneas swaps the
+        // intact city away once Last Stand is turned in - and the client is
+        // only ever told about terrain swaps by the packet this sends. Without
+        // it the swap would not take effect until the player happened to cross
+        // an area boundary.
+        UpdatePhaseDefinitions();
     }
 
     // resend quests status directly

@@ -498,6 +498,11 @@ bool World::SetInitialWorldSettings()
     sLog.outString("Loading Conditions...");
     sObjectMgr.LoadConditions();
 
+    // Must follow LoadConditions(): every definition's condition_id is
+    // validated against the loaded conditions as it is read.
+    sLog.outString("Loading Phase Definitions...");
+    sObjectMgr.LoadPhaseDefinitions();
+
     sLog.outString("Creating map persistent states for non-instanceable maps...");     // must be after PackInstances(), LoadCreatures(), sPoolMgr.LoadFromDB(), sGameEventMgr.LoadFromDB();
     sMapPersistentStateMgr.InitWorldMaps();
     sLog.outString();

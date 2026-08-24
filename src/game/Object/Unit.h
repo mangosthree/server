@@ -2773,6 +2773,7 @@ class Unit : public WorldObject
          * \see UnitState
          */
         bool IsTargetableForAttack(bool inverseAlive = false) const;
+        bool IsImmuneToAttacker(Unit const* pAttacker) const;
         /**
          * Simply checks if this \ref Unit has the flag (\ref Unit::HasFlag)
          * \ref UnitFlags::UNIT_FLAG_PASSIVE in \ref EUnitFields::UNIT_FIELD_FLAGS

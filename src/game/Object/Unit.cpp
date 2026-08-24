@@ -1236,6 +1236,12 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         damage = health > 1 ? health - 1 : 0;
     }
 
+    // A unit the client holds immune to this attacker takes nothing from it.
+    if (pVictim->IsImmuneToAttacker(this))
+    {
+        damage = 0;
+    }
+
     // Rage from Damage made (only from direct weapon damage)
     if (cleanDamage && damagetype == DIRECT_DAMAGE && this != pVictim && GetTypeId() == TYPEID_PLAYER && (GetPowerType() == POWER_RAGE))
     {
@@ -3263,6 +3269,42 @@ FactionTemplateEntry const* Unit::getFactionTemplateEntry() const
 }
 
 /**
+* Tells whether an attacker is barred from attacking this unit at all.
+*
+* The two flags below are named for what vanilla-era MaNGOS believed they did.
+* The 4.3.4 client says otherwise: in its CanAttack (Wow-64.exe build 15595,
+* sub_14023D1E0) bit 0x8 marks a player-controlled unit, and the test reads
+*     if (!(attacker->flags & 0x8) && (target->flags & 0x200)) return false;
+*     if ( (attacker->flags & 0x8) && (target->flags & 0x100)) return false;
+* so 0x200 is "immune to NPCs" and 0x100 is "immune to players". This core
+* enforces neither against a known attacker - 0x200 is only ever read as "will
+* not start a fight itself" - which is why NPCs Blizzard marked untouchable,
+* quest givers among them, are cut down by hostile creatures here.
+*
+* The enum names are left alone: `server-two` shares them, and renaming them
+* would churn every caller for no behavioural gain.
+*
+* \arg \c pAttacker
+*   The unit that wants to attack; NULL or this unit itself is never immune.
+* \return
+*   true when the attack must not be allowed to happen.
+*/
+bool Unit::IsImmuneToAttacker(Unit const* pAttacker) const
+{
+    if (!pAttacker || pAttacker == this)
+    {
+        return false;
+    }
+
+    if (pAttacker->isCharmedOwnedByPlayerOrPlayer())
+    {
+        return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+    }
+
+    return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+}
+
+/**
  * @brief Starts attacking a victim.
  *
  * @param victim The victim to attack.
@@ -3278,6 +3320,12 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
 
     // dead units can neither attack nor be attacked
     if (!IsAlive() || !victim->IsInWorld() || !victim->IsAlive())
+    {
+        return false;
+    }
+
+    // nor can anything attack a unit the client holds immune to it
+    if (victim->IsImmuneToAttacker(this))
     {
         return false;
     }

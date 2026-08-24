@@ -57,6 +57,10 @@
 #include "Pet.h"
 #include "SpellAuras.h"
 #include "TemporarySummon.h"
+#include "movement/typedefs.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 
 /**
  * @brief Handles pet action bar commands, reactions, and spell casts.
@@ -839,15 +843,220 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (pet->GetCharmInfo() && pet->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+    Aura* triggeredByAura = pet->GetTriggeredByClientAura(spellid);
+
+    // do not cast not learned spells - checked before the served quest
+    // spells below, so none of them can be cast from a vehicle that does
+    // not carry it
+    if ((!triggeredByAura && !pet->HasSpell(spellid)) || IsPassiveSpell(spellInfo))
     {
         return;
     }
 
-    Aura* triggeredByAura = pet->GetTriggeredByClientAura(spellid);
+    // 67063 Throw Torch, the Sacrifices (14212) ride. The button sits on the
+    // vehicle bar, but retail has the RIDER throw: every capture cast carries
+    // the player as caster, in the player's own cast sequence, and the throw
+    // animation belongs to him - cast by the horse it plays on nothing and the
+    // client leaves the rider frozen mid-wind-up. The vehicle stays the proper
+    // caster for everything else on a vehicle bar (the Rebel Cannon fires its
+    // own shot on retail), so this stays a single-spell allowance.
+    if (spellid == 67063 && pet->IsVehicle() && pet->GetEntry() == 35231 &&
+        pet->GetCharmerGuid() == _player->GetObjectGuid())
+    {
+        SpellCastTargets riderTargets;
+        recvPacket >> riderTargets.ReadForCaster(_player);
+        riderTargets.ReadAdditionalData(recvPacket, cast_flags);
 
-    // do not cast not learned spells
-    if ((!triggeredByAura && !pet->HasSpell(spellid)) || IsPassiveSpell(spellInfo))
+        Spell* riderSpell = new Spell(_player, spellInfo, true, _player->GetObjectGuid());
+        riderSpell->m_cast_count = cast_count;
+        riderSpell->SpellStart(&riderTargets);
+        return;
+    }
+
+    // 68659 Launch Me, the Two By Sea (14382) catapult ride. The player aims
+    // and the client supplies the destination; retail answers with a vehicle
+    // exit, the 8 s Launch safe-fall (66251, catapult as caster) and a
+    // knockback along the aim bearing - horizontal speed a fixed 57.159, the
+    // vertical solved so the arc lands on the aim point (the capture's
+    // 18.267 for a 96.7 yd shot reproduces from exactly that equation). The
+    // spell's own effects cannot carry any of this here: its targets are
+    // TARGET_DEST_TRAJ and PASSENGER_0 chained through two 4.2+ internal
+    // force-casts this core does not resolve, so the launch is served whole
+    // at the point the aim arrives.
+    if (spellid == 68659 && pet->IsVehicle() && pet->GetEntry() == 36283 &&
+        pet->GetCharmerGuid() == _player->GetObjectGuid())
+    {
+        SpellCastTargets aimTargets;
+        recvPacket >> aimTargets.ReadForCaster(pet);
+        aimTargets.ReadAdditionalData(recvPacket, cast_flags);
+
+        if (!(aimTargets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
+        {
+            return;
+        }
+
+        float fx, fy, fz;
+        aimTargets.getDestination(fx, fy, fz);
+
+        // The wind-up and the boulder arc are the client's, from the cast.
+        Spell* launchSpell = new Spell(pet, spellInfo, true, pet->GetObjectGuid());
+        launchSpell->m_cast_count = cast_count;
+        launchSpell->SpellStart(&aimTargets);
+
+        // Out of the bucket, softly, and away along the aim. The bearing is
+        // taken from the catapult - the exit spot is a yard off its side and
+        // the teleport there is still in flight when the knockback is sent,
+        // exactly the packet order the capture shows.
+        pet->RemoveAurasDueToSpell(69434);                  // the seat
+        pet->CastSpell(_player, 66251, true);               // Launch: safe fall
+
+        float dx = fx - pet->GetPositionX();
+        float dy = fy - pet->GetPositionY();
+        float dist = sqrt(dx * dx + dy * dy);
+
+        if (dist > 3.0f)
+        {
+            if (dist > 150.0f)                              // sanity for a hand-crafted aim
+            {
+                dist = 150.0f;
+            }
+
+            float dz = fz - pet->GetPositionZ();
+            float ft = dist / 57.159f;
+            float vz = dz / ft + 0.5f * float(Movement::gravity) * ft;
+            SendKnockBack(atan2(dy, dx), 57.159f, vz);
+        }
+
+        return;
+    }
+
+    // 68903 Rope, The Hungry Ettin (14416). Mounted on a Mountain Horse the
+    // player lassos the loose ones: the capture runs 68903 through two
+    // internal triggers (68908, 68916) before the credit (68917) - a chain
+    // this core does not resolve, so the lasso is served at cast-receive:
+    // the roped horse takes the rope-attach visual, falls in behind the
+    // ridden one, and the credit lands at once.
+    if (spellid == 68903 && pet->IsVehicle() && pet->GetEntry() == 36540 &&
+        pet->GetCharmerGuid() == _player->GetObjectGuid())
+    {
+        SpellCastTargets ropeTargets;
+        recvPacket >> ropeTargets.ReadForCaster(pet);
+        ropeTargets.ReadAdditionalData(recvPacket, cast_flags);
+
+        Unit* pRoped = _player->GetMap()->GetUnit(ropeTargets.getUnitTargetGuid());
+
+        // The Rope button carries no implicit target, so the client happily
+        // presses it bare: no unit on the wire, and the lasso must find the
+        // nearest loose horse itself.
+        if (!pRoped || pRoped->GetTypeId() != TYPEID_UNIT ||
+            pRoped->GetEntry() != 36540 || pRoped == pet ||
+            !pRoped->GetCharmerGuid().IsEmpty() ||
+            !pRoped->GetChannelObjectGuid().IsEmpty())
+        {
+            // The nearest LOOSE horse. Eligibility is tested per candidate:
+            // horses already on the string trail at 3-6 yd, so the plain
+            // nearest horse is always one of them after the first rope.
+            pRoped = NULL;
+            float fBest = 0.0f;
+
+            std::list<Creature*> lHorses;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(pet, 36540, 30.0f);
+            MaNGOS::CreatureListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(lHorses, u_check);
+            Cell::VisitGridObjects(pet, searcher, 30.0f);
+
+            for (std::list<Creature*>::const_iterator itr = lHorses.begin();
+                 itr != lHorses.end(); ++itr)
+            {
+                Creature* pHorse = *itr;
+                if (pHorse == pet || !pHorse->IsAlive() ||
+                    !pHorse->GetCharmerGuid().IsEmpty() ||
+                    !pHorse->GetChannelObjectGuid().IsEmpty() ||
+                    pHorse->IsTemporarySummon())
+                {
+                    continue;
+                }
+
+                float fDist = pet->GetDistance(pHorse);
+                if (!pRoped || fDist < fBest)
+                {
+                    pRoped = pHorse;
+                    fBest = fDist;
+                }
+            }
+        }
+
+        if (pRoped && pRoped->GetTypeId() == TYPEID_UNIT &&
+            pRoped->GetEntry() == 36540 && pRoped->IsAlive() &&
+            pRoped != pet && pRoped->GetCharmerGuid().IsEmpty() &&
+            pRoped->GetChannelObjectGuid().IsEmpty() &&
+            !((Creature*)pRoped)->IsTemporarySummon() &&
+            pet->IsWithinDistInMap(pRoped, 40.0f))
+        {
+            // The RIDER throws - the same lesson as the Sacrifices torch:
+            // a vehicle-bar action that is the rider's own deed must be cast
+            // by the player or the animation plays on the wrong body. 68908
+            // carries the lasso-arc visual (17938); its serverside summon is
+            // suppressed in EffectSummonType.
+            _player->CastSpell(pRoped, 68908, true);
+
+            // The visible rope. Every rope-beam spell in the client keeps
+            // its rope in the CHANNEL visual kit alone - no state kit, so an
+            // aura draws nothing and the client shows rope only from a unit
+            // whose channel fields point at a target (this is why the TBC
+            // ancestor is named "Wrangling Rope Channel"). The lassoed horse
+            // therefore CHANNELS the lead-rope at its wrangler: one rope per
+            // horse, drawn horse-to-rider, for as long as the fields stand.
+            // The rope is a pure RENDERING reference: a spell id in the
+            // channel field casts nothing - no aura, no area check, no
+            // script anywhere can fire from it. The quest kit's own rope
+            // (68908/16866) anchors at a rig the plain horse model lacks
+            // and floats overhead; 46674's generic rope kit anchors the
+            // horse correctly (seen in the earlier test - only its CAST
+            // baggage was wrong, and none of that exists here).
+            pRoped->SetChannelObjectGuid(_player->GetObjectGuid());
+            pRoped->SetUInt32Value(UNIT_CHANNEL_SPELL, 46674);
+
+            // Each horse takes its own slot in a loose wedge behind the
+            // rider - with one shared follow spot (and no unit collision)
+            // the whole string nested perfectly inside one horse model.
+            uint32 uiSlot = 0;
+            {
+                std::list<Creature*> lString;
+                MaNGOS::AllCreaturesOfEntryInRangeCheck u_stringCheck(pet, 36540, 60.0f);
+                MaNGOS::CreatureListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> stringSearcher(lString, u_stringCheck);
+                Cell::VisitGridObjects(pet, stringSearcher, 60.0f);
+
+                for (std::list<Creature*>::const_iterator itr = lString.begin();
+                     itr != lString.end(); ++itr)
+                {
+                    if ((*itr)->GetChannelObjectGuid() == _player->GetObjectGuid())
+                    {
+                        ++uiSlot;
+                    }
+                }
+            }
+
+            static const float ROPE_SLOT_ANGLE[5] = { 2.36f, 3.93f, 3.14f, 2.09f, 4.19f };
+            static const float ROPE_SLOT_DIST[5]  = { 3.0f, 3.0f, 5.5f, 6.0f, 6.0f };
+            const uint8 uiIdx = uiSlot % 5;
+
+            // No Clear() first: an idle horse's motion stack can be empty
+            // and DirectClean asserts on that. MoveFollow replaces the top.
+            pRoped->GetMotionMaster()->MoveFollow(pet,
+                ROPE_SLOT_DIST[uiIdx], ROPE_SLOT_ANGLE[uiIdx]);
+
+            // No credit yet: retail registers the horses at DELIVERY - Lorna
+            // "accepts the horses in 2s or 3s" - handled by the ridden
+            // horse's script when the string reaches her (npc_mountain_horse).
+
+            // The pasture restocks itself for the next wrangler.
+            ((Creature*)pRoped)->ForcedDespawn(300000);
+        }
+
+        return;
+    }
+
+    if (pet->GetCharmInfo() && pet->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
     {
         return;
     }

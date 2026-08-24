@@ -98,6 +98,18 @@ int32 GetSpellDuration(SpellEntry const* spellInfo)
     {
         return 0;
     }
+
+    // 67063 Throw Torch (Sacrifices, 14212): the DBC duration is -1 - the
+    // percent burn ticks until the target dies. Blizzard's combat rules let
+    // the rider drop combat regardless; this core holds the thrower in
+    // combat while their DoT ticks anywhere, so a torched stalker that
+    // survives pins the player in the combat-bugged state for a minute or
+    // more after the ride. Four ticks keep the flame and the credit.
+    if (spellInfo->ID == 67063)
+    {
+        return 12000;
+    }
+
     SpellDurationEntry const* du = sSpellDurationStore.LookupEntry(spellInfo->DurationIndex);
     if (!du)
     {

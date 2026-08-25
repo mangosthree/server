@@ -971,6 +971,7 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
 {
     *smoothPathSize = 0;
     uint32 nsmoothPath = 0;
+    bool reachedEnd = false;
 
     if (polyPathSize == 0 || polyPathSize > MAX_PATH_LENGTH)
     {
@@ -1067,6 +1068,7 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
         if (endOfPath && inRangeYZX(iterPos, steerPos, SMOOTH_PATH_SLOP, 1.0f))
         {
             // Reached end of path.
+            reachedEnd = true;
             dtVcopy(iterPos, targetPos);
             if (nsmoothPath < maxSmoothPathSize)
             {
@@ -1126,8 +1128,11 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
 
     *smoothPathSize = nsmoothPath;
 
-    // Return success if the smooth path size is within the maximum limit.
-    return nsmoothPath < MAX_POINT_PATH_LENGTH ? DT_SUCCESS : DT_FAILURE;
+    // A full buffer that never reached the end is a truncated route, not a failed one:
+    // BuildPointPath marks it INCOMPLETE from its geometry and the mover walks it as far
+    // as it goes, then re-paths from there.
+    return (reachedEnd || nsmoothPath < maxSmoothPathSize) ? DT_SUCCESS
+                                                         : (DT_SUCCESS | DT_BUFFER_TOO_SMALL);
 }
 
 /**

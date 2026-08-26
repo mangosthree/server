@@ -27,10 +27,10 @@
 #define MANGOS_MOTIONMASTER_H
 
 #include "Platform/Define.h"
+#include <memory>
 #include <sstream>
 
 struct Position;
-#include <memory>
 #include <stack>
 #include <vector>
 

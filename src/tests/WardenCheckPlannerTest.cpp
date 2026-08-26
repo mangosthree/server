@@ -236,5 +236,5 @@ TEST(WardenCheckPlanner_fails_closed_when_result_preflight_exceeds_codec_budget)
         &budget) ==
         warden::CheckPlanValidation::TransportResultBodyTooLarge);
     CHECK(plan.checks.empty());
-    CHECK(budget.maximumResultBody > warden::MaxPlannedCheckResultBody);
+    CHECK(budget.maximumResultBody > warden::MaxDecryptedCheckResultBody);
 }

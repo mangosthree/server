@@ -51,6 +51,8 @@ inline bool IsValidWardenIncidentWindow(uint32 seconds)
 struct WardenRawConfiguration
 {
     uint32 enforcementMode = 2;
+    // When false, missing/unsupported profiles and protocol lifecycle failures
+    // disengage Warden for the session instead of enforcing admission.
     bool requireExactProfile = true;
     uint32 normalMinSeconds = 30;
     uint32 normalMaxSeconds = 60;
@@ -66,6 +68,8 @@ struct WardenConfiguration
 {
     WardenEnforcementMode enforcementMode =
         WardenEnforcementMode::KickAndBan;
+    // This is an operational admission gate only; confirmed cheat evidence
+    // remains actionable regardless of its value.
     bool requireExactProfile = true;
     uint32 normalMinSeconds = 30;
     uint32 normalMaxSeconds = 60;

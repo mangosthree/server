@@ -49,8 +49,6 @@ constexpr std::size_t ProvisionalServerWardenLengthSize = 4;
 constexpr std::size_t MaxEncryptedServerBody =
     MaxServerWardenWireSize - NormalServerHeaderSize -
     ProvisionalServerWardenLengthSize;
-constexpr std::size_t MaxPlannedCheckResultBody =
-    MaxEncryptedServerBody - CheckResultEnvelopeSize;
 
 struct DecodedClientFrame
 {

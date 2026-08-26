@@ -64,7 +64,6 @@ static_assert(warden::NormalServerHeaderSize == 4);
 static_assert(warden::ProvisionalServerWardenLengthSize == 4);
 static_assert(warden::MaxEncryptedServerBody == 10232);
 static_assert(warden::CheckResultEnvelopeSize == 7);
-static_assert(warden::MaxPlannedCheckResultBody == 10225);
 
 TEST(WardenPacketCodec_client_frame_decodes_exact_little_endian_length)
 {

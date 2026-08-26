@@ -250,7 +250,9 @@ CheckPlanValidation InspectCheckPlan(CheckPlan const& plan,
 
     if (!valid || budget.requestBody > MaxEncryptedServerBody)
         return CheckPlanValidation::RequestBodyTooLarge;
-    if (budget.maximumResultBody > MaxPlannedCheckResultBody)
+    // Client result capacity is a proven CMSG property. Keep it independent
+    // from the still-provisional server framing budget used above.
+    if (budget.maximumResultBody > MaxDecryptedCheckResultBody)
         return CheckPlanValidation::TransportResultBodyTooLarge;
     return CheckPlanValidation::Valid;
 }

@@ -24,11 +24,13 @@
  */
 
 #include "WardenEnforcementPolicy.h"
+#include "WardenServer.h"
 
 namespace warden
 {
 WardenEnforcementPolicy::WardenEnforcementPolicy(
-    WardenEnforcementMode mode) : m_mode(mode)
+    WardenEnforcementMode mode, bool requireExactProfile)
+    : m_mode(mode), m_requireExactProfile(requireExactProfile)
 {
 }
 
@@ -142,12 +144,27 @@ WardenEnforcementPolicy::AbortPendingConfirmations()
     return decisions;
 }
 
+WardenPolicyDecision WardenEnforcementPolicy::EvaluateLifecycle(
+    WardenLifecycleEvent const& event) const
+{
+    if (event.state != WardenState::Failed ||
+        m_mode == WardenEnforcementMode::Observe || !m_requireExactProfile)
+    {
+        return {};
+    }
+
+    // Protocol, module and infrastructure failures are never cheating
+    // evidence. Enforcing modes close only the current incompatible session.
+    return {WardenPolicyAction::Kick};
+}
+
 std::vector<WardenPolicyDecision>
 WardenEnforcementPolicy::ConfirmationContractViolation()
 {
     std::vector<WardenPolicyDecision> decisions =
         AbortPendingConfirmations();
-    decisions.push_back({m_mode == WardenEnforcementMode::Observe ?
+    decisions.push_back({m_mode == WardenEnforcementMode::Observe ||
+            !m_requireExactProfile ?
         WardenPolicyAction::Disengage : WardenPolicyAction::Kick});
     return decisions;
 }

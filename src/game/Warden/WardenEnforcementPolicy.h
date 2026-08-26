@@ -66,13 +66,18 @@ struct WardenPolicyDecision
 class WardenEnforcementPolicy
 {
 public:
-    explicit WardenEnforcementPolicy(WardenEnforcementMode mode);
+    explicit WardenEnforcementPolicy(WardenEnforcementMode mode,
+        bool requireExactProfile);
 
     /** Classifies one validated batch and updates confirmation ownership. */
     std::vector<WardenPolicyDecision> EvaluateBatch(
         WardenEvidenceBatch const& batch);
 
-    /** Closes failed enforcing sessions without creating cheating evidence. */
+    /**
+     * Closes failed sessions without creating cheating evidence. This does not
+     * drain confirmations, even when it returns None; the adapter must always
+     * call AbortPendingConfirmations() while finalizing the failed session.
+     */
     WardenPolicyDecision EvaluateLifecycle(
         WardenLifecycleEvent const& event) const;
 
@@ -93,6 +98,7 @@ private:
     static uint64 AuditKey(uint32 checkId, WardenCheckOutcome outcome);
 
     WardenEnforcementMode m_mode;
+    bool m_requireExactProfile;
     std::unordered_map<uint32, PendingConfirmation> m_pendingConfirmations;
     std::unordered_set<uint64> m_confirmedAudits;
 };

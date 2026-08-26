@@ -26,6 +26,7 @@
 #include "TestHarness.h"
 
 #include "WardenEnforcementPolicy.h"
+#include "WardenServer.h"
 
 #include <cstddef>
 #include <initializer_list>
@@ -55,7 +56,7 @@ std::vector<warden::WardenPolicyDecision> Confirm(
     warden::WardenEnforcementMode mode, warden::WardenEvidence first,
     warden::WardenEvidence second)
 {
-    warden::WardenEnforcementPolicy policy(mode);
+    warden::WardenEnforcementPolicy policy(mode, true);
     std::vector<warden::WardenPolicyDecision> const queued =
         policy.EvaluateBatch(Batch(warden::CheckPlanPurpose::Recurring,
             {first}));
@@ -161,7 +162,7 @@ TEST(WardenEnforcementPolicy_routes_cata_actionability_by_mode)
             warden::WardenEnforcementMode::Kick,
             warden::WardenEnforcementMode::KickAndBan})
     {
-        warden::WardenEnforcementPolicy policy(mode);
+        warden::WardenEnforcementPolicy policy(mode, true);
         auto const decisions = policy.EvaluateBatch(Batch(
             warden::CheckPlanPurpose::Initial,
             {
@@ -205,7 +206,7 @@ TEST(WardenEnforcementPolicy_profile_probe_never_queues_confirmation)
             warden::WardenEnforcementMode::Kick,
             warden::WardenEnforcementMode::KickAndBan})
     {
-        warden::WardenEnforcementPolicy policy(mode);
+        warden::WardenEnforcementPolicy policy(mode, true);
         auto const decisions = policy.EvaluateBatch(Batch(
             warden::CheckPlanPurpose::ProfileProbe,
             {Evidence(9, warden::WardenCheckType::Mem,
@@ -272,7 +273,7 @@ TEST(WardenEnforcementPolicy_confirmed_actionable_mismatch_kicks)
 TEST(WardenEnforcementPolicy_direct_operational_audits_are_deduplicated)
 {
     warden::WardenEnforcementPolicy policy(
-        warden::WardenEnforcementMode::Kick);
+        warden::WardenEnforcementMode::Kick, true);
     auto const corroboration = Evidence(2, warden::WardenCheckType::Lua,
         warden::WardenEvidenceClass::Corroboration,
         warden::WardenCheckOutcome::Mismatch);
@@ -301,7 +302,7 @@ TEST(WardenEnforcementPolicy_direct_operational_audits_are_deduplicated)
 TEST(WardenEnforcementPolicy_observe_audits_without_pending_confirmation)
 {
     warden::WardenEnforcementPolicy policy(
-        warden::WardenEnforcementMode::Observe);
+        warden::WardenEnforcementMode::Observe, true);
     auto const mismatch = Evidence(3, warden::WardenCheckType::Mem,
         warden::WardenEvidenceClass::ThreatSignature,
         warden::WardenCheckOutcome::Mismatch);
@@ -323,7 +324,7 @@ TEST(WardenEnforcementPolicy_observe_audits_without_pending_confirmation)
 TEST(WardenEnforcementPolicy_confirmation_unavailable_is_audited_not_punished)
 {
     warden::WardenEnforcementPolicy policy(
-        warden::WardenEnforcementMode::KickAndBan);
+        warden::WardenEnforcementMode::KickAndBan, true);
     auto mismatch = Evidence(3, warden::WardenCheckType::Mem,
         warden::WardenEvidenceClass::ThreatSignature,
         warden::WardenCheckOutcome::Mismatch);
@@ -358,7 +359,7 @@ TEST(WardenEnforcementPolicy_confirmation_contract_checks_id_type_and_class)
     for (uint32 mutation = 0; mutation < 4; ++mutation)
     {
         warden::WardenEnforcementPolicy policy(
-            warden::WardenEnforcementMode::Kick);
+            warden::WardenEnforcementMode::Kick, true);
         REQUIRE(policy.EvaluateBatch(Batch(
             warden::CheckPlanPurpose::Recurring, {pending})).size() == 1u);
         warden::WardenEvidence wrong = pending;
@@ -402,7 +403,7 @@ TEST(WardenEnforcementPolicy_confirmation_requires_exactly_one_item)
                 {evidence, evidence})})
     {
         warden::WardenEnforcementPolicy policy(
-            warden::WardenEnforcementMode::KickAndBan);
+            warden::WardenEnforcementMode::KickAndBan, true);
         REQUIRE(policy.EvaluateBatch(Batch(
             warden::CheckPlanPurpose::Recurring, {evidence})).size() == 1u);
 
@@ -420,7 +421,7 @@ TEST(WardenEnforcementPolicy_confirmation_requires_exactly_one_item)
 TEST(WardenEnforcementPolicy_invalid_confirmation_audits_before_close)
 {
     warden::WardenEnforcementPolicy policy(
-        warden::WardenEnforcementMode::Kick);
+        warden::WardenEnforcementMode::Kick, true);
     auto pending = Evidence(3, warden::WardenCheckType::Mem,
         warden::WardenEvidenceClass::IntegrityInvariant,
         warden::WardenCheckOutcome::Mismatch);
@@ -443,7 +444,7 @@ TEST(WardenEnforcementPolicy_invalid_confirmation_audits_before_close)
 TEST(WardenEnforcementPolicy_abort_drains_only_actionable_pending_metadata)
 {
     warden::WardenEnforcementPolicy policy(
-        warden::WardenEnforcementMode::Kick);
+        warden::WardenEnforcementMode::Kick, true);
     auto const queued = policy.EvaluateBatch(Batch(
         warden::CheckPlanPurpose::Recurring,
         {
@@ -469,7 +470,7 @@ TEST(WardenEnforcementPolicy_abort_drains_only_actionable_pending_metadata)
 TEST(WardenEnforcementPolicy_actionable_confirmation_preserves_other_pending)
 {
     warden::WardenEnforcementPolicy policy(
-        warden::WardenEnforcementMode::Kick);
+        warden::WardenEnforcementMode::Kick, true);
     auto const mpq = Evidence(1, warden::WardenCheckType::Mpq,
         warden::WardenEvidenceClass::IntegrityInvariant,
         warden::WardenCheckOutcome::Mismatch);
@@ -497,4 +498,69 @@ TEST(WardenEnforcementPolicy_actionable_confirmation_preserves_other_pending)
     CHECK(abandoned[0].action == warden::WardenPolicyAction::PersistAudit);
     CHECK(abandoned[0].outcome ==
         warden::WardenCheckOutcome::Unavailable);
+}
+
+TEST(WardenEnforcementPolicy_lifecycle_failure_closes_only_enforcing_modes)
+{
+    warden::WardenLifecycleEvent failed;
+    failed.state = warden::WardenState::Failed;
+    failed.failure = warden::WardenFailure::DeadlineExpired;
+    warden::WardenLifecycleEvent ready;
+    ready.state = warden::WardenState::ReadyForWorld;
+
+    for (warden::WardenEnforcementMode mode :
+        {warden::WardenEnforcementMode::Observe,
+            warden::WardenEnforcementMode::Kick,
+            warden::WardenEnforcementMode::KickAndBan})
+    {
+        warden::WardenEnforcementPolicy policy(mode, true);
+        warden::WardenPolicyDecision const failure =
+            policy.EvaluateLifecycle(failed);
+        CHECK(failure.action ==
+            (mode == warden::WardenEnforcementMode::Observe ?
+                warden::WardenPolicyAction::None :
+                warden::WardenPolicyAction::Kick));
+        CHECK(policy.EvaluateLifecycle(ready).action ==
+            warden::WardenPolicyAction::None);
+    }
+
+    warden::WardenEnforcementPolicy permissive(
+        warden::WardenEnforcementMode::KickAndBan, false);
+    CHECK(permissive.EvaluateLifecycle(failed).action ==
+        warden::WardenPolicyAction::None);
+
+    warden::WardenEnforcementPolicy enforcing(
+        warden::WardenEnforcementMode::Kick, true);
+    auto const mismatch = Evidence(3, warden::WardenCheckType::Mem,
+        warden::WardenEvidenceClass::IntegrityInvariant,
+        warden::WardenCheckOutcome::Mismatch);
+    REQUIRE(enforcing.EvaluateBatch(Batch(
+        warden::CheckPlanPurpose::Recurring, {mismatch})).size() == 1u);
+    CHECK(enforcing.EvaluateLifecycle(failed).action ==
+        warden::WardenPolicyAction::Kick);
+    auto const abandoned = enforcing.AbortPendingConfirmations();
+    REQUIRE(abandoned.size() == 1u);
+    CHECK_EQ(abandoned[0].checkId, uint32(3));
+    CHECK(abandoned[0].outcome ==
+        warden::WardenCheckOutcome::Unavailable);
+}
+
+TEST(WardenEnforcementPolicy_permissive_exact_profile_disengages_on_contract_failure)
+{
+    warden::WardenEnforcementPolicy policy(
+        warden::WardenEnforcementMode::KickAndBan, false);
+    auto const pending = Evidence(3, warden::WardenCheckType::Mem,
+        warden::WardenEvidenceClass::IntegrityInvariant,
+        warden::WardenCheckOutcome::Mismatch);
+    REQUIRE(policy.EvaluateBatch(Batch(
+        warden::CheckPlanPurpose::Recurring, {pending})).size() == 1u);
+
+    warden::WardenEvidence wrong = pending;
+    wrong.checkId = 9999;
+    std::vector<warden::WardenPolicyDecision> const decisions =
+        policy.EvaluateBatch(Batch(
+            warden::CheckPlanPurpose::Confirmation, {wrong}));
+    REQUIRE(decisions.size() == 2u);
+    CHECK(decisions[0].action == warden::WardenPolicyAction::PersistAudit);
+    CHECK(decisions[1].action == warden::WardenPolicyAction::Disengage);
 }

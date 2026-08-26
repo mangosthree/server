@@ -3600,10 +3600,13 @@ bool Map::GetReachableRandomPointOnGround(uint32 phaseMask, float& x, float& y, 
     float i_z = z + 1.0f;
 
     GetHitPosition(x, y, z + 1.0f, i_x, i_y, i_z, phaseMask, -0.5f);
-    i_z = z; // reset i_z to z value to avoid too much difference from original point before GetHeightInRange
-    // commented out, as this function has not been defined anywhere (previous cores or other repos)
-//    if (!GetHeightInRange(phaseMask, i_x, i_y, i_z)) // GetHeight can fail
-//        return false;
+    i_z = z; // reset i_z to z value to avoid too much difference from original point
+    const auto reachable = FloorNear(phaseMask, i_x, i_y, i_z);
+    if (!reachable)
+    {
+        return false;
+    }
+    i_z = *reachable;
 
     // here we have a valid position but the point can have a big Z in some case
     // next code will check angle from 2 points of view: x-axis and y-axis movement

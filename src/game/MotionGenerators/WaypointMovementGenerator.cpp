@@ -842,6 +842,9 @@ void FlightPathMovementGenerator::Reset(Player& player)
     }
     init.SetFirstPointId(GetCurrentNode());
     init.SetFly();
+    // 4.3.4 reads float path points only with UncompressedPath (Catmull-Rom sets it);
+    // the packed linear path wraps at +-255 yd, which every taxi route exceeds.
+    init.SetSmooth();
     init.SetVelocity(PLAYER_FLIGHT_SPEED);
     init.Launch();
 }

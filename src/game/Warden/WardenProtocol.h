@@ -105,15 +105,10 @@ inline char const* ToPersistenceToken(ClientVariant variant)
 
 inline bool IsCanonicalLocaleClaim(std::array<char, 4> const& locale)
 {
-    for (char value : locale)
-    {
-        if (!((value >= 'A' && value <= 'Z') ||
-                (value >= 'a' && value <= 'z')))
-        {
-            return false;
-        }
-    }
-    return true;
+    return locale[0] >= 'a' && locale[0] <= 'z' &&
+        locale[1] >= 'a' && locale[1] <= 'z' &&
+        locale[2] >= 'A' && locale[2] <= 'Z' &&
+        locale[3] >= 'A' && locale[3] <= 'Z';
 }
 
 inline bool IsPublishedCataWardenLocale(

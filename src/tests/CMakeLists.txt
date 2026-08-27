@@ -73,6 +73,8 @@ set(SRC_GRP_TESTS
     WardenManagerTest.cpp
     WardenAuditStoreTest.cpp
     WardenIncidentStoreTest.cpp
+    WorldGatewayAuthTest.cpp
+    WardenAdmissionTest.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenProtocol.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenCryptoContext.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenPacketCodec.cpp
@@ -96,6 +98,7 @@ set(SRC_GRP_TESTS
     ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators/Arbiter/MoveContract.cpp
     ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators/Arbiter/ArbiterModel.cpp
     ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators/Arbiter/ShadowClassifier.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Server/WorldGatewayAuth.cpp
     ByteBufferStressTest.cpp
     CodecStressTest.cpp
     CryptoStressTest.cpp
@@ -138,10 +141,10 @@ add_test(NAME proto_boundary
         -DSOURCE_ROOT=${CMAKE_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckProtoBoundary.cmake)
 
-add_test(NAME warden_dormant_boundary
+add_test(NAME warden_boundary
     COMMAND ${CMAKE_COMMAND}
         -DSOURCE_ROOT=${CMAKE_SOURCE_DIR}
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckDormantWardenBoundary.cmake)
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckWardenBoundary.cmake)
 
 add_test(NAME build_policy
     COMMAND ${CMAKE_COMMAND}

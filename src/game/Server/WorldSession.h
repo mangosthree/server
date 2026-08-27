@@ -45,9 +45,13 @@
 #include "LFGMgr.h"
 #include "SessionMailbox.h"
 #include "SessionProtocolPolicy.h"
+#include "WardenConfiguration.h"
+#include "WardenProtocol.h"
 
+#include <array>
 #include <memory>
 #include <mutex>
+#include <unordered_set>
 
 struct ItemPrototype;
 struct AuctionEntry;
@@ -69,6 +73,16 @@ class MovementInfo;
 class WorldSession;
 
 namespace proto { class IClientLink; }
+
+namespace warden
+{
+enum class WardenFailure : uint8;
+class WardenEnforcementPolicy;
+struct WardenEvidenceBatch;
+struct WardenLifecycleEvent;
+struct WardenPolicyDecision;
+class WardenServer;
+}
 
 struct OpcodeHandler;
 
@@ -336,6 +350,14 @@ class WorldSession
                      AccountTypes sec, uint8 expansion, time_t mute_time,
                      LocaleConstant locale, const BigNumber& sessionKeySalt);
 
+        /** Authenticated-client overload; headless callers use the one above. */
+        WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
+                     std::shared_ptr<SessionMailbox> mailbox,
+                     AccountTypes sec, uint8 expansion, time_t mute_time,
+                     LocaleConstant locale, const BigNumber& sessionKeySalt,
+                     warden::AdmissionData&& admission,
+                     warden::WardenAdmissionContext admissionContext);
+
         /**
          * @brief Destructor
          */
@@ -403,6 +425,12 @@ class WorldSession
         void SendSetPhaseShift(uint32 phaseMask, uint16 mapId = 0);
         void SendQueryTimeResponse();
         void SendRedirectClient(std::string& ip, uint16 port);
+        /** Consumes Warden custody exactly once after native AUTH_OK. */
+        void OnAuthenticatedAdmission();
+        /** Starts bootstrap only after the character list has been sent. */
+        void StartWardenBootstrap();
+        /** Charges deadlines before ordinary session update and reaping. */
+        void UpdateWarden(uint32 diffMs);
 
         /// The account's `s` (SRP6 salt) column -- see m_sessionKeySalt's doc
         /// comment. Name preserved from WorldSocket::GetSessionKey(), which
@@ -1122,6 +1150,24 @@ class WorldSession
 
         void HandleLoadScreenOpcode(WorldPacket& recvPacket);
     private:
+        // Typed callbacks are the sole bridge from pure Warden state into
+        // account policy, logging, persistence, and connection teardown.
+        void HandleWardenLifecycle(
+            warden::WardenLifecycleEvent const& event);
+        void HandleWardenEvidenceBatch(
+            warden::WardenEvidenceBatch const& batch);
+        void ApplyWardenPolicyDecisions(
+            std::vector<warden::WardenPolicyDecision> const& decisions);
+        void DrainWardenPendingConfirmations();
+        void RequestWardenDisengagement();
+        void FinalizeWardenDisengagement();
+        void PersistWardenAudit(
+            warden::WardenPolicyDecision const& decision);
+        void PersistWardenOperationalAudit(warden::WardenFailure failure);
+        void PersistWardenAdmissionAudit(warden::AdmissionStatus status);
+        void PersistWardenIncidentAndKick(
+            warden::WardenPolicyDecision const& decision);
+
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);
         bool VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGuid const& guid) const;
@@ -1139,6 +1185,25 @@ class WorldSession
         std::shared_ptr<proto::IClientLink> m_Socket;
         std::shared_ptr<SessionMailbox> m_mailbox;
         std::string m_Address;
+
+        std::unique_ptr<warden::AdmissionData> m_pendingWardenAdmission;
+        warden::WardenAdmissionHistory m_wardenAdmissionHistory;
+        std::unique_ptr<warden::WardenServer> m_warden;
+        std::unique_ptr<warden::WardenEnforcementPolicy> m_wardenPolicy;
+        warden::WardenConfiguration m_wardenConfiguration;
+        uint32 m_wardenBuild = 0;
+        std::string m_clientOs;
+        std::string m_clientLocale;
+        std::array<char, 4> m_wardenLocale = {{'u', 'n', 'k', 'n'}};
+        warden::WardenArchitecture m_wardenArchitecture =
+            warden::WardenArchitecture::Unclassified;
+        warden::ClientVariant m_wardenVariant =
+            warden::ClientVariant::Unclassified;
+        uint64 m_wardenAggressiveUntil = 0;
+        bool m_wardenAggressive = false;
+        std::unordered_set<uint64> m_wardenLoggedAnomalies;
+        bool m_wardenDisengagementRequested = false;
+        bool m_wardenAdmissionHandled = false;
 
         /// `s` (SRP6 salt), not the session key `K` -- see the constructor's
         /// doc comment. Named GetSessionKey() for source compatibility with

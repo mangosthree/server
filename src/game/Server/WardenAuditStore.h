@@ -70,8 +70,10 @@ inline bool IsValidWardenAuditContext(WardenAuditContext const& context)
     bool const knownArchitecture =
         ToPersistenceToken(context.architecture) != nullptr;
     bool const knownVariant = ToPersistenceToken(context.variant) != nullptr;
+    std::array<char, 4> const unknownLocale = {{'u', 'n', 'k', 'n'}};
     bool const operational = context.checkId == 0 && knownArchitecture &&
-        knownVariant && IsCanonicalLocaleClaim(context.locale) &&
+        knownVariant && (context.locale == unknownLocale ||
+            IsCanonicalLocaleClaim(context.locale)) &&
         context.checkType == WardenCheckType::Timing &&
         context.evidenceClass == WardenEvidenceClass::ProtocolHealth &&
         context.outcome == WardenAuditOutcome::Unavailable;

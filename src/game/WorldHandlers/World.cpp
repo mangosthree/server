@@ -1646,7 +1646,7 @@ void World::ShutdownCancel()
  *
  * @param diff The elapsed world update time in milliseconds.
  */
-void World::UpdateSessions(uint32 /*diff*/)
+void World::UpdateSessions(uint32 diff)
 {
     ///- Add new sessions
     {
@@ -1666,6 +1666,7 @@ void World::UpdateSessions(uint32 /*diff*/)
         WorldSession* pSession = itr->second;
         WorldSessionFilter updater(pSession);
 
+        pSession->UpdateWarden(diff);
         if (!pSession->Update(updater))
         {
             RemoveQueuedSession(pSession);

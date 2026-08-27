@@ -79,6 +79,63 @@ enum class ClientVariant : uint8
     LegacyGrunt
 };
 
+/** Stable bounded tokens used by Realm audit/incident persistence. */
+inline char const* ToPersistenceToken(WardenArchitecture architecture)
+{
+    switch (architecture)
+    {
+        case WardenArchitecture::X86: return "x86";
+        case WardenArchitecture::X64: return "x64";
+        case WardenArchitecture::Unclassified: return "unk";
+    }
+    return nullptr;
+}
+
+inline char const* ToPersistenceToken(ClientVariant variant)
+{
+    switch (variant)
+    {
+        case ClientVariant::Unclassified: return "unclassified";
+        case ClientVariant::Stock: return "stock";
+        case ClientVariant::Grunt: return "grunt";
+        case ClientVariant::LegacyGrunt: return "legacy-grunt";
+    }
+    return nullptr;
+}
+
+inline bool IsCanonicalLocaleClaim(std::array<char, 4> const& locale)
+{
+    for (char value : locale)
+    {
+        if (!((value >= 'A' && value <= 'Z') ||
+                (value >= 'a' && value <= 'z')))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+inline bool IsPublishedCataWardenLocale(
+    std::array<char, 4> const& locale)
+{
+    static constexpr std::array<std::array<char, 4>, 14> Locales = {{
+        {{'d', 'e', 'D', 'E'}}, {{'e', 'n', 'C', 'N'}},
+        {{'e', 'n', 'G', 'B'}}, {{'e', 'n', 'T', 'W'}},
+        {{'e', 'n', 'U', 'S'}}, {{'e', 's', 'E', 'S'}},
+        {{'e', 's', 'M', 'X'}}, {{'f', 'r', 'F', 'R'}},
+        {{'k', 'o', 'K', 'R'}}, {{'p', 't', 'B', 'R'}},
+        {{'p', 't', 'P', 'T'}}, {{'r', 'u', 'R', 'U'}},
+        {{'z', 'h', 'C', 'N'}}, {{'z', 'h', 'T', 'W'}}
+    }};
+    for (std::array<char, 4> const& candidate : Locales)
+    {
+        if (candidate == locale)
+            return true;
+    }
+    return false;
+}
+
 /** Directional keys and response digest produced by bootstrap command 5. */
 struct ArchitectureProof
 {

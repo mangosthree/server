@@ -51,19 +51,34 @@ struct WardenCreationOptions
 class WardenManager
 {
 public:
+    /** Production manager starts with compiled modules but no DB checks. */
+    WardenManager();
     WardenManager(std::shared_ptr<WardenModuleCatalog const> modules,
         std::shared_ptr<WardenCheckCatalog const> checks);
+
+    static WardenManager& Instance();
+
+    /** Stages one validated startup catalogue without enabling sessions. */
+    bool StageCatalogues(
+        std::shared_ptr<WardenCheckCatalog const> checks);
+    bool HasStagedCatalogues() const;
+    bool HasActiveRuntimeSnapshot() const;
+    /** Immutable compiled modules used by the startup coverage transaction. */
+    WardenModuleCatalog const* GetModuleCatalogForStartup() const;
 
     std::unique_ptr<WardenServer> Create(WardenCreationOptions&& options,
         SendFrame send, LifecycleObserver lifecycle = {},
         EvidenceBatchObserver evidence = {}) const;
 
 private:
-    bool HasValidCatalogueSnapshot() const;
+    static bool HasValidCatalogueSnapshot(
+        WardenModuleCatalog const& modules,
+        WardenCheckCatalog const& checks);
     bool CanActivate(WardenConfiguration const& configuration) const;
 
     std::shared_ptr<WardenModuleCatalog const> m_modules;
     std::shared_ptr<WardenCheckCatalog const> m_checks;
+    bool m_runtimeActive = false;
 };
 }
 

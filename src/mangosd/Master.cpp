@@ -39,6 +39,7 @@
 #include "Server/WorldNetwork.h"
 #include "SystemConfig.h"
 #include "Timer.h"
+#include "WardenCheckCatalogLoader.h"
 #include "World.h"
 
 #ifdef ENABLE_SOAP
@@ -387,6 +388,14 @@ int Master::Run()
     }
 
     ClearOnlineAccounts();
+
+    // The check catalogue is mandatory, immutable startup state. Runtime
+    // activation remains closed until World validates the Warden configuration.
+    if (!warden::WardenCheckCatalogLoader().LoadAndStage())
+    {
+        StopDatabases();
+        return 1;
+    }
 
     sWorld.SetInitialWorldSettings();
 

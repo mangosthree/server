@@ -26,8 +26,10 @@
 #include "TestHarness.h"
 
 #include "WardenCheckCatalog.h"
+#include "WardenCheckCatalogLoader.h"
 #include "WardenCheckFixtures.h"
 
+#include <limits>
 #include <vector>
 
 namespace
@@ -300,4 +302,100 @@ TEST(WardenCheckCatalog_build_is_atomic_on_validation_failure)
     CHECK_EQ(catalog.Profiles().size(), size_t(3));
     CHECK(catalog.FindProfileExact({15595, warden::WardenArchitecture::X86,
         warden::test::EnUsLocale(), warden::ClientVariant::Stock}) != nullptr);
+}
+
+TEST(WardenCheckCatalogLoader_rejects_invalid_snapshot_counts_before_rows)
+{
+    warden::WardenCheckCatalogLoadTransaction empty;
+    CHECK(empty.Begin(0) ==
+        warden::WardenCheckCatalogLoadFailure::EmptyCatalogue);
+
+    warden::WardenCheckCatalogLoadTransaction overflow;
+    CHECK(overflow.Begin(uint64(std::numeric_limits<uint32>::max()) + 1) ==
+        warden::WardenCheckCatalogLoadFailure::SourceCountOverflow);
+
+    warden::WardenCheckCatalogLoadTransaction torn;
+    REQUIRE(torn.Begin(3) == warden::WardenCheckCatalogLoadFailure::None);
+    CHECK(torn.ObserveSourceCount(2) ==
+        warden::WardenCheckCatalogLoadFailure::SourceCountInconsistent);
+}
+
+TEST(WardenCheckCatalogLoader_requires_full_module_profile_coverage)
+{
+    warden::WardenCheckCatalog const checks =
+        warden::test::BuildSyntheticCheckCatalog();
+    warden::WardenModuleCatalog const modules =
+        warden::test::BuildSyntheticModuleCatalog();
+    CHECK(warden::ValidateWardenCatalogCoverage(checks, modules) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+
+    warden::WardenModuleCatalog const noModules;
+    CHECK(warden::ValidateWardenCatalogCoverage(checks, noModules) ==
+        warden::WardenCheckCatalogLoadFailure::ProfileWithoutModule);
+
+    warden::WardenCheckCatalog const noChecks;
+    CHECK(warden::ValidateWardenCatalogCoverage(noChecks, modules) ==
+        warden::WardenCheckCatalogLoadFailure::ModuleWithoutProfile);
+}
+
+TEST(WardenCheckCatalogLoader_publishes_only_a_complete_valid_snapshot)
+{
+    std::vector<warden::WardenCheckRowInput> const rows =
+        warden::test::CompleteX86Rows();
+    warden::WardenCheckCatalogLoadTransaction transaction;
+    REQUIRE(transaction.Begin(rows.size()) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    warden::WardenCheckDiagnostic diagnostic;
+    for (warden::WardenCheckRowInput const& row : rows)
+    {
+        REQUIRE(transaction.ObserveSourceCount(rows.size()) ==
+            warden::WardenCheckCatalogLoadFailure::None);
+        REQUIRE(transaction.Add(row, diagnostic) ==
+            warden::WardenCheckCatalogLoadFailure::None);
+    }
+
+    bool published = false;
+    warden::WardenModuleCatalog const modules =
+        warden::test::BuildSyntheticModuleCatalog();
+    CHECK(transaction.Finish(modules,
+        [&published](std::shared_ptr<warden::WardenCheckCatalog const> const& snapshot)
+        {
+            published = snapshot && snapshot->Profiles().size() == 3u;
+            return published;
+        }, diagnostic) == warden::WardenCheckCatalogLoadFailure::None);
+    CHECK(published);
+}
+
+TEST(WardenCheckCatalogLoader_rejects_short_or_rejected_publication)
+{
+    std::vector<warden::WardenCheckRowInput> const rows =
+        warden::test::CompleteX86Rows();
+    warden::WardenCheckCatalogLoadTransaction shortRead;
+    REQUIRE(shortRead.Begin(rows.size()) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    warden::WardenCheckDiagnostic diagnostic;
+    REQUIRE(shortRead.ObserveSourceCount(rows.size()) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    REQUIRE(shortRead.Add(rows.front(), diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    CHECK(shortRead.Finish(warden::test::BuildSyntheticModuleCatalog(), {},
+        diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::SourceCountMismatch);
+
+    warden::WardenCheckCatalogLoadTransaction rejected;
+    REQUIRE(rejected.Begin(rows.size()) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    for (warden::WardenCheckRowInput const& row : rows)
+    {
+        REQUIRE(rejected.ObserveSourceCount(rows.size()) ==
+            warden::WardenCheckCatalogLoadFailure::None);
+        REQUIRE(rejected.Add(row, diagnostic) ==
+            warden::WardenCheckCatalogLoadFailure::None);
+    }
+    CHECK(rejected.Finish(warden::test::BuildSyntheticModuleCatalog(),
+        [](std::shared_ptr<warden::WardenCheckCatalog const> const&)
+        {
+            return false;
+        }, diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::PublicationFailed);
 }

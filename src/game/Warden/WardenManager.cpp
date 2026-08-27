@@ -25,6 +25,9 @@
 
 #include "WardenManager.h"
 
+#include "WardenModuleWin15595X64Data.h"
+#include "WardenModuleWin15595X86Data.h"
+
 #include <openssl/crypto.h>
 
 #include <algorithm>
@@ -88,25 +91,48 @@ bool HasCompleteVariantSet(
 
 namespace warden
 {
+WardenManager::WardenManager()
+{
+    WardenModuleCatalogBuilder builder;
+    if (builder.Add(GetWardenModuleWin15595X86Profile()) !=
+            ModuleCatalogValidation::Valid ||
+        builder.Add(GetWardenModuleWin15595X64Profile()) !=
+            ModuleCatalogValidation::Valid)
+    {
+        return;
+    }
+
+    auto modules = std::make_shared<WardenModuleCatalog>();
+    if (builder.Build(*modules) == ModuleCatalogValidation::Valid)
+        m_modules = std::move(modules);
+}
+
 WardenManager::WardenManager(
     std::shared_ptr<WardenModuleCatalog const> modules,
     std::shared_ptr<WardenCheckCatalog const> checks)
-    : m_modules(std::move(modules)), m_checks(std::move(checks))
+    : m_modules(std::move(modules)), m_checks(std::move(checks)),
+      m_runtimeActive(true)
 {
 }
 
-bool WardenManager::HasValidCatalogueSnapshot() const
+WardenManager& WardenManager::Instance()
 {
-    if (!m_modules || !m_checks || m_modules->Profiles().empty() ||
-        m_checks->Profiles().empty())
+    static WardenManager instance;
+    return instance;
+}
+
+bool WardenManager::HasValidCatalogueSnapshot(
+    WardenModuleCatalog const& modules, WardenCheckCatalog const& checks)
+{
+    if (modules.Profiles().empty() || checks.Profiles().empty())
     {
         return false;
     }
 
-    std::vector<WardenCheckProfile> const& profiles = m_checks->Profiles();
+    std::vector<WardenCheckProfile> const& profiles = checks.Profiles();
     for (WardenCheckProfile const& profile : profiles)
     {
-        ModuleProfile const* module = m_modules->FindExact(
+        ModuleProfile const* module = modules.FindExact(
             {profile.key.build, profile.key.architecture});
         if (!module || module->operatingMode != ModuleOperatingMode::Full ||
             !HasCompleteVariantSet(profiles, profile.key))
@@ -115,7 +141,7 @@ bool WardenManager::HasValidCatalogueSnapshot() const
         }
     }
 
-    for (ModuleProfile const& module : m_modules->Profiles())
+    for (ModuleProfile const& module : modules.Profiles())
     {
         bool const hasProfiles = std::any_of(profiles.begin(), profiles.end(),
             [&module](WardenCheckProfile const& profile)
@@ -127,6 +153,34 @@ bool WardenManager::HasValidCatalogueSnapshot() const
             return false;
     }
     return true;
+}
+
+bool WardenManager::StageCatalogues(
+    std::shared_ptr<WardenCheckCatalog const> checks)
+{
+    if (m_checks || !m_modules || !checks ||
+        !HasValidCatalogueSnapshot(*m_modules, *checks))
+    {
+        return false;
+    }
+    m_checks = std::move(checks);
+    return true;
+}
+
+bool WardenManager::HasStagedCatalogues() const
+{
+    return m_modules && m_checks &&
+        HasValidCatalogueSnapshot(*m_modules, *m_checks);
+}
+
+bool WardenManager::HasActiveRuntimeSnapshot() const
+{
+    return m_runtimeActive && HasStagedCatalogues();
+}
+
+WardenModuleCatalog const* WardenManager::GetModuleCatalogForStartup() const
+{
+    return m_modules.get();
 }
 
 bool WardenManager::CanActivate(
@@ -149,7 +203,7 @@ std::unique_ptr<WardenServer> WardenManager::Create(
 {
     bool const supported = options.build == 15595 &&
         options.clientOs == "Win" && IsExactLocale(options.locale) &&
-        bool(send) && HasValidCatalogueSnapshot() &&
+        bool(send) && HasActiveRuntimeSnapshot() &&
         m_modules->FindExact({options.build, WardenArchitecture::X86}) &&
         m_modules->FindExact({options.build, WardenArchitecture::X64}) &&
         CanActivate(options.configuration);

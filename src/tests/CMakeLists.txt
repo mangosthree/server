@@ -70,6 +70,9 @@ set(SRC_GRP_TESTS
     WardenCheckCatalogTest.cpp
     WardenCheckPlannerTest.cpp
     WardenServerTest.cpp
+    WardenManagerTest.cpp
+    WardenAuditStoreTest.cpp
+    WardenIncidentStoreTest.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenProtocol.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenCryptoContext.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenPacketCodec.cpp

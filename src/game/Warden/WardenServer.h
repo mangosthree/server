@@ -52,6 +52,8 @@ enum class WardenState : uint8
     ModuleHashVerified,
     ModuleInitialized,
     ReadyForWorld,
+    ProvisionalTimingProbeSent,
+    ProvisionalValidated,
     ProfileProbeSent,
     ProfileClassified,
     InitialChecksSent,
@@ -73,6 +75,7 @@ enum class WardenFailure : uint8
     ArchitectureProofAmbiguous,
     ModuleDigestMismatch,
     ModuleLoadFailed,
+    CompatibilityProbeFailed,
     DeadlineExpired,
     CryptoFailure,
     SendFailure,
@@ -107,9 +110,8 @@ class WardenServerTestAccess;
  * Owns one session's complete Warden parse, crypto and scheduling transaction.
  *
  * The public surface accepts complete world payloads only. Module selection is
- * impossible until command 5 authenticates exactly one architecture. G2 wire
- * codecs are intentionally absent, so production cannot advance beyond the
- * cache/load result in this phase.
+ * impossible until command 5 authenticates exactly one architecture. The
+ * selected module ABI then owns every request and result layout.
  */
 class WardenServer
 {
@@ -139,10 +141,17 @@ private:
     bool SendPlain(Bytes plain);
     bool SendModuleUse();
     bool SendModuleTransfer();
-    bool SendBootstrapStringHash(std::string const& text);
+    bool SendModuleHashRequest();
+    bool SendModuleInitialization();
+    bool SendCompatibilityTimingProbe();
+    bool HasCompleteSelectedProfiles() const;
     bool BeginProfileProbe();
     bool BuildPendingPlan(CheckPlanPurpose purpose,
         uint32 confirmationCheckId = 0);
+    void HandleCheckResult(Bytes const& plain,
+        WardenCryptoContext&& candidate);
+    void CompleteProfileProbe(std::vector<Bytes>&& results);
+    void CompleteEvidenceBatch(WardenEvidenceBatch&& batch);
     bool ValidateEvidenceBatch(WardenEvidenceBatch const& batch) const;
     bool HasChargedDeadline() const;
     void ResetDeadline();
@@ -153,7 +162,9 @@ private:
         WardenCryptoContext&& candidate);
     void HandleBootstrapStatus(Bytes const& plain,
         WardenCryptoContext&& candidate);
-    void HandleBootstrapStringHash(Bytes const& plain,
+    void HandleModuleHashResult(Bytes const& plain,
+        WardenCryptoContext&& candidate);
+    void HandleCompatibilityTimingResult(Bytes const& plain,
         WardenCryptoContext&& candidate);
 
     uint32 m_build = 0;
@@ -174,7 +185,7 @@ private:
     Key16 m_challenge{};
     ArchitectureProof m_x86Proof{};
     ArchitectureProof m_x64Proof{};
-    std::optional<std::string> m_pendingBootstrapString;
+    std::optional<WardenCheckXorKey> m_checkXorKey;
     std::optional<WardenCheckPlanner> m_planner;
     std::optional<CheckPlan> m_pendingPlan;
     uint32 m_nextRequestId = 1;
@@ -187,6 +198,7 @@ private:
     bool m_aggressiveImmediatePending = false;
     bool m_terminalNotified = false;
     bool m_notifying = false;
+    bool m_inSendCallback = false;
 #ifdef MANGOS_WARDEN_TEST_ACCESS
     bool m_forceArchitectureMatches = false;
     bool m_forcedX86Match = false;
@@ -202,17 +214,12 @@ private:
 class WardenServerTestAccess
 {
 public:
-    static void AcceptSyntheticModuleHash(WardenServer& server, bool valid);
-    static void AcceptSyntheticModuleInitialization(
-        WardenServer& server, bool valid);
     static void CompleteSyntheticProfileProbe(
         WardenServer& server, std::vector<Bytes>&& results);
     static std::optional<CheckPlan> PendingCheckPlan(
         WardenServer const& server);
     static void CompleteSyntheticEvidenceBatch(
         WardenServer& server, WardenEvidenceBatch&& batch);
-    static bool SendBootstrapStringHash(
-        WardenServer& server, std::string const& text);
     static void ForceNextArchitectureMatches(
         WardenServer& server, bool x86, bool x64);
     static bool PreviewCommittedClientPlaintext(WardenServer const& server,

@@ -35,6 +35,9 @@
 
 namespace warden
 {
+#ifdef MANGOS_WARDEN_TEST_ACCESS
+class WardenCheckCatalogTestAccess;
+#endif
 /**
  * Semantic check families only. G2 maps these to architecture-specific
  * module commands after the authentic module ABI has been recovered.
@@ -102,8 +105,8 @@ struct LuaCheckProfile
 struct MemCheckProfile
 {
     uint32 checkId = 0;
-    // Binary-safe identity: authentic G2 rows carry the 32-byte ModuleId and
-    // may contain zero bytes. Shorter synthetic identifiers exist only at G1.
+    // The module ABI pools a printable process-module name such as Wow.exe;
+    // this is not the 32-byte SHA-256 identity used by ModuleUse.
     Bytes moduleIdentifier;
     uint64 addressOrRva = 0;
     uint32 length = 0;
@@ -211,6 +214,9 @@ public:
 
 private:
     friend class WardenCheckCatalogBuilder;
+#ifdef MANGOS_WARDEN_TEST_ACCESS
+    friend class WardenCheckCatalogTestAccess;
+#endif
     std::vector<WardenCheckProfile> m_profiles;
 };
 

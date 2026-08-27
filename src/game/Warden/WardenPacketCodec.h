@@ -26,9 +26,15 @@
 #ifndef MANGOS_WARDEN_PACKET_CODEC_H
 #define MANGOS_WARDEN_PACKET_CODEC_H
 
+#include "WardenCheckPlan.h"
+#include "WardenCryptoContext.h"
+#include "WardenModuleCatalog.h"
 #include "WardenProtocol.h"
 
 #include <cstddef>
+#include <string>
+#include <variant>
+#include <vector>
 
 namespace warden
 {
@@ -49,6 +55,7 @@ constexpr std::size_t ProvisionalServerWardenLengthSize = 4;
 constexpr std::size_t MaxEncryptedServerBody =
     MaxServerWardenWireSize - NormalServerHeaderSize -
     ProvisionalServerWardenLengthSize;
+constexpr std::size_t Cata15595X86CheckBufferSize = 512;
 
 struct DecodedClientFrame
 {
@@ -74,13 +81,110 @@ enum class EncodeStatus : uint8
 {
     Ok,
     Empty,
-    BodyTooLarge
+    BodyTooLarge,
+    InvalidAbi,
+    InvalidProfile,
+    InvalidPlan,
+    CryptoFailure
+};
+
+/** Transactional command-2 decode status; no partial result is published. */
+enum class DecodeStatus : uint8
+{
+    Ok,
+    InvalidAbi,
+    Empty,
+    WrongSize,
+    UnsupportedCommand,
+    ChecksumMismatch,
+    InvalidValue,
+    CryptoFailure
+};
+
+enum class ModuleDecodeStatus : uint8
+{
+    Ok,
+    InvalidAbi,
+    InvalidCommand,
+    InvalidLength,
+    InvalidChecksum,
+    DigestMismatch,
+    ModuleReportedFailure,
+    InvalidStatus,
+    CryptoFailure
+};
+
+struct TimingResult
+{
+    bool stable = false;
+    uint32 clientTick = 0;
+};
+
+enum class MpqResultStatus : uint8
+{
+    Success = 0,
+    Unavailable = 1
+};
+
+struct MpqResult
+{
+    MpqResultStatus status = MpqResultStatus::Unavailable;
+    Digest20 digest{};
+};
+
+enum class LuaResultStatus : uint8
+{
+    Success = 0,
+    Unavailable = 1
+};
+
+struct LuaResult
+{
+    LuaResultStatus status = LuaResultStatus::Unavailable;
+    std::string text;
+};
+
+enum class MemResultStatus : uint8
+{
+    Success = 0,
+    Unavailable = 1
+};
+
+struct MemResult
+{
+    MemResultStatus status = MemResultStatus::Unavailable;
+    Bytes actualBytes;
+};
+
+using CheckResult =
+    std::variant<TimingResult, MpqResult, LuaResult, MemResult>;
+
+struct CheckBatchResult
+{
+    std::vector<CheckResult> checks;
 };
 
 FrameDecodeStatus DecodeClientFrame(
     ByteView payload, DecodedClientFrame& decoded);
 EncodeStatus EncodeServerFrame(
     ByteView encryptedBody, EncodedServerFrame& encoded);
+EncodeStatus EncodeModuleInitialization(ModuleAbi abi, Bytes& plaintext);
+EncodeStatus EncodeModuleHashRequest(
+    ModuleProfile const& profile, Bytes& plaintext);
+ModuleDecodeStatus DecodeModuleHashResult(
+    ModuleProfile const& profile, ByteView plaintext);
+EncodeStatus EncodeCompatibilityTimingProbe(ModuleAbi abi,
+    WardenCheckXorKey checkXorKey, Bytes& plaintext);
+ModuleDecodeStatus DecodeCompatibilityTimingResult(ModuleAbi abi,
+    ByteView plaintext, uint32& clientTick);
+CheckPlanValidation InspectCheckPlan(ModuleAbi abi, CheckPlan const& plan,
+    WardenCheckPlanBudget& budget);
+EncodeStatus EncodeCheckRequest(ModuleProfile const& profile,
+    WardenCheckXorKey checkXorKey, CheckPlan const& plan, Bytes& encoded);
+DecodeStatus DecodeCheckResult(ModuleAbi abi, ByteView plaintext,
+    CheckPlan const& plan, CheckBatchResult& result);
+/** Erases raw Lua, archive and memory material after semantic classification. */
+void CleanseCheckBatchResult(CheckBatchResult& result);
 }
 
 #endif

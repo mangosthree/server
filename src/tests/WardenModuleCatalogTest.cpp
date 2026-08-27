@@ -26,6 +26,8 @@
 #include "TestHarness.h"
 
 #include "WardenModuleCatalog.h"
+#include "WardenModuleWin15595X64Data.h"
+#include "WardenModuleWin15595X86Data.h"
 
 #include <array>
 #include <type_traits>
@@ -37,6 +39,28 @@ warden::ModuleProfile SyntheticProfile(warden::WardenArchitecture architecture)
 {
     warden::ModuleProfile profile;
     profile.key = {15595, architecture};
+    profile.abi = architecture == warden::WardenArchitecture::X86 ?
+        warden::ModuleAbi::Cata15595X86 :
+        warden::ModuleAbi::Cata15595X64;
+    profile.provenance = architecture == warden::WardenArchitecture::X86 ?
+        warden::ModuleProvenance::BuildMatchedPublic :
+        warden::ModuleProvenance::SignedCrossBuild;
+    profile.operatingMode = architecture == warden::WardenArchitecture::X86 ?
+        warden::ModuleOperatingMode::Full :
+        warden::ModuleOperatingMode::CompatibilityProbeOnly;
+    profile.assurance = warden::ModuleAssurance::StaticVerified;
+    if (architecture == warden::WardenArchitecture::X86)
+        profile.checkCodes = {
+            warden::Cata15595X86TimingCode,
+            warden::Cata15595X86LuaCode,
+            warden::Cata15595X86MpqCode,
+            warden::Cata15595X86MemoryCode};
+    else
+        profile.checkCodes = {0xEA, 0x00, 0x00, 0x00};
+    profile.rekey.seed[0] = 0x11;
+    profile.rekey.expectedResponse[0] = 0x22;
+    profile.rekey.clientToServer[0] = 0x33;
+    profile.rekey.serverToClient[0] = 0x44;
     profile.container = {0x00, 0x01, 0x02, 0x03};
     profile.declaredSize = 4;
     // SHA-256 of the encrypted synthetic container above. Production module
@@ -88,15 +112,87 @@ TEST(WardenModuleCatalog_accepts_exact_15595_architecture_profiles)
 TEST(WardenModuleCatalog_never_falls_back_across_build_or_architecture)
 {
     warden::WardenModuleCatalog catalog;
-    REQUIRE(BuildProfiles({SyntheticProfile(warden::WardenArchitecture::X86)},
-        catalog) == warden::ModuleCatalogValidation::Valid);
+    REQUIRE(BuildProfiles({
+        SyntheticProfile(warden::WardenArchitecture::X86),
+        SyntheticProfile(warden::WardenArchitecture::X64)}, catalog) ==
+        warden::ModuleCatalogValidation::Valid);
 
     CHECK(catalog.FindExact({15594, warden::WardenArchitecture::X86}) ==
         nullptr);
-    CHECK(catalog.FindExact({15595, warden::WardenArchitecture::X64}) ==
-        nullptr);
     CHECK(catalog.FindExact(
         {15595, warden::WardenArchitecture::Unclassified}) == nullptr);
+}
+
+TEST(WardenModuleCatalog_requires_both_architecture_profiles)
+{
+    warden::WardenModuleCatalog catalog;
+    CHECK(BuildProfiles({SyntheticProfile(warden::WardenArchitecture::X86)},
+        catalog) != warden::ModuleCatalogValidation::Valid);
+    CHECK(catalog.Profiles().empty());
+}
+
+TEST(WardenModuleCatalog_rejects_signed_cross_build_full_profile)
+{
+    warden::ModuleProfile profile =
+        SyntheticProfile(warden::WardenArchitecture::X64);
+    profile.operatingMode = warden::ModuleOperatingMode::Full;
+
+    warden::WardenModuleCatalogBuilder builder;
+    CHECK(builder.Add(profile) ==
+        warden::ModuleCatalogValidation::InvalidMetadata);
+}
+
+TEST(WardenModuleCatalog_rejects_duplicate_nonzero_check_codes)
+{
+    warden::ModuleProfile profile =
+        SyntheticProfile(warden::WardenArchitecture::X86);
+    profile.checkCodes.lua = profile.checkCodes.timing;
+
+    warden::WardenModuleCatalogBuilder builder;
+    CHECK(builder.Add(profile) != warden::ModuleCatalogValidation::Valid);
+}
+
+TEST(WardenModuleCatalog_requires_the_complete_x86_check_code_map)
+{
+    warden::ModuleProfile profile =
+        SyntheticProfile(warden::WardenArchitecture::X86);
+    profile.checkCodes.memory = 0;
+
+    warden::WardenModuleCatalogBuilder missingCode;
+    CHECK(missingCode.Add(profile) ==
+        warden::ModuleCatalogValidation::InvalidCheckCodeMap);
+
+    profile = SyntheticProfile(warden::WardenArchitecture::X86);
+    profile.checkCodes.lua ^= 0x01;
+    warden::WardenModuleCatalogBuilder wrongCode;
+    CHECK(wrongCode.Add(profile) ==
+        warden::ModuleCatalogValidation::InvalidCheckCodeMap);
+}
+
+TEST(WardenModuleCatalog_restricts_probe_to_corrected_timing_code)
+{
+    warden::ModuleProfile profile =
+        SyntheticProfile(warden::WardenArchitecture::X64);
+    profile.checkCodes.timing = 0xAE;
+    warden::WardenModuleCatalogBuilder wrongTiming;
+    CHECK(wrongTiming.Add(profile) !=
+        warden::ModuleCatalogValidation::Valid);
+
+    profile = SyntheticProfile(warden::WardenArchitecture::X64);
+    profile.checkCodes.memory = 0x36;
+    warden::WardenModuleCatalogBuilder unreviewedCheck;
+    CHECK(unreviewedCheck.Add(profile) !=
+        warden::ModuleCatalogValidation::Valid);
+}
+
+TEST(WardenModuleCatalog_rejects_missing_module_rekey_vector)
+{
+    warden::ModuleProfile profile =
+        SyntheticProfile(warden::WardenArchitecture::X64);
+    profile.rekey = {};
+
+    warden::WardenModuleCatalogBuilder builder;
+    CHECK(builder.Add(profile) != warden::ModuleCatalogValidation::Valid);
 }
 
 TEST(WardenModuleCatalog_rejects_unknown_or_non_15595_identity)
@@ -169,4 +265,73 @@ TEST(WardenModuleCatalog_rejects_declared_container_size_mismatch)
     profile.declaredSize = 5;
     CHECK(builder.Add(profile) ==
         warden::ModuleCatalogValidation::InvalidContainerSize);
+}
+
+TEST(WardenModuleCatalog_compiled_profiles_match_custody_manifests)
+{
+    warden::ModuleProfile const& x86 =
+        warden::GetWardenModuleWin15595X86Profile();
+    CHECK_EQ(x86.key.build, uint32(15595));
+    CHECK(x86.key.architecture == warden::WardenArchitecture::X86);
+    CHECK(x86.abi == warden::ModuleAbi::Cata15595X86);
+    CHECK(x86.provenance == warden::ModuleProvenance::BuildMatchedPublic);
+    CHECK(x86.operatingMode == warden::ModuleOperatingMode::Full);
+    CHECK(x86.assurance == warden::ModuleAssurance::StaticVerified);
+    CHECK_EQ(x86.declaredSize, uint32(18439));
+    CHECK_EQ(x86.container.size(), size_t(18439));
+    CHECK_HEX(x86.moduleId.data(), x86.moduleId.size(),
+        "7ad7870d064c5a2bc8e55b00c23239b6e964c622c298beb99187fc6f163df4cd");
+    CHECK_HEX(x86.moduleKey.data(), x86.moduleKey.size(),
+        "14cf93daf112b3faa823cc0914e54627");
+    CHECK_HEX(x86.rekey.seed.data(), x86.rekey.seed.size(),
+        "49f95776e6ddf99d9de91d75cc93e955");
+    CHECK_HEX(x86.rekey.expectedResponse.data(),
+        x86.rekey.expectedResponse.size(),
+        "71be54fdf23061892d6eea2fb79119b9f7e05084");
+    CHECK_HEX(x86.rekey.clientToServer.data(),
+        x86.rekey.clientToServer.size(),
+        "8ab07213fcff7bacb77b4804d239445c");
+    CHECK_HEX(x86.rekey.serverToClient.data(),
+        x86.rekey.serverToClient.size(),
+        "6aea6e524748f22d122b27d96622d765");
+    CHECK_EQ(x86.checkCodes.timing, warden::Cata15595X86TimingCode);
+    CHECK_EQ(x86.checkCodes.lua, warden::Cata15595X86LuaCode);
+    CHECK_EQ(x86.checkCodes.mpq, warden::Cata15595X86MpqCode);
+    CHECK_EQ(x86.checkCodes.memory, warden::Cata15595X86MemoryCode);
+
+    warden::ModuleProfile const& x64 =
+        warden::GetWardenModuleWin15595X64Profile();
+    CHECK_EQ(x64.key.build, uint32(15595));
+    CHECK(x64.key.architecture == warden::WardenArchitecture::X64);
+    CHECK(x64.abi == warden::ModuleAbi::Cata15595X64);
+    CHECK(x64.provenance == warden::ModuleProvenance::SignedCrossBuild);
+    CHECK(x64.operatingMode ==
+        warden::ModuleOperatingMode::CompatibilityProbeOnly);
+    CHECK(x64.assurance == warden::ModuleAssurance::StaticVerified);
+    CHECK_EQ(x64.declaredSize, uint32(24405));
+    CHECK_EQ(x64.container.size(), size_t(24405));
+    CHECK_HEX(x64.moduleId.data(), x64.moduleId.size(),
+        "3ead4470f0f4b6d4e5f620153f138993ce76821ad55c08866b600f54a8462248");
+    CHECK_HEX(x64.moduleKey.data(), x64.moduleKey.size(),
+        "2804d38f80eb03a6419f35371747d1f3");
+    CHECK_HEX(x64.rekey.seed.data(), x64.rekey.seed.size(),
+        "8db6e0c5865a1fdb810f26db773f681f");
+    CHECK_HEX(x64.rekey.expectedResponse.data(),
+        x64.rekey.expectedResponse.size(),
+        "57790e891c05e7ceb34e6754daf39e8197ff5cec");
+    CHECK_HEX(x64.rekey.clientToServer.data(),
+        x64.rekey.clientToServer.size(),
+        "558017aaed7fffab273cb00abf517795");
+    CHECK_HEX(x64.rekey.serverToClient.data(),
+        x64.rekey.serverToClient.size(),
+        "1b12c1eab47a79a32b3f8f7b3c985912");
+    CHECK_EQ(x64.checkCodes.timing,
+        warden::CataX64CompatibilityTimingCode);
+    CHECK_EQ(x64.checkCodes.lua, uint8(0));
+    CHECK_EQ(x64.checkCodes.mpq, uint8(0));
+    CHECK_EQ(x64.checkCodes.memory, uint8(0));
+
+    warden::WardenModuleCatalog catalog;
+    CHECK(BuildProfiles({x86, x64}, catalog) ==
+        warden::ModuleCatalogValidation::Valid);
 }

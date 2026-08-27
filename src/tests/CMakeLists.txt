@@ -78,6 +78,8 @@ set(SRC_GRP_TESTS
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenEnforcementPolicy.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenX86Transform.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenModuleCatalog.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenModuleWin15595X86Data.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenModuleWin15595X64Data.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenCheckCatalog.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenCheckPlanner.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenManager.cpp

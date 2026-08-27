@@ -23,32 +23,15 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef MANGOS_WARDEN_CHECK_PLANNER_H
-#define MANGOS_WARDEN_CHECK_PLANNER_H
+#ifndef MANGOS_WARDEN_MODULE_WIN_15595_X86_DATA_H
+#define MANGOS_WARDEN_MODULE_WIN_15595_X86_DATA_H
 
-#include "WardenCheckPlan.h"
-
-#include <vector>
+#include "WardenModuleCatalog.h"
 
 namespace warden
 {
-/** Pure exact-profile phase selector with mandatory transport preflight. */
-class WardenCheckPlanner
-{
-public:
-    explicit WardenCheckPlanner(WardenCheckProfile const& profile);
-
-    CheckPlanValidation Build(CheckPlanPurpose purpose, uint32 requestId,
-        CheckPlan& output, uint32 confirmationCheckId = 0,
-        WardenCheckPlanBudget* budget = nullptr) const;
-
-private:
-    WardenCheckProfile m_profile;
-};
-
-/** Consumes and cleanses raw probe bytes regardless of classification. */
-ClientVariant ClassifyProfileProbe(WardenArchitecture architecture,
-    std::vector<Bytes>& results);
+/** Returns the immutable custody-pinned x86 build-15595 profile. */
+ModuleProfile const& GetWardenModuleWin15595X86Profile();
 }
 
 #endif

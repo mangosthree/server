@@ -46,7 +46,7 @@ struct WardenCreationOptions
 
 /**
  * Holds complete immutable catalogue snapshots and creates inert sessions.
- * Create validates both architecture branches but never chooses between them.
+ * Create validates catalogue coherence but never chooses an architecture.
  */
 class WardenManager
 {
@@ -59,8 +59,8 @@ public:
         EvidenceBatchObserver evidence = {}) const;
 
 private:
-    bool HasCompleteExactProfiles(uint32 build,
-        std::string const& locale) const;
+    bool HasValidCatalogueSnapshot() const;
+    bool CanActivate(WardenConfiguration const& configuration) const;
 
     std::shared_ptr<WardenModuleCatalog const> m_modules;
     std::shared_ptr<WardenCheckCatalog const> m_checks;

@@ -357,7 +357,13 @@ CheckCatalogValidation WardenCheckCatalogBuilder::Add(
                     return fail(CheckCatalogValidation::InvalidAddress);
                 if (!DecodeHex(input.moduleHex, moduleIdentifier) ||
                     moduleIdentifier.empty() ||
-                    moduleIdentifier.size() > ModuleId{}.size())
+                    moduleIdentifier.size() >
+                        std::numeric_limits<uint8>::max() ||
+                    std::any_of(moduleIdentifier.begin(),
+                        moduleIdentifier.end(), [](uint8 value)
+                        {
+                            return value < 0x20 || value > 0x7E;
+                        }))
                     return fail(
                         CheckCatalogValidation::InvalidModuleIdentifier);
             }

@@ -201,6 +201,51 @@ inline ModuleProfile SyntheticModuleProfile(WardenArchitecture architecture)
 {
     ModuleProfile profile;
     profile.key = {15595, architecture};
+    profile.abi = architecture == WardenArchitecture::X86 ?
+        ModuleAbi::Cata15595X86 : ModuleAbi::Cata15595X64;
+    profile.provenance = architecture == WardenArchitecture::X86 ?
+        ModuleProvenance::BuildMatchedPublic :
+        ModuleProvenance::SignedCrossBuild;
+    profile.operatingMode = architecture == WardenArchitecture::X86 ?
+        ModuleOperatingMode::Full :
+        ModuleOperatingMode::CompatibilityProbeOnly;
+    profile.assurance = ModuleAssurance::StaticVerified;
+    profile.checkCodes = architecture == WardenArchitecture::X86 ?
+        ModuleCheckCodes{Cata15595X86TimingCode, Cata15595X86LuaCode,
+            Cata15595X86MpqCode, Cata15595X86MemoryCode} :
+        ModuleCheckCodes{CataX64CompatibilityTimingCode, 0, 0, 0};
+    if (architecture == WardenArchitecture::X86)
+    {
+        profile.rekey.seed = {{
+            0x49, 0xF9, 0x57, 0x76, 0xE6, 0xDD, 0xF9, 0x9D,
+            0x9D, 0xE9, 0x1D, 0x75, 0xCC, 0x93, 0xE9, 0x55}};
+        profile.rekey.expectedResponse = {{
+            0x71, 0xBE, 0x54, 0xFD, 0xF2, 0x30, 0x61, 0x89,
+            0x2D, 0x6E, 0xEA, 0x2F, 0xB7, 0x91, 0x19, 0xB9,
+            0xF7, 0xE0, 0x50, 0x84}};
+        profile.rekey.clientToServer = {{
+            0x8A, 0xB0, 0x72, 0x13, 0xFC, 0xFF, 0x7B, 0xAC,
+            0xB7, 0x7B, 0x48, 0x04, 0xD2, 0x39, 0x44, 0x5C}};
+        profile.rekey.serverToClient = {{
+            0x6A, 0xEA, 0x6E, 0x52, 0x47, 0x48, 0xF2, 0x2D,
+            0x12, 0x2B, 0x27, 0xD9, 0x66, 0x22, 0xD7, 0x65}};
+    }
+    else
+    {
+        profile.rekey.seed = {{
+            0x8D, 0xB6, 0xE0, 0xC5, 0x86, 0x5A, 0x1F, 0xDB,
+            0x81, 0x0F, 0x26, 0xDB, 0x77, 0x3F, 0x68, 0x1F}};
+        profile.rekey.expectedResponse = {{
+            0x57, 0x79, 0x0E, 0x89, 0x1C, 0x05, 0xE7, 0xCE,
+            0xB3, 0x4E, 0x67, 0x54, 0xDA, 0xF3, 0x9E, 0x81,
+            0x97, 0xFF, 0x5C, 0xEC}};
+        profile.rekey.clientToServer = {{
+            0x55, 0x80, 0x17, 0xAA, 0xED, 0x7F, 0xFF, 0xAB,
+            0x27, 0x3C, 0xB0, 0x0A, 0xBF, 0x51, 0x77, 0x95}};
+        profile.rekey.serverToClient = {{
+            0x1B, 0x12, 0xC1, 0xEA, 0xB4, 0x7A, 0x79, 0xA3,
+            0x2B, 0x3F, 0x8F, 0x7B, 0x3C, 0x98, 0x59, 0x12}};
+    }
     std::size_t const size = architecture == WardenArchitecture::X86 ?
         std::size_t(1201) : std::size_t(1001);
     uint8 const multiplier = architecture == WardenArchitecture::X86 ?
@@ -250,22 +295,9 @@ inline WardenModuleCatalog BuildSyntheticModuleCatalog()
 
 inline std::vector<WardenCheckRowInput> CompleteSyntheticRows()
 {
-    std::vector<WardenCheckRowInput> rows;
-    for (WardenArchitecture architecture :
-        {WardenArchitecture::X86, WardenArchitecture::X64})
-    {
-        std::vector<WardenCheckRowInput> probe =
-            ProfileProbeRows(architecture);
-        rows.insert(rows.end(), probe.begin(), probe.end());
-        for (ClientVariant variant :
-            {ClientVariant::Stock, ClientVariant::Grunt})
-        {
-            std::vector<WardenCheckRowInput> classified =
-                ClassifiedRows(architecture, variant);
-            rows.insert(rows.end(), classified.begin(), classified.end());
-        }
-    }
-    return rows;
+    // The x64 module is compatibility-probe-only, so publishing any x64
+    // database profile would violate the runtime containment contract.
+    return CompleteX86Rows();
 }
 
 inline WardenCheckCatalog BuildSyntheticCheckCatalog()

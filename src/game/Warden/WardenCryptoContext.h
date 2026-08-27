@@ -30,9 +30,26 @@
 
 #include <array>
 #include <cstddef>
+#include <optional>
 
 namespace warden
 {
+/**
+ * One non-secret module request terminator/type-XOR byte. Only a successful
+ * module rekey can construct it, preventing directionless scalar call sites.
+ */
+class WardenCheckXorKey
+{
+public:
+    constexpr uint8 Value() const { return m_value; }
+
+private:
+    friend class WardenCryptoContext;
+    explicit constexpr WardenCheckXorKey(uint8 value) : m_value(value) {}
+
+    uint8 m_value;
+};
+
 /** Owns independent streaming RC4 state for one Warden session. */
 class WardenCryptoContext
 {
@@ -57,6 +74,8 @@ public:
     // Both replacement streams are built before either live stream changes.
     bool InstallDirectionalKeys(Key16 const& clientToServer,
         Key16 const& serverToClient);
+    std::optional<WardenCheckXorKey> InstallModuleDirectionalKeys(
+        Key16 const& clientToServer, Key16 const& serverToClient);
 
 private:
     struct Rc4State

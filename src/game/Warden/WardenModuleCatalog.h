@@ -28,6 +28,7 @@
 
 #include "WardenProtocol.h"
 
+#include <array>
 #include <vector>
 
 namespace warden
@@ -39,10 +40,72 @@ struct ModuleProfileKey
     WardenArchitecture architecture = WardenArchitecture::Unclassified;
 };
 
+/** Selects the exact module wire contract after architecture proof. */
+enum class ModuleAbi : uint8
+{
+    Cata15595X86,
+    Cata15595X64
+};
+
+/** Immutable origin of the signed encrypted module container. */
+enum class ModuleProvenance : uint8
+{
+    RetailCaptured15595,
+    BuildMatchedPublic,
+    SignedCrossBuild
+};
+
+/** Maximum behavior the server may request from this module. */
+enum class ModuleOperatingMode : uint8
+{
+    Full,
+    CompatibilityProbeOnly
+};
+
+/** Independently reviewed deployment confidence, separate from provenance. */
+enum class ModuleAssurance : uint8
+{
+    StaticVerified,
+    ExactClientLabValidated,
+    ProductionApproved
+};
+
+/** Module-specific encodings for the four currently modelled check families. */
+struct ModuleCheckCodes
+{
+    uint8 timing = 0;
+    uint8 lua = 0;
+    uint8 mpq = 0;
+    uint8 memory = 0;
+};
+
+constexpr uint8 CataX64CompatibilityTimingCode = 0xEA;
+constexpr uint8 Cata15595X86TimingCode = 0xD0;
+constexpr uint8 Cata15595X86LuaCode = 0x41;
+constexpr uint8 Cata15595X86MpqCode = 0x82;
+constexpr uint8 Cata15595X86MemoryCode = 0x34;
+constexpr uint8 Cata15595X86EndCode = 0xD9;
+
+/** One binary-proven module hash challenge and its atomic replacement keys. */
+struct ModuleRekeyVector
+{
+    Key16 seed{};
+    Digest20 expectedResponse{};
+    Key16 clientToServer{};
+    Key16 serverToClient{};
+};
+
 /** One encrypted signed container and its separately supplied transfer key. */
 struct ModuleProfile
 {
     ModuleProfileKey key;
+    ModuleAbi abi = static_cast<ModuleAbi>(0xFF);
+    ModuleProvenance provenance = static_cast<ModuleProvenance>(0xFF);
+    ModuleOperatingMode operatingMode =
+        static_cast<ModuleOperatingMode>(0xFF);
+    ModuleAssurance assurance = static_cast<ModuleAssurance>(0xFF);
+    ModuleCheckCodes checkCodes;
+    ModuleRekeyVector rekey;
     ModuleId moduleId{};
     Key16 moduleKey{};
     uint32 declaredSize = 0;
@@ -54,12 +117,18 @@ enum class ModuleCatalogValidation : uint8
     Valid,
     InvalidBuild,
     InvalidArchitecture,
+    InvalidAbi,
+    InvalidMetadata,
+    DuplicateCheckCode,
+    InvalidCheckCodeMap,
+    InvalidRekeyVector,
     EmptyContainer,
     InvalidContainerSize,
     InvalidModuleId,
     InvalidModuleKey,
     DuplicateProfile,
-    EmptyCatalog
+    EmptyCatalog,
+    IncompleteArchitectureSet
 };
 
 /** Immutable exact-key module catalogue; it never crosses architectures. */

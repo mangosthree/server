@@ -256,6 +256,22 @@ TEST(WardenCrypto_directional_install_replaces_both_streams_atomically)
         "882c053bf3ef43a96c8c3810416aab0b");
 }
 
+TEST(WardenCrypto_module_rekey_exposes_client_to_server_check_xor_key)
+{
+    warden::WardenCryptoContext crypto;
+    CHECK(crypto.Initialize(LeadingZeroSessionKey()));
+
+    warden::Key16 const clientToServer =
+        ArrayFromHex<16>("558017aaed7fffab273cb00abf517795");
+    warden::Key16 const serverToClient =
+        ArrayFromHex<16>("1b12c1eab47a79a32b3f8f7b3c985912");
+    std::optional<warden::WardenCheckXorKey> const checkXorKey =
+        crypto.InstallModuleDirectionalKeys(clientToServer, serverToClient);
+
+    REQUIRE(checkXorKey.has_value());
+    CHECK_EQ(checkXorKey->Value(), uint8(0x55));
+}
+
 TEST(WardenCrypto_rejects_stream_use_before_initialization)
 {
     warden::WardenCryptoContext crypto;

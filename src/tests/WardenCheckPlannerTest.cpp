@@ -219,6 +219,7 @@ TEST(WardenCheckPlanner_fails_closed_when_result_preflight_exceeds_codec_budget)
     warden::WardenCheckDefinition prototype = oversized.checks[1];
     warden::MemCheckProfile mem =
         std::get<warden::MemCheckProfile>(prototype.payload);
+    mem.length = 255;
     mem.expectedBytes.assign(255, 0x90);
     for (uint32 index = 0; index < 41; ++index)
     {
@@ -234,7 +235,6 @@ TEST(WardenCheckPlanner_fails_closed_when_result_preflight_exceeds_codec_budget)
     warden::WardenCheckPlanBudget budget;
     CHECK(planner.Build(warden::CheckPlanPurpose::Initial, 1, plan, 0,
         &budget) ==
-        warden::CheckPlanValidation::TransportResultBodyTooLarge);
+        warden::CheckPlanValidation::ResultBodyTooLarge);
     CHECK(plan.checks.empty());
-    CHECK(budget.maximumResultBody > warden::MaxDecryptedCheckResultBody);
 }

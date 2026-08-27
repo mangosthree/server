@@ -259,6 +259,18 @@ bool WardenCryptoContext::InstallDirectionalKeys(Key16 const& clientToServer,
     return true;
 }
 
+std::optional<WardenCheckXorKey>
+WardenCryptoContext::InstallModuleDirectionalKeys(
+    Key16 const& clientToServer, Key16 const& serverToClient)
+{
+    if (!InstallDirectionalKeys(clientToServer, serverToClient))
+        return std::nullopt;
+
+    // The module decodes request types and the final zero sentinel with the
+    // first byte of its inbound (client-to-server) key, never the outbound key.
+    return WardenCheckXorKey(clientToServer[0]);
+}
+
 void WardenCryptoContext::Rc4State::Initialize(Key16 const& key)
 {
     for (std::size_t index = 0; index < permutation.size(); ++index)

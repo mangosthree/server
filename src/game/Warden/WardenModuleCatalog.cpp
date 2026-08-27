@@ -41,10 +41,62 @@ bool SameKey(warden::ModuleProfileKey const& left,
         left.architecture == right.architecture;
 }
 
-bool IsZero(warden::Key16 const& key)
+template <std::size_t Size>
+bool IsZero(std::array<uint8, Size> const& value)
 {
-    return std::all_of(key.begin(), key.end(),
+    return std::all_of(value.begin(), value.end(),
         [](uint8 value) { return value == 0; });
+}
+
+bool HasValidMetadata(warden::ModuleProfile const& profile)
+{
+    bool const abiMatches =
+        (profile.key.architecture == warden::WardenArchitecture::X86 &&
+            profile.abi == warden::ModuleAbi::Cata15595X86) ||
+        (profile.key.architecture == warden::WardenArchitecture::X64 &&
+            profile.abi == warden::ModuleAbi::Cata15595X64);
+    if (!abiMatches)
+        return false;
+
+    switch (profile.assurance)
+    {
+        case warden::ModuleAssurance::StaticVerified:
+        case warden::ModuleAssurance::ExactClientLabValidated:
+        case warden::ModuleAssurance::ProductionApproved:
+            break;
+        default:
+            return false;
+    }
+
+    if (profile.operatingMode == warden::ModuleOperatingMode::Full)
+    {
+        return profile.provenance ==
+                warden::ModuleProvenance::RetailCaptured15595 ||
+            profile.provenance ==
+                warden::ModuleProvenance::BuildMatchedPublic;
+    }
+
+    return profile.operatingMode ==
+            warden::ModuleOperatingMode::CompatibilityProbeOnly &&
+        profile.provenance == warden::ModuleProvenance::SignedCrossBuild &&
+        profile.assurance != warden::ModuleAssurance::ProductionApproved;
+}
+
+bool HasDuplicateNonzeroCheckCode(warden::ModuleCheckCodes const& codes)
+{
+    std::array<uint8, 4> const values =
+        {codes.timing, codes.lua, codes.mpq, codes.memory};
+    for (std::size_t index = 0; index < values.size(); ++index)
+    {
+        if (values[index] == 0)
+            continue;
+        if (std::find(values.begin(), values.begin() + index,
+                values[index]) != values.begin() + index)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool Sha256(warden::Bytes const& input, warden::ModuleId& digest)
@@ -90,6 +142,42 @@ ModuleCatalogValidation WardenModuleCatalogBuilder::Add(
     if (profile.key.architecture != WardenArchitecture::X86 &&
         profile.key.architecture != WardenArchitecture::X64)
         return ModuleCatalogValidation::InvalidArchitecture;
+    bool const abiMatches =
+        (profile.key.architecture == WardenArchitecture::X86 &&
+            profile.abi == ModuleAbi::Cata15595X86) ||
+        (profile.key.architecture == WardenArchitecture::X64 &&
+            profile.abi == ModuleAbi::Cata15595X64);
+    if (!abiMatches)
+        return ModuleCatalogValidation::InvalidAbi;
+    if (!HasValidMetadata(profile))
+        return ModuleCatalogValidation::InvalidMetadata;
+    if (HasDuplicateNonzeroCheckCode(profile.checkCodes))
+        return ModuleCatalogValidation::DuplicateCheckCode;
+    if (profile.operatingMode == ModuleOperatingMode::Full &&
+        (profile.abi != ModuleAbi::Cata15595X86 ||
+            profile.checkCodes.timing != Cata15595X86TimingCode ||
+            profile.checkCodes.lua != Cata15595X86LuaCode ||
+            profile.checkCodes.mpq != Cata15595X86MpqCode ||
+            profile.checkCodes.memory != Cata15595X86MemoryCode))
+    {
+        // The x64 full-scan ABI remains deliberately unpublished until an
+        // exact-client module and its complete command grammar satisfy G2.
+        return ModuleCatalogValidation::InvalidCheckCodeMap;
+    }
+    if (profile.operatingMode == ModuleOperatingMode::CompatibilityProbeOnly &&
+        (profile.checkCodes.timing != CataX64CompatibilityTimingCode ||
+            profile.checkCodes.lua != 0 || profile.checkCodes.mpq != 0 ||
+            profile.checkCodes.memory != 0))
+    {
+        return ModuleCatalogValidation::InvalidCheckCodeMap;
+    }
+    if (IsZero(profile.rekey.seed) ||
+        IsZero(profile.rekey.expectedResponse) ||
+        IsZero(profile.rekey.clientToServer) ||
+        IsZero(profile.rekey.serverToClient))
+    {
+        return ModuleCatalogValidation::InvalidRekeyVector;
+    }
     if (profile.container.empty())
         return ModuleCatalogValidation::EmptyContainer;
     if (std::size_t(profile.declaredSize) != profile.container.size())
@@ -121,6 +209,19 @@ ModuleCatalogValidation WardenModuleCatalogBuilder::Build(
 {
     if (m_profiles.empty())
         return ModuleCatalogValidation::EmptyCatalog;
+
+    bool const hasX86 = std::any_of(m_profiles.begin(), m_profiles.end(),
+        [](ModuleProfile const& profile)
+        {
+            return profile.key.architecture == WardenArchitecture::X86;
+        });
+    bool const hasX64 = std::any_of(m_profiles.begin(), m_profiles.end(),
+        [](ModuleProfile const& profile)
+        {
+            return profile.key.architecture == WardenArchitecture::X64;
+        });
+    if (!hasX86 || !hasX64)
+        return ModuleCatalogValidation::IncompleteArchitectureSet;
 
     WardenModuleCatalog staged;
     staged.m_profiles = m_profiles;

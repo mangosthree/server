@@ -26,7 +26,6 @@
 #include "WardenServer.h"
 
 #include <openssl/crypto.h>
-#include <openssl/evp.h>
 #include <openssl/rand.h>
 
 #include <algorithm>
@@ -34,6 +33,7 @@
 #include <cstddef>
 #include <limits>
 #include <utility>
+#include <variant>
 
 namespace
 {
@@ -69,15 +69,6 @@ void AppendUint32(warden::Bytes& bytes, uint32 value)
     bytes.push_back(uint8(value >> 24));
 }
 
-bool Digest(EVP_MD const* algorithm, uint8 const* data, std::size_t size,
-    uint8* output, std::size_t expectedSize)
-{
-    unsigned int actualSize = 0;
-    return EVP_Digest(data, size, output, &actualSize, algorithm, nullptr) ==
-            1 &&
-        actualSize == expectedSize;
-}
-
 bool SameDigest(warden::Digest20 const& left,
     warden::Digest20 const& right)
 {
@@ -106,6 +97,132 @@ std::array<char, 4> ExactLocale(std::string const& locale)
     if (locale.size() == result.size())
         std::copy(locale.begin(), locale.end(), result.begin());
     return result;
+}
+
+bool SameBytes(warden::Bytes const& left, warden::Bytes const& right)
+{
+    return left.size() == right.size() &&
+        (left.empty() || CRYPTO_memcmp(
+            left.data(), right.data(), left.size()) == 0);
+}
+
+bool BuildEvidenceBatch(warden::CheckPlan const& plan,
+    warden::CheckBatchResult const& decoded,
+    warden::WardenEvidenceBatch& output)
+{
+    if (plan.purpose == warden::CheckPlanPurpose::ProfileProbe ||
+        decoded.checks.size() != plan.checks.size())
+    {
+        return false;
+    }
+
+    warden::WardenEvidenceBatch batch;
+    batch.requestId = plan.requestId;
+    batch.purpose = plan.purpose;
+    batch.evidence.reserve(plan.checks.size());
+    for (std::size_t index = 0; index < plan.checks.size(); ++index)
+    {
+        warden::WardenCheckDefinition const& definition = plan.checks[index];
+        warden::WardenEvidence evidence;
+        evidence.requestId = plan.requestId;
+        evidence.checkId = warden::GetWardenCheckId(definition);
+        evidence.checkType = warden::GetWardenCheckType(definition);
+        evidence.evidenceClass = definition.evidenceClass;
+
+        if (std::holds_alternative<warden::TimingCheckProfile>(
+                definition.payload))
+        {
+            warden::TimingResult const* result =
+                std::get_if<warden::TimingResult>(&decoded.checks[index]);
+            if (!result)
+                return false;
+            evidence.outcome = result->stable ?
+                warden::WardenCheckOutcome::Stable :
+                warden::WardenCheckOutcome::Unstable;
+            evidence.clientTick = result->clientTick;
+        }
+        else if (warden::LuaCheckProfile const* luaExpected =
+                     std::get_if<warden::LuaCheckProfile>(
+                         &definition.payload))
+        {
+            warden::LuaResult const* result =
+                std::get_if<warden::LuaResult>(&decoded.checks[index]);
+            if (!result)
+                return false;
+            evidence.outcome = result->status ==
+                    warden::LuaResultStatus::Unavailable ?
+                warden::WardenCheckOutcome::Unavailable :
+                (result->text == luaExpected->expectedText ?
+                        warden::WardenCheckOutcome::Match :
+                        warden::WardenCheckOutcome::Mismatch);
+        }
+        else if (warden::MpqCheckProfile const* mpqExpected =
+                     std::get_if<warden::MpqCheckProfile>(
+                         &definition.payload))
+        {
+            warden::MpqResult const* result =
+                std::get_if<warden::MpqResult>(&decoded.checks[index]);
+            if (!result)
+                return false;
+            bool const matches = CRYPTO_memcmp(result->digest.data(),
+                mpqExpected->expectedSha1.data(), result->digest.size()) == 0;
+            evidence.outcome = result->status ==
+                    warden::MpqResultStatus::Unavailable ?
+                warden::WardenCheckOutcome::Unavailable :
+                (matches ? warden::WardenCheckOutcome::Match :
+                           warden::WardenCheckOutcome::Mismatch);
+        }
+        else
+        {
+            warden::MemCheckProfile const* memExpected =
+                std::get_if<warden::MemCheckProfile>(&definition.payload);
+            warden::MemResult const* result =
+                std::get_if<warden::MemResult>(&decoded.checks[index]);
+            if (!memExpected || !result)
+                return false;
+            evidence.outcome = result->status ==
+                    warden::MemResultStatus::Unavailable ?
+                warden::WardenCheckOutcome::Unavailable :
+                (SameBytes(result->actualBytes, memExpected->expectedBytes) ?
+                        warden::WardenCheckOutcome::Match :
+                        warden::WardenCheckOutcome::Mismatch);
+        }
+        batch.evidence.push_back(evidence);
+    }
+
+    output = std::move(batch);
+    return true;
+}
+
+bool ExtractProfileProbeResults(warden::CheckPlan const& plan,
+    warden::CheckBatchResult& decoded, std::vector<warden::Bytes>& output)
+{
+    if (plan.purpose != warden::CheckPlanPurpose::ProfileProbe ||
+        decoded.checks.size() != plan.checks.size())
+    {
+        return false;
+    }
+
+    std::vector<warden::Bytes> results;
+    results.reserve(decoded.checks.size());
+    for (std::size_t index = 0; index < decoded.checks.size(); ++index)
+    {
+        if (!std::holds_alternative<warden::MemCheckProfile>(
+                plan.checks[index].payload))
+        {
+            return false;
+        }
+        warden::MemResult* result =
+            std::get_if<warden::MemResult>(&decoded.checks[index]);
+        if (!result)
+            return false;
+        if (result->status == warden::MemResultStatus::Success)
+            results.push_back(std::move(result->actualBytes));
+        else
+            results.emplace_back();
+    }
+    output = std::move(results);
+    return true;
 }
 }
 
@@ -158,6 +275,7 @@ bool WardenServer::HasChargedDeadline() const
         case WardenState::ModuleUseSent:
         case WardenState::ModuleTransfer:
         case WardenState::ModuleCached:
+        case WardenState::ProvisionalTimingProbeSent:
         case WardenState::ProfileProbeSent:
         case WardenState::InitialChecksSent:
             return true;
@@ -218,16 +336,24 @@ void WardenServer::Fail(WardenFailure failure)
 {
     if (m_state == WardenState::Failed)
         return;
+    if (m_module && m_module->operatingMode ==
+            ModuleOperatingMode::CompatibilityProbeOnly &&
+        failure != WardenFailure::None)
+    {
+        failure = WardenFailure::CompatibilityProbeFailed;
+    }
     m_failure = failure;
     m_state = WardenState::Failed;
     m_remainingDeadlineMs = 0;
     m_pendingPlan.reset();
-    m_pendingBootstrapString.reset();
+    m_checkXorKey.reset();
     NotifyLifecycle();
 }
 
 bool WardenServer::SendPlain(Bytes plain)
 {
+    if (m_inSendCallback)
+        return false;
     WardenCryptoContext candidate = m_crypto.CloneForTransaction();
     if (!candidate.IsInitialized() ||
         !candidate.TransformServerToClient(plain))
@@ -237,10 +363,17 @@ bool WardenServer::SendPlain(Bytes plain)
 
     EncodedServerFrame frame;
     if (EncodeServerFrame(ByteView(plain), frame) != EncodeStatus::Ok ||
-        !m_send || !m_send(frame))
+        !m_send)
     {
         return false;
     }
+
+    WardenState const stateBeforeSend = m_state;
+    m_inSendCallback = true;
+    bool const sent = m_send(frame);
+    m_inSendCallback = false;
+    if (!sent || m_state != stateBeforeSend)
+        return false;
 
     m_crypto = std::move(candidate);
     return true;
@@ -336,6 +469,71 @@ bool WardenServer::SendModuleTransfer()
     return true;
 }
 
+bool WardenServer::SendModuleHashRequest()
+{
+    if (!m_module)
+        return false;
+    Bytes request;
+    if (EncodeModuleHashRequest(*m_module, request) != EncodeStatus::Ok ||
+        !SendPlain(std::move(request)))
+    {
+        return false;
+    }
+    ResetDeadline();
+    return true;
+}
+
+bool WardenServer::SendModuleInitialization()
+{
+    if (!m_module)
+        return false;
+    Bytes initialization;
+    return EncodeModuleInitialization(m_module->abi, initialization) ==
+            EncodeStatus::Ok &&
+        SendPlain(std::move(initialization));
+}
+
+bool WardenServer::SendCompatibilityTimingProbe()
+{
+    if (!m_module || !m_checkXorKey)
+        return false;
+    Bytes request;
+    if (EncodeCompatibilityTimingProbe(
+            m_module->abi, *m_checkXorKey, request) != EncodeStatus::Ok)
+    {
+        return false;
+    }
+    m_checkXorKey.reset();
+    return SendPlain(std::move(request));
+}
+
+bool WardenServer::HasCompleteSelectedProfiles() const
+{
+    if (!m_module || !m_checks)
+        return false;
+    if (m_module->operatingMode == ModuleOperatingMode::CompatibilityProbeOnly)
+        return true;
+    if (m_module->operatingMode != ModuleOperatingMode::Full ||
+        m_locale.size() != 4)
+    {
+        return false;
+    }
+
+    std::array<char, 4> locale{};
+    std::copy(m_locale.begin(), m_locale.end(), locale.begin());
+    for (ClientVariant variant :
+        {ClientVariant::Unclassified, ClientVariant::Stock,
+            ClientVariant::Grunt})
+    {
+        if (!m_checks->FindProfileExact(
+                {m_build, m_architecture, locale, variant}))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 void WardenServer::HandleArchitectureReply(Bytes const& plain,
     WardenCryptoContext&& candidate)
 {
@@ -389,6 +587,13 @@ void WardenServer::HandleArchitectureReply(Bytes const& plain,
         Fail(WardenFailure::UnsupportedProfile);
         return;
     }
+    // Exact locale profiles are meaningful only after command 5 proves the
+    // architecture. Probe-only modules deliberately publish no check rows.
+    if (!HasCompleteSelectedProfiles())
+    {
+        Fail(WardenFailure::UnsupportedProfile);
+        return;
+    }
 
     Transition(WardenState::ArchitectureClassified);
     if (m_state == WardenState::Failed)
@@ -427,6 +632,8 @@ void WardenServer::HandleBootstrapStatus(Bytes const& plain,
     {
         m_crypto = std::move(candidate);
         Transition(WardenState::ModuleCached);
+        if (m_state != WardenState::Failed && !SendModuleHashRequest())
+            Fail(WardenFailure::SendFailure);
         return;
     }
 
@@ -442,47 +649,84 @@ void WardenServer::HandleBootstrapStatus(Bytes const& plain,
         Fail(WardenFailure::SendFailure);
 }
 
-void WardenServer::HandleBootstrapStringHash(Bytes const& plain,
+void WardenServer::HandleModuleHashResult(Bytes const& plain,
     WardenCryptoContext&& candidate)
 {
-    if (!m_pendingBootstrapString ||
-        plain.size() != 1 + Digest20{}.size() + Digest32{}.size() ||
-        plain[0] != 2)
+    if (!m_module ||
+        DecodeModuleHashResult(*m_module, ByteView(plain)) !=
+            ModuleDecodeStatus::Ok)
     {
-        Fail(WardenFailure::MalformedPayload);
+        Fail(WardenFailure::ModuleDigestMismatch);
         return;
     }
 
-    Digest20 expectedSha1{};
-    Digest32 expectedSha256{};
-    uint8 const* data = reinterpret_cast<uint8 const*>(
-        m_pendingBootstrapString->data());
-    bool const digested = Digest(EVP_sha1(), data,
-            m_pendingBootstrapString->size(), expectedSha1.data(),
-            expectedSha1.size()) &&
-        Digest(EVP_sha256(), data, m_pendingBootstrapString->size(),
-            expectedSha256.data(), expectedSha256.size());
-    bool const matches = digested &&
-        CRYPTO_memcmp(plain.data() + 1, expectedSha1.data(),
-            expectedSha1.size()) == 0 &&
-        CRYPTO_memcmp(plain.data() + 1 + expectedSha1.size(),
-            expectedSha256.data(), expectedSha256.size()) == 0;
-    OPENSSL_cleanse(expectedSha1.data(), expectedSha1.size());
-    OPENSSL_cleanse(expectedSha256.data(), expectedSha256.size());
-    if (!matches)
+    std::optional<WardenCheckXorKey> checkXorKey =
+        candidate.InstallModuleDirectionalKeys(
+            m_module->rekey.clientToServer, m_module->rekey.serverToClient);
+    if (!checkXorKey)
     {
-        Fail(WardenFailure::MalformedPayload);
+        Fail(WardenFailure::CryptoFailure);
         return;
     }
 
     m_crypto = std::move(candidate);
-    m_pendingBootstrapString.reset();
-    ResetDeadline();
+    m_checkXorKey = *checkXorKey;
+    Transition(WardenState::ModuleHashVerified);
+    if (m_state == WardenState::Failed || !SendModuleInitialization())
+    {
+        Fail(WardenFailure::SendFailure);
+        return;
+    }
+
+    Transition(WardenState::ModuleInitialized);
+    if (m_state == WardenState::Failed)
+        return;
+    if (m_module->operatingMode == ModuleOperatingMode::Full)
+    {
+        Transition(WardenState::ReadyForWorld);
+        return;
+    }
+    if (!SendCompatibilityTimingProbe())
+    {
+        Fail(WardenFailure::SendFailure);
+        return;
+    }
+    Transition(WardenState::ProvisionalTimingProbeSent);
+}
+
+void WardenServer::HandleCompatibilityTimingResult(Bytes const& plain,
+    WardenCryptoContext&& candidate)
+{
+    if (!m_module)
+    {
+        Fail(WardenFailure::CompatibilityProbeFailed);
+        return;
+    }
+
+    uint32 clientTick = 0;
+    ModuleDecodeStatus const result = DecodeCompatibilityTimingResult(
+        m_module->abi, ByteView(plain), clientTick);
+    OPENSSL_cleanse(&clientTick, sizeof(clientTick));
+    if (result != ModuleDecodeStatus::Ok)
+    {
+        Fail(WardenFailure::CompatibilityProbeFailed);
+        return;
+    }
+
+    m_crypto = std::move(candidate);
+    Transition(WardenState::ProvisionalValidated);
 }
 
 void WardenServer::HandleClientFrame(ByteView worldPayload)
 {
+    if (m_inSendCallback)
+    {
+        Fail(WardenFailure::UnexpectedCommand);
+        return;
+    }
     if (m_state == WardenState::Failed || m_state == WardenState::Dormant)
+        return;
+    if (m_state == WardenState::ProvisionalValidated)
         return;
 
     DecodedClientFrame decoded;
@@ -512,58 +756,52 @@ void WardenServer::HandleClientFrame(ByteView worldPayload)
             HandleBootstrapStatus(plain, std::move(candidate));
             return;
         case WardenState::ModuleCached:
-            if (m_pendingBootstrapString)
-                HandleBootstrapStringHash(plain, std::move(candidate));
+            HandleModuleHashResult(plain, std::move(candidate));
+            return;
+        case WardenState::ProvisionalTimingProbeSent:
+            HandleCompatibilityTimingResult(plain, std::move(candidate));
+            return;
+        case WardenState::ProfileProbeSent:
+        case WardenState::InitialChecksSent:
+            HandleCheckResult(plain, std::move(candidate));
+            return;
+        case WardenState::Recurring:
+            if (m_pendingPlan)
+                HandleCheckResult(plain, std::move(candidate));
             else
-                Fail(plain.size() == 21 && plain[0] == 4 ?
-                    WardenFailure::Replay : WardenFailure::UnexpectedCommand);
+                Fail(WardenFailure::Replay);
             return;
         case WardenState::ArchitectureClassified:
         case WardenState::ModuleHashVerified:
         case WardenState::ModuleInitialized:
         case WardenState::ReadyForWorld:
-        case WardenState::ProfileProbeSent:
         case WardenState::ProfileClassified:
-        case WardenState::InitialChecksSent:
         case WardenState::Healthy:
-        case WardenState::Recurring:
             Fail(WardenFailure::Replay);
             return;
+        case WardenState::ProvisionalValidated:
         case WardenState::Dormant:
         case WardenState::Failed:
             return;
     }
 }
 
-bool WardenServer::SendBootstrapStringHash(std::string const& text)
-{
-    if (m_state != WardenState::ModuleCached ||
-        m_pendingBootstrapString || text.empty() ||
-        text.size() + 1 > MaxEncryptedServerBody)
-    {
-        return false;
-    }
-
-    Bytes request = {2};
-    request.insert(request.end(), text.begin(), text.end());
-    if (!SendPlain(std::move(request)))
-    {
-        Fail(WardenFailure::SendFailure);
-        return false;
-    }
-    m_pendingBootstrapString = text;
-    ResetDeadline();
-    return true;
-}
-
 bool WardenServer::BuildPendingPlan(CheckPlanPurpose purpose,
     uint32 confirmationCheckId)
 {
-    if (!m_planner || m_pendingPlan)
+    if (!m_module || !m_checkXorKey || !m_planner || m_pendingPlan)
         return false;
     CheckPlan plan;
     if (m_planner->Build(purpose, m_nextRequestId, plan,
             confirmationCheckId) != CheckPlanValidation::Valid)
+    {
+        return false;
+    }
+
+    Bytes request;
+    if (EncodeCheckRequest(*m_module, *m_checkXorKey, plan, request) !=
+            EncodeStatus::Ok ||
+        !SendPlain(std::move(request)))
     {
         return false;
     }
@@ -605,6 +843,137 @@ bool WardenServer::BeginProfileProbe()
     return BuildPendingPlan(CheckPlanPurpose::ProfileProbe);
 }
 
+void WardenServer::HandleCheckResult(Bytes const& plain,
+    WardenCryptoContext&& candidate)
+{
+    if (!m_module || m_module->operatingMode != ModuleOperatingMode::Full ||
+        !m_pendingPlan)
+    {
+        Fail(WardenFailure::UnexpectedCommand);
+        return;
+    }
+
+    CheckBatchResult decoded;
+    if (DecodeCheckResult(m_module->abi, ByteView(plain), *m_pendingPlan,
+            decoded) != DecodeStatus::Ok)
+    {
+        CleanseCheckBatchResult(decoded);
+        Fail(WardenFailure::MalformedPayload);
+        return;
+    }
+
+    bool const profileProbe =
+        m_pendingPlan->purpose == CheckPlanPurpose::ProfileProbe;
+    std::vector<Bytes> probeResults;
+    WardenEvidenceBatch evidence;
+    bool const prepared = profileProbe ?
+        ExtractProfileProbeResults(*m_pendingPlan, decoded, probeResults) :
+        BuildEvidenceBatch(*m_pendingPlan, decoded, evidence);
+    CleanseCheckBatchResult(decoded);
+    if (!prepared)
+    {
+        Fail(WardenFailure::InvalidEvidenceBatch);
+        return;
+    }
+
+    // Commit the inbound RC4 stream only after the complete module response
+    // and its typed semantic projection have both validated.
+    m_crypto = std::move(candidate);
+    if (profileProbe)
+        CompleteProfileProbe(std::move(probeResults));
+    else
+        CompleteEvidenceBatch(std::move(evidence));
+}
+
+void WardenServer::CompleteProfileProbe(std::vector<Bytes>&& results)
+{
+    if (m_state != WardenState::ProfileProbeSent || !m_pendingPlan ||
+        m_pendingPlan->purpose != CheckPlanPurpose::ProfileProbe)
+    {
+        for (Bytes& result : results)
+        {
+            if (!result.empty())
+                OPENSSL_cleanse(result.data(), result.size());
+        }
+        Fail(WardenFailure::UnexpectedCommand);
+        return;
+    }
+
+    ClientVariant const variant =
+        ClassifyProfileProbe(m_architecture, results);
+    m_pendingPlan.reset();
+    m_remainingDeadlineMs = 0;
+    // Preserve recognized-but-unsupported variants in the terminal lifecycle
+    // event so the adapter can persist only their bounded audit token.
+    m_variant = variant;
+    if (variant != ClientVariant::Stock && variant != ClientVariant::Grunt)
+    {
+        Fail(WardenFailure::ProfileUnclassified);
+        return;
+    }
+    WardenCheckProfile const* profile = m_checks->FindProfileExact(
+        {m_build, m_architecture, ExactLocale(m_locale), variant});
+    if (!profile)
+    {
+        Fail(WardenFailure::UnsupportedProfile);
+        return;
+    }
+    m_planner.emplace(*profile);
+    Transition(WardenState::ProfileClassified);
+    if (m_state == WardenState::Failed)
+        return;
+    if (!BuildPendingPlan(CheckPlanPurpose::Initial))
+        Fail(WardenFailure::UnsupportedProfile);
+}
+
+void WardenServer::CompleteEvidenceBatch(WardenEvidenceBatch&& batch)
+{
+    if (m_pendingPlan &&
+        m_pendingPlan->purpose == CheckPlanPurpose::ProfileProbe)
+    {
+        Fail(WardenFailure::UnexpectedCommand);
+        return;
+    }
+    if (!ValidateEvidenceBatch(batch))
+    {
+        Fail(WardenFailure::InvalidEvidenceBatch);
+        return;
+    }
+
+    CheckPlanPurpose const purpose = batch.purpose;
+    bool const cleanInitial = IsCompleteCleanOperatorBatch(batch);
+    m_pendingPlan.reset();
+    m_remainingDeadlineMs = 0;
+    if (purpose == CheckPlanPurpose::Initial)
+    {
+        if (cleanInitial)
+        {
+            Transition(WardenState::Healthy);
+        }
+        else
+        {
+            // Release a valid non-clean first request before policy can queue
+            // an isolated confirmation from the evidence callback below.
+            m_remainingScheduleMs = IntervalMilliseconds(
+                m_aggressive ? m_configuration.aggressiveMinSeconds :
+                               m_configuration.normalMinSeconds);
+            Transition(WardenState::Recurring);
+        }
+    }
+    else
+    {
+        m_remainingScheduleMs = IntervalMilliseconds(
+            m_aggressive ? m_configuration.aggressiveMinSeconds :
+                           m_configuration.normalMinSeconds);
+    }
+
+    if (m_state == WardenState::Failed)
+        return;
+    // Ownership and state commit before external policy can queue follow-up.
+    if (m_evidence)
+        m_evidence(batch);
+}
+
 bool WardenServer::ValidateEvidenceBatch(
     WardenEvidenceBatch const& batch) const
 {
@@ -631,6 +1000,8 @@ bool WardenServer::ValidateEvidenceBatch(
 
 void WardenServer::Update(bool eligible, uint32 diffMs)
 {
+    if (m_inSendCallback)
+        return;
     if (m_state == WardenState::Failed || m_state == WardenState::Dormant)
         return;
     if (HasChargedDeadline())
@@ -685,6 +1056,8 @@ void WardenServer::Update(bool eligible, uint32 diffMs)
 
 bool WardenServer::QueueConfirmation(uint32 checkId)
 {
+    if (m_inSendCallback)
+        return false;
     if (!checkId || !m_planner || m_pendingPlan || m_confirmationCheckId ||
         (m_state != WardenState::Healthy &&
             m_state != WardenState::Recurring))
@@ -703,6 +1076,8 @@ bool WardenServer::QueueConfirmation(uint32 checkId)
 
 void WardenServer::SetAggressive(bool aggressive)
 {
+    if (m_inSendCallback)
+        return;
     if (m_state == WardenState::Failed)
         return;
     if (aggressive && !m_aggressive)
@@ -714,75 +1089,10 @@ void WardenServer::SetAggressive(bool aggressive)
 }
 
 #ifdef MANGOS_WARDEN_TEST_ACCESS
-void WardenServerTestAccess::AcceptSyntheticModuleHash(
-    WardenServer& server, bool valid)
-{
-    if (server.m_state != WardenState::ModuleCached)
-    {
-        server.Fail(WardenFailure::UnexpectedCommand);
-        return;
-    }
-    if (!valid)
-    {
-        server.Fail(WardenFailure::ModuleDigestMismatch);
-        return;
-    }
-    server.Transition(WardenState::ModuleHashVerified);
-}
-
-void WardenServerTestAccess::AcceptSyntheticModuleInitialization(
-    WardenServer& server, bool valid)
-{
-    if (server.m_state != WardenState::ModuleHashVerified)
-    {
-        server.Fail(WardenFailure::UnexpectedCommand);
-        return;
-    }
-    if (!valid)
-    {
-        server.Fail(WardenFailure::ModuleLoadFailed);
-        return;
-    }
-    server.Transition(WardenState::ModuleInitialized);
-    server.Transition(WardenState::ReadyForWorld);
-}
-
 void WardenServerTestAccess::CompleteSyntheticProfileProbe(
     WardenServer& server, std::vector<Bytes>&& results)
 {
-    if (server.m_state != WardenState::ProfileProbeSent ||
-        !server.m_pendingPlan ||
-        server.m_pendingPlan->purpose != CheckPlanPurpose::ProfileProbe)
-    {
-        server.Fail(WardenFailure::UnexpectedCommand);
-        return;
-    }
-
-    ClientVariant const variant =
-        ClassifyProfileProbe(server.m_architecture, results);
-    server.m_pendingPlan.reset();
-    // Preserve recognized-but-unsupported variants in the terminal lifecycle
-    // event so the adapter can persist only their bounded audit token.
-    server.m_variant = variant;
-    if (variant != ClientVariant::Stock && variant != ClientVariant::Grunt)
-    {
-        server.Fail(WardenFailure::ProfileUnclassified);
-        return;
-    }
-    WardenCheckProfile const* profile = server.m_checks->FindProfileExact(
-        {server.m_build, server.m_architecture,
-            ExactLocale(server.m_locale), variant});
-    if (!profile)
-    {
-        server.Fail(WardenFailure::UnsupportedProfile);
-        return;
-    }
-    server.m_planner.emplace(*profile);
-    server.Transition(WardenState::ProfileClassified);
-    if (server.m_state == WardenState::Failed)
-        return;
-    if (!server.BuildPendingPlan(CheckPlanPurpose::Initial))
-        server.Fail(WardenFailure::UnsupportedProfile);
+    server.CompleteProfileProbe(std::move(results));
 }
 
 std::optional<CheckPlan> WardenServerTestAccess::PendingCheckPlan(
@@ -794,65 +1104,7 @@ std::optional<CheckPlan> WardenServerTestAccess::PendingCheckPlan(
 void WardenServerTestAccess::CompleteSyntheticEvidenceBatch(
     WardenServer& server, WardenEvidenceBatch&& batch)
 {
-    // Probe bodies are raw fingerprints consumed by the dedicated classifier,
-    // never generic evidence. Keeping the paths disjoint also prevents a probe
-    // request from retaining a charged state after its deadline is cleared.
-    if (server.m_pendingPlan &&
-        server.m_pendingPlan->purpose == CheckPlanPurpose::ProfileProbe)
-    {
-        server.Fail(WardenFailure::UnexpectedCommand);
-        return;
-    }
-
-    if (!server.ValidateEvidenceBatch(batch))
-    {
-        server.Fail(WardenFailure::InvalidEvidenceBatch);
-        return;
-    }
-
-    CheckPlanPurpose const purpose = batch.purpose;
-    bool const cleanInitial = IsCompleteCleanOperatorBatch(batch);
-    server.m_pendingPlan.reset();
-    server.m_remainingDeadlineMs = 0;
-    if (purpose == CheckPlanPurpose::Initial)
-    {
-        if (cleanInitial)
-        {
-            server.Transition(WardenState::Healthy);
-        }
-        else
-        {
-            // A valid non-clean first batch is not healthy, but it must release
-            // the initial request state before policy queues an isolated
-            // confirmation from the evidence callback below.
-            server.m_remainingScheduleMs = IntervalMilliseconds(
-                server.m_aggressive ?
-                    server.m_configuration.aggressiveMinSeconds :
-                    server.m_configuration.normalMinSeconds);
-            server.Transition(WardenState::Recurring);
-        }
-    }
-    else
-    {
-        server.m_remainingScheduleMs = IntervalMilliseconds(
-            server.m_aggressive ?
-                server.m_configuration.aggressiveMinSeconds :
-                server.m_configuration.normalMinSeconds);
-    }
-
-    if (server.m_state == WardenState::Failed)
-        return;
-
-    // State and pending-plan ownership are committed before external policy
-    // code observes the evidence and potentially queues a confirmation.
-    if (server.m_evidence)
-        server.m_evidence(batch);
-}
-
-bool WardenServerTestAccess::SendBootstrapStringHash(
-    WardenServer& server, std::string const& text)
-{
-    return server.SendBootstrapStringHash(text);
+    server.CompleteEvidenceBatch(std::move(batch));
 }
 
 void WardenServerTestAccess::ForceNextArchitectureMatches(

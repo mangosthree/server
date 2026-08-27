@@ -30,7 +30,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <limits>
 #include <utility>
 #include <vector>
 
@@ -53,17 +52,6 @@ uint8 PurposePhase(warden::CheckPlanPurpose purpose)
             return 0;
     }
     return 0;
-}
-
-bool AddChecked(std::size_t value, std::size_t& total)
-{
-    if (value > std::numeric_limits<std::size_t>::max() - total)
-    {
-        total = std::numeric_limits<std::size_t>::max();
-        return false;
-    }
-    total += value;
-    return true;
 }
 
 void Cleanse(std::vector<warden::Bytes>& results)
@@ -184,76 +172,17 @@ CheckPlanValidation WardenCheckPlanner::Build(CheckPlanPurpose purpose,
         return CheckPlanValidation::EmptyPlan;
 
     WardenCheckPlanBudget inspected;
-    CheckPlanValidation const validation = InspectCheckPlan(staged, inspected);
+    ModuleAbi const abi = staged.profileKey.architecture ==
+            WardenArchitecture::X86 ? ModuleAbi::Cata15595X86 :
+            ModuleAbi::Cata15595X64;
+    CheckPlanValidation const validation =
+        InspectCheckPlan(abi, staged, inspected);
     if (budget)
         *budget = inspected;
     if (validation != CheckPlanValidation::Valid)
         return validation;
 
     output = std::move(staged);
-    return CheckPlanValidation::Valid;
-}
-
-CheckPlanValidation InspectCheckPlan(CheckPlan const& plan,
-    WardenCheckPlanBudget& budget)
-{
-    budget = {};
-    if (plan.checks.empty())
-        return CheckPlanValidation::EmptyPlan;
-
-    bool valid = true;
-    for (WardenCheckDefinition const& check : plan.checks)
-    {
-        switch (GetWardenCheckType(check))
-        {
-            case WardenCheckType::Timing:
-                valid = AddChecked(1, budget.requestBody) && valid;
-                valid = AddChecked(4, budget.maximumResultBody) && valid;
-                break;
-            case WardenCheckType::Mpq:
-            {
-                MpqCheckProfile const& profile =
-                    std::get<MpqCheckProfile>(check.payload);
-                valid = AddChecked(2 + profile.path.size(),
-                    budget.requestBody) && valid;
-                valid = AddChecked(1 + profile.expectedSha1.size(),
-                    budget.maximumResultBody) && valid;
-                break;
-            }
-            case WardenCheckType::Lua:
-            {
-                LuaCheckProfile const& profile =
-                    std::get<LuaCheckProfile>(check.payload);
-                valid = AddChecked(2 + profile.query.size(),
-                    budget.requestBody) && valid;
-                valid = AddChecked(2 + profile.expectedText.size(),
-                    budget.maximumResultBody) && valid;
-                break;
-            }
-            case WardenCheckType::Mem:
-            {
-                MemCheckProfile const& profile =
-                    std::get<MemCheckProfile>(check.payload);
-                std::size_t const addressBytes =
-                    plan.profileKey.architecture == WardenArchitecture::X64 ?
-                    8u : 4u;
-                valid = AddChecked(2 + addressBytes +
-                    profile.moduleIdentifier.size(), budget.requestBody) &&
-                    valid;
-                valid = AddChecked(1 + std::max<std::size_t>(profile.length,
-                    profile.expectedBytes.size()),
-                    budget.maximumResultBody) && valid;
-                break;
-            }
-        }
-    }
-
-    if (!valid || budget.requestBody > MaxEncryptedServerBody)
-        return CheckPlanValidation::RequestBodyTooLarge;
-    // Client result capacity is a proven CMSG property. Keep it independent
-    // from the still-provisional server framing budget used above.
-    if (budget.maximumResultBody > MaxDecryptedCheckResultBody)
-        return CheckPlanValidation::TransportResultBodyTooLarge;
     return CheckPlanValidation::Valid;
 }
 

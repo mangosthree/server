@@ -54,6 +54,8 @@ struct CheckPlan
 
 struct WardenCheckPlanBudget
 {
+    std::size_t stringCount = 0;
+    std::size_t stringTableBytes = 0;
     std::size_t requestBody = 0;
     std::size_t maximumResultBody = 0;
 };
@@ -61,10 +63,18 @@ struct WardenCheckPlanBudget
 enum class CheckPlanValidation : uint8
 {
     Valid,
+    InvalidAbi,
+    InvalidRequestId,
     EmptyPlan,
     InvalidProfilePurpose,
+    InvalidDefinition,
+    DuplicateCheckId,
+    DuplicateTiming,
     InvalidConfirmation,
+    TooManyStrings,
+    StringTableTooLarge,
     RequestBodyTooLarge,
+    ResultBodyTooLarge,
     TransportResultBodyTooLarge
 };
 }

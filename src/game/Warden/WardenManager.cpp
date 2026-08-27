@@ -28,17 +28,61 @@
 #include <openssl/crypto.h>
 
 #include <algorithm>
-#include <array>
+#include <cstddef>
 #include <utility>
+#include <vector>
 
 namespace
 {
-std::array<char, 4> ExactLocale(std::string const& locale)
+bool IsAsciiAlpha(char value)
 {
-    std::array<char, 4> result{};
-    if (locale.size() == result.size())
-        std::copy(locale.begin(), locale.end(), result.begin());
-    return result;
+    return (value >= 'A' && value <= 'Z') ||
+        (value >= 'a' && value <= 'z');
+}
+
+bool IsExactLocale(std::string const& locale)
+{
+    return locale.size() == 4 &&
+        std::all_of(locale.begin(), locale.end(), IsAsciiAlpha);
+}
+
+bool SameProfileGroup(warden::WardenProfileKey const& left,
+    warden::WardenProfileKey const& right)
+{
+    return left.build == right.build &&
+        left.architecture == right.architecture &&
+        left.locale == right.locale;
+}
+
+bool HasCompleteVariantSet(
+    std::vector<warden::WardenCheckProfile> const& profiles,
+    warden::WardenProfileKey const& key)
+{
+    bool unclassified = false;
+    bool stock = false;
+    bool grunt = false;
+    std::size_t count = 0;
+    for (warden::WardenCheckProfile const& profile : profiles)
+    {
+        if (!SameProfileGroup(profile.key, key))
+            continue;
+        ++count;
+        switch (profile.key.variant)
+        {
+            case warden::ClientVariant::Unclassified:
+                unclassified = true;
+                break;
+            case warden::ClientVariant::Stock:
+                stock = true;
+                break;
+            case warden::ClientVariant::Grunt:
+                grunt = true;
+                break;
+            default:
+                return false;
+        }
+    }
+    return count == 3 && unclassified && stock && grunt;
 }
 }
 
@@ -51,31 +95,52 @@ WardenManager::WardenManager(
 {
 }
 
-bool WardenManager::HasCompleteExactProfiles(uint32 build,
-    std::string const& locale) const
+bool WardenManager::HasValidCatalogueSnapshot() const
 {
-    if (!m_modules || !m_checks || locale.size() != 4)
-        return false;
-
-    std::array<char, 4> const exactLocale = ExactLocale(locale);
-    for (WardenArchitecture architecture :
-        {WardenArchitecture::X86, WardenArchitecture::X64})
+    if (!m_modules || !m_checks || m_modules->Profiles().empty() ||
+        m_checks->Profiles().empty())
     {
-        if (!m_modules->FindExact({build, architecture}))
-            return false;
+        return false;
+    }
 
-        for (ClientVariant variant :
-            {ClientVariant::Unclassified, ClientVariant::Stock,
-                ClientVariant::Grunt})
+    std::vector<WardenCheckProfile> const& profiles = m_checks->Profiles();
+    for (WardenCheckProfile const& profile : profiles)
+    {
+        ModuleProfile const* module = m_modules->FindExact(
+            {profile.key.build, profile.key.architecture});
+        if (!module || module->operatingMode != ModuleOperatingMode::Full ||
+            !HasCompleteVariantSet(profiles, profile.key))
         {
-            if (!m_checks->FindProfileExact(
-                    {build, architecture, exactLocale, variant}))
-            {
-                return false;
-            }
+            return false;
         }
     }
+
+    for (ModuleProfile const& module : m_modules->Profiles())
+    {
+        bool const hasProfiles = std::any_of(profiles.begin(), profiles.end(),
+            [&module](WardenCheckProfile const& profile)
+            {
+                return profile.key.build == module.key.build &&
+                    profile.key.architecture == module.key.architecture;
+            });
+        if ((module.operatingMode == ModuleOperatingMode::Full) != hasProfiles)
+            return false;
+    }
     return true;
+}
+
+bool WardenManager::CanActivate(
+    WardenConfiguration const& configuration) const
+{
+    if (configuration.enforcementMode == WardenEnforcementMode::Observe)
+        return true;
+
+    return std::all_of(m_modules->Profiles().begin(),
+        m_modules->Profiles().end(), [](ModuleProfile const& profile)
+        {
+            return profile.operatingMode == ModuleOperatingMode::Full &&
+                profile.assurance == ModuleAssurance::ProductionApproved;
+        });
 }
 
 std::unique_ptr<WardenServer> WardenManager::Create(
@@ -83,8 +148,11 @@ std::unique_ptr<WardenServer> WardenManager::Create(
     LifecycleObserver lifecycle, EvidenceBatchObserver evidence) const
 {
     bool const supported = options.build == 15595 &&
-        options.clientOs == "Win" && bool(send) &&
-        HasCompleteExactProfiles(options.build, options.locale);
+        options.clientOs == "Win" && IsExactLocale(options.locale) &&
+        bool(send) && HasValidCatalogueSnapshot() &&
+        m_modules->FindExact({options.build, WardenArchitecture::X86}) &&
+        m_modules->FindExact({options.build, WardenArchitecture::X64}) &&
+        CanActivate(options.configuration);
 
     WardenCryptoContext crypto;
     bool const initialized = supported && crypto.Initialize(options.sessionKey);

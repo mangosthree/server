@@ -161,7 +161,7 @@ TEST(WardenCheckCatalog_rejects_unknown_scalar_contracts_before_narrowing)
         warden::CheckCatalogValidation::InvalidSortOrder);
 }
 
-TEST(WardenCheckCatalog_preserves_binary_module_identifiers_with_nuls)
+TEST(WardenCheckCatalog_rejects_non_textual_module_identifiers)
 {
     warden::WardenCheckRowInput row =
         warden::test::ClassifiedRows(warden::WardenArchitecture::X86,
@@ -169,7 +169,12 @@ TEST(WardenCheckCatalog_preserves_binary_module_identifiers_with_nuls)
     row.moduleHex =
         "000102030405060708090A0B0C0D0E0F"
         "101112131415161718191A1B1C1D1E1F";
-    CHECK(AddOne(row) == warden::CheckCatalogValidation::Valid);
+    CHECK(AddOne(row) ==
+        warden::CheckCatalogValidation::InvalidModuleIdentifier);
+
+    row.moduleHex = "576F772E1F657865";
+    CHECK(AddOne(row) ==
+        warden::CheckCatalogValidation::InvalidModuleIdentifier);
 }
 
 TEST(WardenCheckCatalog_profile_probe_is_exclusive_unclassified_and_non_actionable)

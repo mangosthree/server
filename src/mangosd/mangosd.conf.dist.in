@@ -1817,12 +1817,12 @@ OutdoorPvp.GHEnabled = 1
 #
 # Warden.EnforcementMode
 #     0 = observe and audit only; required for the first private rollout and
-#         while any compiled module remains compatibility-probe-only.
+#         while any compiled module is not both Full and ProductionApproved.
 #     1 = kick only after an actionable mismatch repeats in an isolated
 #         confirmation request.
 #     2 = kick after confirmation and permanently ban after BanThreshold
 #         confirmed incidents inside IncidentWindow.
-#     Default: 2
+#     Default: 0 while the compiled Cata modules remain StaticVerified
 #
 # Warden.RequireExactProfile
 #     Reject unsupported exact clients in enforcing modes. Observe mode still
@@ -1834,7 +1834,7 @@ OutdoorPvp.GHEnabled = 1
 #
 ################################################################################
 
-Warden.EnforcementMode       = 2
+Warden.EnforcementMode       = 0
 Warden.RequireExactProfile   = 1
 Warden.CheckIntervalMin      = 30
 Warden.CheckIntervalMax      = 60

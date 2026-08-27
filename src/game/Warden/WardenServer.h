@@ -40,7 +40,10 @@
 
 namespace warden
 {
-/** Observable architecture-first state; Failed is absorbing. */
+/**
+ * Observable architecture-first state; Failed is absorbing. Healthy is the
+ * one-shot initial-health edge and Recurring is the steady active state.
+ */
 enum class WardenState : uint8
 {
     Dormant,
@@ -153,6 +156,7 @@ private:
     void CompleteProfileProbe(std::vector<Bytes>&& results);
     void CompleteEvidenceBatch(WardenEvidenceBatch&& batch);
     bool ValidateEvidenceBatch(WardenEvidenceBatch const& batch) const;
+    bool SelectScheduleMilliseconds(uint32& milliseconds) const;
     bool HasChargedDeadline() const;
     void ResetDeadline();
     void Transition(WardenState state);
@@ -203,6 +207,7 @@ private:
     bool m_forceArchitectureMatches = false;
     bool m_forcedX86Match = false;
     bool m_forcedX64Match = false;
+    std::function<uint32(uint32, uint32)> m_scheduleSecondsSelector;
 #endif
 };
 
@@ -224,6 +229,9 @@ public:
         WardenServer& server, bool x86, bool x64);
     static bool PreviewCommittedClientPlaintext(WardenServer const& server,
         ByteView encryptedBody, Bytes& plain);
+    static void SetScheduleSecondsSelector(WardenServer& server,
+        std::function<uint32(uint32, uint32)> selector);
+    static uint32 RemainingScheduleMs(WardenServer const& server);
 };
 #endif
 }

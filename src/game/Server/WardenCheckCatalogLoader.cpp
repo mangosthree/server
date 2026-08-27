@@ -86,9 +86,9 @@ char const* ToString(WardenCheckCatalogLoadFailure failure)
 
 bool WardenCheckCatalogLoader::LoadAndStage() const
 {
-    // Count and rows are projected by one statement. Filtering here makes a
-    // disabled operator row inert while a disabled required profile still
-    // fails the complete-coverage transaction below.
+    // Count and rows are projected by one statement. Disabled rows are inert;
+    // if they remove a required profile, the later module/profile coverage
+    // gate rejects the complete staged snapshot.
     std::unique_ptr<QueryResult> result(WorldDatabase.Query(
         "SELECT `snapshot`.`snapshot_count`, `checks`.`build`, "
         "HEX(`checks`.`architecture`), HEX(`checks`.`locale`), "

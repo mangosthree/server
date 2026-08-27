@@ -217,7 +217,10 @@ struct Harness
         std::string locale = "enUS",
         warden::WardenEnforcementMode enforcementMode =
             warden::WardenEnforcementMode::Observe,
-        std::shared_ptr<warden::WardenCheckCatalog const> checkOverride = {})
+        std::shared_ptr<warden::WardenCheckCatalog const> checkOverride = {},
+        uint32 normalMinSeconds = 1, uint32 normalMaxSeconds = 1,
+        uint32 aggressiveMinSeconds = 1,
+        uint32 aggressiveMaxSeconds = 1)
         : modules(std::make_shared<warden::WardenModuleCatalog const>(
               warden::test::BuildSyntheticModuleCatalog())),
           checks(checkOverride ? std::move(checkOverride) :
@@ -232,10 +235,10 @@ struct Harness
         options.locale = std::move(locale);
         options.sessionKey = warden::test::SyntheticSessionKey();
         options.configuration.enforcementMode = enforcementMode;
-        options.configuration.normalMinSeconds = 1;
-        options.configuration.normalMaxSeconds = 1;
-        options.configuration.aggressiveMinSeconds = 1;
-        options.configuration.aggressiveMaxSeconds = 1;
+        options.configuration.normalMinSeconds = normalMinSeconds;
+        options.configuration.normalMaxSeconds = normalMaxSeconds;
+        options.configuration.aggressiveMinSeconds = aggressiveMinSeconds;
+        options.configuration.aggressiveMaxSeconds = aggressiveMaxSeconds;
 
         server = manager.Create(std::move(options),
             [this](warden::EncodedServerFrame const& frame)
@@ -642,6 +645,78 @@ TEST(WardenServer_strict_state_order_reaches_healthy_only_after_clean_initial_ba
     CHECK(!harness.evidence.empty());
     CHECK(harness.evidence.front().purpose ==
         warden::CheckPlanPurpose::Initial);
+}
+
+TEST(WardenServer_schedule_selects_inside_each_configured_interval)
+{
+    Harness harness(true, "enUS", warden::WardenEnforcementMode::Observe,
+        {}, 7, 11, 2, 4);
+    std::vector<std::pair<uint32, uint32>> bounds;
+    warden::WardenServerTestAccess::SetScheduleSecondsSelector(
+        *harness.server, [&bounds](uint32 minimum, uint32 maximum)
+        {
+            bounds.emplace_back(minimum, maximum);
+            return maximum;
+        });
+
+    REQUIRE(harness.ReachHealthy(warden::WardenArchitecture::X86));
+    CHECK_EQ(warden::WardenServerTestAccess::RemainingScheduleMs(
+        *harness.server), uint32(11000));
+    harness.server->Update(true, 10999);
+    CHECK(harness.server->GetState() == warden::WardenState::Healthy);
+    harness.server->Update(true, 1);
+    std::optional<warden::CheckPlan> const recurring =
+        warden::WardenServerTestAccess::PendingCheckPlan(*harness.server);
+    REQUIRE(recurring);
+    warden::WardenEvidenceBatch batch = Harness::CleanBatch(*recurring);
+    warden::WardenServerTestAccess::CompleteSyntheticEvidenceBatch(
+        *harness.server, std::move(batch));
+    CHECK_EQ(warden::WardenServerTestAccess::RemainingScheduleMs(
+        *harness.server), uint32(11000));
+
+    harness.server->SetAggressive(true);
+    CHECK_EQ(warden::WardenServerTestAccess::RemainingScheduleMs(
+        *harness.server), uint32(4000));
+    std::vector<std::pair<uint32, uint32>> const expectedBounds = {
+        {7, 11}, {7, 11}, {2, 4}};
+    CHECK(bounds == expectedBounds);
+}
+
+TEST(WardenServer_production_schedule_draw_stays_inside_inclusive_bounds)
+{
+    Harness harness(true, "enUS", warden::WardenEnforcementMode::Observe,
+        {}, 7, 11, 2, 4);
+
+    for (uint32 draw = 0; draw < 32; ++draw)
+    {
+        harness.server->SetAggressive(false);
+        uint32 const milliseconds =
+            warden::WardenServerTestAccess::RemainingScheduleMs(
+                *harness.server);
+        CHECK(milliseconds >= 7000);
+        CHECK(milliseconds <= 11000);
+    }
+
+    for (uint32 draw = 0; draw < 32; ++draw)
+    {
+        harness.server->SetAggressive(true);
+        uint32 const milliseconds =
+            warden::WardenServerTestAccess::RemainingScheduleMs(
+                *harness.server);
+        CHECK(milliseconds >= 2000);
+        CHECK(milliseconds <= 4000);
+    }
+}
+
+TEST(WardenServer_plan_send_failure_preserves_transport_reason)
+{
+    Harness harness;
+    REQUIRE(harness.ReachReadyForWorld(warden::WardenArchitecture::X86));
+    harness.sendSucceeds = false;
+    harness.server->Update(true, 0);
+
+    CHECK(harness.server->GetState() == warden::WardenState::Failed);
+    CHECK(harness.server->GetFailure() == warden::WardenFailure::SendFailure);
 }
 
 TEST(WardenServer_in_world_gate_and_complete_batch_gate_prevent_early_healthy)

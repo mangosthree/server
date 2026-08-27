@@ -137,7 +137,7 @@ bool World::LoadConfigSettings(bool reload)
     // cached World setting, so a rejected reload preserves the prior state.
     warden::WardenRawConfiguration rawWarden;
     rawWarden.enforcementMode = static_cast<uint32>(sConfig.GetIntDefault(
-        "Warden.EnforcementMode", 2));
+        "Warden.EnforcementMode", 0));
     rawWarden.requireExactProfile = sConfig.GetBoolDefault(
         "Warden.RequireExactProfile", true);
     rawWarden.normalMinSeconds = static_cast<uint32>(sConfig.GetIntDefault(

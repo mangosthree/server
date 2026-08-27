@@ -46,12 +46,12 @@ warden::WardenRawConfiguration ValidCustomConfiguration()
     return raw;
 }
 }
-TEST(WardenConfiguration_defaults_match_approved_production_policy)
+TEST(WardenConfiguration_defaults_match_safe_provisional_policy)
 {
     warden::WardenRawConfiguration raw;
     auto const result = warden::NormalizeWardenConfiguration(raw);
 
-    CHECK_EQ(uint32(result.value.enforcementMode), uint32(2));
+    CHECK_EQ(uint32(result.value.enforcementMode), uint32(0));
     CHECK(result.value.requireExactProfile);
     CHECK_EQ(result.value.normalMinSeconds, uint32(30));
     CHECK_EQ(result.value.normalMaxSeconds, uint32(60));
@@ -102,7 +102,7 @@ TEST(WardenConfiguration_invalid_mode_falls_back_without_changing_other_groups)
     raw.enforcementMode = 3;
     auto const result = warden::NormalizeWardenConfiguration(raw);
 
-    CHECK_EQ(uint32(result.value.enforcementMode), uint32(2));
+    CHECK_EQ(uint32(result.value.enforcementMode), uint32(0));
     CHECK_EQ(result.value.normalMinSeconds, uint32(31));
     CHECK_EQ(result.value.normalMaxSeconds, uint32(45));
     CHECK(warden::HasWardenConfigurationCorrection(result.corrections,
@@ -215,7 +215,7 @@ TEST(WardenConfiguration_combines_corrections_for_all_invalid_groups)
     raw.incidentWindowSeconds = 0;
     auto const result = warden::NormalizeWardenConfiguration(raw);
 
-    CHECK_EQ(uint32(result.value.enforcementMode), uint32(2));
+    CHECK_EQ(uint32(result.value.enforcementMode), uint32(0));
     CHECK_EQ(result.value.normalMinSeconds, uint32(30));
     CHECK_EQ(result.value.normalMaxSeconds, uint32(60));
     CHECK_EQ(result.value.aggressiveMinSeconds, uint32(10));

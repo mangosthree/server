@@ -108,9 +108,9 @@ require_text(OPCODE_TABLE_TEXT "    AssertWardenOpcodes();"
 # The grouped handler is only a synchronous immutable-view adapter.
 require_count(HANDLER_TEXT "recv_data[.]rfinish[ \t]*[(]" 1
     "Warden handler must finish the packet exactly once")
-require_text(HANDLER_TEXT "recv_data.contents() + recv_data.rpos()"
+require_text(HANDLER_TEXT "recv_data.contents() + readPosition"
     "Warden handler must capture the unread start")
-require_text(HANDLER_TEXT "recv_data.size() - recv_data.rpos()"
+require_text(HANDLER_TEXT "recv_data.size() - readPosition"
     "Warden handler must capture the unread length")
 require_text(HANDLER_TEXT "m_warden->HandleClientFrame(view)"
     "Warden handler must call the server synchronously")
@@ -199,8 +199,10 @@ require_order(UPDATE_TAIL "m_warden->Update(eligible, diffMs)"
 
 # Configuration is mandatory, versioned, and atomically published before any
 # ordinary cached World setting can change.
-require_text(CONF_TEXT "Warden.EnforcementMode       = 2"
-    "documented Warden defaults are missing")
+require_text(CONF_TEXT "Warden.EnforcementMode       = 0"
+    "provisional Warden must ship in observe mode")
+require_text(WORLD_CONFIG_TEXT "\"Warden.EnforcementMode\", 0"
+    "missing-key Warden fallback must remain observe-only")
 require_text(CONF_TEXT "Warden.RequireExactProfile   = 1"
     "exact-profile configuration is missing")
 if(CONF_TEXT MATCHES "Warden[.]Enabled")

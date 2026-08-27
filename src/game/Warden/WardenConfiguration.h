@@ -53,7 +53,9 @@ inline bool IsValidWardenIncidentWindow(uint32 seconds)
 /** Untrusted values read directly from mangosd.conf. */
 struct WardenRawConfiguration
 {
-    uint32 enforcementMode = 2;
+    // Both compiled Cata modules remain StaticVerified, so the only safe
+    // missing-key/default policy is observe-only until G4 promotes them.
+    uint32 enforcementMode = 0;
     // When false, missing/unsupported profiles and protocol lifecycle failures
     // disengage Warden for the session instead of enforcing admission.
     bool requireExactProfile = true;
@@ -70,7 +72,7 @@ struct WardenRawConfiguration
 struct WardenConfiguration
 {
     WardenEnforcementMode enforcementMode =
-        WardenEnforcementMode::KickAndBan;
+        WardenEnforcementMode::Observe;
     // This is an operational admission gate only; confirmed cheat evidence
     // remains actionable regardless of its value.
     bool requireExactProfile = true;

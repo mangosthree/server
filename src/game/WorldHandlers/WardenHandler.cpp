@@ -31,9 +31,9 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
 {
     std::size_t const readPosition = recv_data.rpos();
     std::size_t const unreadSize = readPosition <= recv_data.size() ?
-        recv_data.size() - recv_data.rpos() : 0;
+        recv_data.size() - readPosition : 0;
     uint8 const* unread = unreadSize ?
-        recv_data.contents() + recv_data.rpos() : recv_data.contents();
+        recv_data.contents() + readPosition : recv_data.contents();
     warden::ByteView const view(unread, unreadSize);
     if (m_warden)
         m_warden->HandleClientFrame(view);

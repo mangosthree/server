@@ -267,6 +267,51 @@ void WardenServer::ResetDeadline()
     m_remainingDeadlineMs = BootstrapDeadlineMs;
 }
 
+bool WardenServer::SelectScheduleMilliseconds(uint32& milliseconds) const
+{
+    uint32 const minimum = m_aggressive ?
+        m_configuration.aggressiveMinSeconds :
+        m_configuration.normalMinSeconds;
+    uint32 const maximum = m_aggressive ?
+        m_configuration.aggressiveMaxSeconds :
+        m_configuration.normalMaxSeconds;
+    if (!minimum || minimum > maximum)
+        return false;
+
+    uint32 seconds = minimum;
+#ifdef MANGOS_WARDEN_TEST_ACCESS
+    if (m_scheduleSecondsSelector)
+    {
+        seconds = m_scheduleSecondsSelector(minimum, maximum);
+        if (seconds < minimum || seconds > maximum)
+            return false;
+    }
+    else
+#endif
+    if (minimum != maximum)
+    {
+        // Scan cadence is externally observable. Draw it from OpenSSL instead
+        // of the shared gameplay PRNG, whose state can leak through rolls.
+        uint64 const span = uint64(maximum) - minimum + 1;
+        uint64 const sampleSpace = uint64(std::numeric_limits<uint32>::max()) + 1;
+        uint64 const unbiasedLimit = sampleSpace - (sampleSpace % span);
+        uint32 sample = 0;
+        do
+        {
+            if (RAND_bytes(reinterpret_cast<unsigned char*>(&sample),
+                    int(sizeof(sample))) != 1)
+            {
+                return false;
+            }
+        }
+        while (uint64(sample) >= unbiasedLimit);
+        seconds = minimum + uint32(uint64(sample) % span);
+    }
+
+    milliseconds = IntervalMilliseconds(seconds);
+    return true;
+}
+
 bool WardenServer::HasChargedDeadline() const
 {
     switch (m_state)
@@ -325,9 +370,11 @@ void WardenServer::Transition(WardenState state)
         m_remainingDeadlineMs = 0;
     if (state == WardenState::Healthy)
     {
-        m_remainingScheduleMs = IntervalMilliseconds(
-            m_aggressive ? m_configuration.aggressiveMinSeconds :
-                           m_configuration.normalMinSeconds);
+        if (!SelectScheduleMilliseconds(m_remainingScheduleMs))
+        {
+            Fail(WardenFailure::CryptoFailure);
+            return;
+        }
     }
     NotifyLifecycle();
 }
@@ -800,9 +847,13 @@ bool WardenServer::BuildPendingPlan(CheckPlanPurpose purpose,
 
     Bytes request;
     if (EncodeCheckRequest(*m_module, *m_checkXorKey, plan, request) !=
-            EncodeStatus::Ok ||
-        !SendPlain(std::move(request)))
+            EncodeStatus::Ok)
     {
+        return false;
+    }
+    if (!SendPlain(std::move(request)))
+    {
+        Fail(WardenFailure::SendFailure);
         return false;
     }
     ++m_nextRequestId;
@@ -954,17 +1005,21 @@ void WardenServer::CompleteEvidenceBatch(WardenEvidenceBatch&& batch)
         {
             // Release a valid non-clean first request before policy can queue
             // an isolated confirmation from the evidence callback below.
-            m_remainingScheduleMs = IntervalMilliseconds(
-                m_aggressive ? m_configuration.aggressiveMinSeconds :
-                               m_configuration.normalMinSeconds);
+            if (!SelectScheduleMilliseconds(m_remainingScheduleMs))
+            {
+                Fail(WardenFailure::CryptoFailure);
+                return;
+            }
             Transition(WardenState::Recurring);
         }
     }
     else
     {
-        m_remainingScheduleMs = IntervalMilliseconds(
-            m_aggressive ? m_configuration.aggressiveMinSeconds :
-                           m_configuration.normalMinSeconds);
+        if (!SelectScheduleMilliseconds(m_remainingScheduleMs))
+        {
+            Fail(WardenFailure::CryptoFailure);
+            return;
+        }
     }
 
     if (m_state == WardenState::Failed)
@@ -1083,9 +1138,8 @@ void WardenServer::SetAggressive(bool aggressive)
     if (aggressive && !m_aggressive)
         m_aggressiveImmediatePending = true;
     m_aggressive = aggressive;
-    m_remainingScheduleMs = IntervalMilliseconds(
-        aggressive ? m_configuration.aggressiveMinSeconds :
-                     m_configuration.normalMinSeconds);
+    if (!SelectScheduleMilliseconds(m_remainingScheduleMs))
+        Fail(WardenFailure::CryptoFailure);
 }
 
 #ifdef MANGOS_WARDEN_TEST_ACCESS
@@ -1126,6 +1180,19 @@ bool WardenServerTestAccess::PreviewCommittedClientPlaintext(
     WardenCryptoContext candidate = server.m_crypto.CloneForTransaction();
     return candidate.IsInitialized() &&
         candidate.TransformClientToServer(plain);
+}
+
+void WardenServerTestAccess::SetScheduleSecondsSelector(
+    WardenServer& server,
+    std::function<uint32(uint32, uint32)> selector)
+{
+    server.m_scheduleSecondsSelector = std::move(selector);
+}
+
+uint32 WardenServerTestAccess::RemainingScheduleMs(
+    WardenServer const& server)
+{
+    return server.m_remainingScheduleMs;
 }
 #endif
 }

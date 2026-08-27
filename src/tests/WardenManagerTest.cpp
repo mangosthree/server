@@ -66,3 +66,103 @@ TEST(WardenManager_rejects_empty_staging_without_consuming_the_slot)
         warden::test::BuildSyntheticCheckCatalog());
     CHECK(manager.StageCatalogues(std::move(complete)));
 }
+
+TEST(WardenManager_requires_staging_and_observe_for_provisional_modules)
+{
+    warden::WardenManager manager;
+    warden::WardenConfiguration observe;
+    observe.enforcementMode = warden::WardenEnforcementMode::Observe;
+    CHECK(manager.ValidateRuntimeConfiguration(observe) ==
+        warden::RuntimeValidation::CataloguesUnavailable);
+    CHECK(!manager.ActivateRuntimeConfiguration(observe));
+
+    auto checks = std::make_shared<warden::WardenCheckCatalog const>(
+        warden::test::BuildSyntheticCheckCatalog());
+    REQUIRE(manager.StageCatalogues(std::move(checks)));
+    CHECK(manager.ValidateRuntimeConfiguration(observe) ==
+        warden::RuntimeValidation::Valid);
+
+    warden::WardenConfiguration malformed = observe;
+    malformed.normalMinSeconds = 61;
+    malformed.normalMaxSeconds = 60;
+    CHECK(manager.ValidateRuntimeConfiguration(malformed) ==
+        warden::RuntimeValidation::InvalidConfiguration);
+
+    warden::WardenConfiguration kick = observe;
+    kick.enforcementMode = warden::WardenEnforcementMode::Kick;
+    CHECK(manager.ValidateRuntimeConfiguration(kick) ==
+        warden::RuntimeValidation::ObserveRequired);
+    CHECK(!manager.ActivateRuntimeConfiguration(kick));
+    kick.enforcementMode = warden::WardenEnforcementMode::KickAndBan;
+    CHECK(manager.ValidateRuntimeConfiguration(kick) ==
+        warden::RuntimeValidation::ObserveRequired);
+}
+
+TEST(WardenManager_rejected_reload_preserves_the_exact_active_snapshot)
+{
+    warden::WardenManager manager;
+    auto checks = std::make_shared<warden::WardenCheckCatalog const>(
+        warden::test::BuildSyntheticCheckCatalog());
+    REQUIRE(manager.StageCatalogues(std::move(checks)));
+
+    warden::WardenConfiguration observe;
+    observe.enforcementMode = warden::WardenEnforcementMode::Observe;
+    REQUIRE(manager.ActivateRuntimeConfiguration(observe));
+    std::shared_ptr<warden::WardenRuntimeSnapshot const> first =
+        manager.GetRuntimeSnapshot();
+    REQUIRE(first != nullptr);
+    CHECK(first->configuration.normalMinSeconds == uint32(30));
+
+    warden::WardenConfiguration replacement = observe;
+    replacement.normalMinSeconds = 40;
+    replacement.normalMaxSeconds = 70;
+    REQUIRE(manager.TryReplaceRuntimeConfiguration(replacement));
+    std::shared_ptr<warden::WardenRuntimeSnapshot const> second =
+        manager.GetRuntimeSnapshot();
+    REQUIRE(second != nullptr);
+    CHECK(second != first);
+    CHECK(first->configuration.normalMinSeconds == uint32(30));
+    CHECK(second->configuration.normalMinSeconds == uint32(40));
+
+    warden::WardenConfiguration rejected = replacement;
+    rejected.enforcementMode = warden::WardenEnforcementMode::Kick;
+    CHECK(!manager.TryReplaceRuntimeConfiguration(rejected));
+    CHECK(manager.GetRuntimeSnapshot() == second);
+    CHECK(!manager.ActivateRuntimeConfiguration(observe));
+}
+
+TEST(WardenManager_creates_only_from_a_manager_published_generation)
+{
+    warden::WardenManager manager;
+    auto checks = std::make_shared<warden::WardenCheckCatalog const>(
+        warden::test::BuildSyntheticCheckCatalog());
+    REQUIRE(manager.StageCatalogues(std::move(checks)));
+    warden::WardenConfiguration observe;
+    observe.enforcementMode = warden::WardenEnforcementMode::Observe;
+    REQUIRE(manager.ActivateRuntimeConfiguration(observe));
+    std::shared_ptr<warden::WardenRuntimeSnapshot const> captured =
+        manager.GetRuntimeSnapshot();
+    REQUIRE(captured != nullptr);
+
+    warden::WardenConfiguration replacement = observe;
+    replacement.normalMinSeconds = 40;
+    replacement.normalMaxSeconds = 70;
+    REQUIRE(manager.TryReplaceRuntimeConfiguration(replacement));
+
+    warden::WardenCreationOptions options;
+    options.build = 15595;
+    options.clientOs = "Win";
+    options.locale = "enUS";
+    options.sessionKey = warden::test::SyntheticSessionKey();
+    options.runtimeSnapshot = captured;
+    CHECK(manager.Create(std::move(options),
+        [](warden::EncodedServerFrame const&) { return true; }) != nullptr);
+
+    warden::WardenCreationOptions missingSnapshot;
+    missingSnapshot.build = 15595;
+    missingSnapshot.clientOs = "Win";
+    missingSnapshot.locale = "enUS";
+    missingSnapshot.sessionKey = warden::test::SyntheticSessionKey();
+    CHECK(manager.Create(std::move(missingSnapshot),
+        [](warden::EncodedServerFrame const&) { return true; }) == nullptr);
+}

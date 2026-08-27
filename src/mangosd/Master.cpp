@@ -397,7 +397,13 @@ int Master::Run()
         return 1;
     }
 
-    sWorld.SetInitialWorldSettings();
+    if (!sWorld.SetInitialWorldSettings())
+    {
+        sLog.outError("World initialization aborted: Warden runtime "
+            "configuration could not be published.");
+        StopDatabases();
+        return 1;
+    }
 
 #ifndef _WIN32
     detachDaemon();

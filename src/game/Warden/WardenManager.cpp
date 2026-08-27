@@ -31,7 +31,9 @@
 #include <openssl/crypto.h>
 
 #include <algorithm>
+#include <atomic>
 #include <cstddef>
+#include <limits>
 #include <utility>
 #include <vector>
 
@@ -87,10 +89,46 @@ bool HasCompleteVariantSet(
     }
     return count == 3 && unclassified && stock && grunt;
 }
+
+bool IsValidInterval(uint32 minimum, uint32 maximum)
+{
+    uint32 constexpr MaximumSeconds =
+        std::numeric_limits<uint32>::max() / 1000u;
+    return minimum > 0 && minimum <= maximum && maximum <= MaximumSeconds;
+}
+
+bool IsValidRuntimeConfiguration(
+    warden::WardenConfiguration const& configuration)
+{
+    uint32 const mode = uint32(configuration.enforcementMode);
+    return mode <= uint32(warden::WardenEnforcementMode::KickAndBan) &&
+        IsValidInterval(configuration.normalMinSeconds,
+            configuration.normalMaxSeconds) &&
+        IsValidInterval(configuration.aggressiveMinSeconds,
+            configuration.aggressiveMaxSeconds) &&
+        configuration.aggressiveThreshold > 0 &&
+        configuration.banThreshold > configuration.aggressiveThreshold &&
+        warden::IsValidWardenIncidentWindow(
+            configuration.incidentWindowSeconds);
+}
 }
 
 namespace warden
 {
+char const* ToString(RuntimeValidation validation)
+{
+    switch (validation)
+    {
+        case RuntimeValidation::Valid: return "Valid";
+        case RuntimeValidation::CataloguesUnavailable:
+            return "CataloguesUnavailable";
+        case RuntimeValidation::InvalidConfiguration:
+            return "InvalidConfiguration";
+        case RuntimeValidation::ObserveRequired: return "ObserveRequired";
+    }
+    return "Unknown";
+}
+
 WardenManager::WardenManager()
 {
     WardenModuleCatalogBuilder builder;
@@ -111,7 +149,7 @@ WardenManager::WardenManager(
     std::shared_ptr<WardenModuleCatalog const> modules,
     std::shared_ptr<WardenCheckCatalog const> checks)
     : m_modules(std::move(modules)), m_checks(std::move(checks)),
-      m_runtimeActive(true)
+      m_injectedCatalogues(true)
 {
 }
 
@@ -175,7 +213,66 @@ bool WardenManager::HasStagedCatalogues() const
 
 bool WardenManager::HasActiveRuntimeSnapshot() const
 {
-    return m_runtimeActive && HasStagedCatalogues();
+    return GetRuntimeSnapshot() != nullptr;
+}
+
+RuntimeValidation WardenManager::ValidateRuntimeConfiguration(
+    WardenConfiguration const& configuration) const
+{
+    if (!HasStagedCatalogues())
+        return RuntimeValidation::CataloguesUnavailable;
+    if (!IsValidRuntimeConfiguration(configuration))
+        return RuntimeValidation::InvalidConfiguration;
+    if (!CanActivate(configuration))
+        return RuntimeValidation::ObserveRequired;
+    return RuntimeValidation::Valid;
+}
+
+bool WardenManager::ActivateRuntimeConfiguration(
+    WardenConfiguration configuration)
+{
+    if (ValidateRuntimeConfiguration(configuration) !=
+        RuntimeValidation::Valid)
+    {
+        return false;
+    }
+
+    auto mutableSnapshot = std::make_shared<WardenRuntimeSnapshot>();
+    mutableSnapshot->modules = m_modules;
+    mutableSnapshot->checks = m_checks;
+    mutableSnapshot->configuration = configuration;
+    std::shared_ptr<WardenRuntimeSnapshot const> candidate = mutableSnapshot;
+    std::shared_ptr<WardenRuntimeSnapshot const> expected;
+    return std::atomic_compare_exchange_strong_explicit(&m_runtimeSnapshot,
+        &expected, std::move(candidate), std::memory_order_release,
+        std::memory_order_acquire);
+}
+
+bool WardenManager::TryReplaceRuntimeConfiguration(
+    WardenConfiguration configuration)
+{
+    if (!GetRuntimeSnapshot() ||
+        ValidateRuntimeConfiguration(configuration) !=
+            RuntimeValidation::Valid)
+    {
+        return false;
+    }
+
+    auto mutableSnapshot = std::make_shared<WardenRuntimeSnapshot>();
+    mutableSnapshot->modules = m_modules;
+    mutableSnapshot->checks = m_checks;
+    mutableSnapshot->configuration = configuration;
+    std::shared_ptr<WardenRuntimeSnapshot const> candidate = mutableSnapshot;
+    std::atomic_store_explicit(&m_runtimeSnapshot, std::move(candidate),
+        std::memory_order_release);
+    return true;
+}
+
+std::shared_ptr<WardenRuntimeSnapshot const>
+WardenManager::GetRuntimeSnapshot() const
+{
+    return std::atomic_load_explicit(&m_runtimeSnapshot,
+        std::memory_order_acquire);
 }
 
 WardenModuleCatalog const* WardenManager::GetModuleCatalogForStartup() const
@@ -201,12 +298,33 @@ std::unique_ptr<WardenServer> WardenManager::Create(
     WardenCreationOptions&& options, SendFrame send,
     LifecycleObserver lifecycle, EvidenceBatchObserver evidence) const
 {
+    std::shared_ptr<WardenRuntimeSnapshot const> runtime =
+        options.runtimeSnapshot;
+    std::shared_ptr<WardenModuleCatalog const> modules;
+    std::shared_ptr<WardenCheckCatalog const> checks;
+    WardenConfiguration configuration;
+    if (runtime)
+    {
+        modules = runtime->modules;
+        checks = runtime->checks;
+        configuration = runtime->configuration;
+        if (modules != m_modules || checks != m_checks)
+            runtime.reset();
+    }
+    else if (m_injectedCatalogues)
+    {
+        modules = m_modules;
+        checks = m_checks;
+        configuration = options.configuration;
+    }
+
     bool const supported = options.build == 15595 &&
         options.clientOs == "Win" && IsExactLocale(options.locale) &&
-        bool(send) && HasActiveRuntimeSnapshot() &&
-        m_modules->FindExact({options.build, WardenArchitecture::X86}) &&
-        m_modules->FindExact({options.build, WardenArchitecture::X64}) &&
-        CanActivate(options.configuration);
+        bool(send) && (runtime || m_injectedCatalogues) && modules && checks &&
+        HasValidCatalogueSnapshot(*modules, *checks) &&
+        modules->FindExact({options.build, WardenArchitecture::X86}) &&
+        modules->FindExact({options.build, WardenArchitecture::X64}) &&
+        CanActivate(configuration);
 
     WardenCryptoContext crypto;
     bool const initialized = supported && crypto.Initialize(options.sessionKey);
@@ -218,7 +336,8 @@ std::unique_ptr<WardenServer> WardenManager::Create(
 
     return std::unique_ptr<WardenServer>(new WardenServer(options.build,
         std::move(options.clientOs), std::move(options.locale),
-        options.configuration, options.initialAggressive, m_modules, m_checks,
+        configuration, options.initialAggressive, std::move(modules),
+        std::move(checks),
         std::move(crypto), std::move(send), std::move(lifecycle),
         std::move(evidence)));
 }

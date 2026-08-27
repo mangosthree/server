@@ -1187,6 +1187,8 @@ class WorldSession
         std::string m_Address;
 
         std::unique_ptr<warden::AdmissionData> m_pendingWardenAdmission;
+        std::shared_ptr<warden::WardenRuntimeSnapshot const>
+            m_wardenRuntimeSnapshot;
         warden::WardenAdmissionHistory m_wardenAdmissionHistory;
         std::unique_ptr<warden::WardenServer> m_warden;
         std::unique_ptr<warden::WardenEnforcementPolicy> m_wardenPolicy;

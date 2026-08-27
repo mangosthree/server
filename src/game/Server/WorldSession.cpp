@@ -268,6 +268,7 @@ WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
     m_pendingWardenAdmission(admission.build ?
         std::make_unique<warden::AdmissionData>(std::move(admission)) :
         nullptr),
+    m_wardenRuntimeSnapshot(std::move(admissionContext.runtimeSnapshot)),
     m_wardenAdmissionHistory(std::move(admissionContext.history)),
     m_wardenConfiguration(std::move(admissionContext.configuration)),
     m_sessionKeySalt(sessionKeySalt),
@@ -295,6 +296,7 @@ WorldSession::~WorldSession()
         m_pendingWardenAdmission->Clear();
         m_pendingWardenAdmission.reset();
     }
+    m_wardenRuntimeSnapshot.reset();
 
     ///- unload player if not unloaded
     if (_player)
@@ -328,20 +330,23 @@ void WorldSession::OnAuthenticatedAdmission()
         if (m_pendingWardenAdmission)
             m_pendingWardenAdmission->Clear();
         m_pendingWardenAdmission.reset();
+        m_wardenRuntimeSnapshot.reset();
         m_wardenAdmissionHistory = {};
         return;
     }
 
-    // Task 9 staged catalogues without publishing a runnable configuration.
-    // This guard keeps the intermediate branch inert; Task 11 replaces it with
-    // the coherent runtime snapshot captured by WorldGateway at Attach time.
-    if (!warden::WardenManager::Instance().HasActiveRuntimeSnapshot())
+    if (!m_wardenRuntimeSnapshot)
     {
         m_pendingWardenAdmission->Clear();
         m_pendingWardenAdmission.reset();
+        m_wardenRuntimeSnapshot.reset();
         m_wardenAdmissionHistory = {};
         return;
     }
+
+    // The manager-issued generation, not mutable World configuration, is the
+    // authority for the entire queued or immediate admission.
+    m_wardenConfiguration = m_wardenRuntimeSnapshot->configuration;
 
     warden::AdmissionData admission(std::move(*m_pendingWardenAdmission));
     m_pendingWardenAdmission.reset();
@@ -363,6 +368,7 @@ void WorldSession::OnAuthenticatedAdmission()
             GetAccountId(), WardenAdmissionStatusName(status),
             m_wardenBuild, m_wardenLocale.data());
         admission.Clear();
+        m_wardenRuntimeSnapshot.reset();
         m_wardenAdmissionHistory = {};
 
         if (ClassifyWardenAdmission(status, m_wardenConfiguration) ==
@@ -376,6 +382,7 @@ void WorldSession::OnAuthenticatedAdmission()
     options.clientOs = admission.clientOs;
     options.locale = admission.clientLocale;
     options.sessionKey = admission.sessionKey;
+    options.runtimeSnapshot = m_wardenRuntimeSnapshot;
     options.configuration = m_wardenConfiguration;
     options.initialAggressive = warden::ShouldUseAggressiveWardenAdmission(
         m_wardenAdmissionHistory, m_wardenConfiguration,
@@ -407,6 +414,7 @@ void WorldSession::OnAuthenticatedAdmission()
             {
                 HandleWardenEvidenceBatch(batch);
             });
+    m_wardenRuntimeSnapshot.reset();
 
     if (!server)
     {

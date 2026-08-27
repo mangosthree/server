@@ -33,6 +33,24 @@
 
 namespace warden
 {
+enum class RuntimeValidation : uint8
+{
+    Valid,
+    CataloguesUnavailable,
+    InvalidConfiguration,
+    ObserveRequired
+};
+
+char const* ToString(RuntimeValidation validation);
+
+/** One atomic generation shared by admission, creation, and queued sessions. */
+struct WardenRuntimeSnapshot
+{
+    std::shared_ptr<WardenModuleCatalog const> modules;
+    std::shared_ptr<WardenCheckCatalog const> checks;
+    WardenConfiguration configuration;
+};
+
 /** Immutable authenticated inputs; architecture is deliberately absent. */
 struct WardenCreationOptions
 {
@@ -40,6 +58,9 @@ struct WardenCreationOptions
     std::string clientOs;
     std::string locale;
     SessionKey sessionKey{};
+    std::shared_ptr<WardenRuntimeSnapshot const> runtimeSnapshot;
+    // Used only by the injected pure-test manager when no runtime snapshot is
+    // supplied. Production always consumes runtimeSnapshot->configuration.
     WardenConfiguration configuration;
     bool initialAggressive = false;
 };
@@ -63,6 +84,11 @@ public:
         std::shared_ptr<WardenCheckCatalog const> checks);
     bool HasStagedCatalogues() const;
     bool HasActiveRuntimeSnapshot() const;
+    RuntimeValidation ValidateRuntimeConfiguration(
+        WardenConfiguration const& configuration) const;
+    bool ActivateRuntimeConfiguration(WardenConfiguration configuration);
+    bool TryReplaceRuntimeConfiguration(WardenConfiguration configuration);
+    std::shared_ptr<WardenRuntimeSnapshot const> GetRuntimeSnapshot() const;
     /** Immutable compiled modules used by the startup coverage transaction. */
     WardenModuleCatalog const* GetModuleCatalogForStartup() const;
 
@@ -78,7 +104,8 @@ private:
 
     std::shared_ptr<WardenModuleCatalog const> m_modules;
     std::shared_ptr<WardenCheckCatalog const> m_checks;
-    bool m_runtimeActive = false;
+    std::shared_ptr<WardenRuntimeSnapshot const> m_runtimeSnapshot;
+    bool m_injectedCatalogues = false;
 };
 }
 

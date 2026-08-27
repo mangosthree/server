@@ -276,7 +276,12 @@ bool ChatHandler::HandleReloadAllLocalesCommand(char* /*args*/)
 bool ChatHandler::HandleReloadConfigCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading config settings...");
-    sWorld.LoadConfigSettings(true);
+    if (!sWorld.LoadConfigSettings(true))
+    {
+        SendSysMessage("World config reload rejected; existing settings "
+            "remain active.");
+        return false;
+    }
     sMapMgr.InitializeVisibilityDistanceInfo();
     SendGlobalSysMessage("World config settings reloaded.", SEC_MODERATOR);
     return true;

@@ -39,12 +39,16 @@
 #include "World.h"
 #include "WorldSession.h"
 #include "WorldGatewayAuth.h"
+#include "WardenIncidentStore.h"
+#include "WardenManager.h"
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #endif
 
 #include <string>
+#include <ctime>
+#include <optional>
 
 namespace
 {
@@ -277,9 +281,43 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
     std::shared_ptr<SessionMailbox> mailbox =
         std::make_shared<SessionMailbox>();
 
-    // Task 11 replaces the default context with the manager's coherent active
-    // runtime snapshot and loads incident history under that exact policy.
     warden::WardenAdmissionContext admissionContext;
+    admissionContext.runtimeSnapshot =
+        warden::WardenManager::Instance().GetRuntimeSnapshot();
+    if (!admissionContext.runtimeSnapshot)
+    {
+        sLog.outError("Warden runtime snapshot unavailable during authenticated "
+            "admission for account %u.", row->id);
+        link->Close();
+        return proto::INVALID_SESSION_ID;
+    }
+    // Queue residence may span a reload. Capture one generation now so its
+    // incident history and eventual session never mix two configurations.
+    admissionContext.configuration =
+        admissionContext.runtimeSnapshot->configuration;
+    if (admissionContext.configuration.enforcementMode !=
+        warden::WardenEnforcementMode::Observe)
+    {
+        std::optional<warden::WardenIncidentWindowState> const history =
+            warden::WardenIncidentStore::Instance().Load(row->id,
+                admissionContext.configuration.incidentWindowSeconds,
+                admissionContext.configuration.aggressiveThreshold);
+        if (history)
+        {
+            admissionContext.history.recentIncidentCount =
+                history->recentCount;
+            admissionContext.history.aggressiveUntilServer =
+                warden::RebaseIncidentDeadline(history->aggressiveUntil,
+                    history->databaseNow,
+                    static_cast<uint64>(std::time(nullptr)));
+            admissionContext.history.incidentHistoryLoaded = true;
+        }
+        else
+        {
+            sLog.outError("Warden incident history unavailable for "
+                "account %u; admission will use normal cadence.", row->id);
+        }
+    }
     warden::AdmissionData admission = BuildWardenAdmissionData(request.build,
         row->os, row->clientLocale, row->sessionKey);
     std::unique_ptr<WorldSession> session =

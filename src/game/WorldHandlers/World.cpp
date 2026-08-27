@@ -244,7 +244,7 @@ void World::CleanupsBeforeStop()
 
 
 /// Initialize the World
-void World::SetInitialWorldSettings()
+bool World::SetInitialWorldSettings()
 {
     ///- Initialize the random number generator
     srand((unsigned int)time(NULL));
@@ -256,7 +256,8 @@ void World::SetInitialWorldSettings()
     dtAllocSetCustom(dtCustomAlloc, dtCustomFree);
 
     ///- Initialize config settings
-    LoadConfigSettings();
+    if (!LoadConfigSettings())
+        return false;
 
     ///- Point the terrain engine at the baked tiles. Nothing else tells it where they
     ///  are, and without this every height, liquid and sight query answers "no data"
@@ -871,6 +872,7 @@ void World::SetInitialWorldSettings()
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
     sLog.outString("SERVER STARTUP TIME: %i minutes %i seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
     sLog.outString();
+    return true;
 }
 
 uint32 World::GetBotCount() const

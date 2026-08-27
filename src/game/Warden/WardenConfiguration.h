@@ -28,8 +28,11 @@
 
 #include "Platform/Define.h"
 
+#include <memory>
+
 namespace warden
 {
+struct WardenRuntimeSnapshot;
 /** Controls which confirmed failures may affect a connected account. */
 enum class WardenEnforcementMode : uint8
 {
@@ -92,6 +95,8 @@ struct WardenAdmissionHistory
 /** One coherent Attach-time policy and the history classified under it. */
 struct WardenAdmissionContext
 {
+    /** Exact manager-published generation captured by WorldGateway::Attach. */
+    std::shared_ptr<WardenRuntimeSnapshot const> runtimeSnapshot;
     WardenConfiguration configuration;
     WardenAdmissionHistory history;
 };

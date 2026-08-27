@@ -1807,6 +1807,44 @@ OutdoorPvp.NAEnabled = 1
 OutdoorPvp.GHEnabled = 1
 
 ################################################################################
+# WARDEN
+#
+# The World database Warden catalogue is mandatory. Profiles are selected only
+# by exact client build, proven architecture, exact locale, and in-world
+# executable fingerprint; no locale, architecture, or executable fallback is
+# used. Protocol, transport, timeout, unavailable, and unsupported outcomes are
+# operational failures, never proof of cheating.
+#
+# Warden.EnforcementMode
+#     0 = observe and audit only; required for the first private rollout and
+#         while any compiled module remains compatibility-probe-only.
+#     1 = kick only after an actionable mismatch repeats in an isolated
+#         confirmation request.
+#     2 = kick after confirmation and permanently ban after BanThreshold
+#         confirmed incidents inside IncidentWindow.
+#     Default: 2
+#
+# Warden.RequireExactProfile
+#     Reject unsupported exact clients in enforcing modes. Observe mode still
+#     admits them without Warden after recording one operational audit.
+#     Default: 1
+#
+# Check intervals and IncidentWindow are seconds. AggressiveThreshold switches
+# subsequent sessions to the aggressive cadence; BanThreshold must be larger.
+#
+################################################################################
+
+Warden.EnforcementMode       = 2
+Warden.RequireExactProfile   = 1
+Warden.CheckIntervalMin      = 30
+Warden.CheckIntervalMax      = 60
+Warden.AggressiveIntervalMin = 10
+Warden.AggressiveIntervalMax = 20
+Warden.AggressiveThreshold   = 5
+Warden.BanThreshold          = 10
+Warden.IncidentWindow        = 900
+
+################################################################################
 # NETWORK CONFIG
 #
 #    Network.Threads

@@ -35,11 +35,24 @@ set(HANDLER "${SOURCE_ROOT}/src/game/WorldHandlers/WardenHandler.cpp")
 set(CHARACTER "${SOURCE_ROOT}/src/game/WorldHandlers/CharacterHandler.cpp")
 set(WORLD "${SOURCE_ROOT}/src/game/WorldHandlers/World.cpp")
 set(SESSION_MGR "${SOURCE_ROOT}/src/game/WorldHandlers/WorldSessionMgr.cpp")
+set(WORLD_CONFIG "${SOURCE_ROOT}/src/game/WorldHandlers/WorldConfig.cpp")
+set(MASTER "${SOURCE_ROOT}/src/mangosd/Master.cpp")
+set(CONF "${SOURCE_ROOT}/src/mangosd/mangosd.conf.dist.in")
+set(PARAMS "${SOURCE_ROOT}/cmake/MangosParams.cmake")
+set(REVISIONS "${SOURCE_ROOT}/src/shared/revision_data.h.in")
 
 foreach(PATH IN ITEMS OPCODES OPCODE_TABLE GATEWAY GATEWAY_AUTH SESSION_HEADER
         SESSION_SOURCE HANDLER CHARACTER WORLD SESSION_MGR)
     if(NOT EXISTS "${${PATH}}")
         message(FATAL_ERROR "Active Warden boundary artifact missing: ${${PATH}}")
+    endif()
+    file(READ "${${PATH}}" ${PATH}_TEXT)
+    string(REPLACE "\r\n" "\n" ${PATH}_TEXT "${${PATH}_TEXT}")
+endforeach()
+
+foreach(PATH IN ITEMS WORLD_CONFIG MASTER CONF PARAMS REVISIONS)
+    if(NOT EXISTS "${${PATH}}")
+        message(FATAL_ERROR "Warden publication artifact missing: ${${PATH}}")
     endif()
     file(READ "${${PATH}}" ${PATH}_TEXT)
     string(REPLACE "\r\n" "\n" ${PATH}_TEXT "${${PATH}_TEXT}")
@@ -146,6 +159,12 @@ require_count(SESSION_MGR_TEXT "OnAuthenticatedAdmission[ \t]*[(]" 2
 require_order(GATEWAY_AUTH_TEXT "GetExactLocaleName(clientLocale)"
     "sessionKey.AsByteArray"
     "exact locale must validate before session-key serialization")
+require_text(GATEWAY_TEXT "GetRuntimeSnapshot()"
+    "WorldGateway must capture one active runtime generation")
+require_text(GATEWAY_TEXT "WardenIncidentStore::Instance().Load"
+    "WorldGateway must load history under the captured policy")
+require_text(SESSION_SOURCE_TEXT "options.runtimeSnapshot = m_wardenRuntimeSnapshot"
+    "queued admission must create from its attach-time generation")
 
 # Bootstrap begins after character enumeration, with login as a safety net.
 require_count(CHARACTER_TEXT "StartWardenBootstrap[ \t]*[(]" 2
@@ -177,5 +196,38 @@ string(SUBSTRING "${SESSION_SOURCE_TEXT}" ${UPDATE_FUNCTION_AT} -1 UPDATE_TAIL)
 require_order(UPDATE_TAIL "m_warden->Update(eligible, diffMs)"
     "FinalizeWardenDisengagement()"
     "Update must finalize only after returning")
+
+# Configuration is mandatory, versioned, and atomically published before any
+# ordinary cached World setting can change.
+require_text(CONF_TEXT "Warden.EnforcementMode       = 2"
+    "documented Warden defaults are missing")
+require_text(CONF_TEXT "Warden.RequireExactProfile   = 1"
+    "exact-profile configuration is missing")
+if(CONF_TEXT MATCHES "Warden[.]Enabled")
+    message(FATAL_ERROR "Warden must not have a master disable switch")
+endif()
+require_text(PARAMS_TEXT "set(MANGOS_WORLD_VER 2026082600)"
+    "mangosd configuration version was not advanced")
+require_text(REVISIONS_TEXT "#define REALMD_DB_STRUCTURE_NR      \"5\""
+    "Realm structure requirement must be 22/05/001")
+require_text(REVISIONS_TEXT
+    "#define REALMD_DB_UPDATE_DESCRIPT   \"Cata Warden identity\""
+    "Realm description requirement is stale")
+require_text(REVISIONS_TEXT "#define WORLD_DB_STRUCTURE_NR       \"10\""
+    "World structure requirement must be 22/10/001")
+require_text(REVISIONS_TEXT
+    "#define WORLD_DB_UPDATE_DESCRIPT    \"Cata_Warden_Checks\""
+    "World description requirement is stale")
+require_text(WORLD_CONFIG_TEXT "bool World::LoadConfigSettings(bool reload)"
+    "configuration reload must report rejection")
+require_order(WORLD_CONFIG_TEXT "ValidateRuntimeConfiguration"
+    "SetPlayerLimit"
+    "Warden must validate before ordinary cached settings change")
+require_text(WORLD_CONFIG_TEXT "TryReplaceRuntimeConfiguration"
+    "reload must atomically replace the runtime generation")
+require_text(WORLD_CONFIG_TEXT "ActivateRuntimeConfiguration"
+    "startup must atomically activate the runtime generation")
+require_text(MASTER_TEXT "if (!sWorld.SetInitialWorldSettings())"
+    "Master must abort before listeners when Warden publication fails")
 
 message(STATUS "Active Cata Warden transport/session boundary is intact")

@@ -332,7 +332,6 @@ TEST(WardenPacketCodec_encodes_exact_build_15595_x86_initialization)
         int(warden::EncodeStatus::Ok));
     CHECK_HEX(plaintext.data(), plaintext.size(),
         "030c00e9ab2bd104000010d3430030c2430001"
-        "031400da87a83101000200508c3a0070513a0050653a0000663a00"
         "0308004ca09e6c0101004097470001");
 }
 
@@ -474,7 +473,7 @@ TEST(WardenPacketCodec_accepts_only_pinned_x64_module_hash_response)
         int(warden::ModuleDecodeStatus::DigestMismatch));
 }
 
-TEST(WardenPacketCodec_x86_four_family_plan_has_exact_budget_and_request)
+TEST(WardenPacketCodec_x86_rejects_mpq_without_a_compatible_client_callback)
 {
     warden::CheckPlan const plan = FourFamilyX86Plan();
     warden::WardenCheckPlanBudget budget;
@@ -490,16 +489,32 @@ TEST(WardenPacketCodec_x86_four_family_plan_has_exact_budget_and_request)
     warden::ModuleProfile profile;
     profile.abi = warden::ModuleAbi::Cata15595X86;
     profile.checkCodes = {warden::Cata15595X86TimingCode,
-        warden::Cata15595X86LuaCode, warden::Cata15595X86MpqCode,
+        warden::Cata15595X86LuaCode, 0,
+        warden::Cata15595X86MemoryCode};
+    warden::Bytes encoded = {0xA5};
+    CHECK(warden::EncodeCheckRequest(profile, *key, plan, encoded) ==
+        warden::EncodeStatus::InvalidPlan);
+    CHECK_HEX(encoded.data(), encoded.size(), "a5");
+}
+
+TEST(WardenPacketCodec_x86_encodes_supported_timing_lua_and_memory_plan)
+{
+    warden::CheckPlan plan = FourFamilyX86Plan();
+    plan.checks.erase(plan.checks.begin() + 2);
+
+    std::optional<warden::WardenCheckXorKey> const key = X86CheckXorKey();
+    REQUIRE(key.has_value());
+    warden::ModuleProfile profile;
+    profile.abi = warden::ModuleAbi::Cata15595X86;
+    profile.checkCodes = {warden::Cata15595X86TimingCode,
+        warden::Cata15595X86LuaCode, 0,
         warden::Cata15595X86MemoryCode};
     warden::Bytes encoded;
     CHECK(warden::EncodeCheckRequest(profile, *key, plan, encoded) ==
         warden::EncodeStatus::Ok);
     CHECK_HEX(encoded.data(), encoded.size(),
-        "020b77617264656e5f74657374"
-        "16444246696c6573436c69656e745c4974656d2e646232"
-        "07576f772e65786500"
-        "5acb010802be03027a7f0553");
+        "020b77617264656e5f7465737407576f772e65786500"
+        "5acb01be02027a7f0553");
 }
 
 TEST(WardenPacketCodec_x86_decodes_exact_four_family_result_transactionally)

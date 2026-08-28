@@ -1149,7 +1149,6 @@ TEST(WardenServer_x86_hash_rekeys_and_sends_exact_initialization)
     warden::Bytes const initialization = harness.ReadServer();
     CHECK_HEX(initialization.data(), initialization.size(),
         "030c00e9ab2bd104000010d3430030c2430001"
-        "031400da87a83101000200508c3a0070513a0050653a0000663a00"
         "0308004ca09e6c0101004097470001");
     CHECK(harness.evidence.empty());
 }

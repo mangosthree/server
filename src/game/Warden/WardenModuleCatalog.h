@@ -82,6 +82,8 @@ struct ModuleCheckCodes
 constexpr uint8 CataX64CompatibilityTimingCode = 0xEA;
 constexpr uint8 Cata15595X86TimingCode = 0xD0;
 constexpr uint8 Cata15595X86LuaCode = 0x41;
+// Decoder opcode retained as protocol evidence; the published 15595 profile
+// does not expose it because the x86 host has no ABI-compatible file reader.
 constexpr uint8 Cata15595X86MpqCode = 0x82;
 constexpr uint8 Cata15595X86MemoryCode = 0x34;
 constexpr uint8 Cata15595X86EndCode = 0xD9;

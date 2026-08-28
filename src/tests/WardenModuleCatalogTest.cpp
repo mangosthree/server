@@ -53,7 +53,7 @@ warden::ModuleProfile SyntheticProfile(warden::WardenArchitecture architecture)
         profile.checkCodes = {
             warden::Cata15595X86TimingCode,
             warden::Cata15595X86LuaCode,
-            warden::Cata15595X86MpqCode,
+            0,
             warden::Cata15595X86MemoryCode};
     else
         profile.checkCodes = {0xEA, 0x00, 0x00, 0x00};
@@ -152,7 +152,7 @@ TEST(WardenModuleCatalog_rejects_duplicate_nonzero_check_codes)
     CHECK(builder.Add(profile) != warden::ModuleCatalogValidation::Valid);
 }
 
-TEST(WardenModuleCatalog_requires_the_complete_x86_check_code_map)
+TEST(WardenModuleCatalog_requires_the_supported_x86_check_code_map)
 {
     warden::ModuleProfile profile =
         SyntheticProfile(warden::WardenArchitecture::X86);
@@ -166,6 +166,12 @@ TEST(WardenModuleCatalog_requires_the_complete_x86_check_code_map)
     profile.checkCodes.lua ^= 0x01;
     warden::WardenModuleCatalogBuilder wrongCode;
     CHECK(wrongCode.Add(profile) ==
+        warden::ModuleCatalogValidation::InvalidCheckCodeMap);
+
+    profile = SyntheticProfile(warden::WardenArchitecture::X86);
+    profile.checkCodes.mpq = warden::Cata15595X86MpqCode;
+    warden::WardenModuleCatalogBuilder unsupportedMpq;
+    CHECK(unsupportedMpq.Add(profile) ==
         warden::ModuleCatalogValidation::InvalidCheckCodeMap);
 }
 
@@ -296,7 +302,7 @@ TEST(WardenModuleCatalog_compiled_profiles_match_custody_manifests)
         "6aea6e524748f22d122b27d96622d765");
     CHECK_EQ(x86.checkCodes.timing, warden::Cata15595X86TimingCode);
     CHECK_EQ(x86.checkCodes.lua, warden::Cata15595X86LuaCode);
-    CHECK_EQ(x86.checkCodes.mpq, warden::Cata15595X86MpqCode);
+    CHECK_EQ(x86.checkCodes.mpq, uint8(0));
     CHECK_EQ(x86.checkCodes.memory, warden::Cata15595X86MemoryCode);
 
     warden::ModuleProfile const& x64 =

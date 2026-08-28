@@ -1204,7 +1204,7 @@ warden::ModuleProfile BuildProfile()
     profile.provenance = warden::ModuleProvenance::BuildMatchedPublic;
     profile.operatingMode = warden::ModuleOperatingMode::Full;
     profile.assurance = warden::ModuleAssurance::StaticVerified;
-    profile.checkCodes = {0xD0, 0x41, 0x82, 0x34};
+    profile.checkCodes = {0xD0, 0x41, 0x00, 0x34};
     profile.rekey.seed = {{
             0x49, 0xF9, 0x57, 0x76, 0xE6, 0xDD, 0xF9, 0x9D, 0x9D, 0xE9, 0x1D, 0x75, 0xCC, 0x93, 0xE9, 0x55
     }};

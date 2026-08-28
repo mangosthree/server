@@ -157,7 +157,7 @@ ModuleCatalogValidation WardenModuleCatalogBuilder::Add(
         (profile.abi != ModuleAbi::Cata15595X86 ||
             profile.checkCodes.timing != Cata15595X86TimingCode ||
             profile.checkCodes.lua != Cata15595X86LuaCode ||
-            profile.checkCodes.mpq != Cata15595X86MpqCode ||
+            profile.checkCodes.mpq != 0 ||
             profile.checkCodes.memory != Cata15595X86MemoryCode))
     {
         // The x64 full-scan ABI remains deliberately unpublished until an

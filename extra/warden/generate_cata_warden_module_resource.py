@@ -78,9 +78,10 @@ PROFILES = {
         rekey_response="71be54fdf23061892d6eea2fb79119b9f7e05084",
         client_to_server="8ab07213fcff7bacb77b4804d239445c",
         server_to_client="6aea6e524748f22d122b27d96622d765",
-        # Recovered module dispatch table: simple Lua and MPQ differ from the
-        # stale pre-Cata enum. Advanced Lua (0x9C) is intentionally not exposed.
-        check_codes=(0xD0, 0x41, 0x82, 0x34),
+        # The recovered dispatch table identifies MPQ as 0x82, but this profile
+        # deliberately omits it: the signed module's read ABI is incompatible
+        # with the exact 15595 x86 client. Advanced Lua is likewise not exposed.
+        check_codes=(0xD0, 0x41, 0x00, 0x34),
         provenance_note=(
             "Takenbacon/molten-cata-archive commit "
             "81441e843862a9d26b18dec7cf85cb8da1e88f07"

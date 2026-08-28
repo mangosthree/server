@@ -468,17 +468,14 @@ EncodeStatus EncodeModuleInitialization(ModuleAbi abi, Bytes& plaintext)
     {
         case ModuleAbi::Cata15595X86:
         {
-            // Three independently checksummed command-3 records register the
-            // exact 15595 x86 FrameXML, filesystem and timing RVAs. These are
-            // module RVAs resolved by the host interface, not absolute VAs.
-            static constexpr std::array<uint8, 61> Initialization = {{
+            // The exact x86 client safely satisfies the FrameXML and timing
+            // callback ABIs. Its filesystem readers do not satisfy either
+            // stdcall shape exposed by this signed module, so no archive
+            // callback is registered.
+            static constexpr std::array<uint8, 34> Initialization = {{
                 0x03, 0x0C, 0x00, 0xE9, 0xAB, 0x2B, 0xD1,
                 0x04, 0x00, 0x00, 0x10, 0xD3, 0x43, 0x00,
                 0x30, 0xC2, 0x43, 0x00, 0x01,
-                0x03, 0x14, 0x00, 0xDA, 0x87, 0xA8, 0x31,
-                0x01, 0x00, 0x02, 0x00, 0x50, 0x8C, 0x3A, 0x00,
-                0x70, 0x51, 0x3A, 0x00, 0x50, 0x65, 0x3A, 0x00,
-                0x00, 0x66, 0x3A, 0x00,
                 0x03, 0x08, 0x00, 0x4C, 0xA0, 0x9E, 0x6C,
                 0x01, 0x01, 0x00, 0x40, 0x97, 0x47, 0x00, 0x01
             }};
@@ -593,10 +590,24 @@ EncodeStatus EncodeCheckRequest(ModuleProfile const& profile,
         return EncodeStatus::InvalidAbi;
     if (profile.checkCodes.timing != Cata15595X86TimingCode ||
         profile.checkCodes.lua != Cata15595X86LuaCode ||
-        profile.checkCodes.mpq != Cata15595X86MpqCode ||
+        profile.checkCodes.mpq != 0 ||
         profile.checkCodes.memory != Cata15595X86MemoryCode)
     {
         return EncodeStatus::InvalidProfile;
+    }
+
+    // This signed module recognizes an MPQ opcode, but build 15595 x86 has no
+    // host reader with the required calling convention and return contract.
+    // Reject the plan before it can reach the client even if a database row is
+    // added accidentally.
+    if (std::any_of(plan.checks.begin(), plan.checks.end(),
+            [](WardenCheckDefinition const& definition)
+            {
+                return std::holds_alternative<MpqCheckProfile>(
+                    definition.payload);
+            }))
+    {
+        return EncodeStatus::InvalidPlan;
     }
 
     CheckPlanAnalysis analysis;
@@ -642,17 +653,6 @@ EncodeStatus EncodeCheckRequest(ModuleProfile const& profile,
             candidate.push_back(index);
             continue;
         }
-        if (MpqCheckProfile const* mpq =
-                std::get_if<MpqCheckProfile>(&definition.payload))
-        {
-            uint8 const index = stringIndex(mpq->path);
-            if (!index)
-                return EncodeStatus::InvalidPlan;
-            candidate.push_back(uint8(profile.checkCodes.mpq ^ xorKey));
-            candidate.push_back(index);
-            continue;
-        }
-
         MemCheckProfile const* memory =
             std::get_if<MemCheckProfile>(&definition.payload);
         if (!memory)

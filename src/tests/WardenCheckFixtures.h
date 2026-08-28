@@ -212,7 +212,7 @@ inline ModuleProfile SyntheticModuleProfile(WardenArchitecture architecture)
     profile.assurance = ModuleAssurance::StaticVerified;
     profile.checkCodes = architecture == WardenArchitecture::X86 ?
         ModuleCheckCodes{Cata15595X86TimingCode, Cata15595X86LuaCode,
-            Cata15595X86MpqCode, Cata15595X86MemoryCode} :
+            0, Cata15595X86MemoryCode} :
         ModuleCheckCodes{CataX64CompatibilityTimingCode, 0, 0, 0};
     if (architecture == WardenArchitecture::X86)
     {

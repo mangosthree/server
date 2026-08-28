@@ -1,6 +1,44 @@
 #include <algorithm>
 #include "WaypointSmoothing.h"
 
+namespace
+{
+    constexpr float PACKED_WAYPOINT_STEP = 0.25f;
+
+    /**
+     * @brief Applies appendPackXYZ's truncation and the client's signed decode.
+     * @param offset Component offset from the linear-path midpoint.
+     * @param bits Packed field width (11 for X/Y, 10 for Z).
+     * @return The signed packed integer reconstructed by the client.
+     */
+    int32 RoundTripPackedOffset(float offset, uint32 bits)
+    {
+        const uint32 range = uint32(1) << bits;
+        const uint32 mask = range - 1;
+        const uint32 sign = range >> 1;
+
+        // ByteBuffer::appendPackXYZ truncates toward zero before masking the
+        // signed value into its fixed-width field.
+        const int32 quantized = static_cast<int32>(offset / PACKED_WAYPOINT_STEP);
+        const uint32 encoded = static_cast<uint32>(quantized) & mask;
+        return encoded & sign ? static_cast<int32>(encoded) - static_cast<int32>(range)
+                              : static_cast<int32>(encoded);
+    }
+
+    Geometry::Vector3 ReconstructPackedPoint(Geometry::Vector3 const& midpoint,
+                                             Geometry::Vector3 const& point)
+    {
+        const Geometry::Vector3 offset = midpoint - point;
+        return Geometry::Vector3(
+            midpoint.x - float(RoundTripPackedOffset(offset.x, 11)) *
+                         PACKED_WAYPOINT_STEP,
+            midpoint.y - float(RoundTripPackedOffset(offset.y, 11)) *
+                         PACKED_WAYPOINT_STEP,
+            midpoint.z - float(RoundTripPackedOffset(offset.z, 10)) *
+                         PACKED_WAYPOINT_STEP);
+    }
+}
+
 /**
  * @brief Whether smoothing may pass through the given node without stopping.
  * @param node Per-node smoothing properties.
@@ -89,4 +127,37 @@ bool IsWaypointSmoothingWithinBudget(WaypointSmoothingBounds const& bounds)
     return (bounds.maxX - bounds.minX) <= WAYPOINT_SMOOTHING_MAX_XY_SPAN &&
            (bounds.maxY - bounds.minY) <= WAYPOINT_SMOOTHING_MAX_XY_SPAN &&
            (bounds.maxZ - bounds.minZ) <= WAYPOINT_SMOOTHING_MAX_Z_SPAN;
+}
+
+/**
+ * @brief Whether every linear-path segment survives Cata's packed wire encoding.
+ * @param points Source spline points. The endpoints are uncompressed; every
+ *        intermediate point is reconstructed from a 0.25-yard packed offset.
+ * @param launchPosition Exact first point that MoveSplineInit will put on the wire.
+ * @return False if two adjacent client-side points reconstruct identically.
+ */
+bool IsWaypointSmoothingWireSafe(std::vector<Geometry::Vector3> const& points,
+                                 Geometry::Vector3 const& launchPosition)
+{
+    if (points.size() < 2)
+    {
+        return true;
+    }
+
+    // PacketBuilder::WriteLinearPath sends the destination directly and every
+    // intermediate point as an offset from this midpoint. Compare the path the
+    // client reconstructs, including both uncompressed endpoint boundaries.
+    const Geometry::Vector3 midpoint = (launchPosition + points.back()) / 2.0f;
+    Geometry::Vector3 previous = launchPosition;
+    for (size_t i = 1; i + 1 < points.size(); ++i)
+    {
+        const Geometry::Vector3 current = ReconstructPackedPoint(midpoint, points[i]);
+        if (current == previous)
+        {
+            return false;
+        }
+        previous = current;
+    }
+
+    return previous != points.back();
 }

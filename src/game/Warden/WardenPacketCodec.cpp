@@ -454,7 +454,7 @@ EncodeStatus EncodeServerFrame(
         return EncodeStatus::BodyTooLarge;
 
     encoded.payload.reserve(
-        ProvisionalServerWardenLengthSize + encryptedBody.size());
+        ServerWardenLengthSize + encryptedBody.size());
     AppendLittleEndian32(encoded.payload, uint32(encryptedBody.size()));
     encoded.payload.insert(encoded.payload.end(), encryptedBody.data(),
         encryptedBody.data() + encryptedBody.size());

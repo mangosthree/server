@@ -197,7 +197,7 @@ static_assert(warden::MaxEncryptedClientBody == 10232);
 static_assert(warden::MaxDecryptedCheckResultBody == 10225);
 static_assert(warden::MaxServerWardenWireSize == 10240);
 static_assert(warden::NormalServerHeaderSize == 4);
-static_assert(warden::ProvisionalServerWardenLengthSize == 4);
+static_assert(warden::ServerWardenLengthSize == 4);
 static_assert(warden::MaxEncryptedServerBody == 10232);
 static_assert(warden::CheckResultEnvelopeSize == 7);
 
@@ -250,7 +250,7 @@ TEST(WardenPacketCodec_client_frame_rejects_oversized_body_before_slicing)
         warden::FrameDecodeStatus::BodyTooLarge);
 }
 
-TEST(WardenPacketCodec_server_frame_encodes_provisional_little_endian_length)
+TEST(WardenPacketCodec_server_frame_encodes_live_proven_little_endian_length)
 {
     warden::Bytes const body = {0x11, 0x22, 0x33};
     warden::EncodedServerFrame encoded;
@@ -267,7 +267,7 @@ TEST(WardenPacketCodec_server_frame_accepts_exact_maximum_body)
     CHECK_EQ(int(warden::EncodeServerFrame(warden::ByteView(body), encoded)),
         int(warden::EncodeStatus::Ok));
     CHECK_EQ(encoded.payload.size(),
-        warden::ProvisionalServerWardenLengthSize + body.size());
+        warden::ServerWardenLengthSize + body.size());
     CHECK_HEX(encoded.payload.data(), 4, "f8270000");
     CHECK(std::equal(body.begin(), body.end(), encoded.payload.begin() + 4));
 }

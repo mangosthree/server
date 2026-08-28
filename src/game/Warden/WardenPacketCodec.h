@@ -47,14 +47,14 @@ constexpr std::size_t CheckResultEnvelopeSize = 7;
 constexpr std::size_t MaxDecryptedCheckResultBody =
     MaxEncryptedClientBody - CheckResultEnvelopeSize;
 
-// The outbound envelope is intentionally independent from client-input limits.
-// Its uint32 framing remains provisional until the G3 live capture freezes it.
+// A build-15595 live exchange proves the outbound uint32 little-endian length
+// counts only encrypted-body bytes. Keep its budget independent from input.
 constexpr std::size_t MaxServerWardenWireSize = 10240;
 constexpr std::size_t NormalServerHeaderSize = 4;
-constexpr std::size_t ProvisionalServerWardenLengthSize = 4;
+constexpr std::size_t ServerWardenLengthSize = 4;
 constexpr std::size_t MaxEncryptedServerBody =
     MaxServerWardenWireSize - NormalServerHeaderSize -
-    ProvisionalServerWardenLengthSize;
+    ServerWardenLengthSize;
 constexpr std::size_t Cata15595X86CheckBufferSize = 512;
 
 struct DecodedClientFrame

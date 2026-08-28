@@ -1,7 +1,10 @@
 #ifndef MANGOS_WAYPOINTSMOOTHING_H
 #define MANGOS_WAYPOINTSMOOTHING_H
 
+#include "Geometry/Vector3.h"
 #include "Platform/Define.h"
+
+#include <vector>
 
 /**
  * @brief Safety ceiling on how many waypoints a single smoothed spline may span.
@@ -16,7 +19,7 @@ constexpr size_t WAYPOINT_SMOOTHING_MAX_LOOKAHEAD = 32;
  * @brief Maximum X/Y bounding-box span (in yards) of a single smoothed path.
  *
  * Smoothed splines are sent as a linear path in SMSG_MONSTER_MOVE, whose
- * intermediate points are encoded as offsets from the destination, packed at
+ * intermediate points are encoded as offsets from the endpoint midpoint, packed at
  * 0.25yd granularity into signed 11-bit (X/Y) and 10-bit (Z) fields (see
  * ByteBuffer::appendPackXYZ / PacketBuilder::WriteLinearPath). That caps the
  * representable offset at roughly +/-256yd (X/Y) and +/-128yd (Z); beyond it
@@ -111,5 +114,15 @@ void AddWaypointSmoothingPoint(WaypointSmoothingBounds& bounds, float x, float y
  * @return True while within budget (an empty box is within budget).
  */
 bool IsWaypointSmoothingWithinBudget(WaypointSmoothingBounds const& bounds);
+
+/**
+ * @brief Whether every linear-path segment survives Cata's packed wire encoding.
+ * @param points Source spline points. The endpoints are uncompressed; every
+ *        intermediate point is reconstructed from a 0.25-yard packed offset.
+ * @param launchPosition Exact first point that MoveSplineInit will put on the wire.
+ * @return False if two adjacent client-side points reconstruct identically.
+ */
+bool IsWaypointSmoothingWireSafe(std::vector<Geometry::Vector3> const& points,
+                                 Geometry::Vector3 const& launchPosition);
 
 #endif

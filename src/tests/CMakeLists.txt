@@ -59,6 +59,7 @@ set(SRC_GRP_TESTS
     NavBinningTest.cpp
     DynamicCollisionTest.cpp
     PlacementTest.cpp
+    WaypointSmoothingTest.cpp
     ArbiterModelTest.cpp
     ShadowClassifierTest.cpp
     WardenCryptoContextTest.cpp
@@ -94,6 +95,7 @@ set(SRC_GRP_TESTS
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/DynamicCollision.cpp
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/GameObjectModel.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Server/SessionMailbox.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators/WaypointSmoothing.cpp
     # The movement arbiter's pure core: no Unit, no driver, no map.
     ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators/Arbiter/MoveContract.cpp
     ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators/Arbiter/ArbiterModel.cpp
